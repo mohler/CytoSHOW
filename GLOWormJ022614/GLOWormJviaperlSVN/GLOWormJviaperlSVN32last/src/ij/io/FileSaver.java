@@ -154,7 +154,7 @@ public class FileSaver {
 		fi.description = getDescriptionString();
 		if (virtualStack) {
 			FileInfo fi = imp.getOriginalFileInfo();
-			if (path!=null && path.equals(fi.directory+fi.fileName)) {
+			if (path!=null && fi!= null && path.equals(fi.directory+fi.fileName)) {
 				IJ.error("TIFF virtual stacks cannot be saved in place.");
 				return false;
 			}

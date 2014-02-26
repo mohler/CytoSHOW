@@ -62,6 +62,7 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 	private TextField[] rangeFields;
 	private int firstC, lastC, firstZ, lastZ, firstT, lastT;
 	private int stepT = 1;
+	private boolean flattenTags;
 
     public int setup(String arg, ImagePlus imp) {
         this.imp = imp;
@@ -119,6 +120,7 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 			rangeFields[i] = (TextField)v.elementAt(i);
 			rangeFields[i].addTextListener(this);
 		}
+		gd.addCheckbox("Flatten tags into movie?", true);
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return false;
@@ -157,6 +159,7 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 		} else
 			firstT = lastT = 1;
 
+		flattenTags = gd.getNextBoolean();
 		return true;
     }
 
@@ -478,8 +481,12 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 			ImageIO.write(bi, "jpeg", raOutputStream);
 		} else { //if (biCompression==PNG_COMPRESSION) {
 			BufferedImage bi = new BufferedImage(xDim, yDim, BufferedImage.TYPE_INT_RGB);
+			boolean showing = imp.getCanvas().getShowAllROIs();
+			imp.getCanvas().setShowAllROIs(flattenTags);
 			imp.getCanvas().paint(bi.getGraphics());
 			ImageIO.write(bi, "png", raOutputStream);
+			imp.getCanvas().setShowAllROIs(showing);
+
 		}
 	}
 
