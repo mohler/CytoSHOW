@@ -259,8 +259,11 @@ public class RemoteMQTVSHandler {
 			if (!(moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW"))) {
 				imp2.setDimensions(qtDims[2], qtDims[3], qtDims[4]);
 				imp2.setOpenAsHyperStack(true);
-				CompositeImage ci2 = new CompositeImage(imp2,CompositeImage.COMPOSITE);
-				win2 = new StackWindow(ci2) {
+				CompositeImage ci2 = null;
+				if (!moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/DUP")) {
+					ci2 = new CompositeImage(imp2,CompositeImage.COMPOSITE);
+				}
+				win2 = new StackWindow(ci2==null?imp2:ci2) {
 
 
 					@Override
@@ -321,8 +324,11 @@ public class RemoteMQTVSHandler {
 					}
 				};
 
-				ci2.setWindow(win2);
-				if (qtDims[2] == 1)
+				if (ci2!=null)
+					ci2.setWindow(win2);
+				else
+					imp2.setWindow(win2);
+				if (qtDims[2] == 1 && ci2!=null)
 					IJ.run("Grays");
 
 			} else {
@@ -493,7 +499,8 @@ public class RemoteMQTVSHandler {
 			e.printStackTrace();
 		}
 		ImageProcessor ip = new ColorProcessor(bi);
-		if (!(moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW"))) {
+		if (!(moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW")
+				|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/DUP"))) {
 			ip = ip.convertToByte(false);
 		}
 

@@ -1212,7 +1212,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 			if(!(imp.getImageStack() instanceof MultiQTVirtualStack)
 					&& !(imp.getImageStack() instanceof RemoteMQTVSHandler.RemoteMQTVirtualStack)
 					&& deNovoMovieFile==null) {
-				SaveDialog sd = new SaveDialog("Save Movie for GLOWorm Scene as...", imp.getTitle().substring(0, 25), ".avi");
+				SaveDialog sd = new SaveDialog("Save Movie for GLOWorm Scene as...", imp.getTitle().length()>28?imp.getTitle().substring(0, 25):imp.getTitle().replace(".tif", ""), ".avi");
 				String name = sd.getFileName().replace(" ","");
 				if (name==null) return;
 				/*

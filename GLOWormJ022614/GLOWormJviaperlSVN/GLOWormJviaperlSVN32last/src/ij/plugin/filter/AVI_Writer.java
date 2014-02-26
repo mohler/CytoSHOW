@@ -208,7 +208,7 @@ public class AVI_Writer implements PlugInFilter, TextListener {
         if (imp.getType()==ImagePlus.COLOR_RGB || isComposite || biCompression==JPEG_COMPRESSION || isOverlay)
             bytesPerPixel = 3;  //color and JPEG-compressed files
         else
-            bytesPerPixel = 1;  //gray 8, 16, 32 bit and indexed color: all written as 8 bit
+            bytesPerPixel = 3;  //gray 8, 16, 32 bit and indexed color: all written as 24 bit (used to be 8)
         boolean writeLUT = bytesPerPixel==1; // QuickTime reads the avi palette also for PNG
         linePad = 0;
         int minLineLength = bytesPerPixel*xDim;
