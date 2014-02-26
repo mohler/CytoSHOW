@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="lib" path="precompiled-mpicbg_.jar"/>
+	<classpathentry kind="lib" path="precompiled-mpicbg.jar"/>
+	<classpathentry kind="lib" path="jdom.jar"/>
+	<classpathentry kind="lib" path="SmartCapture_VLite.jar"/>
+	<classpathentry kind="lib" path="Volume_Viewer.jar"/>
+	<classpathentry kind="lib" path="commons-net-3.3.jar"/>
+	<classpathentry kind="lib" path="javaws.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="output" path="plugins"/>
+</classpath>

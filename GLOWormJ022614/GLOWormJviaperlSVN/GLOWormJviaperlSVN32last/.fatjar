@@ -1,0 +1,14 @@
+#Fat Jar Configuration File
+#Wed Feb 26 05:36:02 EST 2014
+onejar.license.required=false
+manifest.classpath=
+manifest.removesigners=true
+onejar.checkbox=false
+jarname=GLOWormJviaperlSVN022614_ij147b_fat.jar
+manifest.mergeall=true
+manifest.mainclass=ij.ImageJ
+manifest.file=<createnew>
+jarname.isextern=false
+onejar.expand=
+excludes=
+includes=

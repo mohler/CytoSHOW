@@ -1,0 +1,613 @@
+package org.vcell.gloworm;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.IndexColorModel;
+import java.util.Vector;
+
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+
+import ij.*;
+import ij.process.*;
+import ij.gui.*;
+import ij.util.Tools;
+import ij.plugin.PlugIn;
+import ij.plugin.filter.Filler;
+import ij.plugin.frame.Channels;
+import ij.plugin.frame.Recorder;
+import ij.plugin.frame.RoiManager;
+
+/** This plugin implements the Image/Duplicate command.
+<pre>
+   // test script
+   img1 = IJ.getImage();
+   img2 = new Duplicator().run(img1);
+   //img2 = new Duplicator().run(img1,1,10);
+   img2.show();
+</pre>
+ */
+public class MQTVS_Duplicator implements PlugIn, TextListener {
+	private static boolean duplicateStack;
+	private boolean duplicateSubstack;
+	private int first, last;
+	private Checkbox checkbox;
+	private TextField rangeField;
+	private TextField[] rangeFields;
+	private int firstC, lastC, firstZ, lastZ, firstT, lastT;
+	private boolean sliceSpecificROIs;
+	private int stepT = 1;
+	private int finalFrames;
+	private int finalT;
+
+	public void run(String arg) {
+		ImagePlus imp = IJ.getImage();
+		imp.getWindow().dupButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/download_button_animatedSmall.gif")));
+		int stackSize = imp.getStackSize();
+		String title = imp.getTitle();
+		String newTitle = WindowManager.getUniqueName((imp.isSketch3D()?"Sketch3D_":"")+"DUP_"+title.replaceAll("Sketch3D_*", ""));
+		if (!IJ.altKeyDown()||stackSize>1) {
+			if (imp.isHyperStack() || imp.getWindow() instanceof StackWindow) {
+				duplicateHyperstack(imp, newTitle);
+				return;
+			} else
+				newTitle = showDialog(imp, "Duplicate...", "Title: ", newTitle);
+		}
+		if (newTitle==null) {
+			imp.getWindow().dupButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/download_button_animatedStill.png")));
+			return;
+		}
+		ImagePlus imp2;
+		Roi roi = imp.getRoi();
+		imp.getCanvas().setVisible(false);
+
+		if (duplicateSubstack && (first>1||last<stackSize))
+			imp2 = run(imp, 1,1, first, last, 1, 1, 1, false);
+		else if (duplicateStack || imp.getStackSize()==1)
+			imp2 = run(imp, 1,1, 1, imp.getNSlices(), 1, 1, 1, false);
+		else
+			imp2 = duplicateImage(imp);
+		imp2.setTitle(newTitle);
+		imp2.show();
+		if (roi!=null && roi.isArea() && roi.getType()!=Roi.RECTANGLE) {
+			imp2.restoreRoi();
+			if (imp.getRoi() != null) {
+				IJ.run("Colors...", "foreground=white background=black selection=yellow");
+				IJ.run(imp2, "Clear Outside", "stack");
+			}
+		}
+		imp.getWindow().dupButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/download_button_animatedStill.png")));
+		imp.getCanvas().setVisible(true);
+		IJ.saveAs(imp2, "Tiff", "");
+	}
+
+	/** Returns a copy of the image, stack or hyperstack contained in the specified ImagePlus. */
+	public ImagePlus run(ImagePlus imp) {
+		if (Recorder.record) Recorder.recordCall("impD = new MQTVS_Duplicator().run(imp);");
+		if (imp.getStackSize()==1) {
+			ImagePlus imp2 = duplicateImage(imp);
+			if (imp.getRoiManager().getColorLegend() != null)
+				imp2.getRoiManager().setColorLegend(imp.getRoiManager().getColorLegend().clone(imp2));
+			return imp2;
+		}
+		Rectangle rect = null;
+		Roi roi = imp.getRoi();
+		if (roi!=null && roi.isArea())
+			rect = roi.getBounds();
+		int width = rect!=null?rect.width:imp.getWidth();
+		int height = rect!=null?rect.height:imp.getHeight();
+		ImageStack stack = imp.getStack();
+		ImageStack stack2 = new ImageStack(width, height, imp.getProcessor().getColorModel());
+		for (int i=1; i<=stack.getSize(); i++) {
+			ImageProcessor ip2 = stack.getProcessor(i);
+			ip2.setRoi(rect);
+			ip2 = ip2.crop();
+			stack2.addSlice(stack.getSliceLabel(i), ip2);
+		}
+		ImagePlus imp2 = new ImagePlus(imp.isSketch3D()?"Sketch3D_":""+"DUP_"+imp.getTitle().replaceAll("Sketch3D_*", ""), stack2);
+		int[] dim = imp.getDimensions();
+		imp2.setDimensions(dim[2], dim[3], dim[4]);
+		if (imp.isComposite()) {
+			imp2 = new CompositeImage(imp2, 0);
+			((CompositeImage)imp2).copyLuts(imp);
+		}
+		if (imp.isHyperStack())
+			imp2.setOpenAsHyperStack(true);
+		Overlay overlay = imp.getOverlay();
+		if (overlay!=null && !imp.getHideOverlay()) {
+			overlay = overlay.duplicate();
+			if (rect!=null)
+				overlay.translate(-rect.x, -rect.y);
+			imp2.setOverlay(overlay);
+		}
+		if (imp.getRoiManager().getColorLegend() != null)
+			imp2.getRoiManager().setColorLegend(imp.getRoiManager().getColorLegend().clone(imp2));
+		return imp2;
+	}
+
+	ImagePlus duplicateImage(ImagePlus imp) {
+		ImageProcessor ip = imp.getProcessor();
+		ImageProcessor ip2 = ip.crop();
+		ImagePlus imp2 = imp.createImagePlus();
+		imp2.setProcessor(imp.isSketch3D()?"Sketch3D_":""+"DUP_"+imp.getTitle().replaceAll("Sketch3D_*", ""), ip2);
+		String info = (String)imp.getProperty("Info");
+		if (info!=null)
+			imp2.setProperty("Info", info);
+		if (imp.getStackSize()>1) {
+			ImageStack stack = imp.getStack();
+			String label = stack.getSliceLabel(imp.getCurrentSlice());
+			if (label!=null && label.indexOf('\n')>0)
+				imp2.setProperty("Info", label);
+			if (imp.isComposite()) {
+				LUT lut = ((CompositeImage)imp).getChannelLut();
+				imp2.getProcessor().setColorModel(lut);
+			}
+		}
+		Overlay overlay = imp.getOverlay();
+		if (overlay!=null && !imp.getHideOverlay()) {
+			overlay = overlay.duplicate();
+			Rectangle r = ip.getRoi();
+			if (r.x>0 || r.y>0)
+				overlay.translate(-r.x, -r.y);
+			imp2.setOverlay(overlay);
+		}
+		if (imp.getRoiManager().getColorLegend() != null)
+			imp2.getRoiManager().setColorLegend(imp.getRoiManager().getColorLegend().clone(imp2));
+		return imp2;
+	}
+
+
+	/** Returns a new hyperstack containing a possibly reduced version of the input image. 
+	 * @param stepT */
+	public ImagePlus run(ImagePlus imp, int firstC, int lastC, int firstZ, int lastZ, int firstT, int lastT, int stepT, boolean sliceSpecificROIs) {
+		RoiManager rm =  imp.getRoiManager();
+		Rectangle rect = null;
+		Roi roi = imp.getRoi();
+		//Roi manualRoi = roi;
+
+		Frame channelsTool = Channels.getInstance();
+		if (channelsTool!=null) ((Channels) channelsTool).close();
+
+		double[] inMin = new double[imp.getNChannels()];
+		double[] inMax = new double[imp.getNChannels()];
+		ColorModel[] cm = new ColorModel[imp.getNChannels()];
+		LUT[] lut = imp.getLuts();
+
+		if (roi!=null && (roi.isArea() || roi instanceof TextRoi ) && !sliceSpecificROIs){
+
+			rect = roi.getBounds();
+		}
+		int width = rect!=null?rect.width:imp.getWidth();
+		int height = rect!=null?rect.height:imp.getHeight();
+		ImageStack stack = imp.getStack();
+		boolean wasBurnIn = false;
+		if (stack.isVirtual()) {
+			wasBurnIn = ((VirtualStack)stack).isBurnIn();
+			((VirtualStack)stack).setBurnIn(false);
+		}
+		ImageStack stack2 = new ImageStack(width, height);
+		int compositeMode = 1; 
+
+		if ( imp.isComposite()) {
+			compositeMode = ((CompositeImage)imp).getMode();
+			((CompositeImage)imp).setMode(3);
+
+		}
+		finalFrames = 0;
+
+		finalT = lastT;
+		for (int t=firstT; t<=lastT; t=t+stepT) {
+			long memoryFree = Runtime.getRuntime().freeMemory();
+			long memoryTotal = Runtime.getRuntime().totalMemory();
+			long memoryUsed = memoryTotal-memoryFree;
+			long memoryMax = Runtime.getRuntime().maxMemory();
+			if ((double)memoryUsed/(double)memoryMax > 0.9) {
+				finalT = t - stepT;
+				finalFrames = finalFrames-1;
+				t = lastT +1;
+			} else {
+
+
+				for (int z=firstZ; z<=lastZ; z++) {
+					for (int c=firstC; c<=lastC; c++) {
+						IJ.runMacro("print(\"\\\\Update:***Duplicating selected region(s) of time-point "+t+", channel "+c+", slice "+z+"...*** \")");
+
+						imp.setPosition(c, z, t);			// THIS LINE CHANGED FROM ORIGINAL PLUGIN.  THIS CHANGE MAKES IT COMPATIBLE WITH MQTVS					/*********/         //ip = imp.getProcessor();						// ALSO SEEMS TO WORK FINE WITH non-virtual HyperStacks
+
+						inMin[c-1] = imp.getChannelProcessor().getMin();
+						inMax[c-1] = imp.getChannelProcessor().getMax();
+						cm[c-1] = imp.getChannelProcessor().getColorModel();
+
+						if (sliceSpecificROIs && rm != null) roi = rm.getSliceSpecificRoi(imp, z, t);
+						imp.setRoi(roi);
+
+						int n1 = imp.getStackIndex(c, z, t);
+						ImageProcessor ip = imp.getProcessor();
+						ip.setRoi(roi);
+						String label = stack.getSliceLabel(n1);
+
+						if (roi!=null && (roi.getType() != Roi.RECTANGLE || roi.getBounds().width != imp.getWidth() || roi.getBounds().height != imp.getHeight() ))
+								ip.fillOutside(roi);
+						if (!sliceSpecificROIs) ip = ip.crop();
+
+						stack2.addSlice(label, ip);
+						IJ.runMacro("print(\"\\\\Update:   Duplicating selected region(s) of time-point "+t+", channel "+c+", slice "+z+"...    \")");
+
+					}
+				}
+				finalFrames++;
+			}
+		}
+		imp.killRoi();
+		if (wasBurnIn)
+			((VirtualStack)stack).setBurnIn(true);
+		//		imp.getWindow().setVisible(true);
+
+
+		if (imp.isComposite()) {
+			for (int i=1; i<=imp.getNChannels(); i++) {
+				((CompositeImage)imp).setChannelLut(lut[i-1], i);
+				((CompositeImage)imp).setPosition(i, 1, 1);
+				((CompositeImage)imp).getChannelProcessor().setMinAndMax(inMin[i-1], inMax[i-1]);
+				((CompositeImage)imp).setMode(compositeMode);
+			}
+		}
+		ImagePlus imp2 = new ImagePlus(imp.isSketch3D()?"Sketch3D_":""+"DUP_"+imp.getTitle().replaceAll("Sketch3D_*", ""), stack2);
+		imp2.setOpenAsHyperStack(true);
+		//		IJ.log(""+imp2.getOpenAsHyperStack());
+
+		//		imp2.setStack("DUP_"+imp.getTitle(), stack2);
+		//		imp2.setStack( stack2, lastC-firstC+1, lastZ-firstZ+1, lastT-firstT+1);
+		//		imp2.setTitle("DUP_"+imp.getTitle());
+
+		//		IJ.log(""+imp2.getOpenAsHyperStack());
+
+		imp2.setDimensions(lastC-firstC+1, lastZ-firstZ+1, finalFrames);
+		if (  ((StackWindow)imp.getWindow()).isWormAtlas() 
+				&& imp.getStack() instanceof MultiQTVirtualStack){
+			//			IJ.log("Copy from WA STACK");
+			imp2.setDimensions(lastC-firstC+1, finalFrames, 1 );
+
+		}
+
+		//		IJ.log(""+imp2.getOpenAsHyperStack());
+
+		if (imp.isComposite()) {
+			//        	IJ.log("Yes CI");
+			//			int mode = ((CompositeImage)imp).getMode();
+			if (lastC>firstC) {
+				imp2 = new CompositeImage(imp2, 3);
+				//				int i2 = 1;
+				for (int i=1; i<=imp2.getNChannels(); i++) {
+					//					lut[i] = ((CompositeImage)imp).getChannelLut(i);
+					((CompositeImage)imp2).setChannelLut(lut[i-1], i);
+					((CompositeImage)imp2).setPosition(i, 1, 1);
+					((CompositeImage)imp2).getChannelProcessor().setMinAndMax(inMin[i-1], inMax[i-1]);
+
+				}
+				((CompositeImage)imp2).setMode(compositeMode);
+			} else if (firstC==lastC) {
+				//				LUT lut = imp.getProcessor().getLut();
+				if (cm[0] instanceof IndexColorModel) imp2.getProcessor().setColorModel(cm[0]);
+				imp2.getProcessor().setColorModel(lut[0]);
+				imp2.setDisplayRange(inMin[0], inMax[0]);
+			}
+		} else {
+			//        	IJ.log("Not CI");
+			imp2.getProcessor().setColorModel(cm[0]);
+			//    		if (lut[0] != null) imp2.getProcessor().setColorModesl(lut[0]);
+			imp2.setDisplayRange(inMin[0], inMax[0]);
+		}
+
+		imp2.setOpenAsHyperStack(true);
+		imp2.killRoi();
+		//		IJ.log(""+imp2.getOpenAsHyperStack());
+
+		if (imp.getRoiManager().getColorLegend() != null)
+			imp2.getRoiManager().setColorLegend(imp.getRoiManager().getColorLegend().clone(imp2));
+		imp2.setCalibration(imp.getCalibration());
+		if (Recorder.record)
+			Recorder.recordCall("impD = new MQTVS_Duplicator().run(imp, "+firstC+", "+lastC+", "+firstZ+", "+lastZ+", "+firstT+", "+lastT+", "+sliceSpecificROIs+");");
+		return imp2;
+	}
+
+
+
+
+
+	String showDialog(ImagePlus imp, String title, String prompt, String defaultString) {
+		int stackSize = imp.getStackSize();
+		duplicateSubstack = stackSize>1 && (stackSize==imp.getNSlices()||stackSize==imp.getNFrames());
+		GenericDialog gd = new GenericDialog(title);
+		gd.addStringField(prompt, defaultString, duplicateSubstack?15:20);
+		if (stackSize>1) {
+			String msg = duplicateSubstack?"Duplicate stack":"Duplicate entire stack";
+			gd.addCheckbox(msg, duplicateStack||imp.isComposite());
+			if (duplicateSubstack) {
+				gd.setInsets(2, 30, 3);
+				gd.addStringField("Range:", "1-"+stackSize);
+				Vector v = gd.getStringFields();
+				rangeField = (TextField)v.elementAt(1);
+				rangeField.addTextListener(this);
+				checkbox = (Checkbox)(gd.getCheckboxes().elementAt(0));
+			}
+		} else
+			duplicateStack = false;
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return null;
+		title = gd.getNextString();
+		if (stackSize>1) {
+			duplicateStack = gd.getNextBoolean();
+			if (duplicateStack && duplicateSubstack) {
+				String[] range = Tools.split(gd.getNextString(), " -");
+				double d1 = Tools.parseDouble(range[0]);
+				double d2 = range.length==2?Tools.parseDouble(range[1]):Double.NaN;
+				first = Double.isNaN(d1)?1:(int)d1;
+				last = Double.isNaN(d2)?stackSize:(int)d2;
+				if (first<1) first = 1;
+				if (last>stackSize) last = stackSize;
+				if (first>last) {first=1; last=stackSize;}
+			} else {
+				first = 1;
+				last = stackSize;
+			}
+		}
+		return title;
+	}
+
+
+
+
+	void duplicateHyperstack(ImagePlus imp, String newTitle) {
+		String title = showHSDialog(imp, newTitle);
+		if (title==null)
+			return;
+		imp.getCanvas().setVisible(false);
+		ImagePlus imp2 = null;
+		Roi roi = imp.getRoi();
+		Roi manualRoi = null;
+		if (roi!=null && roi.isArea()) 
+			manualRoi = roi;
+
+		double inMin = imp.getDisplayRangeMin();
+		double inMax = imp.getDisplayRangeMax();
+		ColorModel cm = imp.getProcessor().getColorModel();
+		int inChannel = imp.getChannel();
+		int inSlice = imp.getSlice();
+		int inFrame = imp.getFrame();
+
+		if (!duplicateStack) {
+			int nChannels = imp.getNChannels();
+			if (nChannels>1 && imp.isComposite() && ((CompositeImage)imp).getMode()==CompositeImage.COMPOSITE) {
+				firstC = 1;
+				lastC = nChannels;
+			} else
+				firstC = lastC = imp.getChannel();
+			firstZ = lastZ = imp.getSlice();
+			firstT = lastT = imp.getFrame();
+		}
+
+//		imp.getWindow().setVisible(false);
+		RoiManager rm = imp.getRoiManager();
+		boolean rmVis =false; 
+		if (rm != null) {
+			rmVis = rm.isVisible();
+			rm.setVisible(false);
+		}
+		MultiChannelController mcc = imp.getMultiChannelController();
+		boolean mccVis = false;
+		if (mcc != null) {
+			mccVis = mcc.isVisible();
+			mcc.setVisible(false);
+		}
+
+		imp2 = run(imp, firstC, lastC, firstZ, lastZ, firstT, lastT, stepT, sliceSpecificROIs);
+
+		imp.getProcessor().setColorModel(cm);
+		imp.setDisplayRange(inMin, inMax);
+		imp.setPosition(inChannel, inSlice, inFrame);
+		int origChannel = imp.getChannel();
+		if (imp instanceof CompositeImage && ((CompositeImage) imp).getMode() ==1 ) {
+			for (int j = 1; j <= imp.getNChannels(); j++) {
+				imp.setPosition(j, imp.getSlice(),
+						imp.getFrame());
+			}
+			imp.setPosition(origChannel, imp.getSlice(), imp.getFrame());
+			imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() + 1);
+			imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() - 1);
+		}
+		imp.getWindow().setVisible(true);
+		imp.setRoi(roi);
+		if (rm != null && rmVis) 
+			rm.setVisible(true);
+		if (mcc != null && mccVis) 
+			mcc.setVisible(true);
+
+		if (imp2==null) return;
+		imp2.setTitle(newTitle);
+
+		if (manualRoi != null && sliceSpecificROIs) {
+			imp2.setRoi(manualRoi);
+			WindowManager.setTempCurrentImage(imp2);
+			IJ.run("Clear Outside", "stack");
+			IJ.run("Crop");
+			WindowManager.setTempCurrentImage(null);
+		}
+
+		imp2.getProcessor().setColorModel(cm);
+		imp2.setDisplayRange(inMin, inMax);
+		imp2.setDimensions(lastC-firstC+1, lastZ-firstZ+1, finalFrames);
+		imp2.setPosition(inChannel-firstC+1, inSlice-firstZ +1, inFrame-firstT+1);
+		//		IJ.log(""+imp2.getOpenAsHyperStack());
+
+		imp2.show();
+		imp2.getWindow().setVisible(false);
+
+		if (imp != null && imp2 != null) {
+			imp2.getWindow().setBackground(imp.getWindow().getBackground());
+			imp2.getWindow().setSubTitleBkgdColor(imp.getWindow().getBackground());
+		}
+
+		if ( imp2.getWindow() instanceof StackWindow &&  ((StackWindow)imp2.getWindow()).getNScrollbars()<2) {
+			if (((StackWindow)imp2.getWindow()).getAnimationZSelector() != null) 
+				((StackWindow)imp2.getWindow()).getAnimationZSelector().setValue(inSlice-firstZ +1);
+		}
+
+
+		int dupX = 0;
+		int dupY = 0;
+		int dupW = imp.getWidth();
+		int dupH = imp.getHeight();
+
+		if (manualRoi!=null){
+			dupX = manualRoi.getBounds().x;
+			dupY = manualRoi.getBounds().y;
+			dupW = manualRoi.getBounds().width;
+			dupH = manualRoi.getBounds().height;
+		}
+
+		RoiManager rm2 = imp2.getRoiManager();
+		rm2.setVisible(false);
+
+		for (int t = firstT; t <= finalT ; t = t+stepT) {
+			for (int z = firstZ; z <= lastZ ; z++) {
+
+				//				IJ.log(" "+firstZ+" "+z+" "+lastZ+" "+" "+firstT+" "+t+" "+lastT+" ");
+				Roi[] sliceSpecficRoiArray = imp.getRoiManager().getSliceSpecificRoiArray(z, t);
+				for (int r = 0; r < sliceSpecficRoiArray.length; r++) {
+					if (manualRoi == null)
+						manualRoi = new Roi(dupX,dupX,dupW,dupH);
+					if( manualRoi.contains((int)((Roi) sliceSpecficRoiArray[r]).getBounds().getCenterX(), (int)((Roi) sliceSpecficRoiArray[r]).getBounds().getCenterY())
+							|| manualRoi.contains((int)((Roi) sliceSpecficRoiArray[r]).getBounds().getMinX(), (int)((Roi) sliceSpecficRoiArray[r]).getBounds().getMinY())
+							|| manualRoi.contains((int)((Roi) sliceSpecficRoiArray[r]).getBounds().getMaxX(), (int)((Roi) sliceSpecficRoiArray[r]).getBounds().getMaxY())
+							|| manualRoi.contains((int)((Roi) sliceSpecficRoiArray[r]).getBounds().getMinX(), (int)((Roi) sliceSpecficRoiArray[r]).getBounds().getMaxY())
+							|| manualRoi.contains((int)((Roi) sliceSpecficRoiArray[r]).getBounds().getMaxX(), (int)((Roi) sliceSpecficRoiArray[r]).getBounds().getMinY())
+							){
+						Roi nextRoi = (Roi) sliceSpecficRoiArray[r].clone();
+						nextRoi.setLocation((int) (sliceSpecficRoiArray[r].getBounds().getX()-dupX), (int) ( sliceSpecficRoiArray[r]).getBounds().getY()-dupY);
+						imp2.setPosition(1, z-firstZ+1, ((t-firstT)/stepT)+1 );
+						rm2.addRoi(nextRoi);
+					}
+				}
+			}
+		}
+		rm2.setZSustain(imp.getRoiManager().getZSustain());
+		rm2.setTSustain(imp.getRoiManager().getTSustain());
+		rm2.showAll(RoiManager.SHOW_ALL);
+		//		imp2.setRoiManager(rm2);
+		if (imp.getMotherImp() != null && !imp.getMotherImp().isSketch3D())
+			imp2.setMotherImp(imp.getMotherImp(), firstT);
+		else if (!imp.isSketch3D())
+			imp2.setMotherImp(imp, firstT);
+		else
+			imp2.setMotherImp(imp2, firstT);
+
+		imp2.getProcessor().setColorModel(cm);
+		imp2.setDisplayRange(inMin, inMax);
+		imp2.setDimensions(lastC-firstC+1, lastZ-firstZ+1, finalFrames);
+		imp2.setPosition(inChannel-firstC+1, inSlice-firstZ +1, inFrame-firstT+1);
+
+		imp2.getWindow().setVisible(true);
+		imp.getWindow().dupButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/download_button_animatedStill.png")));
+		imp.getCanvas().setVisible(true);
+		IJ.saveAs(imp2, "Tiff", "");
+
+	}
+
+
+
+
+	String showHSDialog(ImagePlus imp, String newTitle) {
+		int nChannels = imp.getNChannels();
+		int nSlices = imp.getNSlices();
+		int nFrames = imp.getNFrames();
+		GenericDialog gd = new GenericDialog("Duplicate");
+		gd.addStringField("Title:", newTitle, 15);
+		gd.setInsets(12, 20, 8);
+		if (imp.isHyperStack()) gd.addCheckbox("Duplicate hyperstack", true);
+		else gd.addCheckbox("Duplicate stack", true);
+		boolean amReady = false;
+		if (imp.getRoiManager() != null){
+			gd.addCheckbox("Crop via Tag Manager tags", false);
+			amReady = true;
+		}
+		int nRangeFields = 0;
+		if (nChannels>1) {
+			gd.setInsets(2, 30, 3);
+			gd.addStringField("Channels (c):", "1-"+nChannels);
+			nRangeFields++;
+		}
+		if (nSlices>1) {
+			gd.setInsets(2, 30, 3);
+			gd.addStringField("Slices (z):", "1-"+nSlices);
+			nRangeFields++;
+		}
+		if (nFrames>1) {
+			gd.setInsets(2, 30, 3);
+			gd.addStringField("Frames (t):", ""+ imp.getFrame() +"-"+ imp.getFrame());
+			nRangeFields++;
+		}
+		Vector v = gd.getStringFields();
+		rangeFields = new TextField[3];
+		for (int i=0; i<nRangeFields; i++) {
+			rangeFields[i] = (TextField)v.elementAt(i+1);
+			rangeFields[i].addTextListener(this);
+		}
+		checkbox = (Checkbox)(gd.getCheckboxes().elementAt(0));
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return null;
+		String title = gd.getNextString();
+		duplicateStack = gd.getNextBoolean();
+		if (amReady) 
+			sliceSpecificROIs = gd.getNextBoolean();
+
+		if (nChannels>1) {
+			String[] range = Tools.split(gd.getNextString(), " -");
+			double c1 = Tools.parseDouble(range[0]);
+			double c2 = range.length==2?Tools.parseDouble(range[1]):Double.NaN;
+			firstC = Double.isNaN(c1)?1:(int)c1;
+			lastC = Double.isNaN(c2)?firstC:(int)c2;
+			if (firstC<1) firstC = 1;
+			if (lastC>nChannels) lastC = nChannels;
+			if (firstC>lastC) {firstC=1; lastC=nChannels;}
+		} else
+			firstC = lastC = 1;
+		if (nSlices>1) {
+			String[] range = Tools.split(gd.getNextString(), " -");
+			double z1 = Tools.parseDouble(range[0]);
+			double z2 = range.length==2?Tools.parseDouble(range[1]):Double.NaN;
+			firstZ = Double.isNaN(z1)?1:(int)z1;
+			lastZ = Double.isNaN(z2)?firstZ:(int)z2;
+			if (firstZ<1) firstZ = 1;
+			if (lastZ>nSlices) lastZ = nSlices;
+			if (firstZ>lastZ) {firstZ=1; lastZ=nSlices;}
+		} else
+			firstZ = lastZ = 1;
+		if (nFrames>1) {
+			String[] range = Tools.split(gd.getNextString(), " -");
+			double t1 = Tools.parseDouble(range[0]);
+			double t2 = range.length>=2?Tools.parseDouble(range[1]):Double.NaN;
+			double t3 = range.length==3?Tools.parseDouble(range[2]):Double.NaN;
+			firstT= Double.isNaN(t1)?1:(int)t1;
+			lastT = Double.isNaN(t2)?firstT:(int)t2;
+			stepT = Double.isNaN(t3)?1:(int)t3;
+			if (firstT<1) firstT = 1;
+			if (lastT>nFrames) lastT = nFrames;
+			if (firstT>lastT) {firstT=1; lastT=nFrames;}
+		} else
+			firstT = lastT = 1;
+		return title;
+	}
+
+	public void textValueChanged(TextEvent e) {
+		checkbox.setState(true);
+	}
+
+
+
+}
