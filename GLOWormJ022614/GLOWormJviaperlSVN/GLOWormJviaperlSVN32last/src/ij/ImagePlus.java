@@ -433,7 +433,9 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 					+win.getInsets().bottom
 					+(win instanceof StackWindow?
 							((StackWindow)win).getNScrollbars()
-							*((StackWindow)win).zSelector.getHeight()
+							*(((StackWindow)win).zSelector!=null?
+									((StackWindow)win).zSelector.getHeight():
+										((StackWindow)win).tSelector.getHeight())
 							:0)
 					+win.overheadPanel.getHeight();
 			win.setSize(ic.dstWidth+padH, ic.dstHeight+padV);

@@ -260,7 +260,8 @@ public class RemoteMQTVSHandler {
 				imp2.setDimensions(qtDims[2], qtDims[3], qtDims[4]);
 				imp2.setOpenAsHyperStack(true);
 				CompositeImage ci2 = null;
-				if (!moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/DUP")) {
+				if (!(moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/DUP")
+						|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/Projectionsof"))) {
 					ci2 = new CompositeImage(imp2,CompositeImage.COMPOSITE);
 				}
 				win2 = new StackWindow(ci2==null?imp2:ci2) {
@@ -500,7 +501,8 @@ public class RemoteMQTVSHandler {
 		}
 		ImageProcessor ip = new ColorProcessor(bi);
 		if (!(moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW")
-				|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/DUP"))) {
+				|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/DUP")
+				|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/Projectionsof"))) {
 			ip = ip.convertToByte(false);
 		}
 

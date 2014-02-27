@@ -170,7 +170,8 @@ public class RemoteQTVS_Engine extends UnicastRemoteObject implements Compute {
 		}
 		try {
             if (names[0].substring(names[0].lastIndexOf("/")).startsWith("/SW")
-            		|| names[0].substring(names[0].lastIndexOf("/")).startsWith("/DUP")) {
+            		|| names[0].substring(names[0].lastIndexOf("/")).startsWith("/DUP")
+            		|| names[0].substring(names[0].lastIndexOf("/")).startsWith("/Projectionsof")) {
             	vstack = new MultiQTVirtualStack(mqtf, new ArrayList<String>(),new ArrayList<String>(),movieSlices, false, imp, true, true, false, false, false, false);
             } else {
             	vstack = new MultiQTVirtualStack(mqtf, new ArrayList<String>(),new ArrayList<String>(),movieSlices, true, imp, false, true, false, false, false, false);

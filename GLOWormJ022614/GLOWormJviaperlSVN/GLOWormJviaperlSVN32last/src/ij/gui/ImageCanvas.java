@@ -27,6 +27,7 @@ import java.awt.geom.*;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JList;
 
 import org.vcell.gloworm.MultiQTVirtualStack;
@@ -2757,7 +2758,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		}
 		Roi roi = imp.getRoi();
 		if (roi!=null && (roi.getType()==Roi.POLYGON || roi.getType()==Roi.POLYLINE || roi.getType()==Roi.ANGLE) 
-				&& roi.getState()==roi.CONSTRUCTING) {
+				&& roi.getState()==Roi.CONSTRUCTING) {
 			PolygonRoi pRoi = (PolygonRoi)roi;
 			pRoi.handleMouseMove(sx, sy);
 		} else {
@@ -2776,8 +2777,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			RoiManager rm = imp.getRoiManager();
 			if (rm == null)
 				return;
-			Hashtable rois = rm.getROIs();
-			DefaultListModel listModel = rm.getListModel();
+			Hashtable<String, Roi> rois = rm.getROIs();
+			DefaultListModel<String> listModel = rm.getListModel();
 			int n = listModel.size();
 			if (getLabelShapes() == null || getLabelShapes().length != n)
 				return;
@@ -2802,21 +2803,22 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			}
 			Graphics g = getGraphics();
 			if (cursorString != null) {
+//				IJ.log(cursorString);
 				cursorRoi = new TextRoi(getXMouse()+10/ getMagnification(), getYMouse(), cursorString);
 				((TextRoi) cursorRoi).setCurrentFont(g.getFont().deriveFont((float) (16 / getMagnification())));
-				try {
-					paintDoubleBuffered(g);
+//				try {
+//					paint(g);
 					cursorRoi.setStrokeColor(Color.black);
 					cursorRoi.setFillColor(Colors.decode("#99ffffff",
 							getDefaultColor()));
 					cursorRoi.setLocation(((int) (getXMouse()> getSrcRect().getX()+cursorString.length()*4/ getMagnification()?(getXMouse()< getSrcRect().getMaxX()-cursorString.length()*4.5/ getMagnification()?getXMouse()- cursorString.length()*4/ getMagnification():getXMouse()- cursorString.length()*9/ getMagnification()):getXMouse()))
 							, getYMouse()<getSrcRect().getMaxY()-40/getMagnification()?((int)(getYMouse()+20/ getMagnification())):((int)(getYMouse()-35/ getMagnification())));
 					drawRoi(g, cursorRoi, -1);
-				} finally {
-				}
+//				} finally {
+//				}
 			} else {
 				cursorRoi = null;
-				paintDoubleBuffered(g);
+				paint(g);
 			}
 		}else if (imp.getMotherImp().getRoiManager().getColorLegend() != null){
 			//			IJ.showStatus("bling");
@@ -2826,8 +2828,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				String cursorString = cursorCB.getName();
 				cursorRoi = new TextRoi((getXMouse()-cursorCB.getWidth()/2)/ getMagnification(), getYMouse(), cursorString);
 				((TextRoi) cursorRoi).setCurrentFont(g.getFont().deriveFont((float) (16 / getMagnification())));
-				try {
-					paintDoubleBuffered(g);
+//				try {
+					paint(g);
 					cursorRoi.setStrokeColor(Color.black);
 					//					IJ.log("#99"+Integer.toHexString(imp.getProcessor().get(xMouse,yMouse)).substring(2));
 					//					cursorRoi.setFillColor(Colors.decode("#99"+Integer.toHexString(imp.getProcessor().get(xMouse,yMouse)).substring(2),
@@ -2838,8 +2840,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 					cursorRoi.setLocation(((int) (getXMouse()> getSrcRect().getX()+cursorString.length()*4/ getMagnification()?(getXMouse()< getSrcRect().getMaxX()-cursorString.length()*4.5/ getMagnification()?getXMouse()- cursorString.length()*4/ getMagnification():getXMouse()- cursorString.length()*9/ getMagnification()):getXMouse()))
 							, getYMouse()<getSrcRect().getMaxY()-40/getMagnification()?((int)(getYMouse()+20/ getMagnification())):((int)(getYMouse()-35/ getMagnification())));
 					drawRoi(g, cursorRoi, -1);
-				} finally {
-				}
+//				} finally {
+//				}
 			} else {
 				cursorRoi = null;
 				paint(g);

@@ -54,8 +54,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	private Panel panel;
 	private static Frame instance;
 	private static int colorIndex = 4;
-	private JList list, fullList;
-	private Hashtable rois = new Hashtable();
+	private JList<String> list, fullList;
+	private Hashtable<String, Roi> rois = new Hashtable<String, Roi>();
 	private Roi roiCopy;
 	private boolean canceled;
 	private boolean macro;
@@ -110,7 +110,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	private ColorLegend colorLegend;
 	private double shiftY =10;
 	private double shiftX =10;
-	private DefaultListModel listModel, fullListModel;
+	private DefaultListModel<String> listModel, fullListModel;
 	private boolean rmNeedsUpdate=false;
 	private Button updateButton;
 	private boolean searching;
@@ -147,10 +147,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			return;
 		}
 		//		this.setTitle(getTitle()+":"+ imp.getTitle());
-		list = new JList();
-		fullList = new JList();		
-		listModel = new DefaultListModel();
-		fullListModel = new DefaultListModel();
+		list = new JList<String>();
+		fullList = new JList<String>();		
+		listModel = new DefaultListModel<String>();
+		fullListModel = new DefaultListModel<String>();
 		list.setModel(listModel);
 		fullList.setModel(fullListModel);
 		imp.setRoiManager(this);
@@ -166,10 +166,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		this.imp = WindowManager.getCurrentImage();
 		//		this.setTitle(getTitle()+":"+ imp.getTitle());
 		Prefs.showAllSliceOnly = true;
-		list = new JList();
-		fullList = new JList();
-		listModel = new DefaultListModel();
-		fullListModel = new DefaultListModel();
+		list = new JList<String>();
+		fullList = new JList<String>();
+		listModel = new DefaultListModel<String>();
+		fullListModel = new DefaultListModel<String>();
 		list.setModel(listModel);
 		fullList.setModel(fullListModel);
 
@@ -186,10 +186,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		super("Tag Manager");
 		this.imp = imp;
 		Prefs.showAllSliceOnly = true;
-		list = new JList();
-		fullList = new JList();	
-		listModel = new DefaultListModel();
-		fullListModel = new DefaultListModel();
+		list = new JList<String>();
+		fullList = new JList<String>();	
+		listModel = new DefaultListModel<String>();
+		fullListModel = new DefaultListModel<String>();
 		list.setModel(listModel);
 		fullList.setModel(fullListModel);
 
@@ -2645,7 +2645,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		@see getCount
 		@see getRoisAsArray
 	 */
-	public Hashtable getROIs() {
+	public Hashtable<String, Roi> getROIs() {
 		return rois;
 	}
 
@@ -4318,19 +4318,19 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	}
 
-	public DefaultListModel getListModel() {
+	public DefaultListModel<String> getListModel() {
 		return listModel;
 	}
 
-	public void setListModel(DefaultListModel listModel) {
+	public void setListModel(DefaultListModel<String> listModel) {
 		this.listModel = listModel;
 	}
 
-	public DefaultListModel getFullListModel() {
+	public DefaultListModel<String> getFullListModel() {
 		return fullListModel;
 	}
 
-	public void setFullListModel(DefaultListModel fullListModel) {
+	public void setFullListModel(DefaultListModel<String> fullListModel) {
 		this.fullListModel = fullListModel;
 	}
 
