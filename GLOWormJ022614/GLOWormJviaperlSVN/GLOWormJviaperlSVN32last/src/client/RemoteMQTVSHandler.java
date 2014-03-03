@@ -54,6 +54,7 @@ public class RemoteMQTVSHandler {
 
 	private  Compute comp;
 	private  int[] qtDims;
+	private int stkWidth, stkHeight, stkNChannels, stkNSlices, stkNFrames;
 	public  String[] moviePathNames;
 	private VirtualStack stack;
 	public long lastGetTime=0;
@@ -229,20 +230,26 @@ public class RemoteMQTVSHandler {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
+			
+			stkWidth = qtDims[0]; 
+			stkHeight = qtDims[1]; 
+			stkNChannels = qtDims[2];
+			stkNSlices = qtDims[3];
+			stkNFrames = qtDims[4];
 			imp2 = new ImagePlus();
-			stack = new RemoteMQTVirtualStack(qtDims[0], qtDims[1],
+			stack = new RemoteMQTVirtualStack(stkWidth, stkHeight,
 					ColorModel.getRGBdefault(), "", false, Color.black);
 			((RemoteMQTVirtualStack)stack).setStretchToFitOverlay(stretchToFitOverlay);
 
 
 			if ((moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW"))) {
 				stack.setBurnIn(true);
-				for (int i=1; i<=qtDims[3]*qtDims[4]; i++) {
+				for (int i=1; i<=stkNSlices*stkNFrames; i++) {
 					((VirtualStack)stack).addSlice("");
 				}
 			} else {
 				stack.setBurnIn(false);
-				for (int i=1; i<=qtDims[2]*qtDims[3]*qtDims[4]; i++) {
+				for (int i=1; i<=stkNChannels*stkNSlices*stkNFrames; i++) {
 					((VirtualStack)stack).addSlice("");
 				}
 			}
@@ -257,7 +264,7 @@ public class RemoteMQTVSHandler {
 			
 			win2 = null;
 			if (!(moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW"))) {
-				imp2.setDimensions(qtDims[2], qtDims[3], qtDims[4]);
+				imp2.setDimensions(stkNChannels, stkNSlices, stkNFrames);
 				imp2.setOpenAsHyperStack(true);
 				CompositeImage ci2 = null;
 				if (!(moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/DUP")
@@ -329,12 +336,12 @@ public class RemoteMQTVSHandler {
 					ci2.setWindow(win2);
 				else
 					imp2.setWindow(win2);
-				if (qtDims[2] == 1 && ci2!=null)
+				if (stkNChannels == 1 && ci2!=null)
 					IJ.run("Grays");
 
 			} else {
 				//        	imp2.show();
-				imp2.setDimensions(qtDims[3], qtDims[4], 1);
+				imp2.setDimensions(stkNSlices, stkNFrames, 1);
 				imp2.setOpenAsHyperStack(true);
 				win2 = new StackWindow(imp2) {
 
@@ -425,13 +432,13 @@ public class RemoteMQTVSHandler {
 		Object qtbaosba=null;
 		try {
 			if (moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW")) {
-				int channel = 1+ ((qtSlice-1) % qtDims[3]);
-				int slice = 1+ ((qtSlice-1) / (qtDims[3]));
+				int channel = 1+ ((qtSlice-1) % stkNSlices);
+				int slice = 1+ ((qtSlice-1) / (stkNSlices));
 				qtbaosba = compQ.getQTPixels(remoteImpID, resolutionToGet, channel, slice, jpegQuality);
 			} else {
-				int channel = 1+ ((qtSlice-1) % qtDims[2]);
-				int slice = 1+ (((qtSlice-1)/qtDims[2]) % qtDims[3]);
-				int frame = 1+ ((qtSlice-1) / (qtDims[2]*qtDims[3]));
+				int channel = 1+ ((qtSlice-1) % stkNChannels);
+				int slice = 1+ (((qtSlice-1)/stkNChannels) % stkNSlices);
+				int frame = 1+ ((qtSlice-1) / (stkNChannels*stkNSlices));
 				qtbaosba = compQ.getQTPixels(remoteImpID, channel, slice, frame, jpegQuality);
 			}
 		} catch (RemoteException e) {
@@ -504,6 +511,7 @@ public class RemoteMQTVSHandler {
 				|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/DUP")
 				|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/Projectionsof"))) {
 			ip = ip.convertToByte(false);
+			eightBit = true;
 		}
 
 		if (burnIn) {
@@ -512,14 +520,14 @@ public class RemoteMQTVSHandler {
 					burnInComplete = false;
 
 					IJ.wait(jpegQuality==1?0:0);  //funky little setting...
-					if (((RemoteMQTVirtualStack)stack).selectedSlice == ((((StackWindow)imp2.getWindow()).zSelector.getValue()-1) * qtDims[3])
+					if (((RemoteMQTVirtualStack)stack).selectedSlice == ((((StackWindow)imp2.getWindow()).zSelector.getValue()-1) * stkNSlices)
 																		+ (((StackWindow)imp2.getWindow()).cSelector!=null
 																				?((StackWindow)imp2.getWindow()).cSelector.getValue()
 																						:1)){
 						Thread thread = new Thread(new Runnable() {
 							public void run() {
 								RemoteMQTVSHandler.this.jpegQuality=10*jpegQuality;
-								imp2.setProcessor(stack.getProcessor(((((StackWindow)imp2.getWindow()).zSelector.getValue()-1) * qtDims[3])
+								imp2.setProcessor(stack.getProcessor(((((StackWindow)imp2.getWindow()).zSelector.getValue()-1) * stkNSlices)
 										+ (((StackWindow)imp2.getWindow()).cSelector!=null
 												?((StackWindow)imp2.getWindow()).cSelector.getValue()
 												:1)));
@@ -539,17 +547,17 @@ public class RemoteMQTVSHandler {
 					RemoteMQTVSHandler.this.jpegQuality=100;
 
 					IJ.wait(0);  //funky little setting...
-					if ( (((RemoteMQTVirtualStack)stack).selectedSlice == ((((StackWindow)imp2.getWindow()).zSelector.getValue()-1) * qtDims[3])
+					if ( (((RemoteMQTVirtualStack)stack).selectedSlice == ((((StackWindow)imp2.getWindow()).zSelector.getValue()-1) * stkNSlices)
 																			+ (((StackWindow)imp2.getWindow()).cSelector!=null
 																					?((StackWindow)imp2.getWindow()).cSelector.getValue()
 																					:1)) 
-								&& RemoteMQTVSHandler.this.resolutionToGet < qtDims[2]) {
-						if (RemoteMQTVSHandler.this.resolutionToGet == qtDims[2]-1)
+								&& RemoteMQTVSHandler.this.resolutionToGet < stkNChannels) {
+						if (RemoteMQTVSHandler.this.resolutionToGet == stkNChannels-1)
 							burnInComplete = true;
 						Thread thread = new Thread(new Runnable() {
 							public void run() {
 								RemoteMQTVSHandler.this.resolutionToGet++;
-								ImageProcessor tip = stack.getProcessor(((((StackWindow)imp2.getWindow()).zSelector.getValue()-1) * qtDims[3])
+								ImageProcessor tip = stack.getProcessor(((((StackWindow)imp2.getWindow()).zSelector.getValue()-1) * stkNSlices)
 										+ (((StackWindow)imp2.getWindow()).cSelector!=null
 										?((StackWindow)imp2.getWindow()).cSelector.getValue()
 										:1));
@@ -584,7 +592,7 @@ public class RemoteMQTVSHandler {
 				}
 			}
 		}
-		//		return ip.resize(qtDims[0],qtDims[1],false);
+		//		return ip.resize(stkWidth,stkHeight,false);
 		return ip;
 	}	
 
@@ -625,7 +633,7 @@ public class RemoteMQTVSHandler {
 	public String[] getChannelPathNames() {
 		// TODO Auto-generated method stub
 		if (moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW")) {
-			String[] names = new String[qtDims[3]];
+			String[] names = new String[stkNSlices];
 			for (int n=0; n<names.length;n++){
 				names[n] = this.moviePathNames[moviePathNames.length-1];
 			}
@@ -719,21 +727,21 @@ public class RemoteMQTVSHandler {
 
 
 	public class RemoteMQTVirtualStack extends VirtualStack {
-		private double[] translateX = new double[qtDims[2]];
-		private double[] translateY = new double[qtDims[2]];
-		private int[] nSlicesSingleMovie = new int[qtDims[2]];
+		private double[] translateX = new double[stkNChannels];
+		private double[] translateY = new double[stkNChannels];
+		private int[] nSlicesSingleMovie = new int[stkNChannels];
 		private ImagePlus lineageMapImage;
-		private int[] relativeZFrequencySingleMovie = new int[qtDims[2]];
-		private int[] relativeFrameRateSingleMovie = new int[qtDims[2]];
-		private double[] rotateAngle = new double[qtDims[2]];
-		private int[] shiftZPosition = new int[qtDims[2]];
-		private int[] shiftTPosition = new int[qtDims[2]];
-		private boolean[] flipSingleMovieStackVertical = new boolean[qtDims[2]];
-		private boolean[] flipSingleMovieStackHorizontal = new boolean[qtDims[2]];
-		private boolean[] flipSingleMovieStackOrder = new boolean[qtDims[2]];
-		private double[] scaleX = new double[qtDims[2]];
-		private double[] scaleY = new double[qtDims[2]];
-		private int[] channelLUTIndex = new int[qtDims[2]];
+		private int[] relativeZFrequencySingleMovie = new int[stkNChannels];
+		private int[] relativeFrameRateSingleMovie = new int[stkNChannels];
+		private double[] rotateAngle = new double[stkNChannels];
+		private int[] shiftZPosition = new int[stkNChannels];
+		private int[] shiftTPosition = new int[stkNChannels];
+		private boolean[] flipSingleMovieStackVertical = new boolean[stkNChannels];
+		private boolean[] flipSingleMovieStackHorizontal = new boolean[stkNChannels];
+		private boolean[] flipSingleMovieStackOrder = new boolean[stkNChannels];
+		private double[] scaleX = new double[stkNChannels];
+		private double[] scaleY = new double[stkNChannels];
+		private int[] channelLUTIndex = new int[stkNChannels];
 		private int selectedSlice;
 		private int maximumRelativeZFrequency =1;
 		private int maximumRelativeFrameRate =1;
@@ -745,7 +753,7 @@ public class RemoteMQTVSHandler {
 		private double[] nmdzSingleMovie;
 		private double[] dzdxyRatio;
 		private double sliceDepth;
-		private String[] channelLUTName = new String[qtDims[2]];;
+		private String[] channelLUTName = new String[stkNChannels];;
 
 		private RemoteMQTVirtualStack(int width, int height, ColorModel cm,
 				String path, boolean emptyImage, Color fillColor) {
@@ -787,46 +795,52 @@ public class RemoteMQTVSHandler {
 				if (this.flipSingleMovieStackOrder[0])
 					slice = RemoteMQTVSHandler.this.getImagePlus().getNSlices()-(slice-1);
 			} else {
-				if (this.flipSingleMovieStackOrder[(slice-1)%qtDims[2]]) {
-					int base = slice-((slice-1)%(qtDims[2]*qtDims[3]));
+				if (this.flipSingleMovieStackOrder[(slice-1)%stkNChannels]) {
+					int base = slice-((slice-1)%(stkNChannels*stkNSlices));
 					int nZ = RemoteMQTVSHandler.this.getImagePlus().getNSlices();
-					int sliceLocal = (slice-1)%(qtDims[2]*qtDims[3]);
-					int cLocal = sliceLocal%qtDims[2];
-					int zLocal = (sliceLocal-cLocal)/qtDims[2];
+					int sliceLocal = (slice-1)%(stkNChannels*stkNSlices);
+					int cLocal = sliceLocal%stkNChannels;
+					int zLocal = (sliceLocal-cLocal)/stkNChannels;
 					int flipZLocal = nZ-1-zLocal;
-					int sliceFlip = base + flipZLocal*qtDims[2] + cLocal;
+					int sliceFlip = base + flipZLocal*stkNChannels + cLocal;
 					slice = sliceFlip;
 				}
 			}
 
-			int channelBaseZero = (slice-1)%qtDims[2];
+			int channelBaseZero = (slice-1)%stkNChannels;
 
 			int adjustedSlice = (int)Math.floor((int)Math.floor((int)Math.floor(((slice-1)
-					/(qtDims[2]))
-					/(qtDims[3]))
+					/(stkNChannels))
+					/(stkNSlices))
 					* relativeFrameRateSingleMovie[channelBaseZero])/this.maximumRelativeFrameRate )
-					* (qtDims[2]*qtDims[3])
+					* (stkNChannels*stkNSlices)
 
 					+ (int)Math.floor(((int)Math.floor(((slice-1) 
-							%(qtDims[2]*qtDims[3]))
-							/(qtDims[2]))
+							%(stkNChannels*stkNSlices))
+							/(stkNChannels))
 							* relativeZFrequencySingleMovie[channelBaseZero])/this.maximumRelativeZFrequency )
-							* (qtDims[2])
+							* (stkNChannels)
 
 							+ channelBaseZero + 1
 
-							+ (shiftTPosition[channelBaseZero] * qtDims[2] * qtDims[3])
+							+ (shiftTPosition[channelBaseZero] * stkNChannels * stkNSlices)
 
-							+ (shiftZPosition[channelBaseZero] * qtDims[2]);
+							+ (shiftZPosition[channelBaseZero] * stkNChannels);
 			
-			if ((adjustedSlice )%(qtDims[2] * qtDims[3]) - (channelBaseZero + 1)%qtDims[2] == 0 )  {
-//				IJ.log(""+ adjustedSlice +" "+ channelBaseZero +" "+shiftZPosition[channelBaseZero] +" "+qtDims[2] +" "+qtDims[3]);
-				if (shiftZPosition[channelBaseZero] > 0 )
-					adjustedSlice = adjustedSlice - (qtDims[2] * qtDims[3]);
-				else if (shiftZPosition[channelBaseZero] < 0 )
-					adjustedSlice = adjustedSlice + (qtDims[2] * qtDims[3]);
+			if ((adjustedSlice )%(stkNChannels * stkNSlices) != slice%(stkNChannels * stkNSlices)+(shiftZPosition[channelBaseZero]  * stkNChannels))  {
+//				IJ.log(""+ adjustedSlice +" "+ channelBaseZero +" "+shiftZPosition[channelBaseZero] +" "+stkNChannels +" "+stkNSlices);
+				if (shiftZPosition[channelBaseZero] > 0 ) {
+					adjustedSlice = adjustedSlice - (stkNChannels * stkNSlices);
+					if  (adjustedSlice > nSlices && adjustedSlice < nSlices + (shiftZPosition[channelBaseZero]  * stkNChannels))
+						adjustedSlice = adjustedSlice - (stkNChannels * stkNSlices);
+				}
+				else if (shiftZPosition[channelBaseZero] < 0 ) {
+					adjustedSlice = adjustedSlice + (stkNChannels * stkNSlices);
+					if  (adjustedSlice <0 && adjustedSlice > (shiftZPosition[channelBaseZero]  * stkNChannels))
+							adjustedSlice = adjustedSlice + (stkNChannels * stkNSlices);
+				}
 			}
-			if (adjustedSlice < 1) {
+			if (adjustedSlice <0 ) {
 				if (!eightBit)
 					ip = new ColorProcessor(finalWidth, finalHeight);
 				else 
@@ -845,13 +859,13 @@ public class RemoteMQTVSHandler {
 					boolean burnIn = false;
 					if (win != null) 
 						burnIn = this.isBurnIn() && !win.running && !win.running2 && !win.running3;
-					if ((new File(/*(IJ.isWindows()?"\\\\?\\":"")+*/localMovieDirs[qtDims[2]-1]+"/"+adjustedSlice+".tif")).canRead()) {
-						ip = (new Opener()).openImage(/*(IJ.isWindows()?"\\\\?\\":"")+*/localMovieDirs[qtDims[2]-1]+"/"+adjustedSlice+".tif").getProcessor();
+					if ((new File(/*(IJ.isWindows()?"\\\\?\\":"")+*/localMovieDirs[stkNChannels-1]+"/"+adjustedSlice+".tif")).canRead()) {
+						ip = (new Opener()).openImage(/*(IJ.isWindows()?"\\\\?\\":"")+*/localMovieDirs[stkNChannels-1]+"/"+adjustedSlice+".tif").getProcessor();
 						dejaVuIPLinkedHashMap.put(adjustedSlice, ip.duplicate());
 					}else if (this.isBurnIn()) {
 						boolean cacheIt = false;
 						if (burnIn) {
-							cacheIt =  (resolutionToGet == qtDims[2]);								
+							cacheIt =  (resolutionToGet == stkNChannels);								
 							ip = getRemoteIP(adjustedSlice, jpegQuality, true);
 						} else {
 							resolutionToGet = 1;
@@ -860,24 +874,24 @@ public class RemoteMQTVSHandler {
 						if (cacheIt) {
 							dejaVuIPLinkedHashMap.put(adjustedSlice, ip.duplicate());
 							if ((new File(IJ.getDirectory("home"))).getUsableSpace() > 20000000L) 
-								(new FileSaver(new ImagePlus("",ip))).saveAsTiff(/*(IJ.isWindows()?"\\\\?\\":"")+*/localMovieDirs[qtDims[2]-1]+"/"+adjustedSlice+".tif");
+								(new FileSaver(new ImagePlus("",ip))).saveAsTiff(/*(IJ.isWindows()?"\\\\?\\":"")+*/localMovieDirs[stkNChannels-1]+"/"+adjustedSlice+".tif");
 						}
 					} else {
-						RemoteMQTVSHandler.this.resolutionToGet = qtDims[2];
+						RemoteMQTVSHandler.this.resolutionToGet = stkNChannels;
 						ip = getRemoteIP(adjustedSlice, 100, false);
 						dejaVuIPLinkedHashMap.put(adjustedSlice, ip.duplicate());
 						if ((new File(IJ.getDirectory("home"))).getUsableSpace() > 20000000L) 
-							(new FileSaver(new ImagePlus("",ip))).saveAsTiff(/*(IJ.isWindows()?"\\\\?\\":"")+*/localMovieDirs[qtDims[2]-1]+"/"+adjustedSlice+".tif");
+							(new FileSaver(new ImagePlus("",ip))).saveAsTiff(/*(IJ.isWindows()?"\\\\?\\":"")+*/localMovieDirs[stkNChannels-1]+"/"+adjustedSlice+".tif");
 					}
 
-				}else if ((new File(/*(IJ.isWindows()?"\\\\?\\":"")+*/localMovieDirs[(adjustedSlice-1)%qtDims[2]]+"/"+((int)Math.floor((adjustedSlice-1)/qtDims[2])+1)+".tif")).canRead()) {
-					ip = (new Opener()).openImage(/*(IJ.isWindows()?"\\\\?\\":"")+*/localMovieDirs[(adjustedSlice-1)%qtDims[2]]+"/"+((int)Math.floor((adjustedSlice-1)/qtDims[2])+1)+".tif").getProcessor();
+				}else if ((new File(/*(IJ.isWindows()?"\\\\?\\":"")+*/localMovieDirs[(adjustedSlice-1)%stkNChannels]+"/"+((int)Math.floor((adjustedSlice-1)/stkNChannels)+1)+".tif")).canRead()) {
+					ip = (new Opener()).openImage(/*(IJ.isWindows()?"\\\\?\\":"")+*/localMovieDirs[(adjustedSlice-1)%stkNChannels]+"/"+((int)Math.floor((adjustedSlice-1)/stkNChannels)+1)+".tif").getProcessor();
 					dejaVuIPLinkedHashMap.put(adjustedSlice, ip.duplicate());
 				}else {
 					ip = getRemoteIP(adjustedSlice, 100, false);
 					dejaVuIPLinkedHashMap.put(adjustedSlice, ip.duplicate());
 					if ((new File(IJ.getDirectory("home"))).getUsableSpace() > 20000000L) 
-						(new FileSaver(new ImagePlus("",ip))).saveAsTiff(/*(IJ.isWindows()?"\\\\?\\":"")+*/localMovieDirs[(adjustedSlice-1)%qtDims[2]]+"/"+((int)Math.floor((adjustedSlice-1)/qtDims[2])+1)+".tif");
+						(new FileSaver(new ImagePlus("",ip))).saveAsTiff(/*(IJ.isWindows()?"\\\\?\\":"")+*/localMovieDirs[(adjustedSlice-1)%stkNChannels]+"/"+((int)Math.floor((adjustedSlice-1)/stkNChannels)+1)+".tif");
 				}
 
 
@@ -895,7 +909,7 @@ public class RemoteMQTVSHandler {
 						+ "MB ");
 
 				if (stretchToFitOverlay) {
-					ip = ip.resize(qtDims[0], qtDims[1], false);
+					ip = ip.resize(stkWidth, stkHeight, false);
 				}
 
 
@@ -911,50 +925,50 @@ public class RemoteMQTVSHandler {
 							(1+(scaleY[0]/100)));
 					ip.translate(translateX[0], -translateY[0]);
 				} else {
-					if (flipSingleMovieStackVertical[(adjustedSlice-1)%qtDims[2]])
+					if (flipSingleMovieStackVertical[(adjustedSlice-1)%stkNChannels])
 						ip.flipVertical();
-					if (flipSingleMovieStackHorizontal[(adjustedSlice-1)%qtDims[2]])
+					if (flipSingleMovieStackHorizontal[(adjustedSlice-1)%stkNChannels])
 						ip.flipHorizontal();
 					ip.setBackgroundValue(0);
-					ip.rotate(rotateAngle[(adjustedSlice-1)%qtDims[2]]);
-					ip.scale((1+(scaleX[(adjustedSlice-1)%qtDims[2]]/100)), 
-							(1+(scaleY[(adjustedSlice-1)%qtDims[2]]/100)));
-					ip.translate(translateX[(adjustedSlice-1)%qtDims[2]], -translateY[(adjustedSlice-1)%qtDims[2]]);
+					ip.rotate(rotateAngle[(adjustedSlice-1)%stkNChannels]);
+					ip.scale((1+(scaleX[(adjustedSlice-1)%stkNChannels]/100)), 
+							(1+(scaleY[(adjustedSlice-1)%stkNChannels]/100)));
+					ip.translate(translateX[(adjustedSlice-1)%stkNChannels], -translateY[(adjustedSlice-1)%stkNChannels]);
 				}
 			}
 
 			if (viewOverlay) {
-				finalWidth = qtDims[0];
-				finalHeight = qtDims[1];
+				finalWidth = stkWidth;
+				finalHeight = stkHeight;
 
 			} else if (sideSideStereo){
-				int numPanels = qtDims[2];
+				int numPanels = stkNChannels;
 				if (grid) {
 					gridAcross = numPanels<8?2:4;
 					gridDown = numPanels/gridAcross;
 				}
 				if (horizontal || !horizontal) {
 					if (grid) {
-						finalWidth = ((int)gridAcross) * qtDims[0];
-						finalHeight = ((int)gridDown) * qtDims[1];
+						finalWidth = ((int)gridAcross) * stkWidth;
+						finalHeight = ((int)gridDown) * stkHeight;
 					} else {
-						finalWidth = qtDims[0] * 2;
-						finalHeight = qtDims[1]*numPanels/2;
+						finalWidth = stkWidth * 2;
+						finalHeight = stkHeight*numPanels/2;
 					}
 //				} else {
 //					if (grid) {
-//						finalHeight = ((int)gridAcross) * qtDims[0];
-//						finalWidth = ((int)gridDown) * qtDims[1];
+//						finalHeight = ((int)gridAcross) * stkWidth;
+//						finalWidth = ((int)gridDown) * stkHeight;
 //					} else {
-//						finalWidth = qtDims[0];
-//						finalHeight = qtDims[1] * qtDims[2];
+//						finalWidth = stkWidth;
+//						finalHeight = stkHeight * stkNChannels;
 //					}
 				}
 
 			} else {
-				int numPanels = qtDims[2];
+				int numPanels = stkNChannels;
 				if (redCyanStereo)
-					numPanels = qtDims[2]/2;
+					numPanels = stkNChannels/2;
 				
 				if (grid) {
 					if ( numPanels == 3 ) numPanels = 4;
@@ -974,19 +988,19 @@ public class RemoteMQTVSHandler {
 				}
 				if (horizontal) {
 					if (grid) {
-						finalWidth = ((int)gridAcross) * qtDims[0];
-						finalHeight = ((int)gridDown) * qtDims[1];
+						finalWidth = ((int)gridAcross) * stkWidth;
+						finalHeight = ((int)gridDown) * stkHeight;
 					} else {
-						finalWidth = qtDims[0] * numPanels;
-						finalHeight = qtDims[1];
+						finalWidth = stkWidth * numPanels;
+						finalHeight = stkHeight;
 					}
 				} else {
 					if (grid) {
-						finalHeight = ((int)gridAcross) * qtDims[0];
-						finalWidth = ((int)gridDown) * qtDims[1];
+						finalHeight = ((int)gridAcross) * stkWidth;
+						finalWidth = ((int)gridDown) * stkHeight;
 					} else {
-						finalWidth = qtDims[0];
-						finalHeight = qtDims[1] * numPanels;
+						finalWidth = stkWidth;
+						finalHeight = stkHeight * numPanels;
 					}
 				}
 			}
@@ -999,22 +1013,22 @@ public class RemoteMQTVSHandler {
 
 			finalIP.setColor(Color.black);
 			finalIP.fill();
-			int pane = viewOverlay?0:(slice-1)%qtDims[2];
+			int pane = viewOverlay?0:(slice-1)%stkNChannels;
 			if (redCyanStereo)
 				pane = ((int)Math.floor(pane/2));
 			int insertX = 0;
 			int insertY = 0;
 			if (!viewOverlay) {
 				if (grid || sideSideStereo) {
-					insertX = pane*qtDims[0]%finalWidth;
-					insertY = ((int)Math.floor(pane*qtDims[0]/finalWidth))*qtDims[1];
+					insertX = pane*stkWidth%finalWidth;
+					insertY = ((int)Math.floor(pane*stkWidth/finalWidth))*stkHeight;
 				} else {
 					if (horizontal) {
-						insertX = pane*qtDims[0];
+						insertX = pane*stkWidth;
 						insertY = 0;
 					} else {
 						insertX = 0;
-						insertY = pane*qtDims[0];
+						insertY = pane*stkWidth;
 					}
 				}
 			}
@@ -1027,9 +1041,9 @@ public class RemoteMQTVSHandler {
 		@Override
 		public int getSize() {
 			if (!(moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW"))) {
-				return qtDims[2]*qtDims[3]*qtDims[4];
+				return stkNChannels*stkNSlices*stkNFrames;
 			} else {
-				return qtDims[3]*qtDims[4];
+				return stkNSlices*stkNFrames;
 			}
 		}
 
@@ -1307,7 +1321,7 @@ public class RemoteMQTVSHandler {
 			((StackWindow)imp2.getWindow()).zSelector.setValue(1+(((RemoteMQTVirtualStack)stack).selectedSlice 
 					- (((StackWindow)imp2.getWindow()).cSelector!=null
 					?((StackWindow)imp2.getWindow()).cSelector.getValue()
-							:1))/qtDims[3]) ;
+							:1))/stkNSlices) ;
 			imp2.updateAndRepaintWindow();
 		}
 		return true;

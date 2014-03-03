@@ -13,7 +13,7 @@ import java.awt.image.ColorModel;
 public class VirtualStack extends ImageStack {
 	private static final int INITIAL_SIZE = 100;
 	private String path;
-	private int nSlices;
+	protected int nSlices;
 	private String[] names;
 	private String[] labels;
 	private int bitDepth;
