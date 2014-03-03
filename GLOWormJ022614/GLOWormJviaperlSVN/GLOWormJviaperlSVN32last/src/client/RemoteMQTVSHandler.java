@@ -823,8 +823,7 @@ public class RemoteMQTVSHandler {
 //				IJ.log(""+ adjustedSlice +" "+ channelBaseZero +" "+shiftZPosition[channelBaseZero] +" "+qtDims[2] +" "+qtDims[3]);
 				if (shiftZPosition[channelBaseZero] > 0 )
 					adjustedSlice = adjustedSlice - (qtDims[2] * qtDims[3]);
-				else 
-				if (shiftZPosition[channelBaseZero] < 0 )
+				else if (shiftZPosition[channelBaseZero] < 0 )
 					adjustedSlice = adjustedSlice + (qtDims[2] * qtDims[3]);
 			}
 			if (adjustedSlice < 1) {
