@@ -124,7 +124,7 @@ public QTMovieOpenerMultiMod(String pathListStereo, boolean redCyanStereo2, bool
 			IJ.error("This plugin requires a 32-bit version of Java");
    		 try { BrowserLauncher.openURL
 			 ("mailto:support@gloworm.org?" +
-			 		"subject=Help%20or%20Comments%20on%20GLOWormNotes%20or%20GLOWormJ!!" +
+			 		"subject=Help%20or%20Comments%20on%20CytoSHOWNotes%20or%20CytoSHOW!!" +
 			 		"%20%20Please,%20send%20your%20question%20or%20bug-report%20below." +
 			 		"&body=QTMovieOpenerMultiMod.run" + 
 			 		"This plugin requires a 32-bit version of Java");
@@ -140,7 +140,7 @@ public QTMovieOpenerMultiMod(String pathListStereo, boolean redCyanStereo2, bool
 						+"with QuickTime 7.6 or later.");
 	   		 try { BrowserLauncher.openURL
 				 ("mailto:support@gloworm.org?" +
-				 		"subject=Help%20or%20Comments%20on%20GLOWormNotes%20or%20GLOWormJ!!" +
+				 		"subject=Help%20or%20Comments%20on%20CytoSHOWNotes%20or%20CytoSHOW!!" +
 				 		"%20%20Please,%20send%20your%20question%20or%20bug-report%20below." +
 				 		"&body=QTMovieOpenerMultiMod.run" + 
 				 		"Requires QuickTime for Java, available \n"
@@ -492,7 +492,7 @@ public QTMovieOpenerMultiMod(String pathListStereo, boolean redCyanStereo2, bool
 			IJ.error(qte.getMessage());
 	   		 try { BrowserLauncher.openURL
 				 ("mailto:support@gloworm.org?" +
-				 		"subject=Help%20or%20Comments%20on%20GLOWormNotes%20or%20GLOWormJ!!" +
+				 		"subject=Help%20or%20Comments%20on%20CytoSHOWNotes%20or%20CytoSHOW!!" +
 				 		"%20%20Please,%20send%20your%20question%20or%20bug-report%20below." +
 				 		"&body=QTMovieOpenerMultiMod.openAsVirtualstack" + 
 				 		qte.getMessage());

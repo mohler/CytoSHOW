@@ -1575,8 +1575,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		try { 
 			if (!path.startsWith("/Volumes/GLOWORM_DATA/"))
 				in = new ZipInputStream(new FileInputStream(path)); 
-			else if ((new File(IJ.getDirectory("home")+"GLOWormCacheFiles"+path)).exists())
-				in = new ZipInputStream(new FileInputStream(new File(IJ.getDirectory("home")+"GLOWormCacheFiles"+path))); 
+			else if ((new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path)).exists())
+				in = new ZipInputStream(new FileInputStream(new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path))); 
 			else {
 				if (imp.getRemoteMQTVSHandler().getCompQ().getFileInputByteArray(path) != null)
 					in = new ZipInputStream(new ByteArrayInputStream(imp.getRemoteMQTVSHandler().getCompQ().getFileInputByteArray(path)));
@@ -1715,8 +1715,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		imp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
 		messageRoi = null;
 		busy = false;
-		if (path.startsWith("/Volumes/GLOWORM_DATA/") && !(new File(IJ.getDirectory("home")+"GLOWormCacheFiles"+path)).exists()) {
-			saveMultiple(this.getFullListIndexes(), IJ.getDirectory("home")+"GLOWormCacheFiles"+path);
+		if (path.startsWith("/Volumes/GLOWORM_DATA/") && !(new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path)).exists()) {
+			saveMultiple(this.getFullListIndexes(), IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path);
 		}
 	} 
 

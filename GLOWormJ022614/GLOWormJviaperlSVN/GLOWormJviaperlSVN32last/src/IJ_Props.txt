@@ -10,7 +10,7 @@
 # Commands installed in the right-click popup menu
 # Overridden in StartupMacros
 popup01=Rename Image...
-popup02=GLOWorm Functions
+popup02=CytoSHOW Functions
 popup03=-
 popup04=Adjust Display Contrast...
 popup05=Multi-Channel Controller...
@@ -376,7 +376,7 @@ plug-in06=-
 plug-in07=>"User_Plugins"
 plug-in08=-
 
-plug-in09="Open GLOWorm Movie(s)...",  org.vcell.gloworm.Open_GLOWormMovies
+plug-in09="Open CytoSHOW Movie(s)...",  org.vcell.gloworm.Open_CytoSHOWMovies
 plug-in10="Open Other QuickTime Movie(s)...", org.vcell.gloworm.QT_Movie_OpenerMultiMod
 plug-in11="Open a Saved Scene...", org.vcell.gloworm.MQTVS_SceneLoader
 plug-in12="Multi-Channel Controller...", org.vcell.gloworm.MultiChannelController
@@ -386,12 +386,12 @@ plug-in15="Save movie of this scene...", org.vcell.gloworm.QuickTime_ZTGrabWrite
 plug-in16="Duplicate Region/Load to RAM...", org.vcell.gloworm.MQTVS_Duplicator
 plug-in17="3D Project Selected Region...", ij.plugin.filter.Projector
 plug-in18="Orthogonal Slices", org.vcell.gloworm.MQTVS_OrthogonalViews
-plug-in19="GLOWorm Functions", org.vcell.gloworm.PluginsControl_Panel
+plug-in19="CytoSHOW Functions", org.vcell.gloworm.PluginsControl_Panel
 plug-in20="Save Current Scene...", org.vcell.gloworm.Save_CurrentScene
 plug-in21="Interactive Reslice", org.vcell.gloworm.MQTVS_StackRotateReslice
 plug-in22="Volume Viewer", org.vcell.gloworm.MQTVS_VolumeViewer
 plug-in23="Save JPEG snapshot...", org.vcell.gloworm.Save_JPEGsnapshot
-plug-in24="Show Map of Keypad Controls", ij.plugin.URLOpener("http://fsbill.cam.uchc.edu/gloworm/Xwords/GLOWormJKeypad.jpg")
+plug-in24="Show Map of Keypad Controls", ij.plugin.URLOpener("http://fsbill.cam.uchc.edu/gloworm/Xwords/CytoSHOWKeypad.jpg")
 plug-in25="Share Current Scene...", org.vcell.gloworm.Share_CurrentScene
 plug-in26="Show/Hide Tagging Tools", org.vcell.gloworm.ToggleTagTools
 plug-in27="Stack To QT", gloworm.Stack_To_QT

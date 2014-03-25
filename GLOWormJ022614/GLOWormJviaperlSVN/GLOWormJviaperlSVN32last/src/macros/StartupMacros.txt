@@ -55,7 +55,7 @@
 
   var pmCmds = newMenu("Popup Menu",
        newArray( "Rename Window...", "Duplicate Region/Load to RAM...", "Original Scale", "-", "Record...", "Capture Screen ", "Monitor Memory...", 
-       "Adjust Display Contrast...", "GLOWorm Functions", "Tag Manager...", "Synchronize Windows"));
+       "Adjust Display Contrast...", "CytoSHOW Functions", "Tag Manager...", "Synchronize Windows"));
 
   macro "Popup Menu" {
       cmd = getArgument();
@@ -76,18 +76,18 @@
 	}
   }
 
-  macro "Open_GLOWorm_Movie(s)... [o]" {		
+  macro "Open_CytoSHOW_Movie(s)... [o]" {		
 		//exec("mkdir /Volumes/GLOWORM_DATA/");
 		//exec("mount_afp afp://guest@155.37.78.7/GLOWORM_DATA/ /Volumes/GLOWORM_DATA");
 
-		showStatus("Preparing to offer selections of GLOWorm Movies to Open...");
+		showStatus("Preparing to offer selections of CytoSHOW Movies to Open...");
 		
 		s = File.openUrlAsString('http://fsbill.cam.uchc.edu/gloworm/Xwords/MovieChoiceMacroQTOMM.txt');
 		eval(s);
    }
 
 
-  macro "Make New GLOWorm_QTVR... [m]" {
+  macro "Make New CytoSHOW_QTVR... [m]" {
 
 		s = File.openUrlAsString('http://fsbill.cam.uchc.edu/gloworm/Xwords/CoreCropRotateCode_4D.txt');
 		eval(s);		

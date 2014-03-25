@@ -94,7 +94,7 @@ private int grabX;
     catch (QTException qte) {
  /*     	 try { BrowserLauncher.openURL
 			 ("mailto:support@gloworm.org?" +
-			 		"subject=Help%20or%20Comments%20on%20GLOWormNotes%20or%20GLOWormJ!!" +
+			 		"subject=Help%20or%20Comments%20on%20CytoSHOWNotes%20or%20CytoSHOW!!" +
 			 		"%20%20Please,%20send%20your%20question%20or%20bug-report%20below." +
 			 		"&body=QTVirtualStack" + "A"+
 			 		qte.getMessage());
@@ -244,7 +244,7 @@ private int grabX;
     catch (QTException qte) {
   		 try { BrowserLauncher.openURL
 			 ("mailto:support@gloworm.org?" +
-			 		"subject=Help%20or%20Comments%20on%20GLOWormNotes%20or%20GLOWormJ!!" +
+			 		"subject=Help%20or%20Comments%20on%20CytoSHOWNotes%20or%20CytoSHOW!!" +
 			 		"%20%20Please,%20send%20your%20question%20or%20bug-report%20below." +
 			 		"&body=QTVirtualStack" + "B"+
 			 		qte.getMessage());
@@ -372,7 +372,7 @@ private int grabX;
     catch(Exception e) {				   		 
 /*    	try { BrowserLauncher.openURL
 		 ("mailto:support@gloworm.org?" +
-			 		"subject=Help%20or%20Comments%20on%20GLOWormNotes%20or%20GLOWormJ!!" +
+			 		"subject=Help%20or%20Comments%20on%20CytoSHOWNotes%20or%20CytoSHOW!!" +
 			 		"%20%20Please,%20send%20your%20question%20or%20bug-report%20below." +
 			 		"&body=QTVirtualStack" + "C"+
 			 		e.getMessage());

@@ -19,7 +19,7 @@ public class PluginsControl_Panel extends PlugInFrame implements PlugIn, MouseLi
 
 
 	public PluginsControl_Panel() {
-		super("GLOWormJ Functions");
+		super("CytoSHOW Functions");
 		addMouseListener(this);
 		if (instance!=null) {
 			instance.toFront();
@@ -47,7 +47,7 @@ public class PluginsControl_Panel extends PlugInFrame implements PlugIn, MouseLi
 
 		//		IJ.log ( Menus.getCommands().toString() ) ;
 		//		String[] pluginsArray = Menus.getPlugins();
-		String[] pluginsArray = {/*"Open GLOWorm Movie(s)...",
+		String[] pluginsArray = {/*"Open CytoSHOW Movie(s)...",
 								"Open Other QuickTime Movie(s)...", 
 								"Open a Saved Scene...", */
 				"Adjust Display Contrast...", 
@@ -161,7 +161,7 @@ public class PluginsControl_Panel extends PlugInFrame implements PlugIn, MouseLi
 		String command = e.getActionCommand();
 		if (command==null) return;
 //		if (command == "Show Map of Keypad Controls") {
-//			IJ.run("URL...", "url=http://fsbill.cam.uchc.edu/gloworm/Xwords/GLOWormJKeypad.jpg");
+//			IJ.run("URL...", "url=http://fsbill.cam.uchc.edu/gloworm/Xwords/CytoSHOWKeypad.jpg");
 //			return;
 //		}
 		ImagePlus adjimp = WindowManager.getCurrentImage();
@@ -204,7 +204,7 @@ public class PluginsControl_Panel extends PlugInFrame implements PlugIn, MouseLi
 
 	public void mouseEntered(MouseEvent e) {
 		IJ.runMacro("print(\"\\\\Clear\")");
-		IJ.runMacro("print(\"\\\\Update:GLOWormJ Functions:\\\nProvides quick access to GLOWorm-specific functions not included in the standard menu commands of ImageJ.\\\n \")");
+		IJ.runMacro("print(\"\\\\Update:CytoSHOW Functions:\\\nProvides quick access to CytoSHOW-specific functions not included in the standard menu commands of ImageJ.\\\n \")");
 
 	}
 

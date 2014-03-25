@@ -23,15 +23,15 @@ public class QT_Test2 {
 				IJ.log("QuickTime not found.");
 				GenericDialog gd = new GenericDialog("QuickTime not found");
 				gd.addHelp("http://www.apple.com/quicktime/download/");
-				gd.addMessage("Your computer does not have QuickTime for Java installed.  \nSome features of GLOWormJ can benefit from QuickTime.  \nIf you wish to fix this:\n\n" +
+				gd.addMessage("Your computer does not have QuickTime for Java installed.  \nSome features of CytoSHOW can benefit from QuickTime.  \nIf you wish to fix this:\n\n" +
 						"1. Please click 'Install QuickTime' below to begin QuickTime installation. \n" +
 						"\t\t If you already believe you have QuickTime installed, please click \n" +
 						"\t\t this link anyway, and Unistall and Reinstall QuickTime before \n" +
-						"\t\t trying to run GLOWormJ.\n\n" +
-						"2. Quit GLOWormJ and relaunch to view and analyze QuickTime movies.");
+						"\t\t trying to run CytoSHOW.\n\n" +
+						"2. Quit CytoSHOW and relaunch to view and analyze QuickTime movies.");
 				gd.centerDialog(true);
 				gd.setCancelLabel("Continue without QuickTime");
-				gd.setOKLabel("Quit GLOWormJ");
+				gd.setOKLabel("Quit CytoSHOW");
 				gd.setHelpLabel("Install QuickTime");
 				gd.showDialog();
 				if (gd.wasOKed()) IJ.run("Quit");
@@ -40,15 +40,15 @@ public class QT_Test2 {
 				IJ.log("QuickTime not found.");
 				GenericDialog gd = new GenericDialog("QuickTime not found");
 				gd.addHelp("http://www.apple.com/quicktime/download/");
-				gd.addMessage("Your computer does not have QuickTime for Java installed.  \nSome features of GLOWormJ can benefit from QuickTime.  \nIf you wish to fix this:\n\n" +
+				gd.addMessage("Your computer does not have QuickTime for Java installed.  \nSome features of CytoSHOW can benefit from QuickTime.  \nIf you wish to fix this:\n\n" +
 						"1. Please click 'Install QuickTime' below to begin QuickTime installation. \n" +
 						"\t\t If you already believe you have QuickTime installed, please click \n" +
 						"\t\t this link anyway, and Unistall and Reinstall QuickTime before \n" +
-						"\t\t trying to run GLOWormJ.\n\n" +
-						"2. Quit GLOWormJ and relaunch to view and analyze QuickTime movies.");
+						"\t\t trying to run CytoSHOW.\n\n" +
+						"2. Quit CytoSHOW and relaunch to view and analyze QuickTime movies.");
 				gd.centerDialog(true);
 				gd.setCancelLabel("Continue without QuickTime");
-				gd.setOKLabel("Quit GLOWormJ");
+				gd.setOKLabel("Quit CytoSHOW");
 				gd.setHelpLabel("Install QuickTime");
 				gd.showDialog();
 				if (gd.wasOKed()) IJ.run("Quit");
@@ -59,15 +59,15 @@ public class QT_Test2 {
 				IJ.log("QuickTime not found.");
 				GenericDialog gd = new GenericDialog("QuickTime not found");
 				gd.addHelp("http://www.apple.com/quicktime/download/");
-				gd.addMessage("Your computer does not have QuickTime for Java installed.  \nSome features of GLOWormJ can benefit from QuickTime.  \nIf you wish to fix this:\n\n" +
+				gd.addMessage("Your computer does not have QuickTime for Java installed.  \nSome features of CytoSHOW can benefit from QuickTime.  \nIf you wish to fix this:\n\n" +
 						"1. Please click 'Install QuickTime' below to begin QuickTime installation. \n" +
 						"\t\t If you already believe you have QuickTime installed, please click \n" +
 						"\t\t this link anyway, and Unistall and Reinstall QuickTime before \n" +
-						"\t\t trying to run GLOWormJ.\n\n" +
-						"2. Quit GLOWormJ and relaunch to view and analyze QuickTime movies.");
+						"\t\t trying to run CytoSHOW.\n\n" +
+						"2. Quit CytoSHOW and relaunch to view and analyze QuickTime movies.");
 				gd.centerDialog(true);
 				gd.setCancelLabel("Continue without QuickTime");
-				gd.setOKLabel("Quit GLOWormJ");
+				gd.setOKLabel("Quit CytoSHOW");
 				gd.setHelpLabel("Install QuickTime");
 				gd.showDialog();
 				if (gd.wasOKed()) IJ.run("Quit");

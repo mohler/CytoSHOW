@@ -354,7 +354,7 @@ public class MQTVS_SceneLoader implements PlugIn {
 				if (IJ.debugMode) IJ.log("I/O Error: Cannot read from specified directory/file.");
 				try { BrowserLauncher.openURL
 					("mailto:support@gloworm.org?" +
-							"subject=Help%20or%20Comments%20on%20GLOWormNotes%20or%20GLOWormJ!!" +
+							"subject=Help%20or%20Comments%20on%20CytoSHOWNotes%20or%20CytoSHOW!!" +
 							"%20%20Please,%20send%20your%20question%20or%20bug-report%20below." +
 							"&body=MQTVS_SceneLoader.run" + ev.toString());
 				}
@@ -691,7 +691,7 @@ public class MQTVS_SceneLoader implements PlugIn {
 						if (IJ.debugMode) IJ.log("I/O Error: Cannot read from specified directory/file.");
 						try { BrowserLauncher.openURL
 							("mailto:support@gloworm.org?" +
-									"subject=Help%20or%20Comments%20on%20GLOWormNotes%20or%20GLOWormJ!!" +
+									"subject=Help%20or%20Comments%20on%20CytoSHOWNotes%20or%20CytoSHOW!!" +
 									"%20%20Please,%20send%20your%20question%20or%20bug-report%20below." +
 									"&body=MQTVSSceneLoader.openAsVirtualStack" + ev.toString());
 						}
@@ -802,13 +802,13 @@ public class MQTVS_SceneLoader implements PlugIn {
 				}
 				
 			} else {
-				IJ.error("GLOWormJ Error", "Sorry, but one or more movies specified could not be accessed.");
+				IJ.error("CytoSHOW Error", "Sorry, but one or more movies specified could not be accessed.");
 				try { BrowserLauncher.openURL
 					("mailto:support@gloworm.org?" +
-							"subject=Help%20or%20Comments%20on%20GLOWormNotes%20or%20GLOWormJ!!" +
+							"subject=Help%20or%20Comments%20on%20CytoSHOWNotes%20or%20CytoSHOW!!" +
 							"%20%20Please,%20send%20your%20question%20or%20bug-report%20below." +
 							"&body=MQTVSSceneLoader.openAsVirtualstack" + 
-							"GLOWormJ Error:" + "Sorry, but one or more movies specified could not be accessed.");
+							"CytoSHOW Error:" + "Sorry, but one or more movies specified could not be accessed.");
 				}
 				catch (IOException ev2) {}
 
@@ -823,7 +823,7 @@ public class MQTVS_SceneLoader implements PlugIn {
 			IJ.error(qte.getMessage());
 			try { BrowserLauncher.openURL
 				("mailto:support@gloworm.org?" +
-						"subject=Help%20or%20Comments%20on%20GLOWormNotes%20or%20GLOWormJ!!" +
+						"subject=Help%20or%20Comments%20on%20CytoSHOWNotes%20or%20CytoSHOW!!" +
 						"%20%20Please,%20send%20your%20question%20or%20bug-report%20below." +
 						"&body=MQTVSSceneLoader.openAsVirtualstack" + qte.getMessage());
 			}

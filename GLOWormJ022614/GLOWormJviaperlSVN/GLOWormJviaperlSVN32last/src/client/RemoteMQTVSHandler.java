@@ -215,7 +215,7 @@ public class RemoteMQTVSHandler {
 				return;
 			localMovieDirs = new File[moviePathNames.length];
 			for (int m=0;m<moviePathNames.length;m++) {
-				localMovieDirs[m] = new File(IJ.getDirectory("home")+"GLOWormCacheFiles"+File.separator+moviePathNames[m]);
+				localMovieDirs[m] = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+moviePathNames[m]);
 				if (!localMovieDirs[m].canWrite()) {
 					if (localMovieDirs[m].mkdirs()) {
 						localMovieDirs[m].setReadable(true, false);

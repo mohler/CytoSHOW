@@ -25,7 +25,7 @@ import java.awt.image.*;
 		text[4] = "Java "+System.getProperty("java.version")+(IJ.is64Bit()?" (64-bit)":" (32-bit)");
 		text[5] = IJ.freeMemory();
 		text[6] = " ";
-		text[7] = "GLOWormJ capabilities integrated by";
+		text[7] = "CytoSHOW capabilities integrated by";
 		text[8] = "Bill Mohler";
 		text[9] = "UConn Health Center";
 		text[10] = "http://gloworm.org";
@@ -92,7 +92,7 @@ import java.awt.image.*;
 
 		ip.drawString(text[11], ip.getWidth()-ip.getStringWidth(text[11])-10, ip.getHeight()-3);
 		ImageWindow.centerNextImage();
-		new ImagePlus("About GLOWormJ", ip).show();
+		new ImagePlus("About CytoSHOW", ip).show();
 	}
 
 	int x(String text, ImageProcessor ip, int max) {

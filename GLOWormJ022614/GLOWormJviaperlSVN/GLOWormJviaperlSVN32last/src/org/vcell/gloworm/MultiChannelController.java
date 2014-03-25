@@ -139,9 +139,9 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 			}
 
 		} else {
-			GenericDialog gds = new GenericDialog("Convert to GLOWorm Format?"); 
-			gds.addMessage("This type of Image Stack does not work\nwith all GLOWorm Functions."
-					+ "\nWould you like to Convert it to a GLOWorm Scene?");
+			GenericDialog gds = new GenericDialog("Convert to CytoSHOW Format?"); 
+			gds.addMessage("This type of Image Stack does not work\nwith all CytoSHOW Functions."
+					+ "\nWould you like to Convert it to a CytoSHOW Scene?");
 			//			gds.addRadioButtonGroup("", new String[]{"Save Scene","Share Scene"}, 1, 2, "Save Scene");
 			gds.addChoice("", new String[]{"Save Scene","Share Scene"},"Save Scene");
 			gds.showDialog();
@@ -1212,7 +1212,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 			if(!(imp.getImageStack() instanceof MultiQTVirtualStack)
 					&& !(imp.getImageStack() instanceof RemoteMQTVSHandler.RemoteMQTVirtualStack)
 					&& deNovoMovieFile==null) {
-				SaveDialog sd = new SaveDialog("Save Movie for GLOWorm Scene as...", imp.getTitle().length()>28?imp.getTitle().substring(0, 25):imp.getTitle().replace(".tif", ""), ".avi");
+				SaveDialog sd = new SaveDialog("Save Movie for CytoSHOW Scene as...", imp.getTitle().length()>28?imp.getTitle().substring(0, 25):imp.getTitle().replace(".tif", ""), ".avi");
 				String name = sd.getFileName().replace(" ","");
 				if (name==null) return;
 				/*
@@ -1444,7 +1444,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 						ftpc.disconnect();
 						IJ.log("FTP server refused connection.");
 					} else {
-						ftpc.login("glowormguest", "GLOWorm");
+						ftpc.login("glowormguest", "CytoSHOW");
 						String[] saveDirFileNames = (new File(saveFile.getParent())).list();
 						for (String fileName:saveDirFileNames) {
 							if (fileName.matches(".*"+sec+".*")) {
@@ -1482,7 +1482,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 
 				IJ.wait(10000);
 
-				GenericDialog lgd = new GenericDialog("Shared GLOWorm Scene");
+				GenericDialog lgd = new GenericDialog("Shared CytoSHOW Scene");
 				lgd.addMessage("This scene can be accessed at the web address below.\n" +
 						"Please copy, save, and share this link.\n");
 				String link = "http://fsbill.cam.uchc.edu/cgi-bin/gloworm.pl?MOVIE="

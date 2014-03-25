@@ -140,7 +140,7 @@ public class MQTVSSceneLoader64 implements PlugIn {
 					if (pathlist.startsWith("/Volumes/GLOWORM_DATA/")
 								|| pathlist.contains("\\GLOWORM_DATA\\")) {	
 
-						File cacheFile = new File(IJ.getDirectory("home")+"GLOWormCacheFiles"+File.separator+pathlist);
+						File cacheFile = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+pathlist);
 						if (!(new File(cacheFile.getParent())).canWrite()) {
 							//Crappy loop seems necessary for windows...							
 							while (!(new File(cacheFile.getParent())).mkdirs()) { 
@@ -160,13 +160,13 @@ public class MQTVSSceneLoader64 implements PlugIn {
 									RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], pathlist))));
 							out = new PrintWriter(
 									new BufferedWriter(
-											new FileWriter(IJ.getDirectory("home")+"GLOWormCacheFiles"+pathlist) ), true);
+											new FileWriter(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+pathlist) ), true);
 						}
 					} else {
 						in = new BufferedReader(new FileReader(file));
 						out = new PrintWriter(
 								new BufferedWriter(
-										new FileWriter(IJ.getDirectory("home")+"GLOWormCacheFiles"+pathlist) ), true);
+										new FileWriter(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+pathlist) ), true);
 					}
 					String line = "";
 					//if (IJ.debugMode) IJ.log(line);
@@ -458,7 +458,7 @@ public class MQTVSSceneLoader64 implements PlugIn {
 								adjFilePath=adjFilePath.replace("\\Volumes\\GLOWORM_DATA\\", "/Volumes/GLOWORM_DATA/");
 								if (adjFilePath.startsWith("/Volumes/GLOWORM_DATA/")
 										|| adjFilePath.contains("\\GLOWORM_DATA\\")) {
-									File cacheFile = new File(IJ.getDirectory("home")+"GLOWormCacheFiles"+File.separator+adjFilePath);
+									File cacheFile = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+adjFilePath);
 									if (!(new File(cacheFile.getParent())).canWrite()) {
 										//Crappy loop seems necessary for windows...							
 										while (!(new File(cacheFile.getParent())).mkdirs()) { 
@@ -478,13 +478,13 @@ public class MQTVSSceneLoader64 implements PlugIn {
 												RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], adjFilePath))));
 										out = new PrintWriter(
 												new BufferedWriter(
-														new FileWriter(IJ.getDirectory("home")+"GLOWormCacheFiles"+adjFilePath) ), true);
+														new FileWriter(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+adjFilePath) ), true);
 									}
 								} else {
 									in = new BufferedReader(new FileReader(adjFilePath));
 									out = new PrintWriter(
 											new BufferedWriter(
-													new FileWriter(IJ.getDirectory("home")+"GLOWormCacheFiles"+adjFilePath) ), true);
+													new FileWriter(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+adjFilePath) ), true);
 								}
 								String line = "";
 								//if (IJ.debugMode) IJ.log(line);
@@ -773,7 +773,7 @@ public class MQTVSSceneLoader64 implements PlugIn {
 							IJ.log("I/O Error: Cannot read from specified directory/file.  MQTVSSceneLoader.openAsVirtualStack" + ev.toString());
 							//					try { BrowserLauncher.openURL
 							//						("mailto:support@gloworm.org?" +
-							//								"subject=Help%20or%20Comments%20on%20GLOWormNotes%20or%20GLOWormJ!!" +
+							//								"subject=Help%20or%20Comments%20on%20CytoSHOWNotes%20or%20CytoSHOW!!" +
 							//								"%20%20Please,%20send%20your%20question%20or%20bug-report%20below." +
 							//								"&body=MQTVSSceneLoader.openAsVirtualStack" + ev.toString());
 							//					}
@@ -937,14 +937,14 @@ public class MQTVSSceneLoader64 implements PlugIn {
 		catch (IOException ev)
 		{
 			IJ.log("I/O Error: Cannot read from specified directory/file.");
-			boolean sendErrorEmail = IJ.showMessageWithCancel("**GLOWormJ error**",
-					"It seems that your computer is unable to mount the shared drive \ncontaining GLOWorm movies and scene files."+
-					"\n \nTo report this problem and get help finding a solution, \nplease click OK and send the auto-generated email to GLOWorm staff.");
+			boolean sendErrorEmail = IJ.showMessageWithCancel("**CytoSHOW error**",
+					"It seems that your computer is unable to mount the shared drive \ncontaining CytoSHOW movies and scene files."+
+					"\n \nTo report this problem and get help finding a solution, \nplease click OK and send the auto-generated email to CytoSHOW staff.");
 			if (sendErrorEmail){
 				try { BrowserLauncher.openURL
 
 					("mailto:support@gloworm.org?" +
-							"subject=Help%20or%20Comments%20on%20GLOWormNotes%20or%20GLOWormJ!!" +
+							"subject=Help%20or%20Comments%20on%20CytoSHOWNotes%20or%20CytoSHOW!!" +
 							"%20%20Please,%20send%20your%20question%20or%20bug-report%20below." +
 							"&body=I/O Error: Cannot read from specified directory/file.\nMQTVSSceneLoader.run " + ev.toString());
 				}

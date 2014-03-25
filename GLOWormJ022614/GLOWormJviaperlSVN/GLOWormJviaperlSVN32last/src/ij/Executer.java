@@ -47,7 +47,7 @@ public class Executer implements Runnable {
 		command in a separate thread using the specified image,
 		or using the active image if 'imp' is null. */
 	public Executer(String cmd, ImagePlus imp, ActionEvent ae) {
-		boolean jumpToGLOWorm = IJ.shiftKeyDown();
+		boolean jumpToCytoSHOW = IJ.shiftKeyDown();
 		boolean jumpToWormAtlas = IJ.controlKeyDown() || IJ.altKeyDown();
 		if (cmd.startsWith("near ") || cmd.startsWith("also see: "))
 			cmd = cmd.substring(cmd.indexOf("\""));
@@ -61,7 +61,7 @@ public class Executer implements Runnable {
 			String[] cmdChunks = cmd.split(": ");
 			IJ.log(cmdChunks[cmdChunks.length-1]);
 			ImagePlus cmdImp = null;
-			if (cmdChunks[cmdChunks.length-1].trim().contains("synch all windows to this tag") || jumpToGLOWorm) {
+			if (cmdChunks[cmdChunks.length-1].trim().contains("synch all windows to this tag") || jumpToCytoSHOW) {
 				int[] impIDs = WindowManager.getIDList();
 				for (int e=0; e<impIDs.length; e++) {
 					cmdImp = WindowManager.getImage(impIDs[e]);
@@ -106,10 +106,10 @@ public class Executer implements Runnable {
 		}else if (cmd.startsWith("expresses")){
 			String genePage = ("http://www.wormbase.org/db/get?name="+cmd.split(" ")[1]+";class=gene");
 //			String genePage = ("http://legacy.wormbase.org/db/gene/gene?name="+cmd.split(" ")[1]+";class=Gene");
-			if (jumpToGLOWorm && !jumpToWormAtlas) {
+			if (jumpToCytoSHOW && !jumpToWormAtlas) {
 				genePage = ("http://www.gloworm.org/p/genes.html");
 				IJ.runPlugIn("ij.plugin.BrowserLauncher", genePage );
-			} else if(jumpToGLOWorm && jumpToWormAtlas) {
+			} else if(jumpToCytoSHOW && jumpToWormAtlas) {
 				ij = IJ.getInstance();
 				String oldLog = IJ.getLog();
 				IJ.log("\\Clear");
@@ -161,7 +161,7 @@ public class Executer implements Runnable {
 					}
 				}
 				jumpToWormAtlas = false;
-				jumpToGLOWorm = false;
+				jumpToCytoSHOW = false;
 				imp.getCanvas().getPopup().show(imp.getCanvas(), imp.getCanvas().getMousePressedX(), imp.getCanvas().getMousePressedY());
 			} else {
 				IJ.runPlugIn("ij.plugin.BrowserLauncher", genePage );
@@ -171,7 +171,7 @@ public class Executer implements Runnable {
 			String[] cmdChunks = cmd.split(": ");
 			IJ.log(cmdChunks[cmdChunks.length-1]);
 			ImagePlus cmdImp = null;
-			if ( jumpToGLOWorm) {
+			if ( jumpToCytoSHOW) {
 				int[] impIDs = WindowManager.getIDList();
 				for (int e=0; e<impIDs.length; e++) {
 					cmdImp = WindowManager.getImage(impIDs[e]);
@@ -206,8 +206,8 @@ public class Executer implements Runnable {
 			String cellPage = "http://www.wormbase.org/db/get?name="+cmd.trim().substring(8,cmd.trim().indexOf(" "))+";class=Anatomy_term";
 			if (jumpToWormAtlas) cellPage = ("http://wormatlas.org/search_results.html?cx=016220512202578422943%3Amikvfhp2nri&cof=FORID%3A10&ie=UTF-8&q="
 					+cmd.trim().substring(cmd.trim().indexOf(" ")+1, cmd.trim().indexOf(":"))+ "&siteurl=wormatlas.org%252F");
-			if (jumpToGLOWorm) cellPage = ("http://www.google.com/search?q="+ cmd.trim().substring(8).replaceAll("[:;]", " "));
-			if (jumpToGLOWorm && jumpToWormAtlas) cellPage = "http://www.textpresso.org/cgi-bin/celegans/query?textstring=\""
+			if (jumpToCytoSHOW) cellPage = ("http://www.google.com/search?q="+ cmd.trim().substring(8).replaceAll("[:;]", " "));
+			if (jumpToCytoSHOW && jumpToWormAtlas) cellPage = "http://www.textpresso.org/cgi-bin/celegans/query?textstring=\""
 				+cmd.trim().substring(8,cmd.trim().indexOf(" "))+ "\"";
 			IJ.runPlugIn("ij.plugin.BrowserLauncher", cellPage );
 
@@ -217,8 +217,8 @@ public class Executer implements Runnable {
 			String cellPage = "http://www.wormbase.org/db/get?name="+cmd.trim().substring(15)+";class=Anatomy_term";
 			if (jumpToWormAtlas) cellPage = ("http://wormatlas.org/search_results.html?cx=016220512202578422943%3Amikvfhp2nri&cof=FORID%3A10&ie=UTF-8&q="
 					+cmd.trim().substring(15)+ "&siteurl=wormatlas.org%252F");
-			if (jumpToGLOWorm) cellPage = ("http://www.google.com/search?q="+cmd.trim().substring(15));
-			if (jumpToGLOWorm && jumpToWormAtlas) cellPage = "http://www.textpresso.org/cgi-bin/celegans/query?textstring=\""
+			if (jumpToCytoSHOW) cellPage = ("http://www.google.com/search?q="+cmd.trim().substring(15));
+			if (jumpToCytoSHOW && jumpToWormAtlas) cellPage = "http://www.textpresso.org/cgi-bin/celegans/query?textstring=\""
 				+cmd.trim().substring(15)+ "\"";
 			IJ.runPlugIn("ij.plugin.BrowserLauncher", cellPage );
 		
@@ -230,8 +230,8 @@ public class Executer implements Runnable {
 			String cellPage = "http://www.wormbase.org/db/get?name="+cmd.trim().substring(26,cmd.indexOf(":"))+";class=Anatomy_term";
 			if (jumpToWormAtlas) cellPage = ("http://wormatlas.org/search_results.html?cx=016220512202578422943%3Amikvfhp2nri&cof=FORID%3A10&ie=UTF-8&q="
 					+cmd.trim().substring(26,cmd.indexOf(":"))+ "&siteurl=wormatlas.org%252F");
-			if (jumpToGLOWorm) cellPage = ("http://www.google.com/search?q="+cmd.trim().substring(26,cmd.indexOf(":")));
-			if (jumpToGLOWorm && jumpToWormAtlas) cellPage = "http://www.textpresso.org/cgi-bin/celegans/query?textstring=\""
+			if (jumpToCytoSHOW) cellPage = ("http://www.google.com/search?q="+cmd.trim().substring(26,cmd.indexOf(":")));
+			if (jumpToCytoSHOW && jumpToWormAtlas) cellPage = "http://www.textpresso.org/cgi-bin/celegans/query?textstring=\""
 				+cmd.trim().substring(26,cmd.indexOf(":"))+ "\"";
 			IJ.runPlugIn("ij.plugin.BrowserLauncher", cellPage );
 		} else if (cmd.startsWith("movie ")) {

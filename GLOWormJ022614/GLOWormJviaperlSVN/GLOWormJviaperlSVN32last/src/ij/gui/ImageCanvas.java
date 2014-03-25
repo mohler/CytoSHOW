@@ -1573,19 +1573,19 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 					for (int l = 0; l < logLines2.length; l++) {
 						if (logLines2[l].startsWith("expresses")) {
 
-							boolean hasGLOWormData = glowormHomePage.toLowerCase()
+							boolean hasCytoSHOWData = glowormHomePage.toLowerCase()
 									.contains(logLines2[l].split(" ")[1] + ")")
 									|| glowormHomePage.contains(logLines2[l]
 											.split(" ")[1]
 													+ ":");
 
-							//					boolean hasGLOWormData = glowormGenePage.contains("Interactive movies are available for a fluorescence reporter of this gene.");
+							//					boolean hasCytoSHOWData = glowormGenePage.contains("Interactive movies are available for a fluorescence reporter of this gene.");
 							mi = new MenuItem(logLines2[l]);
 							popupInfo[1] = popupInfo[1]+ logLines2[l] + "\n";
 
 							mi.addActionListener(ij);
 							genePopup.add(mi);
-							if (hasGLOWormData) {
+							if (hasCytoSHOWData) {
 								String[] glowormLogLines = glowormHomePage.split("\n");
 								String matchString = "";
 								for (int g=0;g<glowormLogLines.length;g++) {
@@ -1594,7 +1594,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 										g = glowormLogLines.length;
 									}
 								}
-								PopupMenu glowormPopup = new PopupMenu("***shown in GLOWorm: "+logLines2[l].split(" ")[1]);
+								PopupMenu glowormPopup = new PopupMenu("***shown in CytoSHOW: "+logLines2[l].split(" ")[1]);
 								mi = new MenuItem(matchString);
 								popupInfo[1] = popupInfo[1]+ "  "+ matchString + "\n";
 								mi.addActionListener(ij);
@@ -1644,7 +1644,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 								genePopup.add(glowormPopup);
 							}
 
-							hasGLOWormData = false;
+							hasCytoSHOWData = false;
 						}
 					}
 					IJ.log("\\Clear");
@@ -2361,7 +2361,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 				popup.add(new MenuItem("-"));
 
-				PopupMenu functionPopup = new PopupMenu("GLOWormJ Functions >");
+				PopupMenu functionPopup = new PopupMenu("CytoSHOW Functions >");
 				for (int k = 0; k < standardmis.length; k++) {
 					functionPopup.add(standardmis[k]);
 				}
@@ -2855,7 +2855,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			tool.mouseEntered(imp, e);
 
 		IJ.runMacro("print(\"\\\\Clear\")");
-		IJ.runMacro("print(\"\\\\Update:GLOWorm Movie Window:\\\nLeft-Clicking on any Tag tag will bring the linked image feature into focus.\\\nDouble-clicking will launch web-links to related information:\\\nDouble-click => WormBase.org \\\nShift-double-click => Google.com\\\nControlOption-double-click => WormAtlas.org \\\nShift-ControlOption-double-click => Textpresso C.elegans \\\nRight-Click => Shortcuts to GLOWorm Functions, including cell-search in other open movies \\\nShift-Right-Click => Shows expressed genes with links to WormBase gene pages \\\nControlOption-Right-Click => Shows cell fates, ancestries, and interactions with links to web resources \\\n \")");
+		IJ.runMacro("print(\"\\\\Update:CytoSHOW Movie Window:\\\nLeft-Clicking on any Tag tag will bring the linked image feature into focus.\\\nDouble-clicking will launch web-links to related information:\\\nDouble-click => WormBase.org \\\nShift-double-click => Google.com\\\nControlOption-double-click => WormAtlas.org \\\nShift-ControlOption-double-click => Textpresso C.elegans \\\nRight-Click => Shortcuts to CytoSHOW Functions, including cell-search in other open movies \\\nShift-Right-Click => Shows expressed genes with links to WormBase gene pages \\\nControlOption-Right-Click => Shows cell fates, ancestries, and interactions with links to web resources \\\n \")");
 
 	}
 

@@ -136,7 +136,7 @@ public class MultiQTVirtualStack extends VirtualStack {
 			if (IJ.debugMode) IJ.log("I/O error: cannot open movie file.");
 			/*  		 try { BrowserLauncher.openURL
 			 ("mailto:support@gloworm.org?" +
-			 		"subject=Help%20or%20Comments%20on%20GLOWormNotes%20or%20GLOWormJ!!" +
+			 		"subject=Help%20or%20Comments%20on%20CytoSHOWNotes%20or%20CytoSHOW!!" +
 			 		"%20%20Please,%20send%20your%20question%20or%20bug-report%20below." +
 			 		"&body=MultiQTVirtualStack" + "Z"+
 			 		qte.getMessage());
@@ -292,7 +292,7 @@ public class MultiQTVirtualStack extends VirtualStack {
 						if (IJ.debugMode) IJ.log("I/O error: cannot open movie file.");
 						/*				   		 try { BrowserLauncher.openURL
 							 ("mailto:support@gloworm.org?" +
-							 		"subject=Help%20or%20Comments%20on%20GLOWormNotes%20or%20GLOWormJ!!" +
+							 		"subject=Help%20or%20Comments%20on%20CytoSHOWNotes%20or%20CytoSHOW!!" +
 							 		"%20%20Please,%20send%20your%20question%20or%20bug-report%20below." +
 							 		"&body=MultiQTVirtualStack" + "A"+
 							 		qte.getMessage());
@@ -452,7 +452,7 @@ public class MultiQTVirtualStack extends VirtualStack {
 					if (IJ.debugMode) IJ.log("I/O error: cannot open movie file.");
 					/*					 try { BrowserLauncher.openURL
 						 ("mailto:support@gloworm.org?" +
-						 		"subject=Help%20or%20Comments%20on%20GLOWormNotes%20or%20GLOWormJ!!" +
+						 		"subject=Help%20or%20Comments%20on%20CytoSHOWNotes%20or%20CytoSHOW!!" +
 						 		"%20%20Please,%20send%20your%20question%20or%20bug-report%20below." +
 						 		"&body=MultiQTVirtualStack " + "B"+
 						 		qte.getMessage());
@@ -475,7 +475,7 @@ public class MultiQTVirtualStack extends VirtualStack {
 			if (IJ.debugMode) IJ.log("I/O error: cannot open movie file.");
 			/*		 try { BrowserLauncher.openURL
 			 ("mailto:support@gloworm.org?" +
-			 		"subject=Help%20or%20Comments%20on%20GLOWormNotes%20or%20GLOWormJ!!" +
+			 		"subject=Help%20or%20Comments%20on%20CytoSHOWNotes%20or%20CytoSHOW!!" +
 			 		"%20%20Please,%20send%20your%20question%20or%20bug-report%20below." +
 			 		"&body=MultiQTVirtualStack" + "C"+
 			 		qte.getMessage());
@@ -719,7 +719,7 @@ public class MultiQTVirtualStack extends VirtualStack {
 			if (IJ.debugMode) IJ.log("I/O error: cannot open movie file.");
 			/* 		 try { BrowserLauncher.openURL
 			 ("mailto:support@gloworm.org?" +
-			 		"subject=Help%20or%20Comments%20on%20GLOWormNotes%20or%20GLOWormJ!!" +
+			 		"subject=Help%20or%20Comments%20on%20CytoSHOWNotes%20or%20CytoSHOW!!" +
 			 		"%20%20Please,%20send%20your%20question%20or%20bug-report%20below." +
 			 		"&body=MultiQTVirtualStack" + "D"+
 			 		e.getMessage());
@@ -842,7 +842,7 @@ public class MultiQTVirtualStack extends VirtualStack {
 			if (IJ.debugMode) IJ.log("I/O error: cannot open movie file.");
 			/* 		 try { BrowserLauncher.openURL
 			 ("mailto:support@gloworm.org?" +
-			 		"subject=Help%20or%20Comments%20on%20GLOWormNotes%20or%20GLOWormJ!!" +
+			 		"subject=Help%20or%20Comments%20on%20CytoSHOWNotes%20or%20CytoSHOW!!" +
 			 		"%20%20Please,%20send%20your%20question%20or%20bug-report%20below." +
 			 		"&body=MultiQTVirtualStack" + "D"+
 			 		e.getMessage());

@@ -23,7 +23,7 @@ import org.vcell.gloworm.MultiQTVirtualStack;
 
 import SmartCaptureLite.r;
 
-/** Displays the GLOWormJ ColorLegend window. */
+/** Displays the CytoSHOW ColorLegend window. */
 public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, ActionListener, MouseMotionListener, WindowFocusListener, MouseListener  {
 
 	String[] modes = {"Display Both Checked & Unchecked", "Hide Checked", "Show Checked", "Blink Checked"};

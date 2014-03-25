@@ -146,7 +146,7 @@ public class ImageJ extends Frame implements ActionListener,
 		If  'mode' is ImageJ.EMBEDDED and 'applet is null, creates an embedded 
 		(non-standalone) version of ImageJ. */
 	public ImageJ(java.applet.Applet applet, int mode) {
-		super("GLOWormJ "/*+ UIManager.getLookAndFeel().getDescription()*/);
+		super("CytoSHOW "/*+ UIManager.getLookAndFeel().getDescription()*/);
 	    try {
 	        SingleInstanceService singleInstanceService =
 	            (SingleInstanceService)ServiceManager.
@@ -440,7 +440,7 @@ public class ImageJ extends Frame implements ActionListener,
 	public void mouseClicked(MouseEvent e) {}
 	public void mouseEntered(MouseEvent e) {
 		IJ.runMacro("print(\"\\\\Clear\")");
-		IJ.runMacro("print(\"\\\\Update:GLOWormJ Toolbar:\\\nLeft-Clicking icons selects from a variety of tools for measurement and/or Tag of the movies or images.\\\nRight-clicking allows choice of even more tools.\\\nDouble-clicking allows you to set tool-specific options.\\\nDragging and dropping file icons or web links for additional image, movies, or scenes \\\nonto this toolbar will launch them in this copy of GLOWormJ.\\\n \")");
+		IJ.runMacro("print(\"\\\\Update:CytoSHOW Toolbar:\\\nLeft-Clicking icons selects from a variety of tools for measurement and/or Tag of the movies or images.\\\nRight-clicking allows choice of even more tools.\\\nDouble-clicking allows you to set tool-specific options.\\\nDragging and dropping file icons or web links for additional image, movies, or scenes \\\nonto this toolbar will launch them in this copy of CytoSHOW.\\\n \")");
 
 	}
 
@@ -955,8 +955,8 @@ public class ImageJ extends Frame implements ActionListener,
 			}
 		}
 		if (windowClosed && !changes && Menus.window.getItemCount()>Menus.WINDOW_MENU_ITEMS && !(IJ.macroRunning()&&WindowManager.getImageCount()==0)) {
-			GenericDialog gd = new GenericDialog("GLOWormJ", this);
-			gd.addMessage("Are you sure you want to quit GLOWormJ?");
+			GenericDialog gd = new GenericDialog("CytoSHOW", this);
+			gd.addMessage("Are you sure you want to quit CytoSHOW?");
 			gd.showDialog();
 			quitting = !gd.wasCanceled();
 			windowClosed = false;
@@ -1008,9 +1008,9 @@ public class ImageJ extends Frame implements ActionListener,
 		for (int ii=0; ii<args.length; ii++) {
 			sb.append("'" + args[ii] + "' ");
 		}
-		String message = "GLOWormJ is already running! \nTo open another movie or scene from a web link, \nplease drag and drop the link \n" +
+		String message = "CytoSHOW is already running! \nTo open another movie or scene from a web link, \nplease drag and drop the link \n" +
 //				sb.toString().replaceAll(".*(\"http:.*\").*", "$1") +
-				"onto the bottom of the GLOWormJ toolbar";
+				"onto the bottom of the CytoSHOW toolbar";
 		// this usually serves to alert the user the app.
 		// wants attention.  On Win. it will flash the
 		// apps. icon in the task bar.
@@ -1055,7 +1055,7 @@ public class ImageJ extends Frame implements ActionListener,
 				IJ.log(concat);
 			}
 		}
-//		IJ.showMessage("GLOWormJ is already running!" + concat, message);
+//		IJ.showMessage("CytoSHOW is already running!" + concat, message);
 		if (remote) {
 			if (!concat.contains("scene.scn") && !concat.contains("suite.ste")) {
 				RemoteMQTVSHandler.main(rmiArgsArrayList.toArray(new String[rmiArgsArrayList.size()]));
