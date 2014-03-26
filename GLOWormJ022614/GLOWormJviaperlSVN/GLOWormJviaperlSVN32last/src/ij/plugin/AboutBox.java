@@ -34,7 +34,7 @@ import java.awt.image.*;
 		ImageJ ij = IJ.getInstance();
 		URL url;
 		try {
-			url = new URL("http://fsbill.cam.uchc.edu/gloworm/Xwords/Gloworm3.jpg");
+			url = new URL("http://fsbill.cam.uchc.edu/gloworm/Xwords/CytoSHOW3.gif");
 			if (url!=null) {
 				Image img = null;
 				try {img = ij.createImage((ImageProducer)url.getContent());}
