@@ -1326,9 +1326,9 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
         
         g2d.setFont(font);
         
-//        g2d.setColor(Colors.decode("66ffffff",Color.white));
-//        g2d.fillRect(0, 0, w, h);
-        g2d.setColor(Color.BLACK);
+        g2d.setColor(Colors.decode("66111111",Color.gray));
+        g2d.fillRect(0, 0, w, ht);
+        g2d.setColor(Color.YELLOW);
         g2d.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
         g2d.drawLine(0, 0, 2, 7);
         g2d.drawLine(0, 0, 7, 2);
@@ -2803,22 +2803,50 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			}
 			Graphics g = getGraphics();
 			if (cursorString != null) {
-//				IJ.log(cursorString);
-				cursorRoi = new TextRoi(getXMouse()+10/ getMagnification(), getYMouse(), cursorString);
-				((TextRoi) cursorRoi).setCurrentFont(g.getFont().deriveFont((float) (16 / getMagnification())));
-//				try {
-//					paint(g);
-					cursorRoi.setStrokeColor(Color.black);
-					cursorRoi.setFillColor(Colors.decode("#99ffffff",
-							getDefaultColor()));
-					cursorRoi.setLocation(((int) (getXMouse()> getSrcRect().getX()+cursorString.length()*4/ getMagnification()?(getXMouse()< getSrcRect().getMaxX()-cursorString.length()*4.5/ getMagnification()?getXMouse()- cursorString.length()*4/ getMagnification():getXMouse()- cursorString.length()*9/ getMagnification()):getXMouse()))
-							, getYMouse()<getSrcRect().getMaxY()-40/getMagnification()?((int)(getYMouse()+20/ getMagnification())):((int)(getYMouse()-35/ getMagnification())));
-					drawRoi(g, cursorRoi, -1);
-//				} finally {
-//				}
+////				IJ.log(cursorString);
+//				cursorRoi = new TextRoi(getXMouse()+10/ getMagnification(), getYMouse(), cursorString);
+//				((TextRoi) cursorRoi).setCurrentFont(g.getFont().deriveFont((float) (16 / getMagnification())));
+////				try {
+////					paint(g);
+//					cursorRoi.setStrokeColor(Color.black);
+//					cursorRoi.setFillColor(Colors.decode("#99ffffff",
+//							getDefaultColor()));
+//					cursorRoi.setLocation(((int) (getXMouse()> getSrcRect().getX()+cursorString.length()*4/ getMagnification()?(getXMouse()< getSrcRect().getMaxX()-cursorString.length()*4.5/ getMagnification()?getXMouse()- cursorString.length()*4/ getMagnification():getXMouse()- cursorString.length()*9/ getMagnification()):getXMouse()))
+//							, getYMouse()<getSrcRect().getMaxY()-40/getMagnification()?((int)(getYMouse()+20/ getMagnification())):((int)(getYMouse()-35/ getMagnification())));
+//					drawRoi(g, cursorRoi, -1);
+////				} finally {
+////				}
+				Toolkit tk = Toolkit.getDefaultToolkit();
+//				String cursorString = "Searching! please wait...";
+				Font font = Font.decode("Arial-Outline-18");
+		        
+		        //create the FontRenderContext object which helps us to measure the text
+		        FontRenderContext frc = new FontRenderContext(null, true, true);
+		         
+		        //get the height and width of the text
+		        Rectangle2D bounds = font.getStringBounds(cursorString, frc);
+		        int w = (int) bounds.getWidth();
+		        int ht = (int) bounds.getHeight();
+				Image img = new BufferedImage(w, ht, BufferedImage.TYPE_INT_ARGB_PRE);
+				
+//				img.getGraphics().setColor(Colors.decode("00000000", Color.white));
+		        Graphics2D g2d = (Graphics2D) img.getGraphics();
+		        
+		        g2d.setFont(font);
+		        
+		        g2d.setColor(Colors.decode("66111111",Color.gray));
+		        g2d.fillRect(0, 0, w, ht);
+		        g2d.setColor(Color.YELLOW);
+		        g2d.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
+		        g2d.drawLine(0, 0, 2, 7);
+		        g2d.drawLine(0, 0, 7, 2);
+		        g2d.drawLine(0, 0, 8, 8);
+				g2d.drawString(cursorString, 1, img.getHeight(null)-1);
+				this.setCursor(tk.createCustomCursor(img,new Point(0,0),"labelCursor"));
+
 			} else {
-				cursorRoi = null;
-				paint(g);
+//				cursorRoi = null;
+//				paint(g);
 			}
 		}else if (imp.getMotherImp().getRoiManager().getColorLegend() != null){
 			//			IJ.showStatus("bling");
@@ -2855,7 +2883,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			tool.mouseEntered(imp, e);
 
 		IJ.runMacro("print(\"\\\\Clear\")");
-		IJ.runMacro("print(\"\\\\Update:CytoSHOW Movie Window:\\\nLeft-Clicking on any Tag tag will bring the linked image feature into focus.\\\nDouble-clicking will launch web-links to related information:\\\nDouble-click => WormBase.org \\\nShift-double-click => Google.com\\\nControlOption-double-click => WormAtlas.org \\\nShift-ControlOption-double-click => Textpresso C.elegans \\\nRight-Click => Shortcuts to CytoSHOW Functions, including cell-search in other open movies \\\nShift-Right-Click => Shows expressed genes with links to WormBase gene pages \\\nControlOption-Right-Click => Shows cell fates, ancestries, and interactions with links to web resources \\\n \")");
+		IJ.runMacro("print(\"\\\\Update:CytoSHOW Movie Window:\\\nLeft-Clicking on any Tag tag will bring the linked image feature into focus.\\\nDouble-clicking will launch web-links to related information:\\\nDouble-click => WormBase.org \\\nShift-double-click => Google.com\\\nControlOption-double-click => WormAtlas.org \\\nShift-ControlOption-double-click => Textpresso C.elegans \\\nRight-Click => Shortcuts to CytoSHOW Functions, including cell-search in other open movies, \\\nexpressed genes with links to WormBase gene pages, \\\ncell fates, ancestries, and interactions with links to web resources \\\n \")");
 
 	}
 
