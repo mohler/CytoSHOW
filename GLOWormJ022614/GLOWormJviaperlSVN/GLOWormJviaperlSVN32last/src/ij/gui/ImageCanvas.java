@@ -1310,6 +1310,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 		Toolkit tk = Toolkit.getDefaultToolkit();
 		String cursorString = "Searching! please wait...";
+		if (IJ.isWindows())
+			cursorString = "Wait!";
 		Font font = Font.decode("Arial-Outline-18");
 
 		//create the FontRenderContext object which helps us to measure the text
@@ -1326,7 +1328,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 		g2d.setFont(font);
 
-		g2d.setColor(Colors.decode("66111111",Color.gray));
+		g2d.setColor(Colors.decode("#66111111",Color.gray));
 		g2d.fillRect(0, 0, w, ht);
 		g2d.setColor(Color.YELLOW);
 		g2d.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
@@ -2803,20 +2805,20 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			}
 			Graphics g = getGraphics();
 			if (cursorString != null) {
-				if (!IJ.isMacOSX()) {
+				if (IJ.isWindows()) {
 					//				IJ.log(cursorString);
 					cursorRoi = new TextRoi(getXMouse()+10/ getMagnification(), getYMouse(), cursorString);
 					((TextRoi) cursorRoi).setCurrentFont(g.getFont().deriveFont((float) (16 / getMagnification())));
-					//				try {
-					//					paint(g);
-					cursorRoi.setStrokeColor(Color.black);
-					cursorRoi.setFillColor(Colors.decode("#99ffffff",
-							getDefaultColor()));
-					cursorRoi.setLocation(((int) (getXMouse()> getSrcRect().getX()+cursorString.length()*4/ getMagnification()?(getXMouse()< getSrcRect().getMaxX()-cursorString.length()*4.5/ getMagnification()?getXMouse()- cursorString.length()*4/ getMagnification():getXMouse()- cursorString.length()*9/ getMagnification()):getXMouse()))
-							, getYMouse()<getSrcRect().getMaxY()-40/getMagnification()?((int)(getYMouse()+20/ getMagnification())):((int)(getYMouse()-35/ getMagnification())));
-					drawRoi(g, cursorRoi, -1);
-					//				} finally {
-					//				}
+					try {
+						paint(g);
+						cursorRoi.setStrokeColor(Color.black);
+						cursorRoi.setFillColor(Colors.decode("#99ffffff",
+								getDefaultColor()));
+						cursorRoi.setLocation(((int) (getXMouse()> getSrcRect().getX()+cursorString.length()*4/ getMagnification()?(getXMouse()< getSrcRect().getMaxX()-cursorString.length()*4.5/ getMagnification()?getXMouse()- cursorString.length()*4/ getMagnification():getXMouse()- cursorString.length()*9/ getMagnification()):getXMouse()))
+								, getYMouse()<getSrcRect().getMaxY()-40/getMagnification()?((int)(getYMouse()+20/ getMagnification())):((int)(getYMouse()-35/ getMagnification())));
+						drawRoi(g, cursorRoi, -1);
+					} finally {
+					}
 				} else {
 					Toolkit tk = Toolkit.getDefaultToolkit();
 					Font font = Font.decode("Arial-Outline-18");
@@ -2857,23 +2859,23 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			Checkbox cursorCB = imp.getMotherImp().getRoiManager().getColorLegend().getChosenCB();
 			if (cursorCB != null) {
 				String cursorString = cursorCB.getName();
-				if (!IJ.isMacOSX()) {
+				if (IJ.isWindows()) {
 					cursorRoi = new TextRoi((getXMouse()-cursorCB.getWidth()/2)/ getMagnification(), getYMouse(), cursorString);
 					((TextRoi) cursorRoi).setCurrentFont(g.getFont().deriveFont((float) (16 / getMagnification())));
-					//				try {
-					paint(g);
-					cursorRoi.setStrokeColor(Color.black);
-					//					IJ.log("#99"+Integer.toHexString(imp.getProcessor().get(xMouse,yMouse)).substring(2));
-					//					cursorRoi.setFillColor(Colors.decode("#99"+Integer.toHexString(imp.getProcessor().get(xMouse,yMouse)).substring(2),
-					//							getDefaultColor()));
-					cursorRoi.setFillColor(Colors.decode("#99ffffff",
-							getDefaultColor()));
-					((TextRoi)cursorRoi).updateBounds(g);
-					cursorRoi.setLocation(((int) (getXMouse()> getSrcRect().getX()+cursorString.length()*4/ getMagnification()?(getXMouse()< getSrcRect().getMaxX()-cursorString.length()*4.5/ getMagnification()?getXMouse()- cursorString.length()*4/ getMagnification():getXMouse()- cursorString.length()*9/ getMagnification()):getXMouse()))
-							, getYMouse()<getSrcRect().getMaxY()-40/getMagnification()?((int)(getYMouse()+20/ getMagnification())):((int)(getYMouse()-35/ getMagnification())));
-					drawRoi(g, cursorRoi, -1);
-					//				} finally {
-					//				}
+					try {
+						paint(g);
+						cursorRoi.setStrokeColor(Color.black);
+						//					IJ.log("#99"+Integer.toHexString(imp.getProcessor().get(xMouse,yMouse)).substring(2));
+						//					cursorRoi.setFillColor(Colors.decode("#99"+Integer.toHexString(imp.getProcessor().get(xMouse,yMouse)).substring(2),
+						//							getDefaultColor()));
+						cursorRoi.setFillColor(Colors.decode("#99ffffff",
+								getDefaultColor()));
+						((TextRoi)cursorRoi).updateBounds(g);
+						cursorRoi.setLocation(((int) (getXMouse()> getSrcRect().getX()+cursorString.length()*4/ getMagnification()?(getXMouse()< getSrcRect().getMaxX()-cursorString.length()*4.5/ getMagnification()?getXMouse()- cursorString.length()*4/ getMagnification():getXMouse()- cursorString.length()*9/ getMagnification()):getXMouse()))
+								, getYMouse()<getSrcRect().getMaxY()-40/getMagnification()?((int)(getYMouse()+20/ getMagnification())):((int)(getYMouse()-35/ getMagnification())));
+						drawRoi(g, cursorRoi, -1);
+					} finally {
+					}
 				} else {
 					Toolkit tk = Toolkit.getDefaultToolkit();
 					Font font = Font.decode("Arial-Outline-18");
