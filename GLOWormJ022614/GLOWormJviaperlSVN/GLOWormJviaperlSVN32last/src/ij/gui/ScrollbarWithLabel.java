@@ -1,6 +1,7 @@
 package ij.gui;
 import ij.CompositeImage;
 import ij.IJ;
+import ij.ImagePlus;
 import ij.plugin.Colors;
 
 import java.awt.*;
@@ -208,8 +209,10 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 	}
 
 	public void mouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
+		StackWindow swin = this.stackWindow;
+		ImagePlus imp = swin.getImagePlus();
+		swin.setPositionWithoutScrollbarCheck(imp.getChannel(), imp.getSlice(), imp.getFrame());
+		imp.updateStatusbarValue();
 	}
 
 	public char getType() {

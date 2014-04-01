@@ -292,7 +292,7 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 	public void run() {
 		while (!done) {
 			synchronized(this) {
-				try {wait();}
+				try {wait(10);}
 				catch(InterruptedException e) {}
 			}
 			if (done) return;
@@ -365,7 +365,32 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 		if (this.slice>0) {
 			int s = this.slice;
 			this.slice = 0;
-			if (s!=imp.getCurrentSlice())
+//			if (s!=imp.getCurrentSlice())
+				imp.setSlice(s);
+		}
+    }
+    
+    public void setPositionWithoutScrollbarCheck(int channel, int slice, int frame) {
+//    	if (cSelector!=null && channel!=c) {
+//    		c = channel;
+//			cSelector.setValue(channel);
+//			SyncWindows.setC(this, channel);
+//		}
+//    	if (zSelector!=null && slice!=z) {
+//    		z = slice;
+//			zSelector.setValue(slice);
+//			SyncWindows.setZ(this, slice);
+//		}
+//    	if (tSelector!=null && frame!=t) {
+//    		t = frame;
+//			tSelector.setValue(frame);
+//			SyncWindows.setT(this, frame);
+//		}
+    	updatePosition();
+		if (this.slice>0) {
+			int s = this.slice;
+			this.slice = 0;
+//			if (s!=imp.getCurrentSlice())
 				imp.setSlice(s);
 		}
     }

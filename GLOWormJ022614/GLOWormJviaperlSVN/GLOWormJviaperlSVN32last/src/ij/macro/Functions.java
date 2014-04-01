@@ -4102,7 +4102,7 @@ public class Functions implements MacroConstants, Measurements {
 		if (name.equals("getUnits"))
 			{getStackUnits(cal); return Double.NaN;}
 		if (imp.getStackSize()==1)
-			interp.error("Stack required");
+			interp.error("Macro error: Stack required");
 		if (name.equals("setDimensions"))
 			setDimensions(imp);
 		else if (name.equals("setChannel"))

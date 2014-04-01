@@ -2016,7 +2016,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 						cartoonImp.getWindow().toFront();
 						cartoonImp.getWindow().setBackground(e.getSource() instanceof Checkbox?((Checkbox)e.getSource()).getBackground():imp.getWindow().getBackground());
 					}
-
+					imp.getWindow().toFront();
 					IJ.runMacro(""
 							+ "print(\"starting...\");"
 							+ "string = File.openUrlAsString(\"http://fsbill.cam.uchc.edu/gloworm/Xwords/Partslist.html\");"
@@ -2383,6 +2383,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			else
 				add(popup);
 			if (IJ.isMacOSX()) IJ.wait(10);
+			if (IJ.isLinux()) IJ.wait(10);
 
 			popup.show((Component)e.getSource(), x, y);
 		}
@@ -2928,7 +2929,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		if (tool!=null)
 			tool.mouseClicked(imp, e);
 		if (imp.getRemoteMQTVSHandler() != null) {
-			IJ.run("This Slice");			
+			IJ.run(imp, "This Slice", "");			
 		}
 	}
 

@@ -522,7 +522,7 @@ public QTMovieOpenerMultiMod(String pathListStereo, boolean redCyanStereo2, bool
         int stackSize = imp.getImageStackSize();
 		int mode;
         if (stackSize==1) {
-            IJ.error("MultiQTVirtualStack to HyperStack", "Stack required");
+            IJ.error("MultiQTVirtualStack to HyperStack", "MovieOpener error: Stack required");
             return;
         }
         if (imp.getBitDepth()==24) {

@@ -846,7 +846,7 @@ public class MQTVS_SceneLoader implements PlugIn {
 		imp.setStack(vstack, nChannels, nSlices, nFrames);
 		int stackSize = imp.getImageStackSize();
 		if (stackSize==1) {
-			IJ.error("MultiQTVirtualStack to HyperStack", "Stack required");
+			IJ.error("MultiQTVirtualStack to HyperStack", "SceneLoader error: Stack required");
 			return imp;
 		}
 		if (imp.getBitDepth()==24) {

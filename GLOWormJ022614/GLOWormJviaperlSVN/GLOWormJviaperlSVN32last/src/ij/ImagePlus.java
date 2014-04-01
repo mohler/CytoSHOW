@@ -1403,7 +1403,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	 * @see #setT
 	 */
 	public synchronized void setSlice(int n) {
-		if (stack==null || (n==currentSlice&&ip!=null)) {
+		if (stack==null /*|| (n==currentSlice&&ip!=null)*/) {
 			if (!noUpdateMode)
 				updateAndRepaintWindow();
 			return;

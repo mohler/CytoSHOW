@@ -436,7 +436,7 @@ public class QT_Movie_OpenerMultiMod implements PlugIn, QDConstants, StdQTConsta
         int stackSize = imp.getImageStackSize();
 		int mode;
         if (stackSize==1) {
-            IJ.error("MultiQTVirtualStack to HyperStack", "Stack required");
+            IJ.error("MultiQTVirtualStack to HyperStack", "MovieOpener error: Stack required");
             return;
         }
         if (imp.getBitDepth()==24) {

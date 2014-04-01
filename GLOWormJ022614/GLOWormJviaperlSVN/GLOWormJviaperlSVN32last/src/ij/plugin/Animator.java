@@ -48,7 +48,7 @@ public class Animator implements PlugIn {
 			{IJ.noImage(); return;}
     	nSlices = imp.getStackSize();
 		if (nSlices<2)
-			{IJ.error("Stack required."); return;}
+			{IJ.error("Animator...", "Stack required."); return;}
 		ImageWindow win = imp.getWindow();
 		if (win==null || !(win instanceof StackWindow)) {
 			if (arg.equals("next"))
@@ -110,7 +110,7 @@ public class Animator implements PlugIn {
 
 		}
 
-		if (arg.equals("this")) {
+		if (arg.equals("thisSlice")) {
 			while (imp.getRemoteMQTVSHandler() != null 
 					&& !imp.getRemoteMQTVSHandler().isReady()) {
 				IJ.wait(100);
@@ -118,6 +118,7 @@ public class Animator implements PlugIn {
 			boolean a = (swin.getAnimate()); 
 			if (a) 
 				stopAnimation();
+			
 			thisSlice();
 
 			if (a) 
@@ -161,6 +162,8 @@ public class Animator implements PlugIn {
 			swin.getAnimationSelector().repaint();
 		swin.setAnimate(false);
 		IJ.wait(500+(int)(1000.0/animationRate));
+		swin.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame());
+		imp.updateStatusbarValue();
 		imp.unlock(); 
 		if (swin.getAnimationSelector() != null) 
 			swin.getAnimationSelector().updatePlayPauseIcon();
@@ -411,8 +414,11 @@ public class Animator implements PlugIn {
 		if (!imp.lock())
 			return;
 		
-		ImageProcessor ip = imp.getProcessor();
-		ip.setMinAndMax(ip.getMin(), ip.getMax());
+//		ImageProcessor ip = imp.getProcessor();
+//		if (imp.getRemoteMQTVSHandler() != null)
+//			ip = imp.getStack().getProcessor(imp.getSlice());
+//		ip.setMinAndMax(ip.getMin(), ip.getMax());
+		swin.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame());
 		imp.updateStatusbarValue();
 		imp.unlock();
 	}
