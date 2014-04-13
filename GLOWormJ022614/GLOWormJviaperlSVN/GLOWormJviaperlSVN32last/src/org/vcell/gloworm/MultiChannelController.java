@@ -1444,7 +1444,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 						ftpc.disconnect();
 						IJ.log("FTP server refused connection.");
 					} else {
-						ftpc.login("glowormguest", "CytoSHOW");
+						ftpc.login("glowormguest", "GLOWorm");
 						String[] saveDirFileNames = (new File(saveFile.getParent())).list();
 						for (String fileName:saveDirFileNames) {
 							if (fileName.matches(".*"+sec+".*")) {
