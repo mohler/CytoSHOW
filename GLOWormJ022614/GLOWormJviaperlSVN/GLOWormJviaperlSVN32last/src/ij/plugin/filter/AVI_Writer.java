@@ -40,7 +40,7 @@ public class AVI_Writer implements PlugInFilter, TextListener {
     private final static int FOURCC_00dc = 0x63643030;    //'00dc' compressed frame
 
     //compression options: dialog parameters
-    private static int      compressionIndex = 1; //0=none, 1=PNG, 2=JPEG
+    private static int      compressionIndex = 2; //0=none, 1=PNG, 2=JPEG
     private static int      jpegQuality = 100;    //0 is worst, 100 best (not currently used)
     private final static String[] COMPRESSION_STRINGS = new String[] {"Uncompressed", "PNG", "JPEG"};
     private final static int[] COMPRESSION_TYPES = new int[] {NO_COMPRESSION, PNG_COMPRESSION, JPEG_COMPRESSION};
@@ -477,8 +477,15 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 	private void writeCompressedFrame(ImageProcessor ip) throws IOException {
 		//IJ.log("BufferdImage Type="+bufferedImage.getType()); // 1=RGB, 13=indexed
 		if (biCompression==JPEG_COMPRESSION) {
-			BufferedImage bi = getBufferedImage(ip);
+//			BufferedImage bi = getBufferedImage(ip);			
+			BufferedImage bi = new BufferedImage(xDim, yDim, BufferedImage.TYPE_INT_RGB);
+			boolean showing = imp.getCanvas().getShowAllROIs();
+			imp.getCanvas().setShowAllROIs(flattenTags);
+			imp.getCanvas().paint(bi.getGraphics());
 			ImageIO.write(bi, "jpeg", raOutputStream);
+			imp.getCanvas().setShowAllROIs(showing);
+
+//			ImageIO.write(bi, "jpeg", raOutputStream);
 		} else { //if (biCompression==PNG_COMPRESSION) {
 			BufferedImage bi = new BufferedImage(xDim, yDim, BufferedImage.TYPE_INT_RGB);
 			boolean showing = imp.getCanvas().getShowAllROIs();
