@@ -13,7 +13,11 @@ import java.awt.image.*;
 import java.io.*;
 import java.util.*;
 
+import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
+import javax.imageio.ImageWriteParam;
+import javax.imageio.ImageWriter;
+import javax.imageio.stream.ImageOutputStream;
 
 /**
 This plugin implements the File/Save As/AVI command.
@@ -482,7 +486,32 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 			boolean showing = imp.getCanvas().getShowAllROIs();
 			imp.getCanvas().setShowAllROIs(flattenTags);
 			imp.getCanvas().paint(bi.getGraphics());
-			ImageIO.write(bi, "jpeg", raOutputStream);
+//			ImageIO.write(bi, "jpeg", raOutputStream);
+			
+			Iterator<ImageWriter> iter = ImageIO.getImageWritersByFormatName("jpeg");
+			ImageWriter writer = (ImageWriter)iter.next();
+			ImageOutputStream ios = null;
+			try {
+				ios = ImageIO.createImageOutputStream(raOutputStream);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			writer.setOutput(ios);
+			ImageWriteParam param = writer.getDefaultWriteParam();
+			param.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+			int quality = 100;
+			param.setCompressionQuality(quality/100f);
+			if (quality == 100)
+				param.setSourceSubsampling(1, 1, 0, 0);
+			IIOImage iioImage = new IIOImage(bi, null, null);
+			try {
+				writer.write(null, iioImage, param);
+				ios.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			writer.dispose();
+
 			imp.getCanvas().setShowAllROIs(showing);
 
 //			ImageIO.write(bi, "jpeg", raOutputStream);
