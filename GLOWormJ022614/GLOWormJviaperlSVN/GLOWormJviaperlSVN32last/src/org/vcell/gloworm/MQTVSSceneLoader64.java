@@ -55,6 +55,7 @@ public class MQTVSSceneLoader64 implements PlugIn {
 	private String lineageMapImagePath="";
 	private String lineageLCDFilePath="";
 	private String clFileName;
+	private boolean silentlyUpdateScene;
 
 	/*  */	
 	//constructor for calling by static method:
@@ -170,6 +171,7 @@ public class MQTVSSceneLoader64 implements PlugIn {
 					}
 					String line = "";
 					//if (IJ.debugMode) IJ.log(line);
+					silentlyUpdateScene = false;
 					while (!line.contains("End of parameter list")) {
 						line = in.readLine();
 //						if (out!=null)
@@ -347,6 +349,9 @@ public class MQTVSSceneLoader64 implements PlugIn {
 						if (lineSegments[0].contains("LineageLCDFile") ) {
 							lineageLCDFilePath = lineSegments[1];	    						 
 						}	
+						if (line.contains("AcquisitionComplete = false") ) {
+							silentlyUpdateScene = true;
+						}	
 
 					}
 					in.close();
@@ -418,7 +423,7 @@ public class MQTVSSceneLoader64 implements PlugIn {
 						pathConcat = pathConcat +" " +paths[p]+" " +movieSliceDepthValues[p];
 
 					RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], pathConcat.trim(), 
-												stretchToFitOverlay, viewOverlay, grayscale, grid, horizontal, sideSideStereo, redCyanStereo);
+												stretchToFitOverlay, viewOverlay, grayscale, grid, horizontal, sideSideStereo, redCyanStereo, silentlyUpdateScene);
 					imp = rmqtvsh.getImagePlus();
 					imp.setPosition(cPosition, zPosition, tPosition);
 

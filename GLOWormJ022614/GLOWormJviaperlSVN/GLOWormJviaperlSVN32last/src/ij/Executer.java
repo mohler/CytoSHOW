@@ -283,7 +283,7 @@ public class Executer implements Runnable {
 
 					if (rcs) {
 						RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path+" "+"36"+" "+path+" "+"36", 
-							false, true, true, false, true, false, true);
+							false, true, true, false, true, false, true, false);
 						imp = rmqtvsh.getImagePlus();
 					} else
 						RemoteMQTVSHandler.main(rmiArgsArrayList.toArray(new String[rmiArgsArrayList.size()]));
@@ -295,7 +295,7 @@ public class Executer implements Runnable {
 					rmiArgsArrayList.add(path);
 
 					RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path+" "+"36"+" "+path+" "+"36", 
-							false, true, true, false, true, false, true);
+							false, true, true, false, true, false, true, false);
 
 					imp = rmqtvsh.getImagePlus();
 //					MultiChannelController mcc = new MultiChannelController(imp);

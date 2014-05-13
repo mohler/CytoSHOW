@@ -80,6 +80,7 @@ public class RemoteMQTVSHandler {
 	private boolean sideSideStereo = false;
 	private boolean redCyanStereo = false;
 	private boolean grid = false;
+	private boolean silentlyUpdateScene = false;
 
 
 	public static void main(String args[]) {
@@ -89,7 +90,7 @@ public class RemoteMQTVSHandler {
 	}
 
 	public static RemoteMQTVSHandler build(String url, String portOffset, String pathsThenSlices, 
-			boolean stretchToFitOverlay, boolean viewOverlay, boolean grayscale, boolean grid, boolean horizontal, boolean sideSideStereo, boolean redCyanStereo) {
+			boolean stretchToFitOverlay, boolean viewOverlay, boolean grayscale, boolean grid, boolean horizontal, boolean sideSideStereo, boolean redCyanStereo, boolean silentlyUpdateScene) {
 		ArrayList<String> argArrayList = new ArrayList<String>();
 		argArrayList.add(url);
 		argArrayList.add(portOffset);
@@ -107,6 +108,8 @@ public class RemoteMQTVSHandler {
 			argArrayList.add("-sidesidestereo");
 		if (redCyanStereo)
 			argArrayList.add("-redcyanstereo");
+		if (silentlyUpdateScene)
+			argArrayList.add("-silentlyupdatescene");
 		for (String path:pathsThenSlices.split(" "))
 			argArrayList.add(path);
 		return new RemoteMQTVSHandler(argArrayList.toArray(new String[argArrayList.size()]));
@@ -134,6 +137,8 @@ public class RemoteMQTVSHandler {
 					sideSideStereo = true;
 				if (args[a].toLowerCase() == "-redcyanstereo")
 					redCyanStereo = true;
+				if (args[a].toLowerCase() == "-silentlyupdatescene")
+					silentlyUpdateScene  = true;
 			}
 			if (args.length-skip == 1) {
 				moviePathNames = new String[]{args[skip]};
@@ -201,6 +206,10 @@ public class RemoteMQTVSHandler {
 //			e.printStackTrace();
 		} 
 			
+		boolean firstRun = true;
+		while(silentlyUpdateScene || firstRun){
+			IJ.log("while loop " + silentlyUpdateScene);
+			firstRun = false;
 			if (moviePathNames.length>0)
 				try {
 					remoteImpID = compQ.setUpMovie(moviePathNames, movieSlices, Integer.parseInt(args[0].split(":")[1])+Integer.parseInt(args[1]));
@@ -230,7 +239,7 @@ public class RemoteMQTVSHandler {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			
+
 			stkWidth = qtDims[0]; 
 			stkHeight = qtDims[1]; 
 			stkNChannels = qtDims[2];
@@ -255,14 +264,14 @@ public class RemoteMQTVSHandler {
 			}
 
 			//            imp.show();
-//			imp2.setStack("fromServer:"+args[0]+""+remoteImpID+":"+serverReturnString, ((VirtualStack)stack));
+			//			imp2.setStack("fromServer:"+args[0]+""+remoteImpID+":"+serverReturnString, ((VirtualStack)stack));
 			imp2.setStack(moviePathNames.length +"-movie Scene - "+ moviePathNames[0].replaceAll(".*/", "") +" etc, "+imp2.getID(), ((VirtualStack)stack));
-			
+
 			imp2.getCalibration().pixelDepth = ((RemoteMQTVirtualStack)stack).sliceDepth;
 			imp2.getCalibration().pixelWidth = 1;
 			imp2.getCalibration().pixelHeight = 1;
-			
-			win2 = null;
+
+			//			win2 = null;
 			if (!(moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW"))) {
 				imp2.setDimensions(stkNChannels, stkNSlices, stkNFrames);
 				imp2.setOpenAsHyperStack(true);
@@ -271,66 +280,70 @@ public class RemoteMQTVSHandler {
 						|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/Projectionsof"))) {
 					ci2 = new CompositeImage(imp2,CompositeImage.COMPOSITE);
 				}
-				win2 = new StackWindow(ci2==null?imp2:ci2) {
+				if (win2 == null ) {
+					win2 = new StackWindow(ci2==null?imp2:ci2) {
 
 
-					@Override
-					public void windowIconified(WindowEvent we) {
-						try {
-							compQ.resetServer();
-						} catch (RemoteException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-
-					@Override
-					public void windowClosing(WindowEvent we) {
-						IJ.run(imp, "Stop Animation", "");
-						String compQClosed = "failed";
-						dejaVuIPLinkedHashMap.clear();	
-						try {
-							compQClosed =  (compQ.closeRemoteImp(remoteImpID));
-						} catch (RemoteException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-							compQClosed =  "failed";
-						}
-						if (compQClosed == "VMkilled")
-							spawnStrings =null;
-						super.windowClosing(we);
-					}
-
-					@Override
-					public boolean close() {
-						IJ.run(imp, "Stop Animation", "");
-						String compQClosed = "failed";
-						dejaVuIPLinkedHashMap.clear();	
-						try {
-							compQClosed =  (compQ.closeRemoteImp(remoteImpID));
-						} catch (RemoteException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-							compQClosed =  "failed";
-						}
-						if (compQClosed == "IMPflushed")
+						@Override
+						public void windowIconified(WindowEvent we) {
 							try {
-								Naming.unbind(lookupString);
+								compQ.resetServer();
 							} catch (RemoteException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
-							} catch (MalformedURLException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							} catch (NotBoundException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
 							}
-						if (compQClosed == "VMkilled")
-							spawnStrings =null;
-						return super.close();
-					}
-				};
+						}
+
+						@Override
+						public void windowClosing(WindowEvent we) {
+							IJ.run(imp, "Stop Animation", "");
+							String compQClosed = "failed";
+							dejaVuIPLinkedHashMap.clear();	
+							try {
+								compQClosed =  (compQ.closeRemoteImp(remoteImpID));
+							} catch (RemoteException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+								compQClosed =  "failed";
+							}
+							if (compQClosed == "VMkilled")
+								spawnStrings =null;
+							super.windowClosing(we);
+						}
+
+						@Override
+						public boolean close() {
+							IJ.run(imp, "Stop Animation", "");
+							String compQClosed = "failed";
+							dejaVuIPLinkedHashMap.clear();	
+							try {
+								compQClosed =  (compQ.closeRemoteImp(remoteImpID));
+							} catch (RemoteException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+								compQClosed =  "failed";
+							}
+							if (compQClosed == "IMPflushed")
+								try {
+									Naming.unbind(lookupString);
+								} catch (RemoteException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								} catch (MalformedURLException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								} catch (NotBoundException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+							if (compQClosed == "VMkilled")
+								spawnStrings =null;
+							return super.close();
+						}
+					};
+				} else {
+					win2.updateImage(ci2);
+				}
 
 				if (ci2!=null)
 					ci2.setWindow(win2);
@@ -414,8 +427,10 @@ public class RemoteMQTVSHandler {
 				}
 				rm.runCommand("associate", "true");
 			}
-
-
+			if (silentlyUpdateScene) {
+				IJ.wait(60000);
+			}
+		}
 
 	}    
 

@@ -735,8 +735,8 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 	}
 	
 	public void updateImage(ImagePlus imp) {
-        if (imp!=this.imp)
-            throw new IllegalArgumentException("imp!=this.imp");
+//        if (imp!=this.imp)
+//            throw new IllegalArgumentException("imp!=this.imp");
 		this.imp = imp;
         ic.updateImage(imp);
         setLocationAndSize(true);
