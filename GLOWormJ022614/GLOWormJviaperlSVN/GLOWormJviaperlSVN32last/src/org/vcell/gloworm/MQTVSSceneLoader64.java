@@ -158,22 +158,22 @@ public class MQTVSSceneLoader64 implements PlugIn {
 						}else {
 							in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
 									RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], pathlist))));
-							out = new PrintWriter(
-									new BufferedWriter(
-											new FileWriter(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+pathlist) ), true);
+//							out = new PrintWriter(
+//									new BufferedWriter(
+//											new FileWriter(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+pathlist) ), true);
 						}
 					} else {
 						in = new BufferedReader(new FileReader(file));
-						out = new PrintWriter(
-								new BufferedWriter(
-										new FileWriter(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+pathlist) ), true);
+//						out = new PrintWriter(
+//								new BufferedWriter(
+//										new FileWriter(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+pathlist) ), true);
 					}
 					String line = "";
 					//if (IJ.debugMode) IJ.log(line);
 					while (!line.contains("End of parameter list")) {
 						line = in.readLine();
-						if (out!=null)
-							out.println(line);
+//						if (out!=null)
+//							out.println(line);
 						//if (IJ.debugMode) IJ.log(line);
 						String[] lineSegments = line.split(" \\= ");
 
@@ -350,8 +350,8 @@ public class MQTVSSceneLoader64 implements PlugIn {
 
 					}
 					in.close();
-					if (out!=null)
-						out.close();
+//					if (out!=null)
+//						out.close();
 				}
 
 				//Special case of selecting a cell in an already opened movie from a url click

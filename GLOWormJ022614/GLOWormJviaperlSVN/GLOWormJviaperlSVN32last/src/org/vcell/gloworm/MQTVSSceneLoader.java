@@ -178,9 +178,9 @@ public class MQTVSSceneLoader implements PlugIn {
 						}
 					} else {
 						in = new BufferedReader(new FileReader(file));
-						out = new PrintWriter(
-								new BufferedWriter(
-										new FileWriter(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+pathlist) ), true);
+//						out = new PrintWriter(
+//								new BufferedWriter(
+//										new FileWriter(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+pathlist) ), true);
 					}
 					String line = "";
 					//if (IJ.debugMode) IJ.log(line);

@@ -15,6 +15,7 @@ import java.net.SocketException;
 import java.util.Date;
 
 import javax.swing.JSpinner;
+import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SpinnerListModel;
 import javax.swing.JFileChooser;
@@ -99,7 +100,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 	private boolean openingNewMovie;
 	private File deNovoMovieFile;
 	private boolean sharing;
-	private TextField[] channelNameField;
+	private JTextField[] channelNameField;
 	private int nCheckBoxes;
 	public boolean doingFirstSetup;
 
@@ -242,7 +243,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 		label = new Label[nCheckBoxes];
 		previousShiftZ = new int[nCheckBoxes];
 		previousShiftT = new int[nCheckBoxes];
-		channelNameField = new TextField[nCheckBoxes];
+		channelNameField = new JTextField[nCheckBoxes];
 
 		for (int i=0; i<nCheckBoxes; i++) {
 
@@ -291,9 +292,9 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 				c.insets = new Insets(0, 10, 0, 10);
 				gridbag.setConstraints(mnsp, c);
 				String fitName = "";
-				if (saveName[i].matches("(.*(slc|prx|pry)).*") )
-					saveName[i].replaceAll("(.*(slc|prx|pry)).*", "$1");
-				channelNameField[i] = new TextField(saveName[i]);
+//				if (saveName[i].matches("(.*(slc|prx|pry)).*") )
+//					saveName[i].replaceAll("(.*(slc|prx|pry)).*", "$1");
+				channelNameField[i] = new JTextField(saveName[i]);
 				channelNameField[i].setFocusable(true);
 				channelNameField[i].setEditable(false);
 
@@ -1973,11 +1974,11 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 		this.openingNewMovie = openingNewMovie;
 	}
 
-	public TextField getMovieNameField(int index) {
+	public JTextField getMovieNameField(int index) {
 		return channelNameField[index];
 	}
 
-	public void setMovieNameField(int index, TextField movieNameField) {
+	public void setMovieNameField(int index, JTextField movieNameField) {
 		this.channelNameField[index] = movieNameField;
 	}
 
