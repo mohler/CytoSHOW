@@ -56,6 +56,8 @@ public class MQTVSSceneLoader64 implements PlugIn {
 	private String lineageLCDFilePath="";
 	private String clFileName;
 	private boolean silentlyUpdateScene;
+	private Thread reloadThread;
+	private ImagePlus imp;
 
 	/*  */	
 	//constructor for calling by static method:
@@ -80,27 +82,27 @@ public class MQTVSSceneLoader64 implements PlugIn {
 	}
 
 	//static method
-	public static void runMQTVS_SceneLoader64(String pathlist,  String options) {
-		new MQTVSSceneLoader64(pathlist, options);
+	public static MQTVSSceneLoader64 runMQTVS_SceneLoader64(String pathlist,  String options) {
+		return new MQTVSSceneLoader64(pathlist, options);
 		//return ("Pathlist, Options");
 	}
 
 	//static method
-	public static void runMQTVS_SceneLoader64(String options, int one) {
-		new MQTVSSceneLoader64(options, 1);
+	public static MQTVSSceneLoader64 runMQTVS_SceneLoader64(String options, int one) {
+		return new MQTVSSceneLoader64(options, 1);
 		//return ("Options only");
 	}
 
 	//static method
-	public static void runMQTVS_SceneLoader64(String pathlist) {
-		new MQTVSSceneLoader64(pathlist);
+	public static MQTVSSceneLoader64 runMQTVS_SceneLoader64(String pathlist) {
+		return new MQTVSSceneLoader64(pathlist);
 		//return ("Pathlist only");
 
 	}
 	/*  */
 
 
-	public void run(String arg) {
+	public void run(final String arg) {
 		pathlist = arg;
 		if (pathlist == "") return;
 
@@ -416,7 +418,7 @@ public class MQTVSSceneLoader64 implements PlugIn {
 						movieSliceDepthValues[i] = Integer.valueOf(movieSliceDepths[i]).intValue();
 					}
 					String[] movieAdjustmentFiles = movieAdjustmentFileList.split("\\|"); 
-					ImagePlus imp = null;
+					imp = null;
 
 					String pathConcat="";
 					for (int p=0;p<paths.length;p++)
@@ -427,6 +429,31 @@ public class MQTVSSceneLoader64 implements PlugIn {
 					imp = rmqtvsh.getImagePlus();
 					imp.setPosition(cPosition, zPosition, tPosition);
 
+					if (reloadThread == null) {
+						reloadThread = (new Thread(new Runnable(){
+							public void run() {
+								if(silentlyUpdateScene){
+									IJ.wait(60000);
+									MQTVSSceneLoader64 nextMsl64 = MQTVSSceneLoader64.runMQTVS_SceneLoader64(pathlist);
+									nextMsl64.imp.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame());
+									boolean running = imp.getWindow().running;
+									boolean running2 = imp.getWindow().running2;
+									boolean running3 = imp.getWindow().running3;
+									imp.close();
+
+									if (running3) 
+										IJ.run(nextMsl64.imp, "Start Z Animation", "");
+									if (running) 
+										IJ.run(nextMsl64.imp, "Start Animation [\\]", "");
+									if (running2) 
+										IJ.run(nextMsl64.imp, "Start Animation [\\]", "");
+									
+								}
+							}
+						}
+								));
+						reloadThread.start();
+					}
 
 					MultiChannelController mcc = imp.getMultiChannelController();
 					if (mcc==null) {

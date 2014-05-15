@@ -117,6 +117,11 @@ public class RemoteMQTVSHandler {
 
 	public RemoteMQTVSHandler(String args[]) {
 
+		boolean firstRun = true;
+		IJ.log("while loop " + silentlyUpdateScene);
+		firstRun = false;
+		comp = null;
+		compQ = null;
 		try {
 			String remoteEngineName = args[0]+"/HEAD";
 			int skip = 2;
@@ -170,26 +175,26 @@ public class RemoteMQTVSHandler {
 				return;
 			}
 			try {
-					serverReturnString =comp.spawnNewServer(spawnStrings[0],spawnStrings[1],spawnStrings[2],spawnStrings[3]);
-					lookupString = "//"+serverReturnString.replaceAll("//","").replaceAll(".*>(.*)", "$1");
-				} catch (RemoteException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				try {
-					compQ = (Compute) Naming.lookup(lookupString);
-				} catch (MalformedURLException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (RemoteException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (NotBoundException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				e2.printStackTrace();
-			} catch (MalformedURLException e) {
+				serverReturnString =comp.spawnNewServer(spawnStrings[0],spawnStrings[1],spawnStrings[2],spawnStrings[3]);
+				lookupString = "//"+serverReturnString.replaceAll("//","").replaceAll(".*>(.*)", "$1");
+			} catch (RemoteException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			try {
+				compQ = (Compute) Naming.lookup(lookupString);
+			} catch (MalformedURLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (RemoteException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (NotBoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+			e2.printStackTrace();
+		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (NotBoundException e) {
@@ -198,165 +203,98 @@ public class RemoteMQTVSHandler {
 		} catch (NumberFormatException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-//		} catch (SocketException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (UnknownHostException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
+			//		} catch (SocketException e) {
+			//			// TODO Auto-generated catch block
+			//			e.printStackTrace();
+			//		} catch (UnknownHostException e) {
+			//			// TODO Auto-generated catch block
+			//			e.printStackTrace();
 		} 
-			
-		boolean firstRun = true;
-		while(silentlyUpdateScene || firstRun){
-			IJ.log("while loop " + silentlyUpdateScene);
-			firstRun = false;
-			if (moviePathNames.length>0)
-				try {
-					remoteImpID = compQ.setUpMovie(moviePathNames, movieSlices, Integer.parseInt(args[0].split(":")[1])+Integer.parseInt(args[1]));
-				} catch (NumberFormatException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (RemoteException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			if (remoteImpID == 0)
-				return;
-			localMovieDirs = new File[moviePathNames.length];
-			for (int m=0;m<moviePathNames.length;m++) {
-				localMovieDirs[m] = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+moviePathNames[m]);
-				if (!localMovieDirs[m].canWrite()) {
-					if (localMovieDirs[m].mkdirs()) {
-						localMovieDirs[m].setReadable(true, false);
-						localMovieDirs[m].setWritable(true, false);
-						localMovieDirs[m].setExecutable(true, false);
-					}
-				}
-			}
+
+		//			if (remoteImpID != 0) {
+		//				if (win2 != null) {
+		//					try {
+		//						compQ.resetServer();
+		//					} catch (RemoteException e) {
+		//						// TODO Auto-generated catch block
+		//						e.printStackTrace();
+		//					}
+		//				}
+		//			}
+		if (moviePathNames.length>0) {
 			try {
-				qtDims = compQ.getQTDimensions(remoteImpID);
+				remoteImpID = compQ.setUpMovie(moviePathNames, movieSlices, Integer.parseInt(args[0].split(":")[1])+Integer.parseInt(args[1]));
+			} catch (NumberFormatException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
 			} catch (RemoteException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-
-			stkWidth = qtDims[0]; 
-			stkHeight = qtDims[1]; 
-			stkNChannels = qtDims[2];
-			stkNSlices = qtDims[3];
-			stkNFrames = qtDims[4];
-			imp2 = new ImagePlus();
-			stack = new RemoteMQTVirtualStack(stkWidth, stkHeight,
-					ColorModel.getRGBdefault(), "", false, Color.black);
-			((RemoteMQTVirtualStack)stack).setStretchToFitOverlay(stretchToFitOverlay);
-
-
-			if ((moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW"))) {
-				stack.setBurnIn(true);
-				for (int i=1; i<=stkNSlices*stkNFrames; i++) {
-					((VirtualStack)stack).addSlice("");
-				}
-			} else {
-				stack.setBurnIn(false);
-				for (int i=1; i<=stkNChannels*stkNSlices*stkNFrames; i++) {
-					((VirtualStack)stack).addSlice("");
+		}
+		if (remoteImpID == 0) {
+			return;
+		}
+		localMovieDirs = new File[moviePathNames.length];
+		for (int m=0;m<moviePathNames.length;m++) {
+			localMovieDirs[m] = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+moviePathNames[m]);
+			if (!localMovieDirs[m].canWrite()) {
+				if (localMovieDirs[m].mkdirs()) {
+					localMovieDirs[m].setReadable(true, false);
+					localMovieDirs[m].setWritable(true, false);
+					localMovieDirs[m].setExecutable(true, false);
 				}
 			}
+		}
+		try {
+			qtDims = compQ.getQTDimensions(remoteImpID);
+		} catch (RemoteException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 
-			//            imp.show();
-			//			imp2.setStack("fromServer:"+args[0]+""+remoteImpID+":"+serverReturnString, ((VirtualStack)stack));
-			imp2.setStack(moviePathNames.length +"-movie Scene - "+ moviePathNames[0].replaceAll(".*/", "") +" etc, "+imp2.getID(), ((VirtualStack)stack));
-
-			imp2.getCalibration().pixelDepth = ((RemoteMQTVirtualStack)stack).sliceDepth;
-			imp2.getCalibration().pixelWidth = 1;
-			imp2.getCalibration().pixelHeight = 1;
-
-			//			win2 = null;
-			if (!(moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW"))) {
-				imp2.setDimensions(stkNChannels, stkNSlices, stkNFrames);
-				imp2.setOpenAsHyperStack(true);
-				CompositeImage ci2 = null;
-				if (!(moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/DUP")
-						|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/Projectionsof"))) {
-					ci2 = new CompositeImage(imp2,CompositeImage.COMPOSITE);
-				}
-				if (win2 == null ) {
-					win2 = new StackWindow(ci2==null?imp2:ci2) {
+		stkWidth = qtDims[0]; 
+		stkHeight = qtDims[1]; 
+		stkNChannels = qtDims[2];
+		stkNSlices = qtDims[3];
+		stkNFrames = qtDims[4];
+		imp2 = new ImagePlus();
+		stack = new RemoteMQTVirtualStack(stkWidth, stkHeight,
+				ColorModel.getRGBdefault(), "", false, Color.black);
+		((RemoteMQTVirtualStack)stack).setStretchToFitOverlay(stretchToFitOverlay);
 
 
-						@Override
-						public void windowIconified(WindowEvent we) {
-							try {
-								compQ.resetServer();
-							} catch (RemoteException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						}
+		if ((moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW"))) {
+			stack.setBurnIn(true);
+			for (int i=1; i<=stkNSlices*stkNFrames; i++) {
+				((VirtualStack)stack).addSlice("");
+			}
+		} else {
+			stack.setBurnIn(false);
+			for (int i=1; i<=stkNChannels*stkNSlices*stkNFrames; i++) {
+				((VirtualStack)stack).addSlice("");
+			}
+		}
 
-						@Override
-						public void windowClosing(WindowEvent we) {
-							IJ.run(imp, "Stop Animation", "");
-							String compQClosed = "failed";
-							dejaVuIPLinkedHashMap.clear();	
-							try {
-								compQClosed =  (compQ.closeRemoteImp(remoteImpID));
-							} catch (RemoteException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-								compQClosed =  "failed";
-							}
-							if (compQClosed == "VMkilled")
-								spawnStrings =null;
-							super.windowClosing(we);
-						}
+		//            imp.show();
+		//			imp2.setStack("fromServer:"+args[0]+""+remoteImpID+":"+serverReturnString, ((VirtualStack)stack));
+		imp2.setStack(moviePathNames.length +"-movie Scene - "+ moviePathNames[0].replaceAll(".*/", "") +" etc, "+imp2.getID(), ((VirtualStack)stack));
 
-						@Override
-						public boolean close() {
-							IJ.run(imp, "Stop Animation", "");
-							String compQClosed = "failed";
-							dejaVuIPLinkedHashMap.clear();	
-							try {
-								compQClosed =  (compQ.closeRemoteImp(remoteImpID));
-							} catch (RemoteException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-								compQClosed =  "failed";
-							}
-							if (compQClosed == "IMPflushed")
-								try {
-									Naming.unbind(lookupString);
-								} catch (RemoteException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								} catch (MalformedURLException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								} catch (NotBoundException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-							if (compQClosed == "VMkilled")
-								spawnStrings =null;
-							return super.close();
-						}
-					};
-				} else {
-					win2.updateImage(ci2);
-				}
+		imp2.getCalibration().pixelDepth = ((RemoteMQTVirtualStack)stack).sliceDepth;
+		imp2.getCalibration().pixelWidth = 1;
+		imp2.getCalibration().pixelHeight = 1;
 
-				if (ci2!=null)
-					ci2.setWindow(win2);
-				else
-					imp2.setWindow(win2);
-				if (stkNChannels == 1 && ci2!=null)
-					IJ.run("Grays");
-
-			} else {
-				//        	imp2.show();
-				imp2.setDimensions(stkNSlices, stkNFrames, 1);
-				imp2.setOpenAsHyperStack(true);
-				win2 = new StackWindow(imp2) {
+		//			win2 = null;
+		if (!(moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW"))) {
+			imp2.setDimensions(stkNChannels, stkNSlices, stkNFrames);
+			imp2.setOpenAsHyperStack(true);
+			CompositeImage ci2 = null;
+			if (!(moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/DUP")
+					|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/Projectionsof"))) {
+				ci2 = new CompositeImage(imp2,CompositeImage.COMPOSITE);
+			}
+			if (true ) {
+				win2 = new StackWindow(ci2==null?imp2:ci2) {
 
 
 					@Override
@@ -379,7 +317,7 @@ public class RemoteMQTVSHandler {
 						} catch (RemoteException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
-							compQClosed = "failed";
+							compQClosed =  "failed";
 						}
 						if (compQClosed == "VMkilled")
 							spawnStrings =null;
@@ -396,40 +334,111 @@ public class RemoteMQTVSHandler {
 						} catch (RemoteException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
-							compQClosed = "failed";
+							compQClosed =  "failed";
 						}
+						if (compQClosed == "IMPflushed")
+							try {
+								Naming.unbind(lookupString);
+							} catch (RemoteException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (MalformedURLException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (NotBoundException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
 						if (compQClosed == "VMkilled")
 							spawnStrings =null;
 						return super.close();
 					}
 				};
+			} else {
+				win2.updateImage(ci2);
+			}
 
+			if (ci2!=null)
+				ci2.setWindow(win2);
+			else
 				imp2.setWindow(win2);
-			}
+			if (stkNChannels == 1 && ci2!=null)
+				IJ.run("Grays");
 
-			win2.getImagePlus().setRemoteHandler(this);
+		} else {
+			//        	imp2.show();
+			imp2.setDimensions(stkNSlices, stkNFrames, 1);
+			imp2.setOpenAsHyperStack(true);
+			win2 = new StackWindow(imp2) {
 
-			if 	(win2 != null ){
 
-				MultiChannelController mcc = win2.getImagePlus().getMultiChannelController();
-				if (mcc == null) {
-					mcc = new MultiChannelController(this.getImagePlus());
-					imp2.setMultiChannelController(mcc);
-					//					mcc.setVisible(true);
+				@Override
+				public void windowIconified(WindowEvent we) {
+					try {
+						compQ.resetServer();
+					} catch (RemoteException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
-				//									else
+
+				@Override
+				public void windowClosing(WindowEvent we) {
+					IJ.run(imp, "Stop Animation", "");
+					String compQClosed = "failed";
+					dejaVuIPLinkedHashMap.clear();	
+					try {
+						compQClosed =  (compQ.closeRemoteImp(remoteImpID));
+					} catch (RemoteException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						compQClosed = "failed";
+					}
+					if (compQClosed == "VMkilled")
+						spawnStrings =null;
+					super.windowClosing(we);
+				}
+
+				@Override
+				public boolean close() {
+					IJ.run(imp, "Stop Animation", "");
+					String compQClosed = "failed";
+					dejaVuIPLinkedHashMap.clear();	
+					try {
+						compQClosed =  (compQ.closeRemoteImp(remoteImpID));
+					} catch (RemoteException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						compQClosed = "failed";
+					}
+					if (compQClosed == "VMkilled")
+						spawnStrings =null;
+					return super.close();
+				}
+			};
+
+			imp2.setWindow(win2);
+		}
+
+		win2.getImagePlus().setRemoteHandler(this);
+
+		if 	(win2 != null ){
+
+			MultiChannelController mcc = win2.getImagePlus().getMultiChannelController();
+			if (mcc == null) {
+				mcc = new MultiChannelController(this.getImagePlus());
+				imp2.setMultiChannelController(mcc);
 				//					mcc.setVisible(true);
+			}
+			//									else
+			//					mcc.setVisible(true);
 
-				RoiManager rm = win2.getImagePlus().getRoiManager();
-				if (rm == null) {
-					win2.getImagePlus().setRoiManager(new RoiManager(win2.getImagePlus(), true));
-					rm = win2.getImagePlus().getRoiManager();
-				}
-				rm.runCommand("associate", "true");
+			RoiManager rm = win2.getImagePlus().getRoiManager();
+			if (rm == null) {
+				win2.getImagePlus().setRoiManager(new RoiManager(win2.getImagePlus(), true));
+				rm = win2.getImagePlus().getRoiManager();
 			}
-			if (silentlyUpdateScene) {
-				IJ.wait(60000);
-			}
+			rm.runCommand("associate", "true");
 		}
 
 	}    
@@ -460,7 +469,7 @@ public class RemoteMQTVSHandler {
 			e.printStackTrace();
 			String[] args = new String[] {IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1]};
 			String remoteEngineName = args[0]+"/HEAD";
-//			IJ.log(remoteEngineName);
+			//			IJ.log(remoteEngineName);
 			IJ.log("contacting glowormserver...");
 			try {
 				comp = (Compute) Naming.lookup(remoteEngineName);
@@ -510,7 +519,7 @@ public class RemoteMQTVSHandler {
 					e1.printStackTrace();
 				}
 			}
-			
+
 			return getRemoteIP( qtSlice,jpegQuality,burnIn);
 		}
 		//		System.out.println(qtbaosba.toString()+" "+qtSlice+" "+jpegQuality);
@@ -536,15 +545,15 @@ public class RemoteMQTVSHandler {
 
 					IJ.wait(jpegQuality==1?0:0);  //funky little setting...
 					if (((RemoteMQTVirtualStack)stack).selectedSlice == ((((StackWindow)imp2.getWindow()).zSelector.getValue()-1) * stkNSlices)
-																		+ (((StackWindow)imp2.getWindow()).cSelector!=null
-																				?((StackWindow)imp2.getWindow()).cSelector.getValue()
-																						:1)){
+							+ (((StackWindow)imp2.getWindow()).cSelector!=null
+							?((StackWindow)imp2.getWindow()).cSelector.getValue()
+									:1)){
 						Thread thread = new Thread(new Runnable() {
 							public void run() {
 								RemoteMQTVSHandler.this.jpegQuality=10*jpegQuality;
 								imp2.setProcessor(stack.getProcessor(((((StackWindow)imp2.getWindow()).zSelector.getValue()-1) * stkNSlices)
 										+ (((StackWindow)imp2.getWindow()).cSelector!=null
-												?((StackWindow)imp2.getWindow()).cSelector.getValue()
+										?((StackWindow)imp2.getWindow()).cSelector.getValue()
 												:1)));
 							}
 						});
@@ -563,10 +572,10 @@ public class RemoteMQTVSHandler {
 
 					IJ.wait(0);  //funky little setting...
 					if ( (((RemoteMQTVirtualStack)stack).selectedSlice == ((((StackWindow)imp2.getWindow()).zSelector.getValue()-1) * stkNSlices)
-																			+ (((StackWindow)imp2.getWindow()).cSelector!=null
-																					?((StackWindow)imp2.getWindow()).cSelector.getValue()
-																					:1)) 
-								&& RemoteMQTVSHandler.this.resolutionToGet < stkNChannels) {
+							+ (((StackWindow)imp2.getWindow()).cSelector!=null
+							?((StackWindow)imp2.getWindow()).cSelector.getValue()
+									:1)) 
+									&& RemoteMQTVSHandler.this.resolutionToGet < stkNChannels) {
 						if (RemoteMQTVSHandler.this.resolutionToGet == stkNChannels-1)
 							burnInComplete = true;
 						Thread thread = new Thread(new Runnable() {
@@ -575,7 +584,7 @@ public class RemoteMQTVSHandler {
 								ImageProcessor tip = stack.getProcessor(((((StackWindow)imp2.getWindow()).zSelector.getValue()-1) * stkNSlices)
 										+ (((StackWindow)imp2.getWindow()).cSelector!=null
 										?((StackWindow)imp2.getWindow()).cSelector.getValue()
-										:1));
+												:1));
 								imp2.setProcessor(tip);
 							}
 						});
@@ -717,20 +726,20 @@ public class RemoteMQTVSHandler {
 		this.horizontal = horizontal;
 	}
 
-	
-//	public void refreshIP() {
-//		if (moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW")) {
-//			resolutionToGet = 3;
-//			jpegQuality = 1;
-//			burnInComplete = false;
-//			getImagePlus().setProcessor(stack.getProcessor(getImagePlus().getCurrentSlice()));
-//		}
-//	}
+
+	//	public void refreshIP() {
+	//		if (moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW")) {
+	//			resolutionToGet = 3;
+	//			jpegQuality = 1;
+	//			burnInComplete = false;
+	//			getImagePlus().setProcessor(stack.getProcessor(getImagePlus().getCurrentSlice()));
+	//		}
+	//	}
 
 
 
-	
-	
+
+
 
 	public ArrayList<Thread> getThreadArrayList() {
 		return threadArrayList;
@@ -841,9 +850,9 @@ public class RemoteMQTVSHandler {
 							+ (shiftTPosition[channelBaseZero] * stkNChannels * stkNSlices)
 
 							+ (shiftZPosition[channelBaseZero] * stkNChannels);
-			
+
 			if ((adjustedSlice )%(stkNChannels * stkNSlices) != slice%(stkNChannels * stkNSlices)+(shiftZPosition[channelBaseZero]  * stkNChannels))  {
-//				IJ.log(""+ adjustedSlice +" "+ channelBaseZero +" "+shiftZPosition[channelBaseZero] +" "+stkNChannels +" "+stkNSlices);
+				//				IJ.log(""+ adjustedSlice +" "+ channelBaseZero +" "+shiftZPosition[channelBaseZero] +" "+stkNChannels +" "+stkNSlices);
 				if (shiftZPosition[channelBaseZero] > 0 ) {
 					adjustedSlice = adjustedSlice - (stkNChannels * stkNSlices);
 					if  (adjustedSlice > nSlices && adjustedSlice < nSlices + (shiftZPosition[channelBaseZero]  * stkNChannels))
@@ -852,7 +861,7 @@ public class RemoteMQTVSHandler {
 				else if (shiftZPosition[channelBaseZero] < 0 ) {
 					adjustedSlice = adjustedSlice + (stkNChannels * stkNSlices);
 					if  (adjustedSlice <0 && adjustedSlice > (shiftZPosition[channelBaseZero]  * stkNChannels))
-							adjustedSlice = adjustedSlice + (stkNChannels * stkNSlices);
+						adjustedSlice = adjustedSlice + (stkNChannels * stkNSlices);
 				}
 			}
 			if (adjustedSlice <0 ) {
@@ -970,21 +979,21 @@ public class RemoteMQTVSHandler {
 						finalWidth = stkWidth * 2;
 						finalHeight = stkHeight*numPanels/2;
 					}
-//				} else {
-//					if (grid) {
-//						finalHeight = ((int)gridAcross) * stkWidth;
-//						finalWidth = ((int)gridDown) * stkHeight;
-//					} else {
-//						finalWidth = stkWidth;
-//						finalHeight = stkHeight * stkNChannels;
-//					}
+					//				} else {
+					//					if (grid) {
+					//						finalHeight = ((int)gridAcross) * stkWidth;
+					//						finalWidth = ((int)gridDown) * stkHeight;
+					//					} else {
+					//						finalWidth = stkWidth;
+					//						finalHeight = stkHeight * stkNChannels;
+					//					}
 				}
 
 			} else {
 				int numPanels = stkNChannels;
 				if (redCyanStereo)
 					numPanels = stkNChannels/2;
-				
+
 				if (grid) {
 					if ( numPanels == 3 ) numPanels = 4;
 					if ( numPanels == 5 ) numPanels = 6;
