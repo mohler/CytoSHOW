@@ -58,14 +58,18 @@ public class MQTVSSceneLoader64 implements PlugIn {
 	private boolean silentlyUpdateScene;
 	private Thread reloadThread;
 	private ImagePlus imp;
+	private boolean cycling = false;
 
 	/*  */	
 	//constructor for calling by static method:
 	MQTVSSceneLoader64(String pathlist, String options) {
 		//	         showDialog();	//??????? a Generic dialog there will get the options    ????????
 		this.pathlist = pathlist; //set instance variable
-		Macro.setOptions(options);
-		run("");
+		if (options.contains("cycling"))
+			cycling = true;
+		else
+			Macro.setOptions(options);
+		run(pathlist);
 	}
 
 	//constructor for calling by static method:
@@ -428,25 +432,32 @@ public class MQTVSSceneLoader64 implements PlugIn {
 												stretchToFitOverlay, viewOverlay, grayscale, grid, horizontal, sideSideStereo, redCyanStereo, silentlyUpdateScene);
 					imp = rmqtvsh.getImagePlus();
 					imp.setPosition(cPosition, zPosition, tPosition);
+					if(silentlyUpdateScene && !cycling)
+						imp.getWindow().setVisible(true);
 
 					if (reloadThread == null) {
 						reloadThread = (new Thread(new Runnable(){
 							public void run() {
 								if(silentlyUpdateScene){
 									IJ.wait(60000);
-									MQTVSSceneLoader64 nextMsl64 = MQTVSSceneLoader64.runMQTVS_SceneLoader64(pathlist);
+									MQTVSSceneLoader64 nextMsl64 = MQTVSSceneLoader64.runMQTVS_SceneLoader64(pathlist, "cycling");
 									nextMsl64.imp.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame());
 									boolean running = imp.getWindow().running;
 									boolean running2 = imp.getWindow().running2;
 									boolean running3 = imp.getWindow().running3;
+									nextMsl64.imp.getWindow().setLocation(imp.getWindow().getLocation().x, imp.getWindow().getLocation().y);
+									nextMsl64.imp.getWindow().setVisible(true);
+									if (nextMsl64.imp.isComposite()) {
+										((CompositeImage)nextMsl64.imp).copyLuts(imp);
+										((CompositeImage)nextMsl64.imp).setMode(3);
+										((CompositeImage)nextMsl64.imp).setMode(displayMode);
+									}
 									imp.close();
 
+									if (running || running2) 
+										IJ.doCommand("Start Animation [\\]");
 									if (running3) 
-										IJ.run(nextMsl64.imp, "Start Z Animation", "");
-									if (running) 
-										IJ.run(nextMsl64.imp, "Start Animation [\\]", "");
-									if (running2) 
-										IJ.run(nextMsl64.imp, "Start Animation [\\]", "");
+										IJ.doCommand("Start Z Animation");
 									
 								}
 							}

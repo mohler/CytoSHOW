@@ -357,6 +357,8 @@ public class RemoteMQTVSHandler {
 			} else {
 				win2.updateImage(ci2);
 			}
+			if (win2 != null && silentlyUpdateScene)
+				win2.setVisible(false);
 
 			if (ci2!=null)
 				ci2.setWindow(win2);
