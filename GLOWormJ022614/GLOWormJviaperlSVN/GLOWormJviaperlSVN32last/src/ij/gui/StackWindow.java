@@ -170,18 +170,8 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 					((CompositeImage) this.getImagePlus()).setC(cSelector.getValue());
 				int origChannel = this.getImagePlus().getChannel();
 				if (this.getImagePlus().isComposite() && ((CompositeImage) this.imp).getMode() ==1 ) {
-					for (int j = 1; j <= this.getImagePlus().getNChannels(); j++) {
-						this.setPosition(j, this.getImagePlus().getSlice(),
-								this.getImagePlus().getFrame());
-					}
-					this.setPosition(origChannel, this.getImagePlus()
-							.getSlice(), this.getImagePlus().getFrame());
-					this.setPosition(origChannel, this.getImagePlus()
-							.getSlice(), this.getImagePlus().getFrame() + 1);
-					this.setPosition(origChannel, this.getImagePlus()
-							.getSlice(), this.getImagePlus().getFrame() - 1);
-					if (WindowManager.getFrame("Display") !=null) WindowManager.getFrame("Display").toFront();
-					this.toFront();
+					((CompositeImage)this.getImagePlus()).setMode(3);
+					((CompositeImage)this.getImagePlus()).setMode(1);
 				}
 				if (animationState) IJ.doCommand("Start Animation [\\]");
 				if (animationZState) IJ.doCommand("Start Z Animation");
