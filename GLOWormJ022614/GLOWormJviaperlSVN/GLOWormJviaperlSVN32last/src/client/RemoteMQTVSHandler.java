@@ -81,6 +81,7 @@ public class RemoteMQTVSHandler {
 	private boolean redCyanStereo = false;
 	private boolean grid = false;
 	private boolean silentlyUpdateScene = false;
+	private Thread reloadThread;
 
 
 	public static void main(String args[]) {
@@ -350,7 +351,7 @@ public class RemoteMQTVSHandler {
 								e.printStackTrace();
 							}
 						if (compQClosed == "VMkilled")
-							spawnStrings =null;
+							spawnStrings =null;						
 						return super.close();
 					}
 				};
@@ -1351,6 +1352,14 @@ public class RemoteMQTVSHandler {
 			imp2.updateAndRepaintWindow();
 		}
 		return true;
+	}
+
+	public Thread getReloadThread() {
+		return reloadThread;
+	}
+
+	public void setReloadThread(Thread reloadThread) {
+		this.reloadThread = reloadThread;
 	}
 
 }

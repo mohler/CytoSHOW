@@ -56,7 +56,6 @@ public class MQTVSSceneLoader64 implements PlugIn {
 	private String lineageLCDFilePath="";
 	private String clFileName;
 	private boolean silentlyUpdateScene;
-	private Thread reloadThread;
 	private ImagePlus imp;
 	private boolean cycling = false;
 
@@ -434,12 +433,13 @@ public class MQTVSSceneLoader64 implements PlugIn {
 					imp.setPosition(cPosition, zPosition, tPosition);
 					if(silentlyUpdateScene && !cycling)
 						imp.getWindow().setVisible(true);
-
+					
+					Thread reloadThread = imp.getRemoteMQTVSHandler().getReloadThread();
 					if (reloadThread == null) {
 						reloadThread = (new Thread(new Runnable(){
 							public void run() {
-								if(silentlyUpdateScene){
-									IJ.wait(60000);
+								IJ.wait(60000);
+								if (imp.getWindow()!=null) {
 									MQTVSSceneLoader64 nextMsl64 = MQTVSSceneLoader64.runMQTVS_SceneLoader64(pathlist, "cycling");
 									nextMsl64.imp.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame());
 									boolean running = imp.getWindow().running;
@@ -453,17 +453,17 @@ public class MQTVSSceneLoader64 implements PlugIn {
 										((CompositeImage)nextMsl64.imp).setMode(displayMode);
 									}
 									imp.close();
-
 									if (running || running2) 
 										IJ.doCommand("Start Animation [\\]");
 									if (running3) 
 										IJ.doCommand("Start Z Animation");
-									
 								}
 							}
 						}
 								));
-						reloadThread.start();
+						if(silentlyUpdateScene){
+							reloadThread.start();
+						}
 					}
 
 					MultiChannelController mcc = imp.getMultiChannelController();
