@@ -494,7 +494,7 @@ public class QT_Movie_OpenerMultiMod implements PlugIn, QDConstants, StdQTConsta
             	}
             }
             imp2.setOpenAsHyperStack(true);
-            new StackWindow(imp2);
+            new StackWindow(imp2, true);
             if (imp!=imp2) imp.hide();
 			((MultiQTVirtualStack) vstack).imp = imp2;
 			((MultiQTVirtualStack) vstack).imp.show();

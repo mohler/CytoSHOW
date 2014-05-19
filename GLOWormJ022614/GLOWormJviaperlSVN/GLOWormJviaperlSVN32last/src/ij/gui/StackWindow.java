@@ -25,11 +25,11 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 	private boolean wormAtlas;
 	
 
-	public StackWindow(ImagePlus imp) {
-		this(imp, null);
+	public StackWindow(ImagePlus imp, boolean showNow) {
+		this(imp, null, showNow);
 	}
     
-    public StackWindow(ImagePlus imp, ImageCanvas ic) {
+    public StackWindow(ImagePlus imp, ImageCanvas ic, boolean showNow) {
 		super(imp, ic);
 		addScrollbars(imp);
 		addMouseWheelListener(this);
@@ -39,7 +39,8 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 		pack();
 		ic = imp.getCanvas();
 		if (ic!=null) ic.setMaxBounds();
-		show();
+		if (showNow)
+			show();
 		int previousSlice = imp.getCurrentSlice();
 		if (previousSlice>1 && previousSlice<=imp.getStackSize())
 			imp.setSlice(previousSlice);

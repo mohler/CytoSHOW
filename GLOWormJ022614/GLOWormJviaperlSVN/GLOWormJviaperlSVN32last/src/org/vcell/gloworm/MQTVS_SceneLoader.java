@@ -872,7 +872,7 @@ public class MQTVS_SceneLoader implements PlugIn {
 			//if (IJ.debugMode) IJ.log( "displayMode =" + displayMode );
 		}
 		imp2.setOpenAsHyperStack(true);
-		new StackWindow(imp2);
+		new StackWindow(imp2, true);
 
 		if (imp!=imp2) imp.hide();
 		((MultiQTVirtualStack) vstack).imp = imp2;

@@ -295,7 +295,7 @@ public class RemoteMQTVSHandler {
 				ci2 = new CompositeImage(imp2,CompositeImage.COMPOSITE);
 			}
 			if (true ) {
-				win2 = new StackWindow(ci2==null?imp2:ci2) {
+				win2 = new StackWindow(ci2==null?imp2:ci2, false) {
 
 
 					@Override
@@ -372,7 +372,7 @@ public class RemoteMQTVSHandler {
 			//        	imp2.show();
 			imp2.setDimensions(stkNSlices, stkNFrames, 1);
 			imp2.setOpenAsHyperStack(true);
-			win2 = new StackWindow(imp2) {
+			win2 = new StackWindow(imp2, true) {
 
 
 				@Override

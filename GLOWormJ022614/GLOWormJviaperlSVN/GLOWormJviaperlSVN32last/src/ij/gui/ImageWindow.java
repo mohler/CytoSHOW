@@ -452,7 +452,10 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 				WindowManager.setTempCurrentImage(imp);
 				Interpreter.addBatchModeImage(imp);
 			} else
-				show();
+				if (!(this instanceof StackWindow)) {
+					pack();
+					show();
+				}
 		}
 		origICtop = ic.getY();
 

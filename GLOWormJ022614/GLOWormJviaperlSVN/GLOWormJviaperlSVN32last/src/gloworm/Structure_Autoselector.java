@@ -1045,7 +1045,7 @@ public class Structure_Autoselector implements PlugIn {
 	    
 //	    (doubleProjWindow=new StackWindow(projectStack2Ways(cropWindow.getImagePlus(), imageType, projectionDialogFiller))).show();
     	System.out.println("     in");
-	    doubleProjWindow=new StackWindow(projectStack2Ways(cropWindow.getImagePlus(), imageType, projectionDialogFiller));
+	    doubleProjWindow=new StackWindow(projectStack2Ways(cropWindow.getImagePlus(), imageType, projectionDialogFiller), true);
 	    doubleProjWindow.show();
     	System.out.println("     out");
 

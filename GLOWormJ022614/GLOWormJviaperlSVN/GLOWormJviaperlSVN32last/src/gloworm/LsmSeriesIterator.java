@@ -189,7 +189,7 @@ class LsmSeriesIterator extends StackSeriesIterator implements StackSeriesIterat
 	    part2.hide();
 	    part2.flush();
 	    summary.setStack("", summaryStack);
-	    new StackWindow(summary).show();
+	    new StackWindow(summary, true).show();
 	}
 	return summary;
     }

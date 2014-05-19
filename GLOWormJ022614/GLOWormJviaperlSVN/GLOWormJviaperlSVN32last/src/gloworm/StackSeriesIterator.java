@@ -549,7 +549,7 @@ public abstract class StackSeriesIterator implements Enumeration { //not really 
 	summary=new ImagePlus("", summaryStack);
 	summaryStack.update(summary.getProcessor());
 	//now show it and return it:
-	new StackWindow(summary).show();
+	new StackWindow(summary, true).show();
 //  	new StackWindow(summary=new ImagePlus("", summaryStack)).show();
 	return summary;
     }
