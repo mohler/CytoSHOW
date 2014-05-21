@@ -1227,20 +1227,22 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			if (roi.getMotherImp() !=null) {
 				if (imp.isHyperStack()||imp.isComposite() || imp.getWindow() instanceof StackWindow) {
 					int c =roi.getCPosition();
-					if (roi.getName().split("_")[3].contains("C")){
-						c=0;
-						//						IJ.log("C");
+					int z = imp.getSlice();
+					int t = imp.getFrame();
+					if (roi.getName().split("_").length>3) {
+						if (roi.getName().split("_")[3].contains("C")){
+							c=0;
+							//						IJ.log("C");
+						}
+						if(c==0) c = imp.getChannel();
+						if(z==0) z = imp.getSlice();
+						z =roi.getZPosition();  //IJ.log(""+z);
+						if (roi.getName().split("_")[3].contains("Z"))
+							z=0;
+						t =roi.getTPosition();
+						if (roi.getName().split("_")[3].contains("T"))
+							t=0;
 					}
-					if(c==0) c = imp.getChannel();
-					int z =roi.getZPosition();  //IJ.log(""+z);
-					if (roi.getName().split("_")[3].contains("Z"))
-						z=0;
-					if(z==0) z = imp.getSlice();
-					int t =roi.getTPosition();
-					if (roi.getName().split("_")[3].contains("T"))
-						t=0;
-					if(t==0) t = imp.getFrame();
-
 					imp.setPosition(c, z, t );
 				}
 			}else if (n>=1 && n<=imp.getStackSize()) {
@@ -3957,7 +3959,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					new StackProcessor(projZImps.get(projZImps.size()-1).getStack(), projZImps.get(projZImps.size()-1).getStack().getProcessor(1));
 			sp.flipHorizontal();
 			projZImps.get(projZImps.size()-1).setStack(sp.rotateLeft());	
-	    	
+
 			ImageCanvas ic = projZImps.get(projZImps.size()-1).getCanvas();
 			projZImps.get(projZImps.size()-1).getWindow().pack();
 			int padH = 1+projZImps.get(projZImps.size()-1).getWindow().getInsets().left
@@ -3972,7 +3974,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							:0)
 							+projZImps.get(projZImps.size()-1).getWindow().overheadPanel.getHeight();
 			projZImps.get(projZImps.size()-1).getWindow().setSize(ic.dstWidth+padH, ic.dstHeight+padV);
-			
+
 			flipDupImp.flush();
 			rsImp.close();
 			rsImp.getRoiManager().dispose();

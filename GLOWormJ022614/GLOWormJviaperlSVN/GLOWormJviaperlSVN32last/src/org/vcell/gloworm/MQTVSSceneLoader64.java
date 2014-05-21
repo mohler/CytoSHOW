@@ -58,6 +58,7 @@ public class MQTVSSceneLoader64 implements PlugIn {
 	private boolean silentlyUpdateScene;
 	private ImagePlus imp;
 	private boolean cycling = false;
+	private int acquisitionInterval;
 
 	/*  */	
 	//constructor for calling by static method:
@@ -357,6 +358,9 @@ public class MQTVSSceneLoader64 implements PlugIn {
 						if (line.contains("AcquisitionComplete = false") ) {
 							silentlyUpdateScene = true;
 						}	
+						if (line.contains("AcquisitionInterval") ) {
+						    acquisitionInterval = Integer.parseInt(lineSegments[1]);
+						}	
 
 					}
 					in.close();
@@ -431,14 +435,14 @@ public class MQTVSSceneLoader64 implements PlugIn {
 												stretchToFitOverlay, viewOverlay, grayscale, grid, horizontal, sideSideStereo, redCyanStereo, silentlyUpdateScene);
 					imp = rmqtvsh.getImagePlus();
 					imp.setPosition(cPosition, zPosition, tPosition);
-					if(silentlyUpdateScene && !cycling)
+					if(!cycling)
 						imp.getWindow().setVisible(true);
 					
 					Thread reloadThread = imp.getRemoteMQTVSHandler().getReloadThread();
 					if (reloadThread == null) {
 						reloadThread = (new Thread(new Runnable(){
 							public void run() {
-								IJ.wait(60000);
+								IJ.wait(acquisitionInterval);
 								if (imp.getWindow()!=null) {
 									MQTVSSceneLoader64 nextMsl64 = MQTVSSceneLoader64.runMQTVS_SceneLoader64(pathlist, "cycling");
 									nextMsl64.imp.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame());
@@ -830,6 +834,9 @@ public class MQTVSSceneLoader64 implements PlugIn {
 					imp.setPosition(1, imp.getSlice(), imp.getFrame()+1);
 					imp.setPosition(1, imp.getSlice(), imp.getFrame()-1);
 
+					if(!cycling)
+						imp.getWindow().setVisible(true);
+					
 
 					/*************************************************************************************************************************************************/
 
