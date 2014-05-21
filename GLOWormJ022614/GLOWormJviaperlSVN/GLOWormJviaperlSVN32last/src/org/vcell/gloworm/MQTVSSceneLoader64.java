@@ -450,6 +450,8 @@ public class MQTVSSceneLoader64 implements PlugIn {
 									boolean running2 = imp.getWindow().running2;
 									boolean running3 = imp.getWindow().running3;
 									nextMsl64.imp.getWindow().setLocation(imp.getWindow().getLocation().x, imp.getWindow().getLocation().y);
+									nextMsl64.imp.getCanvas().setMagnification(imp.getCanvas().getMagnification());
+									nextMsl64.imp.getWindow().setSize(imp.getWindow().getSize());
 									nextMsl64.imp.getWindow().setVisible(true);
 									if (nextMsl64.imp.isComposite()) {
 										((CompositeImage)nextMsl64.imp).copyLuts(imp);
