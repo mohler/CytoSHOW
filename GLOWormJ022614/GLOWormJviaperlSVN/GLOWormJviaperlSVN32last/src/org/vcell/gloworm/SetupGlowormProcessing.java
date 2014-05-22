@@ -151,9 +151,9 @@ public class SetupGlowormProcessing implements PlugIn {
 		dir2[2] = (new File(sourceDir)).getParent() + "/" + (new File(sourceDir)).getName() + "Output"+titleBase+"2"+titleW[2]+"/";
 		//dir2[1] =IJ.getDirectory("Choose an Output Directory ");
 		IJ.log(dir2[1]);
-		IJ.log(""+(new File(dir2[1])).mkdirs());
+//		IJ.log(""+(new File(dir2[1])).mkdirs());
 		IJ.log(dir2[2]);
-		IJ.log(""+(new File(dir2[2])).mkdirs());
+//		IJ.log(""+(new File(dir2[2])).mkdirs());
 
 		for (int f=0;f<sourceFileList.length;f++) {
 			IJ.runMacro("print(\"\"+File.getLength(\""+ sourceDir+sourceFileList[f] +"\"));");
@@ -178,8 +178,8 @@ public class SetupGlowormProcessing implements PlugIn {
 		IJ.log("matching tif count w2 = "+tifCountW[2]);
 
 		int r=0;
-		IJ.runMacro("File.makeDirectory(\""+dir2[1] + "mov\");");
-		IJ.runMacro("File.makeDirectory(\""+dir2[2] + "mov\");");
+//		IJ.runMacro("File.makeDirectory(\""+dir2[1] + "mov\");");
+//		IJ.runMacro("File.makeDirectory(\""+dir2[2] + "mov\");");
 
 		RoiManager rm = imp.getRoiManager();
 
@@ -203,28 +203,28 @@ public class SetupGlowormProcessing implements PlugIn {
 						good = false;
 					} else {
 						//unc14PHGFPa_030614_SDCMEmbryo4_slc_aspUK_auBillMohler_date030614_imgsysUCHCSDCM40X30pcStdby100ms_x_y_z36_t182_nmdxy0167_nmdz1000_msdt150000_minIn191_maxIn363
-						IJ.runMacro("File.makeDirectory(\""+dir2[1] + "mov\" + File.separator() + \""
-								+ titleBase.concat("1"+titleW[1]).replace(" ","").replaceAll("[\\(\\)]","_").split("_")[0] + "_Embryo" + (i +2)/2
-								+"_slc_au"+authorName+ "_date"+fileDate+ "_imgsys" +imgSysChannels[0]
-										+ "\");");
-						if (true) {
-							IJ.runMacro("File.makeDirectory(\""+dir2[1] + "mov\" + File.separator() + \""
-									+ titleBase.concat("1"+titleW[1]).replace(" ","").replaceAll("[\\(\\)]","_").split("_")[0] + "_Embryo" + (i +2)/2
-									+"_pry_au"+authorName+ "_date"+fileDate+ "_imgsys" +imgSysChannels[0]
-											+ "\");");
-						}
-						if (true) {
-							IJ.runMacro("File.makeDirectory(\""+dir2[1] + "mov\" + File.separator() + \""
-									+ titleBase.concat("1"+titleW[1]).replace(" ","").replaceAll("[\\(\\)]","_").split("_")[0] + "_Embryo" + (i +2)/2
-									+"_prx_au"+authorName+ "_date"+fileDate+ "_imgsys" +imgSysChannels[0]
-											+ "\");");
-						}
-						if (true) {
-							IJ.runMacro("File.makeDirectory(\""+dir2[2] + "mov\" + File.separator() + \""
-									+ titleBase.concat("2"+titleW[2]).replace(" ","").replaceAll("[\\(\\)]","_").split("_")[0] + "_Embryo" + (i +2)/2
-									+"_slc_au"+authorName+ "_date"+fileDate+ "_imgsys" +imgSysChannels[1]
-											+ "\");");
-						}
+//						IJ.runMacro("File.makeDirectory(\""+dir2[1] + "mov\" + File.separator() + \""
+//								+ titleBase.concat("1"+titleW[1]).replace(" ","").replaceAll("[\\(\\)]","_").split("_")[0] + "_Embryo" + (i +2)/2
+//								+"_slc_au"+authorName+ "_date"+fileDate+ "_imgsys" +imgSysChannels[0]
+//										+ "\");");
+//						if (true) {
+//							IJ.runMacro("File.makeDirectory(\""+dir2[1] + "mov\" + File.separator() + \""
+//									+ titleBase.concat("1"+titleW[1]).replace(" ","").replaceAll("[\\(\\)]","_").split("_")[0] + "_Embryo" + (i +2)/2
+//									+"_pry_au"+authorName+ "_date"+fileDate+ "_imgsys" +imgSysChannels[0]
+//											+ "\");");
+//						}
+//						if (true) {
+//							IJ.runMacro("File.makeDirectory(\""+dir2[1] + "mov\" + File.separator() + \""
+//									+ titleBase.concat("1"+titleW[1]).replace(" ","").replaceAll("[\\(\\)]","_").split("_")[0] + "_Embryo" + (i +2)/2
+//									+"_prx_au"+authorName+ "_date"+fileDate+ "_imgsys" +imgSysChannels[0]
+//											+ "\");");
+//						}
+//						if (true) {
+//							IJ.runMacro("File.makeDirectory(\""+dir2[2] + "mov\" + File.separator() + \""
+//									+ titleBase.concat("2"+titleW[2]).replace(" ","").replaceAll("[\\(\\)]","_").split("_")[0] + "_Embryo" + (i +2)/2
+//									+"_slc_au"+authorName+ "_date"+fileDate+ "_imgsys" +imgSysChannels[1]
+//											+ "\");");
+//						}
 						rm.select(i+1);
 						Roi roi = imp.getRoi();
 
@@ -273,17 +273,17 @@ public class SetupGlowormProcessing implements PlugIn {
 				+ x1s + "," + y1s + "," + x2s + "," + y2s + "," + lineWidth
 				+ "," + sourceDir + "," + tifCountW[1] + "," + titleBase + ",1" + titleW[1] + "," + titleSuffix
 				+ ","+ "cycleIndex" + "," + dir2[1] + "," + UserMin + ","+ UserMax + ","+ maxTifSizeW[1]
-				+ ","+ imp.getCalibration().pixelHeight + ","+ imp.getCalibration().pixelDepth
+				+ ","+ imp.getCalibration().pixelHeight + ","+ imp.getCalibration().pixelDepth + ","+ imp.getCalibration().frameInterval + ","+ imp.getNSlices()
 				+ "," + authorName.replace(" ","").replaceAll("[\\(\\)]","_") + "," + imgSysChannels[0].replace(" ","").replaceAll("[\\(\\)]","_")  + "," + fileDate +"\n"
 				
 				+" /UCHC/HPC/jdk7/jdk1.7.0_07/bin/java -Xmx1500m -jar /UCHC/HPC/ImageJ/ij.jar -ijpath /UCHC/HPC/ImageJ/ -port0 -macro /UCHC/HPC/wmohler_HPC/GLOWormChainMacroMMMDAStacksMultiSelectAutoExtend_051414.ijm "
 				+ x1s + "," + y1s + "," + x2s + "," + y2s + "," + lineWidth
-				+ "," + sourceDir + "," + tifCountW[2] + "," + titleBase + ",1" + titleW[2] + "," + titleSuffix
-				+ ","+ "cycleIndex" + "," + dir2[2] + "," + UserMin + ","+ UserMax + ","+ maxTifSizeW[2]
-				+ ","+ imp.getCalibration().pixelHeight + ","+ imp.getCalibration().pixelDepth
+				+ "," + sourceDir + "," + tifCountW[2] + "," + titleBase + ",2" + titleW[2] + "," + titleSuffix
+				+ ","+ "cycleIndex" + "," + dir2[2] + "," + 200 + ","+ 450 + ","+ maxTifSizeW[2]
+				+ ","+ imp.getCalibration().pixelHeight + ","+ imp.getCalibration().pixelDepth + ","+ imp.getCalibration().frameInterval + ","+ "1"
 				+ "," + authorName.replace(" ","").replaceAll("[\\(\\)]","_") + "," + imgSysChannels[1].replace(" ","").replaceAll("[\\(\\)]","_")  + "," + fileDate +"", 
 				
-				"GLOWormSetupExecArgs.txt");
+				""+ sourceDir +"GLOWormSetupExecArgs.txt");
 
 		
 		
@@ -438,6 +438,7 @@ public class SetupGlowormProcessing implements PlugIn {
 //							+"ZsustainROIs = 1\n"
 //							+"TsustainROIs = 1\n"
 //							+"AcquisitionComplete = false\n"
+//							+"AcquisitionInterval = "+imp.getCalibration().frameInterval*1000+"\n"
 //							+"End of parameter list";
 //					IJ.saveString(sceneString.replace("genericFilePath", "/Volumes/GLOWORM_DATA/"
 //							+ titleBase.concat("1"+titleW[1]).replace(" ","").replaceAll("[\\(\\)]","_").split("_")[0] + "_Embryo" + (i +2)/2
