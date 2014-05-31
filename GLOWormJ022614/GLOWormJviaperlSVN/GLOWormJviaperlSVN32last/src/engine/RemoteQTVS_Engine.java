@@ -442,4 +442,19 @@ public class RemoteQTVS_Engine extends UnicastRemoteObject implements Compute {
 		return true;
 	}
 
+	public String[] getOtherViewNames(String subname)  throws RemoteException {
+		String[] fileList = (new File("/Volumes/GLOWORM_DATA/")).list();
+		ArrayList<String> matchedArrayList = new ArrayList<String>();
+		for (String fileName:fileList) {
+			if (fileName.matches(".*mov")) {
+				String prefix = subname;
+				if(fileName.matches(prefix+".*")) {
+					matchedArrayList.add(fileName);
+				}
+			}
+		}
+		return matchedArrayList.toArray(new String[matchedArrayList.size()]);
+//		return new String[]{prefix+midfix+suffix};
+	}
+
 }

@@ -21,5 +21,6 @@ public interface Compute extends Remote {
 	boolean resetServer() throws RemoteException;
 	void restartLullClock() throws RemoteException;
 	boolean startLullClock() throws RemoteException;
+	String[] getOtherViewNames(String name) throws RemoteException;
 }
 

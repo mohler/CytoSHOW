@@ -425,7 +425,7 @@ public class MQTVSSceneLoader64 implements PlugIn {
 						movieSliceDepthValues[i] = Integer.valueOf(movieSliceDepths[i]).intValue();
 					}
 					String[] movieAdjustmentFiles = movieAdjustmentFileList.split("\\|"); 
-					imp = null;
+					setImp(null);
 
 					String pathConcat="";
 					for (int p=0;p<paths.length;p++)
@@ -433,32 +433,32 @@ public class MQTVSSceneLoader64 implements PlugIn {
 
 					RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], pathConcat.trim(), 
 												stretchToFitOverlay, viewOverlay, grayscale, grid, horizontal, sideSideStereo, redCyanStereo, silentlyUpdateScene);
-					imp = rmqtvsh.getImagePlus();
-					imp.setPosition(cPosition, zPosition, tPosition);
+					setImp(rmqtvsh.getImagePlus());
+					getImp().setPosition(cPosition, zPosition, tPosition);
 					if(!cycling)
-						imp.getWindow().setVisible(true);
+						getImp().getWindow().setVisible(true);
 					
-					Thread reloadThread = imp.getRemoteMQTVSHandler().getReloadThread();
+					Thread reloadThread = getImp().getRemoteMQTVSHandler().getReloadThread();
 					if (reloadThread == null) {
 						reloadThread = (new Thread(new Runnable(){
 							public void run() {
 								IJ.wait(acquisitionInterval);
-								if (imp.getWindow()!=null) {
+								if (getImp().getWindow()!=null) {
 									MQTVSSceneLoader64 nextMsl64 = MQTVSSceneLoader64.runMQTVS_SceneLoader64(pathlist, "cycling");
-									nextMsl64.imp.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame());
-									boolean running = imp.getWindow().running;
-									boolean running2 = imp.getWindow().running2;
-									boolean running3 = imp.getWindow().running3;
-									nextMsl64.imp.getWindow().setLocation(imp.getWindow().getLocation().x, imp.getWindow().getLocation().y);
-									nextMsl64.imp.getCanvas().setMagnification(imp.getCanvas().getMagnification());
-									nextMsl64.imp.getWindow().setSize(imp.getWindow().getSize());
-									nextMsl64.imp.getWindow().setVisible(true);
-									if (nextMsl64.imp.isComposite()) {
-										((CompositeImage)nextMsl64.imp).copyLuts(imp);
-										((CompositeImage)nextMsl64.imp).setMode(3);
-										((CompositeImage)nextMsl64.imp).setMode(displayMode);
+									nextMsl64.getImp().setPosition(getImp().getChannel(), getImp().getSlice(), getImp().getFrame());
+									boolean running = getImp().getWindow().running;
+									boolean running2 = getImp().getWindow().running2;
+									boolean running3 = getImp().getWindow().running3;
+									nextMsl64.getImp().getWindow().setLocation(getImp().getWindow().getLocation().x, getImp().getWindow().getLocation().y);
+									nextMsl64.getImp().getCanvas().setMagnification(getImp().getCanvas().getMagnification());
+									nextMsl64.getImp().getWindow().setSize(getImp().getWindow().getSize());
+									nextMsl64.getImp().getWindow().setVisible(true);
+									if (nextMsl64.getImp().isComposite()) {
+										((CompositeImage)nextMsl64.getImp()).copyLuts(getImp());
+										((CompositeImage)nextMsl64.getImp()).setMode(3);
+										((CompositeImage)nextMsl64.getImp()).setMode(displayMode);
 									}
-									imp.close();
+									getImp().close();
 									if (running || running2) 
 										IJ.doCommand("Start Animation [\\]");
 									if (running3) 
@@ -472,15 +472,15 @@ public class MQTVSSceneLoader64 implements PlugIn {
 						}
 					}
 
-					MultiChannelController mcc = imp.getMultiChannelController();
+					MultiChannelController mcc = getImp().getMultiChannelController();
 					if (mcc==null) {
-						mcc = new MultiChannelController(imp);
-						imp.setMultiChannelController(mcc);
+						mcc = new MultiChannelController(getImp());
+						getImp().setMultiChannelController(mcc);
 					}
 					
 					double lastMin = 0;
 					double lastMax = 255;
-					imp.getMultiChannelController().doingFirstSetup = true;
+					getImp().getMultiChannelController().doingFirstSetup = true;
 					for ( int j=0 ; j < movieAdjustmentFiles.length ; j++) {
 
 						//if (IJ.debugMode) IJ.log("Loading Adjustments for Channel " + (j+1) + " " + ((MultiQTVirtualStack) vstack).getVirtualStack(j).getMovieFile().toString() );
@@ -559,10 +559,10 @@ public class MQTVSSceneLoader64 implements PlugIn {
 										if (line != null) {
 											lineSegments = line.split(" = ");
 											if (lineSegments[0].contains("LUT")) {
-												IJ.run(imp, "Stop Animation", "");
-												imp.setPosition(j + 1, imp.getSlice(), imp.getFrame());
+												IJ.run(getImp(), "Stop Animation", "");
+												getImp().setPosition(j + 1, getImp().getSlice(), getImp().getFrame());
 
-												IJ.run(imp, lineSegments[1], "");
+												IJ.run(getImp(), lineSegments[1], "");
 
 												for (int i = 0; i < channelLUTItems.length; i++) {
 													if (channelLUTItems[i].contains(lineSegments[1])) {
@@ -575,7 +575,7 @@ public class MQTVSSceneLoader64 implements PlugIn {
 											if (lineSegments != null
 													&& lineSegments[0]
 															.contains("DisplayRangeMin")) {
-												IJ.run(imp, "Stop Animation", "");
+												IJ.run(getImp(), "Stop Animation", "");
 												displayMin = Double
 														.parseDouble(lineSegments[1]);
 												lastMin=displayMin;
@@ -584,21 +584,21 @@ public class MQTVSSceneLoader64 implements PlugIn {
 											if (lineSegments != null
 													&& lineSegments[0]
 															.contains("DisplayRangeMax")) {
-												IJ.run(imp, "Stop Animation", "");
+												IJ.run(getImp(), "Stop Animation", "");
 												displayMax = Double
 														.parseDouble(lineSegments[1]);
 												lastMax=displayMax;
 												rangeMod=true;
 											}
-											if (rangeMod && imp.isComposite()) {
-												((CompositeImage) imp).setPosition(j+1, imp.getSlice(), imp.getFrame());
-												imp.setDisplayRange(displayMin, displayMax);
+											if (rangeMod && getImp().isComposite()) {
+												((CompositeImage) getImp()).setPosition(j+1, getImp().getSlice(), getImp().getFrame());
+												getImp().setDisplayRange(displayMin, displayMax);
 											}
 											if (lineSegments != null
 													&& lineSegments[0]
 															.contains("FlipVertical")) {
 												if (lineSegments[1].contains("true")) {
-													if (imp.getRemoteMQTVSHandler()!=null) {
+													if (getImp().getRemoteMQTVSHandler()!=null) {
 //														((RemoteMQTVSHandler.RemoteMQTVirtualStack) imp.getStack())
 //														.flipSingleMovieVertical(j);
 //														imp.getRoiManager().setRmNeedsUpdate(true);
@@ -610,7 +610,7 @@ public class MQTVSSceneLoader64 implements PlugIn {
 													&& lineSegments[0]
 															.contains("FlipHorizontal")) {
 												if (lineSegments[1].contains("true")) {
-													if (imp.getRemoteMQTVSHandler()!=null) {
+													if (getImp().getRemoteMQTVSHandler()!=null) {
 //														((RemoteMQTVSHandler.RemoteMQTVirtualStack) imp.getStack())
 //														.flipSingleMovieHorizontal(j);
 ////														imp.getRoiManager().setRmNeedsUpdate(true);
@@ -622,7 +622,7 @@ public class MQTVSSceneLoader64 implements PlugIn {
 													&& lineSegments[0]
 															.contains("FlipZaxis")) {
 												if (lineSegments[1].contains("true")) {
-													if (imp.getRemoteMQTVSHandler()!=null) {
+													if (getImp().getRemoteMQTVSHandler()!=null) {
 //														((RemoteMQTVSHandler.RemoteMQTVirtualStack) imp.getStack())
 //														.flipSingleMovieZaxis(j);
 //														imp.getRoiManager().setRmNeedsUpdate(true);
@@ -752,7 +752,7 @@ public class MQTVSSceneLoader64 implements PlugIn {
 //													}
 //													imp.getRoiManager().setRmNeedsUpdate(true);
 													mcc.setScaleZSpinner(j, scaleZ);
-													imp.getCalibration().pixelDepth = scaleZ;
+													getImp().getCalibration().pixelDepth = scaleZ;
 												} else {
 													//if (IJ.debugMode) IJ.log("no ScaleY loaded");
 												}
@@ -831,13 +831,13 @@ public class MQTVSSceneLoader64 implements PlugIn {
 						}
 
 					}
-					imp.getMultiChannelController().doingFirstSetup = false;
+					getImp().getMultiChannelController().doingFirstSetup = false;
 
-					imp.setPosition(1, imp.getSlice(), imp.getFrame()+1);
-					imp.setPosition(1, imp.getSlice(), imp.getFrame()-1);
+					getImp().setPosition(1, getImp().getSlice(), getImp().getFrame()+1);
+					getImp().setPosition(1, getImp().getSlice(), getImp().getFrame()-1);
 
 					if(!cycling)
-						imp.getWindow().setVisible(true);
+						getImp().getWindow().setVisible(true);
 					
 
 					/*************************************************************************************************************************************************/
@@ -845,7 +845,7 @@ public class MQTVSSceneLoader64 implements PlugIn {
 					screenDimension = IJ.getScreenSize();
 
 
-					Frame iwf = imp.getWindow();
+					Frame iwf = getImp().getWindow();
 					//if (IJ.debugMode) IJ.log(iwf.toString() + " is the FrontWindow iwf");
 					if (iwf != null) { 
 						Dimension d = iwf.getSize() ;
@@ -853,17 +853,17 @@ public class MQTVSSceneLoader64 implements PlugIn {
 //						while (100+iwf.getSize().height > screenDimension.height-190) {
 //							IJ.run(imp,"Out [-]","");
 //						}
-						Frame mcf = imp.getMultiChannelController();
+						Frame mcf = getImp().getMultiChannelController();
 						if (mcf != null) {
 							Dimension dmc = mcf.getSize() ;
-							mcf.setBounds(screenDimension.width-(175*imp.getNChannels()), ((d.height+120 < screenDimension.height -50)? d.height+120: screenDimension.height-50),175*imp.getNChannels(), 180);
+							mcf.setBounds(screenDimension.width-(175*getImp().getNChannels()), ((d.height+120 < screenDimension.height -50)? d.height+120: screenDimension.height-50),175*getImp().getNChannels(), 180);
 							//					mcf.setVisible(true);
 
 						}
 					}
 //					WindowManager.getFrame("Too Much Info ;) Window").toFront();
 
-					RoiManager rm = imp.getRoiManager();
+					RoiManager rm = getImp().getRoiManager();
 					if (roiFileName != null) {
 						String roiFilePath;
 						if (pathlist.contains("/Volumes/GLOWORM_DATA") ) {
@@ -876,8 +876,8 @@ public class MQTVSSceneLoader64 implements PlugIn {
 						if (roiFile.exists() || roiFilePath.startsWith("/Volumes/GLOWORM_DATA/")) {
 							//						imp.setRoiManager(rm);
 							if (rm == null) {
-								imp.setRoiManager(new RoiManager(imp, true));
-								rm = imp.getRoiManager();
+								getImp().setRoiManager(new RoiManager(getImp(), true));
+								rm = getImp().getRoiManager();
 							}
 
 							rm.runCommand("Open", roiFilePath);
@@ -896,7 +896,7 @@ public class MQTVSSceneLoader64 implements PlugIn {
 										// "update2" does not clone the ROI so the "Show All"
 										// outline moves as the user moves the RO.
 										//IJ.log("Selection = " +roiName +" "+ i);
-										new ij.macro.MacroRunner("roiManager('select', "+i+", "+imp.getID()+");");
+										new ij.macro.MacroRunner("roiManager('select', "+i+", "+getImp().getID()+");");
 									}
 								}
 							}
@@ -926,7 +926,7 @@ public class MQTVSSceneLoader64 implements PlugIn {
 								clStr = stringBuilder.toString();
 							}
 						}
-						ColorLegend cl = new ColorLegend(imp, clStr);
+						ColorLegend cl = new ColorLegend(getImp(), clStr);
 					}
 
 					if (lineageLCDFilePath != "" && lineageMapImagePath != "") {
@@ -956,9 +956,9 @@ public class MQTVSSceneLoader64 implements PlugIn {
 						}
 
 						if (lineageMapImage !=null) {
-							lineageMapImage.getWindow().setBackground(imp.getWindow().getBackground());
-							if (imp!=null) ((VirtualStack) imp.getStack()).setLineageMapImage(lineageMapImage);
-							ImagePlus lineageLinkedImp = imp;
+							lineageMapImage.getWindow().setBackground(getImp().getWindow().getBackground());
+							if (getImp()!=null) ((VirtualStack) getImp().getStack()).setLineageMapImage(lineageMapImage);
+							ImagePlus lineageLinkedImp = getImp();
 							String lineageMacro = IJ.openUrlAsString("http://fsbill.cam.uchc.edu/gloworm/Xwords/LineageTreeBrowseMacro.txt");
 							File tempLCDFile = null;
 							lineageLCDFilePath = lineageLCDFilePath.replaceAll("Q:", "/Volumes/GLOWORM_DATA");
@@ -1005,6 +1005,14 @@ public class MQTVSSceneLoader64 implements PlugIn {
 
 		}
 
+	}
+
+	public ImagePlus getImp() {
+		return imp;
+	}
+
+	public void setImp(ImagePlus imp) {
+		this.imp = imp;
 	}
 
 }

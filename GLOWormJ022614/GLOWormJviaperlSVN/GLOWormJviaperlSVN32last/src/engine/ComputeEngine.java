@@ -113,4 +113,9 @@ public class ComputeEngine extends UnicastRemoteObject implements Compute {
 		return false;
 	}
 
+	public String[] getOtherViewNames(String name)  throws RemoteException{
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

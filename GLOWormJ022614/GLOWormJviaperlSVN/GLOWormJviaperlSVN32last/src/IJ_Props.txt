@@ -396,6 +396,7 @@ plug-in25="Share Current Scene...", org.vcell.gloworm.Share_CurrentScene
 plug-in26="Show/Hide Tagging Tools", org.vcell.gloworm.ToggleTagTools
 plug-in27="Stack To QT", gloworm.Stack_To_QT
 plug-in28="Setup GLOWorm Processing", org.vcell.gloworm.SetupGlowormProcessing
+plug-in28="Slice<>Stereo", org.vcell.gloworm.SliceStereoToggle
 
 # Install user plugins located in ij.jar to Plugins>User Plugins submenu
 #user_plugins01="Red And Blue",RedAndBlue_

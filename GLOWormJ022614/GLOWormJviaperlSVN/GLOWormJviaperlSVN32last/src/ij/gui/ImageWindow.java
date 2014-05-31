@@ -382,6 +382,17 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
 		fspc.fill = GridBagConstraints.BOTH;
+		JButton modeButton = new JButton();
+		modeButton.setActionCommand("Slice<>Stereo");
+		modeButton.setName("Slice<>Stereo");
+		modeButton.setToolTipText("Slice<>Stereo");
+		modeButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/4DMode.png")));
+		modeButton.setFont(buttonPanelFont);
+		viewButtonPanel.add(modeButton, fspc);
+		modeButton.addActionListener(ij);
+		fspc.gridy = y++;
+		fspc.weighty = 0.5;
+		fspc.fill = GridBagConstraints.BOTH;
 		JButton tagsButton = new JButton();
 		tagsButton.setActionCommand("Show/Hide Tagging Tools");
 		tagsButton.setName("Show/Hide Tagging Tools");
