@@ -30,7 +30,18 @@ public class SliceStereoToggle implements PlugIn {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-						pathlist = pathlist + "/Volumes/GLOWORM_DATA/" + matchedNames[(int) Math.floor(Math.random()*(matchedNames.length-1))] + "|";
+						boolean takeNext = false;
+						for (String match:matchedNames) {
+							if (takeNext) {
+								pathlist = pathlist + "/Volumes/GLOWORM_DATA/" + match + "|";
+								takeNext = false;
+							}
+							if (name.contains(match))
+								takeNext = true;
+						}
+						if (pathlist == "")
+							pathlist = pathlist + "/Volumes/GLOWORM_DATA/" + matchedNames[0] + "|";
+//						pathlist = pathlist + "/Volumes/GLOWORM_DATA/" + matchedNames[(int) Math.floor(Math.random()*(matchedNames.length-1))] + "|";
 					}
 				}
 				if (pathlist == "")
