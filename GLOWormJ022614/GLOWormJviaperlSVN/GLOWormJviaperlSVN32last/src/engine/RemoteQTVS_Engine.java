@@ -447,8 +447,10 @@ public class RemoteQTVS_Engine extends UnicastRemoteObject implements Compute {
 		ArrayList<String> matchedArrayList = new ArrayList<String>();
 		for (String fileName:fileList) {
 			if (fileName.matches(".*mov")) {
-				String prefix = subname;
-				if(fileName.matches(prefix+".*")) {
+				String prefix = subname.split(" ")[0];
+				String midfix = subname.split(" ")[1];
+				String suffix = subname.split(" ")[2];
+				if(fileName.matches(prefix+".*"+midfix+".*"+suffix)) {
 					matchedArrayList.add(fileName);
 				}
 			}

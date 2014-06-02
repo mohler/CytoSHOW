@@ -834,23 +834,7 @@ public class RemoteMQTVSHandler {
 
 			int channelBaseZero = (slice-1)%stkNChannels;
 
-			int adjustedSlice = (int)Math.floor((int)Math.floor((int)Math.floor(((slice-1)
-					/(stkNChannels))
-					/(stkNSlices))
-					* relativeFrameRateSingleMovie[channelBaseZero])/this.maximumRelativeFrameRate )
-					* (stkNChannels*stkNSlices)
-
-					+ (int)Math.floor(((int)Math.floor(((slice-1) 
-							%(stkNChannels*stkNSlices))
-							/(stkNChannels))
-							* relativeZFrequencySingleMovie[channelBaseZero])/this.maximumRelativeZFrequency )
-							* (stkNChannels)
-
-							+ channelBaseZero + 1
-
-							+ (shiftTPosition[channelBaseZero] * stkNChannels * stkNSlices)
-
-							+ (shiftZPosition[channelBaseZero] * stkNChannels);
+			int adjustedSlice = getAdjustedSlice(slice, channelBaseZero);
 
 			if ((adjustedSlice )%(stkNChannels * stkNSlices) != slice%(stkNChannels * stkNSlices)+(shiftZPosition[channelBaseZero]  * stkNChannels))  {
 				//				IJ.log(""+ adjustedSlice +" "+ channelBaseZero +" "+shiftZPosition[channelBaseZero] +" "+stkNChannels +" "+stkNSlices);
@@ -1061,6 +1045,27 @@ public class RemoteMQTVSHandler {
 			finalIP.insert(ip, insertX, insertY);
 
 			return finalIP;
+		}
+
+		public int getAdjustedSlice(int slice, int channelBaseZero) {
+			int adjustedSlice = (int)Math.floor((int)Math.floor((int)Math.floor(((slice-1)
+					/(stkNChannels))
+					/(stkNSlices))
+					* relativeFrameRateSingleMovie[channelBaseZero])/this.maximumRelativeFrameRate )
+					* (stkNChannels*stkNSlices)
+
+					+ (int)Math.floor(((int)Math.floor(((slice-1) 
+							%(stkNChannels*stkNSlices))
+							/(stkNChannels))
+							* relativeZFrequencySingleMovie[channelBaseZero])/this.maximumRelativeZFrequency )
+							* (stkNChannels)
+
+							+ channelBaseZero + 1
+
+							+ (shiftTPosition[channelBaseZero] * stkNChannels * stkNSlices)
+
+							+ (shiftZPosition[channelBaseZero] * stkNChannels);
+			return adjustedSlice;
 		}
 
 		@Override

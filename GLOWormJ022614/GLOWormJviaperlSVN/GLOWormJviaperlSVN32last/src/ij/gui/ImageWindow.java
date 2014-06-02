@@ -385,7 +385,7 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 		JButton modeButton = new JButton();
 		modeButton.setActionCommand("Slice<>Stereo");
 		modeButton.setName("Slice<>Stereo");
-		modeButton.setToolTipText("Slice<>Stereo");
+		modeButton.setToolTipText("Switch between Slice- or Stereo-4D");
 		modeButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/4DMode.png")));
 		modeButton.setFont(buttonPanelFont);
 		viewButtonPanel.add(modeButton, fspc);

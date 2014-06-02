@@ -1,14 +1,17 @@
 package org.vcell.gloworm;
 
 import java.rmi.RemoteException;
+import java.util.Hashtable;
 
+import client.RemoteMQTVSHandler;
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.PlugIn;
 
 public class SliceStereoToggle implements PlugIn {
-
+	static Hashtable<String, Integer>  viewSpecificSliceHT = new Hashtable<String, Integer>();
+	
 	public SliceStereoToggle() {
 		// TODO Auto-generated constructor stub
 	}
@@ -16,6 +19,10 @@ public class SliceStereoToggle implements PlugIn {
 	public void run(String arg) {
 		ImagePlus imp = IJ.getImage();
 		if (imp.getWindow()!=null) {
+			if (imp.getRemoteMQTVSHandler() != null)
+				imp.getRemoteMQTVSHandler().getRemoteIP(
+						((RemoteMQTVSHandler.RemoteMQTVirtualStack)imp.getStack())
+							.getAdjustedSlice(imp.getCurrentSlice(), 0), 100, false);
 			String pathlist = "";
 			if (imp.isComposite()) {
 				int displaymode = ((CompositeImage)imp).getMode();
@@ -24,7 +31,7 @@ public class SliceStereoToggle implements PlugIn {
 						String[] matchedNames = {""};
 						try {
 							String justname = name.replace("/Volumes/GLOWORM_DATA/", "");
-							String subname = justname.replaceAll("(_pr|_slc).*","");
+							String subname = justname.replaceAll("(_pr|_slc).*","") + " " + justname.replaceAll(".*(_pr.|_slc)J?", "").replaceAll("_x.*", "") + " " + justname.replaceAll(".*(_nmdxy)", "");
 							matchedNames = imp.getRemoteMQTVSHandler().getCompQ().getOtherViewNames(subname);
 						} catch (RemoteException e) {
 							// TODO Auto-generated catch block
@@ -32,11 +39,10 @@ public class SliceStereoToggle implements PlugIn {
 						}
 						boolean takeNext = false;
 						for (String match:matchedNames) {
-							if (takeNext) {
+							if (takeNext && !match.matches(".*(_pr.|_slc)J.*")) {
 								pathlist = pathlist + "/Volumes/GLOWORM_DATA/" + match + "|";
 								takeNext = false;
-							}
-							if (name.contains(match))
+							} else if (name.contains(match))
 								takeNext = true;
 						}
 						if (pathlist == "")
@@ -47,7 +53,10 @@ public class SliceStereoToggle implements PlugIn {
 				if (pathlist == "")
 					return;
 				MQTVSSceneLoader64 nextMsl64 = MQTVSSceneLoader64.runMQTVS_SceneLoader64(pathlist, "cycling");
-				nextMsl64.getImp().setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame());
+				int slice = 1;
+				if (viewSpecificSliceHT.get(nextMsl64.getImp().getWindow().getTitle().split(",")[0]) != null)
+					slice = viewSpecificSliceHT.get(nextMsl64.getImp().getWindow().getTitle().split(",")[0]);
+				nextMsl64.getImp().setPosition(imp.getChannel(), slice, imp.getFrame());
 				boolean running = imp.getWindow().running;
 				boolean running2 = imp.getWindow().running2;
 				boolean running3 = imp.getWindow().running3;
@@ -63,6 +72,7 @@ public class SliceStereoToggle implements PlugIn {
 					nextMsl64.getImp().updateAndRepaintWindow();
 
 				}
+				viewSpecificSliceHT.put(imp.getWindow().getTitle().split(",")[0], imp.getSlice());
 				imp.close();
 				if (running || running2) 
 					IJ.doCommand("Start Animation [\\]");
