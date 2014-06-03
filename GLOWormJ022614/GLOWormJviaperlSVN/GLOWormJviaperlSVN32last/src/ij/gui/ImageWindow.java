@@ -99,6 +99,7 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 	private Color subTitleBkgdColor = (Color.white);
 	public Panel tagButtonPanel;
 	public Panel viewButtonPanel;
+	public Panel modeButtonPanel;
 	public JButton fullSetButton;
 	public JButton hideShowButton;
 	public JButton sketch3DButton;
@@ -106,6 +107,7 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 	public Panel overheadPanel;
 	private Toolbar toolbar;
 	public JButton dupButton;
+	public JButton modeButton;
 	
 	public ImageWindow(String title) {
 		super(title);
@@ -163,11 +165,14 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 
 		tagButtonPanel = new Panel(fspgridbag);
 		viewButtonPanel = new Panel(viewgridbag);
+		modeButtonPanel = new Panel(viewgridbag);
 		fspgridbag.setConstraints(tagButtonPanel, fspc);
 		fspgridbag.setConstraints(viewButtonPanel, vspc);
+		fspgridbag.setConstraints(modeButtonPanel, vspc);
 		
 		tagButtonPanel.setLayout(fspgridbag);
 		viewButtonPanel.setLayout(viewgridbag);
+		modeButtonPanel.setLayout(viewgridbag);
 		Font buttonPanelFont = new Font(Font.SANS_SERIF, Font.PLAIN, IJ.isMacOSX()?7:9);
 		int y = 0;
 		fspc.gridx = 0;
@@ -382,7 +387,7 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
 		fspc.fill = GridBagConstraints.BOTH;
-		JButton modeButton = new JButton();
+		modeButton = new JButton();
 		modeButton.setActionCommand("Slice<>Stereo");
 		modeButton.setName("Slice<>Stereo");
 		modeButton.setToolTipText("Switch between Slice- or Stereo-4D");
@@ -390,6 +395,7 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 		modeButton.setFont(buttonPanelFont);
 		viewButtonPanel.add(modeButton, fspc);
 		modeButton.addActionListener(ij);
+		modeButton.addMouseMotionListener(ic);
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
 		fspc.fill = GridBagConstraints.BOTH;
@@ -401,6 +407,41 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 		tagsButton.setFont(buttonPanelFont);
 		viewButtonPanel.add(tagsButton, fspc);
 		tagsButton.addActionListener(ij);
+		
+		fspc.gridy = y++;
+		fspc.weighty = 0.5;
+		fspc.fill = GridBagConstraints.BOTH;
+		JButton Slice4DButton = new JButton();
+		Slice4DButton.setActionCommand("Slice<>Stereo");
+		Slice4DButton.setName("Slice<>Stereo");
+		Slice4DButton.setToolTipText("Switch between Slice- or Stereo-4D");
+		Slice4DButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Slice4D.png")));
+		Slice4DButton.setFont(buttonPanelFont);
+		modeButtonPanel.add(Slice4DButton, fspc);
+		Slice4DButton.addActionListener(ij);
+		fspc.gridy = y++;
+		fspc.weighty = 0.5;
+		fspc.fill = GridBagConstraints.BOTH;
+		JButton Stereo4DXButton = new JButton();
+		Stereo4DXButton.setActionCommand("Slice<>Stereo");
+		Stereo4DXButton.setName("Slice<>Stereo");
+		Stereo4DXButton.setToolTipText("Switch between Slice- or Stereo-4D");
+		Stereo4DXButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Stereo4DX.png")));
+		Stereo4DXButton.setFont(buttonPanelFont);
+		modeButtonPanel.add(Stereo4DXButton, fspc);
+		Stereo4DXButton.addActionListener(ij);
+		fspc.gridy = y++;
+		fspc.weighty = 0.5;
+		fspc.fill = GridBagConstraints.BOTH;
+		JButton Stereo4DYButton = new JButton();
+		Stereo4DYButton.setActionCommand("Slice<>Stereo");
+		Stereo4DYButton.setName("Slice<>Stereo");
+		Stereo4DYButton.setToolTipText("Switch between Slice- or Stereo-4D");
+		Stereo4DYButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Stereo4DY.png")));
+		Stereo4DYButton.setFont(buttonPanelFont);
+		modeButtonPanel.add(Stereo4DYButton, fspc);
+		Stereo4DYButton.addActionListener(ij);
+
 //		
 		
 

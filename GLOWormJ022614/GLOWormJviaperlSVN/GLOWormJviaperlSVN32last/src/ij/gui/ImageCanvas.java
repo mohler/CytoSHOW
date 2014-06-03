@@ -2746,169 +2746,174 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 	public void mouseMoved(MouseEvent e) {
 		//if (ij==null) return;
-		int sx = e.getX();
-		int sy = e.getY();
-		int ox = offScreenX(sx);
-		int oy = offScreenY(sy);
-		flags = e.getModifiers();
-		setCursor(sx, sy, ox, oy);
-		//		mousePressedX = mousePressedY = -1;
-		IJ.setInputEvent(e);
-		PlugInTool tool = Toolbar.getPlugInTool();
-		if (tool!=null) {
-			tool.mouseMoved(imp, e);
-			if (e.isConsumed()) return;
+		if (e.getSource() == this.getImage().getWindow().modeButton) {
+			this.getImage().getWindow().modeButtonPanel.setVisible(true);
 		}
-		Roi roi = imp.getRoi();
-		if (roi!=null && (roi.getType()==Roi.POLYGON || roi.getType()==Roi.POLYLINE || roi.getType()==Roi.ANGLE) 
-				&& roi.getState()==Roi.CONSTRUCTING) {
-			PolygonRoi pRoi = (PolygonRoi)roi;
-			pRoi.handleMouseMove(sx, sy);
-		} else {
-			if (ox<imageWidth && oy<imageHeight) {
-				ImageWindow win = imp.getWindow();
-				// Cursor must move at least 12 pixels before text
-				// displayed using IJ.showStatus() is overwritten.
-				if ((sx-sx2)*(sx-sx2)+(sy-sy2)*(sy-sy2)>144)
-					showCursorStatus = true;
-				if (win!=null&&showCursorStatus) win.mouseMoved(ox, oy);
-			} else
-				IJ.showStatus("");
-		}
-
-		if ( !(sketchyMQTVS || imp.getTitle().startsWith("Sketch3D") || (imp.getWindow().getTitle().matches(".*[XY]Z +\\d+ Sketch3D.*")))) {
-			RoiManager rm = imp.getRoiManager();
-			if (rm == null)
-				return;
-			Hashtable<String, Roi> rois = rm.getROIs();
-			DefaultListModel<String> listModel = rm.getListModel();
-			int n = listModel.size();
-			if (getLabelShapes() == null || getLabelShapes().length != n)
-				return;
-			String cursorString = null;
-			for (int i = 0; i < n; i++) {
-				if (rois.get(listModel.get(i)) instanceof Arrow
-						&& getLabelShapes()[i] != null
-						&& getLabelShapes()[i].contains(getXMouse(), getYMouse())) {
-					cursorString = ((Roi) rois.get(listModel.get(i))).getName().split("[\"|]")[1];
-					i = n;
-				}
+		if (e.getSource() == this) {
+			int sx = e.getX();
+			int sy = e.getY();
+			int ox = offScreenX(sx);
+			int oy = offScreenY(sy);
+			flags = e.getModifiers();
+			setCursor(sx, sy, ox, oy);
+			//		mousePressedX = mousePressedY = -1;
+			IJ.setInputEvent(e);
+			PlugInTool tool = Toolbar.getPlugInTool();
+			if (tool!=null) {
+				tool.mouseMoved(imp, e);
+				if (e.isConsumed()) return;
 			}
-			if (cursorString == null) {
+			Roi roi = imp.getRoi();
+			if (roi!=null && (roi.getType()==Roi.POLYGON || roi.getType()==Roi.POLYLINE || roi.getType()==Roi.ANGLE) 
+					&& roi.getState()==Roi.CONSTRUCTING) {
+				PolygonRoi pRoi = (PolygonRoi)roi;
+				pRoi.handleMouseMove(sx, sy);
+			} else {
+				if (ox<imageWidth && oy<imageHeight) {
+					ImageWindow win = imp.getWindow();
+					// Cursor must move at least 12 pixels before text
+					// displayed using IJ.showStatus() is overwritten.
+					if ((sx-sx2)*(sx-sx2)+(sy-sy2)*(sy-sy2)>144)
+						showCursorStatus = true;
+					if (win!=null&&showCursorStatus) win.mouseMoved(ox, oy);
+				} else
+					IJ.showStatus("");
+			}
+
+			if ( !(sketchyMQTVS || imp.getTitle().startsWith("Sketch3D") || (imp.getWindow().getTitle().matches(".*[XY]Z +\\d+ Sketch3D.*")))) {
+				RoiManager rm = imp.getRoiManager();
+				if (rm == null)
+					return;
+				Hashtable<String, Roi> rois = rm.getROIs();
+				DefaultListModel<String> listModel = rm.getListModel();
+				int n = listModel.size();
+				if (getLabelShapes() == null || getLabelShapes().length != n)
+					return;
+				String cursorString = null;
 				for (int i = 0; i < n; i++) {
-					if (getLabelShapes()[i] != null
-							&& getLabelShapes()[i].contains(getXMouse(), getYMouse())
-							&& ((Roi) rois.get(listModel.get(i))).getName().split("[\"|=]").length > 1) {
-						cursorString = ((Roi) rois.get(listModel.get(i))).getName().split("[\"|=]")[1];
+					if (rois.get(listModel.get(i)) instanceof Arrow
+							&& getLabelShapes()[i] != null
+							&& getLabelShapes()[i].contains(getXMouse(), getYMouse())) {
+						cursorString = ((Roi) rois.get(listModel.get(i))).getName().split("[\"|]")[1];
 						i = n;
 					}
 				}
-			}
-			Graphics g = getGraphics();
-			if (cursorString != null) {
-				if (IJ.isWindows()) {
-					//				IJ.log(cursorString);
-					cursorRoi = new TextRoi(getXMouse()+10/ getMagnification(), getYMouse(), cursorString);
-					((TextRoi) cursorRoi).setCurrentFont(g.getFont().deriveFont((float) (16 / getMagnification())));
-					try {
-						paint(g);
-						cursorRoi.setStrokeColor(Color.black);
-						cursorRoi.setFillColor(Colors.decode("#99ffffff",
-								getDefaultColor()));
-						cursorRoi.setLocation(((int) (getXMouse()> getSrcRect().getX()+cursorString.length()*4/ getMagnification()?(getXMouse()< getSrcRect().getMaxX()-cursorString.length()*4.5/ getMagnification()?getXMouse()- cursorString.length()*4/ getMagnification():getXMouse()- cursorString.length()*9/ getMagnification()):getXMouse()))
-								, getYMouse()<getSrcRect().getMaxY()-40/getMagnification()?((int)(getYMouse()+20/ getMagnification())):((int)(getYMouse()-35/ getMagnification())));
-						drawRoi(g, cursorRoi, -1);
-					} finally {
+				if (cursorString == null) {
+					for (int i = 0; i < n; i++) {
+						if (getLabelShapes()[i] != null
+								&& getLabelShapes()[i].contains(getXMouse(), getYMouse())
+								&& ((Roi) rois.get(listModel.get(i))).getName().split("[\"|=]").length > 1) {
+							cursorString = ((Roi) rois.get(listModel.get(i))).getName().split("[\"|=]")[1];
+							i = n;
+						}
+					}
+				}
+				Graphics g = getGraphics();
+				if (cursorString != null) {
+					if (IJ.isWindows()) {
+						//				IJ.log(cursorString);
+						cursorRoi = new TextRoi(getXMouse()+10/ getMagnification(), getYMouse(), cursorString);
+						((TextRoi) cursorRoi).setCurrentFont(g.getFont().deriveFont((float) (16 / getMagnification())));
+						try {
+							paint(g);
+							cursorRoi.setStrokeColor(Color.black);
+							cursorRoi.setFillColor(Colors.decode("#99ffffff",
+									getDefaultColor()));
+							cursorRoi.setLocation(((int) (getXMouse()> getSrcRect().getX()+cursorString.length()*4/ getMagnification()?(getXMouse()< getSrcRect().getMaxX()-cursorString.length()*4.5/ getMagnification()?getXMouse()- cursorString.length()*4/ getMagnification():getXMouse()- cursorString.length()*9/ getMagnification()):getXMouse()))
+									, getYMouse()<getSrcRect().getMaxY()-40/getMagnification()?((int)(getYMouse()+20/ getMagnification())):((int)(getYMouse()-35/ getMagnification())));
+							drawRoi(g, cursorRoi, -1);
+						} finally {
+						}
+					} else {
+						Toolkit tk = Toolkit.getDefaultToolkit();
+						Font font = Font.decode("Arial-Outline-18");
+
+						//create the FontRenderContext object which helps us to measure the text
+						FontRenderContext frc = new FontRenderContext(null, false, false);
+
+						//get the height and width of the text
+						Rectangle2D bounds = font.getStringBounds(cursorString, frc);
+						int w = (int) bounds.getWidth();
+						int ht = (int) bounds.getHeight();
+						Image img = new BufferedImage(w, ht+8, BufferedImage.TYPE_INT_ARGB_PRE);
+
+						//				img.getGraphics().setColor(Colors.decode("00000000", Color.white));
+						Graphics2D g2d = (Graphics2D) img.getGraphics();
+
+						g2d.setFont(font);
+
+						g2d.setColor(Colors.decode("#99ffffff",Color.gray));
+						g2d.fillRect(0, 0, w, ht+8);
+						g2d.setColor(Color.black);
+						g2d.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
+						g2d.drawLine(0, 0, 2, 7);
+						g2d.drawLine(0, 0, 7, 2);
+						g2d.drawLine(0, 0, 8, 8);
+						g2d.drawString(cursorString, 1, img.getHeight(null)-6);
+						this.setCursor(tk.createCustomCursor(img,new Point(0,0),"labelCursor"));
 					}
 				} else {
-					Toolkit tk = Toolkit.getDefaultToolkit();
-					Font font = Font.decode("Arial-Outline-18");
-
-					//create the FontRenderContext object which helps us to measure the text
-					FontRenderContext frc = new FontRenderContext(null, false, false);
-
-					//get the height and width of the text
-					Rectangle2D bounds = font.getStringBounds(cursorString, frc);
-					int w = (int) bounds.getWidth();
-					int ht = (int) bounds.getHeight();
-					Image img = new BufferedImage(w, ht+8, BufferedImage.TYPE_INT_ARGB_PRE);
-
-					//				img.getGraphics().setColor(Colors.decode("00000000", Color.white));
-					Graphics2D g2d = (Graphics2D) img.getGraphics();
-
-					g2d.setFont(font);
-
-					g2d.setColor(Colors.decode("#99ffffff",Color.gray));
-					g2d.fillRect(0, 0, w, ht+8);
-					g2d.setColor(Color.black);
-					g2d.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
-					g2d.drawLine(0, 0, 2, 7);
-					g2d.drawLine(0, 0, 7, 2);
-					g2d.drawLine(0, 0, 8, 8);
-					g2d.drawString(cursorString, 1, img.getHeight(null)-6);
-					this.setCursor(tk.createCustomCursor(img,new Point(0,0),"labelCursor"));
-				}
-			} else {
-				if (!IJ.isMacOSX()) {
-					cursorRoi = null;
-					paint(g);
-				}
-			}
-		}else if (imp.getMotherImp().getRoiManager().getColorLegend() != null){
-			//			IJ.showStatus("bling");
-			Graphics g = getGraphics();
-			Checkbox cursorCB = imp.getMotherImp().getRoiManager().getColorLegend().getChosenCB();
-			if (cursorCB != null) {
-				String cursorString = cursorCB.getName();
-				if (IJ.isWindows()) {
-					cursorRoi = new TextRoi((getXMouse()-cursorCB.getWidth()/2)/ getMagnification(), getYMouse(), cursorString);
-					((TextRoi) cursorRoi).setCurrentFont(g.getFont().deriveFont((float) (16 / getMagnification())));
-					try {
+					if (!IJ.isMacOSX()) {
+						cursorRoi = null;
 						paint(g);
-						cursorRoi.setStrokeColor(Color.black);
-						//					IJ.log("#99"+Integer.toHexString(imp.getProcessor().get(xMouse,yMouse)).substring(2));
-						//					cursorRoi.setFillColor(Colors.decode("#99"+Integer.toHexString(imp.getProcessor().get(xMouse,yMouse)).substring(2),
-						//							getDefaultColor()));
-						cursorRoi.setFillColor(Colors.decode("#99ffffff",
-								getDefaultColor()));
-						((TextRoi)cursorRoi).updateBounds(g);
-						cursorRoi.setLocation(((int) (getXMouse()> getSrcRect().getX()+cursorString.length()*4/ getMagnification()?(getXMouse()< getSrcRect().getMaxX()-cursorString.length()*4.5/ getMagnification()?getXMouse()- cursorString.length()*4/ getMagnification():getXMouse()- cursorString.length()*9/ getMagnification()):getXMouse()))
-								, getYMouse()<getSrcRect().getMaxY()-40/getMagnification()?((int)(getYMouse()+20/ getMagnification())):((int)(getYMouse()-35/ getMagnification())));
-						drawRoi(g, cursorRoi, -1);
-					} finally {
+					}
+				}
+			}else if (imp.getMotherImp().getRoiManager().getColorLegend() != null){
+				//			IJ.showStatus("bling");
+				Graphics g = getGraphics();
+				Checkbox cursorCB = imp.getMotherImp().getRoiManager().getColorLegend().getChosenCB();
+				if (cursorCB != null) {
+					String cursorString = cursorCB.getName();
+					if (IJ.isWindows()) {
+						cursorRoi = new TextRoi((getXMouse()-cursorCB.getWidth()/2)/ getMagnification(), getYMouse(), cursorString);
+						((TextRoi) cursorRoi).setCurrentFont(g.getFont().deriveFont((float) (16 / getMagnification())));
+						try {
+							paint(g);
+							cursorRoi.setStrokeColor(Color.black);
+							//					IJ.log("#99"+Integer.toHexString(imp.getProcessor().get(xMouse,yMouse)).substring(2));
+							//					cursorRoi.setFillColor(Colors.decode("#99"+Integer.toHexString(imp.getProcessor().get(xMouse,yMouse)).substring(2),
+							//							getDefaultColor()));
+							cursorRoi.setFillColor(Colors.decode("#99ffffff",
+									getDefaultColor()));
+							((TextRoi)cursorRoi).updateBounds(g);
+							cursorRoi.setLocation(((int) (getXMouse()> getSrcRect().getX()+cursorString.length()*4/ getMagnification()?(getXMouse()< getSrcRect().getMaxX()-cursorString.length()*4.5/ getMagnification()?getXMouse()- cursorString.length()*4/ getMagnification():getXMouse()- cursorString.length()*9/ getMagnification()):getXMouse()))
+									, getYMouse()<getSrcRect().getMaxY()-40/getMagnification()?((int)(getYMouse()+20/ getMagnification())):((int)(getYMouse()-35/ getMagnification())));
+							drawRoi(g, cursorRoi, -1);
+						} finally {
+						}
+					} else {
+						Toolkit tk = Toolkit.getDefaultToolkit();
+						Font font = Font.decode("Arial-Outline-18");
+
+						//create the FontRenderContext object which helps us to measure the text
+						FontRenderContext frc = new FontRenderContext(null, false, false);
+
+						//get the height and width of the text
+						Rectangle2D bounds = font.getStringBounds(cursorString, frc);
+						int w = (int) bounds.getWidth();
+						int ht = (int) bounds.getHeight();
+						Image img = new BufferedImage(w, ht+8, BufferedImage.TYPE_INT_ARGB_PRE);
+
+						//				img.getGraphics().setColor(Colors.decode("00000000", Color.white));
+						Graphics2D g2d = (Graphics2D) img.getGraphics();
+
+						g2d.setFont(font);
+
+						g2d.setColor(Colors.decode("#99ffffff",Color.gray));
+						g2d.fillRect(0, 0, w, ht+8);
+						g2d.setColor(Color.black);
+						g2d.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
+						g2d.drawLine(0, 0, 2, 7);
+						g2d.drawLine(0, 0, 7, 2);
+						g2d.drawLine(0, 0, 8, 8);
+						g2d.drawString(cursorString, 1, img.getHeight(null)-6);
+						this.setCursor(tk.createCustomCursor(img,new Point(0,0),"labelCursor"));
 					}
 				} else {
-					Toolkit tk = Toolkit.getDefaultToolkit();
-					Font font = Font.decode("Arial-Outline-18");
-
-					//create the FontRenderContext object which helps us to measure the text
-					FontRenderContext frc = new FontRenderContext(null, false, false);
-
-					//get the height and width of the text
-					Rectangle2D bounds = font.getStringBounds(cursorString, frc);
-					int w = (int) bounds.getWidth();
-					int ht = (int) bounds.getHeight();
-					Image img = new BufferedImage(w, ht+8, BufferedImage.TYPE_INT_ARGB_PRE);
-
-					//				img.getGraphics().setColor(Colors.decode("00000000", Color.white));
-					Graphics2D g2d = (Graphics2D) img.getGraphics();
-
-					g2d.setFont(font);
-
-					g2d.setColor(Colors.decode("#99ffffff",Color.gray));
-					g2d.fillRect(0, 0, w, ht+8);
-					g2d.setColor(Color.black);
-					g2d.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
-					g2d.drawLine(0, 0, 2, 7);
-					g2d.drawLine(0, 0, 7, 2);
-					g2d.drawLine(0, 0, 8, 8);
-					g2d.drawString(cursorString, 1, img.getHeight(null)-6);
-					this.setCursor(tk.createCustomCursor(img,new Point(0,0),"labelCursor"));
-				}
-			} else {
-				if (!IJ.isMacOSX()) {
-					cursorRoi = null;
-					paint(g);
+					if (!IJ.isMacOSX()) {
+						cursorRoi = null;
+						paint(g);
+					}
 				}
 			}
 		}

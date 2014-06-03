@@ -285,8 +285,16 @@ public class Executer implements Runnable {
 						RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path+" "+"36"+" "+path+" "+"36", 
 							false, true, true, false, true, false, true, false);
 						imp = rmqtvsh.getImagePlus();
-					} else
-						RemoteMQTVSHandler.main(rmiArgsArrayList.toArray(new String[rmiArgsArrayList.size()]));
+						imp.getWindow().setVisible(true);
+					} else {
+//						RemoteMQTVSHandler.main(rmiArgsArrayList.toArray(new String[rmiArgsArrayList.size()]));
+//						build(String url, String portOffset, String pathsThenSlices, 
+//								boolean stretchToFitOverlay, boolean viewOverlay, boolean grayscale, boolean grid, boolean horizontal, boolean sideSideStereo, boolean redCyanStereo, boolean silentlyUpdateScene) {
+						RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path+" "+"36", 
+								false, true, true, false, true, false, false, false);
+							imp = rmqtvsh.getImagePlus();
+							imp.getWindow().setVisible(true);
+					}
 
 				} else if ((path.toLowerCase().endsWith(".mov") || path.toLowerCase().endsWith(".avi")) && viewName != null) {
 					ArrayList<String> rmiArgsArrayList = new ArrayList<String>();
@@ -310,6 +318,7 @@ public class Executer implements Runnable {
 					IJ.doCommand(mcc.getChannelLUTChoice(1) );
 					mcc.setSliceSpinner(0, 1);					
 //					imp.show();
+					imp.getWindow().setVisible(true);
 
 					
 				}else if (path.toLowerCase().endsWith("scene.scn")) 
