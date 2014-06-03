@@ -282,7 +282,8 @@ public class Executer implements Runnable {
 					rmiArgsArrayList.add(path);
 
 					if (rcs) {
-						RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path+" "+"36"+" "+path+" "+"36", 
+						RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/
+																															+" "+path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
 							false, true, true, false, true, false, true, false);
 						imp = rmqtvsh.getImagePlus();
 						imp.getWindow().setVisible(true);
@@ -290,7 +291,7 @@ public class Executer implements Runnable {
 //						RemoteMQTVSHandler.main(rmiArgsArrayList.toArray(new String[rmiArgsArrayList.size()]));
 //						build(String url, String portOffset, String pathsThenSlices, 
 //								boolean stretchToFitOverlay, boolean viewOverlay, boolean grayscale, boolean grid, boolean horizontal, boolean sideSideStereo, boolean redCyanStereo, boolean silentlyUpdateScene) {
-						RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path+" "+"36", 
+						RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
 								false, true, true, false, true, false, false, false);
 							imp = rmqtvsh.getImagePlus();
 							imp.getWindow().setVisible(true);
@@ -302,7 +303,7 @@ public class Executer implements Runnable {
 					rmiArgsArrayList.add(IJ.rmiURL.split(" ")[1]);
 					rmiArgsArrayList.add(path);
 
-					RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path+" "+"36"+" "+path+" "+"36", 
+					RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/+" "+path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
 							false, true, true, false, true, false, true, false);
 
 					imp = rmqtvsh.getImagePlus();
