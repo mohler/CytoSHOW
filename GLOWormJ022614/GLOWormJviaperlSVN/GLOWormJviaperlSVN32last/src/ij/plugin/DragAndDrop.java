@@ -365,7 +365,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							String pathListSingle = path;
 							//pathListSingle.replace(".mov!", ".mov");
 //							new QTMovieOpenerMultiMod(pathListSingle.substring(0, pathListSingle.length() - 1));
-							RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
+							RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replaceAll("%2B", "\\+").replaceAll("%25", "%")+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
 									false, true, true, false, true, false, false, false);
 							rmqtvsh.getImagePlus().getWindow().setVisible(true);
 							if (dropImp == null)
@@ -380,7 +380,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							if (IJ.debugMode) IJ.log("Found viewname =" + viewName);
 							String pathListStereo = path;
 //							new QTMovieOpenerMultiMod(pathListStereo, true, false);
-							RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/+" "+path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
+							RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replaceAll("%2B", "\\+").replaceAll("%25", "%")+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/+" "+path.replaceAll("%2B", "\\+").replaceAll("%25", "%")+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
 									false, true, true, false, true, false, true, false);
 
 							ImagePlus stereoImp = rmqtvsh.getImagePlus();

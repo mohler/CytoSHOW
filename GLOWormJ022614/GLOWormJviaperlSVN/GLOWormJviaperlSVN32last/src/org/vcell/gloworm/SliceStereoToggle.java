@@ -31,7 +31,7 @@ public class SliceStereoToggle implements PlugIn {
 						String[] matchedNames = {""};
 						try {
 							String justname = name.replace("/Volumes/GLOWORM_DATA/", "");
-							String subname = justname.replaceAll("(_pr|_slc).*","") + " " + justname.replaceAll(".*(_pr.|_slc)J?", "").replaceAll("_x.*", "") + " " + justname.replaceAll(".*(_nmdxy)", "");
+							String subname = justname.replaceAll("(_pr|_slc).*","").replaceAll("\\+", "_") + " " + justname.replaceAll(".*(_pr..?|_slc)J?", "").replaceAll("_x.*", "") + " " + justname.replaceAll(".*(_nmdxy)", "");
 							matchedNames = imp.getRemoteMQTVSHandler().getCompQ().getOtherViewNames(subname);
 						} catch (RemoteException e) {
 							// TODO Auto-generated catch block
@@ -39,7 +39,7 @@ public class SliceStereoToggle implements PlugIn {
 						}
 						boolean takeNext = false;
 						for (String match:matchedNames) {
-							if (takeNext && !match.matches(".*(_pr.|_slc)J.*")) {
+							if (takeNext && !match.matches(".*(_pr..?|_slc)J.*") && pathlist == "") {
 								pathlist = pathlist + "/Volumes/GLOWORM_DATA/" + match + "|";
 								takeNext = false;
 							} else if (name.contains(match))

@@ -450,7 +450,7 @@ public class RemoteQTVS_Engine extends UnicastRemoteObject implements Compute {
 				String prefix = subname.split(" ")[0];
 				String midfix = subname.split(" ")[1];
 				String suffix = subname.split(" ")[2];
-				if(fileName.matches(prefix+".*"+midfix+".*"+suffix)) {
+				if(fileName.replaceAll("\\+", "_").matches(prefix+".*"+midfix+".*"+suffix)) {
 					matchedArrayList.add(fileName);
 				}
 			}
