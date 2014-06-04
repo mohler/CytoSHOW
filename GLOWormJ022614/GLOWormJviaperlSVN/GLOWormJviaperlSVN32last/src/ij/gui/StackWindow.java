@@ -51,7 +51,7 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 		this.pack();
 		int padH = 1+this.getInsets().left
 				+this.getInsets().right
-				+(this.tagButtonPanel.isVisible()?this.tagButtonPanel.getWidth():0)
+				+(this.optionsPanel.isVisible()?this.optionsPanel.getWidth():0)
 				+this.viewButtonPanel.getWidth();
 		int padV = this.getInsets().top
 				+this.getInsets().bottom

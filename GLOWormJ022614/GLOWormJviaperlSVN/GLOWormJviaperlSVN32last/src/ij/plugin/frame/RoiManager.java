@@ -3964,7 +3964,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			projZImps.get(projZImps.size()-1).getWindow().pack();
 			int padH = 1+projZImps.get(projZImps.size()-1).getWindow().getInsets().left
 					+projZImps.get(projZImps.size()-1).getWindow().getInsets().right
-					+(projZImps.get(projZImps.size()-1).getWindow().tagButtonPanel.isVisible()?projZImps.get(projZImps.size()-1).getWindow().tagButtonPanel.getWidth():0)
+					+(projZImps.get(projZImps.size()-1).getWindow().optionsPanel.isVisible()?projZImps.get(projZImps.size()-1).getWindow().optionsPanel.getWidth():0)
 					+projZImps.get(projZImps.size()-1).getWindow().viewButtonPanel.getWidth();
 			int padV = projZImps.get(projZImps.size()-1).getWindow().getInsets().top
 					+projZImps.get(projZImps.size()-1).getWindow().getInsets().bottom

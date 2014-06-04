@@ -828,7 +828,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		int padH = 1+imp.getWindow().getInsets().left
 				+imp.getWindow().getInsets().right
 				+imp.getWindow().viewButtonPanel.getWidth()
-				+(imp.getWindow().tagButtonPanel.isVisible()?imp.getWindow().tagButtonPanel.getWidth():0);
+				+(imp.getWindow().optionsPanel.isVisible()?imp.getWindow().optionsPanel.getWidth():0);
 		int padV = 1+imp.getWindow().getInsets().top
 				+imp.getWindow().getInsets().bottom
 				+(imp.getWindow() instanceof StackWindow?
@@ -929,7 +929,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		int padH = 1+imp.getWindow().getInsets().left
 				+imp.getWindow().getInsets().right
 				+imp.getWindow().viewButtonPanel.getWidth()
-				+(imp.getWindow().tagButtonPanel.isVisible()?imp.getWindow().tagButtonPanel.getWidth():0);
+				+(imp.getWindow().optionsPanel.isVisible()?imp.getWindow().optionsPanel.getWidth():0);
 		int padV = 1+imp.getWindow().getInsets().top
 				+imp.getWindow().getInsets().bottom
 				+(imp.getWindow() instanceof StackWindow?

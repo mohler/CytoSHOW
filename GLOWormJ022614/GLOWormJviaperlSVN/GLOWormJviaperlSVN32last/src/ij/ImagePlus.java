@@ -427,7 +427,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			win.pack();
 			int padH = 1+win.getInsets().left
 					+win.getInsets().right
-					+(win.tagButtonPanel.isVisible()?win.tagButtonPanel.getWidth():0)
+					+(win.optionsPanel.isVisible()?win.optionsPanel.getWidth():0)
 					+win.viewButtonPanel.getWidth();
 			int padV = win.getInsets().top
 					+win.getInsets().bottom

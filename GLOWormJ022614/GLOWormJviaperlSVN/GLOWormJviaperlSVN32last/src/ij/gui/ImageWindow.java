@@ -101,6 +101,7 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 	public Panel viewButtonPanel;
 	public Panel modeButtonPanel;
 	public JButton fullSetButton;
+	public Panel optionsPanel;
 	public JButton hideShowButton;
 	public JButton sketch3DButton;
 	public Label countLabel;
@@ -471,15 +472,16 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 
 		
 		BorderLayout optbl = new BorderLayout();
-		Panel optPanel = new Panel();
-		optPanel.setLayout(optbl);
-		optPanel.add(tagButtonPanel, BorderLayout.EAST);
-		optPanel.add(modeButtonPanel, BorderLayout.WEST);
+		optionsPanel = new Panel();
+		optionsPanel.setLayout(optbl);
+		optionsPanel.add(tagButtonPanel, BorderLayout.EAST);
+		optionsPanel.add(modeButtonPanel, BorderLayout.WEST);
 
-		add(optPanel, BorderLayout.EAST);
+		add(optionsPanel, BorderLayout.EAST);
 		add(viewButtonPanel, BorderLayout.WEST);
 		tagButtonPanel.setVisible(false);
 		modeButtonPanel.setVisible(true);
+		optionsPanel.setVisible(true);
 		viewButtonPanel.setVisible(true);
 		addFocusListener(this);
 		addWindowListener(this);
