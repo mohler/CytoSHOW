@@ -164,7 +164,7 @@ public class MQTVSSceneLoader64 implements PlugIn {
 							in = new BufferedReader(new FileReader(cacheFile));
 						}else {
 							in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
-									RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], pathlist))));
+									RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], pathlist.replaceAll("%2B", "\\+").replaceAll("%25", "%")))));
 //							out = new PrintWriter(
 //									new BufferedWriter(
 //											new FileWriter(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+pathlist) ), true);

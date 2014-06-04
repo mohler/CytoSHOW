@@ -1221,7 +1221,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 				if (!pathList.contains("/Volumes/GLOWORM_DATA/")) {
 					new QTMovieOpenerMultiMod(pathList);
 				} else {
-					MQTVSSceneLoader64.runMQTVS_SceneLoader64(pathList);
+					MQTVSSceneLoader64.runMQTVS_SceneLoader64(pathList.replaceAll("%2B", "\\+").replaceAll("%25", "%"));
 				}
 				if (dropImp == null)
 					return;
