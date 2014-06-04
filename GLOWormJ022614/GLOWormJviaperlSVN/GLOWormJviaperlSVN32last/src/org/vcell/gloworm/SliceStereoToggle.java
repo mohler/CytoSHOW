@@ -63,7 +63,12 @@ public class SliceStereoToggle implements PlugIn {
 				nextMsl64.getImp().getWindow().setLocation(imp.getWindow().getLocation().x, imp.getWindow().getLocation().y);
 				nextMsl64.getImp().getCanvas().setMagnification(imp.getCanvas().getMagnification());
 				nextMsl64.getImp().getWindow().setSize(imp.getWindow().getSize());
+				nextMsl64.getImp().getWindow().pack();
+				nextMsl64.getImp().getCanvas().zoomIn(nextMsl64.getImp().getWidth(), nextMsl64.getImp().getHeight());
+				nextMsl64.getImp().getCanvas().zoomOut(nextMsl64.getImp().getWidth(), nextMsl64.getImp().getHeight());
+
 				nextMsl64.getImp().getWindow().setVisible(true);
+				imp.getWindow().setVisible(false);
 				if (nextMsl64.getImp().isComposite()) {
 					((CompositeImage)nextMsl64.getImp()).copyLuts(imp);
 					//Still need to fix replication of Min Max settings.!!
