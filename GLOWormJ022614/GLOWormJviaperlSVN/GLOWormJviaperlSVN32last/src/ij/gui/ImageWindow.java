@@ -433,6 +433,17 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
 		fspc.fill = GridBagConstraints.BOTH;
+		JButton Stereo4DXrcButton = new JButton();
+		Stereo4DXrcButton.setActionCommand("Slice<>Stereo");
+		Stereo4DXrcButton.setName("Slice<>Stereo");
+		Stereo4DXrcButton.setToolTipText("Switch between Slice- or Stereo-4D");
+		Stereo4DXrcButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Stereo4DXrc.png")));
+		Stereo4DXrcButton.setFont(buttonPanelFont);
+		modeButtonPanel.add(Stereo4DXrcButton, fspc);
+		Stereo4DXrcButton.addActionListener(ij);
+		fspc.gridy = y++;
+		fspc.weighty = 0.5;
+		fspc.fill = GridBagConstraints.BOTH;
 		JButton Stereo4DYButton = new JButton();
 		Stereo4DYButton.setActionCommand("Slice<>Stereo");
 		Stereo4DYButton.setName("Slice<>Stereo");
@@ -441,15 +452,34 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 		Stereo4DYButton.setFont(buttonPanelFont);
 		modeButtonPanel.add(Stereo4DYButton, fspc);
 		Stereo4DYButton.addActionListener(ij);
+		fspc.gridy = y++;
+		fspc.weighty = 0.5;
+		fspc.fill = GridBagConstraints.BOTH;
+		JButton Stereo4DYrcButton = new JButton();
+		Stereo4DYrcButton.setActionCommand("Slice<>Stereo");
+		Stereo4DYrcButton.setName("Slice<>Stereo");
+		Stereo4DYrcButton.setToolTipText("Switch between Slice- or Stereo-4D");
+		Stereo4DYrcButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Stereo4DYrc.png")));
+		Stereo4DYrcButton.setFont(buttonPanelFont);
+		modeButtonPanel.add(Stereo4DYrcButton, fspc);
+		Stereo4DYrcButton.addActionListener(ij);
 
 //		
 		
 
 		add(ic, BorderLayout.CENTER);
 
-		add(tagButtonPanel, BorderLayout.EAST);
+		
+		BorderLayout optbl = new BorderLayout();
+		Panel optPanel = new Panel();
+		optPanel.setLayout(optbl);
+		optPanel.add(tagButtonPanel, BorderLayout.EAST);
+		optPanel.add(modeButtonPanel, BorderLayout.WEST);
+
+		add(optPanel, BorderLayout.EAST);
 		add(viewButtonPanel, BorderLayout.WEST);
 		tagButtonPanel.setVisible(false);
+		modeButtonPanel.setVisible(true);
 		viewButtonPanel.setVisible(true);
 		addFocusListener(this);
 		addWindowListener(this);
