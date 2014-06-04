@@ -19,6 +19,7 @@ import java.util.*;
 
 import org.vcell.gloworm.MQTVSSceneLoader64;
 import org.vcell.gloworm.MQTVSSceneLoader64;
+import org.vcell.gloworm.MultiChannelController;
 import org.vcell.gloworm.MultiQTVirtualStack;
 import org.vcell.gloworm.QTMovieOpenerMultiMod;
 
@@ -363,7 +364,10 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						} else if (path.toLowerCase().endsWith(".mov!") || path.toLowerCase().endsWith(".avi!")){
 							String pathListSingle = path;
 							//pathListSingle.replace(".mov!", ".mov");
-							new QTMovieOpenerMultiMod(pathListSingle.substring(0, pathListSingle.length() - 1));
+//							new QTMovieOpenerMultiMod(pathListSingle.substring(0, pathListSingle.length() - 1));
+							RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
+									false, true, true, false, true, false, false, false);
+							rmqtvsh.getImagePlus().getWindow().setVisible(true);
 							if (dropImp == null)
 								return;
 							dropImp.getCanvas().messageRois.remove("Pending drop "+nDrops);
@@ -375,7 +379,26 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						} else if ((path.toLowerCase().endsWith(".mov") || path.toLowerCase().endsWith(".avi")) && viewName != null) {
 							if (IJ.debugMode) IJ.log("Found viewname =" + viewName);
 							String pathListStereo = path;
-							new QTMovieOpenerMultiMod(pathListStereo, true, false);
+//							new QTMovieOpenerMultiMod(pathListStereo, true, false);
+							RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/+" "+path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
+									false, true, true, false, true, false, true, false);
+
+							ImagePlus stereoImp = rmqtvsh.getImagePlus();
+							MultiChannelController mcc = stereoImp.getMultiChannelController();
+							mcc.setChannelLUTChoice(0, 0);
+							CompositeImage ci = (CompositeImage)stereoImp;
+							ci.setPosition( 0+1, ci.getSlice(), ci.getFrame() );
+							IJ.doCommand(mcc.getChannelLUTChoice(0) );
+							mcc.setChannelLUTChoice(1, 4);
+							ci.setPosition( 1+1, ci.getSlice(), ci.getFrame() );
+							IJ.doCommand(mcc.getChannelLUTChoice(1) );
+							mcc.setSliceSpinner(0, 1);					
+							if (path.contains("_prx_")) {
+								mcc.setRotateAngleSpinner(0, 90);
+								mcc.setRotateAngleSpinner(1, 90);
+							}
+							stereoImp.getWindow().setVisible(true);
+
 							if (dropImp == null)
 								return;
 							dropImp.getCanvas().messageRois.remove("Pending drop "+nDrops);
@@ -1342,7 +1365,10 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						if (openAsVirtualStack && (path.endsWith(".tif")||path.endsWith(".TIF")))
 							(new FileInfoVirtualStack()).run(path);
 						else if  (path.toLowerCase().endsWith(".mov") || path.toLowerCase().endsWith(".avi")) {
-							new QTMovieOpenerMultiMod(path);
+//							new QTMovieOpenerMultiMod(path);
+							RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
+									false, true, true, false, true, false, false, false);
+							rmqtvsh.getImagePlus().getWindow().setVisible(true);
 							if (dropImp == null)
 								return;
 							dropImp.getCanvas().messageRois.remove("Pending drop "+nDrops);

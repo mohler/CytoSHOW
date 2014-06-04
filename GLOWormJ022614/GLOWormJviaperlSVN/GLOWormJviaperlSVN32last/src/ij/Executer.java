@@ -317,7 +317,11 @@ public class Executer implements Runnable {
 					mcc.setChannelLUTChoice(1, 4);
 					ci.setPosition( 1+1, ci.getSlice(), ci.getFrame() );
 					IJ.doCommand(mcc.getChannelLUTChoice(1) );
-					mcc.setSliceSpinner(0, 1);					
+					mcc.setSliceSpinner(0, 1);			
+					if (path.contains("_prx_")) {
+						mcc.setRotateAngleSpinner(0, 90);
+						mcc.setRotateAngleSpinner(1, 90);
+					}
 //					imp.show();
 					imp.getWindow().setVisible(true);
 
