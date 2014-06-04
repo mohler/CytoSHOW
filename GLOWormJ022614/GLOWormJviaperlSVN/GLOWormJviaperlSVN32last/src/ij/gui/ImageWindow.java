@@ -109,6 +109,11 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 	private Toolbar toolbar;
 	public JButton dupButton;
 	public JButton modeButton;
+	public JButton stereo4dxButton;
+	public JButton stereo4dyButton;
+	public JButton stereo4dXrcButton;
+	public JButton slice4dButton;
+	public JButton stereo4dYrcButton;
 	
 	public ImageWindow(String title) {
 		super(title);
@@ -391,7 +396,7 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 		modeButton = new JButton();
 		modeButton.setActionCommand("Slice<>Stereo");
 		modeButton.setName("Slice<>Stereo");
-		modeButton.setToolTipText("Switch between Slice- or Stereo-4D");
+		modeButton.setToolTipText("Choose among Slice-4D or Stereo-4D viewing modes");
 		modeButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/4DMode.png")));
 		modeButton.setFont(buttonPanelFont);
 		viewButtonPanel.add(modeButton, fspc);
@@ -412,58 +417,58 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
 		fspc.fill = GridBagConstraints.BOTH;
-		JButton Slice4DButton = new JButton();
-		Slice4DButton.setActionCommand("Slice<>Stereo");
-		Slice4DButton.setName("Slice<>Stereo");
-		Slice4DButton.setToolTipText("Switch between Slice- or Stereo-4D");
-		Slice4DButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Slice4D.png")));
-		Slice4DButton.setFont(buttonPanelFont);
-		modeButtonPanel.add(Slice4DButton, fspc);
-		Slice4DButton.addActionListener(ij);
+		slice4dButton = new JButton();
+		slice4dButton.setActionCommand("Slice4D");
+		slice4dButton.setName("Slice4D");
+		slice4dButton.setToolTipText("Switch to Slice-4D viewing");
+		slice4dButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Slice4D.png")));
+		slice4dButton.setFont(buttonPanelFont);
+		modeButtonPanel.add(slice4dButton, fspc);
+		slice4dButton.addActionListener(ij);
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
 		fspc.fill = GridBagConstraints.BOTH;
-		JButton Stereo4DXButton = new JButton();
-		Stereo4DXButton.setActionCommand("Slice<>Stereo");
-		Stereo4DXButton.setName("Slice<>Stereo");
-		Stereo4DXButton.setToolTipText("Switch between Slice- or Stereo-4D");
-		Stereo4DXButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Stereo4DX.png")));
-		Stereo4DXButton.setFont(buttonPanelFont);
-		modeButtonPanel.add(Stereo4DXButton, fspc);
-		Stereo4DXButton.addActionListener(ij);
+		stereo4dxButton = new JButton();
+		stereo4dxButton.setActionCommand("Stereo4DX");
+		stereo4dxButton.setName("Stereo4DX");
+		stereo4dxButton.setToolTipText("Switch to Stereo-4D spinning around X-axis");
+		stereo4dxButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Stereo4DX.png")));
+		stereo4dxButton.setFont(buttonPanelFont);
+		modeButtonPanel.add(stereo4dxButton, fspc);
+		stereo4dxButton.addActionListener(ij);
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
 		fspc.fill = GridBagConstraints.BOTH;
-		JButton Stereo4DXrcButton = new JButton();
-		Stereo4DXrcButton.setActionCommand("Slice<>Stereo");
-		Stereo4DXrcButton.setName("Slice<>Stereo");
-		Stereo4DXrcButton.setToolTipText("Switch between Slice- or Stereo-4D");
-		Stereo4DXrcButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Stereo4DXrc.png")));
-		Stereo4DXrcButton.setFont(buttonPanelFont);
-		modeButtonPanel.add(Stereo4DXrcButton, fspc);
-		Stereo4DXrcButton.addActionListener(ij);
+		stereo4dyButton = new JButton();
+		stereo4dyButton.setActionCommand("Stereo4DY");
+		stereo4dyButton.setName("Stereo4DY");
+		stereo4dyButton.setToolTipText("Switch to Stereo-4D spinning around Y-axis");
+		stereo4dyButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Stereo4DY.png")));
+		stereo4dyButton.setFont(buttonPanelFont);
+		modeButtonPanel.add(stereo4dyButton, fspc);
+		stereo4dyButton.addActionListener(ij);
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
 		fspc.fill = GridBagConstraints.BOTH;
-		JButton Stereo4DYButton = new JButton();
-		Stereo4DYButton.setActionCommand("Slice<>Stereo");
-		Stereo4DYButton.setName("Slice<>Stereo");
-		Stereo4DYButton.setToolTipText("Switch between Slice- or Stereo-4D");
-		Stereo4DYButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Stereo4DY.png")));
-		Stereo4DYButton.setFont(buttonPanelFont);
-		modeButtonPanel.add(Stereo4DYButton, fspc);
-		Stereo4DYButton.addActionListener(ij);
+		stereo4dXrcButton = new JButton();
+		stereo4dXrcButton.setActionCommand("Stereo4DXrc");
+		stereo4dXrcButton.setName("Stereo4DXrc");
+		stereo4dXrcButton.setToolTipText("Switch to Red/Cyan Stereo-4D spinning around X-axis");
+		stereo4dXrcButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Stereo4DXrc.png")));
+		stereo4dXrcButton.setFont(buttonPanelFont);
+		modeButtonPanel.add(stereo4dXrcButton, fspc);
+		stereo4dXrcButton.addActionListener(ij);
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
 		fspc.fill = GridBagConstraints.BOTH;
-		JButton Stereo4DYrcButton = new JButton();
-		Stereo4DYrcButton.setActionCommand("Slice<>Stereo");
-		Stereo4DYrcButton.setName("Slice<>Stereo");
-		Stereo4DYrcButton.setToolTipText("Switch between Slice- or Stereo-4D");
-		Stereo4DYrcButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Stereo4DYrc.png")));
-		Stereo4DYrcButton.setFont(buttonPanelFont);
-		modeButtonPanel.add(Stereo4DYrcButton, fspc);
-		Stereo4DYrcButton.addActionListener(ij);
+		stereo4dYrcButton = new JButton();
+		stereo4dYrcButton.setActionCommand("Stereo4DYrc");
+		stereo4dYrcButton.setName("Stereo4DYrc");
+		stereo4dYrcButton.setToolTipText("Switch to Red/Cyan Stereo-4D spinning around Y-axis");
+		stereo4dYrcButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Stereo4DYrc.png")));
+		stereo4dYrcButton.setFont(buttonPanelFont);
+		modeButtonPanel.add(stereo4dYrcButton, fspc);
+		stereo4dYrcButton.addActionListener(ij);
 
 //		
 		
@@ -1093,7 +1098,7 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 		this.pack();
 		int padH = 1+getInsets().left
 				+getInsets().right
-				+(tagButtonPanel.isVisible()?tagButtonPanel.getWidth():0)
+				+(optionsPanel.isVisible()?optionsPanel.getWidth():0)
 				+viewButtonPanel.getWidth();
 		int padV = getInsets().top
 				+getInsets().bottom
@@ -1104,6 +1109,24 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 						+overheadPanel.getHeight();
 		imp.getWindow().setSize(ic.dstWidth+padH, ic.dstHeight+padV);
 	}
+	
+	public void toggle4DModes() {
+		modeButtonPanel.setVisible(!modeButtonPanel.isVisible());
+		this.pack();
+		int padH = 1+getInsets().left
+				+getInsets().right
+				+(optionsPanel.isVisible()?optionsPanel.getWidth():0)
+				+viewButtonPanel.getWidth();
+		int padV = getInsets().top
+				+getInsets().bottom
+				+(this instanceof StackWindow?
+						((StackWindow)this).getNScrollbars()
+						*((StackWindow)this).zSelector.getHeight()
+						:0)
+						+overheadPanel.getHeight();
+		imp.getWindow().setSize(ic.dstWidth+padH, ic.dstHeight+padV);
+	}
+
 	
 } //class ImageWindow
 
