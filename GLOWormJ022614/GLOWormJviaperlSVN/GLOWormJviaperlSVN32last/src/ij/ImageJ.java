@@ -895,9 +895,9 @@ public class ImageJ extends Frame implements ActionListener,
 				for (String scene:concat.split("\\|")) {
 					if (concat.contains("scene.scn")){
 						if (IJ.is64Bit())
-							MQTVSSceneLoader64.runMQTVS_SceneLoader64(scene);
+							MQTVSSceneLoader64.runMQTVS_SceneLoader64(scene).getImp().getWindow().setVisible(true);
 						else
-							MQTVSSceneLoader64.runMQTVS_SceneLoader64(scene);	
+							MQTVSSceneLoader64.runMQTVS_SceneLoader64(scene).getImp().getWindow().setVisible(true);	
 					} else {
 						Opener opener = new Opener();
 						opener.open(scene);

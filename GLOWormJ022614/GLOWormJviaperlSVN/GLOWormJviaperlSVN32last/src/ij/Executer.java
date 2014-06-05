@@ -33,10 +33,10 @@ public class Executer implements Runnable {
 	private static CommandListener listener;
 	private static Vector listeners = new Vector();
 	private ImageJ ij;
-	
+
 	private String command;
 	private Thread thread;
-	
+
 	/** Create an Executer to run the specified menu command
 		in this thread using the active image. */
 	public Executer(String cmd) {
@@ -70,15 +70,15 @@ public class Executer implements Runnable {
 
 					for (int i=0; i<targetItems.length; i++) {
 						if ( ((String) targetItems[i]).startsWith(cmdChunks[0].split(" ")[0] +" ") ) {
-//							WindowManager.setWindow(cmdImp.getWindow());
+							//							WindowManager.setWindow(cmdImp.getWindow());
 							new ij.macro.MacroRunner("roiManager('select', "+i+", "+cmdImp.getID()+");" +
 									"selectImage("+cmdImp.getID()+");" +
 									"getSelectionBounds(roix, roiy, roiwidth, roiheight);" +
 									"run(\"Set... \", \"zoom=\" + getZoom*100 + \" x=\" + roix+roiwidth/2 + \" y=\" + roiy+roiheight/2);" +
 									"roiManager('select', "+i+", "+cmdImp.getID()+");" +
-//									"print(\"Zoom Complete\");"+
-							"");
-//							IJ.wait(200);
+									//									"print(\"Zoom Complete\");"+
+									"");
+							//							IJ.wait(200);
 							i = targetItems.length;
 						}
 					}
@@ -92,20 +92,20 @@ public class Executer implements Runnable {
 						new ij.macro.MacroRunner("roiManager('select', "+i+", "+cmdImp.getID()+");" +
 								"getSelectionBounds(roix, roiy, roiwidth, roiheight);" +
 								"run(\"Set... \", \"zoom=\" + getZoom*100 + \" x=\" + roix+roiwidth/2 + \" y=\" + roiy+roiheight/2);" +
-						"");
+								"");
 						cmdImp.getWindow().toFront();
 						i = targetItems.length;
 					}
 				}
 			}
 		}else if (cmd.startsWith("is also expressed in")){
-//			IJ.showMessage("!"+cmd+"!");
+			//			IJ.showMessage("!"+cmd+"!");
 			String cellPage = ("http://www.wormbase.org/db/get?name="+cmd.split(" ")[4]+";class=Anatomy_term");
 			IJ.runPlugIn("ij.plugin.BrowserLauncher", cellPage );
-			
+
 		}else if (cmd.startsWith("expresses")){
 			String genePage = ("http://www.wormbase.org/db/get?name="+cmd.split(" ")[1]+";class=gene");
-//			String genePage = ("http://legacy.wormbase.org/db/gene/gene?name="+cmd.split(" ")[1]+";class=Gene");
+			//			String genePage = ("http://legacy.wormbase.org/db/gene/gene?name="+cmd.split(" ")[1]+";class=Gene");
 			if (jumpToCytoSHOW && !jumpToWormAtlas) {
 				genePage = ("http://www.gloworm.org/p/genes.html");
 				IJ.runPlugIn("ij.plugin.BrowserLauncher", genePage );
@@ -116,12 +116,12 @@ public class Executer implements Runnable {
 				IJ.runMacro(""
 						+ "string = File.openUrlAsString(\"http://www.wormbase.org/db/get?name="
 						+ cmd.split(" ")[1]
-						+ ";class=gene\");"
-						+ "print(string);");							
+								+ ";class=gene\");"
+								+ "print(string);");							
 				String[] logLines2 = IJ.getLog().split("wname=\"expression\"");
 				IJ.log("\\Clear");
 				IJ.log(oldLog);
-//				IJ.showMessage(cellName+IJ.getLog());
+				//				IJ.showMessage(cellName+IJ.getLog());
 				String restString = logLines2[1].split("\"")[1];
 
 				IJ.log("\\Clear");
@@ -131,12 +131,12 @@ public class Executer implements Runnable {
 						+ "\");"
 
 						+ "cells = split(string, \"><\");"
-//						+ "print(\""+cmd.split(" ")[1]+" expressed in:\");"
+						//						+ "print(\""+cmd.split(" ")[1]+" expressed in:\");"
 						+ "for (i=0; i<lengthOf(cells); i++) {"
 						+ "	if (startsWith(cells[i], \"a href=\\\"/species/c_elegans/anatomy_term/\") ) "
 						+ "		print(cells[i+1]);"
 						+ "}");
-//				popup.add(new MenuItem("-"));
+				//				popup.add(new MenuItem("-"));
 				logLines2 = IJ.getLog().toLowerCase().split("\n");
 				IJ.log("\\Clear");
 				IJ.log(oldLog);
@@ -187,7 +187,7 @@ public class Executer implements Runnable {
 									"run(\"Set... \", \"zoom=\" + getZoom*100 + \" x=\" + roix+roiwidth/2 + \" y=\" + roiy+roiheight/2);" +
 									"roiManager('select', "+i+", "+cmdImp.getID()+");" +
 									//									"print(\"Zoom Complete\");"+
-							"");
+									"");
 							//							IJ.wait(200);
 							i = targetItems.length;
 						}
@@ -199,40 +199,40 @@ public class Executer implements Runnable {
 				new ij.macro.MacroRunner("roiManager('select', "+cmd.split("[{|}]")[2]+", "+cmd.split("[{|}]")[1]+");" +
 						"getSelectionBounds(roix, roiy, roiwidth, roiheight);" +
 						"run(\"Set... \", \"zoom=\" + getZoom*100 + \" x=\" + roix+roiwidth/2 + \" y=\" + roiy+roiheight/2);" +
-				"");
+						"");
 			}
 		}else if (cmd.trim().startsWith("begets=>") || cmd.trim().startsWith("cellID=>")){
-//			String cellPage = "http://legacy.wormbase.org/db/ontology/anatomy?name="+cmd.trim().substring(8,cmd.trim().indexOf(" "))+";open=show_Expr_pattern";
+			//			String cellPage = "http://legacy.wormbase.org/db/ontology/anatomy?name="+cmd.trim().substring(8,cmd.trim().indexOf(" "))+";open=show_Expr_pattern";
 			String cellPage = "http://www.wormbase.org/db/get?name="+cmd.trim().substring(8,cmd.trim().indexOf(" "))+";class=Anatomy_term";
 			if (jumpToWormAtlas) cellPage = ("http://wormatlas.org/search_results.html?cx=016220512202578422943%3Amikvfhp2nri&cof=FORID%3A10&ie=UTF-8&q="
 					+cmd.trim().substring(cmd.trim().indexOf(" ")+1, cmd.trim().indexOf(":"))+ "&siteurl=wormatlas.org%252F");
 			if (jumpToCytoSHOW) cellPage = ("http://www.google.com/search?q="+ cmd.trim().substring(8).replaceAll("[:;]", " "));
 			if (jumpToCytoSHOW && jumpToWormAtlas) cellPage = "http://www.textpresso.org/cgi-bin/celegans/query?textstring=\""
-				+cmd.trim().substring(8,cmd.trim().indexOf(" "))+ "\"";
+					+cmd.trim().substring(8,cmd.trim().indexOf(" "))+ "\"";
 			IJ.runPlugIn("ij.plugin.BrowserLauncher", cellPage );
 
 		}else if (cmd.startsWith("descended from") || cmd.startsWith("analogous to")) {
-//			IJ.log(cmd);
-//			String cellPage = "http://legacy.wormbase.org/db/ontology/anatomy?name="+cmd.trim().substring(15)+";open=show_Expr_pattern";
+			//			IJ.log(cmd);
+			//			String cellPage = "http://legacy.wormbase.org/db/ontology/anatomy?name="+cmd.trim().substring(15)+";open=show_Expr_pattern";
 			String cellPage = "http://www.wormbase.org/db/get?name="+cmd.trim().substring(15)+";class=Anatomy_term";
 			if (jumpToWormAtlas) cellPage = ("http://wormatlas.org/search_results.html?cx=016220512202578422943%3Amikvfhp2nri&cof=FORID%3A10&ie=UTF-8&q="
 					+cmd.trim().substring(15)+ "&siteurl=wormatlas.org%252F");
 			if (jumpToCytoSHOW) cellPage = ("http://www.google.com/search?q="+cmd.trim().substring(15));
 			if (jumpToCytoSHOW && jumpToWormAtlas) cellPage = "http://www.textpresso.org/cgi-bin/celegans/query?textstring=\""
-				+cmd.trim().substring(15)+ "\"";
+					+cmd.trim().substring(15)+ "\"";
 			IJ.runPlugIn("ij.plugin.BrowserLauncher", cellPage );
-		
+
 		}else if (cmd.startsWith("synapses ") 
 				|| cmd.startsWith("is synapsed ") 
 				|| cmd.startsWith("neuromuscular junctions")) {
-//			IJ.log(cmd);
-//			String cellPage = "http://legacy.wormbase.org/db/ontology/anatomy?name="+cmd.trim().substring(26,cmd.indexOf(":"))+";open=show_Expr_pattern";
+			//			IJ.log(cmd);
+			//			String cellPage = "http://legacy.wormbase.org/db/ontology/anatomy?name="+cmd.trim().substring(26,cmd.indexOf(":"))+";open=show_Expr_pattern";
 			String cellPage = "http://www.wormbase.org/db/get?name="+cmd.trim().substring(26,cmd.indexOf(":"))+";class=Anatomy_term";
 			if (jumpToWormAtlas) cellPage = ("http://wormatlas.org/search_results.html?cx=016220512202578422943%3Amikvfhp2nri&cof=FORID%3A10&ie=UTF-8&q="
 					+cmd.trim().substring(26,cmd.indexOf(":"))+ "&siteurl=wormatlas.org%252F");
 			if (jumpToCytoSHOW) cellPage = ("http://www.google.com/search?q="+cmd.trim().substring(26,cmd.indexOf(":")));
 			if (jumpToCytoSHOW && jumpToWormAtlas) cellPage = "http://www.textpresso.org/cgi-bin/celegans/query?textstring=\""
-				+cmd.trim().substring(26,cmd.indexOf(":"))+ "\"";
+					+cmd.trim().substring(26,cmd.indexOf(":"))+ "\"";
 			IJ.runPlugIn("ij.plugin.BrowserLauncher", cellPage );
 		} else if (cmd.startsWith("movie ")) {
 			String movieTitle = cmd.replace("movie ", "");
@@ -241,13 +241,13 @@ public class Executer implements Runnable {
 				movieTitle = movieTitle.replace(" also viewable in RedCyan Stereo", "");
 				rcs = true;
 			}
-			
+
 			String movieUrlOrPath = "";
-//			if(imp == null)
-//				imp = IJ.getImage();
+			//			if(imp == null)
+			//				imp = IJ.getImage();
 			movieUrlOrPath = "" + imp.getCanvas().getPopupInfo()[1].split(movieTitle.replace("+", "\\+") + "...\n")[1]
-			                        .split("\n")[rcs?2:0].trim();
-			
+					.split("\n")[rcs?2:0].trim();
+
 
 			String fileName ="";
 			String viewName= null;
@@ -262,7 +262,7 @@ public class Executer implements Runnable {
 					if (fn2.length < 3 /*&& !fn2[fn2.length - 1].contains("scene.scn")*/) 
 						fileName = fn2[fn2.length-1];
 					else if  (fn2.length >= 3 && 
-								(fn2[fn2.length - 3].contains(".mov") || fn2[fn2.length - 3].contains(".avi"))){
+							(fn2[fn2.length - 3].contains(".mov") || fn2[fn2.length - 3].contains(".avi"))){
 						fileName = fn2[fn2.length-3];
 						if (fn2[fn2.length-1].contains("scene.scn"))
 							viewName = fn2[fn2.length-1];
@@ -270,67 +270,67 @@ public class Executer implements Runnable {
 				}
 			} else {
 				fileName = movieUrlOrPath;
-				
+
 			}
 
-				String path = "/Volumes/GLOWORM_DATA/" + fileName;
-				
-				if ((path.toLowerCase().endsWith(".mov") || path.toLowerCase().endsWith(".avi")) && viewName == null){
-					ArrayList<String> rmiArgsArrayList = new ArrayList<String>();
-					rmiArgsArrayList.add(IJ.rmiURL.split(" ")[0]);
-					rmiArgsArrayList.add(IJ.rmiURL.split(" ")[1]);
-					rmiArgsArrayList.add(path);
+			String path = "/Volumes/GLOWORM_DATA/" + fileName;
 
-					if (rcs) {
-						RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/
-																															+" "+path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
+			if ((path.toLowerCase().endsWith(".mov") || path.toLowerCase().endsWith(".avi")) && viewName == null){
+				ArrayList<String> rmiArgsArrayList = new ArrayList<String>();
+				rmiArgsArrayList.add(IJ.rmiURL.split(" ")[0]);
+				rmiArgsArrayList.add(IJ.rmiURL.split(" ")[1]);
+				rmiArgsArrayList.add(path);
+
+				if (rcs) {
+					RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/
+							+" "+path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
 							false, true, true, false, true, false, true, false);
-						imp = rmqtvsh.getImagePlus();
-						imp.getWindow().setVisible(true);
-					} else {
-//						RemoteMQTVSHandler.main(rmiArgsArrayList.toArray(new String[rmiArgsArrayList.size()]));
-//						build(String url, String portOffset, String pathsThenSlices, 
-//								boolean stretchToFitOverlay, boolean viewOverlay, boolean grayscale, boolean grid, boolean horizontal, boolean sideSideStereo, boolean redCyanStereo, boolean silentlyUpdateScene) {
-						RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
-								false, true, true, false, true, false, false, false);
-							imp = rmqtvsh.getImagePlus();
-							imp.getWindow().setVisible(true);
-					}
-
-				} else if ((path.toLowerCase().endsWith(".mov") || path.toLowerCase().endsWith(".avi")) && viewName != null) {
-					ArrayList<String> rmiArgsArrayList = new ArrayList<String>();
-					rmiArgsArrayList.add(IJ.rmiURL.split(" ")[0]);
-					rmiArgsArrayList.add(IJ.rmiURL.split(" ")[1]);
-					rmiArgsArrayList.add(path);
-
-					RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/+" "+path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
-							false, true, true, false, true, false, true, false);
-
 					imp = rmqtvsh.getImagePlus();
-//					MultiChannelController mcc = new MultiChannelController(imp);
-//					imp.setMultiChannelController(mcc);
-					MultiChannelController mcc = imp.getMultiChannelController();
-					mcc.setChannelLUTChoice(0, 0);
-					CompositeImage ci = (CompositeImage)imp;
-					ci.setPosition( 0+1, ci.getSlice(), ci.getFrame() );
-					IJ.doCommand(mcc.getChannelLUTChoice(0) );
-					mcc.setChannelLUTChoice(1, 4);
-					ci.setPosition( 1+1, ci.getSlice(), ci.getFrame() );
-					IJ.doCommand(mcc.getChannelLUTChoice(1) );
-					mcc.setSliceSpinner(0, 1);			
-					if (path.contains("_prx_")) {
-						mcc.setRotateAngleSpinner(0, 90);
-						mcc.setRotateAngleSpinner(1, 90);
-					}
-//					imp.show();
 					imp.getWindow().setVisible(true);
+				} else {
+					//						RemoteMQTVSHandler.main(rmiArgsArrayList.toArray(new String[rmiArgsArrayList.size()]));
+					//						build(String url, String portOffset, String pathsThenSlices, 
+					//								boolean stretchToFitOverlay, boolean viewOverlay, boolean grayscale, boolean grid, boolean horizontal, boolean sideSideStereo, boolean redCyanStereo, boolean silentlyUpdateScene) {
+					RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
+							false, true, true, false, true, false, false, false);
+					imp = rmqtvsh.getImagePlus();
+					imp.getWindow().setVisible(true);
+				}
 
-					
-				}else if (path.toLowerCase().endsWith("scene.scn")) 
-					MQTVSSceneLoader64.runMQTVS_SceneLoader64(path);
-		
+			} else if ((path.toLowerCase().endsWith(".mov") || path.toLowerCase().endsWith(".avi")) && viewName != null) {
+				ArrayList<String> rmiArgsArrayList = new ArrayList<String>();
+				rmiArgsArrayList.add(IJ.rmiURL.split(" ")[0]);
+				rmiArgsArrayList.add(IJ.rmiURL.split(" ")[1]);
+				rmiArgsArrayList.add(path);
+
+				RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/+" "+path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
+						false, true, true, false, true, false, true, false);
+
+				imp = rmqtvsh.getImagePlus();
+				//					MultiChannelController mcc = new MultiChannelController(imp);
+				//					imp.setMultiChannelController(mcc);
+				MultiChannelController mcc = imp.getMultiChannelController();
+				mcc.setChannelLUTChoice(0, 0);
+				CompositeImage ci = (CompositeImage)imp;
+				ci.setPosition( 0+1, ci.getSlice(), ci.getFrame() );
+				IJ.doCommand(mcc.getChannelLUTChoice(0) );
+				mcc.setChannelLUTChoice(1, 4);
+				ci.setPosition( 1+1, ci.getSlice(), ci.getFrame() );
+				IJ.doCommand(mcc.getChannelLUTChoice(1) );
+				mcc.setSliceSpinner(0, 1);			
+				if (path.contains("_prx_")) {
+					mcc.setRotateAngleSpinner(0, 90);
+					mcc.setRotateAngleSpinner(1, 90);
+				}
+				//					imp.show();
+				imp.getWindow().setVisible(true);
+
+
+			}else if (path.toLowerCase().endsWith("scene.scn")) 
+				MQTVSSceneLoader64.runMQTVS_SceneLoader64(path);
+
 		} else if (cmd.startsWith("Save this info") ){
-//			IJ.run("Text Window ");
+			//			IJ.run("Text Window ");
 			Editor cellInfoTextWin = new Editor();
 			cellInfoTextWin.setTitle(imp.getCanvas().getPopupInfo()[0]+" Info");
 			cellInfoTextWin.getTextArea().append(imp.getCanvas().getPopupInfo()[1]);
@@ -415,8 +415,8 @@ public class Executer implements Runnable {
 			}
 		}
 	}
-	
-    void runCommand(String cmd) {
+
+	void runCommand(String cmd) {
 		Hashtable table = Menus.getCommands();
 		String className = (String)table.get(cmd);
 		if (className!=null) {
@@ -430,8 +430,8 @@ public class Executer implements Runnable {
 				}
 			}
 			if (IJ.shiftKeyDown() && className.startsWith("ij.plugin.Macro_Runner") && !Menus.getShortcuts().contains("*"+cmd))
-    			IJ.open(IJ.getDirectory("plugins")+arg);
-    		else
+				IJ.open(IJ.getDirectory("plugins")+arg);
+			else
 				IJ.runPlugIn(cmd, className, arg);
 		} else {
 			// Is this command in Plugins>Macros?
@@ -446,12 +446,12 @@ public class Executer implements Runnable {
 				OpenDialog.setLastDirectory(dir);
 			} else if (!openRecent(cmd))
 				IJ.error("Unrecognized command: " + cmd);
-	 	}
-    }
-    
-    /** Opens a file from the File/Open Recent menu 
+		}
+	}
+
+	/** Opens a file from the File/Open Recent menu 
  	      and returns 'true' if successful. */
-    boolean openRecent(String cmd) {
+	boolean openRecent(String cmd) {
 		Menu menu = Menus.openRecentMenu;
 		if (menu==null) return false;
 		for (int i=0; i<menu.getItemCount(); i++) {
@@ -461,19 +461,19 @@ public class Executer implements Runnable {
 			}
 		}
 		return false;
-    }
+	}
 
 	/** Returns the last command executed. Returns null
 		if no command has been executed. */
 	public static String getCommand() {
 		return previousCommand;
 	}
-	
+
 	/** Adds the specified command listener. */
 	public static void addCommandListener(CommandListener listener) {
 		listeners.addElement(listener);
 	}
-	
+
 	/** Removes the specified command listener. */
 	public static void removeCommandListener(CommandListener listener) {
 		listeners.removeElement(listener);
