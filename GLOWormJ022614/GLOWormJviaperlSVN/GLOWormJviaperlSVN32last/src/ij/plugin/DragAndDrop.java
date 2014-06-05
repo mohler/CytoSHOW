@@ -396,7 +396,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							if (path.contains("_prx_")) {
 								mcc.setRotateAngleSpinner(0, 90);
 								mcc.setRotateAngleSpinner(1, 90);
-								stereoImp.setRotation(90);
+								rmqtvsh.setRotation(90);
 							}
 							stereoImp.getWindow().setVisible(true);
 

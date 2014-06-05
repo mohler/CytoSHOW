@@ -321,7 +321,7 @@ public class Executer implements Runnable {
 				if (path.contains("_prx_")) {
 					mcc.setRotateAngleSpinner(0, 90);
 					mcc.setRotateAngleSpinner(1, 90);
-					imp.setRotation(90);
+					rmqtvsh.setRotation(90);
 				}
 				//					imp.show();
 				imp.getWindow().setVisible(true);

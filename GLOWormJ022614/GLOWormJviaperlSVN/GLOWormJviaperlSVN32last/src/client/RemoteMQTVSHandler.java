@@ -58,7 +58,7 @@ public class RemoteMQTVSHandler {
 	public  String[] moviePathNames;
 	private VirtualStack stack;
 	public long lastGetTime=0;
-	private ImagePlus imp2;
+	public ImagePlus imp2;
 
 	public double jpegQuality=1;
 	public int resolutionToGet=1;
@@ -82,6 +82,7 @@ public class RemoteMQTVSHandler {
 	private boolean grid = false;
 	private boolean silentlyUpdateScene = false;
 	private Thread reloadThread;
+	private int rotation;
 
 
 	public static void main(String args[]) {
@@ -1046,11 +1047,7 @@ public class RemoteMQTVSHandler {
 			}
 
 			finalIP.insert(ip, insertX, insertY);
-			if (RemoteMQTVSHandler.this.getImagePlus() !=null) {if (RemoteMQTVSHandler.this.getImagePlus().rotation == 90 ||RemoteMQTVSHandler.this.getImagePlus().rotation == -270 )
-				finalIP = finalIP.rotateRight();
-			if (RemoteMQTVSHandler.this.getImagePlus().rotation == -90 ||RemoteMQTVSHandler.this.getImagePlus().rotation == 270 )
-				finalIP = finalIP.rotateLeft();
-			}
+
 
 			return finalIP;
 		}
@@ -1371,6 +1368,11 @@ public class RemoteMQTVSHandler {
 
 	public void setReloadThread(Thread reloadThread) {
 		this.reloadThread = reloadThread;
+	}
+
+	public void setRotation(int i) {
+
+		rotation = i;
 	}
 
 }

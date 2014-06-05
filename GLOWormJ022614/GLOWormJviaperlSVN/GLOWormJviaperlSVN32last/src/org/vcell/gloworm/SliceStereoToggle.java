@@ -71,7 +71,7 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 				if (e.getActionCommand().contains("Stereo4DX")) {
 					mcc.setRotateAngleSpinner(0, 90);
 					mcc.setRotateAngleSpinner(1, 90);
-					newImp.setRotation(90);
+					rmqtvsh.setRotation(90);
 				}
 			}
 			
