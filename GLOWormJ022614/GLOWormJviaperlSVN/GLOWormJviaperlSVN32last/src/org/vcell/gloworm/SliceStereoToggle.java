@@ -29,17 +29,17 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 	public void actionPerformed(ActionEvent e) 	{	
 
 		ImagePlus imp = this.imp;
-	
+
 		String pathlist = "";
 		if (imp.isComposite()) {
 			int displaymode = ((CompositeImage)imp).getMode();
 			reconnectRemote(imp);
-			
+
 			if (e.getActionCommand() == "Slice<>Stereo") {
 				primeButtons(imp);
 				return;
 			}
-			
+
 			else if (e.getActionCommand() == "Slice4D")
 				pathlist = pathlist + "/Volumes/GLOWORM_DATA/" + slcPath+ "|";
 			else if (e.getActionCommand().contains("Stereo4DX"))
@@ -47,30 +47,56 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 			else if (e.getActionCommand().contains("Stereo4DY"))
 				pathlist = pathlist + "/Volumes/GLOWORM_DATA/" + pryPath+ "|";
 
-			MQTVSSceneLoader64 nextMsl64 = MQTVSSceneLoader64.runMQTVS_SceneLoader64(pathlist, "cycling");
+			ImagePlus newImp = null;
 			int slice = 1;
-			if (viewSpecificSliceHT.get(nextMsl64.getImp().getWindow().getTitle().split(",")[0]) != null)
-				slice = viewSpecificSliceHT.get(nextMsl64.getImp().getWindow().getTitle().split(",")[0]);
-			nextMsl64.getImp().setPosition(imp.getChannel(), slice, imp.getFrame());
+			if (!e.getActionCommand().contains("rc")) {
+				MQTVSSceneLoader64 nextMsl64 = MQTVSSceneLoader64.runMQTVS_SceneLoader64(pathlist, "cycling");
+				newImp = nextMsl64.getImp();
+			} else {
+				String path = pathlist.replace("|", "");
+				RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/+" "+path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
+						false, true, true, false, true, false, true, false);
+
+				newImp = rmqtvsh.getImagePlus();
+
+				MultiChannelController mcc = newImp.getMultiChannelController();
+				mcc.setChannelLUTChoice(0, 0);
+				CompositeImage ci = (CompositeImage)newImp;
+				ci.setPosition( 0+1, ci.getSlice(), ci.getFrame() );
+				IJ.doCommand(mcc.getChannelLUTChoice(0) );
+				mcc.setChannelLUTChoice(1, 4);
+				ci.setPosition( 1+1, ci.getSlice(), ci.getFrame() );
+				IJ.doCommand(mcc.getChannelLUTChoice(1) );
+				mcc.setSliceSpinner(0, 1);			
+				if (e.getActionCommand().contains("Stereo4DX")) {
+					mcc.setRotateAngleSpinner(0, 90);
+					mcc.setRotateAngleSpinner(1, 90);
+					newImp.setRotation(90);
+				}
+			}
+			
+			if (viewSpecificSliceHT.get(newImp.getWindow().getTitle().split(",")[0]) != null)
+				slice = viewSpecificSliceHT.get(newImp.getWindow().getTitle().split(",")[0]);
+			newImp.setPosition(imp.getChannel(), slice, imp.getFrame());
 			boolean running = imp.getWindow().running;
 			boolean running2 = imp.getWindow().running2;
 			boolean running3 = imp.getWindow().running3;
-			nextMsl64.getImp().getCanvas().setMagnification(imp.getCanvas().getMagnification());
-			nextMsl64.getImp().getWindow().setSize(imp.getWindow().getSize());
-			nextMsl64.getImp().getWindow().pack();
-			nextMsl64.getImp().getCanvas().zoomIn(nextMsl64.getImp().getWidth(), nextMsl64.getImp().getHeight());
-			nextMsl64.getImp().getCanvas().zoomOut(nextMsl64.getImp().getWidth(), nextMsl64.getImp().getHeight());
-			nextMsl64.getImp().getWindow().setLocation(imp.getWindow().getLocation().x, imp.getWindow().getLocation().y);
-			nextMsl64.getImp().getWindow().setVisible(true);
+			newImp.getCanvas().setMagnification(imp.getCanvas().getMagnification());
+			newImp.getWindow().setSize(imp.getWindow().getSize());
+			newImp.getWindow().pack();
+			newImp.getCanvas().zoomIn(newImp.getWidth(), newImp.getHeight());
+			newImp.getCanvas().zoomOut(newImp.getWidth(), newImp.getHeight());
+			newImp.getWindow().setLocation(imp.getWindow().getLocation().x, imp.getWindow().getLocation().y);
+			newImp.getWindow().setVisible(true);
 
-			nextMsl64.getImp().getWindow().sst.primeButtons(nextMsl64.getImp());;
+			newImp.getWindow().sst.primeButtons(newImp);
 			imp.getWindow().setVisible(false);
-			if (nextMsl64.getImp().isComposite()) {
-				((CompositeImage)nextMsl64.getImp()).copyLuts(imp);
+			if (newImp.isComposite() && !e.getActionCommand().contains("rc")) {
+				((CompositeImage)newImp).copyLuts(imp);
 				//Still need to fix replication of Min Max settings.!!
-				((CompositeImage)nextMsl64.getImp()).setMode(3);
-				((CompositeImage)nextMsl64.getImp()).setMode(displaymode);
-				nextMsl64.getImp().updateAndRepaintWindow();
+				((CompositeImage)newImp).setMode(3);
+				((CompositeImage)newImp).setMode(displaymode);
+				newImp.updateAndRepaintWindow();
 
 			}
 			viewSpecificSliceHT.put(imp.getWindow().getTitle().split(",")[0], imp.getSlice());

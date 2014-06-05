@@ -749,14 +749,10 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			if (recorder!=null) recorder.imageUpdated(this);
 		}
 		ImageProcessor pip = ip;
-//		if (isComposite() && ((CompositeImage)this).cip != null)
-//			pip = ((CompositeImage)this).cip[((CompositeImage)this).currentChannel].duplicate();
-		
-//		IJ.log("igp");
 		if (isSketch3D() && rm!= null && rm.getColorLegend()!=null) {
-//			IJ.log("igp2");
 			pip  = rm.getColorLegend().processedIP(pip);
 		}
+
 		return pip;
 	}
 	
@@ -2045,6 +2041,8 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 
 	private RemoteMQTVSHandler remoteMQTVSHandler;
 
+	public int rotation = 0;
+
    
     /** Redisplays the (x,y) coordinates and pixel value (which may
 		have changed) in the status bar. Called by the Next Slice and
@@ -2618,6 +2616,10 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 
 	public RemoteMQTVSHandler getRemoteMQTVSHandler() {
 		return remoteMQTVSHandler;
+	}
+
+	public void setRotation(int i) {
+		rotation = i;
 	}
 
     

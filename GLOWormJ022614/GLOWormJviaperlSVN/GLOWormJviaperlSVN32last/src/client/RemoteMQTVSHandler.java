@@ -1015,6 +1015,9 @@ public class RemoteMQTVSHandler {
 			}
 
 			ImageProcessor finalIP = null;
+			
+
+			
 			if (ip instanceof ColorProcessor)
 				finalIP = new ColorProcessor(finalWidth, finalHeight);
 			else 
@@ -1043,6 +1046,11 @@ public class RemoteMQTVSHandler {
 			}
 
 			finalIP.insert(ip, insertX, insertY);
+			if (RemoteMQTVSHandler.this.getImagePlus() !=null) {if (RemoteMQTVSHandler.this.getImagePlus().rotation == 90 ||RemoteMQTVSHandler.this.getImagePlus().rotation == -270 )
+				finalIP = finalIP.rotateRight();
+			if (RemoteMQTVSHandler.this.getImagePlus().rotation == -90 ||RemoteMQTVSHandler.this.getImagePlus().rotation == 270 )
+				finalIP = finalIP.rotateLeft();
+			}
 
 			return finalIP;
 		}

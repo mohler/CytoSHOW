@@ -793,6 +793,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		1/8.0, 1/6.0, 1/4.0, 1/3.0, 1/2.0, 0.75, 1.0, 1.5,
 		2.0, 3.0, 4.0, 6.0, 8.0, 12.0, 16.0, 24.0, 32.0 };
 	private Roi cursorRoi;
+	private int rotation;
 
 	public static double getLowerZoomLevel(double currentMag) {
 		double newMag = zoomLevels[0];
@@ -3035,6 +3036,10 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 	public void setMousePressedY(int mousePressedY) {
 		this.mousePressedY = mousePressedY;
+	}
+
+	public void setRotation(int i) {
+		this.rotation = i;
 	}
 
 }
