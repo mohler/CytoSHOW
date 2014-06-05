@@ -1061,16 +1061,20 @@ public class ImageJ extends Frame implements ActionListener,
 //		IJ.showMessage("CytoSHOW is already running!" + concat, message);
 		if (remote) {
 			if (!concat.contains("scene.scn") && !concat.contains("suite.ste")) {
-				RemoteMQTVSHandler.main(rmiArgsArrayList.toArray(new String[rmiArgsArrayList.size()]));
+				RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], concat.replace("|"," "), 
+						false, true, true, false, true, false, false, false);
+					ImagePlus imp = rmqtvsh.getImagePlus();
+					imp.getWindow().setVisible(true);
 			} else {
 				for (String scene:concat.split("\\|")) {
 					if (concat.contains("scene.scn")){
 						if (IJ.is64Bit())
-							MQTVSSceneLoader64.runMQTVS_SceneLoader64(scene);
+							MQTVSSceneLoader64.runMQTVS_SceneLoader64(scene).getImp().getWindow().setVisible(true);
 						else
-							MQTVSSceneLoader64.runMQTVS_SceneLoader64(scene);	
+							MQTVSSceneLoader64.runMQTVS_SceneLoader64(scene).getImp().getWindow().setVisible(true);	
 					} else {
-						(new Opener()).open(scene);
+						Opener opener = new Opener();
+						opener.open(scene);
 					}
 				}
 			}
