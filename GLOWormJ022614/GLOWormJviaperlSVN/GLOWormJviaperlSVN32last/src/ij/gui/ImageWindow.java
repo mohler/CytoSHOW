@@ -115,6 +115,7 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 	public JButton stereo4dXrcButton;
 	public JButton slice4dButton;
 	public JButton stereo4dYrcButton;
+	public SliceStereoToggle sst;
 	
 	public ImageWindow(String title) {
 		super(title);
@@ -401,9 +402,8 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 		modeButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/4DMode.png")));
 		modeButton.setFont(buttonPanelFont);
 		viewButtonPanel.add(modeButton, fspc);
-		SliceStereoToggle sst = new SliceStereoToggle(imp);
+		sst = new SliceStereoToggle(imp);
 		modeButton.addActionListener(sst);
-		modeButton.addMouseMotionListener(ic);
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
 		fspc.fill = GridBagConstraints.BOTH;

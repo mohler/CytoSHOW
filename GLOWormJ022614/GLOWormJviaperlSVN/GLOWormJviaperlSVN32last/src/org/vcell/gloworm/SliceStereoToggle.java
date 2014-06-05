@@ -28,66 +28,16 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 
 	public void actionPerformed(ActionEvent e) 	{	
 
-		imp = IJ.getImage();
+		ImagePlus imp = this.imp;
 	
 		String pathlist = "";
 		if (imp.isComposite()) {
 			int displaymode = ((CompositeImage)imp).getMode();
-			if (imp.getRemoteMQTVSHandler() != null)
-				imp.getRemoteMQTVSHandler().getRemoteIP(
-						((RemoteMQTVSHandler.RemoteMQTVirtualStack)imp.getStack())
-						.getAdjustedSlice(imp.getCurrentSlice(), 0), 100, false);
+			reconnectRemote(imp);
+			
 			if (e.getActionCommand() == "Slice<>Stereo") {
-				imp.getWindow().toggle4DModes();
-				if (imp.getRemoteMQTVSHandler() != null)
-					imp.getRemoteMQTVSHandler().getRemoteIP(
-							((RemoteMQTVSHandler.RemoteMQTVirtualStack)imp.getStack())
-							.getAdjustedSlice(imp.getCurrentSlice(), 0), 100, false);
-				if (imp.isComposite()) {
-					for (String name:imp.getRemoteMQTVSHandler().getChannelPathNames()) {
-						if (name.matches(".*(_pr|_slc)..*_z.*_t.*")) {
-							String[] matchedNames = {""};
-							try {
-								String justname = name.replace("/Volumes/GLOWORM_DATA/", "");
-								String subname = justname.replaceAll("(_pr|_slc).*","").replaceAll("\\+", "_") + " " + justname.replaceAll(".*(_pr..?|_slc)J?", "").replaceAll("_x.*", "") + " " + justname.replaceAll(".*(_nmdxy)", "");
-								matchedNames = imp.getRemoteMQTVSHandler().getCompQ().getOtherViewNames(subname);
-							} catch (RemoteException re) {
-								// TODO Auto-generated catch block
-								re.printStackTrace();
-							}
-							for (String match:matchedNames) {
-								if (match.matches(".*(_slc_).*")) {
-									slcPath = match;
-								}
-								if (match.matches(".*(_pry?xy?_).*")) {
-									prxPath = match;
-								}
-								if (match.matches(".*(_prx?yx?_).*")) {
-									pryPath = match;
-								}
-							}
-						}
-					}
-				}
-				if (slcPath == null) {
-					imp.getWindow().slice4dButton.setVisible(false);
-				} else {
-					imp.getWindow().slice4dButton.setVisible(true);
-				}
-				if (prxPath == null) {
-					imp.getWindow().stereo4dxButton.setVisible(false);
-					imp.getWindow().stereo4dXrcButton.setVisible(false);
-				} else {
-					imp.getWindow().stereo4dxButton.setVisible(true);
-					imp.getWindow().stereo4dXrcButton.setVisible(true);
-				}
-				if (pryPath == null) {
-					imp.getWindow().stereo4dyButton.setVisible(false);
-					imp.getWindow().stereo4dYrcButton.setVisible(false);
-				}else {
-					imp.getWindow().stereo4dyButton.setVisible(true);
-					imp.getWindow().stereo4dYrcButton.setVisible(true);
-				}
+				primeButtons(imp);
+				return;
 			}
 			
 			else if (e.getActionCommand() == "Slice4D")
@@ -105,14 +55,15 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 			boolean running = imp.getWindow().running;
 			boolean running2 = imp.getWindow().running2;
 			boolean running3 = imp.getWindow().running3;
-			nextMsl64.getImp().getWindow().setLocation(imp.getWindow().getLocation().x, imp.getWindow().getLocation().y);
 			nextMsl64.getImp().getCanvas().setMagnification(imp.getCanvas().getMagnification());
 			nextMsl64.getImp().getWindow().setSize(imp.getWindow().getSize());
 			nextMsl64.getImp().getWindow().pack();
 			nextMsl64.getImp().getCanvas().zoomIn(nextMsl64.getImp().getWidth(), nextMsl64.getImp().getHeight());
 			nextMsl64.getImp().getCanvas().zoomOut(nextMsl64.getImp().getWidth(), nextMsl64.getImp().getHeight());
+			nextMsl64.getImp().getWindow().setLocation(imp.getWindow().getLocation().x, imp.getWindow().getLocation().y);
 			nextMsl64.getImp().getWindow().setVisible(true);
-			nextMsl64.getImp().getWindow().toggle4DModes();
+
+			nextMsl64.getImp().getWindow().sst.primeButtons(nextMsl64.getImp());;
 			imp.getWindow().setVisible(false);
 			if (nextMsl64.getImp().isComposite()) {
 				((CompositeImage)nextMsl64.getImp()).copyLuts(imp);
@@ -129,5 +80,65 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 			if (running3) 
 				IJ.doCommand("Start Z Animation");
 		}
+	}
+
+	public void reconnectRemote(ImagePlus rImp) {
+		if (rImp.getRemoteMQTVSHandler() != null) {
+			rImp.getRemoteMQTVSHandler().getRemoteIP(
+					((RemoteMQTVSHandler.RemoteMQTVirtualStack)imp.getStack())
+					.getAdjustedSlice(rImp.getCurrentSlice(), 0), 100, false);
+		}
+	}
+
+	public void primeButtons(ImagePlus imp2) {
+		if (imp2.isComposite()) {
+			reconnectRemote(imp2);
+			for (String name:imp2.getRemoteMQTVSHandler().getChannelPathNames()) {
+				if (name.matches(".*(_pr|_slc)..*_z.*_t.*")) {
+					String[] matchedNames = {""};
+					try {
+						String justname = name.replace("/Volumes/GLOWORM_DATA/", "");
+						String subname = justname.replaceAll("(_pr|_slc).*","").replaceAll("\\+", "_") + " " + justname.replaceAll(".*(_pr..?|_slc)J?", "").replaceAll("_x.*", "") + " " + justname.replaceAll(".*(_nmdxy)", "");
+						matchedNames = imp2.getRemoteMQTVSHandler().getCompQ().getOtherViewNames(subname);
+					} catch (RemoteException re) {
+						// TODO Auto-generated catch block
+						re.printStackTrace();
+					}
+					for (String match:matchedNames) {
+						if (match.matches(".*(_slc_).*")) {
+							slcPath = match;
+						}
+						if (match.matches(".*(_pry?xy?_).*")) {
+							prxPath = match;
+						}
+						if (match.matches(".*(_prx?yx?_).*")) {
+							pryPath = match;
+						}
+					}
+				}
+			}
+		}
+		if (slcPath == null) {
+			imp2.getWindow().slice4dButton.setVisible(false);
+		} else {
+			imp2.getWindow().slice4dButton.setVisible(true);
+		}
+		if (prxPath == null) {
+			imp2.getWindow().stereo4dxButton.setVisible(false);
+			imp2.getWindow().stereo4dXrcButton.setVisible(false);
+		} else {
+			imp2.getWindow().stereo4dxButton.setVisible(true);
+			imp2.getWindow().stereo4dXrcButton.setVisible(true);
+		}
+		if (pryPath == null) {
+			imp2.getWindow().stereo4dyButton.setVisible(false);
+			imp2.getWindow().stereo4dYrcButton.setVisible(false);
+		}else {
+			imp2.getWindow().stereo4dyButton.setVisible(true);
+			imp2.getWindow().stereo4dYrcButton.setVisible(true);
+		}
+		imp2.updateAndRepaintWindow();
+		imp2.getWindow().toggle4DModes();
+		return;
 	}
 }
