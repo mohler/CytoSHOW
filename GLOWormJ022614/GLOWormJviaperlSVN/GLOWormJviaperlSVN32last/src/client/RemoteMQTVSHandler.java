@@ -83,6 +83,7 @@ public class RemoteMQTVSHandler {
 	private boolean silentlyUpdateScene = false;
 	private Thread reloadThread;
 	private int rotation;
+	private boolean rcsPrX;
 
 
 	public static void main(String args[]) {
@@ -92,7 +93,7 @@ public class RemoteMQTVSHandler {
 	}
 
 	public static RemoteMQTVSHandler build(String url, String portOffset, String pathsThenSlices, 
-			boolean stretchToFitOverlay, boolean viewOverlay, boolean grayscale, boolean grid, boolean horizontal, boolean sideSideStereo, boolean redCyanStereo, boolean silentlyUpdateScene) {
+			boolean stretchToFitOverlay, boolean viewOverlay, boolean grayscale, boolean grid, boolean horizontal, boolean sideSideStereo, boolean redCyanStereo, boolean rcsPrx, boolean silentlyUpdateScene) {
 		ArrayList<String> argArrayList = new ArrayList<String>();
 		argArrayList.add(url);
 		argArrayList.add(portOffset);
@@ -112,6 +113,8 @@ public class RemoteMQTVSHandler {
 			argArrayList.add("-redcyanstereo");
 		if (silentlyUpdateScene)
 			argArrayList.add("-silentlyupdatescene");
+		if (rcsPrx) 
+			argArrayList.add("-rcsprx");
 		for (String path:pathsThenSlices.split(" "))
 			argArrayList.add(path);
 		return new RemoteMQTVSHandler(argArrayList.toArray(new String[argArrayList.size()]));
@@ -205,27 +208,11 @@ public class RemoteMQTVSHandler {
 		} catch (NumberFormatException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			//		} catch (SocketException e) {
-			//			// TODO Auto-generated catch block
-			//			e.printStackTrace();
-			//		} catch (UnknownHostException e) {
-			//			// TODO Auto-generated catch block
-			//			e.printStackTrace();
 		} 
 
-		//			if (remoteImpID != 0) {
-		//				if (win2 != null) {
-		//					try {
-		//						compQ.resetServer();
-		//					} catch (RemoteException e) {
-		//						// TODO Auto-generated catch block
-		//						e.printStackTrace();
-		//					}
-		//				}
-		//			}
 		if (moviePathNames.length>0) {
 			try {
-				remoteImpID = compQ.setUpMovie(moviePathNames, movieSlices, Integer.parseInt(args[0].split(":")[1])+Integer.parseInt(args[1]));
+				remoteImpID = compQ.setUpMovie(moviePathNames, movieSlices, Integer.parseInt(args[0].split(":")[1])+Integer.parseInt(args[1]), rcsPrX);
 			} catch (NumberFormatException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -238,6 +225,7 @@ public class RemoteMQTVSHandler {
 			return;
 		}
 		localMovieDirs = new File[moviePathNames.length];
+		rcsPrX = false;
 		for (int m=0;m<moviePathNames.length;m++) {
 			localMovieDirs[m] = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+moviePathNames[m]);
 			if (!localMovieDirs[m].canWrite()) {
@@ -512,7 +500,7 @@ public class RemoteMQTVSHandler {
 
 			if (moviePathNames.length>0) {
 				try {
-					remoteImpID = compQ.setUpMovie(moviePathNames, movieSlices, Integer.parseInt(args[0].split(":")[1])+Integer.parseInt(args[1]));
+					remoteImpID = compQ.setUpMovie(moviePathNames, movieSlices, Integer.parseInt(args[0].split(":")[1])+Integer.parseInt(args[1]), redCyanStereo);
 				} catch (NumberFormatException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -1047,7 +1035,6 @@ public class RemoteMQTVSHandler {
 			}
 
 			finalIP.insert(ip, insertX, insertY);
-
 
 			return finalIP;
 		}

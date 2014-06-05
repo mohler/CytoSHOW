@@ -358,7 +358,7 @@ public class QT_Movie_OpenerMultiMod implements PlugIn, QDConstants, StdQTConsta
 			if (false /*mqtf.length == 1*/) {	
 										//!!! Note that QTVirtualStack is a subclass of VirtualStack.
 				if (virtualHyperStack) {
-					vstack = new MultiQTVirtualStack(mqtf, new ArrayList<String>(), new ArrayList<String>(), movieSlices, eightBit, imp, stretchToFitOverlay, viewOverlay, sideSideStereo, redCyanStereo, horizontal, grid);	
+					vstack = new MultiQTVirtualStack(mqtf, new ArrayList<String>(), new ArrayList<String>(), movieSlices, eightBit, imp, stretchToFitOverlay, viewOverlay, sideSideStereo, redCyanStereo, horizontal, grid, false);	
 				} else {
 					vstack = new QTVirtualStack(mqtf[0], eightBit);	
 				}
@@ -369,7 +369,7 @@ public class QT_Movie_OpenerMultiMod implements PlugIn, QDConstants, StdQTConsta
 			} else {
 										//!!! Note that MultiQTVirtualStack is a subclass of VirtualStack.
 				//if (IJ.debugMode) IJ.log(" \n" + movieCountStr+ ":");
-				vstack = new MultiQTVirtualStack(mqtf, new ArrayList<String>(), new ArrayList<String>(), movieSlices, eightBit, imp, stretchToFitOverlay, viewOverlay, sideSideStereo, redCyanStereo, horizontal, grid);		//!!!!! In MultiQTVirtualStack I need a way to have one stack built from the array of QTFiles.
+				vstack = new MultiQTVirtualStack(mqtf, new ArrayList<String>(), new ArrayList<String>(), movieSlices, eightBit, imp, stretchToFitOverlay, viewOverlay, sideSideStereo, redCyanStereo, horizontal, grid, false);		//!!!!! In MultiQTVirtualStack I need a way to have one stack built from the array of QTFiles.
 
 /*************BUILD THE imp ABOVE WITHIN THE CONSTRUCTOR OF MultiQTVirtualStack, RATHER THAN IN THIS LINE OF THIS CODE	*/			
 				if ( ((MultiQTVirtualStack) vstack).imp != null) {

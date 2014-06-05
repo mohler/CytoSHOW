@@ -79,7 +79,7 @@ public class ComputeEngine extends UnicastRemoteObject implements Compute {
 		return null;
 	}
 
-	public int setUpMovie(String[] names, String[] movieSlices, int port) throws RemoteException {
+	public int setUpMovie(String[] names, String[] movieSlices, int port, boolean redCyanStereo) throws RemoteException {
 		// TODO Auto-generated method stub
 		return 0;
 	}

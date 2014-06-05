@@ -888,7 +888,7 @@ public class ImageJ extends Frame implements ActionListener,
 		if (remote) {
 			if (!concat.contains("scene.scn") && !concat.contains("suite.ste")) {
 				RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], concat.replace("|"," "), 
-						false, true, true, false, true, false, false, false);
+						false, true, true, false, true, false, false, false, false);
 					ImagePlus imp = rmqtvsh.getImagePlus();
 					imp.getWindow().setVisible(true);
 			} else {
@@ -1062,7 +1062,7 @@ public class ImageJ extends Frame implements ActionListener,
 		if (remote) {
 			if (!concat.contains("scene.scn") && !concat.contains("suite.ste")) {
 				RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], concat.replace("|"," "), 
-						false, true, true, false, true, false, false, false);
+						false, true, true, false, true, false, false, false, false);
 					ImagePlus imp = rmqtvsh.getImagePlus();
 					imp.getWindow().setVisible(true);
 			} else {

@@ -55,7 +55,7 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 			} else {
 				String path = pathlist.replace("|", "");
 				RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/+" "+path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
-						false, true, true, false, true, false, true, false);
+						false, true, true, false, true, false, true, e.getActionCommand().contains("Stereo4DXrc"), false);
 
 				newImp = rmqtvsh.getImagePlus();
 
@@ -68,11 +68,11 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 				ci.setPosition( 1+1, ci.getSlice(), ci.getFrame() );
 				IJ.doCommand(mcc.getChannelLUTChoice(1) );
 				mcc.setSliceSpinner(0, 1);			
-				if (e.getActionCommand().contains("Stereo4DX")) {
-					mcc.setRotateAngleSpinner(0, 90);
-					mcc.setRotateAngleSpinner(1, 90);
-					rmqtvsh.setRotation(90);
-				}
+//				if (e.getActionCommand().contains("Stereo4DX")) {
+//					mcc.setRotateAngleSpinner(0, 90);
+//					mcc.setRotateAngleSpinner(1, 90);
+//					rmqtvsh.setRotation(90);
+//				}
 			}
 			
 			if (viewSpecificSliceHT.get(newImp.getWindow().getTitle().split(",")[0]) != null)

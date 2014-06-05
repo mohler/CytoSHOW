@@ -284,7 +284,7 @@ public class Executer implements Runnable {
 				if (rcs) {
 					RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/
 							+" "+path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
-							false, true, true, false, true, false, true, false);
+							false, true, true, false, true, false, true, false, false);
 					imp = rmqtvsh.getImagePlus();
 					imp.getWindow().setVisible(true);
 				} else {
@@ -292,7 +292,7 @@ public class Executer implements Runnable {
 					//						build(String url, String portOffset, String pathsThenSlices, 
 					//								boolean stretchToFitOverlay, boolean viewOverlay, boolean grayscale, boolean grid, boolean horizontal, boolean sideSideStereo, boolean redCyanStereo, boolean silentlyUpdateScene) {
 					RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
-							false, true, true, false, true, false, false, false);
+							false, true, true, false, true, false, false, false, false);
 					imp = rmqtvsh.getImagePlus();
 					imp.getWindow().setVisible(true);
 				}
@@ -304,7 +304,7 @@ public class Executer implements Runnable {
 				rmiArgsArrayList.add(path);
 
 				RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/+" "+path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
-						false, true, true, false, true, false, true, false);
+						false, true, true, false, true, false, true, false, false);
 
 				imp = rmqtvsh.getImagePlus();
 				//					MultiChannelController mcc = new MultiChannelController(imp);
@@ -318,11 +318,11 @@ public class Executer implements Runnable {
 				ci.setPosition( 1+1, ci.getSlice(), ci.getFrame() );
 				IJ.doCommand(mcc.getChannelLUTChoice(1) );
 				mcc.setSliceSpinner(0, 1);			
-				if (path.contains("_prx_")) {
-					mcc.setRotateAngleSpinner(0, 90);
-					mcc.setRotateAngleSpinner(1, 90);
-					rmqtvsh.setRotation(90);
-				}
+//				if (path.contains("_prx_")) {
+//					mcc.setRotateAngleSpinner(0, 90);
+//					mcc.setRotateAngleSpinner(1, 90);
+//					rmqtvsh.setRotation(90);
+//				}
 				//					imp.show();
 				imp.getWindow().setVisible(true);
 

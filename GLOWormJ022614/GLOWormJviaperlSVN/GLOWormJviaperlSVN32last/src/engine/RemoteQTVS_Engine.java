@@ -133,7 +133,7 @@ public class RemoteQTVS_Engine extends UnicastRemoteObject implements Compute {
 
     }
 
-	public int setUpMovie(String[] names, String[] slices, int port)  throws RemoteException {
+	public int setUpMovie(String[] names, String[] slices, int port, boolean redCyanStereo)  throws RemoteException {
 		if (!QTSession.isInitialized())
 			try {
 				QTSession.open();
@@ -172,9 +172,9 @@ public class RemoteQTVS_Engine extends UnicastRemoteObject implements Compute {
             if (names[0].substring(names[0].lastIndexOf("/")).startsWith("/SW")
             		|| names[0].substring(names[0].lastIndexOf("/")).startsWith("/DUP")
             		|| names[0].substring(names[0].lastIndexOf("/")).startsWith("/Projectionsof")) {
-            	vstack = new MultiQTVirtualStack(mqtf, new ArrayList<String>(),new ArrayList<String>(),movieSlices, false, imp, true, true, false, false, false, false);
+            	vstack = new MultiQTVirtualStack(mqtf, new ArrayList<String>(),new ArrayList<String>(),movieSlices, false, imp, true, true, false, redCyanStereo, false, false, false);
             } else {
-            	vstack = new MultiQTVirtualStack(mqtf, new ArrayList<String>(),new ArrayList<String>(),movieSlices, true, imp, false, true, false, false, false, false);
+            	vstack = new MultiQTVirtualStack(mqtf, new ArrayList<String>(),new ArrayList<String>(),movieSlices, true, imp, false, true, false, redCyanStereo, false, false, false);
             }
 		} catch (IOException e) {
 			e.printStackTrace();

@@ -432,7 +432,7 @@ public class MQTVSSceneLoader64 implements PlugIn {
 						pathConcat = pathConcat +" " +paths[p]+" " +movieSliceDepthValues[p];
 
 					RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], pathConcat.trim(), 
-												stretchToFitOverlay, viewOverlay, grayscale, grid, horizontal, sideSideStereo, redCyanStereo, silentlyUpdateScene);
+												stretchToFitOverlay, viewOverlay, grayscale, grid, horizontal, sideSideStereo, redCyanStereo, silentlyUpdateScene, false);
 					setImp(rmqtvsh.getImagePlus());
 					getImp().setPosition(cPosition, zPosition, tPosition);
 					if(!cycling)

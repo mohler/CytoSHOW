@@ -366,7 +366,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							//pathListSingle.replace(".mov!", ".mov");
 //							new QTMovieOpenerMultiMod(pathListSingle.substring(0, pathListSingle.length() - 1));
 							RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replaceAll("%2B", "\\+").replaceAll("%25", "%")+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
-									false, true, true, false, true, false, false, false);
+									false, true, true, false, true, false, false, false, false);
 							rmqtvsh.getImagePlus().getWindow().setVisible(true);
 							if (dropImp == null)
 								return;
@@ -381,7 +381,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							String pathListStereo = path;
 //							new QTMovieOpenerMultiMod(pathListStereo, true, false);
 							RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replaceAll("%2B", "\\+").replaceAll("%25", "%")+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/+" "+path.replaceAll("%2B", "\\+").replaceAll("%25", "%")+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
-									false, true, true, false, true, false, true, false);
+									false, true, true, false, true, false, true, false, false);
 
 							ImagePlus stereoImp = rmqtvsh.getImagePlus();
 							MultiChannelController mcc = stereoImp.getMultiChannelController();
@@ -393,11 +393,11 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							ci.setPosition( 1+1, ci.getSlice(), ci.getFrame() );
 							IJ.doCommand(mcc.getChannelLUTChoice(1) );
 							mcc.setSliceSpinner(0, 1);					
-							if (path.contains("_prx_")) {
-								mcc.setRotateAngleSpinner(0, 90);
-								mcc.setRotateAngleSpinner(1, 90);
-								rmqtvsh.setRotation(90);
-							}
+//							if (path.contains("_prx_")) {
+//								mcc.setRotateAngleSpinner(0, 90);
+//								mcc.setRotateAngleSpinner(1, 90);
+//								rmqtvsh.setRotation(90);
+//							}
 							stereoImp.getWindow().setVisible(true);
 
 							if (dropImp == null)
@@ -1368,7 +1368,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						else if  (path.toLowerCase().endsWith(".mov") || path.toLowerCase().endsWith(".avi")) {
 //							new QTMovieOpenerMultiMod(path);
 							RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
-									false, true, true, false, true, false, false, false);
+									false, true, true, false, true, false, false, false, false);
 							rmqtvsh.getImagePlus().getWindow().setVisible(true);
 							if (dropImp == null)
 								return;

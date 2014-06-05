@@ -400,7 +400,7 @@ public class MQTVS_SceneLoader implements PlugIn {
 			VirtualStack vstack = null;
 
 			//if (IJ.debugMode) IJ.log(" \n" + movieCountStr+ ":");
-			vstack = new MultiQTVirtualStack(mqtf, tifPaths, dirPaths, movieSlices, eightBit, imp, stretchToFitOverlay, viewOverlay, sideSideStereo, redCyanStereo, horizontal, grid);		
+			vstack = new MultiQTVirtualStack(mqtf, tifPaths, dirPaths, movieSlices, eightBit, imp, stretchToFitOverlay, viewOverlay, sideSideStereo, redCyanStereo, horizontal, grid, false);		
 
 			if ( mqtf.length == 1 || ((redCyanStereo || sideSideStereo) && mqtf.length == 2)) {
 				((MultiQTVirtualStack) vstack).imp.setTitle( ((MultiQTVirtualStack) vstack).getVirtualStack(0).getMovieName());

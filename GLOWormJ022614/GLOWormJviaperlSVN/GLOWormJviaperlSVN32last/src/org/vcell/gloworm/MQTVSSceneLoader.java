@@ -434,7 +434,7 @@ public class MQTVSSceneLoader implements PlugIn {
 							pathConcat = pathConcat +" " +path;
 
 						RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], pathConcat.trim(), 
-								stretchToFitOverlay, viewOverlay, grayscale, grid, horizontal, sideSideStereo, redCyanStereo, false);
+								stretchToFitOverlay, viewOverlay, grayscale, grid, horizontal, sideSideStereo, redCyanStereo, false, false);
 						imp = rmqtvsh.getImagePlus();
 					}
 					imp.setPosition(cPosition, zPosition, tPosition);
@@ -1014,7 +1014,7 @@ public class MQTVSSceneLoader implements PlugIn {
 			VirtualStack vstack = null;
 
 			//if (IJ.debugMode) IJ.log(" \n" + movieCountStr+ ":");
-			vstack = new MultiQTVirtualStack(mqtf, tifPaths, dirPaths, movieSlices, eightBit, imp, stretchToFitOverlay, viewOverlay, sideSideStereo, redCyanStereo, horizontal, grid);		
+			vstack = new MultiQTVirtualStack(mqtf, tifPaths, dirPaths, movieSlices, eightBit, imp, stretchToFitOverlay, viewOverlay, sideSideStereo, redCyanStereo, horizontal, grid, false);		
 
 			//			while( ((MultiQTVirtualStack) vstack).imp == null )
 			//				IJ.wait(10);
