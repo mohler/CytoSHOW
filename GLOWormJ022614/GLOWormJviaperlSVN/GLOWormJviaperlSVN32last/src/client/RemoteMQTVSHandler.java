@@ -149,6 +149,8 @@ public class RemoteMQTVSHandler {
 					redCyanStereo = true;
 				if (args[a].toLowerCase() == "-silentlyupdatescene")
 					silentlyUpdateScene  = true;
+				if (args[a].toLowerCase() == "-rcsprx")
+					rcsPrX  = true;
 			}
 			if (args.length-skip == 1) {
 				moviePathNames = new String[]{args[skip]};
@@ -225,9 +227,9 @@ public class RemoteMQTVSHandler {
 			return;
 		}
 		localMovieDirs = new File[moviePathNames.length];
-		rcsPrX = false;
+
 		for (int m=0;m<moviePathNames.length;m++) {
-			localMovieDirs[m] = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+moviePathNames[m]);
+			localMovieDirs[m] = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+moviePathNames[m]+(rcsPrX?"rcsPrX":""));
 			if (!localMovieDirs[m].canWrite()) {
 				if (localMovieDirs[m].mkdirs()) {
 					localMovieDirs[m].setReadable(true, false);
@@ -500,7 +502,7 @@ public class RemoteMQTVSHandler {
 
 			if (moviePathNames.length>0) {
 				try {
-					remoteImpID = compQ.setUpMovie(moviePathNames, movieSlices, Integer.parseInt(args[0].split(":")[1])+Integer.parseInt(args[1]), redCyanStereo);
+					remoteImpID = compQ.setUpMovie(moviePathNames, movieSlices, Integer.parseInt(args[0].split(":")[1])+Integer.parseInt(args[1]), rcsPrX);
 				} catch (NumberFormatException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();

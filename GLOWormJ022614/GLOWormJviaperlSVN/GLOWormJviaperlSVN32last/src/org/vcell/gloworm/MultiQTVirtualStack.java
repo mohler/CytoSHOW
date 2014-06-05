@@ -106,6 +106,7 @@ public class MultiQTVirtualStack extends VirtualStack {
 	private ImagePlus lineageMapImage;
 	private boolean firstCall;
 	private boolean secondCall;
+	private boolean rotateNinetyX;
 
 	public MultiQTVirtualStack(String[] args) {
 		
@@ -151,7 +152,7 @@ public class MultiQTVirtualStack extends VirtualStack {
 			boolean stretchToFitOverlay, boolean viewOverlay, 
 			boolean sideSideStereo, boolean redCyanStereo, boolean horizontal, boolean grid, boolean rotateNinetyX) throws IOException {		//constructor for QTVirtualStack now taking an array of QtFiles.
 		this.eightBit = eightBit;									//!!!Assuming n QTFiles are passed to the constructor, MultiQTVirtualStack would need to open n QTVirtualStacks.
-		
+		this.rotateNinetyX = rotateNinetyX;
 		this.mqtf = mqtf;
 		this.stretchToFitOverlay = stretchToFitOverlay;
 		this.viewOverlay = viewOverlay;
@@ -224,13 +225,13 @@ public class MultiQTVirtualStack extends VirtualStack {
 						QDDimension d = visualTrack.getSize();
 						lengths[sqtf] = visualTrack.getMedia().getSampleCount();
 						if (lengths[sqtf] > maxLength) maxLength = lengths[sqtf];
-						if (redCyanStereo && this.mqtf[sqtf].getName().matches(".*_pry?xy?_.*") && rotateNinetyX) 
+						if (this.mqtf[sqtf].getName().matches(".*_pry?xy?_.*") && rotateNinetyX) 
 							widths[sqtf]  = d.getHeight();
 						else 
 							widths[sqtf]  = d.getWidth();
 						if (widths[sqtf] > maxWidth) maxWidth = widths[sqtf];
 						if (widths[sqtf] < minWidth) minWidth = widths[sqtf];
-						if (redCyanStereo && this.mqtf[sqtf].getName().matches(".*_pry?xy?_.*") && rotateNinetyX) 
+						if (this.mqtf[sqtf].getName().matches(".*_pry?xy?_.*") && rotateNinetyX) 
 							heights[sqtf]  = d.getWidth();
 						else 
 							heights[sqtf]  = d.getHeight();
@@ -711,8 +712,8 @@ public class MultiQTVirtualStack extends VirtualStack {
 					if (stretchToFitOverlay) {
 						channelIP = channelIP.resize(maxWidth, maxHeight, false);
 					}
-					ip.insert(channelIP,0,0);
-
+					ip.insert((this.mqtf[sqtvs].getName().matches(".*_pry?xy?_.*") && rotateNinetyX)?channelIP.rotateRight():channelIP,0,0);
+					 
 					break;
 				}		
 			}
@@ -837,6 +838,8 @@ public class MultiQTVirtualStack extends VirtualStack {
 					if (stretchToFitOverlay) {
 						channelIP = channelIP.resize(maxWidth, maxHeight, false);
 					}
+					if (this.mqtf[sqtvs].getName().matches(".*_pry?xy?_.*") && rotateNinetyX)
+						channelIP = channelIP.rotateRight();
 
 					break;
 				}		
