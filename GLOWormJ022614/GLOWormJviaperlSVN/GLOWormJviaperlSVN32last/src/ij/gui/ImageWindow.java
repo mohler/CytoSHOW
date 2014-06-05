@@ -56,6 +56,7 @@ import javax.swing.JLabel;
 
 import org.vcell.gloworm.MultiChannelController;
 import org.vcell.gloworm.MultiQTVirtualStack;
+import org.vcell.gloworm.SliceStereoToggle;
 
 /** A frame for displaying images. */
 public class ImageWindow extends Frame implements FocusListener, WindowListener, WindowStateListener, MouseWheelListener {
@@ -400,7 +401,8 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 		modeButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/4DMode.png")));
 		modeButton.setFont(buttonPanelFont);
 		viewButtonPanel.add(modeButton, fspc);
-		modeButton.addActionListener(ij);
+		SliceStereoToggle sst = new SliceStereoToggle(imp);
+		modeButton.addActionListener(sst);
 		modeButton.addMouseMotionListener(ic);
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
@@ -424,51 +426,51 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 		slice4dButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Slice4D.png")));
 		slice4dButton.setFont(buttonPanelFont);
 		modeButtonPanel.add(slice4dButton, fspc);
-		slice4dButton.addActionListener(ij);
+		slice4dButton.addActionListener(sst);
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
 		fspc.fill = GridBagConstraints.BOTH;
 		stereo4dxButton = new JButton();
 		stereo4dxButton.setActionCommand("Stereo4DX");
 		stereo4dxButton.setName("Stereo4DX");
-		stereo4dxButton.setToolTipText("Switch to Stereo-4D spinning around X-axis");
+		stereo4dxButton.setToolTipText("Switch to Stereo-4D, spinning around X-axis");
 		stereo4dxButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Stereo4DX.png")));
 		stereo4dxButton.setFont(buttonPanelFont);
 		modeButtonPanel.add(stereo4dxButton, fspc);
-		stereo4dxButton.addActionListener(ij);
+		stereo4dxButton.addActionListener(sst);
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
 		fspc.fill = GridBagConstraints.BOTH;
 		stereo4dyButton = new JButton();
 		stereo4dyButton.setActionCommand("Stereo4DY");
 		stereo4dyButton.setName("Stereo4DY");
-		stereo4dyButton.setToolTipText("Switch to Stereo-4D spinning around Y-axis");
+		stereo4dyButton.setToolTipText("Switch to Stereo-4D, spinning around Y-axis");
 		stereo4dyButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Stereo4DY.png")));
 		stereo4dyButton.setFont(buttonPanelFont);
 		modeButtonPanel.add(stereo4dyButton, fspc);
-		stereo4dyButton.addActionListener(ij);
+		stereo4dyButton.addActionListener(sst);
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
 		fspc.fill = GridBagConstraints.BOTH;
 		stereo4dXrcButton = new JButton();
 		stereo4dXrcButton.setActionCommand("Stereo4DXrc");
 		stereo4dXrcButton.setName("Stereo4DXrc");
-		stereo4dXrcButton.setToolTipText("Switch to Red/Cyan Stereo-4D spinning around X-axis");
+		stereo4dXrcButton.setToolTipText("Switch to Red/Cyan Stereo-4D spinning, around X-axis");
 		stereo4dXrcButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Stereo4DXrc.png")));
 		stereo4dXrcButton.setFont(buttonPanelFont);
 		modeButtonPanel.add(stereo4dXrcButton, fspc);
-		stereo4dXrcButton.addActionListener(ij);
+		stereo4dXrcButton.addActionListener(sst);
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
 		fspc.fill = GridBagConstraints.BOTH;
 		stereo4dYrcButton = new JButton();
 		stereo4dYrcButton.setActionCommand("Stereo4DYrc");
 		stereo4dYrcButton.setName("Stereo4DYrc");
-		stereo4dYrcButton.setToolTipText("Switch to Red/Cyan Stereo-4D spinning around Y-axis");
+		stereo4dYrcButton.setToolTipText("Switch to Red/Cyan Stereo-4D, spinning around Y-axis");
 		stereo4dYrcButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Stereo4DYrc.png")));
 		stereo4dYrcButton.setFont(buttonPanelFont);
 		modeButtonPanel.add(stereo4dYrcButton, fspc);
-		stereo4dYrcButton.addActionListener(ij);
+		stereo4dYrcButton.addActionListener(sst);
 
 //		
 		
@@ -485,7 +487,7 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 		add(optionsPanel, BorderLayout.EAST);
 		add(viewButtonPanel, BorderLayout.WEST);
 		tagButtonPanel.setVisible(false);
-		modeButtonPanel.setVisible(true);
+		modeButtonPanel.setVisible(false);
 		optionsPanel.setVisible(true);
 		viewButtonPanel.setVisible(true);
 		addFocusListener(this);
