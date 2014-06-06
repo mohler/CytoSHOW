@@ -2,6 +2,8 @@ package org.vcell.gloworm;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.ColorModel;
+import java.awt.image.IndexColorModel;
 import java.rmi.RemoteException;
 import java.util.Hashtable;
 
@@ -10,6 +12,7 @@ import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.PlugIn;
+import ij.process.LUT;
 
 public class SliceStereoToggle implements PlugIn, ActionListener {
 	static Hashtable<String, Integer>  viewSpecificSliceHT = new Hashtable<String, Integer>();
@@ -29,6 +32,11 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 	public void actionPerformed(ActionEvent e) 	{	
 
 		ImagePlus imp = this.imp;
+
+		double[] inMin = new double[imp.getNChannels()];
+		double[] inMax = new double[imp.getNChannels()];
+		ColorModel[] cm = new ColorModel[imp.getNChannels()];
+		LUT[] lut = imp.getLuts();
 
 		String pathlist = "";
 		if (imp.isComposite()) {
@@ -68,11 +76,6 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 				ci.setPosition( 1+1, ci.getSlice(), ci.getFrame() );
 				IJ.doCommand(mcc.getChannelLUTChoice(1) );
 				mcc.setSliceSpinner(0, 1);			
-//				if (e.getActionCommand().contains("Stereo4DX")) {
-//					mcc.setRotateAngleSpinner(0, 90);
-//					mcc.setRotateAngleSpinner(1, 90);
-//					rmqtvsh.setRotation(90);
-//				}
 			}
 			
 			if (viewSpecificSliceHT.get(newImp.getWindow().getTitle().split(",")[0]) != null)
@@ -91,14 +94,9 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 
 			newImp.getWindow().sst.primeButtons(newImp);
 			imp.getWindow().setVisible(false);
-			if (newImp.isComposite() && !e.getActionCommand().contains("rc")) {
-				((CompositeImage)newImp).copyLuts(imp);
-				//Still need to fix replication of Min Max settings.!!
-				((CompositeImage)newImp).setMode(3);
-				((CompositeImage)newImp).setMode(displaymode);
-				newImp.updateAndRepaintWindow();
 
-			}
+			newImp.updateAndRepaintWindow();
+
 			viewSpecificSliceHT.put(imp.getWindow().getTitle().split(",")[0], imp.getSlice());
 			imp.close();
 			if (running || running2) 
