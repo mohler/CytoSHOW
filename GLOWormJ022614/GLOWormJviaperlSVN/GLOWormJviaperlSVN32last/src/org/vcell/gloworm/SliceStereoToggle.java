@@ -31,7 +31,8 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 
 
 	public void actionPerformed(ActionEvent e) 	{	
-
+		boolean keepOriginal = false;
+		keepOriginal = true;
 		ImagePlus imp = this.imp;
 
 		ColorModel[] cm = new ColorModel[imp.getNChannels()];
@@ -109,12 +110,14 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 			}
 
 			newImp.getWindow().sst.primeButtons(newImp);
-			imp.getWindow().setVisible(false);
+//			imp.getWindow().setVisible(false);
 
 			newImp.updateAndRepaintWindow();
+			newImp.getWindow().toFront();
 
 			viewSpecificSliceHT.put(imp.getWindow().getTitle().split(",")[0], imp.getSlice());
-			imp.close();
+			if(!keepOriginal)
+				imp.close();
 			if (running || running2) 
 				IJ.doCommand("Start Animation [\\]");
 			if (running3) 
