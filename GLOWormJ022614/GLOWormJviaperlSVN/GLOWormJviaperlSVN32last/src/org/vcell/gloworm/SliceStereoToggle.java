@@ -12,6 +12,7 @@ import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.PlugIn;
+import ij.plugin.frame.ContrastAdjuster;
 import ij.process.LUT;
 
 public class SliceStereoToggle implements PlugIn, ActionListener {
@@ -33,8 +34,6 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 
 		ImagePlus imp = this.imp;
 
-		double[] inMin = new double[imp.getNChannels()];
-		double[] inMax = new double[imp.getNChannels()];
 		ColorModel[] cm = new ColorModel[imp.getNChannels()];
 		LUT[] lut = imp.getLuts();
 
@@ -71,10 +70,10 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 				mcc.setChannelLUTChoice(0, 0);
 				CompositeImage ci = (CompositeImage)newImp;
 				ci.setPosition( 0+1, ci.getSlice(), ci.getFrame() );
-				IJ.doCommand(mcc.getChannelLUTChoice(0) );
+				IJ.run(mcc.getChannelLUTChoice(0));
 				mcc.setChannelLUTChoice(1, 4);
 				ci.setPosition( 1+1, ci.getSlice(), ci.getFrame() );
-				IJ.doCommand(mcc.getChannelLUTChoice(1) );
+				IJ.run(mcc.getChannelLUTChoice(1));
 				mcc.setSliceSpinner(0, 1);			
 			}
 			
@@ -91,6 +90,23 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 			newImp.getCanvas().zoomOut(newImp.getWidth(), newImp.getHeight());
 			newImp.getWindow().setLocation(imp.getWindow().getLocation().x, imp.getWindow().getLocation().y);
 			newImp.getWindow().setVisible(true);
+			double[] inMin = new double[newImp.getNChannels()];
+			double[] inMax = new double[newImp.getNChannels()];
+			if (newImp.isComposite()) {
+				((CompositeImage)newImp).copyLuts(imp);
+				//Still need to fix replication of Min Max settings.!!
+				((CompositeImage)newImp).setMode(3);
+				((CompositeImage)newImp).setMode(displaymode);
+				int channel = imp.getChannel();
+				for (int c=1; c<=newImp.getNChannels(); c++) {
+					inMin[c-1] = imp.getDisplayRangeMin();
+					inMax[c-1] = imp.getDisplayRangeMax();
+					newImp.setPositionWithoutUpdate(c, newImp.getSlice(), newImp.getFrame());
+					newImp.setDisplayRange(inMin[c-1], inMax[c-1]);
+				}
+				((CompositeImage)imp).reset();
+				imp.setPosition(channel, imp.getSlice(), imp.getFrame());
+			}
 
 			newImp.getWindow().sst.primeButtons(newImp);
 			imp.getWindow().setVisible(false);

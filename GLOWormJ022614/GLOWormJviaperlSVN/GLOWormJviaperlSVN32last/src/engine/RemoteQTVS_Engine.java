@@ -363,7 +363,7 @@ public class RemoteQTVS_Engine extends UnicastRemoteObject implements Compute {
 		lullStartTime = System.currentTimeMillis();
 		(new Thread(new Runnable() {
 			public void run() {
-				while(lullStartTime + 120000 > System.currentTimeMillis()) {
+				while(lullStartTime + 300000 > System.currentTimeMillis()) {
 					IJ.wait(1000);
 				}
 				if (RemoteQTVS_Engine.this.port == 80) {
