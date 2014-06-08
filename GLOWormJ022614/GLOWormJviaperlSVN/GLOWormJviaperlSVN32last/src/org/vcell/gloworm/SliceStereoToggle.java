@@ -42,6 +42,32 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 		if (imp.isComposite()) {
 			int displaymode = ((CompositeImage)imp).getMode();
 			reconnectRemote(imp);
+			if (imp.isComposite()) {
+				reconnectRemote(imp);
+				String name = imp.getRemoteMQTVSHandler().getChannelPathNames()[imp.getChannel()-1];
+				if (name.matches(".*(_pr|_slc)..*_z.*_t.*")) {
+					String[] matchedNames = {""};
+					try {
+						String justname = name.replace("/Volumes/GLOWORM_DATA/", "");
+						String subname = justname.replaceAll("(_pr|_slc).*","").replaceAll("\\+", "_") + " " + justname.replaceAll(".*(_pr..?|_slc)J?", "").replaceAll("_x.*", "") + " " + justname.replaceAll(".*(_nmdxy)", "");
+						matchedNames = imp.getRemoteMQTVSHandler().getCompQ().getOtherViewNames(subname);
+					} catch (RemoteException re) {
+						// TODO Auto-generated catch block
+						re.printStackTrace();
+					}
+					for (String match:matchedNames) {
+						if (match.matches(".*(_slc_).*")) {
+							slcPath = match;
+						}
+						if (match.matches(".*(_pry?xy?_).*")) {
+							prxPath = match;
+						}
+						if (match.matches(".*(_prx?yx?_).*")) {
+							pryPath = match;
+						}
+					}
+				}
+			}
 
 			if (e.getActionCommand() == "Slice<>Stereo") {
 				primeButtons(imp);
@@ -77,7 +103,7 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 				IJ.run(mcc.getChannelLUTChoice(1));
 				mcc.setSliceSpinner(0, 1);			
 			}
-			
+
 			if (viewSpecificSliceHT.get(newImp.getWindow().getTitle().split(",")[0]) != null)
 				slice = viewSpecificSliceHT.get(newImp.getWindow().getTitle().split(",")[0]);
 			newImp.setPosition(imp.getChannel(), slice, imp.getFrame());
@@ -110,7 +136,7 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 			}
 
 			newImp.getWindow().sst.primeButtons(newImp);
-//			imp.getWindow().setVisible(false);
+			//			imp.getWindow().setVisible(false);
 
 			newImp.updateAndRepaintWindow();
 			newImp.getWindow().toFront();
@@ -134,33 +160,32 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 	}
 
 	public void primeButtons(ImagePlus imp2) {
-		if (imp2.isComposite()) {
-			reconnectRemote(imp2);
-			for (String name:imp2.getRemoteMQTVSHandler().getChannelPathNames()) {
-				if (name.matches(".*(_pr|_slc)..*_z.*_t.*")) {
-					String[] matchedNames = {""};
-					try {
-						String justname = name.replace("/Volumes/GLOWORM_DATA/", "");
-						String subname = justname.replaceAll("(_pr|_slc).*","").replaceAll("\\+", "_") + " " + justname.replaceAll(".*(_pr..?|_slc)J?", "").replaceAll("_x.*", "") + " " + justname.replaceAll(".*(_nmdxy)", "");
-						matchedNames = imp2.getRemoteMQTVSHandler().getCompQ().getOtherViewNames(subname);
-					} catch (RemoteException re) {
-						// TODO Auto-generated catch block
-						re.printStackTrace();
-					}
-					for (String match:matchedNames) {
-						if (match.matches(".*(_slc_).*")) {
-							slcPath = match;
-						}
-						if (match.matches(".*(_pry?xy?_).*")) {
-							prxPath = match;
-						}
-						if (match.matches(".*(_prx?yx?_).*")) {
-							pryPath = match;
-						}
-					}
-				}
-			}
-		}
+//		if (imp2.isComposite()) {
+//			reconnectRemote(imp2);
+//			String name = imp2.getRemoteMQTVSHandler().getChannelPathNames()[imp2.getChannel()];
+//			if (name.matches(".*(_pr|_slc)..*_z.*_t.*")) {
+//				String[] matchedNames = {""};
+//				try {
+//					String justname = name.replace("/Volumes/GLOWORM_DATA/", "");
+//					String subname = justname.replaceAll("(_pr|_slc).*","").replaceAll("\\+", "_") + " " + justname.replaceAll(".*(_pr..?|_slc)J?", "").replaceAll("_x.*", "") + " " + justname.replaceAll(".*(_nmdxy)", "");
+//					matchedNames = imp2.getRemoteMQTVSHandler().getCompQ().getOtherViewNames(subname);
+//				} catch (RemoteException re) {
+//					// TODO Auto-generated catch block
+//					re.printStackTrace();
+//				}
+//				for (String match:matchedNames) {
+//					if (match.matches(".*(_slc_).*")) {
+//						slcPath = match;
+//					}
+//					if (match.matches(".*(_pry?xy?_).*")) {
+//						prxPath = match;
+//					}
+//					if (match.matches(".*(_prx?yx?_).*")) {
+//						pryPath = match;
+//					}
+//				}
+//			}
+//		}
 		if (slcPath == null) {
 			imp2.getWindow().slice4dButton.setVisible(false);
 		} else {
