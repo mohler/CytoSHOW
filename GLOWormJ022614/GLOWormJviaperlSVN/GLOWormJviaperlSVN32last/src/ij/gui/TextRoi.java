@@ -371,10 +371,10 @@ public class TextRoi extends Roi {
 		String searchText = "";
 		for (String chunk:searchTextChunks)
 			if (!(chunk.matches("-?\\d+") || chunk.matches("\\++")))
-					searchText = searchText + " " + chunk;
+					searchText = (searchText + " " + chunk);
 		if ((IJ.controlKeyDown() || IJ.altKeyDown()) && IJ.shiftKeyDown()) {
 			IJ.runPlugIn("ij.plugin.BrowserLauncher",
-					"http://www.textpresso.org/cgi-bin/celegans/query?textstring=\""
+					"http://www.textpresso.org/cgi-bin/celegans/query?textstring="
 							+ searchText);
 		} else if (IJ.controlKeyDown() || IJ.altKeyDown()) {
 			IJ.runPlugIn("ij.plugin.BrowserLauncher",

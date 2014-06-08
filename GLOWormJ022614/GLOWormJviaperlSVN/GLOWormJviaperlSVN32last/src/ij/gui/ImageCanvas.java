@@ -1165,18 +1165,28 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			tool.mousePressed(imp, e);
 			if (e.isConsumed()) return;
 		}
-		if (cursorRoi != null) {
-			Roi roi = cursorRoi;
-			if (roi != null) 
-				currentRoi = roi;
-			boolean doubleClick = roi==currentRoi && (System.currentTimeMillis()-mouseDownTime)<=400;
-			mouseDownTime = System.currentTimeMillis();
-			if (doubleClick && roi instanceof TextRoi) 
-				((TextRoi)roi).searchWormbase();
-			else if (doubleClick && roi instanceof Roi) {
-				TextRoi fakeTR = new TextRoi(0,0,imp.getRoiManager().getSelectedRoisAsArray()[0]
-						.getName().split("[\"|=]")[1].trim());
-				fakeTR.searchWormbase();
+		boolean doubleClick =  (System.currentTimeMillis()-mouseDownTime)<=400;
+		mouseDownTime = System.currentTimeMillis();
+		//		if (cursorRoi != null) {
+		if (this.getCursor().getType() == Cursor.CUSTOM_CURSOR) {
+			if (doubleClick) {
+				Roi roi = imp.getRoiManager().getSelectedRoisAsArray()[0];
+
+				if (roi != null) 
+					currentRoi = roi;
+				//			if (doubleClick && roi instanceof TextRoi) 
+				//				((TextRoi)roi).searchWormbase();
+				if (roi instanceof Roi) {
+					//				IJ.setKeyDown(KeyEvent.VK_ALT);
+					//				IJ.setKeyDown(KeyEvent.VK_SHIFT);
+
+					TextRoi fakeTR = new TextRoi(0,0,imp.getRoiManager().getSelectedRoisAsArray()[0]
+							.getName().split("[\"|=]")[1].trim());
+					fakeTR.searchWormbase();
+					//				IJ.setKeyUp(KeyEvent.VK_ALT);
+					//				IJ.setKeyUp(KeyEvent.VK_SHIFT);
+
+				}
 			}
 		}
 		Roi impRoi = imp.getRoi();
