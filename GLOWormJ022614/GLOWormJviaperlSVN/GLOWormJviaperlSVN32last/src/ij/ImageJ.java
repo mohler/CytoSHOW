@@ -449,8 +449,8 @@ public class ImageJ extends Frame implements ActionListener,
 		int keyCode = e.getKeyCode();
 		IJ.setKeyDown(keyCode);
 		hotkey = false;
-		if (keyCode==KeyEvent.VK_CONTROL || keyCode==KeyEvent.VK_SHIFT)
-			return;
+//		if (keyCode==KeyEvent.VK_CONTROL || keyCode==KeyEvent.VK_SHIFT)
+//			return;
 		char keyChar = e.getKeyChar();
 		int flags = e.getModifiers();
 		if (IJ.debugMode) IJ.log("keyPressed: code=" + keyCode + " (" + KeyEvent.getKeyText(keyCode)
