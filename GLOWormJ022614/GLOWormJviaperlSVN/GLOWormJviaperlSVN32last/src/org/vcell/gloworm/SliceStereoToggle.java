@@ -135,7 +135,7 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 				imp.setPosition(channel, imp.getSlice(), imp.getFrame());
 			}
 
-			newImp.getWindow().sst.primeButtons(newImp);
+			newImp.getWindow().sst.actionPerformed(new ActionEvent(newImp.getWindow(), ActionEvent.ACTION_PERFORMED, "Slice<>Stereo"));
 			//			imp.getWindow().setVisible(false);
 
 			newImp.updateAndRepaintWindow();
@@ -160,32 +160,7 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 	}
 
 	public void primeButtons(ImagePlus imp2) {
-//		if (imp2.isComposite()) {
-//			reconnectRemote(imp2);
-//			String name = imp2.getRemoteMQTVSHandler().getChannelPathNames()[imp2.getChannel()];
-//			if (name.matches(".*(_pr|_slc)..*_z.*_t.*")) {
-//				String[] matchedNames = {""};
-//				try {
-//					String justname = name.replace("/Volumes/GLOWORM_DATA/", "");
-//					String subname = justname.replaceAll("(_pr|_slc).*","").replaceAll("\\+", "_") + " " + justname.replaceAll(".*(_pr..?|_slc)J?", "").replaceAll("_x.*", "") + " " + justname.replaceAll(".*(_nmdxy)", "");
-//					matchedNames = imp2.getRemoteMQTVSHandler().getCompQ().getOtherViewNames(subname);
-//				} catch (RemoteException re) {
-//					// TODO Auto-generated catch block
-//					re.printStackTrace();
-//				}
-//				for (String match:matchedNames) {
-//					if (match.matches(".*(_slc_).*")) {
-//						slcPath = match;
-//					}
-//					if (match.matches(".*(_pry?xy?_).*")) {
-//						prxPath = match;
-//					}
-//					if (match.matches(".*(_prx?yx?_).*")) {
-//						pryPath = match;
-//					}
-//				}
-//			}
-//		}
+
 		if (slcPath == null) {
 			imp2.getWindow().slice4dButton.setVisible(false);
 		} else {

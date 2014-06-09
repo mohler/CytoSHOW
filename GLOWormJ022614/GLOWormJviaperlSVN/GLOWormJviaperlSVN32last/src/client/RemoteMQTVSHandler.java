@@ -344,10 +344,42 @@ public class RemoteMQTVSHandler {
 						if (compQClosed == "VMkilled")
 							spawnStrings =null;						
 						return super.close();
+						
+						
+					}
+					
+					
+					@Override
+					public void setVisible(final boolean visible) {
+					  // let's handle visibility...
+					  if (!visible || !isVisible()) { // have to check this condition simply because super.setVisible(true) invokes toFront if frame was already visible
+					      super.setVisible(visible);
+					  }
+					  // ...and bring frame to the front.. in a strange and weird way
+					  if (visible) {
+					      int state = super.getExtendedState();
+					      state &= Frame.ICONIFIED;
+					      super.setExtendedState(state);
+					      super.setAlwaysOnTop(true);
+					      super.toFront();
+					      super.requestFocus();
+					  }
+					}
+
+					@Override
+					public void toFront() {
+					  setVisible(true);
+					}
+
+					@Override
+					public void windowActivated(WindowEvent we) {
+						super.windowActivated(we);
+					    super.setAlwaysOnTop(false);
 					}
 				};
 			} else {
 				win2.updateImage(ci2);
+				
 			}
 
 			if (ci2!=null)
