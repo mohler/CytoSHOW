@@ -13,6 +13,7 @@ import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
 import ij.gui.ImageWindow;
 import ij.gui.StackWindow;
+import ij.gui.TextRoi;
 import ij.io.FileSaver;
 import ij.io.Opener;
 
@@ -65,7 +66,7 @@ public class RemoteMQTVSHandler {
 	public boolean burnInComplete= false;
 	private ArrayList<Thread> threadArrayList = new ArrayList<Thread>();
 	private int remoteImpID = 0;
-	private Compute compQ;
+	public Compute compQ;
 	private ImageWindow win2;
 	private static String serverReturnString;
 	private static String[] spawnStrings;
@@ -164,7 +165,7 @@ public class RemoteMQTVSHandler {
 				}
 			}
 			IJ.log(remoteEngineName);
-			IJ.log("contacting glowormserver...");
+			IJ.log("contacting CytoSHOW server...");
 			comp = (Compute) Naming.lookup(remoteEngineName);
 			IJ.log(comp.toString());
 			while (spawnStrings == null || serverReturnString.contains("Exception")) {
@@ -477,6 +478,7 @@ public class RemoteMQTVSHandler {
 	}
 
 	public ImageProcessor getRemoteIP(final int qtSlice, final double jpegQuality, boolean burnIn) {
+
 		Object qtbaosba=null;
 		try {
 			if (moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW")) {
@@ -494,7 +496,16 @@ public class RemoteMQTVSHandler {
 			String[] args = new String[] {IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1]};
 			String remoteEngineName = args[0]+"/HEAD";
 			//			IJ.log(remoteEngineName);
-			IJ.log("contacting glowormserver...");
+			IJ.log("contacting CytoSHOW server...");
+			TextRoi.setFont("Arial", win2.getImagePlus().getWidth()/20, Font.ITALIC);		
+			TextRoi tr = new TextRoi(0, 0, "Contacting\nCytoSHOW\nserver...");
+			tr.setStrokeColor(Color.gray);
+			tr.setFillColor(Color.decode("#55ffff00"));
+
+			win2.getImagePlus().setRoi(tr);
+			tr.setImage(win2.getImagePlus());
+			win2.getImagePlus().getCanvas().paintDoubleBuffered(win2.getImagePlus().getCanvas().getGraphics());
+
 			try {
 				comp = (Compute) Naming.lookup(remoteEngineName);
 				compQ = (Compute) Naming.lookup(lookupString);
@@ -504,6 +515,7 @@ public class RemoteMQTVSHandler {
 			} catch (RemoteException e2) {
 				if (comp==null) {
 					IJ.log(lookupString + "failure to connect.");
+					win2.getImagePlus().killRoi();
 					return null;
 				}
 				try {
@@ -641,7 +653,9 @@ public class RemoteMQTVSHandler {
 			}
 		}
 		//		return ip.resize(stkWidth,stkHeight,false);
+		win2.getImagePlus().killRoi();
 		return ip;
+		
 	}	
 
 

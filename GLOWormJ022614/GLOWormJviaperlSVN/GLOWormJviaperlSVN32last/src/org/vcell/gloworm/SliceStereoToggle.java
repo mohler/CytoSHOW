@@ -1,5 +1,7 @@
 package org.vcell.gloworm;
 
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.ColorModel;
@@ -11,6 +13,7 @@ import client.RemoteMQTVSHandler;
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.gui.TextRoi;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.ContrastAdjuster;
 import ij.process.LUT;
@@ -29,8 +32,22 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 	public void run(String arg) {
 	}
 
-
 	public void actionPerformed(ActionEvent e) 	{	
+		if (e.getActionCommand() == "Slice<>Stereo") {
+			if(imp.getWindow().modeButtonPanel.isVisible()) {
+				primeButtons(imp);
+				return;
+			}
+		}
+		TextRoi.setFont("Arial", imp.getWidth()/20, Font.ITALIC);		
+		TextRoi tr = new TextRoi(0, 0, "Contacting\nCytoSHOW\nserver...");
+		tr.setStrokeColor(Color.gray);
+		tr.setFillColor(Color.decode("#55ffff00"));
+
+		imp.setRoi(tr);
+		tr.setImage(imp);
+		imp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
+
 		boolean keepOriginal = false;
 		keepOriginal = true;
 		ImagePlus imp = this.imp;
@@ -42,36 +59,37 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 		if (imp.isComposite()) {
 			int displaymode = ((CompositeImage)imp).getMode();
 			reconnectRemote(imp);
-			if (imp.isComposite()) {
-				reconnectRemote(imp);
-				String name = imp.getRemoteMQTVSHandler().getChannelPathNames()[imp.getChannel()-1];
-				if (name.matches(".*(_pr|_slc)..*_z.*_t.*")) {
-					String[] matchedNames = {""};
-					try {
-						String justname = name.replace("/Volumes/GLOWORM_DATA/", "");
-						String subname = justname.replaceAll("(_pr|_slc).*","").replaceAll("\\+", "_") + " " + justname.replaceAll(".*(_pr..?|_slc)J?", "").replaceAll("_x.*", "") + " " + justname.replaceAll(".*(_nmdxy)", "");
-						matchedNames = imp.getRemoteMQTVSHandler().getCompQ().getOtherViewNames(subname);
-					} catch (RemoteException re) {
-						// TODO Auto-generated catch block
-						re.printStackTrace();
+			imp.killRoi();
+
+			String name = imp.getRemoteMQTVSHandler().getChannelPathNames()[imp.getChannel()-1];
+			if (name.matches(".*(_pr|_slc)..*_z.*_t.*")) {
+				String[] matchedNames = {""};
+				try {
+					String justname = name.replace("/Volumes/GLOWORM_DATA/", "");
+					String subname = justname.replaceAll("(_pr|_slc).*","").replaceAll("\\+", "_") + " " + justname.replaceAll(".*(_pr..?|_slc)J?", "").replaceAll("_x.*", "") + " " + justname.replaceAll(".*(_nmdxy)", "");
+					matchedNames = imp.getRemoteMQTVSHandler().getCompQ().getOtherViewNames(subname);
+				} catch (RemoteException re) {
+					// TODO Auto-generated catch block
+					re.printStackTrace();
+				}
+				for (String match:matchedNames) {
+					if (match.matches(".*(_slc_).*")) {
+						slcPath = match;
 					}
-					for (String match:matchedNames) {
-						if (match.matches(".*(_slc_).*")) {
-							slcPath = match;
-						}
-						if (match.matches(".*(_pry?xy?_).*")) {
-							prxPath = match;
-						}
-						if (match.matches(".*(_prx?yx?_).*")) {
-							pryPath = match;
-						}
+					if (match.matches(".*(_pry?xy?_).*")) {
+						prxPath = match;
+					}
+					if (match.matches(".*(_prx?yx?_).*")) {
+						pryPath = match;
 					}
 				}
 			}
 
 			if (e.getActionCommand() == "Slice<>Stereo") {
-				primeButtons(imp);
-				return;
+				if(!imp.getWindow().modeButtonPanel.isVisible()) {
+					primeButtons(imp);
+					return;
+				}
 			}
 
 			else if (e.getActionCommand() == "Slice4D")
@@ -153,9 +171,12 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 
 	public void reconnectRemote(ImagePlus rImp) {
 		if (rImp.getRemoteMQTVSHandler() != null) {
-			rImp.getRemoteMQTVSHandler().getRemoteIP(
-					((RemoteMQTVSHandler.RemoteMQTVirtualStack)imp.getStack())
-					.getAdjustedSlice(rImp.getCurrentSlice(), 0), 100, false);
+			if (rImp.getRemoteMQTVSHandler().compQ == null) {
+
+				rImp.getRemoteMQTVSHandler().getRemoteIP(
+						((RemoteMQTVSHandler.RemoteMQTVirtualStack)imp.getStack())
+						.getAdjustedSlice(rImp.getCurrentSlice(), 0), 100, false);
+			}
 		}
 	}
 
