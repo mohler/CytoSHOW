@@ -11,6 +11,7 @@ import java.util.zip.*;
 
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
+import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
@@ -219,6 +220,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		list.addKeyListener(ij);
 		list.addMouseListener(this);
 		list.addMouseWheelListener(this);
+		((JComponent) list).setToolTipText("<html>Left-Clicking a list item <br>highlights that tag <br>in the movie window. <br>Buttons and other widgets <br>modify the content of the list <br>and the display of tags <br>in the movie window</html>");		
+
 		if (IJ.isLinux()) list.setBackground(Color.white);
 		JScrollPane scrollPane = new JScrollPane(list);
 		add("Center", scrollPane);
@@ -3119,8 +3122,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	public void mouseReleased (MouseEvent e) {}
 	public void mouseClicked (MouseEvent e) {}
 	public void mouseEntered (MouseEvent e) {
-		IJ.runMacro("print(\"\\\\Clear\")");
-		IJ.runMacro("print(\"\\\\Update:Tag Manager:\\\nLeft-Clicking a list item highlights the Tag tag in the movie window.\\\nButtons and other widgets modify the content of the list \\\nand the display of tags in the movie window.\\\n \")");
+//		IJ.runMacro("print(\"\\\\Clear\")");
+//		IJ.runMacro("print(\"\\\\Update:Tag Manager:\\\nLeft-Clicking a list item highlights the Tag tag in the movie window.\\\nButtons and other widgets modify the content of the list \\\nand the display of tags in the movie window.\\\n \")");
 
 	}
 	public void mouseExited (MouseEvent e) {}

@@ -2935,8 +2935,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		if (tool!=null)
 			tool.mouseEntered(imp, e);
 
-		IJ.runMacro("print(\"\\\\Clear\")");
-		IJ.runMacro("print(\"\\\\Update:CytoSHOW Movie Window:\\\nLeft-Clicking on any tag will bring the linked image feature into focus.\\\nDouble-clicking will launch web-links to related information:\\\nDouble-click => WormBase.org \\\nShift-double-click => Google.com\\\nControlOption-double-click => WormAtlas.org \\\nShift-ControlOption-double-click => Textpresso C.elegans \\\nRight-Click => Shortcuts to CytoSHOW Functions, including cell-search in other open movies, \\\nexpressed genes with links to WormBase gene pages, \\\ncell fates, ancestries, and interactions with links to web resources \\\n \")");
+//		IJ.runMacro("print(\"\\\\Clear\")");
+//		IJ.runMacro("print(\"\\\\Update:CytoSHOW Movie Window:\\\nLeft-Clicking on any tag will bring the linked image feature into focus.\\\nDouble-clicking will launch web-links to related information:\\\nDouble-click => WormBase.org \\\nShift-double-click => Google.com\\\nControlOption-double-click => WormAtlas.org \\\nShift-ControlOption-double-click => Textpresso C.elegans \\\nRight-Click => Shortcuts to CytoSHOW Functions, including cell-search in other open movies, \\\nexpressed genes with links to WormBase gene pages, \\\ncell fates, ancestries, and interactions with links to web resources \\\n \")");
 
 	}
 

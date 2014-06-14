@@ -23,6 +23,10 @@ import javax.jnlp.SingleInstanceListener;
 import javax.jnlp.SingleInstanceService;
 import javax.jnlp.UnavailableServiceException;
 import javax.swing.ImageIcon;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 
 import org.vcell.gloworm.MQTVSSceneLoader64;
@@ -112,9 +116,9 @@ public class ImageJ extends Frame implements ActionListener,
 	private static String[] arguments;
 	
 	public Toolbar toolbar;
-	private Panel statusBar;
+	private JPanel statusBar;
 	private ProgressBar progressBar;
-	private Label statusLine;
+	private JLabel statusLine;
 	private boolean firstTime = true;
 	private java.applet.Applet applet; // null if not running as an applet
 	private Vector classes = new Vector();
@@ -176,11 +180,11 @@ public class ImageJ extends Frame implements ActionListener,
 		add(toolbar);
 
 		// Status bar
-		statusBar = new Panel();
+		statusBar = new JPanel();
 		statusBar.setLayout(new BorderLayout());
 		statusBar.setForeground(Color.black);
 		statusBar.setBackground(backgroundColor);
-		statusLine = new Label();
+		statusLine = new JLabel();
 		statusLine.setFont(SansSerif12);
 		statusLine.addKeyListener(this);
 		statusLine.addMouseListener(this);
@@ -190,6 +194,8 @@ public class ImageJ extends Frame implements ActionListener,
 		progressBar.addMouseListener(this);
 		statusBar.add("East", progressBar);
 		statusBar.setSize(toolbar.getPreferredSize());
+		((JComponent) statusLine).setToolTipText("<html>Left-Clicking icons selects from a variety of tools for measurement and/or tagging of the movies or images.<br>Right-clicking allows choice of even more tools.<br>Double-clicking allows you to set tool-specific options.<br>Dragging and dropping file icons or web links onto this toolbar will launch them in CytoSHOW.</html>");		
+		ToolTipManager.sharedInstance().setDismissDelay(60000);
 		add(statusBar);
 
 		IJ.init(this, applet);
@@ -302,7 +308,7 @@ public class ImageJ extends Frame implements ActionListener,
         return progressBar;
 	}
 
-	public Panel getStatusBar() {
+	public JPanel getStatusBar() {
         return statusBar;
 	}
 
@@ -439,8 +445,8 @@ public class ImageJ extends Frame implements ActionListener,
 	public void mouseExited(MouseEvent e) {}
 	public void mouseClicked(MouseEvent e) {}
 	public void mouseEntered(MouseEvent e) {
-		IJ.runMacro("print(\"\\\\Clear\")");
-		IJ.runMacro("print(\"\\\\Update:CytoSHOW Toolbar:\\\nLeft-Clicking icons selects from a variety of tools for measurement and/or Tag of the movies or images.\\\nRight-clicking allows choice of even more tools.\\\nDouble-clicking allows you to set tool-specific options.\\\nDragging and dropping file icons or web links for additional image, movies, or scenes \\\nonto this toolbar will launch them in this copy of CytoSHOW.\\\n \")");
+//		IJ.runMacro("print(\"\\\\Clear\")");
+//		IJ.runMacro("print(\"\\\\Update:CytoSHOW Toolbar:\\\nLeft-Clicking icons selects from a variety of tools for measurement and/or Tag of the movies or images.\\\nRight-clicking allows choice of even more tools.\\\nDouble-clicking allows you to set tool-specific options.\\\nDragging and dropping file icons or web links for additional image, movies, or scenes \\\nonto this toolbar will launch them in this copy of CytoSHOW.\\\n \")");
 
 	}
 

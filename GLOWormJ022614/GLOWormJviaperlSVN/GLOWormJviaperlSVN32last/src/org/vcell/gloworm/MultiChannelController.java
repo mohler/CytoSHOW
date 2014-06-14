@@ -14,6 +14,8 @@ import java.io.*;
 import java.net.SocketException;
 import java.util.Date;
 
+import javax.swing.JComponent;
+import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
@@ -120,6 +122,8 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 	public MultiChannelController(ImagePlus mcImp) {
 
 		super("Multi-Channel Controller: "+ (mcImp != null?mcImp.getTitle():"") );
+
+		
 		this.imp = mcImp;
 		if (imp == null)
 			this.imp = WindowManager.getCurrentImage();
@@ -187,12 +191,15 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 		gridbag = new GridBagLayout();
 		c = new GridBagConstraints();
 		gridbag.setConstraints(fsp, c);
-		Panel fspp = new Panel(gridbag);
+		JPanel fspp = new JPanel(gridbag);
 		fsp.add(fspp, c);
 		fspp.setLayout(gridbag);
 		this.add(fsp);
 
-		int y = 0;
+		((JComponent) fspp).setToolTipText("<html>Adjust space/time synch-ing of <br>multiple movie channels <br>in the same window.</html>");		
+	    fspp.setBackground(Color.white);
+
+	    int y = 0;
 		int x = 0;
 		c.gridx = 0;
 		c.gridy = y++;
@@ -1946,8 +1953,8 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 	}
 
 	public void mouseEntered(MouseEvent e) {
-		IJ.runMacro("print(\"\\\\Clear\")");
-		IJ.runMacro("print(\"\\\\Update:Multi-Channel Controller:\\\nProvides adjustments for space/time synchronization of \\\nmultiple channels displayed in the same movie window. \\\n \")");
+//		IJ.runMacro("print(\"\\\\Clear\")");
+//		IJ.runMacro("print(\"\\\\Update:Multi-Channel Controller:\\\nProvides adjustments for space/time synchronization of \\\nmultiple channels displayed in the same movie window. \\\n \")");
 
 	}
 

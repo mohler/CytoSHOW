@@ -203,8 +203,8 @@ public class PluginsControl_Panel extends PlugInFrame implements PlugIn, MouseLi
 
 
 	public void mouseEntered(MouseEvent e) {
-		IJ.runMacro("print(\"\\\\Clear\")");
-		IJ.runMacro("print(\"\\\\Update:CytoSHOW Functions:\\\nProvides quick access to CytoSHOW-specific functions not included in the standard menu commands of ImageJ.\\\n \")");
+//		IJ.runMacro("print(\"\\\\Clear\")");
+//		IJ.runMacro("print(\"\\\\Update:CytoSHOW Functions:\\\nProvides quick access to CytoSHOW-specific functions not included in the standard menu commands of ImageJ.\\\n \")");
 
 	}
 

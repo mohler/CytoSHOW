@@ -10,13 +10,15 @@ import java.awt.font.FontRenderContext;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 
+import javax.swing.JScrollBar;
+
 
 /** This class, based on Joachim Walter's Image5D package, adds "c", "z" labels 
 	 and play-pause icons (T) to the stack and hyperstacks dimension sliders.
  * @author Joachim Walter
  */
 public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListener, AdjustmentListener {
-	Scrollbar bar;
+	JScrollBar bar;
 	private Icon icon;
 	private Icon icon2;
 	private StackWindow stackWindow;
@@ -32,12 +34,12 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 		addMouseListener(this);
 		this.stackWindow = stackWindow;
 		this.label = label;
-		bar = new Scrollbar(Scrollbar.HORIZONTAL, value, visible, minimum, maximum);
+		bar = new JScrollBar(Scrollbar.HORIZONTAL, value, visible, minimum, maximum);
 		bar.addMouseListener(this);
 		setBarCursor(label);
-		icon = new Icon(label);
+		setIcon(new Icon(label));
 		icon2 = new Icon(label);
-		add(icon, BorderLayout.WEST);
+		add(getIcon(), BorderLayout.WEST);
 		add(bar, BorderLayout.CENTER);
 		add(icon2, BorderLayout.EAST);
 		bar.addAdjustmentListener(this);
@@ -183,7 +185,7 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 	}
 		
 	public void updatePlayPauseIcon() {
-		icon.repaint();
+		getIcon().repaint();
 		icon2.repaint();
 	}
 	
@@ -193,8 +195,8 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 	}
 
 	public void mouseEntered(MouseEvent e) {
-		IJ.runMacro("print(\"\\\\Clear\")");
-		IJ.runMacro("print(\"\\\\Update:Movie Dimension Sliders:\\\n\'z\' and \'t\' Sliders adjust the movie position in space and time.\\\n\'c\' Slider selects which channel is being displayed or is adjusted by the Display Tool.\\\n\'r\' Slider adjusts the resolution (pixelation) of the display; low r => faster slice animation.\\\n \")");
+//		IJ.runMacro("print(\"\\\\Clear\")");
+//		IJ.runMacro("print(\"\\\\Update:Movie Dimension Sliders:\\\n\'z\' and \'t\' Sliders adjust the movie position in space and time.\\\n\'c\' Slider selects which channel is being displayed or is adjusted by the Display Tool.\\\n\'r\' Slider adjusts the resolution (pixelation) of the display; low r => faster slice animation.\\\n \")");
 		
 	}
 
@@ -232,7 +234,7 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 			addMouseListener(this);
 			addKeyListener(IJ.getInstance()); 
 			setSize(WIDTH, HEIGHT);
-			this.type = type;
+			this.setType(type);
 		}
 		
 		/** Overrides Component getPreferredSize(). */
@@ -246,11 +248,11 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 		
 		public void paint(Graphics g) {
 			g.setColor(Color.white);
-			if (type =='c') g.setColor(Color.black);
+			if (getType() =='c') g.setColor(Color.black);
 			g.fillRect(0, 0, WIDTH, HEIGHT);
 			Graphics2D g2d = (Graphics2D)g;
 			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-			if (type=='t' || type=='z')
+			if (getType()=='t' || getType()=='z')
 				drawPlayPauseButton(g2d);
 			
 			drawLetter(g);
@@ -258,13 +260,13 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 		
 		private void drawLetter(Graphics g) {
 			g.setFont(new Font("SansSerif", Font.PLAIN, 14));
-			if (type =='c') g.setFont(new Font("SansSerif", Font.PLAIN, 14));
+			if (getType() =='c') g.setFont(new Font("SansSerif", Font.PLAIN, 14));
 			String string = "";
-			if (type =='t'|| type =='z'|| type =='r') 
-				string = String.valueOf(type);
+			if (getType() =='t'|| getType() =='z'|| getType() =='r') 
+				string = String.valueOf(getType());
 				g.setColor(Color.black);
-			if (type =='c') {
-				string = String.valueOf(type);
+			if (getType() =='c') {
+				string = String.valueOf(getType());
 				if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 3 ){
 					string = "CG";
 					g.setColor(Color.white);
@@ -286,10 +288,10 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 		}
 
 		private void drawPlayPauseButton(Graphics2D g) {
-			if ( (type =='t' && stackWindow.getAnimate()) 
-					|| (type =='z' && stackWindow.getZAnimate())  
-					|| (type =='z' && stackWindow.getAnimationSelector().getType() == 'z' && stackWindow.getAnimate()) 
-					|| (type =='z' && stackWindow.getAnimationZSelector().getType() == 'z' && stackWindow.getZAnimate()) ) {
+			if ( (getType() =='t' && stackWindow.getAnimate()) 
+					|| (getType() =='z' && stackWindow.getZAnimate())  
+					|| (getType() =='z' && stackWindow.getAnimationSelector().getType() == 'z' && stackWindow.getAnimate()) 
+					|| (getType() =='z' && stackWindow.getAnimationZSelector().getType() == 'z' && stackWindow.getZAnimate()) ) {
 				g.setColor(Color.red);
 				g.setStroke(stroke);
 				g.drawLine(15, 3, 15, 11);
@@ -306,20 +308,20 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 		}
 		
 		public void mousePressed(MouseEvent e) {
-			if (type!='t' && type!='z' && type!='c' || !iconEnabled) return;
+			if (getType()!='t' && getType()!='z' && getType()!='c' || !iconEnabled) return;
 			int flags = e.getModifiers();
 			if ((flags&(Event.ALT_MASK|Event.META_MASK|Event.CTRL_MASK))!=0){
-				if (type =='t' || type =='z') IJ.doCommand("Animation Options...");
-				else if (type =='c') IJ.run("Channels Tool...");
+				if (getType() =='t' || getType() =='z') IJ.doCommand("Animation Options...");
+				else if (getType() =='c') IJ.run("Channels Tool...");
 				
 			}
-			else if (type =='t' )
+			else if (getType() =='t' )
 				IJ.doCommand("Start Animation [\\]");
-			else if (type == 'z' && stackWindow.getAnimationSelector().getType() == 'z')
+			else if (getType() == 'z' && stackWindow.getAnimationSelector().getType() == 'z')
 				IJ.doCommand("Start Animation [\\]");
-			else if (type =='z' )
+			else if (getType() =='z' )
 				IJ.doCommand("Start Z Animation");
-			else if (type =='c' ){
+			else if (getType() =='c' ){
 				int origChannel = stackWindow.getImagePlus().getChannel();
 				if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 3 ){
 					((CompositeImage) stackWindow.getImagePlus()).setMode(1);
@@ -347,8 +349,6 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 				}
 				stackWindow.cSelector.updatePlayPauseIcon();
 			}
-
-
 		}
 		
 		public void mouseReleased(MouseEvent e) {}
@@ -357,14 +357,22 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 		}
 		public void mouseClicked(MouseEvent e) {}
 		public void mouseEntered(MouseEvent e) {
-			IJ.runMacro("print(\"\\\\Clear\")");
-			if (type =='c' &&  stackWindow.getImagePlus().isComposite() )
-				IJ.runMacro("print(\"\\\\Update:Channel Mode Button: \\\nLeft-Clicking this icon changes the Display Mode from \\\'Channels Merged\\\' to \\\'Channels Color\\\' to \\\'Channels Gray\\\'.\\\nRight-clicking or control-clicking activates the Channels Tool.\\\n \")");
-			else if (type =='z')
-				IJ.runMacro("print(\"\\\\Update:Space Animation Button: \\\nLeft-Clicking this icon plays or pauses animation through focus (or rotates the projected image).\\\nRight-clicking or control-clicking activates the Animation Options Tool.\\\n \")");
-			else if (type =='t')
-				IJ.runMacro("print(\"\\\\Update:Time Animation Button: \\\nLeft-Clicking this icon plays or pauses animation through time.\\\nRight-clicking or control-clicking activates the Animation Options Tool.\\\n \")");
+//			IJ.runMacro("print(\"\\\\Clear\")");
+//			if (type =='c' &&  stackWindow.getImagePlus().isComposite() )
+//				IJ.runMacro("print(\"\\\\Update:Channel Mode Button: \\\nLeft-Clicking this icon changes the Display Mode from \\\'Channels Merged\\\' to \\\'Channels Color\\\' to \\\'Channels Gray\\\'.\\\nRight-clicking or control-clicking activates the Channels Tool.\\\n \")");
+//			else if (type =='z')
+//				IJ.runMacro("print(\"\\\\Update:Space Animation Button: \\\nLeft-Clicking this icon plays or pauses animation through focus (or rotates the projected image).\\\nRight-clicking or control-clicking activates the Animation Options Tool.\\\n \")");
+//			else if (type =='t')
+//				IJ.runMacro("print(\"\\\\Update:Time Animation Button: \\\nLeft-Clicking this icon plays or pauses animation through time.\\\nRight-clicking or control-clicking activates the Animation Options Tool.\\\n \")");
 
+		}
+
+		public char getType() {
+			return type;
+		}
+
+		public void setType(char type) {
+			this.type = type;
 		}
 	
 	} // StartStopIcon class
@@ -373,6 +381,14 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 
 	public void setIconEnabled(boolean b) {
 		iconEnabled = b;
+	}
+
+	public Icon getIcon() {
+		return icon;
+	}
+
+	public void setIcon(Icon icon) {
+		this.icon = icon;
 	}
 
 
