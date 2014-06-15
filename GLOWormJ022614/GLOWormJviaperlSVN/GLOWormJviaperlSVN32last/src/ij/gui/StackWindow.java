@@ -17,7 +17,7 @@ import org.vcell.gloworm.MultiQTVirtualStack;
 /** This class is an extended ImageWindow used to display image stacks. */
 public class StackWindow extends ImageWindow implements Runnable, AdjustmentListener, ActionListener, MouseWheelListener {
 
-	protected JScrollBar sliceSelector; // for backward compatibity with Image5D
+	protected Scrollbar sliceSelector; // for backward compatibity with Image5D
 	public ScrollbarWithLabel cSelector, zSelector, tSelector;
 	protected Thread thread;
 	protected volatile boolean done;
@@ -38,7 +38,7 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 		addScrollbars(imp);
 		addMouseWheelListener(this);
 		if (sliceSelector==null && this.getClass().getName().indexOf("Image5D")!=-1)
-			sliceSelector = new JScrollBar(); // prevents Image5D from crashing
+			sliceSelector = new Scrollbar(); // prevents Image5D from crashing
 		//IJ.log(nChannels+" "+nSlices+" "+nFrames);
 		pack();
 		ic = imp.getCanvas();
@@ -108,7 +108,7 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 
 		if (nChannels>1) {
 			cSelector = new ScrollbarWithLabel(this, 1, 1, 1, nChannels+1, 'c');
-			((JComponent) cSelector.bar).setToolTipText("<html>Left-Clicking this Channel selector's icon <br>changes the Display Mode from <br>\'Channels Merged\' to \'Channels Color\' to \'Channels Gray\'.<br>Right-clicking or control-clicking <br>activates the Channels Tool.</html>");		
+//			((JComponent) cSelector.bar).setToolTipText("<html>Left-Clicking this Channel selector's icon <br>changes the Display Mode from <br>\'Channels Merged\' to \'Channels Color\' to \'Channels Gray\'.<br>Right-clicking or control-clicking <br>activates the Channels Tool.</html>");		
 			if (wormAtlas) cSelector = new ScrollbarWithLabel(this, 1, 1, 1, nChannels+1, 'r');
 			sbgridbag.setConstraints(cSelector, sbgc);
 			sbgc.gridy = y++; 
@@ -124,7 +124,7 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 			if (stackSize==dim[2] && imp.isComposite()) label = 'c';
 			if (wormAtlas) label = 'c';
 			zSelector = new ScrollbarWithLabel(this, 1, 1, 1, nSlices+1, label);
-			((JComponent) zSelector.bar).setToolTipText("<html>Left-Clicking this Slice selector's icon <br>plays/pauses animation through the Z dimension.<br>Right-clicking or control-clicking <br>activates the Animation Options Tool.</html>");		
+//			((JComponent) zSelector.bar).setToolTipText("<html>Left-Clicking this Slice selector's icon <br>plays/pauses animation through the Z dimension.<br>Right-clicking or control-clicking <br>activates the Animation Options Tool.</html>");		
 			
 			if (label=='t') animationSelector = zSelector;
 			if (label=='z') {animationZSelector = zSelector; setZAnimate(false); }
@@ -141,10 +141,10 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 		}
 		if (nFrames>1) {
 			animationSelector = tSelector = new ScrollbarWithLabel(this, 1, 1, 1, nFrames+1, 't');
-			((JComponent) tSelector.bar).setToolTipText("<html>Left-Clicking this Frame selector's icon <br>plays/pauses animation through the T dimension.<br>Right-clicking or control-clicking <br>activates the Animation Options Tool.</html>");		
+//			((JComponent) tSelector.bar).setToolTipText("<html>Left-Clicking this Frame selector's icon <br>plays/pauses animation through the T dimension.<br>Right-clicking or control-clicking <br>activates the Animation Options Tool.</html>");		
 			if (wormAtlas) {
 				animationSelector = tSelector = new ScrollbarWithLabel(this, 1, 1, 1, nFrames+1, 'z');
-				((JComponent) tSelector.bar).setToolTipText("<html>Left-Clicking this Slice selector's icon <br>plays/pauses animation through the Z dimension.<br>Right-clicking or control-clicking <br>activates the Animation Options Tool.</html>");		
+//				((JComponent) tSelector.bar).setToolTipText("<html>Left-Clicking this Slice selector's icon <br>plays/pauses animation through the Z dimension.<br>Right-clicking or control-clicking <br>activates the Animation Options Tool.</html>");		
 			}
 			sbgc.gridy = y++; 
 			scrollbarPanel.add(tSelector, sbgc);
