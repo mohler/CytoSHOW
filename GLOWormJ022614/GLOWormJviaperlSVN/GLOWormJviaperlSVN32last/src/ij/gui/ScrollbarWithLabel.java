@@ -37,9 +37,9 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 		bar = new Scrollbar(Scrollbar.HORIZONTAL, value, visible, minimum, maximum);
 		bar.addMouseListener(this);
 		setBarCursor(label);
-		setIcon(new Icon(label));
+		icon = new Icon(label);
 		icon2 = new Icon(label);
-		add(getIcon(), BorderLayout.WEST);
+		add(icon, BorderLayout.WEST);
 		add(bar, BorderLayout.CENTER);
 		add(icon2, BorderLayout.EAST);
 		bar.addAdjustmentListener(this);
@@ -185,7 +185,7 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 	}
 		
 	public void updatePlayPauseIcon() {
-		getIcon().repaint();
+		icon.repaint();
 		icon2.repaint();
 	}
 	
