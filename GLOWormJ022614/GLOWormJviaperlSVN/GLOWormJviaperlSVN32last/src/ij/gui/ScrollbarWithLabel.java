@@ -10,6 +10,10 @@ import java.awt.font.FontRenderContext;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 
+import javax.swing.Action;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 
 
@@ -25,7 +29,11 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 	transient AdjustmentListener adjustmentListener;
 	public char label;
 	private boolean iconEnabled;
-	
+	JButton iconPanel;
+	JButton icon2Panel;
+	private BufferedImage bi;
+	private BufferedImage bi2;
+
 	public ScrollbarWithLabel() {
 	}
 
@@ -37,46 +45,53 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 		bar = new Scrollbar(Scrollbar.HORIZONTAL, value, visible, minimum, maximum);
 		bar.addMouseListener(this);
 		setBarCursor(label);
+		iconPanel = new IconButton();
+		icon2Panel = new IconButton();
 		icon = new Icon(label);
 		icon2 = new Icon(label);
-		add(icon, BorderLayout.WEST);
+		bi = new BufferedImage(Icon.WIDTH, Icon.HEIGHT, BufferedImage.TYPE_INT_ARGB);
+		iconPanel.setIcon(new ImageIcon(bi));
+		bi2 = new BufferedImage(Icon.WIDTH, Icon.HEIGHT, BufferedImage.TYPE_INT_ARGB);
+		icon2Panel.setIcon(new ImageIcon(bi2));
+		add(iconPanel, BorderLayout.WEST);
 		add(bar, BorderLayout.CENTER);
-		add(icon2, BorderLayout.EAST);
+		add(icon2Panel, BorderLayout.EAST);
 		bar.addAdjustmentListener(this);
 		addKeyListener(IJ.getInstance()); 
 		iconEnabled = true;
+		updatePlayPauseIcon();
 	}
 
 	private void setBarCursor(char label) {
 		Toolkit tk = Toolkit.getDefaultToolkit();
 		String cursorString = label+"="+bar.getValue();
 		Font font = Font.decode("Arial-Outline-18");
-        
-        //create the FontRenderContext object which helps us to measure the text
-        FontRenderContext frc = new FontRenderContext(null, true, true);
-         
-        //get the height and width of the text
-        Rectangle2D bounds = font.getStringBounds(cursorString, frc);
-        int w = (int) bounds.getWidth();
-        int h = (int) bounds.getHeight();
+
+		//create the FontRenderContext object which helps us to measure the text
+		FontRenderContext frc = new FontRenderContext(null, true, true);
+
+		//get the height and width of the text
+		Rectangle2D bounds = font.getStringBounds(cursorString, frc);
+		int w = (int) bounds.getWidth();
+		int h = (int) bounds.getHeight();
 		Image img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB_PRE);
-		
-//		img.getGraphics().setColor(Colors.decode("00000000", Color.white));
-        Graphics2D g = (Graphics2D) img.getGraphics();
-        
-        g.setFont(font);
-        
-//        g.setColor(Colors.decode("66ffffff",Color.white));
-//        g.fillRect(0, 0, w, h);
-        g.setColor(Color.BLACK);
-        g.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
-        g.drawLine(0, 0, 2, 7);
-        g.drawLine(0, 0, 7, 2);
-        g.drawLine(0, 0, 8, 8);
+
+		//		img.getGraphics().setColor(Colors.decode("00000000", Color.white));
+		Graphics2D g = (Graphics2D) img.getGraphics();
+
+		g.setFont(font);
+
+		//        g.setColor(Colors.decode("66ffffff",Color.white));
+		//        g.fillRect(0, 0, w, h);
+		g.setColor(Color.BLACK);
+		g.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
+		g.drawLine(0, 0, 2, 7);
+		g.drawLine(0, 0, 7, 2);
+		g.drawLine(0, 0, 8, 8);
 		g.drawString(cursorString, 1, img.getHeight(null)-1);
 		bar.setCursor(tk.createCustomCursor(img,new Point(0,0),"scrollCursor"));
 	}
-	
+
 	/* (non-Javadoc)
 	 * @see java.awt.Component#getPreferredSize()
 	 */
@@ -89,11 +104,11 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 		dim = new Dimension(width, height);
 		return dim;
 	}
-	
+
 	public Dimension getMinimumSize() {
 		return new Dimension(80, 15);
 	}
-	
+
 	/* Adds KeyListener also to all sub-components.
 	 */
 	public synchronized void addKeyListener(KeyListener l) {
@@ -168,7 +183,7 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 		super.setFocusable(focusable);
 		bar.setFocusable(focusable);
 	}
-		
+
 	/*
 	 * Method of the AdjustmentListener interface.
 	 */
@@ -183,31 +198,33 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 			}
 		}
 	}
-		
+
 	public void updatePlayPauseIcon() {
-		icon.repaint();
-		icon2.repaint();
+		icon.update(bi.getGraphics());
+		icon2.update(bi2.getGraphics());
+		iconPanel.setIcon(new ImageIcon(bi));
+		icon2Panel.setIcon(new ImageIcon(bi2));
 	}
-	
+
 	public void mouseClicked(MouseEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void mouseEntered(MouseEvent e) {
-//		IJ.runMacro("print(\"\\\\Clear\")");
-//		IJ.runMacro("print(\"\\\\Update:Movie Dimension Sliders:\\\n\'z\' and \'t\' Sliders adjust the movie position in space and time.\\\n\'c\' Slider selects which channel is being displayed or is adjusted by the Display Tool.\\\n\'r\' Slider adjusts the resolution (pixelation) of the display; low r => faster slice animation.\\\n \")");
-		
+		//		IJ.runMacro("print(\"\\\\Clear\")");
+		//		IJ.runMacro("print(\"\\\\Update:Movie Dimension Sliders:\\\n\'z\' and \'t\' Sliders adjust the movie position in space and time.\\\n\'c\' Slider selects which channel is being displayed or is adjusted by the Display Tool.\\\n\'r\' Slider adjusts the resolution (pixelation) of the display; low r => faster slice animation.\\\n \")");
+
 	}
 
 	public void mouseExited(MouseEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void mousePressed(MouseEvent e) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void mouseReleased(MouseEvent e) {
@@ -223,97 +240,45 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 	}
 
 
-	
-	class Icon extends Canvas implements MouseListener {
-		private static final int WIDTH = 26, HEIGHT=14;
-		private BasicStroke stroke = new BasicStroke(2f);
-		private char type;
-		private Image image;
+	class IconButton extends JButton implements ActionListener{
 
-		public Icon(char type) {
-			addMouseListener(this);
-			addKeyListener(IJ.getInstance()); 
-			setSize(WIDTH, HEIGHT);
-			this.setType(type);
-		}
-		
-		/** Overrides Component getPreferredSize(). */
-		public Dimension getPreferredSize() {
-			return new Dimension(WIDTH, HEIGHT);
-		}
-				
-		public void update(Graphics g) {
-			paint(g);
-		}
-		
-		public void paint(Graphics g) {
-			g.setColor(Color.white);
-			if (getType() =='c') g.setColor(Color.black);
-			g.fillRect(0, 0, WIDTH, HEIGHT);
-			Graphics2D g2d = (Graphics2D)g;
-			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-			if (getType()=='t' || getType()=='z')
-				drawPlayPauseButton(g2d);
-			
-			drawLetter(g);
-		}
-		
-		private void drawLetter(Graphics g) {
-			g.setFont(new Font("SansSerif", Font.PLAIN, 14));
-			if (getType() =='c') g.setFont(new Font("SansSerif", Font.PLAIN, 14));
-			String string = "";
-			if (getType() =='t'|| getType() =='z'|| getType() =='r') 
-				string = String.valueOf(getType());
-				g.setColor(Color.black);
-			if (getType() =='c') {
-				string = String.valueOf(getType());
-				if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 3 ){
-					string = "CG";
-					g.setColor(Color.white);
-				}
-				else if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 2 ){
-					string = "CC";
-					g.setColor(Color.green);
-				}
-				else if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 1 ){
-					string = "CM";
-					g.setColor(Color.yellow);
-				}
-				else {
-					g.setColor(Color.magenta);
-				}
-				
-			}
-			g.drawString(string, 2, 12); 
+
+		public IconButton() {
+			super();
+			this.addActionListener(this);
+			// TODO Auto-generated constructor stub
 		}
 
-		private void drawPlayPauseButton(Graphics2D g) {
-			if ( (getType() =='t' && stackWindow.getAnimate()) 
-					|| (getType() =='z' && stackWindow.getZAnimate())  
-					|| (getType() =='z' && stackWindow.getAnimationSelector().getType() == 'z' && stackWindow.getAnimate()) 
-					|| (getType() =='z' && stackWindow.getAnimationZSelector().getType() == 'z' && stackWindow.getZAnimate()) ) {
-				g.setColor(Color.red);
-				g.setStroke(stroke);
-				g.drawLine(15, 3, 15, 11);
-				g.drawLine(20, 3, 20, 11);
-			} else {
-				g.setColor(Color.green);
-				GeneralPath path = new GeneralPath();
-				path.moveTo(15f, 2f);
-				path.lineTo(22f, 7f);
-				path.lineTo(15f, 12f);
-				path.lineTo(15f, 2f);
-				g.fill(path);
-			}
+		public IconButton(Action a) {
+			super(a);
+			this.addActionListener(this);
+			// TODO Auto-generated constructor stub
 		}
-		
-		public void mousePressed(MouseEvent e) {
+
+		public IconButton(javax.swing.Icon icon) {
+			super(icon);
+			this.addActionListener(this);
+			// TODO Auto-generated constructor stub
+		}
+
+		public IconButton(String text, javax.swing.Icon icon) {
+			super(text, icon);
+			this.addActionListener(this);
+			// TODO Auto-generated constructor stub
+		}
+
+		public IconButton(String text) {
+			super(text);
+			this.addActionListener(this);
+			// TODO Auto-generated constructor stub
+		}
+
+		public void actionPerformed(ActionEvent e) {
 			if (getType()!='t' && getType()!='z' && getType()!='c' || !iconEnabled) return;
 			int flags = e.getModifiers();
-			if ((flags&(Event.ALT_MASK|Event.META_MASK|Event.CTRL_MASK))!=0){
+			if ((flags&(Event.ALT_MASK|Event.META_MASK|Event.CTRL_MASK))!=0 ){
 				if (getType() =='t' || getType() =='z') IJ.doCommand("Animation Options...");
 				else if (getType() =='c') IJ.run("Channels Tool...");
-				
 			}
 			else if (getType() =='t' )
 				IJ.doCommand("Start Animation [\\]");
@@ -350,22 +315,93 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 				stackWindow.cSelector.updatePlayPauseIcon();
 			}
 		}
-		
-		public void mouseReleased(MouseEvent e) {}
-		public void mouseExited(MouseEvent e) {
-//			IJ.runMacro("print(\"\\\\Clear\")");
-		}
-		public void mouseClicked(MouseEvent e) {}
-		public void mouseEntered(MouseEvent e) {
-//			IJ.runMacro("print(\"\\\\Clear\")");
-//			if (type =='c' &&  stackWindow.getImagePlus().isComposite() )
-//				IJ.runMacro("print(\"\\\\Update:Channel Mode Button: \\\nLeft-Clicking this icon changes the Display Mode from \\\'Channels Merged\\\' to \\\'Channels Color\\\' to \\\'Channels Gray\\\'.\\\nRight-clicking or control-clicking activates the Channels Tool.\\\n \")");
-//			else if (type =='z')
-//				IJ.runMacro("print(\"\\\\Update:Space Animation Button: \\\nLeft-Clicking this icon plays or pauses animation through focus (or rotates the projected image).\\\nRight-clicking or control-clicking activates the Animation Options Tool.\\\n \")");
-//			else if (type =='t')
-//				IJ.runMacro("print(\"\\\\Update:Time Animation Button: \\\nLeft-Clicking this icon plays or pauses animation through time.\\\nRight-clicking or control-clicking activates the Animation Options Tool.\\\n \")");
+	}
 
+
+	class Icon extends Canvas {
+		private static final int WIDTH = 26, HEIGHT=14;
+		private BasicStroke stroke = new BasicStroke(2f);
+		private char type;
+		private Image image;
+
+		public Icon(char type) {
+			addKeyListener(IJ.getInstance()); 
+			setSize(WIDTH, HEIGHT);
+			this.setType(type);
 		}
+
+		/** Overrides Component getPreferredSize(). */
+		public Dimension getPreferredSize() {
+			return new Dimension(WIDTH, HEIGHT);
+		}
+
+		public void update(Graphics g) {
+			paint(g);
+		}
+
+		public void paint(Graphics g) {
+			g.setColor(Color.white);
+			if (getType() =='c') g.setColor(Color.black);
+			g.fillRect(0, 0, WIDTH, HEIGHT);
+			Graphics2D g2d = (Graphics2D)g;
+			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+			if (getType()=='t' || getType()=='z')
+				drawPlayPauseButton(g2d);
+
+			drawLetter(g);
+		}
+
+		private void drawLetter(Graphics g) {
+			g.setFont(new Font("SansSerif", Font.PLAIN, 14));
+			if (getType() =='c') g.setFont(new Font("SansSerif", Font.PLAIN, 14));
+			String string = "";
+			if (getType() =='t'|| getType() =='z'|| getType() =='r') 
+				string = String.valueOf(getType());
+			g.setColor(Color.black);
+			if (getType() =='c') {
+				string = String.valueOf(getType());
+				if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 3 ){
+					string = "CG";
+					g.setColor(Color.white);
+				}
+				else if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 2 ){
+					string = "CC";
+					g.setColor(Color.green);
+				}
+				else if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 1 ){
+					string = "CM";
+					g.setColor(Color.yellow);
+				}
+				else {
+					g.setColor(Color.magenta);
+				}
+
+			}
+			g.drawString(string, 2, 12); 
+		}
+
+		private void drawPlayPauseButton(Graphics2D g) {
+			if ( stackWindow != null) { 
+				if ((	getType() =='t' && stackWindow.getAnimate()) 
+								|| (getType() =='z' && stackWindow.getZAnimate())  
+								|| (getType() =='z' && stackWindow.getAnimationSelector() != null && stackWindow.getAnimationSelector().getType() == 'z' && stackWindow.getAnimate()) 
+								|| (getType() =='z' && stackWindow.getAnimationZSelector() != null && stackWindow.getAnimationZSelector().getType() == 'z' && stackWindow.getZAnimate()) ) {
+					g.setColor(Color.red);
+					g.setStroke(stroke);
+					g.drawLine(15, 3, 15, 11);
+					g.drawLine(20, 3, 20, 11);
+				} else {
+					g.setColor(Color.green);
+					GeneralPath path = new GeneralPath();
+					path.moveTo(15f, 2f);
+					path.lineTo(22f, 7f);
+					path.lineTo(15f, 12f);
+					path.lineTo(15f, 2f);
+					g.fill(path);
+				}
+			}
+		}
+
 
 		public char getType() {
 			return type;
@@ -374,7 +410,7 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 		public void setType(char type) {
 			this.type = type;
 		}
-	
+
 	} // StartStopIcon class
 
 
@@ -394,5 +430,5 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 
 
 
-	
+
 }

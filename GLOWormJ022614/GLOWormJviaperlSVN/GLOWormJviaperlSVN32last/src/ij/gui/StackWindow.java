@@ -108,7 +108,8 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 
 		if (nChannels>1) {
 			cSelector = new ScrollbarWithLabel(this, 1, 1, 1, nChannels+1, 'c');
-//			((JComponent) cSelector.bar).setToolTipText("<html>Left-Clicking this Channel selector's icon <br>changes the Display Mode from <br>\'Channels Merged\' to \'Channels Color\' to \'Channels Gray\'.<br>Right-clicking or control-clicking <br>activates the Channels Tool.</html>");		
+			((JComponent) cSelector.iconPanel).setToolTipText("<html>Left-Clicking this Channel selector's icon <br>changes the Display Mode from <br>\'Channels Merged\' to \'Channels Color\' to \'Channels Gray\'.<br>Right-clicking or control-clicking <br>activates the Channels Tool.</html>");		
+			((JComponent) cSelector.icon2Panel).setToolTipText("<html>Left-Clicking this Channel selector's icon <br>changes the Display Mode from <br>\'Channels Merged\' to \'Channels Color\' to \'Channels Gray\'.<br>Right-clicking or control-clicking <br>activates the Channels Tool.</html>");		
 			if (wormAtlas) cSelector = new ScrollbarWithLabel(this, 1, 1, 1, nChannels+1, 'r');
 			sbgridbag.setConstraints(cSelector, sbgc);
 			sbgc.gridy = y++; 
@@ -124,8 +125,9 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 			if (stackSize==dim[2] && imp.isComposite()) label = 'c';
 			if (wormAtlas) label = 'c';
 			zSelector = new ScrollbarWithLabel(this, 1, 1, 1, nSlices+1, label);
-//			((JComponent) zSelector.bar).setToolTipText("<html>Left-Clicking this Slice selector's icon <br>plays/pauses animation through the Z dimension.<br>Right-clicking or control-clicking <br>activates the Animation Options Tool.</html>");		
-			
+			((JComponent) zSelector.iconPanel).setToolTipText("<html>Left-Clicking this Slice selector's icon <br>plays/pauses animation through the Z dimension.<br>Right-clicking or control-clicking <br>activates the Animation Options Tool.</html>");		
+			((JComponent) zSelector.icon2Panel).setToolTipText("<html>Left-Clicking this Slice selector's icon <br>plays/pauses animation through the Z dimension.<br>Right-clicking or control-clicking <br>activates the Animation Options Tool.</html>");		
+
 			if (label=='t') animationSelector = zSelector;
 			if (label=='z') {animationZSelector = zSelector; setZAnimate(false); }
 			sbgc.gridy = y++; 
@@ -141,10 +143,12 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 		}
 		if (nFrames>1) {
 			animationSelector = tSelector = new ScrollbarWithLabel(this, 1, 1, 1, nFrames+1, 't');
-//			((JComponent) tSelector.bar).setToolTipText("<html>Left-Clicking this Frame selector's icon <br>plays/pauses animation through the T dimension.<br>Right-clicking or control-clicking <br>activates the Animation Options Tool.</html>");		
+			((JComponent) tSelector.iconPanel).setToolTipText("<html>Left-Clicking this Frame selector's icon <br>plays/pauses animation through the T dimension.<br>Right-clicking or control-clicking <br>activates the Animation Options Tool.</html>");		
+			((JComponent) tSelector.icon2Panel).setToolTipText("<html>Left-Clicking this Frame selector's icon <br>plays/pauses animation through the T dimension.<br>Right-clicking or control-clicking <br>activates the Animation Options Tool.</html>");		
 			if (wormAtlas) {
 				animationSelector = tSelector = new ScrollbarWithLabel(this, 1, 1, 1, nFrames+1, 'z');
-//				((JComponent) tSelector.bar).setToolTipText("<html>Left-Clicking this Slice selector's icon <br>plays/pauses animation through the Z dimension.<br>Right-clicking or control-clicking <br>activates the Animation Options Tool.</html>");		
+				((JComponent) tSelector.iconPanel).setToolTipText("<html>Left-Clicking this Slice selector's icon <br>plays/pauses animation through the Z dimension.<br>Right-clicking or control-clicking <br>activates the Animation Options Tool.</html>");		
+				((JComponent) tSelector.icon2Panel).setToolTipText("<html>Left-Clicking this Slice selector's icon <br>plays/pauses animation through the Z dimension.<br>Right-clicking or control-clicking <br>activates the Animation Options Tool.</html>");		
 			}
 			sbgc.gridy = y++; 
 			scrollbarPanel.add(tSelector, sbgc);

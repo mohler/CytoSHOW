@@ -221,6 +221,7 @@ public class Animator implements PlugIn {
 				}
 				imp.setPosition(imp.getChannel(), imp.getSlice(), frame);
 				swin.getAnimationSelector().updatePlayPauseIcon();
+				swin.getAnimationZSelector().updatePlayPauseIcon();
 
 			}
 			return;
@@ -257,6 +258,7 @@ public class Animator implements PlugIn {
 					}
 				}
 				imp.setPosition(imp.getChannel(), slice, imp.getFrame());
+				swin.getAnimationSelector().updatePlayPauseIcon();
 				swin.getAnimationZSelector().updatePlayPauseIcon();
 
 			}
@@ -297,6 +299,7 @@ public class Animator implements PlugIn {
 			}
 			swin.showSlice(slice);
 			swin.getAnimationSelector().updatePlayPauseIcon();
+			swin.getAnimationZSelector().updatePlayPauseIcon();
 
 		}
 		
@@ -506,8 +509,10 @@ public class Animator implements PlugIn {
 		swin.setZAnimate(false);
 		IJ.wait(500+(int)(1000.0/animationRate));
 		imp.unlock(); 
-		if (swin.getAnimationZSelector() != null) 
+		if (swin.getAnimationZSelector() != null) {
+			swin.getAnimationSelector().updatePlayPauseIcon();
 			swin.getAnimationZSelector().updatePlayPauseIcon();
+		}
 
 	}
 
@@ -612,6 +617,7 @@ public class Animator implements PlugIn {
 					swin.setAnimate(true);
 				}
 				//IJ.log("ZAnimating...");
+				swin.getAnimationSelector().updatePlayPauseIcon();
 				swin.getAnimationZSelector().updatePlayPauseIcon();
 
 			}
@@ -651,6 +657,7 @@ public class Animator implements PlugIn {
 				}
 			}
 			swin.showSlice(slice);
+			swin.getAnimationSelector().updatePlayPauseIcon();
 			swin.getAnimationZSelector().updatePlayPauseIcon();
 		}
 		
