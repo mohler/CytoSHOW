@@ -148,7 +148,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 			gds.addMessage("This type of Image Stack does not work\nwith all CytoSHOW Functions."
 					+ "\nWould you like to Convert it to a CytoSHOW Scene?");
 			//			gds.addRadioButtonGroup("", new String[]{"Save Scene","Share Scene"}, 1, 2, "Save Scene");
-			gds.addChoice("", new String[]{"Save Scene","Share Scene"},"Save Scene");
+			gds.addChoice("", new String[]{"Save Scene","Share Scene"},"Share Scene");
 			gds.showDialog();
 			if (gds.wasOKed()) {
 				sharing  = gds.getNextChoice().equals("Share Scene");
@@ -810,7 +810,6 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 			return;			
 		}
 
-
 		if (command==null) return;
 
 		if (command.contains(saveLabel)){
@@ -830,9 +829,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 							long msec = currentDate.getTime();			    
 							long sec = msec/1000;
 
-
 							File saveFile = 
-
 									new File((stack instanceof MultiQTVirtualStack)? 
 											((MultiQTVirtualStack) stack).getVirtualStack(j).getMovieName().substring(0, 15) + "_" + (j+1) + "_" + sec
 											+ ".adj":
@@ -1215,13 +1212,21 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 
 
 		} else if (command.equals("Save Scene")) {
+			Date currentDate = new Date();
+			long msec = currentDate.getTime();			    
+			long sec = msec/1000;
+
 			if (IJ.debugMode) IJ.log("Saving Scene portraying " + ci.getNChannels() + " movies /n");
 
+			String name ="";
+			String path ="";
 			if(!(imp.getImageStack() instanceof MultiQTVirtualStack)
 					&& !(imp.getImageStack() instanceof RemoteMQTVSHandler.RemoteMQTVirtualStack)
 					&& deNovoMovieFile==null) {
-				SaveDialog sd = new SaveDialog("Save Movie for CytoSHOW Scene as...", imp.getTitle().length()>28?imp.getTitle().substring(0, 25):imp.getTitle().replace(".tif", ""), ".avi");
-				String name = sd.getFileName().replace(" ","");
+//				SaveDialog sd = new SaveDialog("Save Movie for CytoSHOW Scene as...", imp.getTitle().length()>28?imp.getTitle().substring(0, 25):imp.getTitle().replace(".tif", ""), ".avi");
+//				String name = sd.getFileName().replace(" ","");
+				name = (imp.getTitle().length()>28?imp.getTitle().substring(0, 25):imp.getTitle().replace(".tif", ""))+sec+".avi";
+				name = name.replace(" ","");
 				if (name==null) return;
 				/*
 			if (name.length()>32) {
@@ -1229,37 +1234,36 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 				return;
 			}
 				 */
-				String dir = sd.getDirectory();
-				String path = dir+name;
-
+				String dir = IJ.getDirectory("home");
+				path = dir+name;
+				imp.killRoi();
 				IJ.run(imp, "AVI... ", "compression=PNG frame=10 slices=1-"+imp.getNSlices()
 						+" frames=1-"+imp.getNSlices()+" save=["+path+"]");				
 				deNovoMovieFile = new java.io.File(path);
+				imp.restoreRoi();
 			}
 
 			/***********Next lines output a file with text **************/
-			Date currentDate = new Date();
-			long msec = currentDate.getTime();			    
-			long sec = msec/1000;
-			File saveFile = new File( "MQTVS_"+ sec +"_scene.scn") ;
+			File saveFile = new File( path+"_scene.scn") ;
 			try {
 
-				while ( saveFile == null || !( saveFile.getPath().toLowerCase().contains("scene.scn")) || !saveFile.exists() ) {
-					JFileChooser fc = new JFileChooser();
-					fc.setDialogTitle( "Save a new *_scene.scn MQTVS Scene file" );
-					fc.setSelectedFile(saveFile);
-					int dialogResult = fc.showSaveDialog(null);
-					if (dialogResult == JFileChooser.APPROVE_OPTION) {
+//				while ( saveFile == null || !( saveFile.getPath().toLowerCase().contains("scene.scn")) || !saveFile.exists() ) {
+//					JFileChooser fc = new JFileChooser();
+//					fc.setDialogTitle( "Save a new *_scene.scn MQTVS Scene file" );
+//					fc.setSelectedFile(saveFile);
+//					int dialogResult = fc.showSaveDialog(null);
+//					if (dialogResult == JFileChooser.APPROVE_OPTION) {
+//
+//						saveFile = fc.getSelectedFile();
+						
+				saveFile.createNewFile();
 
-						saveFile = fc.getSelectedFile();
-						saveFile.createNewFile();
-
-					} else if (dialogResult == JFileChooser.CANCEL_OPTION) {
-						saveFile = null;
-						break;
-					}
-
-				}
+//					} else if (dialogResult == JFileChooser.CANCEL_OPTION) {
+//						saveFile = null;
+//						break;
+//					}
+//
+//				}
 
 				PrintWriter out = 
 						new PrintWriter(
