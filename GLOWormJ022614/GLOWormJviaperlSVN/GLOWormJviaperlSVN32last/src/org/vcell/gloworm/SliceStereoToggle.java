@@ -59,6 +59,7 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 		if (imp.isComposite()) {
 			int displaymode = ((CompositeImage)imp).getMode();
 			reconnectRemote(imp);
+
 			imp.killRoi();
 
 			String name = imp.getRemoteMQTVSHandler().getChannelPathNames()[imp.getChannel()-1];
@@ -171,8 +172,8 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 
 	public void reconnectRemote(ImagePlus rImp) {
 		if (rImp.getRemoteMQTVSHandler() != null) {
-			if (rImp.getRemoteMQTVSHandler().compQ == null) {
-
+//			if (rImp.getRemoteMQTVSHandler().compQ == null) {
+			if (true ) {
 				rImp.getRemoteMQTVSHandler().getRemoteIP(
 						((RemoteMQTVSHandler.RemoteMQTVirtualStack)imp.getStack())
 						.getAdjustedSlice(rImp.getCurrentSlice(), 0), 100, false);

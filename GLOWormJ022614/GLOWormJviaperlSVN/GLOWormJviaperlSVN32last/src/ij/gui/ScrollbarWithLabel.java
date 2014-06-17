@@ -15,6 +15,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
+import javax.swing.SwingUtilities;
 
 
 /** This class, based on Joachim Walter's Image5D package, adds "c", "z" labels 
@@ -53,6 +54,88 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 		iconPanel.setIcon(new ImageIcon(bi));
 		bi2 = new BufferedImage(Icon.WIDTH, Icon.HEIGHT, BufferedImage.TYPE_INT_ARGB);
 		icon2Panel.setIcon(new ImageIcon(bi2));
+		iconPanel.addMouseListener(new MouseAdapter(){
+            boolean pressed;
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                iconPanel.getModel().setArmed(true);
+                iconPanel.getModel().setPressed(true);
+                pressed = true;
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                //if(isRighticonPanelPressed) {underlyingiconPanel.getModel().setPressed(true));
+                iconPanel.getModel().setArmed(false);
+                iconPanel.getModel().setPressed(false);
+
+                if (pressed) {
+                	if (SwingUtilities.isRightMouseButton(e)) {
+                		if (getType() == 'c') {
+                			IJ.run("Channels Tool...");
+                		} else {
+                			IJ.doCommand("Animation Options...");
+                		}
+                	}
+                	else {
+                    }
+                }
+                pressed = false;
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                pressed = false;
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                pressed = true;
+            }                    
+        });
+		icon2Panel.addMouseListener(new MouseAdapter(){
+            boolean pressed;
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                icon2Panel.getModel().setArmed(true);
+                icon2Panel.getModel().setPressed(true);
+                pressed = true;
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                //if(isRighticonPanelPressed) {underlyingiconPanel.getModel().setPressed(true));
+                icon2Panel.getModel().setArmed(false);
+                icon2Panel.getModel().setPressed(false);
+
+                if (pressed) {
+                	if (SwingUtilities.isRightMouseButton(e)) {
+                		if (getType() == 'c') {
+                			IJ.run("Channels Tool...");
+                		} else {
+                			IJ.doCommand("Animation Options...");
+                		}
+                	}
+                	else {
+                    }
+                 }
+                pressed = false;
+
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                pressed = false;
+            }
+
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                pressed = true;
+            }                    
+        });
 		add(iconPanel, BorderLayout.WEST);
 		add(bar, BorderLayout.CENTER);
 		add(icon2Panel, BorderLayout.EAST);
@@ -207,7 +290,16 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 	}
 
 	public void mouseClicked(MouseEvent e) {
-		// TODO Auto-generated method stub
+//		if (SwingUtilities.isRightMouseButton(e)) {
+//			if (iconPanel.contains(e.getPoint())||icon2Panel.contains(e.getPoint())){
+//				 if (getType() == 'c') {
+//					 IJ.run("Channels Tool...");
+//				 } else {
+//					 IJ.doCommand("Animation Options...");
+//				 }
+//			}
+//			
+//		}
 
 	}
 
@@ -276,7 +368,7 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 		public void actionPerformed(ActionEvent e) {
 			if (getType()!='t' && getType()!='z' && getType()!='c' || !iconEnabled) return;
 			int flags = e.getModifiers();
-			if ((flags&(Event.ALT_MASK|Event.META_MASK|Event.CTRL_MASK))!=0 ){
+			if ((flags&(Event.ALT_MASK|Event.META_MASK|Event.CTRL_MASK))!=0){
 				if (getType() =='t' || getType() =='z') IJ.doCommand("Animation Options...");
 				else if (getType() =='c') IJ.run("Channels Tool...");
 			}
