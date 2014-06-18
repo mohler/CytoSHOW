@@ -370,7 +370,7 @@ public class AVI_Writer implements PlugInFilter, TextListener {
         			IJ.showStatus(""+ ((t-firstT) + (z-firstZ)*tDim + (c-1)*zDim*tDim)+"/"+cDim*zDim*tDim);
         			dataChunkOffset[(t-firstT) + (z-firstZ)*tDim + (c-1)*zDim*tDim] = (int)(chunkPointer - moviPointer);
         			dataChunkLength[(t-firstT) + (z-firstZ)*tDim + (c-1)*zDim*tDim] = (int)(raFile.getFilePointer() - chunkPointer - 8); //size excludes '00db' and size fields
-        			if (maxChunkLength < dataChunkLength[z-1]) maxChunkLength = dataChunkLength[z-1];
+        			if (maxChunkLength < dataChunkLength[z-firstZ]) maxChunkLength = dataChunkLength[z-firstZ];
         			chunkEndWriteSize();            // '00db' or '00dc' chunk finished (nesting level 2)
         			//if (IJ.escapePressed()) {
         			//    IJ.showStatus("Save as Avi INTERRUPTED");
