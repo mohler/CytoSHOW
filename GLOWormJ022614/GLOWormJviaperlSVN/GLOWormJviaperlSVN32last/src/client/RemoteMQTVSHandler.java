@@ -598,8 +598,8 @@ public class RemoteMQTVSHandler {
 		}
 		ImageProcessor ip = new ColorProcessor(bi);
 		if (!(moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW")
-				|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/DUP")
-				|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/Projectionsof"))) {
+				/*|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/DUP")
+				|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/Projectionsof")*/)) {
 			ip = ip.convertToByte(false);
 			eightBit = true;
 		}

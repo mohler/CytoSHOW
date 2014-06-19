@@ -96,6 +96,7 @@ public class AVI_Writer implements PlugInFilter, TextListener {
     }
 
     private boolean showDialog(ImagePlus imp) {
+		int nChannels = imp.getNChannels();
 		int nSlices = imp.getNSlices();
 		int nFrames = imp.getNFrames();
     	String options = Macro.getOptions();
@@ -108,6 +109,11 @@ public class AVI_Writer implements PlugInFilter, TextListener {
         //gd.addNumericField("JPEG Quality (0-100):", jpegQuality, 0, 3, "");
 		gd.addNumericField("Frame Rate:", fps, decimalPlaces, 3, "fps");
 		int nRangeFields = 0;
+		if (nChannels>1) {
+			gd.setInsets(2, 30, 3);
+			gd.addStringField("Channels (c):", 1 +"-"+ nChannels);
+			nRangeFields++;
+		}
 		if (nSlices>1) {
 			gd.setInsets(2, 30, 3);
 			gd.addStringField("Slices (z):", imp.getSlice() +"-"+ imp.getSlice());
@@ -119,12 +125,12 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 			nRangeFields++;
 		}
 		Vector v = gd.getStringFields();
-		rangeFields = new TextField[2];
+		rangeFields = new TextField[3];
 		for (int i=0; i<nRangeFields; i++) {
 			rangeFields[i] = (TextField)v.elementAt(i);
 			rangeFields[i].addTextListener(this);
 		}
-		gd.addCheckbox("Flatten tags into movie?", true);
+		gd.addCheckbox("Flatten channels and tags into one layer?", true);
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return false;
@@ -138,6 +144,17 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 		imp.getCalibration().fps = fps;
 
 		
+		if (nChannels>1) {
+			String[] range = Tools.split(gd.getNextString(), " -");
+			double z1 = Tools.parseDouble(range[0]);
+			double z2 = range.length==2?Tools.parseDouble(range[1]):Double.NaN;
+			firstC = Double.isNaN(z1)?1:(int)z1;
+			lastC = Double.isNaN(z2)?firstZ:(int)z2;
+			if (firstC<1) firstC = 1;
+			if (lastC>nChannels) lastC = nChannels;
+			if (firstC>lastC) {firstC=1; lastC=nChannels;}
+		} else
+			firstZ = lastZ = 1;
 		if (nSlices>1) {
 			String[] range = Tools.split(gd.getNextString(), " -");
 			double z1 = Tools.parseDouble(range[0]);
@@ -189,8 +206,9 @@ public class AVI_Writer implements PlugInFilter, TextListener {
         yDim = imp.getCanvas().getHeight();   //image height
         zDim = lastZ-firstZ+1; //number of slices in z stack
         tDim = lastT-firstT+1;
-//        cDim = imp.getNChannels();
-        cDim = 1;
+        cDim = lastC-firstC+1;
+        if (flattenTags)
+        	cDim = 1;
 		boolean saveFrames=false, saveSlices=false, saveChannels=false;
         int channels = imp.getNChannels();
 		int slices = imp.getNSlices();
@@ -332,15 +350,19 @@ public class AVI_Writer implements PlugInFilter, TextListener {
         int[] dataChunkOffset = new int[cDim*zDim*tDim];  // remember chunk positions...
         int[] dataChunkLength = new int[cDim*zDim*tDim];  // ... and sizes for the index
 
+		int mode = CompositeImage.GRAYSCALE;
+		if (imp.isComposite()) {
+			mode = ((CompositeImage)imp).getMode();
+		}
         //  W r i t e   f r a m e   d a t a
-        for (int c=1; c<=cDim; c++) {
+        for (int c=firstC; c<=(flattenTags?firstC:lastC); c++) {
         	for (int z=firstZ; z<=lastZ; z++) {
         		for (int t=firstT; t<=lastT; t= t + stepT) {
         			IJ.showProgress(z, zDim);
 //        			IJ.showStatus(z+"/"+zDim);
         			ImageProcessor ip = null;      // get the image to write ...
-        			if (true /*isComposite || isHyperstack || isOverlay*/) {
-        				imp.setPositionWithoutUpdate(c, z, t);
+    				imp.setPositionWithoutUpdate(c, z, t);
+        			if (flattenTags /*isComposite || isHyperstack || isOverlay*/) {
 //        				if (saveFrames)
 //        					imp.setPositionWithoutUpdate(channel, slice, z+1);
 //        				else if (saveSlices)
@@ -355,7 +377,10 @@ public class AVI_Writer implements PlugInFilter, TextListener {
         				}
         				ip = new ColorProcessor(imp2.getImage());
         			} else {
-        				ip = zDim==1 ? imp.getProcessor() : imp.getStack().getProcessor(z+1);
+            			if (imp.isComposite()) {
+            				((CompositeImage)imp).setMode(CompositeImage.GRAYSCALE);
+            			}
+        				ip = imp.getStack().getProcessor((c-1)*(imp.getNSlices())*(imp.getNFrames()) + (z-1)*(imp.getNFrames()) + t);
         			}
         			int chunkPointer = (int)raFile.getFilePointer();
         			writeInt(dataSignature);        // start writing chunk: '00db' or '00dc'
@@ -367,9 +392,9 @@ public class AVI_Writer implements PlugInFilter, TextListener {
         					writeRGBFrame(ip);
         			} else
         				writeCompressedFrame(ip);
-        			IJ.showStatus(""+ ((t-firstT) + (z-firstZ)*tDim + (c-1)*zDim*tDim)+"/"+cDim*zDim*tDim);
-        			dataChunkOffset[(t-firstT) + (z-firstZ)*tDim + (c-1)*zDim*tDim] = (int)(chunkPointer - moviPointer);
-        			dataChunkLength[(t-firstT) + (z-firstZ)*tDim + (c-1)*zDim*tDim] = (int)(raFile.getFilePointer() - chunkPointer - 8); //size excludes '00db' and size fields
+        			IJ.showStatus(""+ ((t-firstT) + (z-firstZ)*tDim + (c-firstC)*zDim*tDim)+"/"+cDim*zDim*tDim);
+        			dataChunkOffset[(t-firstT) + (z-firstZ)*tDim + (c-firstC)*zDim*tDim] = (int)(chunkPointer - moviPointer);
+        			dataChunkLength[(t-firstT) + (z-firstZ)*tDim + (c-firstC)*zDim*tDim] = (int)(raFile.getFilePointer() - chunkPointer - 8); //size excludes '00db' and size fields
         			if (maxChunkLength < dataChunkLength[z-firstZ]) maxChunkLength = dataChunkLength[z-firstZ];
         			chunkEndWriteSize();            // '00db' or '00dc' chunk finished (nesting level 2)
         			//if (IJ.escapePressed()) {
@@ -380,8 +405,10 @@ public class AVI_Writer implements PlugInFilter, TextListener {
         	}
         }
         chunkEndWriteSize();                // LIST 'movi' finished (nesting level 1)
-		if (isComposite || isHyperstack)
+		if (imp.isComposite() || isHyperstack) {
+			((CompositeImage)imp).setMode(mode);
 			imp.setPosition(channel, slice, frame);
+		}
 
         //  W r i t e   I n d e x
         writeString("idx1");    // Write the idx1 chunk

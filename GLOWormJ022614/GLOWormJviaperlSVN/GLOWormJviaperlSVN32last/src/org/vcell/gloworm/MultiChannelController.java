@@ -145,8 +145,8 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 
 		} else {
 			GenericDialog gds = new GenericDialog("Convert to CytoSHOW Format?"); 
-			gds.addMessage("This type of Image Stack does not work\nwith all CytoSHOW Functions."
-					+ "\nWould you like to Convert it to a CytoSHOW Scene?");
+			gds.addMessage("This type of Image Stack does not work\nfor CytoSHOW's instant Scene sharing."
+					+ "\nWould you like to create version compatible with a shared CytoSHOW Scene?");
 			//			gds.addRadioButtonGroup("", new String[]{"Save Scene","Share Scene"}, 1, 2, "Save Scene");
 			gds.addChoice("", new String[]{"Save Scene","Share Scene"},"Share Scene");
 			gds.showDialog();
@@ -1210,6 +1210,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 		} else if (command.equals("Convert to RGB")) {
 			IJ.doCommand("Stack to RGB");
 
+/********************************/
 
 		} else if (command.equals("Save Scene")) {
 			Date currentDate = new Date();
@@ -1225,7 +1226,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 					&& deNovoMovieFile==null) {
 //				SaveDialog sd = new SaveDialog("Save Movie for CytoSHOW Scene as...", imp.getTitle().length()>28?imp.getTitle().substring(0, 25):imp.getTitle().replace(".tif", ""), ".avi");
 //				String name = sd.getFileName().replace(" ","");
-				name = (imp.getTitle().length()>28?imp.getTitle().substring(0, 25):imp.getTitle().replace(".tif", ""))+sec+".avi";
+				name = (imp.getTitle().length()>28?imp.getTitle().substring(0, 25):imp.getTitle().replace(".tif", ""))+sec+"_1.avi";
 				name = name.replace(" ","");
 				if (name==null) return;
 				/*
@@ -1236,11 +1237,39 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 				 */
 				String dir = IJ.getDirectory("home");
 				path = dir+name;
-				imp.killRoi();
-				IJ.run(imp, "AVI... ", "compression=PNG frame=10 slices=1-"+imp.getNSlices()
-						+" frames=1-"+imp.getNSlices()+" save=["+path+"]");				
-				deNovoMovieFile = new java.io.File(path);
-				imp.restoreRoi();
+				Roi roi = imp.getRoi();
+				if (roi != null)
+					imp.killRoi();
+				int mode = CompositeImage.GRAYSCALE;
+				double[] mins = new double[imp.getNChannels()+1]; 
+				double[] maxs = new double[imp.getNChannels()+1]; 
+
+				if (imp.isComposite()) {
+					int[] position = {imp.getChannel(), imp.getSlice(), imp.getFrame()};
+					mode = ((CompositeImage)imp).getMode();
+					((CompositeImage)imp).setMode(CompositeImage.GRAYSCALE);
+					for (int c=1; c<mins.length; c++) {
+						imp.setPosition(c, position[1], position[2]);
+						mins[c] = imp.getChannelProcessor().getMin();
+						maxs[c] = imp.getChannelProcessor().getMin();
+						imp.getChannelProcessor().setMinAndMax(0, 255);
+					
+						IJ.run(imp, "AVI... ", "compression=PNG frame=10"+" channels="+c+"-"+c+" slices=1-"+imp.getNSlices()
+								+" frames=1-"+imp.getNFrames()+" save=["+path.replace("_1.avi", "_"+c+".avi")+"]");				
+						deNovoMovieFile = new java.io.File(path);
+
+						imp.getChannelProcessor().setMinAndMax(mins[c], maxs[c]);
+					}
+					imp.setPosition(position[0], position[1], position[2]);
+					((CompositeImage)imp).setMode(mode);
+
+				}  else {
+					IJ.run(imp, "AVI... ", "compression=PNG frame=10"+" channels=1-"+imp.getNChannels()+" slices=1-"+imp.getNSlices()
+							+" frames=1-"+imp.getNFrames()+" save=["+path+"]");				
+					deNovoMovieFile = new java.io.File(path);
+				}
+				if (roi != null)
+					imp.setRoi(roi);
 			}
 
 			/***********Next lines output a file with text **************/
@@ -1270,10 +1299,10 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 								new BufferedWriter(
 										new FileWriter(saveFile) ), true);
 				out.println("Saved Scene for movies:"); 
-				for ( int m=0 ; m < (deNovoMovieFile!=null?1:(ci!=null?ci:imp).getNChannels()); m++) {
+				for ( int m=0 ; m < (/*deNovoMovieFile!=null?1:*/(ci!=null?ci:imp).getNChannels()); m++) {
 					int saveChannelNumber = m;									
 					if (stack instanceof MultiQTVirtualStack)
-						out.println( (deNovoMovieFile!=null?(sharing?"/Volumes/GLOWORM_DATA/" + deNovoMovieFile.getName():deNovoMovieFile.getPath()):((MultiQTVirtualStack) stack).getVirtualStack(m).getMovieFile().getPath()) 
+						out.println( (deNovoMovieFile!=null?(sharing?"/Volumes/GLOWORM_DATA/" + deNovoMovieFile.getName():deNovoMovieFile.getPath().replaceAll("_.*.avi", "_"+(m+1)+".avi")):((MultiQTVirtualStack) stack).getVirtualStack(m).getMovieFile().getPath()) 
 								+ " = " + (deNovoMovieFile!=null?imp.getNSlices():((MultiQTVirtualStack) stack).getChannelNSlices(m) )
 								+ " = " + (deNovoMovieFile!=null?
 										(deNovoMovieFile.getName().length()>12?deNovoMovieFile.getName().substring(0, 12):deNovoMovieFile.getName()) + "_" + (m+1) + "_" + sec + ".adj":
@@ -1313,7 +1342,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 					}
 				}
 				out.println("");
-				out.println("Convert8bit = " + (deNovoMovieFile!=null?imp.getNChannels()<1:(stack instanceof MultiQTVirtualStack?((MultiQTVirtualStack) stack).getIsEightBit():(imp.getRemoteMQTVSHandler()!=null?imp.getRemoteMQTVSHandler().isEightBit():false) ) ) );
+				out.println("Convert8bit = " + ((deNovoMovieFile!=null && !deNovoMovieFile.getName().startsWith("SW_"))?true:(stack instanceof MultiQTVirtualStack?((MultiQTVirtualStack) stack).getIsEightBit():(imp.getRemoteMQTVSHandler()!=null?imp.getRemoteMQTVSHandler().isEightBit():false) ) ) );
 				out.println("VirtualStack = " + (deNovoMovieFile!=null?true:(stack instanceof MultiQTVirtualStack?((MultiQTVirtualStack) stack).getIsVirtualStack():true) ));
 				out.println("MultipleMovies = " + (deNovoMovieFile!=null?false:(stack instanceof MultiQTVirtualStack?((MultiQTVirtualStack) stack).getIsMultipleMovies():true) ));
 				out.println("HyperStack = " + (deNovoMovieFile!=null?true:(stack instanceof MultiQTVirtualStack?((MultiQTVirtualStack) stack).getIsHyperStack():true) ));
@@ -1378,16 +1407,16 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 								if (ci.getMode() == 1) {
 
 									out1.println("DisplayRangeMin = "
-											+ (deNovoMovieFile!=null?0:ci.getProcessor(j + 1).getMin()));
+											+ ((deNovoMovieFile!=null && !deNovoMovieFile.getName().startsWith("SW_"))?0:ci.getProcessor(j + 1).getMin()));
 									out1.println("DisplayRangeMax = "
-											+ (deNovoMovieFile!=null?255:ci.getProcessor(j + 1).getMax()));
+											+ ((deNovoMovieFile!=null && !deNovoMovieFile.getName().startsWith("SW_"))?255:ci.getProcessor(j + 1).getMax()));
 								} else {
 									ci.setPosition(j + 1, ci.getSlice(), ci
 											.getFrame());
 									out1.println("DisplayRangeMin = "
-											+ (deNovoMovieFile!=null?0:ci.getProcessor().getMin()));
+											+ ((deNovoMovieFile!=null && !deNovoMovieFile.getName().startsWith("SW_"))?0:ci.getProcessor().getMin()));
 									out1.println("DisplayRangeMax = "
-											+ (deNovoMovieFile!=null?255:ci.getProcessor().getMax()));
+											+ ((deNovoMovieFile!=null && !deNovoMovieFile.getName().startsWith("SW_"))?255:ci.getProcessor().getMax()));
 
 								}
 							}
