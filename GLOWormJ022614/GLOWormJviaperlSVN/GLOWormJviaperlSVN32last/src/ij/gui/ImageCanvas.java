@@ -1003,6 +1003,17 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 	/** Implements the Image/Zoom/Original Scale command. */
 	public void unzoom() {
 		double imag = imp.getWindow().getInitialMagnification();
+		int padH = 1+imp.getWindow().getInsets().left
+				+imp.getWindow().getInsets().right
+				+imp.getWindow().viewButtonPanel.getWidth()
+				+(imp.getWindow().optionsPanel.isVisible()?imp.getWindow().optionsPanel.getWidth():0);
+		int padV = 1+imp.getWindow().getInsets().top
+				+imp.getWindow().getInsets().bottom
+				+(imp.getWindow() instanceof StackWindow?
+						((StackWindow)imp.getWindow()).getNScrollbars()
+						*((StackWindow)imp.getWindow()).zSelector.getHeight()
+						:0)
+						+imp.getWindow().overheadPanel.getHeight();
 		if (magnification==imag)
 			return;
 		srcRect = new Rectangle(0, 0, imageWidth, imageHeight);
@@ -1011,12 +1022,24 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		setMagnification(imag);
 		setMaxBounds();
 		win.pack();
+		imp.getWindow().setSize(dstWidth+padH, dstHeight+padV);
 		setMaxBounds();
 		repaint();
 	}
 
 	/** Implements the Image/Zoom/View 100% command. */
 	public void zoom100Percent() {
+		int padH = 1+imp.getWindow().getInsets().left
+				+imp.getWindow().getInsets().right
+				+imp.getWindow().viewButtonPanel.getWidth()
+				+(imp.getWindow().optionsPanel.isVisible()?imp.getWindow().optionsPanel.getWidth():0);
+		int padV = 1+imp.getWindow().getInsets().top
+				+imp.getWindow().getInsets().bottom
+				+(imp.getWindow() instanceof StackWindow?
+						((StackWindow)imp.getWindow()).getNScrollbars()
+						*((StackWindow)imp.getWindow()).zSelector.getHeight()
+						:0)
+						+imp.getWindow().overheadPanel.getHeight();
 		if (magnification==1.0)
 			return;
 		double imag = imp.getWindow().getInitialMagnification();
@@ -1040,6 +1063,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		int sx = screenX(x);
 		int sy = screenY(y);
 		adjustSourceRect(1.0, sx, sy);
+		imp.getWindow().pack();
+		imp.getWindow().setSize(dstWidth+padH, dstHeight+padV);
 		repaint();
 	}
 

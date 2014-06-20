@@ -1248,6 +1248,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 					int[] position = {imp.getChannel(), imp.getSlice(), imp.getFrame()};
 					mode = ((CompositeImage)imp).getMode();
 					((CompositeImage)imp).setMode(CompositeImage.GRAYSCALE);
+					imp.getCanvas().unzoom();
 					for (int c=1; c<mins.length; c++) {
 						imp.setPosition(c, position[1], position[2]);
 						mins[c] = imp.getChannelProcessor().getMin();
