@@ -1399,7 +1399,8 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 								out1
 								.println((deNovoMovieFile!=null?
 										"LUT = "
-										+ imp.getMotherImp().getMultiChannelController().channelLUTItems[((Choice) channelLUTChoice[j])
+										+ imp.getMotherImp().getMultiChannelController().channelLUTItems
+											[((Choice) imp.getMotherImp().getMultiChannelController().channelLUTChoice[j])
 										                  .getSelectedIndex()]
 										:"LUT = "
 										+ channelLUTItems[((Choice) channelLUTChoice[j])
