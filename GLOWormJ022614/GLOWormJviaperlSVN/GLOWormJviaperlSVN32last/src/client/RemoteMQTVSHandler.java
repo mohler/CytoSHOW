@@ -282,8 +282,8 @@ public class RemoteMQTVSHandler {
 			imp2.setDimensions(stkNChannels, stkNSlices, stkNFrames);
 			imp2.setOpenAsHyperStack(true);
 			CompositeImage ci2 = null;
-			if (!(moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/DUP")
-					|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/Projectionsof"))) {
+			if (true /*!(moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/DUP")
+					|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/Projectionsof"))*/) {
 				ci2 = new CompositeImage(imp2,CompositeImage.COMPOSITE);
 			}
 			if (true ) {

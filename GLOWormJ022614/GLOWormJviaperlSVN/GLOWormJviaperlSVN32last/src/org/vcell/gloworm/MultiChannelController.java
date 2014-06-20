@@ -146,7 +146,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 		} else {
 			GenericDialog gds = new GenericDialog("Convert to CytoSHOW Format?"); 
 			gds.addMessage("This type of Image Stack does not work\nfor CytoSHOW's instant Scene sharing."
-					+ "\nWould you like to create version compatible with a shared CytoSHOW Scene?");
+					+ "\nWould you like to create a version that is \ncompatible with a shared CytoSHOW Scene?");
 			//			gds.addRadioButtonGroup("", new String[]{"Save Scene","Share Scene"}, 1, 2, "Save Scene");
 			gds.addChoice("", new String[]{"Save Scene","Share Scene"},"Share Scene");
 			gds.showDialog();
@@ -1302,14 +1302,14 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 				for ( int m=0 ; m < (/*deNovoMovieFile!=null?1:*/(ci!=null?ci:imp).getNChannels()); m++) {
 					int saveChannelNumber = m;									
 					if (stack instanceof MultiQTVirtualStack)
-						out.println( (deNovoMovieFile!=null?(sharing?"/Volumes/GLOWORM_DATA/" + deNovoMovieFile.getName():deNovoMovieFile.getPath().replaceAll("_.*.avi", "_"+(m+1)+".avi")):((MultiQTVirtualStack) stack).getVirtualStack(m).getMovieFile().getPath()) 
+						out.println( (deNovoMovieFile!=null?(sharing?"/Volumes/GLOWORM_DATA/" + deNovoMovieFile.getName().replaceAll("_.*.avi", "_"+(m+1)+".avi"):deNovoMovieFile.getPath().replaceAll("_.*.avi", "_"+(m+1)+".avi")):((MultiQTVirtualStack) stack).getVirtualStack(m).getMovieFile().getPath()) 
 								+ " = " + (deNovoMovieFile!=null?imp.getNSlices():((MultiQTVirtualStack) stack).getChannelNSlices(m) )
 								+ " = " + (deNovoMovieFile!=null?
 										(deNovoMovieFile.getName().length()>12?deNovoMovieFile.getName().substring(0, 12):deNovoMovieFile.getName()) + "_" + (m+1) + "_" + sec + ".adj":
 											(((MultiQTVirtualStack) stack).getVirtualStack(m).getMovieName().length()>12?((MultiQTVirtualStack) stack).getVirtualStack(m).getMovieName().substring(0, 12):((MultiQTVirtualStack) stack).getVirtualStack(m).getMovieName()) + "_" + (m+1) + "_" + sec + ".adj" ));
 
 					else if (stack instanceof RemoteMQTVSHandler.RemoteMQTVirtualStack)
-						out.println( (deNovoMovieFile!=null?(sharing?"/Volumes/GLOWORM_DATA/" + deNovoMovieFile.getName():deNovoMovieFile.getPath()):imp.getRemoteMQTVSHandler().getChannelPathNames()[m]) 
+						out.println( (deNovoMovieFile!=null?(sharing?"/Volumes/GLOWORM_DATA/" + deNovoMovieFile.getName().replaceAll("_.*.avi", "_"+(m+1)+".avi"):deNovoMovieFile.getPath().replaceAll("_.*.avi", "_"+(m+1)+".avi")):imp.getRemoteMQTVSHandler().getChannelPathNames()[m]) 
 								+ " = " + (deNovoMovieFile!=null?imp.getNSlices():imp.getRemoteMQTVSHandler().getMovieSlicesStrings()[m] )
 								+ " = " + (deNovoMovieFile!=null?
 										(deNovoMovieFile.getName().length()>12?deNovoMovieFile.getName().substring(0, 12):deNovoMovieFile.getName())
@@ -1319,7 +1319,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 													:imp.getRemoteMQTVSHandler().getChannelPathNames()[m].replaceAll(".*/","") )
 													+ "_" + (m+1) + "_" + sec + ".adj" );
 					else 
-						out.println( (deNovoMovieFile!=null?(sharing?"/Volumes/GLOWORM_DATA/" + deNovoMovieFile.getName():deNovoMovieFile.getPath()):"error") 
+						out.println( (deNovoMovieFile!=null?(sharing?"/Volumes/GLOWORM_DATA/" + deNovoMovieFile.getName().replaceAll("_.*.avi", "_"+(m+1)+".avi"):deNovoMovieFile.getPath().replaceAll("_.*.avi", "_"+(m+1)+".avi")):"error") 
 								+ " = " + (deNovoMovieFile!=null?imp.getNSlices():"error" )
 								+ " = " + (deNovoMovieFile!=null?
 										(deNovoMovieFile.getName().length()>12?deNovoMovieFile.getName().substring(0, 12):deNovoMovieFile.getName())
@@ -1398,10 +1398,13 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 							if ( imp.isComposite() ) 
 								out1
 								.println((deNovoMovieFile!=null?
-										""
+										"LUT = "
+										+ imp.getMotherImp().getMultiChannelController().channelLUTItems[((Choice) channelLUTChoice[j])
+										                  .getSelectedIndex()]
 										:"LUT = "
 										+ channelLUTItems[((Choice) channelLUTChoice[j])
-										                  .getSelectedIndex()]));
+										                  .getSelectedIndex()]) 
+										);
 
 							if (ci!=null) {
 								if (ci.getMode() == 1) {
