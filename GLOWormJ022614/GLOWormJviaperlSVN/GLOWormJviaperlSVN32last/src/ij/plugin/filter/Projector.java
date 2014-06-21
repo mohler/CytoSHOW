@@ -438,6 +438,19 @@ public class Projector implements PlugInFilter, TextListener {
 		buildImp.getWindow().setVisible(false);
 		
 		IJ.runMacro("print(\"\\\\Update:   Arranging Tags...   \")");
+		
+		if (WindowManager.getImage("Concatenated Stacks") != null)  {
+			ImagePlus csImp = WindowManager.getImage("Concatenated Stacks");
+			TextRoi.setFont("Arial", csImp.getWidth()/10, Font.ITALIC);		
+			TextRoi tr = new TextRoi(0, 0, "Arranging \nTags...\n");
+			tr.setStrokeColor(Color.gray);
+			tr.setFillColor(Color.decode("#00000000"));
+
+			csImp.setRoi(tr);
+			tr.setImage(csImp);
+			csImp.getCanvas().paintDoubleBuffered(csImp.getCanvas().getGraphics());
+		}
+		
 		RoiManager bigRM = buildImp.getRoiManager();
 		bigRM.setVisible(false);
 		for (int r=0; r<bigRoiAList.size(); r++) {
