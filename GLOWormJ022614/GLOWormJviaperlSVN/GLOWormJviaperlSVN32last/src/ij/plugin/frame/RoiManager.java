@@ -405,8 +405,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					if (timeNow > timeLast + 100) {
 						timeLast = timeNow;
 						Graphics g = imp.getCanvas().getGraphics();
-						if (imp.getCanvas().messageRois.containsKey("Loading Tag tags"))
-							imp.getCanvas().messageRois.remove("Loading Tag tags");
+						if (imp.getCanvas().messageRois.containsKey("Loading Tags"))
+							imp.getCanvas().messageRois.remove("Loading Tags");
 
 						Roi messageRoi = new TextRoi(imp.getCanvas().getSrcRect().x, imp.getCanvas().getSrcRect().y,
 								"   Finding tags that match:\n   "+ "Reloading full set"  + "..." 
@@ -416,7 +416,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						messageRoi.setStrokeColor(Color.black);
 						messageRoi.setFillColor(Colors.decode("#99ffffdd",
 								imp.getCanvas().getDefaultColor()));
-						imp.getCanvas().messageRois.put("Loading Tag tags", messageRoi);
+						imp.getCanvas().messageRois.put("Loading Tags", messageRoi);
 						imp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
 					}
 					continue;
@@ -454,8 +454,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			if (imp.getCanvas().messageRois.containsKey("Finding tags that match"))
 				imp.getCanvas().messageRois.remove("Finding tags that match");
-			if (imp.getCanvas().messageRois.containsKey("Loading Tag tags"))
-				imp.getCanvas().messageRois.remove("Loading Tag tags");
+			if (imp.getCanvas().messageRois.containsKey("Loading Tags"))
+				imp.getCanvas().messageRois.remove("Loading Tags");
 
 			searching = false;
 			list.setSize(dim);
@@ -1605,18 +1605,18 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				if (timeNow > timeLast + 100) {
 					timeLast = timeNow;
 					Graphics g = imp.getCanvas().getGraphics();
-					if (imp.getCanvas().messageRois.containsKey("Loading Tag tags"))
-						imp.getCanvas().messageRois.remove("Loading Tag tags");
+					if (imp.getCanvas().messageRois.containsKey("Loading Tags"))
+						imp.getCanvas().messageRois.remove("Loading Tags");
 
 					messageRoi = new TextRoi(imp.getCanvas().getSrcRect().x, imp.getCanvas().getSrcRect().y,
-							"   Loading Tag tags:\n   " + "   ..."+count+ " features tagged\n"   );
+							"   Loading Tags:\n   " + "   ..."+count+ " features tagged\n"   );
 
 					((TextRoi) messageRoi).setCurrentFont(g.getFont().deriveFont((float) (imp.getCanvas().getSrcRect().width/16)));
 					messageRoi.setStrokeColor(Color.black);
 					messageRoi.setFillColor(Colors.decode("#99ffffdd",
 							imp.getCanvas().getDefaultColor()));
 
-					imp.getCanvas().messageRois.put("Loading Tag tags", messageRoi);
+					imp.getCanvas().messageRois.put("Loading Tags", messageRoi);
 					imp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
 
 				}
@@ -1688,8 +1688,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			} 
 			in.close(); 
 			this.imp.setTitle(impTitle);
-			if (imp.getCanvas().messageRois.containsKey("Loading Tag tags"))
-				imp.getCanvas().messageRois.remove("Loading Tag tags");
+			if (imp.getCanvas().messageRois.containsKey("Loading Tags"))
+				imp.getCanvas().messageRois.remove("Loading Tags");
 		} catch (IOException e) {error(e.toString());} 
 		if (in == null)
 			return;
@@ -1716,7 +1716,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		updateShowAll();
 		showAllCheckbox.setState(true);
 
-		imp.getCanvas().messageRois.remove("Loading Tag tags");
+		imp.getCanvas().messageRois.remove("Loading Tags");
 		imp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
 		messageRoi = null;
 		busy = false;
