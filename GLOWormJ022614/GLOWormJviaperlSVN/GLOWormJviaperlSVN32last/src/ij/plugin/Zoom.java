@@ -3,6 +3,7 @@ import ij.*;
 import ij.gui.*;
 import ij.process.*;
 import ij.measure.*;
+
 import java.awt.*;
 
 /** This plugin implements the commands in the Image/Zoom submenu. */
@@ -108,6 +109,8 @@ public class Zoom implements PlugIn{
 // 		IJ.log(""+ w+" "+width+" "+h+" "+height+" "+mag);
 		win.pack();
 		ic.repaint();
+		ic.zoomIn(x, y);
+		ic.zoomOut(x, y);
 	}
 	
 }
