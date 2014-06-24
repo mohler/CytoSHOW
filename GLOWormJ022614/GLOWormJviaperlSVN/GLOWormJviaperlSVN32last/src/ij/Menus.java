@@ -4,6 +4,7 @@ import ij.util.*;
 import ij.gui.ImageWindow;
 import ij.plugin.MacroInstaller;
 import ij.gui.Toolbar;
+
 import java.awt.*;
 import java.awt.image.*;
 import java.awt.event.*;
@@ -12,6 +13,9 @@ import java.io.*;
 import java.applet.Applet;
 import java.awt.event.*;
 import java.util.zip.*;
+
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 
 /**
 This class installs and updates ImageJ's menus. Note that menu labels,
@@ -49,7 +53,7 @@ public class Menus {
 	private static MenuBar mbar;
 	private static CheckboxMenuItem gray8Item,gray16Item,gray32Item,
 			color256Item,colorRGBItem,RGBStackItem,HSBStackItem;
-	private static PopupMenu popup;
+	private static JPopupMenu popup;
 
 	private static ImageJ ij;
 	private static boolean isFiji;
@@ -1030,8 +1034,8 @@ public class Menus {
 	public static void installPopupMenu(ImageJ ij) {
 		String s;
 		int count = 0;
-		MenuItem mi;
-		popup = new PopupMenu("");
+		JMenuItem mi;
+		popup = new JPopupMenu("");
 		if (fontSize!=0)
 			popup.setFont(getFont());
 
@@ -1043,7 +1047,7 @@ public class Menus {
 			if (s.equals("-"))
 				popup.addSeparator();
 			else if (!s.equals("")) {
-				mi = new MenuItem(s);
+				mi = new JMenuItem(s);
 				mi.addActionListener(ij);
 				popup.add(mi);
 			}
@@ -1293,7 +1297,7 @@ public class Menus {
 		item.addActionListener(ij);
 	}
 
-	public static PopupMenu getPopupMenu() {
+	public static JPopupMenu getPopupMenu() {
 		return popup;
 	}
 	
