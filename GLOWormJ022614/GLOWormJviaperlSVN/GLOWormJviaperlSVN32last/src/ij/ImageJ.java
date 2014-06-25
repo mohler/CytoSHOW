@@ -26,11 +26,14 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
 
 import org.vcell.gloworm.MQTVSSceneLoader64;
 import org.vcell.gloworm.MQTVSSceneLoader64;
@@ -357,12 +360,29 @@ public class ImageJ extends Frame implements ActionListener,
 				Object invoker = Menus.getPopupMenu().getInvoker();
 				if (item == item.getParent().getComponent(0)) {
 //					IJ.showMessage(cmd);
-					JFrame tearoff = new JFrame();
+					JFrame tearoff = new JFrame(cmd);
 					for (Component comp:item.getParent().getComponents()) {
+						Component[] subcomps = null;
+						if (comp instanceof JMenu) {
+							JPopupMenu jsub = ((JMenu) comp).getPopupMenu();
+							subcomps = jsub.getComponents();
+						}
 						item.getParent().remove(comp);
 						tearoff.add(comp);
+						if (comp instanceof JMenu) {
+							JPopupMenu jpm = ((JMenu)comp).getPopupMenu();
+							jpm.setLightWeightPopupEnabled(true);
+							jpm.add(new JMenuItem("hi there"));
+							for (Component jmi:subcomps) {
+								if (jmi instanceof JMenuItem)
+									jpm.add(jmi);
+							}
+							((JMenu) comp).setComponentPopupMenu(jpm);	
+						}
 					}
 					tearoff.pack();
+					tearoff.setLocation(500,400);
+					tearoff.setSize(200,200);
 					tearoff.setVisible(true);
 					return;
 				}
