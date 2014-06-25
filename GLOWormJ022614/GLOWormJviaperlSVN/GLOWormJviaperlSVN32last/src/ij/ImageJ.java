@@ -26,7 +26,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -359,14 +358,10 @@ public class ImageJ extends Frame implements ActionListener,
 				if (item == item.getParent().getComponent(0)) {
 //					IJ.showMessage(cmd);
 					JFrame tearoff = new JFrame();
-					JPanel toPanel = new JPanel();
 					for (Component comp:item.getParent().getComponents()) {
-						toPanel.add(comp);
-							if (comp instanceof JMenu && toPanel.getComponentCount()>1) {
-								((JMenu)toPanel.getComponent(toPanel.getComponentCount()-1)).add(((JMenu) comp).getComponentPopupMenu());
-							}
+						item.getParent().remove(comp);
+						tearoff.add(comp);
 					}
-					tearoff.add(toPanel);
 					tearoff.pack();
 					tearoff.setVisible(true);
 					return;
