@@ -24,8 +24,12 @@ import javax.jnlp.SingleInstanceService;
 import javax.jnlp.UnavailableServiceException;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 
@@ -342,16 +346,35 @@ public class ImageJ extends Frame implements ActionListener,
 		if ((e.getSource() instanceof MenuItem)) {
 			MenuItem item = (MenuItem)e.getSource();
 			String cmd = e.getActionCommand();
-			ImagePlus imp = null;
 			if (item.getParent()==Menus.openRecentMenu) {
 				new RecentOpener(cmd); // open image in separate thread
 				return;
-			} else if (item.getParent() instanceof PopupMenu) {
-				Object parent = Menus.getPopupMenu().getParent();
-				if (parent instanceof ImageCanvas)
-					imp = ((ImageCanvas)parent).getImage();
-				else if (parent instanceof ColorLegend) {
-					RoiManager rm = ((ColorLegend)parent).getRoiManager();
+			}
+		} else if ((e.getSource() instanceof JMenuItem)) {
+			JMenuItem item = (JMenuItem)e.getSource();
+			String cmd = e.getActionCommand();
+			ImagePlus imp = null;
+			if (item.getParent() instanceof JPopupMenu) {
+				Object invoker = Menus.getPopupMenu().getInvoker();
+				if (item == item.getParent().getComponent(0)) {
+//					IJ.showMessage(cmd);
+					JFrame tearoff = new JFrame();
+					JPanel toPanel = new JPanel();
+					for (Component comp:item.getParent().getComponents()) {
+						toPanel.add(comp);
+							if (comp instanceof JMenu && toPanel.getComponentCount()>1) {
+								((JMenu)toPanel.getComponent(toPanel.getComponentCount()-1)).add(((JMenu) comp).getComponentPopupMenu());
+							}
+					}
+					tearoff.add(toPanel);
+					tearoff.pack();
+					tearoff.setVisible(true);
+					return;
+				}
+				if (invoker instanceof ImageCanvas)
+					imp = ((ImageCanvas)invoker).getImage();
+				else if (invoker instanceof ColorLegend) {
+					RoiManager rm = ((ColorLegend)invoker).getRoiManager();
 					for (int i=0; i< rm.getCompImps().size(); i++){
 						if (rm.getCompImps().get(i) != null) {
 							imp = rm.getCompImps().get(i);
@@ -359,13 +382,13 @@ public class ImageJ extends Frame implements ActionListener,
 						}
 					}
 				}
-				else if (parent instanceof MenuItem) {
-					IJ.showMessage(parent.toString());
-					Object grandparent = ((MenuItem)parent).getParent();
+				else if (invoker instanceof MenuItem) {
+					IJ.showMessage(invoker.toString());
+					Object grandparent = ((MenuItem)invoker).getParent();
 					if (grandparent instanceof ImageCanvas)
 						imp = ((ImageCanvas)grandparent).getImage();
-					else if (parent instanceof ColorLegend) {
-						RoiManager rm = ((ColorLegend)parent).getRoiManager();
+					else if (invoker instanceof ColorLegend) {
+						RoiManager rm = ((ColorLegend)invoker).getRoiManager();
 						for (int i=0; i< rm.getCompImps().size(); i++){
 							if (rm.getCompImps().get(i) != null) {
 								imp = rm.getCompImps().get(i);
@@ -378,8 +401,8 @@ public class ImageJ extends Frame implements ActionListener,
 						Object ggparent = ((MenuItem)grandparent).getParent();
 						if (ggparent instanceof ImageCanvas)
 							imp = ((ImageCanvas)ggparent).getImage();
-						else if (parent instanceof ColorLegend) {
-							RoiManager rm = ((ColorLegend)parent).getRoiManager();
+						else if (invoker instanceof ColorLegend) {
+							RoiManager rm = ((ColorLegend)invoker).getRoiManager();
 							for (int i=0; i< rm.getCompImps().size(); i++){
 								if (rm.getCompImps().get(i) != null) {
 									imp = rm.getCompImps().get(i);
