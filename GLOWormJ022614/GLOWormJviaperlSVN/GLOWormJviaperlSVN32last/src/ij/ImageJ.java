@@ -30,6 +30,8 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.MenuElement;
+import javax.swing.MenuSelectionManager;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.event.PopupMenuEvent;
@@ -356,7 +358,9 @@ public class ImageJ extends Frame implements ActionListener,
 			JMenuItem item = (JMenuItem)e.getSource();
 			String cmd = e.getActionCommand();
 			ImagePlus imp = null;
-			if (item.getParent() instanceof JPopupMenu) {
+			if (item.getParent() instanceof JPopupMenu 
+					|| item.getParent() instanceof JMenu
+					|| item.getParent() instanceof JFrame) {
 				Object invoker = Menus.getPopupMenu().getInvoker();
 				if (item == item.getParent().getComponent(0)) {
 //					IJ.showMessage(cmd);
@@ -370,8 +374,8 @@ public class ImageJ extends Frame implements ActionListener,
 						item.getParent().remove(comp);
 						tearoff.add(comp);
 						if (comp instanceof JMenu) {
-							JPopupMenu jpm = ((JMenu)comp).getPopupMenu();
-							jpm.setLightWeightPopupEnabled(true);
+							JPopupMenu jpm = new JPopupMenu();
+							jpm.setInvoker((Component) invoker);
 							jpm.add(new JMenuItem("hi there"));
 							for (Component jmi:subcomps) {
 								if (jmi instanceof JMenuItem)
