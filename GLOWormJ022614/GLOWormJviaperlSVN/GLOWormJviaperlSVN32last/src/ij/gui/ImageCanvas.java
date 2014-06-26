@@ -1447,6 +1447,10 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 					setShowAllROIs(true);
 				}
 				JMenuItem mi =null;
+				mi =  new JMenuItem("^--------------------^");
+				mi.addActionListener(ij);
+				popup.add(mi);
+
 				if (brainbowSelection){
 					//					rm = colorLegend.getRoiManager();
 					////					rm.getImagePlus().setPosition(rm.getImagePlus().getChannel(), rm.getImagePlus().getSlice(),imp.getSlice());
@@ -1572,6 +1576,10 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 					} else {
 						wbCellID = cellName;
 					}
+					mi =  new JMenuItem("^--------------------^");
+					mi.addActionListener(ij);
+					genePopup.add(mi);
+
 					mi = new JMenuItem(cellName);
 					mi.addActionListener(ij);
 					genePopup.add(mi);
@@ -1638,6 +1646,9 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 									}
 								}
 								JMenu glowormPopup = new JMenu("***shown in CytoSHOW: "+logLines2[l].split(" ")[1], true);
+								mi =  new JMenuItem("^--------------------^");
+								mi.addActionListener(ij);
+								glowormPopup.add(mi);
 								mi = new JMenuItem(matchString);
 								popupInfo[1] = popupInfo[1]+ "  "+ matchString + "\n";
 								mi.addActionListener(ij);
@@ -1699,10 +1710,16 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 					JMenu relationshipsPopup = new JMenu("Cell Relationships >", true);
 					popupInfo[1] = popupInfo[1]+"\nCell Relationships >\n";
 					//popup.add(new JMenuItem("-"));
+					mi =  new JMenuItem("^--------------------^");
+					mi.addActionListener(ij);
+					relationshipsPopup.add(mi);
 
 					if (!rm.getImagePlus().getTitle().startsWith("Projections") && rm.getFullListModel().size()>0) {
 
 						JMenu nearPopup = new JMenu("Nearby cells >", true);
+						mi =  new JMenuItem("^--------------------^");
+						mi.addActionListener(ij);
+						nearPopup.add(mi);
 
 						double widthDenom = 3;
 						double timeBalancer = -28;
@@ -1790,6 +1807,9 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 					String embAnalogsMatrix = IJ.openUrlAsString("http://fsbill.cam.uchc.edu/gloworm/Xwords/EmbryonicAnalogousCells.csv");
 					String[] embAnalogsRows = embAnalogsMatrix.split("\n");
 					JMenu analogsPopup = new JMenu("Analogous cells >", true);
+					mi =  new JMenuItem("^--------------------^");
+					mi.addActionListener(ij);
+					analogsPopup.add(mi);
 					int[] openImageIDsWithRM = WindowManager.getIDList();
 					for (int s=1;s< embAnalogsRows.length;s++) {
 						String[] embAnalogsChunks = embAnalogsRows[s].split(",");
@@ -1887,9 +1907,21 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 						boolean elec = false;
 						boolean nmj = false;
 						JMenu presynapticPopup = new JMenu("Presynaptic >", true);
+						mi =  new JMenuItem("^--------------------^");
+						mi.addActionListener(ij);
+						presynapticPopup.add(mi);
 						JMenu postsynapticPopup = new JMenu("Postsynaptic >", true);
+						mi =  new JMenuItem("^--------------------^");
+						mi.addActionListener(ij);
+						postsynapticPopup.add(mi);
 						JMenu electricPopup = new JMenu("Electrical >", true);
+						mi =  new JMenuItem("^--------------------^");
+						mi.addActionListener(ij);
+						electricPopup.add(mi);
 						JMenu neuromuscularPopup = new JMenu("Neuromuscular >", true);
+						mi =  new JMenuItem("^--------------------^");
+						mi.addActionListener(ij);
+						neuromuscularPopup.add(mi);
 
 						String[] synapseRows = synapseMatrix.split("\n");
 						for (int s=1;s< synapseRows.length;s++) {
@@ -2045,6 +2077,9 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 				if (getFates && cellName != "") {
 					JMenu fatePopup = new JMenu("Descendent Cells >", true);
+					mi =  new JMenuItem("^--------------------^");
+					mi.addActionListener(ij);
+					fatePopup.add(mi);
 					popupInfo[1] = popupInfo[1] + "\nDescendent Cells >\n";
 
 					String oldLog = IJ.getLog();
@@ -2189,6 +2224,9 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				if (getFates && cellName != "") {
 					//popup.add(new JMenuItem("-"));
 					JMenu ancestryPopup = new JMenu("Ancestor Cells >", true);
+					mi =  new JMenuItem("^--------------------^");
+					mi.addActionListener(ij);
+					ancestryPopup.add(mi);
 					popupInfo[1] = popupInfo[1] + "\nAncestor Cells >\n";
 
 					String[] cellTagChunks = cellName.replace("\"", "").replace("=", "").split(" ");
@@ -2297,6 +2335,9 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				if (getFates && (dataImp.getStack() instanceof MultiQTVirtualStack)) {
 					//popup.add(new JMenuItem("-"));
 					JMenu relatedDataPopup = new JMenu("Related Data Sets >", true);
+					mi =  new JMenuItem("^--------------------^");
+					mi.addActionListener(ij);
+					relatedDataPopup.add(mi);
 					popupInfo[1] = popupInfo[1] + "\n"+dataImp.getTitle()+"\n";
 					popupInfo[1] = popupInfo[1] + "\nRelated Data Sets >\n";
 					relatedDataPopup.add(dataImp.getTitle());
@@ -2345,10 +2386,19 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 						fileList = glowGeneLog.split("\n");
 
 						JMenu samePopup = new JMenu("Current specimen >", true);
+						mi =  new JMenuItem("^--------------------^");
+						mi.addActionListener(ij);
+						samePopup.add(mi);
 						JMenu diffPopup = new JMenu("More specimens >", true);
+						mi =  new JMenuItem("^--------------------^");
+						mi.addActionListener(ij);
+						diffPopup.add(mi);
 						JMenu[] geneExprPopups = new JMenu[movieGeneNames.length];
 						for (int e1=0; e1<movieGeneNames.length-1; e1++) {
 							geneExprPopups[e1] = new JMenu(movieGeneNames[e1], true);
+							mi =  new JMenuItem("^--------------------^");
+							mi.addActionListener(ij);
+							geneExprPopups[e1].add(mi);
 							diffPopup.add(geneExprPopups[e1]);
 						}
 
@@ -2416,6 +2466,9 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				//popup.add(new JMenuItem("-"));
 
 				JMenu functionPopup = new JMenu("CytoSHOW Functions >", true);
+				mi =  new JMenuItem("^--------------------^");
+				mi.addActionListener(ij);
+				functionPopup.add(mi);
 				for (int k = 0; k < standardmis.length; k++) {
 					functionPopup.add(standardmis[k]);
 				}

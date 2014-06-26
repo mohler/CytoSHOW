@@ -364,10 +364,20 @@ public class ImageJ extends Frame implements ActionListener,
 				if (item.getParent() instanceof JPopupMenu) {
 					item.getParent().setVisible(false);
 				}
-				Object invoker = Menus.getPopupMenu().getInvoker();
-				if (item == item.getParent().getComponent(0)) {
+				final Object invoker = Menus.getPopupMenu().getInvoker();
+				if (item == item.getParent().getComponent(0)
+						&& cmd.contains("^--------------------^")) {
 //					IJ.showMessage(cmd);
-					JFrame tearoff = new JFrame(cmd);
+					JFrame tearoff = new JFrame("aaa") {
+						@Override
+					    protected void processWindowEvent(WindowEvent e) {
+					        super.processWindowEvent(e);
+
+					        if (e.getID() == WindowEvent.WINDOW_CLOSING) {
+								WindowManager.removeWindow(this);
+					        }							
+						}
+					};
 					for (Component comp:item.getParent().getComponents()) {
 						Component[] subcomps = null;
 						if (comp instanceof JMenu) {
@@ -377,20 +387,23 @@ public class ImageJ extends Frame implements ActionListener,
 						item.getParent().remove(comp);
 						tearoff.add(comp);
 						if (comp instanceof JMenu) {
-							JPopupMenu jpm = new JPopupMenu();
+							JPopupMenu jpm = new JPopupMenu() ;
 							jpm.setInvoker((Component) invoker);
 //							jpm.add(new JMenuItem("hi there"));
 							for (Component jmi:subcomps) {
 								if (jmi instanceof JMenuItem)
 									jpm.add(jmi);
 							}
+							jpm.add(new JMenuItem(""));
 							((JMenu) comp).setComponentPopupMenu(jpm);	
 						}
 					}
+					tearoff.add(new JMenuItem(""));
 					tearoff.pack();
 					tearoff.setLocation(500,400);
 					tearoff.setSize(200,200);
 					tearoff.setVisible(true);
+					WindowManager.addWindow(tearoff);
 					return;
 				}
 				if (invoker instanceof ImageCanvas)
