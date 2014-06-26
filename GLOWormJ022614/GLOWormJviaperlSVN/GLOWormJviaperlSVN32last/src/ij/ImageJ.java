@@ -365,10 +365,11 @@ public class ImageJ extends Frame implements ActionListener,
 					item.getParent().setVisible(false);
 				}
 				final Object invoker = Menus.getPopupMenu().getInvoker();
-				if (item == item.getParent().getComponent(0)
-						&& cmd.contains("^--------------------^")) {
+				if (item.getParent() instanceof JPopupMenu 
+						&& item == item.getParent().getComponent(0)
+							&& cmd.contains("^--------------------^")) {
 //					IJ.showMessage(cmd);
-					JFrame tearoff = new JFrame("aaa") {
+					JFrame tearoff = new JFrame() {
 						@Override
 					    protected void processWindowEvent(WindowEvent e) {
 					        super.processWindowEvent(e);
@@ -378,27 +379,58 @@ public class ImageJ extends Frame implements ActionListener,
 					        }							
 						}
 					};
+					
+					ScrollPane fsp = new ScrollPane();
+					GridBagLayout gridbag = new GridBagLayout();
+					GridBagConstraints c = new GridBagConstraints();
+					gridbag.setConstraints(fsp, c);
+					JPanel fspp = new JPanel();
+					fsp.add(fspp, c);
+					fspp.setLayout(gridbag);
+					tearoff.add(fsp);
+				    fspp.setBackground(Color.white);
+
+				    int y = 0;
+					int x = 0;
+					c.gridx = 0;
+					c.gridy = y++;
+					c.gridwidth = 1;
+					c.fill = GridBagConstraints.BOTH;
+					c.anchor = GridBagConstraints.CENTER;
+					c.insets = new Insets(1, 1, 1, 1);
+
+					
+					if (item.getParent() instanceof JPopupMenu) {
+						if (((JPopupMenu)item.getParent()).getInvoker() instanceof JMenu)
+							tearoff.setTitle(((JMenu)((JPopupMenu)item.getParent()).getInvoker()).getText());
+						else if (item.getParent() == Menus.getPopupMenu())
+							tearoff.setTitle(((JMenuItem)item.getParent().getComponent(1)).getText().replace(" \":","\"").replaceAll("(.*) synch.*", "$1"));
+					}
 					for (Component comp:item.getParent().getComponents()) {
-						Component[] subcomps = null;
-						if (comp instanceof JMenu) {
-							JPopupMenu jsub = ((JMenu) comp).getPopupMenu();
-							subcomps = jsub.getComponents();
-						}
-						item.getParent().remove(comp);
-						tearoff.add(comp);
-						if (comp instanceof JMenu) {
-							JPopupMenu jpm = new JPopupMenu() ;
-							jpm.setInvoker((Component) invoker);
-//							jpm.add(new JMenuItem("hi there"));
-							for (Component jmi:subcomps) {
-								if (jmi instanceof JMenuItem)
-									jpm.add(jmi);
+						if (comp != item.getParent().getComponent(0)) {
+							Component[] subcomps = null;
+							if (comp instanceof JMenu) {
+								JPopupMenu jsub = ((JMenu) comp).getPopupMenu();
+								subcomps = jsub.getComponents();
 							}
-							jpm.add(new JMenuItem(""));
-							((JMenu) comp).setComponentPopupMenu(jpm);	
+							item.getParent().remove(comp);
+							fspp.add(comp, c);
+							c.gridy++;
+							if (comp instanceof JMenu) {
+								JPopupMenu jpm = new JPopupMenu() ;
+								jpm.setInvoker((Component) invoker);
+								//							jpm.add(new JMenuItem("hi there"));
+								for (Component jmi:subcomps) {
+									if (jmi instanceof JMenuItem)
+										jpm.add(jmi);
+								}
+								jpm.add(new JMenuItem(""));
+								((JMenu) comp).setComponentPopupMenu(jpm);	
+							}
 						}
 					}
-					tearoff.add(new JMenuItem(""));
+					fspp.add(new JMenuItem(""), c);
+					c.gridy++;
 					tearoff.pack();
 					tearoff.setLocation(500,400);
 					tearoff.setSize(200,200);
