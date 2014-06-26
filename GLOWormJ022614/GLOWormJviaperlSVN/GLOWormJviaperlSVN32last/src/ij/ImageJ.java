@@ -361,6 +361,9 @@ public class ImageJ extends Frame implements ActionListener,
 			if (item.getParent() instanceof JPopupMenu 
 					|| item.getParent() instanceof JMenu
 					|| item.getParent() instanceof JPanel) {
+				if (item.getParent() instanceof JPopupMenu) {
+					item.getParent().setVisible(false);
+				}
 				Object invoker = Menus.getPopupMenu().getInvoker();
 				if (item == item.getParent().getComponent(0)) {
 //					IJ.showMessage(cmd);
@@ -376,7 +379,7 @@ public class ImageJ extends Frame implements ActionListener,
 						if (comp instanceof JMenu) {
 							JPopupMenu jpm = new JPopupMenu();
 							jpm.setInvoker((Component) invoker);
-							jpm.add(new JMenuItem("hi there"));
+//							jpm.add(new JMenuItem("hi there"));
 							for (Component jmi:subcomps) {
 								if (jmi instanceof JMenuItem)
 									jpm.add(jmi);

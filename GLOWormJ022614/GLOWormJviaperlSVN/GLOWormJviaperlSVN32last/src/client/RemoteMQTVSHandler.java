@@ -303,6 +303,16 @@ public class RemoteMQTVSHandler {
 					@Override
 					public void windowClosing(WindowEvent we) {
 						IJ.run(imp, "Stop Animation", "");
+
+						TextRoi.setFont("Arial", win2.getImagePlus().getWidth()/20, Font.ITALIC);		
+						TextRoi tr = new TextRoi(0, 0, "Contacting\nCytoSHOW\nserver...");
+						tr.setStrokeColor(Color.gray);
+						tr.setFillColor(Color.decode("#55ffff00"));
+
+						win2.getImagePlus().setRoi(tr);
+						tr.setImage(win2.getImagePlus());
+						win2.getImagePlus().getCanvas().paintDoubleBuffered(win2.getImagePlus().getCanvas().getGraphics());
+
 						String compQClosed = "failed";
 						dejaVuIPLinkedHashMap.clear();	
 						try {
@@ -320,6 +330,16 @@ public class RemoteMQTVSHandler {
 					@Override
 					public boolean close() {
 						IJ.run(imp, "Stop Animation", "");
+
+						TextRoi.setFont("Arial", win2.getImagePlus().getWidth()/20, Font.ITALIC);		
+						TextRoi tr = new TextRoi(0, 0, "Contacting\nCytoSHOW\nserver...");
+						tr.setStrokeColor(Color.gray);
+						tr.setFillColor(Color.decode("#55ffff00"));
+
+						win2.getImagePlus().setRoi(tr);
+						tr.setImage(win2.getImagePlus());
+						win2.getImagePlus().getCanvas().paintDoubleBuffered(win2.getImagePlus().getCanvas().getGraphics());
+
 						String compQClosed = "failed";
 						dejaVuIPLinkedHashMap.clear();	
 						try {
@@ -410,6 +430,16 @@ public class RemoteMQTVSHandler {
 				@Override
 				public void windowClosing(WindowEvent we) {
 					IJ.run(imp, "Stop Animation", "");
+
+					TextRoi.setFont("Arial", win2.getImagePlus().getWidth()/20, Font.ITALIC);		
+					TextRoi tr = new TextRoi(0, 0, "Contacting\nCytoSHOW\nserver...");
+					tr.setStrokeColor(Color.gray);
+					tr.setFillColor(Color.decode("#55ffff00"));
+
+					win2.getImagePlus().setRoi(tr);
+					tr.setImage(win2.getImagePlus());
+					win2.getImagePlus().getCanvas().paintDoubleBuffered(win2.getImagePlus().getCanvas().getGraphics());
+
 					String compQClosed = "failed";
 					dejaVuIPLinkedHashMap.clear();	
 					try {
@@ -427,6 +457,16 @@ public class RemoteMQTVSHandler {
 				@Override
 				public boolean close() {
 					IJ.run(imp, "Stop Animation", "");
+
+					TextRoi.setFont("Arial", win2.getImagePlus().getWidth()/20, Font.ITALIC);		
+					TextRoi tr = new TextRoi(0, 0, "Contacting\nCytoSHOW\nserver...");
+					tr.setStrokeColor(Color.gray);
+					tr.setFillColor(Color.decode("#55ffff00"));
+
+					win2.getImagePlus().setRoi(tr);
+					tr.setImage(win2.getImagePlus());
+					win2.getImagePlus().getCanvas().paintDoubleBuffered(win2.getImagePlus().getCanvas().getGraphics());
+
 					String compQClosed = "failed";
 					dejaVuIPLinkedHashMap.clear();	
 					try {
