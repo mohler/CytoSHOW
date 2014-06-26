@@ -360,7 +360,7 @@ public class ImageJ extends Frame implements ActionListener,
 			ImagePlus imp = null;
 			if (item.getParent() instanceof JPopupMenu 
 					|| item.getParent() instanceof JMenu
-					|| item.getParent() instanceof JFrame) {
+					|| item.getParent() instanceof JPanel) {
 				Object invoker = Menus.getPopupMenu().getInvoker();
 				if (item == item.getParent().getComponent(0)) {
 //					IJ.showMessage(cmd);

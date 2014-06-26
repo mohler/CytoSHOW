@@ -245,8 +245,12 @@ public class Executer implements Runnable {
 			String movieUrlOrPath = "";
 			//			if(imp == null)
 			//				imp = IJ.getImage();
-			movieUrlOrPath = "" + imp.getCanvas().getPopupInfo()[1].split(movieTitle.replace("+", "\\+") + "...\n")[1]
+			if (imp != null) {
+				movieUrlOrPath = "" + imp.getCanvas().getPopupInfo()[1].split(movieTitle.replace("+", "\\+") + "...\n")[1]
 					.split("\n")[rcs?2:0].trim();
+			}else {
+				return;
+			}
 
 
 			String fileName ="";
