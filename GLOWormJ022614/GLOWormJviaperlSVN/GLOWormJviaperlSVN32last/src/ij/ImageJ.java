@@ -406,8 +406,13 @@ public class ImageJ extends Frame implements ActionListener,
 					if (item.getParent() instanceof JPopupMenu) {
 						if (((JPopupMenu)item.getParent()).getInvoker() instanceof JMenu)
 							tearoff.setTitle(((JMenu)((JPopupMenu)item.getParent()).getInvoker()).getText());
-						else if (item.getParent() == Menus.getPopupMenu())
-							tearoff.setTitle(((JMenuItem)item.getParent().getComponent(1)).getText().replace(" \":","\"").replaceAll("(.*) synch.*", "$1"));
+						else if (item.getParent() == Menus.getPopupMenu()) {
+							int pick = !((JMenuItem)item.getParent()
+									.getComponent(1)).getText().contains("MoW")?1:2;
+							tearoff.setTitle(((JMenuItem)item.getParent()
+									.getComponent(pick)).getText()
+									.replace(" \":","\"").replaceAll("(.*) synch.*", "$1"));
+						}
 					}
 					for (Component comp:item.getParent().getComponents()) {
 						if (comp != item.getParent().getComponent(0)) {
@@ -441,8 +446,10 @@ public class ImageJ extends Frame implements ActionListener,
 					WindowManager.addWindow(tearoff);
 					return;
 				}
-				if (invoker instanceof ImageCanvas)
+				if (invoker instanceof ImageCanvas) {
 					imp = ((ImageCanvas)invoker).getImage();
+					imp.getWindow().setAlwaysOnTop(false);
+				}
 				else if (invoker instanceof ColorLegend) {
 					RoiManager rm = ((ColorLegend)invoker).getRoiManager();
 					for (int i=0; i< rm.getCompImps().size(); i++){
