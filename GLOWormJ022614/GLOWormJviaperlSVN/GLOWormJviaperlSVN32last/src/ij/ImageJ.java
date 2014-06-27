@@ -23,6 +23,7 @@ import javax.jnlp.SingleInstanceListener;
 import javax.jnlp.SingleInstanceService;
 import javax.jnlp.UnavailableServiceException;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -416,22 +417,60 @@ public class ImageJ extends Frame implements ActionListener,
 					for (Component comp:item.getParent().getComponents()) {
 						if (comp != item.getParent().getComponent(0)) {
 							Component[] subcomps = null;
-							if (comp instanceof JMenu) {
+							
+							if (comp instanceof JMenuItem  && !(comp instanceof JMenu)) {
+								JMenuItem compCopy = new JMenuItem(((JMenuItem)comp).getText());
+								compCopy.addActionListener(IJ.getInstance());
+								fspp.add(compCopy, c);
+								c.gridy++;
+							} else if (comp instanceof JPanel) {
+								JPanel compCopy = new JPanel();
+								JButton compCopyButton = new JButton(((JButton)((JPanel)comp).getComponent(0)).getIcon());
+								compCopy.add(compCopyButton);
+								fspp.add(compCopy, c);
+								c.gridy++;
+							} else if (comp instanceof JMenu) {
 								JPopupMenu jsub = ((JMenu) comp).getPopupMenu();
+								if (jsub.getComponentCount() == 0)
+									jsub = ((JComponent) comp).getComponentPopupMenu();
+								
 								subcomps = jsub.getComponents();
-							}
-							fspp.add(comp, c);
-							c.gridy++;
-							if (comp instanceof JMenu) {
+								JMenu compCopy = new JMenu(((JMenu)comp).getText());
+								fspp.add(compCopy, c);
+								c.gridy++;
 								JPopupMenu jpm = new JPopupMenu() ;
 								jpm.setInvoker((Component) invoker);
-								//							jpm.add(new JMenuItem("hi there"));
-								for (Component jmi:subcomps) {
-									if (jmi instanceof JMenuItem)
-										jpm.add(jmi);
+
+								for (Component jmi:subcomps) {									
+									Component[] subcomps2 = null;
+									
+									if (jmi instanceof JMenuItem  && !(jmi instanceof JMenu)) {
+										JMenuItem jmiCopy = new JMenuItem(((JMenuItem)jmi).getText());
+										jmiCopy.addActionListener(IJ.getInstance());
+										jpm.add(jmiCopy);
+									} else if (jmi instanceof JMenu) {
+										JPopupMenu jsub2 = ((JMenu) jmi).getPopupMenu();
+										if (jsub2.getComponentCount() == 0)
+											jsub2 = ((JComponent) jmi).getComponentPopupMenu();
+										
+										subcomps2 = jsub2.getComponents();
+										JMenu jmiCopy = new JMenu(((JMenu)jmi).getText());
+										jpm.add(jmiCopy);
+										JPopupMenu jpm2 = new JPopupMenu() ;
+										jpm2.setInvoker((Component) invoker);
+										for (Component jmi2:subcomps2) {
+											if (jmi2 instanceof JMenuItem) {
+												JMenuItem jmi2Copy = new JMenuItem(((JMenuItem)jmi2).getText());
+												jmi2Copy.addActionListener(IJ.getInstance());
+												jpm2.add(jmi2Copy);
+											}
+										}
+										jpm2.add(new JMenuItem(""));
+										((JMenu) jmiCopy).setComponentPopupMenu(jpm2);	
+									}
 								}
 								jpm.add(new JMenuItem(""));
-								((JMenu) comp).setComponentPopupMenu(jpm);	
+								((JMenu) compCopy).setComponentPopupMenu(jpm);	
 							}
 						}
 					}
