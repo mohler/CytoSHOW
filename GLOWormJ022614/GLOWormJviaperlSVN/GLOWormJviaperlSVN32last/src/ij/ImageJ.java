@@ -407,8 +407,7 @@ public class ImageJ extends Frame implements ActionListener,
 						if (((JPopupMenu)item.getParent()).getInvoker() instanceof JMenu)
 							tearoff.setTitle(((JMenu)((JPopupMenu)item.getParent()).getInvoker()).getText());
 						else if (item.getParent() == Menus.getPopupMenu()) {
-							int pick = !((JMenuItem)item.getParent()
-									.getComponent(1)).getText().contains("MoW")?1:2;
+							int pick = (item.getParent().getComponent(1) instanceof JMenuItem)?1:2;
 							tearoff.setTitle(((JMenuItem)item.getParent()
 									.getComponent(pick)).getText()
 									.replace(" \":","\"").replaceAll("(.*) synch.*", "$1"));

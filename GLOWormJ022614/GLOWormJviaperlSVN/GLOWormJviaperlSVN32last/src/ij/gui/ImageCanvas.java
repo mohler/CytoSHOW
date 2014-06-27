@@ -27,11 +27,14 @@ import java.awt.geom.*;
 
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JMenu;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
 import org.vcell.gloworm.MultiQTVirtualStack;
@@ -1534,20 +1537,16 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				popupInfo[0] = cellName;
 				popupInfo[1] = cellName+"\n\n";
 
-				ImagePlus cartoonImp = WindowManager.getImage(cellName);
-				ImageIcon cartoonIcon = null;
-				if (cartoonImp == null) {
-					cartoonImp = IJ.openImage("http://legacy.wormbase.org/cell/diagrams/"+cellName.toLowerCase()+".gif");
-				}
+				final ImagePlus cartoonImp = IJ.openImage("http://legacy.wormbase.org/cell/diagrams/"+cellName.toLowerCase()+".gif");
+				
 				if (cartoonImp!=null) {
 					cartoonImp.setTitle(cellName);
-					cartoonIcon = new ImageIcon(cartoonImp.getImage());
-					popup.add(new JMenuItem(cellName+" from MoW", cartoonIcon), 1);
-//					cartoonImp.show();
-//					cartoonImp.getWindow().setLocation(imp.getWindow().getX()+imp.getWindow().getWidth(), 
-//							imp.getWindow().getY());
-//					cartoonImp.getWindow().toFront();
-//					cartoonImp.getWindow().setBackground(e.getSource() instanceof Checkbox?((Checkbox)e.getSource()).getBackground():imp.getWindow().getBackground());
+					JPanel cartoonPanel = new JPanel();
+					JButton cartoonButton = new JButton();
+					cartoonButton.setIcon(new ImageIcon(cartoonImp.getImage()));
+					cartoonPanel.add(cartoonButton);
+					cartoonPanel.setBackground(Color.white);
+					popup.add(cartoonPanel, 1);
 				}
 
 				
