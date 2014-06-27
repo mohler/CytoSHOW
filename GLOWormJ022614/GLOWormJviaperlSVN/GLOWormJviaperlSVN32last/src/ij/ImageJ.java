@@ -399,7 +399,7 @@ public class ImageJ extends Frame implements ActionListener,
 					c.anchor = GridBagConstraints.CENTER;
 					c.insets = new Insets(1, 1, 1, 1);
 
-					
+					Dimension parentSize = item.getParent().getSize();
 					if (item.getParent() instanceof JPopupMenu) {
 						if (((JPopupMenu)item.getParent()).getInvoker() instanceof JMenu)
 							tearoff.setTitle(((JMenu)((JPopupMenu)item.getParent()).getInvoker()).getText());
@@ -413,7 +413,6 @@ public class ImageJ extends Frame implements ActionListener,
 								JPopupMenu jsub = ((JMenu) comp).getPopupMenu();
 								subcomps = jsub.getComponents();
 							}
-							item.getParent().remove(comp);
 							fspp.add(comp, c);
 							c.gridy++;
 							if (comp instanceof JMenu) {
@@ -432,8 +431,9 @@ public class ImageJ extends Frame implements ActionListener,
 					fspp.add(new JMenuItem(""), c);
 					c.gridy++;
 					tearoff.pack();
-					tearoff.setLocation(500,400);
-					tearoff.setSize(200,200);
+					tearoff.setLocation(MouseInfo.getPointerInfo().getLocation().x-100,MouseInfo.getPointerInfo().getLocation().y-10);
+//					tearoff.setSize(300,fspp.getComponentCount()*23);
+					tearoff.setSize(parentSize.width+50, parentSize.height+15);
 					tearoff.setVisible(true);
 					WindowManager.addWindow(tearoff);
 					return;
