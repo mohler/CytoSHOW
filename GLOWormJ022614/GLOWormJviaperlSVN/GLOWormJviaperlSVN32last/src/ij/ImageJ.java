@@ -347,14 +347,7 @@ public class ImageJ extends Frame implements ActionListener,
 
 	/** Handle menu events. */
 	public void actionPerformed(ActionEvent e) {
-		if ((e.getSource() instanceof MenuItem)) {
-			MenuItem item = (MenuItem)e.getSource();
-			String cmd = e.getActionCommand();
-			if (item.getParent()==Menus.openRecentMenu) {
-				new RecentOpener(cmd); // open image in separate thread
-				return;
-			}
-		} else if ((e.getSource() instanceof JMenuItem)) {
+		if ((e.getSource() instanceof JMenuItem)) {
 			JMenuItem item = (JMenuItem)e.getSource();
 			String cmd = e.getActionCommand();
 			ImagePlus imp = null;
@@ -369,15 +362,25 @@ public class ImageJ extends Frame implements ActionListener,
 						&& item == item.getParent().getComponent(0)
 							&& cmd.contains("^--------------------^")) {
 //					IJ.showMessage(cmd);
-					JFrame tearoff = new JFrame() {
+					TearoffJFrame tearoff = new TearoffJFrame() {
 						@Override
 					    protected void processWindowEvent(WindowEvent e) {
 					        super.processWindowEvent(e);
-
 					        if (e.getID() == WindowEvent.WINDOW_CLOSING) {
 								WindowManager.removeWindow(this);
 					        }							
 						}
+						
+						
+						@Override
+						public void windowActivated(WindowEvent e) {
+							ImageJ ij = IJ.getInstance();
+							if (IJ.isMacintosh() && ij!=null && !ij.quitting()) {
+								IJ.wait(10); // may be needed for Java 1.4 on OS X
+								setMenuBar(Menus.getMenuBar());
+							}
+						}
+
 					};
 					
 					ScrollPane fsp = new ScrollPane();
@@ -500,8 +503,14 @@ public class ImageJ extends Frame implements ActionListener,
 			}
 			lastKeyCommand = null;
 			if (IJ.debugMode) IJ.log("actionPerformed: time="+ellapsedTime+", "+e);
-		} else {
+		} else if ((e.getSource() instanceof MenuItem)) {
+			MenuItem item = (MenuItem)e.getSource();
 			String cmd = e.getActionCommand();
+			if (item.getParent()==Menus.openRecentMenu) {
+				new RecentOpener(cmd); // open image in separate thread
+				return;
+			}
+			cmd = e.getActionCommand();
 			ImagePlus imp = IJ.getImage();
 			new Executer(cmd, imp, e);
 		}
