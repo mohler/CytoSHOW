@@ -558,6 +558,10 @@ public class ImageJ extends Frame implements ActionListener,
 			cmd = e.getActionCommand();
 			ImagePlus imp = IJ.getImage();
 			new Executer(cmd, imp, e);
+		} else {
+			String cmd = e.getActionCommand();
+			ImagePlus imp = IJ.getImage();
+			new Executer(cmd, imp, e);
 		}
 	}
 

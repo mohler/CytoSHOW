@@ -1460,14 +1460,14 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				if (brainbowSelection){
 					//					rm = colorLegend.getRoiManager();
 					////					rm.getImagePlus().setPosition(rm.getImagePlus().getChannel(), rm.getImagePlus().getSlice(),imp.getSlice());
-					popup.add("brainbow selection");
+//					popup.add("brainbow selection");
 					if (e.getSource() != this) {
 						if ( e.getSource() instanceof Checkbox)
 							cellName = ((Checkbox) e.getSource()).getName().trim();
 					} else
 						cellName = clccb.getName().trim();
 					//					cellName = ((TextRoi)cursorRoi).getText();
-					mi =  new JMenuItem("cellID=>"+cellName+" : "+ rm.getImagePlus().getTitle());
+					mi =  new JMenuItem("\""+cellName + " \": synch all windows to this tag" );
 					mi.addActionListener(ij);
 					popup.add(mi);
 				}
