@@ -19,7 +19,7 @@ public class VirtualStack extends ImageStack {
 	private int bitDepth;
 	private boolean emptyImage;
 	Color fillColor = Color.black;
-	private boolean burnIn = true;
+	private boolean burnIn = false;
 	private ImagePlus lineageMapImage;
 
 

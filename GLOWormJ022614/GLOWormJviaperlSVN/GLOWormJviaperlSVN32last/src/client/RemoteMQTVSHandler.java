@@ -84,7 +84,7 @@ public class RemoteMQTVSHandler {
 	private boolean silentlyUpdateScene = false;
 	private Thread reloadThread;
 	private int rotation;
-	private boolean rcsPrX;
+	private boolean rcsPrX = false;
 
 
 	public static void main(String args[]) {
@@ -258,7 +258,7 @@ public class RemoteMQTVSHandler {
 
 
 		if ((moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW"))) {
-			stack.setBurnIn(true);
+			stack.setBurnIn(false);
 			for (int i=1; i<=stkNSlices*stkNFrames; i++) {
 				((VirtualStack)stack).addSlice("");
 			}
@@ -480,35 +480,6 @@ public class RemoteMQTVSHandler {
 						spawnStrings =null;
 					return super.close();
 				}
-				
-				
-				@Override
-				public void setVisible(final boolean visible) {
-				  // let's handle visibility...
-				  if (!visible || !isVisible()) { // have to check this condition simply because super.setVisible(true) invokes toFront if frame was already visible
-				      super.setVisible(visible);
-				  }
-				  // ...and bring frame to the front.. in a strange and weird way
-				  if (visible) {
-				      int state = super.getExtendedState();
-				      state &= Frame.ICONIFIED;
-				      super.setExtendedState(state);
-				      super.setAlwaysOnTop(true);
-				      super.toFront();
-				      super.requestFocus();
-				  }
-				}
-
-				@Override
-				public void toFront() {
-				  setVisible(true);
-				}
-
-				@Override
-				public void windowActivated(WindowEvent we) {
-					super.windowActivated(we);
-				    super.setAlwaysOnTop(false);
-				}
 			};
 
 			imp2.setWindow(win2);
@@ -553,7 +524,10 @@ public class RemoteMQTVSHandler {
 			if (moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW")) {
 				int channel = 1+ ((qtSlice-1) % stkNSlices);
 				int slice = 1+ ((qtSlice-1) / (stkNSlices));
+				
 				qtbaosba = compQ.getQTPixels(remoteImpID, resolutionToGet, channel, slice, jpegQuality);
+
+
 			} else {
 				int channel = 1+ ((qtSlice-1) % stkNChannels);
 				int slice = 1+ (((qtSlice-1)/stkNChannels) % stkNSlices);
@@ -629,6 +603,17 @@ public class RemoteMQTVSHandler {
 			return getRemoteIP( qtSlice,jpegQuality,burnIn);
 		}
 		//		System.out.println(qtbaosba.toString()+" "+qtSlice+" "+jpegQuality);
+		IJ.log("contacting CytoSHOW server...");
+		TextRoi.setFont("Arial", win2.getImagePlus().getWidth()/20, Font.ITALIC);		
+		TextRoi tr = new TextRoi(0, 0, "Contacting\nCytoSHOW\nserver...");
+		tr.setStrokeColor(Color.gray);
+		tr.setFillColor(Color.decode("#55ffff00"));
+
+		win2.getImagePlus().setRoi(tr);
+		tr.setImage(win2.getImagePlus());
+		win2.getImagePlus().getCanvas().paintDoubleBuffered(win2.getImagePlus().getCanvas().getGraphics());
+		
+				
 		ByteArrayInputStream bais = new ByteArrayInputStream((byte[]) qtbaosba);
 		BufferedImage bi=null;
 		try {
