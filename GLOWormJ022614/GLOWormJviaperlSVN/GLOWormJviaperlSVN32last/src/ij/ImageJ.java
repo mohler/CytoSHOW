@@ -357,6 +357,14 @@ public class ImageJ extends Frame implements ActionListener,
 					|| item.getParent() instanceof JPanel) {
 				if (item.getParent() instanceof JPopupMenu) {
 					item.getParent().setVisible(false);
+//					if (item.getParent().getParent().getParent() instanceof JPanel) {
+//						Component[] ppcs = item.getParent().getParent().getParent().getComponents();
+//						for (Component ppc:ppcs) {
+//							if (ppc instanceof JMenu) {
+//								((JMenu)ppc).getComponentPopupMenu().setVisible(false);
+//							}
+//						}
+//					}
 				}
 				final Object invoker = Menus.getPopupMenu().getInvoker();
 				if (item.getParent() instanceof JPopupMenu 
@@ -562,6 +570,7 @@ public class ImageJ extends Frame implements ActionListener,
 			String cmd = e.getActionCommand();
 			ImagePlus imp = IJ.getImage();
 			new Executer(cmd, imp, e);
+
 		}
 	}
 
