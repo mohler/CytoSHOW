@@ -100,7 +100,7 @@ The following command line options are recognized by ImageJ:
 @author Wayne Rasband (wsr@nih.gov)
 */
 public class ImageJ extends Frame implements ActionListener, 
-	MouseListener, KeyListener, WindowListener, ItemListener, Runnable, SingleInstanceListener {
+	MouseListener, KeyListener, WindowListener, ItemListener, Runnable, SingleInstanceListener, PopupMenuListener {
 
 	/** Plugins should call IJ.getVersion() or IJ.getFullVersion() to get the version string. */
 	public static final String VERSION = "1.47b";
@@ -139,6 +139,7 @@ public class ImageJ extends Frame implements ActionListener,
 	private boolean windowClosed;
 	
 	boolean hotkey;
+	private ArrayList<JPopupMenu> openPopupsArrayList;
 	
 	/** Creates a new ImageJ frame that runs as an application. */
 	public ImageJ() {
@@ -171,6 +172,9 @@ public class ImageJ extends Frame implements ActionListener,
 	        use.printStackTrace();
 //	        System.exit(-1);
 	    }
+	    
+	    openPopupsArrayList = new ArrayList<JPopupMenu>();
+	    
 		embedded = applet==null && (mode==EMBEDDED||mode==NO_SHOW);
 		this.applet = applet;
 		String err1 = Prefs.load(this, applet);
@@ -448,7 +452,7 @@ public class ImageJ extends Frame implements ActionListener,
 								c.gridy++;
 								JPopupMenu jpm = new JPopupMenu() ;
 								jpm.setInvoker((Component) invoker);
-
+								jpm.addPopupMenuListener(IJ.getInstance());
 								for (Component jmi:subcomps) {									
 									Component[] subcomps2 = null;
 									
@@ -466,6 +470,7 @@ public class ImageJ extends Frame implements ActionListener,
 										jpm.add(jmiCopy);
 										JPopupMenu jpm2 = new JPopupMenu() ;
 										jpm2.setInvoker((Component) invoker);
+										jpm2.addPopupMenuListener(IJ.getInstance());
 										for (Component jmi2:subcomps2) {
 											if (jmi2 instanceof JMenuItem) {
 												JMenuItem jmi2Copy = new JMenuItem(((JMenuItem)jmi2).getText());
@@ -1242,6 +1247,32 @@ public class ImageJ extends Frame implements ActionListener,
 				}
 			}
 		}
+	}
+
+	public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+		openPopupsArrayList.add((JPopupMenu)e.getSource());
+//		for(JPopupMenu openPopup:openPopupsArrayList) {
+//			if (!openPopup.equals(Menus.getPopupMenu())
+//					&&!openPopup.isAncestorOf(Menus.getPopupMenu())
+//					&& !openPopup.isAncestorOf(((JPopupMenu)e.getSource())) 
+//					&& openPopup != (JPopupMenu)e.getSource()){
+//				if (!(((JPopupMenu)e.getSource()).getInvoker() instanceof ImageCanvas)) {
+//				openPopup.setVisible(false);
+//				openPopupsArrayList.remove(openPopup);
+//					
+//				}
+//			}
+//		}
+	}
+
+	public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+		openPopupsArrayList.remove((JPopupMenu)e.getSource());
+		
+	}
+
+	public void popupMenuCanceled(PopupMenuEvent e) {
+		openPopupsArrayList.remove((JPopupMenu)e.getSource());
+		
 	}
 }
 
