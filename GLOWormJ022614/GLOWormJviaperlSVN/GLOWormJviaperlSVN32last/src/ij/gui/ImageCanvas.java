@@ -1564,6 +1564,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 				if (getGenes && cellName != "" && cellName != null) {
 					JMenu genePopup = new JMenu(cellName + ": Expressed Genes >", true);
+					genePopup.setIcon(new ImageIcon(ImageWindow.class.getResource("images/DNAicon.png")));
 					genePopup.getPopupMenu().addPopupMenuListener(ij);
 					popupInfo[1] = popupInfo[1] + "Expressed Genes >\n";
 					String oldLog = IJ.getLog();
@@ -1738,6 +1739,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				if (getFates && cellName != "") {
 					JMenu relationshipsPopup = new JMenu(cellName+": Cell Relationships >", true);
 					relationshipsPopup.getPopupMenu().addPopupMenuListener(ij);
+					relationshipsPopup.setIcon(new ImageIcon(ImageWindow.class.getResource("images/HandshakeIcon.png")));
 					popupInfo[1] = popupInfo[1]+"\nCell Relationships >\n";
 					//popup.add(new JMenuItem("-"));
 					mi =  new JMenuItem("^--------------------^");
@@ -2155,6 +2157,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 				if (getFates && cellName != "") {
 					JMenu fatePopup = new JMenu(cellName+": Descendent Cells >", true);
+					fatePopup.setIcon(new ImageIcon(ImageWindow.class.getResource("images/DescendantsIcon.png")));
 					fatePopup.getPopupMenu().addPopupMenuListener(ij);
 					mi =  new JMenuItem("^--------------------^");
 					mi.addActionListener(ij);
@@ -2309,6 +2312,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				if (getFates && cellName != "") {
 					//popup.add(new JMenuItem("-"));
 					JMenu ancestryPopup = new JMenu(cellName+": Ancestor Cells >", true);
+					ancestryPopup.setIcon(new ImageIcon(ImageWindow.class.getResource("images/AncestorIcon.png")));
 					ancestryPopup.getPopupMenu().addPopupMenuListener(ij);
 					mi =  new JMenuItem("^--------------------^");
 					mi.addActionListener(ij);
@@ -2570,6 +2574,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				//popup.add(new JMenuItem("-"));
 
 				JMenu functionPopup = new JMenu("CytoSHOW Functions >", true);
+				functionPopup.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Tools.png")));
 				functionPopup.getPopupMenu().addPopupMenuListener(ij);
 				mi =  new JMenuItem("^--------------------^");
 				mi.addActionListener(ij);

@@ -450,6 +450,7 @@ public class ImageJ extends Frame implements ActionListener,
 								
 								subcomps = jsub.getComponents();
 								JMenu compCopy = new JMenu(((JMenu)comp).getText());
+								compCopy.setIcon(((JMenu)comp).getIcon());
 								fspp.add(compCopy, c);
 								c.gridy++;
 								JPopupMenu jpm = new JPopupMenu() ;
@@ -471,6 +472,7 @@ public class ImageJ extends Frame implements ActionListener,
 										
 										subcomps2 = jsub2.getComponents();
 										JMenu jmiCopy = new JMenu(((JMenu)jmi).getText());
+										jmiCopy.setIcon(((JMenu)jmi).getIcon());
 										jpm.add(jmiCopy);
 										JPopupMenu jpm2 = new JPopupMenu() ;
 										jpm2.setInvoker((Component) invoker);
