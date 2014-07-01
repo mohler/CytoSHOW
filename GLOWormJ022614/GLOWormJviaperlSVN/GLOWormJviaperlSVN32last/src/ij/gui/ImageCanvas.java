@@ -1499,12 +1499,12 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 							mi.addActionListener(ij);
 							popup.add(mi);
 
-							mi = new JMenuItem(listModel.get(r) + ": "
-									+ rm.getImagePlus().getTitle());
-							clickedROIstring = listModel.get(r) + ": "
-									+ rm.getImagePlus().getTitle();
-							mi.addActionListener(ij);
-							popup.add(mi);
+//							mi = new JMenuItem(listModel.get(r) + ": "
+//									+ rm.getImagePlus().getTitle());
+//							clickedROIstring = listModel.get(r) + ": "
+//									+ rm.getImagePlus().getTitle();
+//							mi.addActionListener(ij);
+//							popup.add(mi);
 						}
 						if (lineageMap) r=n;
 					}
@@ -1523,6 +1523,15 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 													impIDs[i])
 													.getTitle())) {
 								mi = new JMenuItem("also see: "
+										+ ((String) roiNames[j]).split("_")[0]
+												+ " in \""
+												+ (WindowManager.getImage(
+														impIDs[i]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
+																(WindowManager.getImage(
+																		impIDs[i]).getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
+																			(WindowManager.getImage(
+																					impIDs[i]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
+								mi.setActionCommand("also see: "
 										+ roiNames[j]
 												+ ": "
 												+ WindowManager.getImage(
@@ -1858,7 +1867,14 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 										String itemString = "***shown here: "
 												+ imgRoiNames[j]+"{"+ openImageIDsWithRM[o] + "|" + j + "}";
 										j = imgRoiNames.length;
-										mi = new JMenuItem(itemString);
+										mi = new JMenuItem(itemString.split("_")[0] + " in " 
+												+ (WindowManager.getImage(
+												openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
+														(WindowManager.getImage(
+																openImageIDsWithRM[o]).getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
+																	(WindowManager.getImage(
+																			openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
+										mi.setActionCommand(itemString);
 										popupInfo[1] = popupInfo[1]+itemString+"\n";
 										mi.addActionListener(ij);
 										analogsPopup.add(mi);
@@ -1911,7 +1927,14 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 											String itemString = "***shown here: "
 													+ imgRoiNames[j]+"{"+ openImageIDsWithRM[o] + "|" + j + "}";
 											j = imgRoiNames.length;
-											mi = new JMenuItem(itemString);
+											mi = new JMenuItem(itemString.split("_")[0] + " in " 
+													+ (WindowManager.getImage(
+													openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
+															(WindowManager.getImage(
+																	openImageIDsWithRM[o]).getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
+																		(WindowManager.getImage(
+																				openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
+											mi.setActionCommand(itemString);
 											popupInfo[1] = popupInfo[1]+itemString+"\n";
 											mi.addActionListener(ij);
 											analogsPopup.add(mi);
@@ -1985,7 +2008,14 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 													String itemString = "***shown here: "
 															+ imgRoiNames[j]+"{"+ openImageIDsWithRM[o] + "|" + j + "}";
 													j = imgRoiNames.length;
-													mi = new JMenuItem(itemString);
+													mi = new JMenuItem(itemString.split("_")[0] + " in " 
+															+ (WindowManager.getImage(
+															openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
+																	(WindowManager.getImage(
+																			openImageIDsWithRM[o]).getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
+																				(WindowManager.getImage(
+																						openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
+													mi.setActionCommand(itemString);
 													popupInfo[1] = popupInfo[1]+itemString+"\n";
 													mi.addActionListener(ij);
 													presynapticPopup.add(mi);
@@ -2019,7 +2049,14 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 													String itemString = "***shown here: "
 															+ imgRoiNames[j]+"{"+ openImageIDsWithRM[o] + "|" + j + "}";
 													j = imgRoiNames.length;
-													mi = new JMenuItem(itemString);
+													mi = new JMenuItem(itemString.split("_")[0] + " in " 
+															+ (WindowManager.getImage(
+															openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
+																	(WindowManager.getImage(
+																			openImageIDsWithRM[o]).getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
+																				(WindowManager.getImage(
+																						openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
+													mi.setActionCommand(itemString);
 													popupInfo[1] = popupInfo[1]+itemString+"\n";
 
 													mi.addActionListener(ij);
@@ -2048,7 +2085,14 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 													String itemString = "***shown here: "
 															+ imgRoiNames[j]+"{"+ openImageIDsWithRM[o] + "|" + j + "}";
 													j = imgRoiNames.length;
-													mi = new JMenuItem(itemString);
+													mi = new JMenuItem(itemString.split("_")[0] + " in " 
+															+ (WindowManager.getImage(
+															openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
+																	(WindowManager.getImage(
+																			openImageIDsWithRM[o]).getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
+																				(WindowManager.getImage(
+																						openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
+													mi.setActionCommand(itemString);
 													popupInfo[1] = popupInfo[1]+itemString+"\n";
 
 													mi.addActionListener(ij);
@@ -2077,7 +2121,14 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 													String itemString = "***shown here: "
 															+ imgRoiNames[j]+"{"+ openImageIDsWithRM[o] + "|" + j + "}";
 													j = imgRoiNames.length;
-													mi = new JMenuItem(itemString);
+													mi = new JMenuItem(itemString.split("_")[0] + " in " 
+															+ (WindowManager.getImage(
+															openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
+																	(WindowManager.getImage(
+																			openImageIDsWithRM[o]).getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
+																				(WindowManager.getImage(
+																						openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
+													mi.setActionCommand(itemString);
 													popupInfo[1] = popupInfo[1]+itemString+"\n";
 
 													mi.addActionListener(ij);
@@ -2181,7 +2232,14 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 												String menuString = "***shown here: "
 														+ imgRoiNames[j]+"{"+ openImageIDsWithRM[o] + "|" + j + "}";
 												j = imgRoiNames.length;
-												mi = new JMenuItem(menuString);
+												mi = new JMenuItem(menuString.split("_")[0] + " in " 
+														+ (WindowManager.getImage(
+														openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
+																(WindowManager.getImage(
+																		openImageIDsWithRM[o]).getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
+																			(WindowManager.getImage(
+																					openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
+												mi.setActionCommand(menuString);
 												popupInfo[1] = popupInfo[1]+itemString+"\n";
 
 												mi.addActionListener(ij);
@@ -2196,6 +2254,9 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 							String itemString = "begets=>"
 									+ logLines2[l].substring(12, logLines2[l]
 											.indexOf(";"));
+							mi = new JMenuItem(itemString.contains(" rel=") ? itemString
+									.substring(0, itemString.indexOf(" rel="))
+									: itemString);
 							itemString = (itemString.contains(" rel=") ? itemString
 									.substring(0, itemString.indexOf(" rel="))
 									: itemString)
@@ -2203,7 +2264,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 									+ logLines2[l].substring(logLines2[l]
 											.indexOf("nofollow>") + 9);
 
-							mi = new JMenuItem(itemString);
+							mi.setToolTipText(itemString);
+							mi.setActionCommand(itemString);
 							popupInfo[1] = popupInfo[1]+itemString+"\n";
 							mi.addActionListener(ij);
 							fatePopup.add(mi);
@@ -2222,7 +2284,14 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 										String menuString = "***shown here: "
 												+ imgRoiNames[j]+"{"+ openImageIDsWithRM[o] + "|" + j + "}";
 										j = imgRoiNames.length;
-										mi = new JMenuItem(menuString);
+										mi = new JMenuItem(menuString.split("_")[0] + " in " 
+												+ (WindowManager.getImage(
+												openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
+														(WindowManager.getImage(
+																openImageIDsWithRM[o]).getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
+																	(WindowManager.getImage(
+																			openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
+										mi.setActionCommand(menuString);
 										popupInfo[1] = popupInfo[1]+itemString+"\n";
 
 										mi.addActionListener(ij);
@@ -2276,7 +2345,14 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 											String itemString = "***shown here: "
 													+ imgRoiNames[j]+"{"+ openImageIDsWithRM[o] + "|" + j + "}";
 											j = imgRoiNames.length;
-											mi = new JMenuItem(itemString);
+											mi = new JMenuItem(itemString.split("_")[0] + " in " 
+													+ (WindowManager.getImage(
+													openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
+															(WindowManager.getImage(
+																	openImageIDsWithRM[o]).getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
+																		(WindowManager.getImage(
+																				openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
+											mi.setActionCommand(itemString);
 											popupInfo[1] = popupInfo[1] + itemString+"\n";
 
 											mi.addActionListener(ij);
@@ -2325,7 +2401,14 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 													String itemString = "***shown here: "
 															+ imgRoiNames[j]+"{"+ openImageIDsWithRM[o] + "|" + j + "}";
 													j = imgRoiNames.length;
-													mi = new JMenuItem(itemString);
+													mi = new JMenuItem(itemString.split("_")[0] + " in " 
+															+ (WindowManager.getImage(
+															openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
+																	(WindowManager.getImage(
+																			openImageIDsWithRM[o]).getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
+																				(WindowManager.getImage(
+																						openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
+													mi.setActionCommand(itemString);
 													popupInfo[1] = popupInfo[1]+itemString+"\n";
 
 													mi.addActionListener(ij);

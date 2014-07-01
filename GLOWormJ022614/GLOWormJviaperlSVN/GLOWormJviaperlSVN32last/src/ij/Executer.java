@@ -194,8 +194,9 @@ public class Executer implements Runnable {
 					}
 				}
 			} else {
-				WindowManager.setCurrentWindow(WindowManager.getImage(Integer.parseInt(cmd.split("[{|}]")[1])).getWindow());
-				WindowManager.getImage(Integer.parseInt(cmd.split("[{|}]")[1])).getWindow().toFront();
+				int windowID = Integer.parseInt(cmd.split("[{|}]")[1]);
+				WindowManager.setCurrentWindow(WindowManager.getImage(windowID).getWindow());
+				WindowManager.getImage(windowID).getWindow().toFront();
 				new ij.macro.MacroRunner("roiManager('select', "+cmd.split("[{|}]")[2]+", "+cmd.split("[{|}]")[1]+");" +
 						"getSelectionBounds(roix, roiy, roiwidth, roiheight);" +
 						"run(\"Set... \", \"zoom=\" + getZoom*100 + \" x=\" + roix+roiwidth/2 + \" y=\" + roiy+roiheight/2);" +

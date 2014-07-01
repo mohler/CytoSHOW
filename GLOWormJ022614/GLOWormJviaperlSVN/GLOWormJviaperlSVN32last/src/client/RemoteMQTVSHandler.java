@@ -606,14 +606,20 @@ public class RemoteMQTVSHandler {
 
 		if (moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW")) {
 			IJ.log("contacting CytoSHOW server...");
-			TextRoi.setFont("Arial", win2.getImagePlus().getWidth()/20, Font.ITALIC);		
-			TextRoi tr = new TextRoi(0, 0, "Contacting\nCytoSHOW\nserver...");
-			tr.setStrokeColor(Color.gray);
-			tr.setFillColor(Color.decode("#55ffff00"));
-
-			win2.getImagePlus().setRoi(tr);
-			tr.setImage(win2.getImagePlus());
-			win2.getImagePlus().getCanvas().paintDoubleBuffered(win2.getImagePlus().getCanvas().getGraphics());
+			if (win2!=null) {
+				TextRoi.setFont("Arial", win2.getImagePlus().getWidth() / 20,
+						Font.ITALIC);
+				TextRoi tr = new TextRoi(0, 0,
+						"Contacting\nCytoSHOW\nserver...");
+				tr.setStrokeColor(Color.gray);
+				tr.setFillColor(Color.decode("#55ffff00"));
+				win2.getImagePlus().setRoi(tr);
+				tr.setImage(win2.getImagePlus());
+				win2.getImagePlus()
+						.getCanvas()
+						.paintDoubleBuffered(
+								win2.getImagePlus().getCanvas().getGraphics());
+			}
 		}
 
 		ByteArrayInputStream bais = new ByteArrayInputStream((byte[]) qtbaosba);
