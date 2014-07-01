@@ -1468,6 +1468,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 						cellName = clccb.getName().trim();
 					//					cellName = ((TextRoi)cursorRoi).getText();
 					mi =  new JMenuItem("\""+cellName + " \": synch all windows to this tag" );
+					mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Synch.png")));
 					mi.addActionListener(ij);
 					popup.add(mi);
 				}
@@ -1494,6 +1495,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 							} 
 
 							mi =new JMenuItem("\""+cellName + " \": synch all windows to this tag" );
+							mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Synch.png")));
 							clickedROIstring = listModel.get(r) + ": "
 									+ rm.getImagePlus().getTitle();
 							mi.addActionListener(ij);
@@ -1536,6 +1538,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 												+ ": "
 												+ WindowManager.getImage(
 														impIDs[i]).getTitle());
+								mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/More.png")));
 								mi.addActionListener(ij);
 								popup.add(mi);
 								j = roiNames.length;
@@ -2588,6 +2591,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 					popupInfo[0] = dataImp.getTitle();
 
 				mi = new JMenuItem("Save this info in text file...");
+				mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Write.png")));
 				mi.addActionListener(ij);
 				//popup.add(new JMenuItem("-"));
 				popup.add(mi);

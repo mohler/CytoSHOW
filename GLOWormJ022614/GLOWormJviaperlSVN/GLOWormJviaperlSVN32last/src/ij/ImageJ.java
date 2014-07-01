@@ -432,6 +432,7 @@ public class ImageJ extends Frame implements ActionListener,
 							
 							if (comp instanceof JMenuItem  && !(comp instanceof JMenu)) {
 								JMenuItem compCopy = new JMenuItem(((JMenuItem)comp).getText());
+								compCopy.setIcon(((JMenuItem)comp).getIcon());
 								compCopy.setToolTipText(((JMenuItem)comp).getToolTipText());
 								compCopy.setActionCommand(((JMenuItem)comp).getActionCommand());
 								compCopy.addActionListener(IJ.getInstance());
@@ -461,6 +462,7 @@ public class ImageJ extends Frame implements ActionListener,
 									
 									if (jmi instanceof JMenuItem  && !(jmi instanceof JMenu)) {
 										JMenuItem jmiCopy = new JMenuItem(((JMenuItem)jmi).getText());
+										jmiCopy.setIcon(((JMenuItem)jmi).getIcon());
 										jmiCopy.setToolTipText(((JMenuItem)jmi).getToolTipText());
 										jmiCopy.setActionCommand(((JMenuItem)jmi).getActionCommand());
 										jmiCopy.addActionListener(IJ.getInstance());
@@ -480,6 +482,7 @@ public class ImageJ extends Frame implements ActionListener,
 										for (Component jmi2:subcomps2) {
 											if (jmi2 instanceof JMenuItem) {
 												JMenuItem jmi2Copy = new JMenuItem(((JMenuItem)jmi2).getText());
+												jmi2Copy.setIcon(((JMenuItem)jmi2).getIcon());
 												jmi2Copy.setToolTipText(((JMenuItem)jmi2).getToolTipText());
 												jmi2Copy.setActionCommand(((JMenuItem)jmi2).getActionCommand());
 												jmi2Copy.addActionListener(IJ.getInstance());
