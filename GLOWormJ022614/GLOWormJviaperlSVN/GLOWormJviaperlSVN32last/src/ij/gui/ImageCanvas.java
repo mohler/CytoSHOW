@@ -1678,6 +1678,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 									}
 								}
 								JMenu glowormPopup = new JMenu(" *** " + logLines2[l].split(" ")[1] + " shown in CytoSHOW:", true);
+								glowormPopup.setIcon(new ImageIcon(ImageWindow.class.getResource("images/CytoSHOW3icon.png")));
 								glowormPopup.getPopupMenu().addPopupMenuListener(ij);
 								mi =  new JMenuItem("^--------------------^");
 								mi.addActionListener(ij);
@@ -1712,6 +1713,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 												glowGeneLogLines[gg].indexOf("</a>")) +"...\n"
 												+"            "+ glowGeneLogLines[gg].substring(glowGeneLogLines[gg].indexOf("http://"), 
 														glowGeneLogLines[gg].indexOf("\">")) + "\n";
+										mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/CytoSHOW3icon.png")));
 										mi.addActionListener(ij);
 										glowormPopup.add(mi);
 										if (glowGeneLogLines[gg].contains("also viewable in ")){
@@ -1720,6 +1722,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 											popupInfo[1] = popupInfo[1] +"      "+ "--also viewable in RedCyan Stereo"  +"...\n"
 													+"            "+ glowGeneLogLines[gg].substring(glowGeneLogLines[gg].indexOf("http://"), 
 															glowGeneLogLines[gg].indexOf("\">")) + "&amp;VIEW=MQTVS_RedCyanStereo_scene.scn" + "\n"; 
+											mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/CytoSHOW3icon.png")));
 											mi.addActionListener(ij);
 											glowormPopup.add(mi);
 
@@ -1752,6 +1755,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 					if (!rm.getImagePlus().getTitle().startsWith("Projections") && rm.getFullListModel().size()>0) {
 
 						JMenu nearPopup = new JMenu(cellName+": Nearby cells >", true);
+						nearPopup.setIcon(new ImageIcon(ImageWindow.class.getResource("images/NearIcon.png")));
 						nearPopup.getPopupMenu().addPopupMenuListener(ij);
 						mi =  new JMenuItem("^--------------------^");
 						mi.addActionListener(ij);
@@ -1825,12 +1829,19 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 									//									nearPopup.add(zSlice+" "+tFrame);
 
 									mi = new JMenuItem("near "
+											+ nearbyROIs[h].getName().split("_")[0]
+													+ " in \""
+													+ (rm.getImagePlus().getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
+																	(rm.getImagePlus().getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
+																				(rm.getImagePlus().getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
+									mi.setActionCommand("near "
 											+ nearbyROIs[h].getName() + ": "
 											+ rm.getImagePlus().getTitle());
 									popupInfo[1] = popupInfo[1]+ "near "
 											+ nearbyROIs[h].getName() + ": "
 											+ rm.getImagePlus().getTitle()+"\n";
 
+									mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/See.png")));
 									mi.addActionListener(ij);
 									nearPopup.add(mi);
 								}
@@ -1843,6 +1854,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 					String embAnalogsMatrix = IJ.openUrlAsString("http://fsbill.cam.uchc.edu/gloworm/Xwords/EmbryonicAnalogousCells.csv");
 					String[] embAnalogsRows = embAnalogsMatrix.split("\n");
 					JMenu analogsPopup = new JMenu(cellName+": Analogous cells >", true);
+					analogsPopup.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Analogs.png")));
 					analogsPopup.getPopupMenu().addPopupMenuListener(ij);
 					mi =  new JMenuItem("^--------------------^");
 					mi.addActionListener(ij);
@@ -1880,6 +1892,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 																	(WindowManager.getImage(
 																			openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
 										mi.setActionCommand(itemString);
+										mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/See.png")));
 										popupInfo[1] = popupInfo[1]+itemString+"\n";
 										mi.addActionListener(ij);
 										analogsPopup.add(mi);
@@ -1940,6 +1953,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 																		(WindowManager.getImage(
 																				openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
 											mi.setActionCommand(itemString);
+											mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/See.png")));
 											popupInfo[1] = popupInfo[1]+itemString+"\n";
 											mi.addActionListener(ij);
 											analogsPopup.add(mi);
@@ -2021,6 +2035,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 																				(WindowManager.getImage(
 																						openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
 													mi.setActionCommand(itemString);
+													mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/See.png")));
 													popupInfo[1] = popupInfo[1]+itemString+"\n";
 													mi.addActionListener(ij);
 													presynapticPopup.add(mi);
@@ -2062,6 +2077,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 																				(WindowManager.getImage(
 																						openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
 													mi.setActionCommand(itemString);
+													mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/See.png")));
 													popupInfo[1] = popupInfo[1]+itemString+"\n";
 
 													mi.addActionListener(ij);
@@ -2098,6 +2114,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 																				(WindowManager.getImage(
 																						openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
 													mi.setActionCommand(itemString);
+													mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/See.png")));
 													popupInfo[1] = popupInfo[1]+itemString+"\n";
 
 													mi.addActionListener(ij);
@@ -2134,6 +2151,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 																				(WindowManager.getImage(
 																						openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
 													mi.setActionCommand(itemString);
+													mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/See.png")));
 													popupInfo[1] = popupInfo[1]+itemString+"\n";
 
 													mi.addActionListener(ij);
@@ -2246,6 +2264,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 																			(WindowManager.getImage(
 																					openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
 												mi.setActionCommand(menuString);
+												mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/See.png")));
 												popupInfo[1] = popupInfo[1]+itemString+"\n";
 
 												mi.addActionListener(ij);
@@ -2298,6 +2317,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 																	(WindowManager.getImage(
 																			openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
 										mi.setActionCommand(menuString);
+										mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/See.png")));
 										popupInfo[1] = popupInfo[1]+itemString+"\n";
 
 										mi.addActionListener(ij);
@@ -2360,6 +2380,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 																		(WindowManager.getImage(
 																				openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
 											mi.setActionCommand(itemString);
+											mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/See.png")));
 											popupInfo[1] = popupInfo[1] + itemString+"\n";
 
 											mi.addActionListener(ij);
@@ -2416,6 +2437,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 																				(WindowManager.getImage(
 																						openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
 													mi.setActionCommand(itemString);
+													mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/See.png")));
 													popupInfo[1] = popupInfo[1]+itemString+"\n";
 
 													mi.addActionListener(ij);
@@ -2524,6 +2546,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 										fileList[f].indexOf("</a>")) +"...\n"
 										+"            "+ fileList[f].substring(fileList[f].indexOf("http://"), 
 												fileList[f].indexOf("\">")) + "\n";
+								mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/CytoSHOW3icon.png")));
 								mi.addActionListener(ij);
 								samePopup.add(mi);
 								if (fileList[f].toLowerCase().contains("also viewable in ")){
@@ -2532,6 +2555,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 									popupInfo[1] = popupInfo[1] +"      "+ "--also viewable in RedCyan Stereo"  +"...\n"
 											+"            "+ fileList[f].substring(fileList[f].indexOf("http://"), 
 													fileList[f].indexOf("\">")) + "&amp;VIEW=MQTVS_RedCyanStereo_scene.scn" + "\n"; 
+									mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/CytoSHOW3icon.png")));
 									mi.addActionListener(ij);
 									samePopup.add(mi);
 
@@ -2546,6 +2570,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 												fileList[f].indexOf("</a>")) +"...\n"
 												+"            "+ fileList[f].substring(fileList[f].indexOf("http://"), 
 														fileList[f].indexOf("\">")) + "\n";
+										mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/CytoSHOW3icon.png")));
 										mi.addActionListener(ij);
 										geneExprPopups[e1].add(mi);
 										if (fileList[f].toLowerCase().contains("also viewable in ")){
@@ -2554,6 +2579,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 											popupInfo[1] = popupInfo[1] +"      "+ "--also viewable in RedCyan Stereo"  +"...\n"
 													+"            "+ fileList[f].substring(fileList[f].indexOf("http://"), 
 															fileList[f].indexOf("\">")) + "&amp;VIEW=MQTVS_RedCyanStereo_scene.scn" + "\n"; 
+											mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/CytoSHOW3icon.png")));
 											mi.addActionListener(ij);
 											geneExprPopups[e1].add(mi);
 
