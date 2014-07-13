@@ -1219,14 +1219,16 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 
 			if (IJ.debugMode) IJ.log("Saving Scene portraying " + ci.getNChannels() + " movies /n");
 
-			String name ="";
-			String path ="";
+			String name = (imp.getTitle().length()>28?imp.getTitle().substring(0, 25):imp.getTitle().replace(".tif", ""))+sec;
+			name = name.replace(" ","");
+			String dir = IJ.getDirectory("home");
+			String path = dir+name;
 			if(!(imp.getImageStack() instanceof MultiQTVirtualStack)
 					&& !(imp.getImageStack() instanceof RemoteMQTVSHandler.RemoteMQTVirtualStack)
 					&& deNovoMovieFile==null) {
 //				SaveDialog sd = new SaveDialog("Save Movie for CytoSHOW Scene as...", imp.getTitle().length()>28?imp.getTitle().substring(0, 25):imp.getTitle().replace(".tif", ""), ".avi");
 //				String name = sd.getFileName().replace(" ","");
-				name = (imp.getTitle().length()>28?imp.getTitle().substring(0, 25):imp.getTitle().replace(".tif", ""))+sec+"_1.avi";
+				name = name +"_1.avi";
 				name = name.replace(" ","");
 				if (name==null) return;
 				/*
@@ -1235,7 +1237,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 				return;
 			}
 				 */
-				String dir = IJ.getDirectory("home");
+				dir = IJ.getDirectory("home");
 				path = dir+name;
 				Roi roi = imp.getRoi();
 				if (roi != null)

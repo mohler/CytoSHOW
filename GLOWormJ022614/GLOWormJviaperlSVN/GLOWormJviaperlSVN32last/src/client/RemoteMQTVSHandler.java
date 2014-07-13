@@ -909,7 +909,10 @@ public class RemoteMQTVSHandler {
 					}
 				}
 				dzdxyRatio[m] = nmdzSingleMovie[m]/nmdxySingleMovie[m];
-				sliceDepth = Math.max(sliceDepth, dzdxyRatio[m]);
+				if (sliceDepth == 0)
+					sliceDepth = dzdxyRatio[m];
+				else
+					sliceDepth = Math.min(sliceDepth, dzdxyRatio[m]);
 			}
 		}
 
