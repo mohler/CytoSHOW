@@ -215,8 +215,8 @@ macro "Monitor diSPIM Acquisition" {
 	wavelengths = Dialog.getNumber();
 	zSlices = Dialog.getNumber();
 
-	    fileListA = getFileList(""+dir+"SPIMA" + File.separator);
- 	   fileListB = getFileList(""+dir +"SPIMB" + File.separator);
+	fileListA = getFileList(""+dir+"SPIMA" + File.separator);
+ 	fileListB = getFileList(""+dir +"SPIMB" + File.separator);
 	fileRanksA = Array.copy(fileListA);
 	fileRanksB = Array.copy(fileListB);
 	fileNumsA = Array.copy(fileListA);
@@ -238,7 +238,7 @@ macro "Monitor diSPIM Acquisition" {
 			print(subsring);
 			print(prefix);
 		}
-		 if(startsWith(prefix, "t"))
+		 if(startsWith(toLowerCase(prefix), "t"))
 			prefix = "aaaaa"+prefix;
 		numer = parseInt(subsring);
 		print(subsring+" "+numer);
@@ -253,7 +253,7 @@ macro "Monitor diSPIM Acquisition" {
 			print(subsring);
 			print(prefix);
 		}
-		 if(startsWith(prefix, "t"))
+		 if(startsWith(toLowerCase(prefix), "t"))
 			prefix = "aaaaa"+prefix;
 		numer = parseInt(subsring);
 		print(subsring+" "+numer);
@@ -276,14 +276,14 @@ macro "Monitor diSPIM Acquisition" {
 	    nextPath =  dir + "SPIMA" + File.separator + fileSortA[d];
 	    print(nextPath);
  	    if ( File.isDirectory(nextPath) == 1) {
-		newTifList = getFileList(nextPath );
-		Array.sort(newTifList);		
-		for (f=0;f<lengthOf(newTifList);f++) {
-	while(!File.exists(dir+"Big5DFileListA.txt"))
-		wait(100);
-			if (indexOf(big5DFileListAString, nextPath + File.separator+newTifList[f])<0)
-				File.append(nextPath + File.separator +newTifList[f], dir+"Big5DFileListA.txt");
-		}
+			newTifList = getFileList(nextPath );
+			Array.sort(newTifList);		
+			for (f=0;f<lengthOf(newTifList);f++) {
+				while(!File.exists(dir+"Big5DFileListA.txt"))
+				wait(100);
+				if (indexOf(big5DFileListAString, nextPath + File.separator+newTifList[f])<0)
+					File.append(nextPath + File.separator +newTifList[f], dir+"Big5DFileListA.txt");
+		    }
 	    }
 
 	}
@@ -293,14 +293,14 @@ macro "Monitor diSPIM Acquisition" {
 	    nextPath =  dir + "SPIMB" + File.separator + fileSortB[d];
 
 	    if ( File.isDirectory(nextPath)  == 1) {
-		newTifList = getFileList(nextPath );
-		Array.sort(newTifList);		
-		for (f=0;f<lengthOf(newTifList);f++) {
-	while(!File.exists(dir+"Big5DFileListB.txt"))
-		wait(100);
-			if (indexOf(big5DFileListBString, nextPath + File.separator +newTifList[f])<0)
-				File.append(nextPath + File.separator +newTifList[f], dir+"Big5DFileListB.txt");
-		}
+			newTifList = getFileList(nextPath );
+			Array.sort(newTifList);		
+			for (f=0;f<lengthOf(newTifList);f++) {
+				while(!File.exists(dir+"Big5DFileListB.txt"))
+				wait(100);
+				if (indexOf(big5DFileListBString, nextPath + File.separator +newTifList[f])<0)
+					File.append(nextPath + File.separator +newTifList[f], dir+"Big5DFileListB.txt");
+			}
 	    }
 
 	}
