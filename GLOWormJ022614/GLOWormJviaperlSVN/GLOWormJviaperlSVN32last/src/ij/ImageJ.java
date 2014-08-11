@@ -580,7 +580,7 @@ public class ImageJ extends Frame implements ActionListener,
 				return;
 			}
 			cmd = e.getActionCommand();
-			ImagePlus imp = IJ.getImage();
+			ImagePlus imp = WindowManager.getCurrentImage();
 			new Executer(cmd, imp, e);
 		} else {
 			String cmd = e.getActionCommand();
@@ -1065,9 +1065,13 @@ public class ImageJ extends Frame implements ActionListener,
 			}
 		}
 		if (remote) {
+			if (concat.contains("NOMOVIE") || concat.contains("APPONLY") || concat.contains("BASIC"))
+				return;
 			if (!concat.contains("scene.scn") && !concat.contains("suite.ste")) {
 				RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], concat.replace("|"," "), 
 						false, true, true, false, true, false, false, false, false);
+					if (rmqtvsh == null)
+						return;
 					ImagePlus imp = rmqtvsh.getImagePlus();
 					imp.getWindow().setVisible(true);
 			} else {

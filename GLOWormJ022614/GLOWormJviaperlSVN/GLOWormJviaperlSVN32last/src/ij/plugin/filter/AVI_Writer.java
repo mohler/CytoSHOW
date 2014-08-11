@@ -405,8 +405,10 @@ public class AVI_Writer implements PlugInFilter, TextListener {
         	}
         }
         chunkEndWriteSize();                // LIST 'movi' finished (nesting level 1)
-		if (imp.isComposite() || isHyperstack) {
+		if (imp.isComposite() ) {
 			((CompositeImage)imp).setMode(mode);
+		}
+		if (isHyperstack) {
 			imp.setPosition(channel, slice, frame);
 		}
 

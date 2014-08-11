@@ -230,6 +230,8 @@ public class MacroInstaller implements PlugIn, MacroConstants, ActionListener {
 		if (path.endsWith("StartupMacros.txt")) {
 			if (Toolbar.installStartupMacrosTools())
 				install(text);
+			
+			install(text);
 			Toolbar tb = Toolbar.getInstance();
 			if (tb!=null)
 				tb.installStartupTools();

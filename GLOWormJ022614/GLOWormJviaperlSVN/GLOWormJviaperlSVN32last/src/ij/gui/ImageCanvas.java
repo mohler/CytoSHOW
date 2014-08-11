@@ -841,7 +841,11 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				+imp.getWindow().getInsets().bottom
 				+(imp.getWindow() instanceof StackWindow?
 						((StackWindow)imp.getWindow()).getNScrollbars()
-						*((StackWindow)imp.getWindow()).zSelector.getHeight()
+						*(((StackWindow)imp.getWindow()).zSelector!=null?
+								((StackWindow)imp.getWindow()).zSelector.getHeight():
+									((StackWindow)imp.getWindow()).tSelector!=null?
+											((StackWindow)imp.getWindow()).tSelector.getHeight():
+												((StackWindow)imp.getWindow()).cSelector.getHeight())
 						:0)
 						+imp.getWindow().overheadPanel.getHeight();
 		Dimension newSize = canEnlarge(newWidth, newHeight);
@@ -942,7 +946,11 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				+imp.getWindow().getInsets().bottom
 				+(imp.getWindow() instanceof StackWindow?
 						((StackWindow)imp.getWindow()).getNScrollbars()
-						*((StackWindow)imp.getWindow()).zSelector.getHeight()
+						*(((StackWindow)imp.getWindow()).zSelector!=null?
+								((StackWindow)imp.getWindow()).zSelector.getHeight():
+									((StackWindow)imp.getWindow()).tSelector!=null?
+											((StackWindow)imp.getWindow()).tSelector.getHeight():
+												((StackWindow)imp.getWindow()).cSelector.getHeight())
 						:0)
 						+imp.getWindow().overheadPanel.getHeight();
 		if (Math.abs(srcRatio-imageRatio)>0.05) {
@@ -1018,7 +1026,11 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				+imp.getWindow().getInsets().bottom
 				+(imp.getWindow() instanceof StackWindow?
 						((StackWindow)imp.getWindow()).getNScrollbars()
-						*((StackWindow)imp.getWindow()).zSelector.getHeight()
+						*(((StackWindow)imp.getWindow()).zSelector!=null?
+								((StackWindow)imp.getWindow()).zSelector.getHeight():
+									((StackWindow)imp.getWindow()).tSelector!=null?
+											((StackWindow)imp.getWindow()).tSelector.getHeight():
+												((StackWindow)imp.getWindow()).cSelector.getHeight())
 						:0)
 						+imp.getWindow().overheadPanel.getHeight();
 		if (magnification==imag)
@@ -1044,7 +1056,11 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				+imp.getWindow().getInsets().bottom
 				+(imp.getWindow() instanceof StackWindow?
 						((StackWindow)imp.getWindow()).getNScrollbars()
-						*((StackWindow)imp.getWindow()).zSelector.getHeight()
+						*(((StackWindow)imp.getWindow()).zSelector!=null?
+								((StackWindow)imp.getWindow()).zSelector.getHeight():
+									((StackWindow)imp.getWindow()).tSelector!=null?
+											((StackWindow)imp.getWindow()).tSelector.getHeight():
+												((StackWindow)imp.getWindow()).cSelector.getHeight())
 						:0)
 						+imp.getWindow().overheadPanel.getHeight();
 		if (magnification==1.0)

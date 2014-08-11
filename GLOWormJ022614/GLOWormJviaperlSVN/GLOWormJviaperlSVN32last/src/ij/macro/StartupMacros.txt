@@ -1,3 +1,10 @@
+  var xx = setup(); // runs when macros are installed
+  function setup() {
+ //     setOption("QueueMacros", true);
+      return true;
+  }
+
+
 // "StartupMacros"
 // The macros and macro tools in this file ("StartupMacros.txt") are 
 // automatically installed in the Plugins>Macros submenu and
@@ -5,15 +12,17 @@
 
 //  About the drawing tools.
 //
-//  This is a set of drawing tools similar to the pencil, paintbrush
-//  and flood fill (paint bucket) tools in NIH Image. The pencil
-//  and paintbrush draw in the current foreground color. The
+//  This is a set of drawing tools similar to the pencil, paintbrush, 
+//  eraser and flood fill (paint bucket) tools in NIH Image. The 
+//  pencil and paintbrush draw in the current foreground color 
+//  and the eraser draws in the current background color. The
 //  flood fill tool fills the selected area using the foreground color.
 //  Hold down the alt key to have the pencil and paintbrush draw 
 //  using the background color or to have the flood fill tool fill 
 //  using the background color. Set the foreground and background 
-//  colors by double-clicking on the eye dropper tool.  Double-click
-//  on the pencil or paintbrush tool to set the drawing width for that tool.
+//  colors by double-clicking on the flood fill tool or on the eye  
+//  dropper tool.  Double-click on the pencil, paintbrush or eraser 
+//  tool  to set the drawing width for that tool.
 //
 // Icons contributed by Tony Collins.
 
@@ -23,33 +32,73 @@
    var floodType =  "8-connected"; //call("ij.Prefs.get", "startup.flood", "8-connected");
 
    // The macro named "AutoRun" runs when ImageJ starts.
-   // macro "AutoRun" {
-   //    print("AutoRun");
-   // }
+   //macro "AutoRun" {print("AutoRun");}
 
    // The macro named "AutoRunAndHide" runs when ImageJ starts
    // and the file containing it is not displayed when ImageJ opens it.
    // macro "AutoRunAndHide" {}
 
+/****/
+    macro "AutoRun" {
+        run("Colors...", "foreground=white background=black selection=yellow");
+		run("Options...", "iterations=1 black pad edm=Overwrite count=1");
+		//if (getInfo("os.name") != "Linux") call("org.vcell.gloworm.QT_Test2.run", "test");
+	}
+/*****/
+
+
+   //macro "AutoRun" {
+      //run("My Plugin");
+  //}
+
+  //macro "Unused Tool -" {}
+
   var pmCmds = newMenu("Popup Menu",
-       newArray("Help...", "Rename...", "Duplicate...", "Original Scale", 
-       "Paste Control...", "-", "Record...", "Capture Screen ", "Monitor Memory...", 
-       "List Commands...", "Control Panel...", "Startup Macros...", "Search..."));
+       newArray( "Rename Window...", "Duplicate Region/Load to RAM...", "Original Scale", "-", "Record...", "Capture Screen ", "Monitor Memory...", 
+       "Adjust Display Contrast...", "CytoSHOW Functions", "Tag Manager...", "Synchronize Windows"));
 
   macro "Popup Menu" {
       cmd = getArgument();
       if (cmd=="Help...")
            showMessage("About Popup Menu",
                "To customize this menu, edit the line that starts with\n\"var pmCmds\" in ImageJ/macros/StartupMacros.txt.");
-      else
+	  else
           run(cmd);
   }
 
-  macro "Unused Tool -" {}
+  macro "Add ROI and advance" {
+	while(true){
+		run("Add to Manager");
+		run("Next Slice [>]");
+		lastItem = roiManager("count", getImageID() ) -1;
+		nameString = call("ij.plugin.frame.RoiManager.getName", 	lastItem, getImageID());
+		waitForUser("Add ROI and advance", nameString);
+	}
+  }
 
-  //macro "Abort Macro or Plugin (or press Esc key) Action Tool - CbooP51b1f5fbbf5f1b15510T5c10X" {
-  //    setKeyDown("Esc");
-  //
+  macro "Open_CytoSHOW_Movie(s)... [o]" {		
+		//exec("mkdir /Volumes/GLOWORM_DATA/");
+		//exec("mount_afp afp://guest@155.37.78.7/GLOWORM_DATA/ /Volumes/GLOWORM_DATA");
+
+		showStatus("Preparing to offer selections of CytoSHOW Movies to Open...");
+		
+		s = File.openUrlAsString('http://fsbill.cam.uchc.edu/gloworm/Xwords/MovieChoiceMacroQTOMM.txt');
+		eval(s);
+   }
+
+
+  macro "Make New CytoSHOW_QTVR... [m]" {
+
+		s = File.openUrlAsString('http://fsbill.cam.uchc.edu/gloworm/Xwords/CoreCropRotateCode_4D.txt');
+		eval(s);		
+   }
+
+
+  macro "Abort Macro or Plugin (or press Esc key) Action Tool - CbooP51b1f5fbbf5f1b15510T5c10X" {
+      setKeyDown("Esc");
+  }
+
+
  
   var xx = requires138b(); // check version at install
   function requires138b() {requires("1.38b"); return 0; }
@@ -91,18 +140,29 @@
 
   var sCmds = newMenu("Stacks Menu Tool", 
        newArray("Add Slice", "Delete Slice", "Next Slice [>]", "Previous Slice [<]", "Set Slice...", "-",
-       "Images to Stack", "Stack to Images", "Make Montage...", "Reslice [/]...", "Z Project...",
-       "3D Project...", "Plot Z-axis Profile", "-", "Label...", "Combine...", "Concatenate...", "-",
-       "Start Animation", "Stop Animation", "Animation Options...", "-", "T1 Head (2.4M, 16-bits)"));
-  macro "Stacks Menu Tool - C037T1b11ST8b09tTcb09k" {
+       "Convert Images to Stack", "Convert Stack to Images", "Make Montage...", "Reslice [/]...", "Z Project...",
+       "3D Project...", "Plot Z-axis Profile", "-", "Start Animation", "Stop Animation", "Animation Options...",
+       "-", "MRI Stack (528K)"));
+  macro "Stacks Menu Tool - C037T0b11ST8b09tTcb09k" {
       cmd = getArgument();
-      if (cmd=="Images to Stack")
-          run(cmd, " ");
-      else if (cmd!="-")
-          run(cmd);
+      if (cmd!="-") run(cmd);
   }
 
-   macro "Paintbrush Tool - C037La077Ld098L6859L4a2fL2f4fL5e9bL9b98L6888L5e8dL888cC123L8a3fL8b6d" {
+
+   macro "Pencil Tool - C037L494fL4990L90b0Lc1c3L82a4Lb58bL7c4fDb4L5a5dL6b6cD7b" {
+        getCursorLoc(x, y, z, flags);
+        if (flags&alt!=0)
+              setColorToBackgound();
+        draw(pencilWidth);
+   }
+ 
+  macro 'Pencil Tool Options...' {
+       pencilWidth = getNumber("Pencil Width (pixels):", pencilWidth);
+  }
+
+
+
+   macro "Paintbrush Tool - C037La077Ld098L6859L4a2fL2f4fL3f99L5e9bL9b98L6888L5e8dL888c" {
         getCursorLoc(x, y, z, flags);
         if (flags&alt!=0)
               setColorToBackgound();
@@ -114,14 +174,16 @@
       call("ij.Prefs.set", "startup.brush", brushWidth);
   }
 
-   macro "Flood Fill Tool -C037B21P085373b75d0L4d1aL3135L4050L6166D57D77D68D09D94Da7C123Da5La9abLb6bc" {
+    macro "Flood Fill Tool -C037B21P085373b75d0L4d1aL3135L4050L6166D57D77D68La5adLb6bcD09D94" {
+        requires("1.34j");
         setupUndo();
         getCursorLoc(x, y, z, flags);
         if (flags&alt!=0) setColorToBackgound();
         floodFill(x, y, floodType);
-   }
+     }
 
    function draw(width) {
+        requires("1.32g");
         setupUndo();
         getCursorLoc(x, y, z, flags);
         setLineWidth(width);
@@ -138,7 +200,13 @@
    }
 
    function setColorToBackgound() {
-       setColor(getValue("color.background"));
+       savep = getPixel(0, 0);
+       makeRectangle(0, 0, 1, 1);
+       run("Clear");
+       background = getPixel(0, 0);
+       run("Select None");
+       setPixel(0, 0, savep);
+       setColor(background);
    }
 
   macro 'Flood Fill Tool Options...' {
@@ -148,7 +216,100 @@
       floodType = Dialog.getChoice();
       call("ij.Prefs.set", "startup.flood", floodType);
   }
+
+
+  // This tool draws arrows. Double click on the tool icon
+  // to set the width and length. Hold the shift key down to
+  // constrain to mod 45 degree angles. Double click
+  // on the eye dropper tool to define the color.
+  // Press "z" to undo.
+  var arrowWidth = 3;
+  var arrowLength = -1;
+  var arrowFirst = 1;
+  var arrowLast = 1;
+  macro "Arrow Tool (double click to configure) -C037L1ee1L65e1La9e1L65a9" {
+      leftButton=16; rightButton=4; alt=8; shift=1;
+      getCursorLoc(x, y, z, flags); 
+      xstart = x; ystart = y; 
+      x2=x; y2=y;
+      setOption("disablePopupMenu", true); 
+      while (flags&leftButton!=0) { 
+          getCursorLoc(x, y, z, flags); 
+          if (x!=x2 || y!=y2) {
+              dx = x - xstart;
+              dy = y - ystart;
+              a = atan2(dy, dx)*180/PI;
+              aa = abs(a);
+              ra = sqrt(dx*dx + dy*dy);
+              dx /= ra;
+              dy /= ra;
+              if (flags&shift!=0) {
+                 s2 = sqrt(2)/2;
+                 if (aa<=22.5||aa>=157.5)
+                    dy=0;
+                 else if (aa>=67.5&&aa<=112.5)
+                    dx=0;
+                else if (a>22.5&&a<67.5)
+                    {dx=s2;dy=s2;}
+                else if (a<-22.5&&a>-67.5)
+                    {dx=s2;dy=-s2;}
+                else if (a<-112.5&&a>-157.5)
+                    {dx=-s2;dy=-s2;}
+               else if (a>112.5&&a<157.5)
+                    {dx=-s2;dy=s2;}
+              }
+              if (arrowLength>=0)
+                 ra = arrowLength;
+              x = xstart + dx*ra;
+              y = ystart + dy*ra;
+              makeLine(xstart, ystart, x, y);
+          }
+          x2=x; y2=y; 
+          wait(10); 
+      }
+      setOption("disablePopupMenu", false);
+       if (x!=xstart || y!=ystart)
+          drawArrow(x2, y2, xstart, ystart, arrowWidth);
+      run("Select None");   
+  }
+
+  function drawArrow(x1, y1, x2, y2, arrowWidth) {
+      setupUndo();
+      setLineWidth(arrowWidth);
+      size = 8+10*arrowWidth*0.5;
+      dx = x2-x1;
+      dy = y2-y1;
+      ra = sqrt(dx*dx + dy*dy);
+      dx /= ra;
+      dy /= ra;
+      x3 = x2-dx*size;
+      y3 = y2-dy*size;
+      r = 0.35*size;
+      x4 = round(x3+dy*r);
+      y4 = round(y3-dx*r);
+      x5 = round(x3-dy*r);
+      y5 = round(y3+dx*r);
+      if (arrowLength==-1 || arrowLength>size)
+         drawLine(x1, y1, x2-dx*size, y2-dy*size);
+      makePolygon(x4,y4,x2,y2,x5,y5);
+      fill;
+   }
  
+  macro "Arrow Tool (double click to configure) Options" {
+      Dialog.create("Arrow Tool");
+      Dialog.addString("Width:", arrowWidth);
+      len = ""+arrowLength;
+      if (arrowLength<0) len = "variable";
+      Dialog.addString("Length:", len);
+      Dialog.show();
+      arrowWidth = parseInt(Dialog.getString());
+      if (isNaN(arrowWidth)) arrowWidth = 3;
+      arrowLength = parseInt(Dialog.getString());
+      size = 8+10* arrowWidth*0.5;
+      if (arrowLength<size) arrowLength=size;
+      if (isNaN(arrowLength)) arrowLength=-1;
+  }
+
   macro "Set Drawing Color..."{ 
       run("Color Picker..."); 
   }
@@ -156,14 +317,12 @@
   macro "-" {} //menu divider
 
   macro "About Startup Macros..." {
-      path = getDirectory("macros")+"About Startup Macros";
+      path = getDirectory("macros")+"/About Startup Macros";
       if (!File.exists(path))
           exit("\"About Startup Macros\" not found in ImageJ/macros/.");
       open(path);
   }
 
-  // This example macro demonstrates how to create a
-  // custom command with a keyboard shortcut.
   macro "Save As JPEG... [j]" {
      quality = call("ij.plugin.JpegWriter.getQuality");
      quality = getNumber("JPEG quality (0-100):", quality);
@@ -171,6 +330,11 @@
      saveAs("Jpeg");
   }
 
+   // The macro named "AutoRunAndHide" runs when ImageJ starts
+   // and the file containing it is not displayed when ImageJ opens it.
+ 
+ 
+ 
 macro "Monitor diSPIM Acquisition" {
 	    minA =0;
 	    maxA = 255;
@@ -196,17 +360,9 @@ macro "Monitor diSPIM Acquisition" {
 	fileSortB = newArray("");
 
 	File.saveString("", dir+"Big5DFileListA.txt");
-	while(!File.exists(dir+"Big5DFileListA.txt"))
-		wait(100);
 	File.saveString("", dir+"Big5DFileListB.txt");
-	while(!File.exists(dir+"Big5DFileListB.txt"))
-		wait(100);
 	File.saveString("", dir+"BigMAXFileListA.txt");
-	while(!File.exists(dir+"BigMAXFileListA.txt"))
-		wait(100);
 	File.saveString("", dir+"BigMAXFileListB.txt");
-	while(!File.exists(dir+"BigMAXFileListB.txt"))
-		wait(100);
 
 	Dialog.create("Data Set Parameters?");
 	Dialog.addNumber("Wavelengths", 2);
@@ -238,7 +394,7 @@ macro "Monitor diSPIM Acquisition" {
 			print(subsring);
 			print(prefix);
 		}
-		 if(startsWith(prefix, "t"))
+		 if(startsWith(prefix, "test"))
 			prefix = "aaaaa"+prefix;
 		numer = parseInt(subsring);
 		print(subsring+" "+numer);
@@ -253,7 +409,7 @@ macro "Monitor diSPIM Acquisition" {
 			print(subsring);
 			print(prefix);
 		}
-		 if(startsWith(prefix, "t"))
+		 if(startsWith(prefix, "test"))
 			prefix = "aaaaa"+prefix;
 		numer = parseInt(subsring);
 		print(subsring+" "+numer);
@@ -279,8 +435,6 @@ macro "Monitor diSPIM Acquisition" {
 		newTifList = getFileList(nextPath );
 		Array.sort(newTifList);		
 		for (f=0;f<lengthOf(newTifList);f++) {
-	while(!File.exists(dir+"Big5DFileListA.txt"))
-		wait(100);
 			if (indexOf(big5DFileListAString, nextPath + File.separator+newTifList[f])<0)
 				File.append(nextPath + File.separator +newTifList[f], dir+"Big5DFileListA.txt");
 		}
@@ -296,8 +450,6 @@ macro "Monitor diSPIM Acquisition" {
 		newTifList = getFileList(nextPath );
 		Array.sort(newTifList);		
 		for (f=0;f<lengthOf(newTifList);f++) {
-	while(!File.exists(dir+"Big5DFileListB.txt"))
-		wait(100);
 			if (indexOf(big5DFileListBString, nextPath + File.separator +newTifList[f])<0)
 				File.append(nextPath + File.separator +newTifList[f], dir+"Big5DFileListB.txt");
 		}
@@ -322,25 +474,16 @@ macro "Monitor diSPIM Acquisition" {
 
 		    run("Z Project...", "start=1 stop="+zSlices+" projection=[Max Intensity]");
 		    File.makeDirectory(dir +"MAX_SPIMA");
-		    //saveAs("Tiff", dir + "MAX_SPIMA" + File.separator + "MAX_SPIMA" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+".tif");
-		    run("Image Sequence... ", "format=TIFF name=MAX_SPIMA" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+" start=1 digits=2 save="+dir+"MAX_SPIMA");
-
+		    saveAs("Tiff", dir + "MAX_SPIMA" + File.separator + "MAX_SPIMA" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+".tif");
 		    close();
 		    bigMAXFileListAString = File.openAsString(dir+"BigMAXFileListA.txt");	    
-		    if (indexOf(bigMAXFileListAString, dir + "MAX_SPIMA" + File.separator + "MAX_SPIMA" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+".tif")<0) {
-				File.append(dir + "MAX_SPIMA" + File.separator + "MAX_SPIMA" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+"01.tif", dir+"BigMAXFileListA.txt");
-				File.append(dir + "MAX_SPIMA" + File.separator + "MAX_SPIMA" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+"02.tif", dir+"BigMAXFileListA.txt");
-		    }
+		    if (indexOf(bigMAXFileListAString, dir + "MAX_SPIMA" + File.separator + "MAX_SPIMA" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+".tif")<0)
+				File.append(dir + "MAX_SPIMA" + File.separator + "MAX_SPIMA" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+".tif", dir+"BigMAXFileListA.txt");
 		    run("Stack From List...", "open="+dir+"BigMAXFileListA.txt use");
 
 		    rename("MAX_SPIMA");
-		    run("Stack to Hyperstack...", "order=xyczt(default) channels="+wavelengths+" slices="+1+" frames="+nSlices/(wavelengths*1)+" display=Composite");
+		    run("Stack to Hyperstack...", "order=xyczt(default) channels="+wavelengths+" slices="+1+" frames="+nSlices/(wavelengths*zSlices)+" display=Composite");
 
-	  	    Stack.setPosition(1, 1, stkNSlices/(wavelengths*zSlices));	
-		    run("Green");
-	  	    Stack.setPosition(2, 1, stkNSlices/(wavelengths*zSlices));	
-		    run("Red");
-		    setVoxelSize(vWidth, vHeight, vDepth, vUnit);    
 
 	  }
 	    if (File.length(dir+"Big5DFileListB.txt" ) >0) {
@@ -358,23 +501,15 @@ macro "Monitor diSPIM Acquisition" {
 
 		    run("Z Project...", "start=1 stop="+zSlices+" projection=[Max Intensity]");
 		    File.makeDirectory(dir +"MAX_SPIMB");
-		    //saveAs("Tiff", dir + "MAX_SPIMB" + File.separator + "MAX_SPIMB" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+".tif");
-		    run("Image Sequence... ", "format=TIFF name=MAX_SPIMB" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+" start=1 digits=2 save="+dir+"MAX_SPIMB");
+		    saveAs("Tiff", dir + "MAX_SPIMB" + File.separator + "MAX_SPIMB" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+".tif");
 		    close();
 		    bigMAXFileListBString = File.openAsString(dir+"BigMAXFileListB.txt");	    
-		    if (indexOf(bigMAXFileListBString, dir + "MAX_SPIMB" + File.separator + "MAX_SPIMB" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+".tif")<0) {
-				File.append(dir + "MAX_SPIMB" + File.separator + "MAX_SPIMB" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+"01.tif", dir+"BigMAXFileListB.txt");
-				File.append(dir + "MAX_SPIMB" + File.separator + "MAX_SPIMB" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+"02.tif", dir+"BigMAXFileListB.txt");
-		    }
+		    if (indexOf(bigMAXFileListBString, dir + "MAX_SPIMB" + File.separator + "MAX_SPIMB" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+".tif")<0)
+				File.append(dir + "MAX_SPIMB" + File.separator + "MAX_SPIMB" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+".tif", dir+"BigMAXFileListB.txt");
 		    run("Stack From List...", "open="+dir+"BigMAXFileListB.txt use");
 
 		    rename("MAX_SPIMB");
-		    run("Stack to Hyperstack...", "order=xyczt(default) channels="+wavelengths+" slices="+1+" frames="+nSlices/(wavelengths*1)+" display=Composite");
-	  	    Stack.setPosition(1, 1, stkNSlices/(wavelengths*zSlices));	
-		    run("Green");
-	  	    Stack.setPosition(2, 1, stkNSlices/(wavelengths*zSlices));	
-		    run("Red");
-		    setVoxelSize(vWidth, vHeight, vDepth, vUnit);    
+		    run("Stack to Hyperstack...", "order=xyczt(default) channels="+wavelengths+" slices="+1+" frames="+nSlices/(wavelengths*zSlices)+" display=Composite");
 
 	  }
 
@@ -408,8 +543,6 @@ macro "Monitor diSPIM Acquisition" {
 		newTifList = getFileList(recentestA);
 		Array.sort(newTifList);		
 		for (f=0;f<lengthOf(newTifList);f++) {
-	while(!File.exists(dir+"Big5DFileListA.txt"))
-		wait(100);
 			if (indexOf(big5DFileListAString, recentestA+newTifList[f])<0)
 				File.append(recentestA+newTifList[f], dir+"Big5DFileListA.txt");
 		}
@@ -427,8 +560,6 @@ macro "Monitor diSPIM Acquisition" {
 		newTifList = getFileList(recentestB);
 		Array.sort(newTifList);
 		for (f=0;f<lengthOf(newTifList);f++) {
-	while(!File.exists(dir+"Big5DFileListB.txt"))
-		wait(100);
 			if (indexOf(big5DFileListBString, recentestB+newTifList[f])<0)
 				File.append(recentestB+newTifList[f], dir+"Big5DFileListB.txt");
 		}
@@ -460,7 +591,7 @@ macro "Monitor diSPIM Acquisition" {
 	  	    Stack.setPosition(2, sliceA, frameA);	
 		    run("Red");
 		    setMinAndMax(minA2, maxA2);	
-	  	    Stack.setPosition(channelA, sliceA, stkNSlices/(wavelengths*zSlices));
+	  	    Stack.setPosition(channelA, sliceA, frameA);
 		    setLocation(xA,yA);
 		    Stack.setDisplayMode(modeA);	    
 		    Stack.setActiveChannels(channelsA);
@@ -468,51 +599,55 @@ macro "Monitor diSPIM Acquisition" {
 		    setVoxelSize(vWidth, vHeight, vDepth, vUnit);    
 		    
 
-	    if (isOpen("MAX_SPIMA")) {
-	    	selectWindow("MAX_SPIMA");
-		Stack.getActiveChannels(channelsMAX_A);
-		Stack.getDisplayMode(modeMAX_A);
-	    	Stack.getPosition(channelMAX_A, sliceMAX_A, frameMAX_A);
-	  	Stack.setPosition(1, sliceMAX_A, frameMAX_A);	
-		getMinAndMax(minMAX_A1, maxMAX_A1);
-	  	Stack.setPosition(2, sliceMAX_A, frameMAX_A);	
-		getMinAndMax(minMAX_A2, maxMAX_A2);
-	    	getLocationAndSize(xMAX_A, yMAX_A, widthMAX_A, heightMAX_A);
-	    	close();
-	    } else {
-		channelMAX_A=1; sliceMAX_A=1; frameMAX_A=1; 
-		xMAX_A=0; yMAX_A=0; widthMAX_A=0; heightMAX_A=0; 
-		minMAX_A1=0;minMAX_A2=0;maxMAX_A1=255;maxMAX_A2=255;
-	    }
 		    run("Z Project...", "start=1 stop="+zSlices+" projection=[Max Intensity]");
 		    File.makeDirectory(dir +"MAX_SPIMA");
-		    //saveAs("Tiff", dir + "MAX_SPIMA" + File.separator + "MAX_SPIMA" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+".tif");
-		    run("Image Sequence... ", "format=TIFF name=MAX_SPIMA" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+" start=1 digits=2 save="+dir+"MAX_SPIMA");
-
+		    saveAs("Tiff", dir + "MAX_SPIMA" + File.separator + "MAX_SPIMA" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+".tif");
 		    close();
 		    bigMAXFileListAString = File.openAsString(dir+"BigMAXFileListA.txt");	    
-		    if (indexOf(bigMAXFileListAString, dir + "MAX_SPIMA" + File.separator + "MAX_SPIMA" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+".tif")<0) {
-				File.append(dir + "MAX_SPIMA" + File.separator + "MAX_SPIMA" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+"01.tif", dir+"BigMAXFileListA.txt");
-				File.append(dir + "MAX_SPIMA" + File.separator + "MAX_SPIMA" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+"02.tif", dir+"BigMAXFileListA.txt");
+		    if (indexOf(bigMAXFileListAString, dir + "MAX_SPIMA" + File.separator + "MAX_SPIMA" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+".tif")<0)
+				File.append(dir + "MAX_SPIMA" + File.separator + "MAX_SPIMA" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+".tif", dir+"BigMAXFileListA.txt");
+
+		    if (isOpen("MAX_SPIMA")) {
+		    	selectWindow("MAX_SPIMA");
+			Stack.getActiveChannels(channelsMAX_A);
+			Stack.getDisplayMode(modeMAX_A);
+		    	Stack.getPosition(channelMAX_A, sliceMAX_A, frameMAX_A);
+		  	Stack.setPosition(1, sliceMAX_A, frameMAX_A);	
+			getMinAndMax(minMAX_A1, maxMAX_A1);
+		  	Stack.setPosition(2, sliceMAX_A, frameMAX_A);	
+			getMinAndMax(minMAX_A2, maxMAX_A2);
+		    	getLocationAndSize(xMAX_A, yMAX_A, widthMAX_A, heightMAX_A);
+		    	close();
+		    } else {
+			channelMAX_A=1; sliceMAX_A=1; frameMAX_A=1; 
+			xMAX_A=0; yMAX_A=0; widthMAX_A=0; heightMAX_A=0; 
+			minMAX_A1=0;minMAX_A2=0;maxMAX_A1=255;maxMAX_A2=255;
 		    }
-		    run("Stack From List...", "open="+dir+"BigMAXFileListA.txt use");
+		    if (File.length(dir+"BigMAXFileListA.txt" ) >0) {
 
-		    rename("MAX_SPIMA");
-		    run("Stack to Hyperstack...", "order=xyczt(default) channels="+wavelengths+" slices="+1+" frames="+nSlices/(wavelengths*1)+" display=Composite");
+			    run("Stack From List...", "open="+dir+"BigMAXFileListA.txt use");
 
-	  	    Stack.setPosition(1, 1, frameA);	
-		    run("Green");
-		    setMinAndMax(minMAX_A1, maxMAX_A1);	
-	  	    Stack.setPosition(2, 1, frameA);	
-		    run("Red");
-		    setMinAndMax(minMAX_A2, maxMAX_A2);	
-	  	    Stack.setPosition(channelMAX_A, 1, stkNSlices/(wavelengths*zSlices));
-		    setLocation(xMAX_A,yMAX_A);
-		    Stack.setDisplayMode(modeMAX_A);	    
-		    Stack.setActiveChannels(channelsMAX_A);
+			    rename("MAX_SPIMA");
+			    run("Stack to Hyperstack...", "order=xyczt(default) channels="+wavelengths+" slices="+1+" frames="+nSlices/(wavelengths*1)+" display=Composite");
 
-		    setVoxelSize(vWidth, vHeight, vDepth, vUnit);    
+		  	    Stack.setPosition(1, sliceMAX_A, frameMAX_A);	
+			    run("Green");
+			    setMinAndMax(minMAX_A1, maxMAX_A1);	
+	  		    Stack.setPosition(2, sliceMAX_A, frameMAX_A);	
+			    run("Red");
+			    setMinAndMax(minMAX_A2, maxMAX_A2);	
+	 	 	    Stack.setPosition(channelMAX_A, sliceMAX_A, frameMAX_A);
+			    setLocation(xMAX_A,yMAX_A);
+			    Stack.setDisplayMode(modeMAX_A);	    
+			    Stack.setActiveChannels(channelsMAX_A);
+
+			    setVoxelSize(vWidth, vHeight, vDepth, vUnit);    
+
+		    }
+
 	    }
+
+
 	    minB =0;
 	    maxB = 255;
 	    channelsB = "11";
@@ -545,60 +680,60 @@ macro "Monitor diSPIM Acquisition" {
 	  	    Stack.setPosition(2, sliceB, frameB);	
 		    run("Red");
 		    setMinAndMax(minB2, maxB2);
-	  	    Stack.setPosition(channelB, sliceB, stkNSlices/(wavelengths*zSlices));		    
+	  	    Stack.setPosition(channelB, sliceB, frameB);		    
 		    setLocation(xB,yB);
 		    Stack.setDisplayMode(modeB);
 		    Stack.setActiveChannels(channelsB);
 
 		    setVoxelSize(vWidth, vHeight, vDepth, vUnit);    
 
-	    if (isOpen("MAX_SPIMB")) {
-	    	selectWindow("MAX_SPIMB");
-		Stack.getActiveChannels(channelsMAX_B);
-		Stack.getDisplayMode(modeMAX_B);
-	    	Stack.getPosition(channelMAX_B, sliceMAX_B, frameMAX_B);
-	  	Stack.setPosition(1, sliceMAX_B, frameMAX_B);	
-		getMinAndMax(minMAX_B1, maxMAX_B1);
-	  	Stack.setPosition(2, sliceMAX_B, frameMAX_B);	
-		getMinAndMax(minMAX_B2, maxMAX_B2);
-	    	getLocationAndSize(xMAX_B, yMAX_B, widthMAX_B, heightMAX_B);
-	    	close();
-	    } else {
-		channelMAX_B=1; sliceMAX_B=1; frameMAX_B=1; 
-		xMAX_B=0; yMAX_B=0; widthMAX_B=0; heightMAX_B=0; 
-		minMAX_B1=0;minMAX_B2=0;maxMAX_B1=255;maxMAX_B2=255;
-	    }
 
 		    run("Z Project...", "start=1 stop="+zSlices+" projection=[Max Intensity]");
 		    File.makeDirectory(dir +"MAX_SPIMB");
-		    //saveAs("Tiff", dir + "MAX_SPIMB" + File.separator + "MAX_SPIMB" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+".tif");
-		    run("Image Sequence... ", "format=TIFF name=MAX_SPIMB" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+" start=1 digits=2 save="+dir+"MAX_SPIMB");
-
+		    saveAs("Tiff", dir + "MAX_SPIMB" + File.separator + "MAX_SPIMB" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+".tif");
 		    close();
 		    bigMAXFileListBString = File.openAsString(dir+"BigMAXFileListB.txt");	    
-		    if (indexOf(bigMAXFileListBString, dir + "MAX_SPIMB" + File.separator + "MAX_SPIMB" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+".tif")<0) {
-				File.append(dir + "MAX_SPIMB" + File.separator + "MAX_SPIMB" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+"01.tif", dir+"BigMAXFileListB.txt");
-				File.append(dir + "MAX_SPIMB" + File.separator + "MAX_SPIMB" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+"02.tif", dir+"BigMAXFileListB.txt");
+		    if (indexOf(bigMAXFileListBString, dir + "MAX_SPIMB" + File.separator + "MAX_SPIMB" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+".tif")<0)
+				File.append(dir + "MAX_SPIMB" + File.separator + "MAX_SPIMB" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+".tif", dir+"BigMAXFileListB.txt");
+
+		    if (isOpen("MAX_SPIMB")) {
+		    	selectWindow("MAX_SPIMB");
+			Stack.getActiveChannels(channelsMAX_B);
+			Stack.getDisplayMode(modeMAX_B);
+		    	Stack.getPosition(channelMAX_B, sliceMAX_B, frameMAX_B);
+		  	Stack.setPosition(1, sliceMAX_B, frameMAX_B);	
+			getMinAndMax(minMAX_B1, maxMAX_B1);
+		  	Stack.setPosition(2, sliceMAX_B, frameMAX_B);	
+			getMinAndMax(minMAX_B2, maxMAX_B2);
+		    	getLocationAndSize(xMAX_B, yMAX_B, widthMAX_B, heightMAX_B);
+		    	close();
+		    } else {
+			channelMAX_B=1; sliceMAX_B=1; frameMAX_B=1; 
+			xMAX_B=0; yMAX_B=0; widthMAX_B=0; heightMAX_B=0; 
+			minMAX_B1=0;minMAX_B2=0;maxMAX_B1=255;maxMAX_B2=255;
 		    }
-		    run("Stack From List...", "open="+dir+"BigMAXFileListB.txt use");
+		    if (File.length(dir+"BigMAXFileListB.txt" ) >0) {
 
-		    rename("MAX_SPIMB");
-		    run("Stack to Hyperstack...", "order=xyczt(default) channels="+wavelengths+" slices="+1+" frames="+nSlices/(wavelengths*1)+" display=Composite");
-	  	    Stack.setPosition(1, 1, frameB);	
-		    run("Green");
-		    setMinAndMax(minMAX_B1, maxMAX_B1);
-	  	    Stack.setPosition(2, 1, frameB);	
-		    run("Red");
-		    setMinAndMax(minMAX_B2, maxMAX_B2);
-	  	    Stack.setPosition(channelMAX_B, 1, stkNSlices/(wavelengths*zSlices));		    
-		    setLocation(xMAX_B,yMAX_B);
-		    Stack.setDisplayMode(modeMAX_B);
-		    Stack.setActiveChannels(channelsMAX_B);
+			    run("Stack From List...", "open="+dir+"BigMAXFileListB.txt use");
 
-		    setVoxelSize(vWidth, vHeight, vDepth, vUnit);    
+			    rename("MAX_SPIMB");
+			    run("Stack to Hyperstack...", "order=xyczt(default) channels="+wavelengths+" slices="+1+" frames="+nSlices/(wavelengths*1)+" display=Composite");
+
+		  	    Stack.setPosition(1, sliceMAX_B, frameMAX_B);	
+			    run("Green");
+			    setMinAndMax(minMAX_B1, maxMAX_B1);	
+	  		    Stack.setPosition(2, sliceMAX_B, frameMAX_B);	
+			    run("Red");
+			    setMinAndMax(minMAX_B2, maxMAX_B2);	
+	 	 	    Stack.setPosition(channelMAX_B, sliceMAX_B, frameMAX_B);
+			    setLocation(xMAX_B,yMAX_B);
+			    Stack.setDisplayMode(modeMAX_B);	    
+			    Stack.setActiveChannels(channelsMAX_B);
+
+			    setVoxelSize(vWidth, vHeight, vDepth, vUnit);    
+
+		    }
+
 	    }
 	}
 }
-
-
-

@@ -149,8 +149,8 @@ public class RemoteQTVS_Engine extends UnicastRemoteObject implements Compute {
 				&& names[0].contains("_imgsys"));
 		if (metaDataNaming) {
 			for (String nameChunk: nameChunks) {
-				if (nameChunk.startsWith("z") ) {
-//					 maxSlicesSingleMovie = Integer.parseInt( nameChunk.substring(1) );
+				if (nameChunk.startsWith("z") && slices.length == 1) {
+					 maxSlicesSingleMovie = Integer.parseInt( nameChunk.substring(1) );
 				}
 				else if (nameChunk.startsWith("nmdxy") ) {
 //					if (IJ.debugMode) IJ.log(""+ Double.parseDouble( nameChunk.substring(5) ));

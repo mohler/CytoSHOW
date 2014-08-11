@@ -1245,7 +1245,10 @@ public class RadonTransform_ extends PlugInFrame implements ActionListener {
         views = v;
         scans = s;
         stepsize = 180/v;
-        infopane.append("Scans= "+s+" "); infopane.append("Views= "+v+"\n");
+//        stepsize = 180/v;
+
+        infopane.append("Scans= "+s+" "); 
+        infopane.append("Views= "+v+"\n");
         infopane.append("Stepsize= "+stepsize+"\n ");
         
         //these are defined in the case of a stack of images as input.

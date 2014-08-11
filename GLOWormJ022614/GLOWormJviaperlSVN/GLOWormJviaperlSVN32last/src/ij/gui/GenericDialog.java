@@ -1063,6 +1063,7 @@ FocusListener, ItemListener, KeyListener, AdjustmentListener, WindowListener {
 				setLocation(xloc, yloc);
 
 			setVisible(true);
+			toFront();
 			recorderOn = Recorder.record;
 			IJ.wait(50); // work around for Sun/WinNT bug
 			
