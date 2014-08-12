@@ -273,37 +273,36 @@ macro "Monitor diSPIM Acquisition" {
 	    }
 	   
 	for (d=0;d<lengthOf(fileSortA);d++) {
-	    nextPath =  dir + "SPIMA" + File.separator + fileSortA[d];
-	    print(nextPath);
- 	    if ( File.isDirectory(nextPath) == 1) {
-			newTifList = getFileList(nextPath );
-			Array.sort(newTifList);		
-			for (f=0;f<lengthOf(newTifList);f++) {
-				while(!File.exists(dir+"Big5DFileListA.txt"))
-				wait(100);
-				if (indexOf(big5DFileListAString, nextPath + File.separator+newTifList[f])<0)
-					File.append(nextPath + File.separator +newTifList[f], dir+"Big5DFileListA.txt");
+		skipIt = false;
+	    nextPathA =  dir + "SPIMA" + File.separator + fileSortA[d];
+	    nextPathB =  dir + "SPIMB" + File.separator + fileSortB[d];
+	    print(nextPathA);
+	    print(nextPathB);
+ 	    if ( File.isDirectory(nextPathA) == 1  && File.isDirectory(nextPathB) == 1) {
+			newTifListA = getFileList(nextPathA);
+			newTifListB = getFileList(nextPathB);
+			if (lengthOf(newTifListA) != lengthOf(newTifListB) || lengthOf(newTifListA) != wavelengths*zSlices)
+				skipIt = true;
+			if(!skipIt) {
+				Array.sort(newTifListA);		
+				for (f=0;f<lengthOf(newTifListA);f++) {
+					while(!File.exists(dir+"Big5DFileListA.txt"))
+					wait(100);
+					if (indexOf(big5DFileListAString, nextPathA + File.separator+newTifListA[f])<0)
+						File.append(nextPathA + File.separator +newTifListA[f], dir+"Big5DFileListA.txt");
+			    }
+				Array.sort(newTifListB);		
+				for (f=0;f<lengthOf(newTifListB);f++) {
+					while(!File.exists(dir+"Big5DFileListB.txt"))
+					wait(100);
+					if (indexOf(big5DFileListBString, nextPathB + File.separator+newTifListB[f])<0)
+						File.append(nextPathB + File.separator +newTifListB[f], dir+"Big5DFileListB.txt");
+			    }
 		    }
 	    }
 
 	}
 
-	for (d=0;d<lengthOf(fileSortB);d++) {
-
-	    nextPath =  dir + "SPIMB" + File.separator + fileSortB[d];
-
-	    if ( File.isDirectory(nextPath)  == 1) {
-			newTifList = getFileList(nextPath );
-			Array.sort(newTifList);		
-			for (f=0;f<lengthOf(newTifList);f++) {
-				while(!File.exists(dir+"Big5DFileListB.txt"))
-				wait(100);
-				if (indexOf(big5DFileListBString, nextPath + File.separator +newTifList[f])<0)
-					File.append(nextPath + File.separator +newTifList[f], dir+"Big5DFileListB.txt");
-			}
-	    }
-
-	}
 
 
 	    if (File.length(dir+"Big5DFileListA.txt" ) >0) {
@@ -320,27 +319,6 @@ macro "Monitor diSPIM Acquisition" {
 
 	  	    Stack.setPosition(1, zSlices/2, stkNSlices/(wavelengths*zSlices));		    
 
-		    run("Z Project...", "start=1 stop="+zSlices+" projection=[Max Intensity]");
-		    File.makeDirectory(dir +"MAX_SPIMA");
-		    //saveAs("Tiff", dir + "MAX_SPIMA" + File.separator + "MAX_SPIMA" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+".tif");
-		    run("Image Sequence... ", "format=TIFF name=MAX_SPIMA" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+" start=1 digits=2 save="+dir+"MAX_SPIMA");
-
-		    close();
-		    bigMAXFileListAString = File.openAsString(dir+"BigMAXFileListA.txt");	    
-		    if (indexOf(bigMAXFileListAString, dir + "MAX_SPIMA" + File.separator + "MAX_SPIMA" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+".tif")<0) {
-				File.append(dir + "MAX_SPIMA" + File.separator + "MAX_SPIMA" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+"01.tif", dir+"BigMAXFileListA.txt");
-				File.append(dir + "MAX_SPIMA" + File.separator + "MAX_SPIMA" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+"02.tif", dir+"BigMAXFileListA.txt");
-		    }
-		    run("Stack From List...", "open="+dir+"BigMAXFileListA.txt use");
-
-		    rename("MAX_SPIMA");
-		    run("Stack to Hyperstack...", "order=xyczt(default) channels="+wavelengths+" slices="+1+" frames="+nSlices/(wavelengths*1)+" display=Composite");
-
-	  	    Stack.setPosition(1, 1, stkNSlices/(wavelengths*zSlices));	
-		    run("Green");
-	  	    Stack.setPosition(2, 1, stkNSlices/(wavelengths*zSlices));	
-		    run("Red");
-		    setVoxelSize(vWidth, vHeight, vDepth, vUnit);    
 
 	  }
 	    if (File.length(dir+"Big5DFileListB.txt" ) >0) {
@@ -356,25 +334,6 @@ macro "Monitor diSPIM Acquisition" {
 
 	  	    Stack.setPosition(1, zSlices/2, stkNSlices/(wavelengths*zSlices));		    
 
-		    run("Z Project...", "start=1 stop="+zSlices+" projection=[Max Intensity]");
-		    File.makeDirectory(dir +"MAX_SPIMB");
-		    //saveAs("Tiff", dir + "MAX_SPIMB" + File.separator + "MAX_SPIMB" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+".tif");
-		    run("Image Sequence... ", "format=TIFF name=MAX_SPIMB" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+" start=1 digits=2 save="+dir+"MAX_SPIMB");
-		    close();
-		    bigMAXFileListBString = File.openAsString(dir+"BigMAXFileListB.txt");	    
-		    if (indexOf(bigMAXFileListBString, dir + "MAX_SPIMB" + File.separator + "MAX_SPIMB" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+".tif")<0) {
-				File.append(dir + "MAX_SPIMB" + File.separator + "MAX_SPIMB" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+"01.tif", dir+"BigMAXFileListB.txt");
-				File.append(dir + "MAX_SPIMB" + File.separator + "MAX_SPIMB" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+"02.tif", dir+"BigMAXFileListB.txt");
-		    }
-		    run("Stack From List...", "open="+dir+"BigMAXFileListB.txt use");
-
-		    rename("MAX_SPIMB");
-		    run("Stack to Hyperstack...", "order=xyczt(default) channels="+wavelengths+" slices="+1+" frames="+nSlices/(wavelengths*1)+" display=Composite");
-	  	    Stack.setPosition(1, 1, stkNSlices/(wavelengths*zSlices));	
-		    run("Green");
-	  	    Stack.setPosition(2, 1, stkNSlices/(wavelengths*zSlices));	
-		    run("Red");
-		    setVoxelSize(vWidth, vHeight, vDepth, vUnit);    
 
 	  }
 
@@ -405,11 +364,13 @@ macro "Monitor diSPIM Acquisition" {
 	    }
 	    IJ.log(recentestA +"\n"+ modDateA);
 	    if (File.isDirectory(recentestA) == 1) {
-		newTifList = getFileList(recentestA);
+	    newTifList = "";
+	    while (lengthOf(newTifList) != wavelengths*zSlices)
+			newTifList = getFileList(recentestA);
 		Array.sort(newTifList);		
 		for (f=0;f<lengthOf(newTifList);f++) {
-	while(!File.exists(dir+"Big5DFileListA.txt"))
-		wait(100);
+			while(!File.exists(dir+"Big5DFileListA.txt"))
+				wait(100);
 			if (indexOf(big5DFileListAString, recentestA+newTifList[f])<0)
 				File.append(recentestA+newTifList[f], dir+"Big5DFileListA.txt");
 		}
@@ -424,7 +385,9 @@ macro "Monitor diSPIM Acquisition" {
 	    }
 	    IJ.log(recentestB+"\n"+ modDateB);
 	    if (File.isDirectory(recentestB) == 1) {
-		newTifList = getFileList(recentestB);
+	    newTifList = "";
+	    while (lengthOf(newTifList) != wavelengths*zSlices)
+			newTifList = getFileList(recentestB);
 		Array.sort(newTifList);
 		for (f=0;f<lengthOf(newTifList);f++) {
 	while(!File.exists(dir+"Big5DFileListB.txt"))
@@ -484,34 +447,6 @@ macro "Monitor diSPIM Acquisition" {
 		xMAX_A=0; yMAX_A=0; widthMAX_A=0; heightMAX_A=0; 
 		minMAX_A1=0;minMAX_A2=0;maxMAX_A1=255;maxMAX_A2=255;
 	    }
-		    run("Z Project...", "start=1 stop="+zSlices+" projection=[Max Intensity]");
-		    File.makeDirectory(dir +"MAX_SPIMA");
-		    //saveAs("Tiff", dir + "MAX_SPIMA" + File.separator + "MAX_SPIMA" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+".tif");
-		    run("Image Sequence... ", "format=TIFF name=MAX_SPIMA" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+" start=1 digits=2 save="+dir+"MAX_SPIMA");
-
-		    close();
-		    bigMAXFileListAString = File.openAsString(dir+"BigMAXFileListA.txt");	    
-		    if (indexOf(bigMAXFileListAString, dir + "MAX_SPIMA" + File.separator + "MAX_SPIMA" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+".tif")<0) {
-				File.append(dir + "MAX_SPIMA" + File.separator + "MAX_SPIMA" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+"01.tif", dir+"BigMAXFileListA.txt");
-				File.append(dir + "MAX_SPIMA" + File.separator + "MAX_SPIMA" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+"02.tif", dir+"BigMAXFileListA.txt");
-		    }
-		    run("Stack From List...", "open="+dir+"BigMAXFileListA.txt use");
-
-		    rename("MAX_SPIMA");
-		    run("Stack to Hyperstack...", "order=xyczt(default) channels="+wavelengths+" slices="+1+" frames="+nSlices/(wavelengths*1)+" display=Composite");
-
-	  	    Stack.setPosition(1, 1, frameA);	
-		    run("Green");
-		    setMinAndMax(minMAX_A1, maxMAX_A1);	
-	  	    Stack.setPosition(2, 1, frameA);	
-		    run("Red");
-		    setMinAndMax(minMAX_A2, maxMAX_A2);	
-	  	    Stack.setPosition(channelMAX_A, 1, stkNSlices/(wavelengths*zSlices));
-		    setLocation(xMAX_A,yMAX_A);
-		    Stack.setDisplayMode(modeMAX_A);	    
-		    Stack.setActiveChannels(channelsMAX_A);
-
-		    setVoxelSize(vWidth, vHeight, vDepth, vUnit);    
 	    }
 	    minB =0;
 	    maxB = 255;
@@ -569,33 +504,6 @@ macro "Monitor diSPIM Acquisition" {
 		minMAX_B1=0;minMAX_B2=0;maxMAX_B1=255;maxMAX_B2=255;
 	    }
 
-		    run("Z Project...", "start=1 stop="+zSlices+" projection=[Max Intensity]");
-		    File.makeDirectory(dir +"MAX_SPIMB");
-		    //saveAs("Tiff", dir + "MAX_SPIMB" + File.separator + "MAX_SPIMB" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+".tif");
-		    run("Image Sequence... ", "format=TIFF name=MAX_SPIMB" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+" start=1 digits=2 save="+dir+"MAX_SPIMB");
-
-		    close();
-		    bigMAXFileListBString = File.openAsString(dir+"BigMAXFileListB.txt");	    
-		    if (indexOf(bigMAXFileListBString, dir + "MAX_SPIMB" + File.separator + "MAX_SPIMB" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+".tif")<0) {
-				File.append(dir + "MAX_SPIMB" + File.separator + "MAX_SPIMB" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+"01.tif", dir+"BigMAXFileListB.txt");
-				File.append(dir + "MAX_SPIMB" + File.separator + "MAX_SPIMB" + IJ.pad(stkNSlices/(wavelengths*zSlices), 5)+"02.tif", dir+"BigMAXFileListB.txt");
-		    }
-		    run("Stack From List...", "open="+dir+"BigMAXFileListB.txt use");
-
-		    rename("MAX_SPIMB");
-		    run("Stack to Hyperstack...", "order=xyczt(default) channels="+wavelengths+" slices="+1+" frames="+nSlices/(wavelengths*1)+" display=Composite");
-	  	    Stack.setPosition(1, 1, frameB);	
-		    run("Green");
-		    setMinAndMax(minMAX_B1, maxMAX_B1);
-	  	    Stack.setPosition(2, 1, frameB);	
-		    run("Red");
-		    setMinAndMax(minMAX_B2, maxMAX_B2);
-	  	    Stack.setPosition(channelMAX_B, 1, stkNSlices/(wavelengths*zSlices));		    
-		    setLocation(xMAX_B,yMAX_B);
-		    Stack.setDisplayMode(modeMAX_B);
-		    Stack.setActiveChannels(channelsMAX_B);
-
-		    setVoxelSize(vWidth, vHeight, vDepth, vUnit);    
 	    }
 	}
 }
