@@ -125,7 +125,7 @@ public class FFTMath implements PlugIn {
         	new ImagePlus(title, result).show();
 		} else {
 			IJ.showStatus("Power spectrum");
-			ImageProcessor ps = result.getPowerSpectrum();
+			ImageProcessor ps = result.getPowerSpectrum(false);
 			ImagePlus imp3 = new ImagePlus(title, ps.convertToFloat());
 			result.quadrantSwapNeeded = true;
 			imp3.setProperty("FHT", result);

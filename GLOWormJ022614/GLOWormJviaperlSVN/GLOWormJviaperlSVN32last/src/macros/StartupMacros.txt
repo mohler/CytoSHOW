@@ -304,6 +304,7 @@ macro "Monitor diSPIM Acquisition" {
 	}
 
 
+	    print(nImages);
 
 	    if (File.length(dir+"Big5DFileListA.txt" ) >0) {
 		    run("Stack From List...", "open="+dir+"Big5DFileListA.txt use");
@@ -336,7 +337,8 @@ macro "Monitor diSPIM Acquisition" {
 
 
 	  }
-
+	  run("Tile");
+	    print(nImages);
 
 	while (true) {
 	    listA = getFileList(""+dir+"SPIMA" + File.separator);
@@ -396,6 +398,10 @@ macro "Monitor diSPIM Acquisition" {
 				File.append(recentestB+newTifList[f], dir+"Big5DFileListB.txt");
 		}
 	    }
+	    
+		setBatchMode(true);
+		print(nImages+" batch");
+		
 	    if (isOpen("SPIMA")) {
 	    	selectWindow("SPIMA");
 		Stack.getActiveChannels(channelsA);
@@ -406,7 +412,9 @@ macro "Monitor diSPIM Acquisition" {
 	  	Stack.setPosition(2, sliceA, frameA);	
 		getMinAndMax(minA2, maxA2);
 	    	getLocationAndSize(xA, yA, widthA, heightA);
+	    print(nImages);
 	    	close();
+	    print(nImages);
 	    } else {
 		channelA=1; sliceA=1; frameA=1; 
 		xA=0; yA=0; widthA=0; heightA=0; 
@@ -416,7 +424,10 @@ macro "Monitor diSPIM Acquisition" {
 		    run("Stack From List...", "open="+dir+"Big5DFileListA.txt use");
 		    stkNSlices = nSlices;
 		    rename("SPIMA");
+		    flatID = getImageID();
+	    print(nImages);
 		    run("Stack to Hyperstack...", "order=xyczt(default) channels="+wavelengths+" slices="+zSlices+" frames="+stkNSlices/(wavelengths*zSlices)+" display=Composite");
+	    print(nImages+" HS");
 	  	    Stack.setPosition(1, sliceA, frameA);	
 		    run("Green");
 		    setMinAndMax(minA1, maxA1);	
@@ -429,8 +440,9 @@ macro "Monitor diSPIM Acquisition" {
 		    Stack.setActiveChannels(channelsA);
 
 		    setVoxelSize(vWidth, vHeight, vDepth, vUnit);    
-		    
-
+		selectImage(flatID);	    
+		close();
+		
 	    if (isOpen("MAX_SPIMA")) {
 	    	selectWindow("MAX_SPIMA");
 		Stack.getActiveChannels(channelsMAX_A);
@@ -448,11 +460,13 @@ macro "Monitor diSPIM Acquisition" {
 		minMAX_A1=0;minMAX_A2=0;maxMAX_A1=255;maxMAX_A2=255;
 	    }
 	    }
+
+
 	    minB =0;
 	    maxB = 255;
 	    channelsB = "11";
 	    modeB="composite";
-	    if (isOpen("SPIMB")) {
+	    	    if (isOpen("SPIMB")) {
 		selectWindow("SPIMB");
 		Stack.getActiveChannels(channelsB);
 		Stack.getDisplayMode(modeB);
@@ -462,7 +476,9 @@ macro "Monitor diSPIM Acquisition" {
 	  	Stack.setPosition(2, sliceB, frameB);	
 		getMinAndMax(minB2, maxB2);
 	    	getLocationAndSize(xB, yB, widthB, heightB);
+	    print(nImages);
 	    	close();
+	    print(nImages);
 	    } else {
 		channelB=1; sliceB=1; frameB=1; 
 		xB=0; yB=0; widthB=0; heightB=0; 
@@ -503,8 +519,63 @@ macro "Monitor diSPIM Acquisition" {
 		xMAX_B=0; yMAX_B=0; widthMAX_B=0; heightMAX_B=0; 
 		minMAX_B1=0;minMAX_B2=0;maxMAX_B1=255;maxMAX_B2=255;
 	    }
-
 	    }
+	    
+	    print(nImages);
+	for (i=1;i<=nImages;i++){
+		print(nImages+" "+i);
+		
+		selectImage(i);
+		//run("Duplicate Region/Load to RAM...", "title=DUP_SPIMA-1 duplicate channels=1-2 slices=1-49 frames=2-2");
+		source = getTitle();
+		Stack.getDimensions(width, height, channels, zDepth, frames);
+		Stack.getPosition(channel, slice, frame);
+		for (z=0; z<zDepth; z++) { 
+			Stack.setSlice(z+1);
+			run("FFT, no auto-scaling");
+			if (z==0) {
+				rename("FFTstack");	
+			} else {
+				run("Select All");
+				run("Copy");
+				close();
+				selectWindow("FFTstack");
+				run("Add Slice");
+				if (z>0)
+					Stack.setSlice(z+2);
+				run("Select All");
+				run("Paste");
+			}
+			selectWindow(source);
+		}
+		selectWindow("FFTstack");
+		makeOval(250, 250, 13, 13);
+		run("Clear", "stack");
+		makeOval(220, 220, 73, 73);
+		run("Clear Outside", "stack");
+		run("Plot Z-axis Profile");
+		close();
+		selectWindow("FFTstack");
+		close();
+		
+		sliceAvgs = newArray(zDepth);
+		List.clear;
+		for (z=1; z<zDepth; z++) { 
+			sliceAvgs[z] = getResult("Mean", z);
+			//print(sliceAvgs[z] );
+			List.set(sliceAvgs[z] , z);
+		}
+		
+		Array.sort(sliceAvgs);
+		print(source+": Best focus in slice "+List.get(sliceAvgs[zDepth-1]));
+		selectWindow("Results");
+		run("Close");
+		selectWindow(source);
+		Stack.setPosition(channel, slice, frame)
+	
+	}
+	    
+		setBatchMode(false);
 	}
 }
 

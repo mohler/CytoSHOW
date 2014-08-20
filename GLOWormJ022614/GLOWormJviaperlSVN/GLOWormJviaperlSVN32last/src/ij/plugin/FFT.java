@@ -34,6 +34,7 @@ public class FFT implements  PlugIn, Measurements {
     private int stackSize = 1;
     private int slice = 1;
     private boolean doFFT;
+	private boolean noScaling;
 
     public void run(String arg) {
         if (arg.equals("options")) {
@@ -51,6 +52,8 @@ public class FFT implements  PlugIn, Measurements {
             if (imp.getStackSize()==2)
                 {doComplexInverseTransform(); return;}
         }
+       if (arg.contains("noScaling"))
+    	   noScaling = true;
         ImageProcessor ip = imp.getProcessor();
         Object obj = imp.getProperty("FHT");
         FHT fht = (obj instanceof FHT)?(FHT)obj:null;
@@ -122,7 +125,7 @@ public class FFT implements  PlugIn, Measurements {
         showStatus("Forward transform");
         fht.transform();
         showStatus("Calculating power spectrum");
-        ImageProcessor ps = fht.getPowerSpectrum();
+        ImageProcessor ps = fht.getPowerSpectrum(noScaling);
         if (!(displayFHT||displayComplex||displayRawPS))
         	displayFFT = true;
         if (displayFFT) {
@@ -269,7 +272,7 @@ public class FFT implements  PlugIn, Measurements {
         FHT fht = (FHT)imp.getProperty("FHT");
         if (fht==null)
             {IJ.error("FFT", "Frequency domain image required"); return;}
-        ImageProcessor ps = fht.getPowerSpectrum();
+        ImageProcessor ps = fht.getPowerSpectrum(noScaling);
         imp.setProcessor(null, ps);
     }
     

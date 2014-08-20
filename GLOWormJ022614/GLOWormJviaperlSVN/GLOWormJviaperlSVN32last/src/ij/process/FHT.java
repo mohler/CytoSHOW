@@ -287,7 +287,7 @@ public class FHT extends FloatProcessor {
 
 	/** Returns an 8-bit power spectrum, log-scaled to 1-254. The image in this
 		FHT is assumed to be in the frequency domain. */
-	public ImageProcessor getPowerSpectrum () {
+	public ImageProcessor getPowerSpectrum (boolean noScaling) {
 		if (!isFrequencyDomain)
 			throw new  IllegalArgumentException("Frequency domain image required");
 		int base;
@@ -312,9 +312,16 @@ public class FHT extends FloatProcessor {
 			min = 0f;
 		else
 			min = (float)Math.log(min);
+		
+		if (noScaling)
+			min = 0f;
+		
 		max = (float)Math.log(max);
 		scale = (float)(253.0/(max-min));
-
+		
+		if (noScaling)
+			scale = (float)1;
+		
 		for (int row=0; row<maxN; row++) {
 			base = row*maxN;
 			for (int col=0; col<maxN; col++) {
