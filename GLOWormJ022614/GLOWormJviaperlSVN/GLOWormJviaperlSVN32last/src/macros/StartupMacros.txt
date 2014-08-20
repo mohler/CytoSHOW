@@ -424,7 +424,6 @@ macro "Monitor diSPIM Acquisition" {
 		    run("Stack From List...", "open="+dir+"Big5DFileListA.txt use");
 		    stkNSlices = nSlices;
 		    rename("SPIMA");
-		    flatID = getImageID();
 	    print(nImages);
 		    run("Stack to Hyperstack...", "order=xyczt(default) channels="+wavelengths+" slices="+zSlices+" frames="+stkNSlices/(wavelengths*zSlices)+" display=Composite");
 	    print(nImages+" HS");
@@ -440,8 +439,6 @@ macro "Monitor diSPIM Acquisition" {
 		    Stack.setActiveChannels(channelsA);
 
 		    setVoxelSize(vWidth, vHeight, vDepth, vUnit);    
-		selectImage(flatID);	    
-		close();
 		
 	    if (isOpen("MAX_SPIMA")) {
 	    	selectWindow("MAX_SPIMA");

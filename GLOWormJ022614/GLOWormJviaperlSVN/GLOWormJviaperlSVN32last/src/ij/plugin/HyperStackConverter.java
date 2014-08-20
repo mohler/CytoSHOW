@@ -77,11 +77,13 @@ public class HyperStackConverter implements PlugIn {
 			IJ.error("HyperStack Converter", "Virtual stacks must by in XYCZT order.");
 		else {
 			shuffle(imp, order);
-			ImagePlus imp2 = imp;
+			ImagePlus imp2 = null;
 			if (nChannels>1 && imp.getBitDepth()!=24) {
 				LUT[] luts = imp.getLuts();
 				if (luts!=null && luts.length<nChannels) luts = null;
-				imp2 = new CompositeImage(imp, mode+1);
+				ImagePlus impClone = imp.createImagePlus();
+				impClone.setDimensions(nChannels, nSlices, nFrames);
+				imp2 = new CompositeImage(impClone, mode+1);
 				if (luts!=null)
 					((CompositeImage)imp2).setLuts(luts);
 			} else if (imp.getClass().getName().indexOf("Image5D")!=-1) {
@@ -95,7 +97,7 @@ public class HyperStackConverter implements PlugIn {
 				new StackWindow(imp2, true);
 			if (imp!=imp2) {
 				imp2.setOverlay(imp.getOverlay());
-				imp.hide();
+				imp.getWindow().close();
 				WindowManager.setCurrentWindow(imp2.getWindow());
 			}
 		}
@@ -166,7 +168,7 @@ public class HyperStackConverter implements PlugIn {
 			new StackWindow(imp2, true);
 		if (imp!=imp2) {
 			imp2.setOverlay(imp.getOverlay());
-			imp.hide();
+			imp.getWindow().close();
 		}
 	}
 	
