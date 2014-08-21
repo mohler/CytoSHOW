@@ -1013,7 +1013,7 @@ FocusListener, ItemListener, KeyListener, AdjustmentListener, WindowListener {
 			recorderOn = Recorder.record && Recorder.recordInMacros;
 		} else {
 			if (pfr!=null) // prepare preview (not in macro mode): tell the PlugInFilterRunner to listen
-			pfr.setDialog(this);
+				pfr.setDialog(this);
 			Panel buttons = new Panel();
 			buttons.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 0));
 			cancel = new Button(cancelLabel);
@@ -1061,9 +1061,15 @@ FocusListener, ItemListener, KeyListener, AdjustmentListener, WindowListener {
 				GUI.center(this);
 			else
 				setLocation(xloc, yloc);
-
+			setModal(false);
 			setVisible(true);
+			
 			toFront();
+			setModal(true);
+
+			while(this.isVisible())
+				IJ.wait(50);
+			
 			recorderOn = Recorder.record;
 			IJ.wait(50); // work around for Sun/WinNT bug
 			
