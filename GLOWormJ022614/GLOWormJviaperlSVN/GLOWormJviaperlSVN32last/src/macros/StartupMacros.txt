@@ -238,7 +238,8 @@ macro "Monitor diSPIM Acquisition" {
 			print(subsring);
 			print(prefix);
 		}
-		 if(startsWith(toLowerCase(prefix), "t"))
+		 if(startsWith(toLowerCase(prefix), "t")
+		 	|| startsWith(toLowerCase(prefix), "f"))
 			prefix = "aaaaa"+prefix;
 		numer = parseInt(subsring);
 		print(subsring+" "+numer);
@@ -253,7 +254,8 @@ macro "Monitor diSPIM Acquisition" {
 			print(subsring);
 			print(prefix);
 		}
-		 if(startsWith(toLowerCase(prefix), "t"))
+		 if(startsWith(toLowerCase(prefix), "t")
+		 	|| startsWith(toLowerCase(prefix), "f"))
 			prefix = "aaaaa"+prefix;
 		numer = parseInt(subsring);
 		print(subsring+" "+numer);
@@ -311,29 +313,55 @@ macro "Monitor diSPIM Acquisition" {
 	  	    stkNSlices = nSlices;
 	
 		    rename("SPIMA");
-		    run("Stack to Hyperstack...", "order=xyczt(default) channels="+wavelengths+" slices="+zSlices+" frames="+nSlices/(wavelengths*zSlices)+" display=Composite");
+		    //run("Stack to Hyperstack...", "order=xyczt(default) channels="+wavelengths+" slices="+zSlices+" frames="+stkNSlices/(wavelengths*zSlices)+" display=Composite");
+			Stack.setDimensions(wavelengths, zSlices, stkNSlices/(wavelengths*zSlices));
+			run("Make Composite", "display=Composite");
+			selectWindow("SPIMA");
+			while (!is("composite")) {
+				wait(100);
+				selectWindow("SPIMA");
+			}
 	  	    Stack.setPosition(1, 1, 1);	
 		    run("Green");
 	  	    Stack.setPosition(2, 1, 1);	
 		    run("Red");
 		    setVoxelSize(vWidth, vHeight, vDepth, vUnit);    
 
-	  	    Stack.setPosition(1, zSlices/2, stkNSlices/(wavelengths*zSlices));		    
-
+	  	    Stack.setPosition(1, zSlices/2, stkNSlices/(wavelengths*zSlices));	
+	  	    getChannel = getSlice = getFrame =1;
+	  	    Stack.getPosition(getChannel, getSlice, getFrame);		    
+	  		while (getSlice != floor(zSlices/2) || getFrame != floor(stkNSlices/(wavelengths*zSlices))) {
+	  			wait(100);
+		  	    Stack.getPosition(getChannel, getSlice, getFrame);		    
+			}
 
 	  }
+
 	    if (File.length(dir+"Big5DFileListB.txt" ) >0) {
 		    run("Stack From List...", "open="+dir+"Big5DFileListB.txt use");
 		    stkNSlices = nSlices;
 		    rename("SPIMB");
-	   	    run("Stack to Hyperstack...", "order=xyczt(default) channels="+wavelengths+" slices="+zSlices+" frames="+stkNSlices/(wavelengths*zSlices)+" display=Composite");
+	   	    //run("Stack to Hyperstack...", "order=xyczt(default) channels="+wavelengths+" slices="+zSlices+" frames="+stkNSlices/(wavelengths*zSlices)+" display=Composite");
+			Stack.setDimensions(wavelengths, zSlices, stkNSlices/(wavelengths*zSlices));
+			run("Make Composite", "display=Composite");
+			selectWindow("SPIMB");
+			while (!is("composite")) {
+				wait(100);
+				selectWindow("SPIMB");
+			}
 	  	    Stack.setPosition(1, 1, 1);	
 		    run("Green");
 	  	    Stack.setPosition(2, 1, 1);	
 		    run("Red");
 		    setVoxelSize(vWidth, vHeight, vDepth, vUnit);    
 
-	  	    Stack.setPosition(1, zSlices/2, stkNSlices/(wavelengths*zSlices));		    
+	  	    Stack.setPosition(1, zSlices/2, stkNSlices/(wavelengths*zSlices));	
+	  	    getChannel = getSlice = getFrame =1;
+	  	    Stack.getPosition(getChannel, getSlice, getFrame);		    
+	  		while (getSlice != floor(zSlices/2) || getFrame != floor(stkNSlices/(wavelengths*zSlices))) {
+	  			wait(100);
+		  	    Stack.getPosition(getChannel, getSlice, getFrame);		    
+			}
 
 
 	  }
@@ -341,6 +369,7 @@ macro "Monitor diSPIM Acquisition" {
 	    print(nImages);
 
 	while (true) {
+		focus = false;
 	    listA = getFileList(""+dir+"SPIMA" + File.separator);
  	    listB = getFileList(""+dir +"SPIMB" + File.separator);
 	    big5DFileListAString = File.openAsString(dir+"Big5DFileListA.txt");	    
@@ -379,13 +408,17 @@ macro "Monitor diSPIM Acquisition" {
 	    }
 	    modDateB = 0;
 	    recentestB = "";
+	    recentestBname ="";
 	    for (b=0;b<lengthOf(fileListB);b++) {
 		if (modDateB < File.lastModified(dir +"SPIMB" + File.separator + fileListB[b])) {
 			modDateB= File.lastModified(dir + "SPIMB" + File.separator + fileListB[b]);
 			recentestB = dir + "SPIMB" + File.separator + fileListB[b];
+			recentestBname = fileListB[b];
 		}
 	    }
 	    IJ.log(recentestB+"\n"+ modDateB);
+		 if(startsWith(toLowerCase(recentestBname), "f"))
+		 	focus = true;
 	    if (File.isDirectory(recentestB) == 1) {
 	    newTifList = "";
 	    while (lengthOf(newTifList) != wavelengths*zSlices)
@@ -399,7 +432,6 @@ macro "Monitor diSPIM Acquisition" {
 		}
 	    }
 	    
-		setBatchMode(true);
 		print(nImages+" batch");
 		
 	    if (isOpen("SPIMA")) {
@@ -420,13 +452,16 @@ macro "Monitor diSPIM Acquisition" {
 		xA=0; yA=0; widthA=0; heightA=0; 
 		minA1=0;minA2=0;maxA1=255;maxA2=255;
 	    }
+		setBatchMode(true);
 	    if (File.length(dir+"Big5DFileListA.txt" ) >0) {
 		    run("Stack From List...", "open="+dir+"Big5DFileListA.txt use");
 		    stkNSlices = nSlices;
 		    rename("SPIMA");
 	    print(nImages);
-		    run("Stack to Hyperstack...", "order=xyczt(default) channels="+wavelengths+" slices="+zSlices+" frames="+stkNSlices/(wavelengths*zSlices)+" display=Composite");
-	    print(nImages+" HS");
+	   	    //run("Stack to Hyperstack...", "order=xyczt(default) channels="+wavelengths+" slices="+zSlices+" frames="+stkNSlices/(wavelengths*zSlices)+" display=Composite");
+			Stack.setDimensions(wavelengths, zSlices, stkNSlices/(wavelengths*zSlices));
+			run("Make Composite", "display=Composite");
+			    print(nImages+" HS");
 	  	    Stack.setPosition(1, sliceA, frameA);	
 		    run("Green");
 		    setMinAndMax(minA1, maxA1);	
@@ -434,7 +469,6 @@ macro "Monitor diSPIM Acquisition" {
 		    run("Red");
 		    setMinAndMax(minA2, maxA2);	
 	  	    Stack.setPosition(channelA, sliceA, stkNSlices/(wavelengths*zSlices));
-		    setLocation(xA,yA);
 		    Stack.setDisplayMode(modeA);	    
 		    Stack.setActiveChannels(channelsA);
 
@@ -457,7 +491,8 @@ macro "Monitor diSPIM Acquisition" {
 		minMAX_A1=0;minMAX_A2=0;maxMAX_A1=255;maxMAX_A2=255;
 	    }
 	    }
-
+		setBatchMode(false);
+		    setLocation(xA,yA);
 
 	    minB =0;
 	    maxB = 255;
@@ -481,12 +516,15 @@ macro "Monitor diSPIM Acquisition" {
 		xB=0; yB=0; widthB=0; heightB=0; 
 		minB1=0;minB2=0;maxB1=255;maxB2=255;
 	    }
+		setBatchMode(true);
 	    if (File.length(dir+"Big5DFileListB.txt" ) >0) {
 		    run("Stack From List...", "open="+dir+"Big5DFileListB.txt use");
 		    stkNSlices = nSlices;
 
 		    rename("SPIMB");
-		    run("Stack to Hyperstack...", "order=xyczt(default) channels="+wavelengths+" slices="+zSlices+" frames="+stkNSlices/(wavelengths*zSlices)+" display=Composite");
+	   	    //run("Stack to Hyperstack...", "order=xyczt(default) channels="+wavelengths+" slices="+zSlices+" frames="+stkNSlices/(wavelengths*zSlices)+" display=Composite");
+			Stack.setDimensions(wavelengths, zSlices, stkNSlices/(wavelengths*zSlices));
+			run("Make Composite", "display=Composite");
 	  	    Stack.setPosition(1, sliceB, frameB);	
 		    run("Green");
 		    setMinAndMax(minB1, maxB1);
@@ -494,7 +532,6 @@ macro "Monitor diSPIM Acquisition" {
 		    run("Red");
 		    setMinAndMax(minB2, maxB2);
 	  	    Stack.setPosition(channelB, sliceB, stkNSlices/(wavelengths*zSlices));		    
-		    setLocation(xB,yB);
 		    Stack.setDisplayMode(modeB);
 		    Stack.setActiveChannels(channelsB);
 
@@ -517,11 +554,15 @@ macro "Monitor diSPIM Acquisition" {
 		minMAX_B1=0;minMAX_B2=0;maxMAX_B1=255;maxMAX_B2=255;
 	    }
 	    }
+	    setBatchMode(false);
+	    setLocation(xB,yB);
 	    
+	    if (focus) {
 	    print(nImages);
 	for (i=1;i<=nImages;i++){
 		print(nImages+" "+i);
 		
+		setBatchMode(true);
 		selectImage(i);
 		//run("Duplicate Region/Load to RAM...", "title=DUP_SPIMA-1 duplicate channels=1-2 slices=1-49 frames=2-2");
 		source = getTitle();
@@ -567,12 +608,13 @@ macro "Monitor diSPIM Acquisition" {
 		print(source+": Best focus in slice "+List.get(sliceAvgs[zDepth-1]));
 		selectWindow("Results");
 		run("Close");
+		setBatchMode(false);
 		selectWindow(source);
-		Stack.setPosition(channel, slice, frame)
-	
+		Stack.setPosition(channel, slice, frame);
+		updateDisplay();
+		}
 	}
 	    
-		setBatchMode(false);
 	}
 }
 
