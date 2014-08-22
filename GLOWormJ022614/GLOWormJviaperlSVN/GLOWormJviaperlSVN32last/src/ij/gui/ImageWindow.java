@@ -362,6 +362,17 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
 		fspc.fill = GridBagConstraints.BOTH;
+		JButton zMipButton = new JButton();
+		zMipButton.setActionCommand("Z Project...");
+		zMipButton.setName("Z Project...");
+		zMipButton.setToolTipText("Maximum Intensity Projection of Z-Stack ...");
+		zMipButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/zMip.png")));
+		zMipButton.setFont(buttonPanelFont);
+		viewButtonPanel.add(zMipButton, fspc);
+		zMipButton.addActionListener(ij);
+		fspc.gridy = y++;
+		fspc.weighty = 0.5;
+		fspc.fill = GridBagConstraints.BOTH;
 		JButton prjButton = new JButton();
 		prjButton.setActionCommand("3D Project Selected Region...");
 		prjButton.setName("3D Project Selected Region...");
