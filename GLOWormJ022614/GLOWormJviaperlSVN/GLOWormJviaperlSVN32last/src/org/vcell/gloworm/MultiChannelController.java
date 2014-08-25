@@ -1222,7 +1222,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 			String name = (imp.getTitle().length()>28?imp.getTitle().substring(0, 25):imp.getTitle().replace(".tif", ""))+sec;
 			name = name.replace(" ","");
 			String dir = IJ.getDirectory("home");
-			String path = dir+name.replaceAll("[\\/:\\.;]", "_");
+			String path = dir+name.replaceAll("[\\?\\\\/:;]", "_");
 			if(!(imp.getImageStack() instanceof MultiQTVirtualStack)
 					&& !(imp.getImageStack() instanceof RemoteMQTVSHandler.RemoteMQTVirtualStack)
 					&& deNovoMovieFile==null) {
@@ -1238,7 +1238,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 			}
 				 */
 				dir = IJ.getDirectory("home");
-				path = dir+name.replaceAll("[\\/:\\.;]", "_");
+				path = dir+name.replaceAll("[\\?\\\\/:;]", "_");
 				Roi roi = imp.getRoi();
 				if (roi != null)
 					imp.killRoi();
