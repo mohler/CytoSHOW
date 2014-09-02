@@ -313,24 +313,29 @@ macro "Monitor diSPIM Acquisition" {
   	    stkNSlices = nSlices;
 
 	    rename("SPIMA: "+dir);
-	    //run("Stack to Hyperstack...", "order=xyczt(default) channels="+wavelengths+" slices="+zSlices+" frames="+stkNSlices/(wavelengths*zSlices)+" display=Composite");
+
 		Stack.setDimensions(wavelengths, zSlices, stkNSlices/(wavelengths*zSlices));
-		run("Make Composite", "display=Composite");
-		selectWindow("SPIMA: "+dir);
-		while (!is("composite")) {
-			wait(100);
+		print(wavelengths+" "+zSlices+" "+stkNSlices/(wavelengths*zSlices));
+		if (wavelengths > 1){
+			run("Make Composite", "display=Composite");
 			selectWindow("SPIMA: "+dir);
-		}
-  	    Stack.setPosition(1, 1, 1);	
-	    run("Green");
-	    resetMinAndMax;
-  	    Stack.setPosition(2, 1, 1);	
-	    run("Red");
-	    resetMinAndMax;
+			while (!is("composite")) {
+				wait(100);
+				selectWindow("SPIMA: "+dir);
+			}
+	  	    Stack.setPosition(1, 1, 1);	
+		    run("Green");
+		    resetMinAndMax;
+	  	    Stack.setPosition(2, 1, 1);	
+		    run("Red");
+		    resetMinAndMax;
+	    } else {
+			selectWindow("SPIMA: "+dir);
+	    }
 	    
 	    setVoxelSize(vWidth, vHeight, vDepth, vUnit);    
 
- 	    Stack.setPosition(2, zSlices/2, stkNSlices/(wavelengths*zSlices));	
+ 	    Stack.setPosition(wavelengths, zSlices/2, stkNSlices/(wavelengths*zSlices));	
   	    getChannel = getSlice = getFrame =1;
   	    Stack.getPosition(getChannel, getSlice, getFrame);		    
   		while (getSlice != floor(zSlices/2) || getFrame != floor(stkNSlices/(wavelengths*zSlices))) {
@@ -349,24 +354,30 @@ macro "Monitor diSPIM Acquisition" {
 	    run("Stack From List...", "open="+dir+"Big5DFileListB.txt use");
 	    stkNSlices = nSlices;
 	    rename("SPIMB: "+dir);
-   	    //run("Stack to Hyperstack...", "order=xyczt(default) channels="+wavelengths+" slices="+zSlices+" frames="+stkNSlices/(wavelengths*zSlices)+" display=Composite");
+
 		Stack.setDimensions(wavelengths, zSlices, stkNSlices/(wavelengths*zSlices));
-		run("Make Composite", "display=Composite");
-		selectWindow("SPIMB: "+dir);
-		while (!is("composite")) {
-			wait(100);
+		print(wavelengths+" "+zSlices+" "+stkNSlices/(wavelengths*zSlices));
+		if (wavelengths > 1){
+			run("Make Composite", "display=Composite");
 			selectWindow("SPIMB: "+dir);
-		}
-  	    Stack.setPosition(1, 1, 1);	
-	    run("Green");
-  	    resetMinAndMax;
-  	    Stack.setPosition(2, 1, 1);	
-	    run("Red");
-	    resetMinAndMax;
+			while (!is("composite")) {
+				wait(100);
+				selectWindow("SPIMB: "+dir);
+			}
+	  	    Stack.setPosition(1, 1, 1);	
+		    run("Green");
+		    resetMinAndMax;
+	  	    Stack.setPosition(2, 1, 1);	
+		    run("Red");
+		    resetMinAndMax;
+	    } else {
+			selectWindow("SPIMB: "+dir);
+	    }
+	    
 	    
 	    setVoxelSize(vWidth, vHeight, vDepth, vUnit);    
 
-  	    Stack.setPosition(2, zSlices/2, stkNSlices/(wavelengths*zSlices));	
+  	    Stack.setPosition(wavelengths, zSlices/2, stkNSlices/(wavelengths*zSlices));	
   	    getChannel = getSlice = getFrame =1;
   	    Stack.getPosition(getChannel, getSlice, getFrame);		    
   		while (getSlice != floor(zSlices/2) || getFrame != floor(stkNSlices/(wavelengths*zSlices))) {
@@ -454,13 +465,17 @@ macro "Monitor diSPIM Acquisition" {
 		
 	    if (isOpen("SPIMA: "+dir)) {
 	    	selectWindow("SPIMA: "+dir);
-			Stack.getActiveChannels(channelsA);
-			Stack.getDisplayMode(modeA);
+				if (wavelengths > 1) {
+					Stack.getActiveChannels(channelsA);
+					Stack.getDisplayMode(modeA);
+				}
 		    Stack.getPosition(channelA, sliceA, frameA);
 		  	Stack.setPosition(1, sliceA, frameA);	
 			getMinAndMax(minA1, maxA1);
-		  	Stack.setPosition(2, sliceA, frameA);	
-			getMinAndMax(minA2, maxA2);
+		  	if (wavelengths > 1) {
+		  		Stack.setPosition(2, sliceA, frameA);	
+				getMinAndMax(minA2, maxA2);
+			}
 		    getLocationAndSize(xA, yA, widthA, heightA);
 		    print(nImages);
 		    close();
@@ -477,32 +492,43 @@ macro "Monitor diSPIM Acquisition" {
 		    stkNSlices = nSlices;
 		    rename("SPIMA: "+dir);
 	    	print(nImages);
-	   	    //run("Stack to Hyperstack...", "order=xyczt(default) channels="+wavelengths+" slices="+zSlices+" frames="+stkNSlices/(wavelengths*zSlices)+" display=Composite");
+
 			Stack.setDimensions(wavelengths, zSlices, stkNSlices/(wavelengths*zSlices));
-			run("Make Composite", "display=Composite");
+			if (wavelengths > 1){
+				run("Make Composite", "display=Composite");
 			    print(nImages+" HS");
-	  	    Stack.setPosition(1, sliceA, frameA);	
-		    run("Green");
-		    setMinAndMax(minA1, maxA1);	
-	  	    Stack.setPosition(2, sliceA, frameA);	
-		    run("Red");
-		    setMinAndMax(minA2, maxA2);	
+		  	    Stack.setPosition(1, sliceA, frameA);	
+			    run("Green");
+			    setMinAndMax(minA1, maxA1);	
+		  	    Stack.setPosition(2, sliceA, frameA);	
+			    run("Red");
+			    setMinAndMax(minA2, maxA2);	
+		    } else {
+				selectWindow("SPIMA: "+dir);
+			    setMinAndMax(minA1, maxA1);
+	    	}
 	  	    Stack.setPosition(channelA, sliceA, stkNSlices/(wavelengths*zSlices));
-		    Stack.setDisplayMode(modeA);	    
-		    Stack.setActiveChannels(channelsA);
+			if (wavelengths > 1) {
+			    Stack.setDisplayMode(modeA);	    
+			    Stack.setActiveChannels(channelsA);
+			}
 
 		    setVoxelSize(vWidth, vHeight, vDepth, vUnit);    
 			updateDisplay();
 		
 		    if (isOpen("MAX_SPIMA: "+dir)) {
 		    	selectWindow("MAX_SPIMA: "+dir);
-				Stack.getActiveChannels(channelsMAX_A);
-				Stack.getDisplayMode(modeMAX_A);
+				if (wavelengths > 1) {
+					Stack.getActiveChannels(channelsMAX_A);
+					Stack.getDisplayMode(modeMAX_A);
+				}
 			    Stack.getPosition(channelMAX_A, sliceMAX_A, frameMAX_A);
-			  	Stack.setPosition(1, sliceMAX_A, frameMAX_A);	
-				getMinAndMax(minMAX_A1, maxMAX_A1);
-			  	Stack.setPosition(2, sliceMAX_A, frameMAX_A);	
-				getMinAndMax(minMAX_A2, maxMAX_A2);
+				if (wavelengths > 1) {
+				  	Stack.setPosition(1, sliceMAX_A, frameMAX_A);	
+					getMinAndMax(minMAX_A1, maxMAX_A1);
+				  	Stack.setPosition(2, sliceMAX_A, frameMAX_A);	
+					getMinAndMax(minMAX_A2, maxMAX_A2);
+				}
 		    	getLocationAndSize(xMAX_A, yMAX_A, widthMAX_A, heightMAX_A);
 		    	close();
 		    } else {
@@ -512,6 +538,7 @@ macro "Monitor diSPIM Acquisition" {
 		    }
 	    }
 		setBatchMode(false);
+		selectWindow("SPIMA: "+dir);
 		setLocation(xA,yA);
 
 	    minB =0;
@@ -521,13 +548,17 @@ macro "Monitor diSPIM Acquisition" {
 	    
 		if (isOpen("SPIMB: "+dir)) {
 			selectWindow("SPIMB: "+dir);
-			Stack.getActiveChannels(channelsB);
-			Stack.getDisplayMode(modeB);
+			if (wavelengths > 1) {
+				Stack.getActiveChannels(channels_B);
+				Stack.getDisplayMode(mode_B);
+			}
 		    Stack.getPosition(channelB, sliceB, frameB);
 		  	Stack.setPosition(1, sliceB, frameB);	
 			getMinAndMax(minB1, maxB1);
-		  	Stack.setPosition(2, sliceB, frameB);	
-			getMinAndMax(minB2, maxB2);
+			if (wavelengths > 1) {
+			  	Stack.setPosition(2, sliceB, frameB);	
+				getMinAndMax(minB2, maxB2);
+			}
 		    getLocationAndSize(xB, yB, widthB, heightB);
 		    print(nImages);
 		    close();
@@ -544,31 +575,42 @@ macro "Monitor diSPIM Acquisition" {
 		    stkNSlices = nSlices;
 
 		    rename("SPIMB: "+dir);
-	   	    //run("Stack to Hyperstack...", "order=xyczt(default) channels="+wavelengths+" slices="+zSlices+" frames="+stkNSlices/(wavelengths*zSlices)+" display=Composite");
+
 			Stack.setDimensions(wavelengths, zSlices, stkNSlices/(wavelengths*zSlices));
-			run("Make Composite", "display=Composite");
-	  	    Stack.setPosition(1, sliceB, frameB);	
-		    run("Green");
-		    setMinAndMax(minB1, maxB1);
-	  	    Stack.setPosition(2, sliceB, frameB);	
-		    run("Red");
-		    setMinAndMax(minB2, maxB2);
+			if (wavelengths > 1){
+				run("Make Composite", "display=Composite");
+		  	    Stack.setPosition(1, sliceB, frameB);	
+			    run("Green");
+			    setMinAndMax(minB1, maxB1);
+		  	    Stack.setPosition(2, sliceB, frameB);	
+			    run("Red");
+			    setMinAndMax(minB2, maxB2);
+		    } else {
+				selectWindow("SPIMB: "+dir);
+			    setMinAndMax(minB1, maxB1);
+	    	}
 	  	    Stack.setPosition(channelB, sliceB, stkNSlices/(wavelengths*zSlices));		    
-		    Stack.setDisplayMode(modeB);
-		    Stack.setActiveChannels(channelsB);
+			if (wavelengths > 1) {
+			    Stack.setDisplayMode(modeA);	    
+			    Stack.setActiveChannels(channelsA);
+			}
 
 		    setVoxelSize(vWidth, vHeight, vDepth, vUnit);    
 			updateDisplay();
 
 		    if (isOpen("MAX_SPIMB: "+dir)) {
 		    	selectWindow("MAX_SPIMB: "+dir);
-				Stack.getActiveChannels(channelsMAX_B);
-				Stack.getDisplayMode(modeMAX_B);
+				if (wavelengths > 1) {
+					Stack.getActiveChannels(channelsMAX_B);
+					Stack.getDisplayMode(modeMAX_B);
+				}
 			    Stack.getPosition(channelMAX_B, sliceMAX_B, frameMAX_B);
 			  	Stack.setPosition(1, sliceMAX_B, frameMAX_B);	
 				getMinAndMax(minMAX_B1, maxMAX_B1);
-			  	Stack.setPosition(2, sliceMAX_B, frameMAX_B);	
-				getMinAndMax(minMAX_B2, maxMAX_B2);
+				if (wavelengths > 1) {
+				  	Stack.setPosition(2, sliceMAX_B, frameMAX_B);	
+					getMinAndMax(minMAX_B2, maxMAX_B2);
+				}
 		    	getLocationAndSize(xMAX_B, yMAX_B, widthMAX_B, heightMAX_B);
 		    	close();
 		    } else {
@@ -578,6 +620,7 @@ macro "Monitor diSPIM Acquisition" {
 		    }
 	    }
 	    setBatchMode(false);
+		selectWindow("SPIMB: "+dir);
 	    setLocation(xB,yB);
 	    updateDisplay();
 	    
