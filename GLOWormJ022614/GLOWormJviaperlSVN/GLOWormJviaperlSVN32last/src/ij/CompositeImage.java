@@ -136,6 +136,8 @@ public class CompositeImage extends ImagePlus {
 	}
 
 	void setupLuts(int channels) {
+		if (ip==null)
+			return;
 		if (lut==null || lut.length<channels) {
 			if (displayRanges!=null && channels!=displayRanges.length/2)
 				displayRanges = null;

@@ -24,6 +24,7 @@ import ij.plugin.frame.Recorder;
 import ij.plugin.frame.RoiManager;
 import ij.plugin.Converter;
 import ij.plugin.Duplicator;
+import ij.plugin.ListVirtualStack;
 import ij.plugin.RectToolOptions;
 
 
@@ -966,8 +967,10 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		}
 		boolean updateWin = isDisplayedHyperStack() && (this.nChannels!=nChannels||this.nSlices!=nSlices||this.nFrames!=nFrames);
 		boolean newSingleImage = win!=null && (win instanceof StackWindow) && nChannels==1&&nSlices==1&&nFrames==1;
-		if (newSingleImage) updateWin = true;
-		updateWin = updateWin || nChannels==1;
+		if (newSingleImage) 
+			updateWin = true;
+		if (this.getStack() instanceof ListVirtualStack && nChannels ==1)
+			updateWin = true;
 		this.nChannels = nChannels;
 		this.nSlices = nSlices;
 		this.nFrames = nFrames;
