@@ -6,7 +6,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 /** Displays the ImageJ Channels window. */
-public class Channels extends PlugInFrame implements PlugIn, ItemListener, ActionListener {
+public class Channels extends PlugInDialog implements PlugIn, ItemListener, ActionListener {
 
 	private static String[] modes = {"Composite", "Color", "Grayscale"};
 	private static String[] menuItems = {"Make Composite", "Convert to RGB", "Split Channels", "Merge Channels...",
@@ -17,7 +17,7 @@ public class Channels extends PlugInFrame implements PlugIn, ItemListener, Actio
 	private Choice choice;
 	private Checkbox[] checkbox;
 	private Button moreButton;
-	private static Frame instance;
+	private static Channels instance;
 	private int id;
 	private static Point location;
 	private PopupMenu pm;
@@ -25,7 +25,7 @@ public class Channels extends PlugInFrame implements PlugIn, ItemListener, Actio
 	public Channels() {
 		super("Channels");
 		if (instance!=null) {
-			WindowManager.toFront(instance);
+			instance.toFront();
 			return;
 		}
 		WindowManager.addWindow(this);
@@ -40,10 +40,8 @@ public class Channels extends PlugInFrame implements PlugIn, ItemListener, Actio
 		c.fill = GridBagConstraints.BOTH;
 		c.anchor = GridBagConstraints.CENTER;
 		int margin = 32;
-		if (IJ.isVista())
-			margin = 40;
-		else if (IJ.isMacOSX())
-			margin = 18;
+		if (IJ.isMacOSX())
+			margin = 20;
 		c.insets = new Insets(10, margin, 10, margin);
 		choice = new Choice();
 		for (int i=0; i<modes.length; i++)
@@ -94,7 +92,8 @@ public class Channels extends PlugInFrame implements PlugIn, ItemListener, Actio
 	
 	public void update() {
 		CompositeImage ci = getImage();
-		if (ci==null) return;
+		if (ci==null || checkbox==null)
+			return;
 		int n = checkbox.length;
 		int nChannels = ci.getNChannels();
 		if (nChannels!=n && nChannels<=CompositeImage.MAX_CHANNELS) {
@@ -109,11 +108,16 @@ public class Channels extends PlugInFrame implements PlugIn, ItemListener, Actio
 			checkbox[i].setState(active[i]);
 		int index = 0;
 		switch (ci.getMode()) {
-			case CompositeImage.COMPOSITE: index=0; break;
-			case CompositeImage.COLOR: index=1; break;
-			case CompositeImage.GRAYSCALE: index=2; break;
+			case IJ.COMPOSITE: index=0; break;
+			case IJ.COLOR: index=1; break;
+			case IJ.GRAYSCALE: index=2; break;
 		}
 		choice.select(index);
+	}
+	
+	public static void updateChannels() {
+		if (instance!=null)
+			instance.update();
 	}
 	
 	void addPopupItem(String s) {
@@ -138,7 +142,7 @@ public class Channels extends PlugInFrame implements PlugIn, ItemListener, Actio
 			if (channels==1 && imp.getStackSize()<=4)
 				channels = imp.getStackSize();
 			if (imp.getBitDepth()==24 || (channels>1&&channels<CompositeImage.MAX_CHANNELS)) {
-				GenericDialog gd = new GenericDialog(imp.getTitle(), this);
+				GenericDialog gd = new GenericDialog(imp.getTitle());
 				gd.addMessage("Convert to multi-channel composite image?");
 				gd.showDialog();
 				if (gd.wasCanceled())
@@ -156,9 +160,9 @@ public class Channels extends PlugInFrame implements PlugIn, ItemListener, Actio
 		if (source==choice) {
 			int index = ((Choice)source).getSelectedIndex();
 			switch (index) {
-				case 0: ci.setMode(CompositeImage.COMPOSITE); break;
-				case 1: ci.setMode(CompositeImage.COLOR); break;
-				case 2: ci.setMode(CompositeImage.GRAYSCALE); break;
+				case 0: ci.setMode(IJ.COMPOSITE); break;
+				case 1: ci.setMode(IJ.COLOR); break;
+				case 2: ci.setMode(IJ.GRAYSCALE); break;
 			}
 			ci.updateAndDraw();
 			if (Recorder.record) {
@@ -174,7 +178,7 @@ public class Channels extends PlugInFrame implements PlugIn, ItemListener, Actio
 			for (int i=0; i<checkbox.length; i++) {
 				Checkbox cb = (Checkbox)source;
 				if (cb==checkbox[i]) {
-					if (ci.getMode()==CompositeImage.COMPOSITE) {
+					if (ci.getMode()==IJ.COMPOSITE) {
 						boolean[] active = ci.getActiveChannels();
 						active[i] = cb.getState();
 						if (Recorder.record) {
@@ -182,6 +186,7 @@ public class Channels extends PlugInFrame implements PlugIn, ItemListener, Actio
 							for (int c=0; c<ci.getNChannels(); c++)
 								str += active[c]?"1":"0";
 							Recorder.record("Stack.setActiveChannels", str);
+							Recorder.record("//Stack.toggleChannel", imp.getChannel());
 						}
 					} else {
 						imp.setPosition(i+1, imp.getSlice(), imp.getFrame());
@@ -207,7 +212,7 @@ public class Channels extends PlugInFrame implements PlugIn, ItemListener, Actio
 			IJ.doCommand(command);
 	}
 	
-	public static Frame getInstance() {
+	public static Channels getInstance() {
 		return instance;
 	}
 		

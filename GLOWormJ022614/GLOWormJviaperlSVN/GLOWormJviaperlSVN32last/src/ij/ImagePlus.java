@@ -16,6 +16,7 @@ import ij.io.*;
 import ij.gui.*;
 import ij.measure.*;
 import ij.plugin.filter.Analyzer;
+import ij.util.DicomTools;
 import ij.util.Tools;
 import ij.macro.Interpreter;
 import ij.plugin.frame.ColorLegend;
@@ -1097,7 +1098,120 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			getLocalCalibration().setImage(this);
 		}
     }
+		
+ 	/** Returns the string value from the "Info" property string  
+	 * associated with 'key', or null if the key is not found. 
+	 * Works with DICOM tags and Bio-Formats metadata.
+	 * @see #getNumericProperty
+	 * @see #getInfoProperty
+	*/
+	public String getStringProperty(String key) {
+		if (key==null)
+			return null;
+		if (isDicomTag(key))
+			return DicomTools.getTag(this, key);
+		if (getStackSize()>1) {
+			ImageStack stack = getStack();
+			String label = stack.getSliceLabel(getCurrentSlice());
+			if (label!=null && label.indexOf('\n')>0) {
+				String value = getStringProperty(key, label);
+				if (value!=null)
+					return value;
+			}
+		}
+		Object obj = getProperty("Info");
+		if (obj==null || !(obj instanceof String))
+			return null;
+		String info = (String)obj;
+		return getStringProperty(key, info);
+	}
+	
+	private boolean isDicomTag(String key) {
+		if (key.length()!=9 || key.charAt(4)!=',')
+			return false;
+		key = key.toLowerCase();
+		for (int i=0; i<9; i++) {
+			char c = i!=4?key.charAt(i):'0';
+			if (!(Character.isDigit(c)||(c=='a'||c=='b'||c=='c'||c=='d'||c=='e'||c=='f')))
+				return false;
+		}
+		return true;
+	}
+	
+	/** Returns the numeric value from the "Info" property string  
+	 * associated with 'key', or NaN if the key is not found or the
+	 * value associated with the key is not numeric. Works with
+	 * DICOM tags and Bio-Formats metadata.
+	 * @see #getStringProperty
+	 * @see #getInfoProperty
+	*/
+	public double getNumericProperty(String key) {
+		return Tools.parseDouble(getStringProperty(key));
+	}
 
+	/**
+	 * @deprecated
+	 * @see #getStringProperty
+	*/
+	public String getProp(String key) {
+		return getStringProperty(key);
+	}
+	
+	private String getStringProperty(String key, String info) {
+		int index1 = -1;
+		index1 = findKey(info, key+": "); // standard 'key: value' pair?
+		if (index1<0) // Bio-Formats metadata?
+			index1 = findKey(info, key+" = ");
+		if (index1<0) // otherwise not found
+			return null;
+		if (index1==info.length())
+			return ""; //empty value at the end
+		int index2 = info.indexOf("\n", index1);
+		if (index2==-1)
+			index2=info.length();
+		String value = info.substring(index1, index2);
+		return value;
+	}
+	
+	/** Find a key in a String (words merely ending with 'key' don't qualify).
+	* @return index of first character after the key, or -1 if not found
+	*/
+	private int findKey(String s, String key) {
+		int i = s.indexOf(key);
+		if (i<0)
+			return -1; //key not found
+		while (i>0 && Character.isLetterOrDigit(s.charAt(i-1)))
+			i = s.indexOf(key, i+key.length());
+		if (i>=0)
+			return i + key.length();
+		else
+			return -1;
+	}
+		
+	/** Returns the "Info" property string, or null if it is not found. */
+	public String getInfoProperty() {
+		String info = null;
+		Object obj = getProperty("Info");
+		if (obj!=null && (obj instanceof String)) {
+			info = (String)obj;
+			if (info.length()==0)
+				info = null;
+		}
+		return info;
+	}
+
+	/** Returns the property associated with 'key', or null if it is not found.
+	 * @see #getStringProperty
+	 * @see #getNumericProperty
+	 * @see #getInfoProperty
+	*/
+	public Object getProperty(String key) {
+		if (properties==null)
+			return null;
+		else
+			return properties.get(key);
+	}
+	
 	/** Adds a key-value pair to this image's properties. The key
 		is removed from the properties table if value is null. */
 	public void setProperty(String key, Object value) {
@@ -1109,14 +1223,6 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			properties.put(key, value);
 	}
 		
-	/** Returns the property associated with 'key'. May return null. */
-	public Object getProperty(String key) {
-		if (properties==null)
-			return null;
-		else
-			return properties.get(key);
-	}
-	
 	/** Returns this image's Properties. May return null. */
 	public Properties getProperties() {
 			return properties;
@@ -1965,6 +2071,21 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			setCalibration(imp.getCalibration());
 	}
 
+	/** Copies attributes (name, ID, calibration, path) of the specified image to this image. */
+	public void copyAttributes(ImagePlus imp) {
+		if (imp==null || imp.getWindow()!=null)
+			throw new IllegalArgumentException("Souce image is null or displayed");
+		ID = imp.getID();
+		setTitle(imp.getTitle());
+		setCalibration(imp.getCalibration());
+		FileInfo fi = imp.getOriginalFileInfo();
+		if (fi!=null)
+			setFileInfo(fi);
+		Object info = imp.getProperty("Info");
+		if (info!=null)
+			setProperty("Info", imp.getProperty("Info"));
+	}
+
     /** Calls System.currentTimeMillis() to save the current
 		time so it can be retrieved later using getStartTime() 
 		to calculate the elapsed time of an operation. */
@@ -2305,6 +2426,15 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	/** Returns true if this is a CompositeImage. */
 	public boolean isComposite() {
 		return compositeImage && nChannels>=1 && imageType!=COLOR_RGB && (this instanceof CompositeImage);
+	}
+
+	/** Returns the display mode (IJ.COMPOSITE, IJ.COLOR
+		or IJ.GRAYSCALE) if this is a CompositeImage, otherwise returns -1. */
+	public int getCompositeMode() {
+		if (isComposite())
+			return ((CompositeImage)this).getMode();
+		else
+			return -1;
 	}
 
 	/** Sets the display range of the current channel. With non-composite

@@ -12,7 +12,7 @@ import ij.process.*;
 public class NewImage {
 
 	public static final int GRAY8=0, GRAY16=1, GRAY32=2, RGB=3;
-	public static final int FILL_BLACK=1, FILL_RAMP=2, FILL_WHITE=4, CHECK_AVAILABLE_MEMORY=8;
+	public static final int FILL_BLACK=1, FILL_RAMP=2, FILL_RANDOM=3, FILL_WHITE=4, CHECK_AVAILABLE_MEMORY=8;
 	private static final int OLD_FILL_WHITE=0;
 	
     static final String TYPE = "new.type";

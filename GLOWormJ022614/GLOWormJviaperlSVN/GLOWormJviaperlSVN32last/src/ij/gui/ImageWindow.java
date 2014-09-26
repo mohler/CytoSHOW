@@ -985,7 +985,7 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 		imp.setActivated(); // notify ImagePlus that image has been activated
 		if (!closed && !quitting && !Interpreter.isBatchMode())
 			WindowManager.setCurrentWindow(this);
-		Frame channels = Channels.getInstance();
+		Channels channels = Channels.getInstance();
 		if (channels!=null && imp.isComposite()) {
 			((Channels)channels).update();
 			WindowManager.getCurrentWindow().toFront();

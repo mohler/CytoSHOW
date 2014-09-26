@@ -3,7 +3,6 @@ import ij.*;
 import ij.text.*;
 import ij.util.*;
 import ij.gui.ImageCanvas;
-
 import java.io.*;
 import java.awt.*;
 
@@ -120,6 +119,15 @@ public class MacroRunner implements Runnable {
 		}
 	}
 	
+	/** Runs a tokenized macro on the current thread. */
+	public void run(Program pgm, int address, String name) {
+		this.pgm = pgm;
+		this.address = address;
+		this.name = name;
+		this.argument = null;
+		run();
+	}
+
 	public Thread getThread() {
 		return thread;
 	}
@@ -156,6 +164,9 @@ public class MacroRunner implements Runnable {
 			if (e instanceof RuntimeException && msg!=null && e.getMessage().equals(Macro.MACRO_CANCELED))
 				return;
 			IJ.handleException(e);
+		} finally {
+			if (thread!=null)
+				WindowManager.setTempCurrentImage(null);
 		}
 	}
 

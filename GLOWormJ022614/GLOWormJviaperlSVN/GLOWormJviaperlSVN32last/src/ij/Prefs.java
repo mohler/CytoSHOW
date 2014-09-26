@@ -53,7 +53,8 @@ public class Prefs {
 	public static final String vistaHint = "";  // no longer used
 
 	private static final int USE_SYSTEM_PROXIES=1<<0, USE_FILE_CHOOSER=1<<1,
-		SUBPIXEL_RESOLUTION=1<<2, ENHANCED_LINE_TOOL=1<<3;
+		SUBPIXEL_RESOLUTION=1<<2, ENHANCED_LINE_TOOL=1<<3, SKIP_RAW_DIALOG=1<<4,
+		REVERSE_NEXT_PREVIOUS_ORDER=1<<5;
 	public static final String OPTIONS2 = "prefs.options2";
     
 	/** file.separator system property */
@@ -104,6 +105,8 @@ public class Prefs {
 	public static boolean moveToMisc;
 	/** Add points to ROI Manager. */
 	public static boolean pointAddToManager;
+	/** Add points to overlay. */
+	public static boolean pointAddToOverlay;
 	/** Extend the borders to foreground for binary erosions and closings. */
 	public static boolean padEdges;
 	/** Run the SocketListener. */
@@ -146,6 +149,10 @@ public class Prefs {
 	public static boolean keepArrowSelections;
 	/** Aways paint using double buffering, except on OS X */
 	public static boolean paintDoubleBuffered;
+	/** Do not display dialog when opening .raw files */
+	public static boolean skipRawDialog;
+	/** Reverse channel-slice-frame priority used by Next Slice and Previous Slice commands. */
+	public static boolean reverseNextPreviousOrder;
 
 	static Properties ijPrefs = new Properties();
 	static Properties props = new Properties(ijPrefs);
@@ -423,19 +430,15 @@ public class Prefs {
 		if (weightedColor)
 			ColorProcessor.setWeightingFactors(0.299, 0.587, 0.114);
 		blackCanvas = (options&BLACK_CANVAS)!=0;
-		pointAutoMeasure = (options&AUTO_MEASURE)!=0;
 		requireControlKey = (options&REQUIRE_CONTROL)!=0;
 		useInvertingLut = (options&USE_INVERTING_LUT)!=0;
 		antialiasedTools = (options&ANTIALIASED_TOOLS)!=0;
 		intelByteOrder = (options&INTEL_BYTE_ORDER)!=0;
-		// doubleBuffer = (options&DOUBLE_BUFFER)!=0; // always double buffer
-		//noPointLabels = (options&NO_POINT_LABELS)!=0;
 		noBorder = (options&NO_BORDER)!=0;
 		showAllSliceOnly = (options&SHOW_ALL_SLICE_ONLY)!=0;
 		copyColumnHeaders = (options&COPY_HEADERS)!=0;
 		noRowNumbers = (options&NO_ROW_NUMBERS)!=0;
 		moveToMisc = (options&MOVE_TO_MISC)!=0;
-		pointAddToManager = (options&ADD_TO_MANAGER)!=0;
 		runSocketListener = (options&RUN_SOCKET_LISTENER)!=0;
 		multiPointMode = (options&MULTI_POINT_MODE)!=0;
 		rotateYZ = (options&ROTATE_YZ)!=0;
@@ -452,6 +455,8 @@ public class Prefs {
 		useFileChooser = (options2&USE_FILE_CHOOSER)!=0;
 		subPixelResolution = (options2&SUBPIXEL_RESOLUTION)!=0;
 		enhancedLineTool = (options2&ENHANCED_LINE_TOOL)!=0;
+		skipRawDialog = (options2&SKIP_RAW_DIALOG)!=0;
+		reverseNextPreviousOrder = (options2&REVERSE_NEXT_PREVIOUS_ORDER)!=0;
 	}
 
 	static void saveOptions(Properties prefs) {
@@ -459,13 +464,13 @@ public class Prefs {
 			+ (interpolateScaledImages?INTERPOLATE:0) + (open100Percent?ONE_HUNDRED_PERCENT:0)
 			+ (blackBackground?BLACK_BACKGROUND:0) + (useJFileChooser?JFILE_CHOOSER:0)
 			+ (blackCanvas?BLACK_CANVAS:0) + (weightedColor?WEIGHTED:0) 
-			+ (pointAutoMeasure?AUTO_MEASURE:0) + (requireControlKey?REQUIRE_CONTROL:0)
+			+ (requireControlKey?REQUIRE_CONTROL:0)
 			+ (useInvertingLut?USE_INVERTING_LUT:0) + (antialiasedTools?ANTIALIASED_TOOLS:0)
 			+ (intelByteOrder?INTEL_BYTE_ORDER:0) + (doubleBuffer?DOUBLE_BUFFER:0)
 			+ (noPointLabels?NO_POINT_LABELS:0) + (noBorder?NO_BORDER:0)
 			+ (showAllSliceOnly?SHOW_ALL_SLICE_ONLY:0) + (copyColumnHeaders?COPY_HEADERS:0)
 			+ (noRowNumbers?NO_ROW_NUMBERS:0) + (moveToMisc?MOVE_TO_MISC:0)
-			+ (pointAddToManager?ADD_TO_MANAGER:0) + (runSocketListener?RUN_SOCKET_LISTENER:0)
+			+ (runSocketListener?RUN_SOCKET_LISTENER:0)
 			+ (multiPointMode?MULTI_POINT_MODE:0) + (rotateYZ?ROTATE_YZ:0)
 			+ (flipXZ?FLIP_XZ:0) + (dontSaveHeaders?DONT_SAVE_HEADERS:0)
 			+ (dontSaveRowNumbers?DONT_SAVE_ROW_NUMBERS:0) + (noClickToGC?NO_CLICK_TO_GC:0)
@@ -475,7 +480,8 @@ public class Prefs {
 
 		int options2 = (useSystemProxies?USE_SYSTEM_PROXIES:0)
 			+ (useFileChooser?USE_FILE_CHOOSER:0) + (subPixelResolution?SUBPIXEL_RESOLUTION:0)
-			+ (enhancedLineTool?ENHANCED_LINE_TOOL:0);
+			+ (enhancedLineTool?ENHANCED_LINE_TOOL:0) + (skipRawDialog?SKIP_RAW_DIALOG:0)
+			+ (reverseNextPreviousOrder?REVERSE_NEXT_PREVIOUS_ORDER:0);
 		prefs.put(OPTIONS2, Integer.toString(options2));
 	}
 
@@ -485,7 +491,10 @@ public class Prefs {
 	public static void set(String key, String text) {
 		if (key.indexOf('.')<1)
 			throw new IllegalArgumentException("Key must have a prefix");
-		ijPrefs.put(KEY_PREFIX+key, text);
+		if (text==null)
+			ijPrefs.remove(KEY_PREFIX+key);
+		else
+			ijPrefs.put(KEY_PREFIX+key, text);
 	}
 
 	/** Saves <code>value</code> in the preferences file using 
@@ -565,7 +574,11 @@ public class Prefs {
 		double yloc = Tools.parseDouble(value.substring(index+1));
 		if (Double.isNaN(yloc)) return null;
 		Point p = new Point((int)xloc, (int)yloc);
-		Dimension screen = IJ.getScreenSize();
+		Dimension screen = null;
+		if (IJ.debugMode)
+			screen = Toolkit.getDefaultToolkit().getScreenSize();
+		else
+			screen = IJ.getScreenSize();
 		if (p.x>screen.width-100 || p.y>screen.height-40)
 			return null;
 		else
@@ -603,7 +616,6 @@ public class Prefs {
 	/** Sets the number of threads (1-32) used by PlugInFilters to process stacks. */
 	public static void setThreads(int n) {
 		if (n<1) n = 1;
-		if (n>32) n = 32;
 		threads = n;
 	}
 	

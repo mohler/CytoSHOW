@@ -13,8 +13,9 @@ import ij.plugin.filter.Analyzer;
 import ij.measure.*;
 import ij.io.SaveDialog;
 
-/** This class implements the Analyze>Plot Profile command.
-* @authors Michael Schmid and Wayne Rasband
+/** This class implements the Analyze/Plot Profile command.
+* @author Michael Schmid
+* @author Wayne Rasband
 */
 public class PlotWindow extends ImageWindow implements ActionListener, ClipboardOwner,
 	MouseListener, MouseMotionListener, KeyListener, ImageListener, Runnable {
@@ -35,8 +36,6 @@ public class PlotWindow extends ImageWindow implements ActionListener, Clipboard
 	private static final int WIDTH = 450;
 	private static final int HEIGHT = 200;
 	
-	private static final String MIN = "pp.min";
-	private static final String MAX = "pp.max";
 	private static final String PLOT_WIDTH = "pp.width";
 	private static final String PLOT_HEIGHT = "pp.height";
 	private static final String OPTIONS = "pp.options";
@@ -56,6 +55,7 @@ public class PlotWindow extends ImageWindow implements ActionListener, Clipboard
 	private Plot plot;
 	private String blankLabel = "                      ";
 	
+	private PlotMaker plotMaker;
 	private ImagePlus srcImp;		// the source image for live plotting
 	private Thread bgThread;		// thread for plotting (in the background)
 	private boolean doUpdate;	// tells the background thread to update
@@ -150,7 +150,7 @@ public class PlotWindow extends ImageWindow implements ActionListener, Clipboard
 		addPoints(Tools.toFloat(x), Tools.toFloat(y), shape);
 	}
 	
-	/** Adds error bars to the plot. */
+	/** Adds vertical error bars to the plot. */
 	public void addErrorBars(float[] errorBars) {
 		plot.addErrorBars(errorBars);
 	}
@@ -190,7 +190,7 @@ public class PlotWindow extends ImageWindow implements ActionListener, Clipboard
 		copy = new Button("Copy...");
 		copy.addActionListener(this);
 		buttons.add(copy);
-		if (plot!=null && plot.getSourceImageID()!=0) {
+		if (plot!=null && plot.getPlotMaker()!=null) {
 			live = new Button("Live");
 			live.addActionListener(this);
 			buttons.add(live);
@@ -251,7 +251,7 @@ public class PlotWindow extends ImageWindow implements ActionListener, Clipboard
 			{imp.changes=false; close();}
 	}
 	
-	/** creates the headings corresponding to the showlist funcion*/
+	/** Creates the headings corresponding to the showlist funcion*/
 	private String createHeading(){
 		String head = "";
 		int sets = plot.storedData.size()/2;
@@ -259,8 +259,14 @@ public class PlotWindow extends ImageWindow implements ActionListener, Clipboard
 			head += sets==1?"X\tY\t":"X0\tY0\t";
 		else
 			head += sets==1?"Y0\t":"Y0\t";
-		if (plot.errorBars!=null)
-			head += "ERR\t";
+		if (plot.errorBars!=null) {
+			if (plot.xErrorBars!=null)
+				head += "Y_ERR\t";
+			else
+				head += "ERR\t";
+		}
+		if (plot.xErrorBars!=null)
+			head += "X_ERR\t";
 		for (int j = 1; j<sets; j++){
 			if (saveXValues || sets>1)
 				head += "X" + j + "\tY" + j + "\t";
@@ -284,17 +290,23 @@ public class PlotWindow extends ImageWindow implements ActionListener, Clipboard
 		
 		/** stores the values that will be displayed*/
 		ArrayList displayed = new ArrayList(plot.storedData);
-		boolean eb_test = false;
+		boolean ex_test = false;
+		boolean ey_test = false;
 		
-		/** includes error bars.*/
+		// includes vertical error bars
 		if (plot.errorBars !=null)
 			displayed.add(2, plot.errorBars);
+			
+		// includes horizontal error bars
+		if (plot.xErrorBars !=null)
+			displayed.add(3, plot.xErrorBars);
 					
 		StringBuffer sb = new StringBuffer();
 		String v;
 		int n = displayed.size();
 		for (int i = 0; i<max; i++) {
-			eb_test = plot.errorBars != null;
+			ey_test = plot.errorBars  != null;
+			ex_test = plot.xErrorBars != null;
 			for (int j = 0; j<n;) {
 				int xdigits = 0;
 				if (saveXValues || n>2) {
@@ -313,13 +325,21 @@ public class PlotWindow extends ImageWindow implements ActionListener, Clipboard
 				sb.append(v);
 				sb.append("\t");
 				j++;
-				if (eb_test){
+				if (ey_test){
 					column = (float[])displayed.get(j);
 					v = i<column.length?IJ.d2s(column[i],ydigits):"";
 					sb.append(v);
 					sb.append("\t");
 					j++;
-					eb_test=false;
+					ey_test=false;
+				}
+				if (ex_test){
+					column = (float[])displayed.get(j);
+					v = i<column.length?IJ.d2s(column[i],ydigits):"";
+					sb.append(v);
+					sb.append("\t");
+					j++;
+					ex_test=false;
 				}
 			}
 			sb.append("\n");
@@ -452,17 +472,14 @@ public class PlotWindow extends ImageWindow implements ActionListener, Clipboard
 	/** Draws a new plot in this window. */
 	public void drawPlot(Plot plot) {
 		this.plot = plot;
-		imp.setProcessor(null, plot.getProcessor());	
+		if (imp!=null)
+			imp.setProcessor(null, plot.getProcessor());	
 	}
 	
 	/** Called once when ImageJ quits. */
 	public static void savePreferences(Properties prefs) {
 		double min = ProfilePlot.getFixedMin();
 		double max = ProfilePlot.getFixedMax();
-		if (!(min==0.0&&max==0.0) && min<max) {
-			prefs.put(MIN, Double.toString(min));
-			prefs.put(MAX, Double.toString(max));
-		}
 		if (plotWidth!=WIDTH || plotHeight!=HEIGHT) {
 			prefs.put(PLOT_WIDTH, Integer.toString(plotWidth));
 			prefs.put(PLOT_HEIGHT, Integer.toString(plotHeight));
@@ -485,10 +502,12 @@ public class PlotWindow extends ImageWindow implements ActionListener, Clipboard
 	}
 
 	private void enableLiveProfiling() {
-		if (plot!=null && bgThread==null && plot.getSourceImageID()!=0) {
-			int id = plot.getSourceImageID();
-			srcImp = WindowManager.getImage(id);
-			if (srcImp==null) return;
+		if (plotMaker==null)
+			plotMaker = plot!=null?plot.getPlotMaker():null;
+		if (plotMaker!=null && bgThread==null) {
+			srcImp = plotMaker.getSourceImage();
+			if (srcImp==null)
+				return;
 			bgThread = new Thread(this, "Live Profiler");
 			bgThread.setPriority(Math.max(bgThread.getPriority()-3, Thread.MIN_PRIORITY));
 			bgThread.start();
@@ -500,10 +519,10 @@ public class PlotWindow extends ImageWindow implements ActionListener, Clipboard
 	}
 	
 	// these listeners are activated if the selection is changed in the source ImagePlus
-	public synchronized void mousePressed(MouseEvent e) { doUpdate = true; notify(); }   
-	public synchronized void mouseDragged(MouseEvent e) { doUpdate = true; notify(); }
-	public synchronized void mouseClicked(MouseEvent e) { doUpdate = true; notify(); }
-	public synchronized void keyPressed(KeyEvent e) { doUpdate = true; notify(); }
+	public synchronized void mousePressed(MouseEvent e) { doUpdate=true; notify(); }   
+	public synchronized void mouseDragged(MouseEvent e) { doUpdate=true; notify(); }
+	public synchronized void mouseClicked(MouseEvent e) { doUpdate=true; notify(); }
+	public synchronized void keyPressed(KeyEvent e) { doUpdate=true; notify(); }
 	
 	// unused listeners
 	public void mouseReleased(MouseEvent e) {}
@@ -517,8 +536,6 @@ public class PlotWindow extends ImageWindow implements ActionListener, Clipboard
 	// This listener is called if the source image content is changed
 	public synchronized void imageUpdated(ImagePlus imp) {
 		if (imp==srcImp) { 
-			if (!isSelection())
-				IJ.run(imp, "Restore Selection", "");
 			doUpdate = true;
 			notify();
 		}
@@ -532,6 +549,7 @@ public class PlotWindow extends ImageWindow implements ActionListener, Clipboard
 			bgThread = null;
 			removeListeners();
 			srcImp = null;
+			plotMaker = null;
 		}
 	}
 	
@@ -539,7 +557,7 @@ public class PlotWindow extends ImageWindow implements ActionListener, Clipboard
 	public void run() {
 		while (true) {
 			IJ.wait(50);	//delay to make sure the roi has been updated
-			Plot plot = getProfilePlot();
+			Plot plot = plotMaker.getPlot();
 			if (doUpdate && plot!=null) {
 				this.plot = plot;
 				ImageProcessor ip = plot.getProcessor();
@@ -575,7 +593,8 @@ public class PlotWindow extends ImageWindow implements ActionListener, Clipboard
 	
 	private void removeListeners() {
 		//IJ.log("removeListeners");
-		if (srcImp==null) return;
+		if (srcImp==null)
+			return;
 		ImageCanvas ic = srcImp.getCanvas();
 		if (ic!=null) {
 			ic.removeMouseListener(this);
@@ -586,31 +605,6 @@ public class PlotWindow extends ImageWindow implements ActionListener, Clipboard
 		Font font = live.getFont();
 		live.setFont(new Font(font.getName(), Font.PLAIN, font.getSize()));
 		live.setForeground(Color.black);
-	}
-	
-	/** Returns true if there is a straight line selection or rectangular selection */
-	private boolean isSelection() {
-		if (srcImp==null)
-			return false;
-		Roi roi = srcImp.getRoi();
-		if (roi==null)
-			return false;
-		int type = roi.getType();
-		return type==Roi.LINE || type==Roi.POLYLINE || type==Roi.RECTANGLE;
-	}
-	
-	/** Get a source image profile plot. */
-	private Plot getProfilePlot() {
-		if (srcImp==null || !isSelection())
-			return null;
-		Roi roi = srcImp.getRoi();
-		if (roi == null)
-			return null;
-		if (!(roi.isLine() || roi.getType()==Roi.RECTANGLE))
-			return null;
-		boolean averageHorizontally = Prefs.verticalProfile || IJ.altKeyDown();
-		ProfilePlot pp = new ProfilePlot(srcImp, averageHorizontally);
-		return pp.getPlot();
 	}
 	
 }

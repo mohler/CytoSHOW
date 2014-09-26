@@ -1,17 +1,19 @@
 package ij.gui;
-
-import java.awt.*;
-import java.awt.image.*;
-import java.awt.event.*;
-import java.awt.geom.*;
 import ij.*;
 import ij.process.*;
 import ij.measure.*;
 import ij.plugin.frame.Recorder;
 import ij.plugin.filter.Analyzer;
+import ij.plugin.filter.ThresholdToSelection;
 import ij.plugin.RectToolOptions;
 import ij.macro.Interpreter;
 import ij.io.RoiDecoder;
+import java.awt.*;
+import java.util.*;
+import java.io.*;
+import java.awt.image.*;
+import java.awt.event.*;
+import java.awt.geom.*;
 
 /** A rectangular region of interest and superclass for the other ROI classes. */
 public class Roi extends Object implements Cloneable, java.io.Serializable {
@@ -25,6 +27,7 @@ public class Roi extends Object implements Cloneable, java.io.Serializable {
 	static final int NO_MODS=0, ADD_TO_ROI=1, SUBTRACT_FROM_ROI=2; // modification states
 		
 	int startX, startY, x, y, width, height;
+	double startXD, startYD;
 	Rectangle2D.Double bounds;
 	double xd, yd, widthd, heightd;
 	int activeHandle;
@@ -71,7 +74,8 @@ public class Roi extends Object implements Cloneable, java.io.Serializable {
 	private int number;
 	private ImagePlus motherImp;
 	private boolean activeOverlayRoi;
-	
+	private Properties props;
+
 
 	/** Creates a rectangular ROI. */
 	public Roi(int x, int y, int width, int height) {
@@ -171,7 +175,23 @@ public class Roi extends Object implements Cloneable, java.io.Serializable {
 		this.y = y;
 		startX = x; startY = y;
 		oldX = x; oldY = y; oldWidth=0; oldHeight=0;
-		xd=x; yd=y;
+		if (bounds!=null) {
+			bounds.x = x;
+			bounds.y = y;
+		}
+	}
+	
+	/** Set the location of the ROI in image coordinates. */
+	public void setLocation(double x, double y) {
+		setLocation((int)x, (int)y);
+		if ((int)x==x && (int)y==y)
+			return;
+		if (bounds!=null) {
+			bounds.x = x;
+			bounds.y = y;
+		} else
+			bounds = new Rectangle2D.Double(x, y, width, height);
+		subPixel = true;
 	}
 	
 	public void setImage(ImagePlus imp) {
@@ -181,8 +201,7 @@ public class Roi extends Object implements Cloneable, java.io.Serializable {
 		if (imp==null) {
 			ic = null;
 			clipboard = null;
-			xMax = 99999;
-			yMax = 99999;
+			xMax = yMax = Integer.MAX_VALUE;
 		} else {
 			ic = imp.getCanvas();
 			xMax = imp.getWidth();
@@ -1752,6 +1771,63 @@ public class Roi extends Object implements Cloneable, java.io.Serializable {
 		return temp;
 	}
 
+	public void setProperty(String key, String value) {
+		if (key==null) return;
+		if (props==null)
+			props = new Properties();
+		if (value==null || value.length()==0)
+			props.remove(key);
+		else
+			props.setProperty(key, value);
+	}
+	
+	public String getProperty(String property) {
+		if (props==null)
+			return null;
+		else
+			return props.getProperty(property);
+	}
+	
+	public void setProperties(String properties) {
+		if (props==null)
+			props = new Properties();
+		else
+			props.clear();
+		try {
+			InputStream is = new ByteArrayInputStream(properties.getBytes("utf-8"));
+			props.load(is);
+		} catch(Exception e) {
+			IJ.error(""+e);
+		}
+	}
+
+	public String getProperties() {
+		if (props==null)
+			return null;
+		Vector v = new Vector();
+		for (Enumeration en=props.keys(); en.hasMoreElements();)
+			v.addElement(en.nextElement());
+		String[] keys = new String[v.size()];
+		for (int i=0; i<keys.length; i++)
+			keys[i] = (String)v.elementAt(i);
+		Arrays.sort(keys);
+		StringBuffer sb = new StringBuffer();
+		for (int i=0; i<keys.length; i++) {
+			sb.append(keys[i]);
+			sb.append(": ");
+			sb.append(props.get(keys[i]));
+			sb.append("\n");
+		}
+		return sb.toString();
+	}
+	
+	public int getPropertyCount() {
+		if (props==null)
+			return 0;
+		else
+			return props.size();
+	}
+		
 	public String toString() {
 		return ("Roi["+getTypeAsString()+", x="+x+", y="+y+", width="+width+", height="+height+"]");
 	}
@@ -1766,6 +1842,55 @@ public class Roi extends Object implements Cloneable, java.io.Serializable {
 	
 	public void mouseReleased(MouseEvent e) {
 		handleMouseUp(e.getX(), e.getY());
+	}
+
+	public double getXBase() {
+		if (bounds!=null)
+			return bounds.x;
+		else
+			return x;
+	}
+
+	public double getYBase() {
+		if (bounds!=null)
+			return bounds.y;
+		else
+			return y;
+	}
+	
+	public double getFloatWidth() {
+		if (bounds!=null)
+			return bounds.width;
+		else
+			return width;
+	}
+
+	public double getFloatHeight() {
+		if (bounds!=null)
+			return bounds.height;
+		else
+			return height;
+	}
+	
+	/** Overridden by PolygonRoi (angle between first two points), TextRoi (text angle) and Line (line angle). */
+	public double getAngle() {
+		return 0.0;
+	}
+	
+	public void enableSubPixelResolution() {
+		bounds = new Rectangle2D.Double(getXBase(), getYBase(), getFloatWidth(), getFloatHeight());
+		subPixel = true;
+	}
+
+	public String getDebugInfo() {
+		return "";
+	}
+
+	/** Returns a hashcode for this Roi that typically changes 
+		if it is moved,	 even though it is still the same object. */
+	public int getHashCode() {
+		return hashCode() ^ (new Double(getXBase()).hashCode()) ^
+			Integer.rotateRight(new Double(getYBase()).hashCode(),16);
 	}
 
 }

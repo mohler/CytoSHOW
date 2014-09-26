@@ -78,8 +78,9 @@ public class FileSaver {
 		return path;
 	}
 	
-	/** Save the image or stack in TIFF format using a save file
-		dialog. Returns false if the user selects cancel. */
+	/** Saves the image or stack in TIFF format using a save file
+		dialog. Returns false if the user selects cancel. Equivalent to 
+		IJ.saveAsTiff(imp,""), which is more convenient. */
 	public boolean saveAsTiff() {
 		String path = getPath("TIFF", ".tif");
 		if (path==null)
@@ -90,12 +91,13 @@ public class FileSaver {
 			return saveAsTiff(path);
 	}
 	
-	/** Save the image in TIFF format using the specified path. */
+	/** Saves the image in TIFF format using the specified path. Equivalent to
+		 IJ.saveAsTiff(imp,path), which is more convenient. */
 	public boolean saveAsTiff(String path) {
+		if (imp.getProperty("FHT")!=null && path.contains("FFT of "))
+			setupFFTSave();
 		fi.nImages = 1;
-		Object info = imp.getProperty("Info");
-		if (info!=null && (info instanceof String))
-			fi.info = (String)info;
+		fi.info = imp.getInfoProperty();
 		Object label = imp.getProperty("Label");
 		if (label!=null && (label instanceof String)) {
 			fi.sliceLabels = new String[1];
@@ -117,14 +119,28 @@ public class FileSaver {
 		return true;
 	}
 	
-	byte[][] getOverlay(ImagePlus imp) {
+	private void setupFFTSave() {
+		Object obj = imp.getProperty("FHT");
+		if (obj==null) return;
+		FHT fht = (obj instanceof FHT)?(FHT)obj:null;
+		if (fht==null) return;
+		if (fht.originalColorModel!=null)
+			fht.setColorModel(fht.originalColorModel);
+		ImagePlus imp2 = new ImagePlus(imp.getTitle(), fht);
+		imp2.setProperty("Info", imp.getProperty("Info"));
+		imp2.setCalibration(imp.getCalibration());
+		imp = imp2;
+		fi = imp.getFileInfo();
+	}
+	
+	public static byte[][] getOverlay(ImagePlus imp) {
 		if (imp.getHideOverlay())
 			return null;
 		Overlay overlay = imp.getOverlay();
 		if (overlay==null) {
 			ImageCanvas ic = imp.getCanvas();
 			if (ic==null) return null;
-			overlay = ic.getShowAllList(); // Tag Manager "Show All" list
+			overlay = ic.getShowAllList(); // ROI Manager "Show All" list
 			if (overlay==null) return null;
 		}
 		int n = overlay.size();
@@ -141,21 +157,20 @@ public class FileSaver {
 		return array;
 	}
 
-	/** Save the stack as a multi-image TIFF using the specified path. */
+	/** Saves the stack as a multi-image TIFF using the specified path.
+		 Equivalent to IJ.saveAsTiff(imp,path), which is more convenient. */
 	public boolean saveAsTiffStack(String path) {
 		if (fi.nImages==1)
-			{IJ.error("This is not a stack"); return false;}
+			{error("This is not a stack"); return false;}
 		boolean virtualStack = imp.getStack().isVirtual();
 		if (virtualStack)
 			fi.virtualStack = (VirtualStack)imp.getStack();
-		Object info = imp.getProperty("Info");
-		if (info!=null && (info instanceof String))
-			fi.info = (String)info;
+		fi.info = imp.getInfoProperty();
 		fi.description = getDescriptionString();
 		if (virtualStack) {
 			FileInfo fi = imp.getOriginalFileInfo();
-			if (path!=null && fi!= null && path.equals(fi.directory+fi.fileName)) {
-				IJ.error("TIFF virtual stacks cannot be saved in place.");
+			if (path!=null && path.equals(fi.directory+fi.fileName)) {
+				error("TIFF virtual stacks cannot be saved in place.");
 				return false;
 			}
 			String[] labels = null;
@@ -163,11 +178,13 @@ public class FileSaver {
 			for (int i=1; i<=vs.getSize(); i++) {
 				ImageProcessor ip = vs.getProcessor(i);
 				String label = vs.getSliceLabel(i);
-				if (i==1 && (label==null||label.length()<200)) break;
-				if (labels==null) labels = new String[vs.getSize()];
+				if (i==1 && label==null)
+					break;
+				if (labels==null)
+					labels = new String[vs.getSize()];
 				labels[i-1] = label;
 			}
-			fi.sliceLabels = labels;
+			this.fi.sliceLabels = labels;
 		} else
 			fi.sliceLabels = imp.getStack().getSliceLabels();
 		fi.roi = RoiEncoder.saveAsByteArray(imp.getRoi());
@@ -192,9 +209,7 @@ public class FileSaver {
 	public byte[] serialize() {
 		if (imp.getStack().isVirtual())
 			return null;
-		Object info = imp.getProperty("Info");
-		if (info!=null && (info instanceof String))
-			fi.info = (String)info;
+		fi.info = imp.getInfoProperty();
 		saveName = true;
 		fi.description = getDescriptionString();
 		saveName = false;
@@ -248,6 +263,8 @@ public class FileSaver {
 	/** Save the image or stack in TIFF/ZIP format using the specified path. */
 	public boolean saveAsZip(String path) {
 		//fi.nImages = 1;
+		if (imp.getProperty("FHT")!=null && path.contains("FFT of "))
+			setupFFTSave();
 		if (!path.endsWith(".zip"))
 			path = path+".zip";
 		if (name==null)
@@ -257,9 +274,7 @@ public class FileSaver {
 		if (!name.endsWith(".tif"))
 			name = name+".tif";
 		fi.description = getDescriptionString();
-		Object info = imp.getProperty("Info");
-		if (info!=null && (info instanceof String))
-			fi.info = (String)info;
+		fi.info = imp.getInfoProperty();
 		fi.roi = RoiEncoder.saveAsByteArray(imp.getRoi());
 		fi.overlay = getOverlay(imp);
 		fi.sliceLabels = imp.getStack().getSliceLabels();
@@ -285,7 +300,10 @@ public class FileSaver {
 	public static boolean okForGif(ImagePlus imp) {
 		int type = imp.getType();
 		if (type==ImagePlus.COLOR_RGB) {
-			IJ.error("To save as Gif, the image must be converted to \"8-bit Color\".");
+			String msg = "To save as GIF, the image ";
+			if (imp.getStackSize()>1)
+				msg = "To save as Animated GIF, the stack ";
+			IJ.error(msg+"must be converted to 8-bit\nindexed color by the Image>Type>8-bit Color command.");
 			return false;
 		} else
 			return true;
@@ -320,8 +338,8 @@ public class FileSaver {
 
 	/** Save the image in JPEG format using a save file
 		dialog. Returns false if the user selects cancel.
-		@see setJpegQuality
-		@see getJpegQuality
+		@see #setJpegQuality
+		@see #getJpegQuality
 	*/
 	public boolean saveAsJpeg() {
 		String type = "JPEG ("+getJpegQuality()+")";
@@ -333,8 +351,8 @@ public class FileSaver {
 	}
 
 	/** Save the image in JPEG format using the specified path.
-		@see setJpegQuality
-		@see getJpegQuality
+		@see #setJpegQuality
+		@see #getJpegQuality
 	*/
 	public boolean saveAsJpeg(String path) {
 		String err = JpegWriter.save(imp, path, jpegQuality);
@@ -550,7 +568,7 @@ public class FileSaver {
 		dialog. Returns false if the user selects cancel. */
 	public boolean saveAsLut() {
 		if (imp.getType()==ImagePlus.COLOR_RGB) {
-			IJ.error("RGB Images do not have a LUT.");
+			error("RGB Images do not have a LUT.");
 			return false;
 		}
 		String path = getPath("LUT", ".lut");
@@ -564,11 +582,11 @@ public class FileSaver {
 		LookUpTable lut = imp.createLut();
 		int mapSize = lut.getMapSize();
 		if (mapSize==0) {
-			IJ.error("RGB Images do not have a LUT.");
+			error("RGB Images do not have a LUT.");
 			return false;
 		}
 		if (mapSize<256) {
-			IJ.error("Cannot save LUTs with less than 256 entries.");
+			error("Cannot save LUTs with less than 256 entries.");
 			return false;
 		}
 		byte[] reds = lut.getReds(); 
@@ -598,6 +616,17 @@ public class FileSaver {
 		return true;
 	}
 
+	public void updateImagePlus(String path, int fileFormat) {
+		if (imp==null || fi==null)
+			return;
+		if (name==null && path!=null) {
+			File f = new File(path);
+			directory = f.getParent() + File.separator;
+			name = f.getName();
+		}
+		updateImp(fi, fileFormat);
+	}
+	
 	private void updateImp(FileInfo fi, int fileFormat) {
 		imp.changes = false;
 		if (name!=null) {
@@ -626,7 +655,11 @@ public class FileSaver {
 		String msg = e.getMessage();
 		if (msg.length()>100)
 			msg = msg.substring(0, 100);
-		IJ.error("FileSaver", "An error occured writing the file.\n \n" + msg);
+		error("An error occured writing the file.\n \n" + msg);
+	}
+	
+	private void error(String msg) {
+		IJ.error("FileSaver", msg);
 	}
 
 	/** Returns a string containing information about the specified  image. */
@@ -652,14 +685,18 @@ public class FileSaver {
 		}
 		if (fi.unit!=null)
 			sb.append("unit="+(fi.unit.equals("\u00B5m")?"um":fi.unit)+"\n");
-		if (fi.valueUnit!=null && fi.calibrationFunction!=Calibration.CUSTOM) {
-			sb.append("cf="+fi.calibrationFunction+"\n");
-			if (fi.coefficients!=null) {
-				for (int i=0; i<fi.coefficients.length; i++)
-					sb.append("c"+i+"="+fi.coefficients[i]+"\n");
+		int bitDepth = imp.getBitDepth();
+		if (fi.valueUnit!=null && (fi.calibrationFunction!=Calibration.CUSTOM||bitDepth==32)) {
+			if (bitDepth!=32) {
+				sb.append("cf="+fi.calibrationFunction+"\n");
+				if (fi.coefficients!=null) {
+					for (int i=0; i<fi.coefficients.length; i++)
+						sb.append("c"+i+"="+fi.coefficients[i]+"\n");
+				}
 			}
 			sb.append("vunit="+fi.valueUnit+"\n");
-			if (cal.zeroClip()) sb.append("zeroclip=true\n");
+			if (cal.zeroClip() && bitDepth!=32)
+				sb.append("zeroclip=true\n");
 		}
 		
 		// get stack z-spacing and fps
@@ -672,7 +709,7 @@ public class FileSaver {
 		if (!cal.getTimeUnit().equals("sec"))
 			sb.append("tunit="+cal.getTimeUnit()+"\n");
 		if (fi.nImages>1) {
-			if (fi.pixelDepth!=0.0 && fi.pixelDepth!=1.0)
+			if (fi.pixelDepth!=1.0)
 				sb.append("spacing="+fi.pixelDepth+"\n");
 			if (cal.fps!=0.0) {
 				if ((int)cal.fps==cal.fps)

@@ -4,6 +4,7 @@ import ij.*;
 import ij.gui.*;
 import ij.measure.*;
 import ij.process.*;
+import ij.util.Tools;
 import java.awt.*;
 import java.util.*;
 
@@ -35,6 +36,8 @@ import java.util.*;
  *                     Maximum points encoded in long array for sorting instead of separete objects that need gc
  *                     New output type 'List'
  * version 22-May-2011 Bugfix: Maximum search in EDM and float images with large dynamic range could omit maxima
+ * version 13-Sep-2013 added the findMaxima() and findMinima() functions for arrays (Norbert Vischer)
+ * version 20-Mar-2014 Watershed segmentation of EDM with tolerance>=1.0 does not kill fine particles
  */
 
 public class MaximumFinder implements ExtendedPlugInFilter, DialogListener {
@@ -167,7 +170,7 @@ public class MaximumFinder implements ExtendedPlugInFilter, DialogListener {
             useMinThreshold = false;
             ((Checkbox)(checkboxes.elementAt(1))).setState(false); //reset "Above Lower Threshold" checkbox
         }
-        if (!gd.getPreviewCheckbox().getState())
+        if (!gd.isPreviewActive())
             messageArea.setText("");        // no "nnn Maxima" message when not previewing
         return (!gd.invalidNumber());
     } // public boolean DialogItemChanged
@@ -229,6 +232,7 @@ public class MaximumFinder implements ExtendedPlugInFilter, DialogListener {
         maxImp.setCalibration(cal);             //keep the spatial calibration
         maxImp.show();
      } //public void run
+     
 
     /** Finds the image maxima and returns them as a Polygon. There
      * is an example at http://imagej.nih.gov/ij/macros/js/FindMaxima.js.
@@ -247,7 +251,115 @@ public class MaximumFinder implements ExtendedPlugInFilter, DialogListener {
 			return points;
     }
 
-    /** Here the processing is done: Find the maxima of an image (does not find minima).
+	/**
+	* Calculates peak positions of 1D array N.Vischer, 13-sep-2013
+	*
+	* @param xx Array containing peaks.
+	* @param tolerance Depth of a qualified valley must exceed tolerance.
+	* Tolerance must be >= 0. Flat tops are marked at their centers.
+	* @param  excludeOnEdges If 'true', a peak is only
+	* accepted if it is separated by two qualified valleys. If 'false', a peak
+	* is also accepted if separated by one qualified valley and by a border.
+	* @return Positions of peaks, sorted with decreasing amplitude
+	*/
+	public static int[] findMaxima(double[] xx, double tolerance, boolean excludeOnEdges) {
+		boolean includeEdge = !excludeOnEdges;
+		int len = xx.length;
+		if (len<2)
+			return new int[0];
+		if (tolerance < 0)
+			tolerance = 0;
+		int[] maxPositions = new int[len];
+		double max = xx[0];
+		double min = xx[0];
+		int maxPos = 0;
+		int lastMaxPos = -1;
+		boolean leftValleyFound = includeEdge;
+		int maxCount = 0;
+		for (int jj = 1; jj < len; jj++) {
+			double val = xx[jj];
+			if (val > min + tolerance)
+				leftValleyFound = true;
+			if (val > max && leftValleyFound) {
+				max = val;
+				maxPos = jj;
+			}
+			if (leftValleyFound)
+				lastMaxPos = maxPos;
+			if (val < max - tolerance && leftValleyFound) {
+				maxPositions[maxCount] = maxPos;
+				maxCount++;
+				leftValleyFound = false;
+				min = val;
+				max = val;
+			}
+			if (val < min) {
+				min = val;
+				if (!leftValleyFound)
+					max = val;
+			}
+		}
+		if (includeEdge) {
+			if (maxCount > 0 && maxPositions[maxCount - 1] != lastMaxPos)
+				maxPositions[maxCount++] = lastMaxPos;
+			if (maxCount == 0 && max - min >= tolerance)
+				maxPositions[maxCount++] = lastMaxPos;
+		}
+		int[] cropped = new int[maxCount];
+		System.arraycopy(maxPositions, 0, cropped, 0, maxCount);
+		maxPositions = cropped;
+		double[] maxValues = new double[maxCount];
+		for (int jj = 0; jj < maxCount; jj++) {
+			int pos = maxPositions[jj];
+			double midPos = pos;
+			while (pos < len - 1 && xx[pos] == xx[pos + 1]) {
+				midPos += 0.5;
+				pos++;
+			}
+			maxPositions[jj] = (int) midPos;
+			maxValues[jj] = xx[maxPositions[jj]];
+		}
+		int[] rankPositions = Tools.rank(maxValues);
+		int[] returnArr = new int[maxCount];
+		for (int jj = 0; jj < maxCount; jj++) {
+			int pos = maxPositions[rankPositions[jj]];
+			returnArr[maxCount - jj - 1] = pos;//use descending order
+		}
+		return returnArr;
+	}
+	
+	/**
+	* Returns minimum positions of array xx, sorted with decreasing strength
+	*/
+	public static int[] findMinima(double[] xx, double tolerance, boolean includeEdges) {
+		int len = xx.length;
+		double[] negArr = new double[len];
+		for (int jj = 0; jj < len; jj++)
+			negArr[jj] = -xx[jj];
+		int[] minPositions = findMaxima(negArr, tolerance, includeEdges);
+		return minPositions;
+	}
+	
+     /** Find the maxima of an image.
+     * @param ip             The input image
+     * @param tolerance      Height tolerance: maxima are accepted only if protruding more than this value
+     *                       from the ridge to a higher maximum
+     * @param outputType     What to mark in output image: SINGLE_POINTS, IN_TOLERANCE or SEGMENTED.
+     *                       No output image is created for output types POINT_SELECTION, LIST and COUNT.
+     * @param excludeOnEdges Whether to exclude edge maxima
+     * @return               A new byteProcessor with a normal (uninverted) LUT where the marked points
+     *                       are set to 255 (Background 0). Pixels outside of the roi of the input ip are not set.
+     *                       Returns null if outputType does not require an output or if cancelled by escape
+     */
+    public ByteProcessor findMaxima(ImageProcessor ip, double tolerance, int outputType, boolean excludeOnEdges) {
+    	return findMaxima(ip, tolerance, ImageProcessor.NO_THRESHOLD, outputType, excludeOnEdges, false);
+    }
+
+   /** Here the processing is done: Find the maxima of an image (does not find minima).
+     *
+     * LIMITATIONS:          With outputType=SEGMENTED (watershed segmentation), some segmentation lines
+     *                       may be improperly placed if local maxima are suppressed by the tolerance.
+     *
      * @param ip             The input image
      * @param tolerance      Height tolerance: maxima are accepted only if protruding more than this value
      *                       from the ridge to a higher maximum
@@ -256,7 +368,7 @@ public class MaximumFinder implements ExtendedPlugInFilter, DialogListener {
      * @param outputType     What to mark in output image: SINGLE_POINTS, IN_TOLERANCE or SEGMENTED.
      *                       No output image is created for output types POINT_SELECTION, LIST and COUNT.
      * @param excludeOnEdges Whether to exclude edge maxima
-     * @param isEDM          Whether the image is a float Euclidian Distance Map
+     * @param isEDM          Whether the image is a float Euclidian Distance Map.
      * @return               A new byteProcessor with a normal (uninverted) LUT where the marked points
      *                       are set to 255 (Background 0). Pixels outside of the roi of the input ip are not set.
      *                       Returns null if outputType does not require an output or if cancelled by escape
@@ -418,6 +530,7 @@ public class MaximumFinder implements ExtendedPlugInFilter, DialogListener {
    void analyzeAndMarkMaxima(ImageProcessor ip, ByteProcessor typeP, long[] maxPoints, boolean excludeEdgesNow,
         boolean isEDM, float globalMin, double tolerance, int outputType, float maxSortingError) {
         byte[] types =  (byte[])typeP.getPixels();
+        float[] edmPixels = isEDM ? (float[])ip.getPixels() : null;
         int nMax = maxPoints.length;
         int [] pList = new int[width*height];       //here we enter points starting from a maximum
         Vector xyVector = null;
@@ -459,6 +572,7 @@ public class MaximumFinder implements ExtendedPlugInFilter, DialogListener {
                     for (int d=0; d<8; d++) {       //analyze all neighbors (in 8 directions) at the same level
                         int offset2 = offset+dirOffset[d];
                         if ((isInner || isWithin(x, y, d)) && (types[offset2]&LISTED)==0) {
+                        if (isEDM && edmPixels[offset2]<=0) continue;   //ignore the background (non-particles)
                             if ((types[offset2]&PROCESSED)!=0) {
                                 maxPossible = false; //we have reached a point processed previously, thus it is no maximum now
                                 //if(x0<25&&y0<20)IJ.write("x0,y0="+x0+","+y0+":stop at processed neighbor from x,y="+x+","+y+", dir="+d);
@@ -554,8 +668,7 @@ public class MaximumFinder implements ExtendedPlugInFilter, DialogListener {
                     ypoints[i] = xy[1];
                 }
                 if (imp!=null) {
-                	Roi points = new PointRoi(xpoints, ypoints, npoints);
-                	((PointRoi)points).setHideLabels(true);
+                	PointRoi points = new PointRoi(xpoints, ypoints, npoints);
                 	imp.setRoi(points);
                 }
                 points = new Polygon(xpoints, ypoints, npoints);

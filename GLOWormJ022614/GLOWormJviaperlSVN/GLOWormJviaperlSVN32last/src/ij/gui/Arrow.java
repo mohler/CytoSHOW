@@ -12,8 +12,8 @@ public class Arrow extends Line {
 	public static final String SIZE_KEY = "arrow.size";
 	public static final String DOUBLE_HEADED_KEY = "arrow.double";
 	public static final String OUTLINE_KEY = "arrow.outline";
-	public static final int FILLED=0, NOTCHED=1, OPEN=2, HEADLESS=3;
-	public static final String[] styles = {"Filled", "Notched", "Open", "Headless"};
+	public static final int FILLED=0, NOTCHED=1, OPEN=2, HEADLESS=3, BAR=4;
+	public static final String[] styles = {"Filled", "Notched", "Open", "Headless", "Bar"};
 	private static int defaultStyle = (int)Prefs.get(STYLE_KEY, FILLED);
 	private static float defaultWidth = (float)Prefs.get(WIDTH_KEY, 2);
 	private static double defaultHeadSize = (int)Prefs.get(SIZE_KEY, 10);  // 0-30;
@@ -26,6 +26,7 @@ public class Arrow extends Line {
 	private float[] points = new float[2*5];
 	private GeneralPath path = new GeneralPath();
 	private static Stroke defaultStroke = new BasicStroke();
+	double headShaftRatio;
 	
 	static {
 		if (defaultStyle<FILLED || defaultStyle>HEADLESS)
@@ -105,16 +106,34 @@ public class Arrow extends Line {
 		path.reset();
 		path = new GeneralPath();
 		calculatePoints();
-		path.moveTo(points[0], points[1]); // tail
-		path.lineTo(points[2 * 1], points[2 * 1 + 1]); // head back
-		path.moveTo(points[2 * 1], points[2 * 1 + 1]); // head back
+		float tailx = points[0];
+		float taily = points[1];
+		float headbackx = points[2*1];
+		float headbacky = points[2*1+1];
+		float headtipx = points[2*3];
+		float headtipy = points[2*3+1];
+		if (outline) {
+			double dx = headtipx - tailx;
+			double dy = headtipy - taily;
+			double shaftLength = Math.sqrt(dx*dx+dy*dy);
+			dx = headtipx - headbackx;
+			dy = headtipy- headbacky;
+			double headLength = Math.sqrt(dx*dx+dy*dy);
+			headShaftRatio = headLength/shaftLength;
+			if (headShaftRatio>1.0)
+				headShaftRatio = 1.0;
+			//IJ.log(headShaftRatio+" "+(int)shaftLength+" "+(int)headLength+" "+(int)tailx+" "+(int)taily+" "+(int)headtipx+" "+(int)headtipy);
+		}
+		path.moveTo(tailx, taily); // tail
+		path.lineTo(headbackx, headbacky); // head back
+		path.moveTo(headbackx, headbacky); // head back
 		if (style==OPEN)
 			path.moveTo(points[2 * 2], points[2 * 2 + 1]);
 		else
 			path.lineTo(points[2 * 2], points[2 * 2 + 1]); // left point
-		path.lineTo(points[2 * 3], points[2 * 3 + 1]); // head tip
+		path.lineTo(headtipx, headtipy); // head tip
 		path.lineTo(points[2 * 4], points[2 * 4 + 1]); // right point
-		path.lineTo(points[2 * 1], points[2 * 1 + 1]); // back to the head back
+		path.lineTo(headbackx, headbacky); // back to the head back
 		return path;
 	}
 
@@ -130,6 +149,8 @@ public class Arrow extends Line {
 		if (style==NOTCHED) length*=0.74;
 		if (style==OPEN) length*=1.32;
 		if (length<0.0 || style==HEADLESS) length=0.0;
+		double x = getXBase();
+		double y = getYBase();
 		x1d=x+x1R; y1d=y+y1R; x2d=x+x2R; y2d=y+y2R;
 		x1=(int)x1d; y1=(int)y1d; x2=(int)x2d; y2=(int)y2d;
 		double dx=x2d-x1d, dy=y2d-y1d;
@@ -146,6 +167,10 @@ public class Arrow extends Line {
 			double factor = style==OPEN?1.3:1.42;
 			points[2*3] = (float)(x2d-dx*shaftWidth*factor);
 			points[2*3+1] = (float)(y2d-dy*shaftWidth*factor);
+			if (style==BAR) {
+				points[2*3] = (float)(x2d-dx*shaftWidth*0.5);
+				points[2*3+1] = (float)(y2d-dy*shaftWidth*0.5);
+			}
 		} else {
 			points[2*3] = (float)x2d;
 			points[2*3+1] = (float)y2d;
@@ -173,6 +198,13 @@ public class Arrow extends Line {
 				points[1*2+1] = points[2*3+1];
 				SL = length;
 				break;
+			case BAR:
+				tip = Math.toRadians(90); //30
+				points[1*2] = points[2*3];
+				points[1*2+1] = points[2*3+1];
+				SL = length;
+				updateFullWindow = true;
+				break;       
 		}
 		// P2 = P3 - SL*alpha+tip
 		points[2*2] = (float) (points[2*3]	- SL*Math.cos(alpha+tip));
@@ -182,7 +214,7 @@ public class Arrow extends Line {
 		points[2*4+1] = (float) (points[2*3+1] - SL*Math.sin(alpha-tip));
  	}
  	
-	public Shape getShape() {
+	private Shape getShape() {
 		Shape arrow = getPath();
 		BasicStroke stroke = new BasicStroke((float)getStrokeWidth(), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
 		Shape outlineShape = stroke.createStrokedShape(arrow);
@@ -210,14 +242,15 @@ public class Arrow extends Line {
 
 	private double getOutlineWidth() {
 		double width = getStrokeWidth()/8.0;
-		if (width<1.0) width = 1.0;
-		double head = headSize/8.0;
-		if (head<1.0) head = 1.0;
-		double lineWidth = width*head;
+		double head = headSize/7.0;
+		double lineWidth = width + head + headShaftRatio;
 		if (lineWidth<1.0) lineWidth = 1.0;
+		//if (width<1) width=1;
+		//if (head<1) head=1;
+		//IJ.log(getStrokeWidth()+"  "+IJ.d2s(width,2)+"  "+IJ.d2s(head,2)+"  "+IJ.d2s(headShaftRatio,2)+"  "+IJ.d2s(lineWidth,2)+"  "+IJ.d2s(width*head,2));
 		return lineWidth;
 	}
-
+	
 	public void drawPixels(ImageProcessor ip) {
 		ShapeRoi shapeRoi = getShapeRoi();
 		ShapeRoi shapeRoi2 = null;
@@ -242,10 +275,10 @@ public class Arrow extends Line {
 		return getShapeRoi().contains(x, y);
 	}
 
-//	/** Return the bounding rectangle of this arrow. */
-//	public Rectangle getBounds() {
-//		return getShapeRoi().getBounds();
-//	}
+	/** Return the bounding rectangle of this arrow. */
+	public Rectangle getBounds() {
+		return getShapeRoi().getBounds();
+	}
 
 	protected void handleMouseDown(int sx, int sy) {
 		super.handleMouseDown(sx, sy);
@@ -274,6 +307,28 @@ public class Arrow extends Line {
 
 	public void setStyle(int style) {
 		this.style = style;
+	}
+	
+	/* Set the style, where 'style' is "filled", "notched", "open", "headless" or "bar",
+		plus optionial modifiers of "outline", "double", "small", "medium" and "large". */
+	public void setStyle(String style) {
+		style = style.toLowerCase();
+		int newStyle = Arrow.FILLED;
+		if (style.contains("notched"))
+			newStyle = Arrow.NOTCHED;
+		else if (style.contains("open"))
+			newStyle = Arrow.OPEN;
+		else if (style.contains("headless"))
+			newStyle = Arrow.HEADLESS;
+		else if (style.contains("bar"))
+			newStyle = Arrow.BAR;
+		setStyle(newStyle);
+		setOutline(style.contains("outline"));
+		setDoubleHeaded(style.contains("double"));
+		if (style.contains("small"))
+			setHeadSize(5);
+		else if (style.contains("large"))
+			setHeadSize(15);
 	}
 
 	public int getStyle() {
@@ -334,14 +389,6 @@ public class Arrow extends Line {
 
 	public static boolean getDefaultOutline() {
 		return defaultOutline;
-	}
-
-	public float[] getPoints() {
-		return points;
-	}
-
-	public void setPoints(float[] points) {
-		this.points = points;
 	}
 
 }

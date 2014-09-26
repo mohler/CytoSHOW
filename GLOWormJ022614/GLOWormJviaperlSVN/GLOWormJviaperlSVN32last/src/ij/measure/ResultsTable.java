@@ -8,11 +8,11 @@ import ij.util.Tools;
 import ij.io.SaveDialog;
 import java.awt.*;
 import java.text.*;
-import java.util.Locale;
+import java.util.*;
 import java.io.*;
 
 
-/** This is a table for storing measurement results as columns of numeric values. 
+/** This is a table for storing measurement results and strings as columns of values. 
 	Call the static ResultsTable.getResultsTable() method to get a reference to the 
 	ResultsTable used by the <i>Analyze/Measure</i> command. 
 	@see ij.plugin.filter.Analyzer#getResultsTable
@@ -47,16 +47,23 @@ public class ResultsTable implements Cloneable {
 	private double[][] columns = new double[maxColumns][];
 	private String[] rowLabels;
 	private int lastColumn = -1;
-	private	StringBuffer sb;
+	private	StringBuilder sb;
 	private int precision = 3;
 	private String rowLabelHeading = "";
 	private char delimiter = '\t';
 	private boolean headingSet; 
 	private boolean showRowNumbers = true;
 	private boolean autoFormat = true;
+	private Hashtable stringColumns;
 
-	/** Constructs an empty ResultsTable with the counter=0 and no columns. */
+
+	/** Constructs an empty ResultsTable with the counter=0, no columns
+		and the precision set to 3 or the "Decimal places" value in
+		Analyze/Set Measurements if that value is higher than 3. */
 	public ResultsTable() {
+		int p = Analyzer.getPrecision();
+		if (p>precision)
+			setPrecision(p);
 	}
 	
 	/** Returns the ResultsTable used by the Measure command. This
@@ -116,6 +123,11 @@ public class ResultsTable implements Cloneable {
 		return counter;
 	}
 	
+	/** Returns the size of this ResultsTable. */
+	public int size() {
+		return counter;
+	}
+
 	/** Adds a value to the end of the given column. Counter must be >0.*/
 	public void addValue(int column, double value) {
 		if (column>=maxColumns)
@@ -148,6 +160,19 @@ public class ResultsTable implements Cloneable {
 		keep[index] = true;
 	}
 	
+	/** Adds a string value to the end of the given column. If the column
+		does not exist, it is created.  Counter must be >0. */
+	public void addValue(String column, String value) {
+		if (column==null)
+			throw new IllegalArgumentException("Column is null");
+		int index = getColumnIndex(column);
+		if (index==COLUMN_NOT_FOUND)
+			index = getFreeColumn(column);
+		addValue(index, Double.NaN);
+		setValue(column, getCounter()-1, value);
+		keep[index] = true;
+	}
+
 	/** Adds a label to the beginning of the current row. Counter must be >0. */
 	public void addLabel(String label) {
 		if (rowLabelHeading.equals(""))
@@ -262,7 +287,7 @@ public class ResultsTable implements Cloneable {
 	/** Returns the index of the first column with the given heading.
 		heading. If not found, returns COLUMN_NOT_FOUND. */
 	public int getColumnIndex(String heading) {
-		for(int i=0; i<headings.length; i++) {
+		for (int i=0; i<headings.length; i++) {
 			if (headings[i]==null)
 				return COLUMN_NOT_FOUND;
 			else if (headings[i].equals(heading))
@@ -327,6 +352,30 @@ public class ResultsTable implements Cloneable {
 		return getValueAsDouble(col,row);
 	}
 
+	/** Returns the string value of the given column and row,
+		where row must be greater than or equal zero
+		and less than the value returned by getCounter(). */
+	public String getStringValue(String column, int row) {
+		if (row<0 || row>=getCounter())
+			throw new IllegalArgumentException("Row out of range");
+		int col = getColumnIndex(column);
+		if (col==COLUMN_NOT_FOUND)
+			throw new IllegalArgumentException("\""+column+"\" column not found");
+		return getStringValue(col, row);
+	}
+
+	/** Returns the string value of the given column and row, where
+		column must be less than or equal the value returned by
+		getLastColumn() and row must be greater than or equal
+		zero and less than the value returned by getCounter(). */
+	public String getStringValue(int column, int row) {
+		if (column>=maxColumns || row>=counter)
+			throw new IllegalArgumentException("Index out of range: "+column+","+row);
+		if (columns[column]==null)
+			throw new IllegalArgumentException("Column not defined: "+column);
+		return getValueAsString(column, row);
+	}
+
 	/**	 Returns the label of the specified row. Returns null if the row does not have a label. */
 	public String getLabel(int row) {
 		if (row<0 || row>=getCounter())
@@ -372,6 +421,42 @@ public class ResultsTable implements Cloneable {
 		columns[column][row] = value;
 	}
 
+	/** Sets the string value of the given column and row, where
+		where 0&lt;=row&lt;counter. If the specified column does 
+		not exist, it is created. When adding columns, 
+		<code>show()</code> must be called to update the 
+		window that displays the table.*/
+	public void setValue(String column, int row, String value) {
+		if (column==null)
+			throw new IllegalArgumentException("Column is null");
+		int col = getColumnIndex(column);
+		if (col==COLUMN_NOT_FOUND)
+			col = getFreeColumn(column);
+		setValue(col, row, value);
+	}
+
+	/** Sets the string value of the given column and row, where
+		where 0&lt;=column&lt;=(lastRow+1 and 0&lt;=row&lt;=counter. */
+	public void setValue(int column, int row, String value) {
+		setValue(column, row, Double.NaN);
+		if (stringColumns==null)
+			stringColumns = new Hashtable();
+		ArrayList stringColumn = (ArrayList)stringColumns.get(new Integer(column));
+		if (stringColumn==null) {
+			stringColumn = new ArrayList();
+			stringColumns.put(new Integer(column), stringColumn);
+		}
+		int size = stringColumn.size();
+		if (row>=size) {
+			for (int i=size; i<row; i++)
+				stringColumn.add(i, "");
+		}
+		if (row==stringColumn.size())
+			stringColumn.add(row, value);
+		else
+			stringColumn.set(row, value);
+	}
+
 	/** Returns a tab or comma delimited string containing the column headings. */
 	public String getColumnHeadings() {
 		if (headingSet && !rowLabelHeading.equals("")) { // workaround setHeading() bug
@@ -381,7 +466,7 @@ public class ResultsTable implements Cloneable {
 			}
 			headingSet = false;
 		}
-		StringBuffer sb = new StringBuffer(200);
+		StringBuilder sb = new StringBuilder(200);
 		if (showRowNumbers)
 			sb.append(" "+delimiter);
 		if (rowLabels!=null)
@@ -398,6 +483,28 @@ public class ResultsTable implements Cloneable {
 		return new String(sb);
 	}
 
+	/** Returns the column headings as an array of Strings. */
+	public String[] getHeadings() {
+		int n = 0;
+		if (rowLabels!=null)
+			n++;
+		for (int i=0; i<=lastColumn; i++)
+			if (columns[i]!=null) n++;
+		String[] temp = new String[n];
+		int index = 0;
+		if (rowLabels!=null)
+			temp[index++] = rowLabelHeading;
+		String heading;
+		for (int i=0; i<=lastColumn; i++) {
+			if (columns[i]!=null) {
+				heading = headings[i];
+				if (heading==null) heading ="---"; 
+				temp[index++] = heading;
+			}
+		}
+		return temp;
+	}
+
 	/** Returns the heading of the specified column or null if the column is empty. */
 	public String getColumnHeading(int column) {
 		if ((column<0) || (column>=maxColumns))
@@ -411,7 +518,7 @@ public class ResultsTable implements Cloneable {
 		if ((row<0) || (row>=counter))
 			throw new IllegalArgumentException("Row out of range: "+row);
 		if (sb==null)
-			sb = new StringBuffer(200);
+			sb = new StringBuilder(200);
 		else
 			sb.setLength(0);
 		if (showRowNumbers) {
@@ -421,18 +528,40 @@ public class ResultsTable implements Cloneable {
 		if (rowLabels!=null) {
 			if (rowLabels[row]!=null) {
 				String label = rowLabels[row];
-				if (delimiter==',') label = label.replaceAll(",", ";");
+				if (delimiter==',')
+					label = label.replaceAll(",", ";");
 				sb.append(label);
 			}
 			sb.append(delimiter);
 		}
 		for (int i=0; i<=lastColumn; i++) {
 			if (columns[i]!=null) {
-				sb.append(n(columns[i][row]));
-				if (i!=lastColumn) sb.append(delimiter);
+				sb.append(getValueAsString(i,row));
+				if (i!=lastColumn)
+					sb.append(delimiter);
 			}
 		}
 		return new String(sb);
+	}
+	
+	private String getValueAsString(int column, int row) { 
+		double value = columns[column][row];
+		//IJ.log("getValueAsString1: col="+column+ ", row= "+row+", value= "+value+", size="+stringColumns.size());
+		if (Double.isNaN(value) && stringColumns!=null) {
+			String string = "NaN";
+			ArrayList stringColumn = (ArrayList)stringColumns.get(new Integer(column));
+			if (stringColumn==null)
+				return string;
+			//IJ.log("getValueAsString2: "+column+ +row+" "+stringColumn.size());
+			if (row>=0 && row<stringColumn.size()) {
+				string = (String)stringColumn.get(row);
+				if (string!=null && string.contains("\n"))
+					string = string.replaceAll("\n", "\\\\n");
+				return string;
+			} else
+				return string;
+		} else
+			return n(value);
 	}
 	
 	/**
@@ -455,9 +584,10 @@ public class ResultsTable implements Cloneable {
 				headings[i] = defaultHeadings[i];
 	}
 
-	/** Sets the number of digits to the right of decimal point. */
-	public void setPrecision(int precision) {
-		this.precision = precision;
+	/** Sets the decimal places (digits to the right of decimal point)
+		that are used when this table is displayed. */
+	public void setPrecision(int decimalPlaces) {
+		this.precision = decimalPlaces;
 	}
 	
 	public void showRowNumbers(boolean showNumbers) {
@@ -533,10 +663,16 @@ public class ResultsTable implements Cloneable {
 			for (int i=row; i<counter-1; i++)
 				rowLabels[i] = rowLabels[i+1];
 		}
-		for (int i=0; i<=lastColumn; i++) {
-			if (columns[i]!=null) {
-				for (int j=row; j<counter-1; j++)
-					columns[i][j] = columns[i][j+1];
+		for (int col=0; col<=lastColumn; col++) {
+			if (columns[col]!=null) {
+				for (int i=row; i<counter-1; i++)
+					columns[col][i] = columns[col][i+1];
+				ArrayList stringColumn = stringColumns!=null?(ArrayList)stringColumns.get(new Integer(col)):null;
+				if (stringColumn!=null && stringColumn.size()==counter) {
+					for (int i=row; i<counter-1; i++)
+						stringColumn.set(i,stringColumn.get(i+1));
+					stringColumn.remove(counter-1);
+				}
 			}
 		}
 		counter--;
@@ -552,6 +688,7 @@ public class ResultsTable implements Cloneable {
 		}
 		lastColumn = -1;
 		rowLabels = null;
+		stringColumns = null;
 	}
 	
 	/** Returns the index of the last used column, or -1 if no columns are used. */
@@ -610,25 +747,27 @@ public class ResultsTable implements Cloneable {
 		} else {
 			Frame frame = WindowManager.getFrame(windowTitle);
 			TextWindow win;
-			if (frame!=null && frame instanceof TextWindow)
+			if (frame!=null && frame instanceof TextWindow) {
 				win = (TextWindow)frame;
-			else {
-				win = new TextWindow(windowTitle, "", 400, 300);
+				win.toFront();
+			} else {
+				int width = getLastColumn()<=1?250:400;
+				win = new TextWindow(windowTitle, "", width, 300);
 				cloneNeeded = true;
 			}
 			tp = win.getTextPanel();
 			tp.setColumnHeadings(tableHeadings);
 			newWindow = tp.getLineCount()==0;
-			autoFormat = false;
+			if (!windowTitle.startsWith("Summary"))
+				autoFormat = false;
 		}
 		tp.setResultsTable(cloneNeeded?(ResultsTable)this.clone():this);
 		int n = getCounter();
 		if (n>0) {
 			if (tp.getLineCount()>0) tp.clear();
-			StringBuffer sb = new StringBuffer(n*tableHeadings.length());
 			for (int i=0; i<n; i++)
-				sb.append(getRowAsString(i)+"\n");
-			tp.append(new String(sb));
+				tp.appendWithoutUpdate(getRowAsString(i));
+			tp.updateDisplay();
 		}
 		if (newWindow) tp.scrollToTop();
 	}
@@ -695,7 +834,6 @@ public class ResultsTable implements Cloneable {
 	
 	/** Opens a tab or comma delimited text file and returns it as a 
 	* ResultsTable. Displays a file open dialog if 'path' is empty or null.
-	* Displays non-numeric tables in a TextWindow and returns null.
 	* @see #open2(String)
 	*/
 	public static ResultsTable open(String path) throws IOException {
@@ -727,13 +865,10 @@ public class ResultsTable implements Cloneable {
 			headings[i] = headings[i].trim();
 		int firstRow = allNumericHeadings?0:1;
 		boolean labels = firstColumn==1 && headings[1].equals("Label");
-		int rtn = 0;
-		if (!labels && (rtn=openNonNumericTable(path, lines, firstRow, cellSeparator))==3)
-			return null;
-		if (!labels && (rtn==1||rtn==2))
+		int type=getTableType(path, lines, firstRow, cellSeparator);
+		if (!labels && (type==1||type==2))
 			labels = true;
-		int labelsIndex = (rtn==2)?0:1;
-			
+		int labelsIndex = (type==2)?0:1;
 		if (lines[0].startsWith("\t")) {
 			String[] headings2 = new String[headings.length+1];
 			headings2[0] = " ";
@@ -749,14 +884,19 @@ public class ResultsTable implements Cloneable {
 			for (int j=firstColumn; j<items.length; j++) {
 				if (j==labelsIndex&&labels)
 					rt.addLabel(headings[labelsIndex], items[labelsIndex]);
-				else if (j<headings.length)
-					rt.addValue(headings[j], Tools.parseDouble(items[j]));
+				else if (j<headings.length) {
+					double value = Tools.parseDouble(items[j]);
+					if (Double.isNaN(value))
+						rt.addValue(headings[j], items[j]);
+					else
+						rt.addValue(headings[j], value);
+				}
 			}
 		}
 		return rt;
 	}
 	
-	static int openNonNumericTable(String path, String[] lines, int firstRow, String cellSeparator) {
+	private static int getTableType(String path, String[] lines, int firstRow, String cellSeparator) {
 		if (lines.length<2) return 0;
 		String[] items=Tools.split(lines[1], cellSeparator);
 		int nonNumericCount = 0;
@@ -774,15 +914,6 @@ public class ResultsTable implements Cloneable {
 			return 1; // assume this is an ImageJ Results table with row numbers and row labels
 		if (nonNumericCount==1 && nonNumericIndex==0)
 			return 2; // assume this is an ImageJ Results table without row numbers and with row labels
-		if (csv) lines[0] = lines[0].replaceAll(",", "\t");
-		StringBuffer sb = new StringBuffer();
-		for (int i=1; i<lines.length; i++) {
-			sb.append(lines[i]);
-			sb.append("\n");
-		}
-		String str = sb.toString();
-		if (csv) str = str.replaceAll(",", "\t");
-		new TextWindow(new File(path).getName(), lines[0], str, 500, 400);
 		return 3;
 	}
 	
@@ -824,7 +955,7 @@ public class ResultsTable implements Cloneable {
 			return "null";
 	}
 
-	/** Creates a copy of this ResultsTable. */
+	/** Duplicates this ResultsTable. */
 	public synchronized Object clone() {
 		try { 
 			ResultsTable rt2 = (ResultsTable)super.clone();
@@ -844,6 +975,15 @@ public class ResultsTable implements Cloneable {
 				rt2.rowLabels = new String[rowLabels.length];
 				for (int i=0; i<counter; i++)
 					rt2.rowLabels[i] = rowLabels[i];
+			}
+			if (stringColumns!=null) {
+				rt2.stringColumns = new Hashtable();
+				Set set = stringColumns.keySet();
+				for (Iterator i=set.iterator(); i.hasNext();) {
+					Integer column = (Integer)i.next();
+					ArrayList list = (ArrayList)stringColumns.get(column);
+					rt2.stringColumns.put(column, list.clone());
+				}
 			}
 			return rt2;
 		}

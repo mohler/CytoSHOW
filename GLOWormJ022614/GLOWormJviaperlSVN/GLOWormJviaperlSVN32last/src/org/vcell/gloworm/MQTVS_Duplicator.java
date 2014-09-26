@@ -168,7 +168,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 		Roi roi = imp.getRoi();
 		//Roi manualRoi = roi;
 
-		Frame channelsTool = Channels.getInstance();
+		Channels channelsTool = Channels.getInstance();
 		if (channelsTool!=null) ((Channels) channelsTool).close();
 
 		double[] inMin = new double[imp.getNChannels()];

@@ -55,7 +55,13 @@ import java.util.Hashtable;
  * If all attempts to find initial points result in NaN, the status returned is
  * INITIALIZATION_FAILURE.
  *
- * Version: Michael Schmid 2012-01-30
+ * Versions:
+ * Michael Schmid 2012-01-30: first version, based on previous CurveFitter
+ * 2012-11-20: mor tries to find initial params not leading to NaN
+ * 2013-09-24: 50% higher maximum iteration count, and never uses more than 0.4*maxIter
+ *             iterations per minimization to avoid trying too few sets of initial params
+ * 2013-10-13: setStatusAndEscape to show iterations and enable abort by ESC
+ * 2014-09-16: normalization bug fixed. makeNewParamVariations checks for paramResolutions
  *
  */
 public class Minimizer {
@@ -89,7 +95,7 @@ public class Minimizer {
     private final static double C_CONTRACTION = 0.5;  // contraction coefficient
     private final static double C_EXPANSION   = 2.0;  // expansion coefficient
     private final static double C_SHRINK      = 0.5;  // shrink coefficient
-    private final static int    ITER_FACTOR   = 500;  // maximum number of iterations per numParams^2; twice that value for 2 threads
+    private final static int    ITER_FACTOR   = 750;  // maximum number of iterations per numParams^2; twice that value for 2 threads
     private final static int WORST=0, NEXT_WORST=1, BEST=2;//indices in array to pass the numbers of the respective vertices
 
     private int numParams;                  // number of independent variables (parameters)
@@ -100,7 +106,7 @@ public class Minimizer {
     private double maxAbsError = 1e-100;    // max absolute error
     private double[] paramResolutions;      // differences of parameters less than these values are considered 0
     private int maxIter;                    // stops after this number of iterations
-    private int numIter;                    // number of iterations performed
+    private int totalNumIter;               // number of iterations performed in all tries so far
     private int numCompletedMinimizations;  // number of minimizations completed
 	private int maxRestarts = 2;            // number of times to try finding local minima; each uses 2 threads if restarts>0
 	private int randomSeed;                 // for starting the random number generator
@@ -110,6 +116,10 @@ public class Minimizer {
 	private boolean wasInitialized;         // initialization was successful at least once
     private double[] result;                // result data+function value
     private Vector<double[]> resultsVector; // holds several results if multiple tries; the best one is kept.
+    private String ijStatusString = null;   // shown together with iteration count in status, no display if null
+    private boolean checkEscape;            // whether to stop when Escape is pressed
+    private int nextIterationForStatus = 10;// next iteration when we should display the status
+    private long startTime;                 // of the whole minimization process
     /*private Hashtable<Thread, double[][]> simpTable =
             new Hashtable<Thread, double[][]>(); //for each thread, holds a reference to its simplex */
 
@@ -205,7 +215,10 @@ public class Minimizer {
             for (double[] r : resultsVector)        // find best result so far
                 if (value(r) < value(result))
                     result = r;
-            if (status != SUCCESS && status != REINITIALIZATION_FAILURE) return status;   // no more tries if error or aborted
+            if (status != SUCCESS && status != REINITIALIZATION_FAILURE && status != MAX_ITERATIONS_EXCEEDED)
+                return status;                      // no more tries if permanent error or aborted
+            if (totalNumIter >= maxIter)
+                return MAX_ITERATIONS_EXCEEDED;     // no more tries if too many iterations
             for (int ir=0; ir<resultsVector.size(); ir++)
                 if (!belowErrorLimit(value((double[])resultsVector.get(ir)), value(result), 1.0)) {
                     resultsVector.remove(ir);       // discard results that are significantly worse
@@ -213,6 +226,8 @@ public class Minimizer {
                 }
             if (resultsVector.size() >= 2) return SUCCESS;  // if we have two (almost) equal results, it's enough
         } //for i <= maxRestarts
+        if (ijStatusString != null)
+            IJ.showStatus("");                      // reset status display
         return maxRestarts>0 ?
                 MAX_RESTARTS_EXCEEDED :             // number of restarts exceeded without two equal results
                 status;                             // if only one run was required, we can't have 2 equal results
@@ -279,7 +294,7 @@ public class Minimizer {
      *  between one and numParams+3 calls of the target function (typically two calls
      *  per iteration) */
     public int getIterations() {
-        return numIter;
+        return totalNumIter;
     }
         
     /** Set maximum number of iterations allowed (including all restarts and all threads).
@@ -375,10 +390,22 @@ public class Minimizer {
     }
 
     /** Aborts minimization. Calls to getParams() will return the best solution found so far.
-     *  This method may be called from the user-supplied target function, e.g. when it checks
-     *  for IJ.escapePressed(), allowing the user to abort a lengthy minimization. */
+     *  This method may be called from the user-supplied target function.
+     *  If displayStatusAndCheckEsc has been called before, the Minimizer itself checks for the ESC key.
+     */
     public void abort() {
         status = ABORTED;
+    }
+
+    /** Create output on the number of iterations in the ImageJ Status line, e.g.
+     *  "<ijStatusString> 50 (max 750); ESC to stop"
+     *  @param ijStatusString Displayed in the beginning of the status message. No display if null.
+     *  E.g. "Optimization: Iteration "
+     *  @param checkEscape When true, the Minimizer stops if escape is pressed and the status
+     *  becomes ABORTED. Note that checking for ESC does not work in the Event Queue thread. */
+    public void setStatusAndEsc(String ijStatusString, boolean checkEscape) {
+        this.ijStatusString = ijStatusString;
+        this.checkEscape = checkEscape;
     }
 
     /** Add a given number of extra elements to array of parameters (independent vaiables)
@@ -402,6 +429,8 @@ public class Minimizer {
             return;
         }
         wasInitialized = true;
+        if (startTime == 0)
+            startTime = System.currentTimeMillis();
         //if (IJ.debugMode) showSimplex(simp, seed+" Initialized:");
         int bestVertexNumber = minimize(simp);          // first minimization
         double bestValueSoFar = value(simp[bestVertexNumber]);
@@ -431,6 +460,7 @@ public class Minimizer {
     }
 
     /** Minimizes the target function by variation of the simplex.
+     *  Note that one call to this function never does more than 0.4*maxIter iterations.
      *  @return index of the best value in simp
      */
     private int minimize(double[][] simp) {
@@ -443,11 +473,13 @@ public class Minimizer {
         int worst = worstNextBestArray[WORST];
         int nextWorst = worstNextBestArray[NEXT_WORST];
         int best = worstNextBestArray[BEST];
-String a="ini";
-double lastBest=value(simp[best]);
-int itOfLastImprovement=numIter;
+        //showSimplex(simp, "before minimization, value="+value(simp[best]));
+
+        //String operation="ini";
+        int thisNumIter=0;
         while (true) {
-            numIter++;
+            totalNumIter++;                                 // global count over all threads
+            thisNumIter++;                                  // local count for this minimize call
             // THE MINIMIZAION ALGORITHM IS HERE
             iteration: {
                 getCenter(simp, worst, center);             // centroid of vertices except worst
@@ -458,20 +490,20 @@ int itOfLastImprovement=numIter;
                     getVertexAndEvaluate(center, simp[worst], -C_EXPANSION, secondTry);
                     if (value(secondTry) <= value(reflected)) {
                         copyVertex(secondTry, simp[worst]);  // if expanded is better than reflected, keep it
-a="expa";
+                        //operation="expa";
                         break iteration;
                     }
                 }
                 if (value(reflected) < value(simp[nextWorst])) {
                     copyVertex(reflected, simp[worst]);     // keep reflected if better than 2nd worst
-a="refl";
+                    //operation="refl";
                     break iteration;
                 } else if (value(reflected) < value(simp[worst])) {
                     // try outer contraction
                     getVertexAndEvaluate(center, simp[worst], -C_CONTRACTION, secondTry);
                     if (value(secondTry) <= value(reflected)) {
                         copyVertex(secondTry, simp[worst]); // keep outer contraction
-a="outC";
+                        //operation="outC";
                         break iteration;
                     }
                 } else if (value(reflected) > value(simp[worst]) || Double.isNaN(value(reflected))) {
@@ -479,13 +511,13 @@ a="outC";
                     getVertexAndEvaluate(center, simp[worst], C_CONTRACTION, secondTry);
                     if (value(secondTry) < value(simp[worst])) {
                         copyVertex(secondTry, simp[worst]);     // keep contracted if better than 2nd worst
-a="innC";
+                        //operation="innC";
                         break iteration;
                     }
                 }
                 // if everything else has failed, contract simplex in on best
                 shrinkSimplexAndEvaluate(simp, best);
-a="shri";
+                //operation="shri";
                 break iteration;
             } // iteration:
             boolean checkParamResolution =    // if new 'worst' is not close to 'best', don't check any further
@@ -494,11 +526,6 @@ a="shri";
             worst = worstNextBestArray[WORST];
             nextWorst = worstNextBestArray[NEXT_WORST];
             best = worstNextBestArray[BEST];
-//if(value(simp[best]) < lastBest) {
-//lastBest = value(simp[best]);
-//itOfLastImprovement=numIter;
-//} else if (numIter>itOfLastImprovement+40) {showVertex(simp[best],"BEST:");
-//showVertex(simp[worst],(numIter-itOfLastImprovement)+" "+a); }
 
             if (checkParamResolution)
                 if (belowResolutionLimit(simp, best))       // check whether all parameters are within the resolution limit
@@ -511,12 +538,29 @@ a="shri";
             }
             if (belowErrorLimit(value(simp[best]), value(simp[worst]), 4.0)) // no large spread of values
                 break;                                      // looks like we are at the minimum
-            if (numIter >= maxIter)
+            if (totalNumIter > maxIter || thisNumIter>4*(maxIter/10))
                 status = MAX_ITERATIONS_EXCEEDED;
             if (status != SUCCESS)
                 break;
+            if ((ijStatusString != null || checkEscape) && totalNumIter > nextIterationForStatus) {
+                long time = System.currentTimeMillis();
+                nextIterationForStatus = totalNumIter + (int)(totalNumIter*500L/(time-startTime+1)); //next display 0.5 sec later
+                if (time - startTime > 1000L) {             // display status and check for ESC after the first second
+                    if (checkEscape && IJ.escapePressed()) {
+                        status = ABORTED;
+                        IJ.resetEscape();
+                        IJ.showStatus(ijStatusString+" ABORTED");
+                        break;
+                    }
+                    if (ijStatusString != null) {
+                        String statusString = ijStatusString+totalNumIter+" ("+maxIter+" max)";
+                        if (checkEscape) statusString += " ESC to stop";
+                        IJ.showStatus(statusString);
+                    }
+                }
+            }
         }
-        //showSimplex(simp, numCompletedMinimizations+1000);
+        //showSimplex(simp, "after "+totalNumIter+" iterations: value="+value(simp[best]));
         return best;
     }
 
@@ -567,17 +611,20 @@ a="shri";
     private double[][] makeSimplex(double[] initialParams, double[] initialParamVariations, Random random) {
         double[][] simp = new double[numVertices][numParams+1+numExtraArrayElements];
         /* simpTable.put(Thread.currentThread(), simp); */
+        
         if (initialParams!=null) {
             for (int i=0; i<numParams; i++)
-                if (Double.isNaN(initialParams[i])) {
-                    if (IJ.debugMode) IJ.log("Error: Initial Parameter["+i+"] is NaN");
-                    return null;
-                }
+                if (Double.isNaN(initialParams[i]))
+                    if (IJ.debugMode) IJ.log("Warning: Initial Parameter["+i+"] is NaN");
             System.arraycopy(initialParams, 0, simp[0], 0, Math.min(initialParams.length, numParams));
         }
         evaluate(simp[0]);
         if (Double.isNaN(value(simp[0]))) {
-            if (IJ.debugMode) showVertex(simp[0], "Error: Initial Parameters yield NaN:");
+            if (IJ.debugMode) showVertex(simp[0], "Warning: Initial Parameters yield NaN:");
+            findValidInitalParams(simp[0], initialParamVariations, random);
+        }
+        if (Double.isNaN(value(simp[0]))) {
+            if (IJ.debugMode) IJ.log("Error: Could not find initial parameters not yielding NaN:");
             return null;
         }
         if (initializeSimplex(simp, initialParamVariations, random))
@@ -605,6 +652,33 @@ a="shri";
         return true;
     }
 
+    /** Find initial parameters not yielding a result of NaN in case those given yield NaN
+     *  Called with params containing the initial parameters that have been tried previously */
+    private void findValidInitalParams(double[] params, double[] initialParamVariations, Random random) {
+        final int maxAttempts = 50*numParams*numParams;  //max number of attempts to find params that do not lead to NaN
+        double rangeFactor = 1;             // will gradually become larger to handle different orders of magnitude
+        final double rangeMultiplyLog = Math.log(1e20)/(maxAttempts-1); //will try up to 1e-20 to 1e20*initialParamVariations
+        double[] firstParams = new double[numParams]; // remember starting params (which may be modified)
+        double[] variations = new double[numParams];    // new values of parameter variations
+        for (int i=0; i<numParams; i++) {
+            firstParams[i] = Double.isNaN(params[i]) ? 0 : params[i];
+            variations[i] = initialParamVariations!=null ? initialParamVariations[i] : 0.1*firstParams[i];
+            if (Double.isNaN(variations[i]) || Math.abs(variations[i])<1e-10 || Math.abs(variations[i])>1e10)
+                variations[i] = 0.1;
+        }
+        for (int attempt=0; attempt<maxAttempts; attempt++) {
+            for (int i=0; i<numParams; i++) {
+                double multiplier = attempt<maxAttempts/10 ? 1 :  //after a while try different orders of magnitude
+                        Math.exp(rangeMultiplyLog*attempt*2*(random.nextDouble()-0.5));
+                params[i] = multiplier*(firstParams[i]+2*(random.nextDouble()-0.5)*variations[i]);
+            }
+            evaluate(params);
+            //showVertex(params,"findValidInitalParams attempt "+attempt);
+            if (!Double.isNaN(value(params))) return;    //found a valid parameter set
+        }
+    }
+
+
     /** Reinitialize an existing simplex: Create new vertices around the best one, keeping the rough size of
      *  the simplex. This helps to avoid premature termination or cases where the simplex has become degenerate.
      *  All points of the new simplex are evaluated already.
@@ -624,8 +698,6 @@ a="shri";
      */
     private boolean initializeSimplex(double[][] simp, double[] paramVariations, Random random) {
         double[] variations = new double[numParams];    // improved values of parameter variations
-        double smallestRange = Double.MAX_VALUE;
-        double largestRange = 0;
         for (int i=0; i<numParams; i++) {
             double range = paramVariations!=null && i<paramVariations.length ?
                     paramVariations[i] : 0.1 * Math.abs(simp[0][i]); // if nothing else given, based on initial parameter
@@ -634,10 +706,8 @@ a="shri";
             if (Math.abs(range/simp[0][i])<1e-10)
                 range = Math.abs(simp[0][i]*1e-10); //range must be more than very last digits
             variations[i] = range;
-            if (range < smallestRange) smallestRange = range;
-            if (range > largestRange) largestRange = range;
+            //IJ.log("param#"+i+" variation="+(float)variations[i]);
         }
-        //IJ.log("smallestR="+smallestRange+" largestR="+largestRange);
         final int maxAttempts = 100*numParams;  //max number of attempts to find params that do not lead to NaN
         for (int v=1; v<numVertices; v++) {
             int numTries = 0;
@@ -645,37 +715,33 @@ a="shri";
                 if (numTries++ > maxAttempts)
                     return false;
                 // Create a vector orthogonal to all others in a coordinate system where every value is
-                // normalized to its respective variations value.
+                // normalized to its respective variations value. We first use this coordinate system where
+                // every parameter is in the [-1, +1] range.
                 // Don't orthogonalize after getting only NaN function values in many attempts; it might be
                 // easier to find viable parameters without normalization.
                 for (int i=0; i<numParams; i++)
-                    simp[v][i] = variations[i]*(random.nextFloat() - 0.5);
-                if (numTries < maxAttempts/2 &&    // (don't orthogonalize if finding valid params was very difficult
-                        largestRange < smallestRange*1e16) {   //... or if orthogonalization won't work due to extremely different parameter ranges
-                    for (int v1=1; v1<v; v1++) {    // to avoid a degenerate simplex, make orthogonal to all others
+                    simp[v][i] = 2*random.nextFloat() - 1.0;
+                if (numTries < maxAttempts/3)       // (don't orthogonalize if finding valid params was very difficult
+                    //IJ.log("orthogonalize vertex "+v);
+                    for (int v2=1; v2<v; v2++) {    // to avoid a degenerate simplex, make orthogonal to all others
                         double lengthSqr = 0;
                         double innerProduct = 0;
                         for (int i=0; i<numParams; i++) {
-                            double x = (simp[v1][i] - simp[0][i])/variations[i];
-                            lengthSqr += x*x;
-                            innerProduct += x*simp[v][i]/variations[i];
+                            double x2 = (simp[v2][i] - simp[0][i])/variations[i]; // convert to [-1, +1] range
+                            lengthSqr += x2*x2;
+                            innerProduct += x2*simp[v][i];
                         }
-                        for (int i=0; i<numParams; i++)
-                            simp[v][i] -= (simp[v1][i] - simp[0][i])/variations[i] * innerProduct/lengthSqr;
+                        for (int i=0; i<numParams; i++)     //subtract component parallel to the other vector
+                            simp[v][i] -= ((simp[v2][i] - simp[0][i])/variations[i])*(innerProduct/lengthSqr);
                     }
-                } //else IJ.log("no orthogonalization v#"+v);
-                double sumSqr = 0;        // normalize the 'try vector' to desired parameter variation range
-                for (int i=0; i<numParams; i++) {
-                    double ratio = simp[v][i] / variations[i];
-                    sumSqr += ratio*ratio;
-                }
-                double nonZeroRandom = -1 + 1.8*random.nextFloat();
-                if (nonZeroRandom > -0.1)
-                    nonZeroRandom += 0.2;   //random number between -1..-0.1 or +0.1..1
-                double normalizationFactor = nonZeroRandom/(Math.sqrt(sumSqr));
+                double sumSqr = 0;              // normalize the 'excursion vector' to length = 1
                 for (int i=0; i<numParams; i++)
-                    simp[v][i] = simp[0][i] + simp[v][i]*normalizationFactor;
-                //IJ.log("[0] var="+paramVariations[0]+"simp0="+simp[0][0]+" rand="+IJ.d2s(nonZeroRandom,4)+" simpV="+simp[v][0]);
+                    sumSqr += simp[v][i]*simp[v][i];
+                if (sumSqr < 1e-14) continue;   // bad luck with random numbers, excursion vector almost zero
+                if (numTries > 2 && sumSqr > 1e-6)
+                    sumSqr = 1;                 // don't normalize if attempts with normalized were unsuccessful
+                for (int i=0; i<numParams; i++)
+                    simp[v][i] = simp[0][i] + simp[v][i]/Math.sqrt(sumSqr)*variations[i];
                 evaluate(simp[v]);
             } while (Double.isNaN(value(simp[v])) && (status == SUCCESS || status == REINITIALIZATION_FAILURE));
         }
@@ -721,9 +787,12 @@ a="shri";
         logTypicalRelativeVariation /= numParams;
         double typicalRelativeVariation = Math.exp(logTypicalRelativeVariation);
         final double WORST_RATIO = 1e-3;        //parameter variation should not be lower than typical value by more than this
-        for (int i=0; i<numParams; i++)
+        for (int i=0; i<numParams; i++) {
             if (paramVariations[i]<relatedTo[i] && paramVariations[i]/relatedTo[i] < typicalRelativeVariation*WORST_RATIO)
                 paramVariations[i] = relatedTo[i]*typicalRelativeVariation*WORST_RATIO;
+            if (paramResolutions != null && paramVariations[i] < 10*paramResolutions[i])
+                paramVariations[i] = 10*paramResolutions[i];// parameter variation must be well above numeric noise limit
+        }
         return paramVariations;
     }
 

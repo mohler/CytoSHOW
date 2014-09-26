@@ -1500,18 +1500,20 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 							if (fileName.matches(".*"+sec+".*")) {
 								FileInputStream fis = new FileInputStream(saveFile.getParent() +File.separator +fileName);
 								ftpc.setFileType(FTPClient.BINARY_FILE_TYPE);
+								ftpc.enterLocalPassiveMode();
 								ftpc.storeFile(fileName+".tmp", fis);
 								fis.close();
 								ftpc.rename(fileName+".tmp", fileName);
 							}
 						}
-						if (deNovoMovieFile !=null) {
-							FileInputStream fis = new FileInputStream(deNovoMovieFile.getPath());
-							ftpc.setFileType(FTPClient.BINARY_FILE_TYPE);
-							ftpc.storeFile(deNovoMovieFile.getName()+".tmp", fis);
-							fis.close();
-							ftpc.rename(deNovoMovieFile.getName()+".tmp", deNovoMovieFile.getName());
-						}
+//						if (deNovoMovieFile !=null) {
+//							FileInputStream fis = new FileInputStream(deNovoMovieFile.getPath());
+//							ftpc.setFileType(FTPClient.BINARY_FILE_TYPE);
+//							ftpc.enterLocalPassiveMode();
+//							ftpc.storeFile(deNovoMovieFile.getName()+".tmp", fis);
+//							fis.close();
+//							ftpc.rename(deNovoMovieFile.getName()+".tmp", deNovoMovieFile.getName());
+//						}
 						ftpc.logout();
 					}
 				} catch (SocketException e1) {

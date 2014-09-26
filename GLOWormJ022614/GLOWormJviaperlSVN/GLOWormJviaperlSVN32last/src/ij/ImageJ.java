@@ -137,7 +137,8 @@ public class ImageJ extends Frame implements ActionListener,
 	private String lastKeyCommand;
 	private boolean embedded;
 	private boolean windowClosed;
-	
+	private static String commandName;
+		
 	boolean hotkey;
 	private ArrayList<JPopupMenu> openPopupsArrayList;
 	
@@ -610,6 +611,10 @@ public class ImageJ extends Frame implements ActionListener,
 			IJ.log("Windows: "+WindowManager.getWindowCount());
 	}
 	
+	public String getInfo() {
+		return version()+System.getProperty("os.name")+" "+System.getProperty("os.version")+"; "+IJ.freeMemory();
+	}
+
 	private String version() {
 		return "ImageJ "+VERSION+BUILD + "; "+"Java "+System.getProperty("java.version")+(IJ.is64Bit()?" [64-bit]; ":" [32-bit]; ");
 	}
@@ -1289,5 +1294,14 @@ public class ImageJ extends Frame implements ActionListener,
 		openPopupsArrayList.remove((JPopupMenu)e.getSource());
 		
 	}
+	
+	public static String getCommandName() {
+		return commandName!=null?commandName:"null";
+	}
+	
+	public static void setCommandName(String name) {
+		commandName = name;
+	}
+	
 }
 

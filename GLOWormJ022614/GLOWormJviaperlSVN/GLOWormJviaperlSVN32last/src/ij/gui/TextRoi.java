@@ -22,6 +22,7 @@ public class TextRoi extends Roi {
 	private static boolean newFont = true;
 	private static boolean antialiasedText = true; // global flag used by text tool
 	private static int globalJustification;
+	private static Color defaultFillColor;
 	private int justification;
 	private boolean antialiased = antialiasedText;
 	private static boolean recordSetFont = true;
@@ -29,6 +30,10 @@ public class TextRoi extends Roi {
 	private boolean firstChar = true;
 	private boolean firstMouseUp = true;
 	private int cline = 0;
+	private boolean drawStringMode;
+	private double angle;  // degrees
+	private static double defaultAngle;
+	private static boolean firstTime = true;
 
 	/** Creates a TextRoi.*/
 	public TextRoi(int x, int y, String text) {
@@ -36,6 +41,33 @@ public class TextRoi extends Roi {
 		init(text, null);
 	}
 	
+	/** Use this constructor as a drop-in replacement for ImageProcessor.drawString(). */
+	public TextRoi(String text, double x, double y, Font font) {
+		super(x, y, 1, 1);
+		drawStringMode = true;
+		if (text!=null && text.contains("\n")) {
+			String[] lines = Tools.split(text, "\n");
+			int count = Math.min(lines.length, MAX_LINES);
+			for (int i=0; i<count; i++)
+				theText[i] = lines[i];
+		} else
+			theText[0] = text;
+		instanceFont = font;
+		if (instanceFont==null)
+			instanceFont = new Font(name, style, size);
+		ImageJ ij = IJ.getInstance();
+		Graphics g = ij!=null?ij.getGraphics():null;
+		if (g==null) return;
+		FontMetrics metrics = g.getFontMetrics(instanceFont);
+		g.dispose();
+		bounds = null;
+		width = (int)stringWidth(theText[0],metrics,g);
+		height = (int)(metrics.getHeight());
+		this.x = (int)x;
+		this.y = (int)(y - height);
+		setAntialiased(true);
+	}
+
 	/** Creates a TextRoi using sub-pixel coordinates.*/
 	public TextRoi(double x, double y, String text) {
 		super(x, y, 1.0, 1.0);
@@ -395,6 +427,16 @@ public class TextRoi extends Roi {
 		}
 	}
 
+	/** Sets the default fill (background) color. */
+	public static void setDefaultFillColor(Color fillColor) {
+		defaultFillColor = fillColor;
+	}
+
+	/** Sets the default angle. */
+	public static void setDefaultAngle(double angle) {
+		defaultAngle = angle;
+	}
+
 	protected void handleMouseUp(int screenX, int screenY) {
 		super.handleMouseUp(screenX, screenY);
 		if (firstMouseUp) {
@@ -555,6 +597,16 @@ public class TextRoi extends Roi {
 		if (ic != null && ic.getGraphics() != null)
 			tr.updateBounds(ic.getGraphics());
 		return tr;
+	}
+	
+	public double getAngle() {
+		return angle;
+	}
+	
+	public void setAngle(double angle) {
+		this.angle = angle;
+		if (angle!=0.0)
+			setAntialiased(true);
 	}
 
 	public void setText(String newText) {
