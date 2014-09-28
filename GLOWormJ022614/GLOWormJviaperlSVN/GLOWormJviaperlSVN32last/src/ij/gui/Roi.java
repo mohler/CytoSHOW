@@ -174,6 +174,8 @@ public class Roi extends Object implements Cloneable, java.io.Serializable {
 		this.x = x;
 		this.y = y;
 		startX = x; startY = y;
+		xd = x;
+		yd = y;
 		oldX = x; oldY = y; oldWidth=0; oldHeight=0;
 		if (bounds!=null) {
 			bounds.x = x;
