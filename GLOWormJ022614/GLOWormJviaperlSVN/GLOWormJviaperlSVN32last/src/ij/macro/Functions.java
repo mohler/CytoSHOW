@@ -2521,7 +2521,7 @@ public class Functions implements MacroConstants, Measurements {
 		boolean multiSelect = false;
 		boolean add = cmd.equals("add");
 		if (twoArgCommand)
-			path = getLastString();
+			path = getNextString();
 		else if (add) {
 			if (interp.nextToken()==',') {
 				interp.getComma();
@@ -2531,20 +2531,25 @@ public class Functions implements MacroConstants, Measurements {
 				interp.getComma();
 				lineWidth = interp.getExpression();
 			}
+			interp.getComma();
+			impID = (int) interp.getExpression();
 			interp.getRightParen();
 		} else if (select) {
 			interp.getComma();
 			multiSelect = isArrayArg();
 			if (!multiSelect) {
 				index = (int)interp.getExpression();
-				interp.getRightParen();
 			}
-		} else if (cmd.equals("translate")) {
-			dx = getNextArg();
-			dy = getLastArg();
-		} else
+			interp.getComma();
+			impID = (int) interp.getExpression();
 			interp.getRightParen();
-		if (WindowManager.getImage(impID).getRoiManager()==null&&roiManager==null) {
+		} else {
+			interp.getComma();
+			impID = (int) interp.getExpression();
+			interp.getRightParen();
+		}
+
+		if (WindowManager.getImage(impID).getRoiManager()==null && roiManager==null) {
 			if (Interpreter.isBatchMode())
 				roiManager = new RoiManager(true);
 			else
