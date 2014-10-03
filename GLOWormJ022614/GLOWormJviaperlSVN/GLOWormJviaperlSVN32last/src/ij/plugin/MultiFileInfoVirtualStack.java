@@ -2,6 +2,7 @@ package ij.plugin;
 
 import ij.*;
 import ij.process.*;
+import ij.util.StringSorter;
 import ij.gui.*;
 import ij.io.*;
 
@@ -40,7 +41,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (dir==null) return;
 		argFile = new File(dir);
 		String[] fileList = argFile.list();
-		Arrays.sort(fileList);
+		fileList = StringSorter.sortNumericallyViaRegex(fileList);
 		for (String file:fileList){
 			TiffDecoder td = new TiffDecoder(dir, file);
 			if (IJ.debugMode) td.enableDebugging();

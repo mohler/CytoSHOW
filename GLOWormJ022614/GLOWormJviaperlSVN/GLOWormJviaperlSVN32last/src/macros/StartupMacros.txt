@@ -694,6 +694,9 @@ macro "BkSubCropMacro" {
 	print(saveDir);
 	
 	run("Image Sequence...", "open=" + sourceDir+File.separator+"BV192_SPIMB_0000.tif sort");
+	original = getTitle();
+	run("Z Project...", "projection=[Max Intensity]");
+	close(original);
 	selector = getImageID;
 	uniqueTitleA = getTitle() + selector;
 	rename(uniqueTitleA);
@@ -728,7 +731,7 @@ macro "BkSubCropMacro" {
 	
 	close(uniqueTitleB);
 	
-	while (true){
+	//while (true){
 		for (l=0;l<lengthOf(list);l++) {
 			if(startsWith(File.getParent(sourceDir)+File.separator+list[l], sourceRoot)) {
 				count++; 
@@ -763,8 +766,13 @@ macro "BkSubCropMacro" {
 		}
 		previousCount = count;
 	}
-	close(uniqueTitleV);
+	//close(uniqueTitleV);
 	setBatchMode(false);
 }
 
-
+macro "zMIP_MovieMacro" {
+	run("MultiTIFF Virtual Stack");
+	Stack.getDimensions(width, height, channels, slices, frames);
+	run("Z Project...", "start=1 stop=" + slices + " projection=[Max Intensity] all");
+	run("Tiff...");
+}
