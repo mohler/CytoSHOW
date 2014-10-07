@@ -446,11 +446,11 @@ public class RemoteQTVS_Engine extends UnicastRemoteObject implements Compute {
 		String[] fileList = (new File("/Volumes/GLOWORM_DATA/")).list();
 		ArrayList<String> matchedArrayList = new ArrayList<String>();
 		for (String fileName:fileList) {
-			if (fileName.matches(".*mov")) {
+			if (fileName.matches(".*mov") || fileName.matches(".*scene.scn")) {
 				String prefix = subname.split(" ")[0];
 				String midfix = subname.split(" ")[1];
 				String suffix = subname.split(" ")[2];
-				if(fileName.replaceAll("\\+", "_").matches(prefix+".*"+midfix+".*"+suffix)) {
+				if(fileName.replaceAll("\\+", "_").matches(prefix+".*"+midfix+".*"/*+suffix*/)) {
 					matchedArrayList.add(fileName);
 				}
 			}

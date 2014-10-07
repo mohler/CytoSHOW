@@ -583,7 +583,8 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 		}
 		IJ.wait(100);
 
-		if (ci.getNChannels() >1 && imp.isComposite() )  choice.select(index);
+		if (ci.getNChannels() >1 && imp.isComposite() )  
+			choice.select(index);
 
 		for (int j = 0; j < nChannels; j++) {
 			while (mcc.getTranslateYSpinner(j) == null) {
@@ -631,7 +632,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 		}
 		if (imp != lastImage) 
 			imp = lastImage;
-		WindowManager.getCurrentWindow().toFront();
+		//WindowManager.getCurrentWindow().toFront();
 
 	}
 

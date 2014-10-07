@@ -2510,8 +2510,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	public void showAll(int mode) {
 		ImagePlus imp = this.imp;
-		if (imp==null)
-		{error("There are no images open."); return;}
+		if (imp==null){
+			error("Linked image is not open."); 
+			return;
+		}
 		ImageCanvas ic = imp.getCanvas();
 		if (ic==null) return;
 		showAll = mode==SHOW_ALL;

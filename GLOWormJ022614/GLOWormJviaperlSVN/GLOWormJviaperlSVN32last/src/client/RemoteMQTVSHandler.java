@@ -112,10 +112,10 @@ public class RemoteMQTVSHandler {
 			argArrayList.add("-sidesidestereo");
 		if (redCyanStereo)
 			argArrayList.add("-redcyanstereo");
-		if (silentlyUpdateScene)
-			argArrayList.add("-silentlyupdatescene");
 		if (rcsPrx) 
 			argArrayList.add("-rcsprx");
+		if (silentlyUpdateScene)
+			argArrayList.add("-silentlyupdatescene");
 		for (String path:pathsThenSlices.split(" "))
 			argArrayList.add(path);
 		return new RemoteMQTVSHandler(argArrayList.toArray(new String[argArrayList.size()]));
@@ -167,7 +167,7 @@ public class RemoteMQTVSHandler {
 			IJ.log(remoteEngineName);
 			IJ.log("contacting CytoSHOW server...");
 			comp = (Compute) Naming.lookup(remoteEngineName);
-			IJ.log(comp.toString());
+			IJ.log(comp.toString()+"7");
 			while (spawnStrings == null || serverReturnString.contains("Exception")) {
 				spawnStrings = new String[] {""+System.currentTimeMillis(),
 						"blank", 
@@ -179,7 +179,7 @@ public class RemoteMQTVSHandler {
 			compQ = (Compute) Naming.lookup(lookupString);
 		}catch (RemoteException e2) {
 			if (comp==null) {
-				IJ.log(lookupString + "failure to connect.");
+				IJ.log(lookupString + "failure to connect.1");
 				return;
 			}
 			try {
@@ -557,7 +557,7 @@ public class RemoteMQTVSHandler {
 				e2.printStackTrace();
 			} catch (RemoteException e2) {
 				if (comp==null) {
-					IJ.log(lookupString + "failure to connect.");
+					IJ.log(lookupString + "failure to connect.2");
 					if (win2 != null)
 						win2.getImagePlus().killRoi();
 					return null;
@@ -739,19 +739,19 @@ public class RemoteMQTVSHandler {
 		RemoteMQTVSHandler rmqtvsh = new RemoteMQTVSHandler(argArrayList.toArray(new String[argArrayList.size()]));
 		try {			
 			if (rmqtvsh.comp==null) {
-				IJ.log(lookupString + "failure to connect.");
+				IJ.log(lookupString + "failure to connect.3");
 				return null;
 			}
-			IJ.log(rmqtvsh.comp.toString() + "failure to connect.");
+			IJ.log(rmqtvsh.comp.toString() + "failure to connect.4");
 			return rmqtvsh.compQ.getFileInputByteArray(pathlist);
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			if (rmqtvsh.comp==null) {
-				IJ.log(lookupString + "failure to connect.");
+				IJ.log(lookupString + "failure to connect.5");
 				return null;
 			}
-			IJ.log(rmqtvsh.comp.toString() + "failure to connect.");
+			IJ.log(rmqtvsh.comp.toString() + "failure to connect.6");
 		}
 		return null;
 	}

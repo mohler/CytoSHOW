@@ -34,6 +34,7 @@ public class MQTVSSceneLoader64 implements PlugIn {
 	private boolean viewOverlay;
 	private boolean sideSideStereo = false;
 	private boolean redCyanStereo = false;
+	private boolean rcsprx = false;
 	private boolean horizontal;
 	private boolean grid = false;
 	private  String[] channelLUTItems =  { "Red", "Green", "Blue", "Grays","Cyan", "Magenta", "Yellow",  "Fire", "Ice", "Spectrum", "3-3-2 RGB"};
@@ -67,6 +68,10 @@ public class MQTVSSceneLoader64 implements PlugIn {
 		this.pathlist = pathlist; //set instance variable
 		if (options.contains("cycling"))
 			cycling = true;
+		if (options.contains("rc"))
+			redCyanStereo = true;
+		if (options.contains("Stereo4DXrc"))
+			rcsprx = true;
 		else
 			Macro.setOptions(options);
 		run(pathlist);
@@ -164,7 +169,7 @@ public class MQTVSSceneLoader64 implements PlugIn {
 							in = new BufferedReader(new FileReader(cacheFile));
 						}else {
 							in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
-									RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], pathlist.replaceAll("%2B", "\\+").replaceAll("%25", "%")))));
+									RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], pathlist.replaceAll("%2B", "\\+").replaceAll("%25", "%").replace("|", "")))));
 //							out = new PrintWriter(
 //									new BufferedWriter(
 //											new FileWriter(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+pathlist) ), true);
@@ -190,11 +195,14 @@ public class MQTVSSceneLoader64 implements PlugIn {
 									|| lineSegments[0].toLowerCase().endsWith(".avi")
 									|| lineSegments[0].toLowerCase().endsWith(".tif")
 									|| new File(lineSegments[0]).isDirectory() ) {
-								movieCount = movieCount +1;
-								movieFileList = movieFileList + lineSegments[0]	+ "|";
+								movieCount = movieCount /*+ (redCyanStereo?2:1)*/;
+								movieFileList = movieFileList + lineSegments[0]	+ "|"
+													+(redCyanStereo?(lineSegments[0] + "|"):"");
 								//if (IJ.debugMode) IJ.log(movieFileList);
-								movieSliceDepthList = movieSliceDepthList + lineSegments[1] + "|";
-								movieAdjustmentFileList = movieAdjustmentFileList + lineSegments[2] + "|";
+								movieSliceDepthList = movieSliceDepthList + lineSegments[1] + "|"
+										+(redCyanStereo?(lineSegments[1] + "|"):"");
+								movieAdjustmentFileList = movieAdjustmentFileList + lineSegments[2] + "|"
+										+(redCyanStereo?(lineSegments[2] + "|"):"");
 							}
 						}
 
@@ -286,7 +294,7 @@ public class MQTVSSceneLoader64 implements PlugIn {
 						}	
 
 						if (lineSegments[0].contains("RedCyanStereo") ) {
-							if (lineSegments[1].contains("true") ) {
+							if (lineSegments[1].contains("true") || redCyanStereo == true) {
 								redCyanStereo = true;
 							} else {
 								redCyanStereo = false;
@@ -432,8 +440,10 @@ public class MQTVSSceneLoader64 implements PlugIn {
 						pathConcat = pathConcat +" " +paths[p]+" " +movieSliceDepthValues[p];
 
 					RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], pathConcat.trim(), 
-												stretchToFitOverlay, viewOverlay, grayscale, grid, horizontal, sideSideStereo, redCyanStereo, silentlyUpdateScene, false);
+												stretchToFitOverlay, viewOverlay, grayscale, grid, horizontal, sideSideStereo, redCyanStereo, rcsprx, silentlyUpdateScene);
+//					rmqtvsh.getImagePlus().show();
 					setImp(rmqtvsh.getImagePlus());
+
 					getImp().setPosition(cPosition, zPosition, tPosition);
 					if(!cycling)
 						getImp().getWindow().setVisible(true);

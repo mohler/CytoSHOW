@@ -765,7 +765,7 @@ macro "BkSubCropMacro" {
 			}
 		}
 		previousCount = count;
-	}
+	//}
 	//close(uniqueTitleV);
 	setBatchMode(false);
 }
