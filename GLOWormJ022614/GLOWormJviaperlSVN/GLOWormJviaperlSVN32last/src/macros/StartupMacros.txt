@@ -626,6 +626,8 @@ macro "Monitor diSPIM Acquisition" {
 	    
 	    if (focus) {
 		    print(nImages);
+		    File.delete(dir+"AutoFocusCommaSpace.txt");
+		    //File.delete(dir+"AutoFocusNewLine.txt");
 			for (i=1;i<=nImages;i++){
 				print(nImages+" "+i);
 				
@@ -673,6 +675,8 @@ macro "Monitor diSPIM Acquisition" {
 				
 				Array.sort(sliceAvgs);
 				print(source+": Best focus in slice "+List.get(sliceAvgs[zDepth-1]));
+				File.append(List.get(sliceAvgs[zDepth-1])+", ", dir+"AutoFocusCommaSpace.txt");
+				//File.append(List.get(sliceAvgs[zDepth-1])+"\\n", dir+"AutoFocusNewLine.txt");
 				selectWindow("Results");
 				run("Close");
 				setBatchMode(false);
