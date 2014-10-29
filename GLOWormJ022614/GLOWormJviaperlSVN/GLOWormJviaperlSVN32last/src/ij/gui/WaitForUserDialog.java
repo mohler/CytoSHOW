@@ -21,8 +21,9 @@ public class WaitForUserDialog extends Dialog implements ActionListener, KeyList
 		super(getFrame(), title, false);
 		label = new MultiLineLabel(text, 175);
 		if (!IJ.isLinux()) label.setFont(new Font("SansSerif", Font.PLAIN, 14));
-		if (IJ.isMacOSX()) {
-			RoiManager rm = WindowManager.getCurrentImage().getRoiManager();
+		RoiManager rm = null;
+		if (IJ.isMacOSX()) {;
+			if (WindowManager.getCurrentImage()!=null ) rm = WindowManager.getCurrentImage().getRoiManager();
 			if (rm!=null) rm.runCommand("enable interrupts");
 		}
         GridBagLayout gridbag = new GridBagLayout(); //set up the layout

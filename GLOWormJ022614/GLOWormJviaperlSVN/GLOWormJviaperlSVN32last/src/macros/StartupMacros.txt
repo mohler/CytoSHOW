@@ -172,6 +172,8 @@
   }
 
 macro "Monitor diSPIM Acquisition" {
+	arg = getArgument();
+	print(arg);
     minA =0;
     maxA = 255;
     channelsA = "11";
@@ -182,6 +184,9 @@ macro "Monitor diSPIM Acquisition" {
     vUnit = "micron";
 
 	dir = "";
+	dir = arg;
+	print(dir);
+	//waitForUser("");
 	while (File.isDirectory(dir) != 1) {
 		dir = getDirectory("Select top directory for diSPIM raw data");
 	}

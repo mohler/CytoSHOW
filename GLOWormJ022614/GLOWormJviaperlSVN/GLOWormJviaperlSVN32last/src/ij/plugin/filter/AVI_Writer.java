@@ -154,7 +154,7 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 			if (lastC>nChannels) lastC = nChannels;
 			if (firstC>lastC) {firstC=1; lastC=nChannels;}
 		} else
-			firstZ = lastZ = 1;
+			firstC = lastC = 1;
 		if (nSlices>1) {
 			String[] range = Tools.split(gd.getNextString(), " -");
 			double z1 = Tools.parseDouble(range[0]);
@@ -380,7 +380,11 @@ public class AVI_Writer implements PlugInFilter, TextListener {
             			if (imp.isComposite()) {
             				((CompositeImage)imp).setMode(CompositeImage.GRAYSCALE);
             			}
-        				ip = imp.getStack().getProcessor((c-1)*(imp.getNSlices())*(imp.getNFrames()) + (z-1)*(imp.getNFrames()) + t);
+        				ip = imp.getStack().getProcessor(
+        						(c-1)*(imp.getNSlices())*(imp.getNFrames()) 
+        						+ (z-1)*(imp.getNFrames()) 
+        						+ t
+        					  );
         			}
         			int chunkPointer = (int)raFile.getFilePointer();
         			writeInt(dataSignature);        // start writing chunk: '00db' or '00dc'
