@@ -140,7 +140,7 @@ public class RemoteQTVS_Engine extends UnicastRemoteObject implements Compute {
 			} catch (QTException e) {
 				e.printStackTrace();
 			}
-		ImagePlus imp = null;
+		ImagePlus impLocal = null;
 		VirtualStack vstack = null;
 		String[] nameChunks = names[0].split("_");
 		int maxSlicesSingleMovie = 0;
@@ -172,35 +172,35 @@ public class RemoteQTVS_Engine extends UnicastRemoteObject implements Compute {
             if (names[0].substring(names[0].lastIndexOf("/")).startsWith("/SW")
             		|| names[0].substring(names[0].lastIndexOf("/")).startsWith("/DUP")
             		|| names[0].substring(names[0].lastIndexOf("/")).startsWith("/Projectionsof")) {
-            	vstack = new MultiQTVirtualStack(mqtf, new ArrayList<String>(),new ArrayList<String>(),movieSlices, false, imp, true, true, false, false, false, false, rcsPrx);
+            	vstack = new MultiQTVirtualStack(mqtf, new ArrayList<String>(),new ArrayList<String>(),movieSlices, false, impLocal, true, true, false, false, false, false, rcsPrx);
             } else {
-            	vstack = new MultiQTVirtualStack(mqtf, new ArrayList<String>(),new ArrayList<String>(),movieSlices, true, imp, false, true, false, false, false, false, rcsPrx);
+            	vstack = new MultiQTVirtualStack(mqtf, new ArrayList<String>(),new ArrayList<String>(),movieSlices, true, impLocal, false, true, false, false, false, false, rcsPrx);
             }
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		imp = ((MultiQTVirtualStack) vstack).imp;
+		impLocal = ((MultiQTVirtualStack) vstack).imp;
 		if  (maxSlicesSingleMovie == 0) {
 			Arrays.sort(movieSlices);
 			maxSlicesSingleMovie = movieSlices[movieSlices.length-1];
 			
 		}
-		imp.setDimensions(mqtf.length, maxSlicesSingleMovie, imp.getImageStackSize()/(maxSlicesSingleMovie*mqtf.length));
-		movieTable.put(imp.getID(), imp);
-        imp.setOpenAsHyperStack(true);
-		imp.show();
-		if (true) {
-			if (true) {
-				((MultiQTVirtualStack) vstack).imp.setTitle( ((MultiQTVirtualStack) vstack).getVirtualStack(0).getMovieName()+":"+port+""+imp.getID());
-			} else {
-				((MultiQTVirtualStack) vstack).imp.setTitle(" : see Multi-Channel Controller for details"+":"+port+""+imp.getID());
-			}
-			imp = ((MultiQTVirtualStack) vstack).imp;
-		} 
+		impLocal.setDimensions(mqtf.length, maxSlicesSingleMovie, impLocal.getImageStackSize()/(maxSlicesSingleMovie*mqtf.length));
+		movieTable.put(impLocal.getID(), impLocal);
+        impLocal.setOpenAsHyperStack(true);
+//		impLocal.show();
+//		if (true) {
+//			if (true) {
+//				((MultiQTVirtualStack) vstack).imp.setTitle( ((MultiQTVirtualStack) vstack).getVirtualStack(0).getMovieName()+":"+port+""+impLocal.getID());
+//			} else {
+//				((MultiQTVirtualStack) vstack).imp.setTitle(" : see Multi-Channel Controller for details"+":"+port+""+impLocal.getID());
+//			}
+//			impLocal = ((MultiQTVirtualStack) vstack).imp;
+//		} 
 //		imp.close();
 		startLullClock();
-		return imp.getID();
+		return impLocal.getID();
 	}
 
 

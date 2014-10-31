@@ -843,8 +843,15 @@ public class MQTVSSceneLoader64 implements PlugIn {
 					}
 					getImp().getMultiChannelController().doingFirstSetup = false;
 
-					getImp().setPosition(1, getImp().getSlice(), getImp().getFrame()+1);
-					getImp().setPosition(1, getImp().getSlice(), getImp().getFrame()-1);
+//					getImp().setPosition(1, getImp().getSlice(), getImp().getFrame()+1);
+//					getImp().setPosition(1, getImp().getSlice(), getImp().getFrame()-1);
+					if (getImp().isComposite()) {
+						int mode = ((CompositeImage)getImp()).getMode();
+						((CompositeImage)getImp()).setMode(1);
+						((CompositeImage)getImp()).setMode(2);
+						((CompositeImage)getImp()).setMode(3);
+						((CompositeImage)getImp()).setMode(mode);
+					}
 
 					if(!cycling)
 						getImp().getWindow().setVisible(true);
