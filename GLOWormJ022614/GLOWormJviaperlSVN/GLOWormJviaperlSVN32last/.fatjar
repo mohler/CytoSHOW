@@ -1,10 +1,10 @@
 #Fat Jar Configuration File
-#Fri Oct 31 11:18:24 EDT 2014
+#Mon Nov 03 07:54:39 EST 2014
 onejar.license.required=true
 manifest.classpath=
 manifest.removesigners=true
 onejar.checkbox=false
-jarname=CytoSHOWviaperlSVN103114_ij149i3_fat.jar
+jarname=CytoSHOWviaperlSVN110314_ij149i3_fat.jar
 manifest.mergeall=true
 manifest.mainclass=
 manifest.file=<createnew>

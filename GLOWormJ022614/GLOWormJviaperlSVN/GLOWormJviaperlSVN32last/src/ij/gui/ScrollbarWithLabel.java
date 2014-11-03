@@ -388,9 +388,16 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 					for (int j=1; j<=stackWindow.getImagePlus().getNChannels(); j++){
 						stackWindow.setPosition(j, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame());
 					}
-					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame());
-					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()+1);
-					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()-1);
+//					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame());
+//					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()+1);
+//					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()-1);
+					if (stackWindow.getImagePlus().isComposite()) {
+						int mode = ((CompositeImage)stackWindow.getImagePlus()).getMode();
+						((CompositeImage)stackWindow.getImagePlus()).setMode(1);
+						((CompositeImage)stackWindow.getImagePlus()).setMode(2);
+						((CompositeImage)stackWindow.getImagePlus()).setMode(3);
+						((CompositeImage)stackWindow.getImagePlus()).setMode(mode);
+					}
 					if (animationState) IJ.doCommand("Start Animation [\\]");
 					if (animationZState) IJ.doCommand("Start Z Animation");
 				}

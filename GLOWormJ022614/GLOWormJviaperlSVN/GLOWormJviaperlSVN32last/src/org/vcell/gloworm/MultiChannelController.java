@@ -788,6 +788,13 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 							imp.updateAndDraw();
 							imp.setPosition( imp.getChannel(), imp.getSlice()-1, imp.getFrame() );
 						}
+						if (imp.isComposite()) {
+							int mode = ((CompositeImage)imp).getMode();
+							((CompositeImage)imp).setMode(1);
+							((CompositeImage)imp).setMode(2);
+							((CompositeImage)imp).setMode(3);
+							((CompositeImage)imp).setMode(mode);
+						}
 					}
 				}
 
@@ -1708,14 +1715,21 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 			if (!openingNewMovie) {
 				if ( imp != null && !((StackWindow)imp.getWindow()).getAnimate() ) {
 					//if (IJ.debugMode) IJ.log( "Animation off. ") ;
-					if(imp.getNFrames()>1) {
-						imp.setPosition( imp.getChannel(), imp.getSlice(), imp.getFrame()+1 );
-						imp.updateAndDraw();
-						imp.setPosition( imp.getChannel(), imp.getSlice(), imp.getFrame()-1 );
-					} else {
-						imp.setPosition( imp.getChannel(), imp.getSlice()+1, imp.getFrame() );
-						imp.updateAndDraw();
-						imp.setPosition( imp.getChannel(), imp.getSlice()-1, imp.getFrame() );
+//					if(imp.getNFrames()>1) {
+//						imp.setPosition( imp.getChannel(), imp.getSlice(), imp.getFrame()+1 );
+//						imp.updateAndDraw();
+//						imp.setPosition( imp.getChannel(), imp.getSlice(), imp.getFrame()-1 );
+//					} else {
+//						imp.setPosition( imp.getChannel(), imp.getSlice()+1, imp.getFrame() );
+//						imp.updateAndDraw();
+//						imp.setPosition( imp.getChannel(), imp.getSlice()-1, imp.getFrame() );
+//					}
+					if (imp.isComposite()) {
+						int mode = ((CompositeImage)imp).getMode();
+						((CompositeImage)imp).setMode(1);
+						((CompositeImage)imp).setMode(2);
+						((CompositeImage)imp).setMode(3);
+						((CompositeImage)imp).setMode(mode);
 					}
 				}
 			}
