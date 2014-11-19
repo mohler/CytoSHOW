@@ -633,6 +633,7 @@ macro "Monitor diSPIM Acquisition" {
 		    print(nImages);
 		    File.delete(dir+"AutoFocusCommaSpace.txt");
 		    //File.delete(dir+"AutoFocusNewLine.txt");
+			autoFocusString = "";
 			for (i=1;i<=nImages;i++){
 				print(nImages+" "+i);
 				
@@ -680,8 +681,7 @@ macro "Monitor diSPIM Acquisition" {
 				
 				Array.sort(sliceAvgs);
 				print(source+": Best focus in slice "+List.get(sliceAvgs[zDepth-1]));
-				File.append(List.get(sliceAvgs[zDepth-1])+", ", dir+"AutoFocusCommaSpace.txt");
-				//File.append(List.get(sliceAvgs[zDepth-1])+"\\n", dir+"AutoFocusNewLine.txt");
+				autoFocusString = autoFocusString + List.get(sliceAvgs[zDepth-1])+", ";
 				selectWindow("Results");
 				run("Close");
 				setBatchMode(false);
@@ -689,6 +689,7 @@ macro "Monitor diSPIM Acquisition" {
 				Stack.setPosition(channel, slice, frame);
 				updateDisplay();
 			}
+			File.saveString(autoFocusString, dir+"AutoFocusCommaSpace.txt");			
 		}		    
 	}
 }
@@ -750,6 +751,109 @@ macro "BkSubCropMacro" {
 			for(i=0;i<count;i++) {
 				if (!File.exists(saveDir+sourceParentName+"_"+i+".tif")) {
 					run("Image Sequence...", "open=" + sourceRoot+i+File.separator+"BV192_SPIMB_0000.tif sort");
+					title = getImageID;
+					uniqueTitleC = getTitle() + title;
+					rename(uniqueTitleC);
+					
+					imageCalculator("Subtract create stack", title, uniqueTitleV);
+					//selectWindow("Result of egl46wam"+i+"");
+					//setTool("rectangle");
+					subID = getImageID();
+					uniqueTitleD = getTitle() + subID;
+					rename(uniqueTitleD);
+			
+					//makeRectangle(x,y,325,425);
+					open(File.getParent(File.getParent(sourceDir))+File.separator+sourceParentName+"_crop.roi");
+					run("Crop");
+					File.makeDirectory(saveDir);
+					saveAs("Tiff", saveDir+sourceParentName+"_"+i+".tif");
+			
+					close(sourceParentName+"_"+i+".tif");
+			
+					close(uniqueTitleC);
+				}
+			}
+		}
+		previousCount = count;
+	//}
+	//close(uniqueTitleV);
+	setBatchMode(false);
+}
+
+
+macro "BkSubCropMacroNewNames" {
+	sourceDir = getDirectory("Select the first stack folder");
+	sourceRoot = substring(sourceDir, 0, lengthOf(sourceDir)-2);
+	print(sourceRoot);
+	sourceParentChunks = split(File.getParent(sourceDir), File.separator);
+	sourceParentName = sourceParentChunks[lengthOf(sourceParentChunks)-1];
+	saveDir = File.getParent(File.getParent(sourceDir))+File.separator+sourceParentName+"_processed"+File.separator;
+	print(saveDir);
+	
+	sourceList = getFileList(sourceDir);
+	
+	run("Image Sequence...", "open=" + sourceDir+File.separator+""+sourceList[0]+" sort");
+	original = getTitle();
+	run("Z Project...", "projection=[Max Intensity]");
+	close(original);
+	selector = getImageID;
+	uniqueTitleA = getTitle() + selector;
+	rename(uniqueTitleA);
+	
+	if (!File.exists(File.getParent(File.getParent(sourceDir))+File.separator+sourceParentName+"_crop.roi")) {
+		makeRectangle(0,0,325,425);
+	} else {
+		open(File.getParent(File.getParent(sourceDir))+File.separator+sourceParentName+"_crop.roi");
+	}
+	waitForUser("Select the region containing the embryo");
+	
+	getSelectionBounds(x, y, w, h);
+	save(File.getParent(File.getParent(sourceDir))+File.separator+sourceParentName+"_crop.roi");
+	
+	close(uniqueTitleA);
+	
+	setBatchMode(true);
+	
+	list = getFileList(File.getParent(sourceDir));
+	count = 0;
+	previousCount = -1;
+		
+		bgMax = 0;
+		for (l=0;l<lengthOf(list);l++) {
+			if(startsWith(File.getParent(sourceDir)+File.separator+list[l], "bg")) {
+				bgNum = parseInt(replace(list[l],"bg","")); 
+				if (bgNum > bgMax)
+					bgMax = bgNum;
+			}
+		}
+	
+	
+	bgList = getFileList(File.getParent(sourceDir)+File.separator+"bg"+bgMax+File.separator);
+	
+	run("Image Sequence...", "open=" + File.getParent(sourceDir)+File.separator+"bg+bgMax"+File.separator+""+bgList[0]+" sort");
+	bg = getImageID;
+	uniqueTitleB = getTitle() + bg;
+	rename(uniqueTitleB);
+	
+	run("Z Project...", "projection=[Average Intensity]");
+	bgAvID = getImageID();
+	uniqueTitleV = getTitle() + bgAvID;
+	rename(uniqueTitleV);
+	
+	close(uniqueTitleB);
+	
+	//while (true){
+		for (l=0;l<lengthOf(list);l++) {
+			if(startsWith(File.getParent(sourceDir)+File.separator+list[l], sourceRoot)) {
+				count++; 
+			}
+		}
+		if(count >previousCount){
+			for(i=1;i<=count;i++) {
+				if (!File.exists(saveDir+sourceParentName+"_"+i+".tif")) {
+					sourceRootiList = getFileList(sourceRoot+i+File.separator);
+				
+					run("Image Sequence...", "open=" + sourceRoot+i+File.separator+""+sourceRootiList[0]+" sort");
 					title = getImageID;
 					uniqueTitleC = getTitle() + title;
 					rename(uniqueTitleC);
