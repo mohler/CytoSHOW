@@ -199,6 +199,10 @@ macro "Monitor diSPIM Acquisition" {
 	fileNumsB = newArray("");
 	fileSortA = newArray("");
 	fileSortB = newArray("");
+	newTifListA = newArray("");
+	newTifListB = newArray("");
+	listA = newArray("");
+	listB = newArray("");
 
 	File.saveString("", dir+"Big5DFileListA.txt");
 	while(!File.exists(dir+"Big5DFileListA.txt"))
@@ -326,7 +330,7 @@ macro "Monitor diSPIM Acquisition" {
 			selectWindow("SPIMA: "+dir);
 			while (!is("composite")) {
 				wait(100);
-				selectWindow("SPIMA: "+dir);
+				//selectWindow("SPIMA: "+dir);
 			}
 	  	    Stack.setPosition(1, 1, 1);	
 		    run("Green");
@@ -367,7 +371,7 @@ macro "Monitor diSPIM Acquisition" {
 			selectWindow("SPIMB: "+dir);
 			while (!is("composite")) {
 				wait(100);
-				selectWindow("SPIMB: "+dir);
+				//selectWindow("SPIMB: "+dir);
 			}
 	  	    Stack.setPosition(1, 1, 1);	
 		    run("Green");
@@ -409,7 +413,8 @@ macro "Monitor diSPIM Acquisition" {
 	    big5DFileListBString = File.openAsString(dir+"Big5DFileListB.txt");
 
 	    while (lengthOf(fileListA) == lengthOf(listA) || lengthOf(fileListB) == lengthOf(listB) ) {
-
+			if (IJ.escapePressed() == "true")
+				exit("Monitoring of "+ dir+ " cancelled by Escape.");
 		 	listA = getFileList(""+dir +"SPIMA" + File.separator);
 			listB = getFileList(""+dir +"SPIMB" + File.separator);
 			wait(5000);
@@ -521,26 +526,6 @@ macro "Monitor diSPIM Acquisition" {
 		    setVoxelSize(vWidth, vHeight, vDepth, vUnit);    
 			updateDisplay();
 		
-//		    if (isOpen("MAX_SPIMA: "+dir)) {
-//		    	selectWindow("MAX_SPIMA: "+dir);
-//				if (wavelengths > 1) {
-//					Stack.getActiveChannels(channelsMAX_A);
-//					Stack.getDisplayMode(modeMAX_A);
-//				}
-//			    Stack.getPosition(channelMAX_A, sliceMAX_A, frameMAX_A);
-//				if (wavelengths > 1) {
-//				  	Stack.setPosition(1, sliceMAX_A, frameMAX_A);	
-//					getMinAndMax(minMAX_A1, maxMAX_A1);
-//				  	Stack.setPosition(2, sliceMAX_A, frameMAX_A);	
-//					getMinAndMax(minMAX_A2, maxMAX_A2);
-//				}
-//		    	getLocationAndSize(xMAX_A, yMAX_A, widthMAX_A, heightMAX_A);
-//		    	close();
-//		    } else {
-//				channelMAX_A=1; sliceMAX_A=1; frameMAX_A=1; 
-//				xMAX_A=0; yMAX_A=0; widthMAX_A=0; heightMAX_A=0; 
-//				minMAX_A1=0;minMAX_A2=0;maxMAX_A1=255;maxMAX_A2=255;
-//		    }
 			setBatchMode(false);
 			selectWindow("SPIMA: "+dir);
 			setLocation(xA,yA);
@@ -603,26 +588,6 @@ macro "Monitor diSPIM Acquisition" {
 		    setVoxelSize(vWidth, vHeight, vDepth, vUnit);    
 			updateDisplay();
 
-//		    if (isOpen("MAX_SPIMB: "+dir)) {
-//		    	selectWindow("MAX_SPIMB: "+dir);
-//				if (wavelengths > 1) {
-//					Stack.getActiveChannels(channelsMAX_B);
-//					Stack.getDisplayMode(modeMAX_B);
-//				}
-//			    Stack.getPosition(channelMAX_B, sliceMAX_B, frameMAX_B);
-//			  	Stack.setPosition(1, sliceMAX_B, frameMAX_B);	
-//				getMinAndMax(minMAX_B1, maxMAX_B1);
-//				if (wavelengths > 1) {
-//				  	Stack.setPosition(2, sliceMAX_B, frameMAX_B);	
-//					getMinAndMax(minMAX_B2, maxMAX_B2);
-//				}
-//		    	getLocationAndSize(xMAX_B, yMAX_B, widthMAX_B, heightMAX_B);
-//		    	close();
-//		    } else {
-//				channelMAX_B=1; sliceMAX_B=1; frameMAX_B=1; 
-//				xMAX_B=0; yMAX_B=0; widthMAX_B=0; heightMAX_B=0; 
-//				minMAX_B1=0;minMAX_B2=0;maxMAX_B1=255;maxMAX_B2=255;
-//		    }
 		    setBatchMode(false);
 			selectWindow("SPIMB: "+dir);
 		    setLocation(xB,yB);

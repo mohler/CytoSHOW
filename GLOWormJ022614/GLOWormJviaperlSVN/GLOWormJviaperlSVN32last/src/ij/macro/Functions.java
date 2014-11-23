@@ -5410,6 +5410,8 @@ public class Functions implements MacroConstants, Measurements {
 			renameResults();
 		else if (name.equals("getFullVersion"))
 			{interp.getParens(); return ""+IJ.getFullVersion();}
+		else if (name.equals("escapePressed"))
+			{interp.getParens(); return ""+IJ.escapePressed();}
 		else
 			interp.error("Unrecognized IJ function name");
 		return null;

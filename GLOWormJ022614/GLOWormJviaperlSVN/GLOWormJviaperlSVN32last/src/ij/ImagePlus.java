@@ -362,6 +362,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
                 WindowManager.setTempCurrentImage(null);
 			deleteRoi(); //save any ROI so it can be restored later
 			Interpreter.removeBatchModeImage(this);
+			this.flush();
 		}
     }
 
