@@ -881,6 +881,31 @@ public class MQTVSSceneLoader64 implements PlugIn {
 //					WindowManager.getFrame("Too Much Info ;) Window").toFront();
 
 					RoiManager rm = getImp().getRoiManager();
+					if (clFileName != null) {
+						String clStr;
+						if (pathlist.contains("/Volumes/GLOWORM_DATA") ) {
+							clStr = IJ.openAsString("/Volumes/GLOWORM_DATA/" + clFileName);
+						} else {
+							clStr = IJ.openAsString(file.getPath().substring(0, file.getPath().lastIndexOf("MQTVS")) + clFileName);
+						}
+						BufferedReader in = null;
+						if (pathlist.startsWith("/Volumes/GLOWORM_DATA/")) {
+							in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
+									RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], ("/Volumes/GLOWORM_DATA/" + clFileName)))));
+							if (in != null) {
+								StringBuilder stringBuilder = new StringBuilder();
+								String ls = System.getProperty("line.separator");
+								String line = "";
+								while (line != null) {
+									line = in.readLine();
+									if (line != null)
+										stringBuilder.append(line).append(ls);
+								}
+								clStr = stringBuilder.toString();
+							}
+						}
+						ColorLegend cl = new ColorLegend(getImp(), clStr);
+					}
 					if (roiFileName != null) {
 						String roiFilePath;
 						if (pathlist.contains("/Volumes/GLOWORM_DATA") ) {
@@ -919,31 +944,6 @@ public class MQTVSSceneLoader64 implements PlugIn {
 							}
 							//						rm.setVisible(false);
 						}
-					}
-					if (clFileName != null) {
-						String clStr;
-						if (pathlist.contains("/Volumes/GLOWORM_DATA") ) {
-							clStr = IJ.openAsString("/Volumes/GLOWORM_DATA/" + clFileName);
-						} else {
-							clStr = IJ.openAsString(file.getPath().substring(0, file.getPath().lastIndexOf("MQTVS")) + clFileName);
-						}
-						BufferedReader in = null;
-						if (pathlist.startsWith("/Volumes/GLOWORM_DATA/")) {
-							in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
-									RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], ("/Volumes/GLOWORM_DATA/" + clFileName)))));
-							if (in != null) {
-								StringBuilder stringBuilder = new StringBuilder();
-								String ls = System.getProperty("line.separator");
-								String line = "";
-								while (line != null) {
-									line = in.readLine();
-									if (line != null)
-										stringBuilder.append(line).append(ls);
-								}
-								clStr = stringBuilder.toString();
-							}
-						}
-						ColorLegend cl = new ColorLegend(getImp(), clStr);
 					}
 
 					if (lineageLCDFilePath != "" && lineageMapImagePath != "") {

@@ -1640,6 +1640,18 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					byte[] bytes = out.toByteArray(); 
 					RoiDecoder rd = new RoiDecoder(bytes, name); 
 					Roi roi = rd.getRoi(); 
+					//
+					ColorLegend cl = getColorLegend();
+					if (cl != null) {
+						Color clColor = cl.getBrainbowColors()
+											.get(roi.getName().toLowerCase().split("_")[0].split("=")[0].replace("\"", "").trim());
+						if (clColor !=null)
+							roi.setFillColor(Colors.decode("#88"+Integer.toHexString(clColor.getRed())
+																+Integer.toHexString(clColor.getGreen())
+																+Integer.toHexString(clColor.getBlue())
+															, Color.white));					
+					}
+					//
 					if (roi!=null) { 
 						roi.setImage(imp);
 						name = name.substring(0, name.length()-4);
