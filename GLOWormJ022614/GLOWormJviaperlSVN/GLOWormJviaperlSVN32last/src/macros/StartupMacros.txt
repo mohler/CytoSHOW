@@ -420,6 +420,11 @@ macro "Monitor diSPIM Acquisition" {
 			wait(5000);
 	    }	
 
+		if (isOpen("Display Channels")) {
+			selectWindow("Display Channels");
+			run("Close");
+		}
+
 	    fileListA = getFileList(dir +"SPIMA" + File.separator);
 	    fileListB = getFileList(dir + "SPIMB" + File.separator);
 
