@@ -92,6 +92,7 @@ public class Projector implements PlugInFilter, TextListener {
 	private int loopC;
 	private int loopT;
 	private int stepT = 1;
+	private boolean is16bit;
 
 	public int setup(String arg, ImagePlus imp) {
 		this.imp = imp;
@@ -110,7 +111,7 @@ public class Projector implements PlugInFilter, TextListener {
 			//IJ.error("3D Project", "Hyperstacks are currently not supported. Convert to\nRGB using Image>Type>RGB Color and try again.");
 			//return DONE; 
 		}
-		return DOES_8G+DOES_RGB+STACK_REQUIRED+NO_CHANGES;
+		return DOES_16+DOES_8G+DOES_RGB+STACK_REQUIRED+NO_CHANGES;
 	}
 
 	public void run(ImageProcessor ip) {
@@ -149,6 +150,7 @@ public class Projector implements PlugInFilter, TextListener {
 		WindowManager.setCurrentWindow(imp.getWindow());
 //		((ContrastAdjuster)ContrastAdjuster.getInstance()).toBack();
 		isRGB = imp.getType()==ImagePlus.COLOR_RGB;
+		is16bit = imp.getType()==ImagePlus.GRAY16;
 		isHyperstack = imp.isHyperStack();
 
 		LUT[] lut = imp.getLuts();
@@ -165,6 +167,7 @@ public class Projector implements PlugInFilter, TextListener {
 		
 		double inMin = imp.getDisplayRangeMin();
 		double inMax = imp.getDisplayRangeMax();
+		LUT[] luts = imp.getLuts();
 		ColorModel cm = imp.getProcessor().getColorModel();
 		int inChannel = imp.getChannel();
 		int inSlice = imp.getSlice();
@@ -236,9 +239,13 @@ public class Projector implements PlugInFilter, TextListener {
 					}
 
 					ImagePlus impDZ = impD.duplicate();
+					if (is16bit) {
+						IJ.run(impDZ,"8-bit","");
+					}
+
 					if (interpolate && sliceInterval>1.0) {
 						if (firstZ != lastZ)
-							impDZ = zScale(impD);
+							impDZ = zScale(impDZ);
 
 
 						if (impDZ==null) return;
@@ -362,7 +369,6 @@ public class Projector implements PlugInFilter, TextListener {
 
 		
 		imp.getProcessor().setColorModel(cm);
-		imp.setDisplayRange(inMin, inMax);
 		imp.setPosition(inChannel, inSlice, inFrame);
 		int origChannel = imp.getChannel();
 		if ( imp.isComposite()) {
@@ -421,11 +427,25 @@ public class Projector implements PlugInFilter, TextListener {
 		buildImp.setTitle((imp.isSketch3D()?"Sketch3D_":"")+"Projections of "+imp.getTitle().replaceAll("Sketch3D_*", ""));
 		
 		buildImp.getProcessor().setColorModel(cm);
-		buildImp.setDisplayRange(inMin, inMax);
+		if (!buildImp.isComposite()) {
+			if (!is16bit) {
+				buildImp.setDisplayRange(inMin, inMax);
+			}else {
+				buildImp.setDisplayRange(0, 255);
+			}
+		} else {
+			if (!is16bit) {
+				((CompositeImage)buildImp).setLuts(luts);
+			} else {
+				((CompositeImage)buildImp).resetDisplayRanges();
+			}
+		}
 		buildImp.setDimensions(finalChannels, finalSlices, finalFrames);
 
-		buildImp.setPosition(inChannel-firstC+1, inSlice-firstZ +1, inFrame-firstT+1);
-		IJ.run(buildImp,imp.getMultiChannelController().getChannelLUTChoice(inChannel-firstC),"");
+		buildImp.setPosition(inChannel-firstC+1, 1, inFrame-firstT+1);
+		if (imp.getMultiChannelController() !=null && imp.isComposite() && ((CompositeImage)imp).getMode() != CompositeImage.GRAYSCALE) {
+			IJ.run(buildImp,imp.getMultiChannelController().getChannelLUTChoice(inChannel-firstC),"");
+		}
 		
 		if (imp.getRoiManager().getColorLegend() != null)
 			buildImp.getRoiManager().setColorLegend(imp.getRoiManager().getColorLegend().clone(buildImp));
@@ -463,6 +483,8 @@ public class Projector implements PlugInFilter, TextListener {
 		bigRM.setZSustain(1);
 		bigRM.setTSustain(imp.getRoiManager().getTSustain());
 		bigRM.showAll(RoiManager.SHOW_ALL);
+		buildImp.setPosition(inChannel-firstC+1, 1, inFrame-firstT+1);
+
 //		buildImp.setRoiManager(bigRM);
 		IJ.runMacro("print(\"\\\\Update:\\\n \")");
 
