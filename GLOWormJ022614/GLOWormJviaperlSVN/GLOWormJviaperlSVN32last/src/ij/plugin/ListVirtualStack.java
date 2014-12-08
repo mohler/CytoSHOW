@@ -4,6 +4,7 @@ import ij.process.*;
 import ij.gui.*;
 import ij.io.*;
 import ij.util.Tools;
+
 import java.awt.*;
 import java.io.*;
 import java.util.*;
@@ -49,11 +50,39 @@ public class ListVirtualStack extends VirtualStack implements PlugIn {
 		if (!showDialog(imp)) return;
 		if (!virtual)
 			stack = convertToRealStack(imp);
+		imp.close();
 		ImagePlus imp2 = new ImagePlus(name, stack);
 		imp2.setCalibration(imp.getCalibration());
 		imp2.show();
 	}
 	
+	public  ListVirtualStack(String listPath) {
+		super();
+		list = open(listPath);
+		if (list==null) return;
+		nImages = list.length;
+		labels = new String[nImages];
+		this.imageWidth = imageWidth;
+		this.imageHeight = imageHeight;
+		if (list.length==0) {
+			IJ.error("Stack From List", "The file path list is empty");
+			return;
+		}
+		if (!list[0].startsWith("http://")) {
+			File f = new File(list[0]);
+			if (!f.exists()) {
+				IJ.error("Stack From List", "The first file on the list does not exist:\n \n"+list[0]);
+				return;
+			}
+		}
+		ImagePlus imp = IJ.openImage(list[0]);
+		if (imp==null) return;
+		imageWidth = imp.getWidth();
+		imageHeight = imp.getHeight();
+		setBitDepth(imp.getBitDepth());
+		imp.close();
+	}
+
 	boolean showDialog(ImagePlus imp) {
 		double bytesPerPixel = 1;
 		switch (imp.getType()) {
