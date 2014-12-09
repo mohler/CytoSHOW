@@ -581,7 +581,7 @@ public class SyncWindows extends PlugInFrame implements
 		if (source instanceof Button) {
 			Button bpressed = (Button)source;
 
-			 if(bpressed==bSyncAll) {
+			 if(bpressed.getLabel() == "Synchronize All") {
 				if (wList == null) return;
 				// Select all items on list.
 				Vector v = new Vector();
@@ -856,6 +856,29 @@ public class SyncWindows extends PlugInFrame implements
 				}
 			}
 		}
+	}
+
+	// --------------------------------------------------
+	/** Adds "this" object as mouse listener and mouse motion listener
+	to each of the window for imp.	*/
+	public void addImp(ImagePlus imp) {
+		Integer I;
+		ImageWindow iw;
+
+		//	Handle initial case of no windows.
+		if(vwins == null && imp!=null)
+			vwins = new Vector();
+
+		// Add imp to synchronized window list.
+		// Make sure input window is not already on list.
+		if(imp!=null && !vwins.contains(imp.getID())) {
+			iw = imp.getWindow();
+			iw.getCanvas().addMouseMotionListener(this);
+			iw.getCanvas().addMouseListener(this);
+			vwins.addElement(imp.getID());
+
+		}
+
 	}
 
 
