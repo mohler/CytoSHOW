@@ -24,7 +24,7 @@ import ij.plugin.frame.SyncWindows;
 public class DISPIM_Monitor implements PlugIn {
 
 	public void run(String arg) {
-
+		String[] args = arg.split("\\|");
 		IJ.log(arg);
 		int minA =0;
 		int maxA = 255;
@@ -36,7 +36,7 @@ public class DISPIM_Monitor implements PlugIn {
 		String vUnit = "micron";
 
 		String dir = "";
-		dir = arg;
+		dir = args[0];
 		IJ.log(dir);
 		//waitForUser("");
 		while (!(new File(dir)).isDirectory()) {
@@ -70,14 +70,21 @@ public class DISPIM_Monitor implements PlugIn {
 		IJ.saveString("", dir+"BigMAXFileListB.txt");
 		while(!(new File(dir+"BigMAXFileListB.txt")).exists())
 			IJ.wait(100);
-
-		GenericDialog gd = new GenericDialog("Data Set Parameters?");
-		gd.addNumericField("Wavelengths", 2, 0);
-		gd.addNumericField("Z Slices/Stack", 49, 0);
-		gd.showDialog();;
-		int wavelengths = (int) gd.getNextNumber();
-		int zSlices = (int) gd.getNextNumber();
-
+		
+		int wavelengths;
+		int zSlices;
+		if(args.length>2){
+			wavelengths = Integer.parseInt(args[1]);
+			zSlices = Integer.parseInt(args[2]);
+		} else {
+			GenericDialog gd = new GenericDialog("Data Set Parameters?");
+			gd.addNumericField("Wavelengths", 2, 0);
+			gd.addNumericField("Z Slices/Stack", 49, 0);
+			gd.showDialog();;
+			wavelengths = (int) gd.getNextNumber();
+			zSlices = (int) gd.getNextNumber();
+		}
+		
 		fileListA = new File(""+dir+"SPIMA").list();
 		fileListB = new File(""+dir+"SPIMB").list();
 		fileRanksA = Arrays.copyOf(fileListA, fileListA.length);
@@ -382,6 +389,8 @@ public class DISPIM_Monitor implements PlugIn {
 					sw.addImp(impS);
 				}
 			}
+			
+			
 			if (focus) {
 				//SAD THAT I HAVE TO FAKE THIS, BUT NOT WORKING IN MY ATTEMPTS AT JAVA-ONLY...
 				String fftMacroString = 
