@@ -58,7 +58,7 @@ import04="Text Image... ",ij.plugin.TextReader
 import05="Text File... ",ij.plugin.TextFileReader
 import06="Results... ",ij.plugin.SimpleCommands("import")
 import07="URL...",ij.plugin.URLOpener
-import08="Stack From List...",ij.plugin.ListVirtualStack
+import08="Stack From List...",ij.plugin.ListVirtualStackOpener
 import09="TIFF Virtual Stack...",ij.plugin.FileInfoVirtualStack
 import10="AVI...",ij.plugin.AVI_Reader
 import11="XY Coordinates... ",ij.plugin.XY_Reader
@@ -66,7 +66,7 @@ import11="XY Coordinates... ",ij.plugin.XY_Reader
 #import09="Capture Video...",QT_Capture
 #import10="QuickTime Movie...",Movie_Opener
 #import11="Pict...",QuickTime_Opener
-import12="MultiTIFF Virtual Stack", ij.plugin.MultiFileInfoVirtualStack
+import12="MultiTIFF Virtual Stack...", ij.plugin.MultiFileInfoVirtualStack
 import13="Animated GIF Stack...", ij.plugin.Animated_Gif_Reader
 
 # Plugins installed in the File/Save As submenu

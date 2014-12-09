@@ -1,4 +1,4 @@
-package ij.plugin;
+package org.vcell.gloworm;
 import ij.*;
 import ij.process.*;
 import ij.gui.*;
@@ -9,52 +9,15 @@ import java.awt.*;
 import java.io.*;
 import java.util.*;
 
-/** This plugin opens images specified by list of file paths as a virtual stack.
-	It implements the File/Import/Stack From List command. */
-public class ListVirtualStack extends VirtualStack implements PlugIn {
+/** This VirtualStack opens images specified by list of file paths.
+	It is at the core of the File/Import/Stack From List command. */
+public class ListVirtualStack extends VirtualStack {
 	private static boolean virtual;
 	private String[] list;
 	private String[] labels;
 	private int nImages;
 	private int imageWidth, imageHeight;
 
-	public void run(String arg) {
-		OpenDialog  od = new OpenDialog("Open Image List", arg);
-		String name = od.getFileName();
-		if (name==null) return;
-		String  dir = od.getDirectory();
-		//IJ.log("ListVirtualStack: "+dir+"   "+name);
-		list = open(dir+name);
-		if (list==null) return;
-		nImages = list.length;
-		labels = new String[nImages];
-		//for (int i=0; i<list.length; i++)
-		//	IJ.log(i+"  "+list[i]);
-		if (list.length==0) {
-			IJ.error("Stack From List", "The file path list is empty");
-			return;
-		}
-		if (!list[0].startsWith("http://")) {
-			File f = new File(list[0]);
-			if (!f.exists()) {
-				IJ.error("Stack From List", "The first file on the list does not exist:\n \n"+list[0]);
-				return;
-			}
-		}
-		ImagePlus imp = IJ.openImage(list[0]);
-		if (imp==null) return;
-		imageWidth = imp.getWidth();
-		imageHeight = imp.getHeight();
-		setBitDepth(imp.getBitDepth());
-		ImageStack stack = this;
-		if (!showDialog(imp)) return;
-		if (!virtual)
-			stack = convertToRealStack(imp);
-		imp.close();
-		ImagePlus imp2 = new ImagePlus(name, stack);
-		imp2.setCalibration(imp.getCalibration());
-		imp2.show();
-	}
 	
 	public  ListVirtualStack(String listPath) {
 		super();

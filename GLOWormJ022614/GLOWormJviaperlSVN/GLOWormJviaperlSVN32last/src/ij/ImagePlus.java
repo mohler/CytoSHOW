@@ -7,6 +7,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.vcell.gloworm.ListVirtualStack;
 import org.vcell.gloworm.MultiChannelController;
 import org.vcell.gloworm.MultiQTVirtualStack;
 
@@ -25,7 +26,6 @@ import ij.plugin.frame.Recorder;
 import ij.plugin.frame.RoiManager;
 import ij.plugin.Converter;
 import ij.plugin.Duplicator;
-import ij.plugin.ListVirtualStack;
 import ij.plugin.RectToolOptions;
 
 
