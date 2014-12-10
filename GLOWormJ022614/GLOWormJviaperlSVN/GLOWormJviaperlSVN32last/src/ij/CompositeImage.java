@@ -4,13 +4,14 @@ import ij.gui.*;
 import ij.plugin.*;
 import ij.plugin.frame.*;
 import ij.io.FileInfo;
+
 import java.awt.*;
 import java.awt.image.*;
 
 public class CompositeImage extends ImagePlus {
 
 	// Note: TRANSPARENT mode has not yet been implemented
-	public static final int COMPOSITE=1, COLOR=2, GRAYSCALE=3, TRANSPARENT=4;
+	public static final int COMPOSITE=1, COLOR=2, GRAYSCALE=3, TRANSPARENT=4, RATIO12=5, RATIO21=6;
 	public static final int MAX_CHANNELS = 36;
 	int[] rgbPixels;
 	boolean newPixels;
@@ -38,6 +39,8 @@ public class CompositeImage extends ImagePlus {
 	byte[][] channelLuts;
 	boolean customLuts;
 	boolean syncChannels;
+	private LUT ratio12LUT;
+	private LUT ratio21LUT;
 
 	public CompositeImage(ImagePlus imp) {
 		this(imp, COLOR);
@@ -127,7 +130,7 @@ public class CompositeImage extends ImagePlus {
 
 	void setup(int channels, ImageStack stack2) {
 		setupLuts(channels);
-		if (mode==COMPOSITE) {
+		if (mode==COMPOSITE || mode==RATIO12 || mode==RATIO21) {
 			cip = new ImageProcessor[channels];
 			for (int i=0; i<channels; ++i) {
 				cip[i] = stack2.getProcessor(i+1);
@@ -135,6 +138,7 @@ public class CompositeImage extends ImagePlus {
 			}
 			currentSlice = currentFrame = 1;
 		}
+
 	}
 
 	void setupLuts(int channels) {
@@ -163,6 +167,8 @@ public class CompositeImage extends ImagePlus {
 					lut[i].max = ip.getMax();
 				}
 			}
+			ratio12LUT = createLutFromColor(Color.cyan);
+			ratio21LUT = createLutFromColor(Color.orange);
 			displayRanges = null;
 		}
 	}
@@ -204,7 +210,7 @@ public class CompositeImage extends ImagePlus {
 		}
 
 		ImageProcessor ip = getProcessor();
-		if (mode!=COMPOSITE) {
+		if (mode!=COMPOSITE && mode!=RATIO12 && mode!=RATIO21) {
 			setupLuts(nChannels);
 			LUT cm = lut[currentChannel];
 			if (mode==COLOR)
@@ -221,7 +227,8 @@ public class CompositeImage extends ImagePlus {
 			if (ip!=null)
 				img = ip.createImage();
 			return;
-		}
+		} 
+
 
 //		if (nChannels==1) {
 //			cip = null;
@@ -268,6 +275,42 @@ public class CompositeImage extends ImagePlus {
 		}
 		
 		cip[currentChannel].setMinAndMax(ip.getMin(),ip.getMax());
+		
+		if (mode==RATIO12 || mode==RATIO21) {
+			LUT cm = mode==RATIO12?ratio12LUT:ratio21LUT;
+			if (!(cm.min==0.0&&cm.max==0.0))
+				ip.setMinAndMax(cm.min, cm.max);
+			if (newChannel) {
+				if (!IJ.isMacro()) ContrastAdjuster.update();
+				Channels channels = Channels.getInstance();
+				for (int i=0; i<MAX_CHANNELS; i++)
+					active[i] = (i==0||i==1)?true:false;
+				if (channels!=null) ((Channels)channels).update();
+			}
+			ImageProcessor rip1= null;
+			ImageProcessor rip2= null;
+			if (cip[0] instanceof ByteProcessor && cip[1] instanceof ByteProcessor) {
+				rip1 = ((ByteProcessor) cip[0]).convertToFloat();
+				rip2 = ((ByteProcessor) cip[1]).convertToFloat();
+			} else if (cip[0] instanceof ShortProcessor && cip[1] instanceof ShortProcessor) {
+				rip1 = ((ShortProcessor) cip[0]).convertToFloat();
+				rip2 = ((ShortProcessor) cip[1]).convertToFloat();
+			}
+			if (rip1!=null && rip2!=null) {
+				if (mode==RATIO12) {
+					rip1.copyBits(rip2, 0, 0, Blitter.DIVIDE);
+					rip1.setColorModel(cm);			
+					this.ip = rip1;
+				} else if (mode==RATIO21) {
+					rip2.copyBits(rip1, 0, 0, Blitter.DIVIDE);
+					rip2.setColorModel(cm);
+					img = rip2.createImage();
+					this.ip = rip2;
+				}
+				img = this.ip.createImage();
+			}
+			return;
+		}
 		
 		if (singleChannel && nChannels<=3) {
 			switch (currentChannel) {
@@ -442,7 +485,7 @@ public class CompositeImage extends ImagePlus {
 	}
 	
 	public synchronized void setMode(int mode) {
-		if (mode<COMPOSITE || mode>GRAYSCALE)
+		if (mode != RATIO12 && mode!=RATIO21 && (mode<COMPOSITE || mode>GRAYSCALE))
 			return;
 		if (mode==COMPOSITE && getNChannels()>MAX_CHANNELS)
 			mode = COLOR;
@@ -463,7 +506,7 @@ public class CompositeImage extends ImagePlus {
 			awtImage = null;
 			currentChannel = 0;
 		}
-		if (mode==GRAYSCALE || mode==TRANSPARENT)
+		if (mode==GRAYSCALE || mode==TRANSPARENT || mode==RATIO12 || mode==RATIO21)
 			ip.setColorModel(ip.getDefaultColorModel());
 		Channels channels = Channels.getInstance();
 		if (channels!=null) ((Channels)channels).update();
@@ -599,20 +642,34 @@ public class CompositeImage extends ImagePlus {
 	public void setDisplayRange(double min, double max) {
 		ip.setMinAndMax(min, max);
 		int c = getChannelIndex();
-		lut[c].min = min;
-		lut[c].max = max;
+		if (mode < RATIO12) {
+			lut[c].min = min;
+			lut[c].max = max;
+		} else if (mode == RATIO12){
+			ratio12LUT.min =min;
+			ratio12LUT.max =max;
+		} else if (mode == RATIO21){
+			ratio21LUT.min =min;
+			ratio21LUT.max =max;
+		}
 	}
 
 	public double getDisplayRangeMin() {
-		if (lut!=null)
+		if (lut!=null && mode<RATIO12)
 			return lut[getChannelIndex()].min;
+		else if (mode>=RATIO12) {
+			return ip.getLut().min;
+		}
 		else
 			return 0.0;
 	}
 
 	public double getDisplayRangeMax() {
-		if (lut!=null)
+		if (lut!=null && mode<RATIO12)
 			return lut[getChannelIndex()].max;
+		else if (mode>=RATIO12) {
+			return ip.getLut().max;
+		}
 		else
 			return 255.0;
 	}

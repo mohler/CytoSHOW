@@ -3,6 +3,10 @@ import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.Colors;
+import ij.process.ByteProcessor;
+import ij.process.ColorProcessor;
+import ij.process.FloatProcessor;
+import ij.process.ShortProcessor;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -380,8 +384,18 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 				IJ.doCommand("Start Z Animation");
 			else if (getType() =='c' ){
 				int origChannel = stackWindow.getImagePlus().getChannel();
-				if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 3 ){
+				if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 6 ){
 					((CompositeImage) stackWindow.getImagePlus()).setMode(1);
+					if (stackWindow.getImagePlus().getType() == ImagePlus.GRAY16) {
+						((CompositeImage) stackWindow.getImagePlus())
+							.setProcessor(new ShortProcessor(stackWindow.getImagePlus().getWidth(), stackWindow.getImagePlus().getHeight()));
+					} else if (stackWindow.getImagePlus().getType() == ImagePlus.GRAY8) {
+						((CompositeImage) stackWindow.getImagePlus())
+							.setProcessor(new ByteProcessor(stackWindow.getImagePlus().getWidth(), stackWindow.getImagePlus().getHeight()));
+					} else if (stackWindow.getImagePlus().getType() == ImagePlus.GRAY32) {
+						((CompositeImage) stackWindow.getImagePlus())
+							.setProcessor(new FloatProcessor(stackWindow.getImagePlus().getWidth(), stackWindow.getImagePlus().getHeight()));
+					}
 					boolean animationState = stackWindow.running2;
 					boolean animationZState = stackWindow.running3;
 					IJ.doCommand("Stop Animation");
@@ -408,6 +422,16 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 				}
 				else if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 2 ){
 					((CompositeImage) stackWindow.getImagePlus()).setMode(3);
+					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()+1);
+					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()-1);
+				}
+				else if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 3 ){
+					((CompositeImage) stackWindow.getImagePlus()).setMode(5);
+					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()+1);
+					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()-1);
+				}
+				else if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 5 ){
+					((CompositeImage) stackWindow.getImagePlus()).setMode(6);
 					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()+1);
 					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()-1);
 				}
@@ -470,6 +494,14 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 				else if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 1 ){
 					string = "CM";
 					g.setColor(Color.yellow);
+				}
+				else if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 5 ){
+					string = "1:2";
+					g.setColor(Color.cyan);
+				}
+				else if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 6 ){
+					string = "2:1";
+					g.setColor(Color.orange);
 				}
 				else {
 					g.setColor(Color.magenta);

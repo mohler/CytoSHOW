@@ -26,7 +26,7 @@ import java.net.*;
 public class IJ {
 
 	/** Image display modes */
-	public static final int COMPOSITE=1, COLOR=2, GRAYSCALE=3;
+	public static final int COMPOSITE=1, COLOR=2, GRAYSCALE=3, RATIO12=5, RATIO21=6;
 	
 	public static final String URL = "http://imagej.nih.gov/ij";
 	public static final int ALL_KEYS = -1;

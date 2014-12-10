@@ -470,7 +470,7 @@ ActionListener, AdjustmentListener, ItemListener {
 		double max = imp.getDisplayRangeMax();;
 		int type = imp.getType();
 		Calibration cal = imp.getCalibration();
-		boolean realValue = type==ImagePlus.GRAY32;
+		boolean realValue = (type==ImagePlus.GRAY32 || (imp.isComposite() && ((CompositeImage)imp).getMode()>=CompositeImage.RATIO12));
 		if (cal.calibrated()) {
 			min = cal.getCValue((int)min);
 			max = cal.getCValue((int)max);
@@ -563,7 +563,8 @@ ActionListener, AdjustmentListener, ItemListener {
 		setMinAndMax(imp, min, max);
 		if (min==max)
 			setThreshold(ip);
-		if (RGBImage) doMasking(imp, ip);
+		if (RGBImage)
+			doMasking(imp, ip);
 		updateScrollBars(maxSlider, false);
 	}
 
@@ -1128,9 +1129,12 @@ ActionListener, AdjustmentListener, ItemListener {
 		}
 		updatePlot();
 		updateLabels(imp);
-		if ((IJ.shiftKeyDown()||(balance && channels==imp.getNChannels() && choice.getSelectedIndex()==channels)) && imp.isComposite())
+        if (imp.isComposite() && ((CompositeImage)imp).getMode()>=CompositeImage.RATIO12) {
+        	imp.getCanvas().paintDoubleBuffered(getGraphics());
+        }
+		else if ((IJ.shiftKeyDown()||(balance && channels==imp.getNChannels() && choice.getSelectedIndex()==channels)) && imp.isComposite())
 			((CompositeImage)imp).updateAllChannelsAndDraw();
-		else
+		else 		
 			imp.updateChannelAndDraw();
 		if (RGBImage)
 			imp.unlock();

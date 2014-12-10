@@ -8,7 +8,7 @@ import java.awt.event.*;
 /** Displays the ImageJ Channels window. */
 public class Channels extends PlugInDialog implements PlugIn, ItemListener, ActionListener {
 
-	private static String[] modes = {"Composite", "Color", "Grayscale"};
+	private static String[] modes = {"Composite", "Color", "Grayscale", "Ratio Ch1/Ch2", "Ratio Ch2/Ch1"};
 	private static String[] menuItems = {"Make Composite", "Convert to RGB", "Split Channels", "Merge Channels...",
 		"Edit LUT...", "-", "Red", "Green", "Blue", "Cyan", "Magenta", "Yellow", "Grays"};
 
@@ -111,6 +111,8 @@ public class Channels extends PlugInDialog implements PlugIn, ItemListener, Acti
 			case IJ.COMPOSITE: index=0; break;
 			case IJ.COLOR: index=1; break;
 			case IJ.GRAYSCALE: index=2; break;
+			case IJ.RATIO12: index=3; break;
+			case IJ.RATIO21: index=4; break;
 		}
 		choice.select(index);
 	}
@@ -163,6 +165,8 @@ public class Channels extends PlugInDialog implements PlugIn, ItemListener, Acti
 				case 0: ci.setMode(IJ.COMPOSITE); break;
 				case 1: ci.setMode(IJ.COLOR); break;
 				case 2: ci.setMode(IJ.GRAYSCALE); break;
+				case 3: ci.setMode(IJ.RATIO12); break;
+				case 4: ci.setMode(IJ.RATIO21); break;
 			}
 			ci.updateAndDraw();
 			if (Recorder.record) {
@@ -171,6 +175,8 @@ public class Channels extends PlugInDialog implements PlugIn, ItemListener, Acti
 					case 0: mode="composite"; break;
 					case 1: mode="color"; break;
 					case 2: mode="grayscale"; break;
+					case 3: mode="ratio12"; break;
+					case 4: mode="ratio21"; break;
 				}
 				Recorder.record("Stack.setDisplayMode", mode);
 			}

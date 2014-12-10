@@ -1531,7 +1531,8 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			if (win!=null && win instanceof StackWindow)
 				((StackWindow)win).updateSliceSelector();
 			Object pixels = stack.getPixels(currentSlice);
-			if (ip!=null && pixels!=null) {
+			if ((ip!=null && pixels!=null) 
+					&& (isComposite() && ((CompositeImage)this).getCompositeMode() < CompositeImage.RATIO12)) {
 //			if (false) {
 				ip.setSnapshotPixels(null);
 				ip.setPixels(pixels);
@@ -2246,18 +2247,25 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
     	int type = getType();
 		switch (type) {
 			case GRAY8: case GRAY16: case COLOR_256:
-				if (type==COLOR_256) {
-					if (cal.getCValue(v[3])==v[3]) // not calibrated
-						return(", index=" + v[3] + ", value=" + v[0] + "," + v[1] + "," + v[2]);
-					else
-						v[0] = v[3];
+				//SPECIAL CASE FORE RATIO MODES
+				if (isComposite() && ((CompositeImage)this).getMode() >= CompositeImage.RATIO12) {
+		   			double value = Float.intBitsToFloat(v[0]);
+	    			String s = (int)value==value?IJ.d2s(value,0)+".0":IJ.d2s(value,4,7);
+	    			return(", value=" + s);
+				} else {
+					if (type==COLOR_256) {
+						if (cal.getCValue(v[3])==v[3]) // not calibrated
+							return(", index=" + v[3] + ", value=" + v[0] + "," + v[1] + "," + v[2]);
+						else
+							v[0] = v[3];
+					}
 				}
 				double cValue = cal.getCValue(v[0]);
 				if (cValue==v[0])
     				return(", value=" + v[0]);
     			else
     				return(", value=" + IJ.d2s(cValue) + " ("+v[0]+")");
-    		case GRAY32:
+    		case (GRAY32):
     			double value = Float.intBitsToFloat(v[0]);
     			String s = (int)value==value?IJ.d2s(value,0)+".0":IJ.d2s(value,4,7);
     			return(", value=" + s);
