@@ -13,6 +13,7 @@ import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.ImageWindow;
+import ij.macro.MacroRunner;
 import ij.measure.Calibration;
 import ij.measure.ResultsTable;
 import ij.plugin.FFT;
@@ -391,6 +392,7 @@ public class DISPIM_Monitor implements PlugIn {
 			}
 			
 			
+			
 			if (focus) {
 				//SAD THAT I HAVE TO FAKE THIS, BUT NOT WORKING IN MY ATTEMPTS AT JAVA-ONLY...
 				String fftMacroString = 
@@ -458,6 +460,28 @@ public class DISPIM_Monitor implements PlugIn {
 						"";
 				IJ.runMacro(fftMacroString);
 			}		    
+		    
+			
+			boolean doDecon=true;
+			if (doDecon) {
+				String deconString = "nibib.spim.PlugInDialogGenerateFusion(\"reg_one boolean false\", \"reg_all boolean true\", \"no_reg_2D boolean false\", \"reg_2D_one boolean false\", \"reg_2D_all boolean false\", \"rotate_begin list_float -10.0,-10.0,-10.0\", \"rotate_end list_float 10.0,10.0,10.0\", \"coarse_rate list_float 3.0,3.0,3.0\", \"fine_rate list_float 0.5,0.5,0.5\", \"save_arithmetic boolean false\", \"show_arithmetic boolean false\", \"save_geometric boolean false\", \"show_geometric boolean false\", \"do_interImages boolean false\", \"save_prefusion boolean false\", \"do_show_pre_fusion boolean false\", \"do_threshold boolean false\", \"save_max_proj boolean false\", \"show_max_proj boolean false\", \"x_max_box_selected boolean false\", \"y_max_box_selected boolean false\", \"z_max_box_selected boolean false\", \"do_smart_movement boolean false\", \"threshold_intensity double 10.0\", \"res_x double 0.1625\", \"res_y double 0.1625\", \"res_z double 1.0\", \"mtxFileDirectory string "+dir.replace("\\", "\\\\")+"SPIMB_processed\", \"spimAFileDir string "+dir.replace("\\", "\\\\")+"SPIMA_processed\", \"spimBFileDir string "+dir.replace("\\", "\\\\")+"SPIMB_processed\", \"baseImage string SPIMA\", \"base_rotation int -1\", \"transform_rotation int 5\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconvDirString string "+dir.replace("\\", "\\\\")+"Deconvolution\\\", \"deconv_show_results boolean false\", \"deconvolution_method int 1\", \"deconv_iterations int 10\", \"deconv_sigmaA list_float 3.5,3.5,9.6\", \"deconv_sigmaB list_float 9.6,3.5,3.5\", \"use_deconv_sigma_conversion_factor boolean true\", \"x_move int 0\", \"y_move int 0\", \"z_move int 0\")";
+				IJ.saveString(deconString, dir+"GenerateFusion.sct");
+
+				(new File(dir+"GenerateFusion.bat")).delete();
+				IJ.runMacro(""
+						+ "		    f = File.open(\""+dir.replace("\\", "\\\\")+"GenerateFusion.bat\");\n" + 
+						"		    batStringD = \"@echo off\";\n" + 
+						"		    print(f,batStringD);\n" + 
+						"		    batStringC = \"C\\:\";\n" + 
+						"		    print(f,batStringC);\n" + 
+						"		    batStringA = \"cd C:\\\\Program Files\\\\mipav\";\n" + 
+						"		    print(f,batStringA);\n" + 
+						"		    batStringB = \"start /b mipav -s "+dir.replace("\\", "\\\\")+"GenerateFusion.sct -hide\";\n" + 
+						"		    print(f,batStringB);\n" + 
+						"		    File.close(f);	    \n" + 
+						"");
+			    new MacroRunner("exec(\"cmd\", \"/c\", \""+dir+"GenerateFusion.bat\")");
+			}		
 		}
 	}
 }
