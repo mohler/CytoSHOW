@@ -2252,20 +2252,18 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		   			double value = Float.intBitsToFloat(v[0]);
 	    			String s = (int)value==value?IJ.d2s(value,0)+".0":IJ.d2s(value,4,7);
 	    			return(", value=" + s);
-				} else {
-					if (type==COLOR_256) {
+				} else if (type==COLOR_256) {
 						if (cal.getCValue(v[3])==v[3]) // not calibrated
 							return(", index=" + v[3] + ", value=" + v[0] + "," + v[1] + "," + v[2]);
 						else
-							v[0] = v[3];
-					}
+							v[0] = v[3];					
 				}
 				double cValue = cal.getCValue(v[0]);
 				if (cValue==v[0])
     				return(", value=" + v[0]);
     			else
     				return(", value=" + IJ.d2s(cValue) + " ("+v[0]+")");
-    		case (GRAY32):
+    		case GRAY32:
     			double value = Float.intBitsToFloat(v[0]);
     			String s = (int)value==value?IJ.d2s(value,0)+".0":IJ.d2s(value,4,7);
     			return(", value=" + s);

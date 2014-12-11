@@ -4,7 +4,6 @@ import ij.gui.*;
 import ij.plugin.*;
 import ij.plugin.frame.*;
 import ij.io.FileInfo;
-
 import java.awt.*;
 import java.awt.image.*;
 
@@ -138,7 +137,6 @@ public class CompositeImage extends ImagePlus {
 			}
 			currentSlice = currentFrame = 1;
 		}
-
 	}
 
 	void setupLuts(int channels) {
@@ -167,10 +165,12 @@ public class CompositeImage extends ImagePlus {
 					lut[i].max = ip.getMax();
 				}
 			}
-			ratio12LUT = createLutFromColor(Color.cyan);
-			ratio21LUT = createLutFromColor(Color.orange);
 			displayRanges = null;
 		}
+		if (ratio12LUT==null)
+			ratio12LUT = createLutFromColor(Color.cyan);
+		if (ratio21LUT==null)
+			ratio21LUT = createLutFromColor(Color.orange);
 	}
 	
 	public void resetDisplayRanges() {
@@ -227,8 +227,7 @@ public class CompositeImage extends ImagePlus {
 			if (ip!=null)
 				img = ip.createImage();
 			return;
-		} 
-
+		}
 
 //		if (nChannels==1) {
 //			cip = null;
@@ -277,16 +276,9 @@ public class CompositeImage extends ImagePlus {
 		cip[currentChannel].setMinAndMax(ip.getMin(),ip.getMax());
 		
 		if (mode==RATIO12 || mode==RATIO21) {
+			setupLuts(nChannels);
 			LUT cm = mode==RATIO12?ratio12LUT:ratio21LUT;
-			if (!(cm.min==0.0&&cm.max==0.0))
-				ip.setMinAndMax(cm.min, cm.max);
-			if (newChannel) {
-				if (!IJ.isMacro()) ContrastAdjuster.update();
-				Channels channels = Channels.getInstance();
-				for (int i=0; i<MAX_CHANNELS; i++)
-					active[i] = (i==0||i==1)?true:false;
-				if (channels!=null) ((Channels)channels).update();
-			}
+
 			ImageProcessor rip1= null;
 			ImageProcessor rip2= null;
 			if (cip[0] instanceof ByteProcessor && cip[1] instanceof ByteProcessor) {
@@ -304,9 +296,10 @@ public class CompositeImage extends ImagePlus {
 				} else if (mode==RATIO21) {
 					rip2.copyBits(rip1, 0, 0, Blitter.DIVIDE);
 					rip2.setColorModel(cm);
-					img = rip2.createImage();
 					this.ip = rip2;
 				}
+				if (!(cm.min==0.0&&cm.max==0.0))
+					this.ip.setMinAndMax(cm.min, cm.max);
 				img = this.ip.createImage();
 			}
 			return;

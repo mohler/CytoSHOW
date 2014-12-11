@@ -1129,12 +1129,9 @@ ActionListener, AdjustmentListener, ItemListener {
 		}
 		updatePlot();
 		updateLabels(imp);
-        if (imp.isComposite() && ((CompositeImage)imp).getMode()>=CompositeImage.RATIO12) {
-        	imp.getCanvas().paintDoubleBuffered(getGraphics());
-        }
-		else if ((IJ.shiftKeyDown()||(balance && channels==imp.getNChannels() && choice.getSelectedIndex()==channels)) && imp.isComposite())
+		if ((IJ.shiftKeyDown()||(balance && channels==imp.getNChannels() && choice.getSelectedIndex()==channels)) && imp.isComposite())
 			((CompositeImage)imp).updateAllChannelsAndDraw();
-		else 		
+		else
 			imp.updateChannelAndDraw();
 		if (RGBImage)
 			imp.unlock();
