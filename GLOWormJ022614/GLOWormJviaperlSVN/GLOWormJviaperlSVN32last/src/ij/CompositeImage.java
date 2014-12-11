@@ -170,7 +170,7 @@ public class CompositeImage extends ImagePlus {
 		if (ratio12LUT==null)
 			ratio12LUT = createLutFromColor(Color.cyan);
 		if (ratio21LUT==null)
-			ratio21LUT = createLutFromColor(Color.orange);
+			ratio21LUT = createLutFromColor(Color.magenta);
 	}
 	
 	public void resetDisplayRanges() {

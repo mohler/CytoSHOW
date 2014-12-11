@@ -1532,8 +1532,9 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 				((StackWindow)win).updateSliceSelector();
 			Object pixels = stack.getPixels(currentSlice);
 			if ((ip!=null && pixels!=null) 
-					&& (isComposite() && ((CompositeImage)this).getCompositeMode() < CompositeImage.RATIO12)) {
-//			if (false) {
+					&& (!isComposite() 
+							|| (isComposite() 
+									&& ((CompositeImage)this).getCompositeMode() < CompositeImage.RATIO12))) {
 				ip.setSnapshotPixels(null);
 				ip.setPixels(pixels);
 				ip.snapshot();
@@ -2252,7 +2253,8 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		   			double value = Float.intBitsToFloat(v[0]);
 	    			String s = (int)value==value?IJ.d2s(value,0)+".0":IJ.d2s(value,4,7);
 	    			return(", value=" + s);
-				} else if (type==COLOR_256) {
+				} 
+				if (type==COLOR_256) {
 						if (cal.getCValue(v[3])==v[3]) // not calibrated
 							return(", index=" + v[3] + ", value=" + v[0] + "," + v[1] + "," + v[2]);
 						else
