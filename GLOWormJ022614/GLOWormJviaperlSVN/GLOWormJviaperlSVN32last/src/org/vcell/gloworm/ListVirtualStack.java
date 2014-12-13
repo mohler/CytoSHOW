@@ -14,7 +14,7 @@ import java.util.*;
 public class ListVirtualStack extends VirtualStack {
 	private static boolean virtual;
 	private String[] list;
-	private String[] labels;
+//	private String[] labels;
 	private int nImages;
 	private int imageWidth, imageHeight;
 
@@ -25,8 +25,9 @@ public class ListVirtualStack extends VirtualStack {
 		if (list==null) return;
 		nImages = list.length;
 		labels = new String[nImages];
-		this.imageWidth = imageWidth;
-		this.imageHeight = imageHeight;
+		names = new String[nImages];
+//		this.imageWidth = imageWidth;
+//		this.imageHeight = imageHeight;
 		if (list.length==0) {
 			IJ.error("Stack From List", "The file path list is empty");
 			return;
@@ -44,6 +45,10 @@ public class ListVirtualStack extends VirtualStack {
 		imageHeight = imp.getHeight();
 		setBitDepth(imp.getBitDepth());
 		imp.close();
+		for(int p=0;p<list.length;p++) {
+			String[] pathChunks = list[p].split(IJ.isWindows()?"\\\\":"/");
+			names[p]= pathChunks[pathChunks.length-2];
+		}
 	}
 
 	boolean showDialog(ImagePlus imp) {
@@ -187,5 +192,10 @@ public class ListVirtualStack extends VirtualStack {
 		return imageHeight;
 	}
 
+	/** Returns the path to the directory containing the current image. */
+	public String getDirectory(int n) {
+		String[] pathChunks = list[n-1].split(IJ.isWindows()?"\\\\":"/");
+		return pathChunks[pathChunks.length-2];
+	}
 
 }

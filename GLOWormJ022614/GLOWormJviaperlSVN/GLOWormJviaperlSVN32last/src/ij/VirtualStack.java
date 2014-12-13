@@ -14,8 +14,8 @@ public class VirtualStack extends ImageStack {
 	private static final int INITIAL_SIZE = 100;
 	private String path;
 	protected int nSlices;
-	private String[] names;
-	private String[] labels;
+	protected String[] names;
+	protected String[] labels;
 	private int bitDepth;
 	private boolean emptyImage;
 	Color fillColor = Color.black;
@@ -25,7 +25,10 @@ public class VirtualStack extends ImageStack {
 
 
 	/** Default constructor. */
-	public VirtualStack() { }
+	public VirtualStack() { 
+		names = new String[INITIAL_SIZE];
+		labels = new String[INITIAL_SIZE];
+	}
 
 	/** Creates a new, empty virtual stack. */
 	public VirtualStack(int width, int height, ColorModel cm, String path, boolean emptyImage, Color fillColor) {
