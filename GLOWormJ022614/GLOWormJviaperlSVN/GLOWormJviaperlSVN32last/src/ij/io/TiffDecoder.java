@@ -39,6 +39,7 @@ public class TiffDecoder {
 	public static final int METAMORPH1 = 33628;
 	public static final int METAMORPH2 = 33629;
 	public static final int IPLAB = 34122;
+	public static final int MIPAV = 65000;
 	public static final int NIH_IMAGE_HDR = 43314;
 	public static final int META_DATA_BYTE_COUNTS = 50838; // private tag registered with Adobe
 	public static final int META_DATA = 50839; // private tag registered with Adobe
