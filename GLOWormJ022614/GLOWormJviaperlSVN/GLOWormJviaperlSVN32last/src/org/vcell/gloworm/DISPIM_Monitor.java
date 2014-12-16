@@ -442,7 +442,7 @@ public class DISPIM_Monitor implements PlugIn {
 							"		    print(f,batStringC);\n" + 
 							"		    batStringA = \"cd C:\\\\Program Files\\\\mipav\";\n" + 
 							"		    print(f,batStringA);\n" + 
-							"		    batStringB = \"start /b mipav -s \\\""+dir.replace("\\", "\\\\")+"GenerateFusion1.sct\\\" -hide\";\n" + 
+							"		    batStringB = \"start /LOW /b mipav -s \\\""+dir.replace("\\", "\\\\")+"GenerateFusion1.sct\\\" -hide\";\n" + 
 							"		    print(f,batStringB);\n" + 
 							"		    File.close(f);	    \n" + 
 							"");
@@ -463,7 +463,7 @@ public class DISPIM_Monitor implements PlugIn {
 								"		    print(f,batStringC);\n" + 
 								"		    batStringA = \"cd C:\\\\Program Files\\\\mipav\";\n" + 
 								"		    print(f,batStringA);\n" + 
-								"		    batStringB = \"start /b mipav -s \\\""+dir.replace("\\", "\\\\")+"GenerateFusion2.sct\\\" -hide\";\n" + 
+								"		    batStringB = \"start /LOW /b mipav -s \\\""+dir.replace("\\", "\\\\")+"GenerateFusion2.sct\\\" -hide\";\n" + 
 								"		    print(f,batStringB);\n" + 
 								"		    File.close(f);	    \n" + 
 								"");
@@ -759,7 +759,7 @@ public class DISPIM_Monitor implements PlugIn {
 							"		    print(f,batStringC);\n" + 
 							"		    batStringA = \"cd C:\\\\Program Files\\\\mipav\";\n" + 
 							"		    print(f,batStringA);\n" + 
-							"		    batStringB = \"start /b mipav -s \\\""+dir.replace("\\", "\\\\")+"GenerateFusion1.sct\\\" -hide\";\n" + 
+							"		    batStringB = \"start /LOW /b mipav -s \\\""+dir.replace("\\", "\\\\")+"GenerateFusion1.sct\\\" -hide\";\n" + 
 							"		    print(f,batStringB);\n" + 
 							"		    File.close(f);	    \n" + 
 							"");
@@ -780,7 +780,7 @@ public class DISPIM_Monitor implements PlugIn {
 								"		    print(f,batStringC);\n" + 
 								"		    batStringA = \"cd C:\\\\Program Files\\\\mipav\";\n" + 
 								"		    print(f,batStringA);\n" + 
-								"		    batStringB = \"start /b mipav -s \\\""+dir.replace("\\", "\\\\")+"GenerateFusion2.sct\\\" -hide\";\n" + 
+								"		    batStringB = \"start /LOW /b mipav -s \\\""+dir.replace("\\", "\\\\")+"GenerateFusion2.sct\\\" -hide\";\n" + 
 								"		    print(f,batStringB);\n" + 
 								"		    File.close(f);	    \n" + 
 								"");
