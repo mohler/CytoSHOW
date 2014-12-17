@@ -455,7 +455,7 @@ public class DISPIM_Monitor implements PlugIn {
 							"	print ( parseFloat(cpuChunks[c]));" +	
 							"}" +
 							"x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +
-							"while(x >70) {\n" +
+							"while(x >50) {\n" +
 							"	wait(10000);" +
 							"	cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
 							"	cpuChunks = split(cpuPerformance,\"\\\"\");" +
@@ -492,7 +492,7 @@ public class DISPIM_Monitor implements PlugIn {
 								"	print ( parseFloat(cpuChunks[c]));" +	
 								"}" +
 								"x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +
-								"while(x >70) {\n" +
+								"while(x >50) {\n" +
 								"	wait(10000);" +
 								"	cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
 								"	cpuChunks = split(cpuPerformance,\"\\\"\");" +
@@ -806,7 +806,7 @@ public class DISPIM_Monitor implements PlugIn {
 									"	print ( parseFloat(cpuChunks[c]));" +	
 									"}" +
 									"x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +
-									"while(x >70) {\n" +
+									"while(x >50) {\n" +
 									"	wait(10000);" +
 									"	cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
 									"	cpuChunks = split(cpuPerformance,\"\\\"\");" +
@@ -843,7 +843,7 @@ public class DISPIM_Monitor implements PlugIn {
 								"	print ( parseFloat(cpuChunks[c]));" +	
 								"}" +
 								"x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +
-								"while(x >70) {\n" +
+								"while(x >50) {\n" +
 								"	wait(10000);" +
 								"	cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
 								"	cpuChunks = split(cpuPerformance,\"\\\"\");" +
