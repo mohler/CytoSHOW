@@ -295,6 +295,7 @@ public class DISPIM_Monitor implements PlugIn {
 		IJ.log(""+WindowManager.getImageCount());
 		
 		YesNoCancelDialog d = new YesNoCancelDialog(IJ.getInstance(), "Deconvolve while aquiring?", "Would you like volumes to be deconvolved/fused \nas soon as they are captured?  \n\nChoose this option if you are ready \nto initiate time-lapse recording.");
+//		d.setVisible(true);
 		if (d.cancelPressed()) {
 			doDecon = false;
 		} else if (d.yesPressed())
@@ -446,7 +447,23 @@ public class DISPIM_Monitor implements PlugIn {
 							"		    print(f,batStringB);\n" + 
 							"		    File.close(f);	    \n" + 
 							"");
-					new MacroRunner("exec(\"cmd64\", \"/c\", \""+dir.replace("\\", "\\\\")+"GenerateFusion1.bat\")");
+					new MacroRunner(
+							"cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
+							"cpuChunks = split(cpuPerformance,\"\\\"\");" +
+							"for(c=0;c<lengthOf(cpuChunks);c++)  {" +
+							"	print (cpuChunks[c]);" +
+							"	print ( parseFloat(cpuChunks[c]));" +	
+							"}" +
+							"x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +
+							"while(x >70) {\n" +
+							"	wait(10000);" +
+							"	cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
+							"	cpuChunks = split(cpuPerformance,\"\\\"\");" +
+							"	x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +	
+							"}" +
+							"print(\"done\");" +
+							"exec(\"cmd64\", \"/c\", \""+dir.replace("\\", "\\\\")+"GenerateFusion1.bat\");"
+							);
 
 					if (wavelengths==2) {
 						String deconString2 = "nibib.spim.PlugInDialogGenerateFusion(\"reg_one boolean false\", \"reg_all boolean true\", \"no_reg_2D boolean false\", \"reg_2D_one boolean false\", \"reg_2D_all boolean false\", \"rotate_begin list_float -10.0,-10.0,-10.0\", \"rotate_end list_float 10.0,10.0,10.0\", \"coarse_rate list_float 3.0,3.0,3.0\", \"fine_rate list_float 0.5,0.5,0.5\", \"save_arithmetic boolean false\", \"show_arithmetic boolean false\", \"save_geometric boolean false\", \"show_geometric boolean false\", \"do_interImages boolean false\", \"save_prefusion boolean false\", \"do_show_pre_fusion boolean false\", \"do_threshold boolean false\", \"save_max_proj boolean false\", \"show_max_proj boolean false\", \"x_max_box_selected boolean false\", \"y_max_box_selected boolean false\", \"z_max_box_selected boolean false\", \"do_smart_movement boolean false\", \"threshold_intensity double 10.0\", \"res_x double 0.1625\", \"res_y double 0.1625\", \"res_z double 1.0\", \"mtxFileDirectory string "+dir.replace("\\", "\\\\")+"SPIMB_Ch2_processed"+ File.separator.replace("\\", "\\\\") + frameName+"\", \"spimAFileDir string "+dir.replace("\\", "\\\\")+"SPIMB_Ch2_processed"+ File.separator.replace("\\", "\\\\") + frameName+"\", \"spimBFileDir string "+dir.replace("\\", "\\\\")+"SPIMA_Ch2_processed"+ File.separator.replace("\\", "\\\\") + frameName+"\", \"baseImage string "+frameName+"\", \"base_rotation int -1\", \"transform_rotation int 5\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconvDirString string "+dir.replace("\\", "\\\\")+"Deconvolution2\\\", \"deconv_show_results boolean false\", \"deconvolution_method int 1\", \"deconv_iterations int 10\", \"deconv_sigmaA list_float 3.5,3.5,9.6\", \"deconv_sigmaB list_float 9.6,3.5,3.5\", \"use_deconv_sigma_conversion_factor boolean true\", \"x_move int 0\", \"y_move int 0\", \"z_move int 0\")";
@@ -467,7 +484,23 @@ public class DISPIM_Monitor implements PlugIn {
 								"		    print(f,batStringB);\n" + 
 								"		    File.close(f);	    \n" + 
 								"");
-						new MacroRunner("exec(\"cmd64\", \"/c\", \""+dir.replace("\\", "\\\\")+"GenerateFusion2.bat\")");
+						new MacroRunner(
+								"cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
+								"cpuChunks = split(cpuPerformance,\"\\\"\");" +
+								"for(c=0;c<lengthOf(cpuChunks);c++)  {" +
+								"	print (cpuChunks[c]);" +
+								"	print ( parseFloat(cpuChunks[c]));" +	
+								"}" +
+								"x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +
+								"while(x >70) {\n" +
+								"	wait(10000);" +
+								"	cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
+								"	cpuChunks = split(cpuPerformance,\"\\\"\");" +
+								"	x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +	
+								"}" +
+								"print(\"done\");" +
+								"exec(\"cmd64\", \"/c\", \""+dir.replace("\\", "\\\\")+"GenerateFusion2.bat\");"
+								);
 					}
 				}
 				IJ.wait(15000);
@@ -545,7 +578,7 @@ public class DISPIM_Monitor implements PlugIn {
 				}
 			}
 			IJ.log(recentestB +"\n"+ modDateB);
-			if(recentestBname.toLowerCase().startsWith("f"))
+			if(recentestBname.toLowerCase().startsWith("focus"))
 				focus = true;
 			if ((new File(recentestB)).isDirectory()) {
 				String[] newTifList = {""};
@@ -616,6 +649,7 @@ public class DISPIM_Monitor implements PlugIn {
 						"				source = getTitle();\n" + 
 						"				Stack.getDimensions(width, height, channels, zDepth, frames);\n" + 
 						"				Stack.getPosition(channel, slice, frame);\n" + 
+						"				Stack.setPosition(channel, slice, frames);\n" + 
 						"				for (z=0; z<zDepth; z++) { \n" + 
 						"					Stack.setSlice(z+1);\n" + 
 						"					run(\"FFT, no auto-scaling\");\n" + 
@@ -634,6 +668,7 @@ public class DISPIM_Monitor implements PlugIn {
 						"					}\n" + 
 						"					selectWindow(source);\n" + 
 						"				}\n" + 
+						"				Stack.setPosition(channel, slice, frame);\n" + 
 						"				selectWindow(\"FFTstack\");\n" + 
 						"				makeOval(250, 250, 13, 13);\n" + 
 						"				run(\"Clear\", \"stack\");\n" + 
@@ -763,7 +798,23 @@ public class DISPIM_Monitor implements PlugIn {
 							"		    print(f,batStringB);\n" + 
 							"		    File.close(f);	    \n" + 
 							"");
-					new MacroRunner("exec(\"cmd64\", \"/c\", \""+dir.replace("\\", "\\\\")+"GenerateFusion1.bat\")");
+					new MacroRunner(
+									"cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
+									"cpuChunks = split(cpuPerformance,\"\\\"\");" +
+									"for(c=0;c<lengthOf(cpuChunks);c++)  {" +
+									"	print (cpuChunks[c]);" +
+									"	print ( parseFloat(cpuChunks[c]));" +	
+									"}" +
+									"x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +
+									"while(x >70) {\n" +
+									"	wait(10000);" +
+									"	cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
+									"	cpuChunks = split(cpuPerformance,\"\\\"\");" +
+									"	x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +	
+									"}" +
+									"print(\"done\");" +
+									"exec(\"cmd64\", \"/c\", \""+dir.replace("\\", "\\\\")+"GenerateFusion1.bat\");"
+									);
 
 					if (wavelengths==2) {
 						String deconString2 = "nibib.spim.PlugInDialogGenerateFusion(\"reg_one boolean false\", \"reg_all boolean true\", \"no_reg_2D boolean false\", \"reg_2D_one boolean false\", \"reg_2D_all boolean false\", \"rotate_begin list_float -10.0,-10.0,-10.0\", \"rotate_end list_float 10.0,10.0,10.0\", \"coarse_rate list_float 3.0,3.0,3.0\", \"fine_rate list_float 0.5,0.5,0.5\", \"save_arithmetic boolean false\", \"show_arithmetic boolean false\", \"save_geometric boolean false\", \"show_geometric boolean false\", \"do_interImages boolean false\", \"save_prefusion boolean false\", \"do_show_pre_fusion boolean false\", \"do_threshold boolean false\", \"save_max_proj boolean false\", \"show_max_proj boolean false\", \"x_max_box_selected boolean false\", \"y_max_box_selected boolean false\", \"z_max_box_selected boolean false\", \"do_smart_movement boolean false\", \"threshold_intensity double 10.0\", \"res_x double 0.1625\", \"res_y double 0.1625\", \"res_z double 1.0\", \"mtxFileDirectory string "+dir.replace("\\", "\\\\")+"SPIMB_Ch2_processed"+ File.separator.replace("\\", "\\\\") + frameName+"\", \"spimAFileDir string "+dir.replace("\\", "\\\\")+"SPIMB_Ch2_processed"+ File.separator.replace("\\", "\\\\") + frameName+"\", \"spimBFileDir string "+dir.replace("\\", "\\\\")+"SPIMA_Ch2_processed"+ File.separator.replace("\\", "\\\\") + frameName+"\", \"baseImage string "+frameName+"\", \"base_rotation int -1\", \"transform_rotation int 5\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconvDirString string "+dir.replace("\\", "\\\\")+"Deconvolution2\\\", \"deconv_show_results boolean false\", \"deconvolution_method int 1\", \"deconv_iterations int 10\", \"deconv_sigmaA list_float 3.5,3.5,9.6\", \"deconv_sigmaB list_float 9.6,3.5,3.5\", \"use_deconv_sigma_conversion_factor boolean true\", \"x_move int 0\", \"y_move int 0\", \"z_move int 0\")";
@@ -784,7 +835,23 @@ public class DISPIM_Monitor implements PlugIn {
 								"		    print(f,batStringB);\n" + 
 								"		    File.close(f);	    \n" + 
 								"");
-						new MacroRunner("exec(\"cmd64\", \"/c\", \""+dir.replace("\\", "\\\\")+"GenerateFusion2.bat\")");
+						new MacroRunner(
+								"cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
+								"cpuChunks = split(cpuPerformance,\"\\\"\");" +
+								"for(c=0;c<lengthOf(cpuChunks);c++)  {" +
+								"	print (cpuChunks[c]);" +
+								"	print ( parseFloat(cpuChunks[c]));" +	
+								"}" +
+								"x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +
+								"while(x >70) {\n" +
+								"	wait(10000);" +
+								"	cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
+								"	cpuChunks = split(cpuPerformance,\"\\\"\");" +
+								"	x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +	
+								"}" +
+								"print(\"done\");" +
+								"exec(\"cmd64\", \"/c\", \""+dir.replace("\\", "\\\\")+"GenerateFusion2.bat\");"
+								);
 					}
 				}
 				impA.setPosition(wasChannelA, wasSliceA, wasFrameA);
