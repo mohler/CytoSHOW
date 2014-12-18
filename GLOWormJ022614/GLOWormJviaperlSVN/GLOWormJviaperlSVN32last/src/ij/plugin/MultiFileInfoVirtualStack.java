@@ -65,6 +65,14 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		}
 	}
 
+	public ArrayList<FileInfoVirtualStack> getFivStacks() {
+		return fivStacks;
+	}
+
+	public void setFivStacks(ArrayList<FileInfoVirtualStack> fivStacks) {
+		this.fivStacks = fivStacks;
+	}
+
 	public void addFileInfo(String path) {
 		TiffDecoder td = new TiffDecoder((new File(path)).getParent(), (new File(path)).getName());
 		if (IJ.debugMode) td.enableDebugging();
