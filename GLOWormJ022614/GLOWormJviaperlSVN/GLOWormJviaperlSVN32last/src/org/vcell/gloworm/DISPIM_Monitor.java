@@ -360,40 +360,43 @@ public class DISPIM_Monitor implements PlugIn {
 			int wasChannelA = impA.getChannel();
 			int wasChannelB = impB.getChannel();
 			
-			if (impDF1 == null) {
-				impDF1 = new ImagePlus();
-				impDF1.setStack("Decon-Fuse-Ch1:"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dir+"Deconvolution1"));
-				int stkNSlicesDF = impDF1.getStackSize();
-				int zSlicesDF1 = ((MultiFileInfoVirtualStack)impDF1.getStack()).getFivStacks().get(0).getSize();
-				impDF1.setOpenAsHyperStack(true);
-				impDF1.setDimensions(1, zSlicesDF1, stkNSlicesDF/(1*zSlicesDF1));
-				impDF1.show();
-			} else {
-				impDF1.setStack("Decon-Fuse-Ch1:"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dir+"Deconvolution1"));
-				int stkNSlicesDF = impDF1.getStackSize();
-				int zSlicesDF1 = ((MultiFileInfoVirtualStack)impDF1.getStack()).getFivStacks().get(0).getSize();
-				impDF1.setOpenAsHyperStack(true);
-				impDF1.setDimensions(1, zSlicesDF1, stkNSlicesDF/(1*zSlicesDF1));
-				impDF1.setWindow(WindowManager.getCurrentWindow());
-			}
-			if (wavelengths ==2) {
-				if (impDF2  == null) {
-					impDF2 = new ImagePlus();
-					impDF2.setStack("Decon-Fuse-Ch2:"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dir+"Deconvolution2"));
-					int stkNSlicesDF = impDF2.getStackSize();
-					int zSlicesDF2 = ((MultiFileInfoVirtualStack)impDF2.getStack()).getFivStacks().get(0).getSize();
-					impDF2.setOpenAsHyperStack(true);
-					impDF1.setDimensions(1, zSlicesDF2, stkNSlicesDF/(1*zSlicesDF2));
-					impDF2.show();
+			if (new File(dir+"Deconvolution1").canRead() && new File(dir+"Deconvolution1").list().length >0) {
+				if (impDF1 == null) {
+					impDF1 = new ImagePlus();
+					impDF1.setStack("Decon-Fuse-Ch1"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dir+"Deconvolution1"));
+					int stkNSlicesDF = impDF1.getStackSize();
+					int zSlicesDF1 = ((MultiFileInfoVirtualStack)impDF1.getStack()).getFivStacks().get(0).getSize();
+					impDF1.setOpenAsHyperStack(true);
+					impDF1.setDimensions(1, zSlicesDF1, stkNSlicesDF/(1*zSlicesDF1));
+					impDF1.show();
 				} else {
-					impDF2.setStack("Decon-Fuse-Ch2:"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dir+"Deconvolution2"));
-					int stkNSlicesDF = impDF2.getStackSize();
-					int zSlicesDF2 = ((MultiFileInfoVirtualStack)impDF2.getStack()).getFivStacks().get(0).getSize();
-					impDF2.setOpenAsHyperStack(true);
-					impDF1.setDimensions(1, zSlicesDF2, stkNSlicesDF/(1*zSlicesDF2));
-					impDF2.setWindow(WindowManager.getCurrentWindow());
+					impDF1.setStack("Decon-Fuse-Ch1"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dir+"Deconvolution1"));
+					int stkNSlicesDF = impDF1.getStackSize();
+					int zSlicesDF1 = ((MultiFileInfoVirtualStack)impDF1.getStack()).getFivStacks().get(0).getSize();
+					impDF1.setOpenAsHyperStack(true);
+					impDF1.setDimensions(1, zSlicesDF1, stkNSlicesDF/(1*zSlicesDF1));
+					impDF1.setWindow(WindowManager.getCurrentWindow());
 				}
-
+				if (wavelengths ==2) {
+					if (new File(dir+"Deconvolution1").canRead() && new File(dir+"Deconvolution1").list().length >0) {
+						if (impDF2  == null) {
+							impDF2 = new ImagePlus();
+							impDF2.setStack("Decon-Fuse-Ch2"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dir+"Deconvolution2"));
+							int stkNSlicesDF = impDF2.getStackSize();
+							int zSlicesDF2 = ((MultiFileInfoVirtualStack)impDF2.getStack()).getFivStacks().get(0).getSize();
+							impDF2.setOpenAsHyperStack(true);
+							impDF2.setDimensions(1, zSlicesDF2, stkNSlicesDF/(1*zSlicesDF2));
+							impDF2.show();
+						} else {
+							impDF2.setStack("Decon-Fuse-Ch2"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dir+"Deconvolution2"));
+							int stkNSlicesDF = impDF2.getStackSize();
+							int zSlicesDF2 = ((MultiFileInfoVirtualStack)impDF2.getStack()).getFivStacks().get(0).getSize();
+							impDF2.setOpenAsHyperStack(true);
+							impDF2.setDimensions(1, zSlicesDF2, stkNSlicesDF/(1*zSlicesDF2));
+							impDF2.setWindow(WindowManager.getCurrentWindow());
+						}
+					}
+				}
 			}
 
 			
@@ -924,41 +927,43 @@ public class DISPIM_Monitor implements PlugIn {
 
 				impA.setPosition(wasChannelA, wasSliceA, wasFrameA);
 				impB.setPosition(wasChannelB, wasSliceB, wasFrameB);
-
-				if (impDF1 == null) {
-					impDF1 = new ImagePlus();
-					impDF1.setStack("Decon-Fuse-Ch1"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dir+"Deconvolution1"));
-					int stkNSlicesDF = impDF1.getStackSize();
-					int zSlicesDF1 = ((MultiFileInfoVirtualStack)impDF1.getStack()).getFivStacks().get(0).getSize();
-					impDF1.setOpenAsHyperStack(true);
-					impDF1.setDimensions(1, zSlicesDF1, stkNSlicesDF/(1*zSlicesDF1));
-					impDF1.show();
-				} else {
-					impDF1.setStack("Decon-Fuse-Ch1"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dir+"Deconvolution1"));
-					int stkNSlicesDF = impDF1.getStackSize();
-					int zSlicesDF1 = ((MultiFileInfoVirtualStack)impDF1.getStack()).getFivStacks().get(0).getSize();
-					impDF1.setOpenAsHyperStack(true);
-					impDF1.setDimensions(1, zSlicesDF1, stkNSlicesDF/(1*zSlicesDF1));
-					impDF1.setWindow(WindowManager.getCurrentWindow());
-				}
-				if (wavelengths ==2) {
-					if (impDF2  == null) {
-						impDF2 = new ImagePlus();
-						impDF2.setStack("Decon-Fuse-Ch2"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dir+"Deconvolution2"));
-						int stkNSlicesDF = impDF2.getStackSize();
-						int zSlicesDF2 = ((MultiFileInfoVirtualStack)impDF2.getStack()).getFivStacks().get(0).getSize();
-						impDF2.setOpenAsHyperStack(true);
-						impDF2.setDimensions(1, zSlicesDF2, stkNSlicesDF/(1*zSlicesDF2));
-						impDF2.show();
+				if (new File(dir+"Deconvolution1").canRead() && new File(dir+"Deconvolution1").list().length >0) {
+					if (impDF1 == null) {
+						impDF1 = new ImagePlus();
+						impDF1.setStack("Decon-Fuse-Ch1"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dir+"Deconvolution1"));
+						int stkNSlicesDF = impDF1.getStackSize();
+						int zSlicesDF1 = ((MultiFileInfoVirtualStack)impDF1.getStack()).getFivStacks().get(0).getSize();
+						impDF1.setOpenAsHyperStack(true);
+						impDF1.setDimensions(1, zSlicesDF1, stkNSlicesDF/(1*zSlicesDF1));
+						impDF1.show();
 					} else {
-						impDF2.setStack("Decon-Fuse-Ch2"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dir+"Deconvolution2"));
-						int stkNSlicesDF = impDF2.getStackSize();
-						int zSlicesDF2 = ((MultiFileInfoVirtualStack)impDF2.getStack()).getFivStacks().get(0).getSize();
-						impDF2.setOpenAsHyperStack(true);
-						impDF2.setDimensions(1, zSlicesDF2, stkNSlicesDF/(1*zSlicesDF2));
-						impDF2.setWindow(WindowManager.getCurrentWindow());
+						impDF1.setStack("Decon-Fuse-Ch1"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dir+"Deconvolution1"));
+						int stkNSlicesDF = impDF1.getStackSize();
+						int zSlicesDF1 = ((MultiFileInfoVirtualStack)impDF1.getStack()).getFivStacks().get(0).getSize();
+						impDF1.setOpenAsHyperStack(true);
+						impDF1.setDimensions(1, zSlicesDF1, stkNSlicesDF/(1*zSlicesDF1));
+						impDF1.setWindow(WindowManager.getCurrentWindow());
 					}
-
+					if (wavelengths ==2) {
+						if (new File(dir+"Deconvolution1").canRead() && new File(dir+"Deconvolution1").list().length >0) {
+							if (impDF2  == null) {
+								impDF2 = new ImagePlus();
+								impDF2.setStack("Decon-Fuse-Ch2"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dir+"Deconvolution2"));
+								int stkNSlicesDF = impDF2.getStackSize();
+								int zSlicesDF2 = ((MultiFileInfoVirtualStack)impDF2.getStack()).getFivStacks().get(0).getSize();
+								impDF2.setOpenAsHyperStack(true);
+								impDF2.setDimensions(1, zSlicesDF2, stkNSlicesDF/(1*zSlicesDF2));
+								impDF2.show();
+							} else {
+								impDF2.setStack("Decon-Fuse-Ch2"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dir+"Deconvolution2"));
+								int stkNSlicesDF = impDF2.getStackSize();
+								int zSlicesDF2 = ((MultiFileInfoVirtualStack)impDF2.getStack()).getFivStacks().get(0).getSize();
+								impDF2.setOpenAsHyperStack(true);
+								impDF2.setDimensions(1, zSlicesDF2, stkNSlicesDF/(1*zSlicesDF2));
+								impDF2.setWindow(WindowManager.getCurrentWindow());
+							}
+						}
+					}
 				}
 			}		
 		}
