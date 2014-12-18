@@ -20,17 +20,73 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	/* Default constructor. */
 	public MultiFileInfoVirtualStack() {}
 
-	/* Constructs a FileInfoVirtualStack from a FileInfo object. */
+	/* Constructs a MultiFileInfoVirtualStack from a FileInfo array. */
 	public MultiFileInfoVirtualStack(FileInfo[] fiArray) {
 		info = fiArray;
 	}
 
-	/* Constructs a FileInfoVirtualStack from a FileInfo 
-	object and displays it if 'show' is true. */
+	/* Constructs a MultiFileInfoVirtualStack from a FileInfo 
+	array and displays it if 'show' is true. */
 	public MultiFileInfoVirtualStack(FileInfo[] fiArray, boolean show) {
 		info = fiArray;
 	}
+	
+	public MultiFileInfoVirtualStack(String arg) {
+		File argFile = new File(arg);
+		String dir = "";
+		if (!argFile.exists() && !argFile.isDirectory())
+			dir = IJ.getDirectory("Select Directory of TIFFs");
+		else
+			dir = arg;
+		if (dir==null) return;
+		argFile = new File(dir);
+		String[] fileList = argFile.list();
+		fileList = StringSorter.sortNumericallyViaRegex(fileList);
+		for (String file:fileList){
+			TiffDecoder td = new TiffDecoder(dir, file);
+			if (IJ.debugMode) td.enableDebugging();
+			IJ.showStatus("Decoding TIFF header...");
+			try {info = td.getTiffInfo();}
+			catch (IOException e) {
+				String msg = e.getMessage();
+				if (msg==null||msg.equals("")) msg = ""+e;
+				IJ.error("TiffDecoder", msg);
+				return;
+			}
+			if (info==null || info.length==0) {
+				continue;
+			}
+			if (IJ.debugMode)
+				IJ.log(info[0].debugInfo);
+			fivStacks.add(new FileInfoVirtualStack());
+			fivStacks.get(fivStacks.size()-1).info = info;
+			fivStacks.get(fivStacks.size()-1).open(false);
+			nImages = fivStacks.size() * fivStacks.get(0).nImages;
+		}
+	}
 
+	public void addFileInfo(String path) {
+		TiffDecoder td = new TiffDecoder((new File(path)).getParent(), (new File(path)).getName());
+		if (IJ.debugMode) td.enableDebugging();
+		IJ.showStatus("Decoding TIFF header...");
+		FileInfo[] fi = null;
+		try {fi = td.getTiffInfo();}
+		catch (IOException e) {
+			String msg = e.getMessage();
+			if (msg==null||msg.equals("")) msg = ""+e;
+			IJ.error("TiffDecoder", msg);
+			return;
+		}
+		if (info==null || info.length==0) {
+			return;
+		}
+		if (IJ.debugMode)
+			IJ.log(info[0].debugInfo);
+		fivStacks.add(new FileInfoVirtualStack());
+		fivStacks.get(fivStacks.size()-1).info = fi;
+		nImages = fivStacks.size() * fivStacks.get(0).nImages;
+	}
+	
 	public void run(String arg) {
 		File argFile = new File(arg);
 		String dir = "";

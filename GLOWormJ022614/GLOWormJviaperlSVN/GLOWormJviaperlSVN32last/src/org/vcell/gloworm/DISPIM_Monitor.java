@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Hashtable;
 
 import ij.CompositeImage;
@@ -16,11 +17,13 @@ import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.ImageWindow;
 import ij.gui.YesNoCancelDialog;
+import ij.io.FileInfo;
 import ij.macro.MacroRunner;
 import ij.measure.Calibration;
 import ij.measure.ResultsTable;
 import ij.plugin.FFT;
 import ij.plugin.FileInfoVirtualStack;
+import ij.plugin.MultiFileInfoVirtualStack;
 import ij.plugin.PlugIn;
 import ij.plugin.filter.Analyzer;
 import ij.plugin.frame.SyncWindows;
@@ -62,6 +65,7 @@ public class DISPIM_Monitor implements PlugIn {
 			dir = IJ.getDirectory("Select top directory for diSPIM raw data");
 		}
 		IJ.log(dir);
+		String tempDir = IJ.getDirectory("temp");
 		String[] fileListA = {""};
 		String[] fileListB = {""};
 		//		fileListB = newArray("");
@@ -77,7 +81,9 @@ public class DISPIM_Monitor implements PlugIn {
 		String[] listB = {""};
 		ImagePlus impA = null;
 		ImagePlus impB = null;
-		
+		ImagePlus impDF1 = null;
+		ImagePlus impDF2 = null;
+
 		String[] dirChunks = dir.split(IJ.isWindows()?"\\\\":"/");
 		String dirName = dirChunks[dirChunks.length-1];
 
@@ -93,7 +99,7 @@ public class DISPIM_Monitor implements PlugIn {
 		IJ.saveString("", dir+"BigMAXFileListB.txt");
 		while(!(new File(dir+"BigMAXFileListB.txt")).exists())
 			IJ.wait(100);
-		
+
 		int wavelengths;
 		int zSlices;
 		if(args.length>2){
@@ -107,7 +113,7 @@ public class DISPIM_Monitor implements PlugIn {
 			wavelengths = (int) gd.getNextNumber();
 			zSlices = (int) gd.getNextNumber();
 		}
-		
+
 		fileListA = new File(""+dir+"SPIMA").list();
 		fileListB = new File(""+dir+"SPIMB").list();
 		fileRanksA = Arrays.copyOf(fileListA, fileListA.length);
@@ -293,9 +299,9 @@ public class DISPIM_Monitor implements PlugIn {
 
 		IJ.run("Tile");
 		IJ.log(""+WindowManager.getImageCount());
-		
+
 		YesNoCancelDialog d = new YesNoCancelDialog(IJ.getInstance(), "Deconvolve while aquiring?", "Would you like volumes to be deconvolved/fused \nas soon as they are captured?  \n\nChoose this option if you are ready \nto initiate time-lapse recording.");
-//		d.setVisible(true);
+		//		d.setVisible(true);
 		if (d.cancelPressed()) {
 			doDecon = false;
 		} else if (d.yesPressed())
@@ -303,8 +309,8 @@ public class DISPIM_Monitor implements PlugIn {
 		else
 			doDecon = false;
 
-		
-		
+
+
 		if (doDecon) {
 
 			while (impA.getRoi()==null || impB.getRoi()==null
@@ -319,11 +325,11 @@ public class DISPIM_Monitor implements PlugIn {
 					}
 				} else if (impA.getRoi().getBounds().width!=cropWidth || impA.getRoi().getBounds().height!=cropHeight) {
 					impA.setRoi(impA.getRoi().getBounds().x + (impA.getRoi().getBounds().width -cropWidth)/2,
-									impA.getRoi().getBounds().y + (impA.getRoi().getBounds().height -cropHeight)/2,
-									cropWidth,cropHeight);
+							impA.getRoi().getBounds().y + (impA.getRoi().getBounds().height -cropHeight)/2,
+							cropWidth,cropHeight);
 					impA.setRoi(impA.getRoi().getBounds().x<0?0:impA.getRoi().getBounds().x,
-									impA.getRoi().getBounds().y<0?0:impA.getRoi().getBounds().y,
-												cropWidth,cropHeight);
+							impA.getRoi().getBounds().y<0?0:impA.getRoi().getBounds().y,
+									cropWidth,cropHeight);
 				}
 				WindowManager.setTempCurrentImage(impB);
 				if (impB.getRoi()==null) {
@@ -334,11 +340,11 @@ public class DISPIM_Monitor implements PlugIn {
 					}
 				} else if (impB.getRoi().getBounds().width!=cropWidth || impB.getRoi().getBounds().height!=cropHeight) {
 					impB.setRoi(impB.getRoi().getBounds().x + (impB.getRoi().getBounds().width -cropWidth)/2,
-									impB.getRoi().getBounds().y + (impB.getRoi().getBounds().height -cropHeight)/2,
-									cropWidth,cropHeight);
+							impB.getRoi().getBounds().y + (impB.getRoi().getBounds().height -cropHeight)/2,
+							cropWidth,cropHeight);
 					impB.setRoi(impB.getRoi().getBounds().x<0?0:impB.getRoi().getBounds().x,
-									impB.getRoi().getBounds().y<0?0:impB.getRoi().getBounds().y,
-											cropWidth,cropHeight);
+							impB.getRoi().getBounds().y<0?0:impB.getRoi().getBounds().y,
+									cropWidth,cropHeight);
 				}
 				WindowManager.setTempCurrentImage(null);
 
@@ -346,19 +352,54 @@ public class DISPIM_Monitor implements PlugIn {
 			}
 			IJ.saveAs(impA, "Selection", dir+dirName +"A_crop.roi");
 			IJ.saveAs(impB, "Selection", dir+dirName +"B_crop.roi");
-			
+
 			int wasFrameA = impA.getFrame();
 			int wasFrameB = impB.getFrame();
 			int wasSliceA = impA.getSlice();
 			int wasSliceB = impB.getSlice();
 			int wasChannelA = impA.getChannel();
 			int wasChannelB = impB.getChannel();
+			
+			if (impDF1 == null) {
+				impDF1 = new ImagePlus();
+				impDF1.setStack("Decon-Fuse-Ch1:"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dir+"Deconvolution1"));
+				int stkNSlicesDF = impDF1.getStackSize();
+				impDF1.setOpenAsHyperStack(true);
+				impDF1.setDimensions(1, 296, stkNSlicesDF/(1*296));
+				impDF1.show();
+			} else {
+				impDF1.setStack("Decon-Fuse-Ch1:"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dir+"Deconvolution1"));
+				int stkNSlicesDF = impDF1.getStackSize();
+				impDF1.setOpenAsHyperStack(true);
+				impDF1.setDimensions(1, 296, stkNSlicesDF/(1*296));
+				impDF1.setWindow(WindowManager.getCurrentWindow());
+			}
+			if (wavelengths ==2) {
+				if (impDF2  == null) {
+					impDF2 = new ImagePlus();
+					impDF2.setStack("Decon-Fuse-Ch2:"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dir+"Deconvolution2"));
+					int stkNSlicesDF = impDF2.getStackSize();
+					impDF2.setOpenAsHyperStack(true);
+					impDF2.setDimensions(1, 296, stkNSlicesDF/(1*296));
+					impDF2.show();
+				} else {
+					impDF2.setStack("Decon-Fuse-Ch2:"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dir+"Deconvolution2"));
+					int stkNSlicesDF = impDF2.getStackSize();
+					impDF2.setOpenAsHyperStack(true);
+					impDF2.setDimensions(1, 296, stkNSlicesDF/(1*296));
+					impDF2.setWindow(WindowManager.getCurrentWindow());
+				}
+
+			}
+
+			
 			for (int f=1;f<=impA.getNFrames();f++) {
 
 				impA.setPositionWithoutUpdate(impA.getChannel(), impA.getSlice(), f);
 				impA.setPositionWithoutUpdate(impA.getChannel(), impA.getSlice(), f);
 
 				String frameName = ((ListVirtualStack)impA.getStack()).getDirectory(impA.getCurrentSlice());
+				String timecode = ""+(new Date()).getTime();
 
 				if (	   !(new File(dir+ "SPIMA_Ch1_processed"+ File.separator + frameName+ File.separator + frameName+".tif")).canRead()
 						|| (wavelengths==2 && !(new File(dir+ "SPIMA_Ch2_processed"+ File.separator + frameName+ File.separator + frameName+".tif")).canRead())
@@ -400,7 +441,7 @@ public class DISPIM_Monitor implements PlugIn {
 						//				impXA2.getCalibration().pixelDepth = impXA2.getCalibration().pixelWidth;
 						IJ.saveAs(impXA2,"Tiff", dir+ "SPIMA_Ch2_processed"+ File.separator + frameName+ File.separator + frameName+".tif");
 					}
-					
+
 					ImageStack stackB1 = new ImageStack(325,425);
 					ImageStack stackB2 = new ImageStack(325,425);
 					impB.getWindow().setEnabled(false);
@@ -432,78 +473,80 @@ public class DISPIM_Monitor implements PlugIn {
 						|| (wavelengths==2 && !(new File(dir+ "Deconvolution2"+ File.separator + "Decon_" + frameName+".tif")).canRead())
 						) {
 					String deconString1 = "nibib.spim.PlugInDialogGenerateFusion(\"reg_one boolean false\", \"reg_all boolean true\", \"no_reg_2D boolean false\", \"reg_2D_one boolean false\", \"reg_2D_all boolean false\", \"rotate_begin list_float -10.0,-10.0,-10.0\", \"rotate_end list_float 10.0,10.0,10.0\", \"coarse_rate list_float 3.0,3.0,3.0\", \"fine_rate list_float 0.5,0.5,0.5\", \"save_arithmetic boolean false\", \"show_arithmetic boolean false\", \"save_geometric boolean false\", \"show_geometric boolean false\", \"do_interImages boolean false\", \"save_prefusion boolean false\", \"do_show_pre_fusion boolean false\", \"do_threshold boolean false\", \"save_max_proj boolean false\", \"show_max_proj boolean false\", \"x_max_box_selected boolean false\", \"y_max_box_selected boolean false\", \"z_max_box_selected boolean false\", \"do_smart_movement boolean false\", \"threshold_intensity double 10.0\", \"res_x double 0.1625\", \"res_y double 0.1625\", \"res_z double 1.0\", \"mtxFileDirectory string "+dir.replace("\\", "\\\\")+"SPIMB_Ch1_processed"+ File.separator.replace("\\", "\\\\") + frameName+"\", \"spimAFileDir string "+dir.replace("\\", "\\\\")+"SPIMB_Ch1_processed"+ File.separator.replace("\\", "\\\\") + frameName+"\", \"spimBFileDir string "+dir.replace("\\", "\\\\")+"SPIMA_Ch1_processed"+ File.separator.replace("\\", "\\\\") + frameName+"\", \"baseImage string "+frameName+"\", \"base_rotation int -1\", \"transform_rotation int 5\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconvDirString string "+dir.replace("\\", "\\\\")+"Deconvolution1\\\", \"deconv_show_results boolean false\", \"deconvolution_method int 1\", \"deconv_iterations int 10\", \"deconv_sigmaA list_float 3.5,3.5,9.6\", \"deconv_sigmaB list_float 9.6,3.5,3.5\", \"use_deconv_sigma_conversion_factor boolean true\", \"x_move int 0\", \"y_move int 0\", \"z_move int 0\")";
-					IJ.saveString(deconString1, dir+"GenerateFusion1.sct");
+					IJ.wait(5000);
 
-					(new File(dir+"GenerateFusion1.bat")).delete();
-					IJ.runMacro(""
-							+ "		    f = File.open(\""+dir.replace("\\", "\\\\")+"GenerateFusion1.bat\");\n" + 
+					new MacroRunner(
+							"cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
+									"cpuChunks = split(cpuPerformance,\"\\\"\");" +
+									"x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +
+									"while(x >50) {\n" +
+									"	wait(10000);" +
+									"	cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
+									"	cpuChunks = split(cpuPerformance,\"\\\"\");" +
+									"	x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +	
+									"}" +
+									"print(\""+frameName+"_1 processing...\");" +
+
+							"			File.saveString(\'"+deconString1+"\', \""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameName+timecode+".sct\");" + 
+
+
+							"		    f = File.open(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameName+timecode+".bat\");\n" + 
 							"		    batStringD = \"@echo off\";\n" + 
 							"		    print(f,batStringD);\n" + 
 							"		    batStringC = \"C\\:\";\n" + 
 							"		    print(f,batStringC);\n" + 
 							"		    batStringA = \"cd C:\\\\Program Files\\\\mipav\";\n" + 
 							"		    print(f,batStringA);\n" + 
-							"		    batStringB = \"start /LOW /b mipav -s \\\""+dir.replace("\\", "\\\\")+"GenerateFusion1.sct\\\" -hide\";\n" + 
+							"		    batStringB = \"start /LOW /b mipav -s \\\""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameName+timecode+".sct\\\" -hide\";\n" + 
 							"		    print(f,batStringB);\n" + 
 							"		    File.close(f);	    \n" + 
-							"");
-					new MacroRunner(
-							"cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
-							"cpuChunks = split(cpuPerformance,\"\\\"\");" +
-							"for(c=0;c<lengthOf(cpuChunks);c++)  {" +
-							"	print (cpuChunks[c]);" +
-							"	print ( parseFloat(cpuChunks[c]));" +	
-							"}" +
-							"x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +
-							"while(x >50) {\n" +
-							"	wait(10000);" +
-							"	cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
-							"	cpuChunks = split(cpuPerformance,\"\\\"\");" +
-							"	x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +	
-							"}" +
-							"print(\"done\");" +
-							"exec(\"cmd64\", \"/c\", \""+dir.replace("\\", "\\\\")+"GenerateFusion1.bat\");"
+
+							"batJob = exec(\"cmd64\", \"/c\", \""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameName+timecode+".bat\");" +
+							"print(\""+frameName+"_1 complete.\");" +
+							"delBat = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameName+timecode+".bat\");" + 
+							"delSct = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameName+timecode+".sct\");" + 
+							""
 							);
 
 					if (wavelengths==2) {
 						String deconString2 = "nibib.spim.PlugInDialogGenerateFusion(\"reg_one boolean false\", \"reg_all boolean true\", \"no_reg_2D boolean false\", \"reg_2D_one boolean false\", \"reg_2D_all boolean false\", \"rotate_begin list_float -10.0,-10.0,-10.0\", \"rotate_end list_float 10.0,10.0,10.0\", \"coarse_rate list_float 3.0,3.0,3.0\", \"fine_rate list_float 0.5,0.5,0.5\", \"save_arithmetic boolean false\", \"show_arithmetic boolean false\", \"save_geometric boolean false\", \"show_geometric boolean false\", \"do_interImages boolean false\", \"save_prefusion boolean false\", \"do_show_pre_fusion boolean false\", \"do_threshold boolean false\", \"save_max_proj boolean false\", \"show_max_proj boolean false\", \"x_max_box_selected boolean false\", \"y_max_box_selected boolean false\", \"z_max_box_selected boolean false\", \"do_smart_movement boolean false\", \"threshold_intensity double 10.0\", \"res_x double 0.1625\", \"res_y double 0.1625\", \"res_z double 1.0\", \"mtxFileDirectory string "+dir.replace("\\", "\\\\")+"SPIMB_Ch2_processed"+ File.separator.replace("\\", "\\\\") + frameName+"\", \"spimAFileDir string "+dir.replace("\\", "\\\\")+"SPIMB_Ch2_processed"+ File.separator.replace("\\", "\\\\") + frameName+"\", \"spimBFileDir string "+dir.replace("\\", "\\\\")+"SPIMA_Ch2_processed"+ File.separator.replace("\\", "\\\\") + frameName+"\", \"baseImage string "+frameName+"\", \"base_rotation int -1\", \"transform_rotation int 5\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconvDirString string "+dir.replace("\\", "\\\\")+"Deconvolution2\\\", \"deconv_show_results boolean false\", \"deconvolution_method int 1\", \"deconv_iterations int 10\", \"deconv_sigmaA list_float 3.5,3.5,9.6\", \"deconv_sigmaB list_float 9.6,3.5,3.5\", \"use_deconv_sigma_conversion_factor boolean true\", \"x_move int 0\", \"y_move int 0\", \"z_move int 0\")";
-						IJ.wait(15000);
+						IJ.wait(5000);
 
-						IJ.saveString(deconString2, dir+"GenerateFusion2.sct");
+						new MacroRunner(
+								"cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
+										"cpuChunks = split(cpuPerformance,\"\\\"\");" +
+										"x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +
+										"while(x >50) {\n" +
+										"	wait(10000);" +
+										"	cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
+										"	cpuChunks = split(cpuPerformance,\"\\\"\");" +
+										"	x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +	
+										"}" +
+										"print(\""+frameName+"_2 processing...\");" +
 
-						(new File(dir+"GenerateFusion2.bat")).delete();
-						IJ.runMacro(""
-								+ "		    f = File.open(\""+dir.replace("\\", "\\\\")+"GenerateFusion2.bat\");\n" + 
+								"			File.saveString(\'"+deconString2+"\', \""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameName+timecode+".sct\");" + 
+
+
+								"		    f = File.open(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameName+timecode+".bat\");\n" + 
 								"		    batStringD = \"@echo off\";\n" + 
 								"		    print(f,batStringD);\n" + 
 								"		    batStringC = \"C\\:\";\n" + 
 								"		    print(f,batStringC);\n" + 
 								"		    batStringA = \"cd C:\\\\Program Files\\\\mipav\";\n" + 
 								"		    print(f,batStringA);\n" + 
-								"		    batStringB = \"start /LOW /b mipav -s \\\""+dir.replace("\\", "\\\\")+"GenerateFusion2.sct\\\" -hide\";\n" + 
+								"		    batStringB = \"start /LOW /b mipav -s \\\""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameName+timecode+".sct\\\" -hide\";\n" + 
 								"		    print(f,batStringB);\n" + 
 								"		    File.close(f);	    \n" + 
-								"");
-						new MacroRunner(
-								"cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
-								"cpuChunks = split(cpuPerformance,\"\\\"\");" +
-								"for(c=0;c<lengthOf(cpuChunks);c++)  {" +
-								"	print (cpuChunks[c]);" +
-								"	print ( parseFloat(cpuChunks[c]));" +	
-								"}" +
-								"x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +
-								"while(x >50) {\n" +
-								"	wait(10000);" +
-								"	cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
-								"	cpuChunks = split(cpuPerformance,\"\\\"\");" +
-								"	x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +	
-								"}" +
-								"print(\"done\");" +
-								"exec(\"cmd64\", \"/c\", \""+dir.replace("\\", "\\\\")+"GenerateFusion2.bat\");"
+
+								"batJob = exec(\"cmd64\", \"/c\", \""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameName+timecode+".bat\");" +
+								"print(\""+frameName+"_2 complete.\");" +
+								"delBat = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameName+timecode+".bat\");" + 
+								"delSct = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameName+timecode+".sct\");" + 
+								""
 								);
 					}
 				}
-				IJ.wait(15000);
+				//				IJ.wait(15000);
 			}
 			impA.setPosition(wasChannelA, wasSliceA, wasFrameA);
 			impB.setPosition(wasChannelB, wasSliceB, wasFrameB);
@@ -629,80 +672,80 @@ public class DISPIM_Monitor implements PlugIn {
 					sw.addImp(impS);
 				}
 			}
-			
-			
-			
+
+
+
 			if (focus) {
 				//SAD THAT I HAVE TO FAKE THIS, BUT NOT WORKING IN MY ATTEMPTS AT JAVA-ONLY...
 				String fftMacroString = 
 						"		    dir = \"" +dir.replace("\\", "\\\\")+"\";\n" + 
-						"			autoFPath = dir+\"AutoFocusCommaSpace.txt\";" +
-						"		    print(nImages);\n" + 
-						"		    File.delete(autoFPath);\n" + 
-						"			autoFocusString = \"\";\n" + 
-						"			for (i=1;i<=nImages;i++){\n" + 
-						"				print(nImages+\" \"+i);\n" + 
-						"				\n" + 
-						"				setBatchMode(true);\n" + 
-						"				selectImage(i);\n" + 
-						"		\n" + 
-						"				source = getTitle();\n" + 
-						"				Stack.getDimensions(width, height, channels, zDepth, frames);\n" + 
-						"				Stack.getPosition(channel, slice, frame);\n" + 
-						"				Stack.setPosition(channel, slice, frames);\n" + 
-						"				for (z=0; z<zDepth; z++) { \n" + 
-						"					Stack.setSlice(z+1);\n" + 
-						"					run(\"FFT, no auto-scaling\");\n" + 
-						"					if (z==0) {\n" + 
-						"						rename(\"FFTstack\");	\n" + 
-						"					} else {\n" + 
-						"						run(\"Select All\");\n" + 
-						"						run(\"Copy\");\n" + 
-						"						close();\n" + 
-						"						selectWindow(\"FFTstack\");\n" + 
-						"						run(\"Add Slice\");\n" + 
-						"						if (z>0)\n" + 
-						"							Stack.setSlice(z+2);\n" + 
-						"						run(\"Select All\");\n" + 
-						"						run(\"Paste\");\n" + 
-						"					}\n" + 
-						"					selectWindow(source);\n" + 
-						"				}\n" + 
-						"				Stack.setPosition(channel, slice, frame);\n" + 
-						"				selectWindow(\"FFTstack\");\n" + 
-						"				makeOval(250, 250, 13, 13);\n" + 
-						"				run(\"Clear\", \"stack\");\n" + 
-						"				makeOval(220, 220, 73, 73);\n" + 
-						"				run(\"Clear Outside\", \"stack\");\n" + 
-						"				run(\"Plot Z-axis Profile\");\n" + 
-						"				close();\n" + 
-						"				selectWindow(\"FFTstack\");\n" + 
-						"				close();\n" + 
-						"				\n" + 
-						"				sliceAvgs = newArray(zDepth);\n" + 
-						"				List.clear;\n" + 
-						"				for (z=1; z<zDepth; z++) { \n" + 
-						"					sliceAvgs[z] = getResult(\"Mean\", z);\n" + 
-						"					//print(sliceAvgs[z] );\n" + 
-						"					List.set(sliceAvgs[z] , z);\n" + 
-						"				}\n" + 
-						"				\n" + 
-						"				Array.sort(sliceAvgs);\n" + 
-						"				print(source+\": Best focus in slice \"+List.get(sliceAvgs[zDepth-1]));\n" + 
-						"				autoFocusString = autoFocusString + List.get(sliceAvgs[zDepth-1])+\", \";\n" + 
-						"				selectWindow(\"Results\");\n" + 
-						"				run(\"Close\");\n" + 
-						"				setBatchMode(false);\n" + 
-						"				selectWindow(source);\n" + 
-						"				Stack.setPosition(channel, slice, frame);\n" + 
-						"				updateDisplay();\n" + 
-						"			}\n" + 
-						"			File.saveString(autoFocusString, autoFPath);			\n" + 
-						"";
+								"			autoFPath = dir+\"AutoFocusCommaSpace.txt\";" +
+								"		    print(nImages);\n" + 
+								"		    File.delete(autoFPath);\n" + 
+								"			autoFocusString = \"\";\n" + 
+								"			for (i=1;i<=nImages;i++){\n" + 
+								"				print(nImages+\" \"+i);\n" + 
+								"				\n" + 
+								"				setBatchMode(true);\n" + 
+								"				selectImage(i);\n" + 
+								"		\n" + 
+								"				source = getTitle();\n" + 
+								"				Stack.getDimensions(width, height, channels, zDepth, frames);\n" + 
+								"				Stack.getPosition(channel, slice, frame);\n" + 
+								"				Stack.setPosition(channel, slice, frames);\n" + 
+								"				for (z=0; z<zDepth; z++) { \n" + 
+								"					Stack.setSlice(z+1);\n" + 
+								"					run(\"FFT, no auto-scaling\");\n" + 
+								"					if (z==0) {\n" + 
+								"						rename(\"FFTstack\");	\n" + 
+								"					} else {\n" + 
+								"						run(\"Select All\");\n" + 
+								"						run(\"Copy\");\n" + 
+								"						close();\n" + 
+								"						selectWindow(\"FFTstack\");\n" + 
+								"						run(\"Add Slice\");\n" + 
+								"						if (z>0)\n" + 
+								"							Stack.setSlice(z+2);\n" + 
+								"						run(\"Select All\");\n" + 
+								"						run(\"Paste\");\n" + 
+								"					}\n" + 
+								"					selectWindow(source);\n" + 
+								"				}\n" + 
+								"				Stack.setPosition(channel, slice, frame);\n" + 
+								"				selectWindow(\"FFTstack\");\n" + 
+								"				makeOval(250, 250, 13, 13);\n" + 
+								"				run(\"Clear\", \"stack\");\n" + 
+								"				makeOval(220, 220, 73, 73);\n" + 
+								"				run(\"Clear Outside\", \"stack\");\n" + 
+								"				run(\"Plot Z-axis Profile\");\n" + 
+								"				close();\n" + 
+								"				selectWindow(\"FFTstack\");\n" + 
+								"				close();\n" + 
+								"				\n" + 
+								"				sliceAvgs = newArray(zDepth);\n" + 
+								"				List.clear;\n" + 
+								"				for (z=1; z<zDepth; z++) { \n" + 
+								"					sliceAvgs[z] = getResult(\"Mean\", z);\n" + 
+								"					//print(sliceAvgs[z] );\n" + 
+								"					List.set(sliceAvgs[z] , z);\n" + 
+								"				}\n" + 
+								"				\n" + 
+								"				Array.sort(sliceAvgs);\n" + 
+								"				print(source+\": Best focus in slice \"+List.get(sliceAvgs[zDepth-1]));\n" + 
+								"				autoFocusString = autoFocusString + List.get(sliceAvgs[zDepth-1])+\", \";\n" + 
+								"				selectWindow(\"Results\");\n" + 
+								"				run(\"Close\");\n" + 
+								"				setBatchMode(false);\n" + 
+								"				selectWindow(source);\n" + 
+								"				Stack.setPosition(channel, slice, frame);\n" + 
+								"				updateDisplay();\n" + 
+								"			}\n" + 
+								"			File.saveString(autoFocusString, autoFPath);			\n" + 
+								"";
 				IJ.runMacro(fftMacroString);
 			}		    
-		    
-			
+
+
 			if (doDecon) {
 				int wasFrameA = impA.getFrame();
 				int wasFrameB = impB.getFrame();
@@ -715,13 +758,15 @@ public class DISPIM_Monitor implements PlugIn {
 				WindowManager.setTempCurrentImage(impB);
 				IJ.open(dir+ dirName +"B_crop.roi");
 				WindowManager.setTempCurrentImage(null);
-				
+
 				for (int f=impA.getNFrames();f<=impA.getNFrames();f++) {
-					
+
 					impA.setPositionWithoutUpdate(impA.getChannel(), impA.getSlice(), f);
 					impA.setPositionWithoutUpdate(impA.getChannel(), impA.getSlice(), f);
-					
+
 					String frameName = ((ListVirtualStack)impA.getStack()).getDirectory(impA.getCurrentSlice());
+					String timecode = ""+(new Date()).getTime();
+
 					IJ.runMacro("File.makeDirectory(\""+dir.replace("\\", "\\\\")+"SPIMA_Ch1_processed\");");
 					IJ.runMacro("File.makeDirectory(\""+dir.replace("\\", "\\\\")+"SPIMA_Ch1_processed\"+File.separator+\""+frameName+"\");");
 					IJ.runMacro("File.makeDirectory(\""+dir.replace("\\", "\\\\")+"SPIMB_Ch1_processed\");");
@@ -737,18 +782,18 @@ public class DISPIM_Monitor implements PlugIn {
 					ImageStack stackA2 = new ImageStack(325,425);
 					impA.getWindow().setEnabled(false);
 					for (int i=1; i<=impA.getNSlices(); i++) {
-							impA.setPositionWithoutUpdate(1, i, f);
-							stackA1.addSlice(impA.getProcessor().crop());					
-							if (wavelengths==2) {
-								impA.setPositionWithoutUpdate(2, i, f);
-								stackA2.addSlice(impA.getProcessor().crop());	
-							}
+						impA.setPositionWithoutUpdate(1, i, f);
+						stackA1.addSlice(impA.getProcessor().crop());					
+						if (wavelengths==2) {
+							impA.setPositionWithoutUpdate(2, i, f);
+							stackA2.addSlice(impA.getProcessor().crop());	
+						}
 					}
 					impA.getWindow().setEnabled(true);
 					ImagePlus impXA1 = new ImagePlus();
 					impXA1.setStack(stackA1);
 					impXA1.setCalibration(impA.getCalibration());
-//					impXA1.getCalibration().pixelDepth = impXA1.getCalibration().pixelWidth;
+					//					impXA1.getCalibration().pixelDepth = impXA1.getCalibration().pixelWidth;
 					IJ.saveAs(impXA1,"Tiff", dir+ "SPIMA_Ch1_processed"+ File.separator + frameName+ File.separator + frameName+".tif");
 					if (wavelengths==2) {
 						ImagePlus impXA2 = new ImagePlus();
@@ -761,18 +806,18 @@ public class DISPIM_Monitor implements PlugIn {
 					ImageStack stackB2 = new ImageStack(325,425);
 					impB.getWindow().setEnabled(false);
 					for (int i=1; i<=impB.getNSlices(); i++) {
-							impB.setPositionWithoutUpdate(1, i, f);
-							stackB1.addSlice(impB.getProcessor().crop());					
-							if (wavelengths==2) {
-								impB.setPositionWithoutUpdate(2, i, f);
-								stackB2.addSlice(impB.getProcessor().crop());	
-							}
+						impB.setPositionWithoutUpdate(1, i, f);
+						stackB1.addSlice(impB.getProcessor().crop());					
+						if (wavelengths==2) {
+							impB.setPositionWithoutUpdate(2, i, f);
+							stackB2.addSlice(impB.getProcessor().crop());	
+						}
 					}
 					impB.getWindow().setEnabled(true);
 					ImagePlus impXB1 = new ImagePlus();
 					impXB1.setStack(stackB1);
 					impXB1.setCalibration(impB.getCalibration());
-//					impXB1.getCalibration().pixelDepth = impXB1.getCalibration().pixelWidth;
+					//					impXB1.getCalibration().pixelDepth = impXB1.getCalibration().pixelWidth;
 					IJ.saveAs(impXB1,"Tiff", dir+ "SPIMB_Ch1_processed"+ File.separator + frameName+ File.separator + frameName+".tif");
 					if (wavelengths==2) {
 						ImagePlus impXB2 = new ImagePlus();
@@ -781,30 +826,12 @@ public class DISPIM_Monitor implements PlugIn {
 						//					impXB2.getCalibration().pixelDepth = impXB2.getCalibration().pixelWidth;
 						IJ.saveAs(impXB2,"Tiff", dir+ "SPIMB_Ch2_processed"+ File.separator + frameName+ File.separator + frameName+".tif");
 					}
-					
 					String deconString1 = "nibib.spim.PlugInDialogGenerateFusion(\"reg_one boolean false\", \"reg_all boolean true\", \"no_reg_2D boolean false\", \"reg_2D_one boolean false\", \"reg_2D_all boolean false\", \"rotate_begin list_float -10.0,-10.0,-10.0\", \"rotate_end list_float 10.0,10.0,10.0\", \"coarse_rate list_float 3.0,3.0,3.0\", \"fine_rate list_float 0.5,0.5,0.5\", \"save_arithmetic boolean false\", \"show_arithmetic boolean false\", \"save_geometric boolean false\", \"show_geometric boolean false\", \"do_interImages boolean false\", \"save_prefusion boolean false\", \"do_show_pre_fusion boolean false\", \"do_threshold boolean false\", \"save_max_proj boolean false\", \"show_max_proj boolean false\", \"x_max_box_selected boolean false\", \"y_max_box_selected boolean false\", \"z_max_box_selected boolean false\", \"do_smart_movement boolean false\", \"threshold_intensity double 10.0\", \"res_x double 0.1625\", \"res_y double 0.1625\", \"res_z double 1.0\", \"mtxFileDirectory string "+dir.replace("\\", "\\\\")+"SPIMB_Ch1_processed"+ File.separator.replace("\\", "\\\\") + frameName+"\", \"spimAFileDir string "+dir.replace("\\", "\\\\")+"SPIMB_Ch1_processed"+ File.separator.replace("\\", "\\\\") + frameName+"\", \"spimBFileDir string "+dir.replace("\\", "\\\\")+"SPIMA_Ch1_processed"+ File.separator.replace("\\", "\\\\") + frameName+"\", \"baseImage string "+frameName+"\", \"base_rotation int -1\", \"transform_rotation int 5\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconvDirString string "+dir.replace("\\", "\\\\")+"Deconvolution1\\\", \"deconv_show_results boolean false\", \"deconvolution_method int 1\", \"deconv_iterations int 10\", \"deconv_sigmaA list_float 3.5,3.5,9.6\", \"deconv_sigmaB list_float 9.6,3.5,3.5\", \"use_deconv_sigma_conversion_factor boolean true\", \"x_move int 0\", \"y_move int 0\", \"z_move int 0\")";
-					IJ.saveString(deconString1, dir+"GenerateFusion1.sct");
+					IJ.wait(5000);
 
-					(new File(dir+"GenerateFusion1.bat")).delete();
-					IJ.runMacro(""
-							+ "		    f = File.open(\""+dir.replace("\\", "\\\\")+"GenerateFusion1.bat\");\n" + 
-							"		    batStringD = \"@echo off\";\n" + 
-							"		    print(f,batStringD);\n" + 
-							"		    batStringC = \"C\\:\";\n" + 
-							"		    print(f,batStringC);\n" + 
-							"		    batStringA = \"cd C:\\\\Program Files\\\\mipav\";\n" + 
-							"		    print(f,batStringA);\n" + 
-							"		    batStringB = \"start /LOW /b mipav -s \\\""+dir.replace("\\", "\\\\")+"GenerateFusion1.sct\\\" -hide\";\n" + 
-							"		    print(f,batStringB);\n" + 
-							"		    File.close(f);	    \n" + 
-							"");
 					new MacroRunner(
-									"cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
+							"cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
 									"cpuChunks = split(cpuPerformance,\"\\\"\");" +
-									"for(c=0;c<lengthOf(cpuChunks);c++)  {" +
-									"	print (cpuChunks[c]);" +
-									"	print ( parseFloat(cpuChunks[c]));" +	
-									"}" +
 									"x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +
 									"while(x >50) {\n" +
 									"	wait(10000);" +
@@ -812,50 +839,103 @@ public class DISPIM_Monitor implements PlugIn {
 									"	cpuChunks = split(cpuPerformance,\"\\\"\");" +
 									"	x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +	
 									"}" +
-									"print(\"done\");" +
-									"exec(\"cmd64\", \"/c\", \""+dir.replace("\\", "\\\\")+"GenerateFusion1.bat\");"
-									);
+									"print(\""+frameName+"_1 processing...\");" +
+
+							"			File.saveString(\'"+deconString1+"\', \""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameName+timecode+".sct\");" + 
+
+
+							"		    f = File.open(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameName+timecode+".bat\");\n" + 
+							"		    batStringD = \"@echo off\";\n" + 
+							"		    print(f,batStringD);\n" + 
+							"		    batStringC = \"C\\:\";\n" + 
+							"		    print(f,batStringC);\n" + 
+							"		    batStringA = \"cd C:\\\\Program Files\\\\mipav\";\n" + 
+							"		    print(f,batStringA);\n" + 
+							"		    batStringB = \"start /LOW /b mipav -s \\\""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameName+timecode+".sct\\\" -hide\";\n" + 
+							"		    print(f,batStringB);\n" + 
+							"		    File.close(f);	    \n" + 
+
+							"batJob = exec(\"cmd64\", \"/c\", \""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameName+timecode+".bat\");" +
+							"print(\""+frameName+"_1 complete.\");" +
+							"delBat = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameName+timecode+".bat\");" + 
+							"delSct = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameName+timecode+".sct\");" + 
+							""
+							);
 
 					if (wavelengths==2) {
 						String deconString2 = "nibib.spim.PlugInDialogGenerateFusion(\"reg_one boolean false\", \"reg_all boolean true\", \"no_reg_2D boolean false\", \"reg_2D_one boolean false\", \"reg_2D_all boolean false\", \"rotate_begin list_float -10.0,-10.0,-10.0\", \"rotate_end list_float 10.0,10.0,10.0\", \"coarse_rate list_float 3.0,3.0,3.0\", \"fine_rate list_float 0.5,0.5,0.5\", \"save_arithmetic boolean false\", \"show_arithmetic boolean false\", \"save_geometric boolean false\", \"show_geometric boolean false\", \"do_interImages boolean false\", \"save_prefusion boolean false\", \"do_show_pre_fusion boolean false\", \"do_threshold boolean false\", \"save_max_proj boolean false\", \"show_max_proj boolean false\", \"x_max_box_selected boolean false\", \"y_max_box_selected boolean false\", \"z_max_box_selected boolean false\", \"do_smart_movement boolean false\", \"threshold_intensity double 10.0\", \"res_x double 0.1625\", \"res_y double 0.1625\", \"res_z double 1.0\", \"mtxFileDirectory string "+dir.replace("\\", "\\\\")+"SPIMB_Ch2_processed"+ File.separator.replace("\\", "\\\\") + frameName+"\", \"spimAFileDir string "+dir.replace("\\", "\\\\")+"SPIMB_Ch2_processed"+ File.separator.replace("\\", "\\\\") + frameName+"\", \"spimBFileDir string "+dir.replace("\\", "\\\\")+"SPIMA_Ch2_processed"+ File.separator.replace("\\", "\\\\") + frameName+"\", \"baseImage string "+frameName+"\", \"base_rotation int -1\", \"transform_rotation int 5\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconvDirString string "+dir.replace("\\", "\\\\")+"Deconvolution2\\\", \"deconv_show_results boolean false\", \"deconvolution_method int 1\", \"deconv_iterations int 10\", \"deconv_sigmaA list_float 3.5,3.5,9.6\", \"deconv_sigmaB list_float 9.6,3.5,3.5\", \"use_deconv_sigma_conversion_factor boolean true\", \"x_move int 0\", \"y_move int 0\", \"z_move int 0\")";
-						IJ.wait(15000);
+						IJ.wait(5000);
 
-						IJ.saveString(deconString2, dir+"GenerateFusion2.sct");
+						new MacroRunner(
+								"cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
+										"cpuChunks = split(cpuPerformance,\"\\\"\");" +
+										"x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +
+										"while(x >50) {\n" +
+										"	wait(10000);" +
+										"	cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
+										"	cpuChunks = split(cpuPerformance,\"\\\"\");" +
+										"	x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +	
+										"}" +
+										"print(\""+frameName+"_2 processing...\");" +
 
-						(new File(dir+"GenerateFusion2.bat")).delete();
-						IJ.runMacro(""
-								+ "		    f = File.open(\""+dir.replace("\\", "\\\\")+"GenerateFusion2.bat\");\n" + 
+								"			File.saveString(\'"+deconString2+"\', \""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameName+timecode+".sct\");" + 
+
+
+								"		    f = File.open(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameName+timecode+".bat\");\n" + 
 								"		    batStringD = \"@echo off\";\n" + 
 								"		    print(f,batStringD);\n" + 
 								"		    batStringC = \"C\\:\";\n" + 
 								"		    print(f,batStringC);\n" + 
 								"		    batStringA = \"cd C:\\\\Program Files\\\\mipav\";\n" + 
 								"		    print(f,batStringA);\n" + 
-								"		    batStringB = \"start /LOW /b mipav -s \\\""+dir.replace("\\", "\\\\")+"GenerateFusion2.sct\\\" -hide\";\n" + 
+								"		    batStringB = \"start /LOW /b mipav -s \\\""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameName+timecode+".sct\\\" -hide\";\n" + 
 								"		    print(f,batStringB);\n" + 
 								"		    File.close(f);	    \n" + 
-								"");
-						new MacroRunner(
-								"cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
-								"cpuChunks = split(cpuPerformance,\"\\\"\");" +
-								"for(c=0;c<lengthOf(cpuChunks);c++)  {" +
-								"	print (cpuChunks[c]);" +
-								"	print ( parseFloat(cpuChunks[c]));" +	
-								"}" +
-								"x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +
-								"while(x >50) {\n" +
-								"	wait(10000);" +
-								"	cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
-								"	cpuChunks = split(cpuPerformance,\"\\\"\");" +
-								"	x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +	
-								"}" +
-								"print(\"done\");" +
-								"exec(\"cmd64\", \"/c\", \""+dir.replace("\\", "\\\\")+"GenerateFusion2.bat\");"
+
+								"batJob = exec(\"cmd64\", \"/c\", \""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameName+timecode+".bat\");" +
+								"print(\""+frameName+"_2 complete.\");" +
+								"delBat = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameName+timecode+".bat\");" + 
+								"delSct = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameName+timecode+".sct\");" + 
+								""
 								);
 					}
 				}
+				//					IJ.wait(15000);
+
 				impA.setPosition(wasChannelA, wasSliceA, wasFrameA);
 				impB.setPosition(wasChannelB, wasSliceB, wasFrameB);
+
+				if (impDF1 == null) {
+					impDF1 = new ImagePlus();
+					impDF1.setStack("Decon-Fuse-Ch1"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dir+"Deconvolution1"));
+					int stkNSlicesDF = impDF1.getStackSize();
+					impDF1.setOpenAsHyperStack(true);
+					impDF1.setDimensions(1, 296, stkNSlicesDF/(1*296));
+					impDF1.show();
+				} else {
+					impDF1.setStack("Decon-Fuse-Ch1"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dir+"Deconvolution1"));
+					int stkNSlicesDF = impDF1.getStackSize();
+					impDF1.setOpenAsHyperStack(true);
+					impDF1.setDimensions(1, 296, stkNSlicesDF/(1*296));
+					impDF1.setWindow(WindowManager.getCurrentWindow());
+				}
+				if (wavelengths ==2) {
+					if (impDF2  == null) {
+						impDF2 = new ImagePlus();
+						impDF2.setStack("Decon-Fuse-Ch2"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dir+"Deconvolution2"));
+						int stkNSlicesDF = impDF2.getStackSize();
+						impDF2.setOpenAsHyperStack(true);
+						impDF2.setDimensions(1, 296, stkNSlicesDF/(1*296));
+						impDF2.show();
+					} else {
+						impDF2.setStack("Decon-Fuse-Ch2"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dir+"Deconvolution2"));
+						int stkNSlicesDF = impDF2.getStackSize();
+						impDF2.setOpenAsHyperStack(true);
+						impDF2.setDimensions(1, 296, stkNSlicesDF/(1*296));
+						impDF2.setWindow(WindowManager.getCurrentWindow());
+					}
+
+				}
 			}		
 		}
 	}
