@@ -764,21 +764,27 @@ public class DISPIM_Monitor implements PlugIn {
 			if (doDecon) {
 				int wasFrameA = impA.getFrame();
 				int wasFrameB = impB.getFrame();
-				int wasFrameDF1 = impDF1.getFrame();
+				int wasFrameDF1 = 1;
+				if (impDF1 != null)
+					wasFrameDF1 = impDF1.getFrame();
 				int wasFrameDF2 = 1;
-				if (impDF2 != null);
+				if (impDF2 != null)
 					wasFrameDF2 = impDF2.getFrame();
 				int wasSliceA = impA.getSlice();
 				int wasSliceB = impB.getSlice();
-				int wasSliceDF1 = impDF1.getSlice();
+				int wasSliceDF1 = 1;
+				if (impDF1 != null)
+					wasSliceDF1 = impDF1.getSlice();
 				int wasSliceDF2 = 1;
-				if (impDF2 != null);
+				if (impDF2 != null)
 					wasSliceDF2 = impDF2.getSlice();
 				int wasChannelA = impA.getChannel();
 				int wasChannelB = impB.getChannel();
-				int wasChannelDF1 = impDF1.getChannel();
+				int wasChannelDF1 = 1;
+				if (impDF1 != null)
+					wasChannelDF1 = impDF1.getChannel();
 				int wasChannelDF2 = 1;
-				if (impDF2 != null);
+				if (impDF2 != null)
 					wasChannelDF2 = impDF2.getChannel();
 				WindowManager.setTempCurrentImage(impA);
 				IJ.open(dir+ dirName +"B_crop.roi");

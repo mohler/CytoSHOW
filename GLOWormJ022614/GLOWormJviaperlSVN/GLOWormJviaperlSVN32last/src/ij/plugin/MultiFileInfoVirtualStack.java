@@ -196,8 +196,21 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	public String getSliceLabel(int n) {
 		if (n<1 || n>nImages)
 			throw new IllegalArgumentException("Argument out of range: "+n);
-		if (info[0].sliceLabels==null || info[0].sliceLabels.length!=nImages)
-			return null;
+		if (info[0].sliceLabels==null || info[0].sliceLabels.length!=nImages) {
+			if (n<1 || n>nImages) {
+				IJ.runMacro("waitForUser(\""+n+"\");");
+				return fivStacks.get(0).info[0].fileName;
+//				throw new IllegalArgumentException("Argument out of range: "+n);
+			}
+			int z = n % fivStacks.get(0).nImages;
+			int t = (int) Math.floor(n/fivStacks.get(0).nImages);
+			if (z==0) {
+				z = fivStacks.get(0).nImages;
+				t=t-1;
+			}
+//			IJ.log(""+n+" "+z+" "+t);
+			return fivStacks.get(t).info[0].fileName + " slice "+ z;
+		}
 		else
 			return info[0].sliceLabels[n-1];
 	}

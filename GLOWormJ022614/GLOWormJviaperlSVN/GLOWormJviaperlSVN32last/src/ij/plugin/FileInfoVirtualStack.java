@@ -176,7 +176,7 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (n<1 || n>nImages)
 			throw new IllegalArgumentException("Argument out of range: "+n);
 		if (info[0].sliceLabels==null || info[0].sliceLabels.length!=nImages)
-			return null;
+			return info[0].fileName + " slice "+ n;
 		else
 			return info[0].sliceLabels[n-1];
 	}
