@@ -41,7 +41,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (dir==null) return;
 		argFile = new File(dir);
 		String[] fileList = argFile.list();
-		fileList = StringSorter.sortNumericallyViaRegex(fileList);
+		fileList = StringSorter.sortNumerically(fileList);
 		for (String file:fileList){
 			TiffDecoder td = new TiffDecoder(dir, file);
 			if (IJ.debugMode) td.enableDebugging();
@@ -105,7 +105,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (dir==null) return;
 		argFile = new File(dir);
 		String[] fileList = argFile.list();
-		fileList = StringSorter.sortNumericallyViaRegex(fileList);
+		fileList = StringSorter.sortNumerically(fileList);
 		for (String file:fileList){
 			TiffDecoder td = new TiffDecoder(dir, file);
 			if (IJ.debugMode) td.enableDebugging();

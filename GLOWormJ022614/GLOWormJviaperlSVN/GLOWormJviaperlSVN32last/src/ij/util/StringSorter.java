@@ -73,6 +73,8 @@ public class StringSorter {
 		return sortedList;
 	}
 
+	
+	//THIS MAY NOT BE WORKING ON WINDOWS??
 	public static String[] sortNumericallyViaRegex(String[] list) {
 		int n = list.length;
 		int stringMaxLength = 0; 
@@ -90,7 +92,7 @@ public class StringSorter {
 			}
 		}
 		for(int i=0;i<n;i++) {
-			if(list[i].length() < stringMaxLength) {
+			if(list[i].length() <= stringMaxLength) {
 				nameChunks[i] = list[i].split("\\d+");
 				if(nameChunks.length > 1) {
 					nameEnd[i] = nameChunks[i][nameChunks[i].length-1];
