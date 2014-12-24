@@ -645,7 +645,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 				IJ.wait(25);
 		} else if (newStackSize>1 && invalidDimensions) {
 			if (isDisplayedHyperStack()) setOpenAsHyperStack(true);
-			win = new StackWindow(this, true);   // replaces this window
+			win = new StackWindow(this, win.isVisible());   // replaces this window
 			setPosition(1, 1, 1);
 		} else if (dimensionsChanged || sliderChange)
 			win.updateImage(this);
@@ -967,7 +967,8 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 //				setSlice(1);
 //			}
 		}
-		boolean updateWin = isDisplayedHyperStack() && (this.nChannels!=nChannels||this.nSlices!=nSlices||this.nFrames!=nFrames);
+		boolean hyper = isDisplayedHyperStack();
+		boolean updateWin = hyper && (this.nChannels!=nChannels||this.nSlices!=nSlices||this.nFrames!=nFrames);
 		boolean newSingleImage = win!=null && (win instanceof StackWindow) && nChannels==1&&nSlices==1&&nFrames==1;
 		if (newSingleImage) 
 			updateWin = true;
@@ -982,7 +983,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			ip=null; img=null;
 			setPositionWithoutUpdate(getChannel(), getSlice(), getFrame());
 			if (isComposite()) ((CompositeImage)this).reset();
-			new StackWindow(this, true);
+			win = new StackWindow(this, win.isVisible());
 		}
 		//IJ.log("setDimensions: "+ nChannels+"  "+nSlices+"  "+nFrames);
 	}

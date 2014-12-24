@@ -73,7 +73,7 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 
 	}
 	
-	void addScrollbars(ImagePlus imp) {
+	public void addScrollbars(ImagePlus imp) {
 		ImageStack s = imp.getStack();
 		wormAtlas = ( (s instanceof MultiQTVirtualStack && ((MultiQTVirtualStack) imp.getMotherImp().getStack()).getVirtualStack(0) != null) && ((MultiQTVirtualStack)s).getVirtualStack(0).getMovieName().startsWith("SW"));
 		int stackSize = s.getSize();
@@ -90,7 +90,7 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 			nFrames = dim[4];
 		}
 		//IJ.log("StackWindow: "+hyperStack+" "+nChannels+" "+nSlices+" "+nFrames);
-		if (nSlices==stackSize) hyperStack = false;
+//		if (nSlices==stackSize) hyperStack = false;
 		if (nChannels*nSlices*nFrames!=stackSize) hyperStack = false;
 		if (cSelector!=null||zSelector!=null||tSelector!=null)
 			removeScrollbars();

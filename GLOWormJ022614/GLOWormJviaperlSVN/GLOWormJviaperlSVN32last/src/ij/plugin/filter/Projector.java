@@ -356,7 +356,7 @@ public class Projector implements PlugInFilter, TextListener {
 						buildImp.setStack(tempDir.getName(), firstStack);
 						buildImp.setOpenAsHyperStack(true);
 						buildImp.setStack(buildImp.getStack(), 1, finalSlices, 1);
-						buildImp.show();
+						buildImp.setWindow(new StackWindow(buildImp, false));
 
 					} else {
 						Roi[] roisArray = projImpD.getRoiManager().getShownRoisAsArray();
@@ -370,16 +370,9 @@ public class Projector implements PlugInFilter, TextListener {
 
 						IJ.save(projImpD, tempDir + File.separator + "proj_"+loopT+"_"+loopC);
 						MultiFileInfoVirtualStack nextStack = new MultiFileInfoVirtualStack(tempDir.getPath());
-//						buildImp.setStack(nextStack,1,finalSlices,1+loopT-firstT);
-//						buildImp.setPosition(1, 1, 1+loopT-firstT);
-//						buildImp.setWindow(WindowManager.getCurrentWindow());
-						ImagePlus buildImpNext = new ImagePlus();
-						buildImpNext.setStack(tempDir.getName(), nextStack);
-						buildImpNext.setOpenAsHyperStack(true);
-						buildImpNext.setStack(buildImpNext.getStack(), 1, finalSlices, 1+loopT-firstT);
-						buildImpNext.show();
-						buildImp.getWindow().dispose();
-						buildImp = buildImpNext;
+						buildImp.setOpenAsHyperStack(true);
+						buildImp.setStack(nextStack, 1, finalSlices, 1+loopT-firstT);
+						buildImp.setPosition(1, finalSlices, 1+loopT-firstT);
 					}
 					projImpD.flush();
 				}
@@ -387,7 +380,6 @@ public class Projector implements PlugInFilter, TextListener {
 			}
 		}		
 		
-
 		
 		imp.getProcessor().setColorModel(cm);
 		imp.setPosition(inChannel, inSlice, inFrame);
