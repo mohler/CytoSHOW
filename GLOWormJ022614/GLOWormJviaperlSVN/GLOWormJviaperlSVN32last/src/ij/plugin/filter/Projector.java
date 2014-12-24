@@ -7,6 +7,7 @@ import ij.plugin.Concatenator;
 import ij.plugin.frame.ContrastAdjuster;
 import ij.plugin.Duplicator;
 import ij.plugin.HyperStackConverter;
+import ij.plugin.MultiFileInfoVirtualStack;
 import ij.plugin.ZProjector;
 import ij.measure.Calibration;
 import ij.plugin.RGBStackMerge;
@@ -19,8 +20,10 @@ import java.awt.*;
 import java.awt.event.TextEvent;
 import java.awt.event.TextListener;
 import java.awt.image.*;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Vector;
 
 import org.vcell.gloworm.MQTVS_Duplicator;
@@ -205,6 +208,9 @@ public class Projector implements PlugInFilter, TextListener {
 
 		ArrayList<Roi> bigRoiAList = new ArrayList<Roi>();
 		int finalT = lastT;
+		long tempTime = (new Date()).getTime();
+		File tempDir = new File(IJ.getDirectory("temp") +"Proj_"+imp.getTitle() + tempTime);
+
 		for (loopT = firstT; loopT < lastT +1; loopT=loopT+stepT) { 
 			long memoryFree = Runtime.getRuntime().freeMemory();
 			long memoryTotal = Runtime.getRuntime().totalMemory();
@@ -331,7 +337,6 @@ public class Projector implements PlugInFilter, TextListener {
 
 					IJ.runMacro("print(\"\\\\Update:\\\n \")");
 
-
 					if ( loopC == firstC && loopT == firstT)  {
 						Roi[] roisArray = projImpD.getRoiManager().getShownRoisAsArray();
 						for (int i=0; i<roisArray.length; i++) {
@@ -341,10 +346,17 @@ public class Projector implements PlugInFilter, TextListener {
 						}
 						projImpD.getRoiManager().dispose();
 						WindowManager.removeWindow(projImpD.getRoiManager());
-
-						buildImp = projImpD.duplicate();
-						buildImp.setTitle("BuildStack");
+						
+						tempDir.mkdir();
 						finalSlices = projImpD.getStackSize();
+
+						IJ.save(projImpD, tempDir + File.separator + "proj_"+loopT+"_"+loopC);
+						MultiFileInfoVirtualStack firstStack = new MultiFileInfoVirtualStack(tempDir.getPath());
+						buildImp = new ImagePlus();
+						buildImp.setStack(tempDir.getName(), firstStack);
+						buildImp.setOpenAsHyperStack(true);
+						buildImp.setStack(buildImp.getStack(), 1, finalSlices, 1);
+						buildImp.show();
 
 					} else {
 						Roi[] roisArray = projImpD.getRoiManager().getShownRoisAsArray();
@@ -356,9 +368,18 @@ public class Projector implements PlugInFilter, TextListener {
 						projImpD.getRoiManager().dispose();
 						WindowManager.removeWindow(projImpD.getRoiManager());
 
-						Concatenator concat = new Concatenator();
-						buildImp =  concat.concatenate(buildImp, projImpD, false);
-
+						IJ.save(projImpD, tempDir + File.separator + "proj_"+loopT+"_"+loopC);
+						MultiFileInfoVirtualStack nextStack = new MultiFileInfoVirtualStack(tempDir.getPath());
+//						buildImp.setStack(nextStack,1,finalSlices,1+loopT-firstT);
+//						buildImp.setPosition(1, 1, 1+loopT-firstT);
+//						buildImp.setWindow(WindowManager.getCurrentWindow());
+						ImagePlus buildImpNext = new ImagePlus();
+						buildImpNext.setStack(tempDir.getName(), nextStack);
+						buildImpNext.setOpenAsHyperStack(true);
+						buildImpNext.setStack(buildImpNext.getStack(), 1, finalSlices, 1+loopT-firstT);
+						buildImpNext.show();
+						buildImp.getWindow().dispose();
+						buildImp = buildImpNext;
 					}
 					projImpD.flush();
 				}
@@ -402,11 +423,9 @@ public class Projector implements PlugInFilter, TextListener {
 
 		finalFrames = (buildImp.getStackSize()/(finalChannels*finalSlices));
 		
-//		IJ.log( "order=xyztc channels=" + finalChannels + " slices=" + finalSlices + " frames=" + finalFrames + " display=Composite " + buildImp.getImageStackSize());
 
-		IJ.run( buildImp, 
-				"Stack to Hyperstack...", "order=xyzct channels=" + finalChannels + " slices=" + finalSlices + " frames=" + finalFrames + " display=Composite");
-//		buildImp =  WindowManager.getCurrentImage();
+//		IJ.run( buildImp, 
+//				"Stack to Hyperstack...", "order=xyzct channels=" + finalChannels + " slices=" + finalSlices + " frames=" + finalFrames + " display=Composite");
 				
 		buildImp.setDimensions(finalChannels, finalSlices, finalFrames);
 

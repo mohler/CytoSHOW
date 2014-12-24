@@ -2721,7 +2721,10 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	}
 
 	public ImagePlus getMotherImp() {
-		return motherImp;
+		if (motherImp!=null)
+			return motherImp;
+		else 
+			return this;
 	}
 
 	public void setMotherImp(ImagePlus imp, int frame) {

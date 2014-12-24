@@ -4060,7 +4060,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	public ColorLegend getColorLegend() {
 		if (colorLegend != null)
 			return colorLegend;
-		else if (imp.getMotherImp() != imp) {
+		else if (imp!=null && imp.getMotherImp() != imp) {
 			colorLegend = imp.getMotherImp().getRoiManager().getColorLegend();
 			return colorLegend;
 		} else 
