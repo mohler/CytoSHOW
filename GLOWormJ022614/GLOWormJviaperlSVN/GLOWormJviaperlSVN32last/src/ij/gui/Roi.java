@@ -256,7 +256,13 @@ public class Roi extends Object implements Cloneable, java.io.Serializable {
 	}
 
 	/** Caculates "Feret" (maximum caliper width), "FeretAngle"
-		and "MinFeret" (minimum caliper width), "FeretX" and "FeretY". */	
+		and "MinFeret" (minimum caliper width), "FeretX" and "FeretY". 
+		a[0] = diameter;
+		a[1] = angle;
+		a[2] = min;
+		a[3] = feretX;
+		a[4] = feretY;
+*/	
 	public double[] getFeretValues() {
 		double min=Double.MAX_VALUE, diameter=0.0, angle=0.0, feretX=0.0, feretY=0.0;
 		int p1=0, p2=0;

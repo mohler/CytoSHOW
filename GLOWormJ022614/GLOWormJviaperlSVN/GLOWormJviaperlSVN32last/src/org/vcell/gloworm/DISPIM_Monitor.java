@@ -1,6 +1,7 @@
 package org.vcell.gloworm;
 
 import java.awt.Button;
+import java.awt.Polygon;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ import ij.VirtualStack;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.ImageWindow;
+import ij.gui.Roi;
 import ij.gui.YesNoCancelDialog;
 import ij.io.FileInfo;
 import ij.macro.MacroRunner;
@@ -28,6 +30,7 @@ import ij.plugin.PlugIn;
 import ij.plugin.filter.Analyzer;
 import ij.plugin.frame.SyncWindows;
 import ij.process.ColorProcessor;
+import ij.process.ImageProcessor;
 
 public class DISPIM_Monitor implements PlugIn {
 
@@ -314,8 +317,8 @@ public class DISPIM_Monitor implements PlugIn {
 		if (doDecon) {
 
 			while (impA.getRoi()==null || impB.getRoi()==null
-					|| impA.getRoi().getBounds().width!=cropWidth || impA.getRoi().getBounds().height!=cropHeight
-					|| impB.getRoi().getBounds().width!=cropWidth || impB.getRoi().getBounds().height!=cropHeight) {
+					|| impA.getRoi().getFeretValues()[0]>cropHeight
+					|| impB.getRoi().getFeretValues()[0]>cropHeight) {
 				WindowManager.setTempCurrentImage(impA);
 				if (impA.getRoi()==null) {
 					if (!((new File(dir+ dirName +"A_crop.roi")).canRead())) {
@@ -323,7 +326,7 @@ public class DISPIM_Monitor implements PlugIn {
 					} else {
 						IJ.open(dir+ dirName +"A_crop.roi");
 					}
-				} else if (impA.getRoi().getBounds().width!=cropWidth || impA.getRoi().getBounds().height!=cropHeight) {
+				} else if (impA.getRoi().getFeretValues()[0]>cropHeight) {
 					impA.setRoi(impA.getRoi().getBounds().x + (impA.getRoi().getBounds().width -cropWidth)/2,
 							impA.getRoi().getBounds().y + (impA.getRoi().getBounds().height -cropHeight)/2,
 							cropWidth,cropHeight);
@@ -427,10 +430,41 @@ public class DISPIM_Monitor implements PlugIn {
 					impA.getWindow().setEnabled(false);
 					for (int i=1; i<=impA.getNSlices(); i++) {
 						impA.setPositionWithoutUpdate(1, i, f);
-						stackA1.addSlice(impA.getProcessor().crop());					
+						Roi impRoi = (Roi) impA.getRoi().clone();
+						Polygon pA = new Polygon(impRoi.getPolygon().xpoints,impRoi.getPolygon().ypoints, impRoi.getPolygon().npoints);
+						double[] fVals = impRoi.getFeretValues();
+						double fMax = fVals[0];
+						double angle = fVals[1];
+						Polygon pAR = rotatePolygon(new Polygon(pA.xpoints,pA.ypoints, pA.npoints), -90+angle);
+						
+						ImageProcessor ip1 = impA.getProcessor().duplicate();
+						ip1.fillOutside(impRoi);
+						ip1.setRoi((int)(pA.getBounds().getCenterX()-fMax/2),
+								(int)(pA.getBounds().getCenterY()-fMax/2),
+								(int)fMax,
+								(int)fMax);
+						ip1.rotate(-90+angle);
+
+						ip1.setRoi(Math.max((int)pAR.getBounds().x-(cropWidth-pAR.getBounds().width)/2, 0),
+								Math.max((int)pAR.getBounds().y-(cropHeight-pAR.getBounds().height)/2, 0),
+								cropWidth, cropHeight);
+						ip1 = ip1.crop();
+						stackA1.addSlice(ip1);					
 						if (wavelengths==2) {
 							impA.setPositionWithoutUpdate(2, i, f);
-							stackA2.addSlice(impA.getProcessor().crop());					
+							ImageProcessor ip2 = impA.getProcessor().duplicate();
+							ip2.fillOutside(impRoi);
+							ip2.setRoi((int)(pA.getBounds().getCenterX()-fMax/2),
+									(int)(pA.getBounds().getCenterY()-fMax/2),
+									(int)fMax,
+									(int)fMax);
+							ip2.rotate(-90+angle);
+
+							ip2.setRoi(Math.max((int)pAR.getBounds().x-(cropWidth-pAR.getBounds().width)/2, 0),
+									Math.max((int)pAR.getBounds().y-(cropHeight-pAR.getBounds().height)/2, 0),
+									cropWidth, cropHeight);
+							ip2 = ip2.crop();
+							stackA2.addSlice(ip2);					
 						}
 					}
 					impA.getWindow().setEnabled(true);
@@ -452,10 +486,41 @@ public class DISPIM_Monitor implements PlugIn {
 					impB.getWindow().setEnabled(false);
 					for (int i=1; i<=impB.getNSlices(); i++) {
 						impB.setPositionWithoutUpdate(1, i, f);
-						stackB1.addSlice(impB.getProcessor().crop());					
+						Roi impRoi = (Roi) impB.getRoi().clone();
+						Polygon pB = new Polygon(impRoi.getPolygon().xpoints,impRoi.getPolygon().ypoints, impRoi.getPolygon().npoints);
+						double[] fVals = impRoi.getFeretValues();
+						double fMax = fVals[0];
+						double angle = fVals[1];
+						Polygon pBR = rotatePolygon(new Polygon(pB.xpoints,pB.ypoints, pB.npoints), -90+angle);
+						
+						ImageProcessor ip1 = impB.getProcessor().duplicate();
+						ip1.fillOutside(impRoi);
+						ip1.setRoi((int)(pB.getBounds().getCenterX()-fMax/2),
+								(int)(pB.getBounds().getCenterY()-fMax/2),
+								(int)fMax,
+								(int)fMax);
+						ip1.rotate(-90+angle);
+
+						ip1.setRoi(Math.max((int)pBR.getBounds().x-(cropWidth-pBR.getBounds().width)/2, 0),
+								Math.max((int)pBR.getBounds().y-(cropHeight-pBR.getBounds().height)/2, 0),
+								cropWidth, cropHeight);
+						ip1 = ip1.crop();
+						stackB1.addSlice(ip1);					
 						if (wavelengths==2) {
 							impB.setPositionWithoutUpdate(2, i, f);
-							stackB2.addSlice(impB.getProcessor().crop());					
+							ImageProcessor ip2 = impB.getProcessor().duplicate();
+							ip2.fillOutside(impRoi);
+							ip2.setRoi((int)(pB.getBounds().getCenterX()-fMax/2),
+									(int)(pB.getBounds().getCenterY()-fMax/2),
+									(int)fMax,
+									(int)fMax);
+							ip2.rotate(-90+angle);
+
+							ip2.setRoi(Math.max((int)pBR.getBounds().x-(cropWidth-pBR.getBounds().width)/2, 0),
+									Math.max((int)pBR.getBounds().y-(cropHeight-pBR.getBounds().height)/2, 0),
+									cropWidth, cropHeight);
+							ip2 = ip2.crop();
+							stackB2.addSlice(ip2);					
 						}
 					}
 					impB.getWindow().setEnabled(true);
@@ -989,5 +1054,20 @@ public class DISPIM_Monitor implements PlugIn {
 				}
 			}		
 		}
+	}
+
+	public Polygon rotatePolygon(Polygon p1, double angle) {
+		double  theta = angle*Math.PI/180;
+		double  xcenter= p1.getBounds().getCenterX(); 
+		double  ycenter= p1.getBounds().getCenterY(); 
+		for (int v=0; v<p1.xpoints.length; v++) {
+			double dx=p1.xpoints[v]-xcenter; 
+			double dy=ycenter-p1.ypoints[v]; 
+			double r = Math.sqrt(dx*dx+dy*dy);
+			double a = Math.atan2(dy, dx);
+			p1.xpoints[v] = (int) (xcenter + r*Math.cos(a+theta));
+			p1.ypoints[v] = (int) (ycenter - r*Math.sin(a+theta));
+		}
+		return p1;
 	}
 }
