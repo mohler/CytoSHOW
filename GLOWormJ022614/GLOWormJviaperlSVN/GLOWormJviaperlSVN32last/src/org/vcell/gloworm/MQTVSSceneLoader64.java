@@ -313,8 +313,8 @@ public class MQTVSSceneLoader64 implements PlugIn {
 						if (lineSegments[0].contains("DisplayMode") ) {
 							if (Integer.parseInt(lineSegments[1]) > 1 ) {
 								displayMode = (Integer.parseInt(lineSegments[1]));
-								if (displayMode == 3)
-									displayMode = 1;
+//								if (displayMode == 3)
+//									displayMode = 1;
 							} else {
 								displayMode = 1;
 							}
@@ -846,11 +846,12 @@ public class MQTVSSceneLoader64 implements PlugIn {
 //					getImp().setPosition(1, getImp().getSlice(), getImp().getFrame()+1);
 //					getImp().setPosition(1, getImp().getSlice(), getImp().getFrame()-1);
 					if (getImp().isComposite()) {
-						int mode = ((CompositeImage)getImp()).getMode();
+//						int mode = ((CompositeImage)getImp()).getMode();
 						((CompositeImage)getImp()).setMode(1);
 						((CompositeImage)getImp()).setMode(2);
 						((CompositeImage)getImp()).setMode(3);
-						((CompositeImage)getImp()).setMode(mode);
+						((CompositeImage)getImp()).setMode(displayMode);
+						((CompositeImage)getImp()).updateAndRepaintWindow();
 					}
 
 					if(!cycling)

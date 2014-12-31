@@ -514,6 +514,8 @@ public class CompositeImage extends ImagePlus {
 			case COMPOSITE: return "composite";
 			case COLOR: return "color";
 			case GRAYSCALE: return "grayscale";
+			case RATIO12: return "ratio12";
+			case RATIO21: return "ratio21";
 		}
 		return "";
 	}
