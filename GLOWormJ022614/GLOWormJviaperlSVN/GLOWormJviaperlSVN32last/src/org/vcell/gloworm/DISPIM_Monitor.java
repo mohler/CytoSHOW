@@ -11,6 +11,7 @@ import java.util.Hashtable;
 
 import ij.CompositeImage;
 import ij.IJ;
+import ij.ImageJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.VirtualStack;
@@ -369,14 +370,14 @@ public class DISPIM_Monitor implements PlugIn {
 						+ "\");");
 			}
 			
-			int[]  minLimit = {(int) impA.getDisplayRangeMin(), (int) impB.getDisplayRangeMin()};
-			if (impA.isComposite()) {
-				minLimit = new int[impA.getNChannels()*2];
-				for (int c=1; c<=impA.getNChannels(); c++) {
-					minLimit[c-1] = (int) ((CompositeImage)impA).getProcessor(c).getMin();
-					minLimit[c+1] = (int) ((CompositeImage)impB).getProcessor(c).getMin();
-				}
-			}
+//			int[]  minLimit = {(int) impA.getDisplayRangeMin(), (int) impB.getDisplayRangeMin()};
+//			if (impA.isComposite()) {
+//				minLimit = new int[impA.getNChannels()*2];
+//				for (int c=1; c<=impA.getNChannels(); c++) {
+//					minLimit[c-1] = (int) ((CompositeImage)impA).getProcessor(c).getMin();
+//					minLimit[c+1] = (int) ((CompositeImage)impB).getProcessor(c).getMin();
+//				}
+//			}
 				
 			IJ.saveAs(impA, "Selection", dir+dirName +"A_crop.roi");
 			IJ.saveAs(impB, "Selection", dir+dirName +"B_crop.roi");
@@ -658,23 +659,23 @@ public class DISPIM_Monitor implements PlugIn {
 							""
 							);
 
-					new MacroRunner(
-									"setBatchMode(true);"+
-									"print(\""+dir.replace("\\", "\\\\")+"Deconvolution1\\\\Decon_"+frameFileNames[f]+".tif\");"+
-									"while(File.exists(\""+dir.replace("\\", "\\\\")+"Deconvolution1\\\\Decon_"+frameFileNames[f]+".tif\") !=1)"+
-											"wait(1000);"+
-					
-									"wait(5000);"+
-									"open(\""+dir.replace("\\", "\\\\")+"Deconvolution1\\\\Decon_"+frameFileNames[f]+".tif\");"+
-									"fixImpID = getImageID();"+
-									"run(\"Save\");"+
-									"selectImage(fixImpID);"+
-									"wait(5000);"+
-									"close();"+
-									"print(\"TIFF fixed\");"+
-									""
-							);
+					final String finalConvPath = dir+"Deconvolution1\\Decon_"+frameFileNames[f]+".tif";
+					Thread convThread = new Thread(new Runnable() {	
+						public void run() {
+							while (!(new File(finalConvPath)).canRead()) {
+								IJ.wait(10000);
+							}
+								
+							ImagePlus convImp = IJ.openImage(finalConvPath);
+							if (convImp!=null) {
+								IJ.saveAs(convImp, "TIFF", finalConvPath);
+								convImp.close();
+							}
+						}
+					});
+					convThread.start();
 
+					
 					if (wavelengths==2) {
 						String deconString2 = "nibib.spim.PlugInDialogGenerateFusion(\"reg_one boolean false\", \"reg_all boolean true\", \"no_reg_2D boolean false\", \"reg_2D_one boolean false\", \"reg_2D_all boolean false\", \"rotate_begin list_float -10.0,-10.0,-10.0\", \"rotate_end list_float 10.0,10.0,10.0\", \"coarse_rate list_float 3.0,3.0,3.0\", \"fine_rate list_float 0.5,0.5,0.5\", \"save_arithmetic boolean false\", \"show_arithmetic boolean false\", \"save_geometric boolean false\", \"show_geometric boolean false\", \"do_interImages boolean false\", \"save_prefusion boolean false\", \"do_show_pre_fusion boolean false\", \"do_threshold boolean false\", \"save_max_proj boolean false\", \"show_max_proj boolean false\", \"x_max_box_selected boolean false\", \"y_max_box_selected boolean false\", \"z_max_box_selected boolean false\", \"do_smart_movement boolean false\", \"threshold_intensity double 10.0\", \"res_x double 0.1625\", \"res_y double 0.1625\", \"res_z double 1.0\", \"mtxFileDirectory string "+dir.replace("\\", "\\\\")+"SPIMB_Ch1_processed"+ File.separator.replace("\\", "\\\\") + frameFileNames[f]+"\", \"spimAFileDir string "+dir.replace("\\", "\\\\")+"SPIMB_Ch2_processed"+ File.separator.replace("\\", "\\\\") + frameFileNames[f]+"\", \"spimBFileDir string "+dir.replace("\\", "\\\\")+"SPIMA_Ch2_processed"+ File.separator.replace("\\", "\\\\") + frameFileNames[f]+"\", \"baseImage string "+frameFileNames[f]+"\", \"base_rotation int -1\", \"transform_rotation int 5\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconvDirString string "+dir.replace("\\", "\\\\")+"Deconvolution2\\\", \"deconv_show_results boolean false\", \"deconvolution_method int 1\", \"deconv_iterations int 10\", \"deconv_sigmaA list_float 3.5,3.5,9.6\", \"deconv_sigmaB list_float 9.6,3.5,3.5\", \"use_deconv_sigma_conversion_factor boolean true\", \"x_move int 0\", \"y_move int 0\", \"z_move int 0\")";
 						IJ.wait(5000);
@@ -716,22 +717,22 @@ public class DISPIM_Monitor implements PlugIn {
 								"delSct = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileNames[f]+timecode+".sct\");" + 
 								""
 								);
-						new MacroRunner(
-								"setBatchMode(true);"+
-								"print(\""+dir.replace("\\", "\\\\")+"Deconvolution2\\\\Decon_"+frameFileNames[f]+".tif\");"+
-								"while(File.exists(\""+dir.replace("\\", "\\\\")+"Deconvolution2\\\\Decon_"+frameFileNames[f]+".tif\") !=1)"+
-										"wait(1000);"+
-					
-								"wait(5000);"+
-								"open(\""+dir.replace("\\", "\\\\")+"Deconvolution2\\\\Decon_"+frameFileNames[f]+".tif\");"+
-								"fixImpID = getImageID();"+
-								"run(\"Save\");"+
-								"selectImage(fixImpID);"+
-								"wait(5000);"+
-								"close();"+
-								"print(\"TIFF fixed\");"+
-								""
-						);
+
+						final String finalConvPath2 = dir+"Deconvolution2\\Decon_"+frameFileNames[f]+".tif";
+						Thread convThread2 = new Thread(new Runnable() {	
+							public void run() {
+								while (!(new File(finalConvPath2)).canRead()) {
+									IJ.wait(10000);
+								}
+									
+								ImagePlus convImp = IJ.openImage(finalConvPath2);
+								if (convImp!=null) {
+									IJ.saveAs(convImp, "TIFF", finalConvPath2);
+									convImp.close();
+								}
+							}
+						});
+						convThread2.start();
 					}
 				}
 				//				IJ.wait(15000);
@@ -958,7 +959,7 @@ public class DISPIM_Monitor implements PlugIn {
 				if (impDF2 != null)
 					wasChannelDF2 = impDF2.getChannel();
 				WindowManager.setTempCurrentImage(impA);
-				IJ.open(dir+ dirName +"B_crop.roi");
+				IJ.open(dir+ dirName +"A_crop.roi");
 				WindowManager.setTempCurrentImage(impB);
 				IJ.open(dir+ dirName +"B_crop.roi");
 				WindowManager.setTempCurrentImage(null);
@@ -1077,22 +1078,21 @@ public class DISPIM_Monitor implements PlugIn {
 							""
 								);
 						
-						new MacroRunner(
-								"setBatchMode(true);"+
-								"print(\""+dir.replace("\\", "\\\\")+"Deconvolution1\\\\Decon_"+frameFileName+".tif\");"+
-								"while(File.exists(\""+dir.replace("\\", "\\\\")+"Deconvolution1\\\\Decon_"+frameFileName+".tif\") !=1)"+
-										"wait(1000);"+
-					
-								"wait(5000);"+
-								"open(\""+dir.replace("\\", "\\\\")+"Deconvolution1\\\\Decon_"+frameFileName+".tif\");"+
-								"fixImpID = getImageID();"+
-								"run(\"Save\");"+
-								"selectImage(fixImpID);"+
-								"wait(5000);"+
-								"close();"+
-								"print(\"TIFF fixed\");"+
-								""
-						);
+						final String finalConvPath = dir+"Deconvolution1\\Decon_"+frameFileName+".tif";
+						Thread convThread = new Thread(new Runnable() {	
+							public void run() {
+								while (!(new File(finalConvPath)).canRead()) {
+									IJ.wait(10000);
+								}
+									
+								ImagePlus convImp = IJ.openImage(finalConvPath);
+								if (convImp!=null) {
+									IJ.saveAs(convImp, "TIFF", finalConvPath);
+									convImp.close();
+								}
+							}
+						});
+						convThread.start();
 
 						
 						if (wavelengths==2) {
@@ -1137,22 +1137,21 @@ public class DISPIM_Monitor implements PlugIn {
 								""
 									);
 
-							new MacroRunner(
-									"setBatchMode(true);"+
-									"print(\""+dir.replace("\\", "\\\\")+"Deconvolution2\\\\Decon_"+frameFileName+".tif\");"+
-									"while(File.exists(\""+dir.replace("\\", "\\\\")+"Deconvolution1\\\\Decon_"+frameFileName+".tif\") !=1)"+
-											"wait(1000);"+
-					
-									"wait(5000);"+
-									"open(\""+dir.replace("\\", "\\\\")+"Deconvolution2\\\\Decon_"+frameFileName+".tif\");"+
-									"fixImpID = getImageID();"+
-									"run(\"Save\");"+
-									"selectImage(fixImpID);"+
-									"wait(5000);"+
-									"close();"+
-									"print(\"TIFF fixed\");"+
-									""
-							);
+							final String finalConvPath2 = dir+"Deconvolution2\\Decon_"+frameFileName+".tif";
+							Thread convThread2 = new Thread(new Runnable() {	
+								public void run() {
+									while (!(new File(finalConvPath2)).canRead()) {
+										IJ.wait(10000);
+									}
+										
+									ImagePlus convImp = IJ.openImage(finalConvPath2);
+									if (convImp!=null) {
+										IJ.saveAs(convImp, "TIFF", finalConvPath2);
+										convImp.close();
+									}
+								}
+							});
+							convThread2.start();
 
 						}
 					}

@@ -983,7 +983,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			ip=null; img=null;
 			setPositionWithoutUpdate(getChannel(), getSlice(), getFrame());
 			if (isComposite()) ((CompositeImage)this).reset();
-			win = new StackWindow(this, win.isVisible());
+			win = new StackWindow(this, win == null || win.isVisible());
 		}
 		//IJ.log("setDimensions: "+ nChannels+"  "+nSlices+"  "+nFrames);
 	}
