@@ -21,10 +21,10 @@ public class CompositeImage extends ImagePlus {
 	BufferedImage rgbImage;
 	ColorModel rgbCM;
 	ImageProcessor[] cip;
-	Color[] colors = {Color.red, Color.green, Color.blue, Color.white, Color.cyan, Color.magenta, Color.yellow, Color.decode("0xff5525"),Color.pink,
-						Color.red, Color.green, Color.blue, Color.white, Color.cyan, Color.magenta, Color.yellow, Color.decode("0xff5525"),Color.pink,
-						Color.red, Color.green, Color.blue, Color.white, Color.cyan, Color.magenta, Color.yellow, Color.decode("0xff5525"),Color.pink,	
-						Color.red, Color.green, Color.blue, Color.white, Color.cyan, Color.magenta, Color.yellow, Color.decode("0xff5525"),Color.pink,};
+	Color[] colors = {Color.green, Color.red, Color.blue, Color.white, Color.cyan, Color.magenta, Color.yellow, Color.decode("0xff5525"),Color.pink,
+						Color.green, Color.red, Color.blue, Color.white, Color.cyan, Color.magenta, Color.yellow, Color.decode("0xff5525"),Color.pink,
+						Color.green, Color.red, Color.blue, Color.white, Color.cyan, Color.magenta, Color.yellow, Color.decode("0xff5525"),Color.pink,	
+						Color.green, Color.red, Color.blue, Color.white, Color.cyan, Color.magenta, Color.yellow, Color.decode("0xff5525"),Color.pink,};
 	LUT[] lut;
 	int currentChannel;
 	int previousChannel;

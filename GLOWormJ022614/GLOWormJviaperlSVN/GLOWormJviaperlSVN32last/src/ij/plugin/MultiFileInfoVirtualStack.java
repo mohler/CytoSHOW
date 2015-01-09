@@ -1,6 +1,7 @@
 package ij.plugin;
 
 import ij.*;
+import ij.measure.Calibration;
 import ij.process.*;
 import ij.util.StringSorter;
 import ij.gui.*;
@@ -16,6 +17,11 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	ArrayList<FileInfoVirtualStack> fivStacks = new ArrayList<FileInfoVirtualStack>();
 	FileInfo[] info;
 	int nImages;
+	private String dir;
+
+	public String getDir() {
+		return dir;
+	}
 
 	/* Default constructor. */
 	public MultiFileInfoVirtualStack() {}
@@ -33,7 +39,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	
 	public MultiFileInfoVirtualStack(String arg) {
 		File argFile = new File(arg);
-		String dir = "";
+		dir = "";
 		if (!argFile.exists() && !argFile.isDirectory())
 			dir = IJ.getDirectory("Select Directory of TIFFs");
 		else
@@ -97,7 +103,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	
 	public void run(String arg) {
 		File argFile = new File(arg);
-		String dir = "";
+		dir = "";
 		if (!argFile.exists() && !argFile.isDirectory())
 			dir = IJ.getDirectory("Select Directory of TIFFs");
 		else
@@ -134,7 +140,19 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		ImagePlus imp = new ImagePlus(fivStacks.get(0).open(false).getTitle().replaceAll("\\d+\\.", "\\."), this);
 		imp.setOpenAsHyperStack(true);
 		imp.setDimensions(1, fivStacks.get(0).nImages, fivStacks.size());
+		if (imp.getOriginalFileInfo() == null) {
+			setUpFileInfo(imp);
+		}
 		imp.show();
+	}
+
+	public void setUpFileInfo(ImagePlus imp) {
+		imp.setFileInfo(new FileInfo());
+		FileInfo fi = imp.getOriginalFileInfo();
+		fi.width = width;
+		fi.height = height;
+		fi.nImages = this.getSize();
+		fi.directory = dir;
 	}
 
 	int getInt(Properties props, String key) {

@@ -209,7 +209,8 @@ public class Projector implements PlugInFilter, TextListener {
 		ArrayList<Roi> bigRoiAList = new ArrayList<Roi>();
 		int finalT = lastT;
 		long tempTime = (new Date()).getTime();
-		File tempDir = new File(new File(IJ.getDirectory("home")).getParent() +"Proj_"+imp.getTitle().replaceAll("[,. ;:]","") + tempTime);
+//		File tempDir = new File(IJ.getDirectory("home") +"Proj_"+imp.getTitle().replaceAll("[,. ;:]","") + tempTime);
+		File tempDir = new File((new File(IJ.getDirectory("image"))).getParent()+ File.separator +"Proj_"+imp.getTitle().replaceAll("[,. ;:]","") + tempTime);
 
 		for (loopT = firstT; loopT < lastT +1; loopT=loopT+stepT) { 
 			long memoryFree = Runtime.getRuntime().freeMemory();

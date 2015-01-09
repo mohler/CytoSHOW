@@ -238,12 +238,12 @@ public class DISPIM_Monitor implements PlugIn {
 					IJ.wait(100);
 					//selectWindow("SPIMA: "+dir);
 				}
-				impA.setPosition(1, 1, 1);	
-				IJ.run("Green");
-				impA.resetDisplayRange();
-				impA.setPosition(2, 1, 1);	
-				IJ.run("Red");
-				impA.resetDisplayRange();
+//				impA.setPosition(1, 1, 1);	
+//				IJ.run("Green");
+//				impA.resetDisplayRange();
+//				impA.setPosition(2, 1, 1);	
+//				IJ.run("Red");
+//				impA.resetDisplayRange();
 			}
 			Calibration cal = impA.getCalibration();
 			cal.pixelWidth = vWidth;
@@ -278,12 +278,12 @@ public class DISPIM_Monitor implements PlugIn {
 					IJ.wait(100);
 					//selectWindow("SPIMB: "+dir);
 				}
-				impB.setPosition(1, 1, 1);	
-				IJ.run("Green");
-				impB.resetDisplayRange();
-				impB.setPosition(2, 1, 1);	
-				IJ.run("Red");
-				impB.resetDisplayRange();
+//				impB.setPosition(1, 1, 1);	
+//				IJ.run("Green");
+//				impB.resetDisplayRange();
+//				impB.setPosition(2, 1, 1);	
+//				IJ.run("Red");
+//				impB.resetDisplayRange();
 			}
 			Calibration cal = impB.getCalibration();
 			cal.pixelWidth = vWidth;
@@ -665,6 +665,7 @@ public class DISPIM_Monitor implements PlugIn {
 							while (!(new File(finalConvPath)).canRead()) {
 								IJ.wait(10000);
 							}
+							IJ.wait(30000);
 								
 							ImagePlus convImp = IJ.openImage(finalConvPath);
 							if (convImp!=null) {
@@ -724,6 +725,7 @@ public class DISPIM_Monitor implements PlugIn {
 								while (!(new File(finalConvPath2)).canRead()) {
 									IJ.wait(10000);
 								}
+								IJ.wait(30000);
 									
 								ImagePlus convImp = IJ.openImage(finalConvPath2);
 								if (convImp!=null) {
@@ -1084,7 +1086,8 @@ public class DISPIM_Monitor implements PlugIn {
 								while (!(new File(finalConvPath)).canRead()) {
 									IJ.wait(10000);
 								}
-									
+								IJ.wait(30000);
+
 								ImagePlus convImp = IJ.openImage(finalConvPath);
 								if (convImp!=null) {
 									IJ.saveAs(convImp, "TIFF", finalConvPath);
@@ -1143,6 +1146,7 @@ public class DISPIM_Monitor implements PlugIn {
 									while (!(new File(finalConvPath2)).canRead()) {
 										IJ.wait(10000);
 									}
+									IJ.wait(30000);
 										
 									ImagePlus convImp = IJ.openImage(finalConvPath2);
 									if (convImp!=null) {
