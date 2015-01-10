@@ -69,9 +69,6 @@ public class MultiChannelFileInfoVirtualStack extends VirtualStack implements Pl
 			fivStacks.get(fivStacks.size()-1).info = info;
 			fivStacks.get(fivStacks.size()-1).open(false);
 			nImages = fivStacks.size() * fivStacks.get(0).nImages;
-			Properties props = (new FileOpener(info[0])).decodeDescriptionString(info[0]);
-
-			nSlices = (int)getDouble(props,"slices");;
 		}
 	}
 
@@ -108,6 +105,8 @@ public class MultiChannelFileInfoVirtualStack extends VirtualStack implements Pl
 		fivStacks.add(new FileInfoVirtualStack());
 		fivStacks.get(fivStacks.size()-1).info = fi;
 		nImages = fivStacks.size() * fivStacks.get(0).nImages;
+		Properties props = (new FileOpener(info[0])).decodeDescriptionString(info[0]);
+		nSlices = (int)getDouble(props,"slices");;
 	}
 	
 	public void run(String arg) {
@@ -206,15 +205,8 @@ public class MultiChannelFileInfoVirtualStack extends VirtualStack implements Pl
 			return fivStacks.get(0).getProcessor(1);
 //			throw new IllegalArgumentException("Argument out of range: "+n);
 		}
-		int c = n % (fivStacks.size());
-		int z = (int) (n % nSlices);
-		int t = (int) (n % fivStacks.get(c).nImages);
-		if (z==0) {
-			z = nSlices;
-			t=t-1;
-		}
-//		IJ.log(""+n+" "+z+" "+t);
-		return fivStacks.get(c).getProcessor((z)*nSlices+t);
+		int c = (n-1) % (fivStacks.size());
+		return fivStacks.get(c).getProcessor((int)Math.floor(((double)n-1)/fivStacks.size()));
 	 }
  
 	 /** Returns the number of images in this stack. */
@@ -232,15 +224,8 @@ public class MultiChannelFileInfoVirtualStack extends VirtualStack implements Pl
 				return fivStacks.get(0).info[0].fileName;
 //				throw new IllegalArgumentException("Argument out of range: "+n);
 			}
-			int c = n % (fivStacks.size());
-			int z = (int) (n % nSlices);
-			int t = (int) (n % fivStacks.get(c).nImages);
-			if (z==0) {
-				z = nSlices;
-				t=t-1;
-			}
-//			IJ.log(""+n+" "+z+" "+t);
-			return fivStacks.get(c).info[0].fileName + " slice "+ (z)*nSlices+t;
+			int c = (n-1) % (fivStacks.size());
+			return fivStacks.get(c).info[0].fileName + " slice "+ (1+((int)Math.floor(((double)n-1)/fivStacks.size())));
 		}
 		else
 			return info[0].sliceLabels[n-1];
