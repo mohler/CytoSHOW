@@ -67,7 +67,8 @@ import11="XY Coordinates... ",ij.plugin.XY_Reader
 #import10="QuickTime Movie...",Movie_Opener
 #import11="Pict...",QuickTime_Opener
 import12="MultiTIFF Virtual Stack...", ij.plugin.MultiFileInfoVirtualStack
-import13="Animated GIF Stack...", ij.plugin.Animated_Gif_Reader
+import13="Multi4DTIFF Virtual Stack...", ij.plugin.MultiChannelFileInfoVirtualStack
+import14="Animated GIF Stack...", ij.plugin.Animated_Gif_Reader
 
 # Plugins installed in the File/Save As submenu
 save01="Tiff...",ij.plugin.filter.Writer("tiff")
