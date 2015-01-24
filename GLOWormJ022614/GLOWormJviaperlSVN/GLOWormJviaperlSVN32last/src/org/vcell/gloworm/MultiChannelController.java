@@ -1254,10 +1254,12 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 				double[] mins = new double[imp.getNChannels()+1]; 
 				double[] maxs = new double[imp.getNChannels()+1]; 
 
-				if (imp.isComposite()) {
+				if (imp.getNChannels()>1) {
 					int[] position = {imp.getChannel(), imp.getSlice(), imp.getFrame()};
-					mode = ((CompositeImage)imp).getMode();
-					((CompositeImage)imp).setMode(CompositeImage.GRAYSCALE);
+					if (imp.isComposite()) {
+						mode = ((CompositeImage)imp).getMode();
+						((CompositeImage)imp).setMode(CompositeImage.GRAYSCALE);
+					}
 					imp.getCanvas().unzoom();
 					for (int c=1; c<mins.length; c++) {
 						imp.setPosition(c, position[1], position[2]);
@@ -1272,9 +1274,11 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 						imp.getChannelProcessor().setMinAndMax(mins[c], maxs[c]);
 					}
 					imp.setPosition(position[0], position[1], position[2]);
-					((CompositeImage)imp).setMode(mode);
+					if (imp.isComposite()) 
+						((CompositeImage)imp).setMode(mode);
 
 				}  else {
+					imp.getCanvas().unzoom();
 					IJ.run(imp, "AVI... ", "compression=PNG frame=10"+" channels=1-"+imp.getNChannels()+" slices=1-"+imp.getNSlices()
 							+" frames=1-"+imp.getNFrames()+" save=["+path+"]");				
 					deNovoMovieFile = new java.io.File(path);

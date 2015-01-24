@@ -203,7 +203,7 @@ public class CompositeImage extends ImagePlus {
 		//IJ.log("CompositeImage.updateImage: "+ch+"/"+nChannels+" "+currentSlice+" "+currentFrame);
 		if (ch>nChannels) ch = nChannels;
 		boolean newChannel = false;
-		if (ch-1!=currentChannel) {
+		if (ch-1!=currentChannel && ch>0) {
 			previousChannel = currentChannel;
 			currentChannel = ch-1;
 			newChannel = true;

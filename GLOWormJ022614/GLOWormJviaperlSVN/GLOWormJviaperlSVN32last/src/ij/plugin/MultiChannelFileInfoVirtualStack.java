@@ -153,6 +153,7 @@ public class MultiChannelFileInfoVirtualStack extends VirtualStack implements Pl
 		if (imp.getOriginalFileInfo() == null) {
 			setUpFileInfo(imp);
 		}
+		imp = new CompositeImage(imp);
 		imp.show();
 	}
 

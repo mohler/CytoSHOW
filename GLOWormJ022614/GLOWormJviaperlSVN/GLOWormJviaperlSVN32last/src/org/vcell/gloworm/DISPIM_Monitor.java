@@ -253,9 +253,9 @@ public class DISPIM_Monitor implements PlugIn {
 
 			impA.setPosition(wavelengths, zSlices/2, stkNSlices/(wavelengths*zSlices));	
 
-			impA.resetDisplayRange();
+//			impA.resetDisplayRange();
 			impA.setPosition(1, zSlices/2, stkNSlices/(wavelengths*zSlices));	
-			impA.resetDisplayRange();
+//			impA.resetDisplayRange();
 			if (impA.isComposite())
 				((CompositeImage)impA).setMode(CompositeImage.COMPOSITE);
 			impA.show();
@@ -293,9 +293,9 @@ public class DISPIM_Monitor implements PlugIn {
 
 			impB.setPosition(wavelengths, zSlices/2, stkNSlices/(wavelengths*zSlices));	
 
-			impB.resetDisplayRange();
+//			impB.resetDisplayRange();
 			impB.setPosition(1, zSlices/2, stkNSlices/(wavelengths*zSlices));	
-			impB.resetDisplayRange();
+//			impB.resetDisplayRange();
 			if (impB.isComposite())
 				((CompositeImage)impB).setMode(CompositeImage.COMPOSITE);
 			impB.show();
@@ -629,7 +629,7 @@ public class DISPIM_Monitor implements PlugIn {
 							"cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
 									"cpuChunks = split(cpuPerformance,\"\\\"\");" +
 									"x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +
-									"while(x >50) {\n" +
+									"while(x >30) {\n" +
 									"	wait(10000);" +
 									"	cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
 									"	cpuChunks = split(cpuPerformance,\"\\\"\");" +
@@ -689,7 +689,7 @@ public class DISPIM_Monitor implements PlugIn {
 								"cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
 										"cpuChunks = split(cpuPerformance,\"\\\"\");" +
 										"x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +
-										"while(x >50) {\n" +
+										"while(x >30) {\n" +
 										"	wait(10000);" +
 										"	cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
 										"	cpuChunks = split(cpuPerformance,\"\\\"\");" +
@@ -1050,7 +1050,7 @@ public class DISPIM_Monitor implements PlugIn {
 								"cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
 										"cpuChunks = split(cpuPerformance,\"\\\"\");" +
 										"x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +
-										"while(x >50) {\n" +
+										"while(x >30) {\n" +
 										"	wait(10000);" +
 										"	cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
 										"	cpuChunks = split(cpuPerformance,\"\\\"\");" +
@@ -1068,7 +1068,7 @@ public class DISPIM_Monitor implements PlugIn {
 							"		    print(f,batStringC);\n" + 
 							"		    batStringA = \"cd C:\\\\Program Files\\\\mipav\";\n" + 
 							"		    print(f,batStringA);\n" + 
-							"		    batStringB = \"start /LOW /b mipav -s \\\""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileName+timecode+".sct\\\" -hide\";\n" + 
+							"		    batStringB = \"start /LOW /AFFINITY 001111111111111111111111 /b mipav -s \\\""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileName+timecode+".sct\\\" -hide\";\n" + 
 							"		    print(f,batStringB);\n" + 
 							"		    print(f,\"exit\");\n" + 
 							"		    File.close(f);	    \n" + 
@@ -1110,7 +1110,7 @@ public class DISPIM_Monitor implements PlugIn {
 									"cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
 											"cpuChunks = split(cpuPerformance,\"\\\"\");" +
 											"x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +
-											"while(x >50) {\n" +
+											"while(x >30) {\n" +
 											"	wait(10000);" +
 											"	cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
 											"	cpuChunks = split(cpuPerformance,\"\\\"\");" +
@@ -1128,7 +1128,7 @@ public class DISPIM_Monitor implements PlugIn {
 								"		    print(f,batStringC);\n" + 
 								"		    batStringA = \"cd C:\\\\Program Files\\\\mipav\";\n" + 
 								"		    print(f,batStringA);\n" + 
-								"		    batStringB = \"start /LOW /b mipav -s \\\""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileName+timecode+".sct\\\" -hide\";\n" + 
+								"		    batStringB = \"start /LOW /AFFINITY 001111111111111111111111 /b mipav -s \\\""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileName+timecode+".sct\\\" -hide\";\n" + 
 								"		    print(f,batStringB);\n" + 
 								"		    print(f,\"exit\");\n" + 
 								"		    File.close(f);	    \n" + 
