@@ -210,9 +210,12 @@ public class Projector implements PlugInFilter, TextListener {
 		int finalT = lastT;
 		long tempTime = (new Date()).getTime();
 //		File tempDir = new File(IJ.getDirectory("home") +"Proj_"+imp.getTitle().replaceAll("[,. ;:]","") + tempTime);
-		String saveRootDir = (IJ.getDirectory("image") != null? (new File(IJ.getDirectory("image"))).getParent(): IJ.getDirectory("home"));
-		File tempDir = new File(saveRootDir + File.separator +"Proj_"+imp.getTitle().replaceAll("[,. ;:]","") + tempTime);
-
+		String saveRootDir = (IJ.getDirectory("image") != null? (new File(IJ.getDirectory("image"))).getParent(): IJ.getDirectory("temp"));
+		File tempDir = new File(saveRootDir + File.separator +"Proj_"+imp.getTitle().replaceAll("[,. ;:]","").replace(File.separator, "_") + tempTime);
+		if (!tempDir.mkdir()) {
+			IJ.error("3D Projection failed", "Unable to save projected stacks to" + tempDir.getPath());
+			return;
+		}
 		for (loopT = firstT; loopT < lastT +1; loopT=loopT+stepT) { 
 			long memoryFree = Runtime.getRuntime().freeMemory();
 			long memoryTotal = Runtime.getRuntime().totalMemory();
@@ -343,7 +346,7 @@ public class Projector implements PlugInFilter, TextListener {
 					IJ.runMacro("print(\"\\\\Update:\\\n \")");
 
 					if ( loopC == firstC && loopT == firstT)  {
-						tempDir.mkdir();
+//						tempDir.mkdir();
 						finalSlices = projImpD[loopC-firstC].getStackSize();
 					}
 					Roi[] roisArray = projImpD[loopC-firstC].getRoiManager().getShownRoisAsArray();
