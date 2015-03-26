@@ -659,7 +659,7 @@ public class DISPIM_Monitor implements PlugIn {
 							"		    File.close(f);	    \n" + 
 
 							"batJob = exec(\"cmd64\", \"/c\", \""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileNames[f]+timecode+".bat\");" +
-							"print(\""+frameFileNames[f]+"_1 complete.\");" +
+							"print(\""+frameFileNames[f]+"_"+ keyChannel +" complete.\");" +
 							"delBat = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileNames[f]+timecode+".bat\");" + 
 							"delSct = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileNames[f]+timecode+".sct\");" + 
 							""
@@ -719,7 +719,7 @@ public class DISPIM_Monitor implements PlugIn {
 								"		    File.close(f);	    \n" + 
 
 								"batJob = exec(\"cmd64\", \"/c\", \""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileNames[f]+timecode+".bat\");" +
-								"print(\""+frameFileNames[f]+"_2 complete.\");" +
+								"print(\""+frameFileNames[f]+"_"+ slaveChannel +" complete.\");" +
 								"delBat = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileNames[f]+timecode+".bat\");" + 
 								"delSct = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileNames[f]+timecode+".sct\");" + 
 								""
@@ -1080,7 +1080,7 @@ public class DISPIM_Monitor implements PlugIn {
 							"		    File.close(f);	    \n" + 
 
 							"batJob = exec(\"cmd64\", \"/c\", \""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileName+timecode+".bat\");" +
-							"print(\""+frameFileName+"_1 complete.\");" +
+							"print(\""+frameFileName+"_"+ keyChannel +" complete.\");" +
 							"delBat = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileName+timecode+".bat\");" + 
 							"delSct = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileName+timecode+".sct\");" + 
 							""
@@ -1140,7 +1140,7 @@ public class DISPIM_Monitor implements PlugIn {
 								"		    File.close(f);	    \n" + 
 
 								"batJob = exec(\"cmd64\", \"/c\", \""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileName+timecode+".bat\");" +
-								"print(\""+frameFileName+"_2 complete.\");" +
+								"print(\""+frameFileName+"_"+ slaveChannel +" complete.\");" +
 								"delBat = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileName+timecode+".bat\");" + 
 								"delSct = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileName+timecode+".sct\");" + 
 								""
