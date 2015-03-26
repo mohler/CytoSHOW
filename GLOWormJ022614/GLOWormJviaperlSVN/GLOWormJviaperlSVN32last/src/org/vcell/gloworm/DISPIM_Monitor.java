@@ -641,7 +641,7 @@ public class DISPIM_Monitor implements PlugIn {
 									"	cpuChunks = split(cpuPerformance,\"\\\"\");" +
 									"	x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +	
 									"}" +
-									"print(\""+frameFileNames[f]+"_1 processing...\");" +
+									"print(\""+frameFileNames[f]+"_"+ keyChannel +" processing...\");" +
 
 							"			File.saveString(\'"+deconStringKey+"\', \""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileNames[f]+timecode+".sct\");" + 
 
@@ -688,8 +688,8 @@ public class DISPIM_Monitor implements PlugIn {
 						IJ.wait(5000);
 
 						new MacroRunner(
-								"print (\""+dir.replace("\\", "\\\\")+"SPIMB_Ch1_processed"+ File.separator.replace("\\", "\\\\") +frameFileNames[f]+ File.separator.replace("\\", "\\\\")+ frameFileNames[f]+ "1_To_"+ frameFileNames[f]+ ".mtx\");"+
-										"while (!File.exists(\""+dir.replace("\\", "\\\\")+"SPIMB_Ch1_processed"+ File.separator.replace("\\", "\\\\") +frameFileNames[f]+ File.separator.replace("\\", "\\\\")+ frameFileNames[f]+ "1_To_"+ frameFileNames[f]+ ".mtx\")) {"
+								"print (\""+dir.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") +frameFileNames[f]+ File.separator.replace("\\", "\\\\")+ frameFileNames[f]+ "1_To_"+ frameFileNames[f]+ ".mtx\");"+
+										"while (!File.exists(\""+dir.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") +frameFileNames[f]+ File.separator.replace("\\", "\\\\")+ frameFileNames[f]+ "1_To_"+ frameFileNames[f]+ ".mtx\")) {"
 												+ "wait(10000);"
 										+ "}"+
 								"cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
@@ -701,7 +701,7 @@ public class DISPIM_Monitor implements PlugIn {
 										"	cpuChunks = split(cpuPerformance,\"\\\"\");" +
 										"	x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +	
 										"}" +
-										"print(\""+frameFileNames[f]+"_2 processing...\");" +
+										"print(\""+frameFileNames[f]+"_"+ slaveChannel +" processing...\");" +
 
 								"			File.saveString(\'"+deconStringSlave+"\', \""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileNames[f]+timecode+".sct\");" + 
 
@@ -1062,7 +1062,7 @@ public class DISPIM_Monitor implements PlugIn {
 										"	cpuChunks = split(cpuPerformance,\"\\\"\");" +
 										"	x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +	
 										"}" +
-										"print(\""+frameFileName+"_1 processing...\");" +
+										"print(\""+frameFileName+"_"+ keyChannel +" processing...\");" +
 
 							"			File.saveString(\'"+deconStringKey+"\', \""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileName+timecode+".sct\");" + 
 
@@ -1109,8 +1109,8 @@ public class DISPIM_Monitor implements PlugIn {
 							IJ.wait(5000);
 
 							new MacroRunner(
-									"print (\""+dir.replace("\\", "\\\\")+"SPIMB_Ch1_processed"+ File.separator.replace("\\", "\\\\") +frameFileName+ File.separator.replace("\\", "\\\\")+ frameFileName+ "1_To_"+ frameFileName+ ".mtx\");"+
-											"while (!File.exists(\""+dir.replace("\\", "\\\\")+"SPIMB_Ch1_processed"+ File.separator.replace("\\", "\\\\") +frameFileName+ File.separator.replace("\\", "\\\\")+ frameFileName+ "1_To_"+ frameFileName+ ".mtx\")) {"
+									"print (\""+dir.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") +frameFileName+ File.separator.replace("\\", "\\\\")+ frameFileName+ "1_To_"+ frameFileName+ ".mtx\");"+
+											"while (!File.exists(\""+dir.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") +frameFileName+ File.separator.replace("\\", "\\\\")+ frameFileName+ "1_To_"+ frameFileName+ ".mtx\")) {"
 													+ "wait(10000);"
 											+ "}"+
 									"cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
@@ -1122,7 +1122,7 @@ public class DISPIM_Monitor implements PlugIn {
 											"	cpuChunks = split(cpuPerformance,\"\\\"\");" +
 											"	x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +	
 											"}" +
-											"print(\""+frameFileName+"_2 processing...\");" +
+											"print(\""+frameFileName+"_"+ slaveChannel +" processing...\");" +
 
 								"			File.saveString(\'"+deconStringSlave+"\', \""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileName+timecode+".sct\");" + 
 

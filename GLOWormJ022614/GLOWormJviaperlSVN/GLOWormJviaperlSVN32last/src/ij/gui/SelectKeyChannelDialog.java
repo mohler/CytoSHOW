@@ -6,12 +6,12 @@ import java.awt.event.*;
 
 /** A modal dialog box with a one line message and
 	"Yes", "No" and "Cancel" buttons. */
-public class SelectKeyChannelDialog extends Dialog implements ActionListener, KeyListener {
+public class SelectKeyChannelDialog extends Dialog implements ActionListener, KeyListener, ItemListener {
     private Choice channelChoices;
     private Button yesB, noB, cancelB;
     private boolean cancelPressed, yesPressed;
 	private boolean firstPaint = true;
-	private int keyChannel;
+	private int keyChannel=1;
 
 	public SelectKeyChannelDialog(Frame parent, String title, String msg) {
 		super(parent, title, true);
@@ -38,6 +38,7 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 			noB = new Button("  No  ");
 			cancelB = new Button(" Cancel ");
 		}
+		channelChoices.addItemListener(this);
 		yesB.addActionListener(this);
 		noB.addActionListener(this);
 		cancelB.addActionListener(this);
@@ -87,7 +88,6 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 		IJ.setKeyDown(keyCode); 
 		if (keyCode==KeyEvent.VK_ENTER||keyCode==KeyEvent.VK_Y||keyCode==KeyEvent.VK_S) {
 			yesPressed = true;
-			keyChannel = channelChoices.getSelectedIndex()+1;
 			closeDialog(); 
 		} else if (keyCode==KeyEvent.VK_N || keyCode==KeyEvent.VK_D) {
 			closeDialog(); 
@@ -115,6 +115,11 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 
 	public int getKeyChannel() {
 		return keyChannel;
+	}
+
+	public void itemStateChanged(ItemEvent e) {
+		keyChannel = channelChoices.getSelectedIndex()+1;		
+		IJ.log("keyChannel "+ keyChannel);
 	}
 
 }
