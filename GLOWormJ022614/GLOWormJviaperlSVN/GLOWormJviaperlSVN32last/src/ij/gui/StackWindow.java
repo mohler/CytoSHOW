@@ -7,6 +7,7 @@ import ij.plugin.frame.SyncWindows;
 import java.awt.*;
 import java.awt.image.*;
 import java.awt.event.*;
+import java.util.ArrayList;
 
 import javax.swing.JComponent;
 import javax.swing.JScrollBar;
@@ -19,6 +20,7 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 
 	protected Scrollbar sliceSelector; // for backward compatibity with Image5D
 	public ScrollbarWithLabel cSelector, zSelector, tSelector;
+	public ArrayList<ScrollbarWithLabel> activeScrollBars = new ArrayList<ScrollbarWithLabel>();
 	protected Thread thread;
 	protected volatile boolean done;
 	protected volatile int slice;
@@ -37,8 +39,9 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 		super(imp, ic);
 		addScrollbars(imp);
 		addMouseWheelListener(this);
-		if (sliceSelector==null && this.getClass().getName().indexOf("Image5D")!=-1)
+		if (sliceSelector==null && this.getClass().getName().indexOf("Image5D")!=-1) {
 			sliceSelector = new Scrollbar(); // prevents Image5D from crashing
+		}
 		//IJ.log(nChannels+" "+nSlices+" "+nFrames);
 		pack();
 		ic = imp.getCanvas();
@@ -122,6 +125,8 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 			cSelector.setFocusable(false); // prevents scroll bar from blinking on Windows
 			cSelector.setUnitIncrement(1);
 			cSelector.setBlockIncrement(1);
+			activeScrollBars.add(cSelector);
+
 		}
 		if (nSlices>1) {
 			char label = nChannels>1||nFrames>1?'z':'z';  
@@ -143,6 +148,8 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 			zSelector.setUnitIncrement(1);
 			zSelector.setBlockIncrement(blockIncrement);
 			sliceSelector = zSelector.bar;
+			activeScrollBars.add(zSelector);
+
 		}
 		if (nFrames>1) {
 			animationSelector = tSelector = new ScrollbarWithLabel(this, 1, 1, 1, nFrames+1, 't');
@@ -162,6 +169,8 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 			if (blockIncrement<1) blockIncrement = 1;
 			tSelector.setUnitIncrement(1);
 			tSelector.setBlockIncrement(blockIncrement);
+			activeScrollBars.add(tSelector);
+
 		}
 		this.add(scrollbarPanel, BorderLayout.SOUTH);
 		

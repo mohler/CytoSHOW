@@ -1115,9 +1115,9 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 				+viewButtonPanel.getWidth();
 		int padV = getInsets().top
 				+getInsets().bottom
-				+(this instanceof StackWindow?
+				+((this instanceof StackWindow && ((StackWindow)this).getNScrollbars() >0)?
 						((StackWindow)this).getNScrollbars()
-						*((StackWindow)this).zSelector.getHeight()
+						*((StackWindow)this).activeScrollBars.get(0).getHeight()
 						:0)
 						+overheadPanel.getHeight();
 		imp.getWindow().setSize(ic.dstWidth+padH, ic.dstHeight+padV);
