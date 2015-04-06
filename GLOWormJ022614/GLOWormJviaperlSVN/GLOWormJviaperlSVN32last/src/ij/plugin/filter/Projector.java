@@ -296,7 +296,7 @@ public class Projector implements PlugInFilter, TextListener {
 					for (int z = 1; z <= imp.getNSlices() ; z++ ) {
 
 						//						IJ.log(" "+firstZ+" "+z+" "+lastZ+" "+" "+firstT+" "+t+" "+lastT+" ");
-						Roi[] sliceSpecficRoiArray = imp.getRoiManager().getSliceSpecificRoiArray(z, loopT);
+						Roi[] sliceSpecficRoiArray = imp.getRoiManager().getSliceSpecificRoiArray(z, loopT, false);
 						for (int r = 0; r < sliceSpecficRoiArray.length; r++) {
 							if (manualRoi == null)
 								manualRoi = new Roi(dupX,dupX,dupW,dupH);

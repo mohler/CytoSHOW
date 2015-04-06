@@ -1832,7 +1832,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 									inPlaneDiameter, inPlaneDiameter);
 
 							Roi[] nearbyROIs = rm.getSliceSpecificRoiArray(zSlice,
-									tFrame);
+									tFrame, false);
 							for (int h = 0; h < nearbyROIs.length; h++) {
 
 								if (hoodRoi.contains((int) nearbyROIs[h]

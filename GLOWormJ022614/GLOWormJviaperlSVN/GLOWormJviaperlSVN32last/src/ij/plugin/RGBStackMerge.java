@@ -226,7 +226,13 @@ public class RGBStackMerge implements PlugIn {
 		for (int i=0; i<n; i++) {
 			if (images[i]!=null) channels++;
 		}
-		if (channels<2) return null;
+		if (channels==1) {
+			for (int i=0; i<n; i++) {
+				if (images[i]!=null) 
+					return images[i];
+			}
+		}
+		if (channels<1) return null;
 		ImagePlus[] images2 = new ImagePlus[channels];
 		Color[] defaultColors = {Color.red,Color.green,Color.blue,Color.white,Color.cyan,Color.magenta,Color.yellow};
 		Color[] colors = new Color[channels];

@@ -477,10 +477,10 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 			for (int z = firstZ; z <= lastZ ; z++) {
 
 				//				IJ.log(" "+firstZ+" "+z+" "+lastZ+" "+" "+firstT+" "+t+" "+lastT+" ");
-				Roi[] sliceSpecficRoiArray = imp.getRoiManager().getSliceSpecificRoiArray(z, t);
+				Roi[] sliceSpecficRoiArray = imp.getRoiManager().getSliceSpecificRoiArray(z, t, true);
 				for (int r = 0; r < sliceSpecficRoiArray.length; r++) {
 					if (manualRoi == null)
-						manualRoi = new Roi(dupX,dupX,dupW,dupH);
+						manualRoi = new Roi(dupX,dupY,dupW,dupH);
 					if( manualRoi.contains((int)((Roi) sliceSpecficRoiArray[r]).getBounds().getCenterX(), (int)((Roi) sliceSpecficRoiArray[r]).getBounds().getCenterY())
 							|| manualRoi.contains((int)((Roi) sliceSpecficRoiArray[r]).getBounds().getMinX(), (int)((Roi) sliceSpecficRoiArray[r]).getBounds().getMinY())
 							|| manualRoi.contains((int)((Roi) sliceSpecficRoiArray[r]).getBounds().getMaxX(), (int)((Roi) sliceSpecficRoiArray[r]).getBounds().getMaxY())

@@ -3190,18 +3190,20 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		showAllCheckbox.setState(canvasShowAllState);
 	}
 
-	public Roi[] getSliceSpecificRoiArray(int z, int t) {
+	public Roi[] getSliceSpecificRoiArray(int z, int t, boolean getSpanners) {
 		Roi[] roiSetIn = this.getFullRoisAsArray();
 		if (roiSetIn == null)
 			return null;
 		ArrayList<Roi> matchedRois = new ArrayList<Roi>();
 		for (int i=0; i < roiSetIn.length; i++) {
 			//			IJ.log(( roiSetIn[i].getZPosition() +" "+ z  +" "+ roiSetIn[i].getTPosition() +" "+ t+"\n"));
-			if ( roiSetIn[i].getZPosition() == z && roiSetIn[i].getTPosition() == t/*  && roiSetIn[i].getTPosition() > t - tSustain &&
+			if (roiSetIn[i].getTPosition() == t || (roiSetIn[i].getTPosition() == 0 && getSpanners)) {
+				if ( roiSetIn[i].getZPosition() == z || (roiSetIn[i].getZPosition() == 0 && getSpanners)/*  && roiSetIn[i].getTPosition() > t - tSustain &&
 					roiSetIn[i].getTPosition() < t + tSustain */) {
-				matchedRois.add(roiSetIn[i]);
-				//				IJ.showMessage("");
+					matchedRois.add(roiSetIn[i]);
+					//				IJ.showMessage("");
 
+				}
 			}
 		}
 		//		IJ.log(""+matchedRoiIndexes.size());
@@ -3215,18 +3217,19 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	}
 
-	public int[] getSliceSpecificIndexes(int z, int t) {
+	public int[] getSliceSpecificIndexes(int z, int t, boolean getSpanners) {
 		Roi[] roiSetIn = this.getFullRoisAsArray();
 		if (roiSetIn == null)
 			return null;
 		ArrayList<Integer> matchedIndexes = new ArrayList<Integer>();
 		for (int i=0; i < roiSetIn.length; i++) {
 			//			IJ.log(( roiSetIn[i].getZPosition() +" "+ z  +" "+ roiSetIn[i].getTPosition() +" "+ t+"\n"));
-			if ( roiSetIn[i].getZPosition() == z && roiSetIn[i].getTPosition() == t/*  && roiSetIn[i].getTPosition() > t - tSustain &&
+			if (roiSetIn[i].getTPosition() == t || (roiSetIn[i].getTPosition() == 0 && getSpanners)) {
+				if ( roiSetIn[i].getZPosition() == z || (roiSetIn[i].getZPosition() == 0 && getSpanners)/*  && roiSetIn[i].getTPosition() > t - tSustain &&
 					roiSetIn[i].getTPosition() < t + tSustain */) {
 				matchedIndexes.add(i);
 				//				IJ.showMessage("");
-
+				}
 			}
 		}
 		//		IJ.log(""+matchedRoiIndexes.size());
@@ -3714,8 +3717,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 					for (int z=1; z<=outNSlices; z++) {
 						ArrayList<String> theseSlcSpecRoiNames = new ArrayList<String>();
-						if (z%fillZfactor == 0 && this.getSliceSpecificRoiArray((int)(z/fillZfactor), t) != null) {
-							for (Roi thisRoi:this.getSliceSpecificRoiArray((int)(z/fillZfactor), t))
+						if (z%fillZfactor == 0 && this.getSliceSpecificRoiArray((int)(z/fillZfactor), t, false) != null) {
+							for (Roi thisRoi:this.getSliceSpecificRoiArray((int)(z/fillZfactor), t, false))
 								theseSlcSpecRoiNames.add(thisRoi.getName());
 						}
 						IJ.log(""+z);
