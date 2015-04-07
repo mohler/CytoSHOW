@@ -3,6 +3,7 @@ import ij.*;
 import ij.gui.*;
 import ij.process.*;
 import ij.measure.*;
+
 import java.awt.*;
 import java.awt.image.*;
 import java.awt.event.*;
@@ -140,7 +141,7 @@ public class MontageMaker implements PlugIn {
 		int montageWidth = width*columns;
 		int montageHeight = height*rows;
 		ImageProcessor ip = imp.getProcessor();
-		ImageProcessor montage = ip.createProcessor(montageWidth+borderWidth/2, montageHeight+borderWidth/2);
+		ImageProcessor montage = new ColorProcessor(montageWidth+borderWidth/2, montageHeight+borderWidth/2);
 		ImagePlus imp2 = new ImagePlus("Montage", montage);
 		imp2.setCalibration(imp.getCalibration());
 		montage = imp2.getProcessor();
@@ -176,7 +177,9 @@ public class MontageMaker implements PlugIn {
 		ImageProcessor aSlice;
 	    int slice = first;
 		while (slice<=last) {
-			aSlice = stack.getProcessor(slice);
+//			aSlice = stack.getProcessor(slice);
+			imp.setPositionWithoutUpdate(1, 1, slice);			
+			aSlice = new ColorProcessor(imp.flatten().getImage());
 			if (scale!=1.0)
 				aSlice = aSlice.resize(width, height);
 			montage.insert(aSlice, x, y);
@@ -214,7 +217,7 @@ public class MontageMaker implements PlugIn {
 		ImagePlus[] montages = new ImagePlus[n];
 		for (int i=0; i<n; i++) {
 			int last = channels[i].getStackSize();
-			montages[i] = makeMontage2(channels[i], columns, rows, scale, 1, last, inc, borderWidth, labels);
+			montages[i] = makeMontage2(imp, columns, rows, scale, 1, last, inc, borderWidth, labels);
 		}
 		ImagePlus montage = (new RGBStackMerge()).mergeHyperstacks(montages, false);
 		montage.setTitle("Montage");

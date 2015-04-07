@@ -2525,10 +2525,14 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			//if (mag<1.0) ic2.setMagnification(mag);
 		}
 		BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-		Graphics g = bi.getGraphics();
-		g.drawImage(getImage(), 0, 0, null);
-		ic2.paint(g);
-		imp2.flatteningCanvas = null;
+		boolean showing = this.getCanvas().getShowAllROIs();
+		this.getCanvas().setShowAllROIs(true);
+		this.getCanvas().paint(bi.getGraphics());
+//		BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+//		Graphics g = bi.getGraphics();
+//		g.drawImage(getImage(), 0, 0, null);
+//		ic2.paint(g);
+//		imp2.flatteningCanvas = null;
 		if (Recorder.record) Recorder.recordCall("imp = IJ.getImage().flatten();");
 		return new ImagePlus(title, new ColorProcessor(bi));
 	}
