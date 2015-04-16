@@ -4,6 +4,7 @@ import ij.gui.*;
 import ij.plugin.*;
 import ij.plugin.frame.*;
 import ij.io.FileInfo;
+
 import java.awt.*;
 import java.awt.image.*;
 
@@ -261,8 +262,15 @@ public class CompositeImage extends ImagePlus {
 			currentFrame = getFrame();
 			int position = getStackIndex(1, currentSlice, currentFrame);
 			if (cip==null) return;
-			for (int i=0; i<nChannels; ++i)
-				cip[i].setPixels(getImageStack().getProcessor(position+i).getPixels());
+			for (int i=0; i<nChannels; ++i) {
+				if (getOriginalFileInfo() != null && getOriginalFileInfo().fileName.toLowerCase().endsWith(".ome.tif")) {
+					IJ.log("ome");
+					cip[i].setPixels(getImageStack().getProcessor(position + (i*getNSlices())).getPixels());
+				}else {
+					IJ.log("not ome");
+					cip[i].setPixels(getImageStack().getProcessor(position+i).getPixels());
+				}
+			}
 		}
 
 		if (rgbPixels == null) {
