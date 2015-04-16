@@ -72,7 +72,7 @@ public class HyperStackConverter implements PlugIn {
 			if (nChannels*nSlices*nFrames>stackSize) {
 				for (int a=stackSize;a<nChannels*nSlices*nFrames;a++) {
 					if (imp.getStack().isVirtual())
-						((VirtualStack)imp.getStack()).addSlice("blank");
+						((VirtualStack)imp.getStack()).addSlice("stuff");
 					else
 						imp.getStack().addSlice(imp.getProcessor().createProcessor(imp.getWidth(), imp.getHeight()));
 				}

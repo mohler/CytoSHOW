@@ -3,6 +3,7 @@ import ij.*;
 import ij.process.*;
 import ij.gui.*;
 import ij.io.*;
+
 import java.awt.*;
 import java.io.*;
 import java.util.Properties;
@@ -72,6 +73,9 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 			}
 		}
 		nImages = info.length;
+		nSlices = nImages;
+		names = new String[nImages+1];
+		labels = new String[nImages+1];
 		FileOpener fo = new FileOpener(info[0] );
 		ImagePlus imp = fo.open(false);
 		if (nImages==1 && fi.fileType==FileInfo.RGB48) {
@@ -137,38 +141,43 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 			info[i-1] = info[i];
 		info[nImages-1] = null;
 		nImages--;
+		nSlices--;
 	}
 	
 	/** Returns an ImageProcessor for the specified image,
 		were 1<=n<=nImages. Returns null if the stack is empty.
 	*/
 	public ImageProcessor getProcessor(int n) {
-		if (n<1 || n>nImages)
+		if (n<1 || n>nSlices)
 			return getProcessor(1);
 //			throw new IllegalArgumentException("Argument out of range: "+n);
 		if (IJ.debugMode) IJ.log("FileInfoVirtualStack: "+n+", "+info[n-1].getOffset());
 		//if (n>1) IJ.log("  "+(info[n-1].getOffset()-info[n-2].getOffset()));
-		info[n-1].nImages = 1; // why is this needed?
-		FileOpener fo = new FileOpener(info[n-1]);
-		ImagePlus imp = fo.open(false);
+		ImagePlus imp = null;		
+		if (n<=nImages ) {
+			info[n-1].nImages = 1; // why is this needed?
+			FileOpener fo = new FileOpener(info[n-1]);
+			imp = fo.open(false);
+		}
 		if (imp!=null)
 			return imp.getProcessor();
 		else {
 			int w=getWidth(), h=getHeight();
-			IJ.log("Read error or file not found ("+n+"): "+info[n-1].directory+info[n-1].fileName);
+			if (n<=nImages ) 
+				IJ.log("Read error or file not found ("+n+"): "+info[n-1].directory+info[n-1].fileName);
 			switch (getBitDepth()) {
 				case 8: return new ByteProcessor(w, h);
 				case 16: return new ShortProcessor(w, h);
 				case 24: return new ColorProcessor(w, h);
 				case 32: return new FloatProcessor(w, h);
-				default: return null;
+				default: return getProcessor(1).createProcessor(w, h);
 			}
 		}
 	 }
  
 	 /** Returns the number of images in this stack. */
 	public int getSize() {
-		return nImages;
+		return nSlices;
 	}
 
 	/** Returns the label of the Nth image. */
