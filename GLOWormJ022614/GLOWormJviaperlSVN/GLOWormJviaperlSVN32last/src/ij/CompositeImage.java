@@ -264,10 +264,10 @@ public class CompositeImage extends ImagePlus {
 			if (cip==null) return;
 			for (int i=0; i<nChannels; ++i) {
 				if (getOriginalFileInfo() != null && getOriginalFileInfo().fileName.toLowerCase().endsWith(".ome.tif")) {
-					IJ.log("ome");
+//					IJ.log("ome");
 					cip[i].setPixels(getImageStack().getProcessor(position + (i*getNSlices())).getPixels());
 				}else {
-					IJ.log("not ome");
+//					IJ.log("not ome");
 					cip[i].setPixels(getImageStack().getProcessor(position+i).getPixels());
 				}
 			}

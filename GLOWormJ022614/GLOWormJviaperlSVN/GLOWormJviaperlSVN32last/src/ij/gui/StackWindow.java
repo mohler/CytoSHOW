@@ -253,10 +253,10 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 	
 	void updatePosition() {
 		if (imp.getOriginalFileInfo() != null && imp.getOriginalFileInfo().fileName.toLowerCase().endsWith(".ome.tif")) {
-			IJ.log("ome");
+//			IJ.log("ome");
 			slice =  (t-1)*nChannels*nSlices + (c-1)*nSlices + z;
 		} else {
-			IJ.log("not ome");
+//			IJ.log("not ome");
 			slice = (t-1)*nChannels*nSlices + (z-1)*nChannels + c;
 		}
 		imp.updatePosition(c, z, t);

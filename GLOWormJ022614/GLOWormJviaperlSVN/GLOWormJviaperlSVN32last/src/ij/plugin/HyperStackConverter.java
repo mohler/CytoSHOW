@@ -69,8 +69,22 @@ public class HyperStackConverter implements PlugIn {
 			return;
 		}
 		if (nChannels*nSlices*nFrames!=stackSize) {
-			IJ.error("HyperStack Converter", "channels x slices x frames <> stack size");
-			return;
+			if (nChannels*nSlices*nFrames>stackSize) {
+				for (int a=stackSize;a<nChannels*nSlices*nFrames;a++) {
+					if (imp.getStack().isVirtual())
+						((VirtualStack)imp.getStack()).addSlice("blank");
+					else
+						imp.getStack().addSlice(imp.getProcessor().createProcessor(imp.getWidth(), imp.getHeight()));
+				}
+			} else if (nChannels*nSlices*nFrames<stackSize) {
+				for (int a=nChannels*nSlices*nFrames;a<stackSize;a++) {
+					imp.getStack().deleteSlice(nChannels*nSlices*nFrames);
+				}
+			}else {
+				IJ.error("HyperStack Converter", "channels x slices x frames <> stack size");
+				return;
+			}
+			imp.setStack(imp.getImageStack());
 		}
 		imp.setDimensions(nChannels, nSlices, nFrames);
 		if (order!=CZT && imp.getStack().isVirtual())
