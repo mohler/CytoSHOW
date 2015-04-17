@@ -309,15 +309,71 @@ public class DISPIM_Monitor implements PlugIn {
 
 			}
 		} else {
-			TiffDecoder td = new TiffDecoder((new File(dirOrOMETiff)).getParent(), (new File(dirOrOMETiff)).getName());
+			TiffDecoder tdA = new TiffDecoder((new File(dirOrOMETiff)).getParent(), (new File(dirOrOMETiff)).getName());
+			TiffDecoder tdB = new TiffDecoder((new File(dirOrOMETiff)).getParent(), (new File(dirOrOMETiff)).getName());
 
 			try {
-				impB = new ImagePlus();
-				impB.setStack(new FileInfoVirtualStack(td.getTiffInfo(), false));
-				int stackSize = impB.getNSlices();
+				impA = new ImagePlus();
+				impA.setStack(new FileInfoVirtualStack(tdA.getTiffInfo(), false));
+				int stackSize = impA.getNSlices();
 				int nChannels = wavelengths*2;
 				int nSlices = zSlices;
 				int nFrames = (int)Math.ceil(stackSize/(nChannels*nSlices));
+				
+				impA.setTitle("SPIMA: "+dirOrOMETiff);
+
+				if (nChannels*nSlices*nFrames!=stackSize) {
+					if (nChannels*nSlices*nFrames>stackSize) {
+						for (int a=stackSize;a<nChannels*nSlices*nFrames;a++) {
+							if (impA.getStack().isVirtual())
+								((VirtualStack)impA.getStack()).addSlice("stuff");
+							else
+								impA.getStack().addSlice(impA.getProcessor().createProcessor(impA.getWidth(), impA.getHeight()));
+						}
+					} else if (nChannels*nSlices*nFrames<stackSize) {
+						for (int a=nChannels*nSlices*nFrames;a<stackSize;a++) {
+							impA.getStack().deleteSlice(nChannels*nSlices*nFrames);
+						}
+					}else {
+						IJ.error("HyperStack Converter", "channels x slices x frames <> stack size");
+						return;
+					}
+					impA.setStack(impA.getImageStack());
+				}
+				impA.setDimensions(nChannels, nSlices, nFrames);
+
+				if (nChannels > 1){
+					impA = new CompositeImage(impA);
+					while (!impA.isComposite()) {
+						IJ.wait(100);
+						//selectWindow("SPIMB: "+dir);
+					}
+					//				impA.setPosition(1, 1, 1);	
+					//				IJ.run("Green");
+					//				impA.resetDisplayRange();
+					//				impA.setPosition(2, 1, 1);	
+					//				IJ.run("Red");
+					//				impA.resetDisplayRange();
+				}
+				Calibration cal = impA.getCalibration();
+				cal.pixelWidth = vWidth;
+				cal.pixelHeight = vHeight;
+				cal.pixelDepth = vDepthRaw;
+				cal.setUnit(vUnit);
+
+				impA.setPosition(wavelengths, nSlices, nFrames);	
+
+				//			impA.resetDisplayRange();
+				impA.setPosition(1, nSlices, nFrames);	
+				//			impA.resetDisplayRange();
+				if (impA.isComposite())
+					((CompositeImage)impA).setMode(CompositeImage.COMPOSITE);
+				impA.setFileInfo(new FileInfo());
+				impA.getOriginalFileInfo().fileName = dirOrOMETiff;
+				impA.show();
+
+				impB = new ImagePlus();
+				impB.setStack(new FileInfoVirtualStack(tdB.getTiffInfo(), false));
 				
 				impB.setTitle("SPIMB: "+dirOrOMETiff);
 
@@ -354,7 +410,7 @@ public class DISPIM_Monitor implements PlugIn {
 					//				IJ.run("Red");
 					//				impB.resetDisplayRange();
 				}
-				Calibration cal = impB.getCalibration();
+				cal = impB.getCalibration();
 				cal.pixelWidth = vWidth;
 				cal.pixelHeight = vHeight;
 				cal.pixelDepth = vDepthRaw;
