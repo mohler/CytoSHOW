@@ -32,6 +32,13 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 		open(show);
 	}
 
+	/* Constructs a FileInfoVirtualStack from an array of FileInfo 
+	objects and displays it if 'show' is true. */
+	public FileInfoVirtualStack(FileInfo[] fi, boolean show) {
+		info = fi;
+		open(show);
+	}
+
 	public void run(String arg) {
 		OpenDialog  od = new OpenDialog("Open TIFF", arg);
 		String name = od.getFileName();
@@ -182,7 +189,7 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 	/** Returns the label of the Nth image. */
 	public String getSliceLabel(int n) {
-		if (n<1 || n>nImages)
+		if (n<1 || n>nSlices)
 			throw new IllegalArgumentException("Argument out of range: "+n);
 		if (info[0].sliceLabels==null || info[0].sliceLabels.length!=nImages)
 			return info[0].fileName + " slice "+ n;

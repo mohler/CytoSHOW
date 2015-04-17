@@ -4,6 +4,7 @@ import java.awt.Button;
 import java.awt.Polygon;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -22,6 +23,7 @@ import ij.gui.Roi;
 import ij.gui.SelectKeyChannelDialog;
 import ij.gui.YesNoCancelDialog;
 import ij.io.FileInfo;
+import ij.io.TiffDecoder;
 import ij.macro.MacroRunner;
 import ij.measure.Calibration;
 import ij.measure.ResultsTable;
@@ -65,14 +67,14 @@ public class DISPIM_Monitor implements PlugIn {
 		int cropWidth = 325;
 		int cropHeight = 425;
 
-		String dir = "";
-		dir = args[0];
-		IJ.log(dir);
+		String dirOrOMETiff = "";
+		dirOrOMETiff = args[0];
+		IJ.log(dirOrOMETiff);
 		//waitForUser("");
-		while (!(new File(dir)).isDirectory()) {
-			dir = IJ.getDirectory("Select top directory for diSPIM raw data");
+		while (!(new File(dirOrOMETiff)).isDirectory() && !dirOrOMETiff.endsWith(".ome.tif")) {
+			dirOrOMETiff = IJ.getFilePath("Select path to diSPIM raw data");
 		}
-		IJ.log(dir);
+		IJ.log(dirOrOMETiff);
 		String tempDir = IJ.getDirectory("temp");
 		String[] fileListA = {""};
 		String[] fileListB = {""};
@@ -87,27 +89,31 @@ public class DISPIM_Monitor implements PlugIn {
 		String[] newTifListB = {""};
 		String[] listA = {""};
 		String[] listB = {""};
+		String big5DFileListAString = ("");	    
+		String big5DFileListBString =("");
 		ImagePlus impA = null;
 		ImagePlus impB = null;
 		ImagePlus impDF1 = null;
 		ImagePlus impDF2 = null;
 
-		String[] dirChunks = dir.split(IJ.isWindows()?"\\\\":"/");
-		String dirName = dirChunks[dirChunks.length-1];
+		String[] dirOrOMETiffChunks = dirOrOMETiff.split(IJ.isWindows()?"\\\\":"/");
+		String dirOrOMETiffName = dirOrOMETiffChunks[dirOrOMETiffChunks.length-1];
 
-		IJ.saveString("", dir+"Big5DFileListA.txt");
-		while(!(new File(dir+"Big5DFileListA.txt")).exists())
-			IJ.wait(100);
-		IJ.saveString("", dir+"Big5DFileListB.txt");
-		while(!(new File(dir+"Big5DFileListB.txt")).exists())
-			IJ.wait(100);
-		IJ.saveString("", dir+"BigMAXFileListA.txt");
-		while(!(new File(dir+"BigMAXFileListA.txt")).exists())
-			IJ.wait(100);
-		IJ.saveString("", dir+"BigMAXFileListB.txt");
-		while(!(new File(dir+"BigMAXFileListB.txt")).exists())
-			IJ.wait(100);
-
+		if ((new File(dirOrOMETiff)).isDirectory()) {
+			IJ.saveString("", dirOrOMETiff+"Big5DFileListA.txt");
+			while(!(new File(dirOrOMETiff+"Big5DFileListA.txt")).exists())
+				IJ.wait(100);
+			IJ.saveString("", dirOrOMETiff+"Big5DFileListB.txt");
+			while(!(new File(dirOrOMETiff+"Big5DFileListB.txt")).exists())
+				IJ.wait(100);
+			IJ.saveString("", dirOrOMETiff+"BigMAXFileListA.txt");
+			while(!(new File(dirOrOMETiff+"BigMAXFileListA.txt")).exists())
+				IJ.wait(100);
+			IJ.saveString("", dirOrOMETiff+"BigMAXFileListB.txt");
+			while(!(new File(dirOrOMETiff+"BigMAXFileListB.txt")).exists())
+				IJ.wait(100);
+		}
+		
 		int wavelengths;
 		int zSlices;
 		if(args.length>2){
@@ -122,189 +128,252 @@ public class DISPIM_Monitor implements PlugIn {
 			zSlices = (int) gd.getNextNumber();
 		}
 
-		fileListA = new File(""+dir+"SPIMA").list();
-		fileListB = new File(""+dir+"SPIMB").list();
-		fileRanksA = Arrays.copyOf(fileListA, fileListA.length);
-		fileRanksB = Arrays.copyOf(fileListB, fileListB.length);
-		fileNumsA = Arrays.copyOf(fileListA, fileListA.length);
-		fileNumsB = Arrays.copyOf(fileListB, fileListB.length);
-		fileSortA = Arrays.copyOf(fileListA, fileListA.length);
-		fileSortB = Arrays.copyOf(fileListB, fileListB.length);
+		if ((new File(dirOrOMETiff)).isDirectory()) {
+			fileListA = new File(""+dirOrOMETiff+"SPIMA").list();
+			fileListB = new File(""+dirOrOMETiff+"SPIMB").list();
+			fileRanksA = Arrays.copyOf(fileListA, fileListA.length);
+			fileRanksB = Arrays.copyOf(fileListB, fileListB.length);
+			fileNumsA = Arrays.copyOf(fileListA, fileListA.length);
+			fileNumsB = Arrays.copyOf(fileListB, fileListB.length);
+			fileSortA = Arrays.copyOf(fileListA, fileListA.length);
+			fileSortB = Arrays.copyOf(fileListB, fileListB.length);
 
-		String big5DFileListAString = ("");	    
-		String big5DFileListBString =("");
-
-		for (int a=0;a<fileListA.length;a++) {
-			if(!fileListA[a].endsWith(".roi") && !fileListA[a].endsWith(".DS_Store") ){
-				String sring = fileListA[a].replace("/", "");
-				String subsring = sring;
-				String prefix = "";
-				double n = Double.NaN;
-				try {
-					n = Integer.parseInt(subsring);
-				} catch(NumberFormatException e) {
-					n = Double.NaN;
-				}
-				while (Double.isNaN(n)) {
+			for (int a=0;a<fileListA.length;a++) {
+				if(!fileListA[a].endsWith(".roi") && !fileListA[a].endsWith(".DS_Store") ){
+					String sring = fileListA[a].replace("/", "");
+					String subsring = sring;
+					String prefix = "";
+					double n = Double.NaN;
 					try {
-						prefix = prefix + subsring.substring(0,1);
-						subsring = subsring.substring(1);
-						n = Integer.parseInt(subsring.split(" ")[0]);
-						IJ.log(subsring);
-						IJ.log(prefix);
-					} catch(NumberFormatException ne) {
-						n = Double.NaN;
-					} catch(StringIndexOutOfBoundsException se) {
+						n = Integer.parseInt(subsring);
+					} catch(NumberFormatException e) {
 						n = Double.NaN;
 					}
-				}
-				if(prefix.toLowerCase().startsWith("t")
-						|| prefix.toLowerCase().startsWith("f"))
-					prefix = "aaaaa"+prefix;
-				int numer = Integer.parseInt(subsring.split(" ")[0]);
-				IJ.log(subsring+" "+numer);
-				fileNumsA[a] =prefix+ IJ.pad(numer,6)+"|"+sring;
-				fileNumsB[a] =prefix+ IJ.pad(numer,6)+"|"+sring;
-			} else {
-				fileNumsA[a] = "";
-				fileNumsB[a] = "";
-			}
-
-		}
-		Arrays.sort(fileNumsA);
-		Arrays.sort(fileNumsB);
-
-		for (int r=0;r<fileNumsA.length;r++) {
-			String[] splt =fileNumsA[r].split("\\|");
-			if (splt.length > 1)
-				fileSortA[r] = splt [1];
-			else 
-				fileSortA[r] = "";
-			IJ.log(r+" "+" "+fileNumsA[r]+" "+fileSortA[r]);
-			splt =fileNumsB[r].split("\\|");
-			if (splt.length > 1)
-				fileSortB[r] = splt[1];
-			else 
-				fileSortB[r] = "";
-
-		}
-
-		for (int d=0;d<fileSortA.length;d++) {
-			boolean skipIt = false;
-			String nextPathA =  dir + "SPIMA" + File.separator + fileSortA[d];
-			String nextPathB =  dir + "SPIMB" + File.separator + fileSortB[d];
-			IJ.log(nextPathA);
-			IJ.log(nextPathB);
-			if ( (new File(nextPathA)).isDirectory()  && (new File(nextPathB)).isDirectory()) {
-				newTifListA = (new File(nextPathA)).list();
-				newTifListB = (new File(nextPathB)).list();
-				if (newTifListA.length != newTifListB.length || newTifListA.length < wavelengths*zSlices)
-					skipIt = true;
-				if(!skipIt) {
-					Arrays.sort(newTifListA);		
-					for (int f=0;f<newTifListA.length;f++) {
-						while(!(new File(dir+"Big5DFileListA.txt")).exists())
-							IJ.wait(100);
-						if (!newTifListA[f].endsWith(".roi") && !newTifListA[f].endsWith(".DS_Store")
-								&& big5DFileListAString.indexOf( nextPathA + File.separator+newTifListA[f])<0)
-							IJ.append(nextPathA + File.separator +newTifListA[f], dir+"Big5DFileListA.txt");
+					while (Double.isNaN(n)) {
+						try {
+							prefix = prefix + subsring.substring(0,1);
+							subsring = subsring.substring(1);
+							n = Integer.parseInt(subsring.split(" ")[0]);
+							IJ.log(subsring);
+							IJ.log(prefix);
+						} catch(NumberFormatException ne) {
+							n = Double.NaN;
+						} catch(StringIndexOutOfBoundsException se) {
+							n = Double.NaN;
+						}
 					}
-					Arrays.sort(newTifListB);		
-					for (int f=0;f<newTifListB.length;f++) {
-						while(!(new File(dir+"Big5DFileListB.txt")).exists())
-							IJ.wait(100);
-						if (!newTifListB[f].endsWith(".roi") && !newTifListB[f].endsWith(".DS_Store")
-								&& big5DFileListBString.indexOf( nextPathB + File.separator+newTifListB[f])<0)
-							IJ.append(nextPathB + File.separator +newTifListB[f], dir+"Big5DFileListB.txt");
+					if(prefix.toLowerCase().startsWith("t")
+							|| prefix.toLowerCase().startsWith("f"))
+						prefix = "aaaaa"+prefix;
+					int numer = Integer.parseInt(subsring.split(" ")[0]);
+					IJ.log(subsring+" "+numer);
+					fileNumsA[a] =prefix+ IJ.pad(numer,6)+"|"+sring;
+					fileNumsB[a] =prefix+ IJ.pad(numer,6)+"|"+sring;
+				} else {
+					fileNumsA[a] = "";
+					fileNumsB[a] = "";
+				}
+
+			}
+			Arrays.sort(fileNumsA);
+			Arrays.sort(fileNumsB);
+
+			for (int r=0;r<fileNumsA.length;r++) {
+				String[] splt =fileNumsA[r].split("\\|");
+				if (splt.length > 1)
+					fileSortA[r] = splt [1];
+				else 
+					fileSortA[r] = "";
+				IJ.log(r+" "+" "+fileNumsA[r]+" "+fileSortA[r]);
+				splt =fileNumsB[r].split("\\|");
+				if (splt.length > 1)
+					fileSortB[r] = splt[1];
+				else 
+					fileSortB[r] = "";
+
+			}
+
+			for (int d=0;d<fileSortA.length;d++) {
+				boolean skipIt = false;
+				String nextPathA =  dirOrOMETiff + "SPIMA" + File.separator + fileSortA[d];
+				String nextPathB =  dirOrOMETiff + "SPIMB" + File.separator + fileSortB[d];
+				IJ.log(nextPathA);
+				IJ.log(nextPathB);
+				if ( (new File(nextPathA)).isDirectory()  && (new File(nextPathB)).isDirectory()) {
+					newTifListA = (new File(nextPathA)).list();
+					newTifListB = (new File(nextPathB)).list();
+					if (newTifListA.length != newTifListB.length || newTifListA.length < wavelengths*zSlices)
+						skipIt = true;
+					if(!skipIt) {
+						Arrays.sort(newTifListA);		
+						for (int f=0;f<newTifListA.length;f++) {
+							while(!(new File(dirOrOMETiff+"Big5DFileListA.txt")).exists())
+								IJ.wait(100);
+							if (!newTifListA[f].endsWith(".roi") && !newTifListA[f].endsWith(".DS_Store")
+									&& big5DFileListAString.indexOf( nextPathA + File.separator+newTifListA[f])<0)
+								IJ.append(nextPathA + File.separator +newTifListA[f], dirOrOMETiff+"Big5DFileListA.txt");
+						}
+						Arrays.sort(newTifListB);		
+						for (int f=0;f<newTifListB.length;f++) {
+							while(!(new File(dirOrOMETiff+"Big5DFileListB.txt")).exists())
+								IJ.wait(100);
+							if (!newTifListB[f].endsWith(".roi") && !newTifListB[f].endsWith(".DS_Store")
+									&& big5DFileListBString.indexOf( nextPathB + File.separator+newTifListB[f])<0)
+								IJ.append(nextPathB + File.separator +newTifListB[f], dirOrOMETiff+"Big5DFileListB.txt");
+						}
 					}
 				}
+
 			}
 
-		}
 
+			IJ.log(""+WindowManager.getImageCount());
 
-		IJ.log(""+WindowManager.getImageCount());
+			if ((new File(dirOrOMETiff+"Big5DFileListA.txt" )).length() >0) {
+				//		    IJ.run("Stack From List...", "open="+dir+"Big5DFileListA.txt use");
+				impA = new ImagePlus();
+				impA.setStack(new ListVirtualStack(dirOrOMETiff+"Big5DFileListA.txt"));
+				int stkNSlices = impA.getNSlices();
 
-		if ((new File(dir+"Big5DFileListA.txt" )).length() >0) {
-			//		    IJ.run("Stack From List...", "open="+dir+"Big5DFileListA.txt use");
-			impA = new ImagePlus();
-			impA.setStack(new ListVirtualStack(dir+"Big5DFileListA.txt"));
-			int stkNSlices = impA.getNSlices();
+				impA.setTitle("SPIMA: "+dirOrOMETiff);
 
-			impA.setTitle("SPIMA: "+dir);
-
-			impA.setDimensions(wavelengths, zSlices, stkNSlices/(wavelengths*zSlices));
-			IJ.log(wavelengths+" "+zSlices+" "+stkNSlices/(wavelengths*zSlices));
-			if (wavelengths > 1){
-				impA = new CompositeImage(impA);
-				while (!impA.isComposite()) {
-					IJ.wait(100);
-					//selectWindow("SPIMA: "+dir);
+				impA.setDimensions(wavelengths, zSlices, stkNSlices/(wavelengths*zSlices));
+				IJ.log(wavelengths+" "+zSlices+" "+stkNSlices/(wavelengths*zSlices));
+				if (wavelengths > 1){
+					impA = new CompositeImage(impA);
+					while (!impA.isComposite()) {
+						IJ.wait(100);
+						//selectWindow("SPIMA: "+dir);
+					}
+					//				impA.setPosition(1, 1, 1);	
+					//				IJ.run("Green");
+					//				impA.resetDisplayRange();
+					//				impA.setPosition(2, 1, 1);	
+					//				IJ.run("Red");
+					//				impA.resetDisplayRange();
 				}
-//				impA.setPosition(1, 1, 1);	
-//				IJ.run("Green");
-//				impA.resetDisplayRange();
-//				impA.setPosition(2, 1, 1);	
-//				IJ.run("Red");
-//				impA.resetDisplayRange();
+				Calibration cal = impA.getCalibration();
+				cal.pixelWidth = vWidth;
+				cal.pixelHeight = vHeight;
+				cal.pixelDepth = vDepthRaw;
+				cal.setUnit(vUnit);
+
+				impA.setPosition(wavelengths, zSlices/2, stkNSlices/(wavelengths*zSlices));	
+
+				//			impA.resetDisplayRange();
+				impA.setPosition(1, zSlices/2, stkNSlices/(wavelengths*zSlices));	
+				//			impA.resetDisplayRange();
+				if (impA.isComposite())
+					((CompositeImage)impA).setMode(CompositeImage.COMPOSITE);
+				impA.show();
+
 			}
-			Calibration cal = impA.getCalibration();
-			cal.pixelWidth = vWidth;
-			cal.pixelHeight = vHeight;
-			cal.pixelDepth = vDepthRaw;
-			cal.setUnit(vUnit);
 
-			impA.setPosition(wavelengths, zSlices/2, stkNSlices/(wavelengths*zSlices));	
+			if ((new File(dirOrOMETiff+"Big5DFileListB.txt" )).length() >0) {
+				//		    IJ.run("Stack From List...", "open="+dir+"Big5DFileListB.txt use");
+				impB = new ImagePlus();
+				impB.setStack(new ListVirtualStack(dirOrOMETiff+"Big5DFileListB.txt"));
+				int stkNSlices = impB.getNSlices();
 
-//			impA.resetDisplayRange();
-			impA.setPosition(1, zSlices/2, stkNSlices/(wavelengths*zSlices));	
-//			impA.resetDisplayRange();
-			if (impA.isComposite())
-				((CompositeImage)impA).setMode(CompositeImage.COMPOSITE);
-			impA.show();
+				impB.setTitle("SPIMB: "+dirOrOMETiff);
 
-		}
-
-		if ((new File(dir+"Big5DFileListB.txt" )).length() >0) {
-			//		    IJ.run("Stack From List...", "open="+dir+"Big5DFileListB.txt use");
-			impB = new ImagePlus();
-			impB.setStack(new ListVirtualStack(dir+"Big5DFileListB.txt"));
-			int stkNSlices = impB.getNSlices();
-
-			impB.setTitle("SPIMB: "+dir);
-
-			impB.setDimensions(wavelengths, zSlices, stkNSlices/(wavelengths*zSlices));
-			IJ.log(wavelengths+" "+zSlices+" "+stkNSlices/(wavelengths*zSlices));
-			if (wavelengths > 1){
-				impB = new CompositeImage(impB);
-				while (!impB.isComposite()) {
-					IJ.wait(100);
-					//selectWindow("SPIMB: "+dir);
+				impB.setDimensions(wavelengths, zSlices, stkNSlices/(wavelengths*zSlices));
+				IJ.log(wavelengths+" "+zSlices+" "+stkNSlices/(wavelengths*zSlices));
+				if (wavelengths > 1){
+					impB = new CompositeImage(impB);
+					while (!impB.isComposite()) {
+						IJ.wait(100);
+						//selectWindow("SPIMB: "+dir);
+					}
+					//				impB.setPosition(1, 1, 1);	
+					//				IJ.run("Green");
+					//				impB.resetDisplayRange();
+					//				impB.setPosition(2, 1, 1);	
+					//				IJ.run("Red");
+					//				impB.resetDisplayRange();
 				}
-//				impB.setPosition(1, 1, 1);	
-//				IJ.run("Green");
-//				impB.resetDisplayRange();
-//				impB.setPosition(2, 1, 1);	
-//				IJ.run("Red");
-//				impB.resetDisplayRange();
+				Calibration cal = impB.getCalibration();
+				cal.pixelWidth = vWidth;
+				cal.pixelHeight = vHeight;
+				cal.pixelDepth = vDepthRaw;
+				cal.setUnit(vUnit);
+
+				impB.setPosition(wavelengths, zSlices/2, stkNSlices/(wavelengths*zSlices));	
+
+				//			impB.resetDisplayRange();
+				impB.setPosition(1, zSlices/2, stkNSlices/(wavelengths*zSlices));	
+				//			impB.resetDisplayRange();
+				if (impB.isComposite())
+					((CompositeImage)impB).setMode(CompositeImage.COMPOSITE);
+				impB.show();
+
 			}
-			Calibration cal = impB.getCalibration();
-			cal.pixelWidth = vWidth;
-			cal.pixelHeight = vHeight;
-			cal.pixelDepth = vDepthRaw;
-			cal.setUnit(vUnit);
+		} else {
+			TiffDecoder td = new TiffDecoder((new File(dirOrOMETiff)).getParent(), (new File(dirOrOMETiff)).getName());
 
-			impB.setPosition(wavelengths, zSlices/2, stkNSlices/(wavelengths*zSlices));	
+			try {
+				impB = new ImagePlus();
+				impB.setStack(new FileInfoVirtualStack(td.getTiffInfo(), false));
+				int stackSize = impB.getNSlices();
+				int nChannels = wavelengths*2;
+				int nSlices = zSlices;
+				int nFrames = (int)Math.ceil(stackSize/(nChannels*nSlices));
+				
+				impB.setTitle("SPIMB: "+dirOrOMETiff);
 
-//			impB.resetDisplayRange();
-			impB.setPosition(1, zSlices/2, stkNSlices/(wavelengths*zSlices));	
-//			impB.resetDisplayRange();
-			if (impB.isComposite())
-				((CompositeImage)impB).setMode(CompositeImage.COMPOSITE);
-			impB.show();
+				if (nChannels*nSlices*nFrames!=stackSize) {
+					if (nChannels*nSlices*nFrames>stackSize) {
+						for (int a=stackSize;a<nChannels*nSlices*nFrames;a++) {
+							if (impB.getStack().isVirtual())
+								((VirtualStack)impB.getStack()).addSlice("stuff");
+							else
+								impB.getStack().addSlice(impB.getProcessor().createProcessor(impB.getWidth(), impB.getHeight()));
+						}
+					} else if (nChannels*nSlices*nFrames<stackSize) {
+						for (int a=nChannels*nSlices*nFrames;a<stackSize;a++) {
+							impB.getStack().deleteSlice(nChannels*nSlices*nFrames);
+						}
+					}else {
+						IJ.error("HyperStack Converter", "channels x slices x frames <> stack size");
+						return;
+					}
+					impB.setStack(impB.getImageStack());
+				}
+				impB.setDimensions(nChannels, nSlices, nFrames);
 
+				if (nChannels > 1){
+					impB = new CompositeImage(impB);
+					while (!impB.isComposite()) {
+						IJ.wait(100);
+						//selectWindow("SPIMB: "+dir);
+					}
+					//				impB.setPosition(1, 1, 1);	
+					//				IJ.run("Green");
+					//				impB.resetDisplayRange();
+					//				impB.setPosition(2, 1, 1);	
+					//				IJ.run("Red");
+					//				impB.resetDisplayRange();
+				}
+				Calibration cal = impB.getCalibration();
+				cal.pixelWidth = vWidth;
+				cal.pixelHeight = vHeight;
+				cal.pixelDepth = vDepthRaw;
+				cal.setUnit(vUnit);
+
+				impB.setPosition(wavelengths, nSlices, nFrames);	
+
+				//			impB.resetDisplayRange();
+				impB.setPosition(1, nSlices, nFrames);	
+				//			impB.resetDisplayRange();
+				if (impB.isComposite())
+					((CompositeImage)impB).setMode(CompositeImage.COMPOSITE);
+				impB.setFileInfo(new FileInfo());
+				impB.getOriginalFileInfo().fileName = dirOrOMETiff;
+				impB.show();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
-
 		IJ.run("Tile");
 		IJ.log(""+WindowManager.getImageCount());
 
@@ -333,10 +402,10 @@ public class DISPIM_Monitor implements PlugIn {
 					|| (impB.getRoi().getType() != Roi.RECTANGLE && impB.getRoi().getFeretValues()[0]>cropHeight*impB.getCalibration().pixelHeight)) {
 				WindowManager.setTempCurrentImage(impA);
 				if (impA.getRoi()==null) {
-					if (!((new File(dir+ dirName +"A_crop.roi")).canRead())) {
+					if (!((new File(dirOrOMETiff+ dirOrOMETiffName +"A_crop.roi")).canRead())) {
 						IJ.makeRectangle(0,0,cropWidth,cropHeight);
 					} else {
-						IJ.open(dir+ dirName +"A_crop.roi");
+						IJ.open(dirOrOMETiff+ dirOrOMETiffName +"A_crop.roi");
 					}
 				} else if (impA.getRoi().getType() != Roi.RECTANGLE && impA.getRoi().getFeretValues()[0]>cropHeight*impA.getCalibration().pixelHeight
 						|| (impA.getRoi().getType() == Roi.RECTANGLE && impA.getRoi().getBounds().getHeight() > cropHeight)
@@ -351,10 +420,10 @@ public class DISPIM_Monitor implements PlugIn {
 				}
 				WindowManager.setTempCurrentImage(impB);
 				if (impB.getRoi()==null) {
-					if (!((new File(dir+ dirName +"B_crop.roi")).canRead())) {
+					if (!((new File(dirOrOMETiff+ dirOrOMETiffName +"B_crop.roi")).canRead())) {
 						IJ.makeRectangle(0,0,cropWidth,cropHeight);
 					} else {
-						IJ.open(dir+ dirName +"B_crop.roi");
+						IJ.open(dirOrOMETiff+ dirOrOMETiffName +"B_crop.roi");
 					}
 				} else if (impB.getRoi().getType() != Roi.RECTANGLE && impB.getRoi().getFeretValues()[0]>cropHeight*impB.getCalibration().pixelHeight
 						|| (impB.getRoi().getType() == Roi.RECTANGLE && impB.getRoi().getBounds().getWidth() > cropHeight)
@@ -385,8 +454,8 @@ public class DISPIM_Monitor implements PlugIn {
 //				}
 //			}
 				
-			IJ.saveAs(impA, "Selection", dir+dirName +"A_crop.roi");
-			IJ.saveAs(impB, "Selection", dir+dirName +"B_crop.roi");
+			IJ.saveAs(impA, "Selection", dirOrOMETiff+dirOrOMETiffName +"A_crop.roi");
+			IJ.saveAs(impB, "Selection", dirOrOMETiff+dirOrOMETiffName +"B_crop.roi");
 
 			int wasFrameA = impA.getFrame();
 			int wasFrameB = impB.getFrame();
@@ -395,34 +464,34 @@ public class DISPIM_Monitor implements PlugIn {
 			int wasChannelA = impA.getChannel();
 			int wasChannelB = impB.getChannel();
 
-			if (new File(dir+"Deconvolution1").canRead() && new File(dir+"Deconvolution1").list().length >0) {
+			if (new File(dirOrOMETiff+"Deconvolution1").canRead() && new File(dirOrOMETiff+"Deconvolution1").list().length >0) {
 				if (impDF1 == null) {
 					impDF1 = new ImagePlus();
-					impDF1.setStack("Decon-Fuse-Ch1"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dir+"Deconvolution1"));
+					impDF1.setStack("Decon-Fuse-Ch1"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution1"));
 					int stkNSlicesDF = impDF1.getStackSize();
 					int zSlicesDF1 = ((MultiFileInfoVirtualStack)impDF1.getStack()).getFivStacks().get(0).getSize();
 					impDF1.setOpenAsHyperStack(true);
 					impDF1.setStack(impDF1.getStack(), 1, zSlicesDF1, stkNSlicesDF/(1*zSlicesDF1));
 					impDF1.show();
 				} else {
-					MultiFileInfoVirtualStack mfivs = new MultiFileInfoVirtualStack(dir+"Deconvolution1");
+					MultiFileInfoVirtualStack mfivs = new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution1");
 					int stkNSlicesDF = mfivs.getSize();
 					int zSlicesDF1 = mfivs.getFivStacks().get(0).getSize();
 					impDF1.setStack(mfivs, 1, zSlicesDF1, stkNSlicesDF/(1*zSlicesDF1));
 					impDF1.setWindow(WindowManager.getCurrentWindow());
 				}
 				if (wavelengths ==2) {
-					if (new File(dir+"Deconvolution1").canRead() && new File(dir+"Deconvolution1").list().length >0) {
+					if (new File(dirOrOMETiff+"Deconvolution1").canRead() && new File(dirOrOMETiff+"Deconvolution1").list().length >0) {
 						if (impDF2  == null) {
 							impDF2 = new ImagePlus();
-							impDF2.setStack("Decon-Fuse-Ch2"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dir+"Deconvolution2"));
+							impDF2.setStack("Decon-Fuse-Ch2"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution2"));
 							int stkNSlicesDF = impDF2.getStackSize();
 							int zSlicesDF2 = ((MultiFileInfoVirtualStack)impDF2.getStack()).getFivStacks().get(0).getSize();
 							impDF2.setOpenAsHyperStack(true);
 							impDF2.setDimensions(1, zSlicesDF2, stkNSlicesDF/(1*zSlicesDF2));
 							impDF2.show();
 						} else {
-							MultiFileInfoVirtualStack mfivs = new MultiFileInfoVirtualStack(dir+"Deconvolution2");
+							MultiFileInfoVirtualStack mfivs = new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution2");
 							int stkNSlicesDF = mfivs.getSize();
 							int zSlicesDF2 = mfivs.getFivStacks().get(0).getSize();
 							impDF2.setStack(mfivs, 1, zSlicesDF2, stkNSlicesDF/(1*zSlicesDF2));
@@ -441,20 +510,20 @@ public class DISPIM_Monitor implements PlugIn {
 				frameFileNames[f] = ((ListVirtualStack)impA.getStack()).getDirectory(impA.getCurrentSlice());
 				String timecode = ""+(new Date()).getTime();
 
-				if (	   !(new File(dir+ "SPIMA_Ch1_processed"+ File.separator + frameFileNames[f]+ File.separator + frameFileNames[f]+".tif")).canRead()
-						|| (wavelengths==2 && !(new File(dir+ "SPIMA_Ch2_processed"+ File.separator + frameFileNames[f]+ File.separator + frameFileNames[f]+".tif")).canRead())
-						|| !(new File(dir+ "SPIMB_Ch1_processed"+ File.separator + frameFileNames[f]+ File.separator + frameFileNames[f]+".tif")).canRead()
-						|| (wavelengths==2 && !(new File(dir+ "SPIMA_Ch2_processed"+ File.separator + frameFileNames[f]+ File.separator + frameFileNames[f]+".tif")).canRead())
+				if (	   !(new File(dirOrOMETiff+ "SPIMA_Ch1_processed"+ File.separator + frameFileNames[f]+ File.separator + frameFileNames[f]+".tif")).canRead()
+						|| (wavelengths==2 && !(new File(dirOrOMETiff+ "SPIMA_Ch2_processed"+ File.separator + frameFileNames[f]+ File.separator + frameFileNames[f]+".tif")).canRead())
+						|| !(new File(dirOrOMETiff+ "SPIMB_Ch1_processed"+ File.separator + frameFileNames[f]+ File.separator + frameFileNames[f]+".tif")).canRead()
+						|| (wavelengths==2 && !(new File(dirOrOMETiff+ "SPIMA_Ch2_processed"+ File.separator + frameFileNames[f]+ File.separator + frameFileNames[f]+".tif")).canRead())
 						) {
-					IJ.runMacro("File.makeDirectory(\""+dir.replace("\\", "\\\\")+"SPIMA_Ch1_processed\");");
-					IJ.runMacro("File.makeDirectory(\""+dir.replace("\\", "\\\\")+"SPIMA_Ch1_processed\"+File.separator+\""+frameFileNames[f]+"\");");
-					IJ.runMacro("File.makeDirectory(\""+dir.replace("\\", "\\\\")+"SPIMB_Ch1_processed\");");
-					IJ.runMacro("File.makeDirectory(\""+dir.replace("\\", "\\\\")+"SPIMB_Ch1_processed\"+File.separator+\""+frameFileNames[f]+"\");");
+					IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMA_Ch1_processed\");");
+					IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMA_Ch1_processed\"+File.separator+\""+frameFileNames[f]+"\");");
+					IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMB_Ch1_processed\");");
+					IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMB_Ch1_processed\"+File.separator+\""+frameFileNames[f]+"\");");
 					if (wavelengths==2) {
-						IJ.runMacro("File.makeDirectory(\""+dir.replace("\\", "\\\\")+"SPIMA_Ch2_processed\");");
-						IJ.runMacro("File.makeDirectory(\""+dir.replace("\\", "\\\\")+"SPIMA_Ch2_processed\"+File.separator+\""+frameFileNames[f]+"\");");
-						IJ.runMacro("File.makeDirectory(\""+dir.replace("\\", "\\\\")+"SPIMB_Ch2_processed\");");
-						IJ.runMacro("File.makeDirectory(\""+dir.replace("\\", "\\\\")+"SPIMB_Ch2_processed\"+File.separator+\""+frameFileNames[f]+"\");");
+						IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMA_Ch2_processed\");");
+						IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMA_Ch2_processed\"+File.separator+\""+frameFileNames[f]+"\");");
+						IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMB_Ch2_processed\");");
+						IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMB_Ch2_processed\"+File.separator+\""+frameFileNames[f]+"\");");
 					}
 
 //					ImageStack stackA1 = new ImageStack(cropHeight,cropWidth);
@@ -527,13 +596,13 @@ public class DISPIM_Monitor implements PlugIn {
 					impXA1.setStack(stackA1);
 					impXA1.setCalibration(impA.getCalibration());
 					//				impXA1.getCalibration().pixelDepth = impXA1.getCalibration().pixelWidth;
-					IJ.saveAs(impXA1,"Tiff", dir+ "SPIMA_Ch1_processed"+ File.separator + frameFileNames[f]+ File.separator + frameFileNames[f]+".tif");
+					IJ.saveAs(impXA1,"Tiff", dirOrOMETiff+ "SPIMA_Ch1_processed"+ File.separator + frameFileNames[f]+ File.separator + frameFileNames[f]+".tif");
 					if (wavelengths==2) {
 						ImagePlus impXA2 = new ImagePlus();
 						impXA2.setStack(stackA2);
 						impXA2.setCalibration(impA.getCalibration());
 						//				impXA2.getCalibration().pixelDepth = impXA2.getCalibration().pixelWidth;
-						IJ.saveAs(impXA2,"Tiff", dir+ "SPIMA_Ch2_processed"+ File.separator + frameFileNames[f]+ File.separator + frameFileNames[f]+".tif");
+						IJ.saveAs(impXA2,"Tiff", dirOrOMETiff+ "SPIMA_Ch2_processed"+ File.separator + frameFileNames[f]+ File.separator + frameFileNames[f]+".tif");
 					}
 
 //					ImageStack stackB1 = new ImageStack(cropHeight,cropWidth);
@@ -606,13 +675,13 @@ public class DISPIM_Monitor implements PlugIn {
 					impXB1.setStack(stackB1);
 					impXB1.setCalibration(impB.getCalibration());
 					//				impXB1.getCalibration().pixelDepth = impXB1.getCalibration().pixelWidth;
-					IJ.saveAs(impXB1,"Tiff", dir+ "SPIMB_Ch1_processed"+ File.separator + frameFileNames[f]+ File.separator + frameFileNames[f]+".tif");
+					IJ.saveAs(impXB1,"Tiff", dirOrOMETiff+ "SPIMB_Ch1_processed"+ File.separator + frameFileNames[f]+ File.separator + frameFileNames[f]+".tif");
 					if (wavelengths==2) {
 						ImagePlus impXB2 = new ImagePlus();
 						impXB2.setStack(stackB2);
 						impXB2.setCalibration(impB.getCalibration());
 						//				impXB2.getCalibration().pixelDepth = impXB2.getCalibration().pixelWidth;
-						IJ.saveAs(impXB2,"Tiff", dir+ "SPIMB_Ch2_processed"+ File.separator + frameFileNames[f]+ File.separator + frameFileNames[f]+".tif");
+						IJ.saveAs(impXB2,"Tiff", dirOrOMETiff+ "SPIMB_Ch2_processed"+ File.separator + frameFileNames[f]+ File.separator + frameFileNames[f]+".tif");
 					}
 
 				}
@@ -625,10 +694,10 @@ public class DISPIM_Monitor implements PlugIn {
 
 				String timecode = ""+(new Date()).getTime();
 
-				if (	   !(new File(dir+ "Deconvolution1"+ File.separator + "Decon_" + frameFileNames[f]+".tif")).canRead()
-						|| (wavelengths==2 && !(new File(dir+ "Deconvolution2"+ File.separator + "Decon_" + frameFileNames[f]+".tif")).canRead())
+				if (	   !(new File(dirOrOMETiff+ "Deconvolution1"+ File.separator + "Decon_" + frameFileNames[f]+".tif")).canRead()
+						|| (wavelengths==2 && !(new File(dirOrOMETiff+ "Deconvolution2"+ File.separator + "Decon_" + frameFileNames[f]+".tif")).canRead())
 						) {
-					String deconStringKey = "nibib.spim.PlugInDialogGenerateFusion(\"reg_one boolean false\", \"reg_all boolean true\", \"no_reg_2D boolean false\", \"reg_2D_one boolean false\", \"reg_2D_all boolean false\", \"rotate_begin list_float -10.0,-10.0,-10.0\", \"rotate_end list_float 10.0,10.0,10.0\", \"coarse_rate list_float 3.0,3.0,3.0\", \"fine_rate list_float 0.5,0.5,0.5\", \"save_arithmetic boolean false\", \"show_arithmetic boolean false\", \"save_geometric boolean false\", \"show_geometric boolean false\", \"do_interImages boolean false\", \"save_prefusion boolean false\", \"do_show_pre_fusion boolean false\", \"do_threshold boolean false\", \"save_max_proj boolean false\", \"show_max_proj boolean false\", \"x_max_box_selected boolean false\", \"y_max_box_selected boolean false\", \"z_max_box_selected boolean false\", \"do_smart_movement boolean false\", \"threshold_intensity double 10.0\", \"res_x double 0.1625\", \"res_y double 0.1625\", \"res_z double 1.0\", \"mtxFileDirectory string "+dir.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileNames[f]+"\", \"spimAFileDir string "+dir.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileNames[f]+"\", \"spimBFileDir string "+dir.replace("\\", "\\\\")+"SPIMA_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileNames[f]+"\", \"baseImage string "+frameFileNames[f]+"\", \"base_rotation int -1\", \"transform_rotation int 5\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconvDirString string "+dir.replace("\\", "\\\\")+"Deconvolution"+ keyChannel +"\\\", \"deconv_show_results boolean false\", \"deconvolution_method int 1\", \"deconv_iterations int 10\", \"deconv_sigmaA list_float 3.5,3.5,9.6\", \"deconv_sigmaB list_float 9.6,3.5,3.5\", \"use_deconv_sigma_conversion_factor boolean true\", \"x_move int 0\", \"y_move int 0\", \"z_move int 0\")";
+					String deconStringKey = "nibib.spim.PlugInDialogGenerateFusion(\"reg_one boolean false\", \"reg_all boolean true\", \"no_reg_2D boolean false\", \"reg_2D_one boolean false\", \"reg_2D_all boolean false\", \"rotate_begin list_float -10.0,-10.0,-10.0\", \"rotate_end list_float 10.0,10.0,10.0\", \"coarse_rate list_float 3.0,3.0,3.0\", \"fine_rate list_float 0.5,0.5,0.5\", \"save_arithmetic boolean false\", \"show_arithmetic boolean false\", \"save_geometric boolean false\", \"show_geometric boolean false\", \"do_interImages boolean false\", \"save_prefusion boolean false\", \"do_show_pre_fusion boolean false\", \"do_threshold boolean false\", \"save_max_proj boolean false\", \"show_max_proj boolean false\", \"x_max_box_selected boolean false\", \"y_max_box_selected boolean false\", \"z_max_box_selected boolean false\", \"do_smart_movement boolean false\", \"threshold_intensity double 10.0\", \"res_x double 0.1625\", \"res_y double 0.1625\", \"res_z double 1.0\", \"mtxFileDirectory string "+dirOrOMETiff.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileNames[f]+"\", \"spimAFileDir string "+dirOrOMETiff.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileNames[f]+"\", \"spimBFileDir string "+dirOrOMETiff.replace("\\", "\\\\")+"SPIMA_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileNames[f]+"\", \"baseImage string "+frameFileNames[f]+"\", \"base_rotation int -1\", \"transform_rotation int 5\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconvDirString string "+dirOrOMETiff.replace("\\", "\\\\")+"Deconvolution"+ keyChannel +"\\\", \"deconv_show_results boolean false\", \"deconvolution_method int 1\", \"deconv_iterations int 10\", \"deconv_sigmaA list_float 3.5,3.5,9.6\", \"deconv_sigmaB list_float 9.6,3.5,3.5\", \"use_deconv_sigma_conversion_factor boolean true\", \"x_move int 0\", \"y_move int 0\", \"z_move int 0\")";
 					IJ.wait(5000);
 
 					new MacroRunner(
@@ -665,7 +734,7 @@ public class DISPIM_Monitor implements PlugIn {
 							""
 							);
 
-					final String finalConvPath = dir+"Deconvolution1\\Decon_"+frameFileNames[f]+".tif";
+					final String finalConvPath = dirOrOMETiff+"Deconvolution1\\Decon_"+frameFileNames[f]+".tif";
 					Thread convThread = new Thread(new Runnable() {	
 						public void run() {
 							while (!(new File(finalConvPath)).canRead()) {
@@ -684,12 +753,12 @@ public class DISPIM_Monitor implements PlugIn {
 
 					
 					if (wavelengths==2) {
-						String deconStringSlave = "nibib.spim.PlugInDialogGenerateFusion(\"reg_one boolean false\", \"reg_all boolean true\", \"no_reg_2D boolean false\", \"reg_2D_one boolean false\", \"reg_2D_all boolean false\", \"rotate_begin list_float -10.0,-10.0,-10.0\", \"rotate_end list_float 10.0,10.0,10.0\", \"coarse_rate list_float 3.0,3.0,3.0\", \"fine_rate list_float 0.5,0.5,0.5\", \"save_arithmetic boolean false\", \"show_arithmetic boolean false\", \"save_geometric boolean false\", \"show_geometric boolean false\", \"do_interImages boolean false\", \"save_prefusion boolean false\", \"do_show_pre_fusion boolean false\", \"do_threshold boolean false\", \"save_max_proj boolean false\", \"show_max_proj boolean false\", \"x_max_box_selected boolean false\", \"y_max_box_selected boolean false\", \"z_max_box_selected boolean false\", \"do_smart_movement boolean false\", \"threshold_intensity double 10.0\", \"res_x double 0.1625\", \"res_y double 0.1625\", \"res_z double 1.0\", \"mtxFileDirectory string "+dir.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileNames[f]+"\", \"spimAFileDir string "+dir.replace("\\", "\\\\")+"SPIMB_Ch"+ slaveChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileNames[f]+"\", \"spimBFileDir string "+dir.replace("\\", "\\\\")+"SPIMA_Ch"+ slaveChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileNames[f]+"\", \"baseImage string "+frameFileNames[f]+"\", \"base_rotation int -1\", \"transform_rotation int 5\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconvDirString string "+dir.replace("\\", "\\\\")+"Deconvolution"+ slaveChannel +"\\\", \"deconv_show_results boolean false\", \"deconvolution_method int 1\", \"deconv_iterations int 10\", \"deconv_sigmaA list_float 3.5,3.5,9.6\", \"deconv_sigmaB list_float 9.6,3.5,3.5\", \"use_deconv_sigma_conversion_factor boolean true\", \"x_move int 0\", \"y_move int 0\", \"z_move int 0\")";
+						String deconStringSlave = "nibib.spim.PlugInDialogGenerateFusion(\"reg_one boolean false\", \"reg_all boolean true\", \"no_reg_2D boolean false\", \"reg_2D_one boolean false\", \"reg_2D_all boolean false\", \"rotate_begin list_float -10.0,-10.0,-10.0\", \"rotate_end list_float 10.0,10.0,10.0\", \"coarse_rate list_float 3.0,3.0,3.0\", \"fine_rate list_float 0.5,0.5,0.5\", \"save_arithmetic boolean false\", \"show_arithmetic boolean false\", \"save_geometric boolean false\", \"show_geometric boolean false\", \"do_interImages boolean false\", \"save_prefusion boolean false\", \"do_show_pre_fusion boolean false\", \"do_threshold boolean false\", \"save_max_proj boolean false\", \"show_max_proj boolean false\", \"x_max_box_selected boolean false\", \"y_max_box_selected boolean false\", \"z_max_box_selected boolean false\", \"do_smart_movement boolean false\", \"threshold_intensity double 10.0\", \"res_x double 0.1625\", \"res_y double 0.1625\", \"res_z double 1.0\", \"mtxFileDirectory string "+dirOrOMETiff.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileNames[f]+"\", \"spimAFileDir string "+dirOrOMETiff.replace("\\", "\\\\")+"SPIMB_Ch"+ slaveChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileNames[f]+"\", \"spimBFileDir string "+dirOrOMETiff.replace("\\", "\\\\")+"SPIMA_Ch"+ slaveChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileNames[f]+"\", \"baseImage string "+frameFileNames[f]+"\", \"base_rotation int -1\", \"transform_rotation int 5\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconvDirString string "+dirOrOMETiff.replace("\\", "\\\\")+"Deconvolution"+ slaveChannel +"\\\", \"deconv_show_results boolean false\", \"deconvolution_method int 1\", \"deconv_iterations int 10\", \"deconv_sigmaA list_float 3.5,3.5,9.6\", \"deconv_sigmaB list_float 9.6,3.5,3.5\", \"use_deconv_sigma_conversion_factor boolean true\", \"x_move int 0\", \"y_move int 0\", \"z_move int 0\")";
 						IJ.wait(5000);
 
 						new MacroRunner(
-								"print (\""+dir.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") +frameFileNames[f]+ File.separator.replace("\\", "\\\\")+ frameFileNames[f]+ "1_To_"+ frameFileNames[f]+ ".mtx\");"+
-										"while (!File.exists(\""+dir.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") +frameFileNames[f]+ File.separator.replace("\\", "\\\\")+ frameFileNames[f]+ "1_To_"+ frameFileNames[f]+ ".mtx\")) {"
+								"print (\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") +frameFileNames[f]+ File.separator.replace("\\", "\\\\")+ frameFileNames[f]+ "1_To_"+ frameFileNames[f]+ ".mtx\");"+
+										"while (!File.exists(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") +frameFileNames[f]+ File.separator.replace("\\", "\\\\")+ frameFileNames[f]+ "1_To_"+ frameFileNames[f]+ ".mtx\")) {"
 												+ "wait(10000);"
 										+ "}"+
 								"cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
@@ -725,7 +794,7 @@ public class DISPIM_Monitor implements PlugIn {
 								""
 								);
 
-						final String finalConvPath2 = dir+"Deconvolution2\\Decon_"+frameFileNames[f]+".tif";
+						final String finalConvPath2 = dirOrOMETiff+"Deconvolution2\\Decon_"+frameFileNames[f]+".tif";
 						Thread convThread2 = new Thread(new Runnable() {	
 							public void run() {
 								while (!(new File(finalConvPath2)).canRead()) {
@@ -748,22 +817,22 @@ public class DISPIM_Monitor implements PlugIn {
 		}		
 
 
-		while (true) {
+		while ((new File(dirOrOMETiff)).isDirectory()) {
 			boolean focus = false;
-			listA = new File(""+dir+"SPIMA").list();
-			listB = new File(""+dir+"SPIMB").list();
-			big5DFileListAString = IJ.openAsString(dir+"Big5DFileListA.txt");	    
-			big5DFileListBString = IJ.openAsString(dir+"Big5DFileListB.txt");
+			listA = new File(""+dirOrOMETiff+"SPIMA").list();
+			listB = new File(""+dirOrOMETiff+"SPIMB").list();
+			big5DFileListAString = IJ.openAsString(dirOrOMETiff+"Big5DFileListA.txt");	    
+			big5DFileListBString = IJ.openAsString(dirOrOMETiff+"Big5DFileListB.txt");
 
 			while (fileListA.length == listA.length || fileListB.length == listB.length ) {
 				if (IJ.escapePressed())
 					if (!IJ.showMessageWithCancel("Cancel diSPIM Monitor Updates?"
-							, "Monitoring of "+ dir+ " paused by Escape.\nClick OK to resume."))
+							, "Monitoring of "+ dirOrOMETiff+ " paused by Escape.\nClick OK to resume."))
 						return;
 					else
 						IJ.resetEscape();
-				listA = new File(""+dir+"SPIMA").list();
-				listB = new File(""+dir+"SPIMB").list();
+				listA = new File(""+dirOrOMETiff+"SPIMA").list();
+				listB = new File(""+dirOrOMETiff+"SPIMB").list();
 				IJ.wait(5000);
 			}	
 			//
@@ -772,16 +841,16 @@ public class DISPIM_Monitor implements PlugIn {
 			//				run("Close");
 			//			}
 			//
-			fileListA = new File(""+dir+"SPIMA").list();
-			fileListB = new File(""+dir+"SPIMB").list();
+			fileListA = new File(""+dirOrOMETiff+"SPIMA").list();
+			fileListB = new File(""+dirOrOMETiff+"SPIMB").list();
 
 			long modDateA = 0;
 			String recentestA = "";
 			for (int a=0;a<fileListA.length;a++) {
 				if(!fileListA[a].endsWith(".roi") && !fileListA[a].endsWith(".DS_Store") ){
-					if (modDateA < (new File(dir +"SPIMA" + File.separator + fileListA[a])).lastModified()) {
-						modDateA = (new File(dir +"SPIMA" + File.separator + fileListA[a])).lastModified();
-						recentestA = dir + "SPIMA" + File.separator + fileListA[a];
+					if (modDateA < (new File(dirOrOMETiff +"SPIMA" + File.separator + fileListA[a])).lastModified()) {
+						modDateA = (new File(dirOrOMETiff +"SPIMA" + File.separator + fileListA[a])).lastModified();
+						recentestA = dirOrOMETiff + "SPIMA" + File.separator + fileListA[a];
 					}
 				}
 			}
@@ -792,25 +861,25 @@ public class DISPIM_Monitor implements PlugIn {
 					newTifList = (new File(recentestA)).list();
 				Arrays.sort(newTifList);		
 				for (int f=0;f<newTifList.length;f++) {
-					while(!(new File(dir+"Big5DFileListA.txt").exists()))
+					while(!(new File(dirOrOMETiff+"Big5DFileListA.txt").exists()))
 						IJ.wait(100);
 					if (!newTifList[f].endsWith(".roi") && !newTifList[f].endsWith(".DS_Store")
 							&& big5DFileListAString.indexOf(recentestA+newTifList[f])<0)
-						IJ.append(recentestA + File.separator + newTifList[f], dir+"Big5DFileListA.txt");
+						IJ.append(recentestA + File.separator + newTifList[f], dirOrOMETiff+"Big5DFileListA.txt");
 				}
 			}
 
-			fileListA = new File(""+dir+"SPIMA").list();
-			fileListB = new File(""+dir+"SPIMB").list();
+			fileListA = new File(""+dirOrOMETiff+"SPIMA").list();
+			fileListB = new File(""+dirOrOMETiff+"SPIMB").list();
 
 			long modDateB = 0;
 			String recentestB = "";
 			String recentestBname = "";
 			for (int a=0;a<fileListB.length;a++) {
 				if(!fileListB[a].endsWith(".roi") && !fileListB[a].endsWith(".DS_Store") ){
-					if (modDateB < (new File(dir +"SPIMB" + File.separator + fileListB[a])).lastModified()) {
-						modDateB = (new File(dir +"SPIMB" + File.separator + fileListB[a])).lastModified();
-						recentestB = dir + "SPIMB" + File.separator + fileListB[a];
+					if (modDateB < (new File(dirOrOMETiff +"SPIMB" + File.separator + fileListB[a])).lastModified()) {
+						modDateB = (new File(dirOrOMETiff +"SPIMB" + File.separator + fileListB[a])).lastModified();
+						recentestB = dirOrOMETiff + "SPIMB" + File.separator + fileListB[a];
 						recentestBname = fileListB[a];
 					}
 				}
@@ -824,11 +893,11 @@ public class DISPIM_Monitor implements PlugIn {
 					newTifList = (new File(recentestB)).list();
 				Arrays.sort(newTifList);		
 				for (int f=0;f<newTifList.length;f++) {
-					while(!(new File(dir+"Big5DFileListB.txt").exists()))
+					while(!(new File(dirOrOMETiff+"Big5DFileListB.txt").exists()))
 						IJ.wait(100);
 					if (!newTifList[f].endsWith(".roi") && !newTifList[f].endsWith(".DS_Store")
 							&& big5DFileListBString.indexOf(recentestA+newTifList[f])<0)
-						IJ.append(recentestB + File.separator + newTifList[f], dir+"Big5DFileListB.txt");
+						IJ.append(recentestB + File.separator + newTifList[f], dirOrOMETiff+"Big5DFileListB.txt");
 				}
 			}
 			boolean wasSynched = false;
@@ -845,7 +914,7 @@ public class DISPIM_Monitor implements PlugIn {
 			int cA = impA.getChannel();
 			int zA = impA.getSlice();
 			int tA = impA.getFrame();
-			ListVirtualStack stackA = new ListVirtualStack(dir+"Big5DFileListA.txt");
+			ListVirtualStack stackA = new ListVirtualStack(dirOrOMETiff+"Big5DFileListA.txt");
 			int stkNSlicesA = stackA.getSize();
 			impA.setStack(stackA, wavelengths, zSlices, stkNSlicesA/(wavelengths*zSlices));
 			impA.setPosition(cA, zA, tA==impA.getNFrames()-1?impA.getNFrames():tA);
@@ -855,7 +924,7 @@ public class DISPIM_Monitor implements PlugIn {
 			int cB = impB.getChannel();
 			int zB = impB.getSlice();
 			int tB = impB.getFrame();
-			ListVirtualStack stackB = new ListVirtualStack(dir+"Big5DFileListB.txt");
+			ListVirtualStack stackB = new ListVirtualStack(dirOrOMETiff+"Big5DFileListB.txt");
 			int stkNSlicesB = stackB.getSize();
 			impB.setStack(stackB, wavelengths, zSlices, stkNSlicesB/(wavelengths*zSlices));
 			impB.setPosition(cB, zB, tB==impB.getNFrames()-1?impB.getNFrames():tB);
@@ -873,7 +942,7 @@ public class DISPIM_Monitor implements PlugIn {
 			if (focus) {
 				//SAD THAT I HAVE TO FAKE THIS, BUT NOT WORKING IN MY ATTEMPTS AT JAVA-ONLY...
 				String fftMacroString = 
-						"		    dir = \"" +dir.replace("\\", "\\\\")+"\";\n" + 
+						"		    dir = \"" +dirOrOMETiff.replace("\\", "\\\\")+"\";\n" + 
 								"			autoFPath = dir+\"AutoFocusCommaSpace.txt\";" +
 								"		    print(nImages);\n" + 
 								"		    File.delete(autoFPath);\n" + 
@@ -967,9 +1036,9 @@ public class DISPIM_Monitor implements PlugIn {
 				if (impDF2 != null)
 					wasChannelDF2 = impDF2.getChannel();
 				WindowManager.setTempCurrentImage(impA);
-				IJ.open(dir+ dirName +"A_crop.roi");
+				IJ.open(dirOrOMETiff+ dirOrOMETiffName +"A_crop.roi");
 				WindowManager.setTempCurrentImage(impB);
-				IJ.open(dir+ dirName +"B_crop.roi");
+				IJ.open(dirOrOMETiff+ dirOrOMETiffName +"B_crop.roi");
 				WindowManager.setTempCurrentImage(null);
 
 				for (int f=impA.getNFrames();f<=impA.getNFrames();f++) {
@@ -979,20 +1048,20 @@ public class DISPIM_Monitor implements PlugIn {
 					String frameFileName = ((ListVirtualStack)impA.getStack()).getDirectory(impA.getCurrentSlice());
 					String timecode = ""+(new Date()).getTime();
 
-					if (	   !(new File(dir+ "SPIMA_Ch1_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif")).canRead()
-							|| (wavelengths==2 && !(new File(dir+ "SPIMA_Ch2_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif")).canRead())
-							|| !(new File(dir+ "SPIMB_Ch1_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif")).canRead()
-							|| (wavelengths==2 && !(new File(dir+ "SPIMA_Ch2_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif")).canRead())
+					if (	   !(new File(dirOrOMETiff+ "SPIMA_Ch1_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif")).canRead()
+							|| (wavelengths==2 && !(new File(dirOrOMETiff+ "SPIMA_Ch2_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif")).canRead())
+							|| !(new File(dirOrOMETiff+ "SPIMB_Ch1_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif")).canRead()
+							|| (wavelengths==2 && !(new File(dirOrOMETiff+ "SPIMA_Ch2_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif")).canRead())
 							) {
-						IJ.runMacro("File.makeDirectory(\""+dir.replace("\\", "\\\\")+"SPIMA_Ch1_processed\");");
-						IJ.runMacro("File.makeDirectory(\""+dir.replace("\\", "\\\\")+"SPIMA_Ch1_processed\"+File.separator+\""+frameFileName+"\");");
-						IJ.runMacro("File.makeDirectory(\""+dir.replace("\\", "\\\\")+"SPIMB_Ch1_processed\");");
-						IJ.runMacro("File.makeDirectory(\""+dir.replace("\\", "\\\\")+"SPIMB_Ch1_processed\"+File.separator+\""+frameFileName+"\");");
+						IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMA_Ch1_processed\");");
+						IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMA_Ch1_processed\"+File.separator+\""+frameFileName+"\");");
+						IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMB_Ch1_processed\");");
+						IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMB_Ch1_processed\"+File.separator+\""+frameFileName+"\");");
 						if (wavelengths==2) {
-							IJ.runMacro("File.makeDirectory(\""+dir.replace("\\", "\\\\")+"SPIMA_Ch2_processed\");");
-							IJ.runMacro("File.makeDirectory(\""+dir.replace("\\", "\\\\")+"SPIMA_Ch2_processed\"+File.separator+\""+frameFileName+"\");");
-							IJ.runMacro("File.makeDirectory(\""+dir.replace("\\", "\\\\")+"SPIMB_Ch2_processed\");");
-							IJ.runMacro("File.makeDirectory(\""+dir.replace("\\", "\\\\")+"SPIMB_Ch2_processed\"+File.separator+\""+frameFileName+"\");");
+							IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMA_Ch2_processed\");");
+							IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMA_Ch2_processed\"+File.separator+\""+frameFileName+"\");");
+							IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMB_Ch2_processed\");");
+							IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMB_Ch2_processed\"+File.separator+\""+frameFileName+"\");");
 						}
 
 						ImageStack stackA1 = new ImageStack(325,425);
@@ -1011,13 +1080,13 @@ public class DISPIM_Monitor implements PlugIn {
 						impXA1.setStack(stackA1);
 						impXA1.setCalibration(impA.getCalibration());
 						//					impXA1.getCalibration().pixelDepth = impXA1.getCalibration().pixelWidth;
-						IJ.saveAs(impXA1,"Tiff", dir+ "SPIMA_Ch1_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif");
+						IJ.saveAs(impXA1,"Tiff", dirOrOMETiff+ "SPIMA_Ch1_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif");
 						if (wavelengths==2) {
 							ImagePlus impXA2 = new ImagePlus();
 							impXA2.setStack(stackA2);
 							impXA2.setCalibration(impA.getCalibration());
 							//					impXA2.getCalibration().pixelDepth = impXA2.getCalibration().pixelWidth;
-							IJ.saveAs(impXA2,"Tiff", dir+ "SPIMA_Ch2_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif");
+							IJ.saveAs(impXA2,"Tiff", dirOrOMETiff+ "SPIMA_Ch2_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif");
 						}
 						ImageStack stackB1 = new ImageStack(325,425);
 						ImageStack stackB2 = new ImageStack(325,425);
@@ -1035,21 +1104,21 @@ public class DISPIM_Monitor implements PlugIn {
 						impXB1.setStack(stackB1);
 						impXB1.setCalibration(impB.getCalibration());
 						//					impXB1.getCalibration().pixelDepth = impXB1.getCalibration().pixelWidth;
-						IJ.saveAs(impXB1,"Tiff", dir+ "SPIMB_Ch1_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif");
+						IJ.saveAs(impXB1,"Tiff", dirOrOMETiff+ "SPIMB_Ch1_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif");
 						if (wavelengths==2) {
 							ImagePlus impXB2 = new ImagePlus();
 							impXB2.setStack(stackB2);
 							impXB2.setCalibration(impB.getCalibration());
 							//					impXB2.getCalibration().pixelDepth = impXB2.getCalibration().pixelWidth;
-							IJ.saveAs(impXB2,"Tiff", dir+ "SPIMB_Ch2_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif");
+							IJ.saveAs(impXB2,"Tiff", dirOrOMETiff+ "SPIMB_Ch2_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif");
 						}
 					}
 
-					if (	   !(new File(dir+ "Deconvolution1"+ File.separator + "Decon_" + frameFileName+".tif")).canRead()
-							|| (wavelengths==2 && !(new File(dir+ "Deconvolution2"+ File.separator + "Decon_" + frameFileName+".tif")).canRead())
+					if (	   !(new File(dirOrOMETiff+ "Deconvolution1"+ File.separator + "Decon_" + frameFileName+".tif")).canRead()
+							|| (wavelengths==2 && !(new File(dirOrOMETiff+ "Deconvolution2"+ File.separator + "Decon_" + frameFileName+".tif")).canRead())
 							) {
 
-						String deconStringKey = "nibib.spim.PlugInDialogGenerateFusion(\"reg_one boolean false\", \"reg_all boolean true\", \"no_reg_2D boolean false\", \"reg_2D_one boolean false\", \"reg_2D_all boolean false\", \"rotate_begin list_float -10.0,-10.0,-10.0\", \"rotate_end list_float 10.0,10.0,10.0\", \"coarse_rate list_float 3.0,3.0,3.0\", \"fine_rate list_float 0.5,0.5,0.5\", \"save_arithmetic boolean false\", \"show_arithmetic boolean false\", \"save_geometric boolean false\", \"show_geometric boolean false\", \"do_interImages boolean false\", \"save_prefusion boolean false\", \"do_show_pre_fusion boolean false\", \"do_threshold boolean false\", \"save_max_proj boolean false\", \"show_max_proj boolean false\", \"x_max_box_selected boolean false\", \"y_max_box_selected boolean false\", \"z_max_box_selected boolean false\", \"do_smart_movement boolean false\", \"threshold_intensity double 10.0\", \"res_x double 0.1625\", \"res_y double 0.1625\", \"res_z double 1.0\", \"mtxFileDirectory string "+dir.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileName+"\", \"spimAFileDir string "+dir.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileName+"\", \"spimBFileDir string "+dir.replace("\\", "\\\\")+"SPIMA_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileName+"\", \"baseImage string "+frameFileName+"\", \"base_rotation int -1\", \"transform_rotation int 5\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconvDirString string "+dir.replace("\\", "\\\\")+"Deconvolution"+ keyChannel +"\\\", \"deconv_show_results boolean false\", \"deconvolution_method int 1\", \"deconv_iterations int 10\", \"deconv_sigmaA list_float 3.5,3.5,9.6\", \"deconv_sigmaB list_float 9.6,3.5,3.5\", \"use_deconv_sigma_conversion_factor boolean true\", \"x_move int 0\", \"y_move int 0\", \"z_move int 0\")";
+						String deconStringKey = "nibib.spim.PlugInDialogGenerateFusion(\"reg_one boolean false\", \"reg_all boolean true\", \"no_reg_2D boolean false\", \"reg_2D_one boolean false\", \"reg_2D_all boolean false\", \"rotate_begin list_float -10.0,-10.0,-10.0\", \"rotate_end list_float 10.0,10.0,10.0\", \"coarse_rate list_float 3.0,3.0,3.0\", \"fine_rate list_float 0.5,0.5,0.5\", \"save_arithmetic boolean false\", \"show_arithmetic boolean false\", \"save_geometric boolean false\", \"show_geometric boolean false\", \"do_interImages boolean false\", \"save_prefusion boolean false\", \"do_show_pre_fusion boolean false\", \"do_threshold boolean false\", \"save_max_proj boolean false\", \"show_max_proj boolean false\", \"x_max_box_selected boolean false\", \"y_max_box_selected boolean false\", \"z_max_box_selected boolean false\", \"do_smart_movement boolean false\", \"threshold_intensity double 10.0\", \"res_x double 0.1625\", \"res_y double 0.1625\", \"res_z double 1.0\", \"mtxFileDirectory string "+dirOrOMETiff.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileName+"\", \"spimAFileDir string "+dirOrOMETiff.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileName+"\", \"spimBFileDir string "+dirOrOMETiff.replace("\\", "\\\\")+"SPIMA_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileName+"\", \"baseImage string "+frameFileName+"\", \"base_rotation int -1\", \"transform_rotation int 5\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconvDirString string "+dirOrOMETiff.replace("\\", "\\\\")+"Deconvolution"+ keyChannel +"\\\", \"deconv_show_results boolean false\", \"deconvolution_method int 1\", \"deconv_iterations int 10\", \"deconv_sigmaA list_float 3.5,3.5,9.6\", \"deconv_sigmaB list_float 9.6,3.5,3.5\", \"use_deconv_sigma_conversion_factor boolean true\", \"x_move int 0\", \"y_move int 0\", \"z_move int 0\")";
 						IJ.wait(5000);
 
 						new MacroRunner(
@@ -1086,7 +1155,7 @@ public class DISPIM_Monitor implements PlugIn {
 							""
 								);
 						
-						final String finalConvPath = dir+"Deconvolution1\\Decon_"+frameFileName+".tif";
+						final String finalConvPath = dirOrOMETiff+"Deconvolution1\\Decon_"+frameFileName+".tif";
 						Thread convThread = new Thread(new Runnable() {	
 							public void run() {
 								while (!(new File(finalConvPath)).canRead()) {
@@ -1105,12 +1174,12 @@ public class DISPIM_Monitor implements PlugIn {
 
 						
 						if (wavelengths==2) {
-							String deconStringSlave = "nibib.spim.PlugInDialogGenerateFusion(\"reg_one boolean false\", \"reg_all boolean true\", \"no_reg_2D boolean false\", \"reg_2D_one boolean false\", \"reg_2D_all boolean false\", \"rotate_begin list_float -10.0,-10.0,-10.0\", \"rotate_end list_float 10.0,10.0,10.0\", \"coarse_rate list_float 3.0,3.0,3.0\", \"fine_rate list_float 0.5,0.5,0.5\", \"save_arithmetic boolean false\", \"show_arithmetic boolean false\", \"save_geometric boolean false\", \"show_geometric boolean false\", \"do_interImages boolean false\", \"save_prefusion boolean false\", \"do_show_pre_fusion boolean false\", \"do_threshold boolean false\", \"save_max_proj boolean false\", \"show_max_proj boolean false\", \"x_max_box_selected boolean false\", \"y_max_box_selected boolean false\", \"z_max_box_selected boolean false\", \"do_smart_movement boolean false\", \"threshold_intensity double 10.0\", \"res_x double 0.1625\", \"res_y double 0.1625\", \"res_z double 1.0\", \"mtxFileDirectory string "+dir.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileName+"\", \"spimAFileDir string "+dir.replace("\\", "\\\\")+"SPIMB_Ch"+ slaveChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileName+"\", \"spimBFileDir string "+dir.replace("\\", "\\\\")+"SPIMA_Ch"+ slaveChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileName+"\", \"baseImage string "+frameFileName+"\", \"base_rotation int -1\", \"transform_rotation int 5\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconvDirString string "+dir.replace("\\", "\\\\")+"Deconvolution"+ slaveChannel +"\\\", \"deconv_show_results boolean false\", \"deconvolution_method int 1\", \"deconv_iterations int 10\", \"deconv_sigmaA list_float 3.5,3.5,9.6\", \"deconv_sigmaB list_float 9.6,3.5,3.5\", \"use_deconv_sigma_conversion_factor boolean true\", \"x_move int 0\", \"y_move int 0\", \"z_move int 0\")";
+							String deconStringSlave = "nibib.spim.PlugInDialogGenerateFusion(\"reg_one boolean false\", \"reg_all boolean true\", \"no_reg_2D boolean false\", \"reg_2D_one boolean false\", \"reg_2D_all boolean false\", \"rotate_begin list_float -10.0,-10.0,-10.0\", \"rotate_end list_float 10.0,10.0,10.0\", \"coarse_rate list_float 3.0,3.0,3.0\", \"fine_rate list_float 0.5,0.5,0.5\", \"save_arithmetic boolean false\", \"show_arithmetic boolean false\", \"save_geometric boolean false\", \"show_geometric boolean false\", \"do_interImages boolean false\", \"save_prefusion boolean false\", \"do_show_pre_fusion boolean false\", \"do_threshold boolean false\", \"save_max_proj boolean false\", \"show_max_proj boolean false\", \"x_max_box_selected boolean false\", \"y_max_box_selected boolean false\", \"z_max_box_selected boolean false\", \"do_smart_movement boolean false\", \"threshold_intensity double 10.0\", \"res_x double 0.1625\", \"res_y double 0.1625\", \"res_z double 1.0\", \"mtxFileDirectory string "+dirOrOMETiff.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileName+"\", \"spimAFileDir string "+dirOrOMETiff.replace("\\", "\\\\")+"SPIMB_Ch"+ slaveChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileName+"\", \"spimBFileDir string "+dirOrOMETiff.replace("\\", "\\\\")+"SPIMA_Ch"+ slaveChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileName+"\", \"baseImage string "+frameFileName+"\", \"base_rotation int -1\", \"transform_rotation int 5\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconvDirString string "+dirOrOMETiff.replace("\\", "\\\\")+"Deconvolution"+ slaveChannel +"\\\", \"deconv_show_results boolean false\", \"deconvolution_method int 1\", \"deconv_iterations int 10\", \"deconv_sigmaA list_float 3.5,3.5,9.6\", \"deconv_sigmaB list_float 9.6,3.5,3.5\", \"use_deconv_sigma_conversion_factor boolean true\", \"x_move int 0\", \"y_move int 0\", \"z_move int 0\")";
 							IJ.wait(5000);
 
 							new MacroRunner(
-									"print (\""+dir.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") +frameFileName+ File.separator.replace("\\", "\\\\")+ frameFileName+ "1_To_"+ frameFileName+ ".mtx\");"+
-											"while (!File.exists(\""+dir.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") +frameFileName+ File.separator.replace("\\", "\\\\")+ frameFileName+ "1_To_"+ frameFileName+ ".mtx\")) {"
+									"print (\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") +frameFileName+ File.separator.replace("\\", "\\\\")+ frameFileName+ "1_To_"+ frameFileName+ ".mtx\");"+
+											"while (!File.exists(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") +frameFileName+ File.separator.replace("\\", "\\\\")+ frameFileName+ "1_To_"+ frameFileName+ ".mtx\")) {"
 													+ "wait(10000);"
 											+ "}"+
 									"cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
@@ -1146,7 +1215,7 @@ public class DISPIM_Monitor implements PlugIn {
 								""
 									);
 
-							final String finalConvPath2 = dir+"Deconvolution2\\Decon_"+frameFileName+".tif";
+							final String finalConvPath2 = dirOrOMETiff+"Deconvolution2\\Decon_"+frameFileName+".tif";
 							Thread convThread2 = new Thread(new Runnable() {	
 								public void run() {
 									while (!(new File(finalConvPath2)).canRead()) {
@@ -1171,17 +1240,17 @@ public class DISPIM_Monitor implements PlugIn {
 				impA.setPosition(wasChannelA, wasSliceA, wasFrameA);
 				impB.setPosition(wasChannelB, wasSliceB, wasFrameB);
 				
-				if (new File(dir+"Deconvolution1").canRead() && new File(dir+"Deconvolution1").list().length >0) {
+				if (new File(dirOrOMETiff+"Deconvolution1").canRead() && new File(dirOrOMETiff+"Deconvolution1").list().length >0) {
 					if (impDF1 == null) {
 						impDF1 = new ImagePlus();
-						impDF1.setStack("Decon-Fuse-Ch1"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dir+"Deconvolution1"));
+						impDF1.setStack("Decon-Fuse-Ch1"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution1"));
 						int stkNSlicesDF = impDF1.getStackSize();
 						int zSlicesDF1 = ((MultiFileInfoVirtualStack)impDF1.getStack()).getFivStacks().get(0).getSize();
 						impDF1.setOpenAsHyperStack(true);
 						impDF1.setDimensions(1, zSlicesDF1, stkNSlicesDF/(1*zSlicesDF1));
 						impDF1.show();
 					} else {
-						ImageStack mfivs = new MultiFileInfoVirtualStack(dir+"Deconvolution1");
+						ImageStack mfivs = new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution1");
 						int stkNSlicesDF = mfivs.getSize();
 						int zSlicesDF1 = ((MultiFileInfoVirtualStack)mfivs).getFivStacks().get(0).getSize();
 						mfivs.setColorModel(impDF1.getStack().getColorModel());
@@ -1189,17 +1258,17 @@ public class DISPIM_Monitor implements PlugIn {
 						impDF1.setPosition(wasChannelDF1, wasSliceDF1, wasFrameDF1==impDF1.getNFrames()-1?impDF1.getNFrames():wasFrameDF1);
 					}
 					if (wavelengths ==2) {
-						if (new File(dir+"Deconvolution2").canRead() && new File(dir+"Deconvolution2").list().length >0) {
+						if (new File(dirOrOMETiff+"Deconvolution2").canRead() && new File(dirOrOMETiff+"Deconvolution2").list().length >0) {
 							if (impDF2  == null) {
 								impDF2 = new ImagePlus();
-								impDF2.setStack("Decon-Fuse-Ch2"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dir+"Deconvolution2"));
+								impDF2.setStack("Decon-Fuse-Ch2"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution2"));
 								int stkNSlicesDF = impDF2.getStackSize();
 								int zSlicesDF2 = ((MultiFileInfoVirtualStack)impDF2.getStack()).getFivStacks().get(0).getSize();
 								impDF2.setOpenAsHyperStack(true);
 								impDF2.setDimensions(1, zSlicesDF2, stkNSlicesDF/(1*zSlicesDF2));
 								impDF2.show();
 							} else {
-								ImageStack mfivs = new MultiFileInfoVirtualStack(dir+"Deconvolution2");
+								ImageStack mfivs = new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution2");
 								int stkNSlicesDF = mfivs.getSize();
 								int zSlicesDF2 = ((MultiFileInfoVirtualStack)mfivs).getFivStacks().get(0).getSize();
 								mfivs.setColorModel(impDF1.getStack().getColorModel());
