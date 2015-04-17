@@ -72,7 +72,10 @@ public class DISPIM_Monitor implements PlugIn {
 		IJ.log(dirOrOMETiff);
 		//waitForUser("");
 		while (!(new File(dirOrOMETiff)).isDirectory() && !dirOrOMETiff.endsWith(".ome.tif")) {
-			dirOrOMETiff = IJ.getFilePath("Select path to diSPIM raw data");
+			if (arg.contains("newMM"))
+				dirOrOMETiff = IJ.getFilePath("Select file with MM diSPIM raw data");
+			else 
+				dirOrOMETiff = IJ.getDirectory("Select master directory with LabView diSPIM raw data");
 		}
 		IJ.log(dirOrOMETiff);
 		String tempDir = IJ.getDirectory("temp");
