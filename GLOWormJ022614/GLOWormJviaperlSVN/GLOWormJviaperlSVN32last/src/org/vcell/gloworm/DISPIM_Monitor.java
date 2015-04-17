@@ -318,7 +318,7 @@ public class DISPIM_Monitor implements PlugIn {
 				int stackSize = impA.getNSlices();
 				int nChannels = wavelengths*2;
 				int nSlices = zSlices;
-				int nFrames = (int)Math.ceil(stackSize/(nChannels*nSlices));
+				int nFrames = (int)Math.floor((double)stackSize/(nChannels*nSlices));
 				
 				impA.setTitle("SPIMA: "+dirOrOMETiff);
 
@@ -338,9 +338,18 @@ public class DISPIM_Monitor implements PlugIn {
 						IJ.error("HyperStack Converter", "channels x slices x frames <> stack size");
 						return;
 					}
-					impA.setStack(impA.getImageStack());
 				}
-				impA.setDimensions(nChannels, nSlices, nFrames);
+				for (int t=nFrames-1;t>=0;t--) {
+					for (int c=nChannels;c>=1;c=c-2) {
+						for (int s=c*nSlices-1;s>=(c-1)*nSlices;s--) {
+							int target = t*nChannels*nSlices + s+1;
+							impA.getStack().deleteSlice(target);
+						}
+					}
+				}
+				impA.setStack(impA.getImageStack());
+
+				impA.setDimensions(wavelengths, nSlices, nFrames);
 
 				if (nChannels > 1){
 					impA = new CompositeImage(impA);
@@ -364,7 +373,7 @@ public class DISPIM_Monitor implements PlugIn {
 				impA.setPosition(wavelengths, nSlices, nFrames);	
 
 				//			impA.resetDisplayRange();
-				impA.setPosition(1, nSlices, nFrames);	
+				impA.setPosition(1, nSlices/2, nFrames/2);	
 				//			impA.resetDisplayRange();
 				if (impA.isComposite())
 					((CompositeImage)impA).setMode(CompositeImage.COMPOSITE);
@@ -393,9 +402,18 @@ public class DISPIM_Monitor implements PlugIn {
 						IJ.error("HyperStack Converter", "channels x slices x frames <> stack size");
 						return;
 					}
-					impB.setStack(impB.getImageStack());
 				}
-				impB.setDimensions(nChannels, nSlices, nFrames);
+				for (int t=nFrames-1;t>=0;t--) {
+					for (int c=nChannels-1;c>=1;c=c-2) {
+						for (int s=c*nSlices-1;s>=(c-1)*nSlices;s--) {
+							int target = t*nChannels*nSlices + s+1;
+							impB.getStack().deleteSlice(target);
+						}
+					}
+				}
+				impB.setStack(impB.getImageStack());
+
+				impB.setDimensions(wavelengths, nSlices, nFrames);
 
 				if (nChannels > 1){
 					impB = new CompositeImage(impB);
@@ -419,7 +437,7 @@ public class DISPIM_Monitor implements PlugIn {
 				impB.setPosition(wavelengths, nSlices, nFrames);	
 
 				//			impB.resetDisplayRange();
-				impB.setPosition(1, nSlices, nFrames);	
+				impB.setPosition(1, nSlices/2, nFrames/2);	
 				//			impB.resetDisplayRange();
 				if (impB.isComposite())
 					((CompositeImage)impB).setMode(CompositeImage.COMPOSITE);

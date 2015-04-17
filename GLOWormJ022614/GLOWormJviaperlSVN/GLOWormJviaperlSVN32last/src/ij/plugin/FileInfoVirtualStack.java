@@ -141,13 +141,14 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 	/** Deletes the specified image, were 1<=n<=nImages. */
 	public void deleteSlice(int n) {
-		if (n<1 || n>nImages)
+		if (n<1 || n>nSlices)
 			throw new IllegalArgumentException("Argument out of range: "+n);
-		if (nImages<1) return;
+		if (nSlices<1) return;
 		for (int i=n; i<nImages; i++)
 			info[i-1] = info[i];
-		info[nImages-1] = null;
-		nImages--;
+		if (nSlices-1<info.length)
+			info[nSlices-1] = null;
+//		nImages--;
 		nSlices--;
 	}
 	
