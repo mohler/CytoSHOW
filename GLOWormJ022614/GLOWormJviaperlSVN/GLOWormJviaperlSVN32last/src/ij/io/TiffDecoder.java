@@ -1,5 +1,7 @@
 package ij.io;
+import ij.IJ;
 import ij.util.Tools;
+
 import java.io.*;
 import java.util.*;
 import java.net.*;
@@ -741,9 +743,10 @@ public class TiffDecoder {
 	public FileInfo[] getTiffInfo() throws IOException {
 		long ifdOffset;
 		Vector info;
-				
-		if (in==null)
-			in = new RandomAccessStream(new RandomAccessFile(new File(directory, name), "r"));
+//		IJ.log(directory+"***"+name);
+		if (in==null) {
+			in = new RandomAccessStream(new RandomAccessFile(new File(directory+name), "r"));
+		}
 		info = new Vector();
 		ifdOffset = OpenImageFileHeader();
 		if (ifdOffset<0L) {

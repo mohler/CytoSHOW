@@ -124,12 +124,16 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				allDirectories = false;
 			else {
 				channels++;
-				String[] buildFileList = new String[(bigSubFileList==null?0:bigSubFileList.length) + subFile.list().length];
+				String[] subFileList = subFile.list();
+				subFileList = StringSorter.sortNumerically(subFileList);
+
+				String[] buildFileList = new String[(bigSubFileList==null?0:bigSubFileList.length) + subFileList.length];
 				for (int f=0; f<buildFileList.length; f++ ) {
 					if (f<(bigSubFileList==null?0:bigSubFileList.length))
 						buildFileList[f] = bigSubFileList[f];
 					else
-						buildFileList[f] = dir+fileName+File.separator+subFile.list()[f-(bigSubFileList==null?0:bigSubFileList.length)];
+						buildFileList[f] = dir+fileName+File.separator+subFileList[f-(bigSubFileList==null?0:bigSubFileList.length)];
+//					IJ.log(buildFileList[f]);
 				}
 				bigSubFileList = buildFileList;
 			}
