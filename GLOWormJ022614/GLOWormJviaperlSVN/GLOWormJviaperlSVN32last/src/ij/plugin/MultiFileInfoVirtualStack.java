@@ -18,6 +18,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	FileInfo[] info;
 	int nImages;
 	private String dir;
+	private int channels;
 
 	public String getDir() {
 		return dir;
@@ -104,7 +105,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	public void run(String arg) {
 		File argFile = new File(arg);
 		dir = "";
-		if (!argFile.exists() && !argFile.isDirectory())
+		if (!argFile.exists() || !argFile.isDirectory())
 			dir = IJ.getDirectory("Select Directory of TIFFs");
 		else
 			dir = arg;
@@ -112,8 +113,36 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		argFile = new File(dir);
 		String[] fileList = argFile.list();
 		fileList = StringSorter.sortNumerically(fileList);
-		for (String file:fileList){
-			TiffDecoder td = new TiffDecoder(dir, file);
+		
+		boolean allDirectories = true;
+		String[] bigSubFileList = null;
+		for (String fileName:fileList) {
+			File subFile = new File(dir+fileName);
+			if (fileName.contains("DS_Store"))
+				;
+			else if (!subFile.isDirectory() )
+				allDirectories = false;
+			else {
+				channels++;
+				String[] buildFileList = new String[(bigSubFileList==null?0:bigSubFileList.length) + subFile.list().length];
+				for (int f=0; f<buildFileList.length; f++ ) {
+					if (f<(bigSubFileList==null?0:bigSubFileList.length))
+						buildFileList[f] = bigSubFileList[f];
+					else
+						buildFileList[f] = dir+fileName+File.separator+subFile.list()[f-(bigSubFileList==null?0:bigSubFileList.length)];
+				}
+				bigSubFileList = buildFileList;
+			}
+		}
+		if (allDirectories) {
+			fileList = bigSubFileList;
+			dir = "";
+		} else {
+			channels = 1;
+		}
+		
+		for (String fileName:fileList){
+			TiffDecoder td = new TiffDecoder(dir, fileName);
 			if (IJ.debugMode) td.enableDebugging();
 			IJ.showStatus("Decoding TIFF header...");
 			try {info = td.getTiffInfo();}
@@ -138,11 +167,34 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	void open(boolean show) {
 		nImages = fivStacks.size() * fivStacks.get(0).nImages;
 		ImagePlus imp = new ImagePlus(fivStacks.get(0).open(false).getTitle().replaceAll("\\d+\\.", "\\."), this);
-		imp.setOpenAsHyperStack(true);
-		imp.setDimensions(1, fivStacks.get(0).nImages, fivStacks.size());
+		imp.setOpenAsHyperStack(true);				
+		if (channels*fivStacks.get(0).nImages*fivStacks.size()!=imp.getStackSize()) {
+			if (channels*fivStacks.get(0).nImages*fivStacks.size()>imp.getStackSize()) {
+				for (int a=imp.getStackSize();a<channels*fivStacks.get(0).nImages*fivStacks.size();a++) {
+					if (imp.getStack().isVirtual())
+						((VirtualStack)imp.getStack()).addSlice("stuff");
+					else
+						imp.getStack().addSlice(imp.getProcessor().createProcessor(imp.getWidth(), imp.getHeight()));
+				}
+			} else if (channels*fivStacks.get(0).nImages*fivStacks.size()<imp.getStackSize()) {
+				for (int a=channels*fivStacks.get(0).nImages*fivStacks.size();a<imp.getStackSize();a++) {
+					imp.getStack().deleteSlice(channels*fivStacks.get(0).nImages*fivStacks.size());
+				}
+			}else {
+				IJ.error("HyperStack Converter", "channels x slices x frames <> stack size");
+				return;
+			}
+		}
+
+		imp.setDimensions(channels, fivStacks.get(0).nImages, fivStacks.size()/channels);
 		if (imp.getOriginalFileInfo() == null) {
 			setUpFileInfo(imp);
 		}
+		imp = new CompositeImage(imp);
+		while (!imp.isComposite()) {
+			IJ.wait(100);
+		}
+		((CompositeImage)imp).setMode(CompositeImage.COMPOSITE);
 		imp.show();
 	}
 

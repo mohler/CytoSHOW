@@ -1,6 +1,7 @@
 package ij.gui;
 import ij.*;
 import ij.measure.Calibration;
+import ij.plugin.MultiFileInfoVirtualStack;
 import ij.plugin.Orthogonal_Views;
 import ij.plugin.frame.SyncWindows;
 
@@ -255,6 +256,8 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 		if (imp.getOriginalFileInfo() != null && imp.getOriginalFileInfo().fileName.toLowerCase().endsWith(".ome.tif")) {
 //			IJ.log("ome");
 			slice =  (t-1)*nChannels*nSlices + (c-1)*nSlices + z;
+		} else if (imp.getStack() instanceof MultiFileInfoVirtualStack) {
+			slice =   (c-1)*nSlices*nFrames + (t-1)*nSlices + z;
 		} else {
 //			IJ.log("not ome");
 			slice = (t-1)*nChannels*nSlices + (z-1)*nChannels + c;

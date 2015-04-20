@@ -266,6 +266,8 @@ public class CompositeImage extends ImagePlus {
 				if (getOriginalFileInfo() != null && getOriginalFileInfo().fileName.toLowerCase().endsWith(".ome.tif")) {
 //					IJ.log("ome");
 					cip[i].setPixels(getImageStack().getProcessor(position + (i*getNSlices())).getPixels());
+				} else if (getStack() instanceof MultiFileInfoVirtualStack) {
+					cip[i].setPixels(getImageStack().getProcessor(position + (i*getNSlices()*getNFrames())).getPixels());				
 				}else {
 //					IJ.log("not ome");
 					cip[i].setPixels(getImageStack().getProcessor(position+i).getPixels());

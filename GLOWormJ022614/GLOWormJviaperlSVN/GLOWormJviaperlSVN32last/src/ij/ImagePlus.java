@@ -26,6 +26,7 @@ import ij.plugin.frame.Recorder;
 import ij.plugin.frame.RoiManager;
 import ij.plugin.Converter;
 import ij.plugin.Duplicator;
+import ij.plugin.MultiFileInfoVirtualStack;
 import ij.plugin.RectToolOptions;
 
 
@@ -1473,6 +1474,8 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		if (getOriginalFileInfo() != null && getOriginalFileInfo().fileName.toLowerCase().endsWith(".ome.tif")) {
 //			IJ.log("ome");
 			return (frame-1)*nChannels*nSlices + (channel-1)*nSlices + slice;
+		} else if (getStack() instanceof MultiFileInfoVirtualStack) {
+			return (channel-1)*nSlices*nFrames + (frame-1)*nSlices + slice;
 		}
 //		IJ.log("not ome");
 		return (frame-1)*nChannels*nSlices + (slice-1)*nChannels + channel;
