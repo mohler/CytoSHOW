@@ -86,7 +86,7 @@ public class MultiChannelFileInfoVirtualStack extends VirtualStack implements Pl
 	}
 
 	public void addFileInfo(String path) {
-		TiffDecoder td = new TiffDecoder((new File(path)).getParent(), (new File(path)).getName());
+		TiffDecoder td = new TiffDecoder("", path);
 		if (IJ.debugMode) td.enableDebugging();
 		IJ.showStatus("Decoding TIFF header...");
 		FileInfo[] fi = null;

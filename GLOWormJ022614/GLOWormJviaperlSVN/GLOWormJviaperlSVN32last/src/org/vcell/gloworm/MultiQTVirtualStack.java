@@ -311,8 +311,7 @@ public class MultiQTVirtualStack extends VirtualStack {
 				} else if (sqtf - this.mqtf.length < tifPaths.size()) {  //case for tiffs
 					int tifNum  = sqtf - this.mqtf.length;
 					vStackArray[sqtf] = ((VirtualStack)new FileInfoVirtualStack(
-											new TiffDecoder(new File(tifPaths.get(tifNum)).getParent(), 
-													new File(tifPaths.get(tifNum)).getName()).getTiffInfo()[0], false));
+											new TiffDecoder("", tifPaths.get(tifNum)).getTiffInfo()[0], false));
 				} else if (sqtf - this.mqtf.length - tifPaths.size() < dirPaths.size()) {  //case for dirs
 					int dirNum  = sqtf - this.mqtf.length - tifPaths.size();
 					vStackArray[sqtf] = ((VirtualStack)FolderOpener.open(tifPaths.get(dirNum)).getStack());

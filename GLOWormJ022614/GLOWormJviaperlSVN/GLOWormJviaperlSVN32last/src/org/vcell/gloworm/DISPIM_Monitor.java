@@ -242,7 +242,7 @@ public class DISPIM_Monitor implements PlugIn {
 
 				impA.setDimensions(wavelengths, zSlices, stkNSlices/(wavelengths*zSlices));
 				IJ.log(wavelengths+" "+zSlices+" "+stkNSlices/(wavelengths*zSlices));
-				if (wavelengths > 1){
+				if (wavelengths >= 1){
 					impA = new CompositeImage(impA);
 					while (!impA.isComposite()) {
 						IJ.wait(100);
@@ -312,8 +312,8 @@ public class DISPIM_Monitor implements PlugIn {
 
 			}
 		} else {
-			TiffDecoder tdA = new TiffDecoder((new File(dirOrOMETiff)).getParent(), (new File(dirOrOMETiff)).getName());
-			TiffDecoder tdB = new TiffDecoder((new File(dirOrOMETiff)).getParent(), (new File(dirOrOMETiff)).getName());
+			TiffDecoder tdA = new TiffDecoder("",dirOrOMETiff);
+			TiffDecoder tdB = new TiffDecoder("",dirOrOMETiff);
 
 			try {
 				impA = new ImagePlus();
@@ -532,14 +532,14 @@ public class DISPIM_Monitor implements PlugIn {
 			if (new File(dirOrOMETiff+"Deconvolution1").canRead() && new File(dirOrOMETiff+"Deconvolution1").list().length >0) {
 				if (impDF1 == null) {
 					impDF1 = new ImagePlus();
-					impDF1.setStack("Decon-Fuse-Ch1"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution1"));
+					impDF1.setStack("Decon-Fuse-Ch1"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution1"+File.separator, false));
 					int stkNSlicesDF = impDF1.getStackSize();
 					int zSlicesDF1 = ((MultiFileInfoVirtualStack)impDF1.getStack()).getFivStacks().get(0).getSize();
 					impDF1.setOpenAsHyperStack(true);
 					impDF1.setStack(impDF1.getStack(), 1, zSlicesDF1, stkNSlicesDF/(1*zSlicesDF1));
 					impDF1.show();
 				} else {
-					MultiFileInfoVirtualStack mfivs = new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution1");
+					MultiFileInfoVirtualStack mfivs = new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution1"+File.separator, false);
 					int stkNSlicesDF = mfivs.getSize();
 					int zSlicesDF1 = mfivs.getFivStacks().get(0).getSize();
 					impDF1.setStack(mfivs, 1, zSlicesDF1, stkNSlicesDF/(1*zSlicesDF1));
@@ -549,14 +549,14 @@ public class DISPIM_Monitor implements PlugIn {
 					if (new File(dirOrOMETiff+"Deconvolution1").canRead() && new File(dirOrOMETiff+"Deconvolution1").list().length >0) {
 						if (impDF2  == null) {
 							impDF2 = new ImagePlus();
-							impDF2.setStack("Decon-Fuse-Ch2"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution2"));
+							impDF2.setStack("Decon-Fuse-Ch2"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution2"+File.separator, false));
 							int stkNSlicesDF = impDF2.getStackSize();
 							int zSlicesDF2 = ((MultiFileInfoVirtualStack)impDF2.getStack()).getFivStacks().get(0).getSize();
 							impDF2.setOpenAsHyperStack(true);
 							impDF2.setDimensions(1, zSlicesDF2, stkNSlicesDF/(1*zSlicesDF2));
 							impDF2.show();
 						} else {
-							MultiFileInfoVirtualStack mfivs = new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution2");
+							MultiFileInfoVirtualStack mfivs = new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution2"+File.separator, false);
 							int stkNSlicesDF = mfivs.getSize();
 							int zSlicesDF2 = mfivs.getFivStacks().get(0).getSize();
 							impDF2.setStack(mfivs, 1, zSlicesDF2, stkNSlicesDF/(1*zSlicesDF2));
@@ -1024,7 +1024,7 @@ public class DISPIM_Monitor implements PlugIn {
 					SyncWindows.getInstance().close();
 				}
 
-				TiffDecoder tdA = new TiffDecoder((new File(dirOrOMETiff)).getParent(), (new File(dirOrOMETiff)).getName());
+				TiffDecoder tdA = new TiffDecoder("", dirOrOMETiff);
 				int cA = impA.getChannel();
 				int zA = impA.getSlice();
 				int tA = impA.getFrame();
@@ -1098,7 +1098,7 @@ public class DISPIM_Monitor implements PlugIn {
 				impA.setWindow(WindowManager.getCurrentWindow());
 
 
-				TiffDecoder tdB = new TiffDecoder((new File(dirOrOMETiff)).getParent(), (new File(dirOrOMETiff)).getName());
+				TiffDecoder tdB = new TiffDecoder("", dirOrOMETiff);
 				int cB = impB.getChannel();
 				int zB = impB.getSlice();
 				int tB = impB.getFrame();
@@ -1484,14 +1484,14 @@ public class DISPIM_Monitor implements PlugIn {
 				if (new File(dirOrOMETiff+"Deconvolution1").canRead() && new File(dirOrOMETiff+"Deconvolution1").list().length >0) {
 					if (impDF1 == null) {
 						impDF1 = new ImagePlus();
-						impDF1.setStack("Decon-Fuse-Ch1"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution1"));
+						impDF1.setStack("Decon-Fuse-Ch1"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution1"+File.separator, false));
 						int stkNSlicesDF = impDF1.getStackSize();
 						int zSlicesDF1 = ((MultiFileInfoVirtualStack)impDF1.getStack()).getFivStacks().get(0).getSize();
 						impDF1.setOpenAsHyperStack(true);
 						impDF1.setDimensions(1, zSlicesDF1, stkNSlicesDF/(1*zSlicesDF1));
 						impDF1.show();
 					} else {
-						ImageStack mfivs = new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution1");
+						ImageStack mfivs = new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution1"+File.separator, false);
 						int stkNSlicesDF = mfivs.getSize();
 						int zSlicesDF1 = ((MultiFileInfoVirtualStack)mfivs).getFivStacks().get(0).getSize();
 						mfivs.setColorModel(impDF1.getStack().getColorModel());
@@ -1502,14 +1502,14 @@ public class DISPIM_Monitor implements PlugIn {
 						if (new File(dirOrOMETiff+"Deconvolution2").canRead() && new File(dirOrOMETiff+"Deconvolution2").list().length >0) {
 							if (impDF2  == null) {
 								impDF2 = new ImagePlus();
-								impDF2.setStack("Decon-Fuse-Ch2"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution2"));
+								impDF2.setStack("Decon-Fuse-Ch2"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution2"+File.separator, false));
 								int stkNSlicesDF = impDF2.getStackSize();
 								int zSlicesDF2 = ((MultiFileInfoVirtualStack)impDF2.getStack()).getFivStacks().get(0).getSize();
 								impDF2.setOpenAsHyperStack(true);
 								impDF2.setDimensions(1, zSlicesDF2, stkNSlicesDF/(1*zSlicesDF2));
 								impDF2.show();
 							} else {
-								ImageStack mfivs = new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution2");
+								ImageStack mfivs = new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution2"+File.separator, false);
 								int stkNSlicesDF = mfivs.getSize();
 								int zSlicesDF2 = ((MultiFileInfoVirtualStack)mfivs).getFivStacks().get(0).getSize();
 								mfivs.setColorModel(impDF1.getStack().getColorModel());
