@@ -256,7 +256,7 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 		if (imp.getOriginalFileInfo() != null && imp.getOriginalFileInfo().fileName.toLowerCase().endsWith(".ome.tif")) {
 //			IJ.log("ome");
 			slice =  (t-1)*nChannels*nSlices + (c-1)*nSlices + z;
-		} else if (imp.getStack() instanceof MultiFileInfoVirtualStack) {
+		} else if (imp.getStack() instanceof MultiFileInfoVirtualStack && ((MultiFileInfoVirtualStack)imp.getStack()).getDimOrder() == "xyztc") {
 			slice =   (c-1)*nSlices*nFrames + (t-1)*nSlices + z;
 		} else {
 //			IJ.log("not ome");

@@ -242,18 +242,11 @@ public class DISPIM_Monitor implements PlugIn {
 
 				impA.setDimensions(wavelengths, zSlices, stkNSlices/(wavelengths*zSlices));
 				IJ.log(wavelengths+" "+zSlices+" "+stkNSlices/(wavelengths*zSlices));
-				if (wavelengths >= 1){
+				if (wavelengths > 1){
 					impA = new CompositeImage(impA);
 					while (!impA.isComposite()) {
 						IJ.wait(100);
-						//selectWindow("SPIMA: "+dir);
 					}
-					//				impA.setPosition(1, 1, 1);	
-					//				IJ.run("Green");
-					//				impA.resetDisplayRange();
-					//				impA.setPosition(2, 1, 1);	
-					//				IJ.run("Red");
-					//				impA.resetDisplayRange();
 				}
 				Calibration cal = impA.getCalibration();
 				cal.pixelWidth = vWidth;
@@ -263,9 +256,8 @@ public class DISPIM_Monitor implements PlugIn {
 
 				impA.setPosition(wavelengths, zSlices/2, stkNSlices/(wavelengths*zSlices));	
 
-				//			impA.resetDisplayRange();
 				impA.setPosition(1, zSlices/2, stkNSlices/(wavelengths*zSlices));	
-				//			impA.resetDisplayRange();
+
 				if (impA.isComposite())
 					((CompositeImage)impA).setMode(CompositeImage.COMPOSITE);
 				impA.show();
@@ -286,14 +278,7 @@ public class DISPIM_Monitor implements PlugIn {
 					impB = new CompositeImage(impB);
 					while (!impB.isComposite()) {
 						IJ.wait(100);
-						//selectWindow("SPIMB: "+dir);
 					}
-					//				impB.setPosition(1, 1, 1);	
-					//				IJ.run("Green");
-					//				impB.resetDisplayRange();
-					//				impB.setPosition(2, 1, 1);	
-					//				IJ.run("Red");
-					//				impB.resetDisplayRange();
 				}
 				Calibration cal = impB.getCalibration();
 				cal.pixelWidth = vWidth;
@@ -303,9 +288,8 @@ public class DISPIM_Monitor implements PlugIn {
 
 				impB.setPosition(wavelengths, zSlices/2, stkNSlices/(wavelengths*zSlices));	
 
-				//			impB.resetDisplayRange();
 				impB.setPosition(1, zSlices/2, stkNSlices/(wavelengths*zSlices));	
-				//			impB.resetDisplayRange();
+
 				if (impB.isComposite())
 					((CompositeImage)impB).setMode(CompositeImage.COMPOSITE);
 				impB.show();
@@ -358,7 +342,6 @@ public class DISPIM_Monitor implements PlugIn {
 					impA = new CompositeImage(impA);
 					while (!impA.isComposite()) {
 						IJ.wait(100);
-						//selectWindow("SPIMB: "+dir);
 					}
 				}
 				Calibration cal = impA.getCalibration();
@@ -369,14 +352,15 @@ public class DISPIM_Monitor implements PlugIn {
 
 				impA.setPosition(wavelengths, nSlices, nFrames);	
 
-				//			impA.resetDisplayRange();
 				impA.setPosition(1, nSlices/2, nFrames/2);	
-				//			impA.resetDisplayRange();
+
 				if (impA.isComposite())
 					((CompositeImage)impA).setMode(CompositeImage.COMPOSITE);
 				impA.setFileInfo(new FileInfo());
 				impA.getOriginalFileInfo().fileName = dirOrOMETiff;
 				impA.show();
+				
+				
 
 				impB = new ImagePlus();
 				impB.setStack(new FileInfoVirtualStack(tdB.getTiffInfo(), false));
@@ -416,7 +400,6 @@ public class DISPIM_Monitor implements PlugIn {
 					impB = new CompositeImage(impB);
 					while (!impB.isComposite()) {
 						IJ.wait(100);
-						//selectWindow("SPIMB: "+dir);
 					}
 				}
 				cal = impB.getCalibration();
@@ -427,9 +410,8 @@ public class DISPIM_Monitor implements PlugIn {
 
 				impB.setPosition(wavelengths, nSlices, nFrames);	
 
-				//			impB.resetDisplayRange();
 				impB.setPosition(1, nSlices/2, nFrames/2);	
-				//			impB.resetDisplayRange();
+
 				if (impB.isComposite())
 					((CompositeImage)impB).setMode(CompositeImage.COMPOSITE);
 				impB.setFileInfo(new FileInfo());
@@ -529,42 +511,67 @@ public class DISPIM_Monitor implements PlugIn {
 			int wasChannelA = impA.getChannel();
 			int wasChannelB = impB.getChannel();
 
-			if (new File(dirOrOMETiff+"Deconvolution1").canRead() && new File(dirOrOMETiff+"Deconvolution1").list().length >0) {
+			if ((new File(dirOrOMETiff)).canRead()) {
 				if (impDF1 == null) {
-					impDF1 = new ImagePlus();
-					impDF1.setStack("Decon-Fuse-Ch1"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution1"+File.separator, false));
-					int stkNSlicesDF = impDF1.getStackSize();
-					int zSlicesDF1 = ((MultiFileInfoVirtualStack)impDF1.getStack()).getFivStacks().get(0).getSize();
-					impDF1.setOpenAsHyperStack(true);
-					impDF1.setStack(impDF1.getStack(), 1, zSlicesDF1, stkNSlicesDF/(1*zSlicesDF1));
-					impDF1.show();
+					MultiFileInfoVirtualStack deconmfivs = new MultiFileInfoVirtualStack((new File(dirOrOMETiff)).isDirectory()?dirOrOMETiff:(new File(dirOrOMETiff)).getParent()+File.separator, "Deconvolution", false);
+					if (deconmfivs.getSize() > 0) {
+						impDF1 = new ImagePlus();
+						impDF1.setStack("Decon-Fuse"+impA.getTitle().replace(impA.getTitle().split(":")[0],""), deconmfivs);
+						impDF1.setFileInfo(new FileInfo());
+//						impDF1.getOriginalFileInfo().directory = (new File(dirOrOMETiff)).isDirectory()?dirOrOMETiff:((new File(dirOrOMETiff)).getParent()+File.separator);
+						impDF1.getOriginalFileInfo().directory = dirOrOMETiff;
+						int stkNSlicesDF = impDF1.getStackSize();
+						int zSlicesDF1 = deconmfivs.getFivStacks().get(0).getSize();
+						impDF1.setOpenAsHyperStack(true);
+						impDF1.setStack(impDF1.getStack(), wavelengths, zSlicesDF1, stkNSlicesDF/(wavelengths*zSlicesDF1));
+						CompositeImage ciDF1 = new CompositeImage(impDF1);
+						ciDF1.show();
+					}
 				} else {
-					MultiFileInfoVirtualStack mfivs = new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution1"+File.separator, false);
-					int stkNSlicesDF = mfivs.getSize();
-					int zSlicesDF1 = mfivs.getFivStacks().get(0).getSize();
-					impDF1.setStack(mfivs, 1, zSlicesDF1, stkNSlicesDF/(1*zSlicesDF1));
+					MultiFileInfoVirtualStack deconmfivs = new MultiFileInfoVirtualStack((new File(dirOrOMETiff)).isDirectory()?dirOrOMETiff:(new File(dirOrOMETiff)).getParent()+File.separator, "Deconvolution", false);
+					int stkNSlicesDF = deconmfivs.getSize();
+					int zSlicesDF1 = deconmfivs.getFivStacks().get(0).getSize();
+					impDF1.setStack(deconmfivs, wavelengths, zSlicesDF1, stkNSlicesDF/(wavelengths*zSlicesDF1));
 					impDF1.setWindow(WindowManager.getCurrentWindow());
 				}
-				if (wavelengths ==2) {
-					if (new File(dirOrOMETiff+"Deconvolution1").canRead() && new File(dirOrOMETiff+"Deconvolution1").list().length >0) {
-						if (impDF2  == null) {
-							impDF2 = new ImagePlus();
-							impDF2.setStack("Decon-Fuse-Ch2"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution2"+File.separator, false));
-							int stkNSlicesDF = impDF2.getStackSize();
-							int zSlicesDF2 = ((MultiFileInfoVirtualStack)impDF2.getStack()).getFivStacks().get(0).getSize();
-							impDF2.setOpenAsHyperStack(true);
-							impDF2.setDimensions(1, zSlicesDF2, stkNSlicesDF/(1*zSlicesDF2));
-							impDF2.show();
-						} else {
-							MultiFileInfoVirtualStack mfivs = new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution2"+File.separator, false);
-							int stkNSlicesDF = mfivs.getSize();
-							int zSlicesDF2 = mfivs.getFivStacks().get(0).getSize();
-							impDF2.setStack(mfivs, 1, zSlicesDF2, stkNSlicesDF/(1*zSlicesDF2));
-							impDF2.setWindow(WindowManager.getCurrentWindow());
-						}
-					}
-				}
 			}
+						
+//			if (new File(dirOrOMETiff+"Deconvolution1").canRead() && new File(dirOrOMETiff+"Deconvolution1").list().length >0) {
+//				if (impDF1 == null) {
+//					impDF1 = new ImagePlus();
+//					impDF1.setStack("Decon-Fuse-Ch1"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution1"+File.separator, false));
+//					int stkNSlicesDF = impDF1.getStackSize();
+//					int zSlicesDF1 = ((MultiFileInfoVirtualStack)impDF1.getStack()).getFivStacks().get(0).getSize();
+//					impDF1.setOpenAsHyperStack(true);
+//					impDF1.setStack(impDF1.getStack(), 1, zSlicesDF1, stkNSlicesDF/(1*zSlicesDF1));
+//					impDF1.show();
+//				} else {
+//					MultiFileInfoVirtualStack mfivs = new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution1"+File.separator, false);
+//					int stkNSlicesDF = mfivs.getSize();
+//					int zSlicesDF1 = mfivs.getFivStacks().get(0).getSize();
+//					impDF1.setStack(mfivs, 1, zSlicesDF1, stkNSlicesDF/(1*zSlicesDF1));
+//					impDF1.setWindow(WindowManager.getCurrentWindow());
+//				}
+//				if (wavelengths ==2) {
+//					if (new File(dirOrOMETiff+"Deconvolution1").canRead() && new File(dirOrOMETiff+"Deconvolution1").list().length >0) {
+//						if (impDF2  == null) {
+//							impDF2 = new ImagePlus();
+//							impDF2.setStack("Decon-Fuse-Ch2"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution2"+File.separator, false));
+//							int stkNSlicesDF = impDF2.getStackSize();
+//							int zSlicesDF2 = ((MultiFileInfoVirtualStack)impDF2.getStack()).getFivStacks().get(0).getSize();
+//							impDF2.setOpenAsHyperStack(true);
+//							impDF2.setDimensions(1, zSlicesDF2, stkNSlicesDF/(1*zSlicesDF2));
+//							impDF2.show();
+//						} else {
+//							MultiFileInfoVirtualStack mfivs = new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution2"+File.separator, false);
+//							int stkNSlicesDF = mfivs.getSize();
+//							int zSlicesDF2 = mfivs.getFivStacks().get(0).getSize();
+//							impDF2.setStack(mfivs, 1, zSlicesDF2, stkNSlicesDF/(1*zSlicesDF2));
+//							impDF2.setWindow(WindowManager.getCurrentWindow());
+//						}
+//					}
+//				}
+//			}
 
 			String[] frameFileNames = new String[impA.getNFrames()+1];
 
@@ -1481,44 +1488,67 @@ public class DISPIM_Monitor implements PlugIn {
 				impA.setPosition(wasChannelA, wasSliceA, wasFrameA);
 				impB.setPosition(wasChannelB, wasSliceB, wasFrameB);
 
-				if (new File(dirOrOMETiff+"Deconvolution1").canRead() && new File(dirOrOMETiff+"Deconvolution1").list().length >0) {
+				if ((new File(dirOrOMETiff)).canRead()) {
 					if (impDF1 == null) {
-						impDF1 = new ImagePlus();
-						impDF1.setStack("Decon-Fuse-Ch1"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution1"+File.separator, false));
-						int stkNSlicesDF = impDF1.getStackSize();
-						int zSlicesDF1 = ((MultiFileInfoVirtualStack)impDF1.getStack()).getFivStacks().get(0).getSize();
-						impDF1.setOpenAsHyperStack(true);
-						impDF1.setDimensions(1, zSlicesDF1, stkNSlicesDF/(1*zSlicesDF1));
-						impDF1.show();
-					} else {
-						ImageStack mfivs = new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution1"+File.separator, false);
-						int stkNSlicesDF = mfivs.getSize();
-						int zSlicesDF1 = ((MultiFileInfoVirtualStack)mfivs).getFivStacks().get(0).getSize();
-						mfivs.setColorModel(impDF1.getStack().getColorModel());
-						impDF1.setStack(mfivs, 1, zSlicesDF1, stkNSlicesDF/(1*zSlicesDF1));
-						impDF1.setPosition(wasChannelDF1, wasSliceDF1, wasFrameDF1==impDF1.getNFrames()-1?impDF1.getNFrames():wasFrameDF1);
-					}
-					if (wavelengths ==2) {
-						if (new File(dirOrOMETiff+"Deconvolution2").canRead() && new File(dirOrOMETiff+"Deconvolution2").list().length >0) {
-							if (impDF2  == null) {
-								impDF2 = new ImagePlus();
-								impDF2.setStack("Decon-Fuse-Ch2"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution2"+File.separator, false));
-								int stkNSlicesDF = impDF2.getStackSize();
-								int zSlicesDF2 = ((MultiFileInfoVirtualStack)impDF2.getStack()).getFivStacks().get(0).getSize();
-								impDF2.setOpenAsHyperStack(true);
-								impDF2.setDimensions(1, zSlicesDF2, stkNSlicesDF/(1*zSlicesDF2));
-								impDF2.show();
-							} else {
-								ImageStack mfivs = new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution2"+File.separator, false);
-								int stkNSlicesDF = mfivs.getSize();
-								int zSlicesDF2 = ((MultiFileInfoVirtualStack)mfivs).getFivStacks().get(0).getSize();
-								mfivs.setColorModel(impDF1.getStack().getColorModel());
-								impDF2.setStack(mfivs, 1, zSlicesDF2, stkNSlicesDF/(1*zSlicesDF2));
-								impDF2.setPosition(wasChannelDF2, wasSliceDF2, wasFrameDF2==impDF2.getNFrames()-1?impDF2.getNFrames():wasFrameDF2);
-							}
+						MultiFileInfoVirtualStack deconmfivs = new MultiFileInfoVirtualStack((new File(dirOrOMETiff)).isDirectory()?dirOrOMETiff:(new File(dirOrOMETiff)).getParent()+File.separator, "Deconvolution", false);
+						if (deconmfivs != null) {
+							impDF1 = new ImagePlus();
+							impDF1.setStack("Decon-Fuse"+impA.getTitle().replace(impA.getTitle().split(":")[0],""), deconmfivs);
+//							impDF1.getOriginalFileInfo().directory = (new File(dirOrOMETiff)).isDirectory()?dirOrOMETiff:((new File(dirOrOMETiff)).getParent()+File.separator);
+							impDF1.getOriginalFileInfo().directory = dirOrOMETiff;
+							int stkNSlicesDF = impDF1.getStackSize();
+							int zSlicesDF1 = deconmfivs.getFivStacks().get(0).getSize();
+							impDF1.setOpenAsHyperStack(true);
+							CompositeImage ciDF1 = new CompositeImage(impDF1);
+							ciDF1.show();
 						}
+					} else {
+						MultiFileInfoVirtualStack deconmfivs = new MultiFileInfoVirtualStack((new File(dirOrOMETiff)).isDirectory()?dirOrOMETiff:(new File(dirOrOMETiff)).getParent()+File.separator, "Deconvolution", false);
+						int stkNSlicesDF = deconmfivs.getSize();
+						int zSlicesDF1 = deconmfivs.getFivStacks().get(0).getSize();
+						impDF1.setStack(deconmfivs, wavelengths, zSlicesDF1, stkNSlicesDF/(wavelengths*zSlicesDF1));
+						impDF1.setWindow(WindowManager.getCurrentWindow());
 					}
 				}
+				
+//				if (new File(dirOrOMETiff+"Deconvolution1").canRead() && new File(dirOrOMETiff+"Deconvolution1").list().length >0) {
+//					if (impDF1 == null) {
+//						impDF1 = new ImagePlus();
+//						impDF1.setStack("Decon-Fuse-Ch1"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution1"+File.separator, false));
+//						int stkNSlicesDF = impDF1.getStackSize();
+//						int zSlicesDF1 = ((MultiFileInfoVirtualStack)impDF1.getStack()).getFivStacks().get(0).getSize();
+//						impDF1.setOpenAsHyperStack(true);
+//						impDF1.setDimensions(1, zSlicesDF1, stkNSlicesDF/(1*zSlicesDF1));
+//						impDF1.show();
+//					} else {
+//						ImageStack mfivs = new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution1"+File.separator, false);
+//						int stkNSlicesDF = mfivs.getSize();
+//						int zSlicesDF1 = ((MultiFileInfoVirtualStack)mfivs).getFivStacks().get(0).getSize();
+//						mfivs.setColorModel(impDF1.getStack().getColorModel());
+//						impDF1.setStack(mfivs, 1, zSlicesDF1, stkNSlicesDF/(1*zSlicesDF1));
+//						impDF1.setPosition(wasChannelDF1, wasSliceDF1, wasFrameDF1==impDF1.getNFrames()-1?impDF1.getNFrames():wasFrameDF1);
+//					}
+//					if (wavelengths ==2) {
+//						if (new File(dirOrOMETiff+"Deconvolution2").canRead() && new File(dirOrOMETiff+"Deconvolution2").list().length >0) {
+//							if (impDF2  == null) {
+//								impDF2 = new ImagePlus();
+//								impDF2.setStack("Decon-Fuse-Ch2"+impA.getTitle().replace(impA.getTitle().split(":")[0],""),new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution2"+File.separator, false));
+//								int stkNSlicesDF = impDF2.getStackSize();
+//								int zSlicesDF2 = ((MultiFileInfoVirtualStack)impDF2.getStack()).getFivStacks().get(0).getSize();
+//								impDF2.setOpenAsHyperStack(true);
+//								impDF2.setDimensions(1, zSlicesDF2, stkNSlicesDF/(1*zSlicesDF2));
+//								impDF2.show();
+//							} else {
+//								ImageStack mfivs = new MultiFileInfoVirtualStack(dirOrOMETiff+"Deconvolution2"+File.separator, false);
+//								int stkNSlicesDF = mfivs.getSize();
+//								int zSlicesDF2 = ((MultiFileInfoVirtualStack)mfivs).getFivStacks().get(0).getSize();
+//								mfivs.setColorModel(impDF1.getStack().getColorModel());
+//								impDF2.setStack(mfivs, 1, zSlicesDF2, stkNSlicesDF/(1*zSlicesDF2));
+//								impDF2.setPosition(wasChannelDF2, wasSliceDF2, wasFrameDF2==impDF2.getNFrames()-1?impDF2.getNFrames():wasFrameDF2);
+//							}
+//						}
+//					}
+//				}
 			}		
 		}
 

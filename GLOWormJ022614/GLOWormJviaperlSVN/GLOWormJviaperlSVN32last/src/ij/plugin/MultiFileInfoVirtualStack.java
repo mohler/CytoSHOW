@@ -19,7 +19,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	int nImages;
 	private String dir;
 	private int channels;
-	private String keyString;
+	private String keyString = "";
+	private String dimOrder;
 
 	public String getDir() {
 		return dir;
@@ -39,13 +40,16 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		info = fiArray;
 	}
 	
-	public MultiFileInfoVirtualStack(String arg, String keyString, boolean show) {
-		this.keyString = keyString;
-		new MultiFileInfoVirtualStack(arg, show);
+	public MultiFileInfoVirtualStack(String arg, boolean show) {
+		openMIVS(arg, "", show);
 	}
 	
-	public MultiFileInfoVirtualStack(String arg, boolean show) {
+	public MultiFileInfoVirtualStack(String arg, String keyString, boolean show) {
+		openMIVS(arg, keyString, show);
+	}
 
+	public void openMIVS(String arg, String keyString, boolean show) {
+		this.keyString = keyString;
 		File argFile = new File(arg);
 		dir = "";
 		if (!argFile.exists() || !argFile.isDirectory())
@@ -63,9 +67,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			File subFile = new File(dir+fileName);
 			if (fileName.contains("DS_Store"))
 				;
-			else if (!subFile.isDirectory() )
+			else if ((keyString == "" || subFile.getName().matches(".*"+keyString+".*")) && !subFile.isDirectory() )
 				allDirectories = false;
-			else {
+			else if (keyString == "" || subFile.getName().matches(".*"+keyString+".*")){
 				channels++;
 				String[] subFileList = subFile.list();
 				subFileList = StringSorter.sortNumerically(subFileList);
@@ -82,33 +86,38 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			}
 		}
 		if (allDirectories) {
+			dimOrder = "xyztc";
 			fileList = bigSubFileList;
 			dir = "";
 		} else {
+			dimOrder = "xyczt";
 			channels = 1;
 		}
-
-		for (String fileName:fileList){
-			TiffDecoder td = new TiffDecoder(dir, fileName);
-			if (IJ.debugMode) td.enableDebugging();
-			IJ.showStatus("Decoding TIFF header...");
-			try {info = td.getTiffInfo();}
-			catch (IOException e) {
-				String msg = e.getMessage();
-				if (msg==null||msg.equals("")) msg = ""+e;
-				IJ.error("TiffDecoder", msg);
-				return;
+		if (dir.length() > 0 && !dir.endsWith(File.separator))
+			dir = dir + File.separator;
+		if (channels >0) {
+			for (String fileName:fileList){
+				TiffDecoder td = new TiffDecoder(dir, fileName);
+				if (IJ.debugMode) td.enableDebugging();
+				IJ.showStatus("Decoding TIFF header...");
+				try {info = td.getTiffInfo();}
+				catch (IOException e) {
+					String msg = e.getMessage();
+					if (msg==null||msg.equals("")) msg = ""+e;
+					IJ.error("TiffDecoder", msg);
+					return;
+				}
+				if (info==null || info.length==0) {
+					continue;
+				}
+				if (IJ.debugMode)
+					IJ.log(info[0].debugInfo);
+				fivStacks.add(new FileInfoVirtualStack());
+				fivStacks.get(fivStacks.size()-1).info = info;
+				fivStacks.get(fivStacks.size()-1).open(false);
 			}
-			if (info==null || info.length==0) {
-				continue;
-			}
-			if (IJ.debugMode)
-				IJ.log(info[0].debugInfo);
-			fivStacks.add(new FileInfoVirtualStack());
-			fivStacks.get(fivStacks.size()-1).info = info;
-			fivStacks.get(fivStacks.size()-1).open(false);
+			open(show);
 		}
-		open(show);
 	}
 
 	public ArrayList<FileInfoVirtualStack> getFivStacks() {
@@ -274,5 +283,16 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	public int getHeight() {
 		return info[0].height;
 	}
+	
+	public String getDimOrder() {
+		// TODO Auto-generated method stub
+		return dimOrder;
+	}
+
+	public void setDimOrder(String dimOrder) {
+		this.dimOrder = dimOrder;
+	}
+
+
  
 }
