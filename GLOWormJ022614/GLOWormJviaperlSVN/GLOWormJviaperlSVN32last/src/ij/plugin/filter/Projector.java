@@ -210,7 +210,21 @@ public class Projector implements PlugInFilter, TextListener {
 		int finalT = lastT;
 		long tempTime = (new Date()).getTime();
 //		File tempDir = new File(IJ.getDirectory("home") +"Proj_"+imp.getTitle().replaceAll("[,. ;:]","") + tempTime);
-		String saveRootDir = (IJ.getDirectory("image") != null? (new File(IJ.getDirectory("image"))).getParent(): IJ.getDirectory("temp"));
+		String saveRootDir = (IJ.getDirectory("image") != null? 
+				((new File(IJ.getDirectory("image"))).isDirectory()?
+						IJ.getDirectory("image"):
+							(new File(IJ.getDirectory("image"))).getParent()): 
+								IJ.getDirectory("temp"));
+		boolean correctSaveRoot = false;
+		for (File saveSibFile: (new File(saveRootDir)).listFiles()) {
+			if (saveSibFile.isDirectory() || (!saveSibFile.getName().toLowerCase().endsWith(".tif")
+												&& !saveSibFile.getName().toLowerCase().contains("ds_store"))) {
+				correctSaveRoot = true;
+			}
+		}
+		if (!correctSaveRoot) {
+			saveRootDir = (new File(saveRootDir)).getParent();
+		}
 		File tempDir = new File(saveRootDir + File.separator +"Proj_"+imp.getTitle().replaceAll("[,. ;:]","").replace(File.separator, "_") + tempTime);
 		if (!tempDir.mkdir()) {
 			IJ.error("3D Projection failed", "Unable to save projected stacks to" + tempDir.getPath());

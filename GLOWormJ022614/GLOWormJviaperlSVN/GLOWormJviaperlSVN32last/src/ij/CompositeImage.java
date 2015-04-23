@@ -268,7 +268,7 @@ public class CompositeImage extends ImagePlus {
 					cip[i].setPixels(getImageStack().getProcessor(position + (i*getNSlices())).getPixels());
 				} else if (getStack() instanceof MultiFileInfoVirtualStack && ((MultiFileInfoVirtualStack)getStack()).getDimOrder() == "xyztc") {
 					cip[i].setPixels(getImageStack().getProcessor(position + (i*getNSlices()*getNFrames())).getPixels());				
-				}else {
+				} else {
 //					IJ.log("not ome");
 					cip[i].setPixels(getImageStack().getProcessor(position+i).getPixels());
 				}
