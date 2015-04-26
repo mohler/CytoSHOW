@@ -358,6 +358,7 @@ public class DISPIM_Monitor implements PlugIn {
 					((CompositeImage)impA).setMode(CompositeImage.COMPOSITE);
 				impA.setFileInfo(new FileInfo());
 				impA.getOriginalFileInfo().fileName = dirOrOMETiff;
+				impA.getOriginalFileInfo().directory = dirOrOMETiff;
 				impA.show();
 				
 				
@@ -416,6 +417,7 @@ public class DISPIM_Monitor implements PlugIn {
 					((CompositeImage)impB).setMode(CompositeImage.COMPOSITE);
 				impB.setFileInfo(new FileInfo());
 				impB.getOriginalFileInfo().fileName = dirOrOMETiff;
+				impB.getOriginalFileInfo().directory = dirOrOMETiff;
 				impB.show();
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -1096,6 +1098,7 @@ public class DISPIM_Monitor implements PlugIn {
 						((CompositeImage)impA).setMode(CompositeImage.COMPOSITE);
 					impA.setFileInfo(new FileInfo());
 					impA.getOriginalFileInfo().fileName = dirOrOMETiff;
+					impA.getOriginalFileInfo().directory = dirOrOMETiff;
 
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -1170,6 +1173,8 @@ public class DISPIM_Monitor implements PlugIn {
 						((CompositeImage)impB).setMode(CompositeImage.COMPOSITE);
 					impB.setFileInfo(new FileInfo());
 					impB.getOriginalFileInfo().fileName = dirOrOMETiff;
+					impB.getOriginalFileInfo().directory = dirOrOMETiff;
+
 
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -1500,6 +1505,7 @@ public class DISPIM_Monitor implements PlugIn {
 							int zSlicesDF1 = deconmfivs.getFivStacks().get(0).getSize();
 							impDF1.setOpenAsHyperStack(true);
 							CompositeImage ciDF1 = new CompositeImage(impDF1);
+							ciDF1.setMode(CompositeImage.COMPOSITE);
 							ciDF1.show();
 						}
 					} else {

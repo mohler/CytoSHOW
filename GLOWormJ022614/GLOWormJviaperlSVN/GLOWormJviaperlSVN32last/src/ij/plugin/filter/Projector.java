@@ -178,7 +178,7 @@ public class Projector implements PlugInFilter, TextListener {
 
 		if ( imp.isComposite()) {
 			stackMode = ((CompositeImage)imp).getMode();
-			((CompositeImage)imp).setMode(3);
+			((CompositeImage)imp).setMode(CompositeImage.GRAYSCALE);
 
 		}
 
@@ -269,8 +269,10 @@ public class Projector implements PlugInFilter, TextListener {
 					ImagePlus impDZ = impD.duplicate();
 					if (is16bit) {
 						IJ.run(impDZ,"8-bit","");
+						if (impDZ.isComposite())
+							((CompositeImage)impDZ).setMode(CompositeImage.GRAYSCALE);
 					}
-
+//					impDZ.show();
 					if (interpolate && sliceInterval>1.0) {
 						if (firstZ != lastZ)
 							impDZ = zScale(impDZ);
@@ -286,8 +288,8 @@ public class Projector implements PlugInFilter, TextListener {
 
 					if (impDZ==null) return;
 
-					//				impDZ.show();
-					//				impDZ.getWindow().setVisible(false);
+//									impDZ.show();
+//									impDZ.getWindow().setVisible(false);
 
 
 

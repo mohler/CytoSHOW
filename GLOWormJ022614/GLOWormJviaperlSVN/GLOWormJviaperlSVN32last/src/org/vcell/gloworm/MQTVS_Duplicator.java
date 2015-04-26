@@ -278,7 +278,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 		if (imp.isComposite()) {
 			//        	IJ.log("Yes CI");
 			//			int mode = ((CompositeImage)imp).getMode();
-			if (lastC>firstC) {
+			if (lastC>=firstC) {
 				imp2 = new CompositeImage(imp2, 3);
 				//				int i2 = 1;
 				for (int i=1; i<=imp2.getNChannels(); i++) {
