@@ -380,8 +380,10 @@ public class Projector implements PlugInFilter, TextListener {
 						stackC.addSlice(""+s, projImpD[loopC-firstC].getStack().getProcessor(s), s*(loopC-firstC+1)-1);
 					}
 				}
-				projImpDC.setStack(stackC);
+				projImpDC.setStack(stackC, lastC-firstC+1, stackC.getSize()/(lastC-firstC+1), 1);
+				
 				IJ.save(projImpDC, tempDir + File.separator + "proj_"+loopT+"_"+loopC+".tif");
+				projImpDC = new CompositeImage(projImpDC);
 				for (loopC = firstC; loopC < lastC +1; loopC++) {
 					projImpD[loopC-firstC].flush();
 				}

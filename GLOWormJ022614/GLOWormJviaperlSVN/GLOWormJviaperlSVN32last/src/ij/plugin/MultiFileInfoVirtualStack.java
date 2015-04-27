@@ -21,10 +21,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	private int channels;
 	private String keyString = "";
 	private String dimOrder;
-
-	public String getDir() {
-		return dir;
-	}
+	private double min;
+	private double max;
 
 	/* Default constructor. */
 	public MultiFileInfoVirtualStack() {}
@@ -67,9 +65,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			File subFile = new File(dir+fileName);
 			if (fileName.contains("DS_Store"))
 				;
-			else if ((keyString == "" || subFile.getName().matches(".*"+keyString+".*")) && !subFile.isDirectory() )
+			else if ((keyString == "" || subFile.getName().matches(".*"+keyString+".*")) && !subFile.isDirectory() ) {
 				allDirectories = false;
-			else if (keyString == "" || subFile.getName().matches(".*"+keyString+".*")){
+			} else if (keyString == "" || subFile.getName().matches(".*"+keyString+".*")){
 				channels++;
 				String[] subFileList = subFile.list();
 				subFileList = StringSorter.sortNumerically(subFileList);
@@ -95,6 +93,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		}
 		if (dir.length() > 0 && !dir.endsWith(File.separator))
 			dir = dir + File.separator;
+		
 		if (channels >0) {
 			for (String fileName:fileList){
 				TiffDecoder td = new TiffDecoder(dir, fileName);
@@ -156,6 +155,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	
 	void open(boolean show) {
 		nImages = fivStacks.size() * fivStacks.get(0).nImages;
+		
+		channels = channels * fivStacks.get(0).getInt((new FileOpener(fivStacks.get(0).info[0])).decodeDescriptionString(fivStacks.get(0).info[0]), "channels");
 		ImagePlus imp = new ImagePlus(fivStacks.get(0).open(false).getTitle().replaceAll("\\d+\\.", "\\."), this);
 		imp.setOpenAsHyperStack(true);				
 		if (channels*fivStacks.get(0).nImages*fivStacks.size()!=imp.getStackSize()) {
@@ -245,7 +246,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			t=t-1;
 		}
 //		IJ.log(""+n+" "+z+" "+t);
-		return fivStacks.get(t).getProcessor(z);
+		ImageProcessor ip = fivStacks.get(t).getProcessor(z);
+//		ip.setMinAndMax(min, max);
+		return ip;
 	 }
  
 	 /** Returns the number of images in this stack. */
@@ -291,6 +294,26 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 	public void setDimOrder(String dimOrder) {
 		this.dimOrder = dimOrder;
+	}
+
+	public double getMin() {
+		return min;
+	}
+
+	public void setMin(double min) {
+		this.min = min;
+	}
+
+	public double getMax() {
+		return max;
+	}
+
+	public void setMax(double max) {
+		this.max = max;
+	}
+
+	public String getDir() {
+		return dir;
 	}
 
 

@@ -1114,14 +1114,22 @@ public class Opener {
 			ij.IJ.run(imp, "Flip Vertically", "stack");
 		int c = imp.getNChannels();
 		boolean composite = c>1 && info[0].description!=null && info[0].description.indexOf("mode=")!=-1;
-		if (c>1 && (imp.getOpenAsHyperStack()||composite) && !imp.isComposite() && imp.getType()!=ImagePlus.COLOR_RGB) {
-			int mode = CompositeImage.COLOR;
-			if (info[0].description!=null) {
-				if (info[0].description.indexOf("mode=composite")!=-1)
-					mode = CompositeImage.COMPOSITE;
-				else if (info[0].description.indexOf("mode=gray")!=-1)
-					mode = CompositeImage.GRAYSCALE;
-			}
+//		if (c>1 && (imp.getOpenAsHyperStack()||composite) && !imp.isComposite() && imp.getType()!=ImagePlus.COLOR_RGB) {
+//			int mode = CompositeImage.COLOR;
+//			if (info[0].description!=null) {
+//				if (info[0].description.indexOf("mode=composite")!=-1)
+//					mode = CompositeImage.COMPOSITE;
+//				else if (info[0].description.indexOf("mode=gray")!=-1)
+//					mode = CompositeImage.GRAYSCALE;
+//			}
+//			imp = new CompositeImage(imp, mode);
+//		}
+		if (c>1 && info[0].description!=null) {
+			int mode = CompositeImage.COMPOSITE;
+			if (info[0].description.indexOf("mode=color")!=-1)
+				mode = CompositeImage.COLOR;
+			else if (info[0].description.indexOf("mode=gray")!=-1)
+				mode = CompositeImage.GRAYSCALE;
 			imp = new CompositeImage(imp, mode);
 		}
 		return imp;
