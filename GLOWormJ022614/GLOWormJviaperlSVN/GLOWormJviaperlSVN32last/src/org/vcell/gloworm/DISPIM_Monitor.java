@@ -527,6 +527,7 @@ public class DISPIM_Monitor implements PlugIn {
 						impDF1.setOpenAsHyperStack(true);
 						impDF1.setStack(impDF1.getStack(), wavelengths, zSlicesDF1, stkNSlicesDF/(wavelengths*zSlicesDF1));
 						CompositeImage ciDF1 = new CompositeImage(impDF1);
+						ciDF1.setMode(CompositeImage.COMPOSITE);
 						ciDF1.show();
 					}
 				} else {
