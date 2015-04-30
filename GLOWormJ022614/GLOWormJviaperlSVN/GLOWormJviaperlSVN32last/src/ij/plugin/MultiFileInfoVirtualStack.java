@@ -156,7 +156,10 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	void open(boolean show) {
 		nImages = fivStacks.size() * fivStacks.get(0).nImages;
 		
-		channels = channels * fivStacks.get(0).getInt((new FileOpener(fivStacks.get(0).info[0])).decodeDescriptionString(fivStacks.get(0).info[0]), "channels");
+		channels = channels * 
+				((new FileOpener(fivStacks.get(0).info[0])).decodeDescriptionString(fivStacks.get(0).info[0]) != null
+					?(fivStacks.get(0).getInt((new FileOpener(fivStacks.get(0).info[0])).decodeDescriptionString(fivStacks.get(0).info[0]), "channels"))
+					:1);
 		ImagePlus imp = new ImagePlus(fivStacks.get(0).open(false).getTitle().replaceAll("\\d+\\.", "\\."), this);
 		imp.setOpenAsHyperStack(true);				
 		if (channels*fivStacks.get(0).nImages*fivStacks.size()!=imp.getStackSize()) {
