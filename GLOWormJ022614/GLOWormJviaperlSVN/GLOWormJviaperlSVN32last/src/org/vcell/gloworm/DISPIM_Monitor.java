@@ -1496,8 +1496,20 @@ public class DISPIM_Monitor implements PlugIn {
 								ciDF2.setMode(CompositeImage.COMPOSITE);
 							else
 								ciDF2.setMode(CompositeImage.GRAYSCALE);
-//THIS DOES NOT WORK!
+//THIS May? WORK!
+							int oldW = win.getWidth();
+							int oldH = win.getHeight();
+							int oldC = win.getImagePlus().getChannel();
+							int oldZ = win.getImagePlus().getSlice();
+							int oldT = win.getImagePlus().getFrame();
+							double oldMin = win.getImagePlus().getDisplayRangeMin();
+							double oldMax = win.getImagePlus().getDisplayRangeMax();
+
 							ciDF2.setWindow(win);
+							win.updateImage(ciDF2);
+							win.setSize(oldW, oldH);
+							win.getImagePlus().setPosition(oldC, oldZ, oldT);
+							win.getImagePlus().setDisplayRange(oldMin, oldMax);
 //*******************
 						}
 					}
