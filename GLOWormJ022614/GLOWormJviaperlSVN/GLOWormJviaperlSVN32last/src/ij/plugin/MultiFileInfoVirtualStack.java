@@ -23,6 +23,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	private String dimOrder;
 	private double min;
 	private double max;
+	private int largestDirectoryLength;
 
 	/* Default constructor. */
 	public MultiFileInfoVirtualStack() {}
@@ -61,6 +62,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 		boolean allDirectories = true;
 		String[] bigSubFileList = null;
+		largestDirectoryLength = 0;
 		for (String fileName:fileList) {
 			File subFile = new File(dir+fileName);
 			if (fileName.contains("DS_Store"))
@@ -70,6 +72,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			} else if (keyString == "" || subFile.getName().matches(".*"+keyString+".*")){
 				channels++;
 				String[] subFileList = subFile.list();
+				largestDirectoryLength = largestDirectoryLength<subFileList.length?subFileList.length:largestDirectoryLength;
 				subFileList = StringSorter.sortNumerically(subFileList);
 
 				String[] buildFileList = new String[(bigSubFileList==null?0:bigSubFileList.length) + subFileList.length];
@@ -162,17 +165,17 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					:1);
 		ImagePlus imp = new ImagePlus(fivStacks.get(0).open(false).getTitle().replaceAll("\\d+\\.", "\\."), this);
 		imp.setOpenAsHyperStack(true);				
-		if (channels*fivStacks.get(0).nImages*fivStacks.size()!=imp.getStackSize()) {
-			if (channels*fivStacks.get(0).nImages*fivStacks.size()>imp.getStackSize()) {
-				for (int a=imp.getStackSize();a<channels*fivStacks.get(0).nImages*fivStacks.size();a++) {
+		if (channels*fivStacks.get(0).nImages*largestDirectoryLength!=imp.getStackSize()) {
+			if (channels*fivStacks.get(0).nImages*largestDirectoryLength>imp.getStackSize()) {
+				for (int a=imp.getStackSize();a<channels*fivStacks.get(0).nImages*largestDirectoryLength;a++) {
 					if (imp.getStack().isVirtual())
 						((VirtualStack)imp.getStack()).addSlice("stuff");
 					else
 						imp.getStack().addSlice(imp.getProcessor().createProcessor(imp.getWidth(), imp.getHeight()));
 				}
-			} else if (channels*fivStacks.get(0).nImages*fivStacks.size()<imp.getStackSize()) {
-				for (int a=channels*fivStacks.get(0).nImages*fivStacks.size();a<imp.getStackSize();a++) {
-					imp.getStack().deleteSlice(channels*fivStacks.get(0).nImages*fivStacks.size());
+			} else if (channels*fivStacks.get(0).nImages*largestDirectoryLength<imp.getStackSize()) {
+				for (int a=channels*fivStacks.get(0).nImages*largestDirectoryLength;a<imp.getStackSize();a++) {
+					imp.getStack().deleteSlice(channels*fivStacks.get(0).nImages*largestDirectoryLength);
 				}
 			}else {
 				IJ.error("HyperStack Converter", "channels x slices x frames <> stack size");
@@ -180,7 +183,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			}
 		}
 
-		imp.setDimensions(channels, fivStacks.get(0).nImages, fivStacks.size()/channels);
+		imp.setDimensions(channels, fivStacks.get(0).nImages, largestDirectoryLength/channels);
 		if (imp.getOriginalFileInfo() == null) {
 			setUpFileInfo(imp);
 		}

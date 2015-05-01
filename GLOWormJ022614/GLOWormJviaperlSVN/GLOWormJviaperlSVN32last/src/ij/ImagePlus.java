@@ -663,8 +663,22 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
     }
     
 	public void setStack(ImageStack stack, int nChannels, int nSlices, int nFrames) {
-		if (nChannels*nSlices*nFrames!=stack.getSize())
-			throw new IllegalArgumentException("channels*slices*frames!=stackSize");
+		if (nChannels*nSlices*nFrames!=stack.getSize()) {
+			if (nChannels*nSlices*nFrames>stack.getSize()) {
+				for (int a=stack.getSize();a<nChannels*nSlices*nFrames;a++) {
+					if (stack.isVirtual())
+						((VirtualStack)stack).addSlice("stuff");
+					else
+						stack.addSlice(this.getProcessor().createProcessor(this.getWidth(), this.getHeight()));
+				}
+			} else if (nChannels*nSlices*nFrames<stack.getSize()) {
+				for (int a=nChannels*nSlices*nFrames;a<stack.getSize();a++) {
+					stack.deleteSlice(nChannels*nSlices*nFrames);
+				}
+			}else {
+				throw new IllegalArgumentException("channels*slices*frames!=stackSize");
+			}
+		}
 		int channelsBefore = this.nChannels;
 		this.nChannels = nChannels;
 		this.nSlices = nSlices;
