@@ -93,6 +93,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		} else {
 			dimOrder = "xyczt";
 			channels = 1;
+			largestDirectoryLength = fileList.length;
 		}
 		if (dir.length() > 0 && !dir.endsWith(File.separator))
 			dir = dir + File.separator;
