@@ -25,6 +25,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	private double max;
 	private int largestDirectoryLength;
 	private File largestDirectoryFile;
+	private String[] largestDirectoryList;
+	private FileInfo[] dummyInfo;
 
 	/* Default constructor. */
 	public MultiFileInfoVirtualStack() {}
@@ -80,7 +82,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				largestDirectoryLength = largestDirectoryLength<subFileList.length?subFileList.length:largestDirectoryLength;
 			}
 		}
-		String[] largestDirectoryList = largestDirectoryFile.list();
+		largestDirectoryList = largestDirectoryFile.list();
 		for (String fileName:fileList) {
 			File subFile = new File(dir+fileName);
 			if (fileName.contains("DS_Store"))
@@ -96,7 +98,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					if (f<(bigSubFileList==null?0:bigSubFileList.length)) {
 						buildFileList[f] = bigSubFileList[f];
 					} else if (subFileList[f-paddingTotal-(bigSubFileList==null?0:bigSubFileList.length)]
-								== largestDirectoryList[f-(bigSubFileList==null?0:bigSubFileList.length)]){
+							== largestDirectoryList[f-(bigSubFileList==null?0:bigSubFileList.length)]){
 						buildFileList[f] = dir+fileName+File.separator+subFileList[f-paddingTotal-(bigSubFileList==null?0:bigSubFileList.length)];
 					} else {
 						buildFileList[f] = "stuff";
@@ -119,12 +121,12 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (dir.length() > 0 && !dir.endsWith(File.separator))
 			dir = dir + File.separator;
 		
-		if (channelDirectories >0) {
-			for (String fileName:fileList){
+		for (String fileName:largestDirectoryList){
+			if ((new File(fileName)).canRead()) {
 				TiffDecoder td = new TiffDecoder(dir, fileName);
 				if (IJ.debugMode) td.enableDebugging();
 				IJ.showStatus("Decoding TIFF header...");
-				try {info = td.getTiffInfo();}
+				try {dummyInfo = td.getTiffInfo();}
 				catch (IOException e) {
 					String msg = e.getMessage();
 					if (msg==null||msg.equals("")) msg = ""+e;
@@ -133,12 +135,39 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				}
 				if (info==null || info.length==0) {
 					continue;
+				} else {
+					break;
 				}
-				if (IJ.debugMode)
-					IJ.log(info[0].debugInfo);
-				fivStacks.add(new FileInfoVirtualStack());
-				fivStacks.get(fivStacks.size()-1).info = info;
-				fivStacks.get(fivStacks.size()-1).open(false);
+			}
+		}	
+		
+		if (channelDirectories >0) {
+			for (String fileName:fileList){
+				if ((new File(fileName)).canRead()) {
+					TiffDecoder td = new TiffDecoder(dir, fileName);
+					if (IJ.debugMode) td.enableDebugging();
+					IJ.showStatus("Decoding TIFF header...");
+					try {info = td.getTiffInfo();}
+					catch (IOException e) {
+						String msg = e.getMessage();
+						if (msg==null||msg.equals("")) msg = ""+e;
+						IJ.error("TiffDecoder", msg);
+						return;
+					}
+					if (info==null || info.length==0) {
+						continue;
+					}
+					if (IJ.debugMode)
+						IJ.log(info[0].debugInfo);
+					fivStacks.add(new FileInfoVirtualStack());
+					fivStacks.get(fivStacks.size()-1).info = info;
+					fivStacks.get(fivStacks.size()-1).open(false);
+				} else if (fileName == "stuff") {
+					fivStacks.add(new FileInfoVirtualStack(new FileInfo()));
+					fivStacks.get(fivStacks.size()-1).info = dummyInfo;
+					fivStacks.get(fivStacks.size()-1).info[0].fileName = "stuff";
+					fivStacks.get(fivStacks.size()-1).open(false);
+				}
 			}
 			open(show);
 		}
