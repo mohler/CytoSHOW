@@ -24,6 +24,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	private double min;
 	private double max;
 	private int largestDirectoryLength;
+	private File largestDirectoryFile;
 
 	/* Default constructor. */
 	public MultiFileInfoVirtualStack() {}
@@ -75,20 +76,37 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			} else if (keyString == "" || subFile.getName().matches(".*"+keyString+".*")){
 				channelDirectories++;
 				String[] subFileList = subFile.list();
+				largestDirectoryFile = largestDirectoryLength<subFileList.length?subFile:largestDirectoryFile;
 				largestDirectoryLength = largestDirectoryLength<subFileList.length?subFileList.length:largestDirectoryLength;
+			}
+		}
+		String[] largestDirectoryList = largestDirectoryFile.list();
+		for (String fileName:fileList) {
+			File subFile = new File(dir+fileName);
+			if (fileName.contains("DS_Store"))
+				;
+			else if ((keyString == "" || subFile.getName().matches(".*"+keyString+".*")) && !subFile.isDirectory()) {
+				;			
+			} else if (keyString == "" || subFile.getName().matches(".*"+keyString+".*")){
+				String[] subFileList = subFile.list();
 				subFileList = StringSorter.sortNumerically(subFileList);
-
-				String[] buildFileList = new String[(bigSubFileList==null?0:bigSubFileList.length) + subFileList.length];
-				for (int f=0; f<buildFileList.length; f++ ) {
-					if (f<(bigSubFileList==null?0:bigSubFileList.length))
+				String[] buildFileList = new String[(bigSubFileList==null?0:bigSubFileList.length) + largestDirectoryLength];
+				int paddingTotal = 0;
+				for (int f=0; f<largestDirectoryLength; f++ ) {
+					if (f<(bigSubFileList==null?0:bigSubFileList.length)) {
 						buildFileList[f] = bigSubFileList[f];
-					else
-						buildFileList[f] = dir+fileName+File.separator+subFileList[f-(bigSubFileList==null?0:bigSubFileList.length)];
-					//					IJ.log(buildFileList[f]);
+					} else if (subFileList[f-paddingTotal-(bigSubFileList==null?0:bigSubFileList.length)]
+								== largestDirectoryList[f-(bigSubFileList==null?0:bigSubFileList.length)]){
+						buildFileList[f] = dir+fileName+File.separator+subFileList[f-paddingTotal-(bigSubFileList==null?0:bigSubFileList.length)];
+					} else {
+						buildFileList[f] = "stuff";
+						paddingTotal++;
+					}
 				}
 				bigSubFileList = buildFileList;
 			}
 		}
+
 		if (allDirectories) {
 			dimOrder = "xyztc";
 			fileList = bigSubFileList;
