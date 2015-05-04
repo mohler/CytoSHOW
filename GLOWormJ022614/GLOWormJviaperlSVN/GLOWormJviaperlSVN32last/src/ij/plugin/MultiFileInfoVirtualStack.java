@@ -174,7 +174,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				} else if (fileName == "stuff") {
 					fivStacks.add(new FileInfoVirtualStack(new FileInfo(), false));
 					fivStacks.get(fivStacks.size()-1).info = dummyInfo;
-					fivStacks.get(fivStacks.size()-1).info[0].fileName = "stuff";
+					for (FileInfo dummyInfo:fivStacks.get(fivStacks.size()-1).info)
+						dummyInfo.fileName = "stuff";
 					fivStacks.get(fivStacks.size()-1).open(false);
 				}
 			}
