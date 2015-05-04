@@ -98,14 +98,20 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				String[] subFileList = subFile.list();
 				subFileList = StringSorter.sortNumerically(subFileList);
 				String[] buildFileList = new String[(bigSubFileList==null?0:bigSubFileList.length) + largestDirectoryTiffCount];
+				IJ.log("bfll "+buildFileList.length);
+				IJ.log(bigSubFileList!=null?"bsfll "+bigSubFileList.length:"bsfll null");
+				IJ.log("ldtc "+largestDirectoryTiffCount);
+
 				int paddingTotal = 0;
-				int g = 0;
+				int g = -1;
 				for (int f=0; f<buildFileList.length; f++ ) {
 					g++;
+					IJ.log(f+" "+g+" "+"preif");
 					if (f<(bigSubFileList==null?0:bigSubFileList.length)) {
 						buildFileList[f] = bigSubFileList[f];
 					} else if (!subFileList[g-paddingTotal-(bigSubFileList==null?0:bigSubFileList.length)].toLowerCase().endsWith(".tif")) {
 						f--;
+						IJ.log(f+" "+g+" "+"tiftest");
 					} else if (subFileList[g-paddingTotal-(bigSubFileList==null?0:bigSubFileList.length)]
 							.matches(largestDirectoryList[g-(bigSubFileList==null?0:bigSubFileList.length)])){
 						buildFileList[f] = dir+fileName+File.separator+subFileList[g-paddingTotal-(bigSubFileList==null?0:bigSubFileList.length)];
