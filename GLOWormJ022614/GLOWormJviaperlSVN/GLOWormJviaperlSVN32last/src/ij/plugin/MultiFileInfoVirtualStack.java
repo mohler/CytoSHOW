@@ -60,14 +60,14 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			dir = arg;
 		if (dir==null) return;
 		argFile = new File(dir);
-		String[] fileList = argFile.list();
-		fileList = StringSorter.sortNumerically(fileList);
+		String[] dirfileList = argFile.list();
+		dirfileList = StringSorter.sortNumerically(dirfileList);
 
 		boolean allDirectories = true;
 		String[] bigSubFileList = null;
 		largestDirectoryLength = 0;
 		int tiffCount = 0;
-		for (String fileName:fileList) {
+		for (String fileName:dirfileList) {
 			File subFile = new File(dir+fileName);
 			if (fileName.contains("DS_Store"))
 				;
@@ -83,7 +83,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			}
 		}
 		largestDirectoryList = largestDirectoryFile.list();
-		for (String fileName:fileList) {
+		for (String fileName:dirfileList) {
 			File subFile = new File(dir+fileName);
 			if (fileName.contains("DS_Store"))
 				;
@@ -94,11 +94,11 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				subFileList = StringSorter.sortNumerically(subFileList);
 				String[] buildFileList = new String[(bigSubFileList==null?0:bigSubFileList.length) + largestDirectoryLength];
 				int paddingTotal = 0;
-				for (int f=0; f<largestDirectoryLength; f++ ) {
+				for (int f=0; f<buildFileList.length; f++ ) {
 					if (f<(bigSubFileList==null?0:bigSubFileList.length)) {
 						buildFileList[f] = bigSubFileList[f];
 					} else if (subFileList[f-paddingTotal-(bigSubFileList==null?0:bigSubFileList.length)]
-							== largestDirectoryList[f-(bigSubFileList==null?0:bigSubFileList.length)]){
+							.matches(largestDirectoryList[f-(bigSubFileList==null?0:bigSubFileList.length)])){
 						buildFileList[f] = dir+fileName+File.separator+subFileList[f-paddingTotal-(bigSubFileList==null?0:bigSubFileList.length)];
 					} else {
 						buildFileList[f] = "stuff";
@@ -111,7 +111,6 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 		if (allDirectories) {
 			dimOrder = "xyztc";
-			fileList = bigSubFileList;
 			dir = "";
 		} else {
 			dimOrder = "xyczt";
@@ -122,8 +121,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			dir = dir + File.separator;
 		
 		for (String fileName:largestDirectoryList){
-			if ((new File(fileName)).canRead()) {
-				TiffDecoder td = new TiffDecoder(dir, fileName);
+			if ((new File(largestDirectoryFile.getPath()+File.separator+fileName)).canRead()) {
+				TiffDecoder td = new TiffDecoder(dir, largestDirectoryFile.getPath()+File.separator+fileName);
 				if (IJ.debugMode) td.enableDebugging();
 				IJ.showStatus("Decoding TIFF header...");
 				try {dummyInfo = td.getTiffInfo();}
@@ -133,7 +132,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					IJ.error("TiffDecoder", msg);
 					return;
 				}
-				if (info==null || info.length==0) {
+				if (dummyInfo==null || dummyInfo.length==0) {
 					continue;
 				} else {
 					break;
@@ -142,7 +141,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		}	
 		
 		if (channelDirectories >0) {
-			for (String fileName:fileList){
+			for (String fileName:(allDirectories?bigSubFileList:dirfileList)){
 				if ((new File(fileName)).canRead()) {
 					TiffDecoder td = new TiffDecoder(dir, fileName);
 					if (IJ.debugMode) td.enableDebugging();
@@ -163,7 +162,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					fivStacks.get(fivStacks.size()-1).info = info;
 					fivStacks.get(fivStacks.size()-1).open(false);
 				} else if (fileName == "stuff") {
-					fivStacks.add(new FileInfoVirtualStack(new FileInfo()));
+					fivStacks.add(new FileInfoVirtualStack(new FileInfo(), false));
 					fivStacks.get(fivStacks.size()-1).info = dummyInfo;
 					fivStacks.get(fivStacks.size()-1).info[0].fileName = "stuff";
 					fivStacks.get(fivStacks.size()-1).open(false);

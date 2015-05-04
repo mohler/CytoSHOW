@@ -178,7 +178,8 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 				case 16: return new ShortProcessor(w, h);
 				case 24: return new ColorProcessor(w, h);
 				case 32: return new FloatProcessor(w, h);
-				default: return getProcessor(1).createProcessor(w, h);
+//				default: return getProcessor(1).createProcessor(w, h);
+				default: return new ByteProcessor(w, h);
 			}
 		}
 	 }
