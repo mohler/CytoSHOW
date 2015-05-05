@@ -83,11 +83,15 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				largestDirectoryLength = largestDirectoryLength<subFileList.length?subFileList.length:largestDirectoryLength;
 			}
 		}
-		largestDirectoryList = largestDirectoryFile.list();
-		largestDirectoryTiffCount = 0;		
-		for (String ldfn:largestDirectoryList)
-			if (ldfn.toLowerCase().endsWith(".tif"))
+		if (largestDirectoryFile!=null) {
+			largestDirectoryList = largestDirectoryFile.list();
+			largestDirectoryTiffCount = 0;		
+			for (String ldfn:largestDirectoryList)
+				if (ldfn.toLowerCase().endsWith(".tif"))
 					largestDirectoryTiffCount++;
+		} else {
+			largestDirectoryTiffCount = tiffCount;
+		}
 		for (String fileName:dirfileList) {
 			File subFile = new File(dir+fileName);
 			if (fileName.contains("DS_Store"))
@@ -136,29 +140,32 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (dir.length() > 0 && !dir.endsWith(File.separator))
 			dir = dir + File.separator;
 		
-		for (String fileName:largestDirectoryList){
-			if ((new File(largestDirectoryFile.getPath()+File.separator+fileName)).canRead()) {
-				TiffDecoder td = new TiffDecoder(dir, largestDirectoryFile.getPath()+File.separator+fileName);
-				if (IJ.debugMode) td.enableDebugging();
-				IJ.showStatus("Decoding TIFF header...");
-				try {dummyInfo = td.getTiffInfo();}
-				catch (IOException e) {
-					String msg = e.getMessage();
-					if (msg==null||msg.equals("")) msg = ""+e;
-					IJ.error("TiffDecoder", msg);
-					return;
-				}
-				if (dummyInfo==null || dummyInfo.length==0) {
-					continue;
-				} else {
-					break;
+		if (largestDirectoryList != null) {
+			for (String fileName:largestDirectoryList){
+				if ((new File(largestDirectoryFile.getPath()+File.separator+fileName)).canRead()) {
+					TiffDecoder td = new TiffDecoder(dir, largestDirectoryFile.getPath()+File.separator+fileName);
+					if (IJ.debugMode) td.enableDebugging();
+					IJ.showStatus("Decoding TIFF header...");
+					try {dummyInfo = td.getTiffInfo();}
+					catch (IOException e) {
+						String msg = e.getMessage();
+						if (msg==null||msg.equals("")) msg = ""+e;
+						IJ.error("TiffDecoder", msg);
+						return;
+					}
+					if (dummyInfo==null || dummyInfo.length==0) {
+						continue;
+					} else {
+						break;
+					}
 				}
 			}
+
 		}	
 		
 		if (channelDirectories >0) {
 			for (String fileName:dirfileList){
-				if ((new File(fileName)).canRead()) {
+				if ((new File(dir + fileName)).canRead()) {
 					TiffDecoder td = new TiffDecoder(dir, fileName);
 					if (IJ.debugMode) td.enableDebugging();
 					IJ.showStatus("Decoding TIFF header...");
