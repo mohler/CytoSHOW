@@ -667,7 +667,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			if (nChannels*nSlices*nFrames>stack.getSize()) {
 				for (int a=stack.getSize();a<nChannels*nSlices*nFrames;a++) {
 					if (stack.isVirtual())
-						((VirtualStack)stack).addSlice("stuff");
+						((VirtualStack)stack).addSlice("blank slice");
 					else
 						stack.addSlice(this.getProcessor().createProcessor(this.getWidth(), this.getHeight()));
 				}

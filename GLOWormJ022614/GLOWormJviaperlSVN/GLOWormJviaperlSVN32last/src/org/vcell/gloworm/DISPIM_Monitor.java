@@ -316,7 +316,7 @@ public class DISPIM_Monitor implements PlugIn {
 					if (nChannels*nSlices*nFrames>stackSize) {
 						for (int a=stackSize;a<nChannels*nSlices*nFrames;a++) {
 							if (impA.getStack().isVirtual())
-								((VirtualStack)impA.getStack()).addSlice("stuff");
+								((VirtualStack)impA.getStack()).addSlice("blank slice");
 							else
 								impA.getStack().addSlice(impA.getProcessor().createProcessor(impA.getWidth(), impA.getHeight()));
 						}
@@ -375,7 +375,7 @@ public class DISPIM_Monitor implements PlugIn {
 					if (nChannels*nSlices*nFrames>stackSize) {
 						for (int a=stackSize;a<nChannels*nSlices*nFrames;a++) {
 							if (impB.getStack().isVirtual())
-								((VirtualStack)impB.getStack()).addSlice("stuff");
+								((VirtualStack)impB.getStack()).addSlice("blank slice");
 							else
 								impB.getStack().addSlice(impB.getProcessor().createProcessor(impB.getWidth(), impB.getHeight()));
 						}
@@ -1017,7 +1017,7 @@ public class DISPIM_Monitor implements PlugIn {
 						if (nChannels*nSlices*nFrames>stackSize) {
 							for (int a=stackSize;a<nChannels*nSlices*nFrames;a++) {
 								if (impA.getStack().isVirtual())
-									((VirtualStack)impA.getStack()).addSlice("stuff");
+									((VirtualStack)impA.getStack()).addSlice("blank slice");
 								else
 									impA.getStack().addSlice(impA.getProcessor().createProcessor(impA.getWidth(), impA.getHeight()));
 							}
@@ -1092,7 +1092,7 @@ public class DISPIM_Monitor implements PlugIn {
 						if (nChannels*nSlices*nFrames>stackSize) {
 							for (int a=stackSize;a<nChannels*nSlices*nFrames;a++) {
 								if (impB.getStack().isVirtual())
-									((VirtualStack)impB.getStack()).addSlice("stuff");
+									((VirtualStack)impB.getStack()).addSlice("blank slice");
 								else
 									impB.getStack().addSlice(impB.getProcessor().createProcessor(impB.getWidth(), impB.getHeight()));
 							}

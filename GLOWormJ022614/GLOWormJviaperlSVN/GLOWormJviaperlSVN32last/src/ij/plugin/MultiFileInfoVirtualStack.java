@@ -112,14 +112,14 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 						if (q-stuffCount+junkCount< subFileList.length 
 								&& !subFileList[q-stuffCount+junkCount].matches(cumTiffListElement)) {
 							if (subFileList[q-stuffCount+junkCount].toLowerCase().endsWith(".tif")) {
-								subFileTiffArrayList.add("stuff");
+								subFileTiffArrayList.add("channel-frame missing");
 								stuffCount++;
 							} else {
 								junkCount++;
 								q--;
 							}
 						} else if (q-stuffCount+junkCount>= subFileList.length) {
-							subFileTiffArrayList.add("stuff");
+							subFileTiffArrayList.add("channel-frame missing");
 							stuffCount++;
 						} else {
 							subFileTiffArrayList.add(dir+fileName+File.separator+cumTiffListElement);
@@ -194,11 +194,11 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					fivStacks.add(new FileInfoVirtualStack());
 					fivStacks.get(fivStacks.size()-1).info = info;
 					fivStacks.get(fivStacks.size()-1).open(false);
-				} else if (fileName == "stuff") {
+				} else if (fileName == "channel-frame missing") {
 					fivStacks.add(new FileInfoVirtualStack(new FileInfo(), false));
 					fivStacks.get(fivStacks.size()-1).info = dummyInfo;
 					for (FileInfo dummyInfo:fivStacks.get(fivStacks.size()-1).info)
-						dummyInfo.fileName = "stuff";
+						dummyInfo.fileName = "channel-frame missing";
 					fivStacks.get(fivStacks.size()-1).open(false);
 				}
 			}
@@ -254,7 +254,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			if (channelDirectories*fivStacks.get(0).nImages*cumulativeTiffFileList.length>imp.getStackSize()) {
 				for (int a=imp.getStackSize();a<channelDirectories*fivStacks.get(0).nImages*cumulativeTiffFileList.length;a++) {
 					if (imp.getStack().isVirtual())
-						((VirtualStack)imp.getStack()).addSlice("stuff");
+						((VirtualStack)imp.getStack()).addSlice("blank slice");
 					else
 						imp.getStack().addSlice(imp.getProcessor().createProcessor(imp.getWidth(), imp.getHeight()));
 				}
