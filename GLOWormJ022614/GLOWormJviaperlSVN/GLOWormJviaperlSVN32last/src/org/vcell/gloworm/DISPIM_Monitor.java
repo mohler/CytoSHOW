@@ -1478,6 +1478,7 @@ public class DISPIM_Monitor implements PlugIn {
 							else
 								ciDF1.setMode(CompositeImage.GRAYSCALE);
 							ciDF1.show();
+							win = ciDF1.getWindow();
 						}
 					} else {
 						MultiFileInfoVirtualStack deconmfivs = new MultiFileInfoVirtualStack((new File(dirOrOMETiff)).isDirectory()?dirOrOMETiff:(new File(dirOrOMETiff)).getParent()+File.separator, "Deconvolution", false);

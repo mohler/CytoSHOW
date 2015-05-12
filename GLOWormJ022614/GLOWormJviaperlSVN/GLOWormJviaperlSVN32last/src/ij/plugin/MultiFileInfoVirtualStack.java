@@ -11,6 +11,7 @@ import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Properties;
 
 public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
@@ -25,7 +26,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	private double max;
 	private int largestDirectoryLength;
 	private File largestDirectoryFile;
-	private String[] largestDirectoryList;
+	private String[] cumulativeTiffFileList;
 	private FileInfo[] dummyInfo;
 	private int largestDirectoryTiffCount;
 
@@ -65,7 +66,10 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		dirfileList = StringSorter.sortNumerically(dirfileList);
 
 		boolean allDirectories = true;
-		String[] bigSubFileList = null;
+//		String[] bigSubFileList = null;
+		ArrayList<String> bigSubFileArrayList = new ArrayList<String>();
+		ArrayList<String> cumulativeSubFileArrayList = new ArrayList<String>();
+		
 		largestDirectoryLength = 0;
 		int tiffCount = 0;
 		for (String fileName:dirfileList) {
@@ -79,19 +83,17 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			} else if (keyString == "" || subFile.getName().matches(".*"+keyString+".*")){
 				channelDirectories++;
 				String[] subFileList = subFile.list();
-				largestDirectoryFile = largestDirectoryLength<subFileList.length?subFile:largestDirectoryFile;
-				largestDirectoryLength = largestDirectoryLength<subFileList.length?subFileList.length:largestDirectoryLength;
+				for (String subFileListElement:subFileList)
+					if (!cumulativeSubFileArrayList.contains(subFileListElement))
+						if (subFileListElement.toLowerCase().endsWith("tif"))
+							cumulativeSubFileArrayList.add(subFileListElement);
 			}
 		}
-		if (largestDirectoryFile!=null) {
-			largestDirectoryList = largestDirectoryFile.list();
-			largestDirectoryTiffCount = 0;		
-			for (String ldfn:largestDirectoryList)
-				if (ldfn.toLowerCase().endsWith(".tif"))
-					largestDirectoryTiffCount++;
-		} else {
-			largestDirectoryTiffCount = tiffCount;
+		cumulativeTiffFileList = new String[cumulativeSubFileArrayList.size()];
+		for (int s=0; s<cumulativeTiffFileList.length; s++) {
+			cumulativeTiffFileList [s] = (String) cumulativeSubFileArrayList.get(s);
 		}
+		cumulativeTiffFileList = StringSorter.sortNumerically(cumulativeTiffFileList);
 		for (String fileName:dirfileList) {
 			File subFile = new File(dir+fileName);
 			if (fileName.contains("DS_Store"))
@@ -101,37 +103,45 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			} else if (keyString == "" || subFile.getName().matches(".*"+keyString+".*")){
 				String[] subFileList = subFile.list();
 				subFileList = StringSorter.sortNumerically(subFileList);
-				String[] buildFileList = new String[(bigSubFileList==null?0:bigSubFileList.length) + largestDirectoryTiffCount];
-				IJ.log("bfll "+buildFileList.length);
-				IJ.log(bigSubFileList!=null?"bsfll "+bigSubFileList.length:"bsfll null");
-				IJ.log("ldtc "+largestDirectoryTiffCount);
+				ArrayList<String> subFileTiffArrayList = new ArrayList<String>();
+				int stuffCount = 0;
+				int junkCount = 0;
+				for (int q=0; q<cumulativeTiffFileList.length; q++)  {
+					String cumTiffListElement = cumulativeTiffFileList[q];
+					if (cumTiffListElement.toLowerCase().endsWith(".tif")) {
+						if (q-stuffCount+junkCount< subFileList.length 
+								&& !subFileList[q-stuffCount+junkCount].matches(cumTiffListElement)) {
+							if (subFileList[q-stuffCount+junkCount].toLowerCase().endsWith(".tif")) {
+								subFileTiffArrayList.add("stuff");
+								stuffCount++;
+							} else {
+								junkCount++;
+								q--;
+							}
+						} else if (q-stuffCount+junkCount>= subFileList.length) {
+							subFileTiffArrayList.add("stuff");
+							stuffCount++;
+						} else {
+							subFileTiffArrayList.add(dir+fileName+File.separator+cumTiffListElement);
+						}
 
-				int paddingTotal = 0;
-				int g = -1;
-				for (int f=0; f<buildFileList.length; f++ ) {
-					g++;
-					IJ.log(f+" "+g+" "+"preif");
-					if (f<(bigSubFileList==null?0:bigSubFileList.length)) {
-						buildFileList[f] = bigSubFileList[f];
-					} else if (!subFileList[g-paddingTotal-(bigSubFileList==null?0:bigSubFileList.length)].toLowerCase().endsWith(".tif")) {
-						f--;
-						IJ.log(f+" "+g+" "+"tiftest");
-					} else if (subFileList[g-paddingTotal-(bigSubFileList==null?0:bigSubFileList.length)]
-							.matches(largestDirectoryList[g-(bigSubFileList==null?0:bigSubFileList.length)])){
-						buildFileList[f] = dir+fileName+File.separator+subFileList[g-paddingTotal-(bigSubFileList==null?0:bigSubFileList.length)];
-					} else {
-						buildFileList[f] = "stuff";
-						paddingTotal++;
-					}
+					} 
 				}
-				bigSubFileList = buildFileList;
+				while (subFileTiffArrayList.remove("junk"));
+				
+				bigSubFileArrayList.addAll(subFileTiffArrayList);
 			}
 		}
 
 		if (allDirectories) {
 			dimOrder = "xyztc";
 			dir = "";
-			dirfileList = bigSubFileList;
+
+			dirfileList = new String[bigSubFileArrayList.size()];
+			for (int s=0; s<dirfileList.length; s++) {
+				dirfileList [s] = (String) bigSubFileArrayList.get(s);
+			}
+
 		} else {
 			dimOrder = "xyczt";
 			channelDirectories = 1;
@@ -140,10 +150,10 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (dir.length() > 0 && !dir.endsWith(File.separator))
 			dir = dir + File.separator;
 		
-		if (largestDirectoryList != null) {
-			for (String fileName:largestDirectoryList){
-				if ((new File(largestDirectoryFile.getPath()+File.separator+fileName)).canRead()) {
-					TiffDecoder td = new TiffDecoder(dir, largestDirectoryFile.getPath()+File.separator+fileName);
+		if (cumulativeTiffFileList != null) {
+			for (String fileName:dirfileList){
+				if ((new File(dir + fileName)).canRead()) {
+					TiffDecoder td = new TiffDecoder(dir, fileName);
 					if (IJ.debugMode) td.enableDebugging();
 					IJ.showStatus("Decoding TIFF header...");
 					try {dummyInfo = td.getTiffInfo();}
@@ -231,7 +241,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	}
 	
 	void open(boolean show) {
-		nImages = channelDirectories* largestDirectoryTiffCount * fivStacks.get(0).nImages;
+		nImages = channelDirectories* cumulativeTiffFileList.length * fivStacks.get(0).nImages;
 		
 		int internalChannels = ((new FileOpener(fivStacks.get(0).info[0])).decodeDescriptionString(fivStacks.get(0).info[0]) != null
 				?(fivStacks.get(0).getInt((new FileOpener(fivStacks.get(0).info[0])).decodeDescriptionString(fivStacks.get(0).info[0]), "channels"))
@@ -240,17 +250,17 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				
 		ImagePlus imp = new ImagePlus(fivStacks.get(0).open(false).getTitle().replaceAll("\\d+\\.", "\\."), this);
 		imp.setOpenAsHyperStack(true);				
-		if (channelDirectories*fivStacks.get(0).nImages*largestDirectoryTiffCount!=imp.getStackSize()) {
-			if (channelDirectories*fivStacks.get(0).nImages*largestDirectoryTiffCount>imp.getStackSize()) {
-				for (int a=imp.getStackSize();a<channelDirectories*fivStacks.get(0).nImages*largestDirectoryTiffCount;a++) {
+		if (channelDirectories*fivStacks.get(0).nImages*cumulativeTiffFileList.length!=imp.getStackSize()) {
+			if (channelDirectories*fivStacks.get(0).nImages*cumulativeTiffFileList.length>imp.getStackSize()) {
+				for (int a=imp.getStackSize();a<channelDirectories*fivStacks.get(0).nImages*cumulativeTiffFileList.length;a++) {
 					if (imp.getStack().isVirtual())
 						((VirtualStack)imp.getStack()).addSlice("stuff");
 					else
 						imp.getStack().addSlice(imp.getProcessor().createProcessor(imp.getWidth(), imp.getHeight()));
 				}
-			} else if (channelDirectories*fivStacks.get(0).nImages*largestDirectoryTiffCount<imp.getStackSize()) {
-				for (int a=channelDirectories*fivStacks.get(0).nImages*largestDirectoryTiffCount;a<imp.getStackSize();a++) {
-					imp.getStack().deleteSlice(channelDirectories*fivStacks.get(0).nImages*largestDirectoryTiffCount);
+			} else if (channelDirectories*fivStacks.get(0).nImages*cumulativeTiffFileList.length<imp.getStackSize()) {
+				for (int a=channelDirectories*fivStacks.get(0).nImages*cumulativeTiffFileList.length;a<imp.getStackSize();a++) {
+					imp.getStack().deleteSlice(channelDirectories*fivStacks.get(0).nImages*cumulativeTiffFileList.length);
 				}
 			}else {
 				IJ.error("HyperStack Converter", "channels x slices x frames <> stack size");
@@ -258,7 +268,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			}
 		}
 
-		imp.setDimensions(channels, fivStacks.get(0).nImages/internalChannels, largestDirectoryTiffCount);
+		imp.setDimensions(channels, fivStacks.get(0).nImages/internalChannels, cumulativeTiffFileList.length);
 		if (imp.getOriginalFileInfo() == null) {
 			setUpFileInfo(imp);
 		}
