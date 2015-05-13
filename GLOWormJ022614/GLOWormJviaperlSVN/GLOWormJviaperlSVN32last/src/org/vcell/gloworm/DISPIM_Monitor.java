@@ -21,6 +21,7 @@ import ij.gui.GenericDialog;
 import ij.gui.ImageWindow;
 import ij.gui.Roi;
 import ij.gui.SelectKeyChannelDialog;
+import ij.gui.StackWindow;
 import ij.gui.YesNoCancelDialog;
 import ij.io.FileInfo;
 import ij.io.TiffDecoder;
@@ -875,8 +876,8 @@ public class DISPIM_Monitor implements PlugIn {
 				deconList2 = (new File(dirOrOMETiff+ "Deconvolution2")).list();
 
 				while ((fileListA.length == listA.length || fileListB.length == listB.length)
-						&& 	deconList1.length == deconFileList1.length
-						&& 	deconList2.length == deconFileList2.length ) {
+						&& 	( !doDecon || (deconList1 !=null && deconList1.length == deconFileList1.length))
+						&& 	( !doDecon || (deconList2 !=null && deconList2.length == deconFileList2.length )) ) {
 					if (IJ.escapePressed())
 						if (!IJ.showMessageWithCancel("Cancel diSPIM Monitor Updates?"
 								, "Monitoring of "+ dirOrOMETiff+ " paused by Escape.\nClick OK to resume."))
@@ -1529,6 +1530,8 @@ public class DISPIM_Monitor implements PlugIn {
 							win.setSize(oldW, oldH);
 							win.getImagePlus().setPosition(oldC, oldZ, oldT);
 							win.getImagePlus().setDisplayRange(oldMin, oldMax);
+							((StackWindow)win).addScrollbars(ciDF2);
+							win.getImagePlus().updateAndRepaintWindow();
 //*******************
 						}
 					}
