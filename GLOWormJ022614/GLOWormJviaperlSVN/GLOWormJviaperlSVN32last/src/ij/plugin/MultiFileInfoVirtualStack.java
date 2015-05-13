@@ -78,8 +78,10 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				;
 			else if ((keyString == "" || subFile.getName().matches(".*"+keyString+".*")) && !subFile.isDirectory()) {
 				allDirectories = false;
-				if (subFile.getName().toLowerCase().endsWith("tif"))
+				if (subFile.getName().toLowerCase().endsWith("tif")) {
+					cumulativeSubFileArrayList.add(subFile.getName());
 					tiffCount++;				
+				}
 			} else if (keyString == "" || subFile.getName().matches(".*"+keyString+".*")){
 				channelDirectories++;
 				String[] subFileList = subFile.list();

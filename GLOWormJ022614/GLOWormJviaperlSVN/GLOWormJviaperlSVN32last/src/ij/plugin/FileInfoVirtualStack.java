@@ -172,7 +172,7 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 		else {
 			int w=getWidth(), h=getHeight();
 			if (n<=nImages ) 
-				IJ.log("Read error or file not found ("+n+"): "+info[n-1].directory+info[n-1].fileName);
+				/*IJ.log("Read error or file not found ("+n+"): "+info[n-1].directory+info[n-1].fileName)*/;
 			switch (getBitDepth()) {
 				case 8: return new ByteProcessor(w, h);
 				case 16: return new ShortProcessor(w, h);

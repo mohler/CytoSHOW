@@ -92,6 +92,10 @@ public class DISPIM_Monitor implements PlugIn {
 		String[] newTifListB = {""};
 		String[] listA = {""};
 		String[] listB = {""};
+		String[] deconFileList1 = {""};
+		String[] deconFileList2 = {""};
+		String[] deconList1 = {""};
+		String[] deconList2 = {""};
 		String big5DFileListAString = ("");	    
 		String big5DFileListBString =("");
 		ImagePlus impA = null;
@@ -867,8 +871,12 @@ public class DISPIM_Monitor implements PlugIn {
 				listB = new File(""+dirOrOMETiff+"SPIMB").list();
 				big5DFileListAString = IJ.openAsString(dirOrOMETiff+"Big5DFileListA.txt");	    
 				big5DFileListBString = IJ.openAsString(dirOrOMETiff+"Big5DFileListB.txt");
+				deconList1 = (new File(dirOrOMETiff+ "Deconvolution1")).list();
+				deconList2 = (new File(dirOrOMETiff+ "Deconvolution2")).list();
 
-				while (fileListA.length == listA.length || fileListB.length == listB.length ) {
+				while ((fileListA.length == listA.length || fileListB.length == listB.length)
+						&& 	deconList1.length == deconFileList1.length
+						&& 	deconList2.length == deconFileList2.length ) {
 					if (IJ.escapePressed())
 						if (!IJ.showMessageWithCancel("Cancel diSPIM Monitor Updates?"
 								, "Monitoring of "+ dirOrOMETiff+ " paused by Escape.\nClick OK to resume."))
@@ -877,6 +885,8 @@ public class DISPIM_Monitor implements PlugIn {
 							IJ.resetEscape();
 					listA = new File(""+dirOrOMETiff+"SPIMA").list();
 					listB = new File(""+dirOrOMETiff+"SPIMB").list();
+					deconList1 = (new File(dirOrOMETiff+ "Deconvolution1")).list();
+					deconList2 = (new File(dirOrOMETiff+ "Deconvolution2")).list();
 					IJ.wait(5000);
 				}	
 				//
@@ -887,6 +897,8 @@ public class DISPIM_Monitor implements PlugIn {
 				//
 				fileListA = new File(""+dirOrOMETiff+"SPIMA").list();
 				fileListB = new File(""+dirOrOMETiff+"SPIMB").list();
+				deconFileList1 = (new File(dirOrOMETiff+ "Deconvolution1")).list();
+				deconFileList2 = (new File(dirOrOMETiff+ "Deconvolution2")).list();
 
 				long modDateA = 0;
 				String recentestA = "";
@@ -983,9 +995,15 @@ public class DISPIM_Monitor implements PlugIn {
 				}
 			} else {
 				long fileOldMod = (new File(dirOrOMETiff)).lastModified();
-				while (fileOldMod == (new File(dirOrOMETiff)).lastModified());
+				while (fileOldMod == (new File(dirOrOMETiff)).lastModified()) {
+					if (IJ.escapePressed())
+						if (!IJ.showMessageWithCancel("Cancel diSPIM Monitor Updates?"
+								, "Monitoring of "+ dirOrOMETiff+ " paused by Escape.\nClick OK to resume."))
+							return;
+						else
+							IJ.resetEscape();
 					IJ.wait(5000);
-					
+				}
 
 				boolean wasSynched = false;
 				ArrayList<ImagePlus> synchedImpsArrayList = new ArrayList<ImagePlus>();
