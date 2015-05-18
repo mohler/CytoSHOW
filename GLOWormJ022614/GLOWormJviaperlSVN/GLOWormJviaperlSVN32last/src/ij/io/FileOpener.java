@@ -5,6 +5,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 import java.util.zip.GZIPInputStream;
+
 import ij.gui.*;
 import ij.process.*;
 import ij.measure.*;
@@ -499,7 +500,7 @@ public class FileOpener {
 		size = fi.nImages>1?size:size/4;
 		if (fi.height==1) size = 0; // allows plugins to read info of unknown length at end of file
 		if (offset+size>length) {
-		   error("Offset + image size > file length.", fi, offset, length);
+		   IJ.log("Offset + image size > file length. "+ fi +" "+ offset +" "+ length);
 		   return false;
 		}
 		return true;

@@ -523,6 +523,10 @@ public class DISPIM_Monitor implements PlugIn {
 
 			if ((new File(dirOrOMETiff)).canRead()) {
 				if (impDF1 == null) {
+					IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"Deconvolution1\");");
+					if (wavelengths==2) {
+						IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"Deconvolution2\");");
+					}
 					MultiFileInfoVirtualStack deconmfivs = new MultiFileInfoVirtualStack((new File(dirOrOMETiff)).isDirectory()?dirOrOMETiff:(new File(dirOrOMETiff)).getParent()+File.separator, "Deconvolution", false);
 					if (deconmfivs.getSize() > 0) {
 						impDF1 = new ImagePlus();
@@ -567,11 +571,13 @@ public class DISPIM_Monitor implements PlugIn {
 					IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMA_Ch1_processed\"+File.separator+\""+frameFileNames[f]+"\");");
 					IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMB_Ch1_processed\");");
 					IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMB_Ch1_processed\"+File.separator+\""+frameFileNames[f]+"\");");
+					IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"Deconvolution1\");");
 					if (wavelengths==2) {
 						IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMA_Ch2_processed\");");
 						IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMA_Ch2_processed\"+File.separator+\""+frameFileNames[f]+"\");");
 						IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMB_Ch2_processed\");");
 						IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMB_Ch2_processed\"+File.separator+\""+frameFileNames[f]+"\");");
+						IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"Deconvolution2\");");
 					}
 
 					//					ImageStack stackA1 = new ImageStack(cropHeight,cropWidth);
@@ -876,8 +882,12 @@ public class DISPIM_Monitor implements PlugIn {
 				deconList2 = (new File(dirOrOMETiff+ "Deconvolution2")).list();
 
 				while ((fileListA.length == listA.length || fileListB.length == listB.length)
-						&& 	( !doDecon || (deconList1 !=null && deconList1.length == deconFileList1.length))
-						&& 	( !doDecon || (deconList2 !=null && deconList2.length == deconFileList2.length )) ) {
+						&& (!doDecon 
+							|| ((deconList1 == null && deconList2 == null)
+								|| 	(!(deconList1 ==null || deconFileList1 ==null 
+											|| deconList1.length != deconFileList1.length)
+									|| !(deconList2 ==null || deconFileList2 ==null 
+											|| deconList2.length != deconFileList2.length )) ) )) {
 					if (IJ.escapePressed())
 						if (!IJ.showMessageWithCancel("Cancel diSPIM Monitor Updates?"
 								, "Monitoring of "+ dirOrOMETiff+ " paused by Escape.\nClick OK to resume."))
@@ -1295,11 +1305,13 @@ public class DISPIM_Monitor implements PlugIn {
 						IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMA_Ch1_processed\"+File.separator+\""+frameFileName+"\");");
 						IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMB_Ch1_processed\");");
 						IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMB_Ch1_processed\"+File.separator+\""+frameFileName+"\");");
+						IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"Deconvolution1\");");
 						if (wavelengths==2) {
 							IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMA_Ch2_processed\");");
 							IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMA_Ch2_processed\"+File.separator+\""+frameFileName+"\");");
 							IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMB_Ch2_processed\");");
 							IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"SPIMB_Ch2_processed\"+File.separator+\""+frameFileName+"\");");
+							IJ.runMacro("File.makeDirectory(\""+dirOrOMETiff.replace("\\", "\\\\")+"Deconvolution2\");");
 						}
 
 						ImageStack stackA1 = new ImageStack(325,425);
@@ -1480,7 +1492,9 @@ public class DISPIM_Monitor implements PlugIn {
 
 				if ((new File(dirOrOMETiff)).canRead()) {
 					if (impDF1 == null) {
-						MultiFileInfoVirtualStack deconmfivs = new MultiFileInfoVirtualStack((new File(dirOrOMETiff)).isDirectory()?dirOrOMETiff:(new File(dirOrOMETiff)).getParent()+File.separator, "Deconvolution", false);
+						MultiFileInfoVirtualStack deconmfivs = new MultiFileInfoVirtualStack((new File(dirOrOMETiff)).isDirectory()?
+																									dirOrOMETiff:
+																									(new File(dirOrOMETiff)).getParent()+File.separator, "Deconvolution", false);
 						if (deconmfivs.getSize() > 0) {
 							impDF1 = new ImagePlus();
 							impDF1.setStack("Decon-Fuse"+impA.getTitle().replace(impA.getTitle().split(":")[0],""), deconmfivs);
@@ -1528,10 +1542,12 @@ public class DISPIM_Monitor implements PlugIn {
 							ciDF2.setWindow(win);
 							win.updateImage(ciDF2);
 							win.setSize(oldW, oldH);
-							win.getImagePlus().setPosition(oldC, oldZ, oldT);
-							win.getImagePlus().setDisplayRange(oldMin, oldMax);
 							((StackWindow)win).addScrollbars(ciDF2);
 							win.getImagePlus().updateAndRepaintWindow();
+							win.getImagePlus().setPosition(oldC, oldZ, oldT);
+							win.getImagePlus().setDisplayRange(oldMin, oldMax);
+							win.setSize(win.getSize().width, win.getSize().height+5);
+
 //*******************
 						}
 					}

@@ -30,6 +30,7 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 	int nChannels=1, nSlices=1, nFrames=1;
 	int c=1, z=1, t=1;
 	private boolean wormAtlas;
+	private Panel scrollbarPanel;
 	
 
 	public StackWindow(ImagePlus imp, boolean showNow) {
@@ -100,7 +101,7 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 			removeScrollbars();
 		ImageJ ij = IJ.getInstance();
 
-		Panel scrollbarPanel = new Panel();
+		scrollbarPanel = new Panel();
 		GridBagLayout sbgridbag = new GridBagLayout();
 		GridBagConstraints sbgc = new GridBagConstraints();
 		scrollbarPanel.setLayout(sbgridbag);
@@ -373,17 +374,17 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
     }
     
     public void setPosition(int channel, int slice, int frame) {
-    	if (cSelector!=null && channel!=c) {
+    	if (cSelector!=null /*&& channel!=c*/) {
     		c = channel;
 			cSelector.setValue(channel);
 			SyncWindows.setC(this, channel);
 		}
-    	if (zSelector!=null && slice!=z) {
+    	if (zSelector!=null /*&& slice!=z*/) {
     		z = slice;
 			zSelector.setValue(slice);
 			SyncWindows.setZ(this, slice);
 		}
-    	if (tSelector!=null && frame!=t) {
+    	if (tSelector!=null /*&& frame!=t*/) {
     		t = frame;
 			tSelector.setValue(frame);
 			SyncWindows.setT(this, frame);
@@ -462,6 +463,7 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
     }
     
     void removeScrollbars() {
+    	remove(scrollbarPanel);
     	if (cSelector!=null) {
     		remove(cSelector);
 			cSelector.removeAdjustmentListener(this);
