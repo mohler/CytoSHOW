@@ -407,7 +407,15 @@ public class ShortProcessor extends ImageProcessor {
 	}
 
 	public void setPixels(Object pixels) {
-		this.pixels = (short[])pixels;
+		if (pixels instanceof float[]) {
+			short[] floatstoshorts= new short[((float[])pixels).length];
+			for(int i=0; i<((float[])pixels).length; i++ ) {
+				floatstoshorts[i] = (short)((float[])pixels)[i];
+				this.pixels = (short[])floatstoshorts;
+			}
+		} else {
+			this.pixels = (short[])pixels;
+		}
 		resetPixels(pixels);
 		if (pixels==null) snapshotPixels = null;
 		if (pixels==null) pixels8 = null;

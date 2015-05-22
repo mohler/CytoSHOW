@@ -56,8 +56,10 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		this.keyString = keyString;
 		File argFile = new File(arg);
 		dir = "";
-		if (!argFile.exists() || !argFile.isDirectory())
+		if (!argFile.exists() || !argFile.isDirectory()) {
 			dir = IJ.getDirectory("Select Directory of TIFFs");
+			keyString = IJ.getString("Subdirectory Name Key String?", "Deconvolution");
+		}
 		else
 			dir = arg;
 		if (dir==null) return;
