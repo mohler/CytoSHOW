@@ -3,18 +3,21 @@ import ij.*;
 import ij.gui.GenericDialog; 
 import ij.process.*;
 import ij.plugin.filter.*; 
+import ij.util.Tools;
 import ij.measure.Measurements;
+
 import java.lang.*; 
 import java.awt.*; 
 import java.awt.event.*; 
 import java.util.Arrays;
+import java.util.Vector;
 
 /** This plugin performs a z-projection of the input stack. Type of
     output image is same as type of input image.
 
     @author Patrick Kelly <phkelly@ucsd.edu> */
 
-public class ZProjector implements PlugIn {
+public class ZProjector implements PlugIn, TextListener {
     public static final int AVG_METHOD = 0; 
     public static final int MAX_METHOD = 1;
     public static final int MIN_METHOD = 2;
@@ -52,6 +55,13 @@ public class ZProjector implements PlugIn {
     private boolean isHyperstack;
     private int increment = 1;
     private int sliceCount;
+	private int firstC;
+	private int lastC;
+	private int firstZ;
+	private int lastZ;
+	private int firstT;
+	private int lastT;
+	private int stepT;
 
     public ZProjector() {
     }
@@ -129,19 +139,22 @@ public class ZProjector implements PlugIn {
 		} else
 			stopSlice  = stackSize;
 			
-		// Build control dialog
-		GenericDialog gd = buildControlDialog(startSlice,stopSlice); 
-		gd.showDialog(); 
-		if(gd.wasCanceled()) return; 
+//		// Build control dialog
+//		GenericDialog gd = buildControlDialog(startSlice,stopSlice); 
+//		gd.showDialog(); 
+//		if(gd.wasCanceled()) return; 
 
-		if (!imp.lock()) return;   // exit if in use
+		
+		
+//		if (!imp.lock()) return;   // exit if in use
 		long tstart = System.currentTimeMillis();
-		setStartSlice((int)gd.getNextNumber()); 
-		setStopSlice((int)gd.getNextNumber()); 
-		method = gd.getNextChoiceIndex();
+//		setStartSlice((int)gd.getNextNumber()); 
+//		setStopSlice((int)gd.getNextNumber()); 
+//		method = gd.getNextChoiceIndex();
+		
 		Prefs.set(METHOD_KEY, method);
 		if (isHyperstack) {
-			allTimeFrames = imp.getNFrames()>1&&imp.getNSlices()>1?gd.getNextBoolean():false;
+			allTimeFrames = imp.getNFrames()>1&&imp.getNSlices()>1?showHSDialog(imp):false;
 			doHyperStackProjection(allTimeFrames);
 		} else if (imp.getType()==ImagePlus.COLOR_RGB)
 			doRGBProjection();
@@ -213,6 +226,85 @@ public class ZProjector implements PlugIn {
 			gd.addCheckbox("All time frames", allTimeFrames); 
 		return gd; 
     }
+    
+    
+	public boolean showHSDialog(ImagePlus imp) {
+		int nChannels = imp.getNChannels();
+		int nSlices = imp.getNSlices();
+		int nFrames = imp.getNFrames();
+		GenericDialog gd = new GenericDialog("Z-Project hyperstack");
+		//gd.addStringField("Title:", newTitle, 15);
+		gd.setInsets(12, 20, 8);
+		gd.addCheckbox("Z-Project hyperstack", true);
+		gd.addCheckbox("Crop via Tag Manager tags", false);
+		gd.addChoice("Projection type", METHODS, METHODS[method]); 
+		int nRangeFields = 0;
+		if (nChannels>1) {
+			gd.setInsets(2, 30, 3);
+			gd.addStringField("Channels (c):", "1-"+nChannels);
+			nRangeFields++;
+		}
+		if (nSlices>1) {
+			gd.setInsets(2, 30, 3);
+			gd.addStringField("Slices (z):", "1-"+nSlices);
+			nRangeFields++;
+		}
+		if (nFrames>1) {
+			gd.setInsets(2, 30, 3);
+			gd.addStringField("Frames (t):", ""+ imp.getFrame() +"-"+ imp.getFrame());
+			nRangeFields++;
+		}
+		Vector v = gd.getStringFields();
+		TextField[] rangeFields = new TextField[3];
+		for (int i=0; i<nRangeFields; i++) {
+			rangeFields[i] = (TextField)v.elementAt(i);
+			rangeFields[i].addTextListener(this);
+		}
+		Checkbox checkbox = (Checkbox)(gd.getCheckboxes().elementAt(0));
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return false;
+		//String title = gd.getNextString();
+		boolean duplicateStack = gd.getNextBoolean();
+		boolean sliceSpecificROIs = gd.getNextBoolean();		
+		method = gd.getNextChoiceIndex();
+		if (nChannels>1) {
+			String[] range = Tools.split(gd.getNextString(), " -");
+			double c1 = Tools.parseDouble(range[0]);
+			double c2 = range.length==2?Tools.parseDouble(range[1]):Double.NaN;
+			firstC = Double.isNaN(c1)?1:(int)c1;
+			lastC = Double.isNaN(c2)?firstC:(int)c2;
+			if (firstC<1) firstC = 1;
+			if (lastC>nChannels) lastC = nChannels;
+			if (firstC>lastC) {firstC=1; lastC=nChannels;}
+		} else
+			firstC = lastC = 1;
+		if (nSlices>1) {
+			String[] range = Tools.split(gd.getNextString(), " -");
+			double z1 = Tools.parseDouble(range[0]);
+			double z2 = range.length==2?Tools.parseDouble(range[1]):Double.NaN;
+			firstZ = Double.isNaN(z1)?1:(int)z1;
+			lastZ = Double.isNaN(z2)?firstZ:(int)z2;
+			if (firstZ<1) firstZ = 1;
+			if (lastZ>nSlices) lastZ = nSlices;
+			if (firstZ>lastZ) {firstZ=1; lastZ=nSlices;}
+		} else
+			firstZ = lastZ = 1;
+		if (nFrames>1) {
+			String[] range = Tools.split(gd.getNextString(), " -");
+			double t1 = Tools.parseDouble(range[0]);
+			double t2 = range.length>=2?Tools.parseDouble(range[1]):Double.NaN;
+			double t3 = range.length==3?Tools.parseDouble(range[2]):Double.NaN;
+			firstT= Double.isNaN(t1)?1:(int)t1;
+			lastT = Double.isNaN(t2)?firstT:(int)t2;
+			stepT = Double.isNaN(t3)?1:(int)t3;
+			if (firstT<1) firstT = 1;
+			if (lastT>nFrames) lastT = nFrames;
+			if (firstT>lastT) {firstT=1; lastT=nFrames;}
+		} else
+			firstT = lastT = 1;
+		return true;
+	}
 
     /** Performs actual projection using specified method. */
     public void doProjection() {
@@ -276,23 +368,23 @@ public class ZProjector implements PlugIn {
     }
 
 	public void doHyperStackProjection(boolean allTimeFrames) {
-		int start = startSlice;
-		int stop = stopSlice;
-		int firstFrame = 1;
-		int lastFrame = imp.getNFrames();
+		int start = firstZ;
+		int stop = lastZ;
+		int firstFrame = firstT;
+		int lastFrame = lastT;
 		if (!allTimeFrames)
 			firstFrame = lastFrame = imp.getFrame();
 		ImageStack stack = new ImageStack(imp.getWidth(), imp.getHeight());
 		int channels = imp.getNChannels();
 		int slices = imp.getNSlices();
-		if (slices==1) {
-			slices = imp.getNFrames();
-			firstFrame = lastFrame = 1;
-		}
+//		if (slices==1) {
+//			slices = imp.getNFrames();
+//			firstFrame = lastFrame = 1;
+//		}
 		int frames = lastFrame-firstFrame+1;
 		increment = channels;
 		boolean rgb = imp.getBitDepth()==24;
-		for (int frame=firstFrame; frame<=lastFrame; frame++) {
+		for (int frame=firstFrame; frame<=lastFrame; frame=frame+stepT) {
 			for (int channel=1; channel<=channels; channel++) {
 				startSlice = (frame-1)*channels*slices + (start-1)*channels + channel;
 				stopSlice = (frame-1)*channels*slices + (stop-1)*channels + channel;
@@ -632,6 +724,12 @@ public class ZProjector implements PlugIn {
 		}
 
     } // end StandardDeviation
+
+
+	public void textValueChanged(TextEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }  // end ZProjection
 
