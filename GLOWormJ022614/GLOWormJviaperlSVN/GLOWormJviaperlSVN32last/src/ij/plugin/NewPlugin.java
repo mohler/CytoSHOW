@@ -63,7 +63,7 @@ public class NewPlugin implements PlugIn {
     		}
     	} else if (arg.equals("suite")) {
     		type = SUITE_FILE;
-    		name = "NewSuite_suite.ste";
+    		name = "Drag or paste scene URLs into this list to share a suite of scenes:";
     	}
     	menuBar = true;
     	if (arg.equals("text+dialog") || type==TABLE) {
@@ -94,9 +94,11 @@ public class NewPlugin implements PlugIn {
 			name = SaveDialog.setExtension(name, ".js");
 		} else if (type==SUITE_FILE) {
 			JButton suiteButton = new JButton("Share this suite of scenes");
+			text = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
 			suiteButton.addActionListener(ed);
 			ed.getPanel().add(suiteButton);
 			ed.pack();
+			ed.setAlwaysOnTop(true);
 		}
 		if (text!=null)
 			ed.create(name, text);
