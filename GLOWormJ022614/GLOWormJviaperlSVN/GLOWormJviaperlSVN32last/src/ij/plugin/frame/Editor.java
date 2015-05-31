@@ -2,12 +2,19 @@ package ij.plugin.frame;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.net.SocketException;
 import java.util.*;
 import java.awt.datatransfer.*;																																																																																													
 
+import javax.swing.BoxLayout;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.ScrollPaneLayout;
 import javax.swing.event.DocumentListener;
+
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPReply;
 
 import ij.*;
 import ij.gui.*;
@@ -87,6 +94,8 @@ public class Editor extends PlugInFrame implements ActionListener, ItemListener,
     private static Editor instance;
     private int runToLine;
     private boolean fixedLineEndings;
+
+	private JPanel panel;
 	
 	public Editor() {
 		this(16, 60, 0, MENU_BAR);
@@ -96,9 +105,12 @@ public class Editor extends PlugInFrame implements ActionListener, ItemListener,
 		super("Editor");
 		WindowManager.addWindow(this);
 		addMenuBar(options);	
+        panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+
 		ta = new JTextArea(rows, columns);
 		sp = new JScrollPane(ta, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-
+		sp.setLayout(new ScrollPaneLayout());
 		ta.getDocument().addDocumentListener(dl);
 //		ta.addTextListener(this);
 		ta.setDragEnabled(true);
@@ -106,7 +118,8 @@ public class Editor extends PlugInFrame implements ActionListener, ItemListener,
 		
 		if (IJ.isLinux()) ta.setBackground(Color.white);
  		addKeyListener(IJ.getInstance());  // ImageJ handles keyboard shortcuts
-		add(sp);
+		panel.add(sp);
+		this.add(panel);
 		pack();
 		if (fontSize<0) fontSize = 0;
 		if (fontSize>=sizes.length) fontSize = sizes.length-1;
@@ -114,6 +127,18 @@ public class Editor extends PlugInFrame implements ActionListener, ItemListener,
 		positionWindow();
 	}
 	
+	public JPanel getPanel() {
+		return panel;
+	}
+
+	public JScrollPane getSp() {
+		return sp;
+	}
+
+	public void setSp(JScrollPane sp) {
+		this.sp = sp;
+	}
+
 	void addMenuBar(int options) {
 		mb = new MenuBar();
 		if (Menus.getFontSize()!=0) ;
@@ -627,6 +652,63 @@ public class Editor extends PlugInFrame implements ActionListener, ItemListener,
 			IJ.open();
 		else if (what.equals("Copy to Image Info"))
 			copyToInfo();
+		else if (what.equals("Share this suite of scenes")) {
+			long sec = (new Date()).getTime();
+			path = IJ.getDirectory("home")+ "NewSuite_"+ sec +"_suite.ste";
+			File saveFile = new File(path);
+			save();
+			FTPClient ftpc = new FTPClient();
+			try {
+				ftpc.connect("155.37.255.65");
+				int reply = ftpc.getReplyCode();
+
+				if(!FTPReply.isPositiveCompletion(reply)) {
+					ftpc.disconnect();
+					IJ.log("FTP server refused connection.");
+				} else {
+					ftpc.login("glowormguest", "GLOWorm");
+					String[] saveDirFileNames = (new File(saveFile.getParent())).list();
+					for (String fileName:saveDirFileNames) {
+						if (fileName.matches(".*"+sec+".*")) {
+							FileInputStream fis = new FileInputStream(saveFile.getParent() +File.separator +fileName);
+							ftpc.setFileType(FTPClient.BINARY_FILE_TYPE);
+							ftpc.enterLocalPassiveMode();
+							ftpc.storeFile(fileName+".tmp", fis);
+							fis.close();
+							ftpc.rename(fileName+".tmp", fileName);
+						}
+					}
+					ftpc.logout();
+				}
+			} catch (SocketException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} finally {
+				if(ftpc.isConnected()) {
+					try {
+						ftpc.disconnect();
+					} catch(IOException ioe) {
+						// do nothing
+					}
+				}
+			}
+
+			IJ.wait(10000);
+
+			GenericDialog lgd = new GenericDialog("Shared CytoSHOW Suite");
+			lgd.addMessage("This suite of scenes can be accessed at the web address below.\n" +
+					"Please copy, save, and share this link.\n");
+			String link = "http://fsbill.cam.uchc.edu/cgi-bin/gloworm.pl?MOVIE="
+					+saveFile.getName();
+			lgd.addStringField("", link, link.length());
+			lgd.pack();
+			lgd.showDialog();
+
+		}
+		
 		else {
 			if (altKeyDown) {
 				enableDebugging();

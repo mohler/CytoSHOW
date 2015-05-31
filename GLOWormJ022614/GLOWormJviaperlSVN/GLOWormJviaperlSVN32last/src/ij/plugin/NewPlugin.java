@@ -1,5 +1,8 @@
 package ij.plugin;
 import java.awt.*;
+
+import javax.swing.JButton;
+
 import ij.*;
 import ij.gui.*;
 import ij.plugin.frame.Editor;
@@ -11,7 +14,7 @@ import ij.util.Tools;
 public class NewPlugin implements PlugIn {
 
 	public static final int MACRO=0, JAVASCRIPT=1, PLUGIN=2, PLUGIN_FILTER=3, PLUGIN_FRAME=4,
-		TEXT_FILE=5, TABLE=6, MACRO_TOOL=7, PLUGIN_TOOL=8;
+		TEXT_FILE=5, TABLE=6, MACRO_TOOL=7, PLUGIN_TOOL=8, SUITE_FILE=9;
     private static int rows = 16;
     private static int columns = 60;
     private static int tableWidth = 350;
@@ -58,6 +61,9 @@ public class NewPlugin implements PlugIn {
     			type = TABLE;
     			name = "Table";
     		}
+    	} else if (arg.equals("suite")) {
+    		type = SUITE_FILE;
+    		name = "NewSuite_suite.ste";
     	}
     	menuBar = true;
     	if (arg.equals("text+dialog") || type==TABLE) {
@@ -65,7 +71,7 @@ public class NewPlugin implements PlugIn {
 		}
 		if (type==-1)
     		createPlugin("Converted_Macro.java", PLUGIN, arg);
-		else if (type==MACRO || type==MACRO_TOOL || type==TEXT_FILE || type==JAVASCRIPT) {
+		else if (type==MACRO || type==MACRO_TOOL || type==TEXT_FILE || type==JAVASCRIPT || type==SUITE_FILE) {
 			if (type==TEXT_FILE && name.equals("Macro"))
 				name = "Untitled.txt";
 			createMacro(name);
@@ -86,6 +92,11 @@ public class NewPlugin implements PlugIn {
 		else if (type==JAVASCRIPT && !name.endsWith(".js")) {
 			if (name.equals("Macro")) name = "script";
 			name = SaveDialog.setExtension(name, ".js");
+		} else if (type==SUITE_FILE) {
+			JButton suiteButton = new JButton("Share this suite of scenes");
+			suiteButton.addActionListener(ed);
+			ed.getPanel().add(suiteButton);
+			ed.pack();
 		}
 		if (text!=null)
 			ed.create(name, text);

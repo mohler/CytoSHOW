@@ -356,7 +356,7 @@ public class Opener {
 									e.printStackTrace();
 								}
 								if (line != null)
-									stringBuilder.append(line).append(ls);
+									stringBuilder.append(line.replace("http://fsbill.cam.uchc.edu/cgi-bin/gloworm.pl?MOVIE=", "/Volumes/GLOWORM_DATA/")).append(ls);
 							}
 							suiteTextLines = stringBuilder.toString().split("\n");
 						}
@@ -370,13 +370,13 @@ public class Opener {
 							String line = "";
 							while (line != null) {
 								try {
-									line = in.readLine();
+									line = in.readLine().replace("http://fsbill.cam.uchc.edu/cgi-bin/gloworm.pl?MOVIE=", "/Volumes/GLOWORM_DATA/");;
 								} catch (IOException e) {
 									// TODO Auto-generated catch block
 									e.printStackTrace();
 								}
 								if (line != null)
-									stringBuilder.append(line).append(ls);
+									stringBuilder.append(line.replace("http://fsbill.cam.uchc.edu/cgi-bin/gloworm.pl?MOVIE=", "/Volumes/GLOWORM_DATA/")).append(ls);
 							}
 							suiteTextLines = stringBuilder.toString().split("\n");
 						}

@@ -402,6 +402,7 @@ plug-in27="Stack To QT", gloworm.Stack_To_QT
 plug-in28="Setup GLOWorm Processing", org.vcell.gloworm.SetupGlowormProcessing
 plug-in28="Slice<>Stereo", org.vcell.gloworm.SliceStereoToggle
 plug-in29="RadonTransform", org.vcell.gloworm.RadonTransform_
+plug-in30="Share_Suite", org.vcell.gloworm.Share_Suite
 
 # Install user plugins located in ij.jar to Plugins>User Plugins submenu
 #user_plugins01="Red And Blue",RedAndBlue_
