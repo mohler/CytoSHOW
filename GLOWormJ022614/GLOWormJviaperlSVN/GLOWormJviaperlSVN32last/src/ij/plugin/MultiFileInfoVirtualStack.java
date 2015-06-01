@@ -29,6 +29,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	private String[] cumulativeTiffFileList;
 	private FileInfo[] dummyInfo;
 	private int largestDirectoryTiffCount;
+	private String infoDir;
 
 	/* Default constructor. */
 	public MultiFileInfoVirtualStack() {}
@@ -63,6 +64,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		else
 			dir = arg;
 		if (dir==null) return;
+		infoDir = dir;
 		argFile = new File(dir);
 		String[] dirfileList = argFile.list();
 		dirfileList = StringSorter.sortNumerically(dirfileList);
@@ -292,7 +294,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		fi.width = width;
 		fi.height = height;
 		fi.nImages = this.getSize();
-		fi.directory = dir;
+		fi.directory = infoDir;
 	}
 
 	int getInt(Properties props, String key) {
