@@ -225,9 +225,23 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 		if (nCheckBoxes>CompositeImage.MAX_CHANNELS)
 			nCheckBoxes = CompositeImage.MAX_CHANNELS;//		checkbox = new Checkbox[nCheckBoxes];
 		ArrayList<String> fullCellNames = new ArrayList<String>(); 
-		for (int i =0;i<rm.getFullCellNames().size();i++)
-			fullCellNames.add(""+rm.getFullCellNames().get(i)+"");
-		brainbowColors = rm.getBrainbowColors();
+		if (rm.getFullCellNames()!=null) {
+			for (int i =0;i<rm.getFullCellNames().size();i++)
+				fullCellNames.add(""+rm.getFullCellNames().get(i)+"");
+		} else {
+			Roi[] fullRois = rm.getFullRoisAsArray();
+			for (int r =0;r<fullRois.length;r++) {
+					String[] searchTextChunks = fullRois[r].getName().split("[\"|=]")[1].split(" ");
+					String searchText = "";
+					for (String chunk:searchTextChunks)
+						if (!(chunk.matches("-?\\d+") || chunk.matches("\\++")))
+							searchText = searchText + " " + chunk;
+					if ( !fullCellNames.contains(searchText.trim())) {
+						fullCellNames.add(searchText.trim());				
+					}
+			}
+		}
+		brainbowColors = rm.getColorLegend().getBrainbowColors();
 		checkbox = new Checkbox[fullCellNames.size()];
 		checkboxHash = new Hashtable<Color,Checkbox>();
 		int count=0;
@@ -238,11 +252,11 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 			((Checkbox)checkbox[i]).setSize(150, 10);
 			checkbox[i].setLabel(fullCellNames.get(i).length()<20?fullCellNames.get(i):fullCellNames.get(i).substring(0, 20) + "...");
 			checkbox[i].setName(fullCellNames.get(i));			
-			checkbox[i].setBackground(brainbowColors.get(fullCellNames.get(i)));
-			checkboxHash.put(brainbowColors.get(fullCellNames.get(i).toLowerCase()), checkbox[i]);
-			checkbox[i].setFont(Menus.getFont().deriveFont(8));
-			         
+			checkbox[i].setBackground(brainbowColors.get(fullCellNames.get(i).toLowerCase()));
 			if (!fullCellNames.get(i).contains("NOTE:")) {
+				checkboxHash.put(brainbowColors.get(fullCellNames.get(i).toLowerCase()), checkbox[i]);
+				checkbox[i].setFont(Menus.getFont().deriveFont(8));
+			         
 				fspp.add(checkbox[i],fspc);
 				if (count==0) {
 					panelWidth = panelWidth + checkbox[i].getWidth();
@@ -295,8 +309,8 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 			location = getLocation();
 		} else
 			setLocation(location);
-//		this.setVisible(true);
-//		show();
+		this.setVisible(true);
+		show();
 	}
 	
 	public void update() {

@@ -11,6 +11,7 @@ import java.util.zip.*;
 
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
@@ -1645,11 +1646,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					if (cl != null) {
 						Color clColor = cl.getBrainbowColors()
 											.get(roi.getName().toLowerCase().split("_")[0].split("=")[0].replace("\"", "").trim());
-						if (clColor !=null)
-							roi.setFillColor(Colors.decode("#88"+Integer.toHexString(clColor.getRed())
-																+Integer.toHexString(clColor.getGreen())
-																+Integer.toHexString(clColor.getBlue())
-															, Color.white));					
+						if (clColor !=null) {
+							String hexRed = Integer.toHexString(clColor.getRed());
+							String hexGreen = Integer.toHexString(clColor.getGreen());
+							String hexBlue = Integer.toHexString(clColor.getBlue());
+							roi.setFillColor(Colors.decode("#88"+(hexRed.length()==1?"0":"")+hexRed
+																+(hexGreen.length()==1?"0":"")+hexGreen
+																+(hexBlue.length()==1?"0":"")+hexBlue
+															, Color.white));
+						}
 					}
 					//
 					if (roi!=null) { 
@@ -2151,13 +2156,41 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			gd.showDialog();
 			if (gd.wasCanceled()) return;
 		}
+		ColorLegend cl = this.getColorLegend();
+		if (cl!=null) {
+			ArrayList<Integer> hitIndexes = new ArrayList<Integer>();
+			for (int i=0; i<n; i++) {
+				String label = (String) listModel.getElementAt(indexes[i]);
+				cl.getBrainbowColors().put(label.split(" =")[0].replace("\"","").toLowerCase(), new Color(fillColor.getRGB()));				
+				for (Checkbox cbC:cl.getCheckbox()) {
+					if (cbC.getName().equals(label.split(" =")[0].replace("\"",""))){
+						cbC.setBackground(new Color(fillColor.getRGB()));
+					}
+				}
+				for (int l=0; l<listModel.size(); l++) {
+					if (((String) listModel.getElementAt(l)).startsWith(label.split("_")[0])) {
+						hitIndexes.add(l);
+					}
+				}
+			}
+			indexes = new int[hitIndexes.size()];
+			n=indexes.length;
+			for (int h=0;h<indexes.length;h++) {
+				indexes[h] = ((int)hitIndexes.get(h));
+			}
+		}
 		for (int i=0; i<n; i++) {
 			String label = (String) listModel.getElementAt(indexes[i]);
 			Roi roi = (Roi)rois.get(label);
 			//IJ.log("set "+color+"  "+lineWidth+"  "+fillColor);
-			if (color!=null) roi.setStrokeColor(color);
-			if (lineWidth>=0) roi.setStrokeWidth(lineWidth);
+			if (color!=null) 
+				roi.setStrokeColor(color);
+			if (lineWidth>=0) 
+				roi.setStrokeWidth(lineWidth);
 			roi.setFillColor(fillColor);
+			if (brainbowColors == null)
+				brainbowColors = new Hashtable<String, Color>();
+			brainbowColors.put(label.split(" =")[0].replace("\"","").toLowerCase(), new Color(fillColor.getRGB()));
 			if (roi!=null && (roi instanceof TextRoi)) {
 				roi.setImage(imp);
 				if (font!=null)
@@ -3446,6 +3479,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 
 		if (brainbow) {
+			if(source instanceof JButton && ((JButton) source).getParent().getParent().getParent() instanceof ImageWindow) 
+				source = ((ImageWindow)((JButton) source).getParent().getParent().getParent()).getImagePlus();
 			ColorLegend cl = getColorLegend(source);
 			if (cl != null){
 				if (cl.getRoiManager() != null && cl.getRoiManager() != this) {
