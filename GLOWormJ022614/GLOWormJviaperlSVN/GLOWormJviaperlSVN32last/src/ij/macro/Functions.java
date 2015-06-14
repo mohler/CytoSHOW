@@ -2520,9 +2520,12 @@ public class Functions implements MacroConstants, Measurements {
 		boolean select = cmd.equals("select");
 		boolean multiSelect = false;
 		boolean add = cmd.equals("add");
-		if (twoArgCommand)
+		if (twoArgCommand) {
 			path = getNextString();
-		else if (add) {
+			interp.getComma();
+			impID = (int) interp.getExpression();
+			interp.getRightParen();
+		} else if (add) {
 			if (interp.nextToken()==',') {
 				interp.getComma();
 				color = interp.getString();

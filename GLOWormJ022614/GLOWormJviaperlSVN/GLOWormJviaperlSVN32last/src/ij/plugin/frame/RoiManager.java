@@ -12,6 +12,7 @@ import java.util.zip.*;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
@@ -365,9 +366,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			imp.getRoiManager().getTextSearchField().setText("");
 			e.setSource(textSearchField); 
 		}
+		boolean wasVis = this.isVisible();
 
 		if (e.getSource() == textSearchField) {
-			boolean wasVis = this.isVisible();
 			this.setVisible(false);
 			showAll(SHOW_NONE);
 
@@ -521,10 +522,16 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				if (list.getSelectedIndices().length == 1)
 					delete(false);
 			}
+			else if (command.equals("Color")) {
+				if (runCommand("set fill color", Integer.toHexString(getSelectedRoisAsArray()[0].getFillColor().getRGB()))) {
+					this.close();
+					this.showWindow(wasVis);
+				}
+			}
 			else if (command.equals("Rename")) {
 				if (rename(null, null, true)) {
 					this.close();
-					this.showWindow(true);
+					this.showWindow(wasVis);
 				}
 			}
 			else if (command.equals("Properties..."))
@@ -2161,6 +2168,35 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			ArrayList<Integer> hitIndexes = new ArrayList<Integer>();
 			for (int i=0; i<n; i++) {
 				String label = (String) listModel.getElementAt(indexes[i]);
+				Color currentBBColor = this.getSelectedRoisAsArray()[0].getFillColor();
+				String hexAlpha = Integer.toHexString(fillColor.getAlpha());
+				String hexRed = Integer.toHexString(fillColor.getRed());
+				String hexGreen = Integer.toHexString(fillColor.getGreen());
+				String hexBlue = Integer.toHexString(fillColor.getBlue());
+//				int fillRGB = Colors.decode("#" /*+(hexAlpha.length()==1?"0":"")+hexAlpha*/
+//												+(hexRed.length()==1?"0":"")+hexRed
+//												+(hexGreen.length()==1?"0":"")+hexGreen
+//												+(hexBlue.length()==1?"0":"")+hexBlue
+//														 , fillColor).getRGB(); 
+				int fillRGB = fillColor.getRGB();
+				int currentRGB = currentBBColor.getRGB();
+				if (fillRGB == currentRGB)
+					return;
+				
+				while (cl.getBrainbowColors().contains(new Color(fillColor.getRGB())) && fillColor.getRGB() != currentRGB) {
+					if (fillColor.getBlue()<255) {
+						hexBlue = Integer.toHexString(fillColor.getBlue()+1);
+					} else if (fillColor.getGreen()<255) {
+						hexGreen = Integer.toHexString(fillColor.getGreen()+1);
+					} else if (fillColor.getRed()<255) {
+						hexRed = Integer.toHexString(fillColor.getRed()+1);
+					} 
+					fillColor = Colors.decode("#" +(hexAlpha.length()==1?"0":"")+hexAlpha
+												+(hexRed.length()==1?"0":"")+hexRed
+												+(hexGreen.length()==1?"0":"")+hexGreen
+												+(hexBlue.length()==1?"0":"")+hexBlue
+														, fillColor);
+				}
 				cl.getBrainbowColors().put(label.split(" =")[0].replace("\"","").toLowerCase(), new Color(fillColor.getRGB()));				
 				for (Checkbox cbC:cl.getCheckbox()) {
 					if (cbC.getName().equals(label.split(" =")[0].replace("\"",""))){
@@ -2168,7 +2204,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					}
 				}
 				for (int l=0; l<listModel.size(); l++) {
-					if (((String) listModel.getElementAt(l)).startsWith(label.split("_")[0])) {
+					if (((String) listModel.getElementAt(l)).startsWith(label.split(" =")[0])) {
 						hitIndexes.add(l);
 					}
 				}
@@ -2213,6 +2249,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			if (roi!=null && (roi instanceof TextRoi)) {
 				((TextRoi)roi).setCurrentFont(font);
 				((TextRoi)roi).setJustification(justification);
+			} else {
+				IJ.log("nontext match: "+roi.getName());
 			}
 			if (roi!=null && (roi instanceof ImageRoi) && opacity!=-1)
 				((ImageRoi)roi).setOpacity(opacity);
@@ -2946,7 +2984,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			macro = false;
 			return true;
 		} else if (cmd.equals("set fill color")) {
-			Color fillColor = Colors.decode(name, Color.cyan);
+			Color fillColor = null;
+			if (name.matches("#........")) {
+				fillColor = Colors.decode(name, Color.cyan);
+			} else {
+				fillColor = JColorChooser.showDialog(this.getFocusOwner(), "Pick a color for "+ this.getSelectedRoisAsArray()[0].getName()+"...", Colors.decode("#"+name, Color.cyan));
+			}
 			setProperties(null, -1, fillColor);
 			macro = false;
 			return true;

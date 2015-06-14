@@ -23,6 +23,7 @@ public class RoiProperties {
 	private static final String[] justNames = {"Left", "Center", "Right"};
 
 	/** Constructs a ColorChooser using the specified title and initial color. */
+	//Doesn't actually seem to do so...
 	public RoiProperties(String title, Roi roi) {
 		if (roi==null)
 			throw new IllegalArgumentException("ROI is null");

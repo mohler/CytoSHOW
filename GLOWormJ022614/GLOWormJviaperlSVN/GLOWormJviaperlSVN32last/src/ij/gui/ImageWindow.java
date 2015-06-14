@@ -208,6 +208,17 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 		addButton.addActionListener(imp.getRoiManager());
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
+		JButton paintButton = new JButton();
+		paintButton.setActionCommand("Color");
+		paintButton.setName("Color");
+		paintButton.setToolTipText("Re-Color Selected Tag");
+		paintButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/DIYPaintbrush.png")));
+		paintButton.setFont(buttonPanelFont);
+		tagButtonPanel.add(paintButton, fspc);
+//		viewButtonPanel.add(renameButton, fspc);
+		paintButton.addActionListener(imp.getRoiManager());
+		fspc.gridy = y++;
+		fspc.weighty = 0.5;
 		JButton renameButton = new JButton();
 		renameButton.setActionCommand("Rename");
 		renameButton.setName("Rename");
