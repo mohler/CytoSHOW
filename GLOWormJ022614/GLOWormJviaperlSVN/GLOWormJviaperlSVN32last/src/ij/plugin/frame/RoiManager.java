@@ -523,9 +523,20 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					delete(false);
 			}
 			else if (command.equals("Color")) {
-				if (runCommand("set fill color", Integer.toHexString(getSelectedRoisAsArray()[0].getFillColor().getRGB()))) {
-					this.close();
-					this.showWindow(wasVis);
+				Roi[] selectedRois = getSelectedRoisAsArray();
+				if (selectedRois.length>0) {
+					int fillColorInt = Colors.decode("#00000000", Color.black).getRGB();
+					if (selectedRois[0].getFillColor() != null) {
+						fillColorInt = selectedRois[0].getFillColor().getRGB();
+					}
+					String hexInt = Integer.toHexString(fillColorInt);
+					int l = hexInt.length();
+					for (int c=0;c<8-l;c++)
+						hexInt = "0"+hexInt;
+					if (runCommand("set fill color", hexInt)) {
+						this.close();
+						this.showWindow(wasVis);
+					}
 				}
 			}
 			else if (command.equals("Rename")) {
@@ -2173,11 +2184,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				String hexRed = Integer.toHexString(fillColor.getRed());
 				String hexGreen = Integer.toHexString(fillColor.getGreen());
 				String hexBlue = Integer.toHexString(fillColor.getBlue());
-//				int fillRGB = Colors.decode("#" /*+(hexAlpha.length()==1?"0":"")+hexAlpha*/
-//												+(hexRed.length()==1?"0":"")+hexRed
-//												+(hexGreen.length()==1?"0":"")+hexGreen
-//												+(hexBlue.length()==1?"0":"")+hexBlue
-//														 , fillColor).getRGB(); 
+				String fillRGBstring = "#"+(hexAlpha.length()==1?"0":"")+hexAlpha
+												+(hexRed.length()==1?"0":"")+hexRed
+												+(hexGreen.length()==1?"0":"")+hexGreen
+												+(hexBlue.length()==1?"0":"")+hexBlue; 
 				int fillRGB = fillColor.getRGB();
 				int currentRGB = currentBBColor.getRGB();
 				if (fillRGB == currentRGB)
@@ -2191,11 +2201,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					} else if (fillColor.getRed()<255) {
 						hexRed = Integer.toHexString(fillColor.getRed()+1);
 					} 
-					fillColor = Colors.decode("#" +(hexAlpha.length()==1?"0":"")+hexAlpha
-												+(hexRed.length()==1?"0":"")+hexRed
-												+(hexGreen.length()==1?"0":"")+hexGreen
-												+(hexBlue.length()==1?"0":"")+hexBlue
-														, fillColor);
+					fillRGBstring = "#"+(hexAlpha.length()==1?"0":"")+hexAlpha
+							+(hexRed.length()==1?"0":"")+hexRed
+							+(hexGreen.length()==1?"0":"")+hexGreen
+							+(hexBlue.length()==1?"0":"")+hexBlue; 
+					fillColor = Colors.decode(fillRGBstring, fillColor);
 				}
 				cl.getBrainbowColors().put(label.split(" =")[0].replace("\"","").toLowerCase(), new Color(fillColor.getRGB()));				
 				for (Checkbox cbC:cl.getCheckbox()) {
