@@ -9,5 +9,6 @@
 	<classpathentry kind="lib" path="commons-net-3.3.jar"/>
 	<classpathentry kind="lib" path="javaws.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="/Users/billmohler/Documents/QTJava.zip"/>
 	<classpathentry kind="output" path="plugins"/>
 </classpath>

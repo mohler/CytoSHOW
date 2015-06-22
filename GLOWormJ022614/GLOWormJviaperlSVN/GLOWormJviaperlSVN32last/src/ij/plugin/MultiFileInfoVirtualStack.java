@@ -110,35 +110,39 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				String[] subFileList = subFile.list();
 				subFileList = StringSorter.sortNumerically(subFileList);
 				ArrayList<String> subFileTiffArrayList = new ArrayList<String>();
-				int stuffCount = 0;
-				int junkCount = 0;
-				for (int q=0; q<cumulativeTiffFileList.length; q++)  {
-					String cumTiffListElement = cumulativeTiffFileList[q];
-					if (cumTiffListElement.toLowerCase().endsWith(".tif")) {
-						if (q-stuffCount+junkCount< subFileList.length 
-								&& !subFileList[q-stuffCount+junkCount].matches(cumTiffListElement)) {
-							if (subFileList[q-stuffCount+junkCount].toLowerCase().endsWith(".tif")) {
+				if(keyString.toLowerCase().startsWith("decon")) {
+					int stuffCount = 0;
+					int junkCount = 0;
+					for (int q=0; q<cumulativeTiffFileList.length; q++)  {
+						String cumTiffListElement = cumulativeTiffFileList[q];
+						if (cumTiffListElement.toLowerCase().endsWith(".tif")) {
+							if (q-stuffCount+junkCount< subFileList.length 
+									&& !subFileList[q-stuffCount+junkCount].matches(cumTiffListElement)) {
+								if (subFileList[q-stuffCount+junkCount].toLowerCase().endsWith(".tif")) {
+									subFileTiffArrayList.add("channel-frame missing");
+									stuffCount++;
+								} else {
+									junkCount++;
+									q--;
+								}
+							} else if (q-stuffCount+junkCount>= subFileList.length) {
 								subFileTiffArrayList.add("channel-frame missing");
 								stuffCount++;
 							} else {
-								junkCount++;
-								q--;
+								subFileTiffArrayList.add(dir+fileName+File.separator+cumTiffListElement);
 							}
-						} else if (q-stuffCount+junkCount>= subFileList.length) {
-							subFileTiffArrayList.add("channel-frame missing");
-							stuffCount++;
-						} else {
-							subFileTiffArrayList.add(dir+fileName+File.separator+cumTiffListElement);
-						}
 
-					} 
+						} 
+					}
+					while (subFileTiffArrayList.remove("junk"));
+				} else {
+					for (String subFilePath:subFileList)
+						subFileTiffArrayList.add(dir+fileName+File.separator+subFilePath);
 				}
-				while (subFileTiffArrayList.remove("junk"));
-				
+
 				bigSubFileArrayList.addAll(subFileTiffArrayList);
 			}
 		}
-
 		if (allDirectories) {
 			dimOrder = "xyztc";
 			dir = "";
@@ -158,7 +162,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		
 		if (cumulativeTiffFileList != null) {
 			for (String fileName:dirfileList){
-				if ((new File(dir + fileName)).canRead()) {
+				if ((new File(dir + fileName)).exists()) {
 					TiffDecoder td = new TiffDecoder(dir, fileName);
 					if (IJ.debugMode) td.enableDebugging();
 					IJ.showStatus("Decoding TIFF header...");
@@ -200,6 +204,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					fivStacks.add(new FileInfoVirtualStack());
 					fivStacks.get(fivStacks.size()-1).info = info;
 					fivStacks.get(fivStacks.size()-1).open(false);
+//					if (fivStacks.get(fivStacks.size()-1).nImages == 1 && 1 < fivStacks.get(0).nImages)
+//						fivStacks.get(fivStacks.size()-1).nImages = fivStacks.get(0).nImages;
 				} else if (fileName == "channel-frame missing") {
 					fivStacks.add(new FileInfoVirtualStack(new FileInfo(), false));
 					fivStacks.get(fivStacks.size()-1).info = dummyInfo;
