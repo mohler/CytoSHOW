@@ -66,8 +66,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (dir==null) return;
 		infoDir = dir;
 		argFile = new File(dir);
-		String[] dirfileList = argFile.list();
-		dirfileList = StringSorter.sortNumerically(dirfileList);
+		String[] dirFileList = argFile.list();
+		dirFileList = StringSorter.sortNumerically(dirFileList);
 
 		boolean allDirectories = true;
 //		String[] bigSubFileList = null;
@@ -76,7 +76,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		
 		largestDirectoryLength = 0;
 		int tiffCount = 0;
-		for (String fileName:dirfileList) {
+		for (String fileName:dirFileList) {
 			File subFile = new File(dir+fileName);
 			if (fileName.contains("DS_Store"))
 				;
@@ -100,7 +100,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			cumulativeTiffFileList [s] = (String) cumulativeSubFileArrayList.get(s);
 		}
 		cumulativeTiffFileList = StringSorter.sortNumerically(cumulativeTiffFileList);
-		for (String fileName:dirfileList) {
+		for (String fileName:dirFileList) {
 			File subFile = new File(dir+fileName);
 			if (fileName.contains("DS_Store"))
 				;
@@ -111,6 +111,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				subFileList = StringSorter.sortNumerically(subFileList);
 				ArrayList<String> subFileTiffArrayList = new ArrayList<String>();
 				if(keyString.toLowerCase().startsWith("decon")) {
+
 					int stuffCount = 0;
 					int junkCount = 0;
 					for (int q=0; q<cumulativeTiffFileList.length; q++)  {
@@ -143,25 +144,27 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				bigSubFileArrayList.addAll(subFileTiffArrayList);
 			}
 		}
+		String[] goDirFileList = {""};
 		if (allDirectories) {
 			dimOrder = "xyztc";
 			dir = "";
 
-			dirfileList = new String[bigSubFileArrayList.size()];
-			for (int s=0; s<dirfileList.length; s++) {
-				dirfileList [s] = (String) bigSubFileArrayList.get(s);
+			goDirFileList = new String[bigSubFileArrayList.size()];
+			for (int s=0; s<goDirFileList.length; s++) {
+				goDirFileList [s] = (String) bigSubFileArrayList.get(s);
 			}
 
 		} else {
 			dimOrder = "xyczt";
 			channelDirectories = 1;
 			largestDirectoryTiffCount = tiffCount;
+			goDirFileList = cumulativeTiffFileList;
 		}
 		if (dir.length() > 0 && !dir.endsWith(File.separator))
 			dir = dir + File.separator;
 		
-		if (cumulativeTiffFileList != null) {
-			for (String fileName:dirfileList){
+		if (goDirFileList != null) {
+			for (String fileName:goDirFileList){
 				if ((new File(dir + fileName)).exists()) {
 					TiffDecoder td = new TiffDecoder(dir, fileName);
 					if (IJ.debugMode) td.enableDebugging();
@@ -184,7 +187,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		}	
 		
 		if (channelDirectories >0) {
-			for (String fileName:dirfileList){
+			for (String fileName:goDirFileList){
 				if ((new File(dir + fileName)).canRead()) {
 					TiffDecoder td = new TiffDecoder(dir, fileName);
 					if (IJ.debugMode) td.enableDebugging();

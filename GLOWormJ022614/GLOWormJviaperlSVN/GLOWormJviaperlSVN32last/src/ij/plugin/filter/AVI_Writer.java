@@ -130,7 +130,7 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 			rangeFields[i] = (TextField)v.elementAt(i);
 			rangeFields[i].addTextListener(this);
 		}
-		gd.addCheckbox("Flatten channels and tags into one layer?", true);
+		gd.addCheckbox("Flatten channels and tags into one layer?  \nThis will also apply current zoom and window boundaries.", true);
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return false;
@@ -202,8 +202,19 @@ public class AVI_Writer implements PlugInFilter, TextListener {
         boolean isComposite = imp.isComposite();
         boolean isHyperstack = imp.isHyperStack();
         boolean isOverlay = imp.getOverlay()!=null && !imp.getHideOverlay();
-        xDim = imp.getCanvas().getWidth();   //image width
-        yDim = imp.getCanvas().getHeight();   //image height
+        if (flattenTags) {
+        	xDim = imp.getCanvas().getWidth();   //image width
+        	yDim = imp.getCanvas().getHeight();   //image height
+        } else {
+           	xDim = imp.getProcessor().getWidth();   
+        	yDim = imp.getProcessor().getHeight();   
+        	if (xDim > 3000 || yDim >3000) {
+        		int newxDim = xDim>yDim?3000:3000*xDim/yDim;
+        		int newyDim = xDim>yDim?3000*yDim/xDim:3000;
+        		xDim = newxDim;
+        		yDim = newyDim;
+        	}
+        }
         zDim = lastZ-firstZ+1; //number of slices in z stack
         tDim = lastT-firstT+1;
         cDim = lastC-firstC+1;
@@ -514,12 +525,19 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 	private void writeCompressedFrame(ImageProcessor ip) throws IOException {
 		//IJ.log("BufferdImage Type="+bufferedImage.getType()); // 1=RGB, 13=indexed
 		if (biCompression==JPEG_COMPRESSION) {
-//			BufferedImage bi = getBufferedImage(ip);			
-			BufferedImage bi = new BufferedImage(xDim, yDim, BufferedImage.TYPE_INT_RGB);
+			BufferedImage bi =null;
+			if (!flattenTags)
+				 bi = getBufferedImage(ip);			
+			else
+				 bi = new BufferedImage(xDim, yDim, BufferedImage.TYPE_INT_RGB);
 			boolean showing = imp.getCanvas().getShowAllROIs();
-			imp.getCanvas().setShowAllROIs(flattenTags);
-			imp.getCanvas().paint(bi.getGraphics());
-//			ImageIO.write(bi, "jpeg", raOutputStream);
+			if (!flattenTags) {
+
+			} else {
+				imp.getCanvas().setShowAllROIs(flattenTags);
+				imp.getCanvas().paint(bi.getGraphics());
+			}
+			//			ImageIO.write(bi, "jpeg", raOutputStream);
 			
 			Iterator<ImageWriter> iter = ImageIO.getImageWritersByFormatName("jpeg");
 			ImageWriter writer = (ImageWriter)iter.next();
@@ -549,7 +567,11 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 
 //			ImageIO.write(bi, "jpeg", raOutputStream);
 		} else { //if (biCompression==PNG_COMPRESSION) {
-			BufferedImage bi = new BufferedImage(xDim, yDim, BufferedImage.TYPE_INT_RGB);
+			BufferedImage bi =null;
+			if (!flattenTags)
+				 bi = getBufferedImage(ip);			
+			else
+				 bi = new BufferedImage(xDim, yDim, BufferedImage.TYPE_INT_RGB);
 			boolean showing = imp.getCanvas().getShowAllROIs();
 			imp.getCanvas().setShowAllROIs(flattenTags);
 			imp.getCanvas().paint(bi.getGraphics());
@@ -560,7 +582,13 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 	}
 
 	private BufferedImage getBufferedImage(ImageProcessor ip) {
-		BufferedImage bi = new BufferedImage(xDim, yDim, BufferedImage.TYPE_INT_RGB);
+		if (ip.getWidth() > 3000 || ip.getHeight() >3000) {
+			ip.setInterpolationMethod(ImageProcessor.BICUBIC);
+			ip = ip.resize(ip.getWidth()>ip.getHeight()?3000:3000*ip.getWidth()/ip.getHeight(),
+							ip.getWidth()>ip.getHeight()?3000*ip.getHeight()/ip.getWidth():3000,
+							true);
+		}
+		BufferedImage bi = new BufferedImage(ip.getWidth(), ip.getHeight(), BufferedImage.TYPE_INT_RGB);
 		Graphics2D g = (Graphics2D)bi.getGraphics();
 		g.drawImage(ip.createImage(), 0, 0, null);
 		return bi;
