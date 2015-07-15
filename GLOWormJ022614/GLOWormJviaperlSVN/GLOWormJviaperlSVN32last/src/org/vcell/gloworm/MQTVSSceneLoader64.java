@@ -8,6 +8,7 @@ import ij.io.FileInfo;
 import ij.io.Opener;
 
 import java.awt.*;
+import java.awt.event.ItemEvent;
 import java.awt.image.BufferedImage;
 
 import ij.plugin.*;
@@ -613,6 +614,8 @@ public class MQTVSSceneLoader64 implements PlugIn {
 //														.flipSingleMovieVertical(j);
 //														imp.getRoiManager().setRmNeedsUpdate(true);
 														mcc.setFlipVCB(j, true);
+														if (IJ.isWindows())
+															mcc.itemStateChanged(new ItemEvent(mcc.getFlipVCB(j), ItemEvent.ITEM_STATE_CHANGED, mcc.getFlipVCB(j), ItemEvent.SELECTED));
 													}
 												}
 											}
@@ -625,6 +628,8 @@ public class MQTVSSceneLoader64 implements PlugIn {
 //														.flipSingleMovieHorizontal(j);
 ////														imp.getRoiManager().setRmNeedsUpdate(true);
 														mcc.setFlipHCB(j, true);
+														if (IJ.isWindows())
+															mcc.itemStateChanged(new ItemEvent(mcc.getFlipHCB(j), ItemEvent.ITEM_STATE_CHANGED, mcc.getFlipHCB(j), ItemEvent.SELECTED));
 													}
 												}
 											}
@@ -637,6 +642,8 @@ public class MQTVSSceneLoader64 implements PlugIn {
 //														.flipSingleMovieZaxis(j);
 //														imp.getRoiManager().setRmNeedsUpdate(true);
 														mcc.setFlipZCB(j, true);
+														if (IJ.isWindows())
+															mcc.itemStateChanged(new ItemEvent(mcc.getFlipZCB(j), ItemEvent.ITEM_STATE_CHANGED, mcc.getFlipZCB(j), ItemEvent.SELECTED));
 													}
 												}
 											}
