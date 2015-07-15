@@ -29,8 +29,8 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 	boolean hyperStack;
 	int nChannels=1, nSlices=1, nFrames=1;
 	int c=1, z=1, t=1;
-	private boolean wormAtlas;
-	private Panel scrollbarPanel;
+	boolean wormAtlas;
+	Panel scrollbarPanel;
 	
 
 	public StackWindow(ImagePlus imp, boolean showNow) {

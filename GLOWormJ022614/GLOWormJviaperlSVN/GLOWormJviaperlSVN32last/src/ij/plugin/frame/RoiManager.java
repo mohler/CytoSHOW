@@ -868,7 +868,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			if (roi instanceof EllipseRoi) altType = "Ellipse";
 			if (roi instanceof Arrow) altType = "Arrow";
 			if (imp != null) 
-				label = ((altType != null)?altType:roi.getTypeAsString() ) +"_"+ imp.getChannel() +"_"+ imp.getSlice() +"_"+imp.getFrame();
+				if (roi.getName() != null)
+					label = "\""+roi.getName().split("\"")[1]+" \"" +"_"+ imp.getChannel() +"_"+ imp.getSlice() +"_"+imp.getFrame();
+				else
+					label = ((altType != null)?altType:roi.getTypeAsString() ) +"_"+ imp.getChannel() +"_"+ imp.getSlice() +"_"+imp.getFrame();
 			else 
 				label = roi.getName();
 		}
@@ -897,14 +900,29 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		rois.put(label, roiCopy);
 
 		if (!Orthogonal_Views.isOrthoViewsImage(imp)) {
-			for (Roi existingRoi:getFullRoisAsArray()){
-				if (imp.getSlice() == existingRoi.getZPosition() && imp.getFrame() == existingRoi.getTPosition()) {
-					if (roiCopy.contains((int)existingRoi.getBounds().getCenterX(), (int)existingRoi.getBounds().getCenterY())) {
-						if (existingRoi instanceof TextRoi && !(roiCopy instanceof TextRoi) && roiCopy.isArea()) {
-							label = (true/*((TextRoi)existingRoi).getText().matches(".*")*/?(""+((TextRoi)existingRoi).getText().replace("\n"," ")+" Area"):"Blank");
-							rename(label, new int[]{listModel.size()-1}, true);
-							roiCopy.setFillColor(existingRoi.getFillColor());
-							roiCopy.setStrokeColor(null);
+			if (imp.getWindow() instanceof StackWindow && ((StackWindow)imp.getWindow()).isWormAtlas()) {
+				for (Roi existingRoi:getFullRoisAsArray()){
+					if (imp.getSlice() == existingRoi.getZPosition() && imp.getFrame() == existingRoi.getTPosition()) {
+						if (roiCopy.contains((int)existingRoi.getBounds().getCenterX(), (int)existingRoi.getBounds().getCenterY())) {
+							if (existingRoi instanceof TextRoi && !(roiCopy instanceof TextRoi) && roiCopy.isArea()) {
+								label = (true/*((TextRoi)existingRoi).getText().matches(".*")*/?(""+((TextRoi)existingRoi).getText().replace("\n"," ")+"| Area"):"Blank");
+								rename(label, new int[]{listModel.size()-1}, true);
+								roiCopy.setFillColor(existingRoi.getFillColor());
+								roiCopy.setStrokeColor(null);
+							}
+						}
+					}
+				}
+			} else {
+				for (Roi existingRoi:getFullRoisAsArray()){
+					if (imp.getSlice() == existingRoi.getZPosition() && imp.getFrame() == existingRoi.getTPosition()) {
+						if (roiCopy.contains((int)existingRoi.getBounds().x, (int)existingRoi.getBounds().y)) {
+							if (existingRoi instanceof TextRoi && !(roiCopy instanceof TextRoi) && roiCopy.isArea()) {
+								label = (true/*((TextRoi)existingRoi).getText().matches(".*")*/?(""+((TextRoi)existingRoi).getText().replace("\n"," ")+"| Area"):"Blank");
+								rename(label, new int[]{listModel.size()-1}, true);
+								roiCopy.setFillColor(existingRoi.getFillColor());
+								roiCopy.setStrokeColor(null);
+							}
 						}
 					}
 				}
@@ -2236,7 +2254,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			roi.setFillColor(fillColor);
 			if (brainbowColors == null)
 				brainbowColors = new Hashtable<String, Color>();
-			brainbowColors.put(label.split(" =")[0].replace("\"","").toLowerCase(), new Color(fillColor.getRGB()));
+			if (fillColor!=null)
+				brainbowColors.put(label.split(" =")[0].replace("\"","").toLowerCase(), new Color(fillColor.getRGB()));
 			if (roi!=null && (roi instanceof TextRoi)) {
 				roi.setImage(imp);
 				if (font!=null)

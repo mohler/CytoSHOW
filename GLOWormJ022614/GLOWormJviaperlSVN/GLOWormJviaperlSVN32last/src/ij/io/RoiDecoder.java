@@ -346,12 +346,12 @@ public class RoiDecoder {
 		if (strokeWidth>0.0)
 			roi.setStrokeWidth(strokeWidth);
 		int strokeColor = getInt(STROKE_COLOR);
-		if (strokeColor!=0) {
+		if (strokeColor>=0) {
 			int alpha = (strokeColor>>24)&0xff;
 			roi.setStrokeColor(new Color(strokeColor, alpha!=255));
 		}
 		int fillColor = getInt(FILL_COLOR);
-		if (fillColor!=0) {
+		if (fillColor>=0) {
 			int alpha = (fillColor>>24)&0xff;
 			roi.setFillColor(new Color(fillColor, alpha!=255));
 		}

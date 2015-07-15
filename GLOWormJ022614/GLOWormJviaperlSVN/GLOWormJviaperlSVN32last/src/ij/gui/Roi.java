@@ -496,6 +496,9 @@ public class Roi extends Object implements Cloneable, java.io.Serializable {
 			Roi r = (Roi)super.clone();
 			r.setImage(null);
 			r.setStroke(getStroke());
+			r.setStrokeColor(getStrokeColor());
+			r.setFillColor(getFillColor());
+			r.setName(getName());
 			r.copyAttributes(this);
 			r.imageID = getImageID();
 			r.setPosition(this.getCPosition(), this.getZPosition(), this.getTPosition());
