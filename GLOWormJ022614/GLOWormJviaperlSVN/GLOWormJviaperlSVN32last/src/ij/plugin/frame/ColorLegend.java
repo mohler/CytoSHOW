@@ -112,7 +112,8 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 		int panelHeight =0;
 		String[] clLines = clStr.split("\n");
 		checkbox = new Checkbox[clLines.length];
-		for (int i=0; i<clLines.length; i++) {			
+		for (int i=0; i<clLines.length; i++) {		
+			IJ.log(clLines[i]);
 			checkbox[i] = new Checkbox();
 			((Checkbox)checkbox[i]).setSize(150, 10);
 			checkbox[i].setLabel(clLines[i].split(",")[0].length()<20?clLines[i].split(",")[0]:clLines[i].split(",")[0].substring(0, 20) + "...");
@@ -241,7 +242,12 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 					}
 			}
 		}
-		brainbowColors = rm.getColorLegend().getBrainbowColors();
+		if (rm.getColorLegend() != null)
+			brainbowColors = rm.getColorLegend().getBrainbowColors();
+		else {
+			rm.setColorLegend(this);
+			brainbowColors = this.getBrainbowColors();
+		}
 		checkbox = new Checkbox[fullCellNames.size()];
 		checkboxHash = new Hashtable<Color,Checkbox>();
 		int count=0;

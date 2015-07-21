@@ -802,6 +802,14 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 		}
 	}
 
+	public boolean isDoingFirstSetup() {
+		return doingFirstSetup;
+	}
+
+	public void setDoingFirstSetup(boolean doingFirstSetup) {
+		this.doingFirstSetup = doingFirstSetup;
+	}
+
 	public void actionPerformed(ActionEvent e) {
 
 		//		ImagePlus imp = WindowManager.getCurrentImage();

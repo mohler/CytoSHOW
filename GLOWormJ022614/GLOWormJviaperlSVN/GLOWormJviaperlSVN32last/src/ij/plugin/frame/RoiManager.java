@@ -868,7 +868,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			if (roi instanceof EllipseRoi) altType = "Ellipse";
 			if (roi instanceof Arrow) altType = "Arrow";
 			if (imp != null) 
-				if (roi.getName() != null)
+				if (roi.getName() != null && roi.getName().split("\"").length>1)
 					label = "\""+roi.getName().split("\"")[1]+" \"" +"_"+ imp.getChannel() +"_"+ imp.getSlice() +"_"+imp.getFrame();
 				else
 					label = ((altType != null)?altType:roi.getTypeAsString() ) +"_"+ imp.getChannel() +"_"+ imp.getSlice() +"_"+imp.getFrame();
@@ -3617,12 +3617,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					if (cellNames != null ) {
 						String[] cellNamesArray = cellNames.toArray(new String[cellNames.size()]);
 						for (int q=cellNamesArray.length-1; q>=0; q--){
-							IJ.log(""+cellNames.get(q) + " "+ q +"?");
+//							IJ.log(""+cellNames.get(q) + " "+ q +"?");
 							if (!selectedNamesStrings.contains(cellNames.get(q))) {
-								IJ.log(""+cellNames.get(q) + " "+ q +"XXX");
+//								IJ.log(""+cellNames.get(q) + " "+ q +"XXX");
 								cellNames.remove(q);
-							} else
-								IJ.log(""+cellNames.get(q) + " "+ q +"OK");
+							} else {
+//								IJ.log(""+cellNames.get(q) + " "+ q +"OK");
+							}
 						}
 					}				
 				}
@@ -3675,14 +3676,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							searchText = searchText + " " + chunk;
 					if ( !cellNames.contains(searchText.trim())) {
 						cellNames.add(searchText.trim());
-						IJ.log(""+cellNames.get(cellNames.size()-1) + " "+ cellNames.size());
+//						IJ.log(""+cellNames.get(cellNames.size()-1) + " "+ cellNames.size());
 					}
 				}
 			}
 			if (cellNames == null) {
 				for (int r=0; r<fullCellNames.size(); r++){
 					cellNames.add(""+fullCellNames.get(r));			
-					IJ.log(""+cellNames.get(cellNames.size()-1) + " "+ cellNames.size());
+//					IJ.log(""+cellNames.get(cellNames.size()-1) + " "+ cellNames.size());
 
 				}
 			}
@@ -3751,7 +3752,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					shownRoisHash.put(cellNumbers[cellNumbers.length-2]+"_"+cellNumbers[cellNumbers.length-1].replaceAll("[CZT]", ""), new ArrayList<String>());
 				if (!shownRoisHash.get(cellNumbers[cellNumbers.length-2]+"_"+cellNumbers[cellNumbers.length-1].replaceAll("[CZT]", "")).contains(shownRois[j].getName())) { 
 					shownRoisHash.get(cellNumbers[cellNumbers.length-2]+"_"+cellNumbers[cellNumbers.length-1].replaceAll("[CZT]", "")).add(shownRois[j].getName());
-					IJ.log(cellNumbers[cellNumbers.length-2]+"_"+cellNumbers[cellNumbers.length-1].replaceAll("[CZT]", "") +" "+j+" "+shownRois[j].getName());
+//					IJ.log(cellNumbers[cellNumbers.length-2]+"_"+cellNumbers[cellNumbers.length-1].replaceAll("[CZT]", "") +" "+j+" "+shownRois[j].getName());
 				}
 
 			}

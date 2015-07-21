@@ -491,6 +491,7 @@ public class MQTVSSceneLoader64 implements PlugIn {
 					
 					double lastMin = 0;
 					double lastMax = 255;
+					//ARE THERE STILL CASES WHERE WE NEED TO ADJUST TAGS ON STARTUP?
 					getImp().getMultiChannelController().doingFirstSetup = true;
 					for ( int j=0 ; j < movieAdjustmentFiles.length ; j++) {
 
@@ -614,8 +615,11 @@ public class MQTVSSceneLoader64 implements PlugIn {
 //														.flipSingleMovieVertical(j);
 //														imp.getRoiManager().setRmNeedsUpdate(true);
 														mcc.setFlipVCB(j, true);
-														if (IJ.isWindows())
+														if (IJ.isWindows()) {
+															mcc.setDoingFirstSetup(false);
 															mcc.itemStateChanged(new ItemEvent(mcc.getFlipVCB(j), ItemEvent.ITEM_STATE_CHANGED, mcc.getFlipVCB(j), ItemEvent.SELECTED));
+															mcc.setDoingFirstSetup(true);
+														}
 													}
 												}
 											}
@@ -628,8 +632,11 @@ public class MQTVSSceneLoader64 implements PlugIn {
 //														.flipSingleMovieHorizontal(j);
 ////														imp.getRoiManager().setRmNeedsUpdate(true);
 														mcc.setFlipHCB(j, true);
-														if (IJ.isWindows())
-															mcc.itemStateChanged(new ItemEvent(mcc.getFlipHCB(j), ItemEvent.ITEM_STATE_CHANGED, mcc.getFlipHCB(j), ItemEvent.SELECTED));
+														if (IJ.isWindows()) {
+															mcc.setDoingFirstSetup(false);
+															mcc.itemStateChanged(new ItemEvent(mcc.getFlipVCB(j), ItemEvent.ITEM_STATE_CHANGED, mcc.getFlipVCB(j), ItemEvent.SELECTED));
+															mcc.setDoingFirstSetup(true);
+														}
 													}
 												}
 											}
@@ -642,8 +649,11 @@ public class MQTVSSceneLoader64 implements PlugIn {
 //														.flipSingleMovieZaxis(j);
 //														imp.getRoiManager().setRmNeedsUpdate(true);
 														mcc.setFlipZCB(j, true);
-														if (IJ.isWindows())
-															mcc.itemStateChanged(new ItemEvent(mcc.getFlipZCB(j), ItemEvent.ITEM_STATE_CHANGED, mcc.getFlipZCB(j), ItemEvent.SELECTED));
+														if (IJ.isWindows()) {
+															mcc.setDoingFirstSetup(false);
+															mcc.itemStateChanged(new ItemEvent(mcc.getFlipVCB(j), ItemEvent.ITEM_STATE_CHANGED, mcc.getFlipVCB(j), ItemEvent.SELECTED));
+															mcc.setDoingFirstSetup(true);
+														}
 													}
 												}
 											}
@@ -889,31 +899,6 @@ public class MQTVSSceneLoader64 implements PlugIn {
 //					WindowManager.getFrame("Too Much Info ;) Window").toFront();
 
 					RoiManager rm = getImp().getRoiManager();
-					if (clFileName != null) {
-						String clStr;
-						if (pathlist.contains("/Volumes/GLOWORM_DATA") ) {
-							clStr = IJ.openAsString("/Volumes/GLOWORM_DATA/" + clFileName);
-						} else {
-							clStr = IJ.openAsString(file.getPath().substring(0, file.getPath().lastIndexOf("MQTVS")) + clFileName);
-						}
-						BufferedReader in = null;
-						if (pathlist.startsWith("/Volumes/GLOWORM_DATA/")) {
-							in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
-									RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], ("/Volumes/GLOWORM_DATA/" + clFileName)))));
-							if (in != null) {
-								StringBuilder stringBuilder = new StringBuilder();
-								String ls = System.getProperty("line.separator");
-								String line = "";
-								while (line != null) {
-									line = in.readLine();
-									if (line != null)
-										stringBuilder.append(line).append(ls);
-								}
-								clStr = stringBuilder.toString();
-							}
-						}
-						ColorLegend cl = new ColorLegend(getImp(), clStr);
-					}
 					if (roiFileName != null) {
 						String roiFilePath;
 						if (pathlist.contains("/Volumes/GLOWORM_DATA") ) {
@@ -953,6 +938,36 @@ public class MQTVSSceneLoader64 implements PlugIn {
 							//						rm.setVisible(false);
 						}
 					}
+					String clStr;
+					if (clFileName != null) {
+						if (pathlist.contains("/Volumes/GLOWORM_DATA") ) {
+							clStr = IJ.openAsString("/Volumes/GLOWORM_DATA/" + clFileName);
+						} else {
+							clStr = IJ.openAsString(file.getPath().substring(0, file.getPath().lastIndexOf("MQTVS")) + clFileName);
+						}
+
+						BufferedReader in = null;
+						if (pathlist.startsWith("/Volumes/GLOWORM_DATA/")) {
+							in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
+									RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], ("/Volumes/GLOWORM_DATA/" + clFileName)))));
+							if (in != null) {
+								StringBuilder stringBuilder = new StringBuilder();
+								String ls = System.getProperty("line.separator");
+								String line = "";
+								while (line != null) {
+									line = in.readLine();
+									if (line != null)
+										stringBuilder.append(line).append(ls);
+								}
+								clStr = stringBuilder.toString();
+							}
+						}
+					} else {
+						String universalCLURL = MQTVSSceneLoader64.class.getResource("docs/fullUniversal_ColorLegend.lgd").toString();
+						clStr = IJ.openUrlAsString(universalCLURL);
+					}
+					ColorLegend cl = new ColorLegend(getImp(), clStr);
+					rm.setColorLegend(cl);
 
 					if (lineageLCDFilePath != "" && lineageMapImagePath != "") {
 						ImagePlus lineageMapImage = null;
