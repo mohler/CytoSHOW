@@ -3825,7 +3825,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 					for (int z=1; z<=outNSlices; z++) {
 						ArrayList<String> theseSlcSpecRoiNames = new ArrayList<String>();
-						if (z%fillZfactor == 0 && this.getSliceSpecificRoiArray((int)(z/fillZfactor), t, false) != null) {
+						if (/*z%fillZfactor == 0 &&*/ this.getSliceSpecificRoiArray((int)(z/fillZfactor), t, false) != null) {
 							for (Roi thisRoi:this.getSliceSpecificRoiArray((int)(z/fillZfactor), t, false))
 								theseSlcSpecRoiNames.add(thisRoi.getName());
 						}
@@ -3834,7 +3834,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							IJ.log(theseSlcSpecRoiNames.get(j));
 							if (theseSlcSpecRoiNames.get(j) != null 
 									&& ((Roi) rois.get(theseSlcSpecRoiNames.get(j).trim()))!=null
-									&& z%fillZfactor == 0 
+									/*&& z%fillZfactor == 0 */
 									&& ((Roi) rois.get(theseSlcSpecRoiNames.get(j).trim())).getZPosition() == (int)(z/fillZfactor)
 									&& ((Roi) rois.get(theseSlcSpecRoiNames.get(j).trim())).getTPosition() == t) {
 								IJ.log(theseSlcSpecRoiNames.get(j));
