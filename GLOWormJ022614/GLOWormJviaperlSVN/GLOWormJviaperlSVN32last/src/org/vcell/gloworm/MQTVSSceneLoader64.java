@@ -897,8 +897,40 @@ public class MQTVSSceneLoader64 implements PlugIn {
 						}
 					}
 //					WindowManager.getFrame("Too Much Info ;) Window").toFront();
-
+					
+					
 					RoiManager rm = getImp().getRoiManager();
+					String clStr;
+					if (clFileName != null) {
+						if (pathlist.contains("/Volumes/GLOWORM_DATA") ) {
+							clStr = IJ.openAsString("/Volumes/GLOWORM_DATA/" + clFileName);
+						} else {
+							clStr = IJ.openAsString(file.getPath().substring(0, file.getPath().lastIndexOf("MQTVS")) + clFileName);
+						}
+
+						BufferedReader in = null;
+						if (pathlist.startsWith("/Volumes/GLOWORM_DATA/")) {
+							in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
+									RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], ("/Volumes/GLOWORM_DATA/" + clFileName)))));
+							if (in != null) {
+								StringBuilder stringBuilder = new StringBuilder();
+								String ls = System.getProperty("line.separator");
+								String line = "";
+								while (line != null) {
+									line = in.readLine();
+									if (line != null)
+										stringBuilder.append(line).append(ls);
+								}
+								clStr = stringBuilder.toString();
+							}
+						}
+					} else {
+						String universalCLURL = MQTVSSceneLoader64.class.getResource("docs/fullUniversal_ColorLegend.lgd").toString();
+						clStr = IJ.openUrlAsString(universalCLURL);
+					}
+					ColorLegend cl = new ColorLegend(getImp(), clStr);
+					rm.setColorLegend(cl);
+
 					if (roiFileName != null) {
 						String roiFilePath;
 						if (pathlist.contains("/Volumes/GLOWORM_DATA") ) {
@@ -938,36 +970,6 @@ public class MQTVSSceneLoader64 implements PlugIn {
 							//						rm.setVisible(false);
 						}
 					}
-					String clStr;
-					if (clFileName != null) {
-						if (pathlist.contains("/Volumes/GLOWORM_DATA") ) {
-							clStr = IJ.openAsString("/Volumes/GLOWORM_DATA/" + clFileName);
-						} else {
-							clStr = IJ.openAsString(file.getPath().substring(0, file.getPath().lastIndexOf("MQTVS")) + clFileName);
-						}
-
-						BufferedReader in = null;
-						if (pathlist.startsWith("/Volumes/GLOWORM_DATA/")) {
-							in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
-									RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], ("/Volumes/GLOWORM_DATA/" + clFileName)))));
-							if (in != null) {
-								StringBuilder stringBuilder = new StringBuilder();
-								String ls = System.getProperty("line.separator");
-								String line = "";
-								while (line != null) {
-									line = in.readLine();
-									if (line != null)
-										stringBuilder.append(line).append(ls);
-								}
-								clStr = stringBuilder.toString();
-							}
-						}
-					} else {
-						String universalCLURL = MQTVSSceneLoader64.class.getResource("docs/fullUniversal_ColorLegend.lgd").toString();
-						clStr = IJ.openUrlAsString(universalCLURL);
-					}
-					ColorLegend cl = new ColorLegend(getImp(), clStr);
-					rm.setColorLegend(cl);
 
 					if (lineageLCDFilePath != "" && lineageMapImagePath != "") {
 						ImagePlus lineageMapImage = null;

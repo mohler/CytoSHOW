@@ -318,6 +318,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		addPopupItem("Specify...");
 		addPopupItem("Remove Slice Info");
 		addPopupItem("Help");
+		addPopupItem("\"Show All\" Color...");
 		addPopupItem("Options...");
 		addPopupItem("Get ROIs this Slice");
 		addPopupItem("Copy Selected to Other Images");
@@ -1679,21 +1680,21 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					Roi roi = rd.getRoi(); 
 					//
 					ColorLegend cl = getColorLegend();
-					if (cl != null) {
-						Color clColor = cl.getBrainbowColors()
-											.get(roi.getName().toLowerCase().split("_")[0].split("=")[0].replace("\"", "").trim());
-						if (clColor !=null) {
-							String hexRed = Integer.toHexString(clColor.getRed());
-							String hexGreen = Integer.toHexString(clColor.getGreen());
-							String hexBlue = Integer.toHexString(clColor.getBlue());
-							roi.setFillColor(Colors.decode("#88"+(hexRed.length()==1?"0":"")+hexRed
-																+(hexGreen.length()==1?"0":"")+hexGreen
-																+(hexBlue.length()==1?"0":"")+hexBlue
-															, Color.white));
-						}
-					}
 					//
 					if (roi!=null) { 
+						if (cl != null) {
+							Color clColor = cl.getBrainbowColors()
+												.get(roi.getName().toLowerCase().split("_")[0].split("=")[0].replace("\"", "").trim());
+							if (clColor !=null) {
+								String hexRed = Integer.toHexString(clColor.getRed());
+								String hexGreen = Integer.toHexString(clColor.getGreen());
+								String hexBlue = Integer.toHexString(clColor.getBlue());
+								roi.setFillColor(Colors.decode("#88"+(hexRed.length()==1?"0":"")+hexRed
+																	+(hexGreen.length()==1?"0":"")+hexGreen
+																	+(hexBlue.length()==1?"0":"")+hexBlue
+																, Color.white));
+							}
+						}
 						roi.setImage(imp);
 						name = name.substring(0, name.length()-4);
 						name = getUniqueName(name); 
@@ -2565,7 +2566,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	void options() {
 		Color c = ImageCanvas.getShowAllColor();
 		GenericDialog gd = new GenericDialog("Options");
-		gd.addPanel(makeButtonPanel(gd), GridBagConstraints.CENTER, new Insets(5, 0, 0, 0));
+//		gd.addPanel(makeButtonPanel(gd), GridBagConstraints.CENTER, new Insets(5, 0, 0, 0));
 		gd.addCheckbox("Associate \"Show All\" ROIs with slices", Prefs.showAllSliceOnly);
 		gd.addCheckbox("Restore ROIs centered", restoreCentered);
 		gd.addCheckbox("Use ROI names as labels", Prefs.useNamesAsLabels);
@@ -3829,26 +3830,25 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							for (Roi thisRoi:this.getSliceSpecificRoiArray((int)(z/fillZfactor), t, false))
 								theseSlcSpecRoiNames.add(thisRoi.getName());
 						}
-						IJ.log(""+z);
+//						IJ.log(""+z);
 						for(int j=0;j<theseSlcSpecRoiNames.size();j++){
-							IJ.log(theseSlcSpecRoiNames.get(j));
+//							IJ.log(theseSlcSpecRoiNames.get(j));
 							if (theseSlcSpecRoiNames.get(j) != null 
 									&& ((Roi) rois.get(theseSlcSpecRoiNames.get(j).trim()))!=null
 									/*&& z%fillZfactor == 0 */
 									&& ((Roi) rois.get(theseSlcSpecRoiNames.get(j).trim())).getZPosition() == (int)(z/fillZfactor)
 									&& ((Roi) rois.get(theseSlcSpecRoiNames.get(j).trim())).getTPosition() == t) {
-								IJ.log(theseSlcSpecRoiNames.get(j));
+//								IJ.log(theseSlcSpecRoiNames.get(j));
 								String[] searchTextChunks = theseSlcSpecRoiNames.get(j).split("[\"|=]")[1].split(" ");
 								String searchText = "";
 								for (String chunk:searchTextChunks)
 									if (!(chunk.matches("-?\\d+") || chunk.matches("\\++")))
 										searchText = searchText + " " + chunk;
 								String cellTagName = searchText.trim();
-								IJ.log(cellTagName);
+//								IJ.log(cellTagName);
 								if ((fatSynapses && theseSlcSpecRoiNames.get(j).startsWith("\"syn")) || isEmbryonic ){
-									IJ.log("EMBRYONIC");
 									if (cellNames.contains(cellTagName) && brainbowColors.get(cellTagName.toLowerCase())!=null){
-										IJ.log("cell name matches");
+//										IJ.log("cell name matches");
 										int maxRadius = synapseScale/2;
 										for (int step= -maxRadius;step< maxRadius;step++) {
 											if (z+step>0 && z+step<= outNSlices ) {
@@ -3856,7 +3856,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 												drawIP.setColor(brainbow?new Color(brainbowColors.get(cellTagName.toLowerCase()).getRGB()):eightBit?Color.WHITE: mowColors.get(cellTagName));
 												double radius = Math.pow( Math.pow((maxRadius),2) - Math.pow(step,2), 0.5 );
 												Roi thisRoi = ((Roi) rois.get(theseSlcSpecRoiNames.get(j).trim()));
-												IJ.log(""+theseSlcSpecRoiNames.get(j).trim()+" "+radius);
+//												IJ.log(""+theseSlcSpecRoiNames.get(j).trim()+" "+radius);
 												if (thisRoi != null)
 													drawIP.fill(new OvalRoi((int)thisRoi.getBounds().getCenterX()-radius,
 															(int)thisRoi.getBounds().getCenterY()-radius, 
@@ -3887,7 +3887,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 											drawIP.fill(thisRoi);
 									}
 								} else {
-									IJ.log(""+cellTagName + brainbowColors.get(cellTagName.toLowerCase()));
+//									IJ.log(""+cellTagName + brainbowColors.get(cellTagName.toLowerCase()));
 
 								}
 
@@ -3898,7 +3898,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						ImageProcessor bip = bigStack.getProcessor(s);
 						bip.setInterpolationMethod(ImageProcessor.BICUBIC);
 						sketchStack.addSlice(bip.resize(modelWidth, imp.getHeight()/(imp.getWidth()/modelWidth), false));
-						IJ.log("RESIZE "+sketchStack.getSize());
+//						IJ.log("RESIZE "+sketchStack.getSize());
 					}
 					miniStackSize = sketchStack.getSize();
 					ImagePlus bigImp = new ImagePlus("bigStack", bigStack);

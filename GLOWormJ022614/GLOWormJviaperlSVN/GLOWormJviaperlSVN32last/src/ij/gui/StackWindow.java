@@ -70,7 +70,7 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 								((StackWindow)this).zSelector.getHeight():
 									((StackWindow)this).tSelector!=null?
 											((StackWindow)this).tSelector.getHeight():
-												((StackWindow)this).tSelector!=null?
+												((StackWindow)this).cSelector!=null?
 														((StackWindow)this).cSelector.getHeight():0)
 						:0)
 						+this.overheadPanel.getHeight();
