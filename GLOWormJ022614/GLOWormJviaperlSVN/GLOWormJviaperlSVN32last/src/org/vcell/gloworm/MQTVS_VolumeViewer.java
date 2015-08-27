@@ -95,7 +95,7 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 //		IJ.runPlugIn("ImageJ_3D_Viewer", "");
 		ImageJ3DViewer ij3dv = new ImageJ3DViewer();
 		ij3dv.run(".");
-		ImageJ3DViewer.add(impD.getTitle(), "White", impD.getTitle()+"_IJ3DV_"+imp.getChannel(), "75", "true", "true", "true", "2", "2");
+		ImageJ3DViewer.add(impD.getTitle(), "White", impD.getTitle()+"_IJ3DV_"+imp.getChannel(), "50", "true", "true", "true", "2", "2");
 		ImageJ3DViewer.select(impD.getTitle()+"_IJ3DV_"+imp.getChannel());
 		ImageJ3DViewer.exportContent("wavefront", IJ.getDirectory("home")+File.separator+impD.getTitle()+"_IJ3DV_"+imp.getChannel()+".obj");
 		
