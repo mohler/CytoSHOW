@@ -35,15 +35,9 @@
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/jocl-natives-linux-amd64.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/jocl-natives-linux-armv6.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/jocl-natives-linux-armv6hf.jar"/>
-	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/jocl-natives-linux-i586.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/jocl-natives-macosx-universal.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/jocl-natives-solaris-amd64.jar"/>
-	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/jocl-natives-solaris-i586.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/jocl-natives-windows-amd64.jar"/>
-	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/jocl-natives-windows-i586.jar"/>
-	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/jogl-all-mobile-natives-linux-i586.jar"/>
-	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/jogl-all-natives-linux-i586.jar"/>
-	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/jogl-all-noawt-natives-linux-i586.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/jogl-all-mobile-natives-linux-amd64.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/jogl-all-natives-linux-amd64.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/jogl-all-noawt-natives-linux-amd64.jar"/>
@@ -56,35 +50,23 @@
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/jogl-all-mobile-natives-macosx-universal.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/jogl-all-natives-macosx-universal.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/jogl-all-noawt-natives-macosx-universal.jar"/>
-	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/jogl-all-mobile-natives-windows-i586.jar"/>
-	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/jogl-all-natives-windows-i586.jar"/>
-	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/jogl-all-noawt-natives-windows-i586.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/jogl-all-mobile-natives-windows-amd64.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/jogl-all-natives-windows-amd64.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/jogl-all-noawt-natives-windows-amd64.jar"/>
-	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/jogl-all-mobile-natives-solaris-i586.jar"/>
-	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/jogl-all-natives-solaris-i586.jar"/>
-	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/jogl-all-noawt-natives-solaris-i586.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/jogl-all-mobile-natives-solaris-amd64.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/jogl-all-natives-solaris-amd64.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/jogl-all-noawt-natives-solaris-amd64.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/joal-natives-linux-amd64.jar"/>
-	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/joal-natives-linux-i586.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/joal-natives-linux-armv6.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/joal-natives-linux-armv6hf.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/joal-natives-macosx-universal.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/joal-natives-solaris-amd64.jar"/>
-	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/joal-natives-solaris-i586.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/joal-natives-windows-amd64.jar"/>
-	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/joal-natives-windows-i586.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/gluegen-rt-natives-linux-armv6hf.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/gluegen-rt-natives-linux-armv6.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/gluegen-rt-natives-linux-amd64.jar"/>
-	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/gluegen-rt-natives-linux-i586.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/gluegen-rt-natives-macosx-universal.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/gluegen-rt-natives-solaris-amd64.jar"/>
-	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/gluegen-rt-natives-solaris-i586.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/gluegen-rt-natives-windows-amd64.jar"/>
-	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/gluegen-rt-natives-windows-i586.jar"/>
 	<classpathentry kind="output" path="plugins"/>
 </classpath>
