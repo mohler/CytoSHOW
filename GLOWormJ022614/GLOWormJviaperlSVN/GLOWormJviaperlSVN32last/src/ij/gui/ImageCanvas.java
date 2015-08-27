@@ -1783,6 +1783,10 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 							widthDenom = 3.8;
 							timeBalancer = 2;
 						}
+						if (rm.getImagePlus().getTitle().contains("SW_")){
+							widthDenom = 100;
+							timeBalancer = 0;
+						}
 						ImagePlus guideImp = rm.getImagePlus();
 						if (rm.getImagePlus().getMotherImp() != null)
 							guideImp = rm.getImagePlus().getMotherImp();
@@ -1798,10 +1802,14 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 								+ guideImp.getHeight());
 						BigDecimal cellDiameterBD = impHeightBD.divide(
 								new BigDecimal("10"), MathContext.DECIMAL32);
-						if (guideImp.getStack() instanceof MultiQTVirtualStack 
-								&& (guideImp.getTitle().startsWith("fromServer://")
-										|| (((MultiQTVirtualStack)guideImp.getStack()).getVirtualStack(0)!=null & ((MultiQTVirtualStack)guideImp.getStack()).getVirtualStack(0).getMovieName().startsWith("SW")))) {
-							//keep same value of cellDiameterBD
+						if (guideImp.getTitle().contains("SW_")){
+
+							cellDiameterBD = impHeightBD.divide(
+									widthDenomBD, MathContext.DECIMAL32).multiply(
+											takeRoot(3, (framesBD.subtract(tBD)
+													.add(new BigDecimal("1"))).divide(tBD,
+															MathContext.DECIMAL32), new BigDecimal(
+																	".001")), MathContext.DECIMAL32);
 						}else{
 							cellDiameterBD = impHeightBD.divide(
 									widthDenomBD, MathContext.DECIMAL32).multiply(
@@ -1810,12 +1818,14 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 															MathContext.DECIMAL32), new BigDecimal(
 																	".001")), MathContext.DECIMAL32);
 						}
-						for (int z = 0; z < (int) (cellDiameterBD.intValue() / guideImp
-								.getCalibration().pixelDepth); z++) {
+						int zSpan = (int) (cellDiameterBD.intValue() / guideImp
+								.getCalibration().pixelDepth);
+						if (zSpan<1)
+							zSpan=1;
+						for (int z = 0; z < zSpan; z++) {
 							int zSlice = Integer.parseInt(((String) rm.getListModel().get(targetTag[0]))
 									.split("_")[((String) rm.getListModel().get(targetTag[0])).split("_").length-2])
-									- ((int) (cellDiameterBD.intValue() / guideImp
-											.getCalibration().pixelDepth)) / 2 + z;
+									- zSpan / 2 + z;
 							if (zSlice < 1 || zSlice > rm.getImagePlus().getNSlices())
 								continue;
 							int tFrame = Integer.parseInt(((String) rm.getListModel().get(targetTag[0]))

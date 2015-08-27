@@ -1,12 +1,14 @@
 package org.vcell.gloworm;
 import java.awt.Frame;
 import java.awt.image.ColorModel;
+import java.io.File;
 
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.plugin.PlugIn;
+import ij3d.ImageJ3DViewer;
 
 
 public class MQTVS_VolumeViewer  implements PlugIn {
@@ -28,15 +30,23 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 					}
 				}
 			}
+		} else {
+//			IJ.runPlugIn("ImageJ_3D_Viewer", "");
+			ImageJ3DViewer ij3dv = new ImageJ3DViewer();
+			ij3dv.run(".");
+			
+			
+			return;
 		}
+		
 		ImagePlus impD = imp;
-		if (imp.getNFrames() > 1 || imp.getRoi() != null) {
-			double inMin = imp.getDisplayRangeMin();
-			double inMax = imp.getDisplayRangeMax();
-			ColorModel cm = imp.getProcessor().getColorModel();
-			int inChannel = imp.getChannel();
-			int inSlice = imp.getSlice();
-			int inFrame = imp.getFrame();
+		if ((imp.getStack().isVirtual() && imp.getNFrames() > 1) || imp.getRoi() != null) {
+//			double inMin = imp.getDisplayRangeMin();
+//			double inMax = imp.getDisplayRangeMax();
+//			ColorModel cm = imp.getProcessor().getColorModel();
+//			int inChannel = imp.getChannel();
+//			int inSlice = imp.getSlice();
+//			int inFrame = imp.getFrame();
 			
 			imp.getWindow().setVisible(false);
 			Frame rm =WindowManager.getFrame("Tag Manager");
@@ -52,39 +62,43 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 				mcc.setVisible(false);
 			}
 			
-				impD = (new MQTVS_Duplicator()).run(imp, imp.getChannel(), imp.getChannel(), 
-					1, imp.getNSlices(), 
-					imp.getFrame(), imp.getFrame(), 1, false);
+			MQTVS_Duplicator duper = new MQTVS_Duplicator();
+			impD = duper.duplicateHyperstack(imp, imp.getTitle()+"_DUP");
 
 			imp.getWindow().setVisible(true);
 			if (rm != null) rm.setVisible(rmWasVis);
 			if (mcc != null) mcc.setVisible(mccWasVis);
 			
-			impD.setCalibration(imp.getCalibration());
-			impD.getProcessor().setColorModel(cm);
-			impD.setDisplayRange(inMin, inMax);
-			impD.setPosition(inChannel, inSlice, 1);
+//			impD.setCalibration(imp.getCalibration());
+//			impD.getProcessor().setColorModel(cm);
+//			impD.setDisplayRange(inMin, inMax);
+//			impD.setPosition(inChannel, inSlice, 1);
 
-			imp.getProcessor().setColorModel(cm);
-			imp.setDisplayRange(inMin, inMax);
-			imp.setPosition(inChannel, inSlice, inFrame);
-			int origChannel = imp.getChannel();
-			if (imp instanceof CompositeImage && ((CompositeImage) imp).getMode() ==1 ) {
-				for (int j = 1; j <= imp.getNChannels(); j++) {
-					imp.setPosition(j, imp.getSlice(),
-							imp.getFrame());
-				}
-				imp.setPosition(origChannel, imp.getSlice(), imp.getFrame());
-				imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() + 1);
-				imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() - 1);
-			}
-
+//			imp.getProcessor().setColorModel(cm);
+//			imp.setDisplayRange(inMin, inMax);
+//			imp.setPosition(inChannel, inSlice, inFrame);
+//			int origChannel = imp.getChannel();
+//			if (imp instanceof CompositeImage && ((CompositeImage) imp).getMode() ==1 ) {
+//				for (int j = 1; j <= imp.getNChannels(); j++) {
+//					imp.setPosition(j, imp.getSlice(),
+//							imp.getFrame());
+//				}
+//				imp.setPosition(origChannel, imp.getSlice(), imp.getFrame());
+//				imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() + 1);
+//				imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() - 1);
+//			}
 
 //			impD.show();
 		}
 
-		IJ.runPlugIn(impD, "Volume_Viewer", "");
-
+//		IJ.runPlugIn(impD, "Volume_Viewer", "");
+//		IJ.runPlugIn("ImageJ_3D_Viewer", "");
+		ImageJ3DViewer ij3dv = new ImageJ3DViewer();
+		ij3dv.run(".");
+		ImageJ3DViewer.add(impD.getTitle(), "White", impD.getTitle()+"_IJ3DV_"+imp.getChannel(), "75", "true", "true", "true", "2", "2");
+		ImageJ3DViewer.select(impD.getTitle()+"_IJ3DV_"+imp.getChannel());
+		ImageJ3DViewer.exportContent("wavefront", IJ.getDirectory("home")+File.separator+impD.getTitle()+"_IJ3DV_"+imp.getChannel()+".obj");
+		
 		if (imp.getNFrames() > 1 || imp.getRoi() != null) {
 			impD.close();
 			impD.flush();

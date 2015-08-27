@@ -362,10 +362,10 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 
 
 
-	void duplicateHyperstack(ImagePlus imp, String newTitle) {
+	public ImagePlus duplicateHyperstack(ImagePlus imp, String newTitle) {
 		String title = showHSDialog(imp, newTitle);
 		if (title==null)
-			return;
+			return null;
 		imp.getCanvas().setVisible(false);
 		ImagePlus imp2 = null;
 		Roi roi = imp.getRoi();
@@ -427,7 +427,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 		if (mcc != null && mccVis) 
 			mcc.setVisible(true);
 
-		if (imp2==null) return;
+		if (imp2==null) return null;
 		imp2.setTitle(newTitle);
 
 		if (manualRoi != null && sliceSpecificROIs) {
@@ -514,7 +514,8 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 		imp2.getWindow().setVisible(true);
 		imp.getWindow().dupButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/download_button_animatedStill.png")));
 		imp.getCanvas().setVisible(true);
-		IJ.saveAs(imp2, "Tiff", "");
+//		IJ.saveAs(imp2, "Tiff", "");
+		return imp2;
 
 	}
 

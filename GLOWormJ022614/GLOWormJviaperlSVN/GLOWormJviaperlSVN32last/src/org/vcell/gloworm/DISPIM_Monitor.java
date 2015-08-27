@@ -1236,15 +1236,15 @@ public class DISPIM_Monitor implements PlugIn {
 								"				\n" + 
 								"				sliceAvgs = newArray(zDepth);\n" + 
 								"				List.clear;\n" + 
-								"				for (z=1; z<zDepth; z++) { \n" + 
+								"				for (z=0; z<zDepth; z++) { \n" + 
 								"					sliceAvgs[z] = getResult(\"Mean\", z);\n" + 
 								"					//print(sliceAvgs[z] );\n" + 
 								"					List.set(sliceAvgs[z] , z);\n" + 
 								"				}\n" + 
 								"				\n" + 
 								"				Array.sort(sliceAvgs);\n" + 
-								"				print(source+\": Best focus in slice \"+List.get(sliceAvgs[zDepth-1]));\n" + 
-								"				autoFocusString = autoFocusString + List.get(sliceAvgs[zDepth-1])+\", \";\n" + 
+								"				print(source+\": Best focus in slice \"+(parseInt(List.get(sliceAvgs[zDepth-1]))+1));\n" + 
+								"				autoFocusString = autoFocusString + (parseInt(List.get(sliceAvgs[zDepth-1]))+1)+\", \";\n" + 
 								"				selectWindow(\"Results\");\n" + 
 								"				run(\"Close\");\n" + 
 								"				setBatchMode(false);\n" + 
