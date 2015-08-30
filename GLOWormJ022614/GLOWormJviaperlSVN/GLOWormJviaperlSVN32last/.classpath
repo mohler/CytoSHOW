@@ -83,15 +83,11 @@
 	<classpathentry kind="lib" path="ImageJ_3D_Viewer.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/atomic/jogl-natives-linux-i586.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/atomic/jogl-natives-solaris-i586.jar"/>
-	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/atomic/jogl-natives-windows-i586.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/atomic/nativewindow-natives-linux-i586.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/atomic/nativewindow-natives-solaris-i586.jar"/>
-	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/atomic/nativewindow-natives-windows-i586.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/atomic/newt-natives-linux-i586.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/atomic/newt-natives-solaris-i586.jar"/>
-	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/atomic/newt-natives-windows-i586.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/atomic/oculusvr-natives-linux-i586.jar"/>
 	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/atomic/oculusvr-natives-solaris-i586.jar"/>
-	<classpathentry kind="lib" path="/Users/billmohler/Downloads/jogamp-all-platforms-1/jar/atomic/oculusvr-natives-windows-i586.jar"/>
 	<classpathentry kind="output" path="plugins"/>
 </classpath>
