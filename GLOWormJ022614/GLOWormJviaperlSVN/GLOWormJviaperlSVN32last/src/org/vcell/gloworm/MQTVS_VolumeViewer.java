@@ -13,7 +13,6 @@ import ij.WindowManager;
 import ij.gui.Roi;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.RoiManager;
-import ij.process.LUT;
 import ij3d.ColorTable;
 import ij3d.ImageJ3DViewer;
 
@@ -73,7 +72,7 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 				ImagePlus impD = duper.run(imp, ch, ch, duper.getFirstZ(), duper.getLastZ(), duper.getFirstT(), duper.getLastT(), duper.getStepT(), false);
 				impD.show();
 				impD.setTitle(imp.getTitle()+"_DUP_"+ch);
-				Color channelColor = ((CompositeImage)imp).getChannelColor(ch-1);
+				Color channelColor = imp instanceof CompositeImage?((CompositeImage)imp).getChannelColor(ch-1):Color.white;
 				ImageJ3DViewer.add(impD.getTitle(), ColorTable.colorNames[ch+2], impD.getTitle()+"_IJ3DV_"+ch, "90", "true", "true", "true", "2", "2");
 				ImageJ3DViewer.select(impD.getTitle()+"_IJ3DV_"+ch);
 				ImageJ3DViewer.setColor(""+channelColor.getRed(), ""+channelColor.getGreen(), ""+channelColor.getBlue());
