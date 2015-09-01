@@ -383,12 +383,12 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 		if (!duplicateStack) {
 			int nChannels = imp.getNChannels();
 			if (nChannels>1 && imp.isComposite() && ((CompositeImage)imp).getMode()==CompositeImage.COMPOSITE) {
-				firstC = 1;
-				lastC = nChannels;
+				setFirstC(1);
+				setLastC(nChannels);
 			} else
-				firstC = lastC = imp.getChannel();
-			firstZ = lastZ = imp.getSlice();
-			firstT = lastT = imp.getFrame();
+				setFirstC(setLastC(imp.getChannel()));
+			setFirstZ(setLastZ(imp.getSlice()));
+			setFirstT(setLastT(imp.getFrame()));
 		}
 
 //		imp.getWindow().setVisible(false);
@@ -405,7 +405,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 			mcc.setVisible(false);
 		}
 
-		imp2 = run(imp, firstC, lastC, firstZ, lastZ, firstT, lastT, stepT, sliceSpecificROIs);
+		imp2 = run(imp, getFirstC(), getLastC(), getFirstZ(), getLastZ(), getFirstT(), getLastT(), getStepT(), sliceSpecificROIs);
 
 		imp.getProcessor().setColorModel(cm);
 		imp.setDisplayRange(inMin, inMax);
@@ -440,8 +440,8 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 
 		imp2.getProcessor().setColorModel(cm);
 		imp2.setDisplayRange(inMin, inMax);
-		imp2.setDimensions(lastC-firstC+1, lastZ-firstZ+1, finalFrames);
-		imp2.setPosition(inChannel-firstC+1, inSlice-firstZ +1, inFrame-firstT+1);
+		imp2.setDimensions(getLastC()-getFirstC()+1, getLastZ()-getFirstZ()+1, finalFrames);
+		imp2.setPosition(inChannel-getFirstC()+1, inSlice-getFirstZ() +1, inFrame-getFirstT()+1);
 		//		IJ.log(""+imp2.getOpenAsHyperStack());
 
 		imp2.show();
@@ -454,7 +454,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 
 		if ( imp2.getWindow() instanceof StackWindow &&  ((StackWindow)imp2.getWindow()).getNScrollbars()<2) {
 			if (((StackWindow)imp2.getWindow()).getAnimationZSelector() != null) 
-				((StackWindow)imp2.getWindow()).getAnimationZSelector().setValue(inSlice-firstZ +1);
+				((StackWindow)imp2.getWindow()).getAnimationZSelector().setValue(inSlice-getFirstZ() +1);
 		}
 
 
@@ -473,8 +473,8 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 		RoiManager rm2 = imp2.getRoiManager();
 		rm2.setVisible(false);
 
-		for (int t = firstT; t <= finalT ; t = t+stepT) {
-			for (int z = firstZ; z <= lastZ ; z++) {
+		for (int t = getFirstT(); t <= finalT ; t = t+getStepT()) {
+			for (int z = getFirstZ(); z <= getLastZ() ; z++) {
 
 				//				IJ.log(" "+firstZ+" "+z+" "+lastZ+" "+" "+firstT+" "+t+" "+lastT+" ");
 				Roi[] sliceSpecficRoiArray = imp.getRoiManager().getSliceSpecificRoiArray(z, t, true);
@@ -489,7 +489,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 							){
 						Roi nextRoi = (Roi) sliceSpecficRoiArray[r].clone();
 						nextRoi.setLocation((int) (sliceSpecficRoiArray[r].getBounds().getX()-dupX), (int) ( sliceSpecficRoiArray[r]).getBounds().getY()-dupY);
-						imp2.setPosition(1, z-firstZ+1, ((t-firstT)/stepT)+1 );
+						imp2.setPosition(1, z-getFirstZ()+1, ((t-getFirstT())/getStepT())+1 );
 						rm2.addRoi(nextRoi);
 					}
 				}
@@ -500,16 +500,16 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 		rm2.showAll(RoiManager.SHOW_ALL);
 		//		imp2.setRoiManager(rm2);
 		if (imp.getMotherImp() != null && !imp.getMotherImp().isSketch3D())
-			imp2.setMotherImp(imp.getMotherImp(), firstT);
+			imp2.setMotherImp(imp.getMotherImp(), getFirstT());
 		else if (!imp.isSketch3D())
-			imp2.setMotherImp(imp, firstT);
+			imp2.setMotherImp(imp, getFirstT());
 		else
-			imp2.setMotherImp(imp2, firstT);
+			imp2.setMotherImp(imp2, getFirstT());
 
 		imp2.getProcessor().setColorModel(cm);
 		imp2.setDisplayRange(inMin, inMax);
-		imp2.setDimensions(lastC-firstC+1, lastZ-firstZ+1, finalFrames);
-		imp2.setPosition(inChannel-firstC+1, inSlice-firstZ +1, inFrame-firstT+1);
+		imp2.setDimensions(getLastC()-getFirstC()+1, getLastZ()-getFirstZ()+1, finalFrames);
+		imp2.setPosition(inChannel-getFirstC()+1, inSlice-getFirstZ() +1, inFrame-getFirstT()+1);
 
 		imp2.getWindow().setVisible(true);
 		imp.getWindow().dupButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/download_button_animatedStill.png")));
@@ -571,42 +571,101 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 			String[] range = Tools.split(gd.getNextString(), " -");
 			double c1 = Tools.parseDouble(range[0]);
 			double c2 = range.length==2?Tools.parseDouble(range[1]):Double.NaN;
-			firstC = Double.isNaN(c1)?1:(int)c1;
-			lastC = Double.isNaN(c2)?firstC:(int)c2;
-			if (firstC<1) firstC = 1;
-			if (lastC>nChannels) lastC = nChannels;
-			if (firstC>lastC) {firstC=1; lastC=nChannels;}
+			setFirstC(Double.isNaN(c1)?1:(int)c1);
+			setLastC(Double.isNaN(c2)?getFirstC():(int)c2);
+			if (getFirstC()<1) setFirstC(1);
+			if (getLastC()>nChannels) setLastC(nChannels);
+			if (getFirstC()>getLastC()) {setFirstC(1); setLastC(nChannels);}
 		} else
-			firstC = lastC = 1;
+			setFirstC(setLastC(1));
 		if (nSlices>1) {
 			String[] range = Tools.split(gd.getNextString(), " -");
 			double z1 = Tools.parseDouble(range[0]);
 			double z2 = range.length==2?Tools.parseDouble(range[1]):Double.NaN;
-			firstZ = Double.isNaN(z1)?1:(int)z1;
-			lastZ = Double.isNaN(z2)?firstZ:(int)z2;
-			if (firstZ<1) firstZ = 1;
-			if (lastZ>nSlices) lastZ = nSlices;
-			if (firstZ>lastZ) {firstZ=1; lastZ=nSlices;}
+			setFirstZ(Double.isNaN(z1)?1:(int)z1);
+			setLastZ(Double.isNaN(z2)?getFirstZ():(int)z2);
+			if (getFirstZ()<1) setFirstZ(1);
+			if (getLastZ()>nSlices) setLastZ(nSlices);
+			if (getFirstZ()>getLastZ()) {setFirstZ(1); setLastZ(nSlices);}
 		} else
-			firstZ = lastZ = 1;
+			setFirstZ(setLastZ(1));
 		if (nFrames>1) {
 			String[] range = Tools.split(gd.getNextString(), " -");
 			double t1 = Tools.parseDouble(range[0]);
 			double t2 = range.length>=2?Tools.parseDouble(range[1]):Double.NaN;
 			double t3 = range.length==3?Tools.parseDouble(range[2]):Double.NaN;
-			firstT= Double.isNaN(t1)?1:(int)t1;
-			lastT = Double.isNaN(t2)?firstT:(int)t2;
-			stepT = Double.isNaN(t3)?1:(int)t3;
-			if (firstT<1) firstT = 1;
-			if (lastT>nFrames) lastT = nFrames;
-			if (firstT>lastT) {firstT=1; lastT=nFrames;}
+			setFirstT(Double.isNaN(t1)?1:(int)t1);
+			setLastT(Double.isNaN(t2)?getFirstT():(int)t2);
+			setStepT(Double.isNaN(t3)?1:(int)t3);
+			if (getFirstT()<1) setFirstT(1);
+			if (getLastT()>nFrames) setLastT(nFrames);
+			if (getFirstT()>getLastT()) {setFirstT(1); setLastT(nFrames);}
 		} else
-			firstT = lastT = 1;
+			setFirstT(setLastT(1));
 		return title;
 	}
 
 	public void textValueChanged(TextEvent e) {
 		checkbox.setState(true);
+	}
+
+	public int getFirstC() {
+		return firstC;
+	}
+
+	public void setFirstC(int firstC) {
+		this.firstC = firstC;
+	}
+
+	public int getLastC() {
+		return lastC;
+	}
+
+	public int setLastC(int lastC) {
+		this.lastC = lastC;
+		return lastC;
+	}
+
+	public int getFirstZ() {
+		return firstZ;
+	}
+
+	public void setFirstZ(int firstZ) {
+		this.firstZ = firstZ;
+	}
+
+	public int getLastZ() {
+		return lastZ;
+	}
+
+	public int setLastZ(int lastZ) {
+		this.lastZ = lastZ;
+		return lastZ;
+	}
+
+	public int getFirstT() {
+		return firstT;
+	}
+
+	public void setFirstT(int firstT) {
+		this.firstT = firstT;
+	}
+
+	public int getLastT() {
+		return lastT;
+	}
+
+	public int setLastT(int lastT) {
+		this.lastT = lastT;
+		return lastT;
+	}
+
+	public int getStepT() {
+		return stepT;
+	}
+
+	public void setStepT(int stepT) {
+		this.stepT = stepT;
 	}
 
 

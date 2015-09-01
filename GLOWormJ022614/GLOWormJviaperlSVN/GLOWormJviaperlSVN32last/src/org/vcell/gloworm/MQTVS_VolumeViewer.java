@@ -1,13 +1,20 @@
 package org.vcell.gloworm;
+import java.awt.Color;
 import java.awt.Frame;
 import java.awt.image.ColorModel;
 import java.io.File;
+
+import com.apple.laf.AquaButtonBorder.Toolbar;
 
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
+import ij.gui.Roi;
 import ij.plugin.PlugIn;
+import ij.plugin.frame.RoiManager;
+import ij.process.LUT;
+import ij3d.ColorTable;
 import ij3d.ImageJ3DViewer;
 
 
@@ -39,69 +46,48 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 			return;
 		}
 		
-		ImagePlus impD = imp;
-		if ((imp.getStack().isVirtual() && imp.getNFrames() > 1) || imp.getRoi() != null) {
-//			double inMin = imp.getDisplayRangeMin();
-//			double inMax = imp.getDisplayRangeMax();
-//			ColorModel cm = imp.getProcessor().getColorModel();
-//			int inChannel = imp.getChannel();
-//			int inSlice = imp.getSlice();
-//			int inFrame = imp.getFrame();
+		MQTVS_Duplicator duper = new MQTVS_Duplicator();
+		ImageJ3DViewer ij3dv = new ImageJ3DViewer();
+		Roi impRoi = imp.getRoi();
+		if (true /*(imp.getStack().isVirtual() && imp.getNFrames() > 1) || imp.getRoi() != null*/) {
 			
 			imp.getWindow().setVisible(false);
-			Frame rm =WindowManager.getFrame("Tag Manager");
+			RoiManager rm = imp.getRoiManager();
 			boolean rmWasVis = false;
 			if (rm != null) {
 				rmWasVis = rm.isVisible();
 				rm.setVisible(false);
 			}
-			Frame mcc = imp.getMultiChannelController();
+			MultiChannelController mcc = imp.getMultiChannelController();
 			boolean mccWasVis = false;
 			if (mcc != null) {
 				mccWasVis = mcc.isVisible();
 				mcc.setVisible(false);
 			}
 			
-			MQTVS_Duplicator duper = new MQTVS_Duplicator();
-			impD = duper.duplicateHyperstack(imp, imp.getTitle()+"_DUP");
+			String duperString = duper.showHSDialog(imp, imp.getTitle()+"_DUP");
+			ij3dv.run(".");
 
+			for (int ch=duper.getFirstC(); ch<=duper.getLastC(); ch++) {
+				imp.setRoi(impRoi);
+				ImagePlus impD = duper.run(imp, ch, ch, duper.getFirstZ(), duper.getLastZ(), duper.getFirstT(), duper.getLastT(), duper.getStepT(), false);
+				impD.show();
+				impD.setTitle(imp.getTitle()+"_DUP_"+ch);
+				Color channelColor = ((CompositeImage)imp).getChannelColor(ch-1);
+				ImageJ3DViewer.add(impD.getTitle(), ColorTable.colorNames[ch+2], impD.getTitle()+"_IJ3DV_"+ch, "90", "true", "true", "true", "2", "2");
+				ImageJ3DViewer.select(impD.getTitle()+"_IJ3DV_"+ch);
+				ImageJ3DViewer.setColor(""+channelColor.getRed(), ""+channelColor.getGreen(), ""+channelColor.getBlue());
+				ImageJ3DViewer.exportContent("wavefront", IJ.getDirectory("home")+File.separator+impD.getTitle()+"_IJ3DV_"+ch+".obj");
+//				impD.close();
+//				impD.flush();
+				ImageJ3DViewer.select(null);
+				IJ.setTool(ij.gui.Toolbar.HAND);
+			}
+			
 			imp.getWindow().setVisible(true);
 			if (rm != null) rm.setVisible(rmWasVis);
 			if (mcc != null) mcc.setVisible(mccWasVis);
-			
-//			impD.setCalibration(imp.getCalibration());
-//			impD.getProcessor().setColorModel(cm);
-//			impD.setDisplayRange(inMin, inMax);
-//			impD.setPosition(inChannel, inSlice, 1);
-
-//			imp.getProcessor().setColorModel(cm);
-//			imp.setDisplayRange(inMin, inMax);
-//			imp.setPosition(inChannel, inSlice, inFrame);
-//			int origChannel = imp.getChannel();
-//			if (imp instanceof CompositeImage && ((CompositeImage) imp).getMode() ==1 ) {
-//				for (int j = 1; j <= imp.getNChannels(); j++) {
-//					imp.setPosition(j, imp.getSlice(),
-//							imp.getFrame());
-//				}
-//				imp.setPosition(origChannel, imp.getSlice(), imp.getFrame());
-//				imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() + 1);
-//				imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() - 1);
-//			}
-
-//			impD.show();
 		}
 
-//		IJ.runPlugIn(impD, "Volume_Viewer", "");
-//		IJ.runPlugIn("ImageJ_3D_Viewer", "");
-		ImageJ3DViewer ij3dv = new ImageJ3DViewer();
-		ij3dv.run(".");
-		ImageJ3DViewer.add(impD.getTitle(), "White", impD.getTitle()+"_IJ3DV_"+imp.getChannel(), "50", "true", "true", "true", "2", "2");
-		ImageJ3DViewer.select(impD.getTitle()+"_IJ3DV_"+imp.getChannel());
-		ImageJ3DViewer.exportContent("wavefront", IJ.getDirectory("home")+File.separator+impD.getTitle()+"_IJ3DV_"+imp.getChannel()+".obj");
-		
-		if (imp.getNFrames() > 1 || imp.getRoi() != null) {
-			impD.close();
-			impD.flush();
-		}
 	}
 }

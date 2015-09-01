@@ -78,6 +78,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	private int  zSustain =1;
 	private int  tSustain =1;
 	private TextField textSearchField =new TextField("Find...");
+	private TextField textNamingField =new TextField("Name...");
 	public Label textCountLabel =new Label("", Label.CENTER);
 
 	private static boolean measureAll = true;
@@ -229,7 +230,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		add("Center", scrollPane);
 		panel = new Panel();
 		int nButtons = BUTTONS;
-		panel.setLayout(new GridLayout(nButtons, 1, 5, 0));
+		panel.setLayout(new GridLayout(nButtons+1, 1, 5, 0));
 		addButton("Add\n(ctrl-t)");
 		addRoiSpanCCheckbox.addItemListener(this);
 		panel.add(addRoiSpanCCheckbox);
@@ -240,6 +241,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		addButton("Update [u]");
 		addButton("Delete");
 		addButton("Rename");
+		panel.add(textNamingField);
+
 		addButton("Sort");
 		addButton("Deselect");
 		addButton("Properties...");
@@ -854,6 +857,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		prevID = imp!=null?imp.getID():0;
 		String name = roi.getName();
+		if (true/*name == null*/)
+			if (!(textNamingField.getText().isEmpty()  || textNamingField.getText().contains("Name..."))) {
+				roi.setName(textNamingField.getText());
+			}
 		if (isStandardName(name))
 			name = null;
 		String label = name!=null?name:getLabel(imp, roi, -1);
@@ -870,7 +877,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			if (roi instanceof Arrow) altType = "Arrow";
 			if (imp != null) 
 				if (roi.getName() != null && roi.getName().split("\"").length>1)
-					label = "\""+roi.getName().split("\"")[1]+" \"" +"_"+ imp.getChannel() +"_"+ imp.getSlice() +"_"+imp.getFrame();
+					label = "\""+roi.getName().split("\"")[1].trim()+" \"" +"_"+ imp.getChannel() +"_"+ imp.getSlice() +"_"+imp.getFrame();
+				else if (roi.getName() != null)
+					label = "\""+roi.getName()+" \"" +"_"+ imp.getChannel() +"_"+ imp.getSlice() +"_"+imp.getFrame();
 				else
 					label = ((altType != null)?altType:roi.getTypeAsString() ) +"_"+ imp.getChannel() +"_"+ imp.getSlice() +"_"+imp.getFrame();
 			else 
@@ -1244,14 +1253,21 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 
 	String promptForName(String name) {
-		GenericDialog gd = new GenericDialog("Tag Manager");
-		gd.addStringField("Rename As:", name.endsWith("|")?name.substring(0, name.length()-1):name, 20);
-		gd.showDialog();
-		if (gd.wasCanceled())
-			return null;
-		String name2 = gd.getNextString();
-		//		name2 = getUniqueName(name2);
+		String name2 = "";		
+		if (textNamingField.getText().isEmpty()  || textNamingField.getText().contains("Name...")) {
+			GenericDialog gd = new GenericDialog("Tag Manager");
+			gd.addStringField("Rename As:", name.endsWith("|")?name.substring(0, name.length()-1):name, 20);
+			gd.showDialog();
+			if (gd.wasCanceled())
+				return null;
+			name2 = gd.getNextString();
+			//		name2 = getUniqueName(name2);
+		} else {
+			name = textNamingField.getText();
+			name2 = name.endsWith("|")?name.substring(0, name.length()-1):name;
+		}
 		return name2;
+		
 	}
 
 	boolean restore(ImagePlus imp, int index, boolean setSlice) {
