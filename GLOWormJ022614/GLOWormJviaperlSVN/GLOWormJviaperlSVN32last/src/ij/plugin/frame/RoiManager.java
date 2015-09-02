@@ -641,6 +641,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				busy = true;
 				imp.getWindow().sketch3DButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/3D_42578.gif")));
 				sketch3D(e.getSource());
+//				sketchVolumeViewer(e.getSource());
 				busy = false;
 				imp.getWindow().sketch3DButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/3D_47973.gif")));
 			}
@@ -659,6 +660,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						.replace("Both Checked & Unchecked", "All").replace("Checked", "Chosen"));
 				imp.getWindow().sketch3DButton.add(pm2);
 				pm2.show(imp.getWindow().sketch3DButton, 1, imp.getWindow().sketch3DButton.getHeight());
+			}
+			else if (command.equals("Sketch\nVV")) {
+				controlKeyDown = true;
+				busy = true;
+				imp.getWindow().sketchVVButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/VV_55184.gif")));
+				sketchVolumeViewer(e.getSource());
+				busy = false;
+				imp.getWindow().sketchVVButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/VV_57282.gif")));
 			}
 			else if (e.getSource() instanceof MenuItem && getColorLegend()!=null) {
 				if (command != null) {
@@ -702,6 +711,36 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		//		IJ.log("DONE");
 		//		done = true;
+	}
+
+	private void sketchVolumeViewer(Object source) { 
+		if (getSelectedRoisAsArray().length<1)
+			return;
+		String rootName = getSelectedRoisAsArray()[0].getName().contains("\"")?getSelectedRoisAsArray()[0].getName().split("\"")[1]:"";
+		ImagePlus sketchImp = NewImage.createImage("SketchVolumeViewer_"+rootName,imp.getWidth(), imp.getHeight(), imp.getNSlices(), 8, NewImage.FILL_BLACK, false);
+		sketchImp.setCalibration(imp.getCalibration());
+		sketchImp.show();
+		sketchImp.setRoiManager(new RoiManager(false));
+		select(-1);
+		IJ.wait(50);
+		ArrayList<Integer> nameMatchIndexArrayList = new ArrayList<Integer>();
+		int fraa = this.getFullRoisAsArray().length;
+		for (int r=0; r < fraa; r++) {
+			if (getFullRoisAsArray()[r].getName().startsWith("\""+rootName))
+				nameMatchIndexArrayList.add(r);
+		}
+		int[] nameMatchIndexes = new int[nameMatchIndexArrayList.size()];
+		for (int i=0; i < nameMatchIndexes.length; i++)
+		{
+			nameMatchIndexes[i] = nameMatchIndexArrayList.get(i);
+			Roi nextRoi = ((Roi)getFullRoisAsArray()[nameMatchIndexArrayList.get(i)]);
+			String[] nextChunks = nextRoi.getName().split("_");
+			sketchImp.setPosition(1, Integer.parseInt(nextChunks[nextChunks.length-2]), Integer.parseInt(nextChunks[nextChunks.length-1].replaceAll("[CZT]", "").split("-")[0]));
+			sketchImp.getRoiManager().addRoi(((Roi)getFullRoisAsArray()[nameMatchIndexArrayList.get(i)]));
+		}		
+		sketchImp.getRoiManager().select(-1);
+		sketchImp.getRoiManager().drawOrFill(FILL);
+		IJ.run("Volume Viewer");
 	}
 
 	public void itemStateChanged(ItemEvent e) {

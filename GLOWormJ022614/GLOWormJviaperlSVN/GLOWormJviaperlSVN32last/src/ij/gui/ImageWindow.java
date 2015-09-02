@@ -116,6 +116,7 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 	public JButton slice4dButton;
 	public JButton stereo4dYrcButton;
 	public SliceStereoToggle sst;
+	public JButton sketchVVButton;
 	
 	public ImageWindow(String title) {
 		super(title);
@@ -301,6 +302,17 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 		tagButtonPanel.add(sketch3DButton, fspc);
 //		viewButtonPanel.add(sketch3DButton, fspc);
 		sketch3DButton.addActionListener(imp.getRoiManager());
+		fspc.gridy = y++;
+		fspc.weighty = 0.5;
+		sketchVVButton = new JButton();
+		sketchVVButton.setActionCommand("Sketch\nVV");
+		sketchVVButton.setName("Sketch\nVV");
+		sketchVVButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/VV_57282.gif")));
+		sketchVVButton.setToolTipText("SketchVV");
+		sketchVVButton.setFont(buttonPanelFont);
+		tagButtonPanel.add(sketchVVButton, fspc);
+//		viewButtonPanel.add(sketch3DButton, fspc);
+		sketchVVButton.addActionListener(imp.getRoiManager());
 		
 //		
 		y = 0;
@@ -392,6 +404,17 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 		prjButton.setFont(buttonPanelFont);
 		viewButtonPanel.add(prjButton, fspc);
 		prjButton.addActionListener(ij);
+		fspc.gridy = y++;
+		fspc.weighty = 0.5;
+		fspc.fill = GridBagConstraints.BOTH;
+		JButton vvButton = new JButton();
+		vvButton.setActionCommand("Volume Viewer");
+		vvButton.setName("Volume Viewer");
+		vvButton.setToolTipText("Volume Viewer of the Selected Region ...");
+		vvButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/VV_58191.gif")));
+		vvButton.setFont(buttonPanelFont);
+		viewButtonPanel.add(vvButton, fspc);
+		vvButton.addActionListener(ij);
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
 		fspc.fill = GridBagConstraints.BOTH;

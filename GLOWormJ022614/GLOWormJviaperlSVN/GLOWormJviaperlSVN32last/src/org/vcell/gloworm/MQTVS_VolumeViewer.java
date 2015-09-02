@@ -64,12 +64,16 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 				mcc.setVisible(false);
 			}
 			
-			String duperString = duper.showHSDialog(imp, imp.getTitle()+"_DUP");
+			String duperString = ""; 
+			if (!imp.getTitle().startsWith("SketchVolumeViewer"))
+				duperString = duper.showHSDialog(imp, imp.getTitle()+"_DUP");
 			ij3dv.run(".");
 
 			for (int ch=duper.getFirstC(); ch<=duper.getLastC(); ch++) {
 				imp.setRoi(impRoi);
-				ImagePlus impD = duper.run(imp, ch, ch, duper.getFirstZ(), duper.getLastZ(), duper.getFirstT(), duper.getLastT(), duper.getStepT(), false);
+				ImagePlus impD = imp;
+				if (!imp.getTitle().startsWith("SketchVolumeViewer"))
+					impD = duper.run(imp, ch, ch, duper.getFirstZ(), duper.getLastZ(), duper.getFirstT(), duper.getLastT(), duper.getStepT(), false);
 				impD.show();
 				impD.setTitle(imp.getTitle()+"_DUP_"+ch);
 				Color channelColor = imp instanceof CompositeImage?((CompositeImage)imp).getChannelColor(ch-1):Color.white;
