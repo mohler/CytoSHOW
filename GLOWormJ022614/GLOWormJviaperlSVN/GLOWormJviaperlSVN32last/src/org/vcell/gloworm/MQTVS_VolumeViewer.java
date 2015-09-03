@@ -88,6 +88,9 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 			}
 			
 			imp.getWindow().setVisible(true);
+			imp.getWindow().setAlwaysOnTop(false);
+			ImageJ3DViewer.select(null);
+			IJ.setTool(ij.gui.Toolbar.HAND);
 			if (rm != null) rm.setVisible(rmWasVis);
 			if (mcc != null) mcc.setVisible(mccWasVis);
 		}
