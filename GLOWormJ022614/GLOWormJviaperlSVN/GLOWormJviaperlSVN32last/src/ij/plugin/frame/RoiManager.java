@@ -24,6 +24,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.vcell.gloworm.MQTVS_VolumeViewer;
 import org.vcell.gloworm.MultiQTVirtualStack;
 import org.vcell.gloworm.RoiLabelByNumbersSorter;
 
@@ -719,7 +720,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			return;
 		ArrayList<String> rootNames= new ArrayList<String>();
 		for (Roi selRoi:getSelectedRoisAsArray()) {
-			String rootName = selRoi.getName().contains("\"")?selRoi.getName().split("\"")[1]:"";
+			String rootName = selRoi.getName().contains("\"")?selRoi.getName().split("\"")[1].trim():"";
 			if (!rootNames.contains(rootName))
 				rootNames.add(rootName);
 		}
@@ -748,9 +749,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}		
 			sketchImp.getRoiManager().select(-1);
 			sketchImp.getRoiManager().drawOrFill(FILL);
-			IJ.run("Volume Viewer");
+			sketchImp.setMotherImp(imp, 0);
+			MQTVS_VolumeViewer vv = new MQTVS_VolumeViewer(); 
+			vv.run(rootName);
 //			ImageJ3DViewer..setColor(""+50*count, "200", "100");
 			count++;
+			sketchImp.close();
+			sketchImp.flush();
 		}
 		ImageJ3DViewer.select(null);
 	}
@@ -4062,7 +4067,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						drawIP.fill();
 						for(int j=0;j<shownIndexes.length;j++){
 							if (shownRois[j] != null) {
-								String cellTagName = shownRois[j].getName().split("[\"|=]")[1].trim();
+								String cellTagName = shownRois[j].getName().split("[\"|=]")[1].trim().toLowerCase();
 								if (shownRois[j].getTPosition() == i+1 
 										&& cellNames!=null && cellNames.size()>0 && (cellNames.get(c2).equals(cellTagName) || !splitThem)){
 									if (fatSynapses && shownRois[j].getName().startsWith("\"syn") ){

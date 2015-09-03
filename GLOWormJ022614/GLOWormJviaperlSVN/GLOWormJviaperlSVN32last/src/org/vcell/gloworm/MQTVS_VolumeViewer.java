@@ -20,6 +20,7 @@ import ij3d.ImageJ3DViewer;
 public class MQTVS_VolumeViewer  implements PlugIn {
 
 	public void run(String arg) {
+		String cellName = arg;
 		ImagePlus imp = WindowManager.getCurrentImage();
 		if (imp != null) {
 			if (imp.getStack() instanceof MultiQTVirtualStack) {
@@ -77,12 +78,13 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 				impD.show();
 				impD.setTitle(imp.getTitle()+"_DUP_"+ch);
 				Color channelColor = imp instanceof CompositeImage?((CompositeImage)imp).getChannelColor(ch-1):Color.white;
-				ImageJ3DViewer.add(impD.getTitle(), ColorTable.colorNames[ch+2], impD.getTitle()+"_IJ3DV_"+ch, "90", "true", "true", "true", "2", "2");
-				ImageJ3DViewer.select(impD.getTitle()+"_IJ3DV_"+ch);
+				if (imp.getMotherImp().getRoiManager().getColorLegend() != null)
+					channelColor = imp.getMotherImp().getRoiManager().getColorLegend().getBrainbowColors().getOrDefault(cellName.toLowerCase(), channelColor);
+				ImageJ3DViewer.add(impD.getTitle(), ColorTable.colorNames[ch+2], ""+cellName+"_IJ3DV_"+ch, "90", "true", "true", "true", "2", "2");
+				ImageJ3DViewer.select(""+cellName+"_IJ3DV_"+ch);
 				ImageJ3DViewer.setColor(""+channelColor.getRed(), ""+channelColor.getGreen(), ""+channelColor.getBlue());
-				ImageJ3DViewer.exportContent("wavefront", IJ.getDirectory("home")+File.separator+impD.getTitle()+"_IJ3DV_"+ch+".obj");
-//				impD.close();
-//				impD.flush();
+				ImageJ3DViewer.exportContent("wavefront", IJ.getDirectory("home")+File.separator+impD.getTitle()+"_"+cellName+"_IJ3DV_"+ch+".obj");
+				
 				ImageJ3DViewer.select(null);
 				IJ.setTool(ij.gui.Toolbar.HAND);
 			}
