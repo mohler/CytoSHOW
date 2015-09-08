@@ -79,19 +79,21 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 				impD.setTitle(imp.getTitle()+"_DUP_"+ch);
 				Color channelColor = imp instanceof CompositeImage?((CompositeImage)imp).getChannelColor(ch-1):Color.white;
 				if (imp.getMotherImp().getRoiManager().getColorLegend() != null)
-					channelColor = imp.getMotherImp().getRoiManager().getColorLegend().getBrainbowColors().getOrDefault(cellName.toLowerCase(), channelColor);
+					channelColor = imp.getMotherImp().getRoiManager().getColorLegend().getBrainbowColors().getOrDefault(cellName.split(" =")[0].toLowerCase(), channelColor);
 				ImageJ3DViewer.add(impD.getTitle(), ColorTable.colorNames[ch+2], ""+cellName+"_IJ3DV_"+ch, "90", "true", "true", "true", "2", "2");
 				ImageJ3DViewer.select(""+cellName+"_IJ3DV_"+ch);
 				ImageJ3DViewer.setColor(""+channelColor.getRed(), ""+channelColor.getGreen(), ""+channelColor.getBlue());
 				ImageJ3DViewer.exportContent("wavefront", IJ.getDirectory("home")+File.separator+impD.getTitle()+"_"+cellName+"_IJ3DV_"+ch+".obj");
 				
 				ImageJ3DViewer.select(null);
+				IJ.getInstance().toFront();
 				IJ.setTool(ij.gui.Toolbar.HAND);
 			}
 			
 			imp.getWindow().setVisible(true);
 			imp.getWindow().setAlwaysOnTop(false);
 			ImageJ3DViewer.select(null);
+			IJ.getInstance().toFront();
 			IJ.setTool(ij.gui.Toolbar.HAND);
 			if (rm != null) rm.setVisible(rmWasVis);
 			if (mcc != null) mcc.setVisible(mccWasVis);

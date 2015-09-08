@@ -725,8 +725,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				rootNames.add(rootName);
 		}
 		int count = 3;
+		ImagePlus sketchImp = NewImage.createImage("SketchVolumeViewer_"+rootNames.get(0),imp.getWidth(), imp.getHeight(), imp.getNSlices(), 8, NewImage.FILL_BLACK, false);
 		for (String rootName:rootNames) {
-			ImagePlus sketchImp = NewImage.createImage("SketchVolumeViewer_"+rootName,imp.getWidth(), imp.getHeight(), imp.getNSlices(), 8, NewImage.FILL_BLACK, false);
+			sketchImp.setTitle("SketchVolumeViewer_"+rootName);
+			IJ.run(sketchImp, "Select All","");
+			IJ.run(sketchImp, "Clear","stack");
 			sketchImp.setCalibration(imp.getCalibration());
 			sketchImp.show();
 			sketchImp.setRoiManager(new RoiManager(false));
@@ -754,8 +757,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			vv.run(rootName);
 //			ImageJ3DViewer..setColor(""+50*count, "200", "100");
 			count++;
-			sketchImp.close();
-			sketchImp.flush();
+//			sketchImp.close();
+//			sketchImp.flush();
 		}
 		ImageJ3DViewer.select(null);
 	}
