@@ -12,12 +12,15 @@ import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.Roi;
 import ij.plugin.PlugIn;
+import ij.plugin.Scaler;
 import ij.plugin.frame.RoiManager;
 import ij3d.ColorTable;
 import ij3d.ImageJ3DViewer;
 
 
 public class MQTVS_VolumeViewer  implements PlugIn {
+
+	public static ImageJ3DViewer ij3dv;
 
 	public void run(String arg) {
 		String cellName = arg;
@@ -47,7 +50,10 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 		}
 		
 		MQTVS_Duplicator duper = new MQTVS_Duplicator();
-		ImageJ3DViewer ij3dv = new ImageJ3DViewer();
+		if (ij3dv==null) {
+			ij3dv = new ImageJ3DViewer();
+//			ij3dv.run(".");
+		}
 		Roi impRoi = imp.getRoi();
 		if (true /*(imp.getStack().isVirtual() && imp.getNFrames() > 1) || imp.getRoi() != null*/) {
 			
@@ -68,7 +74,6 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 			String duperString = ""; 
 			if (!imp.getTitle().startsWith("SketchVolumeViewer"))
 				duperString = duper.showHSDialog(imp, imp.getTitle()+"_DUP");
-			ij3dv.run(".");
 
 			for (int ch=duper.getFirstC(); ch<=duper.getLastC(); ch++) {
 				imp.setRoi(impRoi);
@@ -77,10 +82,27 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 					impD = duper.run(imp, ch, ch, duper.getFirstZ(), duper.getLastZ(), duper.getFirstT(), duper.getLastT(), duper.getStepT(), false);
 				impD.show();
 				impD.setTitle(imp.getTitle()+"_DUP_"+ch);
+				impD.changes = false;
 				Color channelColor = imp instanceof CompositeImage?((CompositeImage)imp).getChannelColor(ch-1):Color.white;
 				if (imp.getMotherImp().getRoiManager().getColorLegend() != null)
 					channelColor = imp.getMotherImp().getRoiManager().getColorLegend().getBrainbowColors().getOrDefault(cellName.split(" =")[0].toLowerCase(), channelColor);
-				ImageJ3DViewer.add(impD.getTitle(), ColorTable.colorNames[ch+2], ""+cellName+"_IJ3DV_"+ch, "90", "true", "true", "true", "2", "2");
+				int binFactor = 2;
+				double scaleFactor  = 1.0;
+				int threshold = 90;
+				if (imp.getTitle().startsWith("SketchVolumeViewer")) {
+					binFactor = 1;
+					scaleFactor  = 0.1;
+					threshold = 1;
+				}
+				IJ.run(impD, "Scale...", "x="+(scaleFactor)+" y="+(scaleFactor)+" z=1.0 interpolation=Bicubic average process create" );
+				ImagePlus impDS = IJ.getImage();
+				impD = impDS;
+				try {
+					ImageJ3DViewer.add(impD.getTitle(), ColorTable.colorNames[ch+2], ""+cellName+"_IJ3DV_"+ch, ""+threshold, "true", "true", "true", ""+binFactor, "2");
+				} catch (NullPointerException npe) {
+					ij3dv.run(".");
+					ImageJ3DViewer.add(impD.getTitle(), ColorTable.colorNames[ch+2], ""+cellName+"_IJ3DV_"+ch, ""+threshold, "true", "true", "true", ""+binFactor, "2");
+				}
 				ImageJ3DViewer.select(""+cellName+"_IJ3DV_"+ch);
 				ImageJ3DViewer.setColor(""+channelColor.getRed(), ""+channelColor.getGreen(), ""+channelColor.getBlue());
 				ImageJ3DViewer.exportContent("wavefront", IJ.getDirectory("home")+File.separator+impD.getTitle()+"_"+cellName+"_IJ3DV_"+ch+".obj");
@@ -88,10 +110,15 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 				ImageJ3DViewer.select(null);
 				IJ.getInstance().toFront();
 				IJ.setTool(ij.gui.Toolbar.HAND);
+				impD.changes = false;
+				impD.getWindow().close();
+				impD.flush();
 			}
 			
-			imp.getWindow().setVisible(true);
-			imp.getWindow().setAlwaysOnTop(false);
+			if (!imp.getTitle().startsWith("SketchVolumeViewer")) {
+				imp.getWindow().setVisible(true);
+				imp.getWindow().setAlwaysOnTop(false);
+			}
 			ImageJ3DViewer.select(null);
 			IJ.getInstance().toFront();
 			IJ.setTool(ij.gui.Toolbar.HAND);

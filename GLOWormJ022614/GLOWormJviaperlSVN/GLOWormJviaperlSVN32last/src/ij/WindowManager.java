@@ -493,7 +493,12 @@ public class WindowManager {
 		ImagePlus imp = WindowManager.getImage(id);
 		if (imp==null) return;
 		ImageWindow win1 = imp.getWindow();
-		if (win1==null) return;
+		if (win1==null) {
+			imp.show();
+		} else {
+			win1.setVisible(true);
+		}
+		win1 = imp.getWindow();
 		setCurrentWindow(win1);
 		toFront(win1);
 		int index = imageList.indexOf(win1);

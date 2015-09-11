@@ -726,13 +726,21 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		int count = 3;
 		ImagePlus sketchImp = NewImage.createImage("SketchVolumeViewer_"+rootNames.get(0),imp.getWidth(), imp.getHeight(), imp.getNSlices(), 8, NewImage.FILL_BLACK, false);
-		for (String rootName:rootNames) {
+		MQTVS_VolumeViewer vv = new MQTVS_VolumeViewer(); 
+		for (int n=0; n<rootNames.size(); n++) {
+			String rootName = rootNames.get(n);
 			sketchImp.setTitle("SketchVolumeViewer_"+rootName);
 			IJ.run(sketchImp, "Select All","");
 			IJ.run(sketchImp, "Clear","stack");
 			sketchImp.setCalibration(imp.getCalibration());
-			sketchImp.show();
-			sketchImp.setRoiManager(new RoiManager(false));
+			if (!sketchImp.isVisible()) {
+				sketchImp.show();
+				sketchImp.setRoiManager(new RoiManager(false));
+			} else {
+				sketchImp.getRoiManager().select(-1);
+				IJ.wait(50);
+				sketchImp.getRoiManager().runCommand("Delete");
+			}
 			select(-1);
 			IJ.wait(50);
 			ArrayList<Integer> nameMatchIndexArrayList = new ArrayList<Integer>();
@@ -753,13 +761,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			sketchImp.getRoiManager().select(-1);
 			sketchImp.getRoiManager().drawOrFill(FILL);
 			sketchImp.setMotherImp(imp, 0);
-			MQTVS_VolumeViewer vv = new MQTVS_VolumeViewer(); 
 			vv.run(rootName);
 //			ImageJ3DViewer..setColor(""+50*count, "200", "100");
 			count++;
 //			sketchImp.close();
 //			sketchImp.flush();
 		}
+		sketchImp.changes = false;
+		sketchImp.getWindow().close();
+		sketchImp.flush();
 		ImageJ3DViewer.select(null);
 	}
 
