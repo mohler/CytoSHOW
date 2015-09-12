@@ -105,6 +105,7 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 				}
 				ImageJ3DViewer.select(""+cellName+"_IJ3DV_"+ch);
 				ImageJ3DViewer.setColor(""+channelColor.getRed(), ""+channelColor.getGreen(), ""+channelColor.getBlue());
+				ImageJ3DViewer.lock();
 				ImageJ3DViewer.exportContent("wavefront", IJ.getDirectory("home")+File.separator+impD.getTitle()+"_"+cellName+"_IJ3DV_"+ch+".obj");
 				
 				ImageJ3DViewer.select(null);

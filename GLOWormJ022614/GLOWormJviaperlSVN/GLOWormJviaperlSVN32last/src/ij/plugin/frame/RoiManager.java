@@ -735,7 +735,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			sketchImp.setCalibration(imp.getCalibration());
 			if (!sketchImp.isVisible()) {
 				sketchImp.show();
-				sketchImp.setRoiManager(new RoiManager(false));
+//				sketchImp.setRoiManager(new RoiManager(false));
+				sketchImp.getRoiManager().select(-1);
+				IJ.wait(50);
+				if (sketchImp.getRoiManager().getCount() >0)
+					sketchImp.getRoiManager().runCommand("Delete");
 			} else {
 				sketchImp.getRoiManager().select(-1);
 				IJ.wait(50);
@@ -768,7 +772,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //			sketchImp.flush();
 		}
 		sketchImp.changes = false;
-		sketchImp.getWindow().close();
+		sketchImp.close();
 		sketchImp.flush();
 		ImageJ3DViewer.select(null);
 	}
