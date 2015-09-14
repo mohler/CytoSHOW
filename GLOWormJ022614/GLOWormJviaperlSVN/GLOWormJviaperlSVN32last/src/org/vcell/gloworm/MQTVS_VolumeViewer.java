@@ -52,7 +52,6 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 		MQTVS_Duplicator duper = new MQTVS_Duplicator();
 		if (ij3dv==null) {
 			ij3dv = new ImageJ3DViewer();
-//			ij3dv.run(".");
 		}
 		Roi impRoi = imp.getRoi();
 		if (true /*(imp.getStack().isVirtual() && imp.getNFrames() > 1) || imp.getRoi() != null*/) {
@@ -85,7 +84,7 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 				impD.changes = false;
 				Color channelColor = imp instanceof CompositeImage?((CompositeImage)imp).getChannelColor(ch-1):Color.white;
 				if (imp.getMotherImp().getRoiManager().getColorLegend() != null)
-					channelColor = imp.getMotherImp().getRoiManager().getColorLegend().getBrainbowColors().getOrDefault(cellName.split(" =")[0].toLowerCase(), channelColor);
+					channelColor = imp.getMotherImp().getRoiManager().getColorLegend().getBrainbowColors().getOrDefault(cellName.split(" =")[0].split(" \\|")[0].toLowerCase(), channelColor);
 				int binFactor = 2;
 				double scaleFactor  = 1.0;
 				int threshold = 90;

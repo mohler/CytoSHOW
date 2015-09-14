@@ -3,6 +3,7 @@ import ij.*;
 import ij.gui.*;
 import ij.io.*;
 import ij.plugin.frame.ColorLegend;
+import ij3d.ImageJ3DViewer;
 
 import java.io.*;
 import java.awt.Checkbox;
@@ -46,6 +47,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 	private boolean traceLineages = false;
 	private boolean traceForward = false;
 	private boolean traceBackward = false;
+	private static ImageJ3DViewer ij3dv;
 	
 	public static DragAndDrop getInstance() {
 		return instance;
@@ -431,8 +433,16 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							nDrops--;
 							return;
 
-						}
-						else {
+						}else if (path.toLowerCase().endsWith(".obj")) {
+							if (ij3dv==null) {
+								ij3dv = new ImageJ3DViewer();
+							}
+							ij3dv.run(path);
+
+							nDrops--;
+							return;
+							
+						} else {
 							openFile(new File(path));
 							if (dropImp == null)
 								return;
@@ -951,6 +961,15 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							MQTVSSceneLoader64.runMQTVS_SceneLoader64(path);
 						else
 							MQTVSSceneLoader64.runMQTVS_SceneLoader64(path);
+					}else if (((String)obj).toLowerCase().endsWith(".obj")) {
+						if (ij3dv==null) {
+							ij3dv = new ImageJ3DViewer();
+						}
+						ij3dv.run(((String)obj));
+
+						nDrops--;
+						return;
+						
 					} else if (( ((String)obj).toLowerCase().trim().equals("or"))){
 						or = true;
 					} else if (( ((String)obj).toLowerCase().trim().contains("trace"))){
@@ -1132,6 +1151,14 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					else
 						MQTVSSceneLoader64.runMQTVS_SceneLoader64( ((File)obj).getPath() );
 
+				}else if (obj!=null && ( ((File)obj).getPath().toLowerCase().endsWith(".obj"))) {
+					if (ij3dv==null) {
+						ij3dv = new ImageJ3DViewer();
+					}
+					ij3dv.run(((File)obj).getPath());
+
+					nDrops--;
+					return;
 				} else if (obj!=null && ((File)obj).getPath().endsWith("ColorLegend.lgd")){
 					ColorLegend cl;
 					if (new File(((File)obj).getPath()).exists()){

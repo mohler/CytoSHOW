@@ -721,8 +721,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		ArrayList<String> rootNames= new ArrayList<String>();
 		for (Roi selRoi:getSelectedRoisAsArray()) {
 			String rootName = selRoi.getName().contains("\"")?selRoi.getName().split("\"")[1].trim():"";
-			if (!rootNames.contains(rootName))
-				rootNames.add(rootName);
+			String[] rootChunks = selRoi.getName().split("_");
+			String rootFrame = rootChunks[rootChunks.length-1].replaceAll("[CZT]", "").split("-")[0];
+			if (!rootNames.contains(rootName+"_"+rootFrame))
+				rootNames.add(rootName+"_"+rootFrame);
 		}
 		int count = 3;
 		ImagePlus sketchImp = NewImage.createImage("SketchVolumeViewer_"+rootNames.get(0),imp.getWidth(), imp.getHeight(), imp.getNSlices(), 8, NewImage.FILL_BLACK, false);
@@ -749,9 +751,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			IJ.wait(50);
 			ArrayList<Integer> nameMatchIndexArrayList = new ArrayList<Integer>();
 			int fraa = this.getFullRoisAsArray().length;
+			Roi[] rois = getFullRoisAsArray();
 			for (int r=0; r < fraa; r++) {
-				if (getFullRoisAsArray()[r].getName().startsWith("\""+rootName))
+				String nextName = rois[r].getName();
+				if (nextName.startsWith("\""+rootName.split("_")[0])
+						&&
+						rootName.endsWith(nextName.split("_")[nextName.split("_").length-1].replaceAll("[CZT]", "").split("-")[0])
+						){
 					nameMatchIndexArrayList.add(r);
+				}
 			}
 			int[] nameMatchIndexes = new int[nameMatchIndexArrayList.size()];
 			for (int i=0; i < nameMatchIndexes.length; i++)
