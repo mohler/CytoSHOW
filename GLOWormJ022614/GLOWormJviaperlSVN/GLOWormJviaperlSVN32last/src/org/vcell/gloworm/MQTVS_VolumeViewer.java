@@ -83,6 +83,8 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 				impD.setTitle(imp.getTitle()+"_DUP_"+ch);
 				impD.changes = false;
 				Color channelColor = imp instanceof CompositeImage?((CompositeImage)imp).getChannelColor(ch-1):Color.white;
+				if (channelColor == Color.black)
+					channelColor = Color.white;
 				if (imp.getMotherImp().getRoiManager().getColorLegend() != null)
 					channelColor = imp.getMotherImp().getRoiManager().getColorLegend().getBrainbowColors().getOrDefault(cellName.split(" =")[0].split(" \\|")[0].toLowerCase(), channelColor);
 				int binFactor = 2;
@@ -105,7 +107,7 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 				ImageJ3DViewer.select(""+cellName+"_IJ3DV_"+ch);
 				ImageJ3DViewer.setColor(""+channelColor.getRed(), ""+channelColor.getGreen(), ""+channelColor.getBlue());
 				ImageJ3DViewer.lock();
-				ImageJ3DViewer.exportContent("wavefront", IJ.getDirectory("home")+File.separator+impD.getTitle()+"_"+cellName+"_IJ3DV_"+ch+".obj");
+				ImageJ3DViewer.exportContent("wavefront", (IJ.getDirectory("home")+File.separator+impD.getTitle()+"_"+cellName+"_IJ3DV_"+ch+".obj").replaceAll("\\s+", "_"));
 				
 				ImageJ3DViewer.select(null);
 				IJ.getInstance().toFront();

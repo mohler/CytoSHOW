@@ -438,7 +438,6 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 								ij3dv = new ImageJ3DViewer();
 							}
 							ij3dv.run(path);
-
 							nDrops--;
 							return;
 							
