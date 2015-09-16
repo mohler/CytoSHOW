@@ -93,6 +93,8 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 				if (imp.getTitle().startsWith("SketchVolumeViewer")) {
 					binFactor = 1;
 					scaleFactor  = 0.1;
+					if (!imp.getMotherImp().getTitle().contains("SW_"))
+						scaleFactor  = 1;
 					threshold = 1;
 				}
 				IJ.run(impD, "Scale...", "x="+(scaleFactor)+" y="+(scaleFactor)+" z=1.0 interpolation=Bicubic average process create" );

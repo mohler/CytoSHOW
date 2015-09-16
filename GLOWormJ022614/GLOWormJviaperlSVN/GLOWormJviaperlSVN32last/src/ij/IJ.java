@@ -175,7 +175,7 @@ public class IJ {
 		}
 		catch (ClassNotFoundException e) {
 			if (IJ.getApplet()==null)
-				log("Plugin or class not found: \"" + className + "\"\n(" + e+")");
+				log("Plugin or class not found: \"" + className + "\"\n(" + e+")\n"+IJ.getClassLoader().toString()+"\n"+IJ.getClassLoader().getParent().toString());
 		}
 		catch (InstantiationException e) {log("Unable to load plugin (ins)");}
 		catch (IllegalAccessException e) {log("Unable to load plugin, possibly \nbecause it is not public.");}
@@ -205,14 +205,14 @@ public class IJ {
 		}
 		catch (ClassNotFoundException e) {
 			if (className.indexOf('_')!=-1 && !suppressPluginNotFoundError)
-				error("Plugin or class not found: \"" + className + "\"\n(" + e+")");
+				error("Plugin or class not found: \"" + className + "\"\n(" + e+")\n"+IJ.getClassLoader().toString()+"\n"+IJ.getClassLoader().getParent().toString());
 		}
 		catch (NoClassDefFoundError e) {
 			int dotIndex = className.indexOf('.');
 			if (dotIndex>=0)
 				return runUserPlugIn(commandName, className.substring(dotIndex+1), arg, createNewLoader);
 			if (className.indexOf('_')!=-1 && !suppressPluginNotFoundError)
-				error("Plugin or class not found: \"" + className + "\"\n(" + e+")");
+				error("Plugin or class not found: \"" + className + "\"\n(" + e+")\n"+IJ.getClassLoader().toString()+"\n"+IJ.getClassLoader().getParent().toString());
 		}
 		catch (InstantiationException e) {error("Unable to load plugin (ins)");}
 		catch (IllegalAccessException e) {error("Unable to load plugin, possibly \nbecause it is not public.");}
@@ -1996,7 +1996,7 @@ public class IJ {
 			if (pluginsDir==null)
 				return IJ.class.getClassLoader();
 			else {
-				if (Menus.jnlp)
+				if (!Menus.jnlp)
 					classLoader = new PluginClassLoader(pluginsDir, true);
 				else
 					classLoader = new PluginClassLoader(pluginsDir);

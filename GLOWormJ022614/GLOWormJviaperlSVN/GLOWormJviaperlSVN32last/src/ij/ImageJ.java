@@ -246,7 +246,7 @@ public class ImageJ extends Frame implements ActionListener,
 		if (applet==null)
 			IJ.runPlugIn("ij.plugin.DragAndDrop", "");
 		String str = m.getMacroCount()==1?" macro":" macros";
-		IJ.showStatus(version()+ m.getPluginCount() + " commands; " + m.getMacroCount() + str);
+		IJ.showStatus(version()+ m.getPluginCount() + " commands; " + m.getMacroCount() + str+" jnlp"+ (Menus.jnlp?"+":"-"));
 		//if (applet==null && !embedded && Prefs.runSocketListener)
 		//	new SocketListener();
 		configureProxy();
