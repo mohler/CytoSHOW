@@ -728,13 +728,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		int count = 3;
 		ImagePlus sketchImp = NewImage.createImage("SketchVolumeViewer_"+rootNames.get(0),imp.getWidth(), imp.getHeight(), imp.getNSlices(), 8, NewImage.FILL_BLACK, false);
+		sketchImp.setCalibration(imp.getCalibration());
 		MQTVS_VolumeViewer vv = new MQTVS_VolumeViewer(); 
 		for (int n=0; n<rootNames.size(); n++) {
 			String rootName = rootNames.get(n);
 			sketchImp.setTitle("SketchVolumeViewer_"+rootName);
 			IJ.run(sketchImp, "Select All","");
 			IJ.run(sketchImp, "Clear","stack");
-			sketchImp.setCalibration(imp.getCalibration());
 			if (!sketchImp.isVisible()) {
 				sketchImp.show();
 //				sketchImp.setRoiManager(new RoiManager(false));

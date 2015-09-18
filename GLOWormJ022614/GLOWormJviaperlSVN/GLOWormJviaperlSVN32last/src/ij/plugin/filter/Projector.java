@@ -118,10 +118,6 @@ public class Projector implements PlugInFilter, TextListener {
 	}
 
 	public void run(ImageProcessor ip) {
-		if (IJ.shiftKeyDown()) {
-			IJ.run(imp, "Volume Viewer", "");
-			return;
-		}
 		if (imp != null) {
 			if (imp.getStack() instanceof MultiQTVirtualStack) {
 				String firstMovieName ="";
@@ -1364,7 +1360,7 @@ public class Projector implements PlugInFilter, TextListener {
 		//new ImagePlus("f", new FloatProcessor(projwidth,projheight,f,null)).show();
 	} // end doOneProjectionZ()
 
-	ImagePlus zScale(ImagePlus imp) {
+	public ImagePlus zScale(ImagePlus imp) {
 		IJ.showStatus("Z Scaling...");
 		ImageStack stack1 = imp.getStack();
 		int depth1 = stack1.getSize();

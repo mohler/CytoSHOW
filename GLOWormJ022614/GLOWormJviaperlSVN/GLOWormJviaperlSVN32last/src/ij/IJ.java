@@ -175,7 +175,7 @@ public class IJ {
 		}
 		catch (ClassNotFoundException e) {
 			if (IJ.getApplet()==null)
-				log("Plugin or class not found: \"" + className + "\"\n(" + e+")\n"+IJ.getClassLoader().toString()+"\n"+IJ.getClassLoader().getParent().toString());
+				log("IJ178>Plugin or class not found: \"" + className + "\"\n(" + e+")\n"+IJ.getClassLoader().toString()+"\n"+IJ.getClassLoader().getParent().toString());
 		}
 		catch (InstantiationException e) {log("Unable to load plugin (ins)");}
 		catch (IllegalAccessException e) {log("Unable to load plugin, possibly \nbecause it is not public.");}
@@ -205,14 +205,23 @@ public class IJ {
 		}
 		catch (ClassNotFoundException e) {
 			if (className.indexOf('_')!=-1 && !suppressPluginNotFoundError)
-				error("Plugin or class not found: \"" + className + "\"\n(" + e+")\n"+IJ.getClassLoader().toString()+"\n"+IJ.getClassLoader().getParent().toString());
+				error("IJ208>Plugin or class not found: \"" + className + "\"\n(" + e+")\n"+IJ.getClassLoader().toString()+"\n"+IJ.getClassLoader().getParent().toString());
 		}
 		catch (NoClassDefFoundError e) {
+			
+			e.printStackTrace();
+			StackTraceElement[] lines = e.getStackTrace();
+			for (StackTraceElement line:lines) {
+				if (line.toString().contains("apple/awt/")) {
+					error("Java3D version conflict:\nPlease remove obsolete conflicting J3D files from folder\"System/Library/Java>Extensions/\"");
+					return(null);
+				}
+			}
 			int dotIndex = className.indexOf('.');
 			if (dotIndex>=0)
 				return runUserPlugIn(commandName, className.substring(dotIndex+1), arg, createNewLoader);
 			if (className.indexOf('_')!=-1 && !suppressPluginNotFoundError)
-				error("Plugin or class not found: \"" + className + "\"\n(" + e+")\n"+IJ.getClassLoader().toString()+"\n"+IJ.getClassLoader().getParent().toString());
+				error("IJ215>Plugin or class not found: \"" + className + "\"\n(" + e+")\n"+IJ.getClassLoader().toString()+"\n"+IJ.getClassLoader().getParent().toString());
 		}
 		catch (InstantiationException e) {error("Unable to load plugin (ins)");}
 		catch (IllegalAccessException e) {error("Unable to load plugin, possibly \nbecause it is not public.");}

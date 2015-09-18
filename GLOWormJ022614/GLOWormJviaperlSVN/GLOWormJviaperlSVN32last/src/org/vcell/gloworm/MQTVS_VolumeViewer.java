@@ -13,6 +13,7 @@ import ij.WindowManager;
 import ij.gui.Roi;
 import ij.plugin.PlugIn;
 import ij.plugin.Scaler;
+import ij.plugin.filter.Projector;
 import ij.plugin.frame.RoiManager;
 import ij3d.ColorTable;
 import ij3d.ImageJ3DViewer;
@@ -97,7 +98,9 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 						scaleFactor  = 1;
 					threshold = 1;
 				}
+				impD = new Projector().zScale(impD);
 				IJ.run(impD, "Scale...", "x="+(scaleFactor)+" y="+(scaleFactor)+" z=1.0 interpolation=Bicubic average process create" );
+				impD.show();
 				ImagePlus impDS = IJ.getImage();
 				impD = impDS;
 				try {
