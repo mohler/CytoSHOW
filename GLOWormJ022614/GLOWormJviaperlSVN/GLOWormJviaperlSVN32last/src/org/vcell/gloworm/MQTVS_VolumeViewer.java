@@ -98,9 +98,7 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 						scaleFactor  = 1;
 					threshold = 1;
 				}
-				impD = new Projector().zScale(impD);
 				IJ.run(impD, "Scale...", "x="+(scaleFactor)+" y="+(scaleFactor)+" z=1.0 interpolation=Bicubic average process create" );
-				impD.show();
 				ImagePlus impDS = IJ.getImage();
 				impD = impDS;
 				try {
