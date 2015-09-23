@@ -110,6 +110,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				String[] subFileList = subFile.list();
 				subFileList = StringSorter.sortNumerically(subFileList);
 				ArrayList<String> subFileTiffArrayList = new ArrayList<String>();
+
 				if(keyString.toLowerCase().startsWith("decon")) {
 
 					int stuffCount = 0;
@@ -127,6 +128,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 									q--;
 								}
 							} else if (q-stuffCount+junkCount>= subFileList.length) {
+
 								subFileTiffArrayList.add("channel-frame missing");
 								stuffCount++;
 							} else {
@@ -144,7 +146,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				bigSubFileArrayList.addAll(subFileTiffArrayList);
 			}
 		}
+
 		String[] goDirFileList = {""};
+
 		if (allDirectories) {
 			dimOrder = "xyztc";
 			dir = "";
@@ -163,9 +167,11 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (dir.length() > 0 && !dir.endsWith(File.separator))
 			dir = dir + File.separator;
 		
+
 		if (goDirFileList != null) {
 			for (String fileName:goDirFileList){
 				if ((new File(dir + fileName)).exists()) {
+
 					TiffDecoder td = new TiffDecoder(dir, fileName);
 					if (IJ.debugMode) td.enableDebugging();
 					IJ.showStatus("Decoding TIFF header...");
