@@ -87,7 +87,7 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 				if (channelColor == Color.black)
 					channelColor = Color.white;
 				if (imp.getMotherImp().getRoiManager().getColorLegend() != null)
-					channelColor = imp.getMotherImp().getRoiManager().getColorLegend().getBrainbowColors().getOrDefault(cellName.split(" =")[0].split(" \\|")[0].toLowerCase(), channelColor);
+					channelColor = imp.getMotherImp().getRoiManager().getColorLegend().getBrainbowColors().get(cellName.split(" =")[0].split(" \\|")[0].toLowerCase());
 				int binFactor = 2;
 				double scaleFactor  = 1.0;
 				int threshold = 90;
