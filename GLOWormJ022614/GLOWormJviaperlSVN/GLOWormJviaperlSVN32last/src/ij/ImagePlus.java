@@ -1485,9 +1485,11 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
     	if (slice>nSlices) slice = nSlices;
     	if (frame<1) frame = 1;
     	if (frame>nFrames) frame = nFrames;
-		if (getOriginalFileInfo() != null && getOriginalFileInfo().fileName.toLowerCase().endsWith(".ome.tif")) {
+		if (getOriginalFileInfo() != null && getOriginalFileInfo().fileName.toLowerCase().endsWith("_csv.ome.tif")) {
 //			IJ.log("ome");
 			return (frame-1)*nChannels*nSlices + (channel-1)*nSlices + slice;
+		} else if (getOriginalFileInfo() != null && getOriginalFileInfo().fileName.toLowerCase().endsWith(".ome.tif")) {
+			return (frame-1)*nChannels*nSlices + (slice-1)*nChannels + channel;
 		} else if (getStack() instanceof MultiFileInfoVirtualStack && ((MultiFileInfoVirtualStack)getStack()).getDimOrder() == "xyztc") {
 			return (channel-1)*nSlices*nFrames + (frame-1)*nSlices + slice;
 		}

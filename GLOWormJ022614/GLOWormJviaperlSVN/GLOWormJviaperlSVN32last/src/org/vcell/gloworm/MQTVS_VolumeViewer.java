@@ -24,6 +24,7 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 	public static ImageJ3DViewer ij3dv;
 
 	public void run(String arg) {
+		boolean singleSave = IJ.shiftKeyDown();
 		String cellName = arg;
 		ImagePlus imp = WindowManager.getCurrentImage();
 		if (imp != null) {
@@ -111,6 +112,11 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 				ImageJ3DViewer.setColor(""+channelColor.getRed(), ""+channelColor.getGreen(), ""+channelColor.getBlue());
 				ImageJ3DViewer.lock();
 				ImageJ3DViewer.exportContent("wavefront", (IJ.getDirectory("home")+File.separator+impD.getTitle()+"_"+cellName+"_IJ3DV_"+ch+".obj").replaceAll("\\s+", "_"));
+				if (singleSave) {
+					ImageJ3DViewer.select(""+cellName+"_IJ3DV_"+ch);
+					ImageJ3DViewer.unlock();
+					ImageJ3DViewer.delete();
+				}
 				
 				ImageJ3DViewer.select(null);
 				IJ.getInstance().toFront();

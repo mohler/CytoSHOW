@@ -263,7 +263,7 @@ public class CompositeImage extends ImagePlus {
 			int position = getStackIndex(1, currentSlice, currentFrame);
 			if (cip==null) return;
 			for (int i=0; i<nChannels; ++i) {
-				if (getOriginalFileInfo() != null && getOriginalFileInfo().fileName.toLowerCase().endsWith(".ome.tif")) {
+				if (getOriginalFileInfo() != null && getOriginalFileInfo().fileName.toLowerCase().endsWith("_CSV.ome.tif")) {
 //					IJ.log("ome");
 					cip[i].setPixels(getImageStack().getProcessor(position + (i*getNSlices())).getPixels());
 				} else if (getStack() instanceof MultiFileInfoVirtualStack && ((MultiFileInfoVirtualStack)getStack()).getDimOrder() == "xyztc") {
