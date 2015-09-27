@@ -214,6 +214,21 @@ public class CompositeImage extends ImagePlus {
 		if (mode!=COMPOSITE && mode!=RATIO12 && mode!=RATIO21) {
 			setupLuts(nChannels);
 			LUT cm = lut[currentChannel];
+			currentSlice = getSlice();
+			currentFrame = getFrame();
+			int positionA = getStackIndex(1, currentSlice, currentFrame);
+			if (getOriginalFileInfo() != null && getOriginalFileInfo().fileName.toLowerCase().endsWith("_csv.ome.tif")) {
+//				IJ.log("ome");
+				ip.setPixels(getImageStack().getProcessor(positionA + (currentChannel*getNSlices())).getPixels());
+			} else if (getOriginalFileInfo() != null && getOriginalFileInfo().fileName.toLowerCase().endsWith(".ome.tif")) {
+//					IJ.log("ome");
+					ip.setPixels(getImageStack().getProcessor(positionA + currentChannel).getPixels());
+			} else if (getStack() instanceof MultiFileInfoVirtualStack && ((MultiFileInfoVirtualStack)getStack()).getDimOrder() == "xyztc") {
+				ip.setPixels(getImageStack().getProcessor(positionA + (currentChannel*getNSlices()*getNFrames())).getPixels());				
+			} else {
+//				IJ.log("not ome");
+				ip.setPixels(getImageStack().getProcessor(positionA+currentChannel).getPixels());
+			}
 			if (mode==COLOR)
 				ip.setColorModel(cm);
 			if (!(cm.min==0.0&&cm.max==0.0))
@@ -266,6 +281,9 @@ public class CompositeImage extends ImagePlus {
 				if (getOriginalFileInfo() != null && getOriginalFileInfo().fileName.toLowerCase().endsWith("_csv.ome.tif")) {
 //					IJ.log("ome");
 					cip[i].setPixels(getImageStack().getProcessor(position + (i*getNSlices())).getPixels());
+				} else if (getOriginalFileInfo() != null && getOriginalFileInfo().fileName.toLowerCase().endsWith(".ome.tif")) {
+//						IJ.log("ome");
+						cip[i].setPixels(getImageStack().getProcessor(position + i).getPixels());
 				} else if (getStack() instanceof MultiFileInfoVirtualStack && ((MultiFileInfoVirtualStack)getStack()).getDimOrder() == "xyztc") {
 					cip[i].setPixels(getImageStack().getProcessor(position + (i*getNSlices()*getNFrames())).getPixels());				
 				} else {

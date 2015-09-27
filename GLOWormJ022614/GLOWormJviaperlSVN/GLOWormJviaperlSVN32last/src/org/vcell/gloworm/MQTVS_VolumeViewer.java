@@ -102,6 +102,9 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 				IJ.run(impD, "Scale...", "x="+(scaleFactor)+" y="+(scaleFactor)+" z=1.0 interpolation=Bicubic average process create" );
 				ImagePlus impDS = IJ.getImage();
 				impD = impDS;
+				IJ.run(impD, "8-bit", "");
+				if (cellName =="")
+					cellName = impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_");
 				try {
 					ImageJ3DViewer.add(impD.getTitle(), ColorTable.colorNames[ch+2], ""+cellName+"_IJ3DV_"+ch, ""+threshold, "true", "true", "true", ""+binFactor, "2");
 				} catch (NullPointerException npe) {
@@ -111,7 +114,7 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 				ImageJ3DViewer.select(""+cellName+"_IJ3DV_"+ch);
 				ImageJ3DViewer.setColor(""+channelColor.getRed(), ""+channelColor.getGreen(), ""+channelColor.getBlue());
 				ImageJ3DViewer.lock();
-				ImageJ3DViewer.exportContent("wavefront", (IJ.getDirectory("home")+File.separator+impD.getTitle()+"_"+cellName+"_IJ3DV_"+ch+".obj").replaceAll("\\s+", "_"));
+				ImageJ3DViewer.exportContent("wavefront", (IJ.getDirectory("home")+File.separator+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"+cellName+"_IJ3DV_"+ch+".obj"));
 				if (singleSave) {
 					ImageJ3DViewer.select(""+cellName+"_IJ3DV_"+ch);
 					ImageJ3DViewer.unlock();
