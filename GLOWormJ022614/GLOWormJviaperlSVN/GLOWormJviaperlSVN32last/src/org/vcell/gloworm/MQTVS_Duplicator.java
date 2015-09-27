@@ -225,6 +225,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 						imp.setRoi(roi);
 
 						int n1 = imp.getStackIndex(c, z, t);
+						imp.updateImage();
 						ImageProcessor ip = imp.getProcessor();
 						ip.setRoi(roi);
 						String label = stack.getSliceLabel(n1);
