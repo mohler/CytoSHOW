@@ -49,14 +49,10 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	}
 	
 	public MultiFileInfoVirtualStack(String arg, boolean show) {
-		openMIVS(arg, "", show);
-	}
-	
-	public MultiFileInfoVirtualStack(String arg, String keyString, boolean show) {
-		openMIVS(arg, keyString, show);
+		new MultiFileInfoVirtualStack(arg, "", show);
 	}
 
-	public void openMIVS(String arg, String keyString, boolean show) {
+	public MultiFileInfoVirtualStack(String arg, String keyString, boolean show) {
 		this.keyString = keyString;
 		File argFile = new File(arg);
 		dir = "";

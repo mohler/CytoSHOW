@@ -133,7 +133,7 @@ public class DISPIM_Monitor implements PlugIn {
 		} else {
 			GenericDialog gd = new GenericDialog("Data Set Parameters?");
 			gd.addNumericField("Wavelengths", 2, 0);
-			gd.addNumericField("Z Slices/Stack", 49, 0);
+			gd.addNumericField("Z Slices/Stack", 50, 0);
 			gd.showDialog();;
 			wavelengths = (int) gd.getNextNumber();
 			zSlices = (int) gd.getNextNumber();
@@ -386,7 +386,7 @@ public class DISPIM_Monitor implements PlugIn {
 			
 
 			impB = new ImagePlus();
-			impA.setStack(new MultiFileInfoVirtualStack(mmPath, "", false));
+			impB.setStack(new MultiFileInfoVirtualStack(mmPath, "", false));
 //				impB.setStack(new FileInfoVirtualStack(tdB.getTiffInfo(), false));
 
 			impB.setTitle("SPIMB: "+dirOrOMETiff);
