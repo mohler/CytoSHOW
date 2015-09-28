@@ -14,6 +14,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Properties;
 
+import org.vcell.gloworm.QTVirtualStack;
+
 public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	ArrayList<FileInfoVirtualStack> fivStacks = new ArrayList<FileInfoVirtualStack>();
 	FileInfo[] info;
@@ -33,6 +35,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	private int largestDirectoryTiffCount;
 	private String infoDir;
 	private int  cDim, zDim, tDim;
+	public int stackNumber;
+	public int sliceNumber;
 
 	/* Default constructor. */
 	public MultiFileInfoVirtualStack() {}
@@ -405,8 +409,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			return fivStacks.get(0).getProcessor(1);
 //			throw new IllegalArgumentException("Argument out of range: "+n);
 		}
-		int stackNumber = 0;
-		int sliceNumber = 1;
+		stackNumber = 0;
+		sliceNumber = 1;
 		int total=0;
 		while (n > total) {
 			total = total + fivStacks.get(stackNumber).getSize();
@@ -445,7 +449,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				t=t-1;
 			}
 //			IJ.log(""+n+" "+z+" "+t);
-			return fivStacks.get(t).info[0].fileName + " slice "+ z;
+			return fivStacks.get(stackNumber).info[0].fileName + " slice "+ sliceNumber;
 		}
 		else
 			return info[0].sliceLabels[n-1];
@@ -488,6 +492,11 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		return dir;
 	}
 
+	public FileInfoVirtualStack getVirtualStack(int number){
+		if (fivStacks == null)
+			return null;
+		return ((FileInfoVirtualStack)fivStacks.get(number));
+	}
 
  
 }

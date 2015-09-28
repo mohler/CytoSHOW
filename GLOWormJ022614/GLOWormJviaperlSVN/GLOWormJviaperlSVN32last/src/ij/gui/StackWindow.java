@@ -346,6 +346,10 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 				channelLabel = " [" + ((MultiQTVirtualStack)this.getImagePlus().getStack()).getVirtualStack(imp.getChannel()-1).getMovieName() + "]";
 			else if (this.getImagePlus().getRemoteMQTVSHandler()!=null)
 				channelLabel = " [" + this.getImagePlus().getRemoteMQTVSHandler().getChannelPathNames()[imp.getChannel()-1].replaceAll(".*/", "").replaceAll("(.*(slc|prx|pry)).*", "$1") + "]";
+			else if (this.getImagePlus().getStack() instanceof MultiFileInfoVirtualStack) {
+				MultiFileInfoVirtualStack mfivs = ((MultiFileInfoVirtualStack)this.getImagePlus().getStack());
+				channelLabel = " ["+ mfivs.getVirtualStack(mfivs.stackNumber) + "]";
+			}
 			s += "c:"+imp.getChannel()+"/"+channels + channelLabel ;
 			if (slices>1||frames>1) s += " ";
 		}
