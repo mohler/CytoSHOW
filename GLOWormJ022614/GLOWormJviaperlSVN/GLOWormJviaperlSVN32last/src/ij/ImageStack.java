@@ -14,7 +14,7 @@ public class ImageStack {
 	static final int INITIAL_SIZE = 25;
 	static final String outOfRange = "Argument out of range: ";
 	private int type = UNKNOWN;
-	private int nSlices = 0;
+	protected int nSlices = 0;
 	private Object[] stack;
 	private String[] label;
 	protected int width;

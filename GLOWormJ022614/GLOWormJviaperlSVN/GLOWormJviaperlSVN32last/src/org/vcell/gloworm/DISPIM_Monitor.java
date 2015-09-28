@@ -311,7 +311,7 @@ public class DISPIM_Monitor implements PlugIn {
 			impA = new ImagePlus();
 			impA.setStack(new MultiFileInfoVirtualStack(mmPath, "", false));
 //				impA.setStack(new FileInfoVirtualStack(tdA.getTiffInfo(), false));
-			int stackSize = impA.getNSlices();
+			int stackSize = impA.getStack().getSize();
 			int nChannels = wavelengths*2;
 			int nSlices = zSlices;
 			int nFrames = (int)Math.floor((double)stackSize/(nChannels*nSlices));
@@ -328,8 +328,8 @@ public class DISPIM_Monitor implements PlugIn {
 					}
 				} else if (nChannels*nSlices*nFrames<stackSize) {
 					for (int a=nChannels*nSlices*nFrames;a<stackSize;a++) {
-						impA.getStack().deleteSlice(nChannels*nSlices*nFrames);
-					}
+						((MultiFileInfoVirtualStack)impA.getStack()).deleteSlice(nChannels*nSlices*nFrames);
+						stackSize = impA.getStack().getSize();					}
 				}else {
 					IJ.error("HyperStack Converter", "channels x slices x frames <> stack size");
 					return;
@@ -341,7 +341,7 @@ public class DISPIM_Monitor implements PlugIn {
 					for (int c=nChannels;c>=1;c=c-2) {
 						for (int s=c*nSlices-1;s>=(c-1)*nSlices;s--) {
 							int target = t*nChannels*nSlices + s+1;
-							impA.getStack().deleteSlice(target);
+							((MultiFileInfoVirtualStack)impA.getStack()).deleteSlice(target);
 						}
 					}
 				}
@@ -350,7 +350,7 @@ public class DISPIM_Monitor implements PlugIn {
 					for (int s=nSlices*nChannels-1;s>=0;s--) {
 						int target = t*nChannels*nSlices + s+1;
 						if (s>=nSlices*nChannels/2) { 
-							impA.getStack().deleteSlice(target);
+							((MultiFileInfoVirtualStack)impA.getStack()).deleteSlice(target);
 						}
 					}
 				}
@@ -388,6 +388,10 @@ public class DISPIM_Monitor implements PlugIn {
 			impB = new ImagePlus();
 			impB.setStack(new MultiFileInfoVirtualStack(mmPath, "", false));
 //				impB.setStack(new FileInfoVirtualStack(tdB.getTiffInfo(), false));
+			stackSize = impB.getNSlices();
+			nChannels = wavelengths*2;
+			nSlices = zSlices;
+			nFrames = (int)Math.floor((double)stackSize/(nChannels*nSlices));
 
 			impB.setTitle("SPIMB: "+dirOrOMETiff);
 
@@ -401,7 +405,8 @@ public class DISPIM_Monitor implements PlugIn {
 					}
 				} else if (nChannels*nSlices*nFrames<stackSize) {
 					for (int a=nChannels*nSlices*nFrames;a<stackSize;a++) {
-						impB.getStack().deleteSlice(nChannels*nSlices*nFrames);
+						((MultiFileInfoVirtualStack)impB.getStack()).deleteSlice(nChannels*nSlices*nFrames);
+						stackSize--;
 					}
 				}else {
 					IJ.error("HyperStack Converter", "channels x slices x frames <> stack size");
@@ -410,10 +415,10 @@ public class DISPIM_Monitor implements PlugIn {
 			}
 			if (channelSwitchVolume ) {
 				for (int t=nFrames-1;t>=0;t--) {
-					for (int c=nChannels-1;c>=1;c=c-2) {
+					for (int c=nChannels;c>=1;c=c-2) {
 						for (int s=c*nSlices-1;s>=(c-1)*nSlices;s--) {
 							int target = t*nChannels*nSlices + s+1;
-							impB.getStack().deleteSlice(target);
+							((MultiFileInfoVirtualStack)impB.getStack()).deleteSlice(target);
 						}
 					}
 				}
@@ -422,7 +427,7 @@ public class DISPIM_Monitor implements PlugIn {
 					for (int s=nSlices*nChannels-1;s>=0;s--) {
 						int target = t*nChannels*nSlices + s+1;
 						if (s<nSlices*nChannels/2) { 
-							impB.getStack().deleteSlice(target);
+							((MultiFileInfoVirtualStack)impB.getStack()).deleteSlice(target);
 						}
 					}
 				}

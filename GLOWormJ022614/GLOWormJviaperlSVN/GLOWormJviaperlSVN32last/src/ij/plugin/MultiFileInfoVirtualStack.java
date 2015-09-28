@@ -370,12 +370,29 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 	/** Deletes the specified image, were 1<=n<=nImages. */
 	public void deleteSlice(int n) {
-		if (n<1 || n>nImages)
-			throw new IllegalArgumentException("Argument out of range: "+n);
-		if (nImages<1) return;
-		for (int i=n; i<nImages; i++)
-			info[i-1] = info[i];
-		info[nImages-1] = null;
+//		if (n<1 || n>nImages)
+//			throw new IllegalArgumentException("Argument out of range: "+n);
+//		if (nImages<1) return;
+//		for (int i=n; i<nImages; i++)
+//			info[i-1] = info[i];
+//		info[nImages-1] = null;
+//		nImages--;
+		if (n<1 || n>nImages) {
+			IJ.runMacro("waitForUser(\""+n+"\");");
+		}
+		int stackNumber = 0;
+		int sliceNumber = 1;
+		int total=0;
+		while (n > total+1) {
+			total = total + fivStacks.get(stackNumber).getSize();
+			stackNumber++;
+		}
+		stackNumber--;
+		total = total - fivStacks.get(stackNumber).getSize();
+
+		sliceNumber = n - total;
+		
+		fivStacks.get(stackNumber).deleteSlice(sliceNumber);
 		nImages--;
 	}
 	

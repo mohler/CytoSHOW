@@ -144,7 +144,7 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (n<1 || n>nSlices)
 			throw new IllegalArgumentException("Argument out of range: "+n);
 		if (nSlices<1) return;
-		for (int i=n; i<nImages; i++)
+		for (int i=n; i<nSlices; i++)
 			info[i-1] = info[i];
 		if (nSlices-1<info.length)
 			info[nSlices-1] = null;
