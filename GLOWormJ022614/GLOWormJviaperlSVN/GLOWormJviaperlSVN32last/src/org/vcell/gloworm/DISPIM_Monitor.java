@@ -415,7 +415,7 @@ public class DISPIM_Monitor implements PlugIn {
 			}
 			if (channelSwitchVolume ) {
 				for (int t=nFrames-1;t>=0;t--) {
-					for (int c=nChannels;c>=1;c=c-2) {
+					for (int c=nChannels-1;c>=1;c=c-2) {
 						for (int s=c*nSlices-1;s>=(c-1)*nSlices;s--) {
 							int target = t*nChannels*nSlices + s+1;
 							((MultiFileInfoVirtualStack)impB.getStack()).deleteSlice(target);
