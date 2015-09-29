@@ -12,6 +12,11 @@ import java.util.Properties;
 	implements the File/Import/TIFF Virtual Stack command. */
 public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 	FileInfo[] info;
+	
+	public FileInfo[] getInfo() {
+		return info;
+	}
+
 	int nImages;
 	
 	/* Default constructor. */

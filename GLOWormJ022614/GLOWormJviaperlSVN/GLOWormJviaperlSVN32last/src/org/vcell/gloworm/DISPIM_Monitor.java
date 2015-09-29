@@ -4,6 +4,7 @@ import java.awt.Button;
 import java.awt.Polygon;
 import java.awt.event.ActionEvent;
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -108,7 +109,7 @@ public class DISPIM_Monitor implements PlugIn {
 		ImageWindow win = null;
 
 		String[] dirOrOMETiffChunks = dirOrOMETiff.split(IJ.isWindows()?"\\\\":"/");
-		String dirOrOMETiffName = dirOrOMETiffChunks[dirOrOMETiffChunks.length-1];
+//		String dirOrOMETiffName = dirOrOMETiffChunks[dirOrOMETiffChunks.length-1];
 
 		if ((new File(dirOrOMETiff)).isDirectory() && !(new File(dirOrOMETiff)).list()[0].startsWith("MMStack_")) {
 			IJ.saveString("", dirOrOMETiff+"Big5DFileListA.txt");
@@ -307,8 +308,7 @@ public class DISPIM_Monitor implements PlugIn {
 			TiffDecoder tdA = new TiffDecoder("",dirOrOMETiff);
 			TiffDecoder tdB = new TiffDecoder("",dirOrOMETiff);
 
-			String mmPath = (new File(dirOrOMETiff)).getParent();
-			
+			String mmPath = (new File(dirOrOMETiff)).getParent();			
 
 			impA = new ImagePlus();
 			impA.setStack(new MultiFileInfoVirtualStack(mmPath, "MMStack", false));
@@ -317,6 +317,9 @@ public class DISPIM_Monitor implements PlugIn {
 			int nChannels = wavelengths*2;
 			int nSlices = zSlices;
 			int nFrames = (int)Math.floor((double)stackSize/(nChannels*nSlices));
+			dirOrOMETiff = ((MultiFileInfoVirtualStack)impA.getStack()).getFivStacks().get(0).getInfo()[0].directory +
+					File.separator +
+					((MultiFileInfoVirtualStack)impA.getStack()).getFivStacks().get(0).getInfo()[0].fileName;
 
 			impA.setTitle("SPIMB: "+dirOrOMETiff);
 
@@ -489,10 +492,10 @@ public class DISPIM_Monitor implements PlugIn {
 					|| (impB.getRoi().getType() != Roi.RECTANGLE && impB.getRoi().getFeretValues()[0]>cropHeight*impB.getCalibration().pixelHeight)) {
 				WindowManager.setTempCurrentImage(impA);
 				if (impA.getRoi()==null) {
-					if (!((new File(dirOrOMETiff+ dirOrOMETiffName +"A_crop.roi")).canRead())) {
+					if (!((new File(dirOrOMETiff/*+ dirOrOMETiffName*/ +"A_crop.roi")).canRead())) {
 						IJ.makeRectangle(0,0,cropWidth,cropHeight);
 					} else {
-						IJ.open(dirOrOMETiff+ dirOrOMETiffName +"A_crop.roi");
+						IJ.open(dirOrOMETiff/*+ dirOrOMETiffName*/ +"A_crop.roi");
 					}
 				} else if (impA.getRoi().getType() != Roi.RECTANGLE && impA.getRoi().getFeretValues()[0]>cropHeight*impA.getCalibration().pixelHeight
 						|| (impA.getRoi().getType() == Roi.RECTANGLE && impA.getRoi().getBounds().getHeight() > cropHeight)
@@ -507,10 +510,10 @@ public class DISPIM_Monitor implements PlugIn {
 				}
 				WindowManager.setTempCurrentImage(impB);
 				if (impB.getRoi()==null) {
-					if (!((new File(dirOrOMETiff+ dirOrOMETiffName +"B_crop.roi")).canRead())) {
+					if (!((new File(dirOrOMETiff/*+ dirOrOMETiffName*/ +"B_crop.roi")).canRead())) {
 						IJ.makeRectangle(0,0,cropWidth,cropHeight);
 					} else {
-						IJ.open(dirOrOMETiff+ dirOrOMETiffName +"B_crop.roi");
+						IJ.open(dirOrOMETiff/*+ dirOrOMETiffName*/ +"B_crop.roi");
 					}
 				} else if (impB.getRoi().getType() != Roi.RECTANGLE && impB.getRoi().getFeretValues()[0]>cropHeight*impB.getCalibration().pixelHeight
 						|| (impB.getRoi().getType() == Roi.RECTANGLE && impB.getRoi().getBounds().getWidth() > cropHeight)
@@ -541,8 +544,8 @@ public class DISPIM_Monitor implements PlugIn {
 			//				}
 			//			}
 
-			IJ.saveAs(impA, "Selection", dirOrOMETiff+dirOrOMETiffName +"A_crop.roi");
-			IJ.saveAs(impB, "Selection", dirOrOMETiff+dirOrOMETiffName +"B_crop.roi");
+			IJ.saveAs(impA, "Selection", dirOrOMETiff/*+dirOrOMETiffName*/ +"A_crop.roi");
+			IJ.saveAs(impB, "Selection", dirOrOMETiff/*+dirOrOMETiffName*/ +"B_crop.roi");
 
 			int wasFrameA = impA.getFrame();
 			int wasFrameB = impB.getFrame();
@@ -1314,9 +1317,9 @@ public class DISPIM_Monitor implements PlugIn {
 				if (impDF2 != null)
 					wasChannelDF2 = impDF2.getChannel();
 				WindowManager.setTempCurrentImage(impA);
-				IJ.open(dirOrOMETiff+ dirOrOMETiffName +"A_crop.roi");
+				IJ.open(dirOrOMETiff/*+ dirOrOMETiffName*/ +"A_crop.roi");
 				WindowManager.setTempCurrentImage(impB);
-				IJ.open(dirOrOMETiff+ dirOrOMETiffName +"B_crop.roi");
+				IJ.open(dirOrOMETiff/*+ dirOrOMETiffName*/ +"B_crop.roi");
 				WindowManager.setTempCurrentImage(null);
 
 				for (int f=impA.getNFrames();f<=impA.getNFrames();f++) {
