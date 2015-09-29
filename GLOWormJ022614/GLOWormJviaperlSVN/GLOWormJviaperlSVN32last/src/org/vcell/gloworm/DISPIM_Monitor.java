@@ -308,15 +308,17 @@ public class DISPIM_Monitor implements PlugIn {
 			TiffDecoder tdB = new TiffDecoder("",dirOrOMETiff);
 
 			String mmPath = (new File(dirOrOMETiff)).getParent();
+			
+
 			impA = new ImagePlus();
-			impA.setStack(new MultiFileInfoVirtualStack(mmPath, "", false));
-//				impA.setStack(new FileInfoVirtualStack(tdA.getTiffInfo(), false));
-			int stackSize = impA.getStack().getSize();
+			impA.setStack(new MultiFileInfoVirtualStack(mmPath, "MMStack", false));
+//				impA.setStack(new FileInfoVirtualStack(tdB.getTiffInfo(), false));
+			int stackSize = impA.getNSlices();
 			int nChannels = wavelengths*2;
 			int nSlices = zSlices;
 			int nFrames = (int)Math.floor((double)stackSize/(nChannels*nSlices));
 
-			impA.setTitle("SPIMA: "+dirOrOMETiff);
+			impA.setTitle("SPIMB: "+dirOrOMETiff);
 
 			if (nChannels*nSlices*nFrames!=stackSize) {
 				if (nChannels*nSlices*nFrames>stackSize) {
@@ -329,7 +331,8 @@ public class DISPIM_Monitor implements PlugIn {
 				} else if (nChannels*nSlices*nFrames<stackSize) {
 					for (int a=nChannels*nSlices*nFrames;a<stackSize;a++) {
 						((MultiFileInfoVirtualStack)impA.getStack()).deleteSlice(nChannels*nSlices*nFrames);
-						stackSize = impA.getStack().getSize();					}
+						stackSize--;
+					}
 				}else {
 					IJ.error("HyperStack Converter", "channels x slices x frames <> stack size");
 					return;
@@ -338,7 +341,7 @@ public class DISPIM_Monitor implements PlugIn {
 			boolean channelSwitchVolume = dirOrOMETiff.contains("_CSV.ome.tif");
 			if (channelSwitchVolume ) {
 				for (int t=nFrames-1;t>=0;t--) {
-					for (int c=nChannels;c>=1;c=c-2) {
+					for (int c=nChannels-1;c>=1;c=c-2) {
 						for (int s=c*nSlices-1;s>=(c-1)*nSlices;s--) {
 							int target = t*nChannels*nSlices + s+1;
 							((MultiFileInfoVirtualStack)impA.getStack()).deleteSlice(target);
@@ -349,13 +352,12 @@ public class DISPIM_Monitor implements PlugIn {
 				for (int t=nFrames-1;t>=0;t--) {
 					for (int s=nSlices*nChannels-1;s>=0;s--) {
 						int target = t*nChannels*nSlices + s+1;
-						if (s>=nSlices*nChannels/2) { 
+						if (s<nSlices*nChannels/2) { 
 							((MultiFileInfoVirtualStack)impA.getStack()).deleteSlice(target);
 						}
 					}
 				}
 			}
-			
 			impA.setStack(impA.getImageStack());
 
 			impA.setDimensions(wavelengths, nSlices, nFrames);
@@ -384,16 +386,15 @@ public class DISPIM_Monitor implements PlugIn {
 			impA.show();
 			
 			
-
 			impB = new ImagePlus();
-			impB.setStack(new MultiFileInfoVirtualStack(mmPath, "", false));
-//				impB.setStack(new FileInfoVirtualStack(tdB.getTiffInfo(), false));
-			stackSize = impB.getNSlices();
-			nChannels = wavelengths*2;
-			nSlices = zSlices;
-			nFrames = (int)Math.floor((double)stackSize/(nChannels*nSlices));
+			impB.setStack(new MultiFileInfoVirtualStack(mmPath, "MMStack", false));
+//				impB.setStack(new FileInfoVirtualStack(tdA.getTiffInfo(), false));
+			 stackSize = impB.getStack().getSize();
+			 nChannels = wavelengths*2;
+			 nSlices = zSlices;
+			 nFrames = (int)Math.floor((double)stackSize/(nChannels*nSlices));
 
-			impB.setTitle("SPIMB: "+dirOrOMETiff);
+			impB.setTitle("SPIMA: "+dirOrOMETiff);
 
 			if (nChannels*nSlices*nFrames!=stackSize) {
 				if (nChannels*nSlices*nFrames>stackSize) {
@@ -406,8 +407,7 @@ public class DISPIM_Monitor implements PlugIn {
 				} else if (nChannels*nSlices*nFrames<stackSize) {
 					for (int a=nChannels*nSlices*nFrames;a<stackSize;a++) {
 						((MultiFileInfoVirtualStack)impB.getStack()).deleteSlice(nChannels*nSlices*nFrames);
-						stackSize--;
-					}
+						stackSize = impB.getStack().getSize();					}
 				}else {
 					IJ.error("HyperStack Converter", "channels x slices x frames <> stack size");
 					return;
@@ -415,7 +415,7 @@ public class DISPIM_Monitor implements PlugIn {
 			}
 			if (channelSwitchVolume ) {
 				for (int t=nFrames-1;t>=0;t--) {
-					for (int c=nChannels-1;c>=1;c=c-2) {
+					for (int c=nChannels;c>=1;c=c-2) {
 						for (int s=c*nSlices-1;s>=(c-1)*nSlices;s--) {
 							int target = t*nChannels*nSlices + s+1;
 							((MultiFileInfoVirtualStack)impB.getStack()).deleteSlice(target);
@@ -426,12 +426,13 @@ public class DISPIM_Monitor implements PlugIn {
 				for (int t=nFrames-1;t>=0;t--) {
 					for (int s=nSlices*nChannels-1;s>=0;s--) {
 						int target = t*nChannels*nSlices + s+1;
-						if (s<nSlices*nChannels/2) { 
+						if (s>=nSlices*nChannels/2) { 
 							((MultiFileInfoVirtualStack)impB.getStack()).deleteSlice(target);
 						}
 					}
 				}
 			}
+			
 			impB.setStack(impB.getImageStack());
 
 			impB.setDimensions(wavelengths, nSlices, nFrames);
@@ -458,6 +459,7 @@ public class DISPIM_Monitor implements PlugIn {
 			impB.getOriginalFileInfo().fileName = dirOrOMETiff;
 			impB.getOriginalFileInfo().directory = dirOrOMETiff;
 			impB.show();
+			
 		}
 		IJ.run("Tile");
 		IJ.log(""+WindowManager.getImageCount());
@@ -586,7 +588,7 @@ public class DISPIM_Monitor implements PlugIn {
 
 				if (impA.getStack() instanceof ListVirtualStack)
 					frameFileNames[f] = ((ListVirtualStack)impA.getStack()).getDirectory(impA.getCurrentSlice());
-				else if (impA.getStack() instanceof FileInfoVirtualStack)
+				else if (impA.getStack() instanceof FileInfoVirtualStack || impA.getStack() instanceof MultiFileInfoVirtualStack)
 					frameFileNames[f] = "t" + f;
 				String timecode = ""+(new Date()).getTime();
 
