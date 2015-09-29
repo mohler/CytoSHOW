@@ -91,13 +91,21 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					cumulativeSubFileArrayList.add(subFile.getName());
 					tiffCount++;				
 				}
-			} else if (keyString == "" || subFile.getName().matches(".*"+keyString+".*")){
-				channelDirectories++;
-				String[] subFileList = subFile.list();
-				for (String subFileListElement:subFileList)
-					if (!cumulativeSubFileArrayList.contains(subFileListElement))
-						if (subFileListElement.toLowerCase().endsWith("tif"))
-							cumulativeSubFileArrayList.add(subFileListElement);
+			}
+		}
+		if (tiffCount == 0) {
+			for (String fileName:dirFileList) {
+				File subFile = new File(dir+fileName);
+				if (fileName.contains("DS_Store"))
+					;
+				else if (keyString == "" || subFile.getName().matches(".*"+keyString+".*")){
+					channelDirectories++;
+					String[] subFileList = subFile.list();
+					for (String subFileListElement:subFileList)
+						if (!cumulativeSubFileArrayList.contains(subFileListElement))
+							if (subFileListElement.toLowerCase().endsWith("tif"))
+								cumulativeSubFileArrayList.add(subFileListElement);
+				}
 			}
 		}
 		cumulativeTiffFileList = new String[cumulativeSubFileArrayList.size()];
