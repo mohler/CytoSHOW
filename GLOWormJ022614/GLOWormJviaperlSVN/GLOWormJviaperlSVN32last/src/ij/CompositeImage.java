@@ -477,7 +477,7 @@ public class CompositeImage extends ImagePlus {
 	}
 	
 	public Color getChannelColor(int channel) {
-		if (lut==null || mode==GRAYSCALE)
+		if (lut==null /*|| mode==GRAYSCALE*/)
 			return Color.black;
 		IndexColorModel cm = lut[channel];
 		if (cm==null)

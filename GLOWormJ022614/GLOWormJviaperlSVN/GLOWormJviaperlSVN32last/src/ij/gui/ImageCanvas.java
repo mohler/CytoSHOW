@@ -1565,17 +1565,17 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				popupInfo[0] = cellName;
 				popupInfo[1] = cellName+"\n\n";
 
-//				final ImagePlus cartoonImp = IJ.openImage("http://legacy.wormbase.org/cell/diagrams/"+cellName.toLowerCase()+".gif");
-//				
-//				if (cartoonImp!=null) {
-//					cartoonImp.setTitle(cellName);
-//					JPanel cartoonPanel = new JPanel();
-//					JButton cartoonButton = new JButton();
-//					cartoonButton.setIcon(new ImageIcon(cartoonImp.getImage()));
-//					cartoonPanel.add(cartoonButton);
-//					cartoonPanel.setBackground(Color.white);
-//					popup.add(cartoonPanel, 1);
-//				}
+				final ImagePlus cartoonImp = IJ.openImage("http://legacy.wormbase.org/cell/diagrams/"+cellName.toLowerCase()+".gif");
+				
+				if (cartoonImp!=null) {
+					cartoonImp.setTitle(cellName);
+					JPanel cartoonPanel = new JPanel();
+					JButton cartoonButton = new JButton();
+					cartoonButton.setIcon(new ImageIcon(cartoonImp.getImage()));
+					cartoonPanel.add(cartoonButton);
+					cartoonPanel.setBackground(Color.white);
+					popup.add(cartoonPanel, 1);
+				}
 
 				
 				

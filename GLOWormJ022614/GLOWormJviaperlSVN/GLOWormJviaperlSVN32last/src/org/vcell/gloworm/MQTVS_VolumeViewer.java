@@ -24,7 +24,7 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 	public static ImageJ3DViewer ij3dv;
 
 	public void run(String arg) {
-		boolean singleSave = IJ.shiftKeyDown();
+		boolean singleSave = !IJ.shiftKeyDown();
 		String cellName = arg;
 		ImagePlus imp = WindowManager.getCurrentImage();
 		if (imp != null) {
@@ -76,57 +76,62 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 			if (!imp.getTitle().startsWith("SketchVolumeViewer"))
 				duperString = duper.showHSDialog(imp, imp.getTitle()+"_DUP");
 
-			for (int ch=duper.getFirstC(); ch<=duper.getLastC(); ch++) {
-				imp.setRoi(impRoi);
-				ImagePlus impD = imp;
-				if (!imp.getTitle().startsWith("SketchVolumeViewer"))
-					impD = duper.run(imp, ch, ch, duper.getFirstZ(), duper.getLastZ(), duper.getFirstT(), duper.getLastT(), duper.getStepT(), false);
-				impD.show();
-				impD.setTitle(imp.getTitle()+"_DUP_"+ch);
-				impD.changes = false;
-				Color channelColor = imp instanceof CompositeImage?((CompositeImage)imp).getChannelColor(ch-1):Color.white;
-				if (channelColor == Color.black)
-					channelColor = Color.white;
-				if (imp.getMotherImp().getRoiManager().getColorLegend() != null)
-					channelColor = imp.getMotherImp().getRoiManager().getColorLegend().getBrainbowColors().get(cellName.split(" =")[0].split(" \\|")[0].toLowerCase());
-				int binFactor = 2;
-				double scaleFactor  = 1.0;
-				int threshold = 90;
-				if (imp.getTitle().startsWith("SketchVolumeViewer")) {
-					binFactor = 1;
-					scaleFactor  = 0.1;
-					if (!imp.getMotherImp().getTitle().contains("SW_"))
-						scaleFactor  = 1;
-					threshold = 1;
+			for (int tpt = (singleSave?duper.getFirstT():0); tpt<=(singleSave?duper.getLastT():0); tpt = tpt+(singleSave?duper.getStepT():1)) {
+				for (int ch=duper.getFirstC(); ch<=duper.getLastC(); ch++) {
+					imp.setRoi(impRoi);
+					ImagePlus impD = imp;
+					if (!imp.getTitle().startsWith("SketchVolumeViewer"))
+						impD = duper.run(imp, ch, ch, duper.getFirstZ(), duper.getLastZ(), singleSave?tpt:duper.getFirstT(), singleSave?tpt:duper.getLastT(), singleSave?1:duper.getStepT(), false);
+					impD.show();
+					impD.setTitle(imp.getShortTitle()+"_DUP_"+ch+"_"+tpt);
+					impD.changes = false;
+					Color channelColor = imp instanceof CompositeImage?((CompositeImage)imp).getChannelColor(ch-1):Color.white;
+					if (channelColor == Color.black)
+						channelColor = Color.white;
+					if (cellName != "" && imp.getMotherImp().getRoiManager().getColorLegend() != null)
+						channelColor = imp.getMotherImp().getRoiManager().getColorLegend().getBrainbowColors().get(cellName.split(" =")[0].split(" \\|")[0].toLowerCase());
+					if (channelColor == null)
+						channelColor = Color.white;
+					int binFactor = 2;
+					double scaleFactor  = 1.0;
+					int threshold = 90;
+					if (imp.getTitle().startsWith("SketchVolumeViewer")) {
+						binFactor = 1;
+						scaleFactor  = 0.1;
+						if (!imp.getMotherImp().getTitle().contains("SW_"))
+							scaleFactor  = 1;
+						threshold = 1;
+					}
+					IJ.run(impD, "Scale...", "x="+(scaleFactor)+" y="+(scaleFactor)+" z=1.0 interpolation=Bicubic average process create" );
+					ImagePlus impDS = IJ.getImage();
+					impD = impDS;
+					IJ.run(impD, "8-bit", "");
+					String objectName = cellName;
+					if (objectName =="")
+						objectName = impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_");
+					try {
+						ImageJ3DViewer.add(impD.getTitle(), ColorTable.colorNames[ch+2], ""+objectName+"_"+ch+"_"+tpt, ""+threshold, "true", "true", "true", ""+binFactor, "2");
+					} catch (NullPointerException npe) {
+						ij3dv.run(".");
+						ImageJ3DViewer.add(impD.getTitle(), ColorTable.colorNames[ch+2], ""+objectName+"_"+ch+"_"+tpt, ""+threshold, "true", "true", "true", ""+binFactor, "2");
+					}
+					ImageJ3DViewer.select(""+objectName+"_"+ch+"_"+tpt);
+					ImageJ3DViewer.setColor(""+channelColor.getRed(), ""+channelColor.getGreen(), ""+channelColor.getBlue());
+					ImageJ3DViewer.lock();
+					ImageJ3DViewer.exportContent("wavefront", (IJ.getDirectory("home")+File.separator+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"+objectName.replaceAll(":","").replaceAll("(/|\\s+)","")+"_"+ch+"_"+tpt+".obj"));
+					if (singleSave) {
+						ImageJ3DViewer.select(""+objectName+"_"+ch+"_"+tpt);
+						ImageJ3DViewer.unlock();
+						ImageJ3DViewer.delete();
+					}
+
+					ImageJ3DViewer.select(null);
+					IJ.getInstance().toFront();
+					IJ.setTool(ij.gui.Toolbar.HAND);
+					impD.changes = false;
+					impD.getWindow().close();
+					impD.flush();
 				}
-				IJ.run(impD, "Scale...", "x="+(scaleFactor)+" y="+(scaleFactor)+" z=1.0 interpolation=Bicubic average process create" );
-				ImagePlus impDS = IJ.getImage();
-				impD = impDS;
-				IJ.run(impD, "8-bit", "");
-				if (cellName =="")
-					cellName = impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_");
-				try {
-					ImageJ3DViewer.add(impD.getTitle(), ColorTable.colorNames[ch+2], ""+cellName+"_IJ3DV_"+ch, ""+threshold, "true", "true", "true", ""+binFactor, "2");
-				} catch (NullPointerException npe) {
-					ij3dv.run(".");
-					ImageJ3DViewer.add(impD.getTitle(), ColorTable.colorNames[ch+2], ""+cellName+"_IJ3DV_"+ch, ""+threshold, "true", "true", "true", ""+binFactor, "2");
-				}
-				ImageJ3DViewer.select(""+cellName+"_IJ3DV_"+ch);
-				ImageJ3DViewer.setColor(""+channelColor.getRed(), ""+channelColor.getGreen(), ""+channelColor.getBlue());
-				ImageJ3DViewer.lock();
-				ImageJ3DViewer.exportContent("wavefront", (IJ.getDirectory("home")+File.separator+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"+cellName+"_IJ3DV_"+ch+".obj"));
-				if (singleSave) {
-					ImageJ3DViewer.select(""+cellName+"_IJ3DV_"+ch);
-					ImageJ3DViewer.unlock();
-					ImageJ3DViewer.delete();
-				}
-				
-				ImageJ3DViewer.select(null);
-				IJ.getInstance().toFront();
-				IJ.setTool(ij.gui.Toolbar.HAND);
-				impD.changes = false;
-				impD.getWindow().close();
-				impD.flush();
 			}
 			
 			if (!imp.getTitle().startsWith("SketchVolumeViewer")) {

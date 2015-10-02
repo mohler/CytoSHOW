@@ -52,10 +52,6 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		info = fiArray;
 	}
 	
-	public MultiFileInfoVirtualStack(String arg, boolean show) {
-		new MultiFileInfoVirtualStack(arg, "", show);
-	}
-
 	public MultiFileInfoVirtualStack(String arg, String keyString, boolean show) {
 		this.keyString = keyString;
 		File argFile = new File(arg);
@@ -115,11 +111,15 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		cumulativeTiffFileList = StringSorter.sortNumerically(cumulativeTiffFileList);
 		for (String fileName:dirFileList) {
 			File subFile = new File(dir+fileName);
-			if (fileName.contains("DS_Store"))
-				;
-			else if ((keyString == "" || subFile.getName().matches(".*"+keyString+".*")) && !subFile.isDirectory()) {
-				;			
-			} else if (keyString == "" || subFile.getName().matches(".*"+keyString+".*")){
+			boolean noKeyString = keyString == "";
+			boolean subFileDir = subFile.isDirectory();
+			if (fileName.contains("DS_Store")) {
+				IJ.log(".");
+				
+			} else if ((noKeyString || subFile.getName().matches(".*"+keyString+".*")) && !subFileDir) {
+				IJ.log(".");
+			
+			} else if (noKeyString || subFile.getName().matches(".*"+keyString+".*")){
 				String[] subFileList = subFile.list();
 				subFileList = StringSorter.sortNumerically(subFileList);
 				ArrayList<String> subFileTiffArrayList = new ArrayList<String>();
@@ -160,6 +160,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			}
 		}
 
+		
 		String[] goDirFileList = {""};
 
 		if (allDirectories) {
@@ -283,7 +284,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	}
 	
 	public void run(String arg) {
-		new MultiFileInfoVirtualStack(arg, true);
+		new MultiFileInfoVirtualStack(arg, "", true);
 	}
 	
 	void open(boolean show) {
@@ -298,12 +299,12 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			GenericDialog gd = new GenericDialog("Dimensions of HyperStacks");
 			gd.addNumericField("Channels (c):", 2, 0);
 			gd.addNumericField("Slices (z):", 50, 0);
-			gd.addNumericField("Frames (t):", nImages/100, 0);
+			gd.addNumericField("Frames (t):", nImages/(100*2), 0);
 			gd.showDialog();
 			if (gd.wasCanceled()) return;
 			cDim = (int) gd.getNextNumber();
 			zDim = (int) gd.getNextNumber();
-			tDim = (int) gd.getNextNumber();
+			tDim = (int) gd.getNextNumber()*2;
 		} else {
 			zDim = fivStacks.get(0).nImages;
 			nImages = channelDirectories* cumulativeTiffFileList.length * zDim;
