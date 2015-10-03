@@ -3,6 +3,7 @@ import ij.*;
 import ij.gui.*;
 import ij.io.*;
 import ij.plugin.frame.ColorLegend;
+import ij3d.ColorTable;
 import ij3d.ImageJ3DViewer;
 
 import java.io.*;
@@ -47,7 +48,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 	private boolean traceLineages = false;
 	private boolean traceForward = false;
 	private boolean traceBackward = false;
-	private static ImageJ3DViewer ij3dv;
+	private ImageJ3DViewer ij3dv;
 	
 	public static DragAndDrop getInstance() {
 		return instance;
@@ -436,8 +437,15 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						}else if (path.toLowerCase().endsWith(".obj")) {
 							if (ij3dv==null) {
 								ij3dv = new ImageJ3DViewer();
+								ij3dv.run(".");
 							}
-							ij3dv.run(path);
+							try {
+								ImageJ3DViewer.importContent(path);
+							} catch (Exception e) {
+								ij3dv.run(".");
+								ImageJ3DViewer.importContent(path);
+							}
+							ImageJ3DViewer.lock();
 							nDrops--;
 							return;
 							
@@ -963,8 +971,15 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					}else if (((String)obj).toLowerCase().endsWith(".obj")) {
 						if (ij3dv==null) {
 							ij3dv = new ImageJ3DViewer();
+							ij3dv.run(".");
 						}
-						ij3dv.run(((String)obj));
+						try {
+							ImageJ3DViewer.importContent(((String)obj));
+						} catch (Exception e) {
+							ij3dv.run(".");
+							ImageJ3DViewer.importContent(((String)obj));
+						}
+						ImageJ3DViewer.lock();
 
 						nDrops--;
 						return;
@@ -1153,8 +1168,15 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 				}else if (obj!=null && ( ((File)obj).getPath().toLowerCase().endsWith(".obj"))) {
 					if (ij3dv==null) {
 						ij3dv = new ImageJ3DViewer();
+						ij3dv.run(".");
 					}
-					ij3dv.run(((File)obj).getPath());
+					try {
+						ImageJ3DViewer.importContent(((File)obj).getPath());
+					} catch (Exception e) {
+						ij3dv.run(".");
+						ImageJ3DViewer.importContent(((File)obj).getPath());
+					}
+					ImageJ3DViewer.lock();
 
 					nDrops--;
 					return;
