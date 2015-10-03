@@ -5,6 +5,7 @@ import ij.ImagePlus;
 import ij3d.contextmenu.ContextMenu;
 import ij3d.pointlist.PointListDialog;
 import ij3d.shortcuts.ShortCuts;
+import ij3d.MeshMaker;
 import ij3d.IJ3dExecuter;
 
 import java.awt.BorderLayout;
