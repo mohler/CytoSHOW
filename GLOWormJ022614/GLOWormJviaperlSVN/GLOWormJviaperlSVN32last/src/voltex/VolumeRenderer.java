@@ -39,9 +39,9 @@ public class VolumeRenderer implements AxisConstants {
 	protected final BranchGroup root;
 
 	/** The AppearanceCreator, which creates the textures. */
-	protected final AppearanceCreator appCreator;
+	protected final VTAppearanceCreator appCreator;
 	/** The GeometryCreator, which creates the corresponding geomentries. */
-	protected final GeometryCreator geomCreator;
+	protected final VTGeometryCreator geomCreator;
 
 	/** A Switch, which holds 6 OrderedGroups, one for each direction */
 	protected final Switch axisSwitch;
@@ -72,8 +72,8 @@ public class VolumeRenderer implements AxisConstants {
 
 		this.volume = new VoltexVolume(img);
 		volume.setChannels(channels);
-		appCreator = new AppearanceCreator(volume, color, tr);
-		geomCreator = new GeometryCreator(volume);
+		appCreator = new VTAppearanceCreator(volume, color, tr);
+		geomCreator = new VTGeometryCreator(volume);
 
 		axisIndex[X_AXIS][FRONT] = 0;
 		axisIndex[X_AXIS][BACK]  = 1;

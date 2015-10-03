@@ -29,7 +29,8 @@ import javax.vecmath.Vector4f;
  * 
  * @author Benjamin Schmid
  */
-public class AppearanceCreator implements AxisConstants {
+public class VTAppearanceCreator implements AxisConstants {
+	
 
 	/** The volume from which the textures are created */
 	private VoltexVolume volume;
@@ -65,7 +66,7 @@ public class AppearanceCreator implements AxisConstants {
 	 * Initializes this AppearanceCreator with the given image data.
 	 * @param volume
 	 */
-	public AppearanceCreator(VoltexVolume volume) {
+	public VTAppearanceCreator(VoltexVolume volume) {
 		this(volume, null, 0.1f);
 	}
 
@@ -76,7 +77,7 @@ public class AppearanceCreator implements AxisConstants {
 	 * @param color
 	 * @param transparency
 	 */
-	public AppearanceCreator(VoltexVolume volume,
+	public VTAppearanceCreator(VoltexVolume volume,
 			Color3f color, float transparency) {
 		initAttributes(color, transparency);
 		setVolume(volume);

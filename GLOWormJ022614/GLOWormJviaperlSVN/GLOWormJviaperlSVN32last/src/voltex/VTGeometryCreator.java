@@ -11,7 +11,7 @@ import javax.media.j3d.*;
  * 
  * @author Benjamin Schmid
  */
-public class GeometryCreator implements AxisConstants {
+public class VTGeometryCreator implements AxisConstants {
 
 	/** Temporary array of the coordinates of one rectangle */
 	private double[] quadCoords = new double[12];
@@ -23,7 +23,7 @@ public class GeometryCreator implements AxisConstants {
 	 * Initializes this GeometryCreator with the given volume
 	 * @param volume
 	 */
-	public GeometryCreator(VoltexVolume volume) {
+	public VTGeometryCreator(VoltexVolume volume) {
 		setVolume(volume);
 	}
 
