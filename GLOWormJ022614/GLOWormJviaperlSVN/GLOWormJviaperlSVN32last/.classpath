@@ -6,7 +6,6 @@
 	<classpathentry kind="lib" path="jdom.jar"/>
 	<classpathentry kind="lib" path="SmartCapture_VLite.jar"/>
 	<classpathentry kind="lib" path="Volume_Viewer.jar"/>
-	<classpathentry kind="lib" path="ImageJ_3D_Viewer.jar"/>
 	<classpathentry kind="lib" path="commons-net-3.3.jar"/>
 	<classpathentry kind="lib" path="javaws.jar"/>
 	<classpathentry kind="lib" path="QTJava.zip"/>
@@ -89,5 +88,8 @@
 	<classpathentry kind="lib" path="jogamp-all-platforms/jar/atomic/newt-natives-solaris-i586.jar"/>
 	<classpathentry kind="lib" path="jogamp-all-platforms/jar/atomic/oculusvr-natives-linux-i586.jar"/>
 	<classpathentry kind="lib" path="jogamp-all-platforms/jar/atomic/oculusvr-natives-solaris-i586.jar"/>
+	<classpathentry kind="lib" path="imglib.jar"/>
+	<classpathentry kind="lib" path="Jama-1.0.3.jar"/>
+	<classpathentry kind="lib" path="junit-4.12.jar"/>
 	<classpathentry kind="output" path="plugins"/>
 </classpath>
