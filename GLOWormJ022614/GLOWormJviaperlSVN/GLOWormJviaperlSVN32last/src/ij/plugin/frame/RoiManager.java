@@ -3168,6 +3168,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	/** Assigns the ROI at the specified index to 'imp'. */
 	public void select(ImagePlus imp, int index) {
+		if (IJ.shiftKeyDown()) {
+			select(index, true, false);
+		}
 		selectedIndexes = null;
 		int n = listModel.getSize();
 		int[] selecteds = list.getSelectedIndices();
@@ -3177,8 +3180,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			return;
 		}
 		if (index>=n) return;			
-		list.clearSelection();
-		list.setSelectedIndex(index);
+		if (IJ.shiftKeyDown()) {
+			list.addSelectionInterval(index, index);
+		} else {
+			list.clearSelection();
+			list.setSelectedIndex(index);
+		}
 		list.ensureIndexIsVisible(index);
 
 		if (imp==null) imp=getImage();
@@ -3195,10 +3202,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		ImagePlus imp = this.imp;
 		if (imp==null) return;
 		Roi previousRoi = imp.getRoi();
-		if (previousRoi==null)
-		{select(index); return;}
+		if (previousRoi==null){
+			select(index); 	
+			return;
+		}
 		Roi.previousRoi = (Roi)previousRoi.clone();
 		String label = (String) listModel.getElementAt(index);
+		list.setSelectedIndices(getSelectedIndexes());
 		Roi roi = (Roi)rois.get(label);
 		if (roi!=null) {
 			roi.setImage(imp);

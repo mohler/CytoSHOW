@@ -1625,8 +1625,10 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 				return;
 			}
 			newRoi = (Roi)newRoi.clone();
-			if (newRoi==null)
-				{deleteRoi(); return;}
+			if (newRoi==null) {
+				deleteRoi(); 
+				return;
+			}
 		}
 		if (bounds.width==0 && bounds.height==0 && !(newRoi.getType()==Roi.POINT||newRoi.getType()==Roi.LINE))
 			{deleteRoi(); return;}
