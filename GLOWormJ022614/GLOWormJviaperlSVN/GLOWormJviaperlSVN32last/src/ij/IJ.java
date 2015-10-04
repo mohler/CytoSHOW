@@ -12,6 +12,8 @@ import ij.macro.Interpreter;
 import ij.measure.Calibration;
 import ij.measure.ResultsTable;
 import ij.measure.Measurements;
+import ij3d.ImageJ3DViewer;
+
 import java.awt.event.*;
 import java.text.*;
 import java.util.*;	
@@ -41,6 +43,7 @@ public class IJ {
     public static final char degreeSymbol = '\u00B0';
 
 	private static ImageJ ij;
+	private static ImageJ3DViewer ij3dv;                                                                                                           
 	private static java.applet.Applet applet;
 	private static ProgressBar progressBar;
 	private static TextPanel textPanel;
@@ -94,6 +97,15 @@ public class IJ {
 		return ij;
 	}
 	
+	/**Returns a reference to the "ImageJ" frame.*/
+	public static ImageJ3DViewer getIJ3DVInstance() {
+		if (ij3dv == null) {
+			ij3dv = new ImageJ3DViewer();
+			ij3dv.run(".");
+		}
+		return ij3dv;
+	}
+
 	/**Enable/disable debug mode.*/
 	public static void setDebugMode(boolean b) {
 		debugMode = b;

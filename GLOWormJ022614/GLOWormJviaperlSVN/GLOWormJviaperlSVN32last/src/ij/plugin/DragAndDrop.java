@@ -436,8 +436,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 
 						}else if (path.toLowerCase().endsWith(".obj")) {
 							if (ij3dv==null) {
-								ij3dv = new ImageJ3DViewer();
-								ij3dv.run(".");
+								ij3dv = IJ.getIJ3DVInstance();
 							}
 							try {
 								ImageJ3DViewer.importContent(path);
@@ -970,8 +969,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							MQTVSSceneLoader64.runMQTVS_SceneLoader64(path);
 					}else if (((String)obj).toLowerCase().endsWith(".obj")) {
 						if (ij3dv==null) {
-							ij3dv = new ImageJ3DViewer();
-							ij3dv.run(".");
+							ij3dv = IJ.getIJ3DVInstance();
 						}
 						try {
 							ImageJ3DViewer.importContent(((String)obj));
@@ -1167,8 +1165,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 
 				}else if (obj!=null && ( ((File)obj).getPath().toLowerCase().endsWith(".obj"))) {
 					if (ij3dv==null) {
-						ij3dv = new ImageJ3DViewer();
-						ij3dv.run(".");
+						ij3dv = IJ.getIJ3DVInstance();
 					}
 					try {
 						ImageJ3DViewer.importContent(((File)obj).getPath());

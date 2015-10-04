@@ -44,16 +44,14 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 			}
 		} else {
 //			IJ.runPlugIn("ImageJ_3D_Viewer", "");
-			ImageJ3DViewer ij3dv = new ImageJ3DViewer();
-			ij3dv.run(".");
-			
+			ImageJ3DViewer ij3dv = IJ.getIJ3DVInstance();			
 			
 			return;
 		}
 		
 		MQTVS_Duplicator duper = new MQTVS_Duplicator();
 		if (ij3dv==null) {
-			ij3dv = new ImageJ3DViewer();
+			ij3dv = IJ.getIJ3DVInstance();
 		}
 		Roi impRoi = imp.getRoi();
 		if (true /*(imp.getStack().isVirtual() && imp.getNFrames() > 1) || imp.getRoi() != null*/) {
