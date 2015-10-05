@@ -75,7 +75,7 @@ public class Executer implements Runnable {
 									"selectImage("+cmdImp.getID()+");" +
 									"getSelectionBounds(roix, roiy, roiwidth, roiheight);" +
 									"run(\"Set... \", \"zoom=\" + getZoom*100 + \" x=\" + roix+roiwidth/2 + \" y=\" + roiy+roiheight/2);" +
-									"roiManager('select', "+i+", "+cmdImp.getID()+");" +
+//									"roiManager('select', "+i+", "+cmdImp.getID()+");" +
 									//									"print(\"Zoom Complete\");"+
 									"");
 							//							IJ.wait(200);
@@ -185,7 +185,7 @@ public class Executer implements Runnable {
 									"selectImage("+cmdImp.getID()+");" +
 									"getSelectionBounds(roix, roiy, roiwidth, roiheight);" +
 									"run(\"Set... \", \"zoom=\" + getZoom*100 + \" x=\" + roix+roiwidth/2 + \" y=\" + roiy+roiheight/2);" +
-									"roiManager('select', "+i+", "+cmdImp.getID()+");" +
+//									"roiManager('select', "+i+", "+cmdImp.getID()+");" +
 									//									"print(\"Zoom Complete\");"+
 									"");
 							//							IJ.wait(200);
