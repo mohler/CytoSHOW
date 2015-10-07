@@ -42,14 +42,14 @@ import javax.media.j3d.RenderingErrorListener;
 import javax.media.j3d.Screen3D;
 import javax.vecmath.Color3f;
 
-public class ImageWindow3D extends JFrame implements UniverseListener {
+public class ImageWindow3D extends ImageWindow implements UniverseListener {
 
 	private DefaultUniverse universe;
 	private ImageCanvas3D canvas3D;
 	private Label status = new Label("");
 	private boolean noOffScreen = true;
 	private ErrorListener error_listener;
-	private ImagePlus imp;
+//	private ImagePlus imp;
 
 	public ImageWindow3D(String title, DefaultUniverse universe) {
 		super(title);
@@ -60,9 +60,11 @@ public class ImageWindow3D extends JFrame implements UniverseListener {
 		imp.setTitle("ImageJ 3D Viewer");
 		this.universe = universe;
 		this.canvas3D = (ImageCanvas3D)universe.getCanvas();
+		ic = this.canvas3D.getRoiCanvas();
 
 		error_listener = new ErrorListener();
 		error_listener.addTo(universe);
+		addCommandButtons(imp);
 
 		add(canvas3D, -1);
 
@@ -248,8 +250,9 @@ public class ImageWindow3D extends JFrame implements UniverseListener {
 		return status;
 	}
 
-	public void close() {
-		if (null == universe) return;
+	public boolean close() {
+		if (null == universe) return false;
+		WindowManager.removeWindow(this);
 		universe.removeUniverseListener(this);
 
 		// Must remove the listener so this instance can be garbage
@@ -274,6 +277,7 @@ public class ImageWindow3D extends JFrame implements UniverseListener {
 		canvas3D.flush();
 		universe = null;
 		dispose();
+		return true;
 	}
 
 	/*
@@ -301,6 +305,11 @@ public class ImageWindow3D extends JFrame implements UniverseListener {
 
 	public void canvasResized() {
 		updateImagePlus();
+	}
+	
+	/** Override Container getInsets() to avoid ic, imp, etc... */
+	public Insets getInsets() {
+		return new Insets(0,0,0,0);	
 	}
 
 	private int lastToolID;

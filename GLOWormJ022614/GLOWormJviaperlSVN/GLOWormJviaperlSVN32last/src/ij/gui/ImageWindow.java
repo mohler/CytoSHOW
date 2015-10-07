@@ -30,6 +30,7 @@ import java.awt.GraphicsEnvironment;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.HeadlessException;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.Label;
@@ -52,6 +53,7 @@ import java.awt.event.WindowStateListener;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 import org.vcell.gloworm.MultiChannelController;
@@ -59,7 +61,7 @@ import org.vcell.gloworm.MultiQTVirtualStack;
 import org.vcell.gloworm.SliceStereoToggle;
 
 /** A frame for displaying images. */
-public class ImageWindow extends Frame implements FocusListener, WindowListener, WindowStateListener, MouseWheelListener {
+public class ImageWindow extends JFrame implements FocusListener, WindowListener, WindowStateListener, MouseWheelListener {
 
 	public static final int MIN_WIDTH = 128;
 	public static final int MIN_HEIGHT = 32;
@@ -129,7 +131,7 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
     public ImageWindow(ImagePlus imp, ImageCanvas ic) {
 		super(imp.getTitle());
 		
-		if (Prefs.blackCanvas && getClass().getName().equals("ij.gui.ImageWindow")) {
+		if (false/*Prefs.blackCanvas && getClass().getName().equals("ij.gui.ImageWindow")*/) {
 			setForeground(Color.white);
 			setBackground(Color.black);
 		} else {
@@ -149,10 +151,6 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 		BorderLayout bl = new BorderLayout();
 		
 		this.setLayout(bl);
-		GridBagLayout fspgridbag = new GridBagLayout();
-		GridBagConstraints fspc = new GridBagConstraints();
-		GridBagLayout viewgridbag = new GridBagLayout();
-		GridBagConstraints vspc = new GridBagConstraints();
 				
 		overheadPanel = new Panel();
 		overheadPanel.setLayout(new GridLayout(1, 1));
@@ -171,6 +169,90 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 
 		this.add(overheadPanel, BorderLayout.NORTH);
 
+		addCommandButtons(imp);
+		
+
+		add(ic, BorderLayout.CENTER);
+
+		
+		addFocusListener(this);
+		addWindowListener(this);
+ 		addWindowStateListener(this);
+ 		addKeyListener(ij);
+		setFocusTraversalKeysEnabled(false);
+		if (!(this instanceof StackWindow))
+			addMouseWheelListener(this);
+		setResizable(true);
+		if (!(this instanceof HistogramWindow&&IJ.isMacro()&&Interpreter.isBatchMode())) {
+			WindowManager.addWindow(this);
+			imp.setWindow(this);
+		}
+		if (previousWindow!=null) {
+			if (newCanvas)
+				setLocationAndSize(false);
+			else
+				ic.update(previousWindow.getCanvas());
+			Point loc = previousWindow.getLocation();
+			setLocation(loc.x, loc.y);
+			if (!(this instanceof StackWindow)) {
+				pack();
+				show();
+			}
+			if (ic.getMagnification()!=0.0)
+				imp.setTitle(imp.getTitle());
+			boolean unlocked = imp.lockSilently();
+			boolean changes = imp.changes;
+			imp.changes = false;
+			previousWindow.close();
+			imp.changes = changes;
+			if (unlocked)
+				imp.unlock();
+			if (this.imp!=null)
+				this.imp.setOpenAsHyperStack(openAsHyperStack);
+			WindowManager.setCurrentWindow(this);
+		} else {
+			setLocationAndSize(false);
+			if (ij!=null && !IJ.isMacintosh()) {
+				Image img = ij.getIconImage();
+				if (img!=null) 
+					try {setIconImage(img);} catch (Exception e) {}
+			}
+			if (centerOnScreen) {
+				GUI.center(this);
+				centerOnScreen = false;
+			} else if (nextLocation!=null) {
+				setLocation(nextLocation);
+				nextLocation = null;
+			}
+			if (Interpreter.isBatchMode() || (IJ.getInstance()==null&&this instanceof HistogramWindow)) {
+				WindowManager.setTempCurrentImage(imp);
+				Interpreter.addBatchModeImage(imp);
+			} else
+				if (!(this instanceof StackWindow)) {
+					pack();
+					show();
+				}
+		}
+		origICtop = ic.getY();
+
+	    addComponentListener(new ComponentAdapter() {
+	      public void componentResized(ComponentEvent e) {
+	    	  ImageCanvas ic = ImageWindow.this.ic;
+	    	  double mag = ic.getMagnification();
+	    	  ImageWindow win = ImageWindow.this;
+	    	  ic.setSourceRect(new Rectangle(ic.getSrcRect().x, ic.getSrcRect().y, 
+	    			  (int)(((BorderLayout)win.getLayout()).getLayoutComponent(BorderLayout.CENTER).getWidth()/mag),
+	    			  (int)(((BorderLayout)win.getLayout()).getLayoutComponent(BorderLayout.CENTER).getHeight()/mag)));
+	      }
+	    });
+
+     }
+
+	public void addCommandButtons(ImagePlus imp) throws HeadlessException {
+		GridBagLayout fspgridbag = new GridBagLayout();
+		GridBagConstraints fspc = new GridBagConstraints();
+		GridBagLayout viewgridbag = new GridBagLayout();
+		GridBagConstraints vspc = new GridBagConstraints();
 
 		tagButtonPanel = new Panel(fspgridbag);
 		viewButtonPanel = new Panel(viewgridbag);
@@ -517,12 +599,6 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 		modeButtonPanel.add(stereo4dYrcButton, fspc);
 		stereo4dYrcButton.addActionListener(sst);
 
-//		
-		
-
-		add(ic, BorderLayout.CENTER);
-
-		
 		BorderLayout optbl = new BorderLayout();
 		optionsPanel = new Panel();
 		optionsPanel.setLayout(optbl);
@@ -535,78 +611,9 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 		modeButtonPanel.setVisible(false);
 		optionsPanel.setVisible(true);
 		viewButtonPanel.setVisible(true);
-		addFocusListener(this);
-		addWindowListener(this);
- 		addWindowStateListener(this);
- 		addKeyListener(ij);
-		setFocusTraversalKeysEnabled(false);
-		if (!(this instanceof StackWindow))
-			addMouseWheelListener(this);
-		setResizable(true);
-		if (!(this instanceof HistogramWindow&&IJ.isMacro()&&Interpreter.isBatchMode())) {
-			WindowManager.addWindow(this);
-			imp.setWindow(this);
-		}
-		if (previousWindow!=null) {
-			if (newCanvas)
-				setLocationAndSize(false);
-			else
-				ic.update(previousWindow.getCanvas());
-			Point loc = previousWindow.getLocation();
-			setLocation(loc.x, loc.y);
-			if (!(this instanceof StackWindow)) {
-				pack();
-				show();
-			}
-			if (ic.getMagnification()!=0.0)
-				imp.setTitle(imp.getTitle());
-			boolean unlocked = imp.lockSilently();
-			boolean changes = imp.changes;
-			imp.changes = false;
-			previousWindow.close();
-			imp.changes = changes;
-			if (unlocked)
-				imp.unlock();
-			if (this.imp!=null)
-				this.imp.setOpenAsHyperStack(openAsHyperStack);
-			WindowManager.setCurrentWindow(this);
-		} else {
-			setLocationAndSize(false);
-			if (ij!=null && !IJ.isMacintosh()) {
-				Image img = ij.getIconImage();
-				if (img!=null) 
-					try {setIconImage(img);} catch (Exception e) {}
-			}
-			if (centerOnScreen) {
-				GUI.center(this);
-				centerOnScreen = false;
-			} else if (nextLocation!=null) {
-				setLocation(nextLocation);
-				nextLocation = null;
-			}
-			if (Interpreter.isBatchMode() || (IJ.getInstance()==null&&this instanceof HistogramWindow)) {
-				WindowManager.setTempCurrentImage(imp);
-				Interpreter.addBatchModeImage(imp);
-			} else
-				if (!(this instanceof StackWindow)) {
-					pack();
-					show();
-				}
-		}
-		origICtop = ic.getY();
 
-	    addComponentListener(new ComponentAdapter() {
-	      public void componentResized(ComponentEvent e) {
-	    	  ImageCanvas ic = ImageWindow.this.ic;
-	    	  double mag = ic.getMagnification();
-	    	  ImageWindow win = ImageWindow.this;
-	    	  ic.setSourceRect(new Rectangle(ic.getSrcRect().x, ic.getSrcRect().y, 
-	    			  (int)(((BorderLayout)win.getLayout()).getLayoutComponent(BorderLayout.CENTER).getWidth()/mag),
-	    			  (int)(((BorderLayout)win.getLayout()).getLayoutComponent(BorderLayout.CENTER).getHeight()/mag)));
-	      }
-	    });
-
-     }
+//		
+	}
     
 	private void setLocationAndSize(boolean updating) {
 		int width = imp.getWidth();
