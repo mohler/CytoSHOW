@@ -66,9 +66,9 @@ public class ImageWindow3D extends ImageWindow implements UniverseListener {
 		error_listener.addTo(universe);
 
 		
-//		addToolBarPanel();
+		addToolBarPanel();
 
-//		addCommandButtons(imp);
+		addCommandButtons(imp);
 
 		add(canvas3D, -1);
 
