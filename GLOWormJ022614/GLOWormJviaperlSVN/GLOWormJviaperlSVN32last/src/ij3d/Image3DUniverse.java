@@ -212,8 +212,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	
 	public void show() {
 		init(new ImageWindow3D("ImageJ 3D Viewer", this));
-		win.pack();
-		win.setVisible(true);
+//		win.pack();
+//		win.setVisible(true);
 	}
 
 	/**
@@ -1764,6 +1764,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 			Content content = createContent(mesh, name);
 			contents.add(content);
+			content.setLocked(true);
 		}
 		return addContentLater(contents);
 	}

@@ -53,6 +53,7 @@ public class ImageWindow3D extends ImageWindow implements UniverseListener {
 
 	public ImageWindow3D(String title, DefaultUniverse universe) {
 		super(title);
+		setVisible(true);
 		String j3dNoOffScreen = System.getProperty("j3d.noOffScreen");
 		if (j3dNoOffScreen != null && j3dNoOffScreen.equals("true"))
 			noOffScreen = true;
@@ -64,7 +65,11 @@ public class ImageWindow3D extends ImageWindow implements UniverseListener {
 
 		error_listener = new ErrorListener();
 		error_listener.addTo(universe);
-		addCommandButtons(imp);
+
+		
+//		addToolBarPanel();
+
+//		addCommandButtons(imp);
 
 		add(canvas3D, -1);
 
@@ -76,7 +81,10 @@ public class ImageWindow3D extends ImageWindow implements UniverseListener {
 
 		universe.addUniverseListener(this);
 		updateImagePlus();
+		pack();
 		universe.ui.setHandTool();
+		WindowManager.addWindow(this);
+
 	}
 
 	public DefaultUniverse getUniverse() {
@@ -308,6 +316,7 @@ public class ImageWindow3D extends ImageWindow implements UniverseListener {
 	}
 	
 	/** Override Container getInsets() to avoid ic, imp, etc... */
+	@Override
 	public Insets getInsets() {
 		return new Insets(0,0,0,0);	
 	}

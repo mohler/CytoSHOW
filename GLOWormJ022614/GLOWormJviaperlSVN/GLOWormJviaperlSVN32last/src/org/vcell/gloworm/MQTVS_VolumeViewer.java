@@ -24,9 +24,12 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 	public static ImageJ3DViewer ij3dv;
 
 	public void run(String arg) {
-		boolean singleSave = IJ.shiftKeyDown();
 		String cellName = arg;
-		ImagePlus imp = WindowManager.getCurrentImage();
+		ImagePlus imp = IJ.getImage();
+	}
+	
+	public void runVolumeViewer(ImagePlus imp, String cellName ) {
+		boolean singleSave = IJ.shiftKeyDown();
 		if (imp != null) {
 			if (imp.getStack() instanceof MultiQTVirtualStack) {
 				String firstMovieName = ((MultiQTVirtualStack)imp.getStack()).getVirtualStack(0).getMovieName();

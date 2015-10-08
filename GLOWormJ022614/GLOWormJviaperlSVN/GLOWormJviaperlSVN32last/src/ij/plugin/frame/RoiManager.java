@@ -767,13 +767,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				nameMatchIndexes[i] = nameMatchIndexArrayList.get(i);
 				Roi nextRoi = ((Roi)getFullRoisAsArray()[nameMatchIndexArrayList.get(i)]);
 				String[] nextChunks = nextRoi.getName().split("_");
+				sketchImp.getWindow().setVisible(true);
 				sketchImp.setPosition(1, Integer.parseInt(nextChunks[nextChunks.length-2]), Integer.parseInt(nextChunks[nextChunks.length-1].replaceAll("[CZT]", "").split("-")[0]));
 				sketchImp.getRoiManager().addRoi(((Roi)getFullRoisAsArray()[nameMatchIndexArrayList.get(i)]));
 			}		
 			sketchImp.getRoiManager().select(-1);
 			sketchImp.getRoiManager().drawOrFill(FILL);
 			sketchImp.setMotherImp(imp, 0);
-			vv.run(rootName);
+			vv.runVolumeViewer(sketchImp, rootName);
 //			ImageJ3DViewer..setColor(""+50*count, "200", "100");
 			count++;
 //			sketchImp.close();
@@ -3203,7 +3204,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (imp==null) return;
 		Roi previousRoi = imp.getRoi();
 		if (previousRoi==null){
-			select(index); 	
+			IJ.setKeyUp(IJ.ALL_KEYS);
+			select(imp, index); 	
 			return;
 		}
 		Roi.previousRoi = (Roi)previousRoi.clone();

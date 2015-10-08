@@ -89,7 +89,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 	private static boolean centerOnScreen;
 	private static Point nextLocation;
 	
-    private int textGap = centerOnScreen?0:TEXT_GAP;
+    protected int textGap = centerOnScreen?0:TEXT_GAP;
 	
 	/** This variable is set false if the user presses the escape key or closes the window. */
 	public boolean running = false;
@@ -152,22 +152,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		
 		this.setLayout(bl);
 				
-		overheadPanel = new Panel();
-		overheadPanel.setLayout(new GridLayout(1, 1));
-		
-		toolbar = new Toolbar();
-		toolbar.installBuiltinTool("LUT Menu");
-		toolbar.installBuiltinTool("Stacks Menu");
-		toolbar.installBuiltinTool("Developer Menu");
-
-		toolbar.addKeyListener(ij);
-		if (ij != null)
-			toolbar.addMouseListener(ij.toolbar);
-		overheadPanel.add(toolbar);
-//		overheadPanel.setSize(overheadPanel.getWidth(), overheadPanel.getHeight()*2);
-//		overheadScrollPane.add(overheadPanel);
-
-		this.add(overheadPanel, BorderLayout.NORTH);
+		addToolBarPanel();
 
 		addCommandButtons(imp);
 		
@@ -247,6 +232,25 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 	    });
 
      }
+
+	public void addToolBarPanel() {
+		overheadPanel = new Panel();
+		overheadPanel.setLayout(new GridLayout(1, 1));
+		
+		toolbar = new Toolbar();
+		toolbar.installBuiltinTool("LUT Menu");
+		toolbar.installBuiltinTool("Stacks Menu");
+		toolbar.installBuiltinTool("Developer Menu");
+
+		toolbar.addKeyListener(ij);
+		if (ij != null)
+			toolbar.addMouseListener(ij.toolbar);
+		overheadPanel.add(toolbar);
+//		overheadPanel.setSize(overheadPanel.getWidth(), overheadPanel.getHeight()*2);
+//		overheadScrollPane.add(overheadPanel);
+
+		this.add(overheadPanel, BorderLayout.NORTH);
+	}
 
 	public void addCommandButtons(ImagePlus imp) throws HeadlessException {
 		GridBagLayout fspgridbag = new GridBagLayout();
