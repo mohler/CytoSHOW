@@ -53,7 +53,6 @@ public class ImageWindow3D extends ImageWindow implements UniverseListener {
 
 	public ImageWindow3D(String title, DefaultUniverse universe) {
 		super(title);
-		setVisible(true);
 		String j3dNoOffScreen = System.getProperty("j3d.noOffScreen");
 		if (j3dNoOffScreen != null && j3dNoOffScreen.equals("true"))
 			noOffScreen = true;
@@ -81,7 +80,6 @@ public class ImageWindow3D extends ImageWindow implements UniverseListener {
 
 		universe.addUniverseListener(this);
 		updateImagePlus();
-		pack();
 		universe.ui.setHandTool();
 		WindowManager.addWindow(this);
 

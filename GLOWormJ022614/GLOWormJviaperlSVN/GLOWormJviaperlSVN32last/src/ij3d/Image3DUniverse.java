@@ -43,6 +43,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.JRootPane;
 import javax.swing.SwingUtilities;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Color3f;
@@ -252,6 +253,13 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		registrationMenubar = new RegistrationMenubar(this);
 		shortcuts = new ShortCuts(menubar);
 		setMenubar(menubar);
+		menubar.setVisible(false);
+		JRootPane rootPane = win.getRootPane();
+		win.pack();
+		win.setVisible(true);
+		menubar.setVisible(false);
+		win.pack();
+
 	}
 
 	/**
