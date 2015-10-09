@@ -129,8 +129,6 @@ public class ImageWindow3D extends JFrame implements UniverseListener {
 		if (ij != null)
 			toolbar.addMouseListener(ij.toolbar);
 		overheadPanel.add(toolbar);
-//		overheadPanel.setSize(overheadPanel.getWidth(), overheadPanel.getHeight()*2);
-//		overheadScrollPane.add(overheadPanel);
 
 		this.add(overheadPanel, BorderLayout.NORTH);
 	}

@@ -109,7 +109,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 
 						List transferData = (List) transferable.getTransferData(DataFlavor.javaFileListFlavor);
 						if (transferData != null && transferData.size() > 0) {
-							IJ.log("You dropped " + transferData.size() + " files");							
+//							IJ.log("You dropped " + transferData.size() + " files");							
 							dtde.dropComplete(true);
 							setIterator(((List)transferData).iterator());
 							consumed = true;
@@ -123,7 +123,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 				if (flavors[i].isFlavorJavaFileListType()) {
 					Object data = t.getTransferData(DataFlavor.javaFileListFlavor);
 					String dataString = "" + ((List)data);
-					IJ.log(dataString);
+//					IJ.log(dataString);
 					if (!dataString.contains("[]")) {
 						setIterator(((List)data).iterator());
 						consumed = true;
@@ -284,7 +284,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 		traceForward = false;
 		traceBackward = false;
 		Iterator iterator = this.getIterator();
-		IJ.log(iterator.toString());
+//		IJ.log(iterator.toString());
 		Roi messageRoi = new TextRoi(0,0,"");
 		if (imp != null) {
 			messageRoi = new TextRoi(dropImp.getCanvas().getSrcRect().x, dropImp.getCanvas().getSrcRect().y,

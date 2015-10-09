@@ -1,9 +1,9 @@
 package ij.gui;
 import java.awt.*;
-import java.awt.event.KeyEvent;
 import java.awt.event.*;
 import java.io.File;
 import java.util.*;
+
 import ij.*;
 import ij.plugin.frame.Recorder; 
 import ij.plugin.frame.Editor; 
@@ -12,6 +12,7 @@ import ij.plugin.RectToolOptions;
 import ij.plugin.tool.PlugInTool;
 import ij.plugin.tool.MacroToolRunner;
 import ij.macro.Program;
+import ij3d.ImageWindow3D;
 
 /** The ImageJ toolbar. */
 public class Toolbar extends Canvas implements MouseListener, MouseMotionListener, ItemListener, ActionListener {
@@ -97,12 +98,13 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 	private Color triangleColor = new Color(150, 0, 0);
 	private Color toolColor = new Color(0, 25, 45);
 	int localCurrent;
+	private boolean threeDViewer;
 
 
 	public Toolbar() {
 		down = new boolean[NUM_TOOLS];
 		resetButtons();
-		down[0] = true;
+		down[HAND] = true;
 		setForeground(Color.black);
 		setBackground(gray);
 		addMouseListener(this);
@@ -673,6 +675,8 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 		
 	public void setTool2(int tool) {
 		if (!isValidTool(tool)) return;
+		if (threeDViewer && tool != HAND && tool != MAGNIFIER)
+			return;
 		String previousName = getToolName();
 		current = tool;
 		localCurrent = tool;
@@ -876,6 +880,10 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
     }
 
 	public void mousePressed(MouseEvent e) {
+		threeDViewer = false;
+		if (((Component)e.getSource()).getParent().getParent().getParent().getParent().getParent() instanceof ImageWindow3D) {
+			threeDViewer = true;
+		}
 		int x = e.getX();
  		int newTool = 0;
 		for (int i=0; i<NUM_BUTTONS; i++) {

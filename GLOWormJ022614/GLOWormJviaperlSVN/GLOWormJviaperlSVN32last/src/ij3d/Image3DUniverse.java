@@ -193,8 +193,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				String cursorString = " ";
 				Toolkit tk = Toolkit.getDefaultToolkit();
 				if(c != null) {
-					IJ.showStatus(c.getName());
-					cursorString = c.getName();
+					IJ.showStatus(c.getName().split("_=")[0]);
+					cursorString = c.getName().split("_=")[0];
 				
 					
 					if (IJ.isWindows())
