@@ -253,12 +253,11 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		registrationMenubar = new RegistrationMenubar(this);
 		shortcuts = new ShortCuts(menubar);
 		setMenubar(menubar);
-		menubar.setVisible(false);
+//		menubar.setVisible(true);
 		JRootPane rootPane = win.getRootPane();
 		win.pack();
 		win.setVisible(true);
-		menubar.setVisible(false);
-		win.pack();
+		win.getJMenuBar().setVisible(true);
 
 	}
 

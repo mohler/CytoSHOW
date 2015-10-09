@@ -1575,7 +1575,7 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 		}
 	}
 	
-	boolean installBuiltinTool(String label) {
+	public boolean installBuiltinTool(String label) {
 		boolean ok = true;
 		PlugInTool tool = null;
 		if (label.startsWith("Arrow")) {
