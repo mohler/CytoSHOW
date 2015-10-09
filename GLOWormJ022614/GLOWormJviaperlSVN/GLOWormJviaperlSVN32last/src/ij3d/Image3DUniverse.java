@@ -2,19 +2,28 @@ package ij3d;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.gui.ImageCanvas;
+import ij.plugin.Colors;
 import ij3d.contextmenu.ContextMenu;
 import ij3d.pointlist.PointListDialog;
 import ij3d.shortcuts.ShortCuts;
 import customnode.MeshMaker;
 import ij3d.IJ3dExecuter;
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.CheckboxMenuItem;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics2D;
 import java.awt.GraphicsDevice;
+import java.awt.Image;
 import java.awt.Menu;
 import java.awt.MenuBar;
 import java.awt.MenuItem;
+import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
@@ -23,6 +32,9 @@ import java.awt.event.MouseMotionAdapter;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.awt.font.FontRenderContext;
+import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -65,7 +77,7 @@ import customnode.MeshLoader;
 public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 	public static ArrayList<Image3DUniverse> universes =
-				new ArrayList<Image3DUniverse>();
+			new ArrayList<Image3DUniverse>();
 
 	private static final UniverseSynchronizer synchronizer =
 			new UniverseSynchronizer();
@@ -93,7 +105,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 * the table are the names of the Contents.
 	 */
 	private Hashtable<String, Content> contents =
-				new Hashtable<String, Content>();
+			new Hashtable<String, Content>();
 
 	/** A reference to the Image3DMenubar */
 	private Image3DMenubar menubar;
@@ -174,31 +186,66 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 		// add mouse listeners
 		canvas.addMouseMotionListener(new MouseMotionAdapter() {
-			
+
 			public void mouseMoved(MouseEvent e) {
 				Content c = picker.getPickedContent(
 						e.getX(), e.getY());
-				if(c != null)
+				String cursorString = " ";
+				Toolkit tk = Toolkit.getDefaultToolkit();
+				if(c != null) {
 					IJ.showStatus(c.getName());
-				else
+					cursorString = c.getName();
+				
+					
+					if (IJ.isWindows())
+						cursorString = c.getName();
+					Font font = Font.decode("Arial-Outline-18");
+
+					//create the FontRenderContext object which helps us to measure the text
+					FontRenderContext frc = new FontRenderContext(null, true, true);
+
+					//get the height and width of the text
+					Rectangle2D bounds = font.getStringBounds(cursorString, frc);
+					int w = (int) bounds.getWidth();
+					int ht = (int) bounds.getHeight();
+					Image img = new BufferedImage(w, ht, BufferedImage.TYPE_INT_ARGB_PRE);
+
+					//		img.getGraphics().setColor(Colors.decode("00000000", Color.white));
+					Graphics2D g2d = (Graphics2D) img.getGraphics();
+
+					g2d.setFont(font);
+
+					g2d.setColor(Colors.decode("#66111111",Color.gray));
+					g2d.fillRect(0, 0, w, ht);
+					g2d.setColor(Color.YELLOW);
+					g2d.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
+					g2d.drawLine(0, 0, 2, 7);
+					g2d.drawLine(0, 0, 7, 2);
+					g2d.drawLine(0, 0, 8, 8);
+					g2d.drawString(cursorString, 1, img.getHeight(null)-1);
+					win.canvas3D.setCursor(tk.createCustomCursor(img,new Point(0,0),"searchCursor"));
+				} else {
 					IJ.showStatus("");
+					win.canvas3D.setCursor(ImageCanvas.defaultCursor);
+				}
+
 			}
 		});
 
 		canvas.addMouseListener(new MouseAdapter() {
-			
+
 			public void mouseClicked(MouseEvent e) {
 				if (e.isConsumed())
 					return;
 				select(picker.getPickedContent(e.getX(), e.getY()));
 			}
 
-			
+
 			public void mousePressed(MouseEvent e) {
 				contextmenu.showPopup(e);
 			}
 
-			
+
 			public void mouseReleased(MouseEvent e) {
 				contextmenu.showPopup(e);
 			}
@@ -210,11 +257,11 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	/**
 	 * Display this universe in a window (an ImageWindow3D).
 	 */
-	
+
 	public void show() {
 		init(new ImageWindow3D("ImageJ 3D Viewer", this));
-//		win.pack();
-//		win.setVisible(true);
+		//		win.pack();
+		//		win.setVisible(true);
 	}
 
 	/**
@@ -240,11 +287,11 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		// AWT heavyweight and Swing lightweight components.
 		// Unfortunately, not everything is working so far, so
 		// comment out the check for the Java version.
-// 		if(System.getProperty("java.version").compareTo("1.6.0_12") < 0)
+		// 		if(System.getProperty("java.version").compareTo("1.6.0_12") < 0)
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		plDialog = new PointListDialog(this.win);
 		plDialog.addWindowListener(new WindowAdapter() {
-			
+
 			public void windowClosing(WindowEvent e) {
 				hideAllLandmarks();
 			}
@@ -253,7 +300,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		registrationMenubar = new RegistrationMenubar(this);
 		shortcuts = new ShortCuts(menubar);
 		setMenubar(menubar);
-//		menubar.setVisible(true);
+		//		menubar.setVisible(true);
 		JRootPane rootPane = win.getRootPane();
 		win.pack();
 		win.setVisible(true);
@@ -266,7 +313,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 */
 	public void setFullScreen(final boolean f) {
 		SwingUtilities.invokeLater(new Runnable() {
-			
+
 			public void run() {
 				doSetFullScreen(f);
 			}
@@ -317,7 +364,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	/**
 	 * Close this universe. Remove all Contents and release all resources.
 	 */
-	
+
 	public void cleanup() {
 		timeline.pause();
 		removeAllContents();
@@ -337,8 +384,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 * @param text
 	 */
 	public void setStatus(String text) {
-// 		if(win != null)
-// 			win.getStatusLabel().setText("  " + text);
+		// 		if(win != null)
+		// 			win.getStatusLabel().setText("  " + text);
 	}
 
 	/**
@@ -367,7 +414,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			} else if(item instanceof CheckboxMenuItem) {
 				jitem = new JCheckBoxMenuItem(label);
 				((JCheckBoxMenuItem)jitem).setState(
-					((CheckboxMenuItem)item).getState());
+						((CheckboxMenuItem)item).getState());
 				for(ItemListener l : ((CheckboxMenuItem)item).getItemListeners())
 					jitem.addItemListener(l);
 			} else if(label.equals("-")) {
@@ -570,7 +617,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	/**
 	 * Returns the selected Content, or null if none is selected.
 	 */
-	
+
 	public Content getSelected() {
 		return selected;
 	}
@@ -723,8 +770,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 */
 	@Deprecated
 	public void updateOctree() {
-// 		if(octree != null)
-// 			octree.update();
+		// 		if(octree != null)
+		// 			octree.update();
 	}
 
 	/**
@@ -733,8 +780,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 */
 	@Deprecated
 	public void cancelOctree() {
-// 		if(octree != null)
-// 			octree.cancel();
+		// 		if(octree != null)
+		// 			octree.cancel();
 	}
 
 	/**
@@ -765,7 +812,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	public VolumeOctree addOctree(String imageDir, String name) {
 		if(octree != null) {
 			IJ.error("Only one large volume can be displayed a time.\n" +
-				"Please remove previously displayed volumes first.");
+					"Please remove previously displayed volumes first.");
 			return null;
 		}
 		if(contents.containsKey(name)) {
@@ -792,43 +839,43 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	/*
 	 * Requires an empty directory.
 	 */
-// 	public VolumeOctree createAndAddOctree(
-// 			String imagePath, String dir, String name) {
-// 		File outdir = new File(dir);
-// 		if(!outdir.exists())
-// 			outdir.mkdir();
-// 		if(!outdir.isDirectory()) {
-// 			throw new RuntimeException("Not a directory");
-// 		}
-// 		try {
-// 			new FilePreparer(imagePath, VolumeOctree.SIZE, dir).createFiles();
-// 			return addOctree(dir, name);
-// 		} catch(Exception e) {
-// 			e.printStackTrace();
-// 			throw new RuntimeException(e);
-// 		}
-// 	}
+	// 	public VolumeOctree createAndAddOctree(
+	// 			String imagePath, String dir, String name) {
+	// 		File outdir = new File(dir);
+	// 		if(!outdir.exists())
+	// 			outdir.mkdir();
+	// 		if(!outdir.isDirectory()) {
+	// 			throw new RuntimeException("Not a directory");
+	// 		}
+	// 		try {
+	// 			new FilePreparer(imagePath, VolumeOctree.SIZE, dir).createFiles();
+	// 			return addOctree(dir, name);
+	// 		} catch(Exception e) {
+	// 			e.printStackTrace();
+	// 			throw new RuntimeException(e);
+	// 		}
+	// 	}
 
 	/**
 	 * @deprecated The octree methods will be outsourced into a different
 	 * plugin.
 	 */
-// 	public octree.VolumeOctree createAndAddOctree(
-// 			ImagePlus image, String dir, String name) {
-// 		File outdir = new File(dir);
-// 		if(!outdir.exists())
-// 			outdir.mkdir();
-// 		if(!outdir.isDirectory()) {
-// 			throw new RuntimeException("Not a directory");
-// 		}
-// 		try {
-// 			new FilePreparer(image, VolumeOctree.SIZE, dir).createFiles();
-// 			return addOctree(dir, name);
-// 		} catch(Exception e) {
-// 			e.printStackTrace();
-// 			throw new RuntimeException(e);
-// 		}
-// 	}
+	// 	public octree.VolumeOctree createAndAddOctree(
+	// 			ImagePlus image, String dir, String name) {
+	// 		File outdir = new File(dir);
+	// 		if(!outdir.exists())
+	// 			outdir.mkdir();
+	// 		if(!outdir.isDirectory()) {
+	// 			throw new RuntimeException("Not a directory");
+	// 		}
+	// 		try {
+	// 			new FilePreparer(image, VolumeOctree.SIZE, dir).createFiles();
+	// 			return addOctree(dir, name);
+	// 		} catch(Exception e) {
+	// 			e.printStackTrace();
+	// 			throw new RuntimeException(e);
+	// 		}
+	// 	}
 
 	/* *************************************************************
 	 * Adding and removing Contents
@@ -849,13 +896,13 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 * @return The Content which is added, null if any error occurred.
 	 */
 	public Content addContent(ImagePlus image, Color3f color, String name,
-		int thresh, boolean[] channels, int resf, int type) {
+			int thresh, boolean[] channels, int resf, int type) {
 		if(contents.containsKey(name)) {
 			IJ.error("Content named '" + name + "' exists already");
 			return null;
 		}
 		Content c = ContentCreator.createContent(name, image, type,
-			resf, 0, color, thresh, channels);
+				resf, 0, color, thresh, channels);
 		return addContent(c);
 	}
 
@@ -879,7 +926,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	public Content addContent(ImagePlus image, int type, int res) {
 		int thr = Content.getDefaultThreshold(image, type);
 		return addContent(image, null, image.getTitle(), thr,
-			new boolean[] {true, true, true}, res, type);
+				new boolean[] {true, true, true}, res, type);
 	}
 
 	/**
@@ -905,7 +952,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		int res = Content.getDefaultResamplingFactor(image, type);
 		int thr = Content.getDefaultThreshold(image, type);
 		return addContent(image, null, image.getTitle(), thr,
-			new boolean[] {true, true, true}, res, type);
+				new boolean[] {true, true, true}, res, type);
 	}
 
 	/**
@@ -959,9 +1006,9 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 * @return the added Content, null if any error occurred
 	 */
 	public Content addVoltex(ImagePlus image, Color3f color,
-		String name, int thresh, boolean[] channels, int resamplingF) {
+			String name, int thresh, boolean[] channels, int resamplingF) {
 		return addContent(image, color, name, thresh, channels,
-			resamplingF, Content.VOLUME);
+				resamplingF, Content.VOLUME);
 	}
 
 	/**
@@ -1015,9 +1062,9 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 * @return the added Content, null if any error occurred
 	 */
 	public Content addOrthoslice(ImagePlus image, Color3f color,
-		String name, int thresh, boolean[] channels, int resamplingF) {
+			String name, int thresh, boolean[] channels, int resamplingF) {
 		return addContent(image, color, name, thresh, channels,
-			resamplingF, Content.ORTHO);
+				resamplingF, Content.ORTHO);
 	}
 
 	/**
@@ -1071,9 +1118,9 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 * @return the added Content, null if any error occurred
 	 */
 	public Content addSurfacePlot(ImagePlus image, Color3f color,
-		String name, int thresh, boolean[] channels, int resamplingF) {
+			String name, int thresh, boolean[] channels, int resamplingF) {
 		return addContent(image, color, name, thresh, channels,
-			resamplingF, Content.SURFACE_PLOT2D);
+				resamplingF, Content.SURFACE_PLOT2D);
 	}
 
 	/**
@@ -1127,7 +1174,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 * @return the added Content, null if any error occurred
 	 */
 	public Content addMesh(ImagePlus image, Color3f color, String name,
-		int threshold, boolean[] channels, int resamplingF) {
+			int threshold, boolean[] channels, int resamplingF) {
 
 		return addContent(image, color, name, threshold, channels,
 				resamplingF, Content.SURFACE);
@@ -1217,11 +1264,11 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 * @return the connected Content.
 	 */
 	public Content addLineMesh(List<Point3f> mesh, Color3f color, String name,
-			    boolean strips) {
-		  int mode = strips ? CustomLineMesh.CONTINUOUS
-				  	: CustomLineMesh.PAIRWISE;
-		  CustomLineMesh lmesh = new CustomLineMesh(mesh, mode, color, 0);
-		  return addCustomMesh(lmesh, name);
+			boolean strips) {
+		int mode = strips ? CustomLineMesh.CONTINUOUS
+				: CustomLineMesh.PAIRWISE;
+		CustomLineMesh lmesh = new CustomLineMesh(mesh, mode, color, 0);
+		return addCustomMesh(lmesh, name);
 	}
 
 	/**
@@ -1237,9 +1284,9 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 * @return the connected Content.
 	 */
 	public Content addPointMesh(List<Point3f> mesh,
-			    Color3f color, String name) {
-		  CustomPointMesh tmesh = new CustomPointMesh(mesh, color, 0);
-		  return addCustomMesh(tmesh, name);
+			Color3f color, String name) {
+		CustomPointMesh tmesh = new CustomPointMesh(mesh, color, 0);
+		return addCustomMesh(tmesh, name);
 	}
 
 	/**
@@ -1255,10 +1302,10 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 * @return the connected Content.
 	 */
 	public Content addPointMesh(List<Point3f> mesh, Color3f color,
-						float ptsize, String name) {
-		  CustomPointMesh tmesh = new CustomPointMesh(mesh, color, 0);
-		  tmesh.setPointSize(ptsize);
-		  return addCustomMesh(tmesh, name);
+			float ptsize, String name) {
+		CustomPointMesh tmesh = new CustomPointMesh(mesh, color, 0);
+		tmesh.setPointSize(ptsize);
+		return addCustomMesh(tmesh, name);
 	}
 
 	/** At every {@link Point3f} in @param points, place an icosphere
@@ -1267,8 +1314,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 * A reasonable @param subdivision value is 2. Higher values will result
 	 * in excessively detailed and very large meshes.*/
 	public Content addIcospheres(final List<Point3f> points, final Color3f color,
-					final int subdivisions, final float radius,
-					final String name) {
+			final int subdivisions, final float radius,
+			final String name) {
 		final List<Point3f> ico = MeshMaker.createIcosahedron(subdivisions, radius);
 		final List<Point3f> mesh = new ArrayList<Point3f>();
 		for (final Point3f p : points) {
@@ -1292,9 +1339,9 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 * @return the connected Content.
 	 */
 	public Content addQuadMesh(List<Point3f> mesh,
-			    Color3f color, String name) {
-		  CustomQuadMesh tmesh = new CustomQuadMesh(mesh, color, 0);
-		  return addCustomMesh(tmesh, name);
+			Color3f color, String name) {
+		CustomQuadMesh tmesh = new CustomQuadMesh(mesh, color, 0);
+		return addCustomMesh(tmesh, name);
 	}
 
 	/**
@@ -1311,7 +1358,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 * @return the connected Content.
 	 */
 	public Content addTriangleMesh(List<Point3f> mesh,
-			    Color3f color, String name) {
+			Color3f color, String name) {
 		CustomTriangleMesh tmesh = new CustomTriangleMesh(mesh, color, 0);
 		return addCustomMesh(tmesh, name);
 	}
@@ -1332,7 +1379,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 * @return the connected Content.
 	 */
 	public Content addTriangleMesh(List<Point3f> mesh,
-			    List<Color3f> colors, String name) {
+			List<Color3f> colors, String name) {
 		CustomTriangleMesh tmesh = new CustomTriangleMesh(mesh);
 		tmesh.setColor(colors);
 		return addCustomMesh(tmesh, name);
@@ -1347,9 +1394,9 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 */
 	@Deprecated
 	public Content addMesh(List mesh, Color3f color, String name,
-			    float scale, int threshold) {
-		  Content c = addMesh(mesh, color, name, threshold);
-		  return c;
+			float scale, int threshold) {
+		Content c = addMesh(mesh, color, name, threshold);
+		return c;
 	}
 
 	/**
@@ -1358,18 +1405,18 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 */
 	@Deprecated
 	public Content addMesh(List<Point3f> mesh, Color3f color, String name,
-			    int threshold) {
-		  return addTriangleMesh(mesh, color, name);
+			int threshold) {
+		return addTriangleMesh(mesh, color, name);
 	}
 
 	/**
 	 * Remove all the contents of this universe.
 	 */
 	public void removeAllContents() {
-		  String[] names = new String[contents.size()];
-		  contents.keySet().toArray(names);
-		  for (int i=0; i<names.length; i++)
-			    removeContent(names[i]);
+		String[] names = new String[contents.size()];
+		contents.keySet().toArray(names);
+		for (int i=0; i<names.length; i++)
+			removeContent(names[i]);
 	}
 
 	/**
@@ -1398,7 +1445,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 * Return an Iterator which iterates through all the contents of this
 	 * universe.
 	 */
-	
+
 	public Iterator contents() {
 		return contents.values().iterator();
 	}
@@ -1737,15 +1784,15 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	public Future<Content> addContentLater(final Content c) {
 		final Image3DUniverse univ = this;
 		return adder.submit(new Callable<Content>() {
-			
+
 			public Content call() {
 				synchronized (lock) {
 					if (!addContentToScene(c)) return null;
 					if (univ.autoAdjustView) {
 						univ.getViewPlatformTransformer()
-							.centerAt(univ.globalCenter);
+						.centerAt(univ.globalCenter);
 						float range = (float)(univ.globalMax.x
-							- univ.globalMin.x);
+								- univ.globalMin.x);
 						univ.ensureScale(range);
 					}
 				}
@@ -1792,7 +1839,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		final ArrayList<Future<Content>> all = new ArrayList<Future<Content>>();
 		for (final Content c : cc) {
 			all.add(adder.submit(new Callable<Content>() {
-				
+
 				public Content call() {
 					if (!addContentToScene(c)) return null;
 					univ.fireContentAdded(c);
@@ -1805,14 +1852,14 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		// executor service, so it will be executed after all other
 		// tasks.
 		adder.submit(new Callable<Boolean>() {
-			
+
 			public Boolean call() {
 				// Now adjust universe view
 				if (univ.autoAdjustView) {
 					univ.getViewPlatformTransformer()
-						.centerAt(univ.globalCenter);
+					.centerAt(univ.globalCenter);
 					float range = (float)(univ.globalMax.x
-						- univ.globalMin.x);
+							- univ.globalMin.x);
 					univ.ensureScale(range);
 				}
 				// Notify listeners

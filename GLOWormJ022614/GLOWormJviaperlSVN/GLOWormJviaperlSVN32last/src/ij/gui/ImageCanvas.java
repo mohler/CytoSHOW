@@ -42,7 +42,7 @@ import org.vcell.gloworm.MultiQTVirtualStack;
 /** This is a Canvas used to display images in a Window. */
 public class ImageCanvas extends Canvas implements MouseListener, MouseMotionListener, Cloneable {
 
-	protected static Cursor defaultCursor = new Cursor(Cursor.DEFAULT_CURSOR);
+	public static Cursor defaultCursor = new Cursor(Cursor.DEFAULT_CURSOR);
 	protected static Cursor handCursor = new Cursor(Cursor.HAND_CURSOR);
 	protected static Cursor moveCursor = new Cursor(Cursor.MOVE_CURSOR);
 	protected static Cursor crosshairCursor = new Cursor(Cursor.CROSSHAIR_CURSOR);

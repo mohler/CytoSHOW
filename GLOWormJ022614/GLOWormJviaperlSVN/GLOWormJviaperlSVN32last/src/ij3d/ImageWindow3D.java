@@ -56,7 +56,7 @@ import org.vcell.gloworm.SliceStereoToggle;
 public class ImageWindow3D extends JFrame implements UniverseListener {
 
 	private DefaultUniverse universe;
-	private ImageCanvas3D canvas3D;
+	ImageCanvas3D canvas3D;
 	private Label status = new Label("");
 	private boolean noOffScreen = true;
 	private ErrorListener error_listener;
@@ -124,9 +124,6 @@ public class ImageWindow3D extends JFrame implements UniverseListener {
 		overheadPanel.setLayout(new GridLayout(1, 1));
 		
 		toolbar = new Toolbar();
-		toolbar.installBuiltinTool("LUT Menu");
-		toolbar.installBuiltinTool("Stacks Menu");
-		toolbar.installBuiltinTool("Developer Menu");
 
 		toolbar.addKeyListener(ij);
 		if (ij != null)
