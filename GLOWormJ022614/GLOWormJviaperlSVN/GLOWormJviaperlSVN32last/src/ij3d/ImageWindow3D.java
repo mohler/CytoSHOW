@@ -101,6 +101,7 @@ public class ImageWindow3D extends JFrame implements UniverseListener {
 
 		
 		addToolBarPanel();
+		toolbar.setTool2(Toolbar.HAND);
 //
 		addCommandButtons(imp);
 
@@ -127,7 +128,7 @@ public class ImageWindow3D extends JFrame implements UniverseListener {
 
 		toolbar.addKeyListener(ij);
 		if (ij != null)
-			toolbar.addMouseListener(ij.toolbar);
+			toolbar.addMouseListener(toolbar);
 		overheadPanel.add(toolbar);
 
 		this.add(overheadPanel, BorderLayout.NORTH);
@@ -733,6 +734,14 @@ public class ImageWindow3D extends JFrame implements UniverseListener {
 //	public Insets getInsets() {
 //		return new Insets(0,0,0,0);	
 //	}
+
+	public Toolbar getToolbar() {
+		return toolbar;
+	}
+
+	public void setToolbar(Toolbar toolbar) {
+		this.toolbar = toolbar;
+	}
 
 	private int lastToolID;
 

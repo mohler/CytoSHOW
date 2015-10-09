@@ -104,7 +104,7 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 	public Toolbar() {
 		down = new boolean[NUM_TOOLS];
 		resetButtons();
-		down[HAND] = true;
+		down[0] = true;
 		setForeground(Color.black);
 		setBackground(gray);
 		addMouseListener(this);
@@ -233,6 +233,9 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
         int index = toolIndex(tool);
         fill3DRect(g, index * SIZE + 1, 1, SIZE, SIZE-1, !down[tool]);
         g.setColor(toolColor);
+		if (threeDViewer && tool != HAND && tool != MAGNIFIER)
+			return;
+
         int x = index * SIZE + OFFSET;
 		int y = OFFSET;
 		if (down[tool]) { x++; y++;}
@@ -675,6 +678,7 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 		
 	public void setTool2(int tool) {
 		if (!isValidTool(tool)) return;
+		paint(g);
 		if (threeDViewer && tool != HAND && tool != MAGNIFIER)
 			return;
 		String previousName = getToolName();
