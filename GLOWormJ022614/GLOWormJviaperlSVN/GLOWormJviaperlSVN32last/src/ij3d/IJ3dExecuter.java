@@ -995,7 +995,7 @@ public class IJ3dExecuter {
 		final Color3f oldC = ci.getColor();
 
 		final GenericDialog gd =
-				new GenericDialog("Adjust threshold/transparency/color...", univ.getWindow());
+				new GenericDialog(c.getName()+ ": Adjust Display...", univ.getWindow());
 		if (imageData ) {
 			gd.addSlider("Threshold", 0, 255, oldThr);
 			((Scrollbar)gd.getSliders().get(0)).setEnabled(imageData);
@@ -1045,8 +1045,8 @@ public class IJ3dExecuter {
 		bSlider.addAdjustmentListener(cListener);
 
 
-		gd.addCheckbox("Apply to all timepoints", true);
-		final Checkbox aBox = (Checkbox)gd.getCheckboxes().get(0);
+//		gd.addCheckbox("Apply to all timepoints", true);
+//		final Checkbox aBox = (Checkbox)gd.getCheckboxes().get(0);
 		gd.setModal(false);
 		gd.setAlwaysOnTop(true);
 		gd.addWindowListener(new WindowAdapter() {
@@ -1054,7 +1054,7 @@ public class IJ3dExecuter {
 			public void windowClosed(WindowEvent e) {
 				try {
 					if(gd.wasCanceled()) {
-						ci.setThreshold((int) oldTr);
+						ci.setThreshold((int) oldThr);
 						univ.fireContentChanged(c);
 						float newTr = (float) (oldTr / 100f);
 						ci.setTransparency(newTr);
@@ -1064,8 +1064,8 @@ public class IJ3dExecuter {
 						return;
 					}
 					// apply to other time points
-					if(aBox.getState())
-						c.setThreshold(ci.getThreshold());
+//					if(aBox.getState())
+//						c.setThreshold(ci.getThreshold());
 
 					record(SET_THRESHOLD,
 							Integer.toString(
@@ -1077,12 +1077,12 @@ public class IJ3dExecuter {
 					// clean up
 					if (null != thresh_adjuster)
 						thresh_adjuster.quit();
+					if (null != transp_adjuster)
+						transp_adjuster.quit();
 				}
-				if (null != transp_adjuster)
-					transp_adjuster.quit();
 				// apply to all instants of the content
-				if(aBox.getState())
-					c.setTransparency(ci.getTransparency());
+//				if(aBox.getState())
+//					c.setTransparency(ci.getTransparency());
 
 				record(SET_TRANSPARENCY, Float.
 						toString(((Scrollbar)gd.getSliders().
