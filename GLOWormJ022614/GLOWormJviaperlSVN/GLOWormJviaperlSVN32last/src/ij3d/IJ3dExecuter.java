@@ -975,7 +975,6 @@ public class IJ3dExecuter {
 			}
 		};
 
-		final Color3f oldC = ci.getColor();
 		final ColorListener colorListener = new ColorListener() {
 
 			public void colorChanged(Color3f color) {
@@ -986,14 +985,14 @@ public class IJ3dExecuter {
 
 			public void ok(final GenericDialog gd) {
 				// gd.wasOKed: apply to all time points
-				if (gd.getNextBoolean())
-					c.setColor(ci.getColor());
+				c.setColor(ci.getColor());
 				univ.fireContentChanged(c);
 			}
 		};
 
 		final int oldThr = ci.getThreshold();
 		final double oldTr = ci.getTransparency();
+		final Color3f oldC = ci.getColor();
 
 		final GenericDialog gd =
 				new GenericDialog("Adjust threshold/transparency/color...", univ.getWindow());
@@ -1057,6 +1056,11 @@ public class IJ3dExecuter {
 					if(gd.wasCanceled()) {
 						ci.setThreshold((int) oldTr);
 						univ.fireContentChanged(c);
+						float newTr = (float) (oldTr / 100f);
+						ci.setTransparency(newTr);
+						univ.fireContentChanged(c);
+						ci.setColor(oldC);
+						univ.fireContentChanged(c);
 						return;
 					}
 					// apply to other time points
@@ -1076,12 +1080,6 @@ public class IJ3dExecuter {
 				}
 				if (null != transp_adjuster)
 					transp_adjuster.quit();
-				if(gd.wasCanceled()) {
-					float newTr = (float) (oldTr / 100f);
-					ci.setTransparency(newTr);
-					univ.fireContentChanged(c);
-					return;
-				}
 				// apply to all instants of the content
 				if(aBox.getState())
 					c.setTransparency(ci.getTransparency());
@@ -1089,13 +1087,11 @@ public class IJ3dExecuter {
 				record(SET_TRANSPARENCY, Float.
 						toString(((Scrollbar)gd.getSliders().
 								get(0)).getValue() / 100f));
-				if (gd.wasCanceled())
-					colorListener.colorChanged(oldC);
-				else {
-					gd.setCursor(new Cursor(Cursor.WAIT_CURSOR));
-					colorListener.ok(gd);
-					gd.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-				}
+
+				gd.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+				colorListener.ok(gd);
+				gd.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+
 			}
 		});
 		gd.showDialog();
