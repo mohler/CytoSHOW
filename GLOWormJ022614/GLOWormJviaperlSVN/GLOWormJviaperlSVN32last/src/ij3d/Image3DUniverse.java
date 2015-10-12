@@ -259,6 +259,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 */
 
 	public void show() {
+		menubar = new Image3DMenubar(this);
 		init(new ImageWindow3D("ImageJ 3D Viewer", this));
 		//		win.pack();
 		//		win.setVisible(true);
@@ -296,7 +297,6 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				hideAllLandmarks();
 			}
 		});
-		menubar = new Image3DMenubar(this);
 		registrationMenubar = new RegistrationMenubar(this);
 		shortcuts = new ShortCuts(menubar);
 		setMenubar(menubar);

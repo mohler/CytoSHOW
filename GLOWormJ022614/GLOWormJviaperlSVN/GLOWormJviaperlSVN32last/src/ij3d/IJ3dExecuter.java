@@ -24,6 +24,7 @@ import isosurface.SmoothControl;
 
 import java.awt.Button;
 import java.awt.Checkbox;
+import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.FlowLayout;
 import java.awt.Label;
@@ -79,9 +80,9 @@ public class IJ3dExecuter {
 	public static final String START_ANIMATE = "startAnimate";
 	public static final String STOP_ANIMATE = "stopAnimate";
 	public static final String START_FREEHAND_RECORDING
-		= "startFreehandRecording";
+	= "startFreehandRecording";
 	public static final String STOP_FREEHAND_RECORDING
-		= "stopFreehandRecording";
+	= "stopFreehandRecording";
 	public static final String RECORD_360 = "record360";
 	public static final String RESET_VIEW = "resetView";
 	public static final String SCALEBAR = "scalebar";
@@ -163,7 +164,7 @@ public class IJ3dExecuter {
 	public void addContent(final ImagePlus image, final File file) {
 		new Thread() {
 			{ setPriority(Thread.NORM_PRIORITY); }
-			
+
 			public void run() {
 				addC(image, file);
 			}
@@ -180,22 +181,22 @@ public class IJ3dExecuter {
 
 		// record
 		String title = gui.getFile() != null ?
-			gui.getFile().getAbsolutePath() :
-			gui.getImage().getTitle();
-		boolean[] channels = gui.getChannels();
-		String[] arg = new String[] {
-			title,
-			ColorTable.getColorName(gui.getColor()),
-			gui.getName(),
-			Integer.toString(gui.getThreshold()),
-			Boolean.toString(channels[0]),
-			Boolean.toString(channels[1]),
-			Boolean.toString(channels[2]),
-			Integer.toString(gui.getResamplingFactor()),
-			Integer.toString(gui.getType())};
-		record(ADD, arg);
+				gui.getFile().getAbsolutePath() :
+					gui.getImage().getTitle();
+				boolean[] channels = gui.getChannels();
+				String[] arg = new String[] {
+						title,
+						ColorTable.getColorName(gui.getColor()),
+						gui.getName(),
+						Integer.toString(gui.getThreshold()),
+						Boolean.toString(channels[0]),
+						Boolean.toString(channels[1]),
+						Boolean.toString(channels[2]),
+						Integer.toString(gui.getResamplingFactor()),
+						Integer.toString(gui.getType())};
+				record(ADD, arg);
 
-		return c;
+				return c;
 	}
 
 	public void delete(Content c) {
@@ -205,29 +206,29 @@ public class IJ3dExecuter {
 		record(DELETE);
 	}
 
-// 	public void loadOctree() {
-// 		OctreeDialog od = new OctreeDialog();
-// 		od.showDialog();
-// 		if(!od.checkUserInput())
-// 			return;
-// 		String dir = od.getImageDir();
-// 		String name = od.getName();
-// 		String path = od.getImagePath();
-// 		if(od.shouldCreateData()) {
-// 			try {
-// 				new FilePreparer(path, VolumeOctree.SIZE, dir).createFiles();
-// 			} catch(Exception e) {
-// 				IJ.error(e.getMessage());
-// 				e.printStackTrace();
-// 				return;
-// 			}
-// 		}
-// 		univ.addOctree(dir, name);
-// 	}
-//
-// 	public void removeOctree() {
-// 		univ.removeOctree();
-// 	}
+	// 	public void loadOctree() {
+	// 		OctreeDialog od = new OctreeDialog();
+	// 		od.showDialog();
+	// 		if(!od.checkUserInput())
+	// 			return;
+	// 		String dir = od.getImageDir();
+	// 		String name = od.getName();
+	// 		String path = od.getImagePath();
+	// 		if(od.shouldCreateData()) {
+	// 			try {
+	// 				new FilePreparer(path, VolumeOctree.SIZE, dir).createFiles();
+	// 			} catch(Exception e) {
+	// 				IJ.error(e.getMessage());
+	// 				e.printStackTrace();
+	// 				return;
+	// 			}
+	// 		}
+	// 		univ.addOctree(dir, name);
+	// 	}
+	//
+	// 	public void removeOctree() {
+	// 		univ.removeOctree();
+	// 	}
 
 	protected void importFile(String dialogTitle, String extension, String formatDescription) {
 		OpenDialog od = new OpenDialog(dialogTitle, OpenDialog.getDefaultDirectory(), null);
@@ -315,7 +316,7 @@ public class IJ3dExecuter {
 
 	public void saveAsU3D(){
 		SaveDialog sd = new SaveDialog(
-			"Save meshes as u3d...", "", ".u3d");
+				"Save meshes as u3d...", "", ".u3d");
 		String dir = sd.getDirectory();
 		String name = sd.getFileName();
 		if(dir == null || name == null)
@@ -336,7 +337,7 @@ public class IJ3dExecuter {
 
 	public void loadView() {
 		OpenDialog sd = new OpenDialog(
-			"Open view...", "", ".view");
+				"Open view...", "", ".view");
 		final String dir = sd.getDirectory();
 		final String name = sd.getFileName();
 		if(dir == null || name == null)
@@ -350,7 +351,7 @@ public class IJ3dExecuter {
 
 	public void saveView() {
 		SaveDialog sd = new SaveDialog(
-			"Save view...", "", ".view");
+				"Save view...", "", ".view");
 		String dir = sd.getDirectory();
 		String name = sd.getFileName();
 		if(dir == null || name == null)
@@ -364,14 +365,14 @@ public class IJ3dExecuter {
 
 	public void loadSession() {
 		OpenDialog sd = new OpenDialog(
-			"Open session...", "session", ".scene");
+				"Open session...", "session", ".scene");
 		final String dir = sd.getDirectory();
 		final String name = sd.getFileName();
 		if(dir == null || name == null)
 			return;
 		new Thread() {
 			{ setPriority(Thread.NORM_PRIORITY); }
-			
+
 			public void run() {
 				try {
 					univ.loadSession(dir + name);
@@ -384,7 +385,7 @@ public class IJ3dExecuter {
 
 	public void saveSession() {
 		SaveDialog sd = new SaveDialog(
-			"Save session...", "session", ".scene");
+				"Save session...", "session", ".scene");
 		String dir = sd.getDirectory();
 		String name = sd.getFileName();
 		if(dir == null || name == null)
@@ -410,11 +411,11 @@ public class IJ3dExecuter {
 		if(!checkSel(c))
 			return;
 		if(c.getType() != Content.VOLUME &&
-			c.getType() != Content.ORTHO)
+				c.getType() != Content.ORTHO)
 			return;
 		if(c.getResamplingFactor() != 1) {
 			IJ.error("Object must be loaded " +
-				"with resamplingfactor 1");
+					"with resamplingfactor 1");
 			return;
 		}
 		((VoltexGroup)c.getContent()).update();
@@ -424,8 +425,8 @@ public class IJ3dExecuter {
 		if(!checkSel(c))
 			return;
 		switch(c.getType()) {
-			case Content.ORTHO: changeOrthslices(c); break;
-			case Content.MULTIORTHO: changeMultiOrthslices(c); break;
+		case Content.ORTHO: changeOrthslices(c); break;
+		case Content.MULTIORTHO: changeMultiOrthslices(c); break;
 		}
 	}
 
@@ -433,7 +434,7 @@ public class IJ3dExecuter {
 		if(!checkSel(c))
 			return;
 		final GenericDialog gd = new GenericDialog(
-			"Adjust slices...", univ.getWindow());
+				"Adjust slices...", univ.getWindow());
 		final MultiOrthoGroup os = (MultiOrthoGroup)c.getContent();
 
 		boolean opaque = os.getTexturesOpaque();
@@ -499,7 +500,7 @@ public class IJ3dExecuter {
 		if(!checkSel(c))
 			return;
 		final GenericDialog gd = new GenericDialog(
-			"Adjust slices...", univ.getWindow());
+				"Adjust slices...", univ.getWindow());
 		final OrthoGroup os = (OrthoGroup)c.getContent();
 		final int ind1 = os.getSlice(VolumeRenderer.X_AXIS);
 		final int ind2 = os.getSlice(VolumeRenderer.Y_AXIS);
@@ -534,9 +535,9 @@ public class IJ3dExecuter {
 			final int i = k;
 			sl[i] = (Scrollbar)gd.getSliders().get(i);
 			sl[i].addAdjustmentListener(new AdjustmentListener() {
-				
+
 				public void adjustmentValueChanged(
-							AdjustmentEvent e) {
+						AdjustmentEvent e) {
 					os.setSlice(dirs[i], sl[i].getValue());
 					univ.fireContentChanged(c);
 				}
@@ -544,7 +545,7 @@ public class IJ3dExecuter {
 
 			cb[i] = (Checkbox)gd.getCheckboxes().get(i);
 			cb[i].addItemListener(new ItemListener() {
-				
+
 				public void itemStateChanged(ItemEvent e) {
 					os.setVisible(dirs[i],cb[i].getState());
 				}
@@ -553,7 +554,7 @@ public class IJ3dExecuter {
 
 		gd.setModal(false);
 		gd.addWindowListener(new WindowAdapter() {
-			
+
 			public void windowClosed(WindowEvent e) {
 				if(gd.wasCanceled()) {
 					os.setSlice(VolumeRenderer.X_AXIS, ind1);
@@ -566,9 +567,9 @@ public class IJ3dExecuter {
 					return;
 				} else {
 					record(SET_SLICES,
-					Integer.toString(sl[0].getValue()),
-					Integer.toString(sl[1].getValue()),
-					Integer.toString(sl[2].getValue()));
+							Integer.toString(sl[0].getValue()),
+							Integer.toString(sl[1].getValue()),
+							Integer.toString(sl[2].getValue()));
 					return;
 				}
 			}
@@ -584,11 +585,11 @@ public class IJ3dExecuter {
 			return;
 		new Thread() {
 			{ setPriority(Thread.NORM_PRIORITY); }
-			
+
 			public void run() {
 				ImageCanvas3D canvas = (ImageCanvas3D)univ.getCanvas();
 				((VoltexGroup)c.getContent()).
-					fillRoi(canvas, canvas.getRoi(), (byte)0);
+				fillRoi(canvas, canvas.getRoi(), (byte)0);
 				univ.fireContentChanged(c);
 				record(FILL_SELECTION);
 			}
@@ -621,16 +622,16 @@ public class IJ3dExecuter {
 		all.toArray(c);
 		final AtomicInteger ai = new AtomicInteger(0);
 		final Thread[] thread = new Thread[
-			Runtime.getRuntime().availableProcessors()];
+		                                   Runtime.getRuntime().availableProcessors()];
 		for (int i = 0; i<thread.length; i++) {
 			thread[i] = new Thread() {
 				{ setPriority(Thread.NORM_PRIORITY); }
-				
+
 				public void run() {
 					try {
 						for (int k=ai.getAndIncrement();
-						k < c.length;
-						k = ai.getAndIncrement()) {
+								k < c.length;
+								k = ai.getAndIncrement()) {
 							smoothMesh(c[k]);
 						}
 					} catch (Exception e) {
@@ -705,24 +706,24 @@ public class IJ3dExecuter {
 		if (showDefaultCheckbox) {
 			final Checkbox cBox = (Checkbox)gd.getCheckboxes().get(0);
 			cBox.addItemListener(new ItemListener() {
-				
+
 				public void itemStateChanged(ItemEvent e) {
 					gd.setCursor(new Cursor(Cursor.WAIT_CURSOR));
 					rSlider.setEnabled(!cBox.getState());
 					gSlider.setEnabled(!cBox.getState());
 					bSlider.setEnabled(!cBox.getState());
 					colorListener.colorChanged(
-						new Color3f(
-							rSlider.getValue() / 255f,
-							gSlider.getValue() / 255f,
-							bSlider.getValue() / 255f));
+							new Color3f(
+									rSlider.getValue() / 255f,
+									gSlider.getValue() / 255f,
+									bSlider.getValue() / 255f));
 					gd.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 				}
 			});
 		}
 
 		AdjustmentListener listener = new AdjustmentListener() {
-			
+
 			public void adjustmentValueChanged(AdjustmentEvent e) {
 				colorListener.colorChanged(new Color3f(
 						rSlider.getValue() / 255f,
@@ -736,7 +737,7 @@ public class IJ3dExecuter {
 
 		gd.setModal(false);
 		gd.addWindowListener(new WindowAdapter() {
-			
+
 			public void windowClosed(WindowEvent e) {
 				if (gd.wasCanceled())
 					colorListener.colorChanged(oldC);
@@ -759,19 +760,19 @@ public class IJ3dExecuter {
 		final ContentInstant ci = c.getCurrent();
 		final Color3f oldC = ci.getColor();
 		final ColorListener colorListener = new ColorListener() {
-			
+
 			public void colorChanged(Color3f color) {
 				ci.setColor(color);
 				univ.fireContentChanged(c);
 			}
 
-			
+
 			public void ok(final GenericDialog gd) {
 				if (gd.getNextBoolean())
 					record(SET_COLOR, "null", "null", "null");
 				else
 					record(SET_COLOR, "" + (int)gd.getNextNumber(),
-						"" + (int)gd.getNextNumber(), "" + (int)gd.getNextNumber());
+							"" + (int)gd.getNextNumber(), "" + (int)gd.getNextNumber());
 
 				// gd.wasOKed: apply to all time points
 				if (gd.getNextBoolean())
@@ -790,14 +791,14 @@ public class IJ3dExecuter {
 		background.getColor(oldC);
 
 		final ColorListener colorListener = new ColorListener() {
-			
+
 			public void colorChanged(Color3f color) {
 				background.setColor(color);
 				status.setBackground(color.get());
 				((ImageCanvas3D)univ.getCanvas()).render();
 			}
 
-			
+
 			public void ok(final GenericDialog gd) {
 				// TODO macro record
 			}
@@ -811,13 +812,13 @@ public class IJ3dExecuter {
 		final ContentInstant ci = c.getCurrent();
 		final Color3f oldC = ci.getLandmarkColor();
 		final ColorListener colorListener = new ColorListener() {
-			
+
 			public void colorChanged(Color3f color) {
 				ci.setLandmarkColor(color);
 				univ.fireContentChanged(c);
 			}
 
-			
+
 			public void ok(final GenericDialog gd) {
 				// TODO: record
 				// gd.wasOKed: apply to all time points
@@ -841,7 +842,7 @@ public class IJ3dExecuter {
 		ld.addCtrlHint();
 
 		ld.addListener(new LUTDialog.Listener() {
-			
+
 			public void applied() {
 				c.setLUT(r, g, b, a);
 				univ.fireContentChanged(c);
@@ -857,7 +858,7 @@ public class IJ3dExecuter {
 			return;
 		final ContentInstant ci = c.getCurrent();
 		GenericDialog gd = new GenericDialog("Adjust channels ...",
-							univ.getWindow());
+				univ.getWindow());
 		gd.addMessage("Channels");
 		gd.addCheckboxGroup(1, 3,
 				new String[] {"red", "green", "blue"},
@@ -868,16 +869,16 @@ public class IJ3dExecuter {
 			return;
 
 		boolean[] channels = new boolean[]{gd.getNextBoolean(),
-						gd.getNextBoolean(),
-						gd.getNextBoolean()};
+				gd.getNextBoolean(),
+				gd.getNextBoolean()};
 		if(gd.getNextBoolean())
 			c.setChannels(channels);
 		else
 			ci.setChannels(channels);
 		univ.fireContentChanged(c);
 		record(SET_CHANNELS, Boolean.toString(channels[0]),
-			Boolean.toString(channels[1]),
-			Boolean.toString(channels[2]));
+				Boolean.toString(channels[1]),
+				Boolean.toString(channels[2]));
 	}
 
 	public void changeTransparency(final Content c) {
@@ -885,21 +886,21 @@ public class IJ3dExecuter {
 			return;
 		final ContentInstant ci = c.getCurrent();
 		final SliderAdjuster transp_adjuster = new SliderAdjuster() {
-			
+
 			public synchronized final void setValue(ContentInstant ci, int v) {
 				ci.setTransparency(v / 100f);
 				univ.fireContentChanged(c);
 			}
 		};
 		final GenericDialog gd = new GenericDialog(
-			"Adjust transparency ...", univ.getWindow());
+				"Adjust transparency ...", univ.getWindow());
 		final int oldTr = (int)(ci.getTransparency() * 100);
 		gd.addSlider("Transparency", 0, 100, oldTr);
 		gd.addCheckbox("Apply to all timepoints", true);
 
 		((Scrollbar)gd.getSliders().get(0)).
-			addAdjustmentListener(new AdjustmentListener() {
-			
+		addAdjustmentListener(new AdjustmentListener() {
+
 			public void adjustmentValueChanged(AdjustmentEvent e) {
 				if(!transp_adjuster.go)
 					transp_adjuster.start();
@@ -907,8 +908,8 @@ public class IJ3dExecuter {
 			}
 		});
 		((TextField)gd.getNumericFields().get(0)).
-			addTextListener(new TextListener() {
-			
+		addTextListener(new TextListener() {
+
 			public void textValueChanged(TextEvent e) {
 				if(!transp_adjuster.go)
 					transp_adjuster.start();
@@ -925,7 +926,7 @@ public class IJ3dExecuter {
 		final Checkbox aBox = (Checkbox)(gd.getCheckboxes().get(0));
 		gd.setModal(false);
 		gd.addWindowListener(new WindowAdapter() {
-			
+
 			public void windowClosed(WindowEvent e) {
 				if (null != transp_adjuster)
 					transp_adjuster.quit();
@@ -940,73 +941,121 @@ public class IJ3dExecuter {
 					c.setTransparency(ci.getTransparency());
 
 				record(SET_TRANSPARENCY, Float.
-					toString(((Scrollbar)gd.getSliders().
-					get(0)).getValue() / 100f));
+						toString(((Scrollbar)gd.getSliders().
+								get(0)).getValue() / 100f));
 			}
 		});
 		gd.showDialog();
 	}
 
 	public void changeThreshold(final Content c) {
+		boolean imageData = true;
 		if(!checkSel(c))
 			return;
 		if(c.getImage() == null) {
-			IJ.error("The selected object contains no image data,\n" +
-					"therefore the threshold can't be changed");
-			return;
+			//			IJ.error("The selected object contains no image data,\n" +
+			//					"therefore the threshold can't be changed");
+			//			return;
+			imageData = false;
 		}
+
 		final ContentInstant ci = c.getCurrent();
 		final SliderAdjuster thresh_adjuster = new SliderAdjuster() {
-			
+
 			public synchronized final void setValue(ContentInstant ci, int v) {
 				ci.setThreshold(v);
 				univ.fireContentChanged(c);
 			}
 		};
-		final int oldTr = (ci.getThreshold());
-		if(c.getType() == Content.SURFACE) {
-			final GenericDialog gd = new GenericDialog(
-				"Adjust threshold ...", univ.getWindow());
-			final int old = ci.getThreshold();
-			gd.addNumericField("Threshold", old, 0);
-			gd.addCheckbox("Apply to all timepoints", true);
-			gd.showDialog();
-			if(gd.wasCanceled())
-				return;
-			int th = (int)gd.getNextNumber();
-			th = Math.max(0, th);
-			th = Math.min(th, 255);
-			if(gd.getNextBoolean())
-				c.setThreshold(th);
-			else
-				ci.setThreshold(th);
-			univ.fireContentChanged(c);
-			record(SET_THRESHOLD, Integer.toString(th));
-			return;
-		}
-		// in case we've not a mesh, change it interactively
-		final GenericDialog gd =
-				new GenericDialog("Adjust threshold...");
-		gd.addSlider("Threshold", 0, 255, oldTr);
-		((Scrollbar)gd.getSliders().get(0)).
-			addAdjustmentListener(new AdjustmentListener() {
-			
-			public void adjustmentValueChanged(final AdjustmentEvent e) {
-				// start adjuster and request an action
-				if(!thresh_adjuster.go)
-					thresh_adjuster.start();
-				thresh_adjuster.exec(e.getValue(), ci, univ);
+		final SliderAdjuster transp_adjuster = new SliderAdjuster() {
+
+			public synchronized final void setValue(ContentInstant ci, int v) {
+				ci.setTransparency(v / 100f);
+				univ.fireContentChanged(c);
 			}
-		});
+		};
+
+		final Color3f oldC = ci.getColor();
+		final ColorListener colorListener = new ColorListener() {
+
+			public void colorChanged(Color3f color) {
+				ci.setColor(color);
+				univ.fireContentChanged(c);
+			}
+
+
+			public void ok(final GenericDialog gd) {
+				// gd.wasOKed: apply to all time points
+				if (gd.getNextBoolean())
+					c.setColor(ci.getColor());
+				univ.fireContentChanged(c);
+			}
+		};
+
+		final int oldThr = ci.getThreshold();
+		final double oldTr = ci.getTransparency();
+
+		final GenericDialog gd =
+				new GenericDialog("Adjust threshold/transparency/color...", univ.getWindow());
+		if (imageData ) {
+			gd.addSlider("Threshold", 0, 255, oldThr);
+			((Scrollbar)gd.getSliders().get(0)).setEnabled(imageData);
+			((Scrollbar)gd.getSliders().get(0)).addAdjustmentListener(new AdjustmentListener() {
+				public void adjustmentValueChanged(final AdjustmentEvent e) {
+					// start adjuster and request an action
+					if(!thresh_adjuster.go)
+						thresh_adjuster.start();
+					thresh_adjuster.exec(e.getValue(), ci, univ);
+				}
+			});
+			gd.addSlider("Transparency", 0, 100, oldTr*100);
+
+			((Scrollbar)gd.getSliders().get(1)).setEnabled(imageData);
+			((Scrollbar)gd.getSliders().get(1)).addAdjustmentListener(new AdjustmentListener() {			
+				public void adjustmentValueChanged(AdjustmentEvent e) {
+					if(!transp_adjuster.go)
+						transp_adjuster.start();
+					transp_adjuster.exec(e.getValue(), ci, univ);
+				}
+			});
+		}
+
+		gd.addSlider("Red",0,255,oldC == null ? 255 : oldC.x*255);
+		gd.addSlider("Green",0,255,oldC == null ? 0 : oldC.y*255);
+		gd.addSlider("Blue",0,255,oldC == null ? 0 : oldC.z*255);
+
+		final Scrollbar rSlider = (Scrollbar)gd.getSliders().get(imageData?2:0);
+		final Scrollbar gSlider = (Scrollbar)gd.getSliders().get(imageData?3:1);
+		final Scrollbar bSlider = (Scrollbar)gd.getSliders().get(imageData?4:2);
+
+		rSlider.setEnabled(oldC != null);
+		gSlider.setEnabled(oldC != null);
+		bSlider.setEnabled(oldC != null);
+
+		AdjustmentListener cListener = new AdjustmentListener() {
+
+			public void adjustmentValueChanged(AdjustmentEvent e) {
+				colorListener.colorChanged(new Color3f(
+						rSlider.getValue() / 255f,
+						gSlider.getValue() / 255f,
+						bSlider.getValue() / 255f));
+			}
+		};
+		rSlider.addAdjustmentListener(cListener);
+		gSlider.addAdjustmentListener(cListener);
+		bSlider.addAdjustmentListener(cListener);
+
+
 		gd.addCheckbox("Apply to all timepoints", true);
 		final Checkbox aBox = (Checkbox)gd.getCheckboxes().get(0);
 		gd.setModal(false);
+		gd.setAlwaysOnTop(true);
 		gd.addWindowListener(new WindowAdapter() {
-			
+
 			public void windowClosed(WindowEvent e) {
 				try {
 					if(gd.wasCanceled()) {
-						ci.setThreshold(oldTr);
+						ci.setThreshold((int) oldTr);
 						univ.fireContentChanged(c);
 						return;
 					}
@@ -1015,8 +1064,8 @@ public class IJ3dExecuter {
 						c.setThreshold(ci.getThreshold());
 
 					record(SET_THRESHOLD,
-						Integer.toString(
-						c.getThreshold()));
+							Integer.toString(
+									c.getThreshold()));
 				} finally {
 					// [ This code block executes even when
 					//   calling return above ]
@@ -1024,6 +1073,28 @@ public class IJ3dExecuter {
 					// clean up
 					if (null != thresh_adjuster)
 						thresh_adjuster.quit();
+				}
+				if (null != transp_adjuster)
+					transp_adjuster.quit();
+				if(gd.wasCanceled()) {
+					float newTr = (float) (oldTr / 100f);
+					ci.setTransparency(newTr);
+					univ.fireContentChanged(c);
+					return;
+				}
+				// apply to all instants of the content
+				if(aBox.getState())
+					c.setTransparency(ci.getTransparency());
+
+				record(SET_TRANSPARENCY, Float.
+						toString(((Scrollbar)gd.getSliders().
+								get(0)).getValue() / 100f));
+				if (gd.wasCanceled())
+					colorListener.colorChanged(oldC);
+				else {
+					gd.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+					colorListener.ok(gd);
+					gd.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 				}
 			}
 		});
@@ -1156,14 +1227,14 @@ public class IJ3dExecuter {
 		if(!checkSel(c))
 			return;
 		final GenericDialog gd =
-			new GenericDialog("Point size", univ.getWindow());
+				new GenericDialog("Point size", univ.getWindow());
 		final float oldS = (c.getLandmarkPointSize());
 		final float minS = oldS / 10f;
 		final float maxS = oldS * 10f;
 		gd.addSlider("Size", minS, maxS, oldS);
 		final TextField textField = (TextField)gd.getNumericFields().get(0);
 		textField.addTextListener(new TextListener() {
-			
+
 			public void textValueChanged(TextEvent e2) {
 				try {
 					c.setLandmarkPointSize(Float.parseFloat(textField.getText()));
@@ -1173,8 +1244,8 @@ public class IJ3dExecuter {
 			}
 		});
 		((Scrollbar)gd.getSliders().get(0)).
-			addAdjustmentListener(new AdjustmentListener() {
-			
+		addAdjustmentListener(new AdjustmentListener() {
+
 			public void adjustmentValueChanged(AdjustmentEvent e) {
 				float newS = Float.parseFloat(textField.getText());
 				c.setLandmarkPointSize(newS);
@@ -1182,7 +1253,7 @@ public class IJ3dExecuter {
 		});
 		gd.setModal(false);
 		gd.addWindowListener(new WindowAdapter() {
-			
+
 			public void windowClosed(WindowEvent e) {
 				if(gd.wasCanceled()) {
 					c.setLandmarkPointSize(oldS);
@@ -1204,7 +1275,7 @@ public class IJ3dExecuter {
 		Collection contents = univ.getContents();
 		if(contents.size() < 2) {
 			IJ.error("At least two bodies are " +
-				"required for registration");
+					"required for registration");
 			return;
 		}
 		RegistrationMenubar rm = univ.getRegistrationMenuBar();
@@ -1224,18 +1295,18 @@ public class IJ3dExecuter {
 		c.getContent().getCenter(center);
 
 		TextWindow tw = new TextWindow(c.getName(),
-			" \tx\ty\tz",
-			"min\t" + (float)min.x + "\t"
-				+ (float)min.y + "\t"
-				+ (float)min.z + "\n" +
-			"max\t" + (float)max.x + "\t"
-				+ (float)max.y + "\t"
-				+ (float)max.z + "\n" +
-			"cog\t" + (float)center.x + "\t"
-				+ (float)center.y + "\t"
-				+ (float)center.z + "\n\n" +
-			"volume\t" + c.getContent().getVolume(),
-			512, 512);
+				" \tx\ty\tz",
+				"min\t" + (float)min.x + "\t"
+						+ (float)min.y + "\t"
+						+ (float)min.z + "\n" +
+						"max\t" + (float)max.x + "\t"
+						+ (float)max.y + "\t"
+						+ (float)max.z + "\n" +
+						"cog\t" + (float)center.x + "\t"
+						+ (float)center.y + "\t"
+						+ (float)center.z + "\n\n" +
+						"volume\t" + c.getContent().getVolume(),
+						512, 512);
 	}
 
 
@@ -1300,13 +1371,13 @@ public class IJ3dExecuter {
 		Point3f center = new Point3f(contentCenter);
 
 		new InteractiveTransformDialog("Set transformation", center, m) {
-			
+
 			public void transformationUpdated(Matrix4f mat) {
 				univ.fireTransformationStarted();
 				c.setTransform(new Transform3D(mat));
 				univ.fireTransformationFinished();
 			}
-			
+
 			public void oked(Matrix4f mat) {
 				Transform3D t = new Transform3D(mat);
 				float[] v = new float[16];
@@ -1314,7 +1385,7 @@ public class IJ3dExecuter {
 				univ.setUseToFront(useToFront);
 				record(SET_TRANSFORM, affine2string(v));
 			}
-			
+
 			public void canceled() {
 				c.setTransform(org);
 				univ.setUseToFront(useToFront);
@@ -1351,14 +1422,14 @@ public class IJ3dExecuter {
 		init.setIdentity();
 
 		new InteractiveTransformDialog("Set transformation", center, init) {
-			
+
 			public void transformationUpdated(Matrix4f mat) {
 				univ.fireTransformationStarted();
 				conc.mul(mat, m);
 				c.setTransform(new Transform3D(conc));
 				univ.fireTransformationFinished();
 			}
-			
+
 			public void oked(Matrix4f mat) {
 				Transform3D t = new Transform3D(mat);
 				float[] v = new float[16];
@@ -1366,7 +1437,7 @@ public class IJ3dExecuter {
 				univ.setUseToFront(useToFront);
 				record(APPLY_TRANSFORM, affine2string(v));
 			}
-			
+
 			public void canceled() {
 				c.setTransform(org);
 				univ.setUseToFront(useToFront);
@@ -1393,7 +1464,7 @@ public class IJ3dExecuter {
 			return;
 		new Thread() {
 			{ setPriority(Thread.NORM_PRIORITY); }
-			
+
 			public void run() {
 				exportTr(c);
 			}
@@ -1468,7 +1539,7 @@ public class IJ3dExecuter {
 
 	public void record360() {
 		new Thread() {
-			
+
 			public void run() {
 				ImagePlus movie = univ.record360();
 				if(movie != null)
@@ -1523,9 +1594,9 @@ public class IJ3dExecuter {
 
 		idx = gd.getNextChoiceIndex();
 		switch(idx) {
-			case 0: axis.x = 1; axis.y = 0; axis.z = 0; break;
-			case 1: axis.x = 0; axis.y = 1; axis.z = 0; break;
-			case 2: axis.x = 0; axis.y = 0; axis.z = 1; break;
+		case 0: axis.x = 1; axis.y = 0; axis.z = 0; break;
+		case 1: axis.x = 0; axis.y = 1; axis.z = 0; break;
+		case 2: axis.x = 0; axis.y = 0; axis.z = 1; break;
 		}
 		interval = (float)gd.getNextNumber();
 		univ.setRotationAxis(axis);
@@ -1536,15 +1607,15 @@ public class IJ3dExecuter {
 		int w = univ.getCanvas().getWidth();
 		int h = univ.getCanvas().getHeight();
 
-		GenericDialog gd = new GenericDialog("Snapshot",
-				univ.getWindow());
-		gd.addNumericField("Target_width", w, 0);
-		gd.addNumericField("Target_height", h, 0);
-		gd.showDialog();
-		if(gd.wasCanceled())
-			return;
-		w = (int)gd.getNextNumber();
-		h = (int)gd.getNextNumber();
+		//		GenericDialog gd = new GenericDialog("Snapshot",
+		//				univ.getWindow());
+		//		gd.addNumericField("Target_width", w, 0);
+		//		gd.addNumericField("Target_height", h, 0);
+		//		gd.showDialog();
+		//		if(gd.wasCanceled())
+		//			return;
+		//		w = (int)gd.getNextNumber();
+		//		h = (int)gd.getNextNumber();
 
 		Map props = univ.getCanvas().queryProperties();
 		int maxW = (Integer)props.get("textureWidthMax");
@@ -1552,10 +1623,16 @@ public class IJ3dExecuter {
 
 		if(w < 0 || w >= maxW || h < 0 || h >= maxH) {
 			IJ.error("Width must be between 0 and " + maxW +
-				",\nheight between 0 and " + maxH);
+					",\nheight between 0 and " + maxH);
 			return;
 		}
-		univ.takeSnapshot(w, h).show();
+		ImagePlus imp2 = univ.takeSnapshot(w, h);
+		String title2 = WindowManager.getUniqueName(imp2.getTitle());
+		imp2.setTitle(title2);
+		imp2.show();
+		WindowManager.setWindow(imp2.getWindow());
+		IJ.run("Jpeg...", null);
+
 		record(SNAPSHOT, Integer.toString(w), Integer.toString(h));
 	}
 
@@ -1575,12 +1652,12 @@ public class IJ3dExecuter {
 		l.getColor(col);
 
 		final ColorListener colorListener = new ColorListener() {
-			
+
 			public void colorChanged(Color3f color) {
 				l.setColor(color);
 			}
 
-			
+
 			public void ok(final GenericDialog gd) {
 				// TODO macro record
 			}
@@ -1627,18 +1704,18 @@ public class IJ3dExecuter {
 	 * *********************************************************/
 	public void j3dproperties() {
 		TextWindow tw = new TextWindow("Java 3D Properties",
-			"Key\tValue", "", 512, 512);
+				"Key\tValue", "", 512, 512);
 		Map props = Image3DUniverse.getProperties();
 		tw.append("Java 3D properties\n \n");
 		for(Iterator it = props.entrySet().iterator();
-						it.hasNext();) {
+				it.hasNext();) {
 			Map.Entry me = (Map.Entry)it.next();
 			tw.append(me.getKey() + "\t" + me.getValue());
 		}
 		props = univ.getCanvas().queryProperties();
 		tw.append(" \nRendering properties\n \n");
 		for(Iterator it = props.entrySet().iterator();
-						it.hasNext();) {
+				it.hasNext();) {
 			Map.Entry me = (Map.Entry)it.next();
 			tw.append(me.getKey() + "\t" + me.getValue());
 		}
@@ -1659,13 +1736,13 @@ public class IJ3dExecuter {
 		Panel p = new Panel(new FlowLayout());
 		Button b = new Button("Open from file");
 		b.addActionListener(new ActionListener() {
-			
+
 			public void actionPerformed(ActionEvent e) {
 				float[] m = new TransformIO().
 						openAffineTransform();
 				if(m != null) {
 					TextField tf = (TextField)gd.
-						getStringFields().get(0);
+							getStringFields().get(0);
 					tf.setText(affine2string(m));
 					tf.repaint();
 				}
@@ -1686,9 +1763,9 @@ public class IJ3dExecuter {
 		Matrix4d m = new Matrix4d();
 		t3d.get(m);
 		return new FastMatrix(new double[][] {
-			{m.m00, m.m01, m.m02, m.m03},
-			{m.m10, m.m11, m.m12, m.m13},
-			{m.m20, m.m21, m.m22, m.m23}});
+				{m.m00, m.m01, m.m02, m.m03},
+				{m.m10, m.m11, m.m12, m.m13},
+				{m.m20, m.m21, m.m22, m.m23}});
 	}
 
 	private String affine2string(float[] matrix) {
@@ -1783,7 +1860,7 @@ public class IJ3dExecuter {
 		 */
 		protected abstract void setValue(final ContentInstant c, final int v);
 
-		
+
 		public void run() {
 			go = true;
 			while (go) {

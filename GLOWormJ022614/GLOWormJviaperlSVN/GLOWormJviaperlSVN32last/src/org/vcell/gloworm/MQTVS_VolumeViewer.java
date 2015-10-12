@@ -26,6 +26,7 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 	public void run(String arg) {
 		String cellName = arg;
 		ImagePlus imp = IJ.getImage();
+		runVolumeViewer(imp, cellName );
 	}
 	
 	public void runVolumeViewer(ImagePlus imp, String cellName ) {

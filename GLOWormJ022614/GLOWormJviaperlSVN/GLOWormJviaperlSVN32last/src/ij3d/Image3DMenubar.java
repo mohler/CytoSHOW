@@ -563,7 +563,7 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 			iJ3dExecuter.fitViewToUniverse();
 		else if(src == fitViewToContent)
 			iJ3dExecuter.fitViewToContent(getSelected());
-		else if(src == snapshot)
+		else if(src == snapshot || e.getActionCommand().toLowerCase().contains("snapshot"))
 			iJ3dExecuter.snapshot();
 		else if(src == record360)
 			iJ3dExecuter.record360();
@@ -577,7 +577,7 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 			iJ3dExecuter.stopAnimation();
 		else if(src == animationOptions)
 			iJ3dExecuter.changeAnimationOptions();
-		else if(src == threshold)
+		else if(src == threshold || e.getActionCommand().toLowerCase().contains("threshold/color"))
 			iJ3dExecuter.changeThreshold(getSelected());
 		else if(src == displayAsVolume) {
 			iJ3dExecuter.displayAs(getSelected(), Content.VOLUME);
