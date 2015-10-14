@@ -119,10 +119,9 @@ public class ImageWindow3D extends JFrame implements FocusListener, WindowListen
 		});
 
 		universe.addUniverseListener(this);
+		addFocusListener(this);
+		addWindowListener(this);
 		updateImagePlus();
-//		universe.ui.setHandTool();
-//		toolbar.setTool(Toolbar.HAND);
-//		toolbar.repaint();
 		WindowManager.addWindow(this);
 
 	}
@@ -820,17 +819,7 @@ public class ImageWindow3D extends JFrame implements FocusListener, WindowListen
 			IJ.wait(10); // may be needed for Java 1.4 on OS X
 			setMenuBar(Menus.getMenuBar());
 		}
-		if (imp==null) return;
-		imp.setActivated(); // notify ImagePlus that image has been activated
-		if (!closed && !quitting && !Interpreter.isBatchMode())
-			WindowManager.setWindow(this);
-		Channels channels = Channels.getInstance();
-		if (channels!=null && imp.isComposite()) {
-			((Channels)channels).update();
-			WindowManager.getCurrentWindow().toFront();
-		}
-		toolbar.setTool2(toolbar.localCurrent);
-
+		toolbar.setTool(toolbar.localCurrent);
 	}
 
 	public void windowDeactivated(WindowEvent e) {
