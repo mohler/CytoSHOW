@@ -7,10 +7,12 @@ import javax.media.j3d.View;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
+import ij.Menus;
 import ij.WindowManager;
 import ij.gui.ImageWindow;
 import ij.gui.ImageCanvas;
 import ij.gui.Toolbar;
+import ij.plugin.frame.Channels;
 import ij.process.ColorProcessor;
 import ij.macro.Interpreter;
 
@@ -38,6 +40,9 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.image.BufferedImage;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.WindowListener;
 import java.awt.event.WindowStateListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowAdapter;
@@ -53,7 +58,7 @@ import javax.vecmath.Color3f;
 
 import org.vcell.gloworm.SliceStereoToggle;
 
-public class ImageWindow3D extends JFrame implements UniverseListener {
+public class ImageWindow3D extends JFrame implements FocusListener, WindowListener, UniverseListener {
 
 	private DefaultUniverse universe;
 	ImageCanvas3D canvas3D;
@@ -94,6 +99,7 @@ public class ImageWindow3D extends JFrame implements UniverseListener {
 		imp.setTitle("ImageJ 3D Viewer");
 		this.universe = universe;
 		this.canvas3D = (ImageCanvas3D)universe.getCanvas();
+		this.setResizable(false);
 		ic = this.canvas3D.getRoiCanvas();
 
 		error_listener = new ErrorListener();
@@ -101,7 +107,6 @@ public class ImageWindow3D extends JFrame implements UniverseListener {
 
 		
 		addToolBarPanel();
-		toolbar.setTool2(Toolbar.HAND);
 //
 		addCommandButtons(imp);
 
@@ -115,7 +120,9 @@ public class ImageWindow3D extends JFrame implements UniverseListener {
 
 		universe.addUniverseListener(this);
 		updateImagePlus();
-		universe.ui.setHandTool();
+//		universe.ui.setHandTool();
+//		toolbar.setTool(Toolbar.HAND);
+//		toolbar.repaint();
 		WindowManager.addWindow(this);
 
 	}
@@ -125,13 +132,15 @@ public class ImageWindow3D extends JFrame implements UniverseListener {
 		overheadPanel.setLayout(new GridLayout(1, 1));
 		
 		toolbar = new Toolbar();
+		toolbar.setThreeDViewer(true);
 
 		toolbar.addKeyListener(ij);
-		if (ij != null)
-			toolbar.addMouseListener(toolbar);
+		toolbar.addMouseListener(toolbar);
 		overheadPanel.add(toolbar);
 
 		this.add(overheadPanel, BorderLayout.NORTH);
+		toolbar.setTool(Toolbar.HAND);
+		toolbar.repaint();
 	}
 	
 	public void addCommandButtons(ImagePlus imp) throws HeadlessException {
@@ -349,7 +358,7 @@ public class ImageWindow3D extends JFrame implements UniverseListener {
 		dupButton.setToolTipText("Download Data from the Selected Region...");
 		dupButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/download_button_animatedStill.png")));
 		dupButton.setFont(buttonPanelFont);
-		viewButtonPanel.add(dupButton, fspc);
+//		viewButtonPanel.add(dupButton, fspc);
 		dupButton.addActionListener(ij);
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
@@ -360,7 +369,7 @@ public class ImageWindow3D extends JFrame implements UniverseListener {
 		zMipButton.setToolTipText("Maximum Intensity Projection of Z-Stack ...");
 		zMipButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/zMip.png")));
 		zMipButton.setFont(buttonPanelFont);
-		viewButtonPanel.add(zMipButton, fspc);
+//		viewButtonPanel.add(zMipButton, fspc);
 		zMipButton.addActionListener(ij);
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
@@ -371,7 +380,7 @@ public class ImageWindow3D extends JFrame implements UniverseListener {
 		prjButton.setToolTipText("3D View of the Selected Region ...");
 		prjButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/3DiconNew32.png")));
 		prjButton.setFont(buttonPanelFont);
-		viewButtonPanel.add(prjButton, fspc);
+//		viewButtonPanel.add(prjButton, fspc);
 		prjButton.addActionListener(ij);
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
@@ -382,7 +391,7 @@ public class ImageWindow3D extends JFrame implements UniverseListener {
 		vvButton.setToolTipText("Volume Viewer of the Selected Region ...");
 		vvButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/VV_58191.gif")));
 		vvButton.setFont(buttonPanelFont);
-		viewButtonPanel.add(vvButton, fspc);
+//		viewButtonPanel.add(vvButton, fspc);
 		vvButton.addActionListener(ij);
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
@@ -393,7 +402,7 @@ public class ImageWindow3D extends JFrame implements UniverseListener {
 		orthoViewButton.setToolTipText("View Orthogonal Slices through the Image Volume");
 		orthoViewButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/orthoIconSmall.png")));
 		orthoViewButton.setFont(buttonPanelFont);
-		viewButtonPanel.add(orthoViewButton, fspc);
+//		viewButtonPanel.add(orthoViewButton, fspc);
 		orthoViewButton.addActionListener(ij);
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
@@ -404,7 +413,7 @@ public class ImageWindow3D extends JFrame implements UniverseListener {
 		advancedViewButton.setToolTipText("Advanced Multi-Channel Scene Controls");
 		advancedViewButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/gearFireIcon.png")));
 		advancedViewButton.setFont(buttonPanelFont);
-		viewButtonPanel.add(advancedViewButton, fspc);
+//		viewButtonPanel.add(advancedViewButton, fspc);
 		advancedViewButton.addActionListener(ij);
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
@@ -415,7 +424,7 @@ public class ImageWindow3D extends JFrame implements UniverseListener {
 		modeButton.setToolTipText("Choose among Slice-4D or Stereo-4D viewing modes");
 		modeButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/4DMode.png")));
 		modeButton.setFont(buttonPanelFont);
-		viewButtonPanel.add(modeButton, fspc);
+//		viewButtonPanel.add(modeButton, fspc);
 		sst = new SliceStereoToggle(imp);
 		modeButton.addActionListener(sst);
 		fspc.gridy = y++;
@@ -427,7 +436,7 @@ public class ImageWindow3D extends JFrame implements UniverseListener {
 		tagsButton.setToolTipText("Show Tag-Editing Tools");
 		tagsButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/TagsThin.png")));
 		tagsButton.setFont(buttonPanelFont);
-		viewButtonPanel.add(tagsButton, fspc);
+//		viewButtonPanel.add(tagsButton, fspc);
 		tagsButton.addActionListener(ij);
 		
 		fspc.gridy = y++;
@@ -745,10 +754,13 @@ public class ImageWindow3D extends JFrame implements UniverseListener {
 	}
 
 	private int lastToolID;
+	private boolean closed;
 
 	private class ErrorListener implements RenderingErrorListener {
 		public void errorOccurred(RenderingError error) {
-			throw new RuntimeException(error.getDetailMessage());
+			IJ.log(error.getDetailMessage());
+			error.printVerbose();
+//			throw new RuntimeException(error.getDetailMessage());
 		}
 
 		/*
@@ -773,6 +785,67 @@ public class ImageWindow3D extends JFrame implements UniverseListener {
 				//e.printStackTrace();
 			}
 		}
+	}
+
+	public void windowOpened(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void windowClosing(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void windowClosed(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void windowIconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void windowDeiconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void windowActivated(WindowEvent e) {
+		if (IJ.debugMode) IJ.log("windowActivated: "+imp.getTitle());
+		ImageJ ij = IJ.getInstance();
+		boolean quitting = ij!=null && ij.quitting();
+		if (IJ.isMacintosh() && ij!=null && !quitting) {
+			IJ.wait(10); // may be needed for Java 1.4 on OS X
+			setMenuBar(Menus.getMenuBar());
+		}
+		if (imp==null) return;
+		imp.setActivated(); // notify ImagePlus that image has been activated
+		if (!closed && !quitting && !Interpreter.isBatchMode())
+			WindowManager.setWindow(this);
+		Channels channels = Channels.getInstance();
+		if (channels!=null && imp.isComposite()) {
+			((Channels)channels).update();
+			WindowManager.getCurrentWindow().toFront();
+		}
+		toolbar.setTool2(toolbar.localCurrent);
+
+	}
+
+	public void windowDeactivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void focusGained(FocusEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void focusLost(FocusEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

@@ -97,7 +97,7 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 	private Color evenDarker = new Color(110, 110, 110);
 	private Color triangleColor = new Color(150, 0, 0);
 	private Color toolColor = new Color(0, 25, 45);
-	int localCurrent;
+	public int localCurrent;
 	private boolean threeDViewer;
 
 
@@ -233,7 +233,7 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
         int index = toolIndex(tool);
         fill3DRect(g, index * SIZE + 1, 1, SIZE, SIZE-1, !down[tool]);
         g.setColor(toolColor);
-		if (threeDViewer && tool != HAND && tool != MAGNIFIER)
+		if (isThreeDViewer() && tool != HAND && tool != MAGNIFIER)
 			return;
 
         int x = index * SIZE + OFFSET;
@@ -679,7 +679,7 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 	public void setTool2(int tool) {
 		if (!isValidTool(tool)) return;
 		paint(g);
-		if (threeDViewer && tool != HAND && tool != MAGNIFIER)
+		if (isThreeDViewer() && tool != HAND && tool != MAGNIFIER)
 			return;
 		String previousName = getToolName();
 		current = tool;
@@ -884,10 +884,6 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
     }
 
 	public void mousePressed(MouseEvent e) {
-		threeDViewer = false;
-		if (((Component)e.getSource()).getParent().getParent().getParent().getParent().getParent() instanceof ImageWindow3D) {
-			threeDViewer = true;
-		}
 		int x = e.getX();
  		int newTool = 0;
 		for (int i=0; i<NUM_BUTTONS; i++) {
@@ -1632,6 +1628,14 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 	public static boolean installStartupMacrosTools() {
 		String customTool0 = Prefs.get(Toolbar.TOOL_KEY+"00", "");
 		return customTool0.equals("") || Character.isDigit(customTool0.charAt(0));
+	}
+
+	public boolean isThreeDViewer() {
+		return threeDViewer;
+	}
+
+	public void setThreeDViewer(boolean threeDViewer) {
+		this.threeDViewer = threeDViewer;
 	}
 	
 	//public void repaint() {

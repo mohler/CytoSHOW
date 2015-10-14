@@ -198,7 +198,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				
 					
 					if (IJ.isWindows())
-						cursorString = c.getName();
+						cursorString = c.getName().split("( |_)=")[0];
 					Font font = Font.decode("Arial-Outline-18");
 
 					//create the FontRenderContext object which helps us to measure the text
