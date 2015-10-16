@@ -124,7 +124,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		imageWidth = width;
 		imageHeight = height;
 		srcRect = new Rectangle(0, 0, imageWidth, imageHeight);
-		setDrawingSize(imageWidth, (int)(imageHeight));
+		setDrawingSize(imageWidth, imageHeight);
 		magnification = 1.0;
 		messageRois = new Hashtable<String,Roi>();
 

@@ -90,7 +90,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 	private static Point nextLocation;
 	
     protected int textGap = centerOnScreen?0:TEXT_GAP;
-	
+
 	/** This variable is set false if the user presses the escape key or closes the window. */
 	public boolean running = false;
 	
@@ -110,6 +110,14 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 	public Label countLabel;
 	public Panel overheadPanel;
 	private Toolbar toolbar;
+	public Toolbar getToolbar() {
+		return toolbar;
+	}
+
+	public void setToolbar(Toolbar toolbar) {
+		this.toolbar = toolbar;
+	}
+
 	public JButton dupButton;
 	public JButton modeButton;
 	public JButton stereo4dxButton;
@@ -130,7 +138,8 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
     
     public ImageWindow(ImagePlus imp, ImageCanvas ic) {
 		super(imp.getTitle());
-		
+		BorderLayout bl = new BorderLayout();
+
 		if (false/*Prefs.blackCanvas && getClass().getName().equals("ij.gui.ImageWindow")*/) {
 			setForeground(Color.white);
 			setBackground(Color.black);
@@ -141,24 +150,32 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
         	else
         		setBackground(Color.white);
         }
+		subTitleBkgdColor = Color.white;
 		boolean openAsHyperStack = imp.getOpenAsHyperStack();
 		ij = IJ.getInstance();
 		this.imp = imp;
-		if (ic==null)
-			{ic=new ImageCanvas(imp); newCanvas=true;}
+		if (ic==null) {
+			ic=new ImageCanvas(imp); 
+			newCanvas=true;
+		}
 		this.ic = ic;
-		ImageWindow previousWindow = imp.getWindow();
-		BorderLayout bl = new BorderLayout();
-		
+		this.setVisible(true);
+		pack();
 		this.setLayout(bl);
-				
-		addToolBarPanel();
 
-		addCommandButtons(imp);
+		ImageWindow previousWindow = imp.getWindow();
 		
 
 		add(ic, BorderLayout.CENTER);
+		pack();
+//		show();
+		addToolBarPanel();
+		pack();
+//		show();
 
+		addCommandButtons(imp);
+		pack();
+//		show();
 		
 		addFocusListener(this);
 		addWindowListener(this);
@@ -220,17 +237,17 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		}
 		origICtop = ic.getY();
 
-	    addComponentListener(new ComponentAdapter() {
-	      public void componentResized(ComponentEvent e) {
-	    	  ImageCanvas ic = ImageWindow.this.ic;
-	    	  double mag = ic.getMagnification();
-	    	  ImageWindow win = ImageWindow.this;
-	    	  ic.setSourceRect(new Rectangle(ic.getSrcRect().x, ic.getSrcRect().y, 
-	    			  (int)(((BorderLayout)win.getLayout()).getLayoutComponent(BorderLayout.CENTER).getWidth()/mag),
-	    			  (int)(((BorderLayout)win.getLayout()).getLayoutComponent(BorderLayout.CENTER).getHeight()/mag)));
-	      }
-	    });
-
+//	    addComponentListener(new ComponentAdapter() {
+//	      public void componentResized(ComponentEvent e) {
+//	    	  System.out.println(e.getSource().toString());
+//	    	  ImageCanvas ic = ImageWindow.this.ic;
+//	    	  double mag = ic.getMagnification();
+//	    	  ic.setSourceRect(new Rectangle(ic.getX(), ic.getY(), 
+//	    			  ((int)(ic.getWidth()/mag)),
+//	    			  ((int)(ic.getHeight()/mag))));
+//	      }
+//	    });
+	    
      }
 
 	public void addToolBarPanel() {
@@ -246,7 +263,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		if (ij != null)
 			toolbar.addMouseListener(toolbar);
 		overheadPanel.add(toolbar);
-//		overheadPanel.setSize(overheadPanel.getWidth(), overheadPanel.getHeight()*2);
+		overheadPanel.setSize(overheadPanel.getWidth(), overheadPanel.getHeight()*2);
 //		overheadScrollPane.add(overheadPanel);
 
 		this.add(overheadPanel, BorderLayout.NORTH);
@@ -732,7 +749,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 			Insets insets = super.getInsets();
 				
 			g.setColor(subTitleBkgdColor);
-			g.fillRect(insets.left, insets.top, (int) g.getFontMetrics().getStringBounds(createSubtitle(), g).getWidth()+10, this.origICtop-insets.top-1);
+			g.fillRect(insets.left, insets.top, (int) g.getFontMetrics().getStringBounds(createSubtitle(), g).getWidth()+10, this.origICtop);
 			if (imp.isComposite()) {
 				CompositeImage ci = (CompositeImage)imp;
 				if (ci.getMode()==CompositeImage.COMPOSITE)
@@ -824,8 +841,8 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		Rectangle r = ic.getBounds();
 		int extraWidth = MIN_WIDTH - r.width;
 		int extraHeight = MIN_HEIGHT - r.height;
-		if (extraWidth<=0 && extraHeight<=0 && !Prefs.noBorder && !IJ.isLinux())
-			g.drawRect(r.x-1, r.y-1, r.width+1, r.height+1);
+//		if (extraWidth<=0 && extraHeight<=0 && !Prefs.noBorder && !IJ.isLinux())
+//			g.drawRect(r.x-1, r.y-1, r.width+1, r.height+1);
     }
     
 	/** Removes this window from the window list and disposes of it.
