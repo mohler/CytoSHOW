@@ -1,13 +1,12 @@
 package view4d;
 
 import ij.gui.GenericDialog;
+import ij3d.ImageCanvas3D;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-
 import java.net.URL;
 import java.awt.image.ImageProducer;
 
@@ -16,7 +15,7 @@ import java.awt.image.ImageProducer;
  *
  * @author Benjamin Schmid
  */
-public class TimelineGUI implements ActionListener, KeyListener {
+public class TimelineGUI implements ActionListener, KeyListener, MouseListener {
 
 	private final JPanel p;
 	private boolean visible = false;
@@ -231,6 +230,36 @@ public class TimelineGUI implements ActionListener, KeyListener {
 		} else if(command.equals("SLOWER")) {
 			timeline.slower();
 		}
+	}
+
+	public void mouseClicked(MouseEvent e) {
+		if (e.getSource() instanceof ImageCanvas3D) {
+			buttons[playIndex].setActionCommand("PLAY");
+			buttons[playIndex].setIcon(new ImageIcon(playImage));
+			buttons[playIndex].setBorder(null);
+			buttons[playIndex].repaint();
+			timeline.pause();
+		}
+	}
+
+	public void mousePressed(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void mouseReleased(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

@@ -176,6 +176,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		this.timeline = new Timeline(this);
 		this.timelineGUI = new TimelineGUI(timeline);
 		canvas.addKeyListener(timelineGUI);
+		canvas.addMouseListener(timelineGUI);
 
 		BranchGroup bg = new BranchGroup();
 		scene.addChild(bg);
@@ -573,7 +574,9 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		if(win == null)
 			return;
 		if(endTime != startTime && !timelineGUIVisible) {
-			win.add(timelineGUI.getPanel(), BorderLayout.SOUTH, -1);
+			win.remove(canvas);
+			win.add(timelineGUI.getPanel(), BorderLayout.SOUTH);
+			win.add(canvas, BorderLayout.CENTER);
 			timelineGUIVisible = true;
 			win.pack();
 		} else if(endTime == startTime && timelineGUIVisible) {

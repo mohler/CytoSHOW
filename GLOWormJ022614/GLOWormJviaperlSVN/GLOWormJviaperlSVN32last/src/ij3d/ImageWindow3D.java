@@ -91,6 +91,7 @@ public class ImageWindow3D extends JFrame implements FocusListener, WindowListen
 
 	public ImageWindow3D(String title, DefaultUniverse universe) {
 		super(title);
+		BorderLayout bl = new BorderLayout();
 		String j3dNoOffScreen = System.getProperty("j3d.noOffScreen");
 		if (j3dNoOffScreen != null && j3dNoOffScreen.equals("true"))
 			noOffScreen = true;
@@ -101,6 +102,7 @@ public class ImageWindow3D extends JFrame implements FocusListener, WindowListen
 		this.canvas3D = (ImageCanvas3D)universe.getCanvas();
 		this.setResizable(false);
 		ic = this.canvas3D.getRoiCanvas();
+		this.setLayout(bl);
 
 		error_listener = new ErrorListener();
 		error_listener.addTo(universe);
@@ -110,7 +112,7 @@ public class ImageWindow3D extends JFrame implements FocusListener, WindowListen
 //
 		addCommandButtons(imp);
 
-		add(canvas3D, -1);
+		add(canvas3D, BorderLayout.CENTER);
 
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
