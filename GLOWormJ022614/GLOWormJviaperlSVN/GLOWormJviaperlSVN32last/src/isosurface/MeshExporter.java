@@ -4,13 +4,14 @@ package isosurface;
 import ij3d.Content;
 import ij3d.ContentNode;
 import ij3d.IJ3dExecuter;
+import ij3d.Image3DUniverse;
+import ij3d.ImageJ3DViewer;
 import customnode.CustomQuadMesh;
 import customnode.CustomTriangleMesh;
 import customnode.WavefrontExporter;
 import customnode.CustomMeshNode;
 import customnode.CustomMesh;
 import customnode.CustomMultiMesh;
-
 import ij.IJ;
 import ij.io.SaveDialog;
 
@@ -24,7 +25,6 @@ import java.io.Writer;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Hashtable;
@@ -42,7 +42,7 @@ public class MeshExporter {
 
 	private MeshExporter() {}
 
-	static private Collection<Content> filterMeshes(final Collection contents) {
+	static private Collection<Content> filterMeshes(final Collection contents, int nowInt) {
 		ArrayList<Content> meshes = new ArrayList<Content>();
 		for (Iterator it = contents.iterator(); it.hasNext(); ) {
 			Content c = (Content)it.next();
@@ -52,7 +52,10 @@ public class MeshExporter {
 			 || node instanceof surfaceplot.SurfacePlotGroup) {
 				continue;
 			}
-			meshes.add(c);
+			c.showTimepoint(nowInt, false);
+			if (c.isVisibleAt(nowInt)) {
+				meshes.add(c);
+			}
 		}
 		return meshes;
 	}
@@ -64,40 +67,47 @@ public class MeshExporter {
 		File obj_file = IJ3dExecuter.promptForFile("Save WaveFront", "untitled", ".obj");
 		if(obj_file == null)
 			return;
-		saveAsWaveFront(contents_, obj_file);
+		saveAsWaveFront(contents_, obj_file, 0,0);
 	}
 
 
-	/** Accepts a collection of MeshGroup objects. */
-	static public void saveAsWaveFront(Collection contents_, File obj_file) {
+	/** Accepts a collection of MeshGroup objects. 
+	 * @param j 
+	 * @param i */
+	static public void saveAsWaveFront(Collection contents_, File obj_file, int startInt, int endInt) {
 		if (null == contents_ || 0 == contents_.size())
 			return;
-		Collection<Content> contents = filterMeshes(contents_);
-		if (0 == contents.size()) {
-			IJ.log("No meshes to export!");
-			return;
-		}
-
 		String obj_filename = obj_file.getName();
-		String mtl_filename = obj_filename.substring(
-			0, obj_filename.lastIndexOf('.')) + ".mtl";
+		for (int nowInt=startInt;nowInt<endInt+1;nowInt++) {
+			Collection<Content> contents = filterMeshes(contents_, nowInt);
+			if (0 == contents.size()) {
+				IJ.log("No meshes to export!");
+				return;
+			}
 
-		File mtl_file = new File(obj_file.getParentFile(), mtl_filename);
+			String obj_incfilename = obj_filename.replace(".obj", "_"+nowInt+".obj");
+			obj_file = new File(obj_file.getParentFile(), obj_incfilename);
 
-		OutputStreamWriter dos_obj = null,
-				   dos_mtl = null;
-		try {
-			dos_obj = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(obj_file)), "8859_1"); // encoding in Latin 1 (for macosx not to mess around
-			dos_mtl = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(mtl_file)), "8859_1"); // encoding in Latin 1 (for macosx not to mess around
-			writeAsWaveFront(contents, mtl_filename, dos_obj, dos_mtl);
-			dos_obj.flush();
-			dos_obj.flush();
-		} catch (IOException e) {
-			IJ.log("Some error ocurred while saving to wavefront:\n" + e);
-			e.printStackTrace();
-		} finally {
-			try { if (null != dos_obj) dos_obj.close(); } catch (Exception e) {}
-			try { if (null != dos_mtl) dos_mtl.close(); } catch (Exception e) {}
+			String mtl_filename = obj_incfilename.substring(
+					0, obj_incfilename.lastIndexOf('.')) + ".mtl";
+
+			File mtl_file = new File(obj_file.getParentFile(), mtl_filename);
+
+			OutputStreamWriter dos_obj = null,
+					dos_mtl = null;
+			try {
+				dos_obj = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(obj_file)), "8859_1"); // encoding in Latin 1 (for macosx not to mess around
+				dos_mtl = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(mtl_file)), "8859_1"); // encoding in Latin 1 (for macosx not to mess around
+				writeAsWaveFront(contents, mtl_filename, dos_obj, dos_mtl);
+				dos_obj.flush();
+				dos_obj.flush();
+			} catch (IOException e) {
+				IJ.log("Some error ocurred while saving to wavefront:\n" + e);
+				e.printStackTrace();
+			} finally {
+				try { if (null != dos_obj) dos_obj.close(); } catch (Exception e) {}
+				try { if (null != dos_mtl) dos_mtl.close(); } catch (Exception e) {}
+			}
 		}
 	}
 
@@ -113,7 +123,7 @@ public class MeshExporter {
 
 	static public void saveAsDXF(Collection meshgroups, File dxf_file) {
 		if (null == meshgroups || 0 == meshgroups.size()) return;
-		meshgroups = filterMeshes(meshgroups);
+		meshgroups = filterMeshes(meshgroups, 1);
 		if (0 == meshgroups.size()) {
 			IJ.log("No meshes to export!");
 			return;
@@ -171,7 +181,7 @@ public class MeshExporter {
 	public static void saveAsSTL(Collection meshgroups, File stl_file, int filetype) {
 		if (null == meshgroups || 0 == meshgroups.size())
 			return;
-		meshgroups = filterMeshes(meshgroups);
+		meshgroups = filterMeshes(meshgroups, 1);
 		if (0 == meshgroups.size()) {
 			IJ.log("No meshes to export!");
 			return;
@@ -472,7 +482,6 @@ public class MeshExporter {
 
 		for(Iterator it = contents.iterator(); it.hasNext(); ) {
 			Content mob = (Content)it.next();
-			
 			ContentNode node = mob.getContent();
 
 			// First CustomMultiMesh, which is also a CustomMeshNode:

@@ -9,6 +9,8 @@ import isosurface.MeshExporter;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Set;
+import java.util.TreeMap;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Color3f;
@@ -333,7 +335,7 @@ public class ImageJ3DViewer implements PlugIn {
 			if (format.equals("dxf"))
 				MeshExporter.saveAsDXF(univ.getContents(), new File(path));
 			else if (format.equals("wavefront"))
-				MeshExporter.saveAsWaveFront(univ.getContents(), new File(path));
+				MeshExporter.saveAsWaveFront(univ.getContents(), new File(path), univ.getStartTime(), univ.getEndTime());
 			else if (format.startsWith("stl")) {
 				if (format.indexOf("ascii") > 0)
 					MeshExporter.saveAsSTL(univ.getContents(), new File(path), MeshExporter.ASCII);

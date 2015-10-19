@@ -173,8 +173,8 @@ public class ContentCreatorDialog {
 			// TODO correct message
 			if(IJ.showMessageWithCancel("Convert...",
 				"8-bit or RGB image required. Convert?")) {
-				for(ImagePlus ip : imps)
-					ContentCreator.convert(ip);
+				for(ImagePlus imp : imps)
+					ContentCreator.convert(imp);
 			} else {
 				return null;
 			}

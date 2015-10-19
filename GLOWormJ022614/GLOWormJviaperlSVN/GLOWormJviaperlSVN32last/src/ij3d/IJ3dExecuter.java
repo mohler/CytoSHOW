@@ -272,7 +272,7 @@ public class IJ3dExecuter {
 		File obj_file = promptForFile("Save WaveFront", "untitled", ".obj");
 		if(obj_file == null)
 			return;
-		MeshExporter.saveAsWaveFront(univ.getContents(), obj_file);
+		MeshExporter.saveAsWaveFront(univ.getContents(), obj_file, univ.getStartTime(), univ.getEndTime());
 		record(EXPORT, "WaveFront", obj_file.getAbsolutePath());
 	}
 
