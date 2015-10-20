@@ -161,6 +161,16 @@ public class IJ3dExecuter {
 		addContentFromImage(image);
 	}
 
+	public void addSavedContent(final String path, final File file) {
+		new Thread() {
+			{ setPriority(Thread.NORM_PRIORITY); }
+
+			public void run() {
+				univ.addContentLater(path);
+			}
+		}.start();
+	}
+
 	public void addContent(final ImagePlus image, final File file) {
 		new Thread() {
 			{ setPriority(Thread.NORM_PRIORITY); }
@@ -242,8 +252,9 @@ public class IJ3dExecuter {
 		IJ.log("path: " + path);
 		Object ob;
 		try {
-			ob = univ.addContentLater(path);
+			univ.addContentLater(path);
 			record(IMPORT, path);
+			ob = univ;
 		} catch (Exception e) {
 			e.printStackTrace();
 			ob = null;

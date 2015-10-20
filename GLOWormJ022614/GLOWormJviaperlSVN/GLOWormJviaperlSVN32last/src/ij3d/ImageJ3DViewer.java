@@ -317,9 +317,14 @@ public class ImageJ3DViewer implements PlugIn {
 		}
 	}
 
+//	public static void importContent(String path) {
+//		Image3DUniverse univ = getUniv();
+//		univ.addContentLater(path);
+//	}
+
 	public static void importContent(String path) {
 		Image3DUniverse univ = getUniv();
-		univ.addContentLater(path);
+		univ.getExecuter().addSavedContent(path, null);
 	}
 
 	public static void exportTransformed() {

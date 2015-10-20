@@ -55,42 +55,42 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 		this.swapTimelapseData = false;
 		setCapability(BranchGroup.ALLOW_DETACH);
 		setCapability(BranchGroup.ENABLE_PICK_REPORTING);
-		timepointToSwitchIndex = new HashMap<Integer, Integer>();
+		setTimepointToSwitchIndex(new HashMap<Integer, Integer>());
 		contentInstants = new TreeMap<Integer, ContentInstant>();
 		ContentInstant ci = new ContentInstant(name + "_#" + tp);
 		ci.timepoint = tp;
 		contentInstants.put(tp, ci);
-		timepointToSwitchIndex.put(tp, 0);
-		contentSwitch = new Switch();
-		contentSwitch.setCapability(Switch.ALLOW_SWITCH_WRITE);
-		contentSwitch.setCapability(Switch.ALLOW_CHILDREN_WRITE);
-		contentSwitch.setCapability(Switch.ALLOW_CHILDREN_EXTEND);
-		contentSwitch.addChild(ci);
-		addChild(contentSwitch);
+		getTimepointToSwitchIndex().put(tp, 0);
+		setContentSwitch(new Switch());
+		getContentSwitch().setCapability(Switch.ALLOW_SWITCH_WRITE);
+		getContentSwitch().setCapability(Switch.ALLOW_CHILDREN_WRITE);
+		getContentSwitch().setCapability(Switch.ALLOW_CHILDREN_EXTEND);
+		getContentSwitch().addChild(ci);
+		addChild(getContentSwitch());
 	}
 
 	public Content(String name, TreeMap<Integer, ContentInstant> contents) {
 		this(name, contents, false);
 	}
 
-	public Content(String name, TreeMap<Integer, ContentInstant> contents, boolean swapTimelapseData) {
+	public Content(String name, TreeMap<Integer, ContentInstant> instants, boolean swapTimelapseData) {
 		this.name = name;
 		this.swapTimelapseData = swapTimelapseData;
 		setCapability(BranchGroup.ALLOW_DETACH);
 		setCapability(BranchGroup.ENABLE_PICK_REPORTING);
-		this.contentInstants = contents;
-		timepointToSwitchIndex = new HashMap<Integer, Integer>();
-		contentSwitch = new Switch();
-		contentSwitch.setCapability(Switch.ALLOW_SWITCH_WRITE);
-		contentSwitch.setCapability(Switch.ALLOW_CHILDREN_WRITE);
-		contentSwitch.setCapability(Switch.ALLOW_CHILDREN_EXTEND);
-		for(int i : contents.keySet()) {
-			ContentInstant c = contents.get(i);
+		this.contentInstants = instants;
+		setTimepointToSwitchIndex(new HashMap<Integer, Integer>());
+		setContentSwitch(new Switch());
+		getContentSwitch().setCapability(Switch.ALLOW_SWITCH_WRITE);
+		getContentSwitch().setCapability(Switch.ALLOW_CHILDREN_WRITE);
+		getContentSwitch().setCapability(Switch.ALLOW_CHILDREN_EXTEND);
+		for(int i : instants.keySet()) {
+			ContentInstant c = instants.get(i);
 			c.timepoint = i;
-			timepointToSwitchIndex.put(i, contentSwitch.numChildren());
-			contentSwitch.addChild(c);
+			getTimepointToSwitchIndex().put(i, getContentSwitch().numChildren());
+			getContentSwitch().addChild(c);
 		}
-		addChild(contentSwitch);
+		addChild(getContentSwitch());
 	}
 
 	// replace if timepoint is already present
@@ -99,26 +99,26 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 //		ci.detach();
 		contentInstants.put(timepoint, ci);
 		if(!contentInstants.containsKey(timepoint)) {
-			timepointToSwitchIndex.put(timepoint, contentSwitch.numChildren());
-			contentSwitch.addChild(ci);
+			getTimepointToSwitchIndex().put(timepoint, getContentSwitch().numChildren());
+			getContentSwitch().addChild(ci);
 		} else {
-			int switchIdx = timepointToSwitchIndex.get(timepoint);
-			contentSwitch.setChild(ci, switchIdx);
+			int switchIdx = getTimepointToSwitchIndex().get(timepoint);
+			getContentSwitch().setChild(ci, switchIdx);
 		}
 	}
 
 	public void removeInstant(int timepoint) {
 		if(!contentInstants.containsKey(timepoint))
 			return;
-		int sIdx = timepointToSwitchIndex.get(timepoint);
-		contentSwitch.removeChild(sIdx);
+		int sIdx = getTimepointToSwitchIndex().get(timepoint);
+		getContentSwitch().removeChild(sIdx);
 		contentInstants.remove(timepoint);
-		timepointToSwitchIndex.remove(timepoint);
+		getTimepointToSwitchIndex().remove(timepoint);
 		// update the following switch indices.
-		for(int i = sIdx; i < contentSwitch.numChildren(); i++) {
-			ContentInstant ci = (ContentInstant)contentSwitch.getChild(i);
+		for(int i = sIdx; i < getContentSwitch().numChildren(); i++) {
+			ContentInstant ci = (ContentInstant)getContentSwitch().getChild(i);
 			int tp = ci.getTimepoint();
-			timepointToSwitchIndex.put(tp, i);
+			getTimepointToSwitchIndex().put(tp, i);
 		}
 	}
 
@@ -159,24 +159,24 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 		if(next != null && swapTimelapseData)
 				next.restoreDisplayedData();
 
-		Integer idx = timepointToSwitchIndex.get(tp);
+		Integer idx = getTimepointToSwitchIndex().get(tp);
 		if(idx == null)
-			contentSwitch.setWhichChild(Switch.CHILD_NONE);
+			getContentSwitch().setWhichChild(Switch.CHILD_NONE);
 		else
-			contentSwitch.setWhichChild(idx);
+			getContentSwitch().setWhichChild(idx);
 	}
 
 	public void setShowAllTimepoints(boolean b) {
 		this.showAllTimepoints = b;
 		if(b) {
-			contentSwitch.setWhichChild(Switch.CHILD_ALL);
+			getContentSwitch().setWhichChild(Switch.CHILD_ALL);
 			return;
 		}
-		Integer idx = timepointToSwitchIndex.get(currentTimePoint);
+		Integer idx = getTimepointToSwitchIndex().get(currentTimePoint);
 		if(idx == null)
-			contentSwitch.setWhichChild(Switch.CHILD_NONE);
+			getContentSwitch().setWhichChild(Switch.CHILD_NONE);
 		else
-			contentSwitch.setWhichChild(idx);
+			getContentSwitch().setWhichChild(idx);
 	}
 
 	public boolean getShowAllTimepoints() {
@@ -701,6 +701,22 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 
 	public boolean isPLVisible() {
 		return getCurrentInstant().isPLVisible();
+	}
+
+	public HashMap<Integer, Integer> getTimepointToSwitchIndex() {
+		return timepointToSwitchIndex;
+	}
+
+	public void setTimepointToSwitchIndex(HashMap<Integer, Integer> timepointToSwitchIndex) {
+		this.timepointToSwitchIndex = timepointToSwitchIndex;
+	}
+
+	public Switch getContentSwitch() {
+		return contentSwitch;
+	}
+
+	public void setContentSwitch(Switch contentSwitch) {
+		this.contentSwitch = contentSwitch;
 	}
 }
 

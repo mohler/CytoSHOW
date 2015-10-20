@@ -40,10 +40,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -51,6 +53,7 @@ import java.util.concurrent.Future;
 
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Canvas3D;
+import javax.media.j3d.Switch;
 import javax.media.j3d.Transform3D;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
@@ -70,6 +73,7 @@ import view4d.Timeline;
 import view4d.TimelineGUI;
 import customnode.CustomLineMesh;
 import customnode.CustomMesh;
+import customnode.CustomMeshNode;
 import customnode.CustomMultiMesh;
 import customnode.CustomPointMesh;
 import customnode.CustomQuadMesh;
@@ -1741,10 +1745,12 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			// update start and end time
 			int st = startTime;
 			int e = endTime;
-			if(c.getStartTime() < startTime)
-				st = c.getStartTime();
-			if(c.getEndTime() > endTime)
-				e = c.getEndTime();
+			int cst = c.getStartTime();
+			int ce = c.getEndTime();
+			if(cst < startTime)
+				st = cst;
+			if(ce > endTime)
+				e = ce;
 			updateStartAndEndTime(st, e);
 
 			this.scene.addChild(c);
@@ -1809,12 +1815,13 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		});
 	}
 
-	public Collection<Future<Content>> addContentLater(String filePath) {
+	public void addContentLater(String filePath) {
 		ArrayList<String> timedObjFileNames = new ArrayList<String>();
 		File file = new File(filePath);
 		if (filePath.matches(".*_\\d+.obj")) {
 			for(String nextfilename: file.getParentFile().list()) {
-				if (nextfilename.matches(".*_\\d+.obj")) {
+				String fileNameRoot = file.getName().split("_\\d+.")[0];
+				if (nextfilename.matches(fileNameRoot+"_\\d+.obj")) {
 					timedObjFileNames.add(nextfilename);
 				}
 			}
@@ -1822,53 +1829,41 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		Object[] timedObjFileNms = timedObjFileNames.toArray();
 		Arrays.sort(timedObjFileNms);
 		List<Content>contents = new ArrayList<Content>();
+		Hashtable<String, TreeMap<Integer, ContentInstant>> cInstants = new Hashtable<String, TreeMap<Integer, ContentInstant>>();
+
 		for (Object nextmatchingfilename: timedObjFileNms) {
 			String nextmatchingfilePath = file.getParent() +File.separator + (String)nextmatchingfilename;
 			String[] tptParse = ((String)nextmatchingfilename).split("_");
 			int nextTpt = Integer.parseInt(tptParse[tptParse.length-1].replace(".obj", ""));
 			Map<String,CustomMesh> meshes = MeshLoader.load(nextmatchingfilePath);
 			if(meshes == null)
-				return null;
+				return;
 
 			for(Map.Entry<String,CustomMesh> entry : meshes.entrySet()) {
 				String name = entry.getKey();
 				name = getSafeContentName(name);
 				CustomMesh mesh = entry.getValue();
-
-				Content content = createContent(mesh, name);
-				if (contents.size() ==0) {
-					contents.add(content);
-					content.setLocked(true);
-					while(contents.size() ==0);
-				} else {
-					int csz = contents.size();
-					for (int c=0; c<csz;c++) { 
-						Content existingContent = contents.get(c);
-						if (content != null && existingContent.getName().contains(content.getName())) {
-//							content.getInstant(0).timepoint = nextTpt;
-//							content = null;
-//							existingContent.addInstant(content.getInstant(0));
-							ContentInstant contInst = new ContentInstant(name + "_#" + nextTpt);
-							contInst.timepoint = nextTpt;
-							existingContent.getInstants().put(nextTpt, contInst);
-							
-							contInst.color = mesh.getColor();
-							contInst.transparency = mesh.getTransparency();
-							contInst.shaded = mesh.isShaded();
-							contInst.showCoordinateSystem(
-								UniverseSettings.showLocalCoordinateSystemsByDefault);
-							content = null;
-						} 
-					}
-					if (content!=null){
-							contents.add(content);
-							content.setLocked(true);
-						
-					}
+				if (!cInstants.containsKey(name)) {
+					cInstants.put(name, new TreeMap<Integer, ContentInstant>());
 				}
+				ContentInstant contInst = new ContentInstant(name + "_#" + nextTpt);
+				contInst.timepoint = nextTpt;
+
+				contInst.color = mesh.getColor();
+				contInst.transparency = mesh.getTransparency();
+				contInst.shaded = mesh.isShaded();
+				contInst.showCoordinateSystem(UniverseSettings.showLocalCoordinateSystemsByDefault);
+				contInst.display(new CustomMeshNode(mesh));
+				contInst.compile();
+
+				cInstants.get(name).put(nextTpt,contInst);
 			}
 		}
-		return addContentLater(contents);
+		for (String cName:cInstants.keySet()) {
+			Content content = new Content(cName, cInstants.get(cName), false);
+			this.addContent(content);
+			content.setLocked(true);
+		}
 	}
 
 
