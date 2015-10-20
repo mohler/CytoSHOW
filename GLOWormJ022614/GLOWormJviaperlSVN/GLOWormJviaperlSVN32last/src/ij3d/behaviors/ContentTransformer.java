@@ -175,7 +175,7 @@ public class ContentTransformer {
 			ipToVWorldInverse.invert(ipToVWorld);
 
 			// calculate the canvas position in world coords
-			c.getContent().getCenter(centerInVWorld);
+			c.getContentNode().getCenter(centerInVWorld);
 			localToVWorld.transform(centerInVWorld);
 			ipToVWorldInverse.transform(centerInVWorld, centerInIp);
 
@@ -191,7 +191,7 @@ public class ContentTransformer {
 				localToVWorld.transform(pickPtInVWorld);
 				r = (float)pickPtInVWorld.distance(centerInVWorld);
 			} else {
-				c.getContent().getMin(p1);
+				c.getContentNode().getMin(p1);
 				localToVWorld.transform(p1);
 				r = (float)p1.distance(centerInVWorld);
 				vec.sub(centerInVWorld, eyePtInVWorld);
@@ -232,7 +232,7 @@ public class ContentTransformer {
 
 			rotateTG = c.getLocalRotate();
 			translateTG = c.getLocalTranslate();
-			c.getContent().getCenter(vec);
+			c.getContentNode().getCenter(vec);
 			transl_inv.set(vec);
 			vec.set(-vec.x, -vec.y, -vec.z);
 			transl.set(vec);

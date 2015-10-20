@@ -418,7 +418,7 @@ public class IJ3dExecuter {
 					"with resamplingfactor 1");
 			return;
 		}
-		((VoltexGroup)c.getContent()).update();
+		((VoltexGroup)c.getContentNode()).update();
 	}
 
 	public void changeSlices(final Content c) {
@@ -435,7 +435,7 @@ public class IJ3dExecuter {
 			return;
 		final GenericDialog gd = new GenericDialog(
 				"Adjust slices...", univ.getWindow());
-		final MultiOrthoGroup os = (MultiOrthoGroup)c.getContent();
+		final MultiOrthoGroup os = (MultiOrthoGroup)c.getContentNode();
 
 		boolean opaque = os.getTexturesOpaque();
 
@@ -501,7 +501,7 @@ public class IJ3dExecuter {
 			return;
 		final GenericDialog gd = new GenericDialog(
 				"Adjust slices...", univ.getWindow());
-		final OrthoGroup os = (OrthoGroup)c.getContent();
+		final OrthoGroup os = (OrthoGroup)c.getContentNode();
 		final int ind1 = os.getSlice(VolumeRenderer.X_AXIS);
 		final int ind2 = os.getSlice(VolumeRenderer.Y_AXIS);
 		final int ind3 = os.getSlice(VolumeRenderer.Z_AXIS);
@@ -588,7 +588,7 @@ public class IJ3dExecuter {
 
 			public void run() {
 				ImageCanvas3D canvas = (ImageCanvas3D)univ.getCanvas();
-				((VoltexGroup)c.getContent()).
+				((VoltexGroup)c.getContentNode()).
 				fillRoi(canvas, canvas.getRoi(), (byte)0);
 				univ.fireContentChanged(c);
 				record(FILL_SELECTION);
@@ -599,7 +599,7 @@ public class IJ3dExecuter {
 	public void smoothMesh(Content c) {
 		if(!checkSel(c))
 			return;
-		ContentNode cn = c.getContent();
+		ContentNode cn = c.getContentNode();
 		// Check multi first; it extends CustomMeshNode
 		if(cn instanceof CustomMultiMesh) {
 			CustomMultiMesh multi = (CustomMultiMesh)cn;
@@ -653,7 +653,7 @@ public class IJ3dExecuter {
 		if(c == null)
 			return;
 		CustomTriangleMesh ctm;
-		ContentNode n = c.getContent();
+		ContentNode n = c.getContentNode();
 		if(n instanceof CustomMeshNode) {
 			if(((CustomMeshNode)n).getMesh() instanceof CustomTriangleMesh)
 				ctm = (CustomTriangleMesh)((CustomMeshNode) n).getMesh();
@@ -757,7 +757,7 @@ public class IJ3dExecuter {
 	public void changeColor(final Content c) {
 		if(!checkSel(c))
 			return;
-		final ContentInstant ci = c.getCurrent();
+		final ContentInstant ci = c.getCurrentInstant();
 		final Color3f oldC = ci.getColor();
 		final ColorListener colorListener = new ColorListener() {
 
@@ -809,7 +809,7 @@ public class IJ3dExecuter {
 	public void changePointColor(final Content c) {
 		if(!checkSel(c))
 			return;
-		final ContentInstant ci = c.getCurrent();
+		final ContentInstant ci = c.getCurrentInstant();
 		final Color3f oldC = ci.getLandmarkColor();
 		final ColorListener colorListener = new ColorListener() {
 
@@ -856,7 +856,7 @@ public class IJ3dExecuter {
 	public void changeChannels(Content c) {
 		if(!checkSel(c))
 			return;
-		final ContentInstant ci = c.getCurrent();
+		final ContentInstant ci = c.getCurrentInstant();
 		GenericDialog gd = new GenericDialog("Adjust channels ...",
 				univ.getWindow());
 		gd.addMessage("Channels");
@@ -884,7 +884,7 @@ public class IJ3dExecuter {
 	public void changeTransparency(final Content c) {
 		if(!checkSel(c))
 			return;
-		final ContentInstant ci = c.getCurrent();
+		final ContentInstant ci = c.getCurrentInstant();
 		final SliderAdjuster transp_adjuster = new SliderAdjuster() {
 
 			public synchronized final void setValue(ContentInstant ci, int v) {
@@ -959,7 +959,7 @@ public class IJ3dExecuter {
 			imageData = false;
 		}
 
-		final ContentInstant ci = c.getCurrent();
+		final ContentInstant ci = c.getCurrentInstant();
 		final SliderAdjuster thresh_adjuster = new SliderAdjuster() {
 
 			public synchronized final void setValue(ContentInstant ci, int v) {
@@ -1109,7 +1109,7 @@ public class IJ3dExecuter {
 			return;
 		}
 
-		ContentInstant ci = c.getCurrent();
+		ContentInstant ci = c.getCurrentInstant();
 		GenericDialog gd = new GenericDialog("Saturated volume rendering");
 		gd.addCheckbox("Apply to all timepoints", true);
 		gd.showDialog();
@@ -1135,7 +1135,7 @@ public class IJ3dExecuter {
 			return;
 		}
 
-		ContentInstant ci = c.getCurrent();
+		ContentInstant ci = c.getCurrentInstant();
 		GenericDialog gd = new GenericDialog("Set shaded");
 		gd.addCheckbox("Apply to all timepoints", true);
 		gd.showDialog();
@@ -1170,8 +1170,8 @@ public class IJ3dExecuter {
 		ImagePlus colorImage = WindowManager.getImage(gd.getNextChoice());
 		if(gd.getNextBoolean())
 			c.applySurfaceColors(colorImage);
-		else if(c.getCurrent() != null)
-			c.getCurrent().applySurfaceColors(colorImage);
+		else if(c.getCurrentInstant() != null)
+			c.getCurrentInstant().applySurfaceColors(colorImage);
 	}
 
 	/* ----------------------------------------------------------
@@ -1286,9 +1286,9 @@ public class IJ3dExecuter {
 		Point3d max = new Point3d();
 		Point3d center = new Point3d();
 
-		c.getContent().getMin(min);
-		c.getContent().getMax(max);
-		c.getContent().getCenter(center);
+		c.getContentNode().getMin(min);
+		c.getContentNode().getMax(max);
+		c.getContentNode().getCenter(center);
 
 		TextWindow tw = new TextWindow(c.getName(),
 				" \tx\ty\tz",
@@ -1301,7 +1301,7 @@ public class IJ3dExecuter {
 						"cog\t" + (float)center.x + "\t"
 						+ (float)center.y + "\t"
 						+ (float)center.z + "\n\n" +
-						"volume\t" + c.getContent().getVolume(),
+						"volume\t" + c.getContentNode().getVolume(),
 						512, 512);
 	}
 
@@ -1363,7 +1363,7 @@ public class IJ3dExecuter {
 		org.get(m);
 
 		Point3d contentCenter = new Point3d();
-		c.getContent().getCenter(contentCenter);
+		c.getContentNode().getCenter(contentCenter);
 		Point3f center = new Point3f(contentCenter);
 
 		new InteractiveTransformDialog("Set transformation", center, m) {
@@ -1411,7 +1411,7 @@ public class IJ3dExecuter {
 		final Matrix4f conc = new Matrix4f();
 
 		Point3d contentCenter = new Point3d();
-		c.getContent().getCenter(contentCenter);
+		c.getContentNode().getCenter(contentCenter);
 		Point3f center = new Point3f(contentCenter);
 
 		Matrix4f init = new Matrix4f();

@@ -83,7 +83,7 @@ public class U3DExporter {
 		List<Mesh> meshes = new ArrayList<Mesh>();
 
 		for(Object content : univ.getContents()) {
-			ContentNode cn = ((Content)content).getContent();
+			ContentNode cn = ((Content)content).getContentNode();
 			CustomTriangleMesh ctm = null;
 			if(cn instanceof CustomMeshNode) {
 				ctm = (CustomTriangleMesh)((CustomMeshNode)cn).getMesh();

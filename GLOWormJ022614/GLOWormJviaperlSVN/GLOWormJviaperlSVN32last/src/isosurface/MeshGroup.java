@@ -24,7 +24,7 @@ public class MeshGroup extends ContentNode {
 	private Point3f min, max, center;
 
 	public MeshGroup (Content c) {
-		this(c.getCurrent());
+		this(c.getCurrentInstant());
 	}
 
 	public MeshGroup (ContentInstant c) {

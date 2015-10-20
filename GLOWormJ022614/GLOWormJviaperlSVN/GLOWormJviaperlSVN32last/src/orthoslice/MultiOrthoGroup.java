@@ -20,7 +20,7 @@ public class MultiOrthoGroup extends VoltexGroup {
 	 * @param c
 	 */
 	public MultiOrthoGroup(Content c) {
-		this(c.getCurrent());
+		this(c.getCurrentInstant());
 	}
 
 	/**

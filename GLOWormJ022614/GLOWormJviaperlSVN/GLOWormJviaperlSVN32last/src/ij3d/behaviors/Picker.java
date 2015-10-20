@@ -310,7 +310,7 @@ public class Picker {
 
 	private static float getVolumePoint(Content c, Point3d p) {
 
-		Volume v = ((VoltexGroup)c.getContent()).getRenderer().
+		Volume v = ((VoltexGroup)c.getContentNode()).getRenderer().
 				getVolume();
 
 		int ix = (int)Math.round(p.x / v.pw);

@@ -93,22 +93,22 @@ public class ContentCreator {
 		boolean timelapse = images.length > 1;
 		boolean shouldSwap = SWAP_TIMELAPSE_DATA && timelapse;
 		for(ImagePlus imp : images) {
-			ContentInstant content = new ContentInstant(name);
-			content.image = imp;
-			content.color = color;
-			content.threshold = thresh;
-			content.channels = channels;
-			content.resamplingF = resf;
-			content.timepoint = tp;
-			content.showCoordinateSystem(UniverseSettings.
+			ContentInstant contInst = new ContentInstant(name);
+			contInst.image = imp;
+			contInst.color = color;
+			contInst.threshold = thresh;
+			contInst.channels = channels;
+			contInst.resamplingF = resf;
+			contInst.timepoint = tp;
+			contInst.showCoordinateSystem(UniverseSettings.
 					showLocalCoordinateSystemsByDefault);
-			content.displayAs(type);
-			content.compile();
+			contInst.displayAs(type);
+			contInst.compile();
 			if(shouldSwap) {
-				content.clearOriginalData();
-				content.swapDisplayedData();
+				contInst.clearOriginalData();
+				contInst.swapDisplayedData();
 			}
-			instants.put(tp++, content);
+			instants.put(tp++, contInst);
 		}
 		return new Content(name, instants, shouldSwap);
 	}
@@ -119,13 +119,13 @@ public class ContentCreator {
 
 	public static Content createContent(CustomMesh mesh, String name, int tp) {
 		Content c = new Content(name, tp);
-		ContentInstant content = c.getInstant(tp);
-		content.color = mesh.getColor();
-		content.transparency = mesh.getTransparency();
-		content.shaded = mesh.isShaded();
-		content.showCoordinateSystem(
+		ContentInstant contInst = c.getInstant(tp);
+		contInst.color = mesh.getColor();
+		contInst.transparency = mesh.getTransparency();
+		contInst.shaded = mesh.isShaded();
+		contInst.showCoordinateSystem(
 			UniverseSettings.showLocalCoordinateSystemsByDefault);
-		content.display(new CustomMeshNode(mesh));
+		contInst.display(new CustomMeshNode(mesh));
 		return c;
 	}
 

@@ -90,9 +90,9 @@ public class SmoothControl {
 	static public final Set<CustomTriangleMesh> findMeshes(final Content content) {
 		final HashSet<CustomTriangleMesh> meshes = new HashSet<CustomTriangleMesh>();
 		if (null == content) return meshes;
-		ContentInstant ci = content.getCurrent();
+		ContentInstant ci = content.getCurrentInstant();
 		if (null == ci) return meshes;
-		ContentNode node = ci.getContent();
+		ContentNode node = ci.getContentNode();
 		if (null == node) return meshes;
 		// Must check first for multi, since it is also a CustomMeshNode
 		if (node instanceof CustomMultiMesh) {
@@ -126,7 +126,7 @@ public class SmoothControl {
 
 	static private final void smooth(final Content c, final int iterations, final Originals originals) {
 		if (null == c) return;
-		final ContentNode cn = c.getContent();
+		final ContentNode cn = c.getContentNode();
 		final Set<CustomTriangleMesh> meshes = findMeshes(c);
 		if (meshes.isEmpty()) {
 			IJ.log("Cannot smooth content of class " + cn.getClass());

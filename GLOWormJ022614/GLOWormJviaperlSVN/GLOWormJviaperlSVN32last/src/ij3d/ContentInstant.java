@@ -682,7 +682,7 @@ public class ContentInstant extends BranchGroup implements UniverseListener, Con
 		return type;
 	}
 
-	public ContentNode getContent() {
+	public ContentNode getContentNode() {
 		return contentNode;
 	}
 

@@ -211,10 +211,10 @@ public class ViewAdjuster {
 		int counter = 0;
 		for (Content c : contents) {
 			Transform3D localToVworld = new Transform3D();
-			c.getContent().getLocalToVworld(localToVworld);
-			c.getContent().getMin(tmp);
+			c.getContentNode().getLocalToVworld(localToVworld);
+			c.getContentNode().getMin(tmp);
 			center.add(tmp);
-			c.getContent().getMax(tmp);
+			c.getContentNode().getMax(tmp);
 			center.add(tmp);
 			counter += 2;
 		}
@@ -230,13 +230,13 @@ public class ViewAdjuster {
 	 */
 	public void add(Content c) {
 		Transform3D localToVworld = new Transform3D();
-		c.getContent().getLocalToVworld(localToVworld);
+		c.getContentNode().getLocalToVworld(localToVworld);
 
 		Point3d min = new Point3d();
-		c.getContent().getMin(min);
+		c.getContentNode().getMin(min);
 
 		Point3d max = new Point3d();
-		c.getContent().getMax(max);
+		c.getContentNode().getMax(max);
 
 		Point3d tmp = new Point3d();
 

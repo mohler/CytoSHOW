@@ -46,7 +46,7 @@ public class MeshExporter {
 		ArrayList<Content> meshes = new ArrayList<Content>();
 		for (Iterator it = contents.iterator(); it.hasNext(); ) {
 			Content c = (Content)it.next();
-			ContentNode node = c.getContent();
+			ContentNode node = c.getContentNode();
 			if (node instanceof voltex.VoltexGroup
 			 || node instanceof orthoslice.OrthoGroup
 			 || node instanceof surfaceplot.SurfacePlotGroup) {
@@ -85,7 +85,7 @@ public class MeshExporter {
 				return;
 			}
 
-			String obj_incfilename = obj_filename.replace(".obj", "_"+nowInt+".obj");
+			String obj_incfilename = obj_filename.replace(".obj", "_"+IJ.pad(nowInt, 4)+".obj");
 			obj_file = new File(obj_file.getParentFile(), obj_incfilename);
 
 			String mtl_filename = obj_incfilename.substring(
@@ -148,11 +148,11 @@ public class MeshExporter {
 
 			CustomMesh cmesh=null;
 
-			if (ob.getContent() instanceof CustomMeshNode) {
-				CustomMeshNode cmeshnode = (CustomMeshNode) ob.getContent();
+			if (ob.getContentNode() instanceof CustomMeshNode) {
+				CustomMeshNode cmeshnode = (CustomMeshNode) ob.getContentNode();
 				cmesh = cmeshnode.getMesh();
-			} else if (ob.getContent() instanceof MeshGroup) {
-				MeshGroup mg = (MeshGroup)ob.getContent();
+			} else if (ob.getContentNode() instanceof MeshGroup) {
+				MeshGroup mg = (MeshGroup)ob.getContentNode();
 				cmesh = mg.getMesh();
 			} else
 				continue;
@@ -222,7 +222,7 @@ public class MeshExporter {
 		for (Iterator<Content> it = meshgroups.iterator(); it.hasNext();) {
 			Content mob = (Content) it.next();
 
-			ContentNode node = mob.getContent();
+			ContentNode node = mob.getContentNode();
 			// First CustomMultiMesh, which is also a CustomMeshNode:
 			if (node instanceof CustomMultiMesh) {
 				CustomMultiMesh multi = (CustomMultiMesh) node;
@@ -326,7 +326,7 @@ public class MeshExporter {
 			for (Iterator<Content> it = meshgroups.iterator(); it.hasNext();) {
 				Content mob = (Content) it.next();
 
-				ContentNode node = mob.getContent();
+				ContentNode node = mob.getContentNode();
 				// First CustomMultiMesh, which is also a CustomMeshNode:
 				if (node instanceof CustomMultiMesh) {
 					CustomMultiMesh multi = (CustomMultiMesh) node;
@@ -482,7 +482,7 @@ public class MeshExporter {
 
 		for(Iterator it = contents.iterator(); it.hasNext(); ) {
 			Content mob = (Content)it.next();
-			ContentNode node = mob.getContent();
+			ContentNode node = mob.getContentNode();
 
 			// First CustomMultiMesh, which is also a CustomMeshNode:
 			if (node instanceof CustomMultiMesh) {

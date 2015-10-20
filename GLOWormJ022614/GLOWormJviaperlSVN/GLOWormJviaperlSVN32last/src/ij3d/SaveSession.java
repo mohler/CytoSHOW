@@ -119,7 +119,7 @@ public class SaveSession {
 						unsavedImages.add(c.image.getTitle());
 					continue;
 				}
-				CustomMeshNode cn = (CustomMeshNode)c.getContent();
+				CustomMeshNode cn = (CustomMeshNode)c.getContentNode();
 				ArrayList<CustomMesh> meshes = getMeshes(cn);
 				int i = -1;
 				for(CustomMesh cm : meshes) {
@@ -365,7 +365,7 @@ public class SaveSession {
 			out.println("imgfile = "      + getImageFile(c));
 
 		int type = c.getType();
-		ContentNode cn = c.getContent();
+		ContentNode cn = c.getContentNode();
 		if(type == Content.SURFACE_PLOT2D) {
 			out.println("surfplt = " +
 				((SurfacePlotGroup)cn).getSlice());
@@ -453,11 +453,11 @@ public class SaveSession {
 			c.displayAs(type);
 			if(type == Content.SURFACE_PLOT2D &&
 				(tmp = props.get("surfplt")) != null) {
-				((SurfacePlotGroup)c.getContent()).
+				((SurfacePlotGroup)c.getContentNode()).
 					setSlice(i(tmp));
 			} else if(type == Content.ORTHO &&
 				(tmp = props.get("ortho")) != null) {
-				OrthoGroup og = (OrthoGroup)c.getContent();
+				OrthoGroup og = (OrthoGroup)c.getContentNode();
 				sp = tmp.split("%%%");
 
 				int slice = i(sp[0]);
@@ -582,7 +582,7 @@ public class SaveSession {
 
 	private static final String getMeshString(ContentInstant c) {
 		ArrayList<CustomMesh> meshes = getMeshes(
-				(CustomMeshNode)c.getContent());
+				(CustomMeshNode)c.getContentNode());
 		String ret = "";
 		for(CustomMesh cm : meshes) {
 			String name = cm.getName();

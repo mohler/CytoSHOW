@@ -22,7 +22,7 @@ public class OrthoGroup extends VoltexGroup {
 	 * @param c
 	 */
 	public OrthoGroup(Content c) {
-		this(c.getCurrent());
+		this(c.getCurrentInstant());
 	}
 
 	/**

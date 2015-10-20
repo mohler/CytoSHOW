@@ -193,7 +193,7 @@ public class ImageJ3DViewer implements PlugIn {
 			univ.getSelected().getType() == Content.ORTHO) {
 
 			OrthoGroup vg = (OrthoGroup)univ.
-						getSelected().getContent();
+						getSelected().getContentNode();
 			vg.setSlice(VolumeRenderer.X_AXIS, getInt(x));
 			vg.setSlice(VolumeRenderer.Y_AXIS, getInt(y));
 			vg.setSlice(VolumeRenderer.Z_AXIS, getInt(z));
@@ -206,7 +206,7 @@ public class ImageJ3DViewer implements PlugIn {
 			univ.getSelected().getType() == Content.VOLUME) {
 
 			VoltexGroup vg = (VoltexGroup)univ.
-						getSelected().getContent();
+						getSelected().getContentNode();
 			ImageCanvas3D canvas = (ImageCanvas3D)univ.getCanvas();
 			vg.fillRoi(canvas, canvas.getRoi(), (byte)0);
 		}

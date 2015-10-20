@@ -63,7 +63,7 @@ public class VoltexGroup extends ContentNode {
 	 *         image.
 	 */
 	public VoltexGroup(Content c) {
-		this(c.getCurrent());
+		this(c.getCurrentInstant());
 	}
 
 	/**

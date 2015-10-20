@@ -47,7 +47,7 @@ public class SurfacePlotGroup extends ContentNode implements AdjustmentListener{
 	 * @param c
 	 */
 	public SurfacePlotGroup(Content c) {
-		this(c.getCurrent());
+		this(c.getCurrentInstant());
 	}
 
 	/**

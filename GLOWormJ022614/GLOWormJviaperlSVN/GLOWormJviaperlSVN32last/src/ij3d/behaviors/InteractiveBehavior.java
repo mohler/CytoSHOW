@@ -267,7 +267,7 @@ public class InteractiveBehavior extends Behavior {
 		} else if(c != null && c.getType() == Content.ORTHO && axis != -1) {
 			boolean changed = false;
 			for(ContentInstant ci : c.getInstants().values()) {
-				OrthoGroup og = (OrthoGroup)ci.getContent();
+				OrthoGroup og = (OrthoGroup)ci.getContentNode();
 				switch(code) {
 					case KeyEvent.VK_RIGHT:
 					case KeyEvent.VK_UP:
@@ -416,7 +416,7 @@ public class InteractiveBehavior extends Behavior {
 					MouseWheelEvent.WHEEL_UNIT_SCROLL)
 					units = we.getUnitsToScroll();
 				for(ContentInstant ci : c.getInstants().values()) {
-					OrthoGroup og = (OrthoGroup)ci.getContent();
+					OrthoGroup og = (OrthoGroup)ci.getContentNode();
 					if(units > 0) og.increase(axis);
 					else if(units < 0) og.decrease(axis);
 				}

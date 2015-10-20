@@ -35,8 +35,10 @@ import java.awt.event.WindowListener;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -1617,10 +1619,10 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 */
 	public void centerSelected(Content c) {
 		Point3d center = new Point3d();
-		c.getContent().getCenter(center);
+		c.getContentNode().getCenter(center);
 
 		Transform3D localToVWorld = new Transform3D();
-		c.getContent().getLocalToVworld(localToVWorld);
+		c.getCurrentInstant().getLocalToVworld(localToVWorld);
 		localToVWorld.transform(center);
 
 		getViewPlatformTransformer().centerAt(center);
@@ -1807,20 +1809,64 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		});
 	}
 
-	public Collection<Future<Content>> addContentLater(String file) {
-		Map<String,CustomMesh> meshes = MeshLoader.load(file);
-		if(meshes == null)
-			return null;
-
+	public Collection<Future<Content>> addContentLater(String filePath) {
+		ArrayList<String> timedObjFileNames = new ArrayList<String>();
+		File file = new File(filePath);
+		if (filePath.matches(".*_\\d+.obj")) {
+			for(String nextfilename: file.getParentFile().list()) {
+				if (nextfilename.matches(".*_\\d+.obj")) {
+					timedObjFileNames.add(nextfilename);
+				}
+			}
+		}
+		Object[] timedObjFileNms = timedObjFileNames.toArray();
+		Arrays.sort(timedObjFileNms);
 		List<Content>contents = new ArrayList<Content>();
-		for(Map.Entry<String,CustomMesh> entry : meshes.entrySet()) {
-			String name = entry.getKey();
-			name = getSafeContentName(name);
-			CustomMesh mesh = entry.getValue();
+		for (Object nextmatchingfilename: timedObjFileNms) {
+			String nextmatchingfilePath = file.getParent() +File.separator + (String)nextmatchingfilename;
+			String[] tptParse = ((String)nextmatchingfilename).split("_");
+			int nextTpt = Integer.parseInt(tptParse[tptParse.length-1].replace(".obj", ""));
+			Map<String,CustomMesh> meshes = MeshLoader.load(nextmatchingfilePath);
+			if(meshes == null)
+				return null;
 
-			Content content = createContent(mesh, name);
-			contents.add(content);
-			content.setLocked(true);
+			for(Map.Entry<String,CustomMesh> entry : meshes.entrySet()) {
+				String name = entry.getKey();
+				name = getSafeContentName(name);
+				CustomMesh mesh = entry.getValue();
+
+				Content content = createContent(mesh, name);
+				if (contents.size() ==0) {
+					contents.add(content);
+					content.setLocked(true);
+					while(contents.size() ==0);
+				} else {
+					int csz = contents.size();
+					for (int c=0; c<csz;c++) { 
+						Content existingContent = contents.get(c);
+						if (content != null && existingContent.getName().contains(content.getName())) {
+//							content.getInstant(0).timepoint = nextTpt;
+//							content = null;
+//							existingContent.addInstant(content.getInstant(0));
+							ContentInstant contInst = new ContentInstant(name + "_#" + nextTpt);
+							contInst.timepoint = nextTpt;
+							existingContent.getInstants().put(nextTpt, contInst);
+							
+							contInst.color = mesh.getColor();
+							contInst.transparency = mesh.getTransparency();
+							contInst.shaded = mesh.isShaded();
+							contInst.showCoordinateSystem(
+								UniverseSettings.showLocalCoordinateSystemsByDefault);
+							content = null;
+						} 
+					}
+					if (content!=null){
+							contents.add(content);
+							content.setLocked(true);
+						
+					}
+				}
+			}
 		}
 		return addContentLater(contents);
 	}
