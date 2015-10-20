@@ -1820,7 +1820,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		File file = new File(filePath);
 		if (filePath.matches(".*_\\d+.obj")) {
 			for(String nextfilename: file.getParentFile().list()) {
-				String fileNameRoot = file.getName().split("_\\d+.")[0];
+				String fileNameRoot = file.getName().split("_\\d+.obj")[0];
 				if (nextfilename.matches(fileNameRoot+"_\\d+.obj")) {
 					timedObjFileNames.add(nextfilename);
 				}
