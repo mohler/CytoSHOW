@@ -33,7 +33,7 @@ public class TimelineGUI implements ActionListener, KeyListener, MouseListener {
 	private static final String[] FILES = new String[] {
 				"icons/first.png",
 				"icons/last.png",
-				"icons/nobounceback.png",
+				"icons/bounceback.png",
 				"icons/play.png",
 				"icons/record.png",
 				"icons/faster.png",
@@ -41,7 +41,7 @@ public class TimelineGUI implements ActionListener, KeyListener, MouseListener {
 
 	private static final String[] COMMANDS = new String[] {
 			"FIRST",
-			"LAST", "NOBOUNCEBACK",
+			"LAST", "BOUNCEBACK",
 			"PLAY", "RECORD", "FASTER", "SLOWER"};
 
 

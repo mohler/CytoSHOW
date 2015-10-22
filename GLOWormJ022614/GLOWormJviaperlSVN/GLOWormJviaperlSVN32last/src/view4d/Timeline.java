@@ -15,7 +15,7 @@ public class Timeline {
 
 	private Image3DUniverse univ;
 	private Thread playing = null;
-	private boolean bounceback = true;
+	private boolean bounceback = false;
 
 	/**
 	 * Initialize the timeline
