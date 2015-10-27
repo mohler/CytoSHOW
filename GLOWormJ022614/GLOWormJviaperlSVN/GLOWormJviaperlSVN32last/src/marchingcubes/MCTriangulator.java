@@ -5,26 +5,37 @@ import ij.ImageStack;
 import ij.process.ImageProcessor;
 import ij.process.ColorProcessor;
 import ij.process.ByteProcessor;
+import ij.gui.NewImage;
+import ij.gui.Roi;
 import ij.measure.Calibration;
+
 import java.util.List;
 
 import javax.vecmath.Point3f;
 
 import ij3d.Volume;
 import ij3d.ImgLibVolume;
-
 import isosurface.Triangulator;
-
 import mpicbg.imglib.image.Image;
 import mpicbg.imglib.type.numeric.RealType;
-
 import vib.NaiveResampler;
 
 public class MCTriangulator implements Triangulator {
 
 	public List getTriangles(ImagePlus image, int threshold, 
 					boolean[] channels, int resamplingF) {
-
+		Roi[] rois = image.getRoiManager().getSelectedRoisAsArray();
+		if (rois.length >0) {
+			ImagePlus newImage = NewImage.createImage("fake", image.getWidth(), image.getHeight()
+					, image.getNSlices(), NewImage.GRAY8, NewImage.FILL_BLACK, false);
+			newImage.setCalibration(image.getCalibration());
+			image = newImage;
+			for (Roi roi:rois) {
+				image.setPositionWithoutUpdate(1, roi.getZPosition(), 1);
+				roi.drawPixels(image.getProcessor());
+			}
+			
+		}
 		if(resamplingF != 1)
 			image = NaiveResampler.resample(image, resamplingF);
 		// There is no need to zero pad any more. MCCube automatically
@@ -37,6 +48,27 @@ public class MCTriangulator implements Triangulator {
 
 		// get triangles
 		List l = MCCube.getTriangles(volume, threshold);
+		return l;
+	}
+
+	public List getTriangles(ImagePlus image, Roi[] rois, int threshold, int resamplingF) {
+
+		image = NewImage.createImage("fake", image.getWidth(), image.getHeight()
+				, image.getNSlices(), NewImage.GRAY8, NewImage.FILL_BLACK, false);
+		for (Roi roi:rois) {
+			image.setPositionWithoutUpdate(1, roi.getZPosition(), 1);
+			roi.drawPixels(image.getProcessor());
+		}
+		if(resamplingF != 1) {
+			image = NaiveResampler.resample(image, resamplingF);
+		}
+		Volume volume = new Volume(image, rois);
+
+		volume.setAverage(true);
+
+		// get triangles
+		List l = MCCube.getTriangles(volume, threshold);
+		image.flush();
 		return l;
 	}
 

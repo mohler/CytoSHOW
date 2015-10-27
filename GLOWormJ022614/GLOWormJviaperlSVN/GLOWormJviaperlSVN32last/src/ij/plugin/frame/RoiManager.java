@@ -727,28 +727,28 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				rootNames.add(rootName+"_"+rootFrame);
 		}
 		int count = 3;
-		ImagePlus sketchImp = NewImage.createImage("SketchVolumeViewer_"+rootNames.get(0),imp.getWidth(), imp.getHeight(), imp.getNSlices(), 8, NewImage.FILL_BLACK, false);
-		sketchImp.setCalibration(imp.getCalibration());
+//		ImagePlus sketchImp = NewImage.createImage("SketchVolumeViewer_"+rootNames.get(0),imp.getWidth(), imp.getHeight(), imp.getNSlices(), 8, NewImage.FILL_BLACK, false);
+//		sketchImp.setCalibration(imp.getCalibration());
 		MQTVS_VolumeViewer vv = new MQTVS_VolumeViewer(); 
 		for (int n=0; n<rootNames.size(); n++) {
 			String rootName = rootNames.get(n);
-			sketchImp.setTitle("SketchVolumeViewer_"+rootName);
-			IJ.run(sketchImp, "Select All","");
-			IJ.run(sketchImp, "Clear","stack");
-			if (!sketchImp.isVisible()) {
-				sketchImp.show();
-//				sketchImp.setRoiManager(new RoiManager(false));
-				sketchImp.getRoiManager().select(-1);
-				IJ.wait(50);
-				if (sketchImp.getRoiManager().getCount() >0)
-					sketchImp.getRoiManager().runCommand("Delete");
-			} else {
-				sketchImp.getRoiManager().select(-1);
-				IJ.wait(50);
-				sketchImp.getRoiManager().runCommand("Delete");
-			}
-			select(-1);
-			IJ.wait(50);
+//			sketchImp.setTitle("SketchVolumeViewer_"+rootName);
+//			IJ.run(sketchImp, "Select All","");
+//			IJ.run(sketchImp, "Clear","stack");
+//			if (!sketchImp.isVisible()) {
+//				sketchImp.show();
+////				sketchImp.setRoiManager(new RoiManager(false));
+//				sketchImp.getRoiManager().select(-1);
+//				IJ.wait(50);
+//				if (sketchImp.getRoiManager().getCount() >0)
+//					sketchImp.getRoiManager().runCommand("Delete");
+//			} else {
+//				sketchImp.getRoiManager().select(-1);
+//				IJ.wait(50);
+//				sketchImp.getRoiManager().runCommand("Delete");
+//			}
+//			select(-1);
+//			IJ.wait(50);
 			ArrayList<Integer> nameMatchIndexArrayList = new ArrayList<Integer>();
 			int fraa = this.getFullRoisAsArray().length;
 			Roi[] rois = getFullRoisAsArray();
@@ -765,24 +765,25 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			for (int i=0; i < nameMatchIndexes.length; i++)
 			{
 				nameMatchIndexes[i] = nameMatchIndexArrayList.get(i);
-				Roi nextRoi = ((Roi)getFullRoisAsArray()[nameMatchIndexArrayList.get(i)]);
-				String[] nextChunks = nextRoi.getName().split("_");
-				sketchImp.getWindow().setVisible(true);
-				sketchImp.setPosition(1, Integer.parseInt(nextChunks[nextChunks.length-2]), Integer.parseInt(nextChunks[nextChunks.length-1].replaceAll("[CZT]", "").split("-")[0]));
-				sketchImp.getRoiManager().addRoi(((Roi)getFullRoisAsArray()[nameMatchIndexArrayList.get(i)]));
+//				Roi nextRoi = ((Roi)getFullRoisAsArray()[nameMatchIndexArrayList.get(i)]);
+//				String[] nextChunks = nextRoi.getName().split("_");
+//				sketchImp.getWindow().setVisible(true);
+//				sketchImp.setPosition(1, Integer.parseInt(nextChunks[nextChunks.length-2]), Integer.parseInt(nextChunks[nextChunks.length-1].replaceAll("[CZT]", "").split("-")[0]));
+//				sketchImp.getRoiManager().addRoi(((Roi)getFullRoisAsArray()[nameMatchIndexArrayList.get(i)]));
 			}		
-			sketchImp.getRoiManager().select(-1);
-			sketchImp.getRoiManager().drawOrFill(FILL);
-			sketchImp.setMotherImp(imp, 0);
-			vv.runVolumeViewer(sketchImp, rootName);
+//			sketchImp.getRoiManager().select(-1);
+//			sketchImp.getRoiManager().drawOrFill(FILL);
+//			sketchImp.setMotherImp(imp, 0);
+			setSelectedIndexes(nameMatchIndexes);
+			vv.runVolumeViewer(imp, rootName);
 //			ImageJ3DViewer..setColor(""+50*count, "200", "100");
 			count++;
 //			sketchImp.close();
 //			sketchImp.flush();
 		}
-		sketchImp.changes = false;
-		sketchImp.close();
-		sketchImp.flush();
+//		sketchImp.changes = false;
+//		sketchImp.close();
+//		sketchImp.flush();
 		ImageJ3DViewer.select(null);
 	}
 

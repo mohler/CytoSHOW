@@ -75,7 +75,7 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 			}
 			
 			String duperString = ""; 
-			if (!imp.getTitle().startsWith("SketchVolumeViewer"))
+			if (imp.getRoiManager().getSelectedRoisAsArray().length == 0)
 				duperString = duper.showHSDialog(imp, imp.getTitle()+"_DUP");
 
 			for (int tpt = (singleSave?duper.getFirstT():0); tpt<=(singleSave?duper.getLastT():0); tpt = tpt+(singleSave?duper.getStepT():1)) {

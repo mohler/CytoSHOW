@@ -2,9 +2,12 @@ package ij3d;
 
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.gui.Roi;
 import ij.measure.Calibration;
 import ij.IJ;
+
 import java.awt.image.IndexColorModel;
+
 import javax.vecmath.Point3d;
 
 /**
@@ -80,6 +83,7 @@ public class Volume {
 
 	/** The maximum coordinate of the data */
 	public final Point3d maxCoord = new Point3d();
+	private Roi[] rois;
 
 	/** Create instance with a null imp. */
 	protected Volume() {
@@ -104,6 +108,11 @@ public class Volume {
 	 */
 	public Volume(ImagePlus imp, boolean[] ch) {
 		setImage(imp, ch);
+	}
+
+	public Volume(ImagePlus image2, Roi[] rois) {
+		setImage(imp, new boolean[]{true,true,true});
+		this.rois = rois;
 	}
 
 	private void setLUTsFromImage(ImagePlus imp) {
