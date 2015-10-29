@@ -3,6 +3,7 @@ package ij3d;
 import ij.ImageStack;
 import ij.ImagePlus;
 import ij.IJ;
+import ij.gui.Roi;
 import ij.io.FileInfo;
 import ij.process.ColorProcessor;
 import ij.process.ImageConverter;
@@ -155,8 +156,10 @@ public class ContentCreator {
 	public static ImagePlus[] getImages(ImagePlus imp) {
 		ImagePlus[] ret = new ImagePlus[imp.getNFrames()];
 		int i = 0;
-		for(ImagePlus frame : HyperStackIterator.getIterable(imp))
-			ret[i++] = frame;
+		for(ImagePlus frame : HyperStackIterator.getIterable(imp)) {
+
+			ret[i++] = frame;			
+		}
 		return ret;
 	}
 
@@ -311,6 +314,12 @@ public class ContentCreator {
 				+ " (frame " + nextFrame + ")", newStack);
 			ret.setCalibration(image.getCalibration().copy());
 			ret.setFileInfo((FileInfo)fi.clone());
+			for (Roi roi:image.getRoiManager().getSelectedRoisAsArray()) {
+				if (roi.getTPosition() == nextFrame+1) {
+					ret.setPosition(1, roi.getZPosition(), 1);
+					ret.getRoiManager().addRoi(roi);
+				}
+			}
 			nextFrame++;
 			return ret;
 		}

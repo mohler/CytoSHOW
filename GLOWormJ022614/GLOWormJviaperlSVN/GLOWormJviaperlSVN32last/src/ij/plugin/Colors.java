@@ -21,9 +21,9 @@ public class Colors implements PlugIn, ItemListener {
 
 	void showDialog() {
 		Color fc =Toolbar.getForegroundColor();
-		String fname = getColorName(fc, "black");
+		String fname = getColorName(fc, "white");
 		Color bc =Toolbar.getBackgroundColor();
-		String bname = getColorName(bc, "white");
+		String bname = getColorName(bc, "black");
 		Color sc =Roi.getColor();
 		String sname = getColorName(sc, "yellow");
 		GenericDialog gd = new GenericDialog("Colors");
@@ -52,8 +52,8 @@ public class Colors implements PlugIn, ItemListener {
 		fname = gd.getNextChoice();
 		bname = gd.getNextChoice();
 		sname = gd.getNextChoice();
-		fc2 = getColor(fname, Color.black);
-		bc2 = getColor(bname, Color.white);
+		fc2 = getColor(fname, Color.white);
+		bc2 = getColor(bname, Color.black);
 		sc2 = getColor(sname, Color.yellow);
 		if (fc2!=fc) Toolbar.setForegroundColor(fc2);
 		if (bc2!=bc) Toolbar.setBackgroundColor(bc2);
