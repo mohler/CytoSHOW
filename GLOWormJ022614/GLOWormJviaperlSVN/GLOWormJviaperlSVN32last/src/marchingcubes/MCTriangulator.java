@@ -24,25 +24,9 @@ public class MCTriangulator implements Triangulator {
 
 	public List getTriangles(ImagePlus image, int threshold, 
 					boolean[] channels, int resamplingF) {
-		Roi[] rois = image.getRoiManager().getSelectedRoisAsArray();
-		if (rois.length >0) {
-			ImagePlus newImage = NewImage.createImage("fake", image.getWidth(), image.getHeight()
-					, image.getNSlices(), NewImage.GRAY8, NewImage.FILL_BLACK, false);
-			newImage.setCalibration(image.getCalibration());
-			image = newImage;
-			for (Roi roi:rois) {
-				image.setPositionWithoutUpdate(1, roi.getZPosition(), 1);
-				roi.drawPixels(image.getProcessor());
-			}
-			
-		}
 		if(resamplingF != 1)
 			image = NaiveResampler.resample(image, resamplingF);
-		// There is no need to zero pad any more. MCCube automatically
-		// scans one pixel more in each direction, assuming a value
-		// of zero outside the image.
-		// zeroPad(image);
-		// create Volume
+
 		Volume volume = new Volume(image, channels);
 		volume.setAverage(true);
 
@@ -62,7 +46,7 @@ public class MCTriangulator implements Triangulator {
 		if(resamplingF != 1) {
 			image = NaiveResampler.resample(image, resamplingF);
 		}
-		Volume volume = new Volume(image, rois);
+		Volume volume = new Volume(image);
 
 		volume.setAverage(true);
 
