@@ -302,8 +302,8 @@ public class FolderOpener implements PlugIn {
 					cal.pixelWidth /= scale/100.0;
 					cal.pixelHeight /= scale/100.0;
 				}
-				if (cal.pixelWidth!=1.0 && cal.pixelDepth==1.0)
-					cal.pixelDepth = cal.pixelWidth;
+//				if (cal.pixelWidth!=1.0 && cal.pixelDepth==1.0)
+//					cal.pixelDepth = cal.pixelWidth;
 				if (cal.pixelWidth<=0.0001 && cal.getUnit().equals("cm")) {
 					cal.pixelWidth *= 10000.0;
 					cal.pixelHeight *= 10000.0;
