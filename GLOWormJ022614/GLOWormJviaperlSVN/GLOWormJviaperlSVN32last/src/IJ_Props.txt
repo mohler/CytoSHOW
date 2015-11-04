@@ -50,6 +50,7 @@ new04="Internal Clipboard",ij.plugin.Clipboard("show")
 new05="System Clipboard[V]",ij.plugin.Clipboard("showsys")
 new06="diSPIM Monitor", org.vcell.gloworm.DISPIM_Monitor("newLabView")
 new07="diSPIM Monitor (MicroManager)", org.vcell.gloworm.DISPIM_Monitor("newMM")
+new08="diSPIM Monitor (WG_MicroManager)", org.vcell.gloworm.DISPIM_Monitor("sstMM")
 
 # Plugins installed in the File/Import submenu
 import01="Image Sequence...",ij.plugin.FolderOpener

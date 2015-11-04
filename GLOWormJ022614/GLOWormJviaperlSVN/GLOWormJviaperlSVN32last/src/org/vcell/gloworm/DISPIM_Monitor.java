@@ -73,8 +73,10 @@ public class DISPIM_Monitor implements PlugIn {
 		dirOrOMETiff = args[0];
 		IJ.log(dirOrOMETiff);
 		//waitForUser("");
-		while (!(new File(dirOrOMETiff)).isDirectory() && !dirOrOMETiff.endsWith(".ome.tif")) {
+		while (!(new File(dirOrOMETiff)).isDirectory() && !dirOrOMETiff.endsWith(".tif")) {
 			if (arg.contains("newMM"))
+				dirOrOMETiff = IJ.getFilePath("Select a file with MM diSPIM raw data");
+			else if (arg.contains("sstMM"))
 				dirOrOMETiff = IJ.getFilePath("Select a file with MM diSPIM raw data");
 			else 
 				dirOrOMETiff = IJ.getDirectory("Select master directory with LabView diSPIM raw data");
@@ -304,7 +306,7 @@ public class DISPIM_Monitor implements PlugIn {
 				impB.show();
 
 			}
-		} else {
+		} else if (dirOrOMETiff.endsWith(".ome.tif")){
 			TiffDecoder tdA = new TiffDecoder("",dirOrOMETiff);
 			TiffDecoder tdB = new TiffDecoder("",dirOrOMETiff);
 
@@ -463,7 +465,19 @@ public class DISPIM_Monitor implements PlugIn {
 			impB.getOriginalFileInfo().directory = dirOrOMETiff;
 			impB.show();
 			
+		} else if (dirOrOMETiff.matches(".*_\\d{9}_\\d{3}_.*.tif")) {
+			IJ.run("Image Sequence...", "open=["+dirOrOMETiff+"] number=2200 starting=1 increment=1 scale=100 file=Cam1 or=[] sort use");
+			IJ.run("Stack to Hyperstack...", "order=xyczt(default) channels=2 slices=50 frames=11 display=Composite");
+//			IJ.getImage().setTitle("SPIMA: "+IJ.getImage().getTitle());
+			impA = WindowManager.getCurrentImage();
+			impA.setTitle("SPIMA :" + impA.getTitle()); 
+			IJ.run("Image Sequence...", "open=["+dirOrOMETiff+"] number=2200 starting=1 increment=1 scale=100 file=Cam2 or=[] sort use");
+			IJ.run("Stack to Hyperstack...", "order=xyczt(default) channels=2 slices=50 frames=11 display=Composite");
+//			IJ.getImage().setTitle("SPIMB: "+IJ.getImage().getTitle());
+			impB = WindowManager.getCurrentImage();
+			impB.setTitle("SPIMB :" + impB.getTitle());
 		}
+		
 		IJ.run("Tile");
 		IJ.log(""+WindowManager.getImageCount());
 
