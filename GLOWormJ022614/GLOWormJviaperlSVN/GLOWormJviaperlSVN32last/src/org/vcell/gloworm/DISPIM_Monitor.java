@@ -483,13 +483,13 @@ public class DISPIM_Monitor implements PlugIn {
 					if (newFileListItem.endsWith(".tif"))
 						newLength++;
 			}
-			IJ.run("Image Sequence...", "open=["+dirOrOMETiff+"] number="+ newLength +" starting=1 increment=1 scale=100 file=Cam1 or=[] sort use");
+			IJ.run("Image Sequence...", "open=["+dirOrOMETiff+"] number="+ newLength +" starting=1 increment=1 scale=100 file=Cam2 or=[] sort use");
 			IJ.run("Stack to Hyperstack...", "order=xyczt(default) channels="+ wavelengths +" slices="+ zSlices +" frames="+ (Math.floor(newLength/(wavelengths * 2 * zSlices))) +" display=Composite");
 //			IJ.getImage().setTitle("SPIMA: "+IJ.getImage().getTitle());
 			impA = WindowManager.getCurrentImage();
 			impA.setTitle("SPIMA: " + impA.getTitle()); 
 			
-			IJ.run("Image Sequence...", "open=["+dirOrOMETiff+"] number="+ newLength +" starting=1 increment=1 scale=100 file=Cam2 or=[] sort use");
+			IJ.run("Image Sequence...", "open=["+dirOrOMETiff+"] number="+ newLength +" starting=1 increment=1 scale=100 file=Cam1 or=[] sort use");
 			IJ.run("Stack to Hyperstack...", "order=xyczt(default) channels="+ wavelengths +" slices="+ zSlices +" frames="+ (Math.floor(newLength/(wavelengths * 2 * zSlices))) +" display=Composite");
 //			IJ.getImage().setTitle("SPIMB: "+IJ.getImage().getTitle());
 			impB = WindowManager.getCurrentImage();
@@ -1117,7 +1117,7 @@ public class DISPIM_Monitor implements PlugIn {
 				modeB = ((CompositeImage)impB).getCompositeMode();
 
 				impA.close();
-				IJ.run("Image Sequence...", "open=["+dirOrOMETiff+"] number="+ newLength +" starting=1 increment=1 scale=100 file=Cam1 or=[] sort use");
+				IJ.run("Image Sequence...", "open=["+dirOrOMETiff+"] number="+ newLength +" starting=1 increment=1 scale=100 file=Cam2 or=[] sort use");
 				IJ.run("Stack to Hyperstack...", "order=xyczt(default) channels="+ wavelengths +" slices="+ zSlices +" frames="+ (Math.floor(newLength/(wavelengths * 2 * zSlices))) +" display=Composite");
 //				IJ.getImage().setTitle("SPIMA: "+IJ.getImage().getTitle());
 				impA = WindowManager.getCurrentImage();
@@ -1436,7 +1436,14 @@ public class DISPIM_Monitor implements PlugIn {
 
 					impA.setPositionWithoutUpdate(impA.getChannel(), impA.getSlice(), f);
 
-					String frameFileName = ((ListVirtualStack)impA.getStack()).getDirectory(impA.getCurrentSlice());
+					String frameFileName = "";
+					if (impA.getStack() instanceof ListVirtualStack)
+						frameFileName = ((ListVirtualStack)impA.getStack()).getDirectory(impA.getCurrentSlice());
+					else if (impA.getStack() instanceof FileInfoVirtualStack || impA.getStack() instanceof MultiFileInfoVirtualStack)
+						frameFileName = "t" + f;
+					else 
+						frameFileName = "t" + f;
+
 					String timecode = ""+(new Date()).getTime();
 
 					if (	   !(new File(dirOrOMETiff+ "SPIMA_Ch1_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif")).canRead()
