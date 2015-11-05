@@ -44,6 +44,7 @@ public class DISPIM_Monitor implements PlugIn {
 	private boolean doDecon;
 	private int keyChannel;
 	private int slaveChannel;
+	private int oldLength;
 
 	public boolean isDoDecon() {
 		return doDecon;
@@ -59,11 +60,12 @@ public class DISPIM_Monitor implements PlugIn {
 		int minA =0;
 		int maxA = 255;
 		String channelsA = "11";
-		String modeA="composite";
-		double vWidth = 0.163;
-		double vHeight = 0.163;
+		int modeA= CompositeImage.COMPOSITE;
+		int modeB= CompositeImage.COMPOSITE;
+		double vWidth = 0.1625;
+		double vHeight = 0.1625;
 		double vDepthRaw = 1.000;
-		double vDepthDecon = 0.163;
+		double vDepthDecon = 0.1625;
 		String vUnit = "micron";
 		doDecon = true;
 		int cropWidth = 325;
@@ -94,8 +96,8 @@ public class DISPIM_Monitor implements PlugIn {
 		String[] fileSortB = {""};
 		String[] newTifListA = {""};
 		String[] newTifListB = {""};
-		String[] listA = {""};
-		String[] listB = {""};
+		String[] listOld = {""};
+		String[] listNew = {""};
 		String[] deconFileList1 = {""};
 		String[] deconFileList2 = {""};
 		String[] deconList1 = {""};
@@ -466,16 +468,34 @@ public class DISPIM_Monitor implements PlugIn {
 			impB.show();
 			
 		} else if (dirOrOMETiff.matches(".*_\\d{9}_\\d{3}_.*.tif")) {
-			IJ.run("Image Sequence...", "open=["+dirOrOMETiff+"] number=2200 starting=1 increment=1 scale=100 file=Cam1 or=[] sort use");
-			IJ.run("Stack to Hyperstack...", "order=xyczt(default) channels=2 slices=50 frames=11 display=Composite");
+			listNew = new File(dirOrOMETiff).getParentFile().list();
+			int 	newLength =0;
+			for (String newFileListItem:listNew)
+				if (newFileListItem.endsWith(".tif"))
+					newLength++;
+
+			while (Math.floor(newLength/(wavelengths * 2 * zSlices)) == 0) {
+				
+				IJ.wait(10);
+				listNew = new File(dirOrOMETiff).getParentFile().list();
+				newLength =0;
+				for (String newFileListItem:listNew)
+					if (newFileListItem.endsWith(".tif"))
+						newLength++;
+			}
+			IJ.run("Image Sequence...", "open=["+dirOrOMETiff+"] number="+ newLength +" starting=1 increment=1 scale=100 file=Cam1 or=[] sort use");
+			IJ.run("Stack to Hyperstack...", "order=xyczt(default) channels="+ wavelengths +" slices="+ zSlices +" frames="+ (Math.floor(newLength/(wavelengths * 2 * zSlices))) +" display=Composite");
 //			IJ.getImage().setTitle("SPIMA: "+IJ.getImage().getTitle());
 			impA = WindowManager.getCurrentImage();
 			impA.setTitle("SPIMA: " + impA.getTitle()); 
-			IJ.run("Image Sequence...", "open=["+dirOrOMETiff+"] number=2200 starting=1 increment=1 scale=100 file=Cam2 or=[] sort use");
-			IJ.run("Stack to Hyperstack...", "order=xyczt(default) channels=2 slices=50 frames=11 display=Composite");
+			
+			IJ.run("Image Sequence...", "open=["+dirOrOMETiff+"] number="+ newLength +" starting=1 increment=1 scale=100 file=Cam2 or=[] sort use");
+			IJ.run("Stack to Hyperstack...", "order=xyczt(default) channels="+ wavelengths +" slices="+ zSlices +" frames="+ (Math.floor(newLength/(wavelengths * 2 * zSlices))) +" display=Composite");
 //			IJ.getImage().setTitle("SPIMB: "+IJ.getImage().getTitle());
 			impB = WindowManager.getCurrentImage();
 			impB.setTitle("SPIMB: " + impB.getTitle());
+			
+			oldLength = newLength;
 		}
 		
 		IJ.run("Tile");
@@ -921,14 +941,14 @@ public class DISPIM_Monitor implements PlugIn {
 		while (true) {
 			boolean focus = false;
 			if ((new File(dirOrOMETiff)).isDirectory()) {
-				listA = new File(""+dirOrOMETiff+"SPIMA").list();
-				listB = new File(""+dirOrOMETiff+"SPIMB").list();
+				listOld = new File(""+dirOrOMETiff+"SPIMA").list();
+				listNew = new File(""+dirOrOMETiff+"SPIMB").list();
 				big5DFileListAString = IJ.openAsString(dirOrOMETiff+"Big5DFileListA.txt");	    
 				big5DFileListBString = IJ.openAsString(dirOrOMETiff+"Big5DFileListB.txt");
 				deconList1 = (new File(dirOrOMETiff+ "Deconvolution1")).list();
 				deconList2 = (new File(dirOrOMETiff+ "Deconvolution2")).list();
 
-				while ((fileListA.length == listA.length || fileListB.length == listB.length)
+				while ((fileListA.length == listOld.length || fileListB.length == listNew.length)
 						&& (!doDecon 
 							|| ((deconList1 == null && deconList2 == null)
 								|| 	(!(deconList1 ==null || deconFileList1 ==null 
@@ -941,8 +961,8 @@ public class DISPIM_Monitor implements PlugIn {
 							return;
 						else
 							IJ.resetEscape();
-					listA = new File(""+dirOrOMETiff+"SPIMA").list();
-					listB = new File(""+dirOrOMETiff+"SPIMB").list();
+					listOld = new File(""+dirOrOMETiff+"SPIMA").list();
+					listNew = new File(""+dirOrOMETiff+"SPIMB").list();
 					deconList1 = (new File(dirOrOMETiff+ "Deconvolution1")).list();
 					deconList2 = (new File(dirOrOMETiff+ "Deconvolution2")).list();
 					IJ.wait(5000);
@@ -1053,26 +1073,26 @@ public class DISPIM_Monitor implements PlugIn {
 				}
 			} else if (dirOrOMETiff.matches(".*_\\d{9}_\\d{3}_.*.tif")) {
 
-				listA = new File(dirOrOMETiff).getParentFile().list();
-				int aLength = listA.length;
-				aLength =0;
-				for (String a:listA)
-					if (a.endsWith(".tif"))
-						aLength++;
-//				int numExtraFiles = aLength%(wavelengths * 2 * zSlices);
-				int bLength = aLength;
-				while (aLength == bLength
-						||
-						bLength%(wavelengths * 2 * zSlices) != 0) {
-					
-					IJ.wait(1000);
-					listB = new File(dirOrOMETiff).getParentFile().list();
-					bLength =0;
-					for (String b:listB)
-						if (b.endsWith(".tif"))
-							bLength++;
-				}
+//				listOld = new File(dirOrOMETiff).getParentFile().list();
+//				int oldLength = listOld.length;
+//				oldLength =0;
+//				for (String oldFileListItem:listOld)
+//					if (oldFileListItem.endsWith(".tif"))
+//						oldLength++;
 
+				int newLength = oldLength;
+				while (oldLength == newLength
+						||
+						newLength%(wavelengths * 2 * zSlices) != 0) {
+					
+					IJ.wait(10);
+					listNew = new File(dirOrOMETiff).getParentFile().list();
+					newLength =0;
+					for (String newFileListItem:listNew)
+						if (newFileListItem.endsWith(".tif"))
+							newLength++;
+				}
+				oldLength = newLength;
 				boolean wasSynched = false;
 				ArrayList<ImagePlus> synchedImpsArrayList = new ArrayList<ImagePlus>();
 				if (SyncWindows.getInstance()!=null) {
@@ -1091,20 +1111,27 @@ public class DISPIM_Monitor implements PlugIn {
 				int cB = impB.getChannel();
 				int zB = impB.getSlice();
 				int tB = impB.getFrame();
+				modeA = ((CompositeImage)impA).getCompositeMode();
+				modeB = ((CompositeImage)impB).getCompositeMode();
 
-				IJ.run("Image Sequence...", "open=["+dirOrOMETiff+"] number=2200 starting=1 increment=1 scale=100 file=Cam1 or=[] sort use");
-				IJ.run("Stack to Hyperstack...", "order=xyczt(default) channels=2 slices=50 frames=11 display=Composite");
-//				IJ.getImage().setTitle("SPIMA: "+IJ.getImage().getTitle());
 				impA.close();
+				IJ.run("Image Sequence...", "open=["+dirOrOMETiff+"] number="+ newLength +" starting=1 increment=1 scale=100 file=Cam1 or=[] sort use");
+				IJ.run("Stack to Hyperstack...", "order=xyczt(default) channels="+ wavelengths +" slices="+ zSlices +" frames="+ (Math.floor(newLength/(wavelengths * 2 * zSlices))) +" display=Composite");
+//				IJ.getImage().setTitle("SPIMA: "+IJ.getImage().getTitle());
 				impA = WindowManager.getCurrentImage();
 				impA.setTitle("SPIMA: " + impA.getTitle()); 
-				IJ.run("Image Sequence...", "open=["+dirOrOMETiff+"] number=2200 starting=1 increment=1 scale=100 file=Cam2 or=[] sort use");
-				IJ.run("Stack to Hyperstack...", "order=xyczt(default) channels=2 slices=50 frames=11 display=Composite");
-//				IJ.getImage().setTitle("SPIMB: "+IJ.getImage().getTitle());
+				((CompositeImage)impA).setMode(modeA);
+				impA.updateAndRepaintWindow();
+				
 				impB.close();
+				IJ.run("Image Sequence...", "open=["+dirOrOMETiff+"] number="+ newLength +" starting=1 increment=1 scale=100 file=Cam1 or=[] sort use");
+				IJ.run("Stack to Hyperstack...", "order=xyczt(default) channels="+ wavelengths +" slices="+ zSlices +" frames="+ (Math.floor(newLength/(wavelengths * 2 * zSlices))) +" display=Composite");
+//				IJ.getImage().setTitle("SPIMB: "+IJ.getImage().getTitle());
 				impB = WindowManager.getCurrentImage();
 				impB.setTitle("SPIMB: " + impB.getTitle());
-				
+				((CompositeImage)impB).setMode(modeB);
+				impB.updateAndRepaintWindow();
+
 				impA.setPosition(cA, zA, tA==impA.getNFrames()-1?impA.getNFrames():tA);
 				impB.setPosition(cB, zB, tB==impB.getNFrames()-1?impB.getNFrames():tB);
 				IJ.run("Tile");
