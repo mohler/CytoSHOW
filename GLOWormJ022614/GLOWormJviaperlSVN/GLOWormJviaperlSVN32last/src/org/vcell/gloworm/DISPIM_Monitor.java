@@ -627,6 +627,8 @@ public class DISPIM_Monitor implements PlugIn {
 					frameFileNames[f] = ((ListVirtualStack)impA.getStack()).getDirectory(impA.getCurrentSlice());
 				else if (impA.getStack() instanceof FileInfoVirtualStack || impA.getStack() instanceof MultiFileInfoVirtualStack)
 					frameFileNames[f] = "t" + f;
+				else 
+					frameFileNames[f] = "t" + f;
 				String timecode = ""+(new Date()).getTime();
 
 				if (	   !(new File(dirOrOMETiff+ "SPIMA_Ch1_processed"+ File.separator + frameFileNames[f]+ File.separator + frameFileNames[f]+".tif")).canRead()
@@ -1121,6 +1123,7 @@ public class DISPIM_Monitor implements PlugIn {
 				impA = WindowManager.getCurrentImage();
 				impA.setTitle("SPIMA: " + impA.getTitle()); 
 				((CompositeImage)impA).setMode(modeA);
+				((StackWindow)impA.getWindow()).cSelector.updatePlayPauseIcon();
 				impA.updateAndRepaintWindow();
 				
 				impB.close();
@@ -1130,6 +1133,7 @@ public class DISPIM_Monitor implements PlugIn {
 				impB = WindowManager.getCurrentImage();
 				impB.setTitle("SPIMB: " + impB.getTitle());
 				((CompositeImage)impB).setMode(modeB);
+				((StackWindow)impB.getWindow()).cSelector.updatePlayPauseIcon();
 				impB.updateAndRepaintWindow();
 
 				impA.setPosition(cA, zA, tA==impA.getNFrames()-1?impA.getNFrames():tA);
