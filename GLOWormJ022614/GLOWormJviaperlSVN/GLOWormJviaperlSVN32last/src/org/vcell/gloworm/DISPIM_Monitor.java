@@ -470,12 +470,12 @@ public class DISPIM_Monitor implements PlugIn {
 			IJ.run("Stack to Hyperstack...", "order=xyczt(default) channels=2 slices=50 frames=11 display=Composite");
 //			IJ.getImage().setTitle("SPIMA: "+IJ.getImage().getTitle());
 			impA = WindowManager.getCurrentImage();
-			impA.setTitle("SPIMA :" + impA.getTitle()); 
+			impA.setTitle("SPIMA: " + impA.getTitle()); 
 			IJ.run("Image Sequence...", "open=["+dirOrOMETiff+"] number=2200 starting=1 increment=1 scale=100 file=Cam2 or=[] sort use");
 			IJ.run("Stack to Hyperstack...", "order=xyczt(default) channels=2 slices=50 frames=11 display=Composite");
 //			IJ.getImage().setTitle("SPIMB: "+IJ.getImage().getTitle());
 			impB = WindowManager.getCurrentImage();
-			impB.setTitle("SPIMB :" + impB.getTitle());
+			impB.setTitle("SPIMB: " + impB.getTitle());
 		}
 		
 		IJ.run("Tile");
@@ -1051,6 +1051,71 @@ public class DISPIM_Monitor implements PlugIn {
 						sw.addImp(impS);
 					}
 				}
+			} else if (dirOrOMETiff.matches(".*_\\d{9}_\\d{3}_.*.tif")) {
+
+				listA = new File(dirOrOMETiff).getParentFile().list();
+				int aLength = listA.length;
+				aLength =0;
+				for (String a:listA)
+					if (a.endsWith(".tif"))
+						aLength++;
+//				int numExtraFiles = aLength%(wavelengths * 2 * zSlices);
+				int bLength = aLength;
+				while (aLength == bLength
+						||
+						bLength%(wavelengths * 2 * zSlices) != 0) {
+					
+					IJ.wait(1000);
+					listB = new File(dirOrOMETiff).getParentFile().list();
+					bLength =0;
+					for (String b:listB)
+						if (b.endsWith(".tif"))
+							bLength++;
+				}
+
+				boolean wasSynched = false;
+				ArrayList<ImagePlus> synchedImpsArrayList = new ArrayList<ImagePlus>();
+				if (SyncWindows.getInstance()!=null) {
+					int v=0;
+					while (SyncWindows.getInstance().getImageFromVector(v) != null) {
+						wasSynched = true;
+						synchedImpsArrayList.add(SyncWindows.getInstance().getImageFromVector(v));
+						v++;
+					}
+					SyncWindows.getInstance().close();
+				}
+
+				int cA = impA.getChannel();
+				int zA = impA.getSlice();
+				int tA = impA.getFrame();
+				int cB = impB.getChannel();
+				int zB = impB.getSlice();
+				int tB = impB.getFrame();
+
+				IJ.run("Image Sequence...", "open=["+dirOrOMETiff+"] number=2200 starting=1 increment=1 scale=100 file=Cam1 or=[] sort use");
+				IJ.run("Stack to Hyperstack...", "order=xyczt(default) channels=2 slices=50 frames=11 display=Composite");
+//				IJ.getImage().setTitle("SPIMA: "+IJ.getImage().getTitle());
+				impA.close();
+				impA = WindowManager.getCurrentImage();
+				impA.setTitle("SPIMA: " + impA.getTitle()); 
+				IJ.run("Image Sequence...", "open=["+dirOrOMETiff+"] number=2200 starting=1 increment=1 scale=100 file=Cam2 or=[] sort use");
+				IJ.run("Stack to Hyperstack...", "order=xyczt(default) channels=2 slices=50 frames=11 display=Composite");
+//				IJ.getImage().setTitle("SPIMB: "+IJ.getImage().getTitle());
+				impB.close();
+				impB = WindowManager.getCurrentImage();
+				impB.setTitle("SPIMB: " + impB.getTitle());
+				
+				impA.setPosition(cA, zA, tA==impA.getNFrames()-1?impA.getNFrames():tA);
+				impB.setPosition(cB, zB, tB==impB.getNFrames()-1?impB.getNFrames():tB);
+				IJ.run("Tile");
+				
+				if (wasSynched) {
+					SyncWindows sw = new SyncWindows();
+					for (ImagePlus impS:synchedImpsArrayList) {
+						sw.addImp(impS);
+					}
+				}
+				
 			} else {
 				long fileOldMod = (new File(dirOrOMETiff)).lastModified();
 				while (fileOldMod == (new File(dirOrOMETiff)).lastModified()) {
