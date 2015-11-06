@@ -85,7 +85,7 @@ public class DISPIM_Monitor implements PlugIn {
 		}
 		IJ.log(dirOrOMETiff);
 		File dirOrOMETiffFile = new File(dirOrOMETiff);
-		String savePath = dirOrOMETiffFile.getParent() + File.separator + dirOrOMETiffFile.getName().split("_")[0] + "_";
+		String savePath = dirOrOMETiffFile.getParentFile().getParent() + File.separator + dirOrOMETiffFile.getParentFile().getName() + "_" + dirOrOMETiffFile.getName().split("_")[0] + "_";
 		if (dirOrOMETiffFile.isDirectory())
 			savePath = dirOrOMETiff;
 		String tempDir = IJ.getDirectory("temp");
