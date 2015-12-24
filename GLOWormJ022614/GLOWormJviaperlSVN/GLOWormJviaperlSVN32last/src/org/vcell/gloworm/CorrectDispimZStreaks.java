@@ -33,7 +33,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 			ImageProcessor targetIP = imp.getProcessor().duplicate();
 			for (int t=10;t>=1;t--) {
 				mf = new MaximumFinder();
-				Polygon maxPoly = mf.getMaxima(targetIP, t, false);
+				Polygon maxPoly = mf.getMaxima(targetIP, 10, false);
 
 				int[] maxXs = new int[maxPoly.npoints];
 				int[] maxYs = new int[maxPoly.npoints];
@@ -45,12 +45,12 @@ public class CorrectDispimZStreaks implements PlugIn {
 					if (!maxCum.contains(maxXs[n]+","+maxYs[n])) {
 						maxCum.add(maxXs[n]+","+maxYs[n]);
 						ImageProcessor modIP = gaussianDiffIP.duplicate();
-						modIP.multiply(((double)imp.getProcessor().getPixel(maxXs[n], maxYs[n]))/256);
+						modIP.multiply(((double)imp.getProcessor().getPixel(maxXs[n], maxYs[n]))/1000);
 						imp.getProcessor().copyBits(modIP, maxXs[n]-gaussianDiffIP.getWidth()/2, maxYs[n]-gaussianDiffIP.getHeight()/2, Blitter.DIFFERENCE);
 						targetIP.copyBits(modIP, maxXs[n]-gaussianDiffIP.getWidth()/2, maxYs[n]-gaussianDiffIP.getHeight()/2, Blitter.DIFFERENCE);
 						Color fgc = Toolbar.getForegroundColor();
 						Toolbar.setForegroundColor(Color.BLACK);
-						targetIP.fillOval(maxXs[n], maxYs[n], 5, 3);
+						targetIP.fillOval(maxXs[n]-2, maxYs[n]-1, 5, 3);
 						Toolbar.setForegroundColor(fgc);
 
 					}
