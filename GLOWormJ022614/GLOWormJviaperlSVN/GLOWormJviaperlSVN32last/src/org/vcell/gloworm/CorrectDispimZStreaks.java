@@ -33,6 +33,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 		gaussianDiffIP = gaussianDiffImp.getProcessor();
 		GenericDialog gd = new GenericDialog("Specify Z Correction Options...");
 //		IJ.log(Prefs.getPrefsDir());
+		
 		gd.addNumericField("Mask Scale Factor", Prefs.getDouble("Zstreak.maskScaleFactor", 0.25), 5);
 		gd.addNumericField("Max Tolerance", Prefs.getInt("Zstreak.maxTolerance", 10), 0);
 		gd.addNumericField("Min Tolerance", Prefs.getInt("Zstreak.minTolerance", 0), 0);
