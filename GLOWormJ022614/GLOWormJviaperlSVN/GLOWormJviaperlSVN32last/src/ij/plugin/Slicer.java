@@ -449,6 +449,7 @@ public class Slicer implements PlugIn, TextListener, ItemListener {
 		 double zSpacing = inputZSpacing/cal.pixelWidth;
 		 if (zSpacing!=1.0) {
 				ip2.setInterpolate(true);
+			 	ip2.setInterpolationMethod(ImageProcessor.BICUBIC);
 				if (rotate)
 					ip2 = ip2.resize((int)(stackSize*zSpacing), line.length);
 				else
