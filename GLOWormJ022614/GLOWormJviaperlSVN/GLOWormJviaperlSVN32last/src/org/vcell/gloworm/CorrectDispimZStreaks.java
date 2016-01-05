@@ -18,6 +18,7 @@ import ij.measure.ResultsTable;
 import ij.plugin.Converter;
 import ij.plugin.PlugIn;
 import ij.plugin.filter.MaximumFinder;
+import ij.plugin.Resizer;
 import ij.process.Blitter;
 import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
@@ -40,7 +41,8 @@ public class CorrectDispimZStreaks implements PlugIn {
 		GenericDialog gd = new GenericDialog("Specify Z Correction Options...");
 //		IJ.log(Prefs.getPrefsDir());
 		
-		gd.addNumericField("Mask Scale Factor", 0.5, 5);
+		gd.addNumericField("MaskWidth", 1, 0);
+		gd.addNumericField("Mask Scale Factor", 0.125, 5);
 		gd.addNumericField("Max Tolerance", 10, 0);
 		gd.addNumericField("Min Tolerance", 10, 0);
 		gd.addNumericField("Iterations at Min Tol", 20, 0);
@@ -49,6 +51,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
+		int maskWidth = (int) gd.getNextNumber();
 		double maskScaleFactor = (double) gd.getNextNumber();
 		Prefs.set("Zstreak.maskScaleFactor", maskScaleFactor);
 		int maxTolerance = (int) gd.getNextNumber();
@@ -64,6 +67,10 @@ public class CorrectDispimZStreaks implements PlugIn {
 		Prefs.savePreferences();	
 		imp.setSlice(1);
 
+		gaussianDiffIP.setRoi((gaussianDiffIP.getWidth()-1-maskWidth)/2, 0, maskWidth, gaussianDiffIP.getHeight());
+		gaussianDiffIP = gaussianDiffIP.crop();
+		gaussianDiffImp = new ImagePlus(gaussianDiffImp.getTitle(),gaussianDiffIP);
+		
 		int bkgdMode = 0;
 		int bkgdMin = 0;
 		int[] histo = imp.getProcessor().getHistogram();
@@ -114,12 +121,12 @@ public class CorrectDispimZStreaks implements PlugIn {
 					if (!maxCum.contains(maxXs[n]+","+maxYs[n])) {
 						maxCum.add(maxXs[n]+","+maxYs[n]);
 						ImageProcessor modIP = gaussianDiffIP.duplicate();
-						modIP.multiply(maskScaleFactor * (((double)imp.getProcessor().getPixel(maxXs[n], maxYs[n]))-bkgdMode)/1000);
-						imp.getProcessor().copyBits(modIP, maxXs[n]-gaussianDiffIP.getWidth()/2, maxYs[n]-gaussianDiffIP.getHeight()/2, Blitter.DIFFERENCE);
-						targetIP.copyBits(modIP, maxXs[n]-gaussianDiffIP.getWidth()/2, maxYs[n]-gaussianDiffIP.getHeight()/2, Blitter.DIFFERENCE);
+						modIP.multiply(maskScaleFactor * (((double)imp.getProcessor().getPixel(maxXs[n], maxYs[n])))/255);
+						imp.getProcessor().copyBits(modIP, maxXs[n]-1, maxYs[n]-gaussianDiffIP.getHeight()/2, Blitter.DIFFERENCE);
+						targetIP.copyBits(modIP, maxXs[n]-1, maxYs[n]-gaussianDiffIP.getHeight()/2, Blitter.DIFFERENCE);
 						Color fgc = Toolbar.getForegroundColor();
 						Toolbar.setForegroundColor(Color.BLACK);
-						targetIP.fillOval(maxXs[n]-1, maxYs[n]-1, 3, 3);
+						targetIP.fillOval(maxXs[n]-blankWidth/2, maxYs[n]-blankHeight/2, blankWidth, blankHeight);
 						Toolbar.setForegroundColor(fgc);
 
 					}
@@ -140,12 +147,12 @@ public class CorrectDispimZStreaks implements PlugIn {
 					if (!maxCum.contains(maxXs[n]+","+maxYs[n])) {
 						maxCum.add(maxXs[n]+","+maxYs[n]);
 						ImageProcessor modIP = gaussianDiffIP.duplicate();
-						modIP.multiply(maskScaleFactor * (((double)imp.getProcessor().getPixel(maxXs[n], maxYs[n]))-bkgdMode)/1000);
-						imp.getProcessor().copyBits(modIP, maxXs[n]-gaussianDiffIP.getWidth()/2, maxYs[n]-gaussianDiffIP.getHeight()/2, Blitter.DIFFERENCE);
-						targetIP.copyBits(modIP, maxXs[n]-gaussianDiffIP.getWidth()/2, maxYs[n]-gaussianDiffIP.getHeight()/2, Blitter.DIFFERENCE);
+						modIP.multiply(maskScaleFactor * (((double)imp.getProcessor().getPixel(maxXs[n], maxYs[n])))/1000);
+						imp.getProcessor().copyBits(modIP, maxXs[n]-1, maxYs[n]-gaussianDiffIP.getHeight()/2, Blitter.DIFFERENCE);
+						targetIP.copyBits(modIP, maxXs[n]-1, maxYs[n]-gaussianDiffIP.getHeight()/2, Blitter.DIFFERENCE);
 						Color fgc = Toolbar.getForegroundColor();
 						Toolbar.setForegroundColor(Color.BLACK);
-						targetIP.fillOval(maxXs[n]-1, maxYs[n]-1, 3, 3);
+						targetIP.fillOval(maxXs[n]-blankWidth/2, maxYs[n]-blankHeight/2, blankWidth, blankHeight);
 						Toolbar.setForegroundColor(fgc);
 
 					}
