@@ -703,4 +703,52 @@ public class Slicer implements PlugIn, TextListener, ItemListener {
 		 long available = max - inUse;
 		 return (int)((available+524288L)/1048576L);
 	}
+
+	public static String getStartAt() {
+		return startAt;
+	}
+
+	public static void setStartAt(String startAt) {
+		Slicer.startAt = startAt;
+	}
+
+	public static boolean isRotate() {
+		return rotate;
+	}
+
+	public static void setRotate(boolean rotate) {
+		Slicer.rotate = rotate;
+	}
+
+	public static boolean isFlip() {
+		return flip;
+	}
+
+	public static void setFlip(boolean flip) {
+		Slicer.flip = flip;
+	}
+
+	public boolean isNointerpolate() {
+		return nointerpolate;
+	}
+
+	public void setNointerpolate(boolean nointerpolate) {
+		this.nointerpolate = nointerpolate;
+	}
+
+	public double getOutputZSpacing() {
+		return outputZSpacing;
+	}
+
+	public void setOutputZSpacing(double outputZSpacing) {
+		this.outputZSpacing = outputZSpacing;
+	}
+
+	public int getOutputSlices() {
+		return outputSlices;
+	}
+
+	public void setOutputSlices(int outputSlices) {
+		this.outputSlices = outputSlices;
+	}
 }

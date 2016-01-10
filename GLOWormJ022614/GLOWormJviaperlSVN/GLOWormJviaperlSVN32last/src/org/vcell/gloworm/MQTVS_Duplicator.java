@@ -232,7 +232,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 						String label = stack.getSliceLabel(n1);
 
 						if (roi!=null && (roi.getType() != Roi.RECTANGLE || roi.getBounds().width != imp.getWidth() || roi.getBounds().height != imp.getHeight() ))
-								ip.fillOutside(roi);
+							ip.fillOutside(roi);
 						if (!sliceSpecificROIs) ip = ip.crop();
 
 						stack2.addSlice(label, ip);
@@ -393,7 +393,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 			setFirstT(setLastT(imp.getFrame()));
 		}
 
-//		imp.getWindow().setVisible(false);
+		//		imp.getWindow().setVisible(false);
 		RoiManager rm = imp.getRoiManager();
 		boolean rmVis =false; 
 		if (rm != null) {
@@ -447,18 +447,19 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 		//		IJ.log(""+imp2.getOpenAsHyperStack());
 
 		imp2.show();
-		imp2.getWindow().setVisible(false);
+		if (imp2.getWindow() != null) {
+			imp2.getWindow().setVisible(false);
 
-		if (imp != null && imp2 != null) {
-			imp2.getWindow().setBackground(imp.getWindow().getBackground());
-			imp2.getWindow().setSubTitleBkgdColor(imp.getWindow().getBackground());
+			if (imp != null && imp2 != null) {
+				imp2.getWindow().setBackground(imp.getWindow().getBackground());
+				imp2.getWindow().setSubTitleBkgdColor(imp.getWindow().getBackground());
+			}
+
+			if ( imp2.getWindow() instanceof StackWindow &&  ((StackWindow)imp2.getWindow()).getNScrollbars()<2) {
+				if (((StackWindow)imp2.getWindow()).getAnimationZSelector() != null) 
+					((StackWindow)imp2.getWindow()).getAnimationZSelector().setValue(inSlice-getFirstZ() +1);
+			}
 		}
-
-		if ( imp2.getWindow() instanceof StackWindow &&  ((StackWindow)imp2.getWindow()).getNScrollbars()<2) {
-			if (((StackWindow)imp2.getWindow()).getAnimationZSelector() != null) 
-				((StackWindow)imp2.getWindow()).getAnimationZSelector().setValue(inSlice-getFirstZ() +1);
-		}
-
 
 		int dupX = 0;
 		int dupY = 0;
@@ -513,10 +514,12 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 		imp2.setDimensions(getLastC()-getFirstC()+1, getLastZ()-getFirstZ()+1, finalFrames);
 		imp2.setPosition(inChannel-getFirstC()+1, inSlice-getFirstZ() +1, inFrame-getFirstT()+1);
 
-		imp2.getWindow().setVisible(true);
+		if (imp2.getWindow() != null) {
+			imp2.getWindow().setVisible(true);
+		}
 		imp.getWindow().dupButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/download_button_animatedStill.png")));
 		imp.getCanvas().setVisible(true);
-//		IJ.saveAs(imp2, "Tiff", "");
+		//		IJ.saveAs(imp2, "Tiff", "");
 		return imp2;
 
 	}
