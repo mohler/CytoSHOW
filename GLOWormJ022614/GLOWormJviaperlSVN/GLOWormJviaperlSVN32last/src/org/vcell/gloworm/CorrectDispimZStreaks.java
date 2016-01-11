@@ -15,7 +15,6 @@ import ij.gui.GenericDialog;
 import ij.gui.ImageWindow;
 import ij.gui.Roi;
 import ij.gui.Toolbar;
-import ij.io.FileSaver;
 import ij.measure.ResultsTable;
 import ij.plugin.Converter;
 import ij.plugin.PlugIn;
@@ -27,11 +26,16 @@ import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
 
 public class CorrectDispimZStreaks implements PlugIn {
-//	ImagePlus imp;
-//	ImageProcessor gaussianDiffIP;
-//	private MaximumFinder mf;
+	ImagePlus imp;
+	ImageProcessor gaussianDiffIP;
+	private MaximumFinder mf;
 
-	public void processStack(ImagePlus imp) {
+	public void run(String arg) {
+		imp = IJ.getImage();
+		if (imp.getNFrames()>1) {
+			this.doHyperStack(imp);
+			return;
+		}
 		int slice = imp.getSlice();
 		ImagePlus gaussianDiffImp = (new ImagePlus("http://fsbill.cam.uchc.edu/Xwords/z-x_Mask_ver_-32bkg_x255over408_15x33rect.tif"));
 		gaussianDiffImp.getProcessor().setMinAndMax(0, 255);
@@ -39,7 +43,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 		if (imp.getBitDepth() == 8)
 			(new Converter()).run("8-bit");
 		WindowManager.setTempCurrentImage(null);
-		ImageProcessor gaussianDiffIP = gaussianDiffImp.getProcessor();
+		gaussianDiffIP = gaussianDiffImp.getProcessor();
 		GenericDialog gd = new GenericDialog("Specify Z Correction Options...");
 //		IJ.log(Prefs.getPrefsDir());
 		
@@ -105,12 +109,11 @@ public class CorrectDispimZStreaks implements PlugIn {
 //				}
 //			}
 
-//			IJ.log("bkgdMode = "+bkgdMode+", bkgdMin = "+bkgdMin);
-			IJ.log(""+s);
+			IJ.log("bkgdMode = "+bkgdMode+", bkgdMin = "+bkgdMin);
 			ArrayList<String> maxCum = new ArrayList<String>();
 			ImageProcessor targetIP = imp.getProcessor().duplicate();
 			for (int t=minTolerance;t>maxTolerance;t--) {
-				MaximumFinder mf = new MaximumFinder();
+				mf = new MaximumFinder();
 				Polygon maxPoly = mf.getMaxima(targetIP, t, false);
 
 				int[] maxXs = new int[maxPoly.npoints];
@@ -118,7 +121,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 
 				maxXs = maxPoly.xpoints;
 				maxYs = maxPoly.ypoints;
-//				IJ.log(maxXs.length+" maxima");
+				IJ.log(maxXs.length+" maxima");
 
 				for (int n=0; n<maxXs.length; n++) {
 					if (!maxCum.contains(maxXs[n]+","+maxYs[n])) {
@@ -136,7 +139,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 				}
 			}
 			for (int t=iterations;t>0;t--) {
-				MaximumFinder mf = new MaximumFinder();
+				mf = new MaximumFinder();
 				Polygon maxPoly = mf.getMaxima(targetIP, minTolerance, false);
 
 				int[] maxXs = new int[maxPoly.npoints];
@@ -144,7 +147,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 
 				maxXs = maxPoly.xpoints;
 				maxYs = maxPoly.ypoints;
-//				IJ.log(maxXs.length+" maxima");
+				IJ.log(maxXs.length+" maxima");
 				
 				for (int n=0; n<maxXs.length; n++) {
 					if (!maxCum.contains(maxXs[n]+","+maxYs[n])) {
@@ -190,43 +193,43 @@ public class CorrectDispimZStreaks implements PlugIn {
 		
 		for(int f=1;f<=t;f++){
 			IJ.log(path+titleShort+"_"+f+".tif");
+			impHS.setRoi(roi);
 			MQTVS_Duplicator duper = new MQTVS_Duplicator();
 			ImagePlus impHS_dup = duper.run(impHS, 1, 1, 1, impHS.getNSlices(), f, f, 1, false);
 			impHS_dup.setCalibration(impHS.getCalibration());
+//			impHS_dup.show();
+			IJ.run(impHS_dup, "Select All", "");
 			Slicer slicer = new Slicer();
 			slicer.setNointerpolate(false);
-			slicer.setOutputZSpacing(1);  //pixels
+			slicer.setOutputZSpacing(1);  
 //			IJ.showMessage(title, ""+slicer.getOutputZSpacing());
 			Slicer.setStartAt("Top");
-			if (roi ==null)
-				impHS_dup.setRoi(0,0,impHS_dup.getWidth()-1, impHS_dup.getHeight()-1);
-			else
-				impHS_dup.setRoi(roi);
+//			if (roi ==null)
+//				impHS_dup.setRoi(0,0,impHS_dup.getWidth()-1, impHS_dup.getHeight()-1);
+//			else
+//				impHS_dup.setRoi(roi);
 			ImagePlus impHS_duprs = slicer.reslice(impHS_dup);
-			impHS_dup.close();
-			impHS_dup.flush();
-//			IJ.showMessage(title, ""+impHS_duprs.getWidth()+" "+impHS_duprs.getHeight());
-			this.processStack(impHS_duprs);
-			impHS_duprs.setRoi(0,0,impHS_duprs.getWidth()-1, impHS_duprs.getHeight()-1);
-//			IJ.showMessage(title, ""+slicer.getOutputZSpacing());
-
+			impHS_duprs.getCalibration().pixelWidth = impHS.getCalibration().pixelWidth;
+			impHS_duprs.getCalibration().pixelHeight = impHS.getCalibration().pixelWidth;
+			impHS_duprs.getCalibration().pixelDepth = impHS.getCalibration().pixelWidth;
+//			impHS_duprs.show();
+//			IJ.runMacro("waitForUser(\"\");");
+			IJ.run(impHS_duprs, "Correct diSPIM ZStreaks...", "maskwidth=3 mask=0.5 max=10 min=10 iterations=50 blankwidth=3 blankheight=3");
+			slicer.setNointerpolate(true);
+			slicer.setOutputZSpacing(1);  
+			IJ.run(impHS_duprs, "Select All", "");
 			ImagePlus impHS_duprsrs = slicer.reslice(impHS_duprs);
-			impHS_duprs.close();
-			impHS_duprs.flush();
+//			impHS_duprsrs.show();
+//			IJ.runMacro("waitForUser(\"\");");
 
 			IJ.saveAsTiff(impHS_duprsrs, path+titleShort+"_"+f+".tif");
+			impHS_dup.close();
+			impHS_dup.flush();
+			impHS_duprs.close();
+			impHS_duprs.flush();
 			impHS_duprsrs.close();
 			impHS_duprsrs.flush();
 
 		}
-	}
-
-	public void run(String arg) {
-		ImagePlus imp = IJ.getImage();
-		if (imp.getNFrames() >= 1) {
-			doHyperStack(imp);
-			return;
-		}
-		
 	}
 }
