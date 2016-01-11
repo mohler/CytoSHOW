@@ -335,7 +335,7 @@ public class Slicer implements PlugIn, TextListener, ItemListener {
 					y2 = r.y;
 					xInc = 0.0;
 					yInc = outputZSpacing;
-					outputSlices =	(int)(r.height/(outputZSpacing/imp.getCalibration().pixelDepth));
+					outputSlices =	(int)(r.height/outputZSpacing);
 				} else if (startAt.equals(starts[1])) { // left
 					x1 = r.x;
 					y1 = r.y;
@@ -343,7 +343,7 @@ public class Slicer implements PlugIn, TextListener, ItemListener {
 					y2 = r.y + r.height;
 					xInc = outputZSpacing;
 					yInc = 0.0;
-					outputSlices =	(int)(r.width/(outputZSpacing/imp.getCalibration().pixelDepth));
+					outputSlices =	(int)(r.width/outputZSpacing);
 				} else if (startAt.equals(starts[2])) { // bottom
 					x1 = r.x;
 					y1 = r.y + r.height-1;
@@ -351,7 +351,7 @@ public class Slicer implements PlugIn, TextListener, ItemListener {
 					y2 = r.y + r.height-1;
 					xInc = 0.0;
 					yInc = -outputZSpacing;
-					outputSlices =	(int)(r.height/(outputZSpacing/imp.getCalibration().pixelDepth));
+					outputSlices =	(int)(r.height/outputZSpacing);
 				} else if (startAt.equals(starts[3])) { // right
 					x1 = r.x + r.width-1;
 					y1 = r.y;
@@ -359,7 +359,7 @@ public class Slicer implements PlugIn, TextListener, ItemListener {
 					y2 = r.y + r.height;
 					xInc = -outputZSpacing;
 					yInc = 0.0;
-					outputSlices =	(int)(r.width/(outputZSpacing/imp.getCalibration().pixelDepth));
+					outputSlices =	(int)(r.width/outputZSpacing);
 				}
 		 } else if (roi.getType()==Roi.LINE) {
 				Line line = (Line)roi;
@@ -369,7 +369,7 @@ public class Slicer implements PlugIn, TextListener, ItemListener {
 				y2 = line.y2;
 				double dx = x2 - x1;
 				double dy = y2 - y1;
-				double nrm = Math.sqrt(dx*dx + dy*dy)/(outputZSpacing/imp.getCalibration().pixelDepth);
+				double nrm = Math.sqrt(dx*dx + dy*dy)/outputZSpacing;
 				xInc = -(dy/nrm);
 				yInc = (dx/nrm);
 		 } else
