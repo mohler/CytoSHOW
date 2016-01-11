@@ -91,6 +91,8 @@ public class Slicer implements PlugIn, TextListener, ItemListener {
 		 Roi roi = imp.getRoi();
 		 int roiType = roi!=null?roi.getType():0;
 		 Calibration origCal = imp.getCalibration();
+		inputZSpacing = origCal.pixelDepth;
+
 		 boolean globalCalibration = false;
 		 if (nointerpolate) {// temporarily clear spatial calibration
 				globalCalibration = imp.getGlobalCalibration()!=null;
@@ -333,7 +335,7 @@ public class Slicer implements PlugIn, TextListener, ItemListener {
 					y2 = r.y;
 					xInc = 0.0;
 					yInc = outputZSpacing;
-					outputSlices =	(int)(r.height/outputZSpacing);
+					outputSlices =	(int)(r.height/(outputZSpacing/imp.getCalibration().pixelDepth));
 				} else if (startAt.equals(starts[1])) { // left
 					x1 = r.x;
 					y1 = r.y;
@@ -341,7 +343,7 @@ public class Slicer implements PlugIn, TextListener, ItemListener {
 					y2 = r.y + r.height;
 					xInc = outputZSpacing;
 					yInc = 0.0;
-					outputSlices =	(int)(r.width/outputZSpacing);
+					outputSlices =	(int)(r.width/(outputZSpacing/imp.getCalibration().pixelDepth));
 				} else if (startAt.equals(starts[2])) { // bottom
 					x1 = r.x;
 					y1 = r.y + r.height-1;
@@ -349,7 +351,7 @@ public class Slicer implements PlugIn, TextListener, ItemListener {
 					y2 = r.y + r.height-1;
 					xInc = 0.0;
 					yInc = -outputZSpacing;
-					outputSlices =	(int)(r.height/outputZSpacing);
+					outputSlices =	(int)(r.height/(outputZSpacing/imp.getCalibration().pixelDepth));
 				} else if (startAt.equals(starts[3])) { // right
 					x1 = r.x + r.width-1;
 					y1 = r.y;
@@ -357,7 +359,7 @@ public class Slicer implements PlugIn, TextListener, ItemListener {
 					y2 = r.y + r.height;
 					xInc = -outputZSpacing;
 					yInc = 0.0;
-					outputSlices =	(int)(r.width/outputZSpacing);
+					outputSlices =	(int)(r.width/(outputZSpacing/imp.getCalibration().pixelDepth));
 				}
 		 } else if (roi.getType()==Roi.LINE) {
 				Line line = (Line)roi;
@@ -367,7 +369,7 @@ public class Slicer implements PlugIn, TextListener, ItemListener {
 				y2 = line.y2;
 				double dx = x2 - x1;
 				double dy = y2 - y1;
-				double nrm = Math.sqrt(dx*dx + dy*dy)/outputZSpacing;
+				double nrm = Math.sqrt(dx*dx + dy*dy)/(outputZSpacing/imp.getCalibration().pixelDepth);
 				xInc = -(dy/nrm);
 				yInc = (dx/nrm);
 		 } else

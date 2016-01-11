@@ -197,30 +197,25 @@ public class CorrectDispimZStreaks implements PlugIn {
 			MQTVS_Duplicator duper = new MQTVS_Duplicator();
 			ImagePlus impHS_dup = duper.run(impHS, 1, 1, 1, impHS.getNSlices(), f, f, 1, false);
 			impHS_dup.setCalibration(impHS.getCalibration());
-//			impHS_dup.show();
+			impHS_dup.getCalibration().pixelWidth = impHS.getCalibration().pixelWidth;
+			impHS_dup.getCalibration().pixelHeight = impHS.getCalibration().pixelHeight;
+			impHS_dup.getCalibration().pixelDepth = impHS.getCalibration().pixelDepth;
 			IJ.run(impHS_dup, "Select All", "");
 			Slicer slicer = new Slicer();
-			slicer.setNointerpolate(false);
-			slicer.setOutputZSpacing(1);  
-//			IJ.showMessage(title, ""+slicer.getOutputZSpacing());
+			slicer.setNointerpolate(false); //clumsy, don't use true ever
+			slicer.setOutputZSpacing(impHS.getCalibration().pixelDepth);  
 			Slicer.setStartAt("Top");
-//			if (roi ==null)
-//				impHS_dup.setRoi(0,0,impHS_dup.getWidth()-1, impHS_dup.getHeight()-1);
-//			else
-//				impHS_dup.setRoi(roi);
 			ImagePlus impHS_duprs = slicer.reslice(impHS_dup);
+			impHS_duprs.setCalibration(impHS.getCalibration());
 			impHS_duprs.getCalibration().pixelWidth = impHS.getCalibration().pixelWidth;
-			impHS_duprs.getCalibration().pixelHeight = impHS.getCalibration().pixelWidth;
+			impHS_duprs.getCalibration().pixelHeight = impHS.getCalibration().pixelHeight;
 			impHS_duprs.getCalibration().pixelDepth = impHS.getCalibration().pixelWidth;
-			impHS_duprs.show();
-			IJ.runMacro("waitForUser(\"\");");
+
 			IJ.run(impHS_duprs, "Correct diSPIM ZStreaks...", "maskwidth=3 mask=1.0 max=10 min=10 iterations=50 blankwidth=3 blankheight=3");
-			slicer.setNointerpolate(false);
-			slicer.setOutputZSpacing(0.1625);  
+			slicer.setNointerpolate(false); //clumsy, don't use true ever
+			slicer.setOutputZSpacing(impHS_duprs.getCalibration().pixelDepth);  
 			IJ.run(impHS_duprs, "Select All", "");
 			ImagePlus impHS_duprsrs = slicer.reslice(impHS_duprs);
-//			impHS_duprsrs.show();
-//			IJ.runMacro("waitForUser(\"\");");
 
 			IJ.saveAsTiff(impHS_duprsrs, path+titleShort+"_"+f+".tif");
 			impHS_dup.close();
