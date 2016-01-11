@@ -212,11 +212,11 @@ public class CorrectDispimZStreaks implements PlugIn {
 			impHS_duprs.getCalibration().pixelWidth = impHS.getCalibration().pixelWidth;
 			impHS_duprs.getCalibration().pixelHeight = impHS.getCalibration().pixelWidth;
 			impHS_duprs.getCalibration().pixelDepth = impHS.getCalibration().pixelWidth;
-//			impHS_duprs.show();
-//			IJ.runMacro("waitForUser(\"\");");
-			IJ.run(impHS_duprs, "Correct diSPIM ZStreaks...", "maskwidth=3 mask=0.5 max=10 min=10 iterations=50 blankwidth=3 blankheight=3");
-			slicer.setNointerpolate(true);
-			slicer.setOutputZSpacing(1);  
+			impHS_duprs.show();
+			IJ.runMacro("waitForUser(\"\");");
+			IJ.run(impHS_duprs, "Correct diSPIM ZStreaks...", "maskwidth=3 mask=1.0 max=10 min=10 iterations=50 blankwidth=3 blankheight=3");
+			slicer.setNointerpolate(false);
+			slicer.setOutputZSpacing(0.1625);  
 			IJ.run(impHS_duprs, "Select All", "");
 			ImagePlus impHS_duprsrs = slicer.reslice(impHS_duprs);
 //			impHS_duprsrs.show();
