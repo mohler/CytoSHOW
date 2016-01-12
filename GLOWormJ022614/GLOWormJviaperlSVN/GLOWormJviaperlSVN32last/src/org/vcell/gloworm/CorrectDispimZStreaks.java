@@ -128,8 +128,8 @@ public class CorrectDispimZStreaks implements PlugIn {
 						maxCum.add(maxXs[n]+","+maxYs[n]);
 						ImageProcessor modIP = gaussianDiffIP.duplicate();
 						modIP.multiply(maskScaleFactor * (((double)imp.getProcessor().getPixel(maxXs[n], maxYs[n])))/255);
-						imp.getProcessor().copyBits(modIP, maxXs[n]-1, maxYs[n]-gaussianDiffIP.getHeight()/2, Blitter.DIFFERENCE);
-						targetIP.copyBits(modIP, maxXs[n]-1, maxYs[n]-gaussianDiffIP.getHeight()/2, Blitter.DIFFERENCE);
+						imp.getProcessor().copyBits(modIP, maxXs[n], maxYs[n]-gaussianDiffIP.getHeight()/2, Blitter.DIFFERENCE);
+						targetIP.copyBits(modIP, maxXs[n], maxYs[n]-gaussianDiffIP.getHeight()/2, Blitter.DIFFERENCE);
 						Color fgc = Toolbar.getForegroundColor();
 						Toolbar.setForegroundColor(Color.BLACK);
 						targetIP.fillOval(maxXs[n]-blankWidth/2, maxYs[n]-blankHeight/2, blankWidth, blankHeight);
@@ -153,9 +153,9 @@ public class CorrectDispimZStreaks implements PlugIn {
 					if (!maxCum.contains(maxXs[n]+","+maxYs[n])) {
 						maxCum.add(maxXs[n]+","+maxYs[n]);
 						ImageProcessor modIP = gaussianDiffIP.duplicate();
-						modIP.multiply(maskScaleFactor * (((double)imp.getProcessor().getPixel(maxXs[n], maxYs[n])))/1000);
-						imp.getProcessor().copyBits(modIP, maxXs[n]-1, maxYs[n]-gaussianDiffIP.getHeight()/2, Blitter.DIFFERENCE);
-						targetIP.copyBits(modIP, maxXs[n]-1, maxYs[n]-gaussianDiffIP.getHeight()/2, Blitter.DIFFERENCE);
+						modIP.multiply(maskScaleFactor * (((double)imp.getProcessor().getPixel(maxXs[n], maxYs[n])))/255);
+						imp.getProcessor().copyBits(modIP, maxXs[n], maxYs[n]-gaussianDiffIP.getHeight()/2, Blitter.DIFFERENCE);
+						targetIP.copyBits(modIP, maxXs[n], maxYs[n]-gaussianDiffIP.getHeight()/2, Blitter.DIFFERENCE);
 						Color fgc = Toolbar.getForegroundColor();
 						Toolbar.setForegroundColor(Color.BLACK);
 						targetIP.fillOval(maxXs[n]-blankWidth/2, maxYs[n]-blankHeight/2, blankWidth, blankHeight);
@@ -200,23 +200,27 @@ public class CorrectDispimZStreaks implements PlugIn {
 			impHS_dup.getCalibration().pixelWidth = impHS.getCalibration().pixelWidth;
 			impHS_dup.getCalibration().pixelHeight = impHS.getCalibration().pixelHeight;
 			impHS_dup.getCalibration().pixelDepth = impHS.getCalibration().pixelDepth;
+			impHS_dup.show();
 			IJ.run(impHS_dup, "Select All", "");
 			Slicer slicer = new Slicer();
 			slicer.setNointerpolate(false); //clumsy, don't use true ever
-			slicer.setOutputZSpacing(impHS.getCalibration().pixelDepth);  
+			slicer.setOutputZSpacing(1);  
 			Slicer.setStartAt("Top");
 			ImagePlus impHS_duprs = slicer.reslice(impHS_dup);
 			impHS_duprs.setCalibration(impHS.getCalibration());
 			impHS_duprs.getCalibration().pixelWidth = impHS.getCalibration().pixelWidth;
 			impHS_duprs.getCalibration().pixelHeight = impHS.getCalibration().pixelHeight;
 			impHS_duprs.getCalibration().pixelDepth = impHS.getCalibration().pixelWidth;
-
-			IJ.run(impHS_duprs, "Correct diSPIM ZStreaks...", "maskwidth=3 mask=1.0 max=10 min=10 iterations=50 blankwidth=3 blankheight=3");
+			impHS_duprs.show();
+			IJ.run(impHS_duprs, "Correct diSPIM ZStreaks...", "maskwidth=3 mask=1.0 max=10 min=10 iterations=50 blankwidth=1 blankheight=1");
+			impHS_duprs.updateAndRepaintWindow();
+			IJ.runMacro("waitForUser(2);");
 			slicer.setNointerpolate(false); //clumsy, don't use true ever
-			slicer.setOutputZSpacing(impHS_duprs.getCalibration().pixelDepth);  
+			slicer.setOutputZSpacing(1);  
 			IJ.run(impHS_duprs, "Select All", "");
 			ImagePlus impHS_duprsrs = slicer.reslice(impHS_duprs);
-
+			impHS_duprsrs.show();
+//			IJ.runMacro("waitForUser(3);");
 			IJ.saveAsTiff(impHS_duprsrs, path+titleShort+"_"+f+".tif");
 			impHS_dup.close();
 			impHS_dup.flush();
