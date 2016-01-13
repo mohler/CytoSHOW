@@ -29,13 +29,16 @@ public class CorrectDispimZStreaks implements PlugIn {
 	ImagePlus imp;
 	ImageProcessor gaussianDiffIP;
 	private MaximumFinder mf;
+	private int maskWidth;
+	private double maskScaleFactor;
+	private int maxTolerance;
+	private int minTolerance;
+	private int iterations;
+	private int blankWidth;
+	private int blankHeight;
 
 	public void run(String arg) {
 		imp = IJ.getImage();
-		if (imp.getNFrames()>1) {
-			this.doHyperStack(imp);
-			return;
-		}
 		int slice = imp.getSlice();
 		ImagePlus gaussianDiffImp = (new ImagePlus("http://fsbill.cam.uchc.edu/Xwords/z-x_Mask_ver_-32bkg_x255over408_15x33rect.tif"));
 		gaussianDiffImp.getProcessor().setMinAndMax(0, 255);
@@ -47,30 +50,35 @@ public class CorrectDispimZStreaks implements PlugIn {
 		GenericDialog gd = new GenericDialog("Specify Z Correction Options...");
 //		IJ.log(Prefs.getPrefsDir());
 		
-		gd.addNumericField("MaskWidth", 1, 0);
+		gd.addNumericField("MaskWidth", 3, 0);
 		gd.addNumericField("Mask Scale Factor", 0.125, 5);
 		gd.addNumericField("Max Tolerance", 10, 0);
 		gd.addNumericField("Min Tolerance", 10, 0);
-		gd.addNumericField("Iterations at Min Tol", 20, 0);
+		gd.addNumericField("Iterations at Min Tol", 50, 0);
 		gd.addNumericField("BlankWidth", 3, 0);
 		gd.addNumericField("BlankHeight", 3, 0);
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
-		int maskWidth = (int) gd.getNextNumber();
-		double maskScaleFactor = (double) gd.getNextNumber();
+		 maskWidth = (int) gd.getNextNumber();
+		 maskScaleFactor = (double) gd.getNextNumber();
 		Prefs.set("Zstreak.maskScaleFactor", maskScaleFactor);
-		int maxTolerance = (int) gd.getNextNumber();
+		 maxTolerance = (int) gd.getNextNumber();
 		Prefs.set("Zstreak.maxTolerance", maxTolerance);
-		int minTolerance = (int) gd.getNextNumber();
+		 minTolerance = (int) gd.getNextNumber();
 		Prefs.set("Zstreak.minTolerance", minTolerance);
-		int iterations = (int) gd.getNextNumber();
+		 iterations = (int) gd.getNextNumber();
 		Prefs.set("Zstreak.iterations", iterations);
-		int blankWidth = (int) gd.getNextNumber();
+		 blankWidth = (int) gd.getNextNumber();
 		Prefs.set("Zstreak.blankWidth", blankWidth);
-		int blankHeight = (int) gd.getNextNumber();
+		 blankHeight = (int) gd.getNextNumber();
 		Prefs.set("Zstreak.blankHeight", blankHeight);
 		Prefs.savePreferences();	
+		if (imp.getNFrames()>1) {
+			this.doHyperStack(imp);
+			return;
+		}
+
 		imp.setSlice(1);
 
 		gaussianDiffIP.setRoi((gaussianDiffIP.getWidth()-1-maskWidth)/2, 0, maskWidth, gaussianDiffIP.getHeight());
@@ -200,7 +208,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 			impHS_dup.getCalibration().pixelWidth = impHS.getCalibration().pixelWidth;
 			impHS_dup.getCalibration().pixelHeight = impHS.getCalibration().pixelHeight;
 			impHS_dup.getCalibration().pixelDepth = impHS.getCalibration().pixelDepth;
-			impHS_dup.show();
+//			impHS_dup.show();
 			IJ.run(impHS_dup, "Select All", "");
 			Slicer slicer = new Slicer();
 			slicer.setNointerpolate(false); //clumsy, don't use true ever
@@ -211,15 +219,16 @@ public class CorrectDispimZStreaks implements PlugIn {
 			impHS_duprs.getCalibration().pixelWidth = impHS.getCalibration().pixelWidth;
 			impHS_duprs.getCalibration().pixelHeight = impHS.getCalibration().pixelHeight;
 			impHS_duprs.getCalibration().pixelDepth = impHS.getCalibration().pixelWidth;
-			impHS_duprs.show();
-			IJ.run(impHS_duprs, "Correct diSPIM ZStreaks...", "maskwidth=3 mask=1.0 max=10 min=10 iterations=50 blankwidth=1 blankheight=1");
+//			impHS_duprs.show();
+			IJ.run(impHS_duprs, "Correct diSPIM ZStreaks...", "maskwidth="+maskWidth+" mask="+maskScaleFactor+" max="+maxTolerance+" min="+minTolerance+" iterations="+iterations+" blankwidth="+blankWidth+" blankheight="+blankHeight+"");
+			
 			impHS_duprs.updateAndRepaintWindow();
-			IJ.runMacro("waitForUser(2);");
+//			IJ.runMacro("waitForUser(2);");
 			slicer.setNointerpolate(false); //clumsy, don't use true ever
 			slicer.setOutputZSpacing(1);  
 			IJ.run(impHS_duprs, "Select All", "");
 			ImagePlus impHS_duprsrs = slicer.reslice(impHS_duprs);
-			impHS_duprsrs.show();
+//			impHS_duprsrs.show();
 //			IJ.runMacro("waitForUser(3);");
 			IJ.saveAsTiff(impHS_duprsrs, path+titleShort+"_"+f+".tif");
 			impHS_dup.close();
