@@ -188,7 +188,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 		String path= IJ.getDirectory("");
 		Roi roi = impHS.getRoi();
 		String title = impHS.getTitle();
-		String[] titleChunks =  title.split( "[:"+File.separator+"]");
+		String[] titleChunks =  title.split( "[:\\"+File.separator+"]");
 		int lot = titleChunks.length;
 		String titleShort  = titleChunks[0]+titleChunks[lot-1];
 		IJ.log(path+titleShort+"_#.tif");
