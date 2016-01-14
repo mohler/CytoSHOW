@@ -1,10 +1,13 @@
 package org.vcell.gloworm;
 
+import java.awt.Checkbox;
 import java.awt.Color;
 import java.awt.Polygon;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
+
+import javax.swing.JFrame;
 
 import javafx.scene.control.Spinner;
 import ij.IJ;
@@ -36,10 +39,13 @@ public class CorrectDispimZStreaks implements PlugIn {
 	private int iterations;
 	private int blankWidth;
 	private int blankHeight;
+	private static Checkbox monitorCheckbox;
+	private ImagePlus monitorImp;
+	private ImagePlus targetImp;
+	private static JFrame monitorFrame;
 
 	public void run(String arg) {
 		imp = IJ.getImage();
-		ImagePlus targetImp = new ImagePlus();
 		int slice = imp.getSlice();
 		ImagePlus gaussianDiffImp = (new ImagePlus("http://fsbill.cam.uchc.edu/Xwords/z-x_Mask_ver_-32bkg_x255over408_15x33rect.tif"));
 		gaussianDiffImp.getProcessor().setMinAndMax(0, 255);
@@ -75,10 +81,19 @@ public class CorrectDispimZStreaks implements PlugIn {
 		 blankHeight = (int) gd.getNextNumber();
 		Prefs.set("Zstreak.blankHeight", blankHeight);
 		Prefs.savePreferences();	
+		if (monitorFrame == null || monitorCheckbox == null) {
+			monitorFrame = new JFrame("Monitor processing visually?");
+			monitorCheckbox= new Checkbox("Monitor processing visually?");
+			monitorFrame.add(monitorCheckbox);
+			monitorFrame.pack();
+			monitorFrame.setVisible(true);
+		}
 		if (imp.getNFrames()>1) {
 			this.doHyperStack(imp);
 			return;
 		}
+		targetImp = new ImagePlus("Process Monitor");
+		monitorImp = new ImagePlus("Target Monitor");
 
 		imp.setSlice(1);
 
@@ -122,6 +137,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 			ArrayList<String> maxCum = new ArrayList<String>();
 			ImageProcessor targetIP = imp.getProcessor().duplicate();
 			targetImp.setProcessor(targetIP);
+			monitorImp.setProcessor(targetIP);
 			
 			for (int t=minTolerance;t>maxTolerance;t--) {
 				mf = new MaximumFinder();
@@ -174,13 +190,16 @@ public class CorrectDispimZStreaks implements PlugIn {
 
 					}
 				}
-				if (!imp.isVisible())
-					imp.show();
-//				imp.updateAndRepaintWindow();
-//				targetImp.setProcessor(targetIP);
-//				if (!targetImp.isVisible())
-//					targetImp.show();
-//				targetImp.updateAndRepaintWindow();
+				if (getMonitorStatus()) {				
+					if (!monitorImp.isVisible())
+						monitorImp.show();
+					monitorImp.setProcessor(imp.getProcessor());
+					monitorImp.updateAndRepaintWindow();
+					targetImp.setProcessor(targetIP);
+					if (!targetImp.isVisible())
+						targetImp.show();
+					targetImp.updateAndRepaintWindow();
+				}
 //				IJ.runMacro("waitForUser(1);");
 			}
 //			for(int x=0;x<imp.getWidth();x++) {
@@ -195,6 +214,12 @@ public class CorrectDispimZStreaks implements PlugIn {
 		imp.updateAndDraw();
 		targetImp.close();
 		targetImp.flush();
+		monitorImp.close();
+		monitorImp.flush();
+	}
+
+	private boolean getMonitorStatus() {
+		return (monitorCheckbox != null && monitorCheckbox.getState());
 	}
 
 	public void doHyperStack(ImagePlus impHS){
@@ -212,6 +237,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 		int z = dim[3];
 		int t = dim[4];
 		
+
 		for(int f=1;f<=t;f++){
 			IJ.log(path+titleShort+"_"+f+".tif");
 			impHS.setRoi(roi);
