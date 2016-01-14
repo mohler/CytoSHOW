@@ -39,6 +39,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 
 	public void run(String arg) {
 		imp = IJ.getImage();
+		ImagePlus targetImp = new ImagePlus();
 		int slice = imp.getSlice();
 		ImagePlus gaussianDiffImp = (new ImagePlus("http://fsbill.cam.uchc.edu/Xwords/z-x_Mask_ver_-32bkg_x255over408_15x33rect.tif"));
 		gaussianDiffImp.getProcessor().setMinAndMax(0, 255);
@@ -120,6 +121,8 @@ public class CorrectDispimZStreaks implements PlugIn {
 			IJ.log("bkgdMode = "+bkgdMode+", bkgdMin = "+bkgdMin);
 			ArrayList<String> maxCum = new ArrayList<String>();
 			ImageProcessor targetIP = imp.getProcessor().duplicate();
+			targetImp.setProcessor(targetIP);
+			
 			for (int t=minTolerance;t>maxTolerance;t--) {
 				mf = new MaximumFinder();
 				Polygon maxPoly = mf.getMaxima(targetIP, t, false);
@@ -171,6 +174,14 @@ public class CorrectDispimZStreaks implements PlugIn {
 
 					}
 				}
+				if (!imp.isVisible())
+					imp.show();
+//				imp.updateAndRepaintWindow();
+//				targetImp.setProcessor(targetIP);
+//				if (!targetImp.isVisible())
+//					targetImp.show();
+//				targetImp.updateAndRepaintWindow();
+//				IJ.runMacro("waitForUser(1);");
 			}
 //			for(int x=0;x<imp.getWidth();x++) {
 //				for(int y=0;y<imp.getHeight();y++) {
@@ -182,6 +193,8 @@ public class CorrectDispimZStreaks implements PlugIn {
 		}
 		imp.setSlice(slice);
 		imp.updateAndDraw();
+		targetImp.close();
+		targetImp.flush();
 	}
 
 	public void doHyperStack(ImagePlus impHS){
