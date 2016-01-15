@@ -60,7 +60,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 //		IJ.log(Prefs.getPrefsDir());
 		
 		gd.addNumericField("MaskWidth", 1, 0);
-		gd.addNumericField("Mask Scale Factor", 0.125, 5);
+		gd.addNumericField("Mask Scale Factor", 0.100, 3);
 		gd.addNumericField("Max Tolerance", 10, 0);
 		gd.addNumericField("Min Tolerance", 10, 0);
 		gd.addNumericField("Iterations at Min Tol", 50, 0);
@@ -122,21 +122,6 @@ public class CorrectDispimZStreaks implements PlugIn {
 		
 		for (int s=1;s<=imp.getStackSize();s++) {
 			imp.setSlice(s);
-
-//			int bkgdMode = 0;
-//			int bkgdMin = 0;
-//			int[] histo = imp.getProcessor().getHistogram();
-//			//for mode value as bkgd
-//			for (int h = 0; h < histo.length; h++) {
-//				bkgdMode = histo[h] >bkgdMode? h: bkgdMode;
-//			}
-//			//for lowest non-zero value as bkgd
-//			for (int h = 0; h < histo.length; h++) {
-//				if (histo[h] >0) {
-//					bkgdMin = histo[h];
-//					h = histo.length;
-//				}
-//			}
 
 			IJ.log("bkgdMode = "+bkgdMode+", bkgdMin = "+bkgdMin);
 			ArrayList<String> maxCum = new ArrayList<String>();
