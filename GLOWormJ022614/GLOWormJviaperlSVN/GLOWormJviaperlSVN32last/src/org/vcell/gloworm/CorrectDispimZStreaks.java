@@ -43,6 +43,8 @@ public class CorrectDispimZStreaks implements PlugIn {
 	private ImagePlus monitorImp;
 	private ImagePlus targetImp;
 	private static JFrame monitorFrame;
+	private int[] maxXs;
+	private int[] maxYs;
 
 	public void run(String arg) {
 		imp = IJ.getImage();
@@ -57,13 +59,13 @@ public class CorrectDispimZStreaks implements PlugIn {
 		GenericDialog gd = new GenericDialog("Specify Z Correction Options...");
 //		IJ.log(Prefs.getPrefsDir());
 		
-		gd.addNumericField("MaskWidth", 3, 0);
+		gd.addNumericField("MaskWidth", 1, 0);
 		gd.addNumericField("Mask Scale Factor", 0.125, 5);
 		gd.addNumericField("Max Tolerance", 10, 0);
 		gd.addNumericField("Min Tolerance", 10, 0);
 		gd.addNumericField("Iterations at Min Tol", 50, 0);
-		gd.addNumericField("BlankWidth", 3, 0);
-		gd.addNumericField("BlankHeight", 3, 0);
+		gd.addNumericField("BlankWidth", 1, 0);
+		gd.addNumericField("BlankHeight", 1, 0);
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
@@ -100,7 +102,9 @@ public class CorrectDispimZStreaks implements PlugIn {
 		gaussianDiffIP.setRoi((gaussianDiffIP.getWidth()-1-maskWidth)/2, 0, maskWidth, gaussianDiffIP.getHeight());
 		gaussianDiffIP = gaussianDiffIP.crop();
 		gaussianDiffImp = new ImagePlus(gaussianDiffImp.getTitle(),gaussianDiffIP);
-		
+
+		imp.setSlice(1);
+
 		int bkgdMode = 0;
 		int bkgdMin = 0;
 		int[] histo = imp.getProcessor().getHistogram();
@@ -115,6 +119,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 				h = histo.length;
 			}
 		}
+		
 		for (int s=1;s<=imp.getStackSize();s++) {
 			imp.setSlice(s);
 
@@ -138,13 +143,18 @@ public class CorrectDispimZStreaks implements PlugIn {
 			ImageProcessor targetIP = imp.getProcessor().duplicate();
 			targetImp.setProcessor(targetIP);
 			monitorImp.setProcessor(targetIP);
-			
+			maxXs = new int[10];
+			maxYs = new int[10];
+			int minMax = 1000000;
+			int bottomCount = 0;
+			boolean bottomedOut = false;
+
 			for (int t=minTolerance;t>maxTolerance;t--) {
 				mf = new MaximumFinder();
 				Polygon maxPoly = mf.getMaxima(targetIP, t, false);
 
-				int[] maxXs = new int[maxPoly.npoints];
-				int[] maxYs = new int[maxPoly.npoints];
+				maxXs = new int[maxPoly.npoints];
+				maxYs = new int[maxPoly.npoints];
 
 				maxXs = maxPoly.xpoints;
 				maxYs = maxPoly.ypoints;
@@ -165,12 +175,21 @@ public class CorrectDispimZStreaks implements PlugIn {
 					}
 				}
 			}
-			for (int t=iterations;t>0;t--) {
+			
+			
+//			for (int t=iterations;t>0;t--) {
+//			while (maxXs.length != minMax && bottomCount < 20 ) {
+			while (!bottomedOut) {
+				bottomedOut = true;
+//				if (maxXs.length < minMax)
+//					minMax = maxXs.length;
+//				if (maxXs.length == minMax)
+//					bottomCount++;
 				mf = new MaximumFinder();
 				Polygon maxPoly = mf.getMaxima(targetIP, minTolerance, false);
 
-				int[] maxXs = new int[maxPoly.npoints];
-				int[] maxYs = new int[maxPoly.npoints];
+				maxXs = new int[maxPoly.npoints];
+				maxYs = new int[maxPoly.npoints];
 
 				maxXs = maxPoly.xpoints;
 				maxYs = maxPoly.ypoints;
@@ -180,6 +199,8 @@ public class CorrectDispimZStreaks implements PlugIn {
 					if (!maxCum.contains(maxXs[n]+","+maxYs[n])) {
 						maxCum.add(maxXs[n]+","+maxYs[n]);
 						ImageProcessor modIP = gaussianDiffIP.duplicate();
+						if (bkgdMode < imp.getProcessor().getPixel(maxXs[n], maxYs[n]))
+							bottomedOut = false;
 						modIP.multiply(maskScaleFactor * (((double)imp.getProcessor().getPixel(maxXs[n], maxYs[n])))/255);
 						imp.getProcessor().copyBits(modIP, maxXs[n], maxYs[n]-gaussianDiffIP.getHeight()/2, Blitter.DIFFERENCE);
 						targetIP.copyBits(modIP, maxXs[n], maxYs[n]-gaussianDiffIP.getHeight()/2, Blitter.DIFFERENCE);
