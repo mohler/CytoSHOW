@@ -43,8 +43,8 @@ public class CorrectDispimZStreaks implements PlugIn {
 	private ImagePlus monitorImp;
 	private ImagePlus targetImp;
 	private static JFrame monitorFrame;
-	private int[] maxXs;
-	private int[] maxYs;
+//	private int[] maxXs;
+//	private int[] maxYs;
 
 	public void run(String arg) {
 		imp = IJ.getImage();
@@ -119,8 +119,8 @@ public class CorrectDispimZStreaks implements PlugIn {
 				h = histo.length;
 			}
 		}
-
-		for (int ss=1;ss<=imp.getStackSize();ss+=20) {
+		final boolean[] doneDestreak = new boolean[imp.getStackSize()];
+		for (int ss=1;ss<=imp.getStackSize();ss++) {
 			final ImageProcessor fIP= imp.getStack().getProcessor(ss);
 			final int s = ss;
 			final int fbkgdMode = bkgdMode;
@@ -133,8 +133,8 @@ public class CorrectDispimZStreaks implements PlugIn {
 					 ImageProcessor targetIP = fIP.duplicate();
 					targetImp.setProcessor(targetIP);
 					monitorImp.setProcessor(targetIP);
-					maxXs = new int[10];
-					maxYs = new int[10];
+					int[]  maxXs = new int[10];
+					int[]  maxYs = new int[10];
 					int minMax = 1000000;
 					int bottomCount = 0;
 
@@ -178,8 +178,8 @@ public class CorrectDispimZStreaks implements PlugIn {
 						mf = new MaximumFinder();
 						Polygon maxPoly = mf.getMaxima(targetIP, minTolerance, false);
 
-						int[] maxXs = new int[maxPoly.npoints];
-						int[] maxYs = new int[maxPoly.npoints];
+						maxXs = new int[maxPoly.npoints];
+						maxYs = new int[maxPoly.npoints];
 
 						maxXs = maxPoly.xpoints;
 						maxYs = maxPoly.ypoints;
@@ -202,6 +202,9 @@ public class CorrectDispimZStreaks implements PlugIn {
 							}
 						}
 					}
+					imp.getStack().getProcessor(s).setPixels(fIP.getPixels());
+					doneDestreak[s-1] = true;
+					
 					if (getMonitorStatus()) {				
 						if (!monitorImp.isVisible())
 							monitorImp.show();
@@ -223,6 +226,16 @@ public class CorrectDispimZStreaks implements PlugIn {
 			//					}
 			//				}
 			//			}
+		}
+		boolean doneAllSlices = false;
+		while (!doneAllSlices) {
+			doneAllSlices = true;
+			for (int b=1; b<doneDestreak.length; b++) {
+				if (doneDestreak[b] == false) {
+					doneAllSlices = false;
+					continue;
+				}
+			}
 		}
 		imp.setSlice(slice);
 		imp.updateAndDraw();
