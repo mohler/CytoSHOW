@@ -43,8 +43,8 @@ public class CorrectDispimZStreaks implements PlugIn {
 	private ImagePlus monitorImp;
 	private ImagePlus targetImp;
 	private static JFrame monitorFrame;
-//	private int[] maxXs;
-//	private int[] maxYs;
+	private int[] maxXs;
+	private int[] maxYs;
 
 	public void run(String arg) {
 		imp = IJ.getImage();
@@ -57,8 +57,8 @@ public class CorrectDispimZStreaks implements PlugIn {
 		WindowManager.setTempCurrentImage(null);
 		gaussianDiffIP = gaussianDiffImp.getProcessor();
 		GenericDialog gd = new GenericDialog("Specify Z Correction Options...");
-		//		IJ.log(Prefs.getPrefsDir());
-
+//		IJ.log(Prefs.getPrefsDir());
+		
 		gd.addNumericField("MaskWidth", 1, 0);
 		gd.addNumericField("Mask Scale Factor", 0.100, 3);
 		gd.addNumericField("Max Tolerance", 10, 0);
@@ -69,18 +69,18 @@ public class CorrectDispimZStreaks implements PlugIn {
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
-		maskWidth = (int) gd.getNextNumber();
-		maskScaleFactor = (double) gd.getNextNumber();
+		 maskWidth = (int) gd.getNextNumber();
+		 maskScaleFactor = (double) gd.getNextNumber();
 		Prefs.set("Zstreak.maskScaleFactor", maskScaleFactor);
-		maxTolerance = (int) gd.getNextNumber();
+		 maxTolerance = (int) gd.getNextNumber();
 		Prefs.set("Zstreak.maxTolerance", maxTolerance);
-		minTolerance = (int) gd.getNextNumber();
+		 minTolerance = (int) gd.getNextNumber();
 		Prefs.set("Zstreak.minTolerance", minTolerance);
-		iterations = (int) gd.getNextNumber();
+		 iterations = (int) gd.getNextNumber();
 		Prefs.set("Zstreak.iterations", iterations);
-		blankWidth = (int) gd.getNextNumber();
+		 blankWidth = (int) gd.getNextNumber();
 		Prefs.set("Zstreak.blankWidth", blankWidth);
-		blankHeight = (int) gd.getNextNumber();
+		 blankHeight = (int) gd.getNextNumber();
 		Prefs.set("Zstreak.blankHeight", blankHeight);
 		Prefs.savePreferences();	
 		if (monitorFrame == null || monitorCheckbox == null) {
@@ -119,123 +119,102 @@ public class CorrectDispimZStreaks implements PlugIn {
 				h = histo.length;
 			}
 		}
-		final boolean[] doneDestreak = new boolean[imp.getStackSize()];
-		for (int ss=1;ss<=imp.getStackSize();ss++) {
-			final ImageProcessor fIP= imp.getStack().getProcessor(ss);
-			final int s = ss;
-			final int fbkgdMode = bkgdMode;
-			final int fbkgdMin = bkgdMin;
-			new Thread(new Runnable() {
-				public void run() {
+		
+		for (int s=1;s<=imp.getStackSize();s++) {
+			imp.setSlice(s);
 
-					IJ.log("bkgdMode = "+fbkgdMode+", bkgdMin = "+fbkgdMin);
-					 ArrayList<String> maxCum = new ArrayList<String>();
-					 ImageProcessor targetIP = fIP.duplicate();
+			IJ.log("bkgdMode = "+bkgdMode+", bkgdMin = "+bkgdMin);
+			ArrayList<String> maxCum = new ArrayList<String>();
+			ImageProcessor targetIP = imp.getProcessor().duplicate();
+			targetImp.setProcessor(targetIP);
+			monitorImp.setProcessor(targetIP);
+			maxXs = new int[10];
+			maxYs = new int[10];
+			int minMax = 1000000;
+			int bottomCount = 0;
+			boolean bottomedOut = false;
+
+			for (int t=minTolerance;t>maxTolerance;t--) {
+				mf = new MaximumFinder();
+				Polygon maxPoly = mf.getMaxima(targetIP, t, false);
+
+				maxXs = new int[maxPoly.npoints];
+				maxYs = new int[maxPoly.npoints];
+
+				maxXs = maxPoly.xpoints;
+				maxYs = maxPoly.ypoints;
+				IJ.log(maxXs.length+" maxima");
+
+				for (int n=0; n<maxXs.length; n++) {
+					if (!maxCum.contains(maxXs[n]+","+maxYs[n])) {
+						maxCum.add(maxXs[n]+","+maxYs[n]);
+						ImageProcessor modIP = gaussianDiffIP.duplicate();
+						modIP.multiply(maskScaleFactor * (((double)imp.getProcessor().getPixel(maxXs[n], maxYs[n])))/255);
+						imp.getProcessor().copyBits(modIP, maxXs[n], maxYs[n]-gaussianDiffIP.getHeight()/2, Blitter.DIFFERENCE);
+						targetIP.copyBits(modIP, maxXs[n], maxYs[n]-gaussianDiffIP.getHeight()/2, Blitter.DIFFERENCE);
+						Color fgc = Toolbar.getForegroundColor();
+						Toolbar.setForegroundColor(Color.BLACK);
+						targetIP.fillOval(maxXs[n]-blankWidth/2, maxYs[n]-blankHeight/2, blankWidth, blankHeight);
+						Toolbar.setForegroundColor(fgc);
+
+					}
+				}
+			}
+			
+			
+//			for (int t=iterations;t>0;t--) {
+//			while (maxXs.length != minMax && bottomCount < 20 ) {
+			while (!bottomedOut) {
+				bottomedOut = true;
+//				if (maxXs.length < minMax)
+//					minMax = maxXs.length;
+//				if (maxXs.length == minMax)
+//					bottomCount++;
+				mf = new MaximumFinder();
+				Polygon maxPoly = mf.getMaxima(targetIP, minTolerance, false);
+
+				maxXs = new int[maxPoly.npoints];
+				maxYs = new int[maxPoly.npoints];
+
+				maxXs = maxPoly.xpoints;
+				maxYs = maxPoly.ypoints;
+				IJ.log(maxXs.length+" maxima");
+				
+				for (int n=0; n<maxXs.length; n++) {
+					if (!maxCum.contains(maxXs[n]+","+maxYs[n])) {
+						maxCum.add(maxXs[n]+","+maxYs[n]);
+						ImageProcessor modIP = gaussianDiffIP.duplicate();
+						if (bkgdMode < imp.getProcessor().getPixel(maxXs[n], maxYs[n]))
+							bottomedOut = false;
+						modIP.multiply(maskScaleFactor * (((double)imp.getProcessor().getPixel(maxXs[n], maxYs[n])))/255);
+						imp.getProcessor().copyBits(modIP, maxXs[n], maxYs[n]-gaussianDiffIP.getHeight()/2, Blitter.DIFFERENCE);
+						targetIP.copyBits(modIP, maxXs[n], maxYs[n]-gaussianDiffIP.getHeight()/2, Blitter.DIFFERENCE);
+						Color fgc = Toolbar.getForegroundColor();
+						Toolbar.setForegroundColor(Color.BLACK);
+						targetIP.fillOval(maxXs[n]-blankWidth/2, maxYs[n]-blankHeight/2, blankWidth, blankHeight);
+						Toolbar.setForegroundColor(fgc);
+
+					}
+				}
+				if (getMonitorStatus()) {				
+					if (!monitorImp.isVisible())
+						monitorImp.show();
+					monitorImp.setProcessor(imp.getProcessor());
+					monitorImp.updateAndRepaintWindow();
 					targetImp.setProcessor(targetIP);
-					monitorImp.setProcessor(targetIP);
-					int[]  maxXs = new int[10];
-					int[]  maxYs = new int[10];
-					int minMax = 1000000;
-					int bottomCount = 0;
-
-					for (int t=minTolerance;t>maxTolerance;t--) {
-						mf = new MaximumFinder();
-						Polygon maxPoly = mf.getMaxima(targetIP, t, false);
-
-						maxXs = new int[maxPoly.npoints];
-						maxYs = new int[maxPoly.npoints];
-
-						maxXs = maxPoly.xpoints;
-						maxYs = maxPoly.ypoints;
-						IJ.log(maxXs.length+" maxima");
-
-						for (int n=0; n<maxXs.length; n++) {
-							if (!maxCum.contains(maxXs[n]+","+maxYs[n])) {
-								maxCum.add(maxXs[n]+","+maxYs[n]);
-								ImageProcessor modIP = gaussianDiffIP.duplicate();
-								modIP.multiply(maskScaleFactor * (((double)fIP.getPixel(maxXs[n], maxYs[n])))/255);
-								fIP.copyBits(modIP, maxXs[n], maxYs[n]-gaussianDiffIP.getHeight()/2, Blitter.DIFFERENCE);
-								targetIP.copyBits(modIP, maxXs[n], maxYs[n]-gaussianDiffIP.getHeight()/2, Blitter.DIFFERENCE);
-								Color fgc = Toolbar.getForegroundColor();
-								Toolbar.setForegroundColor(Color.BLACK);
-								targetIP.fillOval(maxXs[n]-blankWidth/2, maxYs[n]-blankHeight/2, blankWidth, blankHeight);
-								Toolbar.setForegroundColor(fgc);
-
-							}
-						}
-					}
-
-
-					//			for (int t=iterations;t>0;t--) {
-					//			while (maxXs.length != minMax && bottomCount < 20 ) {
-					boolean bottomedOut = false;
-					while (!bottomedOut) {
-						bottomedOut = true;
-						//				if (maxXs.length < minMax)
-						//					minMax = maxXs.length;
-						//				if (maxXs.length == minMax)
-						//					bottomCount++;
-						mf = new MaximumFinder();
-						Polygon maxPoly = mf.getMaxima(targetIP, minTolerance, false);
-
-						maxXs = new int[maxPoly.npoints];
-						maxYs = new int[maxPoly.npoints];
-
-						maxXs = maxPoly.xpoints;
-						maxYs = maxPoly.ypoints;
-						IJ.log(maxXs.length+" maxima");
-
-						for (int n=0; n<maxXs.length; n++) {
-
-							if (!maxCum.contains(maxXs[n]+","+maxYs[n])) {
-								maxCum.add(maxXs[n]+","+maxYs[n]);
-								ImageProcessor modIP = gaussianDiffIP.duplicate();
-								if (fbkgdMode < fIP.getPixel(maxXs[n], maxYs[n]))
-									bottomedOut = false;
-								modIP.multiply(maskScaleFactor * (((double)fIP.getPixel(maxXs[n], maxYs[n])))/255);
-								fIP.copyBits(modIP, maxXs[n], maxYs[n]-gaussianDiffIP.getHeight()/2, Blitter.DIFFERENCE);
-								targetIP.copyBits(modIP, maxXs[n], maxYs[n]-gaussianDiffIP.getHeight()/2, Blitter.DIFFERENCE);
-								Color fgc = Toolbar.getForegroundColor();
-								Toolbar.setForegroundColor(Color.BLACK);
-								targetIP.fillOval(maxXs[n]-blankWidth/2, maxYs[n]-blankHeight/2, blankWidth, blankHeight);
-								Toolbar.setForegroundColor(fgc);
-							}
-						}
-					}
-					imp.getStack().getProcessor(s).setPixels(fIP.getPixels());
-					doneDestreak[s-1] = true;
-					
-					if (getMonitorStatus()) {				
-						if (!monitorImp.isVisible())
-							monitorImp.show();
-						monitorImp.setProcessor(fIP);
-						monitorImp.updateAndRepaintWindow();
-						targetImp.setProcessor(targetIP);
-						if (!targetImp.isVisible())
-							targetImp.show();
-						targetImp.updateAndRepaintWindow();
-					}
-					//				IJ.runMacro("waitForUser(1);");
+					if (!targetImp.isVisible())
+						targetImp.show();
+					targetImp.updateAndRepaintWindow();
 				}
+//				IJ.runMacro("waitForUser(1);");
 			}
-					).start();
-			//			for(int x=0;x<imp.getWidth();x++) {
-			//				for(int y=0;y<imp.getHeight();y++) {
-			//					if(imp.getProcessor().get(x,y) < bkgdMode) {
-			//						imp.getProcessor().set(x,y, bkgdMode);
-			//					}
-			//				}
-			//			}
-		}
-		boolean doneAllSlices = false;
-		while (!doneAllSlices) {
-			doneAllSlices = true;
-			for (int b=1; b<doneDestreak.length; b++) {
-				if (doneDestreak[b] == false) {
-					doneAllSlices = false;
-					continue;
-				}
-			}
+//			for(int x=0;x<imp.getWidth();x++) {
+//				for(int y=0;y<imp.getHeight();y++) {
+//					if(imp.getProcessor().get(x,y) < bkgdMode) {
+//						imp.getProcessor().set(x,y, bkgdMode);
+//					}
+//				}
+//			}
 		}
 		imp.setSlice(slice);
 		imp.updateAndDraw();
@@ -263,7 +242,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 		int c = dim[2];
 		int z = dim[3];
 		int t = dim[4];
-
+		
 
 		for(int f=1;f<=t;f++){
 			IJ.log(path+titleShort+"_"+f+".tif");
@@ -278,7 +257,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 			impHS_dup.getCalibration().pixelWidth = impHS.getCalibration().pixelWidth;
 			impHS_dup.getCalibration().pixelHeight = impHS.getCalibration().pixelHeight;
 			impHS_dup.getCalibration().pixelDepth = impHS.getCalibration().pixelDepth;
-			//			impHS_dup.show();
+//			impHS_dup.show();
 			IJ.run(impHS_dup, "Select All", "");
 			Slicer slicer = new Slicer();
 			slicer.setNointerpolate(false); //clumsy, don't use true ever
@@ -289,17 +268,17 @@ public class CorrectDispimZStreaks implements PlugIn {
 			impHS_duprs.getCalibration().pixelWidth = impHS.getCalibration().pixelWidth;
 			impHS_duprs.getCalibration().pixelHeight = impHS.getCalibration().pixelHeight;
 			impHS_duprs.getCalibration().pixelDepth = impHS.getCalibration().pixelWidth;
-			//			impHS_duprs.show();
+//			impHS_duprs.show();
 			IJ.run(impHS_duprs, "Correct diSPIM ZStreaks...", "maskwidth="+maskWidth+" mask="+maskScaleFactor+" max="+maxTolerance+" min="+minTolerance+" iterations="+iterations+" blankwidth="+blankWidth+" blankheight="+blankHeight+"");
-
+			
 			impHS_duprs.updateAndRepaintWindow();
-			//			IJ.runMacro("waitForUser(2);");
+//			IJ.runMacro("waitForUser(2);");
 			slicer.setNointerpolate(false); //clumsy, don't use true ever
 			slicer.setOutputZSpacing(1);  
 			IJ.run(impHS_duprs, "Select All", "");
 			ImagePlus impHS_duprsrs = slicer.reslice(impHS_duprs);
-			//			impHS_duprsrs.show();
-			//			IJ.runMacro("waitForUser(3);");
+//			impHS_duprsrs.show();
+//			IJ.runMacro("waitForUser(3);");
 			IJ.saveAsTiff(impHS_duprsrs, path+titleShort+"_"+f+".tif");
 			impHS_dup.close();
 			impHS_dup.flush();
