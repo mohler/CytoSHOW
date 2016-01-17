@@ -3,8 +3,9 @@ package org.vcell.gloworm;
 import java.awt.Checkbox;
 import java.awt.Color;
 import java.awt.Polygon;
-import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
@@ -49,7 +50,10 @@ public class CorrectDispimZStreaks implements PlugIn {
 	public void run(String arg) {
 		imp = IJ.getImage();
 		int slice = imp.getSlice();
-		ImagePlus gaussianDiffImp = (new ImagePlus("http://fsbill.cam.uchc.edu/Xwords/z-x_Mask_ver_-32bkg_x255over408_15x33rect.tif"));
+//		ImagePlus gaussianDiffImp = (new ImagePlus("http://fsbill.cam.uchc.edu/Xwords/z-x_Mask_ver_-32bkg_x255over408_15x33rect.tif"));
+		URL url = ImageWindow.class.getResource("images/z-x_Mask_ver_-32bkg_x255over408_15x33rect.tif");
+		if (url==null) return;
+		ImagePlus gaussianDiffImp = new ImagePlus(url.getPath());
 		gaussianDiffImp.getProcessor().setMinAndMax(0, 255);
 		WindowManager.setTempCurrentImage(gaussianDiffImp);
 		if (imp.getBitDepth() == 8)
