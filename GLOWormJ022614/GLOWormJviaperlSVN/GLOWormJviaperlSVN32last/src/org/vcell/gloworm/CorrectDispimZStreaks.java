@@ -2,12 +2,16 @@ package org.vcell.gloworm;
 
 import java.awt.Checkbox;
 import java.awt.Color;
+import java.awt.Image;
 import java.awt.Polygon;
+import java.awt.image.ImageProducer;
 import java.io.File;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.net.URL;
 import java.util.ArrayList;
 
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
 import javafx.scene.control.Spinner;
@@ -19,6 +23,7 @@ import ij.gui.GenericDialog;
 import ij.gui.ImageWindow;
 import ij.gui.Roi;
 import ij.gui.Toolbar;
+import ij.io.Opener;
 import ij.measure.ResultsTable;
 import ij.plugin.Converter;
 import ij.plugin.PlugIn;
@@ -29,10 +34,12 @@ import ij.process.Blitter;
 import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
 
+import com.sun.management.OperatingSystemMXBean; 
+
+
 public class CorrectDispimZStreaks implements PlugIn {
 	ImagePlus imp;
 	ImageProcessor gaussianDiffIP;
-	private MaximumFinder mf;
 	private int maskWidth;
 	private double maskScaleFactor;
 	private int maxTolerance;
@@ -40,6 +47,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 	private int iterations;
 	private int blankWidth;
 	private int blankHeight;
+	private double bkgdModeCutoffFactor;
 	private static Checkbox monitorCheckbox;
 	private ImagePlus monitorImp;
 	private ImagePlus targetImp;
@@ -53,7 +61,13 @@ public class CorrectDispimZStreaks implements PlugIn {
 //		ImagePlus gaussianDiffImp = (new ImagePlus("http://fsbill.cam.uchc.edu/Xwords/z-x_Mask_ver_-32bkg_x255over408_15x33rect.tif"));
 		URL url = ImageWindow.class.getResource("images/z-x_Mask_ver_-32bkg_x255over408_15x33rect.tif");
 		if (url==null) return;
-		ImagePlus gaussianDiffImp = new ImagePlus(url.getPath());
+		ImagePlus gaussianDiffImp = null;
+		try {
+			gaussianDiffImp = (new Opener()).openTiff(url.openStream(), "");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		gaussianDiffImp.getProcessor().setMinAndMax(0, 255);
 		WindowManager.setTempCurrentImage(gaussianDiffImp);
 		if (imp.getBitDepth() == 8)
@@ -70,6 +84,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 		gd.addNumericField("Iterations at Min Tol", 50, 0);
 		gd.addNumericField("BlankWidth", 1, 0);
 		gd.addNumericField("BlankHeight", 1, 0);
+		gd.addNumericField("Bkgd Mode Cutoff Factor", 1.0, 2);
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
@@ -86,6 +101,8 @@ public class CorrectDispimZStreaks implements PlugIn {
 		Prefs.set("Zstreak.blankWidth", blankWidth);
 		blankHeight = (int) gd.getNextNumber();
 		Prefs.set("Zstreak.blankHeight", blankHeight);
+		bkgdModeCutoffFactor = (int) gd.getNextNumber();
+		Prefs.set("Zstreak.bkgdModeCutoffFactor", bkgdModeCutoffFactor);
 		Prefs.savePreferences();	
 		if (monitorFrame == null || monitorCheckbox == null) {
 			monitorFrame = new JFrame("Monitor processing visually?");
@@ -129,7 +146,18 @@ public class CorrectDispimZStreaks implements PlugIn {
 			final int s = ss;
 			final int fbkgdMode = bkgdMode;
 			final int fbkgdMin = bkgdMin;
-			new Thread(new Runnable() {
+			OperatingSystemMXBean osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class);  
+			// What % CPU load this current JVM is taking, from 0.0-1.0  
+			double jvmCpuLoad = osBean.getProcessCpuLoad();  
+			// What % load the overall system is at, from 0.0-1.0  
+			double sysCpuLoad = osBean.getSystemCpuLoad();  
+			while (sysCpuLoad > 0.5) {
+				IJ.wait(1000);
+				jvmCpuLoad = osBean.getProcessCpuLoad();  
+				sysCpuLoad = osBean.getSystemCpuLoad();  
+			}
+			IJ.wait(100);
+			Thread destreakThread = new Thread(new Runnable() {
 				public void run() {
 
 					IJ.log("bkgdMode = "+fbkgdMode+", bkgdMin = "+fbkgdMin);
@@ -143,7 +171,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 					int bottomCount = 0;
 
 					for (int t=minTolerance;t>maxTolerance;t--) {
-						mf = new MaximumFinder();
+						MaximumFinder mf = new MaximumFinder();
 						Polygon maxPoly = mf.getMaxima(targetIP, t, false);
 
 						maxXs = new int[maxPoly.npoints];
@@ -175,11 +203,8 @@ public class CorrectDispimZStreaks implements PlugIn {
 					boolean bottomedOut = false;
 					while (!bottomedOut) {
 						bottomedOut = true;
-						//				if (maxXs.length < minMax)
-						//					minMax = maxXs.length;
-						//				if (maxXs.length == minMax)
-						//					bottomCount++;
-						mf = new MaximumFinder();
+
+						MaximumFinder mf = new MaximumFinder();
 						Polygon maxPoly = mf.getMaxima(targetIP, minTolerance, false);
 
 						maxXs = new int[maxPoly.npoints];
@@ -194,7 +219,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 							if (!maxCum.contains(maxXs[n]+","+maxYs[n])) {
 								maxCum.add(maxXs[n]+","+maxYs[n]);
 								ImageProcessor modIP = gaussianDiffIP.duplicate();
-								if (fbkgdMode < fIP.getPixel(maxXs[n], maxYs[n]))
+								if (bkgdModeCutoffFactor * fbkgdMode < fIP.getPixel(maxXs[n], maxYs[n]))
 									bottomedOut = false;
 								modIP.multiply(maskScaleFactor * (((double)fIP.getPixel(maxXs[n], maxYs[n])))/255);
 								fIP.copyBits(modIP, maxXs[n], maxYs[n]-gaussianDiffIP.getHeight()/2, Blitter.DIFFERENCE);
@@ -222,7 +247,14 @@ public class CorrectDispimZStreaks implements PlugIn {
 					//				IJ.runMacro("waitForUser(1);");
 				}
 			}
-					).start();
+			);
+			destreakThread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
+				public void uncaughtException(Thread myThread, Throwable e) {
+					IJ.handleException(e);
+				}
+			});
+	        destreakThread.start();
+	        
 			//			for(int x=0;x<imp.getWidth();x++) {
 			//				for(int y=0;y<imp.getHeight();y++) {
 			//					if(imp.getProcessor().get(x,y) < bkgdMode) {
@@ -294,7 +326,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 			impHS_duprs.getCalibration().pixelHeight = impHS.getCalibration().pixelHeight;
 			impHS_duprs.getCalibration().pixelDepth = impHS.getCalibration().pixelWidth;
 			//			impHS_duprs.show();
-			IJ.run(impHS_duprs, "Correct diSPIM ZStreaks...", "maskwidth="+maskWidth+" mask="+maskScaleFactor+" max="+maxTolerance+" min="+minTolerance+" iterations="+iterations+" blankwidth="+blankWidth+" blankheight="+blankHeight+"");
+			IJ.run(impHS_duprs, "Correct diSPIM ZStreaks...", "maskwidth="+maskWidth+" mask="+maskScaleFactor+" max="+maxTolerance+" min="+minTolerance+" iterations="+iterations+" blankwidth="+blankWidth+" blankheight="+blankHeight+" bkgd="+bkgdModeCutoffFactor+"");
 
 			impHS_duprs.updateAndRepaintWindow();
 			//			IJ.runMacro("waitForUser(2);");
