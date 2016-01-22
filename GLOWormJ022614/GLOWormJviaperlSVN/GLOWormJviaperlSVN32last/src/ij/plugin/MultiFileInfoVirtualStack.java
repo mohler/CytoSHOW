@@ -318,8 +318,10 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			tDim = cumulativeTiffFileList.length;
 		}
 		
-				
-		ImagePlus imp = new ImagePlus(fivStacks.get(0).open(false).getTitle().replaceAll("\\d+\\.", "\\."), this);
+		String[] dirChunks = dir.split("\\"+File.separator);
+		ImagePlus imp = new ImagePlus(
+				dirChunks[dirChunks.length-1]+"_"+
+				fivStacks.get(0).open(false).getTitle().replaceAll("\\d+\\.", "\\."), this);
 		imp.setOpenAsHyperStack(true);				
 		if (cDim*zDim*tDim != imp.getStackSize()) {
 			if (cDim*zDim*tDim > imp.getStackSize()) {
