@@ -837,8 +837,8 @@ public class ImageJ extends Frame implements ActionListener,
 			if (cmd.charAt(0)==MacroInstaller.commandPrefix)
 				MacroInstaller.runMacroShortcut(cmd);
 			else {
-				if (cmd.contains("Animation"))
-					doCommand(cmd);
+				if (cmd.contains("Animation") ||  (cmd.contains("Slice [")/* && (!IJ.getImage().getWindow().running2 && !IJ.getImage().getWindow().running3)*/))
+					doCommand(cmd);  //runs cmd in new thread
 				else
 					IJ.run(cmd);
 				keyPressedTime = System.currentTimeMillis();

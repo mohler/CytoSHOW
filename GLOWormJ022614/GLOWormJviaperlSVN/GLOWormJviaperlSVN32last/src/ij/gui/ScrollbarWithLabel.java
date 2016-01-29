@@ -201,6 +201,9 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 	public synchronized void addKeyListener(KeyListener l) {
 		super.addKeyListener(l);
 		bar.addKeyListener(l);
+		iconPanel.addKeyListener(l);
+		icon2Panel.addKeyListener(l);
+
 	}
 
 	/* Removes KeyListener also from all sub-components.
@@ -448,7 +451,7 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 		private Image image;
 
 		public Icon(char type) {
-			addKeyListener(IJ.getInstance()); 
+//			addKeyListener(IJ.getInstance()); 
 			setSize(WIDTH, HEIGHT);
 			this.setType(type);
 		}

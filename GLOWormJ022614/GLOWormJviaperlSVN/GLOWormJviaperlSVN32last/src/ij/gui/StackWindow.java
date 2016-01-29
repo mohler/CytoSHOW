@@ -122,7 +122,6 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 			sbgridbag.setConstraints(cSelector, sbgc);
 			sbgc.gridy = y++; 
 			scrollbarPanel.add(cSelector);
-			if (ij!=null) cSelector.addKeyListener(ij);
 			cSelector.addAdjustmentListener(this);
 			cSelector.setFocusable(false); // prevents scroll bar from blinking on Windows
 			cSelector.setUnitIncrement(1);
@@ -140,9 +139,9 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 
 			if (label=='t') animationSelector = zSelector;
 			if (label=='z') {animationZSelector = zSelector; setZAnimate(false); }
+			sbgridbag.setConstraints(zSelector, sbgc);
 			sbgc.gridy = y++; 
-			scrollbarPanel.add(zSelector, sbgc);
-			if (ij!=null) zSelector.addKeyListener(ij);
+			scrollbarPanel.add(zSelector);
 			zSelector.addAdjustmentListener(this);
 			zSelector.setFocusable(false);
 			int blockIncrement = nSlices/10;
@@ -162,9 +161,9 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 				((JComponent) tSelector.iconPanel).setToolTipText("<html>Left-Clicking this Slice selector's icon <br>plays/pauses animation through the Z dimension.<br>Right-clicking or control-clicking <br>activates the Animation Options Tool.</html>");		
 				((JComponent) tSelector.icon2Panel).setToolTipText("<html>Left-Clicking this Slice selector's icon <br>plays/pauses animation through the Z dimension.<br>Right-clicking or control-clicking <br>activates the Animation Options Tool.</html>");		
 			}
+			sbgridbag.setConstraints(tSelector, sbgc);
 			sbgc.gridy = y++; 
-			scrollbarPanel.add(tSelector, sbgc);
-			if (ij!=null) tSelector.addKeyListener(ij);
+			scrollbarPanel.add(tSelector);
 			tSelector.addAdjustmentListener(this);
 			tSelector.setFocusable(false);
 			int blockIncrement = nFrames/10;
