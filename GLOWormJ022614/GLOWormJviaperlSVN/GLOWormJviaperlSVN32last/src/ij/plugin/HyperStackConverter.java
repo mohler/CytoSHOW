@@ -87,9 +87,12 @@ public class HyperStackConverter implements PlugIn {
 			imp.setStack(imp.getImageStack());
 		}
 		imp.setDimensions(nChannels, nSlices, nFrames);
-		if (order!=CZT && imp.getStack().isVirtual())
+		if (order==ZTC  && imp.getStack() instanceof MultiFileInfoVirtualStack){
+			((MultiFileInfoVirtualStack)imp.getStack()).setDimOrder("xyztc");
+		}
+		else if (order!=CZT && imp.getStack().isVirtual())
 			IJ.error("HyperStack Converter", "Virtual stacks must by in XYCZT order.");
-		else {
+//		else {
 			shuffle(imp, order);
 			ImagePlus imp2 = imp;
 			if (nChannels>1 && imp.getBitDepth()!=24) {
@@ -112,7 +115,7 @@ public class HyperStackConverter implements PlugIn {
 				imp.hide();
 				WindowManager.setCurrentWindow(imp2.getWindow());
 			}
-		}
+//		}
 	}
 
 	/** Changes the dimension order of a 4D or 5D stack from 
@@ -141,7 +144,7 @@ public class HyperStackConverter implements PlugIn {
 				nFirst=nFrames; nMiddle=nSlices; nLast=nChannels;
 				break;
 		}
-		if (order!=CZT) {
+		if (order!=CZT && !(order==ZTC  && imp.getStack() instanceof MultiFileInfoVirtualStack)) {
 			ImageStack stack = imp.getImageStack();
 			Object[] images1 = stack.getImageArray();
 			Object[] images2 = new Object[images1.length];

@@ -104,7 +104,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 		Prefs.set("Zstreak.blankWidth", blankWidth);
 		blankHeight = (int) gd.getNextNumber();
 		Prefs.set("Zstreak.blankHeight", blankHeight);
-		bkgdModeCutoffFactor = (int) gd.getNextNumber();
+		bkgdModeCutoffFactor = gd.getNextNumber();
 		Prefs.set("Zstreak.bkgdModeCutoffFactor", bkgdModeCutoffFactor);
 		channelRange = gd.getNextString();
 		Prefs.set("Zstreak.channelRange", channelRange);
@@ -207,6 +207,8 @@ public class CorrectDispimZStreaks implements PlugIn {
 					//			while (maxXs.length != minMax && bottomCount < 20 ) {
 					boolean bottomedOut = false;
 					while (!bottomedOut) {
+//						while (ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class).getProcessCpuLoad() > 0.80)
+//							IJ.wait(1000);
 						bottomedOut = true;
 
 						MaximumFinder mf = new MaximumFinder();
@@ -325,8 +327,8 @@ public class CorrectDispimZStreaks implements PlugIn {
 
 		for(int f=1;f<=t;f++){
 			for (int ch=firstC; ch<=lastC; ch++) {
-				IJ.log(path+titleShort+"_"+f+"_"+ch+".tif");
-				if ((new File(path+titleShort+"_"+f+"_"+ch+".tif")).canRead()) {
+				IJ.log(path+titleShort+"_"+ch+"_"+f+".tif");
+				if ((new File(path+titleShort+"_"+ch+"_"+f+".tif")).canRead()) {
 					IJ.log("already exists");
 					continue;
 				}
@@ -359,7 +361,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 				ImagePlus impHS_duprsrs = slicer.reslice(impHS_duprs);
 				//			impHS_duprsrs.show();
 				//			IJ.runMacro("waitForUser(3);");
-				IJ.saveAsTiff(impHS_duprsrs, path+titleShort+"_"+f+"_"+ch+".tif");
+				IJ.saveAsTiff(impHS_duprsrs, path+titleShort+"_"+ch+"_"+f+".tif");
 				impHS_dup.close();
 				impHS_dup.flush();
 				impHS_duprs.close();
