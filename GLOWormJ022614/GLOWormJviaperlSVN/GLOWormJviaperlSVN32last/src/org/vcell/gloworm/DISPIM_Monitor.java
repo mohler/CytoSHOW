@@ -1117,8 +1117,10 @@ public class DISPIM_Monitor implements PlugIn {
 				int cB = impB.getChannel();
 				int zB = impB.getSlice();
 				int tB = impB.getFrame();
-				modeA = ((CompositeImage)impA).getCompositeMode();
-				modeB = ((CompositeImage)impB).getCompositeMode();
+				if (impA.isComposite())
+					modeA = ((CompositeImage)impA).getCompositeMode();
+				if (impB.isComposite())
+					modeB = ((CompositeImage)impB).getCompositeMode();
 
 				impA.close();
 				IJ.run("Image Sequence...", "open=["+dirOrOMETiff+"] number="+ newLength +" starting=1 increment=1 scale=100 file=Cam2 or=[] sort use");
@@ -1126,7 +1128,8 @@ public class DISPIM_Monitor implements PlugIn {
 //				IJ.getImage().setTitle("SPIMA: "+IJ.getImage().getTitle());
 				impA = WindowManager.getCurrentImage();
 				impA.setTitle("SPIMA: " + impA.getTitle()); 
-				((CompositeImage)impA).setMode(modeA);
+				if (impA.isComposite())
+					((CompositeImage)impA).setMode(modeA);
 				((StackWindow)impA.getWindow()).cSelector.updatePlayPauseIcon();
 				impA.updateAndRepaintWindow();
 				
@@ -1136,7 +1139,8 @@ public class DISPIM_Monitor implements PlugIn {
 //				IJ.getImage().setTitle("SPIMB: "+IJ.getImage().getTitle());
 				impB = WindowManager.getCurrentImage();
 				impB.setTitle("SPIMB: " + impB.getTitle());
-				((CompositeImage)impB).setMode(modeB);
+				if (impB.isComposite())
+					((CompositeImage)impB).setMode(modeB);
 				((StackWindow)impB.getWindow()).cSelector.updatePlayPauseIcon();
 				impB.updateAndRepaintWindow();
 
@@ -1436,15 +1440,6 @@ public class DISPIM_Monitor implements PlugIn {
 				IJ.open(savePath/*+ dirOrOMETiffName*/ +"B_crop.roi");
 				WindowManager.setTempCurrentImage(null);
 
-				IJ.runMacro("File.makeDirectory(\""+savePath.replace("\\", "\\\\")+"SPIMA_Ch1_processed\");");
-				IJ.runMacro("File.makeDirectory(\""+savePath.replace("\\", "\\\\")+"SPIMB_Ch1_processed\");");
-				IJ.runMacro("File.makeDirectory(\""+savePath.replace("\\", "\\\\")+"Deconvolution1\");");
-				if (wavelengths==2) {
-					IJ.runMacro("File.makeDirectory(\""+savePath.replace("\\", "\\\\")+"SPIMA_Ch2_processed\");");
-					IJ.runMacro("File.makeDirectory(\""+savePath.replace("\\", "\\\\")+"SPIMB_Ch2_processed\");");
-					IJ.runMacro("File.makeDirectory(\""+savePath.replace("\\", "\\\\")+"Deconvolution2\");");
-				}
-
 				for (int f=impA.getNFrames();f<=impA.getNFrames();f++) {
 
 					impA.setPositionWithoutUpdate(impA.getChannel(), impA.getSlice(), f);
@@ -1458,79 +1453,75 @@ public class DISPIM_Monitor implements PlugIn {
 						frameFileName = "t" + f;
 
 					String timecode = ""+(new Date()).getTime();
-					
-					IJ.run(impA, "Correct diSPIM ZStreaks...", "maskwidth="+maskWidth+" mask="+maskScaleFactor+" max="+maxTolerance+" min="+minTolerance+" iterations="+iterations+" blankwidth="+blankWidth+" blankheight="+blankHeight+" bkgd="+bkgdModeCutoffFactor+"");
-					IJ.run(impB, "Correct diSPIM ZStreaks...", "maskwidth="+maskWidth+" mask="+maskScaleFactor+" max="+maxTolerance+" min="+minTolerance+" iterations="+iterations+" blankwidth="+blankWidth+" blankheight="+blankHeight+" bkgd="+bkgdModeCutoffFactor+"");
 
-					//
-//					if (	   !(new File(savePath+ "SPIMA_Ch1_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif")).canRead()
-//							|| (wavelengths==2 && !(new File(savePath+ "SPIMA_Ch2_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif")).canRead())
-//							|| !(new File(savePath+ "SPIMB_Ch1_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif")).canRead()
-//							|| (wavelengths==2 && !(new File(savePath+ "SPIMA_Ch2_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif")).canRead())
-//							) {
-//						IJ.runMacro("File.makeDirectory(\""+savePath.replace("\\", "\\\\")+"SPIMA_Ch1_processed\");");
-//						IJ.runMacro("File.makeDirectory(\""+savePath.replace("\\", "\\\\")+"SPIMA_Ch1_processed\"+File.separator+\""+frameFileName+"\");");
-//						IJ.runMacro("File.makeDirectory(\""+savePath.replace("\\", "\\\\")+"SPIMB_Ch1_processed\");");
-//						IJ.runMacro("File.makeDirectory(\""+savePath.replace("\\", "\\\\")+"SPIMB_Ch1_processed\"+File.separator+\""+frameFileName+"\");");
-//						IJ.runMacro("File.makeDirectory(\""+savePath.replace("\\", "\\\\")+"Deconvolution1\");");
-//						if (wavelengths==2) {
-//							IJ.runMacro("File.makeDirectory(\""+savePath.replace("\\", "\\\\")+"SPIMA_Ch2_processed\");");
-//							IJ.runMacro("File.makeDirectory(\""+savePath.replace("\\", "\\\\")+"SPIMA_Ch2_processed\"+File.separator+\""+frameFileName+"\");");
-//							IJ.runMacro("File.makeDirectory(\""+savePath.replace("\\", "\\\\")+"SPIMB_Ch2_processed\");");
-//							IJ.runMacro("File.makeDirectory(\""+savePath.replace("\\", "\\\\")+"SPIMB_Ch2_processed\"+File.separator+\""+frameFileName+"\");");
-//							IJ.runMacro("File.makeDirectory(\""+savePath.replace("\\", "\\\\")+"Deconvolution2\");");
-//						}
-//
-//						ImageStack stackA1 = new ImageStack(325,425);
-//						ImageStack stackA2 = new ImageStack(325,425);
-//						impA.getWindow().setEnabled(false);
-//						for (int i=1; i<=impA.getNSlices(); i++) {
-//							impA.setPositionWithoutUpdate(1, i, f);
-//							stackA1.addSlice(impA.getProcessor().crop());					
-//							if (wavelengths==2) {
-//								impA.setPositionWithoutUpdate(2, i, f);
-//								stackA2.addSlice(impA.getProcessor().crop());	
-//							}
-//						}
-//						impA.getWindow().setEnabled(true);
-//						ImagePlus impXA1 = new ImagePlus();
-//						impXA1.setStack(stackA1);
-//						impXA1.setCalibration(impA.getCalibration());
-//						//					impXA1.getCalibration().pixelDepth = impXA1.getCalibration().pixelWidth;
-//						IJ.saveAs(impXA1,"Tiff", savePath+ "SPIMA_Ch1_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif");
-//						if (wavelengths==2) {
-//							ImagePlus impXA2 = new ImagePlus();
-//							impXA2.setStack(stackA2);
-//							impXA2.setCalibration(impA.getCalibration());
-//							//					impXA2.getCalibration().pixelDepth = impXA2.getCalibration().pixelWidth;
-//							IJ.saveAs(impXA2,"Tiff", savePath+ "SPIMA_Ch2_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif");
-//						}
-//						ImageStack stackB1 = new ImageStack(325,425);
-//						ImageStack stackB2 = new ImageStack(325,425);
-//						impB.getWindow().setEnabled(false);
-//						for (int i=1; i<=impB.getNSlices(); i++) {
-//							impB.setPositionWithoutUpdate(1, i, f);
-//							stackB1.addSlice(impB.getProcessor().crop());					
-//							if (wavelengths==2) {
-//								impB.setPositionWithoutUpdate(2, i, f);
-//								stackB2.addSlice(impB.getProcessor().crop());	
-//							}
-//						}
-//						impB.getWindow().setEnabled(true);
-//						ImagePlus impXB1 = new ImagePlus();
-//						impXB1.setStack(stackB1);
-//						impXB1.setCalibration(impB.getCalibration());
-//						//					impXB1.getCalibration().pixelDepth = impXB1.getCalibration().pixelWidth;
-//						IJ.saveAs(impXB1,"Tiff", savePath+ "SPIMB_Ch1_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif");
-//						if (wavelengths==2) {
-//							ImagePlus impXB2 = new ImagePlus();
-//							impXB2.setStack(stackB2);
-//							impXB2.setCalibration(impB.getCalibration());
-//							//					impXB2.getCalibration().pixelDepth = impXB2.getCalibration().pixelWidth;
-//							IJ.saveAs(impXB2,"Tiff", savePath+ "SPIMB_Ch2_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif");
-//						}
-//					}
-//
+					if (	   !(new File(savePath+ "SPIMA_Ch1_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif")).canRead()
+							|| (wavelengths==2 && !(new File(savePath+ "SPIMA_Ch2_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif")).canRead())
+							|| !(new File(savePath+ "SPIMB_Ch1_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif")).canRead()
+							|| (wavelengths==2 && !(new File(savePath+ "SPIMA_Ch2_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif")).canRead())
+							) {
+						IJ.runMacro("File.makeDirectory(\""+savePath.replace("\\", "\\\\")+"SPIMA_Ch1_processed\");");
+						IJ.runMacro("File.makeDirectory(\""+savePath.replace("\\", "\\\\")+"SPIMA_Ch1_processed\"+File.separator+\""+frameFileName+"\");");
+						IJ.runMacro("File.makeDirectory(\""+savePath.replace("\\", "\\\\")+"SPIMB_Ch1_processed\");");
+						IJ.runMacro("File.makeDirectory(\""+savePath.replace("\\", "\\\\")+"SPIMB_Ch1_processed\"+File.separator+\""+frameFileName+"\");");
+						IJ.runMacro("File.makeDirectory(\""+savePath.replace("\\", "\\\\")+"Deconvolution1\");");
+						if (wavelengths==2) {
+							IJ.runMacro("File.makeDirectory(\""+savePath.replace("\\", "\\\\")+"SPIMA_Ch2_processed\");");
+							IJ.runMacro("File.makeDirectory(\""+savePath.replace("\\", "\\\\")+"SPIMA_Ch2_processed\"+File.separator+\""+frameFileName+"\");");
+							IJ.runMacro("File.makeDirectory(\""+savePath.replace("\\", "\\\\")+"SPIMB_Ch2_processed\");");
+							IJ.runMacro("File.makeDirectory(\""+savePath.replace("\\", "\\\\")+"SPIMB_Ch2_processed\"+File.separator+\""+frameFileName+"\");");
+							IJ.runMacro("File.makeDirectory(\""+savePath.replace("\\", "\\\\")+"Deconvolution2\");");
+						}
+
+						ImageStack stackA1 = new ImageStack(325,425);
+						ImageStack stackA2 = new ImageStack(325,425);
+						impA.getWindow().setEnabled(false);
+						for (int i=1; i<=impA.getNSlices(); i++) {
+							impA.setPositionWithoutUpdate(1, i, f);
+							stackA1.addSlice(impA.getProcessor().crop());					
+							if (wavelengths==2) {
+								impA.setPositionWithoutUpdate(2, i, f);
+								stackA2.addSlice(impA.getProcessor().crop());	
+							}
+						}
+						impA.getWindow().setEnabled(true);
+						ImagePlus impXA1 = new ImagePlus();
+						impXA1.setStack(stackA1);
+						impXA1.setCalibration(impA.getCalibration());
+						//					impXA1.getCalibration().pixelDepth = impXA1.getCalibration().pixelWidth;
+						IJ.saveAs(impXA1,"Tiff", savePath+ "SPIMA_Ch1_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif");
+						if (wavelengths==2) {
+							ImagePlus impXA2 = new ImagePlus();
+							impXA2.setStack(stackA2);
+							impXA2.setCalibration(impA.getCalibration());
+							//					impXA2.getCalibration().pixelDepth = impXA2.getCalibration().pixelWidth;
+							IJ.saveAs(impXA2,"Tiff", savePath+ "SPIMA_Ch2_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif");
+						}
+						ImageStack stackB1 = new ImageStack(325,425);
+						ImageStack stackB2 = new ImageStack(325,425);
+						impB.getWindow().setEnabled(false);
+						for (int i=1; i<=impB.getNSlices(); i++) {
+							impB.setPositionWithoutUpdate(1, i, f);
+							stackB1.addSlice(impB.getProcessor().crop());					
+							if (wavelengths==2) {
+								impB.setPositionWithoutUpdate(2, i, f);
+								stackB2.addSlice(impB.getProcessor().crop());	
+							}
+						}
+						impB.getWindow().setEnabled(true);
+						ImagePlus impXB1 = new ImagePlus();
+						impXB1.setStack(stackB1);
+						impXB1.setCalibration(impB.getCalibration());
+						//					impXB1.getCalibration().pixelDepth = impXB1.getCalibration().pixelWidth;
+						IJ.saveAs(impXB1,"Tiff", savePath+ "SPIMB_Ch1_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif");
+						if (wavelengths==2) {
+							ImagePlus impXB2 = new ImagePlus();
+							impXB2.setStack(stackB2);
+							impXB2.setCalibration(impB.getCalibration());
+							//					impXB2.getCalibration().pixelDepth = impXB2.getCalibration().pixelWidth;
+							IJ.saveAs(impXB2,"Tiff", savePath+ "SPIMB_Ch2_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif");
+						}
+					}
+
 					if (	   !(new File(savePath+ "Deconvolution1"+ File.separator + "Decon_" + frameFileName+".tif")).canRead()
 							|| (wavelengths==2 && !(new File(savePath+ "Deconvolution2"+ File.separator + "Decon_" + frameFileName+".tif")).canRead())
 							) {
