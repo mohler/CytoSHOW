@@ -339,7 +339,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 				impHS_dup.getCalibration().pixelWidth = impHS.getCalibration().pixelWidth;
 				impHS_dup.getCalibration().pixelHeight = impHS.getCalibration().pixelHeight;
 				impHS_dup.getCalibration().pixelDepth = impHS.getCalibration().pixelDepth;
-				//			impHS_dup.show();
+
 				IJ.run(impHS_dup, "Select All", "");
 				Slicer slicer = new Slicer();
 				slicer.setNointerpolate(false); //clumsy, don't use true ever
@@ -350,17 +350,16 @@ public class CorrectDispimZStreaks implements PlugIn {
 				impHS_duprs.getCalibration().pixelWidth = impHS.getCalibration().pixelWidth;
 				impHS_duprs.getCalibration().pixelHeight = impHS.getCalibration().pixelHeight;
 				impHS_duprs.getCalibration().pixelDepth = impHS.getCalibration().pixelWidth;
-				//			impHS_duprs.show();
+
 				IJ.run(impHS_duprs, "Correct diSPIM ZStreaks...", "maskwidth="+maskWidth+" mask="+maskScaleFactor+" max="+maxTolerance+" min="+minTolerance+" iterations="+iterations+" blankwidth="+blankWidth+" blankheight="+blankHeight+" bkgd="+bkgdModeCutoffFactor+"");
 
 				impHS_duprs.updateAndRepaintWindow();
-				//			IJ.runMacro("waitForUser(2);");
+
 				slicer.setNointerpolate(false); //clumsy, don't use true ever
 				slicer.setOutputZSpacing(1);  
 				IJ.run(impHS_duprs, "Select All", "");
 				ImagePlus impHS_duprsrs = slicer.reslice(impHS_duprs);
-				//			impHS_duprsrs.show();
-				//			IJ.runMacro("waitForUser(3);");
+
 				IJ.saveAsTiff(impHS_duprsrs, path+titleShort+"_"+ch+"_"+f+".tif");
 				impHS_dup.close();
 				impHS_dup.flush();
