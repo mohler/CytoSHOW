@@ -3,6 +3,7 @@ package org.vcell.gloworm;
 import java.awt.Button;
 import java.awt.Polygon;
 import java.awt.event.ActionEvent;
+import java.awt.image.ColorModel;
 import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -31,6 +32,7 @@ import ij.measure.Calibration;
 import ij.measure.ResultsTable;
 import ij.plugin.FFT;
 import ij.plugin.FileInfoVirtualStack;
+import ij.plugin.FolderOpener;
 import ij.plugin.MultiFileInfoVirtualStack;
 import ij.plugin.PlugIn;
 import ij.plugin.filter.Analyzer;
@@ -117,7 +119,7 @@ public class DISPIM_Monitor implements PlugIn {
 		ImageWindow win = null;
 
 		String[] dirOrOMETiffChunks = dirOrOMETiff.split(IJ.isWindows()?"\\\\":"/");
-//		String dirOrOMETiffName = dirOrOMETiffChunks[dirOrOMETiffChunks.length-1];
+		//		String dirOrOMETiffName = dirOrOMETiffChunks[dirOrOMETiffChunks.length-1];
 
 		if ((new File(dirOrOMETiff)).isDirectory() && !(new File(dirOrOMETiff)).list()[0].startsWith("MMStack_")) {
 			IJ.saveString("", dirOrOMETiff+"Big5DFileListA.txt");
@@ -320,7 +322,7 @@ public class DISPIM_Monitor implements PlugIn {
 
 			impA = new ImagePlus();
 			impA.setStack(new MultiFileInfoVirtualStack(mmPath, "MMStack", false));
-//				impA.setStack(new FileInfoVirtualStack(tdB.getTiffInfo(), false));
+			//				impA.setStack(new FileInfoVirtualStack(tdB.getTiffInfo(), false));
 			int stackSize = impA.getNSlices();
 			int nChannels = wavelengths*2;
 			int nSlices = zSlices;
@@ -395,15 +397,15 @@ public class DISPIM_Monitor implements PlugIn {
 			impA.getOriginalFileInfo().fileName = dirOrOMETiff;
 			impA.getOriginalFileInfo().directory = dirOrOMETiff;
 			impA.show();
-			
-			
+
+
 			impB = new ImagePlus();
 			impB.setStack(new MultiFileInfoVirtualStack(mmPath, "MMStack", false));
-//				impB.setStack(new FileInfoVirtualStack(tdA.getTiffInfo(), false));
-			 stackSize = impB.getStack().getSize();
-			 nChannels = wavelengths*2;
-			 nSlices = zSlices;
-			 nFrames = (int)Math.floor((double)stackSize/(nChannels*nSlices));
+			//				impB.setStack(new FileInfoVirtualStack(tdA.getTiffInfo(), false));
+			stackSize = impB.getStack().getSize();
+			nChannels = wavelengths*2;
+			nSlices = zSlices;
+			nFrames = (int)Math.floor((double)stackSize/(nChannels*nSlices));
 
 			impB.setTitle("SPIMA: "+dirOrOMETiff);
 
@@ -443,7 +445,7 @@ public class DISPIM_Monitor implements PlugIn {
 					}
 				}
 			}
-			
+
 			impB.setStack(impB.getImageStack());
 
 			impB.setDimensions(wavelengths, nSlices, nFrames);
@@ -470,7 +472,7 @@ public class DISPIM_Monitor implements PlugIn {
 			impB.getOriginalFileInfo().fileName = dirOrOMETiff;
 			impB.getOriginalFileInfo().directory = dirOrOMETiff;
 			impB.show();
-			
+
 		} else if (dirOrOMETiff.matches(".*_\\d{9}_\\d{3}_.*.tif")) {
 			listNew = new File(dirOrOMETiff).getParentFile().list();
 			int 	newLength =0;
@@ -479,7 +481,7 @@ public class DISPIM_Monitor implements PlugIn {
 					newLength++;
 
 			while (Math.floor(newLength/(wavelengths * 2 * zSlices)) == 0) {
-				
+
 				IJ.wait(10);
 				listNew = new File(dirOrOMETiff).getParentFile().list();
 				newLength =0;
@@ -489,19 +491,19 @@ public class DISPIM_Monitor implements PlugIn {
 			}
 			IJ.run("Image Sequence...", "open=["+dirOrOMETiff+"] number="+ newLength +" starting=1 increment=1 scale=100 file=Cam2 or=[] sort use");
 			IJ.run("Stack to Hyperstack...", "order=xyczt(default) channels="+ wavelengths +" slices="+ zSlices +" frames="+ (Math.floor(newLength/(wavelengths * 2 * zSlices))) +" display=Composite");
-//			IJ.getImage().setTitle("SPIMA: "+IJ.getImage().getTitle());
+			//			IJ.getImage().setTitle("SPIMA: "+IJ.getImage().getTitle());
 			impA = WindowManager.getCurrentImage();
 			impA.setTitle("SPIMA: " + impA.getTitle()); 
-			
+
 			IJ.run("Image Sequence...", "open=["+dirOrOMETiff+"] number="+ newLength +" starting=1 increment=1 scale=100 file=Cam1 or=[] sort use");
 			IJ.run("Stack to Hyperstack...", "order=xyczt(default) channels="+ wavelengths +" slices="+ zSlices +" frames="+ (Math.floor(newLength/(wavelengths * 2 * zSlices))) +" display=Composite");
-//			IJ.getImage().setTitle("SPIMB: "+IJ.getImage().getTitle());
+			//			IJ.getImage().setTitle("SPIMB: "+IJ.getImage().getTitle());
 			impB = WindowManager.getCurrentImage();
 			impB.setTitle("SPIMB: " + impB.getTitle());
-			
+
 			oldLength = newLength;
 		}
-		
+
 		IJ.run("Tile");
 		IJ.log(""+WindowManager.getImageCount());
 
@@ -603,7 +605,7 @@ public class DISPIM_Monitor implements PlugIn {
 						impDF1 = new ImagePlus();
 						impDF1.setStack("Decon-Fuse"+impA.getTitle().replace(impA.getTitle().split(":")[0],""), deconmfivs);
 						impDF1.setFileInfo(new FileInfo());
-//						impDF1.getOriginalFileInfo().directory = (new File(dirOrOMETiff)).isDirectory()?dirOrOMETiff:((new File(dirOrOMETiff)).getParent()+File.separator);
+						//						impDF1.getOriginalFileInfo().directory = (new File(dirOrOMETiff)).isDirectory()?dirOrOMETiff:((new File(dirOrOMETiff)).getParent()+File.separator);
 						impDF1.getOriginalFileInfo().directory = dirOrOMETiff;
 						int stkNSlicesDF = impDF1.getStackSize();
 						int zSlicesDF1 = deconmfivs.getFivStacks().get(0).getSize();
@@ -619,7 +621,7 @@ public class DISPIM_Monitor implements PlugIn {
 					}
 				} 
 			}
-						
+
 
 			String[] frameFileNames = new String[impA.getNFrames()+1];
 
@@ -956,11 +958,11 @@ public class DISPIM_Monitor implements PlugIn {
 
 				while ((fileListA.length == listOld.length || fileListB.length == listNew.length)
 						&& (!doDecon 
-							|| ((deconList1 == null && deconList2 == null)
-								|| 	(!(deconList1 ==null || deconFileList1 ==null 
-											|| deconList1.length != deconFileList1.length)
-									|| !(deconList2 ==null || deconFileList2 ==null 
-											|| deconList2.length != deconFileList2.length )) ) )) {
+								|| ((deconList1 == null && deconList2 == null)
+										|| 	(!(deconList1 ==null || deconFileList1 ==null 
+										|| deconList1.length != deconFileList1.length)
+										|| !(deconList2 ==null || deconFileList2 ==null 
+										|| deconList2.length != deconFileList2.length )) ) )) {
 					if (IJ.escapePressed())
 						if (!IJ.showMessageWithCancel("Cancel diSPIM Monitor Updates?"
 								, "Monitoring of "+ dirOrOMETiff+ " paused by Escape.\nClick OK to resume."))
@@ -1079,18 +1081,18 @@ public class DISPIM_Monitor implements PlugIn {
 				}
 			} else if (dirOrOMETiff.matches(".*_\\d{9}_\\d{3}_.*.tif")) {
 
-//				listOld = new File(dirOrOMETiff).getParentFile().list();
-//				int oldLength = listOld.length;
-//				oldLength =0;
-//				for (String oldFileListItem:listOld)
-//					if (oldFileListItem.endsWith(".tif"))
-//						oldLength++;
+				//				listOld = new File(dirOrOMETiff).getParentFile().list();
+				//				int oldLength = listOld.length;
+				//				oldLength =0;
+				//				for (String oldFileListItem:listOld)
+				//					if (oldFileListItem.endsWith(".tif"))
+				//						oldLength++;
 
 				int newLength = oldLength;
 				while (oldLength == newLength
 						||
 						newLength%(wavelengths * 2 * zSlices) != 0) {
-					
+
 					IJ.wait(10);
 					listNew = new File(dirOrOMETiff).getParentFile().list();
 					newLength =0;
@@ -1122,39 +1124,49 @@ public class DISPIM_Monitor implements PlugIn {
 				if (impB.isComposite())
 					modeB = ((CompositeImage)impB).getCompositeMode();
 
-				impA.close();
-				IJ.run("Image Sequence...", "open=["+dirOrOMETiff+"] number="+ newLength +" starting=1 increment=1 scale=100 file=Cam2 or=[] sort use");
-				IJ.run("Stack to Hyperstack...", "order=xyczt(default) channels="+ wavelengths +" slices="+ zSlices +" frames="+ (Math.floor(newLength/(wavelengths * 2 * zSlices))) +" display=Composite");
-//				IJ.getImage().setTitle("SPIMA: "+IJ.getImage().getTitle());
-				impA = WindowManager.getCurrentImage();
-				impA.setTitle("SPIMA: " + impA.getTitle()); 
-				if (impA.isComposite())
-					((CompositeImage)impA).setMode(modeA);
-				((StackWindow)impA.getWindow()).cSelector.updatePlayPauseIcon();
-				impA.updateAndRepaintWindow();
-				
-				impB.close();
-				IJ.run("Image Sequence...", "open=["+dirOrOMETiff+"] number="+ newLength +" starting=1 increment=1 scale=100 file=Cam1 or=[] sort use");
-				IJ.run("Stack to Hyperstack...", "order=xyczt(default) channels="+ wavelengths +" slices="+ zSlices +" frames="+ (Math.floor(newLength/(wavelengths * 2 * zSlices))) +" display=Composite");
-//				IJ.getImage().setTitle("SPIMB: "+IJ.getImage().getTitle());
-				impB = WindowManager.getCurrentImage();
-				impB.setTitle("SPIMB: " + impB.getTitle());
-				if (impB.isComposite())
-					((CompositeImage)impB).setMode(modeB);
-				((StackWindow)impB.getWindow()).cSelector.updatePlayPauseIcon();
-				impB.updateAndRepaintWindow();
+//				IJ.run("Image Sequence...", "open=["+dirOrOMETiff+"] number="+ newLength +" starting=1 increment=1 scale=100 file=Cam2 or=[] sort use");
+				FolderOpener foA = new FolderOpener();
+				foA.openAsVirtualStack(true);
+				foA.sortFileNames(true);
+				foA.setFilter("Cam2");
+				ImagePlus impTmpA = foA.openFolder(new File(dirOrOMETiff).getParent());
 
-				impA.setPosition(cA, zA, tA==impA.getNFrames()-1?impA.getNFrames():tA);
-				impB.setPosition(cB, zB, tB==impB.getNFrames()-1?impB.getNFrames():tB);
-				IJ.run("Tile");
+//NOT WORKING YET!!!!				
+				ColorModel cmA = impA.getProcessor().getColorModel();
+				double dminA = impA.getProcessor().getMin();
+				double dmaxA = impA.getProcessor().getMax();
+				impA.setStack(impTmpA.getStack(), wavelengths, zSlices, impTmpA.getStack().getSize()/(wavelengths*zSlices));
+				impA.getProcessor().setColorModel(cmA);
+				impA.getProcessor().setMinAndMax(dminA, dmaxA);
 				
+				impA.setPosition(cA, zA, tA==impA.getNFrames()-1?impA.getNFrames():tA);
+				impA.setWindow(WindowManager.getCurrentWindow());
+
+
+//				IJ.run("Image Sequence...", "open=["+dirOrOMETiff+"] number="+ newLength +" starting=1 increment=1 scale=100 file=Cam1 or=[] sort use");
+				FolderOpener foB = new FolderOpener();
+				foB.openAsVirtualStack(true);
+				foB.sortFileNames(true);
+				foB.setFilter("Cam2");
+				ImagePlus impTmpB = foB.openFolder(new File(dirOrOMETiff).getParent());
+
+				ColorModel cmB = impB.getProcessor().getColorModel();
+				double dminB = impB.getProcessor().getMin();
+				double dmaxB = impB.getProcessor().getMax();
+				impB.setStack(impTmpB.getStack(), wavelengths, zSlices, impTmpB.getStack().getSize()/(wavelengths*zSlices));
+				impB.getProcessor().setColorModel(cmB);
+				impB.getProcessor().setMinAndMax(dminB, dmaxB);
+
+				impB.setPosition(cB, zB, tB==impB.getNFrames()-1?impB.getNFrames():tB);
+				impB.setWindow(WindowManager.getCurrentWindow());
+
 				if (wasSynched) {
 					SyncWindows sw = new SyncWindows();
 					for (ImagePlus impS:synchedImpsArrayList) {
 						sw.addImp(impS);
 					}
 				}
-				
+
 			} else {
 				long fileOldMod = (new File(dirOrOMETiff)).lastModified();
 				while (fileOldMod == (new File(dirOrOMETiff)).lastModified()) {
@@ -1183,7 +1195,7 @@ public class DISPIM_Monitor implements PlugIn {
 				int cA = impA.getChannel();
 				int zA = impA.getSlice();
 				int tA = impA.getFrame();
-				
+
 				try {
 					impA.setStack(new FileInfoVirtualStack(tdA.getTiffInfo(), false));
 					int stackSize = impA.getNSlices();
@@ -1249,7 +1261,7 @@ public class DISPIM_Monitor implements PlugIn {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-			
+
 				impA.setPosition(cA, zA, tA==impA.getNFrames()-1?impA.getNFrames():tA);
 				impA.setWindow(WindowManager.getCurrentWindow());
 
@@ -1258,7 +1270,7 @@ public class DISPIM_Monitor implements PlugIn {
 				int cB = impB.getChannel();
 				int zB = impB.getSlice();
 				int tB = impB.getFrame();
-				
+
 				try {
 					impB.setStack(new FileInfoVirtualStack(tdB.getTiffInfo(), false));
 					int stackSize = impB.getNSlices();
@@ -1325,7 +1337,7 @@ public class DISPIM_Monitor implements PlugIn {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-			
+
 				impB.setPosition(cB, zB, tB==impB.getNFrames()-1?impB.getNFrames():tB);
 				impB.setWindow(WindowManager.getCurrentWindow());
 
@@ -1651,13 +1663,13 @@ public class DISPIM_Monitor implements PlugIn {
 				if ((new File(dirOrOMETiff)).canRead()) {
 					if (impDF1 == null) {
 						MultiFileInfoVirtualStack deconmfivs = new MultiFileInfoVirtualStack((new File(dirOrOMETiff)).isDirectory()?
-																									dirOrOMETiff:
-																									(new File(dirOrOMETiff)).getParent()+File.separator, "Deconvolution", false);
+								dirOrOMETiff:
+									(new File(dirOrOMETiff)).getParent()+File.separator, "Deconvolution", false);
 						if (deconmfivs.getSize() > 0) {
 							impDF1 = new ImagePlus();
 							impDF1.setStack("Decon-Fuse"+impA.getTitle().replace(impA.getTitle().split(":")[0],""), deconmfivs);
 							impDF1.setFileInfo(new FileInfo());
-//							impDF1.getOriginalFileInfo().directory = (new File(dirOrOMETiff)).isDirectory()?dirOrOMETiff:((new File(dirOrOMETiff)).getParent()+File.separator);
+							//							impDF1.getOriginalFileInfo().directory = (new File(dirOrOMETiff)).isDirectory()?dirOrOMETiff:((new File(dirOrOMETiff)).getParent()+File.separator);
 							impDF1.getOriginalFileInfo().directory = dirOrOMETiff;
 							int stkNSlicesDF = impDF1.getStackSize();
 							int zSlicesDF1 = deconmfivs.getFivStacks().get(0).getSize();
@@ -1677,7 +1689,7 @@ public class DISPIM_Monitor implements PlugIn {
 							impDF2 = new ImagePlus();
 							impDF2.setStack("Decon-Fuse"+impA.getTitle().replace(impA.getTitle().split(":")[0],""), deconmfivs);
 							impDF2.setFileInfo(new FileInfo());
-//							impDF2.getOriginalFileInfo().directory = (new File(dirOrOMETiff)).isDirectory()?dirOrOMETiff:((new File(dirOrOMETiff)).getParent()+File.separator);
+							//							impDF2.getOriginalFileInfo().directory = (new File(dirOrOMETiff)).isDirectory()?dirOrOMETiff:((new File(dirOrOMETiff)).getParent()+File.separator);
 							impDF2.getOriginalFileInfo().directory = dirOrOMETiff;
 							int stkNSlicesDF = impDF2.getStackSize();
 							int zSlicesDF1 = deconmfivs.getFivStacks().get(0).getSize();
@@ -1688,7 +1700,7 @@ public class DISPIM_Monitor implements PlugIn {
 								ciDF2.setMode(CompositeImage.COMPOSITE);
 							else
 								ciDF2.setMode(CompositeImage.GRAYSCALE);
-//THIS May? WORK!
+							//THIS May? WORK!
 							int oldW = win.getWidth();
 							int oldH = win.getHeight();
 							int oldC = win.getImagePlus().getChannel();
@@ -1706,7 +1718,7 @@ public class DISPIM_Monitor implements PlugIn {
 							win.getImagePlus().setDisplayRange(oldMin, oldMax);
 							win.setSize(win.getSize().width, win.getSize().height+5);
 
-//*******************
+							//*******************
 						}
 					}
 				}

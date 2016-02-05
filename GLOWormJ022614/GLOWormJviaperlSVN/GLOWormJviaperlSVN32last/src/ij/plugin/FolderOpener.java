@@ -381,6 +381,10 @@ public class FolderOpener implements PlugIn {
 		return true;
 	}
 
+	public void setFilter(String filter) {
+		this.filter = filter;
+	}
+
 	/** Removes names that start with "." or end with ".db", ".txt", ".lut", "roi", ".pty", ".hdr", ".py", etc. */
 	public String[] trimFileList(String[] rawlist) {
 		int count = 0;
