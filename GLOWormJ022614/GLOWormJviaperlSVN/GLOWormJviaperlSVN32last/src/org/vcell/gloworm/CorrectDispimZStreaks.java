@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
@@ -48,12 +49,13 @@ public class CorrectDispimZStreaks implements PlugIn {
 	private int iterations;
 	private int blankWidth;
 	private int blankHeight;
-	private double bkgdModeCutoffFactor;
+	private double origBkgdModeCutoffFactor;
 	private static Checkbox monitorCheckbox;
 	private ImagePlus monitorImp;
 	private ImagePlus targetImp;
 	private static JFrame monitorFrame;
 	private String channelRange;
+	private int f;
 	//	private int[] maxXs;
 	//	private int[] maxYs;
 
@@ -104,8 +106,8 @@ public class CorrectDispimZStreaks implements PlugIn {
 		Prefs.set("Zstreak.blankWidth", blankWidth);
 		blankHeight = (int) gd.getNextNumber();
 		Prefs.set("Zstreak.blankHeight", blankHeight);
-		bkgdModeCutoffFactor = gd.getNextNumber();
-		Prefs.set("Zstreak.bkgdModeCutoffFactor", bkgdModeCutoffFactor);
+		origBkgdModeCutoffFactor = gd.getNextNumber();
+		Prefs.set("Zstreak.bkgdModeCutoffFactor", origBkgdModeCutoffFactor);
 		channelRange = gd.getNextString();
 		Prefs.set("Zstreak.channelRange", channelRange);
 		Prefs.savePreferences();	
@@ -147,6 +149,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 		}
 		final boolean[] doneDestreak = new boolean[imp.getStackSize()];
 		for (int ss=1;ss<=imp.getStackSize();ss++) {
+			final int fss = ss;
 			final ImageProcessor fIP= imp.getStack().getProcessor(ss);
 			final int s = ss;
 			final int fbkgdMode = bkgdMode;
@@ -184,7 +187,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 
 						maxXs = maxPoly.xpoints;
 						maxYs = maxPoly.ypoints;
-						IJ.log(maxXs.length+" maxima");
+						IJ.log(maxXs.length+" maxima "+ imp.getTitle() +" x=" + fss + " bkmcof=" + origBkgdModeCutoffFactor);
 
 						for (int n=0; n<maxXs.length; n++) {
 							if (!maxCum.contains(maxXs[n]+","+maxYs[n])) {
@@ -206,9 +209,15 @@ public class CorrectDispimZStreaks implements PlugIn {
 					//			for (int t=iterations;t>0;t--) {
 					//			while (maxXs.length != minMax && bottomCount < 20 ) {
 					boolean bottomedOut = false;
+					long whileLoopStartTime = (new Date()).getTime();
+					double bkgdModeCutoffFactor = origBkgdModeCutoffFactor;
 					while (!bottomedOut) {
-//						while (ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class).getProcessCpuLoad() > 0.80)
-//							IJ.wait(1000);
+						
+						if (ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class).getProcessCpuLoad() > 0.40
+							&& (new Date()).getTime() - whileLoopStartTime > 60000 ) {
+								bkgdModeCutoffFactor = bkgdModeCutoffFactor + .1;
+								IJ.log("steppimg up bkgdModeCutoffFactor => "+ bkgdModeCutoffFactor);
+						}
 						bottomedOut = true;
 
 						MaximumFinder mf = new MaximumFinder();
@@ -219,7 +228,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 
 						maxXs = maxPoly.xpoints;
 						maxYs = maxPoly.ypoints;
-						IJ.log(maxXs.length+" maxima");
+						IJ.log(maxXs.length+" maxima  "+ imp.getTitle() +" x=" + fss + " bkmcof=" + bkgdModeCutoffFactor);
 						
 						if (maxXs.length < 10)
 							continue;
@@ -241,7 +250,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 							}
 						}
 					}
-					fIP.subtract(fbkgdMode*bkgdModeCutoffFactor);
+					fIP.subtract(fbkgdMode*origBkgdModeCutoffFactor);
 					imp.getStack().getProcessor(s).setPixels(fIP.getPixels());
 					doneDestreak[s-1] = true;
 
@@ -346,12 +355,13 @@ public class CorrectDispimZStreaks implements PlugIn {
 				slicer.setOutputZSpacing(1);  
 				Slicer.setStartAt("Top");
 				ImagePlus impHS_duprs = slicer.reslice(impHS_dup);
+				impHS_duprs.setTitle("frame"+f);
 				impHS_duprs.setCalibration(impHS.getCalibration());
 				impHS_duprs.getCalibration().pixelWidth = impHS.getCalibration().pixelWidth;
 				impHS_duprs.getCalibration().pixelHeight = impHS.getCalibration().pixelHeight;
 				impHS_duprs.getCalibration().pixelDepth = impHS.getCalibration().pixelWidth;
 
-				IJ.run(impHS_duprs, "Correct diSPIM ZStreaks...", "maskwidth="+maskWidth+" mask="+maskScaleFactor+" max="+maxTolerance+" min="+minTolerance+" iterations="+iterations+" blankwidth="+blankWidth+" blankheight="+blankHeight+" bkgd="+bkgdModeCutoffFactor+"");
+				IJ.run(impHS_duprs, "Correct diSPIM ZStreaks...", "maskwidth="+maskWidth+" mask="+maskScaleFactor+" max="+maxTolerance+" min="+minTolerance+" iterations="+iterations+" blankwidth="+blankWidth+" blankheight="+blankHeight+" bkgd="+origBkgdModeCutoffFactor+"");
 
 				impHS_duprs.updateAndRepaintWindow();
 
