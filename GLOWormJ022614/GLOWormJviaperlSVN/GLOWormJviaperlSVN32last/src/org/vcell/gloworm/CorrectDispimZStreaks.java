@@ -55,9 +55,10 @@ public class CorrectDispimZStreaks implements PlugIn {
 	private ImagePlus targetImp;
 	private static JFrame monitorFrame;
 	private String channelRange;
-	private int f;
 	//	private int[] maxXs;
 	//	private int[] maxYs;
+	private double cpuLimit;
+	private double threadTimeLimit;
 
 	public void run(String arg) {
 		imp = IJ.getImage();
@@ -89,6 +90,8 @@ public class CorrectDispimZStreaks implements PlugIn {
 		gd.addNumericField("BlankWidth", 1, 0);
 		gd.addNumericField("BlankHeight", 1, 0);
 		gd.addNumericField("Bkgd Mode Cutoff Factor", 1.0, 2);
+		gd.addNumericField("CPU max", 0.40, 2);
+		gd.addNumericField("Thread time limit", 60, 1);
 		gd.addStringField("Channel(s)", "1-"+imp.getNChannels());
 		gd.showDialog();
 		if (gd.wasCanceled())
@@ -108,6 +111,10 @@ public class CorrectDispimZStreaks implements PlugIn {
 		Prefs.set("Zstreak.blankHeight", blankHeight);
 		origBkgdModeCutoffFactor = gd.getNextNumber();
 		Prefs.set("Zstreak.bkgdModeCutoffFactor", origBkgdModeCutoffFactor);
+		cpuLimit = gd.getNextNumber();
+		Prefs.set("Zstreak.cpuLimit", cpuLimit);
+		threadTimeLimit = gd.getNextNumber();
+		Prefs.set("Zstreak.threadTimeLimit", threadTimeLimit);
 		channelRange = gd.getNextString();
 		Prefs.set("Zstreak.channelRange", channelRange);
 		Prefs.savePreferences();	
@@ -213,8 +220,8 @@ public class CorrectDispimZStreaks implements PlugIn {
 					double bkgdModeCutoffFactor = origBkgdModeCutoffFactor;
 					while (!bottomedOut) {
 						
-						if (ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class).getProcessCpuLoad() > 0.40
-							&& (new Date()).getTime() - whileLoopStartTime > 60000 ) {
+						if (ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class).getProcessCpuLoad() > cpuLimit
+							&& (new Date()).getTime() - whileLoopStartTime > threadTimeLimit*1000 ) {
 								bkgdModeCutoffFactor = bkgdModeCutoffFactor + .1;
 								IJ.log("steppimg up bkgdModeCutoffFactor => "+ bkgdModeCutoffFactor);
 						}
@@ -268,6 +275,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 				}
 			}
 					);
+			
 			destreakThread.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
 				public void uncaughtException(Thread myThread, Throwable e) {
 					IJ.handleException(e);
@@ -361,7 +369,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 				impHS_duprs.getCalibration().pixelHeight = impHS.getCalibration().pixelHeight;
 				impHS_duprs.getCalibration().pixelDepth = impHS.getCalibration().pixelWidth;
 
-				IJ.run(impHS_duprs, "Correct diSPIM ZStreaks...", "maskwidth="+maskWidth+" mask="+maskScaleFactor+" max="+maxTolerance+" min="+minTolerance+" iterations="+iterations+" blankwidth="+blankWidth+" blankheight="+blankHeight+" bkgd="+origBkgdModeCutoffFactor+"");
+				IJ.run(impHS_duprs, "Correct diSPIM ZStreaks...", "maskwidth="+maskWidth+" mask="+maskScaleFactor+" max="+maxTolerance+" min="+minTolerance+" iterations="+iterations+" blankwidth="+blankWidth+" blankheight="+blankHeight+" bkgd="+origBkgdModeCutoffFactor+" cpu"+cpuLimit+" thread"+threadTimeLimit+"");
 
 				impHS_duprs.updateAndRepaintWindow();
 
