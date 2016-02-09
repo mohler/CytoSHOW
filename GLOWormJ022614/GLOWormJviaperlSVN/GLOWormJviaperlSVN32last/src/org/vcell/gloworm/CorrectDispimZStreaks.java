@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 
 import javax.imageio.ImageIO;
@@ -59,6 +60,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 	//	private int[] maxYs;
 	private double cpuLimit;
 	private double threadTimeLimit;
+	private String outPath;
 
 	public void run(String arg) {
 		imp = IJ.getImage();
@@ -93,6 +95,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 		gd.addNumericField("CPU max", 0.40, 2);
 		gd.addNumericField("Thread time limit", 60, 1);
 		gd.addStringField("Channel(s)", "1-"+imp.getNChannels());
+		gd.addStringField("Path to output (optional)", "");
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return;
@@ -117,6 +120,8 @@ public class CorrectDispimZStreaks implements PlugIn {
 		Prefs.set("Zstreak.threadTimeLimit", threadTimeLimit);
 		channelRange = gd.getNextString();
 		Prefs.set("Zstreak.channelRange", channelRange);
+		outPath = gd.getNextString().trim();
+		Prefs.set("Zstreak.outPath", outPath);
 		Prefs.savePreferences();	
 		if (monitorFrame == null || monitorCheckbox == null) { 
 			monitorFrame = new JFrame("Monitor processing visually?");
@@ -129,6 +134,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 			this.doHyperStack(imp);
 			return;
 		}
+		
 		targetImp = new ImagePlus("Process Monitor");
 		monitorImp = new ImagePlus("Target Monitor");
 
@@ -166,7 +172,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 			double jvmCpuLoad = osBean.getProcessCpuLoad();  
 			// What % load the overall system is at, from 0.0-1.0  
 			double sysCpuLoad = osBean.getSystemCpuLoad();  
-			while (sysCpuLoad > 0.5) {
+			while (sysCpuLoad > cpuLimit) {
 				IJ.wait(1000);
 				jvmCpuLoad = osBean.getProcessCpuLoad();  
 				sysCpuLoad = osBean.getSystemCpuLoad();  
@@ -217,7 +223,10 @@ public class CorrectDispimZStreaks implements PlugIn {
 					//			while (maxXs.length != minMax && bottomCount < 20 ) {
 					boolean bottomedOut = false;
 					long whileLoopStartTime = (new Date()).getTime();
+//					double bkgdModeCutoffFactor = origBkgdModeCutoffFactor;
+					
 					double bkgdModeCutoffFactor = origBkgdModeCutoffFactor;
+
 					while (!bottomedOut) {
 						
 						if (ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class).getProcessCpuLoad() > cpuLimit
@@ -225,6 +234,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 								bkgdModeCutoffFactor = bkgdModeCutoffFactor + .1;
 								IJ.log("steppimg up bkgdModeCutoffFactor => "+ bkgdModeCutoffFactor);
 						}
+
 						bottomedOut = true;
 
 						MaximumFinder mf = new MaximumFinder();
@@ -260,6 +270,8 @@ public class CorrectDispimZStreaks implements PlugIn {
 					fIP.subtract(fbkgdMode*origBkgdModeCutoffFactor);
 					imp.getStack().getProcessor(s).setPixels(fIP.getPixels());
 					doneDestreak[s-1] = true;
+					IJ.append(""+ s + " "+ bkgdModeCutoffFactor, outPath+"zags"+channelRange+".log");
+
 
 					if (getMonitorStatus()) {				
 						if (!monitorImp.isVisible())
@@ -271,7 +283,6 @@ public class CorrectDispimZStreaks implements PlugIn {
 							targetImp.show();
 						targetImp.updateAndRepaintWindow();
 					}
-					//				IJ.runMacro("waitForUser(1);");
 				}
 			}
 					);
@@ -280,17 +291,12 @@ public class CorrectDispimZStreaks implements PlugIn {
 				public void uncaughtException(Thread myThread, Throwable e) {
 					IJ.handleException(e);
 				}
-			});
+			}
+			);
 			destreakThread.start();
-
-			//			for(int x=0;x<imp.getWidth();x++) {
-			//				for(int y=0;y<imp.getHeight();y++) {
-			//					if(imp.getProcessor().get(x,y) < bkgdMode) {
-			//						imp.getProcessor().set(x,y, bkgdMode);
-			//					}
-			//				}
-			//			}
+			
 		}
+
 		boolean doneAllSlices = false;
 		while (!doneAllSlices) {
 			doneAllSlices = true;
@@ -314,7 +320,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 	}
 
 	public void doHyperStack(ImagePlus impHS){
-		String path= IJ.getDirectory("");
+		String path= IJ.getDirectory(outPath);
 		Roi roi = impHS.getRoi();
 		String title = impHS.getTitle();
 		String[] titleChunks =  title.split( "[ _:\\"+File.separator+"]");
@@ -368,8 +374,16 @@ public class CorrectDispimZStreaks implements PlugIn {
 				impHS_duprs.getCalibration().pixelWidth = impHS.getCalibration().pixelWidth;
 				impHS_duprs.getCalibration().pixelHeight = impHS.getCalibration().pixelHeight;
 				impHS_duprs.getCalibration().pixelDepth = impHS.getCalibration().pixelWidth;
-
-				IJ.run(impHS_duprs, "Correct diSPIM ZStreaks...", "maskwidth="+maskWidth+" mask="+maskScaleFactor+" max="+maxTolerance+" min="+minTolerance+" iterations="+iterations+" blankwidth="+blankWidth+" blankheight="+blankHeight+" bkgd="+origBkgdModeCutoffFactor+" cpu"+cpuLimit+" thread"+threadTimeLimit+"");
+				String zagsLog = IJ.openAsString(outPath+"zags"+ch+".log");
+				if (zagsLog != null && !zagsLog.startsWith("Error")) {
+					String[] zagsLines = zagsLog.split("\\n");
+					double[] zagsBKMCOFs = new double[h];
+					for (int xz=zagsLines.length-1; xz>zagsLines.length-1-h; xz--)
+						zagsBKMCOFs[xz] = Double.parseDouble(zagsLines[xz].split(" ")[1]);
+					Arrays.sort(zagsBKMCOFs);
+					origBkgdModeCutoffFactor = zagsBKMCOFs[h/2]; //gives median of previuous time stacks final cutoffs
+				}
+				IJ.run(impHS_duprs, "Correct diSPIM ZStreaks...", "maskwidth="+maskWidth+" mask="+maskScaleFactor+" max="+maxTolerance+" min="+minTolerance+" iterations="+iterations+" blankwidth="+blankWidth+" blankheight="+blankHeight+" bkgd="+origBkgdModeCutoffFactor+" cpu="+cpuLimit+" thread="+threadTimeLimit+" channel(s)="+ch+" path="+path+"");
 
 				impHS_duprs.updateAndRepaintWindow();
 
