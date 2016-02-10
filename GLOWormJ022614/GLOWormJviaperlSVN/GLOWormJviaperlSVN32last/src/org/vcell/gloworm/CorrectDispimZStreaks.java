@@ -61,6 +61,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 	private double cpuLimit;
 	private double threadTimeLimit;
 	private String outPath;
+	private double fbkgdFloorFactor=0.5;
 
 	public void run(String arg) {
 		imp = IJ.getImage();
@@ -120,7 +121,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 		Prefs.set("Zstreak.threadTimeLimit", threadTimeLimit);
 		channelRange = gd.getNextString();
 		Prefs.set("Zstreak.channelRange", channelRange);
-		outPath = gd.getNextString().trim();
+		outPath = gd.getNextString().replace("spaceSPACE", " ");
 		Prefs.set("Zstreak.outPath", outPath);
 		Prefs.savePreferences();	
 		if (monitorFrame == null || monitorCheckbox == null) { 
@@ -185,6 +186,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 					ArrayList<String> maxCum = new ArrayList<String>();
 					ImageProcessor targetIP = fIP.duplicate();
 					targetImp.setProcessor(targetIP);
+					targetIP.setColor(Color.BLACK);
 					monitorImp.setProcessor(targetIP);
 					int[]  maxXs = new int[10];
 					int[]  maxYs = new int[10];
@@ -209,10 +211,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 								modIP.multiply(maskScaleFactor * (((double)fIP.getPixel(maxXs[n], maxYs[n])))/255);
 								fIP.copyBits(modIP, maxXs[n], maxYs[n]-gaussianDiffIP.getHeight()/2, Blitter.DIFFERENCE);
 								targetIP.copyBits(modIP, maxXs[n], maxYs[n]-gaussianDiffIP.getHeight()/2, Blitter.DIFFERENCE);
-								Color fgc = Toolbar.getForegroundColor();
-								Toolbar.setForegroundColor(Color.BLACK);
 								targetIP.fillOval(maxXs[n]-blankWidth/2, maxYs[n]-blankHeight/2, blankWidth, blankHeight);
-								Toolbar.setForegroundColor(fgc);
 
 							}
 						}
@@ -229,8 +228,9 @@ public class CorrectDispimZStreaks implements PlugIn {
 
 					while (!bottomedOut) {
 						
-						if (ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class).getProcessCpuLoad() > cpuLimit
-							&& (new Date()).getTime() - whileLoopStartTime > threadTimeLimit*1000 ) {
+//						if (ManagementFactory.getPlatformMXBean(OperatingSystemMXBean.class).getProcessCpuLoad() > cpuLimit &&
+						if (
+								(new Date()).getTime() - whileLoopStartTime > threadTimeLimit*1000 ) {
 								bkgdModeCutoffFactor = bkgdModeCutoffFactor + .1;
 								IJ.log("steppimg up bkgdModeCutoffFactor => "+ bkgdModeCutoffFactor);
 						}
@@ -267,7 +267,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 							}
 						}
 					}
-					fIP.subtract(fbkgdMode*origBkgdModeCutoffFactor);
+					fIP.subtract(fbkgdFloorFactor*origBkgdModeCutoffFactor);
 					imp.getStack().getProcessor(s).setPixels(fIP.getPixels());
 					doneDestreak[s-1] = true;
 					IJ.append(""+ s + " "+ bkgdModeCutoffFactor, outPath+"zags"+channelRange+".log");
@@ -328,8 +328,8 @@ public class CorrectDispimZStreaks implements PlugIn {
 		String titleShort  = titleChunks[0]+titleChunks[lot-1];
 		IJ.log(path+titleShort+"_#.tif");
 		int[] dim = impHS.getDimensions();
-		int w = dim[0];
-		int h = dim[1];
+		int w = impHS.getRoi().getBounds().width;
+		int h = impHS.getRoi().getBounds().height;
 		int c = dim[2];
 		int z = dim[3];
 		int t = dim[4];
@@ -369,21 +369,25 @@ public class CorrectDispimZStreaks implements PlugIn {
 				slicer.setOutputZSpacing(1);  
 				Slicer.setStartAt("Top");
 				ImagePlus impHS_duprs = slicer.reslice(impHS_dup);
-				impHS_duprs.setTitle("frame"+f);
+				impHS_duprs.setTitle(titleShort+"Frame"+f);
 				impHS_duprs.setCalibration(impHS.getCalibration());
 				impHS_duprs.getCalibration().pixelWidth = impHS.getCalibration().pixelWidth;
 				impHS_duprs.getCalibration().pixelHeight = impHS.getCalibration().pixelHeight;
 				impHS_duprs.getCalibration().pixelDepth = impHS.getCalibration().pixelWidth;
-				String zagsLog = IJ.openAsString(outPath+"zags"+ch+".log");
+				String zagsLog = IJ.openAsString(path+"zags"+ch+".log");
 				if (zagsLog != null && !zagsLog.startsWith("Error")) {
 					String[] zagsLines = zagsLog.split("\\n");
 					double[] zagsBKMCOFs = new double[h];
 					for (int xz=zagsLines.length-1; xz>zagsLines.length-1-h; xz--)
-						zagsBKMCOFs[xz] = Double.parseDouble(zagsLines[xz].split(" ")[1]);
+						zagsBKMCOFs[zagsLines.length-1-xz] = Double.parseDouble(zagsLines[xz].split(" ")[1]);
+					double sum =0;
 					Arrays.sort(zagsBKMCOFs);
-					origBkgdModeCutoffFactor = zagsBKMCOFs[h/2]; //gives median of previuous time stacks final cutoffs
+					for (double zagsBKMCOF:zagsBKMCOFs)
+						sum += zagsBKMCOF;
+					origBkgdModeCutoffFactor = sum/h; //mean from last tpt stack
+
 				}
-				IJ.run(impHS_duprs, "Correct diSPIM ZStreaks...", "maskwidth="+maskWidth+" mask="+maskScaleFactor+" max="+maxTolerance+" min="+minTolerance+" iterations="+iterations+" blankwidth="+blankWidth+" blankheight="+blankHeight+" bkgd="+origBkgdModeCutoffFactor+" cpu="+cpuLimit+" thread="+threadTimeLimit+" channel(s)="+ch+" path="+path+"");
+				IJ.run(impHS_duprs, "Correct diSPIM ZStreaks...", "maskwidth="+maskWidth+" mask="+maskScaleFactor+" max="+maxTolerance+" min="+minTolerance+" iterations="+iterations+" blankwidth="+blankWidth+" blankheight="+blankHeight+" bkgd="+origBkgdModeCutoffFactor+" cpu="+cpuLimit+" thread="+threadTimeLimit+" channel(s)="+ch+" path=["+path.replace(" ", "spaceSPACE")+"]");
 
 				impHS_duprs.updateAndRepaintWindow();
 
