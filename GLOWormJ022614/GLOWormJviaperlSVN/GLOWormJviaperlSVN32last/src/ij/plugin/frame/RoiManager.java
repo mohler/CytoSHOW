@@ -67,7 +67,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	private boolean ignoreInterrupts;
 	private PopupMenu pm;
 	private Button moreButton, colorButton;
-	private Checkbox addRoiSpanCCheckbox = new Checkbox("Span C", true);
+	private Checkbox addRoiSpanCCheckbox = new Checkbox("Span C", false);
 	private Checkbox addRoiSpanZCheckbox = new Checkbox("Span Z", false);
 	private Checkbox addRoiSpanTCheckbox = new Checkbox("Span T", false);	
 	private Checkbox showAllCheckbox = new Checkbox("Show", true);
@@ -91,7 +91,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	private int defaultLineWidth = 1;
 	private Color defaultColor;
 	private boolean firstTime = true;
-	private boolean addRoiSpanC = true;
+	private boolean addRoiSpanC;
 	private boolean addRoiSpanZ;
 	private boolean addRoiSpanT;
 	private String prevSearchString = "";
