@@ -208,7 +208,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		
 		if (channelDirectories >0) {
 			for (String fileName:goDirFileList){
-				if ((new File(dir + fileName)).canRead()) {
+				if ((new File(dir + fileName)).canRead() && fileName.toLowerCase().endsWith(".tif")) {
 					TiffDecoder td = new TiffDecoder(dir, fileName);
 					if (IJ.debugMode) td.enableDebugging();
 					IJ.showStatus("Decoding TIFF header...");

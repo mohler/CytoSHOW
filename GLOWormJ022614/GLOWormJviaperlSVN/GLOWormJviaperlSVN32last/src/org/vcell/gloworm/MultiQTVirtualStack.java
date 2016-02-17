@@ -81,7 +81,7 @@ public class MultiQTVirtualStack extends VirtualStack {
 	public int maxSlicesSingleMovie ;
 	public int maxTimesSingleMovie ;
 	public int maximumRelativeFrameRate;
-	public int maximumrelativeZFrequency;
+	public int maximumRelativeZFrequency;
 
 	private int compositeChannel;
 	private int lastChannel;  //A non-zero nonsense integer value to trigger initiation of the channel order in getProcessor.
@@ -396,10 +396,10 @@ public class MultiQTVirtualStack extends VirtualStack {
 
 
 			/*******/				
-			maximumrelativeZFrequency = getRelativeZFrequencySingleMovie()[0];   // start with the first value
+			maximumRelativeZFrequency = getRelativeZFrequencySingleMovie()[0];   // start with the first value
 			for (int i=1; i<getRelativeZFrequencySingleMovie().length; i++) {
-				if (getRelativeZFrequencySingleMovie()[i] > maximumrelativeZFrequency) {
-					maximumrelativeZFrequency = getRelativeZFrequencySingleMovie()[i];   // new maximum
+				if (getRelativeZFrequencySingleMovie()[i] > maximumRelativeZFrequency) {
+					maximumRelativeZFrequency = getRelativeZFrequencySingleMovie()[i];   // new maximum
 				}
 			}
 
@@ -575,10 +575,10 @@ public class MultiQTVirtualStack extends VirtualStack {
 	public void setRelativeZFrequency(int channelBaseZero, int relativeZFrequency) {
 
 		this.getRelativeZFrequencySingleMovie()[channelBaseZero] = relativeZFrequency;
-		this.maximumrelativeZFrequency = this.getRelativeZFrequencySingleMovie()[0];   // start with the first value
+		this.maximumRelativeZFrequency = this.getRelativeZFrequencySingleMovie()[0];   // start with the first value
 		for (int i=1; i<getRelativeZFrequencySingleMovie().length; i++) {
-			if (this.getRelativeZFrequencySingleMovie()[i] > this.maximumrelativeZFrequency) {
-				this.maximumrelativeZFrequency = this.getRelativeZFrequencySingleMovie()[i];   // new maximum
+			if (this.getRelativeZFrequencySingleMovie()[i] > this.maximumRelativeZFrequency) {
+				this.maximumRelativeZFrequency = this.getRelativeZFrequencySingleMovie()[i];   // new maximum
 			}
 		}
 	}
@@ -654,7 +654,7 @@ public class MultiQTVirtualStack extends VirtualStack {
 				}
 
 				slice = ((compositeChannel <1) ? 1 : (compositeChannel-1) )*nSlices*nFrames 
-				+ (z-1)*((compositeChannel <1) ? 1 : this.getRelativeZFrequencySingleMovie()[compositeChannel-1])/this.maximumrelativeZFrequency*nFrames 
+				+ (z-1)*((compositeChannel <1) ? 1 : this.getRelativeZFrequencySingleMovie()[compositeChannel-1])/this.maximumRelativeZFrequency*nFrames 
 				+ t*((compositeChannel <1) ? 1 : this.getRelativeFrameRateSingleMovie()[compositeChannel-1])/this.maximumRelativeFrameRate;
 
 //				if (compositeChannel >0)
@@ -678,7 +678,7 @@ public class MultiQTVirtualStack extends VirtualStack {
 				}
 
 				slice = (c-1)*nSlices*nFrames 
-				+ (z-1)*((c == 0) ? 1 : this.getRelativeZFrequencySingleMovie()[c-1])/this.maximumrelativeZFrequency*nFrames 
+				+ (z-1)*((c == 0) ? 1 : this.getRelativeZFrequencySingleMovie()[c-1])/this.maximumRelativeZFrequency*nFrames 
 				+ t*((c == 0) ? 1 : this.getRelativeFrameRateSingleMovie()[c-1])/this.maximumRelativeFrameRate;	
 			}		  
 		}
@@ -782,7 +782,7 @@ public class MultiQTVirtualStack extends VirtualStack {
 				}
 
 				slice = ((compositeChannel <1) ? 1 : (compositeChannel-1) )*nSlices*nFrames 
-				+ (z-1)*((compositeChannel <1) ? 1 : this.getRelativeZFrequencySingleMovie()[compositeChannel-1])/this.maximumrelativeZFrequency*nFrames 
+				+ (z-1)*((compositeChannel <1) ? 1 : this.getRelativeZFrequencySingleMovie()[compositeChannel-1])/this.maximumRelativeZFrequency*nFrames 
 				+ t*((compositeChannel <1) ? 1 : this.getRelativeFrameRateSingleMovie()[compositeChannel-1])/this.maximumRelativeFrameRate;
 
 //				if (compositeChannel >0)
@@ -806,7 +806,7 @@ public class MultiQTVirtualStack extends VirtualStack {
 				}
 
 				slice = (c-1)*nSlices*nFrames 
-				+ (z-1)*((c == 0) ? 1 : this.getRelativeZFrequencySingleMovie()[c-1])/this.maximumrelativeZFrequency*nFrames 
+				+ (z-1)*((c == 0) ? 1 : this.getRelativeZFrequencySingleMovie()[c-1])/this.maximumRelativeZFrequency*nFrames 
 				+ t*((c == 0) ? 1 : this.getRelativeFrameRateSingleMovie()[c-1])/this.maximumRelativeFrameRate;	
 			}		  
 		}

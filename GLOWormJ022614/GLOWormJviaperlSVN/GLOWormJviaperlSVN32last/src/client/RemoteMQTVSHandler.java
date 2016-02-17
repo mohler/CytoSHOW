@@ -869,8 +869,8 @@ public class RemoteMQTVSHandler {
 		private double[] scaleY = new double[stkNChannels];
 		private int[] channelLUTIndex = new int[stkNChannels];
 		private int selectedSlice;
-		private int maximumRelativeZFrequency =1;
-		private int maximumRelativeFrameRate =1;
+		public int maximumRelativeZFrequency =1;
+		public int maximumRelativeFrameRate =1;
 		private int finalWidth;
 		private int finalHeight;
 		private double gridAcross;

@@ -35,6 +35,7 @@ import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
 
 import client.RemoteMQTVSHandler;
+import client.RemoteMQTVSHandler.RemoteMQTVirtualStack;
 
 
 /** Displays the ImageJ Channels window. */
@@ -1824,9 +1825,14 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 						}	
 						rois[i].setPosition(rois[i].getCPosition(), newZposition ,rois[i].getTPosition());
 						// Update Zfrequencies
-						newZposition = (int) (rois[i].getZPosition() 
+						if (imp.getStack() instanceof RemoteMQTVirtualStack)
+							newZposition = (int) (rois[i].getZPosition() 
+								/ ((double)((RemoteMQTVirtualStack)imp.getStack()).getRelativeZFrequencySingleMovie()[c]
+										/ (double)((RemoteMQTVirtualStack)imp.getStack()).maximumRelativeZFrequency) );
+						else if (imp.getStack() instanceof MultiQTVirtualStack) 
+							newZposition = (int) (rois[i].getZPosition() 
 								/ ((double)((MultiQTVirtualStack)imp.getStack()).getRelativeZFrequencySingleMovie()[c]
-										/ (double)((MultiQTVirtualStack)imp.getStack()).maximumrelativeZFrequency) );
+										/ (double)((MultiQTVirtualStack)imp.getStack()).maximumRelativeZFrequency) );
 						rois[i].setPosition(rois[i].getCPosition(), newZposition, rois[i].getTPosition());
 						// Update Tshifts
 						int newTposition = (int) (rois[i].getTPosition() - Double.parseDouble(frameSpinner[c].getValue().toString()));
@@ -1838,7 +1844,12 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 						}
 						rois[i].setPosition(rois[i].getCPosition(), rois[i].getZPosition(), newTposition);
 						// Update Tfrequencies
-						newTposition = (int) (rois[i].getTPosition() 
+						if (imp.getStack() instanceof RemoteMQTVirtualStack)
+							newTposition = (int) (rois[i].getTPosition() 
+									/ ((double)((RemoteMQTVirtualStack)imp.getStack()).getRelativeFrameRateSingleMovie()[c]
+											/ (double)((RemoteMQTVirtualStack)imp.getStack()).maximumRelativeFrameRate) );
+						else if (imp.getStack() instanceof MultiQTVirtualStack) 
+							newTposition = (int) (rois[i].getTPosition() 
 								/ ((double)((MultiQTVirtualStack)imp.getStack()).getRelativeFrameRateSingleMovie()[c]
 										/ (double)((MultiQTVirtualStack)imp.getStack()).maximumRelativeFrameRate) );
 						rois[i].setPosition(c+1, rois[i].getZPosition(), newTposition );
