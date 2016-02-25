@@ -268,7 +268,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 							}
 						}
 					}
-					fIP.subtract(bkgdFloorFactor*origBkgdModeCutoffFactor);
+					fIP.subtract(bkgdFloorFactor*fbkgdMode);
 					imp.getStack().getProcessor(s).setPixels(fIP.getPixels());
 					doneDestreak[s-1] = true;
 					IJ.append(""+ s + " "+ bkgdModeCutoffFactor, outPath+"zags_"+imp.getTitle().split("_")[0]+"_"+channelRange+".log");
@@ -389,8 +389,8 @@ public class CorrectDispimZStreaks implements PlugIn {
 					Arrays.sort(zagsBKMCOFs);
 					for (double zagsBKMCOF:zagsBKMCOFs)
 						sum += zagsBKMCOF;
-					origBkgdModeCutoffFactor = 0.5*sum/zagsLines.length; //mean from last tpt stack
-
+					origBkgdModeCutoffFactor = /*0.5**/sum/zagsLines.length; //mean from last tpt stack
+												//not sure why I was taking half...
 				}
 				IJ.run(impHS_duprs, "Correct diSPIM ZStreaks...", "maskwidth="+maskWidth+" mask="+maskScaleFactor+" max="+maxTolerance+" min="+minTolerance+" iterations="+iterations+" blankwidth="+blankWidth+" blankheight="+blankHeight+" bkgd="+origBkgdModeCutoffFactor+" floor="+bkgdFloorFactor+" cpu="+cpuLimit+" thread="+threadTimeLimit+" channel(s)="+ch+" path=["+path.replace(" ", "spaceSPACE")+"]");
 
