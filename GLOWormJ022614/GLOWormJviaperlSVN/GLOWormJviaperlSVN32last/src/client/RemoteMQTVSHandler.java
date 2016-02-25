@@ -630,12 +630,11 @@ public class RemoteMQTVSHandler {
 			e.printStackTrace();
 		}
 		ImageProcessor ip = new ColorProcessor(bi);
-//		if (!(moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW")
-//				/*|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/DUP")
-//				|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/Projectionsof")*/)) {
-//			ip = ip.convertToByte(false);
-//			eightBit = true;
-//		}
+		if (!(moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW_")
+				|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/RGB_"))) {
+			ip = ip.convertToByte(false);
+			eightBit = true;
+		}
 
 		if (burnIn) {
 			if ((StackWindow)imp2.getWindow()!=null){
