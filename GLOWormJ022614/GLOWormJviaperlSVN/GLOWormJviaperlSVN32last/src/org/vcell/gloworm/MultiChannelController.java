@@ -1247,6 +1247,8 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 //				String name = sd.getFileName().replace(" ","");
 				name = name +"_1.avi";
 				name = name.replace(" ","");
+				if (imp.getType()==ImagePlus.COLOR_RGB)
+					name = "RGB_"+name;
 				if (name==null) return;
 				/*
 			if (name.length()>32) {
@@ -1366,7 +1368,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 					}
 				}
 				out.println("");
-				out.println("Convert8bit = " + ((deNovoMovieFile!=null && !deNovoMovieFile.getName().startsWith("SW_"))?true:(stack instanceof MultiQTVirtualStack?((MultiQTVirtualStack) stack).getIsEightBit():(imp.getRemoteMQTVSHandler()!=null?imp.getRemoteMQTVSHandler().isEightBit():false) ) ) );
+				out.println("Convert8bit = " + ((deNovoMovieFile!=null && !deNovoMovieFile.getName().startsWith("SW_") && !deNovoMovieFile.getName().startsWith("RGB_"))?true:(stack instanceof MultiQTVirtualStack?((MultiQTVirtualStack) stack).getIsEightBit():(imp.getRemoteMQTVSHandler()!=null?imp.getRemoteMQTVSHandler().isEightBit():false) ) ) );
 				out.println("VirtualStack = " + (deNovoMovieFile!=null?true:(stack instanceof MultiQTVirtualStack?((MultiQTVirtualStack) stack).getIsVirtualStack():true) ));
 				out.println("MultipleMovies = " + (deNovoMovieFile!=null?(imp.getNChannels()>1):(stack instanceof MultiQTVirtualStack?((MultiQTVirtualStack) stack).getIsMultipleMovies():true) ));
 				out.println("HyperStack = " + (deNovoMovieFile!=null?true:(stack instanceof MultiQTVirtualStack?((MultiQTVirtualStack) stack).getIsHyperStack():true) ));
