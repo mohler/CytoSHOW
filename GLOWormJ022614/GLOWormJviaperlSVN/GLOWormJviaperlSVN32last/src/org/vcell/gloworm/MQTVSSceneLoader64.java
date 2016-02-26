@@ -404,7 +404,7 @@ public class MQTVSSceneLoader64 implements PlugIn {
 				}
 
 
-				if ( !IJ.isWindows() || pathlist.contains("/Volumes/GLOWORM_DATA/")) {
+				if ( !IJ.isWindows() || movieFileList.contains("/Volumes/GLOWORM_DATA/")) {
 					movieFileList = movieFileList.replaceAll("Q:", "/Volumes/GLOWORM_DATA");
 					movieFileList = movieFileList.replace('\\', '/');
 					//if (IJ.debugMode) IJ.log(movieFileList + "WinToMac");			
@@ -507,7 +507,7 @@ public class MQTVSSceneLoader64 implements PlugIn {
 
 						try {
 							File adjFile;
-							if (pathlist.contains("/Volumes/GLOWORM_DATA") ) {
+							if (movieFileList.contains("/Volumes/GLOWORM_DATA") ) {
 								adjFile = new File("/Volumes/GLOWORM_DATA/"  + movieAdjustmentFiles[j]  );
 							} else if (!IJ.isWindows() ) {
 								//if (IJ.debugMode) IJ.log("Macintosh or Linux");
@@ -910,14 +910,14 @@ public class MQTVSSceneLoader64 implements PlugIn {
 					RoiManager rm = getImp().getRoiManager();
 					String clStr;
 					if (clFileName != null) {
-						if (pathlist.contains("/Volumes/GLOWORM_DATA") ) {
+						if (movieFileList.contains("/Volumes/GLOWORM_DATA") ) {
 							clStr = IJ.openAsString("/Volumes/GLOWORM_DATA/" + clFileName);
 						} else {
 							clStr = IJ.openAsString(file.getPath().substring(0, file.getPath().lastIndexOf("MQTVS")) + clFileName);
 						}
 
 						BufferedReader in = null;
-						if (pathlist.startsWith("/Volumes/GLOWORM_DATA/")) {
+						if (movieFileList.startsWith("/Volumes/GLOWORM_DATA/")) {
 							in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
 									RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], ("/Volumes/GLOWORM_DATA/" + clFileName)))));
 							if (in != null) {
@@ -941,7 +941,7 @@ public class MQTVSSceneLoader64 implements PlugIn {
 
 					if (roiFileName != null) {
 						String roiFilePath;
-						if (pathlist.contains("/Volumes/GLOWORM_DATA") ) {
+						if (movieFileList.contains("/Volumes/GLOWORM_DATA") ) {
 							roiFilePath = "/Volumes/GLOWORM_DATA/"  + roiFileName ;
 						} else {
 							roiFilePath = file.getPath().substring(0, file.getPath().lastIndexOf("MQTVS")) + roiFileName; 
