@@ -107,6 +107,8 @@ public class MultiQTVirtualStack extends VirtualStack {
 	private boolean firstCall;
 	private boolean secondCall;
 	private boolean rotateNinetyX;
+	private String sceneFileText;
+	private String sceneFileName;
 
 	public MultiQTVirtualStack(String[] args) {
 		
@@ -150,7 +152,7 @@ public class MultiQTVirtualStack extends VirtualStack {
 
 	public MultiQTVirtualStack(QTFile[] mqtf, ArrayList<String> tifPaths, ArrayList<String> dirPaths, int[] movieSlices, boolean eightBit, ImagePlus imp, 
 			boolean stretchToFitOverlay, boolean viewOverlay, 
-			boolean sideSideStereo, boolean redCyanStereo, boolean horizontal, boolean grid, boolean rotateNinetyX) throws IOException {		//constructor for QTVirtualStack now taking an array of QtFiles.
+			boolean sideSideStereo, boolean redCyanStereo, boolean horizontal, boolean grid, boolean rotateNinetyX, String sceneFileName, String sceneFileText) throws IOException {		//constructor for QTVirtualStack now taking an array of QtFiles.
 		this.eightBit = eightBit;									//!!!Assuming n QTFiles are passed to the constructor, MultiQTVirtualStack would need to open n QTVirtualStacks.
 		this.rotateNinetyX = rotateNinetyX;
 		this.mqtf = mqtf;
@@ -173,6 +175,9 @@ public class MultiQTVirtualStack extends VirtualStack {
 
 		}
 		this.imp = ((ImagePlus) imp);
+		this.sceneFileText = sceneFileText;
+		this.sceneFileName = sceneFileName;
+
 		try {														// !!! So this idea just  has  me  opening  an Array of QTVirtual stacks
 			vStackArray = new VirtualStack[this.mqtf.length + tifPaths.size() + dirPaths.size()];		
 			channelImpArray = new ImagePlus[this.mqtf.length + tifPaths.size() + dirPaths.size()];
@@ -495,6 +500,14 @@ public class MultiQTVirtualStack extends VirtualStack {
 
 
 	//these methods are all inherited from VirtualStack (and likely from Stack).
+
+	public void setSceneFileText(String sceneFileText) {
+		this.sceneFileText = sceneFileText;
+	}
+
+	public void setSceneFileName(String sceneFileName) {
+		this.sceneFileName = sceneFileName;
+	}
 
 	public int getMaxWidth() {
 		return maxWidth;
@@ -1094,11 +1107,13 @@ public class MultiQTVirtualStack extends VirtualStack {
 		return relativeFrameRateSingleMovie;
 	}
 
+	public String getSceneFileText() {
+		return sceneFileText;
+	}
 
-
-
-
-
+	public String getSceneFileName() {
+		return sceneFileName;
+	}
 
 }
 

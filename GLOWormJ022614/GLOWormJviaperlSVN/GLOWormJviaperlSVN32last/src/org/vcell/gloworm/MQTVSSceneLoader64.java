@@ -61,6 +61,8 @@ public class MQTVSSceneLoader64 implements PlugIn {
 	private ImagePlus imp;
 	private boolean cycling = false;
 	private int acquisitionInterval;
+	private String sceneFileText;
+	private String sceneFileName;
 
 	/*  */	
 	//constructor for calling by static method:
@@ -141,6 +143,8 @@ public class MQTVSSceneLoader64 implements PlugIn {
 			if ( file == null) {
 				IJ.log("null pathlist file");
 			}else {
+				sceneFileName = file.getName();
+				sceneFileText = "";
 				if ( !file.getPath().toLowerCase().contains("scene.scn") ) {
 					IJ.log(" pathlist not scene.scn file");
 					movieFileList = movieFileList + pathlist	+ "|";
@@ -186,7 +190,8 @@ public class MQTVSSceneLoader64 implements PlugIn {
 					silentlyUpdateScene = false;
 					while (!line.contains("End of parameter list")) {
 						line = in.readLine();
-//						if (out!=null)
+						sceneFileText = sceneFileText + line + "\n";
+						//						if (out!=null)
 //							out.println(line);
 						//if (IJ.debugMode) IJ.log(line);
 						String[] lineSegments = line.split(" \\= ");
@@ -372,6 +377,7 @@ public class MQTVSSceneLoader64 implements PlugIn {
 						}	
 
 					}
+
 					in.close();
 //					if (out!=null)
 //						out.close();
@@ -443,8 +449,10 @@ public class MQTVSSceneLoader64 implements PlugIn {
 					RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], pathConcat.trim(), 
 												stretchToFitOverlay, viewOverlay, grayscale, grid, horizontal, sideSideStereo, redCyanStereo, rcsprx, silentlyUpdateScene);
 //					rmqtvsh.getImagePlus().show();
+					((RemoteMQTVSHandler.RemoteMQTVirtualStack)rmqtvsh.getImagePlus().getStack()).setSceneFileName(sceneFileName);
+					((RemoteMQTVSHandler.RemoteMQTVirtualStack)rmqtvsh.getImagePlus().getStack()).setSceneFileText(sceneFileText);
 					setImp(rmqtvsh.getImagePlus());
-
+					
 					getImp().setPosition(cPosition, zPosition, tPosition);
 					if(!cycling)
 						getImp().getWindow().setVisible(true);

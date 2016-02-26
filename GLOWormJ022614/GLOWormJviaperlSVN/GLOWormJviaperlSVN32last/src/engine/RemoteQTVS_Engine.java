@@ -80,6 +80,8 @@ public class RemoteQTVS_Engine extends UnicastRemoteObject implements Compute {
 	private Hashtable<Integer,ImagePlus> movieTable = new Hashtable<Integer,ImagePlus>();
 	private long lullStartTime;
 	private int port;
+	private String sceneFileName = null;
+	private String sceneFileText = null;
 	private static String sprName;
 	private static Compute engine;
 	private static String portString;
@@ -174,9 +176,9 @@ public class RemoteQTVS_Engine extends UnicastRemoteObject implements Compute {
 //               	|| names[0].substring(names[0].lastIndexOf("/")).startsWith("/DUP")
 //            		|| names[0].substring(names[0].lastIndexOf("/")).startsWith("/Projectionsof")
             		) {
-            	vstack = new MultiQTVirtualStack(mqtf, new ArrayList<String>(),new ArrayList<String>(),movieSlices, false, impLocal, true, true, false, false, false, false, rcsPrx);
+            	vstack = new MultiQTVirtualStack(mqtf, new ArrayList<String>(),new ArrayList<String>(),movieSlices, false, impLocal, true, true, false, false, false, false, rcsPrx, sceneFileName, sceneFileText);
             } else {
-            	vstack = new MultiQTVirtualStack(mqtf, new ArrayList<String>(),new ArrayList<String>(),movieSlices, true, impLocal, false, true, false, false, false, false, rcsPrx);
+            	vstack = new MultiQTVirtualStack(mqtf, new ArrayList<String>(),new ArrayList<String>(),movieSlices, true, impLocal, false, true, false, false, false, false, rcsPrx, sceneFileName, sceneFileText);
             }
 		} catch (IOException e) {
 			e.printStackTrace();

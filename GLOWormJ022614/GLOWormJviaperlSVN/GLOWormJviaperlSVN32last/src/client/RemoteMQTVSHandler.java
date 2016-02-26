@@ -878,7 +878,9 @@ public class RemoteMQTVSHandler {
 		private double[] nmdzSingleMovie;
 		private double[] dzdxyRatio;
 		private double sliceDepth;
-		private String[] channelLUTName = new String[stkNChannels];;
+		private String[] channelLUTName = new String[stkNChannels];
+		private String sceneFileText;
+		private String sceneFileName;;
 
 		private RemoteMQTVirtualStack(int width, int height, ColorModel cm,
 				String path, boolean emptyImage, Color fillColor) {
@@ -1444,6 +1446,21 @@ public class RemoteMQTVSHandler {
 			RemoteMQTVSHandler.this.horizontal = horizontal;
 		}
 
+		public void setSceneFileText(String sceneFileText) {
+			this.sceneFileText = sceneFileText;
+		}
+
+		public void setSceneFileName(String sceneFileName) {
+			this.sceneFileName = sceneFileName;
+		}
+
+		public String getSceneFileText() {
+			return sceneFileText;
+		}
+
+		public String getSceneFileName() {
+			return sceneFileName;
+		}
 
 	}
 

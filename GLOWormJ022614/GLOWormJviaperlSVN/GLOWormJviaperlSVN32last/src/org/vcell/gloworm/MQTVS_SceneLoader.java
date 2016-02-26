@@ -15,8 +15,8 @@ import java.io.*;
 import java.util.ArrayList;
 
 import javax.swing.JFileChooser;
-import ij.util.Java2;
 
+import ij.util.Java2;
 import quicktime.*;								//There is no need to import QTVirtualStack simply because it is contained in the same .jar file as this file?
 import quicktime.io.*;
 import quicktime.qd.*;
@@ -65,6 +65,8 @@ public class MQTVS_SceneLoader implements PlugIn {
 	private String lineageMapImagePath = "";
 	private String lineageLCDFilePath = "";
 	private String clFileName;
+	private String sceneFileText;
+	private String sceneFileName;
 
 
 	//static method
@@ -117,6 +119,8 @@ public class MQTVS_SceneLoader implements PlugIn {
 		if (inPath != null) {
 			try {
 				file = new File(inPath);
+				sceneFileText = IJ.openAsString(inPath);
+				sceneFileName = file.getName();
 				if ( file != null) {
 					if ( file.getPath().toLowerCase().contains("scene.scn") ) {
 
@@ -400,7 +404,7 @@ public class MQTVS_SceneLoader implements PlugIn {
 			VirtualStack vstack = null;
 
 			//if (IJ.debugMode) IJ.log(" \n" + movieCountStr+ ":");
-			vstack = new MultiQTVirtualStack(mqtf, tifPaths, dirPaths, movieSlices, eightBit, imp, stretchToFitOverlay, viewOverlay, sideSideStereo, redCyanStereo, horizontal, grid, false);		
+			vstack = new MultiQTVirtualStack(mqtf, tifPaths, dirPaths, movieSlices, eightBit, imp, stretchToFitOverlay, viewOverlay, sideSideStereo, redCyanStereo, horizontal, grid, false, sceneFileName, sceneFileText);		
 
 			if ( mqtf.length == 1 || ((redCyanStereo || sideSideStereo) && mqtf.length == 2)) {
 				((MultiQTVirtualStack) vstack).imp.setTitle( ((MultiQTVirtualStack) vstack).getVirtualStack(0).getMovieName());

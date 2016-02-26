@@ -70,6 +70,8 @@ public class MQTVSSceneLoader implements PlugIn {
 	private String lineageMapImagePath="";
 	private String lineageLCDFilePath="";
 	private String clFileName;
+	private String sceneFileText;
+	private String sceneFileName;
 
 	/*  */	
 	//constructor for calling by static method:
@@ -146,7 +148,8 @@ public class MQTVSSceneLoader implements PlugIn {
 				if ( !file.getPath().toLowerCase().contains("scene.scn") ) {
 					IJ.log(" pathlist not scene.scn file");
 				} else {
-
+					sceneFileText = IJ.openAsString(pathlist);
+					sceneFileName = file.getName();
 					//if (IJ.debugMode) IJ.log(file.getPath() );
 					BufferedReader in = null;
 					PrintWriter out = null;
@@ -1014,7 +1017,7 @@ public class MQTVSSceneLoader implements PlugIn {
 			VirtualStack vstack = null;
 
 			//if (IJ.debugMode) IJ.log(" \n" + movieCountStr+ ":");
-			vstack = new MultiQTVirtualStack(mqtf, tifPaths, dirPaths, movieSlices, eightBit, imp, stretchToFitOverlay, viewOverlay, sideSideStereo, redCyanStereo, horizontal, grid, false);		
+			vstack = new MultiQTVirtualStack(mqtf, tifPaths, dirPaths, movieSlices, eightBit, imp, stretchToFitOverlay, viewOverlay, sideSideStereo, redCyanStereo, horizontal, grid, false, sceneFileName, sceneFileText);		
 
 			//			while( ((MultiQTVirtualStack) vstack).imp == null )
 			//				IJ.wait(10);

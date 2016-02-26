@@ -25,6 +25,7 @@ import javax.swing.filechooser.FileSystemView;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import ij.text.TextWindow;
 import ij.util.Java2;
 import quicktime.QTException;
 import quicktime.QTSession;
@@ -106,6 +107,8 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 	private JTextField[] channelNameField;
 	private int nCheckBoxes;
 	public boolean doingFirstSetup;
+	private Button showButton;
+	private TextWindow tw;
 
 
 	public boolean isSharing() {
@@ -214,6 +217,10 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 		else if (IJ.isMacOSX())
 			margin = 18;
 		c.insets = new Insets(10, margin, 10, margin);
+		showButton = new  Button("Show Scene Details");
+		showButton.addActionListener(this);
+		fspp.add(showButton, c);
+		c.gridy = y++;
 		if (imp.getNChannels() >1 && imp.isComposite()) {
 			choice = new Choice();
 			for (int i = 0; i < modes.length; i++)
@@ -296,6 +303,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 				if (IJ.debugMode) IJ.log(saveName[i]);
 				ScrollPane mnsp = new ScrollPane();
 				Panel movieNamePanel = new Panel();
+				c.gridy = y++;
 				c.gridy = y++;
 				c.insets = new Insets(0, 10, 0, 10);
 				gridbag.setConstraints(mnsp, c);
@@ -822,7 +830,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 
 		String command = e.getActionCommand();
 
-		if (!(stack instanceof MultiQTVirtualStack) && !command.equals("Save Scene")  && !command.equals("Share Scene")){
+		if (!(stack instanceof MultiQTVirtualStack) && (command.equals("Save Scene")  || command.equals("Share Scene"))){
 			IJ.showMessage("Error: Multi-Channel Controller", "This type of Image Stack does not work with a Multi-Channel Controller.");
 			return;			
 		}
@@ -1229,7 +1237,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 
 /********************************/
 
-		} else if (command.equals("Save Scene")) {
+		} else if (command.equals("Save Scene") || command.equals("Show Scene Details")) {
 			Date currentDate = new Date();
 			long msec = currentDate.getTime();			    
 			long sec = msec/1000;
@@ -1391,6 +1399,8 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 				out.println("End of parameter list");
 				//if (IJ.debugMode) IJ.log(""+ imp.getNChannels());
 
+				out.close();
+				
 				if (imp!=null) {
 					for (int j = 0; j < imp.getNChannels(); j++) {
 						try {
@@ -1486,6 +1496,8 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 									+ (deNovoMovieFile!=null?0.0:Double.parseDouble(translateYSpinner[j]
 											.getValue().toString())));
 							out1.println("End of parameter list");
+							
+							out1.close();
 
 						} catch (IOException ev) {
 							//if (IJ.debugMode) IJ.log("debug c");
@@ -1505,6 +1517,15 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 			}
 			catch (IOException ev)
 			{
+			}
+			if (command.equals("Show Scene Details")) {
+				if (imp.getStack() instanceof MultiQTVirtualStack) {
+					tw = new TextWindow(((MultiQTVirtualStack)imp.getStack()).getSceneFileName(),"", ((MultiQTVirtualStack)imp.getStack()).getSceneFileText(), 300, 300);
+				} else if (imp.getStack() instanceof RemoteMQTVSHandler.RemoteMQTVirtualStack) {
+					tw = new TextWindow(((RemoteMQTVSHandler.RemoteMQTVirtualStack)imp.getStack()).getSceneFileName(),"", ((RemoteMQTVSHandler.RemoteMQTVirtualStack)imp.getStack()).getSceneFileText(), 300, 300);
+				} else {
+					tw = new TextWindow(saveFile.getName(), "", IJ.openAsString(saveFile.getPath()), 300, 300);
+				}
 			}
 
 			if (sharing) {
