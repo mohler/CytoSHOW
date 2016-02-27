@@ -1520,9 +1520,9 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 			}
 			if (command.equals("Show Scene Details")) {
 				if (imp.getStack() instanceof MultiQTVirtualStack) {
-					tw = new TextWindow(((MultiQTVirtualStack)imp.getStack()).getSceneFileName(),"", ((MultiQTVirtualStack)imp.getStack()).getSceneFileText(), 300, 300);
+					tw = new TextWindow(((MultiQTVirtualStack)imp.getStack()).getSceneFileName(),"", "Shared as http://fsbill.cam.uchc.edu/cgi-bin/gloworm.pl?MOVIE="+((MultiQTVirtualStack)imp.getStack()).getSceneFileName()+"\n"+((MultiQTVirtualStack)imp.getStack()).getSceneFileText(), 300, 300);
 				} else if (imp.getStack() instanceof RemoteMQTVSHandler.RemoteMQTVirtualStack) {
-					tw = new TextWindow(((RemoteMQTVSHandler.RemoteMQTVirtualStack)imp.getStack()).getSceneFileName(),"", ((RemoteMQTVSHandler.RemoteMQTVirtualStack)imp.getStack()).getSceneFileText(), 300, 300);
+					tw = new TextWindow(((RemoteMQTVSHandler.RemoteMQTVirtualStack)imp.getStack()).getSceneFileName(),"", "Shared as http://fsbill.cam.uchc.edu/cgi-bin/gloworm.pl?MOVIE="+((RemoteMQTVSHandler.RemoteMQTVirtualStack)imp.getStack()).getSceneFileName()+"\n"+((RemoteMQTVSHandler.RemoteMQTVirtualStack)imp.getStack()).getSceneFileText(), 300, 300);
 				} else {
 					tw = new TextWindow(saveFile.getName(), "", IJ.openAsString(saveFile.getPath()), 300, 300);
 				}

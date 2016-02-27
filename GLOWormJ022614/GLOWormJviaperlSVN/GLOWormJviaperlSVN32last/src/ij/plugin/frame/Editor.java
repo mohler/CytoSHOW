@@ -61,7 +61,7 @@ public class Editor extends PlugInFrame implements ActionListener, ItemListener,
 	private DocumentListener dl;
 	private JScrollPane sp;
 	private JTextArea ta;
-	private String path;
+	protected String path;
 	private boolean changes;
 	private static String searchString = "";
 	private static boolean caseSensitive = Prefs.get(CASE_SENSITIVE, true);
@@ -652,7 +652,7 @@ public class Editor extends PlugInFrame implements ActionListener, ItemListener,
 			IJ.open();
 		else if (what.equals("Copy to Image Info"))
 			copyToInfo();
-		else if (what.equals("Share this suite of scenes")) {
+		else if (what.equals("Share Suite of Scenes")) {
 			long sec = (new Date()).getTime();
 			path = IJ.getDirectory("home")+ "NewSuite_"+ sec +"_suite.ste";
 			File saveFile = new File(path);
@@ -709,7 +709,7 @@ public class Editor extends PlugInFrame implements ActionListener, ItemListener,
 
 		}
 		
-		else {
+		else if (what.startsWith("Run Macro")){
 			if (altKeyDown) {
 				enableDebugging();
 				installer.runMacro(what, this);

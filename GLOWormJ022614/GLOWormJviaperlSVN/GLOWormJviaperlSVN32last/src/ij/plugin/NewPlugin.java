@@ -93,7 +93,7 @@ public class NewPlugin implements PlugIn {
 			if (name.equals("Macro")) name = "script";
 			name = SaveDialog.setExtension(name, ".js");
 		} else if (type==SUITE_FILE) {
-			JButton suiteButton = new JButton("Share this suite of scenes");
+			JButton suiteButton = new JButton("Share Suite of Scenes");
 			text = "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n";
 			suiteButton.addActionListener(ed);
 			ed.getPanel().add(suiteButton);
