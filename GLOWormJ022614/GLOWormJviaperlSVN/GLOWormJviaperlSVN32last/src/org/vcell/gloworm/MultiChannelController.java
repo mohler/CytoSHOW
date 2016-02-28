@@ -159,8 +159,8 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 				nonMovieMCC = true;
 				this.actionPerformed(new ActionEvent(this, 0, "Save Scene") );
 			} 
-			this.dispose();
-			return;
+//			this.dispose();
+//			return;
 
 		}
 
@@ -226,7 +226,11 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 		}
 		nCheckBoxes = imp!=null?imp.getNChannels():1;
 
-		if (nonMovieMCC) {
+		pack();
+		setVisible(true);
+		
+		
+		if (!nonMovieMCC) {
 			if (IJ.debugMode) IJ.log("" + nCheckBoxes);
 			if (nCheckBoxes>CompositeImage.MAX_CHANNELS)
 				nCheckBoxes = CompositeImage.MAX_CHANNELS;
