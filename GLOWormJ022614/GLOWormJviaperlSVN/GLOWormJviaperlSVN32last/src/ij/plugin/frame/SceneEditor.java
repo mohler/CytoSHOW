@@ -188,7 +188,7 @@ public class SceneEditor extends Editor {
 			lgd.pack();
 			lgd.showDialog();
 		}
-		if ("Share Scene".equals(what)) {
+		if ("Share Suite".equals(what)) {
 			IJ.run("Share_Suite");
 		}		
 	}

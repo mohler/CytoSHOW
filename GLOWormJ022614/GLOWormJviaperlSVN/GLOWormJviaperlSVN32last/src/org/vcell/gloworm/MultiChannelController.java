@@ -109,6 +109,8 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 	public boolean doingFirstSetup;
 	private Button showButton;
 	private TextWindow tw;
+	private File saveFile;
+	private boolean nonMovieMCC;
 
 
 	public boolean isSharing() {
@@ -127,7 +129,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 
 		super("Multi-Channel Controller: "+ (mcImp != null?mcImp.getTitle():"") );
 
-		
+
 		this.imp = mcImp;
 		if (imp == null)
 			this.imp = WindowManager.getCurrentImage();
@@ -135,27 +137,26 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 			this.dispose();
 			return;
 		}
-		if (imp.getImageStack() instanceof VirtualStack) {
-			if (imp.getMultiChannelController() != null) {
-				imp.getMultiChannelController().setVisible(true);
-				imp.getMultiChannelController().setSize(175*imp.getNChannels(), 180);
-				imp.getMultiChannelController().toFront();
-				this.dispose();
-				return;
-			} else {
-				imp.setMultiChannelController(this);
-				this.setVisible(false);
-			}
+		if (imp.getMultiChannelController() != null) {
+			imp.getMultiChannelController().setVisible(true);
+			imp.getMultiChannelController().setSize(175*imp.getNChannels(), 180);
+			imp.getMultiChannelController().toFront();
+			this.dispose();
+			return;
 
-		} else {
+		} else if (!(imp.getImageStack() instanceof MultiQTVirtualStack) && !(imp.getImageStack() instanceof RemoteMQTVirtualStack) && deNovoMovieFile==null) {
 			GenericDialog gds = new GenericDialog("Convert to CytoSHOW Format?"); 
-			gds.addMessage("This type of Image Stack does not work\nfor CytoSHOW's instant Scene sharing."
-					+ "\nWould you like to create a version that is \ncompatible with a shared CytoSHOW Scene?");
+			gds.addMessage("This type of Image Stack does not work"
+					+ "\nwith a MultiChannelController"
+					+ "\nor CytoSHOW's instant Scene sharing."
+					+ "\nWould you like to create a version that is "
+					+ "\ncompatible with a shared CytoSHOW Scene?");
 			//			gds.addRadioButtonGroup("", new String[]{"Save Scene","Share Scene"}, 1, 2, "Save Scene");
 			gds.addChoice("", new String[]{"Save Scene","Share Scene"},"Share Scene");
 			gds.showDialog();
 			if (gds.wasOKed()) {
 				sharing  = gds.getNextChoice().equals("Share Scene");
+				nonMovieMCC = true;
 				this.actionPerformed(new ActionEvent(this, 0, "Save Scene") );
 			} 
 			this.dispose();
@@ -171,12 +172,6 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 				}
 			}
 		}
-
-		//		if (imp.getMultiChannelController()!=null) {
-		//			imp.getMultiChannelController().setVisible(true);
-		//			imp.getMultiChannelController().toFront();
-		//			return;
-		//		}
 
 		addMouseListener(this);
 
@@ -201,9 +196,9 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 		this.add(fsp);
 
 		((JComponent) fspp).setToolTipText("<html>Adjust space/time synch-ing of <br>multiple movie channels <br>in the same window.</html>");		
-	    fspp.setBackground(Color.white);
+		fspp.setBackground(Color.white);
 
-	    int y = 0;
+		int y = 0;
 		int x = 0;
 		c.gridx = 0;
 		c.gridy = y++;
@@ -231,301 +226,302 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 		}
 		nCheckBoxes = imp!=null?imp.getNChannels():1;
 
-		if (IJ.debugMode) IJ.log("" + nCheckBoxes);
-		if (nCheckBoxes>CompositeImage.MAX_CHANNELS)
-			nCheckBoxes = CompositeImage.MAX_CHANNELS;
-		saveName = new String[nCheckBoxes];
-		visibility = new Checkbox[nCheckBoxes];
-		channelLUTChoice = new Choice[nCheckBoxes];
-		channelLUTSpinner = new JSpinner[nCheckBoxes];
-		flipVCB = new Checkbox[nCheckBoxes];
-		flipHCB = new Checkbox[nCheckBoxes];
-		flipZCB = new Checkbox[nCheckBoxes];
-		sliceSpinner = new JSpinner[nCheckBoxes];
-		frameSpinner = new JSpinner[nCheckBoxes];
-		deltaZSpinner = new JSpinner[nCheckBoxes];
-		deltaTSpinner = new JSpinner[nCheckBoxes];
-		scaleXSpinner = new JSpinner[nCheckBoxes];
-		scaleYSpinner = new JSpinner[nCheckBoxes];
-		scaleZSpinner = new JSpinner[nCheckBoxes];
-		rotateAngleSpinner = new JSpinner[nCheckBoxes];
-		translateXSpinner = new JSpinner[nCheckBoxes];
-		translateYSpinner = new JSpinner[nCheckBoxes];
-		saveButton = new Button[nCheckBoxes];
-		loadButton = new Button[nCheckBoxes];
+		if (nonMovieMCC) {
+			if (IJ.debugMode) IJ.log("" + nCheckBoxes);
+			if (nCheckBoxes>CompositeImage.MAX_CHANNELS)
+				nCheckBoxes = CompositeImage.MAX_CHANNELS;
+			saveName = new String[nCheckBoxes];
+			visibility = new Checkbox[nCheckBoxes];
+			channelLUTChoice = new Choice[nCheckBoxes];
+			channelLUTSpinner = new JSpinner[nCheckBoxes];
+			flipVCB = new Checkbox[nCheckBoxes];
+			flipHCB = new Checkbox[nCheckBoxes];
+			flipZCB = new Checkbox[nCheckBoxes];
+			sliceSpinner = new JSpinner[nCheckBoxes];
+			frameSpinner = new JSpinner[nCheckBoxes];
+			deltaZSpinner = new JSpinner[nCheckBoxes];
+			deltaTSpinner = new JSpinner[nCheckBoxes];
+			scaleXSpinner = new JSpinner[nCheckBoxes];
+			scaleYSpinner = new JSpinner[nCheckBoxes];
+			scaleZSpinner = new JSpinner[nCheckBoxes];
+			rotateAngleSpinner = new JSpinner[nCheckBoxes];
+			translateXSpinner = new JSpinner[nCheckBoxes];
+			translateYSpinner = new JSpinner[nCheckBoxes];
+			saveButton = new Button[nCheckBoxes];
+			loadButton = new Button[nCheckBoxes];
 
 
-		label = new Label[nCheckBoxes];
-		previousShiftZ = new int[nCheckBoxes];
-		previousShiftT = new int[nCheckBoxes];
-		channelNameField = new JTextField[nCheckBoxes];
+			label = new Label[nCheckBoxes];
+			previousShiftZ = new int[nCheckBoxes];
+			previousShiftT = new int[nCheckBoxes];
+			channelNameField = new JTextField[nCheckBoxes];
 
-		for (int i=0; i<nCheckBoxes; i++) {
+			for (int i=0; i<nCheckBoxes; i++) {
 
-			/*********/
-			{
-				x= i;
-				c.gridx = x;
-				y = 1;
-				c.gridy = y;
-			}
-			/*********/
-
-			zLabel = new Label("Shift Z", Label.CENTER);
-			tLabel = new Label("Shift T", Label.CENTER);
-			deltaZLabel = new Label("Rel. dZ", Label.CENTER);
-			deltaTLabel = new Label("Rel. dT", Label.CENTER);
-			scaleXLabel = new Label("Scale X", Label.CENTER);
-			scaleYLabel = new Label("Scale Y", Label.CENTER);
-			scaleZLabel = new Label("Scale Z", Label.CENTER);
-			rotateAngleLabel = new Label("Rotate", Label.CENTER);
-			translateXLabel = new Label("Shift X", Label.CENTER);
-			translateYLabel = new Label("Shift Y", Label.CENTER);
-
-			previousShiftZ[i] = 0;  
-			previousShiftT[i] = 0;
-
-			//			ImagePlus imp = WindowManager.getCurrentImage();
-			if (imp != null) {
-				ImageStack stack = imp.getStack();		
-
-
-				if (stack instanceof MultiQTVirtualStack && 
-						((MultiQTVirtualStack) imp.getMotherImp().getStack()).getVirtualStack(i) != null) {
-					saveName[i] = (stack instanceof MultiQTVirtualStack)?
-							((MultiQTVirtualStack) stack).getVirtualStack(i).getMovieFile().getName():
-								((QTVirtualStack) stack).getMovieFile().getName();
-				} else 	if (imp.getRemoteMQTVSHandler() != null) {
-					saveName[i] = imp.getRemoteMQTVSHandler().getChannelPathNames()[i].replaceAll(".*/", "");
+				/*********/
+				{
+					x= i;
+					c.gridx = x;
+					y = 1;
+					c.gridy = y;
 				}
+				/*********/
+
+				zLabel = new Label("Shift Z", Label.CENTER);
+				tLabel = new Label("Shift T", Label.CENTER);
+				deltaZLabel = new Label("Rel. dZ", Label.CENTER);
+				deltaTLabel = new Label("Rel. dT", Label.CENTER);
+				scaleXLabel = new Label("Scale X", Label.CENTER);
+				scaleYLabel = new Label("Scale Y", Label.CENTER);
+				scaleZLabel = new Label("Scale Z", Label.CENTER);
+				rotateAngleLabel = new Label("Rotate", Label.CENTER);
+				translateXLabel = new Label("Shift X", Label.CENTER);
+				translateYLabel = new Label("Shift Y", Label.CENTER);
+
+				previousShiftZ[i] = 0;  
+				previousShiftT[i] = 0;
+
+				//			ImagePlus imp = WindowManager.getCurrentImage();
+				if (imp != null) {
+					ImageStack stack = imp.getStack();		
 
 
-				if (IJ.debugMode) IJ.log(saveName[i]);
-				ScrollPane mnsp = new ScrollPane();
-				Panel movieNamePanel = new Panel();
-				c.gridy = y++;
-				c.gridy = y++;
-				c.insets = new Insets(0, 10, 0, 10);
-				gridbag.setConstraints(mnsp, c);
-				String fitName = "";
-//				if (saveName[i].matches("(.*(slc|prx|pry)).*") )
-//					saveName[i].replaceAll("(.*(slc|prx|pry)).*", "$1");
-				channelNameField[i] = new JTextField(saveName[i]);
-				channelNameField[i].setFocusable(true);
-				channelNameField[i].setEditable(false);
-
-				//				movieNamePanel.add("Center", channelNameField[i]);
-				mnsp.setPreferredSize(new Dimension(25,50));
-				mnsp.add(channelNameField[i]);
-				fspp.add(mnsp);
-				c.gridy = y++;
+					if (stack instanceof MultiQTVirtualStack && 
+							((MultiQTVirtualStack) imp.getMotherImp().getStack()).getVirtualStack(i) != null) {
+						saveName[i] = (stack instanceof MultiQTVirtualStack)?
+								((MultiQTVirtualStack) stack).getVirtualStack(i).getMovieFile().getName():
+									((QTVirtualStack) stack).getMovieFile().getName();
+					} else 	if (imp.getRemoteMQTVSHandler() != null) {
+						saveName[i] = imp.getRemoteMQTVSHandler().getChannelPathNames()[i].replaceAll(".*/", "");
+					}
 
 
-				visibility[i] = new Checkbox("Channel "+(i+1), true);
-				//				c.insets = new Insets(0, 25, i<nCheckBoxes?0:10, 5);		//Is this line giving the weird spacing?
-				c.gridy = y++;
-				if (imp.getNChannels() >1) fspp.add(visibility[i], c);		
-				c.gridy = y++;
+					if (IJ.debugMode) IJ.log(saveName[i]);
+					ScrollPane mnsp = new ScrollPane();
+					Panel movieNamePanel = new Panel();
+					c.gridy = y++;
+					c.gridy = y++;
+					c.insets = new Insets(0, 10, 0, 10);
+					gridbag.setConstraints(mnsp, c);
+					String fitName = "";
+					//				if (saveName[i].matches("(.*(slc|prx|pry)).*") )
+					//					saveName[i].replaceAll("(.*(slc|prx|pry)).*", "$1");
+					channelNameField[i] = new JTextField(saveName[i]);
+					channelNameField[i].setFocusable(true);
+					channelNameField[i].setEditable(false);
 
-				channelLUTChoice[i] = new Choice();
-				for (int k=0; k<channelLUTItems.length; k++)
-					channelLUTChoice[i].addItem(channelLUTItems[k]);
-				channelLUTChoice[i].select(3);
-				channelLUTChoice[i].addItemListener(this);
-				if ( imp.isComposite() ) fspp.add(channelLUTChoice[i], c);
-
-
-				flipVCB[i] = new Checkbox("FlipV", false);
-				flipHCB[i] = new Checkbox("FlipH", false);
-				flipZCB[i] = new Checkbox("FlipZ", false);
-				c.gridy = y++;
-
-				fspp.add(flipVCB[i] , c);		
-				c.gridy = y++;
-				fspp.add(flipHCB[i] , c);		
-				c.gridy = y++;
-				fspp.add(flipZCB[i] , c);		
-				c.gridy = y++;
-				c.gridy = y++;
-
-				slicePanel = new Panel();
-				c.gridy = y++;
-				c.gridy = y++;
-				c.insets = new Insets(0, 10, 0, 10);
-				gridbag.setConstraints(slicePanel, c);
-				slicePanel.setLayout(new BorderLayout());
-				slicePanel.add("Center", zLabel);
-				fspp.add(slicePanel);
-
-				sliceSpinner[i]= new JSpinner(new SpinnerNumberModel(0, 0 - ( (imp).getNSlices() ) , ( (imp).getNSlices() ), 1));
-				sliceSpinner[i].setToolTipText("Shift Channel "+ (i+1) +"  display along Z axis by # slices or rotation increments");
-				c.gridy = y++;
-				fspp.add(sliceSpinner[i], c);
-
-				deltaZPanel = new Panel();
-				c.gridy = y++;
-				c.insets = new Insets(0, 10, 0, 10);
-				gridbag.setConstraints(deltaZPanel, c);
-				deltaZPanel.setLayout(new BorderLayout());
-				deltaZPanel.add("Center", deltaZLabel);
-				fspp.add(deltaZPanel);
-
-				deltaZSpinner[i]= new JSpinner(new SpinnerNumberModel(1, 1, 100, 1));
-				deltaZSpinner[i].setToolTipText("Adjust Channel "+ (i+1) +" 's Z-axis spacing of slices or rotation increments relative to other Channel(s)");
-				c.gridy = y++;
-				fspp.add(deltaZSpinner[i], c);
-				c.gridy = y++;
+					//				movieNamePanel.add("Center", channelNameField[i]);
+					mnsp.setPreferredSize(new Dimension(25,50));
+					mnsp.add(channelNameField[i]);
+					fspp.add(mnsp);
+					c.gridy = y++;
 
 
-				framePanel = new Panel();
-				c.gridy = y++;
-				c.insets = new Insets(0, 10, 0, 10);
-				gridbag.setConstraints(framePanel, c);
-				framePanel.setLayout(new BorderLayout());
-				framePanel.add("Center", tLabel);
-				fspp.add(framePanel);
+					visibility[i] = new Checkbox("Channel "+(i+1), true);
+					//				c.insets = new Insets(0, 25, i<nCheckBoxes?0:10, 5);		//Is this line giving the weird spacing?
+					c.gridy = y++;
+					if (imp.getNChannels() >1) fspp.add(visibility[i], c);		
+					c.gridy = y++;
 
-				frameSpinner[i]= new JSpinner(new SpinnerNumberModel(0, 0-(imp).getNFrames(), (imp).getNFrames(), 1));
-				frameSpinner[i].setToolTipText("Adjust Channel "+ (i+1) +" display along T axis by # time increments");			
-				c.gridy = y++;
-				fspp.add(frameSpinner[i], c);
-				c.gridy = y++;
-
-				deltaTPanel = new Panel();
-				c.gridy = y++;
-				c.insets = new Insets(0, 10, 0, 10);
-				gridbag.setConstraints(deltaTPanel, c);
-				deltaTPanel.setLayout(new BorderLayout());
-				deltaTPanel.add("Center", deltaTLabel);
-				fspp.add(deltaTPanel);
-
-				deltaTSpinner[i]= new JSpinner(new SpinnerNumberModel(1, 1, 100, 1));
-				deltaTSpinner[i].setToolTipText("Adjust Channel "+ (i+1) +" 's T-axis frame rate relative to other Channel(s)");			
-				c.gridy = y++;
-				fspp.add(deltaTSpinner[i], c);
-				c.gridy = y++;
-
-				scaleXPanel = new Panel();
-				c.gridy = y++;
-				c.insets = new Insets(0, 10, 0, 10);
-				gridbag.setConstraints(scaleXPanel, c);
-				scaleXPanel.setLayout(new BorderLayout());
-				scaleXPanel.add("Center", scaleXLabel);
-				fspp.add(scaleXPanel);
-
-				scaleXSpinner[i]= new JSpinner(new SpinnerNumberModel(0, -100, 500, 1));
-				scaleXSpinner[i].setToolTipText("Adjust Channel "+ (i+1) +" 's X-axis scaling/magnification by # percent");			
-				c.gridy = y++;
-				fspp.add(scaleXSpinner[i], c);
-				c.gridy = y++;
+					channelLUTChoice[i] = new Choice();
+					for (int k=0; k<channelLUTItems.length; k++)
+						channelLUTChoice[i].addItem(channelLUTItems[k]);
+					channelLUTChoice[i].select(3);
+					channelLUTChoice[i].addItemListener(this);
+					if ( imp.isComposite() ) fspp.add(channelLUTChoice[i], c);
 
 
-				scaleYPanel = new Panel();
-				c.gridy = y++;
-				c.insets = new Insets(0, 10, 0, 10);
-				gridbag.setConstraints(scaleYPanel, c);
-				scaleYPanel.setLayout(new BorderLayout());
-				scaleYPanel.add("Center", scaleYLabel);
-				fspp.add(scaleYPanel);
+					flipVCB[i] = new Checkbox("FlipV", false);
+					flipHCB[i] = new Checkbox("FlipH", false);
+					flipZCB[i] = new Checkbox("FlipZ", false);
+					c.gridy = y++;
 
-				scaleYSpinner[i]= new JSpinner(new SpinnerNumberModel(0, -100, 500, 1));
-				scaleYSpinner[i].setToolTipText("Adjust Channel "+ (i+1) +" 's Y-axis scaling/magnification by # percent");			
-				c.gridy = y++;
-				fspp.add(scaleYSpinner[i], c);
-				c.gridy = y++;
+					fspp.add(flipVCB[i] , c);		
+					c.gridy = y++;
+					fspp.add(flipHCB[i] , c);		
+					c.gridy = y++;
+					fspp.add(flipZCB[i] , c);		
+					c.gridy = y++;
+					c.gridy = y++;
 
+					slicePanel = new Panel();
+					c.gridy = y++;
+					c.gridy = y++;
+					c.insets = new Insets(0, 10, 0, 10);
+					gridbag.setConstraints(slicePanel, c);
+					slicePanel.setLayout(new BorderLayout());
+					slicePanel.add("Center", zLabel);
+					fspp.add(slicePanel);
 
-				scaleZPanel = new Panel();
-				c.gridy = y++;
-				c.insets = new Insets(0, 10, 0, 10);
-				gridbag.setConstraints(scaleZPanel, c);
-				scaleZPanel.setLayout(new BorderLayout());
-				scaleZPanel.add("Center", scaleZLabel);
-				fspp.add(scaleZPanel);
+					sliceSpinner[i]= new JSpinner(new SpinnerNumberModel(0, 0 - ( (imp).getNSlices() ) , ( (imp).getNSlices() ), 1));
+					sliceSpinner[i].setToolTipText("Shift Channel "+ (i+1) +"  display along Z axis by # slices or rotation increments");
+					c.gridy = y++;
+					fspp.add(sliceSpinner[i], c);
 
-				scaleZSpinner[i]= new JSpinner(new SpinnerNumberModel(0, -100, 500, 0.1));
-				scaleZSpinner[i].setToolTipText("Adjust Channel "+ (i+1) +" 's Z-axis scaling/magnification by # percent");			
-				c.gridy = y++;
-				fspp.add(scaleZSpinner[i], c);
-				c.gridy = y++;
+					deltaZPanel = new Panel();
+					c.gridy = y++;
+					c.insets = new Insets(0, 10, 0, 10);
+					gridbag.setConstraints(deltaZPanel, c);
+					deltaZPanel.setLayout(new BorderLayout());
+					deltaZPanel.add("Center", deltaZLabel);
+					fspp.add(deltaZPanel);
 
-
-				rotateAnglePanel = new Panel();
-				c.gridy = y++;
-				c.insets = new Insets(0, 10, 0, 10);
-				gridbag.setConstraints(rotateAnglePanel, c);
-				rotateAnglePanel.setLayout(new BorderLayout());
-				rotateAnglePanel.add("Center", rotateAngleLabel);
-				fspp.add(rotateAnglePanel);
-
-				rotateAngleSpinner[i]= new JSpinner(new SpinnerNumberModel(0, -360, 360, 1));
-				rotateAngleSpinner[i].setToolTipText("Rotate Channel "+ (i+1) +" display by # degrees in XY plane");			
-				c.gridy = y++;
-				fspp.add(rotateAngleSpinner[i], c);
-				c.gridy = y++;
+					deltaZSpinner[i]= new JSpinner(new SpinnerNumberModel(1, 1, 100, 1));
+					deltaZSpinner[i].setToolTipText("Adjust Channel "+ (i+1) +" 's Z-axis spacing of slices or rotation increments relative to other Channel(s)");
+					c.gridy = y++;
+					fspp.add(deltaZSpinner[i], c);
+					c.gridy = y++;
 
 
-				translateXPanel = new Panel();
-				c.gridy = y++;
-				c.insets = new Insets(0, 10, 0, 10);
-				gridbag.setConstraints(translateXPanel, c);
-				translateXPanel.setLayout(new BorderLayout());
-				translateXPanel.add("Center", translateXLabel);
-				fspp.add(translateXPanel);
+					framePanel = new Panel();
+					c.gridy = y++;
+					c.insets = new Insets(0, 10, 0, 10);
+					gridbag.setConstraints(framePanel, c);
+					framePanel.setLayout(new BorderLayout());
+					framePanel.add("Center", tLabel);
+					fspp.add(framePanel);
 
-				translateXSpinner[i]= new JSpinner(new SpinnerNumberModel(0, -1000, 1000, 1));
-				translateXSpinner[i].setToolTipText("Move Channel "+ (i+1) +" display # pixels along X axis");			
-				c.gridy = y++;
-				fspp.add(translateXSpinner[i], c);
-				c.gridy = y++;
+					frameSpinner[i]= new JSpinner(new SpinnerNumberModel(0, 0-(imp).getNFrames(), (imp).getNFrames(), 1));
+					frameSpinner[i].setToolTipText("Adjust Channel "+ (i+1) +" display along T axis by # time increments");			
+					c.gridy = y++;
+					fspp.add(frameSpinner[i], c);
+					c.gridy = y++;
+
+					deltaTPanel = new Panel();
+					c.gridy = y++;
+					c.insets = new Insets(0, 10, 0, 10);
+					gridbag.setConstraints(deltaTPanel, c);
+					deltaTPanel.setLayout(new BorderLayout());
+					deltaTPanel.add("Center", deltaTLabel);
+					fspp.add(deltaTPanel);
+
+					deltaTSpinner[i]= new JSpinner(new SpinnerNumberModel(1, 1, 100, 1));
+					deltaTSpinner[i].setToolTipText("Adjust Channel "+ (i+1) +" 's T-axis frame rate relative to other Channel(s)");			
+					c.gridy = y++;
+					fspp.add(deltaTSpinner[i], c);
+					c.gridy = y++;
+
+					scaleXPanel = new Panel();
+					c.gridy = y++;
+					c.insets = new Insets(0, 10, 0, 10);
+					gridbag.setConstraints(scaleXPanel, c);
+					scaleXPanel.setLayout(new BorderLayout());
+					scaleXPanel.add("Center", scaleXLabel);
+					fspp.add(scaleXPanel);
+
+					scaleXSpinner[i]= new JSpinner(new SpinnerNumberModel(0, -100, 500, 1));
+					scaleXSpinner[i].setToolTipText("Adjust Channel "+ (i+1) +" 's X-axis scaling/magnification by # percent");			
+					c.gridy = y++;
+					fspp.add(scaleXSpinner[i], c);
+					c.gridy = y++;
 
 
-				translateYPanel = new Panel();
-				c.gridy = y++;
-				c.insets = new Insets(0, 10, 0, 10);
-				gridbag.setConstraints(translateYPanel, c);
-				translateYPanel.setLayout(new BorderLayout());
-				translateYPanel.add("Center", translateYLabel);
-				fspp.add(translateYPanel);
+					scaleYPanel = new Panel();
+					c.gridy = y++;
+					c.insets = new Insets(0, 10, 0, 10);
+					gridbag.setConstraints(scaleYPanel, c);
+					scaleYPanel.setLayout(new BorderLayout());
+					scaleYPanel.add("Center", scaleYLabel);
+					fspp.add(scaleYPanel);
 
-				translateYSpinner[i]= new JSpinner(new SpinnerNumberModel(0, -1000, 1000, 1));
-				translateYSpinner[i].setToolTipText("Move Channel "+ (i+1) +" display # pixels along Y axis");			
-				c.gridy = y++;
-				fspp.add(translateYSpinner[i], c);
-				c.gridy = y++;
-
-
-				saveButton[i] = new Button(saveLabel + (i+1));
-				fspp.add(saveButton[i], c);
-				c.gridy = y++;
-
-				loadButton[i] = new Button(loadLabel + (i+1));
-				fspp.add(loadButton[i], c);
-				c.gridy = y++;
+					scaleYSpinner[i]= new JSpinner(new SpinnerNumberModel(0, -100, 500, 1));
+					scaleYSpinner[i].setToolTipText("Adjust Channel "+ (i+1) +" 's Y-axis scaling/magnification by # percent");			
+					c.gridy = y++;
+					fspp.add(scaleYSpinner[i], c);
+					c.gridy = y++;
 
 
+					scaleZPanel = new Panel();
+					c.gridy = y++;
+					c.insets = new Insets(0, 10, 0, 10);
+					gridbag.setConstraints(scaleZPanel, c);
+					scaleZPanel.setLayout(new BorderLayout());
+					scaleZPanel.add("Center", scaleZLabel);
+					fspp.add(scaleZPanel);
 
-				if (imp.getNChannels() >1) visibility[i].addItemListener(this);
-				flipVCB[i].addItemListener(this);
-				flipHCB[i].addItemListener(this);
-				flipZCB[i].addItemListener(this);
+					scaleZSpinner[i]= new JSpinner(new SpinnerNumberModel(0, -100, 500, 0.1));
+					scaleZSpinner[i].setToolTipText("Adjust Channel "+ (i+1) +" 's Z-axis scaling/magnification by # percent");			
+					c.gridy = y++;
+					fspp.add(scaleZSpinner[i], c);
+					c.gridy = y++;
 
-				sliceSpinner[i].addChangeListener(this);
-				frameSpinner[i].addChangeListener(this);
-				deltaZSpinner[i].addChangeListener(this);
-				deltaTSpinner[i].addChangeListener(this);
-				scaleXSpinner[i].addChangeListener(this);
-				scaleYSpinner[i].addChangeListener(this);
-				scaleZSpinner[i].addChangeListener(this);
-				rotateAngleSpinner[i].addChangeListener(this);
-				translateXSpinner[i].addChangeListener(this);
-				translateYSpinner[i].addChangeListener(this);
-				saveButton[i].addActionListener(this);
-				loadButton[i].addActionListener(this);
 
+					rotateAnglePanel = new Panel();
+					c.gridy = y++;
+					c.insets = new Insets(0, 10, 0, 10);
+					gridbag.setConstraints(rotateAnglePanel, c);
+					rotateAnglePanel.setLayout(new BorderLayout());
+					rotateAnglePanel.add("Center", rotateAngleLabel);
+					fspp.add(rotateAnglePanel);
+
+					rotateAngleSpinner[i]= new JSpinner(new SpinnerNumberModel(0, -360, 360, 1));
+					rotateAngleSpinner[i].setToolTipText("Rotate Channel "+ (i+1) +" display by # degrees in XY plane");			
+					c.gridy = y++;
+					fspp.add(rotateAngleSpinner[i], c);
+					c.gridy = y++;
+
+
+					translateXPanel = new Panel();
+					c.gridy = y++;
+					c.insets = new Insets(0, 10, 0, 10);
+					gridbag.setConstraints(translateXPanel, c);
+					translateXPanel.setLayout(new BorderLayout());
+					translateXPanel.add("Center", translateXLabel);
+					fspp.add(translateXPanel);
+
+					translateXSpinner[i]= new JSpinner(new SpinnerNumberModel(0, -1000, 1000, 1));
+					translateXSpinner[i].setToolTipText("Move Channel "+ (i+1) +" display # pixels along X axis");			
+					c.gridy = y++;
+					fspp.add(translateXSpinner[i], c);
+					c.gridy = y++;
+
+
+					translateYPanel = new Panel();
+					c.gridy = y++;
+					c.insets = new Insets(0, 10, 0, 10);
+					gridbag.setConstraints(translateYPanel, c);
+					translateYPanel.setLayout(new BorderLayout());
+					translateYPanel.add("Center", translateYLabel);
+					fspp.add(translateYPanel);
+
+					translateYSpinner[i]= new JSpinner(new SpinnerNumberModel(0, -1000, 1000, 1));
+					translateYSpinner[i].setToolTipText("Move Channel "+ (i+1) +" display # pixels along Y axis");			
+					c.gridy = y++;
+					fspp.add(translateYSpinner[i], c);
+					c.gridy = y++;
+
+
+					saveButton[i] = new Button(saveLabel + (i+1));
+					fspp.add(saveButton[i], c);
+					c.gridy = y++;
+
+					loadButton[i] = new Button(loadLabel + (i+1));
+					fspp.add(loadButton[i], c);
+					c.gridy = y++;
+
+
+
+					if (imp.getNChannels() >1) visibility[i].addItemListener(this);
+					flipVCB[i].addItemListener(this);
+					flipHCB[i].addItemListener(this);
+					flipZCB[i].addItemListener(this);
+
+					sliceSpinner[i].addChangeListener(this);
+					frameSpinner[i].addChangeListener(this);
+					deltaZSpinner[i].addChangeListener(this);
+					deltaTSpinner[i].addChangeListener(this);
+					scaleXSpinner[i].addChangeListener(this);
+					scaleYSpinner[i].addChangeListener(this);
+					scaleZSpinner[i].addChangeListener(this);
+					rotateAngleSpinner[i].addChangeListener(this);
+					translateXSpinner[i].addChangeListener(this);
+					translateYSpinner[i].addChangeListener(this);
+					saveButton[i].addActionListener(this);
+					loadButton[i].addActionListener(this);
+
+				}
 			}
 		}
-
 		addKeyListener(IJ.getInstance());  // ImageJ handles keyboard shortcuts
 		for (Component comp:fspp.getComponents())
 			comp.setMinimumSize(null);
@@ -542,7 +538,8 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 			setLocation(location);
 		if (imp!=null) 
 			imp.setMultiChannelController(this);
-		//		this.setVisible(true);
+		this.setVisible(true);
+
 	}
 
 	public void update() {
@@ -830,7 +827,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 
 		String command = e.getActionCommand();
 
-		if (!(stack instanceof MultiQTVirtualStack) && (command.equals("Save Scene")  || command.equals("Share Scene"))){
+		if (!(stack instanceof MultiQTVirtualStack || stack instanceof RemoteMQTVirtualStack) && !command.equals("Save Scene")  && !command.equals("Share Scene")  && !command.equals("Show Scene Details")){
 			IJ.showMessage("Error: Multi-Channel Controller", "This type of Image Stack does not work with a Multi-Channel Controller.");
 			return;			
 		}
@@ -841,51 +838,119 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 			for ( int j=0 ; j < CompositeImage.MAX_CHANNELS; j++) {
 				if ( command.contains(""+(j+1) ) ) {
 					int saveChannelNumber = j +1;
-					//					if (IJ.debugMode) IJ.log("Saving Adjustments for Channel " + saveChannelNumber + " " + ((MultiQTVirtualStack) stack).getVirtualStack(j).getMovieFile().toString() );
-					String saveName = (stack instanceof MultiQTVirtualStack)?
-							((MultiQTVirtualStack) stack).getVirtualStack(j).getMovieName():
-								((QTVirtualStack) stack).getMovieName();
-							if (IJ.debugMode) IJ.log(saveName);
+					String saveName = (stack instanceof MultiQTVirtualStack)?((MultiQTVirtualStack) stack).getVirtualStack(j).getMovieName():((QTVirtualStack) stack).getMovieName();
+					if (IJ.debugMode) 
+						IJ.log(saveName);
 
-							IJ.run("Stop Animation", "");
-							(ci!=null?ci:imp).setPosition(saveChannelNumber, (ci!=null?ci:imp).getSlice(), (ci!=null?ci:imp).getFrame() );
-							/***********Next lines output a file with text **************/
-							try {				Date currentDate = new Date();
+					IJ.run("Stop Animation", "");
+					(ci!=null?ci:imp).setPosition(saveChannelNumber, (ci!=null?ci:imp).getSlice(), (ci!=null?ci:imp).getFrame() );
+					/***********Next lines output a file with text **************/
+					File saveFileAdj = null;
+					try {				
+						Date currentDate = new Date();
+						long msec = currentDate.getTime();			    
+						long sec = msec/1000;
+
+						saveFileAdj = new File((stack instanceof MultiQTVirtualStack)? 
+								((MultiQTVirtualStack) stack).getVirtualStack(j).getMovieName().substring(0, 15) + "_" + (j+1) + "_" + sec
+								+ ".adj":
+									((QTVirtualStack) stack).getMovieName().substring(0, 15) + "_" + (j+1) + "_" + sec
+									+ ".adj");
+						while ( saveFileAdj == null ||  saveFileAdj.exists() ) {
+							JFileChooser fc = new JFileChooser( ((stack instanceof MultiQTVirtualStack)?
+									((MultiQTVirtualStack) stack).getVirtualStack(j).getMovieFile().getPath():
+										((QTVirtualStack) stack).getMovieFile().getPath()), FileSystemView.getFileSystemView());
+							fc.setDialogTitle( "Save a new *.adj Channel Adjustment file" );
+							fc.setSelectedFile(saveFileAdj);
+							int dialogResult = fc.showSaveDialog(null);
+							if (dialogResult == JFileChooser.APPROVE_OPTION) {
+
+								saveFileAdj = fc.getSelectedFile();
+
+							} else if (dialogResult == JFileChooser.CANCEL_OPTION) {
+								saveFileAdj = null;
+								break;
+							}
+
+						}
+
+
+						PrintWriter out = 
+								new PrintWriter(
+										new BufferedWriter(
+												new FileWriter(saveFileAdj) ), true);
+						out.println("Saved Adjustments for movie " + ( (stack instanceof MultiQTVirtualStack)?
+								((MultiQTVirtualStack) stack).getVirtualStack(j).getMovieFile().getPath():
+									((QTVirtualStack) stack).getMovieFile().getPath() ) );
+						out.println("");
+						if ( imp.isComposite() ) 
+							out.println("LUT = " + channelLUTItems[((Choice)channelLUTChoice[j]).getSelectedIndex()] );
+						if (ci!=null) out.println("DisplayRangeMin = "+ (ci).getProcessor(j+1).getMin());
+						else out.println("DisplayRangeMin = "+ imp.getProcessor().getMin());
+						if (ci!=null) out.println("DisplayRangeMax = "+ (ci).getProcessor(j+1).getMax());
+						else out.println("DisplayRangeMax = "+ imp.getProcessor().getMax());
+						out.println("FlipVertical = " + flipVCB[j].getState());
+						out.println("FlipHorizontal = " + flipHCB[j].getState());
+						out.println("FlipZaxis = " + flipZCB[j].getState());
+						out.println("ShiftZ = " + Integer.parseInt(sliceSpinner[j].getValue().toString()));
+						out.println("ShiftT = " + Integer.parseInt(frameSpinner[j].getValue().toString()));
+						out.println("deltaZ = " + Integer.parseInt(deltaZSpinner[j].getValue().toString()));
+						out.println("deltaT = " + Integer.parseInt(deltaTSpinner[j].getValue().toString()));
+						out.println("ScaleX = " + Double.parseDouble(scaleXSpinner[j].getValue().toString() ));
+						out.println("ScaleY = " + Double.parseDouble(scaleYSpinner[j].getValue().toString() ));
+						out.println("RotationAngle = " + Double.parseDouble(rotateAngleSpinner[j].getValue().toString() ));
+						out.println("ShiftX = " + Double.parseDouble(translateXSpinner[j].getValue().toString() ));
+						out.println("ShiftY = " + Double.parseDouble(translateYSpinner[j].getValue().toString() ));
+						out.println("End of parameter list");
+
+					}
+					catch (IOException ev)
+					{
+						try {
+							Date currentDate = new Date();
 							long msec = currentDate.getTime();			    
 							long sec = msec/1000;
 
-							File saveFile = 
-									new File((stack instanceof MultiQTVirtualStack)? 
-											((MultiQTVirtualStack) stack).getVirtualStack(j).getMovieName().substring(0, 15) + "_" + (j+1) + "_" + sec
-											+ ".adj":
-												((QTVirtualStack) stack).getMovieName().substring(0, 15) + "_" + (j+1) + "_" + sec
-												+ ".adj") ;
-							while ( saveFile == null ||  saveFile.exists() ) {
-								JFileChooser fc = new JFileChooser( ((stack instanceof MultiQTVirtualStack)?
-										((MultiQTVirtualStack) stack).getVirtualStack(j).getMovieFile().getPath():
-											((QTVirtualStack) stack).getMovieFile().getPath()), FileSystemView.getFileSystemView());
-								fc.setDialogTitle( "Save a new *.adj Channel Adjustment file" );
-								fc.setSelectedFile(saveFile);
-								int dialogResult = fc.showSaveDialog(null);
-								if (dialogResult == JFileChooser.APPROVE_OPTION) {
 
-									saveFile = fc.getSelectedFile();
+							if (IJ.debugMode) IJ.log("I/O Error: Cannot save to specified directory/file.");
+							MessageDialog ioErrorDialog = new MessageDialog(this, "Save Settings Error!", "Your movie settings could not be automatically saved in the same location as the movie file\n\nPlease choose another location");
+							//ioErrorDialog.show();
 
-								} else if (dialogResult == JFileChooser.CANCEL_OPTION) {
-									saveFile = null;
-									break;
-								}
+							Boolean newSave = true;
+							if (saveFileAdj == null) {
+								saveFileAdj = new File( (stack instanceof MultiQTVirtualStack)?
+										((MultiQTVirtualStack) stack).getVirtualStack(j).getMovieName().substring(0, 15) + "_" + (j+1) + "_" + sec
+										+ ".adj": 
+											((QTVirtualStack) stack).getMovieName().substring(0, 15) + "_" + (j+1) + "_" + sec
+											+ ".adj");
+								while ( saveFileAdj == null ||  saveFileAdj.exists() ) {
+									JFileChooser fc = new JFileChooser( ((stack instanceof MultiQTVirtualStack)?
+											((MultiQTVirtualStack) stack).getVirtualStack(j).getMovieFile().getPath():
+												((QTVirtualStack) stack).getMovieFile().getPath()), FileSystemView.getFileSystemView());
+									fc.setDialogTitle( "Save a new *.adj Channel Adjustment file" );
+									fc.setSelectedFile(saveFileAdj);
+									int dialogResult = fc.showSaveDialog(null);
+									if (dialogResult == JFileChooser.APPROVE_OPTION) {
 
+										saveFileAdj = fc.getSelectedFile();
+										newSave = false;
+
+										if (saveFileAdj.exists())
+											newSave = true;
+
+									} else if (dialogResult == JFileChooser.CANCEL_OPTION) {
+										saveFileAdj = null;
+										break;
+									}
+								}	
 							}
-
-
 							PrintWriter out = 
 									new PrintWriter(
 											new BufferedWriter(
-													new FileWriter(saveFile) ), true);
-							out.println("Saved Adjustments for movie " + ( (stack instanceof MultiQTVirtualStack)?
+													new FileWriter(saveFileAdj) ), true);
+							out.println("Saved Adjustments for movie " + ((stack instanceof MultiQTVirtualStack)?
 									((MultiQTVirtualStack) stack).getVirtualStack(j).getMovieFile().getPath():
-										((QTVirtualStack) stack).getMovieFile().getPath() ) );
+										((QTVirtualStack) stack).getMovieFile().getPath()) );
 							out.println("");
 							if ( imp.isComposite() ) 
 								out.println("LUT = " + channelLUTItems[((Choice)channelLUTChoice[j]).getSelectedIndex()] );
@@ -906,82 +971,15 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 							out.println("ShiftX = " + Double.parseDouble(translateXSpinner[j].getValue().toString() ));
 							out.println("ShiftY = " + Double.parseDouble(translateYSpinner[j].getValue().toString() ));
 							out.println("End of parameter list");
-
-							}
-							catch (IOException ev)
-							{
-								try {
-									Date currentDate = new Date();
-									long msec = currentDate.getTime();			    
-									long sec = msec/1000;
-
-
-									if (IJ.debugMode) IJ.log("I/O Error: Cannot save to specified directory/file.");
-									MessageDialog ioErrorDialog = new MessageDialog(this, "Save Settings Error!", "Your movie settings could not be automatically saved in the same location as the movie file\n\nPlease choose another location");
-									//ioErrorDialog.show();
-
-									Boolean newSave = true;
-									File saveFile = new File( (stack instanceof MultiQTVirtualStack)?
-											((MultiQTVirtualStack) stack).getVirtualStack(j).getMovieName().substring(0, 15) + "_" + (j+1) + "_" + sec
-											+ ".adj": 
-												((QTVirtualStack) stack).getMovieName().substring(0, 15) + "_" + (j+1) + "_" + sec
-												+ ".adj");
-									while ( saveFile == null ||  saveFile.exists() ) {
-										JFileChooser fc = new JFileChooser( ((stack instanceof MultiQTVirtualStack)?
-												((MultiQTVirtualStack) stack).getVirtualStack(j).getMovieFile().getPath():
-													((QTVirtualStack) stack).getMovieFile().getPath()), FileSystemView.getFileSystemView());
-										fc.setDialogTitle( "Save a new *.adj Channel Adjustment file" );
-										fc.setSelectedFile(saveFile);
-										int dialogResult = fc.showSaveDialog(null);
-										if (dialogResult == JFileChooser.APPROVE_OPTION) {
-
-											saveFile = fc.getSelectedFile();
-											newSave = false;
-
-											if (saveFile.exists())
-												newSave = true;
-
-										} else if (dialogResult == JFileChooser.CANCEL_OPTION) {
-											saveFile = null;
-											break;
-										}
-									}	
-									PrintWriter out = 
-											new PrintWriter(
-													new BufferedWriter(
-															new FileWriter(saveFile) ), true);
-									out.println("Saved Adjustments for movie " + ((stack instanceof MultiQTVirtualStack)?
-											((MultiQTVirtualStack) stack).getVirtualStack(j).getMovieFile().getPath():
-												((QTVirtualStack) stack).getMovieFile().getPath()) );
-									out.println("");
-									if ( imp.isComposite() ) 
-										out.println("LUT = " + channelLUTItems[((Choice)channelLUTChoice[j]).getSelectedIndex()] );
-									if (ci!=null) out.println("DisplayRangeMin = "+ (ci).getProcessor(j+1).getMin());
-									else out.println("DisplayRangeMin = "+ imp.getProcessor().getMin());
-									if (ci!=null) out.println("DisplayRangeMax = "+ (ci).getProcessor(j+1).getMax());
-									else out.println("DisplayRangeMax = "+ imp.getProcessor().getMax());
-									out.println("FlipVertical = " + flipVCB[j].getState());
-									out.println("FlipHorizontal = " + flipHCB[j].getState());
-									out.println("FlipZaxis = " + flipZCB[j].getState());
-									out.println("ShiftZ = " + Integer.parseInt(sliceSpinner[j].getValue().toString()));
-									out.println("ShiftT = " + Integer.parseInt(frameSpinner[j].getValue().toString()));
-									out.println("deltaZ = " + Integer.parseInt(deltaZSpinner[j].getValue().toString()));
-									out.println("deltaT = " + Integer.parseInt(deltaTSpinner[j].getValue().toString()));
-									out.println("ScaleX = " + Double.parseDouble(scaleXSpinner[j].getValue().toString() ));
-									out.println("ScaleY = " + Double.parseDouble(scaleYSpinner[j].getValue().toString() ));
-									out.println("RotationAngle = " + Double.parseDouble(rotateAngleSpinner[j].getValue().toString() ));
-									out.println("ShiftX = " + Double.parseDouble(translateXSpinner[j].getValue().toString() ));
-									out.println("ShiftY = " + Double.parseDouble(translateYSpinner[j].getValue().toString() ));
-									out.println("End of parameter list");
-								}
-								catch (IOException ex)
-								{
-								}
+						}
+						catch (IOException ex)
+						{
+						}
 
 
 
-							}
-							/***********end of text output***********/
+					}
+					/***********end of text output***********/
 				}
 			}
 
@@ -1251,6 +1249,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 			if(!(imp.getImageStack() instanceof MultiQTVirtualStack)
 					&& !(imp.getImageStack() instanceof RemoteMQTVSHandler.RemoteMQTVirtualStack)
 					&& deNovoMovieFile==null) {
+				imp.setMultiChannelController(this);
 //				SaveDialog sd = new SaveDialog("Save Movie for CytoSHOW Scene as...", imp.getTitle().length()>28?imp.getTitle().substring(0, 25):imp.getTitle().replace(".tif", ""), ".avi");
 //				String name = sd.getFileName().replace(" ","");
 				name = name +"_1.avi";
@@ -1307,224 +1306,226 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 			}
 
 			/***********Next lines output a file with text **************/
-			File saveFile = new File( path+"_scene.scn") ;
-			try {
+			if (saveFile == null || !command.equals("Show Scene Details")) {
+				saveFile = new File( path+"_scene.scn") ;
+				try {
 
-//				while ( saveFile == null || !( saveFile.getPath().toLowerCase().contains("scene.scn")) || !saveFile.exists() ) {
-//					JFileChooser fc = new JFileChooser();
-//					fc.setDialogTitle( "Save a new *_scene.scn MQTVS Scene file" );
-//					fc.setSelectedFile(saveFile);
-//					int dialogResult = fc.showSaveDialog(null);
-//					if (dialogResult == JFileChooser.APPROVE_OPTION) {
-//
-//						saveFile = fc.getSelectedFile();
-						
-				saveFile.createNewFile();
+					//				while ( saveFile == null || !( saveFile.getPath().toLowerCase().contains("scene.scn")) || !saveFile.exists() ) {
+					//					JFileChooser fc = new JFileChooser();
+					//					fc.setDialogTitle( "Save a new *_scene.scn MQTVS Scene file" );
+					//					fc.setSelectedFile(saveFile);
+					//					int dialogResult = fc.showSaveDialog(null);
+					//					if (dialogResult == JFileChooser.APPROVE_OPTION) {
+					//
+					//						saveFile = fc.getSelectedFile();
 
-//					} else if (dialogResult == JFileChooser.CANCEL_OPTION) {
-//						saveFile = null;
-//						break;
-//					}
-//
-//				}
+					saveFile.createNewFile();
 
-				PrintWriter out = 
-						new PrintWriter(
-								new BufferedWriter(
-										new FileWriter(saveFile) ), true);
-				out.println("Saved Scene for movies:"); 
-				for ( int m=0 ; m < (/*deNovoMovieFile!=null?1:*/(ci!=null?ci:imp).getNChannels()); m++) {
-					int saveChannelNumber = m;									
-					if (stack instanceof MultiQTVirtualStack)
-						out.println( (deNovoMovieFile!=null?(sharing?"/Volumes/GLOWORM_DATA/" + deNovoMovieFile.getName().replaceAll("_\\d+.avi", "_"+(m+1)+".avi"):deNovoMovieFile.getPath().replaceAll("_\\d+.avi", "_"+(m+1)+".avi")):((MultiQTVirtualStack) stack).getVirtualStack(m).getMovieFile().getPath()) 
-								+ " = " + (deNovoMovieFile!=null?imp.getNSlices():((MultiQTVirtualStack) stack).getChannelNSlices(m) )
-								+ " = " + (deNovoMovieFile!=null?
-										(deNovoMovieFile.getName().length()>12?deNovoMovieFile.getName().substring(0, 12):deNovoMovieFile.getName()) + "_" + (m+1) + "_" + sec + ".adj":
-											(((MultiQTVirtualStack) stack).getVirtualStack(m).getMovieName().length()>12?((MultiQTVirtualStack) stack).getVirtualStack(m).getMovieName().substring(0, 12):((MultiQTVirtualStack) stack).getVirtualStack(m).getMovieName()) + "_" + (m+1) + "_" + sec + ".adj" ));
+					//					} else if (dialogResult == JFileChooser.CANCEL_OPTION) {
+					//						saveFile = null;
+					//						break;
+					//					}
+					//
+					//				}
 
-					else if (stack instanceof RemoteMQTVSHandler.RemoteMQTVirtualStack)
-						out.println( (deNovoMovieFile!=null?(sharing?"/Volumes/GLOWORM_DATA/" + deNovoMovieFile.getName().replaceAll("_\\d+.avi", "_"+(m+1)+".avi"):deNovoMovieFile.getPath().replaceAll("_\\d+.avi", "_"+(m+1)+".avi")):imp.getRemoteMQTVSHandler().getChannelPathNames()[m]) 
-								+ " = " + (deNovoMovieFile!=null?imp.getNSlices():imp.getRemoteMQTVSHandler().getMovieSlicesStrings()[m] )
-								+ " = " + (deNovoMovieFile!=null?
-										(deNovoMovieFile.getName().length()>12?deNovoMovieFile.getName().substring(0, 12):deNovoMovieFile.getName())
-										+ "_" + (m+1) + "_" + sec + ".adj":
-											imp.getRemoteMQTVSHandler().getChannelPathNames()[m].replaceAll(".*/","").length()>12?
-													imp.getRemoteMQTVSHandler().getChannelPathNames()[m].replaceAll(".*/","").substring(0, 12)
-													:imp.getRemoteMQTVSHandler().getChannelPathNames()[m].replaceAll(".*/","") )
-													+ "_" + (m+1) + "_" + sec + ".adj" );
-					else 
-						out.println( (deNovoMovieFile!=null?(sharing?"/Volumes/GLOWORM_DATA/" + deNovoMovieFile.getName().replaceAll("_\\d+.avi", "_"+(m+1)+".avi"):deNovoMovieFile.getPath().replaceAll("_\\d+.avi", "_"+(m+1)+".avi")):"error") 
-								+ " = " + (deNovoMovieFile!=null?imp.getNSlices():"error" )
-								+ " = " + (deNovoMovieFile!=null?
-										(deNovoMovieFile.getName().length()>12?deNovoMovieFile.getName().substring(0, 12):deNovoMovieFile.getName())
-										+ "_" + (m+1) + "_" + sec + ".adj":
-											"error" + "_" + (m+1) + "_" + sec + ".adj" ));
-
-				}
-				out.println("");
-				RoiManager rm =  imp.getRoiManager();
-				if ( rm != null ) {
-					if (rm.getCount()>0){
-						out.println("ROIfile = " + /*saveFile.getParent() +File.separator +*/ "MQTVS_"+ sec +"_ROIs.zip");
-						if (rm.getList().getSelectedValue() != null){
-							out.println("Selection = " + rm.getList().getSelectedValue());
-						}
-					}
-					ColorLegend cl = rm.getColorLegend();
-					if ( cl != null) {
-						out.println("ColorLegendFile = " + /*saveFile.getParent() +File.separator +*/ "MQTVS_"+ sec +"_ColorLegend.lgd");
-					}
-				}
-				out.println("");
-				out.println("Convert8bit = " + ((deNovoMovieFile!=null && !deNovoMovieFile.getName().startsWith("SW_") && !deNovoMovieFile.getName().startsWith("RGB_"))?true:(stack instanceof MultiQTVirtualStack?((MultiQTVirtualStack) stack).getIsEightBit():(imp.getRemoteMQTVSHandler()!=null?imp.getRemoteMQTVSHandler().isEightBit():false) ) ) );
-				out.println("VirtualStack = " + (deNovoMovieFile!=null?true:(stack instanceof MultiQTVirtualStack?((MultiQTVirtualStack) stack).getIsVirtualStack():true) ));
-				out.println("MultipleMovies = " + (deNovoMovieFile!=null?(imp.getNChannels()>1):(stack instanceof MultiQTVirtualStack?((MultiQTVirtualStack) stack).getIsMultipleMovies():true) ));
-				out.println("HyperStack = " + (deNovoMovieFile!=null?true:(stack instanceof MultiQTVirtualStack?((MultiQTVirtualStack) stack).getIsHyperStack():true) ));
-				out.println("StretchToFit = " + (deNovoMovieFile!=null?true:(stack instanceof MultiQTVirtualStack?((MultiQTVirtualStack) stack).getIsStretchToFit():(imp.getRemoteMQTVSHandler()!=null?imp.getRemoteMQTVSHandler().isStretchToFitOverlay():false) ) ) );
-				out.println("ViewInOverlay = " + (deNovoMovieFile!=null?true:(stack instanceof MultiQTVirtualStack?((MultiQTVirtualStack) stack).getIsViewInOverlay():(imp.getRemoteMQTVSHandler()!=null?imp.getRemoteMQTVSHandler().isViewOverlay():false) ) ) );
-				out.println("HorizontalMontage = " + (deNovoMovieFile!=null?false:(stack instanceof MultiQTVirtualStack?((MultiQTVirtualStack) stack).getIsHorizontalMontage():(imp.getRemoteMQTVSHandler()!=null?imp.getRemoteMQTVSHandler().isHorizontal():false) ) ) );
-				out.println("SideSideStereo = " + (deNovoMovieFile!=null?false:(stack instanceof MultiQTVirtualStack?((MultiQTVirtualStack) stack).getIsSideSideStereo():(imp.getRemoteMQTVSHandler()!=null?imp.getRemoteMQTVSHandler().isSideSideStereo():false) ) ) );
-				out.println("RedCyanStereo = " + (deNovoMovieFile!=null?false:(stack instanceof MultiQTVirtualStack?((MultiQTVirtualStack) stack).getIsRedCyanStereo():(imp.getRemoteMQTVSHandler()!=null?imp.getRemoteMQTVSHandler().isRedCyanStereo():false) ) ) );
-				out.println("GridLayOut = " + (deNovoMovieFile!=null?false:(stack instanceof MultiQTVirtualStack?((MultiQTVirtualStack) stack).getIsGrid():(imp.getRemoteMQTVSHandler()!=null?imp.getRemoteMQTVSHandler().isGrid():false) ) ) );
-
-				if (ci!=null) out.println("DisplayMode = " + ci.getMode() + " = " + ci.getModeAsString()	 );	
-				else out.println("DisplayMode = " + 1	 );
-				out.println("Cposition = " + (deNovoMovieFile!=null?1:(ci!=null?ci:imp).getChannel())	 );			
-				out.println("Zposition = " + (ci!=null?ci:imp).getSlice()	 );			
-				out.println("Tposition = " + (ci!=null?ci:imp).getFrame()	 );			
-				if (rm !=null) {
-					out.println("ZsustainROIs = " + (rm ==null?1:rm.getZSustain()) );
-					out.println("TsustainROIs = " + (rm ==null?1:rm.getTSustain()) );
-				}
-				out.println("End of parameter list");
-				//if (IJ.debugMode) IJ.log(""+ imp.getNChannels());
-
-				out.close();
-				
-				if (imp!=null) {
-					for (int j = 0; j < imp.getNChannels(); j++) {
-						try {
-							//if (IJ.debugMode) IJ.log("debug a");
-							File saveFile1 = new File(saveFile.getParent()
-									+ File.separator
-									+ (deNovoMovieFile!=null?
-											(deNovoMovieFile.getName().length()>12?deNovoMovieFile.getName().substring(0, 12):deNovoMovieFile.getName()) + "_" + (j+1) + "_" + sec + ".adj"
-											:( stack instanceof MultiQTVirtualStack
-													?(((MultiQTVirtualStack) stack).getVirtualStack(j).getMovieName().length()>12
-															?((MultiQTVirtualStack) stack).getVirtualStack(j).getMovieName().substring(0, 12)
-																	:((MultiQTVirtualStack) stack).getVirtualStack(j).getMovieName()) 
-																	:(imp.getRemoteMQTVSHandler().getChannelPathNames()[j].replaceAll(".*/","").length()>12
-																			?imp.getRemoteMQTVSHandler().getChannelPathNames()[j].replaceAll(".*/","").substring(0, 12)
-																					:imp.getRemoteMQTVSHandler().getChannelPathNames()[j].replaceAll(".*/","") ))
-																					+ "_" + (j+1) + "_" + sec + ".adj" ));
-							PrintWriter out1 = new PrintWriter(
+					PrintWriter out = 
+							new PrintWriter(
 									new BufferedWriter(
-											new FileWriter(saveFile1)), true);
-							if (deNovoMovieFile!=null)
-								out1.println("Saved Adjustments for movie "
-										+ deNovoMovieFile.getPath());
-							else
-								out1.println("Saved Adjustments for movie "
-										+ (stack instanceof MultiQTVirtualStack
-												?((MultiQTVirtualStack) stack)
-														.getVirtualStack(j).getMovieFile()
-														.getPath()
-														:imp.getRemoteMQTVSHandler().getChannelPathNames()[j]) );
-							out1.println("");
-							if ( imp.isComposite() ) 
-								out1
-								.println((deNovoMovieFile!=null && imp.getMotherImp().getMultiChannelController()!=null?
-										"LUT = "
-										+ imp.getMotherImp().getMultiChannelController().channelLUTItems
-											[((Choice) imp.getMotherImp().getMultiChannelController().channelLUTChoice[j])
-										                  .getSelectedIndex()]
-										:channelLUTChoice!=null?
-												"LUT = "
-												+ channelLUTItems[((Choice) channelLUTChoice[j])
-										                  .getSelectedIndex()]:
-										                	  channelLUTItems[j]) 
-										);
+											new FileWriter(saveFile) ), true);
+					out.println("Saved Scene for movies:"); 
+					for ( int m=0 ; m < (/*deNovoMovieFile!=null?1:*/(ci!=null?ci:imp).getNChannels()); m++) {
+						int saveChannelNumber = m;									
+						if (stack instanceof MultiQTVirtualStack)
+							out.println( (deNovoMovieFile!=null?(sharing?"/Volumes/GLOWORM_DATA/" + deNovoMovieFile.getName().replaceAll("_\\d+.avi", "_"+(m+1)+".avi"):deNovoMovieFile.getPath().replaceAll("_\\d+.avi", "_"+(m+1)+".avi")):((MultiQTVirtualStack) stack).getVirtualStack(m).getMovieFile().getPath()) 
+									+ " = " + (deNovoMovieFile!=null?imp.getNSlices():((MultiQTVirtualStack) stack).getChannelNSlices(m) )
+									+ " = " + (deNovoMovieFile!=null?
+											(deNovoMovieFile.getName().length()>12?deNovoMovieFile.getName().substring(0, 12):deNovoMovieFile.getName()) + "_" + (m+1) + "_" + sec + ".adj":
+												(((MultiQTVirtualStack) stack).getVirtualStack(m).getMovieName().length()>12?((MultiQTVirtualStack) stack).getVirtualStack(m).getMovieName().substring(0, 12):((MultiQTVirtualStack) stack).getVirtualStack(m).getMovieName()) + "_" + (m+1) + "_" + sec + ".adj" ));
 
-							if (ci!=null) {
-								if (ci.getMode() == 1) {
+						else if (stack instanceof RemoteMQTVSHandler.RemoteMQTVirtualStack)
+							out.println( (deNovoMovieFile!=null?(sharing?"/Volumes/GLOWORM_DATA/" + deNovoMovieFile.getName().replaceAll("_\\d+.avi", "_"+(m+1)+".avi"):deNovoMovieFile.getPath().replaceAll("_\\d+.avi", "_"+(m+1)+".avi")):imp.getRemoteMQTVSHandler().getChannelPathNames()[m]) 
+									+ " = " + (deNovoMovieFile!=null?imp.getNSlices():imp.getRemoteMQTVSHandler().getMovieSlicesStrings()[m] )
+									+ " = " + (deNovoMovieFile!=null?
+											(deNovoMovieFile.getName().length()>12?deNovoMovieFile.getName().substring(0, 12):deNovoMovieFile.getName())
+											+ "_" + (m+1) + "_" + sec + ".adj":
+												imp.getRemoteMQTVSHandler().getChannelPathNames()[m].replaceAll(".*/","").length()>12?
+														imp.getRemoteMQTVSHandler().getChannelPathNames()[m].replaceAll(".*/","").substring(0, 12)
+														:imp.getRemoteMQTVSHandler().getChannelPathNames()[m].replaceAll(".*/","") )
+														+ "_" + (m+1) + "_" + sec + ".adj" );
+						else 
+							out.println( (deNovoMovieFile!=null?(sharing?"/Volumes/GLOWORM_DATA/" + deNovoMovieFile.getName().replaceAll("_\\d+.avi", "_"+(m+1)+".avi"):deNovoMovieFile.getPath().replaceAll("_\\d+.avi", "_"+(m+1)+".avi")):"error") 
+									+ " = " + (deNovoMovieFile!=null?imp.getNSlices():"error" )
+									+ " = " + (deNovoMovieFile!=null?
+											(deNovoMovieFile.getName().length()>12?deNovoMovieFile.getName().substring(0, 12):deNovoMovieFile.getName())
+											+ "_" + (m+1) + "_" + sec + ".adj":
+												"error" + "_" + (m+1) + "_" + sec + ".adj" ));
 
-									out1.println("DisplayRangeMin = "
-											+ ((deNovoMovieFile!=null && !deNovoMovieFile.getName().startsWith("SW_"))?0:ci.getProcessor(j + 1).getMin()));
-									out1.println("DisplayRangeMax = "
-											+ ((deNovoMovieFile!=null && !deNovoMovieFile.getName().startsWith("SW_"))?255:ci.getProcessor(j + 1).getMax()));
-								} else {
-									ci.setPosition(j + 1, ci.getSlice(), ci
-											.getFrame());
-									out1.println("DisplayRangeMin = "
-											+ ((deNovoMovieFile!=null && !deNovoMovieFile.getName().startsWith("SW_"))?0:ci.getProcessor().getMin()));
-									out1.println("DisplayRangeMax = "
-											+ ((deNovoMovieFile!=null && !deNovoMovieFile.getName().startsWith("SW_"))?255:ci.getProcessor().getMax()));
-
-								}
+					}
+					out.println("");
+					RoiManager rm =  imp.getRoiManager();
+					if ( rm != null ) {
+						if (rm.getCount()>0){
+							out.println("ROIfile = " + /*saveFile.getParent() +File.separator +*/ "MQTVS_"+ sec +"_ROIs.zip");
+							if (rm.getList().getSelectedValue() != null){
+								out.println("Selection = " + rm.getList().getSelectedValue());
 							}
-							out1.println("FlipVertical = "
-									+ (deNovoMovieFile!=null?false:flipVCB[j].getState()));
-							out1.println("FlipHorizontal = "
-									+ (deNovoMovieFile!=null?false:flipHCB[j].getState()));
-							out1.println("FlipZaxis = "
-									+ (deNovoMovieFile!=null?false:flipZCB[j].getState()));
-							out1.println("ShiftZ = "
-									+ (deNovoMovieFile!=null?0:Integer.parseInt(sliceSpinner[j]
-											.getValue().toString())));
-							out1.println("ShiftT = "
-									+ (deNovoMovieFile!=null?0:Integer.parseInt(frameSpinner[j]
-											.getValue().toString())));
-							out1.println("deltaZ = "
-									+ (deNovoMovieFile!=null?1:Integer.parseInt(deltaZSpinner[j]
-											.getValue().toString())));
-							out1.println("deltaT = "
-									+ (deNovoMovieFile!=null?1:Integer.parseInt(deltaTSpinner[j]
-											.getValue().toString())));
-							out1.println("ScaleX = "
-									+ (deNovoMovieFile!=null?0.0:Double.parseDouble(scaleXSpinner[j]
-											.getValue().toString())));
-							out1.println("ScaleY = "
-									+ (deNovoMovieFile!=null?0.0:Double.parseDouble(scaleYSpinner[j]
-											.getValue().toString())));
-							out1.println("RotationAngle = "
-									+ (deNovoMovieFile!=null?0.0:Double.parseDouble(rotateAngleSpinner[j]
-											.getValue().toString())));
-							out1.println("ShiftX = "
-									+ (deNovoMovieFile!=null?0.0:Double.parseDouble(translateXSpinner[j]
-											.getValue().toString())));
-							out1.println("ShiftY = "
-									+ (deNovoMovieFile!=null?0.0:Double.parseDouble(translateYSpinner[j]
-											.getValue().toString())));
-							out1.println("End of parameter list");
-							
-							out1.close();
+						}
+						ColorLegend cl = rm.getColorLegend();
+						if ( cl != null) {
+							out.println("ColorLegendFile = " + /*saveFile.getParent() +File.separator +*/ "MQTVS_"+ sec +"_ColorLegend.lgd");
+						}
+					}
+					out.println("");
+					out.println("Convert8bit = " + ((deNovoMovieFile!=null && !deNovoMovieFile.getName().startsWith("SW_") && !deNovoMovieFile.getName().startsWith("RGB_"))?true:(stack instanceof MultiQTVirtualStack?((MultiQTVirtualStack) stack).getIsEightBit():(imp.getRemoteMQTVSHandler()!=null?imp.getRemoteMQTVSHandler().isEightBit():false) ) ) );
+					out.println("VirtualStack = " + (deNovoMovieFile!=null?true:(stack instanceof MultiQTVirtualStack?((MultiQTVirtualStack) stack).getIsVirtualStack():true) ));
+					out.println("MultipleMovies = " + (deNovoMovieFile!=null?(imp.getNChannels()>1):(stack instanceof MultiQTVirtualStack?((MultiQTVirtualStack) stack).getIsMultipleMovies():true) ));
+					out.println("HyperStack = " + (deNovoMovieFile!=null?true:(stack instanceof MultiQTVirtualStack?((MultiQTVirtualStack) stack).getIsHyperStack():true) ));
+					out.println("StretchToFit = " + (deNovoMovieFile!=null?true:(stack instanceof MultiQTVirtualStack?((MultiQTVirtualStack) stack).getIsStretchToFit():(imp.getRemoteMQTVSHandler()!=null?imp.getRemoteMQTVSHandler().isStretchToFitOverlay():false) ) ) );
+					out.println("ViewInOverlay = " + (deNovoMovieFile!=null?true:(stack instanceof MultiQTVirtualStack?((MultiQTVirtualStack) stack).getIsViewInOverlay():(imp.getRemoteMQTVSHandler()!=null?imp.getRemoteMQTVSHandler().isViewOverlay():false) ) ) );
+					out.println("HorizontalMontage = " + (deNovoMovieFile!=null?false:(stack instanceof MultiQTVirtualStack?((MultiQTVirtualStack) stack).getIsHorizontalMontage():(imp.getRemoteMQTVSHandler()!=null?imp.getRemoteMQTVSHandler().isHorizontal():false) ) ) );
+					out.println("SideSideStereo = " + (deNovoMovieFile!=null?false:(stack instanceof MultiQTVirtualStack?((MultiQTVirtualStack) stack).getIsSideSideStereo():(imp.getRemoteMQTVSHandler()!=null?imp.getRemoteMQTVSHandler().isSideSideStereo():false) ) ) );
+					out.println("RedCyanStereo = " + (deNovoMovieFile!=null?false:(stack instanceof MultiQTVirtualStack?((MultiQTVirtualStack) stack).getIsRedCyanStereo():(imp.getRemoteMQTVSHandler()!=null?imp.getRemoteMQTVSHandler().isRedCyanStereo():false) ) ) );
+					out.println("GridLayOut = " + (deNovoMovieFile!=null?false:(stack instanceof MultiQTVirtualStack?((MultiQTVirtualStack) stack).getIsGrid():(imp.getRemoteMQTVSHandler()!=null?imp.getRemoteMQTVSHandler().isGrid():false) ) ) );
 
-						} catch (IOException ev) {
-							//if (IJ.debugMode) IJ.log("debug c");
+					if (ci!=null) out.println("DisplayMode = " + ci.getMode() + " = " + ci.getModeAsString()	 );	
+					else out.println("DisplayMode = " + 1	 );
+					out.println("Cposition = " + (deNovoMovieFile!=null?1:(ci!=null?ci:imp).getChannel())	 );			
+					out.println("Zposition = " + (ci!=null?ci:imp).getSlice()	 );			
+					out.println("Tposition = " + (ci!=null?ci:imp).getFrame()	 );			
+					if (rm !=null) {
+						out.println("ZsustainROIs = " + (rm ==null?1:rm.getZSustain()) );
+						out.println("TsustainROIs = " + (rm ==null?1:rm.getTSustain()) );
+					}
+					out.println("End of parameter list");
+					//if (IJ.debugMode) IJ.log(""+ imp.getNChannels());
 
+					out.close();
+
+					if (imp!=null) {
+						for (int j = 0; j < imp.getNChannels(); j++) {
+							try {
+								//if (IJ.debugMode) IJ.log("debug a");
+								File saveFile1 = new File(saveFile.getParent()
+										+ File.separator
+										+ (deNovoMovieFile!=null?
+												(deNovoMovieFile.getName().length()>12?deNovoMovieFile.getName().substring(0, 12):deNovoMovieFile.getName()) + "_" + (j+1) + "_" + sec + ".adj"
+												:( stack instanceof MultiQTVirtualStack
+														?(((MultiQTVirtualStack) stack).getVirtualStack(j).getMovieName().length()>12
+																?((MultiQTVirtualStack) stack).getVirtualStack(j).getMovieName().substring(0, 12)
+																		:((MultiQTVirtualStack) stack).getVirtualStack(j).getMovieName()) 
+																		:(imp.getRemoteMQTVSHandler().getChannelPathNames()[j].replaceAll(".*/","").length()>12
+																				?imp.getRemoteMQTVSHandler().getChannelPathNames()[j].replaceAll(".*/","").substring(0, 12)
+																						:imp.getRemoteMQTVSHandler().getChannelPathNames()[j].replaceAll(".*/","") ))
+																						+ "_" + (j+1) + "_" + sec + ".adj" ));
+								PrintWriter out1 = new PrintWriter(
+										new BufferedWriter(
+												new FileWriter(saveFile1)), true);
+								if (deNovoMovieFile!=null)
+									out1.println("Saved Adjustments for movie "
+											+ deNovoMovieFile.getPath());
+								else
+									out1.println("Saved Adjustments for movie "
+											+ (stack instanceof MultiQTVirtualStack
+													?((MultiQTVirtualStack) stack)
+															.getVirtualStack(j).getMovieFile()
+															.getPath()
+															:imp.getRemoteMQTVSHandler().getChannelPathNames()[j]) );
+								out1.println("");
+								if ( imp.isComposite() ) 
+									out1
+									.println((deNovoMovieFile!=null && imp.getMotherImp().getMultiChannelController()!=null?
+											"LUT = "
+											+ imp.getMotherImp().getMultiChannelController().channelLUTItems
+											[((Choice) imp.getMotherImp().getMultiChannelController().channelLUTChoice[j])
+											 .getSelectedIndex()]
+													 :channelLUTChoice!=null?
+															 "LUT = "
+															 + channelLUTItems[((Choice) channelLUTChoice[j])
+															                   .getSelectedIndex()]:
+															                	   channelLUTItems[j]) 
+											);
+
+								if (ci!=null) {
+									if (ci.getMode() == 1) {
+
+										out1.println("DisplayRangeMin = "
+												+ ((deNovoMovieFile!=null && !deNovoMovieFile.getName().startsWith("SW_"))?0:ci.getProcessor(j + 1).getMin()));
+										out1.println("DisplayRangeMax = "
+												+ ((deNovoMovieFile!=null && !deNovoMovieFile.getName().startsWith("SW_"))?255:ci.getProcessor(j + 1).getMax()));
+									} else {
+										ci.setPosition(j + 1, ci.getSlice(), ci
+												.getFrame());
+										out1.println("DisplayRangeMin = "
+												+ ((deNovoMovieFile!=null && !deNovoMovieFile.getName().startsWith("SW_"))?0:ci.getProcessor().getMin()));
+										out1.println("DisplayRangeMax = "
+												+ ((deNovoMovieFile!=null && !deNovoMovieFile.getName().startsWith("SW_"))?255:ci.getProcessor().getMax()));
+
+									}
+								}
+								out1.println("FlipVertical = "
+										+ (deNovoMovieFile!=null?false:flipVCB[j].getState()));
+								out1.println("FlipHorizontal = "
+										+ (deNovoMovieFile!=null?false:flipHCB[j].getState()));
+								out1.println("FlipZaxis = "
+										+ (deNovoMovieFile!=null?false:flipZCB[j].getState()));
+								out1.println("ShiftZ = "
+										+ (deNovoMovieFile!=null?0:Integer.parseInt(sliceSpinner[j]
+												.getValue().toString())));
+								out1.println("ShiftT = "
+										+ (deNovoMovieFile!=null?0:Integer.parseInt(frameSpinner[j]
+												.getValue().toString())));
+								out1.println("deltaZ = "
+										+ (deNovoMovieFile!=null?1:Integer.parseInt(deltaZSpinner[j]
+												.getValue().toString())));
+								out1.println("deltaT = "
+										+ (deNovoMovieFile!=null?1:Integer.parseInt(deltaTSpinner[j]
+												.getValue().toString())));
+								out1.println("ScaleX = "
+										+ (deNovoMovieFile!=null?0.0:Double.parseDouble(scaleXSpinner[j]
+												.getValue().toString())));
+								out1.println("ScaleY = "
+										+ (deNovoMovieFile!=null?0.0:Double.parseDouble(scaleYSpinner[j]
+												.getValue().toString())));
+								out1.println("RotationAngle = "
+										+ (deNovoMovieFile!=null?0.0:Double.parseDouble(rotateAngleSpinner[j]
+												.getValue().toString())));
+								out1.println("ShiftX = "
+										+ (deNovoMovieFile!=null?0.0:Double.parseDouble(translateXSpinner[j]
+												.getValue().toString())));
+								out1.println("ShiftY = "
+										+ (deNovoMovieFile!=null?0.0:Double.parseDouble(translateYSpinner[j]
+												.getValue().toString())));
+								out1.println("End of parameter list");
+
+								out1.close();
+
+							} catch (IOException ev) {
+								//if (IJ.debugMode) IJ.log("debug c");
+
+							}
+						}
+					}
+					if ( rm != null) {
+						if (rm.getCount()>0){
+							((RoiManager)rm).runCommand("Save", saveFile.getParent() +File.separator +"MQTVS_"+ sec +"_ROIs.zip");
+						}
+						ColorLegend cl = rm.getColorLegend();
+						if ( cl != null) {
+							cl.save(saveFile.getParent() +File.separator + "MQTVS_"+ sec +"_ColorLegend.lgd");
 						}
 					}
 				}
-				if ( rm != null) {
-					if (rm.getCount()>0){
-						((RoiManager)rm).runCommand("Save", saveFile.getParent() +File.separator +"MQTVS_"+ sec +"_ROIs.zip");
-					}
-					ColorLegend cl = rm.getColorLegend();
-					if ( cl != null) {
-						cl.save(saveFile.getParent() +File.separator + "MQTVS_"+ sec +"_ColorLegend.lgd");
-					}
+				catch (IOException ev)
+				{
 				}
-			}
-			catch (IOException ev)
-			{
 			}
 			if (command.equals("Show Scene Details")) {
 				if (imp.getStack() instanceof MultiQTVirtualStack) {
-					tw = new TextWindow(((MultiQTVirtualStack)imp.getStack()).getSceneFileName(),"", "Shared as http://fsbill.cam.uchc.edu/cgi-bin/gloworm.pl?MOVIE="+((MultiQTVirtualStack)imp.getStack()).getSceneFileName()+"\n"+((MultiQTVirtualStack)imp.getStack()).getSceneFileText(), 300, 300);
+					tw = new TextWindow(((MultiQTVirtualStack)imp.getStack()).getSceneFileName(),"", "Shared as: \nhttp://fsbill.cam.uchc.edu/cgi-bin/gloworm.pl?MOVIE="+((MultiQTVirtualStack)imp.getStack()).getSceneFileName()+"\n"+((MultiQTVirtualStack)imp.getStack()).getSceneFileText(), 300, 300);
 				} else if (imp.getStack() instanceof RemoteMQTVSHandler.RemoteMQTVirtualStack) {
-					tw = new TextWindow(((RemoteMQTVSHandler.RemoteMQTVirtualStack)imp.getStack()).getSceneFileName(),"", "Shared as http://fsbill.cam.uchc.edu/cgi-bin/gloworm.pl?MOVIE="+((RemoteMQTVSHandler.RemoteMQTVirtualStack)imp.getStack()).getSceneFileName()+"\n"+((RemoteMQTVSHandler.RemoteMQTVirtualStack)imp.getStack()).getSceneFileText(), 300, 300);
+					tw = new TextWindow(((RemoteMQTVSHandler.RemoteMQTVirtualStack)imp.getStack()).getSceneFileName(),"", "Shared as: \nhttp://fsbill.cam.uchc.edu/cgi-bin/gloworm.pl?MOVIE="+((RemoteMQTVSHandler.RemoteMQTVirtualStack)imp.getStack()).getSceneFileName()+"\n"+((RemoteMQTVSHandler.RemoteMQTVirtualStack)imp.getStack()).getSceneFileText(), 300, 300);
 				} else {
-					tw = new TextWindow(saveFile.getName(), "", IJ.openAsString(saveFile.getPath()), 300, 300);
+					tw = new TextWindow(saveFile.getName(), "", "Shared as: \nhttp://fsbill.cam.uchc.edu/cgi-bin/gloworm.pl?MOVIE="+saveFile.getName()+"\n"+IJ.openAsString(saveFile.getPath()), 300, 300);
 				}
 			}
 
@@ -1587,6 +1588,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 				lgd.pack();
 				lgd.showDialog();
 
+				sharing = false;
 			}
 //			if (deNovoMovieFile!=null) {
 //				MQTVSSceneLoader.runMQTVS_SceneLoader(saveFile.getPath());

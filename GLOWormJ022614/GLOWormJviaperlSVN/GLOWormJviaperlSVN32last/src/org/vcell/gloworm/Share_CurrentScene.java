@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.ImageStack;
 import ij.plugin.PlugIn;
 
 
@@ -23,10 +24,10 @@ public class Share_CurrentScene implements PlugIn {
 		else if (mcc == null) {
 			imp.setMultiChannelController(new MultiChannelController(imp));
 			mcc = imp.getMultiChannelController();
-			if (mcc!=null && imp.getImageStack() instanceof MultiQTVirtualStack) {
-				mcc.setSharing(true);
-				mcc.actionPerformed(new ActionEvent(mcc, 0, "Save Scene") );
-			}
+//			if (mcc!=null && imp.getImageStack() instanceof ImageStack) {
+//				mcc.setSharing(true);
+//				mcc.actionPerformed(new ActionEvent(mcc, 0, "Save Scene") );
+//			}
 		}
 	
 	}
