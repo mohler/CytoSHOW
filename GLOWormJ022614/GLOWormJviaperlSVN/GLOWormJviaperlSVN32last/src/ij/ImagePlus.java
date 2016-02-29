@@ -1565,13 +1565,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 				ip.snapshot();
 			} else
 				ip = stack.getProcessor(n);
-			//if (IJ.altKeyDown() && !IJ.isMacro()) {
-			//	if (imageType==GRAY16 || imageType==GRAY32) {
-			//		ip.resetMinAndMax();
-			//		IJ.showStatus(n+": min="+ip.getMin()+", max="+ip.getMax());
-			//	}
-			//	ContrastAdjuster.update();
-			//}
+
 			if (stack.isVirtual()) {
 				Overlay overlay2 = ip.getOverlay();
 				if (overlay2!=null)

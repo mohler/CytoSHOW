@@ -42,6 +42,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 	private int stepT = 1;
 	private int finalFrames;
 	private int finalT;
+	private boolean copyMergedImage;
 
 	public void run(String arg) {
 		ImagePlus imp = IJ.getImage();
@@ -193,7 +194,8 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 
 		if ( imp.isComposite()) {
 			compositeMode = ((CompositeImage)imp).getMode();
-			((CompositeImage)imp).setMode(3);
+			if (!copyMergedImage)
+				((CompositeImage)imp).setMode(3);
 
 		}
 		finalFrames = 0;
@@ -212,7 +214,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 
 
 				for (int z=firstZ; z<=lastZ; z++) {
-					for (int c=firstC; c<=lastC; c++) {
+					for (int c=firstC; c<=(copyMergedImage?firstC:lastC); c++) {
 						IJ.runMacro("print(\"\\\\Update:***Duplicating selected region(s) of time-point "+t+", channel "+c+", slice "+z+"...*** \")");
 
 						imp.setPosition(c, z, t);			// THIS LINE CHANGED FROM ORIGINAL PLUGIN.  THIS CHANGE MAKES IT COMPATIBLE WITH MQTVS					/*********/         //ip = imp.getProcessor();						// ALSO SEEMS TO WORK FINE WITH non-virtual HyperStacks
@@ -267,7 +269,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 
 		//		IJ.log(""+imp2.getOpenAsHyperStack());
 
-		imp2.setDimensions(lastC-firstC+1, lastZ-firstZ+1, finalFrames);
+		imp2.setDimensions(copyMergedImage?1:lastC-firstC+1, lastZ-firstZ+1, finalFrames);
 		if (  ((StackWindow)imp.getWindow()).isWormAtlas() 
 				&& imp.getStack() instanceof MultiQTVirtualStack){
 			//			IJ.log("Copy from WA STACK");
@@ -280,7 +282,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 		if (imp.isComposite()) {
 			//        	IJ.log("Yes CI");
 			//			int mode = ((CompositeImage)imp).getMode();
-			if (lastC>=firstC) {
+			if (lastC>=firstC && !copyMergedImage) {
 				imp2 = new CompositeImage(imp2, 3);
 				//				int i2 = 1;
 				for (int i=1; i<=imp2.getNChannels(); i++) {
@@ -573,7 +575,11 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 			sliceSpecificROIs = gd.getNextBoolean();
 
 		if (nChannels>1) {
-			String[] range = Tools.split(gd.getNextString(), " -");
+			String channelRangeString = gd.getNextString();
+//			copyMergedImage = channelRangeString.contains("merge");
+			copyMergedImage = (imp.isComposite() && ((CompositeImage)imp).getCompositeMode() >= CompositeImage.RATIO12);
+			String[] range = Tools.split(channelRangeString, " -");
+//			channelRangeString = channelRangeString.replace("merge","").trim();
 			double c1 = Tools.parseDouble(range[0]);
 			double c2 = range.length==2?Tools.parseDouble(range[1]):Double.NaN;
 			setFirstC(Double.isNaN(c1)?1:(int)c1);
