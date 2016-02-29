@@ -96,6 +96,7 @@ public class Projector implements PlugInFilter, TextListener {
 	private int loopT;
 	private int stepT = 1;
 	private boolean is16bit;
+	private boolean is32bit;
 
 	public int setup(String arg, ImagePlus imp) {
 		this.imp = imp;
@@ -150,11 +151,12 @@ public class Projector implements PlugInFilter, TextListener {
 //		((ContrastAdjuster)ContrastAdjuster.getInstance()).toBack();
 		isRGB = imp.getType()==ImagePlus.COLOR_RGB;
 		is16bit = imp.getType()==ImagePlus.GRAY16;
+		is32bit = imp.getType()==ImagePlus.GRAY32;
 		isHyperstack = imp.isHyperStack();
 
 		LUT[] lut = imp.getLuts();
 
-		int stackMode = 1;
+		int stackMode = 0;
 
 
 		double originalSliceInterval = sliceInterval;
@@ -172,11 +174,16 @@ public class Projector implements PlugInFilter, TextListener {
 		int inSlice = imp.getSlice();
 		int inFrame = imp.getFrame();
 
-		if ( imp.isComposite()) {
+		if ( imp.isComposite())
+			stackMode = ((CompositeImage)imp).getCompositeMode();
+		if ( imp.isComposite() && ((CompositeImage)imp).getCompositeMode() < CompositeImage.RATIO12) {
 			stackMode = ((CompositeImage)imp).getMode();
 			((CompositeImage)imp).setMode(CompositeImage.GRAYSCALE);
 
 		}
+		if (imp.isComposite() && ((CompositeImage)imp).getCompositeMode() >= CompositeImage.RATIO12)
+			lastC = firstC;
+
 
 		imp.getWindow().setVisible(false);
 		
@@ -239,7 +246,6 @@ public class Projector implements PlugInFilter, TextListener {
 
 				ImagePlus projImpDC = new ImagePlus();
 				ImageStack stackC = null;
-
 				for (loopC = firstC; loopC < lastC +1; loopC++) {
 
 
@@ -250,7 +256,8 @@ public class Projector implements PlugInFilter, TextListener {
 						impD = (new MQTVS_Duplicator()).run(imp, loopC, loopC, firstZ, lastZ, loopT, loopT, 1, sliceSpecificROIs);
 					}
 					impD.setCalibration(imp.getCalibration());
-
+//					impD.show();
+					
 					if (manualRoi != null && sliceSpecificROIs) {
 						impD.setRoi(manualRoi);
 						WindowManager.setTempCurrentImage(impD);
@@ -263,9 +270,11 @@ public class Projector implements PlugInFilter, TextListener {
 					}
 
 					ImagePlus impDZ = impD.duplicate();
-					if (is16bit) {
+					if (impDZ.getBitDepth() > 8) {
+						impDZ.setPosition(1, (1+lastZ+1-firstZ)/2, 1);
+						impDZ.getProcessor().setMinAndMax(0.3, 2.0);
 						IJ.run(impDZ,"8-bit","");
-						if (impDZ.isComposite())
+						if (impDZ.isComposite()   )
 							((CompositeImage)impDZ).setMode(CompositeImage.GRAYSCALE);
 					}
 //					impDZ.show();
@@ -283,7 +292,7 @@ public class Projector implements PlugInFilter, TextListener {
 					//Code below here taken from MQTVS_Duplicator.duplicateHyperstack
 
 					if (impDZ==null) return;
-
+//					impDZ.show();
 //									impDZ.show();
 //									impDZ.getWindow().setVisible(false);
 
@@ -361,6 +370,8 @@ public class Projector implements PlugInFilter, TextListener {
 //						tempDir.mkdir();
 						finalSlices = projImpD[loopC-firstC].getStackSize();
 					}
+//					projImpD[loopC-firstC].show();
+					
 					Roi[] roisArray = projImpD[loopC-firstC].getRoiManager().getShownRoisAsArray();
 					for (int i=0; i<roisArray.length; i++) {
 						Roi nextRoi = (Roi) roisArray[i].clone();
@@ -405,8 +416,7 @@ public class Projector implements PlugInFilter, TextListener {
 
 		if (imp instanceof CompositeImage && ((CompositeImage) imp).getMode() ==1 ) {
 			for (int j = 1; j <= imp.getNChannels(); j++) {
-				imp.setPosition(j, imp.getSlice(),
-						imp.getFrame());
+				imp.setPosition(j, imp.getSlice(), imp.getFrame());
 			}
 			imp.setPosition(origChannel, imp.getSlice(), imp.getFrame());
 			imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() + 1);
@@ -440,7 +450,7 @@ public class Projector implements PlugInFilter, TextListener {
 			((CompositeImage)buildImp2).copyLuts(imp);
 			//buildImp2.show();
 			buildImp = buildImp2;
-			((CompositeImage)buildImp).setMode(stackMode);
+//			((CompositeImage)buildImp).setMode(	(imp.isComposite() && ((CompositeImage)imp).getCompositeMode() >= CompositeImage.RATIO12)?CompositeImage.GRAYSCALE:stackMode);
 
 		}
 

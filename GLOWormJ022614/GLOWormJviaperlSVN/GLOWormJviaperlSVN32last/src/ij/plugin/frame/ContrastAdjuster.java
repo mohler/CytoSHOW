@@ -308,7 +308,7 @@ ActionListener, AdjustmentListener, ItemListener {
 	void setup() {
 		ImagePlus imp = WindowManager.getCurrentImage();
 		if (imp!=null) {
-			if (imp.getWindow().isVisible() && imp != null && imp.getWindow() != null) {
+			if (imp != null && imp.getWindow() != null && imp.getWindow().isVisible()) {
 				setup(imp);
 				min = imp.getDisplayRangeMin();
 				max = imp.getDisplayRangeMax();

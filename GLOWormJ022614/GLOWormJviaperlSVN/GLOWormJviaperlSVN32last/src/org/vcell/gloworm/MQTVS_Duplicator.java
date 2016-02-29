@@ -47,6 +47,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 	public void run(String arg) {
 		ImagePlus imp = IJ.getImage();
 		imp.getWindow().dupButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/download_button_animatedSmall.gif")));
+		copyMergedImage = (imp.isComposite() && ((CompositeImage)imp).getCompositeMode() >= CompositeImage.RATIO12);
 		int stackSize = imp.getStackSize();
 		String title = imp.getTitle();
 		String newTitle = WindowManager.getUniqueName((imp.isSketch3D()?"Sketch3D_":"")+"DUP_"+title.replaceAll("Sketch3D_*", ""));
@@ -87,6 +88,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 
 	/** Returns a copy of the image, stack or hyperstack contained in the specified ImagePlus. */
 	public ImagePlus run(ImagePlus imp) {
+		copyMergedImage = (imp.isComposite() && ((CompositeImage)imp).getCompositeMode() >= CompositeImage.RATIO12);
 		if (Recorder.record) Recorder.recordCall("impD = new MQTVS_Duplicator().run(imp);");
 		if (imp.getStackSize()==1) {
 			ImagePlus imp2 = duplicateImage(imp);
@@ -164,6 +166,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 	/** Returns a new hyperstack containing a possibly reduced version of the input image. 
 	 * @param stepT */
 	public ImagePlus run(ImagePlus imp, int firstC, int lastC, int firstZ, int lastZ, int firstT, int lastT, int stepT, boolean sliceSpecificROIs) {
+		copyMergedImage = (imp.isComposite() && ((CompositeImage)imp).getCompositeMode() >= CompositeImage.RATIO12);
 		RoiManager rm =  imp.getRoiManager();
 		Rectangle rect = null;
 		Roi roi = imp.getRoi();
@@ -190,7 +193,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 			((VirtualStack)stack).setBurnIn(false);
 		}
 		ImageStack stack2 = new ImageStack(width, height);
-		int compositeMode = 1; 
+		int compositeMode = 0; 
 
 		if ( imp.isComposite()) {
 			compositeMode = ((CompositeImage)imp).getMode();
@@ -212,9 +215,10 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 				t = lastT +1;
 			} else {
 
-
+				if (copyMergedImage)
+					lastC=firstC;
 				for (int z=firstZ; z<=lastZ; z++) {
-					for (int c=firstC; c<=(copyMergedImage?firstC:lastC); c++) {
+					for (int c=firstC; c<=lastC; c++) {
 						IJ.runMacro("print(\"\\\\Update:***Duplicating selected region(s) of time-point "+t+", channel "+c+", slice "+z+"...*** \")");
 
 						imp.setPosition(c, z, t);			// THIS LINE CHANGED FROM ORIGINAL PLUGIN.  THIS CHANGE MAKES IT COMPATIBLE WITH MQTVS					/*********/         //ip = imp.getProcessor();						// ALSO SEEMS TO WORK FINE WITH non-virtual HyperStacks
@@ -577,7 +581,6 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 		if (nChannels>1) {
 			String channelRangeString = gd.getNextString();
 //			copyMergedImage = channelRangeString.contains("merge");
-			copyMergedImage = (imp.isComposite() && ((CompositeImage)imp).getCompositeMode() >= CompositeImage.RATIO12);
 			String[] range = Tools.split(channelRangeString, " -");
 //			channelRangeString = channelRangeString.replace("merge","").trim();
 			double c1 = Tools.parseDouble(range[0]);
