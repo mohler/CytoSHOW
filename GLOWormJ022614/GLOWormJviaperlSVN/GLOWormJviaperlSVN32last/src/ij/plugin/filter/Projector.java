@@ -272,7 +272,7 @@ public class Projector implements PlugInFilter, TextListener {
 					ImagePlus impDZ = impD.duplicate();
 					if (impDZ.getBitDepth() > 8) {
 						impDZ.setPosition(1, (1+lastZ+1-firstZ)/2, 1);
-						impDZ.getProcessor().setMinAndMax(0.3, 2.0);
+						impDZ.getProcessor().setMinAndMax(0.0, 50.0);
 						IJ.run(impDZ,"8-bit","");
 						if (impDZ.isComposite()   )
 							((CompositeImage)impDZ).setMode(CompositeImage.GRAYSCALE);
