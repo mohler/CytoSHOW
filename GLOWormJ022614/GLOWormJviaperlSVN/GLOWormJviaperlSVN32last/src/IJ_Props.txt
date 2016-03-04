@@ -407,6 +407,7 @@ plug-in29="RadonTransform", org.vcell.gloworm.RadonTransform_
 plug-in30="Share_Suite", org.vcell.gloworm.Share_Suite
 plug-in31="Save JPEG snapshot of IJ3DV...", ij3D.iJ3dExecuter.snapshot
 plug-in32="Correct diSPIM ZStreaks...", org.vcell.gloworm.CorrectDispimZStreaks
+plug-in33="WG_Upload...", org.vcell.gloworm.WG_Uploader
 
 # Install user plugins located in ij.jar to Plugins>User Plugins submenu
 #user_plugins01="Red And Blue",RedAndBlue_

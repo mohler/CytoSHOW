@@ -365,6 +365,8 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 		if (imp.isComposite()) {
 			mode = ((CompositeImage)imp).getMode();
 		}
+		if (((CompositeImage)imp).getMode() <= CompositeImage.RATIO12)
+			lastC=firstC;
 		//  W r i t e   f r a m e   d a t a
 		for (int c=firstC; c<=(flattenTags?firstC:lastC); c++) {
 			for (int z=firstZ; z<=lastZ; z++) {
@@ -388,12 +390,15 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 						}
 						ip = new ColorProcessor(imp2.getImage());
 					} else {
-						if (imp.isComposite()) {
+						if (imp.isComposite() && ((CompositeImage)imp).getMode() <= CompositeImage.RATIO12) {
 							((CompositeImage)imp).setMode(CompositeImage.GRAYSCALE);
 						}
 						
 						if (imp.getStack().getBitDepth() == 8 || imp.getStack().getBitDepth() == 16)
-							ip = new ByteProcessor(imp.getImage());
+							if (((CompositeImage)imp).getMode() <= CompositeImage.RATIO12)
+								ip = new ByteProcessor(imp.getImage());
+							else
+								ip = new ColorProcessor(imp.getImage());
 						else
 							ip = new ColorProcessor(imp.getImage());
 						
