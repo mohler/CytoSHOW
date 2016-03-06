@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 
 import org.apache.commons.net.ftp.FTPClient;
@@ -58,7 +59,7 @@ public class WG_Uploader implements PlugIn {
 				ftpc.makeDirectory(ftpc.getLocalAddress().toString());
 				ftpc.changeWorkingDirectory(ftpc.getLocalAddress().toString());
 				for (String path:iterativeDirPaths) {
-					String[] pathChunks = path.split(""+File.separator);
+					String[] pathChunks = path.replace(":","").split("\\"+File.separator);
 					for (String chunk:pathChunks) {
 						ftpc.makeDirectory(chunk);
 						ftpc.changeWorkingDirectory(chunk);
@@ -67,24 +68,27 @@ public class WG_Uploader implements PlugIn {
 					String[] remoteFileNames = ftpc.listNames();
 					for (String fileName:localDirFileNames) {
 						boolean alreadyDone= false;
+						File file = new File(path +File.separator +fileName);
+						Date fd = new Date(file.lastModified());
+						String dateTouchString = 20
+								+ IJ.pad(fd.getYear()-100, 2) 
+								+ IJ.pad(fd.getMonth()+1, 2)
+								+ IJ.pad(fd.getDate(), 2)
+								+ IJ.pad(fd.getHours(), 2)
+								+ IJ.pad(fd.getMinutes(), 2)
+								+ "."
+								+ IJ.pad(fd.getSeconds(), 2);
 						if (remoteFileNames != null) {
 							for (String remoteFileName:remoteFileNames) {
-								if (fileName.equals(remoteFileName)) {
+								if (fileName.equals(remoteFileName)
+										|| remoteFileName.equals(fileName+"_"+dateTouchString)) {
 									alreadyDone = true;
+									IJ.append((new Date()).toString()+" "+path+fileName+"_"+dateTouchString+" already backed up.", IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+"WG_UploadLog.log");
+										
 									break;
 								}
 							}
 						}
-						File file = new File(path +File.separator +fileName);
-						Date fd = new Date(file.lastModified());
-						String dateTouchString = 20
-													+ IJ.pad(fd.getYear()-100, 2) 
-													+ IJ.pad(fd.getMonth()+1, 2)
-													+ IJ.pad(fd.getDate(), 2)
-													+ IJ.pad(fd.getHours(), 2)
-													+ IJ.pad(fd.getMinutes(), 2)
-													+ "."
-													+ IJ.pad(fd.getSeconds(), 2);
 						if (!file.isDirectory() && !alreadyDone) {
 							FileInputStream fis = new FileInputStream(path +File.separator +fileName);
 							ftpc.setFileType(FTPClient.BINARY_FILE_TYPE);
@@ -93,9 +97,10 @@ public class WG_Uploader implements PlugIn {
 							
 							fis.close();
 							ftpc.rename(fileName+"_" + dateTouchString+".tmp", fileName+"_" + dateTouchString);
+							IJ.append((new Date()).toString()+" "+path+fileName+"_"+dateTouchString+" newly backed up", IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+"WG_UploadLog.log");
 						}
 					}
-					for (int c=1;c<pathChunks.length;c++) {
+					for (int c=IJ.isWindows()?0:1;c<pathChunks.length;c++) {
 						ftpc.changeToParentDirectory();
 					}
 				}
