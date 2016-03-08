@@ -4,10 +4,16 @@ import ij.IJ;
 import ij.io.DirectoryChooser;
 import ij.plugin.PlugIn;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.SocketException;
+import java.net.UnknownHostException;
+import java.rmi.RemoteException;
+import java.rmi.server.RemoteServer;
+import java.rmi.server.ServerNotActiveException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -18,8 +24,12 @@ import org.apache.commons.net.ftp.FTPReply;
 
 public class WG_Uploader implements PlugIn {
 	
+//	public void run(String arg) {
+//		new WG_Uploader((new DirectoryChooser("Upload Folder Contents")).getDirectory());
+//	}
+
 	public void run(String arg) {
-		new WG_Uploader((new DirectoryChooser("Upload Folder Contents")).getDirectory());
+		spawnNewUploadProcess((new DirectoryChooser("Upload Folder Contents")).getDirectory());
 	}
 
 	public WG_Uploader() {
@@ -27,6 +37,9 @@ public class WG_Uploader implements PlugIn {
 	}
 	
 	public WG_Uploader(String masterPath) {
+		if (masterPath == null)
+			return;
+
 		ArrayList<String> iterativeDirPaths = new ArrayList<String>();
 		iterativeDirPaths.add(masterPath);
 		int increment = 0;
@@ -60,9 +73,17 @@ public class WG_Uploader implements PlugIn {
 				ftpc.changeWorkingDirectory(ftpc.getLocalAddress().toString());
 				for (String path:iterativeDirPaths) {
 					String[] pathChunks = path.replace(":","").split("\\"+File.separator);
+					String pathConcat = "";
 					for (String chunk:pathChunks) {
-						ftpc.makeDirectory(chunk);
-						ftpc.changeWorkingDirectory(chunk);
+						if (!chunk.equals("")) {
+							pathConcat = pathConcat + File.separator + chunk;
+							File dirFile = new File(pathConcat);
+							Date dd = new Date(dirFile.lastModified());
+							String dirDateTouchString = "";
+// seemed like good idea, but folder moddates tricky...no go
+							ftpc.makeDirectory(chunk);
+							ftpc.changeWorkingDirectory(chunk);
+						}
 					}
 					String[] localDirFileNames = (new File(path)).list();
 					String[] remoteFileNames = ftpc.listNames();
@@ -83,7 +104,7 @@ public class WG_Uploader implements PlugIn {
 								if (fileName.equals(remoteFileName)
 										|| remoteFileName.equals(fileName+"_"+dateTouchString)) {
 									alreadyDone = true;
-									IJ.append((new Date()).toString()+" "+path+fileName+"_"+dateTouchString+" already backed up.", IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+"WG_UploadLog.log");
+									IJ.append((new Date()).toString()+" "+path+fileName+/*"_"+dateTouchString+*/" already backed up.", IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+"WG_UploadLog.log");
 										
 									break;
 								}
@@ -97,7 +118,7 @@ public class WG_Uploader implements PlugIn {
 							
 							fis.close();
 							ftpc.rename(fileName+"_" + dateTouchString+".tmp", fileName+"_" + dateTouchString);
-							IJ.append((new Date()).toString()+" "+path+fileName+"_"+dateTouchString+" newly backed up", IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+"WG_UploadLog.log");
+							IJ.append((new Date()).toString()+" "+path+fileName+/*"_"+dateTouchString+*/" newly backed up", IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+"WG_UploadLog.log");
 						}
 					}
 					for (int c=IJ.isWindows()?0:1;c<pathChunks.length;c++) {
@@ -121,6 +142,45 @@ public class WG_Uploader implements PlugIn {
 				}
 			}
 		}
+		System.exit(0);
+	
+	}
+	
+	public String spawnNewUploadProcess(String arg) {
+			String path = arg;
+			ProcessBuilder jvm = null;
+			Process newUploadProcess = null;
+			int attempts =0;
+			String WG_uploadSavePath = IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+"WG_Upload.jnlp";
+			String WG_uploadJNLP = IJ.openUrlAsString("http://fsbill.cam.uchc.edu/Xwords/uploadTool/WG_Upload.jnlp");
+			WG_uploadJNLP = WG_uploadJNLP.replace("/Users/wmohler/Documents/stuff/", path);
+			new File(WG_uploadSavePath).delete();
+			IJ.append(WG_uploadJNLP,WG_uploadSavePath);
+			String returnString = "";
+			String line = "";			
+			while(attempts<1) {
+				jvm = new ProcessBuilder("javaws", WG_uploadSavePath);
+				attempts++;
+				jvm.redirectErrorStream(true);
+				try {
+					newUploadProcess = jvm.start();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				BufferedReader br = new BufferedReader(new InputStreamReader(newUploadProcess.getInputStream()));
+				try {
+					line = br.readLine();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			} 
+			String processInfo = "";
+		    IJ.wait(2000);
+
+			return returnString;
+
 	}
 
 }

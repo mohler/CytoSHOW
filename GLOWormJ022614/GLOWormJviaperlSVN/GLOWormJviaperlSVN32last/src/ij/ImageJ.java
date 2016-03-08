@@ -40,6 +40,7 @@ import javax.swing.event.PopupMenuListener;
 
 import org.vcell.gloworm.MQTVSSceneLoader64;
 import org.vcell.gloworm.MQTVSSceneLoader64;
+import org.vcell.gloworm.WG_Uploader;
 
 import client.RemoteMQTVSHandler;
 
@@ -977,9 +978,16 @@ public class ImageJ extends Frame implements ActionListener,
 			if (arg==null) continue;
 			//IJ.log(i+"  "+arg);
 			if (args[i].startsWith("-")) {
-				if (args[i].startsWith("-batch"))
+				if (args[i].startsWith("-batch")) {
 					noGUI = true;
-				else if (args[i].startsWith("-debug"))
+				}else if (args[i].startsWith("-upload")) {
+					noGUI = true;
+					if (i+1<nArgs) {
+						new WG_Uploader(args[i+1]);
+						args[i+1] = null;
+					} else
+						new WG_Uploader((new DirectoryChooser("Upload Folder Contents")).getDirectory());
+				} else if (args[i].startsWith("-debug"))
 					IJ.debugMode = true;
 				else if (args[i].startsWith("-ijpath") && i+1<nArgs) {
 					Prefs.setHomeDir(args[i+1]);
@@ -992,7 +1000,7 @@ public class ImageJ extends Frame implements ActionListener,
 						mode = EMBEDDED;
 					else if (delta>0 && DEFAULT_PORT+delta<65536)
 						port = DEFAULT_PORT+delta;
-				} 
+				}
 			} 
 		}
  
