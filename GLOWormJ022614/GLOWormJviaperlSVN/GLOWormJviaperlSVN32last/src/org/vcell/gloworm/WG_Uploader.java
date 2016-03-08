@@ -19,6 +19,11 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
+import javax.jnlp.ServiceManager;
+import javax.jnlp.SingleInstanceListener;
+import javax.jnlp.SingleInstanceService;
+import javax.jnlp.UnavailableServiceException;
+
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
 
@@ -152,13 +157,21 @@ public class WG_Uploader implements PlugIn {
 			Process newUploadProcess = null;
 			int attempts =0;
 			String WG_uploadSavePath = IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+"WG_Upload.jnlp";
-			String WG_uploadJNLP = IJ.openUrlAsString("http://fsbill.cam.uchc.edu/Xwords/uploadTool/WG_Upload.jnlp");
-			WG_uploadJNLP = WG_uploadJNLP.replace("/Users/wmohler/Documents/stuff/", path);
+			String WG_uploadJNLP = IJ.openUrlAsString("http://upload.cytoshow.org/WG_Upload.jnlp");
+			WG_uploadJNLP = WG_uploadJNLP.replace("<argument>-upload</argument>", "<argument>-upload</argument>\n    <argument>"+path+"</argument>");
 			new File(WG_uploadSavePath).delete();
 			IJ.append(WG_uploadJNLP,WG_uploadSavePath);
 			String returnString = "";
 			String line = "";			
 			while(attempts<1) {
+				SingleInstanceService sis;
+				try {
+					sis = (SingleInstanceService) ServiceManager.lookup("javax.jnlp.SingleInstanceService");
+					sis.removeSingleInstanceListener((SingleInstanceListener)IJ.getInstance() );				
+				} catch (UnavailableServiceException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 				jvm = new ProcessBuilder("javaws", WG_uploadSavePath);
 				attempts++;
 				jvm.redirectErrorStream(true);
@@ -175,6 +188,15 @@ public class WG_Uploader implements PlugIn {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+			    IJ.wait(60000);
+				try {
+					sis = (SingleInstanceService) ServiceManager.lookup("javax.jnlp.SingleInstanceService");
+					sis.addSingleInstanceListener((SingleInstanceListener)IJ.getInstance() );				
+				} catch (UnavailableServiceException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+
 			} 
 			String processInfo = "";
 		    IJ.wait(2000);
