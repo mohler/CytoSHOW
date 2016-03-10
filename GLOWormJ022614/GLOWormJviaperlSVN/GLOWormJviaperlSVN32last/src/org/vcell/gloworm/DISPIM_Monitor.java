@@ -102,8 +102,8 @@ public class DISPIM_Monitor implements PlugIn {
 		String[] fileSortB = {""};
 		String[] newTifListA = {""};
 		String[] newTifListB = {""};
-		String[] listOld = {""};
-		String[] listNew = {""};
+		String[] listA = {""};
+		String[] listB = {""};
 		String[] deconFileList1 = {""};
 		String[] deconFileList2 = {""};
 		String[] deconList1 = {""};
@@ -474,18 +474,18 @@ public class DISPIM_Monitor implements PlugIn {
 			impB.show();
 
 		} else if (dirOrOMETiff.matches(".*_\\d{9}_\\d{3}_.*.tif")) {
-			listNew = new File(dirOrOMETiff).getParentFile().list();
+			listB = new File(dirOrOMETiff).getParentFile().list();
 			int 	newLength =0;
-			for (String newFileListItem:listNew)
+			for (String newFileListItem:listB)
 				if (newFileListItem.endsWith(".tif"))
 					newLength++;
 
 			while (Math.floor(newLength/(wavelengths * 2 * zSlices)) == 0) {
 
 				IJ.wait(10);
-				listNew = new File(dirOrOMETiff).getParentFile().list();
+				listB = new File(dirOrOMETiff).getParentFile().list();
 				newLength =0;
-				for (String newFileListItem:listNew)
+				for (String newFileListItem:listB)
 					if (newFileListItem.endsWith(".tif"))
 						newLength++;
 			}
@@ -949,14 +949,14 @@ public class DISPIM_Monitor implements PlugIn {
 		while (true) {
 			boolean focus = false;
 			if ((new File(dirOrOMETiff)).isDirectory()) {
-				listOld = new File(""+dirOrOMETiff+"SPIMA").list();
-				listNew = new File(""+dirOrOMETiff+"SPIMB").list();
+				listA = new File(""+dirOrOMETiff+"SPIMA").list();
+				listB = new File(""+dirOrOMETiff+"SPIMB").list();
 				big5DFileListAString = IJ.openAsString(dirOrOMETiff+"Big5DFileListA.txt");	    
 				big5DFileListBString = IJ.openAsString(dirOrOMETiff+"Big5DFileListB.txt");
 				deconList1 = (new File(dirOrOMETiff+ "Deconvolution1")).list();
 				deconList2 = (new File(dirOrOMETiff+ "Deconvolution2")).list();
 
-				while ((fileListA.length == listOld.length || fileListB.length == listNew.length)
+				while ((fileListA.length == listA.length || fileListB.length == listB.length)
 						&& (!doDecon 
 								|| ((deconList1 == null && deconList2 == null)
 										|| 	(!(deconList1 ==null || deconFileList1 ==null 
@@ -969,8 +969,8 @@ public class DISPIM_Monitor implements PlugIn {
 							return;
 						else
 							IJ.resetEscape();
-					listOld = new File(""+dirOrOMETiff+"SPIMA").list();
-					listNew = new File(""+dirOrOMETiff+"SPIMB").list();
+					listA = new File(""+dirOrOMETiff+"SPIMA").list();
+					listB = new File(""+dirOrOMETiff+"SPIMB").list();
 					deconList1 = (new File(dirOrOMETiff+ "Deconvolution1")).list();
 					deconList2 = (new File(dirOrOMETiff+ "Deconvolution2")).list();
 					IJ.wait(5000);
@@ -1081,22 +1081,15 @@ public class DISPIM_Monitor implements PlugIn {
 				}
 			} else if (dirOrOMETiff.matches(".*_\\d{9}_\\d{3}_.*.tif")) {
 
-				//				listOld = new File(dirOrOMETiff).getParentFile().list();
-				//				int oldLength = listOld.length;
-				//				oldLength =0;
-				//				for (String oldFileListItem:listOld)
-				//					if (oldFileListItem.endsWith(".tif"))
-				//						oldLength++;
-
 				int newLength = oldLength;
 				while (oldLength == newLength
 						||
 						newLength%(wavelengths * 2 * zSlices) != 0) {
 
 					IJ.wait(10);
-					listNew = new File(dirOrOMETiff).getParentFile().list();
+					listB = new File(dirOrOMETiff).getParentFile().list();
 					newLength =0;
-					for (String newFileListItem:listNew)
+					for (String newFileListItem:listB)
 						if (newFileListItem.endsWith(".tif"))
 							newLength++;
 				}
@@ -1147,7 +1140,7 @@ public class DISPIM_Monitor implements PlugIn {
 				FolderOpener foB = new FolderOpener();
 				foB.openAsVirtualStack(true);
 				foB.sortFileNames(true);
-				foB.setFilter("Cam2");
+				foB.setFilter("Cam1");
 				ImagePlus impTmpB = foB.openFolder(new File(dirOrOMETiff).getParent());
 
 				ColorModel cmB = impB.getProcessor().getColorModel();

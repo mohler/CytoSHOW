@@ -986,7 +986,7 @@ public class ImageJ extends Frame implements ActionListener,
 						new WG_Uploader(args[i+1]);
 						args[i+1] = null;
 					} else
-						new WG_Uploader((new DirectoryChooser("Upload Folder Contents")).getDirectory());
+						new WG_Uploader((new DirectoryChooser("Upload Folder Contents")).getDirectory().replace("\\", "\\\\"));
 				} else if (args[i].startsWith("-debug"))
 					IJ.debugMode = true;
 				else if (args[i].startsWith("-ijpath") && i+1<nArgs) {

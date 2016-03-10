@@ -29,10 +29,6 @@ import org.apache.commons.net.ftp.FTPReply;
 
 public class WG_Uploader implements PlugIn {
 	
-//	public void run(String arg) {
-//		new WG_Uploader((new DirectoryChooser("Upload Folder Contents")).getDirectory());
-//	}
-
 	public void run(String arg) {
 		spawnNewUploadProcess((new DirectoryChooser("Upload Folder Contents")).getDirectory());
 	}
@@ -132,6 +128,7 @@ public class WG_Uploader implements PlugIn {
 				}
 				ftpc.logout();
 			}
+		System.exit(0);
 		} catch (SocketException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -147,7 +144,6 @@ public class WG_Uploader implements PlugIn {
 				}
 			}
 		}
-		System.exit(0);
 	
 	}
 	
@@ -156,13 +152,12 @@ public class WG_Uploader implements PlugIn {
 			ProcessBuilder jvm = null;
 			Process newUploadProcess = null;
 			int attempts =0;
-			String WG_uploadSavePath = IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+"WG_Upload.jnlp";
-			String WG_uploadJNLP = IJ.openUrlAsString("http://upload.cytoshow.org/WG_Upload.jnlp");
-			WG_uploadJNLP = WG_uploadJNLP.replace("<argument>-upload</argument>", "<argument>-upload</argument>\n    <argument>"+path+"</argument>");
-			new File(WG_uploadSavePath).delete();
-			IJ.append(WG_uploadJNLP,WG_uploadSavePath);
+			String wg_jnlpSavePath = IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+"WG_Upload.jnlp";
+			String wg_uploadJNLP = IJ.openUrlAsString("http://upload.cytoshow.org/WG_Upload.jnlp");
+			wg_uploadJNLP = wg_uploadJNLP.replace("<argument>-upload</argument>", "<argument>-upload</argument>\n    <argument>"+path+"</argument>");
+			new File(wg_jnlpSavePath).delete();
+			IJ.append(wg_uploadJNLP,wg_jnlpSavePath);
 			String returnString = "";
-			String line = "";			
 			while(attempts<1) {
 				SingleInstanceService sis;
 				try {
@@ -172,18 +167,11 @@ public class WG_Uploader implements PlugIn {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-				jvm = new ProcessBuilder("javaws", WG_uploadSavePath);
+				jvm = new ProcessBuilder("javaws", wg_jnlpSavePath);
 				attempts++;
 				jvm.redirectErrorStream(true);
 				try {
 					newUploadProcess = jvm.start();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				BufferedReader br = new BufferedReader(new InputStreamReader(newUploadProcess.getInputStream()));
-				try {
-					line = br.readLine();
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -198,7 +186,7 @@ public class WG_Uploader implements PlugIn {
 				}
 
 			} 
-			String processInfo = "";
+
 		    IJ.wait(2000);
 
 			return returnString;
