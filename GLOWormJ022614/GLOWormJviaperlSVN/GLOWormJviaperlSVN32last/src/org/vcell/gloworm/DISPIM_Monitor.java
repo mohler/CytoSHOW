@@ -12,11 +12,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Hashtable;
 
-import javax.jnlp.ServiceManager;
-import javax.jnlp.SingleInstanceListener;
-import javax.jnlp.SingleInstanceService;
-import javax.jnlp.UnavailableServiceException;
-
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImageJ;
@@ -832,14 +827,6 @@ public class DISPIM_Monitor implements PlugIn {
 			impA.setPosition(wasChannelA, wasSliceA, wasFrameA);
 			impB.setPosition(wasChannelB, wasSliceB, wasFrameB);
 
-			SingleInstanceService sis;
-			try {
-				sis = (SingleInstanceService) ServiceManager.lookup("javax.jnlp.SingleInstanceService");
-				sis.removeSingleInstanceListener((SingleInstanceListener)IJ.getInstance() );				
-			} catch (UnavailableServiceException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
 			for (int f=1;f<=impA.getNFrames();f++) {
 
 				String timecode = ""+(new Date()).getTime();
@@ -963,13 +950,6 @@ public class DISPIM_Monitor implements PlugIn {
 					}
 				}
 				//				IJ.wait(15000);
-			}
-			try {
-				sis = (SingleInstanceService) ServiceManager.lookup("javax.jnlp.SingleInstanceService");
-				sis.addSingleInstanceListener((SingleInstanceListener)IJ.getInstance() );				
-			} catch (UnavailableServiceException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
 			}
 		}		
 
@@ -1472,14 +1452,6 @@ public class DISPIM_Monitor implements PlugIn {
 				WindowManager.setTempCurrentImage(impB);
 				IJ.open(savePath/*+ dirOrOMETiffName*/ +"B_crop.roi");
 				WindowManager.setTempCurrentImage(null);
-				SingleInstanceService sis;
-				try {
-					sis = (SingleInstanceService) ServiceManager.lookup("javax.jnlp.SingleInstanceService");
-					sis.addSingleInstanceListener((SingleInstanceListener)IJ.getInstance() );				
-				} catch (UnavailableServiceException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
 
 				for (int f=impA.getNFrames();f<=impA.getNFrames();f++) {
 
@@ -1685,13 +1657,6 @@ public class DISPIM_Monitor implements PlugIn {
 					}
 				}
 				//					IJ.wait(15000);
-				try {
-					sis = (SingleInstanceService) ServiceManager.lookup("javax.jnlp.SingleInstanceService");
-					sis.addSingleInstanceListener((SingleInstanceListener)IJ.getInstance() );				
-				} catch (UnavailableServiceException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
 
 				impA.setPosition(wasChannelA, wasSliceA, wasFrameA);
 				impB.setPosition(wasChannelB, wasSliceB, wasFrameB);
