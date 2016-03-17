@@ -227,7 +227,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 		nCheckBoxes = imp!=null?imp.getNChannels():1;
 
 		pack();
-		setVisible(true);
+//		setVisible(true);
 		
 		
 		if (!nonMovieMCC) {
@@ -542,7 +542,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 			setLocation(location);
 		if (imp!=null) 
 			imp.setMultiChannelController(this);
-		this.setVisible(true);
+//		this.setVisible(true);
 
 	}
 
@@ -1437,7 +1437,9 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 								out1.println("");
 								if ( imp.isComposite() ) 
 									out1
-									.println((deNovoMovieFile!=null && imp.getMotherImp().getMultiChannelController()!=null?
+									.println((deNovoMovieFile!=null 
+												&& imp.getMotherImp().getMultiChannelController()!=null
+												&& imp.getMotherImp().getMultiChannelController().channelLUTChoice!=null?
 											"LUT = "
 											+ imp.getMotherImp().getMultiChannelController().channelLUTItems
 											[((Choice) imp.getMotherImp().getMultiChannelController().channelLUTChoice[j])
