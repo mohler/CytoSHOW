@@ -167,7 +167,7 @@ public class WG_Uploader implements PlugIn {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-				jvm = new ProcessBuilder("javaws", wg_jnlpSavePath);
+				jvm = new ProcessBuilder("javaws", "-Xnosplash", wg_jnlpSavePath);
 				attempts++;
 				jvm.redirectErrorStream(true);
 				try {
