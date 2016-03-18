@@ -96,7 +96,7 @@ public class DISPIM_Monitor implements PlugIn {
 		String savePath = dirOrOMETiffFile.getParentFile().getParent() + File.separator + dirOrOMETiffFile.getParentFile().getName() + "_" + dirOrOMETiffFile.getName().split("_")[0] + "_";
 		if (dirOrOMETiffFile.isDirectory())
 			savePath = dirOrOMETiff;
-		String tempDir = IJ.getDirectory("temp");
+		final String tempDir = IJ.getDirectory("temp");
 		String[] fileListA = {""};
 		String[] fileListB = {""};
 		//		fileListB = newArray("");
@@ -830,12 +830,15 @@ public class DISPIM_Monitor implements PlugIn {
 				}
 			}
 
+			final String[] frameFileNamesFinal = frameFileNames;
+
 			impA.setPosition(wasChannelA, wasSliceA, wasFrameA);
 			impB.setPosition(wasChannelB, wasSliceB, wasFrameB);
 
 			for (int f=1;f<=impA.getNFrames();f++) {
+				final int ff = f;
 
-				String timecode = ""+(new Date()).getTime();
+				final String timecode = ""+(new Date()).getTime();
 
 				if (	   !(new File(savePath+ "Deconvolution1"+ File.separator + "Decon_" + frameFileNames[f]+".tif")).canRead()
 						|| (wavelengths==2 && !(new File(savePath+ "Deconvolution2"+ File.separator + "Decon_" + frameFileNames[f]+".tif")).canRead())
@@ -843,7 +846,7 @@ public class DISPIM_Monitor implements PlugIn {
 					String deconStringKey = "nibib.spim.PlugInDialogGenerateFusion(\"reg_one boolean false\", \"reg_all boolean true\", \"no_reg_2D boolean false\", \"reg_2D_one boolean false\", \"reg_2D_all boolean false\", \"rotate_begin list_float -10.0,-10.0,-10.0\", \"rotate_end list_float 10.0,10.0,10.0\", \"coarse_rate list_float 3.0,3.0,3.0\", \"fine_rate list_float 0.5,0.5,0.5\", \"save_arithmetic boolean false\", \"show_arithmetic boolean false\", \"save_geometric boolean false\", \"show_geometric boolean false\", \"do_interImages boolean false\", \"save_prefusion boolean false\", \"do_show_pre_fusion boolean false\", \"do_threshold boolean false\", \"save_max_proj boolean false\", \"show_max_proj boolean false\", \"x_max_box_selected boolean false\", \"y_max_box_selected boolean false\", \"z_max_box_selected boolean false\", \"do_smart_movement boolean false\", \"threshold_intensity double 10.0\", \"res_x double 0.1625\", \"res_y double 0.1625\", \"res_z double 1.0\", \"mtxFileDirectory string "+savePath.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileNames[f]+"\", \"spimAFileDir string "+savePath.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileNames[f]+"\", \"spimBFileDir string "+savePath.replace("\\", "\\\\")+"SPIMA_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileNames[f]+"\", \"baseImage string "+frameFileNames[f]+"\", \"base_rotation int -1\", \"transform_rotation int 5\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconv_platform int 2\", \"deconvDirString string "+savePath.replace("\\", "\\\\")+"Deconvolution"+ keyChannel +"\\\", \"deconv_show_results boolean false\", \"deconvolution_method int 1\", \"deconv_iterations int 10\", \"deconv_sigmaA list_float 3.5,3.5,9.6\", \"deconv_sigmaB list_float 9.6,3.5,3.5\", \"use_deconv_sigma_conversion_factor boolean true\", \"x_move int 0\", \"y_move int 0\", \"z_move int 0\")";
 					IJ.wait(5000);
 
-					IJ.saveString(
+					new MacroRunner(
 							"cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
 									"cpuChunks = split(cpuPerformance,\"\\\"\");" +
 									"x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +
@@ -865,19 +868,14 @@ public class DISPIM_Monitor implements PlugIn {
 							"		    print(f,batStringC);\n" + 
 							"		    batStringA = \"cd C:\\\\Program Files\\\\mipav\";\n" + 
 							"		    print(f,batStringA);\n" + 
-							"		    batStringB = \"start /NORMAL /AFFINITY 001111111111111111111111 /b mipav -s \\\""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileNames[f]+timecode+".sct\\\" -hide\";\n" + 
+							"		    batStringB = \"cmd64 /c start /LOW /b mipav -s \\\""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileNames[f]+timecode+".sct\\\" -hide\";\n" + 
 							"		    print(f,batStringB);\n" + 
 							"		    print(f,\"exit\");\n" + 
 							"		    File.close(f);	    \n" + 
 
-							"batJob = exec(\"cmd64\", \"/c\", \""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileNames[f]+timecode+".bat\");" +
-							"print(\""+frameFileNames[f]+"_"+ keyChannel +" complete.\");" +
-							"delBat = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileNames[f]+timecode+".bat\");" + 
-							"delSct = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileNames[f]+timecode+".sct\");" + 
+							"batJob = exec(\"cmd64\", \"/c\", \"start\", \"/min\", \""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileNames[f]+timecode+".bat\");" +
 							""
-							, savePath+"MipavMacro1.ijm");
-					
-					String deconSpawnString1 = spawnNewDecon(savePath+"MipavMacro1.ijm");
+							);
 
 					final String finalConvPath = savePath+"Deconvolution1\\Decon_"+frameFileNames[f]+".tif";
 					Thread convThread = new Thread(new Runnable() {	
@@ -886,6 +884,12 @@ public class DISPIM_Monitor implements PlugIn {
 								IJ.wait(10000);
 							}
 							IJ.wait(30000);
+							new MacroRunner(
+									"print(\""+frameFileNamesFinal[ff]+"_"+ keyChannel +" complete.\");" +
+											"delBat = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileNamesFinal[ff]+timecode+".bat\");" + 
+											"delSct = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileNamesFinal[ff]+timecode+".sct\");"  
+									);
+
 
 							ImagePlus convImp = IJ.openImage(finalConvPath);
 							if (convImp!=null) {
@@ -901,7 +905,7 @@ public class DISPIM_Monitor implements PlugIn {
 						String deconStringSlave = "nibib.spim.PlugInDialogGenerateFusion(\"reg_one boolean false\", \"reg_all boolean true\", \"no_reg_2D boolean false\", \"reg_2D_one boolean false\", \"reg_2D_all boolean false\", \"rotate_begin list_float -10.0,-10.0,-10.0\", \"rotate_end list_float 10.0,10.0,10.0\", \"coarse_rate list_float 3.0,3.0,3.0\", \"fine_rate list_float 0.5,0.5,0.5\", \"save_arithmetic boolean false\", \"show_arithmetic boolean false\", \"save_geometric boolean false\", \"show_geometric boolean false\", \"do_interImages boolean false\", \"save_prefusion boolean false\", \"do_show_pre_fusion boolean false\", \"do_threshold boolean false\", \"save_max_proj boolean false\", \"show_max_proj boolean false\", \"x_max_box_selected boolean false\", \"y_max_box_selected boolean false\", \"z_max_box_selected boolean false\", \"do_smart_movement boolean false\", \"threshold_intensity double 10.0\", \"res_x double 0.1625\", \"res_y double 0.1625\", \"res_z double 1.0\", \"mtxFileDirectory string "+savePath.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileNames[f]+"\", \"spimAFileDir string "+savePath.replace("\\", "\\\\")+"SPIMB_Ch"+ slaveChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileNames[f]+"\", \"spimBFileDir string "+savePath.replace("\\", "\\\\")+"SPIMA_Ch"+ slaveChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileNames[f]+"\", \"baseImage string "+frameFileNames[f]+"\", \"base_rotation int -1\", \"transform_rotation int 5\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconv_platform int 2\", \"deconvDirString string "+savePath.replace("\\", "\\\\")+"Deconvolution"+ slaveChannel +"\\\", \"deconv_show_results boolean false\", \"deconvolution_method int 1\", \"deconv_iterations int 10\", \"deconv_sigmaA list_float 3.5,3.5,9.6\", \"deconv_sigmaB list_float 9.6,3.5,3.5\", \"use_deconv_sigma_conversion_factor boolean true\", \"x_move int 0\", \"y_move int 0\", \"z_move int 0\")";
 						IJ.wait(5000);
 
-						IJ.saveString(
+						new MacroRunner(
 								"print (\""+savePath.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") +frameFileNames[f]+ File.separator.replace("\\", "\\\\")+ frameFileNames[f]+ "1_To_"+ frameFileNames[f]+ ".mtx\");"+
 										"while (!File.exists(\""+savePath.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") +frameFileNames[f]+ File.separator.replace("\\", "\\\\")+ frameFileNames[f]+ "1_To_"+ frameFileNames[f]+ ".mtx\")) {"
 										+ "wait(10000);"
@@ -927,19 +931,14 @@ public class DISPIM_Monitor implements PlugIn {
 								"		    print(f,batStringC);\n" + 
 								"		    batStringA = \"cd C:\\\\Program Files\\\\mipav\";\n" + 
 								"		    print(f,batStringA);\n" + 
-								"		    batStringB = \"start /NORMAL /AFFINITY 001111111111111111111111 /b mipav -s \\\""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileNames[f]+timecode+".sct\\\" -hide\";\n" + 
+								"		    batStringB = \"cmd64 /c start /LOW /b mipav -s \\\""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileNames[f]+timecode+".sct\\\" -hide\";\n" + 
 								"		    print(f,batStringB);\n" + 
 								"		    print(f,\"exit\");\n" + 
 								"		    File.close(f);	    \n" + 
 
-								"batJob = exec(\"cmd64\", \"/c\", \""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileNames[f]+timecode+".bat\");" +
-								"print(\""+frameFileNames[f]+"_"+ slaveChannel +" complete.\");" +
-								"delBat = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileNames[f]+timecode+".bat\");" + 
-								"delSct = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileNames[f]+timecode+".sct\");" + 
+								"batJob = exec(\"cmd64\", \"/c\", \"start\", \"/min\", \""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileNames[f]+timecode+".bat\");" +
 								""
-								, savePath+"MipavMacro2.ijm");
-
-						String deconSpawnString2 = spawnNewDecon(savePath+"MipavMacro2.ijm");
+								);
 
 						final String finalConvPath2 = savePath+"Deconvolution2\\Decon_"+frameFileNames[f]+".tif";
 						Thread convThread2 = new Thread(new Runnable() {	
@@ -948,6 +947,11 @@ public class DISPIM_Monitor implements PlugIn {
 									IJ.wait(10000);
 								}
 								IJ.wait(30000);
+								new MacroRunner(
+										"print(\""+frameFileNamesFinal[ff]+"_"+ slaveChannel +" complete.\");" +
+												"delBat = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileNamesFinal[ff]+timecode+".bat\");" + 
+												"delSct = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileNamesFinal[ff]+timecode+".sct\");"  
+										);
 
 								ImagePlus convImp = IJ.openImage(finalConvPath2);
 								if (convImp!=null) {
@@ -1474,8 +1478,8 @@ public class DISPIM_Monitor implements PlugIn {
 						frameFileName = "t" + f;
 					else 
 						frameFileName = "t" + f;
-
-					String timecode = ""+(new Date()).getTime();
+					final String frameFileNameFinal = frameFileName;
+					final String timecode = ""+(new Date()).getTime();
 
 					if (	   !(new File(savePath+ "SPIMA_Ch1_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif")).canRead()
 							|| (wavelengths==2 && !(new File(savePath+ "SPIMA_Ch2_processed"+ File.separator + frameFileName+ File.separator + frameFileName+".tif")).canRead())
@@ -1552,7 +1556,7 @@ public class DISPIM_Monitor implements PlugIn {
 						String deconStringKey = "nibib.spim.PlugInDialogGenerateFusion(\"reg_one boolean false\", \"reg_all boolean true\", \"no_reg_2D boolean false\", \"reg_2D_one boolean false\", \"reg_2D_all boolean false\", \"rotate_begin list_float -10.0,-10.0,-10.0\", \"rotate_end list_float 10.0,10.0,10.0\", \"coarse_rate list_float 3.0,3.0,3.0\", \"fine_rate list_float 0.5,0.5,0.5\", \"save_arithmetic boolean false\", \"show_arithmetic boolean false\", \"save_geometric boolean false\", \"show_geometric boolean false\", \"do_interImages boolean false\", \"save_prefusion boolean false\", \"do_show_pre_fusion boolean false\", \"do_threshold boolean false\", \"save_max_proj boolean false\", \"show_max_proj boolean false\", \"x_max_box_selected boolean false\", \"y_max_box_selected boolean false\", \"z_max_box_selected boolean false\", \"do_smart_movement boolean false\", \"threshold_intensity double 10.0\", \"res_x double 0.1625\", \"res_y double 0.1625\", \"res_z double 1.0\", \"mtxFileDirectory string "+savePath.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileName+"\", \"spimAFileDir string "+savePath.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileName+"\", \"spimBFileDir string "+savePath.replace("\\", "\\\\")+"SPIMA_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileName+"\", \"baseImage string "+frameFileName+"\", \"base_rotation int -1\", \"transform_rotation int 5\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconv_platform int 2\", \"deconvDirString string "+savePath.replace("\\", "\\\\")+"Deconvolution"+ keyChannel +"\\\", \"deconv_show_results boolean false\", \"deconvolution_method int 1\", \"deconv_iterations int 10\", \"deconv_sigmaA list_float 3.5,3.5,9.6\", \"deconv_sigmaB list_float 9.6,3.5,3.5\", \"use_deconv_sigma_conversion_factor boolean true\", \"x_move int 0\", \"y_move int 0\", \"z_move int 0\")";
 						IJ.wait(5000);
 
-						IJ.saveString(
+						new MacroRunner(
 								"cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");" +
 										"cpuChunks = split(cpuPerformance,\"\\\"\");" +
 										"x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); " +
@@ -1574,19 +1578,14 @@ public class DISPIM_Monitor implements PlugIn {
 							"		    print(f,batStringC);\n" + 
 							"		    batStringA = \"cd C:\\\\Program Files\\\\mipav\";\n" + 
 							"		    print(f,batStringA);\n" + 
-							"		    batStringB = \"start /NORMAL /AFFINITY 001111111111111111111111 /b mipav -s \\\""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileName+timecode+".sct\\\" -hide\";\n" + 
+							"		    batStringB = \"cmd64 /c start /LOW /AFFINITY 001111111111111111111111 /b mipav -s \\\""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileName+timecode+".sct\\\" -hide\";\n" + 
 							"		    print(f,batStringB);\n" + 
 							"		    print(f,\"exit\");\n" + 
 							"		    File.close(f);	    \n" + 
 
-							"batJob = exec(\"cmd64\", \"/c\", \""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileName+timecode+".bat\");" +
-							"print(\""+frameFileName+"_"+ keyChannel +" complete.\");" +
-							"delBat = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileName+timecode+".bat\");" + 
-							"delSct = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileName+timecode+".sct\");" + 
+							"batJob = exec(\"cmd64\", \"/c\", \"start\", \"/min\", \""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileName+timecode+".bat\");" +
 							""
-							, savePath+"MipavMacro1.ijm");
-
-						String deconSpawnString1 = spawnNewDecon(savePath+"MipavMacro1.ijm");
+								);
 
 						final String finalConvPath = savePath+"Deconvolution1\\Decon_"+frameFileName+".tif";
 						Thread convThread = new Thread(new Runnable() {	
@@ -1595,6 +1594,11 @@ public class DISPIM_Monitor implements PlugIn {
 									IJ.wait(10000);
 								}
 								IJ.wait(30000);
+								new MacroRunner(
+										"print(\""+frameFileNameFinal+"_"+ keyChannel +" complete.\");" +
+												"delBat = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileNameFinal+timecode+".bat\");" + 
+												"delSct = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileNameFinal+timecode+".sct\");"  
+										);
 
 								ImagePlus convImp = IJ.openImage(finalConvPath);
 								if (convImp!=null) {
@@ -1610,7 +1614,7 @@ public class DISPIM_Monitor implements PlugIn {
 							String deconStringSlave = "nibib.spim.PlugInDialogGenerateFusion(\"reg_one boolean false\", \"reg_all boolean true\", \"no_reg_2D boolean false\", \"reg_2D_one boolean false\", \"reg_2D_all boolean false\", \"rotate_begin list_float -10.0,-10.0,-10.0\", \"rotate_end list_float 10.0,10.0,10.0\", \"coarse_rate list_float 3.0,3.0,3.0\", \"fine_rate list_float 0.5,0.5,0.5\", \"save_arithmetic boolean false\", \"show_arithmetic boolean false\", \"save_geometric boolean false\", \"show_geometric boolean false\", \"do_interImages boolean false\", \"save_prefusion boolean false\", \"do_show_pre_fusion boolean false\", \"do_threshold boolean false\", \"save_max_proj boolean false\", \"show_max_proj boolean false\", \"x_max_box_selected boolean false\", \"y_max_box_selected boolean false\", \"z_max_box_selected boolean false\", \"do_smart_movement boolean false\", \"threshold_intensity double 10.0\", \"res_x double 0.1625\", \"res_y double 0.1625\", \"res_z double 1.0\", \"mtxFileDirectory string "+savePath.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileName+"\", \"spimAFileDir string "+savePath.replace("\\", "\\\\")+"SPIMB_Ch"+ slaveChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileName+"\", \"spimBFileDir string "+savePath.replace("\\", "\\\\")+"SPIMA_Ch"+ slaveChannel +"_processed"+ File.separator.replace("\\", "\\\\") + frameFileName+"\", \"baseImage string "+frameFileName+"\", \"base_rotation int -1\", \"transform_rotation int 5\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconv_platform int 2\", \"deconvDirString string "+savePath.replace("\\", "\\\\")+"Deconvolution"+ slaveChannel +"\\\", \"deconv_show_results boolean false\", \"deconvolution_method int 1\", \"deconv_iterations int 10\", \"deconv_sigmaA list_float 3.5,3.5,9.6\", \"deconv_sigmaB list_float 9.6,3.5,3.5\", \"use_deconv_sigma_conversion_factor boolean true\", \"x_move int 0\", \"y_move int 0\", \"z_move int 0\")";
 							IJ.wait(5000);
 
-							IJ.saveString(
+							new MacroRunner(
 									"print (\""+savePath.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") +frameFileName+ File.separator.replace("\\", "\\\\")+ frameFileName+ "1_To_"+ frameFileName+ ".mtx\");"+
 											"while (!File.exists(\""+savePath.replace("\\", "\\\\")+"SPIMB_Ch"+ keyChannel +"_processed"+ File.separator.replace("\\", "\\\\") +frameFileName+ File.separator.replace("\\", "\\\\")+ frameFileName+ "1_To_"+ frameFileName+ ".mtx\")) {"
 											+ "wait(10000);"
@@ -1636,19 +1640,14 @@ public class DISPIM_Monitor implements PlugIn {
 								"		    print(f,batStringC);\n" + 
 								"		    batStringA = \"cd C:\\\\Program Files\\\\mipav\";\n" + 
 								"		    print(f,batStringA);\n" + 
-								"		    batStringB = \"start /NORMAL /AFFINITY 001111111111111111111111 /b mipav -s \\\""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileName+timecode+".sct\\\" -hide\";\n" + 
+								"		    batStringB = \"cmd64 /c start /LOW /AFFINITY 001111111111111111111111 /b mipav -s \\\""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileName+timecode+".sct\\\" -hide\";\n" + 
 								"		    print(f,batStringB);\n" + 
 								"		    print(f,\"exit\");\n" + 
 								"		    File.close(f);	    \n" + 
 
-								"batJob = exec(\"cmd64\", \"/c\", \""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileName+timecode+".bat\");" +
-								"print(\""+frameFileName+"_"+ slaveChannel +" complete.\");" +
-								"delBat = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileName+timecode+".bat\");" + 
-								"delSct = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileName+timecode+".sct\");" + 
+								"batJob = exec(\"cmd64\", \"/c\", \"start\", \"/min\", \""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileName+timecode+".bat\");" +
 								""
-								, savePath+"MipavMacro2.ijm");
-
-							String deconSpawnString2 = spawnNewDecon(savePath+"MipavMacro2.ijm");
+									);
 
 							final String finalConvPath2 = savePath+"Deconvolution2\\Decon_"+frameFileName+".tif";
 							Thread convThread2 = new Thread(new Runnable() {	
@@ -1657,6 +1656,12 @@ public class DISPIM_Monitor implements PlugIn {
 										IJ.wait(10000);
 									}
 									IJ.wait(30000);
+									new MacroRunner(
+											"print(\""+frameFileNameFinal+"_"+ slaveChannel +" complete.\");" +
+													"delBat = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileNameFinal+timecode+".bat\");" + 
+													"delSct = File.delete(\""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileNameFinal+timecode+".sct\");"  
+											);
+									
 
 									ImagePlus convImp = IJ.openImage(finalConvPath2);
 									if (convImp!=null) {
@@ -1755,32 +1760,4 @@ public class DISPIM_Monitor implements PlugIn {
 		}
 		return p1;
 	}
-	
-	public String spawnNewDecon(String macroPath)  {
-		
-		ProcessBuilder jvm = null;
-		Process newWG_DeconProcess = null;
-		String returnString = "";
-		String wg_jnlpSavePath = IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+"WG_Decon.jnlp";
-		String wg_deconJNLP = IJ.openUrlAsString("http://upload.cytoshow.org/WG_Upload.jnlp");
-		wg_deconJNLP = wg_deconJNLP.replace("<argument>-upload</argument>", "<argument>-macro</argument>\n    <argument>"+macroPath+"</argument>");
-		new File(wg_jnlpSavePath).delete();
-		IJ.append(wg_deconJNLP,wg_jnlpSavePath);
-
-		jvm = new ProcessBuilder("java", "-Xnosplash", wg_jnlpSavePath);
-		jvm.redirectErrorStream(true);
-		try {
-			newWG_DeconProcess = jvm.start();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	    IJ.wait(2000);
-
-		return returnString;
-
-}
-
-
 }
