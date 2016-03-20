@@ -936,7 +936,7 @@ public class DISPIM_Monitor implements PlugIn {
 								"		    print(f,\"exit\");\n" + 
 								"		    File.close(f);	    \n" + 
 
-								"batJob = exec(\"cmd64\", \"/c\", \"start\", \"/min\", \""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileNames[f]+timecode+".bat\");" +
+								"batJob = exec(\"cmd64\", \"/c\", \"start\", \"\", \"/min\", \""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileNames[f]+timecode+".bat\");" +
 								""
 								);
 

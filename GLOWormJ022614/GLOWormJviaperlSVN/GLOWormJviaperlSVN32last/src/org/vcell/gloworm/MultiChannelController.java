@@ -139,7 +139,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 		}
 		if (imp.getMultiChannelController() != null) {
 			imp.getMultiChannelController().setVisible(true);
-			imp.getMultiChannelController().setSize(175*imp.getNChannels(), 180);
+			imp.getMultiChannelController().setSize(175*imp.getNChannels(), 250);
 			imp.getMultiChannelController().toFront();
 			this.dispose();
 			return;
@@ -1440,15 +1440,13 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 									.println((deNovoMovieFile!=null 
 												&& imp.getMotherImp().getMultiChannelController()!=null
 												&& imp.getMotherImp().getMultiChannelController().channelLUTChoice!=null?
-											"LUT = "
-											+ imp.getMotherImp().getMultiChannelController().channelLUTItems
-											[((Choice) imp.getMotherImp().getMultiChannelController().channelLUTChoice[j])
-											 .getSelectedIndex()]
-													 :channelLUTChoice!=null?
-															 "LUT = "
-															 + channelLUTItems[((Choice) channelLUTChoice[j])
-															                   .getSelectedIndex()]:
-															                	   channelLUTItems[j]) 
+													"LUT = "
+													+ (j==0?"Green":"Red")
+															 :channelLUTChoice!=null?
+																	 "LUT = "
+																	 + channelLUTItems[((Choice) channelLUTChoice[j])
+																	                   .getSelectedIndex()]:
+																	                	   channelLUTItems[j]) 
 											);
 
 								if (ci!=null) {
