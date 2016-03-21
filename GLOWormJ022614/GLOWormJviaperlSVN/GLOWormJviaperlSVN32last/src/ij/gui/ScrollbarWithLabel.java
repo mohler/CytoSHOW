@@ -405,9 +405,9 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 					for (int j=1; j<=stackWindow.getImagePlus().getNChannels(); j++){
 						stackWindow.setPosition(j, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame());
 					}
-//					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame());
-//					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()+1);
-//					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()-1);
+					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame());
+
+
 					if (stackWindow.getImagePlus().isComposite()) {
 						int mode = ((CompositeImage)stackWindow.getImagePlus()).getMode();
 						((CompositeImage)stackWindow.getImagePlus()).setMode(1);

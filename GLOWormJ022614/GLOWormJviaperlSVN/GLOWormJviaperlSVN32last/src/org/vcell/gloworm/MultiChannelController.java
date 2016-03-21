@@ -935,6 +935,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 						out.println("RotationAngle = " + Double.parseDouble(rotateAngleSpinner[j].getValue().toString() ));
 						out.println("ShiftX = " + Double.parseDouble(translateXSpinner[j].getValue().toString() ));
 						out.println("ShiftY = " + Double.parseDouble(translateYSpinner[j].getValue().toString() ));
+						out.println("DropFrames = ," + dropFramesField[j].getText() );
 						out.println("End of parameter list");
 
 					}
@@ -1004,6 +1005,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 							out.println("RotationAngle = " + Double.parseDouble(rotateAngleSpinner[j].getValue().toString() ));
 							out.println("ShiftX = " + Double.parseDouble(translateXSpinner[j].getValue().toString() ));
 							out.println("ShiftY = " + Double.parseDouble(translateYSpinner[j].getValue().toString() ));
+							out.println("DropFrames = ," + dropFramesField[j].getText() );
 							out.println("End of parameter list");
 						}
 						catch (IOException ex)
@@ -1247,6 +1249,17 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 										}
 									}	
 
+									if (lineSegments[0].contains("DropFrames") ) {
+										String dropFramesString = lineSegments[2];
+										if (true ) {
+											if (IJ.debugMode) IJ.log("YES dropped frames  loaded");
+
+											dropFramesField[j].setText(dropFramesString) ;
+
+										} else {
+											if (IJ.debugMode) IJ.log("no dropped frames loaded");
+										}
+									}	
 								}	
 								in.close();
 							}
@@ -1529,6 +1542,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 								out1.println("ShiftY = "
 										+ (deNovoMovieFile!=null?0.0:Double.parseDouble(translateYSpinner[j]
 												.getValue().toString())));
+								out1.println("DropFrames = ," + (deNovoMovieFile!=null?"":dropFramesField[j].getText() ));
 								out1.println("End of parameter list");
 
 								out1.close();

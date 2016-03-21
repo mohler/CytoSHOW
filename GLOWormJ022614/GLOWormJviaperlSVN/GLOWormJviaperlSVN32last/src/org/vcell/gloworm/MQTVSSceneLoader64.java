@@ -841,6 +841,17 @@ public class MQTVSSceneLoader64 implements PlugIn {
 													//if (IJ.debugMode) IJ.log("no shift in Y loaded");
 												}
 											}	
+											if (lineSegments[0].contains("DropFrames") ) {
+												String dropFramesString = lineSegments[1];
+												if (true ) {
+													if (IJ.debugMode) IJ.log("YES ShiftY loaded");
+
+													mcc.setDropFramesFieldText(dropFramesString, j) ;
+
+												} else {
+													if (IJ.debugMode) IJ.log("no dropped frames loaded");
+												}
+											}												
 										}
 									}
 								}	
