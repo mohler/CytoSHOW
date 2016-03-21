@@ -75,6 +75,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 	private JSpinner[] rotateAngleSpinner ;
 	private JSpinner[] translateXSpinner ;
 	private JSpinner[] translateYSpinner ;
+	private JTextField[] dropFramesField;
 
 
 	private Button moreButton;
@@ -97,7 +98,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 	mindeltaZLabel, maxdeltaZLabel, deltaZLabel, mindeltaTLabel, maxdeltaTLabel, zLabel, tLabel, deltaTLabel, 
 	minscaleXLabel, maxscaleXLabel, scaleXLabel, minscaleYLabel, maxscaleYLabel, scaleYLabel, scaleZLabel,
 	minrotateAngleLabel, maxrotateAngleLabel, rotateAngleLabel, 
-	mintranslateXLabel, maxtranslateXLabel, translateXLabel, mintranslateYLabel, maxtranslateYLabel, translateYLabel ;
+	mintranslateXLabel, maxtranslateXLabel, translateXLabel, mintranslateYLabel, maxtranslateYLabel, translateYLabel, dropFramesLabel;
 	Font monoFont = new Font("Monospaced", Font.PLAIN, 12);
 	private ImagePlus imp = null;
 	private boolean notComposite;
@@ -111,6 +112,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 	private TextWindow tw;
 	private File saveFile;
 	private boolean nonMovieMCC;
+	private Panel dropFramesPanel;
 
 
 	public boolean isSharing() {
@@ -146,9 +148,9 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 
 		} else if (!(imp.getImageStack() instanceof MultiQTVirtualStack) && !(imp.getImageStack() instanceof RemoteMQTVirtualStack) && deNovoMovieFile==null) {
 			GenericDialog gds = new GenericDialog("Convert to CytoSHOW Format?"); 
-			gds.addMessage("This type of Image Stack does not work"
+			gds.addMessage("This type of Image Stack does not work directly"
 					+ "\nwith a MultiChannelController"
-					+ "\nor CytoSHOW's instant Scene sharing."
+					+ "\nor with CytoSHOW's instant Scene sharing."
 					+ "\nWould you like to create a version that is "
 					+ "\ncompatible with a shared CytoSHOW Scene?");
 			//			gds.addRadioButtonGroup("", new String[]{"Save Scene","Share Scene"}, 1, 2, "Save Scene");
@@ -251,6 +253,8 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 			rotateAngleSpinner = new JSpinner[nCheckBoxes];
 			translateXSpinner = new JSpinner[nCheckBoxes];
 			translateYSpinner = new JSpinner[nCheckBoxes];
+			dropFramesField = new JTextField[nCheckBoxes];
+
 			saveButton = new Button[nCheckBoxes];
 			loadButton = new Button[nCheckBoxes];
 
@@ -281,6 +285,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 				rotateAngleLabel = new Label("Rotate", Label.CENTER);
 				translateXLabel = new Label("Shift X", Label.CENTER);
 				translateYLabel = new Label("Shift Y", Label.CENTER);
+				dropFramesLabel = new Label("Drop Frames", Label.CENTER);
 
 				previousShiftZ[i] = 0;  
 				previousShiftT[i] = 0;
@@ -302,7 +307,6 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 
 					if (IJ.debugMode) IJ.log(saveName[i]);
 					ScrollPane mnsp = new ScrollPane();
-					Panel movieNamePanel = new Panel();
 					c.gridy = y++;
 					c.gridy = y++;
 					c.insets = new Insets(0, 10, 0, 10);
@@ -495,6 +499,32 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 					c.gridy = y++;
 
 
+					dropFramesPanel = new Panel();
+					c.gridy = y++;
+					c.insets = new Insets(0, 10, 0, 10);
+					gridbag.setConstraints(dropFramesPanel, c);
+					dropFramesPanel.setLayout(new BorderLayout());
+					dropFramesPanel.add("Center", dropFramesLabel);
+					fspp.add(dropFramesPanel);
+
+					ScrollPane dfsp = new ScrollPane();
+					c.gridy = y++;
+					c.gridy = y++;
+					c.insets = new Insets(0, 10, 0, 10);
+					gridbag.setConstraints(dfsp, c);
+					String dropFramesString = "";
+					dropFramesField[i] = new JTextField(dropFramesString);
+					dropFramesField[i].setToolTipText("Ignore Channel "+ (i+1) +"specific timepoints...");			
+					dropFramesField[i].setFocusable(true);
+					dropFramesField[i].setEditable(true);
+
+					//				movieNamePanel.add("Center", channelNameField[i]);
+					dfsp.setPreferredSize(new Dimension(25,50));
+					dfsp.add(dropFramesField[i]);
+					fspp.add(dfsp);
+					c.gridy = y++;
+
+					
 					saveButton[i] = new Button(saveLabel + (i+1));
 					fspp.add(saveButton[i], c);
 					c.gridy = y++;
@@ -2098,6 +2128,14 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 
 	public void setMovieNameField(int index, JTextField movieNameField) {
 		this.channelNameField[index] = movieNameField;
+	}
+
+	public String getDropFramesFieldText(int index) {
+		return dropFramesField[index].getText();
+	}
+
+	public void setDropFramesFieldText(String text, int index) {
+		this.dropFramesField[index].setText(text);
 	}
 
 

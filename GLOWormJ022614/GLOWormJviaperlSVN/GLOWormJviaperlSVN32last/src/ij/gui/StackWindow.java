@@ -14,6 +14,7 @@ import javax.swing.JComponent;
 import javax.swing.JScrollBar;
 import javax.swing.ToolTipManager;
 
+import org.vcell.gloworm.MultiChannelController;
 import org.vcell.gloworm.MultiQTVirtualStack;
 
 /** This class is an extended ImageWindow used to display image stacks. */
@@ -187,7 +188,8 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 				return;
 			}
 		}
-				
+		int trueFrame = t;
+
 		if (running2 || running3) {
 			boolean animationState = this.running2;
 			boolean animationZState = this.running3;
@@ -218,7 +220,19 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 				int slice = hyperStack?imp.getSlice():imp.getCurrentSlice();
 				if (z==slice&&e.getAdjustmentType()==AdjustmentEvent.TRACK) return;
 			} else if (e.getSource()==tSelector) {
-				t = tSelector.getValue();
+				trueFrame = tSelector.getValue();
+		    	int frame = trueFrame;
+		    	MultiChannelController mcc = imp.getMultiChannelController();
+		    	if (mcc!=null && mcc.getDropFramesFieldText(c-1)!=null) {
+		    		String[] dropFramesChunks = mcc.getDropFramesFieldText(c-1).split(",");
+		    		ArrayList<String> dropFramesChunksArrayList = new ArrayList<String>();
+		    		for (String dropFramesChunk:dropFramesChunks)
+		    			dropFramesChunksArrayList.add(dropFramesChunk.trim());
+		    		while (dropFramesChunksArrayList.contains(""+frame)) {
+		    			frame--;
+		    		}
+		    	}
+				t = frame;
 				if (t==imp.getFrame()&&e.getAdjustmentType()==AdjustmentEvent.TRACK) {
 					adjustmentValueChanged(new AdjustmentEvent(e.getAdjustable(), 
 							AdjustmentEvent.ADJUSTMENT_FIRST,AdjustmentEvent.UNIT_INCREMENT,t,false));
@@ -227,6 +241,7 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 			}
 			updatePosition();			
 			notify();
+
 			if (e.getSource()==cSelector &&  (imp.isComposite() && ((CompositeImage) this.imp).getMode() ==1 ) ) {
 				if (WindowManager.getFrame("Display") != null)
 					WindowManager.getFrame("Display").toFront();
@@ -376,7 +391,18 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
     	return hyperStack;
     }
     
-    public void setPosition(int channel, int slice, int frame) {
+    public void setPosition(int channel, int slice, int trueFrame) {
+    	int frame = trueFrame;
+    	MultiChannelController mcc = imp.getMultiChannelController();
+    	if (mcc!=null && mcc.getDropFramesFieldText(channel-1)!=null) {
+    		String[] dropFramesChunks = mcc.getDropFramesFieldText(channel-1).split(",");
+    		ArrayList<String> dropFramesChunksArrayList = new ArrayList<String>();
+    		for (String dropFramesChunk:dropFramesChunks)
+    			dropFramesChunksArrayList.add(dropFramesChunk.trim());
+    		while (dropFramesChunksArrayList.contains(""+frame)) {
+    			frame--;
+    		}
+    	}
     	if (cSelector!=null /*&& channel!=c*/) {
     		c = channel;
 			cSelector.setValue(channel);
@@ -389,8 +415,8 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 		}
     	if (tSelector!=null /*&& frame!=t*/) {
     		t = frame;
-			tSelector.setValue(frame);
-			SyncWindows.setT(this, frame);
+			tSelector.setValue(trueFrame);
+			SyncWindows.setT(this, trueFrame);
 		}
     	updatePosition();
 		if (this.slice>0) {
@@ -399,6 +425,8 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 //			if (s!=imp.getCurrentSlice())
 				imp.setSlice(s);
 		}
+		t = trueFrame;
+		imp.updatePosition(c, z, t);
     }
     
     public void setPositionWithoutScrollbarCheck(int channel, int slice, int frame) {
