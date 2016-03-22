@@ -3,6 +3,7 @@ import java.awt.Color;
 import java.awt.Frame;
 import java.awt.image.ColorModel;
 import java.io.File;
+import java.util.Date;
 
 import com.apple.laf.AquaButtonBorder.Toolbar;
 
@@ -77,13 +78,16 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 			String duperString = ""; 
 			if (imp.getRoiManager().getSelectedRoisAsArray().length == 0)
 				duperString = duper.showHSDialog(imp, imp.getTitle()+"_DUP");
+			Date currentDate = new Date();
+			long msec = currentDate.getTime();	
+			long sec = msec/1000;
 
 			for (int tpt = (singleSave?duper.getFirstT():0); tpt<=(singleSave?duper.getLastT():0); tpt = tpt+(singleSave?duper.getStepT():1)) {
 				for (int ch=duper.getFirstC(); ch<=duper.getLastC(); ch++) {
 					imp.setRoi(impRoi);
 					ImagePlus impD = imp;
 					if (!imp.getTitle().startsWith("SketchVolumeViewer"))
-						impD = duper.run(imp, ch, ch, duper.getFirstZ(), duper.getLastZ(), singleSave?tpt:duper.getFirstT(), singleSave?tpt:duper.getLastT(), singleSave?1:duper.getStepT(), false);
+						impD = duper.run(imp, ch, ch, duper.getFirstZ(), duper.getLastZ(), singleSave?tpt:duper.getFirstT(), singleSave?tpt:duper.getLastT(), singleSave?1:duper.getStepT(), false, sec);
 					impD.show();
 					impD.setTitle(imp.getShortTitle()+"_DUP_"+ch+"_"+tpt);
 					impD.changes = false;
