@@ -30,7 +30,7 @@ public class MQTVS_StackRotateReslice  implements PlugIn {
 			
 			ImagePlus impD = (new MQTVS_Duplicator()).run(imp, imp.getChannel(), imp.getChannel(), 
 					1, imp.getNSlices(), 
-					imp.getFrame(), imp.getFrame(), 1, false);
+					imp.getFrame(), imp.getFrame(), 1, false, 0);
 
 			imp.getWindow().setVisible(true);
 			if (rm != null) rm.setVisible(true);

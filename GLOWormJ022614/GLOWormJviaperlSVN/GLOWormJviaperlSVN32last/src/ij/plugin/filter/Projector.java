@@ -97,6 +97,7 @@ public class Projector implements PlugInFilter, TextListener {
 	private int stepT = 1;
 	private boolean is16bit;
 	private boolean is32bit;
+	private String dupTitle;
 
 	public int setup(String arg, ImagePlus imp) {
 		this.imp = imp;
@@ -233,6 +234,7 @@ public class Projector implements PlugInFilter, TextListener {
 			IJ.error("3D Projection failed", "Unable to save projected stacks to" + tempDir.getPath());
 			return;
 		}
+
 		for (loopT = firstT; loopT < lastT +1; loopT=loopT+stepT) { 
 			long memoryFree = Runtime.getRuntime().freeMemory();
 			long memoryTotal = Runtime.getRuntime().totalMemory();
@@ -252,8 +254,9 @@ public class Projector implements PlugInFilter, TextListener {
 					sliceInterval = originalSliceInterval;
 					imp.setRoi(manualRoi);
 					ImagePlus impD = null;
+
 					if ( imp.getNFrames() >= 1 || (roi!=null && roi.isArea() && roi.getType()!=Roi.RECTANGLE) ) {
-						impD = (new MQTVS_Duplicator()).run(imp, loopC, loopC, firstZ, lastZ, loopT, loopT, 1, sliceSpecificROIs);
+						impD = (new MQTVS_Duplicator()).run(imp, loopC, loopC, firstZ, lastZ, loopT, loopT, 1, sliceSpecificROIs, tempTime);
 					}
 					impD.setCalibration(imp.getCalibration());
 //					impD.show();
@@ -455,10 +458,6 @@ public class Projector implements PlugInFilter, TextListener {
 		}
 
 		if (buildImp==null) return;
-		//Are the next 3 lines actually necessary? Big waste of 2x RAM. But apparently necessary if closing the ConcatStaxs window later / Sihce they share the same stack.
-//		ImagePlus buildImp3 = buildImp.duplicate();
-//		buildImp.flush();
-//		buildImp = buildImp3;
 		buildImp.setTitle((imp.isSketch3D()?"Sketch3D_":"")+"Projections of "+imp.getTitle().replaceAll("Sketch3D_*", ""));
 		
 		buildImp.getProcessor().setColorModel(cm);
@@ -648,7 +647,7 @@ public class Projector implements PlugInFilter, TextListener {
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return false;
-		//String title = gd.getNextString();
+//		dupTitle = gd.getNextString();
 		duplicateStack = gd.getNextBoolean();
 		sliceSpecificROIs = gd.getNextBoolean();		
 		if (nChannels>1) {

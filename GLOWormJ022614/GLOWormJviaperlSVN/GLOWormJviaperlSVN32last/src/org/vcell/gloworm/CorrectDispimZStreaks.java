@@ -349,6 +349,10 @@ public class CorrectDispimZStreaks implements PlugIn {
 			lastC=impHS.getNChannels();
 		}
 
+		Date currentDate = new Date();
+		long msec = currentDate.getTime();	
+		long sec = msec/1000;
+
 		for(int f=1;f<=t;f++){
 			for (int ch=firstC; ch<=lastC; ch++) {
 				IJ.log(path+titleShort+"_"+ch+"_"+f+".tif");
@@ -358,7 +362,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 				}
 				impHS.setRoi(roi);
 				MQTVS_Duplicator duper = new MQTVS_Duplicator();
-				ImagePlus impHS_dup = duper.run(impHS, ch, ch, 1, impHS.getNSlices(), f, f, 1, false);
+				ImagePlus impHS_dup = duper.run(impHS, ch, ch, 1, impHS.getNSlices(), f, f, 1, false, sec);
 				impHS_dup.setCalibration(impHS.getCalibration());
 				impHS_dup.getCalibration().pixelWidth = impHS.getCalibration().pixelWidth;
 				impHS_dup.getCalibration().pixelHeight = impHS.getCalibration().pixelHeight;

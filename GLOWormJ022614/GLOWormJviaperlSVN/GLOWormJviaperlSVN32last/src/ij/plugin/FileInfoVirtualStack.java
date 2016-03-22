@@ -43,6 +43,22 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 		info = fi;
 		open(show);
 	}
+	
+	public  ImageStack createStack(String path, boolean show) {
+		TiffDecoder td = new TiffDecoder((new File(path)).getParent(), (new File(path)).getName());
+		if (IJ.debugMode) td.enableDebugging();
+		IJ.showStatus("Decoding TIFF header...");
+		try {info = td.getTiffInfo();}
+		catch (IOException e) {
+			String msg = e.getMessage();
+			if (msg==null||msg.equals("")) msg = ""+e;
+			IJ.error("TiffDecoder", msg);
+			return null;
+		}
+		
+		return open(show).getStack();
+	}
+
 
 	public void run(String arg) {
 		OpenDialog  od = new OpenDialog("Open TIFF", arg);

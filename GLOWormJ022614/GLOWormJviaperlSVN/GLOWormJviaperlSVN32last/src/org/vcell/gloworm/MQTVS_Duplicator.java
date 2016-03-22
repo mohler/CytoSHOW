@@ -4,6 +4,8 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.IndexColorModel;
+import java.io.File;
+import java.util.Date;
 import java.util.Vector;
 
 import javax.swing.Icon;
@@ -14,7 +16,10 @@ import javax.swing.JLabel;
 import ij.*;
 import ij.process.*;
 import ij.gui.*;
+import ij.io.FileInfo;
 import ij.util.Tools;
+import ij.plugin.FileInfoVirtualStack;
+import ij.plugin.MultiFileInfoVirtualStack;
 import ij.plugin.PlugIn;
 import ij.plugin.filter.Filler;
 import ij.plugin.frame.Channels;
@@ -43,6 +48,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 	private int finalFrames;
 	private int finalT;
 	private boolean copyMergedImage;
+	private String dupTitle;
 
 	public void run(String arg) {
 		ImagePlus imp = IJ.getImage();
@@ -67,9 +73,9 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 		imp.getCanvas().setVisible(false);
 
 		if (duplicateSubstack && (first>1||last<stackSize))
-			imp2 = run(imp, 1,1, first, last, 1, 1, 1, false);
+			imp2 = run(imp, 1,1, first, last, 1, 1, 1, false, 0);
 		else if (duplicateStack || imp.getStackSize()==1)
-			imp2 = run(imp, 1,1, 1, imp.getNSlices(), 1, 1, 1, false);
+			imp2 = run(imp, 1,1, 1, imp.getNSlices(), 1, 1, 1, false, 0);
 		else
 			imp2 = duplicateImage(imp);
 		imp2.setTitle(newTitle);
@@ -165,7 +171,8 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 
 	/** Returns a new hyperstack containing a possibly reduced version of the input image. 
 	 * @param stepT */
-	public ImagePlus run(ImagePlus imp, int firstC, int lastC, int firstZ, int lastZ, int firstT, int lastT, int stepT, boolean sliceSpecificROIs) {
+	public ImagePlus run(ImagePlus imp, int firstC, int lastC, int firstZ, int lastZ, int firstT, int lastT, int stepT, boolean sliceSpecificROIs, long sec) {
+		boolean singleStack = firstT==lastT;
 		copyMergedImage = (imp.isComposite() && ((CompositeImage)imp).getCompositeMode() >= CompositeImage.RATIO12);
 		RoiManager rm =  imp.getRoiManager();
 		Rectangle rect = null;
@@ -192,7 +199,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 			wasBurnIn = ((VirtualStack)stack).isBurnIn();
 			((VirtualStack)stack).setBurnIn(false);
 		}
-		ImageStack stack2 = new ImageStack(width, height);
+		ImageStack stack2 = null;
 		int compositeMode = 0; 
 
 		if ( imp.isComposite()) {
@@ -204,7 +211,18 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 		finalFrames = 0;
 
 		finalT = lastT;
+		if (sec == 0) {
+			Date currentDate = new Date();
+			long msec = currentDate.getTime();	
+			sec = msec/1000;
+		}
+
+		new File(IJ.getDirectory("home")+File.separator+imp.getTitle().replace(".tif","")+sec).mkdirs();
+			
+		String stackPath = "";
+			
 		for (int t=firstT; t<=lastT; t=t+stepT) {
+			ImageStack stackT = new ImageStack(width, height);
 			long memoryFree = Runtime.getRuntime().freeMemory();
 			long memoryTotal = Runtime.getRuntime().totalMemory();
 			long memoryUsed = memoryTotal-memoryFree;
@@ -241,13 +259,32 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 							ip.fillOutside(roi);
 						if (!sliceSpecificROIs) ip = ip.crop();
 
-						stack2.addSlice(label, ip);
+						stackT.addSlice(label, ip);
 						IJ.runMacro("print(\"\\\\Update:   Duplicating selected region(s) of time-point "+t+", channel "+c+", slice "+z+"...    \")");
 
 					}
 				}
 				finalFrames++;
+				ImagePlus impT = new ImagePlus(dupTitle+"_"+ t +".tif", stackT);
+				
+				impT.setOpenAsHyperStack(true);
+
+				impT.setDimensions(copyMergedImage?1:lastC-firstC+1, lastZ-firstZ+1, 1);
+				if (  ((StackWindow)imp.getWindow()).isWormAtlas() 
+						&& imp.getStack() instanceof MultiQTVirtualStack){
+					//			IJ.log("Copy from WA STACK");
+					impT.setDimensions(lastC-firstC+1, finalFrames, 1 );
+
+				}
+
+				stackPath = IJ.getDirectory("home")+imp.getTitle().replace(".tif","")+sec+File.separator+impT.getTitle();
+				IJ.saveAs(impT, "Tiff", stackPath);
+				impT.close();
+				impT.flush();
+
+
 			}
+			
 		}
 		imp.killRoi();
 		if (wasBurnIn)
@@ -263,15 +300,13 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 				((CompositeImage)imp).setMode(compositeMode);
 			}
 		}
+		if (!singleStack) {
+			stack2 = new MultiFileInfoVirtualStack(IJ.getDirectory("home")+imp.getTitle().replace(".tif","")+sec,"",false);
+		} else {
+			stack2 = (new FileInfoVirtualStack()).createStack(stackPath, false);
+		}
 		ImagePlus imp2 = new ImagePlus(imp.isSketch3D()?"Sketch3D_":""+"DUP_"+imp.getTitle().replaceAll("Sketch3D_*", ""), stack2);
 		imp2.setOpenAsHyperStack(true);
-		//		IJ.log(""+imp2.getOpenAsHyperStack());
-
-		//		imp2.setStack("DUP_"+imp.getTitle(), stack2);
-		//		imp2.setStack( stack2, lastC-firstC+1, lastZ-firstZ+1, lastT-firstT+1);
-		//		imp2.setTitle("DUP_"+imp.getTitle());
-
-		//		IJ.log(""+imp2.getOpenAsHyperStack());
 
 		imp2.setDimensions(copyMergedImage?1:lastC-firstC+1, lastZ-firstZ+1, finalFrames);
 		if (  ((StackWindow)imp.getWindow()).isWormAtlas() 
@@ -371,8 +406,8 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 
 
 	public ImagePlus duplicateHyperstack(ImagePlus imp, String newTitle) {
-		String title = showHSDialog(imp, newTitle);
-		if (title==null)
+		dupTitle = showHSDialog(imp, newTitle);
+		if (dupTitle==null)
 			return null;
 		imp.getCanvas().setVisible(false);
 		ImagePlus imp2 = null;
@@ -413,7 +448,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 			mcc.setVisible(false);
 		}
 
-		imp2 = run(imp, getFirstC(), getLastC(), getFirstZ(), getLastZ(), getFirstT(), getLastT(), getStepT(), sliceSpecificROIs);
+		imp2 = run(imp, getFirstC(), getLastC(), getFirstZ(), getLastZ(), getFirstT(), getLastT(), getStepT(), sliceSpecificROIs, 0);
 
 		imp.getProcessor().setColorModel(cm);
 		imp.setDisplayRange(inMin, inMax);
