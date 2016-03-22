@@ -45,7 +45,7 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 	}
 	
 	public  ImageStack createStack(String path, boolean show) {
-		TiffDecoder td = new TiffDecoder((new File(path)).getParent(), (new File(path)).getName());
+		TiffDecoder td = new TiffDecoder((new File(path)).getParent()+File.separator, (new File(path)).getName());
 		if (IJ.debugMode) td.enableDebugging();
 		IJ.showStatus("Decoding TIFF header...");
 		try {info = td.getTiffInfo();}

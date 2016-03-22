@@ -217,10 +217,12 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 			sec = msec/1000;
 		}
 
-		new File(IJ.getDirectory("home")+File.separator+imp.getTitle().replace(".tif","")+sec).mkdirs();
+		if (!singleStack)
+			new File(IJ.getDirectory("home")+File.separator+imp.getTitle().replace(".tif","")+sec).mkdirs();
 			
 		String stackPath = "";
-			
+		ImagePlus impT = null;
+		
 		for (int t=firstT; t<=lastT; t=t+stepT) {
 			ImageStack stackT = new ImageStack(width, height);
 			long memoryFree = Runtime.getRuntime().freeMemory();
@@ -265,7 +267,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 					}
 				}
 				finalFrames++;
-				ImagePlus impT = new ImagePlus(dupTitle+"_"+ t +".tif", stackT);
+				impT = new ImagePlus(dupTitle+"_"+ t +".tif", stackT);
 				
 				impT.setOpenAsHyperStack(true);
 
@@ -278,10 +280,11 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 				}
 
 				stackPath = IJ.getDirectory("home")+imp.getTitle().replace(".tif","")+sec+File.separator+impT.getTitle();
-				IJ.saveAs(impT, "Tiff", stackPath);
-				impT.close();
-				impT.flush();
-
+				if (!singleStack) {
+					IJ.saveAs(impT, "Tiff", stackPath);
+					impT.close();
+					impT.flush();
+				}
 
 			}
 			
@@ -303,7 +306,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 		if (!singleStack) {
 			stack2 = new MultiFileInfoVirtualStack(IJ.getDirectory("home")+imp.getTitle().replace(".tif","")+sec,"",false);
 		} else {
-			stack2 = (new FileInfoVirtualStack()).createStack(stackPath, false);
+			stack2 = impT.getStack();
 		}
 		ImagePlus imp2 = new ImagePlus(imp.isSketch3D()?"Sketch3D_":""+"DUP_"+imp.getTitle().replaceAll("Sketch3D_*", ""), stack2);
 		imp2.setOpenAsHyperStack(true);
