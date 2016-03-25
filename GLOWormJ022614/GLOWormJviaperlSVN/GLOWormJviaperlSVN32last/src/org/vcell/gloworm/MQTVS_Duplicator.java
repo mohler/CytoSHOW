@@ -42,7 +42,12 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 	private Checkbox checkbox;
 	private TextField rangeField;
 	private TextField[] rangeFields;
-	private int firstC, lastC, firstZ, lastZ, firstT, lastT;
+	private int firstC = 1;
+	private int lastC = 1;
+	private int firstZ = 1;
+	private int lastZ = 1;
+	private int firstT = 1;
+	private int lastT = 1;
 	private boolean sliceSpecificROIs;
 	private int stepT = 1;
 	private int finalFrames;

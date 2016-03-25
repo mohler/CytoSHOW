@@ -623,7 +623,7 @@ public class MQTVSSceneLoader64 implements PlugIn {
 //														.flipSingleMovieVertical(j);
 //														imp.getRoiManager().setRmNeedsUpdate(true);
 														mcc.setFlipVCB(j, true);
-														if (IJ.isWindows()) {
+														if (true/*IJ.isWindows()*/) {
 															mcc.setDoingFirstSetup(false);
 															mcc.itemStateChanged(new ItemEvent(mcc.getFlipVCB(j), ItemEvent.ITEM_STATE_CHANGED, mcc.getFlipVCB(j), ItemEvent.SELECTED));
 															mcc.setDoingFirstSetup(true);
@@ -640,9 +640,9 @@ public class MQTVSSceneLoader64 implements PlugIn {
 //														.flipSingleMovieHorizontal(j);
 ////														imp.getRoiManager().setRmNeedsUpdate(true);
 														mcc.setFlipHCB(j, true);
-														if (IJ.isWindows()) {
+														if (true/*IJ.isWindows()*/) {
 															mcc.setDoingFirstSetup(false);
-															mcc.itemStateChanged(new ItemEvent(mcc.getFlipVCB(j), ItemEvent.ITEM_STATE_CHANGED, mcc.getFlipVCB(j), ItemEvent.SELECTED));
+															mcc.itemStateChanged(new ItemEvent(mcc.getFlipHCB(j), ItemEvent.ITEM_STATE_CHANGED, mcc.getFlipHCB(j), ItemEvent.SELECTED));
 															mcc.setDoingFirstSetup(true);
 														}
 													}
@@ -657,9 +657,9 @@ public class MQTVSSceneLoader64 implements PlugIn {
 //														.flipSingleMovieZaxis(j);
 //														imp.getRoiManager().setRmNeedsUpdate(true);
 														mcc.setFlipZCB(j, true);
-														if (IJ.isWindows()) {
+														if (true/*IJ.isWindows()*/) {
 															mcc.setDoingFirstSetup(false);
-															mcc.itemStateChanged(new ItemEvent(mcc.getFlipVCB(j), ItemEvent.ITEM_STATE_CHANGED, mcc.getFlipVCB(j), ItemEvent.SELECTED));
+															mcc.itemStateChanged(new ItemEvent(mcc.getFlipZCB(j), ItemEvent.ITEM_STATE_CHANGED, mcc.getFlipZCB(j), ItemEvent.SELECTED));
 															mcc.setDoingFirstSetup(true);
 														}
 													}

@@ -2269,7 +2269,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			rpRoi = (Roi) rpRoi.clone();
 			if (n>1)
 				rpRoi.setName("range: "+(indexes[0]+1)+"-"+(indexes[n-1]+1));
-			rpRoi.setFillColor(fillColor);
+			rpRoi.setFillColor(fillColor!=null?fillColor:Colors.decode("#00000000", Color.black));
 			RoiProperties rp = new RoiProperties("Properties", rpRoi);
 			if (!rp.showDialog())
 				return;
