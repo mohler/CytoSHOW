@@ -109,7 +109,8 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 		setBackground(gray);
 		addMouseListener(this);
 		addMouseMotionListener(this);
-		instance = this;
+		if (instance == null)
+			instance = this;
 		names[NUM_TOOLS-1] = "\"More Tools\" menu (switch toolsets or add tools)";
 		icons[NUM_TOOLS-1] = "C900T1c12>T7c12>"; // ">>"
 		addPopupMenus();

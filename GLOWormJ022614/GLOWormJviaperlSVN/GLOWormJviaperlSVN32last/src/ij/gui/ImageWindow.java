@@ -260,8 +260,8 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		toolbar.installBuiltinTool("Developer Menu");
 
 		toolbar.addKeyListener(ij);
-		if (ij != null)
-			toolbar.addMouseListener(toolbar);
+//		if (ij != null)
+//			toolbar.addMouseListener(toolbar);
 		overheadPanel.add(toolbar);
 		overheadPanel.setSize(overheadPanel.getWidth(), overheadPanel.getHeight()*2);
 //		overheadScrollPane.add(overheadPanel);

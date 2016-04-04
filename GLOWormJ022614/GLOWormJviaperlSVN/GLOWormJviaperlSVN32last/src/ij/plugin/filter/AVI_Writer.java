@@ -364,9 +364,9 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 		int mode = CompositeImage.GRAYSCALE;
 		if (imp.isComposite()) {
 			mode = ((CompositeImage)imp).getMode();
+			if (((CompositeImage)imp).getMode() <= CompositeImage.RATIO12)
+				lastC=firstC;
 		}
-		if (((CompositeImage)imp).getMode() <= CompositeImage.RATIO12)
-			lastC=firstC;
 		//  W r i t e   f r a m e   d a t a
 		for (int c=firstC; c<=(flattenTags?firstC:lastC); c++) {
 			for (int z=firstZ; z<=lastZ; z++) {
