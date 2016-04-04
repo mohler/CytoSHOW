@@ -1401,7 +1401,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 														+ "_" + (m+1) + "_" + sec + ".adj" );
 						else 
 							out.println( (deNovoMovieFile!=null?(sharing?"/Volumes/GLOWORM_DATA/" + deNovoMovieFile.getName().replaceAll("_\\d+.avi", "_"+(m+1)+".avi"):deNovoMovieFile.getPath().replaceAll("_\\d+.avi", "_"+(m+1)+".avi")):"error") 
-									+ " = " + (deNovoMovieFile!=null?imp.getNSlices():"error" )
+									+ " = " + (deNovoMovieFile!=null?(!(deNovoMovieFile.getName().startsWith("SW_")|| deNovoMovieFile.getName().startsWith("RGB_"))?imp.getNSlices():1):"error" )
 									+ " = " + (deNovoMovieFile!=null?
 											(deNovoMovieFile.getName().length()>12?deNovoMovieFile.getName().substring(0, 12):deNovoMovieFile.getName())
 											+ "_" + (m+1) + "_" + sec + ".adj":
@@ -1496,16 +1496,16 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 									if (ci.getMode() == 1) {
 
 										out1.println("DisplayRangeMin = "
-												+ ((deNovoMovieFile!=null && !deNovoMovieFile.getName().startsWith("SW_"))?0:ci.getProcessor(j + 1).getMin()));
+												+ ((deNovoMovieFile!=null && !(deNovoMovieFile.getName().startsWith("SW_")|| deNovoMovieFile.getName().startsWith("RGB_")))?0:ci.getProcessor(j + 1).getMin()));
 										out1.println("DisplayRangeMax = "
-												+ ((deNovoMovieFile!=null && !deNovoMovieFile.getName().startsWith("SW_"))?255:ci.getProcessor(j + 1).getMax()));
+												+ ((deNovoMovieFile!=null && !(deNovoMovieFile.getName().startsWith("SW_")|| deNovoMovieFile.getName().startsWith("RGB_")))?255:ci.getProcessor(j + 1).getMax()));
 									} else {
 										ci.setPosition(j + 1, ci.getSlice(), ci
 												.getFrame());
 										out1.println("DisplayRangeMin = "
-												+ ((deNovoMovieFile!=null && !deNovoMovieFile.getName().startsWith("SW_"))?0:ci.getProcessor().getMin()));
+												+ ((deNovoMovieFile!=null && !(deNovoMovieFile.getName().startsWith("SW_")|| deNovoMovieFile.getName().startsWith("RGB_")))?0:ci.getProcessor().getMin()));
 										out1.println("DisplayRangeMax = "
-												+ ((deNovoMovieFile!=null && !deNovoMovieFile.getName().startsWith("SW_"))?255:ci.getProcessor().getMax()));
+												+ ((deNovoMovieFile!=null && !(deNovoMovieFile.getName().startsWith("SW_")|| deNovoMovieFile.getName().startsWith("RGB_")))?255:ci.getProcessor().getMax()));
 
 									}
 								}
@@ -2145,6 +2145,8 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 	}
 
 	public String getDropFramesFieldText(int index) {
+		if (dropFramesField == null || index >= dropFramesField.length)
+			return null;
 		return dropFramesField[index].getText();
 	}
 

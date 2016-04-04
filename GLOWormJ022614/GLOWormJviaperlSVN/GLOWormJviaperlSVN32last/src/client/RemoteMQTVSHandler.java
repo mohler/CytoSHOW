@@ -257,7 +257,8 @@ public class RemoteMQTVSHandler {
 		((RemoteMQTVirtualStack)stack).setStretchToFitOverlay(stretchToFitOverlay);
 
 
-		if ((moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW"))) {
+		if ((moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW")
+				|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/RGB_"))) {
 			stack.setBurnIn(false);
 			for (int i=1; i<=stkNSlices*stkNFrames; i++) {
 				((VirtualStack)stack).addSlice("");
@@ -278,7 +279,8 @@ public class RemoteMQTVSHandler {
 		imp2.getCalibration().pixelHeight = 1;
 
 		//			win2 = null;
-		if (!(moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW"))) {
+		if (!(moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW")
+				|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/RGB_"))) {
 			imp2.setDimensions(stkNChannels, stkNSlices, stkNFrames);
 			imp2.setOpenAsHyperStack(true);
 			CompositeImage ci2 = null;
