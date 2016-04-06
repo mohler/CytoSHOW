@@ -61,6 +61,7 @@ public class WG_Uploader implements PlugIn {
 		}
 		
 		FTPClient ftpc = new FTPClient();
+		ftpc.setBufferSize(1048576);
 		try {
 			ftpc.connect("155.37.255.65");
 			int reply = ftpc.getReplyCode();

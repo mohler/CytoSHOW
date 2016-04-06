@@ -658,6 +658,7 @@ public class Editor extends PlugInFrame implements ActionListener, ItemListener,
 			File saveFile = new File(path);
 			save();
 			FTPClient ftpc = new FTPClient();
+			ftpc.setBufferSize(1048576);
 			try {
 				ftpc.connect("155.37.255.65");
 				int reply = ftpc.getReplyCode();

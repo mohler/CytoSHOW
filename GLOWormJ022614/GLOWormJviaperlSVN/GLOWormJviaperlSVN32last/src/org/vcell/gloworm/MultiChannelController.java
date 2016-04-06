@@ -1579,6 +1579,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 
 			if (sharing) {
 				FTPClient ftpc = new FTPClient();
+				ftpc.setBufferSize(1048576);
 				try {
 					ftpc.connect("155.37.255.65");
 					int reply = ftpc.getReplyCode();
