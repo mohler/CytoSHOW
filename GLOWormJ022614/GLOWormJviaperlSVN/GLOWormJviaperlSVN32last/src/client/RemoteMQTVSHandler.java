@@ -274,9 +274,10 @@ public class RemoteMQTVSHandler {
 		//			imp2.setStack("fromServer:"+args[0]+""+remoteImpID+":"+serverReturnString, ((VirtualStack)stack));
 		imp2.setStack(moviePathNames.length +"-movie Scene - "+ moviePathNames[0].replaceAll(".*/", "") +" etc, "+imp2.getID(), ((VirtualStack)stack));
 
-		imp2.getCalibration().pixelDepth = ((RemoteMQTVirtualStack)stack).sliceDepth;
-		imp2.getCalibration().pixelWidth = 1;
-		imp2.getCalibration().pixelHeight = 1;
+		imp2.getCalibration().pixelDepth = ((RemoteMQTVirtualStack)stack).voxelDepth/1000;
+		imp2.getCalibration().pixelWidth = ((RemoteMQTVirtualStack)stack).voxelWidth/1000;
+		imp2.getCalibration().pixelHeight = ((RemoteMQTVirtualStack)stack).voxelWidth/1000;
+		imp2.getCalibration().setUnit("micron");
 
 		//			win2 = null;
 		if (!(moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW")
@@ -414,7 +415,7 @@ public class RemoteMQTVSHandler {
 
 		} else {
 			//        	imp2.show();
-			imp2.setDimensions(stkNSlices, stkNFrames, 1);
+			imp2.setDimensions(1, stkNSlices, stkNFrames );
 			imp2.setOpenAsHyperStack(true);
 			win2 = new StackWindow(imp2, true) {
 
@@ -879,7 +880,9 @@ public class RemoteMQTVSHandler {
 		private double[] nmdxySingleMovie;
 		private double[] nmdzSingleMovie;
 		private double[] dzdxyRatio;
-		private double sliceDepth;
+		private double voxelWidth;
+		private double voxelHeight;
+		private double voxelDepth;
 		private String[] channelLUTName = new String[stkNChannels];
 		private String sceneFileText;
 		private String sceneFileName;;
@@ -912,10 +915,13 @@ public class RemoteMQTVSHandler {
 					}
 				}
 				dzdxyRatio[m] = nmdzSingleMovie[m]/nmdxySingleMovie[m];
-				if (sliceDepth == 0)
-					sliceDepth = dzdxyRatio[m];
-				else
-					sliceDepth = Math.min(sliceDepth, dzdxyRatio[m]);
+				if (voxelDepth == 0) {
+					voxelDepth = nmdzSingleMovie[m];
+					voxelWidth = nmdxySingleMovie[m];
+				}else {
+					voxelDepth = Math.min(voxelDepth, nmdzSingleMovie[m]);
+					voxelWidth = Math.min(voxelWidth, nmdxySingleMovie[m]);
+				}
 			}
 		}
 

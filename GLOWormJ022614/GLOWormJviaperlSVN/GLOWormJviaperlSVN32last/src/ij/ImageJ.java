@@ -589,6 +589,7 @@ public class ImageJ extends Frame implements ActionListener,
 			ImagePlus imp = IJ.getImage();
 			new Executer(cmd, imp, e);
 
+			imp.getCanvas().requestFocus();
 		}
 	}
 

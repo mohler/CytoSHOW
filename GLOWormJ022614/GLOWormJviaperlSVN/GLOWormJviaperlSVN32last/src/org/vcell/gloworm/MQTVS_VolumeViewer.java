@@ -12,6 +12,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.Roi;
+import ij.plugin.Colors;
 import ij.plugin.PlugIn;
 import ij.plugin.Scaler;
 import ij.plugin.filter.Projector;
@@ -91,20 +92,21 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 					impD.show();
 					impD.setTitle(imp.getShortTitle()+"_DUP_"+ch+"_"+tpt);
 					impD.changes = false;
-					Color channelColor = imp instanceof CompositeImage?((CompositeImage)imp).getChannelColor(ch-1):Color.white;
+					Color white = Colors.decode("#ff229900", Color.white);
+					Color channelColor = imp instanceof CompositeImage?((CompositeImage)imp).getChannelColor(ch-1):white;
 					if (channelColor == Color.black)
-						channelColor = Color.white;
+						channelColor = white;
 					if (cellName != "" && imp.getMotherImp().getRoiManager().getColorLegend() != null)
 						channelColor = imp.getMotherImp().getRoiManager().getColorLegend().getBrainbowColors().get(cellName.split(" =")[0].split(" \\|")[0].toLowerCase());
 					if (channelColor == null)
-						channelColor = Color.white;
+						channelColor = white;
 					int binFactor = 2;
 					double scaleFactor  = 1.0;
 					int threshold = 90;
 					if (imp.getTitle().startsWith("SketchVolumeViewer")) {
 						binFactor = 1;
 						scaleFactor  = 0.1;
-						if (!imp.getMotherImp().getTitle().contains("SW_"))
+						if (!(imp.getMotherImp().getTitle().contains("SW_") || imp.getMotherImp().getTitle().contains("RGB_")))
 							scaleFactor  = 1;
 						threshold = 1;
 					}
