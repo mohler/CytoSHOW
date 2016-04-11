@@ -72,8 +72,8 @@ public class WG_Uploader implements PlugIn {
 			} else {
 				ftpc.login("glowormguest", "GLOWorm");
 				ftpc.makeDirectory(ftpc.getLocalAddress().toString());
-				ftpc.changeWorkingDirectory(ftpc.getLocalAddress().toString());
 				for (String path:iterativeDirPaths) {
+					ftpc.changeWorkingDirectory(ftpc.getLocalAddress().toString());
 					String[] pathChunks = path.replace(":","").split("\\"+File.separator);
 					String pathConcat = "";
 					for (String chunk:pathChunks) {
