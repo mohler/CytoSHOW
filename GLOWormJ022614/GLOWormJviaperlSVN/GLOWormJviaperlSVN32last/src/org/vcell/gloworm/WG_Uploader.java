@@ -70,19 +70,17 @@ public class WG_Uploader implements PlugIn {
 				ftpc.disconnect();
 				IJ.log("FTP server refused connection.");
 			} else {
+				ftpc.enterLocalPassiveMode();
 				ftpc.login("glowormguest", "GLOWorm");
-				ftpc.makeDirectory(ftpc.getLocalAddress().toString());
+				ftpc.makeDirectory("WormguidesUploads");
+				ftpc.changeWorkingDirectory("/WormguidesUploads");
+
+				ftpc.makeDirectory("/WormguidesUploads/"+ftpc.getLocalAddress().toString());
 				for (String path:iterativeDirPaths) {
-					ftpc.changeWorkingDirectory(ftpc.getLocalAddress().toString());
+					ftpc.changeWorkingDirectory("/WormguidesUploads/"+ftpc.getLocalAddress().toString());
 					String[] pathChunks = path.replace(":","").split("\\"+File.separator);
-					String pathConcat = "";
 					for (String chunk:pathChunks) {
 						if (!chunk.equals("")) {
-							pathConcat = pathConcat + File.separator + chunk;
-							File dirFile = new File(pathConcat);
-							Date dd = new Date(dirFile.lastModified());
-							String dirDateTouchString = "";
-// seemed like good idea, but folder moddates tricky...no go
 							ftpc.makeDirectory(chunk);
 							ftpc.changeWorkingDirectory(chunk);
 						}
