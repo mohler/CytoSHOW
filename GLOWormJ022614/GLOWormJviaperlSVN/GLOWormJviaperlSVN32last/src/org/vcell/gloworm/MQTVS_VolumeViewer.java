@@ -123,7 +123,7 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 						ij3dv.run(".");
 						ImageJ3DViewer.add(impD.getTitle(), ColorTable.colorNames[ch+2], ""+objectName/*+"_"+ch+"_"+tpt*/, ""+threshold, "true", "true", "true", ""+binFactor, "2");
 					}
-					ImageJ3DViewer.select(""+objectName+"_"+ch+"_"+tpt);
+					ImageJ3DViewer.select(""+objectName/*+"_"+ch+"_"+tpt*/);
 					ImageJ3DViewer.setColor(""+channelColor.getRed(), ""+channelColor.getGreen(), ""+channelColor.getBlue());
 					ImageJ3DViewer.lock();
 					ImageJ3DViewer.exportContent("wavefront", (IJ.getDirectory("home")+File.separator+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"+objectName.replaceAll(":","").replaceAll("(/|\\s+)","")+"_"+ch+"_"+tpt+".obj"));

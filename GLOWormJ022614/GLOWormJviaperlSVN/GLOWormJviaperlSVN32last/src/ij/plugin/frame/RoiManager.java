@@ -784,7 +784,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			sketchImp.setMotherImp(imp, 0);
 			sketchImp.getRoiManager().setSelectedIndexes(sketchImp.getRoiManager().getFullListIndexes());
 			vv.runVolumeViewer(sketchImp, rootName);
-//			ImageJ3DViewer.setColor("255", "200", "100");
+
 			count++;
 			sketchImp.changes = false;
 			sketchImp.close();
