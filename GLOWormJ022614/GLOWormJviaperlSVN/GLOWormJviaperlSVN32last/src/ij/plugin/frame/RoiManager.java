@@ -718,19 +718,25 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	private void sketchVolumeViewer(Object source) { 
 		if (getSelectedRoisAsArray().length<1)
 			return;
-		ArrayList<String> rootNames= new ArrayList<String>();
+		ArrayList<String> rootNames_rootFrames = new ArrayList<String>();
+		ArrayList<String> rootNames = new ArrayList<String>();
+
 		for (Roi selRoi:getSelectedRoisAsArray()) {
 			String rootName = selRoi.getName().contains("\"")?selRoi.getName().split("\"")[1].trim():"";
+			rootName = rootName.contains(" ")?rootName.split("[_\\- ]")[0].trim():"";
 			String[] rootChunks = selRoi.getName().split("_");
 			String rootFrame = rootChunks[rootChunks.length-1].replaceAll("[CZT]", "").split("-")[0];
-			if (!rootNames.contains(rootName+"_"+rootFrame))
-				rootNames.add(rootName+"_"+rootFrame);
+			if (!rootNames_rootFrames.contains(rootName+"_"+rootFrame)) {
+				rootNames_rootFrames.add(rootName+"_"+rootFrame);
+				rootNames.add(rootName);				
+			}
 		}
 		int count = 3;
-		ImagePlus sketchImp = NewImage.createImage("SketchVolumeViewer_"+rootNames.get(0),imp.getWidth(), imp.getHeight(), imp.getNSlices(), 8, NewImage.FILL_BLACK, false);
-		sketchImp.setCalibration(imp.getCalibration());
 		MQTVS_VolumeViewer vv = new MQTVS_VolumeViewer(); 
-		for (int n=0; n<rootNames.size(); n++) {
+		for (int n=0; n<rootNames_rootFrames.size(); n++) {
+			ImagePlus sketchImp = NewImage.createImage("SketchVolumeViewer_"+rootNames_rootFrames.get(0),imp.getWidth(), imp.getHeight(), imp.getNSlices()*imp.getNFrames(), 8, NewImage.FILL_BLACK, false);
+			sketchImp.setDimensions(1, imp.getNSlices(), imp.getNFrames());
+			sketchImp.setCalibration(imp.getCalibration());
 			String rootName = rootNames.get(n);
 			sketchImp.setTitle("SketchVolumeViewer_"+rootName);
 			IJ.run(sketchImp, "Select All","");
@@ -755,8 +761,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			for (int r=0; r < fraa; r++) {
 				String nextName = rois[r].getName();
 				if (nextName.startsWith("\""+rootName.split("_")[0])
-						&&
-						rootName.endsWith(nextName.split("_")[nextName.split("_").length-1].replaceAll("[CZT]", "").split("-")[0])
+						/*&&
+						rootName.endsWith(nextName.split("_")[nextName.split("_").length-1].replaceAll("[CZT]", "").split("-")[0])*/
 						){
 					nameMatchIndexArrayList.add(r);
 				}
@@ -768,7 +774,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				Roi nextRoi = ((Roi)getFullRoisAsArray()[nameMatchIndexArrayList.get(i)]);
 				String[] nextChunks = nextRoi.getName().split("_");
 				sketchImp.getWindow().setVisible(true);
-				sketchImp.setPosition(1, Integer.parseInt(nextChunks[nextChunks.length-2]), Integer.parseInt(nextChunks[nextChunks.length-1].replaceAll("[CZT]", "").split("-")[0]));
+				int nextSlice = Integer.parseInt(nextChunks[nextChunks.length-2]);
+				int nextFrame = Integer.parseInt(nextChunks[nextChunks.length-1].replaceAll("[CZT]", "").split("-")[0]);
+				sketchImp.setPosition(1, nextSlice, nextFrame);
 				sketchImp.getRoiManager().addRoi((nextRoi));
 			}		
 			sketchImp.getRoiManager().select(-1);
@@ -778,11 +786,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			vv.runVolumeViewer(sketchImp, rootName);
 //			ImageJ3DViewer.setColor("255", "200", "100");
 			count++;
+			sketchImp.changes = false;
+			sketchImp.close();
+			sketchImp.flush();
+			ImageJ3DViewer.select(null);
 		}
-		sketchImp.changes = false;
-		sketchImp.close();
-		sketchImp.flush();
-		ImageJ3DViewer.select(null);
 	}
 
 	public void itemStateChanged(ItemEvent e) {
