@@ -257,7 +257,7 @@ public class RemoteMQTVSHandler {
 		((RemoteMQTVirtualStack)stack).setStretchToFitOverlay(stretchToFitOverlay);
 
 
-		if ((moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW")
+		if ((moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW_")
 				|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/RGB_"))) {
 			stack.setBurnIn(false);
 			for (int i=1; i<=stkNSlices*stkNFrames; i++) {
@@ -280,7 +280,7 @@ public class RemoteMQTVSHandler {
 		imp2.getCalibration().setUnit("micron");
 
 		//			win2 = null;
-		if (!(moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW")
+		if (!(moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW_")
 				|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/RGB_"))) {
 			imp2.setDimensions(stkNChannels, stkNSlices, stkNFrames);
 			imp2.setOpenAsHyperStack(true);
@@ -416,6 +416,8 @@ public class RemoteMQTVSHandler {
 		} else {
 			//        	imp2.show();
 			imp2.setDimensions(1, stkNSlices, stkNFrames );
+			if (moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW_"))
+				imp2.setDimensions(1, stkNFrames, 1 );
 			imp2.setOpenAsHyperStack(true);
 			win2 = new StackWindow(imp2, true) {
 
@@ -524,7 +526,8 @@ public class RemoteMQTVSHandler {
 
 		Object qtbaosba=null;
 		try {
-			if (moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW")) {
+			if (moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW_")
+					|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/RGB_")) {
 				int channel = 1+ ((qtSlice-1) % stkNSlices);
 				int slice = 1+ ((qtSlice-1) / (stkNSlices));
 				
@@ -607,7 +610,8 @@ public class RemoteMQTVSHandler {
 		}
 		//		System.out.println(qtbaosba.toString()+" "+qtSlice+" "+jpegQuality);
 
-		if (moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW")) {
+		if (moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW_")
+				|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/RGB_")) {
 			IJ.log("contacting CytoSHOW server...");
 			if (win2!=null) {
 				TextRoi.setFont("Arial", win2.getImagePlus().getWidth() / 20,
@@ -667,7 +671,8 @@ public class RemoteMQTVSHandler {
 						for (Thread nextThread:threadArrayList)
 							nextThread.interrupt();
 					}
-				} else if ((moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW"))
+				} else if ((moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW_")
+						|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/RGB_"))
 						&& !burnInComplete) {
 					RemoteMQTVSHandler.this.jpegQuality=100;
 
@@ -760,7 +765,8 @@ public class RemoteMQTVSHandler {
 
 	public String[] getChannelPathNames() {
 		// TODO Auto-generated method stub
-		if (moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW")) {
+		if (moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW_")
+				|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/RGB_")) {
 			String[] names = new String[stkNSlices];
 			for (int n=0; n<names.length;n++){
 				names[n] = this.moviePathNames[moviePathNames.length-1];
@@ -832,7 +838,7 @@ public class RemoteMQTVSHandler {
 
 
 	//	public void refreshIP() {
-	//		if (moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW")) {
+	//		if (moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW_")) {
 	//			resolutionToGet = 3;
 	//			jpegQuality = 1;
 	//			burnInComplete = false;
@@ -929,7 +935,8 @@ public class RemoteMQTVSHandler {
 		public ImageProcessor getProcessor( int slice) {
 			this.selectedSlice = slice;
 			ImageProcessor ip = null;
-			if (moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW")) {
+			if (moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW_")
+					|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/RGB_")) {
 				if (this.flipSingleMovieStackOrder[0])
 					slice = RemoteMQTVSHandler.this.getImagePlus().getNSlices()-(slice-1);
 			} else {
@@ -974,7 +981,8 @@ public class RemoteMQTVSHandler {
 			} else {
 				if (dejaVuIPLinkedHashMap.get(adjustedSlice) != null) {
 					ip = dejaVuIPLinkedHashMap.get(adjustedSlice).duplicate();
-				} else if (moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW")) {
+				} else if (moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW_")
+						|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/RGB_")) {
 					ImageWindow win = null;
 					if (RemoteMQTVSHandler.this.getImagePlus() != null)
 						win = RemoteMQTVSHandler.this.getImagePlus().getWindow();
@@ -1036,7 +1044,8 @@ public class RemoteMQTVSHandler {
 
 
 
-				if (moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW")) {
+				if (moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW_")
+						|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/RGB_")) {
 					if (flipSingleMovieStackVertical[0])
 						ip.flipVertical();
 					if (flipSingleMovieStackHorizontal[0])
@@ -1186,7 +1195,8 @@ public class RemoteMQTVSHandler {
 
 		@Override
 		public int getSize() {
-			if (!(moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW"))) {
+			if (!(moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW_")
+					|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/RGB_"))) {
 				return stkNChannels*stkNSlices*stkNFrames;
 			} else {
 				return stkNSlices*stkNFrames;
@@ -1474,7 +1484,8 @@ public class RemoteMQTVSHandler {
 
 
 	public boolean isReady() {
-		if (moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW")) {
+		if (moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW_")
+				|| moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/RGB_")) {
 			for(Thread t:threadArrayList) {
 				if(t.isAlive())
 					return false;
