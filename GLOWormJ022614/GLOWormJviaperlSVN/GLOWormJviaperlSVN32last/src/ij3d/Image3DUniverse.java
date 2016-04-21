@@ -611,6 +611,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		}
 		if(c != null && c.isVisibleAt(currentTimepoint)) {
 			c.setSelected(true);
+			
 			selected = c;
 		}
 		String st = c != null ? c.getName() : "none";

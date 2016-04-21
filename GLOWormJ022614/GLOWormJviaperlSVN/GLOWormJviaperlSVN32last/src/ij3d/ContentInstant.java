@@ -3,6 +3,10 @@ package ij3d;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.gui.Arrow;
+import ij.gui.Line;
+import ij.gui.Roi;
+import ij.gui.TextRoi;
 import ij.io.FileInfo;
 import ij.io.OpenDialog;
 import ij.process.ImageProcessor;
@@ -13,10 +17,14 @@ import ij3d.shapes.BoundingBox;
 import ij3d.shapes.CoordinateSystem;
 import isosurface.MeshGroup;
 
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Enumeration;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.OrderedGroup;
@@ -84,6 +92,9 @@ public class ContentInstant extends BranchGroup implements UniverseListener, Con
 	protected TransformGroup localTranslate;
 
 	private boolean available = true;
+
+    private ScheduledThreadPoolExecutor blinkService = new ScheduledThreadPoolExecutor(1);
+	private ScheduledFuture schfut;
 
 	public ContentInstant(String name) {
 		// create BranchGroup for this image
@@ -302,6 +313,10 @@ public class ContentInstant extends BranchGroup implements UniverseListener, Con
 	private String displayedDataSwapfile = null;
 	private String originalDataSwapfile = null;
 
+	private boolean blinkOn;
+
+	private Color3f trueColor;
+
 	private String getOriginalDataSwapfile() {
 		if(originalDataSwapfile != null)
 			return originalDataSwapfile;
@@ -360,8 +375,30 @@ public class ContentInstant extends BranchGroup implements UniverseListener, Con
 
 	public void setSelected(boolean selected) {
 		this.selected = selected;
-		boolean sb = selected && UniverseSettings.showSelectionBox;
-		setSwitch(BS, sb);
+		blinkOn=true;
+		if (this.trueColor == null)
+			this.trueColor = getColor();
+//		final Color3f realColor = this.trueColor;
+		if (schfut != null && !selected) {
+			schfut.cancel(true);
+			schfut = null;
+			setColor(this.trueColor);
+		} else {
+			schfut = blinkService.scheduleAtFixedRate(new Runnable()
+			{
+				public void run()
+				{
+
+					if (blinkOn){
+						setTempColor(ContentInstant.this.trueColor);
+						blinkOn = false;
+					} else {
+						setTempColor(new Color3f(0.5f,0.5f,0.5f));
+						blinkOn =true;
+					}
+				}
+			}, 0, 500, TimeUnit.MILLISECONDS);
+		}
 	}
 
 	/* ************************************************************
@@ -604,6 +641,18 @@ public class ContentInstant extends BranchGroup implements UniverseListener, Con
 	}
 
 	public void setColor(Color3f color) {
+		if ((this.color == null && color == null) ||
+				(this.color != null && color != null &&
+				 this.color.equals(color)))
+			return;
+		this.trueColor = color;
+		this.color = color;
+ 		plShape.setColor(color);
+		if(contentNode != null)
+			contentNode.colorUpdated(this.color);
+	}
+
+	public void setTempColor(Color3f color) {
 		if ((this.color == null && color == null) ||
 				(this.color != null && color != null &&
 				 this.color.equals(color)))

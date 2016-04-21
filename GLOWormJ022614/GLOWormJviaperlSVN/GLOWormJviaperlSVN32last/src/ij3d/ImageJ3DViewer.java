@@ -117,8 +117,7 @@ public class ImageJ3DViewer implements PlugIn {
 
 	public static void select(String name) {
 		Image3DUniverse univ = getUniv();
-		if(univ != null) univ.select(
-			univ.getContent(name));
+		if(univ != null) univ.select(univ.getContent(name));
 	}
 
 	// Contents menu

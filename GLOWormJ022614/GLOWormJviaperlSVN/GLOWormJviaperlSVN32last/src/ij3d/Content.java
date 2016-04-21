@@ -85,10 +85,10 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 		getContentSwitch().setCapability(Switch.ALLOW_CHILDREN_WRITE);
 		getContentSwitch().setCapability(Switch.ALLOW_CHILDREN_EXTEND);
 		for(int i : instants.keySet()) {
-			ContentInstant c = instants.get(i);
-			c.timepoint = i;
+			ContentInstant ci = instants.get(i);
+			ci.timepoint = i;
 			getTimepointToSwitchIndex().put(i, getContentSwitch().numChildren());
-			getContentSwitch().addChild(c);
+			getContentSwitch().addChild(ci);
 		}
 		addChild(getContentSwitch());
 	}
@@ -206,8 +206,8 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 	// ContentInstants.
 	//
 	public void displayAs(int type) {
-		for(ContentInstant c : contentInstants.values())
-			c.displayAs(type);
+		for(ContentInstant ci : contentInstants.values())
+			ci.displayAs(type);
 	}
 
 	public static int getDefaultThreshold(ImagePlus imp, int type) {
@@ -219,8 +219,8 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 	}
 
 	public void display(ContentNode node) {
-		for(ContentInstant c : contentInstants.values())
-			c.display(node);
+		for(ContentInstant ci : contentInstants.values())
+			ci.display(node);
 	}
 
 	public ImagePlus exportTransformed() {
@@ -233,25 +233,25 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 	 * ***********************************************************/
 
 	public void setVisible(boolean b) {
-		for(ContentInstant c : contentInstants.values())
-			c.setVisible(b);
+		for(ContentInstant ci : contentInstants.values())
+			ci.setVisible(b);
 	}
 
 	public void showBoundingBox(boolean b) {
-		for(ContentInstant c : contentInstants.values())
-			c.showBoundingBox(b);
+		for(ContentInstant ci : contentInstants.values())
+			ci.showBoundingBox(b);
 	}
 
 
 	public void showCoordinateSystem(boolean b) {
-		for(ContentInstant c : contentInstants.values())
-			c.showCoordinateSystem(b);
+		for(ContentInstant ci : contentInstants.values())
+			ci.showCoordinateSystem(b);
 	}
 
 	public void setSelected(boolean selected) {
 		// TODO really all?
-		for(ContentInstant c : contentInstants.values())
-			c.setSelected(selected);
+		for(ContentInstant ci : contentInstants.values())
+			ci.setSelected(selected);
 	}
 
 	/* ************************************************************
@@ -259,8 +259,8 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 	 *
 	 * ***********************************************************/
 	public void setPointListDialog(PointListDialog p) {
-		for(ContentInstant c : contentInstants.values())
-			c.setPointListDialog(p);
+		for(ContentInstant ci : contentInstants.values())
+			ci.setPointListDialog(p);
 	}
 
 	public void showPointList(boolean b) {
@@ -387,8 +387,8 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 	}
 
 	public void setLandmarkPointSize(float r) {
-		for(ContentInstant c : contentInstants.values())
-			c.setLandmarkPointSize(r);
+		for(ContentInstant ci : contentInstants.values())
+			ci.setLandmarkPointSize(r);
 	}
 
 	public Color3f getLandmarkColor() {
@@ -396,8 +396,8 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 	}
 
 	public void setLandmarkColor(Color3f color) {
-		for(ContentInstant c : contentInstants.values())
-			c.setLandmarkColor(color);
+		for(ContentInstant ci : contentInstants.values())
+			ci.setLandmarkColor(color);
 	}
 
 	public PointList getPointList() {
@@ -417,13 +417,13 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 	 *
 	 **************************************************************/
 	public void toggleLock() {
-		for(ContentInstant c : contentInstants.values())
-			c.toggleLock();
+		for(ContentInstant ci : contentInstants.values())
+			ci.toggleLock();
 	}
 
 	public void setLocked(boolean b) {
-		for(ContentInstant c : contentInstants.values())
-			c.setLocked(b);
+		for(ContentInstant ci : contentInstants.values())
+			ci.setLocked(b);
 	}
 
 	public void applyTransform(double[] matrix) {
@@ -431,8 +431,8 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 	}
 
 	public void applyTransform(Transform3D transform) {
-		for(ContentInstant c : contentInstants.values())
-			c.applyTransform(transform);
+		for(ContentInstant ci : contentInstants.values())
+			ci.applyTransform(transform);
 	}
 
 	public void applyRotation(int axis, double degree) {
@@ -456,8 +456,8 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 	}
 
 	public void setTransform(Transform3D transform) {
-		for(ContentInstant c : contentInstants.values())
-			c.setTransform(transform);
+		for(ContentInstant ci : contentInstants.values())
+			ci.setTransform(transform);
 	}
 
 	public void setRotation(int axis, double degree) {
@@ -486,43 +486,43 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 	 * ***********************************************************/
 
 	public void setChannels(boolean[] channels) {
-		for(ContentInstant c : contentInstants.values())
-			c.setChannels(channels);
+		for(ContentInstant ci : contentInstants.values())
+			ci.setChannels(channels);
 	}
 
 	public void setLUT(int[] r, int[] g, int[] b, int[] a) {
-		for(ContentInstant c : contentInstants.values())
-			c.setLUT(r, g, b, a);
+		for(ContentInstant ci : contentInstants.values())
+			ci.setLUT(r, g, b, a);
 	}
 
 	public void setThreshold(int th) {
-		for(ContentInstant c : contentInstants.values())
-			c.setThreshold(th);
+		for(ContentInstant ci : contentInstants.values())
+			ci.setThreshold(th);
 	}
 
 	public void setShaded(boolean b) {
-		for(ContentInstant c : contentInstants.values())
-			c.setShaded(b);
+		for(ContentInstant ci : contentInstants.values())
+			ci.setShaded(b);
 	}
 
 	public void setSaturatedVolumeRendering(boolean b) {
-		for(ContentInstant c : contentInstants.values())
-			c.setSaturatedVolumeRendering(b);
+		for(ContentInstant ci : contentInstants.values())
+			ci.setSaturatedVolumeRendering(b);
 	}
 
 	public void applySurfaceColors(ImagePlus img) {
-		for(ContentInstant c : contentInstants.values())
-			c.applySurfaceColors(img);
+		for(ContentInstant ci : contentInstants.values())
+			ci.applySurfaceColors(img);
 	}
 
 	public void setColor(Color3f color) {
-		for(ContentInstant c : contentInstants.values())
-			c.setColor(color);
+		for(ContentInstant ci : contentInstants.values())
+			ci.setColor(color);
 	}
 
 	public synchronized void setTransparency(float transparency) {
-		for(ContentInstant c : contentInstants.values())
-			c.setTransparency(transparency);
+		for(ContentInstant ci : contentInstants.values())
+			ci.setTransparency(transparency);
 	}
 
 	/* ************************************************************
@@ -541,8 +541,8 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 	public void contentChanged(Content c) {}
 
 	public void universeClosed() {
-		for(ContentInstant c : contentInstants.values()) {
-			c.universeClosed();
+		for(ContentInstant ci : contentInstants.values()) {
+			ci.universeClosed();
 		}
 	}
 
@@ -562,18 +562,18 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 		curr.getLocalTranslate(t);
 		curr.getLocalRotate(r);
 
-		for(ContentInstant c : contentInstants.values()) {
-			if(c == getCurrentInstant())
+		for(ContentInstant ci : contentInstants.values()) {
+			if(ci == getCurrentInstant())
 				continue;
-			c.getLocalRotate().setTransform(r);
-			c.getLocalTranslate().setTransform(t);
-			c.transformationFinished(view);
+			ci.getLocalRotate().setTransform(r);
+			ci.getLocalTranslate().setTransform(t);
+			ci.transformationFinished(view);
 		}
 	}
 
 	public void eyePtChanged(View view) {
-		for(ContentInstant c : contentInstants.values())
-			c.eyePtChanged(view);
+		for(ContentInstant ci : contentInstants.values())
+			ci.eyePtChanged(view);
 	}
 
 	/* *************************************************************
@@ -598,8 +598,8 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 			Double.MAX_VALUE,
 			Double.MAX_VALUE);
 		Point3d tmp = new Point3d();
-		for(ContentInstant c : contentInstants.values()) {
-			c.getContentNode().getMin(tmp);
+		for(ContentInstant ci : contentInstants.values()) {
+			ci.getContentNode().getMin(tmp);
 			if(tmp.x < min.x) min.x = tmp.x;
 			if(tmp.y < min.y) min.y = tmp.y;
 			if(tmp.z < min.z) min.z = tmp.z;
@@ -611,8 +611,8 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 			Double.MIN_VALUE,
 			Double.MIN_VALUE);
 		Point3d tmp = new Point3d();
-		for(ContentInstant c : contentInstants.values()) {
-			c.getContentNode().getMax(tmp);
+		for(ContentInstant ci : contentInstants.values()) {
+			ci.getContentNode().getMax(tmp);
 			if(tmp.x > max.x) max.x = tmp.x;
 			if(tmp.y > max.y) max.y = tmp.y;
 			if(tmp.z > max.z) max.z = tmp.z;

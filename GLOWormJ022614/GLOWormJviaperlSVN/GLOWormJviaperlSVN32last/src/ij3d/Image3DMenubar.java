@@ -343,7 +343,18 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 	}
 
 	public JMenu createSelectMenu() {
-		return new JMenu("Select");
+		JMenu selectM = new JMenu("Select");
+		final JCheckBoxMenuItem none = new JCheckBoxMenuItem("None");
+		none.addItemListener(new ItemListener() {
+			
+			public void itemStateChanged(ItemEvent e) {
+				if(e.getStateChange() == ItemEvent.SELECTED)
+					iJ3dExecuter.select(null);
+			}
+		});
+		selectM.add(none);
+
+		return selectM;
 	}
 
 	public JMenu createTransformMenu() {
@@ -740,10 +751,11 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 		item.addItemListener(new ItemListener() {
 			
 			public void itemStateChanged(ItemEvent e) {
-				if(item.getState())
+//				item.setSelected(!item.isSelected());
+				if(e.getStateChange() == ItemEvent.SELECTED)
 					iJ3dExecuter.select(name);
-				else
-					iJ3dExecuter.select(null);
+//				else
+//					iJ3dExecuter.select(null);
 			}
 		});
 		selectMenu.add(item);
