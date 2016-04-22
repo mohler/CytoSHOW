@@ -716,6 +716,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 
 	private void sketchVolumeViewer(Object source) { 
+		IJ.setForegroundColor(255, 255, 255);
+		IJ.setBackgroundColor(0, 0, 0);
 		if (getSelectedRoisAsArray().length<1)
 			return;
 		ArrayList<String> rootNames_rootFrames = new ArrayList<String>();
@@ -723,7 +725,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		for (Roi selRoi:getSelectedRoisAsArray()) {
 			String rootName = selRoi.getName().contains("\"")?selRoi.getName().split("\"")[1].trim():"";
-			rootName = rootName.contains(" ")?rootName.split("[_\\- ]")[0].trim():"";
+			rootName = rootName.contains(" ")?rootName.split("[_\\- ]")[0].trim():rootName;
 			String[] rootChunks = selRoi.getName().split("_");
 			String rootFrame = rootChunks[rootChunks.length-1].replaceAll("[CZT]", "").split("-")[0];
 			if (!rootNames_rootFrames.contains(rootName+"_"+rootFrame)) {

@@ -94,7 +94,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				File subFile = new File(dir+fileName);
 				if (fileName.contains("DS_Store"))
 					;
-				else if (keyString == "" || subFile.getName().matches(".*"+keyString+".*")){
+				else if (keyString == "" || (subFile.getName().matches(".*"+keyString+".*") && !subFile.getName().startsWith("Proj_"))){
 					channelDirectories++;
 					String[] subFileList = subFile.list();
 					for (String subFileListElement:subFileList)
@@ -119,7 +119,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			} else if ((noKeyString || subFile.getName().matches(".*"+keyString+".*")) && !subFileDir) {
 				IJ.log(".");
 			
-			} else if (noKeyString || subFile.getName().matches(".*"+keyString+".*")){
+			} else if (noKeyString || (subFile.getName().matches(".*"+keyString+".*") && !subFile.getName().startsWith("Proj_"))){
 				String[] subFileList = subFile.list();
 				subFileList = StringSorter.sortNumerically(subFileList);
 				ArrayList<String> subFileTiffArrayList = new ArrayList<String>();
