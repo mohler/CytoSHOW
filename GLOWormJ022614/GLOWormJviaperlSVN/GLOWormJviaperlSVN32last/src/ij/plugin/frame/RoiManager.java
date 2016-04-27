@@ -999,6 +999,26 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (fillColor!=null)
 			roiCopy.setFillColor(fillColor);
 		rois.put(label, roiCopy);
+		
+		
+		ColorLegend cl = getColorLegend();
+		//
+		if (roiCopy!=null) { 
+			if (cl != null) {
+				Color clColor = cl.getBrainbowColors()
+									.get(roiCopy.getName().toLowerCase().split("_")[0].split("=")[0].replace("\"", "").trim());
+				if (clColor !=null) {
+					String hexRed = Integer.toHexString(clColor.getRed());
+					String hexGreen = Integer.toHexString(clColor.getGreen());
+					String hexBlue = Integer.toHexString(clColor.getBlue());
+					roiCopy.setFillColor(Colors.decode("#88"+(hexRed.length()==1?"0":"")+hexRed
+														+(hexGreen.length()==1?"0":"")+hexGreen
+														+(hexBlue.length()==1?"0":"")+hexBlue
+													, Color.white));
+				}
+			}
+		} 
+	
 
 		if (!Orthogonal_Views.isOrthoViewsImage(imp)) {
 			if (imp.getWindow() instanceof StackWindow && ((StackWindow)imp.getWindow()).isWormAtlas()) {
@@ -1324,6 +1344,25 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 			roi.setName(label);
 			rois.put(label, roi);
+			
+			ColorLegend cl = getColorLegend();
+			//
+			if (roi!=null) { 
+				if (cl != null) {
+					Color clColor = cl.getBrainbowColors()
+										.get(roi.getName().toLowerCase().split("_")[0].split("=")[0].replace("\"", "").trim());
+					if (clColor !=null) {
+						String hexRed = Integer.toHexString(clColor.getRed());
+						String hexGreen = Integer.toHexString(clColor.getGreen());
+						String hexBlue = Integer.toHexString(clColor.getBlue());
+						roi.setFillColor(Colors.decode("#88"+(hexRed.length()==1?"0":"")+hexRed
+															+(hexGreen.length()==1?"0":"")+hexGreen
+															+(hexBlue.length()==1?"0":"")+hexBlue
+														, Color.white));
+					}
+				}
+			} 
+		
 			listModel.setElementAt(label, indexes[i]);
 			//		fullList.replaceItem(name2, index);
 			if (!listModel.equals(fullListModel)) {
