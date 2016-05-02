@@ -113,7 +113,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 		String[] clLines = clStr.split("\n");
 		checkbox = new Checkbox[clLines.length];
 		for (int i=0; i<clLines.length; i++) {		
-			IJ.log(clLines[i]);
+//			IJ.log(clLines[i]);
 			checkbox[i] = new Checkbox();
 			((Checkbox)checkbox[i]).setSize(150, 10);
 			checkbox[i].setLabel(clLines[i].split(",")[0].length()<20?clLines[i].split(",")[0]:clLines[i].split(",")[0].substring(0, 20) + "...");
