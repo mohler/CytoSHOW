@@ -768,6 +768,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			return;
 		ArrayList<String> rootNames_rootFrames = new ArrayList<String>();
 		ArrayList<String> rootNames = new ArrayList<String>();
+		String roiColorString = Colors.colorToHexString(this.getSelectedRoisAsArray()[0].getFillColor());
+		roiColorString = roiColorString.substring(roiColorString.length()-6);
+		String assignedColorString = "#ff" + roiColorString;
 
 		for (Roi selRoi:getSelectedRoisAsArray()) {
 			String rootName = selRoi.getName().contains("\"")?selRoi.getName().split("\"")[1].trim():"";
@@ -816,8 +819,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				}
 			}
 			int[] nameMatchIndexes = new int[nameMatchIndexArrayList.size()];
-			for (int i=0; i < nameMatchIndexes.length; i++)
-			{
+			for (int i=0; i < nameMatchIndexes.length; i++) {
 				nameMatchIndexes[i] = nameMatchIndexArrayList.get(i);
 				Roi nextRoi = ((Roi)getFullRoisAsArray()[nameMatchIndexArrayList.get(i)]);
 				String[] nextChunks = nextRoi.getName().split("_");
@@ -831,7 +833,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			sketchImp.getRoiManager().drawOrFill(FILL);
 			sketchImp.setMotherImp(imp, 0);
 			sketchImp.getRoiManager().setSelectedIndexes(sketchImp.getRoiManager().getFullListIndexes());
-			vv.runVolumeViewer(sketchImp, rootName);
+										 
+			vv.runVolumeViewer(sketchImp, rootName, assignedColorString);
 
 			sketchImp.changes = false;
 			sketchImp.close();

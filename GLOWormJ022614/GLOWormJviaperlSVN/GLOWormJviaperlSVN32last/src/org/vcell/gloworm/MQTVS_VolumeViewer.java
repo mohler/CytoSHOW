@@ -28,10 +28,10 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 	public void run(String arg) {
 		String cellName = arg;
 		ImagePlus imp = IJ.getImage();
-		runVolumeViewer(imp, cellName );
+		runVolumeViewer(imp, cellName, null);
 	}
 	
-	public void runVolumeViewer(ImagePlus imp, String cellName ) {
+	public void runVolumeViewer(ImagePlus imp, String cellName, String assignedColorString) {
 		boolean singleSave = IJ.shiftKeyDown();
 		if (imp != null) {
 			if (imp.getStack() instanceof MultiQTVirtualStack) {
@@ -93,13 +93,17 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 					impD.setTitle(imp.getShortTitle()+"_DUP_"+ch+"_"+tpt);
 					impD.changes = false;
 					Color white = Colors.decode("#ff229900", Color.white);
-					Color channelColor = imp instanceof CompositeImage?((CompositeImage)imp).getChannelColor(ch-1):white;
-					if (channelColor == Color.black)
-						channelColor = white;
-					if (cellName != "" && imp.getMotherImp().getRoiManager().getColorLegend() != null)
-						channelColor = imp.getMotherImp().getRoiManager().getColorLegend().getBrainbowColors().get(cellName.split(" =")[0].split(" \\|")[0].toLowerCase());
-					if (channelColor == null)
-						channelColor = white;
+					
+					Color channelColor = assignedColorString!=null?Colors.decode(assignedColorString, null):null;
+					if (channelColor == null) {
+						channelColor = imp instanceof CompositeImage?((CompositeImage)imp).getChannelColor(ch-1):white;
+						if (channelColor == Color.black)
+							channelColor = white;
+						if (cellName != "" && imp.getMotherImp().getRoiManager().getColorLegend() != null)
+							channelColor = imp.getMotherImp().getRoiManager().getColorLegend().getBrainbowColors().get(cellName.split(" =")[0].split(" \\|")[0].toLowerCase());
+						if (channelColor == null)
+							channelColor = white;
+					}
 					int binFactor = 2;
 					double scaleFactor  = 1.0;
 					int threshold = 90;
