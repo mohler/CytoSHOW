@@ -539,11 +539,57 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					int l = hexInt.length();
 					for (int c=0;c<8-l;c++)
 						hexInt = "0"+hexInt;
-					if (runCommand("set fill color", hexInt)) {
-						this.close();
-						this.showWindow(wasVis);
+					String hexName = "#"+hexInt;
+					Color fillColor = JColorChooser.showDialog(this.getFocusOwner(), "Pick a color for "+ this.getSelectedRoisAsArray()[0].getName()+"...", Colors.decode(hexName, Color.cyan));
+					String alphaCorrFillColorString =  Colors.colorToHexString(fillColor).replaceAll("#", hexName.substring(0, 3));
+					fillColor = Colors.decode(alphaCorrFillColorString, fillColor);
+
+					ArrayList<String> rootNames_rootFrames = new ArrayList<String>();
+					ArrayList<String> rootNames = new ArrayList<String>();
+
+
+					for (Roi selRoi:getSelectedRoisAsArray()) {
+						String rootName = selRoi.getName().contains("\"")?selRoi.getName().split("\"")[1].trim():"";
+						rootName = rootName.contains(" ")?rootName.split("[_\\- ]")[0].trim():rootName;
+						String[] rootChunks = selRoi.getName().split("_");
+						String rootFrame = rootChunks[rootChunks.length-1].replaceAll("[CZT]", "").split("-")[0];
+						if (!rootNames_rootFrames.contains(rootName+"_"+rootFrame)) {
+							rootNames_rootFrames.add(rootName+"_"+rootFrame);
+							rootNames.add(rootName);				
+						}
 					}
+					
+					ArrayList<Integer> nameMatchIndexArrayList = new ArrayList<Integer>();
+
+					for (int n=0; n<rootNames.size(); n++) {
+						String rootName = rootNames.get(n);
+						Roi[] rois = getFullRoisAsArray();
+						int fraa = rois.length;
+						for (int r=0; r < fraa; r++) {
+							String nextName = rois[r].getName();
+							if (nextName.startsWith("\""+rootName.split("_")[0])){
+								nameMatchIndexArrayList.add(r);
+							}
+						}
+
+					}
+					int[] nameMatchIndexes = new int[nameMatchIndexArrayList.size()];
+					for (int i=0; i < nameMatchIndexes.length; i++) {
+						nameMatchIndexes[i] = nameMatchIndexArrayList.get(i);
+//						this.select(nameMatchIndexes[i]);
+//
+//						if (runCommand("set fill color", alphaCorrFillColorString)) {
+//						}
+					}	
+					this.setSelectedIndexes(nameMatchIndexes);
+
+					if (runCommand("set fill color", alphaCorrFillColorString)) {
+					}
+
 				}
+				this.close();
+				this.showWindow(wasVis);
+
 			}
 			else if (command.equals("Rename")) {
 				if (rename(null, null, true)) {
@@ -733,7 +779,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				rootNames.add(rootName);				
 			}
 		}
-		int count = 3;
+
 		MQTVS_VolumeViewer vv = new MQTVS_VolumeViewer(); 
 		for (int n=0; n<rootNames_rootFrames.size(); n++) {
 			ImagePlus sketchImp = NewImage.createImage("SketchVolumeViewer_"+rootNames_rootFrames.get(0),imp.getWidth(), imp.getHeight(), imp.getNSlices()*imp.getNFrames(), 8, NewImage.FILL_BLACK, false);
@@ -787,7 +833,6 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			sketchImp.getRoiManager().setSelectedIndexes(sketchImp.getRoiManager().getFullListIndexes());
 			vv.runVolumeViewer(sketchImp, rootName);
 
-			count++;
 			sketchImp.changes = false;
 			sketchImp.close();
 			sketchImp.flush();
@@ -3165,6 +3210,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				fillColor = Colors.decode(name, Color.cyan);
 			} else {
 				fillColor = JColorChooser.showDialog(this.getFocusOwner(), "Pick a color for "+ this.getSelectedRoisAsArray()[0].getName()+"...", Colors.decode("#"+name, Color.cyan));
+				if (name.length() == 8) {
+					String alphaCorrFillColorString =  Colors.colorToHexString(fillColor).replaceAll("#", "#"+name.substring(0, 2));
+					fillColor = Colors.decode(alphaCorrFillColorString, fillColor);
+				}
 			}
 			setProperties(null, -1, fillColor);
 			macro = false;

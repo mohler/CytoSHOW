@@ -194,6 +194,14 @@ public class Colors implements PlugIn, ItemListener {
 		return str2!=null?str2:str;
 	}
 
+	/** Converts a Color into a string ("#ff0000", "#00ff00", #aa55ff, etc.). */
+	public static String colorToHexString(Color color) {
+		String str = color!=null?"#"+Integer.toHexString(color.getRGB()):"None";
+		if (str.length()==9 && str.startsWith("#ff"))
+			str = "#"+str.substring(3);
+		return str;
+	}
+
 	private static float parseHex(String hex) {
 		float value = 0f;
 		try {value=Integer.parseInt(hex,16);}
