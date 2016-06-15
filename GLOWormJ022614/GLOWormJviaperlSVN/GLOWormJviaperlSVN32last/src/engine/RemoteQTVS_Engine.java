@@ -193,16 +193,7 @@ public class RemoteQTVS_Engine extends UnicastRemoteObject implements Compute {
 		impLocal.setDimensions(mqtf.length, maxSlicesSingleMovie, impLocal.getImageStackSize()/(maxSlicesSingleMovie*mqtf.length));
 		movieTable.put(impLocal.getID(), impLocal);
         impLocal.setOpenAsHyperStack(true);
-//		impLocal.show();
-//		if (true) {
-//			if (true) {
-//				((MultiQTVirtualStack) vstack).imp.setTitle( ((MultiQTVirtualStack) vstack).getVirtualStack(0).getMovieName()+":"+port+""+impLocal.getID());
-//			} else {
-//				((MultiQTVirtualStack) vstack).imp.setTitle(" : see Multi-Channel Controller for details"+":"+port+""+impLocal.getID());
-//			}
-//			impLocal = ((MultiQTVirtualStack) vstack).imp;
-//		} 
-//		imp.close();
+
 		startLullClock();
 		return impLocal.getID();
 	}

@@ -154,7 +154,7 @@ public class ZProjector implements PlugIn, TextListener {
 		
 		Prefs.set(METHOD_KEY, method);
 		if (isHyperstack) {
-			allTimeFrames = imp.getNFrames()>1&&imp.getNSlices()>1?showHSDialog(imp):false;
+			allTimeFrames = imp.getNFrames()>1&&imp.getNSlices()>1?showHSDialog(imp):showHSDialog(imp);
 			doHyperStackProjection(allTimeFrames);
 		} else if (imp.getType()==ImagePlus.COLOR_RGB)
 			doRGBProjection();
@@ -300,9 +300,10 @@ public class ZProjector implements PlugIn, TextListener {
 			stepT = Double.isNaN(t3)?1:(int)t3;
 			if (firstT<1) firstT = 1;
 			if (lastT>nFrames) lastT = nFrames;
+			if (stepT <1) stepT = 1;
 			if (firstT>lastT) {firstT=1; lastT=nFrames;}
 		} else
-			firstT = lastT = 1;
+			firstT = lastT = stepT = 1;
 		return true;
 	}
 

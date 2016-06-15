@@ -124,7 +124,7 @@ public class RemoteMQTVSHandler {
 	public RemoteMQTVSHandler(String args[]) {
 
 		boolean firstRun = true;
-		IJ.log("while loop " + silentlyUpdateScene);
+//		IJ.log("while loop " + silentlyUpdateScene);
 		firstRun = false;
 		comp = null;
 		compQ = null;

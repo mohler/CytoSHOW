@@ -1327,7 +1327,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			}
 			if (getLabelShapes()[i]!=null && getLabelShapes()[i].contains(x, y)
 					&& ( ((Roi) rois.get(listModel.get(i))).getFillColor()!=null
-					|| rois.get(listModel.get(i)) instanceof TextRoi ) ) {
+						|| ((Roi) rois.get(listModel.get(i))).getStrokeColor()!=null
+						|| rois.get(listModel.get(i)) instanceof TextRoi ) ) {
 				//rm.select(i);
 				// this needs to run on a separate thread, at least on OS X
 				// "update2" does not clone the ROI so the "Show All"
@@ -1566,17 +1567,25 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				popupInfo[0] = cellName;
 				popupInfo[1] = cellName+"\n\n";
 
-				final ImagePlus cartoonImp = IJ.openImage("http://legacy.wormbase.org/cell/diagrams/"+cellName.toLowerCase()+".gif");
+				final String finalCellName = ""+cellName;
 				
-				if (cartoonImp!=null) {
-					cartoonImp.setTitle(cellName);
-					JPanel cartoonPanel = new JPanel();
-					JButton cartoonButton = new JButton();
-					cartoonButton.setIcon(new ImageIcon(cartoonImp.getImage()));
-					cartoonPanel.add(cartoonButton);
-					cartoonPanel.setBackground(Color.white);
-					popup.add(cartoonPanel, 1);
+				new Thread(new Runnable() {
+					public void run() {
+						ImagePlus cartoonImp = IJ.openImage("http://legacy.wormbase.org/cell/diagrams/"+finalCellName.toLowerCase()+".gif");
+						if (cartoonImp!=null) {
+							cartoonImp.setTitle(finalCellName);
+							JPanel cartoonPanel = new JPanel();
+							JButton cartoonButton = new JButton();
+							cartoonButton.setIcon(new ImageIcon(cartoonImp.getImage()));
+							cartoonPanel.add(cartoonButton);
+							cartoonPanel.setBackground(Color.white);
+							popup.add(cartoonPanel, 1);
+						}
+					}
 				}
+				).start();
+				
+				
 
 				
 				
