@@ -538,18 +538,19 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 		xz_image.getRoiManager().getROIs().clear();
 		if (xz_image.getWindow() != null && imp.getRoiManager().isShowAll()) {
 			if ( stackRois[0] != null) {
-				ArrayList<Roi> cloneeRois = new ArrayList<Roi>();
+				ArrayList<Roi> cloneRois = new ArrayList<Roi>();
 				for (int r = 0; r < stackRois.length; r++) {
 					Rectangle srb = stackRois[r].getBounds();
 					for (int x = 0; x < width; x++) {
-						if (srb.contains(x, y) && !cloneeRois.contains(stackRois[r])) {
-							if (stackRois[r] instanceof TextRoi) {
+						if (srb.contains(x, y) && !cloneRois.contains(stackRois[r])) {
+							if (stackRois[r] instanceof TextRoi || stackRois[r] instanceof OvalRoi) {
 								Roi nextRoi = (Roi) stackRois[r].clone();
-								cloneeRois.add(stackRois[r]);
+								cloneRois.add(stackRois[r]);
 								nextRoi.setLocation(
 										(int) (nextRoi.getBounds().x) ,
 										(int) (nextRoi.getZPosition()
-												* imp.getCalibration().pixelDepth - srb.getHeight() / 2));
+												* imp.getCalibration().pixelDepth/imp.getCalibration().pixelWidth 
+												- srb.getHeight() / 2));
 								xz_image.getRoiManager().addRoi(nextRoi);
 								//							x = x+srb.width;
 								//							r=stackRois.length;
@@ -679,17 +680,22 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 		yz_image.getRoiManager().getROIs().clear();
 		if (yz_image.getWindow() != null  && imp.getRoiManager().isShowAll()) {
 			if (stackRois[0] != null ) {
+				ArrayList<Roi> cloneRois = new ArrayList<Roi>();
 				for (int r = 0; r < stackRois.length; r++) {
 					Rectangle srb = stackRois[r].getBounds();
 					for (int y = 0; y < height; y++) {
-						if (srb.contains(x, y)) {
-							Roi nextRoi = (Roi) stackRois[r].clone();
-							nextRoi.setLocation((int) (nextRoi.getZPosition()
-									* imp.getCalibration().pixelDepth - srb.getWidth() / 2),
-									(int) (nextRoi.getBounds().y));
-							yz_image.getRoiManager().addRoi(nextRoi);
-//							y = y + srb.height;
-//							r=stackRois.length;
+						if (srb.contains(x, y) && !cloneRois.contains(stackRois[r])) {
+							if (stackRois[r] instanceof TextRoi || stackRois[r] instanceof OvalRoi) {
+								Roi nextRoi = (Roi) stackRois[r].clone();
+								cloneRois.add(stackRois[r]);
+								nextRoi.setLocation((int) (nextRoi.getZPosition()
+										* imp.getCalibration().pixelDepth/imp.getCalibration().pixelHeight -
+										srb.getWidth() / 2),
+										(int) (nextRoi.getBounds().y));
+								yz_image.getRoiManager().addRoi(nextRoi);
+								//							y = y + srb.height;
+								//							r=stackRois.length;
+							}
 						}
 					}
 				}

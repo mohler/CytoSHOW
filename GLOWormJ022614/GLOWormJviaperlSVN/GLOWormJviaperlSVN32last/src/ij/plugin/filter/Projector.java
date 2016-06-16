@@ -333,7 +333,7 @@ public class Projector implements PlugInFilter, TextListener {
 								Roi nextRoi = (Roi) sliceSpecficRoiArray[r].clone();
 								if (nextRoi!=null) {
 									nextRoi.setLocation((int) ((Roi) sliceSpecficRoiArray[r]).getBounds().getX()-dupX, (int) ((Roi) sliceSpecficRoiArray[r]).getBounds().getY()-dupY);
-									int adjustZ = ((int) ((z-firstZ)*(imp.getCalibration().pixelDepth)+1));
+									int adjustZ = ((int) ((z-firstZ)*(sliceInterval)+1));
 									impDZ.setPosition(1, adjustZ, 1);
 									rm2.addRoi(nextRoi);
 									impDZ.setRoi(nextRoi);

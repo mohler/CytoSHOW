@@ -1571,7 +1571,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				
 				new Thread(new Runnable() {
 					public void run() {
-						ImagePlus cartoonImp = IJ.openImage("http://legacy.wormbase.org/cell/diagrams/"+finalCellName.toLowerCase()+".gif");
+						ImagePlus cartoonImp = IJ.openImage("http://fsbill.cam.uchc.edu/gloworm/Xwords/NeuronDiagrams/"+finalCellName.toLowerCase()+".gif");
 						if (cartoonImp!=null) {
 							cartoonImp.setTitle(finalCellName);
 							JPanel cartoonPanel = new JPanel();
