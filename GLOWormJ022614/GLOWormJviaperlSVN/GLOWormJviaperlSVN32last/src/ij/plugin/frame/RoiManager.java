@@ -2340,8 +2340,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		return true;
 	}
 
-	void setProperties(Color color, int lineWidth, Color fillColor) {
-		boolean showDialog = color==null && lineWidth==-1 && fillColor==null;
+	void setProperties(Color strokeColor, int lineWidth, Color fillColor) {
+		boolean showDialog = strokeColor==null && lineWidth==-1 && fillColor==null;
 		int[] indexes = getSelectedIndexes();
 		if (indexes.length==0)
 			indexes = getAllShownIndexes();
@@ -2361,24 +2361,24 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			if (rpRoi.getStrokeColor()==null)
 				rpRoi.setStrokeColor(ImageCanvas.getShowAllColor());
-			rpRoi = (Roi) rpRoi.clone();
+			Roi rpRoiClone = (Roi) rpRoi.clone();
 			if (n>1)
 				rpRoi.setName("range: "+(indexes[0]+1)+"-"+(indexes[n-1]+1));
-			rpRoi.setFillColor(fillColor!=null?fillColor:Colors.decode("#00000000", Color.black));
-			RoiProperties rp = new RoiProperties("Properties", rpRoi);
+//			rpRoi.setFillColor(fillColor!=null?fillColor:Colors.decode("#00000000", Color.black));
+			RoiProperties rp = new RoiProperties("Properties", rpRoiClone);
 			if (!rp.showDialog())
 				return;
-			lineWidth =  (int)rpRoi.getStrokeWidth();
+			lineWidth =  (int)rpRoiClone.getStrokeWidth();
 			defaultLineWidth = lineWidth;
-			color =  rpRoi.getStrokeColor();
-			fillColor =  rpRoi.getFillColor();
-			defaultColor = color;
-			if (rpRoi instanceof TextRoi) {
-				font = ((TextRoi)rpRoi).getCurrentFont();
-				justification = ((TextRoi)rpRoi).getJustification();
+			strokeColor =  rpRoiClone.getStrokeColor();
+			fillColor =  rpRoiClone.getFillColor();
+			defaultColor = strokeColor;
+			if (rpRoiClone instanceof TextRoi) {
+				font = ((TextRoi)rpRoiClone).getCurrentFont();
+				justification = ((TextRoi)rpRoiClone).getJustification();
 			}
-			if (rpRoi instanceof ImageRoi)
-				opacity = ((ImageRoi)rpRoi).getOpacity();
+			if (rpRoiClone instanceof ImageRoi)
+				opacity = ((ImageRoi)rpRoiClone).getOpacity();
 		}
 		ImagePlus imp = this.imp;
 		if (n==listModel.getSize() && n>1 && !IJ.isMacro()) {
@@ -2440,46 +2440,47 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		for (int i=0; i<n; i++) {
 			String label = (String) listModel.getElementAt(indexes[i]);
-			Roi roi = (Roi)rois.get(label);
+			Roi nextRoi = (Roi)rois.get(label);
 			//IJ.log("set "+color+"  "+lineWidth+"  "+fillColor);
-			if (color!=null) 
-				roi.setStrokeColor(color);
+			if (strokeColor!=null) 
+				nextRoi.setStrokeColor(strokeColor);
 			if (lineWidth>=0) 
-				roi.setStrokeWidth(lineWidth);
-			roi.setFillColor(fillColor);
+				nextRoi.setStrokeWidth(lineWidth);
+			nextRoi.setFillColor(fillColor);
 			if (brainbowColors == null)
 				brainbowColors = new Hashtable<String, Color>();
 			if (fillColor!=null)
 				brainbowColors.put(label.split(" =")[0].replace("\"","").toLowerCase(), new Color(fillColor.getRGB()));
-			if (roi!=null && (roi instanceof TextRoi)) {
-				roi.setImage(imp);
+			if (nextRoi!=null && (nextRoi instanceof TextRoi)) {
+				nextRoi.setImage(imp);
 				if (font!=null)
-					((TextRoi)roi).setCurrentFont(font);
-				((TextRoi)roi).setJustification(justification);
-				roi.setImage(null);
+					((TextRoi)nextRoi).setCurrentFont(font);
+				((TextRoi)nextRoi).setJustification(justification);
+				nextRoi.setImage(null);
 			}
-			if (roi!=null && (roi instanceof ImageRoi) && opacity!=-1)
-				((ImageRoi)roi).setOpacity(opacity);
+			if (nextRoi!=null && (nextRoi instanceof ImageRoi) && opacity!=-1)
+				((ImageRoi)nextRoi).setOpacity(opacity);
 		}
 		if (rpRoi!=null && rpName!=null && !rpRoi.getName().equals(rpName))
 			rename(rpRoi.getName(), null, true);
 		ImageCanvas ic = imp!=null?imp.getCanvas():null;
-		Roi roi = imp!=null?imp.getRoi():null;
+		
+//		Roi roi = imp!=null?imp.getRoi():null;
 		boolean showingAll = ic!=null &&  ic.getShowAllROIs();
-		if (roi!=null && (n==1||!showingAll)) {
-			if (lineWidth>=0) roi.setStrokeWidth(lineWidth);
-			if (color!=null) roi.setStrokeColor(color);
-			if (fillColor!=null) roi.setFillColor(fillColor);
-			if (roi!=null && (roi instanceof TextRoi)) {
-				((TextRoi)roi).setCurrentFont(font);
-				((TextRoi)roi).setJustification(justification);
+		if (rpRoi!=null && (n==1||!showingAll)) {
+			if (lineWidth>=0) rpRoi.setStrokeWidth(lineWidth);
+			if (strokeColor!=null) rpRoi.setStrokeColor(strokeColor);
+			if (fillColor!=null) rpRoi.setFillColor(fillColor);
+			if (rpRoi!=null && (rpRoi instanceof TextRoi)) {
+				((TextRoi)rpRoi).setCurrentFont(font);
+				((TextRoi)rpRoi).setJustification(justification);
 			} else {
-				IJ.log("nontext match: "+roi.getName());
+				IJ.log("nontext match: "+rpRoi.getName());
 			}
-			if (roi!=null && (roi instanceof ImageRoi) && opacity!=-1)
-				((ImageRoi)roi).setOpacity(opacity);
+			if (rpRoi!=null && (rpRoi instanceof ImageRoi) && opacity!=-1)
+				((ImageRoi)rpRoi).setOpacity(opacity);
 		}
-		if (lineWidth>1 && !showingAll && roi==null) {
+		if (lineWidth>1 && !showingAll && rpRoi==null) {
 			showAll(SHOW_ALL);
 			showingAll = true;
 		}
@@ -2488,7 +2489,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			if (fillColor!=null)
 				Recorder.record("roiManager", "Set Fill Color", Colors.colorToString(fillColor));
 			else {
-				Recorder.record("roiManager", "Set Color", Colors.colorToString(color!=null?color:Color.red));
+				Recorder.record("roiManager", "Set Color", Colors.colorToString(strokeColor!=null?strokeColor:Color.red));
 				Recorder.record("roiManager", "Set Line Width", lineWidth);
 			}
 		}

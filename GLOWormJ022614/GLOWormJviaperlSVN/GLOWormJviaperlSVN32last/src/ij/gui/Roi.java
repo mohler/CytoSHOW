@@ -1454,9 +1454,9 @@ public class Roi extends Object implements Cloneable, java.io.Serializable {
 		if (width==0)
 			stroke = null;
 		else if (wideLine)
-			this.stroke = new BasicStroke(width, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL);
+			this.stroke = new BasicStroke((float)width, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL);
 		else
-			this.stroke = new BasicStroke(width);
+			this.stroke = new BasicStroke((float)width);
 		if (width>1f) fillColor = null;
 	}
 

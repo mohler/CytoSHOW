@@ -24,6 +24,7 @@ import ij.plugin.frame.ColorLegend;
 import ij.plugin.frame.ContrastAdjuster;
 import ij.plugin.frame.Recorder;
 import ij.plugin.frame.RoiManager;
+import ij.plugin.Colors;
 import ij.plugin.Converter;
 import ij.plugin.Duplicator;
 import ij.plugin.MultiFileInfoVirtualStack;
@@ -1642,42 +1643,52 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		}
 		if (this.isDisplayedHyperStack()){
 			blinkOn=true;
+			final Roi blinkRoi = (Roi)roi.clone();
+			final Roi origRoi = (Roi)roi.clone();
+		
+			if (roi instanceof Arrow)
+				blinkRoi.setStrokeColor(roiStrokeColor.brighter());
+			
+			blinkRoi.setFillColor(Roi.getDefaultFillColor());
+			
+			if (roi instanceof TextRoi)
+				blinkRoi.setFillColor(Color.yellow);
+
 			if (schfut != null)
 				schfut.cancel(true);
 			schfut = blinkService.scheduleAtFixedRate(new Runnable()
 			{
 				public void run()
 				{
-					double strokeWidthMagAdjust = roiStrokeWidth/win.getCanvas().getMagnification();
-					Roi dummyRoi = new Roi(0,0,0,0);
-					dummyRoi.setStrokeWidth(strokeWidthMagAdjust);
-					strokeWidthMagAdjust = dummyRoi.getStrokeWidth();
+//					double strokeWidthMagAdjust = roiStrokeWidth/win.getCanvas().getMagnification();
+//					Roi dummyRoi = new Roi(0,0,0,0);
+//					dummyRoi.setStrokeWidth(strokeWidthMagAdjust);
+//					strokeWidthMagAdjust = dummyRoi.getStrokeWidth();
 
 					if (roi instanceof Line) 
-						roi.setStrokeWidth(strokeWidthMagAdjust);
+						roi.setStrokeWidth(roiStrokeWidth);
 					else
 						roi.setStrokeWidth(roiStrokeWidth);
 					
 					if (blinkOn){
-						if (roi instanceof Arrow)
-							roi.setStrokeColor(roiStrokeColor.brighter());
-						roi.setFillColor(Roi.getDefaultFillColor());
-						if (roi instanceof TextRoi)
-							roi.setFillColor(Color.yellow);
+						killRoi();
+						roi = blinkRoi;
+						roi.setImage(ImagePlus.this);
 
 						blinkOn = false;
 					} else {
-						if (roi instanceof Arrow)
-							roi.setStrokeColor(roiStrokeColor.darker());
-						roi.setFillColor(roiFillColor);
+						killRoi();
+						roi = origRoi;
+						roi.setImage(ImagePlus.this);
+
 						blinkOn =true;
 					}
 					draw();
 				}
 			}, 0, 500, TimeUnit.MILLISECONDS);
 		}
-		if (roi!=null)
-			roi.setImage(this);
+//		if (roi!=null)
+//			roi.setImage(this);
 		if (updateDisplay) draw();
 	}
 	
