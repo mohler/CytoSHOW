@@ -1916,7 +1916,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 								Object[] imgRoiNames =  WindowManager.getImage(openImageIDsWithRM[o]).getRoiManager().getListModel().toArray();
 								for (int j = 0; j < imgRoiNames.length; j++) {
-									if (((String) imgRoiNames[j]).replace("\"","").startsWith(analogName+" ")) {
+									if (((String) imgRoiNames[j]).replace("\"","").trim().startsWith(analogName+" ")) {
 										String itemString = "***shown here: "
 												+ imgRoiNames[j]+"{"+ openImageIDsWithRM[o] + "|" + j + "}";
 										j = imgRoiNames.length;
@@ -1977,7 +1977,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 									Object[] imgRoiNames =  WindowManager.getImage(openImageIDsWithRM[o]).getRoiManager().getListModel().toArray();
 									for (int j = 0; j < imgRoiNames.length; j++) {
-										if (((String) imgRoiNames[j]).toUpperCase().replace("\"","").startsWith(analogName.toUpperCase()+" ")) {
+										if (((String) imgRoiNames[j]).toUpperCase().replace("\"","").trim().startsWith(analogName.toUpperCase()+" ")) {
 											String itemString = "***shown here: "
 													+ imgRoiNames[j]+"{"+ openImageIDsWithRM[o] + "|" + j + "}";
 											j = imgRoiNames.length;
@@ -2063,7 +2063,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 											Object[] imgRoiNames =  WindowManager.getImage(openImageIDsWithRM[o]).getRoiManager().getListModel().toArray();
 											for (int j = 0; j < imgRoiNames.length; j++) {
-												if (((String) imgRoiNames[j]).replace("\"","").startsWith(candidate+" ")) {
+												if (((String) imgRoiNames[j]).replace("\"","").trim().startsWith(candidate+" ")) {
 													String itemString = "***shown here: "
 															+ imgRoiNames[j]+"{"+ openImageIDsWithRM[o] + "|" + j + "}";
 													j = imgRoiNames.length;
@@ -2105,7 +2105,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 											Object[] imgRoiNames =  WindowManager.getImage(openImageIDsWithRM[o]).getRoiManager().getListModel().toArray();
 											for (int j = 0; j < imgRoiNames.length; j++) {
-												if (((String) imgRoiNames[j]).replace("\"","").startsWith(candidate+" ")) {
+												if (((String) imgRoiNames[j]).replace("\"","").trim().startsWith(candidate+" ")) {
 													String itemString = "***shown here: "
 															+ imgRoiNames[j]+"{"+ openImageIDsWithRM[o] + "|" + j + "}";
 													j = imgRoiNames.length;
@@ -2142,7 +2142,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 											Object[] imgRoiNames =  WindowManager.getImage(openImageIDsWithRM[o]).getRoiManager().getListModel().toArray();
 											for (int j = 0; j < imgRoiNames.length; j++) {
-												if (((String) imgRoiNames[j]).replace("\"","").startsWith(candidate+" ")) {
+												if (((String) imgRoiNames[j]).replace("\"","").trim().startsWith(candidate+" ")) {
 													String itemString = "***shown here: "
 															+ imgRoiNames[j]+"{"+ openImageIDsWithRM[o] + "|" + j + "}";
 													j = imgRoiNames.length;
@@ -2179,7 +2179,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 											Object[] imgRoiNames =  WindowManager.getImage(openImageIDsWithRM[o]).getRoiManager().getListModel().toArray();
 											for (int j = 0; j < imgRoiNames.length; j++) {
-												if (((String) imgRoiNames[j]).replace("\"","").startsWith(candidate+" ")) {
+												if (((String) imgRoiNames[j]).replace("\"","").trim().startsWith(candidate+" ")) {
 													String itemString = "***shown here: "
 															+ imgRoiNames[j]+"{"+ openImageIDsWithRM[o] + "|" + j + "}";
 													j = imgRoiNames.length;
@@ -2408,7 +2408,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 									Object[] imgRoiNames =  WindowManager.getImage(openImageIDsWithRM[o]).getRoiManager().getListModel().toArray();
 									for (int j = 0; j < imgRoiNames.length; j++) {
-										if (((String) imgRoiNames[j]).replace("\"","").startsWith(candidate+" ")) {
+										if (((String) imgRoiNames[j]).replace("\"","").trim().startsWith(candidate+" ")) {
 											String itemString = "***shown here: "
 													+ imgRoiNames[j]+"{"+ openImageIDsWithRM[o] + "|" + j + "}";
 											j = imgRoiNames.length;
@@ -2465,7 +2465,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 											Object[] imgRoiNames =  WindowManager.getImage(openImageIDsWithRM[o]).getRoiManager().getListModel().toArray();
 											for (int j = 0; j < imgRoiNames.length; j++) {
-												if (((String) imgRoiNames[j]).replace("\"","").startsWith(candidate+" ")) {
+												if (((String) imgRoiNames[j]).replace("\"","").trim().startsWith(candidate+" ")) {
 													String itemString = "***shown here: "
 															+ imgRoiNames[j]+"{"+ openImageIDsWithRM[o] + "|" + j + "}";
 													j = imgRoiNames.length;

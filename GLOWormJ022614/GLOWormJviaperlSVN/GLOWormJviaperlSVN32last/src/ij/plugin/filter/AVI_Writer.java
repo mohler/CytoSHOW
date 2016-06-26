@@ -395,8 +395,9 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 						}
 						
 						if (imp.getStack().getBitDepth() == 8 || imp.getStack().getBitDepth() == 16)
-							if (((CompositeImage)imp).getMode() <= CompositeImage.RATIO12)
-								ip = new ByteProcessor(imp.getImage());
+							if (imp.isComposite() ) 
+								if (((CompositeImage)imp).getMode() <= CompositeImage.RATIO12)
+									ip = new ByteProcessor(imp.getImage());
 							else
 								ip = new ColorProcessor(imp.getImage());
 						else

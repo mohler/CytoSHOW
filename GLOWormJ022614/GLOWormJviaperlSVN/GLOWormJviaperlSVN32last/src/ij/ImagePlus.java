@@ -1619,28 +1619,11 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 				roiFillColor = newRoi.getFillColor();
 				return;
 			}
-			newRoi = (Roi)newRoi.clone();
-			if (newRoi==null) {
-				deleteRoi(); 
-				return;
-			}
 		}
 		if (bounds.width==0 && bounds.height==0 && !(newRoi.getType()==Roi.POINT||newRoi.getType()==Roi.LINE))
 			{deleteRoi(); return;}
 		roi = newRoi;
-		roiFillColor = roi.getFillColor();
-		roiStrokeWidth = roi.getStrokeWidth();
-		roiStrokeColor = roi.getStrokeColor();
-		if (roiStrokeColor ==null)
-			roiStrokeColor = Color.yellow;
 		
-		if (ip!=null) {
-			ip.setMask(null);
-			if (roi.isArea())
-				ip.setRoi(bounds);
-			else
-				ip.resetRoi();
-		}
 		if (this.isDisplayedHyperStack()){
 			blinkOn=true;
 			final Roi blinkRoi = (Roi)roi.clone();
@@ -1660,26 +1643,23 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			{
 				public void run()
 				{
-//					double strokeWidthMagAdjust = roiStrokeWidth/win.getCanvas().getMagnification();
-//					Roi dummyRoi = new Roi(0,0,0,0);
-//					dummyRoi.setStrokeWidth(strokeWidthMagAdjust);
-//					strokeWidthMagAdjust = dummyRoi.getStrokeWidth();
-
 					if (roi instanceof Line) 
 						roi.setStrokeWidth(roiStrokeWidth);
 					else
 						roi.setStrokeWidth(roiStrokeWidth);
-					
+					Rectangle locBounds = getRoi().getBounds();
 					if (blinkOn){
 						killRoi();
 						roi = blinkRoi;
 						roi.setImage(ImagePlus.this);
+						roi.setLocation(locBounds.x, locBounds.y);
 
 						blinkOn = false;
 					} else {
 						killRoi();
 						roi = origRoi;
 						roi.setImage(ImagePlus.this);
+						roi.setLocation(locBounds.x, locBounds.y);
 
 						blinkOn =true;
 					}
