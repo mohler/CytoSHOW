@@ -239,7 +239,7 @@ public class ImageJ extends Frame implements ActionListener,
 		}
 		m.installStartupMacroSet();
 		
-		if (IJ.is64Bit()) {
+		if (!IJ.is64Bit()) {
 
 			if (IJ.showMessageWithCancel("Hmmmm...your Java is 32-bit", "Are you hoping to run CytoSHOW with all functions available?\n"
 
