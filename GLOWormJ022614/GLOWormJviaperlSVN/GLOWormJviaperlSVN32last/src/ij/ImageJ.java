@@ -238,6 +238,23 @@ public class ImageJ extends Frame implements ActionListener,
 			IJ.runPlugIn("ij.plugin.ClassChecker", "");
 		}
 		m.installStartupMacroSet();
+		
+		if (IJ.is64Bit()) {
+
+			if (IJ.showMessageWithCancel("Hmmmm...your Java is 32-bit", "Are you hoping to run CytoSHOW with all functions available?\n"
+
+					+ "Then you need 64-bit Java!\n"
+					+ "Shall we clear this up now (OK) or continue in limited32-bit mode (Cancel)?\n\n"
+
+					+ "http://www.java.com/en/download/manual.jsp\n"
+
+					+ "http://javadl.oracle.com/webapps/download/AutoDL?BundleId=210185")) {
+				IJ.runPlugIn("ij.plugin.BrowserLauncher", "http://www.java.com/en/download/manual.jsp");
+				System.exit(0);
+			}
+		}
+
+
 		if (IJ.isMacintosh()&&applet==null) { 
 			Object qh = null; 
 			qh = IJ.runPlugIn("MacAdapter", ""); 
