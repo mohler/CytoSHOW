@@ -2,7 +2,9 @@ package ij.gui;
 
 import java.awt.*;
 import java.awt.image.*;
+
 import ij.*;
+import ij.plugin.Colors;
 import ij.process.*;
 import ij.measure.Calibration;
 
@@ -212,9 +214,13 @@ public class OvalRoi extends Roi {
 		cachedMask = null;
 	}
 
+	@Override
 	public void draw(Graphics g) {
 		Color color =  strokeColor!=null? strokeColor:ROIColor;
-		if (fillColor!=null) color = fillColor;
+		if (fillColor!=null) 
+			color = fillColor;
+		else
+			color = Color.cyan;
 		Color sourceColor = null;
 		boolean isActiveOverlayRoi = !overlay && isActiveOverlayRoi();
 		if (isActiveOverlayRoi /*&& !hasHandles*/) {
@@ -233,6 +239,7 @@ public class OvalRoi extends Roi {
 			}
 		} else
 			color = Color.cyan;
+		
 		g.setColor(color);
 		mag = getMagnification();
 		int sw = (int)(width*mag);
@@ -256,7 +263,7 @@ public class OvalRoi extends Roi {
 		if (stroke!=null) 
 			g2d.setStroke(new BasicStroke (getStrokeWidth()*2));
 		if (fillColor!=null) {
-			if (!overlay && isActiveOverlayRoi()) {
+			if (isActiveOverlayRoi) {
 				g2d.setStroke(new BasicStroke (getStrokeWidth()*3));
 				g.setColor(Color.yellow);
 				g.drawOval(sx1, sy1, sw, sh);
@@ -265,10 +272,16 @@ public class OvalRoi extends Roi {
 				g.fillOval(sx1, sy1, sw, sh);
 			}
 		} else{
-			g2d.setStroke(new BasicStroke (getStrokeWidth()*2));
-			if (sourceColor != null)
-				color = new Color(sourceColor.getRed(), sourceColor.getGreen(), sourceColor.getBlue());			
-			g.drawOval(sx1, sy1, sw, sh);
+			if (isActiveOverlayRoi) {
+				g2d.setStroke(new BasicStroke (getStrokeWidth()*3));
+				g.setColor(Color.red);
+				g.drawOval(sx1, sy1, sw, sh);
+			} else{			
+				g2d.setStroke(new BasicStroke (getStrokeWidth()*2));
+				if (sourceColor != null)
+					color = new Color(sourceColor.getRed(), sourceColor.getGreen(), sourceColor.getBlue());			
+				g.drawOval(sx1, sy1, sw, sh);
+			}
 		}
 		if (state!=CONSTRUCTING && clipboard==null && !overlay) {
 			int size2 = HANDLE_SIZE/2;

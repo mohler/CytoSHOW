@@ -5,9 +5,11 @@ import ij.measure.*;
 import ij.plugin.frame.Recorder;
 import ij.plugin.filter.Analyzer;
 import ij.plugin.filter.ThresholdToSelection;
+import ij.plugin.Colors;
 import ij.plugin.RectToolOptions;
 import ij.macro.Interpreter;
 import ij.io.RoiDecoder;
+
 import java.awt.*;
 import java.util.*;
 import java.io.*;
@@ -930,15 +932,16 @@ public class Roi extends Object implements Cloneable, java.io.Serializable {
 					if (imp.getRoiManager().getSelectedRoisAsArray().length>0)
 						sourceColor = imp.getRoiManager().getSelectedRoisAsArray()[0].getFillColor();
 					if (sourceColor == null)
-						sourceColor = Color.decode("#33ffffff");
+						sourceColor = Colors.decode("#33ffffff", null);
 				}
 				if (sourceColor != null)
-					color = new Color(sourceColor.getRed(), sourceColor.getGreen(), sourceColor.getBlue());
+					color = sourceColor;
 				else
 					color = Color.cyan;
 			}
-		} else
-			color = Color.cyan;
+		} 
+//		else
+//			color = Color.cyan;
 
 		g.setColor(color);
 		mag = getMagnification();
@@ -1001,7 +1004,7 @@ public class Roi extends Object implements Cloneable, java.io.Serializable {
 				}
 			} else {
 				if (fillColor!=null) {
-					if (!overlay && isActiveOverlayRoi()) {
+					if (!overlay ) {
 						g2d.setStroke(new BasicStroke (getStrokeWidth()*3));
 						g.setColor(Color.yellow);
 						g.drawRect(sx1, sy1, sw, sh);
@@ -1012,7 +1015,7 @@ public class Roi extends Object implements Cloneable, java.io.Serializable {
 				} else {
 					g2d.setStroke(new BasicStroke (getStrokeWidth()*2));
 					if (sourceColor!=null)
-						g.setColor(new Color(sourceColor.getRed(), sourceColor.getGreen(), sourceColor.getBlue()));
+						g.setColor(sourceColor);
 					g.drawRect(sx1, sy1, sw, sh);
 				}
 			}

@@ -246,9 +246,7 @@ public class ImageJ extends Frame implements ActionListener,
 					+ "Then you need 64-bit Java!\n"
 					+ "Shall we clear this up now (OK) or continue in limited32-bit mode (Cancel)?\n\n"
 
-					+ "http://www.java.com/en/download/manual.jsp\n"
-
-					+ "http://javadl.oracle.com/webapps/download/AutoDL?BundleId=210185")) {
+					)) {
 				IJ.runPlugIn("ij.plugin.BrowserLauncher", "http://www.java.com/en/download/manual.jsp");
 				System.exit(0);
 			}
