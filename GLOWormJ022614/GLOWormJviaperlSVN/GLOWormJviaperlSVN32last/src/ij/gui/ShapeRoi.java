@@ -4,6 +4,7 @@ import java.awt.image.*;
 import java.awt.geom.*;
 import java.awt.event.KeyEvent;
 import java.util.*;
+
 import ij.*;
 import ij.process.*;
 import ij.measure.*;
@@ -1076,8 +1077,10 @@ public class ShapeRoi extends Roi {
 				g2d.setStroke(new BasicStroke (getStrokeWidth()*3));
 	    		g.setColor(Color.yellow);
 				g2d.draw(aTx.createTransformedShape(shape));
-			} else 
+			} else {
+				g.setColor(fillColor);
 				g2d.fill(aTx.createTransformedShape(shape));
+			}
 		} else {
 			g2d.setStroke(new BasicStroke (getStrokeWidth()*2));
 			if (sourceColor != null)

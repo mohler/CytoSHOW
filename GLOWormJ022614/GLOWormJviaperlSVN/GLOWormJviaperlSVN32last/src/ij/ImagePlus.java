@@ -1634,7 +1634,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			
 			blinkRoi.setFillColor(null);
 			if (origRoi.getFillColor() == null);
-				origRoi.setFillColor(Colors.decode("#22ffff00", null));
+				origRoi.setFillColor(Colors.decode("#01ffff00", null));
 //			blinkRoi.setFillColor(Colors.decode("#01ffffff", null));
 	
 			if (roi instanceof TextRoi)

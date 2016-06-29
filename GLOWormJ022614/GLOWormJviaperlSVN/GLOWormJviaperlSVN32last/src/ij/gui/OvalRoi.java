@@ -217,10 +217,6 @@ public class OvalRoi extends Roi {
 	@Override
 	public void draw(Graphics g) {
 		Color color =  strokeColor!=null? strokeColor:ROIColor;
-		if (fillColor!=null) 
-			color = fillColor;
-		else
-			color = Color.cyan;
 		Color sourceColor = null;
 		boolean isActiveOverlayRoi = !overlay && isActiveOverlayRoi();
 		if (isActiveOverlayRoi /*&& !hasHandles*/) {
@@ -230,7 +226,8 @@ public class OvalRoi extends Roi {
 				sourceColor = isLine() ? strokeColor: null;
 				if (sourceColor == null || sourceColor == Roi.getDefaultFillColor()){
 					if (imp.getRoiManager().getSelectedRoisAsArray().length>0)
-						sourceColor = imp.getRoiManager().getSelectedRoisAsArray()[0].getFillColor();
+						if (imp.getRoiManager().getSelectedRoisAsArray()[0] != null)
+							sourceColor = imp.getRoiManager().getSelectedRoisAsArray()[0].getFillColor();
 				}
 				if (sourceColor != null)
 					color = new Color(sourceColor.getRed(), sourceColor.getGreen(), sourceColor.getBlue());
@@ -239,7 +236,7 @@ public class OvalRoi extends Roi {
 			}
 		} else
 			color = Color.cyan;
-		
+		if (fillColor!=null) color = fillColor;
 		g.setColor(color);
 		mag = getMagnification();
 		int sw = (int)(width*mag);
@@ -272,16 +269,12 @@ public class OvalRoi extends Roi {
 				g.fillOval(sx1, sy1, sw, sh);
 			}
 		} else{
-			if (isActiveOverlayRoi) {
-				g2d.setStroke(new BasicStroke (getStrokeWidth()*3));
-				g.setColor(Color.red);
-				g.drawOval(sx1, sy1, sw, sh);
-			} else{			
-				g2d.setStroke(new BasicStroke (getStrokeWidth()*2));
-				if (sourceColor != null)
-					color = new Color(sourceColor.getRed(), sourceColor.getGreen(), sourceColor.getBlue());			
-				g.drawOval(sx1, sy1, sw, sh);
-			}
+			g2d.setStroke(new BasicStroke (getStrokeWidth()*2));
+			if (sourceColor != null)
+				color = new Color(sourceColor.getRed(), sourceColor.getGreen(), sourceColor.getBlue());			
+			g.setColor(color);
+			g.drawOval(sx1, sy1, sw, sh);
+
 		}
 		if (state!=CONSTRUCTING && clipboard==null && !overlay) {
 			int size2 = HANDLE_SIZE/2;
