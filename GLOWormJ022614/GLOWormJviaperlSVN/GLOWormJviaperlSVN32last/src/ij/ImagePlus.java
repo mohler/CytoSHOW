@@ -1651,22 +1651,24 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 					else
 						roi.setStrokeWidth(roiStrokeWidth);
 					Rectangle locBounds = getRoi().getBounds();
-					if (blinkOn){
-						killRoi();
-						roi = blinkRoi;
-						roi.setImage(ImagePlus.this);
-						roi.setLocation(locBounds.x, locBounds.y);
+					if (roi.getState() != Roi.MOVING) {
+						if (blinkOn){
+							killRoi();
+							roi = blinkRoi;
+							roi.setImage(ImagePlus.this);
+							roi.setLocation(locBounds.x, locBounds.y);
 
-						blinkOn = false;
-					} else {
-						killRoi();
-						roi = origRoi;
-						roi.setImage(ImagePlus.this);
-						roi.setLocation(locBounds.x, locBounds.y);
+							blinkOn = false;
+						} else {
+							killRoi();
+							roi = origRoi;
+							roi.setImage(ImagePlus.this);
+							roi.setLocation(locBounds.x, locBounds.y);
 
-						blinkOn =true;
+							blinkOn =true;
+						}
+						draw();
 					}
-					draw();
 				}
 			}, 0, 500, TimeUnit.MILLISECONDS);
 		}
