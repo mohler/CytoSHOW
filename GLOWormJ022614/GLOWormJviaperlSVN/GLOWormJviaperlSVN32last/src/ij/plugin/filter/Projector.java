@@ -1039,7 +1039,7 @@ public class Projector implements PlugInFilter, TextListener {
 		
 		for(int r=0; r < roiArray.length; r++) {
 			//			for (int k=1; k<=nSlices; k++) {
-			z = (int)((roiArray[r].getZPosition()-1)*sliceInterval+0.5) - zcenter;
+			z = (int)((roiArray[r].getZPosition()-1)*(imp.getCalibration().pixelDepth/imp.getCalibration().pixelWidth)+0.5) - zcenter;
 			zcostheta = z * costheta;
 			zsintheta = z * sintheta;
 			ycostheta = ycosthetainit;
@@ -1166,7 +1166,7 @@ public class Projector implements PlugInFilter, TextListener {
 		
 		for(int r=0; r < roiArray.length; r++) {
 			//			for (int k=1; k<=nSlices; k++) {
-			z = (int)((roiArray[r].getZPosition()-1)*sliceInterval+0.5) - zcenter;
+			z = (int)((roiArray[r].getZPosition()-1)*(imp.getCalibration().pixelDepth/imp.getCalibration().pixelWidth)+0.5) - zcenter;
 			zcostheta = z * costheta;
 			zsintheta = z * sintheta;
 			offsetinit = ((projheight-bottom+top)/2) * projwidth +(projwidth - right + left)/2 - projwidth;

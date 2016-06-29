@@ -543,7 +543,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 					Rectangle srb = stackRois[r].getBounds();
 					for (int x = 0; x < width; x++) {
 						if (srb.contains(x, y) && !cloneRois.contains(stackRois[r])) {
-							if (stackRois[r] instanceof TextRoi || stackRois[r] instanceof OvalRoi) {
+							if (stackRois[r] instanceof TextRoi || stackRois[r] instanceof OvalRoi || !(stackRois[r] instanceof ShapeRoi)) {
 								Roi nextRoi = (Roi) stackRois[r].clone();
 								cloneRois.add(stackRois[r]);
 								nextRoi.setLocation(
@@ -685,7 +685,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 					Rectangle srb = stackRois[r].getBounds();
 					for (int y = 0; y < height; y++) {
 						if (srb.contains(x, y) && !cloneRois.contains(stackRois[r])) {
-							if (stackRois[r] instanceof TextRoi || stackRois[r] instanceof OvalRoi) {
+							if (stackRois[r] instanceof TextRoi || stackRois[r] instanceof OvalRoi || !(stackRois[r] instanceof ShapeRoi)) {
 								Roi nextRoi = (Roi) stackRois[r].clone();
 								cloneRois.add(stackRois[r]);
 								nextRoi.setLocation((int) (nextRoi.getZPosition()
