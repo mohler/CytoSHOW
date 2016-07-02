@@ -24,7 +24,6 @@ import ij.plugin.frame.ColorLegend;
 import ij.plugin.frame.ContrastAdjuster;
 import ij.plugin.frame.Recorder;
 import ij.plugin.frame.RoiManager;
-import ij.plugin.Colors;
 import ij.plugin.Converter;
 import ij.plugin.Duplicator;
 import ij.plugin.MultiFileInfoVirtualStack;
@@ -1619,61 +1618,66 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 				roiFillColor = newRoi.getFillColor();
 				return;
 			}
+			newRoi = (Roi)newRoi.clone();
+			if (newRoi==null) {
+				deleteRoi(); 
+				return;
+			}
 		}
 		if (bounds.width==0 && bounds.height==0 && !(newRoi.getType()==Roi.POINT||newRoi.getType()==Roi.LINE))
 			{deleteRoi(); return;}
 		roi = newRoi;
+		roiFillColor = roi.getFillColor();
+		roiStrokeWidth = roi.getStrokeWidth();
+		roiStrokeColor = roi.getStrokeColor();
+		if (roiStrokeColor ==null)
+			roiStrokeColor = Color.yellow;
 		
+		if (ip!=null) {
+			ip.setMask(null);
+			if (roi.isArea())
+				ip.setRoi(bounds);
+			else
+				ip.resetRoi();
+		}
 		if (this.isDisplayedHyperStack()){
 			blinkOn=true;
-			final Roi blinkRoi = (Roi)roi.clone();
-			final Roi origRoi = (Roi)roi.clone();
-		
-			if (roi instanceof Arrow)
-				blinkRoi.setStrokeColor(roiStrokeColor.brighter());
-			
-			blinkRoi.setFillColor(null);
-			if (origRoi.getFillColor() == null);
-				origRoi.setFillColor(Colors.decode("#01ffff00", null));
-//			blinkRoi.setFillColor(Colors.decode("#01ffffff", null));
-	
-			if (roi instanceof TextRoi)
-				blinkRoi.setFillColor(Color.yellow);
-
 			if (schfut != null)
 				schfut.cancel(true);
 			schfut = blinkService.scheduleAtFixedRate(new Runnable()
 			{
 				public void run()
 				{
+					double strokeWidthMagAdjust = roiStrokeWidth/win.getCanvas().getMagnification();
+					Roi dummyRoi = new Roi(0,0,0,0);
+					dummyRoi.setStrokeWidth(strokeWidthMagAdjust);
+					strokeWidthMagAdjust = dummyRoi.getStrokeWidth();
+
 					if (roi instanceof Line) 
-						roi.setStrokeWidth(roiStrokeWidth);
+						roi.setStrokeWidth(strokeWidthMagAdjust);
 					else
 						roi.setStrokeWidth(roiStrokeWidth);
-					Rectangle locBounds = getRoi().getBounds();
-					if (roi.getState() != Roi.MOVING) {
-						if (blinkOn){
-							killRoi();
-							roi = blinkRoi;
-							roi.setImage(ImagePlus.this);
-							roi.setLocation(locBounds.x, locBounds.y);
+					
+					if (blinkOn){
+						if (roi instanceof Arrow)
+							roi.setStrokeColor(roiStrokeColor.brighter());
+						roi.setFillColor(Roi.getDefaultFillColor());
+						if (roi instanceof TextRoi)
+							roi.setFillColor(Color.yellow);
 
-							blinkOn = false;
-						} else {
-							killRoi();
-							roi = origRoi;
-							roi.setImage(ImagePlus.this);
-							roi.setLocation(locBounds.x, locBounds.y);
-
-							blinkOn =true;
-						}
-						draw();
+						blinkOn = false;
+					} else {
+						if (roi instanceof Arrow)
+							roi.setStrokeColor(roiStrokeColor.darker());
+						roi.setFillColor(roiFillColor);
+						blinkOn =true;
 					}
+					draw();
 				}
 			}, 0, 500, TimeUnit.MILLISECONDS);
 		}
-//		if (roi!=null)
-//			roi.setImage(this);
+		if (roi!=null)
+			roi.setImage(this);
 		if (updateDisplay) draw();
 	}
 	
