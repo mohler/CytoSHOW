@@ -1,6 +1,7 @@
 package ij.gui;
 import java.awt.*;
 import java.awt.image.*;
+
 import ij.*;
 import ij.plugin.frame.Recorder;
 import ij.process.FloatPolygon;
@@ -30,6 +31,7 @@ public class EllipseRoi extends PolygonRoi {
 		ystart = ic.offScreenYD(sy);
 	}
 
+	@Override
 	public void draw(Graphics g) {
 		super.draw(g);
 		int size2 = HANDLE_SIZE/2;

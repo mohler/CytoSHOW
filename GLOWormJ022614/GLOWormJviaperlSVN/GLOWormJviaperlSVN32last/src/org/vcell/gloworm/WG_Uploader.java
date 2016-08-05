@@ -3,6 +3,7 @@ package org.vcell.gloworm;
 import ij.IJ;
 import ij.io.DirectoryChooser;
 import ij.plugin.PlugIn;
+import ij.text.TextWindow;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -41,6 +42,14 @@ public class WG_Uploader implements PlugIn {
 		if (masterPath == null)
 			return;
 
+		TextWindow tw = new TextWindow("WG_upload","","",400,80) {
+			 public void close() {
+				 if (!IJ.showMessageWithCancel("Finish this WG_upload job??", "Click Cancel to end this job."))
+					 System.exit(0);
+			 }
+		};
+		tw.setVisible(true);
+		
 		ArrayList<String> iterativeDirPaths = new ArrayList<String>();
 		iterativeDirPaths.add(masterPath);
 		int increment = 0;
@@ -59,7 +68,7 @@ public class WG_Uploader implements PlugIn {
 			}
 			alSize = iterativeDirPaths.size();
 		}
-		
+
 		FTPClient ftpc = new FTPClient();
 		ftpc.setBufferSize(1048576);
 		try {
@@ -105,7 +114,7 @@ public class WG_Uploader implements PlugIn {
 										|| remoteFileName.equals(fileName+"_"+dateTouchString)) {
 									alreadyDone = true;
 									IJ.append((new Date()).toString()+" "+path+fileName+/*"_"+dateTouchString+*/" already backed up.", IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+"WG_UploadLog.log");
-										
+									tw.append((new Date()).toString()+" "+path+fileName+/*"_"+dateTouchString+*/" already backed up.");
 									break;
 								}
 							}
@@ -119,15 +128,17 @@ public class WG_Uploader implements PlugIn {
 							fis.close();
 							ftpc.rename(fileName+"_" + dateTouchString+".tmp", fileName+"_" + dateTouchString);
 							IJ.append((new Date()).toString()+" "+path+fileName+/*"_"+dateTouchString+*/" newly backed up", IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+"WG_UploadLog.log");
+							tw.append((new Date()).toString()+" "+path+fileName+/*"_"+dateTouchString+*/" newly backed up");
 						}
 					}
 					for (int c=IJ.isWindows()?0:1;c<pathChunks.length;c++) {
 						ftpc.changeToParentDirectory();
 					}
 				}
+				IJ.append("ENTIRE UPLOAD COMPLETE: "+ masterPath, IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+"WG_UploadLog.log");
+				tw.append("ENTIRE UPLOAD COMPLETE: "+ masterPath);
 				ftpc.logout();
 			}
-		System.exit(0);
 		} catch (SocketException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();

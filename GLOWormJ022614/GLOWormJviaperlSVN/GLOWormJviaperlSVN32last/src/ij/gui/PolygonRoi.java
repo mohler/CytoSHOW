@@ -3,6 +3,7 @@ import ij.*;
 import ij.process.*;
 import ij.measure.*;
 import ij.plugin.frame.*;
+
 import java.awt.*;
 import java.awt.image.*;
 import java.awt.geom.*;
@@ -179,6 +180,7 @@ public class PolygonRoi extends Roi {
 		}
 	}
 	
+	@Override
 	public void draw(Graphics g) {
         updatePolygon();
 		Color color =  strokeColor!=null?strokeColor:ROIColor;

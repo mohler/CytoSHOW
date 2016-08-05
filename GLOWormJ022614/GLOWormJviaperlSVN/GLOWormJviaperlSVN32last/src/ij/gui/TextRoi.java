@@ -213,6 +213,7 @@ public class TextRoi extends Roi {
 		}
 	}
 
+	@Override
 	/** Draws the text on the screen, clipped to the ROI. */
 	public void draw(Graphics g) {
 		if (IJ.debugMode) IJ.log("draw: "+theText[0]+"  "+width+","+height);

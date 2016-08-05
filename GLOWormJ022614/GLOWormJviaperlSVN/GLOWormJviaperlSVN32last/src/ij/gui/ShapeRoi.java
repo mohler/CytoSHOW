@@ -1037,6 +1037,7 @@ public class ShapeRoi extends Roi {
 	/**********************************************************************************/
 
 	/** Non-destructively draws the shape of this object on the associated ImagePlus. */
+	@Override
 	public void draw(Graphics g) {
 		Color color =  strokeColor!=null? strokeColor:ROIColor;
 		Color sourceColor = null;
