@@ -345,11 +345,14 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (imp.getOriginalFileInfo() == null) {
 			setUpFileInfo(imp);
 		}
-		imp = new CompositeImage(imp);
-		while (!imp.isComposite()) {
-			IJ.wait(100);
+		if(imp.getType()!=ImagePlus.COLOR_RGB) {
+				imp = new CompositeImage(imp);
+		
+				while (!imp.isComposite()) {
+					IJ.wait(100);
+				}
+				((CompositeImage)imp).setMode(CompositeImage.COMPOSITE);
 		}
-		((CompositeImage)imp).setMode(CompositeImage.COMPOSITE);
 		if (show)
 			imp.show();
 	}

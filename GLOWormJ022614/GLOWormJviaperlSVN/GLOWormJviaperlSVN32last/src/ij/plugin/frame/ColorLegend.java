@@ -58,7 +58,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 	private Color chosenColor;
 	private Hashtable<Integer, String> selectedColorRGBs;
 	Button clearButton = new Button("Clear All CheckBoxes");
-	private boolean sketchyMQTVS = false;
+	private boolean sketchyMQTVS = true;
 	private ImageProcessor lastIp;
 	private boolean changedCBorChoice;
 	public Hashtable<Integer, Color> droppedCellColors = new Hashtable<Integer, Color>();

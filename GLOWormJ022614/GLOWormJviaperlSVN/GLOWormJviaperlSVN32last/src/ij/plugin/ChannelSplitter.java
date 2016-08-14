@@ -107,6 +107,7 @@ public class ChannelSplitter implements PlugIn {
 			 r = new byte[w*h];
 			 g = new byte[w*h];
 			 b = new byte[w*h];
+			 //IJ.log(rgb.getProcessor(slice).toString());
 			 cp = (ColorProcessor)rgb.getProcessor(slice);
 			 slice += inc;
 			 cp.getRGB(r,g,b);

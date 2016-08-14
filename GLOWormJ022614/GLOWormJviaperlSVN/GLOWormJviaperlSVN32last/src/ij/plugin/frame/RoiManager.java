@@ -1059,7 +1059,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					String hexRed = Integer.toHexString(clColor.getRed());
 					String hexGreen = Integer.toHexString(clColor.getGreen());
 					String hexBlue = Integer.toHexString(clColor.getBlue());
-					roiCopy.setFillColor(Colors.decode("#88"+(hexRed.length()==1?"0":"")+hexRed
+					roiCopy.setFillColor(Colors.decode("#ff"+(hexRed.length()==1?"0":"")+hexRed
 														+(hexGreen.length()==1?"0":"")+hexGreen
 														+(hexBlue.length()==1?"0":"")+hexBlue
 													, Color.white));
@@ -1403,7 +1403,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						String hexRed = Integer.toHexString(clColor.getRed());
 						String hexGreen = Integer.toHexString(clColor.getGreen());
 						String hexBlue = Integer.toHexString(clColor.getBlue());
-						roi.setFillColor(Colors.decode("#88"+(hexRed.length()==1?"0":"")+hexRed
+						roi.setFillColor(Colors.decode("#ff"+(hexRed.length()==1?"0":"")+hexRed
 															+(hexGreen.length()==1?"0":"")+hexGreen
 															+(hexBlue.length()==1?"0":"")+hexBlue
 														, Color.white));
@@ -1883,7 +1883,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								String hexRed = Integer.toHexString(clColor.getRed());
 								String hexGreen = Integer.toHexString(clColor.getGreen());
 								String hexBlue = Integer.toHexString(clColor.getBlue());
-								roi.setFillColor(Colors.decode("#88"+(hexRed.length()==1?"0":"")+hexRed
+								roi.setFillColor(Colors.decode("#ff"+(hexRed.length()==1?"0":"")+hexRed
 																	+(hexGreen.length()==1?"0":"")+hexGreen
 																	+(hexBlue.length()==1?"0":"")+hexBlue
 																, Color.white));

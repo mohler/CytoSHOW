@@ -273,7 +273,7 @@ public class Projector implements PlugInFilter, TextListener {
 					}
 
 					ImagePlus impDZ = impD.duplicate();
-					if (impDZ.getBitDepth() > 8) {
+					if (impDZ.getBitDepth() > 8 && !isRGB) {
 						impDZ.setPosition(1, (1+lastZ+1-firstZ)/2, 1);
 						impDZ.getProcessor().setMinAndMax(0.0, 50.0);
 						IJ.run(impDZ,"8-bit","");
@@ -393,7 +393,8 @@ public class Projector implements PlugInFilter, TextListener {
 				projImpDC.setStack(stackC, lastC-firstC+1, stackC.getSize()/(lastC-firstC+1), 1);
 				
 				IJ.save(projImpDC, tempDir + File.separator + "proj_"+loopT+"_"+loopC+".tif");
-				projImpDC = new CompositeImage(projImpDC);
+				if (!isRGB) 
+					projImpDC= new CompositeImage(projImpDC);
 				for (loopC = firstC; loopC < lastC +1; loopC++) {
 					projImpD[loopC-firstC].flush();
 				}
