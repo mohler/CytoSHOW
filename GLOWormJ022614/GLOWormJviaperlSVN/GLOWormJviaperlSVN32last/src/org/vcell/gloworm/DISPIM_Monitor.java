@@ -868,12 +868,12 @@ public class DISPIM_Monitor implements PlugIn {
 							"		    print(f,batStringC);\n" + 
 							"		    batStringA = \"cd C:\\\\Program Files\\\\mipav\";\n" + 
 							"		    print(f,batStringA);\n" + 
-							"		    batStringB = \"cmd64 /c start /LOW /b mipav -s \\\""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileNames[f]+timecode+".sct\\\" -hide\";\n" + 
+							"		    batStringB = \"cmd64 /c mipav -s \\\""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileNames[f]+timecode+".sct\\\" -hide\";\n" + 
 							"		    print(f,batStringB);\n" + 
 							"		    print(f,\"exit\");\n" + 
 							"		    File.close(f);	    \n" + 
 
-							"batJob = exec(\"cmd64\", \"/c\", \"start\", \"/min\", \""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileNames[f]+timecode+".bat\");" +
+							"batJob = exec(\"cmd64\", \"/c\", \"start\", \"/low\", \"/min\", \"/wait\", \""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileNames[f]+timecode+".bat\");" +
 							""
 							);
 
@@ -931,12 +931,12 @@ public class DISPIM_Monitor implements PlugIn {
 								"		    print(f,batStringC);\n" + 
 								"		    batStringA = \"cd C:\\\\Program Files\\\\mipav\";\n" + 
 								"		    print(f,batStringA);\n" + 
-								"		    batStringB = \"cmd64 /c start /LOW /b mipav -s \\\""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileNames[f]+timecode+".sct\\\" -hide\";\n" + 
+								"		    batStringB = \"cmd64 /c mipav -s \\\""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileNames[f]+timecode+".sct\\\" -hide\";\n" + 
 								"		    print(f,batStringB);\n" + 
 								"		    print(f,\"exit\");\n" + 
 								"		    File.close(f);	    \n" + 
 
-								"batJob = exec(\"cmd64\", \"/c\", \"start\", \"\", \"/min\", \""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileNames[f]+timecode+".bat\");" +
+								"batJob = exec(\"cmd64\", \"/c\", \"start\", \"/low\", \"/min\", \"/wait\", \""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileNames[f]+timecode+".bat\");" +
 								""
 								);
 
@@ -1578,12 +1578,12 @@ public class DISPIM_Monitor implements PlugIn {
 							"		    print(f,batStringC);\n" + 
 							"		    batStringA = \"cd C:\\\\Program Files\\\\mipav\";\n" + 
 							"		    print(f,batStringA);\n" + 
-							"		    batStringB = \"cmd64 /c start /LOW /AFFINITY 001111111111111111111111 /b mipav -s \\\""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileName+timecode+".sct\\\" -hide\";\n" + 
+							"		    batStringB = \"cmd64 /c mipav -s \\\""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileName+timecode+".sct\\\" -hide\";\n" + 
 							"		    print(f,batStringB);\n" + 
 							"		    print(f,\"exit\");\n" + 
 							"		    File.close(f);	    \n" + 
 
-							"batJob = exec(\"cmd64\", \"/c\", \"start\", \"/min\", \""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileName+timecode+".bat\");" +
+							"batJob = exec(\"cmd64\", \"/c\", \"start\", \"/low\", \"/min\", \"/wait\", \""+tempDir.replace("\\", "\\\\")+"GenerateFusion1"+frameFileName+timecode+".bat\");" +
 							""
 								);
 
@@ -1640,12 +1640,12 @@ public class DISPIM_Monitor implements PlugIn {
 								"		    print(f,batStringC);\n" + 
 								"		    batStringA = \"cd C:\\\\Program Files\\\\mipav\";\n" + 
 								"		    print(f,batStringA);\n" + 
-								"		    batStringB = \"cmd64 /c start /LOW /AFFINITY 001111111111111111111111 /b mipav -s \\\""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileName+timecode+".sct\\\" -hide\";\n" + 
+								"		    batStringB = \"cmd64 /c mipav -s \\\""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileName+timecode+".sct\\\" -hide\";\n" + 
 								"		    print(f,batStringB);\n" + 
 								"		    print(f,\"exit\");\n" + 
 								"		    File.close(f);	    \n" + 
 
-								"batJob = exec(\"cmd64\", \"/c\", \"start\", \"/min\", \""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileName+timecode+".bat\");" +
+								"batJob = exec(\"cmd64\", \"/c\", \"start\", \"/low\", \"/min\", \"/wait\", \""+tempDir.replace("\\", "\\\\")+"GenerateFusion2"+frameFileName+timecode+".bat\");" +
 								""
 									);
 

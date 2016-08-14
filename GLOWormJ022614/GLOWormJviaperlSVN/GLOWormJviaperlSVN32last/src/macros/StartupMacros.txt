@@ -172,8 +172,8 @@
   }
 
 macro "Monitor diSPIM Acquisition" {
-	//run("diSPIM Monitor", "select=/Users/wmohler/Documents/FRED wavelengths=2 slices=49");
-	run("diSPIM Monitor");
+	run("diSPIM Monitor", "select=/Users/wmohler/Documents/FRED wavelengths=2 slices=49");
+	//run("diSPIM Monitor");
 }
 
 macro "BkSubCropMacro" {
