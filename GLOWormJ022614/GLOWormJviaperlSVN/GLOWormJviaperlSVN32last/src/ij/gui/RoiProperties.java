@@ -66,7 +66,7 @@ public class RoiProperties {
 		if (!isRange && (roi instanceof ImageRoi) && !overlayOptions)
 			return showImageDialog(name);
 		if (roi.getStrokeColor()!=null) strokeColor = roi.getStrokeColor();
-//		if (strokeColor==null) strokeColor = Roi.getColor();
+		if (strokeColor==null) strokeColor = Roi.getColor();
 		if (roi.getFillColor()!=null) fillColor = roi.getFillColor();
 		double width = roi.getStrokeWidth();
 		if (width>0) strokeWidth = width;

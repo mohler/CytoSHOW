@@ -5,11 +5,9 @@ import ij.measure.*;
 import ij.plugin.frame.Recorder;
 import ij.plugin.filter.Analyzer;
 import ij.plugin.filter.ThresholdToSelection;
-import ij.plugin.Colors;
 import ij.plugin.RectToolOptions;
 import ij.macro.Interpreter;
 import ij.io.RoiDecoder;
-
 import java.awt.*;
 import java.util.*;
 import java.io.*;
@@ -932,16 +930,15 @@ public class Roi extends Object implements Cloneable, java.io.Serializable {
 					if (imp.getRoiManager().getSelectedRoisAsArray().length>0)
 						sourceColor = imp.getRoiManager().getSelectedRoisAsArray()[0].getFillColor();
 					if (sourceColor == null)
-						sourceColor = Colors.decode("#33ffffff", null);
+						sourceColor = Color.decode("#33ffffff");
 				}
 				if (sourceColor != null)
-					color = sourceColor;
+					color = new Color(sourceColor.getRed(), sourceColor.getGreen(), sourceColor.getBlue());
 				else
 					color = Color.cyan;
 			}
-		} 
-//		else
-//			color = Color.cyan;
+		} else
+			color = Color.cyan;
 
 		g.setColor(color);
 		mag = getMagnification();
@@ -1004,7 +1001,7 @@ public class Roi extends Object implements Cloneable, java.io.Serializable {
 				}
 			} else {
 				if (fillColor!=null) {
-					if (!overlay ) {
+					if (!overlay && isActiveOverlayRoi()) {
 						g2d.setStroke(new BasicStroke (getStrokeWidth()*3));
 						g.setColor(Color.yellow);
 						g.drawRect(sx1, sy1, sw, sh);
@@ -1015,7 +1012,7 @@ public class Roi extends Object implements Cloneable, java.io.Serializable {
 				} else {
 					g2d.setStroke(new BasicStroke (getStrokeWidth()*2));
 					if (sourceColor!=null)
-						g.setColor(sourceColor);
+						g.setColor(new Color(sourceColor.getRed(), sourceColor.getGreen(), sourceColor.getBlue()));
 					g.drawRect(sx1, sy1, sw, sh);
 				}
 			}
@@ -1457,9 +1454,9 @@ public class Roi extends Object implements Cloneable, java.io.Serializable {
 		if (width==0)
 			stroke = null;
 		else if (wideLine)
-			this.stroke = new BasicStroke((float)width, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL);
+			this.stroke = new BasicStroke(width, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL);
 		else
-			this.stroke = new BasicStroke((float)width);
+			this.stroke = new BasicStroke(width);
 		if (width>1f) fillColor = null;
 	}
 
