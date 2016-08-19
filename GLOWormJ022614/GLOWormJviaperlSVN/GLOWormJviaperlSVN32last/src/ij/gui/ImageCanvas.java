@@ -1786,103 +1786,91 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 						mi =  new JMenuItem("^--------------------^");
 						mi.addActionListener(ij);
 						nearPopup.add(mi);
-
-						double widthDenom = 3;
-						double timeBalancer = -28;
-						if (rm.getImagePlus().getTitle().contains("MQTVS_1305281558")){
-							widthDenom = 3.8;
-							timeBalancer = 2;
-						}
-						if (rm.getImagePlus().getTitle().contains("SW_")){
-							widthDenom = 100;
-							timeBalancer = 0;
-						}
+						
 						ImagePlus guideImp = rm.getImagePlus();
 						if (rm.getImagePlus().getMotherImp() != null)
 							guideImp = rm.getImagePlus().getMotherImp();
 						int frames = guideImp.getNFrames();
 
-						BigDecimal framesBD = new BigDecimal(""
-								+ (frames + timeBalancer));
-						BigDecimal widthDenomBD = new BigDecimal("" + widthDenom);
-						BigDecimal tBD = new BigDecimal(""
-								+ (rm.getImagePlus().getMotherFrame() > 0 ? rm.getImagePlus().getMotherFrame()
-										: 0 + rm.getFullRoisAsArray()[targetTag[0]].getTPosition() + timeBalancer));
-						BigDecimal impHeightBD = new BigDecimal(""
-								+ guideImp.getHeight());
-						BigDecimal cellDiameterBD = impHeightBD.divide(
-								new BigDecimal("10"), MathContext.DECIMAL32);
-						if (guideImp.getTitle().contains("SW_")){
 
-							cellDiameterBD = impHeightBD.divide(
-									widthDenomBD, MathContext.DECIMAL32).multiply(
-											takeRoot(3, (framesBD.subtract(tBD)
-													.add(new BigDecimal("1"))).divide(tBD,
-															MathContext.DECIMAL32), new BigDecimal(
-																	".001")), MathContext.DECIMAL32);
-						}else{
-							cellDiameterBD = impHeightBD.divide(
-									widthDenomBD, MathContext.DECIMAL32).multiply(
-											takeRoot(3, (framesBD.subtract(tBD)
-													.add(new BigDecimal("1"))).divide(tBD,
-															MathContext.DECIMAL32), new BigDecimal(
-																	".001")), MathContext.DECIMAL32);
-						}
-						int zSpan = (int) (cellDiameterBD.intValue() / guideImp
-								.getCalibration().pixelDepth);
-						if (zSpan<1)
-							zSpan=1;
-						for (int z = 0; z < zSpan; z++) {
-							int zSlice = Integer.parseInt(((String) rm.getListModel().get(targetTag[0]))
-									.split("_")[((String) rm.getListModel().get(targetTag[0])).split("_").length-2])
-									- zSpan / 2 + z;
-							if (zSlice < 1 || zSlice > rm.getImagePlus().getNSlices())
-								continue;
-							int tFrame = Integer.parseInt(((String) rm.getListModel().get(targetTag[0]))
-									.split("_")[((String) rm.getListModel().get(targetTag[0])).split("_").length-1]
-											.replace("C", "").replace("Z", "").replace("T", "").split("-")[0]);
+						int zRadius=1;
+						ArrayList<Roi> nearHits = new ArrayList<Roi>();
+						String[] targetChunks = ((String) rm.getListModel().get(targetTag[0])).split("_");
+						int targetZ = Integer.parseInt(targetChunks[targetChunks.length-2]);
+						int tFrame = Integer.parseInt(targetChunks[targetChunks.length-1]
+								.replace("C", "").replace("Z", "").replace("T", "").split("-")[0]);
+						
+						double threeDZdiagonal = Math.sqrt(
+															Math.pow(
+																	Math.sqrt(Math.pow(guideImp.getWidth(), 2)
+																				+Math.pow(guideImp.getHeight(), 2)
+																			 ) 
+																, 2)
+															+
+															Math.pow(
+																	guideImp.getNSlices()
+																	*(guideImp.getCalibration().pixelDepth/guideImp.getCalibration().pixelWidth)
+																,2)
+														);
+						
+						double zxRatio = guideImp.getCalibration().pixelDepth/guideImp.getCalibration().pixelWidth;
+						while (nearHits.size() < 10 && (zRadius< threeDZdiagonal)) {
+							for (int zSlice=targetZ-zRadius;zSlice<=targetZ+zRadius;zSlice++) {
+								if (zSlice < 1 || zSlice > rm.getImagePlus().getNSlices())
+									continue;
+								if (guideImp.getTitle().contains("SW_"))
+									zSlice = targetZ;
+								double inPlaneDiameter = 2 * zxRatio * Math.sqrt(Math.pow(zRadius,2)-Math.pow((zSlice-targetZ),2));
 
-							double inPlaneDiameter = 2 * Math.sqrt(Math.pow(
-									cellDiameterBD.intValue() / 2, 2)
-									- Math.pow((rm.getFullRoisAsArray()[targetTag[0]].getZPosition() - zSlice)
-											* guideImp.getCalibration().pixelDepth, 2));
+								Roi hoodRoi = new OvalRoi(targetTag[1] - (inPlaneDiameter / 2),
+										targetTag[2] - (inPlaneDiameter / 2), 
+										inPlaneDiameter, inPlaneDiameter);
+//								imp.setPosition(guideImp.getChannel(), zSlice, guideImp.getFrame());
+//								imp.setRoi(hoodRoi);
+//								imp.getProcessor().fillOval(hoodRoi.x, hoodRoi.y, hoodRoi.width, hoodRoi.height);
+								Roi[] nearbyROIs = rm.getSliceSpecificRoiArray(zSlice,
+										tFrame, false);
+								for (int h = 0; h < nearbyROIs.length; h++) {
 
-							Roi hoodRoi = new OvalRoi(targetTag[1] - (inPlaneDiameter / 2),
-									targetTag[2] - (inPlaneDiameter / 2), 
-									inPlaneDiameter, inPlaneDiameter);
+									if (hoodRoi.contains((int) nearbyROIs[h]
+											.getBounds().getCenterX(),
+											(int) nearbyROIs[h].getBounds()
+											.getCenterY())
+											&& !clickedROIstring.contains(nearbyROIs[h].getName()
+													+ ": " + rm.getImagePlus().getTitle())) {
 
-							Roi[] nearbyROIs = rm.getSliceSpecificRoiArray(zSlice,
-									tFrame, false);
-							for (int h = 0; h < nearbyROIs.length; h++) {
-
-								if (hoodRoi.contains((int) nearbyROIs[h]
-										.getBounds().getCenterX(),
-										(int) nearbyROIs[h].getBounds()
-										.getCenterY())
-										&& !clickedROIstring.contains(nearbyROIs[h].getName()
-												+ ": " + rm.getImagePlus().getTitle())) {
-
-									//									nearPopup.add(zSlice+" "+tFrame);
-
-									mi = new JMenuItem("near "
-											+ nearbyROIs[h].getName().split("_")[0]
-													+ " in \""
-													+ (rm.getImagePlus().getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
-																	(rm.getImagePlus().getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
-																				(rm.getImagePlus().getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
-									mi.setActionCommand("near "
-											+ nearbyROIs[h].getName() + ": "
-											+ rm.getImagePlus().getTitle());
-									popupInfo[1] = popupInfo[1]+ "near "
-											+ nearbyROIs[h].getName() + ": "
-											+ rm.getImagePlus().getTitle()+"\n";
-
-									mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/See.png")));
-									mi.addActionListener(ij);
-									nearPopup.add(mi);
+										if (!nearHits.contains(nearbyROIs[h]) && nearHits.size()<50)
+											nearHits.add(nearbyROIs[h]);
+									}
 								}
+								if (guideImp.getTitle().contains("SW_")) 
+									zSlice = targetZ+zRadius+1;
 							}
+							zRadius = (int) (zRadius+1);
 						}
+
+						for (Roi hit:nearHits) {
+							String[] hitChunks = hit.getName().split("_");
+							mi = new JMenuItem("near "
+									+ hitChunks[0]
+											+ " at coord {"+hit.getBounds().getCenterX()+","+hit.getBounds().getCenterY()+","+hit.getZPosition()+","+hit.getTPosition() 
+											+ "} in \""
+											+ (rm.getImagePlus().getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
+													(rm.getImagePlus().getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
+														(rm.getImagePlus().getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
+							mi.setActionCommand("near "
+									+ hit.getName() + ": "
+									+ rm.getImagePlus().getTitle());
+							popupInfo[1] = popupInfo[1]+ "near "
+									+ hit.getName() + ": "
+									+ rm.getImagePlus().getTitle()+"\n";
+
+							mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/See.png")));
+							mi.addActionListener(ij);
+							nearPopup.add(mi);
+
+						}
+
 						relationshipsPopup.add(nearPopup);			
 					}
 
@@ -1922,11 +1910,11 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 										j = imgRoiNames.length;
 										mi = new JMenuItem(itemString.split("_")[0] + " in " 
 												+ (WindowManager.getImage(
-												openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
-														(WindowManager.getImage(
-																openImageIDsWithRM[o]).getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
-																	(WindowManager.getImage(
-																			openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
+														openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
+																(WindowManager.getImage(
+																		openImageIDsWithRM[o]).getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
+																			(WindowManager.getImage(
+																					openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
 										mi.setActionCommand(itemString);
 										mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/See.png")));
 										popupInfo[1] = popupInfo[1]+itemString+"\n";
@@ -1983,11 +1971,11 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 											j = imgRoiNames.length;
 											mi = new JMenuItem(itemString.split("_")[0] + " in " 
 													+ (WindowManager.getImage(
-													openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
-															(WindowManager.getImage(
-																	openImageIDsWithRM[o]).getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
-																		(WindowManager.getImage(
-																				openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
+															openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
+																	(WindowManager.getImage(
+																			openImageIDsWithRM[o]).getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
+																				(WindowManager.getImage(
+																						openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
 											mi.setActionCommand(itemString);
 											mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/See.png")));
 											popupInfo[1] = popupInfo[1]+itemString+"\n";
@@ -2069,11 +2057,11 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 													j = imgRoiNames.length;
 													mi = new JMenuItem(itemString.split("_")[0] + " in " 
 															+ (WindowManager.getImage(
-															openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
-																	(WindowManager.getImage(
-																			openImageIDsWithRM[o]).getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
-																				(WindowManager.getImage(
-																						openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
+																	openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
+																			(WindowManager.getImage(
+																					openImageIDsWithRM[o]).getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
+																						(WindowManager.getImage(
+																								openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
 													mi.setActionCommand(itemString);
 													mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/See.png")));
 													popupInfo[1] = popupInfo[1]+itemString+"\n";
@@ -2111,11 +2099,11 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 													j = imgRoiNames.length;
 													mi = new JMenuItem(itemString.split("_")[0] + " in " 
 															+ (WindowManager.getImage(
-															openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
-																	(WindowManager.getImage(
-																			openImageIDsWithRM[o]).getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
-																				(WindowManager.getImage(
-																						openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
+																	openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
+																			(WindowManager.getImage(
+																					openImageIDsWithRM[o]).getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
+																						(WindowManager.getImage(
+																								openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
 													mi.setActionCommand(itemString);
 													mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/See.png")));
 													popupInfo[1] = popupInfo[1]+itemString+"\n";
@@ -2148,11 +2136,11 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 													j = imgRoiNames.length;
 													mi = new JMenuItem(itemString.split("_")[0] + " in " 
 															+ (WindowManager.getImage(
-															openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
-																	(WindowManager.getImage(
-																			openImageIDsWithRM[o]).getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
-																				(WindowManager.getImage(
-																						openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
+																	openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
+																			(WindowManager.getImage(
+																					openImageIDsWithRM[o]).getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
+																						(WindowManager.getImage(
+																								openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
 													mi.setActionCommand(itemString);
 													mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/See.png")));
 													popupInfo[1] = popupInfo[1]+itemString+"\n";
@@ -2185,11 +2173,11 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 													j = imgRoiNames.length;
 													mi = new JMenuItem(itemString.split("_")[0] + " in " 
 															+ (WindowManager.getImage(
-															openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
-																	(WindowManager.getImage(
-																			openImageIDsWithRM[o]).getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
-																				(WindowManager.getImage(
-																						openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
+																	openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
+																			(WindowManager.getImage(
+																					openImageIDsWithRM[o]).getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
+																						(WindowManager.getImage(
+																								openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
 													mi.setActionCommand(itemString);
 													mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/See.png")));
 													popupInfo[1] = popupInfo[1]+itemString+"\n";

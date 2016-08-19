@@ -284,7 +284,7 @@ public class RemoteQTVS_Engine extends UnicastRemoteObject implements Compute {
 			String line = "";			
 			while(!line.contains("QTVSEngine bound on port") && attempts<3) {
 				serverPort = "" + (8085 +((int)(Math.random()*1000)));
-				jvm = new ProcessBuilder("java","-d32", "-Xmx500M", "-Xdock:name=\"CytoSHOW "+macID+":"+RemoteServer.getClientHost()+">"+serverPort+"\"", 
+				jvm = new ProcessBuilder("java","-d32", "-Xmx1000M", "-Xdock:name=\"CytoSHOW "+macID+":"+RemoteServer.getClientHost()+">"+serverPort+"\"", 
 						"-jar", "/Users/wmohler/Documents/RemoteQTVS_jpgEngine.jar", macID+":"+RemoteServer.getClientHost()+">"+serverIP+":"+serverPort+"/QTVS");
 				attempts++;
 				jvm.redirectErrorStream(true);
