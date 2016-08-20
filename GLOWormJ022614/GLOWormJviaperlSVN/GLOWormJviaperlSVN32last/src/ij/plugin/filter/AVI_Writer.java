@@ -401,7 +401,9 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 								}else {
 									ip = new ColorProcessor(imp.getImage());
 								}
-							}
+							} else {
+								ip = new ByteProcessor(imp.getImage());
+							} 
 						}else {
 							ip = new ColorProcessor(imp.getImage());
 						}

@@ -1450,7 +1450,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 
 			if (rm != null) {
-
+				Roi[] fullRoisArray = rm.getFullRoisAsArray();
 				DefaultListModel listModel = rm.getListModel();
 				int n = listModel.getSize();
 
@@ -1500,12 +1500,12 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 									&& ((String) listModel.get(r)).startsWith("\""+logLines[logLines.length-1].split("[> ,]")[1]+" " + logLines[logLines.length-1].split("[> ,]")[2])) ) {
 						mi = null;
 						targetTag[0] = r;
-						targetTag[1] = (int) rm.getFullRoisAsArray()[r].getBounds().getCenterX();
-						targetTag[2] = (int) rm.getFullRoisAsArray()[r].getBounds().getCenterY();
+						targetTag[1] = (int) fullRoisArray[r].getBounds().getCenterX();
+						targetTag[2] = (int) fullRoisArray[r].getBounds().getCenterY();
 
 						if (!brainbowSelection) {
 							cellTag = (String) listModel.get(r);
-							cellName = ((String) listModel.get(r)).split("[\"|=]")[1].trim();
+							cellName = cellTag.split("[\"|=]")[1].trim();
 							if (cellName.split(" ").length >1 
 									&& cellName.split(" ")[1].matches("-*\\d*") 
 									&& (cellName.split(" ").length <3?true:cellName.split(" ")[2].matches("\\+*")) ){
@@ -1526,7 +1526,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 //							mi.addActionListener(ij);
 //							popup.add(mi);
 						}
-						if (lineageMap) r=n;
+						if (true) r=n;
 					}
 				}
 				for (int i = 0; i < impIDs.length; i++) {
@@ -1792,9 +1792,23 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 							guideImp = rm.getImagePlus().getMotherImp();
 						int frames = guideImp.getNFrames();
 
+						ArrayList<Roi> sameCellRois = new ArrayList<Roi>(); 
+						ArrayList<String> sameCellTrimmedNames = new ArrayList<String>(); 
+						ArrayList<Integer> sameCellZs = new ArrayList<Integer>(); 
+						ArrayList<Integer> sameCellTs = new ArrayList<Integer>(); 
+						
+						for (Roi nextRoi:fullRoisArray) {
+							if (nextRoi.getName().startsWith("\""+cellName+" ")) {
+								sameCellRois.add(nextRoi);
+								sameCellTrimmedNames.add(nextRoi.getName());
+								sameCellZs.add(nextRoi.getZPosition());
+								sameCellTs.add(nextRoi.getTPosition());
+							}
+						}
 
 						int zRadius=1;
 						ArrayList<Roi> nearHits = new ArrayList<Roi>();
+						ArrayList<String> nearHitNames = new ArrayList<String>();
 						String[] targetChunks = ((String) rm.getListModel().get(targetTag[0])).split("_");
 						int targetZ = Integer.parseInt(targetChunks[targetChunks.length-2]);
 						int tFrame = Integer.parseInt(targetChunks[targetChunks.length-1]
@@ -1814,39 +1828,46 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 														);
 						
 						double zxRatio = guideImp.getCalibration().pixelDepth/guideImp.getCalibration().pixelWidth;
+
+						
 						while (nearHits.size() < 10 && (zRadius< threeDZdiagonal)) {
-							for (int zSlice=targetZ-zRadius;zSlice<=targetZ+zRadius;zSlice++) {
-								if (zSlice < 1 || zSlice > rm.getImagePlus().getNSlices())
-									continue;
-								if (guideImp.getTitle().contains("SW_"))
-									zSlice = targetZ;
-								double inPlaneDiameter = 2 * zxRatio * Math.sqrt(Math.pow(zRadius,2)-Math.pow((zSlice-targetZ),2));
+							for (int zSliceAdjust=0-(zRadius-1);zSliceAdjust<=0+(zRadius-1);zSliceAdjust++) {
 
-								Roi hoodRoi = new OvalRoi(targetTag[1] - (inPlaneDiameter / 2),
-										targetTag[2] - (inPlaneDiameter / 2), 
-										inPlaneDiameter, inPlaneDiameter);
-//								imp.setPosition(guideImp.getChannel(), zSlice, guideImp.getFrame());
-//								imp.setRoi(hoodRoi);
-//								imp.getProcessor().fillOval(hoodRoi.x, hoodRoi.y, hoodRoi.width, hoodRoi.height);
-								Roi[] nearbyROIs = rm.getSliceSpecificRoiArray(zSlice,
-										tFrame, false);
-								for (int h = 0; h < nearbyROIs.length; h++) {
+								for (int sc=0;sc<sameCellRois.size();sc++) {
+									int zSlice = sameCellRois.get(sc).getZPosition() + zSliceAdjust;
+									if (zSlice < 1 || zSlice > rm.getImagePlus().getNSlices())
+										continue;
+									if (guideImp.getTitle().contains("SW_"))
+										zSlice = sameCellZs.get(sc);
+									double inPlaneDiameter = 4 * zxRatio * zRadius;
+									if (!guideImp.getTitle().contains("SW_"))
+										inPlaneDiameter = 2 * zxRatio * Math.sqrt(Math.pow(zRadius,2)-Math.pow((zSlice-targetZ),2));
 
-									if (hoodRoi.contains((int) nearbyROIs[h]
-											.getBounds().getCenterX(),
-											(int) nearbyROIs[h].getBounds()
-											.getCenterY())
-											&& !clickedROIstring.contains(nearbyROIs[h].getName()
-													+ ": " + rm.getImagePlus().getTitle())) {
-
-										if (!nearHits.contains(nearbyROIs[h]) && nearHits.size()<50)
-											nearHits.add(nearbyROIs[h]);
+									Roi hoodRoi = new OvalRoi(targetTag[1] - (inPlaneDiameter / 2),
+											targetTag[2] - (inPlaneDiameter / 2), 
+											inPlaneDiameter, inPlaneDiameter);
+									Roi[] nearbyROIs = rm.getSliceSpecificRoiArray(zSlice,
+											sameCellTs.get(sc), false);
+									for (int h = 0; h < nearbyROIs.length; h++) {
+										Roi nextNearRoi = nearbyROIs[h];
+										String nnrn = nextNearRoi.getName().split("[\"|=]")[1].trim().split(" ")[0];
+										if (hoodRoi.contains((int) nextNearRoi
+												.getBounds().getCenterX(),
+												(int) nextNearRoi.getBounds()
+												.getCenterY())
+												&& !clickedROIstring.startsWith("\""+nnrn) ){
+											boolean notGotYet = !nearHits.contains(nextNearRoi)  && !nearHitNames.contains(nextNearRoi.getName().split("[\"|=]")[1].trim().split(" ")[0]);
+											if (notGotYet && nearHits.size()<50) {
+												nearHits.add(nextNearRoi);
+												nearHitNames.add(nextNearRoi.getName().split("[\"|=]")[1].trim().split(" ")[0]);
+											}
+										}
 									}
 								}
 								if (guideImp.getTitle().contains("SW_")) 
-									zSlice = targetZ+zRadius+1;
+									zSliceAdjust = targetZ+zRadius+1;
 							}
-							zRadius = (int) (zRadius+1);
+								zRadius = (int) (zRadius+1);
 						}
 
 						for (Roi hit:nearHits) {
@@ -2216,7 +2237,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 					String oldLog = IJ.getLog();
 					IJ.log(cellName);
 
-					imp.getWindow().toFront();
+//					imp.getWindow().toFront();
 					IJ.runMacro(""
 							+ "print(\"starting...\");"
 							+ "string = File.openUrlAsString(\"http://fsbill.cam.uchc.edu/gloworm/Xwords/Partslist.html\");"
