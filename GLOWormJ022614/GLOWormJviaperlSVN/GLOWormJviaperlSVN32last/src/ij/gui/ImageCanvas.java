@@ -1843,8 +1843,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 									if (!guideImp.getTitle().contains("SW_"))
 										inPlaneDiameter = 2 * zxRatio * Math.sqrt(Math.pow(zRadius,2)-Math.pow((zSlice-targetZ),2));
 
-									Roi hoodRoi = new OvalRoi(targetTag[1] - (inPlaneDiameter / 2),
-											targetTag[2] - (inPlaneDiameter / 2), 
+									Roi hoodRoi = new OvalRoi(sameCellRois.get(sc).getBounds().getCenterX() - (inPlaneDiameter / 2),
+											sameCellRois.get(sc).getBounds().getCenterY() - (inPlaneDiameter / 2), 
 											inPlaneDiameter, inPlaneDiameter);
 									Roi[] nearbyROIs = rm.getSliceSpecificRoiArray(zSlice,
 											sameCellTs.get(sc), false);
