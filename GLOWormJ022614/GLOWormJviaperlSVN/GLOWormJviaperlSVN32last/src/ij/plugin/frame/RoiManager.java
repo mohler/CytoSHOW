@@ -599,6 +599,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			else if (command.equals("Properties..."))
 				setProperties(null, -1, null);
+			else if (command.equals("Flatten"))
+				IJ.run("Flatten_Tags");
 			else if (command.equals("Flatten [F]"))
 				flatten();
 			else if (command.equals("Measure"))

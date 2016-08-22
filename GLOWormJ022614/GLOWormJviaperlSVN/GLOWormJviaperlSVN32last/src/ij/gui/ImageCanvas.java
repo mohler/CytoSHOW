@@ -1590,7 +1590,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				
 				
 				String[] logLines2=null;
-
+				
+//				if (false) {
 				if (getGenes && cellName != "" && cellName != null) {
 					JMenu genePopup = new JMenu(cellName + ": Expressed Genes >", true);
 					genePopup.setIcon(new ImageIcon(ImageWindow.class.getResource("images/DNAicon.png")));

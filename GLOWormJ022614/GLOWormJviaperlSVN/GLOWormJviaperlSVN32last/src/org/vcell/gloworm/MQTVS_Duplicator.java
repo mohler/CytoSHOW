@@ -267,6 +267,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 						if (!sliceSpecificROIs) ip = ip.crop();
 
 						stackT.addSlice(label, ip);
+						ip = null;
 						IJ.runMacro("print(\"\\\\Update:   Duplicating selected region(s) of time-point "+t+", channel "+c+", slice "+z+"...    \")");
 
 					}

@@ -2028,6 +2028,8 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		if (motherImp != null) {
 			motherImp = null;
 		}
+		if (getRemoteMQTVSHandler() != null)
+			getRemoteMQTVSHandler().dispose();
 		getRoiManager().dispose();
 		if (getMultiChannelController() != null)
 			getMultiChannelController().dispose();

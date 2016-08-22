@@ -127,6 +127,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 	public JButton stereo4dYrcButton;
 	public SliceStereoToggle sst;
 	public JButton sketchVVButton;
+	private JButton flattenTagsButton;
 	
 	public ImageWindow(String title) {
 		super(title);
@@ -394,6 +395,17 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		tagButtonPanel.add(hideShowButton, fspc);
 //		viewButtonPanel.add(hideShowButton, fspc);
 		hideShowButton.addActionListener(imp.getRoiManager());
+		fspc.gridy = y++;
+		fspc.weighty = 0.5;
+		flattenTagsButton = new JButton();
+		flattenTagsButton.setActionCommand("Flatten");
+		flattenTagsButton.setName("Flatten");
+		flattenTagsButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/flatten.png")));
+		flattenTagsButton.setToolTipText("Flatten Tags into Image");
+		flattenTagsButton.setFont(buttonPanelFont);
+		tagButtonPanel.add(flattenTagsButton, fspc);
+//		viewButtonPanel.add(flattenTagsButton, fspc);
+		flattenTagsButton.addActionListener(imp.getRoiManager());
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
 		sketch3DButton = new JButton();
