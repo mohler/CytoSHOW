@@ -1808,8 +1808,10 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 						}
 
 						int zRadius=1;
+						double inPlaneDiameter=0;
 						ArrayList<Roi> nearHits = new ArrayList<Roi>();
 						ArrayList<String> nearHitNames = new ArrayList<String>();
+						Hashtable<String,ArrayList<Roi>> hitNameRoisHashtable = new Hashtable<String,ArrayList<Roi>>();
 						String[] targetChunks = ((String) rm.getListModel().get(targetTag[0])).split("_");
 						int targetZ = Integer.parseInt(targetChunks[targetChunks.length-2]);
 						int tFrame = Integer.parseInt(targetChunks[targetChunks.length-1]
@@ -1840,7 +1842,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 										continue;
 									if (guideImp.getTitle().contains("SW_"))
 										zSlice = sameCellZs.get(sc);
-									double inPlaneDiameter = 4 * zxRatio * zRadius;
+									inPlaneDiameter = 10 * zxRatio * zRadius;
 									if (!guideImp.getTitle().contains("SW_"))
 										inPlaneDiameter = 2 * zxRatio * Math.sqrt(Math.pow(zRadius,2)-Math.pow((zSlice-targetZ),2));
 
@@ -1852,13 +1854,18 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 									for (int h = 0; h < nearbyROIs.length; h++) {
 										Roi nextNearRoi = nearbyROIs[h];
 										String nnrn = nextNearRoi.getName().split("[\"|=]")[1].trim().split(" ")[0];
-										if (hoodRoi.contains((int) nextNearRoi
+										if (((OvalRoi)hoodRoi).contains((int) nextNearRoi
 												.getBounds().getCenterX(),
 												(int) nextNearRoi.getBounds()
 												.getCenterY())
 												&& !clickedROIstring.startsWith("\""+nnrn) ){
+											String hitTrimName = nextNearRoi.getName().split("[\"|=]")[1].trim().split(" ")[0];
+											if (hitNameRoisHashtable.get(hitTrimName)==null) {
+												hitNameRoisHashtable.put(hitTrimName, new ArrayList<Roi>());
+											}
+											hitNameRoisHashtable.get(hitTrimName).add(nextNearRoi);
 											boolean notGotYet = !nearHits.contains(nextNearRoi)  && !nearHitNames.contains(nextNearRoi.getName().split("[\"|=]")[1].trim().split(" ")[0]);
-											if (notGotYet && nearHits.size()<50) {
+											if (notGotYet && nearHits.size()<100) {
 												nearHits.add(nextNearRoi);
 												nearHitNames.add(nextNearRoi.getName().split("[\"|=]")[1].trim().split(" ")[0]);
 											}
@@ -1871,20 +1878,32 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 								zRadius = (int) (zRadius+1);
 						}
 
-						for (Roi hit:nearHits) {
-							String[] hitChunks = hit.getName().split("_");
+						for (String hit:hitNameRoisHashtable.keySet()) {
+							ArrayList<Roi> hitRois = hitNameRoisHashtable.get(hit);
+							
+							if (imp.getTitle().contains("SW_")){
+
+							}
+							
+							String hitPlaneString ="";
+							int[] hitPlaneArray = new int[hitRois.size()];
+							for (int q=0;q<hitRois.size();q++)
+								hitPlaneArray[q]=hitRois.get(q).getZPosition();
+							Arrays.sort(hitPlaneArray);
+							for (Object plane:hitPlaneArray)
+								hitPlaneString = hitPlaneString +" " +(Integer)plane;
+							
 							mi = new JMenuItem("near "
-									+ hitChunks[0]
-											+ " at coord {"+hit.getBounds().getCenterX()+","+hit.getBounds().getCenterY()+","+hit.getZPosition()+","+hit.getTPosition() 
-											+ "} in \""
+									+ hit
+											+ " within "+inPlaneDiameter/2 * imp.getCalibration().pixelWidth*1000+"nm at planes {"+ hitPlaneString+ "} in \""
 											+ (rm.getImagePlus().getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
 													(rm.getImagePlus().getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
 														(rm.getImagePlus().getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
 							mi.setActionCommand("near "
-									+ hit.getName() + ": "
+									+ hit + ": "
 									+ rm.getImagePlus().getTitle());
 							popupInfo[1] = popupInfo[1]+ "near "
-									+ hit.getName() + ": "
+									+ hit + ": "
 									+ rm.getImagePlus().getTitle()+"\n";
 
 							mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/See.png")));
