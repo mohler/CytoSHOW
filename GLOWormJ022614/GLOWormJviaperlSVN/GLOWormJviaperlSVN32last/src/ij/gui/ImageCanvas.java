@@ -1900,10 +1900,10 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 													(rm.getImagePlus().getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
 														(rm.getImagePlus().getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
 							mi.setActionCommand("near "
-									+ hit + ": "
+									+ hitNameRoisHashtable.get(hit).get(0).getName() + ": "
 									+ rm.getImagePlus().getTitle());
 							popupInfo[1] = popupInfo[1]+ "near "
-									+ hit + ": "
+									+ hitNameRoisHashtable.get(hit).get(0).getName() + ": "
 									+ rm.getImagePlus().getTitle()+"\n";
 
 							mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/See.png")));
