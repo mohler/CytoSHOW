@@ -1902,9 +1902,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 							mi.setActionCommand("near "
 									+ hitNameRoisHashtable.get(hit).get(0).getName() + ": "
 									+ rm.getImagePlus().getTitle());
-							popupInfo[1] = popupInfo[1]+ "near "
-									+ hitNameRoisHashtable.get(hit).get(0).getName() + ": "
-									+ rm.getImagePlus().getTitle()+"\n";
+							popupInfo[1] = popupInfo[1]+ mi.getText()+"\n";
 
 							mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/See.png")));
 							mi.addActionListener(ij);
@@ -1914,6 +1912,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 						relationshipsPopup.add(nearPopup);			
 					}
+					popupInfo[1] = popupInfo[1] +"\n";
 
 					String analogName ="";
 					String embAnalogsMatrix = IJ.openUrlAsString("http://fsbill.cam.uchc.edu/gloworm/Xwords/EmbryonicAnalogousCells.csv");
@@ -1934,9 +1933,9 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 							relationshipsPopup.add(analogsPopup);
 
-							mi = new JMenuItem("");
-							mi.setLabel("analogous to   " + embAnalogsChunks[1]+cellName.substring(embAnalogsChunks[0].length(), cellName.length()));
+							mi = new JMenuItem("analogous to   " + embAnalogsChunks[1]+cellName.substring(embAnalogsChunks[0].length(), cellName.length()));
 							mi.addActionListener(ij);
+							popupInfo[1] = popupInfo[1]+mi.getText()+"\n";
 							analogsPopup.add(mi);
 							analogName = embAnalogsChunks[1]+cellName.substring(embAnalogsChunks[0].length(), cellName.length());
 
@@ -1958,7 +1957,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 																					openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
 										mi.setActionCommand(itemString);
 										mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/See.png")));
-										popupInfo[1] = popupInfo[1]+itemString+"\n";
+										popupInfo[1] = popupInfo[1]+mi.getText()+"\n";
 										mi.addActionListener(ij);
 										analogsPopup.add(mi);
 									}
@@ -1971,6 +1970,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 						String oldLog = IJ.getLog();
 						mi = new JMenuItem(cellName);
 						mi.addActionListener(ij);
+						popupInfo[1] = popupInfo[1]+mi.getText()+"\n";
 						analogsPopup.add(mi);
 						relationshipsPopup.add(analogsPopup);
 
@@ -1995,9 +1995,9 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 							if (logLines[h].startsWith("analogOf ")
 									&& ( cellName.matches(".*(D|R|V|L)") && (logLines[h].trim().toUpperCase().matches(".*[^A-Z]" + cellName.toUpperCase().substring(0,cellName.length()-1)+ "(DL|D|DR|R|VR|V|VL|L):.*") )
 											|| ( cellName.matches(".*(DL|DR|VL|VR)") && logLines[h].trim().toUpperCase().matches(".*[^A-Z]" + cellName.toUpperCase().substring(0,cellName.length()-2)+ "(DL|D|DR|R|VR|V|VL|L):.*"))) ) {
-								mi = new JMenuItem("");
-								mi.setLabel("analogous to   " + logLines[h].substring(logLines[h].indexOf("name=")+5, logLines[h].indexOf(" rel=")) );
+								mi = new JMenuItem("analogous to   " + logLines[h].substring(logLines[h].indexOf("name=")+5, logLines[h].indexOf(" rel=")) );
 								mi.addActionListener(ij);
+								popupInfo[1] = popupInfo[1]+mi.getText()+"\n";
 								analogsPopup.add(mi);
 
 
@@ -2019,8 +2019,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 																						openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
 											mi.setActionCommand(itemString);
 											mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/See.png")));
-											popupInfo[1] = popupInfo[1]+itemString+"\n";
-											mi.addActionListener(ij);
+											popupInfo[1] = popupInfo[1]+mi.getText()+"\n";											mi.addActionListener(ij);
 											analogsPopup.add(mi);
 										}
 									}
@@ -2029,6 +2028,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 							}
 						}
 					}
+					popupInfo[1] = popupInfo[1] +"\n";
 
 					String synapseMatrix = IJ.openUrlAsString("http://fsbill.cam.uchc.edu/gloworm/Xwords/NeuronConnect.csv");
 					if (synapseMatrix.contains(cellName)){
@@ -2072,18 +2072,12 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 								if (synapseChunks[0].contains(cellName)) {
 									if (synapseChunks[2].startsWith("S")) {
 										presyn = true;
-										mi = new JMenuItem("");
-										mi.setLabel("synapses chemically onto  "
+										mi = new JMenuItem("synapses chemically onto  "
 												+ synapseChunks[1] + ": "
 												+ synapseChunks[3]+" "
 												+ (synapseChunks[2].contains("Sp")?"polyadic":"monadic")
 												+ (Integer.parseInt(synapseChunks[3])>1?" synapses":" synapse"));
-										popupInfo[1] = popupInfo[1]+"synapses chemically onto  "
-												+ synapseChunks[1] + ": "
-												+ synapseChunks[3]+" "
-												+ (synapseChunks[2].contains("Sp")?"polyadic":"monadic")
-												+ (Integer.parseInt(synapseChunks[3])>1?" synapses":" synapse")+"\n";
-
+										popupInfo[1] = popupInfo[1]+mi.getText()+"\n";
 										mi.addActionListener(ij);
 										presynapticPopup.add(mi);
 										String candidate = synapseChunks[1];
@@ -2105,7 +2099,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 																								openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
 													mi.setActionCommand(itemString);
 													mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/See.png")));
-													popupInfo[1] = popupInfo[1]+itemString+"\n";
+													popupInfo[1] = popupInfo[1]+mi.getText()+"\n";
 													mi.addActionListener(ij);
 													presynapticPopup.add(mi);
 												}
@@ -2114,17 +2108,13 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 									}	
 									if (synapseChunks[2].startsWith("R")) {
 										postsyn = true;
-										mi = new JMenuItem("");
-										mi.setLabel("is synapsed chemically by "
+										mi = new JMenuItem("is synapsed chemically by "
 												+ synapseChunks[1] + ": "
 												+ synapseChunks[3]+" "
 												+ (synapseChunks[2].contains("Rp")?"polyadic":"monadic") 
 												+ (Integer.parseInt(synapseChunks[3])>1?" synapses":" synapse"));
-										popupInfo[1] = popupInfo[1]+"is synapsed chemically by "
-												+ synapseChunks[1] + ": "
-												+ synapseChunks[3]+" "
-												+ (synapseChunks[2].contains("Rp")?"polyadic":"monadic")
-												+ (Integer.parseInt(synapseChunks[3])>1?" synapses":" synapse")+"\n";
+										popupInfo[1] = popupInfo[1]+mi.getText()+"\n";
+
 
 										mi.addActionListener(ij);
 										postsynapticPopup.add(mi);
@@ -2147,7 +2137,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 																								openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
 													mi.setActionCommand(itemString);
 													mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/See.png")));
-													popupInfo[1] = popupInfo[1]+itemString+"\n";
+													popupInfo[1] = popupInfo[1]+mi.getText()+"\n";
 
 													mi.addActionListener(ij);
 													postsynapticPopup.add(mi);
@@ -2157,12 +2147,12 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 									}	
 									if (synapseChunks[2].startsWith("EJ")) {
 										elec = true;
-										mi = new JMenuItem("");
-										mi.setLabel("synapses electrically to  "
+										mi = new JMenuItem("synapses electrically to  "
 												+ synapseChunks[1] + ": "
 												+ synapseChunks[3]+" "
 												+ "electric" 
 												+ (Integer.parseInt(synapseChunks[3])>1?" junctions":" junction"));
+										popupInfo[1] = popupInfo[1]+mi.getText()+"\n";
 										mi.addActionListener(ij);
 										electricPopup.add(mi);
 										String candidate = synapseChunks[1];
@@ -2184,7 +2174,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 																								openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
 													mi.setActionCommand(itemString);
 													mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/See.png")));
-													popupInfo[1] = popupInfo[1]+itemString+"\n";
+													popupInfo[1] = popupInfo[1]+mi.getText()+"\n";
 
 													mi.addActionListener(ij);
 													electricPopup.add(mi);
@@ -2194,12 +2184,12 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 									}	
 									if (synapseChunks[2].startsWith("NMJ")) {
 										nmj = true;
-										mi = new JMenuItem("");
-										mi.setLabel("neuromuscular junctions   "
+										mi = new JMenuItem("neuromuscular junctions   "
 												+ synapseChunks[1] + ": "
 												+ synapseChunks[3]+" "
 												+ "neuromuscular" 
 												+ (Integer.parseInt(synapseChunks[3])>1?" junctions":" junction"));
+										popupInfo[1] = popupInfo[1]+mi.getText()+"\n";
 										mi.addActionListener(ij);
 										neuromuscularPopup.add(mi);
 										String candidate = synapseChunks[1];
@@ -2221,7 +2211,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 																								openImageIDsWithRM[o]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
 													mi.setActionCommand(itemString);
 													mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/See.png")));
-													popupInfo[1] = popupInfo[1]+itemString+"\n";
+													popupInfo[1] = popupInfo[1]+mi.getText()+"\n";
 
 													mi.addActionListener(ij);
 													neuromuscularPopup.add(mi);
@@ -2244,6 +2234,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 					popup.add(relationshipsPopup);
 				}
+				popupInfo[1] = popupInfo[1] +"\n";
 
 				if (getFates && cellName != "") {
 					JMenu fatePopup = new JMenu(cellName+": Descendent Cells >", true);
@@ -2400,6 +2391,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 					IJ.log(oldLog);
 					popup.add(fatePopup);
 				}
+				popupInfo[1] = popupInfo[1] +"\n";
 
 				if (getFates && cellName != "") {
 					//popup.add(new JMenuItem("-"));
