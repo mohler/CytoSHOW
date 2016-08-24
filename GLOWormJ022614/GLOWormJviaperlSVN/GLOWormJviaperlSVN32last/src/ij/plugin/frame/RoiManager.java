@@ -516,8 +516,43 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				return;
 			}
 			String command = label;
-			if (command.equals("Add\n(ctrl-t)"))
+			if (command.equals("Add\n(ctrl-t)")) {
+				String newName = promptForName("name");
+				Color existingColor = null;
+				Roi[] rois = getFullRoisAsArray();
+				int fraa = rois.length;
+				int r =0;
+				while (existingColor == null) {
+					if(r>rois.length-1) {
+						break;
+					}
+						
+					String nextName = rois[r].getName();
+					if (nextName.startsWith("\""+newName+" \"")){
+						existingColor = rois[r].getFillColor();
+					}
+					r++;
+				}
+				String existinghexName = "";
+				if (existingColor!=null) {
+					int existingColorInt = existingColor.getRGB();
+					String existinghexInt = Integer.toHexString(existingColorInt);
+					int l = existinghexInt.length();
+					for (int c=0;c<8-l;c++)
+						existinghexInt = "0"+existinghexInt;
+					existinghexName = "#"+existinghexInt;
+				}
+
 				add(shiftKeyDown, altKeyDown, controlKeyDown);
+				
+				if (existinghexName !="") {
+						this.select(getListModel().getSize()-1);
+
+						if (runCommand("set fill color", existinghexName)) {					}	
+				}
+
+				updateShowAll();
+			}
 			else if (command.equals("Update [u]")) {
 				if (imp.getMultiChannelController()!=null)
 					imp.getMultiChannelController().updateRoiManager();
@@ -541,7 +576,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						hexInt = "0"+hexInt;
 					String hexName = "#"+hexInt;
 					Color fillColor = JColorChooser.showDialog(this.getFocusOwner(), "Pick a color for "+ this.getSelectedRoisAsArray()[0].getName()+"...", Colors.decode(hexName, Color.cyan));
-					String alphaCorrFillColorString =  Colors.colorToHexString(fillColor).replaceAll("#", hexName.substring(0, 3));
+					String whackchacha = hexName.substring(0, 3);
+					if (whackchacha.equals("#00"))
+							whackchacha = "#88";
+					String colorPickerString = Colors.colorToHexString(fillColor);
+					String alphaCorrFillColorString = colorPickerString;
+					while (!alphaCorrFillColorString.matches("#........"))
+						if (alphaCorrFillColorString.matches("#......")) 
+							alphaCorrFillColorString =  alphaCorrFillColorString.replaceAll("#", whackchacha);
+					
 					fillColor = Colors.decode(alphaCorrFillColorString, fillColor);
 
 					ArrayList<String> rootNames_rootFrames = new ArrayList<String>();
@@ -549,8 +592,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 
 					for (Roi selRoi:getSelectedRoisAsArray()) {
-						String rootName = selRoi.getName().contains("\"")?selRoi.getName().split("\"")[1].trim():"";
-						rootName = rootName.contains(" ")?rootName.split("[_\\- ]")[0].trim():rootName;
+						String rootName = selRoi.getName().contains("\"")?"\""+selRoi.getName().split("\"")[1]+"\"":selRoi.getName().split("_")[0].trim();
+//						rootName = rootName.contains(" ")?rootName.split("[_\\- ]")[0].trim():rootName;
 						String[] rootChunks = selRoi.getName().split("_");
 						String rootFrame = rootChunks[rootChunks.length-1].replaceAll("[CZT]", "").split("-")[0];
 						if (!rootNames_rootFrames.contains(rootName+"_"+rootFrame)) {
@@ -567,7 +610,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						int fraa = rois.length;
 						for (int r=0; r < fraa; r++) {
 							String nextName = rois[r].getName();
-							if (nextName.startsWith("\""+rootName.split("_")[0])){
+							if (nextName.startsWith(rootName)){
 								nameMatchIndexArrayList.add(r);
 							}
 						}
@@ -576,23 +619,91 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					int[] nameMatchIndexes = new int[nameMatchIndexArrayList.size()];
 					for (int i=0; i < nameMatchIndexes.length; i++) {
 						nameMatchIndexes[i] = nameMatchIndexArrayList.get(i);
-//						this.select(nameMatchIndexes[i]);
-//
-//						if (runCommand("set fill color", alphaCorrFillColorString)) {
-//						}
-					}	
-					this.setSelectedIndexes(nameMatchIndexes);
+						this.select(nameMatchIndexes[i]);
 
-					if (runCommand("set fill color", alphaCorrFillColorString)) {
-					}
+						if (runCommand("set fill color", alphaCorrFillColorString)) {
+						}
+					}	
+//					this.setSelectedIndexes(nameMatchIndexes);
+//
+//					if (runCommand("set fill color", alphaCorrFillColorString)) {
+//					}
 
 				}
 				this.close();
 				this.showWindow(wasVis);
+				updateShowAll();
 
 			}
 			else if (command.equals("Rename")) {
-				if (rename(null, null, true)) {
+				
+				ArrayList<String> rootNames_rootFrames = new ArrayList<String>();
+				ArrayList<String> rootNames = new ArrayList<String>();
+
+				String newName = promptForName("name");
+				Color existingColor = null;
+				Roi[] rois = getFullRoisAsArray();
+				int fraa = rois.length;
+				int r =0;
+				while (existingColor == null) {
+					if(r>rois.length-1) {
+						break;
+					}
+						
+					String nextName = rois[r].getName();
+					if (nextName.startsWith("\""+newName+" \"")){
+						existingColor = rois[r].getFillColor();
+					}
+					r++;
+				}
+				String existinghexName = "";
+				if (existingColor!=null) {
+					int existingColorInt = existingColor.getRGB();
+					String existinghexInt = Integer.toHexString(existingColorInt);
+					int l = existinghexInt.length();
+					for (int c=0;c<8-l;c++)
+						existinghexInt = "0"+existinghexInt;
+					existinghexName = "#"+existinghexInt;
+				}
+
+				for (Roi selRoi:getSelectedRoisAsArray()) {
+					String rootName = selRoi.getName().contains("\"")?"\""+selRoi.getName().split("\"")[1]+"\"":selRoi.getName().split("_")[0].trim();
+//					rootName = rootName.contains(" ")?rootName.split("[_\\- ]")[0].trim():rootName;
+					String[] rootChunks = selRoi.getName().split("_");
+					String rootFrame = rootChunks[rootChunks.length-1].replaceAll("[CZT]", "").split("-")[0];
+					if (!rootNames_rootFrames.contains(rootName+"_"+rootFrame)) {
+						rootNames_rootFrames.add(rootName+"_"+rootFrame);
+						rootNames.add(rootName);				
+					}
+				}
+				
+				ArrayList<Integer> nameMatchIndexArrayList = new ArrayList<Integer>();
+
+				for (int n=0; n<rootNames.size(); n++) {
+					String rootName = rootNames.get(n);
+					Roi[] rois2 = getFullRoisAsArray();
+					int fraaa = rois2.length;
+					for (int r2=0; r2 < fraaa; r2++) {
+						String nextName = rois2[r2].getName();
+						if (nextName.startsWith(rootName)){
+							nameMatchIndexArrayList.add(r2);
+						}
+					}
+
+				}
+				int[] nameMatchIndexes = new int[nameMatchIndexArrayList.size()];
+				for (int n=0;n<nameMatchIndexes.length;n++)
+					nameMatchIndexes[n] = nameMatchIndexArrayList.get(n);
+				if (rename(null, nameMatchIndexes, true)) {
+					if (existinghexName !="") {
+						for (int i=0; i < nameMatchIndexes.length; i++) {
+							this.select(nameMatchIndexes[i]);
+
+							if (runCommand("set fill color", existinghexName)) {
+							}
+						}	
+					}
+
 					this.close();
 					this.showWindow(wasVis);
 				}
