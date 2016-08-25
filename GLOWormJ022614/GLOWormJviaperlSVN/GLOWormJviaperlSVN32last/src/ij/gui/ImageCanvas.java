@@ -1360,9 +1360,9 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				return true;
 			}
 			if (getLabelShapes()[i]!=null && getLabelShapes()[i].contains(x, y)
-					&& ( getLabelShapes()[i].getFillColor()!=null
+					/*&& ( getLabelShapes()[i].getFillColor()!=null
 						|| getLabelShapes()[i].getStrokeColor()!=null
-						|| rois.get(getLabelShapes()[i].getName()) instanceof TextRoi ) ) {
+						|| rois.get(getLabelShapes()[i].getName()) instanceof TextRoi )*/ ) {
 				//rm.select(i);
 				// this needs to run on a separate thread, at least on OS X
 				// "update2" does not clone the ROI so the "Show All"

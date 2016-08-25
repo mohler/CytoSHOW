@@ -528,7 +528,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 				mouseLocColor = ((ColorProcessor)bbImp.getIP())
 				.getColor(bbImp.getCanvas().offScreenX(e.getX()),
 					bbImp.getCanvas().offScreenY(e.getY()));
-			if (!selectMore && !mouseLocColor.equals(Color.black)){
+			if (!selectMore && mouseLocColor!=null && !mouseLocColor.equals(Color.black)){
 				for (Checkbox cbq:checkbox) {
 					if (cbq.getState()) {
 						cbq.setState(false);
