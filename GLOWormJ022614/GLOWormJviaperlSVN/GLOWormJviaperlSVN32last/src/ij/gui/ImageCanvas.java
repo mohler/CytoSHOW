@@ -263,13 +263,13 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			return;
 		}
 		initGraphics(g, null, showAllColor);
-		Hashtable rois = rm.getROIs();
-		DefaultListModel listModel = rm.getListModel();
+		Hashtable<String,Roi> rois = rm.getROIs();
+		DefaultListModel<String> listModel = rm.getListModel();
 		boolean drawLabels = rm.getDrawLabels();
 		currentRoi = null;
 		int n = 0;
-		if (listModel != null)
-			n = listModel.getSize();
+		if (labelShapes != null)
+			n = labelShapes.length;
 		if (IJ.debugMode) IJ.log("paint: drawing "+n+" \"Show All\" ROIs");
 		//		if (labelShapes==null || labelShapes.length!=n)
 		setLabelShapes(new ShapeRoi[n]);
@@ -288,12 +288,42 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			frame = imp.getFrame();
 		}
 		drawNames = Prefs.useNamesAsLabels;
-		for (int i=0; i<n; i++) {
+		
+		sliceRois = new ArrayList<Roi>();
+		for (int tSpan=imp.getFrame()-rm.getTSustain()+1;tSpan<=imp.getFrame()+rm.getTSustain()-1;tSpan++) {
+			for (int zSpan=imp.getSlice()-rm.getZSustain()+1;zSpan<=imp.getSlice()+rm.getZSustain()-1;zSpan++) {
+				String rbnString = ""+(imp.getChannel()>0?imp.getChannel():1)+"_"+zSpan+"_"+tSpan;
+				if(rm.getROIsByNumbers().get(rbnString)!=null)
+					sliceRois.addAll(rm.getROIsByNumbers().get(rbnString));
+				if(rm.getROIsByNumbers().get("0_0_0")!=null)
+					sliceRois.addAll(rm.getROIsByNumbers().get("0_0_0"));
+				if(rm.getROIsByNumbers().get("0_"+zSpan+"_"+tSpan)!=null)
+					sliceRois.addAll(rm.getROIsByNumbers().get("0_"+zSpan+"_"+tSpan));
+				if(rm.getROIsByNumbers().get((imp.getChannel()>0?imp.getChannel():1)+"_0"+"_"+tSpan)!=null)
+					sliceRois.addAll(rm.getROIsByNumbers().get((imp.getChannel()>0?imp.getChannel():1)+"_0"+"_"+tSpan));
+				if(rm.getROIsByNumbers().get((imp.getChannel()>0?imp.getChannel():1)+"_0_0")!=null)
+					sliceRois.addAll(rm.getROIsByNumbers().get((imp.getChannel()>0?imp.getChannel():1)+"_0_0"));
+				if(rm.getROIsByNumbers().get((imp.getChannel()>0?imp.getChannel():1)+"_"+zSpan+"_0")!=null)
+					sliceRois.addAll(rm.getROIsByNumbers().get((imp.getChannel()>0?imp.getChannel():1)+"_"+zSpan+"_0"));
+				if(rm.getROIsByNumbers().get(("0_"+zSpan+"_0"))!=null)
+					sliceRois.addAll(rm.getROIsByNumbers().get(("0_"+zSpan+"_0")));
+				if(rm.getROIsByNumbers().get("0_0"+"_"+tSpan)!=null)
+					sliceRois.addAll(rm.getROIsByNumbers().get("0_0"+"_"+tSpan));
+			}
+		}
+
+		if (sliceRois == null)
+			return;
+		Roi[] sliceRoisArray = new Roi[sliceRois.size()];
+		for (int sr=0;sr<sliceRoisArray.length;sr++)
+			sliceRoisArray[sr] = ((Roi)sliceRois.get(sr));
+		labelShapes = new ShapeRoi[sliceRoisArray.length];
+		for (int i=0; i<sliceRoisArray.length; i++) {  
 			String label = null;
 			Roi roi = null;
 			try {
 				label = (String) listModel.get(i);
-				roi = (Roi)rois.get(label);
+				roi = sliceRoisArray[i];
 			} catch(Exception e) {
 				roi = null;
 			}
@@ -333,7 +363,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 							roi.setStrokeColor(origColor.darker());
 						drawRoi(g, roi, drawLabels?i:-1);
 						roi.setStrokeColor(origColor);
-						getLabelShapes()[i] = roi instanceof Arrow?((Arrow)roi).getShapeRoi():new ShapeRoi(roi);
+						labelShapes[i] = roi instanceof Arrow?((Arrow)roi).getShapeRoi():new ShapeRoi(roi);
+						labelShapes[i].setName(roi.getName());
 					}
 				} else {
 					int position = roi.getPosition();
@@ -498,8 +529,10 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			g.setColor(bgColor);
 			g.fillRoundRect(x-1, y-h+2, w+1, h-3, 5, 5);
 		}
-		if (!drawingList && getLabelShapes()!=null && index<getLabelShapes().length)
-			getLabelShapes()[index] = new ShapeRoi(new Rectangle(x-1, y-h+2, w+1, h));
+		if (!drawingList && getLabelShapes()!=null && index<getLabelShapes().length) {
+			labelShapes[index] = new ShapeRoi(new Rectangle(x-1, y-h+2, w+1, h));
+			labelShapes[index].setName(roi.getName());
+		}
 		g.setColor(labelColor);
 		g.drawString(label, x, y-2);
 		g.setColor(getDefaultColor());
@@ -801,6 +834,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		2.0, 3.0, 4.0, 6.0, 8.0, 12.0, 16.0, 24.0, 32.0 };
 	private Roi cursorRoi;
 	private int rotation;
+	private ArrayList<Roi> sliceRois;
 
 	public static double getLowerZoomLevel(double currentMag) {
 		double newMag = zoomLevels[0];
@@ -1318,7 +1352,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		if (rm==null) return false;
 		Hashtable rois = rm.getROIs();
 		DefaultListModel listModel = rm.getListModel();
-		int n = listModel.getSize();
+		int n = labelShapes.length;
 		if (getLabelShapes()==null || getLabelShapes().length!=n) return false;
 		for (int i=0; i<n; i++) {
 			if ( rois.get(listModel.get(i)) instanceof Arrow && getLabelShapes()[i]!=null && getLabelShapes()[i].contains(x, y)) {
@@ -1326,14 +1360,15 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				return true;
 			}
 			if (getLabelShapes()[i]!=null && getLabelShapes()[i].contains(x, y)
-					&& ( ((Roi) rois.get(listModel.get(i))).getFillColor()!=null
-						|| ((Roi) rois.get(listModel.get(i))).getStrokeColor()!=null
-						|| rois.get(listModel.get(i)) instanceof TextRoi ) ) {
+					&& ( getLabelShapes()[i].getFillColor()!=null
+						|| getLabelShapes()[i].getStrokeColor()!=null
+						|| rois.get(getLabelShapes()[i].getName()) instanceof TextRoi ) ) {
 				//rm.select(i);
 				// this needs to run on a separate thread, at least on OS X
 				// "update2" does not clone the ROI so the "Show All"
 				// outline moves as the user moves the RO.
-				new ij.macro.MacroRunner("roiManager('select', "+i+", "+imp.getID()+");");
+				int q = listModel.indexOf(getLabelShapes()[i].getName());
+				new ij.macro.MacroRunner("roiManager('select', "+q+", "+imp.getID()+");");
 				return true;
 			}
 		}
@@ -1452,7 +1487,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			if (rm != null) {
 				Roi[] fullRoisArray = rm.getFullRoisAsArray();
 				DefaultListModel listModel = rm.getListModel();
-				int n = listModel.getSize();
+				int n = labelShapes.length;
 
 				String cellName = "";
 				String cellTag = "";
@@ -1497,14 +1532,14 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 							&& this.getLabelShapes()[r].contains(xOS, yOS))
 							|| (brainbowSelection /*&& rm.getImagePlus().getCanvas().getlabelShapes()[r].intersects(new Rectangle (xOS*10-200, yOS*10-200,400,400))*/)
 							|| (lineageMap && logLines.length >0 && logLines[logLines.length-1].startsWith(">")
-									&& ((String) listModel.get(r)).startsWith("\""+logLines[logLines.length-1].split("[> ,]")[1]+" " + logLines[logLines.length-1].split("[> ,]")[2])) ) {
+									&& (this.getLabelShapes()[r].getName()).startsWith("\""+logLines[logLines.length-1].split("[> ,]")[1]+" " + logLines[logLines.length-1].split("[> ,]")[2])) ) {
 						mi = null;
 						targetTag[0] = r;
-						targetTag[1] = (int) fullRoisArray[r].getBounds().getCenterX();
-						targetTag[2] = (int) fullRoisArray[r].getBounds().getCenterY();
+						targetTag[1] = (int) this.getLabelShapes()[r].getBounds().getCenterX();
+						targetTag[2] = (int) this.getLabelShapes()[r].getBounds().getCenterY();
 
 						if (!brainbowSelection) {
-							cellTag = (String) listModel.get(r);
+							cellTag = this.getLabelShapes()[r].getName();
 							cellName = cellTag.split("[\"|=]")[1].trim();
 							if (cellName.split(" ").length >1 
 									&& cellName.split(" ")[1].matches("-*\\d*") 
@@ -1514,7 +1549,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 							mi =new JMenuItem("\""+cellName + " \": synch all windows to this tag" );
 							mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Synch.png")));
-							clickedROIstring = listModel.get(r) + ": "
+							clickedROIstring = this.getLabelShapes()[r].getName() + ": "
 									+ rm.getImagePlus().getTitle();
 							mi.addActionListener(ij);
 							popup.add(mi);
@@ -3092,24 +3127,31 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 					return;
 				Hashtable<String, Roi> rois = rm.getROIs();
 				DefaultListModel<String> listModel = rm.getListModel();
-				int n = listModel.size();
+				int n = labelShapes.length;
 				if (getLabelShapes() == null || getLabelShapes().length != n)
 					return;
 				String cursorString = null;
-				for (int i = 0; i < n; i++) {
-					if (rois.get(listModel.get(i)) instanceof Arrow
+
+				if (sliceRois == null)
+					return;
+				Roi[] sliceRoisArray = new Roi[sliceRois.size()];
+				for (int sr=0;sr<sliceRoisArray.length;sr++)
+					sliceRoisArray[sr] = ((Roi)sliceRois.get(sr));
+				
+				for (int i=0; i<sliceRoisArray.length; i++) {  
+					if (sliceRoisArray[i] instanceof Arrow
 							&& getLabelShapes()[i] != null
 							&& getLabelShapes()[i].contains(getXMouse(), getYMouse())) {
-						cursorString = ((Roi) rois.get(listModel.get(i))).getName().split("[\"|]")[1];
+						cursorString = sliceRoisArray[i].getName().split("[\"|=]")[1];
 						i = n;
 					}
 				}
 				if (cursorString == null) {
-					for (int i = 0; i < n; i++) {
+					for (int i=0; i<sliceRoisArray.length; i++) {  
 						if (getLabelShapes()[i] != null
 								&& getLabelShapes()[i].contains(getXMouse(), getYMouse())
-								&& ((Roi) rois.get(listModel.get(i))).getName().split("[\"|=]").length > 1) {
-							cursorString = ((Roi) rois.get(listModel.get(i))).getName().split("[\"|=]")[1];
+								&& sliceRoisArray[i].getName().split("[\"|=]").length > 1) {
+							cursorString = sliceRoisArray[i].getName().split("[\"|=]")[1];
 							i = n;
 						}
 					}

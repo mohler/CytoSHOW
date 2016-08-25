@@ -61,6 +61,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	private static int colorIndex = 4;
 	private JList<String> list, fullList;
 	private Hashtable<String, Roi> rois = new Hashtable<String, Roi>();
+	private Hashtable<String,  ArrayList<Roi>> roisByNumbers = new Hashtable<String, ArrayList<Roi>>();
+
 	private Roi roiCopy;
 	private boolean canceled;
 	private boolean macro;
@@ -545,10 +547,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 				add(shiftKeyDown, altKeyDown, controlKeyDown);
 				
-				if (existinghexName !="") {
-						this.select(getListModel().getSize()-1);
+				if (existingColor != null) {
+						rois[getListModel().getSize()-1].setFillColor(existingColor);
 
-						if (runCommand("set fill color", existinghexName)) {					}	
 				}
 
 				updateShowAll();
@@ -603,10 +604,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					}
 					
 					ArrayList<Integer> nameMatchIndexArrayList = new ArrayList<Integer>();
+						Roi[] rois = getFullRoisAsArray();
 
 					for (int n=0; n<rootNames.size(); n++) {
 						String rootName = rootNames.get(n);
-						Roi[] rois = getFullRoisAsArray();
 						int fraa = rois.length;
 						for (int r=0; r < fraa; r++) {
 							String nextName = rois[r].getName();
@@ -619,10 +620,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					int[] nameMatchIndexes = new int[nameMatchIndexArrayList.size()];
 					for (int i=0; i < nameMatchIndexes.length; i++) {
 						nameMatchIndexes[i] = nameMatchIndexArrayList.get(i);
-						this.select(nameMatchIndexes[i]);
+						rois[nameMatchIndexes[i]].setFillColor(Colors.decode(alphaCorrFillColorString, fillColor));;
 
-						if (runCommand("set fill color", alphaCorrFillColorString)) {
-						}
+						
 					}	
 //					this.setSelectedIndexes(nameMatchIndexes);
 //
@@ -699,8 +699,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						for (int i=0; i < nameMatchIndexes.length; i++) {
 							this.select(nameMatchIndexes[i]);
 
-							if (runCommand("set fill color", existinghexName)) {
-							}
+							rois[nameMatchIndexes[i]].setFillColor(existingColor);
+							
 						}	
 					}
 
@@ -708,6 +708,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					this.showWindow(wasVis);
 				}
 			}
+
 			else if (command.equals("Properties..."))
 				setProperties(null, -1, null);
 			else if (command.equals("Flatten"))
@@ -1160,8 +1161,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (fillColor!=null)
 			roiCopy.setFillColor(fillColor);
 		rois.put(label, roiCopy);
-		
-		
+		ArrayList<Roi> sliceRois = roisByNumbers.get(roiCopy.getCPosition()+"_"+roiCopy.getZPosition()+"_"+roiCopy.getTPosition());
+		if (sliceRois == null) {
+			roisByNumbers.put(roiCopy.getCPosition()+"_"+roiCopy.getZPosition()+"_"+roiCopy.getTPosition(), new ArrayList<Roi>());
+			sliceRois = roisByNumbers.get(roiCopy.getCPosition()+"_"+roiCopy.getZPosition()+"_"+roiCopy.getTPosition());
+		}
+		sliceRois.add(roiCopy);
+
 		ColorLegend cl = getColorLegend();
 		//
 		if (roiCopy!=null) { 
@@ -1276,6 +1282,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 		}
 		rois.put(label, roiCopy);
+		ArrayList<Roi> sliceRois = roisByNumbers.get(roiCopy.getCPosition()+"_"+roiCopy.getZPosition()+"_"+roiCopy.getTPosition());
+		if (sliceRois == null) {
+			roisByNumbers.put(roiCopy.getCPosition()+"_"+roiCopy.getZPosition()+"_"+roiCopy.getTPosition(), new ArrayList<Roi>());
+			sliceRois = roisByNumbers.get(roiCopy.getCPosition()+"_"+roiCopy.getZPosition()+"_"+roiCopy.getTPosition());
+		}
+		sliceRois.add(roiCopy);
+		
 		textCountLabel.setText(""+ listModel.size() +"/"+ fullListModel.size());
 		imp.getWindow().countLabel.setText(""+ listModel.size() +"/"+ fullListModel.size() +"");
 		imp.getWindow().countLabel.repaint();			
@@ -1449,10 +1462,22 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				if (imp.getStackSize()>1)
 					roi2.setPosition(c,z,t);
 				rois.put(label, roi2);
+				ArrayList<Roi> sliceRois = roisByNumbers.get(roi2.getCPosition()+"_"+roi2.getZPosition()+"_"+roi2.getTPosition());
+				if (sliceRois == null) {
+					roisByNumbers.put(roi2.getCPosition()+"_"+roi2.getZPosition()+"_"+roi2.getTPosition(), new ArrayList<Roi>());
+					sliceRois = roisByNumbers.get(roi2.getCPosition()+"_"+roi2.getZPosition()+"_"+roi2.getTPosition());
+				}
+				sliceRois.add(roi2);
 				//				IJ.log("cloning");
-			} else
+			} else {
 				rois.put(label, roi);
-
+				ArrayList<Roi> sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
+				if (sliceRois == null) {
+					roisByNumbers.put(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition(), new ArrayList<Roi>());
+					sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
+				}
+				sliceRois.add(roi);
+			}
 
 			updateShowAll();
 		}
@@ -1505,6 +1530,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 			roi.setName(label);
 			rois.put(label, roi);
+			ArrayList<Roi> sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
+			if (sliceRois == null) {
+				roisByNumbers.put(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition(), new ArrayList<Roi>());
+				sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
+			}
+			sliceRois.add(roi);
 			
 			ColorLegend cl = getColorLegend();
 			//
@@ -1724,6 +1755,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			listModel.addElement(name);
 			fullListModel.addElement(name);
 			rois.put(name, roi);
+			ArrayList<Roi> sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
+			if (sliceRois == null) {
+				roisByNumbers.put(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition(), new ArrayList<Roi>());
+				sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
+			}
+			sliceRois.add(roi);
 		}		
 		showAll(SHOW_ALL);
 		updateShowAll();
@@ -1808,6 +1845,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						listModel.addElement(fillColor); 
 						fullListModel.addElement(fillColor);
 						rois.put(fillColor, pRoi); 
+						ArrayList<Roi> sliceRois = roisByNumbers.get(pRoi.getCPosition()+"_"+pRoi.getZPosition()+"_"+pRoi.getTPosition());
+						if (sliceRois == null) {
+							roisByNumbers.put(pRoi.getCPosition()+"_"+pRoi.getZPosition()+"_"+pRoi.getTPosition(), new ArrayList<Roi>());
+							sliceRois = roisByNumbers.get(pRoi.getCPosition()+"_"+pRoi.getZPosition()+"_"+pRoi.getTPosition());
+						}
+						sliceRois.add(pRoi);
 						nRois++;
 
 						pRoi.setFillColor(Colors.decode(fillColor.replace("#", "#33"), defaultColor));
@@ -1869,6 +1912,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						listModel.addElement(connStroke); 
 						fullListModel.addElement(connStroke);
 						rois.put(connStroke, aRoi); 
+						ArrayList<Roi> sliceRois = roisByNumbers.get(aRoi.getCPosition()+"_"+aRoi.getZPosition()+"_"+aRoi.getTPosition());
+						if (sliceRois == null) {
+							roisByNumbers.put(aRoi.getCPosition()+"_"+aRoi.getZPosition()+"_"+aRoi.getTPosition(), new ArrayList<Roi>());
+							sliceRois = roisByNumbers.get(aRoi.getCPosition()+"_"+aRoi.getZPosition()+"_"+aRoi.getTPosition());
+						}
+						sliceRois.add(aRoi);
 						nRois++;
 
 						aRoi.setStrokeColor(Colors.decode(connStroke, defaultColor));
@@ -2015,6 +2064,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						fullListModel.addElement(name);
 						rois.put(name, roi); 
 						((Roi) rois.get(name)).setName(name);  //weird but necessary, and logically so
+						ArrayList<Roi> sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
+						if (sliceRois == null) {
+							roisByNumbers.put(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition(), new ArrayList<Roi>());
+							sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
+						}
+						sliceRois.add(roi);
 
 						nRois++;
 						String nameEndReader = name;
@@ -2131,6 +2186,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (!name2.endsWith(".roi")) name2 = name2+".roi";
 		String newName = name2.substring(0, name2.length()-4);
 		rois.put(newName, roi);
+		ArrayList<Roi> sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
+		if (sliceRois == null) {
+			roisByNumbers.put(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition(), new ArrayList<Roi>());
+			sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
+		}
+		sliceRois.add(roi);
 		roi.setName(newName);
 		listModel.setElementAt(newName, indexes[0]);
 		fullListModel.setElementAt(newName, indexes[0]);
@@ -2860,6 +2921,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			roi.setName(name2);
 			roi.setPosition(0,0,0);
 			rois.put(name2, roi);
+			ArrayList<Roi> sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
+			if (sliceRois == null) {
+				roisByNumbers.put(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition(), new ArrayList<Roi>());
+				sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
+			}
+			sliceRois.add(roi);
 			listModel.setElementAt(name2, index);
 			fullListModel.setElementAt(name2, index);
 		}
@@ -3074,6 +3141,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	 */
 	public Hashtable<String, Roi> getROIs() {
 		return rois;
+	}
+
+	public Hashtable<String, ArrayList<Roi>> getROIsByNumbers() {
+		return roisByNumbers;
 	}
 
 	/** Returns the selection list.
@@ -4954,6 +5025,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				listModel.addElement(roiName);
 				fullListModel.addElement(roiName);
 				rois.put(roiName, tRoi);
+				ArrayList<Roi> sliceRois = roisByNumbers.get(tRoi.getCPosition()+"_"+tRoi.getZPosition()+"_"+tRoi.getTPosition());
+				if (sliceRois == null) {
+					roisByNumbers.put(tRoi.getCPosition()+"_"+tRoi.getZPosition()+"_"+tRoi.getTPosition(), new ArrayList<Roi>());
+					sliceRois = roisByNumbers.get(tRoi.getCPosition()+"_"+tRoi.getZPosition()+"_"+tRoi.getTPosition());
+				}
+				sliceRois.add(tRoi);
 				nRois++;
 				tRoi.setFillColor(fillColorNew);
 				//					imp.setRoi(tRoi, true);
@@ -5009,6 +5086,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					listModel.addElement(roiName);
 					fullListModel.addElement(roiName);
 					rois.put(roiName, lRoi);
+					ArrayList<Roi> sliceRois = roisByNumbers.get(lRoi.getCPosition()+"_"+lRoi.getZPosition()+"_"+lRoi.getTPosition());
+					if (sliceRois == null) {
+						roisByNumbers.put(lRoi.getCPosition()+"_"+lRoi.getZPosition()+"_"+lRoi.getTPosition(), new ArrayList<Roi>());
+						sliceRois = roisByNumbers.get(lRoi.getCPosition()+"_"+lRoi.getZPosition()+"_"+lRoi.getTPosition());
+					}
+					sliceRois.add(lRoi);
 					nRois++;
 					lRoi.setPosition(1, 1, centerZ);
 					indexes[2*i] = listModel.getSize() - 1;
@@ -5021,6 +5104,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					listModel.addElement(roiName);
 					fullListModel.addElement(roiName);
 					rois.put(roiName, aRoi);
+					sliceRois = roisByNumbers.get(aRoi.getCPosition()+"_"+aRoi.getZPosition()+"_"+aRoi.getTPosition());
+					if (sliceRois == null) {
+						roisByNumbers.put(aRoi.getCPosition()+"_"+aRoi.getZPosition()+"_"+aRoi.getTPosition(), new ArrayList<Roi>());
+						sliceRois = roisByNumbers.get(aRoi.getCPosition()+"_"+aRoi.getZPosition()+"_"+aRoi.getTPosition());
+					}
+					sliceRois.add(aRoi);
 					nRois++;
 					aRoi.setPosition(1, 1, centerZ);
 					indexes[(2*i)+1] = listModel.getSize() - 1;
@@ -5033,7 +5122,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				if (imp.getRoi() != null){
 					listModel.addElement(roiName);
 					fullListModel.addElement(roiName);
-					rois.put(roiName, imp.getRoi());
+					Roi roi = imp.getRoi();
+					rois.put(roiName, roi);
+					ArrayList<Roi> sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
+					if (sliceRois == null) {
+						roisByNumbers.put(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition(), new ArrayList<Roi>());
+						sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
+					}
+					sliceRois.add(roi);
 					nRois++;
 				}
 				list.clearSelection();
