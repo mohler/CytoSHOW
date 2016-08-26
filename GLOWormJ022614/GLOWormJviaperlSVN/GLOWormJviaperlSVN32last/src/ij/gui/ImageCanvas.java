@@ -1922,18 +1922,34 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 							
 							String hitPlaneString ="";
 							int[] hitPlaneArray = new int[hitRois.size()];
-							for (int q=0;q<hitRois.size();q++)
-								hitPlaneArray[q]=hitRois.get(q).getZPosition();
+							
+							if(guideImp.getTitle().contains("SW_")) {
+								for (int q=0;q<hitRois.size();q++)
+									hitPlaneArray[q]=hitRois.get(q).getZPosition();
+							} else {
+								for (int q=0;q<hitRois.size();q++)
+									hitPlaneArray[q]=hitRois.get(q).getTPosition();
+							}
 							Arrays.sort(hitPlaneArray);
 							for (Object plane:hitPlaneArray)
-								hitPlaneString = hitPlaneString +" " +(Integer)plane;
-							
-							mi = new JMenuItem("near "
-									+ hit
-											+ " within "+inPlaneDiameter/2 * imp.getCalibration().pixelWidth*1000+"nm at planes {"+ hitPlaneString+ "} in \""
-											+ (rm.getImagePlus().getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
-													(rm.getImagePlus().getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
-														(rm.getImagePlus().getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
+								if (!hitPlaneString.contains(" " +(Integer)plane+","))
+									hitPlaneString = hitPlaneString +" " +(Integer)plane+",";
+							hitPlaneString = hitPlaneString.replaceAll("(.*),", "$1 ");
+							if(guideImp.getTitle().contains("SW_")) {
+								mi = new JMenuItem("near "
+										+ hit
+										+ " within "+String.format("%.0f", (inPlaneDiameter/2 * imp.getCalibration().pixelWidth*1000)) +"nm at slices {"+ hitPlaneString+ "} in \""
+										+ (rm.getImagePlus().getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
+												(rm.getImagePlus().getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
+													(rm.getImagePlus().getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
+							} else {
+								mi = new JMenuItem("near "
+										+ hit
+												+ " within "+String.format("%.2f", (inPlaneDiameter/2 * imp.getCalibration().pixelWidth))+"µm at frames {"+ hitPlaneString+ "} in \""
+												+ (rm.getImagePlus().getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
+														(rm.getImagePlus().getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
+															(rm.getImagePlus().getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
+							}
 							mi.setActionCommand("near "
 									+ hitNameRoisHashtable.get(hit).get(0).getName() + ": "
 									+ rm.getImagePlus().getTitle());
