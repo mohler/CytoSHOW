@@ -1844,6 +1844,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 						int zRadius=1;
 						double inPlaneDiameter=0;
+						double maxInPlaneDiameter=0;
 						ArrayList<Roi> nearHits = new ArrayList<Roi>();
 						ArrayList<String> nearHitNames = new ArrayList<String>();
 						Hashtable<String,ArrayList<Roi>> hitNameRoisHashtable = new Hashtable<String,ArrayList<Roi>>();
@@ -1875,12 +1876,16 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 									int zSlice = sameCellRois.get(sc).getZPosition() + zSliceAdjust;
 									if (zSlice < 1 || zSlice > rm.getImagePlus().getNSlices())
 										continue;
-									if (guideImp.getTitle().contains("SW_"))
+									if (guideImp.getTitle().contains("SW_")) {
 										zSlice = sameCellZs.get(sc);
-									inPlaneDiameter = 10 * zxRatio * zRadius;
-									if (!guideImp.getTitle().contains("SW_"))
-										inPlaneDiameter = 2 * zxRatio * Math.sqrt(Math.pow(zRadius,2)-Math.pow((zSlice-targetZ),2));
-
+										inPlaneDiameter = 10 * zxRatio * zRadius;
+									}
+									if (!guideImp.getTitle().contains("SW_")) {
+										double legXYSquared = Math.pow(zRadius,2)-Math.pow((zSlice-targetZ),2);
+										inPlaneDiameter = 2 * zxRatio * Math.sqrt(legXYSquared>0?legXYSquared:0);
+									}
+									if (inPlaneDiameter>maxInPlaneDiameter)
+										maxInPlaneDiameter = inPlaneDiameter;
 									Roi hoodRoi = new OvalRoi(sameCellRois.get(sc).getBounds().getCenterX() - (inPlaneDiameter / 2),
 											sameCellRois.get(sc).getBounds().getCenterY() - (inPlaneDiameter / 2), 
 											inPlaneDiameter, inPlaneDiameter);
@@ -1938,14 +1943,14 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 							if(guideImp.getTitle().contains("SW_")) {
 								mi = new JMenuItem("near "
 										+ hit
-										+ " within "+String.format("%.0f", (inPlaneDiameter/2 * imp.getCalibration().pixelWidth*1000)) +"nm at slices {"+ hitPlaneString+ "} in \""
+										+ " within "+ (maxInPlaneDiameter/2 * imp.getCalibration().pixelWidth*1000) +"nm at slices {"+ hitPlaneString+ "} in \""
 										+ (rm.getImagePlus().getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
 												(rm.getImagePlus().getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
 													(rm.getImagePlus().getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
 							} else {
 								mi = new JMenuItem("near "
 										+ hit
-												+ " within "+String.format("%.2f", (inPlaneDiameter/2 * imp.getCalibration().pixelWidth))+"µm at frames {"+ hitPlaneString+ "} in \""
+												+ " within "+ (maxInPlaneDiameter/2 * imp.getCalibration().pixelWidth)+"µm at frames {"+ hitPlaneString+ "} in \""
 												+ (rm.getImagePlus().getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
 														(rm.getImagePlus().getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
 															(rm.getImagePlus().getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
