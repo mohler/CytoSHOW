@@ -97,6 +97,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 	public Hashtable<String,Roi> messageRois;
 	public String droppedGeneUrls = "";
 	public boolean sketchyMQTVS;
+	private ArrayList<Roi> sliceRois;
 
 
 
@@ -834,7 +835,6 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		2.0, 3.0, 4.0, 6.0, 8.0, 12.0, 16.0, 24.0, 32.0 };
 	private Roi cursorRoi;
 	private int rotation;
-	private ArrayList<Roi> sliceRois;
 
 	public static double getLowerZoomLevel(double currentMag) {
 		double newMag = zoomLevels[0];
@@ -1352,11 +1352,12 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		if (rm==null) return false;
 		Hashtable rois = rm.getROIs();
 		DefaultListModel listModel = rm.getListModel();
+		if (getLabelShapes()==null) return false;
 		int n = labelShapes.length;
-		if (getLabelShapes()==null || getLabelShapes().length!=n) return false;
 		for (int i=0; i<n; i++) {
 			if ( rois.get(listModel.get(i)) instanceof Arrow && getLabelShapes()[i]!=null && getLabelShapes()[i].contains(x, y)) {
-				new ij.macro.MacroRunner("roiManager('select', "+i+", "+imp.getID()+");");
+				int q = listModel.indexOf(getLabelShapes()[i].getName());
+				new ij.macro.MacroRunner("roiManager('select', "+q+", "+imp.getID()+");");
 				return true;
 			}
 			if (getLabelShapes()[i]!=null && getLabelShapes()[i].contains(x, y)
@@ -1484,7 +1485,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 							|| sketchyMQTVS);
 
 
-			if (rm != null) {
+			if (rm != null && labelShapes != null) {
 				Roi[] fullRoisArray = rm.getFullRoisAsArray();
 				DefaultListModel listModel = rm.getListModel();
 				int n = labelShapes.length;
