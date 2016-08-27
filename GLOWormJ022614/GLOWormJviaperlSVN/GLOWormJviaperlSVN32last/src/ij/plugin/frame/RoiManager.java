@@ -1189,8 +1189,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		if (!Orthogonal_Views.isOrthoViewsImage(imp)) {
 			if (imp.getWindow() instanceof StackWindow && ((StackWindow)imp.getWindow()).isWormAtlas()) {
-				for (Roi existingRoi:getFullRoisAsArray()){
-					if (imp.getSlice() == existingRoi.getZPosition() && imp.getFrame() == existingRoi.getTPosition()) {
+				for (Roi existingRoi:roisByNumbers.get(imp.getChannel()+"_"+imp.getSlice()+"_"+imp.getFrame())){
+//					if (imp.getSlice() == existingRoi.getZPosition() && imp.getFrame() == existingRoi.getTPosition()) {
 						if (roiCopy.contains((int)existingRoi.getBounds().getCenterX(), (int)existingRoi.getBounds().getCenterY())) {
 							if (existingRoi instanceof TextRoi && !(roiCopy instanceof TextRoi) && roiCopy.isArea()) {
 								label = (true/*((TextRoi)existingRoi).getText().matches(".*")*/?(""+((TextRoi)existingRoi).getText().replace("\n"," ")+"| Area"):"Blank");
@@ -1198,20 +1198,20 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								roiCopy.setFillColor(existingRoi.getFillColor());
 								roiCopy.setStrokeColor(null);
 							}
-						}
+//						}
 					}
 				}
 			} else {
-				for (Roi existingRoi:getFullRoisAsArray()){
-					if (imp.getSlice() == existingRoi.getZPosition() && imp.getFrame() == existingRoi.getTPosition()) {
-						if (roiCopy.contains((int)existingRoi.getBounds().x, (int)existingRoi.getBounds().y)) {
+				for (Roi existingRoi:roisByNumbers.get(imp.getChannel()+"_"+imp.getSlice()+"_"+imp.getFrame())){
+//					if (imp.getSlice() == existingRoi.getZPosition() && imp.getFrame() == existingRoi.getTPosition()) {
+						if (roiCopy.contains((int)existingRoi.getBounds().getCenterX(), (int)existingRoi.getBounds().getCenterY())) {
 							if (existingRoi instanceof TextRoi && !(roiCopy instanceof TextRoi) && roiCopy.isArea()) {
 								label = (true/*((TextRoi)existingRoi).getText().matches(".*")*/?(""+((TextRoi)existingRoi).getText().replace("\n"," ")+"| Area"):"Blank");
 								rename(label, new int[]{listModel.size()-1}, true);
 								roiCopy.setFillColor(existingRoi.getFillColor());
 								roiCopy.setStrokeColor(null);
 							}
-						}
+//						}
 					}
 				}
 			}
@@ -1389,7 +1389,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						delete = true;
 				}
 				if (delete) {
-					rois.remove(listModel.getElementAt(i));
+					Roi roi = rois.get(listModel.getElementAt(i));
+					int c = roi.getCPosition();
+					int z = roi.getZPosition();
+					int t = roi.getTPosition();
+					getROIsByNumbers().get(c+"_"+z+"_"+t).remove(roi);
+
+					rois.remove(roi);
 					fullListModel.removeElement(listModel.getElementAt(i));
 					listModel.remove(i);
 				}
