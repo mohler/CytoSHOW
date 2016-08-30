@@ -521,20 +521,16 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			if (command.equals("Add\n(ctrl-t)")) {
 				String newName = promptForName("name");
 				Color existingColor = null;
-				Roi[] rois = getFullRoisAsArray();
-				int fraa = rois.length;
-				int r =0;
-				while (existingColor == null) {
-					if(r>rois.length-1) {
+				Enumeration<Roi> roisElements = rois.elements();
+				while (roisElements.hasMoreElements()) {
+					Roi nextRoi = roisElements.nextElement();
+					String nextName = nextRoi.getName();
+					if (nextName.startsWith("\""+newName+" \"")){
+						existingColor = nextRoi.getFillColor();
 						break;
 					}
-						
-					String nextName = rois[r].getName();
-					if (nextName.startsWith("\""+newName+" \"")){
-						existingColor = rois[r].getFillColor();
-					}
-					r++;
 				}
+				
 				String existinghexName = "";
 				if (existingColor!=null) {
 					int existingColorInt = existingColor.getRGB();
@@ -548,7 +544,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				add(shiftKeyDown, altKeyDown, controlKeyDown);
 				
 				if (existingColor != null) {
-						rois[getListModel().getSize()-1].setFillColor(existingColor);
+						rois.get(getListModel().get(getListModel().getSize()-1)).setFillColor(existingColor);
 
 				}
 
@@ -1161,10 +1157,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (fillColor!=null)
 			roiCopy.setFillColor(fillColor);
 		rois.put(label, roiCopy);
-		ArrayList<Roi> sliceRois = roisByNumbers.get(roiCopy.getCPosition()+"_"+roiCopy.getZPosition()+"_"+roiCopy.getTPosition());
+		ArrayList<Roi> sliceRois = roisByNumbers.get((addRoiSpanC?0:roiCopy.getCPosition())+"_"+(addRoiSpanZ?0:roiCopy.getZPosition())+"_"+(addRoiSpanT?0:roiCopy.getTPosition()));
 		if (sliceRois == null) {
-			roisByNumbers.put(roiCopy.getCPosition()+"_"+roiCopy.getZPosition()+"_"+roiCopy.getTPosition(), new ArrayList<Roi>());
-			sliceRois = roisByNumbers.get(roiCopy.getCPosition()+"_"+roiCopy.getZPosition()+"_"+roiCopy.getTPosition());
+			roisByNumbers.put((addRoiSpanC?0:roiCopy.getCPosition())+"_"+(addRoiSpanZ?0:roiCopy.getZPosition())+"_"+(addRoiSpanT?0:roiCopy.getTPosition()), new ArrayList<Roi>());
+			sliceRois = roisByNumbers.get((addRoiSpanC?0:roiCopy.getCPosition())+"_"+(addRoiSpanZ?0:roiCopy.getZPosition())+"_"+(addRoiSpanT?0:roiCopy.getTPosition()));
 		}
 		sliceRois.add(roiCopy);
 
@@ -1189,7 +1185,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		if (!Orthogonal_Views.isOrthoViewsImage(imp)) {
 			if (imp.getWindow() instanceof StackWindow && ((StackWindow)imp.getWindow()).isWormAtlas()) {
-				for (Roi existingRoi:roisByNumbers.get(imp.getChannel()+"_"+imp.getSlice()+"_"+imp.getFrame())){
+				for (Roi existingRoi:roisByNumbers.get((addRoiSpanC?0:roiCopy.getCPosition())+"_"+(addRoiSpanZ?0:roiCopy.getZPosition())+"_"+(addRoiSpanT?0:roiCopy.getTPosition()))){
 //					if (imp.getSlice() == existingRoi.getZPosition() && imp.getFrame() == existingRoi.getTPosition()) {
 						if (roiCopy.contains((int)existingRoi.getBounds().getCenterX(), (int)existingRoi.getBounds().getCenterY())) {
 							if (existingRoi instanceof TextRoi && !(roiCopy instanceof TextRoi) && roiCopy.isArea()) {
@@ -1202,7 +1198,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					}
 				}
 			} else {
-				for (Roi existingRoi:roisByNumbers.get(imp.getChannel()+"_"+imp.getSlice()+"_"+imp.getFrame())){
+				for (Roi existingRoi:roisByNumbers.get((addRoiSpanC?0:roiCopy.getCPosition())+"_"+(addRoiSpanZ?0:roiCopy.getZPosition())+"_"+(addRoiSpanT?0:roiCopy.getTPosition()))){
 //					if (imp.getSlice() == existingRoi.getZPosition() && imp.getFrame() == existingRoi.getTPosition()) {
 						if (roiCopy.contains((int)existingRoi.getBounds().getCenterX(), (int)existingRoi.getBounds().getCenterY())) {
 							if (existingRoi instanceof TextRoi && !(roiCopy instanceof TextRoi) && roiCopy.isArea()) {
@@ -1393,9 +1389,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					int c = roi.getCPosition();
 					int z = roi.getZPosition();
 					int t = roi.getTPosition();
+					
 					getROIsByNumbers().get(c+"_"+z+"_"+t).remove(roi);
-
-					rois.remove(roi);
+					rois.remove(roi.getName());
 					fullListModel.removeElement(listModel.getElementAt(i));
 					listModel.remove(i);
 				}
@@ -1611,23 +1607,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			// resets n the the proper CZT position of the current image based on n's CZT postion in the motherImp of this ROI
 			if (roi.getMotherImp() !=null) {
 				if (imp.isHyperStack()||imp.isComposite() || imp.getWindow() instanceof StackWindow) {
-					int c =roi.getCPosition();
-					int z = imp.getSlice();
-					int t = imp.getFrame();
-					if (roi.getName().split("_").length>3) {
-						if (roi.getName().split("_")[3].contains("C")){
-							c=0;
-							//						IJ.log("C");
-						}
+					int c = roi.getCPosition();
+					int z = roi.getZPosition();
+					int t = roi.getTPosition();
 						if(c==0) c = imp.getChannel();
 						if(z==0) z = imp.getSlice();
-						z =roi.getZPosition();  //IJ.log(""+z);
-						if (roi.getName().split("_")[3].contains("Z"))
-							z=0;
-						t =roi.getTPosition();
-						if (roi.getName().split("_")[3].contains("T"))
-							t=0;
-					}
+						if(t==0) t = imp.getFrame();
+					
 					imp.setPosition(c, z, t );
 				}
 			}else if (n>=1 && n<=imp.getStackSize()) {
@@ -2148,7 +2134,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	} 
 
 
-	String getUniqueName(String name) {
+	public String getUniqueName(String name) {
 		String name2 = name + (addRoiSpanC?"C":"") + (addRoiSpanZ?"Z":"") + (addRoiSpanT?"T":"");
 		String suffix ="";
 		while (name2.endsWith("C") || name2.endsWith("Z") || name2.endsWith("T")) {

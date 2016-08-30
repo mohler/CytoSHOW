@@ -1,9 +1,11 @@
 package ij.plugin.filter;
 import ij.*;
+import ij.plugin.frame.RoiManager;
 import ij.process.*;
 import ij.gui.*;
 import ij.util.Tools;
 import ij.measure.Measurements;
+
 import java.awt.*;
 
 
@@ -249,9 +251,9 @@ public class StackLabeler implements ExtendedPlugInFilter, DialogListener {
 			if (frame>=firstFrame&&frame<=lastFrame) {
 				int xloc = format==LABEL?x-textWidth:x-textWidth;
 				int yloc = format==LABEL?y-yoffset:y-yoffset;
-				if (dimension=="Channels")
+				if (dimension=="Channels") {
 					imp.setPositionWithoutUpdate(frame,1,1);
-				else if (dimension=="Slices") {
+				} else if (dimension=="Slices") {
 					imp.setPositionWithoutUpdate(1,frame,1);
 					s= s + " zL";
 				} else if (dimension=="Frames") {
@@ -263,7 +265,8 @@ public class StackLabeler implements ExtendedPlugInFilter, DialogListener {
 //				roi.setNonScalable(true);
 
 //				overlay.add(roi);
-				imp.getRoiManager().addRoi(roi);
+				RoiManager rm =imp.getRoiManager();
+				rm.addRoi(roi);
 			}
 //			if (image==imp.getStackSize()||previewing)
 //				imp.setOverlay(overlay);
