@@ -795,7 +795,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 								}
 							}
 						}
-						dropImp.getCanvas().droppedGeneUrls = (dropImp.getCanvas().droppedGeneUrls != ""?dropImp.getCanvas().droppedGeneUrls:"cells_expressing:\n") 
+						dropImp.getCanvas().droppedGeneUrls = (dropImp.getCanvas().droppedGeneUrls != ""?dropImp.getCanvas().droppedGeneUrls:"(Live_from_WormBase...)\nCells_expressing:\n") 
 								+ ((String)obj).replace("http://www.wormbase.org/db/get?name=", "")
 								.replace(";class=gene", "")
 								.replaceAll(".*/gene/", "").split(" ")[0]+ "&";
@@ -956,7 +956,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 								}
 							}
 						}
-						dropImp.getCanvas().droppedGeneUrls = (dropImp.getCanvas().droppedGeneUrls != ""?dropImp.getCanvas().droppedGeneUrls:"cells_expressing:\n") 
+						dropImp.getCanvas().droppedGeneUrls = (dropImp.getCanvas().droppedGeneUrls != ""?dropImp.getCanvas().droppedGeneUrls:"(Live_from_WormBase...)\nCells_expressing:\n") 
 								+ ((String)obj).replaceAll(".*/expr_pattern/", "")+ "&";
 
 					}
