@@ -6,6 +6,7 @@ import ij.measure.*;
 import ij.plugin.ContrastEnhancer;
 import ij.measure.Calibration;
 import ij.util.Tools;
+
 import java.awt.*;
 import java.util.*;
 
@@ -29,6 +30,7 @@ public class FFT implements  PlugIn, Measurements {
     
     private ImagePlus imp;
     private boolean padded;
+    private boolean noDisplay;
     private int originalWidth;
     private int originalHeight;
     private int stackSize = 1;
@@ -36,12 +38,14 @@ public class FFT implements  PlugIn, Measurements {
     private boolean doFFT;
 	private boolean noScaling;
 
+	
     public void run(String arg) {
         if (arg.equals("options")) {
             showDialog();
             if (doFFT) arg="fft"; else return;
         }
-        imp = IJ.getImage();
+        if (imp == null)
+        		imp = IJ.getImage();
         if (arg.equals("redisplay"))
             {redisplayPowerSpectrum(); return;}
         if (arg.equals("swap"))
@@ -54,6 +58,9 @@ public class FFT implements  PlugIn, Measurements {
         }
        if (arg.contains("noScaling"))
     	   noScaling = true;
+       if (arg.contains("noDisplay"))
+    	   noDisplay = true;
+    	   
         ImageProcessor ip = imp.getProcessor();
         Object obj = imp.getProperty("FHT");
         FHT fht = (obj instanceof FHT)?(FHT)obj:null;
@@ -72,16 +79,20 @@ public class FFT implements  PlugIn, Measurements {
             fht = newFHT(ip);
             inverse = false;
         }
-        if (inverse)
-            doInverseTransform(fht);
-        else {
-            fileName = imp.getTitle();
-            doForwardTransform(fht);   
-        }    
+        if(noDisplay) {
+        	
+        } else {
+        	if (inverse)
+        		doInverseTransform(fht).show();
+        	else {
+        		fileName = imp.getTitle();
+        		doForwardTransform(fht).show();   
+        	}    
+        }
         IJ.showProgress(1.0);
     }
     
-    void doInverseTransform(FHT fht) {
+    public ImagePlus doInverseTransform(FHT fht) {
         fht = fht.getCopy();
         doMasking(fht);
         showStatus("Inverse transform");
@@ -102,7 +113,7 @@ public class FFT implements  PlugIn, Measurements {
                 showStatus("Setting brightness");
                 if (fht.rgb==null || ip2==null) {
                     IJ.error("FFT", "Unable to set brightness");
-                    return;
+                    return null;
                 }
                 ColorProcessor rgb = (ColorProcessor)fht.rgb.duplicate();
                 rgb.setBrightness((FloatProcessor)ip2);
@@ -118,25 +129,28 @@ public class FFT implements  PlugIn, Measurements {
             title = title.substring(7, title.length());
         ImagePlus imp2 = new ImagePlus("Inverse FFT of "+title, ip2);
         imp2.setCalibration(imp.getCalibration());
-        imp2.show();
+//        imp2.show();
+        return imp2;
     }
 
-    void doForwardTransform(FHT fht) {
+    public ImagePlus doForwardTransform(FHT fht) {
         showStatus("Forward transform");
         fht.transform();
         showStatus("Calculating power spectrum");
         ImageProcessor ps = fht.getPowerSpectrum(noScaling);
         if (!(displayFHT||displayComplex||displayRawPS))
         	displayFFT = true;
+        ImagePlus imp2 = null;
         if (displayFFT) {
-            ImagePlus imp2 = new ImagePlus("FFT of "+imp.getTitle(), ps);
-            imp2.show();
+            imp2 = new ImagePlus("FFT of "+imp.getTitle(), ps);
+//            imp2.show();
             imp2.setProperty("FHT", fht);
             imp2.setCalibration(imp.getCalibration());
         }
+        return imp2;
     }
     
-    FHT newFHT(ImageProcessor ip) {
+    public FHT newFHT(ImageProcessor ip) {
         FHT fht;
         if (ip instanceof ColorProcessor) {
             showStatus("Extracting brightness");

@@ -1184,9 +1184,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	
 
 		if (!Orthogonal_Views.isOrthoViewsImage(imp)) {
-			if (imp.getWindow() instanceof StackWindow && ((StackWindow)imp.getWindow()).isWormAtlas()) {
-				for (Roi existingRoi:roisByNumbers.get((addRoiSpanC?0:roiCopy.getCPosition())+"_"+(addRoiSpanZ?0:roiCopy.getZPosition())+"_"+(addRoiSpanT?0:roiCopy.getTPosition()))){
-//					if (imp.getSlice() == existingRoi.getZPosition() && imp.getFrame() == existingRoi.getTPosition()) {
+			if (imp.getWindow()!=null) {
+				if (imp.getWindow() instanceof StackWindow && ((StackWindow)imp.getWindow()).isWormAtlas()) {
+					for (Roi existingRoi:roisByNumbers.get((addRoiSpanC?0:roiCopy.getCPosition())+"_"+(addRoiSpanZ?0:roiCopy.getZPosition())+"_"+(addRoiSpanT?0:roiCopy.getTPosition()))){
+						//					if (imp.getSlice() == existingRoi.getZPosition() && imp.getFrame() == existingRoi.getTPosition()) {
 						if (roiCopy.contains((int)existingRoi.getBounds().getCenterX(), (int)existingRoi.getBounds().getCenterY())) {
 							if (existingRoi instanceof TextRoi && !(roiCopy instanceof TextRoi) && roiCopy.isArea()) {
 								label = (true/*((TextRoi)existingRoi).getText().matches(".*")*/?(""+((TextRoi)existingRoi).getText().replace("\n"," ")+"| Area"):"Blank");
@@ -1194,12 +1195,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								roiCopy.setFillColor(existingRoi.getFillColor());
 								roiCopy.setStrokeColor(null);
 							}
-//						}
+							//						}
+						}
 					}
-				}
-			} else {
-				for (Roi existingRoi:roisByNumbers.get((addRoiSpanC?0:roiCopy.getCPosition())+"_"+(addRoiSpanZ?0:roiCopy.getZPosition())+"_"+(addRoiSpanT?0:roiCopy.getTPosition()))){
-//					if (imp.getSlice() == existingRoi.getZPosition() && imp.getFrame() == existingRoi.getTPosition()) {
+				} else {
+					for (Roi existingRoi:roisByNumbers.get((addRoiSpanC?0:roiCopy.getCPosition())+"_"+(addRoiSpanZ?0:roiCopy.getZPosition())+"_"+(addRoiSpanT?0:roiCopy.getTPosition()))){
+						//					if (imp.getSlice() == existingRoi.getZPosition() && imp.getFrame() == existingRoi.getTPosition()) {
 						if (roiCopy.contains((int)existingRoi.getBounds().getCenterX(), (int)existingRoi.getBounds().getCenterY())) {
 							if (existingRoi instanceof TextRoi && !(roiCopy instanceof TextRoi) && roiCopy.isArea()) {
 								label = (true/*((TextRoi)existingRoi).getText().matches(".*")*/?(""+((TextRoi)existingRoi).getText().replace("\n"," ")+"| Area"):"Blank");
@@ -1207,12 +1208,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								roiCopy.setFillColor(existingRoi.getFillColor());
 								roiCopy.setStrokeColor(null);
 							}
-//						}
+							//						}
+						}
 					}
 				}
 			}
 		}
-
 
 		if (imp != null) {
 			int c = imp.getChannel();
@@ -1286,9 +1287,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		sliceRois.add(roiCopy);
 		
 		textCountLabel.setText(""+ listModel.size() +"/"+ fullListModel.size());
-		imp.getWindow().countLabel.setText(""+ listModel.size() +"/"+ fullListModel.size() +"");
-		imp.getWindow().countLabel.repaint();			
-	}
+		if (imp.getWindow()!=null) {
+			imp.getWindow().countLabel.setText(""+ listModel.size() +"/"+ fullListModel.size() +"");
+			imp.getWindow().countLabel.repaint();			
+		}
+		}
 
 	boolean isStandardName(String name) {
 		if (name==null) return false;
@@ -1403,8 +1406,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			imp.deleteRoi();
 		updateShowAll();
 		textCountLabel.setText(""+ listModel.size() +"/"+ fullListModel.size());
-		imp.getWindow().countLabel.setText(""+ listModel.size() +"/"+ fullListModel.size() +"");
-		imp.getWindow().countLabel.repaint();			
+		if (imp.getWindow()!=null) {
+			imp.getWindow().countLabel.setText(""+ listModel.size() +"/"+ fullListModel.size() +"");
+			imp.getWindow().countLabel.repaint();			
+		}
 		if (record()) Recorder.record("roiManager", "Delete");
 		return true;
 	}
@@ -1599,22 +1604,26 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		Roi roi = (Roi)rois.get(label);
 		if (imp==null || roi==null)
 			return false;
-		if (imp.getWindow().running || imp.getWindow().running2 || imp.getWindow().running3) {
-			IJ.run("Stop Animation");
+		if (imp.getWindow()!=null) {
+			if (imp.getWindow().running || imp.getWindow().running2 || imp.getWindow().running3) {
+				IJ.run("Stop Animation");
+			}
 		}			
 		if (setSlice) {
 			int n = getSliceNumber(roi, label);
 			// resets n the the proper CZT position of the current image based on n's CZT postion in the motherImp of this ROI
 			if (roi.getMotherImp() !=null) {
-				if (imp.isHyperStack()||imp.isComposite() || imp.getWindow() instanceof StackWindow) {
-					int c = roi.getCPosition();
-					int z = roi.getZPosition();
-					int t = roi.getTPosition();
+				if (imp.getWindow()!=null) {
+					if (imp.isHyperStack()||imp.isComposite() || imp.getWindow() instanceof StackWindow) {
+						int c = roi.getCPosition();
+						int z = roi.getZPosition();
+						int t = roi.getTPosition();
 						if(c==0) c = imp.getChannel();
 						if(z==0) z = imp.getSlice();
 						if(t==0) t = imp.getFrame();
-					
-					imp.setPosition(c, z, t );
+
+						imp.setPosition(c, z, t );
+					}
 				}
 			}else if (n>=1 && n<=imp.getStackSize()) {
 				if (imp.isHyperStack()||imp.isComposite())
@@ -1630,11 +1639,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			roi2.setLocation(r.x+(int)cal.xOrigin, r.y+(int)cal.yOrigin);
 		int width= imp.getWidth(), height=imp.getHeight();
 		if (restoreCentered) {
-			ImageCanvas ic = imp.getCanvas();
-			if (ic!=null) {
-				Rectangle r1 = ic.getSrcRect();
-				Rectangle r2 = roi2.getBounds();
-				roi2.setLocation(r1.x+r1.width/2-r2.width/2, r1.y+r1.height/2-r2.height/2);
+			if (imp.getCanvas()!=null) {
+				ImageCanvas ic = imp.getCanvas();
+				if (ic!=null) {
+					Rectangle r1 = ic.getSrcRect();
+					Rectangle r2 = roi2.getBounds();
+					roi2.setLocation(r1.x+r1.width/2-r2.width/2, r1.y+r1.height/2-r2.height/2);
+				}
 			}
 		}
 		boolean oob = false;
@@ -1711,8 +1722,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			openZip(path);
 			this.setTitle(origTitle);
 			textCountLabel.setText(""+ listModel.size() +"/"+ fullListModel.size());
-			imp.getWindow().countLabel.setText(""+ listModel.size() +"/"+ fullListModel.size() +"");
-			imp.getWindow().countLabel.repaint();			
+			if (imp.getWindow()!=null) {
+				imp.getWindow().countLabel.setText(""+ listModel.size() +"/"+ fullListModel.size() +"");
+				imp.getWindow().countLabel.repaint();
+			}
 			return;			
 		}
 		if (path.endsWith(".xml")) {
@@ -1721,8 +1734,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			openXml(path);
 			this.setTitle(origTitle);
 			textCountLabel.setText(""+ listModel.size() +"/"+ fullListModel.size());
-			imp.getWindow().countLabel.setText(""+ listModel.size() +"/"+ fullListModel.size() +"");
-			imp.getWindow().countLabel.repaint();			
+			if (imp.getWindow()!=null) {
+				imp.getWindow().countLabel.setText(""+ listModel.size() +"/"+ fullListModel.size() +"");
+				imp.getWindow().countLabel.repaint();
+			}
 			return;			
 		}
 		if (path.endsWith(".csv")) {
@@ -1731,8 +1746,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			openCsv(path);
 			this.setTitle(origTitle);
 			textCountLabel.setText(""+ listModel.size() +"/"+ fullListModel.size());
-			imp.getWindow().countLabel.setText(""+ listModel.size() +"/"+ fullListModel.size());
-			imp.getWindow().countLabel.repaint();			
+			if (imp.getWindow()!=null) {
+				imp.getWindow().countLabel.setText(""+ listModel.size() +"/"+ fullListModel.size());
+				imp.getWindow().countLabel.repaint();
+			}
 			return;			
 		}
 
@@ -1990,21 +2007,22 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				timeNow = System.currentTimeMillis();
 				if (timeNow > timeLast + 100) {
 					timeLast = timeNow;
-					Graphics g = imp.getCanvas().getGraphics();
-					if (imp.getCanvas().messageRois.containsKey("Loading Tags"))
-						imp.getCanvas().messageRois.remove("Loading Tags");
+					if (imp.getCanvas()!=null) {
+						Graphics g = imp.getCanvas().getGraphics();
+						if (imp.getCanvas().messageRois.containsKey("Loading Tags"))
+							imp.getCanvas().messageRois.remove("Loading Tags");
 
-					messageRoi = new TextRoi(imp.getCanvas().getSrcRect().x, imp.getCanvas().getSrcRect().y,
-							"   Loading Tags:\n   " + "   ..."+count+ " features tagged\n"   );
+						messageRoi = new TextRoi(imp.getCanvas().getSrcRect().x, imp.getCanvas().getSrcRect().y,
+								"   Loading Tags:\n   " + "   ..."+count+ " features tagged\n"   );
 
-					((TextRoi) messageRoi).setCurrentFont(g.getFont().deriveFont((float) (imp.getCanvas().getSrcRect().width/16)));
-					messageRoi.setStrokeColor(Color.black);
-					messageRoi.setFillColor(Colors.decode("#99ffffdd",
-							imp.getCanvas().getDefaultColor()));
+						((TextRoi) messageRoi).setCurrentFont(g.getFont().deriveFont((float) (imp.getCanvas().getSrcRect().width/16)));
+						messageRoi.setStrokeColor(Color.black);
+						messageRoi.setFillColor(Colors.decode("#99ffffdd",
+								imp.getCanvas().getDefaultColor()));
 
-					imp.getCanvas().messageRois.put("Loading Tags", messageRoi);
-					imp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
-
+						imp.getCanvas().messageRois.put("Loading Tags", messageRoi);
+						imp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
+					}
 				}
 				this.setTitle(  "Tag Manager" + ((nRois%100>50)?" LOADING!!!":" Loading...") );
 				if (nRois%100>50){
@@ -2096,8 +2114,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			} 
 			in.close(); 
 			this.imp.setTitle(impTitle);
-			if (imp.getCanvas().messageRois.containsKey("Loading Tags"))
-				imp.getCanvas().messageRois.remove("Loading Tags");
+			if(imp.getCanvas()!=null) {
+				if (imp.getCanvas().messageRois.containsKey("Loading Tags"))
+					imp.getCanvas().messageRois.remove("Loading Tags");
+			}
 		} catch (IOException e) {error(e.toString());} 
 		if (in == null)
 			return;
@@ -2123,9 +2143,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		showAll(SHOW_ALL);
 		updateShowAll();
 		showAllCheckbox.setState(true);
-
-		imp.getCanvas().messageRois.remove("Loading Tags");
-		imp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
+		if(imp.getCanvas()!=null) {
+			imp.getCanvas().messageRois.remove("Loading Tags");
+			imp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
+		}
 		messageRoi = null;
 		busy = false;
 		if (path.startsWith("/Volumes/GLOWORM_DATA/") && !(new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path)).exists()) {
@@ -5026,7 +5047,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				nRois++;
 				tRoi.setFillColor(fillColorNew);
 				//					imp.setRoi(tRoi, true);
-				((TextRoi)tRoi).updateBounds(imp.getCanvas().getGraphics());
+				if (imp.getCanvas()!=null) {
+					((TextRoi)tRoi).updateBounds(imp.getCanvas().getGraphics());
+				}
 				tRoi.setLocation((int)(centerX - tRoi.getBounds().getWidth()/4), 
 						(int)(centerY - tRoi.getBounds().getHeight()/1.2));
 				tRoi.setPosition(1, 1, centerZ);
@@ -5219,8 +5242,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						fullListModel.removeElement(listModel.getElementAt(s));
 						listModel.remove(s);
 						textCountLabel.setText(""+ listModel.size() +"/"+ fullListModel.size());
-						imp.getWindow().countLabel.setText(""+ listModel.size() +"/"+ fullListModel.size() +"");
-						imp.getWindow().countLabel.repaint();			
+						if (imp.getWindow()!=null) {
+							imp.getWindow().countLabel.setText(""+ listModel.size() +"/"+ fullListModel.size() +"");
+							imp.getWindow().countLabel.repaint();	
+						}
 						ra = this.getFullRoisAsArray();
 					}
 				}
