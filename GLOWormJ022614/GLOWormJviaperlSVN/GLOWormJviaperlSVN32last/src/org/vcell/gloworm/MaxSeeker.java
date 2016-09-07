@@ -25,6 +25,7 @@ public class MaxSeeker implements PlugIn {
 
 	public void run(String arg) {
 		ImagePlus imp = WindowManager.getCurrentImage();
+		imp.getWindow().setVisible(false);
 		ImageStack newStack = new ImageStack(imp.getWidth(), imp.getHeight());
 		RoiManager rm = imp.getRoiManager();
 		DefaultListModel<String> lm = rm.getListModel();
