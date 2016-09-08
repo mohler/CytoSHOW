@@ -2074,10 +2074,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						fullListModel.addElement(name);
 						rois.put(name, roi); 
 						((Roi) rois.get(name)).setName(name);  //weird but necessary, and logically so
-						ArrayList<Roi> sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
+						String rbnKey = roi.getCPosition()+"_"+(imp.getNSlices()==1?1:roi.getZPosition())+"_"+roi.getTPosition();
+						ArrayList<Roi> sliceRois = roisByNumbers.get(rbnKey);
 						if (sliceRois == null) {
-							roisByNumbers.put(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition(), new ArrayList<Roi>());
-							sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
+							roisByNumbers.put(rbnKey, new ArrayList<Roi>());
+							sliceRois = roisByNumbers.get(rbnKey);
 						}
 						sliceRois.add(roi);
 
@@ -2108,6 +2109,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							}
 						}
 						roi.setPosition(c, z, t);
+						if(imp.getNSlices()==1)
+							roi.setPosition(c, 1, t);
 					} 
 				} 
 				entry = in.getNextEntry(); 
@@ -3573,6 +3576,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		if (originalRois != null) {
 			originalRois = null;
+		}
+		if (roisByNumbers != null) {
+			roisByNumbers = null;
 		}
 		list = null;
 		listModel = null;
