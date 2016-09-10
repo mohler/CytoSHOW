@@ -31,29 +31,12 @@ public class MaxSeeker implements PlugIn {
 		RoiManager rm = imp.getRoiManager();
 		DefaultListModel<String> lm = rm.getListModel();
 
-		for(int t=1;t<=imp.getNFrames();t++) {
+		for(int t=24073;t<=imp.getNFrames();t++) {
+//		for(int t=1;t<=10;t++) {
 			for (int z=1;z<=imp.getNSlices();z++) {
-//				FFT fft = new FFT();
 				imp.setPositionWithoutUpdate(1, z, t);
-//				FHT fht = fft.newFHT(imp.getProcessor());
-//
-//				OvalRoi innerCircle = new OvalRoi(52, 52, 23, 23);
-//				OvalRoi outerCircle = new OvalRoi(38, 38, 52, 52);
-//				ImagePlus impFFT = fft.doForwardTransform(fht);
-//				//			impFFT.show();
-//
-//				impFFT.setRoi(innerCircle);
-//				FFT invFFT = new FFT();
-//
-//				ImageProcessor ipFFT = impFFT.getProcessor();
-//				ipFFT.fill(innerCircle);
-//				ipFFT.fillOutside(outerCircle);
-//
-//				Object obj = impFFT.getProperty("FHT");
-//				FHT invFHT = (obj instanceof FHT)?(FHT)obj:null;
-//
-//				ImagePlus impClean = invFFT.doInverseTransform(invFHT);
-				IJ.run(imp, "Find Maxima...", "noise=50 output=[Point Selection] exclude");
+
+				IJ.run(imp, "Find Maxima...", "noise=45 output=[Point Selection] exclude");
 				//			impClean.getRoi().setPosition(1, 1, p);
 				if (imp.getRoi()!=null) {
 					rm.addRoi(imp.getRoi());
@@ -77,7 +60,7 @@ public class MaxSeeker implements PlugIn {
 					Roi hROI = sliceH.get(0);
 					Polygon hROIpoly = hROI.getPolygon();
 					for (int pi=0;pi<iROIpoly.npoints;pi++) {
-						OvalRoi iOval = new OvalRoi(iROIpoly.xpoints[pi]-2, iROIpoly.ypoints[pi]-3,7,7);
+						OvalRoi iOval = new OvalRoi(iROIpoly.xpoints[pi]-2, iROIpoly.ypoints[pi]-4,9,9);
 						for (int ph=0;ph<hROIpoly.npoints;ph++) {
 							if ((new ShapeRoi(iOval)).contains(hROIpoly.xpoints[ph], hROIpoly.ypoints[ph])) {
 								if (doubleStacked.get(""+hROIpoly.xpoints[ph]+"_"+hROIpoly.ypoints[ph]+"_"+z) == null) {
@@ -95,8 +78,11 @@ public class MaxSeeker implements PlugIn {
 			int rs = rm.getCount();
 			for(int r =rs-1;r>=0;r--) {
 				if (rm.getListModel().get(r).startsWith("Point")) {
-					rm.getROIs().remove(rm.getListModel().get(r));
-					rm.getListModel().remove(r);
+					rm.select(r);
+					rm.delete(false);
+				
+//					rm.getROIs().remove(rm.getListModel().get(r));
+//					rm.getListModel().remove(r);
 					
 				}
 			}
@@ -125,5 +111,6 @@ public class MaxSeeker implements PlugIn {
 			}
 
 		}
+		imp.getWindow().setVisible(true);
 	}
 }

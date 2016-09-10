@@ -411,6 +411,7 @@ plug-in33="WG_Upload...", org.vcell.gloworm.WG_Uploader
 plug-in34="Flatten_Tags", org.vcell.gloworm.FlattenerOfTags
 plug-in35="Resize_All_Tags", org.vcell.gloworm.ROIScaler
 plug-in36="Max_Seeker", org.vcell.gloworm.MaxSeeker
+plug-in37="Tag_Tracker", org.vcell.gloworm.TagTracker
 
 
 # Install user plugins located in ij.jar to Plugins>User Plugins submenu

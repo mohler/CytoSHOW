@@ -1357,7 +1357,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (record()) Recorder.record("roiManager", "Add & Draw");
 	}
 
-	boolean delete(boolean replacing) {
+	public boolean delete(boolean replacing) {
 		int count = listModel.getSize();
 		int fullCount = fullListModel.getSize();
 		if (count==0)
@@ -1378,6 +1378,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		if (fullCount==index.length && !replacing) {
 			rois.clear();
+			roisByNumbers.clear();
 			listModel.removeAllElements();
 			fullListModel.removeAllElements();
 		} else {
