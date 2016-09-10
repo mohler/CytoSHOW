@@ -62,6 +62,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	private JList<String> list, fullList;
 	private Hashtable<String, Roi> rois = new Hashtable<String, Roi>();
 	private Hashtable<String,  ArrayList<Roi>> roisByNumbers = new Hashtable<String, ArrayList<Roi>>();
+	private Hashtable<String,  ArrayList<Roi>> roisByName = new Hashtable<String, ArrayList<Roi>>();
+
+	public Hashtable<String, ArrayList<Roi>> getROIsByName() {
+		return roisByName;
+	}
+
+	public void setROIsByName(Hashtable<String, ArrayList<Roi>> roisByName) {
+		this.roisByName = roisByName;
+	}
 
 	private Roi roiCopy;
 	private boolean canceled;

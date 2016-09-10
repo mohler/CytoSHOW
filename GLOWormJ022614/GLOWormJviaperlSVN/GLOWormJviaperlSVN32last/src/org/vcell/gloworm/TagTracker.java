@@ -32,8 +32,8 @@ public class TagTracker implements PlugIn {
 		RoiManager rm = imp.getRoiManager();
 		DefaultListModel<String> lm = rm.getListModel();
 
-//		for(int t=1;t<=imp.getNFrames();t++) {
-		for(int t=1;t<=1000;t++) {
+		for(int t=1;t<=imp.getNFrames();t++) {
+//		for(int t=1;t<=1000;t++) {
 			for (int z=1;z<=imp.getNSlices();z++) {
 				ArrayList<Roi> ztRoiAL = rm.getROIsByNumbers().get("1_"+z+"_"+t);
 				
@@ -59,18 +59,25 @@ public class TagTracker implements PlugIn {
 						for (Roi roiTest:zAllt1uRoiAL) {
 							if ((new ShapeRoi(new OvalRoi(roi.getBounds().getCenterX()-4,roi.getBounds().getCenterY()-4,9,9))).contains((int)roiTest.getBounds().getCenterX(), (int)roiTest.getBounds().getCenterY())) {
 								if (roi.getFillColor() ==null || roi.getFillColor().getRGB()==0) {
-									double rand = Math.random();
+									double rand = Math.random()+0.00000000000000001;
 									String randString = (""+rand).substring((""+rand).length()-8);
-									String randName="\""+(""+rand).substring((""+rand).length()-8)+" \"";
+									String randName="\""+randString+" \"";
 									for(int i=0;i<lm.size();i++) {
 										String s = lm.elementAt(i);
 										if (s.equals(roi.getName())) {
 											s = randName + (s).substring((s).indexOf("_"));
 											lm.set(i, s);
+											rm.getFullListModel().set(i, s);
 											String roiOldName = roi.getName();
 											roi.setName(s);
 											rm.getROIs().put(s, roi);
 											rm.getROIs().remove(roiOldName);
+											if (rm.getROIsByName().get(randName)==null) {
+												rm.getROIsByName().put(randName, new ArrayList<Roi>());
+											}
+											if (!rm.getROIsByName().get(randName).contains(roi)) {
+												rm.getROIsByName().get(randName).add(roi);
+											}
 										}
 									}
 									roi.setFillColor(Colors.decode("#"+randString.replaceAll("(..)(......)","88$2"),Color.white));
@@ -79,12 +86,20 @@ public class TagTracker implements PlugIn {
 								for(int i=0;i<lm.size();i++) {
 									String s = lm.elementAt(i);
 									if (s.equals(roiTest.getName())) {
-										String newS=roi.getName().split("_")[0]+ (s).substring((s).indexOf("_"));
+										String roiRootName = roi.getName().split("_")[0];
+										String newS=roiRootName+ (s).substring((s).indexOf("_"));
 										lm.set(i, newS);
+										rm.getFullListModel().set(i, newS);
 										String roiOldName = roiTest.getName();
 										roiTest.setName(newS);
 										rm.getROIs().put(newS, roi);
 										rm.getROIs().remove(roiOldName);
+										if (rm.getROIsByName().get(roiRootName)==null) {
+											rm.getROIsByName().put(roiRootName, new ArrayList<Roi>());
+										}
+										if (!rm.getROIsByName().get(roiRootName).contains(roi)) {
+											rm.getROIsByName().get(roiRootName).add(roi);
+										}
 									}
 								}
 							}
@@ -101,6 +116,7 @@ public class TagTracker implements PlugIn {
 			String s = lm.elementAt(i);
 			if (!s.startsWith("\"")) {
 				lm.remove(i);
+				rm.getFullListModel().remove(i);
 				rm.getROIs().remove(s);
 			}
 		}
