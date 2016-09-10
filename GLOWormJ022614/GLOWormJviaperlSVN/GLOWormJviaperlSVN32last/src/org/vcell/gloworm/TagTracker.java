@@ -58,7 +58,9 @@ public class TagTracker implements PlugIn {
 						for (Roi roiTest:zAllt1uRoiAL) {
 							if ((new ShapeRoi(new OvalRoi(roi.getBounds().getCenterX()-4,roi.getBounds().getCenterY()-4,9,9))).contains((int)roiTest.getBounds().getCenterX(), (int)roiTest.getBounds().getCenterY())) {
 								if (roi.getFillColor() ==null || roi.getFillColor().getRGB()==0) {
-									String randName="\""+Math.random()+" \"";
+									double rand = Math.random();
+									String randString = (""+rand).substring((""+rand).length()-8);
+									String randName="\""+(""+rand).substring((""+rand).length()-8)+" \"";
 									for(int i=0;i<lm.size();i++) {
 										String s = lm.elementAt(i);
 										if (s.equals(roi.getName())) {
@@ -70,8 +72,7 @@ public class TagTracker implements PlugIn {
 											rm.getROIs().remove(roiOldName);
 										}
 									}
-									roi.setFillColor(Colors.getColor(Colors.colors[(int) (Math.random()*6)], Color.white));
-									roi.setFillColor(Colors.decode("#"+Integer.toHexString(roi.getFillColor().getRGB()).replaceAll("(..)(......)","44$2"),Color.white));
+									roi.setFillColor(Colors.decode("#"+randString.replaceAll("(..)(......)","88$2"),Color.white));
 								}
 								roiTest.setFillColor(roi.getFillColor());
 								for(int i=0;i<lm.size();i++) {
@@ -80,8 +81,8 @@ public class TagTracker implements PlugIn {
 										String newS=roi.getName().split("_")[0]+ (s).substring((s).indexOf("_"));
 										lm.set(i, newS);
 										String roiOldName = roiTest.getName();
-										roiTest.setName(s);
-										rm.getROIs().put(s, roi);
+										roiTest.setName(newS);
+										rm.getROIs().put(newS, roi);
 										rm.getROIs().remove(roiOldName);
 									}
 								}
