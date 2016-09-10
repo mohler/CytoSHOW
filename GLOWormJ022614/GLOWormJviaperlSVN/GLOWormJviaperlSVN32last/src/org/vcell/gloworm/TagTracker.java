@@ -54,7 +54,8 @@ public class TagTracker implements PlugIn {
 				if (z2ut1uRoiAL!=null)
 					zAllt1uRoiAL.addAll(z2ut1uRoiAL);
 				if(ztRoiAL!=null) {
-					for (Roi roi:ztRoiAL) {
+					for (Object r:ztRoiAL.toArray()) {
+						Roi roi = (Roi)r;
 						for (Roi roiTest:zAllt1uRoiAL) {
 							if ((new ShapeRoi(new OvalRoi(roi.getBounds().getCenterX()-4,roi.getBounds().getCenterY()-4,9,9))).contains((int)roiTest.getBounds().getCenterX(), (int)roiTest.getBounds().getCenterY())) {
 								if (roi.getFillColor() ==null || roi.getFillColor().getRGB()==0) {
@@ -88,8 +89,19 @@ public class TagTracker implements PlugIn {
 								}
 							}
 						}
+						if(!roi.getName().startsWith("\"")) {
+							ztRoiAL.remove(roi);
+						}
 					}
+					
 				}	
+			}
+		}
+		for(int i=lm.size()-1;i>=0;i--) {
+			String s = lm.elementAt(i);
+			if (!s.startsWith("\"")) {
+				lm.remove(i);
+				rm.getROIs().remove(s);
 			}
 		}
 		rm.validate();
