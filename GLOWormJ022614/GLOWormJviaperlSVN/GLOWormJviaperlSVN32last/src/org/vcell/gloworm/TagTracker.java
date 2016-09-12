@@ -50,13 +50,13 @@ public class TagTracker implements PlugIn {
 		DefaultListModel<String> lm = rm.getListModel();
 	  try {
 		  
-        Map<String, String> env = new HashMap<String, String>(); 
-        env.put("create", "true");
-        URI uri = URI.create("jar:file:"+IJ.getDirectory("home")
-				+File.separator+"CytoSHOWCacheFiles"
-				+File.separator+"TrackingOutputs"
-				+File.separator+imp.getTitle()+"trkROIs.zip");
-		FileSystem zipfs = FileSystems.newFileSystem(uri, env);
+//        Map<String, String> env = new HashMap<String, String>(); 
+//        env.put("create", "true");
+//        URI uri = URI.create("jar:file:"+IJ.getDirectory("home")
+//				+File.separator+"CytoSHOWCacheFiles"
+//				+File.separator+"TrackingOutputs"
+//				+File.separator+imp.getTitle()+"trkROIs.zip");
+//		FileSystem zipfs = FileSystems.newFileSystem(uri, env);
 		
 		for(int t=0;t<=imp.getNFrames();t++) {
 //		for(int t=1;t<=1000;t++) {
@@ -164,12 +164,12 @@ public class TagTracker implements PlugIn {
 					for (Roi roi:ztRoiAL) {
 						String label = roi.getName();
 						if (!label.endsWith(".roi")) label += ".roi";
-						Path roifile = Paths.get(IJ.getDirectory("home")
-								+File.separator+"CytoSHOWCacheFiles"
-								+File.separator+"TrackingOutputs"
-								+File.separator+"TempsForZip"
-								+File.separator+label);
-					    Path pathInZipfile = zipfs.getPath("/"+label);          
+//						Path roifile = Paths.get(IJ.getDirectory("home")
+//								+File.separator+"CytoSHOWCacheFiles"
+//								+File.separator+"TrackingOutputs"
+//								+File.separator+"TempsForZip"
+//								+File.separator+label);
+//					    Path pathInZipfile = zipfs.getPath("/"+label);          
 					    (new File(IJ.getDirectory("home")
 								+File.separator+"CytoSHOWCacheFiles"
 								+File.separator+"TrackingOutputs"
@@ -181,14 +181,14 @@ public class TagTracker implements PlugIn {
 								+File.separator+label);
 					       
 						re.write(roi);
-						Files.copy(roifile,pathInZipfile, StandardCopyOption.REPLACE_EXISTING );
+//						Files.copy(roifile,pathInZipfile, StandardCopyOption.REPLACE_EXISTING );
 
 					}
 				}
 				
 			}
 		}
-		zipfs.close();
+//		zipfs.close();
 		for(int i=lm.size()-1;i>=0;i--) {
 			String s = lm.elementAt(i);
 			if (!s.startsWith("\"")) {
