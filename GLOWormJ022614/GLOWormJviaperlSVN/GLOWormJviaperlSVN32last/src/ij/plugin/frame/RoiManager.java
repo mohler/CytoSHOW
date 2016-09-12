@@ -608,25 +608,26 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						}
 					}
 					
-					ArrayList<Integer> nameMatchIndexArrayList = new ArrayList<Integer>();
-						Roi[] rois = getFullRoisAsArray();
+					ArrayList<Roi> nameMatchArrayList = new ArrayList<Roi>();
+//					Roi[] fullrois = getFullRoisAsArray();
 
 					for (int n=0; n<rootNames.size(); n++) {
 						String rootName = rootNames.get(n);
-						int fraa = rois.length;
-						for (int r=0; r < fraa; r++) {
-							String nextName = rois[r].getName();
-							if (nextName.startsWith(rootName)){
-								nameMatchIndexArrayList.add(r);
-							}
-						}
+						nameMatchArrayList.addAll(roisByName.get(rootName));
+//						int fraa = fullrois.length;
+//						for (int r=0; r < fraa; r++) {
+//							String nextName = fullrois[r].getName();
+//							if (nextName.startsWith(rootName)){
+//								nameMatchIndexArrayList.add(r);
+//							}
+//						}
 
 					}
-					int[] nameMatchIndexes = new int[nameMatchIndexArrayList.size()];
-					for (int i=0; i < nameMatchIndexes.length; i++) {
-						nameMatchIndexes[i] = nameMatchIndexArrayList.get(i);
-						rois[nameMatchIndexes[i]].setFillColor(Colors.decode(alphaCorrFillColorString, fillColor));;
-
+//					int[] nameMatchIndexes = new int[nameMatchIndexArrayList.size()];
+					for (Roi nmRoi:nameMatchArrayList) {
+//						nameMatchIndexes[i] = nameMatchIndexArrayList.get(i);
+//						fullrois[nameMatchIndexes[i]].setFillColor(Colors.decode(alphaCorrFillColorString, fillColor));
+						nmRoi.setFillColor(Colors.decode(alphaCorrFillColorString, fillColor));
 						
 					}	
 //					this.setSelectedIndexes(nameMatchIndexes);
