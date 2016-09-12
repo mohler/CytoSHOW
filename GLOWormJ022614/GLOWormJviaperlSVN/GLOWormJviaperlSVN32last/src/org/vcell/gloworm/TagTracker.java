@@ -8,8 +8,17 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URI;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -40,21 +49,14 @@ public class TagTracker implements PlugIn {
 		RoiManager rm = imp.getRoiManager();
 		DefaultListModel<String> lm = rm.getListModel();
 	  try {
-		ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(new File(IJ.getDirectory("home")
-														+File.separator+"CytoSHOWCacheFiles"
-														+File.separator+"TrackingOutputs"
-														+File.separator+imp.getTitle()+"trkROIs.tmp")));
-		DataOutputStream out = new DataOutputStream(new BufferedOutputStream(zos));
-		RoiEncoder re = new RoiEncoder(out);
-
-//		Code snippet here is example of using new Java7  Zip File Systems. Need to try this out
-//		try (FileSystem fs = FileSystems.newFileSystem(uri, env))
-//		{
-//		    Path nf = fs.getPath("new.txt");
-//		    try (Writer writer = Files.newBufferedWriter(nf, StandardCharsets.UTF_8, StandardOpenOption.CREATE)) {
-//		        writer.write("hello");
-//		    }
-//		}
+		  
+        Map<String, String> env = new HashMap<String, String>(); 
+        env.put("create", "true");
+        URI uri = URI.create("jar:file:"+IJ.getDirectory("home")
+				+File.separator+"CytoSHOWCacheFiles"
+				+File.separator+"TrackingOutputs"
+				+File.separator+imp.getTitle()+"trkROIs.zip");
+		FileSystem zipfs = FileSystems.newFileSystem(uri, env);
 		
 		for(int t=0;t<=imp.getNFrames();t++) {
 //		for(int t=1;t<=1000;t++) {
@@ -158,26 +160,35 @@ public class TagTracker implements PlugIn {
 							ztRoiAL.remove(roi);
 						}
 					}
-
+					
 					for (Roi roi:ztRoiAL) {
 						String label = roi.getName();
 						if (!label.endsWith(".roi")) label += ".roi";
-						zos.putNextEntry(new ZipEntry(label));
+						Path roifile = Paths.get(IJ.getDirectory("home")
+								+File.separator+"CytoSHOWCacheFiles"
+								+File.separator+"TrackingOutputs"
+								+File.separator+"TempsForZip"
+								+File.separator+label);
+					    Path pathInZipfile = zipfs.getPath("/"+label);          
+					    (new File(IJ.getDirectory("home")
+								+File.separator+"CytoSHOWCacheFiles"
+								+File.separator+"TrackingOutputs"
+								+File.separator+"TempsForZip")).mkdirs();
+					    RoiEncoder re = new RoiEncoder(IJ.getDirectory("home")
+								+File.separator+"CytoSHOWCacheFiles"
+								+File.separator+"TrackingOutputs"
+								+File.separator+"TempsForZip"
+								+File.separator+label);
+					       
 						re.write(roi);
-						out.flush();
+						Files.copy(roifile,pathInZipfile, StandardCopyOption.REPLACE_EXISTING );
+
 					}
 				}
 				
 			}
 		}
-		out.close();
-		new File(IJ.getDirectory("home")
-				+File.separator+"CytoSHOWCacheFiles"
-				+File.separator+"TrackingOutputs"
-				+File.separator+imp.getTitle()+"trkROIs.tmp").renameTo(new File(IJ.getDirectory("home")
-																			+File.separator+"CytoSHOWCacheFiles"
-																			+File.separator+"TrackingOutputs"
-																			+File.separator+imp.getTitle()+"trkROIs.zip"));
+		zipfs.close();
 		for(int i=lm.size()-1;i>=0;i--) {
 			String s = lm.elementAt(i);
 			if (!s.startsWith("\"")) {
@@ -190,6 +201,7 @@ public class TagTracker implements PlugIn {
 		rm.repaint();
 		imp.getWindow().setVisible(true);
 	  }catch (IOException e) {
+		  System.out.print(e);
 	  }
 	}
 }
