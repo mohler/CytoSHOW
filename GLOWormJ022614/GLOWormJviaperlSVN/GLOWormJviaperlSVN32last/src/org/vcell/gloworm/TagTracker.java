@@ -58,7 +58,7 @@ public class TagTracker implements PlugIn {
 //				+File.separator+imp.getTitle()+"trkROIs.zip");
 //		FileSystem zipfs = FileSystems.newFileSystem(uri, env);
 		
-		for(int t=0;t<=imp.getNFrames();t++) {
+		for(int t=1;t<=imp.getNFrames();t++) {
 //		for(int t=1;t<=1000;t++) {
 			for (int z=1;z<=imp.getNSlices();z++) {
 				ArrayList<Roi> ztRoiAL = rm.getROIsByNumbers().get("1_"+z+"_"+t);
