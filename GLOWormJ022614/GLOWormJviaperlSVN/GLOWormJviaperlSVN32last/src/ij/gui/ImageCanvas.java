@@ -1375,7 +1375,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				
 				int q = listModel.indexOf(sliceRoisArray[i].getName());
 				new ij.macro.MacroRunner("roiManager('select', "+q+", "+imp.getID()+");");
-				rm.show();
+				rm.validate();
+				rm.repaint();
 				return true;
 			}
 			
@@ -1391,7 +1392,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				// outline moves as the user moves the RO.
 				int q = listModel.indexOf(sliceRoisArray[i].getName());
 				new ij.macro.MacroRunner("roiManager('select', "+q+", "+imp.getID()+");");
-				rm.show();
+				rm.validate();
+				rm.repaint();
 				return true;
 			}
 		}

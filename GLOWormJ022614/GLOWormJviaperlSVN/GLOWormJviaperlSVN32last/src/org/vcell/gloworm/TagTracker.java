@@ -69,38 +69,51 @@ public class TagTracker implements PlugIn {
 					ArrayList<Roi> z1dt1uRoiAL = rm.getROIsByNumbers().get("1_"+(z-1)+"_"+(t+1));
 					ArrayList<Roi> z2ut1uRoiAL = rm.getROIsByNumbers().get("1_"+(z+2)+"_"+(t+1));
 					ArrayList<Roi> z2dt1uRoiAL = rm.getROIsByNumbers().get("1_"+(z-2)+"_"+(t+1));
+					ArrayList<Roi> z3ut1uRoiAL = rm.getROIsByNumbers().get("1_"+(z+3)+"_"+(t+1));
+					ArrayList<Roi> z3dt1uRoiAL = rm.getROIsByNumbers().get("1_"+(z-3)+"_"+(t+1));
 					ArrayList<Roi> zt2uRoiAL = rm.getROIsByNumbers().get("1_"+z+"_"+(t+1));
 					ArrayList<Roi> z1ut2uRoiAL = rm.getROIsByNumbers().get("1_"+(z+1)+"_"+(t+2));
 					ArrayList<Roi> z1dt2uRoiAL = rm.getROIsByNumbers().get("1_"+(z-1)+"_"+(t+2));
 					ArrayList<Roi> z2ut2uRoiAL = rm.getROIsByNumbers().get("1_"+(z+2)+"_"+(t+2));
 					ArrayList<Roi> z2dt2uRoiAL = rm.getROIsByNumbers().get("1_"+(z-2)+"_"+(t+2));
+					ArrayList<Roi> z3ut2uRoiAL = rm.getROIsByNumbers().get("1_"+(z+3)+"_"+(t+2));
+					ArrayList<Roi> z3dt2uRoiAL = rm.getROIsByNumbers().get("1_"+(z-3)+"_"+(t+2));
 					ArrayList<Roi> zAlltFwdRoiAL = new ArrayList<Roi>();
-					//This stacking order has a rational basis: closest taken first.
+					//This stacking order has a rational basis: closest/soonest taken first.
 					if (zt1uRoiAL!=null)
 						zAlltFwdRoiAL.addAll(zt1uRoiAL);
-					if (zt2uRoiAL!=null)
-						zAlltFwdRoiAL.addAll(zt2uRoiAL);
 					if (z1dt1uRoiAL!=null)
 						zAlltFwdRoiAL.addAll(z1dt1uRoiAL);
 					if (z1ut1uRoiAL!=null)
 						zAlltFwdRoiAL.addAll(z1ut1uRoiAL);
-					if (z1dt2uRoiAL!=null)
-						zAlltFwdRoiAL.addAll(z1dt2uRoiAL);
-					if (z1ut2uRoiAL!=null)
-						zAlltFwdRoiAL.addAll(z1ut2uRoiAL);
 					if (z2dt1uRoiAL!=null)
 						zAlltFwdRoiAL.addAll(z2dt1uRoiAL);
 					if (z2ut1uRoiAL!=null)
 						zAlltFwdRoiAL.addAll(z2ut1uRoiAL);
+					if (z3dt1uRoiAL!=null)
+						zAlltFwdRoiAL.addAll(z3dt1uRoiAL);
+					if (z3ut1uRoiAL!=null)
+						zAlltFwdRoiAL.addAll(z3ut1uRoiAL);
+					if (zt2uRoiAL!=null)
+						zAlltFwdRoiAL.addAll(zt2uRoiAL);
+					if (z1dt2uRoiAL!=null)
+						zAlltFwdRoiAL.addAll(z1dt2uRoiAL);
+					if (z1ut2uRoiAL!=null)
+						zAlltFwdRoiAL.addAll(z1ut2uRoiAL);
 					if (z2dt2uRoiAL!=null)
 						zAlltFwdRoiAL.addAll(z2dt2uRoiAL);
 					if (z2ut2uRoiAL!=null)
 						zAlltFwdRoiAL.addAll(z2ut2uRoiAL);
+					if (z3dt2uRoiAL!=null)
+						zAlltFwdRoiAL.addAll(z3dt2uRoiAL);
+					if (z3ut2uRoiAL!=null)
+						zAlltFwdRoiAL.addAll(z3ut2uRoiAL);
 					
 					for (Object r:ztRoiAL.toArray()) {
 						Roi roi = (Roi)r;
+						boolean disconnect = true;
 						for (Roi roiTest:zAlltFwdRoiAL) {
-							if ((new ShapeRoi(new OvalRoi(roi.getBounds().getCenterX()-4,roi.getBounds().getCenterY()-4,9,9))).contains((int)roiTest.getBounds().getCenterX(), (int)roiTest.getBounds().getCenterY())) {
+							if ((new ShapeRoi(new OvalRoi(roi.getBounds().getCenterX()-4,roi.getBounds().getCenterY()-3,7,7))).contains((int)roiTest.getBounds().getCenterX(), (int)roiTest.getBounds().getCenterY())) {
 								if (roi.getFillColor() ==null || roi.getFillColor().getRGB()==0) {
 									double rand = Math.random();
 									String randFix = (""+rand).replaceAll("E-\\d*", "");
@@ -134,31 +147,37 @@ public class TagTracker implements PlugIn {
 								String roiRootName = roi.getName().split("_")[0];
 								if (!(roiTest.getFillColor() == roi.getFillColor() && roiTest.getName().startsWith(roiRootName))) {
 									roiTest.setFillColor(roi.getFillColor());
+									String roiOldName = roiTest.getName();
+									String newS=roiRootName+ (roiTest.getName()).substring((roiTest.getName()).indexOf("_"));
 									for(int i=0;i<lm.size();i++) {
 										String s = lm.elementAt(i);
 										if (s.equals(roiTest.getName())) {
-											String newS=roiRootName+ (s).substring((s).indexOf("_"));
 											lm.set(i, newS);
 											rm.getFullListModel().set(i, newS);
-											String roiOldName = roiTest.getName();
-											roiTest.setName(newS);
+											
 											rm.getROIs().put(newS, roi);
 											rm.getROIs().remove(roiOldName);
+//											rm.getROIsByName().get(roiOldName.split("_")[0]).remove(roiTest);
 											if (rm.getROIsByName().get(roiRootName)==null) {
 												rm.getROIsByName().put(roiRootName, new ArrayList<Roi>());
 											}
 											if (!rm.getROIsByName().get(roiRootName).contains(roi)) {
 												rm.getROIsByName().get(roiRootName).add(roi);
 											}
+											IJ.log(roi.getName()+"fixed");
 										}
 									}
+									roiTest.setName(newS);
 								} 
+								disconnect = false;
 								break; //for roiTest
-							}
+							} 
 						}
 						if(!roi.getName().startsWith("\"")) {
 							ztRoiAL.remove(roi);
 						}
+						if(disconnect)
+							IJ.log(roi.getName()+" disconnected");
 					}
 					
 					for (Roi roi:ztRoiAL) {

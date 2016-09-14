@@ -1050,7 +1050,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						Recorder.record("roiManager", "Select", index);
 				}
 			}
+			list.validate();
+			list.repaint();
 		}
+		this.validate();
+		this.repaint();
 	}
 
 	void add(boolean shiftKeyDown, boolean altKeyDown, boolean controlKeyDown) {
