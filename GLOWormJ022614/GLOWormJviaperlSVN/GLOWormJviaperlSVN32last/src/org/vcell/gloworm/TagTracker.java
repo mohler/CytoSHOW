@@ -151,18 +151,18 @@ public class TagTracker implements PlugIn {
 									String newS=roiRootName+ (roiTest.getName()).substring((roiTest.getName()).indexOf("_"));
 									for(int i=0;i<lm.size();i++) {
 										String s = lm.elementAt(i);
-										if (s.equals(roiTest.getName())) {
+										if (s.equals(roiOldName)) {
 											lm.set(i, newS);
 											rm.getFullListModel().set(i, newS);
 											
-											rm.getROIs().put(newS, roi);
+											rm.getROIs().put(newS, roiTest);
 											rm.getROIs().remove(roiOldName);
 //											rm.getROIsByName().get(roiOldName.split("_")[0]).remove(roiTest);
 											if (rm.getROIsByName().get(roiRootName)==null) {
 												rm.getROIsByName().put(roiRootName, new ArrayList<Roi>());
 											}
-											if (!rm.getROIsByName().get(roiRootName).contains(roi)) {
-												rm.getROIsByName().get(roiRootName).add(roi);
+											if (!rm.getROIsByName().get(roiRootName).contains(roiTest)) {
+												rm.getROIsByName().get(roiRootName).add(roiTest);
 											}
 											IJ.log(roi.getName()+"fixed");
 										}
