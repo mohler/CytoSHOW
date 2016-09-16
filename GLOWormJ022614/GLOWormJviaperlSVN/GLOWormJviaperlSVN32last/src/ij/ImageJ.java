@@ -1053,7 +1053,7 @@ public class ImageJ extends Frame implements ActionListener,
 				}else if (args[i].startsWith("-remote")) {
 					remote = true;
 					if (IJ.rmiURL == null || !IJ.rmiURL.matches("\\/\\/\\d\\d?\\d?\\.\\d\\d?\\d?\\.\\d\\d?\\d?\\.\\d\\d?\\d?:\\d\\d?\\d?\\d? \\d\\d?\\d?\\d?")) {
-						IJ.rmiURL = "//155.37.255.69:8084 1";
+						IJ.rmiURL = "//155.37.253.202:8084 1";
 					}
 					if (args.length > i+2) {
 						if (args[i+1].matches("\\/\\/\\d\\d?\\d?\\.\\d\\d?\\d?\\.\\d\\d?\\d?\\.\\d\\d?\\d?:\\d\\d?\\d?\\d?")
@@ -1237,7 +1237,7 @@ public class ImageJ extends Frame implements ActionListener,
 			} else if (args[ii]!=null && args[ii].startsWith("-remote")) {
 				remote = true;
 				if (IJ.rmiURL == null || !IJ.rmiURL.matches("\\/\\/\\d\\d?\\d?\\.\\d\\d?\\d?\\.\\d\\d?\\d?\\.\\d\\d?\\d?:\\d\\d?\\d?\\d? \\d\\d?\\d?\\d?")) {
-					IJ.rmiURL = "//155.37.255.69:8084 1";
+					IJ.rmiURL = "//155.37.253.202:8084 1";
 				}
 				if (args.length > ii+2) {
 					if (args[ii+1].matches("\\/\\/\\d\\d?\\d?\\.\\d\\d?\\d?\\.\\d\\d?\\d?\\.\\d\\d?\\d?:\\d\\d?\\d?\\d?")

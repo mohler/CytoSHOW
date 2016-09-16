@@ -152,6 +152,7 @@ public class TagTracker implements PlugIn {
 									for(int i=0;i<lm.size();i++) {
 										String s = lm.elementAt(i);
 										if (s.equals(roiOldName)) {
+											//I think i might speed things up if I leave lm stuff to end in new thread.
 											lm.set(i, newS);
 											rm.getFullListModel().set(i, newS);
 											

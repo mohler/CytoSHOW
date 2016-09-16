@@ -93,7 +93,7 @@ public class RemoteQTVS_Engine extends UnicastRemoteObject implements Compute {
     }
 
     public static void main(String[] args) {
-    	String ipAddress = "155.37.255.69"; //Local IP address 
+    	String ipAddress = "155.37.253.202"; //Local IP address 
     	System.setProperty("java.rmi.server.hostname",ipAddress);        
     	
     	Registry registry;

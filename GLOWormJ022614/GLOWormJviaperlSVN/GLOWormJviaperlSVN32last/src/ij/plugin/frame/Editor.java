@@ -660,7 +660,7 @@ public class Editor extends PlugInFrame implements ActionListener, ItemListener,
 			FTPClient ftpc = new FTPClient();
 			ftpc.setBufferSize(1048576);
 			try {
-				ftpc.connect("155.37.255.65");
+				ftpc.connect("155.37.253.201");
 				int reply = ftpc.getReplyCode();
 
 				if(!FTPReply.isPositiveCompletion(reply)) {
