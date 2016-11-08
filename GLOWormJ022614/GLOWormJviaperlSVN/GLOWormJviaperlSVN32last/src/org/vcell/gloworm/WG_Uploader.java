@@ -44,7 +44,7 @@ public class WG_Uploader implements PlugIn {
 
 		TextWindow tw = new TextWindow("WG_upload","","",400,80) {
 			 public void close() {
-				 if (!IJ.showMessageWithCancel("Finish this WG_upload job??", "Click Cancel to end this job."))
+				 if (!IJ.showMessageWithCancel("Finish this WG_upload job??", "Click Cancel to end this upload. Click OK to continue uploading."))
 					 System.exit(0);
 			 }
 		};
@@ -70,7 +70,7 @@ public class WG_Uploader implements PlugIn {
 		}
 
 		FTPClient ftpc = new FTPClient();
-		ftpc.setBufferSize(1048576);
+		ftpc.setBufferSize(1024000);
 		try {
 			ftpc.connect("155.37.253.201");
 			int reply = ftpc.getReplyCode();
@@ -122,7 +122,10 @@ public class WG_Uploader implements PlugIn {
 						if (!file.isDirectory() && !alreadyDone) {
 							FileInputStream fis = new FileInputStream(path +File.separator +fileName);
 							ftpc.setFileType(FTPClient.BINARY_FILE_TYPE);
+							tw.append((new Date()).toString()+" "+path+fileName+/*"_"+dateTouchString+*/" starting backup");
 							ftpc.enterLocalPassiveMode();
+//							ftpc.enterRemotePassiveMode();
+//							ftpc.enterLocalActiveMode();
 							ftpc.storeFile(fileName+"_" + dateTouchString+".tmp", fis);
 							
 							fis.close();

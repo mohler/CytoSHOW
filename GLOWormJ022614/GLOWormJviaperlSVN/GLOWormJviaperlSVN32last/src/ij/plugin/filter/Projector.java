@@ -220,12 +220,12 @@ public class Projector implements PlugInFilter, TextListener {
 							(new File(IJ.getDirectory("image"))).getParent()): 
 								IJ.getDirectory("temp"));
 		boolean correctSaveRoot = false;
-		for (File saveSibFile: (new File(saveRootDir)).listFiles()) {
-			if (saveSibFile.isDirectory() || (!saveSibFile.getName().toLowerCase().endsWith(".tif")
-												&& !saveSibFile.getName().toLowerCase().contains("ds_store"))) {
-				correctSaveRoot = true;
-			}
-		}
+//		for (File saveSibFile: (new File(saveRootDir)).listFiles()) {
+//			if (saveSibFile.isDirectory() || (!saveSibFile.getName().toLowerCase().endsWith(".tif")
+//												&& !saveSibFile.getName().toLowerCase().contains("ds_store"))) {
+//				correctSaveRoot = true;
+//			}
+//		}
 		if (!correctSaveRoot) {
 			saveRootDir = (new File(saveRootDir)).getParent();
 		}

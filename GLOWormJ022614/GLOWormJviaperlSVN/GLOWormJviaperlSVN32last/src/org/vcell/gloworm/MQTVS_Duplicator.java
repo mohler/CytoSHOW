@@ -221,11 +221,29 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 			long msec = currentDate.getTime();	
 			sec = msec/1000;
 		}
+		String tempPath = "";
 
-		if (!singleStack)
-			new File(IJ.getDirectory("home")+File.separator+imp.getTitle().replace(".tif","")+sec).mkdirs();
-			
-		String stackPath = "";
+		String saveRootDir = (IJ.getDirectory("image") != null? 
+				((new File(IJ.getDirectory("image"))).isDirectory()?
+						IJ.getDirectory("image"):
+							(new File(IJ.getDirectory("image"))).getParent()): 
+								IJ.getDirectory("temp"));
+		boolean correctSaveRoot = false;
+//		for (File saveSibFile: (new File(saveRootDir)).listFiles()) {
+//			if (saveSibFile.isDirectory() || (!saveSibFile.getName().toLowerCase().endsWith(".tif")
+//												&& !saveSibFile.getName().toLowerCase().contains("ds_store"))) {
+//				correctSaveRoot = true;
+//			}
+//		}
+		if (!correctSaveRoot) {
+			saveRootDir = (new File(saveRootDir)).getParent();
+		}
+
+		if (!singleStack) {
+			tempPath = saveRootDir+File.separator+"DUP_"+imp.getTitle().replace(".tif","").replaceAll("[,. ;:]","")+sec;
+			new File(tempPath).mkdirs();
+		}
+//		String stackPath = "";
 		ImagePlus impT = null;
 		
 		for (int t=firstT; t<=lastT; t=t+stepT) {
@@ -285,9 +303,9 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 
 				}
 
-				stackPath = IJ.getDirectory("home")+imp.getTitle().replace(".tif","")+sec+File.separator+impT.getTitle();
+//				stackPath = IJ.getDirectory("home")+imp.getTitle().replace(".tif","").replaceAll("[,. ;:]","")+sec+File.separator+impT.getTitle().replaceAll("[, ;:]","");
 				if (!singleStack) {
-					IJ.saveAs(impT, "Tiff", stackPath);
+					IJ.saveAs(impT, "Tiff", tempPath+File.separator+impT.getTitle().replaceAll("[, ;:]",""));
 					impT.close();
 					impT.flush();
 				}
@@ -310,7 +328,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 			}
 		}
 		if (!singleStack) {
-			stack2 = new MultiFileInfoVirtualStack(IJ.getDirectory("home")+imp.getTitle().replace(".tif","")+sec,"",false);
+			stack2 = new MultiFileInfoVirtualStack(tempPath,"",false);
 		} else {
 			stack2 = impT.getStack();
 		}
