@@ -15,6 +15,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.Inet4Address;
 import java.rmi.Naming;
 
 import javax.swing.JButton;
@@ -109,7 +110,7 @@ public class WGFileUploadClient implements PlugIn, ActionListener {
 //				String remoteEngineName = arg+"/HEAD";
 //				Compute fileInt=(Compute)Naming.lookup(remoteEngineName);
 				IJ.log(path);
-				fileInt.saveUploadFile(uploadFileByteArray(path), path.replaceAll("[:]", "").replace("\\","/"));
+				fileInt.saveUploadFile(uploadFileByteArray(path), "/"+Inet4Address.getLocalHost().getHostAddress()+"/"+path.replaceAll("[:]", "").replace("\\","/"));
 				JOptionPane.showMessageDialog(null,path+" uploaded successfully");
 			}
 			catch(Exception e)
