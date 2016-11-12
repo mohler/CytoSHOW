@@ -14,11 +14,14 @@ import ij.process.ImageProcessor;
 
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -453,5 +456,64 @@ public class RemoteQTVS_Engine extends UnicastRemoteObject implements Compute {
 		return matchedArrayList.toArray(new String[matchedArrayList.size()]);
 //		return new String[]{prefix+midfix+suffix};
 	}
+
+	public byte[] downloadFileByteArray(String fileName) throws RemoteException {
+		try
+		{
+			File file=new File(fileName);
+			//Defines buffer in which the file will be read
+			byte[] buffer=new byte[(int)file.length()];
+			BufferedInputStream inputFileStream=new BufferedInputStream( new FileInputStream(fileName));
+			//Reads the file into buffer
+			inputFileStream.read(buffer,0,buffer.length);
+			inputFileStream.close();
+			return(buffer);
+		}
+		catch(Exception e)
+		{
+			System.out.println("FileImpl:"+e.getMessage());
+			e.printStackTrace();
+			return(null);                    
+		}
+	}
+
+	public String[] getFiles(String path) throws RemoteException {
+		//Folder name in which the files should be stored
+		String dirname=path;
+		File serverDir=new File(dirname);
+		String[] file=serverDir.list();
+		return file;
+	}
+
+	public void saveUploadFile(byte[] uploadBytes, String path) {
+		File file=new File("/Users/glowormguest/Public/DropBox/WormguidesUploads/"+path);
+		file.getParentFile().mkdirs();
+		BufferedOutputStream outputFileStream = null;
+		try {
+			outputFileStream = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath()));
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			outputFileStream.write(uploadBytes,0,uploadBytes.length);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			outputFileStream.flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		try {
+			outputFileStream.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
 
 }

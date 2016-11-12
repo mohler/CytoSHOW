@@ -22,5 +22,9 @@ public interface Compute extends Remote {
 	void restartLullClock() throws RemoteException;
 	boolean startLullClock() throws RemoteException;
 	String[] getOtherViewNames(String name) throws RemoteException;
+	public byte[] downloadFileByteArray(String fileName)throws RemoteException;
+	public String[] getFiles(String path)throws RemoteException;
+	public void saveUploadFile(byte[] uploadBytes, String path)throws RemoteException;
+
 }
 

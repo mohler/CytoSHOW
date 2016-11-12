@@ -167,7 +167,7 @@ public class RemoteMQTVSHandler {
 			IJ.log(remoteEngineName);
 			IJ.log("contacting CytoSHOW server...");
 			comp = (Compute) Naming.lookup(remoteEngineName);
-			IJ.log(comp.toString()+"7");
+			IJ.log(comp.toString()+"success on connect.7");
 			while (spawnStrings == null || serverReturnString.contains("Exception")) {
 				spawnStrings = new String[] {""+System.currentTimeMillis(),
 						"blank", 
@@ -749,7 +749,7 @@ public class RemoteMQTVSHandler {
 				IJ.log(lookupString + "failure to connect.3");
 				return null;
 			}
-			IJ.log(rmqtvsh.comp.toString() + "failure to connect.4");
+			IJ.log(rmqtvsh.comp.toString() + "success on connect.4");
 			return rmqtvsh.compQ.getFileInputByteArray(pathlist);
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block

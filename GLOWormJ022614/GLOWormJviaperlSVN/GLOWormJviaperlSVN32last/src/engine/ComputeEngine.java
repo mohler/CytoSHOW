@@ -118,4 +118,20 @@ public class ComputeEngine extends UnicastRemoteObject implements Compute {
 		return null;
 	}
 
+	public byte[] downloadFileByteArray(String fileName) throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String[] getFiles(String path) throws RemoteException {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public void saveUploadFile(byte[] uploadBytes, String path)
+			throws RemoteException {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

@@ -189,7 +189,7 @@ public class IJ {
 			if (IJ.getApplet()==null)
 				log("IJ178>Plugin or class not found: \"" + className + "\"\n(" + e+")\n"+IJ.getClassLoader().toString()+"\n"+IJ.getClassLoader().getParent().toString());
 		}
-		catch (InstantiationException e) {log("Unable to load plugin (ins)");}
+		catch (InstantiationException e) {log("IJ192>Unable to load plugin (ins)");}
 		catch (IllegalAccessException e) {log("Unable to load plugin, possibly \nbecause it is not public.");}
 		redirectErrorMessages = false;
 		return thePlugIn;
@@ -235,7 +235,7 @@ public class IJ {
 			if (className.indexOf('_')!=-1 && !suppressPluginNotFoundError)
 				error("IJ215>Plugin or class not found: \"" + className + "\"\n(" + e+")\n"+IJ.getClassLoader().toString()+"\n"+IJ.getClassLoader().getParent().toString());
 		}
-		catch (InstantiationException e) {error("Unable to load plugin (ins)");}
+		catch (InstantiationException e) {e.printStackTrace(); error("IJ238>Unable to load plugin (ins)");}
 		catch (IllegalAccessException e) {error("Unable to load plugin, possibly \nbecause it is not public.");}
 		if (thePlugIn!=null && !"HandleExtraFileTypes".equals(className))
  			redirectErrorMessages = false;
