@@ -57,39 +57,40 @@ public class WGFileUploadClient implements PlugIn, ActionListener {
 				IJ.log(""+remoteEngineName);
 				fileInt = (Compute) Naming.lookup(remoteEngineName);
 				IJ.log(fileInt.toString()+"success on connect.1");
-				path = IJ.getString("Upload files from which client directory?", "/Users/wmohler/CytoSHOWCacheFiles/Volumes/GLOWORM_DATA/SEAMJR_MAX_MAX_SPIMA-1470331696_1.avi");
-				list=(new File(path)).list();
-				IJ.log(remoteEngineName+ list.toString());
-				files=new JList<String>(list);
+				path = IJ.getFilePath("Upload which file?");
+//				list=(new File(path)).list();
+//				IJ.log(remoteEngineName+ list.toString());
+//				files=new JList<String>(list);
 			}
 			catch(Exception e)
 			{
 				IJ.log("FileServer Exception:"+e.toString());
 			}
 
-			files.setVisibleRowCount(3);
-			files.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-			files.addListSelectionListener(
-					new ListSelectionListener()
-					{
-						public void valueChanged(ListSelectionEvent ev)
-						{
-							curpointer=files.getSelectedIndex();
-						}
-					});
-
-			upload=new JButton("Upload");
-			exit=new JButton("Exit");
-
-			container.add(upload);
-			container.add(exit);
-			container.add(new JScrollPane(files));
-
-			upload.addActionListener(this);
-			exit.addActionListener(this); 
-			jFrame.setTitle("WGFileUploadClient");
-			jFrame.setSize(new Dimension(250,250));
-			jFrame.setVisible(true);
+//			files.setVisibleRowCount(3);
+//			files.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+//			files.addListSelectionListener(
+//					new ListSelectionListener()
+//					{
+//						public void valueChanged(ListSelectionEvent ev)
+//						{
+//							curpointer=files.getSelectedIndex();
+//						}
+//					});
+//
+//			upload=new JButton("Upload");
+//			exit=new JButton("Exit");
+//
+//			container.add(upload);
+//			container.add(exit);
+//			container.add(new JScrollPane(files));
+//
+//			upload.addActionListener(this);
+//			exit.addActionListener(this); 
+//			jFrame.setTitle("WGFileUploadClient");
+//			jFrame.setSize(new Dimension(250,250));
+//			jFrame.setVisible(true);
+			actionPerformed(new ActionEvent(this, 0, "Upload"));
 		}
 
 	}
@@ -107,9 +108,9 @@ public class WGFileUploadClient implements PlugIn, ActionListener {
 			{
 //				String remoteEngineName = arg+"/HEAD";
 //				Compute fileInt=(Compute)Naming.lookup(remoteEngineName);
-				IJ.log(path+File.separator+list[curpointer]);
-				fileInt.saveUploadFile(uploadFileByteArray(path+File.separator+list[curpointer]), path+File.separator+list[curpointer]);
-				JOptionPane.showMessageDialog(jFrame,list[curpointer]+"Uploaded successfully???");
+				IJ.log(path);
+				fileInt.saveUploadFile(uploadFileByteArray(path), path.replaceAll("[:]", "").replace("\\","/"));
+				JOptionPane.showMessageDialog(null,path+" uploaded successfully");
 			}
 			catch(Exception e)
 			{
