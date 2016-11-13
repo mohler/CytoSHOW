@@ -25,6 +25,7 @@ public interface Compute extends Remote {
 	public byte[] downloadFileByteArray(String fileName)throws RemoteException;
 	public String[] getFiles(String path)throws RemoteException;
 	public void saveUploadFile(byte[] uploadBytes, String path)throws RemoteException;
+	public byte[] downloadFileChunkByteArray(String fileName, int chunkSize, int iteration) throws RemoteException;
 
 }
 

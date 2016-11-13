@@ -134,4 +134,7 @@ public class ComputeEngine extends UnicastRemoteObject implements Compute {
 		
 	}
 
+	public byte[] downloadFileChunkByteArray(String fileName, int chunkSize, int iteration) throws RemoteException {
+		return null;
+	}
 }

@@ -477,6 +477,28 @@ public class RemoteQTVS_Engine extends UnicastRemoteObject implements Compute {
 		}
 	}
 
+	public byte[] downloadFileChunkByteArray(String fileName, int chunkSize, int iteration) throws RemoteException {
+		try
+		{
+			File file=new File(fileName);
+			//Defines buffer in which the file will be read
+			int nextChunkSize = (int) (chunkSize < file.length()-iteration*chunkSize?chunkSize:file.length()%chunkSize);
+			byte[] buffer=new byte[nextChunkSize];
+			BufferedInputStream inputFileStream=new BufferedInputStream( new FileInputStream(fileName));
+			//Reads the file into buffer
+			inputFileStream.skip(iteration*chunkSize);
+			inputFileStream.read(buffer,0,nextChunkSize);
+			inputFileStream.close();
+			return(buffer);
+		}
+		catch(Exception e)
+		{
+			System.out.println("FileImpl:"+e.getMessage());
+			e.printStackTrace();
+			return(null);                    
+		}
+	}
+
 	public String[] getFiles(String path) throws RemoteException {
 		//Folder name in which the files should be stored
 		String dirname=path;

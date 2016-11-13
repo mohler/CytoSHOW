@@ -12,6 +12,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.rmi.Naming;
+import java.rmi.RemoteException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -37,7 +38,7 @@ public class WGFileDownloadClient implements PlugIn, ActionListener {
 	JList<String> files;
 	JButton download,exit;
 	String list[];
-	int curpointer=0;
+	int curpointer=-1;
 	public String arg;
 	private String path;
 	private Compute fileInt;
@@ -45,10 +46,12 @@ public class WGFileDownloadClient implements PlugIn, ActionListener {
 	//	public FileClient(String[] args)
 	public void run(String arg) {
 		{     
+			curpointer=-1;
 			Container container=jFrame.getContentPane();
 			container.setLayout(new FlowLayout());
 			try
 			{
+				this.arg = arg;
 				String remoteEngineName = arg+"/HEAD";
 				IJ.log(""+remoteEngineName);
 				fileInt = (Compute) Naming.lookup(remoteEngineName);
@@ -99,24 +102,38 @@ public class WGFileDownloadClient implements PlugIn, ActionListener {
 		}
 		else if(eventlabel.equals("Download"))
 		{
-			try
-			{
-//				String remoteEngineName = arg+"/HEAD";
-//				Compute fileInt=(Compute)Naming.lookup(remoteEngineName);
-				byte[] filedata=fileInt.downloadFileByteArray(path+"/"+list[curpointer]);
-				File file=new File(IJ.getDirectory("home")+path+File.separator+list[curpointer]);
-				file.getParentFile().mkdirs();
-				BufferedOutputStream outputFile=new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath()));
-				outputFile.write(filedata,0,filedata.length);
-				outputFile.flush();
-				outputFile.close();
-				JOptionPane.showMessageDialog(jFrame,list[curpointer]+"Downloaded successfully");
-			}
-			catch(Exception e)
-			{
-				System.out.println("FileServer Exception:"+e.getMessage());
-			}
+			int loopStart = curpointer==-1?0:curpointer;
+			int loopEnd = curpointer==-1?list.length:curpointer+1;
+			for (int f=(loopStart); f<(loopEnd); f++) {
+				curpointer = f;
+				try
+				{
+					String remoteEngineName = this.arg+"/HEAD";
+					Compute fileInt=(Compute)Naming.lookup(remoteEngineName);
+					int chunkSize = 10*1024*1024;
+					File file=new File(IJ.getDirectory("home")+path+File.separator+list[curpointer]);
+					file.getParentFile().mkdirs();
+					BufferedOutputStream outputFile=new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath()));
+					boolean looping = true;
+					int iteration = 0;
+					while(looping) {
+						//				byte[] filedata=fileInt..downloadFileChunkByteArray(path+"/"+list[curpointer]);
+						byte[] filedata = fileInt.downloadFileChunkByteArray(path+"/"+list[curpointer], chunkSize, iteration);
+						looping = filedata!=null && filedata.length == chunkSize ;
+						if (filedata!=null)
+							outputFile.write(filedata,0,filedata.length);
+						iteration++;
+					}
+					outputFile.flush();
+					outputFile.close();
+				}
+				catch(Exception e)
+				{
+					System.out.println("FileServer Exception:"+e.getMessage());
+				}
 
+			}
+			JOptionPane.showMessageDialog(jFrame,list[curpointer]+"Downloaded successfully");
 		}
 	}
 	//	public static void main(String args[])
