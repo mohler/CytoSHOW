@@ -122,6 +122,8 @@ public class WGFileDownloadClient implements PlugIn, ActionListener {
 						looping = filedata!=null && filedata.length == chunkSize ;
 						if (filedata!=null)
 							outputFile.write(filedata,0,filedata.length);
+						else
+							looping = false;
 						iteration++;
 					}
 					outputFile.flush();

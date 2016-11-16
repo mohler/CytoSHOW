@@ -30,6 +30,9 @@ import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.rmi.Naming;
 import java.rmi.NoSuchObjectException;
 import java.rmi.NotBoundException;
@@ -477,14 +480,14 @@ public class RemoteQTVS_Engine extends UnicastRemoteObject implements Compute {
 		}
 	}
 
-	public byte[] downloadFileChunkByteArray(String fileName, int chunkSize, int iteration) throws RemoteException {
+	public byte[] downloadFileChunkByteArray(String filePath, int chunkSize, int iteration) throws RemoteException {
 		try
 		{
-			File file=new File(fileName);
+			File file=new File(filePath);
 			//Defines buffer in which the file will be read
 			int nextChunkSize = (int) (chunkSize < file.length()-iteration*chunkSize?chunkSize:file.length()%chunkSize);
 			byte[] buffer=new byte[nextChunkSize];
-			BufferedInputStream inputFileStream=new BufferedInputStream( new FileInputStream(fileName));
+			BufferedInputStream inputFileStream=new BufferedInputStream( new FileInputStream(filePath));
 			//Reads the file into buffer
 			inputFileStream.skip(iteration*chunkSize);
 			inputFileStream.read(buffer,0,nextChunkSize);
@@ -507,12 +510,12 @@ public class RemoteQTVS_Engine extends UnicastRemoteObject implements Compute {
 		return file;
 	}
 
-	public void saveUploadFile(byte[] uploadBytes, String path) {
+	public long saveUploadFile(byte[] uploadBytes, String path) {
 		File file=new File("/Users/glowormguest/Public/DropBox/WormguidesUploads/"+path);
 		file.getParentFile().mkdirs();
 		BufferedOutputStream outputFileStream = null;
 		try {
-			outputFileStream = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath()));
+			outputFileStream = new BufferedOutputStream(new FileOutputStream(file.getAbsolutePath(), true));
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -535,6 +538,13 @@ public class RemoteQTVS_Engine extends UnicastRemoteObject implements Compute {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return file.length();
+	}
+
+	public void renameUploadFile(String tempName, String permName) throws RemoteException {
+		File tempFile = new File("/Users/glowormguest/Public/DropBox/WormguidesUploads/"+tempName);
+		File permFile = new File("/Users/glowormguest/Public/DropBox/WormguidesUploads/"+permName);
+		tempFile.renameTo(permFile);
 	}
 
 

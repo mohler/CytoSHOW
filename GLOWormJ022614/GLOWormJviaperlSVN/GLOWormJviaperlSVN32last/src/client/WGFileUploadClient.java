@@ -17,6 +17,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.rmi.Naming;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.Date;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -30,7 +33,7 @@ import javax.swing.event.ListSelectionListener;
 import compute.Compute;
 
 public class WGFileUploadClient implements PlugIn, ActionListener {
-	
+
 	JFrame jFrame = new JFrame();
 	public JFrame getjFrame() {
 		return jFrame;
@@ -46,51 +49,56 @@ public class WGFileUploadClient implements PlugIn, ActionListener {
 	public String arg;
 	private String path;
 	private Compute fileInt;
+	private ArrayList<String> subDirectories = new ArrayList<String>();
+	static int chunkSizeSpec = 4096*4096;
 
 	//	public FileClient(String[] args)
 	public void run(String arg) {
 		{     
 			Container container=jFrame.getContentPane();
 			container.setLayout(new FlowLayout());
+			chunkSizeSpec = (int) IJ.getNumber("Bytes per chunk?", chunkSizeSpec);
 			try
 			{
 				String remoteEngineName = arg+"/HEAD";
 				IJ.log(""+remoteEngineName);
 				fileInt = (Compute) Naming.lookup(remoteEngineName);
 				IJ.log(fileInt.toString()+"success on connect.1");
-				path = IJ.getFilePath("Upload which file?");
-//				list=(new File(path)).list();
-//				IJ.log(remoteEngineName+ list.toString());
-//				files=new JList<String>(list);
+				path = IJ.getDirectory("Upload which folder?");
+				if (!path.endsWith(File.separator))
+					path = path+File.separator;
+				list=(new File(path)).list();
+				IJ.log(remoteEngineName+ list.toString());
+				files=new JList<String>(list);
 			}
 			catch(Exception e)
 			{
 				IJ.log("FileServer Exception:"+e.toString());
 			}
 
-//			files.setVisibleRowCount(3);
-//			files.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-//			files.addListSelectionListener(
-//					new ListSelectionListener()
-//					{
-//						public void valueChanged(ListSelectionEvent ev)
-//						{
-//							curpointer=files.getSelectedIndex();
-//						}
-//					});
-//
-//			upload=new JButton("Upload");
-//			exit=new JButton("Exit");
-//
-//			container.add(upload);
-//			container.add(exit);
-//			container.add(new JScrollPane(files));
-//
-//			upload.addActionListener(this);
-//			exit.addActionListener(this); 
-//			jFrame.setTitle("WGFileUploadClient");
-//			jFrame.setSize(new Dimension(250,250));
-//			jFrame.setVisible(true);
+			//			files.setVisibleRowCount(3);
+			//			files.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+			//			files.addListSelectionListener(
+			//					new ListSelectionListener()
+			//					{
+			//						public void valueChanged(ListSelectionEvent ev)
+			//						{
+			//							curpointer=files.getSelectedIndex();
+			//						}
+			//					});
+			//
+			//			upload=new JButton("Upload");
+			//			exit=new JButton("Exit");
+			//
+			//			container.add(upload);
+			//			container.add(exit);
+			//			container.add(new JScrollPane(files));
+			//
+			//			upload.addActionListener(this);
+			//			exit.addActionListener(this); 
+			//			jFrame.setTitle("WGFileUploadClient");
+			//			jFrame.setSize(new Dimension(250,250));
+			//			jFrame.setVisible(true);
 			actionPerformed(new ActionEvent(this, 0, "Upload"));
 		}
 
@@ -105,21 +113,56 @@ public class WGFileUploadClient implements PlugIn, ActionListener {
 		}
 		else if(eventlabel.equals("Upload"))
 		{
-			try
-			{
-//				String remoteEngineName = arg+"/HEAD";
-//				Compute fileInt=(Compute)Naming.lookup(remoteEngineName);
-				IJ.log(path);
-				fileInt.saveUploadFile(uploadFileByteArray(path), "/"+Inet4Address.getLocalHost().getHostAddress()+"/"+path.replaceAll("[:]", "").replace("\\","/"));
-				JOptionPane.showMessageDialog(null,path+" uploaded successfully");
-			}
-			catch(Exception e)
-			{
-				System.out.println("FileServer Exception:"+e.getMessage());
-			}
+			if ((new File(path)).isDirectory()){
+				for (int f=0;f<list.length;f++) {
+					String filePath = path+list[f];
+					File nextFile = new File(filePath);
+					long nextFileLength = nextFile.length();
+					if (nextFile.isDirectory()) {
+						subDirectories.add(filePath);
+					} else {
+						Date fd = new Date(nextFile.lastModified());
+						String dateTouchString = 20
+								+ IJ.pad(fd.getYear()-100, 2) 
+								+ IJ.pad(fd.getMonth()+1, 2)
+								+ IJ.pad(fd.getDate(), 2)
+								+ IJ.pad(fd.getHours(), 2)
+								+ IJ.pad(fd.getMinutes(), 2)
+								+ "."
+								+ IJ.pad(fd.getSeconds(), 2);
 
+						try
+						{
+							IJ.log(filePath+" starting upload, "+nextFileLength+" bytes...");
+							long timeStart = (new Date()).getTime();
+							int iteration=0;
+							boolean looping = true;
+							
+							while(looping ) {
+								//fileInt.saveUploadFile(uploadFileByteArray(filePath), "/"+Inet4Address.getLocalHost().getHostAddress()+"/"+filePath.replaceAll("[:]", "").replace("\\","/")+"_" + dateTouchString);
+								long sizeOnServerSoFar = fileInt.saveUploadFile(uploadFileChunkByteArray(filePath, chunkSizeSpec, iteration), "/"+Inet4Address.getLocalHost().getHostAddress()+"/"+filePath.replaceAll("[:]", "").replace("\\","/")+"_" + dateTouchString+".tmp");
+								IJ.log(""+sizeOnServerSoFar);
+								iteration++;
+								long copiedSoFar = ((long)chunkSizeSpec)*((long)iteration);
+								looping = copiedSoFar < nextFileLength;
+							}
+							IJ.log(filePath+" uploaded successfully ("+nextFile.length()+" bytes, "+((new Date()).getTime()-timeStart)+" msec)");
+							fileInt.renameUploadFile("/"+Inet4Address.getLocalHost().getHostAddress()+"/"+filePath.replaceAll("[:]", "").replace("\\","/")+"_" + dateTouchString+".tmp",
+									"/"+Inet4Address.getLocalHost().getHostAddress()+"/"+filePath.replaceAll("[:]", "").replace("\\","/")+"_" + dateTouchString);
+						}
+						catch(Exception e)
+						{
+							IJ.log("FileServer Exception:"+e.initCause(e).toString());
+						}
+					}
+				}
+				for (String subdir:subDirectories) {
+					IJ.run("TestRMIFTUpload", "upload=["+subdir+"]");				
+				}
+				
+			}
 		}
-	}
+}
 	
 	public byte[] uploadFileByteArray(String path) {
 		File file=new File(path);
@@ -148,19 +191,29 @@ public class WGFileUploadClient implements PlugIn, ActionListener {
 		return(buffer);
 
 	}
-	//	public static void main(String args[])
-	//	{
-	//		FileClient fileClient=new FileClient(args);
-	//		arg=args[0];
-	//		fileClient.getjFrame().setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	//	}
-
-	//	public void run(String arg) {
-	//		FileClient fileClient=new FileClient(new String[]{arg}) ;
-	//		this.arg=arg;
-	//		fileClient.getjFrame().setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	//		
-	//	}
+	
+	public byte[] uploadFileChunkByteArray(String filePath, int chunkSize, int iteration) {
+		try
+		{
+			File file=new File(filePath);
+			long fileLength = file.length();
+			//Defines buffer in which the file will be read
+			long nextChunkSize =  (chunkSize < fileLength-(iteration*chunkSize)?chunkSize:fileLength%chunkSize);
+			byte[] buffer=new byte[(int) nextChunkSize];
+			BufferedInputStream inputFileStream=new BufferedInputStream( new FileInputStream(filePath));
+			//Reads the file into buffer
+			inputFileStream.skip(((long)chunkSize)*((long)iteration));
+			inputFileStream.read(buffer,0,(int) nextChunkSize);
+			inputFileStream.close();
+			return(buffer);
+		}
+		catch(Exception e)
+		{
+			System.out.println("FileImpl:"+e.getMessage());
+			e.printStackTrace();
+			return(null);                    
+		}
+	}
 }
 
 

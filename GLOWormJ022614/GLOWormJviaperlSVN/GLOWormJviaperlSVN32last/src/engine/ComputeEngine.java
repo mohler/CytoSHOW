@@ -128,13 +128,20 @@ public class ComputeEngine extends UnicastRemoteObject implements Compute {
 		return null;
 	}
 
-	public void saveUploadFile(byte[] uploadBytes, String path)
+	public long saveUploadFile(byte[] uploadBytes, String path)
 			throws RemoteException {
 		// TODO Auto-generated method stub
+		return 0;
 		
 	}
 
-	public byte[] downloadFileChunkByteArray(String fileName, int chunkSize, int iteration) throws RemoteException {
+	public byte[] downloadFileChunkByteArray(String filePath, int chunkSize, int iteration) throws RemoteException {
 		return null;
+	}
+
+	public void renameUploadFile(String tempName, String permName)
+			throws RemoteException {
+		// TODO Auto-generated method stub
+		
 	}
 }
