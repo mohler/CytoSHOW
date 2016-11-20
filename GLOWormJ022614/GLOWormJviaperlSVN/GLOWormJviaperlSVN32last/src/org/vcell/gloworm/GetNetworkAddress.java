@@ -1,5 +1,7 @@
 package org.vcell.gloworm;
 
+import ij.IJ;
+
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -13,7 +15,7 @@ public class GetNetworkAddress{
    }
 
    public static String GetAddress(String addressType){
-       String address = "";
+       String address = "FAILSONTRY";
        InetAddress lanIp = null;
         try {
 
@@ -23,14 +25,18 @@ public class GetNetworkAddress{
             while(net.hasMoreElements()){
                 NetworkInterface element = net.nextElement();
                 Enumeration<InetAddress> addresses = element.getInetAddresses();
-                while (addresses.hasMoreElements()){
+                while (addresses.hasMoreElements() && lanIp == null){
                     InetAddress ip = addresses.nextElement();
+                    //IJ.log(ip.toString());
                     if (ip instanceof Inet4Address){
 
-                        if (ip.isSiteLocalAddress()){
+                        if (!ip.toString().contains("127.0.0.1")){
+//                      if (ip.isSiteLocalAddress()){
 
                             ipAddress = ip.getHostAddress();
+                            //IJ.log(ipAddress.toString());
                             lanIp = InetAddress.getByName(ipAddress);
+                            //IJ.log(lanIp.toString());
                         }
 
                     }
@@ -38,7 +44,7 @@ public class GetNetworkAddress{
                 }
             }
 
-            if(lanIp == null) return null;
+            if(lanIp == null) return "LANIPNULL";
 
             if(addressType.equals("ip")){
 
@@ -46,7 +52,30 @@ public class GetNetworkAddress{
 
             }else if(addressType.equals("mac")){
 
-                address = GetMacAddress(lanIp);
+                address = getMacAddress(lanIp);
+                //IJ.log(""+ipAddress+" "+lanIp+" "+address);
+                if (address=="NOMACADDRESS") {
+                    net = NetworkInterface.getNetworkInterfaces();
+                    while(net.hasMoreElements() && address=="NOMACADDRESS"){
+                        NetworkInterface element = net.nextElement();
+                        Enumeration<InetAddress> addresses = element.getInetAddresses();
+                        while (addresses.hasMoreElements() && address=="NOMACADDRESS"){
+                            InetAddress ip = addresses.nextElement();
+                            if (ip instanceof Inet4Address){
+
+                                if (ip.isSiteLocalAddress()){
+
+                                    ipAddress = ip.getHostAddress();
+                                    lanIp = InetAddress.getByName(ipAddress);
+                                    address = getMacAddress(lanIp);
+                                    //IJ.log(""+ipAddress+" "+lanIp+" "+address);
+                                }
+
+                            }
+
+                        }
+                    }
+                }
 
             }else{
 
@@ -72,8 +101,8 @@ public class GetNetworkAddress{
 
    }
 
-   private static String GetMacAddress(InetAddress ip){
-       String address = null;
+   private static String getMacAddress(InetAddress ip){
+       String address = "NOMACADDRESS";
         try {
 
             NetworkInterface network = NetworkInterface.getByInetAddress(ip);
@@ -86,6 +115,10 @@ public class GetNetworkAddress{
             address = sb.toString();
 
         } catch (SocketException e) {
+
+            e.printStackTrace();
+
+        } catch (Exception e){
 
             e.printStackTrace();
 
