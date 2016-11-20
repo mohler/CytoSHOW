@@ -30,6 +30,8 @@ import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.vcell.gloworm.GetNetworkAddress;
+
 import compute.Compute;
 
 public class WGFileUploadClient implements PlugIn, ActionListener {
@@ -76,29 +78,6 @@ public class WGFileUploadClient implements PlugIn, ActionListener {
 				IJ.log("FileServer Exception:"+e.toString());
 			}
 
-			//			files.setVisibleRowCount(3);
-			//			files.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-			//			files.addListSelectionListener(
-			//					new ListSelectionListener()
-			//					{
-			//						public void valueChanged(ListSelectionEvent ev)
-			//						{
-			//							curpointer=files.getSelectedIndex();
-			//						}
-			//					});
-			//
-			//			upload=new JButton("Upload");
-			//			exit=new JButton("Exit");
-			//
-			//			container.add(upload);
-			//			container.add(exit);
-			//			container.add(new JScrollPane(files));
-			//
-			//			upload.addActionListener(this);
-			//			exit.addActionListener(this); 
-			//			jFrame.setTitle("WGFileUploadClient");
-			//			jFrame.setSize(new Dimension(250,250));
-			//			jFrame.setVisible(true);
 			actionPerformed(new ActionEvent(this, 0, "Upload"));
 		}
 
@@ -133,22 +112,25 @@ public class WGFileUploadClient implements PlugIn, ActionListener {
 
 						try
 						{
+//							String uniqueClientIdentifier = GetNetworkAddress.GetAddress("ip");
+							String uniqueClientIdentifier = GetNetworkAddress.GetAddress("mac");
+//							String uniqueClientIdentifier = Inet4Address.getLocalHost().getHostAddress();
 							IJ.log(filePath+" starting upload, "+nextFileLength+" bytes...");
 							long timeStart = (new Date()).getTime();
 							int iteration=0;
 							boolean looping = true;
 							
 							while(looping ) {
-								//fileInt.saveUploadFile(uploadFileByteArray(filePath), "/"+Inet4Address.getLocalHost().getHostAddress()+"/"+filePath.replaceAll("[:]", "").replace("\\","/")+"_" + dateTouchString);
-								long sizeOnServerSoFar = fileInt.saveUploadFile(uploadFileChunkByteArray(filePath, chunkSizeSpec, iteration), "/"+Inet4Address.getLocalHost().getHostAddress()+"/"+filePath.replaceAll("[:]", "").replace("\\","/")+"_" + dateTouchString+".tmp");
-								IJ.log(""+sizeOnServerSoFar);
+								//fileInt.saveUploadFile(uploadFileByteArray(filePath), "/"+uniqueClientIdentifier+"/"+filePath.replaceAll("[:]", "").replace("\\","/")+"_" + dateTouchString);
+								long sizeOnServerSoFar = fileInt.saveUploadFile(uploadFileChunkByteArray(filePath, chunkSizeSpec, iteration), "/"+uniqueClientIdentifier+"/"+filePath.replaceAll("[:]", "").replace("\\","/")+"_" + dateTouchString+".tmp");
+//								IJ.log(""+sizeOnServerSoFar);
 								iteration++;
 								long copiedSoFar = ((long)chunkSizeSpec)*((long)iteration);
 								looping = copiedSoFar < nextFileLength;
 							}
 							IJ.log(filePath+" uploaded successfully ("+nextFile.length()+" bytes, "+((new Date()).getTime()-timeStart)+" msec)");
-							fileInt.renameUploadFile("/"+Inet4Address.getLocalHost().getHostAddress()+"/"+filePath.replaceAll("[:]", "").replace("\\","/")+"_" + dateTouchString+".tmp",
-									"/"+Inet4Address.getLocalHost().getHostAddress()+"/"+filePath.replaceAll("[:]", "").replace("\\","/")+"_" + dateTouchString);
+							fileInt.renameUploadFile("/"+uniqueClientIdentifier+"/"+filePath.replaceAll("[:]", "").replace("\\","/")+"_" + dateTouchString+".tmp",
+									"/"+uniqueClientIdentifier+"/"+filePath.replaceAll("[:]", "").replace("\\","/")+"_" + dateTouchString);
 						}
 						catch(Exception e)
 						{
@@ -198,7 +180,7 @@ public class WGFileUploadClient implements PlugIn, ActionListener {
 			File file=new File(filePath);
 			long fileLength = file.length();
 			//Defines buffer in which the file will be read
-			long nextChunkSize =  (chunkSize < fileLength-(iteration*chunkSize)?chunkSize:fileLength%chunkSize);
+			long nextChunkSize =  (((long)chunkSize) < fileLength-(((long)chunkSize)*((long)iteration))?((long)chunkSize):fileLength%((long)chunkSize));
 			byte[] buffer=new byte[(int) nextChunkSize];
 			BufferedInputStream inputFileStream=new BufferedInputStream( new FileInputStream(filePath));
 			//Reads the file into buffer
