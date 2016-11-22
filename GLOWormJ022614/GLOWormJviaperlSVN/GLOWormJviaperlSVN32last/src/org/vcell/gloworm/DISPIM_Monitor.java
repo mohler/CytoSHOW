@@ -314,7 +314,7 @@ public class DISPIM_Monitor implements PlugIn {
 				cal.pixelDepth = vDepthRaw;
 				cal.setUnit(vUnit);
 				if (stageScan)
-					impA.getStack().setSkewXperZ(cal.pixelDepth/cal.pixelWidth);
+					impA.getStack().setSkewXperZ(-cal.pixelDepth/cal.pixelWidth);
 
 				impA.setPosition(wavelengths, zSlices/2, stkNSlices/(wavelengths*zSlices));	
 
@@ -1140,7 +1140,7 @@ public class DISPIM_Monitor implements PlugIn {
 				int stkNSlicesA = stackA.getSize();
 				impA.setStack(stackA, wavelengths, zSlices, stkNSlicesA/(wavelengths*zSlices));
 				if (stageScan)
-					impA.getStack().setSkewXperZ(impA.getCalibration().pixelDepth/impA.getCalibration().pixelWidth);
+					impA.getStack().setSkewXperZ(-impA.getCalibration().pixelDepth/impA.getCalibration().pixelWidth);
 				impA.setPosition(cA, zA, tA==impA.getNFrames()-1?impA.getNFrames():tA);
 				impA.setWindow(WindowManager.getCurrentWindow());
 
@@ -1152,7 +1152,7 @@ public class DISPIM_Monitor implements PlugIn {
 				int stkNSlicesB = stackB.getSize();
 				impB.setStack(stackB, wavelengths, zSlices, stkNSlicesB/(wavelengths*zSlices));
 				if (stageScan)
-					impB.getStack().setSkewXperZ(impB.getCalibration().pixelDepth/impB.getCalibration().pixelWidth);
+					impB.getStack().setSkewXperZ(-impB.getCalibration().pixelDepth/impB.getCalibration().pixelWidth);
 				impB.setPosition(cB, zB, tB==impB.getNFrames()-1?impB.getNFrames():tB);
 				impB.setWindow(WindowManager.getCurrentWindow());
 
