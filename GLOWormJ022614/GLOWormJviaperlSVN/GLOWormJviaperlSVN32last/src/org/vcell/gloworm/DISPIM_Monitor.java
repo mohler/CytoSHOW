@@ -1139,6 +1139,8 @@ public class DISPIM_Monitor implements PlugIn {
 				ListVirtualStack stackA = new ListVirtualStack(dirOrOMETiff+"Big5DFileListA.txt");
 				int stkNSlicesA = stackA.getSize();
 				impA.setStack(stackA, wavelengths, zSlices, stkNSlicesA/(wavelengths*zSlices));
+				if (stageScan)
+					impA.getStack().setSkewXperZ(impA.getCalibration().pixelDepth/impA.getCalibration().pixelWidth);
 				impA.setPosition(cA, zA, tA==impA.getNFrames()-1?impA.getNFrames():tA);
 				impA.setWindow(WindowManager.getCurrentWindow());
 
@@ -1149,6 +1151,8 @@ public class DISPIM_Monitor implements PlugIn {
 				ListVirtualStack stackB = new ListVirtualStack(dirOrOMETiff+"Big5DFileListB.txt");
 				int stkNSlicesB = stackB.getSize();
 				impB.setStack(stackB, wavelengths, zSlices, stkNSlicesB/(wavelengths*zSlices));
+				if (stageScan)
+					impB.getStack().setSkewXperZ(impB.getCalibration().pixelDepth/impB.getCalibration().pixelWidth);
 				impB.setPosition(cB, zB, tB==impB.getNFrames()-1?impB.getNFrames():tB);
 				impB.setWindow(WindowManager.getCurrentWindow());
 
