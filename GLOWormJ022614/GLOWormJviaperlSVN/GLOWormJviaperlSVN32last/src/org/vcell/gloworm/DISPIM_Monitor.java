@@ -78,18 +78,52 @@ public class DISPIM_Monitor implements PlugIn {
 		doDecon = true;
 		int cropWidth = 325;
 		int cropHeight = 425;
-
+		boolean stackDualViewTimePoints = false;
+		boolean singleImageTiffs = false;
+		boolean omeTiffs = false;
+		boolean stackLabviewTimePoints = false;
+		boolean stageScan = false;
 		String dirOrOMETiff = "";
 		dirOrOMETiff = args[0];
 		IJ.log(dirOrOMETiff);
 		//waitForUser("");
 		while (!(new File(dirOrOMETiff)).isDirectory() && !dirOrOMETiff.endsWith(".tif")) {
-			if (arg.contains("newMM"))
+			if (arg.contains("newMM")) {
 				dirOrOMETiff = IJ.getFilePath("Select a file with MM diSPIM raw data");
-			else if (arg.contains("sstMM"))
+				stackDualViewTimePoints = false;
+				singleImageTiffs = false;
+				omeTiffs = true;
+				stackLabviewTimePoints = false;
+				stageScan = false;
+			}else if (arg.contains("sstMM")) {;
 				dirOrOMETiff = IJ.getFilePath("Select a file with MM diSPIM raw data");
-			else 
+				stackDualViewTimePoints = false;
+				singleImageTiffs = true;
+				omeTiffs = false;
+				stackLabviewTimePoints = false;
+				stageScan = false;
+			}else if (arg.contains("stageScanMM")) {
+				dirOrOMETiff = IJ.getFilePath("Select a file with stage-scanned MM diSPIM raw data");
+				stackDualViewTimePoints = false;
+				singleImageTiffs = true;
+				omeTiffs = false;
+				stackLabviewTimePoints = false;
+				stageScan = true;
+			}else if (arg.contains("scanStageLabView")) {
+				dirOrOMETiff = IJ.getDirectory("Select master directory with stage-scanned LabView diSPIM raw data");
+				stackDualViewTimePoints = false;
+				singleImageTiffs = false;
+				omeTiffs = false;
+				stackLabviewTimePoints = true;
+				stageScan = true;
+			}else { 
 				dirOrOMETiff = IJ.getDirectory("Select master directory with LabView diSPIM raw data");
+				stackDualViewTimePoints = false;
+				singleImageTiffs = false;
+				omeTiffs = false;
+				stackLabviewTimePoints = true;
+				stageScan = false;
+			}
 		}
 		IJ.log(dirOrOMETiff);
 		File dirOrOMETiffFile = new File(dirOrOMETiff);
@@ -261,6 +295,7 @@ public class DISPIM_Monitor implements PlugIn {
 				//		    IJ.run("Stack From List...", "open="+dir+"Big5DFileListA.txt use");
 				impA = new ImagePlus();
 				impA.setStack(new ListVirtualStack(dirOrOMETiff+"Big5DFileListA.txt"));
+				impA.getStack().setSkewXperZ(zSlices);
 				int stkNSlices = impA.getNSlices();
 
 				impA.setTitle("SPIMA: "+dirOrOMETiff);
@@ -278,6 +313,8 @@ public class DISPIM_Monitor implements PlugIn {
 				cal.pixelHeight = vHeight;
 				cal.pixelDepth = vDepthRaw;
 				cal.setUnit(vUnit);
+				if (stageScan)
+					impA.getStack().setSkewXperZ(cal.pixelDepth/cal.pixelWidth);
 
 				impA.setPosition(wavelengths, zSlices/2, stkNSlices/(wavelengths*zSlices));	
 
@@ -310,6 +347,8 @@ public class DISPIM_Monitor implements PlugIn {
 				cal.pixelHeight = vHeight;
 				cal.pixelDepth = vDepthRaw;
 				cal.setUnit(vUnit);
+				if (stageScan)
+					impB.getStack().setSkewXperZ(-cal.pixelDepth/cal.pixelWidth);
 
 				impB.setPosition(wavelengths, zSlices/2, stkNSlices/(wavelengths*zSlices));	
 
@@ -392,6 +431,8 @@ public class DISPIM_Monitor implements PlugIn {
 			cal.pixelHeight = vHeight;
 			cal.pixelDepth = vDepthRaw;
 			cal.setUnit(vUnit);
+			if (stageScan)
+				impA.getStack().setSkewXperZ(cal.pixelDepth/cal.pixelWidth);
 
 			impA.setPosition(wavelengths, nSlices, nFrames);	
 
@@ -467,6 +508,8 @@ public class DISPIM_Monitor implements PlugIn {
 			cal.pixelHeight = vHeight;
 			cal.pixelDepth = vDepthRaw;
 			cal.setUnit(vUnit);
+			if (stageScan)
+				impB.getStack().setSkewXperZ(-cal.pixelDepth/cal.pixelWidth);
 
 			impB.setPosition(wavelengths, nSlices, nFrames);	
 
@@ -499,12 +542,26 @@ public class DISPIM_Monitor implements PlugIn {
 			IJ.run("Stack to Hyperstack...", "order=xyczt(default) channels="+ wavelengths +" slices="+ zSlices +" frames="+ (Math.floor(newLength/(wavelengths * 2 * zSlices))) +" display=Composite");
 			//			IJ.getImage().setTitle("SPIMA: "+IJ.getImage().getTitle());
 			impA = WindowManager.getCurrentImage();
+			Calibration calA = impA.getCalibration();
+			calA.pixelWidth = vWidth;
+			calA.pixelHeight = vHeight;
+			calA.pixelDepth = vDepthRaw;
+			calA.setUnit(vUnit);
+			if (stageScan)
+				impA.getStack().setSkewXperZ(calA.pixelDepth/calA.pixelWidth);
 			impA.setTitle("SPIMA: " + impA.getTitle()); 
 
 			IJ.run("Image Sequence...", "open=["+dirOrOMETiff+"] number="+ newLength +" starting=1 increment=1 scale=100 file=Cam1 or=[] sort use");
 			IJ.run("Stack to Hyperstack...", "order=xyczt(default) channels="+ wavelengths +" slices="+ zSlices +" frames="+ (Math.floor(newLength/(wavelengths * 2 * zSlices))) +" display=Composite");
 			//			IJ.getImage().setTitle("SPIMB: "+IJ.getImage().getTitle());
 			impB = WindowManager.getCurrentImage();
+			Calibration calB = impB.getCalibration();
+			calB.pixelWidth = vWidth;
+			calB.pixelHeight = vHeight;
+			calB.pixelDepth = vDepthRaw;
+			calB.setUnit(vUnit);
+			if (stageScan)
+				impB.getStack().setSkewXperZ(-calB.pixelDepth/calB.pixelWidth);
 			impB.setTitle("SPIMB: " + impB.getTitle());
 
 			oldLength = newLength;
@@ -1261,6 +1318,8 @@ public class DISPIM_Monitor implements PlugIn {
 					cal.pixelHeight = vHeight;
 					cal.pixelDepth = vDepthRaw;
 					cal.setUnit(vUnit);
+					if (stageScan)
+						impA.getStack().setSkewXperZ(cal.pixelDepth/cal.pixelWidth);
 
 					impA.setPosition(wavelengths, nSlices, nFrames);	
 
@@ -1336,6 +1395,8 @@ public class DISPIM_Monitor implements PlugIn {
 					cal.pixelHeight = vHeight;
 					cal.pixelDepth = vDepthRaw;
 					cal.setUnit(vUnit);
+					if (stageScan)
+						impB.getStack().setSkewXperZ(-cal.pixelDepth/cal.pixelWidth);
 
 					impB.setPosition(wavelengths, nSlices, nFrames);	
 

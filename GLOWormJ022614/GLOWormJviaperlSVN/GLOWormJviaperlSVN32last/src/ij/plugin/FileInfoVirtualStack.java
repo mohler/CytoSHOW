@@ -188,9 +188,16 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 			FileOpener fo = new FileOpener(info[n-1]);
 			imp = fo.open(false);
 		}
-		if (imp!=null)
-			return imp.getProcessor();
-		else {
+		if (imp!=null) {
+			ImageProcessor ip = imp.getProcessor();
+			ip.setInterpolationMethod(ImageProcessor.BICUBIC);
+			if (this.getOwnerImps() != null && this.getOwnerImps().size() > 0 && this.getOwnerImps().get(0) != null) {
+				ip.translate(skewXperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1), skewYperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1));
+			} else {
+				ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
+			}
+			return ip;
+		} else {
 			int w=getWidth(), h=getHeight();
 			if (n<=nImages ) 
 				/*IJ.log("Read error or file not found ("+n+"): "+info[n-1].directory+info[n-1].fileName)*/;

@@ -19,6 +19,8 @@ public class ImageStack {
 	private String[] label;
 	protected int width;
 	protected int height;
+	protected double skewXperZ = 0f;
+	protected double skewYperZ = 0f;
 	private Rectangle roi;
 	private ColorModel cm;
 	private double min=Double.MAX_VALUE;
@@ -277,6 +279,12 @@ public class ImageStack {
 			ip.setMinAndMax(min, max);
 		if (cTable!=null)
 			ip.setCalibrationTable(cTable);
+		ip.setInterpolationMethod(ImageProcessor.BICUBIC);
+		if (this.getOwnerImps() != null && this.getOwnerImps().size() > 0 && this.getOwnerImps().get(0) != null) {
+			ip.translate(skewXperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1), skewYperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1));
+		} else {
+			ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
+		}
 		return ip;
 	}
 	
@@ -595,5 +603,21 @@ public class ImageStack {
 		 this.ownerImps.remove(imp);
 		 return ownerImps.size() > 0;
 	 }
+
+	public double getSkewXperZ() {
+		return skewXperZ;
+	}
+
+	public void setSkewXperZ(double skewXperZ) {
+		this.skewXperZ = skewXperZ;
+	}
+
+	public double getSkewYperZ() {
+		return skewYperZ;
+	}
+
+	public void setSkewYperZ(double skewYperZ) {
+		this.skewYperZ = skewYperZ;
+	}
 
 }

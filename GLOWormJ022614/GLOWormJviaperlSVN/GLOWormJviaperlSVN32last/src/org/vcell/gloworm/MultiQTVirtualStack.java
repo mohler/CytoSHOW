@@ -730,8 +730,12 @@ public class MultiQTVirtualStack extends VirtualStack {
 				}		
 			}
 
-
-
+			ip.setInterpolationMethod(ImageProcessor.BICUBIC);
+			if (this.getOwnerImps() != null && this.getOwnerImps().size() > 0 && this.getOwnerImps().get(0) != null) {
+				ip.translate(skewXperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1), skewYperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1));
+		} else {
+			ip.translate(skewXperZ*(slice-1), skewYperZ*(slice-1));
+		}
 			return ip;
 		}
 		catch(Exception e) {

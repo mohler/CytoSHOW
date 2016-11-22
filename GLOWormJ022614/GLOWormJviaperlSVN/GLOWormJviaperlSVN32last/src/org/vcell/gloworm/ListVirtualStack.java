@@ -139,35 +139,42 @@ public class ListVirtualStack extends VirtualStack {
 			throw new IllegalArgumentException("Argument out of range: "+n);
 		IJ.redirectErrorMessages();
 		String url = list[n-1];
+		ImageProcessor ip = null;
 		ImagePlus imp = null;
 		if (url.length()>0)
 			imp = IJ.openImage(url);
 		if (imp!=null) {
 			labels[n-1] = (new File(list[n-1])).getName()+"\n"+(String)imp.getProperty("Info");
-			ImageProcessor ip =  imp.getProcessor();
+			ip =  imp.getProcessor();
 			int bitDepth = getBitDepth();
 			if (imp.getBitDepth()!=bitDepth) {
 				switch (bitDepth) {
-					case 8: ip=ip.convertToByte(true); break;
-					case 16: ip=ip.convertToShort(true); break;
-					case 24:  ip=ip.convertToRGB(); break;
-					case 32: ip=ip.convertToFloat(); break;
+				case 8: ip=ip.convertToByte(true); break;
+				case 16: ip=ip.convertToShort(true); break;
+				case 24:  ip=ip.convertToRGB(); break;
+				case 32: ip=ip.convertToFloat(); break;
 				}
 			}
 			if (ip.getWidth()!=imageWidth || ip.getHeight()!=imageHeight)
-			ip = ip.resize(imageWidth, imageHeight);
-			return ip;
+				ip = ip.resize(imageWidth, imageHeight);
 		} else {
-				ImageProcessor ip = null;
-				switch (getBitDepth()) {
-					case 8: ip=new ByteProcessor(imageWidth,imageHeight); break;
-					case 16: ip=new ShortProcessor(imageWidth,imageHeight); break;
-					case 24:  ip=new ColorProcessor(imageWidth,imageHeight); break;
-					case 32: ip=new FloatProcessor(imageWidth,imageHeight); break;
-				}
-			return ip;
+			ip = null;
+			switch (getBitDepth()) {
+			case 8: ip=new ByteProcessor(imageWidth,imageHeight); break;
+			case 16: ip=new ShortProcessor(imageWidth,imageHeight); break;
+			case 24:  ip=new ColorProcessor(imageWidth,imageHeight); break;
+			case 32: ip=new FloatProcessor(imageWidth,imageHeight); break;
+			}
 		}
-	 }
+		ip.setInterpolationMethod(ImageProcessor.BICUBIC);
+
+		if (this.getOwnerImps() != null && this.getOwnerImps().size() > 0 && this.getOwnerImps().get(0) != null) {
+			ip.translate(skewXperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1), skewYperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1));
+		} else {
+			ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
+		}
+		return ip;
+	}
  
 	 /** Returns the number of images in this stack. */
 	public int getSize() {
