@@ -1214,6 +1214,8 @@ public class DISPIM_Monitor implements PlugIn {
 				impA.setStack(impTmpA.getStack(), wavelengths, zSlices, impTmpA.getStack().getSize()/(wavelengths*zSlices));
 				impA.getProcessor().setColorModel(cmA);
 				impA.getProcessor().setMinAndMax(dminA, dmaxA);
+				if (stageScan)
+					impA.getStack().setSkewXperZ(impB.getCalibration().pixelDepth/impB.getCalibration().pixelWidth);
 				
 				impA.setPosition(cA, zA, tA==impA.getNFrames()-1?impA.getNFrames():tA);
 				impA.setWindow(WindowManager.getCurrentWindow());
@@ -1232,6 +1234,8 @@ public class DISPIM_Monitor implements PlugIn {
 				impB.setStack(impTmpB.getStack(), wavelengths, zSlices, impTmpB.getStack().getSize()/(wavelengths*zSlices));
 				impB.getProcessor().setColorModel(cmB);
 				impB.getProcessor().setMinAndMax(dminB, dmaxB);
+				if (stageScan)
+					impB.getStack().setSkewXperZ(-impB.getCalibration().pixelDepth/impB.getCalibration().pixelWidth);
 
 				impB.setPosition(cB, zB, tB==impB.getNFrames()-1?impB.getNFrames():tB);
 				impB.setWindow(WindowManager.getCurrentWindow());
