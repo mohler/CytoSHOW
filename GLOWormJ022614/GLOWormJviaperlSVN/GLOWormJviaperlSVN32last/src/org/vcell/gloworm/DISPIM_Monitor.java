@@ -548,7 +548,7 @@ public class DISPIM_Monitor implements PlugIn {
 			calA.pixelDepth = vDepthRaw;
 			calA.setUnit(vUnit);
 			if (stageScan)
-				impA.getStack().setSkewXperZ(calA.pixelDepth/calA.pixelWidth);
+				impA.getStack().setSkewXperZ(-calA.pixelDepth/calA.pixelWidth);
 			impA.setTitle("SPIMA: " + impA.getTitle()); 
 
 			IJ.run("Image Sequence...", "open=["+dirOrOMETiff+"] number="+ newLength +" starting=1 increment=1 scale=100 file=Cam1 or=[] sort use");
@@ -561,7 +561,7 @@ public class DISPIM_Monitor implements PlugIn {
 			calB.pixelDepth = vDepthRaw;
 			calB.setUnit(vUnit);
 			if (stageScan)
-				impB.getStack().setSkewXperZ(-calB.pixelDepth/calB.pixelWidth);
+				impB.getStack().setSkewXperZ(calB.pixelDepth/calB.pixelWidth);
 			impB.setTitle("SPIMB: " + impB.getTitle());
 
 			oldLength = newLength;
@@ -1215,7 +1215,7 @@ public class DISPIM_Monitor implements PlugIn {
 				impA.getProcessor().setColorModel(cmA);
 				impA.getProcessor().setMinAndMax(dminA, dmaxA);
 				if (stageScan)
-					impA.getStack().setSkewXperZ(impB.getCalibration().pixelDepth/impB.getCalibration().pixelWidth);
+					impA.getStack().setSkewXperZ(-impB.getCalibration().pixelDepth/impB.getCalibration().pixelWidth);
 				
 				impA.setPosition(cA, zA, tA==impA.getNFrames()-1?impA.getNFrames():tA);
 				impA.setWindow(WindowManager.getCurrentWindow());
@@ -1235,7 +1235,7 @@ public class DISPIM_Monitor implements PlugIn {
 				impB.getProcessor().setColorModel(cmB);
 				impB.getProcessor().setMinAndMax(dminB, dmaxB);
 				if (stageScan)
-					impB.getStack().setSkewXperZ(-impB.getCalibration().pixelDepth/impB.getCalibration().pixelWidth);
+					impB.getStack().setSkewXperZ(impB.getCalibration().pixelDepth/impB.getCalibration().pixelWidth);
 
 				impB.setPosition(cB, zB, tB==impB.getNFrames()-1?impB.getNFrames():tB);
 				impB.setWindow(WindowManager.getCurrentWindow());
