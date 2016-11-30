@@ -264,10 +264,13 @@ public class DISPIM_Monitor implements PlugIn {
 				if ( (new File(nextPathA)).isDirectory()  && (new File(nextPathB)).isDirectory()) {
 					newTifListA = (new File(nextPathA)).list();
 					newTifListB = (new File(nextPathB)).list();
-					if (newTifListA.length != newTifListB.length || newTifListA.length < wavelengths*zSlices)
+					if ((newTifListA.length != newTifListB.length-1 /*idiotic*/ && newTifListA.length != newTifListB.length) || newTifListA.length < wavelengths*zSlices)
 						skipIt = true;
 					if(!skipIt) {
-						Arrays.sort(newTifListA);		
+						Arrays.sort(newTifListA);	
+						if (newTifListA.length == newTifListB.length-1) {
+							newTifListA = Arrays.copyOf(newTifListA, newTifListA.length-1);
+						}
 						for (int f=0;f<newTifListA.length;f++) {
 							while(!(new File(dirOrOMETiff+"Big5DFileListA.txt")).exists())
 								IJ.wait(100);
@@ -276,6 +279,9 @@ public class DISPIM_Monitor implements PlugIn {
 								IJ.append(nextPathA + File.separator +newTifListA[f], dirOrOMETiff+"Big5DFileListA.txt");
 						}
 						Arrays.sort(newTifListB);		
+						if (newTifListA.length == newTifListB.length-2) {
+							newTifListB = Arrays.copyOf(newTifListB, newTifListA.length);
+						}
 						for (int f=0;f<newTifListB.length;f++) {
 							while(!(new File(dirOrOMETiff+"Big5DFileListB.txt")).exists())
 								IJ.wait(100);
@@ -295,7 +301,7 @@ public class DISPIM_Monitor implements PlugIn {
 				//		    IJ.run("Stack From List...", "open="+dir+"Big5DFileListA.txt use");
 				impA = new ImagePlus();
 				impA.setStack(new ListVirtualStack(dirOrOMETiff+"Big5DFileListA.txt"));
-				impA.getStack().setSkewXperZ(zSlices);
+
 				int stkNSlices = impA.getNSlices();
 
 				impA.setTitle("SPIMA: "+dirOrOMETiff);
@@ -314,7 +320,7 @@ public class DISPIM_Monitor implements PlugIn {
 				cal.pixelDepth = vDepthRaw;
 				cal.setUnit(vUnit);
 				if (stageScan)
-					impA.getStack().setSkewXperZ(-cal.pixelDepth/cal.pixelWidth);
+					impA.getStack().setSkewYperZ(-cal.pixelDepth/cal.pixelWidth);
 
 				impA.setPosition(wavelengths, zSlices/2, stkNSlices/(wavelengths*zSlices));	
 
@@ -348,7 +354,7 @@ public class DISPIM_Monitor implements PlugIn {
 				cal.pixelDepth = vDepthRaw;
 				cal.setUnit(vUnit);
 				if (stageScan)
-					impB.getStack().setSkewXperZ(-cal.pixelDepth/cal.pixelWidth);
+					impB.getStack().setSkewYperZ(cal.pixelDepth/cal.pixelWidth);
 
 				impB.setPosition(wavelengths, zSlices/2, stkNSlices/(wavelengths*zSlices));	
 
@@ -1140,7 +1146,7 @@ public class DISPIM_Monitor implements PlugIn {
 				int stkNSlicesA = stackA.getSize();
 				impA.setStack(stackA, wavelengths, zSlices, stkNSlicesA/(wavelengths*zSlices));
 				if (stageScan)
-					impA.getStack().setSkewXperZ(-impA.getCalibration().pixelDepth/impA.getCalibration().pixelWidth);
+					impA.getStack().setSkewYperZ(-impA.getCalibration().pixelDepth/impA.getCalibration().pixelWidth);
 				impA.setPosition(cA, zA, tA==impA.getNFrames()-1?impA.getNFrames():tA);
 				impA.setWindow(WindowManager.getCurrentWindow());
 
@@ -1152,7 +1158,7 @@ public class DISPIM_Monitor implements PlugIn {
 				int stkNSlicesB = stackB.getSize();
 				impB.setStack(stackB, wavelengths, zSlices, stkNSlicesB/(wavelengths*zSlices));
 				if (stageScan)
-					impB.getStack().setSkewXperZ(-impB.getCalibration().pixelDepth/impB.getCalibration().pixelWidth);
+					impB.getStack().setSkewYperZ(impB.getCalibration().pixelDepth/impB.getCalibration().pixelWidth);
 				impB.setPosition(cB, zB, tB==impB.getNFrames()-1?impB.getNFrames():tB);
 				impB.setWindow(WindowManager.getCurrentWindow());
 

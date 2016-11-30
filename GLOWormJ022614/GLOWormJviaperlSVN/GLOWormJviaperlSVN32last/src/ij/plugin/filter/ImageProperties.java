@@ -124,6 +124,15 @@ public class ImageProperties implements PlugInFilter, TextListener {
 			cal.pixelWidth = pixelWidth;
 			cal.pixelHeight = pixelHeight;
 			cal.pixelDepth = pixelDepth;
+			if (imp.getStack().getSkewXperZ() < 0)
+				imp.getStack().setSkewXperZ(-cal.pixelDepth/cal.pixelWidth);
+			if (imp.getStack().getSkewXperZ() > 0)
+				imp.getStack().setSkewXperZ(cal.pixelDepth/cal.pixelWidth);
+			if (imp.getStack().getSkewYperZ() < 0)
+				imp.getStack().setSkewYperZ(-cal.pixelDepth/cal.pixelWidth);
+			if (imp.getStack().getSkewYperZ() > 0)
+				imp.getStack().setSkewYperZ(cal.pixelDepth/cal.pixelWidth);
+
 		}
 
 		String frameInterval = validateInterval(gd.getNextString());

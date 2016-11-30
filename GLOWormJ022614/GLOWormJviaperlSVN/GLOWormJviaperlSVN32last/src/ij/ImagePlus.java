@@ -2194,6 +2194,9 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 
 	public int rotation = 0;
 
+	public boolean skewX;
+	public boolean skewY;
+
    
     /** Redisplays the (x,y) coordinates and pixel value (which may
 		have changed) in the status bar. Called by the Next Slice and
