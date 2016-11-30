@@ -53,6 +53,9 @@ public class DISPIM_Monitor implements PlugIn {
 	private int keyChannel;
 	private int slaveChannel;
 	private int oldLength;
+	private int ssAdirection;
+	private int ssBdirection;
+	private String ssOrientation;
 
 	public boolean isDoDecon() {
 		return doDecon;
@@ -116,6 +119,17 @@ public class DISPIM_Monitor implements PlugIn {
 				omeTiffs = false;
 				stackLabviewTimePoints = true;
 				stageScan = true;
+				GenericDialog lvssDialog = new GenericDialog("Stage-scan pecifications...");
+				lvssDialog.addChoice("Stage scan orientation", new String[]{"X", "Y"}, "Y");
+				lvssDialog.addChoice("Stage scan A direction", new String[]{"Plus", "Minus"}, "Minus");
+				lvssDialog.addChoice("Stage scan B direction", new String[]{"Plus", "Minus"}, "Plus");
+				lvssDialog.addNumericField("Z step size", 0.65, 4);
+				lvssDialog.showDialog();
+				ssOrientation = lvssDialog.getNextChoice();
+				ssAdirection = lvssDialog.getNextChoice() == "Minus"?-1:1;
+				ssBdirection = lvssDialog.getNextChoice() == "Minus"?-1:1;
+				double ssZstep = lvssDialog.getNextNumber();
+				vDepthRaw = ssZstep;
 			}else { 
 				dirOrOMETiff = IJ.getDirectory("Select master directory with LabView diSPIM raw data");
 				stackDualViewTimePoints = false;
@@ -320,7 +334,10 @@ public class DISPIM_Monitor implements PlugIn {
 				cal.pixelDepth = vDepthRaw;
 				cal.setUnit(vUnit);
 				if (stageScan)
-					impA.getStack().setSkewYperZ(-cal.pixelDepth/cal.pixelWidth);
+					if (ssOrientation =="Y")
+						impA.getStack().setSkewYperZ(ssAdirection*cal.pixelDepth/cal.pixelWidth);
+					else 
+						impA.getStack().setSkewXperZ(ssAdirection*cal.pixelDepth/cal.pixelWidth);
 
 				impA.setPosition(wavelengths, zSlices/2, stkNSlices/(wavelengths*zSlices));	
 
@@ -354,7 +371,10 @@ public class DISPIM_Monitor implements PlugIn {
 				cal.pixelDepth = vDepthRaw;
 				cal.setUnit(vUnit);
 				if (stageScan)
-					impB.getStack().setSkewYperZ(cal.pixelDepth/cal.pixelWidth);
+					if (ssOrientation =="Y")
+						impB.getStack().setSkewYperZ(ssBdirection*cal.pixelDepth/cal.pixelWidth);
+					else 
+						impB.getStack().setSkewXperZ(ssBdirection*cal.pixelDepth/cal.pixelWidth);
 
 				impB.setPosition(wavelengths, zSlices/2, stkNSlices/(wavelengths*zSlices));	
 
@@ -1146,7 +1166,10 @@ public class DISPIM_Monitor implements PlugIn {
 				int stkNSlicesA = stackA.getSize();
 				impA.setStack(stackA, wavelengths, zSlices, stkNSlicesA/(wavelengths*zSlices));
 				if (stageScan)
-					impA.getStack().setSkewYperZ(-impA.getCalibration().pixelDepth/impA.getCalibration().pixelWidth);
+					if (ssOrientation =="Y")
+						impA.getStack().setSkewYperZ(ssAdirection*impA.getCalibration().pixelDepth/impA.getCalibration().pixelWidth);
+					else 
+						impA.getStack().setSkewXperZ(ssAdirection*impA.getCalibration().pixelDepth/impA.getCalibration().pixelWidth);
 				impA.setPosition(cA, zA, tA==impA.getNFrames()-1?impA.getNFrames():tA);
 				impA.setWindow(WindowManager.getCurrentWindow());
 
@@ -1158,7 +1181,11 @@ public class DISPIM_Monitor implements PlugIn {
 				int stkNSlicesB = stackB.getSize();
 				impB.setStack(stackB, wavelengths, zSlices, stkNSlicesB/(wavelengths*zSlices));
 				if (stageScan)
-					impB.getStack().setSkewYperZ(impB.getCalibration().pixelDepth/impB.getCalibration().pixelWidth);
+					if (ssOrientation =="Y")
+						impB.getStack().setSkewYperZ(ssBdirection*impB.getCalibration().pixelDepth/impB.getCalibration().pixelWidth);
+					else 
+						impB.getStack().setSkewXperZ(ssBdirection*impB.getCalibration().pixelDepth/impB.getCalibration().pixelWidth);
+
 				impB.setPosition(cB, zB, tB==impB.getNFrames()-1?impB.getNFrames():tB);
 				impB.setWindow(WindowManager.getCurrentWindow());
 
