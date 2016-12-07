@@ -437,8 +437,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		
 //		IJ.log(""+n+" "+z+" "+t);
 		if (cumulativeTiffFileList[0].startsWith("MMStack_")) {
-			stackNumber = n<=zDim*tDim?(n-1)/zDim:((n-1)-zDim*tDim)/zDim;
-			sliceNumber = n<=zDim*tDim?((n-1)%zDim)+1:50+((n-1)%zDim)+1;
+			stackNumber = n<=(cDim/2)*zDim*tDim?(n-1)/((cDim/2)*zDim):((n-1)-(cDim/2)*zDim*tDim)/((cDim/2)*zDim);
+			sliceNumber = n<=(cDim/2)*zDim*tDim?((n-1)%((cDim/2)*zDim))+1:50+((n-1)%((cDim/2)*zDim))+1;
 		}
 		IJ.log(""+n+" "+stackNumber+" "+sliceNumber);
 		ImageProcessor ip = fivStacks.get(stackNumber).getProcessor(sliceNumber);
