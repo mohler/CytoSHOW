@@ -98,9 +98,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					channelDirectories++;
 					String[] subFileList = subFile.list();
 					for (String subFileListElement:subFileList)
-						if (!cumulativeSubFileArrayList.contains(subFileListElement))
+						if (!cumulativeSubFileArrayList.contains(dir+fileName+File.separator+subFileListElement))
 							if (subFileListElement.toLowerCase().endsWith("tif"))
-								cumulativeSubFileArrayList.add(subFileListElement);
+								cumulativeSubFileArrayList.add(dir+fileName+File.separator+subFileListElement);
 				}
 			}
 		}
@@ -291,7 +291,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		cDim=1;
 		zDim=1;
 		tDim = 1;
-		if (cumulativeTiffFileList[0].startsWith("MMStack_"))  {
+		if (cumulativeTiffFileList[0].contains("MMStack_"))  {
 			nImages = 0;
 			for (FileInfoVirtualStack mmStack:fivStacks) {
 				nImages = nImages + mmStack.getSize();
