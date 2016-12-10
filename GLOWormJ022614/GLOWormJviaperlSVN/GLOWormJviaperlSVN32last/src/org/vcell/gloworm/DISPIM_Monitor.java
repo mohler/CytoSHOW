@@ -53,9 +53,6 @@ public class DISPIM_Monitor implements PlugIn {
 	private int keyChannel;
 	private int slaveChannel;
 	private int oldLength;
-	private int ssAdirection;
-	private int ssBdirection;
-	private String ssOrientation;
 
 	public boolean isDoDecon() {
 		return doDecon;
@@ -126,17 +123,6 @@ public class DISPIM_Monitor implements PlugIn {
 				omeTiffs = false;
 				stackLabviewTimePoints = true;
 				stageScan = true;
-				GenericDialog lvssDialog = new GenericDialog("Stage-scan pecifications...");
-				lvssDialog.addChoice("Stage scan orientation", new String[]{"X", "Y"}, "Y");
-				lvssDialog.addChoice("Stage scan A direction", new String[]{"Plus", "Minus"}, "Minus");
-				lvssDialog.addChoice("Stage scan B direction", new String[]{"Plus", "Minus"}, "Plus");
-				lvssDialog.addNumericField("Z step size", 0.65, 4);
-				lvssDialog.showDialog();
-				ssOrientation = lvssDialog.getNextChoice();
-				ssAdirection = lvssDialog.getNextChoice() == "Minus"?-1:1;
-				ssBdirection = lvssDialog.getNextChoice() == "Minus"?-1:1;
-				double ssZstep = lvssDialog.getNextNumber();
-				vDepthRaw = ssZstep;
 			}else { 
 				dirOrOMETiff = IJ.getDirectory("Select master directory with LabView diSPIM raw data");
 				stackDualViewTimePoints = false;
@@ -285,7 +271,6 @@ public class DISPIM_Monitor implements PlugIn {
 
 				}
 
-<<<<<<< .mine
 				for (int d=0;d<fileSortA.length;d++) {
 					boolean skipIt = false;
 					String nextPathA =  dirOrOMETiff + "SPIMA" + File.separator + fileSortA[d];
@@ -314,41 +299,6 @@ public class DISPIM_Monitor implements PlugIn {
 										&& big5DFileListBString.indexOf( nextPathB + File.separator+newTifListB[f])<0)
 									IJ.append(nextPathB + File.separator +newTifListB[f], dirOrOMETiff+"Big5DFileListB.txt");
 							}
-=======
-			for (int d=0;d<fileSortA.length;d++) {
-				boolean skipIt = false;
-				String nextPathA =  dirOrOMETiff + "SPIMA" + File.separator + fileSortA[d];
-				String nextPathB =  dirOrOMETiff + "SPIMB" + File.separator + fileSortB[d];
-				IJ.log(nextPathA);
-				IJ.log(nextPathB);
-				if ( (new File(nextPathA)).isDirectory()  && (new File(nextPathB)).isDirectory()) {
-					newTifListA = (new File(nextPathA)).list();
-					newTifListB = (new File(nextPathB)).list();
-					if ((newTifListA.length != newTifListB.length-1 /*idiotic*/ && newTifListA.length != newTifListB.length) || newTifListA.length < wavelengths*zSlices)
-						skipIt = true;
-					if(!skipIt) {
-						Arrays.sort(newTifListA);	
-						if (newTifListA.length == newTifListB.length-1) {
-							newTifListA = Arrays.copyOf(newTifListA, newTifListA.length-1);
-						}
-						for (int f=0;f<newTifListA.length;f++) {
-							while(!(new File(dirOrOMETiff+"Big5DFileListA.txt")).exists())
-								IJ.wait(100);
-							if (!newTifListA[f].endsWith(".roi") && !newTifListA[f].endsWith(".DS_Store")
-									&& big5DFileListAString.indexOf( nextPathA + File.separator+newTifListA[f])<0)
-								IJ.append(nextPathA + File.separator +newTifListA[f], dirOrOMETiff+"Big5DFileListA.txt");
-						}
-						Arrays.sort(newTifListB);		
-						if (newTifListA.length == newTifListB.length-2) {
-							newTifListB = Arrays.copyOf(newTifListB, newTifListA.length);
-						}
-						for (int f=0;f<newTifListB.length;f++) {
-							while(!(new File(dirOrOMETiff+"Big5DFileListB.txt")).exists())
-								IJ.wait(100);
-							if (!newTifListB[f].endsWith(".roi") && !newTifListB[f].endsWith(".DS_Store")
-									&& big5DFileListBString.indexOf( nextPathB + File.separator+newTifListB[f])<0)
-								IJ.append(nextPathB + File.separator +newTifListB[f], dirOrOMETiff+"Big5DFileListB.txt");
->>>>>>> .r20504
 						}
 					}
 
@@ -357,21 +307,12 @@ public class DISPIM_Monitor implements PlugIn {
 
 				IJ.log(""+WindowManager.getImageCount());
 
-<<<<<<< .mine
 				if ((new File(dirOrOMETiff+"Big5DFileListA.txt" )).length() >0) {
 					//		    IJ.run("Stack From List...", "open="+dir+"Big5DFileListA.txt use");
 					impA = new ImagePlus();
 					impA.setStack(new ListVirtualStack(dirOrOMETiff+"Big5DFileListA.txt"));
 					impA.getStack().setSkewXperZ(zSlices);
 					int stkNSlices = impA.getNSlices();
-=======
-			if ((new File(dirOrOMETiff+"Big5DFileListA.txt" )).length() >0) {
-				//		    IJ.run("Stack From List...", "open="+dir+"Big5DFileListA.txt use");
-				impA = new ImagePlus();
-				impA.setStack(new ListVirtualStack(dirOrOMETiff+"Big5DFileListA.txt"));
-
-				int stkNSlices = impA.getNSlices();
->>>>>>> .r20504
 
 					impA.setTitle("SPIMA: "+dirOrOMETiff);
 
@@ -383,7 +324,6 @@ public class DISPIM_Monitor implements PlugIn {
 							IJ.wait(100);
 						}
 					}
-<<<<<<< .mine
 					Calibration cal = impA.getCalibration();
 					cal.pixelWidth = vWidth;
 					cal.pixelHeight = vHeight;
@@ -391,19 +331,6 @@ public class DISPIM_Monitor implements PlugIn {
 					cal.setUnit(vUnit);
 					if (stageScan)
 						impA.getStack().setSkewXperZ(-cal.pixelDepth/cal.pixelWidth);
-=======
-				}
-				Calibration cal = impA.getCalibration();
-				cal.pixelWidth = vWidth;
-				cal.pixelHeight = vHeight;
-				cal.pixelDepth = vDepthRaw;
-				cal.setUnit(vUnit);
-				if (stageScan)
-					if (ssOrientation =="Y")
-						impA.getStack().setSkewYperZ(ssAdirection*cal.pixelDepth/cal.pixelWidth);
-					else 
-						impA.getStack().setSkewXperZ(ssAdirection*cal.pixelDepth/cal.pixelWidth);
->>>>>>> .r20504
 
 					impA.setPosition(wavelengths, zSlices/2, stkNSlices/(wavelengths*zSlices));	
 
@@ -431,7 +358,6 @@ public class DISPIM_Monitor implements PlugIn {
 							IJ.wait(100);
 						}
 					}
-<<<<<<< .mine
 					Calibration cal = impB.getCalibration();
 					cal.pixelWidth = vWidth;
 					cal.pixelHeight = vHeight;
@@ -439,19 +365,6 @@ public class DISPIM_Monitor implements PlugIn {
 					cal.setUnit(vUnit);
 					if (stageScan)
 						impB.getStack().setSkewXperZ(-cal.pixelDepth/cal.pixelWidth);
-=======
-				}
-				Calibration cal = impB.getCalibration();
-				cal.pixelWidth = vWidth;
-				cal.pixelHeight = vHeight;
-				cal.pixelDepth = vDepthRaw;
-				cal.setUnit(vUnit);
-				if (stageScan)
-					if (ssOrientation =="Y")
-						impB.getStack().setSkewYperZ(ssBdirection*cal.pixelDepth/cal.pixelWidth);
-					else 
-						impB.getStack().setSkewXperZ(ssBdirection*cal.pixelDepth/cal.pixelWidth);
->>>>>>> .r20504
 
 					impB.setPosition(wavelengths, zSlices/2, stkNSlices/(wavelengths*zSlices));	
 
@@ -1244,10 +1157,7 @@ public class DISPIM_Monitor implements PlugIn {
 				int stkNSlicesA = stackA.getSize();
 				impA.setStack(stackA, wavelengths, zSlices, stkNSlicesA/(wavelengths*zSlices));
 				if (stageScan)
-					if (ssOrientation =="Y")
-						impA.getStack().setSkewYperZ(ssAdirection*impA.getCalibration().pixelDepth/impA.getCalibration().pixelWidth);
-					else 
-						impA.getStack().setSkewXperZ(ssAdirection*impA.getCalibration().pixelDepth/impA.getCalibration().pixelWidth);
+					impA.getStack().setSkewXperZ(-impA.getCalibration().pixelDepth/impA.getCalibration().pixelWidth);
 				impA.setPosition(cA, zA, tA==impA.getNFrames()-1?impA.getNFrames():tA);
 				impA.setWindow(WindowManager.getCurrentWindow());
 
@@ -1259,11 +1169,7 @@ public class DISPIM_Monitor implements PlugIn {
 				int stkNSlicesB = stackB.getSize();
 				impB.setStack(stackB, wavelengths, zSlices, stkNSlicesB/(wavelengths*zSlices));
 				if (stageScan)
-					if (ssOrientation =="Y")
-						impB.getStack().setSkewYperZ(ssBdirection*impB.getCalibration().pixelDepth/impB.getCalibration().pixelWidth);
-					else 
-						impB.getStack().setSkewXperZ(ssBdirection*impB.getCalibration().pixelDepth/impB.getCalibration().pixelWidth);
-
+					impB.getStack().setSkewXperZ(-impB.getCalibration().pixelDepth/impB.getCalibration().pixelWidth);
 				impB.setPosition(cB, zB, tB==impB.getNFrames()-1?impB.getNFrames():tB);
 				impB.setWindow(WindowManager.getCurrentWindow());
 
