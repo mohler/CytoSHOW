@@ -171,7 +171,6 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 		if (allDirectories) {
 			dimOrder = "xyztc";
-			dimOrder = "xyczt";
 			dir = "";
 
 			goDirFileList = new String[bigSubFileArrayList.size()];
@@ -306,7 +305,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			GenericDialog gd = new GenericDialog("Dimensions of HyperStacks");
 			gd.addNumericField("Channels (c):", 2, 0);
 			gd.addNumericField("Slices (z):", 50, 0);
-			gd.addNumericField("Frames (t):", nImages/(100*2), 0);
+			gd.addNumericField("Frames (t):", nImages/(50*2*2), 0);
 			gd.showDialog();
 			if (gd.wasCanceled()) return;
 			cDim = (int) gd.getNextNumber();
@@ -425,7 +424,6 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		were 1<=n<=nImages. Returns null if the stack is empty.
 	*/
 	public ImageProcessor getProcessor(int n) {
-		n = n + (isViewB?fivStacks.get(stackNumber).getSize()/2:0);
 		if (n<1 || n>nImages) {
 			IJ.runMacro("waitForUser(\""+n+"\");");
 			return fivStacks.get(0).getProcessor(1);
@@ -435,16 +433,15 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		sliceNumber = 1;
 		int total=0;
 		while (n > total) {
-			total = total + fivStacks.get(stackNumber).getSize();
+			total = total + fivStacks.get(stackNumber).getSize()/2;
 			stackNumber++;
 		}
 		stackNumber--;
-		total = total - fivStacks.get(stackNumber).getSize();
 
-		sliceNumber = n - total;
+		sliceNumber = (n-1) % (fivStacks.get(stackNumber).getSize()/2) + 1;
 		
 //		IJ.log(""+n+" "+z+" "+t);
-		ImageProcessor ip = fivStacks.get(stackNumber).getProcessor(sliceNumber);
+		ImageProcessor ip = fivStacks.get(stackNumber).getProcessor(sliceNumber+(isViewB?fivStacks.get(stackNumber).getSize()/2:0));
 		ip.setInterpolationMethod(ImageProcessor.BICUBIC);
 		if (this.getOwnerImps() != null && this.getOwnerImps().size() > 0 && this.getOwnerImps().get(0) != null) {
 			ip.translate(skewXperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1-this.getOwnerImps().get(this.getOwnerImps().size()-1).getNSlices()/2), skewYperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1-this.getOwnerImps().get(this.getOwnerImps().size()-1).getNSlices()/2));
