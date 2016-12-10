@@ -106,7 +106,14 @@ public class DISPIM_Monitor implements PlugIn {
 				stackLabviewTimePoints = false;
 				stageScan = false;
 			}else if (arg.contains("stageScanMM")) {
-				dirOrOMETiff = IJ.getFilePath("Select a file with stage-scanned MM diSPIM raw data");
+				dirOrOMETiff = IJ.getDirectory("Select directory with stage-scanned MM diSPIM raw data");
+				stackDualViewTimePoints = true;
+				singleImageTiffs = false;
+				omeTiffs = true;
+				stackLabviewTimePoints = false;
+				stageScan = true;
+			}else if (arg.contains("stageScansstMM")) {
+				dirOrOMETiff = IJ.getFilePath("Select a file with stage-scanned WG MM diSPIM raw data");
 				stackDualViewTimePoints = false;
 				singleImageTiffs = true;
 				omeTiffs = false;
@@ -175,7 +182,7 @@ public class DISPIM_Monitor implements PlugIn {
 		String[] dirOrOMETiffChunks = dirOrOMETiff.split(IJ.isWindows()?"\\\\":"/");
 		//		String dirOrOMETiffName = dirOrOMETiffChunks[dirOrOMETiffChunks.length-1];
 
-		if ((new File(dirOrOMETiff)).isDirectory() && !(new File(dirOrOMETiff)).list()[0].startsWith("MMStack_")) {
+		if ((new File(dirOrOMETiff)).isDirectory() && !omeTiffs) {
 			IJ.saveString("", dirOrOMETiff+"Big5DFileListA.txt");
 			while(!(new File(dirOrOMETiff+"Big5DFileListA.txt")).exists())
 				IJ.wait(100);
@@ -205,70 +212,109 @@ public class DISPIM_Monitor implements PlugIn {
 		}
 
 		if ((new File(dirOrOMETiff)).isDirectory() ) {
-			fileListA = new File(""+dirOrOMETiff+"SPIMA").list();
-			fileListB = new File(""+dirOrOMETiff+"SPIMB").list();
-			fileRanksA = Arrays.copyOf(fileListA, fileListA.length);
-			fileRanksB = Arrays.copyOf(fileListB, fileListB.length);
-			fileNumsA = Arrays.copyOf(fileListA, fileListA.length);
-			fileNumsB = Arrays.copyOf(fileListB, fileListB.length);
-			fileSortA = Arrays.copyOf(fileListA, fileListA.length);
-			fileSortB = Arrays.copyOf(fileListB, fileListB.length);
+			if (omeTiffs) {
+				impA = new ImagePlus("SPIMA",new MultiFileInfoVirtualStack(dirOrOMETiff,(new File(dirOrOMETiff)).list()[1].split("_")[0], true));
+				impB = new ImagePlus("SPIMB",new MultiFileInfoVirtualStack(dirOrOMETiff,(new File(dirOrOMETiff)).list()[1].split("_")[0], true));
+//				impA.setDimensions(2*wavelengths, zSlices, impA.getStackSize()/(2*wavelengths*zSlices));
+//				impB.setDimensions(2*wavelengths, zSlices, impB.getStackSize()/(2*wavelengths*zSlices));
+//
+//				impA.show();
+//				impB.show();
+			} else {
+				fileListA = new File(""+dirOrOMETiff+"SPIMA").list();
+				fileListB = new File(""+dirOrOMETiff+"SPIMB").list();
+				fileRanksA = Arrays.copyOf(fileListA, fileListA.length);
+				fileRanksB = Arrays.copyOf(fileListB, fileListB.length);
+				fileNumsA = Arrays.copyOf(fileListA, fileListA.length);
+				fileNumsB = Arrays.copyOf(fileListB, fileListB.length);
+				fileSortA = Arrays.copyOf(fileListA, fileListA.length);
+				fileSortB = Arrays.copyOf(fileListB, fileListB.length);
 
-			for (int a=0;a<fileListA.length;a++) {
-				if(!fileListA[a].endsWith(".roi") && !fileListA[a].endsWith(".DS_Store") ){
-					String sring = fileListA[a].replace("/", "");
-					String subsring = sring;
-					String prefix = "";
-					double n = Double.NaN;
-					try {
-						n = Integer.parseInt(subsring);
-					} catch(NumberFormatException e) {
-						n = Double.NaN;
-					}
-					while (Double.isNaN(n)) {
+				for (int a=0;a<fileListA.length;a++) {
+					if(!fileListA[a].endsWith(".roi") && !fileListA[a].endsWith(".DS_Store") ){
+						String sring = fileListA[a].replace("/", "");
+						String subsring = sring;
+						String prefix = "";
+						double n = Double.NaN;
 						try {
-							prefix = prefix + subsring.substring(0,1);
-							subsring = subsring.substring(1);
-							n = Integer.parseInt(subsring.split(" ")[0]);
-							IJ.log(subsring);
-							IJ.log(prefix);
-						} catch(NumberFormatException ne) {
-							n = Double.NaN;
-						} catch(StringIndexOutOfBoundsException se) {
+							n = Integer.parseInt(subsring);
+						} catch(NumberFormatException e) {
 							n = Double.NaN;
 						}
+						while (Double.isNaN(n)) {
+							try {
+								prefix = prefix + subsring.substring(0,1);
+								subsring = subsring.substring(1);
+								n = Integer.parseInt(subsring.split(" ")[0]);
+								IJ.log(subsring);
+								IJ.log(prefix);
+							} catch(NumberFormatException ne) {
+								n = Double.NaN;
+							} catch(StringIndexOutOfBoundsException se) {
+								n = Double.NaN;
+							}
+						}
+						if(prefix.toLowerCase().startsWith("t")
+								|| prefix.toLowerCase().startsWith("f"))
+							prefix = "aaaaa"+prefix;
+						int numer = Integer.parseInt(subsring.split(" ")[0]);
+						IJ.log(subsring+" "+numer);
+						fileNumsA[a] =prefix+ IJ.pad(numer,6)+"|"+sring;
+						fileNumsB[a] =prefix+ IJ.pad(numer,6)+"|"+sring;
+					} else {
+						fileNumsA[a] = "";
+						fileNumsB[a] = "";
 					}
-					if(prefix.toLowerCase().startsWith("t")
-							|| prefix.toLowerCase().startsWith("f"))
-						prefix = "aaaaa"+prefix;
-					int numer = Integer.parseInt(subsring.split(" ")[0]);
-					IJ.log(subsring+" "+numer);
-					fileNumsA[a] =prefix+ IJ.pad(numer,6)+"|"+sring;
-					fileNumsB[a] =prefix+ IJ.pad(numer,6)+"|"+sring;
-				} else {
-					fileNumsA[a] = "";
-					fileNumsB[a] = "";
+
+				}
+				Arrays.sort(fileNumsA);
+				Arrays.sort(fileNumsB);
+
+				for (int r=0;r<fileNumsA.length;r++) {
+					String[] splt =fileNumsA[r].split("\\|");
+					if (splt.length > 1)
+						fileSortA[r] = splt [1];
+					else 
+						fileSortA[r] = "";
+					IJ.log(r+" "+" "+fileNumsA[r]+" "+fileSortA[r]);
+					splt =fileNumsB[r].split("\\|");
+					if (splt.length > 1)
+						fileSortB[r] = splt[1];
+					else 
+						fileSortB[r] = "";
+
 				}
 
-			}
-			Arrays.sort(fileNumsA);
-			Arrays.sort(fileNumsB);
-
-			for (int r=0;r<fileNumsA.length;r++) {
-				String[] splt =fileNumsA[r].split("\\|");
-				if (splt.length > 1)
-					fileSortA[r] = splt [1];
-				else 
-					fileSortA[r] = "";
-				IJ.log(r+" "+" "+fileNumsA[r]+" "+fileSortA[r]);
-				splt =fileNumsB[r].split("\\|");
-				if (splt.length > 1)
-					fileSortB[r] = splt[1];
-				else 
-					fileSortB[r] = "";
-
-			}
-
+<<<<<<< .mine
+				for (int d=0;d<fileSortA.length;d++) {
+					boolean skipIt = false;
+					String nextPathA =  dirOrOMETiff + "SPIMA" + File.separator + fileSortA[d];
+					String nextPathB =  dirOrOMETiff + "SPIMB" + File.separator + fileSortB[d];
+					IJ.log(nextPathA);
+					IJ.log(nextPathB);
+					if ( (new File(nextPathA)).isDirectory()  && (new File(nextPathB)).isDirectory()) {
+						newTifListA = (new File(nextPathA)).list();
+						newTifListB = (new File(nextPathB)).list();
+						if (newTifListA.length != newTifListB.length || newTifListA.length < wavelengths*zSlices)
+							skipIt = true;
+						if(!skipIt) {
+							Arrays.sort(newTifListA);		
+							for (int f=0;f<newTifListA.length;f++) {
+								while(!(new File(dirOrOMETiff+"Big5DFileListA.txt")).exists())
+									IJ.wait(100);
+								if (!newTifListA[f].endsWith(".roi") && !newTifListA[f].endsWith(".DS_Store")
+										&& big5DFileListAString.indexOf( nextPathA + File.separator+newTifListA[f])<0)
+									IJ.append(nextPathA + File.separator +newTifListA[f], dirOrOMETiff+"Big5DFileListA.txt");
+							}
+							Arrays.sort(newTifListB);		
+							for (int f=0;f<newTifListB.length;f++) {
+								while(!(new File(dirOrOMETiff+"Big5DFileListB.txt")).exists())
+									IJ.wait(100);
+								if (!newTifListB[f].endsWith(".roi") && !newTifListB[f].endsWith(".DS_Store")
+										&& big5DFileListBString.indexOf( nextPathB + File.separator+newTifListB[f])<0)
+									IJ.append(nextPathB + File.separator +newTifListB[f], dirOrOMETiff+"Big5DFileListB.txt");
+							}
+=======
 			for (int d=0;d<fileSortA.length;d++) {
 				boolean skipIt = false;
 				String nextPathA =  dirOrOMETiff + "SPIMA" + File.separator + fileSortA[d];
@@ -302,31 +348,50 @@ public class DISPIM_Monitor implements PlugIn {
 							if (!newTifListB[f].endsWith(".roi") && !newTifListB[f].endsWith(".DS_Store")
 									&& big5DFileListBString.indexOf( nextPathB + File.separator+newTifListB[f])<0)
 								IJ.append(nextPathB + File.separator +newTifListB[f], dirOrOMETiff+"Big5DFileListB.txt");
+>>>>>>> .r20504
 						}
 					}
+
 				}
 
-			}
 
+				IJ.log(""+WindowManager.getImageCount());
 
-			IJ.log(""+WindowManager.getImageCount());
-
+<<<<<<< .mine
+				if ((new File(dirOrOMETiff+"Big5DFileListA.txt" )).length() >0) {
+					//		    IJ.run("Stack From List...", "open="+dir+"Big5DFileListA.txt use");
+					impA = new ImagePlus();
+					impA.setStack(new ListVirtualStack(dirOrOMETiff+"Big5DFileListA.txt"));
+					impA.getStack().setSkewXperZ(zSlices);
+					int stkNSlices = impA.getNSlices();
+=======
 			if ((new File(dirOrOMETiff+"Big5DFileListA.txt" )).length() >0) {
 				//		    IJ.run("Stack From List...", "open="+dir+"Big5DFileListA.txt use");
 				impA = new ImagePlus();
 				impA.setStack(new ListVirtualStack(dirOrOMETiff+"Big5DFileListA.txt"));
 
 				int stkNSlices = impA.getNSlices();
+>>>>>>> .r20504
 
-				impA.setTitle("SPIMA: "+dirOrOMETiff);
+					impA.setTitle("SPIMA: "+dirOrOMETiff);
 
-				impA.setDimensions(wavelengths, zSlices, stkNSlices/(wavelengths*zSlices));
-				IJ.log(wavelengths+" "+zSlices+" "+stkNSlices/(wavelengths*zSlices));
-				if (wavelengths > 1){
-					impA = new CompositeImage(impA);
-					while (!impA.isComposite()) {
-						IJ.wait(100);
+					impA.setDimensions(wavelengths, zSlices, stkNSlices/(wavelengths*zSlices));
+					IJ.log(wavelengths+" "+zSlices+" "+stkNSlices/(wavelengths*zSlices));
+					if (wavelengths > 1){
+						impA = new CompositeImage(impA);
+						while (!impA.isComposite()) {
+							IJ.wait(100);
+						}
 					}
+<<<<<<< .mine
+					Calibration cal = impA.getCalibration();
+					cal.pixelWidth = vWidth;
+					cal.pixelHeight = vHeight;
+					cal.pixelDepth = vDepthRaw;
+					cal.setUnit(vUnit);
+					if (stageScan)
+						impA.getStack().setSkewXperZ(-cal.pixelDepth/cal.pixelWidth);
+=======
 				}
 				Calibration cal = impA.getCalibration();
 				cal.pixelWidth = vWidth;
@@ -338,32 +403,43 @@ public class DISPIM_Monitor implements PlugIn {
 						impA.getStack().setSkewYperZ(ssAdirection*cal.pixelDepth/cal.pixelWidth);
 					else 
 						impA.getStack().setSkewXperZ(ssAdirection*cal.pixelDepth/cal.pixelWidth);
+>>>>>>> .r20504
 
-				impA.setPosition(wavelengths, zSlices/2, stkNSlices/(wavelengths*zSlices));	
+					impA.setPosition(wavelengths, zSlices/2, stkNSlices/(wavelengths*zSlices));	
 
-				impA.setPosition(1, zSlices/2, stkNSlices/(wavelengths*zSlices));	
+					impA.setPosition(1, zSlices/2, stkNSlices/(wavelengths*zSlices));	
 
-				if (impA.isComposite())
-					((CompositeImage)impA).setMode(CompositeImage.COMPOSITE);
-				impA.show();
+					if (impA.isComposite())
+						((CompositeImage)impA).setMode(CompositeImage.COMPOSITE);
+					impA.show();
 
-			}
+				}
 
-			if ((new File(dirOrOMETiff+"Big5DFileListB.txt" )).length() >0) {
-				//		    IJ.run("Stack From List...", "open="+dir+"Big5DFileListB.txt use");
-				impB = new ImagePlus();
-				impB.setStack(new ListVirtualStack(dirOrOMETiff+"Big5DFileListB.txt"));
-				int stkNSlices = impB.getNSlices();
+				if ((new File(dirOrOMETiff+"Big5DFileListB.txt" )).length() >0) {
+					//		    IJ.run("Stack From List...", "open="+dir+"Big5DFileListB.txt use");
+					impB = new ImagePlus();
+					impB.setStack(new ListVirtualStack(dirOrOMETiff+"Big5DFileListB.txt"));
+					int stkNSlices = impB.getNSlices();
 
-				impB.setTitle("SPIMB: "+dirOrOMETiff);
+					impB.setTitle("SPIMB: "+dirOrOMETiff);
 
-				impB.setDimensions(wavelengths, zSlices, stkNSlices/(wavelengths*zSlices));
-				IJ.log(wavelengths+" "+zSlices+" "+stkNSlices/(wavelengths*zSlices));
-				if (wavelengths > 1){
-					impB = new CompositeImage(impB);
-					while (!impB.isComposite()) {
-						IJ.wait(100);
+					impB.setDimensions(wavelengths, zSlices, stkNSlices/(wavelengths*zSlices));
+					IJ.log(wavelengths+" "+zSlices+" "+stkNSlices/(wavelengths*zSlices));
+					if (wavelengths > 1){
+						impB = new CompositeImage(impB);
+						while (!impB.isComposite()) {
+							IJ.wait(100);
+						}
 					}
+<<<<<<< .mine
+					Calibration cal = impB.getCalibration();
+					cal.pixelWidth = vWidth;
+					cal.pixelHeight = vHeight;
+					cal.pixelDepth = vDepthRaw;
+					cal.setUnit(vUnit);
+					if (stageScan)
+						impB.getStack().setSkewXperZ(-cal.pixelDepth/cal.pixelWidth);
+=======
 				}
 				Calibration cal = impB.getCalibration();
 				cal.pixelWidth = vWidth;
@@ -375,15 +451,17 @@ public class DISPIM_Monitor implements PlugIn {
 						impB.getStack().setSkewYperZ(ssBdirection*cal.pixelDepth/cal.pixelWidth);
 					else 
 						impB.getStack().setSkewXperZ(ssBdirection*cal.pixelDepth/cal.pixelWidth);
+>>>>>>> .r20504
 
-				impB.setPosition(wavelengths, zSlices/2, stkNSlices/(wavelengths*zSlices));	
+					impB.setPosition(wavelengths, zSlices/2, stkNSlices/(wavelengths*zSlices));	
 
-				impB.setPosition(1, zSlices/2, stkNSlices/(wavelengths*zSlices));	
+					impB.setPosition(1, zSlices/2, stkNSlices/(wavelengths*zSlices));	
 
-				if (impB.isComposite())
-					((CompositeImage)impB).setMode(CompositeImage.COMPOSITE);
-				impB.show();
+					if (impB.isComposite())
+						((CompositeImage)impB).setMode(CompositeImage.COMPOSITE);
+					impB.show();
 
+				}
 			}
 		} else if (dirOrOMETiff.endsWith(".ome.tif")){
 			TiffDecoder tdA = new TiffDecoder("",dirOrOMETiff);
@@ -1053,7 +1131,7 @@ public class DISPIM_Monitor implements PlugIn {
 
 		while (true) {
 			boolean focus = false;
-			if ((new File(dirOrOMETiff)).isDirectory()) {
+			if ((new File(dirOrOMETiff)).isDirectory() && !omeTiffs) {
 				listA = new File(""+dirOrOMETiff+"SPIMA").list();
 				listB = new File(""+dirOrOMETiff+"SPIMB").list();
 				big5DFileListAString = IJ.openAsString(dirOrOMETiff+"Big5DFileListA.txt");	    
