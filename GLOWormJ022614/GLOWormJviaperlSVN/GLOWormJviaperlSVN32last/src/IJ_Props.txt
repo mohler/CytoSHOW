@@ -53,7 +53,8 @@ new07="diSPIM Monitor (MicroManager)", org.vcell.gloworm.DISPIM_Monitor("newMM")
 new08="diSPIM Monitor (WG_MicroManager)", org.vcell.gloworm.DISPIM_Monitor("sstMM")
 new09="diSPIM Monitor (Stage-Scan LabView)", org.vcell.gloworm.DISPIM_Monitor("scanStageLabView")
 new10="diSPIM Monitor (Stage-Scan MicroManager)", org.vcell.gloworm.DISPIM_Monitor("stageScanMM")
-new11="Scene Editor",ij.plugin.frame.SceneEditor
+new11="diSPIM Monitor (Stage-Scan WG_MicroManager)", org.vcell.gloworm.DISPIM_Monitor("stageScansstMM")
+new12="Scene Editor",ij.plugin.frame.SceneEditor
 
 # Plugins installed in the File/Import submenu
 import01="Image Sequence...",ij.plugin.FolderOpener
