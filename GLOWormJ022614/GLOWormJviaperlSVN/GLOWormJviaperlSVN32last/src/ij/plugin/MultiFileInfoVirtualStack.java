@@ -299,12 +299,12 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			GenericDialog gd = new GenericDialog("Dimensions of HyperStacks");
 			gd.addNumericField("Channels (c):", 2, 0);
 			gd.addNumericField("Slices (z):", 50, 0);
-			gd.addNumericField("Frames (t):", nImages/(100), 0);
+			gd.addNumericField("Frames (t):", nImages/(100*2), 0);
 			gd.showDialog();
 			if (gd.wasCanceled()) return;
 			cDim = (int) gd.getNextNumber();
 			zDim = (int) gd.getNextNumber();
-			tDim = (int) gd.getNextNumber();
+			tDim = (int) gd.getNextNumber()*2;
 		} else {
 			zDim = fivStacks.get(0).nImages;
 			nImages = channelDirectories* cumulativeTiffFileList.length * zDim;
@@ -415,7 +415,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	}
 	
 	/** Returns an ImageProcessor for the specified image,
-		where 1<=n<=nImages. Returns null if the stack is empty.
+		were 1<=n<=nImages. Returns null if the stack is empty.
 	*/
 	public ImageProcessor getProcessor(int n) {
 		if (n<1 || n>nImages) {
@@ -436,11 +436,6 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		sliceNumber = n - total;
 		
 //		IJ.log(""+n+" "+z+" "+t);
-		if (cumulativeTiffFileList[0].startsWith("MMStack_")) {
-			stackNumber = n<=(cDim/2)*zDim*tDim?(n-1)/((cDim/2)*zDim):((n-1)-(cDim/2)*zDim*tDim)/((cDim/2)*zDim);
-			sliceNumber = n<=(cDim/2)*zDim*tDim?((n-1)%((cDim/2)*zDim))+1:50+((n-1)%((cDim/2)*zDim))+1;
-		}
-		IJ.log(""+n+" "+stackNumber+" "+sliceNumber);
 		ImageProcessor ip = fivStacks.get(stackNumber).getProcessor(sliceNumber);
 		ip.setInterpolationMethod(ImageProcessor.BICUBIC);
 		if (this.getOwnerImps() != null && this.getOwnerImps().size() > 0 && this.getOwnerImps().get(0) != null) {
