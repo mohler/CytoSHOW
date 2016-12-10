@@ -37,6 +37,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	private int  cDim, zDim, tDim;
 	public int stackNumber;
 	public int sliceNumber;
+	private boolean isViewB;
 
 	/* Default constructor. */
 	public MultiFileInfoVirtualStack() {}
@@ -52,8 +53,13 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		info = fiArray;
 	}
 	
-	public MultiFileInfoVirtualStack(String arg, String keyString, boolean show) {
+	public MultiFileInfoVirtualStack(String dirOrOMETiff, String string, boolean show) {
+		new MultiFileInfoVirtualStack(dirOrOMETiff, string, false, show);
+	}
+
+	public MultiFileInfoVirtualStack(String arg, String keyString, boolean isViewB, boolean show) {
 		this.keyString = keyString;
+		this.isViewB = isViewB;
 		File argFile = new File(arg);
 		dir = "";
 		if (!argFile.exists() || !argFile.isDirectory()) {
@@ -165,6 +171,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 		if (allDirectories) {
 			dimOrder = "xyztc";
+			dimOrder = "xyczt";
 			dir = "";
 
 			goDirFileList = new String[bigSubFileArrayList.size()];
@@ -304,7 +311,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			if (gd.wasCanceled()) return;
 			cDim = (int) gd.getNextNumber();
 			zDim = (int) gd.getNextNumber();
-			tDim = (int) gd.getNextNumber()*2;
+			tDim = (int) gd.getNextNumber();
 		} else {
 			zDim = fivStacks.get(0).nImages;
 			nImages = channelDirectories* cumulativeTiffFileList.length * zDim;
@@ -418,6 +425,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		were 1<=n<=nImages. Returns null if the stack is empty.
 	*/
 	public ImageProcessor getProcessor(int n) {
+		n = n + (isViewB?fivStacks.get(stackNumber).getSize()/2:0);
 		if (n<1 || n>nImages) {
 			IJ.runMacro("waitForUser(\""+n+"\");");
 			return fivStacks.get(0).getProcessor(1);

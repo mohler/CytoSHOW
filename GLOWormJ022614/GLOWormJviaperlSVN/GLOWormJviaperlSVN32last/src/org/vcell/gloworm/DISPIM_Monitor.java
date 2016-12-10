@@ -183,12 +183,12 @@ public class DISPIM_Monitor implements PlugIn {
 				IJ.wait(100);
 		}
 
-		int wavelengths;
-		int zSlices;
+		int wavelengths=1;
+		int zSlices=1;
 		if(args.length>2){
 			wavelengths = Integer.parseInt(args[1]);
 			zSlices = Integer.parseInt(args[2]);
-		} else {
+		} else if (!omeTiffs){
 			GenericDialog gd = new GenericDialog("Data Set Parameters?");
 			gd.addNumericField("Wavelengths", 2, 0);
 			gd.addNumericField("Z Slices/Stack", 50, 0);
@@ -196,16 +196,16 @@ public class DISPIM_Monitor implements PlugIn {
 			wavelengths = (int) gd.getNextNumber();
 			zSlices = (int) gd.getNextNumber();
 		}
-
-		if ((new File(dirOrOMETiff)).isDirectory() ) {
+		dirOrOMETiffFile = new File(dirOrOMETiff);
+		if (dirOrOMETiffFile.isDirectory() ) {
 			if (omeTiffs) {
-				impA = new ImagePlus("SPIMA",new MultiFileInfoVirtualStack(dirOrOMETiff,(new File(dirOrOMETiff)).list()[1].split("_")[0], true));
-				impB = new ImagePlus("SPIMB",new MultiFileInfoVirtualStack(dirOrOMETiff,(new File(dirOrOMETiff)).list()[1].split("_")[0], true));
-//				impA.setDimensions(2*wavelengths, zSlices, impA.getStackSize()/(2*wavelengths*zSlices));
-//				impB.setDimensions(2*wavelengths, zSlices, impB.getStackSize()/(2*wavelengths*zSlices));
-//
-//				impA.show();
-//				impB.show();
+				MultiFileInfoVirtualStack stackA = new MultiFileInfoVirtualStack(dirOrOMETiff,dirOrOMETiffFile.list()[1].split("_")[0], false, true);
+				MultiFileInfoVirtualStack stackB = new MultiFileInfoVirtualStack(dirOrOMETiff,dirOrOMETiffFile.list()[1].split("_")[0], true, true);
+				impA = new ImagePlus(dirOrOMETiffFile.getName()+": SPIMA", stackA);
+				stackA.setDimOrder("xyczt");
+				impB = new ImagePlus(dirOrOMETiffFile.getName()+": SPIMB", stackB);
+				stackB.setDimOrder("xyczt");
+
 			} else {
 				fileListA = new File(""+dirOrOMETiff+"SPIMA").list();
 				fileListB = new File(""+dirOrOMETiff+"SPIMB").list();
