@@ -88,7 +88,7 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 					imp.setRoi(impRoi);
 					ImagePlus impD = imp;
 					if (!imp.getTitle().startsWith("SketchVolumeViewer"))
-						impD = duper.run(imp, ch, ch, duper.getFirstZ(), duper.getLastZ(), singleSave?tpt:duper.getFirstT(), singleSave?tpt:duper.getLastT(), singleSave?1:duper.getStepT(), false, sec);
+						impD = duper.run(imp, ch, ch, duper.getFirstZ(), duper.getLastZ(), singleSave?tpt:duper.getFirstT(), singleSave?tpt:duper.getLastT(), singleSave?1:duper.getStepT(), false, msec);
 					impD.show();
 					impD.setTitle(imp.getShortTitle()+"_DUP_"+ch+"_"+tpt);
 					impD.changes = false;

@@ -176,7 +176,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 
 	/** Returns a new hyperstack containing a possibly reduced version of the input image. 
 	 * @param stepT */
-	public ImagePlus run(ImagePlus imp, int firstC, int lastC, int firstZ, int lastZ, int firstT, int lastT, int stepT, boolean sliceSpecificROIs, long sec) {
+	public ImagePlus run(ImagePlus imp, int firstC, int lastC, int firstZ, int lastZ, int firstT, int lastT, int stepT, boolean sliceSpecificROIs, long msec) {
 		boolean singleStack = firstT==lastT;
 		copyMergedImage = (imp.isComposite() && ((CompositeImage)imp).getCompositeMode() >= CompositeImage.RATIO12);
 		RoiManager rm =  imp.getRoiManager();
@@ -216,10 +216,10 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 		finalFrames = 0;
 
 		finalT = lastT;
-		if (sec == 0) {
+		if (msec == 0) {
 			Date currentDate = new Date();
-			long msec = currentDate.getTime();	
-			sec = msec/1000;
+			msec = currentDate.getTime();	
+			long sec = msec/1000;
 		}
 		String tempPath = "";
 
@@ -240,7 +240,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 		}
 
 		if (!singleStack) {
-			tempPath = saveRootDir+File.separator+"DUP_"+imp.getTitle().replace(".tif","").replaceAll("[,. ;:]","")+sec;
+			tempPath = saveRootDir+File.separator+"DUP_"+imp.getTitle().replace(".tif","").replaceAll("[,. ;:]","")+msec;
 			new File(tempPath).mkdirs();
 		}
 //		String stackPath = "";

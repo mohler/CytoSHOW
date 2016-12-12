@@ -362,7 +362,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 				}
 				impHS.setRoi(roi);
 				MQTVS_Duplicator duper = new MQTVS_Duplicator();
-				ImagePlus impHS_dup = duper.run(impHS, ch, ch, 1, impHS.getNSlices(), f, f, 1, false, sec);
+				ImagePlus impHS_dup = duper.run(impHS, ch, ch, 1, impHS.getNSlices(), f, f, 1, false, msec);
 				impHS_dup.setCalibration(impHS.getCalibration());
 				impHS_dup.getCalibration().pixelWidth = impHS.getCalibration().pixelWidth;
 				impHS_dup.getCalibration().pixelHeight = impHS.getCalibration().pixelHeight;

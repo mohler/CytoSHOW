@@ -34,7 +34,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	private FileInfo[] dummyInfo;
 	private int largestDirectoryTiffCount;
 	private String infoDir;
-	private int  cDim, zDim, tDim, vDim;
+	private int  cDim, zDim, tDim;
+	private int  vDim=1;
 	public int stackNumber;
 	public int sliceNumber;
 	private boolean isViewB;
@@ -54,11 +55,11 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	}
 	
 	public MultiFileInfoVirtualStack(String dirOrOMETiff, String string, boolean show) {
-		new MultiFileInfoVirtualStack(dirOrOMETiff, string, 0, 0, 0, 1, false, show);
+		this(dirOrOMETiff, string, 0, 0, 0, 1, false, show);
 	}
 
 	public MultiFileInfoVirtualStack(String dirOrOMETiff, String string, boolean isViewB, boolean show) {
-		new MultiFileInfoVirtualStack(dirOrOMETiff, string, 0, 0, 0, 1, isViewB, show);
+		this(dirOrOMETiff, string, 0, 0, 0, 1, isViewB, show);
 	}
 
 	public MultiFileInfoVirtualStack(String arg, String keyString, int cDim, int zDim, int tDim, int vDim, boolean isViewB, boolean show) {
