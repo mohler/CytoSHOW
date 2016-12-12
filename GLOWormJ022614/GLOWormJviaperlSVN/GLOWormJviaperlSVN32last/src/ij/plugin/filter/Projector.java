@@ -215,9 +215,9 @@ public class Projector implements PlugInFilter, TextListener {
 		long tempTime = (new Date()).getTime();
 //		File tempDir = new File(IJ.getDirectory("home") +"Proj_"+imp.getTitle().replaceAll("[,. ;:]","") + tempTime);
 		String saveRootDir = (IJ.getDirectory("image") != null? 
-				((new File(IJ.getDirectory("image"))).isDirectory()?
-						IJ.getDirectory("image"):
-							(new File(IJ.getDirectory("image"))).getParent()): 
+//				((new File(IJ.getDirectory("image"))).isDirectory()?
+//						IJ.getDirectory("image"):
+							(new File(IJ.getDirectory("image"))).getParent()/*)*/: 
 								IJ.getDirectory("temp"));
 		boolean correctSaveRoot = false;
 		for (File saveSibFile: (new File(saveRootDir)).listFiles()) {
@@ -398,7 +398,7 @@ public class Projector implements PlugInFilter, TextListener {
 				for (loopC = firstC; loopC < lastC +1; loopC++) {
 					projImpD[loopC-firstC].flush();
 				}
-				MultiFileInfoVirtualStack nextStack = new MultiFileInfoVirtualStack(tempDir.getPath()+ File.separator , "", false);
+				MultiFileInfoVirtualStack nextStack = new MultiFileInfoVirtualStack(tempDir.getPath()+ File.separator , "",0,0,0, 1, false, false);
 				if (buildImp == null)
 					buildImp = new ImagePlus();
 				buildImp.setOpenAsHyperStack(true);

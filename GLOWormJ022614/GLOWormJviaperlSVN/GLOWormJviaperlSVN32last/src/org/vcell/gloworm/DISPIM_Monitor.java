@@ -212,19 +212,78 @@ public class DISPIM_Monitor implements PlugIn {
 		dirOrOMETiffFile = new File(dirOrOMETiff);
 		if (dirOrOMETiffFile.isDirectory()) {
 			if (omeTiffs) {
-				MultiFileInfoVirtualStack stackA = new MultiFileInfoVirtualStack(
-						dirOrOMETiff, dirOrOMETiffFile.list()[1].split("_")[0],
-						false, true);
-				MultiFileInfoVirtualStack stackB = new MultiFileInfoVirtualStack(
-						dirOrOMETiff, dirOrOMETiffFile.list()[1].split("_")[0],
-						true, true);
-				impA = new ImagePlus(dirOrOMETiffFile.getName() + ": SPIMA",
-						stackA);
-				stackA.setDimOrder("xyczt");
-				impB = new ImagePlus(dirOrOMETiffFile.getName() + ": SPIMB",
-						stackB);
-				stackB.setDimOrder("xyczt");
+				impA = new ImagePlus();
+				impA.setTitle(dirOrOMETiffFile.getName() + ": SPIMA");
+				impB = new ImagePlus();
+				impB.setTitle(dirOrOMETiffFile.getName() + ": SPIMB");
+				
+				impA.setFileInfo(new FileInfo());
+				impA.getOriginalFileInfo().fileName = dirOrOMETiff;
+				impA.getOriginalFileInfo().directory = dirOrOMETiff;
+				
+				impB.setFileInfo(new FileInfo());
+				impB.getOriginalFileInfo().fileName = dirOrOMETiff;
+				impB.getOriginalFileInfo().directory = dirOrOMETiff;
 
+				int cDim = 0;
+				int zDim = 0;
+				int tDim = 0;
+				GenericDialog gd = new GenericDialog("Dimensions of HyperStacks");
+				gd.addNumericField("Channels (c):", 2, 0);
+				gd.addNumericField("Slices (z):", 50, 0);
+				gd.addNumericField("Frames (t):", dirOrOMETiffFile.list().length, 0);
+				gd.showDialog();
+				if (gd.wasCanceled()) return;
+				if (cDim == 0 || tDim == 0 || tDim == 0) {
+					cDim = (int) gd.getNextNumber();
+					zDim = (int) gd.getNextNumber();
+					tDim = (int) gd.getNextNumber();
+				}
+				MultiFileInfoVirtualStack stackA = new MultiFileInfoVirtualStack(
+						dirOrOMETiff, dirOrOMETiffFile.list()[1].split("_")[0], cDim, zDim, tDim, 2,
+						false, false);
+				MultiFileInfoVirtualStack stackB = new MultiFileInfoVirtualStack(
+						dirOrOMETiff, dirOrOMETiffFile.list()[1].split("_")[0], cDim, zDim, tDim, 2,
+						true, false);
+				impA.setStack(stackA);
+				Calibration calA = impA.getCalibration();
+				calA.pixelWidth = vWidth;
+				calA.pixelHeight = vHeight;
+				calA.pixelDepth = vDepthRaw;
+				calA.setUnit(vUnit);
+
+				stackA.setDimOrder("xyczt");
+				stackA.setSkewXperZ(
+						calA.pixelDepth / calA.pixelWidth);
+				impA.setOpenAsHyperStack(true);
+				impA.setDimensions(2, 50, 10);
+				impA = new CompositeImage(impA);
+				while (!impA.isComposite()) {
+					IJ.wait(100);
+				}
+				((CompositeImage)impA).setMode(CompositeImage.COMPOSITE);
+
+
+				impB.setStack(stackB);
+				Calibration calB = impB.getCalibration();
+				calB.pixelWidth = vWidth;
+				calB.pixelHeight = vHeight;
+				calB.pixelDepth = vDepthRaw;
+				calB.setUnit(vUnit);
+
+				stackB.setDimOrder("xyczt");
+				stackB.setSkewXperZ(
+						-calB.pixelDepth / calB.pixelWidth);
+				impB.setOpenAsHyperStack(true);
+				impB.setDimensions(2, 50, 10);
+				impB = new CompositeImage(impB);
+				while (!impB.isComposite()) {
+					IJ.wait(100);
+				}
+				((CompositeImage)impB).setMode(CompositeImage.COMPOSITE);
+
+				impA.show();
+				impB.show();
 			} else {
 				fileListA = new File("" + dirOrOMETiff + "SPIMA").list();
 				fileListB = new File("" + dirOrOMETiff + "SPIMB").list();

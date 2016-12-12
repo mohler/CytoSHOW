@@ -34,7 +34,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	private FileInfo[] dummyInfo;
 	private int largestDirectoryTiffCount;
 	private String infoDir;
-	private int  cDim, zDim, tDim;
+	private int  cDim, zDim, tDim, vDim;
 	public int stackNumber;
 	public int sliceNumber;
 	private boolean isViewB;
@@ -54,12 +54,20 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	}
 	
 	public MultiFileInfoVirtualStack(String dirOrOMETiff, String string, boolean show) {
-		new MultiFileInfoVirtualStack(dirOrOMETiff, string, false, show);
+		new MultiFileInfoVirtualStack(dirOrOMETiff, string, 0, 0, 0, 1, false, show);
 	}
 
-	public MultiFileInfoVirtualStack(String arg, String keyString, boolean isViewB, boolean show) {
+	public MultiFileInfoVirtualStack(String dirOrOMETiff, String string, boolean isViewB, boolean show) {
+		new MultiFileInfoVirtualStack(dirOrOMETiff, string, 0, 0, 0, 1, isViewB, show);
+	}
+
+	public MultiFileInfoVirtualStack(String arg, String keyString, int cDim, int zDim, int tDim, int vDim, boolean isViewB, boolean show) {
 		this.keyString = keyString;
 		this.isViewB = isViewB;
+		this.cDim = cDim;
+		this.zDim = zDim;
+		this.tDim = tDim;
+		this.vDim = vDim;
 		File argFile = new File(arg);
 		dir = "";
 		if (!argFile.exists() || !argFile.isDirectory()) {
@@ -294,23 +302,26 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	}
 	
 	void open(boolean show) {
-		cDim=1;
-		zDim=1;
-		tDim = 1;
 		if (cumulativeTiffFileList[0].contains("MMStack_"))  {
 			nImages = 0;
 			for (FileInfoVirtualStack mmStack:fivStacks) {
 				nImages = nImages + mmStack.getSize();
 			}
-			GenericDialog gd = new GenericDialog("Dimensions of HyperStacks");
-			gd.addNumericField("Channels (c):", 2, 0);
-			gd.addNumericField("Slices (z):", 50, 0);
-			gd.addNumericField("Frames (t):", nImages/(50*2*2), 0);
-			gd.showDialog();
-			if (gd.wasCanceled()) return;
-			cDim = (int) gd.getNextNumber();
-			zDim = (int) gd.getNextNumber();
-			tDim = (int) gd.getNextNumber();
+			if (cDim == 0 || tDim == 0 || tDim == 0) {
+				GenericDialog gd = new GenericDialog("Dimensions of HyperStacks");
+				gd.addNumericField("Channels (c):", 2, 0);
+				gd.addNumericField("Slices (z):", 50, 0);
+				gd.addNumericField("Frames (t):", nImages/(50*2*2), 0);
+				gd.showDialog();
+				if (gd.wasCanceled()) return;
+				cDim = (int) gd.getNextNumber();
+				zDim = (int) gd.getNextNumber();
+				tDim = (int) gd.getNextNumber();
+			} else {
+//				cDim=1;
+//				zDim=1;
+//				tDim=1;
+			}
 		} else {
 			zDim = fivStacks.get(0).nImages;
 			nImages = channelDirectories* cumulativeTiffFileList.length * zDim;
@@ -429,19 +440,22 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			return fivStacks.get(0).getProcessor(1);
 //			throw new IllegalArgumentException("Argument out of range: "+n);
 		}
+		
 		stackNumber = 0;
 		sliceNumber = 1;
 		int total=0;
 		while (n > total) {
-			total = total + fivStacks.get(stackNumber).getSize()/2;
+			total = total + fivStacks.get(stackNumber).getSize()/vDim;
 			stackNumber++;
 		}
 		stackNumber--;
 
-		sliceNumber = (n-1) % (fivStacks.get(stackNumber).getSize()/2) + 1;
+		n = n + stackNumber*fivStacks.get(stackNumber).getSize()/vDim;
+		
+		sliceNumber = (n-1) % (fivStacks.get(stackNumber).getSize()/vDim) + 1;
 		
 //		IJ.log(""+n+" "+z+" "+t);
-		ImageProcessor ip = fivStacks.get(stackNumber).getProcessor(sliceNumber+(isViewB?fivStacks.get(stackNumber).getSize()/2:0));
+		ImageProcessor ip = fivStacks.get(stackNumber).getProcessor(sliceNumber+(isViewB?fivStacks.get(stackNumber).getSize()/vDim:0));
 		ip.setInterpolationMethod(ImageProcessor.BICUBIC);
 		if (this.getOwnerImps() != null && this.getOwnerImps().size() > 0 && this.getOwnerImps().get(0) != null) {
 			ip.translate(skewXperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1-this.getOwnerImps().get(this.getOwnerImps().size()-1).getNSlices()/2), skewYperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1-this.getOwnerImps().get(this.getOwnerImps().size()-1).getNSlices()/2));
@@ -454,7 +468,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
  
 	 /** Returns the number of images in this stack. */
 	public int getSize() {
-		return nImages;
+		return nImages/vDim;
 	}
 
 	/** Returns the label of the Nth image. */
