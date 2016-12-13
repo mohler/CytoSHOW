@@ -1500,177 +1500,297 @@ public class DISPIM_Monitor implements PlugIn {
 
 		while (true) {
 			boolean focus = false;
-			if ((new File(dirOrOMETiff)).isDirectory() && !omeTiffs) {
-				listA = new File("" + dirOrOMETiff + "SPIMA").list();
-				listB = new File("" + dirOrOMETiff + "SPIMB").list();
-				big5DFileListAString = IJ.openAsString(dirOrOMETiff
-						+ "Big5DFileListA.txt");
-				big5DFileListBString = IJ.openAsString(dirOrOMETiff
-						+ "Big5DFileListB.txt");
-				deconList1 = (new File(dirOrOMETiff + "Deconvolution1")).list();
-				deconList2 = (new File(dirOrOMETiff + "Deconvolution2")).list();
+			if ((new File(dirOrOMETiff)).isDirectory()) {
+				if (omeTiffs) {
+					impA = new ImagePlus();
+					impA.setTitle(dirOrOMETiffFile.getName() + ": SPIMA");
+					impB = new ImagePlus();
+					impB.setTitle(dirOrOMETiffFile.getName() + ": SPIMB");
+					
+					impA.setFileInfo(new FileInfo());
+					impA.getOriginalFileInfo().fileName = dirOrOMETiff;
+					impA.getOriginalFileInfo().directory = dirOrOMETiff;
+					
+					impB.setFileInfo(new FileInfo());
+					impB.getOriginalFileInfo().fileName = dirOrOMETiff;
+					impB.getOriginalFileInfo().directory = dirOrOMETiff;
 
-				while ((fileListA.length == listA.length || fileListB.length == listB.length)
-						&& (!doDecon || ((deconList1 == null && deconList2 == null) || (!(deconList1 == null
-								|| deconFileList1 == null || deconList1.length != deconFileList1.length) || !(deconList2 == null
-								|| deconFileList2 == null || deconList2.length != deconFileList2.length))))) {
-					if (IJ.escapePressed())
-						if (!IJ.showMessageWithCancel(
-								"Cancel diSPIM Monitor Updates?",
-								"Monitoring of "
-										+ dirOrOMETiff
-										+ " paused by Escape.\nClick OK to resume."))
-							return;
-						else
-							IJ.resetEscape();
+					int cDim = 0;
+					int zDim = 0;
+					int tDim = 0;
+					GenericDialog gd = new GenericDialog("Dimensions of HyperStacks");
+					gd.addNumericField("Channels (c):", 2, 0);
+					gd.addNumericField("Slices (z):", 50, 0);
+					gd.addNumericField("Frames (t):", dirOrOMETiffFile.list().length, 0);
+					gd.showDialog();
+					if (gd.wasCanceled()) return;
+					if (cDim == 0 || tDim == 0 || tDim == 0) {
+						cDim = (int) gd.getNextNumber();
+						zDim = (int) gd.getNextNumber();
+						tDim = (int) gd.getNextNumber();
+					}
+					MultiFileInfoVirtualStack stackA = new MultiFileInfoVirtualStack(
+							dirOrOMETiff, dirOrOMETiffFile.list()[1].split("_")[0], cDim, zDim, tDim, 2,
+							false, false);
+					MultiFileInfoVirtualStack stackB = new MultiFileInfoVirtualStack(
+							dirOrOMETiff, dirOrOMETiffFile.list()[1].split("_")[0], cDim, zDim, tDim, 2,
+							true, false);
+					
+					int cA = impA.getChannel();
+					int zA = impA.getSlice();
+					int tA = impA.getFrame();
+					
+					impA.setStack(stackA);
+					Calibration calA = impA.getCalibration();
+					calA.pixelWidth = vWidth;
+					calA.pixelHeight = vHeight;
+					calA.pixelDepth = vDepthRaw;
+					calA.setUnit(vUnit);
+
+					stackA.setDimOrder("xyczt");
+					stackA.setSkewXperZ(
+							calA.pixelDepth / calA.pixelWidth);
+					impA.setOpenAsHyperStack(true);
+					impA.setDimensions(2, 50, 10);
+					impA = new CompositeImage(impA);
+					while (!impA.isComposite()) {
+						IJ.wait(100);
+					}
+					((CompositeImage)impA).setMode(CompositeImage.COMPOSITE);
+
+					int cB = impB.getChannel();
+					int zB = impB.getSlice();
+					int tB = impB.getFrame();
+
+					impB.setStack(stackB);
+					Calibration calB = impB.getCalibration();
+					calB.pixelWidth = vWidth;
+					calB.pixelHeight = vHeight;
+					calB.pixelDepth = vDepthRaw;
+					calB.setUnit(vUnit);
+
+					stackB.setDimOrder("xyczt");
+					stackB.setSkewXperZ(
+							-calB.pixelDepth / calB.pixelWidth);
+					impB.setOpenAsHyperStack(true);
+					impB.setDimensions(2, 50, 10);
+					impB = new CompositeImage(impB);
+					while (!impB.isComposite()) {
+						IJ.wait(100);
+					}
+					((CompositeImage)impB).setMode(CompositeImage.COMPOSITE);
+
+					impA.show();
+					impB.show();
+					
+					boolean wasSynched = false;
+					ArrayList<ImagePlus> synchedImpsArrayList = new ArrayList<ImagePlus>();
+					if (SyncWindows.getInstance() != null) {
+						int v = 0;
+						while (SyncWindows.getInstance().getImageFromVector(v) != null) {
+							wasSynched = true;
+							synchedImpsArrayList.add(SyncWindows.getInstance()
+									.getImageFromVector(v));
+							v++;
+						}
+						SyncWindows.getInstance().close();
+					}
+
+
+					int stkNSlicesA = stackA.getSize();
+					impA.setStack(stackA, wavelengths, zSlices, stkNSlicesA
+							/ (wavelengths * zSlices));
+					impA.setPosition(cA, zA,
+							tA == impA.getNFrames() - 1 ? impA.getNFrames() : tA);
+					impA.setWindow(WindowManager.getCurrentWindow());
+
+					int stkNSlicesB = stackB.getSize();
+					impB.setStack(stackB, wavelengths, zSlices, stkNSlicesB
+							/ (wavelengths * zSlices));
+					impB.setPosition(cB, zB,
+							tB == impB.getNFrames() - 1 ? impB.getNFrames() : tB);
+					impB.setWindow(WindowManager.getCurrentWindow());
+
+					if (wasSynched) {
+						SyncWindows sw = new SyncWindows();
+						for (ImagePlus impS : synchedImpsArrayList) {
+							sw.addImp(impS);
+						}
+					}
+
+				} else {
+
 					listA = new File("" + dirOrOMETiff + "SPIMA").list();
 					listB = new File("" + dirOrOMETiff + "SPIMB").list();
-					deconList1 = (new File(dirOrOMETiff + "Deconvolution1"))
-							.list();
-					deconList2 = (new File(dirOrOMETiff + "Deconvolution2"))
-							.list();
-					IJ.wait(5000);
-				}
-				//
-				// if (isOpen("Display Channels")) {
-				// selectWindow("Display Channels");
-				// run("Close");
-				// }
-				//
-				fileListA = new File("" + dirOrOMETiff + "SPIMA").list();
-				fileListB = new File("" + dirOrOMETiff + "SPIMB").list();
-				deconFileList1 = (new File(dirOrOMETiff + "Deconvolution1"))
-						.list();
-				deconFileList2 = (new File(dirOrOMETiff + "Deconvolution2"))
-						.list();
+					big5DFileListAString = IJ.openAsString(dirOrOMETiff
+							+ "Big5DFileListA.txt");
+					big5DFileListBString = IJ.openAsString(dirOrOMETiff
+							+ "Big5DFileListB.txt");
+					deconList1 = (new File(dirOrOMETiff + "Deconvolution1")).list();
+					deconList2 = (new File(dirOrOMETiff + "Deconvolution2")).list();
 
-				long modDateA = 0;
-				String recentestA = "";
-				for (int a = 0; a < fileListA.length; a++) {
-					if (!fileListA[a].endsWith(".roi")
-							&& !fileListA[a].endsWith(".DS_Store")) {
-						if (modDateA < (new File(dirOrOMETiff + "SPIMA"
-								+ File.separator + fileListA[a]))
-								.lastModified()) {
-							modDateA = (new File(dirOrOMETiff + "SPIMA"
+					while ((fileListA.length == listA.length || fileListB.length == listB.length)
+							&& (!doDecon || ((deconList1 == null && deconList2 == null) || (!(deconList1 == null
+							|| deconFileList1 == null || deconList1.length != deconFileList1.length) || !(deconList2 == null
+							|| deconFileList2 == null || deconList2.length != deconFileList2.length))))) {
+						if (IJ.escapePressed())
+							if (!IJ.showMessageWithCancel(
+									"Cancel diSPIM Monitor Updates?",
+									"Monitoring of "
+											+ dirOrOMETiff
+											+ " paused by Escape.\nClick OK to resume."))
+								return;
+							else
+								IJ.resetEscape();
+						listA = new File("" + dirOrOMETiff + "SPIMA").list();
+						listB = new File("" + dirOrOMETiff + "SPIMB").list();
+						deconList1 = (new File(dirOrOMETiff + "Deconvolution1"))
+								.list();
+						deconList2 = (new File(dirOrOMETiff + "Deconvolution2"))
+								.list();
+						IJ.wait(5000);
+					}
+					//
+					// if (isOpen("Display Channels")) {
+					// selectWindow("Display Channels");
+					// run("Close");
+					// }
+					//
+					fileListA = new File("" + dirOrOMETiff + "SPIMA").list();
+					fileListB = new File("" + dirOrOMETiff + "SPIMB").list();
+					deconFileList1 = (new File(dirOrOMETiff + "Deconvolution1"))
+							.list();
+					deconFileList2 = (new File(dirOrOMETiff + "Deconvolution2"))
+							.list();
+
+					long modDateA = 0;
+					String recentestA = "";
+					for (int a = 0; a < fileListA.length; a++) {
+						if (!fileListA[a].endsWith(".roi")
+								&& !fileListA[a].endsWith(".DS_Store")) {
+							if (modDateA < (new File(dirOrOMETiff + "SPIMA"
 									+ File.separator + fileListA[a]))
-									.lastModified();
-							recentestA = dirOrOMETiff + "SPIMA"
-									+ File.separator + fileListA[a];
+									.lastModified()) {
+								modDateA = (new File(dirOrOMETiff + "SPIMA"
+										+ File.separator + fileListA[a]))
+										.lastModified();
+								recentestA = dirOrOMETiff + "SPIMA"
+										+ File.separator + fileListA[a];
+							}
 						}
 					}
-				}
-				IJ.log(recentestA + "\n" + modDateA);
-				if ((new File(recentestA)).isDirectory()) {
-					String[] newTifList = { "" };
-					while (newTifList.length < wavelengths * zSlices)
-						newTifList = (new File(recentestA)).list();
-					Arrays.sort(newTifList);
-					for (int f = 0; f < newTifList.length; f++) {
-						while (!(new File(dirOrOMETiff + "Big5DFileListA.txt")
-								.exists()))
-							IJ.wait(100);
-						if (!newTifList[f].endsWith(".roi")
-								&& !newTifList[f].endsWith(".DS_Store")
-								&& big5DFileListAString.indexOf(recentestA
-										+ newTifList[f]) < 0)
-							IJ.append(recentestA + File.separator
-									+ newTifList[f], dirOrOMETiff
-									+ "Big5DFileListA.txt");
+					IJ.log(recentestA + "\n" + modDateA);
+					if ((new File(recentestA)).isDirectory()) {
+						String[] newTifList = { "" };
+						while (newTifList.length < wavelengths * zSlices)
+							newTifList = (new File(recentestA)).list();
+						Arrays.sort(newTifList);
+						for (int f = 0; f < newTifList.length; f++) {
+							while (!(new File(dirOrOMETiff + "Big5DFileListA.txt")
+							.exists()))
+								IJ.wait(100);
+							if (!newTifList[f].endsWith(".roi")
+									&& !newTifList[f].endsWith(".DS_Store")
+									&& big5DFileListAString.indexOf(recentestA
+											+ newTifList[f]) < 0)
+								IJ.append(recentestA + File.separator
+										+ newTifList[f], dirOrOMETiff
+										+ "Big5DFileListA.txt");
+						}
 					}
-				}
 
-				fileListA = new File("" + dirOrOMETiff + "SPIMA").list();
-				fileListB = new File("" + dirOrOMETiff + "SPIMB").list();
+					fileListA = new File("" + dirOrOMETiff + "SPIMA").list();
+					fileListB = new File("" + dirOrOMETiff + "SPIMB").list();
 
-				long modDateB = 0;
-				String recentestB = "";
-				String recentestBname = "";
-				for (int a = 0; a < fileListB.length; a++) {
-					if (!fileListB[a].endsWith(".roi")
-							&& !fileListB[a].endsWith(".DS_Store")) {
-						if (modDateB < (new File(dirOrOMETiff + "SPIMB"
-								+ File.separator + fileListB[a]))
-								.lastModified()) {
-							modDateB = (new File(dirOrOMETiff + "SPIMB"
+					long modDateB = 0;
+					String recentestB = "";
+					String recentestBname = "";
+					for (int a = 0; a < fileListB.length; a++) {
+						if (!fileListB[a].endsWith(".roi")
+								&& !fileListB[a].endsWith(".DS_Store")) {
+							if (modDateB < (new File(dirOrOMETiff + "SPIMB"
 									+ File.separator + fileListB[a]))
-									.lastModified();
-							recentestB = dirOrOMETiff + "SPIMB"
-									+ File.separator + fileListB[a];
-							recentestBname = fileListB[a];
+									.lastModified()) {
+								modDateB = (new File(dirOrOMETiff + "SPIMB"
+										+ File.separator + fileListB[a]))
+										.lastModified();
+								recentestB = dirOrOMETiff + "SPIMB"
+										+ File.separator + fileListB[a];
+								recentestBname = fileListB[a];
+							}
 						}
 					}
-				}
-				IJ.log(recentestB + "\n" + modDateB);
-				if (recentestBname.toLowerCase().startsWith("focus"))
-					focus = true;
-				if ((new File(recentestB)).isDirectory()) {
-					String[] newTifList = { "" };
-					while (newTifList.length < wavelengths * zSlices)
-						newTifList = (new File(recentestB)).list();
-					Arrays.sort(newTifList);
-					for (int f = 0; f < newTifList.length; f++) {
-						while (!(new File(dirOrOMETiff + "Big5DFileListB.txt")
-								.exists()))
-							IJ.wait(100);
-						if (!newTifList[f].endsWith(".roi")
-								&& !newTifList[f].endsWith(".DS_Store")
-								&& big5DFileListBString.indexOf(recentestA
-										+ newTifList[f]) < 0)
-							IJ.append(recentestB + File.separator
-									+ newTifList[f], dirOrOMETiff
-									+ "Big5DFileListB.txt");
+					IJ.log(recentestB + "\n" + modDateB);
+					if (recentestBname.toLowerCase().startsWith("focus"))
+						focus = true;
+					if ((new File(recentestB)).isDirectory()) {
+						String[] newTifList = { "" };
+						while (newTifList.length < wavelengths * zSlices)
+							newTifList = (new File(recentestB)).list();
+						Arrays.sort(newTifList);
+						for (int f = 0; f < newTifList.length; f++) {
+							while (!(new File(dirOrOMETiff + "Big5DFileListB.txt")
+							.exists()))
+								IJ.wait(100);
+							if (!newTifList[f].endsWith(".roi")
+									&& !newTifList[f].endsWith(".DS_Store")
+									&& big5DFileListBString.indexOf(recentestA
+											+ newTifList[f]) < 0)
+								IJ.append(recentestB + File.separator
+										+ newTifList[f], dirOrOMETiff
+										+ "Big5DFileListB.txt");
+						}
 					}
-				}
-				boolean wasSynched = false;
-				ArrayList<ImagePlus> synchedImpsArrayList = new ArrayList<ImagePlus>();
-				if (SyncWindows.getInstance() != null) {
-					int v = 0;
-					while (SyncWindows.getInstance().getImageFromVector(v) != null) {
-						wasSynched = true;
-						synchedImpsArrayList.add(SyncWindows.getInstance()
-								.getImageFromVector(v));
-						v++;
+					boolean wasSynched = false;
+					ArrayList<ImagePlus> synchedImpsArrayList = new ArrayList<ImagePlus>();
+					if (SyncWindows.getInstance() != null) {
+						int v = 0;
+						while (SyncWindows.getInstance().getImageFromVector(v) != null) {
+							wasSynched = true;
+							synchedImpsArrayList.add(SyncWindows.getInstance()
+									.getImageFromVector(v));
+							v++;
+						}
+						SyncWindows.getInstance().close();
 					}
-					SyncWindows.getInstance().close();
-				}
 
-				int cA = impA.getChannel();
-				int zA = impA.getSlice();
-				int tA = impA.getFrame();
-				ListVirtualStack stackA = new ListVirtualStack(dirOrOMETiff
-						+ "Big5DFileListA.txt");
-				int stkNSlicesA = stackA.getSize();
-				impA.setStack(stackA, wavelengths, zSlices, stkNSlicesA
-						/ (wavelengths * zSlices));
-				if (stageScan)
-					impA.getStack().setSkewXperZ(
-							-impA.getCalibration().pixelDepth
-									/ impA.getCalibration().pixelWidth);
-				impA.setPosition(cA, zA,
-						tA == impA.getNFrames() - 1 ? impA.getNFrames() : tA);
-				impA.setWindow(WindowManager.getCurrentWindow());
+					int cA = impA.getChannel();
+					int zA = impA.getSlice();
+					int tA = impA.getFrame();
+					ListVirtualStack stackA = new ListVirtualStack(dirOrOMETiff
+							+ "Big5DFileListA.txt");
+					int stkNSlicesA = stackA.getSize();
+					impA.setStack(stackA, wavelengths, zSlices, stkNSlicesA
+							/ (wavelengths * zSlices));
+					if (stageScan)
+						impA.getStack().setSkewXperZ(
+								-impA.getCalibration().pixelDepth
+								/ impA.getCalibration().pixelWidth);
+					impA.setPosition(cA, zA,
+							tA == impA.getNFrames() - 1 ? impA.getNFrames() : tA);
+					impA.setWindow(WindowManager.getCurrentWindow());
 
-				int cB = impB.getChannel();
-				int zB = impB.getSlice();
-				int tB = impB.getFrame();
-				ListVirtualStack stackB = new ListVirtualStack(dirOrOMETiff
-						+ "Big5DFileListB.txt");
-				int stkNSlicesB = stackB.getSize();
-				impB.setStack(stackB, wavelengths, zSlices, stkNSlicesB
-						/ (wavelengths * zSlices));
-				if (stageScan)
-					impB.getStack().setSkewXperZ(
-							-impB.getCalibration().pixelDepth
-									/ impB.getCalibration().pixelWidth);
-				impB.setPosition(cB, zB,
-						tB == impB.getNFrames() - 1 ? impB.getNFrames() : tB);
-				impB.setWindow(WindowManager.getCurrentWindow());
+					int cB = impB.getChannel();
+					int zB = impB.getSlice();
+					int tB = impB.getFrame();
+					ListVirtualStack stackB = new ListVirtualStack(dirOrOMETiff
+							+ "Big5DFileListB.txt");
+					int stkNSlicesB = stackB.getSize();
+					impB.setStack(stackB, wavelengths, zSlices, stkNSlicesB
+							/ (wavelengths * zSlices));
+					if (stageScan)
+						impB.getStack().setSkewXperZ(
+								-impB.getCalibration().pixelDepth
+								/ impB.getCalibration().pixelWidth);
+					impB.setPosition(cB, zB,
+							tB == impB.getNFrames() - 1 ? impB.getNFrames() : tB);
+					impB.setWindow(WindowManager.getCurrentWindow());
 
-				if (wasSynched) {
-					SyncWindows sw = new SyncWindows();
-					for (ImagePlus impS : synchedImpsArrayList) {
-						sw.addImp(impS);
+					if (wasSynched) {
+						SyncWindows sw = new SyncWindows();
+						for (ImagePlus impS : synchedImpsArrayList) {
+							sw.addImp(impS);
+						}
 					}
 				}
 			} else if (dirOrOMETiff.matches(".*_\\d{9}_\\d{3}_.*.tif")) {
