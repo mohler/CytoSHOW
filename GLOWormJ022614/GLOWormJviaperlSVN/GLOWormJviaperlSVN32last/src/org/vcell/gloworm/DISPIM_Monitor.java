@@ -1502,33 +1502,54 @@ public class DISPIM_Monitor implements PlugIn {
 			boolean focus = false;
 			if ((new File(dirOrOMETiff)).isDirectory()) {
 				if (omeTiffs) {
-					impA = new ImagePlus();
-					impA.setTitle(dirOrOMETiffFile.getName() + ": SPIMA");
-					impB = new ImagePlus();
-					impB.setTitle(dirOrOMETiffFile.getName() + ": SPIMB");
-					
-					impA.setFileInfo(new FileInfo());
-					impA.getOriginalFileInfo().fileName = dirOrOMETiff;
-					impA.getOriginalFileInfo().directory = dirOrOMETiff;
-					
-					impB.setFileInfo(new FileInfo());
-					impB.getOriginalFileInfo().fileName = dirOrOMETiff;
-					impB.getOriginalFileInfo().directory = dirOrOMETiff;
+					listA = new File("" + dirOrOMETiff).list();
+					deconList1 = (new File(dirOrOMETiff + "Deconvolution1")).list();
+					deconList2 = (new File(dirOrOMETiff + "Deconvolution2")).list();
 
-					int cDim = 0;
-					int zDim = 0;
-					int tDim = 0;
-					GenericDialog gd = new GenericDialog("Dimensions of HyperStacks");
-					gd.addNumericField("Channels (c):", 2, 0);
-					gd.addNumericField("Slices (z):", 50, 0);
-					gd.addNumericField("Frames (t):", dirOrOMETiffFile.list().length, 0);
-					gd.showDialog();
-					if (gd.wasCanceled()) return;
-					if (cDim == 0 || tDim == 0 || tDim == 0) {
-						cDim = (int) gd.getNextNumber();
-						zDim = (int) gd.getNextNumber();
-						tDim = (int) gd.getNextNumber();
+					while ((fileListA.length == listA.length)
+							&& (!doDecon || ((deconList1 == null && deconList2 == null) || (!(deconList1 == null
+							|| deconFileList1 == null || deconList1.length != deconFileList1.length) || !(deconList2 == null
+							|| deconFileList2 == null || deconList2.length != deconFileList2.length))))) {
+						if (IJ.escapePressed())
+							if (!IJ.showMessageWithCancel(
+									"Cancel diSPIM Monitor Updates?",
+									"Monitoring of "
+											+ dirOrOMETiff
+											+ " paused by Escape.\nClick OK to resume."))
+								return;
+							else
+								IJ.resetEscape();
+						listA = new File("" + dirOrOMETiff).list();
+						deconList1 = (new File(dirOrOMETiff + "Deconvolution1"))
+								.list();
+						deconList2 = (new File(dirOrOMETiff + "Deconvolution2"))
+								.list();
+						IJ.wait(5000);
 					}
+					fileListA = new File("" + dirOrOMETiff).list();
+					deconFileList1 = (new File(dirOrOMETiff + "Deconvolution1"))
+							.list();
+					deconFileList2 = (new File(dirOrOMETiff + "Deconvolution2"))
+							.list();
+
+					long modDateA = 0;
+					String recentestA = "";
+					for (int a = 0; a < fileListA.length; a++) {
+						if (!fileListA[a].endsWith(".roi")
+								&& !fileListA[a].endsWith(".DS_Store")) {
+							if (modDateA < (new File(dirOrOMETiff
+									+ File.separator + fileListA[a]))
+									.lastModified()) {
+								modDateA = (new File(dirOrOMETiff
+										+ File.separator + fileListA[a]))
+										.lastModified();
+								recentestA = dirOrOMETiff
+										+ File.separator + fileListA[a];
+							}
+						}
+					}
+					IJ.log(recentestA + "\n" + modDateA);
+
 					MultiFileInfoVirtualStack stackA = new MultiFileInfoVirtualStack(
 							dirOrOMETiff, dirOrOMETiffFile.list()[1].split("_")[0], cDim, zDim, tDim, 2,
 							false, false);
