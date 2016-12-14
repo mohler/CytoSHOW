@@ -892,8 +892,8 @@ public class DISPIM_Monitor implements PlugIn {
 								+ "Deconvolution2\");");
 					}
 					MultiFileInfoVirtualStack deconmfivs = new MultiFileInfoVirtualStack(
-							(new File(dirOrOMETiff)).isDirectory() ? dirOrOMETiff
-									: (new File(dirOrOMETiff)).getParent()
+							((new File(dirOrOMETiff)).isDirectory() ? dirOrOMETiff
+									: (new File(dirOrOMETiff)).getParent())
 											+ File.separator, "Deconvolution",
 							false);
 					if (deconmfivs.getSize() > 0) {
