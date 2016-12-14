@@ -147,7 +147,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 						String cumTiffListElement = cumulativeTiffFileList[q];
 						if (cumTiffListElement.toLowerCase().endsWith(".tif")) {
 							if (q-stuffCount+junkCount< subFileList.length 
-									&& !subFileList[q-stuffCount+junkCount].matches(cumTiffListElement)) {
+									&& !subFileList[q-stuffCount+junkCount].matches(cumTiffListElement.replace("\\","\\\\"))) {
 								if (subFileList[q-stuffCount+junkCount].toLowerCase().endsWith(".tif")) {
 									subFileTiffArrayList.add("channel-frame missing");
 									stuffCount++;
