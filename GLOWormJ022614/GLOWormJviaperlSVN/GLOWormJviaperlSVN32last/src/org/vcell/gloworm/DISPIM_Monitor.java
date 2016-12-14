@@ -53,6 +53,10 @@ public class DISPIM_Monitor implements PlugIn {
 	private int keyChannel;
 	private int slaveChannel;
 	private int oldLength;
+	private int cDim;
+	private int zDim;
+	private int tDim;
+	private int vDim;
 
 	public boolean isDoDecon() {
 		return doDecon;
@@ -212,6 +216,7 @@ public class DISPIM_Monitor implements PlugIn {
 		dirOrOMETiffFile = new File(dirOrOMETiff);
 		if (dirOrOMETiffFile.isDirectory()) {
 			if (omeTiffs) {
+				fileListA = new File("" + dirOrOMETiff).list();
 				impA = new ImagePlus();
 				impA.setTitle(dirOrOMETiffFile.getName() + ": SPIMA");
 				impB = new ImagePlus();
@@ -225,25 +230,29 @@ public class DISPIM_Monitor implements PlugIn {
 				impB.getOriginalFileInfo().fileName = dirOrOMETiff;
 				impB.getOriginalFileInfo().directory = dirOrOMETiff;
 
-				int cDim = 0;
-				int zDim = 0;
-				int tDim = 0;
+				cDim = 0;
+				zDim = 0;
+				tDim = 0;
+				vDim = 0;
 				GenericDialog gd = new GenericDialog("Dimensions of HyperStacks");
 				gd.addNumericField("Channels (c):", 2, 0);
 				gd.addNumericField("Slices (z):", 50, 0);
-				gd.addNumericField("Frames (t):", dirOrOMETiffFile.list().length, 0);
+//				gd.addNumericField("Frames (t):", dirOrOMETiffFile.list().length, 0);
+				gd.addNumericField("Views (v):", 2, 0);
+
 				gd.showDialog();
 				if (gd.wasCanceled()) return;
 				if (cDim == 0 || tDim == 0 || tDim == 0) {
 					cDim = (int) gd.getNextNumber();
 					zDim = (int) gd.getNextNumber();
-					tDim = (int) gd.getNextNumber();
+//					tDim = (int) gd.getNextNumber();
+					vDim = (int) gd.getNextNumber();
 				}
 				MultiFileInfoVirtualStack stackA = new MultiFileInfoVirtualStack(
-						dirOrOMETiff, dirOrOMETiffFile.list()[1].split("_")[0], cDim, zDim, tDim, 2,
+						dirOrOMETiff, dirOrOMETiffFile.list()[1].split("_")[0], cDim, zDim, dirOrOMETiffFile.list().length, vDim,
 						false, false);
 				MultiFileInfoVirtualStack stackB = new MultiFileInfoVirtualStack(
-						dirOrOMETiff, dirOrOMETiffFile.list()[1].split("_")[0], cDim, zDim, tDim, 2,
+						dirOrOMETiff, dirOrOMETiffFile.list()[1].split("_")[0], cDim, zDim, dirOrOMETiffFile.list().length, vDim,
 						true, false);
 				impA.setStack(stackA);
 				Calibration calA = impA.getCalibration();
@@ -256,7 +265,7 @@ public class DISPIM_Monitor implements PlugIn {
 				stackA.setSkewXperZ(
 						calA.pixelDepth / calA.pixelWidth);
 				impA.setOpenAsHyperStack(true);
-				impA.setDimensions(2, 50, 10);
+				impA.setDimensions(cDim, zDim, stackA.getSize()/(cDim*zDim));
 				impA = new CompositeImage(impA);
 				while (!impA.isComposite()) {
 					IJ.wait(100);
@@ -275,7 +284,7 @@ public class DISPIM_Monitor implements PlugIn {
 				stackB.setSkewXperZ(
 						-calB.pixelDepth / calB.pixelWidth);
 				impB.setOpenAsHyperStack(true);
-				impB.setDimensions(2, 50, 10);
+				impB.setDimensions(cDim, zDim, stackB.getSize()/(cDim*zDim));
 				impB = new CompositeImage(impB);
 				while (!impB.isComposite()) {
 					IJ.wait(100);
@@ -1551,10 +1560,10 @@ public class DISPIM_Monitor implements PlugIn {
 					IJ.log(recentestA + "\n" + modDateA);
 
 					MultiFileInfoVirtualStack stackA = new MultiFileInfoVirtualStack(
-							dirOrOMETiff, dirOrOMETiffFile.list()[1].split("_")[0], cDim, zDim, tDim, 2,
+							dirOrOMETiff, dirOrOMETiffFile.list()[1].split("_")[0], cDim, zDim, dirOrOMETiffFile.list().length, vDim,
 							false, false);
 					MultiFileInfoVirtualStack stackB = new MultiFileInfoVirtualStack(
-							dirOrOMETiff, dirOrOMETiffFile.list()[1].split("_")[0], cDim, zDim, tDim, 2,
+							dirOrOMETiff, dirOrOMETiffFile.list()[1].split("_")[0], cDim, zDim, dirOrOMETiffFile.list().length, vDim,
 							true, false);
 					
 					int cA = impA.getChannel();
@@ -1571,13 +1580,15 @@ public class DISPIM_Monitor implements PlugIn {
 					stackA.setDimOrder("xyczt");
 					stackA.setSkewXperZ(
 							calA.pixelDepth / calA.pixelWidth);
-					impA.setOpenAsHyperStack(true);
-					impA.setDimensions(2, 50, 10);
-					impA = new CompositeImage(impA);
+					impA.setDimensions(cDim, zDim, stackA.getSize()/(cDim*zDim));
 					while (!impA.isComposite()) {
 						IJ.wait(100);
 					}
 					((CompositeImage)impA).setMode(CompositeImage.COMPOSITE);
+
+					impA.setPosition(cA, zA,
+							tA == impA.getNFrames() - 1 ? impA.getNFrames() : tA);
+					impA.setWindow(WindowManager.getCurrentWindow());
 
 					int cB = impB.getChannel();
 					int zB = impB.getSlice();
@@ -1593,17 +1604,16 @@ public class DISPIM_Monitor implements PlugIn {
 					stackB.setDimOrder("xyczt");
 					stackB.setSkewXperZ(
 							-calB.pixelDepth / calB.pixelWidth);
-					impB.setOpenAsHyperStack(true);
-					impB.setDimensions(2, 50, 10);
-					impB = new CompositeImage(impB);
+					impB.setDimensions(cDim, zDim, stackB.getSize()/(cDim*zDim));
 					while (!impB.isComposite()) {
 						IJ.wait(100);
 					}
 					((CompositeImage)impB).setMode(CompositeImage.COMPOSITE);
-
-					impA.show();
-					impB.show();
 					
+					impB.setPosition(cB, zB,
+							tB == impB.getNFrames() - 1 ? impB.getNFrames() : tB);
+					impB.setWindow(WindowManager.getCurrentWindow());
+
 					boolean wasSynched = false;
 					ArrayList<ImagePlus> synchedImpsArrayList = new ArrayList<ImagePlus>();
 					if (SyncWindows.getInstance() != null) {
@@ -1617,20 +1627,6 @@ public class DISPIM_Monitor implements PlugIn {
 						SyncWindows.getInstance().close();
 					}
 
-
-					int stkNSlicesA = stackA.getSize();
-					impA.setStack(stackA, wavelengths, zSlices, stkNSlicesA
-							/ (wavelengths * zSlices));
-					impA.setPosition(cA, zA,
-							tA == impA.getNFrames() - 1 ? impA.getNFrames() : tA);
-					impA.setWindow(WindowManager.getCurrentWindow());
-
-					int stkNSlicesB = stackB.getSize();
-					impB.setStack(stackB, wavelengths, zSlices, stkNSlicesB
-							/ (wavelengths * zSlices));
-					impB.setPosition(cB, zB,
-							tB == impB.getNFrames() - 1 ? impB.getNFrames() : tB);
-					impB.setWindow(WindowManager.getCurrentWindow());
 
 					if (wasSynched) {
 						SyncWindows sw = new SyncWindows();
