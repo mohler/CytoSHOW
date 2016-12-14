@@ -169,6 +169,7 @@ public class DISPIM_Monitor implements PlugIn {
 		String[] deconFileList2 = { "" };
 		String[] deconList1 = { "" };
 		String[] deconList2 = { "" };
+		String keyString ="";
 		String big5DFileListAString = ("");
 		String big5DFileListBString = ("");
 		ImagePlus impA = null;
@@ -244,15 +245,17 @@ public class DISPIM_Monitor implements PlugIn {
 				if (gd.wasCanceled()) return;
 				if (cDim == 0 || tDim == 0 || tDim == 0) {
 					cDim = (int) gd.getNextNumber();
+					wavelengths = cDim;
 					zDim = (int) gd.getNextNumber();
 //					tDim = (int) gd.getNextNumber();
 					vDim = (int) gd.getNextNumber();
 				}
+				keyString = dirOrOMETiffFile.list()[dirOrOMETiffFile.list().length/2].split("_")[0];
 				MultiFileInfoVirtualStack stackA = new MultiFileInfoVirtualStack(
-						dirOrOMETiff, dirOrOMETiffFile.list()[1].split("_")[0], cDim, zDim, dirOrOMETiffFile.list().length, vDim,
+						dirOrOMETiff, keyString, cDim, zDim, dirOrOMETiffFile.list().length, vDim,
 						false, false);
 				MultiFileInfoVirtualStack stackB = new MultiFileInfoVirtualStack(
-						dirOrOMETiff, dirOrOMETiffFile.list()[1].split("_")[0], cDim, zDim, dirOrOMETiffFile.list().length, vDim,
+						dirOrOMETiff, keyString, cDim, zDim, dirOrOMETiffFile.list().length, vDim,
 						true, false);
 				impA.setStack(stackA);
 				Calibration calA = impA.getCalibration();
@@ -1560,10 +1563,10 @@ public class DISPIM_Monitor implements PlugIn {
 					IJ.log(recentestA + "\n" + modDateA);
 
 					MultiFileInfoVirtualStack stackA = new MultiFileInfoVirtualStack(
-							dirOrOMETiff, dirOrOMETiffFile.list()[1].split("_")[0], cDim, zDim, dirOrOMETiffFile.list().length, vDim,
+							dirOrOMETiff, keyString, cDim, zDim, dirOrOMETiffFile.list().length, vDim,
 							false, false);
 					MultiFileInfoVirtualStack stackB = new MultiFileInfoVirtualStack(
-							dirOrOMETiff, dirOrOMETiffFile.list()[1].split("_")[0], cDim, zDim, dirOrOMETiffFile.list().length, vDim,
+							dirOrOMETiff, keyString, cDim, zDim, dirOrOMETiffFile.list().length, vDim,
 							true, false);
 					
 					int cA = impA.getChannel();
