@@ -251,11 +251,17 @@ public class DISPIM_Monitor implements PlugIn {
 					vDim = (int) gd.getNextNumber();
 				}
 				keyString = dirOrOMETiffFile.list()[dirOrOMETiffFile.list().length/2].split("_")[0];
+				for (String fileName:dirOrOMETiffFile.list()) {
+					File nextFile = new File(dirOrOMETiffFile+File.separator+fileName);
+					if(nextFile.isDirectory() && nextFile.list()[0].contains("MMStack")){
+						tDim++;
+					}
+				}
 				MultiFileInfoVirtualStack stackA = new MultiFileInfoVirtualStack(
-						dirOrOMETiff, keyString, cDim, zDim, dirOrOMETiffFile.list().length, vDim,
+						dirOrOMETiff, keyString, cDim, zDim, tDim, vDim,
 						false, false);
 				MultiFileInfoVirtualStack stackB = new MultiFileInfoVirtualStack(
-						dirOrOMETiff, keyString, cDim, zDim, dirOrOMETiffFile.list().length, vDim,
+						dirOrOMETiff, keyString, cDim, zDim, tDim, vDim,
 						true, false);
 				impA.setStack(stackA);
 				Calibration calA = impA.getCalibration();
