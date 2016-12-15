@@ -146,8 +146,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					if (cumTiffListElement.contains("Deconvolution"+c) && cumTiffListElement.toLowerCase().endsWith(".tif")) {
 						cumTiffListElement = cumTiffListElement.replace("\\","\\\\");
 						
-						String cumTiffListElementName = cumTiffListElement.split(File.separator)[cumTiffListElement.split(File.separator).length-1];
-						int tValue = Integer.parseInt(cumTiffListElementName.substring(cumTiffListElementName.indexOf("Decon_t")+7).replace(".tif", "") );
+//						String cumTiffListElementName = cumTiffListElement.split(File.separator)[cumTiffListElement.split(File.separator).length-1];
+						int tValue = Integer.parseInt(cumTiffListElement.substring(cumTiffListElement.indexOf("Decon_t")+7).replace(".tif", "") );
 						bigSubFileArrayList.set(tValue-1+highT*(c-1), cumTiffListElement);
 
 					} 
