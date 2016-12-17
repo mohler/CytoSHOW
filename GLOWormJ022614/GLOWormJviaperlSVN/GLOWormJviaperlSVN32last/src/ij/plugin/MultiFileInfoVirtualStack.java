@@ -193,6 +193,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 		} else {
 			dimOrder = "xyczt";
+			dir = "";
 			channelDirectories = 1;
 			largestDirectoryTiffCount = tiffCount;
 			goDirFileList = cumulativeTiffFileArray;
@@ -322,6 +323,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				cDim = (int) gd.getNextNumber();
 				zDim = (int) gd.getNextNumber();
 				tDim = (int) gd.getNextNumber();
+				nImages = cDim*zDim*tDim;
 			} else {
 //				cDim=1;
 //				zDim=1;
@@ -348,7 +350,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			int channels = channelDirectories * internalChannels;
 			cDim = channels;
 			zDim = fivStacks.get(0).nImages/(cDim/channelDirectories);
-			tDim = fivStacks.size()/cDim;
+			tDim = fivStacks.size()/(cDim/internalChannels);
 		}
 		
 		String[] dirChunks = dir.split("\\"+File.separator);
