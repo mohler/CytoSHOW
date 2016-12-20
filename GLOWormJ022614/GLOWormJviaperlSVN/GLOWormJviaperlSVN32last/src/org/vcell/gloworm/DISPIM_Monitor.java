@@ -1544,6 +1544,9 @@ public class DISPIM_Monitor implements PlugIn {
 								.list();
 						IJ.wait(5000);
 					}
+					
+					IJ.log("NEW DATA WRITTEN");
+					IJ.wait(10000);
 					fileListA = new File("" + dirOrOMETiff).list();
 					deconFileList1 = (new File(dirOrOMETiff + "Deconvolution1"))
 							.list();

@@ -216,34 +216,35 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 		finalFrames = 0;
 
 		finalT = lastT;
-		if (msec == 0) {
-			Date currentDate = new Date();
-			msec = currentDate.getTime();	
-			long sec = msec/1000;
-		}
-		String tempPath = "";
 
-		String saveRootDir = (IJ.getDirectory("image") != null? 
-				((new File(IJ.getDirectory("image"))).isDirectory()?
-						IJ.getDirectory("image"):
-							(new File(IJ.getDirectory("image"))).getParent()): 
-								IJ.getDirectory("temp"));
+		long tempTime = (new Date()).getTime();
+//		String tempPath = "";
+
+		String saveRootDir = "";
+		String saveRootPrefix = "";
+		if (IJ.getDirectory("image") != null){
+			saveRootDir = (new File(IJ.getDirectory("image"))).getParent()/*)*/ ;
+			saveRootPrefix = (new File(IJ.getDirectory("image"))).getName()+"_";
+		}else {
+			saveRootDir = IJ.getDirectory("temp");
+		}
 		boolean correctSaveRoot = false;
-//		for (File saveSibFile: (new File(saveRootDir)).listFiles()) {
-//			if (saveSibFile.isDirectory() || (!saveSibFile.getName().toLowerCase().endsWith(".tif")
-//												&& !saveSibFile.getName().toLowerCase().contains("ds_store"))) {
-//				correctSaveRoot = true;
-//			}
-//		}
+		for (File saveSibFile: (new File(saveRootDir)).listFiles()) {
+			if (saveSibFile.isDirectory() || (!saveSibFile.getName().toLowerCase().endsWith(".tif")
+												&& !saveSibFile.getName().toLowerCase().contains("ds_store"))) {
+				correctSaveRoot = true;
+			}
+		}
 		if (!correctSaveRoot) {
 			saveRootDir = (new File(saveRootDir)).getParent();
 		}
-
-		if (!singleStack) {
-			tempPath = saveRootDir+File.separator+"DUP_"+imp.getTitle().replace(".tif","").replaceAll("[,. ;:]","")+msec;
-			new File(tempPath).mkdirs();
+		File tempDir = new File(saveRootDir + File.separator + saveRootPrefix +"DUP_"+imp.getTitle().replaceAll("[,. ;:]","").replace(File.separator, "_") + tempTime);
+		if (!tempDir.mkdir()) {
+			IJ.error("Duplication failed", "Unable to save copied stacks to" + tempDir.getPath());
+			return null;
 		}
-//		String stackPath = "";
+
+		//		String stackPath = "";
 		ImagePlus impT = null;
 		
 		for (int t=firstT; t<=lastT; t=t+stepT) {
@@ -305,7 +306,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 
 //				stackPath = IJ.getDirectory("home")+imp.getTitle().replace(".tif","").replaceAll("[,. ;:]","")+sec+File.separator+impT.getTitle().replaceAll("[, ;:]","");
 				if (!singleStack) {
-					IJ.saveAs(impT, "Tiff", tempPath+File.separator+impT.getTitle().replaceAll("[, ;:]",""));
+					IJ.saveAs(impT, "Tiff", tempDir+File.separator+impT.getTitle().replaceAll("[, ;:]",""));
 					impT.close();
 					impT.flush();
 				}
@@ -328,7 +329,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 			}
 		}
 		if (!singleStack) {
-			stack2 = new MultiFileInfoVirtualStack(tempPath,"",false);
+			stack2 = new MultiFileInfoVirtualStack(saveRootDir + File.separator + saveRootPrefix +"DUP_"+imp.getTitle().replaceAll("[,. ;:]","").replace(File.separator, "_") + tempTime,"",false);
 		} else {
 			stack2 = impT.getStack();
 		}
