@@ -1520,9 +1520,18 @@ public class DISPIM_Monitor implements PlugIn {
 			boolean focus = false;
 			if ((new File(dirOrOMETiff)).isDirectory()) {
 				if (omeTiffs) {
-					listA = new File("" + dirOrOMETiff).list();
-					deconList1 = (new File(dirOrOMETiff + "Deconvolution1")).list();
-					deconList2 = (new File(dirOrOMETiff + "Deconvolution2")).list();
+					fileListA = new File("" + dirOrOMETiff).list();
+					String[] newlist = new String[fileListA.length];
+					int yescount = 0;
+					for (int fle=0; fle<fileListA.length; fle++) {
+						if (fileListA[fle].contains(keyString)) {
+							newlist[yescount] = fileListA[fle];
+							yescount++;
+						}
+					}
+					fileListA = Arrays.copyOf(newlist, yescount);
+					deconFileList1 = (new File(dirOrOMETiff + "Deconvolution1")).list();
+					deconFileList2 = (new File(dirOrOMETiff + "Deconvolution2")).list();
 
 					while ((fileListA.length == listA.length)
 							&& (!doDecon || ((deconList1 == null && deconList2 == null) || (!(deconList1 == null
@@ -1538,6 +1547,15 @@ public class DISPIM_Monitor implements PlugIn {
 							else
 								IJ.resetEscape();
 						listA = new File("" + dirOrOMETiff).list();
+						String[] newlist2 = new String[listA.length];
+						int yescount2 = 0;
+						for (int fle=0; fle<listA.length; fle++) {
+							if (listA[fle].contains(keyString)) {
+								newlist2[yescount2] = listA[fle];
+								yescount2++;
+							}
+						}
+						listA = Arrays.copyOf(newlist2, yescount2);
 						deconList1 = (new File(dirOrOMETiff + "Deconvolution1"))
 								.list();
 						deconList2 = (new File(dirOrOMETiff + "Deconvolution2"))
@@ -1547,11 +1565,9 @@ public class DISPIM_Monitor implements PlugIn {
 					
 					IJ.log("NEW DATA WRITTEN");
 					IJ.wait(10000);
-					fileListA = new File("" + dirOrOMETiff).list();
-					deconFileList1 = (new File(dirOrOMETiff + "Deconvolution1"))
-							.list();
-					deconFileList2 = (new File(dirOrOMETiff + "Deconvolution2"))
-							.list();
+					fileListA = listA;
+					deconFileList1 = deconList1;
+					deconFileList2 = deconList2;
 
 					long modDateA = 0;
 					String recentestA = "";
@@ -2239,7 +2255,7 @@ public class DISPIM_Monitor implements PlugIn {
 				IJ.open(savePath/* + dirOrOMETiffName */+ "B_crop.roi");
 				WindowManager.setTempCurrentImage(null);
 
-				for (int f = impA.getNFrames(); f <= impA.getNFrames(); f++) {
+				for (int f = 1; f <= impA.getNFrames(); f++) {
 
 					impA.setPositionWithoutUpdate(impA.getChannel(),
 							impA.getSlice(), f);
