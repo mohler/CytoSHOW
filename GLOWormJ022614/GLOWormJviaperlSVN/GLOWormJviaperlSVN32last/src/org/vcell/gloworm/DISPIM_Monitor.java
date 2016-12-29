@@ -1530,8 +1530,11 @@ public class DISPIM_Monitor implements PlugIn {
 						}
 					}
 					fileListA = Arrays.copyOf(newlist, yescount);
+					listA = fileListA;
 					deconFileList1 = (new File(dirOrOMETiff + "Deconvolution1")).list();
+					deconList1 = deconFileList1;
 					deconFileList2 = (new File(dirOrOMETiff + "Deconvolution2")).list();
+					deconList2 = deconFileList2;
 
 					while ((fileListA.length == listA.length)
 							&& (!doDecon || ((deconList1 == null && deconList2 == null) || (!(deconList1 == null
