@@ -56,14 +56,14 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	}
 	
 	public MultiFileInfoVirtualStack(String dirOrOMETiff, String string, boolean show) {
-		this(dirOrOMETiff, string, 0, 0, 0, 1, false, show);
+		this(dirOrOMETiff, string, 0, 0, 0, 1, 0, false, show);
 	}
 
 	public MultiFileInfoVirtualStack(String dirOrOMETiff, String string, boolean isViewB, boolean show) {
-		this(dirOrOMETiff, string, 0, 0, 0, 1, isViewB, show);
+		this(dirOrOMETiff, string, 0, 0, 0, 1, 0, isViewB, show);
 	}
 
-	public MultiFileInfoVirtualStack(String arg, String keyString, int cDim, int zDim, int tDim, int vDim, boolean isViewB, boolean show) {
+	public MultiFileInfoVirtualStack(String arg, String keyString, int cDim, int zDim, int tDim, int vDim, int pos, boolean isViewB, boolean show) {
 		this.keyString = keyString;
 		this.isViewB = isViewB;
 		this.cDim = cDim;
@@ -115,7 +115,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					String[] subFileList = subFile.list();
 					for (String subFileListElement:subFileList)
 						if (!cumulativeSubFileArrayList.contains(dir+fileName+File.separator+subFileListElement))
-							if (subFileListElement.toLowerCase().endsWith("tif"))
+							if (subFileListElement.toLowerCase().contains("_pos"+pos) 
+									&& subFileListElement.toLowerCase().endsWith("tif"))
 								cumulativeSubFileArrayList.add(dir+fileName+File.separator+subFileListElement);
 				}
 			}
@@ -153,6 +154,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					} 
 				}
 			}
+		} else if (cumulativeTiffFileArray.length >0){ 
+			for (String cumulativeTiffFileArrayElement:cumulativeTiffFileArray)
+				bigSubFileArrayList.add(cumulativeTiffFileArrayElement);
 		} else { 
 
 			for (String fileName:dirFileList) {

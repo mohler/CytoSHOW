@@ -57,6 +57,7 @@ public class DISPIM_Monitor implements PlugIn {
 	private int zDim;
 	private int tDim;
 	private int vDim;
+	private int pDim;
 
 	public boolean isDoDecon() {
 		return doDecon;
@@ -178,6 +179,13 @@ public class DISPIM_Monitor implements PlugIn {
 		ImagePlus impDF2 = null;
 		CompositeImage ciDF1 = null;
 		CompositeImage ciDF2 = null;
+		ImagePlus[] impAs = new ImagePlus[1];
+		ImagePlus[] impBs  = new ImagePlus[1];
+		ImagePlus[] impDF1s  = new ImagePlus[1];
+		ImagePlus[] impDF2s  = new ImagePlus[1];
+		CompositeImage[] ciDF1s  = new CompositeImage[1];
+		CompositeImage[] ciDF2s  = new CompositeImage[1];
+
 		ImageWindow win = null;
 
 		String[] dirOrOMETiffChunks = dirOrOMETiff
@@ -218,18 +226,6 @@ public class DISPIM_Monitor implements PlugIn {
 		if (dirOrOMETiffFile.isDirectory()) {
 			if (omeTiffs) {
 				fileListA = new File("" + dirOrOMETiff).list();
-				impA = new ImagePlus();
-				impA.setTitle(dirOrOMETiffFile.getName() + ": SPIMA");
-				impB = new ImagePlus();
-				impB.setTitle(dirOrOMETiffFile.getName() + ": SPIMB");
-				
-				impA.setFileInfo(new FileInfo());
-				impA.getOriginalFileInfo().fileName = dirOrOMETiff;
-				impA.getOriginalFileInfo().directory = dirOrOMETiff;
-				
-				impB.setFileInfo(new FileInfo());
-				impB.getOriginalFileInfo().fileName = dirOrOMETiff;
-				impB.getOriginalFileInfo().directory = dirOrOMETiff;
 
 				cDim = 0;
 				zDim = 0;
@@ -240,6 +236,7 @@ public class DISPIM_Monitor implements PlugIn {
 				gd.addNumericField("Slices (z):", 50, 0);
 //				gd.addNumericField("Frames (t):", dirOrOMETiffFile.list().length, 0);
 				gd.addNumericField("Views (v):", 2, 0);
+				gd.addNumericField("Positions (p):", 1, 0);
 
 				gd.showDialog();
 				if (gd.wasCanceled()) return;
@@ -249,6 +246,7 @@ public class DISPIM_Monitor implements PlugIn {
 					zDim = (int) gd.getNextNumber();
 //					tDim = (int) gd.getNextNumber();
 					vDim = (int) gd.getNextNumber();
+					pDim = (int) gd.getNextNumber();
 				}
 				keyString = dirOrOMETiffFile.list()[dirOrOMETiffFile.list().length/2].split("_")[0];
 				for (String fileName:dirOrOMETiffFile.list()) {
@@ -257,51 +255,73 @@ public class DISPIM_Monitor implements PlugIn {
 						tDim++;
 					}
 				}
-				MultiFileInfoVirtualStack stackA = new MultiFileInfoVirtualStack(
-						dirOrOMETiff, keyString, cDim, zDim, tDim, vDim,
-						false, false);
-				MultiFileInfoVirtualStack stackB = new MultiFileInfoVirtualStack(
-						dirOrOMETiff, keyString, cDim, zDim, tDim, vDim,
-						true, false);
-				impA.setStack(stackA);
-				Calibration calA = impA.getCalibration();
-				calA.pixelWidth = vWidth;
-				calA.pixelHeight = vHeight;
-				calA.pixelDepth = vDepthRaw;
-				calA.setUnit(vUnit);
+				impAs = new ImagePlus[pDim];
+				impBs = new ImagePlus[pDim];
 
-				stackA.setDimOrder("xyczt");
-				stackA.setSkewXperZ(
-						calA.pixelDepth / calA.pixelWidth);
-				impA.setOpenAsHyperStack(true);
-				impA.setDimensions(cDim, zDim, stackA.getSize()/(cDim*zDim));
-				impA = new CompositeImage(impA);
-				while (!impA.isComposite()) {
-					IJ.wait(100);
+				MultiFileInfoVirtualStack[] stackAs = new MultiFileInfoVirtualStack[pDim];
+				MultiFileInfoVirtualStack[] stackBs = new MultiFileInfoVirtualStack[pDim];
+
+				for (int pos=0; pos<pDim; pos++) {
+					impAs[pos] = new ImagePlus();
+					impAs[pos].setTitle(dirOrOMETiffFile.getName() +"_Pos"+pos+ ": SPIMA");
+					impBs[pos] = new ImagePlus();
+					impBs[pos].setTitle(dirOrOMETiffFile.getName() +"_Pos"+pos+ ": SPIMB");
+
+					impAs[pos].setFileInfo(new FileInfo());
+					impAs[pos].getOriginalFileInfo().fileName = dirOrOMETiff;
+					impAs[pos].getOriginalFileInfo().directory = dirOrOMETiff;
+
+					impBs[pos].setFileInfo(new FileInfo());
+					impBs[pos].getOriginalFileInfo().fileName = dirOrOMETiff;
+					impBs[pos].getOriginalFileInfo().directory = dirOrOMETiff;
+
+					stackAs[pos] = new MultiFileInfoVirtualStack(
+							dirOrOMETiff, keyString, cDim, zDim, tDim, vDim, pos,
+							false, false);
+					stackBs[pos] = new MultiFileInfoVirtualStack(
+							dirOrOMETiff, keyString, cDim, zDim, tDim, vDim, pos,
+							true, false);
+					
+					impAs[pos].setStack(stackAs[pos]);
+					Calibration calA = impAs[pos].getCalibration();
+					calA.pixelWidth = vWidth;
+					calA.pixelHeight = vHeight;
+					calA.pixelDepth = vDepthRaw;
+					calA.setUnit(vUnit);
+
+					stackAs[pos].setDimOrder("xyczt");
+					stackAs[pos].setSkewXperZ(
+							calA.pixelDepth / calA.pixelWidth);
+					impAs[pos].setOpenAsHyperStack(true);
+					impAs[pos].setDimensions(cDim, zDim, stackAs[pos].getSize()/(cDim*zDim));
+					impAs[pos] = new CompositeImage(impAs[pos]);
+					while (!impAs[pos].isComposite()) {
+						IJ.wait(100);
+					}
+					((CompositeImage)impAs[pos]).setMode(CompositeImage.COMPOSITE);
+
+
+					impBs[pos].setStack(stackBs[pos]);
+					Calibration calB = impBs[pos].getCalibration();
+					calB.pixelWidth = vWidth;
+					calB.pixelHeight = vHeight;
+					calB.pixelDepth = vDepthRaw;
+					calB.setUnit(vUnit);
+
+					stackBs[pos].setDimOrder("xyczt");
+					stackBs[pos].setSkewXperZ(
+							-calB.pixelDepth / calB.pixelWidth);
+					impBs[pos].setOpenAsHyperStack(true);
+					impBs[pos].setDimensions(cDim, zDim, stackBs[pos].getSize()/(cDim*zDim));
+					impBs[pos] = new CompositeImage(impBs[pos]);
+					while (!impBs[pos].isComposite()) {
+						IJ.wait(100);
+					}
+					((CompositeImage)impBs[pos]).setMode(CompositeImage.COMPOSITE);
+
+					impAs[pos].show();
+					impBs[pos].show();
 				}
-				((CompositeImage)impA).setMode(CompositeImage.COMPOSITE);
-
-
-				impB.setStack(stackB);
-				Calibration calB = impB.getCalibration();
-				calB.pixelWidth = vWidth;
-				calB.pixelHeight = vHeight;
-				calB.pixelDepth = vDepthRaw;
-				calB.setUnit(vUnit);
-
-				stackB.setDimOrder("xyczt");
-				stackB.setSkewXperZ(
-						-calB.pixelDepth / calB.pixelWidth);
-				impB.setOpenAsHyperStack(true);
-				impB.setDimensions(cDim, zDim, stackB.getSize()/(cDim*zDim));
-				impB = new CompositeImage(impB);
-				while (!impB.isComposite()) {
-					IJ.wait(100);
-				}
-				((CompositeImage)impB).setMode(CompositeImage.COMPOSITE);
-
-				impA.show();
-				impB.show();
 			} else {
 				fileListA = new File("" + dirOrOMETiff + "SPIMA").list();
 				fileListB = new File("" + dirOrOMETiff + "SPIMB").list();
@@ -1520,6 +1540,7 @@ public class DISPIM_Monitor implements PlugIn {
 			boolean focus = false;
 			if ((new File(dirOrOMETiff)).isDirectory()) {
 				if (omeTiffs) {
+
 					fileListA = new File("" + dirOrOMETiff).list();
 					String[] newlist = new String[fileListA.length];
 					int yescount = 0;
@@ -1565,7 +1586,7 @@ public class DISPIM_Monitor implements PlugIn {
 								.list();
 						IJ.wait(5000);
 					}
-					
+
 					IJ.log("NEW DATA WRITTEN");
 					IJ.wait(10000);
 					fileListA = listA;
@@ -1589,83 +1610,89 @@ public class DISPIM_Monitor implements PlugIn {
 						}
 					}
 					IJ.log(recentestA + "\n" + modDateA);
-
-					MultiFileInfoVirtualStack stackA = new MultiFileInfoVirtualStack(
-							dirOrOMETiff, keyString, cDim, zDim, dirOrOMETiffFile.list().length, vDim,
-							false, false);
-					MultiFileInfoVirtualStack stackB = new MultiFileInfoVirtualStack(
-							dirOrOMETiff, keyString, cDim, zDim, dirOrOMETiffFile.list().length, vDim,
-							true, false);
 					
-					int cA = impA.getChannel();
-					int zA = impA.getSlice();
-					int tA = impA.getFrame();
+					MultiFileInfoVirtualStack[] stackAs = new MultiFileInfoVirtualStack[pDim];
+					MultiFileInfoVirtualStack[] stackBs = new MultiFileInfoVirtualStack[pDim];
+
 					
-					impA.setStack(stackA);
-					Calibration calA = impA.getCalibration();
-					calA.pixelWidth = vWidth;
-					calA.pixelHeight = vHeight;
-					calA.pixelDepth = vDepthRaw;
-					calA.setUnit(vUnit);
+					for (int pos=0; pos<pDim; pos++) {
 
-					stackA.setDimOrder("xyczt");
-					stackA.setSkewXperZ(
-							calA.pixelDepth / calA.pixelWidth);
-					impA.setDimensions(cDim, zDim, stackA.getSize()/(cDim*zDim));
-					while (!impA.isComposite()) {
-						IJ.wait(100);
-					}
-					((CompositeImage)impA).setMode(CompositeImage.COMPOSITE);
+						stackAs[pos] = new MultiFileInfoVirtualStack(
+								dirOrOMETiff, keyString, cDim, zDim, dirOrOMETiffFile.list().length, vDim, pos,
+								false, false);
+						stackBs[pos] = new MultiFileInfoVirtualStack(
+								dirOrOMETiff, keyString, cDim, zDim, dirOrOMETiffFile.list().length, vDim, pos,
+								true, false);
 
-					impA.setPosition(cA, zA,
-							tA == impA.getNFrames() - 1 ? impA.getNFrames() : tA);
-					impA.setWindow(WindowManager.getCurrentWindow());
+						int cA = impAs[pos].getChannel();
+						int zA = impAs[pos].getSlice();
+						int tA = impAs[pos].getFrame();
 
-					int cB = impB.getChannel();
-					int zB = impB.getSlice();
-					int tB = impB.getFrame();
+						impAs[pos].setStack(stackAs[pos]);
+						Calibration calA = impAs[pos].getCalibration();
+						calA.pixelWidth = vWidth;
+						calA.pixelHeight = vHeight;
+						calA.pixelDepth = vDepthRaw;
+						calA.setUnit(vUnit);
 
-					impB.setStack(stackB);
-					Calibration calB = impB.getCalibration();
-					calB.pixelWidth = vWidth;
-					calB.pixelHeight = vHeight;
-					calB.pixelDepth = vDepthRaw;
-					calB.setUnit(vUnit);
-
-					stackB.setDimOrder("xyczt");
-					stackB.setSkewXperZ(
-							-calB.pixelDepth / calB.pixelWidth);
-					impB.setDimensions(cDim, zDim, stackB.getSize()/(cDim*zDim));
-					while (!impB.isComposite()) {
-						IJ.wait(100);
-					}
-					((CompositeImage)impB).setMode(CompositeImage.COMPOSITE);
-					
-					impB.setPosition(cB, zB,
-							tB == impB.getNFrames() - 1 ? impB.getNFrames() : tB);
-					impB.setWindow(WindowManager.getCurrentWindow());
-
-					boolean wasSynched = false;
-					ArrayList<ImagePlus> synchedImpsArrayList = new ArrayList<ImagePlus>();
-					if (SyncWindows.getInstance() != null) {
-						int v = 0;
-						while (SyncWindows.getInstance().getImageFromVector(v) != null) {
-							wasSynched = true;
-							synchedImpsArrayList.add(SyncWindows.getInstance()
-									.getImageFromVector(v));
-							v++;
+						stackAs[pos].setDimOrder("xyczt");
+						stackAs[pos].setSkewXperZ(
+								calA.pixelDepth / calA.pixelWidth);
+						impAs[pos].setDimensions(cDim, zDim, stackAs[pos].getSize()/(cDim*zDim));
+						while (!impAs[pos].isComposite()) {
+							IJ.wait(100);
 						}
-						SyncWindows.getInstance().close();
-					}
+						((CompositeImage)impAs[pos]).setMode(CompositeImage.COMPOSITE);
+
+						impAs[pos].setPosition(cA, zA,
+								tA == impAs[pos].getNFrames() - 1 ? impAs[pos].getNFrames() : tA);
+						impAs[pos].setWindow(WindowManager.getCurrentWindow());
+
+						int cB = impBs[pos].getChannel();
+						int zB = impBs[pos].getSlice();
+						int tB = impBs[pos].getFrame();
+
+						impBs[pos].setStack(stackBs[pos]);
+						Calibration calB = impBs[pos].getCalibration();
+						calB.pixelWidth = vWidth;
+						calB.pixelHeight = vHeight;
+						calB.pixelDepth = vDepthRaw;
+						calB.setUnit(vUnit);
+
+						stackBs[pos].setDimOrder("xyczt");
+						stackBs[pos].setSkewXperZ(
+								-calB.pixelDepth / calB.pixelWidth);
+						impBs[pos].setDimensions(cDim, zDim, stackBs[pos].getSize()/(cDim*zDim));
+						while (!impBs[pos].isComposite()) {
+							IJ.wait(100);
+						}
+						((CompositeImage)impBs[pos]).setMode(CompositeImage.COMPOSITE);
+
+						impBs[pos].setPosition(cB, zB,
+								tB == impBs[pos].getNFrames() - 1 ? impBs[pos].getNFrames() : tB);
+						impBs[pos].setWindow(WindowManager.getCurrentWindow());
+
+						boolean wasSynched = false;
+						ArrayList<ImagePlus> synchedImpsArrayList = new ArrayList<ImagePlus>();
+						if (SyncWindows.getInstance() != null) {
+							int v = 0;
+							while (SyncWindows.getInstance().getImageFromVector(v) != null) {
+								wasSynched = true;
+								synchedImpsArrayList.add(SyncWindows.getInstance()
+										.getImageFromVector(v));
+								v++;
+							}
+							SyncWindows.getInstance().close();
+						}
 
 
-					if (wasSynched) {
-						SyncWindows sw = new SyncWindows();
-						for (ImagePlus impS : synchedImpsArrayList) {
-							sw.addImp(impS);
+						if (wasSynched) {
+							SyncWindows sw = new SyncWindows();
+							for (ImagePlus impS : synchedImpsArrayList) {
+								sw.addImp(impS);
+							}
 						}
 					}
-
 				} else {
 
 					listA = new File("" + dirOrOMETiff + "SPIMA").list();
