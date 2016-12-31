@@ -92,6 +92,8 @@ public class DISPIM_Monitor implements PlugIn {
 		dirOrOMETiff = args[0];
 		IJ.log(dirOrOMETiff);
 		// waitForUser("");
+		String keyString ="";
+
 		while (!(new File(dirOrOMETiff)).isDirectory()
 				&& !dirOrOMETiff.endsWith(".tif")) {
 			if (arg.contains("newMM")) {
@@ -113,7 +115,9 @@ public class DISPIM_Monitor implements PlugIn {
 				stageScan = false;
 			} else if (arg.contains("stageScanMM")) {
 				dirOrOMETiff = IJ
-						.getDirectory("Select directory with stage-scanned MM diSPIM raw data");
+						.getDirectory("Select a timepoint directory with stage-scanned MM diSPIM raw data");
+				keyString = (new File(dirOrOMETiff)).getName().split("_")[0];
+				dirOrOMETiff = (new File(dirOrOMETiff)).getParent()+File.separator;
 				stackDualViewTimePoints = true;
 				singleImageTiffs = false;
 				omeTiffs = true;
@@ -170,7 +174,6 @@ public class DISPIM_Monitor implements PlugIn {
 		String[] deconFileList2 = { "" };
 		String[] deconList1 = { "" };
 		String[] deconList2 = { "" };
-		String keyString ="";
 		String big5DFileListAString = ("");
 		String big5DFileListBString = ("");
 		ImagePlus impA = null;
@@ -248,7 +251,8 @@ public class DISPIM_Monitor implements PlugIn {
 					vDim = (int) gd.getNextNumber();
 					pDim = (int) gd.getNextNumber();
 				}
-				keyString = dirOrOMETiffFile.list()[dirOrOMETiffFile.list().length/2].split("_")[0];
+				if (keyString =="")
+					keyString = dirOrOMETiffFile.list()[dirOrOMETiffFile.list().length/2].split("_")[0];
 				for (String fileName:dirOrOMETiffFile.list()) {
 					File nextFile = new File(dirOrOMETiffFile+File.separator+fileName);
 					if(nextFile.isDirectory() && nextFile.list().length>0 && nextFile.list()[0].contains("MMStack")){
@@ -855,7 +859,7 @@ public class DISPIM_Monitor implements PlugIn {
 						}
 						WindowManager.setTempCurrentImage(impB);
 						if (roiB == null) {
-							if (!((new File(savePath + "_Pos" + pos +  "Pos" + pos + "B_crop.roi")).canRead())) {
+							if (!((new File(savePath + "Pos" + pos + "B_crop.roi")).canRead())) {
 								IJ.makeRectangle(0, 0, cropWidth, cropHeight);
 							} else {
 								IJ.open(savePath +  "Pos" + pos + "B_crop.roi");
