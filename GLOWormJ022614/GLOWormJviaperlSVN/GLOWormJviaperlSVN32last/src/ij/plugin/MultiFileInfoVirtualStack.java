@@ -480,9 +480,26 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		
 //		IJ.log(""+n+" "+z+" "+t);
 		ImageProcessor ip = fivStacks.get(stackNumber).getProcessor(sliceNumber+(isViewB?fivStacks.get(stackNumber).getSize()/vDim:0));
+  		int[] ipHis = ip.getHistogram();
+  		double ipHisMode = 0.0;
+  		int ipHisLength = ipHis.length;
+  		int ipHisMaxBin = 0;
+  		for (int h=0; h<ipHisLength; h++) {
+  			if (ipHis[h] > ipHisMaxBin) {
+  				ipHisMaxBin = ipHis[h];
+  				ipHisMode = (double)h;
+  			}
+  		}
+  		ImageProcessor ip2 = ip.duplicate();
+  		ip2.setValue(ipHisMode);
+  		ip2.fill();
+  		
+
 		ip.setInterpolationMethod(ImageProcessor.BICUBIC);
 		if (this.getOwnerImps() != null && this.getOwnerImps().size() > 0 && this.getOwnerImps().get(0) != null) {
 			ip.translate(skewXperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1-this.getOwnerImps().get(this.getOwnerImps().size()-1).getNSlices()/2), skewYperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1-this.getOwnerImps().get(this.getOwnerImps().size()-1).getNSlices()/2));
+			ip2.copyBits(ip, 0, 0, Blitter.COPY_ZERO_TRANSPARENT);
+			ip = ip2;
 		} else {
 			ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
 		}
