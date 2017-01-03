@@ -125,8 +125,10 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		int highT = 0;
 		for (int s=0; s<cumulativeTiffFileArray.length; s++) {
 			cumulativeTiffFileArray[s] = (String) cumulativeSubFileArrayList.get(s);
-			if (cumulativeTiffFileArray[s].matches(".*Decon_t.*\\.tif")) {
-				int tValue = Integer.parseInt(cumulativeTiffFileArray[s].substring(cumulativeTiffFileArray[s].indexOf("Decon_t")+7).replace(".tif", "") );
+			String[] subFilePathChunks = cumulativeTiffFileArray[s].split(File.separator.replace("\\", "\\\\"));
+			String subFileName = subFilePathChunks[subFilePathChunks.length-1];
+			if (subFileName.matches(".*Decon_t.*\\.tif")) {
+				int tValue = Integer.parseInt(subFileName.substring(subFileName.indexOf("Decon_t")+7).replace(".tif", "") );
 				if (tValue > highT)
 					highT = tValue;
 			}
@@ -146,9 +148,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					String cumTiffListElement = cumulativeTiffFileArray[q];
 					if (cumTiffListElement.contains("Deconvolution"+c) && cumTiffListElement.toLowerCase().endsWith(".tif")) {
 						cumTiffListElement = cumTiffListElement.replace("\\","\\\\");
-						
-//						String cumTiffListElementName = cumTiffListElement.split(File.separator)[cumTiffListElement.split(File.separator).length-1];
-						int tValue = Integer.parseInt(cumTiffListElement.substring(cumTiffListElement.indexOf("Decon_t")+7).replace(".tif", "") );
+						String[] cumTiffListElementPathChunks = cumTiffListElement.split(File.separator.replace("\\", "\\\\"));
+						String cumTiffListElementName = cumTiffListElementPathChunks[cumTiffListElementPathChunks.length-1];
+						int tValue = Integer.parseInt(cumTiffListElementName.substring(cumTiffListElementName.indexOf("Decon_t")+7).replace(".tif", "") );
 						bigSubFileArrayList.set(tValue-1+highT*(c-1), cumTiffListElement);
 
 					} 
