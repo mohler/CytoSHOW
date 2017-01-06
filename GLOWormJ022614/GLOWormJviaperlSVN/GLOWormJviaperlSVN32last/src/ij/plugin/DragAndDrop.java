@@ -165,7 +165,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						} else if ( !tmp.contains(File.separator)  
 								&& (tmp.toLowerCase().endsWith(".mov") 
 										|| tmp.toLowerCase().endsWith(".avi") 
-										|| tmp.toLowerCase().endsWith("scene.scn")
+										|| tmp.toLowerCase().contains("scene.scn")
 										|| tmp.toLowerCase().endsWith(".obj"))){
 							if (IJ.debugMode) IJ.log(" stringinput");
 							list.add(tmp);
@@ -369,11 +369,16 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						String[] fn2 = fileName.split("=|&");
 						if (fn2.length < 3 /*&& !fn2[fn2.length - 1].contains("scene.scn")*/) 
 							fileName = fn2[fn2.length-1];
-						else if  (fn2.length >= 3 && 
-								(fn2[fn2.length - 3].contains(".mov") || fn2[fn2.length - 3].contains(".avi"))){
-							fileName = fn2[fn2.length-3];
-							if (fn2[fn2.length-1].contains("scene.scn"))
-								viewName = fn2[fn2.length-1];
+						else if  (fn2.length >= 3) {
+							if ((fn2[fn2.length - 3].contains(".mov") || fn2[fn2.length - 3].contains(".avi"))){
+								fileName = fn2[fn2.length-3];
+								if (fn2[fn2.length-1].contains("scene.scn"))
+									viewName = fn2[fn2.length-1];
+							} else {
+								if (fileName.contains("_SPECTAG=")) {
+									fileName = fileName.replaceAll(".*MOVIE=", "");
+								}
+							}
 						}
 					}
 					String path = fileName;
@@ -431,7 +436,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						nDrops--;
 						return;
 
-					}else if (path.toLowerCase().endsWith("scene.scn")) {
+					}else if (path.toLowerCase().contains("scene.scn")) {
 						if (IJ.is64Bit())
 							MQTVSSceneLoader64.runMQTVS_SceneLoader64(path);
 						else
@@ -972,7 +977,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						path = ((String)obj);
 					if (IJ.debugMode) IJ.log(path + " is the path sent to QTMOMM");
 					pathList = pathList + path +  ((iterator.hasNext()  || openAsVirtualStack)? "|": "");
-				} else if (( ((String)obj).toLowerCase().endsWith("scene.scn"))){
+				} else if (( ((String)obj).toLowerCase().contains("scene.scn"))){
 					String path = "";
 					if (!((String)obj).contains(File.separator) && !((String)obj).startsWith("/Volumes/GLOWORM_DATA/")) {
 						if (IJ.isMacOSX() || IJ.isLinux()) {
@@ -1177,7 +1182,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 			else if (obj!=null && ( ((File)obj).getPath().toLowerCase().endsWith(".mov") 
 					|| ((File)obj).getPath().toLowerCase().endsWith(".avi"))) 
 				pathList = pathList + ((File)obj).getPath() +  ((iterator.hasNext()  || openAsVirtualStack)? "|": "");
-			else if (obj!=null && ((File)obj).getPath().toLowerCase().endsWith("scene.scn")) {
+			else if (obj!=null && ((File)obj).getPath().toLowerCase().contains("scene.scn")) {
 				if (IJ.is64Bit())
 					MQTVSSceneLoader64.runMQTVS_SceneLoader64( ((File)obj).getPath() );
 				else

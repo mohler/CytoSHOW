@@ -24,7 +24,7 @@ public class StackCombiner implements PlugIn {
 	public void run(String arg) {
 		if (!showDialog())
 			return;
-		if (imp1.getType()!=imp2.getType() || imp1.isHyperStack() || imp2.isHyperStack())
+		if (imp1.getType()!=imp2.getType()/* || imp1.isHyperStack() || imp2.isHyperStack()*/)
 			{error(); return;}
 		ImageStack stack1 = imp1.getStack();
 		ImageStack stack2 = imp2.getStack();

@@ -63,6 +63,7 @@ public class MQTVSSceneLoader64 implements PlugIn {
 	private int acquisitionInterval;
 	private String sceneFileText;
 	private String sceneFileName;
+	private String specTag;
 
 	/*  */	
 	//constructor for calling by static method:
@@ -134,8 +135,13 @@ public class MQTVSSceneLoader64 implements PlugIn {
 		if (pathlist.contains("/Volumes/GLOWORM_DATA"))
 			pathlist = pathlist.replace('\\', '/');
 		pathlist = pathlist.replaceAll("(URL=)http.*MOVIE=", ""); //Windows drop string
+		if (pathlist.contains("_SPECTAG=")) {
+			specTag = pathlist.replaceAll(".*_SPECTAG=", "");
+			pathlist = pathlist.replaceAll("_SPECTAG=.*", "");
+		}
 		pathlist = pathlist.replace("localhost", "");
 		IJ.log(pathlist);
+		IJ.log(specTag);
 
 		File loadFile = new File(pathlist) ;
 		try {
@@ -382,6 +388,9 @@ public class MQTVSSceneLoader64 implements PlugIn {
 //					if (out!=null)
 //						out.close();
 				}
+				
+				if (specTag != null)
+					roiName = specTag;
 
 				//Special case of selecting a cell in an already opened movie from a url click
 				if (WindowManager.getIDList() != null) {
@@ -395,6 +404,9 @@ public class MQTVSSceneLoader64 implements PlugIn {
 									//IJ.log(rm.getList().getItems()[i]);
 									if (((String) WindowManager.getImage(WindowManager.getIDList()[q]).getRoiManager().getListModel().get(i)).matches(roiName+"[CZT]*")) {
 										new ij.macro.MacroRunner("roiManager('select', "+i+", "+WindowManager.getIDList()[q]+");");
+										return;
+									} else if (((String)  WindowManager.getImage(WindowManager.getIDList()[q]).getRoiManager().getListModel().get(i)).matches(".*"+roiName+" .*")){
+										new ij.macro.MacroRunner("roiManager('select', "+i+", "+getImp().getID()+");");
 										return;
 									}
 								}
@@ -950,6 +962,7 @@ public class MQTVSSceneLoader64 implements PlugIn {
 					ColorLegend cl = new ColorLegend(getImp(), clStr);
 					rm.setColorLegend(cl);
 
+					
 					if (roiFileName != null) {
 						String roiFilePath;
 						if (movieFileList.contains("/Volumes/GLOWORM_DATA") ) {
@@ -983,6 +996,10 @@ public class MQTVSSceneLoader64 implements PlugIn {
 										// outline moves as the user moves the RO.
 										//IJ.log("Selection = " +roiName +" "+ i);
 										new ij.macro.MacroRunner("roiManager('select', "+i+", "+getImp().getID()+");");
+										break;
+									} else if (((String) rm.getListModel().get(i)).matches(".*"+roiName+" .*")){
+										new ij.macro.MacroRunner("roiManager('select', "+i+", "+getImp().getID()+");");
+										break;
 									}
 								}
 							}
