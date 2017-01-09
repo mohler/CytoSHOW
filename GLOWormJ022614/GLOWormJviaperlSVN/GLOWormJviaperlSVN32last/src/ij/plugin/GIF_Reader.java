@@ -11,14 +11,27 @@ import java.awt.image.*;
 /** This plugin opens GIFs and Animated GIFs. */
 public class GIF_Reader extends ImagePlus implements PlugIn {
 
+	public GIF_Reader(String path) {
+		this.run(path);
+	}
+	
 	public void run(String arg) {
-		OpenDialog od = new OpenDialog("Open GIF...", arg);
-		String name = od.getFileName();
-		if (name==null)
-			return;
-		String dir = od.getDirectory();
 		GifDecoder d = new GifDecoder();
-		int status = d.read(dir+name);
+		File argFile = (new File(arg));
+		String name;
+		String dir;
+		if ((new File(arg)).canRead()) {
+			name = argFile.getName();
+			dir = argFile.getParent()+File.separator;
+		}else {
+			OpenDialog od = new OpenDialog("Open GIF...", arg);
+			name = od.getFileName();
+			if (name==null)
+				return;
+			dir = od.getDirectory();
+			arg = dir+name;
+		}
+		int status = d.read(arg);
 		int n = d.getFrameCount();
 		ImageStack stack = null;
 		for (int i=0; i < n; i++) {
@@ -30,8 +43,8 @@ public class GIF_Reader extends ImagePlus implements PlugIn {
 		}
 		if (stack!=null) {
 			setStack(name, stack);
-			if (getType()==COLOR_RGB)
-				Opener.convertGrayJpegTo8Bits(this);
+//			if (getType()==COLOR_RGB)
+//				Opener.convertGrayJpegTo8Bits(this);
 			FileInfo fi = new FileInfo();
 			fi.fileFormat = fi.GIF_OR_JPG;
 			fi.fileName = name;

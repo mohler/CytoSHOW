@@ -6,6 +6,7 @@ import ij.plugin.frame.*;
 import ij.plugin.DICOM;
 import ij.plugin.AVI_Reader;
 import ij.plugin.DragAndDrop;
+import ij.plugin.GIF_Reader;
 import ij.plugin.SimpleCommands;
 import ij.plugin.TextFileReader;
 import ij.text.TextWindow;
@@ -17,6 +18,7 @@ import java.awt.*;
 import java.awt.image.*;
 import java.io.*;
 import java.net.*;
+import java.nio.channels.ReadableByteChannel;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Hashtable;
@@ -712,13 +714,32 @@ public class Opener {
 	}
 
 	ImagePlus openJpegOrGifUsingURL(String title, URL url) {
+		ImagePlus imp = null;
 		if (url==null) return null;
-		Image img = Toolkit.getDefaultToolkit().createImage(url);
-		if (img!=null) {
-			ImagePlus imp = new ImagePlus(title, img);
+		if (url.getFile().toLowerCase().endsWith(".gif")) {
+			URLConnection uc;
+			String tempPath = IJ.getDirectory("temp");
+			try {
+				ReadableByteChannel rbc = java.nio.channels.Channels.newChannel(url.openStream());
+
+				FileOutputStream fos = new FileOutputStream(tempPath+title+(!title.toLowerCase().endsWith(".gif")?".gif":""));
+				fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
+				
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}				
+
+			imp = new GIF_Reader(tempPath+title+(!title.toLowerCase().endsWith(".gif")?".gif":""));
 			return imp;
-		} else
-			return null;
+		} else {
+			Image img = Toolkit.getDefaultToolkit().createImage(url);
+			if (img!=null) {
+				imp = new ImagePlus(title, img);
+				return imp;
+			} else
+				return null;
+		}
 	}
 
 	ImagePlus openPngUsingURL(String title, URL url) {
@@ -738,21 +759,25 @@ public class Opener {
 
 	ImagePlus openJpegOrGif(String dir, String name) {
 		ImagePlus imp = null;
-		Image img = Toolkit.getDefaultToolkit().createImage(dir+name);
-		if (img!=null) {
-			try {
-				imp = new ImagePlus(name, img);
-			} catch (IllegalStateException e) {
-				IJ.error("Opener", e.getMessage()+"\n(Note: IJ cannot open CMYK JPEGs)\n \n"+dir+name);
-				return null; // error loading image
-			}				
-			if (imp.getType()==ImagePlus.COLOR_RGB)
-				convertGrayJpegTo8Bits(imp);
-			FileInfo fi = new FileInfo();
-			fi.fileFormat = fi.GIF_OR_JPG;
-			fi.fileName = name;
-			fi.directory = dir;
-			imp.setFileInfo(fi);
+		if (name.toLowerCase().endsWith(".gif")) {
+			imp = new GIF_Reader(dir+name);
+		} else {
+			Image img = Toolkit.getDefaultToolkit().createImage(dir+name);
+			if (img!=null) {
+				try {
+					imp = new ImagePlus(name, img);
+				} catch (IllegalStateException e) {
+					IJ.error("Opener", e.getMessage()+"\n(Note: IJ cannot open CMYK JPEGs)\n \n"+dir+name);
+					return null; // error loading image
+				}				
+				if (imp.getType()==ImagePlus.COLOR_RGB)
+					convertGrayJpegTo8Bits(imp);
+				FileInfo fi = new FileInfo();
+				fi.fileFormat = fi.GIF_OR_JPG;
+				fi.fileName = name;
+				fi.directory = dir;
+				imp.setFileInfo(fi);
+			}
 		}
 		return imp;
 	}

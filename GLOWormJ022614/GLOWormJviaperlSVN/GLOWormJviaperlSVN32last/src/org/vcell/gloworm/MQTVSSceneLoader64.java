@@ -131,10 +131,10 @@ public class MQTVSSceneLoader64 implements PlugIn {
 			WindowManager.getFrame("Too Much Info ;) Window").toFront();
 		}
 
-		pathlist = pathlist.replaceAll("Q:", "/Volumes/GLOWORM_DATA");
+		pathlist = pathlist.replaceAll("Q:", "/Volumes/GLOWORM_DATA").replace(".url", "");
 		if (pathlist.contains("/Volumes/GLOWORM_DATA"))
 			pathlist = pathlist.replace('\\', '/');
-		pathlist = pathlist.replaceAll("(URL=)http.*MOVIE=", ""); //Windows drop string
+		pathlist = pathlist.replaceAll(".*MOVIE=", "/Volumes/GLOWORM_DATA/"); //Windows drop string
 		if (pathlist.contains("_SPECTAG=")) {
 			specTag = pathlist.replaceAll(".*_SPECTAG=", "");
 			pathlist = pathlist.replaceAll("_SPECTAG=.*", "");
@@ -1066,20 +1066,20 @@ public class MQTVSSceneLoader64 implements PlugIn {
 		}	
 		catch (IOException ev)
 		{
-			IJ.log("I/O Error: Cannot read from specified directory/file.");
-			boolean sendErrorEmail = IJ.showMessageWithCancel("**CytoSHOW error**",
-					"It seems that your computer is unable to mount the shared drive \ncontaining CytoSHOW movies and scene files."+
-					"\n \nTo report this problem and get help finding a solution, \nplease click OK and send the auto-generated email to CytoSHOW staff.");
-			if (sendErrorEmail){
-				try { BrowserLauncher.openURL
-
-					("mailto:support@gloworm.org?" +
-							"subject=Help%20or%20Comments%20on%20CytoSHOWNotes%20or%20CytoSHOW!!" +
-							"%20%20Please,%20send%20your%20question%20or%20bug-report%20below." +
-							"&body=I/O Error: Cannot read from specified directory/file.\nMQTVSSceneLoader.run " + ev.toString());
-				}
-				catch (IOException ev2) {}
-			}
+//			IJ.log("I/O Error: Cannot read from specified directory/file.");
+//			boolean sendErrorEmail = IJ.showMessageWithCancel("**CytoSHOW error**",
+//					"It seems that your computer is unable to mount the shared drive \ncontaining CytoSHOW movies and scene files."+
+//					"\n \nTo report this problem and get help finding a solution, \nplease click OK and send the auto-generated email to CytoSHOW staff.");
+//			if (sendErrorEmail){
+//				try { BrowserLauncher.openURL
+//
+//					("mailto:support@gloworm.org?" +
+//							"subject=Help%20or%20Comments%20on%20CytoSHOWNotes%20or%20CytoSHOW!!" +
+//							"%20%20Please,%20send%20your%20question%20or%20bug-report%20below." +
+//							"&body=I/O Error: Cannot read from specified directory/file.\nMQTVSSceneLoader.run " + ev.toString());
+//				}
+//				catch (IOException ev2) {}
+//			}
 
 		}
 
