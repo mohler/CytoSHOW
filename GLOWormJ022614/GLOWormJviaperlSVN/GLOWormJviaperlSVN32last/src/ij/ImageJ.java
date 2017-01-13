@@ -681,7 +681,8 @@ public class ImageJ extends Frame implements ActionListener,
 						case 'A': keyChar = IJ.angstromSymbol; break;
 						default:
 					}
-				((TextRoi)roi).addChar(keyChar);
+				if (roi instanceof TextRoi)
+					((TextRoi)roi).addChar(keyChar);
 				return;
 			} else {
 				if (imp.getMotherImp()!=imp ){

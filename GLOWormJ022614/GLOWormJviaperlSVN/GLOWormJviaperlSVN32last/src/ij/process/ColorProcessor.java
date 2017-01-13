@@ -113,7 +113,11 @@ public class ColorProcessor extends ImageProcessor {
 	}
 
 	public Color getColor(int x, int y) {
-		int c = pixels[y*width+x];
+		if (y>=this.getHeight())
+			y=this.getHeight()-1;
+		if (x>=this.getWidth())
+			x=this.getWidth()-1;
+		int c = pixels[(y)*width+(x)];
 		int r = (c&0xff0000)>>16;
 		int g = (c&0xff00)>>8;
 		int b = c&0xff;

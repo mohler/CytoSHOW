@@ -313,7 +313,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			}
 		}
 
-		if (sliceRois == null)
+		if (sliceRois.size() == 0)
 			return;
 		Roi[] sliceRoisArray = new Roi[sliceRois.size()];
 		for (int sr=0;sr<sliceRoisArray.length;sr++)
@@ -366,7 +366,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 						drawRoi(g, roi, drawLabels?i:-1);
 						roi.setStrokeColor(origColor);
 						labelShapes.put(roi, roi instanceof Arrow?((Arrow)roi).getShapeRoi():new ShapeRoi(roi));
-						labelShapes.get(roi).setName(roi.getName());
+						if (labelShapes.get(roi) != null) labelShapes.get(roi).setName(roi.getName());
 					}
 				} else {
 					int position = roi.getPosition();
@@ -3137,7 +3137,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 	public void mouseMoved(MouseEvent e) {
 		//if (ij==null) return;
-		if (e.getSource() == this.getImage().getWindow().modeButton) {
+		if (this.getImage().getWindow().modeButton != null && e.getSource() == this.getImage().getWindow().modeButton) {
 			this.getImage().getWindow().modeButtonPanel.setVisible(true);
 		}
 		if (e.getSource() == this) {
@@ -3200,7 +3200,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				}
 				if (cursorString == null) {
 					for (int i=0; i<sliceRoisArray.length; i++) {  
-						if (getLabelShapes().get(sliceRoisArray[i]) != null
+						if (getLabelShapes().get(sliceRoisArray[i]) != null 
 								&& getLabelShapes().get(sliceRoisArray[i]).contains(getXMouse(), getYMouse())
 								&& sliceRoisArray[i].getName().split("[\"|=]").length > 1) {
 							cursorString = sliceRoisArray[i].getName().split("[\"|=]")[1];
