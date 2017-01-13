@@ -3195,7 +3195,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 							&& getLabelShapes().get(sliceRoisArray[i]) != null
 							&& getLabelShapes().get(sliceRoisArray[i]).contains(getXMouse(), getYMouse())) {
 						cursorString = sliceRoisArray[i].getName().split("[\"|=]")[1];
-						i = n;
+						i = sliceRoisArray.length;
 					}
 				}
 				if (cursorString == null) {
@@ -3204,7 +3204,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 								&& getLabelShapes().get(sliceRoisArray[i]).contains(getXMouse(), getYMouse())
 								&& sliceRoisArray[i].getName().split("[\"|=]").length > 1) {
 							cursorString = sliceRoisArray[i].getName().split("[\"|=]")[1];
-							i = n;
+							i = sliceRoisArray.length;
 						}
 					}
 				}
