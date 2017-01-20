@@ -1509,10 +1509,14 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 							|| sketchyMQTVS);
 
 
-			if (rm != null && labelShapes != null) {
+			if (rm != null && (labelShapes != null || brainbowSelection)) {
 				Roi[] fullRoisArray = rm.getFullRoisAsArray();
 				DefaultListModel listModel = rm.getListModel();
-				int n = labelShapes.size();
+				int n;
+				if (labelShapes == null)
+					n=0;
+				else
+					n = labelShapes.size();
 
 				String cellName = "";
 				String cellTag = "";
@@ -1590,7 +1594,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 //							mi.addActionListener(ij);
 //							popup.add(mi);
 						}
-						if (true) r=n;
+						if (true) r=sliceRoisArray.length;
 					}
 				}
 				for (int i = 0; i < impIDs.length; i++) {
@@ -1636,7 +1640,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				new Thread(new Runnable() {
 					public void run() {
 						ImagePlus cartoonImp = IJ.openImage("http://fsbill.cam.uchc.edu/gloworm/Xwords/NeuronDiagrams/"+finalCellName.toLowerCase()+".gif");
-						if (cartoonImp!=null) {
+						if (cartoonImp!=null && cartoonImp.getImage()!=null) {
 							cartoonImp.setTitle(finalCellName);
 							JPanel cartoonPanel = new JPanel();
 							JButton cartoonButton = new JButton();
