@@ -939,21 +939,24 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				}
 			}
 			int[] nameMatchIndexes = new int[nameMatchIndexArrayList.size()];
+			Roi nextRoi = ((Roi)rois[0]);
 			for (int i=0; i < nameMatchIndexes.length; i++) {
 				nameMatchIndexes[i] = nameMatchIndexArrayList.get(i);
-				Roi nextRoi = ((Roi)getFullRoisAsArray()[nameMatchIndexArrayList.get(i)]);
+				nextRoi = ((Roi)rois[nameMatchIndexArrayList.get(i)]);
 				String[] nextChunks = nextRoi.getName().split("_");
 				sketchImp.getWindow().setVisible(true);
 				int nextSlice = Integer.parseInt(nextChunks[nextChunks.length-2]);
 				int nextFrame = Integer.parseInt(nextChunks[nextChunks.length-1].replaceAll("[CZT]", "").split("-")[0]);
 				sketchImp.setPosition(1, nextSlice, nextFrame);
-				sketchImp.getRoiManager().addRoi((nextRoi));
+				sketchImp.getRoiManager().addRoi(((Roi)nextRoi.clone()));
 			}		
 			sketchImp.getRoiManager().select(-1);
 			sketchImp.getRoiManager().drawOrFill(FILL);
 			sketchImp.setMotherImp(imp, 0);
 			sketchImp.getRoiManager().setSelectedIndexes(sketchImp.getRoiManager().getFullListIndexes());
-										 
+				roiColorString = Colors.colorToHexString(nextRoi.getFillColor());
+				roiColorString = roiColorString.substring(roiColorString.length()-6);
+				assignedColorString = "#ff" + roiColorString;
 			vv.runVolumeViewer(sketchImp, rootName, assignedColorString);
 
 			sketchImp.changes = false;
