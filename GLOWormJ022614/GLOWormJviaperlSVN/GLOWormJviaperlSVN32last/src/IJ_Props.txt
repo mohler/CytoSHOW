@@ -49,12 +49,13 @@ new03="Text Window[N]",ij.plugin.NewPlugin("text")
 new04="Internal Clipboard",ij.plugin.Clipboard("show")
 new05="System Clipboard[V]",ij.plugin.Clipboard("showsys")
 new06="diSPIM Monitor (LabView)", org.vcell.gloworm.DISPIM_Monitor("newLabView")
-new07="diSPIM Monitor (MicroManager)", org.vcell.gloworm.DISPIM_Monitor("newMM")
-new08="diSPIM Monitor (WG_MicroManager)", org.vcell.gloworm.DISPIM_Monitor("sstMM")
-new09="diSPIM Monitor (Stage-Scan LabView)", org.vcell.gloworm.DISPIM_Monitor("scanStageLabView")
-new10="diSPIM Monitor (Stage-Scan MicroManager)", org.vcell.gloworm.DISPIM_Monitor("stageScanMM")
-new11="diSPIM Monitor (Stage-Scan WG_MicroManager)", org.vcell.gloworm.DISPIM_Monitor("stageScansstMM")
-new12="Scene Editor",ij.plugin.frame.SceneEditor
+new07="diSPIM Monitor (megaTiff MicroManager)", org.vcell.gloworm.DISPIM_Monitor("megaTiffMM")
+new08="diSPIM Monitor (MicroManager)", org.vcell.gloworm.DISPIM_Monitor("newMM")
+new09="diSPIM Monitor (WG_MicroManager)", org.vcell.gloworm.DISPIM_Monitor("sstMM")
+new10="diSPIM Monitor (Stage-Scan LabView)", org.vcell.gloworm.DISPIM_Monitor("scanStageLabView")
+new11="diSPIM Monitor (Stage-Scan MicroManager)", org.vcell.gloworm.DISPIM_Monitor("stageScanMM")
+new12="diSPIM Monitor (Stage-Scan WG_MicroManager)", org.vcell.gloworm.DISPIM_Monitor("stageScansstMM")
+new13="Scene Editor",ij.plugin.frame.SceneEditor
 
 # Plugins installed in the File/Import submenu
 import01="Image Sequence...",ij.plugin.FolderOpener
