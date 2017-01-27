@@ -57,7 +57,7 @@ public class DISPIM_Monitor implements PlugIn {
 	private int zDim;
 	private int tDim;
 	private int vDim;
-	private int pDim;
+	private int pDim = 1;
 
 	public boolean isDoDecon() {
 		return doDecon;
