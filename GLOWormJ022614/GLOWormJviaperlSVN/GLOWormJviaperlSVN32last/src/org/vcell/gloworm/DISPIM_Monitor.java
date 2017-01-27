@@ -2270,15 +2270,15 @@ public class DISPIM_Monitor implements PlugIn {
 			}
 
 
-			for (int pos=0; pos<pDim; pos++) {
+			if (doDecon) {
+				for (int pos=0; pos<pDim; pos++) {
 
-				impA = impAs[pos];
-				impB = impBs[pos];
+					impA = impAs[pos];
+					impB = impBs[pos];
 
-				Roi roiA = impA.getRoi();
-				Roi roiB = impB.getRoi();
+					Roi roiA = impA.getRoi();
+					Roi roiB = impB.getRoi();
 
-				if (doDecon) {
 					int wasFrameA = impA.getFrame();
 					int wasFrameB = impB.getFrame();
 					int wasFrameDF1 = 1;
