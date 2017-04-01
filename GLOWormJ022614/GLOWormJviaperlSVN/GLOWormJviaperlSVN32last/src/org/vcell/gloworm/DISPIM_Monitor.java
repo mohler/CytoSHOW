@@ -285,9 +285,23 @@ public class DISPIM_Monitor implements PlugIn {
 												.replace(",", "\\n")
 												.replace(",", "\\n")
 												.replace("}", "\\n}\\n")
-												.replace("{", "\\n{\\n").split("\\\\n");
-				for(String chunk:diSPIMheaderChunks)
+												.replace("{", "\\n{\\n")
+												.replace("]", "\\n]\\n")
+												.replace("[", "\\n[\\n")
+												.split("\\\\n");
+				int indents = 1;
+				for(String chunk:diSPIMheaderChunks) {
+					if (chunk.startsWith("}") || chunk.startsWith("]")) {
+						indents--;
+					}
+					for (int i=0;i<indents;i++)
+						chunk = "        "+chunk;
 					IJ.log(chunk);
+					if (chunk.contains("{") || chunk.contains("[")) {
+						indents++;
+					}
+				}
+				
 				impAs = new ImagePlus[pDim];
 				impBs = new ImagePlus[pDim];
 
