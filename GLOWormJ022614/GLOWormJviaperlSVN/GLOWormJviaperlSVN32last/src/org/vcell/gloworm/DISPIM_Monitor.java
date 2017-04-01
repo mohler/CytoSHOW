@@ -280,7 +280,12 @@ public class DISPIM_Monitor implements PlugIn {
 						}
 					}
 				}
-				String[] diSPIMheaderChunks = diSPIMheader/*.replace("[", "\\n[").replace("]", "\\n]")*/.replace("}", "\\n}").replace("{", "\\n{").split("\\\\n");
+				String[] diSPIMheaderChunks = diSPIMheader
+												.replace("\\\"", "\"")
+												.replace(",", "\\n")
+												.replace(",", "\\n")
+												.replace("}", "\\n}\\n")
+												.replace("{", "\\n{\\n").split("\\\\n");
 				for(String chunk:diSPIMheaderChunks)
 					IJ.log(chunk);
 				impAs = new ImagePlus[pDim];
