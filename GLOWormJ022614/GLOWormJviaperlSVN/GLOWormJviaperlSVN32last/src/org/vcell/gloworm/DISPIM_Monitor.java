@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.image.ColorModel;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -32,6 +33,7 @@ import ij.gui.SelectKeyChannelDialog;
 import ij.gui.StackWindow;
 import ij.gui.YesNoCancelDialog;
 import ij.io.FileInfo;
+import ij.io.OpenDialog;
 import ij.io.TiffDecoder;
 import ij.macro.MacroRunner;
 import ij.measure.Calibration;
@@ -264,17 +266,23 @@ public class DISPIM_Monitor implements PlugIn {
 				}
 				if (keyString =="")
 					keyString = dirOrOMETiffFile.list()[dirOrOMETiffFile.list().length/2].split("_")[0];
+				String diSPIMheader = "";
 				for (String fileName:dirOrOMETiffFile.list()) {
 					File nextFile = new File(dirOrOMETiffFile+File.separator+fileName);
+
 					if(nextFile.isDirectory() && nextFile.list().length>0) {
 						for (String listFile:nextFile.list()){
 							if (listFile.contains("MMStack")) {
+								diSPIMheader = open_diSPIMheaderAsString(nextFile.getPath()+File.separator+listFile);
 								tDim++;
 								break;
 							}
 						}
 					}
 				}
+				String[] diSPIMheaderChunks = diSPIMheader/*.replace("[", "\\n[").replace("]", "\\n]")*/.replace("}", "\\n}").replace("{", "\\n{").split("\\\\n");
+				for(String chunk:diSPIMheaderChunks)
+					IJ.log(chunk);
 				impAs = new ImagePlus[pDim];
 				impBs = new ImagePlus[pDim];
 
@@ -2835,4 +2843,41 @@ public class DISPIM_Monitor implements PlugIn {
 		}
 		return p1;
 	}
+	
+//	{"LaserExposure_ms":"2.5","MVRotations":"0_90_0_90","SPIMtype":"diSPIM","UUID":"ea4d0baa-8f54-4937-82f7-4d1e62492be5","SPIMAcqSettings":"{\n  \"spimMode\": \"PIEZO_SLICE_SCAN\",\n  \"isStageScanning\": false,\n  \"useTimepoints\": true,\n  \"numTimepoints\": 5,\n  \"timepointInterval\": 15.0,\n  \"useMultiPositions\": true,\n  \"useChannels\": true,\n  \"channelMode\": \"VOLUME_HW\",\n  \"numChannels\": 2,\n  \"channels\": [\n    {\n      \"useChannel_\": true,\n      \"group_\": \"Channel\",\n      \"config_\": \"488 nm\"\n    },\n    {\n      \"useChannel_\": true,\n      \"group_\": \"Channel\",\n      \"config_\": \"561 nm\"\n    }\n  ],\n  \"channelGroup\": \"Channel\",\n  \"useAutofocus\": false,\n  \"numSides\": 2,\n  \"firstSideIsA\": true,\n  \"delayBeforeSide\": 50.0,\n  \"numSlices\": 50,\n  \"stepSizeUm\": 1.0,\n  \"minimizeSlicePeriod\": true,\n  \"desiredSlicePeriod\": 5.5,\n  \"desiredLightExposure\": 2.5,\n  \"centerAtCurrentZ\": false,\n  \"sliceTiming\": {\n    \"scanDelay\": 4.5,\n    \"scanNum\": 1,\n    \"scanPeriod\": 3.0,\n    \"laserDelay\": 5.5,\n    \"laserDuration\": 2.5,\n    \"cameraDelay\": 2.75,\n    \"cameraDuration\": 1.0,\n    \"cameraExposure\": 5.35,\n    \"sliceDuration\": 8.0,\n    \"valid\": true\n  },\n  \"cameraMode\": \"EDGE\",\n  \"hardwareTimepoints\": false,\n  \"separateTimepoints\": true\n}
+
+	public String open_diSPIMheaderAsString(String path) {
+		if (path==null || path.equals("")) {
+			OpenDialog od = new OpenDialog("Open Text File", "");
+			String directory = od.getDirectory();
+			String name = od.getFileName();
+			if (name==null) return null;
+			path = directory + name;
+		}
+		String str = "";
+		File file = new File(path);
+		if (!file.exists())
+			return "Error: file not found";
+		try {
+			StringBuffer sb = new StringBuffer(5000);
+			BufferedReader r = new BufferedReader(new FileReader(file));
+			String s ="";
+			while (!s.contains("·²4 È")) {
+				s=r.readLine();
+				if (s==null)
+					break;
+//				else
+//					IJ.log(s);
+//					sb.append(s+"\n");
+			}
+			r.close();
+//			str = new String(sb);
+			str = s;
+		}
+		catch (Exception e) {
+			str = "Error: "+e.getMessage();
+		}
+		return str;
+	}
+
 }
