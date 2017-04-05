@@ -52,7 +52,7 @@ import ij.process.LUT;
 public class DISPIM_Monitor implements PlugIn {
 
 	//Info from proximal tiff header in MMomeTIFF vvvvvvv
-	 private int diSPIM_MM_LaserExposure_ms;
+	 private double diSPIM_MM_LaserExposure_ms;
 	 private String diSPIM_MM_MVRotations;
 	 private String diSPIM_MM_SPIMtype;
 	 private String diSPIM_MM_UUID;
@@ -354,8 +354,11 @@ public class DISPIM_Monitor implements PlugIn {
 					vDim = (int) gd.getNextNumber();
 					pDim = (int) gd.getNextNumber();
 				}
+
 				if (keyString =="")
 					keyString = dirOrOMETiffFile.list()[dirOrOMETiffFile.list().length/2].split("_")[0];
+
+				//Reading in diSPIM header from MM tiffs vvvvvv
 				String diSPIMheader = "";
 				for (String fileName:dirOrOMETiffFile.list()) {
 					File nextFile = new File(dirOrOMETiffFile+File.separator+fileName);
@@ -392,13 +395,267 @@ public class DISPIM_Monitor implements PlugIn {
 						indents++;
 					}
 					if (chunk.trim().startsWith("\"spimMode\":")) {
-//						IJ.log(chunk.split(":")[1]);
+						diSPIM_MM_spimMode = chunk.split(":")[1].replace("\"", "");
 					}
-					if (chunk.trim().split("\"").length>1)
-						allVars = allVars+"\\\n diSPIM_MM_"+chunk.trim().split("\"")[1];
+
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_LaserExposure_ms= Double.parseDouble(chunk.split(":")[1].replace("\"", ""));
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_MVRotations= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_SPIMtype= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_UUID= chunk.split(":")[1].replace("\"", "");
+					}					 									
+
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_spimMode= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_isStageScanning= chunk.split(":")[1].replace("\"", "").toLowerCase().contains("true");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_useTimepoints= chunk.split(":")[1].replace("\"", "").toLowerCase().contains("true");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_numTimepoints= Integer.parseInt(chunk.split(":")[1].replace("\"", ""));
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_timepointInterval= Double.parseDouble(chunk.split(":")[1].replace("\"", ""));
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_useMultiPositions= chunk.split(":")[1].replace("\"", "").toLowerCase().contains("true");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_useChannels= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_channelMode= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_numChannels= chunk.split(":")[1].replace("\"", "");
+					}					 									
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_channels= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_useChannel= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_group= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_config= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_channelGroup= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_useAutofocus= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_numSides= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_firstSideIsA= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_delayBeforeSide= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_numSlices= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_stepSizeUm= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_minimizeSlicePeriod= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_desiredSlicePeriod= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_desiredLightExposure= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_centerAtCurrentZ= chunk.split(":")[1].replace("\"", "");
+					}					 									
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_sliceTiming= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_scanDelay= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_scanNum= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_scanPeriod= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_laserDelay= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_laserDuration= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_cameraDelay= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_cameraDuration= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_cameraExposure= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_sliceDuration= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_valid= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_cameraMode= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_useHardwareTimepoints= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_useHeparateTimepoints= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_Position_X= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_Position_Y= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_Date= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_MetadataVersion= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_Width= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_PixelAspect= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_ChNames= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_Height= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_SlicePeriod_ms= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_GridColumn= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_PixelSize_um= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_Frames= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_Source= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_Channels= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_AcqusitionName= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_NumberOfSides= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_SPIMmode= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_ChColors= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_Slices= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_UserName= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_Depth= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_PixelType= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_Time= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_FirstSide= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_zStep_um= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_SlicesFirst= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_ChContrastMin= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_StartTime= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_MVRotationAxis= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_MicroManagerVersion= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_IJType= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_GridRow= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_VolumeDuration= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_NumComponents= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_Position_SPIM_Head= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_BitDepth= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_ComputerName= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_CameraMode= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_TimeFirst= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_ChContrastMax= chunk.split(":")[1].replace("\"", "");
+					}
+					if (chunk.trim().startsWith("\"spimMode\":")) {
+						diSPIM_MM_Positions= chunk.split(":")[1].replace("\"", "");
+					}
+
+					//					if (chunk.trim().split(":").length>1)
+					//						allVars = allVars+"\n diSPIM_MM_"+chunk.trim().split(":")[1];
 				}
-				IJ.log(allVars);
+//				IJ.log(allVars);
 				
+				//Reading in diSPIM header from MM tiffs ^^^^^^
+
 				impAs = new ImagePlus[pDim];
 				impBs = new ImagePlus[pDim];
 
