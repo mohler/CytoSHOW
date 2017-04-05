@@ -333,27 +333,27 @@ public class DISPIM_Monitor implements PlugIn {
 			if (omeTiffs) {
 				fileListA = new File("" + dirOrOMETiff).list();
 
-				cDim = 0;
-				zDim = 0;
-				tDim = 0;
-				vDim = 0;
-				GenericDialog gd = new GenericDialog("Dimensions of HyperStacks");
-				gd.addNumericField("Channels (c):", 2, 0);
-				gd.addNumericField("Slices (z):", 50, 0);
-//				gd.addNumericField("Frames (t):", dirOrOMETiffFile.list().length, 0);
-				gd.addNumericField("Views (v):", 2, 0);
-				gd.addNumericField("Positions (p):", 1, 0);
-
-				gd.showDialog();
-				if (gd.wasCanceled()) return;
-				if (cDim == 0 || tDim == 0 || tDim == 0) {
-					cDim = (int) gd.getNextNumber();
-					wavelengths = cDim;
-					zDim = (int) gd.getNextNumber();
-//					tDim = (int) gd.getNextNumber();
-					vDim = (int) gd.getNextNumber();
-					pDim = (int) gd.getNextNumber();
-				}
+//				cDim = 0;
+//				zDim = 0;
+//				tDim = 0;
+//				vDim = 0;
+//				GenericDialog gd = new GenericDialog("Dimensions of HyperStacks");
+//				gd.addNumericField("Channels (c):", 2, 0);
+//				gd.addNumericField("Slices (z):", 50, 0);
+////				gd.addNumericField("Frames (t):", dirOrOMETiffFile.list().length, 0);
+//				gd.addNumericField("Views (v):", 2, 0);
+//				gd.addNumericField("Positions (p):", 1, 0);
+//
+//				gd.showDialog();
+//				if (gd.wasCanceled()) return;
+//				if (cDim == 0 || tDim == 0 || tDim == 0) {
+//					cDim = (int) gd.getNextNumber();
+//					wavelengths = cDim;
+//					zDim = (int) gd.getNextNumber();
+////					tDim = (int) gd.getNextNumber();
+//					vDim = (int) gd.getNextNumber();
+//					pDim = (int) gd.getNextNumber();
+//				}
 
 				if (keyString =="")
 					keyString = dirOrOMETiffFile.list()[dirOrOMETiffFile.list().length/2].split("_")[0];
@@ -394,49 +394,47 @@ public class DISPIM_Monitor implements PlugIn {
 					if (chunk.contains("{") || chunk.contains("[")) {
 						indents++;
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_spimMode = chunk.split(":")[1].replace("\"", "");
-					}
-
-					if (chunk.trim().startsWith("\"spimMode\":")) {
+					
+					if (chunk.trim().startsWith("\"LaserExposure_ms\":")) {
 						diSPIM_MM_LaserExposure_ms= Double.parseDouble(chunk.split(":")[1].replace("\"", ""));
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
+					if (chunk.trim().startsWith("\"MVRotations\":")) {
 						diSPIM_MM_MVRotations= chunk.split(":")[1].replace("\"", "");
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
+					if (chunk.trim().startsWith("\"SPIMtype\":")) {
 						diSPIM_MM_SPIMtype= chunk.split(":")[1].replace("\"", "");
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
+					if (chunk.trim().startsWith("\"UUID\":")) {
 						diSPIM_MM_UUID= chunk.split(":")[1].replace("\"", "");
 					}					 									
 
 					if (chunk.trim().startsWith("\"spimMode\":")) {
 						diSPIM_MM_spimMode= chunk.split(":")[1].replace("\"", "");
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
+					if (chunk.trim().startsWith("\"isStageScanning\":")) {
 						diSPIM_MM_isStageScanning= chunk.split(":")[1].replace("\"", "").toLowerCase().contains("true");
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
+					if (chunk.trim().startsWith("\"useTimepoints\":")) {
 						diSPIM_MM_useTimepoints= chunk.split(":")[1].replace("\"", "").toLowerCase().contains("true");
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
+					if (chunk.trim().startsWith("\"numTimepoints\":")) {
 						diSPIM_MM_numTimepoints= Integer.parseInt(chunk.split(":")[1].replace("\"", ""));
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
+					if (chunk.trim().startsWith("\"timepointInterval\":")) {
 						diSPIM_MM_timepointInterval= Double.parseDouble(chunk.split(":")[1].replace("\"", ""));
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
+					if (chunk.trim().startsWith("\"useMultiPositions\":")) {
 						diSPIM_MM_useMultiPositions= chunk.split(":")[1].replace("\"", "").toLowerCase().contains("true");
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
+					if (chunk.trim().startsWith("\"useChannels\":")) {
 						diSPIM_MM_useChannels= chunk.split(":")[1].replace("\"", "").toLowerCase().contains("true");
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
+					if (chunk.trim().startsWith("\"channelMode\":")) {
 						diSPIM_MM_channelMode= chunk.split(":")[1].replace("\"", "");
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
+					if (chunk.trim().startsWith("\"numChannels\":")) {
 						diSPIM_MM_numChannels= Integer.parseInt(chunk.split(":")[1].replace("\"", ""));
+						cDim = diSPIM_MM_numChannels;
 					}					 					
 					
 					for (int diSPIM_MM_channel=0; diSPIM_MM_channel<diSPIM_MM_numChannels; diSPIM_MM_channel++) {
@@ -459,6 +457,7 @@ public class DISPIM_Monitor implements PlugIn {
 					}
 					if (chunk.trim().startsWith("\"spimMode\":")) {
 						diSPIM_MM_numSides= Integer.parseInt(chunk.split(":")[1].replace("\"", ""));
+						vDim = diSPIM_MM_numSides;
 					}
 					if (chunk.trim().startsWith("\"spimMode\":")) {
 						diSPIM_MM_firstSideIsA= chunk.split(":")[1].replace("\"", "").toLowerCase().contains("true");
@@ -468,6 +467,7 @@ public class DISPIM_Monitor implements PlugIn {
 					}
 					if (chunk.trim().startsWith("\"spimMode\":")) {
 						diSPIM_MM_numSlices= Integer.parseInt(chunk.split(":")[1].replace("\"", ""));
+						zDim = diSPIM_MM_numSlices;
 					}
 					if (chunk.trim().startsWith("\"spimMode\":")) {
 						diSPIM_MM_stepSizeUm= Double.parseDouble(chunk.split(":")[1].replace("\"", ""));
@@ -560,6 +560,8 @@ public class DISPIM_Monitor implements PlugIn {
 					}
 					if (chunk.trim().startsWith("\"spimMode\":")) {
 						diSPIM_MM_PixelSize_um= Double.parseDouble(chunk.split(":")[1].replace("\"", ""));
+						vWidth = diSPIM_MM_PixelSize_um;
+						vHeight = diSPIM_MM_PixelSize_um;
 					}
 					if (chunk.trim().startsWith("\"spimMode\":")) {
 						diSPIM_MM_Frames= Integer.parseInt(chunk.split(":")[1].replace("\"", ""));
@@ -607,6 +609,7 @@ public class DISPIM_Monitor implements PlugIn {
 					}
 					if (chunk.trim().startsWith("\"spimMode\":")) {
 						diSPIM_MM_zStep_um= Double.parseDouble(chunk.split(":")[1].replace("\"", ""));
+						vDepthRaw = diSPIM_MM_zStep_um;
 					}
 					if (chunk.trim().startsWith("\"spimMode\":")) {
 						diSPIM_MM_SlicesFirst= chunk.split(":")[1].replace("\"", "").toLowerCase().contains("true");
@@ -663,6 +666,7 @@ public class DISPIM_Monitor implements PlugIn {
 					
 					if (chunk.trim().startsWith("\"spimMode\":")) {
 						diSPIM_MM_Positions= Integer.parseInt(chunk.split(":")[1].replace("\"", ""));
+						pDim = diSPIM_MM_Positions;
 					}
 
 					//					if (chunk.trim().split(":").length>1)
@@ -706,7 +710,7 @@ public class DISPIM_Monitor implements PlugIn {
 					calA.pixelDepth = vDepthRaw;
 					calA.setUnit(vUnit);
 
-					stackAs[pos].setDimOrder("xyczt");
+					stackAs[pos].setDimOrder(diSPIM_MM_channelMode=="VOLUME_HW"?"xyczt":"xyczt");
 					if (stageScan)
 						stackAs[pos].setSkewXperZ(
 							calA.pixelDepth / calA.pixelWidth);
@@ -726,7 +730,7 @@ public class DISPIM_Monitor implements PlugIn {
 					calB.pixelDepth = vDepthRaw;
 					calB.setUnit(vUnit);
 
-					stackBs[pos].setDimOrder("xyczt");
+					stackBs[pos].setDimOrder(diSPIM_MM_channelMode=="VOLUME_HW"?"xyczt":"xyczt");
 					if (stageScan)
 						stackBs[pos].setSkewXperZ(
 							-calB.pixelDepth / calB.pixelWidth);
