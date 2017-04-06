@@ -149,6 +149,8 @@ public class DISPIM_Monitor implements PlugIn {
 	private int vDim;
 	private int pDim = 1;
 	private String[] diSPIM_MM_ChColorStrings;
+	private String[] diSPIM_MM_ChContrastMinStrings;
+	private String[] diSPIM_MM_ChContrastMaxStrings;
 	
 	
 
@@ -406,13 +408,13 @@ public class DISPIM_Monitor implements PlugIn {
 				int diSPIM_MM_channel_name_index=0; 
 
 				for(String chunk:diSPIMheaderChunks) {
-					if (chunk.startsWith("}") || chunk.startsWith("]")) {
+					if (chunk.startsWith("}") ) {
 						indents--;
 					}
 					for (int i=0;i<indents;i++)
 						chunk = "        "+chunk;
 					IJ.log(chunk);
-					if (chunk.contains("{") || chunk.contains("[")) {
+					if (chunk.contains("{") ) {
 						indents++;
 					}
 					
@@ -618,7 +620,6 @@ public class DISPIM_Monitor implements PlugIn {
 							}
 						}
 					
-//							diSPIM_MM_ChColors[0]= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
 //				
 //					if (chunk.trim().startsWith("\"spimMode\":")) {
 //						diSPIM_MM_Slices= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
@@ -646,11 +647,15 @@ public class DISPIM_Monitor implements PlugIn {
 //						diSPIM_MM_SlicesFirst= chunk.split(":")[1].replace("\"", "").trim().toLowerCase().contains("true");
 //					}
 //					
-//					for (int diSPIM_MM_channel=0; diSPIM_MM_channel<diSPIM_MM_numChannels; diSPIM_MM_channel++) {
-//						if (chunk.trim().startsWith("\"spimMode\":")) {
-//							diSPIM_MM_ChContrastMin[diSPIM_MM_channel]= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
-//						}
-//					}
+						if (chunk.trim().startsWith("\"ChContrastMin\":")) {
+							diSPIM_MM_ChContrastMinStrings= chunk.split(":")[1].replace("[", "").replace("]", "").replace("\"", "").split(";");
+							diSPIM_MM_ChContrastMin = new int[diSPIM_MM_ChContrastMinStrings.length];
+							for(int ccmin=0;ccmin<diSPIM_MM_ChContrastMinStrings.length;ccmin++) {
+								IJ.log(diSPIM_MM_ChContrastMinStrings[ccmin]);
+								diSPIM_MM_ChContrastMin[ccmin] = Integer.parseInt(diSPIM_MM_ChContrastMinStrings[ccmin]);
+							}
+						}
+					
 //					
 //					if (chunk.trim().startsWith("\"spimMode\":")) {
 //						diSPIM_MM_StartTime= chunk.split(":")[1].replace("\"", "").trim();
@@ -689,12 +694,15 @@ public class DISPIM_Monitor implements PlugIn {
 //						diSPIM_MM_TimeFirst= chunk.split(":")[1].replace("\"", "").trim().toLowerCase().contains("true");
 //					}
 //
-//					for (int diSPIM_MM_channel=0; diSPIM_MM_channel<diSPIM_MM_numChannels; diSPIM_MM_channel++) {
-//						if (chunk.trim().startsWith("\"spimMode\":")) {
-//							diSPIM_MM_ChContrastMax[diSPIM_MM_channel]= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
-//						}
-//					}
-//					
+						if (chunk.trim().startsWith("\"ChContrastMax\":")) {
+							diSPIM_MM_ChContrastMaxStrings= chunk.split(":")[1].replace("[", "").replace("]", "").replace("\"", "").split(";");
+							diSPIM_MM_ChContrastMax = new int[diSPIM_MM_ChContrastMaxStrings.length];
+							for(int ccMax=0;ccMax<diSPIM_MM_ChContrastMaxStrings.length;ccMax++) {
+								IJ.log(diSPIM_MM_ChContrastMaxStrings[ccMax]);
+								diSPIM_MM_ChContrastMax[ccMax] = Integer.parseInt(diSPIM_MM_ChContrastMaxStrings[ccMax]);
+							}
+						}
+				
 //					if (chunk.trim().startsWith("\"spimMode\":")) {
 //						diSPIM_MM_Positions= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
 //						pDim = diSPIM_MM_Positions;
