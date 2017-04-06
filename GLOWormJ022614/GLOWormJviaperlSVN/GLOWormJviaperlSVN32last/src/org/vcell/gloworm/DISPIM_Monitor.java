@@ -373,17 +373,37 @@ public class DISPIM_Monitor implements PlugIn {
 						}
 					}
 				}
-				String[] diSPIMheaderChunks = diSPIMheader
+				IJ.log(diSPIMheader);
+				
+				String squareSetsSearchPattern=".*";
+				int squareSetsCount=0;
+				for(int i = 0; i < diSPIMheader.length(); i++){
+					if (diSPIMheader.charAt(i)=='[') {
+						squareSetsSearchPattern = squareSetsSearchPattern+"(\\[.*\\]).*";
+						squareSetsCount++;
+					}
+				}
+				
+				for(int capture=2;capture<=squareSetsCount;capture++) {
+					diSPIMheader = diSPIMheader.replace((diSPIMheader.replaceAll(squareSetsSearchPattern, "$"+capture)),
+														(diSPIMheader.replaceAll(squareSetsSearchPattern, "$"+capture).replace(",",";")));
+				}
+				
+					String[] diSPIMheaderChunks = diSPIMheader
 												.replace("\\\"", "\"")
-												.replace(",", "\\n")
 												.replace(",", "\\n")
 												.replace("}", "\\n}\\n")
 												.replace("{", "\\n{\\n")
-												.replace("]", "\\n]\\n")
-												.replace("[", "\\n[\\n")
+//												.replace("]", "\\n]\\n")
+//												.replace("[", "\\n[\\n")
 												.split("\\\\n");
 				int indents = 1;
 				String allVars = "";
+				int diSPIM_MM_channel_use_index=0; 
+				int diSPIM_MM_channel_group_index=0; 
+				int diSPIM_MM_channel_config_index=0; 
+				int diSPIM_MM_channel_name_index=0; 
+
 				for(String chunk:diSPIMheaderChunks) {
 					if (chunk.startsWith("}") || chunk.startsWith("]")) {
 						indents--;
@@ -396,278 +416,283 @@ public class DISPIM_Monitor implements PlugIn {
 					}
 					
 					if (chunk.trim().startsWith("\"LaserExposure_ms\":")) {
-						diSPIM_MM_LaserExposure_ms= Double.parseDouble(chunk.split(":")[1].replace("\"", ""));
+						diSPIM_MM_LaserExposure_ms= Double.parseDouble(chunk.split(":")[1].replace("\"", "").trim());
 					}
 					if (chunk.trim().startsWith("\"MVRotations\":")) {
-						diSPIM_MM_MVRotations= chunk.split(":")[1].replace("\"", "");
+						diSPIM_MM_MVRotations= chunk.split(":")[1].replace("\"", "").trim();
 					}
 					if (chunk.trim().startsWith("\"SPIMtype\":")) {
-						diSPIM_MM_SPIMtype= chunk.split(":")[1].replace("\"", "");
+						diSPIM_MM_SPIMtype= chunk.split(":")[1].replace("\"", "").trim();
 					}
 					if (chunk.trim().startsWith("\"UUID\":")) {
-						diSPIM_MM_UUID= chunk.split(":")[1].replace("\"", "");
+						diSPIM_MM_UUID= chunk.split(":")[1].replace("\"", "").trim();
 					}					 									
 
 					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_spimMode= chunk.split(":")[1].replace("\"", "");
+						diSPIM_MM_spimMode= chunk.split(":")[1].replace("\"", "").trim();
 					}
 					if (chunk.trim().startsWith("\"isStageScanning\":")) {
-						diSPIM_MM_isStageScanning= chunk.split(":")[1].replace("\"", "").toLowerCase().contains("true");
+						diSPIM_MM_isStageScanning= chunk.split(":")[1].replace("\"", "").trim().toLowerCase().contains("true");
 					}
 					if (chunk.trim().startsWith("\"useTimepoints\":")) {
-						diSPIM_MM_useTimepoints= chunk.split(":")[1].replace("\"", "").toLowerCase().contains("true");
+						diSPIM_MM_useTimepoints= chunk.split(":")[1].replace("\"", "").trim().toLowerCase().contains("true");
 					}
 					if (chunk.trim().startsWith("\"numTimepoints\":")) {
-						diSPIM_MM_numTimepoints= Integer.parseInt(chunk.split(":")[1].replace("\"", ""));
+						diSPIM_MM_numTimepoints= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
 					}
 					if (chunk.trim().startsWith("\"timepointInterval\":")) {
-						diSPIM_MM_timepointInterval= Double.parseDouble(chunk.split(":")[1].replace("\"", ""));
+						diSPIM_MM_timepointInterval= Double.parseDouble(chunk.split(":")[1].replace("\"", "").trim());
 					}
 					if (chunk.trim().startsWith("\"useMultiPositions\":")) {
-						diSPIM_MM_useMultiPositions= chunk.split(":")[1].replace("\"", "").toLowerCase().contains("true");
+						diSPIM_MM_useMultiPositions= chunk.split(":")[1].replace("\"", "").trim().toLowerCase().contains("true");
 					}
 					if (chunk.trim().startsWith("\"useChannels\":")) {
-						diSPIM_MM_useChannels= chunk.split(":")[1].replace("\"", "").toLowerCase().contains("true");
+						diSPIM_MM_useChannels= chunk.split(":")[1].replace("\"", "").trim().toLowerCase().contains("true");
 					}
 					if (chunk.trim().startsWith("\"channelMode\":")) {
-						diSPIM_MM_channelMode= chunk.split(":")[1].replace("\"", "");
+						diSPIM_MM_channelMode= chunk.split(":")[1].replace("\"", "").trim();
 					}
 					if (chunk.trim().startsWith("\"numChannels\":")) {
-						diSPIM_MM_numChannels= Integer.parseInt(chunk.split(":")[1].replace("\"", ""));
+						diSPIM_MM_numChannels= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
 						cDim = diSPIM_MM_numChannels;
 					}					 					
+					diSPIM_MM_useChannel= new boolean[diSPIM_MM_numChannels];
+						if (chunk.trim().startsWith("\"useChannel_\":")) {
+							diSPIM_MM_useChannel[diSPIM_MM_channel_use_index]= chunk.split(":")[1].replace("\"", "").trim().toLowerCase().contains("true");
+							diSPIM_MM_channel_use_index++;					
+						}
+						diSPIM_MM_group= new String[diSPIM_MM_numChannels];
+						if (chunk.trim().startsWith("\"group_\":")) {
+							diSPIM_MM_group[diSPIM_MM_channel_group_index]= chunk.split(":")[1].replace("\"", "").trim();
+							diSPIM_MM_channel_group_index++;
+						}
+						diSPIM_MM_config= new String[diSPIM_MM_numChannels];
+						if (chunk.trim().startsWith("\"config_\":")) {
+							diSPIM_MM_config[diSPIM_MM_channel_config_index]= chunk.split(":")[1].replace("\"", "").trim();
+							diSPIM_MM_channel_config_index++;
+						}
 					
-					for (int diSPIM_MM_channel=0; diSPIM_MM_channel<diSPIM_MM_numChannels; diSPIM_MM_channel++) {
-						if (chunk.trim().startsWith("\"spimMode\":")) {
-							diSPIM_MM_useChannel[diSPIM_MM_channel]= chunk.split(":")[1].replace("\"", "").toLowerCase().contains("true");
-						}
-						if (chunk.trim().startsWith("\"spimMode\":")) {
-							diSPIM_MM_group[diSPIM_MM_channel]= chunk.split(":")[1].replace("\"", "");
-						}
-						if (chunk.trim().startsWith("\"spimMode\":")) {
-							diSPIM_MM_config[diSPIM_MM_channel]= chunk.split(":")[1].replace("\"", "");
-						}
-					}
 					
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_channelGroup= chunk.split(":")[1].replace("\"", "");
+					if (chunk.trim().startsWith("\"channelGroup\":")) {
+						diSPIM_MM_channelGroup= chunk.split(":")[1].replace("\"", "").trim();
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_useAutofocus= chunk.split(":")[1].replace("\"", "").toLowerCase().contains("true");
+					if (chunk.trim().startsWith("\"useAutofocus\":")) {
+						diSPIM_MM_useAutofocus= chunk.split(":")[1].replace("\"", "").trim().toLowerCase().contains("true");
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_numSides= Integer.parseInt(chunk.split(":")[1].replace("\"", ""));
+					if (chunk.trim().startsWith("\"numSides\":")) {
+						diSPIM_MM_numSides= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
 						vDim = diSPIM_MM_numSides;
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_firstSideIsA= chunk.split(":")[1].replace("\"", "").toLowerCase().contains("true");
+					if (chunk.trim().startsWith("\"firstSideIsA\":")) {
+						diSPIM_MM_firstSideIsA= chunk.split(":")[1].replace("\"", "").trim().toLowerCase().contains("true");
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_delayBeforeSide= Double.parseDouble(chunk.split(":")[1].replace("\"", ""));
+					if (chunk.trim().startsWith("\"delayBeforeSide\":")) {
+						diSPIM_MM_delayBeforeSide= Double.parseDouble(chunk.split(":")[1].replace("\"", "").trim());
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_numSlices= Integer.parseInt(chunk.split(":")[1].replace("\"", ""));
+					if (chunk.trim().startsWith("\"numSlices\":")) {
+						diSPIM_MM_numSlices= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
 						zDim = diSPIM_MM_numSlices;
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_stepSizeUm= Double.parseDouble(chunk.split(":")[1].replace("\"", ""));
+					if (chunk.trim().startsWith("\"stepSizeUm\":")) {
+						diSPIM_MM_stepSizeUm= Double.parseDouble(chunk.split(":")[1].replace("\"", "").trim());
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_minimizeSlicePeriod= chunk.split(":")[1].replace("\"", "").toLowerCase().contains("true");
+					if (chunk.trim().startsWith("\"minimizeSlicePeriod\":")) {
+						diSPIM_MM_minimizeSlicePeriod= chunk.split(":")[1].replace("\"", "").trim().toLowerCase().contains("true");
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_desiredSlicePeriod= Double.parseDouble(chunk.split(":")[1].replace("\"", ""));
+					if (chunk.trim().startsWith("\"desiredSlicePeriod\":")) {
+						diSPIM_MM_desiredSlicePeriod= Double.parseDouble(chunk.split(":")[1].replace("\"", "").trim());
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_desiredLightExposure= Double.parseDouble(chunk.split(":")[1].replace("\"", ""));
+					if (chunk.trim().startsWith("\"desiredLightExposure\":")) {
+						diSPIM_MM_desiredLightExposure= Double.parseDouble(chunk.split(":")[1].replace("\"", "").trim());
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_centerAtCurrentZ= chunk.split(":")[1].replace("\"", "").toLowerCase().contains("true");
+					if (chunk.trim().startsWith("\"centerAtCurrentZ\":")) {
+						diSPIM_MM_centerAtCurrentZ= chunk.split(":")[1].replace("\"", "").trim().toLowerCase().contains("true");
 					}					 									
 
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_scanDelay= Double.parseDouble(chunk.split(":")[1].replace("\"", ""));
+					if (chunk.trim().startsWith("\"scanDelay\":")) {
+						diSPIM_MM_scanDelay= Double.parseDouble(chunk.split(":")[1].replace("\"", "").trim());
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_scanNum= Integer.parseInt(chunk.split(":")[1].replace("\"", ""));
+					if (chunk.trim().startsWith("\"scanNum\":")) {
+						diSPIM_MM_scanNum= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_scanPeriod= Double.parseDouble(chunk.split(":")[1].replace("\"", ""));
+					if (chunk.trim().startsWith("\"scanPeriod\":")) {
+						diSPIM_MM_scanPeriod= Double.parseDouble(chunk.split(":")[1].replace("\"", "").trim());
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_laserDelay= Double.parseDouble(chunk.split(":")[1].replace("\"", ""));
+					if (chunk.trim().startsWith("\"laserDelay\":")) {
+						diSPIM_MM_laserDelay= Double.parseDouble(chunk.split(":")[1].replace("\"", "").trim());
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_laserDuration= Double.parseDouble(chunk.split(":")[1].replace("\"", ""));
+					if (chunk.trim().startsWith("\"laserDuration\":")) {
+						diSPIM_MM_laserDuration= Double.parseDouble(chunk.split(":")[1].replace("\"", "").trim());
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_cameraDelay= Double.parseDouble(chunk.split(":")[1].replace("\"", ""));
+					if (chunk.trim().startsWith("\"cameraDelay\":")) {
+						diSPIM_MM_cameraDelay= Double.parseDouble(chunk.split(":")[1].replace("\"", "").trim());
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_cameraDuration= Double.parseDouble(chunk.split(":")[1].replace("\"", ""));
+					if (chunk.trim().startsWith("\"cameraDuration\":")) {
+						diSPIM_MM_cameraDuration= Double.parseDouble(chunk.split(":")[1].replace("\"", "").trim());
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_cameraExposure= Double.parseDouble(chunk.split(":")[1].replace("\"", ""));
+					if (chunk.trim().startsWith("\"cameraExposure\":")) {
+						diSPIM_MM_cameraExposure= Double.parseDouble(chunk.split(":")[1].replace("\"", "").trim());
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_sliceDuration= Double.parseDouble(chunk.split(":")[1].replace("\"", ""));
+					if (chunk.trim().startsWith("\"sliceDuration\":")) {
+						diSPIM_MM_sliceDuration= Double.parseDouble(chunk.split(":")[1].replace("\"", "").trim());
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_valid= chunk.split(":")[1].replace("\"", "").toLowerCase().contains("true");
+					if (chunk.trim().startsWith("\"valid\":")) {
+						diSPIM_MM_valid= chunk.split(":")[1].replace("\"", "").trim().toLowerCase().contains("true");
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_cameraMode= chunk.split(":")[1].replace("\"", "");
+					if (chunk.trim().startsWith("\"cameraMode\":")) {
+						diSPIM_MM_cameraMode= chunk.split(":")[1].replace("\"", "").trim();
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_useHardwareTimepoints= chunk.split(":")[1].replace("\"", "").toLowerCase().contains("true");
+					if (chunk.trim().startsWith("\"hardwareTimepoints\":")) {
+						diSPIM_MM_useHardwareTimepoints= chunk.split(":")[1].replace("\"", "").trim().toLowerCase().contains("true");
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_useSeparateTimepoints= chunk.split(":")[1].replace("\"", "").toLowerCase().contains("true");
+					if (chunk.trim().startsWith("\"separateTimepoints\":")) {
+						diSPIM_MM_useSeparateTimepoints= chunk.split(":")[1].replace("\"", "").trim().toLowerCase().contains("true");
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_Position_X= chunk.split(":")[1].replace("\"", "");
+					if (chunk.trim().startsWith("\"Position_X\":")) {
+						diSPIM_MM_Position_X= chunk.split(":")[1].replace("\"", "").trim();
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_Position_Y= chunk.split(":")[1].replace("\"", "");
+					if (chunk.trim().startsWith("\"Position_Y\":")) {
+						diSPIM_MM_Position_Y= chunk.split(":")[1].replace("\"", "").trim();
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_Date= chunk.split(":")[1].replace("\"", "");
+					if (chunk.trim().startsWith("\"Date\":")) {
+						diSPIM_MM_Date= chunk.split(":")[1].replace("\"", "").trim();
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_MetadataVersion= Integer.parseInt(chunk.split(":")[1].replace("\"", ""));
+					if (chunk.trim().startsWith("\"MetadataVersion\":")) {
+						diSPIM_MM_MetadataVersion= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_Width= Integer.parseInt(chunk.split(":")[1].replace("\"", ""));
+					if (chunk.trim().startsWith("\"Width\":")) {
+						diSPIM_MM_Width= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
 					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_PixelAspect= Double.parseDouble(chunk.split(":")[1].replace("\"", ""));
-					}
-
-					for (int diSPIM_MM_channel=0; diSPIM_MM_channel<diSPIM_MM_numChannels; diSPIM_MM_channel++) {
-						if (chunk.trim().startsWith("\"spimMode\":")) {
-							diSPIM_MM_ChNames[diSPIM_MM_channel]= chunk.split(":")[1].replace("\"", "");
-						}
-					}
-					
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_Height= Integer.parseInt(chunk.split(":")[1].replace("\"", ""));
-					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_SlicePeriod_ms= chunk.split(":")[1].replace("\"", "");
-					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_GridColumn= Integer.parseInt(chunk.split(":")[1].replace("\"", ""));
-					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_PixelSize_um= Double.parseDouble(chunk.split(":")[1].replace("\"", ""));
-						vWidth = diSPIM_MM_PixelSize_um;
-						vHeight = diSPIM_MM_PixelSize_um;
-					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_Frames= Integer.parseInt(chunk.split(":")[1].replace("\"", ""));
-					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_Source= chunk.split(":")[1].replace("\"", "");
-					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_Channels= Integer.parseInt(chunk.split(":")[1].replace("\"", ""));
-					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_AcqusitionName= chunk.split(":")[1].replace("\"", "");
-					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_NumberOfSides= Integer.parseInt(chunk.split(":")[1].replace("\"", ""));
-					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_SPIMmode= chunk.split(":")[1].replace("\"", "");
-					}
-					
-					
-					for (int diSPIM_MM_channel=0; diSPIM_MM_channel<diSPIM_MM_numChannels; diSPIM_MM_channel++) {
-						if (chunk.trim().startsWith("\"spimMode\":")) {
-							diSPIM_MM_ChColors[0]= Integer.parseInt(chunk.split(":")[1].replace("\"", ""));
-						}
-					}
-				
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_Slices= Integer.parseInt(chunk.split(":")[1].replace("\"", ""));
-					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_UserName= chunk.split(":")[1].replace("\"", "");
-					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_Depth= Integer.parseInt(chunk.split(":")[1].replace("\"", ""));
-					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_PixelType= chunk.split(":")[1].replace("\"", "");
-					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_Time= chunk.split(":")[1].replace("\"", "");
-					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_FirstSide= chunk.split(":")[1].replace("\"", "");
-					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_zStep_um= Double.parseDouble(chunk.split(":")[1].replace("\"", ""));
-						vDepthRaw = diSPIM_MM_zStep_um;
-					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_SlicesFirst= chunk.split(":")[1].replace("\"", "").toLowerCase().contains("true");
-					}
-					
-					for (int diSPIM_MM_channel=0; diSPIM_MM_channel<diSPIM_MM_numChannels; diSPIM_MM_channel++) {
-						if (chunk.trim().startsWith("\"spimMode\":")) {
-							diSPIM_MM_ChContrastMin[diSPIM_MM_channel]= Integer.parseInt(chunk.split(":")[1].replace("\"", ""));
-						}
-					}
-					
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_StartTime= chunk.split(":")[1].replace("\"", "");
-					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_MVRotationAxis= chunk.split(":")[1].replace("\"", "");
-					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_MicroManagerVersion= chunk.split(":")[1].replace("\"", "");
-					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_IJType= Integer.parseInt(chunk.split(":")[1].replace("\"", ""));
-					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_GridRow= Integer.parseInt(chunk.split(":")[1].replace("\"", ""));
-					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_VolumeDuration= chunk.split(":")[1].replace("\"", "");
-					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_NumComponents= Integer.parseInt(chunk.split(":")[1].replace("\"", ""));
-					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_Position_SPIM_Head= chunk.split(":")[1].replace("\"", "");
-					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_BitDepth= Integer.parseInt(chunk.split(":")[1].replace("\"", ""));
-					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_ComputerName= chunk.split(":")[1].replace("\"", "");
-					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_CameraMode= chunk.split(":")[1].replace("\"", "");
-					}
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_TimeFirst= chunk.split(":")[1].replace("\"", "").toLowerCase().contains("true");
+					if (chunk.trim().startsWith("\"PixelAspect\":")) {
+						diSPIM_MM_PixelAspect= Double.parseDouble(chunk.split(":")[1].replace("\"", "").trim());
 					}
 
-					for (int diSPIM_MM_channel=0; diSPIM_MM_channel<diSPIM_MM_numChannels; diSPIM_MM_channel++) {
-						if (chunk.trim().startsWith("\"spimMode\":")) {
-							diSPIM_MM_ChContrastMax[diSPIM_MM_channel]= Integer.parseInt(chunk.split(":")[1].replace("\"", ""));
+						if (chunk.trim().startsWith("\"ChNames\":")) {
+							diSPIM_MM_ChNames= chunk.split(":")[1].replace("[", "").replace("]", "").replace("\"", "").split(";");
+							for(String s:diSPIM_MM_ChNames)
+								IJ.log(s);
 						}
-					}
 					
-					if (chunk.trim().startsWith("\"spimMode\":")) {
-						diSPIM_MM_Positions= Integer.parseInt(chunk.split(":")[1].replace("\"", ""));
-						pDim = diSPIM_MM_Positions;
-					}
+					
+//					if (chunk.trim().startsWith("\"spimMode\":")) {
+//						diSPIM_MM_Height= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
+//					}
+//					if (chunk.trim().startsWith("\"spimMode\":")) {
+//						diSPIM_MM_SlicePeriod_ms= chunk.split(":")[1].replace("\"", "").trim();
+//					}
+//					if (chunk.trim().startsWith("\"spimMode\":")) {
+//						diSPIM_MM_GridColumn= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
+//					}
+//					if (chunk.trim().startsWith("\"spimMode\":")) {
+//						diSPIM_MM_PixelSize_um= Double.parseDouble(chunk.split(":")[1].replace("\"", "").trim());
+//						vWidth = diSPIM_MM_PixelSize_um;
+//						vHeight = diSPIM_MM_PixelSize_um;
+//					}
+//					if (chunk.trim().startsWith("\"spimMode\":")) {
+//						diSPIM_MM_Frames= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
+//					}
+//					if (chunk.trim().startsWith("\"spimMode\":")) {
+//						diSPIM_MM_Source= chunk.split(":")[1].replace("\"", "").trim();
+//					}
+//					if (chunk.trim().startsWith("\"spimMode\":")) {
+//						diSPIM_MM_Channels= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
+//					}
+//					if (chunk.trim().startsWith("\"spimMode\":")) {
+//						diSPIM_MM_AcqusitionName= chunk.split(":")[1].replace("\"", "").trim();
+//					}
+//					if (chunk.trim().startsWith("\"spimMode\":")) {
+//						diSPIM_MM_NumberOfSides= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
+//					}
+//					if (chunk.trim().startsWith("\"spimMode\":")) {
+//						diSPIM_MM_SPIMmode= chunk.split(":")[1].replace("\"", "").trim();
+//					}
+//					
+//					
+//					for (int diSPIM_MM_channel=0; diSPIM_MM_channel<diSPIM_MM_numChannels; diSPIM_MM_channel++) {
+//						if (chunk.trim().startsWith("\"spimMode\":")) {
+//							diSPIM_MM_ChColors[0]= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
+//						}
+//					}
+//				
+//					if (chunk.trim().startsWith("\"spimMode\":")) {
+//						diSPIM_MM_Slices= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
+//					}
+//					if (chunk.trim().startsWith("\"spimMode\":")) {
+//						diSPIM_MM_UserName= chunk.split(":")[1].replace("\"", "").trim();
+//					}
+//					if (chunk.trim().startsWith("\"spimMode\":")) {
+//						diSPIM_MM_Depth= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
+//					}
+//					if (chunk.trim().startsWith("\"spimMode\":")) {
+//						diSPIM_MM_PixelType= chunk.split(":")[1].replace("\"", "").trim();
+//					}
+//					if (chunk.trim().startsWith("\"spimMode\":")) {
+//						diSPIM_MM_Time= chunk.split(":")[1].replace("\"", "").trim();
+//					}
+//					if (chunk.trim().startsWith("\"spimMode\":")) {
+//						diSPIM_MM_FirstSide= chunk.split(":")[1].replace("\"", "").trim();
+//					}
+//					if (chunk.trim().startsWith("\"spimMode\":")) {
+//						diSPIM_MM_zStep_um= Double.parseDouble(chunk.split(":")[1].replace("\"", "").trim());
+//						vDepthRaw = diSPIM_MM_zStep_um;
+//					}
+//					if (chunk.trim().startsWith("\"spimMode\":")) {
+//						diSPIM_MM_SlicesFirst= chunk.split(":")[1].replace("\"", "").trim().toLowerCase().contains("true");
+//					}
+//					
+//					for (int diSPIM_MM_channel=0; diSPIM_MM_channel<diSPIM_MM_numChannels; diSPIM_MM_channel++) {
+//						if (chunk.trim().startsWith("\"spimMode\":")) {
+//							diSPIM_MM_ChContrastMin[diSPIM_MM_channel]= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
+//						}
+//					}
+//					
+//					if (chunk.trim().startsWith("\"spimMode\":")) {
+//						diSPIM_MM_StartTime= chunk.split(":")[1].replace("\"", "").trim();
+//					}
+//					if (chunk.trim().startsWith("\"spimMode\":")) {
+//						diSPIM_MM_MVRotationAxis= chunk.split(":")[1].replace("\"", "").trim();
+//					}
+//					if (chunk.trim().startsWith("\"spimMode\":")) {
+//						diSPIM_MM_MicroManagerVersion= chunk.split(":")[1].replace("\"", "").trim();
+//					}
+//					if (chunk.trim().startsWith("\"spimMode\":")) {
+//						diSPIM_MM_IJType= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
+//					}
+//					if (chunk.trim().startsWith("\"spimMode\":")) {
+//						diSPIM_MM_GridRow= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
+//					}
+//					if (chunk.trim().startsWith("\"spimMode\":")) {
+//						diSPIM_MM_VolumeDuration= chunk.split(":")[1].replace("\"", "").trim();
+//					}
+//					if (chunk.trim().startsWith("\"spimMode\":")) {
+//						diSPIM_MM_NumComponents= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
+//					}
+//					if (chunk.trim().startsWith("\"spimMode\":")) {
+//						diSPIM_MM_Position_SPIM_Head= chunk.split(":")[1].replace("\"", "").trim();
+//					}
+//					if (chunk.trim().startsWith("\"spimMode\":")) {
+//						diSPIM_MM_BitDepth= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
+//					}
+//					if (chunk.trim().startsWith("\"spimMode\":")) {
+//						diSPIM_MM_ComputerName= chunk.split(":")[1].replace("\"", "").trim();
+//					}
+//					if (chunk.trim().startsWith("\"spimMode\":")) {
+//						diSPIM_MM_CameraMode= chunk.split(":")[1].replace("\"", "").trim();
+//					}
+//					if (chunk.trim().startsWith("\"spimMode\":")) {
+//						diSPIM_MM_TimeFirst= chunk.split(":")[1].replace("\"", "").trim().toLowerCase().contains("true");
+//					}
+//
+//					for (int diSPIM_MM_channel=0; diSPIM_MM_channel<diSPIM_MM_numChannels; diSPIM_MM_channel++) {
+//						if (chunk.trim().startsWith("\"spimMode\":")) {
+//							diSPIM_MM_ChContrastMax[diSPIM_MM_channel]= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
+//						}
+//					}
+//					
+//					if (chunk.trim().startsWith("\"spimMode\":")) {
+//						diSPIM_MM_Positions= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
+//						pDim = diSPIM_MM_Positions;
+//					}
 
 					//					if (chunk.trim().split(":").length>1)
 					//						allVars = allVars+"\n diSPIM_MM_"+chunk.trim().split(":")[1];
