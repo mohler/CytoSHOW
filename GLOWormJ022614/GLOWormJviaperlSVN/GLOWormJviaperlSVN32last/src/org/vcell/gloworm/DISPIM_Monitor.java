@@ -148,6 +148,7 @@ public class DISPIM_Monitor implements PlugIn {
 	private int tDim;
 	private int vDim;
 	private int pDim = 1;
+	private String[] diSPIM_MM_ChColorStrings;
 	
 	
 
@@ -608,11 +609,16 @@ public class DISPIM_Monitor implements PlugIn {
 //					}
 //					
 //					
-//					for (int diSPIM_MM_channel=0; diSPIM_MM_channel<diSPIM_MM_numChannels; diSPIM_MM_channel++) {
-//						if (chunk.trim().startsWith("\"spimMode\":")) {
+						if (chunk.trim().startsWith("\"ChColors\":")) {
+							diSPIM_MM_ChColorStrings= chunk.split(":")[1].replace("[", "").replace("]", "").replace("\"", "").split(";");
+							diSPIM_MM_ChColors = new int[diSPIM_MM_ChColorStrings.length];
+							for(int ccs=0;ccs<diSPIM_MM_ChColorStrings.length;ccs++) {
+								IJ.log(diSPIM_MM_ChColorStrings[ccs]);
+								diSPIM_MM_ChColors[ccs] = Integer.parseInt(diSPIM_MM_ChColorStrings[ccs]);
+							}
+						}
+					
 //							diSPIM_MM_ChColors[0]= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
-//						}
-//					}
 //				
 //					if (chunk.trim().startsWith("\"spimMode\":")) {
 //						diSPIM_MM_Slices= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
