@@ -370,6 +370,7 @@ public class DISPIM_Monitor implements PlugIn {
 					if(nextFile.isDirectory() && nextFile.list().length>0) {
 						for (String listFile:nextFile.list()){
 							if (listFile.contains("MMStack")) {
+								IJ.log(nextFile.getPath()+File.separator+listFile);
 								diSPIMheader = open_diSPIMheaderAsString(nextFile.getPath()+File.separator+listFile);
 								tDim++;
 								break;
@@ -3328,6 +3329,7 @@ public class DISPIM_Monitor implements PlugIn {
 //	{"LaserExposure_ms":"2.5","MVRotations":"0_90_0_90","SPIMtype":"diSPIM","UUID":"ea4d0baa-8f54-4937-82f7-4d1e62492be5","SPIMAcqSettings":"{\n  \"spimMode\": \"PIEZO_SLICE_SCAN\",\n  \"isStageScanning\": false,\n  \"useTimepoints\": true,\n  \"numTimepoints\": 5,\n  \"timepointInterval\": 15.0,\n  \"useMultiPositions\": true,\n  \"useChannels\": true,\n  \"channelMode\": \"VOLUME_HW\",\n  \"numChannels\": 2,\n  \"channels\": [\n    {\n      \"useChannel_\": true,\n      \"group_\": \"Channel\",\n      \"config_\": \"488 nm\"\n    },\n    {\n      \"useChannel_\": true,\n      \"group_\": \"Channel\",\n      \"config_\": \"561 nm\"\n    }\n  ],\n  \"channelGroup\": \"Channel\",\n  \"useAutofocus\": false,\n  \"numSides\": 2,\n  \"firstSideIsA\": true,\n  \"delayBeforeSide\": 50.0,\n  \"numSlices\": 50,\n  \"stepSizeUm\": 1.0,\n  \"minimizeSlicePeriod\": true,\n  \"desiredSlicePeriod\": 5.5,\n  \"desiredLightExposure\": 2.5,\n  \"centerAtCurrentZ\": false,\n  \"sliceTiming\": {\n    \"scanDelay\": 4.5,\n    \"scanNum\": 1,\n    \"scanPeriod\": 3.0,\n    \"laserDelay\": 5.5,\n    \"laserDuration\": 2.5,\n    \"cameraDelay\": 2.75,\n    \"cameraDuration\": 1.0,\n    \"cameraExposure\": 5.35,\n    \"sliceDuration\": 8.0,\n    \"valid\": true\n  },\n  \"cameraMode\": \"EDGE\",\n  \"hardwareTimepoints\": false,\n  \"separateTimepoints\": true\n}
 
 	public String open_diSPIMheaderAsString(String path) {
+		IJ.log(path);
 		if (path==null || path.equals("")) {
 			OpenDialog od = new OpenDialog("Open Text File", "");
 			String directory = od.getDirectory();
@@ -3343,13 +3345,15 @@ public class DISPIM_Monitor implements PlugIn {
 			StringBuffer sb = new StringBuffer(5000);
 			BufferedReader r = new BufferedReader(new FileReader(file));
 			String s ="";
-			while (!s.contains("·²4 È")) {
+			while (!s.contains("\"Positions\":")) {
+//			for (int l=0;l<2;l++) {
 				s=r.readLine();
+				IJ.log(s);
 				if (s==null)
 					break;
-//				else
-//					IJ.log(s);
-//					sb.append(s+"\n");
+				//				else
+				//					IJ.log(s);
+				//					sb.append(s+"\n");
 			}
 			r.close();
 //			str = new String(sb);
