@@ -56,20 +56,21 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	}
 	
 	public MultiFileInfoVirtualStack(String dirOrOMETiff, String string, boolean show) {
-		this(dirOrOMETiff, string, 0, 0, 0, 1, 0, false, show);
+		this(dirOrOMETiff, "xyczt", string, 0, 0, 0, 1, 0, false, show);
 	}
 
 	public MultiFileInfoVirtualStack(String dirOrOMETiff, String string, boolean isViewB, boolean show) {
-		this(dirOrOMETiff, string, 0, 0, 0, 1, 0, isViewB, show);
+		this(dirOrOMETiff, "xyczt", string, 0, 0, 0, 1, 0, isViewB, show);
 	}
 
-	public MultiFileInfoVirtualStack(String arg, String keyString, int cDim, int zDim, int tDim, int vDim, int pos, boolean isViewB, boolean show) {
+	public MultiFileInfoVirtualStack(String arg, String sliceOrder, String keyString, int cDim, int zDim, int tDim, int vDim, int pos, boolean isViewB, boolean show) {
 		this.keyString = keyString;
 		this.isViewB = isViewB;
 		this.cDim = cDim;
 		this.zDim = zDim;
 		this.tDim = tDim;
 		this.vDim = vDim;
+		this.dimOrder = sliceOrder;
 		File argFile = new File(arg);
 		dir = "";
 		if (!argFile.exists() || !argFile.isDirectory()) {
@@ -189,7 +190,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		String[] goDirFileList = {""};
 
 		if (allDirectories) {
-			dimOrder = "xyztc";
+//			dimOrder = "xyztc";
 			dir = "";
 
 			goDirFileList = new String[bigSubFileArrayList.size()];
@@ -478,10 +479,15 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 		n = n + stackNumber*fivStacks.get(stackNumber).getSize()/vDim;
 		
-		sliceNumber = (n-1) % (fivStacks.get(stackNumber).getSize()/vDim) + 1;
-		
+			sliceNumber = (n-1) % (fivStacks.get(stackNumber).getSize()/vDim);
+
 //		IJ.log(""+n+" "+z+" "+t);
-		ImageProcessor ip = fivStacks.get(stackNumber).getProcessor(sliceNumber+(isViewB?fivStacks.get(stackNumber).getSize()/vDim:0));
+		ImageProcessor ip = null;
+		if (dimOrder == "xyczt")
+			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber+1+(isViewB?fivStacks.get(stackNumber).getSize()/vDim:0));
+		if (dimOrder == "xyzct")
+			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber/cDim + ((sliceNumber%cDim)*fivStacks.get(stackNumber).getSize()/(vDim))
+																		+(isViewB?fivStacks.get(stackNumber).getSize()/(cDim*vDim):0));
   		int[] ipHis = ip.getHistogram();
   		double ipHisMode = 0.0;
   		int ipHisLength = ipHis.length;
