@@ -52,93 +52,93 @@ import ij.process.LUT;
 public class DISPIM_Monitor implements PlugIn {
 
 	//Info from proximal tiff header in MMomeTIFF vvvvvvv
-	 private double diSPIM_MM_LaserExposure_ms;
-	 private String diSPIM_MM_MVRotations;
-	 private String diSPIM_MM_SPIMtype;
-	 private String diSPIM_MM_UUID;
-//	 private int diSPIM_MM_SPIMAcqSettings;
-	 private String diSPIM_MM_spimMode;
-	 private boolean diSPIM_MM_isStageScanning;
-	 private boolean diSPIM_MM_useTimepoints;
-	 private int diSPIM_MM_numTimepoints;
-	 private double diSPIM_MM_timepointInterval;
-	 private boolean diSPIM_MM_useMultiPositions;
-	 private boolean diSPIM_MM_useChannels;
-	 private String diSPIM_MM_channelMode;
-	 private int diSPIM_MM_numChannels;
-//	 private int diSPIM_MM_channels;
-	 private boolean[] diSPIM_MM_useChannel;
-	 private String[] diSPIM_MM_group;
-	 private String[] diSPIM_MM_config;
-	 private String diSPIM_MM_channelGroup;
-	 private boolean diSPIM_MM_useAutofocus;
-	 private int diSPIM_MM_numSides;
-	 private boolean diSPIM_MM_firstSideIsA;
-	 private double diSPIM_MM_delayBeforeSide;
-	 private int diSPIM_MM_numSlices;
-	 private double diSPIM_MM_stepSizeUm;
-	 private boolean diSPIM_MM_minimizeSlicePeriod;
-	 private double diSPIM_MM_desiredSlicePeriod;
-	 private double diSPIM_MM_desiredLightExposure;
-	 private boolean diSPIM_MM_centerAtCurrentZ;
-//	 private int diSPIM_MM_sliceTiming;
-	 private double diSPIM_MM_scanDelay;
-	 private int diSPIM_MM_scanNum;
-	 private double diSPIM_MM_scanPeriod;
-	 private double diSPIM_MM_laserDelay;
-	 private double diSPIM_MM_laserDuration;
-	 private double diSPIM_MM_cameraDelay;
-	 private double diSPIM_MM_cameraDuration;
-	 private double diSPIM_MM_cameraExposure;
-	 private double diSPIM_MM_sliceDuration;
-	 private boolean diSPIM_MM_valid;
-	 private String diSPIM_MM_cameraMode;
-	 private boolean diSPIM_MM_useHardwareTimepoints;
-	 private boolean diSPIM_MM_useSeparateTimepoints;
-	 private String diSPIM_MM_Position_X;
-	 private String diSPIM_MM_Position_Y;
-	 private String diSPIM_MM_Date;
-	 private int diSPIM_MM_MetadataVersion;
-	 private int diSPIM_MM_Width;
-	 private double diSPIM_MM_PixelAspect;
-	 private String[] diSPIM_MM_ChNames;
-	 private int diSPIM_MM_Height;
-	 private String diSPIM_MM_SlicePeriod_ms;
-	 private int diSPIM_MM_GridColumn;
-	 private double diSPIM_MM_PixelSize_um;
-	 private int diSPIM_MM_Frames;
-	 private String diSPIM_MM_Source;
-	 private int diSPIM_MM_Channels;
-	 private String diSPIM_MM_AcqusitionName;
-	 private int diSPIM_MM_NumberOfSides;
-	 private String diSPIM_MM_SPIMmode;
-	 private int[] diSPIM_MM_ChColors;
-	 private int diSPIM_MM_Slices;
-	 private String diSPIM_MM_UserName;
-	 private int diSPIM_MM_Depth;
-	 private String diSPIM_MM_PixelType;
-	 private String diSPIM_MM_Time;
-	 private String diSPIM_MM_FirstSide;
-	 private double diSPIM_MM_zStep_um;
-	 private boolean diSPIM_MM_SlicesFirst;
-	 private int[] diSPIM_MM_ChContrastMin;
-	 private String diSPIM_MM_StartTime;
-	 private String diSPIM_MM_MVRotationAxis;
-	 private String diSPIM_MM_MicroManagerVersion;
-	 private int diSPIM_MM_IJType;
-	 private int diSPIM_MM_GridRow;
-	 private String diSPIM_MM_VolumeDuration;
-	 private int diSPIM_MM_NumComponents;
-	 private String diSPIM_MM_Position_SPIM_Head;
-	 private int diSPIM_MM_BitDepth;
-	 private String diSPIM_MM_ComputerName;
-	 private String diSPIM_MM_CameraMode;
-	 private boolean diSPIM_MM_TimeFirst;
-	 private int[] diSPIM_MM_ChContrastMax;
-	 private int diSPIM_MM_Positions;
-		//Info from proximal tiff header in MMomeTIFF ^^^^^^
+	private double diSPIM_MM_LaserExposure_ms;
+	private String diSPIM_MM_MVRotations;
+	private String diSPIM_MM_SPIMtype;
+	private String diSPIM_MM_UUID;
+	//	 private int diSPIM_MM_SPIMAcqSettings;
+	private String diSPIM_MM_spimMode;
+	private boolean diSPIM_MM_isStageScanning;
+	private boolean diSPIM_MM_useTimepoints;
+	private int diSPIM_MM_numTimepoints;
+	private double diSPIM_MM_timepointInterval;
+	private boolean diSPIM_MM_useMultiPositions;
+	private boolean diSPIM_MM_useChannels;
+	private String diSPIM_MM_channelMode;
+	private int diSPIM_MM_numChannels;
+	//	 private int diSPIM_MM_channels;
+	private boolean[] diSPIM_MM_useChannel;
+	private String[] diSPIM_MM_group;
+	private String[] diSPIM_MM_config;
+	private String diSPIM_MM_channelGroup;
+	private boolean diSPIM_MM_useAutofocus;
+	private int diSPIM_MM_numSides;
+	private boolean diSPIM_MM_firstSideIsA;
+	private double diSPIM_MM_delayBeforeSide;
+	private int diSPIM_MM_numSlices;
+	private double diSPIM_MM_stepSizeUm;
+	private boolean diSPIM_MM_minimizeSlicePeriod;
+	private double diSPIM_MM_desiredSlicePeriod;
+	private double diSPIM_MM_desiredLightExposure;
+	private boolean diSPIM_MM_centerAtCurrentZ;
+	//	 private int diSPIM_MM_sliceTiming;
+	private double diSPIM_MM_scanDelay;
+	private int diSPIM_MM_scanNum;
+	private double diSPIM_MM_scanPeriod;
+	private double diSPIM_MM_laserDelay;
+	private double diSPIM_MM_laserDuration;
+	private double diSPIM_MM_cameraDelay;
+	private double diSPIM_MM_cameraDuration;
+	private double diSPIM_MM_cameraExposure;
+	private double diSPIM_MM_sliceDuration;
+	private boolean diSPIM_MM_valid;
+	private String diSPIM_MM_cameraMode;
+	private boolean diSPIM_MM_useHardwareTimepoints;
+	private boolean diSPIM_MM_useSeparateTimepoints;
+	private String diSPIM_MM_Position_X;
+	private String diSPIM_MM_Position_Y;
+	private String diSPIM_MM_Date;
+	private int diSPIM_MM_MetadataVersion;
+	private int diSPIM_MM_Width;
+	private double diSPIM_MM_PixelAspect;
+	private String[] diSPIM_MM_ChNames;
+	private int diSPIM_MM_Height;
+	private String diSPIM_MM_SlicePeriod_ms;
+	private int diSPIM_MM_GridColumn;
+	private double diSPIM_MM_PixelSize_um;
+	private int diSPIM_MM_Frames;
+	private String diSPIM_MM_Source;
+	private int diSPIM_MM_Channels;
+	private String diSPIM_MM_AcqusitionName;
+	private int diSPIM_MM_NumberOfSides;
+	private String diSPIM_MM_SPIMmode;
+	private int[] diSPIM_MM_ChColors;
+	private int diSPIM_MM_Slices;
+	private String diSPIM_MM_UserName;
+	private int diSPIM_MM_Depth;
+	private String diSPIM_MM_PixelType;
+	private String diSPIM_MM_Time;
+	private String diSPIM_MM_FirstSide;
+	private double diSPIM_MM_zStep_um;
+	private boolean diSPIM_MM_SlicesFirst;
+	private int[] diSPIM_MM_ChContrastMin;
+	private String diSPIM_MM_StartTime;
+	private String diSPIM_MM_MVRotationAxis;
+	private String diSPIM_MM_MicroManagerVersion;
+	private int diSPIM_MM_IJType;
+	private int diSPIM_MM_GridRow;
+	private String diSPIM_MM_VolumeDuration;
+	private int diSPIM_MM_NumComponents;
+	private String diSPIM_MM_Position_SPIM_Head;
+	private int diSPIM_MM_BitDepth;
+	private String diSPIM_MM_ComputerName;
+	private String diSPIM_MM_CameraMode;
+	private boolean diSPIM_MM_TimeFirst;
+	private int[] diSPIM_MM_ChContrastMax;
+	private int diSPIM_MM_Positions;
+	//Info from proximal tiff header in MMomeTIFF ^^^^^^
 
-	
+
 	private boolean doDecon;
 	private int keyChannel;
 	private int slaveChannel;
@@ -152,8 +152,8 @@ public class DISPIM_Monitor implements PlugIn {
 	private String[] diSPIM_MM_ChContrastMinStrings;
 	private String[] diSPIM_MM_ChContrastMaxStrings;
 	private String dimOrder;
-	
-	
+
+
 
 	public boolean isDoDecon() {
 		return doDecon;
@@ -337,37 +337,37 @@ public class DISPIM_Monitor implements PlugIn {
 			if (omeTiffs) {
 				fileListA = new File("" + dirOrOMETiff).list();
 
-//				cDim = 0;
-//				zDim = 0;
-//				tDim = 0;
-//				vDim = 0;
-//				GenericDialog gd = new GenericDialog("Dimensions of HyperStacks");
-//				gd.addNumericField("Channels (c):", 2, 0);
-//				gd.addNumericField("Slices (z):", 50, 0);
-////				gd.addNumericField("Frames (t):", dirOrOMETiffFile.list().length, 0);
-//				gd.addNumericField("Views (v):", 2, 0);
-//				gd.addNumericField("Positions (p):", 1, 0);
-//
-//				gd.showDialog();
-//				if (gd.wasCanceled()) return;
-//				if (cDim == 0 || tDim == 0 || tDim == 0) {
-//					cDim = (int) gd.getNextNumber();
-//					wavelengths = cDim;
-//					zDim = (int) gd.getNextNumber();
-////					tDim = (int) gd.getNextNumber();
-//					vDim = (int) gd.getNextNumber();
-//					pDim = (int) gd.getNextNumber();
-//				}
+				//				cDim = 0;
+				//				zDim = 0;
+				//				tDim = 0;
+				//				vDim = 0;
+				//				GenericDialog gd = new GenericDialog("Dimensions of HyperStacks");
+				//				gd.addNumericField("Channels (c):", 2, 0);
+				//				gd.addNumericField("Slices (z):", 50, 0);
+				////				gd.addNumericField("Frames (t):", dirOrOMETiffFile.list().length, 0);
+				//				gd.addNumericField("Views (v):", 2, 0);
+				//				gd.addNumericField("Positions (p):", 1, 0);
+				//
+				//				gd.showDialog();
+				//				if (gd.wasCanceled()) return;
+				//				if (cDim == 0 || tDim == 0 || tDim == 0) {
+				//					cDim = (int) gd.getNextNumber();
+				//					wavelengths = cDim;
+				//					zDim = (int) gd.getNextNumber();
+				////					tDim = (int) gd.getNextNumber();
+				//					vDim = (int) gd.getNextNumber();
+				//					pDim = (int) gd.getNextNumber();
+				//				}
 
 				if (keyString =="")
 					keyString = dirOrOMETiffFile.list()[dirOrOMETiffFile.list().length/2].split("_")[0];
 
 				//Reading in diSPIM header from MM tiffs vvvvvv
-				
+
 				readInMMdiSPIMheader(dirOrOMETiffFile);
-				
+
 				//Reading in diSPIM header from MM tiffs ^^^^^^
-				
+
 				dimOrder = (diSPIM_MM_channelMode.contains("VOLUME")?"xyzct":"xyczt");
 
 				vWidth = diSPIM_MM_PixelSize_um;
@@ -393,46 +393,46 @@ public class DISPIM_Monitor implements PlugIn {
 					impBs[pos].setFileInfo(new FileInfo());
 					impBs[pos].getOriginalFileInfo().fileName = dirOrOMETiff;
 					impBs[pos].getOriginalFileInfo().directory = dirOrOMETiff;
-					
+
 					stackAs[pos] = new MultiFileInfoVirtualStack(
 							dirOrOMETiff, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
 							false, false);
 					stackBs[pos] = new MultiFileInfoVirtualStack(
 							dirOrOMETiff, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
 							true, false);
-					
+
 					impAs[pos].setStack(stackAs[pos]);
 					Calibration calA = impAs[pos].getCalibration();
 					calA.pixelWidth = vWidth;
 					calA.pixelHeight = vHeight;
 					calA.pixelDepth = vDepthRaw;
 					calA.setUnit(vUnit);
-					
+
 					boolean channelSwitchVolume = stackAs[pos].getDimOrder() == "xyzct" ;
 					if (channelSwitchVolume ) {
-//						for (int t=tDim-1;t>=0;t--) {
-//							for (int c=cDim-1;c>=1;c=c-2) {
-//								for (int s=c*zDim-1;s>=(c-1)*zDim;s--) {
-//									int target = t*cDim*zDim + s+1;
-//									stackAs[pos].deleteSlice(target);
-//								}
-//							}
-//						}
+						//						for (int t=tDim-1;t>=0;t--) {
+						//							for (int c=cDim-1;c>=1;c=c-2) {
+						//								for (int s=c*zDim-1;s>=(c-1)*zDim;s--) {
+						//									int target = t*cDim*zDim + s+1;
+						//									stackAs[pos].deleteSlice(target);
+						//								}
+						//							}
+						//						}
 					} else {
-//						for (int t=tDim-1;t>=0;t--) {
-//							for (int s=zDim*cDim-1;s>=0;s--) {
-//								int target = t*cDim*zDim + s+1;
-//								if (s<zDim*cDim/2) { 
-//									stackAs[pos].deleteSlice(target);
-//								}
-//							}
-//						}
+						//						for (int t=tDim-1;t>=0;t--) {
+						//							for (int s=zDim*cDim-1;s>=0;s--) {
+						//								int target = t*cDim*zDim + s+1;
+						//								if (s<zDim*cDim/2) { 
+						//									stackAs[pos].deleteSlice(target);
+						//								}
+						//							}
+						//						}
 					}
 
-					
+
 					if (stageScan)
 						stackAs[pos].setSkewXperZ(
-							calA.pixelDepth / calA.pixelWidth);
+								calA.pixelDepth / calA.pixelWidth);
 					impAs[pos].setOpenAsHyperStack(true);
 					impAs[pos].setDimensions(cDim, zDim, stackAs[pos].getSize()/(cDim*zDim));
 					impAs[pos] = new CompositeImage(impAs[pos]);
@@ -448,31 +448,31 @@ public class DISPIM_Monitor implements PlugIn {
 					calB.pixelHeight = vHeight;
 					calB.pixelDepth = vDepthRaw;
 					calB.setUnit(vUnit);
-					
+
 					if (channelSwitchVolume ) {
-//						for (int t=tDim-1;t>=0;t--) {
-//							for (int c=cDim-1;c>=1;c=c-2) {
-//								for (int s=c*zDim-1;s>=(c-1)*zDim;s--) {
-//									int target = t*cDim*zDim + s+1;
-//									stackBs[pos].deleteSlice(target);
-//								}
-//							}
-//						}
+						//						for (int t=tDim-1;t>=0;t--) {
+						//							for (int c=cDim-1;c>=1;c=c-2) {
+						//								for (int s=c*zDim-1;s>=(c-1)*zDim;s--) {
+						//									int target = t*cDim*zDim + s+1;
+						//									stackBs[pos].deleteSlice(target);
+						//								}
+						//							}
+						//						}
 					} else {
-//						for (int t=tDim-1;t>=0;t--) {
-//							for (int s=zDim*cDim-1;s>=0;s--) {
-//								int target = t*cDim*zDim + s+1;
-//								if (s<zDim*cDim/2) { 
-//									stackBs[pos].deleteSlice(target);
-//								}
-//							}
-//						}
+						//						for (int t=tDim-1;t>=0;t--) {
+						//							for (int s=zDim*cDim-1;s>=0;s--) {
+						//								int target = t*cDim*zDim + s+1;
+						//								if (s<zDim*cDim/2) { 
+						//									stackBs[pos].deleteSlice(target);
+						//								}
+						//							}
+						//						}
 					}
-					
-					
+
+
 					if (stageScan)
 						stackBs[pos].setSkewXperZ(
-							-calB.pixelDepth / calB.pixelWidth);
+								-calB.pixelDepth / calB.pixelWidth);
 					impBs[pos].setOpenAsHyperStack(true);
 					impBs[pos].setDimensions(cDim, zDim, stackBs[pos].getSize()/(cDim*zDim));
 					impBs[pos] = new CompositeImage(impBs[pos]);
@@ -574,7 +574,7 @@ public class DISPIM_Monitor implements PlugIn {
 								if (!newTifListA[f].endsWith(".roi")
 										&& !newTifListA[f]
 												.endsWith(".DS_Store")
-										&& big5DFileListAString
+												&& big5DFileListAString
 												.indexOf(nextPathA
 														+ File.separator
 														+ newTifListA[f]) < 0)
@@ -590,7 +590,7 @@ public class DISPIM_Monitor implements PlugIn {
 								if (!newTifListB[f].endsWith(".roi")
 										&& !newTifListB[f]
 												.endsWith(".DS_Store")
-										&& big5DFileListBString
+												&& big5DFileListBString
 												.indexOf(nextPathB
 														+ File.separator
 														+ newTifListB[f]) < 0)
@@ -643,7 +643,7 @@ public class DISPIM_Monitor implements PlugIn {
 
 					if (impA.isComposite())
 						((CompositeImage) impA)
-								.setMode(CompositeImage.COMPOSITE);
+						.setMode(CompositeImage.COMPOSITE);
 					impA.show();
 
 				}
@@ -685,7 +685,7 @@ public class DISPIM_Monitor implements PlugIn {
 
 					if (impB.isComposite())
 						((CompositeImage) impB)
-								.setMode(CompositeImage.COMPOSITE);
+						.setMode(CompositeImage.COMPOSITE);
 					impB.show();
 
 				}
@@ -879,7 +879,7 @@ public class DISPIM_Monitor implements PlugIn {
 							+ " frames="
 							+ (Math.floor(newLength
 									/ (wavelengths * 2 * zSlices)))
-							+ " display=Composite");
+									+ " display=Composite");
 			// IJ.getImage().setTitle("SPIMA: "+IJ.getImage().getTitle());
 			impA = impAs[0] = WindowManager.getCurrentImage();
 			Calibration calA = impA.getCalibration();
@@ -889,7 +889,7 @@ public class DISPIM_Monitor implements PlugIn {
 			calA.setUnit(vUnit);
 			if (stageScan)
 				impA.getStack()
-						.setSkewXperZ(-calA.pixelDepth / calA.pixelWidth);
+				.setSkewXperZ(-calA.pixelDepth / calA.pixelWidth);
 			impA.setTitle("SPIMA: " + impA.getTitle());
 
 			IJ.run("Image Sequence...",
@@ -906,7 +906,7 @@ public class DISPIM_Monitor implements PlugIn {
 							+ " frames="
 							+ (Math.floor(newLength
 									/ (wavelengths * 2 * zSlices)))
-							+ " display=Composite");
+									+ " display=Composite");
 			// IJ.getImage().setTitle("SPIMB: "+IJ.getImage().getTitle());
 			impB = impBs[0] = WindowManager.getCurrentImage();
 			Calibration calB = impB.getCalibration();
@@ -938,538 +938,538 @@ public class DISPIM_Monitor implements PlugIn {
 		} else
 			doDecon = false;
 
-			if (doDecon) {
-				
-				for (int pos=0; pos<pDim; pos++) {
+		if (doDecon) {
 
-					impA = impAs[pos];
-					impB = impBs[pos];
+			for (int pos=0; pos<pDim; pos++) {
 
-					Roi roiA = impA.getRoi();
-					Roi roiB = impB.getRoi();
+				impA = impAs[pos];
+				impB = impBs[pos];
 
-					while (roiA == null || roiB == null
-							// || (roiA.getType() == Roi.RECTANGLE &&
-							// roiA.getBounds().getHeight() > cropHeight)
-							// || (roiB.getType() == Roi.RECTANGLE &&
-							// roiB.getBounds().getHeight() > cropHeight)
-							// || (roiA.getType() == Roi.RECTANGLE &&
-							// roiA.getBounds().getWidth() > cropHeight)
-							// || (roiB.getType() == Roi.RECTANGLE &&
-							// roiB.getBounds().getWidth() > cropHeight)
-							// || (roiA.getType() != Roi.RECTANGLE &&
-							// roiA.getFeretValues()[0]>cropHeight*impA.getCalibration().pixelHeight)
-							// || (roiB.getType() != Roi.RECTANGLE &&
-							// roiB.getFeretValues()[0]>cropHeight*impB.getCalibration().pixelHeight)
-							) {
-						WindowManager.setTempCurrentImage(impA);
-						if (roiA == null) {
-							if (!((new File(savePath +  "Pos" + pos + "A_crop.roi")).canRead())) {
-								IJ.makeRectangle(0, 0, cropWidth, cropHeight);
-							} else {
-								IJ.open(savePath +  "Pos" + pos + "A_crop.roi");
-								roiA = impA.getRoi();
-								cropWidth = roiA.getBounds().width;
-								cropHeight = roiA.getBounds().height;
-							}
-						} else if (roiA.getType() != Roi.RECTANGLE
-								&& roiA.getFeretValues()[0] > cropHeight
-								* impA.getCalibration().pixelHeight
-								|| (roiA.getType() == Roi.RECTANGLE && roiA.getBounds()
-								.getHeight() > cropHeight)
-								|| (roiA.getType() == Roi.RECTANGLE && roiA.getBounds()
-								.getWidth() > cropHeight)) {
-							impA.setRoi(roiA.getBounds().x
-									+ (roiA.getBounds().width - cropWidth) / 2,
-									roiA.getBounds().y
-									+ (roiA.getBounds().height - cropHeight)
-									/ 2, cropWidth, cropHeight);
-							impA.setRoi(
-									roiA.getBounds().x < 0 ? 0 : roiA.getBounds().x,
-											roiA.getBounds().y < 0 ? 0 : roiA.getBounds().y,
-													cropWidth, cropHeight);
+				Roi roiA = impA.getRoi();
+				Roi roiB = impB.getRoi();
+
+				while (roiA == null || roiB == null
+						// || (roiA.getType() == Roi.RECTANGLE &&
+						// roiA.getBounds().getHeight() > cropHeight)
+						// || (roiB.getType() == Roi.RECTANGLE &&
+						// roiB.getBounds().getHeight() > cropHeight)
+						// || (roiA.getType() == Roi.RECTANGLE &&
+						// roiA.getBounds().getWidth() > cropHeight)
+						// || (roiB.getType() == Roi.RECTANGLE &&
+						// roiB.getBounds().getWidth() > cropHeight)
+						// || (roiA.getType() != Roi.RECTANGLE &&
+						// roiA.getFeretValues()[0]>cropHeight*impA.getCalibration().pixelHeight)
+						// || (roiB.getType() != Roi.RECTANGLE &&
+						// roiB.getFeretValues()[0]>cropHeight*impB.getCalibration().pixelHeight)
+						) {
+					WindowManager.setTempCurrentImage(impA);
+					if (roiA == null) {
+						if (!((new File(savePath +  "Pos" + pos + "A_crop.roi")).canRead())) {
+							IJ.makeRectangle(0, 0, cropWidth, cropHeight);
+						} else {
+							IJ.open(savePath +  "Pos" + pos + "A_crop.roi");
+							roiA = impA.getRoi();
+							cropWidth = roiA.getBounds().width;
+							cropHeight = roiA.getBounds().height;
 						}
-						WindowManager.setTempCurrentImage(impB);
-						if (roiB == null) {
-							if (!((new File(savePath + "Pos" + pos + "B_crop.roi")).canRead())) {
-								IJ.makeRectangle(0, 0, cropWidth, cropHeight);
-							} else {
-								IJ.open(savePath +  "Pos" + pos + "B_crop.roi");
-								roiB = impB.getRoi();
-							}
-						} else if (roiB.getType() != Roi.RECTANGLE
-								&& roiB.getFeretValues()[0] > cropHeight
-								* impB.getCalibration().pixelHeight
-								|| (roiB.getType() == Roi.RECTANGLE && roiB.getBounds()
-								.getWidth() > cropHeight)
-								|| (roiB.getType() == Roi.RECTANGLE && roiB.getBounds()
-								.getHeight() > cropHeight)) {
-							impB.setRoi(roiB.getBounds().x
-									+ (roiB.getBounds().width - cropWidth) / 2,
-									roiB.getBounds().y
-									+ (roiB.getBounds().height - cropHeight)
-									/ 2, cropWidth, cropHeight);
-							impB.setRoi(
-									roiB.getBounds().x < 0 ? 0 : roiB.getBounds().x,
-											roiB.getBounds().y < 0 ? 0 : roiB.getBounds().y,
-													cropWidth, cropHeight);
-						}
-						WindowManager.setTempCurrentImage(null);
-
-						IJ.runMacro("waitForUser(\"Select the regions containing the embryo"
-								+ "\\\n for deconvolution/fusion processing."
-								// + "\\\nAlso, set the minimum Brightness limit."
-								// +
-								// "\\\nWhen you are then ready, click OK here to commence processing."
-								+ "\");");
-						roiA = impA.getRoi();
-						roiB = impB.getRoi();
+					} else if (roiA.getType() != Roi.RECTANGLE
+							&& roiA.getFeretValues()[0] > cropHeight
+							* impA.getCalibration().pixelHeight
+							|| (roiA.getType() == Roi.RECTANGLE && roiA.getBounds()
+							.getHeight() > cropHeight)
+							|| (roiA.getType() == Roi.RECTANGLE && roiA.getBounds()
+							.getWidth() > cropHeight)) {
+						impA.setRoi(roiA.getBounds().x
+								+ (roiA.getBounds().width - cropWidth) / 2,
+								roiA.getBounds().y
+								+ (roiA.getBounds().height - cropHeight)
+								/ 2, cropWidth, cropHeight);
+						impA.setRoi(
+								roiA.getBounds().x < 0 ? 0 : roiA.getBounds().x,
+										roiA.getBounds().y < 0 ? 0 : roiA.getBounds().y,
+												cropWidth, cropHeight);
 					}
+					WindowManager.setTempCurrentImage(impB);
+					if (roiB == null) {
+						if (!((new File(savePath + "Pos" + pos + "B_crop.roi")).canRead())) {
+							IJ.makeRectangle(0, 0, cropWidth, cropHeight);
+						} else {
+							IJ.open(savePath +  "Pos" + pos + "B_crop.roi");
+							roiB = impB.getRoi();
+						}
+					} else if (roiB.getType() != Roi.RECTANGLE
+							&& roiB.getFeretValues()[0] > cropHeight
+							* impB.getCalibration().pixelHeight
+							|| (roiB.getType() == Roi.RECTANGLE && roiB.getBounds()
+							.getWidth() > cropHeight)
+							|| (roiB.getType() == Roi.RECTANGLE && roiB.getBounds()
+							.getHeight() > cropHeight)) {
+						impB.setRoi(roiB.getBounds().x
+								+ (roiB.getBounds().width - cropWidth) / 2,
+								roiB.getBounds().y
+								+ (roiB.getBounds().height - cropHeight)
+								/ 2, cropWidth, cropHeight);
+						impB.setRoi(
+								roiB.getBounds().x < 0 ? 0 : roiB.getBounds().x,
+										roiB.getBounds().y < 0 ? 0 : roiB.getBounds().y,
+												cropWidth, cropHeight);
+					}
+					WindowManager.setTempCurrentImage(null);
 
-					// int[] minLimit = {(int) impA.getDisplayRangeMin(), (int)
-					// impB.getDisplayRangeMin()};
-					// if (impA.isComposite()) {
-					// minLimit = new int[impA.getNChannels()*2];
-					// for (int c=1; c<=impA.getNChannels(); c++) {
-					// minLimit[c-1] = (int)
-					// ((CompositeImage)impA).getProcessor(c).getMin();
-					// minLimit[c+1] = (int)
-					// ((CompositeImage)impB).getProcessor(c).getMin();
-					// }
-					// }
-
-					IJ.saveAs(impA, "Selection", savePath +  "Pos" + pos + "A_crop.roi");
-					IJ.saveAs(impB, "Selection", savePath +  "Pos" + pos + "B_crop.roi");
-
+					IJ.runMacro("waitForUser(\"Select the regions containing the embryo"
+							+ "\\\n for deconvolution/fusion processing."
+							// + "\\\nAlso, set the minimum Brightness limit."
+							// +
+							// "\\\nWhen you are then ready, click OK here to commence processing."
+							+ "\");");
+					roiA = impA.getRoi();
+					roiB = impB.getRoi();
 				}
-				
-				
-				for (int pos=0; pos<pDim; pos++) {
 
-					impA = impAs[pos];
-					impB = impBs[pos];
-					
-					Roi roiA = impA.getRoi();
-					Roi roiB = impB.getRoi();
+				// int[] minLimit = {(int) impA.getDisplayRangeMin(), (int)
+				// impB.getDisplayRangeMin()};
+				// if (impA.isComposite()) {
+				// minLimit = new int[impA.getNChannels()*2];
+				// for (int c=1; c<=impA.getNChannels(); c++) {
+				// minLimit[c-1] = (int)
+				// ((CompositeImage)impA).getProcessor(c).getMin();
+				// minLimit[c+1] = (int)
+				// ((CompositeImage)impB).getProcessor(c).getMin();
+				// }
+				// }
 
-					int wasFrameA = impA.getFrame();
-					int wasFrameB = impB.getFrame();
-					int wasSliceA = impA.getSlice();
-					int wasSliceB = impB.getSlice();
-					int wasChannelA = impA.getChannel();
-					int wasChannelB = impB.getChannel();
+				IJ.saveAs(impA, "Selection", savePath +  "Pos" + pos + "A_crop.roi");
+				IJ.saveAs(impB, "Selection", savePath +  "Pos" + pos + "B_crop.roi");
 
-					if ((new File(savePath)).canRead()) {
-						if (impDF1 == null) {
+			}
+
+
+			for (int pos=0; pos<pDim; pos++) {
+
+				impA = impAs[pos];
+				impB = impBs[pos];
+
+				Roi roiA = impA.getRoi();
+				Roi roiB = impB.getRoi();
+
+				int wasFrameA = impA.getFrame();
+				int wasFrameB = impB.getFrame();
+				int wasSliceA = impA.getSlice();
+				int wasSliceB = impB.getSlice();
+				int wasChannelA = impA.getChannel();
+				int wasChannelB = impB.getChannel();
+
+				if ((new File(savePath)).canRead()) {
+					if (impDF1 == null) {
+						IJ.runMacro("File.makeDirectory(\""
+								+ savePath.replace("\\", "\\\\")
+								+"Pos"+pos+ "_Deconvolution1\");");
+						if (wavelengths == 2) {
 							IJ.runMacro("File.makeDirectory(\""
 									+ savePath.replace("\\", "\\\\")
-									+"Pos"+pos+ "_Deconvolution1\");");
-							if (wavelengths == 2) {
-								IJ.runMacro("File.makeDirectory(\""
-										+ savePath.replace("\\", "\\\\")
-										+"Pos"+pos+ "_Deconvolution2\");");
-							}
-							MultiFileInfoVirtualStack deconmfivs = new MultiFileInfoVirtualStack(
-									((new File(dirOrOMETiff)).isDirectory() ? dirOrOMETiff
-											: (new File(dirOrOMETiff)).getParent())
-											+ File.separator, "Deconvolution",
-											false);
-							if (deconmfivs.getSize() > 0) {
-								impDF1 = new ImagePlus();
-								impDF1.setStack(
-										"Decon-Fuse"
-												+ impA.getTitle().replace(
-														impA.getTitle().split(":")[0],
-														""), deconmfivs);
-								impDF1.setFileInfo(new FileInfo());
-								// impDF1.getOriginalFileInfo().directory = (new
-								// File(dirOrOMETiff)).isDirectory()?dirOrOMETiff:((new
-								// File(dirOrOMETiff)).getParent()+File.separator);
-								impDF1.getOriginalFileInfo().directory = dirOrOMETiff;
-								int stkNSlicesDF = impDF1.getStackSize();
-								int zSlicesDF1 = deconmfivs.getFivStacks().get(0)
-										.getSize();
-								impDF1.setOpenAsHyperStack(true);
-								impDF1.setStack(impDF1.getStack(), wavelengths,
-										zSlicesDF1, stkNSlicesDF
-										/ (wavelengths * zSlicesDF1));
-								ciDF1 = new CompositeImage(impDF1);
-								if (wavelengths > 1)
-									ciDF1.setMode(CompositeImage.COMPOSITE);
-								else
-									ciDF1.setMode(CompositeImage.GRAYSCALE);
-								ciDF1.show();
-								win = ciDF1.getWindow();
-							}
+									+"Pos"+pos+ "_Deconvolution2\");");
+						}
+						MultiFileInfoVirtualStack deconmfivs = new MultiFileInfoVirtualStack(
+								((new File(dirOrOMETiff)).isDirectory() ? dirOrOMETiff
+										: (new File(dirOrOMETiff)).getParent())
+										+ File.separator, "Deconvolution",
+										false);
+						if (deconmfivs.getSize() > 0) {
+							impDF1 = new ImagePlus();
+							impDF1.setStack(
+									"Decon-Fuse"
+											+ impA.getTitle().replace(
+													impA.getTitle().split(":")[0],
+													""), deconmfivs);
+							impDF1.setFileInfo(new FileInfo());
+							// impDF1.getOriginalFileInfo().directory = (new
+							// File(dirOrOMETiff)).isDirectory()?dirOrOMETiff:((new
+							// File(dirOrOMETiff)).getParent()+File.separator);
+							impDF1.getOriginalFileInfo().directory = dirOrOMETiff;
+							int stkNSlicesDF = impDF1.getStackSize();
+							int zSlicesDF1 = deconmfivs.getFivStacks().get(0)
+									.getSize();
+							impDF1.setOpenAsHyperStack(true);
+							impDF1.setStack(impDF1.getStack(), wavelengths,
+									zSlicesDF1, stkNSlicesDF
+									/ (wavelengths * zSlicesDF1));
+							ciDF1 = new CompositeImage(impDF1);
+							if (wavelengths > 1)
+								ciDF1.setMode(CompositeImage.COMPOSITE);
+							else
+								ciDF1.setMode(CompositeImage.GRAYSCALE);
+							ciDF1.show();
+							win = ciDF1.getWindow();
 						}
 					}
+				}
 
-					String[] frameFileNames = new String[impA.getNFrames() + 1];
+				String[] frameFileNames = new String[impA.getNFrames() + 1];
 
-					for (int f = 1; f <= impA.getNFrames(); f++) {
+				for (int f = 1; f <= impA.getNFrames(); f++) {
 
-						impA.setPositionWithoutUpdate(impA.getChannel(),
-								impA.getSlice(), f);
+					impA.setPositionWithoutUpdate(impA.getChannel(),
+							impA.getSlice(), f);
 
-						if (impA.getStack() instanceof ListVirtualStack)
-							frameFileNames[f] = ((ListVirtualStack) impA.getStack())
-							.getDirectory(impA.getCurrentSlice());
-						else if (impA.getStack() instanceof FileInfoVirtualStack
-								|| impA.getStack() instanceof MultiFileInfoVirtualStack)
-							frameFileNames[f] = "t" + f;
-						else
-							frameFileNames[f] = "t" + f;
-						String timecode = "" + (new Date()).getTime();
+					if (impA.getStack() instanceof ListVirtualStack)
+						frameFileNames[f] = ((ListVirtualStack) impA.getStack())
+						.getDirectory(impA.getCurrentSlice());
+					else if (impA.getStack() instanceof FileInfoVirtualStack
+							|| impA.getStack() instanceof MultiFileInfoVirtualStack)
+						frameFileNames[f] = "t" + f;
+					else
+						frameFileNames[f] = "t" + f;
+					String timecode = "" + (new Date()).getTime();
 
-						if (!(new File(savePath + "Pos"+pos+ "_SPIMA_Ch1_processed"
-								+ File.separator + frameFileNames[f] + File.separator
-								+ frameFileNames[f] + ".tif")).canRead()
-								|| (wavelengths == 2 && !(new File(savePath
-										+ "Pos"+pos+ "_SPIMA_Ch2_processed" + File.separator
-										+ frameFileNames[f] + File.separator
-										+ frameFileNames[f] + ".tif")).canRead())
-										|| !(new File(savePath + "Pos"+pos+ "_SPIMB_Ch1_processed"
-												+ File.separator + frameFileNames[f]
-														+ File.separator + frameFileNames[f] + ".tif"))
-														.canRead()
-														|| (wavelengths == 2 && !(new File(savePath
-																+ "Pos"+pos+ "_SPIMA_Ch2_processed" + File.separator
-																+ frameFileNames[f] + File.separator
-																+ frameFileNames[f] + ".tif")).canRead())) {
+					if (!(new File(savePath + "Pos"+pos+ "_SPIMA_Ch1_processed"
+							+ File.separator + frameFileNames[f] + File.separator
+							+ frameFileNames[f] + ".tif")).canRead()
+							|| (wavelengths == 2 && !(new File(savePath
+									+ "Pos"+pos+ "_SPIMA_Ch2_processed" + File.separator
+									+ frameFileNames[f] + File.separator
+									+ frameFileNames[f] + ".tif")).canRead())
+									|| !(new File(savePath + "Pos"+pos+ "_SPIMB_Ch1_processed"
+											+ File.separator + frameFileNames[f]
+													+ File.separator + frameFileNames[f] + ".tif"))
+													.canRead()
+													|| (wavelengths == 2 && !(new File(savePath
+															+ "Pos"+pos+ "_SPIMA_Ch2_processed" + File.separator
+															+ frameFileNames[f] + File.separator
+															+ frameFileNames[f] + ".tif")).canRead())) {
+						IJ.runMacro("File.makeDirectory(\""
+								+ savePath.replace("\\", "\\\\")
+								+ "Pos"+pos+ "_SPIMA_Ch1_processed\");");
+						IJ.runMacro("File.makeDirectory(\""
+								+ savePath.replace("\\", "\\\\")
+								+ "Pos"+pos+ "_SPIMA_Ch1_processed\"+File.separator+\""
+								+ frameFileNames[f] + "\");");
+						IJ.runMacro("File.makeDirectory(\""
+								+ savePath.replace("\\", "\\\\")
+								+ "Pos"+pos+ "_SPIMB_Ch1_processed\");");
+						IJ.runMacro("File.makeDirectory(\""
+								+ savePath.replace("\\", "\\\\")
+								+ "Pos"+pos+ "_SPIMB_Ch1_processed\"+File.separator+\""
+								+ frameFileNames[f] + "\");");
+						IJ.runMacro("File.makeDirectory(\""
+								+ savePath.replace("\\", "\\\\")
+								+"Pos"+pos+ "_Deconvolution1\");");
+						if (wavelengths == 2) {
 							IJ.runMacro("File.makeDirectory(\""
 									+ savePath.replace("\\", "\\\\")
-									+ "Pos"+pos+ "_SPIMA_Ch1_processed\");");
+									+ "Pos"+pos+ "_SPIMA_Ch2_processed\");");
 							IJ.runMacro("File.makeDirectory(\""
 									+ savePath.replace("\\", "\\\\")
-									+ "Pos"+pos+ "_SPIMA_Ch1_processed\"+File.separator+\""
+									+ "Pos"+pos+ "_SPIMA_Ch2_processed\"+File.separator+\""
 									+ frameFileNames[f] + "\");");
 							IJ.runMacro("File.makeDirectory(\""
 									+ savePath.replace("\\", "\\\\")
-									+ "Pos"+pos+ "_SPIMB_Ch1_processed\");");
+									+ "Pos"+pos+ "_SPIMB_Ch2_processed\");");
 							IJ.runMacro("File.makeDirectory(\""
 									+ savePath.replace("\\", "\\\\")
-									+ "Pos"+pos+ "_SPIMB_Ch1_processed\"+File.separator+\""
+									+ "Pos"+pos+ "_SPIMB_Ch2_processed\"+File.separator+\""
 									+ frameFileNames[f] + "\");");
 							IJ.runMacro("File.makeDirectory(\""
 									+ savePath.replace("\\", "\\\\")
-									+"Pos"+pos+ "_Deconvolution1\");");
-							if (wavelengths == 2) {
-								IJ.runMacro("File.makeDirectory(\""
-										+ savePath.replace("\\", "\\\\")
-										+ "Pos"+pos+ "_SPIMA_Ch2_processed\");");
-								IJ.runMacro("File.makeDirectory(\""
-										+ savePath.replace("\\", "\\\\")
-										+ "Pos"+pos+ "_SPIMA_Ch2_processed\"+File.separator+\""
-										+ frameFileNames[f] + "\");");
-								IJ.runMacro("File.makeDirectory(\""
-										+ savePath.replace("\\", "\\\\")
-										+ "Pos"+pos+ "_SPIMB_Ch2_processed\");");
-								IJ.runMacro("File.makeDirectory(\""
-										+ savePath.replace("\\", "\\\\")
-										+ "Pos"+pos+ "_SPIMB_Ch2_processed\"+File.separator+\""
-										+ frameFileNames[f] + "\");");
-								IJ.runMacro("File.makeDirectory(\""
-										+ savePath.replace("\\", "\\\\")
-										+"Pos"+pos+ "_Deconvolution2\");");
-							}
+									+"Pos"+pos+ "_Deconvolution2\");");
+						}
 
-							// ImageStack stackA1 = new
-							// ImageStack(cropHeight,cropWidth);
-							// ImageStack stackA2 = new
-							// ImageStack(cropHeight,cropWidth);
-							ImageStack stackA1 = new ImageStack(cropWidth, cropHeight);
-							ImageStack stackA2 = new ImageStack(cropWidth, cropHeight);
-							impA.getWindow().setEnabled(false);
-							for (int i = 1; i <= impA.getNSlices(); i++) {
-								impA.setPositionWithoutUpdate(1, i, f);
-								Roi impRoi = (Roi) roiA.clone();
-								Polygon pA = new Polygon(impRoi.getPolygon().xpoints,
-										impRoi.getPolygon().ypoints,
-										impRoi.getPolygon().npoints);
-								double fMax = impRoi.getBounds().width > impRoi
-										.getBounds().height ? impRoi.getBounds().width
-												: impRoi.getBounds().height;
-										double angle = impRoi.getBounds().width > impRoi
-												.getBounds().height ? 90 : 0;
-										if (impRoi.getType() != Roi.RECTANGLE) {
-											double[] fVals = impRoi.getFeretValues();
-											fMax = fVals[0];
-											angle = fVals[1];
-										}
-										// Polygon pAR = rotatePolygon(new
-										// Polygon(pA.xpoints,pA.ypoints, pA.npoints),
-										// -180+angle);
-										Polygon pAR = pA;
+						// ImageStack stackA1 = new
+						// ImageStack(cropHeight,cropWidth);
+						// ImageStack stackA2 = new
+						// ImageStack(cropHeight,cropWidth);
+						ImageStack stackA1 = new ImageStack(cropWidth, cropHeight);
+						ImageStack stackA2 = new ImageStack(cropWidth, cropHeight);
+						impA.getWindow().setEnabled(false);
+						for (int i = 1; i <= impA.getNSlices(); i++) {
+							impA.setPositionWithoutUpdate(1, i, f);
+							Roi impRoi = (Roi) roiA.clone();
+							Polygon pA = new Polygon(impRoi.getPolygon().xpoints,
+									impRoi.getPolygon().ypoints,
+									impRoi.getPolygon().npoints);
+							double fMax = impRoi.getBounds().width > impRoi
+									.getBounds().height ? impRoi.getBounds().width
+											: impRoi.getBounds().height;
+									double angle = impRoi.getBounds().width > impRoi
+											.getBounds().height ? 90 : 0;
+									if (impRoi.getType() != Roi.RECTANGLE) {
+										double[] fVals = impRoi.getFeretValues();
+										fMax = fVals[0];
+										angle = fVals[1];
+									}
+									// Polygon pAR = rotatePolygon(new
+									// Polygon(pA.xpoints,pA.ypoints, pA.npoints),
+									// -180+angle);
+									Polygon pAR = pA;
 
-										ImageProcessor ip1 = impA.getProcessor().duplicate();
-										// ip1.fillOutside(impRoi);
-										// ip1.setRoi((int)(pA.getBounds().getCenterX()-fMax/2),
+									ImageProcessor ip1 = impA.getProcessor().duplicate();
+									// ip1.fillOutside(impRoi);
+									// ip1.setRoi((int)(pA.getBounds().getCenterX()-fMax/2),
+									// (int)(pA.getBounds().getCenterY()-fMax/2),
+									// (int)fMax,
+									// (int)fMax);
+									// ip1.rotate(-180+angle);
+
+									// ip1.setRoi(Math.max((int)pAR.getBounds().x-(cropHeight-pAR.getBounds().width)/2,
+									// 0),
+									// Math.max((int)pAR.getBounds().y-(cropWidth-pAR.getBounds().height)/2,
+									// 0),
+									// cropHeight, cropWidth);
+									ip1.setRoi(
+											Math.max((int) pAR.getBounds().x
+													- (cropWidth - pAR.getBounds().width)
+													/ 2, 0),
+													Math.max((int) pAR.getBounds().y
+															- (cropHeight - pAR.getBounds().height)
+															/ 2, 0), cropWidth, cropHeight);
+									ip1 = ip1.crop();
+									// ImageProcessor ip1r = ip1.createProcessor(cropHeight,
+									// cropWidth);
+									ImageProcessor ip1r = ip1.createProcessor(cropWidth,
+											cropHeight);
+									ip1r.insert(ip1, 0, 0);
+									ip1 = ip1r;
+									// ip1.subtract(minLimit[0]);
+									stackA1.addSlice(ip1);
+									if (wavelengths == 2) {
+										impA.setPositionWithoutUpdate(2, i, f);
+										ImageProcessor ip2 = impA.getProcessor()
+												.duplicate();
+										// ip2.fillOutside(impRoi);
+										// ip2.setRoi((int)(pA.getBounds().getCenterX()-fMax/2),
 										// (int)(pA.getBounds().getCenterY()-fMax/2),
 										// (int)fMax,
 										// (int)fMax);
-										// ip1.rotate(-180+angle);
+										// ip2.rotate(-180+angle);
 
-										// ip1.setRoi(Math.max((int)pAR.getBounds().x-(cropHeight-pAR.getBounds().width)/2,
+										// ip2.setRoi(Math.max((int)pAR.getBounds().x-(cropHeight-pAR.getBounds().width)/2,
 										// 0),
 										// Math.max((int)pAR.getBounds().y-(cropWidth-pAR.getBounds().height)/2,
 										// 0),
 										// cropHeight, cropWidth);
-										ip1.setRoi(
-												Math.max((int) pAR.getBounds().x
-														- (cropWidth - pAR.getBounds().width)
-														/ 2, 0),
-														Math.max((int) pAR.getBounds().y
-																- (cropHeight - pAR.getBounds().height)
-																/ 2, 0), cropWidth, cropHeight);
-										ip1 = ip1.crop();
-										// ImageProcessor ip1r = ip1.createProcessor(cropHeight,
-										// cropWidth);
-										ImageProcessor ip1r = ip1.createProcessor(cropWidth,
-												cropHeight);
-										ip1r.insert(ip1, 0, 0);
-										ip1 = ip1r;
-										// ip1.subtract(minLimit[0]);
-										stackA1.addSlice(ip1);
-										if (wavelengths == 2) {
-											impA.setPositionWithoutUpdate(2, i, f);
-											ImageProcessor ip2 = impA.getProcessor()
-													.duplicate();
-											// ip2.fillOutside(impRoi);
-											// ip2.setRoi((int)(pA.getBounds().getCenterX()-fMax/2),
-											// (int)(pA.getBounds().getCenterY()-fMax/2),
-											// (int)fMax,
-											// (int)fMax);
-											// ip2.rotate(-180+angle);
+										ip2.setRoi(
+												Math.max(
+														(int) pAR.getBounds().x
+														- (cropWidth - pAR
+																.getBounds().width)
+																/ 2, 0),
+																Math.max(
+																		(int) pAR.getBounds().y
+																		- (cropHeight - pAR
+																				.getBounds().height)
+																				/ 2, 0), cropWidth,
+																				cropHeight);
+										ip2 = ip2.crop();
+										// ImageProcessor ip2r =
+										// ip2.createProcessor(cropHeight, cropWidth);
+										ImageProcessor ip2r = ip2.createProcessor(
+												cropWidth, cropHeight);
+										ip2r.insert(ip2, 0, 0);
+										ip2 = ip2r;
+										// ip2.subtract(minLimit[1]);
+										stackA2.addSlice(ip2);
+									}
+						}
+						impA.getWindow().setEnabled(true);
+						ImagePlus impXA1 = new ImagePlus();
+						impXA1.setStack(stackA1);
+						impXA1.setCalibration(impA.getCalibration());
+						// impXA1.getCalibration().pixelDepth =
+						// impXA1.getCalibration().pixelWidth;
+						IJ.saveAs(impXA1, "Tiff", savePath + "Pos"+pos+ "_SPIMA_Ch1_processed"
+								+ File.separator + frameFileNames[f]
+										+ File.separator + frameFileNames[f] + ".tif");
+						if (wavelengths == 2) {
+							ImagePlus impXA2 = new ImagePlus();
+							impXA2.setStack(stackA2);
+							impXA2.setCalibration(impA.getCalibration());
+							// impXA2.getCalibration().pixelDepth =
+							// impXA2.getCalibration().pixelWidth;
+							IJ.saveAs(impXA2, "Tiff", savePath
+									+ "Pos"+pos+ "_SPIMA_Ch2_processed" + File.separator
+									+ frameFileNames[f] + File.separator
+									+ frameFileNames[f] + ".tif");
+						}
 
-											// ip2.setRoi(Math.max((int)pAR.getBounds().x-(cropHeight-pAR.getBounds().width)/2,
-											// 0),
-											// Math.max((int)pAR.getBounds().y-(cropWidth-pAR.getBounds().height)/2,
-											// 0),
-											// cropHeight, cropWidth);
-											ip2.setRoi(
-													Math.max(
-															(int) pAR.getBounds().x
-															- (cropWidth - pAR
-																	.getBounds().width)
-																	/ 2, 0),
-																	Math.max(
-																			(int) pAR.getBounds().y
-																			- (cropHeight - pAR
-																					.getBounds().height)
-																					/ 2, 0), cropWidth,
-																					cropHeight);
-											ip2 = ip2.crop();
-											// ImageProcessor ip2r =
-											// ip2.createProcessor(cropHeight, cropWidth);
-											ImageProcessor ip2r = ip2.createProcessor(
-													cropWidth, cropHeight);
-											ip2r.insert(ip2, 0, 0);
-											ip2 = ip2r;
-											// ip2.subtract(minLimit[1]);
-											stackA2.addSlice(ip2);
-										}
-							}
-							impA.getWindow().setEnabled(true);
-							ImagePlus impXA1 = new ImagePlus();
-							impXA1.setStack(stackA1);
-							impXA1.setCalibration(impA.getCalibration());
-							// impXA1.getCalibration().pixelDepth =
-							// impXA1.getCalibration().pixelWidth;
-							IJ.saveAs(impXA1, "Tiff", savePath + "Pos"+pos+ "_SPIMA_Ch1_processed"
-									+ File.separator + frameFileNames[f]
-											+ File.separator + frameFileNames[f] + ".tif");
-							if (wavelengths == 2) {
-								ImagePlus impXA2 = new ImagePlus();
-								impXA2.setStack(stackA2);
-								impXA2.setCalibration(impA.getCalibration());
-								// impXA2.getCalibration().pixelDepth =
-								// impXA2.getCalibration().pixelWidth;
-								IJ.saveAs(impXA2, "Tiff", savePath
-										+ "Pos"+pos+ "_SPIMA_Ch2_processed" + File.separator
-										+ frameFileNames[f] + File.separator
-										+ frameFileNames[f] + ".tif");
-							}
+						// ImageStack stackB1 = new
+						// ImageStack(cropHeight,cropWidth);
+						// ImageStack stackB2 = new
+						// ImageStack(cropHeight,cropWidth);
+						ImageStack stackB1 = new ImageStack(cropWidth, cropHeight);
+						ImageStack stackB2 = new ImageStack(cropWidth, cropHeight);
+						impB.getWindow().setEnabled(false);
+						for (int i = 1; i <= impB.getNSlices(); i++) {
+							impB.setPositionWithoutUpdate(1, i, f);
+							Roi impRoi = (Roi) roiB.clone();
+							Polygon pB = new Polygon(impRoi.getPolygon().xpoints,
+									impRoi.getPolygon().ypoints,
+									impRoi.getPolygon().npoints);
+							double fMax = impRoi.getBounds().width > impRoi
+									.getBounds().height ? impRoi.getBounds().width
+											: impRoi.getBounds().height;
+									double angle = impRoi.getBounds().width > impRoi
+											.getBounds().height ? 90 : 0;
+									if (impRoi.getType() != Roi.RECTANGLE) {
+										double[] fVals = impRoi.getFeretValues();
+										fMax = fVals[0];
+										angle = fVals[1];
+									}
+									// Polygon pBR = rotatePolygon(new
+									// Polygon(pB.xpoints,pB.ypoints, pB.npoints),
+									// -180+angle);
+									Polygon pBR = pB;
 
-							// ImageStack stackB1 = new
-							// ImageStack(cropHeight,cropWidth);
-							// ImageStack stackB2 = new
-							// ImageStack(cropHeight,cropWidth);
-							ImageStack stackB1 = new ImageStack(cropWidth, cropHeight);
-							ImageStack stackB2 = new ImageStack(cropWidth, cropHeight);
-							impB.getWindow().setEnabled(false);
-							for (int i = 1; i <= impB.getNSlices(); i++) {
-								impB.setPositionWithoutUpdate(1, i, f);
-								Roi impRoi = (Roi) roiB.clone();
-								Polygon pB = new Polygon(impRoi.getPolygon().xpoints,
-										impRoi.getPolygon().ypoints,
-										impRoi.getPolygon().npoints);
-								double fMax = impRoi.getBounds().width > impRoi
-										.getBounds().height ? impRoi.getBounds().width
-												: impRoi.getBounds().height;
-										double angle = impRoi.getBounds().width > impRoi
-												.getBounds().height ? 90 : 0;
-										if (impRoi.getType() != Roi.RECTANGLE) {
-											double[] fVals = impRoi.getFeretValues();
-											fMax = fVals[0];
-											angle = fVals[1];
-										}
-										// Polygon pBR = rotatePolygon(new
-										// Polygon(pB.xpoints,pB.ypoints, pB.npoints),
-										// -180+angle);
-										Polygon pBR = pB;
+									ImageProcessor ip1 = impB.getProcessor().duplicate();
+									// ip1.fillOutside(impRoi);
+									// ip1.setRoi((int)(pB.getBounds().getCenterX()-fMax/2),
+									// (int)(pB.getBounds().getCenterY()-fMax/2),
+									// (int)fMax,
+									// (int)fMax);
+									// ip1.rotate(-180+angle);
 
-										ImageProcessor ip1 = impB.getProcessor().duplicate();
-										// ip1.fillOutside(impRoi);
-										// ip1.setRoi((int)(pB.getBounds().getCenterX()-fMax/2),
+									// ip1.setRoi(Math.max((int)pBR.getBounds().x-(cropHeight-pBR.getBounds().width)/2,
+									// 0),
+									// Math.max((int)pBR.getBounds().y-(cropWidth-pBR.getBounds().height)/2,
+									// 0),
+									// cropHeight, cropWidth);
+									ip1.setRoi(
+											Math.max((int) pBR.getBounds().x
+													- (cropWidth - pBR.getBounds().width)
+													/ 2, 0),
+													Math.max((int) pBR.getBounds().y
+															- (cropHeight - pBR.getBounds().height)
+															/ 2, 0), cropWidth, cropHeight);
+									ip1 = ip1.crop();
+									// ImageProcessor ip1r = ip1.createProcessor(cropHeight,
+									// cropWidth);
+									ImageProcessor ip1r = ip1.createProcessor(cropWidth,
+											cropHeight);
+									ip1r.insert(ip1, 0, 0);
+									ip1 = ip1r;
+									// ip1.subtract(minLimit[2]);
+									stackB1.addSlice(ip1);
+									if (wavelengths == 2) {
+										impB.setPositionWithoutUpdate(2, i, f);
+										ImageProcessor ip2 = impB.getProcessor()
+												.duplicate();
+										// ip2.fillOutside(impRoi);
+										// ip2.setRoi((int)(pB.getBounds().getCenterX()-fMax/2),
 										// (int)(pB.getBounds().getCenterY()-fMax/2),
 										// (int)fMax,
 										// (int)fMax);
-										// ip1.rotate(-180+angle);
+										// ip2.rotate(-180+angle);
 
-										// ip1.setRoi(Math.max((int)pBR.getBounds().x-(cropHeight-pBR.getBounds().width)/2,
+										// ip2.setRoi(Math.max((int)pBR.getBounds().x-(cropHeight-pBR.getBounds().width)/2,
 										// 0),
 										// Math.max((int)pBR.getBounds().y-(cropWidth-pBR.getBounds().height)/2,
 										// 0),
 										// cropHeight, cropWidth);
-										ip1.setRoi(
-												Math.max((int) pBR.getBounds().x
-														- (cropWidth - pBR.getBounds().width)
-														/ 2, 0),
-														Math.max((int) pBR.getBounds().y
-																- (cropHeight - pBR.getBounds().height)
-																/ 2, 0), cropWidth, cropHeight);
-										ip1 = ip1.crop();
-										// ImageProcessor ip1r = ip1.createProcessor(cropHeight,
-										// cropWidth);
-										ImageProcessor ip1r = ip1.createProcessor(cropWidth,
-												cropHeight);
-										ip1r.insert(ip1, 0, 0);
-										ip1 = ip1r;
-										// ip1.subtract(minLimit[2]);
-										stackB1.addSlice(ip1);
-										if (wavelengths == 2) {
-											impB.setPositionWithoutUpdate(2, i, f);
-											ImageProcessor ip2 = impB.getProcessor()
-													.duplicate();
-											// ip2.fillOutside(impRoi);
-											// ip2.setRoi((int)(pB.getBounds().getCenterX()-fMax/2),
-											// (int)(pB.getBounds().getCenterY()-fMax/2),
-											// (int)fMax,
-											// (int)fMax);
-											// ip2.rotate(-180+angle);
-
-											// ip2.setRoi(Math.max((int)pBR.getBounds().x-(cropHeight-pBR.getBounds().width)/2,
-											// 0),
-											// Math.max((int)pBR.getBounds().y-(cropWidth-pBR.getBounds().height)/2,
-											// 0),
-											// cropHeight, cropWidth);
-											ip2.setRoi(
-													Math.max(
-															(int) pBR.getBounds().x
-															- (cropWidth - pBR
-																	.getBounds().width)
-																	/ 2, 0),
-																	Math.max(
-																			(int) pBR.getBounds().y
-																			- (cropHeight - pBR
-																					.getBounds().height)
-																					/ 2, 0), cropWidth,
-																					cropHeight);
-											ip2 = ip2.crop();
-											// ImageProcessor ip2r =
-											// ip2.createProcessor(cropHeight, cropWidth);
-											ImageProcessor ip2r = ip2.createProcessor(
-													cropWidth, cropHeight);
-											ip2r.insert(ip2, 0, 0);
-											ip2 = ip2r;
-											// ip2.subtract(minLimit[3]);
-											stackB2.addSlice(ip2);
-										}
-							}
-							impB.getWindow().setEnabled(true);
-							ImagePlus impXB1 = new ImagePlus();
-							impXB1.setStack(stackB1);
-							impXB1.setCalibration(impB.getCalibration());
-							// impXB1.getCalibration().pixelDepth =
-							// impXB1.getCalibration().pixelWidth;
-							IJ.saveAs(impXB1, "Tiff", savePath + "Pos"+pos+ "_SPIMB_Ch1_processed"
-									+ File.separator + frameFileNames[f]
-											+ File.separator + frameFileNames[f] + ".tif");
-							if (wavelengths == 2) {
-								ImagePlus impXB2 = new ImagePlus();
-								impXB2.setStack(stackB2);
-								impXB2.setCalibration(impB.getCalibration());
-								// impXB2.getCalibration().pixelDepth =
-								// impXB2.getCalibration().pixelWidth;
-								IJ.saveAs(impXB2, "Tiff", savePath
-										+ "Pos"+pos+ "_SPIMB_Ch2_processed" + File.separator
-										+ frameFileNames[f] + File.separator
-										+ frameFileNames[f] + ".tif");
-							}
-
+										ip2.setRoi(
+												Math.max(
+														(int) pBR.getBounds().x
+														- (cropWidth - pBR
+																.getBounds().width)
+																/ 2, 0),
+																Math.max(
+																		(int) pBR.getBounds().y
+																		- (cropHeight - pBR
+																				.getBounds().height)
+																				/ 2, 0), cropWidth,
+																				cropHeight);
+										ip2 = ip2.crop();
+										// ImageProcessor ip2r =
+										// ip2.createProcessor(cropHeight, cropWidth);
+										ImageProcessor ip2r = ip2.createProcessor(
+												cropWidth, cropHeight);
+										ip2r.insert(ip2, 0, 0);
+										ip2 = ip2r;
+										// ip2.subtract(minLimit[3]);
+										stackB2.addSlice(ip2);
+									}
 						}
+						impB.getWindow().setEnabled(true);
+						ImagePlus impXB1 = new ImagePlus();
+						impXB1.setStack(stackB1);
+						impXB1.setCalibration(impB.getCalibration());
+						// impXB1.getCalibration().pixelDepth =
+						// impXB1.getCalibration().pixelWidth;
+						IJ.saveAs(impXB1, "Tiff", savePath + "Pos"+pos+ "_SPIMB_Ch1_processed"
+								+ File.separator + frameFileNames[f]
+										+ File.separator + frameFileNames[f] + ".tif");
+						if (wavelengths == 2) {
+							ImagePlus impXB2 = new ImagePlus();
+							impXB2.setStack(stackB2);
+							impXB2.setCalibration(impB.getCalibration());
+							// impXB2.getCalibration().pixelDepth =
+							// impXB2.getCalibration().pixelWidth;
+							IJ.saveAs(impXB2, "Tiff", savePath
+									+ "Pos"+pos+ "_SPIMB_Ch2_processed" + File.separator
+									+ frameFileNames[f] + File.separator
+									+ frameFileNames[f] + ".tif");
+						}
+
 					}
+				}
 
-					final String[] frameFileNamesFinal = frameFileNames;
+				final String[] frameFileNamesFinal = frameFileNames;
 
-					impA.setPosition(wasChannelA, wasSliceA, wasFrameA);
-					impB.setPosition(wasChannelB, wasSliceB, wasFrameB);
+				impA.setPosition(wasChannelA, wasSliceA, wasFrameA);
+				impB.setPosition(wasChannelB, wasSliceB, wasFrameB);
 
-					for (int f = 1; f <= impA.getNFrames(); f++) {
-						final int ff = f;
+				for (int f = 1; f <= impA.getNFrames(); f++) {
+					final int ff = f;
 
-						final String timecode = "" + (new Date()).getTime();
+					final String timecode = "" + (new Date()).getTime();
 
-						if (!(new File(savePath +"Pos"+pos+ "_Deconvolution1" + File.separator
-								+ "Decon_" + frameFileNames[f] + ".tif")).canRead()
-								|| (wavelengths == 2 && !(new File(savePath
-										+"Pos"+pos+ "_Deconvolution2" + File.separator + "Decon_"
-										+ frameFileNames[f] + ".tif")).canRead())) {
-							String deconStringKey = "nibib.spim.PlugInDialogGenerateFusion(\"reg_one boolean false\", \"reg_all boolean true\", \"no_reg_2D boolean false\", \"reg_2D_one boolean false\", \"reg_2D_all boolean false\", \"rotate_begin list_float -10.0,-10.0,-10.0\", \"rotate_end list_float 10.0,10.0,10.0\", \"coarse_rate list_float 3.0,3.0,3.0\", \"fine_rate list_float 0.5,0.5,0.5\", \"save_arithmetic boolean false\", \"show_arithmetic boolean false\", \"save_geometric boolean false\", \"show_geometric boolean false\", \"do_interImages boolean false\", \"save_prefusion boolean false\", \"do_show_pre_fusion boolean false\", \"do_threshold boolean false\", \"save_max_proj boolean false\", \"show_max_proj boolean false\", \"x_max_box_selected boolean false\", \"y_max_box_selected boolean false\", \"z_max_box_selected boolean false\", \"do_smart_movement boolean false\", \"threshold_intensity double 10.0\", \"res_x double 0.1625\", \"res_y double 0.1625\", \"res_z double 1.0\", \"mtxFileDirectory string "
-									+ savePath.replace("\\", "\\\\")
-									+ "Pos"+pos+ "_SPIMB_Ch"
-									+ keyChannel
-									+ "_processed"
-									+ File.separator.replace("\\", "\\\\")
-									+ frameFileNames[f]
-											+ "\", \"spimAFileDir string "
-											+ savePath.replace("\\", "\\\\")
-											+ "Pos"+pos+ "_SPIMB_Ch"
-											+ keyChannel
-											+ "_processed"
-											+ File.separator.replace("\\", "\\\\")
-											+ frameFileNames[f]
-													+ "\", \"spimBFileDir string "
-													+ savePath.replace("\\", "\\\\")
-													+ "Pos"+pos+ "_SPIMA_Ch"
-													+ keyChannel
-													+ "_processed"
-													+ File.separator.replace("\\", "\\\\")
-													+ frameFileNames[f]
-															+ "\", \"baseImage string "
-															+ frameFileNames[f]
-																	+ "\", \"base_rotation int -1\", \"transform_rotation int 5\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconv_platform int 2\", \"deconvDirString string "
-																	+ savePath.replace("\\", "\\\\")
-																	+"Pos"+pos+ "_Deconvolution"
-																	+ keyChannel
-																	+ "\\\", \"deconv_show_results boolean false\", \"deconvolution_method int 1\", \"deconv_iterations int 10\", \"deconv_sigmaA list_float 3.5,3.5,9.6\", \"deconv_sigmaB list_float 9.6,3.5,3.5\", \"use_deconv_sigma_conversion_factor boolean true\", \"x_move int 0\", \"y_move int 0\", \"z_move int 0\", \"fusion_range string 1-1\")";
-							IJ.wait(5000);
+					if (!(new File(savePath +"Pos"+pos+ "_Deconvolution1" + File.separator
+							+ "Decon_" + frameFileNames[f] + ".tif")).canRead()
+							|| (wavelengths == 2 && !(new File(savePath
+									+"Pos"+pos+ "_Deconvolution2" + File.separator + "Decon_"
+									+ frameFileNames[f] + ".tif")).canRead())) {
+						String deconStringKey = "nibib.spim.PlugInDialogGenerateFusion(\"reg_one boolean false\", \"reg_all boolean true\", \"no_reg_2D boolean false\", \"reg_2D_one boolean false\", \"reg_2D_all boolean false\", \"rotate_begin list_float -10.0,-10.0,-10.0\", \"rotate_end list_float 10.0,10.0,10.0\", \"coarse_rate list_float 3.0,3.0,3.0\", \"fine_rate list_float 0.5,0.5,0.5\", \"save_arithmetic boolean false\", \"show_arithmetic boolean false\", \"save_geometric boolean false\", \"show_geometric boolean false\", \"do_interImages boolean false\", \"save_prefusion boolean false\", \"do_show_pre_fusion boolean false\", \"do_threshold boolean false\", \"save_max_proj boolean false\", \"show_max_proj boolean false\", \"x_max_box_selected boolean false\", \"y_max_box_selected boolean false\", \"z_max_box_selected boolean false\", \"do_smart_movement boolean false\", \"threshold_intensity double 10.0\", \"res_x double 0.1625\", \"res_y double 0.1625\", \"res_z double 1.0\", \"mtxFileDirectory string "
+								+ savePath.replace("\\", "\\\\")
+								+ "Pos"+pos+ "_SPIMB_Ch"
+								+ keyChannel
+								+ "_processed"
+								+ File.separator.replace("\\", "\\\\")
+								+ frameFileNames[f]
+										+ "\", \"spimAFileDir string "
+										+ savePath.replace("\\", "\\\\")
+										+ "Pos"+pos+ "_SPIMB_Ch"
+										+ keyChannel
+										+ "_processed"
+										+ File.separator.replace("\\", "\\\\")
+										+ frameFileNames[f]
+												+ "\", \"spimBFileDir string "
+												+ savePath.replace("\\", "\\\\")
+												+ "Pos"+pos+ "_SPIMA_Ch"
+												+ keyChannel
+												+ "_processed"
+												+ File.separator.replace("\\", "\\\\")
+												+ frameFileNames[f]
+														+ "\", \"baseImage string "
+														+ frameFileNames[f]
+																+ "\", \"base_rotation int -1\", \"transform_rotation int 5\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconv_platform int 2\", \"deconvDirString string "
+																+ savePath.replace("\\", "\\\\")
+																+"Pos"+pos+ "_Deconvolution"
+																+ keyChannel
+																+ "\\\", \"deconv_show_results boolean false\", \"deconvolution_method int 1\", \"deconv_iterations int 10\", \"deconv_sigmaA list_float 3.5,3.5,9.6\", \"deconv_sigmaB list_float 9.6,3.5,3.5\", \"use_deconv_sigma_conversion_factor boolean true\", \"x_move int 0\", \"y_move int 0\", \"z_move int 0\", \"fusion_range string 1-1\")";
+						IJ.wait(5000);
 
-							new MacroRunner(
-									"cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");"
-											+ "cpuChunks = split(cpuPerformance,\"\\\"\");"
-											+ "x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); "
-											+ "while(x >30) {\n"
-											+ "	wait(10000);"
-											+ "	cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");"
-											+ "	cpuChunks = split(cpuPerformance,\"\\\"\");"
-											+ "	x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); "
-											+ "}" + "print(\""
-											+ frameFileNames[f]
-													+ "_"
-													+ keyChannel
-													+ " processing...\");"
-													+
+						new MacroRunner(
+								"cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");"
+										+ "cpuChunks = split(cpuPerformance,\"\\\"\");"
+										+ "x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); "
+										+ "while(x >30) {\n"
+										+ "	wait(10000);"
+										+ "	cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");"
+										+ "	cpuChunks = split(cpuPerformance,\"\\\"\");"
+										+ "	x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); "
+										+ "}" + "print(\""
+										+ frameFileNames[f]
+												+ "_"
+												+ keyChannel
+												+ " processing...\");"
+												+
 
 									"			File.saveString(\'"
 									+ deconStringKey
@@ -1510,110 +1510,110 @@ public class DISPIM_Monitor implements PlugIn {
 									+ frameFileNames[f]
 											+ timecode + ".bat\");" + "");
 
-							final String finalConvPath = savePath
-									+"Pos"+pos+ "_Deconvolution1\\Decon_" + frameFileNames[f]
-											+ ".tif";
-							Thread convThread = new Thread(new Runnable() {
-								public void run() {
-									while (!(new File(finalConvPath)).canRead()) {
-										IJ.wait(10000);
-									}
-									IJ.wait(30000);
-									new MacroRunner("print(\""
-											+ frameFileNamesFinal[ff] + "_"
-											+ keyChannel + " complete.\");"
-											+ "delBat = File.delete(\""
-											+ tempDir.replace("\\", "\\\\")
-											+ "GenerateFusion1"
-											+ frameFileNamesFinal[ff] + timecode
-											+ ".bat\");" + "delSct = File.delete(\""
-											+ tempDir.replace("\\", "\\\\")
-											+ "GenerateFusion1"
-											+ frameFileNamesFinal[ff] + timecode
-											+ ".sct\");");
-
-									ImagePlus convImp = IJ.openImage(finalConvPath);
-									if (convImp != null) {
-										IJ.saveAs(convImp, "TIFF", finalConvPath);
-										convImp.close();
-									}
+						final String finalConvPath = savePath
+								+"Pos"+pos+ "_Deconvolution1\\Decon_" + frameFileNames[f]
+										+ ".tif";
+						Thread convThread = new Thread(new Runnable() {
+							public void run() {
+								while (!(new File(finalConvPath)).canRead()) {
+									IJ.wait(10000);
 								}
-							});
-							convThread.start();
+								IJ.wait(30000);
+								new MacroRunner("print(\""
+										+ frameFileNamesFinal[ff] + "_"
+										+ keyChannel + " complete.\");"
+										+ "delBat = File.delete(\""
+										+ tempDir.replace("\\", "\\\\")
+										+ "GenerateFusion1"
+										+ frameFileNamesFinal[ff] + timecode
+										+ ".bat\");" + "delSct = File.delete(\""
+										+ tempDir.replace("\\", "\\\\")
+										+ "GenerateFusion1"
+										+ frameFileNamesFinal[ff] + timecode
+										+ ".sct\");");
 
-							if (wavelengths == 2) {
-								String deconStringSlave = "nibib.spim.PlugInDialogGenerateFusion(\"reg_one boolean false\", \"reg_all boolean true\", \"no_reg_2D boolean false\", \"reg_2D_one boolean false\", \"reg_2D_all boolean false\", \"rotate_begin list_float -10.0,-10.0,-10.0\", \"rotate_end list_float 10.0,10.0,10.0\", \"coarse_rate list_float 3.0,3.0,3.0\", \"fine_rate list_float 0.5,0.5,0.5\", \"save_arithmetic boolean false\", \"show_arithmetic boolean false\", \"save_geometric boolean false\", \"show_geometric boolean false\", \"do_interImages boolean false\", \"save_prefusion boolean false\", \"do_show_pre_fusion boolean false\", \"do_threshold boolean false\", \"save_max_proj boolean false\", \"show_max_proj boolean false\", \"x_max_box_selected boolean false\", \"y_max_box_selected boolean false\", \"z_max_box_selected boolean false\", \"do_smart_movement boolean false\", \"threshold_intensity double 10.0\", \"res_x double 0.1625\", \"res_y double 0.1625\", \"res_z double 1.0\", \"mtxFileDirectory string "
-										+ savePath.replace("\\", "\\\\")
-										+ "Pos"+pos+ "_SPIMB_Ch"
-										+ keyChannel
-										+ "_processed"
-										+ File.separator.replace("\\", "\\\\")
-										+ frameFileNames[f]
-												+ "\", \"spimAFileDir string "
-												+ savePath.replace("\\", "\\\\")
-												+ "Pos"+pos+ "_SPIMB_Ch"
-												+ slaveChannel
-												+ "_processed"
-												+ File.separator.replace("\\", "\\\\")
-												+ frameFileNames[f]
-														+ "\", \"spimBFileDir string "
-														+ savePath.replace("\\", "\\\\")
-														+ "Pos"+pos+ "_SPIMA_Ch"
-														+ slaveChannel
-														+ "_processed"
-														+ File.separator.replace("\\", "\\\\")
-														+ frameFileNames[f]
-																+ "\", \"baseImage string "
-																+ frameFileNames[f]
-																		+ "\", \"base_rotation int -1\", \"transform_rotation int 5\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconv_platform int 2\", \"deconvDirString string "
-																		+ savePath.replace("\\", "\\\\")
-																		+"Pos"+pos+ "_Deconvolution"
-																		+ slaveChannel
-																		+ "\\\", \"deconv_show_results boolean false\", \"deconvolution_method int 1\", \"deconv_iterations int 10\", \"deconv_sigmaA list_float 3.5,3.5,9.6\", \"deconv_sigmaB list_float 9.6,3.5,3.5\", \"use_deconv_sigma_conversion_factor boolean true\", \"x_move int 0\", \"y_move int 0\", \"z_move int 0\", \"fusion_range string 1-1\")";
-								IJ.wait(5000);
+								ImagePlus convImp = IJ.openImage(finalConvPath);
+								if (convImp != null) {
+									IJ.saveAs(convImp, "TIFF", finalConvPath);
+									convImp.close();
+								}
+							}
+						});
+						convThread.start();
 
-								new MacroRunner(
-										"print (\""
-												+ savePath.replace("\\", "\\\\")
-												+ "Pos"+pos+ "_SPIMB_Ch"
-												+ keyChannel
-												+ "_processed"
-												+ File.separator.replace("\\", "\\\\")
-												+ frameFileNames[f]
-														+ File.separator.replace("\\", "\\\\")
-														+ frameFileNames[f]
-																+ "1_To_"
-																+ frameFileNames[f]
-																		+ ".mtx\");"
-																		+ "while (!File.exists(\""
-																		+ savePath.replace("\\", "\\\\")
-																		+ "Pos"+pos+ "_SPIMB_Ch"
-																		+ keyChannel
-																		+ "_processed"
-																		+ File.separator.replace("\\", "\\\\")
-																		+ frameFileNames[f]
-																				+ File.separator.replace("\\", "\\\\")
-																				+ frameFileNames[f]
-																						+ "1_To_"
-																						+ frameFileNames[f]
-																								+ ".mtx\")) {"
-																								+ "wait(10000);"
-																								+ "}"
-																								+ "cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");"
-																								+ "cpuChunks = split(cpuPerformance,\"\\\"\");"
-																								+ "x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); "
-																								+ "while(x >30) {\n"
-																								+ "	wait(10000);"
-																								+ "	cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");"
-																								+ "	cpuChunks = split(cpuPerformance,\"\\\"\");"
-																								+ "	x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); "
-																								+ "}"
-																								+ "print(\""
-																								+ frameFileNames[f]
-																										+ "_"
-																										+ slaveChannel
-																										+ " processing...\");"
-																										+
+						if (wavelengths == 2) {
+							String deconStringSlave = "nibib.spim.PlugInDialogGenerateFusion(\"reg_one boolean false\", \"reg_all boolean true\", \"no_reg_2D boolean false\", \"reg_2D_one boolean false\", \"reg_2D_all boolean false\", \"rotate_begin list_float -10.0,-10.0,-10.0\", \"rotate_end list_float 10.0,10.0,10.0\", \"coarse_rate list_float 3.0,3.0,3.0\", \"fine_rate list_float 0.5,0.5,0.5\", \"save_arithmetic boolean false\", \"show_arithmetic boolean false\", \"save_geometric boolean false\", \"show_geometric boolean false\", \"do_interImages boolean false\", \"save_prefusion boolean false\", \"do_show_pre_fusion boolean false\", \"do_threshold boolean false\", \"save_max_proj boolean false\", \"show_max_proj boolean false\", \"x_max_box_selected boolean false\", \"y_max_box_selected boolean false\", \"z_max_box_selected boolean false\", \"do_smart_movement boolean false\", \"threshold_intensity double 10.0\", \"res_x double 0.1625\", \"res_y double 0.1625\", \"res_z double 1.0\", \"mtxFileDirectory string "
+									+ savePath.replace("\\", "\\\\")
+									+ "Pos"+pos+ "_SPIMB_Ch"
+									+ keyChannel
+									+ "_processed"
+									+ File.separator.replace("\\", "\\\\")
+									+ frameFileNames[f]
+											+ "\", \"spimAFileDir string "
+											+ savePath.replace("\\", "\\\\")
+											+ "Pos"+pos+ "_SPIMB_Ch"
+											+ slaveChannel
+											+ "_processed"
+											+ File.separator.replace("\\", "\\\\")
+											+ frameFileNames[f]
+													+ "\", \"spimBFileDir string "
+													+ savePath.replace("\\", "\\\\")
+													+ "Pos"+pos+ "_SPIMA_Ch"
+													+ slaveChannel
+													+ "_processed"
+													+ File.separator.replace("\\", "\\\\")
+													+ frameFileNames[f]
+															+ "\", \"baseImage string "
+															+ frameFileNames[f]
+																	+ "\", \"base_rotation int -1\", \"transform_rotation int 5\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconv_platform int 2\", \"deconvDirString string "
+																	+ savePath.replace("\\", "\\\\")
+																	+"Pos"+pos+ "_Deconvolution"
+																	+ slaveChannel
+																	+ "\\\", \"deconv_show_results boolean false\", \"deconvolution_method int 1\", \"deconv_iterations int 10\", \"deconv_sigmaA list_float 3.5,3.5,9.6\", \"deconv_sigmaB list_float 9.6,3.5,3.5\", \"use_deconv_sigma_conversion_factor boolean true\", \"x_move int 0\", \"y_move int 0\", \"z_move int 0\", \"fusion_range string 1-1\")";
+							IJ.wait(5000);
+
+							new MacroRunner(
+									"print (\""
+											+ savePath.replace("\\", "\\\\")
+											+ "Pos"+pos+ "_SPIMB_Ch"
+											+ keyChannel
+											+ "_processed"
+											+ File.separator.replace("\\", "\\\\")
+											+ frameFileNames[f]
+													+ File.separator.replace("\\", "\\\\")
+													+ frameFileNames[f]
+															+ "1_To_"
+															+ frameFileNames[f]
+																	+ ".mtx\");"
+																	+ "while (!File.exists(\""
+																	+ savePath.replace("\\", "\\\\")
+																	+ "Pos"+pos+ "_SPIMB_Ch"
+																	+ keyChannel
+																	+ "_processed"
+																	+ File.separator.replace("\\", "\\\\")
+																	+ frameFileNames[f]
+																			+ File.separator.replace("\\", "\\\\")
+																			+ frameFileNames[f]
+																					+ "1_To_"
+																					+ frameFileNames[f]
+																							+ ".mtx\")) {"
+																							+ "wait(10000);"
+																							+ "}"
+																							+ "cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");"
+																							+ "cpuChunks = split(cpuPerformance,\"\\\"\");"
+																							+ "x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); "
+																							+ "while(x >30) {\n"
+																							+ "	wait(10000);"
+																							+ "	cpuPerformance = exec(\"cmd64\",\"/c\",\"typeperf \\\"\\\\Processor(_Total)\\\\% Processor Time\\\" -sc 1\");"
+																							+ "	cpuChunks = split(cpuPerformance,\"\\\"\");"
+																							+ "	x = parseFloat(cpuChunks[lengthOf(cpuChunks)-2]); "
+																							+ "}"
+																							+ "print(\""
+																							+ frameFileNames[f]
+																									+ "_"
+																									+ slaveChannel
+																									+ " processing...\");"
+																									+
 
 										"			File.saveString(\'"
 										+ deconStringSlave
@@ -1650,45 +1650,45 @@ public class DISPIM_Monitor implements PlugIn {
 										+ "GenerateFusion2" + frameFileNames[f]
 												+ timecode + ".bat\");" + "");
 
-								final String finalConvPath2 = savePath
-										+"Pos"+pos+ "_Deconvolution2\\Decon_" + frameFileNames[f]
-												+ ".tif";
-								Thread convThread2 = new Thread(new Runnable() {
-									public void run() {
-										while (!(new File(finalConvPath2)).canRead()) {
-											IJ.wait(10000);
-										}
-										IJ.wait(30000);
-										new MacroRunner("print(\""
-												+ frameFileNamesFinal[ff] + "_"
-												+ slaveChannel + " complete.\");"
-												+ "delBat = File.delete(\""
-												+ tempDir.replace("\\", "\\\\")
-												+ "GenerateFusion2"
-												+ frameFileNamesFinal[ff] + timecode
-												+ ".bat\");"
-												+ "delSct = File.delete(\""
-												+ tempDir.replace("\\", "\\\\")
-												+ "GenerateFusion2"
-												+ frameFileNamesFinal[ff] + timecode
-												+ ".sct\");");
-
-										ImagePlus convImp = IJ
-												.openImage(finalConvPath2);
-										if (convImp != null) {
-											IJ.saveAs(convImp, "TIFF", finalConvPath2);
-											convImp.close();
-										}
+							final String finalConvPath2 = savePath
+									+"Pos"+pos+ "_Deconvolution2\\Decon_" + frameFileNames[f]
+											+ ".tif";
+							Thread convThread2 = new Thread(new Runnable() {
+								public void run() {
+									while (!(new File(finalConvPath2)).canRead()) {
+										IJ.wait(10000);
 									}
-								});
-								convThread2.start();
-							}
+									IJ.wait(30000);
+									new MacroRunner("print(\""
+											+ frameFileNamesFinal[ff] + "_"
+											+ slaveChannel + " complete.\");"
+											+ "delBat = File.delete(\""
+											+ tempDir.replace("\\", "\\\\")
+											+ "GenerateFusion2"
+											+ frameFileNamesFinal[ff] + timecode
+											+ ".bat\");"
+											+ "delSct = File.delete(\""
+											+ tempDir.replace("\\", "\\\\")
+											+ "GenerateFusion2"
+											+ frameFileNamesFinal[ff] + timecode
+											+ ".sct\");");
+
+									ImagePlus convImp = IJ
+											.openImage(finalConvPath2);
+									if (convImp != null) {
+										IJ.saveAs(convImp, "TIFF", finalConvPath2);
+										convImp.close();
+									}
+								}
+							});
+							convThread2.start();
 						}
-						// IJ.wait(15000);
 					}
+					// IJ.wait(15000);
 				}
+			}
 		}
-		
+
 		while (true) {
 			boolean focus = false;
 			if ((new File(dirOrOMETiff)).isDirectory()) {
@@ -1763,11 +1763,11 @@ public class DISPIM_Monitor implements PlugIn {
 						}
 					}
 					IJ.log(recentestA + "\n" + modDateA);
-					
+
 					MultiFileInfoVirtualStack[] stackAs = new MultiFileInfoVirtualStack[pDim];
 					MultiFileInfoVirtualStack[] stackBs = new MultiFileInfoVirtualStack[pDim];
 
-					
+
 					for (int pos=0; pos<pDim; pos++) {
 
 						stackAs[pos] = new MultiFileInfoVirtualStack(
@@ -1790,7 +1790,7 @@ public class DISPIM_Monitor implements PlugIn {
 
 						if (stageScan)
 							stackAs[pos].setSkewXperZ(
-								calA.pixelDepth / calA.pixelWidth);
+									calA.pixelDepth / calA.pixelWidth);
 						impAs[pos].setDimensions(cDim, zDim, stackAs[pos].getSize()/(cDim*zDim));
 						while (!impAs[pos].isComposite()) {
 							IJ.wait(100);
@@ -1814,7 +1814,7 @@ public class DISPIM_Monitor implements PlugIn {
 
 						if (stageScan)
 							stackBs[pos].setSkewXperZ(
-								-calB.pixelDepth / calB.pixelWidth);
+									-calB.pixelDepth / calB.pixelWidth);
 						impBs[pos].setDimensions(cDim, zDim, stackBs[pos].getSize()/(cDim*zDim));
 						while (!impBs[pos].isComposite()) {
 							IJ.wait(100);
@@ -2067,7 +2067,7 @@ public class DISPIM_Monitor implements PlugIn {
 				foA.sortFileNames(true);
 				foA.setFilter("Cam2");
 				ImagePlus impTmpA = foA.openFolder(new File(dirOrOMETiff)
-						.getParent());
+				.getParent());
 
 				// NOT WORKING YET!!!!
 				ColorModel cmA = impA.getProcessor().getColorModel();
@@ -2080,7 +2080,7 @@ public class DISPIM_Monitor implements PlugIn {
 				if (stageScan)
 					impA.getStack().setSkewXperZ(
 							-impB.getCalibration().pixelDepth
-									/ impB.getCalibration().pixelWidth);
+							/ impB.getCalibration().pixelWidth);
 
 				impA.setPosition(cA, zA,
 						tA == impA.getNFrames() - 1 ? impA.getNFrames() : tA);
@@ -2094,7 +2094,7 @@ public class DISPIM_Monitor implements PlugIn {
 				foB.sortFileNames(true);
 				foB.setFilter("Cam1");
 				ImagePlus impTmpB = foB.openFolder(new File(dirOrOMETiff)
-						.getParent());
+				.getParent());
 
 				ColorModel cmB = impB.getProcessor().getColorModel();
 				double dminB = impB.getProcessor().getMin();
@@ -2106,7 +2106,7 @@ public class DISPIM_Monitor implements PlugIn {
 				if (stageScan)
 					impB.getStack().setSkewXperZ(
 							impB.getCalibration().pixelDepth
-									/ impB.getCalibration().pixelWidth);
+							/ impB.getCalibration().pixelWidth);
 
 				impB.setPosition(cB, zB,
 						tB == impB.getNFrames() - 1 ? impB.getNFrames() : tB);
@@ -2169,13 +2169,13 @@ public class DISPIM_Monitor implements PlugIn {
 									* nFrames; a++) {
 								if (impA.getStack().isVirtual())
 									((VirtualStack) impA.getStack())
-											.addSlice("blank slice");
+									.addSlice("blank slice");
 								else
 									impA.getStack().addSlice(
 											impA.getProcessor()
-													.createProcessor(
-															impA.getWidth(),
-															impA.getHeight()));
+											.createProcessor(
+													impA.getWidth(),
+													impA.getHeight()));
 							}
 						} else if (nChannels * nSlices * nFrames < stackSize) {
 							for (int a = nChannels * nSlices * nFrames; a < stackSize; a++) {
@@ -2224,7 +2224,7 @@ public class DISPIM_Monitor implements PlugIn {
 					// impA.resetDisplayRange();
 					if (impA.isComposite())
 						((CompositeImage) impA)
-								.setMode(CompositeImage.COMPOSITE);
+						.setMode(CompositeImage.COMPOSITE);
 					impA.setFileInfo(new FileInfo());
 					impA.getOriginalFileInfo().fileName = dirOrOMETiff;
 					impA.getOriginalFileInfo().directory = dirOrOMETiff;
@@ -2259,13 +2259,13 @@ public class DISPIM_Monitor implements PlugIn {
 									* nFrames; a++) {
 								if (impB.getStack().isVirtual())
 									((VirtualStack) impB.getStack())
-											.addSlice("blank slice");
+									.addSlice("blank slice");
 								else
 									impB.getStack().addSlice(
 											impB.getProcessor()
-													.createProcessor(
-															impB.getWidth(),
-															impB.getHeight()));
+											.createProcessor(
+													impB.getWidth(),
+													impB.getHeight()));
 							}
 						} else if (nChannels * nSlices * nFrames < stackSize) {
 							for (int a = nChannels * nSlices * nFrames; a < stackSize; a++) {
@@ -2314,7 +2314,7 @@ public class DISPIM_Monitor implements PlugIn {
 					// impB.resetDisplayRange();
 					if (impB.isComposite())
 						((CompositeImage) impB)
-								.setMode(CompositeImage.COMPOSITE);
+						.setMode(CompositeImage.COMPOSITE);
 					impB.setFileInfo(new FileInfo());
 					impB.getOriginalFileInfo().fileName = dirOrOMETiff;
 					impB.getOriginalFileInfo().directory = dirOrOMETiff;
@@ -2970,7 +2970,7 @@ public class DISPIM_Monitor implements PlugIn {
 					if (listFile.contains("MMStack")) {
 						IJ.log(nextFile.getPath()+File.separator+listFile);
 						if (diSPIMheader == "")
-								diSPIMheader = open_diSPIMheaderAsString(nextFile.getPath()+File.separator+listFile);
+							diSPIMheader = open_diSPIMheaderAsString(nextFile.getPath()+File.separator+listFile);
 						tDim++;
 						break;
 					}
@@ -2978,7 +2978,7 @@ public class DISPIM_Monitor implements PlugIn {
 			}
 		}
 		IJ.log(diSPIMheader);
-		
+
 		String squareSetsSearchPattern=".*";
 		int squareSetsCount=0;
 		for(int i = 0; i < diSPIMheader.length(); i++){
@@ -2987,20 +2987,20 @@ public class DISPIM_Monitor implements PlugIn {
 				squareSetsCount++;
 			}
 		}
-		
+
 		for(int capture=2;capture<=squareSetsCount;capture++) {
 			diSPIMheader = diSPIMheader.replace((diSPIMheader.replaceAll(squareSetsSearchPattern, "$"+capture)),
-												(diSPIMheader.replaceAll(squareSetsSearchPattern, "$"+capture).replace(",",";")));
+					(diSPIMheader.replaceAll(squareSetsSearchPattern, "$"+capture).replace(",",";")));
 		}
-		
-			String[] diSPIMheaderChunks = diSPIMheader
-										.replace("\\\"", "\"")
-										.replace(",", "\\n")
-										.replace("}", "\\n}\\n")
-										.replace("{", "\\n{\\n")
-//												.replace("]", "\\n]\\n")
-//												.replace("[", "\\n[\\n")
-										.split("\\\\n");
+
+		String[] diSPIMheaderChunks = diSPIMheader
+				.replace("\\\"", "\"")
+				.replace(",", "\\n")
+				.replace("}", "\\n}\\n")
+				.replace("{", "\\n{\\n")
+				//												.replace("]", "\\n]\\n")
+				//												.replace("[", "\\n[\\n")
+				.split("\\\\n");
 		int indents = 1;
 		String allVars = "";
 		int diSPIM_MM_channel_use_index=0; 
@@ -3018,7 +3018,7 @@ public class DISPIM_Monitor implements PlugIn {
 			if (chunk.contains("{") ) {
 				indents++;
 			}
-			
+
 			if (chunk.trim().startsWith("\"LaserExposure_ms\":")) {
 				diSPIM_MM_LaserExposure_ms= Double.parseDouble(chunk.split(":")[1].replace("\"", "").trim());
 			}
@@ -3061,22 +3061,22 @@ public class DISPIM_Monitor implements PlugIn {
 				cDim = diSPIM_MM_numChannels;
 			}					 					
 			diSPIM_MM_useChannel= new boolean[diSPIM_MM_numChannels];
-				if (chunk.trim().startsWith("\"useChannel_\":")) {
-					diSPIM_MM_useChannel[diSPIM_MM_channel_use_index]= chunk.split(":")[1].replace("\"", "").trim().toLowerCase().contains("true");
-					diSPIM_MM_channel_use_index++;					
-				}
-				diSPIM_MM_group= new String[diSPIM_MM_numChannels];
-				if (chunk.trim().startsWith("\"group_\":")) {
-					diSPIM_MM_group[diSPIM_MM_channel_group_index]= chunk.split(":")[1].replace("\"", "").trim();
-					diSPIM_MM_channel_group_index++;
-				}
-				diSPIM_MM_config= new String[diSPIM_MM_numChannels];
-				if (chunk.trim().startsWith("\"config_\":")) {
-					diSPIM_MM_config[diSPIM_MM_channel_config_index]= chunk.split(":")[1].replace("\"", "").trim();
-					diSPIM_MM_channel_config_index++;
-				}
-			
-			
+			if (chunk.trim().startsWith("\"useChannel_\":")) {
+				diSPIM_MM_useChannel[diSPIM_MM_channel_use_index]= chunk.split(":")[1].replace("\"", "").trim().toLowerCase().contains("true");
+				diSPIM_MM_channel_use_index++;					
+			}
+			diSPIM_MM_group= new String[diSPIM_MM_numChannels];
+			if (chunk.trim().startsWith("\"group_\":")) {
+				diSPIM_MM_group[diSPIM_MM_channel_group_index]= chunk.split(":")[1].replace("\"", "").trim();
+				diSPIM_MM_channel_group_index++;
+			}
+			diSPIM_MM_config= new String[diSPIM_MM_numChannels];
+			if (chunk.trim().startsWith("\"config_\":")) {
+				diSPIM_MM_config[diSPIM_MM_channel_config_index]= chunk.split(":")[1].replace("\"", "").trim();
+				diSPIM_MM_channel_config_index++;
+			}
+
+
 			if (chunk.trim().startsWith("\"channelGroup\":")) {
 				diSPIM_MM_channelGroup= chunk.split(":")[1].replace("\"", "").trim();
 			}
@@ -3171,13 +3171,13 @@ public class DISPIM_Monitor implements PlugIn {
 				diSPIM_MM_PixelAspect= Double.parseDouble(chunk.split(":")[1].replace("\"", "").trim());
 			}
 
-				if (chunk.trim().startsWith("\"ChNames\":")) {
-					diSPIM_MM_ChNames= chunk.split(":")[1].replace("[", "").replace("]", "").replace("\"", "").split(";");
-					for(String s:diSPIM_MM_ChNames)
-						IJ.log(s);
-				}
-			
-			
+			if (chunk.trim().startsWith("\"ChNames\":")) {
+				diSPIM_MM_ChNames= chunk.split(":")[1].replace("[", "").replace("]", "").replace("\"", "").split(";");
+				for(String s:diSPIM_MM_ChNames)
+					IJ.log(s);
+			}
+
+
 			if (chunk.trim().startsWith("\"Height\":")) {
 				diSPIM_MM_Height= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
 			}
@@ -3189,8 +3189,8 @@ public class DISPIM_Monitor implements PlugIn {
 			}
 			if (chunk.trim().startsWith("\"PixelSize_um\":")) {
 				diSPIM_MM_PixelSize_um= Double.parseDouble(chunk.split(":")[1].replace("\"", "").trim());
-//						vWidth = diSPIM_MM_PixelSize_um;
-//						vHeight = diSPIM_MM_PixelSize_um;
+				//						vWidth = diSPIM_MM_PixelSize_um;
+				//						vHeight = diSPIM_MM_PixelSize_um;
 			}
 			if (chunk.trim().startsWith("\"Frames\":")) {
 				diSPIM_MM_Frames= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
@@ -3210,18 +3210,18 @@ public class DISPIM_Monitor implements PlugIn {
 			if (chunk.trim().startsWith("\"SPIMmode\":")) {
 				diSPIM_MM_SPIMmode= chunk.split(":")[1].replace("\"", "").trim();
 			}
-			
-			
-				if (chunk.trim().startsWith("\"ChColors\":")) {
-					diSPIM_MM_ChColorStrings= chunk.split(":")[1].replace("[", "").replace("]", "").replace("\"", "").split(";");
-					diSPIM_MM_ChColors = new int[diSPIM_MM_ChColorStrings.length];
-					for(int ccs=0;ccs<diSPIM_MM_ChColorStrings.length;ccs++) {
-						IJ.log(diSPIM_MM_ChColorStrings[ccs]);
-						diSPIM_MM_ChColors[ccs] = Integer.parseInt(diSPIM_MM_ChColorStrings[ccs]);
-					}
+
+
+			if (chunk.trim().startsWith("\"ChColors\":")) {
+				diSPIM_MM_ChColorStrings= chunk.split(":")[1].replace("[", "").replace("]", "").replace("\"", "").split(";");
+				diSPIM_MM_ChColors = new int[diSPIM_MM_ChColorStrings.length];
+				for(int ccs=0;ccs<diSPIM_MM_ChColorStrings.length;ccs++) {
+					IJ.log(diSPIM_MM_ChColorStrings[ccs]);
+					diSPIM_MM_ChColors[ccs] = Integer.parseInt(diSPIM_MM_ChColorStrings[ccs]);
 				}
-			
-		
+			}
+
+
 			if (chunk.trim().startsWith("\"Slices\":")) {
 				diSPIM_MM_Slices= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
 			}
@@ -3242,22 +3242,22 @@ public class DISPIM_Monitor implements PlugIn {
 			}
 			if (chunk.trim().startsWith("\"z-step_um\":")) {
 				diSPIM_MM_zStep_um= Double.parseDouble(chunk.split(":")[1].replace("\"", "").trim());
-//						vDepthRaw = diSPIM_MM_zStep_um;
+				//						vDepthRaw = diSPIM_MM_zStep_um;
 			}
 			if (chunk.trim().startsWith("\"SlicesFirst\":")) {
 				diSPIM_MM_SlicesFirst= chunk.split(":")[1].replace("\"", "").trim().toLowerCase().contains("true");
 			}
-			
-				if (chunk.trim().startsWith("\"ChContrastMin\":")) {
-					diSPIM_MM_ChContrastMinStrings= chunk.split(":")[1].replace("[", "").replace("]", "").replace("\"", "").split(";");
-					diSPIM_MM_ChContrastMin = new int[diSPIM_MM_ChContrastMinStrings.length];
-					for(int ccmin=0;ccmin<diSPIM_MM_ChContrastMinStrings.length;ccmin++) {
-						IJ.log(diSPIM_MM_ChContrastMinStrings[ccmin]);
-						diSPIM_MM_ChContrastMin[ccmin] = Integer.parseInt(diSPIM_MM_ChContrastMinStrings[ccmin]);
-					}
+
+			if (chunk.trim().startsWith("\"ChContrastMin\":")) {
+				diSPIM_MM_ChContrastMinStrings= chunk.split(":")[1].replace("[", "").replace("]", "").replace("\"", "").split(";");
+				diSPIM_MM_ChContrastMin = new int[diSPIM_MM_ChContrastMinStrings.length];
+				for(int ccmin=0;ccmin<diSPIM_MM_ChContrastMinStrings.length;ccmin++) {
+					IJ.log(diSPIM_MM_ChContrastMinStrings[ccmin]);
+					diSPIM_MM_ChContrastMin[ccmin] = Integer.parseInt(diSPIM_MM_ChContrastMinStrings[ccmin]);
 				}
-			
-			
+			}
+
+
 			if (chunk.trim().startsWith("\"StartTime\":")) {
 				diSPIM_MM_StartTime= chunk.split(":")[1].replace("\"", "").trim();
 			}
@@ -3295,15 +3295,15 @@ public class DISPIM_Monitor implements PlugIn {
 				diSPIM_MM_TimeFirst= chunk.split(":")[1].replace("\"", "").trim().toLowerCase().contains("true");
 			}
 
-				if (chunk.trim().startsWith("\"ChContrastMax\":")) {
-					diSPIM_MM_ChContrastMaxStrings= chunk.split(":")[1].replace("[", "").replace("]", "").replace("\"", "").split(";");
-					diSPIM_MM_ChContrastMax = new int[diSPIM_MM_ChContrastMaxStrings.length];
-					for(int ccMax=0;ccMax<diSPIM_MM_ChContrastMaxStrings.length;ccMax++) {
-						IJ.log(diSPIM_MM_ChContrastMaxStrings[ccMax]);
-						diSPIM_MM_ChContrastMax[ccMax] = Integer.parseInt(diSPIM_MM_ChContrastMaxStrings[ccMax]);
-					}
+			if (chunk.trim().startsWith("\"ChContrastMax\":")) {
+				diSPIM_MM_ChContrastMaxStrings= chunk.split(":")[1].replace("[", "").replace("]", "").replace("\"", "").split(";");
+				diSPIM_MM_ChContrastMax = new int[diSPIM_MM_ChContrastMaxStrings.length];
+				for(int ccMax=0;ccMax<diSPIM_MM_ChContrastMaxStrings.length;ccMax++) {
+					IJ.log(diSPIM_MM_ChContrastMaxStrings[ccMax]);
+					diSPIM_MM_ChContrastMax[ccMax] = Integer.parseInt(diSPIM_MM_ChContrastMaxStrings[ccMax]);
 				}
-		
+			}
+
 			if (chunk.trim().startsWith("\"Positions\":")) {
 				diSPIM_MM_Positions= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
 				pDim = diSPIM_MM_Positions;
@@ -3312,7 +3312,7 @@ public class DISPIM_Monitor implements PlugIn {
 			//					if (chunk.trim().split(":").length>1)
 			//						allVars = allVars+"\n diSPIM_MM_"+chunk.trim().split(":")[1];
 		}
-			//				IJ.log(allVars);
+		//				IJ.log(allVars);
 	}
 
 	public Polygon rotatePolygon(Polygon p1, double angle) {
@@ -3329,8 +3329,8 @@ public class DISPIM_Monitor implements PlugIn {
 		}
 		return p1;
 	}
-	
-//	{"LaserExposure_ms":"2.5","MVRotations":"0_90_0_90","SPIMtype":"diSPIM","UUID":"ea4d0baa-8f54-4937-82f7-4d1e62492be5","SPIMAcqSettings":"{\n  \"spimMode\": \"PIEZO_SLICE_SCAN\",\n  \"isStageScanning\": false,\n  \"useTimepoints\": true,\n  \"numTimepoints\": 5,\n  \"timepointInterval\": 15.0,\n  \"useMultiPositions\": true,\n  \"useChannels\": true,\n  \"channelMode\": \"VOLUME_HW\",\n  \"numChannels\": 2,\n  \"channels\": [\n    {\n      \"useChannel_\": true,\n      \"group_\": \"Channel\",\n      \"config_\": \"488 nm\"\n    },\n    {\n      \"useChannel_\": true,\n      \"group_\": \"Channel\",\n      \"config_\": \"561 nm\"\n    }\n  ],\n  \"channelGroup\": \"Channel\",\n  \"useAutofocus\": false,\n  \"numSides\": 2,\n  \"firstSideIsA\": true,\n  \"delayBeforeSide\": 50.0,\n  \"numSlices\": 50,\n  \"stepSizeUm\": 1.0,\n  \"minimizeSlicePeriod\": true,\n  \"desiredSlicePeriod\": 5.5,\n  \"desiredLightExposure\": 2.5,\n  \"centerAtCurrentZ\": false,\n  \"sliceTiming\": {\n    \"scanDelay\": 4.5,\n    \"scanNum\": 1,\n    \"scanPeriod\": 3.0,\n    \"laserDelay\": 5.5,\n    \"laserDuration\": 2.5,\n    \"cameraDelay\": 2.75,\n    \"cameraDuration\": 1.0,\n    \"cameraExposure\": 5.35,\n    \"sliceDuration\": 8.0,\n    \"valid\": true\n  },\n  \"cameraMode\": \"EDGE\",\n  \"hardwareTimepoints\": false,\n  \"separateTimepoints\": true\n}
+
+	//	{"LaserExposure_ms":"2.5","MVRotations":"0_90_0_90","SPIMtype":"diSPIM","UUID":"ea4d0baa-8f54-4937-82f7-4d1e62492be5","SPIMAcqSettings":"{\n  \"spimMode\": \"PIEZO_SLICE_SCAN\",\n  \"isStageScanning\": false,\n  \"useTimepoints\": true,\n  \"numTimepoints\": 5,\n  \"timepointInterval\": 15.0,\n  \"useMultiPositions\": true,\n  \"useChannels\": true,\n  \"channelMode\": \"VOLUME_HW\",\n  \"numChannels\": 2,\n  \"channels\": [\n    {\n      \"useChannel_\": true,\n      \"group_\": \"Channel\",\n      \"config_\": \"488 nm\"\n    },\n    {\n      \"useChannel_\": true,\n      \"group_\": \"Channel\",\n      \"config_\": \"561 nm\"\n    }\n  ],\n  \"channelGroup\": \"Channel\",\n  \"useAutofocus\": false,\n  \"numSides\": 2,\n  \"firstSideIsA\": true,\n  \"delayBeforeSide\": 50.0,\n  \"numSlices\": 50,\n  \"stepSizeUm\": 1.0,\n  \"minimizeSlicePeriod\": true,\n  \"desiredSlicePeriod\": 5.5,\n  \"desiredLightExposure\": 2.5,\n  \"centerAtCurrentZ\": false,\n  \"sliceTiming\": {\n    \"scanDelay\": 4.5,\n    \"scanNum\": 1,\n    \"scanPeriod\": 3.0,\n    \"laserDelay\": 5.5,\n    \"laserDuration\": 2.5,\n    \"cameraDelay\": 2.75,\n    \"cameraDuration\": 1.0,\n    \"cameraExposure\": 5.35,\n    \"sliceDuration\": 8.0,\n    \"valid\": true\n  },\n  \"cameraMode\": \"EDGE\",\n  \"hardwareTimepoints\": false,\n  \"separateTimepoints\": true\n}
 
 	public String open_diSPIMheaderAsString(String path) {
 		IJ.log(path);
@@ -3350,7 +3350,7 @@ public class DISPIM_Monitor implements PlugIn {
 			BufferedReader r = new BufferedReader(new FileReader(file));
 			String s ="";
 			while (!s.contains("\"Positions\":")) {
-//			for (int l=0;l<2;l++) {
+				//			for (int l=0;l<2;l++) {
 				s=r.readLine();
 				IJ.log(s);
 				if (s==null)
@@ -3360,7 +3360,7 @@ public class DISPIM_Monitor implements PlugIn {
 				//					sb.append(s+"\n");
 			}
 			r.close();
-//			str = new String(sb);
+			//			str = new String(sb);
 			str = s;
 		}
 		catch (Exception e) {
