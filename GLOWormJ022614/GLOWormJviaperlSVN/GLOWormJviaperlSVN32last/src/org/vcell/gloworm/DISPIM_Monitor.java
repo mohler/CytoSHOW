@@ -370,6 +370,7 @@ public class DISPIM_Monitor implements PlugIn {
 
 				dimOrder = (diSPIM_MM_channelMode.contains("VOLUME")?"xyzct":"xyczt");
 
+				wavelengths = diSPIM_MM_numChannels;
 				vWidth = diSPIM_MM_PixelSize_um;
 				vHeight = diSPIM_MM_PixelSize_um;
 				vDepthRaw = diSPIM_MM_zStep_um;
@@ -1015,16 +1016,24 @@ public class DISPIM_Monitor implements PlugIn {
 												cropWidth, cropHeight);
 					}
 					WindowManager.setTempCurrentImage(null);
-
-					IJ.runMacro("waitForUser(\"Select the regions containing the embryo"
-							+ "\\\n for deconvolution/fusion processing."
-							// + "\\\nAlso, set the minimum Brightness limit."
-							// +
-							// "\\\nWhen you are then ready, click OK here to commence processing."
-							+ "\");");
-					roiA = impA.getRoi();
-					roiB = impB.getRoi();
 				}
+			}
+			
+			IJ.runMacro("waitForUser(\"Select the regions containing the embryo"
+					+ "\\\n for deconvolution/fusion processing."
+					// + "\\\nAlso, set the minimum Brightness limit."
+					// +
+					// "\\\nWhen you are then ready, click OK here to commence processing."
+					+ "\");");
+
+			for (int pos=0; pos<pDim; pos++) {
+				
+					impA = impAs[pos];
+					impB = impBs[pos];
+
+					Roi roiA = impA.getRoi();
+					Roi roiB = impB.getRoi();
+				
 
 				// int[] minLimit = {(int) impA.getDisplayRangeMin(), (int)
 				// impB.getDisplayRangeMin()};
