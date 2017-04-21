@@ -1443,14 +1443,14 @@ public class DISPIM_Monitor implements PlugIn {
 								+ frameFileNames[f]
 										+ "\", \"spimAFileDir string "
 										+ savePath.replace("\\", "\\\\")
-										+ "Pos"+pos+ "_SPIMB_Ch"
+										+ "Pos"+pos+ "_SPIMA_Ch"
 										+ keyChannel
 										+ "_processed"
 										+ File.separator.replace("\\", "\\\\")
 										+ frameFileNames[f]
 												+ "\", \"spimBFileDir string "
 												+ savePath.replace("\\", "\\\\")
-												+ "Pos"+pos+ "_SPIMA_Ch"
+												+ "Pos"+pos+ "_SPIMB_Ch"
 												+ keyChannel
 												+ "_processed"
 												+ File.separator.replace("\\", "\\\\")
@@ -1560,14 +1560,14 @@ public class DISPIM_Monitor implements PlugIn {
 									+ frameFileNames[f]
 											+ "\", \"spimAFileDir string "
 											+ savePath.replace("\\", "\\\\")
-											+ "Pos"+pos+ "_SPIMB_Ch"
+											+ "Pos"+pos+ "_SPIMA_Ch"
 											+ slaveChannel
 											+ "_processed"
 											+ File.separator.replace("\\", "\\\\")
 											+ frameFileNames[f]
 													+ "\", \"spimBFileDir string "
 													+ savePath.replace("\\", "\\\\")
-													+ "Pos"+pos+ "_SPIMA_Ch"
+													+ "Pos"+pos+ "_SPIMB_Ch"
 													+ slaveChannel
 													+ "_processed"
 													+ File.separator.replace("\\", "\\\\")
@@ -2607,14 +2607,14 @@ public class DISPIM_Monitor implements PlugIn {
 									+ frameFileName
 									+ "\", \"spimAFileDir string "
 									+ savePath.replace("\\", "\\\\")
-									+ "Pos"+pos+ "_SPIMB_Ch"
+									+ "Pos"+pos+ "_SPIMA_Ch"
 									+ keyChannel
 									+ "_processed"
 									+ File.separator.replace("\\", "\\\\")
 									+ frameFileName
 									+ "\", \"spimBFileDir string "
 									+ savePath.replace("\\", "\\\\")
-									+ "Pos"+pos+ "_SPIMA_Ch"
+									+ "Pos"+pos+ "_SPIMB_Ch"
 									+ keyChannel
 									+ "_processed"
 									+ File.separator.replace("\\", "\\\\")
@@ -2724,14 +2724,14 @@ public class DISPIM_Monitor implements PlugIn {
 										+ frameFileName
 										+ "\", \"spimAFileDir string "
 										+ savePath.replace("\\", "\\\\")
-										+ "Pos"+pos+ "_SPIMB_Ch"
+										+ "Pos"+pos+ "_SPIMA_Ch"
 										+ slaveChannel
 										+ "_processed"
 										+ File.separator.replace("\\", "\\\\")
 										+ frameFileName
 										+ "\", \"spimBFileDir string "
 										+ savePath.replace("\\", "\\\\")
-										+ "Pos"+pos+ "_SPIMA_Ch"
+										+ "Pos"+pos+ "_SPIMB_Ch"
 										+ slaveChannel
 										+ "_processed"
 										+ File.separator.replace("\\", "\\\\")
