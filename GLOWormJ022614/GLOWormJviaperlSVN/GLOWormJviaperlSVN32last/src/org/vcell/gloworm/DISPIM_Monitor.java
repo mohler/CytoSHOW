@@ -967,6 +967,7 @@ public class DISPIM_Monitor implements PlugIn {
 					if (roiA == null) {
 						if (!((new File(savePath +  "Pos" + pos + "A_crop.roi")).canRead())) {
 							IJ.makeRectangle(0, 0, cropWidth, cropHeight);
+							roiA = impA.getRoi();
 						} else {
 							IJ.open(savePath +  "Pos" + pos + "A_crop.roi");
 							roiA = impA.getRoi();
@@ -994,6 +995,7 @@ public class DISPIM_Monitor implements PlugIn {
 					if (roiB == null) {
 						if (!((new File(savePath + "Pos" + pos + "B_crop.roi")).canRead())) {
 							IJ.makeRectangle(0, 0, cropWidth, cropHeight);
+							roiB = impB.getRoi();
 						} else {
 							IJ.open(savePath +  "Pos" + pos + "B_crop.roi");
 							roiB = impB.getRoi();
