@@ -699,7 +699,7 @@ public class DISPIM_Monitor implements PlugIn {
 
 			impA = new ImagePlus();
 			impA.setStack(new MultiFileInfoVirtualStack(mmPath, "MMStack", false));
-			//				impA.setStack(new FileInfoVirtualStack(tdB.getTiffInfo(), false));
+			//				impA.setStack(new FileInfoVirtualStack(tdB.getTiffInfo(0), false));
 			int stackSize = impA.getNSlices();
 			int nChannels = wavelengths*2;
 			int nSlices = zSlices;
@@ -778,7 +778,7 @@ public class DISPIM_Monitor implements PlugIn {
 
 			impB = new ImagePlus();
 			impB.setStack(new MultiFileInfoVirtualStack(mmPath, "MMStack", false));
-			//				impB.setStack(new FileInfoVirtualStack(tdA.getTiffInfo(), false));
+			//				impB.setStack(new FileInfoVirtualStack(tdA.getTiffInfo(0), false));
 			stackSize = impB.getStack().getSize();
 			nChannels = wavelengths*2;
 			nSlices = zSlices;
@@ -1443,14 +1443,14 @@ public class DISPIM_Monitor implements PlugIn {
 								+ "_processed"
 								+ File.separator.replace("\\", "\\\\")
 								+ frameFileNames[f]
-										+ "\", \"spimAFileDir string "
+										+ "\", \"spimBFileDir string "
 										+ savePath.replace("\\", "\\\\")
 										+ "Pos"+pos+ "_SPIMA_Ch"
 										+ keyChannel
 										+ "_processed"
 										+ File.separator.replace("\\", "\\\\")
 										+ frameFileNames[f]
-												+ "\", \"spimBFileDir string "
+												+ "\", \"spimAFileDir string "
 												+ savePath.replace("\\", "\\\\")
 												+ "Pos"+pos+ "_SPIMB_Ch"
 												+ keyChannel
@@ -1459,7 +1459,8 @@ public class DISPIM_Monitor implements PlugIn {
 												+ frameFileNames[f]
 														+ "\", \"baseImage string "
 														+ frameFileNames[f]
-																+ "\", \"base_rotation int -1\", \"transform_rotation int 5\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconv_platform int 2\", \"deconvDirString string "
+//																+ "\", \"base_rotation int -1\", \"transform_rotation int 5\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconv_platform int 2\", \"deconvDirString string "
+																+ "\", \"base_rotation int -1\", \"transform_rotation int 4\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconv_platform int 2\", \"deconvDirString string "
 																+ savePath.replace("\\", "\\\\")
 																+"Pos"+pos+ "_Deconvolution"
 																+ keyChannel
@@ -1560,14 +1561,14 @@ public class DISPIM_Monitor implements PlugIn {
 									+ "_processed"
 									+ File.separator.replace("\\", "\\\\")
 									+ frameFileNames[f]
-											+ "\", \"spimAFileDir string "
+											+ "\", \"spimBFileDir string "
 											+ savePath.replace("\\", "\\\\")
 											+ "Pos"+pos+ "_SPIMA_Ch"
 											+ slaveChannel
 											+ "_processed"
 											+ File.separator.replace("\\", "\\\\")
 											+ frameFileNames[f]
-													+ "\", \"spimBFileDir string "
+													+ "\", \"spimAFileDir string "
 													+ savePath.replace("\\", "\\\\")
 													+ "Pos"+pos+ "_SPIMB_Ch"
 													+ slaveChannel
@@ -1576,7 +1577,8 @@ public class DISPIM_Monitor implements PlugIn {
 													+ frameFileNames[f]
 															+ "\", \"baseImage string "
 															+ frameFileNames[f]
-																	+ "\", \"base_rotation int -1\", \"transform_rotation int 5\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconv_platform int 2\", \"deconvDirString string "
+//																	+ "\", \"base_rotation int -1\", \"transform_rotation int 5\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconv_platform int 2\", \"deconvDirString string "
+																	+ "\", \"base_rotation int -1\", \"transform_rotation int 4\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconv_platform int 2\", \"deconvDirString string "
 																	+ savePath.replace("\\", "\\\\")
 																	+"Pos"+pos+ "_Deconvolution"
 																	+ slaveChannel
@@ -2164,7 +2166,7 @@ public class DISPIM_Monitor implements PlugIn {
 				int tA = impA.getFrame();
 
 				try {
-					impA.setStack(new FileInfoVirtualStack(tdA.getTiffInfo(),
+					impA.setStack(new FileInfoVirtualStack(tdA.getTiffInfo(0),
 							false));
 					int stackSize = impA.getNSlices();
 					int nChannels = wavelengths * 2;
@@ -2254,7 +2256,7 @@ public class DISPIM_Monitor implements PlugIn {
 				int tB = impB.getFrame();
 
 				try {
-					impB.setStack(new FileInfoVirtualStack(tdB.getTiffInfo(),
+					impB.setStack(new FileInfoVirtualStack(tdB.getTiffInfo(0),
 							false));
 					int stackSize = impB.getNSlices();
 					int nChannels = wavelengths * 2;
@@ -2607,14 +2609,14 @@ public class DISPIM_Monitor implements PlugIn {
 									+ "_processed"
 									+ File.separator.replace("\\", "\\\\")
 									+ frameFileName
-									+ "\", \"spimAFileDir string "
+									+ "\", \"spimBFileDir string "
 									+ savePath.replace("\\", "\\\\")
 									+ "Pos"+pos+ "_SPIMA_Ch"
 									+ keyChannel
 									+ "_processed"
 									+ File.separator.replace("\\", "\\\\")
 									+ frameFileName
-									+ "\", \"spimBFileDir string "
+									+ "\", \"spimAFileDir string "
 									+ savePath.replace("\\", "\\\\")
 									+ "Pos"+pos+ "_SPIMB_Ch"
 									+ keyChannel
@@ -2624,6 +2626,7 @@ public class DISPIM_Monitor implements PlugIn {
 									+ "\", \"baseImage string "
 									+ frameFileName
 									+ "\", \"base_rotation int -1\", \"transform_rotation int 5\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconv_platform int 2\", \"deconvDirString string "
+									+ "\", \"base_rotation int -1\", \"transform_rotation int 4\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconv_platform int 2\", \"deconvDirString string "
 									+ savePath.replace("\\", "\\\\")
 									+"Pos"+pos+ "_Deconvolution"
 									+ keyChannel
@@ -2724,14 +2727,14 @@ public class DISPIM_Monitor implements PlugIn {
 										+ "_processed"
 										+ File.separator.replace("\\", "\\\\")
 										+ frameFileName
-										+ "\", \"spimAFileDir string "
+										+ "\", \"spimBFileDir string "
 										+ savePath.replace("\\", "\\\\")
 										+ "Pos"+pos+ "_SPIMA_Ch"
 										+ slaveChannel
 										+ "_processed"
 										+ File.separator.replace("\\", "\\\\")
 										+ frameFileName
-										+ "\", \"spimBFileDir string "
+										+ "\", \"spimAFileDir string "
 										+ savePath.replace("\\", "\\\\")
 										+ "Pos"+pos+ "_SPIMB_Ch"
 										+ slaveChannel
@@ -2741,6 +2744,7 @@ public class DISPIM_Monitor implements PlugIn {
 										+ "\", \"baseImage string "
 										+ frameFileName
 										+ "\", \"base_rotation int -1\", \"transform_rotation int 5\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconv_platform int 2\", \"deconvDirString string "
+										+ "\", \"base_rotation int -1\", \"transform_rotation int 4\", \"concurrent_num int 1\", \"mode_num int 0\", \"save_type string Tiff\", \"do_deconv boolean true\", \"deconv_platform int 2\", \"deconvDirString string "
 										+ savePath.replace("\\", "\\\\")
 										+"Pos"+pos+ "_Deconvolution"
 										+ slaveChannel
@@ -2988,7 +2992,7 @@ public class DISPIM_Monitor implements PlugIn {
 				}
 			}
 		}
-		IJ.log(diSPIMheader);
+//		IJ.log(diSPIMheader);
 
 		String squareSetsSearchPattern=".*";
 		int squareSetsCount=0;
@@ -3025,7 +3029,7 @@ public class DISPIM_Monitor implements PlugIn {
 			}
 			for (int i=0;i<indents;i++)
 				chunk = "        "+chunk;
-			IJ.log(chunk);
+//			IJ.log(chunk);
 			if (chunk.contains("{") ) {
 				indents++;
 			}
@@ -3185,7 +3189,8 @@ public class DISPIM_Monitor implements PlugIn {
 			if (chunk.trim().startsWith("\"ChNames\":")) {
 				diSPIM_MM_ChNames= chunk.split(":")[1].replace("[", "").replace("]", "").replace("\"", "").split(";");
 				for(String s:diSPIM_MM_ChNames)
-					IJ.log(s);
+//					IJ.log(s)
+					;
 			}
 
 
@@ -3227,7 +3232,7 @@ public class DISPIM_Monitor implements PlugIn {
 				diSPIM_MM_ChColorStrings= chunk.split(":")[1].replace("[", "").replace("]", "").replace("\"", "").split(";");
 				diSPIM_MM_ChColors = new int[diSPIM_MM_ChColorStrings.length];
 				for(int ccs=0;ccs<diSPIM_MM_ChColorStrings.length;ccs++) {
-					IJ.log(diSPIM_MM_ChColorStrings[ccs]);
+//					IJ.log(diSPIM_MM_ChColorStrings[ccs]);
 					diSPIM_MM_ChColors[ccs] = Integer.parseInt(diSPIM_MM_ChColorStrings[ccs]);
 				}
 			}
@@ -3263,7 +3268,7 @@ public class DISPIM_Monitor implements PlugIn {
 				diSPIM_MM_ChContrastMinStrings= chunk.split(":")[1].replace("[", "").replace("]", "").replace("\"", "").split(";");
 				diSPIM_MM_ChContrastMin = new int[diSPIM_MM_ChContrastMinStrings.length];
 				for(int ccmin=0;ccmin<diSPIM_MM_ChContrastMinStrings.length;ccmin++) {
-					IJ.log(diSPIM_MM_ChContrastMinStrings[ccmin]);
+//					IJ.log(diSPIM_MM_ChContrastMinStrings[ccmin]);
 					diSPIM_MM_ChContrastMin[ccmin] = Integer.parseInt(diSPIM_MM_ChContrastMinStrings[ccmin]);
 				}
 			}
@@ -3310,7 +3315,7 @@ public class DISPIM_Monitor implements PlugIn {
 				diSPIM_MM_ChContrastMaxStrings= chunk.split(":")[1].replace("[", "").replace("]", "").replace("\"", "").split(";");
 				diSPIM_MM_ChContrastMax = new int[diSPIM_MM_ChContrastMaxStrings.length];
 				for(int ccMax=0;ccMax<diSPIM_MM_ChContrastMaxStrings.length;ccMax++) {
-					IJ.log(diSPIM_MM_ChContrastMaxStrings[ccMax]);
+//					IJ.log(diSPIM_MM_ChContrastMaxStrings[ccMax]);
 					diSPIM_MM_ChContrastMax[ccMax] = Integer.parseInt(diSPIM_MM_ChContrastMaxStrings[ccMax]);
 				}
 			}
@@ -3363,7 +3368,7 @@ public class DISPIM_Monitor implements PlugIn {
 			while (!s.contains("\"Positions\":")) {
 				//			for (int l=0;l<2;l++) {
 				s=r.readLine();
-				IJ.log(s);
+//				IJ.log(s);
 				if (s==null)
 					break;
 				//				else

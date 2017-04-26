@@ -213,8 +213,62 @@ public class FileInfo implements Cloneable {
     }
 
 	public synchronized Object clone() {
-		try {return super.clone();}
-		catch (CloneNotSupportedException e) {return null;}
+		FileInfo nfi = new FileInfo();
+		
+		/* File format (TIFF, GIF_OR_JPG, BMP, etc.). Used by the File/Revert command */
+		nfi.fileFormat = fileFormat;
+		
+		/* File type (GRAY8, GRAY_16_UNSIGNED, RGB, etc.) */
+		nfi.fileType = fileType;
+		
+		nfi.fileName = fileName;
+		nfi.directory = directory;
+		nfi.url = url;
+	    nfi.width = width;
+	    nfi.height = height;
+	    nfi.offset = offset;
+	    nfi.nImages = nImages;
+	    nfi.gapBetweenImages = gapBetweenImages;
+	    nfi.whiteIsZero = whiteIsZero;
+	    nfi.intelByteOrder = intelByteOrder;
+		nfi.compression = compression;
+	    nfi.samplesPerPixel = samplesPerPixel;
+	    
+	    nfi.stripLengths = stripLengths;
+	    nfi.rowsPerStrip = rowsPerStrip;
+		nfi.lutSize = lutSize;
+		nfi.reds = reds;
+		nfi.greens = greens;
+		nfi.blues = blues;
+		nfi.pixels = pixels;	
+		nfi.debugInfo = debugInfo;
+		nfi.sliceLabels = sliceLabels;
+		nfi.info = info;
+		nfi.inputStream = inputStream;
+		nfi.virtualStack = virtualStack;
+		
+		nfi.pixelWidth = pixelWidth;
+		nfi.pixelHeight = pixelHeight;
+		nfi.pixelDepth = pixelDepth;
+		nfi.unit = unit;
+		nfi.calibrationFunction = calibrationFunction;
+		nfi.coefficients = coefficients;
+		nfi.valueUnit = valueUnit;
+		nfi.frameInterval = frameInterval;
+		nfi.description = description;
+
+		nfi.longOffset = longOffset;
+
+		nfi.metaDataTypes = metaDataTypes;
+		nfi.metaData = metaData;
+		nfi.displayRanges = displayRanges;
+		nfi.channelLuts = channelLuts;
+		nfi.roi = roi;
+		nfi.overlay = overlay;
+		nfi.samplesPerPixel = samplesPerPixel;
+		nfi.openNextName = openNextName;
+
+		return nfi;
 	}
 
 }

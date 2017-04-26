@@ -11,10 +11,10 @@ import java.util.Properties;
 /** This plugin opens a multi-page TIFF file as a virtual stack. It
 	implements the File/Import/TIFF Virtual Stack command. */
 public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
-	FileInfo[] info;
+	FileInfo[] infoArray;
 	
 	public FileInfo[] getInfo() {
-		return info;
+		return infoArray;
 	}
 
 	int nImages;
@@ -24,23 +24,23 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 	/* Constructs a FileInfoVirtualStack from a FileInfo object. */
 	public FileInfoVirtualStack(FileInfo fi) {
-		info = new FileInfo[1];
-		info[0] = fi;
+		infoArray = new FileInfo[1];
+		infoArray[0] = fi;
 		open(true);
 	}
 
 	/* Constructs a FileInfoVirtualStack from a FileInfo 
 		object and displays it if 'show' is true. */
 	public FileInfoVirtualStack(FileInfo fi, boolean show) {
-		info = new FileInfo[1];
-		info[0] = fi;
+		infoArray = new FileInfo[1];
+		infoArray[0] = fi;
 		open(show);
 	}
 
 	/* Constructs a FileInfoVirtualStack from an array of FileInfo 
 	objects and displays it if 'show' is true. */
 	public FileInfoVirtualStack(FileInfo[] fi, boolean show) {
-		info = fi;
+		infoArray = fi;
 		open(show);
 	}
 	
@@ -48,7 +48,7 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 		TiffDecoder td = new TiffDecoder((new File(path)).getParent()+File.separator, (new File(path)).getName());
 		if (IJ.debugMode) td.enableDebugging();
 		IJ.showStatus("Decoding TIFF header...");
-		try {info = td.getTiffInfo();}
+		try {infoArray = td.getTiffInfo(0);}
 		catch (IOException e) {
 			String msg = e.getMessage();
 			if (msg==null||msg.equals("")) msg = ""+e;
@@ -72,39 +72,39 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 		TiffDecoder td = new TiffDecoder(dir, name);
 		if (IJ.debugMode) td.enableDebugging();
 		IJ.showStatus("Decoding TIFF header...");
-		try {info = td.getTiffInfo();}
+		try {infoArray = td.getTiffInfo(0);}
 		catch (IOException e) {
 			String msg = e.getMessage();
 			if (msg==null||msg.equals("")) msg = ""+e;
 			IJ.error("TiffDecoder", msg);
 			return;
 		}
-		if (info==null || info.length==0) {
+		if (infoArray==null || infoArray.length==0) {
 			IJ.error("Virtual Stack", "This does not appear to be a TIFF stack");
 			return;
 		}
 		if (IJ.debugMode)
-			IJ.log(info[0].debugInfo);
+			IJ.log(infoArray[0].debugInfo);
 		open(true);
 	}
 	
 	public ImagePlus open(boolean show) {
-		FileInfo fi = info[0];
+		FileInfo fi = infoArray[0];
 		int n = fi.nImages;
-		if (info.length==1 && n>1) {
-			info = new FileInfo[n];
+		if (infoArray.length==1 && n>1) {
+			infoArray = new FileInfo[n];
 			long size = fi.width*fi.height*fi.getBytesPerPixel();
 			for (int i=0; i<n; i++) {
-				info[i] = (FileInfo)fi.clone();
-				info[i].nImages = 1;
-				info[i].longOffset = fi.getOffset() + i*(size + fi.gapBetweenImages);
+				infoArray[i] = (FileInfo)fi.clone();
+				infoArray[i].nImages = 1;
+				infoArray[i].longOffset = fi.getOffset() + i*(size + fi.gapBetweenImages);
 			}
 		}
-		nImages = info.length;
+		nImages = infoArray.length;
 		nSlices = nImages;
 		names = new String[nImages+1];
 		labels = new String[nImages+1];
-		FileOpener fo = new FileOpener(info[0] );
+		FileOpener fo = new FileOpener(infoArray[0] );
 		ImagePlus imp = fo.open(false);
 		if (nImages==1 && fi.fileType==FileInfo.RGB48) {
 			if (show) imp.show();
@@ -140,6 +140,28 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 		return imp2;
 	}
 
+	public void setupStack() {
+		FileInfo fi = infoArray[0];
+		int n = fi.nImages;
+		if (infoArray.length==1 && n>1) {
+			infoArray = new FileInfo[n];
+			long size = fi.width*fi.height*fi.getBytesPerPixel();
+			for (int i=0; i<n; i++) {
+				infoArray[i] = (FileInfo)fi.clone();
+				infoArray[i].nImages = 1;
+				infoArray[i].longOffset = fi.getOffset() + i*(size + fi.gapBetweenImages);
+			}
+		}
+		nImages = infoArray.length;
+		nSlices = nImages;
+		names = new String[nImages+1];
+		labels = new String[nImages+1];
+
+		
+		return;
+	}
+
+	
 	int getInt(Properties props, String key) {
 		Double n = getNumber(props, key);
 		return n!=null?(int)n.doubleValue():1;
@@ -166,9 +188,9 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 			throw new IllegalArgumentException("Argument out of range: "+n);
 		if (nSlices<1) return;
 		for (int i=n; i<nSlices; i++)
-			info[i-1] = info[i];
-		if (nSlices-1<info.length)
-			info[nSlices-1] = null;
+			infoArray[i-1] = infoArray[i];
+		if (nSlices-1<infoArray.length)
+			infoArray[nSlices-1] = null;
 //		nImages--;
 		nSlices--;
 	}
@@ -180,12 +202,12 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (n<1 || n>nSlices)
 			return getProcessor(1);
 //			throw new IllegalArgumentException("Argument out of range: "+n);
-		if (IJ.debugMode) IJ.log("FileInfoVirtualStack: "+n+", "+info[n-1].getOffset());
+		if (IJ.debugMode) IJ.log("FileInfoVirtualStack: "+n+", "+infoArray[n-1].getOffset());
 		//if (n>1) IJ.log("  "+(info[n-1].getOffset()-info[n-2].getOffset()));
 		ImagePlus imp = null;		
 		if (n<=nImages ) {
-			info[n-1].nImages = 1; // why is this needed?
-			FileOpener fo = new FileOpener(info[n-1]);
+			infoArray[n-1].nImages = 1; // why is this needed?
+			FileOpener fo = new FileOpener(infoArray[n-1]);
 			imp = fo.open(false);
 		}
 		if (imp!=null) {
@@ -221,18 +243,18 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 	public String getSliceLabel(int n) {
 		if (n<1 || n>nSlices)
 			throw new IllegalArgumentException("Argument out of range: "+n);
-		if (info[0].sliceLabels==null || info[0].sliceLabels.length!=nImages)
-			return info[0].fileName + " slice "+ n;
+		if (infoArray[0].sliceLabels==null || infoArray[0].sliceLabels.length!=nImages)
+			return infoArray[0].fileName + " slice "+ n;
 		else
-			return info[0].sliceLabels[n-1];
+			return infoArray[0].sliceLabels[n-1];
 	}
 
 	public int getWidth() {
-		return info[0].width;
+		return infoArray[0].width;
 	}
 	
 	public int getHeight() {
-		return info[0].height;
+		return infoArray[0].height;
 	}
     
 }

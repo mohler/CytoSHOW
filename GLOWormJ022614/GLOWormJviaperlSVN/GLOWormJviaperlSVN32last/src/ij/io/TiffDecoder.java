@@ -119,7 +119,7 @@ public class TiffDecoder {
         return Double.longBitsToDouble(readLong());
     }
 
-	long OpenImageFileHeader() throws IOException {
+	long openImageFileHeader() throws IOException {
 	// Open 8-byte Image File Header at start of file.
 	// Returns the offset in bytes to the first IFD or -1
 	// if this is not a valid tiff file.
@@ -354,7 +354,7 @@ public class TiffDecoder {
 			return 0.0;
 	}
 	
-	FileInfo OpenIFD() throws IOException {
+	FileInfo openIFD() throws IOException {
 	// Get Image File Directory data
 		int tag, fieldType, count, value;
 		int nEntries = getShort();
@@ -740,7 +740,7 @@ public class TiffDecoder {
 		debugMode = true;
 	}
 		
-	public FileInfo[] getTiffInfo() throws IOException {
+	public FileInfo[] getTiffInfo(int depth) throws IOException {
 		long ifdOffset;
 		Vector info;
 //		IJ.log(directory+"***"+name);
@@ -748,25 +748,28 @@ public class TiffDecoder {
 			in = new RandomAccessStream(new RandomAccessFile(new File(directory+name), "r"));
 		}
 		info = new Vector();
-		ifdOffset = OpenImageFileHeader();
+		ifdOffset = openImageFileHeader();
 		if (ifdOffset<0L) {
 			in.close();
 			return null;
 		}
 		if (debugMode) dInfo = "\n  " + name + ": opening\n";
-		while (ifdOffset>0L) {
+		int count = 0;
+		while (ifdOffset>0L && (depth<1 || count<depth)) {
 			in.seek(ifdOffset);
-			FileInfo fi = OpenIFD();
+			FileInfo fi = openIFD();
 			if (fi!=null) {
 				info.addElement(fi);
 				ifdOffset = ((long)getInt())&0xffffffffL;
 			} else
 				ifdOffset = 0L;
 			if (debugMode && ifdCount<10) dInfo += "  nextIFD=" + ifdOffset + "\n";
+
 			if (fi!=null) {
 				if (fi.nImages>1) // ignore extra IFDs in ImageJ and NIH Image stacks
 					ifdOffset = 0L;
 			}
+			count++;
 		}
 		if (info.size()==0) {
 			in.close();
@@ -792,6 +795,62 @@ public class TiffDecoder {
 			return fi;
 		}
 	}
+	
+	public long[] getTiffImageOffsets(int depth) throws IOException {
+		long ifdOffset;
+		ArrayList<Long> tiOffsets;
+//		IJ.log(directory+"***"+name);
+		if (in==null) {
+			in = new RandomAccessStream(new RandomAccessFile(new File(directory+name), "r"));
+		}
+		tiOffsets = new ArrayList<Long>();
+		ifdOffset = openImageFileHeader();
+		if (ifdOffset<0L) {
+			in.close();
+			return null;
+		}
+		if (debugMode) dInfo = "\n  " + name + ": opening\n";
+		tiOffsets.add(ifdOffset);
+		int count = 0;
+		while (ifdOffset>0L && (depth<1 || count<depth)) {
+			in.seek(ifdOffset);
+			skipIFD();
+			ifdOffset = ((long)getInt())&0xffffffffL;
+			if (tiOffsets.size()>0 && ifdOffset != tiOffsets.get(count)) {
+				tiOffsets.add(ifdOffset);
+				count++;
+			} else {
+				ifdOffset=0L;
+			}
+		}
+		if (tiOffsets.size()==0) {
+			in.close();
+			return null;
+		} else {
+			long[] tiOffsetsArray = new long[tiOffsets.size()];
+			for (int tio=0; tio<tiOffsetsArray.length;tio++) {
+				tiOffsetsArray[tio] = tiOffsets.get(tio);
+			}
+			return tiOffsetsArray;
+		}
+	}
+
+	void skipIFD() throws IOException {
+	// Get Image File Directory data
+		int tag, fieldType, count, value;
+		int nEntries = getShort();
+		if (nEntries<1 || nEntries>1000)
+			return ;
+		for (int i=0; i<nEntries; i++) {
+			tag = getShort();
+			fieldType = getShort();
+			count = getInt();
+			value = getValue(fieldType, count);
+			long lvalue = ((long)value)&0xffffffffL;
+		}
+		return;
+	}
+
 	
 	String getGapInfo(FileInfo[] fi) {
 		if (fi.length<2) return "0";

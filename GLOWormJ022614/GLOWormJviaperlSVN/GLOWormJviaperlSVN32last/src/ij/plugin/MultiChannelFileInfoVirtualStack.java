@@ -53,7 +53,7 @@ public class MultiChannelFileInfoVirtualStack extends VirtualStack implements Pl
 			TiffDecoder td = new TiffDecoder(dir, file);
 			if (IJ.debugMode) td.enableDebugging();
 			IJ.showStatus("Decoding TIFF header...");
-			try {info = td.getTiffInfo();}
+			try {info = td.getTiffInfo(0);}
 			catch (IOException e) {
 				String msg = e.getMessage();
 				if (msg==null||msg.equals("")) msg = ""+e;
@@ -66,7 +66,7 @@ public class MultiChannelFileInfoVirtualStack extends VirtualStack implements Pl
 			if (IJ.debugMode)
 				IJ.log(info[0].debugInfo);
 			fivStacks.add(new FileInfoVirtualStack());
-			fivStacks.get(fivStacks.size()-1).info = info;
+			fivStacks.get(fivStacks.size()-1).infoArray = info;
 			fivStacks.get(fivStacks.size()-1).open(false);
 			nImages = fivStacks.size() * fivStacks.get(0).nImages;
 		}
@@ -90,7 +90,7 @@ public class MultiChannelFileInfoVirtualStack extends VirtualStack implements Pl
 		if (IJ.debugMode) td.enableDebugging();
 		IJ.showStatus("Decoding TIFF header...");
 		FileInfo[] fi = null;
-		try {fi = td.getTiffInfo();}
+		try {fi = td.getTiffInfo(0);}
 		catch (IOException e) {
 			String msg = e.getMessage();
 			if (msg==null||msg.equals("")) msg = ""+e;
@@ -103,7 +103,7 @@ public class MultiChannelFileInfoVirtualStack extends VirtualStack implements Pl
 		if (IJ.debugMode)
 			IJ.log(info[0].debugInfo);
 		fivStacks.add(new FileInfoVirtualStack());
-		fivStacks.get(fivStacks.size()-1).info = fi;
+		fivStacks.get(fivStacks.size()-1).infoArray = fi;
 		nImages = fivStacks.size() * fivStacks.get(0).nImages;
 		Properties props = (new FileOpener(info[0])).decodeDescriptionString(info[0]);
 		nSlices = (int)getDouble(props,"slices");;
@@ -124,7 +124,7 @@ public class MultiChannelFileInfoVirtualStack extends VirtualStack implements Pl
 			TiffDecoder td = new TiffDecoder(dir, file);
 			if (IJ.debugMode) td.enableDebugging();
 			IJ.showStatus("Decoding TIFF header...");
-			try {info = td.getTiffInfo();}
+			try {info = td.getTiffInfo(0);}
 			catch (IOException e) {
 				String msg = e.getMessage();
 				if (msg==null||msg.equals("")) msg = ""+e;
@@ -137,7 +137,7 @@ public class MultiChannelFileInfoVirtualStack extends VirtualStack implements Pl
 			if (IJ.debugMode)
 				IJ.log(info[0].debugInfo);
 			fivStacks.add(new FileInfoVirtualStack());
-			fivStacks.get(fivStacks.size()-1).info = info;
+			fivStacks.get(fivStacks.size()-1).infoArray = info;
 			fivStacks.get(fivStacks.size()-1).open(false);
 			Properties props = (new FileOpener(info[0])).decodeDescriptionString(info[0]);
 			nSlices = (int)getDouble(props,"slices");;
@@ -229,11 +229,11 @@ public class MultiChannelFileInfoVirtualStack extends VirtualStack implements Pl
 		if (info[0].sliceLabels==null || info[0].sliceLabels.length!=nImages) {
 			if (n<1 || n>nImages) {
 				IJ.runMacro("waitForUser(\""+n+"\");");
-				return fivStacks.get(0).info[0].fileName;
+				return fivStacks.get(0).infoArray[0].fileName;
 //				throw new IllegalArgumentException("Argument out of range: "+n);
 			}
 			int c = (n-1) % (fivStacks.size());
-			return fivStacks.get(c).info[0].fileName + " slice "+ (1+((int)Math.floor(((double)n-1)/fivStacks.size())));
+			return fivStacks.get(c).infoArray[0].fileName + " slice "+ (1+((int)Math.floor(((double)n-1)/fivStacks.size())));
 		}
 		else
 			return info[0].sliceLabels[n-1];

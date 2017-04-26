@@ -957,7 +957,7 @@ public class Opener {
 		TiffDecoder td = new TiffDecoder(directory, name);
 		if (IJ.debugMode) td.enableDebugging();
 		FileInfo[] info=null;
-		try {info = td.getTiffInfo();}
+		try {info = td.getTiffInfo(0);}
 		catch (IOException e) {
 			String msg = e.getMessage();
 			if (msg==null||msg.equals("")) msg = ""+e;
@@ -974,7 +974,7 @@ public class Opener {
 		TiffDecoder td = new TiffDecoder(getDir(path), getName(path));
 		if (IJ.debugMode) td.enableDebugging();
 		FileInfo[] info=null;
-		try {info = td.getTiffInfo();}
+		try {info = td.getTiffInfo(0);}
 		catch (IOException e) {
 			String msg = e.getMessage();
 			if (msg==null||msg.equals("")) msg = ""+e;
@@ -1009,7 +1009,7 @@ public class Opener {
 		try {
 			TiffDecoder td = new TiffDecoder(in, name);
 			if (IJ.debugMode) td.enableDebugging();
-			info = td.getTiffInfo();
+			info = td.getTiffInfo(0);
 		} catch (FileNotFoundException e) {
 			IJ.error("TiffDecoder", "File not found: "+e.getMessage());
 			return null;
@@ -1070,7 +1070,7 @@ public class Opener {
 			decoder.enableDebugging();
 		FileInfo[] info = null;
 		try {
-			info = decoder.getTiffInfo();
+			info = decoder.getTiffInfo(0);
 		} catch (IOException e) {
 			return null;
 		}

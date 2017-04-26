@@ -18,7 +18,7 @@ import org.vcell.gloworm.QTVirtualStack;
 
 public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	ArrayList<FileInfoVirtualStack> fivStacks = new ArrayList<FileInfoVirtualStack>();
-	FileInfo[] info;
+	FileInfo[] infoArray;
 	ArrayList<FileInfo[]> infoCollectorArrayList =new ArrayList<FileInfo[]>();;
 
 	int nImages;
@@ -31,7 +31,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	private int largestDirectoryLength;
 	private File largestDirectoryFile;
 	private String[] cumulativeTiffFileArray;
-	private FileInfo[] dummyInfo;
+	private FileInfo[] dummyInfoArray;
 	private int largestDirectoryTiffCount;
 	private String infoDir;
 	private int  cDim, zDim, tDim;
@@ -46,13 +46,13 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 	/* Constructs a MultiFileInfoVirtualStack from a FileInfo array. */
 	public MultiFileInfoVirtualStack(FileInfo[] fiArray) {
-		info = fiArray;
+		infoArray = fiArray;
 	}
 
 	/* Constructs a MultiFileInfoVirtualStack from a FileInfo 
 	array and displays it if 'show' is true. */
 	public MultiFileInfoVirtualStack(FileInfo[] fiArray, boolean show) {
-		info = fiArray;
+		infoArray = fiArray;
 	}
 	
 	public MultiFileInfoVirtualStack(String dirOrOMETiff, String string, boolean show) {
@@ -216,14 +216,19 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					TiffDecoder td = new TiffDecoder(dir, fileName);
 					if (IJ.debugMode) td.enableDebugging();
 					IJ.showStatus("Decoding TIFF header...");
-					try {dummyInfo = td.getTiffInfo();}
+					try {dummyInfoArray = td.getTiffInfo(0);}
 					catch (IOException e) {
 						String msg = e.getMessage();
 						if (msg==null||msg.equals("")) msg = ""+e;
 						IJ.error("TiffDecoder", msg);
 						return;
 					}
-					if (dummyInfo==null || dummyInfo.length==0) {
+//					int prevOffset = 0;
+//					for (FileInfo fi:dummyInfoArray) {
+//						IJ.log(" "+fi.offset+" "+(fi.offset-prevOffset)+" "+fi.longOffset+" "+fi.gapBetweenImages);
+//						prevOffset = fi.offset;
+//					}
+					if (dummyInfoArray==null || dummyInfoArray.length==0) {
 						continue;
 					} else {
 						break;
@@ -234,34 +239,52 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		}	
 		
 		if (channelDirectories >0) {
+			
 			for (String fileName:goDirFileList){
 				if ((new File(dir + fileName)).canRead() && fileName.toLowerCase().endsWith(".tif")) {
-					TiffDecoder td = new TiffDecoder(dir, fileName);
-					if (IJ.debugMode) td.enableDebugging();
-					IJ.showStatus("Decoding TIFF header...");
-					try {infoCollectorArrayList.add(td.getTiffInfo());}
-					catch (IOException e) {
-						String msg = e.getMessage();
-						if (msg==null||msg.equals("")) msg = ""+e;
-						IJ.error("TiffDecoder", msg);
-						return;
+					if (dummyInfoArray == null) {
+						TiffDecoder td = new TiffDecoder(dir, fileName);
+						if (IJ.debugMode) td.enableDebugging();
+						IJ.showStatus("Decoding TIFF header...");
+						try {infoCollectorArrayList.add(td.getTiffInfo(0));}
+						catch (IOException e) {
+							String msg = e.getMessage();
+							if (msg==null||msg.equals("")) msg = ""+e;
+							IJ.error("TiffDecoder", msg);
+							return;
+						}
+					} else {
+						TiffDecoder td = new TiffDecoder(dir, fileName);
+						if (IJ.debugMode) td.enableDebugging();
+						IJ.showStatus("Decoding  TIFF image headers..."+fileName.substring(fileName.length()-40));
+						long[] tiOffsetsArray = new long[dummyInfoArray.length];
+						try {
+							tiOffsetsArray = td.getTiffImageOffsets(0);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						for (int di=0; di<dummyInfoArray.length; di++) {
+							infoCollectorArrayList.add(new FileInfo[dummyInfoArray.length]);
+							for (int si=0; si<infoCollectorArrayList.get(infoCollectorArrayList.size()-1).length; si++) {
+								infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[si] = (FileInfo) dummyInfoArray[si].clone();
+								infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[si].fileName = fileName;
+								infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[si].longOffset = tiOffsetsArray[si];
+								infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[si].offset = (int)tiOffsetsArray[si];
+							}
+						}
 					}
 					if (infoCollectorArrayList==null || infoCollectorArrayList.size()==0) {
 						continue;
 					}
-					if (IJ.debugMode)
-						IJ.log(info[0].debugInfo);
 					fivStacks.add(new FileInfoVirtualStack());
-					fivStacks.get(fivStacks.size()-1).info = infoCollectorArrayList.get(infoCollectorArrayList.size()-1);
-					fivStacks.get(fivStacks.size()-1).open(false);
-//					if (fivStacks.get(fivStacks.size()-1).nImages == 1 && 1 < fivStacks.get(0).nImages)
-//						fivStacks.get(fivStacks.size()-1).nImages = fivStacks.get(0).nImages;
+					fivStacks.get(fivStacks.size()-1).infoArray = infoCollectorArrayList.get(infoCollectorArrayList.size()-1);
+					fivStacks.get(fivStacks.size()-1).setupStack();
 				} else if (fileName.matches(".*channel.*-frame.* missing")) {
 					fivStacks.add(new FileInfoVirtualStack(new FileInfo(), false));
-					fivStacks.get(fivStacks.size()-1).info = dummyInfo;
-					for (FileInfo dummyInfo:fivStacks.get(fivStacks.size()-1).info)
-						dummyInfo.fileName = fileName;
-					fivStacks.get(fivStacks.size()-1).open(false);
+					for (FileInfo sliceInfo:fivStacks.get(fivStacks.size()-1).infoArray)
+						sliceInfo.fileName = fileName;
+					fivStacks.get(fivStacks.size()-1).setupStack();
 				}
 			}
 			if (fivStacks.size() > 0) {
@@ -271,9 +294,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 						infoArrayList.add(fi);
 					}
 				}
-				info = new FileInfo[infoArrayList.size()];
-				for (int f=0;f<info.length;f++) {;
-					info[f] = (FileInfo) infoArrayList.get(f);
+				infoArray = new FileInfo[infoArrayList.size()];
+				for (int f=0;f<infoArray.length;f++) {;
+					infoArray[f] = (FileInfo) infoArrayList.get(f);
 				}
 				open(show);
 			}
@@ -293,20 +316,20 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (IJ.debugMode) td.enableDebugging();
 		IJ.showStatus("Decoding TIFF header...");
 		FileInfo[] fi = null;
-		try {fi = td.getTiffInfo();}
+		try {fi = td.getTiffInfo(0);}
 		catch (IOException e) {
 			String msg = e.getMessage();
 			if (msg==null||msg.equals("")) msg = ""+e;
 			IJ.error("TiffDecoder", msg);
 			return;
 		}
-		if (info==null || info.length==0) {
+		if (infoArray==null || infoArray.length==0) {
 			return;
 		}
 		if (IJ.debugMode)
-			IJ.log(info[0].debugInfo);
+			IJ.log(infoArray[0].debugInfo);
 		fivStacks.add(new FileInfoVirtualStack());
-		fivStacks.get(fivStacks.size()-1).info = fi;
+		fivStacks.get(fivStacks.size()-1).infoArray = fi;
 		nImages = fivStacks.size() * fivStacks.get(0).nImages;
 	}
 	
@@ -315,7 +338,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	}
 	
 	void open(boolean show) {
-		if (cumulativeTiffFileArray[0].contains("MMStack_"))  {
+		if (cumulativeTiffFileArray.length >0 && cumulativeTiffFileArray[0].contains("MMStack_"))  {
 			nImages = 0;
 			for (FileInfoVirtualStack mmStack:fivStacks) {
 				nImages = nImages + mmStack.getSize();
@@ -340,8 +363,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			zDim = fivStacks.get(0).nImages;
 			nImages = fivStacks.size() * zDim;
 
-			int internalChannels = ((new FileOpener(fivStacks.get(0).info[0])).decodeDescriptionString(fivStacks.get(0).info[0]) != null
-					?(fivStacks.get(0).getInt((new FileOpener(fivStacks.get(0).info[0])).decodeDescriptionString(fivStacks.get(0).info[0]), "channels"))
+			int internalChannels = ((new FileOpener(fivStacks.get(0).infoArray[0])).decodeDescriptionString(fivStacks.get(0).infoArray[0]) != null
+					?(fivStacks.get(0).getInt((new FileOpener(fivStacks.get(0).infoArray[0])).decodeDescriptionString(fivStacks.get(0).infoArray[0]), "channels"))
 							:1);		
 			int channels = channelDirectories * internalChannels;
 			cDim = channels;
@@ -351,8 +374,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			zDim = fivStacks.get(0).nImages;
 			nImages = channelDirectories* fivStacks.size() * zDim;
 
-			int internalChannels = ((new FileOpener(fivStacks.get(0).info[0])).decodeDescriptionString(fivStacks.get(0).info[0]) != null
-					?(fivStacks.get(0).getInt((new FileOpener(fivStacks.get(0).info[0])).decodeDescriptionString(fivStacks.get(0).info[0]), "channels"))
+			int internalChannels = ((new FileOpener(fivStacks.get(0).infoArray[0])).decodeDescriptionString(fivStacks.get(0).infoArray[0]) != null
+					?(fivStacks.get(0).getInt((new FileOpener(fivStacks.get(0).infoArray[0])).decodeDescriptionString(fivStacks.get(0).infoArray[0]), "channels"))
 							:1);		
 			int channels = channelDirectories * internalChannels;
 			cDim = channels;
@@ -524,10 +547,10 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	public String getSliceLabel(int n) {
 		if (n<1 || n>nImages)
 			throw new IllegalArgumentException("Argument out of range: "+n);
-		if (info[0].sliceLabels==null || info[0].sliceLabels.length!=nImages) {
+		if (infoArray[0].sliceLabels==null || infoArray[0].sliceLabels.length!=nImages) {
 			if (n<1 || n>nImages) {
 				IJ.runMacro("waitForUser(\""+n+"\");");
-				return fivStacks.get(0).info[0].fileName;
+				return fivStacks.get(0).infoArray[0].fileName;
 //				throw new IllegalArgumentException("Argument out of range: "+n);
 			}
 			int z = n % fivStacks.get(0).nImages;
@@ -537,18 +560,18 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				t=t-1;
 			}
 //			IJ.log(""+n+" "+z+" "+t);
-			return fivStacks.get(stackNumber).info[0].fileName + " slice "+ sliceNumber;
+			return fivStacks.get(stackNumber).infoArray[0].fileName + " slice "+ sliceNumber;
 		}
 		else
-			return info[0].sliceLabels[n-1];
+			return infoArray[0].sliceLabels[n-1];
 	}
 
 	public int getWidth() {
-		return info[0].width;
+		return infoArray[0].width;
 	}
 	
 	public int getHeight() {
-		return info[0].height;
+		return infoArray[0].height;
 	}
 	
 	public String getDimOrder() {
