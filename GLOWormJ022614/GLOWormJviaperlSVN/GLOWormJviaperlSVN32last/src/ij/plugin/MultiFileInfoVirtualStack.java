@@ -20,7 +20,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	ArrayList<FileInfoVirtualStack> fivStacks = new ArrayList<FileInfoVirtualStack>();
 	FileInfo[] infoArray;
 	ArrayList<FileInfo[]> infoCollectorArrayList =new ArrayList<FileInfo[]>();;
-
+	ArrayList<String> touchedFiles = new ArrayList<String>();
 	int nImages;
 	private String dir;
 	private int channelDirectories;
@@ -506,17 +506,20 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			sliceNumber = (n-1) % (fivStacks.get(stackNumber).getSize()/vDim);
 
 			if (stackNumber>=0 && sliceNumber>=0) {
-				TiffDecoder td = new TiffDecoder(dir, fivStacks.get(stackNumber).infoArray[sliceNumber].fileName);
-				if (IJ.debugMode) td.enableDebugging();
-				IJ.showStatus("Decoding TIFF header...");
-				try {infoCollectorArrayList.set(stackNumber, td.getTiffInfo(0));}
-				catch (IOException e) {
-					String msg = e.getMessage();
-					if (msg==null||msg.equals("")) msg = ""+e;
-					IJ.error("TiffDecoder", msg);
+				if (!touchedFiles.contains(fivStacks.get(stackNumber).infoArray[sliceNumber].fileName)) {
+					TiffDecoder td = new TiffDecoder(dir, fivStacks.get(stackNumber).infoArray[sliceNumber].fileName);
+					if (IJ.debugMode) td.enableDebugging();
+					IJ.showStatus("Decoding TIFF header...");
+					try {infoCollectorArrayList.set(stackNumber, td.getTiffInfo(0));}
+					catch (IOException e) {
+						String msg = e.getMessage();
+						if (msg==null||msg.equals("")) msg = ""+e;
+						IJ.error("TiffDecoder", msg);
+					}
+					fivStacks.get(stackNumber).infoArray = infoCollectorArrayList.get(stackNumber);
+					fivStacks.get(stackNumber).open(false);
+					touchedFiles.add(fivStacks.get(stackNumber).infoArray[sliceNumber].fileName);
 				}
-				fivStacks.get(stackNumber).infoArray = infoCollectorArrayList.get(stackNumber);
-				fivStacks.get(stackNumber).open(false);
 			} 
 
 			//		IJ.log(""+n+" "+z+" "+t);
