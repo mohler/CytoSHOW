@@ -257,20 +257,20 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 						TiffDecoder td = new TiffDecoder(dir, fileName);
 						if (IJ.debugMode) td.enableDebugging();
 						IJ.showStatus("Decoding  TIFF image headers..."+fileName.substring(fileName.length()-40));
-						long[] tiOffsetsArray = new long[dummyInfoArray.length];
-						try {
-							tiOffsetsArray = td.getTiffImageOffsets(0);
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+//						long[] tiOffsetsArray = new long[dummyInfoArray.length];
+//						try {
+//							tiOffsetsArray = td.getTiffImageOffsets(0);
+//						} catch (IOException e) {
+//							// TODO Auto-generated catch block
+//							e.printStackTrace();
+//						}
 						for (int di=0; di<dummyInfoArray.length; di++) {
 							infoCollectorArrayList.add(new FileInfo[dummyInfoArray.length]);
 							for (int si=0; si<infoCollectorArrayList.get(infoCollectorArrayList.size()-1).length; si++) {
 								infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[si] = (FileInfo) dummyInfoArray[si].clone();
 								infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[si].fileName = fileName;
-								infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[si].longOffset = tiOffsetsArray[si];
-								infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[si].offset = (int)tiOffsetsArray[si];
+//								infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[si].longOffset = tiOffsetsArray[si];
+//								infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[si].offset = (int)tiOffsetsArray[si];
 							}
 						}
 					}
@@ -490,7 +490,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			return fivStacks.get(0).getProcessor(1);
 //			throw new IllegalArgumentException("Argument out of range: "+n);
 		}
-		
+				
+			
 		stackNumber = 0;
 		sliceNumber = 1;
 		int total=0;
@@ -504,7 +505,21 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		
 			sliceNumber = (n-1) % (fivStacks.get(stackNumber).getSize()/vDim);
 
-//		IJ.log(""+n+" "+z+" "+t);
+			if (stackNumber>=0 && sliceNumber>=0) {
+				TiffDecoder td = new TiffDecoder(dir, fivStacks.get(stackNumber).infoArray[sliceNumber].fileName);
+				if (IJ.debugMode) td.enableDebugging();
+				IJ.showStatus("Decoding TIFF header...");
+				try {infoCollectorArrayList.set(stackNumber, td.getTiffInfo(0));}
+				catch (IOException e) {
+					String msg = e.getMessage();
+					if (msg==null||msg.equals("")) msg = ""+e;
+					IJ.error("TiffDecoder", msg);
+				}
+				fivStacks.get(stackNumber).infoArray = infoCollectorArrayList.get(stackNumber);
+				fivStacks.get(stackNumber).open(false);
+			} 
+
+			//		IJ.log(""+n+" "+z+" "+t);
 		ImageProcessor ip = null;
 		if (dimOrder == "xyczt")
 			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber+1+(isViewB?fivStacks.get(stackNumber).getSize()/vDim:0));

@@ -810,14 +810,17 @@ public class TiffDecoder {
 			return null;
 		}
 		if (debugMode) dInfo = "\n  " + name + ": opening\n";
+		long prevOffset = ifdOffset;
 		tiOffsets.add(ifdOffset);
+
 		int count = 0;
 		while (ifdOffset>0L && (depth<1 || count<depth)) {
 			in.seek(ifdOffset);
 			skipIFD();
 			ifdOffset = ((long)getInt())&0xffffffffL;
-			if (tiOffsets.size()>0 && ifdOffset != tiOffsets.get(count)) {
+			if ((ifdOffset>0L)) {
 				tiOffsets.add(ifdOffset);
+				prevOffset = ifdOffset;
 				count++;
 			} else {
 				ifdOffset=0L;
@@ -827,6 +830,7 @@ public class TiffDecoder {
 			in.close();
 			return null;
 		} else {
+			in.close();
 			long[] tiOffsetsArray = new long[tiOffsets.size()];
 			for (int tio=0; tio<tiOffsetsArray.length;tio++) {
 				tiOffsetsArray[tio] = tiOffsets.get(tio);
