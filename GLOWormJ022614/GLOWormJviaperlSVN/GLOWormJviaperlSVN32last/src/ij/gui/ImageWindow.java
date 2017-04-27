@@ -53,12 +53,16 @@ import java.awt.event.WindowStateListener;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 import org.vcell.gloworm.MultiChannelController;
 import org.vcell.gloworm.MultiQTVirtualStack;
 import org.vcell.gloworm.SliceStereoToggle;
+
+import com.sun.xml.internal.ws.util.StringUtils;
 
 /** A frame for displaying images. */
 public class ImageWindow extends JFrame implements FocusListener, WindowListener, WindowStateListener, MouseWheelListener {
@@ -108,7 +112,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 	public JButton hideShowButton;
 	public JButton sketch3DButton;
 	public Label countLabel;
-	public Panel overheadPanel;
+	public JPanel overheadPanel;
 	private Toolbar toolbar;
 	public Toolbar getToolbar() {
 		return toolbar;
@@ -252,7 +256,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
      }
 
 	public void addToolBarPanel() {
-		overheadPanel = new Panel();
+		overheadPanel = new JPanel();
 		overheadPanel.setLayout(new GridLayout(1, 1));
 		
 		toolbar = new Toolbar();
@@ -771,7 +775,8 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 			} else {
 				g.setColor(Color.black);
 			}
-			g.drawString(createSubtitle(), insets.left+5, insets.top+TEXT_GAP);
+			String subTitle = createSubtitle();
+			g.drawString(subTitle, insets.left+5, insets.top+TEXT_GAP);
 		}
     }
     
@@ -783,7 +788,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
     		ImageStack stack = imp.getStack();
     		int currentSlice = imp.getCurrentSlice();
     		s += currentSlice+"/"+nSlices;
-    		String label = stack.getShortSliceLabel(currentSlice);
+    		String label = stack.getSliceLabel(currentSlice);
     		if (label!=null && label.length()>0) {
     			if (imp.isHyperStack()) label = label.replace(';', ' ');
     			s += " (" + label + ")";
@@ -801,8 +806,8 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 				int len = label.length();
 				if (len>4 && label.charAt(len-4)=='.' && !Character.isDigit(label.charAt(len-1)))
 					label = label.substring(0,len-4);
-				if (label.length()>60)
-					label = label.substring(0, 60);
+//				if (label.length()>60)
+//					label = label.substring(0, 60);
 				s = label + "; ";
 			}
 		}
