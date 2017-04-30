@@ -163,6 +163,9 @@ public class DISPIM_Monitor implements PlugIn {
 		this.doDecon = doDecon;
 	}
 
+	/* (non-Javadoc)
+	 * @see ij.plugin.PlugIn#run(java.lang.String)
+	 */
 	public void run(String arg) {
 		String[] args = arg.split("\\|");
 		IJ.log(arg);
@@ -283,18 +286,27 @@ public class DISPIM_Monitor implements PlugIn {
 		String[] deconList2 = { "" };
 		String big5DFileListAString = ("");
 		String big5DFileListBString = ("");
-		ImagePlus impA = null;
-		ImagePlus impB = null;
-		ImagePlus impDF1 = null;
-		ImagePlus impDF2 = null;
-		CompositeImage ciDF1 = null;
-		CompositeImage ciDF2 = null;
+//		ImagePlus impA = null;
+//		ImagePlus impB = null;
+//		ImagePlus impDF1 = null;
+//		ImagePlus impDF2 = null;
+//		CompositeImage ciDF1 = null;
+//		CompositeImage ciDF2 = null;
 		ImagePlus[] impAs = new ImagePlus[1];
 		ImagePlus[] impBs  = new ImagePlus[1];
 		ImagePlus[] impDF1s  = new ImagePlus[1];
 		ImagePlus[] impDF2s  = new ImagePlus[1];
 		CompositeImage[] ciDF1s  = new CompositeImage[1];
 		CompositeImage[] ciDF2s  = new CompositeImage[1];
+		Roi[] roiAs  = new Roi[1];
+		Roi[] roiBs  = new Roi[1];
+		int[] wasFrameA = new int[1];
+		int[] wasFrameB = new int[1];
+		int[] wasSliceA = new int[1];
+		int[] wasSliceB = new int[1];
+		int[] wasChannelA = new int[1];
+		int[] wasChannelB = new int[1];
+
 
 		ImageWindow win = null;
 
@@ -377,6 +389,18 @@ public class DISPIM_Monitor implements PlugIn {
 
 				impAs = new ImagePlus[pDim];
 				impBs = new ImagePlus[pDim];
+				roiAs = new Roi[pDim];
+				roiBs = new Roi[pDim];
+				impDF1s  = new ImagePlus[pDim];
+				impDF2s  = new ImagePlus[pDim];
+				ciDF1s  = new CompositeImage[pDim];
+				ciDF2s  = new CompositeImage[pDim];
+				wasFrameA = new int[pDim];
+				wasFrameB = new int[pDim];
+				wasSliceA = new int[pDim];
+				wasSliceB = new int[pDim];
+				wasChannelA = new int[pDim];
+				wasChannelB = new int[pDim];
 
 				MultiFileInfoVirtualStack[] stackAs = new MultiFileInfoVirtualStack[pDim];
 				MultiFileInfoVirtualStack[] stackBs = new MultiFileInfoVirtualStack[pDim];
@@ -609,85 +633,85 @@ public class DISPIM_Monitor implements PlugIn {
 				if ((new File(dirOrOMETiff + "Big5DFileListA.txt")).length() > 0) {
 					// IJ.run("Stack From List...",
 					// "open="+dir+"Big5DFileListA.txt use");
-					impA = impAs[0];
-					impA.setStack(new ListVirtualStack(dirOrOMETiff
+//					impA = impAs[0];
+					impAs[0].setStack(new ListVirtualStack(dirOrOMETiff
 							+ "Big5DFileListA.txt"));
 
-					int stkNSlices = impA.getNSlices();
+					int stkNSlices = impAs[0].getNSlices();
 
-					impA.setTitle("SPIMA: " + dirOrOMETiff);
+					impAs[0].setTitle("SPIMA: " + dirOrOMETiff);
 
-					impA.setDimensions(wavelengths, zSlices, stkNSlices
+					impAs[0].setDimensions(wavelengths, zSlices, stkNSlices
 							/ (wavelengths * zSlices));
 					IJ.log(wavelengths + " " + zSlices + " " + stkNSlices
 							/ (wavelengths * zSlices));
 					if (wavelengths > 1) {
-						impA = new CompositeImage(impA);
-						while (!impA.isComposite()) {
+						impAs[0] = new CompositeImage(impAs[0]);
+						while (!impAs[0].isComposite()) {
 							IJ.wait(100);
 						}
 					}
-					Calibration cal = impA.getCalibration();
+					Calibration cal = impAs[0].getCalibration();
 					cal.pixelWidth = vWidth;
 					cal.pixelHeight = vHeight;
 					cal.pixelDepth = vDepthRaw;
 					cal.setUnit(vUnit);
 					if (stageScan)
-						impA.getStack().setSkewXperZ(
+						impAs[0].getStack().setSkewXperZ(
 								-cal.pixelDepth / cal.pixelWidth);
 
-					impA.setPosition(wavelengths, zSlices / 2, stkNSlices
+					impAs[0].setPosition(wavelengths, zSlices / 2, stkNSlices
 							/ (wavelengths * zSlices));
 
-					impA.setPosition(1, zSlices / 2, stkNSlices
+					impAs[0].setPosition(1, zSlices / 2, stkNSlices
 							/ (wavelengths * zSlices));
 
-					if (impA.isComposite())
-						((CompositeImage) impA)
+					if (impAs[0].isComposite())
+						((CompositeImage) impAs[0])
 						.setMode(CompositeImage.COMPOSITE);
-					impA.show();
+					impAs[0].show();
 
 				}
 
 				if ((new File(dirOrOMETiff + "Big5DFileListB.txt")).length() > 0) {
 					// IJ.run("Stack From List...",
 					// "open="+dir+"Big5DFileListB.txt use");
-					impB = impBs[0];
-					impB.setStack(new ListVirtualStack(dirOrOMETiff
+//					impB = impBs[0];
+					impBs[0].setStack(new ListVirtualStack(dirOrOMETiff
 							+ "Big5DFileListB.txt"));
-					int stkNSlices = impB.getNSlices();
+					int stkNSlices = impBs[0].getNSlices();
 
-					impB.setTitle("SPIMB: " + dirOrOMETiff);
+					impBs[0].setTitle("SPIMB: " + dirOrOMETiff);
 
-					impB.setDimensions(wavelengths, zSlices, stkNSlices
+					impBs[0].setDimensions(wavelengths, zSlices, stkNSlices
 							/ (wavelengths * zSlices));
 					IJ.log(wavelengths + " " + zSlices + " " + stkNSlices
 							/ (wavelengths * zSlices));
 					if (wavelengths > 1) {
-						impB = new CompositeImage(impB);
-						while (!impB.isComposite()) {
+						impBs[0] = new CompositeImage(impBs[0]);
+						while (!impBs[0].isComposite()) {
 							IJ.wait(100);
 						}
 					}
-					Calibration cal = impB.getCalibration();
+					Calibration cal = impBs[0].getCalibration();
 					cal.pixelWidth = vWidth;
 					cal.pixelHeight = vHeight;
 					cal.pixelDepth = vDepthRaw;
 					cal.setUnit(vUnit);
 					if (stageScan)
-						impB.getStack().setSkewXperZ(
+						impBs[0].getStack().setSkewXperZ(
 								-cal.pixelDepth / cal.pixelWidth);
 
-					impB.setPosition(wavelengths, zSlices / 2, stkNSlices
+					impBs[0].setPosition(wavelengths, zSlices / 2, stkNSlices
 							/ (wavelengths * zSlices));
 
-					impB.setPosition(1, zSlices / 2, stkNSlices
+					impBs[0].setPosition(1, zSlices / 2, stkNSlices
 							/ (wavelengths * zSlices));
 
-					if (impB.isComposite())
-						((CompositeImage) impB)
+					if (impBs[0].isComposite())
+						((CompositeImage) impBs[0])
 						.setMode(CompositeImage.COMPOSITE);
-					impB.show();
+					impBs[0].show();
 
 				}
 			}
@@ -697,30 +721,30 @@ public class DISPIM_Monitor implements PlugIn {
 
 			String mmPath = (new File(dirOrOMETiff)).getParent();			
 
-			impA = new ImagePlus();
-			impA.setStack(new MultiFileInfoVirtualStack(mmPath, "MMStack", false));
-			//				impA.setStack(new FileInfoVirtualStack(tdB.getTiffInfo(0), false));
-			int stackSize = impA.getNSlices();
+//			impA = new ImagePlus();
+			impAs[0].setStack(new MultiFileInfoVirtualStack(mmPath, "MMStack", false));
+			//				impAs[0].setStack(new FileInfoVirtualStack(tdB.getTiffInfo(0), false));
+			int stackSize = impAs[0].getNSlices();
 			int nChannels = wavelengths*2;
 			int nSlices = zSlices;
 			int nFrames = (int)Math.floor((double)stackSize/(nChannels*nSlices));
-			dirOrOMETiff = ((MultiFileInfoVirtualStack)impA.getStack()).getFivStacks().get(0).getInfo()[0].directory +
+			dirOrOMETiff = ((MultiFileInfoVirtualStack)impAs[0].getStack()).getFivStacks().get(0).getInfo()[0].directory +
 					File.separator +
-					((MultiFileInfoVirtualStack)impA.getStack()).getFivStacks().get(0).getInfo()[0].fileName;
+					((MultiFileInfoVirtualStack)impAs[0].getStack()).getFivStacks().get(0).getInfo()[0].fileName;
 
-			impA.setTitle("SPIMB: "+dirOrOMETiff);
+			impAs[0].setTitle("SPIMB: "+dirOrOMETiff);
 
 			if (nChannels*nSlices*nFrames!=stackSize) {
 				if (nChannels*nSlices*nFrames>stackSize) {
 					for (int a=stackSize;a<nChannels*nSlices*nFrames;a++) {
-						if (impA.getStack().isVirtual())
-							((VirtualStack)impA.getStack()).addSlice("blank slice");
+						if (impAs[0].getStack().isVirtual())
+							((VirtualStack)impAs[0].getStack()).addSlice("blank slice");
 						else
-							impA.getStack().addSlice(impA.getProcessor().createProcessor(impA.getWidth(), impA.getHeight()));
+							impAs[0].getStack().addSlice(impAs[0].getProcessor().createProcessor(impAs[0].getWidth(), impAs[0].getHeight()));
 					}
 				} else if (nChannels*nSlices*nFrames<stackSize) {
 					for (int a=nChannels*nSlices*nFrames;a<stackSize;a++) {
-						((MultiFileInfoVirtualStack)impA.getStack()).deleteSlice(nChannels*nSlices*nFrames);
+						((MultiFileInfoVirtualStack)impAs[0].getStack()).deleteSlice(nChannels*nSlices*nFrames);
 						stackSize--;
 					}
 				}else {
@@ -734,7 +758,7 @@ public class DISPIM_Monitor implements PlugIn {
 					for (int c=nChannels-1;c>=1;c=c-2) {
 						for (int s=c*nSlices-1;s>=(c-1)*nSlices;s--) {
 							int target = t*nChannels*nSlices + s+1;
-							((MultiFileInfoVirtualStack)impA.getStack()).deleteSlice(target);
+							((MultiFileInfoVirtualStack)impAs[0].getStack()).deleteSlice(target);
 						}
 					}
 				}
@@ -743,61 +767,61 @@ public class DISPIM_Monitor implements PlugIn {
 					for (int s=nSlices*nChannels-1;s>=0;s--) {
 						int target = t*nChannels*nSlices + s+1;
 						if (s<nSlices*nChannels/2) { 
-							((MultiFileInfoVirtualStack)impA.getStack()).deleteSlice(target);
+							((MultiFileInfoVirtualStack)impAs[0].getStack()).deleteSlice(target);
 						}
 					}
 				}
 			}
-			impA.setStack(impA.getImageStack());
+			impAs[0].setStack(impAs[0].getImageStack());
 
-			impA.setDimensions(wavelengths, nSlices, nFrames);
+			impAs[0].setDimensions(wavelengths, nSlices, nFrames);
 
 			if (nChannels > 1){
-				impA = new CompositeImage(impA);
-				while (!impA.isComposite()) {
+				impAs[0] = new CompositeImage(impAs[0]);
+				while (!impAs[0].isComposite()) {
 					IJ.wait(100);
 				}
 			}
-			Calibration cal = impA.getCalibration();
+			Calibration cal = impAs[0].getCalibration();
 			cal.pixelWidth = vWidth;
 			cal.pixelHeight = vHeight;
 			cal.pixelDepth = vDepthRaw;
 			cal.setUnit(vUnit);
 
-			impA.setPosition(wavelengths, nSlices, nFrames);	
+			impAs[0].setPosition(wavelengths, nSlices, nFrames);	
 
-			impA.setPosition(1, nSlices/2, nFrames/2);	
+			impAs[0].setPosition(1, nSlices/2, nFrames/2);	
 
-			if (impA.isComposite())
-				((CompositeImage)impA).setMode(CompositeImage.COMPOSITE);
-			impA.setFileInfo(new FileInfo());
-			impA.getOriginalFileInfo().fileName = dirOrOMETiff;
-			impA.getOriginalFileInfo().directory = dirOrOMETiff;
-			impA.show();
+			if (impAs[0].isComposite())
+				((CompositeImage)impAs[0]).setMode(CompositeImage.COMPOSITE);
+			impAs[0].setFileInfo(new FileInfo());
+			impAs[0].getOriginalFileInfo().fileName = dirOrOMETiff;
+			impAs[0].getOriginalFileInfo().directory = dirOrOMETiff;
+			impAs[0].show();
 
 
-			impB = new ImagePlus();
-			impB.setStack(new MultiFileInfoVirtualStack(mmPath, "MMStack", false));
-			//				impB.setStack(new FileInfoVirtualStack(tdA.getTiffInfo(0), false));
-			stackSize = impB.getStack().getSize();
+//			impB = new ImagePlus();
+			impBs[0].setStack(new MultiFileInfoVirtualStack(mmPath, "MMStack", false));
+			//				impBs[0].setStack(new FileInfoVirtualStack(tdA.getTiffInfo(0), false));
+			stackSize = impBs[0].getStack().getSize();
 			nChannels = wavelengths*2;
 			nSlices = zSlices;
 			nFrames = (int)Math.floor((double)stackSize/(nChannels*nSlices));
 
-			impB.setTitle("SPIMA: "+dirOrOMETiff);
+			impBs[0].setTitle("SPIMA: "+dirOrOMETiff);
 
 			if (nChannels*nSlices*nFrames!=stackSize) {
 				if (nChannels*nSlices*nFrames>stackSize) {
 					for (int a=stackSize;a<nChannels*nSlices*nFrames;a++) {
-						if (impB.getStack().isVirtual())
-							((VirtualStack)impB.getStack()).addSlice("blank slice");
+						if (impBs[0].getStack().isVirtual())
+							((VirtualStack)impBs[0].getStack()).addSlice("blank slice");
 						else
-							impB.getStack().addSlice(impB.getProcessor().createProcessor(impB.getWidth(), impB.getHeight()));
+							impBs[0].getStack().addSlice(impBs[0].getProcessor().createProcessor(impBs[0].getWidth(), impBs[0].getHeight()));
 					}
 				} else if (nChannels*nSlices*nFrames<stackSize) {
 					for (int a=nChannels*nSlices*nFrames;a<stackSize;a++) {
-						((MultiFileInfoVirtualStack)impB.getStack()).deleteSlice(nChannels*nSlices*nFrames);
-						stackSize = impB.getStack().getSize();					}
+						((MultiFileInfoVirtualStack)impBs[0].getStack()).deleteSlice(nChannels*nSlices*nFrames);
+						stackSize = impBs[0].getStack().getSize();					}
 				}else {
 					IJ.error("HyperStack Converter", "channels x slices x frames <> stack size");
 					return;
@@ -808,7 +832,7 @@ public class DISPIM_Monitor implements PlugIn {
 					for (int c=nChannels;c>=1;c=c-2) {
 						for (int s=c*nSlices-1;s>=(c-1)*nSlices;s--) {
 							int target = t*nChannels*nSlices + s+1;
-							((MultiFileInfoVirtualStack)impB.getStack()).deleteSlice(target);
+							((MultiFileInfoVirtualStack)impBs[0].getStack()).deleteSlice(target);
 						}
 					}
 				}
@@ -817,38 +841,38 @@ public class DISPIM_Monitor implements PlugIn {
 					for (int s=nSlices*nChannels-1;s>=0;s--) {
 						int target = t*nChannels*nSlices + s+1;
 						if (s>=nSlices*nChannels/2) { 
-							((MultiFileInfoVirtualStack)impB.getStack()).deleteSlice(target);
+							((MultiFileInfoVirtualStack)impBs[0].getStack()).deleteSlice(target);
 						}
 					}
 				}
 			}
 
-			impB.setStack(impB.getImageStack());
+			impBs[0].setStack(impBs[0].getImageStack());
 
-			impB.setDimensions(wavelengths, nSlices, nFrames);
+			impBs[0].setDimensions(wavelengths, nSlices, nFrames);
 
 			if (nChannels > 1){
-				impB = new CompositeImage(impB);
-				while (!impB.isComposite()) {
+				impBs[0] = new CompositeImage(impBs[0]);
+				while (!impBs[0].isComposite()) {
 					IJ.wait(100);
 				}
 			}
-			cal = impB.getCalibration();
+			cal = impBs[0].getCalibration();
 			cal.pixelWidth = vWidth;
 			cal.pixelHeight = vHeight;
 			cal.pixelDepth = vDepthRaw;
 			cal.setUnit(vUnit);
 
-			impB.setPosition(wavelengths, nSlices, nFrames);	
+			impBs[0].setPosition(wavelengths, nSlices, nFrames);	
 
-			impB.setPosition(1, nSlices/2, nFrames/2);	
+			impBs[0].setPosition(1, nSlices/2, nFrames/2);	
 
-			if (impB.isComposite())
-				((CompositeImage)impB).setMode(CompositeImage.COMPOSITE);
-			impB.setFileInfo(new FileInfo());
-			impB.getOriginalFileInfo().fileName = dirOrOMETiff;
-			impB.getOriginalFileInfo().directory = dirOrOMETiff;
-			impB.show();
+			if (impBs[0].isComposite())
+				((CompositeImage)impBs[0]).setMode(CompositeImage.COMPOSITE);
+			impBs[0].setFileInfo(new FileInfo());
+			impBs[0].getOriginalFileInfo().fileName = dirOrOMETiff;
+			impBs[0].getOriginalFileInfo().directory = dirOrOMETiff;
+			impBs[0].show();
 
 		} else if (dirOrOMETiff.matches(".*_\\d{9}_\\d{3}_.*.tif")) {
 			listB = new File(dirOrOMETiff).getParentFile().list();
@@ -882,16 +906,16 @@ public class DISPIM_Monitor implements PlugIn {
 									/ (wavelengths * 2 * zSlices)))
 									+ " display=Composite");
 			// IJ.getImage().setTitle("SPIMA: "+IJ.getImage().getTitle());
-			impA = impAs[0] = WindowManager.getCurrentImage();
-			Calibration calA = impA.getCalibration();
+			/*impA = */ impAs[0] = WindowManager.getCurrentImage();
+			Calibration calA = impAs[0].getCalibration();
 			calA.pixelWidth = vWidth;
 			calA.pixelHeight = vHeight;
 			calA.pixelDepth = vDepthRaw;
 			calA.setUnit(vUnit);
 			if (stageScan)
-				impA.getStack()
+				impAs[0].getStack()
 				.setSkewXperZ(-calA.pixelDepth / calA.pixelWidth);
-			impA.setTitle("SPIMA: " + impA.getTitle());
+			impAs[0].setTitle("SPIMA: " + impAs[0].getTitle());
 
 			IJ.run("Image Sequence...",
 					"open=["
@@ -909,15 +933,15 @@ public class DISPIM_Monitor implements PlugIn {
 									/ (wavelengths * 2 * zSlices)))
 									+ " display=Composite");
 			// IJ.getImage().setTitle("SPIMB: "+IJ.getImage().getTitle());
-			impB = impBs[0] = WindowManager.getCurrentImage();
-			Calibration calB = impB.getCalibration();
+			/*impB = */ impBs[0] = WindowManager.getCurrentImage();
+			Calibration calB = impBs[0].getCalibration();
 			calB.pixelWidth = vWidth;
 			calB.pixelHeight = vHeight;
 			calB.pixelDepth = vDepthRaw;
 			calB.setUnit(vUnit);
 			if (stageScan)
-				impB.getStack().setSkewXperZ(calB.pixelDepth / calB.pixelWidth);
-			impB.setTitle("SPIMB: " + impB.getTitle());
+				impBs[0].getStack().setSkewXperZ(calB.pixelDepth / calB.pixelWidth);
+			impBs[0].setTitle("SPIMB: " + impBs[0].getTitle());
 
 			oldLength = newLength;
 		}
@@ -943,78 +967,65 @@ public class DISPIM_Monitor implements PlugIn {
 
 			for (int pos=0; pos<pDim; pos++) {
 
-				impA = impAs[pos];
-				impB = impBs[pos];
+//				impA = impAs[pos];
+//				impB = impBs[pos];
 
-				Roi roiA = impA.getRoi();
-				Roi roiB = impB.getRoi();
+				roiAs[pos] = impAs[pos].getRoi();
+				roiBs[pos] = impBs[pos].getRoi();
 
-				while (roiA == null || roiB == null
-						// || (roiA.getType() == Roi.RECTANGLE &&
-						// roiA.getBounds().getHeight() > cropHeight)
-						// || (roiB.getType() == Roi.RECTANGLE &&
-						// roiB.getBounds().getHeight() > cropHeight)
-						// || (roiA.getType() == Roi.RECTANGLE &&
-						// roiA.getBounds().getWidth() > cropHeight)
-						// || (roiB.getType() == Roi.RECTANGLE &&
-						// roiB.getBounds().getWidth() > cropHeight)
-						// || (roiA.getType() != Roi.RECTANGLE &&
-						// roiA.getFeretValues()[0]>cropHeight*impA.getCalibration().pixelHeight)
-						// || (roiB.getType() != Roi.RECTANGLE &&
-						// roiB.getFeretValues()[0]>cropHeight*impB.getCalibration().pixelHeight)
-						) {
-					WindowManager.setTempCurrentImage(impA);
-					if (roiA == null) {
+				while (roiAs[pos] == null || roiBs[pos] == null) {
+					WindowManager.setTempCurrentImage(impAs[pos]);
+					if (roiAs[pos] == null) {
 						if (!((new File(savePath +  "Pos" + pos + "A_crop.roi")).canRead())) {
 							IJ.makeRectangle(0, 0, cropWidth, cropHeight);
-							roiA = impA.getRoi();
+							roiAs[pos] = impAs[pos].getRoi();
 						} else {
 							IJ.open(savePath +  "Pos" + pos + "A_crop.roi");
-							roiA = impA.getRoi();
-							cropWidth = roiA.getBounds().width;
-							cropHeight = roiA.getBounds().height;
+							roiAs[pos] = impAs[pos].getRoi();
+							cropWidth = roiAs[pos].getBounds().width;
+							cropHeight = roiAs[pos].getBounds().height;
 						}
-					} else if (roiA.getType() != Roi.RECTANGLE
-							&& roiA.getFeretValues()[0] > cropHeight
-							* impA.getCalibration().pixelHeight
-							|| (roiA.getType() == Roi.RECTANGLE && roiA.getBounds()
+					} else if (roiAs[pos].getType() != Roi.RECTANGLE
+							&& roiAs[pos].getFeretValues()[0] > cropHeight
+							* impAs[pos].getCalibration().pixelHeight
+							|| (roiAs[pos].getType() == Roi.RECTANGLE && roiAs[pos].getBounds()
 							.getHeight() > cropHeight)
-							|| (roiA.getType() == Roi.RECTANGLE && roiA.getBounds()
+							|| (roiAs[pos].getType() == Roi.RECTANGLE && roiAs[pos].getBounds()
 							.getWidth() > cropHeight)) {
-						impA.setRoi(roiA.getBounds().x
-								+ (roiA.getBounds().width - cropWidth) / 2,
-								roiA.getBounds().y
-								+ (roiA.getBounds().height - cropHeight)
+						impAs[pos].setRoi(roiAs[pos].getBounds().x
+								+ (roiAs[pos].getBounds().width - cropWidth) / 2,
+								roiAs[pos].getBounds().y
+								+ (roiAs[pos].getBounds().height - cropHeight)
 								/ 2, cropWidth, cropHeight);
-						impA.setRoi(
-								roiA.getBounds().x < 0 ? 0 : roiA.getBounds().x,
-										roiA.getBounds().y < 0 ? 0 : roiA.getBounds().y,
+						impAs[pos].setRoi(
+								roiAs[pos].getBounds().x < 0 ? 0 : roiAs[pos].getBounds().x,
+										roiAs[pos].getBounds().y < 0 ? 0 : roiAs[pos].getBounds().y,
 												cropWidth, cropHeight);
 					}
-					WindowManager.setTempCurrentImage(impB);
-					if (roiB == null) {
+					WindowManager.setTempCurrentImage(impBs[pos]);
+					if (roiBs[pos] == null) {
 						if (!((new File(savePath + "Pos" + pos + "B_crop.roi")).canRead())) {
 							IJ.makeRectangle(0, 0, cropWidth, cropHeight);
-							roiB = impB.getRoi();
+							roiBs[pos] = impBs[pos].getRoi();
 						} else {
 							IJ.open(savePath +  "Pos" + pos + "B_crop.roi");
-							roiB = impB.getRoi();
+							roiBs[pos] = impBs[pos].getRoi();
 						}
-					} else if (roiB.getType() != Roi.RECTANGLE
-							&& roiB.getFeretValues()[0] > cropHeight
-							* impB.getCalibration().pixelHeight
-							|| (roiB.getType() == Roi.RECTANGLE && roiB.getBounds()
+					} else if (roiBs[pos].getType() != Roi.RECTANGLE
+							&& roiBs[pos].getFeretValues()[0] > cropHeight
+							* impBs[pos].getCalibration().pixelHeight
+							|| (roiBs[pos].getType() == Roi.RECTANGLE && roiBs[pos].getBounds()
 							.getWidth() > cropHeight)
-							|| (roiB.getType() == Roi.RECTANGLE && roiB.getBounds()
+							|| (roiBs[pos].getType() == Roi.RECTANGLE && roiBs[pos].getBounds()
 							.getHeight() > cropHeight)) {
-						impB.setRoi(roiB.getBounds().x
-								+ (roiB.getBounds().width - cropWidth) / 2,
-								roiB.getBounds().y
-								+ (roiB.getBounds().height - cropHeight)
+						impBs[pos].setRoi(roiBs[pos].getBounds().x
+								+ (roiBs[pos].getBounds().width - cropWidth) / 2,
+								roiBs[pos].getBounds().y
+								+ (roiBs[pos].getBounds().height - cropHeight)
 								/ 2, cropWidth, cropHeight);
-						impB.setRoi(
-								roiB.getBounds().x < 0 ? 0 : roiB.getBounds().x,
-										roiB.getBounds().y < 0 ? 0 : roiB.getBounds().y,
+						impBs[pos].setRoi(
+								roiBs[pos].getBounds().x < 0 ? 0 : roiBs[pos].getBounds().x,
+										roiBs[pos].getBounds().y < 0 ? 0 : roiBs[pos].getBounds().y,
 												cropWidth, cropHeight);
 					}
 					WindowManager.setTempCurrentImage(null);
@@ -1030,48 +1041,48 @@ public class DISPIM_Monitor implements PlugIn {
 
 			for (int pos=0; pos<pDim; pos++) {
 				
-					impA = impAs[pos];
-					impB = impBs[pos];
+//					impA = impAs[pos];
+//					impB = impBs[pos];
 
-					Roi roiA = impA.getRoi();
-					Roi roiB = impB.getRoi();
+					roiAs[pos] = impAs[pos].getRoi();
+					roiBs[pos] = impBs[pos].getRoi();
 				
 
-				// int[] minLimit = {(int) impA.getDisplayRangeMin(), (int)
-				// impB.getDisplayRangeMin()};
-				// if (impA.isComposite()) {
-				// minLimit = new int[impA.getNChannels()*2];
-				// for (int c=1; c<=impA.getNChannels(); c++) {
+				// int[] minLimit = {(int) impAs[pos].getDisplayRangeMin(), (int)
+				// impBs[pos].getDisplayRangeMin()};
+				// if (impAs[pos].isComposite()) {
+				// minLimit = new int[impAs[pos].getNChannels()*2];
+				// for (int c=1; c<=impAs[pos].getNChannels(); c++) {
 				// minLimit[c-1] = (int)
-				// ((CompositeImage)impA).getProcessor(c).getMin();
+				// ((CompositeImage)impAs[pos]).getProcessor(c).getMin();
 				// minLimit[c+1] = (int)
-				// ((CompositeImage)impB).getProcessor(c).getMin();
+				// ((CompositeImage)impBs[pos]).getProcessor(c).getMin();
 				// }
 				// }
 
-				IJ.saveAs(impA, "Selection", savePath +  "Pos" + pos + "A_crop.roi");
-				IJ.saveAs(impB, "Selection", savePath +  "Pos" + pos + "B_crop.roi");
+				IJ.saveAs(impAs[pos], "Selection", savePath +  "Pos" + pos + "A_crop.roi");
+				IJ.saveAs(impBs[pos], "Selection", savePath +  "Pos" + pos + "B_crop.roi");
 
 			}
 
 
 			for (int pos=0; pos<pDim; pos++) {
 
-				impA = impAs[pos];
-				impB = impBs[pos];
+//				impA = impAs[pos];
+//				impB = impBs[pos];
 
-				Roi roiA = impA.getRoi();
-				Roi roiB = impB.getRoi();
+				 roiAs[pos] = impAs[pos].getRoi();
+				 roiBs[pos] = impBs[pos].getRoi();
 
-				int wasFrameA = impA.getFrame();
-				int wasFrameB = impB.getFrame();
-				int wasSliceA = impA.getSlice();
-				int wasSliceB = impB.getSlice();
-				int wasChannelA = impA.getChannel();
-				int wasChannelB = impB.getChannel();
+				wasFrameA[pos] = impAs[pos].getFrame();
+				wasFrameB[pos] = impBs[pos].getFrame();
+				wasSliceA[pos] = impAs[pos].getSlice();
+				wasSliceB[pos] = impBs[pos].getSlice();
+				wasChannelA[pos] = impAs[pos].getChannel();
+				wasChannelB[pos] = impBs[pos].getChannel();
 
 				if ((new File(savePath)).canRead()) {
-					if (impDF1 == null) {
+					if (impDF1s[pos] == null) {
 						IJ.runMacro("File.makeDirectory(\""
 								+ savePath.replace("\\", "\\\\")
 								+"Pos"+pos+ "_Deconvolution1\");");
@@ -1086,47 +1097,52 @@ public class DISPIM_Monitor implements PlugIn {
 										+ File.separator, "Deconvolution",
 										false);
 						if (deconmfivs.getSize() > 0) {
-							impDF1 = new ImagePlus();
-							impDF1.setStack(
+							impDF1s[pos] = new ImagePlus();
+							impDF1s[pos].setStack(
 									"Decon-Fuse"
-											+ impA.getTitle().replace(
-													impA.getTitle().split(":")[0],
+											+ impAs[pos].getTitle().replace(
+													impAs[pos].getTitle().split(":")[0],
 													""), deconmfivs);
-							impDF1.setFileInfo(new FileInfo());
-							// impDF1.getOriginalFileInfo().directory = (new
+							impDF1s[pos].setFileInfo(new FileInfo());
+							// impDF1s[pos].getOriginalFileInfo().directory = (new
 							// File(dirOrOMETiff)).isDirectory()?dirOrOMETiff:((new
 							// File(dirOrOMETiff)).getParent()+File.separator);
-							impDF1.getOriginalFileInfo().directory = dirOrOMETiff;
-							int stkNSlicesDF = impDF1.getStackSize();
+							impDF1s[pos].getOriginalFileInfo().directory = dirOrOMETiff;
+							int stkNSlicesDF = impDF1s[pos].getStackSize();
 							int zSlicesDF1 = deconmfivs.getFivStacks().get(0)
 									.getSize();
-							impDF1.setOpenAsHyperStack(true);
-							impDF1.setStack(impDF1.getStack(), wavelengths,
+							impDF1s[pos].setOpenAsHyperStack(true);
+							impDF1s[pos].setStack(impDF1s[pos].getStack(), wavelengths,
 									zSlicesDF1, stkNSlicesDF
 									/ (wavelengths * zSlicesDF1));
-							ciDF1 = new CompositeImage(impDF1);
+							ciDF1s[pos] = new CompositeImage(impDF1s[pos]);
 							if (wavelengths > 1)
-								ciDF1.setMode(CompositeImage.COMPOSITE);
+								ciDF1s[pos].setMode(CompositeImage.COMPOSITE);
 							else
-								ciDF1.setMode(CompositeImage.GRAYSCALE);
-							ciDF1.show();
-							win = ciDF1.getWindow();
+								ciDF1s[pos].setMode(CompositeImage.GRAYSCALE);
+							ciDF1s[pos].show();
+							win = ciDF1s[pos].getWindow();
 						}
 					}
 				}
+			}
+			
+			
+			for (int pos=0; pos<pDim; pos++) {
 
-				String[] frameFileNames = new String[impA.getNFrames() + 1];
 
-				for (int f = 1; f <= impA.getNFrames(); f++) {
+				String[] frameFileNames = new String[impAs[pos].getNFrames() + 1];
 
-					impA.setPositionWithoutUpdate(impA.getChannel(),
-							impA.getSlice(), f);
+				for (int f = 1; f <= impAs[pos].getNFrames(); f++) {
 
-					if (impA.getStack() instanceof ListVirtualStack)
-						frameFileNames[f] = ((ListVirtualStack) impA.getStack())
-						.getDirectory(impA.getCurrentSlice());
-					else if (impA.getStack() instanceof FileInfoVirtualStack
-							|| impA.getStack() instanceof MultiFileInfoVirtualStack)
+					impAs[pos].setPositionWithoutUpdate(impAs[pos].getChannel(),
+							impAs[pos].getSlice(), f);
+
+					if (impAs[pos].getStack() instanceof ListVirtualStack)
+						frameFileNames[f] = ((ListVirtualStack) impAs[pos].getStack())
+						.getDirectory(impAs[pos].getCurrentSlice());
+					else if (impAs[pos].getStack() instanceof FileInfoVirtualStack
+							|| impAs[pos].getStack() instanceof MultiFileInfoVirtualStack)
 						frameFileNames[f] = "t" + f;
 					else
 						frameFileNames[f] = "t" + f;
@@ -1190,10 +1206,10 @@ public class DISPIM_Monitor implements PlugIn {
 						// ImageStack(cropHeight,cropWidth);
 						ImageStack stackA1 = new ImageStack(cropWidth, cropHeight);
 						ImageStack stackA2 = new ImageStack(cropWidth, cropHeight);
-						impA.getWindow().setEnabled(false);
-						for (int i = 1; i <= impA.getNSlices(); i++) {
-							impA.setPositionWithoutUpdate(1, i, f);
-							Roi impRoi = (Roi) roiA.clone();
+						impAs[pos].getWindow().setEnabled(false);
+						for (int i = 1; i <= impAs[pos].getNSlices(); i++) {
+							impAs[pos].setPositionWithoutUpdate(1, i, f);
+							Roi impRoi = (Roi) roiAs[pos].clone();
 							Polygon pA = new Polygon(impRoi.getPolygon().xpoints,
 									impRoi.getPolygon().ypoints,
 									impRoi.getPolygon().npoints);
@@ -1212,7 +1228,7 @@ public class DISPIM_Monitor implements PlugIn {
 									// -180+angle);
 									Polygon pAR = pA;
 
-									ImageProcessor ip1 = impA.getProcessor().duplicate();
+									ImageProcessor ip1 = impAs[pos].getProcessor().duplicate();
 									// ip1.fillOutside(impRoi);
 									// ip1.setRoi((int)(pA.getBounds().getCenterX()-fMax/2),
 									// (int)(pA.getBounds().getCenterY()-fMax/2),
@@ -1242,8 +1258,8 @@ public class DISPIM_Monitor implements PlugIn {
 									// ip1.subtract(minLimit[0]);
 									stackA1.addSlice(ip1);
 									if (wavelengths == 2) {
-										impA.setPositionWithoutUpdate(2, i, f);
-										ImageProcessor ip2 = impA.getProcessor()
+										impAs[pos].setPositionWithoutUpdate(2, i, f);
+										ImageProcessor ip2 = impAs[pos].getProcessor()
 												.duplicate();
 										// ip2.fillOutside(impRoi);
 										// ip2.setRoi((int)(pA.getBounds().getCenterX()-fMax/2),
@@ -1280,10 +1296,10 @@ public class DISPIM_Monitor implements PlugIn {
 										stackA2.addSlice(ip2);
 									}
 						}
-						impA.getWindow().setEnabled(true);
+						impAs[pos].getWindow().setEnabled(true);
 						ImagePlus impXA1 = new ImagePlus();
 						impXA1.setStack(stackA1);
-						impXA1.setCalibration(impA.getCalibration());
+						impXA1.setCalibration(impAs[pos].getCalibration());
 						// impXA1.getCalibration().pixelDepth =
 						// impXA1.getCalibration().pixelWidth;
 						IJ.saveAs(impXA1, "Tiff", savePath + "Pos"+pos+ "_SPIMA_Ch1_processed"
@@ -1292,7 +1308,7 @@ public class DISPIM_Monitor implements PlugIn {
 						if (wavelengths == 2) {
 							ImagePlus impXA2 = new ImagePlus();
 							impXA2.setStack(stackA2);
-							impXA2.setCalibration(impA.getCalibration());
+							impXA2.setCalibration(impAs[pos].getCalibration());
 							// impXA2.getCalibration().pixelDepth =
 							// impXA2.getCalibration().pixelWidth;
 							IJ.saveAs(impXA2, "Tiff", savePath
@@ -1307,10 +1323,10 @@ public class DISPIM_Monitor implements PlugIn {
 						// ImageStack(cropHeight,cropWidth);
 						ImageStack stackB1 = new ImageStack(cropWidth, cropHeight);
 						ImageStack stackB2 = new ImageStack(cropWidth, cropHeight);
-						impB.getWindow().setEnabled(false);
-						for (int i = 1; i <= impB.getNSlices(); i++) {
-							impB.setPositionWithoutUpdate(1, i, f);
-							Roi impRoi = (Roi) roiB.clone();
+						impBs[pos].getWindow().setEnabled(false);
+						for (int i = 1; i <= impBs[pos].getNSlices(); i++) {
+							impBs[pos].setPositionWithoutUpdate(1, i, f);
+							Roi impRoi = (Roi) roiBs[pos].clone();
 							Polygon pB = new Polygon(impRoi.getPolygon().xpoints,
 									impRoi.getPolygon().ypoints,
 									impRoi.getPolygon().npoints);
@@ -1329,7 +1345,7 @@ public class DISPIM_Monitor implements PlugIn {
 									// -180+angle);
 									Polygon pBR = pB;
 
-									ImageProcessor ip1 = impB.getProcessor().duplicate();
+									ImageProcessor ip1 = impBs[pos].getProcessor().duplicate();
 									// ip1.fillOutside(impRoi);
 									// ip1.setRoi((int)(pB.getBounds().getCenterX()-fMax/2),
 									// (int)(pB.getBounds().getCenterY()-fMax/2),
@@ -1359,8 +1375,8 @@ public class DISPIM_Monitor implements PlugIn {
 									// ip1.subtract(minLimit[2]);
 									stackB1.addSlice(ip1);
 									if (wavelengths == 2) {
-										impB.setPositionWithoutUpdate(2, i, f);
-										ImageProcessor ip2 = impB.getProcessor()
+										impBs[pos].setPositionWithoutUpdate(2, i, f);
+										ImageProcessor ip2 = impBs[pos].getProcessor()
 												.duplicate();
 										// ip2.fillOutside(impRoi);
 										// ip2.setRoi((int)(pB.getBounds().getCenterX()-fMax/2),
@@ -1397,10 +1413,10 @@ public class DISPIM_Monitor implements PlugIn {
 										stackB2.addSlice(ip2);
 									}
 						}
-						impB.getWindow().setEnabled(true);
+						impBs[pos].getWindow().setEnabled(true);
 						ImagePlus impXB1 = new ImagePlus();
 						impXB1.setStack(stackB1);
-						impXB1.setCalibration(impB.getCalibration());
+						impXB1.setCalibration(impBs[pos].getCalibration());
 						// impXB1.getCalibration().pixelDepth =
 						// impXB1.getCalibration().pixelWidth;
 						IJ.saveAs(impXB1, "Tiff", savePath + "Pos"+pos+ "_SPIMB_Ch1_processed"
@@ -1409,7 +1425,7 @@ public class DISPIM_Monitor implements PlugIn {
 						if (wavelengths == 2) {
 							ImagePlus impXB2 = new ImagePlus();
 							impXB2.setStack(stackB2);
-							impXB2.setCalibration(impB.getCalibration());
+							impXB2.setCalibration(impBs[pos].getCalibration());
 							// impXB2.getCalibration().pixelDepth =
 							// impXB2.getCalibration().pixelWidth;
 							IJ.saveAs(impXB2, "Tiff", savePath
@@ -1423,10 +1439,10 @@ public class DISPIM_Monitor implements PlugIn {
 
 				final String[] frameFileNamesFinal = frameFileNames;
 
-				impA.setPosition(wasChannelA, wasSliceA, wasFrameA);
-				impB.setPosition(wasChannelB, wasSliceB, wasFrameB);
+				impAs[pos].setPosition(wasChannelA[pos], wasSliceA[pos], wasFrameA[pos]);
+				impBs[pos].setPosition(wasChannelB[pos], wasSliceB[pos], wasFrameB[pos]);
 
-				for (int f = 1; f <= impA.getNFrames(); f++) {
+				for (int f = 1; f <= impAs[pos].getNFrames(); f++) {
 					final int ff = f;
 
 					final String timecode = "" + (new Date()).getTime();
@@ -1704,6 +1720,7 @@ public class DISPIM_Monitor implements PlugIn {
 
 		while (true) {
 			boolean focus = false;
+			for (int pos=0; pos<pDim; pos++) {
 			if ((new File(dirOrOMETiff)).isDirectory()) {
 				if (omeTiffs) {
 
@@ -1781,7 +1798,6 @@ public class DISPIM_Monitor implements PlugIn {
 					MultiFileInfoVirtualStack[] stackBs = new MultiFileInfoVirtualStack[pDim];
 
 
-					for (int pos=0; pos<pDim; pos++) {
 
 						stackAs[pos] = new MultiFileInfoVirtualStack(
 								dirOrOMETiff, dimOrder, keyString, cDim, zDim, dirOrOMETiffFile.list().length, vDim, pos,
@@ -1858,7 +1874,7 @@ public class DISPIM_Monitor implements PlugIn {
 								sw.addImp(impS);
 							}
 						}
-					}
+					
 				} else {
 
 					listA = new File("" + dirOrOMETiff + "SPIMA").list();
@@ -1995,37 +2011,37 @@ public class DISPIM_Monitor implements PlugIn {
 						SyncWindows.getInstance().close();
 					}
 
-					int cA = impA.getChannel();
-					int zA = impA.getSlice();
-					int tA = impA.getFrame();
+					int cA = impAs[pos].getChannel();
+					int zA = impAs[pos].getSlice();
+					int tA = impAs[pos].getFrame();
 					ListVirtualStack stackA = new ListVirtualStack(dirOrOMETiff
 							+ "Big5DFileListA.txt");
 					int stkNSlicesA = stackA.getSize();
-					impA.setStack(stackA, wavelengths, zSlices, stkNSlicesA
+					impAs[pos].setStack(stackA, wavelengths, zSlices, stkNSlicesA
 							/ (wavelengths * zSlices));
 					if (stageScan)
-						impA.getStack().setSkewXperZ(
-								-impA.getCalibration().pixelDepth
-								/ impA.getCalibration().pixelWidth);
-					impA.setPosition(cA, zA,
-							tA == impA.getNFrames() - 1 ? impA.getNFrames() : tA);
-					impA.setWindow(WindowManager.getCurrentWindow());
+						impAs[pos].getStack().setSkewXperZ(
+								-impAs[pos].getCalibration().pixelDepth
+								/ impAs[pos].getCalibration().pixelWidth);
+					impAs[pos].setPosition(cA, zA,
+							tA == impAs[pos].getNFrames() - 1 ? impAs[pos].getNFrames() : tA);
+					impAs[pos].setWindow(WindowManager.getCurrentWindow());
 
-					int cB = impB.getChannel();
-					int zB = impB.getSlice();
-					int tB = impB.getFrame();
+					int cB = impBs[pos].getChannel();
+					int zB = impBs[pos].getSlice();
+					int tB = impBs[pos].getFrame();
 					ListVirtualStack stackB = new ListVirtualStack(dirOrOMETiff
 							+ "Big5DFileListB.txt");
 					int stkNSlicesB = stackB.getSize();
-					impB.setStack(stackB, wavelengths, zSlices, stkNSlicesB
+					impBs[pos].setStack(stackB, wavelengths, zSlices, stkNSlicesB
 							/ (wavelengths * zSlices));
 					if (stageScan)
-						impB.getStack().setSkewXperZ(
-								-impB.getCalibration().pixelDepth
-								/ impB.getCalibration().pixelWidth);
-					impB.setPosition(cB, zB,
-							tB == impB.getNFrames() - 1 ? impB.getNFrames() : tB);
-					impB.setWindow(WindowManager.getCurrentWindow());
+						impBs[pos].getStack().setSkewXperZ(
+								-impBs[pos].getCalibration().pixelDepth
+								/ impBs[pos].getCalibration().pixelWidth);
+					impBs[pos].setPosition(cB, zB,
+							tB == impBs[pos].getNFrames() - 1 ? impBs[pos].getNFrames() : tB);
+					impBs[pos].setWindow(WindowManager.getCurrentWindow());
 
 					if (wasSynched) {
 						SyncWindows sw = new SyncWindows();
@@ -2061,16 +2077,16 @@ public class DISPIM_Monitor implements PlugIn {
 					SyncWindows.getInstance().close();
 				}
 
-				int cA = impA.getChannel();
-				int zA = impA.getSlice();
-				int tA = impA.getFrame();
-				int cB = impB.getChannel();
-				int zB = impB.getSlice();
-				int tB = impB.getFrame();
-				if (impA.isComposite())
-					modeA = ((CompositeImage) impA).getCompositeMode();
-				if (impB.isComposite())
-					modeB = ((CompositeImage) impB).getCompositeMode();
+				int cA = impAs[pos].getChannel();
+				int zA = impAs[pos].getSlice();
+				int tA = impAs[pos].getFrame();
+				int cB = impBs[pos].getChannel();
+				int zB = impBs[pos].getSlice();
+				int tB = impBs[pos].getFrame();
+				if (impAs[pos].isComposite())
+					modeA = ((CompositeImage) impAs[pos]).getCompositeMode();
+				if (impBs[pos].isComposite())
+					modeB = ((CompositeImage) impBs[pos]).getCompositeMode();
 
 				// IJ.run("Image Sequence...",
 				// "open=["+dirOrOMETiff+"] number="+ newLength
@@ -2083,21 +2099,21 @@ public class DISPIM_Monitor implements PlugIn {
 				.getParent());
 
 				// NOT WORKING YET!!!!
-				ColorModel cmA = impA.getProcessor().getColorModel();
-				double dminA = impA.getProcessor().getMin();
-				double dmaxA = impA.getProcessor().getMax();
-				impA.setStack(impTmpA.getStack(), wavelengths, zSlices, impTmpA
+				ColorModel cmA = impAs[pos].getProcessor().getColorModel();
+				double dminA = impAs[pos].getProcessor().getMin();
+				double dmaxA = impAs[pos].getProcessor().getMax();
+				impAs[pos].setStack(impTmpA.getStack(), wavelengths, zSlices, impTmpA
 						.getStack().getSize() / (wavelengths * zSlices));
-				impA.getProcessor().setColorModel(cmA);
-				impA.getProcessor().setMinAndMax(dminA, dmaxA);
+				impAs[pos].getProcessor().setColorModel(cmA);
+				impAs[pos].getProcessor().setMinAndMax(dminA, dmaxA);
 				if (stageScan)
-					impA.getStack().setSkewXperZ(
-							-impB.getCalibration().pixelDepth
-							/ impB.getCalibration().pixelWidth);
+					impAs[pos].getStack().setSkewXperZ(
+							-impBs[pos].getCalibration().pixelDepth
+							/ impBs[pos].getCalibration().pixelWidth);
 
-				impA.setPosition(cA, zA,
-						tA == impA.getNFrames() - 1 ? impA.getNFrames() : tA);
-				impA.setWindow(WindowManager.getCurrentWindow());
+				impAs[pos].setPosition(cA, zA,
+						tA == impAs[pos].getNFrames() - 1 ? impAs[pos].getNFrames() : tA);
+				impAs[pos].setWindow(WindowManager.getCurrentWindow());
 
 				// IJ.run("Image Sequence...",
 				// "open=["+dirOrOMETiff+"] number="+ newLength
@@ -2109,21 +2125,21 @@ public class DISPIM_Monitor implements PlugIn {
 				ImagePlus impTmpB = foB.openFolder(new File(dirOrOMETiff)
 				.getParent());
 
-				ColorModel cmB = impB.getProcessor().getColorModel();
-				double dminB = impB.getProcessor().getMin();
-				double dmaxB = impB.getProcessor().getMax();
-				impB.setStack(impTmpB.getStack(), wavelengths, zSlices, impTmpB
+				ColorModel cmB = impBs[pos].getProcessor().getColorModel();
+				double dminB = impBs[pos].getProcessor().getMin();
+				double dmaxB = impBs[pos].getProcessor().getMax();
+				impBs[pos].setStack(impTmpB.getStack(), wavelengths, zSlices, impTmpB
 						.getStack().getSize() / (wavelengths * zSlices));
-				impB.getProcessor().setColorModel(cmB);
-				impB.getProcessor().setMinAndMax(dminB, dmaxB);
+				impBs[pos].getProcessor().setColorModel(cmB);
+				impBs[pos].getProcessor().setMinAndMax(dminB, dmaxB);
 				if (stageScan)
-					impB.getStack().setSkewXperZ(
-							impB.getCalibration().pixelDepth
-							/ impB.getCalibration().pixelWidth);
+					impBs[pos].getStack().setSkewXperZ(
+							impBs[pos].getCalibration().pixelDepth
+							/ impBs[pos].getCalibration().pixelWidth);
 
-				impB.setPosition(cB, zB,
-						tB == impB.getNFrames() - 1 ? impB.getNFrames() : tB);
-				impB.setWindow(WindowManager.getCurrentWindow());
+				impBs[pos].setPosition(cB, zB,
+						tB == impBs[pos].getNFrames() - 1 ? impBs[pos].getNFrames() : tB);
+				impBs[pos].setWindow(WindowManager.getCurrentWindow());
 
 				if (wasSynched) {
 					SyncWindows sw = new SyncWindows();
@@ -2161,38 +2177,38 @@ public class DISPIM_Monitor implements PlugIn {
 				}
 
 				TiffDecoder tdA = new TiffDecoder("", dirOrOMETiff);
-				int cA = impA.getChannel();
-				int zA = impA.getSlice();
-				int tA = impA.getFrame();
+				int cA = impAs[pos].getChannel();
+				int zA = impAs[pos].getSlice();
+				int tA = impAs[pos].getFrame();
 
 				try {
-					impA.setStack(new FileInfoVirtualStack(tdA.getTiffInfo(0),
+					impAs[pos].setStack(new FileInfoVirtualStack(tdA.getTiffInfo(0),
 							false));
-					int stackSize = impA.getNSlices();
+					int stackSize = impAs[pos].getNSlices();
 					int nChannels = wavelengths * 2;
 					int nSlices = zSlices;
 					int nFrames = (int) Math.floor((double) stackSize
 							/ (nChannels * nSlices));
 
-					impA.setTitle("SPIMA: " + dirOrOMETiff);
+					impAs[pos].setTitle("SPIMA: " + dirOrOMETiff);
 
 					if (nChannels * nSlices * nFrames != stackSize) {
 						if (nChannels * nSlices * nFrames > stackSize) {
 							for (int a = stackSize; a < nChannels * nSlices
 									* nFrames; a++) {
-								if (impA.getStack().isVirtual())
-									((VirtualStack) impA.getStack())
+								if (impAs[pos].getStack().isVirtual())
+									((VirtualStack) impAs[pos].getStack())
 									.addSlice("blank slice");
 								else
-									impA.getStack().addSlice(
-											impA.getProcessor()
+									impAs[pos].getStack().addSlice(
+											impAs[pos].getProcessor()
 											.createProcessor(
-													impA.getWidth(),
-													impA.getHeight()));
+													impAs[pos].getWidth(),
+													impAs[pos].getHeight()));
 							}
 						} else if (nChannels * nSlices * nFrames < stackSize) {
 							for (int a = nChannels * nSlices * nFrames; a < stackSize; a++) {
-								impA.getStack().deleteSlice(
+								impAs[pos].getStack().deleteSlice(
 										nChannels * nSlices * nFrames);
 							}
 						} else {
@@ -2206,83 +2222,83 @@ public class DISPIM_Monitor implements PlugIn {
 							for (int s = c * nSlices - 1; s >= (c - 1)
 									* nSlices; s--) {
 								int target = t * nChannels * nSlices + s + 1;
-								impA.getStack().deleteSlice(target);
+								impAs[pos].getStack().deleteSlice(target);
 							}
 						}
 					}
-					impA.setStack(impA.getImageStack());
+					impAs[pos].setStack(impAs[pos].getImageStack());
 
-					impA.setDimensions(wavelengths, nSlices, nFrames);
+					impAs[pos].setDimensions(wavelengths, nSlices, nFrames);
 
 					if (nChannels > 1) {
-						impA = new CompositeImage(impA);
-						while (!impA.isComposite()) {
+						impAs[pos] = new CompositeImage(impAs[pos]);
+						while (!impAs[pos].isComposite()) {
 							IJ.wait(100);
 							// selectWindow("SPIMB: "+dir);
 						}
 					}
-					Calibration cal = impA.getCalibration();
+					Calibration cal = impAs[pos].getCalibration();
 					cal.pixelWidth = vWidth;
 					cal.pixelHeight = vHeight;
 					cal.pixelDepth = vDepthRaw;
 					cal.setUnit(vUnit);
 					if (stageScan)
-						impA.getStack().setSkewXperZ(
+						impAs[pos].getStack().setSkewXperZ(
 								cal.pixelDepth / cal.pixelWidth);
 
-					impA.setPosition(wavelengths, nSlices, nFrames);
+					impAs[pos].setPosition(wavelengths, nSlices, nFrames);
 
-					// impA.resetDisplayRange();
-					impA.setPosition(1, nSlices / 2, nFrames / 2);
-					// impA.resetDisplayRange();
-					if (impA.isComposite())
-						((CompositeImage) impA)
+					// impAs[pos].resetDisplayRange();
+					impAs[pos].setPosition(1, nSlices / 2, nFrames / 2);
+					// impAs[pos].resetDisplayRange();
+					if (impAs[pos].isComposite())
+						((CompositeImage) impAs[pos])
 						.setMode(CompositeImage.COMPOSITE);
-					impA.setFileInfo(new FileInfo());
-					impA.getOriginalFileInfo().fileName = dirOrOMETiff;
-					impA.getOriginalFileInfo().directory = dirOrOMETiff;
+					impAs[pos].setFileInfo(new FileInfo());
+					impAs[pos].getOriginalFileInfo().fileName = dirOrOMETiff;
+					impAs[pos].getOriginalFileInfo().directory = dirOrOMETiff;
 
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 
-				impA.setPosition(cA, zA,
-						tA == impA.getNFrames() - 1 ? impA.getNFrames() : tA);
-				impA.setWindow(WindowManager.getCurrentWindow());
+				impAs[pos].setPosition(cA, zA,
+						tA == impAs[pos].getNFrames() - 1 ? impAs[pos].getNFrames() : tA);
+				impAs[pos].setWindow(WindowManager.getCurrentWindow());
 
 				TiffDecoder tdB = new TiffDecoder("", dirOrOMETiff);
-				int cB = impB.getChannel();
-				int zB = impB.getSlice();
-				int tB = impB.getFrame();
+				int cB = impBs[pos].getChannel();
+				int zB = impBs[pos].getSlice();
+				int tB = impBs[pos].getFrame();
 
 				try {
-					impB.setStack(new FileInfoVirtualStack(tdB.getTiffInfo(0),
+					impBs[pos].setStack(new FileInfoVirtualStack(tdB.getTiffInfo(0),
 							false));
-					int stackSize = impB.getNSlices();
+					int stackSize = impBs[pos].getNSlices();
 					int nChannels = wavelengths * 2;
 					int nSlices = zSlices;
 					int nFrames = (int) Math.floor((double) stackSize
 							/ (nChannels * nSlices));
 
-					impB.setTitle("SPIMB: " + dirOrOMETiff);
+					impBs[pos].setTitle("SPIMB: " + dirOrOMETiff);
 
 					if (nChannels * nSlices * nFrames != stackSize) {
 						if (nChannels * nSlices * nFrames > stackSize) {
 							for (int a = stackSize; a < nChannels * nSlices
 									* nFrames; a++) {
-								if (impB.getStack().isVirtual())
-									((VirtualStack) impB.getStack())
+								if (impBs[pos].getStack().isVirtual())
+									((VirtualStack) impBs[pos].getStack())
 									.addSlice("blank slice");
 								else
-									impB.getStack().addSlice(
-											impB.getProcessor()
+									impBs[pos].getStack().addSlice(
+											impBs[pos].getProcessor()
 											.createProcessor(
-													impB.getWidth(),
-													impB.getHeight()));
+													impBs[pos].getWidth(),
+													impBs[pos].getHeight()));
 							}
 						} else if (nChannels * nSlices * nFrames < stackSize) {
 							for (int a = nChannels * nSlices * nFrames; a < stackSize; a++) {
-								impB.getStack().deleteSlice(
+								impBs[pos].getStack().deleteSlice(
 										nChannels * nSlices * nFrames);
 							}
 						} else {
@@ -2296,49 +2312,49 @@ public class DISPIM_Monitor implements PlugIn {
 							for (int s = c * nSlices - 1; s >= (c - 1)
 									* nSlices; s--) {
 								int target = t * nChannels * nSlices + s + 1;
-								impB.getStack().deleteSlice(target);
+								impBs[pos].getStack().deleteSlice(target);
 							}
 						}
 					}
-					impB.setStack(impB.getImageStack());
+					impBs[pos].setStack(impBs[pos].getImageStack());
 
-					impB.setDimensions(wavelengths, nSlices, nFrames);
+					impBs[pos].setDimensions(wavelengths, nSlices, nFrames);
 
 					if (nChannels > 1) {
-						impB = new CompositeImage(impB);
-						while (!impB.isComposite()) {
+						impBs[pos] = new CompositeImage(impBs[pos]);
+						while (!impBs[pos].isComposite()) {
 							IJ.wait(100);
 							// selectWindow("SPIMB: "+dir);
 						}
 					}
-					Calibration cal = impB.getCalibration();
+					Calibration cal = impBs[pos].getCalibration();
 					cal.pixelWidth = vWidth;
 					cal.pixelHeight = vHeight;
 					cal.pixelDepth = vDepthRaw;
 					cal.setUnit(vUnit);
 					if (stageScan)
-						impB.getStack().setSkewXperZ(
+						impBs[pos].getStack().setSkewXperZ(
 								-cal.pixelDepth / cal.pixelWidth);
 
-					impB.setPosition(wavelengths, nSlices, nFrames);
+					impBs[pos].setPosition(wavelengths, nSlices, nFrames);
 
-					// impB.resetDisplayRange();
-					impB.setPosition(1, nSlices / 2, nFrames / 2);
-					// impB.resetDisplayRange();
-					if (impB.isComposite())
-						((CompositeImage) impB)
+					// impBs[pos].resetDisplayRange();
+					impBs[pos].setPosition(1, nSlices / 2, nFrames / 2);
+					// impBs[pos].resetDisplayRange();
+					if (impBs[pos].isComposite())
+						((CompositeImage) impBs[pos])
 						.setMode(CompositeImage.COMPOSITE);
-					impB.setFileInfo(new FileInfo());
-					impB.getOriginalFileInfo().fileName = dirOrOMETiff;
-					impB.getOriginalFileInfo().directory = dirOrOMETiff;
+					impBs[pos].setFileInfo(new FileInfo());
+					impBs[pos].getOriginalFileInfo().fileName = dirOrOMETiff;
+					impBs[pos].getOriginalFileInfo().directory = dirOrOMETiff;
 
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 
-				impB.setPosition(cB, zB,
-						tB == impB.getNFrames() - 1 ? impB.getNFrames() : tB);
-				impB.setWindow(WindowManager.getCurrentWindow());
+				impBs[pos].setPosition(cB, zB,
+						tB == impBs[pos].getNFrames() - 1 ? impBs[pos].getNFrames() : tB);
+				impBs[pos].setWindow(WindowManager.getCurrentWindow());
 
 				if (wasSynched) {
 					SyncWindows sw = new SyncWindows();
@@ -2422,55 +2438,54 @@ public class DISPIM_Monitor implements PlugIn {
 
 
 			if (doDecon) {
-				for (int pos=0; pos<pDim; pos++) {
 
-					impA = impAs[pos];
-					impB = impBs[pos];
+//					impA = impAs[pos];
+//					impB = impBs[pos];
 
-					Roi roiA = impA.getRoi();
-					Roi roiB = impB.getRoi();
+					 roiAs[pos] = impAs[pos].getRoi();
+					 roiBs[pos] = impBs[pos].getRoi();
 
-					int wasFrameA = impA.getFrame();
-					int wasFrameB = impB.getFrame();
+					wasFrameA[pos] = impAs[pos].getFrame();
+					wasFrameB[pos] = impBs[pos].getFrame();
 					int wasFrameDF1 = 1;
-					if (impDF1 != null)
-						wasFrameDF1 = impDF1.getFrame();
+					if (impDF1s[pos] != null)
+						wasFrameDF1 = impDF1s[pos].getFrame();
 					int wasFrameDF2 = 1;
-					if (impDF2 != null)
-						wasFrameDF2 = impDF2.getFrame();
-					int wasSliceA = impA.getSlice();
-					int wasSliceB = impB.getSlice();
+					if (impDF2s[pos] != null)
+						wasFrameDF2 = impDF2s[pos].getFrame();
+					wasSliceA[pos] = impAs[pos].getSlice();
+					wasSliceB[pos] = impBs[pos].getSlice();
 					int wasSliceDF1 = 1;
-					if (impDF1 != null)
-						wasSliceDF1 = impDF1.getSlice();
+					if (impDF1s[pos] != null)
+						wasSliceDF1 = impDF1s[pos].getSlice();
 					int wasSliceDF2 = 1;
-					if (impDF2 != null)
-						wasSliceDF2 = impDF2.getSlice();
-					int wasChannelA = impA.getChannel();
-					int wasChannelB = impB.getChannel();
+					if (impDF2s[pos] != null)
+						wasSliceDF2 = impDF2s[pos].getSlice();
+					wasChannelA[pos] = impAs[pos].getChannel();
+					wasChannelB[pos] = impBs[pos].getChannel();
 					int wasChannelDF1 = 1;
-					if (impDF1 != null)
-						wasChannelDF1 = impDF1.getChannel();
+					if (impDF1s[pos] != null)
+						wasChannelDF1 = impDF1s[pos].getChannel();
 					int wasChannelDF2 = 1;
-					if (impDF2 != null)
-						wasChannelDF2 = impDF2.getChannel();
-					WindowManager.setTempCurrentImage(impA);
+					if (impDF2s[pos] != null)
+						wasChannelDF2 = impDF2s[pos].getChannel();
+					WindowManager.setTempCurrentImage(impAs[pos]);
 					IJ.open(savePath/* + dirOrOMETiffName */+  "Pos" + pos + "A_crop.roi");
-					WindowManager.setTempCurrentImage(impB);
+					WindowManager.setTempCurrentImage(impBs[pos]);
 					IJ.open(savePath/* + dirOrOMETiffName */+  "Pos" + pos + "B_crop.roi");
 					WindowManager.setTempCurrentImage(null);
 
-					for (int f = 1; f <= impA.getNFrames(); f++) {
+					for (int f = 1; f <= impAs[pos].getNFrames(); f++) {
 
-						impA.setPositionWithoutUpdate(impA.getChannel(),
-								impA.getSlice(), f);
+						impAs[pos].setPositionWithoutUpdate(impAs[pos].getChannel(),
+								impAs[pos].getSlice(), f);
 
 						String frameFileName = "";
-						if (impA.getStack() instanceof ListVirtualStack)
-							frameFileName = ((ListVirtualStack) impA.getStack())
-							.getDirectory(impA.getCurrentSlice());
-						else if (impA.getStack() instanceof FileInfoVirtualStack
-								|| impA.getStack() instanceof MultiFileInfoVirtualStack)
+						if (impAs[pos].getStack() instanceof ListVirtualStack)
+							frameFileName = ((ListVirtualStack) impAs[pos].getStack())
+							.getDirectory(impAs[pos].getCurrentSlice());
+						else if (impAs[pos].getStack() instanceof FileInfoVirtualStack
+								|| impAs[pos].getStack() instanceof MultiFileInfoVirtualStack)
 							frameFileName = "t" + f;
 						else
 							frameFileName = "t" + f;
@@ -2531,19 +2546,19 @@ public class DISPIM_Monitor implements PlugIn {
 
 							ImageStack stackA1 = new ImageStack(325, 425);
 							ImageStack stackA2 = new ImageStack(325, 425);
-							impA.getWindow().setEnabled(false);
-							for (int i = 1; i <= impA.getNSlices(); i++) {
-								impA.setPositionWithoutUpdate(1, i, f);
-								stackA1.addSlice(impA.getProcessor().crop());
+							impAs[pos].getWindow().setEnabled(false);
+							for (int i = 1; i <= impAs[pos].getNSlices(); i++) {
+								impAs[pos].setPositionWithoutUpdate(1, i, f);
+								stackA1.addSlice(impAs[pos].getProcessor().crop());
 								if (wavelengths == 2) {
-									impA.setPositionWithoutUpdate(2, i, f);
-									stackA2.addSlice(impA.getProcessor().crop());
+									impAs[pos].setPositionWithoutUpdate(2, i, f);
+									stackA2.addSlice(impAs[pos].getProcessor().crop());
 								}
 							}
-							impA.getWindow().setEnabled(true);
+							impAs[pos].getWindow().setEnabled(true);
 							ImagePlus impXA1 = new ImagePlus();
 							impXA1.setStack(stackA1);
-							impXA1.setCalibration(impA.getCalibration());
+							impXA1.setCalibration(impAs[pos].getCalibration());
 							// impXA1.getCalibration().pixelDepth =
 							// impXA1.getCalibration().pixelWidth;
 							IJ.saveAs(impXA1, "Tiff", savePath
@@ -2553,7 +2568,7 @@ public class DISPIM_Monitor implements PlugIn {
 							if (wavelengths == 2) {
 								ImagePlus impXA2 = new ImagePlus();
 								impXA2.setStack(stackA2);
-								impXA2.setCalibration(impA.getCalibration());
+								impXA2.setCalibration(impAs[pos].getCalibration());
 								// impXA2.getCalibration().pixelDepth =
 								// impXA2.getCalibration().pixelWidth;
 								IJ.saveAs(impXA2, "Tiff", savePath
@@ -2563,19 +2578,19 @@ public class DISPIM_Monitor implements PlugIn {
 							}
 							ImageStack stackB1 = new ImageStack(325, 425);
 							ImageStack stackB2 = new ImageStack(325, 425);
-							impB.getWindow().setEnabled(false);
-							for (int i = 1; i <= impB.getNSlices(); i++) {
-								impB.setPositionWithoutUpdate(1, i, f);
-								stackB1.addSlice(impB.getProcessor().crop());
+							impBs[pos].getWindow().setEnabled(false);
+							for (int i = 1; i <= impBs[pos].getNSlices(); i++) {
+								impBs[pos].setPositionWithoutUpdate(1, i, f);
+								stackB1.addSlice(impBs[pos].getProcessor().crop());
 								if (wavelengths == 2) {
-									impB.setPositionWithoutUpdate(2, i, f);
-									stackB2.addSlice(impB.getProcessor().crop());
+									impBs[pos].setPositionWithoutUpdate(2, i, f);
+									stackB2.addSlice(impBs[pos].getProcessor().crop());
 								}
 							}
-							impB.getWindow().setEnabled(true);
+							impBs[pos].getWindow().setEnabled(true);
 							ImagePlus impXB1 = new ImagePlus();
 							impXB1.setStack(stackB1);
-							impXB1.setCalibration(impB.getCalibration());
+							impXB1.setCalibration(impBs[pos].getCalibration());
 							// impXB1.getCalibration().pixelDepth =
 							// impXB1.getCalibration().pixelWidth;
 							IJ.saveAs(impXB1, "Tiff", savePath
@@ -2585,7 +2600,7 @@ public class DISPIM_Monitor implements PlugIn {
 							if (wavelengths == 2) {
 								ImagePlus impXB2 = new ImagePlus();
 								impXB2.setStack(stackB2);
-								impXB2.setCalibration(impB.getCalibration());
+								impXB2.setCalibration(impBs[pos].getCalibration());
 								// impXB2.getCalibration().pixelDepth =
 								// impXB2.getCalibration().pixelWidth;
 								IJ.saveAs(impXB2, "Tiff", savePath
@@ -2873,44 +2888,44 @@ public class DISPIM_Monitor implements PlugIn {
 					}
 					// IJ.wait(15000);
 
-					impA.setPosition(wasChannelA, wasSliceA, wasFrameA);
-					impB.setPosition(wasChannelB, wasSliceB, wasFrameB);
+					impAs[pos].setPosition(wasChannelA[pos], wasSliceA[pos], wasFrameA[pos]);
+					impBs[pos].setPosition(wasChannelB[pos], wasSliceB[pos], wasFrameB[pos]);
 
 					if ((new File(dirOrOMETiff)).canRead()) {
-						if (impDF1 == null) {
+						if (impDF1s[pos] == null) {
 							MultiFileInfoVirtualStack deconmfivs = new MultiFileInfoVirtualStack(
 									(new File(dirOrOMETiff)).isDirectory() ? dirOrOMETiff
 											: (new File(dirOrOMETiff)).getParent()
 											+ File.separator,
 											"Deconvolution", false);
 							if (deconmfivs.getSize() > 0) {
-								impDF1 = new ImagePlus();
-								impDF1.setStack(
+								impDF1s[pos] = new ImagePlus();
+								impDF1s[pos].setStack(
 										"Decon-Fuse"
-												+ impA.getTitle()
+												+ impAs[pos].getTitle()
 												.replace(
-														impA.getTitle()
+														impAs[pos].getTitle()
 														.split(":")[0],
 														""), deconmfivs);
-								impDF1.setFileInfo(new FileInfo());
-								// impDF1.getOriginalFileInfo().directory = (new
+								impDF1s[pos].setFileInfo(new FileInfo());
+								// impDF1s[pos].getOriginalFileInfo().directory = (new
 								// File(dirOrOMETiff)).isDirectory()?dirOrOMETiff:((new
 								// File(dirOrOMETiff)).getParent()+File.separator);
-								impDF1.getOriginalFileInfo().directory = dirOrOMETiff;
-								int stkNSlicesDF = impDF1.getStackSize();
+								impDF1s[pos].getOriginalFileInfo().directory = dirOrOMETiff;
+								int stkNSlicesDF = impDF1s[pos].getStackSize();
 								int zSlicesDF1 = deconmfivs.getFivStacks().get(0)
 										.getSize();
-								impDF1.setOpenAsHyperStack(true);
-								impDF1.setStack(impDF1.getStack(), wavelengths,
+								impDF1s[pos].setOpenAsHyperStack(true);
+								impDF1s[pos].setStack(impDF1s[pos].getStack(), wavelengths,
 										zSlicesDF1, stkNSlicesDF
 										/ (wavelengths * zSlicesDF1));
-								ciDF1 = new CompositeImage(impDF1);
+								ciDF1s[pos] = new CompositeImage(impDF1s[pos]);
 								if (wavelengths > 1)
-									ciDF1.setMode(CompositeImage.COMPOSITE);
+									ciDF1s[pos].setMode(CompositeImage.COMPOSITE);
 								else
-									ciDF1.setMode(CompositeImage.GRAYSCALE);
-								ciDF1.show();
-								win = ciDF1.getWindow();
+									ciDF1s[pos].setMode(CompositeImage.GRAYSCALE);
+								ciDF1s[pos].show();
+								win = ciDF1s[pos].getWindow();
 							}
 						} else {
 							MultiFileInfoVirtualStack deconmfivs = new MultiFileInfoVirtualStack(
@@ -2919,31 +2934,31 @@ public class DISPIM_Monitor implements PlugIn {
 											+ File.separator,
 											"Deconvolution", false);
 							if (deconmfivs.getSize() > 0) {
-								impDF2 = new ImagePlus();
-								impDF2.setStack(
+								impDF2s[pos] = new ImagePlus();
+								impDF2s[pos].setStack(
 										"Decon-Fuse"
-												+ impA.getTitle()
+												+ impAs[pos].getTitle()
 												.replace(
-														impA.getTitle()
+														impAs[pos].getTitle()
 														.split(":")[0],
 														""), deconmfivs);
-								impDF2.setFileInfo(new FileInfo());
-								// impDF2.getOriginalFileInfo().directory = (new
+								impDF2s[pos].setFileInfo(new FileInfo());
+								// impDF2s[pos].getOriginalFileInfo().directory = (new
 								// File(dirOrOMETiff)).isDirectory()?dirOrOMETiff:((new
 								// File(dirOrOMETiff)).getParent()+File.separator);
-								impDF2.getOriginalFileInfo().directory = dirOrOMETiff;
-								int stkNSlicesDF = impDF2.getStackSize();
+								impDF2s[pos].getOriginalFileInfo().directory = dirOrOMETiff;
+								int stkNSlicesDF = impDF2s[pos].getStackSize();
 								int zSlicesDF1 = deconmfivs.getFivStacks().get(0)
 										.getSize();
-								impDF2.setOpenAsHyperStack(true);
-								impDF2.setStack(impDF2.getStack(), wavelengths,
+								impDF2s[pos].setOpenAsHyperStack(true);
+								impDF2s[pos].setStack(impDF2s[pos].getStack(), wavelengths,
 										zSlicesDF1, stkNSlicesDF
 										/ (wavelengths * zSlicesDF1));
-								ciDF2 = new CompositeImage(impDF2);
+								ciDF2s[pos] = new CompositeImage(impDF2s[pos]);
 								if (wavelengths > 1)
-									ciDF2.setMode(CompositeImage.COMPOSITE);
+									ciDF2s[pos].setMode(CompositeImage.COMPOSITE);
 								else
-									ciDF2.setMode(CompositeImage.GRAYSCALE);
+									ciDF2s[pos].setMode(CompositeImage.GRAYSCALE);
 								// THIS May? WORK!
 								int oldW = win.getWidth();
 								int oldH = win.getHeight();
@@ -2955,10 +2970,10 @@ public class DISPIM_Monitor implements PlugIn {
 								double oldMax = win.getImagePlus()
 										.getDisplayRangeMax();
 
-								ciDF2.setWindow(win);
-								win.updateImage(ciDF2);
+								ciDF2s[pos].setWindow(win);
+								win.updateImage(ciDF2s[pos]);
 								win.setSize(oldW, oldH);
-								((StackWindow) win).addScrollbars(ciDF2);
+								((StackWindow) win).addScrollbars(ciDF2s[pos]);
 								win.getImagePlus().updateAndRepaintWindow();
 								win.getImagePlus().setPosition(oldC, oldZ, oldT);
 								win.getImagePlus().setDisplayRange(oldMin, oldMax);
@@ -2969,8 +2984,9 @@ public class DISPIM_Monitor implements PlugIn {
 							}
 						}
 					}
-				}
+				
 			}
+		}
 		}
 	}
 
