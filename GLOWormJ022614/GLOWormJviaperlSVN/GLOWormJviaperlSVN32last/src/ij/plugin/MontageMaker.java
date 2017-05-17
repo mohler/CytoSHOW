@@ -178,7 +178,7 @@ public class MontageMaker implements PlugIn {
 	    int slice = first;
 		while (slice<=last) {
 //			aSlice = stack.getProcessor(slice);
-			imp.setPositionWithoutUpdate(1, 1, slice);			
+			imp.setPositionWithoutUpdate(1, slice, 1);			
 			aSlice = new ColorProcessor(imp.flatten().getImage());
 			if (scale!=1.0)
 				aSlice = aSlice.resize(width, height);

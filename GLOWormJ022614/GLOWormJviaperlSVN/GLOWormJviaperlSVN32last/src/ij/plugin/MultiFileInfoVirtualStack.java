@@ -529,7 +529,10 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (dimOrder == "xyzct")
 			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber/cDim + ((sliceNumber%cDim)*fivStacks.get(stackNumber).getSize()/(vDim))
 																		+(isViewB?fivStacks.get(stackNumber).getSize()/(cDim*vDim):0));
-  		int[] ipHis = ip.getHistogram();
+		if (ip instanceof FloatProcessor) {
+			ip = ip.convertToShort(false);
+		}
+		int[] ipHis = ip.getHistogram();
   		double ipHisMode = 0.0;
   		int ipHisLength = ipHis.length;
   		int ipHisMaxBin = 0;
