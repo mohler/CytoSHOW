@@ -17,10 +17,10 @@ import java.util.Properties;
 import org.vcell.gloworm.QTVirtualStack;
 
 public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
-	ArrayList<FileInfoVirtualStack> fivStacks = new ArrayList<FileInfoVirtualStack>();
+	ArrayList<FileInfoVirtualStack> fivStacks;
 	FileInfo[] infoArray;
-	ArrayList<FileInfo[]> infoCollectorArrayList =new ArrayList<FileInfo[]>();;
-	ArrayList<String> touchedFiles = new ArrayList<String>();
+	ArrayList<FileInfo[]> infoCollectorArrayList;
+	ArrayList<String> touchedFiles;
 	int nImages;
 	private String dir;
 	private int channelDirectories;
@@ -71,6 +71,11 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		this.tDim = tDim;
 		this.vDim = vDim;
 		this.dimOrder = sliceOrder;
+		fivStacks = new ArrayList<FileInfoVirtualStack>();
+		
+		infoCollectorArrayList =new ArrayList<FileInfo[]>();;
+		touchedFiles = new ArrayList<String>();
+
 		File argFile = new File(arg);
 		dir = "";
 		if (!argFile.exists() || !argFile.isDirectory()) {
@@ -264,7 +269,6 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 //							// TODO Auto-generated catch block
 //							e.printStackTrace();
 //						}
-						for (int di=0; di<dummyInfoArray.length; di++) {
 							infoCollectorArrayList.add(new FileInfo[dummyInfoArray.length]);
 							for (int si=0; si<infoCollectorArrayList.get(infoCollectorArrayList.size()-1).length; si++) {
 								infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[si] = (FileInfo) dummyInfoArray[si].clone();
@@ -272,7 +276,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 //								infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[si].longOffset = tiOffsetsArray[si];
 //								infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[si].offset = (int)tiOffsetsArray[si];
 							}
-						}
+						
 					}
 					if (infoCollectorArrayList==null || infoCollectorArrayList.size()==0) {
 						continue;
@@ -384,9 +388,11 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		}
 		
 		String[] dirChunks = dir.split("\\"+File.separator);
+		ImagePlus fivImpZero = fivStacks.get(0).open(false);
 		ImagePlus imp = new ImagePlus(
 				dirChunks[dirChunks.length-1]+"_"+
-				fivStacks.get(0).open(false).getTitle().replaceAll("\\d+\\.", "\\."), this);
+				fivImpZero.getTitle().replaceAll("\\d+\\.", "\\."), this);
+		fivImpZero.flush();
 		imp.setOpenAsHyperStack(true);			
 		int cztDims = cDim*zDim*tDim;
 		int impSize = imp.getStackSize();
@@ -517,8 +523,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 						IJ.error("TiffDecoder", msg);
 					}
 					fivStacks.get(stackNumber).infoArray = infoCollectorArrayList.get(stackNumber);
-					fivStacks.get(stackNumber).open(false);
+					ImagePlus fivImpSN = fivStacks.get(stackNumber).open(false);
 					touchedFiles.add(fivStacks.get(stackNumber).infoArray[sliceNumber].fileName);
+					fivImpSN.flush();
 				}
 			} 
 
