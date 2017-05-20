@@ -152,9 +152,10 @@ public class DISPIM_Monitor implements PlugIn {
 	private String[] diSPIM_MM_ChContrastMinStrings;
 	private String[] diSPIM_MM_ChContrastMaxStrings;
 	private String dimOrder;
-
-
-
+	private WG_Uploader wgUploadJob;
+	private boolean uploadPending;
+	private boolean uploadRunning;
+	
 	public boolean isDoDecon() {
 		return doDecon;
 	}
@@ -940,6 +941,14 @@ public class DISPIM_Monitor implements PlugIn {
 			slaveChannel = keyChannel == 1 ? 2 : 1;
 		} else
 			doDecon = false;
+		if (wgUploadJob == null) 
+			wgUploadJob = new WG_Uploader();
+		uploadRunning = wgUploadJob.getNewUploadProcess() != null;
+		if(!uploadRunning)	{
+			wgUploadJob = new WG_Uploader();
+			wgUploadJob.run(dirOrOMETiff);
+		}
+
 
 		if (doDecon) {
 
@@ -1422,7 +1431,7 @@ public class DISPIM_Monitor implements PlugIn {
 
 					timecode = "" + (new Date()).getTime();
 					final String ftimecode = timecode;
-					
+
 					if (!(new File(savePath +"Pos"+pos+ "_Deconvolution1" + File.separator
 							+ "Decon_" + frameFileNames[f] + ".tif")).canRead()
 							|| (wavelengths == 2 && !(new File(savePath
@@ -1692,7 +1701,7 @@ public class DISPIM_Monitor implements PlugIn {
 					// IJ.wait(15000);
 				}
 			}
-		
+		}
 
 		while (true) {
 			boolean focus = false;
@@ -1720,6 +1729,8 @@ public class DISPIM_Monitor implements PlugIn {
 								&& (!doDecon || ((deconList1 == null && deconList2 == null) || (!(deconList1 == null
 								|| deconFileList1 == null || deconList1.length != deconFileList1.length) || !(deconList2 == null
 								|| deconFileList2 == null || deconList2.length != deconFileList2.length))))) {
+							
+							uploadRunning = wgUploadJob.getNewUploadProcess() != null;
 							if (IJ.escapePressed())
 								if (!IJ.showMessageWithCancel(
 										"Cancel diSPIM Monitor Updates?",
@@ -1747,6 +1758,7 @@ public class DISPIM_Monitor implements PlugIn {
 						}
 
 						IJ.log("NEW DATA WRITTEN");
+						uploadPending = true;
 						IJ.wait(10000);
 						fileListA = listA;
 						deconFileList1 = deconList1;
@@ -1889,6 +1901,9 @@ public class DISPIM_Monitor implements PlugIn {
 						// run("Close");
 						// }
 						//
+						IJ.log("NEW DATA WRITTEN");
+						uploadPending = true;
+
 						fileListA = new File("" + dirOrOMETiff + "SPIMA").list();
 						fileListB = new File("" + dirOrOMETiff + "SPIMB").list();
 						deconFileList1 = (new File(dirOrOMETiff +"_Deconvolution1"))
@@ -2138,6 +2153,8 @@ public class DISPIM_Monitor implements PlugIn {
 								IJ.resetEscape();
 						IJ.wait(5000);
 					}
+					IJ.log("NEW DATA WRITTEN");
+					uploadPending = true;
 
 					boolean wasSynched = false;
 					ArrayList<ImagePlus> synchedImpsArrayList = new ArrayList<ImagePlus>();
@@ -2410,6 +2427,14 @@ public class DISPIM_Monitor implements PlugIn {
 							+ "			File.saveString(autoFocusString, autoFPath);			\n"
 							+ "";
 					IJ.runMacro(fftMacroString);
+				}
+
+
+				uploadRunning = wgUploadJob.getNewUploadProcess() != null;
+				if(!uploadRunning && uploadPending)	{
+					uploadPending = false;
+					wgUploadJob = new WG_Uploader();
+					wgUploadJob.run(dirOrOMETiff);
 				}
 
 
@@ -2957,14 +2982,14 @@ public class DISPIM_Monitor implements PlugIn {
 										win.getSize().height + 5);
 
 								// *******************
-							
+
+							}
+
 						}
-					}
 					}
 				}
 			}
 		}
-	}
 	}
 	
 	

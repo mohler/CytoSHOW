@@ -24,14 +24,25 @@ import javax.jnlp.ServiceManager;
 import javax.jnlp.SingleInstanceListener;
 import javax.jnlp.SingleInstanceService;
 import javax.jnlp.UnavailableServiceException;
+import javax.swing.JFrame;
 
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPReply;
 
 public class WG_Uploader implements PlugIn {
 	
+	private ProcessBuilder jvm;
+	private  Process newUploadProcess;
+	
+	public ProcessBuilder getJvm() {
+		return jvm;
+	}
+
 	public void run(String arg) {
-		spawnNewUploadProcess((new DirectoryChooser("Upload Folder Contents")).getDirectory());
+		if (arg == null || arg == "")
+			arg = (new DirectoryChooser("Upload Folder Contents")).getDirectory();
+		spawnNewUploadProcess(arg);
+		
 	}
 
 	public WG_Uploader() {
@@ -44,12 +55,15 @@ public class WG_Uploader implements PlugIn {
 
 		TextWindow tw = new TextWindow("WG_upload","","",400,80) {
 			 public void close() {
-				 if (!IJ.showMessageWithCancel("Finish this WG_upload job??", "Click Cancel to end this upload. Click OK to continue uploading."))
+				 if (!IJ.showMessageWithCancel("Finish this WG_upload job??", "Click Cancel to end this upload. Click OK to continue uploading.")) {
+					 newUploadProcess = null;
 					 System.exit(0);
+				 }
 			 }
 		};
 		tw.setVisible(true);
-		
+		tw.setExtendedState(JFrame.MAXIMIZED_BOTH);
+		tw.setExtendedState(JFrame.ICONIFIED);
 		ArrayList<String> iterativeDirPaths = new ArrayList<String>();
 		iterativeDirPaths.add(masterPath);
 		int increment = 0;
@@ -157,14 +171,16 @@ public class WG_Uploader implements PlugIn {
 				}
 			}
 		}
-	
+		newUploadProcess = null;
+		 System.exit(0);
 	}
 	
 	public String spawnNewUploadProcess(String arg) {
 			String path = arg;
-			ProcessBuilder jvm = null;
-			Process newUploadProcess = null;
+			jvm = null;
+			newUploadProcess = null;
 			int attempts =0;
+			new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator).mkdirs();
 			String wg_jnlpSavePath = IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+"WG_Upload.jnlp";
 			String wg_uploadJNLP = IJ.openUrlAsString("http://upload.cytoshow.org/WG_Upload.jnlp");
 			wg_uploadJNLP = wg_uploadJNLP.replace("<argument>-upload</argument>", "<argument>-upload</argument>\n    <argument>"+path+"</argument>");
@@ -204,6 +220,10 @@ public class WG_Uploader implements PlugIn {
 
 			return returnString;
 
+	}
+
+	public Process getNewUploadProcess() {
+		return newUploadProcess;
 	}
 
 }
