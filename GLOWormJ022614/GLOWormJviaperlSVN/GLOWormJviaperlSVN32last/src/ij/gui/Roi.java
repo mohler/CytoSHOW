@@ -1597,7 +1597,8 @@ public class Roi extends Object implements Cloneable, java.io.Serializable {
 		this.slice = slice;
 		if (frame<0) frame=0;
 		this.frame = frame;
-		position = ((frame==0?1:frame) -1)*imp.getNChannels()*imp.getNSlices() + ((slice==0?1:slice) -1)*imp.getNChannels() + channel;
+		if (imp!=null)
+				position = ((frame==0?1:frame) -1)*imp.getNChannels()*imp.getNSlices() + ((slice==0?1:slice) -1)*imp.getNChannels() + channel;
 	}
 	
 	/** Returns the channel position of this ROI, or zero
