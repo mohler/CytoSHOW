@@ -1688,7 +1688,6 @@ public class DISPIM_Monitor implements PlugIn {
 								|| deconFileList1 == null || deconList1.length != deconFileList1.length) || !(deconList2 == null
 								|| deconFileList2 == null || deconList2.length != deconFileList2.length))))) {
 							
-							uploadRunning = wgUploadJob.getNewUploadProcess().isAlive();
 							if (IJ.escapePressed())
 								if (!IJ.showMessageWithCancel(
 										"Cancel diSPIM Monitor Updates?",
@@ -1755,71 +1754,68 @@ public class DISPIM_Monitor implements PlugIn {
 
 						for (int pos=0; pos<pDim; pos++) {
 
-							while (stackAs[pos] == null || stackBs[pos]== null) {
-//								IJ.log("null stack(s)");
-								stackAs[pos] = new MultiFileInfoVirtualStack(
-										dirOrOMETiff, dimOrder, keyString, cDim, zDim, dirOrOMETiffFile.list().length, vDim, pos,
-										false, false);
-								stackBs[pos] = new MultiFileInfoVirtualStack(
-										dirOrOMETiff, dimOrder, keyString, cDim, zDim, dirOrOMETiffFile.list().length, vDim, pos,
-										true, false);
-							}
 							win = impAs[pos].getWindow();
+							double zoomA = win.getCanvas().getMagnification();
 							int cA = impAs[pos].getChannel();
 							int zA = impAs[pos].getSlice();
 							int tA = impAs[pos].getFrame();
-
-							impAs[pos].setStack(stackAs[pos]);
+							boolean tailing = tA==impAs[pos].getNFrames();
+							tDim = listA.length;
 							Calibration calA = impAs[pos].getCalibration();
 							calA.pixelWidth = vWidth;
 							calA.pixelHeight = vHeight;
 							calA.pixelDepth = vDepthRaw;
 							calA.setUnit(vUnit);
 
+							stackAs[pos] = new MultiFileInfoVirtualStack(
+									dirOrOMETiff, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
+									false, false);
+
 							if (stageScan)
 								stackAs[pos].setSkewXperZ(
 										calA.pixelDepth / calA.pixelWidth);
+							
+							impAs[pos].flush();
+							impAs[pos] = new CompositeImage(new ImagePlus(impAs[pos].getTitle(), stackAs[pos]));
 							impAs[pos].setOpenAsHyperStack(true);
-							impAs[pos].setDimensions(cDim, zDim, stackAs[pos].getSize()/(cDim*zDim));
-							impAs[pos] = new CompositeImage(impAs[pos]);
-							while (!impAs[pos].isComposite()) {
-								IJ.wait(100);
-							}
-
+							impAs[pos].setDimensions(cDim, zDim, tDim);
 							win.setImage(impAs[pos]);
+							impAs[pos].setPosition(cA, zA, tailing? impAs[pos].getNFrames() : tA);
 							((CompositeImage)impAs[pos]).setMode(CompositeImage.COMPOSITE);
-
-							impAs[pos].setPosition(cA, zA,
-									tA == impAs[pos].getNFrames() - 1 ? impAs[pos].getNFrames() : tA);
-
+							win.getCanvas().setMagnification(zoomA);
+							win.pack();
 							
 							win = impBs[pos].getWindow();
+							double zoomB = win.getCanvas().getMagnification();
 							int cB = impBs[pos].getChannel();
 							int zB = impBs[pos].getSlice();
 							int tB = impBs[pos].getFrame();
-
-							impBs[pos].setStack(stackBs[pos]);
-							
+							tailing = tB==impBs[pos].getNFrames();
+							tDim = listA.length;
 							Calibration calB = impBs[pos].getCalibration();
 							calB.pixelWidth = vWidth;
 							calB.pixelHeight = vHeight;
 							calB.pixelDepth = vDepthRaw;
 							calB.setUnit(vUnit);
 
+							stackBs[pos] = new MultiFileInfoVirtualStack(
+									dirOrOMETiff, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
+									true, false);
+
 							if (stageScan)
 								stackBs[pos].setSkewXperZ(
-										-calB.pixelDepth / calB.pixelWidth);
+										calB.pixelDepth / calB.pixelWidth);
+							
+							impBs[pos].flush();
+							impBs[pos] = new CompositeImage(new ImagePlus(impBs[pos].getTitle(), stackBs[pos]));
 							impBs[pos].setOpenAsHyperStack(true);
-							impBs[pos].setDimensions(cDim, zDim, stackBs[pos].getSize()/(cDim*zDim));
-							impBs[pos] = new CompositeImage(impBs[pos]);
-							while (!impBs[pos].isComposite()) {
-								IJ.wait(100);
-							}
-
+							impBs[pos].setDimensions(cDim, zDim, tDim);
 							win.setImage(impBs[pos]);
+
+							impBs[pos].setPosition(cB, zB, tailing? impBs[pos].getNFrames() : tB);
 							((CompositeImage)impBs[pos]).setMode(CompositeImage.COMPOSITE);
-							impBs[pos].setPosition(cB, zB,
-									tB == impBs[pos].getNFrames() - 1 ? impBs[pos].getNFrames() : tB);
+							win.getCanvas().setMagnification(zoomB);
+							win.pack();
 
 						}
 						
