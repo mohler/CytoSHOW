@@ -1,6 +1,7 @@
 package org.vcell.gloworm;
 
 import java.awt.Button;
+import java.awt.Dimension;
 import java.awt.Polygon;
 import java.awt.event.ActionEvent;
 import java.awt.image.ColorModel;
@@ -1759,6 +1760,8 @@ public class DISPIM_Monitor implements PlugIn {
 							int cA = impAs[pos].getChannel();
 							int zA = impAs[pos].getSlice();
 							int tA = impAs[pos].getFrame();
+							if (impAs[pos].isComposite())
+								modeA = ((CompositeImage)impAs[pos]).getCompositeMode();
 							boolean tailing = tA==impAs[pos].getNFrames();
 							tDim = listA.length;
 							Calibration calA = impAs[pos].getCalibration();
@@ -1780,16 +1783,27 @@ public class DISPIM_Monitor implements PlugIn {
 							impAs[pos].setOpenAsHyperStack(true);
 							impAs[pos].setDimensions(cDim, zDim, tDim);
 							win.setImage(impAs[pos]);
-							impAs[pos].setPosition(cA, zA, tailing? impAs[pos].getNFrames() : tA);
-							((CompositeImage)impAs[pos]).setMode(CompositeImage.COMPOSITE);
+					        if (win instanceof StackWindow) {
+					        	StackWindow sw = (StackWindow)win;
+					        	int stackSize = impAs[pos].getStackSize();
+					        	int nScrollbars = sw.getNScrollbars();
+					        	sw.addScrollbars(impAs[pos]);
+					        }
+							impAs[pos].setPosition(cA, zA, (tailing || tA > impAs[pos].getNFrames())? impAs[pos].getNFrames() : tA);
+							((CompositeImage)impAs[pos]).setMode(modeA);
 							win.getCanvas().setMagnification(zoomA);
+							Dimension winSize = win.getSize();
 							win.pack();
-							
+							win.setSize(winSize);
+						
+														
 							win = impBs[pos].getWindow();
 							double zoomB = win.getCanvas().getMagnification();
 							int cB = impBs[pos].getChannel();
 							int zB = impBs[pos].getSlice();
 							int tB = impBs[pos].getFrame();
+							if (impBs[pos].isComposite())
+								modeB = ((CompositeImage)impBs[pos]).getCompositeMode();
 							tailing = tB==impBs[pos].getNFrames();
 							tDim = listA.length;
 							Calibration calB = impBs[pos].getCalibration();
@@ -1811,11 +1825,18 @@ public class DISPIM_Monitor implements PlugIn {
 							impBs[pos].setOpenAsHyperStack(true);
 							impBs[pos].setDimensions(cDim, zDim, tDim);
 							win.setImage(impBs[pos]);
-
-							impBs[pos].setPosition(cB, zB, tailing? impBs[pos].getNFrames() : tB);
-							((CompositeImage)impBs[pos]).setMode(CompositeImage.COMPOSITE);
+					        if (win instanceof StackWindow) {
+					        	StackWindow sw = (StackWindow)win;
+					        	int stackSize = impBs[pos].getStackSize();
+					        	int nScrollbars = sw.getNScrollbars();
+					        	sw.addScrollbars(impBs[pos]);
+					        }
+							impBs[pos].setPosition(cB, zB, (tailing || tB > impBs[pos].getNFrames())? impBs[pos].getNFrames() : tB);
+							((CompositeImage)impBs[pos]).setMode(modeB);
 							win.getCanvas().setMagnification(zoomB);
+							winSize = win.getSize();
 							win.pack();
+							win.setSize(winSize);
 
 						}
 						

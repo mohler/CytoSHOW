@@ -525,7 +525,6 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					fivStacks.get(stackNumber).infoArray = infoCollectorArrayList.get(stackNumber);
 					ImagePlus fivImpSN = fivStacks.get(stackNumber).open(false);
 					touchedFiles.add(fivStacks.get(stackNumber).infoArray[sliceNumber].fileName);
-					fivImpSN.flush();
 				}
 			} 
 
