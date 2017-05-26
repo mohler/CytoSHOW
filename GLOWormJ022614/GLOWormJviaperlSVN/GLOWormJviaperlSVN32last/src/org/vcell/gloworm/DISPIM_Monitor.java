@@ -445,6 +445,9 @@ public class DISPIM_Monitor implements PlugIn {
 					}
 					((CompositeImage)impBs[pos]).setMode(CompositeImage.COMPOSITE);
 
+					impAs[pos].setPosition(1, zDim/2, impAs[pos].getNFrames());
+					impBs[pos].setPosition(1, zDim/2, impBs[pos].getNFrames());
+
 					impAs[pos].show();
 					impBs[pos].show();
 				}
@@ -1764,24 +1767,25 @@ public class DISPIM_Monitor implements PlugIn {
 								modeA = ((CompositeImage)impAs[pos]).getCompositeMode();
 							boolean tailing = tA==impAs[pos].getNFrames();
 							tDim = listA.length;
-							Calibration calA = impAs[pos].getCalibration();
-							calA.pixelWidth = vWidth;
-							calA.pixelHeight = vHeight;
-							calA.pixelDepth = vDepthRaw;
-							calA.setUnit(vUnit);
 
 							stackAs[pos] = new MultiFileInfoVirtualStack(
 									dirOrOMETiff, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
 									false, false);
 
-							if (stageScan)
-								stackAs[pos].setSkewXperZ(
-										calA.pixelDepth / calA.pixelWidth);
 							
 							impAs[pos].flush();
 							impAs[pos] = new CompositeImage(new ImagePlus(impAs[pos].getTitle(), stackAs[pos]));
 							impAs[pos].setOpenAsHyperStack(true);
 							impAs[pos].setDimensions(cDim, zDim, tDim);
+							Calibration calA = impAs[pos].getCalibration();
+							calA.pixelWidth = vWidth;
+							calA.pixelHeight = vHeight;
+							calA.pixelDepth = vDepthRaw;
+							calA.setUnit(vUnit);
+							if (stageScan)
+								stackAs[pos].setSkewXperZ(
+										calA.pixelDepth / calA.pixelWidth);
+
 							win.setImage(impAs[pos]);
 					        if (win instanceof StackWindow) {
 					        	StackWindow sw = (StackWindow)win;
@@ -1806,24 +1810,24 @@ public class DISPIM_Monitor implements PlugIn {
 								modeB = ((CompositeImage)impBs[pos]).getCompositeMode();
 							tailing = tB==impBs[pos].getNFrames();
 							tDim = listA.length;
-							Calibration calB = impBs[pos].getCalibration();
-							calB.pixelWidth = vWidth;
-							calB.pixelHeight = vHeight;
-							calB.pixelDepth = vDepthRaw;
-							calB.setUnit(vUnit);
 
 							stackBs[pos] = new MultiFileInfoVirtualStack(
 									dirOrOMETiff, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
 									true, false);
 
-							if (stageScan)
-								stackBs[pos].setSkewXperZ(
-										calB.pixelDepth / calB.pixelWidth);
-							
 							impBs[pos].flush();
 							impBs[pos] = new CompositeImage(new ImagePlus(impBs[pos].getTitle(), stackBs[pos]));
 							impBs[pos].setOpenAsHyperStack(true);
 							impBs[pos].setDimensions(cDim, zDim, tDim);
+							Calibration calB = impBs[pos].getCalibration();
+							calB.pixelWidth = vWidth;
+							calB.pixelHeight = vHeight;
+							calB.pixelDepth = vDepthRaw;
+							calB.setUnit(vUnit);
+							if (stageScan)
+								stackBs[pos].setSkewXperZ(
+										calB.pixelDepth / calB.pixelWidth);
+							
 							win.setImage(impBs[pos]);
 					        if (win instanceof StackWindow) {
 					        	StackWindow sw = (StackWindow)win;
