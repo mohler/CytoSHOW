@@ -171,8 +171,12 @@ public class DISPIM_Monitor implements PlugIn {
 	public void run(String arg) {
 		String[] args = arg.split("\\|");
 		IJ.log(arg);
-		int minA = 0;
-		int maxA = 255;
+		LUT[] lutA = new LUT[4];
+		LUT[] lutB = new LUT[4];
+		double[] minA = {0,0,0,0};
+		double[] maxA = {255,255,255,255};
+		double[] minB = {0,0,0,0};
+		double[] maxB = {255,255,255,255};
 		String channelsA = "11";
 		int modeA = CompositeImage.COMPOSITE;
 		int modeB = CompositeImage.COMPOSITE;
@@ -1763,8 +1767,15 @@ public class DISPIM_Monitor implements PlugIn {
 							int cA = impAs[pos].getChannel();
 							int zA = impAs[pos].getSlice();
 							int tA = impAs[pos].getFrame();
-							if (impAs[pos].isComposite())
+							if (impAs[pos].isComposite()) {
 								modeA = ((CompositeImage)impAs[pos]).getCompositeMode();
+								for (int ch=0;ch<impAs[pos].getNChannels();ch++) {
+									((CompositeImage)impAs[pos]).setC(ch);
+									lutA[ch] = ((CompositeImage)impAs[pos]).getChannelLut();
+									minA[ch] = ((CompositeImage)impAs[pos]).getDisplayRangeMin();
+									maxA[ch] = ((CompositeImage)impAs[pos]).getDisplayRangeMax();
+								}
+							}
 							boolean tailing = tA==impAs[pos].getNFrames();
 							tDim = listA.length;
 
@@ -1799,15 +1810,30 @@ public class DISPIM_Monitor implements PlugIn {
 							Dimension winSize = win.getSize();
 							win.pack();
 							win.setSize(winSize);
-						
+							((CompositeImage)impAs[pos]).updateAndDraw();
+							for (int ch=0;ch<impAs[pos].getNChannels();ch++) {
+								((CompositeImage)impAs[pos]).setC(ch);
+								((CompositeImage)impAs[pos]).setChannelColorModel(lutA[ch]);
+								((CompositeImage)impAs[pos]).setDisplayRange(minA[ch], maxA[ch]);
+							}
+							((CompositeImage)impAs[pos]).updateAndDraw();
+
 														
 							win = impBs[pos].getWindow();
 							double zoomB = win.getCanvas().getMagnification();
 							int cB = impBs[pos].getChannel();
 							int zB = impBs[pos].getSlice();
 							int tB = impBs[pos].getFrame();
-							if (impBs[pos].isComposite())
+							if (impBs[pos].isComposite()) {
 								modeB = ((CompositeImage)impBs[pos]).getCompositeMode();
+								for (int ch=0;ch<impBs[pos].getNChannels();ch++) {
+									((CompositeImage)impBs[pos]).setC(ch);
+									lutB[ch] = ((CompositeImage)impBs[pos]).getChannelLut();
+									minB[ch] = ((CompositeImage)impBs[pos]).getDisplayRangeMin();
+									maxB[ch] = ((CompositeImage)impBs[pos]).getDisplayRangeMax();
+								}
+							}
+							
 							tailing = tB==impBs[pos].getNFrames();
 							tDim = listA.length;
 
@@ -1841,6 +1867,13 @@ public class DISPIM_Monitor implements PlugIn {
 							winSize = win.getSize();
 							win.pack();
 							win.setSize(winSize);
+							((CompositeImage)impBs[pos]).updateAndDraw();
+							for (int ch=0;ch<impBs[pos].getNChannels();ch++) {
+								((CompositeImage)impBs[pos]).setC(ch);
+								((CompositeImage)impBs[pos]).setChannelColorModel(lutB[ch]);
+								((CompositeImage)impBs[pos]).setDisplayRange(minB[ch], maxB[ch]);
+							}
+							((CompositeImage)impBs[pos]).updateAndDraw();
 
 						}
 						
@@ -2102,13 +2135,13 @@ public class DISPIM_Monitor implements PlugIn {
 
 						// NOT WORKING YET!!!!
 						win = impAs[pos].getWindow();
-						ColorModel cmA = impAs[pos].getProcessor().getColorModel();
-						double dminA = impAs[pos].getProcessor().getMin();
-						double dmaxA = impAs[pos].getProcessor().getMax();
+//						ColorModel cmA = impAs[pos].getProcessor().getColorModel();
+//						double dminA = impAs[pos].getProcessor().getMin();
+//						double dmaxA = impAs[pos].getProcessor().getMax();
 						impAs[pos].setStack(impTmpA.getStack(), wavelengths, zSlices, impTmpA
 								.getStack().getSize() / (wavelengths * zSlices));
-						impAs[pos].getProcessor().setColorModel(cmA);
-						impAs[pos].getProcessor().setMinAndMax(dminA, dmaxA);
+//						impAs[pos].getProcessor().setColorModel(cmA);
+//						impAs[pos].getProcessor().setMinAndMax(dminA, dmaxA);
 						if (stageScan)
 							impAs[pos].getStack().setSkewXperZ(
 									-impBs[pos].getCalibration().pixelDepth
@@ -2131,13 +2164,13 @@ public class DISPIM_Monitor implements PlugIn {
 						.getParent());
 
 						win = impBs[pos].getWindow();
-						ColorModel cmB = impBs[pos].getProcessor().getColorModel();
-						double dminB = impBs[pos].getProcessor().getMin();
-						double dmaxB = impBs[pos].getProcessor().getMax();
+//						ColorModel cmB = impBs[pos].getProcessor().getColorModel();
+//						double dminB = impBs[pos].getProcessor().getMin();
+//						double dmaxB = impBs[pos].getProcessor().getMax();
 						impBs[pos].setStack(impTmpB.getStack(), wavelengths, zSlices, impTmpB
 								.getStack().getSize() / (wavelengths * zSlices));
-						impBs[pos].getProcessor().setColorModel(cmB);
-						impBs[pos].getProcessor().setMinAndMax(dminB, dmaxB);
+//						impBs[pos].getProcessor().setColorModel(cmB);
+//						impBs[pos].getProcessor().setMinAndMax(dminB, dmaxB);
 						if (stageScan)
 							impBs[pos].getStack().setSkewXperZ(
 									impBs[pos].getCalibration().pixelDepth
