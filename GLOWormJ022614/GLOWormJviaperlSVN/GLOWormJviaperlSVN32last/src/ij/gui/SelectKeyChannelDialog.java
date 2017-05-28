@@ -8,10 +8,17 @@ import java.awt.event.*;
 	"Yes", "No" and "Cancel" buttons. */
 public class SelectKeyChannelDialog extends Dialog implements ActionListener, KeyListener, ItemListener {
     private Choice channelChoices;
+    private Choice methodChoices;
+
     private Button yesB, noB, cancelB;
     private boolean cancelPressed, yesPressed;
 	private boolean firstPaint = true;
 	private int keyChannel=1;
+	private String regDeconMethod;
+
+	public String getRegDeconMethod() {
+		return regDeconMethod;
+	}
 
 	public SelectKeyChannelDialog(Frame parent, String title, String msg) {
 		super(parent, title, true);
@@ -24,7 +31,12 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 		channelChoices = new Choice();
 		channelChoices.add("Key registration on Channel 1");
 		channelChoices.add("Key registration on Channel 2");
+		methodChoices = new Choice();
+		methodChoices.add("mipav CPU method");
+		methodChoices.add("MinGuo GPU method");
+
 		panel.add(channelChoices);
+		panel.add(methodChoices);
 		add("North", panel);
 		
 		panel = new Panel();
@@ -39,6 +51,7 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 			cancelB = new Button(" Cancel ");
 		}
 		channelChoices.addItemListener(this);
+		methodChoices.addItemListener(this);
 		yesB.addActionListener(this);
 		noB.addActionListener(this);
 		cancelB.addActionListener(this);
@@ -118,8 +131,14 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 	}
 
 	public void itemStateChanged(ItemEvent e) {
-		keyChannel = channelChoices.getSelectedIndex()+1;		
-		IJ.log("keyChannel "+ keyChannel);
+		if (e.getSource() == channelChoices) {
+			keyChannel = channelChoices.getSelectedIndex()+1;		
+			IJ.log("keyChannel "+ keyChannel);
+		}
+		if (e.getSource() == methodChoices) {
+			regDeconMethod = methodChoices.getSelectedItem();		
+			IJ.log("regDeconMethod "+ regDeconMethod);
+		}
 	}
 
 }

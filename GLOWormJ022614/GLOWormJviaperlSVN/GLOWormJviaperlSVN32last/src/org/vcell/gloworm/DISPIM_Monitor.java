@@ -140,7 +140,8 @@ public class DISPIM_Monitor implements PlugIn {
 	//Info from proximal tiff header in MMomeTIFF ^^^^^^
 
 
-	private boolean doDecon;
+	private boolean doMipavDecon;
+	private boolean doGPUdecon;
 	private int keyChannel;
 	private int slaveChannel;
 	private int oldLength;
@@ -158,11 +159,11 @@ public class DISPIM_Monitor implements PlugIn {
 	private boolean uploadRunning;
 	
 	public boolean isDoDecon() {
-		return doDecon;
+		return doMipavDecon;
 	}
 
 	public void setDoDecon(boolean doDecon) {
-		this.doDecon = doDecon;
+		this.doMipavDecon = doDecon;
 	}
 
 	/* (non-Javadoc)
@@ -185,7 +186,7 @@ public class DISPIM_Monitor implements PlugIn {
 		double vDepthRaw = 1.000;
 		double vDepthDecon = 0.1625;
 		String vUnit = "micron";
-		doDecon = true;
+		doMipavDecon = true;
 		int cropWidth = 325;
 		int cropHeight = 425;
 		boolean stackDualViewTimePoints = false;
@@ -266,6 +267,8 @@ public class DISPIM_Monitor implements PlugIn {
 			}
 		}
 		IJ.log(dirOrOMETiff);
+		final String dirOrOMETiffFinal = dirOrOMETiff;
+
 		File dirOrOMETiffFile = new File(dirOrOMETiff);
 		String savePath = dirOrOMETiffFile.getParentFile().getParent()
 				+ File.separator + dirOrOMETiffFile.getParentFile().getName()
@@ -901,24 +904,19 @@ public class DISPIM_Monitor implements PlugIn {
 				"Would you like volumes to be deconvolved/fused \nas soon as they are captured?  \n\nChoose this option if you are ready \nto initiate time-lapse recording.");
 		// d.setVisible(true);
 		if (d.cancelPressed()) {
-			doDecon = false;
+			doMipavDecon = false;
 		} else if (d.yesPressed()) {
-			doDecon = true;
+			doMipavDecon = d.getRegDeconMethod() == "mipav CPU method";
+			doGPUdecon = d.getRegDeconMethod() == "MinGuo GPU method";
 			keyChannel = d.getKeyChannel();
 			slaveChannel = keyChannel == 1 ? 2 : 1;
-		} else
-			doDecon = false;
-		if (wgUploadJob == null) 
-			wgUploadJob = new WG_Uploader();
-		if (wgUploadJob.getNewUploadProcess() != null)
-			uploadRunning = wgUploadJob.getNewUploadProcess().isAlive();
-		if(!uploadRunning)	{
-			wgUploadJob = new WG_Uploader();
-			wgUploadJob.run(dirOrOMETiff);
+		} else {
+			doMipavDecon = false;
+			doGPUdecon = false;
 		}
 
 
-		if (doDecon) {
+		if (doMipavDecon || doGPUdecon) {
 
 			for (int pos=0; pos<pDim; pos++) {
 
@@ -1019,8 +1017,24 @@ public class DISPIM_Monitor implements PlugIn {
 				IJ.saveAs(impBs[pos], "Selection", savePath +  "Pos" + pos + "B_crop.roi");
 
 			}
+		}
 
+		Thread uploadThread = new Thread(new Runnable() {
+			public void run() {
+				if (wgUploadJob == null) 
+					wgUploadJob = new WG_Uploader();
+				if (wgUploadJob.getNewUploadProcess() != null)
+					uploadRunning = wgUploadJob.getNewUploadProcess().isAlive();
+				if(!uploadRunning)	{
+					wgUploadJob = new WG_Uploader();
+					wgUploadJob.run(dirOrOMETiffFinal);
+				}
+			}
+		});
+		uploadThread.start();
 
+		
+		if (doMipavDecon) {
 			for (int pos=0; pos<pDim; pos++) {
 
 				//				impA = impAs[pos];
@@ -1513,11 +1527,11 @@ public class DISPIM_Monitor implements PlugIn {
 										+ frameFileNamesFinal[ff] + ftimecode
 										+ ".sct\");");
 
-								ImagePlus convImp = IJ.openImage(finalConvPath);
-								if (convImp != null) {
-									IJ.saveAs(convImp, "TIFF", finalConvPath);
-									convImp.close();
-								}
+//								ImagePlus convImp = IJ.openImage(finalConvPath);
+//								if (convImp != null) {
+//									IJ.saveAs(convImp, "TIFF", finalConvPath);
+//									convImp.close();
+//								}
 							}
 						});
 						convThread.start();
@@ -1655,12 +1669,12 @@ public class DISPIM_Monitor implements PlugIn {
 											+ frameFileNamesFinal[ff] + ftimecode
 											+ ".sct\");");
 
-									ImagePlus convImp = IJ
-											.openImage(finalConvPath2);
-									if (convImp != null) {
-										IJ.saveAs(convImp, "TIFF", finalConvPath2);
-										convImp.close();
-									}
+//									ImagePlus convImp = IJ
+//											.openImage(finalConvPath2);
+//									if (convImp != null) {
+//										IJ.saveAs(convImp, "TIFF", finalConvPath2);
+//										convImp.close();
+//									}
 								}
 							});
 							convThread2.start();
@@ -1692,7 +1706,7 @@ public class DISPIM_Monitor implements PlugIn {
 						deconList2 = deconFileList2;
 
 						while ((fileListA.length == listA.length)
-								&& (!doDecon || ((deconList1 == null && deconList2 == null) || (!(deconList1 == null
+								&& (!doMipavDecon || ((deconList1 == null && deconList2 == null) || (!(deconList1 == null
 								|| deconFileList1 == null || deconList1.length != deconFileList1.length) || !(deconList2 == null
 								|| deconFileList2 == null || deconList2.length != deconFileList2.length))))) {
 							
@@ -1767,15 +1781,6 @@ public class DISPIM_Monitor implements PlugIn {
 							int cA = impAs[pos].getChannel();
 							int zA = impAs[pos].getSlice();
 							int tA = impAs[pos].getFrame();
-							if (impAs[pos].isComposite()) {
-								modeA = ((CompositeImage)impAs[pos]).getCompositeMode();
-								for (int ch=0;ch<impAs[pos].getNChannels();ch++) {
-									((CompositeImage)impAs[pos]).setC(ch);
-									lutA[ch] = ((CompositeImage)impAs[pos]).getChannelLut();
-									minA[ch] = ((CompositeImage)impAs[pos]).getDisplayRangeMin();
-									maxA[ch] = ((CompositeImage)impAs[pos]).getDisplayRangeMax();
-								}
-							}
 							boolean tailing = tA==impAs[pos].getNFrames();
 							tDim = listA.length;
 
@@ -1783,11 +1788,15 @@ public class DISPIM_Monitor implements PlugIn {
 									dirOrOMETiff, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
 									false, false);
 
-							
+							ImagePlus impNext = new ImagePlus(impAs[pos].getTitle(), stackAs[pos]);
+							impNext.setOpenAsHyperStack(true);
+							impNext.setDimensions(cDim, zDim, tDim);
+							impNext = new CompositeImage(impNext);
+							((CompositeImage)impNext).setMode(modeA);
+							((CompositeImage)impNext).reset();
+							((CompositeImage)impNext).copyLuts(impAs[pos]);
 							impAs[pos].flush();
-							impAs[pos] = new CompositeImage(new ImagePlus(impAs[pos].getTitle(), stackAs[pos]));
-							impAs[pos].setOpenAsHyperStack(true);
-							impAs[pos].setDimensions(cDim, zDim, tDim);
+							impAs[pos] = impNext;
 							Calibration calA = impAs[pos].getCalibration();
 							calA.pixelWidth = vWidth;
 							calA.pixelHeight = vHeight;
@@ -1810,13 +1819,6 @@ public class DISPIM_Monitor implements PlugIn {
 							Dimension winSize = win.getSize();
 							win.pack();
 							win.setSize(winSize);
-							((CompositeImage)impAs[pos]).updateAndDraw();
-							for (int ch=0;ch<impAs[pos].getNChannels();ch++) {
-								((CompositeImage)impAs[pos]).setC(ch);
-								((CompositeImage)impAs[pos]).setChannelColorModel(lutA[ch]);
-								((CompositeImage)impAs[pos]).setDisplayRange(minA[ch], maxA[ch]);
-							}
-							((CompositeImage)impAs[pos]).updateAndDraw();
 
 														
 							win = impBs[pos].getWindow();
@@ -1826,12 +1828,6 @@ public class DISPIM_Monitor implements PlugIn {
 							int tB = impBs[pos].getFrame();
 							if (impBs[pos].isComposite()) {
 								modeB = ((CompositeImage)impBs[pos]).getCompositeMode();
-								for (int ch=0;ch<impBs[pos].getNChannels();ch++) {
-									((CompositeImage)impBs[pos]).setC(ch);
-									lutB[ch] = ((CompositeImage)impBs[pos]).getChannelLut();
-									minB[ch] = ((CompositeImage)impBs[pos]).getDisplayRangeMin();
-									maxB[ch] = ((CompositeImage)impBs[pos]).getDisplayRangeMax();
-								}
 							}
 							
 							tailing = tB==impBs[pos].getNFrames();
@@ -1841,10 +1837,15 @@ public class DISPIM_Monitor implements PlugIn {
 									dirOrOMETiff, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
 									true, false);
 
+							impNext = new CompositeImage(new ImagePlus(impBs[pos].getTitle(), stackBs[pos]));
+							impNext.setOpenAsHyperStack(true);
+							impNext.setDimensions(cDim, zDim, tDim);
+							impNext = new CompositeImage(impNext);
+							((CompositeImage)impNext).setMode(modeB);
+							((CompositeImage)impNext).reset();
+							((CompositeImage)impNext).copyLuts(impBs[pos]);
 							impBs[pos].flush();
-							impBs[pos] = new CompositeImage(new ImagePlus(impBs[pos].getTitle(), stackBs[pos]));
-							impBs[pos].setOpenAsHyperStack(true);
-							impBs[pos].setDimensions(cDim, zDim, tDim);
+							impBs[pos] = impNext;
 							Calibration calB = impBs[pos].getCalibration();
 							calB.pixelWidth = vWidth;
 							calB.pixelHeight = vHeight;
@@ -1867,13 +1868,6 @@ public class DISPIM_Monitor implements PlugIn {
 							winSize = win.getSize();
 							win.pack();
 							win.setSize(winSize);
-							((CompositeImage)impBs[pos]).updateAndDraw();
-							for (int ch=0;ch<impBs[pos].getNChannels();ch++) {
-								((CompositeImage)impBs[pos]).setC(ch);
-								((CompositeImage)impBs[pos]).setChannelColorModel(lutB[ch]);
-								((CompositeImage)impBs[pos]).setDisplayRange(minB[ch], maxB[ch]);
-							}
-							((CompositeImage)impBs[pos]).updateAndDraw();
 
 						}
 						
@@ -1910,7 +1904,7 @@ public class DISPIM_Monitor implements PlugIn {
 						deconList2 = (new File(dirOrOMETiff +"_Deconvolution2")).list();
 
 						while ((fileListA.length == listA.length || fileListB.length == listB.length)
-								&& (!doDecon || ((deconList1 == null && deconList2 == null) || (!(deconList1 == null
+								&& (!doMipavDecon || ((deconList1 == null && deconList2 == null) || (!(deconList1 == null
 								|| deconFileList1 == null || deconList1.length != deconFileList1.length) || !(deconList2 == null
 								|| deconFileList2 == null || deconList2.length != deconFileList2.length))))) {
 							if (IJ.escapePressed())
@@ -2495,7 +2489,7 @@ public class DISPIM_Monitor implements PlugIn {
 				}
 
 
-				if (doDecon) {
+				if (doMipavDecon) {
 
 					//					impA = impAs[pos];
 					//					impB = impBs[pos];
@@ -2784,11 +2778,11 @@ public class DISPIM_Monitor implements PlugIn {
 												+ frameFileNameFinal + timecode
 												+ ".sct\");");
 
-										ImagePlus convImp = IJ.openImage(finalConvPath);
-										if (convImp != null) {
-											IJ.saveAs(convImp, "TIFF", finalConvPath);
-											convImp.close();
-										}
+//										ImagePlus convImp = IJ.openImage(finalConvPath);
+//										if (convImp != null) {
+//											IJ.saveAs(convImp, "TIFF", finalConvPath);
+//											convImp.close();
+//										}
 									}
 								});
 								convThread.start();
@@ -2931,13 +2925,13 @@ public class DISPIM_Monitor implements PlugIn {
 													+ frameFileNameFinal + timecode
 													+ ".sct\");");
 
-											ImagePlus convImp = IJ
-													.openImage(finalConvPath2);
-											if (convImp != null) {
-												IJ.saveAs(convImp, "TIFF",
-														finalConvPath2);
-												convImp.close();
-											}
+//											ImagePlus convImp = IJ
+//													.openImage(finalConvPath2);
+//											if (convImp != null) {
+//												IJ.saveAs(convImp, "TIFF",
+//														finalConvPath2);
+//												convImp.close();
+//											}
 										}
 									});
 									convThread2.start();

@@ -591,6 +591,11 @@ public class CompositeImage extends ImagePlus {
 		if (!imp.isComposite() || imp.getNChannels()!=channels)
 			return;
 		CompositeImage ci = (CompositeImage)imp;
+		for (int i=0; i<channels; i++) {
+			this.setPositionWithoutUpdate(i+1,1,1);
+			imp.setPositionWithoutUpdate(i+1,1,1);
+			this.getChannelProcessor().setMinAndMax(imp.getChannelProcessor().getMin(), imp.getChannelProcessor().getMax());
+		}
 		LUT[] luts = ci.getLuts();
 		if (luts!=null && luts.length==channels) {
 			lut = luts;
@@ -600,8 +605,9 @@ public class CompositeImage extends ImagePlus {
 		setMode(mode2);
 		if (mode2==COMPOSITE) {
 			boolean[] active2 = ci.getActiveChannels();
-			for (int i=0; i<MAX_CHANNELS; i++)
+			for (int i=0; i<channels; i++) {
 				active[i] = active2[i];
+			}
 		}
 		if (ci.hasCustomLuts())
 			customLuts = true;
