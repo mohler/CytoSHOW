@@ -56,11 +56,11 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	}
 	
 	public MultiFileInfoVirtualStack(String dirOrOMETiff, String string, boolean show) {
-		this(dirOrOMETiff, "xyczt", string, 0, 0, 0, 1, 0, false, show);
+		this(dirOrOMETiff, "xyczt", string, 0, 0, 0, 1, -1, false, show);
 	}
 
 	public MultiFileInfoVirtualStack(String dirOrOMETiff, String string, boolean isViewB, boolean show) {
-		this(dirOrOMETiff, "xyczt", string, 0, 0, 0, 1, 0, isViewB, show);
+		this(dirOrOMETiff, "xyczt", string, 0, 0, 0, 1, -1, isViewB, show);
 	}
 
 	public MultiFileInfoVirtualStack(String arg, String sliceOrder, String keyString, int cDim, int zDim, int tDim, int vDim, int pos, boolean isViewB, boolean show) {
@@ -121,8 +121,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					String[] subFileList = subFile.list();
 					for (String subFileListElement:subFileList)
 						if (!cumulativeSubFileArrayList.contains(dir+fileName+File.separator+subFileListElement))
-							if (subFileListElement.toLowerCase().contains("_pos"+pos) 
-									&& subFileListElement.toLowerCase().endsWith("tif"))
+							if ((pos ==-1 ||subFileListElement.toLowerCase().contains("_pos"+pos))
+									&&  subFileListElement.toLowerCase().endsWith("tif"))
 								cumulativeSubFileArrayList.add(dir+fileName+File.separator+subFileListElement);
 				}
 			}
@@ -133,15 +133,17 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			cumulativeTiffFileArray[s] = (String) cumulativeSubFileArrayList.get(s);
 			String[] subFilePathChunks = cumulativeTiffFileArray[s].split(File.separator.replace("\\", "\\\\"));
 			String subFileName = subFilePathChunks[subFilePathChunks.length-1];
-			if (subFileName.matches(".*Decon_t.*\\.tif")) {
-				int tValue = Integer.parseInt(subFileName.substring(subFileName.indexOf("Decon_t")+7).replace(".tif", "") );
+			if (subFileName.matches(".*_t\\d+.*\\.tif")) {
+				int tValue = Integer.parseInt(subFileName.replaceAll(".*_t(\\d+).*\\.tif", "$1"));
 				if (tValue > highT)
 					highT = tValue;
 			}
+			if (highT > 0)
+				dimOrder = "xyztc";
 		}
 		cumulativeTiffFileArray = StringSorter.sortNumerically(cumulativeTiffFileArray);
 
-		if(keyString.toLowerCase().startsWith("decon")) {
+		if(keyString.toLowerCase().contains("deconvolution")) {
 			monitoringDecon = true;
 			for (int c = 1; c <= channelDirectories;c++){
 				for (int t =1;t<=highT;t++) {
@@ -156,7 +158,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 						cumTiffListElement = cumTiffListElement.replace("\\","\\\\");
 						String[] cumTiffListElementPathChunks = cumTiffListElement.split(File.separator.replace("\\", "\\\\"));
 						String cumTiffListElementName = cumTiffListElementPathChunks[cumTiffListElementPathChunks.length-1];
-						int tValue = Integer.parseInt(cumTiffListElementName.substring(cumTiffListElementName.indexOf("Decon_t")+7).replace(".tif", "") );
+						int tValue = Integer.parseInt(cumTiffListElementName.replaceAll(".*_t(\\d+).*\\.tif", "$1"));
 						bigSubFileArrayList.set(tValue-1+highT*(c-1), cumTiffListElement);
 
 					} 
@@ -204,7 +206,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			}
 
 		} else {
-			dimOrder = "xyczt";
+//			dimOrder = "xyczt";
 			dir = "";
 			channelDirectories = 1;
 			largestDirectoryTiffCount = tiffCount;
@@ -261,7 +263,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					} else {
 						TiffDecoder td = new TiffDecoder(dir, fileName);
 						if (IJ.debugMode) td.enableDebugging();
-						IJ.showStatus("Decoding  TIFF image headers..."+fileName.substring(fileName.length()-40));
+						IJ.showStatus("Decoding  TIFF image headers..."+fileName);
 //						long[] tiOffsetsArray = new long[dummyInfoArray.length];
 //						try {
 //							tiOffsetsArray = td.getTiffImageOffsets(0);
@@ -535,6 +537,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (dimOrder == "xyzct")
 			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber/cDim + ((sliceNumber%cDim)*fivStacks.get(stackNumber).getSize()/(vDim))
 																		+(isViewB?fivStacks.get(stackNumber).getSize()/(cDim*vDim):0));
+		if (dimOrder == "xyztc")
+			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber);
+		
 		if (ip instanceof FloatProcessor) {
 			ip = ip.convertToShort(false);
 		}
