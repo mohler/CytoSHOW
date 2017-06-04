@@ -12,6 +12,11 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.UnknownHostException;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.rmi.RemoteException;
 import java.rmi.server.RemoteServer;
 import java.rmi.server.ServerNotActiveException;
@@ -157,6 +162,8 @@ public class DISPIM_Monitor implements PlugIn {
 	private WG_Uploader wgUploadJob;
 	private boolean uploadPending;
 	private boolean uploadRunning;
+	private int iterations;
+	private Double modeSubtractionFraction;
 	
 	public boolean isDoDecon() {
 		return doMipavDecon;
@@ -905,9 +912,14 @@ public class DISPIM_Monitor implements PlugIn {
 		// d.setVisible(true);
 		if (d.cancelPressed()) {
 			doMipavDecon = false;
+			doGPUdecon = false;
 		} else if (d.yesPressed()) {
 			doMipavDecon = d.getRegDeconMethod() == "mipav CPU method";
 			doGPUdecon = d.getRegDeconMethod() == "MinGuo GPU method";
+			if (doGPUdecon) {
+				iterations = d.getIterations();
+				modeSubtractionFraction = d.getSubFract();
+			}
 			keyChannel = d.getKeyChannel();
 			slaveChannel = keyChannel == 1 ? 2 : 1;
 		} else {
@@ -1034,7 +1046,7 @@ public class DISPIM_Monitor implements PlugIn {
 		uploadThread.start();
 
 		
-		if (doMipavDecon) {
+		if (doMipavDecon || doGPUdecon) {
 			for (int pos=0; pos<pDim; pos++) {
 
 				//				impA = impAs[pos];
@@ -1051,15 +1063,9 @@ public class DISPIM_Monitor implements PlugIn {
 				wasChannelB[pos] = impBs[pos].getChannel();
 
 				if ((new File(savePath)).canRead()) {
+					// SETUP OF WINDOWS SHOWING PRE-EXISTING DECON OUTPUTS
 					if (impDF1s[pos] == null) {
-						IJ.runMacro("File.makeDirectory(\""
-								+ savePath.replace("\\", "\\\\")
-								+"Pos"+pos+ "_Deconvolution1\");");
-						if (wavelengths == 2) {
-							IJ.runMacro("File.makeDirectory(\""
-									+ savePath.replace("\\", "\\\\")
-									+"Pos"+pos+ "_Deconvolution2\");");
-						}
+
 						MultiFileInfoVirtualStack deconmfivs = new MultiFileInfoVirtualStack(
 								((new File(dirOrOMETiff)).isDirectory() ? dirOrOMETiff
 										: (new File(dirOrOMETiff)).getParent())
@@ -1073,9 +1079,7 @@ public class DISPIM_Monitor implements PlugIn {
 													impAs[pos].getTitle().split(":")[0],
 													""), deconmfivs);
 							impDF1s[pos].setFileInfo(new FileInfo());
-							// impDF1s[pos].getOriginalFileInfo().directory = (new
-							// File(dirOrOMETiff)).isDirectory()?dirOrOMETiff:((new
-							// File(dirOrOMETiff)).getParent()+File.separator);
+
 							impDF1s[pos].getOriginalFileInfo().directory = dirOrOMETiff;
 							int stkNSlicesDF = impDF1s[pos].getStackSize();
 							int zSlicesDF1 = deconmfivs.getFivStacks().get(0)
@@ -1094,8 +1098,284 @@ public class DISPIM_Monitor implements PlugIn {
 						}
 					}
 				}
-			}
+			}  //END SETUP OF WINDOW SHOWING PRE-EXISTING DECON OUTPUTS
+		}
+		if (doGPUdecon) {
 
+			String[] frameFileNames = new String[impAs[0].getNFrames() + 1];
+
+			new File("" + savePath + "CropBkgdSub").mkdirs();
+			new File("" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "RegA" + File.separator + "tmx").mkdirs();
+			new File("" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "RegB" + File.separator + "tmx").mkdirs();
+			new File("" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "Decon").mkdirs();
+			if (wavelengths ==2) {
+				new File("" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "RegA" + File.separator + "tmx").mkdirs();
+				new File("" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "RegB" + File.separator + "tmx").mkdirs();
+				new File("" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "Decon").mkdirs();
+			}
+			
+			for (int f = 1; f <= impAs[0].getNFrames(); f++) {
+				for (int pos=0; pos<pDim; pos++) {
+					new File("" + savePath + "RegDecon" + File.separator + "Pos"+ pos + File.separator +"Deconvolution1").mkdirs();
+					new File("" + savePath + "RegDecon" + File.separator + "Pos"+ pos + File.separator +"Deconvolution2").mkdirs();
+
+					impAs[pos].setPositionWithoutUpdate(impAs[pos].getChannel(), impAs[pos].getSlice(), f);
+
+					if (impAs[pos].getStack() instanceof ListVirtualStack)
+						frameFileNames[f] = ((ListVirtualStack) impAs[pos].getStack())
+						.getDirectory(impAs[pos].getCurrentSlice());
+					else if (impAs[pos].getStack() instanceof FileInfoVirtualStack
+							|| impAs[pos].getStack() instanceof MultiFileInfoVirtualStack)
+						frameFileNames[f] = "t" + f;
+					else
+						frameFileNames[f] = "t" + f;
+					String timecode = "" + (new Date()).getTime();
+
+						ImageStack stackA1 = new ImageStack(cropWidth, cropHeight);
+						ImageStack stackA2 = new ImageStack(cropWidth, cropHeight);
+						impAs[pos].getWindow().setEnabled(false);
+						double maxBkgd1 = 0.0;
+						double maxBkgd2 = 0.0;
+						for (int i = 1; i <= impAs[pos].getNSlices(); i++) {
+							impAs[pos].setPositionWithoutUpdate(1, i, f);
+							Roi impRoi = (Roi) roiAs[pos].clone();
+							Polygon pA = new Polygon(impRoi.getPolygon().xpoints,
+									impRoi.getPolygon().ypoints,
+									impRoi.getPolygon().npoints);
+							double fMax = impRoi.getBounds().width > impRoi.getBounds().height ? impRoi.getBounds().width: impRoi.getBounds().height;
+							double angle = impRoi.getBounds().width > impRoi.getBounds().height ? 90 : 0;
+							if (impRoi.getType() != Roi.RECTANGLE) {
+								double[] fVals = impRoi.getFeretValues();
+								fMax = fVals[0];
+								angle = fVals[1];
+							}
+							Polygon pAR = pA;
+
+							ImageProcessor ipA1 = impAs[pos].getProcessor().duplicate();
+							int[] ipHis = ipA1.getHistogram();
+					  		double ipHisMode = 0.0;
+					  		int ipHisLength = ipHis.length;
+					  		int ipHisMaxBin = 0;
+					  		for (int h=0; h<ipHisLength; h++) {
+					  			if (ipHis[h] > ipHisMaxBin) {
+					  				ipHisMaxBin = ipHis[h];
+					  				ipHisMode = (double)h;
+					  			}
+					  		}
+							if (maxBkgd1 < ipHisMode )
+								maxBkgd1 = ipHisMode;
+							ipA1.subtract(ipHisMode * modeSubtractionFraction);
+							ipA1.setRoi(
+									Math.max((int) pAR.getBounds().x
+											- (cropWidth - pAR.getBounds().width)
+											/ 2, 0),
+											Math.max((int) pAR.getBounds().y
+													- (cropHeight - pAR.getBounds().height)
+													/ 2, 0), cropWidth, cropHeight);
+							ipA1 = ipA1.crop();
+							ImageProcessor ipA1r = ipA1.createProcessor(cropWidth, cropHeight);
+							ipA1r.insert(ipA1, 0, 0);
+							ipA1 = ipA1r;
+
+							stackA1.addSlice(ipA1);
+							
+							if (wavelengths == 2) {
+								impAs[pos].setPositionWithoutUpdate(2, i, f);
+								ImageProcessor ipA2 = impAs[pos].getProcessor().duplicate();
+								ipHis = ipA2.getHistogram();
+						  		ipHisMode = 0.0;
+						  		ipHisLength = ipHis.length;
+						  		ipHisMaxBin = 0;
+						  		for (int h=0; h<ipHisLength; h++) {
+						  			if (ipHis[h] > ipHisMaxBin) {
+						  				ipHisMaxBin = ipHis[h];
+						  				ipHisMode = (double)h;
+						  			}
+						  		}
+
+								if (maxBkgd2 < ipHisMode )
+									maxBkgd2 = ipHisMode;
+								ipA2.subtract(ipHisMode * modeSubtractionFraction);
+								ipA2.setRoi(
+										Math.max(
+												(int) pAR.getBounds().x
+												- (cropWidth - pAR
+														.getBounds().width)
+														/ 2, 0),
+														Math.max((int) pAR.getBounds().y
+																- (cropHeight - pAR.getBounds().height)
+																/ 2, 0), cropWidth, cropHeight);
+								ipA2 = ipA2.crop();
+								ImageProcessor ipA2r = ipA2.createProcessor(
+										cropWidth, cropHeight);
+								ipA2r.insert(ipA2, 0, 0);
+								ipA2 = ipA2r;
+								stackA2.addSlice(ipA2);
+							}
+						}
+						
+						impAs[pos].getWindow().setEnabled(true);
+						ImagePlus impXA1 = new ImagePlus();
+						impXA1.setStack(stackA1);
+						impXA1.setCalibration(impAs[pos].getCalibration());
+						IJ.saveAs(impXA1, "Tiff", savePath + "CropBkgdSub" + File.separator + "SPIMA1_1.tif");
+						if (wavelengths == 2) {
+							ImagePlus impXA2 = new ImagePlus();
+							impXA2.setStack(stackA2);
+							impXA2.setCalibration(impAs[pos].getCalibration());
+							IJ.saveAs(impXA2, "Tiff", savePath + "CropBkgdSub" + File.separator + "SPIMA2_1.tif");
+
+						}
+
+						ImageStack stackB1 = new ImageStack(cropWidth, cropHeight);
+						ImageStack stackB2 = new ImageStack(cropWidth, cropHeight);
+						impBs[pos].getWindow().setEnabled(false);
+						for (int i = 1; i <= impBs[pos].getNSlices(); i++) {
+							impBs[pos].setPositionWithoutUpdate(1, i, f);
+							Roi impRoi = (Roi) roiBs[pos].clone();
+							Polygon pB = new Polygon(impRoi.getPolygon().xpoints,
+									impRoi.getPolygon().ypoints,
+									impRoi.getPolygon().npoints);
+							double fMax = impRoi.getBounds().width > impRoi
+									.getBounds().height ? impRoi.getBounds().width
+											: impRoi.getBounds().height;
+									double angle = impRoi.getBounds().width > impRoi
+											.getBounds().height ? 90 : 0;
+									if (impRoi.getType() != Roi.RECTANGLE) {
+										double[] fVals = impRoi.getFeretValues();
+										fMax = fVals[0];
+										angle = fVals[1];
+									}
+								Polygon pBR = pB;
+
+									ImageProcessor ipB1 = impBs[pos].getProcessor().duplicate();
+									int[] ipHis = ipB1.getHistogram();
+							  		double ipHisMode = 0.0;
+							  		int ipHisLength = ipHis.length;
+							  		int ipHisMaxBin = 0;
+							  		for (int h=0; h<ipHisLength; h++) {
+							  			if (ipHis[h] > ipHisMaxBin) {
+							  				ipHisMaxBin = ipHis[h];
+							  				ipHisMode = (double)h;
+							  			}
+							  		}
+									if (maxBkgd1 < ipHisMode )
+										maxBkgd1 = ipHisMode;
+									ipB1.subtract(ipHisMode * modeSubtractionFraction);
+									ipB1.setRoi(
+											Math.max((int) pBR.getBounds().x
+													- (cropWidth - pBR.getBounds().width)
+													/ 2, 0),
+													Math.max((int) pBR.getBounds().y
+															- (cropHeight - pBR.getBounds().height)
+															/ 2, 0), cropWidth, cropHeight);
+									ipB1 = ipB1.crop();
+
+									ImageProcessor ipB1r = ipB1.createProcessor(cropWidth,
+											cropHeight);
+									ipB1r.insert(ipB1, 0, 0);
+									ipB1 = ipB1r;
+									// ip1.subtract(minLimit[2]);
+									stackB1.addSlice(ipB1);
+									if (wavelengths == 2) {
+										impBs[pos].setPositionWithoutUpdate(2, i, f);
+										ImageProcessor ipB2 = impBs[pos].getProcessor().duplicate();
+										ipHis = ipB2.getHistogram();
+								  		ipHisMode = 0.0;
+								  		ipHisLength = ipHis.length;
+								  		ipHisMaxBin = 0;
+								  		for (int h=0; h<ipHisLength; h++) {
+								  			if (ipHis[h] > ipHisMaxBin) {
+								  				ipHisMaxBin = ipHis[h];
+								  				ipHisMode = (double)h;
+								  			}
+								  		}
+
+										if (maxBkgd2 < ipHisMode )
+											maxBkgd2 = ipHisMode;
+										ipB2.subtract(ipHisMode * modeSubtractionFraction);
+										ipB2.setRoi(
+												Math.max(
+														(int) pBR.getBounds().x
+														- (cropWidth - pBR
+																.getBounds().width)
+																/ 2, 0),
+																Math.max(
+																		(int) pBR.getBounds().y
+																		- (cropHeight - pBR
+																				.getBounds().height)
+																				/ 2, 0), cropWidth,
+																				cropHeight);
+										ipB2 = ipB2.crop();
+										ImageProcessor ipB2r = ipB2.createProcessor(
+												cropWidth, cropHeight);
+										ipB2r.insert(ipB2, 0, 0);
+										ipB2 = ipB2r;
+										// ip2.subtract(minLimit[3]);
+										stackB2.addSlice(ipB2);
+									}
+						}
+						impBs[pos].getWindow().setEnabled(true);
+						ImagePlus impXB1 = new ImagePlus();
+						impXB1.setStack(stackB1);
+						impXB1.setCalibration(impBs[pos].getCalibration());
+						IJ.saveAs(impXB1, "Tiff", savePath + "CropBkgdSub" + File.separator + "SPIMB1_1.tif");
+						if (wavelengths == 2) {
+							ImagePlus impXB2 = new ImagePlus();
+							impXB2.setStack(stackB2);
+							impXB2.setCalibration(impBs[pos].getCalibration());
+							IJ.saveAs(impXB2, "Tiff", savePath + "CropBkgdSub" + File.separator + "SPIMB2_1.tif");
+
+						}
+
+					
+
+
+					final String[] frameFileNamesFinal = frameFileNames;
+
+					impAs[pos].setPosition(wasChannelA[pos], wasSliceA[pos], wasFrameA[pos]);
+					impBs[pos].setPosition(wasChannelB[pos], wasSliceB[pos], wasFrameB[pos]);
+
+					final int ff = f;
+
+					timecode = "" + (new Date()).getTime();
+					final String ftimecode = timecode;
+
+					if (wavelengths == 1) {
+						try {
+							Runtime.getRuntime().exec("cmd /c start /min /wait C:\\spimfusion_singlecolor.exe " + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMA1_ SPIMB1_  "   + savePath + "RegDecon" + File.separator +" 1 1 1 0 0.1625 0.1625 1 0.1625 0.1625 1 -1 -1 0 1 " + savePath + "RegDecon"  + File.separator+ "Color1" + File.separator  +"RegA" + File.separator + "tmx" + File.separator+ "Matrix_1.tmx 1 0.0001 " + iterations + " 16 C:\\DataForTest\\PSFA.tif C:\\DataForTest\\PSFB.tif 1 0");
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					if (wavelengths == 2) {
+						try {
+							Runtime.getRuntime().exec("cmd /c start /min /wait C:\\spimfusion_dualcolor.exe " + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMA1_ SPIMB1_  "  + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMA2_ SPIMB2_ " + savePath + "RegDecon" + File.separator +" 1 1 1 0 0.1625 0.1625 1 0.1625 0.1625 1 -1 -1 0 1 " + savePath + "RegDecon"  + File.separator+ "Color1" + File.separator  +"RegA" + File.separator + "tmx" + File.separator+ "Matrix_1.tmx 1 0.0001 " + iterations + " 16 C:\\DataForTest\\PSFA.tif C:\\DataForTest\\PSFB.tif 1 0");
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+					try {
+						while (!(new File(savePath + "RegDecon" + File.separator + "Color1" + File.separator + "Decon" + File.separator + "Decon_1.tif").canRead()))
+							IJ.wait(100);
+						Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Color1" + File.separator + "Decon" + File.separator + "Decon_1.tif"),
+								Paths.get(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution1" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif"), StandardCopyOption.REPLACE_EXISTING);
+						if (wavelengths == 2)
+							while (!(new File(savePath + "RegDecon" + File.separator + "Color2" + File.separator + "Decon" + File.separator + "Decon_1.tif").canRead()))
+								IJ.wait(100);
+							Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Color2" + File.separator + "Decon" + File.separator + "Decon_1.tif"),
+								Paths.get(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution2" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif"), StandardCopyOption.REPLACE_EXISTING);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+		
+		if (doMipavDecon) {
 
 			String[] frameFileNames = new String[impAs[0].getNFrames() + 1];
 
@@ -1167,10 +1447,6 @@ public class DISPIM_Monitor implements PlugIn {
 									+"Pos"+pos+ "_Deconvolution2\");");
 						}
 
-						// ImageStack stackA1 = new
-						// ImageStack(cropHeight,cropWidth);
-						// ImageStack stackA2 = new
-						// ImageStack(cropHeight,cropWidth);
 						ImageStack stackA1 = new ImageStack(cropWidth, cropHeight);
 						ImageStack stackA2 = new ImageStack(cropWidth, cropHeight);
 						impAs[pos].getWindow().setEnabled(false);
@@ -1190,24 +1466,9 @@ public class DISPIM_Monitor implements PlugIn {
 										fMax = fVals[0];
 										angle = fVals[1];
 									}
-									// Polygon pAR = rotatePolygon(new
-									// Polygon(pA.xpoints,pA.ypoints, pA.npoints),
-									// -180+angle);
 									Polygon pAR = pA;
 
 									ImageProcessor ip1 = impAs[pos].getProcessor().duplicate();
-									// ip1.fillOutside(impRoi);
-									// ip1.setRoi((int)(pA.getBounds().getCenterX()-fMax/2),
-									// (int)(pA.getBounds().getCenterY()-fMax/2),
-									// (int)fMax,
-									// (int)fMax);
-									// ip1.rotate(-180+angle);
-
-									// ip1.setRoi(Math.max((int)pAR.getBounds().x-(cropHeight-pAR.getBounds().width)/2,
-									// 0),
-									// Math.max((int)pAR.getBounds().y-(cropWidth-pAR.getBounds().height)/2,
-									// 0),
-									// cropHeight, cropWidth);
 									ip1.setRoi(
 											Math.max((int) pAR.getBounds().x
 													- (cropWidth - pAR.getBounds().width)
@@ -1216,30 +1477,16 @@ public class DISPIM_Monitor implements PlugIn {
 															- (cropHeight - pAR.getBounds().height)
 															/ 2, 0), cropWidth, cropHeight);
 									ip1 = ip1.crop();
-									// ImageProcessor ip1r = ip1.createProcessor(cropHeight,
-									// cropWidth);
 									ImageProcessor ip1r = ip1.createProcessor(cropWidth,
 											cropHeight);
 									ip1r.insert(ip1, 0, 0);
 									ip1 = ip1r;
-									// ip1.subtract(minLimit[0]);
+//									ip1.subtract(minLimit[0]);
 									stackA1.addSlice(ip1);
 									if (wavelengths == 2) {
 										impAs[pos].setPositionWithoutUpdate(2, i, f);
 										ImageProcessor ip2 = impAs[pos].getProcessor()
 												.duplicate();
-										// ip2.fillOutside(impRoi);
-										// ip2.setRoi((int)(pA.getBounds().getCenterX()-fMax/2),
-										// (int)(pA.getBounds().getCenterY()-fMax/2),
-										// (int)fMax,
-										// (int)fMax);
-										// ip2.rotate(-180+angle);
-
-										// ip2.setRoi(Math.max((int)pAR.getBounds().x-(cropHeight-pAR.getBounds().width)/2,
-										// 0),
-										// Math.max((int)pAR.getBounds().y-(cropWidth-pAR.getBounds().height)/2,
-										// 0),
-										// cropHeight, cropWidth);
 										ip2.setRoi(
 												Math.max(
 														(int) pAR.getBounds().x
@@ -1253,8 +1500,6 @@ public class DISPIM_Monitor implements PlugIn {
 																				/ 2, 0), cropWidth,
 																				cropHeight);
 										ip2 = ip2.crop();
-										// ImageProcessor ip2r =
-										// ip2.createProcessor(cropHeight, cropWidth);
 										ImageProcessor ip2r = ip2.createProcessor(
 												cropWidth, cropHeight);
 										ip2r.insert(ip2, 0, 0);
@@ -1267,8 +1512,6 @@ public class DISPIM_Monitor implements PlugIn {
 						ImagePlus impXA1 = new ImagePlus();
 						impXA1.setStack(stackA1);
 						impXA1.setCalibration(impAs[pos].getCalibration());
-						// impXA1.getCalibration().pixelDepth =
-						// impXA1.getCalibration().pixelWidth;
 						IJ.saveAs(impXA1, "Tiff", savePath + "Pos"+pos+ "_SPIMA_Ch1_processed"
 								+ File.separator + frameFileNames[f]
 										+ File.separator + frameFileNames[f] + ".tif");
@@ -1276,18 +1519,12 @@ public class DISPIM_Monitor implements PlugIn {
 							ImagePlus impXA2 = new ImagePlus();
 							impXA2.setStack(stackA2);
 							impXA2.setCalibration(impAs[pos].getCalibration());
-							// impXA2.getCalibration().pixelDepth =
-							// impXA2.getCalibration().pixelWidth;
 							IJ.saveAs(impXA2, "Tiff", savePath
 									+ "Pos"+pos+ "_SPIMA_Ch2_processed" + File.separator
 									+ frameFileNames[f] + File.separator
 									+ frameFileNames[f] + ".tif");
 						}
 
-						// ImageStack stackB1 = new
-						// ImageStack(cropHeight,cropWidth);
-						// ImageStack stackB2 = new
-						// ImageStack(cropHeight,cropWidth);
 						ImageStack stackB1 = new ImageStack(cropWidth, cropHeight);
 						ImageStack stackB2 = new ImageStack(cropWidth, cropHeight);
 						impBs[pos].getWindow().setEnabled(false);
@@ -1307,24 +1544,9 @@ public class DISPIM_Monitor implements PlugIn {
 										fMax = fVals[0];
 										angle = fVals[1];
 									}
-									// Polygon pBR = rotatePolygon(new
-									// Polygon(pB.xpoints,pB.ypoints, pB.npoints),
-									// -180+angle);
-									Polygon pBR = pB;
+								Polygon pBR = pB;
 
 									ImageProcessor ip1 = impBs[pos].getProcessor().duplicate();
-									// ip1.fillOutside(impRoi);
-									// ip1.setRoi((int)(pB.getBounds().getCenterX()-fMax/2),
-									// (int)(pB.getBounds().getCenterY()-fMax/2),
-									// (int)fMax,
-									// (int)fMax);
-									// ip1.rotate(-180+angle);
-
-									// ip1.setRoi(Math.max((int)pBR.getBounds().x-(cropHeight-pBR.getBounds().width)/2,
-									// 0),
-									// Math.max((int)pBR.getBounds().y-(cropWidth-pBR.getBounds().height)/2,
-									// 0),
-									// cropHeight, cropWidth);
 									ip1.setRoi(
 											Math.max((int) pBR.getBounds().x
 													- (cropWidth - pBR.getBounds().width)
@@ -1333,8 +1555,7 @@ public class DISPIM_Monitor implements PlugIn {
 															- (cropHeight - pBR.getBounds().height)
 															/ 2, 0), cropWidth, cropHeight);
 									ip1 = ip1.crop();
-									// ImageProcessor ip1r = ip1.createProcessor(cropHeight,
-									// cropWidth);
+
 									ImageProcessor ip1r = ip1.createProcessor(cropWidth,
 											cropHeight);
 									ip1r.insert(ip1, 0, 0);
@@ -1345,18 +1566,6 @@ public class DISPIM_Monitor implements PlugIn {
 										impBs[pos].setPositionWithoutUpdate(2, i, f);
 										ImageProcessor ip2 = impBs[pos].getProcessor()
 												.duplicate();
-										// ip2.fillOutside(impRoi);
-										// ip2.setRoi((int)(pB.getBounds().getCenterX()-fMax/2),
-										// (int)(pB.getBounds().getCenterY()-fMax/2),
-										// (int)fMax,
-										// (int)fMax);
-										// ip2.rotate(-180+angle);
-
-										// ip2.setRoi(Math.max((int)pBR.getBounds().x-(cropHeight-pBR.getBounds().width)/2,
-										// 0),
-										// Math.max((int)pBR.getBounds().y-(cropWidth-pBR.getBounds().height)/2,
-										// 0),
-										// cropHeight, cropWidth);
 										ip2.setRoi(
 												Math.max(
 														(int) pBR.getBounds().x
@@ -1370,8 +1579,6 @@ public class DISPIM_Monitor implements PlugIn {
 																				/ 2, 0), cropWidth,
 																				cropHeight);
 										ip2 = ip2.crop();
-										// ImageProcessor ip2r =
-										// ip2.createProcessor(cropHeight, cropWidth);
 										ImageProcessor ip2r = ip2.createProcessor(
 												cropWidth, cropHeight);
 										ip2r.insert(ip2, 0, 0);
@@ -1384,8 +1591,6 @@ public class DISPIM_Monitor implements PlugIn {
 						ImagePlus impXB1 = new ImagePlus();
 						impXB1.setStack(stackB1);
 						impXB1.setCalibration(impBs[pos].getCalibration());
-						// impXB1.getCalibration().pixelDepth =
-						// impXB1.getCalibration().pixelWidth;
 						IJ.saveAs(impXB1, "Tiff", savePath + "Pos"+pos+ "_SPIMB_Ch1_processed"
 								+ File.separator + frameFileNames[f]
 										+ File.separator + frameFileNames[f] + ".tif");
@@ -1393,8 +1598,6 @@ public class DISPIM_Monitor implements PlugIn {
 							ImagePlus impXB2 = new ImagePlus();
 							impXB2.setStack(stackB2);
 							impXB2.setCalibration(impBs[pos].getCalibration());
-							// impXB2.getCalibration().pixelDepth =
-							// impXB2.getCalibration().pixelWidth;
 							IJ.saveAs(impXB2, "Tiff", savePath
 									+ "Pos"+pos+ "_SPIMB_Ch2_processed" + File.separator
 									+ frameFileNames[f] + File.separator

@@ -4,6 +4,10 @@ import ij.IJ;
 import java.awt.*;
 import java.awt.event.*;
 
+import javax.swing.JSpinner;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
+
 /** A modal dialog box with a one line message and
 	"Yes", "No" and "Cancel" buttons. */
 public class SelectKeyChannelDialog extends Dialog implements ActionListener, KeyListener, ItemListener {
@@ -15,6 +19,43 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 	private boolean firstPaint = true;
 	private int keyChannel=1;
 	private String regDeconMethod;
+	private JSpinner subtractionFractionSpinner;
+	public JSpinner getSubtractionFractionSpinner() {
+		return subtractionFractionSpinner;
+	}
+
+	public void setSubtractionFractionSpinner(JSpinner subtractionFractionSpinner) {
+		this.subtractionFractionSpinner = subtractionFractionSpinner;
+	}
+
+	private JSpinner iterationSpinner;
+	private Panel optPanel;
+	private double subFract;
+	public double getSubFract() {
+		return subFract;
+	}
+
+	public void setSubFract(double subFract) {
+		this.subFract = subFract;
+	}
+
+	private int iterations;
+
+	public int getIterations() {
+		return iterations;
+	}
+
+	public void setIterations(int iterations) {
+		this.iterations = iterations;
+	}
+
+	public JSpinner getIterationSpinner() {
+		return iterationSpinner;
+	}
+
+	public void setIterationSpinner(JSpinner iterationSpinner) {
+		this.iterationSpinner = iterationSpinner;
+	}
 
 	public String getRegDeconMethod() {
 		return regDeconMethod;
@@ -32,8 +73,8 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 		channelChoices.add("Key registration on Channel 1");
 		channelChoices.add("Key registration on Channel 2");
 		methodChoices = new Choice();
-		methodChoices.add("mipav CPU method");
 		methodChoices.add("MinGuo GPU method");
+		methodChoices.add("mipav CPU method");
 
 		panel.add(channelChoices);
 		panel.add(methodChoices);
@@ -69,6 +110,16 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 			panel.add(cancelB);
 		}
 		add("South", panel);
+		
+		subtractionFractionSpinner = new JSpinner(new SpinnerNumberModel(1.0, -1.0, 2.0, 0.1));  
+		subtractionFractionSpinner.setToolTipText("Fraction of image Mode value to subtract");
+		iterationSpinner = new JSpinner(new SpinnerNumberModel(10, 1, 100, 1));  
+		iterationSpinner.setToolTipText("Iterations of Deconvolution");
+		optPanel = new Panel();
+		optPanel.add("Center", subtractionFractionSpinner);
+		optPanel.add("East", iterationSpinner);
+		add("East", optPanel);
+
 		pack();
 		GUI.center(this);
 		show();
@@ -77,8 +128,13 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource()==cancelB)
 			cancelPressed = true;
-		else if (e.getSource()==yesB)
+		else if (e.getSource()==yesB) {
 			yesPressed = true;
+			keyChannel = channelChoices.getSelectedIndex()+1;
+			regDeconMethod = methodChoices.getSelectedItem();		
+			subFract = ((Double)subtractionFractionSpinner.getValue());
+			iterations = ((Integer)iterationSpinner.getValue());
+		}
 		closeDialog();
 	}
 	
@@ -138,6 +194,17 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 		if (e.getSource() == methodChoices) {
 			regDeconMethod = methodChoices.getSelectedItem();		
 			IJ.log("regDeconMethod "+ regDeconMethod);
+			if (regDeconMethod.contains("GPU") ) {
+				if (optPanel!=null) {
+					optPanel.setVisible(true);
+				}
+				this.pack();
+			} else {
+				if (optPanel != null) {
+					optPanel.setVisible(false);
+					this.pack();
+				}
+			}
 		}
 	}
 
