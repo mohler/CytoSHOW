@@ -164,7 +164,16 @@ public class DISPIM_Monitor implements PlugIn {
 	private boolean uploadRunning;
 	private int iterations;
 	private Double modeSubtractionFraction;
+	private Process regDeconProcess;
 	
+	public Process getRegDeconProcess() {
+		return regDeconProcess;
+	}
+
+	public void setRegDeconProcess(Process regDeconProcess) {
+		this.regDeconProcess = regDeconProcess;
+	}
+
 	public boolean isDoDecon() {
 		return doMipavDecon;
 	}
@@ -904,6 +913,22 @@ public class DISPIM_Monitor implements PlugIn {
 
 		IJ.run("Tile");
 		IJ.log("" + WindowManager.getImageCount());
+		
+		Thread uploadThread = new Thread(new Runnable() {
+			public void run() {
+				if (wgUploadJob == null) 
+					wgUploadJob = new WG_Uploader();
+				if (wgUploadJob.getNewUploadProcess() != null)
+					uploadRunning = wgUploadJob.getNewUploadProcess().isAlive();
+				if(!uploadRunning)	{
+					wgUploadJob = new WG_Uploader();
+					wgUploadJob.run(dirOrOMETiffFinal);
+				}
+			}
+		});
+		uploadThread.start();
+
+		
 
 		SelectKeyChannelDialog d = new SelectKeyChannelDialog(
 				IJ.getInstance(),
@@ -1031,21 +1056,6 @@ public class DISPIM_Monitor implements PlugIn {
 			}
 		}
 
-		Thread uploadThread = new Thread(new Runnable() {
-			public void run() {
-				if (wgUploadJob == null) 
-					wgUploadJob = new WG_Uploader();
-				if (wgUploadJob.getNewUploadProcess() != null)
-					uploadRunning = wgUploadJob.getNewUploadProcess().isAlive();
-				if(!uploadRunning)	{
-					wgUploadJob = new WG_Uploader();
-					wgUploadJob.run(dirOrOMETiffFinal);
-				}
-			}
-		});
-		uploadThread.start();
-
-		
 		if (doMipavDecon || doGPUdecon) {
 			for (int pos=0; pos<pDim; pos++) {
 
@@ -1340,10 +1350,15 @@ public class DISPIM_Monitor implements PlugIn {
 
 					timecode = "" + (new Date()).getTime();
 					final String ftimecode = timecode;
-
+					
+					while (regDeconProcess!= null && regDeconProcess.isAlive()) {
+						IJ.wait(100);
+					}
+					if (regDeconProcess!= null)
+						IJ.log("rdpExit="+regDeconProcess.exitValue());
 					if (wavelengths == 1) {
 						try {
-							Runtime.getRuntime().exec("cmd /c start /min /wait C:\\spimfusion_singlecolor.exe " + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMA1_ SPIMB1_  "   + savePath + "RegDecon" + File.separator +" 1 1 1 0 0.1625 0.1625 1 0.1625 0.1625 1 -1 -1 0 1 " + savePath + "RegDecon"  + File.separator+ "Color1" + File.separator  +"RegA" + File.separator + "tmx" + File.separator+ "Matrix_1.tmx 1 0.0001 " + iterations + " 16 C:\\DataForTest\\PSFA.tif C:\\DataForTest\\PSFB.tif 1 0");
+							regDeconProcess = Runtime.getRuntime().exec("cmd /c start /wait C:\\spimfusion_singlecolor.exe " + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMB1_ SPIMA1_ "   + savePath + "RegDecon" + File.separator +" 1 1 1 0 0.1625 0.1625 1 0.1625 0.1625 1 -1 -1 0 1 " + "Balabalabala" + " 1 0.0001 " + iterations + " 16 C:\\DataForTest\\PSFA.tif C:\\DataForTest\\PSFB.tif 1 0");
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -1351,12 +1366,20 @@ public class DISPIM_Monitor implements PlugIn {
 					}
 					if (wavelengths == 2) {
 						try {
-							Runtime.getRuntime().exec("cmd /c start /min /wait C:\\spimfusion_dualcolor.exe " + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMA1_ SPIMB1_  "  + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMA2_ SPIMB2_ " + savePath + "RegDecon" + File.separator +" 1 1 1 0 0.1625 0.1625 1 0.1625 0.1625 1 -1 -1 0 1 " + savePath + "RegDecon"  + File.separator+ "Color1" + File.separator  +"RegA" + File.separator + "tmx" + File.separator+ "Matrix_1.tmx 1 0.0001 " + iterations + " 16 C:\\DataForTest\\PSFA.tif C:\\DataForTest\\PSFB.tif 1 0");
+							regDeconProcess = Runtime.getRuntime().exec("cmd /c start /wait C:\\spimfusion_dualcolor.exe " + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMB1_ SPIMA1_  "  + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMB2_ SPIMA2_ " + savePath + "RegDecon" + File.separator +" 1 1 1 0 0.1625 0.1625 1 0.1625 0.1625 1 -1 -1 0 1 " + "Balabalabala" + " 1 0.0001 " + iterations + " 16 C:\\DataForTest\\PSFA.tif C:\\DataForTest\\PSFB.tif 1 0");
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 					}
+
+//					IJ.runMacro("waitForUser()");
+					while (regDeconProcess!= null && regDeconProcess.isAlive()) {
+						IJ.wait(100);
+					}
+					if (regDeconProcess!= null)
+						IJ.log("rdpExit="+regDeconProcess.exitValue());
+
 					try {
 						while (!(new File(savePath + "RegDecon" + File.separator + "Color1" + File.separator + "Decon" + File.separator + "Decon_1.tif").canRead()))
 							IJ.wait(100);
