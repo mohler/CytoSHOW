@@ -1116,7 +1116,7 @@ public class DISPIM_Monitor implements PlugIn {
 			  		}
 			  		ipTest.setRoi((Roi) roiAs[pos]);
 			  		ipTest = ipTest.crop();
-			  		if (ImageStatistics.getStatistics(ipTest, Measurements.MEAN, impAs[pos].getCalibration()).mean > ipHisMode * 1.1) {
+			  		if (ImageStatistics.getStatistics(ipTest, Measurements.MEAN, impAs[pos].getCalibration()).mean > ipHisMode * 1.0) {
 			  			if (zFirstA[pos] == 0) {
 			  				zFirstA[pos] = zTest;
 			  				zLastA[pos] = zTest;
@@ -1140,7 +1140,7 @@ public class DISPIM_Monitor implements PlugIn {
 				  		}
 				  		ipTest.setRoi((Roi) roiAs[pos]);
 				  		ipTest = ipTest.crop();
-				  		if (ImageStatistics.getStatistics(ipTest, Measurements.MEAN, impAs[pos].getCalibration()).mean > ipHisMode * 1.1) {
+				  		if (ImageStatistics.getStatistics(ipTest, Measurements.MEAN, impAs[pos].getCalibration()).mean > ipHisMode * 1.0) {
 				  			if (zFirstA[pos] == 0) {
 				  				zFirstA[pos] = zTest;
 				  				zLastA[pos] = zTest;
@@ -1180,7 +1180,7 @@ public class DISPIM_Monitor implements PlugIn {
 			  		}
 			  		ipTest.setRoi((Roi) roiBs[pos]);
 			  		ipTest = ipTest.crop();
-			  		if (ImageStatistics.getStatistics(ipTest, Measurements.MEAN, impBs[pos].getCalibration()).mean > ipHisMode * 1.1) {
+			  		if (ImageStatistics.getStatistics(ipTest, Measurements.MEAN, impBs[pos].getCalibration()).mean > ipHisMode * 1.0) {
 			  			if (zFirstB[pos] == 0) {
 			  				zFirstB[pos] = zTest;
 			  				zLastB[pos] = zTest;
@@ -1204,7 +1204,7 @@ public class DISPIM_Monitor implements PlugIn {
 				  		}
 				  		ipTest.setRoi((Roi) roiBs[pos]);
 				  		ipTest = ipTest.crop();
-				  		if (ImageStatistics.getStatistics(ipTest, Measurements.MEAN, impBs[pos].getCalibration()).mean > ipHisMode * 1.1) {
+				  		if (ImageStatistics.getStatistics(ipTest, Measurements.MEAN, impBs[pos].getCalibration()).mean > ipHisMode * 1.0) {
 				  			if (zFirstB[pos] == 0) {
 				  				zFirstB[pos] = zTest;
 				  				zLastB[pos] = zTest;
