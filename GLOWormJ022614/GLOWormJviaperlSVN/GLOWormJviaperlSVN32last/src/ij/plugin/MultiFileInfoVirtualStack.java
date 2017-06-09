@@ -541,7 +541,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber);
 		
 		if (ip instanceof FloatProcessor) {
-			ip = ip.convertToShort(false);
+//			ip = ip.convertToShort(false);
 		}
 		int[] ipHis = ip.getHistogram();
   		double ipHisMode = 0.0;
