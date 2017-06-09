@@ -313,68 +313,68 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			}
 		}
 
-		if (sliceRois.size() == 0)
-			return;
-		Roi[] sliceRoisArray = new Roi[sliceRois.size()];
-		for (int sr=0;sr<sliceRoisArray.length;sr++)
-			sliceRoisArray[sr] = ((Roi)sliceRois.get(sr));
-		labelShapes = new Hashtable<Roi,ShapeRoi>();
-		for (int i=0; i<sliceRoisArray.length; i++) {  
-			String label = null;
-			Roi roi = null;
-			try {
-				roi = sliceRoisArray[i];
-				label = roi.getName();
-			} catch(Exception e) {
-				roi = null;
-			}
-			if (roi==null || !rm.getListModel().contains(roi.getName() )) 
-				continue;
-			if (showAllList!=null)
-				showAllList.add(roi);
-			if (i<200 && drawLabels && roi==imp.getRoi())
-				currentRoi = roi;
-			if (Prefs.showAllSliceOnly && (true || imp.getStackSize()>1) ) {
-				if (true || hyperstack) {
+		if (sliceRois.size() > 0) {
+			Roi[] sliceRoisArray = new Roi[sliceRois.size()];
+			for (int sr=0;sr<sliceRoisArray.length;sr++)
+				sliceRoisArray[sr] = ((Roi)sliceRois.get(sr));
+			labelShapes = new Hashtable<Roi,ShapeRoi>();
+			for (int i=0; i<sliceRoisArray.length; i++) {  
+				String label = null;
+				Roi roi = null;
+				try {
+					roi = sliceRoisArray[i];
+					label = roi.getName();
+				} catch(Exception e) {
+					roi = null;
+				}
+				if (roi==null || !rm.getListModel().contains(roi.getName() )) 
+					continue;
+				if (showAllList!=null)
+					showAllList.add(roi);
+				if (i<200 && drawLabels && roi==imp.getRoi())
+					currentRoi = roi;
+				if (Prefs.showAllSliceOnly && (true || imp.getStackSize()>1) ) {
+					if (true || hyperstack) {
 
-					int c = roi.getCPosition();
-					int z = roi.getZPosition();
-					int t = roi.getTPosition();
+						int c = roi.getCPosition();
+						int z = roi.getZPosition();
+						int t = roi.getTPosition();
 
-					if (roi.getName() != null && roi.getName().split("_").length>3) {
-						if (roi.getName().split("_")[3].contains("C"))
-							c=0;
-						if (roi.getName().split("_")[3].contains("Z"))
-							z=0;
-						if (roi.getName().split("_")[3].contains("T"))
-							t=0;
-					}
-					//IJ.log(""+c+z+t);
-					CompositeImage ci = null;
-					if (imp.isComposite()) ci = ((CompositeImage)imp);
+						if (roi.getName() != null && roi.getName().split("_").length>3) {
+							if (roi.getName().split("_")[3].contains("C"))
+								c=0;
+							if (roi.getName().split("_")[3].contains("Z"))
+								z=0;
+							if (roi.getName().split("_")[3].contains("T"))
+								t=0;
+						}
+						//IJ.log(""+c+z+t);
+						CompositeImage ci = null;
+						if (imp.isComposite()) ci = ((CompositeImage)imp);
 
-					//					IJ.log(Math.abs(z-slice) +" "+ rm.getZSustain() +"z");
-					//					IJ.log(Math.abs(t-frame) +" "+ rm.getTSustain() +"t");
-					if ((c==0||c==channel|| (ci !=null && ci.getMode() == ci.COMPOSITE)) 
-							&& (z==0||z==slice||(!roi.getName().contains(" zL") && Math.abs(z-slice)<rm.getZSustain()) /*|| Math.abs(z+(roi.getMotherImp()!=null?roi.getMotherImp().getNSlices():imp.getNSlices())-slice)<rm.getZSustain()*/ ) 
-							&& (t==0||t==frame||(!roi.getName().contains(" tL") && Math.abs(t-frame)<rm.getTSustain()) /*|| Math.abs(t+(roi.getMotherImp()!=null?roi.getMotherImp().getNFrames():imp.getNFrames())-frame)<rm.getTSustain()*/ ) ) {
-						Color origColor = roi.getStrokeColor();
-						if (origColor == null) origColor = showAllColor;
-						if ((c!=channel ||  z !=slice || t != frame) 
-								&& (c!=0) && !(z==0 && t==frame) && !(t==0 && z==slice) && !(z==0 && t==0)) 
-							roi.setStrokeColor(origColor.darker());
+						//					IJ.log(Math.abs(z-slice) +" "+ rm.getZSustain() +"z");
+						//					IJ.log(Math.abs(t-frame) +" "+ rm.getTSustain() +"t");
+						if ((c==0||c==channel|| (ci !=null && ci.getMode() == ci.COMPOSITE)) 
+								&& (z==0||z==slice||(!roi.getName().contains(" zL") && Math.abs(z-slice)<rm.getZSustain()) /*|| Math.abs(z+(roi.getMotherImp()!=null?roi.getMotherImp().getNSlices():imp.getNSlices())-slice)<rm.getZSustain()*/ ) 
+								&& (t==0||t==frame||(!roi.getName().contains(" tL") && Math.abs(t-frame)<rm.getTSustain()) /*|| Math.abs(t+(roi.getMotherImp()!=null?roi.getMotherImp().getNFrames():imp.getNFrames())-frame)<rm.getTSustain()*/ ) ) {
+							Color origColor = roi.getStrokeColor();
+							if (origColor == null) origColor = showAllColor;
+							if ((c!=channel ||  z !=slice || t != frame) 
+									&& (c!=0) && !(z==0 && t==frame) && !(t==0 && z==slice) && !(z==0 && t==0)) 
+								roi.setStrokeColor(origColor.darker());
+							drawRoi(g, roi, drawLabels?i:-1);
+							roi.setStrokeColor(origColor);
+							labelShapes.put(roi, roi instanceof Arrow?((Arrow)roi).getShapeRoi():new ShapeRoi(roi));
+							if (labelShapes.get(roi) != null) labelShapes.get(roi).setName(roi.getName());
+						}
+					} else {
+						int position = roi.getPosition();
+						if (position==0)
+							position = getSliceNumber(roi.getName());
+						if (position==0 || position==currentImage)
+							drawRoi(g, roi, -1);  //Why is this line here?
 						drawRoi(g, roi, drawLabels?i:-1);
-						roi.setStrokeColor(origColor);
-						labelShapes.put(roi, roi instanceof Arrow?((Arrow)roi).getShapeRoi():new ShapeRoi(roi));
-						if (labelShapes.get(roi) != null) labelShapes.get(roi).setName(roi.getName());
 					}
-				} else {
-					int position = roi.getPosition();
-					if (position==0)
-						position = getSliceNumber(roi.getName());
-					if (position==0 || position==currentImage)
-						drawRoi(g, roi, -1);  //Why is this line here?
-					drawRoi(g, roi, drawLabels?i:-1);
 				}
 			}
 		}
