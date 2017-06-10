@@ -492,6 +492,13 @@ public class DISPIM_Monitor implements PlugIn {
 
 					impAs[pos].setPosition(1, zDim/2, impAs[pos].getNFrames());
 					impBs[pos].setPosition(1, zDim/2, impBs[pos].getNFrames());
+					wasFrameA[pos] = impAs[pos].getFrame();
+					wasFrameB[pos] = impBs[pos].getFrame();
+					wasSliceA[pos] = impAs[pos].getSlice();
+					wasSliceB[pos] = impBs[pos].getSlice();
+					wasChannelA[pos] = impAs[pos].getChannel();
+					wasChannelB[pos] = impBs[pos].getChannel();
+
 
 					impAs[pos].show();
 					impBs[pos].show();
@@ -1291,23 +1298,29 @@ public class DISPIM_Monitor implements PlugIn {
 				new File("" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "RegB" + File.separator + "tmx").mkdirs();
 				new File("" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "Decon").mkdirs();
 			}
+			for (int posForPathSetup=0; posForPathSetup<pDim; posForPathSetup++) {
+				new File("" + savePath + "RegDecon" + File.separator + "Pos"+ posForPathSetup + File.separator +"Deconvolution1").mkdirs();
+				new File("" + savePath + "RegDecon" + File.separator + "Pos"+ posForPathSetup + File.separator +"Deconvolution2").mkdirs();
+			}
 			
 			for (int f = 1; f <= impAs[0].getNFrames(); f++) {
 				for (int pos=0; pos<pDim; pos++) {
-					new File("" + savePath + "RegDecon" + File.separator + "Pos"+ pos + File.separator +"Deconvolution1").mkdirs();
-					new File("" + savePath + "RegDecon" + File.separator + "Pos"+ pos + File.separator +"Deconvolution2").mkdirs();
 
-					impAs[pos].setPositionWithoutUpdate(impAs[pos].getChannel(), impAs[pos].getSlice(), f);
+					if (new File(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution1" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif").canRead()) {
+						IJ.log("already done: " + pos +" "+ impAs[pos].getChannel()+" "+ impAs[pos].getSlice()+" "+ f);
+					} else {
+						IJ.log("starting " + pos +" "+ impAs[pos].getChannel()+" "+ impAs[pos].getSlice()+" "+ f);
+						impAs[pos].setPositionWithoutUpdate(impAs[pos].getChannel(), impAs[pos].getSlice(), f);
 
-					if (impAs[pos].getStack() instanceof ListVirtualStack)
-						frameFileNames[f] = ((ListVirtualStack) impAs[pos].getStack())
-						.getDirectory(impAs[pos].getCurrentSlice());
-					else if (impAs[pos].getStack() instanceof FileInfoVirtualStack
-							|| impAs[pos].getStack() instanceof MultiFileInfoVirtualStack)
-						frameFileNames[f] = "t" + f;
-					else
-						frameFileNames[f] = "t" + f;
-					String timecode = "" + (new Date()).getTime();
+						if (impAs[pos].getStack() instanceof ListVirtualStack)
+							frameFileNames[f] = ((ListVirtualStack) impAs[pos].getStack())
+							.getDirectory(impAs[pos].getCurrentSlice());
+						else if (impAs[pos].getStack() instanceof FileInfoVirtualStack
+								|| impAs[pos].getStack() instanceof MultiFileInfoVirtualStack)
+							frameFileNames[f] = "t" + f;
+						else
+							frameFileNames[f] = "t" + f;
+						String timecode = "" + (new Date()).getTime();
 
 						ImageStack stackA1 = new ImageStack((int)cropWidthA[pos], (int)cropHeightA[pos]);
 						ImageStack stackA2 = new ImageStack((int)cropWidthA[pos], (int)cropHeightA[pos]);
@@ -1331,15 +1344,15 @@ public class DISPIM_Monitor implements PlugIn {
 
 							ImageProcessor ipA1 = impAs[pos].getProcessor().duplicate();
 							int[] ipHis = ipA1.getHistogram();
-					  		double ipHisMode = 0.0;
-					  		int ipHisLength = ipHis.length;
-					  		int ipHisMaxBin = 0;
-					  		for (int h=0; h<ipHisLength; h++) {
-					  			if (ipHis[h] > ipHisMaxBin) {
-					  				ipHisMaxBin = ipHis[h];
-					  				ipHisMode = (double)h;
-					  			}
-					  		}
+							double ipHisMode = 0.0;
+							int ipHisLength = ipHis.length;
+							int ipHisMaxBin = 0;
+							for (int h=0; h<ipHisLength; h++) {
+								if (ipHis[h] > ipHisMaxBin) {
+									ipHisMaxBin = ipHis[h];
+									ipHisMode = (double)h;
+								}
+							}
 							if (maxBkgd1 < ipHisMode )
 								maxBkgd1 = ipHisMode;
 							ipA1.subtract(ipHisMode * modeSubtractionFraction);
@@ -1350,20 +1363,20 @@ public class DISPIM_Monitor implements PlugIn {
 							ipA1 = ipA1r;
 
 							stackA1.addSlice(ipA1);
-							
+
 							if (wavelengths == 2) {
 								impAs[pos].setPositionWithoutUpdate(2, i, f);
 								ImageProcessor ipA2 = impAs[pos].getProcessor().duplicate();
 								ipHis = ipA2.getHistogram();
-						  		ipHisMode = 0.0;
-						  		ipHisLength = ipHis.length;
-						  		ipHisMaxBin = 0;
-						  		for (int h=0; h<ipHisLength; h++) {
-						  			if (ipHis[h] > ipHisMaxBin) {
-						  				ipHisMaxBin = ipHis[h];
-						  				ipHisMode = (double)h;
-						  			}
-						  		}
+								ipHisMode = 0.0;
+								ipHisLength = ipHis.length;
+								ipHisMaxBin = 0;
+								for (int h=0; h<ipHisLength; h++) {
+									if (ipHis[h] > ipHisMaxBin) {
+										ipHisMaxBin = ipHis[h];
+										ipHisMode = (double)h;
+									}
+								}
 
 								if (maxBkgd2 < ipHisMode )
 									maxBkgd2 = ipHisMode;
@@ -1377,7 +1390,7 @@ public class DISPIM_Monitor implements PlugIn {
 								stackA2.addSlice(ipA2);
 							}
 						}
-						
+
 						impAs[pos].getWindow().setEnabled(true);
 						ImagePlus impXA1 = new ImagePlus();
 						impXA1.setStack(stackA1);
@@ -1410,19 +1423,19 @@ public class DISPIM_Monitor implements PlugIn {
 										fMax = fVals[0];
 										angle = fVals[1];
 									}
-								Polygon pBR = pB;
+									Polygon pBR = pB;
 
 									ImageProcessor ipB1 = impBs[pos].getProcessor().duplicate();
 									int[] ipHis = ipB1.getHistogram();
-							  		double ipHisMode = 0.0;
-							  		int ipHisLength = ipHis.length;
-							  		int ipHisMaxBin = 0;
-							  		for (int h=0; h<ipHisLength; h++) {
-							  			if (ipHis[h] > ipHisMaxBin) {
-							  				ipHisMaxBin = ipHis[h];
-							  				ipHisMode = (double)h;
-							  			}
-							  		}
+									double ipHisMode = 0.0;
+									int ipHisLength = ipHis.length;
+									int ipHisMaxBin = 0;
+									for (int h=0; h<ipHisLength; h++) {
+										if (ipHis[h] > ipHisMaxBin) {
+											ipHisMaxBin = ipHis[h];
+											ipHisMode = (double)h;
+										}
+									}
 									if (maxBkgd1 < ipHisMode )
 										maxBkgd1 = ipHisMode;
 									ipB1.subtract(ipHisMode * modeSubtractionFraction);
@@ -1439,15 +1452,15 @@ public class DISPIM_Monitor implements PlugIn {
 										impBs[pos].setPositionWithoutUpdate(2, i, f);
 										ImageProcessor ipB2 = impBs[pos].getProcessor().duplicate();
 										ipHis = ipB2.getHistogram();
-								  		ipHisMode = 0.0;
-								  		ipHisLength = ipHis.length;
-								  		ipHisMaxBin = 0;
-								  		for (int h=0; h<ipHisLength; h++) {
-								  			if (ipHis[h] > ipHisMaxBin) {
-								  				ipHisMaxBin = ipHis[h];
-								  				ipHisMode = (double)h;
-								  			}
-								  		}
+										ipHisMode = 0.0;
+										ipHisLength = ipHis.length;
+										ipHisMaxBin = 0;
+										for (int h=0; h<ipHisLength; h++) {
+											if (ipHis[h] > ipHisMaxBin) {
+												ipHisMaxBin = ipHis[h];
+												ipHisMode = (double)h;
+											}
+										}
 
 										if (maxBkgd2 < ipHisMode )
 											maxBkgd2 = ipHisMode;
@@ -1475,67 +1488,78 @@ public class DISPIM_Monitor implements PlugIn {
 
 						}
 
-					
 
 
-					final String[] frameFileNamesFinal = frameFileNames;
 
-					impAs[pos].setPosition(wasChannelA[pos], wasSliceA[pos], wasFrameA[pos]);
-					impAs[pos].updateAndDraw();
-					impBs[pos].setPosition(wasChannelB[pos], wasSliceB[pos], wasFrameB[pos]);
-					impBs[pos].updateAndDraw();
+						final String[] frameFileNamesFinal = frameFileNames;
 
-					final int ff = f;
+						impAs[pos].setPosition(wasChannelA[pos], wasSliceA[pos], wasFrameA[pos]);
+						impAs[pos].updateAndDraw();
+						impBs[pos].setPosition(wasChannelB[pos], wasSliceB[pos], wasFrameB[pos]);
+						impBs[pos].updateAndDraw();
 
-					timecode = "" + (new Date()).getTime();
-					final String ftimecode = timecode;
-					
-					while (regDeconProcess!= null && regDeconProcess.isAlive()) {
-						IJ.wait(100);
-					}
-					if (regDeconProcess!= null)
-						IJ.log("rdpExit="+regDeconProcess.exitValue());
-					if (wavelengths == 1) {
-						try {
-							String cmdln = "cmd start /min /wait C:\\spimfusion_singlecolor.exe " + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMB1_ SPIMA1_ "   + savePath + "RegDecon" + File.separator +" 1 1 1 1 0.1625 0.1625 1 0.1625 0.1625 1 1 -1 0 0 " + "Balabalabala" + " 1 0.0001 " + iterations + " 16 C:\\DataForTest\\PSFA64.tif C:\\DataForTest\\PSFB64.tif 1 0";
-							IJ.log(cmdln);
-							regDeconProcess = Runtime.getRuntime().exec(cmdln);
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-					if (wavelengths == 2) {
-						try {
-							String cmdln = "cmd start /min /wait C:\\spimfusion_dualcolor.exe " + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMB1_ SPIMA1_  "  + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMB2_ SPIMA2_ " + savePath + "RegDecon" + File.separator +" 1 1 1 1 0.1625 0.1625 1 0.1625 0.1625 1 1 -1 0 0 " + "Balabalabala" + " 1 0.0001 " + iterations + " 16 C:\\DataForTest\\PSFA64.tif C:\\DataForTest\\PSFB64.tif 1 0";
-							IJ.log(cmdln);
-							regDeconProcess = Runtime.getRuntime().exec(cmdln);
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
+						final int ff = f;
 
-//					IJ.runMacro("waitForUser()");
-					while (regDeconProcess!= null && regDeconProcess.isAlive()) {
-						IJ.wait(100);
-					}
-					if (regDeconProcess!= null)
-						IJ.log("rdpExit="+regDeconProcess.exitValue());
+						timecode = "" + (new Date()).getTime();
+						final String ftimecode = timecode;
 
-					try {
-						while (!(new File(savePath + "RegDecon" + File.separator + "Color1" + File.separator + "Decon" + File.separator + "Decon_1.tif").canRead()))
+						while (regDeconProcess!= null && regDeconProcess.isAlive()) {
 							IJ.wait(100);
-						Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Color1" + File.separator + "Decon" + File.separator + "Decon_1.tif"),
-								Paths.get(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution1" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif"), StandardCopyOption.REPLACE_EXISTING);
-						if (wavelengths == 2)
-							while (!(new File(savePath + "RegDecon" + File.separator + "Color2" + File.separator + "Decon" + File.separator + "Decon_1.tif").canRead()))
+						}
+						if (regDeconProcess!= null)
+							IJ.log("rdpExit="+regDeconProcess.exitValue());
+						if (wavelengths == 1) {
+							try {
+								String cmdln = "cmd /c start /min /wait C:\\spimfusion_singlecolor.exe " + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMB1_ SPIMA1_ "   + savePath + "RegDecon" + File.separator +" 1 1 1 1 0.1625 0.1625 1 0.1625 0.1625 1 1 -1 0 0 " + "Balabalabala" + " 1 0.0001 " + iterations + " 16 C:\\DataForTest\\PSFA64.tif C:\\DataForTest\\PSFB64.tif 1 0";
+								IJ.log(cmdln);
+								regDeconProcess = Runtime.getRuntime().exec(cmdln);
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+						if (wavelengths == 2) {
+							try {
+								String cmdln = "cmd /c start /min /wait C:\\spimfusion_dualcolor.exe " + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMB1_ SPIMA1_  "  + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMB2_ SPIMA2_ " + savePath + "RegDecon" + File.separator +" 1 1 1 1 0.1625 0.1625 1 0.1625 0.1625 1 1 -1 0 0 " + "Balabalabala" + " 1 0.0001 " + iterations + " 16 C:\\DataForTest\\PSFA64.tif C:\\DataForTest\\PSFB64.tif 1 0";
+								IJ.log(cmdln);
+								regDeconProcess = Runtime.getRuntime().exec(cmdln);
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+
+						//					IJ.runMacro("waitForUser()");
+						while (regDeconProcess!= null && regDeconProcess.isAlive()) {
+							IJ.wait(100);
+						}
+						if (regDeconProcess!= null)
+							IJ.log("rdpExit="+regDeconProcess.exitValue());
+
+						try {
+							int waitCount = 0;
+							while (!(new File(savePath + "RegDecon" + File.separator + "Color1" + File.separator + "Decon" + File.separator + "Decon_1.tif").canRead()) && waitCount<100) {
 								IJ.wait(100);
-							Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Color2" + File.separator + "Decon" + File.separator + "Decon_1.tif"),
-								Paths.get(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution2" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif"), StandardCopyOption.REPLACE_EXISTING);
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
+								waitCount++;
+							}
+							if(new File(savePath + "RegDecon" + File.separator + "Color1" + File.separator + "Decon" + File.separator + "Decon_1.tif").canRead())
+								Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Color1" + File.separator + "Decon" + File.separator + "Decon_1.tif"),
+									Paths.get(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution1" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif"), StandardCopyOption.REPLACE_EXISTING);
+							if (wavelengths == 2) {
+								waitCount = 0;
+								while (!(new File(savePath + "RegDecon" + File.separator + "Color2" + File.separator + "Decon" + File.separator + "Decon_1.tif").canRead()) && waitCount<100) {
+									IJ.wait(100);
+									waitCount++;
+								}
+								if (new File(savePath + "RegDecon" + File.separator + "Color2" + File.separator + "Decon" + File.separator + "Decon_1.tif").canRead())
+									Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Color2" + File.separator + "Decon" + File.separator + "Decon_1.tif"),
+										Paths.get(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution2" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif"), StandardCopyOption.REPLACE_EXISTING);
+							}
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						IJ.log("finishing " + pos +" "+ impAs[pos].getChannel()+" "+ impAs[pos].getSlice()+" "+ f);
 					}
 				}
 			}
