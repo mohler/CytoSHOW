@@ -401,7 +401,7 @@ public class Projector implements PlugInFilter, TextListener {
 				for (loopC = firstC; loopC < lastC +1; loopC++) {
 					projImpD[loopC-firstC].flush();
 				}
-				MultiFileInfoVirtualStack nextStack = new MultiFileInfoVirtualStack(tempDir.getPath()+ File.separator , "xyzct", "",0,0,0, 1, 0, false, false);
+				MultiFileInfoVirtualStack nextStack = new MultiFileInfoVirtualStack(tempDir.getPath()+ File.separator , "xyczt", "",0,0,0, 1, 0, false, false);
 				if (buildImp == null)
 					buildImp = new ImagePlus();
 				buildImp.setOpenAsHyperStack(true);

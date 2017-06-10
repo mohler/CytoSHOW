@@ -216,8 +216,9 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 		finalFrames = 0;
 
 		finalT = lastT;
-
-		long tempTime = (new Date()).getTime();
+		long tempTime = msec;
+		if (tempTime==0) 
+			tempTime = (new Date()).getTime();
 //		String tempPath = "";
 
 		String saveRootDir = "";
