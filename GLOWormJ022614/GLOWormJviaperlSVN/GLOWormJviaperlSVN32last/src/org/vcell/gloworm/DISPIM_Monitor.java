@@ -1240,12 +1240,12 @@ public class DISPIM_Monitor implements PlugIn {
 				roiAs[pos] = impAs[pos].getRoi();
 				roiBs[pos] = impBs[pos].getRoi();
 
-				wasFrameA[pos] = impAs[pos].getFrame();
-				wasFrameB[pos] = impBs[pos].getFrame();
-				wasSliceA[pos] = impAs[pos].getSlice();
-				wasSliceB[pos] = impBs[pos].getSlice();
-				wasChannelA[pos] = impAs[pos].getChannel();
-				wasChannelB[pos] = impBs[pos].getChannel();
+//				wasFrameA[pos] = impAs[pos].getFrame();
+//				wasFrameB[pos] = impBs[pos].getFrame();
+//				wasSliceA[pos] = impAs[pos].getSlice();
+//				wasSliceB[pos] = impBs[pos].getSlice();
+//				wasChannelA[pos] = impAs[pos].getChannel();
+//				wasChannelB[pos] = impBs[pos].getChannel();
 
 				if ((new File(savePath)).canRead()) {
 					// SETUP OF WINDOWS SHOWING PRE-EXISTING DECON OUTPUTS

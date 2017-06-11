@@ -240,7 +240,8 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 			saveRootDir = (new File(saveRootDir)).getParent();
 		}
 		File tempDir = new File(saveRootDir + File.separator + saveRootPrefix +"DUP_"+imp.getTitle().replaceAll("[,. ;:]","").replace(File.separator, "_") + tempTime);
-		if (!tempDir.mkdir()) {
+		tempDir.mkdirs();
+		if (!tempDir.exists()) {
 			IJ.error("Duplication failed", "Unable to save copied stacks to" + tempDir.getPath());
 			return null;
 		}
