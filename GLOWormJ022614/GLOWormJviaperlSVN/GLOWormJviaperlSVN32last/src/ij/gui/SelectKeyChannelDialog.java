@@ -19,13 +19,13 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 	private boolean firstPaint = true;
 	private int keyChannel=1;
 	private String regDeconMethod;
-	private JSpinner subtractionFractionSpinner;
+	private JSpinner modeFractionSpinner;
 	public JSpinner getSubtractionFractionSpinner() {
-		return subtractionFractionSpinner;
+		return modeFractionSpinner;
 	}
 
 	public void setSubtractionFractionSpinner(JSpinner subtractionFractionSpinner) {
-		this.subtractionFractionSpinner = subtractionFractionSpinner;
+		this.modeFractionSpinner = subtractionFractionSpinner;
 	}
 
 	private JSpinner iterationSpinner;
@@ -111,12 +111,12 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 		}
 		add("South", panel);
 		
-		subtractionFractionSpinner = new JSpinner(new SpinnerNumberModel(1.0, -1.0, 2.0, 0.1));  
-		subtractionFractionSpinner.setToolTipText("Fraction of image Mode value to subtract");
+		modeFractionSpinner = new JSpinner(new SpinnerNumberModel(1.0, -1.0, 2.0, 0.1));  
+		modeFractionSpinner.setToolTipText("Fraction of image Mode to use for baseline");
 		iterationSpinner = new JSpinner(new SpinnerNumberModel(10, 1, 100, 1));  
 		iterationSpinner.setToolTipText("Iterations of Deconvolution");
 		optPanel = new Panel();
-		optPanel.add("Center", subtractionFractionSpinner);
+		optPanel.add("Center", modeFractionSpinner);
 		optPanel.add("East", iterationSpinner);
 		add("East", optPanel);
 
@@ -132,7 +132,7 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 			yesPressed = true;
 			keyChannel = channelChoices.getSelectedIndex()+1;
 			regDeconMethod = methodChoices.getSelectedItem();		
-			subFract = ((Double)subtractionFractionSpinner.getValue());
+			subFract = ((Double)modeFractionSpinner.getValue());
 			iterations = ((Integer)iterationSpinner.getValue());
 		}
 		closeDialog();

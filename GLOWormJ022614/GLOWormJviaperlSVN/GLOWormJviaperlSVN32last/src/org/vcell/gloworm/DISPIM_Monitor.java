@@ -165,7 +165,7 @@ public class DISPIM_Monitor implements PlugIn {
 	private boolean uploadPending;
 	private boolean uploadRunning;
 	private int iterations;
-	private Double modeSubtractionFraction;
+	private Double sliceTresholdVsMode;
 	private Process regDeconProcess;
 	
 
@@ -972,7 +972,7 @@ public class DISPIM_Monitor implements PlugIn {
 			doGPUdecon = d.getRegDeconMethod() == "MinGuo GPU method";
 			if (doGPUdecon) {
 				iterations = d.getIterations();
-				modeSubtractionFraction = d.getSubFract();
+				sliceTresholdVsMode = d.getSubFract();
 			}
 			keyChannel = d.getKeyChannel();
 			slaveChannel = keyChannel == 1 ? 2 : 1;
@@ -1123,7 +1123,8 @@ public class DISPIM_Monitor implements PlugIn {
 			  		}
 			  		ipTest.setRoi((Roi) roiAs[pos]);
 			  		ipTest = ipTest.crop();
-			  		if (ImageStatistics.getStatistics(ipTest, Measurements.MEAN, impAs[pos].getCalibration()).mean > ipHisMode * 1.0) {
+			  		double testmean = ipTest.getStatistics().mean;
+			  		if (ipTest.getStatistics().mean > ipHisMode) {
 			  			if (zFirstA[pos] == 0) {
 			  				zFirstA[pos] = zTest;
 			  				zLastA[pos] = zTest;
@@ -1147,7 +1148,7 @@ public class DISPIM_Monitor implements PlugIn {
 				  		}
 				  		ipTest.setRoi((Roi) roiAs[pos]);
 				  		ipTest = ipTest.crop();
-				  		if (ImageStatistics.getStatistics(ipTest, Measurements.MEAN, impAs[pos].getCalibration()).mean > ipHisMode * 1.0) {
+				  		if (ipTest.getStatistics().mean > ipHisMode) {
 				  			if (zFirstA[pos] == 0) {
 				  				zFirstA[pos] = zTest;
 				  				zLastA[pos] = zTest;
@@ -1187,7 +1188,7 @@ public class DISPIM_Monitor implements PlugIn {
 			  		}
 			  		ipTest.setRoi((Roi) roiBs[pos]);
 			  		ipTest = ipTest.crop();
-			  		if (ImageStatistics.getStatistics(ipTest, Measurements.MEAN, impBs[pos].getCalibration()).mean > ipHisMode * 1.0) {
+			  		if (ipTest.getStatistics().mean > ipHisMode) {
 			  			if (zFirstB[pos] == 0) {
 			  				zFirstB[pos] = zTest;
 			  				zLastB[pos] = zTest;
@@ -1211,7 +1212,8 @@ public class DISPIM_Monitor implements PlugIn {
 				  		}
 				  		ipTest.setRoi((Roi) roiBs[pos]);
 				  		ipTest = ipTest.crop();
-				  		if (ImageStatistics.getStatistics(ipTest, Measurements.MEAN, impBs[pos].getCalibration()).mean > ipHisMode * 1.0) {
+				  		
+				  		if (ipTest.getStatistics().mean > ipHisMode) {
 				  			if (zFirstB[pos] == 0) {
 				  				zFirstB[pos] = zTest;
 				  				zLastB[pos] = zTest;
@@ -1355,8 +1357,9 @@ public class DISPIM_Monitor implements PlugIn {
 							}
 							if (maxBkgd1 < ipHisMode )
 								maxBkgd1 = ipHisMode;
-							ipA1.subtract(ipHisMode * modeSubtractionFraction);
+							ipA1.subtract(ipHisMode * sliceTresholdVsMode);
 							ipA1.setRoi((Roi) roiAs[pos]);
+							ipA1.fillOutside((Roi) roiAs[pos]);
 							ipA1 = ipA1.crop();
 							ImageProcessor ipA1r = ipA1.createProcessor((int)cropWidthA[pos], (int)cropHeightA[pos]);
 							ipA1r.insert(ipA1, 0, 0);
@@ -1380,8 +1383,9 @@ public class DISPIM_Monitor implements PlugIn {
 
 								if (maxBkgd2 < ipHisMode )
 									maxBkgd2 = ipHisMode;
-								ipA2.subtract(ipHisMode * modeSubtractionFraction);
+								ipA2.subtract(ipHisMode * sliceTresholdVsMode);
 								ipA2.setRoi((Roi) roiAs[pos]);
+								ipA2.fillOutside((Roi) roiAs[pos]);
 								ipA2 = ipA2.crop();
 								ImageProcessor ipA2r = ipA2.createProcessor(
 										(int)cropWidthA[pos], (int)cropHeightA[pos]);
@@ -1438,8 +1442,9 @@ public class DISPIM_Monitor implements PlugIn {
 									}
 									if (maxBkgd1 < ipHisMode )
 										maxBkgd1 = ipHisMode;
-									ipB1.subtract(ipHisMode * modeSubtractionFraction);
+									ipB1.subtract(ipHisMode * sliceTresholdVsMode);
 									ipB1.setRoi((Roi) roiBs[pos]);
+									ipB1.fillOutside((Roi) roiBs[pos]);
 									ipB1 = ipB1.crop();
 
 									ImageProcessor ipB1r = ipB1.createProcessor((int)cropWidthB[pos],
@@ -1464,8 +1469,9 @@ public class DISPIM_Monitor implements PlugIn {
 
 										if (maxBkgd2 < ipHisMode )
 											maxBkgd2 = ipHisMode;
-										ipB2.subtract(ipHisMode * modeSubtractionFraction);
+										ipB2.subtract(ipHisMode * sliceTresholdVsMode);
 										ipB2.setRoi((Roi) roiBs[pos]);
+										ipB2.fillOutside((Roi) roiBs[pos]);
 										ipB2 = ipB2.crop();
 										ImageProcessor ipB2r = ipB2.createProcessor(
 												(int)cropWidthB[pos], (int)cropHeightB[pos]);
@@ -1510,7 +1516,7 @@ public class DISPIM_Monitor implements PlugIn {
 							IJ.log("rdpExit="+regDeconProcess.exitValue());
 						if (wavelengths == 1) {
 							try {
-								String cmdln = "cmd /c start /min /wait C:\\spimfusion_singlecolor.exe " + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMB1_ SPIMA1_ "   + savePath + "RegDecon" + File.separator +" 1 1 1 1 0.1625 0.1625 1 0.1625 0.1625 1 1 -1 0 0 " + "Balabalabala" + " 1 0.0001 " + iterations + " 16 C:\\DataForTest\\PSFA64.tif C:\\DataForTest\\PSFB64.tif 1 0";
+								String cmdln = "cmd /c start /min /wait C:\\spimfusion_singlecolor.exe " + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMB1_ SPIMA1_ "   + savePath + "RegDecon" + File.separator +" 1 1 1 1 0.1625 0.1625 1 0.1625 0.1625 1 1 -1 0 0 " + savePath + "RegDecon" + File.separator + "RegB" +File.separator+"tmx" +File.separator+"Matrix_1.tmx" + " 1 0.0001 " + iterations + " 16 C:\\DataForTest\\PSFA64.tif C:\\DataForTest\\PSFB64.tif 1 0";
 								IJ.log(cmdln);
 								regDeconProcess = Runtime.getRuntime().exec(cmdln);
 							} catch (IOException e) {
@@ -1520,7 +1526,7 @@ public class DISPIM_Monitor implements PlugIn {
 						}
 						if (wavelengths == 2) {
 							try {
-								String cmdln = "cmd /c start /min /wait C:\\spimfusion_dualcolor.exe " + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMB1_ SPIMA1_  "  + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMB2_ SPIMA2_ " + savePath + "RegDecon" + File.separator +" 1 1 1 1 0.1625 0.1625 1 0.1625 0.1625 1 1 -1 0 0 " + "Balabalabala" + " 1 0.0001 " + iterations + " 16 C:\\DataForTest\\PSFA64.tif C:\\DataForTest\\PSFB64.tif 1 0";
+								String cmdln = "cmd /c start /min /wait C:\\spimfusion_dualcolor.exe " + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMB1_ SPIMA1_  "  + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMB2_ SPIMA2_ " + savePath + "RegDecon" + File.separator +" 1 1 1 1 0.1625 0.1625 1 0.1625 0.1625 1 1 -1 0 1 " + savePath + "RegDecon" + File.separator + "Color1" +File.separator + "RegB" +File.separator+"tmx" +File.separator+"Matrix_1.tmx" + " 1 0.0001 " + iterations + " 16 C:\\DataForTest\\PSFA64.tif C:\\DataForTest\\PSFB64.tif 1 0";
 								IJ.log(cmdln);
 								regDeconProcess = Runtime.getRuntime().exec(cmdln);
 							} catch (IOException e) {
