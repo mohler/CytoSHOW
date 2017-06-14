@@ -121,7 +121,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					String[] subFileList = subFile.list();
 					for (String subFileListElement:subFileList)
 						if (!cumulativeSubFileArrayList.contains(dir+fileName+File.separator+subFileListElement))
-							if ((pos ==-1 ||subFileListElement.toLowerCase().contains("_pos"+pos))
+							if ((pos ==-1 ||subFileListElement.toLowerCase().contains("_pos"+pos+"."))
 									&&  subFileListElement.toLowerCase().endsWith("tif"))
 								cumulativeSubFileArrayList.add(dir+fileName+File.separator+subFileListElement);
 				}
