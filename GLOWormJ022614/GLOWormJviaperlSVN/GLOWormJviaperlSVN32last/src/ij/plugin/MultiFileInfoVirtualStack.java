@@ -127,185 +127,189 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				}
 			}
 		}
-		cumulativeTiffFileArray = new String[cumulativeSubFileArrayList.size()];
-		int highT = 0;
-		for (int s=0; s<cumulativeTiffFileArray.length; s++) {
-			cumulativeTiffFileArray[s] = (String) cumulativeSubFileArrayList.get(s);
-			String[] subFilePathChunks = cumulativeTiffFileArray[s].split(File.separator.replace("\\", "\\\\"));
-			String subFileName = subFilePathChunks[subFilePathChunks.length-1];
-			if (subFileName.matches(".*_t\\d+.*\\.tif")) {
-				int tValue = Integer.parseInt(subFileName.replaceAll(".*_t(\\d+).*\\.tif", "$1"));
-				if (tValue > highT)
-					highT = tValue;
-			}
-			if (highT > 0)
-				dimOrder = "xyztc";
-		}
-		cumulativeTiffFileArray = StringSorter.sortNumerically(cumulativeTiffFileArray);
+		if (cumulativeSubFileArrayList.size() != 0) {
 
-		if(keyString.toLowerCase().contains("deconvolution")) {
-			monitoringDecon = true;
-			for (int c = 1; c <= channelDirectories;c++){
-				for (int t =1;t<=highT;t++) {
-					bigSubFileArrayList.add("channel "+c+"-frame "+ t +" missing");
+			cumulativeTiffFileArray = new String[cumulativeSubFileArrayList.size()];
+			int highT = 0;
+			for (int s=0; s<cumulativeTiffFileArray.length; s++) {
+				cumulativeTiffFileArray[s] = (String) cumulativeSubFileArrayList.get(s);
+				String[] subFilePathChunks = cumulativeTiffFileArray[s].split(File.separator.replace("\\", "\\\\"));
+				String subFileName = subFilePathChunks[subFilePathChunks.length-1];
+				if (subFileName.matches(".*_t\\d+.*\\.tif")) {
+					int tValue = Integer.parseInt(subFileName.replaceAll(".*_t(\\d+).*\\.tif", "$1"));
+					if (tValue > highT)
+						highT = tValue;
 				}
+				if (highT > 0)
+					dimOrder = "xyztc";
 			}
+			cumulativeTiffFileArray = StringSorter.sortNumerically(cumulativeTiffFileArray);
 
-			for (int c = 1; c <= channelDirectories;c++){
-				for (int q=0; q<cumulativeTiffFileArray.length; q++)  {
-					String cumTiffListElement = cumulativeTiffFileArray[q];
-					if (cumTiffListElement.contains("Deconvolution"+c) && cumTiffListElement.toLowerCase().endsWith(".tif")) {
-						cumTiffListElement = cumTiffListElement.replace("\\","\\\\");
-						String[] cumTiffListElementPathChunks = cumTiffListElement.split(File.separator.replace("\\", "\\\\"));
-						String cumTiffListElementName = cumTiffListElementPathChunks[cumTiffListElementPathChunks.length-1];
-						int tValue = Integer.parseInt(cumTiffListElementName.replaceAll(".*_t(\\d+).*\\.tif", "$1"));
-						bigSubFileArrayList.set(tValue-1+highT*(c-1), cumTiffListElement);
-
-					} 
-				}
-			}
-		} else if (cumulativeTiffFileArray.length >0){ 
-			for (String cumulativeTiffFileArrayElement:cumulativeTiffFileArray)
-				bigSubFileArrayList.add(cumulativeTiffFileArrayElement);
-		} else { 
-
-			for (String fileName:dirFileList) {
-				File subFile = new File(dir+fileName);
-				boolean noKeyString = keyString == "";
-				boolean subFileIsDir = subFile.isDirectory();
-				if (fileName.contains("DS_Store")) {
-					IJ.log(".");
-
-				} else if ((noKeyString || subFile.getName().matches(".*"+keyString+".*")) && !subFileIsDir) {
-					IJ.log(".");
-
-				} else if (noKeyString || (subFile.getName().matches(".*"+keyString+".*") && !subFile.getName().startsWith("Proj_"))){
-					String[] subFileList = subFile.list();
-					subFileList = StringSorter.sortNumerically(subFileList);
-					ArrayList<String> subFileTiffArrayList = new ArrayList<String>();
-
-
-					for (String subFilePath:subFileList)
-						subFileTiffArrayList.add(dir+fileName+File.separator+subFilePath);
-
-
-					bigSubFileArrayList.addAll(subFileTiffArrayList);
-				}
-			}
-		}
-		
-		String[] goDirFileList = {""};
-
-		if (allDirectories) {
-//			dimOrder = "xyztc";
-			dir = "";
-
-			goDirFileList = new String[bigSubFileArrayList.size()];
-			for (int s=0; s<goDirFileList.length; s++) {
-				goDirFileList [s] = (String) bigSubFileArrayList.get(s);
-			}
-
-		} else {
-//			dimOrder = "xyczt";
-			dir = "";
-			channelDirectories = 1;
-			largestDirectoryTiffCount = tiffCount;
-			goDirFileList = cumulativeTiffFileArray;
-		}
-		if (dir.length() > 0 && !dir.endsWith(File.separator))
-			dir = dir + File.separator;
-		
-
-		if (goDirFileList != null) {
-			for (String fileName:goDirFileList){
-				if ((new File(fileName)).exists()) {
-
-					TiffDecoder td = new TiffDecoder(dir, fileName);
-					if (IJ.debugMode) td.enableDebugging();
-					IJ.showStatus("Decoding TIFF header...");
-					try {dummyInfoArray = td.getTiffInfo(0);}
-					catch (IOException e) {
-						String msg = e.getMessage();
-						if (msg==null||msg.equals("")) msg = ""+e;
-						IJ.error("TiffDecoder", msg);
-						return;
+			if(keyString.toLowerCase().contains("deconvolution")) {
+				monitoringDecon = true;
+				for (int c = 1; c <= channelDirectories;c++){
+					for (int t =1;t<=highT;t++) {
+						bigSubFileArrayList.add("channel "+c+"-frame "+ t +" missing");
 					}
-//					int prevOffset = 0;
-//					for (FileInfo fi:dummyInfoArray) {
-//						IJ.log(" "+fi.offset+" "+(fi.offset-prevOffset)+" "+fi.longOffset+" "+fi.gapBetweenImages);
-//						prevOffset = fi.offset;
-//					}
-					if (dummyInfoArray==null || dummyInfoArray.length==0) {
-						continue;
-					} else {
-						break;
+				}
+
+				for (int c = 1; c <= channelDirectories;c++){
+					for (int q=0; q<cumulativeTiffFileArray.length; q++)  {
+						String cumTiffListElement = cumulativeTiffFileArray[q];
+						if (cumTiffListElement.contains("Deconvolution"+c) && cumTiffListElement.toLowerCase().endsWith(".tif")) {
+							cumTiffListElement = cumTiffListElement.replace("\\","\\\\");
+							String[] cumTiffListElementPathChunks = cumTiffListElement.split(File.separator.replace("\\", "\\\\"));
+							String cumTiffListElementName = cumTiffListElementPathChunks[cumTiffListElementPathChunks.length-1];
+							int tValue = Integer.parseInt(cumTiffListElementName.replaceAll(".*_t(\\d+).*\\.tif", "$1"));
+							bigSubFileArrayList.set(tValue-1+highT*(c-1), cumTiffListElement);
+
+						} 
+					}
+				}
+			} else if (cumulativeTiffFileArray.length >0){ 
+				for (String cumulativeTiffFileArrayElement:cumulativeTiffFileArray)
+					bigSubFileArrayList.add(cumulativeTiffFileArrayElement);
+			} else { 
+
+				for (String fileName:dirFileList) {
+					File subFile = new File(dir+fileName);
+					boolean noKeyString = keyString == "";
+					boolean subFileIsDir = subFile.isDirectory();
+					if (fileName.contains("DS_Store")) {
+						IJ.log(".");
+
+					} else if ((noKeyString || subFile.getName().matches(".*"+keyString+".*")) && !subFileIsDir) {
+						IJ.log(".");
+
+					} else if (noKeyString || (subFile.getName().matches(".*"+keyString+".*") && !subFile.getName().startsWith("Proj_"))){
+						String[] subFileList = subFile.list();
+						subFileList = StringSorter.sortNumerically(subFileList);
+						ArrayList<String> subFileTiffArrayList = new ArrayList<String>();
+
+
+						for (String subFilePath:subFileList)
+							subFileTiffArrayList.add(dir+fileName+File.separator+subFilePath);
+
+
+						bigSubFileArrayList.addAll(subFileTiffArrayList);
 					}
 				}
 			}
 
-		}	
-		
-		if (channelDirectories >0) {
-			
-			for (String fileName:goDirFileList){
-				if ((new File(dir + fileName)).canRead() && fileName.toLowerCase().endsWith(".tif")) {
-					if (dummyInfoArray == null) {
+			String[] goDirFileList = {""};
+
+			if (allDirectories) {
+				//			dimOrder = "xyztc";
+				dir = "";
+
+				goDirFileList = new String[bigSubFileArrayList.size()];
+				for (int s=0; s<goDirFileList.length; s++) {
+					goDirFileList [s] = (String) bigSubFileArrayList.get(s);
+				}
+
+			} else {
+				//			dimOrder = "xyczt";
+				dir = "";
+				channelDirectories = 1;
+				largestDirectoryTiffCount = tiffCount;
+				goDirFileList = cumulativeTiffFileArray;
+			}
+			if (dir.length() > 0 && !dir.endsWith(File.separator))
+				dir = dir + File.separator;
+
+
+			if (goDirFileList != null) {
+				for (String fileName:goDirFileList){
+					if ((new File(fileName)).exists()) {
+
 						TiffDecoder td = new TiffDecoder(dir, fileName);
 						if (IJ.debugMode) td.enableDebugging();
 						IJ.showStatus("Decoding TIFF header...");
-						try {infoCollectorArrayList.add(td.getTiffInfo(0));}
+						try {dummyInfoArray = td.getTiffInfo(0);}
 						catch (IOException e) {
 							String msg = e.getMessage();
 							if (msg==null||msg.equals("")) msg = ""+e;
 							IJ.error("TiffDecoder", msg);
 							return;
 						}
-					} else {
-						TiffDecoder td = new TiffDecoder(dir, fileName);
-						if (IJ.debugMode) td.enableDebugging();
-						IJ.showStatus("Decoding  TIFF image headers..."+fileName);
-//						long[] tiOffsetsArray = new long[dummyInfoArray.length];
-//						try {
-//							tiOffsetsArray = td.getTiffImageOffsets(0);
-//						} catch (IOException e) {
-//							// TODO Auto-generated catch block
-//							e.printStackTrace();
-//						}
+						//					int prevOffset = 0;
+						//					for (FileInfo fi:dummyInfoArray) {
+						//						IJ.log(" "+fi.offset+" "+(fi.offset-prevOffset)+" "+fi.longOffset+" "+fi.gapBetweenImages);
+						//						prevOffset = fi.offset;
+						//					}
+						if (dummyInfoArray==null || dummyInfoArray.length==0) {
+							continue;
+						} else {
+							break;
+						}
+					}
+				}
+
+			}	
+
+			if (channelDirectories >0) {
+
+				for (String fileName:goDirFileList){
+					if ((new File(dir + fileName)).canRead() && fileName.toLowerCase().endsWith(".tif")) {
+						if (dummyInfoArray == null) {
+							TiffDecoder td = new TiffDecoder(dir, fileName);
+							if (IJ.debugMode) td.enableDebugging();
+							IJ.showStatus("Decoding TIFF header...");
+							try {infoCollectorArrayList.add(td.getTiffInfo(0));}
+							catch (IOException e) {
+								String msg = e.getMessage();
+								if (msg==null||msg.equals("")) msg = ""+e;
+								IJ.error("TiffDecoder", msg);
+								return;
+							}
+						} else {
+							TiffDecoder td = new TiffDecoder(dir, fileName);
+							if (IJ.debugMode) td.enableDebugging();
+							IJ.showStatus("Decoding  TIFF image headers..."+fileName);
+							//						long[] tiOffsetsArray = new long[dummyInfoArray.length];
+							//						try {
+							//							tiOffsetsArray = td.getTiffImageOffsets(0);
+							//						} catch (IOException e) {
+							//							// TODO Auto-generated catch block
+							//							e.printStackTrace();
+							//						}
 							infoCollectorArrayList.add(new FileInfo[dummyInfoArray.length]);
 							for (int si=0; si<infoCollectorArrayList.get(infoCollectorArrayList.size()-1).length; si++) {
 								infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[si] = (FileInfo) dummyInfoArray[si].clone();
 								infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[si].fileName = fileName;
-//								infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[si].longOffset = tiOffsetsArray[si];
-//								infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[si].offset = (int)tiOffsetsArray[si];
+								//								infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[si].longOffset = tiOffsetsArray[si];
+								//								infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[si].offset = (int)tiOffsetsArray[si];
 							}
-						
-					}
-					if (infoCollectorArrayList==null || infoCollectorArrayList.size()==0) {
-						continue;
-					}
-					fivStacks.add(new FileInfoVirtualStack());
-					fivStacks.get(fivStacks.size()-1).infoArray = infoCollectorArrayList.get(infoCollectorArrayList.size()-1);
-					fivStacks.get(fivStacks.size()-1).setupStack();
-				} else if (fileName.matches(".*channel.*-frame.* missing")) {
-					fivStacks.add(new FileInfoVirtualStack(new FileInfo(), false));
-					for (FileInfo sliceInfo:fivStacks.get(fivStacks.size()-1).infoArray)
-						sliceInfo.fileName = fileName;
-					fivStacks.get(fivStacks.size()-1).setupStack();
-				}
-			}
-			if (fivStacks.size() > 0) {
-				ArrayList<FileInfo> infoArrayList = new ArrayList<FileInfo>();
-				for (FileInfo[] fia:infoCollectorArrayList) {
-					for (FileInfo fi:fia) {
-						infoArrayList.add(fi);
+
+						}
+						if (infoCollectorArrayList==null || infoCollectorArrayList.size()==0) {
+							continue;
+						}
+						fivStacks.add(new FileInfoVirtualStack());
+						fivStacks.get(fivStacks.size()-1).infoArray = infoCollectorArrayList.get(infoCollectorArrayList.size()-1);
+						fivStacks.get(fivStacks.size()-1).setupStack();
+					} else if (fileName.matches(".*channel.*-frame.* missing")) {
+						fivStacks.add(new FileInfoVirtualStack(new FileInfo(), false));
+						for (FileInfo sliceInfo:fivStacks.get(fivStacks.size()-1).infoArray)
+							sliceInfo.fileName = fileName;
+						fivStacks.get(fivStacks.size()-1).setupStack();
 					}
 				}
-				infoArray = new FileInfo[infoArrayList.size()];
-				for (int f=0;f<infoArray.length;f++) {;
+				if (fivStacks.size() > 0) {
+					ArrayList<FileInfo> infoArrayList = new ArrayList<FileInfo>();
+					for (FileInfo[] fia:infoCollectorArrayList) {
+						for (FileInfo fi:fia) {
+							infoArrayList.add(fi);
+						}
+					}
+					infoArray = new FileInfo[infoArrayList.size()];
+					for (int f=0;f<infoArray.length;f++) {;
 					infoArray[f] = (FileInfo) infoArrayList.get(f);
+					}
+					open(show);
 				}
-				open(show);
 			}
+
 		}
 	}
 

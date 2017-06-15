@@ -40,6 +40,16 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 	}
 
 	private int iterations;
+	private Choice matrixPriming;
+	private String matPrimMethod;
+
+	public String getMatPrimMethod() {
+		return matPrimMethod;
+	}
+
+	public void setMatPrimMethod(String matPrimMethod) {
+		this.matPrimMethod = matPrimMethod;
+	}
 
 	public int getIterations() {
 		return iterations;
@@ -75,9 +85,13 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 		methodChoices = new Choice();
 		methodChoices.add("MinGuo GPU method");
 		methodChoices.add("mipav CPU method");
-
+		matrixPriming = new Choice();
+		matrixPriming.add("Fresh registration for every volume");
+		matrixPriming.add("Prime registration with previous matrix");
+		
 		panel.add(channelChoices);
 		panel.add(methodChoices);
+		panel.add(matrixPriming);
 		add("North", panel);
 		
 		panel = new Panel();
@@ -93,6 +107,7 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 		}
 		channelChoices.addItemListener(this);
 		methodChoices.addItemListener(this);
+		matrixPriming.addItemListener(this);
 		yesB.addActionListener(this);
 		noB.addActionListener(this);
 		cancelB.addActionListener(this);
@@ -131,7 +146,8 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 		else if (e.getSource()==yesB) {
 			yesPressed = true;
 			keyChannel = channelChoices.getSelectedIndex()+1;
-			regDeconMethod = methodChoices.getSelectedItem();		
+			regDeconMethod = methodChoices.getSelectedItem();	
+			matPrimMethod = matrixPriming.getSelectedItem();
 			subFract = ((Double)modeFractionSpinner.getValue());
 			iterations = ((Integer)iterationSpinner.getValue());
 		}

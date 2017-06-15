@@ -2800,5 +2800,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		rotation = i;
 	}
 
-    
+    public boolean hasNullStack() {
+    	return (stack == null);
+    }
 }

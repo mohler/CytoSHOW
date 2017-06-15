@@ -167,6 +167,7 @@ public class DISPIM_Monitor implements PlugIn {
 	private int iterations;
 	private Double sliceTresholdVsMode;
 	private Process regDeconProcess;
+	private boolean doRegPriming;
 	
 
 	
@@ -451,6 +452,14 @@ public class DISPIM_Monitor implements PlugIn {
 							dirOrOMETiff, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
 							true, false);
 
+					if (stackAs[pos].getSize() == 0) {
+						impAs[pos].flush();
+						continue;
+					}
+					if (stackBs[pos].getSize() == 0) {
+						impBs[pos].flush();
+						continue;
+					}
 					impAs[pos].setStack(stackAs[pos]);
 					Calibration calA = impAs[pos].getCalibration();
 					calA.pixelWidth = vWidth;
@@ -970,6 +979,7 @@ public class DISPIM_Monitor implements PlugIn {
 		} else if (d.yesPressed()) {
 			doMipavDecon = d.getRegDeconMethod() == "mipav CPU method";
 			doGPUdecon = d.getRegDeconMethod() == "MinGuo GPU method";
+			doRegPriming = d.getMatPrimMethod() == "Prime registration with previous matrix";
 			if (doGPUdecon) {
 				iterations = d.getIterations();
 				sliceTresholdVsMode = d.getSubFract();
@@ -986,8 +996,10 @@ public class DISPIM_Monitor implements PlugIn {
 
 			for (int pos=0; pos<pDim; pos++) {
 
-				//				impA = impAs[pos];
-				//				impB = impBs[pos];
+				if (impAs[pos].hasNullStack())
+					continue;
+				if (impBs[pos].hasNullStack())
+					continue;
 
 				roiAs[pos] = impAs[pos].getRoi();
 				roiBs[pos] = impBs[pos].getRoi();
@@ -1085,8 +1097,11 @@ public class DISPIM_Monitor implements PlugIn {
 
 			for (int pos=0; pos<pDim; pos++) {
 
-				//					impA = impAs[pos];
-				//					impB = impBs[pos];
+				if (impAs[pos].hasNullStack())
+					continue;
+				if (impBs[pos].hasNullStack())
+					continue;
+
 
 				roiAs[pos] = impAs[pos].getRoi();
 				roiBs[pos] = impBs[pos].getRoi();
@@ -1239,6 +1254,11 @@ public class DISPIM_Monitor implements PlugIn {
 				//				impA = impAs[pos];
 				//				impB = impBs[pos];
 
+				if (impAs[pos].hasNullStack())
+					continue;
+				if (impBs[pos].hasNullStack())
+					continue;
+
 				roiAs[pos] = impAs[pos].getRoi();
 				roiBs[pos] = impBs[pos].getRoi();
 
@@ -1306,12 +1326,14 @@ public class DISPIM_Monitor implements PlugIn {
 				new File("" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "RegA" + File.separator + "tmx").mkdirs();
 				new File("" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "RegB" + File.separator + "tmx").mkdirs();
 				new File("" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "Decon").mkdirs();
-				try {
-					Files.copy(Paths.get("C:\\DataForTest\\Matrix_0.tmx"), Paths.get("" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "RegA" + File.separator + "tmx" + File.separator + "Matrix_1.tmx"));
-					Files.copy(Paths.get("C:\\DataForTest\\Matrix_0.tmx"), Paths.get("" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "RegB" + File.separator + "tmx" + File.separator + "Matrix_1.tmx"));
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
+				if (doRegPriming){
+					try {
+						Files.copy(Paths.get("C:\\DataForTest\\Matrix_0.tmx"), Paths.get("" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "RegA" + File.separator + "tmx" + File.separator + "Matrix_1.tmx"));
+						Files.copy(Paths.get("C:\\DataForTest\\Matrix_0.tmx"), Paths.get("" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "RegB" + File.separator + "tmx" + File.separator + "Matrix_1.tmx"));
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 				}
 			}
 			for (int posForPathSetup=0; posForPathSetup<pDim; posForPathSetup++) {
@@ -1321,6 +1343,11 @@ public class DISPIM_Monitor implements PlugIn {
 			
 			for (int f = 1; f <= impAs[0].getNFrames(); f++) {
 				for (int pos=0; pos<pDim; pos++) {
+
+					if (impAs[pos].hasNullStack())
+						continue;
+					if (impBs[pos].hasNullStack())
+						continue;
 
 					if (new File(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution1" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif").canRead()) {
 						IJ.log("already done: " + pos +" "+ impAs[pos].getChannel()+" "+ impAs[pos].getSlice()+" "+ f);
@@ -1530,7 +1557,7 @@ public class DISPIM_Monitor implements PlugIn {
 							IJ.log("rdpExit="+regDeconProcess.exitValue());
 						if (wavelengths == 1) {
 							try {
-								String cmdln = "cmd /c start /min /wait C:\\spimfusion_singlecolor.exe " + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMB1_ SPIMA1_ "   + savePath + "RegDecon" + File.separator +" 1 1 1 1 0.1625 0.1625 1 0.1625 0.1625 1 1 -1 0 0 " + savePath + "RegDecon" + File.separator + "RegB" +File.separator+"tmx" +File.separator+"Matrix_1.tmx" + " 1 0.0001 " + iterations + " 16 C:\\DataForTest\\PSFA64.tif C:\\DataForTest\\PSFB64.tif 1 0";
+								String cmdln = "cmd /c start /min /wait C:\\spimfusion_singlecolor.exe " + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMB1_ SPIMA1_ "   + savePath + "RegDecon" + File.separator +" 1 1 1 1 0.1625 0.1625 1 0.1625 0.1625 1 1 -1 0 "+ (doRegPriming?"1 ":"0 ")+ savePath + "RegDecon" + File.separator + "RegB" +File.separator+"tmx" +File.separator+"Matrix_1.tmx" + " 1 0.0001 " + iterations + " 16 C:\\DataForTest\\PSFA64.tif C:\\DataForTest\\PSFB64.tif 1 0";
 								IJ.log(cmdln);
 								regDeconProcess = Runtime.getRuntime().exec(cmdln);
 							} catch (IOException e) {
@@ -1540,7 +1567,7 @@ public class DISPIM_Monitor implements PlugIn {
 						}
 						if (wavelengths == 2) {
 							try {
-								String cmdln = "cmd /c start /min /wait C:\\spimfusion_dualcolor.exe " + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMB1_ SPIMA1_  "  + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMB2_ SPIMA2_ " + savePath + "RegDecon" + File.separator +" 1 1 1 1 0.1625 0.1625 1 0.1625 0.1625 1 1 -1 0 1 " + savePath + "RegDecon" + File.separator + "Color1" +File.separator + "RegB" +File.separator+"tmx" +File.separator+"Matrix_1.tmx" + " 1 0.0001 " + iterations + " 16 C:\\DataForTest\\PSFA64.tif C:\\DataForTest\\PSFB64.tif 1 0";
+								String cmdln = "cmd /c start /min /wait C:\\spimfusion_dualcolor.exe " + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMB1_ SPIMA1_  "  + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMB2_ SPIMA2_ " + savePath + "RegDecon" + File.separator +" 1 1 1 1 0.1625 0.1625 1 0.1625 0.1625 1 1 -1 0 "+ (doRegPriming?"1 ":"0 ")+ savePath + "RegDecon" + File.separator + "Color1" +File.separator + "RegB" +File.separator+"tmx" +File.separator+"Matrix_1.tmx" + " 1 0.0001 " + iterations + " 16 C:\\DataForTest\\PSFA64.tif C:\\DataForTest\\PSFB64.tif 1 0";
 								IJ.log(cmdln);
 								regDeconProcess = Runtime.getRuntime().exec(cmdln);
 							} catch (IOException e) {
@@ -1591,6 +1618,12 @@ public class DISPIM_Monitor implements PlugIn {
 
 			for (int f = 1; f <= impAs[0].getNFrames(); f++) {
 				for (int pos=0; pos<pDim; pos++) {
+
+					if (impAs[pos].hasNullStack())
+						continue;
+					if (impBs[pos].hasNullStack())
+						continue;
+
 
 					impAs[pos].setPositionWithoutUpdate(impAs[pos].getChannel(),
 							impAs[pos].getSlice(), f);
@@ -2188,6 +2221,11 @@ public class DISPIM_Monitor implements PlugIn {
 						MultiFileInfoVirtualStack[] stackBs = new MultiFileInfoVirtualStack[pDim];
 
 						for (int pos=0; pos<pDim; pos++) {
+							if (impAs[pos].hasNullStack())
+								continue;
+							if (impBs[pos].hasNullStack())
+								continue;
+
 
 							win = impAs[pos].getWindow();
 							double zoomA = win.getCanvas().getMagnification();
@@ -2445,6 +2483,11 @@ public class DISPIM_Monitor implements PlugIn {
 						}
 
 						for (int pos=0; pos<pDim; pos++) {
+							if (impAs[pos].hasNullStack())
+								continue;
+							if (impBs[pos].hasNullStack())
+								continue;
+
 
 							win = impAs[pos].getWindow();
 							int cA = impAs[pos].getChannel();
@@ -2518,6 +2561,11 @@ public class DISPIM_Monitor implements PlugIn {
 						SyncWindows.getInstance().close();
 					}
 					for (int pos=0; pos<pDim; pos++) {
+						if (impAs[pos].hasNullStack())
+							continue;
+						if (impBs[pos].hasNullStack())
+							continue;
+
 
 						int cA = impAs[pos].getChannel();
 						int zA = impAs[pos].getSlice();
@@ -2626,6 +2674,11 @@ public class DISPIM_Monitor implements PlugIn {
 						SyncWindows.getInstance().close();
 					}
 					for (int pos=0; pos<pDim; pos++) {
+						if (impAs[pos].hasNullStack())
+							continue;
+						if (impBs[pos].hasNullStack())
+							continue;
+
 
 						TiffDecoder tdA = new TiffDecoder("", dirOrOMETiff);
 						win = impAs[pos].getWindow();
@@ -2907,6 +2960,11 @@ public class DISPIM_Monitor implements PlugIn {
 					//					impA = impAs[pos];
 					//					impB = impBs[pos];
 					for (int pos=0; pos<pDim; pos++) {
+						if (impAs[pos].hasNullStack())
+							continue;
+						if (impBs[pos].hasNullStack())
+							continue;
+
 
 						roiAs[pos] = impAs[pos].getRoi();
 						roiBs[pos] = impBs[pos].getRoi();
@@ -3354,6 +3412,11 @@ public class DISPIM_Monitor implements PlugIn {
 					}
 					// IJ.wait(15000);
 					for (int pos=0; pos<pDim; pos++) {
+						if (impAs[pos].hasNullStack())
+							continue;
+						if (impBs[pos].hasNullStack())
+							continue;
+
 
 						impAs[pos].setPosition(wasChannelA[pos], wasSliceA[pos], wasFrameA[pos]);
 						impBs[pos].setPosition(wasChannelB[pos], wasSliceB[pos], wasFrameB[pos]);
