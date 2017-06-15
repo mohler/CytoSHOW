@@ -86,8 +86,8 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 		methodChoices.add("MinGuo GPU method");
 		methodChoices.add("mipav CPU method");
 		matrixPriming = new Choice();
-		matrixPriming.add("Fresh registration for every volume");
 		matrixPriming.add("Prime registration with previous matrix");
+		matrixPriming.add("Fresh registration for every volume");
 		
 		panel.add(channelChoices);
 		panel.add(methodChoices);
