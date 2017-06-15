@@ -346,6 +346,7 @@ public class DISPIM_Monitor implements PlugIn {
 		int[] zLastA =new int[1];
 		int[] zFirstB =new int[1];
 		int[] zLastB =new int[1];
+		String[] lastMatrix = new String[1];
 
 
 		ImageWindow win = null;
@@ -423,6 +424,7 @@ public class DISPIM_Monitor implements PlugIn {
 				 zLastA = new int[pDim];
 				 zFirstB = new int[pDim];
 				 zLastB = new int[pDim];
+				 lastMatrix = new String[pDim];
 				 cropWidthA = new double[pDim];
 				 cropHeightA = new double[pDim];
 				 cropWidthB = new double[pDim];
@@ -1315,12 +1317,17 @@ public class DISPIM_Monitor implements PlugIn {
 			new File("" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "RegA" + File.separator + "tmx").mkdirs();
 			new File("" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "RegB" + File.separator + "tmx").mkdirs();
 			new File("" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "Decon").mkdirs();
-			try {
-				Files.copy(Paths.get("C:\\DataForTest\\Matrix_0.tmx"), Paths.get("" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "RegA" + File.separator + "tmx" + File.separator + "Matrix_1.tmx"));
-				Files.copy(Paths.get("C:\\DataForTest\\Matrix_0.tmx"), Paths.get("" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "RegB" + File.separator + "tmx" + File.separator + "Matrix_1.tmx"));
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+			if (doRegPriming){
+				for (int pos=0; pos<pDim; pos++) {
+					lastMatrix[pos] = IJ.openAsString("C:\\DataForTest\\Matrix_0.tmx");
+				}
+				try {
+					Files.copy(Paths.get("C:\\DataForTest\\Matrix_0.tmx"), Paths.get("" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "RegA" + File.separator + "tmx" + File.separator + "Matrix_1.tmx"));
+					Files.copy(Paths.get("C:\\DataForTest\\Matrix_0.tmx"), Paths.get("" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "RegB" + File.separator + "tmx" + File.separator + "Matrix_1.tmx"));
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 			if (wavelengths ==2) {
 				new File("" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "RegA" + File.separator + "tmx").mkdirs();
@@ -1353,6 +1360,8 @@ public class DISPIM_Monitor implements PlugIn {
 						IJ.log("already done: " + pos +" "+ impAs[pos].getChannel()+" "+ impAs[pos].getSlice()+" "+ f);
 					} else {
 						IJ.log("starting " + pos +" "+ impAs[pos].getChannel()+" "+ impAs[pos].getSlice()+" "+ f);
+						IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "RegB" + File.separator + "tmx" + File.separator + "Matrix_1.tmx");
+
 						impAs[pos].setPositionWithoutUpdate(impAs[pos].getChannel(), impAs[pos].getSlice(), f);
 
 						if (impAs[pos].getStack() instanceof ListVirtualStack)
@@ -1589,10 +1598,14 @@ public class DISPIM_Monitor implements PlugIn {
 								IJ.wait(100);
 								waitCount++;
 							}
-							if(new File(savePath + "RegDecon" + File.separator + "Color1" + File.separator + "Decon" + File.separator + "Decon_1.tif").canRead())
+							if(new File(savePath + "RegDecon" + File.separator + "Color1" + File.separator + "Decon" + File.separator + "Decon_1.tif").canRead()) {
 								Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Color1" + File.separator + "Decon" + File.separator + "Decon_1.tif"),
 									Paths.get(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution1" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif"), StandardCopyOption.REPLACE_EXISTING);
-							if (wavelengths == 2) {
+								
+								lastMatrix[pos] = IJ.openAsString("" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "RegB" + File.separator + "tmx" + File.separator + "Matrix_1.tmx");
+
+							}
+								if (wavelengths == 2) {
 								waitCount = 0;
 								while (!(new File(savePath + "RegDecon" + File.separator + "Color2" + File.separator + "Decon" + File.separator + "Decon_1.tif").canRead()) && waitCount<100) {
 									IJ.wait(100);
