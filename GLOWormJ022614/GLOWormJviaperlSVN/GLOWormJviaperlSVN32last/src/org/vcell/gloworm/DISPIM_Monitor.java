@@ -1247,6 +1247,11 @@ public class DISPIM_Monitor implements PlugIn {
 				IJ.saveAs(impAs[pos], "Selection", savePath +  "Pos" + pos + "A_"+zFirstA[pos]+"-"+zLastA[pos]+"crop.roi");
 				IJ.saveAs(impBs[pos], "Selection", savePath +  "Pos" + pos + "B_"+zFirstB[pos]+"-"+zLastB[pos]+"crop.roi");
 
+				impAs[pos].setPosition(wasChannelA[pos], wasSliceA[pos], wasFrameA[pos]);
+				impAs[pos].updateAndDraw();
+				impBs[pos].setPosition(wasChannelB[pos], wasSliceB[pos], wasFrameB[pos]);
+				impBs[pos].updateAndDraw();
+
 			}
 		}
 
