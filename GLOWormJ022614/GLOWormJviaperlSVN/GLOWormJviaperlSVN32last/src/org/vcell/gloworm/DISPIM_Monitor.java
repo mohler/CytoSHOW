@@ -1269,29 +1269,28 @@ public class DISPIM_Monitor implements PlugIn {
 				roiAs[pos] = impAs[pos].getRoi();
 				roiBs[pos] = impBs[pos].getRoi();
 
-//				wasFrameA[pos] = impAs[pos].getFrame();
-//				wasFrameB[pos] = impBs[pos].getFrame();
-//				wasSliceA[pos] = impAs[pos].getSlice();
-//				wasSliceB[pos] = impBs[pos].getSlice();
-//				wasChannelA[pos] = impAs[pos].getChannel();
-//				wasChannelB[pos] = impBs[pos].getChannel();
-
 				if ((new File(savePath)).canRead()) {
 					// SETUP OF WINDOWS SHOWING PRE-EXISTING DECON OUTPUTS
+					MultiFileInfoVirtualStack deconmfivs = null;					
 					if (impDF1s[pos] == null) {
-
-						MultiFileInfoVirtualStack deconmfivs = new MultiFileInfoVirtualStack(
-								((new File(dirOrOMETiff)).isDirectory() ? dirOrOMETiff
-										: (new File(dirOrOMETiff)).getParent())
-										+ File.separator, "Deconvolution",
+						if (doGPUdecon) {
+							if (new File(dirOrOMETiff
+									+ File.separator + "RegDecon" + File.separator + "Pos" + pos).canRead() ) {
+								deconmfivs = new MultiFileInfoVirtualStack(dirOrOMETiff
+										+ File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution",
 										false);
-						if (deconmfivs.getSize() > 0) {
+							}
+						} else {
+							deconmfivs = new MultiFileInfoVirtualStack(
+									((new File(dirOrOMETiff)).isDirectory() ? dirOrOMETiff
+											: (new File(dirOrOMETiff)).getParent())
+											+ File.separator, "Deconvolution",
+											false);
+						}
+						if (deconmfivs!=null && deconmfivs.getSize() > 0) {
 							impDF1s[pos] = new ImagePlus();
-							impDF1s[pos].setStack(
-									"Decon-Fuse"
-											+ impAs[pos].getTitle().replace(
-													impAs[pos].getTitle().split(":")[0],
-													""), deconmfivs);
+							impDF1s[pos].setStack("Decon-Fuse_"
+											+ impAs[pos].getTitle().split(":")[0], deconmfivs);
 							impDF1s[pos].setFileInfo(new FileInfo());
 
 							impDF1s[pos].getOriginalFileInfo().directory = dirOrOMETiff;
@@ -1314,6 +1313,8 @@ public class DISPIM_Monitor implements PlugIn {
 				}
 			}  //END SETUP OF WINDOW SHOWING PRE-EXISTING DECON OUTPUTS
 		}
+		
+		
 		if (doGPUdecon) {
 
 			String[] frameFileNames = new String[impAs[0].getNFrames() + 1];
@@ -1455,11 +1456,17 @@ public class DISPIM_Monitor implements PlugIn {
 						impXA1.setStack(stackA1);
 						impXA1.setCalibration(impAs[pos].getCalibration());
 						IJ.saveAs(impXA1, "Tiff", savePath + "CropBkgdSub" + File.separator + "SPIMA1_1.tif");
+						while (!(new File(savePath + "CropBkgdSub" + File.separator + "SPIMA1_1.tif").canRead())){
+							IJ.wait(100);
+						}
 						if (wavelengths == 2) {
 							ImagePlus impXA2 = new ImagePlus();
 							impXA2.setStack(stackA2);
 							impXA2.setCalibration(impAs[pos].getCalibration());
 							IJ.saveAs(impXA2, "Tiff", savePath + "CropBkgdSub" + File.separator + "SPIMA2_1.tif");
+							while (!(new File(savePath + "CropBkgdSub" + File.separator + "SPIMA2_1.tif").canRead())){
+								IJ.wait(100);
+							}
 
 						}
 
@@ -1541,11 +1548,17 @@ public class DISPIM_Monitor implements PlugIn {
 						impXB1.setStack(stackB1);
 						impXB1.setCalibration(impBs[pos].getCalibration());
 						IJ.saveAs(impXB1, "Tiff", savePath + "CropBkgdSub" + File.separator + "SPIMB1_1.tif");
+						while (!(new File(savePath + "CropBkgdSub" + File.separator + "SPIMB1_1.tif").canRead())){
+							IJ.wait(100);
+						}
 						if (wavelengths == 2) {
 							ImagePlus impXB2 = new ImagePlus();
 							impXB2.setStack(stackB2);
 							impXB2.setCalibration(impBs[pos].getCalibration());
 							IJ.saveAs(impXB2, "Tiff", savePath + "CropBkgdSub" + File.separator + "SPIMB2_1.tif");
+							while (!(new File(savePath + "CropBkgdSub" + File.separator + "SPIMB2_1.tif").canRead())){
+								IJ.wait(100);
+							}
 
 						}
 
@@ -1559,6 +1572,9 @@ public class DISPIM_Monitor implements PlugIn {
 						impBs[pos].setPosition(wasChannelB[pos], wasSliceB[pos], wasFrameB[pos]);
 						impBs[pos].updateAndDraw();
 
+						if (f==1)
+							IJ.wait(1000);
+						
 						final int ff = f;
 
 						timecode = "" + (new Date()).getTime();
@@ -2224,13 +2240,23 @@ public class DISPIM_Monitor implements PlugIn {
 							}
 						}
 						IJ.log(recentestA + "\n" + modDateA);
-						while (new File(recentestA).list().length < pDim) {
+						File recentestAFile = new File(recentestA);
+						ArrayList<String> rafdlclean = new ArrayList<String>();
+						while (rafdlclean.size() < pDim) {
+							rafdlclean = new ArrayList<String>();
+							String[] recentestAFileDirList = recentestAFile.list();
+							for (int f = 0; f < recentestAFileDirList.length; f++) {
+								if (!recentestAFileDirList[f].endsWith(".roi")
+										&& !recentestAFileDirList[f].endsWith(".DS_Store")) {
+									rafdlclean.add(recentestAFileDirList[f]);
+								}
+							}
 							IJ.wait(1000);
 							IJ.log(".");
+							recentestAFileDirList = recentestAFile.list();
 						}
-						
 						for (int nf =0; nf< pDim; nf++) {
-							if (nf>0 && new File(new File(recentestA).list()[nf]).length() != new File(new File(recentestA).list()[0]).length())
+							if (nf>0 && new File(rafdlclean.get(nf)).length() != new File(rafdlclean.get(nf)).length())
 								nf--;
 						}
 						IJ.log(recentestA + " complete");
@@ -2965,12 +2991,27 @@ public class DISPIM_Monitor implements PlugIn {
 				}
 
 
-				uploadRunning = wgUploadJob.getNewUploadProcess().isAlive();
-				if(!uploadRunning && uploadPending)	{
-					uploadPending = false;
-					wgUploadJob = new WG_Uploader();
-					wgUploadJob.run(dirOrOMETiff);
-				}
+//				uploadRunning = wgUploadJob.getNewUploadProcess().isAlive();
+//				if(!uploadRunning && uploadPending)	{
+//					uploadPending = false;
+//					wgUploadJob = new WG_Uploader();
+//					wgUploadJob.run(dirOrOMETiff);
+//				}
+
+				Thread uploadWhileMonitoringThread = new Thread(new Runnable() {
+					public void run() {
+						if (wgUploadJob == null) 
+							wgUploadJob = new WG_Uploader();
+						if (wgUploadJob.getNewUploadProcess() != null)
+							uploadRunning = wgUploadJob.getNewUploadProcess().isAlive();
+						if(!uploadRunning)	{
+							wgUploadJob = new WG_Uploader();
+							wgUploadJob.run(dirOrOMETiffFinal);
+						}
+					}
+				});
+				uploadWhileMonitoringThread.start();
+
 
 				if (doGPUdecon) {
 
@@ -3113,11 +3154,17 @@ public class DISPIM_Monitor implements PlugIn {
 								impXA1.setStack(stackA1);
 								impXA1.setCalibration(impAs[pos].getCalibration());
 								IJ.saveAs(impXA1, "Tiff", savePath + "CropBkgdSub" + File.separator + "SPIMA1_1.tif");
+								while (!(new File(savePath + "CropBkgdSub" + File.separator + "SPIMA1_1.tif").canRead())){
+									IJ.wait(100);
+								}
 								if (wavelengths == 2) {
 									ImagePlus impXA2 = new ImagePlus();
 									impXA2.setStack(stackA2);
 									impXA2.setCalibration(impAs[pos].getCalibration());
 									IJ.saveAs(impXA2, "Tiff", savePath + "CropBkgdSub" + File.separator + "SPIMA2_1.tif");
+									while (!(new File(savePath + "CropBkgdSub" + File.separator + "SPIMA2_1.tif").canRead())){
+										IJ.wait(100);
+									}
 
 								}
 
@@ -3199,11 +3246,17 @@ public class DISPIM_Monitor implements PlugIn {
 								impXB1.setStack(stackB1);
 								impXB1.setCalibration(impBs[pos].getCalibration());
 								IJ.saveAs(impXB1, "Tiff", savePath + "CropBkgdSub" + File.separator + "SPIMB1_1.tif");
+								while (!(new File(savePath + "CropBkgdSub" + File.separator + "SPIMB1_1.tif").canRead())){
+									IJ.wait(100);
+								}
 								if (wavelengths == 2) {
 									ImagePlus impXB2 = new ImagePlus();
 									impXB2.setStack(stackB2);
 									impXB2.setCalibration(impBs[pos].getCalibration());
 									IJ.saveAs(impXB2, "Tiff", savePath + "CropBkgdSub" + File.separator + "SPIMB2_1.tif");
+									while (!(new File(savePath + "CropBkgdSub" + File.separator + "SPIMB2_1.tif").canRead())){
+										IJ.wait(100);
+									}
 
 								}
 
@@ -3286,9 +3339,84 @@ public class DISPIM_Monitor implements PlugIn {
 							}
 						}
 					}
-				}
 
+					for (int pos=0; pos<pDim; pos++) {
+
+						//				impA = impAs[pos];
+						//				impB = impBs[pos];
+
+						if (impAs[pos].hasNullStack())
+							continue;
+						if (impBs[pos].hasNullStack())
+							continue;
+
+						roiAs[pos] = impAs[pos].getRoi();
+						roiBs[pos] = impBs[pos].getRoi();
+
+						if ((new File(savePath)).canRead()) {
+							// SETUP OF WINDOWS SHOWING NEW AND PRE-EXISTING DECON OUTPUTS
+							MultiFileInfoVirtualStack deconmfivs = null;					
+							if (true) {
+								if (new File(dirOrOMETiff
+										+ File.separator + "RegDecon" + File.separator + "Pos" + pos).canRead() ) {
+									deconmfivs = new MultiFileInfoVirtualStack(dirOrOMETiff
+											+ File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution",
+											false);
+								}
+
+								if (deconmfivs!=null && deconmfivs.getSize() > 0) {
+									impDF1s[pos] = new ImagePlus();
+									impDF1s[pos].setStack("Decon-Fuse_"
+											+ impAs[pos].getTitle().split(":")[0], deconmfivs);
+									impDF1s[pos].setFileInfo(new FileInfo());
+
+									impDF1s[pos].getOriginalFileInfo().directory = dirOrOMETiff;
+									int stkNSlicesDF = impDF1s[pos].getStackSize();
+									int zSlicesDF1 = deconmfivs.getFivStacks().get(0)
+											.getSize();
+									impDF1s[pos].setOpenAsHyperStack(true);
+									impDF1s[pos].setStack(impDF1s[pos].getStack(), wavelengths,
+											zSlicesDF1, stkNSlicesDF
+											/ (wavelengths * zSlicesDF1));
+									if (ciDF1s[pos]!=null)
+										win = ciDF1s[pos].getWindow();
+								
+									ciDF1s[pos] = new CompositeImage(impDF1s[pos]);
+									if (wavelengths > 1)
+										ciDF1s[pos].setMode(CompositeImage.COMPOSITE);
+									else
+										ciDF1s[pos].setMode(CompositeImage.GRAYSCALE);
+									if (win==null) {
+										ciDF1s[pos].show();
+									}else {
+										int oldW = win.getWidth();
+										int oldH = win.getHeight();
+										int oldC = win.getImagePlus().getChannel();
+										int oldZ = win.getImagePlus().getSlice();
+										int oldT = win.getImagePlus().getFrame();
+										double oldMin = win.getImagePlus()
+												.getDisplayRangeMin();
+										double oldMax = win.getImagePlus()
+												.getDisplayRangeMax();
+
+										ciDF1s[pos].setWindow(win);
+										win.updateImage(ciDF1s[pos]);
+										win.setSize(oldW, oldH);
+										((StackWindow) win).addScrollbars(ciDF1s[pos]);
+										win.getImagePlus().updateAndRepaintWindow();
+										win.getImagePlus().setPosition(oldC, oldZ, oldT);
+										win.getImagePlus().setDisplayRange(oldMin, oldMax);
+										win.setSize(win.getSize().width,
+												win.getSize().height + 5);
+
+									}
+								}
+							}
+						}
+					}  //END SETUP OF WINDOW SHOWING NEW AND PRE-EXISTING DECON OUTPUTS
+				}
 				
+
 				
 				if (doMipavDecon) {
 
