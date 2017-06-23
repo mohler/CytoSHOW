@@ -19,29 +19,38 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 	private boolean firstPaint = true;
 	private int keyChannel=1;
 	private String regDeconMethod;
-	private JSpinner modeFractionSpinner;
-	public JSpinner getSubtractionFractionSpinner() {
-		return modeFractionSpinner;
+	private JSpinner modeFractionSpinnerA, modeFractionSpinnerB;
+	public JSpinner getSubtractionFractionSpinnerA() {
+		return modeFractionSpinnerA;
 	}
 
-	public void setSubtractionFractionSpinner(JSpinner subtractionFractionSpinner) {
-		this.modeFractionSpinner = subtractionFractionSpinner;
+	public JSpinner getSubtractionFractionSpinnerB() {
+		return modeFractionSpinnerB;
 	}
 
 	private JSpinner iterationSpinner;
 	private Panel optPanel;
-	private double subFract;
-	public double getSubFract() {
-		return subFract;
-	}
-
-	public void setSubFract(double subFract) {
-		this.subFract = subFract;
-	}
-
 	private int iterations;
 	private Choice matrixPriming;
 	private String matPrimMethod;
+	private Double subFractA;
+	private Double subFractB;
+	public double getSubFractA() {
+		return subFractA;
+	}
+
+	public void setSubFractA(double subFract) {
+		this.subFractA = subFract;
+	}
+	public double getSubFractB() {
+		return subFractB;
+	}
+
+	public void setSubFractB(double subFract) {
+		this.subFractB = subFract;
+	}
+
+
 
 	public String getMatPrimMethod() {
 		return matPrimMethod;
@@ -126,12 +135,15 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 		}
 		add("South", panel);
 		
-		modeFractionSpinner = new JSpinner(new SpinnerNumberModel(1.0, -1.0, 2.0, 0.1));  
-		modeFractionSpinner.setToolTipText("Fraction of image Mode to use for baseline");
+		modeFractionSpinnerA = new JSpinner(new SpinnerNumberModel(1.011, -1.0, 2.0, 0.001));  
+		modeFractionSpinnerA.setToolTipText("Fraction of image Mode to use for autocrop \nand background subtraction on Camera A");
+		modeFractionSpinnerB = new JSpinner(new SpinnerNumberModel(1.012, -1.0, 2.0, 0.001));  
+		modeFractionSpinnerB.setToolTipText("Fraction of image Mode to use for autocrop \nand background subtraction on Camera B");
 		iterationSpinner = new JSpinner(new SpinnerNumberModel(10, 1, 100, 1));  
 		iterationSpinner.setToolTipText("Iterations of Deconvolution");
 		optPanel = new Panel();
-		optPanel.add("Center", modeFractionSpinner);
+		optPanel.add("West", modeFractionSpinnerA);
+		optPanel.add("Center", modeFractionSpinnerB);
 		optPanel.add("East", iterationSpinner);
 		add("East", optPanel);
 
@@ -148,7 +160,8 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 			keyChannel = channelChoices.getSelectedIndex()+1;
 			regDeconMethod = methodChoices.getSelectedItem();	
 			matPrimMethod = matrixPriming.getSelectedItem();
-			subFract = ((Double)modeFractionSpinner.getValue());
+			subFractA = ((Double)modeFractionSpinnerA.getValue());
+			subFractB = ((Double)modeFractionSpinnerB.getValue());
 			iterations = ((Integer)iterationSpinner.getValue());
 		}
 		closeDialog();

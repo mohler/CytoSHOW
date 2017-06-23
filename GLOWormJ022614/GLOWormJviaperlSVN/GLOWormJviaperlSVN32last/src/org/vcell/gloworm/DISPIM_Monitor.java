@@ -165,9 +165,10 @@ public class DISPIM_Monitor implements PlugIn {
 	private boolean uploadPending;
 	private boolean uploadRunning;
 	private int iterations;
-	private Double sliceTresholdVsMode;
 	private Process regDeconProcess;
 	private boolean doRegPriming;
+	private double sliceTresholdVsModeA;
+	private double sliceTresholdVsModeB;
 	
 
 	
@@ -984,7 +985,9 @@ public class DISPIM_Monitor implements PlugIn {
 			doRegPriming = d.getMatPrimMethod() == "Prime registration with previous matrix";
 			if (doGPUdecon) {
 				iterations = d.getIterations();
-				sliceTresholdVsMode = d.getSubFract();
+				sliceTresholdVsModeA = d.getSubFractA();
+				sliceTresholdVsModeB = d.getSubFractB();
+
 			}
 			keyChannel = d.getKeyChannel();
 			slaveChannel = keyChannel == 1 ? 2 : 1;
@@ -1112,7 +1115,7 @@ public class DISPIM_Monitor implements PlugIn {
 				 zFirstB[pos] = 0;
 				 zLastB[pos] = 0;
 
-				for (int zTest = 1; zTest< impAs[pos].getNSlices(); zTest++) {
+				for (int zTest = 1; zTest<= impAs[pos].getNSlices(); zTest++) {
 					Roi impRoi = (Roi) roiAs[pos].clone();
 					Polygon pA = new Polygon(impRoi.getPolygon().xpoints,
 							impRoi.getPolygon().ypoints,
@@ -1141,7 +1144,7 @@ public class DISPIM_Monitor implements PlugIn {
 			  		ipTest.setRoi((Roi) roiAs[pos]);
 			  		ipTest = ipTest.crop();
 			  		double testmean = ipTest.getStatistics().mean;
-			  		if (ipTest.getStatistics().mean > ipHisMode) {
+			  		if (testmean > ipHisMode*sliceTresholdVsModeA) {
 			  			if (zFirstA[pos] == 0) {
 			  				zFirstA[pos] = zTest;
 			  				zLastA[pos] = zTest;
@@ -1165,7 +1168,7 @@ public class DISPIM_Monitor implements PlugIn {
 				  		}
 				  		ipTest.setRoi((Roi) roiAs[pos]);
 				  		ipTest = ipTest.crop();
-				  		if (ipTest.getStatistics().mean > ipHisMode) {
+				  		if (ipTest.getStatistics().mean > ipHisMode*sliceTresholdVsModeA) {
 				  			if (zFirstA[pos] == 0) {
 				  				zFirstA[pos] = zTest;
 				  				zLastA[pos] = zTest;
@@ -1177,7 +1180,7 @@ public class DISPIM_Monitor implements PlugIn {
 					}
 				}
 
-				for (int zTest = 1; zTest< impBs[pos].getNSlices(); zTest++) {
+				for (int zTest = 1; zTest<= impBs[pos].getNSlices(); zTest++) {
 					Roi impRoi = (Roi) roiBs[pos].clone();
 					Polygon pB = new Polygon(impRoi.getPolygon().xpoints,
 							impRoi.getPolygon().ypoints,
@@ -1205,7 +1208,7 @@ public class DISPIM_Monitor implements PlugIn {
 			  		}
 			  		ipTest.setRoi((Roi) roiBs[pos]);
 			  		ipTest = ipTest.crop();
-			  		if (ipTest.getStatistics().mean > ipHisMode) {
+			  		if (ipTest.getStatistics().mean > ipHisMode*sliceTresholdVsModeB) {
 			  			if (zFirstB[pos] == 0) {
 			  				zFirstB[pos] = zTest;
 			  				zLastB[pos] = zTest;
@@ -1230,7 +1233,7 @@ public class DISPIM_Monitor implements PlugIn {
 				  		ipTest.setRoi((Roi) roiBs[pos]);
 				  		ipTest = ipTest.crop();
 				  		
-				  		if (ipTest.getStatistics().mean > ipHisMode) {
+				  		if (ipTest.getStatistics().mean > ipHisMode*sliceTresholdVsModeB) {
 				  			if (zFirstB[pos] == 0) {
 				  				zFirstB[pos] = zTest;
 				  				zLastB[pos] = zTest;
@@ -1423,7 +1426,7 @@ public class DISPIM_Monitor implements PlugIn {
 							}
 							if (maxBkgd1 < ipHisMode )
 								maxBkgd1 = ipHisMode;
-							ipA1.subtract(ipHisMode * sliceTresholdVsMode);
+							ipA1.subtract(ipHisMode * sliceTresholdVsModeA);
 							ipA1.setRoi((Roi) roiAs[pos]);
 							ipA1.fillOutside((Roi) roiAs[pos]);
 							ipA1 = ipA1.crop();
@@ -1449,7 +1452,7 @@ public class DISPIM_Monitor implements PlugIn {
 
 								if (maxBkgd2 < ipHisMode )
 									maxBkgd2 = ipHisMode;
-								ipA2.subtract(ipHisMode * sliceTresholdVsMode);
+								ipA2.subtract(ipHisMode * sliceTresholdVsModeA);
 								ipA2.setRoi((Roi) roiAs[pos]);
 								ipA2.fillOutside((Roi) roiAs[pos]);
 								ipA2 = ipA2.crop();
@@ -1514,7 +1517,7 @@ public class DISPIM_Monitor implements PlugIn {
 									}
 									if (maxBkgd1 < ipHisMode )
 										maxBkgd1 = ipHisMode;
-									ipB1.subtract(ipHisMode * sliceTresholdVsMode);
+									ipB1.subtract(ipHisMode * sliceTresholdVsModeB);
 									ipB1.setRoi((Roi) roiBs[pos]);
 									ipB1.fillOutside((Roi) roiBs[pos]);
 									ipB1 = ipB1.crop();
@@ -1541,7 +1544,7 @@ public class DISPIM_Monitor implements PlugIn {
 
 										if (maxBkgd2 < ipHisMode )
 											maxBkgd2 = ipHisMode;
-										ipB2.subtract(ipHisMode * sliceTresholdVsMode);
+										ipB2.subtract(ipHisMode * sliceTresholdVsModeB);
 										ipB2.setRoi((Roi) roiBs[pos]);
 										ipB2.fillOutside((Roi) roiBs[pos]);
 										ipB2 = ipB2.crop();
@@ -3108,7 +3111,7 @@ public class DISPIM_Monitor implements PlugIn {
 									}
 									if (maxBkgd1 < ipHisMode )
 										maxBkgd1 = ipHisMode;
-									ipA1.subtract(ipHisMode * sliceTresholdVsMode);
+									ipA1.subtract(ipHisMode * sliceTresholdVsModeA);
 									ipA1.setRoi((Roi) roiAs[pos]);
 									ipA1.fillOutside((Roi) roiAs[pos]);
 									ipA1 = ipA1.crop();
@@ -3134,7 +3137,7 @@ public class DISPIM_Monitor implements PlugIn {
 
 										if (maxBkgd2 < ipHisMode )
 											maxBkgd2 = ipHisMode;
-										ipA2.subtract(ipHisMode * sliceTresholdVsMode);
+										ipA2.subtract(ipHisMode * sliceTresholdVsModeA);
 										ipA2.setRoi((Roi) roiAs[pos]);
 										ipA2.fillOutside((Roi) roiAs[pos]);
 										ipA2 = ipA2.crop();
@@ -3199,7 +3202,7 @@ public class DISPIM_Monitor implements PlugIn {
 											}
 											if (maxBkgd1 < ipHisMode )
 												maxBkgd1 = ipHisMode;
-											ipB1.subtract(ipHisMode * sliceTresholdVsMode);
+											ipB1.subtract(ipHisMode * sliceTresholdVsModeB);
 											ipB1.setRoi((Roi) roiBs[pos]);
 											ipB1.fillOutside((Roi) roiBs[pos]);
 											ipB1 = ipB1.crop();
@@ -3226,7 +3229,7 @@ public class DISPIM_Monitor implements PlugIn {
 
 												if (maxBkgd2 < ipHisMode )
 													maxBkgd2 = ipHisMode;
-												ipB2.subtract(ipHisMode * sliceTresholdVsMode);
+												ipB2.subtract(ipHisMode * sliceTresholdVsModeB);
 												ipB2.setRoi((Roi) roiBs[pos]);
 												ipB2.fillOutside((Roi) roiBs[pos]);
 												ipB2 = ipB2.crop();
