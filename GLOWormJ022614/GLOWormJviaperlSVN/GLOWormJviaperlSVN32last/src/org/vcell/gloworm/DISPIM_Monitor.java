@@ -1600,8 +1600,8 @@ public class DISPIM_Monitor implements PlugIn {
 							IJ.log("rdpExit="+regDeconProcess.exitValue());
 						if (wavelengths == 1) {
 							try {
-								String cmdln = "cmd /c start /min /wait C:\\spimfusion_singlecolor.exe " + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMB1_ SPIMA1_ "   + savePath + "RegDecon" + File.separator +" 1 1 1 1 0.1625 0.1625 1 0.1625 0.1625 1 1 -1 0 "+ (doRegPriming?"1 ":"0 ")+ savePath + "RegDecon" + File.separator + "RegB" +File.separator+"tmx" +File.separator+"Matrix_1.tmx" + " 1 0.0001 " + iterations + " 16 C:\\DataForTest\\PSFA64.tif C:\\DataForTest\\PSFB64.tif 1 0";
-								IJ.log(cmdln);
+								String[] cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_singlecolor.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB1_","SPIMA1_", savePath + "RegDecon" + File.separator ,"1","1","1","1","0.1625","0.1625","1","0.1625","0.1625","1","1","-1","0", (doRegPriming?"1":"0"),savePath + "RegDecon" + File.separator + "RegB" +File.separator+"tmx" +File.separator+"Matrix_1.tmx" , "1","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
+
 								regDeconProcess = Runtime.getRuntime().exec(cmdln);
 							} catch (IOException e) {
 								// TODO Auto-generated catch block
@@ -1610,8 +1610,8 @@ public class DISPIM_Monitor implements PlugIn {
 						}
 						if (wavelengths == 2) {
 							try {
-								String cmdln = "cmd /c start /min /wait C:\\spimfusion_dualcolor.exe " + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMB1_ SPIMA1_  "  + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMB2_ SPIMA2_ " + savePath + "RegDecon" + File.separator +" 1 1 1 1 0.1625 0.1625 1 0.1625 0.1625 1 1 -1 0 "+ (doRegPriming?"1 ":"0 ")+ savePath + "RegDecon" + File.separator + "Color1" +File.separator + "RegB" +File.separator+"tmx" +File.separator+"Matrix_1.tmx" + " 1 0.0001 " + iterations + " 16 C:\\DataForTest\\PSFA64.tif C:\\DataForTest\\PSFB64.tif 1 0";
-								IJ.log(cmdln);
+								String[] cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_dualcolor.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB1_","SPIMA1_"  , savePath + "CropBkgdSub" + File.separator , savePath + "CropBkgdSub" + File.separator , "SPIMB2_","SPIMA2_", savePath + "RegDecon" + File.separator ,"1","1","1","1","0.1625","0.1625","1","0.1625","0.1625","1","1","-1","0", (doRegPriming?"1":"0"),savePath + "RegDecon" + File.separator  + "Color1" +File.separator + "RegB" +File.separator+"tmx" +File.separator+"Matrix_1.tmx" , "1","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
+//								IJ.log(cmdln);
 								regDeconProcess = Runtime.getRuntime().exec(cmdln);
 							} catch (IOException e) {
 								// TODO Auto-generated catch block
@@ -3282,8 +3282,8 @@ public class DISPIM_Monitor implements PlugIn {
 									IJ.log("rdpExit="+regDeconProcess.exitValue());
 								if (wavelengths == 1) {
 									try {
-										String cmdln = "cmd /c start /min /wait C:\\spimfusion_singlecolor.exe " + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMB1_ SPIMA1_ "   + savePath + "RegDecon" + File.separator +" 1 1 1 1 0.1625 0.1625 1 0.1625 0.1625 1 1 -1 0 "+ (doRegPriming?"1 ":"0 ")+ savePath + "RegDecon" + File.separator + "RegB" +File.separator+"tmx" +File.separator+"Matrix_1.tmx" + " 1 0.0001 " + iterations + " 16 C:\\DataForTest\\PSFA64.tif C:\\DataForTest\\PSFB64.tif 1 0";
-										IJ.log(cmdln);
+										String[] cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_singlecolor.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB1_","SPIMA1_", savePath + "RegDecon" + File.separator ,"1","1","1","1","0.1625","0.1625","1","0.1625","0.1625","1","1","-1","0", (doRegPriming?"1":"0"),savePath + "RegDecon" + File.separator + "RegB" +File.separator+"tmx" +File.separator+"Matrix_1.tmx" , "1","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
+//										IJ.log(cmdln);
 										regDeconProcess = Runtime.getRuntime().exec(cmdln);
 									} catch (IOException e) {
 										// TODO Auto-generated catch block
@@ -3292,8 +3292,8 @@ public class DISPIM_Monitor implements PlugIn {
 								}
 								if (wavelengths == 2) {
 									try {
-										String cmdln = "cmd /c start /min /wait C:\\spimfusion_dualcolor.exe " + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMB1_ SPIMA1_  "  + savePath + "CropBkgdSub" + File.separator + " " + savePath + "CropBkgdSub" + File.separator  + " SPIMB2_ SPIMA2_ " + savePath + "RegDecon" + File.separator +" 1 1 1 1 0.1625 0.1625 1 0.1625 0.1625 1 1 -1 0 "+ (doRegPriming?"1 ":"0 ")+ savePath + "RegDecon" + File.separator + "Color1" +File.separator + "RegB" +File.separator+"tmx" +File.separator+"Matrix_1.tmx" + " 1 0.0001 " + iterations + " 16 C:\\DataForTest\\PSFA64.tif C:\\DataForTest\\PSFB64.tif 1 0";
-										IJ.log(cmdln);
+										String[] cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_dualcolor.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB1_","SPIMA1_"  , savePath + "CropBkgdSub" + File.separator , savePath + "CropBkgdSub" + File.separator , "SPIMB2_","SPIMA2_", savePath + "RegDecon" + File.separator ,"1","1","1","1","0.1625","0.1625","1","0.1625","0.1625","1","1","-1","0", (doRegPriming?"1":"0"),savePath + "RegDecon" + File.separator  + "Color1" +File.separator + "RegB" +File.separator+"tmx" +File.separator+"Matrix_1.tmx" , "1","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
+//										IJ.log(cmdln);
 										regDeconProcess = Runtime.getRuntime().exec(cmdln);
 									} catch (IOException e) {
 										// TODO Auto-generated catch block
