@@ -1654,6 +1654,72 @@ public class DISPIM_Monitor implements PlugIn {
 							e.printStackTrace();
 						}
 						IJ.log("finishing " + pos +" "+ impAs[pos].getChannel()+" "+ impAs[pos].getSlice()+" "+ f);
+						if (impAs[pos].hasNullStack())
+							continue;
+						if (impBs[pos].hasNullStack())
+							continue;
+
+						if ((new File(savePath)).canRead()) {
+							// SETUP OF WINDOWS SHOWING NEW AND PRE-EXISTING DECON OUTPUTS
+							MultiFileInfoVirtualStack deconmfivs = null;					
+							if (true) {
+								if (new File(dirOrOMETiff
+										+ File.separator + "RegDecon" + File.separator + "Pos" + pos).canRead() ) {
+									deconmfivs = new MultiFileInfoVirtualStack(dirOrOMETiff
+											+ File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution",
+											false);
+								}
+
+								if (deconmfivs!=null && deconmfivs.getSize() > 0) {
+									impDF1s[pos] = new ImagePlus();
+									impDF1s[pos].setStack("Decon-Fuse_"
+											+ impAs[pos].getTitle().split(":")[0], deconmfivs);
+									impDF1s[pos].setFileInfo(new FileInfo());
+
+									impDF1s[pos].getOriginalFileInfo().directory = dirOrOMETiff;
+									int stkNSlicesDF = impDF1s[pos].getStackSize();
+									int zSlicesDF1 = deconmfivs.getFivStacks().get(0)
+											.getSize();
+									impDF1s[pos].setOpenAsHyperStack(true);
+									impDF1s[pos].setStack(impDF1s[pos].getStack(), wavelengths,
+											zSlicesDF1, stkNSlicesDF
+											/ (wavelengths * zSlicesDF1));
+									if (ciDF1s[pos]!=null)
+										win = ciDF1s[pos].getWindow();
+								
+									ciDF1s[pos] = new CompositeImage(impDF1s[pos]);
+									if (wavelengths > 1)
+										ciDF1s[pos].setMode(CompositeImage.COMPOSITE);
+									else
+										ciDF1s[pos].setMode(CompositeImage.GRAYSCALE);
+									if (win==null) {
+										ciDF1s[pos].show();
+									}else {
+										int oldW = win.getWidth();
+										int oldH = win.getHeight();
+										int oldC = win.getImagePlus().getChannel();
+										int oldZ = win.getImagePlus().getSlice();
+										int oldT = win.getImagePlus().getFrame();
+										double oldMin = win.getImagePlus()
+												.getDisplayRangeMin();
+										double oldMax = win.getImagePlus()
+												.getDisplayRangeMax();
+
+										ciDF1s[pos].setWindow(win);
+										win.updateImage(ciDF1s[pos]);
+										win.setSize(oldW, oldH);
+										((StackWindow) win).addScrollbars(ciDF1s[pos]);
+										win.getImagePlus().updateAndRepaintWindow();
+										win.getImagePlus().setPosition(oldC, oldZ, oldT);
+										win.getImagePlus().setDisplayRange(oldMin, oldMax);
+										win.setSize(win.getSize().width,
+												win.getSize().height + 5);
+
+									}
+								}
+							}
+						}
+					
 					}
 				}
 			}
