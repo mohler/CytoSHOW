@@ -1219,7 +1219,7 @@ public class Menus {
 	static synchronized void addWindowMenuItem(ImagePlus imp) {
 		addWindowMenuItem(-1, imp);
 	}
-		/** Adds one image to the end of the Window menu. */
+		/** Adds one image at position n. */
 	static synchronized void addWindowMenuItem(int n, ImagePlus imp) {
 		if (ij==null) return;
 		String name = imp.getTitle();
@@ -1239,7 +1239,7 @@ public class Menus {
 		if (n<0)
 			window.add(item);
 		else
-			window.insert(item, WINDOW_MENU_ITEMS+windowMenuItems2+n+1);
+			window.insert(item, WINDOW_MENU_ITEMS+windowMenuItems2+n);
 		item.addItemListener(ij);
 	}
 	

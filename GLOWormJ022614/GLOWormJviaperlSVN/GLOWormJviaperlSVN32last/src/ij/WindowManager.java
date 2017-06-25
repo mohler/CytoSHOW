@@ -570,5 +570,17 @@ public class WindowManager {
 		return nonImageList;
 	}
 
+	public synchronized static void group(ImagePlus imp1, ImagePlus imp2) {
+		// TODO Auto-generated method stub
+		int imp1index = 0;
+		removeWindow(imp2.getWindow());
+		for (int i=0; i<getIDList().length;i++) {
+			if(getIDList()[i] == imp1.getID()) {
+				imp1index = i;
+			}
+		}
+		addImageWindow(imp1index+1, imp2.getWindow());
+	}
+
 
 }
