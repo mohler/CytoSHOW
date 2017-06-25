@@ -1719,6 +1719,8 @@ public class DISPIM_Monitor implements PlugIn {
 			}
 		}
 		
+		IJ.run("Tile");
+		
 		if (doMipavDecon) {
 
 			String[] frameFileNames = new String[impAs[0].getNFrames() + 1];
