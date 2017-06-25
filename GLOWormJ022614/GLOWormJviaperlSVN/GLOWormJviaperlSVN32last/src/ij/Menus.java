@@ -1217,6 +1217,10 @@ public class Menus {
 
 	/** Adds one image to the end of the Window menu. */
 	static synchronized void addWindowMenuItem(ImagePlus imp) {
+		addWindowMenuItem(-1, imp);
+	}
+		/** Adds one image to the end of the Window menu. */
+	static synchronized void addWindowMenuItem(int n, ImagePlus imp) {
 		if (ij==null) return;
 		String name = imp.getTitle();
 		int size = (imp.getWidth()*imp.getHeight()*imp.getStackSize())/1024;
@@ -1232,7 +1236,10 @@ public class Menus {
 		}
 		CheckboxMenuItem item = new CheckboxMenuItem(name + " " + size + "K");
 		item.setActionCommand("" + imp.getID());
-		window.add(item);
+		if (n<0)
+			window.add(item);
+		else
+			window.insert(item, WINDOW_MENU_ITEMS+windowMenuItems2+n+1);
 		item.addItemListener(ij);
 	}
 	

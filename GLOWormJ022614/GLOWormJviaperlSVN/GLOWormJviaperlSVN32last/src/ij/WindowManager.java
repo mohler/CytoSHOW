@@ -249,17 +249,37 @@ public class WindowManager {
  		}
     }
 
+	/** Adds the specified window to the Window menu at relative index n. */
+	public synchronized static void addWindow(int n, Window win) {
+		//IJ.write("addWindow: "+win.getTitle());
+		if (win==null)
+			return;
+		else if (win instanceof ImageWindow)
+			addImageWindow(n, (ImageWindow)win);
+		else {
+			Menus.insertWindowMenuItem(win);
+			nonImageList.add(n, win);
+ 		}
+    }
+
 	/** Adds the specified Frame to the Window menu. */
 	public static void addWindow(Frame win) {
 		addWindow((Window)win);
 	}
 
 	private static void addImageWindow(ImageWindow win) {
+		addImageWindow(-1, win);
+	}
+	
+	private static void addImageWindow(int n, ImageWindow win) {
 		ImagePlus imp = win.getImagePlus();
 		if (imp==null) return;
 		checkForDuplicateName(imp);
-		imageList.addElement(win);
-        Menus.addWindowMenuItem(imp);
+		if (n<0)
+			imageList.addElement(win);
+		else
+			imageList.add(n, win);
+        Menus.addWindowMenuItem(n, imp);
         setCurrentWindow(win);
     }
 
@@ -542,4 +562,13 @@ public class WindowManager {
 		frame.toFront();
 	}
     
+	public static Vector getImageListVector() {
+		return imageList;
+	}
+
+	public static Vector getNonImageListVector() {
+		return nonImageList;
+	}
+
+
 }
