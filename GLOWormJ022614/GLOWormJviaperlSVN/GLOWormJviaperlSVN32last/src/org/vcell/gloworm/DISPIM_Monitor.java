@@ -1302,12 +1302,15 @@ public class DISPIM_Monitor implements PlugIn {
 								win = ciDF1s[pos].getWindow();
 							}
 							ciDF1s[pos] = new CompositeImage(impDF1s[pos]);
+							ciDF1s[pos].setPosition(1, ciDF1s[pos].getNSlices()/2, ciDF1s[pos].getNFrames());
+
 							if (wavelengths > 1)
 								ciDF1s[pos].setMode(CompositeImage.COMPOSITE);
 							else
 								ciDF1s[pos].setMode(CompositeImage.GRAYSCALE);
 							if (win==null) {
 								ciDF1s[pos].show();
+								ciDF1s[pos].setPosition(1, ciDF1s[pos].getNSlices()/2, ciDF1s[pos].getNFrames());
 							} else {
 								int oldW = win.getWidth();
 								int oldH = win.getHeight();
@@ -1682,6 +1685,7 @@ public class DISPIM_Monitor implements PlugIn {
 										win = ciDF1s[pos].getWindow();
 								
 									ciDF1s[pos] = new CompositeImage(impDF1s[pos]);
+									ciDF1s[pos].setPosition(1, ciDF1s[pos].getNSlices()/2, ciDF1s[pos].getNFrames());
 									if (wavelengths > 1)
 										ciDF1s[pos].setMode(CompositeImage.COMPOSITE);
 									else
