@@ -1718,6 +1718,8 @@ public class DISPIM_Monitor implements PlugIn {
 												win.getSize().height + 5);
 
 									}
+									IJ.run("Tile");
+
 								}
 							}
 						}
