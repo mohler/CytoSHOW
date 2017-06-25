@@ -1688,6 +1688,8 @@ public class DISPIM_Monitor implements PlugIn {
 										ciDF1s[pos].setMode(CompositeImage.GRAYSCALE);
 									if (win==null) {
 										ciDF1s[pos].show();
+										ciDF1s[pos].setPosition(1, ciDF1s[pos].getNSlices()/2, ciDF1s[pos].getNFrames());
+
 									}else {
 										int oldW = win.getWidth();
 										int oldH = win.getHeight();
@@ -1718,9 +1720,7 @@ public class DISPIM_Monitor implements PlugIn {
 				}
 			}
 		}
-		
-		IJ.run("Tile");
-		
+				
 		if (doMipavDecon) {
 
 			String[] frameFileNames = new String[impAs[0].getNFrames() + 1];
@@ -2240,6 +2240,10 @@ public class DISPIM_Monitor implements PlugIn {
 			}
 		}
 
+		
+		IJ.run("Tile");
+
+		
 		while (true) {
 			boolean focus = false;
 				if ((new File(dirOrOMETiff)).isDirectory()) {
