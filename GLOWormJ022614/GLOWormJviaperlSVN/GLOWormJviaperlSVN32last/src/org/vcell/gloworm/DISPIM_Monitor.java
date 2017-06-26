@@ -1336,6 +1336,8 @@ public class DISPIM_Monitor implements PlugIn {
 						}
 					}
 				}
+				IJ.run("Tile");
+
 			}  //END SETUP OF WINDOW SHOWING PRE-EXISTING DECON OUTPUTS
 		}
 		
