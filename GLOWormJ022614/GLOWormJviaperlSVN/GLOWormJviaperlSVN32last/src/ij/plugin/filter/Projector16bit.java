@@ -39,7 +39,7 @@ thresholding), or add a greater degree of visual realism by employing depth cues
 contributed by Michael Castle of the  University of Michigan Mental Health Research Institute.
  */ 
 
-public class Projector implements PlugInFilter, TextListener {
+public class Projector16bit implements PlugInFilter, TextListener {
 
 	static final int xAxis=0, yAxis=1, zAxis=2;
 	static final int nearestPoint=0, brightestPoint=1, meanValue=2;
@@ -61,13 +61,13 @@ public class Projector implements PlugInFilter, TextListener {
 	private static boolean interpolate = true;
 	private static boolean debugMode;
 	private int transparencyLower = 1;
-	private int transparencyUpper = 255;	
+	private int transparencyUpper = 0xffff;	
 	ImagePlus imp;
 	ImageStack stack;
 	ImageStack stack2;
 	int width, height, imageWidth;
 	int left, right, top, bottom;
-	byte[] projArray, opaArray, brightCueArray;
+	short[] projArray, opaArray, brightCueArray;
 	short[] zBuffer, cueZBuffer, countBuffer;
 	int[] sumBuffer;
 	boolean isRGB;
@@ -101,8 +101,8 @@ public class Projector implements PlugInFilter, TextListener {
 
 	public int setup(String arg, ImagePlus imp) {
 		this.imp = imp;
-		if (imp.getType()==ImagePlus.GRAY16) {
-			IJ.runPlugIn("ij.plugin.filter.Projector16bit", arg);
+		if (false/*!(imp.getStack() instanceof MultiQTVirtualStack) && imp.getType() == ImagePlus.COLOR_RGB*/) {
+			IJ.runPlugIn("ij.plugin.Projector", arg);
 			return DONE;
 		}
 		roi = imp.getRoi();	
@@ -279,7 +279,7 @@ public class Projector implements PlugInFilter, TextListener {
 					if (impDZ.getBitDepth() > 8 && !isRGB) {
 						impDZ.setPosition(1, (1+lastZ+1-firstZ)/2, 1);
 						impDZ.getProcessor().setMinAndMax(0.0, 50.0);
-						IJ.run(impDZ,"8-bit","");
+//						IJ.run(impDZ,"8-bit","");
 						if (impDZ.isComposite()   )
 							((CompositeImage)impDZ).setMode(CompositeImage.GRAYSCALE);
 					}
@@ -888,7 +888,7 @@ public class Projector implements PlugInFilter, TextListener {
 			costheta = (int)(BIGPOWEROF2*Math.cos(thetarad) + 0.5);
 			sintheta = (int)(BIGPOWEROF2*Math.sin(thetarad) + 0.5);
 
-			projArray = (byte[])stack2.getPixels(n+1);
+			projArray = (short[])stack2.getPixels(n+1);
 			if (projArray==null)
 				break;
 			if ((projectionMethod==nearestPoint) || (opacity>0)) {
@@ -897,11 +897,11 @@ public class Projector implements PlugInFilter, TextListener {
 			}
 			if ((opacity>0) && (projectionMethod!=nearestPoint)) {
 				for (int i=0; i<projsize; i++)
-					opaArray[i] = (byte)0;
+					opaArray[i] = (short)0;
 			}
 			if ((projectionMethod==brightestPoint) && (depthCueInt<100)) {
 				for (int i=0; i<projsize; i++)
-					brightCueArray[i] = (byte)0;
+					brightCueArray[i] = (short)0;
 				for (int i=0; i<projsize; i++)
 					cueZBuffer[i] = (short)0;
 			}
@@ -928,22 +928,22 @@ public class Projector implements PlugInFilter, TextListener {
 				for (int i=0; i<projsize; i++) {
 					count = countBuffer[i];
 					if (count!=0)
-						projArray[i] = (byte)(sumBuffer[i]/count);
+						projArray[i] = (short)(sumBuffer[i]/count);
 				}
 			}
 			if ((opacity>0) && (projectionMethod!=nearestPoint)) {
 				for (int i=0; i<projsize; i++)
-					projArray[i] = (byte)((opacity*(opaArray[i]&0xff) + (100-opacity)*(projArray[i] &0xff))/100);
+					projArray[i] = (short)((opacity*(opaArray[i]&0xffff) + (100-opacity)*(projArray[i] &0xffff))/100);
 			}
 			if (axisOfRotation==zAxis) {
 				for (int i=projwidth; i<(projsize-projwidth); i++) {
-					curval = projArray[i]&0xff;
-					prevval = projArray[i-1]&0xff;
-					nextval = projArray[i+1]&0xff;
-					aboveval = projArray[i-projwidth]&0xff;
-					belowval = projArray[i+projwidth]&0xff;
+					curval = projArray[i]&0xffff;
+					prevval = projArray[i-1]&0xffff;
+					nextval = projArray[i+1]&0xffff;
+					aboveval = projArray[i-projwidth]&0xffff;
+					belowval = projArray[i+projwidth]&0xffff;
 					if ((curval==0)&&(prevval!=0)&&(nextval!=0)&&(aboveval!=0)&&(belowval!=0))
-						projArray[i] = (byte)((prevval+nextval+aboveval+belowval)/4);
+						projArray[i] = (short)((prevval+nextval+aboveval+belowval)/4);
 				}
 			}
 
@@ -959,9 +959,9 @@ public class Projector implements PlugInFilter, TextListener {
 		if (!batchMode) IJ.showProgress(1.0);
 
 		if (debugMode) {
-			if (projArray!=null) new ImagePlus("projArray", new ByteProcessor(projwidth, projheight, projArray, null)).show();
-			if (opaArray!=null) new ImagePlus("opaArray", new ByteProcessor(projwidth, projheight, opaArray, null)).show();
-			if (brightCueArray!=null) new ImagePlus("brightCueArray", new ByteProcessor(projwidth, projheight, brightCueArray, null)).show();
+			if (projArray!=null) new ImagePlus("projArray", new ShortProcessor(projwidth, projheight, projArray, null)).show();
+			if (opaArray!=null) new ImagePlus("opaArray", new ShortProcessor(projwidth, projheight, opaArray, null)).show();
+			if (brightCueArray!=null) new ImagePlus("brightCueArray", new ShortProcessor(projwidth, projheight, brightCueArray, null)).show();
 			if (zBuffer!=null) new ImagePlus("zBuffer", new ShortProcessor(projwidth, projheight, zBuffer, null)).show();
 			if (cueZBuffer!=null) new ImagePlus("cueZBuffer", new ShortProcessor(projwidth, projheight, cueZBuffer, null)).show();
 			if (countBuffer!=null) new ImagePlus("countBuffer", new ShortProcessor(projwidth, projheight, countBuffer, null)).show();
@@ -983,15 +983,15 @@ public class Projector implements PlugInFilter, TextListener {
 		ColorModel cm = imp.getProcessor().getColorModel();
 		if (isRGB) cm = null;
 		stack2 = new ImageStack(projwidth, projheight, cm);
-		projArray = new byte[projsize];
+		projArray = new short[projsize];
 		for (int i=0; i<nProjections; i++)
-			stack2.addSlice(null, new byte[projsize]);
+			stack2.addSlice(null, new short[projsize]);
 		if ((projectionMethod==nearestPoint) || (opacity > 0))
 			zBuffer = new short[projsize];		
 		if ((opacity>0) && (projectionMethod!=nearestPoint))
-			opaArray = new byte[projsize];
+			opaArray = new short[projsize];
 		if ((projectionMethod==brightestPoint) && (depthCueInt<100)) {
-			brightCueArray = new byte[projsize];
+			brightCueArray = new short[projsize];
 			cueZBuffer = new short[projsize];
 		}
 		if (projectionMethod==meanValue) {
@@ -1022,7 +1022,7 @@ public class Projector implements PlugInFilter, TextListener {
 		boolean MeanVal, BrightestPt;
 		int ysintheta, ycostheta;
 		int zsintheta, zcostheta, ysinthetainit, ycosthetainit;
-		byte[] pixels;
+		short[] pixels;
 		int projsize = projwidth * projheight;
 
 		//find z-coordinates of first and last slices
@@ -1067,7 +1067,7 @@ public class Projector implements PlugInFilter, TextListener {
 
 		
 		for (int k=1; k<=nSlices; k++) {
-			pixels = (byte[])stack.getPixels(k);
+			pixels = (short[])stack.getPixels(k);
 			z = (int)((k-1)*sliceInterval+0.5) - zcenter;
 			zcostheta = z * costheta;
 			zsintheta = z * sintheta;
@@ -1083,7 +1083,7 @@ public class Projector implements PlugInFilter, TextListener {
 				//read each pixel in current row and project it
 				int lineIndex = j*imageWidth;
 				for (int i=left; i<right; i++) {
-					thispixel = pixels[lineIndex+i]&0xff;
+					thispixel = pixels[lineIndex+i]&0xffff;
 					offset++;
 					//if (stack2.getSize()==32 && j==32 && i==32) IJ.write("thispixel: "+thispixel+ " "+lineIndex);
 					if ((offset>=projsize) || (offset<0))
@@ -1094,17 +1094,17 @@ public class Projector implements PlugInFilter, TextListener {
 								zBuffer[offset] = (short)znew;
 								if (OpacityAndNotNearestPt) {
 									if (DepthCueSurfLessThan100)
-										opaArray[offset] = (byte)(/*255 -*/ (depthCueSurf*(/*255-*/thispixel)/100 + 
+										opaArray[offset] = (short)(/*255 -*/ (depthCueSurf*(/*255-*/thispixel)/100 + 
 												c100minusDepthCueSurf*(/*255-*/thispixel)*(zmax-znew)/zmaxminuszmintimes100));
 									else
-										opaArray[offset] = (byte)thispixel;
+										opaArray[offset] = (short)thispixel;
 								} else {
-									//p = (BYTE *)(projaddr + offset);
+									//p = (short *)(projaddr + offset);
 									if (DepthCueSurfLessThan100)
-										projArray[offset] = (byte)(/*255 -*/ (depthCueSurf*(/*255-*/thispixel)/100 +
+										projArray[offset] = (short)(/*255 -*/ (depthCueSurf*(/*255-*/thispixel)/100 +
 												c100minusDepthCueSurf*(/*255-*/thispixel)*(zmax-znew)/zmaxminuszmintimes100));
 									else
-										projArray[offset]  = (byte)thispixel;
+										projArray[offset]  = (short)thispixel;
 								}
 							} // if znew<zBuffer[offset]
 						} //if OpacityOrNearestP
@@ -1116,15 +1116,15 @@ public class Projector implements PlugInFilter, TextListener {
 						} else
 							if (BrightestPt) {
 								if (DepthCueIntLessThan100) {
-									if ((thispixel>(brightCueArray[offset]&0xff)) || (thispixel==(brightCueArray[offset]&0xff)) && (znew>cueZBuffer[offset])) {
-										brightCueArray[offset] = (byte)thispixel;  //use z-buffer to ensure that if depth-cueing is on,
+									if ((thispixel>(brightCueArray[offset]&0xffff)) || (thispixel==(brightCueArray[offset]&0xffff)) && (znew>cueZBuffer[offset])) {
+										brightCueArray[offset] = (short)thispixel;  //use z-buffer to ensure that if depth-cueing is on,
 										cueZBuffer[offset] = (short)znew;       //the closer of two equally-bright points is displayed.
-										projArray[offset] = (byte)((depthCueInt*thispixel/100 +
+										projArray[offset] = (short)((depthCueInt*thispixel/100 +
 												c100minusDepthCueInt*thispixel*(zmax-znew)/zmaxminuszmintimes100));
 									}
 								} else {
-									if (thispixel>(projArray[offset]&0xff))
-										projArray[offset] = (byte)thispixel;
+									if (thispixel>(projArray[offset]&0xffff))
+										projArray[offset] = (short)thispixel;
 								}
 							} // else BrightestPt
 					} // if thispixel in range
@@ -1149,7 +1149,7 @@ public class Projector implements PlugInFilter, TextListener {
 		boolean MeanVal, BrightestPt;
 		int xsintheta, xcostheta;
 		int zsintheta, zcostheta, xsinthetainit, xcosthetainit;
-		byte[] pixels;
+		short[] pixels;
 		int projsize = projwidth * projheight;
 
 		//find z-coordinates of first and last slices
@@ -1201,7 +1201,7 @@ public class Projector implements PlugInFilter, TextListener {
 
 		
 		for (int k=1; k<=nSlices; k++) {
-			pixels = (byte[])stack.getPixels(k);
+			pixels = (short[])stack.getPixels(k);
 			z = (int)((k-1)*sliceInterval+0.5) - zcenter;
 			zcostheta = z * costheta;
 			zsintheta = z * sintheta;
@@ -1213,7 +1213,7 @@ public class Projector implements PlugInFilter, TextListener {
 				int lineOffset = j*imageWidth;
 				//read each pixel in current row and project it
 				for (int i=left; i<right; i++) {
-					thispixel =pixels[lineOffset+i]&0xff;
+					thispixel =pixels[lineOffset+i]&0xffff;
 					xcostheta += costheta;  //rotate about x-axis and find new x,z
 					xsintheta += sintheta;  //y-coordinates will not change
 					//if (k==1 && j==top) IJ.write(k+" "thispixel);
@@ -1228,16 +1228,16 @@ public class Projector implements PlugInFilter, TextListener {
 								zBuffer[offset] = (short)znew;
 								if (OpacityAndNotNearestPt) {
 									if (DepthCueSurfLessThan100)
-										opaArray[offset] = (byte)((depthCueSurf*thispixel/100 + 
+										opaArray[offset] = (short)((depthCueSurf*thispixel/100 + 
 												c100minusDepthCueSurf*thispixel*(zmax-znew)/zmaxminuszmintimes100));
 									else
-										opaArray[offset] = (byte)thispixel;
+										opaArray[offset] = (short)thispixel;
 								} else {
 									if (DepthCueSurfLessThan100)
-										projArray[offset] = (byte)((depthCueSurf*thispixel/100 +
+										projArray[offset] = (short)((depthCueSurf*thispixel/100 +
 												c100minusDepthCueSurf*thispixel*(zmax-znew)/zmaxminuszmintimes100));
 									else
-										projArray[offset] = (byte)thispixel;
+										projArray[offset] = (short)thispixel;
 								}
 							} // if (znew < zBuffer[offset])
 						} // if (OpacityOrNearestPt)
@@ -1246,15 +1246,15 @@ public class Projector implements PlugInFilter, TextListener {
 							countBuffer[offset]++;
 						} else if (BrightestPt) {
 							if (DepthCueIntLessThan100) {
-								if ((thispixel>(brightCueArray[offset]&0xff)) || (thispixel==(brightCueArray[offset]&0xff)) && (znew>cueZBuffer[offset])) {
-									brightCueArray[offset] = (byte)thispixel;  //use z-buffer to ensure that if depth-cueing is on,
+								if ((thispixel>(brightCueArray[offset]&0xffff)) || (thispixel==(brightCueArray[offset]&0xffff)) && (znew>cueZBuffer[offset])) {
+									brightCueArray[offset] = (short)thispixel;  //use z-buffer to ensure that if depth-cueing is on,
 									cueZBuffer[offset] = (short)znew;       //the closer of two equally-bright points is displayed.
-									projArray[offset] = (byte)((depthCueInt*thispixel/100 +
+									projArray[offset] = (short)((depthCueInt*thispixel/100 +
 											c100minusDepthCueInt*thispixel*(zmax-znew)/zmaxminuszmintimes100));
 								}
 							} else {
-								if (thispixel > (projArray[offset]&0xff))
-									projArray[offset] = (byte)thispixel;
+								if (thispixel > (projArray[offset]&0xffff))
+									projArray[offset] = (short)thispixel;
 							}
 						} // if  BrightestPt
 					} //end if thispixel in range
@@ -1278,7 +1278,7 @@ public class Projector implements PlugInFilter, TextListener {
 		boolean MeanVal, BrightestPt;
 		int xsintheta, xcostheta, ysintheta, ycostheta;
 		int xsinthetainit, xcosthetainit, ysinthetainit, ycosthetainit;
-		byte[] pixels;
+		short[] pixels;
 		int projsize = projwidth * projheight;
 
 		//find z-coordinates of first and last slices
@@ -1310,7 +1310,7 @@ public class Projector implements PlugInFilter, TextListener {
 		//IJ.write("c100minusDepthCueSurf: "+c100minusDepthCueSurf);
 		offsetinit = ((projheight-bottom+top)/2) * projwidth + (projwidth - right + left)/2 - 1;
 		for (int k=1; k<=nSlices; k++) {
-			pixels = (byte[])stack.getPixels(k);
+			pixels = (short[])stack.getPixels(k);
 			z = (int)((k-1)*sliceInterval+0.5) - zcenter;
 			ycostheta = ycosthetainit;
 			ysintheta = ysinthetainit;
@@ -1323,7 +1323,7 @@ public class Projector implements PlugInFilter, TextListener {
 				int lineIndex = j*imageWidth;
 				//read each pixel in current row and project it
 				for (int i=left; i<right; i++) {
-					thispixel = pixels[lineIndex+i]&0xff;
+					thispixel = pixels[lineIndex+i]&0xffff;
 					xcostheta += costheta;  //rotate about x-axis and find new y,z
 					xsintheta += sintheta;  //x-coordinates will not change
 					if ((thispixel <= transparencyUpper) && (thispixel >= transparencyLower)) {
@@ -1337,16 +1337,16 @@ public class Projector implements PlugInFilter, TextListener {
 								zBuffer[offset] = (short)z;
 								if (OpacityAndNotNearestPt) {
 									if (DepthCueSurfLessThan100)
-										opaArray[offset] = (byte)((depthCueSurf*(thispixel)/100 +  c100minusDepthCueSurf*(thispixel)*(zmax-z)/zmaxminuszmintimes100));
+										opaArray[offset] = (short)((depthCueSurf*(thispixel)/100 +  c100minusDepthCueSurf*(thispixel)*(zmax-z)/zmaxminuszmintimes100));
 									else
-										opaArray[offset] = (byte)thispixel;
+										opaArray[offset] = (short)thispixel;
 								} else {
 									if (DepthCueSurfLessThan100) {
 										int v = (depthCueSurf*thispixel/100 + c100minusDepthCueSurf*thispixel*(zmax-z)/zmaxminuszmintimes100);
 										//f[offset] = z;
-										projArray[offset] = (byte)v;
+										projArray[offset] = (short)v;
 									} else
-										projArray[offset] = (byte)thispixel;
+										projArray[offset] = (short)thispixel;
 								}
 							} // if z<zBuffer[offset]
 						} // OpacityOrNearestPt
@@ -1355,15 +1355,15 @@ public class Projector implements PlugInFilter, TextListener {
 							countBuffer[offset]++;
 						} else if (BrightestPt) {
 							if (DepthCueIntLessThan100) {
-								if ((thispixel>(brightCueArray[offset]&0xff)) || (thispixel==(brightCueArray[offset]&0xff)) && (z>cueZBuffer[offset])) {
-									brightCueArray[offset] = (byte)thispixel;  //use z-buffer to ensure that if depth-cueing is on,
+								if ((thispixel>(brightCueArray[offset]&0xffff)) || (thispixel==(brightCueArray[offset]&0xffff)) && (z>cueZBuffer[offset])) {
+									brightCueArray[offset] = (short)thispixel;  //use z-buffer to ensure that if depth-cueing is on,
 									cueZBuffer[offset] = (short)z;       //the closer of two equally-bright points is displayed.
-									projArray[offset] = (byte)((depthCueInt*(thispixel)/100 + c100minusDepthCueInt*(thispixel)*(zmax-z)/zmaxminuszmintimes100));
+									projArray[offset] = (short)((depthCueInt*(thispixel)/100 + c100minusDepthCueInt*(thispixel)*(zmax-z)/zmaxminuszmintimes100));
 								}
 							} else {
-								//p = (BYTE *)(projaddr + offset);
-								if (thispixel > (projArray[offset]&0xff))
-									projArray[offset] = (byte)thispixel;
+								//p = (short *)(projaddr + offset);
+								if (thispixel > (projArray[offset]&0xffff))
+									projArray[offset] = (short)thispixel;
 							}
 						} // else BrightestPt
 					} //if thispixel in range
@@ -1387,7 +1387,7 @@ public class Projector implements PlugInFilter, TextListener {
 		int width2 = r.width;
 		int height2 = r.height;
 		int depth2 = (int)(stack1.getSize()*sliceInterval+0.5);
-		imp2 = NewImage.createImage(title, width2, height2, depth2, isRGB?24:8, NewImage.FILL_BLACK, false);
+		imp2 = NewImage.createImage(title, width2, height2, depth2, isRGB?24:16, NewImage.FILL_BLACK, false);
 		if (imp2==null || depth2!=imp2.getStackSize()) return null;
 		ImageStack stack2 = imp2.getStack();
 		ImageProcessor xzPlane1 = ip.createProcessor(width2, depth1);
@@ -1399,7 +1399,7 @@ public class Projector implements PlugInFilter, TextListener {
 				if (isRGB)
 					getRGBRow(stack1, r.x, r.y+y, z, width1, width2, line);
 				else
-					getByteRow(stack1, r.x, r.y+y, z, width1, width2, line);
+					getshortRow(stack1, r.x, r.y+y, z, width1, width2, line);
 				xzPlane1.putRow(0, z, line, width2);
 			}
 			//if (y==r.y) new ImagePlus("xzPlane", xzPlane1).show();
@@ -1409,7 +1409,7 @@ public class Projector implements PlugInFilter, TextListener {
 				if (isRGB)
 					putRGBRow(stack2, y, z, width2, line);
 				else
-					putByteRow(stack2, y, z, width2, line);
+					putshortRow(stack2, y, z, width2, line);
 			}
 			if (!batchMode) IJ.showProgress(y, height2-1);
 		}
@@ -1421,18 +1421,18 @@ public class Projector implements PlugInFilter, TextListener {
 		return imp2;
 	}
 
-	public void getByteRow(ImageStack stack, int x, int y, int z, int width1, int width2, int[] line) {
-		byte[] pixels = (byte[])stack.getPixels(z+1);
+	public void getshortRow(ImageStack stack, int x, int y, int z, int width1, int width2, int[] line) {
+		short[] pixels = (short[])stack.getPixels(z+1);
 		int j = x + y*width1;
 		for (int i=0; i<width2; i++)
-			line[i] = pixels[j++]&255;
+			line[i] = pixels[j++]&0xffff;
 	}
 
-	public void putByteRow(ImageStack stack, int y, int z, int width, int[] line) {
-		byte[] pixels = (byte[])stack.getPixels(z+1);
+	public void putshortRow(ImageStack stack, int y, int z, int width, int[] line) {
+		short[] pixels = (short[])stack.getPixels(z+1);
 		int j = y*width;
 		for (int i=0; i<width; i++)
-			pixels[j++] = (byte)line[i];
+			pixels[j++] = (short)line[i];
 	}
 
 	public void getRGBRow(ImageStack stack, int x, int y, int z, int width1, int width2, int[] line) {
