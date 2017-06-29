@@ -62,14 +62,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	private JList<String> list, fullList;
 	private Hashtable<String, Roi> rois = new Hashtable<String, Roi>();
 	private Hashtable<String,  ArrayList<Roi>> roisByNumbers = new Hashtable<String, ArrayList<Roi>>();
-	private Hashtable<String,  ArrayList<Roi>> roisByName = new Hashtable<String, ArrayList<Roi>>();
+	private Hashtable<String,  ArrayList<Roi>> roisByRootName = new Hashtable<String, ArrayList<Roi>>();
 
 	public Hashtable<String, ArrayList<Roi>> getROIsByName() {
-		return roisByName;
+		return roisByRootName;
 	}
 
 	public void setROIsByName(Hashtable<String, ArrayList<Roi>> roisByName) {
-		this.roisByName = roisByName;
+		this.roisByRootName = roisByName;
 	}
 
 	private Roi roiCopy;
@@ -613,7 +613,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 					for (int n=0; n<rootNames.size(); n++) {
 						String rootName = rootNames.get(n);
-						nameMatchArrayList.addAll(roisByName.get(rootName));
+						nameMatchArrayList.addAll(roisByRootName.get(rootName));
 //						int fraa = fullrois.length;
 //						for (int r=0; r < fraa; r++) {
 //							String nextName = fullrois[r].getName();
@@ -1182,6 +1182,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		sliceRois.add(roiCopy);
 
+		String rootName = roiCopy.getName().contains("\"")?"\""+roiCopy.getName().split("\"")[1]+"\"":roiCopy.getName().split("_")[0].trim();
+
+		ArrayList<Roi> rootNameRois = roisByRootName.get(rootName);
+		if (rootNameRois == null) {
+			roisByRootName.put(rootName, new ArrayList<Roi>());
+			rootNameRois = roisByRootName.get(rootName);
+		}
+		rootNameRois.add(roiCopy);
+
 		ColorLegend cl = getColorLegend();
 		//
 		if (roiCopy!=null) { 
@@ -1303,7 +1312,16 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			sliceRois = roisByNumbers.get(roiCopy.getCPosition()+"_"+roiCopy.getZPosition()+"_"+roiCopy.getTPosition());
 		}
 		sliceRois.add(roiCopy);
-		
+		String rootName = roiCopy.getName().contains("\"")?"\""+roiCopy.getName().split("\"")[1]+"\"":roiCopy.getName().split("_")[0].trim();
+
+		ArrayList<Roi> rootNameRois = roisByRootName.get(rootName);
+		if (rootNameRois == null) {
+			roisByRootName.put(rootName, new ArrayList<Roi>());
+			rootNameRois = roisByRootName.get(rootName);
+		}
+		rootNameRois.add(roiCopy);
+
+
 		textCountLabel.setText(""+ listModel.size() +"/"+ fullListModel.size());
 		if (imp.getWindow()!=null) {
 			imp.getWindow().countLabel.setText(""+ listModel.size() +"/"+ fullListModel.size() +"");
@@ -1494,6 +1512,16 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					sliceRois = roisByNumbers.get(roi2.getCPosition()+"_"+roi2.getZPosition()+"_"+roi2.getTPosition());
 				}
 				sliceRois.add(roi2);
+				String rootName = roi2.getName().contains("\"")?"\""+roi2.getName().split("\"")[1]+"\"":roi2.getName().split("_")[0].trim();
+
+				ArrayList<Roi> rootNameRois = roisByRootName.get(rootName);
+				if (rootNameRois == null) {
+					roisByRootName.put(rootName, new ArrayList<Roi>());
+					rootNameRois = roisByRootName.get(rootName);
+				}
+				rootNameRois.add(roi2);
+
+
 				//				IJ.log("cloning");
 			} else {
 				rois.put(label, roi);
@@ -1503,6 +1531,16 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
 				}
 				sliceRois.add(roi);
+				String rootName = roi.getName().contains("\"")?"\""+roi.getName().split("\"")[1]+"\"":roi.getName().split("_")[0].trim();
+
+				ArrayList<Roi> rootNameRois = roisByRootName.get(rootName);
+				if (rootNameRois == null) {
+					roisByRootName.put(rootName, new ArrayList<Roi>());
+					rootNameRois = roisByRootName.get(rootName);
+				}
+				rootNameRois.add(roi);
+
+
 			}
 
 			updateShowAll();
@@ -1562,7 +1600,16 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
 			}
 			sliceRois.add(roi);
-			
+
+			String rootName = roi.getName().contains("\"")?"\""+roi.getName().split("\"")[1]+"\"":roi.getName().split("_")[0].trim();
+
+			ArrayList<Roi> rootNameRois = roisByRootName.get(rootName);
+			if (rootNameRois == null) {
+				roisByRootName.put(rootName, new ArrayList<Roi>());
+				rootNameRois = roisByRootName.get(rootName);
+			}
+			rootNameRois.add(roi);
+
 			ColorLegend cl = getColorLegend();
 			//
 			if (roi!=null) { 
@@ -1789,6 +1836,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
 			}
 			sliceRois.add(roi);
+			String rootName = roi.getName().contains("\"")?"\""+roi.getName().split("\"")[1]+"\"":roi.getName().split("_")[0].trim();
+
+			ArrayList<Roi> rootNameRois = roisByRootName.get(rootName);
+			if (rootNameRois == null) {
+				roisByRootName.put(rootName, new ArrayList<Roi>());
+				rootNameRois = roisByRootName.get(rootName);
+			}
+			rootNameRois.add(roi);
 		}		
 		showAll(SHOW_ALL);
 		updateShowAll();
@@ -1879,6 +1934,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							sliceRois = roisByNumbers.get(pRoi.getCPosition()+"_"+pRoi.getZPosition()+"_"+pRoi.getTPosition());
 						}
 						sliceRois.add(pRoi);
+						String rootName = pRoi.getName().contains("\"")?"\""+pRoi.getName().split("\"")[1]+"\"":pRoi.getName().split("_")[0].trim();
+
+						ArrayList<Roi> rootNameRois = roisByRootName.get(rootName);
+						if (rootNameRois == null) {
+							roisByRootName.put(rootName, new ArrayList<Roi>());
+							rootNameRois = roisByRootName.get(rootName);
+						}
+						rootNameRois.add(pRoi);
 						nRois++;
 
 						pRoi.setFillColor(Colors.decode(fillColor.replace("#", "#33"), defaultColor));
@@ -1946,6 +2009,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							sliceRois = roisByNumbers.get(aRoi.getCPosition()+"_"+aRoi.getZPosition()+"_"+aRoi.getTPosition());
 						}
 						sliceRois.add(aRoi);
+						String rootName = aRoi.getName().contains("\"")?"\""+aRoi.getName().split("\"")[1]+"\"":aRoi.getName().split("_")[0].trim();
+
+						ArrayList<Roi> rootNameRois = roisByRootName.get(rootName);
+						if (rootNameRois == null) {
+							roisByRootName.put(rootName, new ArrayList<Roi>());
+							rootNameRois = roisByRootName.get(rootName);
+						}
+						rootNameRois.add(aRoi);
 						nRois++;
 
 						aRoi.setStrokeColor(Colors.decode(connStroke, defaultColor));
@@ -2100,6 +2171,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							sliceRois = roisByNumbers.get(rbnKey);
 						}
 						sliceRois.add(roi);
+						String rootName = roi.getName().contains("\"")?"\""+roi.getName().split("\"")[1]+"\"":roi.getName().split("_")[0].trim();
+
+						ArrayList<Roi> rootNameRois = roisByRootName.get(rootName);
+						if (rootNameRois == null) {
+							roisByRootName.put(rootName, new ArrayList<Roi>());
+							rootNameRois = roisByRootName.get(rootName);
+						}
+						rootNameRois.add(roi);
 
 						nRois++;
 						String nameEndReader = name;
@@ -2227,6 +2306,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
 		}
 		sliceRois.add(roi);
+		String rootName = newName.contains("\"")?"\""+roi.getName().split("\"")[1]+"\"":roi.getName().split("_")[0].trim();
+
+		ArrayList<Roi> rootNameRois = roisByRootName.get(rootName);
+		if (rootNameRois == null) {
+			roisByRootName.put(rootName, new ArrayList<Roi>());
+			rootNameRois = roisByRootName.get(rootName);
+		}
+		rootNameRois.add(roi);
+		
 		roi.setName(newName);
 		listModel.setElementAt(newName, indexes[0]);
 		fullListModel.setElementAt(newName, indexes[0]);
@@ -2962,6 +3050,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
 			}
 			sliceRois.add(roi);
+			String rootName = roi.getName().contains("\"")?"\""+roi.getName().split("\"")[1]+"\"":roi.getName().split("_")[0].trim();
+
+			ArrayList<Roi> rootNameRois = roisByRootName.get(rootName);
+			if (rootNameRois == null) {
+				roisByRootName.put(rootName, new ArrayList<Roi>());
+				rootNameRois = roisByRootName.get(rootName);
+			}
+			rootNameRois.add(roi);
 			listModel.setElementAt(name2, index);
 			fullListModel.setElementAt(name2, index);
 		}
@@ -5069,6 +5165,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					sliceRois = roisByNumbers.get(tRoi.getCPosition()+"_"+tRoi.getZPosition()+"_"+tRoi.getTPosition());
 				}
 				sliceRois.add(tRoi);
+				String rootName = tRoi.getName().contains("\"")?"\""+tRoi.getName().split("\"")[1]+"\"":tRoi.getName().split("_")[0].trim();
+
+				ArrayList<Roi> rootNameRois = roisByRootName.get(rootName);
+				if (rootNameRois == null) {
+					roisByRootName.put(rootName, new ArrayList<Roi>());
+					rootNameRois = roisByRootName.get(rootName);
+				}
+				rootNameRois.add(tRoi);
 				nRois++;
 				tRoi.setFillColor(fillColorNew);
 				//					imp.setRoi(tRoi, true);
@@ -5132,6 +5236,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						sliceRois = roisByNumbers.get(lRoi.getCPosition()+"_"+lRoi.getZPosition()+"_"+lRoi.getTPosition());
 					}
 					sliceRois.add(lRoi);
+					String rootName = lRoi.getName().contains("\"")?"\""+lRoi.getName().split("\"")[1]+"\"":lRoi.getName().split("_")[0].trim();
+
+					ArrayList<Roi> rootNameRois = roisByRootName.get(rootName);
+					if (rootNameRois == null) {
+						roisByRootName.put(rootName, new ArrayList<Roi>());
+						rootNameRois = roisByRootName.get(rootName);
+					}
+					rootNameRois.add(lRoi);
 					nRois++;
 					lRoi.setPosition(1, 1, centerZ);
 					indexes[2*i] = listModel.getSize() - 1;
@@ -5150,6 +5262,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						sliceRois = roisByNumbers.get(aRoi.getCPosition()+"_"+aRoi.getZPosition()+"_"+aRoi.getTPosition());
 					}
 					sliceRois.add(aRoi);
+					rootName = lRoi.getName().contains("\"")?"\""+lRoi.getName().split("\"")[1]+"\"":lRoi.getName().split("_")[0].trim();
+
+					rootNameRois = roisByRootName.get(rootName);
+					if (rootNameRois == null) {
+						roisByRootName.put(rootName, new ArrayList<Roi>());
+						rootNameRois = roisByRootName.get(rootName);
+					}
+					rootNameRois.add(lRoi);
 					nRois++;
 					aRoi.setPosition(1, 1, centerZ);
 					indexes[(2*i)+1] = listModel.getSize() - 1;
@@ -5170,6 +5290,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
 					}
 					sliceRois.add(roi);
+					String rootName = roi.getName().contains("\"")?"\""+roi.getName().split("\"")[1]+"\"":roi.getName().split("_")[0].trim();
+
+					ArrayList<Roi> rootNameRois = roisByRootName.get(rootName);
+					if (rootNameRois == null) {
+						roisByRootName.put(rootName, new ArrayList<Roi>());
+						rootNameRois = roisByRootName.get(rootName);
+					}
+					rootNameRois.add(roi);
 					nRois++;
 				}
 				list.clearSelection();

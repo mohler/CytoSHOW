@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.rmi.RemoteException;
@@ -82,6 +83,14 @@ public class WG_Uploader implements PlugIn {
 			}
 			alSize = iterativeDirPaths.size();
 		}
+		String uniqueClientIdentifier;
+		try {
+			uniqueClientIdentifier = InetAddress.getLocalHost().getHostName() +"_"+ GetNetworkAddress.GetAddress("mac");
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			uniqueClientIdentifier = GetNetworkAddress.GetAddress("mac");
+		}
 
 		FTPClient ftpc = new FTPClient();
 		ftpc.setBufferSize(1024000);
@@ -93,14 +102,16 @@ public class WG_Uploader implements PlugIn {
 				ftpc.disconnect();
 				IJ.log("FTP server refused connection.");
 			} else {
+//				uniqueClientIdentifier = ftpc.getLocalAddress().toString();
+
 				ftpc.enterLocalPassiveMode();
 				ftpc.login("glowormguest", "GLOWorm");
 				ftpc.makeDirectory("WormguidesUploads");
 				ftpc.changeWorkingDirectory("/WormguidesUploads");
 
-				ftpc.makeDirectory("/WormguidesUploads/"+ftpc.getLocalAddress().toString());
+				ftpc.makeDirectory("/WormguidesUploads/"+uniqueClientIdentifier);
 				for (String path:iterativeDirPaths) {
-					ftpc.changeWorkingDirectory("/WormguidesUploads/"+ftpc.getLocalAddress().toString());
+					ftpc.changeWorkingDirectory("/WormguidesUploads/"+uniqueClientIdentifier);
 					String[] pathChunks = path.replace(":","").split("\\"+File.separator);
 					for (String chunk:pathChunks) {
 						if (!chunk.equals("")) {
