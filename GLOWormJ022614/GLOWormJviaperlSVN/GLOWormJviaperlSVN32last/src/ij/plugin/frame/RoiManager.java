@@ -1175,21 +1175,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (fillColor!=null)
 			roiCopy.setFillColor(fillColor);
 		rois.put(label, roiCopy);
-		ArrayList<Roi> sliceRois = roisByNumbers.get((addRoiSpanC?0:roiCopy.getCPosition())+"_"+(addRoiSpanZ?0:roiCopy.getZPosition())+"_"+(addRoiSpanT?0:roiCopy.getTPosition()));
-		if (sliceRois == null) {
-			roisByNumbers.put((addRoiSpanC?0:roiCopy.getCPosition())+"_"+(addRoiSpanZ?0:roiCopy.getZPosition())+"_"+(addRoiSpanT?0:roiCopy.getTPosition()), new ArrayList<Roi>());
-			sliceRois = roisByNumbers.get((addRoiSpanC?0:roiCopy.getCPosition())+"_"+(addRoiSpanZ?0:roiCopy.getZPosition())+"_"+(addRoiSpanT?0:roiCopy.getTPosition()));
-		}
-		sliceRois.add(roiCopy);
-
-		String rootName = roiCopy.getName().contains("\"")?"\""+roiCopy.getName().split("\"")[1]+"\"":roiCopy.getName().split("_")[0].trim();
-
-		ArrayList<Roi> rootNameRois = roisByRootName.get(rootName);
-		if (rootNameRois == null) {
-			roisByRootName.put(rootName, new ArrayList<Roi>());
-			rootNameRois = roisByRootName.get(rootName);
-		}
-		rootNameRois.add(roiCopy);
+		setUpRoisByNameAndNumbers(roiCopy);
 
 		ColorLegend cl = getColorLegend();
 		//
@@ -1270,6 +1256,24 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		return true;
 	}
 
+	public void setUpRoisByNameAndNumbers(Roi roi) {
+		ArrayList<Roi> sliceRois = roisByNumbers.get((addRoiSpanC?0:roi.getCPosition())+"_"+(addRoiSpanZ?0:roi.getZPosition())+"_"+(addRoiSpanT?0:roi.getTPosition()));
+		if (sliceRois == null) {
+			roisByNumbers.put((addRoiSpanC?0:roi.getCPosition())+"_"+(addRoiSpanZ?0:roi.getZPosition())+"_"+(addRoiSpanT?0:roi.getTPosition()), new ArrayList<Roi>());
+			sliceRois = roisByNumbers.get((addRoiSpanC?0:roi.getCPosition())+"_"+(addRoiSpanZ?0:roi.getZPosition())+"_"+(addRoiSpanT?0:roi.getTPosition()));
+		}
+		sliceRois.add(roi);
+
+		String rootName = roi.getName().contains("\"")?"\""+roi.getName().split("\"")[1]+"\"":roi.getName().split("_")[0].trim();
+
+		ArrayList<Roi> rootNameRois = roisByRootName.get(rootName);
+		if (rootNameRois == null) {
+			roisByRootName.put(rootName, new ArrayList<Roi>());
+			rootNameRois = roisByRootName.get(rootName);
+		}
+		rootNameRois.add(roi);
+	}
+
 	void recordAdd(Color color, int lineWidth) {
 		if (Recorder.scriptMode())
 			Recorder.recordCall("rm.addRoi(imp.getRoi());");
@@ -1306,21 +1310,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 		}
 		rois.put(label, roiCopy);
-		ArrayList<Roi> sliceRois = roisByNumbers.get(roiCopy.getCPosition()+"_"+roiCopy.getZPosition()+"_"+roiCopy.getTPosition());
-		if (sliceRois == null) {
-			roisByNumbers.put(roiCopy.getCPosition()+"_"+roiCopy.getZPosition()+"_"+roiCopy.getTPosition(), new ArrayList<Roi>());
-			sliceRois = roisByNumbers.get(roiCopy.getCPosition()+"_"+roiCopy.getZPosition()+"_"+roiCopy.getTPosition());
-		}
-		sliceRois.add(roiCopy);
-		String rootName = roiCopy.getName().contains("\"")?"\""+roiCopy.getName().split("\"")[1]+"\"":roiCopy.getName().split("_")[0].trim();
-
-		ArrayList<Roi> rootNameRois = roisByRootName.get(rootName);
-		if (rootNameRois == null) {
-			roisByRootName.put(rootName, new ArrayList<Roi>());
-			rootNameRois = roisByRootName.get(rootName);
-		}
-		rootNameRois.add(roiCopy);
-
+		setUpRoisByNameAndNumbers(roiCopy);
 
 		textCountLabel.setText(""+ listModel.size() +"/"+ fullListModel.size());
 		if (imp.getWindow()!=null) {
@@ -1506,39 +1496,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				if (imp.getStackSize()>1)
 					roi2.setPosition(c,z,t);
 				rois.put(label, roi2);
-				ArrayList<Roi> sliceRois = roisByNumbers.get(roi2.getCPosition()+"_"+roi2.getZPosition()+"_"+roi2.getTPosition());
-				if (sliceRois == null) {
-					roisByNumbers.put(roi2.getCPosition()+"_"+roi2.getZPosition()+"_"+roi2.getTPosition(), new ArrayList<Roi>());
-					sliceRois = roisByNumbers.get(roi2.getCPosition()+"_"+roi2.getZPosition()+"_"+roi2.getTPosition());
-				}
-				sliceRois.add(roi2);
-				String rootName = roi2.getName().contains("\"")?"\""+roi2.getName().split("\"")[1]+"\"":roi2.getName().split("_")[0].trim();
-
-				ArrayList<Roi> rootNameRois = roisByRootName.get(rootName);
-				if (rootNameRois == null) {
-					roisByRootName.put(rootName, new ArrayList<Roi>());
-					rootNameRois = roisByRootName.get(rootName);
-				}
-				rootNameRois.add(roi2);
-
+				setUpRoisByNameAndNumbers(roi2);
 
 				//				IJ.log("cloning");
 			} else {
 				rois.put(label, roi);
-				ArrayList<Roi> sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
-				if (sliceRois == null) {
-					roisByNumbers.put(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition(), new ArrayList<Roi>());
-					sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
-				}
-				sliceRois.add(roi);
-				String rootName = roi.getName().contains("\"")?"\""+roi.getName().split("\"")[1]+"\"":roi.getName().split("_")[0].trim();
-
-				ArrayList<Roi> rootNameRois = roisByRootName.get(rootName);
-				if (rootNameRois == null) {
-					roisByRootName.put(rootName, new ArrayList<Roi>());
-					rootNameRois = roisByRootName.get(rootName);
-				}
-				rootNameRois.add(roi);
+				setUpRoisByNameAndNumbers(roi);
 
 
 			}
@@ -1594,21 +1557,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 			roi.setName(label);
 			rois.put(label, roi);
-			ArrayList<Roi> sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
-			if (sliceRois == null) {
-				roisByNumbers.put(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition(), new ArrayList<Roi>());
-				sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
-			}
-			sliceRois.add(roi);
-
-			String rootName = roi.getName().contains("\"")?"\""+roi.getName().split("\"")[1]+"\"":roi.getName().split("_")[0].trim();
-
-			ArrayList<Roi> rootNameRois = roisByRootName.get(rootName);
-			if (rootNameRois == null) {
-				roisByRootName.put(rootName, new ArrayList<Roi>());
-				rootNameRois = roisByRootName.get(rootName);
-			}
-			rootNameRois.add(roi);
+			setUpRoisByNameAndNumbers(roi);
 
 			ColorLegend cl = getColorLegend();
 			//
@@ -1830,20 +1779,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			listModel.addElement(name);
 			fullListModel.addElement(name);
 			rois.put(name, roi);
-			ArrayList<Roi> sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
-			if (sliceRois == null) {
-				roisByNumbers.put(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition(), new ArrayList<Roi>());
-				sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
-			}
-			sliceRois.add(roi);
-			String rootName = roi.getName().contains("\"")?"\""+roi.getName().split("\"")[1]+"\"":roi.getName().split("_")[0].trim();
-
-			ArrayList<Roi> rootNameRois = roisByRootName.get(rootName);
-			if (rootNameRois == null) {
-				roisByRootName.put(rootName, new ArrayList<Roi>());
-				rootNameRois = roisByRootName.get(rootName);
-			}
-			rootNameRois.add(roi);
+			setUpRoisByNameAndNumbers(roi);
 		}		
 		showAll(SHOW_ALL);
 		updateShowAll();
@@ -1928,20 +1864,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						listModel.addElement(fillColor); 
 						fullListModel.addElement(fillColor);
 						rois.put(fillColor, pRoi); 
-						ArrayList<Roi> sliceRois = roisByNumbers.get(pRoi.getCPosition()+"_"+pRoi.getZPosition()+"_"+pRoi.getTPosition());
-						if (sliceRois == null) {
-							roisByNumbers.put(pRoi.getCPosition()+"_"+pRoi.getZPosition()+"_"+pRoi.getTPosition(), new ArrayList<Roi>());
-							sliceRois = roisByNumbers.get(pRoi.getCPosition()+"_"+pRoi.getZPosition()+"_"+pRoi.getTPosition());
-						}
-						sliceRois.add(pRoi);
-						String rootName = pRoi.getName().contains("\"")?"\""+pRoi.getName().split("\"")[1]+"\"":pRoi.getName().split("_")[0].trim();
-
-						ArrayList<Roi> rootNameRois = roisByRootName.get(rootName);
-						if (rootNameRois == null) {
-							roisByRootName.put(rootName, new ArrayList<Roi>());
-							rootNameRois = roisByRootName.get(rootName);
-						}
-						rootNameRois.add(pRoi);
+						setUpRoisByNameAndNumbers(pRoi);
 						nRois++;
 
 						pRoi.setFillColor(Colors.decode(fillColor.replace("#", "#33"), defaultColor));
@@ -2003,20 +1926,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						listModel.addElement(connStroke); 
 						fullListModel.addElement(connStroke);
 						rois.put(connStroke, aRoi); 
-						ArrayList<Roi> sliceRois = roisByNumbers.get(aRoi.getCPosition()+"_"+aRoi.getZPosition()+"_"+aRoi.getTPosition());
-						if (sliceRois == null) {
-							roisByNumbers.put(aRoi.getCPosition()+"_"+aRoi.getZPosition()+"_"+aRoi.getTPosition(), new ArrayList<Roi>());
-							sliceRois = roisByNumbers.get(aRoi.getCPosition()+"_"+aRoi.getZPosition()+"_"+aRoi.getTPosition());
-						}
-						sliceRois.add(aRoi);
-						String rootName = aRoi.getName().contains("\"")?"\""+aRoi.getName().split("\"")[1]+"\"":aRoi.getName().split("_")[0].trim();
-
-						ArrayList<Roi> rootNameRois = roisByRootName.get(rootName);
-						if (rootNameRois == null) {
-							roisByRootName.put(rootName, new ArrayList<Roi>());
-							rootNameRois = roisByRootName.get(rootName);
-						}
-						rootNameRois.add(aRoi);
+						setUpRoisByNameAndNumbers(aRoi);
 						nRois++;
 
 						aRoi.setStrokeColor(Colors.decode(connStroke, defaultColor));
@@ -3044,23 +2954,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			roi.setName(name2);
 			roi.setPosition(0,0,0);
 			rois.put(name2, roi);
-			ArrayList<Roi> sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
-			if (sliceRois == null) {
-				roisByNumbers.put(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition(), new ArrayList<Roi>());
-				sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
-			}
-			sliceRois.add(roi);
-			String rootName = roi.getName().contains("\"")?"\""+roi.getName().split("\"")[1]+"\"":roi.getName().split("_")[0].trim();
-
-			ArrayList<Roi> rootNameRois = roisByRootName.get(rootName);
-			if (rootNameRois == null) {
-				roisByRootName.put(rootName, new ArrayList<Roi>());
-				rootNameRois = roisByRootName.get(rootName);
-			}
-			rootNameRois.add(roi);
-			listModel.setElementAt(name2, index);
-			fullListModel.setElementAt(name2, index);
-		}
+			setUpRoisByNameAndNumbers(roi);		}
 	}
 
 	void help() {
@@ -5159,20 +5053,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				listModel.addElement(roiName);
 				fullListModel.addElement(roiName);
 				rois.put(roiName, tRoi);
-				ArrayList<Roi> sliceRois = roisByNumbers.get(tRoi.getCPosition()+"_"+tRoi.getZPosition()+"_"+tRoi.getTPosition());
-				if (sliceRois == null) {
-					roisByNumbers.put(tRoi.getCPosition()+"_"+tRoi.getZPosition()+"_"+tRoi.getTPosition(), new ArrayList<Roi>());
-					sliceRois = roisByNumbers.get(tRoi.getCPosition()+"_"+tRoi.getZPosition()+"_"+tRoi.getTPosition());
-				}
-				sliceRois.add(tRoi);
-				String rootName = tRoi.getName().contains("\"")?"\""+tRoi.getName().split("\"")[1]+"\"":tRoi.getName().split("_")[0].trim();
-
-				ArrayList<Roi> rootNameRois = roisByRootName.get(rootName);
-				if (rootNameRois == null) {
-					roisByRootName.put(rootName, new ArrayList<Roi>());
-					rootNameRois = roisByRootName.get(rootName);
-				}
-				rootNameRois.add(tRoi);
+				setUpRoisByNameAndNumbers(tRoi);
 				nRois++;
 				tRoi.setFillColor(fillColorNew);
 				//					imp.setRoi(tRoi, true);
@@ -5230,20 +5111,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					listModel.addElement(roiName);
 					fullListModel.addElement(roiName);
 					rois.put(roiName, lRoi);
-					ArrayList<Roi> sliceRois = roisByNumbers.get(lRoi.getCPosition()+"_"+lRoi.getZPosition()+"_"+lRoi.getTPosition());
-					if (sliceRois == null) {
-						roisByNumbers.put(lRoi.getCPosition()+"_"+lRoi.getZPosition()+"_"+lRoi.getTPosition(), new ArrayList<Roi>());
-						sliceRois = roisByNumbers.get(lRoi.getCPosition()+"_"+lRoi.getZPosition()+"_"+lRoi.getTPosition());
-					}
-					sliceRois.add(lRoi);
-					String rootName = lRoi.getName().contains("\"")?"\""+lRoi.getName().split("\"")[1]+"\"":lRoi.getName().split("_")[0].trim();
-
-					ArrayList<Roi> rootNameRois = roisByRootName.get(rootName);
-					if (rootNameRois == null) {
-						roisByRootName.put(rootName, new ArrayList<Roi>());
-						rootNameRois = roisByRootName.get(rootName);
-					}
-					rootNameRois.add(lRoi);
+					setUpRoisByNameAndNumbers(lRoi);
 					nRois++;
 					lRoi.setPosition(1, 1, centerZ);
 					indexes[2*i] = listModel.getSize() - 1;
@@ -5256,20 +5124,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					listModel.addElement(roiName);
 					fullListModel.addElement(roiName);
 					rois.put(roiName, aRoi);
-					sliceRois = roisByNumbers.get(aRoi.getCPosition()+"_"+aRoi.getZPosition()+"_"+aRoi.getTPosition());
-					if (sliceRois == null) {
-						roisByNumbers.put(aRoi.getCPosition()+"_"+aRoi.getZPosition()+"_"+aRoi.getTPosition(), new ArrayList<Roi>());
-						sliceRois = roisByNumbers.get(aRoi.getCPosition()+"_"+aRoi.getZPosition()+"_"+aRoi.getTPosition());
-					}
-					sliceRois.add(aRoi);
-					rootName = lRoi.getName().contains("\"")?"\""+lRoi.getName().split("\"")[1]+"\"":lRoi.getName().split("_")[0].trim();
-
-					rootNameRois = roisByRootName.get(rootName);
-					if (rootNameRois == null) {
-						roisByRootName.put(rootName, new ArrayList<Roi>());
-						rootNameRois = roisByRootName.get(rootName);
-					}
-					rootNameRois.add(lRoi);
+					setUpRoisByNameAndNumbers(aRoi);
 					nRois++;
 					aRoi.setPosition(1, 1, centerZ);
 					indexes[(2*i)+1] = listModel.getSize() - 1;
@@ -5284,20 +5139,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					fullListModel.addElement(roiName);
 					Roi roi = imp.getRoi();
 					rois.put(roiName, roi);
-					ArrayList<Roi> sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
-					if (sliceRois == null) {
-						roisByNumbers.put(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition(), new ArrayList<Roi>());
-						sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
-					}
-					sliceRois.add(roi);
-					String rootName = roi.getName().contains("\"")?"\""+roi.getName().split("\"")[1]+"\"":roi.getName().split("_")[0].trim();
-
-					ArrayList<Roi> rootNameRois = roisByRootName.get(rootName);
-					if (rootNameRois == null) {
-						roisByRootName.put(rootName, new ArrayList<Roi>());
-						rootNameRois = roisByRootName.get(rootName);
-					}
-					rootNameRois.add(roi);
+					setUpRoisByNameAndNumbers(roi);
 					nRois++;
 				}
 				list.clearSelection();
