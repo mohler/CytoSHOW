@@ -4619,8 +4619,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		return colorLegend;
 	}
 
-	public void setColorLegend(ColorLegend colorLegend) {
-		this.colorLegend = colorLegend;
+	public void setColorLegend(ColorLegend cl) {
+		this.colorLegend = cl;
 	}
 
 	public void setCellNames(ArrayList<String> cellNames) {

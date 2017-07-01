@@ -1219,7 +1219,12 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 				ColorLegend cl;
 				if (new File(((File)obj).getPath()).exists()){
 					cl = new ColorLegend(imp, IJ.openAsString(((File)obj).getPath()));
+					impCL = imp.getRoiManager().getColorLegend();
 					IJ.showStatus("");
+					dropImp.getCanvas().messageRois.remove("Pending drop "+nDrops);
+
+					nDrops--;
+					return;
 				} else
 					IJ.showStatus("badpath");
 			} else if (obj!=null && IJ.isWindows() && ((File)obj).getPath().endsWith(".url")){

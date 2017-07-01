@@ -182,6 +182,26 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 			setLocation(location);
 //		this.setVisible(true);
 		
+		for (Roi roi:rm.getROIs().values()) {
+			if (roi!=null) { 
+				if (this != null) {
+					Color clColor = this.getBrainbowColors()
+							.get(roi.getName().toLowerCase().split("_")[0].split("=")[0].replace("\"", "").trim());
+					if (clColor !=null) {
+						String hexRed = Integer.toHexString(clColor.getRed());
+						String hexGreen = Integer.toHexString(clColor.getGreen());
+						String hexBlue = Integer.toHexString(clColor.getBlue());
+						roi.setFillColor(Colors.decode("#ff"+(hexRed.length()==1?"0":"")+hexRed
+								+(hexGreen.length()==1?"0":"")+hexGreen
+								+(hexBlue.length()==1?"0":"")+hexBlue
+								, Color.white));
+					}
+				}
+				roi.setImage(imp);
+			}
+
+		}
+		imp.updateAndRepaintWindow();
 	}
 	
 	
