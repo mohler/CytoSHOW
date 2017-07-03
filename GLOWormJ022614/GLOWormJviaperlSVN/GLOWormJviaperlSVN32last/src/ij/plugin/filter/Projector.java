@@ -186,8 +186,9 @@ public class Projector implements PlugInFilter, TextListener {
 		if (imp.isComposite() && ((CompositeImage)imp).getCompositeMode() >= CompositeImage.RATIO12)
 			lastC = firstC;
 
-
-		imp.getWindow().setVisible(false);
+		if (imp.getWindow()!=null) {
+			imp.getWindow().setVisible(false);
+		}
 
 		Frame rm = imp.getRoiManager();
 		boolean rmVis =false; 

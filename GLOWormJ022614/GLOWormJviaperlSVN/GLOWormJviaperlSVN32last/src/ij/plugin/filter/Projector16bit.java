@@ -98,7 +98,31 @@ public class Projector16bit implements PlugInFilter, TextListener {
 	private boolean is16bit;
 	private boolean is32bit;
 	private String dupTitle;
+	private long tempTime;
+	private boolean noDialogs;
+	private boolean noShow;
+	private File tempXDir;
+	private File tempYDir;
 
+	public Projector16bit(ImagePlus imp,int rotationAxis, long tempTime) {
+		this.imp=imp;
+		this.firstC=1;
+		this.lastC=imp.getNChannels();
+		this.firstZ=1;
+		this.lastZ=imp.getNSlices();
+		this.firstT=imp.getNFrames();
+		this.lastT=imp.getNFrames();
+		this.tempTime = tempTime;
+		this.sliceInterval = imp.getCalibration().pixelDepth;
+		this.is16bit=true;
+		this.isHyperstack=true;
+		this.noDialogs=true;
+		this.noShow=true;
+		this.axisOfRotation = rotationAxis;
+		
+		run(this.imp.getProcessor());
+	}
+	
 	public int setup(String arg, ImagePlus imp) {
 		this.imp = imp;
 		if (false/*!(imp.getStack() instanceof MultiQTVirtualStack) && imp.getType() == ImagePlus.COLOR_RGB*/) {
@@ -143,12 +167,15 @@ public class Projector16bit implements PlugInFilter, TextListener {
 				return; 
 		}
 
-		if (!showHSDialog(imp))
-			return;
+		if (!noDialogs) {
+			if (!showHSDialog(imp))
+				return;
 
-		if (!showDialog())
-			return;
-		WindowManager.setCurrentWindow(imp.getWindow());
+			if (!showDialog())
+				return;
+		}
+		if(imp.getWindow()!=null)
+			WindowManager.setCurrentWindow(imp.getWindow());
 		//		((ContrastAdjuster)ContrastAdjuster.getInstance()).toBack();
 		isRGB = imp.getType()==ImagePlus.COLOR_RGB;
 		is16bit = imp.getType()==ImagePlus.GRAY16;
@@ -187,7 +214,9 @@ public class Projector16bit implements PlugInFilter, TextListener {
 			lastC = firstC;
 
 
-		imp.getWindow().setVisible(false);
+		if (imp.getWindow()!=null) {
+			imp.getWindow().setVisible(false);
+		}
 
 		Frame rm = imp.getRoiManager();
 		boolean rmVis =false; 
@@ -233,11 +262,13 @@ public class Projector16bit implements PlugInFilter, TextListener {
 		if (!correctSaveRoot) {
 			saveRootDir = (new File(saveRootDir)).getParent();
 		}
-		File tempDir = new File(saveRootDir + File.separator + saveRootPrefix +"Proj_"+imp.getTitle().replaceAll("[,. ;:]","").replace(File.separator, "_") + tempTime);
-		if (!tempDir.mkdir()) {
-			IJ.error("3D Projection failed", "Unable to save projected stacks to" + tempDir.getPath());
-			return;
-		}
+		tempXDir = new File(saveRootDir + File.separator + saveRootPrefix +"ProjX_"+imp.getTitle().replaceAll("[,. ;:]","").replace(File.separator, "_") + tempTime);
+		tempYDir = new File(saveRootDir + File.separator + saveRootPrefix +"ProjY_"+imp.getTitle().replaceAll("[,. ;:]","").replace(File.separator, "_") + tempTime);
+
+		if (axisOfRotation == 0)
+			tempXDir.mkdirs();
+		else
+			tempYDir.mkdirs();
 
 		for (loopT = firstT; loopT < lastT +1; loopT=loopT+stepT) { 
 			long memoryFree = Runtime.getRuntime().freeMemory();
@@ -396,13 +427,17 @@ public class Projector16bit implements PlugInFilter, TextListener {
 				}
 				projImpDC.setStack(stackC, lastC-firstC+1, stackC.getSize()/(lastC-firstC+1), 1);
 
-				IJ.save(projImpDC, tempDir + File.separator + "proj_"+loopT+"_"+loopC+".tif");
+				if (axisOfRotation == 0)
+					IJ.save(projImpDC, tempXDir + File.separator + "proj_"+loopT+"_"+loopC+".tif");
+				else
+					IJ.save(projImpDC, tempYDir + File.separator + "proj_"+loopT+"_"+loopC+".tif");
+
 				if (!isRGB) 
 					projImpDC= new CompositeImage(projImpDC);
 				for (loopC = firstC; loopC < lastC +1; loopC++) {
 					projImpD[loopC-firstC].flush();
 				}
-				MultiFileInfoVirtualStack nextStack = new MultiFileInfoVirtualStack(tempDir.getPath()+ File.separator , "xyczt", "",0,0,0, 1, 0, false, false);
+				MultiFileInfoVirtualStack nextStack = new MultiFileInfoVirtualStack(tempXDir.getPath()+ File.separator , "xyczt", "",0,0,0, 1, 0, false, false);
 				buildImp = new ImagePlus();
 				buildImp.setOpenAsHyperStack(true);
 
@@ -428,7 +463,8 @@ public class Projector16bit implements PlugInFilter, TextListener {
 				}
 
 				imp.setRoi(manualRoi);
-				imp.getWindow().setVisible(true);
+				if(imp.getWindow()!=null)
+					imp.getWindow().setVisible(true);
 
 
 				if (rm != null && rmVis) 
@@ -490,7 +526,7 @@ public class Projector16bit implements PlugInFilter, TextListener {
 					buildWin = buildImp.getWindow();
 				}
 
-				if (imp != null & buildImp != null){
+				if (imp != null & buildImp != null && imp.getWindow()!=null){
 					buildWin.setBackground(imp.getWindow().getBackground());
 					buildWin.setSubTitleBkgdColor(imp.getWindow().getBackground());
 				}
@@ -1475,6 +1511,188 @@ public class Projector16bit implements PlugInFilter, TextListener {
 
 	public void textValueChanged(TextEvent e) {
 		checkbox.setState(true);
+	}
+
+	public static int getAxisOfRotation() {
+		return axisOfRotation;
+	}
+
+	public static void setAxisOfRotation(int axisOfRotation) {
+		Projector16bit.axisOfRotation = axisOfRotation;
+	}
+
+	public static int getProjectionMethod() {
+		return projectionMethod;
+	}
+
+	public static void setProjectionMethod(int projectionMethod) {
+		Projector16bit.projectionMethod = projectionMethod;
+	}
+
+	public double getSliceInterval() {
+		return sliceInterval;
+	}
+
+	public void setSliceInterval(double sliceInterval) {
+		this.sliceInterval = sliceInterval;
+	}
+
+	public static int getInitAngle() {
+		return initAngle;
+	}
+
+	public static void setInitAngle(int initAngle) {
+		Projector16bit.initAngle = initAngle;
+	}
+
+	public static int getTotalAngle() {
+		return totalAngle;
+	}
+
+	public static void setTotalAngle(int totalAngle) {
+		Projector16bit.totalAngle = totalAngle;
+	}
+
+	public static int getAngleInc() {
+		return angleInc;
+	}
+
+	public static void setAngleInc(int angleInc) {
+		Projector16bit.angleInc = angleInc;
+	}
+
+	public static int getOpacity() {
+		return opacity;
+	}
+
+	public static void setOpacity(int opacity) {
+		Projector16bit.opacity = opacity;
+	}
+
+	public static int getDepthCueSurf() {
+		return depthCueSurf;
+	}
+
+	public static void setDepthCueSurf(int depthCueSurf) {
+		Projector16bit.depthCueSurf = depthCueSurf;
+	}
+
+	public static int getDepthCueInt() {
+		return depthCueInt;
+	}
+
+	public static void setDepthCueInt(int depthCueInt) {
+		Projector16bit.depthCueInt = depthCueInt;
+	}
+
+	public static boolean isInterpolate() {
+		return interpolate;
+	}
+
+	public static void setInterpolate(boolean interpolate) {
+		Projector16bit.interpolate = interpolate;
+	}
+
+	public int getTransparencyLower() {
+		return transparencyLower;
+	}
+
+	public void setTransparencyLower(int transparencyLower) {
+		this.transparencyLower = transparencyLower;
+	}
+
+	public int getTransparencyUpper() {
+		return transparencyUpper;
+	}
+
+	public void setTransparencyUpper(int transparencyUpper) {
+		this.transparencyUpper = transparencyUpper;
+	}
+
+	public int getFirstC() {
+		return firstC;
+	}
+
+	public void setFirstC(int firstC) {
+		this.firstC = firstC;
+	}
+
+	public int getLastC() {
+		return lastC;
+	}
+
+	public void setLastC(int lastC) {
+		this.lastC = lastC;
+	}
+
+	public int getFirstZ() {
+		return firstZ;
+	}
+
+	public void setFirstZ(int firstZ) {
+		this.firstZ = firstZ;
+	}
+
+	public int getLastZ() {
+		return lastZ;
+	}
+
+	public void setLastZ(int lastZ) {
+		this.lastZ = lastZ;
+	}
+
+	public int getFirstT() {
+		return firstT;
+	}
+
+	public void setFirstT(int firstT) {
+		this.firstT = firstT;
+	}
+
+	public int getLastT() {
+		return lastT;
+	}
+
+	public void setLastT(int lastT) {
+		this.lastT = lastT;
+	}
+
+	public int getLoopC() {
+		return loopC;
+	}
+
+	public void setLoopC(int loopC) {
+		this.loopC = loopC;
+	}
+
+	public int getLoopT() {
+		return loopT;
+	}
+
+	public void setLoopT(int loopT) {
+		this.loopT = loopT;
+	}
+
+	public int getStepT() {
+		return stepT;
+	}
+
+	public void setStepT(int stepT) {
+		this.stepT = stepT;
+	}
+
+	public File getTempDir() {
+		if (axisOfRotation == 0)
+			return tempXDir;
+		else
+			return tempYDir;
+	}
+
+	public void setTempDir(File tempDir) {
+		if (axisOfRotation == 0)
+			this.tempXDir = tempDir;
+		else
+			this.tempYDir = tempDir;
 	}
 
 }

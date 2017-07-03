@@ -301,7 +301,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 				impT.setOpenAsHyperStack(true);
 
 				impT.setDimensions(copyMergedImage?1:lastC-firstC+1, lastZ-firstZ+1, 1);
-				if (  ((StackWindow)imp.getWindow()).isWormAtlas() 
+				if (imp.getWindow()!=null &&  ((StackWindow)imp.getWindow()).isWormAtlas() 
 						&& imp.getStack() instanceof MultiQTVirtualStack){
 					//			IJ.log("Copy from WA STACK");
 					impT.setDimensions(lastC-firstC+1, finalFrames, 1 );
@@ -341,7 +341,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 		imp2.setOpenAsHyperStack(true);
 
 		imp2.setDimensions(copyMergedImage?1:lastC-firstC+1, lastZ-firstZ+1, finalFrames);
-		if (  ((StackWindow)imp.getWindow()).isWormAtlas() 
+		if (imp.getWindow()!=null && ((StackWindow)imp.getWindow()).isWormAtlas() 
 				&& imp.getStack() instanceof MultiQTVirtualStack){
 			//			IJ.log("Copy from WA STACK");
 			imp2.setDimensions(lastC-firstC+1, finalFrames, 1 );
@@ -495,7 +495,8 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 			imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() + 1);
 			imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() - 1);
 		}
-		imp.getWindow().setVisible(true);
+		if(imp.getWindow()!=null) 
+			imp.getWindow().setVisible(true);
 		imp.setRoi(roi);
 		if (rm != null && rmVis) 
 			rm.setVisible(true);
@@ -523,7 +524,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 		if (imp2.getWindow() != null) {
 			imp2.getWindow().setVisible(false);
 
-			if (imp != null && imp2 != null) {
+			if (imp != null && imp2 != null && imp.getWindow()!=null && imp2.getWindow()!=null) {
 				imp2.getWindow().setBackground(imp.getWindow().getBackground());
 				imp2.getWindow().setSubTitleBkgdColor(imp.getWindow().getBackground());
 			}
@@ -590,7 +591,8 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 		if (imp2.getWindow() != null) {
 			imp2.getWindow().setVisible(true);
 		}
-		imp.getWindow().dupButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/download_button_animatedStill.png")));
+		if(imp.getWindow()!=null)
+			imp.getWindow().dupButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/download_button_animatedStill.png")));
 		imp.getCanvas().setVisible(true);
 		//		IJ.saveAs(imp2, "Tiff", "");
 		return imp2;

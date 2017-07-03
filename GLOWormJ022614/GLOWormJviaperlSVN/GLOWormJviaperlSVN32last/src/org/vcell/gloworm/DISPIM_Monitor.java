@@ -51,6 +51,7 @@ import ij.plugin.FolderOpener;
 import ij.plugin.MultiFileInfoVirtualStack;
 import ij.plugin.PlugIn;
 import ij.plugin.filter.Analyzer;
+import ij.plugin.filter.Projector16bit;
 import ij.plugin.frame.SyncWindows;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
@@ -169,7 +170,8 @@ public class DISPIM_Monitor implements PlugIn {
 	private boolean doRegPriming;
 	private double sliceTresholdVsModeA;
 	private double sliceTresholdVsModeB;
-	
+	private long tempTime = (new Date()).getTime();
+
 
 	
 	public Process getRegDeconProcess() {
@@ -1661,6 +1663,7 @@ public class DISPIM_Monitor implements PlugIn {
 
 						if ((new File(savePath)).canRead()) {
 							// SETUP OF WINDOWS SHOWING NEW AND PRE-EXISTING DECON OUTPUTS
+							
 							MultiFileInfoVirtualStack deconmfivs = null;					
 							if (true) {
 								if (new File(dirOrOMETiff
@@ -1693,6 +1696,25 @@ public class DISPIM_Monitor implements PlugIn {
 										ciDF1s[pos].setMode(CompositeImage.COMPOSITE);
 									else
 										ciDF1s[pos].setMode(CompositeImage.GRAYSCALE);
+
+									Projector16bit prjX = new Projector16bit(ciDF1s[pos], 0, tempTime);
+									try {
+										Files.move(Paths.get(prjX.getTempDir().getAbsolutePath()+"proj_1_3.tif"),
+												Paths.get(prjX.getTempDir().getAbsolutePath()+"projX_"+pos+"_"+ciDF1s[pos].getNFrames()+".tif"));
+									} catch (IOException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+									Projector16bit prjY = new Projector16bit(ciDF1s[pos], 1, tempTime);
+									try {
+										Files.move(Paths.get(prjX.getTempDir().getAbsolutePath()+"proj_1_3.tif"),
+												Paths.get(prjX.getTempDir().getAbsolutePath()+"projY_"+pos+"_"+ciDF1s[pos].getNFrames()+".tif"));
+									} catch (IOException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+
+
 									if (win==null) {
 										ciDF1s[pos].show();
 										WindowManager.group(impBs[pos], ciDF1s[pos]);
