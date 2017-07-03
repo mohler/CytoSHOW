@@ -1698,21 +1698,11 @@ public class DISPIM_Monitor implements PlugIn {
 										ciDF1s[pos].setMode(CompositeImage.GRAYSCALE);
 
 									Projector16bit prjX = new Projector16bit(ciDF1s[pos], 0, tempTime);
-									try {
-										Files.move(Paths.get(prjX.getTempDir().getAbsolutePath()+"proj_1_3.tif"),
-												Paths.get(prjX.getTempDir().getAbsolutePath()+"projX_"+pos+"_"+ciDF1s[pos].getNFrames()+".tif"));
-									} catch (IOException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
-									}
+									new File(prjX.getTempDir().getAbsolutePath()+"proj_1_3.tif")
+										.renameTo(new File(prjX.getTempDir().getAbsolutePath()+"projX_"+pos+"_"+ciDF1s[pos].getNFrames()+".tif"));
 									Projector16bit prjY = new Projector16bit(ciDF1s[pos], 1, tempTime);
-									try {
-										Files.move(Paths.get(prjX.getTempDir().getAbsolutePath()+"proj_1_3.tif"),
-												Paths.get(prjX.getTempDir().getAbsolutePath()+"projY_"+pos+"_"+ciDF1s[pos].getNFrames()+".tif"));
-									} catch (IOException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
-									}
+									new File(prjY.getTempDir().getAbsolutePath()+"proj_1_3.tif")
+										.renameTo(new File(prjY.getTempDir().getAbsolutePath()+"projY_"+pos+"_"+ciDF1s[pos].getNFrames()+".tif"));
 
 
 									if (win==null) {

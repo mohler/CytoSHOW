@@ -437,192 +437,194 @@ public class Projector16bit implements PlugInFilter, TextListener {
 				for (loopC = firstC; loopC < lastC +1; loopC++) {
 					projImpD[loopC-firstC].flush();
 				}
-				MultiFileInfoVirtualStack nextStack = new MultiFileInfoVirtualStack(tempXDir.getPath()+ File.separator , "xyczt", "",0,0,0, 1, 0, false, false);
-				buildImp = new ImagePlus();
-				buildImp.setOpenAsHyperStack(true);
+				
+				if(!noShow) {
+					MultiFileInfoVirtualStack nextStack = new MultiFileInfoVirtualStack(tempXDir.getPath()+ File.separator , "xyczt", "",0,0,0, 1, 0, false, false);
+					buildImp = new ImagePlus();
+					buildImp.setOpenAsHyperStack(true);
 
-				finalFrames++;
-				buildImp.setStack(nextStack, 1+lastC-firstC, finalSlices, finalFrames);
+					finalFrames++;
+					buildImp.setStack(nextStack, 1+lastC-firstC, finalSlices, finalFrames);
 
 
-				imp.getProcessor().setColorModel(cm);
-				imp.setPosition(inChannel, inSlice, inFrame);
-				int origChannel = imp.getChannel();
-				if ( imp.isComposite()) {
-					((CompositeImage)imp).setMode(stackMode);
+					imp.getProcessor().setColorModel(cm);
+					imp.setPosition(inChannel, inSlice, inFrame);
+					int origChannel = imp.getChannel();
+					if ( imp.isComposite()) {
+						((CompositeImage)imp).setMode(stackMode);
 
-				}
-
-				if (imp instanceof CompositeImage && ((CompositeImage) imp).getMode() ==1 ) {
-					for (int j = 1; j <= imp.getNChannels(); j++) {
-						imp.setPosition(j, imp.getSlice(), imp.getFrame());
 					}
-					imp.setPosition(origChannel, imp.getSlice(), imp.getFrame());
-					imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() + 1);
-					imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() - 1);
-				}
 
-				imp.setRoi(manualRoi);
-				if(imp.getWindow()!=null)
-					imp.getWindow().setVisible(true);
-
-
-				if (rm != null && rmVis) 
-					rm.setVisible(true);
-				if (mcc != null && mccVis) 
-					mcc.setVisible(true);
-				if (liw != null && liwVis) 
-					liw.setVisible(true);
-
-
-				finalChannels = lastC - firstC+1;
-
-				finalFrames = (buildImp.getStackSize()/(finalChannels*finalSlices));
-
-
-				//				IJ.run( buildImp, 
-				//						"Stack to Hyperstack...", "order=xyzct channels=" + finalChannels + " slices=" + finalSlices + " frames=" + finalFrames + " display=Composite");
-
-				buildImp.setDimensions(finalChannels, finalSlices, finalFrames);
-
-				if ( imp.isComposite() ) {
-					CompositeImage buildImp2 = new CompositeImage(buildImp, 0);
-					((CompositeImage)buildImp2).copyLuts(imp);
-					//buildImp2.show();
-					buildImp = buildImp2;
-					//					((CompositeImage)buildImp).setMode(	(imp.isComposite() && ((CompositeImage)imp).getCompositeMode() >= CompositeImage.RATIO12)?CompositeImage.GRAYSCALE:stackMode);
-
-				}
-
-				if (buildImp==null) return;
-				buildImp.setTitle((imp.isSketch3D()?"Sketch3D_":"")+"Projections of "+imp.getTitle().replaceAll("Sketch3D_*", ""));
-
-				buildImp.getProcessor().setColorModel(cm);
-				if (!buildImp.isComposite()) {
-					if (!is16bit) {
-						buildImp.setDisplayRange(inMin, inMax);
-					}else {
-						buildImp.setDisplayRange(0, 255);
+					if (imp instanceof CompositeImage && ((CompositeImage) imp).getMode() ==1 ) {
+						for (int j = 1; j <= imp.getNChannels(); j++) {
+							imp.setPosition(j, imp.getSlice(), imp.getFrame());
+						}
+						imp.setPosition(origChannel, imp.getSlice(), imp.getFrame());
+						imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() + 1);
+						imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() - 1);
 					}
-				} else {
-					if (!is16bit) {
-						((CompositeImage)buildImp).setLuts(luts);
+
+					imp.setRoi(manualRoi);
+					if(imp.getWindow()!=null)
+						imp.getWindow().setVisible(true);
+
+
+					if (rm != null && rmVis) 
+						rm.setVisible(true);
+					if (mcc != null && mccVis) 
+						mcc.setVisible(true);
+					if (liw != null && liwVis) 
+						liw.setVisible(true);
+
+
+					finalChannels = lastC - firstC+1;
+
+					finalFrames = (buildImp.getStackSize()/(finalChannels*finalSlices));
+
+
+					//				IJ.run( buildImp, 
+					//						"Stack to Hyperstack...", "order=xyzct channels=" + finalChannels + " slices=" + finalSlices + " frames=" + finalFrames + " display=Composite");
+
+					buildImp.setDimensions(finalChannels, finalSlices, finalFrames);
+
+					if ( imp.isComposite() ) {
+						CompositeImage buildImp2 = new CompositeImage(buildImp, 0);
+						((CompositeImage)buildImp2).copyLuts(imp);
+						//buildImp2.show();
+						buildImp = buildImp2;
+						//					((CompositeImage)buildImp).setMode(	(imp.isComposite() && ((CompositeImage)imp).getCompositeMode() >= CompositeImage.RATIO12)?CompositeImage.GRAYSCALE:stackMode);
+
+					}
+
+					if (buildImp==null) return;
+					buildImp.setTitle((imp.isSketch3D()?"Sketch3D_":"")+"Projections of "+imp.getTitle().replaceAll("Sketch3D_*", ""));
+
+					buildImp.getProcessor().setColorModel(cm);
+					if (!buildImp.isComposite()) {
+						if (!is16bit) {
+							buildImp.setDisplayRange(inMin, inMax);
+						}else {
+							buildImp.setDisplayRange(0, 255);
+						}
 					} else {
-						((CompositeImage)buildImp).resetDisplayRanges();
+						if (!is16bit) {
+							((CompositeImage)buildImp).setLuts(luts);
+						} else {
+							((CompositeImage)buildImp).resetDisplayRanges();
+						}
 					}
-				}
-				buildImp.setDimensions(finalChannels, finalSlices, finalFrames);
+					buildImp.setDimensions(finalChannels, finalSlices, finalFrames);
 
-				buildImp.setPosition(inChannel-firstC+1, 1, inFrame-firstT+1);
-				if (imp.getMultiChannelController() !=null && imp.isComposite() && ((CompositeImage)imp).getMode() != CompositeImage.GRAYSCALE) {
-					IJ.run(buildImp,imp.getMultiChannelController().getChannelLUTChoice(inChannel-firstC),"");
-				}
-
-				if (imp.getRoiManager().getColorLegend() != null)
-					buildImp.getRoiManager().setColorLegend(imp.getRoiManager().getColorLegend().clone(buildImp));
-
-				if (buildWin==null) {
-					buildImp.show();
-					buildWin = buildImp.getWindow();
-				}
-
-				if (imp != null & buildImp != null && imp.getWindow()!=null){
-					buildWin.setBackground(imp.getWindow().getBackground());
-					buildWin.setSubTitleBkgdColor(imp.getWindow().getBackground());
-				}
-				//				buildWin.setVisible(false);
-
-				IJ.runMacro("print(\"\\\\Update:   Arranging Tags...   \")");
-
-				if (WindowManager.getImage("Concatenated Stacks") != null)  {
-					ImagePlus csImp = WindowManager.getImage("Concatenated Stacks");
-					TextRoi.setFont("Arial", csImp.getWidth()/10, Font.ITALIC);		
-					TextRoi tr = new TextRoi(0, 0, "Arranging \nTags...\n");
-					tr.setStrokeColor(Color.gray);
-					tr.setFillColor(Color.decode("#00000000"));
-
-					csImp.setRoi(tr);
-					tr.setImage(csImp);
-					csImp.getCanvas().paintDoubleBuffered(csImp.getCanvas().getGraphics());
-				}
-
-				RoiManager bigRM = buildImp.getRoiManager();
-				bigRM.setVisible(false);
-				for (int r=0; r<bigRoiAList.size(); r++) {
-					int c = bigRoiAList.get(r).getCPosition();
-					int z = bigRoiAList.get(r).getZPosition();
-					int t = bigRoiAList.get(r).getTPosition();
-					buildImp.setPosition(c, z, t); 
-					bigRM.addRoi(((Roi)bigRoiAList.get(r).clone()));
-				}
-				bigRM.setZSustain(1);
-				bigRM.setTSustain(imp.getRoiManager().getTSustain());
-				bigRM.showAll(RoiManager.SHOW_ALL);
-				buildImp.setPosition(inChannel-firstC+1, 1, inFrame-firstT+1);
-
-				//				buildImp.setRoiManager(bigRM);
-				IJ.runMacro("print(\"\\\\Update:\\\n \")");
-
-				if (imp.getMotherImp() != null && !imp.getMotherImp().isSketch3D())
-					buildImp.setMotherImp(imp.getMotherImp(), firstT);
-				else if (!imp.isSketch3D())
-					buildImp.setMotherImp(imp, firstT);
-				else
-					buildImp.setMotherImp(buildImp, firstT);
-
-
-				while (WindowManager.getImage("Concatenated Stacks") != null) 
-					WindowManager.getImage("Concatenated Stacks").close();
-				for (ImagePlus ownerImp:buildImp.getImageStack().getOwnerImps()) 
-					if (ownerImp.getTitle() == "Concatenated Stacks") {
-						buildImp.getImageStack().removeOwnerImp(ownerImp);
-						ownerImp.flush();
+					buildImp.setPosition(inChannel-firstC+1, 1, inFrame-firstT+1);
+					if (imp.getMultiChannelController() !=null && imp.isComposite() && ((CompositeImage)imp).getMode() != CompositeImage.GRAYSCALE) {
+						IJ.run(buildImp,imp.getMultiChannelController().getChannelLUTChoice(inChannel-firstC),"");
 					}
 
-				if (WindowManager.getImage("BuildStack")!= null) 
-					WindowManager.getImage("BuildStack").close();
+					if (imp.getRoiManager().getColorLegend() != null)
+						buildImp.getRoiManager().setColorLegend(imp.getRoiManager().getColorLegend().clone(buildImp));
 
-				imp.setPosition(inChannel, inSlice, inFrame);
-
-				if (imp.isComposite() && ((CompositeImage) imp).getMode() ==1 ) {
-					((CompositeImage) imp).setMode(2);
-					((CompositeImage) imp).setMode(3);
-					((CompositeImage) imp).setMode(1);
-
-					for (int j = 1; j <= imp.getNChannels(); j++) {
-						imp.setPosition(j, imp.getSlice(),
-								imp.getFrame());
+					if (buildWin==null) {
+						buildImp.show();
+						buildWin = buildImp.getWindow();
 					}
-					imp.setPosition(origChannel, imp.getSlice(), imp.getFrame());
-					imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() + 1);
-					imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() - 1);
+
+					if (imp != null & buildImp != null && imp.getWindow()!=null){
+						buildWin.setBackground(imp.getWindow().getBackground());
+						buildWin.setSubTitleBkgdColor(imp.getWindow().getBackground());
+					}
+					//				buildWin.setVisible(false);
+
+					IJ.runMacro("print(\"\\\\Update:   Arranging Tags...   \")");
+
+					if (WindowManager.getImage("Concatenated Stacks") != null)  {
+						ImagePlus csImp = WindowManager.getImage("Concatenated Stacks");
+						TextRoi.setFont("Arial", csImp.getWidth()/10, Font.ITALIC);		
+						TextRoi tr = new TextRoi(0, 0, "Arranging \nTags...\n");
+						tr.setStrokeColor(Color.gray);
+						tr.setFillColor(Color.decode("#00000000"));
+
+						csImp.setRoi(tr);
+						tr.setImage(csImp);
+						csImp.getCanvas().paintDoubleBuffered(csImp.getCanvas().getGraphics());
+					}
+
+					RoiManager bigRM = buildImp.getRoiManager();
+					bigRM.setVisible(false);
+					for (int r=0; r<bigRoiAList.size(); r++) {
+						int c = bigRoiAList.get(r).getCPosition();
+						int z = bigRoiAList.get(r).getZPosition();
+						int t = bigRoiAList.get(r).getTPosition();
+						buildImp.setPosition(c, z, t); 
+						bigRM.addRoi(((Roi)bigRoiAList.get(r).clone()));
+					}
+					bigRM.setZSustain(1);
+					bigRM.setTSustain(imp.getRoiManager().getTSustain());
+					bigRM.showAll(RoiManager.SHOW_ALL);
+					buildImp.setPosition(inChannel-firstC+1, 1, inFrame-firstT+1);
+
+					//				buildImp.setRoiManager(bigRM);
+					IJ.runMacro("print(\"\\\\Update:\\\n \")");
+
+					if (imp.getMotherImp() != null && !imp.getMotherImp().isSketch3D())
+						buildImp.setMotherImp(imp.getMotherImp(), firstT);
+					else if (!imp.isSketch3D())
+						buildImp.setMotherImp(imp, firstT);
+					else
+						buildImp.setMotherImp(buildImp, firstT);
+
+
+					while (WindowManager.getImage("Concatenated Stacks") != null) 
+						WindowManager.getImage("Concatenated Stacks").close();
+					for (ImagePlus ownerImp:buildImp.getImageStack().getOwnerImps()) 
+						if (ownerImp.getTitle() == "Concatenated Stacks") {
+							buildImp.getImageStack().removeOwnerImp(ownerImp);
+							ownerImp.flush();
+						}
+
+					if (WindowManager.getImage("BuildStack")!= null) 
+						WindowManager.getImage("BuildStack").close();
+
+					imp.setPosition(inChannel, inSlice, inFrame);
+
+					if (imp.isComposite() && ((CompositeImage) imp).getMode() ==1 ) {
+						((CompositeImage) imp).setMode(2);
+						((CompositeImage) imp).setMode(3);
+						((CompositeImage) imp).setMode(1);
+
+						for (int j = 1; j <= imp.getNChannels(); j++) {
+							imp.setPosition(j, imp.getSlice(),
+									imp.getFrame());
+						}
+						imp.setPosition(origChannel, imp.getSlice(), imp.getFrame());
+						imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() + 1);
+						imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() - 1);
+
+					}
+					int oldW = buildWin.getWidth();
+					int oldH = buildWin.getHeight();
+					int oldC = buildWin.getImagePlus().getChannel();
+					int oldZ = buildWin.getImagePlus().getSlice();
+					int oldT = buildWin.getImagePlus().getFrame();
+					double oldMin = buildWin.getImagePlus()
+							.getDisplayRangeMin();
+					double oldMax = buildWin.getImagePlus()
+							.getDisplayRangeMax();
+					buildWin.setVisible(false);				
+					buildImp.setWindow(buildWin);
+					buildWin.updateImage(buildImp);
+					buildWin.setSize(oldW, oldH);
+
+					((StackWindow) buildWin).addScrollbars(buildImp);
+					buildWin.getImagePlus().updateAndRepaintWindow();
+					buildWin.getImagePlus().setPosition(oldC, oldZ, oldT);
+					buildWin.getImagePlus().setDisplayRange(oldMin, oldMax);
+					buildWin.setSize(buildWin.getSize().width,
+							buildWin.getSize().height);
+					buildWin.setVisible(true);				
 
 				}
-				int oldW = buildWin.getWidth();
-				int oldH = buildWin.getHeight();
-				int oldC = buildWin.getImagePlus().getChannel();
-				int oldZ = buildWin.getImagePlus().getSlice();
-				int oldT = buildWin.getImagePlus().getFrame();
-				double oldMin = buildWin.getImagePlus()
-						.getDisplayRangeMin();
-				double oldMax = buildWin.getImagePlus()
-						.getDisplayRangeMax();
-				buildWin.setVisible(false);				
-				buildImp.setWindow(buildWin);
-				buildWin.updateImage(buildImp);
-				buildWin.setSize(oldW, oldH);
-
-				((StackWindow) buildWin).addScrollbars(buildImp);
-				buildWin.getImagePlus().updateAndRepaintWindow();
-				buildWin.getImagePlus().setPosition(oldC, oldZ, oldT);
-				buildWin.getImagePlus().setDisplayRange(oldMin, oldMax);
-				buildWin.setSize(buildWin.getSize().width,
-						buildWin.getSize().height);
-				buildWin.setVisible(true);				
-
-			}
 		}		
-
+		}
 
 	}
 
