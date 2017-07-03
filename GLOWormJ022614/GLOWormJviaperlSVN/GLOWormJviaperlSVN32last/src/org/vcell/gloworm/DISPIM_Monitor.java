@@ -1709,6 +1709,7 @@ public class DISPIM_Monitor implements PlugIn {
 										double oldMax = win.getImagePlus()
 												.getDisplayRangeMax();
 
+										win.setVisible(false);	
 										ciDF1s[pos].setWindow(win);
 										win.updateImage(ciDF1s[pos]);
 										win.setSize(oldW, oldH);
@@ -1717,7 +1718,8 @@ public class DISPIM_Monitor implements PlugIn {
 										win.getImagePlus().setPosition(oldC, oldZ, oldT);
 										win.getImagePlus().setDisplayRange(oldMin, oldMax);
 										win.setSize(win.getSize().width,
-												win.getSize().height + 5);
+												win.getSize().height);
+										win.setVisible(true);	
 
 									}
 									IJ.run("Tile");

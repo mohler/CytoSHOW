@@ -111,7 +111,7 @@ public class Projector16bit implements PlugInFilter, TextListener {
 		if (roi!=null && roi.isArea() && !(roi instanceof TextRoi)) 
 			manualRoi = roi;
 
-		
+
 		if (imp!=null && imp.isHyperStack()) {
 			//IJ.error("3D Project", "Hyperstacks are currently not supported. Convert to\nRGB using Image>Type>RGB Color and try again.");
 			//return DONE; 
@@ -129,7 +129,7 @@ public class Projector16bit implements PlugInFilter, TextListener {
 						|| firstMovieName.toLowerCase().contains("prx") || firstMovieName.toLowerCase().contains("pry") ) {
 					if ( !IJ.showMessageWithCancel("Use Stereo4D data for 3D Project input?", 
 							"Are you certain you want to run 3D Projection " +
-							"\nto dissect a region from a Stereo4D movie? \n(it's already 3D-projected!)" +
+									"\nto dissect a region from a Stereo4D movie? \n(it's already 3D-projected!)" +
 							"\n \nUsually, one wants to use Slice4D data for input to 3D Project.") ) {
 						return;
 					}
@@ -137,7 +137,7 @@ public class Projector16bit implements PlugInFilter, TextListener {
 			}
 		}
 
-		
+
 		if (ip.isInvertedLut()) {
 			if (!IJ.showMessageWithCancel("3D Project", ZProjector.lutMessage))
 				return; 
@@ -149,7 +149,7 @@ public class Projector16bit implements PlugInFilter, TextListener {
 		if (!showDialog())
 			return;
 		WindowManager.setCurrentWindow(imp.getWindow());
-//		((ContrastAdjuster)ContrastAdjuster.getInstance()).toBack();
+		//		((ContrastAdjuster)ContrastAdjuster.getInstance()).toBack();
 		isRGB = imp.getType()==ImagePlus.COLOR_RGB;
 		is16bit = imp.getType()==ImagePlus.GRAY16;
 		is32bit = imp.getType()==ImagePlus.GRAY32;
@@ -162,11 +162,12 @@ public class Projector16bit implements PlugInFilter, TextListener {
 
 		double originalSliceInterval = sliceInterval;
 		ImagePlus buildImp = null;
+		ImageWindow buildWin = null;
 		projImpD = new ImagePlus[lastC-firstC+1];
 		int finalChannels = 0;
 		int finalSlices = 0;
 		int finalFrames = 0;
-		
+
 		double inMin = imp.getDisplayRangeMin();
 		double inMax = imp.getDisplayRangeMax();
 		LUT[] luts = imp.getLuts();
@@ -187,7 +188,7 @@ public class Projector16bit implements PlugInFilter, TextListener {
 
 
 		imp.getWindow().setVisible(false);
-		
+
 		Frame rm = imp.getRoiManager();
 		boolean rmVis =false; 
 		if (rm != null) {
@@ -200,10 +201,10 @@ public class Projector16bit implements PlugInFilter, TextListener {
 			mccVis = mcc.isVisible();
 			mcc.setVisible(false);
 		}
-		
+
 		ImageWindow liw = null;
 		if (imp.getImageStack() instanceof MultiQTVirtualStack && ((MultiQTVirtualStack)imp.getImageStack()).getLineageMapImage() != null)
-			 liw = ((MultiQTVirtualStack)imp.getImageStack()).getLineageMapImage().getWindow();
+			liw = ((MultiQTVirtualStack)imp.getImageStack()).getLineageMapImage().getWindow();
 		boolean liwVis = false;
 		if (liw != null) {	
 			liwVis = liw.isVisible();
@@ -213,7 +214,7 @@ public class Projector16bit implements PlugInFilter, TextListener {
 		ArrayList<Roi> bigRoiAList = new ArrayList<Roi>();
 		int finalT = lastT;
 		long tempTime = (new Date()).getTime();
-//		File tempDir = new File(IJ.getDirectory("home") +"Proj_"+imp.getTitle().replaceAll("[,. ;:]","") + tempTime);
+		//		File tempDir = new File(IJ.getDirectory("home") +"Proj_"+imp.getTitle().replaceAll("[,. ;:]","") + tempTime);
 		String saveRootDir = "";
 		String saveRootPrefix = "";
 		if (IJ.getDirectory("image") != null){
@@ -225,7 +226,7 @@ public class Projector16bit implements PlugInFilter, TextListener {
 		boolean correctSaveRoot = false;
 		for (File saveSibFile: (new File(saveRootDir)).listFiles()) {
 			if (saveSibFile.isDirectory() || (!saveSibFile.getName().toLowerCase().endsWith(".tif")
-												&& !saveSibFile.getName().toLowerCase().contains("ds_store"))) {
+					&& !saveSibFile.getName().toLowerCase().contains("ds_store"))) {
 				correctSaveRoot = true;
 			}
 		}
@@ -262,8 +263,8 @@ public class Projector16bit implements PlugInFilter, TextListener {
 						impD = (new MQTVS_Duplicator()).run(imp, loopC, loopC, firstZ, lastZ, loopT, loopT, 1, sliceSpecificROIs, tempTime);
 					}
 					impD.setCalibration(imp.getCalibration());
-//					impD.show();
-					
+					//					impD.show();
+
 					if (manualRoi != null && sliceSpecificROIs) {
 						impD.setRoi(manualRoi);
 						WindowManager.setTempCurrentImage(impD);
@@ -279,11 +280,11 @@ public class Projector16bit implements PlugInFilter, TextListener {
 					if (impDZ.getBitDepth() > 8 && !isRGB) {
 						impDZ.setPosition(1, (1+lastZ+1-firstZ)/2, 1);
 						impDZ.getProcessor().setMinAndMax(0.0, 50.0);
-//						IJ.run(impDZ,"8-bit","");
+						//						IJ.run(impDZ,"8-bit","");
 						if (impDZ.isComposite()   )
 							((CompositeImage)impDZ).setMode(CompositeImage.GRAYSCALE);
 					}
-//					impDZ.show();
+					//					impDZ.show();
 					if (interpolate && sliceInterval>1.0) {
 						if (firstZ != lastZ)
 							impDZ = zScale(impDZ);
@@ -298,9 +299,9 @@ public class Projector16bit implements PlugInFilter, TextListener {
 					//Code below here taken from MQTVS_Duplicator.duplicateHyperstack
 
 					if (impDZ==null) return;
-//					impDZ.show();
-//									impDZ.show();
-//									impDZ.getWindow().setVisible(false);
+					//					impDZ.show();
+					//									impDZ.show();
+					//									impDZ.getWindow().setVisible(false);
 
 
 
@@ -316,9 +317,9 @@ public class Projector16bit implements PlugInFilter, TextListener {
 						dupH = manualRoi.getBounds().height;
 					}
 
-//					impDZ.show();
+					//					impDZ.show();
 					RoiManager rm2 = impDZ.getRoiManager();
-//					rm2.setVisible(true);
+					//					rm2.setVisible(true);
 
 					for (int z = 1; z <= imp.getNSlices() ; z++ ) {
 
@@ -373,11 +374,11 @@ public class Projector16bit implements PlugInFilter, TextListener {
 					IJ.runMacro("print(\"\\\\Update:\\\n \")");
 
 					if ( loopC == firstC && loopT == firstT)  {
-//						tempDir.mkdir();
+						//						tempDir.mkdir();
 						finalSlices = projImpD[loopC-firstC].getStackSize();
 					}
-//					projImpD[loopC-firstC].show();
-					
+					//					projImpD[loopC-firstC].show();
+
 					Roi[] roisArray = projImpD[loopC-firstC].getRoiManager().getShownRoisAsArray();
 					for (int i=0; i<roisArray.length; i++) {
 						Roi nextRoi = (Roi) roisArray[i].clone();
@@ -394,7 +395,7 @@ public class Projector16bit implements PlugInFilter, TextListener {
 					}
 				}
 				projImpDC.setStack(stackC, lastC-firstC+1, stackC.getSize()/(lastC-firstC+1), 1);
-				
+
 				IJ.save(projImpDC, tempDir + File.separator + "proj_"+loopT+"_"+loopC+".tif");
 				if (!isRGB) 
 					projImpDC= new CompositeImage(projImpDC);
@@ -402,167 +403,190 @@ public class Projector16bit implements PlugInFilter, TextListener {
 					projImpD[loopC-firstC].flush();
 				}
 				MultiFileInfoVirtualStack nextStack = new MultiFileInfoVirtualStack(tempDir.getPath()+ File.separator , "xyczt", "",0,0,0, 1, 0, false, false);
-				if (buildImp == null)
-					buildImp = new ImagePlus();
+				buildImp = new ImagePlus();
 				buildImp.setOpenAsHyperStack(true);
-				buildImp.setStack(nextStack, 1+lastC-firstC, finalSlices, 1+loopT-firstT);
-				buildImp.setPosition(1, finalSlices, 1+loopT-firstT);
 
 				finalFrames++;
+				buildImp.setStack(nextStack, 1+lastC-firstC, finalSlices, finalFrames);
+
+
+				imp.getProcessor().setColorModel(cm);
+				imp.setPosition(inChannel, inSlice, inFrame);
+				int origChannel = imp.getChannel();
+				if ( imp.isComposite()) {
+					((CompositeImage)imp).setMode(stackMode);
+
+				}
+
+				if (imp instanceof CompositeImage && ((CompositeImage) imp).getMode() ==1 ) {
+					for (int j = 1; j <= imp.getNChannels(); j++) {
+						imp.setPosition(j, imp.getSlice(), imp.getFrame());
+					}
+					imp.setPosition(origChannel, imp.getSlice(), imp.getFrame());
+					imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() + 1);
+					imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() - 1);
+				}
+
+				imp.setRoi(manualRoi);
+				imp.getWindow().setVisible(true);
+
+
+				if (rm != null && rmVis) 
+					rm.setVisible(true);
+				if (mcc != null && mccVis) 
+					mcc.setVisible(true);
+				if (liw != null && liwVis) 
+					liw.setVisible(true);
+
+
+				finalChannels = lastC - firstC+1;
+
+				finalFrames = (buildImp.getStackSize()/(finalChannels*finalSlices));
+
+
+				//				IJ.run( buildImp, 
+				//						"Stack to Hyperstack...", "order=xyzct channels=" + finalChannels + " slices=" + finalSlices + " frames=" + finalFrames + " display=Composite");
+
+				buildImp.setDimensions(finalChannels, finalSlices, finalFrames);
+
+				if ( imp.isComposite() ) {
+					CompositeImage buildImp2 = new CompositeImage(buildImp, 0);
+					((CompositeImage)buildImp2).copyLuts(imp);
+					//buildImp2.show();
+					buildImp = buildImp2;
+					//					((CompositeImage)buildImp).setMode(	(imp.isComposite() && ((CompositeImage)imp).getCompositeMode() >= CompositeImage.RATIO12)?CompositeImage.GRAYSCALE:stackMode);
+
+				}
+
+				if (buildImp==null) return;
+				buildImp.setTitle((imp.isSketch3D()?"Sketch3D_":"")+"Projections of "+imp.getTitle().replaceAll("Sketch3D_*", ""));
+
+				buildImp.getProcessor().setColorModel(cm);
+				if (!buildImp.isComposite()) {
+					if (!is16bit) {
+						buildImp.setDisplayRange(inMin, inMax);
+					}else {
+						buildImp.setDisplayRange(0, 255);
+					}
+				} else {
+					if (!is16bit) {
+						((CompositeImage)buildImp).setLuts(luts);
+					} else {
+						((CompositeImage)buildImp).resetDisplayRanges();
+					}
+				}
+				buildImp.setDimensions(finalChannels, finalSlices, finalFrames);
+
+				buildImp.setPosition(inChannel-firstC+1, 1, inFrame-firstT+1);
+				if (imp.getMultiChannelController() !=null && imp.isComposite() && ((CompositeImage)imp).getMode() != CompositeImage.GRAYSCALE) {
+					IJ.run(buildImp,imp.getMultiChannelController().getChannelLUTChoice(inChannel-firstC),"");
+				}
+
+				if (imp.getRoiManager().getColorLegend() != null)
+					buildImp.getRoiManager().setColorLegend(imp.getRoiManager().getColorLegend().clone(buildImp));
+
+				if (buildWin==null) {
+					buildImp.show();
+					buildWin = buildImp.getWindow();
+				}
+
+				if (imp != null & buildImp != null){
+					buildWin.setBackground(imp.getWindow().getBackground());
+					buildWin.setSubTitleBkgdColor(imp.getWindow().getBackground());
+				}
+				//				buildWin.setVisible(false);
+
+				IJ.runMacro("print(\"\\\\Update:   Arranging Tags...   \")");
+
+				if (WindowManager.getImage("Concatenated Stacks") != null)  {
+					ImagePlus csImp = WindowManager.getImage("Concatenated Stacks");
+					TextRoi.setFont("Arial", csImp.getWidth()/10, Font.ITALIC);		
+					TextRoi tr = new TextRoi(0, 0, "Arranging \nTags...\n");
+					tr.setStrokeColor(Color.gray);
+					tr.setFillColor(Color.decode("#00000000"));
+
+					csImp.setRoi(tr);
+					tr.setImage(csImp);
+					csImp.getCanvas().paintDoubleBuffered(csImp.getCanvas().getGraphics());
+				}
+
+				RoiManager bigRM = buildImp.getRoiManager();
+				bigRM.setVisible(false);
+				for (int r=0; r<bigRoiAList.size(); r++) {
+					int c = bigRoiAList.get(r).getCPosition();
+					int z = bigRoiAList.get(r).getZPosition();
+					int t = bigRoiAList.get(r).getTPosition();
+					buildImp.setPosition(c, z, t); 
+					bigRM.addRoi(((Roi)bigRoiAList.get(r).clone()));
+				}
+				bigRM.setZSustain(1);
+				bigRM.setTSustain(imp.getRoiManager().getTSustain());
+				bigRM.showAll(RoiManager.SHOW_ALL);
+				buildImp.setPosition(inChannel-firstC+1, 1, inFrame-firstT+1);
+
+				//				buildImp.setRoiManager(bigRM);
+				IJ.runMacro("print(\"\\\\Update:\\\n \")");
+
+				if (imp.getMotherImp() != null && !imp.getMotherImp().isSketch3D())
+					buildImp.setMotherImp(imp.getMotherImp(), firstT);
+				else if (!imp.isSketch3D())
+					buildImp.setMotherImp(imp, firstT);
+				else
+					buildImp.setMotherImp(buildImp, firstT);
+
+
+				while (WindowManager.getImage("Concatenated Stacks") != null) 
+					WindowManager.getImage("Concatenated Stacks").close();
+				for (ImagePlus ownerImp:buildImp.getImageStack().getOwnerImps()) 
+					if (ownerImp.getTitle() == "Concatenated Stacks") {
+						buildImp.getImageStack().removeOwnerImp(ownerImp);
+						ownerImp.flush();
+					}
+
+				if (WindowManager.getImage("BuildStack")!= null) 
+					WindowManager.getImage("BuildStack").close();
+
+				imp.setPosition(inChannel, inSlice, inFrame);
+
+				if (imp.isComposite() && ((CompositeImage) imp).getMode() ==1 ) {
+					((CompositeImage) imp).setMode(2);
+					((CompositeImage) imp).setMode(3);
+					((CompositeImage) imp).setMode(1);
+
+					for (int j = 1; j <= imp.getNChannels(); j++) {
+						imp.setPosition(j, imp.getSlice(),
+								imp.getFrame());
+					}
+					imp.setPosition(origChannel, imp.getSlice(), imp.getFrame());
+					imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() + 1);
+					imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() - 1);
+
+				}
+				int oldW = buildWin.getWidth();
+				int oldH = buildWin.getHeight();
+				int oldC = buildWin.getImagePlus().getChannel();
+				int oldZ = buildWin.getImagePlus().getSlice();
+				int oldT = buildWin.getImagePlus().getFrame();
+				double oldMin = buildWin.getImagePlus()
+						.getDisplayRangeMin();
+				double oldMax = buildWin.getImagePlus()
+						.getDisplayRangeMax();
+				buildWin.setVisible(false);				
+				buildImp.setWindow(buildWin);
+				buildWin.updateImage(buildImp);
+				buildWin.setSize(oldW, oldH);
+
+				((StackWindow) buildWin).addScrollbars(buildImp);
+				buildWin.getImagePlus().updateAndRepaintWindow();
+				buildWin.getImagePlus().setPosition(oldC, oldZ, oldT);
+				buildWin.getImagePlus().setDisplayRange(oldMin, oldMax);
+				buildWin.setSize(buildWin.getSize().width,
+						buildWin.getSize().height);
+				buildWin.setVisible(true);				
+
 			}
 		}		
-		
-		
-		imp.getProcessor().setColorModel(cm);
-		imp.setPosition(inChannel, inSlice, inFrame);
-		int origChannel = imp.getChannel();
-		if ( imp.isComposite()) {
-			((CompositeImage)imp).setMode(stackMode);
 
-		}
-
-		if (imp instanceof CompositeImage && ((CompositeImage) imp).getMode() ==1 ) {
-			for (int j = 1; j <= imp.getNChannels(); j++) {
-				imp.setPosition(j, imp.getSlice(), imp.getFrame());
-			}
-			imp.setPosition(origChannel, imp.getSlice(), imp.getFrame());
-			imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() + 1);
-			imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() - 1);
-		}
-
-		imp.setRoi(manualRoi);
-		imp.getWindow().setVisible(true);
-
-
-		if (rm != null && rmVis) 
-			rm.setVisible(true);
-		if (mcc != null && mccVis) 
-			mcc.setVisible(true);
-		if (liw != null && liwVis) 
-			liw.setVisible(true);
-
-
-		finalChannels = lastC - firstC+1;
-
-		finalFrames = (buildImp.getStackSize()/(finalChannels*finalSlices));
-		
-
-//		IJ.run( buildImp, 
-//				"Stack to Hyperstack...", "order=xyzct channels=" + finalChannels + " slices=" + finalSlices + " frames=" + finalFrames + " display=Composite");
-				
-		buildImp.setDimensions(finalChannels, finalSlices, finalFrames);
-
-		if ( imp.isComposite() ) {
-			CompositeImage buildImp2 = new CompositeImage(buildImp, 0);
-			((CompositeImage)buildImp2).copyLuts(imp);
-			//buildImp2.show();
-			buildImp = buildImp2;
-//			((CompositeImage)buildImp).setMode(	(imp.isComposite() && ((CompositeImage)imp).getCompositeMode() >= CompositeImage.RATIO12)?CompositeImage.GRAYSCALE:stackMode);
-
-		}
-
-		if (buildImp==null) return;
-		buildImp.setTitle((imp.isSketch3D()?"Sketch3D_":"")+"Projections of "+imp.getTitle().replaceAll("Sketch3D_*", ""));
-		
-		buildImp.getProcessor().setColorModel(cm);
-		if (!buildImp.isComposite()) {
-			if (!is16bit) {
-				buildImp.setDisplayRange(inMin, inMax);
-			}else {
-				buildImp.setDisplayRange(0, 255);
-			}
-		} else {
-			if (!is16bit) {
-				((CompositeImage)buildImp).setLuts(luts);
-			} else {
-				((CompositeImage)buildImp).resetDisplayRanges();
-			}
-		}
-		buildImp.setDimensions(finalChannels, finalSlices, finalFrames);
-
-		buildImp.setPosition(inChannel-firstC+1, 1, inFrame-firstT+1);
-		if (imp.getMultiChannelController() !=null && imp.isComposite() && ((CompositeImage)imp).getMode() != CompositeImage.GRAYSCALE) {
-			IJ.run(buildImp,imp.getMultiChannelController().getChannelLUTChoice(inChannel-firstC),"");
-		}
-		
-		if (imp.getRoiManager().getColorLegend() != null)
-			buildImp.getRoiManager().setColorLegend(imp.getRoiManager().getColorLegend().clone(buildImp));
-		buildImp.show();
-
-		if (imp != null & buildImp != null){
-			buildImp.getWindow().setBackground(imp.getWindow().getBackground());
-			buildImp.getWindow().setSubTitleBkgdColor(imp.getWindow().getBackground());
-		}
-		buildImp.getWindow().setVisible(false);
-		
-		IJ.runMacro("print(\"\\\\Update:   Arranging Tags...   \")");
-		
-		if (WindowManager.getImage("Concatenated Stacks") != null)  {
-			ImagePlus csImp = WindowManager.getImage("Concatenated Stacks");
-			TextRoi.setFont("Arial", csImp.getWidth()/10, Font.ITALIC);		
-			TextRoi tr = new TextRoi(0, 0, "Arranging \nTags...\n");
-			tr.setStrokeColor(Color.gray);
-			tr.setFillColor(Color.decode("#00000000"));
-
-			csImp.setRoi(tr);
-			tr.setImage(csImp);
-			csImp.getCanvas().paintDoubleBuffered(csImp.getCanvas().getGraphics());
-		}
-		
-		RoiManager bigRM = buildImp.getRoiManager();
-		bigRM.setVisible(false);
-		for (int r=0; r<bigRoiAList.size(); r++) {
-			int c = bigRoiAList.get(r).getCPosition();
-			int z = bigRoiAList.get(r).getZPosition();
-			int t = bigRoiAList.get(r).getTPosition();
-			buildImp.setPosition(c, z, t); 
-			bigRM.addRoi(((Roi)bigRoiAList.get(r).clone()));
-		}
-		bigRM.setZSustain(1);
-		bigRM.setTSustain(imp.getRoiManager().getTSustain());
-		bigRM.showAll(RoiManager.SHOW_ALL);
-		buildImp.setPosition(inChannel-firstC+1, 1, inFrame-firstT+1);
-
-//		buildImp.setRoiManager(bigRM);
-		IJ.runMacro("print(\"\\\\Update:\\\n \")");
-
-		if (imp.getMotherImp() != null && !imp.getMotherImp().isSketch3D())
-			buildImp.setMotherImp(imp.getMotherImp(), firstT);
-		else if (!imp.isSketch3D())
-			buildImp.setMotherImp(imp, firstT);
-		else
-			buildImp.setMotherImp(buildImp, firstT);
-
-		
-		while (WindowManager.getImage("Concatenated Stacks") != null) 
-			WindowManager.getImage("Concatenated Stacks").close();
-		for (ImagePlus ownerImp:buildImp.getImageStack().getOwnerImps()) 
-			if (ownerImp.getTitle() == "Concatenated Stacks") {
-				buildImp.getImageStack().removeOwnerImp(ownerImp);
-				ownerImp.flush();
-			}
-
-		if (WindowManager.getImage("BuildStack")!= null) 
-			WindowManager.getImage("BuildStack").close();
-		
-		imp.setPosition(inChannel, inSlice, inFrame);
-
-		if (imp.isComposite() && ((CompositeImage) imp).getMode() ==1 ) {
-			((CompositeImage) imp).setMode(2);
-			((CompositeImage) imp).setMode(3);
-			((CompositeImage) imp).setMode(1);
-
-			for (int j = 1; j <= imp.getNChannels(); j++) {
-				imp.setPosition(j, imp.getSlice(),
-						imp.getFrame());
-			}
-			imp.setPosition(origChannel, imp.getSlice(), imp.getFrame());
-			imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() + 1);
-			imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() - 1);
-			
-		}
-
-		buildImp.getWindow().setVisible(true);
 
 	}
 
@@ -591,30 +615,30 @@ public class Projector16bit implements PlugInFilter, TextListener {
 		gd.addNumericField("Interior depth-cueing (0-100%):", 100-depthCueInt, 0);
 		gd.addCheckbox("Interpolate", interpolate);
 		gd.addCheckbox("Outline/shadow (nearest point method only)", outlineObjects);
-		
+
 		//gd.addCheckbox("Debug Mode:", debugMode);
 
 		gd.addHelp(IJ.URL+"/docs/menus/image.html#project");
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return false;;
-		projectionMethod = gd.getNextChoiceIndex();
-		axisOfRotation = gd.getNextChoiceIndex();
-		cal.pixelDepth = gd.getNextNumber();
-		if (cal.pixelWidth==0.0) cal.pixelWidth = 1.0;
-		sliceInterval = cal.pixelDepth/cal.pixelWidth;
-		initAngle =  (int)gd.getNextNumber();
-		totalAngle =  (int)gd.getNextNumber();
-		angleInc =  (int)gd.getNextNumber();
-		transparencyLower =  (int)gd.getNextNumber();
-		transparencyUpper =  (int)gd.getNextNumber();
-		opacity =  (int)gd.getNextNumber();
-		depthCueSurf =  100-(int)gd.getNextNumber();
-		depthCueInt =  100-(int)gd.getNextNumber();
-		interpolate =  gd.getNextBoolean();
-		outlineObjects =  gd.getNextBoolean();
-		return true;
-    }
+			projectionMethod = gd.getNextChoiceIndex();
+			axisOfRotation = gd.getNextChoiceIndex();
+			cal.pixelDepth = gd.getNextNumber();
+			if (cal.pixelWidth==0.0) cal.pixelWidth = 1.0;
+			sliceInterval = cal.pixelDepth/cal.pixelWidth;
+			initAngle =  (int)gd.getNextNumber();
+			totalAngle =  (int)gd.getNextNumber();
+			angleInc =  (int)gd.getNextNumber();
+			transparencyLower =  (int)gd.getNextNumber();
+			transparencyUpper =  (int)gd.getNextNumber();
+			opacity =  (int)gd.getNextNumber();
+			depthCueSurf =  100-(int)gd.getNextNumber();
+			depthCueInt =  100-(int)gd.getNextNumber();
+			interpolate =  gd.getNextBoolean();
+			outlineObjects =  gd.getNextBoolean();
+			return true;
+	}
 
 	public boolean showHSDialog(ImagePlus imp) {
 		int nChannels = imp.getNChannels();
@@ -651,7 +675,7 @@ public class Projector16bit implements PlugInFilter, TextListener {
 		gd.showDialog();
 		if (gd.wasCanceled())
 			return false;
-//		dupTitle = gd.getNextString();
+		//		dupTitle = gd.getNextString();
 		duplicateStack = gd.getNextBoolean();
 		sliceSpecificROIs = gd.getNextBoolean();		
 		if (nChannels>1) {
@@ -693,90 +717,90 @@ public class Projector16bit implements PlugInFilter, TextListener {
 	}
 
 
-    public  ImagePlus doRGBProjections(ImagePlus imp) {
-    	boolean saveUseInvertingLut = Prefs.useInvertingLut;
-    	Prefs.useInvertingLut = false;
-        ImageStack[] channels = ChannelSplitter.splitRGB(imp.getStack(), true);
-        ImagePlus red = new ImagePlus("Red", channels[0]);
-        ImagePlus green = new ImagePlus("Green", channels[1]);
-        ImagePlus blue = new ImagePlus("Blue", channels[2]);
-        Calibration cal = imp.getCalibration();
-        Roi roi = imp.getRoi();
-        if (roi!=null)
-        	{red.setRoi(roi); green.setRoi(roi); blue.setRoi(roi);}
-        red.setCalibration(cal); green.setCalibration(cal); blue.setCalibration(cal);
-        label = "Red: ";
-        progressBase = 0.0;
-        progressScale = 1.0/3.0;
-        ImagePlus redProj = doProjections(red);
-        red.flush();
-        if (redProj==null || done) return null;
-        label = "Green: ";
-        progressBase = 1.0/3.0;
-        ImagePlus greenProj = doProjections(green);
-        green.flush();
-        if (green==null || done) return null;
-        label = "Blue: ";
-        progressBase = 2.0/3.0;
-        ImagePlus blueProj = doProjections(blue);
-        blue.flush();
-        if (blue==null || done) return null;
-        int w = redProj.getWidth(), h = redProj.getHeight(), d = redProj.getStackSize();
-        RGBStackMerge merge = new RGBStackMerge();
-        ImageStack stack = merge.mergeStacks(w, h, d, redProj.getStack(), greenProj.getStack(), blueProj.getStack(), true);
-        redProj.flush();
-        greenProj.flush();
-        blueProj.flush();
-        Prefs.useInvertingLut = saveUseInvertingLut;
-        ImagePlus returnImp = new ImagePlus("Projections of "+imp.getShortTitle(), stack);
-        for (int s=1;s<=stack.getSize();s++) {
-        	ColorProcessor cp = (ColorProcessor) stack.getProcessor(s);
-    		if (projectionMethod == nearestPoint && outlineObjects) {
-     			int[][] pixels = cp.getIntArray();
-       			int[][] pixelsCopy = Arrays.copyOf(pixels, pixels.length);
-       			for (int x = 0; x<cp.getWidth();x++) {
-       				for (int y = 0; y<cp.getHeight();y++) {
-       					int[] adjacentColors = new int[9];
-       					int[] neighborColors = new int[9];
-       					int nearReach = 3;
-       					neighborColors[0] = pixelsCopy[x-nearReach>0?x-nearReach:x][y-nearReach>0?y-nearReach:y];
-       					neighborColors[1] = pixelsCopy[x-nearReach>0?x-nearReach:x][y];
-       					neighborColors[2] = pixelsCopy[x-nearReach>0?x-nearReach:x][y+nearReach<cp.getHeight()?y+nearReach:y];
-       					neighborColors[3] = pixelsCopy[x][y-nearReach>0?y-nearReach:y];
-       					neighborColors[4] = pixelsCopy[x][y];
-       					neighborColors[5] = pixelsCopy[x][y+nearReach<cp.getHeight()?y+nearReach:y];
-       					neighborColors[6] = pixelsCopy[x+nearReach<cp.getWidth()?x+nearReach:x][y-nearReach>0?y-nearReach:y];
-       					neighborColors[7] = pixelsCopy[x+nearReach<cp.getWidth()?x+nearReach:x][y];
-       					neighborColors[8] = pixelsCopy[x+nearReach<cp.getWidth()?x+nearReach:x][y+nearReach<cp.getHeight()?y+nearReach:y];
+	public  ImagePlus doRGBProjections(ImagePlus imp) {
+		boolean saveUseInvertingLut = Prefs.useInvertingLut;
+		Prefs.useInvertingLut = false;
+		ImageStack[] channels = ChannelSplitter.splitRGB(imp.getStack(), true);
+		ImagePlus red = new ImagePlus("Red", channels[0]);
+		ImagePlus green = new ImagePlus("Green", channels[1]);
+		ImagePlus blue = new ImagePlus("Blue", channels[2]);
+		Calibration cal = imp.getCalibration();
+		Roi roi = imp.getRoi();
+		if (roi!=null)
+		{red.setRoi(roi); green.setRoi(roi); blue.setRoi(roi);}
+		red.setCalibration(cal); green.setCalibration(cal); blue.setCalibration(cal);
+		label = "Red: ";
+		progressBase = 0.0;
+		progressScale = 1.0/3.0;
+		ImagePlus redProj = doProjections(red);
+		red.flush();
+		if (redProj==null || done) return null;
+		label = "Green: ";
+		progressBase = 1.0/3.0;
+		ImagePlus greenProj = doProjections(green);
+		green.flush();
+		if (green==null || done) return null;
+		label = "Blue: ";
+		progressBase = 2.0/3.0;
+		ImagePlus blueProj = doProjections(blue);
+		blue.flush();
+		if (blue==null || done) return null;
+		int w = redProj.getWidth(), h = redProj.getHeight(), d = redProj.getStackSize();
+		RGBStackMerge merge = new RGBStackMerge();
+		ImageStack stack = merge.mergeStacks(w, h, d, redProj.getStack(), greenProj.getStack(), blueProj.getStack(), true);
+		redProj.flush();
+		greenProj.flush();
+		blueProj.flush();
+		Prefs.useInvertingLut = saveUseInvertingLut;
+		ImagePlus returnImp = new ImagePlus("Projections of "+imp.getShortTitle(), stack);
+		for (int s=1;s<=stack.getSize();s++) {
+			ColorProcessor cp = (ColorProcessor) stack.getProcessor(s);
+			if (projectionMethod == nearestPoint && outlineObjects) {
+				int[][] pixels = cp.getIntArray();
+				int[][] pixelsCopy = Arrays.copyOf(pixels, pixels.length);
+				for (int x = 0; x<cp.getWidth();x++) {
+					for (int y = 0; y<cp.getHeight();y++) {
+						int[] adjacentColors = new int[9];
+						int[] neighborColors = new int[9];
+						int nearReach = 3;
+						neighborColors[0] = pixelsCopy[x-nearReach>0?x-nearReach:x][y-nearReach>0?y-nearReach:y];
+						neighborColors[1] = pixelsCopy[x-nearReach>0?x-nearReach:x][y];
+						neighborColors[2] = pixelsCopy[x-nearReach>0?x-nearReach:x][y+nearReach<cp.getHeight()?y+nearReach:y];
+						neighborColors[3] = pixelsCopy[x][y-nearReach>0?y-nearReach:y];
+						neighborColors[4] = pixelsCopy[x][y];
+						neighborColors[5] = pixelsCopy[x][y+nearReach<cp.getHeight()?y+nearReach:y];
+						neighborColors[6] = pixelsCopy[x+nearReach<cp.getWidth()?x+nearReach:x][y-nearReach>0?y-nearReach:y];
+						neighborColors[7] = pixelsCopy[x+nearReach<cp.getWidth()?x+nearReach:x][y];
+						neighborColors[8] = pixelsCopy[x+nearReach<cp.getWidth()?x+nearReach:x][y+nearReach<cp.getHeight()?y+nearReach:y];
 
-       					adjacentColors[0] = pixelsCopy[x-1>0?x-1:x][y-1>0?y-1:y];
-       					adjacentColors[1] = pixelsCopy[x-1>0?x-1:x][y];
-       					adjacentColors[2] = pixelsCopy[x-1>0?x-1:x][y+1<cp.getHeight()?y+1:y];
-       					adjacentColors[3] = pixelsCopy[x][y-1>0?y-1:y];
-       					adjacentColors[4] = pixelsCopy[x][y];
-       					adjacentColors[5] = pixelsCopy[x][y+1<cp.getHeight()?y+1:y];
-       					adjacentColors[6] = pixelsCopy[x+1<cp.getWidth()?x+1:x][y-1>0?y-1:y];
-       					adjacentColors[7] = pixelsCopy[x+1<cp.getWidth()?x+1:x][y];
-       					adjacentColors[8] = pixelsCopy[x+1<cp.getWidth()?x+1:x][y+1<cp.getHeight()?y+1:y];
+						adjacentColors[0] = pixelsCopy[x-1>0?x-1:x][y-1>0?y-1:y];
+						adjacentColors[1] = pixelsCopy[x-1>0?x-1:x][y];
+						adjacentColors[2] = pixelsCopy[x-1>0?x-1:x][y+1<cp.getHeight()?y+1:y];
+						adjacentColors[3] = pixelsCopy[x][y-1>0?y-1:y];
+						adjacentColors[4] = pixelsCopy[x][y];
+						adjacentColors[5] = pixelsCopy[x][y+1<cp.getHeight()?y+1:y];
+						adjacentColors[6] = pixelsCopy[x+1<cp.getWidth()?x+1:x][y-1>0?y-1:y];
+						adjacentColors[7] = pixelsCopy[x+1<cp.getWidth()?x+1:x][y];
+						adjacentColors[8] = pixelsCopy[x+1<cp.getWidth()?x+1:x][y+1<cp.getHeight()?y+1:y];
 
-       					for (int neighborColor:neighborColors) {	
-   							cp.set(x, y, new Color(pixelsCopy[x][y]).getRGB());
-       						if (neighborColor != pixelsCopy[x][y] ) { //finds pixel near edge? 
-       							cp.set(x, y, new Color(pixelsCopy[x][y]).darker().getRGB());
-       						}
-       					}
-       					for (int adjacentColor:adjacentColors) {				
-       						if (adjacentColor != pixelsCopy[x][y] ) { //finds edge pixel
-       							cp.set(x, y, new Color(pixelsCopy[x][y]).darker().darker().getRGB());
-       						}
-       					}
-       				}
-    			}
-    		}
+						for (int neighborColor:neighborColors) {	
+							cp.set(x, y, new Color(pixelsCopy[x][y]).getRGB());
+							if (neighborColor != pixelsCopy[x][y] ) { //finds pixel near edge? 
+									cp.set(x, y, new Color(pixelsCopy[x][y]).darker().getRGB());
+							}
+						}
+						for (int adjacentColor:adjacentColors) {				
+							if (adjacentColor != pixelsCopy[x][y] ) { //finds edge pixel
+								cp.set(x, y, new Color(pixelsCopy[x][y]).darker().darker().getRGB());
+							}
+						}
+					}
+				}
+			}
 
-        }
-        return returnImp;
-    }
+		}
+		return returnImp;
+	}
 
 	public ImagePlus doProjections(ImagePlus imp) {
 		int nSlices;				// number of slices in volume
@@ -845,8 +869,8 @@ public class Projector16bit implements PlugInFilter, TextListener {
 		if ((projwidth%2)==1)
 			projwidth++;
 		int projsize = projwidth * projheight;
-//		IJ.log(projwidth+" "+projheight);
-		
+		//		IJ.log(projwidth+" "+projheight);
+
 		if (projwidth<=0 || projheight<=0) {
 			IJ.error("'projwidth' or 'projheight' <= 0");
 			return null;
@@ -860,20 +884,20 @@ public class Projector16bit implements PlugInFilter, TextListener {
 			stack2 = null;
 			IJ.error("Projector - Out of Memory",
 					"To use less memory, use a rectanguar\n"
-					+"selection,  reduce \"Total Rotation\",\n"
-					+"and/or increase \"Angle Increment\"."
-			);
+							+"selection,  reduce \"Total Rotation\",\n"
+							+"and/or increase \"Angle Increment\"."
+					);
 			return null;
 		}
 		ImagePlus projections = new ImagePlus("Projections of "+imp.getShortTitle(), stack2);
 		projImpD[loopC-firstC] = projections;
-		
+
 		roiArray = imp.getRoiManager().getShownRoisAsArray();
-		
+
 		rmProj = projections.getRoiManager();
-//		rmProj.showAll(RoiManager.SHOW_ALL);
-//		rmProj.setVisible(false);
-		
+		//		rmProj.showAll(RoiManager.SHOW_ALL);
+		//		rmProj.setVisible(false);
+
 
 		projections.setCalibration(imp.getCalibration());
 		//projections.show();
@@ -1040,7 +1064,7 @@ public class Projector16bit implements PlugInFilter, TextListener {
 		ycosthetainit = (top - ycenter - 1) * costheta;
 		ysinthetainit = (top - ycenter - 1) * sintheta;
 		offsetinit = ((projheight-bottom+top)/2) * projwidth + (projwidth - right + left)/2 - 1;
-		
+
 		for(int r=0; r < roiArray.length; r++) {
 			//			for (int k=1; k<=nSlices; k++) {
 			z = (int)((roiArray[r].getZPosition()-1)*(imp.getCalibration().pixelDepth/imp.getCalibration().pixelWidth)+0.5) - zcenter;
@@ -1055,17 +1079,17 @@ public class Projector16bit implements PlugInFilter, TextListener {
 			znew = (ysintheta + zcostheta)/BIGPOWEROF2 + zcenter;
 
 			ynew = (offsetinit/projwidth) +ynew;
-			
+
 			Roi nextRoi = (Roi) roiArray[r].clone();
 			nextRoi.setLocation( (int)(roiArray[r].getBounds().getCenterX() - nextRoi.getBounds().getWidth()/2), (int) ( ynew - nextRoi.getBounds().getHeight()/2));
 			projImpD[loopC-firstC].setSlice(projSlice);
 			rmProj.addRoi(nextRoi);
-//			imp.getRoiManager().dispose();
-//			WindowManager.removeWindow(imp.getRoiManager());
+			//			imp.getRoiManager().dispose();
+			//			WindowManager.removeWindow(imp.getRoiManager());
 
 		}
 
-		
+
 		for (int k=1; k<=nSlices; k++) {
 			pixels = (short[])stack.getPixels(k);
 			z = (int)((k-1)*sliceInterval+0.5) - zcenter;
@@ -1166,20 +1190,20 @@ public class Projector16bit implements PlugInFilter, TextListener {
 		BrightestPt = (projectionMethod==brightestPoint);
 		xcosthetainit = (left - xcenter - 1) * costheta;
 		xsinthetainit = (left - xcenter - 1) * sintheta;
-		
-		
+
+
 		for(int r=0; r < roiArray.length; r++) {
 			//			for (int k=1; k<=nSlices; k++) {
 			z = (int)((roiArray[r].getZPosition()-1)*(imp.getCalibration().pixelDepth/imp.getCalibration().pixelWidth)+0.5) - zcenter;
 			zcostheta = z * costheta;
 			zsintheta = z * sintheta;
 			offsetinit = ((projheight-bottom+top)/2) * projwidth +(projwidth - right + left)/2 - projwidth;
-//			IJ.log(""+offsetinit);
-//			for (int j=top; j<bottom; j++) {
+			//			IJ.log(""+offsetinit);
+			//			for (int j=top; j<bottom; j++) {
 			xcostheta = xcosthetainit;
 			xsintheta = xsinthetainit;
 			offsetinit = offsetinit + (int) (projwidth * roiArray[r].getBounds().getCenterY());
-//			for (int i=left; i<right; i++) 
+			//			for (int i=left; i<right; i++) 
 			xcostheta = xcostheta + (int) (costheta * (roiArray[r].getBounds().getCenterX())) ;  //rotate about y-axis and find new x,z
 			xsintheta = xsintheta + (int) (sintheta * (roiArray[r].getBounds().getCenterX()));  //y-coordinates will not change
 			xnew = (xcostheta + zsintheta)/BIGPOWEROF2 + xcenter - left;
@@ -1187,19 +1211,19 @@ public class Projector16bit implements PlugInFilter, TextListener {
 			offset = offsetinit + xnew;
 
 			xnew = xnew + ((projheight-bottom+top)/2) * projwidth +(projwidth - right + left)/2;
-//			ynew = (offset/projwidth) + roiArray[r].getBounds().getCenterY();
-			
+			//			ynew = (offset/projwidth) + roiArray[r].getBounds().getCenterY();
+
 			Roi nextRoi = (Roi) roiArray[r].clone();
 			nextRoi.setLocation( (int) (xnew - nextRoi.getBounds().getWidth()/2), (int)((roiArray[r].getBounds().getCenterY() - nextRoi.getBounds().getHeight()/2)));
 			projImpD[loopC-firstC].setSlice(projSlice);
 			rmProj.addRoi(((Roi)nextRoi.clone()));
-//			if (imp.getRoiManager() != null){
-//				imp.getRoiManager().dispose();
-//				WindowManager.removeWindow(imp.getRoiManager());
-//			}
+			//			if (imp.getRoiManager() != null){
+			//				imp.getRoiManager().dispose();
+			//				WindowManager.removeWindow(imp.getRoiManager());
+			//			}
 		}
 
-		
+
 		for (int k=1; k<=nSlices; k++) {
 			pixels = (short[])stack.getPixels(k);
 			z = (int)((k-1)*sliceInterval+0.5) - zcenter;

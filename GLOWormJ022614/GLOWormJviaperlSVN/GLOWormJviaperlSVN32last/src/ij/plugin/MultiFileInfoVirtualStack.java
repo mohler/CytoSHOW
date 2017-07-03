@@ -596,7 +596,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				t=t-1;
 			}
 //			IJ.log(""+n+" "+z+" "+t);
-			return fivStacks.get(stackNumber).infoArray[0].fileName + " slice "+ sliceNumber;
+			return /*fivStacks.get(0).infoArray[0].fileName +*/ " slice "+ sliceNumber;
 		}
 		else
 			return infoArray[0].sliceLabels[n-1];
