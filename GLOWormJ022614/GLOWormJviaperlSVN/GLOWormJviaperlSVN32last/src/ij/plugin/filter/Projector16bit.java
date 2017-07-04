@@ -48,8 +48,8 @@ public class Projector16bit implements PlugInFilter, TextListener {
 	String[] axisList = {"X-Axis", "Y-Axis", "Z-Axis"};
 	String[] methodList = {"Nearest Point", "Brightest Point", "Mean Value"};
 
-	private static int axisOfRotation = yAxis;
-	private static int projectionMethod = brightestPoint;
+	private  int axisOfRotation = yAxis;
+	private  int projectionMethod = brightestPoint;
 
 	private double sliceInterval = 5.0; // pixels
 	private static int initAngle = 0;
@@ -242,7 +242,8 @@ public class Projector16bit implements PlugInFilter, TextListener {
 
 		ArrayList<Roi> bigRoiAList = new ArrayList<Roi>();
 		int finalT = lastT;
-		long tempTime = (new Date()).getTime();
+		if (tempTime==0)
+			tempTime = (new Date()).getTime();
 		//		File tempDir = new File(IJ.getDirectory("home") +"Proj_"+imp.getTitle().replaceAll("[,. ;:]","") + tempTime);
 		String saveRootDir = "";
 		String saveRootPrefix = "";
@@ -428,9 +429,9 @@ public class Projector16bit implements PlugInFilter, TextListener {
 				projImpDC.setStack(stackC, lastC-firstC+1, stackC.getSize()/(lastC-firstC+1), 1);
 
 				if (axisOfRotation == 0)
-					IJ.save(projImpDC, tempXDir + File.separator + "proj_"+loopT+"_"+loopC+".tif");
+					IJ.save(projImpDC, tempXDir + File.separator + "proj_"+1+"_"+1+".tif");
 				else
-					IJ.save(projImpDC, tempYDir + File.separator + "proj_"+loopT+"_"+loopC+".tif");
+					IJ.save(projImpDC, tempYDir + File.separator + "proj_"+1+"_"+1+".tif");
 
 				if (!isRGB) 
 					projImpDC= new CompositeImage(projImpDC);
@@ -439,7 +440,7 @@ public class Projector16bit implements PlugInFilter, TextListener {
 				}
 				
 				if(!noShow) {
-					MultiFileInfoVirtualStack nextStack = new MultiFileInfoVirtualStack(tempXDir.getPath()+ File.separator , "xyczt", "",0,0,0, 1, 0, false, false);
+					MultiFileInfoVirtualStack nextStack = new MultiFileInfoVirtualStack(getTempDir().getPath()+ File.separator , "xyczt", "",0,0,0, 1, 0, false, false);
 					buildImp = new ImagePlus();
 					buildImp.setOpenAsHyperStack(true);
 
@@ -1515,20 +1516,20 @@ public class Projector16bit implements PlugInFilter, TextListener {
 		checkbox.setState(true);
 	}
 
-	public static int getAxisOfRotation() {
+	public  int getAxisOfRotation() {
 		return axisOfRotation;
 	}
 
-	public static void setAxisOfRotation(int axisOfRotation) {
-		Projector16bit.axisOfRotation = axisOfRotation;
+	public  void setAxisOfRotation(int axisOfRotation) {
+		axisOfRotation = axisOfRotation;
 	}
 
-	public static int getProjectionMethod() {
+	public  int getProjectionMethod() {
 		return projectionMethod;
 	}
 
-	public static void setProjectionMethod(int projectionMethod) {
-		Projector16bit.projectionMethod = projectionMethod;
+	public  void setProjectionMethod(int projectionMethod) {
+		projectionMethod = projectionMethod;
 	}
 
 	public double getSliceInterval() {

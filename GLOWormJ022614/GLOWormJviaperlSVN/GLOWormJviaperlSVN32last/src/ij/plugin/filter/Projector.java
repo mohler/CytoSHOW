@@ -48,8 +48,8 @@ public class Projector implements PlugInFilter, TextListener {
 	String[] axisList = {"X-Axis", "Y-Axis", "Z-Axis"};
 	String[] methodList = {"Nearest Point", "Brightest Point", "Mean Value"};
 
-	private static int axisOfRotation = yAxis;
-	private static int projectionMethod = brightestPoint;
+	private  int axisOfRotation = yAxis;
+	private  int projectionMethod = brightestPoint;
 
 	private double sliceInterval = 5.0; // pixels
 	private static int initAngle = 0;

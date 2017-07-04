@@ -331,7 +331,9 @@ public class DISPIM_Monitor implements PlugIn {
 		ImagePlus[] impDF1s  = new ImagePlus[1];
 		ImagePlus[] impDF2s  = new ImagePlus[1];
 		CompositeImage[] ciDF1s  = new CompositeImage[1];
-		CompositeImage[] ciDF2s  = new CompositeImage[1];
+		Projector16bit[] prjXs = new Projector16bit[1];
+		Projector16bit[] prjYs = new Projector16bit[1];
+
 		Roi[] roiAs  = new Roi[1];
 		Roi[] roiBs  = new Roi[1];
 		int[] wasFrameA = new int[1];
@@ -409,7 +411,9 @@ public class DISPIM_Monitor implements PlugIn {
 				impDF1s  = new ImagePlus[pDim];
 				impDF2s  = new ImagePlus[pDim];
 				ciDF1s  = new CompositeImage[pDim];
-				ciDF2s  = new CompositeImage[pDim];
+				prjXs = new Projector16bit[pDim];
+				prjYs = new Projector16bit[pDim];
+
 				wasFrameA = new int[pDim];
 				wasFrameB = new int[pDim];
 				wasSliceA = new int[pDim];
@@ -430,6 +434,7 @@ public class DISPIM_Monitor implements PlugIn {
 				MultiFileInfoVirtualStack[] stackBs = new MultiFileInfoVirtualStack[pDim];
 
 				for (int pos=0; pos<pDim; pos++) {
+
 					impAs[pos] = new ImagePlus();
 					impAs[pos].setTitle(dirOrOMETiffFile.getName() +"_Pos"+pos+ ": SPIMA");
 					impBs[pos] = new ImagePlus();
@@ -1305,6 +1310,13 @@ public class DISPIM_Monitor implements PlugIn {
 							}
 							ciDF1s[pos] = new CompositeImage(impDF1s[pos]);
 							ciDF1s[pos].setPosition(1, ciDF1s[pos].getNSlices()/2, ciDF1s[pos].getNFrames());
+							 prjXs[pos] = new Projector16bit(ciDF1s[pos], 0, tempTime);
+							 prjYs[pos] = new Projector16bit(ciDF1s[pos], 1, tempTime);
+							 
+							new File(prjXs[pos].getTempDir().getPath()+File.separator+"proj_1_1.tif")
+								.renameTo(new File(prjXs[pos].getTempDir().getPath()+File.separator+"projX_"+pos+"_"+ciDF1s[pos].getNFrames()+".tif"));
+							new File(prjYs[pos].getTempDir().getPath()+File.separator+"proj_1_1.tif")
+								.renameTo(new File(prjYs[pos].getTempDir().getPath()+File.separator+"projY_"+pos+"_"+ciDF1s[pos].getNFrames()+".tif"));
 
 							if (wavelengths > 1)
 								ciDF1s[pos].setMode(CompositeImage.COMPOSITE);
@@ -1368,7 +1380,7 @@ public class DISPIM_Monitor implements PlugIn {
 				new File("" + savePath + "RegDecon" + File.separator + "Pos"+ posForPathSetup + File.separator +"Deconvolution1").mkdirs();
 				new File("" + savePath + "RegDecon" + File.separator + "Pos"+ posForPathSetup + File.separator +"Deconvolution2").mkdirs();
 			}
-			
+
 			for (int f = 1; f <= impAs[0].getNFrames(); f++) {
 				for (int pos=0; pos<pDim; pos++) {
 
@@ -1692,17 +1704,18 @@ public class DISPIM_Monitor implements PlugIn {
 								
 									ciDF1s[pos] = new CompositeImage(impDF1s[pos]);
 									ciDF1s[pos].setPosition(1, ciDF1s[pos].getNSlices()/2, ciDF1s[pos].getNFrames());
+									 prjXs[pos] = new Projector16bit(ciDF1s[pos], 0, tempTime);
+									 prjYs[pos] = new Projector16bit(ciDF1s[pos], 1, tempTime);
+
+									new File(prjXs[pos].getTempDir().getPath()+File.separator+"proj_1_1.tif")
+										.renameTo(new File(prjXs[pos].getTempDir().getPath()+File.separator+"projX_"+pos+"_"+ciDF1s[pos].getNFrames()+".tif"));
+									new File(prjYs[pos].getTempDir().getPath()+File.separator+"proj_1_1.tif")
+										.renameTo(new File(prjYs[pos].getTempDir().getPath()+File.separator+"projY_"+pos+"_"+ciDF1s[pos].getNFrames()+".tif"));
+
 									if (wavelengths > 1)
 										ciDF1s[pos].setMode(CompositeImage.COMPOSITE);
 									else
 										ciDF1s[pos].setMode(CompositeImage.GRAYSCALE);
-
-									Projector16bit prjX = new Projector16bit(ciDF1s[pos], 0, tempTime);
-									new File(prjX.getTempDir().getAbsolutePath()+"proj_1_3.tif")
-										.renameTo(new File(prjX.getTempDir().getAbsolutePath()+"projX_"+pos+"_"+ciDF1s[pos].getNFrames()+".tif"));
-									Projector16bit prjY = new Projector16bit(ciDF1s[pos], 1, tempTime);
-									new File(prjY.getTempDir().getAbsolutePath()+"proj_1_3.tif")
-										.renameTo(new File(prjY.getTempDir().getAbsolutePath()+"projY_"+pos+"_"+ciDF1s[pos].getNFrames()+".tif"));
 
 
 									if (win==null) {
