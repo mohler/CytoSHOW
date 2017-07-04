@@ -103,8 +103,10 @@ public class Projector16bit implements PlugInFilter, TextListener {
 	private boolean noShow;
 	private File tempXDir;
 	private File tempYDir;
+	private String saveRootDir;
+	private String saveRootPrefix;
 
-	public Projector16bit(ImagePlus imp,int rotationAxis, long tempTime) {
+	public Projector16bit(ImagePlus imp,int rotationAxis, long tempTime, String saveRootDir) {
 		this.imp=imp;
 		this.firstC=1;
 		this.lastC=imp.getNChannels();
@@ -119,6 +121,8 @@ public class Projector16bit implements PlugInFilter, TextListener {
 		this.noDialogs=true;
 		this.noShow=true;
 		this.axisOfRotation = rotationAxis;
+		this.saveRootDir=saveRootDir;
+		this.saveRootPrefix = "";
 		
 		run(this.imp.getProcessor());
 	}
@@ -244,14 +248,15 @@ public class Projector16bit implements PlugInFilter, TextListener {
 		int finalT = lastT;
 		if (tempTime==0)
 			tempTime = (new Date()).getTime();
-		//		File tempDir = new File(IJ.getDirectory("home") +"Proj_"+imp.getTitle().replaceAll("[,. ;:]","") + tempTime);
-		String saveRootDir = "";
-		String saveRootPrefix = "";
-		if (IJ.getDirectory("image") != null){
-			saveRootDir = (new File(IJ.getDirectory("image"))).getParent()/*)*/ ;
-			saveRootPrefix = (new File(IJ.getDirectory("image"))).getName()+"_";
-		}else {
-			saveRootDir = IJ.getDirectory("temp");
+		if (saveRootDir == null) {
+			if (IJ.getDirectory("image") != null){
+				saveRootDir = (new File(IJ.getDirectory("image"))).getParent()/*)*/ ;
+			}else {
+				saveRootDir = IJ.getDirectory("temp");
+			}
+		}
+		if (saveRootPrefix == null) {
+			saveRootPrefix = new File(saveRootDir).getName()+"_";
 		}
 		boolean correctSaveRoot = false;
 		for (File saveSibFile: (new File(saveRootDir)).listFiles()) {
