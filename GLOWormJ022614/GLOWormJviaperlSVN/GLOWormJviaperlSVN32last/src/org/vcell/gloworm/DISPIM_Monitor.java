@@ -1350,6 +1350,7 @@ public class DISPIM_Monitor implements PlugIn {
 								int oldC = win.getImagePlus().getChannel();
 								int oldZ = win.getImagePlus().getSlice();
 								int oldT = win.getImagePlus().getFrame();
+								double oldMag = win.getCanvas().getMagnification();
 								double oldMin = win.getImagePlus()
 										.getDisplayRangeMin();
 								double oldMax = win.getImagePlus()
@@ -1359,7 +1360,7 @@ public class DISPIM_Monitor implements PlugIn {
 								win.updateImage(ciDFs[pos]);
 								win.setSize(oldW, oldH);
 								((StackWindow) win).addScrollbars(ciDFs[pos]);
-								win.getImagePlus().updateAndRepaintWindow();
+								win.getCanvas().setMagnification(oldMag);								win.getImagePlus().updateAndRepaintWindow();
 								win.getImagePlus().setPosition(oldC, oldZ, oldT);
 								win.getImagePlus().setDisplayRange(oldMin, oldMax);
 								win.setSize(win.getSize().width,
@@ -1422,6 +1423,7 @@ public class DISPIM_Monitor implements PlugIn {
 								int oldC = prjXwin.getImagePlus().getChannel();
 								int oldZ = prjXwin.getImagePlus().getSlice();
 								int oldT = prjXwin.getImagePlus().getFrame();
+								double oldMag = prjXwin.getCanvas().getMagnification();
 								double oldMin = prjXwin.getImagePlus()
 										.getDisplayRangeMin();
 								double oldMax = prjXwin.getImagePlus()
@@ -1431,6 +1433,7 @@ public class DISPIM_Monitor implements PlugIn {
 								prjXwin.updateImage(ciPrxs[pos]);
 								prjXwin.setSize(oldW, oldH);
 								((StackWindow) prjXwin).addScrollbars(ciPrxs[pos]);
+								prjXwin.getCanvas().setMagnification(oldMag);
 								prjXwin.getImagePlus().updateAndRepaintWindow();
 								prjXwin.getImagePlus().setPosition(oldC, oldZ, oldT);
 								prjXwin.getImagePlus().setDisplayRange(oldMin, oldMax);
@@ -1454,6 +1457,7 @@ public class DISPIM_Monitor implements PlugIn {
 								int oldC = prjYwin.getImagePlus().getChannel();
 								int oldZ = prjYwin.getImagePlus().getSlice();
 								int oldT = prjYwin.getImagePlus().getFrame();
+								double oldMag = prjXwin.getCanvas().getMagnification();
 								double oldMin = prjYwin.getImagePlus()
 										.getDisplayRangeMin();
 								double oldMax = prjYwin.getImagePlus()
@@ -1463,7 +1467,7 @@ public class DISPIM_Monitor implements PlugIn {
 								prjYwin.updateImage(ciPrys[pos]);
 								prjYwin.setSize(oldW, oldH);
 								((StackWindow) prjYwin).addScrollbars(ciPrys[pos]);
-								prjYwin.getImagePlus().updateAndRepaintWindow();
+								prjYwin.getCanvas().setMagnification(oldMag);								prjYwin.getImagePlus().updateAndRepaintWindow();
 								prjYwin.getImagePlus().setPosition(oldC, oldZ, oldT);
 								prjYwin.getImagePlus().setDisplayRange(oldMin, oldMax);
 								prjYwin.setSize(prjYwin.getSize().width,
@@ -1856,6 +1860,7 @@ public class DISPIM_Monitor implements PlugIn {
 										int oldC = win.getImagePlus().getChannel();
 										int oldZ = win.getImagePlus().getSlice();
 										int oldT = win.getImagePlus().getFrame();
+										double oldMag = win.getCanvas().getMagnification();
 										double oldMin = win.getImagePlus()
 												.getDisplayRangeMin();
 										double oldMax = win.getImagePlus()
@@ -1866,6 +1871,7 @@ public class DISPIM_Monitor implements PlugIn {
 										win.updateImage(ciDFs[pos]);
 										win.setSize(oldW, oldH);
 										((StackWindow) win).addScrollbars(ciDFs[pos]);
+										win.getCanvas().setMagnification(oldMag);
 										win.getImagePlus().updateAndRepaintWindow();
 										win.getImagePlus().setPosition(oldC, oldZ, oldT);
 										win.getImagePlus().setDisplayRange(oldMin, oldMax);
@@ -1930,6 +1936,7 @@ public class DISPIM_Monitor implements PlugIn {
 											oldC = prjXwin.getImagePlus().getChannel();
 											oldZ = prjXwin.getImagePlus().getSlice();
 											oldT = prjXwin.getImagePlus().getFrame();
+											oldMag = prjXwin.getCanvas().getMagnification();
 											oldMin = prjXwin.getImagePlus()
 													.getDisplayRangeMin();
 											oldMax = prjXwin.getImagePlus()
@@ -1939,7 +1946,7 @@ public class DISPIM_Monitor implements PlugIn {
 											prjXwin.updateImage(ciPrxs[pos]);
 											prjXwin.setSize(oldW, oldH);
 											((StackWindow) prjXwin).addScrollbars(ciPrxs[pos]);
-											prjXwin.getImagePlus().updateAndRepaintWindow();
+											prjXwin.getCanvas().setMagnification(oldMag);											prjXwin.getImagePlus().updateAndRepaintWindow();
 											prjXwin.getImagePlus().setPosition(oldC, oldZ, oldT);
 											prjXwin.getImagePlus().setDisplayRange(oldMin, oldMax);
 											prjXwin.setSize(prjXwin.getSize().width,
@@ -1961,6 +1968,7 @@ public class DISPIM_Monitor implements PlugIn {
 											oldC = prjYwin.getImagePlus().getChannel();
 											oldZ = prjYwin.getImagePlus().getSlice();
 											oldT = prjYwin.getImagePlus().getFrame();
+											oldMag = prjYwin.getCanvas().getMagnification();
 											oldMin = prjYwin.getImagePlus()
 													.getDisplayRangeMin();
 											oldMax = prjYwin.getImagePlus()
@@ -1970,6 +1978,7 @@ public class DISPIM_Monitor implements PlugIn {
 											prjYwin.updateImage(ciPrys[pos]);
 											prjYwin.setSize(oldW, oldH);
 											((StackWindow) prjYwin).addScrollbars(ciPrys[pos]);
+											prjYwin.getCanvas().setMagnification(oldMag);
 											prjYwin.getImagePlus().updateAndRepaintWindow();
 											prjYwin.getImagePlus().setPosition(oldC, oldZ, oldT);
 											prjYwin.getImagePlus().setDisplayRange(oldMin, oldMax);
@@ -4299,6 +4308,7 @@ public class DISPIM_Monitor implements PlugIn {
 									int oldC = win.getImagePlus().getChannel();
 									int oldZ = win.getImagePlus().getSlice();
 									int oldT = win.getImagePlus().getFrame();
+									double oldMag = win.getCanvas().getMagnification();
 									double oldMin = win.getImagePlus()
 											.getDisplayRangeMin();
 									double oldMax = win.getImagePlus()
@@ -4308,6 +4318,7 @@ public class DISPIM_Monitor implements PlugIn {
 									win.updateImage(ciDFs[pos]);
 									win.setSize(oldW, oldH);
 									((StackWindow) win).addScrollbars(ciDFs[pos]);
+									win.getCanvas().setMagnification(oldMag);
 									win.getImagePlus().updateAndRepaintWindow();
 									win.getImagePlus().setPosition(oldC, oldZ, oldT);
 									win.getImagePlus().setDisplayRange(oldMin, oldMax);

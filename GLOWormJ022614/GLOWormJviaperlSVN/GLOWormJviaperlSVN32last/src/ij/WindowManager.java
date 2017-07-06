@@ -20,7 +20,7 @@ public class WindowManager {
 	private static Window frontWindow;
 	private static Frame frontFrame;
 	private static Hashtable tempImageTable = new Hashtable();
-	
+	private static ArrayList groups;
 	private WindowManager() {
 	}
 
