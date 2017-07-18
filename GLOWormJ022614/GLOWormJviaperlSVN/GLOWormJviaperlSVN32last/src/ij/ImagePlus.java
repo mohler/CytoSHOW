@@ -12,6 +12,7 @@ import org.vcell.gloworm.MultiChannelController;
 import org.vcell.gloworm.MultiQTVirtualStack;
 
 import client.RemoteMQTVSHandler;
+import client.RemoteMTVSHandler;
 import ij.process.*;
 import ij.io.*;
 import ij.gui.*;
@@ -2199,6 +2200,8 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	public boolean skewX;
 	public boolean skewY;
 
+	private RemoteMTVSHandler remoteMTVSHandler;
+
    
     /** Redisplays the (x,y) coordinates and pixel value (which may
 		have changed) in the status bar. Called by the Next Slice and
@@ -2796,6 +2799,16 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		return remoteMQTVSHandler;
 	}
 
+	public void setRemoteHandler(RemoteMTVSHandler remoteMTVSHandler) {
+		this.remoteMTVSHandler = remoteMTVSHandler;
+	}
+	
+	public RemoteMTVSHandler getRemoteMTVSHandler() {
+		return remoteMTVSHandler;
+	}
+
+
+	
 	public void setRotation(int i) {
 		rotation = i;
 	}
@@ -2803,4 +2816,5 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
     public boolean hasNullStack() {
     	return (stack == null);
     }
+
 }

@@ -121,7 +121,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 			ip2 = ip2.crop();
 			stack2.addSlice(stack.getSliceLabel(i), ip2);
 		}
-		ImagePlus imp2 = new ImagePlus(imp.isSketch3D()?"Sketch3D_":""+"DUP_"+imp.getTitle().replaceAll("Sketch3D_*", ""), stack2);
+		ImagePlus imp2 = new ImagePlus((imp.isSketch3D()?"Sketch3D_":""+"DUP_")+imp.getTitle().replaceAll("Sketch3D_*", ""), stack2);
 		int[] dim = imp.getDimensions();
 		imp2.setDimensions(dim[2], dim[3], dim[4]);
 		if (imp.isComposite()) {
@@ -146,7 +146,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 		ImageProcessor ip = imp.getProcessor();
 		ImageProcessor ip2 = ip.crop();
 		ImagePlus imp2 = imp.createImagePlus();
-		imp2.setProcessor(imp.isSketch3D()?"Sketch3D_":""+"DUP_"+imp.getTitle().replaceAll("Sketch3D_*", ""), ip2);
+		imp2.setProcessor((imp.isSketch3D()?"Sketch3D_":"")+"DUP_"+imp.getTitle().replaceAll("Sketch3D_*", ""), ip2);
 		String info = (String)imp.getProperty("Info");
 		if (info!=null)
 			imp2.setProperty("Info", info);
@@ -173,10 +173,15 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 		return imp2;
 	}
 
+	public ImagePlus run(ImagePlus imp, int firstC, int lastC, int firstZ, int lastZ, int firstT, int lastT, int stepT, boolean sliceSpecificROIs, long msec) {
+		return 	run( imp,  firstC,  lastC,  firstZ,  lastZ,  firstT,  lastT,  stepT,  sliceSpecificROIs,  msec,  false) ;
 
+	}
+	
+	
 	/** Returns a new hyperstack containing a possibly reduced version of the input image. 
 	 * @param stepT */
-	public ImagePlus run(ImagePlus imp, int firstC, int lastC, int firstZ, int lastZ, int firstT, int lastT, int stepT, boolean sliceSpecificROIs, long msec) {
+	public ImagePlus run(ImagePlus imp, int firstC, int lastC, int firstZ, int lastZ, int firstT, int lastT, int stepT, boolean sliceSpecificROIs, long msec, boolean systemTemp) {
 		boolean singleStack = firstT==lastT;
 		copyMergedImage = (imp.isComposite() && ((CompositeImage)imp).getCompositeMode() >= CompositeImage.RATIO12);
 		RoiManager rm =  imp.getRoiManager();
@@ -223,7 +228,10 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 
 		String saveRootDir = "";
 		String saveRootPrefix = "";
-		if (IJ.getDirectory("image") != null){
+		if (systemTemp) {
+			saveRootDir = IJ.getDirectory("temp");
+		} else if (IJ.getDirectory("image") != null){
+		
 			saveRootDir = (new File(IJ.getDirectory("image"))).getParent()/*)*/ ;
 			saveRootPrefix = (new File(IJ.getDirectory("image"))).getName()+"_";
 		}else {
@@ -239,7 +247,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 		if (!correctSaveRoot) {
 			saveRootDir = (new File(saveRootDir)).getParent();
 		}
-		File tempDir = new File(saveRootDir + File.separator + saveRootPrefix +"DUP_"+imp.getTitle().replaceAll("[,. ;:]","").replace(File.separator, "_") + tempTime);
+		File tempDir = new File(saveRootDir + File.separator + "DUP_"+ saveRootPrefix.replaceAll("[,. ;:]","").replace(File.separator, "_") + tempTime);
 		if (!singleStack) {
 			tempDir.mkdirs();
 			if (!tempDir.exists()) {
@@ -333,11 +341,11 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 			}
 		}
 		if (!singleStack) {
-			stack2 = new MultiFileInfoVirtualStack(saveRootDir + File.separator + saveRootPrefix +"DUP_"+imp.getTitle().replaceAll("[,. ;:]","").replace(File.separator, "_") + tempTime,"",false);
+			stack2 = new MultiFileInfoVirtualStack(saveRootDir + File.separator + "DUP_"+ saveRootPrefix.replaceAll("[,. ;:]","").replace(File.separator, "_") + tempTime,"",false);
 		} else {
 			stack2 = impT.getStack();
 		}
-		ImagePlus imp2 = new ImagePlus(imp.isSketch3D()?"Sketch3D_":""+"DUP_"+imp.getTitle().replaceAll("Sketch3D_*", ""), stack2);
+		ImagePlus imp2 = new ImagePlus((imp.isSketch3D()?"Sketch3D_":"")+ "DUP_"+ saveRootPrefix.replaceAll("Sketch3D_*", ""), stack2);
 		imp2.setOpenAsHyperStack(true);
 
 		imp2.setDimensions(copyMergedImage?1:lastC-firstC+1, lastZ-firstZ+1, finalFrames);
@@ -438,6 +446,8 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 
 
 	public ImagePlus duplicateHyperstack(ImagePlus imp, String newTitle) {
+		String saveRootForDup = (new File(IJ.getDirectory("image"))).getName()+"_";
+		newTitle = "DUP_tmp_" + saveRootForDup;
 		dupTitle = showHSDialog(imp, newTitle);
 		if (dupTitle==null)
 			return null;
@@ -480,7 +490,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 			mcc.setVisible(false);
 		}
 
-		imp2 = run(imp, getFirstC(), getLastC(), getFirstZ(), getLastZ(), getFirstT(), getLastT(), getStepT(), sliceSpecificROIs, 0);
+		imp2 = run(imp, getFirstC(), getLastC(), getFirstZ(), getLastZ(), getFirstT(), getLastT(), getStepT(), sliceSpecificROIs, 0, true);
 
 		imp.getProcessor().setColorModel(cm);
 		imp.setDisplayRange(inMin, inMax);

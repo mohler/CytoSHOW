@@ -35,6 +35,8 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 	private String matPrimMethod;
 	private Double subFractA;
 	private Double subFractB;
+	private Checkbox depthSeek;
+	private boolean autodepth;
 	public double getSubFractA() {
 		return subFractA;
 	}
@@ -135,13 +137,15 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 		}
 		add("South", panel);
 		
-		modeFractionSpinnerA = new JSpinner(new SpinnerNumberModel(1.011, -1.0, 2.0, 0.001));  
+		depthSeek = new Checkbox("Auto-sense specimen depth?", false);
+		modeFractionSpinnerA = new JSpinner(new SpinnerNumberModel(/*1.011*/ 1, -1.0, 2.0, 0.001));  
 		modeFractionSpinnerA.setToolTipText("Fraction of image Mode to use for autocrop \nand background subtraction on Camera A");
-		modeFractionSpinnerB = new JSpinner(new SpinnerNumberModel(1.012, -1.0, 2.0, 0.001));  
+		modeFractionSpinnerB = new JSpinner(new SpinnerNumberModel(/*1.012*/ 1, -1.0, 2.0, 0.001));  
 		modeFractionSpinnerB.setToolTipText("Fraction of image Mode to use for autocrop \nand background subtraction on Camera B");
 		iterationSpinner = new JSpinner(new SpinnerNumberModel(10, 1, 100, 1));  
 		iterationSpinner.setToolTipText("Iterations of Deconvolution");
 		optPanel = new Panel();
+		optPanel.add("West", depthSeek);
 		optPanel.add("West", modeFractionSpinnerA);
 		optPanel.add("Center", modeFractionSpinnerB);
 		optPanel.add("East", iterationSpinner);
@@ -220,6 +224,9 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 			keyChannel = channelChoices.getSelectedIndex()+1;		
 			IJ.log("keyChannel "+ keyChannel);
 		}
+		if (e.getSource()==depthSeek) {
+			autodepth = false;
+		}
 		if (e.getSource() == methodChoices) {
 			regDeconMethod = methodChoices.getSelectedItem();		
 			IJ.log("regDeconMethod "+ regDeconMethod);
@@ -235,6 +242,14 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 				}
 			}
 		}
+	}
+
+	public boolean isAutodepth() {
+		return autodepth;
+	}
+
+	public void setAutodepth(boolean autodepth) {
+		this.autodepth = autodepth;
 	}
 
 }
