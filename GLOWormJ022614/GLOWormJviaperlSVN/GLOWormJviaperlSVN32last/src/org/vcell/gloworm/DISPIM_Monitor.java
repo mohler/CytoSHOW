@@ -59,6 +59,7 @@ import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
 import ij.process.ImageStatistics;
 import ij.process.LUT;
+import ij.process.ShortProcessor;
 
 public class DISPIM_Monitor implements PlugIn, ActionListener {
 
@@ -1039,6 +1040,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 		if (doMipavDecon || doGPUdecon) {
 
 			for (int pos=0; pos<pDim; pos++) {
+				if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+					doProcessing[pos] = false;
+					continue;
+				}
+				if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+					doProcessing[pos] = false;
+					continue;
+				} 
+
 				doProcessing[pos] = true;
 				
 
@@ -1314,6 +1324,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				}
 			}
 			for (int pos=0; pos<pDim; pos++) {
+				if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+					doProcessing[pos] = false;
+					continue;
+				}
+				if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+					doProcessing[pos] = false;
+					continue;
+				} 
+
 				if(doProcessing[pos]) {
 					if(fuseButton[pos][0] != null)
 						fuseButton[pos][0].setVisible(false);
@@ -1327,6 +1346,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 		} else {	//if not deconning immediately)
 			for (int pos=0; pos<pDim; pos++) {
+				if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+					doProcessing[pos] = false;
+					continue;
+				}
+				if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+					doProcessing[pos] = false;
+					continue;
+				} 
+
 				if(fuseButton[pos][0] == null) {
 					fuseButton[pos][0] = new Button("Fuse");
 					fuseButton[pos][0].addActionListener(this);
@@ -1353,6 +1381,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 			MultiFileInfoVirtualStack[] stackPrys = new MultiFileInfoVirtualStack[pDim];
 
 			for (int pos=0; pos<pDim; pos++) {
+				if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+					doProcessing[pos] = false;
+					continue;
+				}
+				if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+					doProcessing[pos] = false;
+					continue;
+				} 
+
 				if (doProcessing[pos]) {
 					stackDFs[pos] = null;					
 
@@ -1572,6 +1609,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 			new File("" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "Decon").mkdirs();
 			if (doRegPriming){
 				for (int pos=0; pos<pDim; pos++) {
+					if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+						doProcessing[pos] = false;
+						continue;
+					}
+					if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+						doProcessing[pos] = false;
+						continue;
+					} 
+
 					lastMatrix[pos] = IJ.openAsString("C:\\DataForTest\\Matrix_0.tmx");
 				}
 			}
@@ -1589,6 +1635,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 			for (int f = 1; f <= impAs[0].getNFrames(); f++) {
 				for (int pos=0; pos<pDim; pos++) {
+					if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+						doProcessing[pos] = false;
+						continue;
+					}
+					if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+						doProcessing[pos] = false;
+						continue;
+					} 
+
 					if (doProcessing[pos]) {
 
 						if (impAs[pos].hasNullStack())
@@ -1618,6 +1673,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 							ImageStack stackA1 = new ImageStack((int)cropWidthA[pos], (int)cropHeightA[pos]);
 							ImageStack stackA2 = new ImageStack((int)cropWidthA[pos], (int)cropHeightA[pos]);
 							impAs[pos].getWindow().setEnabled(false);
+							
+							stackA1.addSlice(new ShortProcessor((int)cropWidthA[pos], (int)cropHeightA[pos]));
+							stackA2.addSlice(new ShortProcessor((int)cropWidthA[pos], (int)cropHeightA[pos]));
+
 							double maxBkgd1 = 0.0;
 							double maxBkgd2 = 0.0;
 							for (int i = zFirstA[pos]; i <= zLastA[pos]; i++) {
@@ -1686,6 +1745,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 								}
 							}
 
+							stackA1.addSlice(new ShortProcessor((int)cropWidthA[pos], (int)cropHeightA[pos]));
+							stackA2.addSlice(new ShortProcessor((int)cropWidthA[pos], (int)cropHeightA[pos]));
+
 							impAs[pos].getWindow().setEnabled(true);
 							ImagePlus impXA1 = new ImagePlus();
 							impXA1.setStack(stackA1);
@@ -1708,6 +1770,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 							ImageStack stackB1 = new ImageStack((int)cropWidthB[pos], (int)cropHeightB[pos]);
 							ImageStack stackB2 = new ImageStack((int)cropWidthB[pos], (int)cropHeightB[pos]);
 							impBs[pos].getWindow().setEnabled(false);
+							
+							stackB1.addSlice(new ShortProcessor((int)cropWidthB[pos], (int)cropHeightB[pos]));
+							stackB2.addSlice(new ShortProcessor((int)cropWidthB[pos], (int)cropHeightB[pos]));
+							
 							for (int i = zFirstB[pos]; i <= zLastB[pos]; i++) {
 								impBs[pos].setPositionWithoutUpdate(1, i, f);
 								Roi impRoi = (Roi) roiBs[pos].clone();
@@ -1778,6 +1844,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 											stackB2.addSlice(ipB2);
 										}
 							}
+							
+							stackB1.addSlice(new ShortProcessor((int)cropWidthB[pos], (int)cropHeightB[pos]));
+							stackB2.addSlice(new ShortProcessor((int)cropWidthB[pos], (int)cropHeightB[pos]));
+
 							impBs[pos].getWindow().setEnabled(true);
 							ImagePlus impXB1 = new ImagePlus();
 							impXB1.setStack(stackB1);
@@ -2103,6 +2173,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 			for (int f = 1; f <= impAs[0].getNFrames(); f++) {
 				for (int pos=0; pos<pDim; pos++) {
+					if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+						doProcessing[pos] = false;
+						continue;
+					}
+					if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+						doProcessing[pos] = false;
+						continue;
+					} 
+
 					if (doProcessing[pos]) {
 
 					if (impAs[pos].hasNullStack())
@@ -2725,6 +2804,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 						MultiFileInfoVirtualStack[] stackBs = new MultiFileInfoVirtualStack[pDim];
 
 						for (int pos=0; pos<pDim; pos++) {
+							if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+								doProcessing[pos] = false;
+								continue;
+							}
+							if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+								doProcessing[pos] = false;
+								continue;
+							} 
+
 							if (doProcessing[pos]) {
 
 								if (impAs[pos].hasNullStack())
@@ -2990,6 +3078,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 						}
 
 						for (int pos=0; pos<pDim; pos++) {
+							if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+								doProcessing[pos] = false;
+								continue;
+							}
+							if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+								doProcessing[pos] = false;
+								continue;
+							} 
+
 							if (doProcessing[pos]) {
 
 								if (impAs[pos].hasNullStack())
@@ -3071,6 +3168,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 						SyncWindows.getInstance().close();
 					}
 					for (int pos=0; pos<pDim; pos++) {
+						if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+							doProcessing[pos] = false;
+							continue;
+						}
+						if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+							doProcessing[pos] = false;
+							continue;
+						} 
+
 						if (doProcessing[pos]) {
 
 							if (impAs[pos].hasNullStack())
@@ -3187,6 +3293,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 						SyncWindows.getInstance().close();
 					}
 					for (int pos=0; pos<pDim; pos++) {
+						if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+							doProcessing[pos] = false;
+							continue;
+						}
+						if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+							doProcessing[pos] = false;
+							continue;
+						} 
+
 						if (doProcessing[pos]) {
 
 							if (impAs[pos].hasNullStack())
@@ -3497,6 +3612,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 					new File("" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "Decon").mkdirs();
 					if (doRegPriming){
 						for (int pos=0; pos<pDim; pos++) {
+							if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+								doProcessing[pos] = false;
+								continue;
+							}
+							if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+								doProcessing[pos] = false;
+								continue;
+							} 
+
 							if (doProcessing[pos]) {
 
 								if (lastMatrix[pos] == null)
@@ -3518,6 +3642,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 					
 					for (int f = 1; f <= impAs[0].getNFrames(); f++) {
 						for (int pos=0; pos<pDim; pos++) {
+							if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+								doProcessing[pos] = false;
+								continue;
+							}
+							if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+								doProcessing[pos] = false;
+								continue;
+							} 
+
 							if (doProcessing[pos]) {
 								MultiFileInfoVirtualStack[] stackDFs = new MultiFileInfoVirtualStack[pDim];
 
@@ -3548,6 +3681,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 									ImageStack stackA1 = new ImageStack((int)cropWidthA[pos], (int)cropHeightA[pos]);
 									ImageStack stackA2 = new ImageStack((int)cropWidthA[pos], (int)cropHeightA[pos]);
 									impAs[pos].getWindow().setEnabled(false);
+									
+									stackA1.addSlice(new ShortProcessor((int)cropWidthA[pos], (int)cropHeightA[pos]));
+									stackA2.addSlice(new ShortProcessor((int)cropWidthA[pos], (int)cropHeightA[pos]));
+
 									double maxBkgd1 = 0.0;
 									double maxBkgd2 = 0.0;
 									for (int i = zFirstA[pos]; i <= zLastA[pos]; i++) {
@@ -3616,6 +3753,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 										}
 									}
 
+									stackA1.addSlice(new ShortProcessor((int)cropWidthA[pos], (int)cropHeightA[pos]));
+									stackA2.addSlice(new ShortProcessor((int)cropWidthA[pos], (int)cropHeightA[pos]));
+
 									impAs[pos].getWindow().setEnabled(true);
 									ImagePlus impXA1 = new ImagePlus();
 									impXA1.setStack(stackA1);
@@ -3638,6 +3778,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 									ImageStack stackB1 = new ImageStack((int)cropWidthB[pos], (int)cropHeightB[pos]);
 									ImageStack stackB2 = new ImageStack((int)cropWidthB[pos], (int)cropHeightB[pos]);
 									impBs[pos].getWindow().setEnabled(false);
+
+									stackB1.addSlice(new ShortProcessor((int)cropWidthB[pos], (int)cropHeightB[pos]));
+									stackB2.addSlice(new ShortProcessor((int)cropWidthB[pos], (int)cropHeightB[pos]));
+
 									for (int i = zFirstB[pos]; i <= zLastB[pos]; i++) {
 										impBs[pos].setPositionWithoutUpdate(1, i, f);
 										Roi impRoi = (Roi) roiBs[pos].clone();
@@ -3708,6 +3852,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 													stackB2.addSlice(ipB2);
 												}
 									}
+									
+									stackB1.addSlice(new ShortProcessor((int)cropWidthB[pos], (int)cropHeightB[pos]));
+									stackB2.addSlice(new ShortProcessor((int)cropWidthB[pos], (int)cropHeightB[pos]));
+
 									impBs[pos].getWindow().setEnabled(true);
 									ImagePlus impXB1 = new ImagePlus();
 									impXB1.setStack(stackB1);
@@ -4027,6 +4175,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 					//					impA = impAs[pos];
 					//					impB = impBs[pos];
 					for (int pos=0; pos<pDim; pos++) {
+						if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+							doProcessing[pos] = false;
+							continue;
+						}
+						if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+							doProcessing[pos] = false;
+							continue;
+						} 
+
 						if (doProcessing[pos]) {
 
 							if (impAs[pos].hasNullStack())
@@ -4482,6 +4639,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 					}
 					// IJ.wait(15000);
 					for (int pos=0; pos<pDim; pos++) {
+						if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+							doProcessing[pos] = false;
+							continue;
+						}
+						if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+							doProcessing[pos] = false;
+							continue;
+						} 
+
 						if (doProcessing[pos]) {
 
 							if (impAs[pos].hasNullStack())
