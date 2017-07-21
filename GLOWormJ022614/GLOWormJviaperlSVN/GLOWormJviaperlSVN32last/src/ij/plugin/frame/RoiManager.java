@@ -163,7 +163,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			imp.getRoiManager().toFront();
 			return;
 		}
-		//		this.setTitle(getTitle()+":"+ imp.getTitle());
+		//		//this.setTitle(getTitle()+":"+ imp.getTitle());
 		list = new JList<String>();
 		fullList = new JList<String>();		
 		listModel = new DefaultListModel<String>();
@@ -181,7 +181,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	public RoiManager(boolean hideWindow) {
 		super("Tag Manager");
 		this.imp = WindowManager.getCurrentImage();
-		//		this.setTitle(getTitle()+":"+ imp.getTitle());
+		//		//this.setTitle(getTitle()+":"+ imp.getTitle());
 		Prefs.showAllSliceOnly = true;
 		list = new JList<String>();
 		fullList = new JList<String>();
@@ -211,7 +211,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		fullList.setModel(fullListModel);
 
 		if (imp != null){
-			//			this.setTitle(getTitle()+":"+ imp.getTitle());
+			//			//this.setTitle(getTitle()+":"+ imp.getTitle());
 			imp.setRoiManager(this);
 		}
 		showWindow(!hideWindow);
@@ -403,19 +403,22 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			textCountLabel.setText("?" +"/"+ fullListModel.size());
 			imp.getWindow().countLabel.setText(""+ listModel.size() +"/"+ fullListModel.size() +"");
 			imp.getWindow().countLabel.repaint();			
+			//imp.getWindow().tagsButton.setText(""+fullListModel.size());
+
+			imp.getWindow().tagsButton.repaint();
 			searching = true;
 			long timeLast = 0;
 			long timeNow = 0;
 
 			for (int i = 0; i < count; i++) {			
 				timeNow = System.currentTimeMillis();
-				this.setTitle(  "Tag Manager" + ((i%100>50)?" SEARCHING!!!":" Searching...") );
+				//this.setTitle(  "Tag Manager" + ((i%100>50)?" SEARCHING!!!":" Searching...") );
 				if (i%100>50){
 					//					IJ.runMacro("print(\"\\\\Update:***Tag Manager is still searching tags...***\")");
-					this.imp.setTitle("***"+ impTitle);
+					//this.imp.setTitle("***"+ impTitle);
 				}else{
 					//					IJ.runMacro("print(\"\\\\Update:   Tag Manager is still searching tags...   \")");
-					this.imp.setTitle("   "+ impTitle);
+					//this.imp.setTitle("   "+ impTitle);
 				}
 				if (searchString.trim().equalsIgnoreCase("") || searchString.trim().equalsIgnoreCase(".*")) {
 					listModel.addElement(fullListModel.get(i));
@@ -481,8 +484,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			textCountLabel.setText(""+ listModel.size() +"/"+ fullListModel.size());
 			imp.getWindow().countLabel.setText(""+ listModel.size() +"/"+ fullListModel.size() +"");
 			imp.getWindow().countLabel.repaint();			
-			//			this.setTitle(  thisWasTitle  );
-			this.imp.setTitle(impTitle);
+			//imp.getWindow().tagsButton.setText(""+fullListModel.size());
+
+			imp.getWindow().tagsButton.repaint();			
+			//			//this.setTitle(  thisWasTitle  );
+			//this.imp.setTitle(impTitle);
 
 			IJ.runMacro("print(\"\\\\Update:\")");
 
@@ -1251,7 +1257,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		textCountLabel.setText(""+ listModel.size() +"/"+ fullListModel.size());
 		if (imp.getWindow()!=null) {
 			imp.getWindow().countLabel.setText(""+ listModel.size() +"/"+ fullListModel.size() +"");
-			imp.getWindow().countLabel.repaint();
+			imp.getWindow().countLabel.repaint();			
+			//imp.getWindow().tagsButton.setText(""+fullListModel.size());
+
+			imp.getWindow().tagsButton.repaint();
 		}
 		return true;
 	}
@@ -1316,6 +1325,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (imp.getWindow()!=null) {
 			imp.getWindow().countLabel.setText(""+ listModel.size() +"/"+ fullListModel.size() +"");
 			imp.getWindow().countLabel.repaint();			
+			//imp.getWindow().tagsButton.setText(""+fullListModel.size());
+
+			imp.getWindow().tagsButton.repaint();			
 		}
 		}
 
@@ -1436,6 +1448,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (imp.getWindow()!=null) {
 			imp.getWindow().countLabel.setText(""+ listModel.size() +"/"+ fullListModel.size() +"");
 			imp.getWindow().countLabel.repaint();			
+			//imp.getWindow().tagsButton.setText(""+fullListModel.size());
+
+			imp.getWindow().tagsButton.repaint();			
 		}
 		if (record()) Recorder.record("roiManager", "Delete");
 		return true;
@@ -1733,37 +1748,46 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			Recorder.record("roiManager", "Open", path);
 		if (path.endsWith(".zip")) {
 			String origTitle = this.title;
-			this.setTitle("Tag Manager LOADING!!!");
+			//this.setTitle("Tag Manager LOADING!!!");
 			openZip(path);
-			this.setTitle(origTitle);
+			//this.setTitle(origTitle);
 			textCountLabel.setText(""+ listModel.size() +"/"+ fullListModel.size());
 			if (imp.getWindow()!=null) {
 				imp.getWindow().countLabel.setText(""+ listModel.size() +"/"+ fullListModel.size() +"");
-				imp.getWindow().countLabel.repaint();
+			imp.getWindow().countLabel.repaint();			
+			//imp.getWindow().tagsButton.setText(""+fullListModel.size());
+
+			imp.getWindow().tagsButton.repaint();
 			}
 			return;			
 		}
 		if (path.endsWith(".xml")) {
 			String origTitle = this.title;
-			this.setTitle("Tag Manager LOADING!!!");
+			//this.setTitle("Tag Manager LOADING!!!");
 			openXml(path);
-			this.setTitle(origTitle);
+			//this.setTitle(origTitle);
 			textCountLabel.setText(""+ listModel.size() +"/"+ fullListModel.size());
 			if (imp.getWindow()!=null) {
 				imp.getWindow().countLabel.setText(""+ listModel.size() +"/"+ fullListModel.size() +"");
-				imp.getWindow().countLabel.repaint();
+			imp.getWindow().countLabel.repaint();			
+			//imp.getWindow().tagsButton.setText(""+fullListModel.size());
+
+			imp.getWindow().tagsButton.repaint();
 			}
 			return;			
 		}
 		if (path.endsWith(".csv")) {
 			String origTitle = this.title;
-			this.setTitle("Tag Manager LOADING!!!");
+			//this.setTitle("Tag Manager LOADING!!!");
 			openCsv(path);
-			this.setTitle(origTitle);
+			//this.setTitle(origTitle);
 			textCountLabel.setText(""+ listModel.size() +"/"+ fullListModel.size());
 			if (imp.getWindow()!=null) {
-				imp.getWindow().countLabel.setText(""+ listModel.size() +"/"+ fullListModel.size());
-				imp.getWindow().countLabel.repaint();
+				imp.getWindow().countLabel.setText(""+ listModel.size() +"/"+ fullListModel.size() +"");
+				imp.getWindow().countLabel.repaint();			
+				////imp.getWindow().tagsButton.setText(""+fullListModel.size());
+
+				//imp.getWindow().tagsButton.repaint();
 			}
 			return;			
 		}
@@ -1830,14 +1854,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 			for (int sl=0; sl< sLayers.length; sl++){				
 				count++;
-				this.setTitle(  "Tag Manager" + ((nRois%100>50)?" LOADING!!!":" Loading...") );
+				//this.setTitle(  "Tag Manager" + ((nRois%100>50)?" LOADING!!!":" Loading...") );
 				if (nRois%100>50){
 					IJ.runMacro("print(\"\\\\Update:***Tag Manager is still loading tags...***"+count+"\");");
-					this.imp.setTitle("***"+ impTitle);
+					//this.imp.setTitle("***"+ impTitle);
 				} 
 				else {
 					IJ.runMacro("print(\"\\\\Update:   Tag Manager is still loading tags...   "+count+"\");");
-					this.imp.setTitle("   "+ impTitle);
+					//this.imp.setTitle("   "+ impTitle);
 				} 
 
 				String sLayer=sLayers[sl];
@@ -1878,14 +1902,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		for (int sc=1; sc<sConnectors.length; sc++){
 			count++;
-			this.setTitle(  "Tag Manager" + ((nRois%100>50)?" LOADING!!!":" Loading...") );
+			//this.setTitle(  "Tag Manager" + ((nRois%100>50)?" LOADING!!!":" Loading...") );
 			if (nRois%100>50){
 				IJ.runMacro("print(\"\\\\Update:***Tag Manager is still loading tags...***"+count+"\");");
-				this.imp.setTitle("***"+ impTitle);
+				//this.imp.setTitle("***"+ impTitle);
 			} 
 			else {
 				IJ.runMacro("print(\"\\\\Update:   Tag Manager is still loading tags...   "+count+"\");");
-				this.imp.setTitle("   "+ impTitle);
+				//this.imp.setTitle("   "+ impTitle);
 			} 
 
 			String sConnector = sConnectors[sc];
@@ -1937,7 +1961,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					}
 		}
 		updateShowAll();
-		this.imp.setTitle(impTitle);
+		//this.imp.setTitle(impTitle);
 		this.setVisible(wasVis);
 		busy = false;
 	}
@@ -2024,14 +2048,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						imp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
 					}
 				}
-				this.setTitle(  "Tag Manager" + ((nRois%100>50)?" LOADING!!!":" Loading...") );
+				//this.setTitle(  "Tag Manager" + ((nRois%100>50)?" LOADING!!!":" Loading...") );
 				if (nRois%100>50){
 					//					IJ.runMacro("print(\"\\\\Update:***Tag Manager is still loading tags...***"+count+"\");");
-					this.imp.setTitle("***"+ impTitle);
+					//this.imp.setTitle("***"+ impTitle);
 				} 
 				else {
 					//					IJ.runMacro("print(\"\\\\Update:   Tag Manager is still loading tags...   "+count+"\");");
-					this.imp.setTitle("   "+ impTitle);
+					//this.imp.setTitle("   "+ impTitle);
 				} 
 				count++;
 
@@ -2124,11 +2148,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				entry = in.getNextEntry(); 
 			} 
 			in.close(); 
-			this.imp.setTitle(impTitle);
-			if(imp.getCanvas()!=null) {
-				if (imp.getCanvas().messageRois.containsKey("Loading Tags"))
-					imp.getCanvas().messageRois.remove("Loading Tags");
-			}
+//			//this.imp.setTitle(impTitle);
+//			if(imp.getCanvas()!=null) {
+//				if (imp.getCanvas().messageRois.containsKey("Loading Tags"))
+//					imp.getCanvas().messageRois.remove("Loading Tags");
+//			}
 		} catch (IOException e) {error(e.toString());} 
 		if (in == null)
 			return;
@@ -2902,7 +2926,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		//			labels[index++] = (String)en.nextElement();
 		listModel.removeAllElements();
 		fullListModel.removeAllElements();				
-		this.setTitle(  "Tag Manager SORTING!!!") ;
+		//this.setTitle(  "Tag Manager SORTING!!!") ;
 
 		if (sortmode > 0) {
 			RoiLabelByNumbersSorter.sort(labels, sortmode);	
@@ -2917,7 +2941,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		//		Dimension dim = list.getSize();
 		//		list.setSize(0,0);
 		for (int i=0; i<labels.length; i++) {
-			this.setTitle(  "Tag Manager" + ((numSorted%100>50)?" SORTING!!!":" Sorting...") );
+			//this.setTitle(  "Tag Manager" + ((numSorted%100>50)?" SORTING!!!":" Sorting...") );
 			listModel.addElement(labels[i]);
 			numSorted++;
 		}
@@ -2925,7 +2949,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		for (int i=0; i<fullLabels.length; i++) {
 			fullListModel.addElement(fullLabels[i]);
 		}
-		this.setTitle(  "Tag Manager" );
+		//this.setTitle(  "Tag Manager" );
 
 		if (record()) Recorder.record("roiManager", "Sort");
 		busy = false;
@@ -5155,7 +5179,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 		}
 		updateShowAll();
-		this.imp.setTitle(impTitle);
+		//this.imp.setTitle(impTitle);
 		imp.getWindow().setVisible(true);
 		this.setVisible(wasVis);
 		busy = false;
@@ -5239,7 +5263,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						textCountLabel.setText(""+ listModel.size() +"/"+ fullListModel.size());
 						if (imp.getWindow()!=null) {
 							imp.getWindow().countLabel.setText(""+ listModel.size() +"/"+ fullListModel.size() +"");
-							imp.getWindow().countLabel.repaint();	
+			imp.getWindow().countLabel.repaint();			
+			//imp.getWindow().tagsButton.setText(""+fullListModel.size());
+
+			imp.getWindow().tagsButton.repaint();
 						}
 						ra = this.getFullRoisAsArray();
 					}

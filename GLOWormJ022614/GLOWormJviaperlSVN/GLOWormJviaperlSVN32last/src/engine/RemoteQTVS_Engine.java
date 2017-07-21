@@ -334,7 +334,7 @@ public class RemoteQTVS_Engine extends UnicastRemoteObject implements Compute {
 					return null;
 			InputStream input = new FileInputStream(path); 
 			ByteArrayOutputStream output = new ByteArrayOutputStream();
-			byte[] buffer = new byte[8192];
+			byte[] buffer = new byte[1024*1024];
 
 			try {
 				for (int length = 0; (length = input.read(buffer)) > 0;) {

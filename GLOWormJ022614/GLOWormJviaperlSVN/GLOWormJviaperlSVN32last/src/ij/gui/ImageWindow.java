@@ -19,6 +19,7 @@ import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.ComponentOrientation;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -57,6 +58,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 
 import org.vcell.gloworm.MultiChannelController;
 import org.vcell.gloworm.MultiQTVirtualStack;
@@ -132,6 +134,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 	public SliceStereoToggle sst;
 	public JButton sketchVVButton;
 	private JButton flattenTagsButton;
+	public JButton tagsButton;
 	
 	public ImageWindow(String title) {
 		super(title);
@@ -571,11 +574,13 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
 		fspc.fill = GridBagConstraints.BOTH;
-		JButton tagsButton = new JButton();
+		tagsButton = new JButton();
 		tagsButton.setActionCommand("Show/Hide Tagging Tools");
 		tagsButton.setName("Show/Hide Tagging Tools");
 		tagsButton.setToolTipText("Show Tag-Editing Tools");
 		tagsButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/TagsThin.png")));
+		tagsButton.setHorizontalTextPosition(SwingConstants.CENTER);
+		tagsButton.setVerticalTextPosition(SwingConstants.CENTER);
 		tagsButton.setFont(buttonPanelFont);
 		viewButtonPanel.add(tagsButton, fspc);
 		tagsButton.addActionListener(ij);
