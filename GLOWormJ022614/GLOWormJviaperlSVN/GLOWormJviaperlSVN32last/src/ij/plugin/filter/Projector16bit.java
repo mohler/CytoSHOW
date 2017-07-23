@@ -268,8 +268,8 @@ public class Projector16bit implements PlugInFilter, TextListener {
 		if (!correctSaveRoot) {
 			saveRootDir = (new File(saveRootDir)).getParent();
 		}
-		tempXDir = new File(saveRootDir + File.separator + saveRootPrefix +"ProjX_"+imp.getTitle().replaceAll("[,. ;:]","").replace(File.separator, "_") + "_" + tempTime);
-		tempYDir = new File(saveRootDir + File.separator + saveRootPrefix +"ProjY_"+imp.getTitle().replaceAll("[,. ;:]","").replace(File.separator, "_") + "_" + tempTime);
+		tempXDir = new File(saveRootDir + File.separator + saveRootPrefix +"ProjX_"+imp.getTitle().replaceAll("[,. ;:]","").replace(File.separator, "_") + "_" + (tempTime==-1?"FullVolume":tempTime));
+		tempYDir = new File(saveRootDir + File.separator + saveRootPrefix +"ProjY_"+imp.getTitle().replaceAll("[,. ;:]","").replace(File.separator, "_") + "_" + (tempTime==-1?"FullVolume":tempTime));
 
 		if (axisOfRotation == 0)
 			tempXDir.mkdirs();

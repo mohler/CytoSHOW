@@ -173,13 +173,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 	private boolean doRegPriming;
 	private double sliceTresholdVsModeA;
 	private double sliceTresholdVsModeB;
-	private long tempTime = (new Date()).getTime();
+	private long tempTime = -1;
 	private MultiFileInfoVirtualStack deconmfivs;
 	private MultiFileInfoVirtualStack dfProjXmfivs;
 	private MultiFileInfoVirtualStack dfProjYmfivs;
 	private boolean autodepth;
 	private Button[][] fuseButton;
 	private String dirOrOMETiff;
+	String timecode = "" + -1;
 
 	String[] fileListA = { "" };
 	String[] fileListB = { "" };
@@ -1413,6 +1414,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 									stackDFs[pos] = new MultiFileInfoVirtualStack(dirOrOMETiff
 											+ File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution",
 											false);
+									stackPrxs[pos] = new MultiFileInfoVirtualStack(dirOrOMETiff + File.separator + "ProjX_"+("Decon-Fuse_"
+											+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_"+"_Pos"+pos+"_FullVolume", "", false);					
+									stackPrys[pos] = new MultiFileInfoVirtualStack(dirOrOMETiff + File.separator + "ProjY_"+("Decon-Fuse_"
+											+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_"+"_Pos"+pos+"_FullVolume", "", false);					
+
 								}
 							} else {
 								stackDFs[pos] = new MultiFileInfoVirtualStack(
@@ -1440,14 +1446,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 								}
 								ciDFs[pos] = new CompositeImage(impDF1s[pos]);
 								ciDFs[pos].setPosition(1, ciDFs[pos].getNSlices()/2, ciDFs[pos].getNFrames());
-
-								prjXs[pos] = new Projector16bit(ciDFs[pos], 0, tempTime, savePath);
-								prjYs[pos] = new Projector16bit(ciDFs[pos], 1, tempTime, savePath);
-
-								new File(prjXs[pos].getTempDir().getPath()+File.separator+"proj_1_1.tif")
-								.renameTo(new File(prjXs[pos].getTempDir().getPath()+File.separator+"projX_"+pos+"_"+ciDFs[pos].getNFrames()+".tif"));
-								new File(prjYs[pos].getTempDir().getPath()+File.separator+"proj_1_1.tif")
-								.renameTo(new File(prjYs[pos].getTempDir().getPath()+File.separator+"projY_"+pos+"_"+ciDFs[pos].getNFrames()+".tif"));
 
 								if (wavelengths > 1)
 									ciDFs[pos].setMode(CompositeImage.COMPOSITE);
@@ -1480,9 +1478,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 											win.getSize().height);
 
 								}
-
-								stackPrxs[pos] = new MultiFileInfoVirtualStack(prjXs[pos].getTempDir().getPath()+File.separator, "", false);
-								stackPrys[pos] = new MultiFileInfoVirtualStack(prjYs[pos].getTempDir().getPath()+File.separator, "", false);
 
 								impPrxs[pos] = new ImagePlus();
 								impPrxs[pos].setStack("3DProjX_Decon-Fuse_"
@@ -1588,6 +1583,20 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 									prjYwin.setSize(prjYwin.getSize().width,
 											prjYwin.getSize().height);
 								}
+								
+//								prjXs[pos] = new Projector16bit(ciDFs[pos], 0, tempTime, savePath);
+//								prjYs[pos] = new Projector16bit(ciDFs[pos], 1, tempTime, savePath);
+//
+//								new File(prjXs[pos].getTempDir().getPath()+File.separator+"proj_1_1.tif")
+//								.renameTo(new File(prjXs[pos].getTempDir().getPath()+File.separator+"projX_"+pos+"_"+ciDFs[pos].getNFrames()+".tif"));
+//								new File(prjYs[pos].getTempDir().getPath()+File.separator+"proj_1_1.tif")
+//								.renameTo(new File(prjYs[pos].getTempDir().getPath()+File.separator+"projY_"+pos+"_"+ciDFs[pos].getNFrames()+".tif"));
+//
+//
+//								stackPrxs[pos] = new MultiFileInfoVirtualStack(prjXs[pos].getTempDir().getPath()+File.separator, "", false);
+//								stackPrys[pos] = new MultiFileInfoVirtualStack(prjYs[pos].getTempDir().getPath()+File.separator, "", false);
+
+
 
 							}
 						}
@@ -1651,12 +1660,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 						if (impBs[pos].hasNullStack())
 							continue;
 
-						if (new File(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution1" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif").canRead()) {
+						if (new File(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution1" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif").canRead()
+							&& new File(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution2" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif").canRead()) {
 							IJ.log("already done: " + pos +" "+ impAs[pos].getChannel()+" "+ impAs[pos].getSlice()+" "+ f);
 						} else {
 							IJ.log("starting " + pos +" "+ impAs[pos].getChannel()+" "+ impAs[pos].getSlice()+" "+ f);
 							IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "RegB" + File.separator + "tmx" + File.separator + "Matrix_1.tmx");
 							IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "RegB" + File.separator + "tmx" + File.separator + "Matrix_1.tmx");
+							IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "RegA" + File.separator + "tmx" + File.separator + "Matrix_1.tmx");
+							IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "RegA" + File.separator + "tmx" + File.separator + "Matrix_1.tmx");
 
 							impAs[pos].setPositionWithoutUpdate(impAs[pos].getChannel(), impAs[pos].getSlice(), f);
 
@@ -1668,7 +1680,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 								frameFileNames[f] = "t" + f;
 							else
 								frameFileNames[f] = "t" + f;
-							String timecode = "" + (new Date()).getTime();
+//							timecode = "" + (new Date()).getTime();
 
 							ImageStack stackA1 = new ImageStack((int)cropWidthA[pos], (int)cropHeightA[pos]);
 							ImageStack stackA2 = new ImageStack((int)cropWidthA[pos], (int)cropHeightA[pos]);
@@ -1882,7 +1894,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 							final int ff = f;
 
-							timecode = "" + (new Date()).getTime();
+//							timecode = "" + (new Date()).getTime();
 							final String ftimecode = timecode;
 
 							while (regDeconProcess!= null && regDeconProcess.isAlive()) {
@@ -2201,7 +2213,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 						frameFileNames[f] = "t" + f;
 					else
 						frameFileNames[f] = "t" + f;
-					String timecode = "" + (new Date()).getTime();
+//					timecode = "" + (new Date()).getTime();
 
 					if (!(new File(savePath + "Pos"+pos+ "_SPIMA_Ch1_processed"
 							+ File.separator + frameFileNames[f] + File.separator
@@ -2422,7 +2434,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 					final int ff = f;
 
-					timecode = "" + (new Date()).getTime();
+//					timecode = "" + (new Date()).getTime();
 					final String ftimecode = timecode;
 
 					if (!(new File(savePath +"Pos"+pos+ "_Deconvolution1" + File.separator
@@ -3676,7 +3688,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 										frameFileNames[f] = "t" + f;
 									else
 										frameFileNames[f] = "t" + f;
-									String timecode = "" + (new Date()).getTime();
+//									timecode = "" + (new Date()).getTime();
 
 									ImageStack stackA1 = new ImageStack((int)cropWidthA[pos], (int)cropHeightA[pos]);
 									ImageStack stackA2 = new ImageStack((int)cropWidthA[pos], (int)cropHeightA[pos]);
@@ -3887,7 +3899,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 									final int ff = f;
 
-									timecode = "" + (new Date()).getTime();
+//									timecode = "" + (new Date()).getTime();
 									final String ftimecode = timecode;
 
 									while (regDeconProcess!= null && regDeconProcess.isAlive()) {
@@ -4240,7 +4252,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 								else
 									frameFileName = "t" + f;
 								final String frameFileNameFinal = frameFileName;
-								final String timecode = "" + (new Date()).getTime();
+								final String timecodeFinal = this.timecode;
 
 								if (!(new File(savePath + "Pos"+pos+ "_SPIMA_Ch1_processed"
 										+ File.separator + frameFileName + File.separator
@@ -4420,7 +4432,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 										+ tempDir.replace("\\", "\\\\")
 										+ "GenerateFusion1"
 										+ frameFileName
-										+ timecode
+										+ timecodeFinal
 										+ ".sct\");"
 										+
 
@@ -4428,7 +4440,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 										+ tempDir.replace("\\", "\\\\")
 										+ "GenerateFusion1"
 										+ frameFileName
-										+ timecode
+										+ timecodeFinal
 										+ ".bat\");\n"
 										+ "		    batStringD = \"@echo off\";\n"
 										+ "		    print(f,batStringD);\n"
@@ -4440,7 +4452,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 										+ tempDir.replace("\\", "\\\\")
 										+ "GenerateFusion1"
 										+ frameFileName
-										+ timecode
+										+ timecodeFinal
 										+ ".sct\\\" -hide\";\n"
 										+ "		    print(f,batStringB);\n"
 										+ "		    print(f,\"exit\");\n"
@@ -4451,7 +4463,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 										+ tempDir.replace("\\", "\\\\")
 										+ "GenerateFusion1"
 										+ frameFileName
-										+ timecode + ".bat\");" + "");
+										+ timecodeFinal + ".bat\");" + "");
 
 									final String finalConvPath = savePath
 											+"Pos"+pos+ "_Deconvolution1\\Decon_" + frameFileName
@@ -4467,12 +4479,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 													+ "delBat = File.delete(\""
 													+ tempDir.replace("\\", "\\\\")
 													+ "GenerateFusion1"
-													+ frameFileNameFinal + timecode
+													+ frameFileNameFinal + timecodeFinal
 													+ ".bat\");"
 													+ "delSct = File.delete(\""
 													+ tempDir.replace("\\", "\\\\")
 													+ "GenerateFusion1"
-													+ frameFileNameFinal + timecode
+													+ frameFileNameFinal + timecodeFinal
 													+ ".sct\");");
 
 											//										ImagePlus convImp = IJ.openImage(finalConvPath);
@@ -4569,7 +4581,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 											+ tempDir.replace("\\", "\\\\")
 											+ "GenerateFusion2"
 											+ frameFileName
-											+ timecode
+											+ timecodeFinal
 											+ ".sct\");"
 											+
 
@@ -4577,7 +4589,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 											+ tempDir.replace("\\", "\\\\")
 											+ "GenerateFusion2"
 											+ frameFileName
-											+ timecode
+											+ timecodeFinal
 											+ ".bat\");\n"
 											+ "		    batStringD = \"@echo off\";\n"
 											+ "		    print(f,batStringD);\n"
@@ -4588,7 +4600,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 											+ "		    batStringB = \"cmd64 /c mipav -s \\\""
 											+ tempDir.replace("\\", "\\\\")
 											+ "GenerateFusion2" + frameFileName
-											+ timecode + ".sct\\\" -hide\";\n"
+											+ timecodeFinal + ".sct\\\" -hide\";\n"
 											+ "		    print(f,batStringB);\n"
 											+ "		    print(f,\"exit\");\n"
 											+ "		    File.close(f);	    \n" +
@@ -4596,7 +4608,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 											"batJob = exec(\"cmd64\", \"/c\", \"start\", \"/low\", \"/min\", \"/wait\", \""
 											+ tempDir.replace("\\", "\\\\")
 											+ "GenerateFusion2" + frameFileName
-											+ timecode + ".bat\");" + "");
+											+ timecodeFinal + ".bat\");" + "");
 
 										final String finalConvPath2 = savePath
 												+"Pos"+pos+ "_Deconvolution2\\Decon_" + frameFileName
@@ -4614,12 +4626,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 														+ "delBat = File.delete(\""
 														+ tempDir.replace("\\", "\\\\")
 														+ "GenerateFusion2"
-														+ frameFileNameFinal + timecode
+														+ frameFileNameFinal + timecodeFinal
 														+ ".bat\");"
 														+ "delSct = File.delete(\""
 														+ tempDir.replace("\\", "\\\\")
 														+ "GenerateFusion2"
-														+ frameFileNameFinal + timecode
+														+ frameFileNameFinal + timecodeFinal
 														+ ".sct\");");
 
 												//											ImagePlus convImp = IJ
