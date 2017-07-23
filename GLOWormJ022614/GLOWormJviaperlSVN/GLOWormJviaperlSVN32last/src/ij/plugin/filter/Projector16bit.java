@@ -112,8 +112,8 @@ public class Projector16bit implements PlugInFilter, TextListener {
 		this.lastC=imp.getNChannels();
 		this.firstZ=1;
 		this.lastZ=imp.getNSlices();
-		this.firstT=imp.getNFrames();
-		this.lastT=imp.getNFrames();
+		this.firstT=imp.getFrame();
+		this.lastT=imp.getFrame();
 		this.tempTime = tempTime;
 		this.sliceInterval = imp.getCalibration().pixelDepth;
 		this.is16bit=true;
