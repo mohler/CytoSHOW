@@ -1408,16 +1408,23 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 						stackPrxs[pos] = null;					
 						stackPrys[pos] = null;					
 						if (true) {
+							String prxPath = "";
+							String pryPath = "";
 							if (doGPUdecon) {
 								if (new File(dirOrOMETiff
 										+ File.separator + "RegDecon" + File.separator + "Pos" + pos).canRead() ) {
 									stackDFs[pos] = new MultiFileInfoVirtualStack(dirOrOMETiff
 											+ File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution",
 											false);
-									stackPrxs[pos] = new MultiFileInfoVirtualStack(dirOrOMETiff + File.separator + "ProjX_"+("Decon-Fuse_"
-											+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_"+"_Pos"+pos+"_FullVolume", "", false);					
-									stackPrys[pos] = new MultiFileInfoVirtualStack(dirOrOMETiff + File.separator + "ProjY_"+("Decon-Fuse_"
-											+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_"+"_Pos"+pos+"_FullVolume", "", false);					
+									prxPath = dirOrOMETiff + File.separator + "ProjX_"+("Decon-Fuse_"
+											+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
+									pryPath = dirOrOMETiff + File.separator + "ProjY_"+("Decon-Fuse_"
+											+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
+									IJ.log(prxPath);
+									IJ.log(pryPath);
+
+									stackPrxs[pos] = new MultiFileInfoVirtualStack(prxPath, "", false);					
+									stackPrys[pos] = new MultiFileInfoVirtualStack(pryPath, "", false);					
 
 								}
 							} else {
@@ -1484,7 +1491,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 										+ impAs[pos].getTitle().split(":")[0], stackPrxs[pos]);
 								impPrxs[pos].setFileInfo(new FileInfo());
 
-								impPrxs[pos].getOriginalFileInfo().directory = prjXs[pos].getTempDir().getPath()+File.separator;
+								impPrxs[pos].getOriginalFileInfo().directory = prxPath + File.separator;
 								int stkNSlicesPrx = impPrxs[pos].getStackSize();
 								int zSlicesPrx = stackPrxs[pos].getFivStacks().get(0)
 										.getSize()/wavelengths;
@@ -1503,7 +1510,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 										+ impAs[pos].getTitle().split(":")[0], stackPrys[pos]);
 								impPrys[pos].setFileInfo(new FileInfo());
 
-								impPrys[pos].getOriginalFileInfo().directory = prjYs[pos].getTempDir().getPath()+File.separator;
+								impPrys[pos].getOriginalFileInfo().directory = pryPath + File.separator;
 								int stkNSlicesPry = impPrys[pos].getStackSize();
 								int zSlicesPry = stackPrys[pos].getFivStacks().get(0)
 										.getSize()/wavelengths;
