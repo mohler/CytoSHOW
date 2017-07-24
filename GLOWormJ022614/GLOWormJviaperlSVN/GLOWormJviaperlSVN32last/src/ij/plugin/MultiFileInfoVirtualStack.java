@@ -353,7 +353,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			for (FileInfoVirtualStack mmStack:fivStacks) {
 				nImages = nImages + mmStack.getSize();
 			}
-			if (cDim == 0 || tDim == 0 || tDim == 0) {
+			if (cDim == 0 || zDim == 0 || tDim == 0) {
 				GenericDialog gd = new GenericDialog("Dimensions of HyperStacks");
 				gd.addNumericField("Channels (c):", 2, 0);
 				gd.addNumericField("Slices (z):", 50, 0);
