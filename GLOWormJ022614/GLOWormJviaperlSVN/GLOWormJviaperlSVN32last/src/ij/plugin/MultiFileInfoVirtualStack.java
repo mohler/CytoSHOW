@@ -112,6 +112,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			}
 		}
 		if (tiffCount == 0) {
+			ArrayList<ArrayList<String>> channelArraryLists = new ArrayList<ArrayList<String>>();
 			for (String fileName:dirFileList) {
 				File subFile = new File(dir+fileName);
 				if (fileName.contains("DS_Store"))
@@ -119,13 +120,33 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				else if (keyString == "" || (subFile.getName().matches(".*"+keyString+".*") && !subFile.getName().startsWith("Proj_"))){
 					channelDirectories++;
 					String[] subFileList = subFile.list();
-					for (String subFileListElement:subFileList)
-						if (!cumulativeSubFileArrayList.contains(dir+fileName+File.separator+subFileListElement))
+					channelArraryLists.add(new ArrayList<String>());
+					for (String subFileListElement:subFileList) {
+						if (!cumulativeSubFileArrayList.contains(dir+fileName+File.separator+subFileListElement)) {
 							if ((pos ==-1 ||subFileListElement.toLowerCase().contains("_pos"+pos+"."))
-									&&  subFileListElement.toLowerCase().endsWith("tif"))
+									&&  subFileListElement.toLowerCase().endsWith("tif")) {
+								channelArraryLists.get(channelDirectories-1).add(dir+fileName+File.separator+subFileListElement);
 								cumulativeSubFileArrayList.add(dir+fileName+File.separator+subFileListElement);
+							}
+						}
+					}
 				}
 			}
+			int lowestSpan = Integer.MAX_VALUE;
+			for (ArrayList<String> al:channelArraryLists) {
+				if (lowestSpan > al.size()){
+					lowestSpan = al.size();
+				}
+			}
+			for (ArrayList<String> al:channelArraryLists) {
+				for (int zap=lowestSpan;zap<al.size();zap++) {
+					if (al.size()>zap) {
+						cumulativeSubFileArrayList.remove(al.get(zap-1));
+					}
+				}
+			}
+
+			
 		}
 		if (cumulativeSubFileArrayList.size() != 0) {
 
@@ -145,7 +166,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			}
 			cumulativeTiffFileArray = StringSorter.sortNumerically(cumulativeTiffFileArray);
 
-			if(keyString.toLowerCase().contains("deconvolution")) {
+			if(false) {
 				monitoringDecon = true;
 				for (int c = 1; c <= channelDirectories;c++){
 					for (int t =1;t<=highT;t++) {
@@ -196,6 +217,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				}
 			}
 
+			monitoringDecon = keyString.toLowerCase().contains("deconvolution");
+				
 			String[] goDirFileList = {""};
 
 			if (allDirectories) {
