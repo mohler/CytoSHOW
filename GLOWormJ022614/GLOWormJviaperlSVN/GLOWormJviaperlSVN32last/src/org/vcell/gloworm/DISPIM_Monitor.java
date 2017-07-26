@@ -379,6 +379,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 			savePath = dirOrOMETiffFile.getParentFile().getParent()
 					+ File.separator + dirOrOMETiffFile.getParentFile().getName()
 					+ "_" + dirOrOMETiffFile.getName().split("_")[0] + "_";
+			new File(savePath).mkdirs();
 			if (dirOrOMETiffFile.isDirectory())
 				savePath = dirOrOMETiff;
 			tempDir = IJ.getDirectory("temp");
@@ -989,6 +990,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				impBs[0].setTitle("SPIMB: " + impBs[0].getTitle());
 
 				oldLength = newLength;
+				fuseButton = new Button[pDim][2];
+
 			}
 
 			IJ.run("Tile");
@@ -1337,12 +1340,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				} 
 
 				if(doProcessing[pos]) {
-					if(fuseButton[pos][0] != null)
-						fuseButton[pos][0].setVisible(false);
-					if(fuseButton[pos][1] != null)
-						fuseButton[pos][1].setVisible(false);
-					impAs[pos].getWindow().pack();
-					impBs[pos].getWindow().pack();
+//					if(fuseButton[pos][0] != null)
+//						fuseButton[pos][0].setVisible(false);
+//					if(fuseButton[pos][1] != null)
+//						fuseButton[pos][1].setVisible(false);
+//					impAs[pos].getWindow().pack();
+//					impBs[pos].getWindow().pack();
 				}
 			}
 			IJ.run("Tile");
@@ -3181,8 +3184,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				} else if (dirOrOMETiff.matches(".*_\\d{9}_\\d{3}_.*.tif")) {
 
 					int newLength = oldLength;
-					while (oldLength == newLength
-							|| newLength % (wavelengths * 2 * zSlices) != 0) {
+					while (monitoring && (oldLength == newLength
+							|| newLength % (wavelengths * 2 * zSlices) != 0)) {
 
 						IJ.wait(10);
 						listB = new File(dirOrOMETiff).getParentFile().list();
