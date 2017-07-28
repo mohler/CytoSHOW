@@ -50,6 +50,16 @@ public class Projector implements PlugInFilter, TextListener {
 
 	private  int axisOfRotation = yAxis;
 	private  int projectionMethod = brightestPoint;
+	private static String tempDir = "";
+	private static long tempCode = 0;
+	
+	public static String getTempDir() {
+		return tempDir;
+	}
+
+	public static void setTempDir(String tempDir) {
+		Projector.tempDir = tempDir;
+	}
 
 	private double sliceInterval = 5.0; // pixels
 	private static int initAngle = 0;
@@ -101,8 +111,6 @@ public class Projector implements PlugInFilter, TextListener {
 	private long tempTime;
 	private boolean noDialogs;
 	private boolean noShow;
-	private File tempXDir;
-	private File tempYDir;
 	private String saveRootDir;
 	private String saveRootPrefix;
 
@@ -221,8 +229,10 @@ public class Projector implements PlugInFilter, TextListener {
 
 		ArrayList<Roi> bigRoiAList = new ArrayList<Roi>();
 		int finalT = lastT;
-		if (tempTime==0)
+		if (Projector.tempCode==0)
 			tempTime = (new Date()).getTime();
+		else
+			tempTime = Projector.tempCode;
 		if (saveRootDir == null) {
 			if (IJ.getDirectory("image") != null){
 				saveRootDir = (new File(IJ.getDirectory("image"))).getParent()/*)*/ ;
@@ -243,11 +253,13 @@ public class Projector implements PlugInFilter, TextListener {
 		if (!correctSaveRoot) {
 			saveRootDir = (new File(saveRootDir)).getParent();
 		}
-		File tempDir = new File(saveRootDir + File.separator + saveRootPrefix +"Proj_"+imp.getTitle().replaceAll("[,. ;:]","").replace(File.separator, "_") + tempTime);
-		if (!tempDir.mkdir()) {
-			IJ.error("3D Projection failed", "Unable to save projected stacks to" + tempDir.getPath());
-			return;
-		}
+		File tempDirFile = null;
+		if (Projector.tempDir!="")
+			tempDirFile = new File(Projector.tempDir);
+		else
+			tempDirFile = new File(saveRootDir + File.separator + saveRootPrefix +"Proj_"+imp.getTitle().replaceAll("[,. ;:]","").replace(File.separator, "_") + tempTime);
+
+		tempDirFile.mkdirs();
 
 		for (loopT = firstT; loopT < lastT +1; loopT=loopT+stepT) { 
 			long memoryFree = Runtime.getRuntime().freeMemory();
@@ -406,13 +418,13 @@ public class Projector implements PlugInFilter, TextListener {
 				}
 				projImpDC.setStack(stackC, lastC-firstC+1, stackC.getSize()/(lastC-firstC+1), 1);
 
-				IJ.save(projImpDC, tempDir + File.separator + "proj_"+loopT+"_"+loopC+".tif");
+				IJ.save(projImpDC, tempDirFile + File.separator + "proj_"+loopT+"_"+loopC+".tif");
 				if (!isRGB) 
 					projImpDC= new CompositeImage(projImpDC);
 				for (loopC = firstC; loopC < lastC +1; loopC++) {
 					projImpD[loopC-firstC].flush();
 				}
-				MultiFileInfoVirtualStack nextStack = new MultiFileInfoVirtualStack(tempDir.getPath()+ File.separator , "xyczt", "",0,0,0, 1, 0, false, false);
+				MultiFileInfoVirtualStack nextStack = new MultiFileInfoVirtualStack(tempDirFile.getPath()+ File.separator , "xyczt", "",0,0,0, 1, 0, false, false);
 				buildImp = new ImagePlus();
 				buildImp.setOpenAsHyperStack(true);
 

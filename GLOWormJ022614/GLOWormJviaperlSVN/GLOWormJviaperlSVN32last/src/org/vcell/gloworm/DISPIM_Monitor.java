@@ -53,6 +53,7 @@ import ij.plugin.FolderOpener;
 import ij.plugin.MultiFileInfoVirtualStack;
 import ij.plugin.PlugIn;
 import ij.plugin.filter.Analyzer;
+import ij.plugin.filter.Projector;
 import ij.plugin.filter.Projector16bit;
 import ij.plugin.frame.SyncWindows;
 import ij.process.ColorProcessor;
@@ -2012,9 +2013,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 													continue;
 												else {
 													ciDFs[pos].setPosition(1, ciDFs[pos].getNSlices()/2, k);
-//													prjXs[pos] = new Projector16bit(ciDFs[pos], 0, tempTime, savePath);
+													Projector.setTempDir(prxPath);
+													IJ.run(ciDFs[pos],"3D Project Selected Region...", "3d channels=1-"+ciDFs[pos].getNChannels()+" slices=1-"+ciDFs[pos].getNSlices()+" frames="+ciDFs[pos].getFrame()+"-"+ciDFs[pos].getFrame()+" projection=[Brightest Point] axis=X-Axis slice=1 initial=0 total=360 rotation=10 lower=1 upper=65535 opacity=0 surface=0 interior=0 interpolate");
+													
 													ciDFs[pos].setPosition(1, ciDFs[pos].getNSlices()/2, k);
-//													prjYs[pos] = new Projector16bit(ciDFs[pos], 1, tempTime, savePath);
+													Projector.setTempDir(pryPath);
+													IJ.run(ciDFs[pos],"3D Project Selected Region...", "3d channels=1-"+ciDFs[pos].getNChannels()+" slices=1-"+ciDFs[pos].getNSlices()+" frames="+ciDFs[pos].getFrame()+"-"+ciDFs[pos].getFrame()+" projection=[Brightest Point] axis=Y-Axis slice=1 initial=0 total=360 rotation=10 lower=1 upper=65535 opacity=0 surface=0 interior=0 interpolate");
+													Projector.setTempDir("");
 
 													try {
 														Files.move(Paths.get(prxPath+File.separator+"proj_1_1.tif"),
@@ -4051,14 +4056,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 												ciDFs[pos] = ((CompositeImage)impNext);
 
 												ciDFs[pos].setPosition(1, ciDFs[pos].getNSlices()/2, ciDFs[pos].getNFrames());
-//												prjXs[pos] = new Projector16bit(ciDFs[pos], 0, tempTime, savePath);
+												Projector.setTempDir(prxPath);
+												IJ.run(ciDFs[pos],"3D Project Selected Region...", "3d channels=1-"+ciDFs[pos].getNChannels()+" slices=1-"+ciDFs[pos].getNSlices()+" frames="+ciDFs[pos].getFrame()+"-"+ciDFs[pos].getFrame()+" projection=[Brightest Point] axis=X-Axis slice=1 initial=0 total=360 rotation=10 lower=1 upper=65535 opacity=0 surface=0 interior=0 interpolate");
+												
 												ciDFs[pos].setPosition(1, ciDFs[pos].getNSlices()/2, ciDFs[pos].getNFrames());
-//												prjYs[pos] = new Projector16bit(ciDFs[pos], 1, tempTime, savePath);
+												Projector.setTempDir(pryPath);
+												IJ.run(ciDFs[pos],"3D Project Selected Region...", "3d channels=1-"+ciDFs[pos].getNChannels()+" slices=1-"+ciDFs[pos].getNSlices()+" frames="+ciDFs[pos].getFrame()+"-"+ciDFs[pos].getFrame()+" projection=[Brightest Point] axis=Y-Axis slice=1 initial=0 total=360 rotation=10 lower=1 upper=65535 opacity=0 surface=0 interior=0 interpolate");
+												Projector.setTempDir("");
 
-//												new File(prxPath+File.separator+"proj_1_1.tif")
-//												.renameTo(new File(prxPath+File.separator+"projX_"+pos+"_"+ciDFs[pos].getFrame()+".tif"));
-//												new File(pryPath+File.separator+"proj_1_1.tif")
-//												.renameTo(new File(pryPath+File.separator+"projY_"+pos+"_"+ciDFs[pos].getFrame()+".tif"));
 												try {
 													Files.move(Paths.get(prxPath+File.separator+"proj_1_1.tif"),
 															Paths.get(prxPath+File.separator+"projX_"+pos+"_"+ciDFs[pos].getFrame()+".tif"), StandardCopyOption.REPLACE_EXISTING);
