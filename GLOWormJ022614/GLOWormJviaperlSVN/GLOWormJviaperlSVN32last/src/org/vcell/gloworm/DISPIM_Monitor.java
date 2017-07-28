@@ -1890,7 +1890,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 							impBs[pos].updateAndDraw();
 
 							if (f==1)
-								IJ.wait(1000);
+								IJ.wait(5000);
 
 							final int ff = f;
 
@@ -2012,9 +2012,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 													continue;
 												else {
 													ciDFs[pos].setPosition(1, ciDFs[pos].getNSlices()/2, k);
-													prjXs[pos] = new Projector16bit(ciDFs[pos], 0, tempTime, savePath);
+//													prjXs[pos] = new Projector16bit(ciDFs[pos], 0, tempTime, savePath);
 													ciDFs[pos].setPosition(1, ciDFs[pos].getNSlices()/2, k);
-													prjYs[pos] = new Projector16bit(ciDFs[pos], 1, tempTime, savePath);
+//													prjYs[pos] = new Projector16bit(ciDFs[pos], 1, tempTime, savePath);
 
 													try {
 														Files.move(Paths.get(prxPath+File.separator+"proj_1_1.tif"),
@@ -4051,9 +4051,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 												ciDFs[pos] = ((CompositeImage)impNext);
 
 												ciDFs[pos].setPosition(1, ciDFs[pos].getNSlices()/2, ciDFs[pos].getNFrames());
-												prjXs[pos] = new Projector16bit(ciDFs[pos], 0, tempTime, savePath);
+//												prjXs[pos] = new Projector16bit(ciDFs[pos], 0, tempTime, savePath);
 												ciDFs[pos].setPosition(1, ciDFs[pos].getNSlices()/2, ciDFs[pos].getNFrames());
-												prjYs[pos] = new Projector16bit(ciDFs[pos], 1, tempTime, savePath);
+//												prjYs[pos] = new Projector16bit(ciDFs[pos], 1, tempTime, savePath);
 
 //												new File(prxPath+File.separator+"proj_1_1.tif")
 //												.renameTo(new File(prxPath+File.separator+"projX_"+pos+"_"+ciDFs[pos].getFrame()+".tif"));

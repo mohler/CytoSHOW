@@ -98,6 +98,13 @@ public class Projector implements PlugInFilter, TextListener {
 	private boolean is16bit;
 	private boolean is32bit;
 	private String dupTitle;
+	private long tempTime;
+	private boolean noDialogs;
+	private boolean noShow;
+	private File tempXDir;
+	private File tempYDir;
+	private String saveRootDir;
+	private String saveRootPrefix;
 
 	public int setup(String arg, ImagePlus imp) {
 		this.imp = imp;
@@ -214,15 +221,17 @@ public class Projector implements PlugInFilter, TextListener {
 
 		ArrayList<Roi> bigRoiAList = new ArrayList<Roi>();
 		int finalT = lastT;
-		long tempTime = (new Date()).getTime();
-		//		File tempDir = new File(IJ.getDirectory("home") +"Proj_"+imp.getTitle().replaceAll("[,. ;:]","") + tempTime);
-		String saveRootDir = "";
-		String saveRootPrefix = "";
-		if (IJ.getDirectory("image") != null){
-			saveRootDir = (new File(IJ.getDirectory("image"))).getParent()/*)*/ ;
-			saveRootPrefix = (new File(IJ.getDirectory("image"))).getName()+"_";
-		}else {
-			saveRootDir = IJ.getDirectory("temp");
+		if (tempTime==0)
+			tempTime = (new Date()).getTime();
+		if (saveRootDir == null) {
+			if (IJ.getDirectory("image") != null){
+				saveRootDir = (new File(IJ.getDirectory("image"))).getParent()/*)*/ ;
+			}else {
+				saveRootDir = IJ.getDirectory("temp");
+			}
+		}
+		if (saveRootPrefix == null) {
+			saveRootPrefix = new File(saveRootDir).getName()+"_";
 		}
 		boolean correctSaveRoot = false;
 		for (File saveSibFile: (new File(saveRootDir)).listFiles()) {
@@ -429,7 +438,8 @@ public class Projector implements PlugInFilter, TextListener {
 				}
 
 				imp.setRoi(manualRoi);
-				imp.getWindow().setVisible(true);
+//				if(imp.getWindow()!=null)
+//					imp.getWindow().setVisible(true);
 
 
 				if (rm != null && rmVis) 
@@ -491,7 +501,7 @@ public class Projector implements PlugInFilter, TextListener {
 					buildWin = buildImp.getWindow();
 				}
 
-				if (imp != null & buildImp != null){
+				if (imp != null & buildImp != null && imp.getWindow()!=null){
 					buildWin.setBackground(imp.getWindow().getBackground());
 					buildWin.setSubTitleBkgdColor(imp.getWindow().getBackground());
 				}
@@ -583,11 +593,14 @@ public class Projector implements PlugInFilter, TextListener {
 				buildWin.getImagePlus().setDisplayRange(oldMin, oldMax);
 				buildWin.setSize(buildWin.getSize().width,
 						buildWin.getSize().height);
-				buildWin.setVisible(true);				
+//				buildWin.setVisible(true);				
 
 			}
 		}		
+		if(imp.getWindow()!=null)
+			imp.getWindow().setVisible(true);
 
+		buildWin.setVisible(true);				
 
 	}
 
