@@ -8,7 +8,7 @@ import java.awt.*;
 
 public class WindowOrganizer implements PlugIn {
 
-	private static final int XSTART=4, YSTART=80, XOFFSET=8, YOFFSET=24,MAXSTEP=200,GAP=2;
+	private static final int XSTART=4, YSTART=95, XOFFSET=8, YOFFSET=24,MAXSTEP=200,GAP=2;
 	private int titlebarHeight = IJ.isMacintosh()?40:20;
 
 	public void run(String arg) {

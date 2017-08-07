@@ -194,7 +194,7 @@ public class Projector16bit implements PlugInFilter, TextListener {
 			lastC = firstC;
 
 		if (imp.getWindow()!=null) {
-			imp.getWindow().setVisible(false);
+			imp.getWindow().setEnabled(false);
 		}
 
 		Frame rm = imp.getRoiManager();
@@ -243,11 +243,13 @@ public class Projector16bit implements PlugInFilter, TextListener {
 		if (!correctSaveRoot) {
 			saveRootDir = (new File(saveRootDir)).getParent();
 		}
-		File tempDir = new File(saveRootDir + File.separator + saveRootPrefix +"Proj_"+imp.getTitle().replaceAll("[,. ;:]","").replace(File.separator, "_") + tempTime);
-		if (!tempDir.mkdir()) {
-			IJ.error("3D Projection failed", "Unable to save projected stacks to" + tempDir.getPath());
-			return;
-		}
+		File tempDirFile = null;
+		if (Projector.getTempDir()!="")
+			tempDirFile = new File(Projector.getTempDir());
+		else
+			tempDirFile = new File(saveRootDir + File.separator + saveRootPrefix +"Proj_"+imp.getTitle().replaceAll("[,. ;:]","").replace(File.separator, "_") + tempTime);
+
+		tempDirFile.mkdirs();
 
 		for (loopT = firstT; loopT < lastT +1; loopT=loopT+stepT) { 
 			long memoryFree = Runtime.getRuntime().freeMemory();
@@ -406,13 +408,19 @@ public class Projector16bit implements PlugInFilter, TextListener {
 				}
 				projImpDC.setStack(stackC, lastC-firstC+1, stackC.getSize()/(lastC-firstC+1), 1);
 
-				IJ.save(projImpDC, tempDir + File.separator + "proj_"+loopT+"_"+loopC+".tif");
+				IJ.save(projImpDC, tempDirFile + File.separator + "proj_"+loopT+"_"+firstC+".tif");
 				if (!isRGB) 
 					projImpDC= new CompositeImage(projImpDC);
 				for (loopC = firstC; loopC < lastC +1; loopC++) {
 					projImpD[loopC-firstC].flush();
 				}
-				MultiFileInfoVirtualStack nextStack = new MultiFileInfoVirtualStack(tempDir.getPath()+ File.separator , "xyczt", "",0,0,0, 1, 0, false, false);
+				if (Projector.getTempDir()!="") {
+					projImpDC.flush();
+					return;
+				}
+				
+				
+				MultiFileInfoVirtualStack nextStack = new MultiFileInfoVirtualStack(tempDirFile.getPath()+ File.separator , "xyczt", "",0,0,0, 1, 0, false, false);
 				buildImp = new ImagePlus();
 				buildImp.setOpenAsHyperStack(true);
 
@@ -597,11 +605,11 @@ public class Projector16bit implements PlugInFilter, TextListener {
 
 			}
 		}		
-		if(imp.getWindow()!=null)
-			imp.getWindow().setVisible(true);
-
-		buildWin.setVisible(true);				
-
+		if (imp.getWindow()!=null)
+			imp.getWindow().setEnabled(true);
+		
+		if (Projector.getTempDir()=="")
+			buildWin.setVisible(true);				
 
 	}
 
