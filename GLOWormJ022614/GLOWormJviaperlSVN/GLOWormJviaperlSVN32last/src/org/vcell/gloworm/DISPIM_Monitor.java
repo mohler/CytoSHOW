@@ -1,6 +1,7 @@
 package org.vcell.gloworm;
 
 import java.awt.Button;
+
 import java.awt.Dimension;
 import java.awt.Polygon;
 import java.awt.event.ActionEvent;
@@ -1438,6 +1439,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 									if (new File(prxPath).canRead() && new File(pryPath).canRead()) {
 										stackPrxs[pos] = new MultiFileInfoVirtualStack(prxPath, "", false);					
 										stackPrys[pos] = new MultiFileInfoVirtualStack(pryPath, "", false);					
+									} else {
+										new File(prxPath).mkdirs();
+										new File(pryPath).mkdirs();
 									}
 								}
 							} else {
@@ -1621,9 +1625,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 			String[] frameFileNames = new String[impAs[0].getNFrames() + 1];
 
 			new File("" + savePath + "CropBkgdSub").mkdirs();
-//			new File("" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "RegA" + File.separator + "tmx").mkdirs();
-//			new File("" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "RegB" + File.separator + "tmx").mkdirs();
+			new File("" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "RegA" + File.separator + "tmx").mkdirs();
+			new File("" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "RegB" + File.separator + "tmx").mkdirs();
 			new File("" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "Decon").mkdirs();
+			new File("" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "TMX").mkdirs();
 			if (doRegPriming){
 				for (int pos=0; pos<pDim; pos++) {
 					if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
@@ -1639,9 +1644,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				}
 			}
 			if (wavelengths ==2) {
-//				new File("" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "RegA" + File.separator + "tmx").mkdirs();
-//				new File("" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "RegB" + File.separator + "tmx").mkdirs();
+				new File("" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "RegA" + File.separator + "tmx").mkdirs();
+				new File("" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "RegB" + File.separator + "tmx").mkdirs();
 				new File("" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "Decon").mkdirs();
+				new File("" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "TMX").mkdirs();
 				if (doRegPriming){
 				}
 			}
@@ -1675,8 +1681,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 							IJ.log("starting " + pos +" "+ impAs[pos].getChannel()+" "+ impAs[pos].getSlice()+" "+ f);
 							IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "Color1" +File.separator + "TMX" + File.separator + "Matrix_1.tmx");
 							IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "Color2" +File.separator + "TMX" + File.separator + "Matrix_1.tmx");
-//							IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "RegA" + File.separator + "tmx" + File.separator + "Matrix_1.tmx");
-//							IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "RegA" + File.separator + "tmx" + File.separator + "Matrix_1.tmx");
+							IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "RegB" + File.separator + "tmx" + File.separator + "Matrix_1.tmx");
+							IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "RegB" + File.separator + "tmx" + File.separator + "Matrix_1.tmx");
+							IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "RegA" + File.separator + "tmx" + File.separator + "Matrix_1.tmx");
+							IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "RegA" + File.separator + "tmx" + File.separator + "Matrix_1.tmx");
 
 							impAs[pos].setPositionWithoutUpdate(impAs[pos].getChannel(), impAs[pos].getSlice(), f);
 
@@ -1733,9 +1741,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 								ipA1 = ipA1.crop();
 								ImageProcessor ipA1r = ipA1.createProcessor((int)cropWidthA[pos]+2, (int)cropHeightA[pos]+2);
 								ipA1r.insert(ipA1, 1, 1);
-//								ipA1 = ipA1r;
+								ipA1 = ipA1r;
 
-								stackA1.addSlice(ipA1r);
+								stackA1.addSlice(ipA1);
 
 								if (wavelengths == 2) {
 									impAs[pos].setPositionWithoutUpdate(2, i, f);
@@ -1760,8 +1768,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 									ImageProcessor ipA2r = ipA2.createProcessor(
 											(int)cropWidthA[pos]+2, (int)cropHeightA[pos]+2);
 									ipA2r.insert(ipA2, 1, 1);
-//									ipA2 = ipA2r;
-									stackA2.addSlice(ipA2r);
+									ipA2 = ipA2r;
+									stackA2.addSlice(ipA2);
 								}
 							}
 
@@ -1833,9 +1841,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 										ImageProcessor ipB1r = ipB1.createProcessor((int)cropWidthB[pos]+2,
 												(int)cropHeightB[pos]+2);
 										ipB1r.insert(ipB1, 1, 1);
-//										ipB1 = ipB1r;
+										ipB1 = ipB1r;
 										// ip1.subtract(minLimit[2]);
-										stackB1.addSlice(ipB1r);
+										stackB1.addSlice(ipB1);
 										if (wavelengths == 2) {
 											impBs[pos].setPositionWithoutUpdate(2, i, f);
 											ImageProcessor ipB2 = impBs[pos].getProcessor().duplicate();
@@ -1859,9 +1867,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 											ImageProcessor ipB2r = ipB2.createProcessor(
 													(int)cropWidthB[pos]+2, (int)cropHeightB[pos]+2);
 											ipB2r.insert(ipB2, 1, 1);
-//											ipB2 = ipB2r;
+											ipB2 = ipB2r;
 											// ip2.subtract(minLimit[3]);
-											stackB2.addSlice(ipB2r);
+											stackB2.addSlice(ipB2);
 										}
 							}
 							
@@ -2021,7 +2029,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 												+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
 										IJ.log(prxPath);
 										IJ.log(pryPath);
-
+										new File(prxPath).mkdirs();
+										new File(pryPath).mkdirs();
+									
 										
 										while (!(new File(prxPath).exists()) || !(new File(pryPath).exists()) || ciDFs[pos].getNFrames() > new File(prxPath).list().length || ciDFs[pos].getNFrames() > new File(pryPath).list().length) {
 											//CATCH UP ON ANY UNPROJECTED VOLUMES
@@ -3672,6 +3682,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 //					new File("" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "RegA" + File.separator + "tmx").mkdirs();
 //					new File("" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "RegB" + File.separator + "tmx").mkdirs();
 					new File("" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "Decon").mkdirs();
+					new File("" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "TMX").mkdirs();
 					if (doRegPriming){
 						for (int pos=0; pos<pDim; pos++) {
 							if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
@@ -3694,6 +3705,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 //						new File("" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "RegA" + File.separator + "tmx").mkdirs();
 //						new File("" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "RegB" + File.separator + "tmx").mkdirs();
 						new File("" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "Decon").mkdirs();
+						new File("" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "TMX").mkdirs();
 						if (doRegPriming){
 						}
 					}
