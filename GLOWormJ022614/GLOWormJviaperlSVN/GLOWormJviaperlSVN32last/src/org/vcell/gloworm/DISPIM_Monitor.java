@@ -1440,8 +1440,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 										stackPrxs[pos] = new MultiFileInfoVirtualStack(prxPath, "", false);					
 										stackPrys[pos] = new MultiFileInfoVirtualStack(pryPath, "", false);					
 									} else {
-										new File(prxPath).mkdirs();
-										new File(pryPath).mkdirs();
+										new File(prxPath+File.separator+"Color1").mkdirs();
+										new File(prxPath+File.separator+"Color2").mkdirs();
+										new File(pryPath+File.separator+"Color1").mkdirs();
+										new File(pryPath+File.separator+"Color2").mkdirs();
 									}
 								}
 							} else {
@@ -1513,7 +1515,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 									impPrxs[pos].getOriginalFileInfo().directory = prxPath + File.separator;
 									int stkNSlicesPrx = impPrxs[pos].getStackSize();
 									int zSlicesPrx = stackPrxs[pos].getFivStacks().get(0)
-											.getSize()/wavelengths;
+											.getSize();
 									impPrxs[pos].setOpenAsHyperStack(true);
 									impPrxs[pos].setStack(impPrxs[pos].getStack(), wavelengths,
 											zSlicesPrx, stkNSlicesPrx
@@ -1532,7 +1534,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 									impPrys[pos].getOriginalFileInfo().directory = pryPath + File.separator;
 									int stkNSlicesPry = impPrys[pos].getStackSize();
 									int zSlicesPry = stackPrys[pos].getFivStacks().get(0)
-											.getSize()/wavelengths;
+											.getSize();
 									impPrys[pos].setOpenAsHyperStack(true);
 									impPrys[pos].setStack(impPrys[pos].getStack(), wavelengths,
 											zSlicesPry, stkNSlicesPry
@@ -2029,41 +2031,43 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 												+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
 										IJ.log(prxPath);
 										IJ.log(pryPath);
-										new File(prxPath).mkdirs();
-										new File(pryPath).mkdirs();
+										new File(prxPath+File.separator+"Color1").mkdirs();
+										new File(prxPath+File.separator+"Color2").mkdirs();
+										new File(pryPath+File.separator+"Color1").mkdirs();
+										new File(pryPath+File.separator+"Color2").mkdirs();
 									
-										
-										while (!(new File(prxPath).exists()) || !(new File(pryPath).exists()) || ciDFs[pos].getNFrames() > new File(prxPath).list().length || ciDFs[pos].getNFrames() > new File(pryPath).list().length) {
-											//CATCH UP ON ANY UNPROJECTED VOLUMES
-											for (int k=1;k<=ciDFs[pos].getNFrames();k++) {
-												if (new File(prxPath+File.separator+"proj_"+k+"_1.tif").canRead() && new File(pryPath+File.separator+"proj_"+k+"_1.tif").canRead())
-													continue;
-												else {
-													ciDFs[pos].setPosition(1, ciDFs[pos].getNSlices()/2, k);
-													Projector.setTempDir(prxPath);
-													//IJ.run(ciDFs[pos],"3D Project Selected Region...", "3d channels=1-"+ciDFs[pos].getNChannels()+" slices=1-"+ciDFs[pos].getNSlices()+" frames="+ciDFs[pos].getFrame()+"-"+ciDFs[pos].getFrame()+" projection=[Brightest Point] axis=X-Axis slice=1 initial=0 total=360 rotation=10 lower=1 upper=65535 opacity=0 surface=0 interior=0 interpolate");
-													
-													ciDFs[pos].setPosition(1, ciDFs[pos].getNSlices()/2, k);
-													Projector.setTempDir(pryPath);
-													//IJ.run(ciDFs[pos],"3D Project Selected Region...", "3d channels=1-"+ciDFs[pos].getNChannels()+" slices=1-"+ciDFs[pos].getNSlices()+" frames="+ciDFs[pos].getFrame()+"-"+ciDFs[pos].getFrame()+" projection=[Brightest Point] axis=Y-Axis slice=1 initial=0 total=360 rotation=10 lower=1 upper=65535 opacity=0 surface=0 interior=0 interpolate");
-													Projector.setTempDir("");
+										int k = impDF1s[pos].getNFrames();
 
-													try {
-														Files.move(Paths.get(savePath + "RegDecon" + File.separator +"Decon"+ File.separator +"MP_3D_Xaxis"+ File.separator +"MP_3D_Xaxis_1.tif"),
-																Paths.get(prxPath+File.separator+"projX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-														Files.move(Paths.get(savePath + "RegDecon" + File.separator +"Decon"+ File.separator +"MP_3D_Yaxis"+ File.separator +"MP_3D_Yaxis_1.tif"),
-																Paths.get(pryPath+File.separator+"projY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-													} catch (IOException e) {
-														// TODO Auto-generated catch block
-														e.printStackTrace();
-													}
+										if (new File(prxPath+File.separator+"Color1"+File.separator+"proj_"+k+"_1.tif").canRead() && new File(pryPath+File.separator+"Color1"+File.separator+"proj_"+k+"_1.tif").canRead()
+												&& new File(prxPath+File.separator+"Color2"+File.separator+"proj_"+k+"_1.tif").canRead() && new File(pryPath+File.separator+"Color2"+File.separator+"proj_"+k+"_1.tif").canRead())
+											continue;
+										else {
+											ciDFs[pos].setPosition(1, ciDFs[pos].getNSlices()/2, k);
+											Projector.setTempDir(prxPath);
+											//IJ.run(ciDFs[pos],"3D Project Selected Region...", "3d channels=1-"+ciDFs[pos].getNChannels()+" slices=1-"+ciDFs[pos].getNSlices()+" frames="+ciDFs[pos].getFrame()+"-"+ciDFs[pos].getFrame()+" projection=[Brightest Point] axis=X-Axis slice=1 initial=0 total=360 rotation=10 lower=1 upper=65535 opacity=0 surface=0 interior=0 interpolate");
 
-												}
+											ciDFs[pos].setPosition(1, ciDFs[pos].getNSlices()/2, k);
+											Projector.setTempDir(pryPath);
+											//IJ.run(ciDFs[pos],"3D Project Selected Region...", "3d channels=1-"+ciDFs[pos].getNChannels()+" slices=1-"+ciDFs[pos].getNSlices()+" frames="+ciDFs[pos].getFrame()+"-"+ciDFs[pos].getFrame()+" projection=[Brightest Point] axis=Y-Axis slice=1 initial=0 total=360 rotation=10 lower=1 upper=65535 opacity=0 surface=0 interior=0 interpolate");
+											Projector.setTempDir("");
+
+											try {
+												Files.move(Paths.get(savePath + "RegDecon" + File.separator +"Color1"+ File.separator +"Decon"+ File.separator +"MP_3D_Xaxis"+ File.separator +"MP_3D_Xaxis_1.tif"),
+														Paths.get(prxPath+File.separator +"Color1"+ File.separator +"projX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+												Files.move(Paths.get(savePath + "RegDecon" + File.separator +"Color1"+ File.separator +"Decon"+ File.separator +"MP_3D_Yaxis"+ File.separator +"MP_3D_Yaxis_1.tif"),
+														Paths.get(pryPath+File.separator +"Color1"+ File.separator +"projY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+												Files.move(Paths.get(savePath + "RegDecon" + File.separator +"Color2"+ File.separator +"Decon"+ File.separator +"MP_3D_Xaxis"+ File.separator +"MP_3D_Xaxis_1.tif"),
+														Paths.get(prxPath+File.separator+"Color2"+ File.separator + "projX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+												Files.move(Paths.get(savePath + "RegDecon" + File.separator +"Color2"+ File.separator +"Decon"+ File.separator +"MP_3D_Yaxis"+ File.separator +"MP_3D_Yaxis_1.tif"),
+														Paths.get(pryPath+File.separator+ "Color2"+ File.separator +"projY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+											} catch (IOException e) {
+												// TODO Auto-generated catch block
+												e.printStackTrace();
 											}
 
-										}	//END CATCH UP ON ANY UNPROJECTED VOLUMES
+										}
 
-										
+
 										if (wavelengths > 1)
 											ciDFs[pos].setMode(CompositeImage.COMPOSITE);
 										else
@@ -2102,8 +2106,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 											win.setVisible(true);	
 										
 
-											dfProjXmfivs = new MultiFileInfoVirtualStack(prxPath+File.separator, "", false);
-											dfProjYmfivs = new MultiFileInfoVirtualStack(pryPath+File.separator, "", false);
+											dfProjXmfivs = new MultiFileInfoVirtualStack(prxPath+File.separator, "Color", false);
+											dfProjYmfivs = new MultiFileInfoVirtualStack(pryPath+File.separator, "Color", false);
 
 											impPrxs[pos] = new ImagePlus();
 											impPrxs[pos].setStack("3DProjX_Decon-Fuse_"
@@ -2113,7 +2117,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 											impPrxs[pos].getOriginalFileInfo().directory = prxPath+File.separator;
 											int stkNSlicesPrx = impPrxs[pos].getStackSize();
 											int zSlicesPrx = dfProjXmfivs.getFivStacks().get(0)
-													.getSize()/wavelengths;
+													.getSize();
 											impPrxs[pos].setOpenAsHyperStack(true);
 											impPrxs[pos].setStack(impPrxs[pos].getStack(), wavelengths,
 													zSlicesPrx, stkNSlicesPrx
@@ -2133,7 +2137,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 											impPrys[pos].getOriginalFileInfo().directory = pryPath+File.separator;
 											int stkNSlicesPry = impPrys[pos].getStackSize();
 											int zSlicesPry = dfProjYmfivs.getFivStacks().get(0)
-													.getSize()/wavelengths;
+													.getSize();
 											impPrys[pos].setOpenAsHyperStack(true);
 											impPrys[pos].setStack(impPrys[pos].getStack(), wavelengths,
 													zSlicesPry, stkNSlicesPry
@@ -4104,10 +4108,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 												Projector.setTempDir("");
 
 												try {
-													Files.move(Paths.get(savePath + "RegDecon" + File.separator +"Decon"+ File.separator +"MP_3D_Xaxis"+ File.separator +"MP_3D_Xaxis_1.tif"),
-															Paths.get(prxPath+File.separator+"projX_"+pos+"_"+ciDFs[pos].getFrame()+".tif"), StandardCopyOption.REPLACE_EXISTING);
-													Files.move(Paths.get(savePath + "RegDecon" + File.separator +"Decon"+ File.separator +"MP_3D_Yaxis"+ File.separator +"MP_3D_Yaxis_1.tif"),
-															Paths.get(pryPath+File.separator+"projY_"+pos+"_"+ciDFs[pos].getFrame()+".tif"), StandardCopyOption.REPLACE_EXISTING);
+													Files.move(Paths.get(savePath + "RegDecon" + File.separator +"Color1"+ File.separator +"Decon"+ File.separator +"MP_3D_Xaxis"+ File.separator +"MP_3D_Xaxis_1.tif"),
+															Paths.get(prxPath+File.separator +"Color1"+ File.separator +"projX_"+pos+"_"+ciDFs[pos].getNFrames()+".tif"), StandardCopyOption.REPLACE_EXISTING);
+													Files.move(Paths.get(savePath + "RegDecon" + File.separator +"Color1"+ File.separator +"Decon"+ File.separator +"MP_3D_Yaxis"+ File.separator +"MP_3D_Yaxis_1.tif"),
+															Paths.get(pryPath+File.separator +"Color1"+ File.separator +"projY_"+pos+"_"+ciDFs[pos].getNFrames()+".tif"), StandardCopyOption.REPLACE_EXISTING);
+													Files.move(Paths.get(savePath + "RegDecon" + File.separator +"Color2"+ File.separator +"Decon"+ File.separator +"MP_3D_Xaxis"+ File.separator +"MP_3D_Xaxis_1.tif"),
+															Paths.get(prxPath+File.separator+"Color2"+ File.separator + "projX_"+pos+"_"+ciDFs[pos].getNFrames()+".tif"), StandardCopyOption.REPLACE_EXISTING);
+													Files.move(Paths.get(savePath + "RegDecon" + File.separator +"Color2"+ File.separator +"Decon"+ File.separator +"MP_3D_Yaxis"+ File.separator +"MP_3D_Yaxis_1.tif"),
+															Paths.get(pryPath+File.separator+ "Color2"+ File.separator +"projY_"+pos+"_"+ciDFs[pos].getNFrames()+".tif"), StandardCopyOption.REPLACE_EXISTING);
 												} catch (IOException e) {
 													// TODO Auto-generated catch block
 													e.printStackTrace();
@@ -4132,8 +4140,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 												win.pack();
 												win.setSize(winSize);
 
-												dfProjXmfivs = new MultiFileInfoVirtualStack(prxPath+File.separator, "", false);
-												dfProjYmfivs = new MultiFileInfoVirtualStack(pryPath+File.separator, "", false);
+												dfProjXmfivs = new MultiFileInfoVirtualStack(prxPath+File.separator, "Color", false);
+												dfProjYmfivs = new MultiFileInfoVirtualStack(pryPath+File.separator, "Color", false);
 
 												impPrxs[pos] = new ImagePlus();
 												impPrxs[pos].setStack("3DProjX_Decon-Fuse_"
@@ -4143,7 +4151,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 												impPrxs[pos].getOriginalFileInfo().directory = prxPath+File.separator;
 												int stkNSlicesPrx = impPrxs[pos].getStackSize();
 												int zSlicesPrx = dfProjXmfivs.getFivStacks().get(0)
-														.getSize()/wavelengths;
+														.getSize();
 												impPrxs[pos].setOpenAsHyperStack(true);
 												impPrxs[pos].setStack(impPrxs[pos].getStack(), wavelengths,
 														zSlicesPrx, stkNSlicesPrx
@@ -4163,7 +4171,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 												impPrys[pos].getOriginalFileInfo().directory = pryPath+File.separator;
 												int stkNSlicesPry = impPrys[pos].getStackSize();
 												int zSlicesPry = dfProjYmfivs.getFivStacks().get(0)
-														.getSize()/wavelengths;
+														.getSize();
 												impPrys[pos].setOpenAsHyperStack(true);
 												impPrys[pos].setStack(impPrys[pos].getStack(), wavelengths,
 														zSlicesPry, stkNSlicesPry

@@ -161,33 +161,17 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					if (tValue > highT)
 						highT = tValue;
 				}
+				if (subFileName.matches("proj._\\d+_\\d+.tif")) {
+					int tValue = Integer.parseInt(subFileName.replaceAll("proj._\\d+_(\\d+).tif", "$1"));
+					if (tValue > highT)
+						highT = tValue;
+				}
 				if (highT > 0)
 					dimOrder = "xyztc";
 			}
 			cumulativeTiffFileArray = StringSorter.sortNumerically(cumulativeTiffFileArray);
 
-			if(false) {
-				monitoringDecon = true;
-				for (int c = 1; c <= channelDirectories;c++){
-					for (int t =1;t<=highT;t++) {
-						bigSubFileArrayList.add("channel "+c+"-frame "+ t +" missing");
-					}
-				}
-
-				for (int c = 1; c <= channelDirectories;c++){
-					for (int q=0; q<cumulativeTiffFileArray.length; q++)  {
-						String cumTiffListElement = cumulativeTiffFileArray[q];
-						if (cumTiffListElement.contains("Deconvolution"+c) && cumTiffListElement.toLowerCase().endsWith(".tif")) {
-							cumTiffListElement = cumTiffListElement.replace("\\","\\\\");
-							String[] cumTiffListElementPathChunks = cumTiffListElement.split(File.separator.replace("\\", "\\\\"));
-							String cumTiffListElementName = cumTiffListElementPathChunks[cumTiffListElementPathChunks.length-1];
-							int tValue = Integer.parseInt(cumTiffListElementName.replaceAll(".*_t(\\d+).*\\.tif", "$1"));
-							bigSubFileArrayList.set(tValue-1+highT*(c-1), cumTiffListElement);
-
-						} 
-					}
-				}
-			} else if (cumulativeTiffFileArray.length >0){ 
+			if (cumulativeTiffFileArray.length >0){ 
 				for (String cumulativeTiffFileArrayElement:cumulativeTiffFileArray)
 					bigSubFileArrayList.add(cumulativeTiffFileArrayElement);
 			} else { 
@@ -217,7 +201,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				}
 			}
 
-			monitoringDecon = keyString.toLowerCase().contains("deconvolution");
+			monitoringDecon = keyString.toLowerCase().contains("deconvolution") 
+								|| keyString.toLowerCase().contains("color");
 				
 			String[] goDirFileList = {""};
 
@@ -405,7 +390,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			tDim = fivStacks.size()/cDim;
 		} else {
 			zDim = fivStacks.get(0).nImages;
-			nImages = channelDirectories* fivStacks.size() * zDim;
+			nImages = /*channelDirectories**/ fivStacks.size() * zDim;
 
 			int internalChannels = ((new FileOpener(fivStacks.get(0).infoArray[0])).decodeDescriptionString(fivStacks.get(0).infoArray[0]) != null
 					?(fivStacks.get(0).getInt((new FileOpener(fivStacks.get(0).infoArray[0])).decodeDescriptionString(fivStacks.get(0).infoArray[0]), "channels"))
