@@ -1511,7 +1511,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 								}
 								
-								if (impPrxs[pos]!=null && impPrys[pos]!=null) {
+								if (stackPrxs[pos]!=null && stackPrys[pos]!=null) {
 
 									impPrxs[pos] = new ImagePlus();
 									impPrxs[pos].setStack("3DProjX_Decon-Fuse_"
@@ -1678,6 +1678,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 						continue;
 					}
 					if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+						doProcessing[pos] = false;
+						continue;
+					} 
+					if (impAs[pos].getNFrames() == impPrxs[pos].getNFrames() && impAs[pos].getNFrames() == impPrys[pos].getNFrames()) {
+						doProcessing[pos] = false;
+						continue;
+					}
+					if (impBs[pos].getNFrames() == impPrxs[pos].getNFrames() && impBs[pos].getNFrames() == impPrys[pos].getNFrames()) {
 						doProcessing[pos] = false;
 						continue;
 					} 
