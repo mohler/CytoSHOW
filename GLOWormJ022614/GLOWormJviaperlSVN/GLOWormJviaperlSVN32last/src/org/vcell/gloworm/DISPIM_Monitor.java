@@ -271,6 +271,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 	boolean stageScan = false;
 	private String prxPath;
 	private String pryPath;
+	private String keyString;
 	
 	public Process getRegDeconProcess() {
 		return regDeconProcess;
@@ -303,8 +304,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 		dirOrOMETiff = "";
 		dirOrOMETiff = args[0];
 		IJ.log(dirOrOMETiff);
-		// waitForUser("");
-		String keyString ="";
+//		keyString = "";
 		boolean fullRun = !(arg.contains("rerunWithDecon"));
 		
 		if (fullRun) {
@@ -1445,12 +1445,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 											stackPrxs[pos] = new MultiFileInfoVirtualStack(prxPath, "Color", false);					
 											stackPrys[pos] = new MultiFileInfoVirtualStack(pryPath, "Color", false);		
 										}
-									} else {
-//										new File(prxPath+File.separator+"Color1").mkdirs();
-//										new File(prxPath+File.separator+"Color2").mkdirs();
-//										new File(pryPath+File.separator+"Color1").mkdirs();
-//										new File(pryPath+File.separator+"Color2").mkdirs();
-									}
+									} 
 								}
 							} else {
 								stackDFs[pos] = new MultiFileInfoVirtualStack(
@@ -1475,6 +1470,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 										/ (wavelengths * zSlicesDF1));
 								if (ciDFs[pos] != null) {
 									win = ciDFs[pos].getWindow();
+								} else {
+									win = null;
 								}
 								ciDFs[pos] = new CompositeImage(impDF1s[pos]);
 								ciDFs[pos].setPosition(1, ciDFs[pos].getNSlices()/2, ciDFs[pos].getNFrames());
@@ -1503,7 +1500,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 									win.updateImage(ciDFs[pos]);
 									win.setSize(oldW, oldH);
 									((StackWindow) win).addScrollbars(ciDFs[pos]);
-									win.getCanvas().setMagnification(oldMag);								win.getImagePlus().updateAndRepaintWindow();
+									win.getCanvas().setMagnification(oldMag);								
+									win.getImagePlus().updateAndRepaintWindow();
 									win.getImagePlus().setPosition(oldC, oldZ, oldT);
 									win.getImagePlus().setDisplayRange(oldMin, oldMax);
 									win.setSize(win.getSize().width,
@@ -1642,8 +1640,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 						doProcessing[pos] = false;
 						continue;
 					} 
-
 					lastMatrix[pos] = IJ.openAsString("C:\\DataForTest\\Matrix_0.tmx");
+
+					if (new File("" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "TMX" + File.separator + "RegMatrix_"+pos+"_1.tmx").canRead() )
+						lastMatrix[pos] = IJ.openAsString("" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "TMX" + File.separator + "RegMatrix_"+pos+"_1.tmx");
 				}
 			}
 			if (wavelengths ==1) {
@@ -1665,6 +1665,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				}
 			}
 			for (int posForPathSetup=0; posForPathSetup<pDim; posForPathSetup++) {
+				if (wavelengths ==1) {
+					IJ.saveString(lastMatrix[posForPathSetup], "" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_"+posForPathSetup+"_1.tmx");
+				}
+				if (wavelengths ==2) {
+					IJ.saveString(lastMatrix[posForPathSetup], "" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "TMX" + File.separator + "RegMatrix_"+posForPathSetup+"_1.tmx");
+					IJ.saveString(lastMatrix[posForPathSetup], "" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "TMX" + File.separator + "RegMatrix_"+posForPathSetup+"_1.tmx");
+				}
+
 				new File("" + savePath + "RegDecon" + File.separator + "Pos"+ posForPathSetup + File.separator +"Deconvolution1").mkdirs();
 				if (wavelengths ==2) {
 					new File("" + savePath + "RegDecon" + File.separator + "Pos"+ posForPathSetup + File.separator +"Deconvolution2").mkdirs();
@@ -1681,14 +1689,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 						doProcessing[pos] = false;
 						continue;
 					} 
-					if (impAs[pos].getNFrames() == impPrxs[pos].getNFrames() && impAs[pos].getNFrames() == impPrys[pos].getNFrames()) {
+					if (impAs[pos].getNFrames() == impPrxs[pos].getNFrames() && impAs[pos].getNFrames() == impPrys[pos].getNFrames()
+							&& impBs[pos].getNFrames() == impPrxs[pos].getNFrames() && impBs[pos].getNFrames() == impPrys[pos].getNFrames()) {
 						doProcessing[pos] = false;
 						continue;
 					}
-					if (impBs[pos].getNFrames() == impPrxs[pos].getNFrames() && impBs[pos].getNFrames() == impPrys[pos].getNFrames()) {
-						doProcessing[pos] = false;
-						continue;
-					} 
 
 					if (doProcessing[pos]) {
 
@@ -1702,14 +1707,18 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 								(wavelengths ==2 && new File(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution1" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif").canRead()
 									&& new File(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution2" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif").canRead())) {
 							IJ.log("already done: " + pos +" "+ impAs[pos].getChannel()+" "+ impAs[pos].getSlice()+" "+ f);
+							continue;
 						} else {
 							IJ.log("starting " + pos +" "+ impAs[pos].getChannel()+" "+ impAs[pos].getSlice()+" "+ f);
 							if (wavelengths == 2) {
 								IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "Color1" +File.separator + "TMX" + File.separator + "Matrix_1.tmx");
 								IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "Color2" +File.separator + "TMX" + File.separator + "Matrix_1.tmx");
+								IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "TMX" + File.separator + "RegMatrix_"+pos+"_1.tmx");
+								IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "TMX" + File.separator + "RegMatrix_"+pos+"_1.tmx");
 							}
 							if (wavelengths == 1) {
 								IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
+								IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "TMX" + File.separator + "RegMatrix_"+pos+"_1.tmx");
 
 							}
 
@@ -1949,9 +1958,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 								try {
 									String[] cmdln =null;
 									if (this.omeTiffs)
-										cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB1_","SPIMA1_", savePath + "RegDecon" + File.separator ,"1","1","1","1","0.1625","0.1625","1","0.1625","0.1625","1","1","-1","0", (doRegPriming?"1":"0"),savePath + "RegDecon" + File.separator +"TMX" +File.separator+"Matrix_1.tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
+										cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB1_","SPIMA1_", savePath + "RegDecon" + File.separator ,"1","1","1","1","0.1625","0.1625","1","0.1625","0.1625","1","1","-1","0", (doRegPriming?"1":"0"),savePath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_"+pos+"_1.tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
 									else
-										cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA1_","SPIMB1_", savePath + "RegDecon" + File.separator ,"1","1","1","1","0.1625","0.1625","1","0.1625","0.1625","1","1","-1","0", (doRegPriming?"1":"0"),savePath + "RegDecon" + File.separator +"TMX" +File.separator+"Matrix_1.tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
+										cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA1_","SPIMB1_", savePath + "RegDecon" + File.separator ,"1","1","1","1","0.1625","0.1625","1","0.1625","0.1625","1","1","-1","0", (doRegPriming?"1":"0"),savePath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_"+pos+"_1.tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
 
 									regDeconProcess = Runtime.getRuntime().exec(cmdln);
 								} catch (IOException e) {
@@ -1964,14 +1973,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 									String[] cmdln = {""};
 									if (keyChannel ==1)
 										if (this.omeTiffs)
-											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB1_","SPIMA1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1","0.1625","0.1625","1","0.1625","0.1625","1","1","-1","0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator + "Color1" + File.separator +"TMX" +File.separator+"Matrix_1.tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0" , savePath + "CropBkgdSub" + File.separator , savePath + "CropBkgdSub" + File.separator , "SPIMB2_","SPIMA2_"};
+											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB1_","SPIMA1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1","0.1625","0.1625","1","0.1625","0.1625","1","1","-1","0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator + "Color1" + File.separator +"TMX" +File.separator+"RegMatrix_"+pos+"_1.tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0" , savePath + "CropBkgdSub" + File.separator , savePath + "CropBkgdSub" + File.separator , "SPIMB2_","SPIMA2_"};
 										else
-											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA1_","SPIMB1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1","0.1625","0.1625","1","0.1625","0.1625","1","1","-1","0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator + "Color1" + File.separator +"TMX" +File.separator+"Matrix_1.tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0" , savePath + "CropBkgdSub" + File.separator , savePath + "CropBkgdSub" + File.separator , "SPIMA2_","SPIMB2_"};
+											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA1_","SPIMB1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1","0.1625","0.1625","1","0.1625","0.1625","1","1","-1","0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator + "Color1" + File.separator +"TMX" +File.separator+"RegMatrix_"+pos+"_1.tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0" , savePath + "CropBkgdSub" + File.separator , savePath + "CropBkgdSub" + File.separator , "SPIMA2_","SPIMB2_"};
 									else
 										if (this.omeTiffs)
-											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB2_","SPIMA2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1","0.1625","0.1625","1","0.1625","0.1625","1","1","-1","0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator + "Color1" + File.separator +"TMX" +File.separator+"Matrix_1.tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0" , savePath + "CropBkgdSub" + File.separator , savePath + "CropBkgdSub" + File.separator , "SPIMB1_","SPIMA1_"};
+											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB2_","SPIMA2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1","0.1625","0.1625","1","0.1625","0.1625","1","1","-1","0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator + "Color1" + File.separator +"TMX" +File.separator+"RegMatrix_"+pos+"_1.tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0" , savePath + "CropBkgdSub" + File.separator , savePath + "CropBkgdSub" + File.separator , "SPIMB1_","SPIMA1_"};
 										else
-											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA2_","SPIMB2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1","0.1625","0.1625","1","0.1625","0.1625","1","1","-1","0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator + "Color1" + File.separator +"TMX" +File.separator+"Matrix_1.tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0" , savePath + "CropBkgdSub" + File.separator , savePath + "CropBkgdSub" + File.separator , "SPIMA1_","SPIMB1_"};
+											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA2_","SPIMB2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1","0.1625","0.1625","1","0.1625","0.1625","1","1","-1","0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator + "Color1" + File.separator +"TMX" +File.separator+"RegMatrix_"+pos+"_1.tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0" , savePath + "CropBkgdSub" + File.separator , savePath + "CropBkgdSub" + File.separator , "SPIMA1_","SPIMB1_"};
 											
 									//								IJ.log(cmdln);
 									IJ.log(Arrays.toString(cmdln));
@@ -1981,6 +1990,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 									e.printStackTrace();
 								}
 							}
+							if (new File("" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "TMX" + File.separator + "RegMatrix_"+pos+"_1.tmx").canRead() )
+								lastMatrix[pos] = IJ.openAsString("" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "TMX" + File.separator + "RegMatrix_"+pos+"_1.tmx");
 
 							//					IJ.runMacro("waitForUser()");
 							while (regDeconProcess!= null && regDeconProcess.isAlive()) {
@@ -2008,6 +2019,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 //										IJ.runMacro("waitForUser;");
 										IJ.log(""+ pos+ "old=> " + lastMatrix[pos]);
 										lastMatrix[pos] = IJ.openAsString("" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
+										IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_"+pos+"_1.tmx");
 										IJ.log(""+ pos+ "new=> " + lastMatrix[pos]);
 
 									}
@@ -2026,6 +2038,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 //										IJ.runMacro("waitForUser;");
 										IJ.log(""+ pos+ "old=> " + lastMatrix[pos]);
 										lastMatrix[pos] = IJ.openAsString("" + savePath + "RegDecon" + File.separator + "Color1" +File.separator + "TMX" + File.separator + "Matrix_1.tmx");
+										IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "TMX" + File.separator + "RegMatrix_"+pos+"_1.tmx");
 										IJ.log(""+ pos+ "new=> " + lastMatrix[pos]);
 
 									}
@@ -2035,7 +2048,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 //										IJ.runMacro("waitForUser;");
 										IJ.log(""+ pos+ "old=> " + lastMatrix[pos]);
-										lastMatrix[pos] = IJ.openAsString("" + savePath + "RegDecon" + File.separator + "Color1" +File.separator + "TMX" + File.separator + "Matrix_1.tmx");
+										lastMatrix[pos] = IJ.openAsString("" + savePath + "RegDecon" + File.separator + "Color2" +File.separator + "TMX" + File.separator + "Matrix_1.tmx");
+										IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "TMX" + File.separator + "RegMatrix_"+pos+"_1.tmx");
 										IJ.log(""+ pos+ "new=> " + lastMatrix[pos]);
 
 									}
@@ -2075,8 +2089,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 										impDF1s[pos].setStack(impDF1s[pos].getStack(), wavelengths,
 												zSlicesDF1, stkNSlicesDF
 												/ (wavelengths * zSlicesDF1));
-										if (ciDFs[pos]!=null)
+										if (ciDFs[pos] != null) {
 											win = ciDFs[pos].getWindow();
+										} else {
+											win = null;
+										}
 
 										ciDFs[pos] = new CompositeImage(impDF1s[pos]);
 										
@@ -2952,6 +2969,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 						MultiFileInfoVirtualStack[] stackBs = new MultiFileInfoVirtualStack[pDim];
 
 						for (int pos=0; pos<pDim; pos++) {
+							doProcessing[pos] = true;
+							
 							if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
 								doProcessing[pos] = false;
 								continue;
@@ -3226,6 +3245,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 						}
 
 						for (int pos=0; pos<pDim; pos++) {
+							doProcessing[pos] = true;
+
 							if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
 								doProcessing[pos] = false;
 								continue;
@@ -3316,6 +3337,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 						SyncWindows.getInstance().close();
 					}
 					for (int pos=0; pos<pDim; pos++) {
+						doProcessing[pos] = true;
+
 						if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
 							doProcessing[pos] = false;
 							continue;
@@ -3441,6 +3464,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 						SyncWindows.getInstance().close();
 					}
 					for (int pos=0; pos<pDim; pos++) {
+						doProcessing[pos] = true;
+
 						if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
 							doProcessing[pos] = false;
 							continue;
@@ -3761,6 +3786,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 					new File("" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "TMX").mkdirs();
 					if (doRegPriming){
 						for (int pos=0; pos<pDim; pos++) {
+							doProcessing[pos] = true;
+
 							if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
 								doProcessing[pos] = false;
 								continue;
@@ -3772,8 +3799,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 							if (doProcessing[pos]) {
 
-								if (lastMatrix[pos] == null)
+								if (lastMatrix[pos] == null) {
 									lastMatrix[pos] = IJ.openAsString("C:\\DataForTest\\Matrix_0.tmx");
+									if (new File("" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "TMX" + File.separator + "RegMatrix_"+pos+"_1.tmx").canRead() )
+										lastMatrix[pos] = IJ.openAsString("" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "TMX" + File.separator + "RegMatrix_"+pos+"_1.tmx");
+
+								}
 							}
 						}
 					}
@@ -3792,6 +3823,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 					
 					for (int f = 1; f <= impAs[0].getNFrames(); f++) {
 						for (int pos=0; pos<pDim; pos++) {
+							doProcessing[pos] = true;
+
 							if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
 								doProcessing[pos] = false;
 								continue;
@@ -3800,6 +3833,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 								doProcessing[pos] = false;
 								continue;
 							} 
+							if (f <= impPrxs[pos].getNFrames() && f <= impPrys[pos].getNFrames()
+									&& f <= impPrxs[pos].getNFrames() && f <= impPrys[pos].getNFrames()) {
+								doProcessing[pos] = false;
+								continue;
+							}
 
 							if (doProcessing[pos]) {
 
@@ -3813,16 +3851,17 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 										(wavelengths ==2 && new File(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution1" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif").canRead()
 											&& new File(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution2" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif").canRead())) {
 									IJ.log("already done: " + pos +" "+ impAs[pos].getChannel()+" "+ impAs[pos].getSlice()+" "+ f);
+									continue;
 								} else {
 									IJ.log("starting " + pos +" "+ impAs[pos].getChannel()+" "+ impAs[pos].getSlice()+" "+ f);
-									if (wavelengths == 2) {
-										IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "Color1" +File.separator + "TMX" + File.separator + "Matrix_1.tmx");
-										IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "Color2" +File.separator + "TMX" + File.separator + "Matrix_1.tmx");
-									}
-									if (wavelengths == 1) {
-										IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
-
-									}
+//									if (wavelengths == 2) {
+//										IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "Color1" +File.separator + "TMX" + File.separator + "Matrix_1.tmx");
+//										IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "Color2" +File.separator + "TMX" + File.separator + "Matrix_1.tmx");
+//									}
+//									if (wavelengths == 1) {
+//										IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
+//
+//									}
 
 									impAs[pos].setPositionWithoutUpdate(impAs[pos].getChannel(), impAs[pos].getSlice(), f);
 
@@ -4060,9 +4099,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 										try {
 											String[] cmdln =null;
 											if (this.omeTiffs)
-												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB1_","SPIMA1_", savePath + "RegDecon" + File.separator ,"1","1","1","1","0.1625","0.1625","1","0.1625","0.1625","1","1","-1","0", (doRegPriming?"1":"0"),savePath + "RegDecon" + File.separator +"TMX" +File.separator+"Matrix_1.tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
+												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB1_","SPIMA1_", savePath + "RegDecon" + File.separator ,"1","1","1","1","0.1625","0.1625","1","0.1625","0.1625","1","1","-1","0", (doRegPriming?"1":"0"),savePath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_"+pos+"_1.tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
 											else
-												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA1_","SPIMB1_", savePath + "RegDecon" + File.separator ,"1","1","1","1","0.1625","0.1625","1","0.1625","0.1625","1","1","-1","0", (doRegPriming?"1":"0"),savePath + "RegDecon" + File.separator +"TMX" +File.separator+"Matrix_1.tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
+												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA1_","SPIMB1_", savePath + "RegDecon" + File.separator ,"1","1","1","1","0.1625","0.1625","1","0.1625","0.1625","1","1","-1","0", (doRegPriming?"1":"0"),savePath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_"+pos+"_1.tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
 
 											regDeconProcess = Runtime.getRuntime().exec(cmdln);
 										} catch (IOException e) {
@@ -4075,14 +4114,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 											String[] cmdln = {""};
 											if (keyChannel ==1)
 												if (this.omeTiffs)
-													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB1_","SPIMA1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1","0.1625","0.1625","1","0.1625","0.1625","1","1","-1","0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator + "Color1" + File.separator +"TMX" +File.separator+"Matrix_1.tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0" , savePath + "CropBkgdSub" + File.separator , savePath + "CropBkgdSub" + File.separator , "SPIMB2_","SPIMA2_"};
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB1_","SPIMA1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1","0.1625","0.1625","1","0.1625","0.1625","1","1","-1","0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator + "Color1" + File.separator +"TMX" +File.separator+"RegMatrix_"+pos+"_1.tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0" , savePath + "CropBkgdSub" + File.separator , savePath + "CropBkgdSub" + File.separator , "SPIMB2_","SPIMA2_"};
 												else
-													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA1_","SPIMB1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1","0.1625","0.1625","1","0.1625","0.1625","1","1","-1","0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator + "Color1" + File.separator +"TMX" +File.separator+"Matrix_1.tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0" , savePath + "CropBkgdSub" + File.separator , savePath + "CropBkgdSub" + File.separator , "SPIMA2_","SPIMB2_"};
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA1_","SPIMB1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1","0.1625","0.1625","1","0.1625","0.1625","1","1","-1","0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator + "Color1" + File.separator +"TMX" +File.separator+"RegMatrix_"+pos+"_1.tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0" , savePath + "CropBkgdSub" + File.separator , savePath + "CropBkgdSub" + File.separator , "SPIMA2_","SPIMB2_"};
 											else
 												if (this.omeTiffs)
-													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB2_","SPIMA2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1","0.1625","0.1625","1","0.1625","0.1625","1","1","-1","0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator + "Color1" + File.separator +"TMX" +File.separator+"Matrix_1.tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0" , savePath + "CropBkgdSub" + File.separator , savePath + "CropBkgdSub" + File.separator , "SPIMB1_","SPIMA1_"};
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB2_","SPIMA2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1","0.1625","0.1625","1","0.1625","0.1625","1","1","-1","0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator + "Color1" + File.separator +"TMX" +File.separator+"RegMatrix_"+pos+"_1.tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0" , savePath + "CropBkgdSub" + File.separator , savePath + "CropBkgdSub" + File.separator , "SPIMB1_","SPIMA1_"};
 												else
-													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA2_","SPIMB2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1","0.1625","0.1625","1","0.1625","0.1625","1","1","-1","0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator + "Color1" + File.separator +"TMX" +File.separator+"Matrix_1.tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0" , savePath + "CropBkgdSub" + File.separator , savePath + "CropBkgdSub" + File.separator , "SPIMA1_","SPIMB1_"};
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA2_","SPIMB2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1","0.1625","0.1625","1","0.1625","0.1625","1","1","-1","0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator + "Color1" + File.separator +"TMX" +File.separator+"RegMatrix_"+pos+"_1.tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0" , savePath + "CropBkgdSub" + File.separator , savePath + "CropBkgdSub" + File.separator , "SPIMA1_","SPIMB1_"};
 													
 											//								IJ.log(cmdln);
 											IJ.log(Arrays.toString(cmdln));
@@ -4119,6 +4158,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 //												IJ.runMacro("waitForUser;");
 												IJ.log(""+ pos+ "old=> " + lastMatrix[pos]);
 												lastMatrix[pos] = IJ.openAsString("" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
+												IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_"+pos+"_1.tmx");
 												IJ.log(""+ pos+ "new=> " + lastMatrix[pos]);
 
 											}
@@ -4137,6 +4177,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 //												IJ.runMacro("waitForUser;");
 												IJ.log(""+ pos+ "old=> " + lastMatrix[pos]);
 												lastMatrix[pos] = IJ.openAsString("" + savePath + "RegDecon" + File.separator + "Color1" +File.separator + "TMX" + File.separator + "Matrix_1.tmx");
+												IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "TMX" + File.separator + "RegMatrix_"+pos+"_1.tmx");
 												IJ.log(""+ pos+ "new=> " + lastMatrix[pos]);
 
 											}
@@ -4147,6 +4188,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 //												IJ.runMacro("waitForUser;");
 												IJ.log(""+ pos+ "old=> " + lastMatrix[pos]);
 												lastMatrix[pos] = IJ.openAsString("" + savePath + "RegDecon" + File.separator + "Color1" +File.separator + "TMX" + File.separator + "Matrix_1.tmx");
+												IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "TMX" + File.separator + "RegMatrix_"+pos+"_1.tmx");
 												IJ.log(""+ pos+ "new=> " + lastMatrix[pos]);
 
 											}
@@ -4186,8 +4228,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 												impDF1s[pos].setStack(impDF1s[pos].getStack(), wavelengths,
 														zSlicesDF1, stkNSlicesDF
 														/ (wavelengths * zSlicesDF1));
-												if (ciDFs[pos]!=null)
+												if (ciDFs[pos] != null) {
 													win = ciDFs[pos].getWindow();
+												} else {
+													win = null;
+												}
 
 												ciDFs[pos] = new CompositeImage(impDF1s[pos]);
 												
@@ -4433,6 +4478,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 					//					impA = impAs[pos];
 					//					impB = impBs[pos];
 					for (int pos=0; pos<pDim; pos++) {
+						doProcessing[pos] = true;
+
 						if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
 							doProcessing[pos] = false;
 							continue;
@@ -4897,6 +4944,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 					}
 					// IJ.wait(15000);
 					for (int pos=0; pos<pDim; pos++) {
+						doProcessing[pos] = true;
+
 						if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
 							doProcessing[pos] = false;
 							continue;
