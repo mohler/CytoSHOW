@@ -1648,6 +1648,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				}
 			}
 			if (wavelengths ==1) {
+				new File("" + savePath + "CropBkgdSub").mkdirs();
 				new File("" + savePath + "RegDecon" + File.separator + "TMX").mkdirs();
 				if (doRegPriming){
 				}
@@ -1666,10 +1667,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				}
 			}
 			for (int posForPathSetup=0; posForPathSetup<pDim; posForPathSetup++) {
-				if (wavelengths >0) {
-					IJ.saveString(lastMatrix[posForPathSetup], "" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_"+posForPathSetup+"_1.tmx");
-				}
-//				if (wavelengths ==2) {
+//				if (wavelengths >0) {
+//					IJ.saveString(lastMatrix[posForPathSetup], "" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_"+posForPathSetup+"_1.tmx");
+//				}
+////				if (wavelengths ==2) {
 //					IJ.saveString(lastMatrix[posForPathSetup], "" + savePath + "RegDecon" + File.separator + "Color1" + File.separator + "TMX" + File.separator + "RegMatrix_"+posForPathSetup+"_1.tmx");
 //					IJ.saveString(lastMatrix[posForPathSetup], "" + savePath + "RegDecon" + File.separator + "Color2" + File.separator + "TMX" + File.separator + "RegMatrix_"+posForPathSetup+"_1.tmx");
 //				}
@@ -2010,7 +2011,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 									}
 
-									int k = impDF1s[pos].getNFrames();
+									int k = f;
 
 									if (new File(prxPath+File.separator+"Color1"+File.separator+"proj_"+k+"_1.tif").canRead() && new File(pryPath+File.separator+"Color1"+File.separator+"proj_"+k+"_1.tif").canRead()
 											&&  (wavelengths == 2 && new File(prxPath+File.separator+"Color2"+File.separator+"proj_"+k+"_1.tif").canRead() && new File(pryPath+File.separator+"Color2"+File.separator+"proj_"+k+"_1.tif").canRead()))
