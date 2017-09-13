@@ -121,6 +121,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					channelDirectories++;
 					String[] subFileList = subFile.list();
 					channelArraryLists.add(new ArrayList<String>());
+					IJ.log(fileName +"???  "+keyString );
 					for (String subFileListElement:subFileList) {
 						if (!cumulativeSubFileArrayList.contains(dir+fileName+File.separator+subFileListElement)) {
 							if ((pos ==-1 ||subFileListElement.toLowerCase().contains("_pos"+pos+"."))
