@@ -349,7 +349,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			IJ.log(infoArray[0].debugInfo);
 		fivStacks.add(new FileInfoVirtualStack());
 		fivStacks.get(fivStacks.size()-1).infoArray = fi;
-		nImages = fivStacks.size() * fivStacks.get(0).nImages;
+		nImages = fivStacks.size() * fivStacks.get(0).nImages*(dimOrder == "xySplitCzt"?2:1);
 	}
 	
 	public void run(String arg) {
@@ -360,7 +360,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (cumulativeTiffFileArray.length >0 && cumulativeTiffFileArray[0].contains("MMStack_"))  {
 			nImages = 0;
 			for (FileInfoVirtualStack mmStack:fivStacks) {
-				nImages = nImages + mmStack.getSize();
+				nImages = nImages + mmStack.getSize()*(dimOrder == "xySplitCzt"?2:1);
 			}
 			if (cDim == 0 || zDim == 0 || tDim == 0) {
 				GenericDialog gd = new GenericDialog("Dimensions of HyperStacks");
@@ -380,7 +380,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			}
 		} else if (monitoringDecon){
 			zDim = fivStacks.get(0).nImages;
-			nImages = fivStacks.size() * zDim;
+			nImages = fivStacks.size() * zDim*(dimOrder == "xySplitCzt"?2:1);
 
 			int internalChannels = ((new FileOpener(fivStacks.get(0).infoArray[0])).decodeDescriptionString(fivStacks.get(0).infoArray[0]) != null
 					?(fivStacks.get(0).getInt((new FileOpener(fivStacks.get(0).infoArray[0])).decodeDescriptionString(fivStacks.get(0).infoArray[0]), "channels"))
@@ -391,7 +391,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			tDim = fivStacks.size()/cDim;
 		} else {
 			zDim = fivStacks.get(0).nImages;
-			nImages = /*channelDirectories**/ fivStacks.size() * zDim;
+			nImages = /*channelDirectories**/ fivStacks.size() * zDim*(dimOrder == "xySplitCzt"?2:1);
 
 			int internalChannels = ((new FileOpener(fivStacks.get(0).infoArray[0])).decodeDescriptionString(fivStacks.get(0).infoArray[0]) != null
 					?(fivStacks.get(0).getInt((new FileOpener(fivStacks.get(0).infoArray[0])).decodeDescriptionString(fivStacks.get(0).infoArray[0]), "channels"))
@@ -474,7 +474,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		return s!=null&&s.equals("true")?true:false;
 	}
 
-	/** Deletes the specified image, were 1<=n<=nImages. */
+	/** Deletes the specified image, where 1<=n<=nImages. */
 	public void deleteSlice(int n) {
 //		if (n<1 || n>nImages)
 //			throw new IllegalArgumentException("Argument out of range: "+n);
@@ -503,7 +503,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	}
 	
 	/** Returns an ImageProcessor for the specified image,
-		were 1<=n<=nImages. Returns null if the stack is empty.
+		where 1<=n<=nImages. Returns null if the stack is empty.
 	*/
 	public ImageProcessor getProcessor(int n) {
 		if (n<1 || n>nImages) {
@@ -517,14 +517,14 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		sliceNumber = 1;
 		int total=0;
 		while (n > total) {
-			total = total + fivStacks.get(stackNumber).getSize()/vDim;
+			total = total + fivStacks.get(stackNumber).getSize()*(dimOrder == "xySplitCzt"?2:1)/vDim;
 			stackNumber++;
 		}
 		stackNumber--;
 
-		n = n + stackNumber*fivStacks.get(stackNumber).getSize()/vDim;
+		n = n + stackNumber*fivStacks.get(stackNumber).getSize()*(dimOrder == "xySplitCzt"?2:1)/vDim;
 		
-			sliceNumber = (n-1) % (fivStacks.get(stackNumber).getSize()/vDim);
+			sliceNumber = (n-1) % (fivStacks.get(stackNumber).getSize()*(dimOrder == "xySplitCzt"?2:1)/vDim);
 
 			if (stackNumber>=0 && sliceNumber>=0) {
 				if (!touchedFiles.contains(fivStacks.get(stackNumber).infoArray[sliceNumber].fileName)) {
@@ -547,6 +547,11 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		ImageProcessor ip = null;
 		if (dimOrder == "xyczt")
 			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber+1+(isViewB?fivStacks.get(stackNumber).getSize()/vDim:0));
+		if (dimOrder == "xySplitCzt") {
+			ip = fivStacks.get(stackNumber).getProcessor((sliceNumber/2)+1+(isViewB?fivStacks.get(stackNumber).getSize()/vDim:0));
+			ip.setRoi(1280-((sliceNumber%2)*1024), 0, 512, 512);
+			ip=ip.crop();
+		}
 		if (dimOrder == "xyzct")
 			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber/cDim + ((sliceNumber%cDim)*fivStacks.get(stackNumber).getSize()/(vDim))
 																		+(isViewB?fivStacks.get(stackNumber).getSize()/(cDim*vDim):0));

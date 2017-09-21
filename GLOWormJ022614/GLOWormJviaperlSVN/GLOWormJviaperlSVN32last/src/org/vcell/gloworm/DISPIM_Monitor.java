@@ -81,9 +81,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 	private String diSPIM_MM_channelMode;
 	private int diSPIM_MM_numChannels;
 	//	 private int diSPIM_MM_channels;
-	private boolean[] diSPIM_MM_useChannel;
-	private String[] diSPIM_MM_group;
-	private String[] diSPIM_MM_config;
+	private ArrayList<Boolean> diSPIM_MM_useChannel_ArrayList;
+	private ArrayList<String> diSPIM_MM_group_ArrayList;
+	private ArrayList<String> diSPIM_MM_config_ArrayList;
 	private String diSPIM_MM_channelGroup;
 	private boolean diSPIM_MM_useAutofocus;
 	private int diSPIM_MM_numSides;
@@ -272,6 +272,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 	private String prxPath;
 	private String pryPath;
 	private String keyString;
+	private boolean splitChannels;
 	
 	public Process getRegDeconProcess() {
 		return regDeconProcess;
@@ -432,9 +433,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 					//Reading in diSPIM header from MM tiffs ^^^^^^
 
-					dimOrder = (diSPIM_MM_channelMode.contains("VOLUME")?"xyzct":"xyczt");
+					if (dimOrder == null || dimOrder == "")
+						dimOrder = (diSPIM_MM_channelMode.contains("VOLUME")?"xyzct":"xyczt");
 
-					wavelengths = diSPIM_MM_numChannels;
+					wavelengths = cDim; 
 					vWidth = diSPIM_MM_PixelSize_um;
 					vHeight = diSPIM_MM_PixelSize_um;
 					vDepthRaw = diSPIM_MM_zStep_um;
@@ -5204,6 +5206,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 		}
 		IJ.log("*************************");
 		IJ.log(diSPIMheader);
+		diSPIM_MM_useChannel_ArrayList = new ArrayList<Boolean>();
+		diSPIM_MM_group_ArrayList = new ArrayList<String>();
+		diSPIM_MM_config_ArrayList = new ArrayList<String>();
 
 		String[] diSPIMheaderChunks = diSPIMheader
 				.replace("\\\"", "\"")
@@ -5271,23 +5276,23 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 			if (chunk.trim().startsWith("\"numChannels\":")) {
 				diSPIM_MM_numChannels= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
 				cDim = diSPIM_MM_numChannels;
-			}					 					
-			diSPIM_MM_useChannel= new boolean[diSPIM_MM_numChannels];
-			if (chunk.trim().startsWith("\"useChannel_\":")) {
-				diSPIM_MM_useChannel[diSPIM_MM_channel_use_index]= chunk.split(":")[1].replace("\"", "").trim().toLowerCase().contains("true");
-				diSPIM_MM_channel_use_index++;					
-			}
-			diSPIM_MM_group= new String[diSPIM_MM_numChannels];
-			if (chunk.trim().startsWith("\"group_\":")) {
-				diSPIM_MM_group[diSPIM_MM_channel_group_index]= chunk.split(":")[1].replace("\"", "").trim();
-				diSPIM_MM_channel_group_index++;
-			}
-			diSPIM_MM_config= new String[diSPIM_MM_numChannels];
-			if (chunk.trim().startsWith("\"config_\":")) {
-				diSPIM_MM_config[diSPIM_MM_channel_config_index]= chunk.split(":")[1].replace("\"", "").trim();
-				diSPIM_MM_channel_config_index++;
-			}
+			}				
+			
+				if (chunk.trim().startsWith("\"useChannel_\":")) {
+					diSPIM_MM_useChannel_ArrayList.add(chunk.trim().split(":")[1].replace("\"", "").trim().toLowerCase().contains("true"));
+					diSPIM_MM_channel_use_index++;					
+				}
 
+				if (chunk.trim().startsWith("\"group_\":")) {
+					diSPIM_MM_group_ArrayList.add(chunk.trim().split(":")[1].replace("\"", "").trim());
+					diSPIM_MM_channel_group_index++;
+				}
+
+				if (chunk.trim().startsWith("\"config_\":")) {
+					diSPIM_MM_config_ArrayList.add(chunk.trim().split(":")[1].replace("\"", "").trim());
+					diSPIM_MM_channel_config_index++;
+				}
+			
 
 			if (chunk.trim().startsWith("\"channelGroup\":")) {
 				diSPIM_MM_channelGroup= chunk.split(":")[1].replace("\"", "").trim();
@@ -5448,7 +5453,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				diSPIM_MM_PixelType= chunk.split(":")[1].replace("\"", "").trim();
 			}
 			if (chunk.trim().startsWith("\"Time\":")) {
-				diSPIM_MM_Time= chunk.split(":")[1].replace("\"", "").trim();
+				diSPIM_MM_Time= chunk.split("\":\"")[1].replace("\"", "").trim();
 			}
 			if (chunk.trim().startsWith("\"FirstSide\":")) {
 				diSPIM_MM_FirstSide= chunk.split(":")[1].replace("\"", "").trim();
@@ -5472,7 +5477,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 
 			if (chunk.trim().startsWith("\"StartTime\":")) {
-				diSPIM_MM_StartTime= chunk.split(":")[1].replace("\"", "").trim();
+				diSPIM_MM_StartTime= chunk.split("\":\"")[1].replace("\"", "").trim();
 			}
 			if (chunk.trim().startsWith("\"MVRotationAxis\":")) {
 				diSPIM_MM_MVRotationAxis= chunk.split(":")[1].replace("\"", "").trim();
@@ -5526,6 +5531,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 //									allVars = allVars+"\n diSPIM_MM_"+chunk.trim().split(":")[1];
 		}
 //						IJ.log(allVars);
+		if (diSPIM_MM_channelMode.startsWith("NONE") && diSPIM_MM_channel_use_index>1) {
+			cDim = diSPIM_MM_channel_use_index;
+			splitChannels = true;
+			dimOrder = "xySplitCzt";
+		}
 	}
 
 	public Polygon rotatePolygon(Polygon p1, double angle) {
