@@ -548,8 +548,10 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (dimOrder == "xyczt")
 			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber+1+(isViewB?fivStacks.get(stackNumber).getSize()/vDim:0));
 		if (dimOrder == "xySplitCzt") {
+			int dX = -11;
+			int dY = 7;
 			ip = fivStacks.get(stackNumber).getProcessor((sliceNumber/2)+1+(isViewB?fivStacks.get(stackNumber).getSize()/vDim:0));
-			ip.setRoi(1280-((sliceNumber%2)*1024), 0, 512, 512);
+			ip.setRoi(1280-((1-sliceNumber%2)*(1024+dX)), 0+((1-sliceNumber%2)*(0+dY)), 512, 512-dY);
 			ip=ip.crop();
 		}
 		if (dimOrder == "xyzct")

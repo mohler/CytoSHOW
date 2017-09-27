@@ -260,7 +260,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		}
 		if (rm==null) {
 			showAllROIs = false;
-			repaint();
+			paintDoubleBuffered(getGraphics());
 			return;
 		}
 		initGraphics(g, null, showAllColor);
@@ -617,6 +617,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 					yOffset = yOffset + r.get(i).height;
 				}
 			}
+			g.clearRect(0,0,this.getWidth(),this.getHeight());
 			g.drawImage(offScreenImage, 0, 0, null);
 		}
 		catch(OutOfMemoryError e) {IJ.outOfMemory("Paint");}
@@ -797,7 +798,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				srcRect.x = imageWidth-srcRect.width;
 			if ((srcRect.y+srcRect.height)>imageHeight)
 				srcRect.y = imageHeight-srcRect.height;
-			repaint();
+			paintDoubleBuffered(getGraphics());
 		}
 		//IJ.log("resizeCanvas2: "+srcRect+" "+dstWidth+"  "+dstHeight+" "+width+"  "+height);
 	}
@@ -913,7 +914,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		}
 		if (srcRect.width<imageWidth || srcRect.height<imageHeight)
 			resetMaxBounds();
-		repaint();
+		paintDoubleBuffered(getGraphics());
 	}
 
 	public void adjustSourceRect(double newMag, int x, int y) {
@@ -1022,12 +1023,12 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				setDrawingSize(newDstWidth, newDstHeight);
 				imp.getWindow().pack();
 				imp.getWindow().setSize(newDstWidth+padH, newDstHeight+padV);
-				repaint();
+				paintDoubleBuffered(getGraphics());
 			} else {
 				setDrawingSize(newDstWidth, newDstHeight);
 				imp.getWindow().pack();
 				imp.getWindow().setSize(newDstWidth+padH, newDstHeight+padV);
-				repaint();
+				paintDoubleBuffered(getGraphics());
 			}
 			return;
 		}
@@ -1055,7 +1056,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		setMagnification(newMag);
 		//IJ.write(srcRect.x + " " + srcRect.width + " " + dstWidth);
 		setMaxBounds();
-		repaint();
+		paintDoubleBuffered(getGraphics());
 	}
 
 	/** Implements the Image/Zoom/Original Scale command. */
@@ -1086,7 +1087,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		win.pack();
 		imp.getWindow().setSize(dstWidth+padH, dstHeight+padV);
 		setMaxBounds();
-		repaint();
+		paintDoubleBuffered(getGraphics());
 	}
 
 	/** Implements the Image/Zoom/View 100% command. */
@@ -1131,7 +1132,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		adjustSourceRect(1.0, sx, sy);
 		imp.getWindow().pack();
 		imp.getWindow().setSize(dstWidth+padH, dstHeight+padV);
-		repaint();
+		paintDoubleBuffered(getGraphics());
 	}
 
 	protected void scroll(int sx, int sy) {
@@ -2982,7 +2983,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 	/** Use ImagePlus.setOverlay(ij.gui.Overlay). */
 	public void setOverlay(Overlay overlay) {
 		this.overlay = overlay;
-		repaint();
+		paintDoubleBuffered(getGraphics());
 	}
 
 	/** Use ImagePlus.getOverlay(). */
@@ -3005,7 +3006,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			overlay.drawLabels(overlay.size()>0&&overlay.get(0).getStrokeColor()==null);
 		else
 			customRoi = false;
-		repaint();
+		paintDoubleBuffered(getGraphics());
 	}
 
 	/**
