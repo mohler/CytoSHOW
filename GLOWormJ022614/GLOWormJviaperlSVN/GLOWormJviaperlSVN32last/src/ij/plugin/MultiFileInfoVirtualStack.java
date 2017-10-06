@@ -489,7 +489,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		int stackNumber = 0;
 		int sliceNumber = 1;
 		int total=0;
-		while (n > total) {
+		while (n > total && stackNumber<fivStacks.size()) {
 			total = total + fivStacks.get(stackNumber).getSize();
 			stackNumber++;
 		}

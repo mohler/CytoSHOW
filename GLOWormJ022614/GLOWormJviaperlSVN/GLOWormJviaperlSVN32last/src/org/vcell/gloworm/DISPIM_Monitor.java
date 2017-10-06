@@ -419,7 +419,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 			if (args.length > 2) {
 				wavelengths = Integer.parseInt(args[1]);
 				zSlices = Integer.parseInt(args[2]);
-			} else if (!omeTiffs || !dirOrOMETiffFile.isDirectory()) {
+			} else if (!omeTiffs && !dirOrOMETiffFile.isDirectory()) {
 				
 				readInMMdiSPIMheader(dirOrOMETiffFile);
 				
@@ -838,12 +838,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				for (int pos=0; pos<pDim; pos++) {
 
 					impAs[pos] = new ImagePlus();
-					impAs[pos].setStack(new MultiFileInfoVirtualStack(mmPath, "MMStack", false));
+					impAs[pos].setStack(new MultiFileInfoVirtualStack(mmPath, "MMStack",  "", cDim, zDim, tDim, vDim, pos, false, false));
 					//				impAs[pos].setStack(new FileInfoVirtualStack(tdB.getTiffInfo(0), false));
 					int stackSize = impAs[pos].getNSlices();
-					int nChannels = wavelengths*2;
-					int nSlices = zSlices;
-					int nFrames = (int)Math.floor((double)stackSize/(nChannels*nSlices));
+					int nChannels = cDim;
+					int nSlices = zDim;
+					int nFrames = tDim;
 					dirOrOMETiff = ((MultiFileInfoVirtualStack)impAs[pos].getStack()).getFivStacks().get(0).getInfo()[pos].directory +
 							File.separator +
 							((MultiFileInfoVirtualStack)impAs[pos].getStack()).getFivStacks().get(0).getInfo()[pos].fileName;
@@ -917,7 +917,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 
 					impBs[pos] = new ImagePlus();
-					impBs[pos].setStack(new MultiFileInfoVirtualStack(mmPath, "MMStack", false));
+					impBs[pos].setStack(new MultiFileInfoVirtualStack(mmPath, "MMStack",  "", cDim, zDim, tDim, vDim, pos, true, false));
 					//				impBs[pos].setStack(new FileInfoVirtualStack(tdA.getTiffInfo(0), false));
 					stackSize = impBs[pos].getStack().getSize();
 					nChannels = wavelengths*2;
@@ -5374,6 +5374,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 			}
 			if (chunk.trim().startsWith("\"numTimepoints\":")) {
 				diSPIM_MM_numTimepoints= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
+				tDim = diSPIM_MM_numTimepoints;
 			}
 			if (chunk.trim().startsWith("\"timepointInterval\":")) {
 				diSPIM_MM_timepointInterval= Double.parseDouble(chunk.split(":")[1].replace("\"", "").trim());
@@ -5526,18 +5527,21 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 			}
 			if (chunk.trim().startsWith("\"Frames\":")) {
 				diSPIM_MM_Frames= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
+				tDim = diSPIM_MM_Frames;
 			}
 			if (chunk.trim().startsWith("\"Source\":")) {
 				diSPIM_MM_Source= chunk.split(":")[1].replace("\"", "").trim();
 			}
 			if (chunk.trim().startsWith("\"Channels\":")) {
 				diSPIM_MM_Channels= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
+				cDim = diSPIM_MM_Channels;
 			}
 			if (chunk.trim().startsWith("\"AcqusitionName\":")) {
 				diSPIM_MM_AcqusitionName= chunk.split(":")[1].replace("\"", "").trim();
 			}
 			if (chunk.trim().startsWith("\"NumberOfSides\":")) {
 				diSPIM_MM_NumberOfSides= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
+				vDim = diSPIM_MM_NumberOfSides;
 			}
 			if (chunk.trim().startsWith("\"SPIMmode\":")) {
 				diSPIM_MM_SPIMmode= chunk.split(":")[1].replace("\"", "").trim();
@@ -5556,6 +5560,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 			if (chunk.trim().startsWith("\"Slices\":")) {
 				diSPIM_MM_Slices= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
+				zDim = diSPIM_MM_Slices;
 			}
 			if (chunk.trim().startsWith("\"UserName\":")) {
 				diSPIM_MM_UserName= chunk.split(":")[1].replace("\"", "").trim();
@@ -5638,14 +5643,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 			if (chunk.trim().startsWith("\"Positions\":")) {
 				diSPIM_MM_Positions= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
-				pDim = diSPIM_MM_Positions;
 			}
 
 //								if (chunk.trim().split(":").length>1)
 //									allVars = allVars+"\n diSPIM_MM_"+chunk.trim().split(":")[1];
 		}
 //						IJ.log(allVars);
-		if (diSPIM_MM_channelMode.startsWith("NONE") && diSPIM_MM_useChannels==false) {
+		if ((diSPIM_MM_channelMode==null || diSPIM_MM_channelMode.startsWith("NONE")) && diSPIM_MM_useChannels==false) {
 			cDim = 2;    //using diSPIM_MM_channel_use_index value doesn' work for Shroff system (counts 4, duh)
 			splitChannels = true;
 			dimOrder = "xySplitCzt";
