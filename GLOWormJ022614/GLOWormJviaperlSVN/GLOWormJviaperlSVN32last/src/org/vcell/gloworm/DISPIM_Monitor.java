@@ -1864,7 +1864,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 							ImagePlus impXA1 = new ImagePlus();
 							impXA1.setStack(stackA1);
 							if (uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC")) {
-								IJ.run(impXA1, "Rotate 90 Degrees Right", "stack");
+								IJ.run(impXA1, "Rotate 90 Degrees Left", "stack");
 							}
 							impXA1.setCalibration(impAs[pos].getCalibration());
 							IJ.saveAs(impXA1, "Tiff", savePath + "CropBkgdSub" + File.separator + "SPIMA1_1.tif");
@@ -1875,7 +1875,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 								ImagePlus impXA2 = new ImagePlus();
 								impXA2.setStack(stackA2);
 								if (uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC")) {
-									IJ.run(impXA2, "Rotate 90 Degrees Right", "stack");
+									IJ.run(impXA2, "Rotate 90 Degrees Left", "stack");
 								}
 								impXA2.setCalibration(impAs[pos].getCalibration());
 								IJ.saveAs(impXA2, "Tiff", savePath + "CropBkgdSub" + File.separator + "SPIMA2_1.tif");
@@ -1970,7 +1970,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 							ImagePlus impXB1 = new ImagePlus();
 							impXB1.setStack(stackB1);
 							if (uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC")) {
-								IJ.run(impXB1, "Flip Horizontally", "stack");
+//								IJ.run(impXB1, "Flip Horizontally", "stack");
 								IJ.run(impXB1, "Rotate 90 Degrees Right", "stack");
 							}
 							impXB1.setCalibration(impBs[pos].getCalibration());
@@ -1982,7 +1982,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 								ImagePlus impXB2 = new ImagePlus();
 								impXB2.setStack(stackB2);
 								if (uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC")) {
-									IJ.run(impXB2, "Flip Horizontally", "stack");
+//									IJ.run(impXB2, "Flip Horizontally", "stack");
 									IJ.run(impXB2, "Rotate 90 Degrees Right", "stack");
 								}
 								impXB2.setCalibration(impBs[pos].getCalibration());
@@ -2032,12 +2032,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 							}
 							String threeDorientationIndex= "-1";
 							if (uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC")) {
-								threeDorientationIndex =  "1";
+								threeDorientationIndex =  "-1";
 							}							
 							if (wavelengths == 1) {
 								try {
 									String[] cmdln =null;
-									if (this.omeTiffs && !uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC"))
+									if (this.omeTiffs)
 										cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB1_","SPIMA1_", savePath + "RegDecon" + File.separator ,"1","1","1","1",""+impBs[pos].getCalibration().pixelWidth, ""+impBs[pos].getCalibration().pixelHeight,""+impBs[pos].getCalibration().pixelDepth, ""+impAs[pos].getCalibration().pixelWidth, ""+impAs[pos].getCalibration().pixelHeight,""+impAs[pos].getCalibration().pixelDepth,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
 									else
 										cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA1_","SPIMB1_", savePath + "RegDecon" + File.separator ,"1","1","1","1",""+impAs[pos].getCalibration().pixelWidth, ""+impAs[pos].getCalibration().pixelHeight,""+impAs[pos].getCalibration().pixelDepth, ""+impBs[pos].getCalibration().pixelWidth, ""+impBs[pos].getCalibration().pixelHeight,""+impBs[pos].getCalibration().pixelDepth,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
@@ -2106,12 +2106,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 								try {
 									String[] cmdln = {""};
 									if (keyChannel ==1)
-										if (this.omeTiffs && !uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC"))
+										if (this.omeTiffs)
 											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB1_","SPIMA1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+impBs[pos].getCalibration().pixelWidth, ""+impBs[pos].getCalibration().pixelHeight,""+impBs[pos].getCalibration().pixelDepth, ""+impAs[pos].getCalibration().pixelWidth, ""+impAs[pos].getCalibration().pixelHeight,""+impAs[pos].getCalibration().pixelDepth,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
 										else
 											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA1_","SPIMB1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+impAs[pos].getCalibration().pixelWidth, ""+impAs[pos].getCalibration().pixelHeight,""+impAs[pos].getCalibration().pixelDepth, ""+impBs[pos].getCalibration().pixelWidth, ""+impBs[pos].getCalibration().pixelHeight,""+impBs[pos].getCalibration().pixelDepth,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
 									else
-										if (this.omeTiffs && !uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC"))
+										if (this.omeTiffs)
 											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB2_","SPIMA2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+impBs[pos].getCalibration().pixelWidth, ""+impBs[pos].getCalibration().pixelHeight,""+impBs[pos].getCalibration().pixelDepth, ""+impAs[pos].getCalibration().pixelWidth, ""+impAs[pos].getCalibration().pixelHeight,""+impAs[pos].getCalibration().pixelDepth,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
 										else
 											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA2_","SPIMB2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+impAs[pos].getCalibration().pixelWidth, ""+impAs[pos].getCalibration().pixelHeight,""+impAs[pos].getCalibration().pixelDepth, ""+impBs[pos].getCalibration().pixelWidth, ""+impBs[pos].getCalibration().pixelHeight,""+impBs[pos].getCalibration().pixelDepth,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
@@ -2176,12 +2176,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 								try {
 									String[] cmdln = {""};
 									if (keyChannel ==1)
-										if (this.omeTiffs && !uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC"))
+										if (this.omeTiffs)
 											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB2_","SPIMA2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+impBs[pos].getCalibration().pixelWidth, ""+impBs[pos].getCalibration().pixelHeight,""+impBs[pos].getCalibration().pixelDepth, ""+impAs[pos].getCalibration().pixelWidth, ""+impAs[pos].getCalibration().pixelHeight,""+impAs[pos].getCalibration().pixelDepth,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
 										else
 											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA2_","SPIMB2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+impAs[pos].getCalibration().pixelWidth, ""+impAs[pos].getCalibration().pixelHeight,""+impAs[pos].getCalibration().pixelDepth, ""+impBs[pos].getCalibration().pixelWidth, ""+impBs[pos].getCalibration().pixelHeight,""+impBs[pos].getCalibration().pixelDepth,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
 									else
-										if (this.omeTiffs && !uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC"))
+										if (this.omeTiffs)
 											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB1_","SPIMA1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+impBs[pos].getCalibration().pixelWidth, ""+impBs[pos].getCalibration().pixelHeight,""+impBs[pos].getCalibration().pixelDepth, ""+impAs[pos].getCalibration().pixelWidth, ""+impAs[pos].getCalibration().pixelHeight,""+impAs[pos].getCalibration().pixelDepth,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
 										else
 											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA1_","SPIMB1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+impAs[pos].getCalibration().pixelWidth, ""+impAs[pos].getCalibration().pixelHeight,""+impAs[pos].getCalibration().pixelDepth, ""+impBs[pos].getCalibration().pixelWidth, ""+impBs[pos].getCalibration().pixelHeight,""+impBs[pos].getCalibration().pixelDepth,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
@@ -4074,7 +4074,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 								ImagePlus impXA1 = new ImagePlus();
 								impXA1.setStack(stackA1);
 								if (uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC")) {
-									IJ.run(impXA1, "Rotate 90 Degrees Right", "stack");
+									IJ.run(impXA1, "Rotate 90 Degrees Left", "stack");
 								}
 								impXA1.setCalibration(impAs[pos].getCalibration());
 								IJ.saveAs(impXA1, "Tiff", savePath + "CropBkgdSub" + File.separator + "SPIMA1_1.tif");
@@ -4085,7 +4085,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 									ImagePlus impXA2 = new ImagePlus();
 									impXA2.setStack(stackA2);
 									if (uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC")) {
-										IJ.run(impXA2, "Rotate 90 Degrees Right", "stack");
+										IJ.run(impXA2, "Rotate 90 Degrees Left", "stack");
 									}
 									impXA2.setCalibration(impAs[pos].getCalibration());
 									IJ.saveAs(impXA2, "Tiff", savePath + "CropBkgdSub" + File.separator + "SPIMA2_1.tif");
@@ -4180,7 +4180,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 								ImagePlus impXB1 = new ImagePlus();
 								impXB1.setStack(stackB1);
 								if (uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC")) {
-									IJ.run(impXB1, "Flip Horizontally", "stack");
+//									IJ.run(impXB1, "Flip Horizontally", "stack");
 									IJ.run(impXB1, "Rotate 90 Degrees Right", "stack");
 								}
 								impXB1.setCalibration(impBs[pos].getCalibration());
@@ -4192,7 +4192,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 									ImagePlus impXB2 = new ImagePlus();
 									impXB2.setStack(stackB2);
 									if (uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC")) {
-										IJ.run(impXB2, "Flip Horizontally", "stack");
+//										IJ.run(impXB2, "Flip Horizontally", "stack");
 										IJ.run(impXB2, "Rotate 90 Degrees Right", "stack");
 									}
 									impXB2.setCalibration(impBs[pos].getCalibration());
@@ -4244,13 +4244,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 								
 								String threeDorientationIndex= "-1";
 								if (uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC")) {
-									threeDorientationIndex =  "1";
+									threeDorientationIndex =  "-1";
 								}							
 
 								if (wavelengths == 1) {
 									try {
 										String[] cmdln =null;
-										if (this.omeTiffs && !uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC"))
+										if (this.omeTiffs)
 											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB1_","SPIMA1_", savePath + "RegDecon" + File.separator ,"1","1","1","1",""+impBs[pos].getCalibration().pixelWidth, ""+impBs[pos].getCalibration().pixelHeight,""+impBs[pos].getCalibration().pixelDepth, ""+impAs[pos].getCalibration().pixelWidth, ""+impAs[pos].getCalibration().pixelHeight,""+impAs[pos].getCalibration().pixelDepth,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
 										else
 											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA1_","SPIMB1_", savePath + "RegDecon" + File.separator ,"1","1","1","1",""+impAs[pos].getCalibration().pixelWidth, ""+impAs[pos].getCalibration().pixelHeight,""+impAs[pos].getCalibration().pixelDepth, ""+impBs[pos].getCalibration().pixelWidth, ""+impBs[pos].getCalibration().pixelHeight,""+impBs[pos].getCalibration().pixelDepth,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
@@ -4319,12 +4319,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 									try {
 										String[] cmdln = {""};
 										if (keyChannel ==1)
-											if (this.omeTiffs && !uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC"))
+											if (this.omeTiffs)
 												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB1_","SPIMA1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+impBs[pos].getCalibration().pixelWidth, ""+impBs[pos].getCalibration().pixelHeight,""+impBs[pos].getCalibration().pixelDepth, ""+impAs[pos].getCalibration().pixelWidth, ""+impAs[pos].getCalibration().pixelHeight,""+impAs[pos].getCalibration().pixelDepth,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
 											else
 												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA1_","SPIMB1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+impAs[pos].getCalibration().pixelWidth, ""+impAs[pos].getCalibration().pixelHeight,""+impAs[pos].getCalibration().pixelDepth, ""+impBs[pos].getCalibration().pixelWidth, ""+impBs[pos].getCalibration().pixelHeight,""+impBs[pos].getCalibration().pixelDepth,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
 										else
-											if (this.omeTiffs && !uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC"))
+											if (this.omeTiffs)
 												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB2_","SPIMA2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+impBs[pos].getCalibration().pixelWidth, ""+impBs[pos].getCalibration().pixelHeight,""+impBs[pos].getCalibration().pixelDepth, ""+impAs[pos].getCalibration().pixelWidth, ""+impAs[pos].getCalibration().pixelHeight,""+impAs[pos].getCalibration().pixelDepth,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
 											else
 												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA2_","SPIMB2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+impAs[pos].getCalibration().pixelWidth, ""+impAs[pos].getCalibration().pixelHeight,""+impAs[pos].getCalibration().pixelDepth, ""+impBs[pos].getCalibration().pixelWidth, ""+impBs[pos].getCalibration().pixelHeight,""+impBs[pos].getCalibration().pixelDepth,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
@@ -4389,12 +4389,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 									try {
 										String[] cmdln = {""};
 										if (keyChannel ==1)
-											if (this.omeTiffs && !uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC"))
+											if (this.omeTiffs)
 												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB2_","SPIMA2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+impBs[pos].getCalibration().pixelWidth, ""+impBs[pos].getCalibration().pixelHeight,""+impBs[pos].getCalibration().pixelDepth, ""+impAs[pos].getCalibration().pixelWidth, ""+impAs[pos].getCalibration().pixelHeight,""+impAs[pos].getCalibration().pixelDepth,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
 											else
 												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA2_","SPIMB2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+impAs[pos].getCalibration().pixelWidth, ""+impAs[pos].getCalibration().pixelHeight,""+impAs[pos].getCalibration().pixelDepth, ""+impBs[pos].getCalibration().pixelWidth, ""+impBs[pos].getCalibration().pixelHeight,""+impBs[pos].getCalibration().pixelDepth,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
 										else
-											if (this.omeTiffs && !uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC"))
+											if (this.omeTiffs)
 												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB1_","SPIMA1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+impBs[pos].getCalibration().pixelWidth, ""+impBs[pos].getCalibration().pixelHeight,""+impBs[pos].getCalibration().pixelDepth, ""+impAs[pos].getCalibration().pixelWidth, ""+impAs[pos].getCalibration().pixelHeight,""+impAs[pos].getCalibration().pixelDepth,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
 											else
 												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA1_","SPIMB1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+impAs[pos].getCalibration().pixelWidth, ""+impAs[pos].getCalibration().pixelHeight,""+impAs[pos].getCalibration().pixelDepth, ""+impBs[pos].getCalibration().pixelWidth, ""+impBs[pos].getCalibration().pixelHeight,""+impBs[pos].getCalibration().pixelDepth,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA64.tif","C:\\DataForTest\\PSFB64.tif","1","0"};
