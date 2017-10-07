@@ -312,8 +312,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 						}
 					}
 					infoArray = new FileInfo[infoArrayList.size()];
-					for (int f=0;f<infoArray.length;f++) {;
-					infoArray[f] = (FileInfo) infoArrayList.get(f);
+					for (int f=0;f<infoArray.length;f++) {
+						infoArray[f] = (FileInfo) infoArrayList.get(f);
 					}
 					open(show);
 				}
