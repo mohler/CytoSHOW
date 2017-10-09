@@ -578,9 +578,10 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			int dY = 7;
 			ImagePlus imp = null;		
 			if (n<=nImages ) {
-				n=(n%(zDim*cDim))+(zDim*cDim*vDim)*(n/(zDim*cDim));
-				infoArray[(n/2)+1+(isViewB?(zDim/2):0)].nImages = 1; // why is this needed?
-				FileOpener fo = new FileOpener(infoArray[(n/2)+1+(isViewB?(zDim/2):0)]);
+				int nCorr = ((n-1)/2)+    (zDim)*((n-1)/(zDim*vDim))     +(isViewB?(zDim):0);
+				IJ.log(n + "=>" + nCorr);
+				infoArray[nCorr].nImages = 1; // why is this needed?
+				FileOpener fo = new FileOpener(infoArray[nCorr]);
 				imp = fo.open(false);
 			}
 			if (imp!=null) {
