@@ -158,11 +158,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 	private int keyChannel;
 	private int slaveChannel;
 	private int oldLength;
-	private int cDim;
-	private int zDim;
-	private int tDim;
-	private int vDim;
-	private int pDim = 1;
+	private int cDim=1;
+	private int zDim=1;
+	private int tDim=1;
+	private int vDim=1;
+	private int pDim=1;
 	private String[] diSPIM_MM_ChColorStrings;
 	private String[] diSPIM_MM_ChContrastMinStrings;
 	private String[] diSPIM_MM_ChContrastMaxStrings;
@@ -791,7 +791,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				String mmPath = (new File(dirOrOMETiff)).getParent();
 				
 				if (dimOrder == null || dimOrder == "")
-					dimOrder = (diSPIM_MM_channelMode.contains("VOLUME")?"xyzct":"xyczt");
+					dimOrder = ((diSPIM_MM_channelMode!=null && diSPIM_MM_channelMode.contains("VOLUME"))?"xyzct":"xyczt");
 
 				wavelengths = cDim; 
 				vWidth = diSPIM_MM_PixelSize_um;
@@ -838,19 +838,19 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				for (int pos=0; pos<pDim; pos++) {
 
 					impAs[pos] = new ImagePlus();
-					impAs[pos].setStack(new MultiFileInfoVirtualStack(mmPath, "MMStack",  "", cDim, zDim, tDim, vDim, pos, false, false));
+					impAs[pos].setStack(new MultiFileInfoVirtualStack(mmPath, dimOrder, "MMStack", cDim, zDim, tDim, vDim, pos, false, false));
 					//				impAs[pos].setStack(new FileInfoVirtualStack(tdB.getTiffInfo(0), false));
 					int stackSize = impAs[pos].getNSlices();
 					int nChannels = cDim;
 					int nSlices = zDim;
-					int nFrames = tDim;
+					int nFrames = ((MultiFileInfoVirtualStack)impAs[pos].getStack()).tDim;
 					dirOrOMETiff = ((MultiFileInfoVirtualStack)impAs[pos].getStack()).getFivStacks().get(0).getInfo()[pos].directory +
 							File.separator +
 							((MultiFileInfoVirtualStack)impAs[pos].getStack()).getFivStacks().get(0).getInfo()[pos].fileName;
 
 					impAs[pos].setTitle("SPIMB: "+dirOrOMETiff);
 
-					if (nChannels*nSlices*nFrames!=stackSize) {
+					if (nChannels*nSlices*nFrames/vDim!=stackSize) {
 						if (nChannels*nSlices*nFrames>stackSize) {
 							for (int a=stackSize;a<nChannels*nSlices*nFrames;a++) {
 								if (impAs[pos].getStack().isVirtual())
@@ -869,28 +869,28 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 						}
 					}
 					boolean channelSwitchVolume = dirOrOMETiff.contains("_CSV.ome.tif");
-					if (channelSwitchVolume ) {
-						for (int t=nFrames-1;t>=0;t--) {
-							for (int c=nChannels-1;c>=1;c=c-2) {
-								for (int s=c*nSlices-1;s>=(c-1)*nSlices;s--) {
-									int target = t*nChannels*nSlices + s+1;
-									((MultiFileInfoVirtualStack)impAs[pos].getStack()).deleteSlice(target);
-								}
-							}
-						}
-					} else {
-						for (int t=nFrames-1;t>=0;t--) {
-							for (int s=nSlices*nChannels-1;s>=0;s--) {
-								int target = t*nChannels*nSlices + s+1;
-								if (s<nSlices*nChannels/2) { 
-									((MultiFileInfoVirtualStack)impAs[pos].getStack()).deleteSlice(target);
-								}
-							}
-						}
-					}
+//					if (channelSwitchVolume ) {
+//						for (int t=nFrames-1;t>=0;t--) {
+//							for (int c=nChannels-1;c>=1;c=c-2) {
+//								for (int s=c*nSlices-1;s>=(c-1)*nSlices;s--) {
+//									int target = t*nChannels*nSlices + s+1;
+//									((MultiFileInfoVirtualStack)impAs[pos].getStack()).deleteSlice(target);
+//								}
+//							}
+//						}
+//					} else {
+//						for (int t=nFrames-1;t>=0;t--) {
+//							for (int s=nSlices*nChannels-1;s>=0;s--) {
+//								int target = t*nChannels*nSlices + s+1;
+//								if (s<nSlices*nChannels/2) { 
+//									((MultiFileInfoVirtualStack)impAs[pos].getStack()).deleteSlice(target);
+//								}
+//							}
+//						}
+//					}
 					impAs[pos].setStack(impAs[pos].getImageStack());
 
-					impAs[pos].setDimensions(wavelengths, nSlices, nFrames);
+					impAs[pos].setDimensions(cDim/vDim, nSlices, nFrames);
 
 					if (nChannels > 1){
 						impAs[pos] = new CompositeImage(impAs[pos]);
@@ -917,16 +917,16 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 
 					impBs[pos] = new ImagePlus();
-					impBs[pos].setStack(new MultiFileInfoVirtualStack(mmPath, "MMStack",  "", cDim, zDim, tDim, vDim, pos, true, false));
+					impBs[pos].setStack(new MultiFileInfoVirtualStack(mmPath, dimOrder, "MMStack", cDim, zDim, tDim, vDim, pos, true, false));
 					//				impBs[pos].setStack(new FileInfoVirtualStack(tdA.getTiffInfo(0), false));
-					stackSize = impBs[pos].getStack().getSize();
-					nChannels = wavelengths*2;
-					nSlices = zSlices;
-					nFrames = (int)Math.floor((double)stackSize/(nChannels*nSlices));
+					stackSize = impBs[pos].getNSlices();
+					nChannels = cDim;
+					nSlices = zDim;
+					nFrames = ((MultiFileInfoVirtualStack)impAs[pos].getStack()).tDim;
 
 					impBs[pos].setTitle("SPIMA: "+dirOrOMETiff);
 
-					if (nChannels*nSlices*nFrames!=stackSize) {
+					if (nChannels*nSlices*nFrames/vDim!=stackSize) {
 						if (nChannels*nSlices*nFrames>stackSize) {
 							for (int a=stackSize;a<nChannels*nSlices*nFrames;a++) {
 								if (impBs[pos].getStack().isVirtual())
@@ -943,29 +943,29 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 							return;
 						}
 					}
-					if (channelSwitchVolume ) {
-						for (int t=nFrames-1;t>=0;t--) {
-							for (int c=nChannels;c>=1;c=c-2) {
-								for (int s=c*nSlices-1;s>=(c-1)*nSlices;s--) {
-									int target = t*nChannels*nSlices + s+1;
-									((MultiFileInfoVirtualStack)impBs[pos].getStack()).deleteSlice(target);
-								}
-							}
-						}
-					} else {
-						for (int t=nFrames-1;t>=0;t--) {
-							for (int s=nSlices*nChannels-1;s>=0;s--) {
-								int target = t*nChannels*nSlices + s+1;
-								if (s>=nSlices*nChannels/2) { 
-									((MultiFileInfoVirtualStack)impBs[pos].getStack()).deleteSlice(target);
-								}
-							}
-						}
-					}
+//					if (channelSwitchVolume ) {
+//						for (int t=nFrames-1;t>=0;t--) {
+//							for (int c=nChannels;c>=1;c=c-2) {
+//								for (int s=c*nSlices-1;s>=(c-1)*nSlices;s--) {
+//									int target = t*nChannels*nSlices + s+1;
+//									((MultiFileInfoVirtualStack)impBs[pos].getStack()).deleteSlice(target);
+//								}
+//							}
+//						}
+//					} else {
+//						for (int t=nFrames-1;t>=0;t--) {
+//							for (int s=nSlices*nChannels-1;s>=0;s--) {
+//								int target = t*nChannels*nSlices + s+1;
+//								if (s>=nSlices*nChannels/2) { 
+//									((MultiFileInfoVirtualStack)impBs[pos].getStack()).deleteSlice(target);
+//								}
+//							}
+//						}
+//					}
 
 					impBs[pos].setStack(impBs[pos].getImageStack());
 
-					impBs[pos].setDimensions(wavelengths, nSlices, nFrames);
+					impBs[pos].setDimensions(cDim/vDim, nSlices, nFrames);
 
 					if (nChannels > 1){
 						impBs[pos] = new CompositeImage(impBs[pos]);
@@ -5643,16 +5643,22 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 			if (chunk.trim().startsWith("\"Positions\":")) {
 				diSPIM_MM_Positions= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
+				pDim = diSPIM_MM_Positions;
 			}
 
 //								if (chunk.trim().split(":").length>1)
 //									allVars = allVars+"\n diSPIM_MM_"+chunk.trim().split(":")[1];
 		}
 //						IJ.log(allVars);
-		if ((diSPIM_MM_channelMode==null || diSPIM_MM_channelMode.startsWith("NONE")) && diSPIM_MM_useChannels==false) {
-			cDim = 2;    //using diSPIM_MM_channel_use_index value doesn' work for Shroff system (counts 4, duh)
-			splitChannels = true;
-			dimOrder = "xySplitCzt";
+
+		if (diSPIM_MM_Width == 2048 ) {
+			if (diSPIM_MM_channelMode==null || diSPIM_MM_channelMode.startsWith("NONE")) {
+				if(diSPIM_MM_useChannels==false) {
+					cDim = 2;    //using diSPIM_MM_channel_use_index value doesn' work for Shroff system (counts 4, duh)
+					splitChannels = true;
+					dimOrder = "xySplitCzt";
+				}
+			}
 		}
 	}
 

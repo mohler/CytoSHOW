@@ -34,7 +34,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	private FileInfo[] dummyInfoArray;
 	private int largestDirectoryTiffCount;
 	private String infoDir;
-	private int  cDim, zDim, tDim;
+	private int  cDim;
+	private int zDim;
+	public int tDim;
 	private int  vDim=1;
 	public int stackNumber;
 	public int sliceNumber;
@@ -335,7 +337,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (IJ.debugMode) td.enableDebugging();
 		IJ.showStatus("Decoding TIFF header...");
 		FileInfo[] fi = null;
-		try {fi = td.getTiffInfo(0);}
+		try {
+			fi = td.getTiffInfo(0);
+		}
 		catch (IOException e) {
 			String msg = e.getMessage();
 			if (msg==null||msg.equals("")) msg = ""+e;
@@ -374,9 +378,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				tDim = (int) gd.getNextNumber();
 				nImages = cDim*zDim*tDim;
 			} else {
-//				cDim=1;
-//				zDim=1;
-//				tDim=1;
+				this.tDim =nImages/(this.cDim*this.zDim);
 			}
 		} else if (monitoringDecon){
 			zDim = fivStacks.get(0).nImages;
@@ -410,7 +412,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		fivImpZero.flush();
 		imp.setOpenAsHyperStack(true);			
 		int cztDims = cDim*zDim*tDim;
-		int impSize = imp.getStackSize();
+		int impSize = imp.getStackSize()*vDim;
 		if (cztDims!= impSize) {
 			if (cztDims > impSize) {
 				for (int a=imp.getStackSize();a<cDim*zDim*tDim;a++) {
@@ -476,13 +478,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 	/** Deletes the specified image, where 1<=n<=nImages. */
 	public void deleteSlice(int n) {
-//		if (n<1 || n>nImages)
-//			throw new IllegalArgumentException("Argument out of range: "+n);
-//		if (nImages<1) return;
-//		for (int i=n; i<nImages; i++)
-//			info[i-1] = info[i];
-//		info[nImages-1] = null;
-//		nImages--;
+
 		if (n<1 || n>nImages) {
 			IJ.runMacro("waitForUser(\""+n+"\");");
 		}
@@ -516,43 +512,102 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		stackNumber = 0;
 		sliceNumber = 1;
 		int total=0;
-		while (n > total) {
-			total = total + fivStacks.get(stackNumber).getSize()*(dimOrder == "xySplitCzt"?2:1)/vDim;
-			stackNumber++;
-		}
-		stackNumber--;
-
-		n = n + stackNumber*fivStacks.get(stackNumber).getSize()*(dimOrder == "xySplitCzt"?2:1)/vDim;
-		
-			sliceNumber = (n-1) % (fivStacks.get(stackNumber).getSize()*(dimOrder == "xySplitCzt"?2:1)/vDim);
-
-			if (stackNumber>=0 && sliceNumber>=0) {
-				if (!touchedFiles.contains(fivStacks.get(stackNumber).infoArray[sliceNumber].fileName)) {
-					TiffDecoder td = new TiffDecoder(dir, fivStacks.get(stackNumber).infoArray[sliceNumber].fileName);
-					if (IJ.debugMode) td.enableDebugging();
-					IJ.showStatus("Decoding TIFF header...");
-					try {infoCollectorArrayList.set(stackNumber, td.getTiffInfo(0));}
-					catch (IOException e) {
-						String msg = e.getMessage();
-						if (msg==null||msg.equals("")) msg = ""+e;
-						IJ.error("TiffDecoder", msg);
-					}
-					fivStacks.get(stackNumber).infoArray = infoCollectorArrayList.get(stackNumber);
-					ImagePlus fivImpSN = fivStacks.get(stackNumber).open(false);
-					touchedFiles.add(fivStacks.get(stackNumber).infoArray[sliceNumber].fileName);
-				}
-			} 
-
+//		while (n > total) {
+//			total = total + fivStacks.get(stackNumber).getSize()*(dimOrder == "xySplitCzt"?2:1)/vDim;
+//			stackNumber++;
+//		}
+//		stackNumber--;
+//
+//		n = n + stackNumber*fivStacks.get(stackNumber).getSize()*(dimOrder == "xySplitCzt"?2:1)/vDim;
+//		
+//			sliceNumber = (n-1) % (fivStacks.get(stackNumber).getSize()*(dimOrder == "xySplitCzt"?2:1)/vDim);
+//
+//			if (stackNumber>=0 && sliceNumber>=0) {
+//				if (!touchedFiles.contains(fivStacks.get(stackNumber).infoArray[sliceNumber].fileName)) {
+//					TiffDecoder td = new TiffDecoder(dir, fivStacks.get(stackNumber).infoArray[sliceNumber].fileName);
+//					if (IJ.debugMode) td.enableDebugging();
+//					IJ.showStatus("Decoding TIFF header...");
+//					try {infoCollectorArrayList.set(stackNumber, td.getTiffInfo(0));}
+//					catch (IOException e) {
+//						String msg = e.getMessage();
+//						if (msg==null||msg.equals("")) msg = ""+e;
+//						IJ.error("TiffDecoder", msg);
+//					}
+//					fivStacks.get(stackNumber).infoArray = infoCollectorArrayList.get(stackNumber);
+//					ImagePlus fivImpSN = fivStacks.get(stackNumber).open(false);
+//					touchedFiles.add(fivStacks.get(stackNumber).infoArray[sliceNumber].fileName);
+//				}
+//			} 
+//
 			//		IJ.log(""+n+" "+z+" "+t);
 		ImageProcessor ip = null;
-		if (dimOrder == "xyczt")
-			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber+1+(isViewB?fivStacks.get(stackNumber).getSize()/vDim:0));
+		if (dimOrder == "xyczt") {
+//			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber+1+(isViewB?fivStacks.get(stackNumber).getSize()/vDim:0));
+			ImagePlus imp = null;		
+			if (n<=nImages ) {
+				n=(n%(zDim*cDim/vDim))+(zDim*cDim)*(n/(zDim*cDim/vDim));
+				infoArray[n+1+(isViewB?zDim*cDim/vDim:0)].nImages = 1; // why is this needed?
+				FileOpener fo = new FileOpener(infoArray[n+1+(isViewB?zDim*cDim/vDim:0)]);
+				imp = fo.open(false);
+			}
+			if (imp!=null) {
+				ip = imp.getProcessor();
+				ip.setInterpolationMethod(ImageProcessor.BICUBIC);
+				if (this.getOwnerImps() != null && this.getOwnerImps().size() > 0 && this.getOwnerImps().get(0) != null) {
+					ip.translate(skewXperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1-this.getOwnerImps().get(this.getOwnerImps().size()-1).getNSlices()/2), skewYperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1-this.getOwnerImps().get(this.getOwnerImps().size()-1).getNSlices()/2));
+				} else {
+					ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
+				}
+				return ip;
+			} else {
+				int w=getWidth(), h=getHeight();
+				if (n<=nImages ) 
+					/*IJ.log("Read error or file not found ("+n+"): "+info[n-1].directory+info[n-1].fileName)*/;
+				switch (getBitDepth()) {
+					case 8: return new ByteProcessor(w, h);
+					case 16: return new ShortProcessor(w, h);
+					case 24: return new ColorProcessor(w, h);
+					case 32: return new FloatProcessor(w, h);
+//					default: return getProcessor(1).createProcessor(w, h);
+					default: return new ShortProcessor(w, h);
+				}
+			}
+		}
 		if (dimOrder == "xySplitCzt") {
 			int dX = -11;
 			int dY = 7;
-			ip = fivStacks.get(stackNumber).getProcessor((sliceNumber/2)+1+(isViewB?fivStacks.get(stackNumber).getSize()/vDim:0));
-			ip.setRoi(1280-((1-sliceNumber%2)*(1024+dX)), 0+((1-sliceNumber%2)*(0+dY)), 512, 512-dY);
-			ip=ip.crop();
+			ImagePlus imp = null;		
+			if (n<=nImages ) {
+				n=(n%(zDim*cDim))+(zDim*cDim*vDim)*(n/(zDim*cDim));
+				infoArray[(n/2)+1+(isViewB?(zDim/2):0)].nImages = 1; // why is this needed?
+				FileOpener fo = new FileOpener(infoArray[(n/2)+1+(isViewB?(zDim/2):0)]);
+				imp = fo.open(false);
+			}
+			if (imp!=null) {
+				ip = imp.getProcessor();
+				ip.setInterpolationMethod(ImageProcessor.BICUBIC);
+				if (this.getOwnerImps() != null && this.getOwnerImps().size() > 0 && this.getOwnerImps().get(0) != null) {
+					ip.translate(skewXperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1-this.getOwnerImps().get(this.getOwnerImps().size()-1).getNSlices()/2), skewYperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1-this.getOwnerImps().get(this.getOwnerImps().size()-1).getNSlices()/2));
+				} else {
+					ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
+				}
+				ip.setRoi(1280-((1-n%2)*(1024+dX)), 0+((1-n%2)*(0+dY)), 512, 512-dY);
+				ip=ip.crop();
+
+				return ip;
+			} else {
+				int w=getWidth(), h=getHeight();
+				if (n<=nImages ) 
+					/*IJ.log("Read error or file not found ("+n+"): "+info[n-1].directory+info[n-1].fileName)*/;
+				switch (getBitDepth()) {
+					case 8: return new ByteProcessor(w, h);
+					case 16: return new ShortProcessor(w, h);
+					case 24: return new ColorProcessor(w, h);
+					case 32: return new FloatProcessor(w, h);
+//					default: return getProcessor(1).createProcessor(w, h);
+					default: return new ShortProcessor(w, h);
+				}
+			}
 		}
 		if (dimOrder == "xyzct")
 			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber/cDim + ((sliceNumber%cDim)*fivStacks.get(stackNumber).getSize()/(vDim))
