@@ -649,7 +649,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
  
 	 /** Returns the number of images in this stack. */
 	public int getSize() {
-		return nImages/vDim;
+		return nImages;
 	}
 
 	/** Returns the label of the Nth image. */

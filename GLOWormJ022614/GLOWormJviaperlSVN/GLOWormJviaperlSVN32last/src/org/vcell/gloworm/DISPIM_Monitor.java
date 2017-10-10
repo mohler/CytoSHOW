@@ -836,11 +836,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				MultiFileInfoVirtualStack[] stackBs = new MultiFileInfoVirtualStack[pDim];
 
 				for (int pos=0; pos<pDim; pos++) {
-
+					if(!(new File(mmPath+File.separator+"MMStack_Pos"+pos+".ome.tif").canRead())) {
+						continue;
+					}
 					impAs[pos] = new ImagePlus();
-					impAs[pos].setStack(new MultiFileInfoVirtualStack(mmPath, dimOrder, "MMStack", cDim, zDim, tDim, vDim, pos, false, false));
+					impAs[pos].setStack(new MultiFileInfoVirtualStack(mmPath, dimOrder, "MMStack_Pos"+pos, cDim, zDim, tDim, vDim, pos, false, false));
 					//				impAs[pos].setStack(new FileInfoVirtualStack(tdB.getTiffInfo(0), false));
-					int stackSize = impAs[pos].getNSlices();
+					int stackSize = impAs[pos].getImageStackSize();
 					int nChannels = cDim;
 					int nSlices = zDim;
 					int nFrames = ((MultiFileInfoVirtualStack)impAs[pos].getStack()).tDim;
@@ -850,7 +852,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 					impAs[pos].setTitle("SPIMB: "+dirOrOMETiff);
 
-					if (nChannels*nSlices*nFrames/vDim!=stackSize) {
+					if (nChannels*nSlices*nFrames!=stackSize) {
 						if (nChannels*nSlices*nFrames>stackSize) {
 							for (int a=stackSize;a<nChannels*nSlices*nFrames;a++) {
 								if (impAs[pos].getStack().isVirtual())
@@ -889,8 +891,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 //						}
 //					}
 					impAs[pos].setStack(impAs[pos].getImageStack());
-
-					impAs[pos].setDimensions(cDim/vDim, nSlices, nFrames);
+					impAs[pos].setOpenAsHyperStack(true);
+					impAs[pos].setDimensions(dimOrder=="XYSplitCZT"?cDim:cDim/vDim, nSlices, nFrames);
 
 					if (nChannels > 1){
 						impAs[pos] = new CompositeImage(impAs[pos]);
@@ -898,6 +900,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 							IJ.wait(100);
 						}
 					}
+					if (impAs[pos].isComposite())
+						((CompositeImage)impAs[pos]).setMode(CompositeImage.COMPOSITE);
+
 					Calibration cal = impAs[pos].getCalibration();
 					cal.pixelWidth = vWidth;
 					cal.pixelHeight = vHeight;
@@ -908,8 +913,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 					impAs[pos].setPosition(1, nSlices/2, nFrames/2);	
 
-					if (impAs[pos].isComposite())
-						((CompositeImage)impAs[pos]).setMode(CompositeImage.COMPOSITE);
 					impAs[pos].setFileInfo(new FileInfo());
 					impAs[pos].getOriginalFileInfo().fileName = dirOrOMETiff;
 					impAs[pos].getOriginalFileInfo().directory = dirOrOMETiff;
@@ -917,16 +920,16 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 
 					impBs[pos] = new ImagePlus();
-					impBs[pos].setStack(new MultiFileInfoVirtualStack(mmPath, dimOrder, "MMStack", cDim, zDim, tDim, vDim, pos, true, false));
+					impBs[pos].setStack(new MultiFileInfoVirtualStack(mmPath, dimOrder, "MMStack_Pos"+pos, cDim, zDim, tDim, vDim, pos, true, false));
 					//				impBs[pos].setStack(new FileInfoVirtualStack(tdA.getTiffInfo(0), false));
-					stackSize = impBs[pos].getNSlices();
+					stackSize = impBs[pos].getImageStackSize();
 					nChannels = cDim;
 					nSlices = zDim;
 					nFrames = ((MultiFileInfoVirtualStack)impAs[pos].getStack()).tDim;
 
 					impBs[pos].setTitle("SPIMA: "+dirOrOMETiff);
 
-					if (nChannels*nSlices*nFrames/vDim!=stackSize) {
+					if (nChannels*nSlices*nFrames!=stackSize) {
 						if (nChannels*nSlices*nFrames>stackSize) {
 							for (int a=stackSize;a<nChannels*nSlices*nFrames;a++) {
 								if (impBs[pos].getStack().isVirtual())
@@ -964,8 +967,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 //					}
 
 					impBs[pos].setStack(impBs[pos].getImageStack());
-
-					impBs[pos].setDimensions(cDim/vDim, nSlices, nFrames);
+					impBs[pos].setOpenAsHyperStack(true);
+					impBs[pos].setDimensions(dimOrder=="XYSplitCZT"?cDim:cDim/vDim, nSlices, nFrames);
 
 					if (nChannels > 1){
 						impBs[pos] = new CompositeImage(impBs[pos]);
@@ -973,6 +976,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 							IJ.wait(100);
 						}
 					}
+					if (impBs[pos].isComposite())
+						((CompositeImage)impBs[pos]).setMode(CompositeImage.COMPOSITE);
+
 					cal = impBs[pos].getCalibration();
 					cal.pixelWidth = vWidth;
 					cal.pixelHeight = vHeight;
@@ -983,8 +989,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 					impBs[pos].setPosition(1, nSlices/2, nFrames/2);	
 
-					if (impBs[pos].isComposite())
-						((CompositeImage)impBs[pos]).setMode(CompositeImage.COMPOSITE);
 					impBs[pos].setFileInfo(new FileInfo());
 					impBs[pos].getOriginalFileInfo().fileName = dirOrOMETiff;
 					impBs[pos].getOriginalFileInfo().directory = dirOrOMETiff;
@@ -1116,11 +1120,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 		if (doMipavDecon || doGPUdecon) {
 
 			for (int pos=0; pos<pDim; pos++) {
-				if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+				if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
 					doProcessing[pos] = false;
 					continue;
 				}
-				if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+				if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
 					doProcessing[pos] = false;
 					continue;
 				} 
@@ -1128,11 +1132,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				doProcessing[pos] = true;
 				
 
-				if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+				if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
 					doProcessing[pos] = false;
 					continue;
 				}
-				if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+				if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
 					doProcessing[pos] = false;
 					continue;
 				} 
@@ -1233,11 +1237,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 			for (int pos=0; pos<pDim; pos++) {
 
-				if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+				if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
 					doProcessing[pos] = false;
 					continue;
 				}
-				if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+				if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
 					doProcessing[pos] = false;
 					continue;
 				} 
@@ -1407,11 +1411,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				}
 			}
 			for (int pos=0; pos<pDim; pos++) {
-				if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+				if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
 					doProcessing[pos] = false;
 					continue;
 				}
-				if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+				if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
 					doProcessing[pos] = false;
 					continue;
 				} 
@@ -1429,11 +1433,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 		} else {	//if not deconning immediately)
 			for (int pos=0; pos<pDim; pos++) {
-				if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+				if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
 					doProcessing[pos] = false;
 					continue;
 				}
-				if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+				if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
 					doProcessing[pos] = false;
 					continue;
 				} 
@@ -1464,11 +1468,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 			MultiFileInfoVirtualStack[] stackPrys = new MultiFileInfoVirtualStack[pDim];
 
 			for (int pos=0; pos<pDim; pos++) {
-				if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+				if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
 					doProcessing[pos] = false;
 					continue;
 				}
-				if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+				if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
 					doProcessing[pos] = false;
 					continue;
 				} 
@@ -1707,11 +1711,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 			}
 			if (doRegPriming){
 				for (int pos=0; pos<pDim; pos++) {
-					if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+					if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
 						doProcessing[pos] = false;
 						continue;
 					}
-					if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+					if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
 						doProcessing[pos] = false;
 						continue;
 					} 
@@ -1732,11 +1736,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 			for (int f = 1; f <= impAs[0].getNFrames(); f++) {
 				for (int pos=0; pos<pDim; pos++) {
-					if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+					if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
 						doProcessing[pos] = false;
 						continue;
 					}
-					if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+					if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
 						doProcessing[pos] = false;
 						continue;
 					} 
@@ -2470,11 +2474,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 			for (int f = 1; f <= impAs[0].getNFrames(); f++) {
 				for (int pos=0; pos<pDim; pos++) {
-					if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+					if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
 						doProcessing[pos] = false;
 						continue;
 					}
-					if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+					if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
 						doProcessing[pos] = false;
 						continue;
 					} 
@@ -3107,11 +3111,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 					for (int pos=0; pos<pDim; pos++) {
 						doProcessing[pos] = true;
 
-						if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+						if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
 							doProcessing[pos] = false;
 							continue;
 						}
-						if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+						if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
 							doProcessing[pos] = false;
 							continue;
 						} 
@@ -3375,11 +3379,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 					for (int pos=0; pos<pDim; pos++) {
 						doProcessing[pos] = true;
 
-						if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+						if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
 							doProcessing[pos] = false;
 							continue;
 						}
-						if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+						if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
 							doProcessing[pos] = false;
 							continue;
 						} 
@@ -3467,11 +3471,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				for (int pos=0; pos<pDim; pos++) {
 					doProcessing[pos] = true;
 
-					if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+					if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
 						doProcessing[pos] = false;
 						continue;
 					}
-					if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+					if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
 						doProcessing[pos] = false;
 						continue;
 					} 
@@ -3594,11 +3598,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				for (int pos=0; pos<pDim; pos++) {
 					doProcessing[pos] = true;
 
-					if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+					if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
 						doProcessing[pos] = false;
 						continue;
 					}
-					if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+					if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
 						doProcessing[pos] = false;
 						continue;
 					} 
@@ -3915,11 +3919,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				}
 				if (doRegPriming){
 					for (int pos=0; pos<pDim; pos++) {
-						if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+						if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
 							doProcessing[pos] = false;
 							continue;
 						}
-						if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+						if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
 							doProcessing[pos] = false;
 							continue;
 						} 
@@ -3941,11 +3945,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 				for (int f = 1; f <= impAs[0].getNFrames(); f++) {
 					for (int pos=0; pos<pDim; pos++) {
-						if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+						if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
 							doProcessing[pos] = false;
 							continue;
 						}
-						if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+						if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
 							doProcessing[pos] = false;
 							continue;
 						} 
@@ -4686,11 +4690,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				for (int pos=0; pos<pDim; pos++) {
 					doProcessing[pos] = true;
 
-					if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+					if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
 						doProcessing[pos] = false;
 						continue;
 					}
-					if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+					if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
 						doProcessing[pos] = false;
 						continue;
 					} 
@@ -5152,11 +5156,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				for (int pos=0; pos<pDim; pos++) {
 					doProcessing[pos] = true;
 
-					if (impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+					if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
 						doProcessing[pos] = false;
 						continue;
 					}
-					if (impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+					if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
 						doProcessing[pos] = false;
 						continue;
 					} 
