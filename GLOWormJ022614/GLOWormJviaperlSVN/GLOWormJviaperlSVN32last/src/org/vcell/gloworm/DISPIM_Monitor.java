@@ -536,7 +536,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 							stackAs[pos].setSkewXperZ(
 									calA.pixelDepth / calA.pixelWidth);
 						impAs[pos].setOpenAsHyperStack(true);
-						impAs[pos].setDimensions(cDim, zDim, stackAs[pos].getSize()/(cDim*zDim));
+						impAs[pos].setDimensions(cDim/(dimOrder=="xySplitCzt"?1:vDim), zDim, stackAs[pos].getSize()*(dimOrder=="xySplitCzt"?1:vDim)/(cDim*zDim));
 						impAs[pos] = new CompositeImage(impAs[pos]);
 						while (!impAs[pos].isComposite()) {
 							IJ.wait(100);
@@ -556,7 +556,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 							stackBs[pos].setSkewXperZ(
 									-calB.pixelDepth / calB.pixelWidth);
 						impBs[pos].setOpenAsHyperStack(true);
-						impBs[pos].setDimensions(cDim, zDim, stackBs[pos].getSize()/(cDim*zDim));
+						impBs[pos].setDimensions(cDim/(dimOrder=="xySplitCzt"?1:vDim), zDim, stackBs[pos].getSize()*(dimOrder=="xySplitCzt"?1:vDim)/(cDim*zDim));
 						impBs[pos] = new CompositeImage(impBs[pos]);
 						while (!impBs[pos].isComposite()) {
 							IJ.wait(100);
@@ -782,7 +782,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 					}
 				}
-			} else if (dirOrOMETiff.endsWith(".ome.tif")) {
+			} else if (this.dirOrOMETiff.endsWith(".ome.tif")) {
 				readInMMdiSPIMheader(dirOrOMETiffFile);
 
 				TiffDecoder tdA = new TiffDecoder("",dirOrOMETiff);
@@ -836,21 +836,28 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				MultiFileInfoVirtualStack[] stackBs = new MultiFileInfoVirtualStack[pDim];
 
 				for (int pos=0; pos<pDim; pos++) {
-					if(!(new File(mmPath+File.separator+"MMStack_Pos"+pos+".ome.tif").canRead())) {
+					String[] mmList = (new File(mmPath)).list();
+					boolean noFilesForPos = true;
+					for (String mmListFileName:mmList) {
+						if(mmListFileName.toLowerCase().matches(".*mmstack_pos"+pos+".*.ome.tif")) {
+							noFilesForPos = false;
+						}
+					}
+					if (noFilesForPos) {
 						continue;
 					}
 					impAs[pos] = new ImagePlus();
 					impAs[pos].setStack(new MultiFileInfoVirtualStack(mmPath, dimOrder, "MMStack_Pos"+pos, cDim, zDim, tDim, vDim, pos, false, false));
-					//				impAs[pos].setStack(new FileInfoVirtualStack(tdB.getTiffInfo(0), false));
+
 					int stackSize = impAs[pos].getImageStackSize();
-					int nChannels = cDim;
+					int nChannels = cDim/(dimOrder=="xySplitCzt"?1:vDim);
 					int nSlices = zDim;
 					int nFrames = ((MultiFileInfoVirtualStack)impAs[pos].getStack()).tDim;
-					dirOrOMETiff = ((MultiFileInfoVirtualStack)impAs[pos].getStack()).getFivStacks().get(0).getInfo()[pos].directory +
-							File.separator +
-							((MultiFileInfoVirtualStack)impAs[pos].getStack()).getFivStacks().get(0).getInfo()[pos].fileName;
+//					dirOrOMETiff = ((MultiFileInfoVirtualStack)impAs[pos].getStack()).getFivStacks().get(0).getInfo()[pos].directory +
+//							File.separator +
+//							((MultiFileInfoVirtualStack)impAs[pos].getStack()).getFivStacks().get(0).getInfo()[pos].fileName;
 
-					impAs[pos].setTitle("SPIMB: "+dirOrOMETiff);
+//					impAs[pos].setTitle("SPIMB: "+dirOrOMETiff);
 
 					if (nChannels*nSlices*nFrames!=stackSize) {
 						if (nChannels*nSlices*nFrames>stackSize) {
@@ -870,30 +877,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 							return;
 						}
 					}
-					boolean channelSwitchVolume = dirOrOMETiff.contains("_CSV.ome.tif");
-//					if (channelSwitchVolume ) {
-//						for (int t=nFrames-1;t>=0;t--) {
-//							for (int c=nChannels-1;c>=1;c=c-2) {
-//								for (int s=c*nSlices-1;s>=(c-1)*nSlices;s--) {
-//									int target = t*nChannels*nSlices + s+1;
-//									((MultiFileInfoVirtualStack)impAs[pos].getStack()).deleteSlice(target);
-//								}
-//							}
-//						}
-//					} else {
-//						for (int t=nFrames-1;t>=0;t--) {
-//							for (int s=nSlices*nChannels-1;s>=0;s--) {
-//								int target = t*nChannels*nSlices + s+1;
-//								if (s<nSlices*nChannels/2) { 
-//									((MultiFileInfoVirtualStack)impAs[pos].getStack()).deleteSlice(target);
-//								}
-//							}
-//						}
-//					}
+
 					impAs[pos].setStack(impAs[pos].getImageStack());
 					impAs[pos].setOpenAsHyperStack(true);
-					impAs[pos].setDimensions(dimOrder=="XYSplitCZT"?cDim:cDim/vDim, nSlices, nFrames);
-
+					impAs[pos].setDimensions(nChannels, nSlices, nFrames);
+					
 					if (nChannels > 1){
 						impAs[pos] = new CompositeImage(impAs[pos]);
 						while (!impAs[pos].isComposite()) {
@@ -923,7 +911,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 					impBs[pos].setStack(new MultiFileInfoVirtualStack(mmPath, dimOrder, "MMStack_Pos"+pos, cDim, zDim, tDim, vDim, pos, true, false));
 					//				impBs[pos].setStack(new FileInfoVirtualStack(tdA.getTiffInfo(0), false));
 					stackSize = impBs[pos].getImageStackSize();
-					nChannels = cDim;
+					nChannels = cDim/(dimOrder=="xySplitCzt"?1:vDim);
 					nSlices = zDim;
 					nFrames = ((MultiFileInfoVirtualStack)impAs[pos].getStack()).tDim;
 
@@ -946,29 +934,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 							return;
 						}
 					}
-//					if (channelSwitchVolume ) {
-//						for (int t=nFrames-1;t>=0;t--) {
-//							for (int c=nChannels;c>=1;c=c-2) {
-//								for (int s=c*nSlices-1;s>=(c-1)*nSlices;s--) {
-//									int target = t*nChannels*nSlices + s+1;
-//									((MultiFileInfoVirtualStack)impBs[pos].getStack()).deleteSlice(target);
-//								}
-//							}
-//						}
-//					} else {
-//						for (int t=nFrames-1;t>=0;t--) {
-//							for (int s=nSlices*nChannels-1;s>=0;s--) {
-//								int target = t*nChannels*nSlices + s+1;
-//								if (s>=nSlices*nChannels/2) { 
-//									((MultiFileInfoVirtualStack)impBs[pos].getStack()).deleteSlice(target);
-//								}
-//							}
-//						}
-//					}
 
 					impBs[pos].setStack(impBs[pos].getImageStack());
 					impBs[pos].setOpenAsHyperStack(true);
-					impBs[pos].setDimensions(dimOrder=="XYSplitCZT"?cDim:cDim/vDim, nSlices, nFrames);
+					impBs[pos].setDimensions(nChannels, nSlices, nFrames);
 
 					if (nChannels > 1){
 						impBs[pos] = new CompositeImage(impBs[pos]);

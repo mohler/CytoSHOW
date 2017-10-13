@@ -39,8 +39,8 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 	/* Constructs a FileInfoVirtualStack from an array of FileInfo 
 	objects and displays it if 'show' is true. */
-	public FileInfoVirtualStack(FileInfo[] fi, boolean show) {
-		infoArray = fi;
+	public FileInfoVirtualStack(FileInfo[] fiArray, boolean show) {
+		infoArray = fiArray;
 		open(show);
 	}
 	

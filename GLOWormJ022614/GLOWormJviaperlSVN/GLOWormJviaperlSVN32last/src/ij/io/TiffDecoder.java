@@ -74,6 +74,7 @@ public class TiffDecoder {
 	private int ifdCount;
 	private int[] metaDataCounts;
 	private String tiffMetadata;
+	private long imageFileHeader;
 		
 	public TiffDecoder(String directory, String name) {
 		this.directory = directory;
@@ -749,6 +750,7 @@ public class TiffDecoder {
 		}
 		info = new Vector();
 		ifdOffset = openImageFileHeader();
+		imageFileHeader = ifdOffset;
 		if (ifdOffset<0L) {
 			in.close();
 			return null;
@@ -805,6 +807,7 @@ public class TiffDecoder {
 		}
 		tiOffsets = new ArrayList<Long>();
 		ifdOffset = openImageFileHeader();
+		imageFileHeader = ifdOffset;
 		if (ifdOffset<0L) {
 			in.close();
 			return null;
@@ -837,6 +840,10 @@ public class TiffDecoder {
 			}
 			return tiOffsetsArray;
 		}
+	}
+
+	public long getImageFileHeader() {
+		return imageFileHeader;
 	}
 
 	void skipIFD() throws IOException {
