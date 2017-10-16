@@ -857,7 +857,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 //							File.separator +
 //							((MultiFileInfoVirtualStack)impAs[pos].getStack()).getFivStacks().get(0).getInfo()[pos].fileName;
 
-//					impAs[pos].setTitle("SPIMB: "+dirOrOMETiff);
+					impAs[pos].setTitle("SPIMB: "+dirOrOMETiff);
 
 					if (nChannels*nSlices*nFrames!=stackSize) {
 						if (nChannels*nSlices*nFrames>stackSize) {
