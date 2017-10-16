@@ -516,12 +516,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 						calA.pixelDepth = vDepthRaw;
 						calA.setUnit(vUnit);
 
-
+						int sizeA = stackAs[pos].getSize();
+						int sizeB = stackBs[pos].getSize();
 						if (stageScan)
 							stackAs[pos].setSkewXperZ(
 									calA.pixelDepth / calA.pixelWidth);
 						impAs[pos].setOpenAsHyperStack(true);
-						impAs[pos].setDimensions(cDim, zDim, stackAs[pos].getSize()/(cDim*zDim));
+						impAs[pos].setDimensions(cDim/(dimOrder=="xySplitCzt"?1:vDim), zDim, sizeA/((cDim/(dimOrder=="xySplitCzt"?1:vDim))*zDim));
 						impAs[pos] = new CompositeImage(impAs[pos]);
 						while (!impAs[pos].isComposite()) {
 							IJ.wait(100);
@@ -541,7 +542,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 							stackBs[pos].setSkewXperZ(
 									-calB.pixelDepth / calB.pixelWidth);
 						impBs[pos].setOpenAsHyperStack(true);
-						impBs[pos].setDimensions(cDim, zDim, stackBs[pos].getSize()/(cDim*zDim));
+						impBs[pos].setDimensions(cDim/(dimOrder=="xySplitCzt"?1:vDim), zDim, sizeB/((cDim/(dimOrder=="xySplitCzt"?1:vDim))*zDim));
 						impBs[pos] = new CompositeImage(impBs[pos]);
 						while (!impBs[pos].isComposite()) {
 							IJ.wait(100);
@@ -816,9 +817,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				cropWidthB = new double[pDim];
 				cropHeightB = new double[pDim];
 				fuseButton = new Button[pDim][2];
-
-				MultiFileInfoVirtualStack[] stackAs = new MultiFileInfoVirtualStack[pDim];
-				MultiFileInfoVirtualStack[] stackBs = new MultiFileInfoVirtualStack[pDim];
 
 				for (int pos=0; pos<pDim; pos++) {
 					String[] mmList = (new File(mmPath)).list();

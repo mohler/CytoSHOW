@@ -299,16 +299,16 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					}
 				}
 				if (fivStacks.size() > 0) {
-					ArrayList<FileInfo> infoArrayList = new ArrayList<FileInfo>();
-					for (FileInfo[] fia:infoCollectorArrayList) {
-						for (FileInfo fi:fia) {
-							infoArrayList.add(fi);
-						}
-					}
-					infoArray = new FileInfo[infoArrayList.size()];
-					for (int f=0;f<infoArray.length;f++) {
-						infoArray[f] = (FileInfo) infoArrayList.get(f);
-					}
+//					ArrayList<FileInfo> infoArrayList = new ArrayList<FileInfo>();
+//					for (FileInfo[] fia:infoCollectorArrayList) {
+//						for (FileInfo fi:fia) {
+//							infoArrayList.add(fi);
+//						}
+//					}
+//					infoArray = new FileInfo[infoArrayList.size()];
+//					for (int f=0;f<infoArray.length;f++) {
+//						infoArray[f] = (FileInfo) infoArrayList.get(f);
+//					}
 					open(show);
 				}
 			}
@@ -370,7 +370,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				tDim = (int) gd.getNextNumber();
 				nImages = cDim*zDim*tDim;
 			} else {
-				this.tDim =nImages/(this.cDim*this.zDim*vDim);
+				this.tDim =nImages/(this.cDim*this.zDim*(dimOrder == "xySplitCzt"?2:1));
 			}
 		} else if (monitoringDecon){
 			nImages = 0;
@@ -389,7 +389,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				tDim = (int) gd.getNextNumber();
 				nImages = cDim*zDim*tDim;
 			} else {
-				this.tDim =nImages/(this.cDim*this.zDim*vDim);
+				this.tDim =nImages/(this.cDim*this.zDim*(dimOrder == "xySplitCzt"?2:1));
 			}
 		} else {
 			nImages = 0;
@@ -408,7 +408,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				tDim = (int) gd.getNextNumber();
 				nImages = cDim*zDim*tDim;
 			} else {
-				this.tDim =nImages/(this.cDim*this.zDim*vDim);
+				this.tDim =nImages/(this.cDim*this.zDim*(dimOrder == "xySplitCzt"?2:1));
 			}
 		}
 		
@@ -525,11 +525,11 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			stackNumber++;
 		}
 		stackNumber--;
-
-		
-		
+		int megaHangover = fivStacks.get(stackNumber).getSize()%(zDim*cDim*vDim);
 		sliceNumber = (n-1) % (fivStacks.get(stackNumber).getSize()*(dimOrder == "xySplitCzt"?2:1)/vDim);
-
+		sliceNumber = sliceNumber - stackNumber*megaHangover;
+		
+		IJ.log("stack = "+stackNumber+"   slice = "+sliceNumber);
 		if (stackNumber>=0 && sliceNumber>=0) {
 			if (!touchedFiles.contains(fivStacks.get(stackNumber).infoArray[sliceNumber].fileName)) {
 				TiffDecoder td = new TiffDecoder(dir, fivStacks.get(stackNumber).infoArray[sliceNumber].fileName);
@@ -551,41 +551,14 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		ImageProcessor ip = null;
 		if (dimOrder == "xyczt") {
 			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber+1+(isViewB?fivStacks.get(stackNumber).getSize()/vDim:0));
-//			ImagePlus imp = null;		
-//			if (n<=nImages ) {
-//				int nCorr = (n-1) + (zDim*vDim)*((n-1)/(zDim*cDim/vDim)) + (isViewB?zDim*cDim/vDim:0);
-//				IJ.log(n + "=>" + nCorr);
-//				infoArray[nCorr].nImages = 1; // why is this needed?
-//				FileOpener fo = new FileOpener(infoArray[nCorr]);
-//				imp = fo.open(false);
-//			}
-//			if (imp!=null) {
-//				ip = imp.getProcessor();
-//				ip.setInterpolationMethod(ImageProcessor.BICUBIC);
-//				if (this.getOwnerImps() != null && this.getOwnerImps().size() > 0 && this.getOwnerImps().get(0) != null) {
-//					ip.translate(skewXperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1-this.getOwnerImps().get(this.getOwnerImps().size()-1).getNSlices()/2), skewYperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1-this.getOwnerImps().get(this.getOwnerImps().size()-1).getNSlices()/2));
-//				} else {
-//					ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
-//				}
-//				return ip;
-//			} else {
-//				int w=getWidth(), h=getHeight();
-//				if (n<=nImages ) 
-//					/*IJ.log("Read error or file not found ("+n+"): "+info[n-1].directory+info[n-1].fileName)*/;
-//				switch (getBitDepth()) {
-//					case 8: return new ByteProcessor(w, h);
-//					case 16: return new ShortProcessor(w, h);
-//					case 24: return new ColorProcessor(w, h);
-//					case 32: return new FloatProcessor(w, h);
-////					default: return getProcessor(1).createProcessor(w, h);
-//					default: return new ShortProcessor(w, h);
-//				}
-//			}
 		}
 		if (dimOrder == "xySplitCzt") {
 			int dX = -11;
 			int dY = 7;
-			ip = fivStacks.get(stackNumber).getProcessor((sliceNumber/2)+1+(isViewB?fivStacks.get(stackNumber).getSize()/vDim:0));
+			
+//// RIGHT FUCKING HERE IS WHERE I NEED TO SOLVE THE FILE-END-RATCHET PROBLEM FOR MEGATIFFS
+			
+			ip = fivStacks.get(stackNumber).getProcessor((sliceNumber/cDim)+1+(isViewB?zDim:0));
 			ip.setInterpolationMethod(ImageProcessor.BICUBIC);
 			if (this.getOwnerImps() != null && this.getOwnerImps().size() > 0 && this.getOwnerImps().get(0) != null) {
 				ip.translate(skewXperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1-this.getOwnerImps().get(this.getOwnerImps().size()-1).getNSlices()/2), skewYperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1-this.getOwnerImps().get(this.getOwnerImps().size()-1).getNSlices()/2));
@@ -594,8 +567,6 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			}
 			ip.setRoi(1280-((1-n%2)*(1024+dX)), 0+((1-n%2)*(0+dY)), 512, 512-dY);
 			ip=ip.crop();
-
-			return ip;
 		}
 		if (dimOrder == "xyzct")
 			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber/cDim + ((sliceNumber%cDim)*fivStacks.get(stackNumber).getSize()/(vDim))
@@ -642,7 +613,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	public String getSliceLabel(int n) {
 		if (n<1 || n>nImages)
 			throw new IllegalArgumentException("Argument out of range: "+n);
-		if (infoArray[0].sliceLabels==null || infoArray[0].sliceLabels.length!=nImages) {
+		if (infoArray==null || infoArray[0].sliceLabels==null || infoArray[0].sliceLabels.length!=nImages) {
 			if (n<1 || n>nImages) {
 				IJ.runMacro("waitForUser(\""+n+"\");");
 				return fivStacks.get(0).infoArray[0].fileName;
