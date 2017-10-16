@@ -1,7 +1,6 @@
 package org.vcell.gloworm;
 
 import java.awt.Button;
-
 import java.awt.Dimension;
 import java.awt.Polygon;
 import java.awt.event.ActionEvent;
@@ -14,6 +13,8 @@ import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.InetAddress;
+import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
@@ -385,7 +386,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				savePath = dirOrOMETiffFile.getParentFile().getParent()
 					+ File.separator + dirOrOMETiffFile.getParentFile().getName()
 					+ "_" + dirOrOMETiffFile.getName().split("_")[0] + "_"+ File.separator;
-			new File(savePath).mkdirs();
+//			new File(savePath).mkdirs();
 			tempDir = IJ.getDirectory("temp");
 
 
@@ -411,13 +412,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				wavelengths = Integer.parseInt(args[1]);
 				zSlices = Integer.parseInt(args[2]);
 			} else if (!omeTiffs || !dirOrOMETiffFile.isDirectory()) {
-				GenericDialog gd = new GenericDialog("Data Set Parameters?");
-				gd.addNumericField("Wavelengths", 2, 0);
-				gd.addNumericField("Z Slices/Stack", 50, 0);
-				gd.showDialog();
-				;
-				wavelengths = (int) gd.getNextNumber();
-				zSlices = (int) gd.getNextNumber();
+//				GenericDialog gd = new GenericDialog("Data Set Parameters?");
+//				gd.addNumericField("Wavelengths", 2, 0);
+//				gd.addNumericField("Z Slices/Stack", 50, 0);
+//				gd.showDialog();
+//				;
+//				wavelengths = (int) gd.getNextNumber();
+//				zSlices = (int) gd.getNextNumber();
 			}
 			dirOrOMETiffFile = new File(dirOrOMETiff);
 			if (dirOrOMETiffFile.isDirectory()) {
@@ -767,7 +768,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 					}
 				}
 			} else if (this.dirOrOMETiff.endsWith(".ome.tif")) {
-				readInMMdiSPIMheader(dirOrOMETiffFile);
+				readInMMdiSPIMheader(dirOrOMETiffFile.getParentFile());
 
 				TiffDecoder tdA = new TiffDecoder("",dirOrOMETiff);
 				TiffDecoder tdB = new TiffDecoder("",dirOrOMETiff);
@@ -841,7 +842,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 //							File.separator +
 //							((MultiFileInfoVirtualStack)impAs[pos].getStack()).getFivStacks().get(0).getInfo()[pos].fileName;
 
-//					impAs[pos].setTitle("SPIMB: "+dirOrOMETiff);
+					impAs[pos].setTitle("SPIMB: "+dirOrOMETiff);
 
 					if (nChannels*nSlices*nFrames!=stackSize) {
 						if (nChannels*nSlices*nFrames>stackSize) {
@@ -5208,25 +5209,32 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 	public void readInMMdiSPIMheader(File dirOrOMETiffFile)
 			throws NumberFormatException {
 		String diSPIMheader = "";
-		for (String fileName:dirOrOMETiffFile.list()) {
-			File nextFile = new File(dirOrOMETiffFile+File.separator+fileName);
+		if (dirOrOMETiffFile.isDirectory()) {
+			for (String fileName:dirOrOMETiffFile.list()) {
+				File nextFile = new File(dirOrOMETiffFile+File.separator+fileName);
 
-			if(nextFile.isDirectory() && nextFile.list().length>0) {
-				for (String listFile:nextFile.list()){
-					if (listFile.contains("MMStack")) {
-						IJ.log(nextFile.getPath()+File.separator+listFile);
-						if (diSPIMheader == "")
-							diSPIMheader = open_diSPIMheaderAsString(nextFile.getPath()+File.separator+listFile);
-						tDim++;
-						break;
+				if(nextFile.isDirectory() && nextFile.list().length>0) {
+					for (String listFile:nextFile.list()){
+						if (listFile.contains("MMStack")) {
+							IJ.log(nextFile.getPath()+File.separator+listFile);
+							if (diSPIMheader == "")
+								diSPIMheader = open_diSPIMheaderAsString(nextFile.getPath()+File.separator+listFile);
+							tDim++;
+							break;
+						}
 					}
+				} else if (fileName.contains("MMStack")) {
+					IJ.log(nextFile.getPath());
+					if (diSPIMheader == "")
+						diSPIMheader = open_diSPIMheaderAsString(nextFile.getPath());
+					tDim++;
+					break;
 				}
 			}
+		} else {
+			diSPIMheader = open_diSPIMheaderAsString(dirOrOMETiffFile.getAbsolutePath());
 		}
-//				IJ.log(diSPIMheader);
-//				diSPIMheader = diSPIMheader.replaceAll("(.*\\$.\\# .  \\{)", "{");
-				diSPIMheader = diSPIMheader.replaceAll("(.*\\$.\\#.*\\{\")(.*)", "\\{\"$2");
-//				IJ.log(diSPIMheader);
+		diSPIMheader = diSPIMheader.replaceAll("(.*\\$.\\#.*\\{\")(.*)", "\\{\"$2");
 
 		String squareSetsSearchPattern=".*";
 		int squareSetsCount=0;
@@ -5297,6 +5305,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 			}
 			if (chunk.trim().startsWith("\"numTimepoints\":")) {
 				diSPIM_MM_numTimepoints= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
+				tDim = diSPIM_MM_numTimepoints;
 			}
 			if (chunk.trim().startsWith("\"timepointInterval\":")) {
 				diSPIM_MM_timepointInterval= Double.parseDouble(chunk.split(":")[1].replace("\"", "").trim());
@@ -5449,18 +5458,21 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 			}
 			if (chunk.trim().startsWith("\"Frames\":")) {
 				diSPIM_MM_Frames= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
+				tDim = diSPIM_MM_Frames;
 			}
 			if (chunk.trim().startsWith("\"Source\":")) {
 				diSPIM_MM_Source= chunk.split(":")[1].replace("\"", "").trim();
 			}
 			if (chunk.trim().startsWith("\"Channels\":")) {
 				diSPIM_MM_Channels= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
+				cDim = diSPIM_MM_Channels;
 			}
 			if (chunk.trim().startsWith("\"AcqusitionName\":")) {
 				diSPIM_MM_AcqusitionName= chunk.split(":")[1].replace("\"", "").trim();
 			}
 			if (chunk.trim().startsWith("\"NumberOfSides\":")) {
 				diSPIM_MM_NumberOfSides= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
+				vDim = diSPIM_MM_NumberOfSides;
 			}
 			if (chunk.trim().startsWith("\"SPIMmode\":")) {
 				diSPIM_MM_SPIMmode= chunk.split(":")[1].replace("\"", "").trim();
@@ -5479,6 +5491,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 			if (chunk.trim().startsWith("\"Slices\":")) {
 				diSPIM_MM_Slices= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
+				zDim = diSPIM_MM_Slices;
 			}
 			if (chunk.trim().startsWith("\"UserName\":")) {
 				diSPIM_MM_UserName= chunk.split(":")[1].replace("\"", "").trim();
@@ -5568,10 +5581,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 //									allVars = allVars+"\n diSPIM_MM_"+chunk.trim().split(":")[1];
 		}
 //						IJ.log(allVars);
-		if (diSPIM_MM_channelMode.startsWith("NONE") && diSPIM_MM_channel_use_index>1) {
-			cDim = diSPIM_MM_channel_use_index;
-			splitChannels = true;
-			dimOrder = "xySplitCzt";
+
+		if (diSPIM_MM_Width == 2048 ) {
+			if (diSPIM_MM_channelMode==null || diSPIM_MM_channelMode.startsWith("NONE")) {
+				if(diSPIM_MM_useChannels==false) {
+					cDim = 2;    //using diSPIM_MM_channel_use_index value doesn' work for Shroff system (counts 4, duh)
+					splitChannels = true;
+					dimOrder = "xySplitCzt";
+				}
+			}
 		}
 	}
 
