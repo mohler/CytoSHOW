@@ -261,76 +261,51 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			if (channelDirectories >0) {
 
 				for (String fileName:goDirFileList){
-					File nextFile = new File(dir + fileName);
-					long nextFileLength = nextFile.length();
-					if (nextFile.canRead() && fileName.toLowerCase().endsWith(".tif")) {
-						//						if (dummyInfoArray == null) {
-						//							TiffDecoder td = new TiffDecoder(dir, fileName);
-						//							if (IJ.debugMode) td.enableDebugging();
-						//							IJ.showStatus("Decoding TIFF header...");
-						//							try {infoCollectorArrayList.add(td.getTiffInfo(0));}
-						//							catch (IOException e) {
-						//								String msg = e.getMessage();
-						//								if (msg==null||msg.equals("")) msg = ""+e;
-						//								IJ.error("TiffDecoder", msg);
-						//								return;
-						//							}
-						//						} else {
+					File currentFile = new File(dir + fileName);
+					long currentFileLength = currentFile.length();
+					if (currentFile.canRead() && fileName.toLowerCase().endsWith(".tif")) {
 						TiffDecoder td = new TiffDecoder(dir, fileName);
 						if (IJ.debugMode) td.enableDebugging();
 						IJ.showStatus("Decoding  TIFF image headers..."+fileName);
 
 						FileInfo fiOne = null;
 						long fileHeaderLength = 0L;
+						FileInfo[] realIFDs = null;
 						try {
+							realIFDs = td.getTiffInfo(0);
+							
+							td = new TiffDecoder(dir, fileName);
 							fiOne = td.getTiffInfo(1)[0];
 							fileHeaderLength = td.getImageFileHeader();
-
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-						long openingOffset = fileHeaderLength + fiOne.getOffset();
-						if (openingOffset == 0L)
-							continue;
 													
-						long size = fiOne.width*fiOne.height*fiOne.getBytesPerPixel();
-
+						long[] tweens = new long[realIFDs.length-1];
+						long xySize = fiOne.width*fiOne.height*fiOne.getBytesPerPixel();
+						long firstOffset = fiOne.getOffset();
+						long incOffset = firstOffset - fileHeaderLength;
 						ArrayList<FileInfo> fiArrayList = new ArrayList<FileInfo>();
-						long endOfNextImage = fiOne.getOffset() + (size + fiOne.gapBetweenImages);
-						long incrementingOffset = fileHeaderLength;
-						
-						while (endOfNextImage < nextFileLength){
-							fiArrayList.add((FileInfo)fiOne.clone());
-							fiArrayList.get(fiArrayList.size()-1).nImages = 1;
-							fiArrayList.get(fiArrayList.size()-1).longOffset = incrementingOffset +fiOne.getOffset() + (fiArrayList.size()-1)*(size + fiOne.gapBetweenImages);
-							endOfNextImage = endOfNextImage + fiOne.getOffset()+(size + fiOne.gapBetweenImages);
+						long endOfNextImage = firstOffset + xySize;
+						int count = 0;
+						for (int f=0;f<realIFDs.length;f++){
+							fiArrayList.add((FileInfo)realIFDs[f]);
+//							fiArrayList.get(fiArrayList.size()-1).nImages = 1;
+//							fiArrayList.get(fiArrayList.size()-1).longOffset = fiOne.getOffset() + (fiArrayList.size()-1) * (xySize + incOffset);
+//							count++;
+//							endOfNextImage = endOfNextImage + incOffset + xySize;
 						}
-						fiArrayList.remove(fiArrayList.get(fiArrayList.size()-1));
+//						fiArrayList.remove(fiArrayList.get(fiArrayList.size()-1));
 						
 
 						
 						infoCollectorArrayList.add(fiArrayList);
-						//							for (int si=0; si<infoCollectorArrayList.get(infoCollectorArrayList.size()-1).length; si++) {
-						//								infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[si] = (FileInfo) dummyInfoArray[si].clone();
-						//								infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[si].fileName = fileName;
-						//								//								infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[si].longOffset = tiOffsetsArray[si];
-						//								//								infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[si].offset = (int)tiOffsetsArray[si];
-						//							}
 
-						//						}
 						if (infoCollectorArrayList==null || infoCollectorArrayList.size()==0) {
 							continue;
 						}
-						//						fivStacks.add(new FileInfoVirtualStack());
-						//						fivStacks.get(fivStacks.size()-1).infoArray = infoCollectorArrayList.get(infoCollectorArrayList.size()-1);
-						//						fivStacks.get(fivStacks.size()-1).setupStack();
-						//					} else if (fileName.matches(".*channel.*-frame.* missing")) {
-						//						fivStacks.add(new FileInfoVirtualStack(new FileInfo(), false));
-						//						for (FileInfo sliceInfo:fivStacks.get(fivStacks.size()-1).infoArray)
-						//							sliceInfo.fileName = fileName;
-						//						fivStacks.get(fivStacks.size()-1).setupStack();
-						//					}
+
 					}
 				}
 				if (infoCollectorArrayList.size() > 0) {
