@@ -549,7 +549,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 //
 			//		IJ.log(""+n+" "+z+" "+t);
 		ImageProcessor ip = null;
-		if (dimOrder == "xyczt") {
+		if (dimOrder == "xyczt") { 
 //			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber+1+(isViewB?fivStacks.get(stackNumber).getSize()/vDim:0));
 			ImagePlus imp = null;		
 			if (n<=nImages ) {
