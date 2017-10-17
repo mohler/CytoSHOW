@@ -524,10 +524,13 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			total = total + fivStacks.get(stackNumber).getSize()*(dimOrder == "xySplitCzt"?2:1)/vDim;
 			stackNumber++;
 		}
+		boolean lastVolumeInMegaFrag = stackNumber>fivStacks.get(stackNumber).getSize()*(dimOrder == "xySplitCzt"?2:1)/(cDim*zDim*vDim);
+				
 		stackNumber--;
-		int megaHangover = fivStacks.get(stackNumber).getSize()%(zDim*cDim*vDim);
+
 		sliceNumber = (n-1) % (fivStacks.get(stackNumber).getSize()*(dimOrder == "xySplitCzt"?2:1)/vDim);
-		sliceNumber = sliceNumber - stackNumber*megaHangover;
+		
+		
 		
 		IJ.log("stack = "+stackNumber+"   slice = "+sliceNumber);
 		if (stackNumber>=0 && sliceNumber>=0) {
