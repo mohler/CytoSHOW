@@ -520,16 +520,27 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		stackNumber = 0;
 		sliceNumber = 1;
 		int total=0;
+		
+		if (dimOrder == "xySplitCzt") {
+			int adjN =0;
+			while (n>zDim*cDim) {
+				adjN = adjN + (zDim*cDim*vDim);
+				n = n-zDim*cDim;
+			}
+			n=n+adjN;
+		}
+		
 		while (n > total) {
-			total = total + fivStacks.get(stackNumber).getSize()*(dimOrder == "xySplitCzt"?2:1)/vDim;
+			total = total + fivStacks.get(stackNumber).getSize()*(dimOrder == "xySplitCzt"?2:1);
 			stackNumber++;
 		}
-		boolean lastVolumeInMegaFrag = stackNumber>fivStacks.get(stackNumber).getSize()*(dimOrder == "xySplitCzt"?2:1)/(cDim*zDim*vDim);
 				
 		stackNumber--;
 
-		sliceNumber = (n-1) % (fivStacks.get(stackNumber).getSize()*(dimOrder == "xySplitCzt"?2:1)/vDim);
-		
+		sliceNumber = (n-1) % (fivStacks.get(stackNumber).getSize()*(dimOrder == "xySplitCzt"?2:1));
+		if (dimOrder == "xySplitCzt") {
+			sliceNumber = (sliceNumber/2);
+		}
 		
 		
 		IJ.log("stack = "+stackNumber+"   slice = "+sliceNumber);
@@ -561,7 +572,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			
 //// RIGHT FUCKING HERE IS WHERE I NEED TO SOLVE THE FILE-END-RATCHET PROBLEM FOR MEGATIFFS
 			
-			ip = fivStacks.get(stackNumber).getProcessor((sliceNumber/cDim)+1+(isViewB?zDim:0));
+			ip = fivStacks.get(stackNumber).getProcessor((sliceNumber)+1+(isViewB?zDim:0));
+			
 			ip.setInterpolationMethod(ImageProcessor.BICUBIC);
 			if (this.getOwnerImps() != null && this.getOwnerImps().size() > 0 && this.getOwnerImps().get(0) != null) {
 				ip.translate(skewXperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1-this.getOwnerImps().get(this.getOwnerImps().size()-1).getNSlices()/2), skewYperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1-this.getOwnerImps().get(this.getOwnerImps().size()-1).getNSlices()/2));
