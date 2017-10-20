@@ -973,6 +973,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 					if (newFileListItem.endsWith(".tif"))
 						newLength++;
 
+				wavelengths = 2;  //OLD DEFAULT VALUES OFTEN USED.  NEED TO TREAT SMARTLY SOON
+				zSlices = 50;
 				while (Math.floor(newLength / (wavelengths * 2 * zSlices)) == 0) {
 
 					IJ.wait(10);
