@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 import org.vcell.gloworm.QTVirtualStack;
 
@@ -299,16 +300,16 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					}
 				}
 				if (fivStacks.size() > 0) {
-//					ArrayList<FileInfo> infoArrayList = new ArrayList<FileInfo>();
-//					for (FileInfo[] fia:infoCollectorArrayList) {
-//						for (FileInfo fi:fia) {
-//							infoArrayList.add(fi);
-//						}
-//					}
-//					infoArray = new FileInfo[infoArrayList.size()];
-//					for (int f=0;f<infoArray.length;f++) {
-//						infoArray[f] = (FileInfo) infoArrayList.get(f);
-//					}
+					ArrayList<FileInfo> infoArrayList = new ArrayList<FileInfo>();
+					for (FileInfo[] fia:infoCollectorArrayList) {
+						for (FileInfo fi:fia) {
+							infoArrayList.add(fi);
+						}
+					}
+					infoArray = new FileInfo[infoArrayList.size()];
+					for (int f=0;f<infoArray.length;f++) {
+						infoArray[f] = (FileInfo) infoArrayList.get(f);
+					}
 					open(show);
 				}
 			}
@@ -353,7 +354,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	}
 	
 	void open(boolean show) {
-		if (cumulativeTiffFileArray.length >0 && cumulativeTiffFileArray[0].contains("MMStack_"))  {
+		String[] splitPath = cumulativeTiffFileArray[0].split(Pattern.quote(File.separator));
+		if (splitPath[splitPath.length-1].startsWith("MMStack_") && (cumulativeTiffFileArray.length >0)) { 
 			nImages = 0;
 			for (FileInfoVirtualStack mmStack:fivStacks) {
 				nImages = nImages + mmStack.getSize()*(dimOrder == "xySplitCzt"?2:1);
@@ -372,44 +374,29 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			} else {
 				this.tDim =nImages/(this.cDim*this.zDim*(dimOrder == "xySplitCzt"?2:1));
 			}
+
 		} else if (monitoringDecon){
-			nImages = 0;
-			for (FileInfoVirtualStack mmStack:fivStacks) {
-				nImages = nImages + mmStack.getSize()*(dimOrder == "xySplitCzt"?2:1);
-			}
-			if (cDim == 0 || zDim == 0 || tDim == 0) {
-				GenericDialog gd = new GenericDialog("Dimensions of HyperStacks");
-				gd.addNumericField("Channels (c):", 2, 0);
-				gd.addNumericField("Slices (z):", 50, 0);
-				gd.addNumericField("Frames (t):", nImages/(50*2*2), 0);
-				gd.showDialog();
-				if (gd.wasCanceled()) return;
-				cDim = (int) gd.getNextNumber();
-				zDim = (int) gd.getNextNumber();
-				tDim = (int) gd.getNextNumber();
-				nImages = cDim*zDim*tDim;
-			} else {
-				this.tDim =nImages/(this.cDim*this.zDim*(dimOrder == "xySplitCzt"?2:1));
-			}
+			zDim = fivStacks.get(0).nImages;
+			nImages = fivStacks.size() * zDim*(dimOrder == "xySplitCzt"?2:1);
+
+			int internalChannels = ((new FileOpener(fivStacks.get(0).infoArray[0])).decodeDescriptionString(fivStacks.get(0).infoArray[0]) != null
+					?(fivStacks.get(0).getInt((new FileOpener(fivStacks.get(0).infoArray[0])).decodeDescriptionString(fivStacks.get(0).infoArray[0]), "channels"))
+							:1);		
+			int channels = channelDirectories * internalChannels;
+			cDim = channels;
+			zDim = fivStacks.get(0).nImages/(cDim/channelDirectories);
+			tDim = fivStacks.size()/cDim;
 		} else {
-			nImages = 0;
-			for (FileInfoVirtualStack mmStack:fivStacks) {
-				nImages = nImages + mmStack.getSize()*(dimOrder == "xySplitCzt"?2:1);
-			}
-			if (cDim == 0 || zDim == 0 || tDim == 0) {
-				GenericDialog gd = new GenericDialog("Dimensions of HyperStacks");
-				gd.addNumericField("Channels (c):", 2, 0);
-				gd.addNumericField("Slices (z):", 50, 0);
-				gd.addNumericField("Frames (t):", nImages/(50*2*2), 0);
-				gd.showDialog();
-				if (gd.wasCanceled()) return;
-				cDim = (int) gd.getNextNumber();
-				zDim = (int) gd.getNextNumber();
-				tDim = (int) gd.getNextNumber();
-				nImages = cDim*zDim*tDim;
-			} else {
-				this.tDim =nImages/(this.cDim*this.zDim*(dimOrder == "xySplitCzt"?2:1));
-			}
+			zDim = fivStacks.get(0).nImages;
+			nImages = /*channelDirectories**/ fivStacks.size() * zDim*(dimOrder == "xySplitCzt"?2:1);
+
+			int internalChannels = ((new FileOpener(fivStacks.get(0).infoArray[0])).decodeDescriptionString(fivStacks.get(0).infoArray[0]) != null
+					?(fivStacks.get(0).getInt((new FileOpener(fivStacks.get(0).infoArray[0])).decodeDescriptionString(fivStacks.get(0).infoArray[0]), "channels"))
+							:1);		
+			int channels = channelDirectories * internalChannels;
+			cDim = channels;
+			zDim = fivStacks.get(0).nImages/(cDim/channelDirectories);
+			tDim = fivStacks.size()/(cDim/internalChannels);
 		}
 		
 		String[] dirChunks = dir.split("\\"+File.separator);
@@ -520,6 +507,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		stackNumber = 0;
 		sliceNumber = 1;
 		int total=0;
+		
+//		if (dimOrder == "xySplitCzt") {
 		
 		if (dimOrder == "xySplitCzt") {
 			int adjN =0;

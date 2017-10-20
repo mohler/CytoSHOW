@@ -138,8 +138,8 @@ public class WG_Uploader implements PlugIn {
 								if (fileName.equals(remoteFileName)
 										|| remoteFileName.equals(fileName+"_"+dateTouchString)) {
 									alreadyDone = true;
-									IJ.append((new Date()).toString()+" "+path+fileName+/*"_"+dateTouchString+*/" already backed up.", IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+"WG_UploadLog.log");
-									tw.append((new Date()).toString()+" "+path+fileName+/*"_"+dateTouchString+*/" already backed up.");
+									IJ.append((new Date()).toString()+" "+path+File.separator+fileName+/*"_"+dateTouchString+*/" already backed up.", IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+"WG_UploadLog.log");
+									tw.append((new Date()).toString()+" "+path+File.separator+fileName+/*"_"+dateTouchString+*/" already backed up.");
 									break;
 								}
 							}
@@ -147,7 +147,7 @@ public class WG_Uploader implements PlugIn {
 						if (!file.isDirectory() && !alreadyDone) {
 							FileInputStream fis = new FileInputStream(path +File.separator +fileName);
 							ftpc.setFileType(FTPClient.BINARY_FILE_TYPE);
-							tw.append((new Date()).toString()+" "+path+fileName+/*"_"+dateTouchString+*/" starting backup");
+							tw.append((new Date()).toString()+" "+path+File.separator+fileName+/*"_"+dateTouchString+*/" starting backup");
 							ftpc.enterLocalPassiveMode();
 //							ftpc.enterRemotePassiveMode();
 //							ftpc.enterLocalActiveMode();
@@ -155,8 +155,8 @@ public class WG_Uploader implements PlugIn {
 							
 							fis.close();
 							ftpc.rename(fileName+"_" + dateTouchString+".tmp", fileName+"_" + dateTouchString);
-							IJ.append((new Date()).toString()+" "+path+fileName+/*"_"+dateTouchString+*/" newly backed up", IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+"WG_UploadLog.log");
-							tw.append((new Date()).toString()+" "+path+fileName+/*"_"+dateTouchString+*/" newly backed up");
+							IJ.append((new Date()).toString()+" "+path+File.separator+fileName+/*"_"+dateTouchString+*/" newly backed up", IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+"WG_UploadLog.log");
+							tw.append((new Date()).toString()+" "+path+File.separator+fileName+/*"_"+dateTouchString+*/" newly backed up");
 						}
 					}
 					for (int c=IJ.isWindows()?0:1;c<pathChunks.length;c++) {
