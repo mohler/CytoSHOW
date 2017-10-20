@@ -346,7 +346,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			IJ.log(infoArray[0].debugInfo);
 		fivStacks.add(new FileInfoVirtualStack());
 		fivStacks.get(fivStacks.size()-1).infoArray = fi;
-		nImages = fivStacks.size() * fivStacks.get(0).nImages*(dimOrder == "xySplitCzt"?2:1);
+		nImages = fivStacks.size() * fivStacks.get(0).nImages*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1);
 	}
 	
 	public void run(String arg) {
@@ -358,7 +358,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (splitPath[splitPath.length-1].startsWith("MMStack_") && (cumulativeTiffFileArray.length >0)) { 
 			nImages = 0;
 			for (FileInfoVirtualStack mmStack:fivStacks) {
-				nImages = nImages + mmStack.getSize()*(dimOrder == "xySplitCzt"?2:1);
+				nImages = nImages + mmStack.getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1);
 			}
 			if (cDim == 0 || zDim == 0 || tDim == 0) {
 				GenericDialog gd = new GenericDialog("Dimensions of HyperStacks");
@@ -372,12 +372,12 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				tDim = (int) gd.getNextNumber();
 				nImages = cDim*zDim*tDim;
 			} else {
-				this.tDim =nImages/(this.cDim*this.zDim*(dimOrder == "xySplitCzt"?2:1));
+				this.tDim =nImages/(this.cDim*this.zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
 			}
 
 		} else if (monitoringDecon){
 			zDim = fivStacks.get(0).nImages;
-			nImages = fivStacks.size() * zDim*(dimOrder == "xySplitCzt"?2:1);
+			nImages = fivStacks.size() * zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1);
 
 			int internalChannels = ((new FileOpener(fivStacks.get(0).infoArray[0])).decodeDescriptionString(fivStacks.get(0).infoArray[0]) != null
 					?(fivStacks.get(0).getInt((new FileOpener(fivStacks.get(0).infoArray[0])).decodeDescriptionString(fivStacks.get(0).infoArray[0]), "channels"))
@@ -388,7 +388,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			tDim = fivStacks.size()/cDim;
 		} else {
 			zDim = fivStacks.get(0).nImages;
-			nImages = /*channelDirectories**/ fivStacks.size() * zDim*(dimOrder == "xySplitCzt"?2:1);
+			nImages = /*channelDirectories**/ fivStacks.size() * zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1);
 
 			int internalChannels = ((new FileOpener(fivStacks.get(0).infoArray[0])).decodeDescriptionString(fivStacks.get(0).infoArray[0]) != null
 					?(fivStacks.get(0).getInt((new FileOpener(fivStacks.get(0).infoArray[0])).decodeDescriptionString(fivStacks.get(0).infoArray[0]), "channels"))
@@ -507,27 +507,25 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		stackNumber = 0;
 		sliceNumber = 1;
 		int total=0;
-		
-//		if (dimOrder == "xySplitCzt") {
-		
-		if (dimOrder == "xySplitCzt") {
+				
+		if (dimOrder.toLowerCase().matches("xy.*czt")) {
 			int adjN =0;
-			while (n>zDim*cDim) {
-				adjN = adjN + (zDim*cDim*vDim);
-				n = n-zDim*cDim;
+			while (n>zDim*cDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1)/vDim) {
+				adjN = adjN + (zDim*cDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
+				n = n-zDim*cDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1)/vDim;
 			}
 			n=n+adjN;
 		}
 		
 		while (n > total) {
-			total = total + fivStacks.get(stackNumber).getSize()*(dimOrder == "xySplitCzt"?2:1);
+			total = total + fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1);
 			stackNumber++;
 		}
 				
 		stackNumber--;
 
-		sliceNumber = (n-1) % (fivStacks.get(stackNumber).getSize()*(dimOrder == "xySplitCzt"?2:1));
-		if (dimOrder == "xySplitCzt") {
+		sliceNumber = (n-1) % (fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
+		if (dimOrder.toLowerCase().matches(".*splitc.*")) {
 			sliceNumber = (sliceNumber/2);
 		}
 		
@@ -555,7 +553,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (dimOrder == "xyczt") {
 			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber+1+(isViewB?fivStacks.get(stackNumber).getSize()/vDim:0));
 		}
-		if (dimOrder == "xySplitCzt") {
+		if (dimOrder.toLowerCase().matches(".*splitc.*")) {
 			int dX = -11;
 			int dY = 7;
 			
