@@ -20,7 +20,9 @@ public class WindowOrganizer implements PlugIn {
 			IJ.noImage();
 			return;
 		}
-		if (arg.equals("tile"))
+		if (arg.equals("minimize")){
+			minimizeAll();
+		}else if (arg.equals("tile")) 			
 			tileWindows(wList);
 		else
 			cascadeWindows(wList);
@@ -168,6 +170,25 @@ public class WindowOrganizer implements PlugIn {
 		IJ.getInstance().toFront();
 	}
 
+	void minimizeAll() {
+		int[] wList = WindowManager.getIDList();
+		if (wList!=null) {
+			for (int i=0; i<wList.length; i++) {
+				ImageWindow win = getWindow(wList[i]);
+				if (win!=null)
+					win.setState(Frame.ICONIFIED);
+				
+			}
+		}
+		Frame[] frames = WindowManager.getNonImageWindows();
+		if (frames!=null) {
+			for (int i=0; i<frames.length; i++)
+					frames[i].setState(Frame.ICONIFIED);
+		}
+		IJ.getInstance().setState(Frame.ICONIFIED);
+	}
+
+	
 }
 
 

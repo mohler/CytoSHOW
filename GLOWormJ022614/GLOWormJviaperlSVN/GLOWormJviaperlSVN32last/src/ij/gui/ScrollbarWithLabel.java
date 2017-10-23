@@ -168,8 +168,8 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 
 		g.setFont(font);
 
-		//        g.setColor(Colors.decode("66ffffff",Color.white));
-		//        g.fillRect(0, 0, w, h);
+		g.setColor(Colors.decode("66ffffff",Color.white));
+		g.fillRect(0, 0, w, h);
 		g.setColor(Color.BLACK);
 		g.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
 		g.drawLine(0, 0, 2, 7);

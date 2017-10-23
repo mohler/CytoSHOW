@@ -4,7 +4,12 @@ import java.io.*;
 import java.util.Properties;
 
 /** This class consists of public fields that describe an image file. */
-public class FileInfo implements Cloneable {
+public class FileInfo implements Cloneable, Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	/** 8-bit unsigned integer (0-255). */
 	public static final int GRAY8 = 0;

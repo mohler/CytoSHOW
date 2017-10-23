@@ -219,6 +219,7 @@ public class Menus {
 		addPlugInItem(window, "Put Behind [tab]", "ij.plugin.Commands(\"tab\")", 0, false);
 		addPlugInItem(window, "Cascade", "ij.plugin.WindowOrganizer(\"cascade\")", 0, false);
 		addPlugInItem(window, "Tile", "ij.plugin.WindowOrganizer(\"tile\")", 0, false);
+		addPlugInItem(window, "Minimize All", "ij.plugin.WindowOrganizer(\"minimize\")", 0, false);
 		window.addSeparator();
 
 		Menu help = getMenu("Help");

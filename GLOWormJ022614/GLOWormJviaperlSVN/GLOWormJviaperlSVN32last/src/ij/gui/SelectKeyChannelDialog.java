@@ -37,15 +37,21 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 	private Double subFractB;
 	private Checkbox depthSeek;
 	private boolean autodepth;
+	private Choice abRelOriChoices;
+	private int abRelOriValue;
+	
 	public double getSubFractA() {
-		return subFractA;
+//		return subFractA;
+		return 1;
 	}
 
 	public void setSubFractA(double subFract) {
 		this.subFractA = subFract;
 	}
+	
 	public double getSubFractB() {
-		return subFractB;
+//		return subFractB;
+		return 1;
 	}
 
 	public void setSubFractB(double subFract) {
@@ -93,6 +99,10 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 		channelChoices = new Choice();
 		channelChoices.add("Key registration on Channel 1");
 		channelChoices.add("Key registration on Channel 2");
+		abRelOriChoices = new Choice();
+		abRelOriChoices.add("Input Volumes Rel. Orientation = -1");
+		abRelOriChoices.add("Input Volumes Rel. Orientation = 0");
+		abRelOriChoices.add("Input Volumes Rel. Orientation = +1");
 		methodChoices = new Choice();
 		methodChoices.add("MinGuo GPU method");
 		methodChoices.add("mipav CPU method");
@@ -101,6 +111,7 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 		matrixPriming.add("Fresh registration for every volume");
 		
 		panel.add(channelChoices);
+		panel.add(abRelOriChoices);
 		panel.add(methodChoices);
 		panel.add(matrixPriming);
 		add("North", panel);
@@ -117,6 +128,7 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 			cancelB = new Button(" Cancel ");
 		}
 		channelChoices.addItemListener(this);
+		abRelOriChoices.addItemListener(this);
 		methodChoices.addItemListener(this);
 		matrixPriming.addItemListener(this);
 		yesB.addActionListener(this);
@@ -126,9 +138,9 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 		noB.addKeyListener(this);
 		cancelB.addKeyListener(this);
 		if (IJ.isMacintosh()) {
+			panel.add(yesB);
 			panel.add(noB);
 			panel.add(cancelB);
-			panel.add(yesB);
 			setResizable(false);
 		} else {
 			panel.add(yesB);
@@ -137,19 +149,19 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 		}
 		add("South", panel);
 		
-		depthSeek = new Checkbox("Auto-sense specimen depth?", false);
-		modeFractionSpinnerA = new JSpinner(new SpinnerNumberModel(/*1.011*/ 1, -1.0, 2.0, 0.001));  
-		modeFractionSpinnerA.setToolTipText("Fraction of image Mode to use for autocrop \nand background subtraction on Camera A");
-		modeFractionSpinnerB = new JSpinner(new SpinnerNumberModel(/*1.012*/ 1, -1.0, 2.0, 0.001));  
-		modeFractionSpinnerB.setToolTipText("Fraction of image Mode to use for autocrop \nand background subtraction on Camera B");
-		iterationSpinner = new JSpinner(new SpinnerNumberModel(10, 1, 100, 1));  
-		iterationSpinner.setToolTipText("Iterations of Deconvolution");
-		optPanel = new Panel();
-		optPanel.add("West", depthSeek);
-		optPanel.add("West", modeFractionSpinnerA);
-		optPanel.add("Center", modeFractionSpinnerB);
-		optPanel.add("East", iterationSpinner);
-		add("East", optPanel);
+//		depthSeek = new Checkbox("Auto-sense specimen depth?", false);
+//		modeFractionSpinnerA = new JSpinner(new SpinnerNumberModel(/*1.011*/ 1, -1.0, 2.0, 0.001));  
+//		modeFractionSpinnerA.setToolTipText("Fraction of image Mode to use for autocrop \nand background subtraction on Camera A");
+//		modeFractionSpinnerB = new JSpinner(new SpinnerNumberModel(/*1.012*/ 1, -1.0, 2.0, 0.001));  
+//		modeFractionSpinnerB.setToolTipText("Fraction of image Mode to use for autocrop \nand background subtraction on Camera B");
+//		iterationSpinner = new JSpinner(new SpinnerNumberModel(10, 1, 100, 1));  
+//		iterationSpinner.setToolTipText("Iterations of Deconvolution");
+//		optPanel = new Panel();
+//		optPanel.add("West", depthSeek);
+//		optPanel.add("West", modeFractionSpinnerA);
+//		optPanel.add("Center", modeFractionSpinnerB);
+//		optPanel.add("East", iterationSpinner);
+//		add("East", optPanel);
 
 		pack();
 		GUI.center(this);
@@ -162,11 +174,12 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 		else if (e.getSource()==yesB) {
 			yesPressed = true;
 			keyChannel = channelChoices.getSelectedIndex()+1;
+			abRelOriValue = abRelOriChoices.getSelectedIndex()-1;
 			regDeconMethod = methodChoices.getSelectedItem();	
 			matPrimMethod = matrixPriming.getSelectedItem();
-			subFractA = ((Double)modeFractionSpinnerA.getValue());
-			subFractB = ((Double)modeFractionSpinnerB.getValue());
-			iterations = ((Integer)iterationSpinner.getValue());
+//			subFractA = ((Double)modeFractionSpinnerA.getValue());
+//			subFractB = ((Double)modeFractionSpinnerB.getValue());
+//			iterations = ((Integer)iterationSpinner.getValue());
 		}
 		closeDialog();
 	}
@@ -250,6 +263,11 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 
 	public void setAutodepth(boolean autodepth) {
 		this.autodepth = autodepth;
+	}
+
+	public int getAbRelOriValue() {
+		// TODO Auto-generated method stub
+		return abRelOriValue;
 	}
 
 }

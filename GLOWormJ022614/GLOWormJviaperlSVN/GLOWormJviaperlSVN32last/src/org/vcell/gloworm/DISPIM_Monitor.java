@@ -274,6 +274,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 	private String keyString;
 	private boolean splitChannels;
 	private String dirOrOMETiffFinal;
+	private int abRelOriValue;
 	
 	public Process getRegDeconProcess() {
 		return regDeconProcess;
@@ -449,7 +450,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 					if (dimOrder == null || dimOrder == "")
 						dimOrder = (diSPIM_MM_channelMode.contains("VOLUME")?"xyzct":"xyczt");
 
-					wavelengths = cDim; 
+					
+					if (!dimOrder.toLowerCase().matches(".*splitc.*"))
+						wavelengths = cDim/vDim; 
+					else
+						wavelengths = cDim;
 					vWidth = diSPIM_MM_PixelSize_um;
 					vHeight = diSPIM_MM_PixelSize_um;
 					vDepthRaw = diSPIM_MM_zStep_um;
@@ -791,7 +796,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				if (dimOrder == null || dimOrder == "")
 					dimOrder = ((diSPIM_MM_channelMode!=null && diSPIM_MM_channelMode.contains("VOLUME"))?"xyzct":"xyczt");
 
-				wavelengths = cDim; 
+				if (!dimOrder.toLowerCase().matches(".*splitc.*"))
+					wavelengths = cDim/vDim; 
+				else
+					wavelengths = cDim;
 				vWidth = diSPIM_MM_PixelSize_um;
 				vHeight = diSPIM_MM_PixelSize_um;
 				vDepthRaw = diSPIM_MM_zStep_um;
@@ -1083,6 +1091,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 				}
 				keyChannel = d.getKeyChannel();
+				abRelOriValue = d.getAbRelOriValue();
 				autodepth = d.isAutodepth();
 				slaveChannel = keyChannel == 1 ? 2 : 1;
 			} else {
@@ -2012,10 +2021,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 								new File(prxPath+File.separator+"Color2").mkdirs();
 								new File(pryPath+File.separator+"Color2").mkdirs();
 							}
-							String threeDorientationIndex= "1";
-							if (uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC")) {
-								threeDorientationIndex =  "-1";
-							}							
+
+							String threeDorientationIndex= ""+abRelOriValue;
+
+//							String threeDorientationIndex= "1";
+//							if (uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC")) {
+//								threeDorientationIndex =  "-1";
+//							}							
 							if (wavelengths == 1) {
 								try {
 									String[] cmdln =null;
@@ -4254,11 +4266,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 									new File(pryPath+File.separator+"Color2").mkdirs();
 								}
 
-								
-								String threeDorientationIndex= "1";
-								if (uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC")) {
-									threeDorientationIndex =  "-1";
-								}							
+								String threeDorientationIndex= ""+abRelOriValue;
+
+//								String threeDorientationIndex= "1";
+//								if (uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC")) {
+//									threeDorientationIndex =  "-1";
+//								}							
 
 								if (wavelengths == 1) {
 									try {
