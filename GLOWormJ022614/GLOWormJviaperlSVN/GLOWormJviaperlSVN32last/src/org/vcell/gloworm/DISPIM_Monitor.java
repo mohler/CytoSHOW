@@ -863,7 +863,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 					impBs[pos].getOriginalFileInfo().directory = dirOrOMETiff;
 
 					impAs[pos].setStack(new MultiFileInfoVirtualStack(mmPath, dimOrder, "MMStack_Pos"+pos, cDim, zDim, tDim, vDim, pos, false, false));
-
+//					((MultiFileInfoVirtualStack)impAs[pos].getStack()).getOwnerImps().add(impAs[pos]);
+					
 					int stackSize = impAs[pos].getImageStackSize();
 					int nChannels = cDim/(dimOrder=="xySplitCzt"?1:vDim);
 					int nSlices = zDim;
@@ -922,7 +923,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 
 					impBs[pos].setStack(new MultiFileInfoVirtualStack(mmPath, dimOrder, "MMStack_Pos"+pos, cDim, zDim, tDim, vDim, pos, true, false));
-					//				impBs[pos].setStack(new FileInfoVirtualStack(tdA.getTiffInfo(0), false));
+//					((MultiFileInfoVirtualStack)impBs[pos].getStack()).getOwnerImps().add(impBs[pos]);
+					
 					stackSize = impBs[pos].getImageStackSize();
 					nChannels = cDim/(dimOrder=="xySplitCzt"?1:vDim);
 					nSlices = zDim;

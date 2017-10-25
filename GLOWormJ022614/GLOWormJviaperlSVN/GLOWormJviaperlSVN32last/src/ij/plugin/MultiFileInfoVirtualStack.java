@@ -524,13 +524,12 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				
 		stackNumber--;
 
-		sliceNumber = (n-1) % (fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
+		sliceNumber = (n) % (fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
 		if (dimOrder.toLowerCase().matches(".*splitc.*")) {
 			sliceNumber = (sliceNumber/2);
 		}
 		
 		
-		//IJ.log("stack = "+stackNumber+"   slice = "+sliceNumber);
 		if (stackNumber>=0 && sliceNumber>=0) {
 			if (!touchedFiles.contains(fivStacks.get(stackNumber).infoArray[sliceNumber].fileName)) {
 				TiffDecoder td = new TiffDecoder(dir, fivStacks.get(stackNumber).infoArray[sliceNumber].fileName);
@@ -548,9 +547,13 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			}
 		} 
 
-			//		IJ.log(""+n+" "+z+" "+t);
 		ImageProcessor ip = null;
 		if (dimOrder == "xyczt") {
+			int  vSliceNumber = (sliceNumber)+1+(isViewB?fivStacks.get(stackNumber).getSize()/vDim:0);
+			if (vSliceNumber>fivStacks.get(stackNumber).getSize()) {
+				vSliceNumber = vSliceNumber-fivStacks.get(stackNumber).getSize();
+				stackNumber++;
+			}
 			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber+1+(isViewB?fivStacks.get(stackNumber).getSize()/vDim:0));
 		}
 		if (dimOrder.toLowerCase().matches(".*splitc.*")) {
@@ -558,8 +561,13 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			int dY = 7;
 			
 //// RIGHT FUCKING HERE IS WHERE I NEED TO SOLVE THE FILE-END-RATCHET PROBLEM FOR MEGATIFFS
-			
-			ip = fivStacks.get(stackNumber).getProcessor((sliceNumber)+1+(isViewB?zDim:0));
+			int  vSliceNumber = (sliceNumber)+1+(isViewB?zDim:0);
+			if (vSliceNumber>fivStacks.get(stackNumber).getSize()) {
+				vSliceNumber = vSliceNumber-fivStacks.get(stackNumber).getSize();
+				stackNumber++;
+			}
+			IJ.log(/*"z= "+this.getOwnerImps().get(0).getSlice()   +"    t= "+this.getOwnerImps().get(0).getFrame()   +*/"    n= "+n+"    stack = "+stackNumber+"   slice = "+vSliceNumber);
+			ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber);
 			
 			ip.setInterpolationMethod(ImageProcessor.BICUBIC);
 			if (this.getOwnerImps() != null && this.getOwnerImps().size() > 0 && this.getOwnerImps().get(0) != null) {
