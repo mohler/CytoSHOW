@@ -206,7 +206,7 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 		//if (n>1) IJ.log("  "+(info[n-1].getOffset()-info[n-2].getOffset()));
 		ImagePlus imp = null;		
 		if (n<=nImages ) {
-			infoArray[n-1].nImages = 1; // why is this needed?
+			infoArray[n-1].nImages = 1; 
 			FileOpener fo = new FileOpener(infoArray[n-1]);
 			imp = fo.open(false);
 		}

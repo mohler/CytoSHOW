@@ -524,27 +524,14 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				
 		stackNumber--;
 
-		sliceNumber = (n) % (fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
+		sliceNumber = (n+1) % (fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
 		if (dimOrder.toLowerCase().matches(".*splitc.*")) {
 			sliceNumber = (sliceNumber/2);
 		}
 		
 		
 		if (stackNumber>=0 && sliceNumber>=0) {
-			if (!touchedFiles.contains(fivStacks.get(stackNumber).infoArray[sliceNumber].fileName)) {
-				TiffDecoder td = new TiffDecoder(dir, fivStacks.get(stackNumber).infoArray[sliceNumber].fileName);
-				if (IJ.debugMode) td.enableDebugging();
-				IJ.showStatus("Decoding TIFF header...");
-				try {infoCollectorArrayList.set(stackNumber, td.getTiffInfo(0));}
-				catch (IOException e) {
-					String msg = e.getMessage();
-					if (msg==null||msg.equals("")) msg = ""+e;
-					IJ.error("TiffDecoder", msg);
-				}
-				fivStacks.get(stackNumber).infoArray = infoCollectorArrayList.get(stackNumber);
-
-				touchedFiles.add(fivStacks.get(stackNumber).infoArray[sliceNumber].fileName);
-			}
+			initiateStack(stackNumber, sliceNumber);
 		} 
 
 		ImageProcessor ip = null;
@@ -554,19 +541,19 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				vSliceNumber = vSliceNumber-fivStacks.get(stackNumber).getSize();
 				stackNumber++;
 			}
-			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber+1+(isViewB?fivStacks.get(stackNumber).getSize()/vDim:0));
+			initiateStack(stackNumber, vSliceNumber);
+			ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber);
 		}
 		if (dimOrder.toLowerCase().matches(".*splitc.*")) {
 			int dX = -11;
 			int dY = 7;
 			
-//// RIGHT FUCKING HERE IS WHERE I NEED TO SOLVE THE FILE-END-RATCHET PROBLEM FOR MEGATIFFS
 			int  vSliceNumber = (sliceNumber)+1+(isViewB?zDim:0);
 			if (vSliceNumber>fivStacks.get(stackNumber).getSize()) {
 				vSliceNumber = vSliceNumber-fivStacks.get(stackNumber).getSize();
 				stackNumber++;
 			}
-			IJ.log(/*"z= "+this.getOwnerImps().get(0).getSlice()   +"    t= "+this.getOwnerImps().get(0).getFrame()   +*/"    n= "+n+"    stack = "+stackNumber+"   slice = "+vSliceNumber);
+			initiateStack(stackNumber, vSliceNumber);
 			ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber);
 			
 			ip.setInterpolationMethod(ImageProcessor.BICUBIC);
@@ -578,11 +565,15 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			ip.setRoi(1280-((1-n%2)*(1024+dX)), 0+((1-n%2)*(0+dY)), 512, 512-dY);
 			ip=ip.crop();
 		}
-		if (dimOrder == "xyzct")
+		if (dimOrder == "xyzct") {
+			initiateStack(stackNumber, sliceNumber);
 			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber/cDim + ((sliceNumber%cDim)*fivStacks.get(stackNumber).getSize()/(vDim))
 																		+(isViewB?fivStacks.get(stackNumber).getSize()/(cDim*vDim):0));
-		if (dimOrder == "xyztc")
+		}
+		if (dimOrder == "xyztc") {
+			initiateStack(stackNumber, sliceNumber);
 			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber);
+		}
 		
 		if (ip instanceof FloatProcessor) {
 //			ip = ip.convertToShort(false);
@@ -613,6 +604,26 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 //		ip.setMinAndMax(min, max);
 		return ip;
 	 }
+
+	public void initiateStack(int stkNum, int slcNum) {
+		if (fivStacks!=null && fivStacks.size()>stkNum && fivStacks.get(stkNum).infoArray.length>slcNum) {
+			String currentFileName =fivStacks.get(stkNum).infoArray[slcNum].fileName;
+			if (!touchedFiles.contains(currentFileName)) {
+				TiffDecoder td = new TiffDecoder(dir, currentFileName);
+				if (IJ.debugMode) td.enableDebugging();
+				IJ.showStatus("Decoding TIFF header...");
+				try {infoCollectorArrayList.set(stkNum, td.getTiffInfo(0));}
+				catch (IOException e) {
+					String msg = e.getMessage();
+					if (msg==null||msg.equals("")) msg = ""+e;
+					IJ.error("TiffDecoder", msg);
+				}
+				fivStacks.get(stkNum).infoArray = infoCollectorArrayList.get(stkNum);
+
+				touchedFiles.add(currentFileName);
+			}
+		}
+	}
  
 	 /** Returns the number of images in this stack. */
 	public int getSize() {
