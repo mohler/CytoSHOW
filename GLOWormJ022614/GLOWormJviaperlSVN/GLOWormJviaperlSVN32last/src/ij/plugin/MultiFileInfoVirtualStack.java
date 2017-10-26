@@ -524,7 +524,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				
 		stackNumber--;
 
-		sliceNumber = (n+1) % (fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
+		sliceNumber = (n) % (fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
 		if (dimOrder.toLowerCase().matches(".*splitc.*")) {
 			sliceNumber = (sliceNumber/2);
 		}
