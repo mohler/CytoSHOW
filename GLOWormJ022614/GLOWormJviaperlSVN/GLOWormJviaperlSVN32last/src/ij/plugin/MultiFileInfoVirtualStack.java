@@ -9,12 +9,15 @@ import ij.io.*;
 
 import java.awt.*;
 import java.io.*;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Properties;
 import java.util.regex.Pattern;
 
+import org.vcell.gloworm.GetNetworkAddress;
 import org.vcell.gloworm.QTVirtualStack;
 
 public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
@@ -536,7 +539,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 		ImageProcessor ip = null;
 		if (dimOrder == "xyczt") {
-			int  vSliceNumber = (sliceNumber)+1+(isViewB?fivStacks.get(stackNumber).getSize()/vDim:0);
+			int  vSliceNumber = (sliceNumber)+(isViewB?fivStacks.get(stackNumber).getSize()/vDim:0);
 			if (vSliceNumber>fivStacks.get(stackNumber).getSize()) {
 				vSliceNumber = vSliceNumber-fivStacks.get(stackNumber).getSize();
 				stackNumber++;
@@ -548,7 +551,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			int dX = -11;
 			int dY = 7;
 			
-			int  vSliceNumber = (sliceNumber)+1+(isViewB?zDim:0);
+			int  vSliceNumber = (sliceNumber)+(isViewB?zDim:0);
 			if (vSliceNumber>fivStacks.get(stackNumber).getSize()) {
 				vSliceNumber = vSliceNumber-fivStacks.get(stackNumber).getSize();
 				stackNumber++;
@@ -562,7 +565,23 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			} else {
 				ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
 			}
-			ip.setRoi(1280-((1-n%2)*(1024+dX)), 0+((1-n%2)*(0+dY)), 512, 512-dY);
+			String uniqueClientIdentifier;
+			try {
+				uniqueClientIdentifier = InetAddress.getLocalHost().getHostName() +"_"+ GetNetworkAddress.GetAddress("mac");
+			} catch (UnknownHostException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				uniqueClientIdentifier = GetNetworkAddress.GetAddress("mac");
+			}
+			if (ip.getWidth()==2048) {
+				ip.setRoi(1280-((1-n%2)*(1024+dX)), 0+((1-n%2)*(0+dY)), 512, 512-dY);
+			} else if (ip.getWidth()==1536){
+				dX=2;
+				dY=-1;
+				int xOri = 0+((n%2)*(1024+dX));
+				int yOri = 0+((1-n%2)*(0+dY));
+				ip.setRoi(xOri, yOri, 512-Math.abs(dX), 512-Math.abs(dX));
+			}
 			ip=ip.crop();
 		}
 		if (dimOrder == "xyzct") {

@@ -1725,11 +1725,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 			for (int f = 1; f <= impAs[0].getNFrames(); f++) {
 				for (int pos=0; pos<pDim; pos++) {
-					if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+					if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible() || f>impAs[pos].getNFrames()) {
 						doProcessing[pos] = false;
 						continue;
 					}
-					if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+					if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible() || f>impBs[pos].getNFrames()) {
 						doProcessing[pos] = false;
 						continue;
 					} 
@@ -2471,11 +2471,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 			for (int f = 1; f <= impAs[0].getNFrames(); f++) {
 				for (int pos=0; pos<pDim; pos++) {
-					if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+					if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()  || f>impAs[pos].getNFrames()) {
 						doProcessing[pos] = false;
 						continue;
 					}
-					if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+					if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()  || f>impBs[pos].getNFrames()) {
 						doProcessing[pos] = false;
 						continue;
 					} 
@@ -3968,11 +3968,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 				for (int f = 1; f <= impAs[0].getNFrames(); f++) {
 					for (int pos=0; pos<pDim; pos++) {
-						if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+						if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()  || f>impAs[pos].getNFrames()) {
 							doProcessing[pos] = false;
 							continue;
 						}
-						if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+						if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()  || f>impBs[pos].getNFrames()) {
 							doProcessing[pos] = false;
 							continue;
 						} 
@@ -5686,6 +5686,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 //						IJ.log(allVars);
 
 		if (diSPIM_MM_Width == 2048 ) {
+			if (diSPIM_MM_channelMode==null || diSPIM_MM_channelMode.startsWith("NONE")) {
+				if(diSPIM_MM_useChannels==false) {
+					cDim = 2;    //using diSPIM_MM_channel_use_index value doesn' work for Shroff system (counts 4, duh)
+					splitChannels = true;
+					dimOrder = "xySplitCzt";
+				}
+			}
+		}
+		if (diSPIM_MM_Width == 1536 ) {
 			if (diSPIM_MM_channelMode==null || diSPIM_MM_channelMode.startsWith("NONE")) {
 				if(diSPIM_MM_useChannels==false) {
 					cDim = 2;    //using diSPIM_MM_channel_use_index value doesn' work for Shroff system (counts 4, duh)
