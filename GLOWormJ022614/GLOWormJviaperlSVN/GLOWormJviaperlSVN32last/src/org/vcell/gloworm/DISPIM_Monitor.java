@@ -1856,7 +1856,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 							impAs[pos].getWindow().setEnabled(true);
 							ImagePlus impXA1 = new ImagePlus();
 							impXA1.setStack(stackA1);
-							if (uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC")) {
+							if (diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
 								IJ.run(impXA1, "Rotate 90 Degrees Left", "stack");
 							}
 							impXA1.setCalibration(impAs[pos].getCalibration());
@@ -1867,7 +1867,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 							if (wavelengths == 2) {
 								ImagePlus impXA2 = new ImagePlus();
 								impXA2.setStack(stackA2);
-								if (uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC")) {
+								if (diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
 									IJ.run(impXA2, "Rotate 90 Degrees Left", "stack");
 								}
 								impXA2.setCalibration(impAs[pos].getCalibration());
@@ -1962,7 +1962,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 							impBs[pos].getWindow().setEnabled(true);
 							ImagePlus impXB1 = new ImagePlus();
 							impXB1.setStack(stackB1);
-							if (uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC")) {
+							if (diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
 //								IJ.run(impXB1, "Flip Horizontally", "stack");
 								IJ.run(impXB1, "Rotate 90 Degrees Right", "stack");
 							}
@@ -1974,7 +1974,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 							if (wavelengths == 2) {
 								ImagePlus impXB2 = new ImagePlus();
 								impXB2.setStack(stackB2);
-								if (uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC")) {
+								if (diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
 //									IJ.run(impXB2, "Flip Horizontally", "stack");
 									IJ.run(impXB2, "Rotate 90 Degrees Right", "stack");
 								}
@@ -2027,7 +2027,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 							String threeDorientationIndex= ""+abRelOriValue;
 
 //							String threeDorientationIndex= "1";
-//							if (uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC")) {
+//							if (diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
 //								threeDorientationIndex =  "-1";
 //							}							
 							if (wavelengths == 1) {
@@ -4100,7 +4100,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 								impAs[pos].getWindow().setEnabled(true);
 								ImagePlus impXA1 = new ImagePlus();
 								impXA1.setStack(stackA1);
-								if (uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC")) {
+								if (diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
 									IJ.run(impXA1, "Rotate 90 Degrees Left", "stack");
 								}
 								impXA1.setCalibration(impAs[pos].getCalibration());
@@ -4111,7 +4111,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 								if (wavelengths == 2) {
 									ImagePlus impXA2 = new ImagePlus();
 									impXA2.setStack(stackA2);
-									if (uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC")) {
+									if (diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
 										IJ.run(impXA2, "Rotate 90 Degrees Left", "stack");
 									}
 									impXA2.setCalibration(impAs[pos].getCalibration());
@@ -4206,7 +4206,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 								impBs[pos].getWindow().setEnabled(true);
 								ImagePlus impXB1 = new ImagePlus();
 								impXB1.setStack(stackB1);
-								if (uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC")) {
+								if (diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
 //									IJ.run(impXB1, "Flip Horizontally", "stack");
 									IJ.run(impXB1, "Rotate 90 Degrees Right", "stack");
 								}
@@ -4218,7 +4218,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 								if (wavelengths == 2) {
 									ImagePlus impXB2 = new ImagePlus();
 									impXB2.setStack(stackB2);
-									if (uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC")) {
+									if (diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
 //										IJ.run(impXB2, "Flip Horizontally", "stack");
 										IJ.run(impXB2, "Rotate 90 Degrees Right", "stack");
 									}
@@ -4271,7 +4271,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 								String threeDorientationIndex= ""+abRelOriValue;
 
 //								String threeDorientationIndex= "1";
-//								if (uniqueClientIdentifier.contains("diSPIM-HP_40-A8-F0-CA-0A-CC")) {
+//								if (diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
 //									threeDorientationIndex =  "-1";
 //								}							
 
