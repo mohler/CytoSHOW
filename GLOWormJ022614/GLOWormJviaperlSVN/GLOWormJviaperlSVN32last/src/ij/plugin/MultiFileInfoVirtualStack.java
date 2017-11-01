@@ -548,8 +548,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber);
 		}
 		if (dimOrder.toLowerCase().matches(".*splitc.*")) {
-			int dX = -11;
-			int dY = 7;
+			int dX = 0;
+			int dY = 0;
 			
 			int  vSliceNumber = (sliceNumber)+(isViewB?zDim:0);
 			if (vSliceNumber>fivStacks.get(stackNumber).getSize()) {
@@ -565,24 +565,22 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			} else {
 				ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
 			}
-			String uniqueClientIdentifier;
-			try {
-				uniqueClientIdentifier = InetAddress.getLocalHost().getHostName() +"_"+ GetNetworkAddress.GetAddress("mac");
-			} catch (UnknownHostException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-				uniqueClientIdentifier = GetNetworkAddress.GetAddress("mac");
-			}
+
 			if (ip.getWidth()==2048) {
-				ip.setRoi(1280-((1-n%2)*(1024+dX)), 0+((1-n%2)*(0+dY)), 512, 512-dY);
+				dX=0;
+				dY=0;
+				int xOri = 256+((1-n%2)*(1024));
+				int yOri = 0+((1-n%2)*(0));
+				ip.setRoi(xOri, yOri, 512, 512);
 			} else if (ip.getWidth()==1536){
 				dX=2;
-				dY=-1;
-				int xOri = 0+((n%2)*(1024+dX));
-				int yOri = 0+((1-n%2)*(0+dY));
-				ip.setRoi(xOri, yOri, 512-Math.abs(dX), 512-Math.abs(dX));
+				dY=2;
+				int xOri = 0+((1-n%2)*(1024));
+				int yOri = 0+((1-n%2)*(0));
+				ip.setRoi(xOri, yOri, 512, 512);
 			}
-			ip=ip.crop();
+			ip = ip.crop();
+			ip.translate((1-n%2)*dX, (1-n%2)*dY);
 		}
 		if (dimOrder == "xyzct") {
 			initiateStack(stackNumber, sliceNumber);

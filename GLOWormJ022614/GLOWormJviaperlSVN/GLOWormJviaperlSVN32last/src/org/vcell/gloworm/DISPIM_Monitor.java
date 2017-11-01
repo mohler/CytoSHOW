@@ -448,9 +448,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 					//Reading in diSPIM header from MM tiffs ^^^^^^
 
 					if (dimOrder == null || dimOrder == "")
-						dimOrder = (diSPIM_MM_channelMode.contains("VOLUME")?"xyzct":"xyczt");
+						dimOrder = (diSPIM_MM_channelMode!=null && diSPIM_MM_channelMode.contains("VOLUME")?"xyzct":"xyczt");
 
-					
 					if (!dimOrder.toLowerCase().matches(".*splitc.*"))
 						wavelengths = cDim/vDim; 
 					else
