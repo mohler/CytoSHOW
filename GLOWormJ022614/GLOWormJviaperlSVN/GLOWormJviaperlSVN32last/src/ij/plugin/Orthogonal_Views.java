@@ -4,12 +4,15 @@ import ij.gui.*;
 import ij.measure.*;
 import ij.plugin.frame.RoiManager;
 import ij.process.*;
+
 import java.awt.*;
 import java.awt.List;
 import java.awt.image.*;
 import java.awt.event.*;
 import java.awt.geom.*;
 import java.util.*;
+
+import javax.swing.JFrame;
 
 import org.vcell.gloworm.MultiQTVirtualStack;
  
@@ -47,14 +50,14 @@ import org.vcell.gloworm.MultiQTVirtualStack;
 public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListener, KeyListener, ActionListener, 
 	ImageListener, WindowListener, AdjustmentListener, MouseWheelListener, FocusListener, CommandListener {
 
-	private ImageWindow win;
-	private ImagePlus imp;
+	private ImageWindow xyWin;
+	private ImagePlus originalImp;
 	private boolean rgb;
 	public ImageStack imageStack;
 	private boolean hyperstack;
 	private int currentChannel, currentFrame; 
 	private int currentMode = 10000;
-	private ImageCanvas canvas;
+	private ImageCanvas xyCanvas;
 	private static final int H_ROI=0, H_ZOOM=1;
 	private static boolean sticky=true;
 	private static int xzID, yzID, xyID;
@@ -87,53 +90,53 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 	private ImagePlus xy_image;
 	 
 	public void run(String arg) {
-		imp = IJ.getImage();
-		originalStack = imp.getStack();
+		originalImp = IJ.getImage();
+		originalStack = originalImp.getStack();
 		originalCM = originalStack.getColorModel();
-		defaultWinColor = new Color(imp.getWindow().getBackground().getRGB());
+		defaultWinColor = new Color(originalImp.getWindow().getBackground().getRGB());
 		if (instance!=null) {
 			instance.dispose();
 			return;
 		}
-		if (imp.getStackSize()==1) {
+		if (originalImp.getStackSize()==1) {
 			IJ.error("Othogonal Views", "This command requires a stack.");
 			return;
 		}
-		hyperstack = imp.isHyperStack();
-		if ((hyperstack||imp.isComposite()) && imp.getNSlices()<=1) {
+		hyperstack = originalImp.isHyperStack();
+		if ((hyperstack||originalImp.isComposite()) && originalImp.getNSlices()<=1) {
 			IJ.error("Othogonal Views", "This command requires a stack, or a hypertack with Z>1.");
 			return;
 		}
 		yz_image = WindowManager.getImage(yzID);
-		rgb = imp.getBitDepth()==24 || hyperstack;
-		int yzBitDepth = hyperstack?24:imp.getBitDepth();
-		if (yz_image==null || yz_image.getHeight()!=imp.getHeight() || yz_image.getBitDepth()!=yzBitDepth){
+		rgb = originalImp.getBitDepth()==24 || hyperstack;
+		int yzBitDepth = hyperstack?24:originalImp.getBitDepth();
+		if (yz_image==null || yz_image.getHeight()!=originalImp.getHeight() || yz_image.getBitDepth()!=yzBitDepth){
 			yz_image = new ImagePlus();
-			yz_image.setMotherImp(imp.getMotherImp(), imp.getMotherFrame());
+			yz_image.setMotherImp(originalImp.getMotherImp(), originalImp.getMotherFrame());
 //			IJ.log("SET MOTHERIMP XZ");
 		}
 		xz_image = WindowManager.getImage(xzID);
 		//if (xz_image!=null) IJ.log(imp+"  "+xz_image+"  "+xz_image.getHeight()+"  "+imp.getHeight()+"  "+xz_image.getBitDepth()+"  "+yzBitDepth);
-		if (xz_image==null || xz_image.getWidth()!=imp.getWidth() || xz_image.getBitDepth()!=yzBitDepth) {
+		if (xz_image==null || xz_image.getWidth()!=originalImp.getWidth() || xz_image.getBitDepth()!=yzBitDepth) {
 			xz_image = new ImagePlus();
 //			IJ.log("NEW XZ");
-			xz_image.setMotherImp(imp.getMotherImp(), imp.getMotherFrame());
+			xz_image.setMotherImp(originalImp.getMotherImp(), originalImp.getMotherFrame());
 //			IJ.log("SET MOTHERIMP YZ");
 		}
 		xy_image = WindowManager.getImage(xyID);
 		//if (xy_image!=null) IJ.log(imp+"  "+xy_image+"  "+xy_image.getHeight()+"  "+imp.getHeight()+"  "+xy_image.getBitDepth()+"  "+yzBitDepth);
-		if (xy_image==null || xy_image.getWidth()!=imp.getWidth() || xy_image.getBitDepth()!=yzBitDepth) {
+		if (xy_image==null || xy_image.getWidth()!=originalImp.getWidth() || xy_image.getBitDepth()!=yzBitDepth) {
 			xy_image = new ImagePlus();
 //			IJ.log("NEW xy");
-			xy_image.setMotherImp(imp.getMotherImp(), imp.getMotherFrame());
+			xy_image.setMotherImp(originalImp.getMotherImp(), originalImp.getMotherFrame());
 //			IJ.log("SET MOTHERIMP YZ");
 		}
 		instance = this;
-		ImageProcessor ip = (imp instanceof CompositeImage && imp.getNChannels()>1)?
-							new ColorProcessor(imp.getImage()):imp.getProcessor();
+		ImageProcessor ip = (originalImp instanceof CompositeImage && originalImp.getNChannels()>1)?
+							new ColorProcessor(originalImp.getImage()):originalImp.getProcessor();
 		min = ip.getMin();
 		max = ip.getMax();
-		cal=this.imp.getCalibration();
+		cal=this.originalImp.getCalibration();
 		double calx=cal.pixelWidth;
 		double caly=cal.pixelHeight;
 		double calz=cal.pixelDepth;
@@ -141,13 +144,13 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 		ay=caly/calx;
 		az=calz/calx;
 		imageStack = getStack();
-		win = xy_image.getWindow();
-		canvas = win.getCanvas();
-		addListeners(canvas);
-		magnification= canvas.getMagnification();
-		imp.deleteRoi();
-		Rectangle r = canvas.getSrcRect();
-		if (imp.getID()==previousID)
+		xyWin = xy_image.getWindow();
+		xyCanvas = xyWin.getCanvas();
+		addListeners(xyCanvas);
+		magnification= xyCanvas.getMagnification();
+		originalImp.deleteRoi();
+		Rectangle r = xyCanvas.getSrcRect();
+		if (originalImp.getID()==previousID)
 			crossLoc = new Point(previousX, previousY);
 		else
 			crossLoc = new Point(r.x+r.width/2, r.y+r.height/2);
@@ -171,25 +174,25 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 			boolean xy_setup =false;
 			if (xy_image == null)
 				xy_setup =true;
-			if (xy_setup  || (imp.isComposite() && ((CompositeImage)imp).getMode() != currentMode)) {
+			if (xy_setup  || (originalImp.isComposite() && ((CompositeImage)originalImp).getMode() != currentMode)) {
 				xy_image.flush();
-				xy_image = imp.createImagePlus();
+				xy_image = originalImp.createImagePlus();
 			}
-			xy_image.setTitle(imp.getTitle()+" t="+imp.getFrame());
-			if (imp.isComposite() && currentMode == 10000) {
-				originalMode =  ((CompositeImage)imp).getMode();
+			xy_image.setTitle(originalImp.getTitle()+" t="+originalImp.getFrame());
+			if (originalImp.isComposite() && currentMode == 10000) {
+				originalMode =  ((CompositeImage)originalImp).getMode();
 			}
-			if (imp.isComposite()) {
+			if (originalImp.isComposite()) {
 //				((CompositeImage)imp).setMode(CompositeImage.GRAYSCALE);
-				currentMode = ((CompositeImage)imp).getMode();
+				currentMode = ((CompositeImage)originalImp).getMode();
 			}
-			imp.deleteRoi();
-			int slices = imp.getNSlices();
-			ImageStack stack = new ImageStack(imp.getWidth(), imp.getHeight());
-			int c=imp.getChannel(), z=imp.getSlice(), t=imp.getFrame();
+			originalImp.deleteRoi();
+			int slices = originalImp.getNSlices();
+			ImageStack stack = new ImageStack(originalImp.getWidth(), originalImp.getHeight());
+			int c=originalImp.getChannel(), z=originalImp.getSlice(), t=originalImp.getFrame();
 			
 			stackRoiArrayList.clear();
-			RoiManager rm = imp.getRoiManager();
+			RoiManager rm = originalImp.getRoiManager();
 			Roi[] allRois = rm.getShownRoisAsArray();
 
 			for (int j=0; j<allRois.length; j++) {
@@ -208,47 +211,47 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 			stackRoiArrayList.clear();
 
 			for (int i=1; i<=slices; i++) {
-				int slicePos = (t-1)*imp.getNSlices() + (i-1)*imp.getNChannels() + c;
-				if (imp instanceof CompositeImage && imp.getNChannels()>1 && currentMode < CompositeImage.GRAYSCALE) {
-					imp.getWindow().setEnabled(false);
-					imp.setPositionWithoutUpdate(c, i, t);
-					((CompositeImage)imp).setMode(currentMode);
-					stack.addSlice(new ColorProcessor(imp.getImage()));
-				} else if (imp.getStack() instanceof VirtualStack) {
-					imp.getWindow().setEnabled(false);
-					imp.setPositionWithoutUpdate(c, i, t);
-					stack.addSlice(imp.getProcessor());
+				int slicePos = (t-1)*originalImp.getNSlices() + (i-1)*originalImp.getNChannels() + c;
+				if (originalImp instanceof CompositeImage && originalImp.getNChannels()>1 && currentMode < CompositeImage.GRAYSCALE) {
+					originalImp.getWindow().setEnabled(false);
+					originalImp.setPositionWithoutUpdate(c, i, t);
+					((CompositeImage)originalImp).setMode(currentMode);
+					stack.addSlice(new ColorProcessor(originalImp.getImage()));
+				} else if (originalImp.getStack() instanceof VirtualStack) {
+					originalImp.getWindow().setEnabled(false);
+					originalImp.setPositionWithoutUpdate(c, i, t);
+					stack.addSlice(originalImp.getProcessor());
 				} else {
-					imp.getWindow().setEnabled(false);
-					imp.setPositionWithoutUpdate(c, i, t);
-					stack.addSlice(imp.getProcessor());
+					originalImp.getWindow().setEnabled(false);
+					originalImp.setPositionWithoutUpdate(c, i, t);
+					stack.addSlice(originalImp.getProcessor());
 				}
 			}
-			if (imp.isComposite()) {
-				if (((StackWindow)imp.getWindow()).cSelector != null)
-					((StackWindow)imp.getWindow()).cSelector.setIconEnabled(false);
+			if (originalImp.isComposite()) {
+				if (((StackWindow)originalImp.getWindow()).cSelector != null)
+					((StackWindow)originalImp.getWindow()).cSelector.setIconEnabled(false);
 			}
-			if (imp.getStack().isVirtual()) {
-				if (((StackWindow)imp.getWindow()).tSelector != null)
-					((StackWindow)imp.getWindow()).tSelector.setEnabled(false);
+			if (originalImp.getStack().isVirtual()) {
+				if (((StackWindow)originalImp.getWindow()).tSelector != null)
+					((StackWindow)originalImp.getWindow()).tSelector.setEnabled(false);
 			}
-			if (imp.isComposite() && imp.getStack().isVirtual()) {
-				if (((StackWindow)imp.getWindow()).zSelector != null)
-					((StackWindow)imp.getWindow()).zSelector.setEnabled(false);
+			if (originalImp.isComposite() && originalImp.getStack().isVirtual()) {
+				if (((StackWindow)originalImp.getWindow()).zSelector != null)
+					((StackWindow)originalImp.getWindow()).zSelector.setEnabled(false);
 			}
 
 
-			imp.setPosition(c, z, t);
-			imp.getWindow().setEnabled(true);
+			originalImp.setPosition(c, z, t);
+			originalImp.getWindow().setEnabled(true);
 			currentChannel = c;
 			currentFrame = t;
-			imp.deleteRoi();
+			originalImp.deleteRoi();
 			xy_image.setStack(stack);
 			xy_image.show();
 			while (xy_image.getWindow() == null) IJ.wait(10);
 			xy_image.getWindow().setBackground(Color.yellow);
 			if (xy_setup)
-				xy_image.getWindow().setLocation(imp.getWindow().getLocation());
+				xy_image.getWindow().setLocation(originalImp.getWindow().getLocation());
 			xyID = xy_image.getID();
 			for (Roi stackRoi:stackRois) {
 				if (stackRoi != null) {
@@ -257,23 +260,23 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 				}
 			}
 			xy_image.getRoiManager().showAll(RoiManager.SHOW_ALL);
-			xy_image.getRoiManager().setZSustain(imp.getRoiManager().getZSustain());
+			xy_image.getRoiManager().setZSustain(originalImp.getRoiManager().getZSustain());
 			return stack;
 		} else
-			return imp.getStack();
+			return originalImp.getStack();
 	}
  
 	private void addListeners(ImageCanvas canvass) {
-		canvas.addMouseListener(this);
-		canvas.addMouseMotionListener(this);
-		canvas.addKeyListener(this);
-		win.addWindowListener (this);  
-		win.addMouseWheelListener(this);
-		win.addFocusListener(this);
+		xyCanvas.addMouseListener(this);
+		xyCanvas.addMouseMotionListener(this);
+		xyCanvas.addKeyListener(this);
+		xyWin.addWindowListener (this);  
+		xyWin.addMouseWheelListener(this);
+		xyWin.addFocusListener(this);
 //		Component[] c = win.getComponents();
 //		//IJ.log(c[1].toString());
 //		((ScrollbarWithLabel) c[1]).addAdjustmentListener (this);
-		((StackWindow) win).zSelector.addAdjustmentListener(this);
+		((StackWindow) xyWin).zSelector.addAdjustmentListener(this);
 		ImagePlus.addImageListener(this);
 		Executer.addCommandListener(this);
 
@@ -300,7 +303,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 	}
 
 	private void updateMagnification(int x, int y) {
-        double magnification= win.getCanvas().getMagnification();
+        double magnification= xyWin.getCanvas().getMagnification();
         int z = xy_image.getSlice()-1;
         ImageWindow xz_win = xz_image.getWindow();
         if (xz_win==null) return;
@@ -335,10 +338,10 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 	
 	void updateViews(Point p, ImageStack iStack) {
 		ImageProcessor ip = null;
-		if (imp instanceof CompositeImage && imp.getNChannels()>1 && currentMode < CompositeImage.GRAYSCALE)
+		if (originalImp instanceof CompositeImage && originalImp.getNChannels()>1 && currentMode < CompositeImage.GRAYSCALE)
 			ip = xy_image.getProcessor();
 		else
-			ip = imp.getProcessor();
+			ip = originalImp.getProcessor();
 		if (!(ip instanceof ColorProcessor)) {
 			ColorModel cm = ip.getColorModel();
 			iStack.setColorModel(cm);
@@ -463,9 +466,9 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
  			if (firstTime) {
  				xy_image.getWindow().toFront();
  				if (hyperstack)
- 					imp.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame());
+ 					originalImp.setPosition(originalImp.getChannel(), originalImp.getSlice(), originalImp.getFrame());
  				else
- 					imp.setSlice(imp.getNSlices()/2);
+ 					originalImp.setSlice(originalImp.getNSlices()/2);
  				firstTime = false;
  			}
 		}
@@ -536,7 +539,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 		//loop will set up RoiManager
 		xz_image.getRoiManager().getListModel().removeAllElements();
 		xz_image.getRoiManager().getROIs().clear();
-		if (xz_image.getWindow() != null && imp.getRoiManager().isShowAll()) {
+		if (xz_image.getWindow() != null && originalImp.getRoiManager().isShowAll()) {
 			if ( stackRois[0] != null) {
 				ArrayList<Roi> cloneRois = new ArrayList<Roi>();
 				for (int r = 0; r < stackRois.length; r++) {
@@ -549,7 +552,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 								nextRoi.setLocation(
 										(int) (nextRoi.getBounds().x) ,
 										(int) (nextRoi.getZPosition()
-												* imp.getCalibration().pixelDepth/imp.getCalibration().pixelWidth 
+												* originalImp.getCalibration().pixelDepth/originalImp.getCalibration().pixelWidth 
 												- srb.getHeight() / 2));
 								xz_image.getRoiManager().addRoi(nextRoi);
 								//							x = x+srb.width;
@@ -678,7 +681,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 		//loop will set up RoiManager
 		yz_image.getRoiManager().getListModel().removeAllElements();
 		yz_image.getRoiManager().getROIs().clear();
-		if (yz_image.getWindow() != null  && imp.getRoiManager().isShowAll()) {
+		if (yz_image.getWindow() != null  && originalImp.getRoiManager().isShowAll()) {
 			if (stackRois[0] != null ) {
 				ArrayList<Roi> cloneRois = new ArrayList<Roi>();
 				for (int r = 0; r < stackRois.length; r++) {
@@ -689,7 +692,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 								Roi nextRoi = (Roi) stackRois[r].clone();
 								cloneRois.add(stackRois[r]);
 								nextRoi.setLocation((int) (nextRoi.getZPosition()
-										* imp.getCalibration().pixelDepth/imp.getCalibration().pixelHeight -
+										* originalImp.getCalibration().pixelDepth/originalImp.getCalibration().pixelHeight -
 										srb.getWidth() / 2),
 										(int) (nextRoi.getBounds().y));
 								yz_image.getRoiManager().addRoi(nextRoi);
@@ -756,93 +759,111 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 	}
 	      
 	void dispose() {
-		if (((StackWindow)imp.getWindow()).cSelector != null)
-			((StackWindow)imp.getWindow()).cSelector.setIconEnabled(true);
-		updater.quit();
-		updater = null;
-		xy_image.setOverlay(null);
-		int recentZ = xy_image.getSlice();
-		canvas.removeMouseListener(this);
-		canvas.removeMouseMotionListener(this);
-		canvas.removeKeyListener(this);
-		canvas.setCustomRoi(false);
-		xz_image.setOverlay(null);
-		xz_image.getRoiManager().dispose();
-		WindowManager.removeWindow(xz_image.getRoiManager());
-		ImageWindow win1 = xz_image.getWindow();
-		if (win1!=null) {
-			win1.removeMouseWheelListener(this);
-			ImageCanvas ic = win1.getCanvas();
-			if (ic!=null) {
-			//IJ.log("TEST1");
-				ic.removeKeyListener(this);
-				ic.removeMouseListener(this);
-				ic.removeMouseMotionListener(this);
-				ic.setCustomRoi(false);
-				win1.removeWindowListener(this);
-				win1.removeFocusListener(this);
-				win1.setResizable(true);
-				win1.setBackground(defaultWinColor);
-			}
+		if (((StackWindow)originalImp.getWindow()).cSelector != null)
+			((StackWindow)originalImp.getWindow()).cSelector.setIconEnabled(true);
+		if (updater!=null) {
+			updater.quit();
+			updater = null;
 		}
-		yz_image.setOverlay(null);
-		yz_image.getRoiManager().dispose();
-		WindowManager.removeWindow(yz_image.getRoiManager());
-		ImageWindow win2 = yz_image.getWindow();
-		if (win2!=null) {
-			win2.removeMouseWheelListener(this);
-			ImageCanvas ic = win2.getCanvas();
-			if (ic!=null) {
-			//IJ.log("TEST2");
-				ic.removeKeyListener(this);
-				ic.removeMouseListener(this);
-				ic.removeMouseMotionListener(this);
-				ic.setCustomRoi(false);
-				win2.removeWindowListener(this);
-				win2.removeFocusListener(this);
-				win2.setResizable(true);
-				win2.setBackground(defaultWinColor);
+		int recentZ = originalImp.getSlice();
+		if(xy_image!=null && xy_image.getWindow()!= null && !xy_image.getWindow().isClosed()) {		
+			xy_image.setOverlay(null);
+			recentZ = xy_image.getSlice();
+			xyCanvas.removeMouseListener(this);
+			xyCanvas.removeMouseMotionListener(this);
+			xyCanvas.removeKeyListener(this);
+			xyCanvas.setCustomRoi(false);
+			xy_image.close();
+		}
+
+		if (xz_image!=null && xz_image.getWindow()!= null && !xz_image.getWindow().isClosed()) {		
+			xz_image.setOverlay(null);
+			xz_image.getRoiManager().dispose();
+			WindowManager.removeWindow(xz_image.getRoiManager());
+			ImageWindow win1 = xz_image.getWindow();
+			if (win1!=null && !win1.isClosed()) {
+				win1.removeMouseWheelListener(this);
+				ImageCanvas ic = win1.getCanvas();
+				if (ic!=null) {
+					//IJ.log("TEST1");
+					ic.removeKeyListener(this);
+					ic.removeMouseListener(this);
+					ic.removeMouseMotionListener(this);
+					ic.setCustomRoi(false);
+					win1.removeWindowListener(this);
+					win1.removeFocusListener(this);
+					win1.setResizable(true);
+					win1.setBackground(defaultWinColor);
+				}
 			}
+			xz_image.close();
+		}
+		
+		
+		if (yz_image!=null && yz_image.getWindow()!= null && !yz_image.getWindow().isClosed()) {		
+			yz_image.setOverlay(null);
+			yz_image.getRoiManager().dispose();
+			WindowManager.removeWindow(yz_image.getRoiManager());
+			ImageWindow win2 = yz_image.getWindow();
+			if (win2!=null && !win2.isClosed()) {
+				win2.removeMouseWheelListener(this);
+				ImageCanvas ic = win2.getCanvas();
+				if (ic!=null) {
+					//IJ.log("TEST2");
+					ic.removeKeyListener(this);
+					ic.removeMouseListener(this);
+					ic.removeMouseMotionListener(this);
+					ic.setCustomRoi(false);
+					win2.removeWindowListener(this);
+					win2.removeFocusListener(this);
+					win2.setResizable(true);
+					win2.setBackground(defaultWinColor);
+				}
+			}
+			yz_image.close();
 		}
 		ImagePlus.removeImageListener(this);
 		Executer.removeCommandListener(this);
-		win.removeWindowListener(this);
-		win.removeFocusListener(this);
-		win.setResizable(true);
-		win.setBackground(defaultWinColor);
+		if(xyWin!=null) {		
+			xyWin.removeWindowListener(this);
+			xyWin.removeFocusListener(this);
+			xyWin.setResizable(true);
+			xyWin.setBackground(defaultWinColor);
+		}
 		instance = null;
-		previousID = imp.getID();
+		previousID = originalImp.getID();
 		previousX = crossLoc.x;
 		previousY = crossLoc.y;
-		if (!(imp instanceof CompositeImage) || imp.getNChannels()<=1 || currentMode != CompositeImage.COMPOSITE){
-			ColorModel cm = (imp.getProcessor().getColorModel());
-			int min = (int) imp.getProcessor().getMin();
-			int max = (int) imp.getProcessor().getMax();
-			imp.setStack(originalStack);
-			imp.getProcessor().setColorModel(cm);
-			imp.getProcessor().setMinAndMax(min, max);
-			if (((StackWindow)imp.getWindow()).cSelector != null)
-				((StackWindow)imp.getWindow()).cSelector.setEnabled(true);
-			if (((StackWindow)imp.getWindow()).tSelector != null)
-				((StackWindow)imp.getWindow()).tSelector.setEnabled(true);
-			if (((StackWindow)imp.getWindow()).zSelector != null)
-				((StackWindow)imp.getWindow()).zSelector.setEnabled(true);
+		if (!(originalImp instanceof CompositeImage) || originalImp.getNChannels()<=1 || currentMode != CompositeImage.COMPOSITE){
+			ColorModel cm = (originalImp.getProcessor().getColorModel());
+			int min = (int) originalImp.getProcessor().getMin();
+			int max = (int) originalImp.getProcessor().getMax();
+			originalImp.setStack(originalStack);
+			originalImp.getProcessor().setColorModel(cm);
+			originalImp.getProcessor().setMinAndMax(min, max);
+			if (((StackWindow)originalImp.getWindow()).cSelector != null)
+				((StackWindow)originalImp.getWindow()).cSelector.setEnabled(true);
+			if (((StackWindow)originalImp.getWindow()).tSelector != null)
+				((StackWindow)originalImp.getWindow()).tSelector.setEnabled(true);
+			if (((StackWindow)originalImp.getWindow()).zSelector != null)
+				((StackWindow)originalImp.getWindow()).zSelector.setEnabled(true);
 		} else {
-			imp.getStack().setColorModel(originalCM);
-			imp.setStack(originalStack);
-			((CompositeImage)imp).setMode(originalMode);
-			if (((StackWindow)imp.getWindow()).cSelector != null)
-				((StackWindow)imp.getWindow()).cSelector.setEnabled(true);
-			if (((StackWindow)imp.getWindow()).tSelector != null)
-				((StackWindow)imp.getWindow()).tSelector.setEnabled(true);
-			if (((StackWindow)imp.getWindow()).zSelector != null)
-				((StackWindow)imp.getWindow()).zSelector.setEnabled(true);
+			originalImp.getStack().setColorModel(originalCM);
+			originalImp.setStack(originalStack);
+			((CompositeImage)originalImp).setMode(originalMode);
+			if (((StackWindow)originalImp.getWindow()).cSelector != null)
+				((StackWindow)originalImp.getWindow()).cSelector.setEnabled(true);
+			if (((StackWindow)originalImp.getWindow()).tSelector != null)
+				((StackWindow)originalImp.getWindow()).tSelector.setEnabled(true);
+			if (((StackWindow)originalImp.getWindow()).zSelector != null)
+				((StackWindow)originalImp.getWindow()).zSelector.setEnabled(true);
 		}
-		imp.setPosition(imp.getChannel(), recentZ, imp.getFrame());
-		imp.setPosition(imp.getChannel(), recentZ+1, imp.getFrame());
-		imp.setPosition(imp.getChannel(), recentZ, imp.getFrame());
+		xy_image.close();
+		originalImp.setPosition(originalImp.getChannel(), recentZ, originalImp.getFrame());
+		originalImp.setPosition(originalImp.getChannel(), recentZ+1, originalImp.getFrame());
+		originalImp.setPosition(originalImp.getChannel(), recentZ, originalImp.getFrame());
 //		IJ.runMacro("waitForUser;");
-		imp.updateAndDraw();
+		originalImp.updateAndDraw();
 		imageStack = null;
 	}
 	
@@ -864,8 +885,8 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 	public void mouseDragged(MouseEvent e) {
 		if (IJ.spaceBarDown())  // scrolling?
 			return;
-		if (e.getSource().equals(canvas)) {
-			crossLoc = canvas.getCursorLoc();
+		if (e.getSource().equals(xyCanvas)) {
+			crossLoc = xyCanvas.getCursorLoc();
 //			IJ.log("md");
 			update();
 
@@ -874,17 +895,17 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 			crossLoc.x = xz_image.getCanvas().getCursorLoc().x;
 			int pos = xz_image.getCanvas().getCursorLoc().y;
 			int z = (int)Math.round(pos/az);
-			int slice = flipXZ?imp.getNSlices()-z:z+1;
-			if (imp instanceof CompositeImage && imp.getNChannels()>1 && currentMode < CompositeImage.GRAYSCALE) {
+			int slice = flipXZ?originalImp.getNSlices()-z:z+1;
+			if (originalImp instanceof CompositeImage && originalImp.getNChannels()>1 && currentMode < CompositeImage.GRAYSCALE) {
 				xy_image.setSlice(slice);
 //				imp.zeroUpdateMode = true;
 //				imp.setPositionWithoutUpdate(imp.getChannel(), slice, imp.getFrame());
 //				imp.zeroUpdateMode = false;
 				((StackWindow)xy_image.getWindow()).zSelector.setValue(slice);
 
-			} else if (imp.getStack() instanceof VirtualStack) {
-				int min = (int) imp.getProcessor().getMin();
-				int max = (int) imp.getProcessor().getMax();
+			} else if (originalImp.getStack() instanceof VirtualStack) {
+				int min = (int) originalImp.getProcessor().getMin();
+				int max = (int) originalImp.getProcessor().getMax();
 				xy_image.setSlice(slice);
 				xy_image.getProcessor().setMinAndMax(min, max);
 //				imp.zeroUpdateMode = true;
@@ -909,16 +930,16 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 			}
 			int z = (int)Math.round(pos/az);
 			int slice = z+1;
-			if (imp instanceof CompositeImage && imp.getNChannels()>1 && currentMode < CompositeImage.GRAYSCALE) {
+			if (originalImp instanceof CompositeImage && originalImp.getNChannels()>1 && currentMode < CompositeImage.GRAYSCALE) {
 				xy_image.setSlice(slice);
 //				imp.zeroUpdateMode = true;
 //				imp.setPositionWithoutUpdate(imp.getChannel(), slice, imp.getFrame());
 //				imp.zeroUpdateMode = false;
 				((StackWindow)xy_image.getWindow()).zSelector.setValue(slice);
 
-			} else if (imp.getStack() instanceof VirtualStack) {
-				int min = (int) imp.getProcessor().getMin();
-				int max = (int) imp.getProcessor().getMax();
+			} else if (originalImp.getStack() instanceof VirtualStack) {
+				int min = (int) originalImp.getProcessor().getMin();
+				int max = (int) originalImp.getProcessor().getMax();
 				xy_image.setSlice(slice);
 				xy_image.getProcessor().setMinAndMax(min, max);
 //				imp.zeroUpdateMode = true;
@@ -979,16 +1000,16 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 	}
 	
 	private void exec() {
-		if (canvas==null) return;
-		int width=imp.getWidth();
-		int height=imp.getHeight();
+		if (xyCanvas==null) return;
+		int width=originalImp.getWidth();
+		int height=originalImp.getHeight();
 		if (hyperstack) {
-			int c = imp.getChannel();
-			int t = imp.getFrame();
+			int c = originalImp.getChannel();
+			int t = originalImp.getFrame();
 			if (c!=currentChannel || t!=currentFrame)
 				imageStack = null;
-			if (imp.isComposite()) {
-				int mode = ((CompositeImage)imp).getMode();
+			if (originalImp.isComposite()) {
+				int mode = ((CompositeImage)originalImp).getMode();
 				if (mode!=currentMode)
 					imageStack = null;
 			}
@@ -1018,14 +1039,14 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 		overlay.add(vLine);
 		overlay.add(hLine);
 		
-		Roi yzLabel = new TextRoi(p.x+1,1,"YZ", Font.decode("Arial-"+8/canvas.getMagnification()));
+		Roi yzLabel = new TextRoi(p.x+1,1,"YZ", Font.decode("Arial-"+8/xyCanvas.getMagnification()));
 		yzLabel.setStrokeColor(Color.cyan);
-		Roi xzLabel = new TextRoi(1,p.y,"XZ", Font.decode("Arial-"+8/canvas.getMagnification()));
+		Roi xzLabel = new TextRoi(1,p.y,"XZ", Font.decode("Arial-"+8/xyCanvas.getMagnification()));
 		xzLabel.setStrokeColor(Color.magenta);
 		overlay.add(yzLabel);
 		overlay.add(xzLabel);
 		xy_image.setOverlay(overlay);
-		canvas.setCustomRoi(true);
+		xyCanvas.setCustomRoi(true);
 		updateCrosses(p.x, p.y, arat, brat);
 		if (syncZoom) updateMagnification(p.x, p.y);
 		arrangeWindows(sticky);
@@ -1033,7 +1054,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 
 	private void updateCrosses(int x, int y, double arat, double brat) {
 		Point p;
-		int z=imp.getNSlices();
+		int z=originalImp.getNSlices();
 		int zlice=((StackWindow)xy_image.getWindow()).zSelector.getValue()-1;
 		int zcoord=(int)Math.round(arat*zlice);
 		if (flipXZ) zcoord = (int)Math.round(arat*(z-zlice));
@@ -1050,9 +1071,9 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 		overlay.add(vLine);
 		overlay.add(hLine);
 		
-		Roi yzLabel = new TextRoi(p.x+1,1,"YZ", Font.decode("Arial-"+8/canvas.getMagnification()));
+		Roi yzLabel = new TextRoi(p.x+1,1,"YZ", Font.decode("Arial-"+8/xyCanvas.getMagnification()));
 		yzLabel.setStrokeColor(Color.cyan);
-		Roi xyLabel = new TextRoi(1,p.y,"XY", Font.decode("Arial-"+8/canvas.getMagnification()));
+		Roi xyLabel = new TextRoi(1,p.y,"XY", Font.decode("Arial-"+8/xyCanvas.getMagnification()));
 		xyLabel.setStrokeColor(Color.yellow);
 		overlay.add(yzLabel);
 		overlay.add(xyLabel);
@@ -1076,9 +1097,9 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 		overlay.add(vLine);
 		overlay.add(hLine);
 		
-		xyLabel = new TextRoi(p.x+1,1,"XY", Font.decode("Arial-"+8/canvas.getMagnification()));
+		xyLabel = new TextRoi(p.x+1,1,"XY", Font.decode("Arial-"+8/xyCanvas.getMagnification()));
 		xyLabel.setStrokeColor(Color.yellow);
-		Roi xzLabel = new TextRoi(1,p.y,"XZ", Font.decode("Arial-"+8/canvas.getMagnification()));
+		Roi xzLabel = new TextRoi(1,p.y,"XZ", Font.decode("Arial-"+8/xyCanvas.getMagnification()));
 		xzLabel.setStrokeColor(Color.magenta);
 		overlay.add(xyLabel);
 		overlay.add(xzLabel);
@@ -1096,7 +1117,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 			IJ.beep();
 			dispose();
 		} else if (IJ.shiftKeyDown()) {
-			int width=imp.getWidth(), height=imp.getHeight();
+			int width=originalImp.getWidth(), height=originalImp.getHeight();
 			switch (key) {
 				case KeyEvent.VK_LEFT: crossLoc.x--; if (crossLoc.x<0) crossLoc.x=0; break;
 				case KeyEvent.VK_RIGHT: crossLoc.x++; if (crossLoc.x>=width) crossLoc.x=width-1; break;
@@ -1126,7 +1147,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 	}
 
 	public void imageUpdated(ImagePlus imp) {
-		if (imp==this.imp) {
+		if (imp==this.originalImp) {
 			ImageProcessor ip = imp.getProcessor();
 			min = ip.getMin();
 			max = ip.getMax();
@@ -1213,7 +1234,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 
 	public void focusGained(FocusEvent e) {
 		ImageCanvas ic = xy_image.getCanvas();
-		if (ic!=null) canvas.requestFocus();
+		if (ic!=null) xyCanvas.requestFocus();
 		arrangeWindows(sticky);
 	}
 
@@ -1223,7 +1244,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 	
 	public static ImagePlus getImage() {
 		if (instance!=null)
-			return instance.imp;
+			return instance.originalImp;
 		else
 			return null;
 	}
@@ -1232,7 +1253,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 		if (imp==null || instance==null)
 			return false;
 		else
-			return imp==instance.imp || imp==instance.xz_image || imp==instance.yz_image || imp == instance.xy_image;
+			return imp==instance.originalImp || imp==instance.xz_image || imp==instance.yz_image || imp == instance.xy_image;
 	}
 
 	public static Orthogonal_Views getInstance() {
@@ -1243,16 +1264,16 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 		int[] loc = new int[3];
 		loc[0] = crossLoc.x;
 		loc[1] = crossLoc.y;
-		loc[2] = imp.getSlice()-1;
+		loc[2] = originalImp.getSlice()-1;
 		return loc;
 	}
 	
 	public void setCrossLoc(int x, int y, int z) {
 		crossLoc.setLocation(x, y);
 		if (hyperstack)
-			imp.setPosition(imp.getChannel(), z+1, imp.getFrame());
+			originalImp.setPosition(originalImp.getChannel(), z+1, originalImp.getFrame());
 		else
-			imp.setSlice(z+1);
+			originalImp.setSlice(z+1);
 //		IJ.log("setCrossLoc");
 		update();
 	}
