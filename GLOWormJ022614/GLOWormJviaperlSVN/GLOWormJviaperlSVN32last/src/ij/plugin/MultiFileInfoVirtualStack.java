@@ -527,7 +527,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				
 		stackNumber--;
 
-		sliceNumber = (n) % (fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
+		sliceNumber = (n+1) % (fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
 		if (dimOrder.toLowerCase().matches(".*splitc.*")) {
 			sliceNumber = (sliceNumber/2);
 		}
@@ -567,16 +567,16 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			}
 
 			if (ip.getWidth()==2048) {
-				dX=0;
+				dX=2;
 				dY=0;
-				int xOri = 256+((1-n%2)*(1024));
-				int yOri = 0+((1-n%2)*(0));
+				int xOri = 256+((1-(n+1)%2)*(1024));
+				int yOri = 0+((1-(n+1)%2)*(0));
 				ip.setRoi(xOri, yOri, 512, 512);
 			} else if (ip.getWidth()==1536){
-				dX=2;
-				dY=2;
-				int xOri = 0+((1-n%2)*(1024));
-				int yOri = 0+((1-n%2)*(0));
+				dX=isViewB?3:0;
+				dY=isViewB?-2:-2;
+				int xOri = 0+((1-(n+1)%2)*(1024));
+				int yOri = 0+((1-(n+1)%2)*(0));
 				ip.setRoi(xOri, yOri, 512, 512);
 			}
 			ip = ip.crop();
