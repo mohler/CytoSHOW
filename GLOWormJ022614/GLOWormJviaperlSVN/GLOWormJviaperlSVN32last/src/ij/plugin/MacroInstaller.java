@@ -353,19 +353,34 @@ public class MacroInstaller implements PlugIn, MacroConstants, ActionListener {
 	 /** Returns a text file contained in ij.jar. */
 	 public String openFromIJJar(String path) {
 		String text = null;
+		InputStream is = null;
+		InputStreamReader isr = null;
 		  try {
-			InputStream is = this.getClass().getResourceAsStream(path);
+			is = this.getClass().getResourceAsStream(path);
 			//IJ.log(is+"	"+path);
 			if (is==null) return null;
-				InputStreamReader isr = new InputStreamReader(is);
+				isr = new InputStreamReader(is);
 				StringBuffer sb = new StringBuffer();
 				char [] b = new char [8192];
 				int n;
 				while ((n = isr.read(b)) > 0)
 					 sb.append(b,0, n);
 				text = sb.toString();
+				is.close();
+				isr.close();
 		  }
 		  catch (IOException e) {}
+		  finally {
+			  if (isr!=null) {
+				  try {
+					  is.close();
+					  isr.close();
+				  } catch (IOException e) {
+					  // TODO Auto-generated catch block
+					  e.printStackTrace();
+				  }
+			  }
+		  }
 		  return text;
 	}
 	

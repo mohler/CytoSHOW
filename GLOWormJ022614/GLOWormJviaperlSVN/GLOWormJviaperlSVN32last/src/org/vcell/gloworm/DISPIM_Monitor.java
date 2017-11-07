@@ -311,6 +311,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 	private MultiFileInfoVirtualStack[] stackDFs;
 	private MultiFileInfoVirtualStack[] stackPrxs;
 	private MultiFileInfoVirtualStack[] stackPrys;
+	private MultiFileInfoVirtualStack[] stackAs;
+	private MultiFileInfoVirtualStack[] stackBs;
 	
 	public Process getRegDeconProcess() {
 		return regDeconProcess;
@@ -528,8 +530,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 					cropHeightB = new double[pDim];
 					fuseButton = new Button[pDim][2];
 
-					MultiFileInfoVirtualStack[] stackAs = new MultiFileInfoVirtualStack[pDim];
-					MultiFileInfoVirtualStack[] stackBs = new MultiFileInfoVirtualStack[pDim];
+					stackAs = new MultiFileInfoVirtualStack[pDim];
+					stackBs = new MultiFileInfoVirtualStack[pDim];
 
 					for (int pos=0; pos<pDim; pos++) {
 
@@ -3870,6 +3872,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 							IJ.log("finishing " + pos +" "+ impAs[pos].getChannel()+" "+ impAs[pos].getSlice()+" "+ f);
 
 						}
+							
 							saveFile = new File(savePath);
 							if ((saveFile).canRead()) {
 								// SETUP OF WINDOWS SHOWING NEW AND PRE-EXISTING DECON OUTPUTS
@@ -3904,7 +3907,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 										}
 
 										ciDFs[pos] = new CompositeImage(impDF1s[pos]);
-										
+
 
 
 										if (wavelengths > 1)
@@ -3945,156 +3948,156 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 											win.setVisible(true);	
 										}
 
-											dfProjXmfivs = new MultiFileInfoVirtualStack(prxPath+File.separator, "Color", false);
-											dfProjYmfivs = new MultiFileInfoVirtualStack(pryPath+File.separator, "Color", false);
+										dfProjXmfivs = new MultiFileInfoVirtualStack(prxPath+File.separator, "Color", false);
+										dfProjYmfivs = new MultiFileInfoVirtualStack(pryPath+File.separator, "Color", false);
 
-											impPrxs[pos] = new ImagePlus();
-											impPrxs[pos].setStack("3DProjX_Decon-Fuse_"
-													+ impAs[pos].getTitle().split(":")[0], dfProjXmfivs);
-											impPrxs[pos].setFileInfo(new FileInfo());
+										impPrxs[pos] = new ImagePlus();
+										impPrxs[pos].setStack("3DProjX_Decon-Fuse_"
+												+ impAs[pos].getTitle().split(":")[0], dfProjXmfivs);
+										impPrxs[pos].setFileInfo(new FileInfo());
 
-											impPrxs[pos].getOriginalFileInfo().directory = prxPath+File.separator;
-											int stkNSlicesPrx = impPrxs[pos].getStackSize();
-											int zSlicesPrx = dfProjXmfivs.getFivStacks().get(0)
-													.getSize();
-											impPrxs[pos].setOpenAsHyperStack(true);
-											impPrxs[pos].setStack(impPrxs[pos].getStack(), wavelengths,
-													zSlicesPrx, stkNSlicesPrx
-													/ (wavelengths * zSlicesPrx));
-											if (ciPrxs[pos] != null) {
-												prjXwin = ciPrxs[pos].getWindow();
-											}
-											ciPrxs[pos] = new CompositeImage(impPrxs[pos]);
+										impPrxs[pos].getOriginalFileInfo().directory = prxPath+File.separator;
+										int stkNSlicesPrx = impPrxs[pos].getStackSize();
+										int zSlicesPrx = dfProjXmfivs.getFivStacks().get(0)
+												.getSize();
+										impPrxs[pos].setOpenAsHyperStack(true);
+										impPrxs[pos].setStack(impPrxs[pos].getStack(), wavelengths,
+												zSlicesPrx, stkNSlicesPrx
+												/ (wavelengths * zSlicesPrx));
+										if (ciPrxs[pos] != null) {
+											prjXwin = ciPrxs[pos].getWindow();
+										}
+										ciPrxs[pos] = new CompositeImage(impPrxs[pos]);
+										ciPrxs[pos].setPosition(1, ciPrxs[pos].getNSlices()/2, ciPrxs[pos].getNFrames());
+
+
+										impPrys[pos] = new ImagePlus();
+										impPrys[pos].setStack("3DProjY_Decon-Fuse_"
+												+ impAs[pos].getTitle().split(":")[0], dfProjYmfivs);
+										impPrys[pos].setFileInfo(new FileInfo());
+
+										impPrys[pos].getOriginalFileInfo().directory = pryPath+File.separator;
+										int stkNSlicesPry = impPrys[pos].getStackSize();
+										int zSlicesPry = dfProjYmfivs.getFivStacks().get(0)
+												.getSize();
+										impPrys[pos].setOpenAsHyperStack(true);
+										impPrys[pos].setStack(impPrys[pos].getStack(), wavelengths,
+												zSlicesPry, stkNSlicesPry
+												/ (wavelengths * zSlicesPry));
+										if (ciPrys[pos] != null) {
+											prjYwin = ciPrys[pos].getWindow();
+										}
+										ciPrys[pos] = new CompositeImage(impPrys[pos]);
+										ciPrys[pos].setPosition(1, ciPrys[pos].getNSlices()/2, ciPrys[pos].getNFrames());
+
+										if (wavelengths > 1)
+											ciPrxs[pos].setMode(CompositeImage.COMPOSITE);
+										else
+											ciPrxs[pos].setMode(CompositeImage.GRAYSCALE);
+
+										int oldW;
+										int oldH;
+										int oldC;
+										int oldZ;
+										int oldT;
+										double oldMag;
+										double oldMin;
+										double oldMax;
+										if (prjXwin==null) {
+											ciPrxs[pos].show();
+											WindowManager.group(ciDFs[pos], ciPrxs[pos]);
 											ciPrxs[pos].setPosition(1, ciPrxs[pos].getNSlices()/2, ciPrxs[pos].getNFrames());
+										} else {
+											oldW = prjXwin.getWidth();
+											oldH = prjXwin.getHeight();
+											oldC = prjXwin.getImagePlus().getChannel();
+											oldZ = prjXwin.getImagePlus().getSlice();
+											oldT = prjXwin.getImagePlus().getFrame();
+											oldMag = prjXwin.getCanvas().getMagnification();
+											oldMin = prjXwin.getImagePlus()
+													.getDisplayRangeMin();
+											oldMax = prjXwin.getImagePlus()
+													.getDisplayRangeMax();
+											((CompositeImage)ciPrxs[pos]).copyLuts(prjXwin.getImagePlus());
+
+											ciPrxs[pos].setWindow(prjXwin);
+											prjXwin.updateImage(ciPrxs[pos]);
+											prjXwin.setSize(oldW, oldH);
+											((StackWindow) prjXwin).addScrollbars(ciPrxs[pos]);
+											prjXwin.getCanvas().setMagnification(oldMag);											
+											prjXwin.getImagePlus().updateAndDraw();
+											prjXwin.getImagePlus().setPosition(oldC, oldZ, oldT);
+											prjXwin.getImagePlus().setDisplayRange(oldMin, oldMax);
+											prjXwin.setSize(prjXwin.getSize().width,
+													prjXwin.getSize().height);
 
 
-											impPrys[pos] = new ImagePlus();
-											impPrys[pos].setStack("3DProjY_Decon-Fuse_"
-													+ impAs[pos].getTitle().split(":")[0], dfProjYmfivs);
-											impPrys[pos].setFileInfo(new FileInfo());
-
-											impPrys[pos].getOriginalFileInfo().directory = pryPath+File.separator;
-											int stkNSlicesPry = impPrys[pos].getStackSize();
-											int zSlicesPry = dfProjYmfivs.getFivStacks().get(0)
-													.getSize();
-											impPrys[pos].setOpenAsHyperStack(true);
-											impPrys[pos].setStack(impPrys[pos].getStack(), wavelengths,
-													zSlicesPry, stkNSlicesPry
-													/ (wavelengths * zSlicesPry));
-											if (ciPrys[pos] != null) {
-												prjYwin = ciPrys[pos].getWindow();
-											}
-											ciPrys[pos] = new CompositeImage(impPrys[pos]);
+										}
+										if (wavelengths > 1)
+											ciPrys[pos].setMode(CompositeImage.COMPOSITE);
+										else
+											ciPrys[pos].setMode(CompositeImage.GRAYSCALE);
+										if (prjYwin==null) {
+											ciPrys[pos].show();
+											WindowManager.group(ciPrxs[pos], ciPrys[pos]);
 											ciPrys[pos].setPosition(1, ciPrys[pos].getNSlices()/2, ciPrys[pos].getNFrames());
+										} else {
+											oldW = prjYwin.getWidth();
+											oldH = prjYwin.getHeight();
+											oldC = prjYwin.getImagePlus().getChannel();
+											oldZ = prjYwin.getImagePlus().getSlice();
+											oldT = prjYwin.getImagePlus().getFrame();
+											oldMag = prjYwin.getCanvas().getMagnification();
+											oldMin = prjYwin.getImagePlus()
+													.getDisplayRangeMin();
+											oldMax = prjYwin.getImagePlus()
+													.getDisplayRangeMax();
+											((CompositeImage)ciPrys[pos]).copyLuts(prjYwin.getImagePlus());
 
-											if (wavelengths > 1)
-												ciPrxs[pos].setMode(CompositeImage.COMPOSITE);
-											else
-												ciPrxs[pos].setMode(CompositeImage.GRAYSCALE);
+											ciPrys[pos].setWindow(prjYwin);
+											prjYwin.updateImage(ciPrys[pos]);
+											prjYwin.setSize(oldW, oldH);
+											((StackWindow) prjYwin).addScrollbars(ciPrys[pos]);
+											prjYwin.getCanvas().setMagnification(oldMag);
+											prjYwin.getImagePlus().updateAndDraw();
+											prjYwin.getImagePlus().setPosition(oldC, oldZ, oldT);
+											prjYwin.getImagePlus().setDisplayRange(oldMin, oldMax);
+											prjYwin.setSize(prjYwin.getSize().width,
+													prjYwin.getSize().height);
+										}
 
-											int oldW;
-											int oldH;
-											int oldC;
-											int oldZ;
-											int oldT;
-											double oldMag;
-											double oldMin;
-											double oldMax;
-											if (prjXwin==null) {
-												ciPrxs[pos].show();
-												WindowManager.group(ciDFs[pos], ciPrxs[pos]);
-												ciPrxs[pos].setPosition(1, ciPrxs[pos].getNSlices()/2, ciPrxs[pos].getNFrames());
-											} else {
-												oldW = prjXwin.getWidth();
-												oldH = prjXwin.getHeight();
-												oldC = prjXwin.getImagePlus().getChannel();
-												oldZ = prjXwin.getImagePlus().getSlice();
-												oldT = prjXwin.getImagePlus().getFrame();
-												oldMag = prjXwin.getCanvas().getMagnification();
-												oldMin = prjXwin.getImagePlus()
-														.getDisplayRangeMin();
-												oldMax = prjXwin.getImagePlus()
-														.getDisplayRangeMax();
-												((CompositeImage)ciPrxs[pos]).copyLuts(prjXwin.getImagePlus());
-
-												ciPrxs[pos].setWindow(prjXwin);
-												prjXwin.updateImage(ciPrxs[pos]);
-												prjXwin.setSize(oldW, oldH);
-												((StackWindow) prjXwin).addScrollbars(ciPrxs[pos]);
-												prjXwin.getCanvas().setMagnification(oldMag);											
-												prjXwin.getImagePlus().updateAndDraw();
-												prjXwin.getImagePlus().setPosition(oldC, oldZ, oldT);
-												prjXwin.getImagePlus().setDisplayRange(oldMin, oldMax);
-												prjXwin.setSize(prjXwin.getSize().width,
-														prjXwin.getSize().height);
-
-
-											}
-											if (wavelengths > 1)
-												ciPrys[pos].setMode(CompositeImage.COMPOSITE);
-											else
-												ciPrys[pos].setMode(CompositeImage.GRAYSCALE);
-											if (prjYwin==null) {
-												ciPrys[pos].show();
-												WindowManager.group(ciPrxs[pos], ciPrys[pos]);
-												ciPrys[pos].setPosition(1, ciPrys[pos].getNSlices()/2, ciPrys[pos].getNFrames());
-											} else {
-												oldW = prjYwin.getWidth();
-												oldH = prjYwin.getHeight();
-												oldC = prjYwin.getImagePlus().getChannel();
-												oldZ = prjYwin.getImagePlus().getSlice();
-												oldT = prjYwin.getImagePlus().getFrame();
-												oldMag = prjYwin.getCanvas().getMagnification();
-												oldMin = prjYwin.getImagePlus()
-														.getDisplayRangeMin();
-												oldMax = prjYwin.getImagePlus()
-														.getDisplayRangeMax();
-												((CompositeImage)ciPrys[pos]).copyLuts(prjYwin.getImagePlus());
-
-												ciPrys[pos].setWindow(prjYwin);
-												prjYwin.updateImage(ciPrys[pos]);
-												prjYwin.setSize(oldW, oldH);
-												((StackWindow) prjYwin).addScrollbars(ciPrys[pos]);
-												prjYwin.getCanvas().setMagnification(oldMag);
-												prjYwin.getImagePlus().updateAndDraw();
-												prjYwin.getImagePlus().setPosition(oldC, oldZ, oldT);
-												prjYwin.getImagePlus().setDisplayRange(oldMin, oldMax);
-												prjYwin.setSize(prjYwin.getSize().width,
-														prjYwin.getSize().height);
-											}
-										
 
 									}
 								}
 							}
 
-						
+
+						}
 					}
+					//				IJ.run("Tile");
+
+					String dirOrOMETiffDirectory = dirOrOMETiff;
+					if (!new File(dirOrOMETiff).isDirectory())
+						dirOrOMETiffDirectory = new File(dirOrOMETiff).getParent();
+					final String dirOrOMETiffFinal = dirOrOMETiffDirectory;
+
+					//				Thread uploadDeconPrjThread = new Thread(new Runnable() {
+					//					public void run() {
+					//						if (wgUploadJob == null) 
+					//							wgUploadJob = new WG_Uploader();
+					//						if (wgUploadJob.getNewUploadProcess() != null)
+					//							uploadRunning = wgUploadJob.getNewUploadProcess().isAlive();
+					//						if(!uploadRunning)	{
+					//							wgUploadJob = new WG_Uploader();
+					//							wgUploadJob.run(dirOrOMETiffFinal);
+					//						}
+					//					}
+					//				});
+					//				uploadDeconPrjThread.start();
+
+
 				}
-//				IJ.run("Tile");
-				
-				String dirOrOMETiffDirectory = dirOrOMETiff;
-				if (!new File(dirOrOMETiff).isDirectory())
-					dirOrOMETiffDirectory = new File(dirOrOMETiff).getParent();
-				final String dirOrOMETiffFinal = dirOrOMETiffDirectory;
-
-				//				Thread uploadDeconPrjThread = new Thread(new Runnable() {
-//					public void run() {
-//						if (wgUploadJob == null) 
-//							wgUploadJob = new WG_Uploader();
-//						if (wgUploadJob.getNewUploadProcess() != null)
-//							uploadRunning = wgUploadJob.getNewUploadProcess().isAlive();
-//						if(!uploadRunning)	{
-//							wgUploadJob = new WG_Uploader();
-//							wgUploadJob.run(dirOrOMETiffFinal);
-//						}
-//					}
-//				});
-//				uploadDeconPrjThread.start();
-
-
 			}
-		}
 	}
 	
 	
