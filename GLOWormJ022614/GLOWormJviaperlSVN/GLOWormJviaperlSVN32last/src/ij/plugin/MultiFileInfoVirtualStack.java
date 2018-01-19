@@ -51,13 +51,14 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 	/* Constructs a MultiFileInfoVirtualStack from a FileInfo array. */
 	public MultiFileInfoVirtualStack(FileInfo[] fiArray) {
-		infoArray = fiArray;
+		this(fiArray, true);
 	}
 
 	/* Constructs a MultiFileInfoVirtualStack from a FileInfo 
 	array and displays it if 'show' is true. */
 	public MultiFileInfoVirtualStack(FileInfo[] fiArray, boolean show) {
 		infoArray = fiArray;
+		open(show);
 	}
 	
 	public MultiFileInfoVirtualStack(String dirOrOMETiff, String string, boolean show) {
@@ -527,7 +528,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				
 		stackNumber--;
 
-		sliceNumber = (n+1) % (fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
+		sliceNumber = (n) % (fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
 		if (dimOrder.toLowerCase().matches(".*splitc.*")) {
 			sliceNumber = (sliceNumber/2);
 		}
@@ -623,7 +624,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	 }
 
 	public void initiateStack(int stkNum, int slcNum) {
+		fivStacks.get(stkNum).setupStack();
 		if (fivStacks!=null && fivStacks.size()>stkNum && fivStacks.get(stkNum).infoArray.length>slcNum) {
+			
 			String currentFileName =fivStacks.get(stkNum).infoArray[slcNum].fileName;
 			if (!touchedFiles.contains(currentFileName)) {
 				TiffDecoder td = new TiffDecoder(dir, currentFileName);

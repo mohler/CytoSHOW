@@ -27,12 +27,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.regex.Pattern;
 
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.Prefs;
 import ij.VirtualStack;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
@@ -358,6 +360,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 		}
 
 		if (fullRun) {
+			OpenDialog.setDefaultDirectory(Prefs.get("diSPIMmonitor.input", dirOrOMETiff));
+
 			while (!(new File(dirOrOMETiff)).isDirectory()
 					&& !dirOrOMETiff.endsWith(".tif")) {
 				if (arg.contains("newMM")) {
@@ -425,6 +429,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				}
 			}
 			IJ.log(dirOrOMETiff);
+			Prefs.set("diSPIMmonitor.input", dirOrOMETiff);
 			String dirOrOMETiffDirectory = dirOrOMETiff;
 			if (!new File(dirOrOMETiff).isDirectory())
 				dirOrOMETiffDirectory = new File(dirOrOMETiff).getParent();
@@ -437,7 +442,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				savePath = dirOrOMETiffFile.getParentFile().getParent()
 					+ File.separator + dirOrOMETiffFile.getParentFile().getName()
 					+ "_" + dirOrOMETiffFile.getName().split("_")[0] + "_"+ File.separator;
+
+			String[] savePathChunks = savePath.split(Pattern.quote(File.separator));
+			String saveName = savePathChunks[savePathChunks.length-1];
+			OpenDialog.setDefaultDirectory(Prefs.get("diSPIMmonitor.output", savePath));
+			savePath = IJ.getDirectory("Select Output Folder")+ File.separator + saveName+"_Output"+ File.separator;
 			new File(savePath).mkdirs();
+			Prefs.set("diSPIMmonitor.output", new File(savePath).getParent());
 			tempDir = IJ.getDirectory("temp");
 
 
