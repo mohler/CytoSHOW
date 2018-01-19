@@ -315,6 +315,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 	private MultiFileInfoVirtualStack[] stackPrys;
 	private MultiFileInfoVirtualStack[] stackAs;
 	private MultiFileInfoVirtualStack[] stackBs;
+	private String saveName;
 	
 	public Process getRegDeconProcess() {
 		return regDeconProcess;
@@ -444,11 +445,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 					+ "_" + dirOrOMETiffFile.getName().split("_")[0] + "_"+ File.separator;
 
 			String[] savePathChunks = savePath.split(Pattern.quote(File.separator));
-			String saveName = savePathChunks[savePathChunks.length-1];
-			OpenDialog.setDefaultDirectory(Prefs.get("diSPIMmonitor.output", savePath));
-			savePath = IJ.getDirectory("Select Output Folder")+ File.separator + saveName+"_Output"+ File.separator;
-			new File(savePath).mkdirs();
-			Prefs.set("diSPIMmonitor.output", new File(savePath).getParent());
+			saveName = savePathChunks[savePathChunks.length-1];
+//			OpenDialog.setDefaultDirectory(Prefs.get("diSPIMmonitor.output", savePath));
+//			savePath = IJ.getDirectory("Select Output Folder")+ File.separator + saveName+"_Output"+ File.separator;
+//			new File(savePath).mkdirs();
+//			Prefs.set("diSPIMmonitor.output", new File(savePath).getParent());
 			tempDir = IJ.getDirectory("temp");
 
 
@@ -1144,6 +1145,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				abRelOriValue = d.getAbRelOriValue();
 				autodepth = d.isAutodepth();
 				slaveChannel = keyChannel == 1 ? 2 : 1;
+				OpenDialog.setDefaultDirectory(Prefs.get("diSPIMmonitor.output", savePath));
+				savePath = IJ.getDirectory("Select Output Folder")+ File.separator + saveName+"_Output"+ File.separator;
+				new File(savePath).mkdirs();
+				Prefs.set("diSPIMmonitor.output", new File(savePath).getParent());
+
 			} else {
 				doMipavDecon = false;
 				doGPUdecon = false;
