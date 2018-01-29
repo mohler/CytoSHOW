@@ -4484,8 +4484,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				}
 			}
 
-			if (chunk.trim().startsWith("\"Positions\":")) {
-				diSPIM_MM_Positions= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
+			if (chunk.trim().contains("\"Positions\":")) {
+				diSPIM_MM_Positions= Integer.parseInt(chunk.replaceAll("(.*\"Positions\":)(.*)", "\"Positions\":$2").split(":")[1].split("[;,]")[0].replace("\"", "").trim());
 				pDim = diSPIM_MM_Positions;
 			}
 
