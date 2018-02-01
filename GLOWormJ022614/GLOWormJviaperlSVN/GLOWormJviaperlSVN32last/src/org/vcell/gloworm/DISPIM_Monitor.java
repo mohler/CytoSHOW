@@ -560,6 +560,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 						impBs[pos].getOriginalFileInfo().fileName = dirOrOMETiff;
 						impBs[pos].getOriginalFileInfo().directory = dirOrOMETiff;
 
+						tDim = Math.max(diSPIM_MM_Frames, diSPIM_MM_numTimepoints);
+						
 						stackAs[pos] = new MultiFileInfoVirtualStack(
 								dirOrOMETiff, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
 								false, false);
@@ -588,7 +590,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 							stackAs[pos].setSkewXperZ(
 									calA.pixelDepth / calA.pixelWidth);
 						impAs[pos].setOpenAsHyperStack(true);
-						impAs[pos].setDimensions(cDim/(dimOrder=="xySplitCzt"?1:vDim), zDim, sizeA/((cDim/(dimOrder=="xySplitCzt"?1:vDim))*zDim));
+						impAs[pos].setDimensions(cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim), zDim, sizeA/((cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim))*zDim));
 						impAs[pos] = new CompositeImage(impAs[pos]);
 						while (!impAs[pos].isComposite()) {
 							IJ.wait(100);
@@ -608,7 +610,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 							stackBs[pos].setSkewXperZ(
 									-calB.pixelDepth / calB.pixelWidth);
 						impBs[pos].setOpenAsHyperStack(true);
-						impBs[pos].setDimensions(cDim/(dimOrder=="xySplitCzt"?1:vDim), zDim, sizeB/((cDim/(dimOrder=="xySplitCzt"?1:vDim))*zDim));
+						impBs[pos].setDimensions(cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim), zDim, sizeB/((cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim))*zDim));
 						impBs[pos] = new CompositeImage(impBs[pos]);
 						while (!impBs[pos].isComposite()) {
 							IJ.wait(100);
@@ -4510,6 +4512,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 					splitChannels = true;
 					dimOrder = "xySplitCzt";
 				}
+			} else {
+				cDim = 2;    //using diSPIM_MM_channel_use_index value doesn' work for Shroff system (counts 4, duh)
+				splitChannels = true;
+				dimOrder = "xySplitSequentialCzt";
 			}
 		}
 	}

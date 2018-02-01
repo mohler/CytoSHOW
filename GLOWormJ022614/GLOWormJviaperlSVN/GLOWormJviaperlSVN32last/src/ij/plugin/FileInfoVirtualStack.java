@@ -191,7 +191,7 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 			infoArray[i-1] = infoArray[i];
 		if (nSlices-1<infoArray.length)
 			infoArray[nSlices-1] = null;
-//		nImages--;
+		nImages--;
 		nSlices--;
 	}
 	
