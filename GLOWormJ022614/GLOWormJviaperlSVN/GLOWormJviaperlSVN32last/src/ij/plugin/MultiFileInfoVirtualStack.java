@@ -8,6 +8,7 @@ import ij.gui.*;
 import ij.io.*;
 
 import java.awt.*;
+
 import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -501,7 +502,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		where 1<=n<=nImages. Returns null if the stack is empty.
 	*/
 	public ImageProcessor getProcessor(int n) {
-		IJ.log("n= "+n);
+		//IJ.log("n= "+n);
 		if (n<1 || n>nImages) {
 			IJ.runMacro("waitForUser(\""+n+"\");");
 			return fivStacks.get(0).getProcessor(1);
@@ -521,7 +522,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			}
 			n=n+adjN;
 		}
-		IJ.log("n now= "+n);
+		//IJ.log("n now= "+n);
 
 		while (n > total) {
 			total = total + fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1);
@@ -553,13 +554,13 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			
 			int  vSliceNumber = (sliceNumber)+(isViewB?zDim*(dimOrder.toLowerCase().matches(".*split.*c.*")?2:1):0);
 			
-//			while (vSliceNumber>fivStacks.get(stackNumber).getSize()) {
-//				vSliceNumber = vSliceNumber-fivStacks.get(stackNumber).getSize();
-//				stackNumber++;
-//			}
+			while (vSliceNumber>fivStacks.get(stackNumber).getSize()) {
+				vSliceNumber = vSliceNumber-fivStacks.get(stackNumber).getSize();
+				stackNumber++;
+			}
 			initiateStack(stackNumber, vSliceNumber);
 			ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber);
-			IJ.log(" slice# "+sliceNumber+" stack# "+stackNumber+" vslice# "+vSliceNumber);
+			//IJ.log(" slice# "+sliceNumber+" stack# "+stackNumber+" vslice# "+vSliceNumber);
 			ip.setInterpolationMethod(ImageProcessor.BICUBIC);
 			if (this.getOwnerImps() != null && this.getOwnerImps().size() > 0 && this.getOwnerImps().get(0) != null) {
 				ip.translate(skewXperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1-this.getOwnerImps().get(this.getOwnerImps().size()-1).getNSlices()/2), skewYperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1-this.getOwnerImps().get(this.getOwnerImps().size()-1).getNSlices()/2));
