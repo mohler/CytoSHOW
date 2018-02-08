@@ -4513,9 +4513,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 					dimOrder = "xySplitCzt";
 				}
 			} else {
-				cDim = 2;    //using diSPIM_MM_channel_use_index value doesn' work for Shroff system (counts 4, duh)
-				splitChannels = true;
-				dimOrder = "xySplitSequentialCzt";
+				if (diSPIM_MM_numChannels == 2) {
+					cDim = 2;    //using diSPIM_MM_channel_use_index value doesn' work for Shroff system (counts 4, duh)
+					splitChannels = true;
+					dimOrder = "xySplitSequentialCzt";
+				} else if (diSPIM_MM_numChannels == 1) {
+					cDim = 2;    //using diSPIM_MM_channel_use_index value doesn' work for Shroff system (counts 4, duh)
+					splitChannels = true;
+					dimOrder = "xySplitCzt";
+				}
 			}
 		}
 	}

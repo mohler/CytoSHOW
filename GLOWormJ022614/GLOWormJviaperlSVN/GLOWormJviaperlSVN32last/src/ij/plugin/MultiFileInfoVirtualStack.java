@@ -502,7 +502,6 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		where 1<=n<=nImages. Returns null if the stack is empty.
 	*/
 	public ImageProcessor getProcessor(int n) {
-		//IJ.log("n= "+n);
 		if (n<1 || n>nImages) {
 			IJ.runMacro("waitForUser(\""+n+"\");");
 			return fivStacks.get(0).getProcessor(1);
@@ -522,8 +521,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			}
 			n=n+adjN;
 		}
-		//IJ.log("n now= "+n);
-
+		
 		while (n > total) {
 			total = total + fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1);
 			stackNumber++;
@@ -540,27 +538,27 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		ImageProcessor ip = null;
 		if (dimOrder == "xyczt") {
 			int  vSliceNumber = (sliceNumber)+(isViewB?fivStacks.get(stackNumber).getSize()/vDim:0);
-//			while (vSliceNumber>fivStacks.get(stackNumber).getSize()) {
-//				vSliceNumber = vSliceNumber-fivStacks.get(stackNumber).getSize();
-//				stackNumber++;
-//			}
-			initiateStack(stackNumber, vSliceNumber);
-			ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber);
-		}
-		if (dimOrder.toLowerCase().matches(".*split.*c.*")) {
-//			stackNumber=0;
-			int dX = 0;
-			int dY = 0;
-			
-			int  vSliceNumber = (sliceNumber)+(isViewB?zDim*(dimOrder.toLowerCase().matches(".*split.*c.*")?2:1):0);
-			
-			while (vSliceNumber>fivStacks.get(stackNumber).getSize()) {
+			if (vSliceNumber>fivStacks.get(stackNumber).getSize()) {
 				vSliceNumber = vSliceNumber-fivStacks.get(stackNumber).getSize();
 				stackNumber++;
 			}
 			initiateStack(stackNumber, vSliceNumber);
 			ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber);
-			//IJ.log(" slice# "+sliceNumber+" stack# "+stackNumber+" vslice# "+vSliceNumber);
+		}
+		if (dimOrder.toLowerCase().matches(".*split.*c.*")) {
+
+			int dX = 0;
+			int dY = 0;
+			
+			int  vSliceNumber = (sliceNumber)+(isViewB?zDim*(dimOrder.toLowerCase().matches(".*splitsequentialc.*")?2:1):0);
+			
+			if (vSliceNumber>fivStacks.get(stackNumber).getSize()) {
+				vSliceNumber = vSliceNumber-fivStacks.get(stackNumber).getSize();
+				stackNumber++;
+			}
+			initiateStack(stackNumber, vSliceNumber);
+			ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber);
+			
 			ip.setInterpolationMethod(ImageProcessor.BICUBIC);
 			if (this.getOwnerImps() != null && this.getOwnerImps().size() > 0 && this.getOwnerImps().get(0) != null) {
 				ip.translate(skewXperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1-this.getOwnerImps().get(this.getOwnerImps().size()-1).getNSlices()/2), skewYperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1-this.getOwnerImps().get(this.getOwnerImps().size()-1).getNSlices()/2));
