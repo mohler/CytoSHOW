@@ -1148,7 +1148,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				autodepth = d.isAutodepth();
 				slaveChannel = keyChannel == 1 ? 2 : 1;
 				OpenDialog.setDefaultDirectory(Prefs.get("diSPIMmonitor.output", savePath));
-				savePath = IJ.getDirectory("Select Output Folder")+ File.separator + saveName+"_Output"+ File.separator;
+				String savePathParent = IJ.getDirectory("Select where to make Output Folder");
+				if (savePathParent.contains(dirOrOMETiff)) { 
+					savePath = (new File(dirOrOMETiff)).getParent() + File.separator+(new File(dirOrOMETiff)).getName().replaceAll("_", "").substring(0, (new File(dirOrOMETiff)).getName().replaceAll("_", "").length()<90?(new File(dirOrOMETiff)).getName().replaceAll("_", "").length():85)+"..._Output"+ File.separator;
+				} else {
+					savePath = savePathParent + File.separator + (new File(dirOrOMETiff)).getName().replaceAll("_", "")+"_Output"+ File.separator;
+				}
+				
 				new File(savePath).mkdirs();
 				Prefs.set("diSPIMmonitor.output", new File(savePath).getParent());
 
@@ -3235,7 +3241,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 	public void processFilesByMinGuoDeconvolution() {
 		//START PROCESSING ALREADY SAVED RAW DATA 
 
-		String[] frameFileNames = new String[impAs[0].getNFrames() + 1];
 
 		if (wavelengths >=1) {
 			new File("" + savePath + "CropBkgdSub").mkdirs();
@@ -3268,25 +3273,36 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 			}
 		}
 
-		for (int f = 1; f <= impAs[0].getNFrames(); f++) {
+		int maxFrameCount = 0;
+		for (int pos=0; pos<pDim; pos++) {
+			if (impAs[pos].getNFrames() > maxFrameCount) {
+				maxFrameCount = impAs[pos].getNFrames();
+			}
+		}
+		String[][] frameFileNames = new String[pDim][maxFrameCount + 1];
+
+		for (int f = 1; f <= maxFrameCount; f++) {
 			for (int pos=0; pos<pDim; pos++) {
 				if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible() || f>impAs[pos].getNFrames()) {
 					doProcessing[pos] = false;
+					IJ.log("! no winorstackA "+f+" "+pos);
 					continue;
 				}
 				if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible() || f>impBs[pos].getNFrames()) {
 					doProcessing[pos] = false;
+					IJ.log("! no winorstackB "+f+" "+pos);
 					continue;
 				} 
 				if (impPrxs[pos]!=null && impPrys[pos]!=null && impAs[pos].getNFrames() == impPrxs[pos].getNFrames() && impAs[pos].getNFrames() == impPrys[pos].getNFrames()
 						&& impBs[pos].getNFrames() == impPrxs[pos].getNFrames() && impBs[pos].getNFrames() == impPrys[pos].getNFrames()) {
 					doProcessing[pos] = false;
+					IJ.log("no unfinishedViewss "+f+" "+pos);
 					continue;
 				}
 
 				if (doProcessing[pos]) {
 
-					if (impAs[pos].hasNullStack())
+					if (impAs[pos].hasNullStack() || impAs[pos].getNFrames()<f-1)
 						continue;
 					if (impBs[pos].hasNullStack())
 						continue;
@@ -3314,13 +3330,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 						impAs[pos].setPositionWithoutUpdate(impAs[pos].getChannel(), impAs[pos].getSlice(), f);
 
 						if (impAs[pos].getStack() instanceof ListVirtualStack)
-							frameFileNames[f] = ((ListVirtualStack) impAs[pos].getStack())
+							frameFileNames[pos][f] = ((ListVirtualStack) impAs[pos].getStack())
 							.getDirectory(impAs[pos].getCurrentSlice());
 						else if (impAs[pos].getStack() instanceof FileInfoVirtualStack
 								|| impAs[pos].getStack() instanceof MultiFileInfoVirtualStack)
-							frameFileNames[f] = "t" + f;
+							frameFileNames[pos][f] = "t" + f;
 						else
-							frameFileNames[f] = "t" + f;
+							frameFileNames[pos][f] = "t" + f;
 						//							timecode = "" + (new Date()).getTime();
 
 						stackA1 = new ImageStack((int)cropWidthA[pos]+2, (int)cropHeightA[pos]+2);
@@ -3537,7 +3553,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 
 
-						final String[] frameFileNamesFinal = frameFileNames;
+						final String[][] frameFileNamesFinal = frameFileNames;
 
 						impAs[pos].setPosition(wasChannelA[pos], wasSliceA[pos], wasFrameA[pos]);
 						impAs[pos].updateAndDraw();
