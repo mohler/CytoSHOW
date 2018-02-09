@@ -1150,9 +1150,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				OpenDialog.setDefaultDirectory(Prefs.get("diSPIMmonitor.output", savePath));
 				String savePathParent = IJ.getDirectory("Select where to make Output Folder");
 				if (savePathParent.contains(dirOrOMETiff)) { 
-					savePath = (new File(dirOrOMETiff)).getParent() + File.separator+(new File(dirOrOMETiff)).getName().replaceAll("_", "").substring(0, (new File(dirOrOMETiff)).getName().replaceAll("_", "").length()<90?(new File(dirOrOMETiff)).getName().replaceAll("_", "").length():85)+"..._Output"+ File.separator;
+					String shortName = (new File(dirOrOMETiff)).getName().replaceAll("_", "").replaceAll("&", "AND");
+					savePath = (new File(dirOrOMETiff)).getParent() + File.separator+shortName.substring(0, shortName.length()<90?shortName.length():85)+"..._Output"+ File.separator;
 				} else {
-					savePath = savePathParent + File.separator + (new File(dirOrOMETiff)).getName().replaceAll("_", "")+"_Output"+ File.separator;
+					savePath = savePathParent + File.separator + (new File(dirOrOMETiff)).getName().replaceAll("_", "").replaceAll("&", "AND") +"..._Output"+ File.separator;
 				}
 				
 				new File(savePath).mkdirs();
