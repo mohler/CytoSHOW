@@ -4530,12 +4530,17 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 					dimOrder = "xySplitCzt";
 				}
 			} else {
+//				if (diSPIM_MM_numChannels == 2) {
+//					cDim = 2;    
+//					splitChannels = true;
+//					dimOrder = "xySplitSequentialCzt";
+//				}
 				if (diSPIM_MM_numChannels == 2) {
-					cDim = 2;    //using diSPIM_MM_channel_use_index value doesn' work for Shroff system (counts 4, duh)
+					cDim = 4;    
 					splitChannels = true;
-					dimOrder = "xySplitSequentialCzt";
+					dimOrder = "xySplitCzt";
 				} else if (diSPIM_MM_numChannels == 1) {
-					cDim = 2;    //using diSPIM_MM_channel_use_index value doesn' work for Shroff system (counts 4, duh)
+					cDim = 2;    
 					splitChannels = true;
 					dimOrder = "xySplitCzt";
 				}

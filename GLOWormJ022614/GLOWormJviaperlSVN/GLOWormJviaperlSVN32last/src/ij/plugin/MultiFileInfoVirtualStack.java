@@ -411,7 +411,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				fivImpZero.getTitle().replaceAll("\\d+\\.", "\\."), this);
 		fivImpZero.flush();
 		imp.setOpenAsHyperStack(true);			
-		int cztDims = cDim*zDim*tDim;
+		int cztDims = cDim*zDim*fivStacks.size();
 		int impSize = imp.getStackSize()*vDim;
 		if (cztDims!= impSize) {
 			if (cztDims > impSize) {
@@ -529,7 +529,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				
 		stackNumber--;
 
-		sliceNumber = (n) % (fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
+		sliceNumber = 1+(n) % (fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
 		if (dimOrder.toLowerCase().matches(".*splitc.*")) {
 			sliceNumber = (sliceNumber/2);
 		}
@@ -550,7 +550,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			int dX = 0;
 			int dY = 0;
 			
-			int  vSliceNumber = (sliceNumber)+(isViewB?zDim*(dimOrder.toLowerCase().matches(".*splitsequentialc.*")?2:1):0);
+			int  vSliceNumber = (sliceNumber)+(isViewB?zDim*(cDim/2)*(dimOrder.toLowerCase().matches(".*splitsequentialc.*")?2:1):0);
 			
 			if (vSliceNumber>fivStacks.get(stackNumber).getSize()) {
 				vSliceNumber = vSliceNumber-fivStacks.get(stackNumber).getSize();
@@ -576,7 +576,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			} else if (ip.getWidth()==1536) //Yale splitview setup
 				{
 				dX=isViewB?3:0;
-				dY=isViewB?-2:-2;
+				dY=isViewB?4:0;
 				int xOri = 0+((0+(n+1)%2)*(1024));
 				int yOri = 0+((1-(n+1)%2)*(0));
 				ip.setRoi(xOri, yOri, 512, 512);

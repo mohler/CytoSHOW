@@ -1,5 +1,6 @@
 package ij.gui;
 import ij.IJ;
+import ij.Prefs;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -100,9 +101,9 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 		channelChoices.add("Key registration on Channel 1");
 		channelChoices.add("Key registration on Channel 2");
 		abRelOriChoices = new Choice();
-		abRelOriChoices.add("Input Volumes Rel. Orientation = -1");
-		abRelOriChoices.add("Input Volumes Rel. Orientation = 0");
 		abRelOriChoices.add("Input Volumes Rel. Orientation = +1");
+		abRelOriChoices.add("Input Volumes Rel. Orientation = 0");
+		abRelOriChoices.add("Input Volumes Rel. Orientation = -1");
 		methodChoices = new Choice();
 		methodChoices.add("MinGuo GPU method");
 		methodChoices.add("mipav CPU method");
@@ -111,9 +112,14 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 		matrixPriming.add("Fresh registration for every volume");
 		
 		panel.add(channelChoices);
+		channelChoices.select(Prefs.get("diSPIMmonitor.keyChannel", "Key registration on Channel 1"));
 		panel.add(abRelOriChoices);
+		abRelOriChoices.select(Prefs.get("diSPIMmonitor.relativeOrientation", "Input Volumes Rel. Orientation = +1"));
 		panel.add(methodChoices);
+		methodChoices.select(Prefs.get("diSPIMmonitor.fusionMethod", "MinGuo GPU method"));
 		panel.add(matrixPriming);
+		matrixPriming.select(Prefs.get("diSPIMmonitor.matrixPrimimg", "Prime registration with previous matrix"));
+
 		add("North", panel);
 		
 		panel = new Panel();
@@ -174,9 +180,14 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 		else if (e.getSource()==yesB) {
 			yesPressed = true;
 			keyChannel = channelChoices.getSelectedIndex()+1;
+			Prefs.set("diSPIMmonitor.keyChannel", channelChoices.getSelectedItem());
 			abRelOriValue = abRelOriChoices.getSelectedIndex()-1;
+			Prefs.set("diSPIMmonitor.relativeOrientation", abRelOriChoices.getSelectedItem());
 			regDeconMethod = methodChoices.getSelectedItem();	
+			Prefs.set("diSPIMmonitor.fusionMethod", methodChoices.getSelectedItem());
 			matPrimMethod = matrixPriming.getSelectedItem();
+			Prefs.set("diSPIMmonitor.matrixPrimimg", matrixPriming.getSelectedItem());
+
 //			subFractA = ((Double)modeFractionSpinnerA.getValue());
 //			subFractB = ((Double)modeFractionSpinnerB.getValue());
 //			iterations = ((Integer)iterationSpinner.getValue());
