@@ -4647,7 +4647,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 			monitoring = false;
 		}
 		if (e.getActionCommand() == "CSM") {
-			cDim = 2;    
+			cDim = 2;
+			wavelengths = 2;
 			splitChannels = true;
 			dimOrder = "xySplitSequentialCzt";
 
@@ -4655,6 +4656,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 			MultiFileInfoVirtualStack[] stackBs = new MultiFileInfoVirtualStack[pDim];
 
 			for (int pos=0; pos<pDim; pos++) {
+				doProcessing[pos] = true;
 
 				if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
 					doProcessing[pos] = false;
@@ -4671,94 +4673,95 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				if (impBs[pos].hasNullStack())
 					continue;
 
+				if (doProcessing[pos]) {
 
-				win = impAs[pos].getWindow();
-				double zoomA = win.getCanvas().getMagnification();
-				int cA = impAs[pos].getChannel();
-				int zA = impAs[pos].getSlice();
-				int tA = impAs[pos].getFrame();
-				boolean tailing = tA==impAs[pos].getNFrames();
-				tDim = listA.length;
+					win = impAs[pos].getWindow();
+					double zoomA = win.getCanvas().getMagnification();
+					int cA = impAs[pos].getChannel();
+					int zA = impAs[pos].getSlice();
+					int tA = impAs[pos].getFrame();
+					boolean tailing = tA==impAs[pos].getNFrames();
+					tDim = listA.length;
 
-				stackAs[pos] = new MultiFileInfoVirtualStack(
-						dirOrOMETiff, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
-						false, false);
+					stackAs[pos] = new MultiFileInfoVirtualStack(
+							dirOrOMETiff, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
+							false, false);
 
-				ImagePlus impNext = new ImagePlus(impAs[pos].getTitle(), stackAs[pos]);
-				impNext.setOpenAsHyperStack(true);
-				impNext.setDimensions(cDim, zDim, tDim);
-				impNext = new CompositeImage(impNext);
-				((CompositeImage)impNext).setMode(modeA);
-				((CompositeImage)impNext).reset();
-				((CompositeImage)impNext).copyLuts(impAs[pos]);
-				impNext.setCalibration(impAs[pos].getCalibration());
-				if (stageScan)
-					stackAs[pos].setSkewXperZ(
-							impNext.getCalibration().pixelDepth / impNext.getCalibration().pixelWidth);
-				impAs[pos].flush();
-				impAs[pos] = impNext;
+					ImagePlus impNext = new ImagePlus(impAs[pos].getTitle(), stackAs[pos]);
+					impNext.setOpenAsHyperStack(true);
+					impNext.setDimensions(cDim, zDim, tDim);
+					impNext = new CompositeImage(impNext);
+					((CompositeImage)impNext).setMode(modeA);
+					((CompositeImage)impNext).reset();
+					((CompositeImage)impNext).copyLuts(impAs[pos]);
+					impNext.setCalibration(impAs[pos].getCalibration());
+					if (stageScan)
+						stackAs[pos].setSkewXperZ(
+								impNext.getCalibration().pixelDepth / impNext.getCalibration().pixelWidth);
+					impAs[pos].flush();
+					impAs[pos] = impNext;
 
 
-				win.setImage(impAs[pos]);
-				if (win instanceof StackWindow) {
-					StackWindow sw = (StackWindow)win;
-					int stackSize = impAs[pos].getStackSize();
-					int nScrollbars = sw.getNScrollbars();
-					sw.addScrollbars(impAs[pos]);
+					win.setImage(impAs[pos]);
+					if (win instanceof StackWindow) {
+						StackWindow sw = (StackWindow)win;
+						int stackSize = impAs[pos].getStackSize();
+						int nScrollbars = sw.getNScrollbars();
+						sw.addScrollbars(impAs[pos]);
+					}
+					impAs[pos].setPosition(cA, zA, (tailing || tA > impAs[pos].getNFrames())? impAs[pos].getNFrames() : tA);
+					((CompositeImage)impAs[pos]).setMode(modeA);
+					win.getCanvas().setMagnification(zoomA);
+					Dimension winSize = win.getSize();
+					win.pack();
+					win.setSize(winSize);
+
+
+					win = impBs[pos].getWindow();
+					double zoomB = win.getCanvas().getMagnification();
+					int cB = impBs[pos].getChannel();
+					int zB = impBs[pos].getSlice();
+					int tB = impBs[pos].getFrame();
+					if (impBs[pos].isComposite()) {
+						modeB = ((CompositeImage)impBs[pos]).getCompositeMode();
+					}
+
+					tailing = tB==impBs[pos].getNFrames();
+					tDim = listA.length;
+
+					stackBs[pos] = new MultiFileInfoVirtualStack(
+							dirOrOMETiff, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
+							true, false);
+
+					impNext = new CompositeImage(new ImagePlus(impBs[pos].getTitle(), stackBs[pos]));
+					impNext.setOpenAsHyperStack(true);
+					impNext.setDimensions(cDim, zDim, tDim);
+					impNext = new CompositeImage(impNext);
+					((CompositeImage)impNext).setMode(modeB);
+					((CompositeImage)impNext).reset();
+					((CompositeImage)impNext).copyLuts(impBs[pos]);
+					impNext.setCalibration(impBs[pos].getCalibration());
+					if (stageScan)
+						stackAs[pos].setSkewXperZ(
+								impNext.getCalibration().pixelDepth / impNext.getCalibration().pixelWidth);
+					impBs[pos].flush();
+					impBs[pos] = impNext;
+
+					win.setImage(impBs[pos]);
+					if (win instanceof StackWindow) {
+						StackWindow sw = (StackWindow)win;
+						int stackSize = impBs[pos].getStackSize();
+						int nScrollbars = sw.getNScrollbars();
+						sw.addScrollbars(impBs[pos]);
+					}
+					impBs[pos].setPosition(cB, zB, (tailing || tB > impBs[pos].getNFrames())? impBs[pos].getNFrames() : tB);
+					((CompositeImage)impBs[pos]).setMode(modeB);
+					win.getCanvas().setMagnification(zoomB);
+					winSize = win.getSize();
+					win.pack();
+					win.setSize(winSize);
+
 				}
-				impAs[pos].setPosition(cA, zA, (tailing || tA > impAs[pos].getNFrames())? impAs[pos].getNFrames() : tA);
-				((CompositeImage)impAs[pos]).setMode(modeA);
-				win.getCanvas().setMagnification(zoomA);
-				Dimension winSize = win.getSize();
-				win.pack();
-				win.setSize(winSize);
-
-
-				win = impBs[pos].getWindow();
-				double zoomB = win.getCanvas().getMagnification();
-				int cB = impBs[pos].getChannel();
-				int zB = impBs[pos].getSlice();
-				int tB = impBs[pos].getFrame();
-				if (impBs[pos].isComposite()) {
-					modeB = ((CompositeImage)impBs[pos]).getCompositeMode();
-				}
-
-				tailing = tB==impBs[pos].getNFrames();
-				tDim = listA.length;
-
-				stackBs[pos] = new MultiFileInfoVirtualStack(
-						dirOrOMETiff, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
-						true, false);
-
-				impNext = new CompositeImage(new ImagePlus(impBs[pos].getTitle(), stackBs[pos]));
-				impNext.setOpenAsHyperStack(true);
-				impNext.setDimensions(cDim, zDim, tDim);
-				impNext = new CompositeImage(impNext);
-				((CompositeImage)impNext).setMode(modeB);
-				((CompositeImage)impNext).reset();
-				((CompositeImage)impNext).copyLuts(impBs[pos]);
-				impNext.setCalibration(impBs[pos].getCalibration());
-				if (stageScan)
-					stackAs[pos].setSkewXperZ(
-							impNext.getCalibration().pixelDepth / impNext.getCalibration().pixelWidth);
-				impBs[pos].flush();
-				impBs[pos] = impNext;
-
-				win.setImage(impBs[pos]);
-				if (win instanceof StackWindow) {
-					StackWindow sw = (StackWindow)win;
-					int stackSize = impBs[pos].getStackSize();
-					int nScrollbars = sw.getNScrollbars();
-					sw.addScrollbars(impBs[pos]);
-				}
-				impBs[pos].setPosition(cB, zB, (tailing || tB > impBs[pos].getNFrames())? impBs[pos].getNFrames() : tB);
-				((CompositeImage)impBs[pos]).setMode(modeB);
-				win.getCanvas().setMagnification(zoomB);
-				winSize = win.getSize();
-				win.pack();
-				win.setSize(winSize);
-
-
 			}
 
 		}
