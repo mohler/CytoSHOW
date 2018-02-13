@@ -1,7 +1,10 @@
 package org.vcell.gloworm;
 
+import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Dimension;
+import java.awt.GridBagLayout;
+import java.awt.Panel;
 import java.awt.Polygon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -28,6 +31,8 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.regex.Pattern;
+
+import javax.swing.JPanel;
 
 import ij.CompositeImage;
 import ij.IJ;
@@ -183,6 +188,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 	private MultiFileInfoVirtualStack dfProjYmfivs;
 	private boolean autodepth;
 	private Button[][] fuseButton;
+	private Button[][] splitButton;
 	private String dirOrOMETiff;
 	String timecode = "" + -1;
 
@@ -541,6 +547,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 					cropWidthB = new double[pDim];
 					cropHeightB = new double[pDim];
 					fuseButton = new Button[pDim][2];
+					splitButton = new Button[pDim][2];
 
 					stackAs = new MultiFileInfoVirtualStack[pDim];
 					stackBs = new MultiFileInfoVirtualStack[pDim];
@@ -888,6 +895,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				cropWidthB = new double[pDim];
 				cropHeightB = new double[pDim];
 				fuseButton = new Button[pDim][2];
+				splitButton = new Button[pDim][2];
 
 				for (int pos=0; pos<pDim; pos++) {
 					String[] mmList = (new File(mmPath)).list();
@@ -1100,6 +1108,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 				oldLength = newLength;
 				fuseButton = new Button[pDim][2];
+				splitButton = new Button[pDim][2];
 
 			}
 
@@ -1480,6 +1489,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 			IJ.run("Tile");
 
 		} else {	//if not deconning immediately)
+			Panel[][] fuseSplitPanel = new Panel[pDim][2];
 			for (int pos=0; pos<pDim; pos++) {
 				if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
 					doProcessing[pos] = false;
@@ -1489,23 +1499,52 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 					doProcessing[pos] = false;
 					continue;
 				} 
+				if(fuseSplitPanel[pos][0] == null) {
+					fuseSplitPanel[pos][0] = new Panel(new BorderLayout());
+					
+				}
+				if(fuseSplitPanel[pos][1] == null) {
+					fuseSplitPanel[pos][1] = new Panel(new BorderLayout());					
+				}
 
 				if(fuseButton[pos][0] == null) {
 					fuseButton[pos][0] = new Button("Fuse");
 					fuseButton[pos][0].addActionListener(this);
-					impAs[pos].getWindow().viewButtonPanel.add(fuseButton[pos][0]);
+					fuseSplitPanel[pos][0].add(BorderLayout.NORTH, fuseButton[pos][0]);
 				}else {
 					fuseButton[pos][0].setVisible(true);
 				}
 				if(fuseButton[pos][1] == null) {
 					fuseButton[pos][1] = new Button("Fuse");
 					fuseButton[pos][1].addActionListener(this);
-					impBs[pos].getWindow().viewButtonPanel.add(fuseButton[pos][1]);
+					fuseSplitPanel[pos][1].add(BorderLayout.NORTH, fuseButton[pos][1]);
 				}else {
 					fuseButton[pos][1].setVisible(true);
 				}
+				impAs[pos].getWindow().viewButtonPanel.add(fuseSplitPanel[pos][0]);
+				impBs[pos].getWindow().viewButtonPanel.add(fuseSplitPanel[pos][1]);
+
+				if ( splitChannels = true ) {
+
+					if(splitButton[pos][0] == null) {
+						splitButton[pos][0] = new Button("CSM");
+						splitButton[pos][0].addActionListener(this);
+						fuseSplitPanel[pos][0].add(BorderLayout.SOUTH, splitButton[pos][0]);
+					}else {
+						splitButton[pos][0].setVisible(true);
+					}
+					if(splitButton[pos][1] == null) {
+						splitButton[pos][1] = new Button("CSM");
+						splitButton[pos][1].addActionListener(this);
+						fuseSplitPanel[pos][1].add(BorderLayout.SOUTH, splitButton[pos][1]);
+					}else {
+						splitButton[pos][1].setVisible(true);
+					}
+				}
 				impAs[pos].getWindow().pack();
 				impBs[pos].getWindow().pack();
+				
+				
 			}
 			IJ.run("Tile");
 		}
@@ -4603,8 +4642,126 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 	}
 
 	public void actionPerformed(ActionEvent e) {
-		rerunArg = (dirOrOMETiff+"|"+"rerunWithDecon"+"|"+"newMM");
-		monitoring = false;
+		if (e.getActionCommand() == "Fuse") {
+			rerunArg = (dirOrOMETiff+"|"+"rerunWithDecon"+"|"+"newMM");
+			monitoring = false;
+		}
+		if (e.getActionCommand() == "CSM") {
+			cDim = 2;    
+			splitChannels = true;
+			dimOrder = "xySplitSequentialCzt";
+
+			MultiFileInfoVirtualStack[] stackAs = new MultiFileInfoVirtualStack[pDim];
+			MultiFileInfoVirtualStack[] stackBs = new MultiFileInfoVirtualStack[pDim];
+
+			for (int pos=0; pos<pDim; pos++) {
+
+				if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+					doProcessing[pos] = false;
+					continue;
+				}
+				if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+					doProcessing[pos] = false;
+					continue;
+				} 
+
+
+				if (impAs[pos].hasNullStack())
+					continue;
+				if (impBs[pos].hasNullStack())
+					continue;
+
+
+				win = impAs[pos].getWindow();
+				double zoomA = win.getCanvas().getMagnification();
+				int cA = impAs[pos].getChannel();
+				int zA = impAs[pos].getSlice();
+				int tA = impAs[pos].getFrame();
+				boolean tailing = tA==impAs[pos].getNFrames();
+				tDim = listA.length;
+
+				stackAs[pos] = new MultiFileInfoVirtualStack(
+						dirOrOMETiff, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
+						false, false);
+
+				ImagePlus impNext = new ImagePlus(impAs[pos].getTitle(), stackAs[pos]);
+				impNext.setOpenAsHyperStack(true);
+				impNext.setDimensions(cDim, zDim, tDim);
+				impNext = new CompositeImage(impNext);
+				((CompositeImage)impNext).setMode(modeA);
+				((CompositeImage)impNext).reset();
+				((CompositeImage)impNext).copyLuts(impAs[pos]);
+				impNext.setCalibration(impAs[pos].getCalibration());
+				if (stageScan)
+					stackAs[pos].setSkewXperZ(
+							impNext.getCalibration().pixelDepth / impNext.getCalibration().pixelWidth);
+				impAs[pos].flush();
+				impAs[pos] = impNext;
+
+
+				win.setImage(impAs[pos]);
+				if (win instanceof StackWindow) {
+					StackWindow sw = (StackWindow)win;
+					int stackSize = impAs[pos].getStackSize();
+					int nScrollbars = sw.getNScrollbars();
+					sw.addScrollbars(impAs[pos]);
+				}
+				impAs[pos].setPosition(cA, zA, (tailing || tA > impAs[pos].getNFrames())? impAs[pos].getNFrames() : tA);
+				((CompositeImage)impAs[pos]).setMode(modeA);
+				win.getCanvas().setMagnification(zoomA);
+				Dimension winSize = win.getSize();
+				win.pack();
+				win.setSize(winSize);
+
+
+				win = impBs[pos].getWindow();
+				double zoomB = win.getCanvas().getMagnification();
+				int cB = impBs[pos].getChannel();
+				int zB = impBs[pos].getSlice();
+				int tB = impBs[pos].getFrame();
+				if (impBs[pos].isComposite()) {
+					modeB = ((CompositeImage)impBs[pos]).getCompositeMode();
+				}
+
+				tailing = tB==impBs[pos].getNFrames();
+				tDim = listA.length;
+
+				stackBs[pos] = new MultiFileInfoVirtualStack(
+						dirOrOMETiff, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
+						true, false);
+
+				impNext = new CompositeImage(new ImagePlus(impBs[pos].getTitle(), stackBs[pos]));
+				impNext.setOpenAsHyperStack(true);
+				impNext.setDimensions(cDim, zDim, tDim);
+				impNext = new CompositeImage(impNext);
+				((CompositeImage)impNext).setMode(modeB);
+				((CompositeImage)impNext).reset();
+				((CompositeImage)impNext).copyLuts(impBs[pos]);
+				impNext.setCalibration(impBs[pos].getCalibration());
+				if (stageScan)
+					stackAs[pos].setSkewXperZ(
+							impNext.getCalibration().pixelDepth / impNext.getCalibration().pixelWidth);
+				impBs[pos].flush();
+				impBs[pos] = impNext;
+
+				win.setImage(impBs[pos]);
+				if (win instanceof StackWindow) {
+					StackWindow sw = (StackWindow)win;
+					int stackSize = impBs[pos].getStackSize();
+					int nScrollbars = sw.getNScrollbars();
+					sw.addScrollbars(impBs[pos]);
+				}
+				impBs[pos].setPosition(cB, zB, (tailing || tB > impBs[pos].getNFrames())? impBs[pos].getNFrames() : tB);
+				((CompositeImage)impBs[pos]).setMode(modeB);
+				win.getCanvas().setMagnification(zoomB);
+				winSize = win.getSize();
+				win.pack();
+				win.setSize(winSize);
+
+
+			}
+
+		}
 
 	}
 

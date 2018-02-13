@@ -549,8 +549,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 			int dX = 0;
 			int dY = 0;
-			
-			int  vSliceNumber = (sliceNumber)+(isViewB?zDim*(cDim/2)*(dimOrder.toLowerCase().matches(".*splitsequentialc.*")?2:1):0);
+												// below seems like too much adjusting, but gives sensible result for 2 channel display...
+			int  vSliceNumber = (sliceNumber+(dimOrder.toLowerCase().matches(".*splitsequentialc.*")?-1:0))+(isViewB?zDim*(cDim/2)*(dimOrder.toLowerCase().matches(".*splitsequentialc.*")?2:1):0);
 			
 			if (vSliceNumber>fivStacks.get(stackNumber).getSize()) {
 				vSliceNumber = vSliceNumber-fivStacks.get(stackNumber).getSize();
