@@ -1364,8 +1364,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 								}
 							}
 
-							if (wavelengths == 2) {
-								impAs[pos].setPositionWithoutUpdate(2, zTest, impAs[pos].getFrame());
+							if (wavelengths >= 2) {
+								impAs[pos].setPositionWithoutUpdate(wavelengths, zTest, impAs[pos].getFrame());
 								ipTest = impAs[pos].getProcessor().duplicate();
 								ipHisTest = ipTest.getHistogram();
 								ipHisMode = 0.0;
@@ -1428,8 +1428,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 								}
 							}
 
-							if (wavelengths == 2) {
-								impBs[pos].setPositionWithoutUpdate(2, zTest, impBs[pos].getFrame());
+							if (wavelengths >= 2) {
+								impBs[pos].setPositionWithoutUpdate(wavelengths, zTest, impBs[pos].getFrame());
 								ipTest = impBs[pos].getProcessor().duplicate();
 								ipHisTest = ipTest.getHistogram();
 								ipHisMode = 0.0;
@@ -2787,7 +2787,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 					if (!(new File(savePath + "Pos"+pos+ "_SPIMA_Ch1_processed"
 							+ File.separator + frameFileNames[f] + File.separator
 							+ frameFileNames[f] + ".tif")).canRead()
-							|| (wavelengths == 2 && !(new File(savePath
+							|| (wavelengths >= 2 && !(new File(savePath
 									+ "Pos"+pos+ "_SPIMA_Ch2_processed" + File.separator
 									+ frameFileNames[f] + File.separator
 									+ frameFileNames[f] + ".tif")).canRead())
@@ -2795,7 +2795,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 											+ File.separator + frameFileNames[f]
 													+ File.separator + frameFileNames[f] + ".tif"))
 													.canRead()
-													|| (wavelengths == 2 && !(new File(savePath
+													|| (wavelengths >= 2 && !(new File(savePath
 															+ "Pos"+pos+ "_SPIMA_Ch2_processed" + File.separator
 															+ frameFileNames[f] + File.separator
 															+ frameFileNames[f] + ".tif")).canRead())) {
@@ -2816,7 +2816,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 						IJ.runMacro("File.makeDirectory(\""
 								+ savePath.replace("\\", "\\\\")
 								+"Pos"+pos+ "_Deconvolution1\");");
-						if (wavelengths == 2) {
+						if (wavelengths >= 2) {
 							IJ.runMacro("File.makeDirectory(\""
 									+ savePath.replace("\\", "\\\\")
 									+ "Pos"+pos+ "_SPIMA_Ch2_processed\");");
@@ -2872,8 +2872,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 									ip1 = ip1r;
 									//									ip1.subtract(minLimit[0]);
 									stackA1.addSlice(ip1);
-									if (wavelengths == 2) {
-										impAs[pos].setPositionWithoutUpdate(2, i, f);
+									if (wavelengths >= 2) {
+										impAs[pos].setPositionWithoutUpdate(wavelengths, i, f);
 										ImageProcessor ip2 = impAs[pos].getProcessor()
 												.duplicate();
 										ip2.setRoi(
@@ -2904,7 +2904,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 						IJ.saveAs(impXA1, "Tiff", savePath + "Pos"+pos+ "_SPIMA_Ch1_processed"
 								+ File.separator + frameFileNames[f]
 										+ File.separator + frameFileNames[f] + ".tif");
-						if (wavelengths == 2) {
+						if (wavelengths >= 2) {
 							ImagePlus impXA2 = new ImagePlus();
 							impXA2.setStack(stackA2);
 							impXA2.setCalibration(impAs[pos].getCalibration());
@@ -2951,8 +2951,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 									ip1 = ip1r;
 									// ip1.subtract(minLimit[2]);
 									stackB1.addSlice(ip1);
-									if (wavelengths == 2) {
-										impBs[pos].setPositionWithoutUpdate(2, i, f);
+									if (wavelengths >= 2) {
+										impBs[pos].setPositionWithoutUpdate(wavelengths, i, f);
 										ImageProcessor ip2 = impBs[pos].getProcessor()
 												.duplicate();
 										ip2.setRoi(
@@ -2983,7 +2983,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 						IJ.saveAs(impXB1, "Tiff", savePath + "Pos"+pos+ "_SPIMB_Ch1_processed"
 								+ File.separator + frameFileNames[f]
 										+ File.separator + frameFileNames[f] + ".tif");
-						if (wavelengths == 2) {
+						if (wavelengths >= 2) {
 							ImagePlus impXB2 = new ImagePlus();
 							impXB2.setStack(stackB2);
 							impXB2.setCalibration(impBs[pos].getCalibration());
@@ -3008,7 +3008,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 					if (!(new File(savePath +"Pos"+pos+ "_Deconvolution1" + File.separator
 							+ "Decon_" + frameFileNames[f] + ".tif")).canRead()
-							|| (wavelengths == 2 && !(new File(savePath
+							|| (wavelengths >= 2 && !(new File(savePath
 									+"Pos"+pos+ "_Deconvolution2" + File.separator + "Decon_"
 									+ frameFileNames[f] + ".tif")).canRead())) {
 						String deconStringKey = "nibib.spim.PlugInDialogGenerateFusion(\"reg_one boolean false\", \"reg_all boolean true\", \"no_reg_2D boolean false\", \"reg_2D_one boolean false\", \"reg_2D_all boolean false\", \"rotate_begin list_float -10.0,-10.0,-10.0\", \"rotate_end list_float 10.0,10.0,10.0\", \"coarse_rate list_float 3.0,3.0,3.0\", \"fine_rate list_float 0.5,0.5,0.5\", \"save_arithmetic boolean false\", \"show_arithmetic boolean false\", \"save_geometric boolean false\", \"show_geometric boolean false\", \"do_interImages boolean false\", \"save_prefusion boolean false\", \"do_show_pre_fusion boolean false\", \"do_threshold boolean false\", \"save_max_proj boolean false\", \"show_max_proj boolean false\", \"x_max_box_selected boolean false\", \"y_max_box_selected boolean false\", \"z_max_box_selected boolean false\", \"do_smart_movement boolean false\", \"threshold_intensity double 10.0\", \"res_x double 0.182\", \"res_y double 0.182\", \"res_z double 1.0\", \"mtxFileDirectory string "
@@ -3128,7 +3128,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 						});
 						convThread.start();
 
-						if (wavelengths == 2) {
+						if (wavelengths >= 2) {
 							String deconStringSlave = "nibib.spim.PlugInDialogGenerateFusion(\"reg_one boolean false\", \"reg_all boolean true\", \"no_reg_2D boolean false\", \"reg_2D_one boolean false\", \"reg_2D_all boolean false\", \"rotate_begin list_float -10.0,-10.0,-10.0\", \"rotate_end list_float 10.0,10.0,10.0\", \"coarse_rate list_float 3.0,3.0,3.0\", \"fine_rate list_float 0.5,0.5,0.5\", \"save_arithmetic boolean false\", \"show_arithmetic boolean false\", \"save_geometric boolean false\", \"show_geometric boolean false\", \"do_interImages boolean false\", \"save_prefusion boolean false\", \"do_show_pre_fusion boolean false\", \"do_threshold boolean false\", \"save_max_proj boolean false\", \"show_max_proj boolean false\", \"x_max_box_selected boolean false\", \"y_max_box_selected boolean false\", \"z_max_box_selected boolean false\", \"do_smart_movement boolean false\", \"threshold_intensity double 10.0\", \"res_x double 0.182\", \"res_y double 0.182\", \"res_z double 1.0\", \"mtxFileDirectory string "
 									+ savePath.replace("\\", "\\\\")
 									+ "Pos"+pos+ "_SPIMB_Ch"
@@ -3426,8 +3426,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 							stackA1.addSlice(ipA1);
 
-							if (wavelengths == 2) {
-								impAs[pos].setPositionWithoutUpdate(2, i, f);
+							if (wavelengths >= 2) {
+								impAs[pos].setPositionWithoutUpdate(wavelengths, i, f);
 								ipA2 = impAs[pos].getProcessor().duplicate();
 								ipHis = ipA2.getHistogram();
 								ipHisMode = 0.0;
@@ -3468,7 +3468,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 						while (!(new File(savePath + "CropBkgdSub" + File.separator + "SPIMA1_1.tif").canRead())){
 							IJ.wait(100);
 						}
-						if (wavelengths == 2) {
+						if (wavelengths >= 2) {
 							impXA2 = new ImagePlus();
 							impXA2.setStack(stackA2);
 							if (diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
@@ -3531,8 +3531,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 									ipB1 = ipB1r;
 									// ip1.subtract(minLimit[2]);
 									stackB1.addSlice(ipB1);
-									if (wavelengths == 2) {
-										impBs[pos].setPositionWithoutUpdate(2, i, f);
+									if (wavelengths >= 2) {
+										impBs[pos].setPositionWithoutUpdate(wavelengths, i, f);
 										ipB2 = impBs[pos].getProcessor().duplicate();
 										ipHis = ipB2.getHistogram();
 										ipHisMode = 0.0;
@@ -3575,7 +3575,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 						while (!(new File(savePath + "CropBkgdSub" + File.separator + "SPIMB1_1.tif").canRead())){
 							IJ.wait(100);
 						}
-						if (wavelengths == 2) {
+						if (wavelengths >= 2) {
 							impXB2 = new ImagePlus();
 							impXB2.setStack(stackB2);
 							if (diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
@@ -3653,7 +3653,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 						pryColor1File = new File(pryPath+File.separator+"Color1");
 						prxColor1File.mkdirs();
 						pryColor1File.mkdirs();
-						if (wavelengths == 2) {
+						if (wavelengths >= 2) {
 							prxColor2File = new File(prxPath+File.separator+"Color2");
 							pryColor2File = new File(pryPath+File.separator+"Color2");
 							prxColor2File.mkdirs();
@@ -3732,7 +3732,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 								int k = f;
 
 								if (new File(prxPath+File.separator+"Color1"+File.separator+"proj_"+k+"_1.tif").canRead() && new File(pryPath+File.separator+"Color1"+File.separator+"proj_"+k+"_1.tif").canRead()
-										&&  (wavelengths == 2 && new File(prxPath+File.separator+"Color2"+File.separator+"proj_"+k+"_1.tif").canRead() && new File(pryPath+File.separator+"Color2"+File.separator+"proj_"+k+"_1.tif").canRead()))
+										&&  (wavelengths >= 2 && new File(prxPath+File.separator+"Color2"+File.separator+"proj_"+k+"_1.tif").canRead() && new File(pryPath+File.separator+"Color2"+File.separator+"proj_"+k+"_1.tif").canRead()))
 									continue;
 								else {
 									try {
@@ -3757,7 +3757,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 
 						//	NEW TWO CALL VERSION TO REUSE FIT ON CH 2						
-						if (wavelengths == 2) {
+						if (wavelengths >= 2) {
 							try {
 								String[] cmdln = {""};
 								if (keyChannel ==1)
