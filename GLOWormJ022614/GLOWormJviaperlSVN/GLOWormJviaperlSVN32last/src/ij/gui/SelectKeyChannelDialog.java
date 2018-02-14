@@ -181,7 +181,7 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 			yesPressed = true;
 			keyChannel = channelChoices.getSelectedIndex()+1;
 			Prefs.set("diSPIMmonitor.keyChannel", channelChoices.getSelectedItem());
-			abRelOriValue = abRelOriChoices.getSelectedIndex()-1;
+			abRelOriValue = 1-abRelOriChoices.getSelectedIndex();
 			Prefs.set("diSPIMmonitor.relativeOrientation", abRelOriChoices.getSelectedItem());
 			regDeconMethod = methodChoices.getSelectedItem();	
 			Prefs.set("diSPIMmonitor.fusionMethod", methodChoices.getSelectedItem());
