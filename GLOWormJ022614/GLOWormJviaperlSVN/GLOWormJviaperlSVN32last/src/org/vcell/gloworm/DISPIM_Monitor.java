@@ -243,6 +243,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 	private String savePath;
 	private String tempDir;
 	int wavelengths = 1;
+	int outputWavelengths = 1;
 	int zSlices = 1;
 	ImageWindow win = null;
 	ImageWindow prjXwin = null;
@@ -1175,7 +1176,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 		}
 
 		if (doMipavDecon || doGPUdecon) {
-
+			outputWavelengths = wavelengths >1?2:1;
 			for (int pos=0; pos<pDim; pos++) {
 				if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
 					doProcessing[pos] = false;
@@ -1602,7 +1603,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 											stackPrys[pos] = new MultiFileInfoVirtualStack(pryPath, "Color", false,
 													false);		
 										}
-										if (wavelengths ==2) {
+										if (wavelengths >= 2) {
 											stackPrxs[pos] = new MultiFileInfoVirtualStack(prxPath, "Color", false,
 													false);					
 											stackPrys[pos] = new MultiFileInfoVirtualStack(pryPath,  "Color", false,
@@ -1628,9 +1629,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 								int zSlicesDF1 = stackDFs[pos].getFivStacks().get(0)
 										.getSize();
 								impDF1s[pos].setOpenAsHyperStack(true);
-								impDF1s[pos].setStack(impDF1s[pos].getStack(), wavelengths,
+								impDF1s[pos].setStack(impDF1s[pos].getStack(), outputWavelengths,
 										zSlicesDF1, stkNSlicesDF
-										/ (wavelengths * zSlicesDF1));
+										/ (outputWavelengths * zSlicesDF1));
 								if (ciDFs[pos] != null) {
 									win = ciDFs[pos].getWindow();
 								} else {
@@ -1684,9 +1685,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 									int zSlicesPrx = stackPrxs[pos].getFivStacks().get(0)
 											.getSize();
 									impPrxs[pos].setOpenAsHyperStack(true);
-									impPrxs[pos].setStack(impPrxs[pos].getStack(), wavelengths,
+									impPrxs[pos].setStack(impPrxs[pos].getStack(), outputWavelengths,
 											zSlicesPrx, stkNSlicesPrx
-											/ (wavelengths * zSlicesPrx));
+											/ (outputWavelengths * zSlicesPrx));
 									if (ciPrxs[pos] != null) {
 										prjXwin = ciPrxs[pos].getWindow();
 									}
@@ -1703,9 +1704,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 									int zSlicesPry = stackPrys[pos].getFivStacks().get(0)
 											.getSize();
 									impPrys[pos].setOpenAsHyperStack(true);
-									impPrys[pos].setStack(impPrys[pos].getStack(), wavelengths,
+									impPrys[pos].setStack(impPrys[pos].getStack(), outputWavelengths,
 											zSlicesPry, stkNSlicesPry
-											/ (wavelengths * zSlicesPry));
+											/ (outputWavelengths * zSlicesPry));
 									if (ciPrys[pos] != null) {
 										prjYwin = ciPrys[pos].getWindow();
 									}
@@ -3308,7 +3309,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 		}
 		for (int posForPathSetup=0; posForPathSetup<pDim; posForPathSetup++) {
 			new File("" + savePath + "RegDecon" + File.separator + "Pos"+ posForPathSetup + File.separator +"Deconvolution1").mkdirs();
-			if (wavelengths ==2) {
+			if (wavelengths >= 2) {
 				new File("" + savePath + "RegDecon" + File.separator + "Pos"+ posForPathSetup + File.separator +"Deconvolution2").mkdirs();
 			}
 		}
@@ -3353,7 +3354,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 					tmxFile = new File("" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx");
 					if ((wavelengths ==1 && dc1File.canRead())
 							||
-							(wavelengths ==2 && dc1File.canRead()
+							(wavelengths >= 2 && dc1File.canRead()
 							&& dc2File.canRead())) {
 						IJ.log("already done: " + pos +" "+ impAs[pos].getChannel()+" "+ impAs[pos].getSlice()+" "+ f);
 						continue;
@@ -3972,9 +3973,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 								int zSlicesDF1 = deconmfivs.getFivStacks().get(0)
 										.getSize();
 								impDF1s[pos].setOpenAsHyperStack(true);
-								impDF1s[pos].setStack(impDF1s[pos].getStack(), wavelengths,
+								impDF1s[pos].setStack(impDF1s[pos].getStack(), outputWavelengths,
 										zSlicesDF1, stkNSlicesDF
-										/ (wavelengths * zSlicesDF1));
+										/ (outputWavelengths * zSlicesDF1));
 								if (ciDFs[pos] != null) {
 									win = ciDFs[pos].getWindow();
 								} else {
@@ -4036,9 +4037,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 								int zSlicesPrx = dfProjXmfivs.getFivStacks().get(0)
 										.getSize();
 								impPrxs[pos].setOpenAsHyperStack(true);
-								impPrxs[pos].setStack(impPrxs[pos].getStack(), wavelengths,
+								impPrxs[pos].setStack(impPrxs[pos].getStack(), outputWavelengths,
 										zSlicesPrx, stkNSlicesPrx
-										/ (wavelengths * zSlicesPrx));
+										/ (outputWavelengths * zSlicesPrx));
 								if (ciPrxs[pos] != null) {
 									prjXwin = ciPrxs[pos].getWindow();
 								}
@@ -4056,9 +4057,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 								int zSlicesPry = dfProjYmfivs.getFivStacks().get(0)
 										.getSize();
 								impPrys[pos].setOpenAsHyperStack(true);
-								impPrys[pos].setStack(impPrys[pos].getStack(), wavelengths,
+								impPrys[pos].setStack(impPrys[pos].getStack(), outputWavelengths,
 										zSlicesPry, stkNSlicesPry
-										/ (wavelengths * zSlicesPry));
+										/ (outputWavelengths * zSlicesPry));
 								if (ciPrys[pos] != null) {
 									prjYwin = ciPrys[pos].getWindow();
 								}
