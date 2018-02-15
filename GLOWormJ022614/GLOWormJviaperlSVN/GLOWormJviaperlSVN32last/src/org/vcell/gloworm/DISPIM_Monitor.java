@@ -4648,10 +4648,17 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 			monitoring = false;
 		}
 		if (e.getActionCommand() == "CSM") {
-			cDim = 2;
-			wavelengths = 2;
-			splitChannels = true;
-			dimOrder = "xySplitSequentialCzt";
+			if (cDim == 4 && wavelengths == 4 && splitChannels == true && dimOrder == "xySplitCzt") {
+				cDim = 2;
+				wavelengths = 2;
+				splitChannels = true;
+				dimOrder = "xySplitSequentialCzt";
+			} else if (cDim == 2 && wavelengths == 2 && splitChannels == true && dimOrder == "xySplitSequentialCzt") {
+				cDim = 4;
+				wavelengths = 4;
+				splitChannels = true;
+				dimOrder = "xySplitCzt";
+			}
 
 			MultiFileInfoVirtualStack[] stackAs = new MultiFileInfoVirtualStack[pDim];
 			MultiFileInfoVirtualStack[] stackBs = new MultiFileInfoVirtualStack[pDim];

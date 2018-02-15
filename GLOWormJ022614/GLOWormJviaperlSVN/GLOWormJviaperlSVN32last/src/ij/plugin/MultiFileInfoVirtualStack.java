@@ -533,7 +533,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (dimOrder.toLowerCase().matches(".*splitc.*")) {
 			sliceNumber = (sliceNumber/2);
 		}
-		
+
 		
 		ImageProcessor ip = null;
 		if (dimOrder == "xyczt") {
@@ -552,10 +552,22 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			
 			int  vSliceNumber = (sliceNumber)+(isViewB?zDim*(cDim/2)*(dimOrder.toLowerCase().matches(".*splitsequentialc.*")?2:1):0);
 			
+			
+		//ADJUSTMENTS BELOW DEAL WITH CALLING C1 AND C4 FOR CSM MODE SWITCH TO JUST 2 MAIN RG CHANNELS
+		//I DO NOT FULLY UNDERSTAND HOW OR WHY IT WORKS!!!???
+			if (dimOrder.toLowerCase().matches(".*splitsequentialc.*")) {
+				if (vSliceNumber%2 == 0) {
+					vSliceNumber = vSliceNumber-1;
+				} else {
+					vSliceNumber = vSliceNumber-1;
+				}
+			}
+
 			if (vSliceNumber>fivStacks.get(stackNumber).getSize()) {
 				vSliceNumber = vSliceNumber-fivStacks.get(stackNumber).getSize();
 				stackNumber++;
 			}
+
 			initiateStack(stackNumber, vSliceNumber);
 			ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber);
 			
