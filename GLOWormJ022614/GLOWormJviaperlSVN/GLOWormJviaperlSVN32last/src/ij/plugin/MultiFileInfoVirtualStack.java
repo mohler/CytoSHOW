@@ -8,7 +8,6 @@ import ij.gui.*;
 import ij.io.*;
 
 import java.awt.*;
-
 import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -511,6 +510,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			
 		stackNumber = 0;
 		sliceNumber = 1;
+		int  vSliceNumber = 0;
 		int total=0;
 				
 		if (dimOrder.toLowerCase().matches("xy.*czt")) {
@@ -537,7 +537,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		
 		ImageProcessor ip = null;
 		if (dimOrder == "xyczt") {
-			int  vSliceNumber = (sliceNumber)+(isViewB?fivStacks.get(stackNumber).getSize()/vDim:0);
+			vSliceNumber = (sliceNumber)+(isViewB?fivStacks.get(stackNumber).getSize()/vDim:0);
 			if (vSliceNumber>fivStacks.get(stackNumber).getSize()) {
 				vSliceNumber = vSliceNumber-fivStacks.get(stackNumber).getSize();
 				stackNumber++;
@@ -550,7 +550,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			int dX = 0;
 			int dY = 0;
 			
-			int  vSliceNumber = (sliceNumber)+(isViewB?zDim*(cDim/2)*(dimOrder.toLowerCase().matches(".*splitsequentialc.*")?2:1):0);
+			 vSliceNumber = (sliceNumber)+(isViewB?zDim*(cDim/2)*(dimOrder.toLowerCase().matches(".*splitsequentialc.*")?2:1):0);
 			
 			
 		//ADJUSTMENTS BELOW DEAL WITH CALLING C1 AND C4 FOR CSM MODE SWITCH TO JUST 2 MAIN RG CHANNELS
@@ -632,6 +632,38 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		} else {
 			ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
 		}
+		
+		if (n%4 == 1) {
+			ImageProcessor nextIP = fivStacks.get(stackNumber).getProcessor(vSliceNumber+1);
+			int dX=0;
+			int dY=0;
+			if (nextIP.getWidth()==1536) //Yale splitview setup
+			{
+				dX=isViewB?3:0;
+				dY=isViewB?4:0;
+				int xOri = 1024;
+				int yOri = 0;
+				ip.setRoi(xOri, yOri, 512, 512);
+			}
+			nextIP = nextIP.crop();
+			nextIP.translate((1-n%2)*dX, (1-n%2)*dY);
+			ImageProcessor rip1= null;
+			ImageProcessor rip2= null;
+			if (ip instanceof ByteProcessor && nextIP instanceof ByteProcessor) {
+				rip1 = ((ByteProcessor) ip).convertToFloat();
+				rip2 = ((ByteProcessor) nextIP).convertToFloat();
+			} else if (ip instanceof ShortProcessor && nextIP instanceof ShortProcessor) {
+				rip1 = ((ShortProcessor) ip).convertToFloat();
+				rip2 = ((ShortProcessor) nextIP).convertToFloat();
+			}
+			if (rip1!=null && rip2!=null) {
+				rip1.copyBits(rip2, 0, 0, Blitter.DIVIDE);
+				rip1.setMinAndMax(0, 1024);
+				ip = rip1.convertToShort(true);
+			}
+		}
+		
+		
 //		ip.setMinAndMax(min, max);
 		return ip;
 	 }
