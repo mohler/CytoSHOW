@@ -633,7 +633,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
 		}
 		
-		if (n%4 == 1) {
+		if (n%cDim == 1) {
 			ImageProcessor nextIP = fivStacks.get(stackNumber).getProcessor(vSliceNumber+1);
 			int dX=0;
 			int dY=0;
