@@ -538,6 +538,14 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		ImageProcessor ip = null;
 		if (dimOrder == "xyczt") {
 			vSliceNumber = (sliceNumber)+(isViewB?fivStacks.get(stackNumber).getSize()/vDim:0);
+			//ADJUSTMENTS BELOW DEAL WITH CALLING RG CHANNELS CORRECTLY
+			//I DO NOT FULLY UNDERSTAND HOW OR WHY IT WORKS!!!???
+			if (vSliceNumber%2 == 0) {
+				vSliceNumber = vSliceNumber-1;
+			} else {
+				vSliceNumber = vSliceNumber-1;
+			}
+
 			if (vSliceNumber>fivStacks.get(stackNumber).getSize()) {
 				vSliceNumber = vSliceNumber-fivStacks.get(stackNumber).getSize();
 				stackNumber++;
@@ -587,8 +595,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				ip.setRoi(xOri, yOri, 512, 512);
 			} else if (ip.getWidth()==1536) //Yale splitview setup
 				{
-				dX=isViewB?3:0;
-				dY=isViewB?4:0;
+				dX=isViewB?2:5;
+				dY=isViewB?7:2;
 				int xOri = 0+((0+(n+1)%2)*(1024));
 				int yOri = 0+((1-(n+1)%2)*(0));
 				ip.setRoi(xOri, yOri, 512, 512);
@@ -633,14 +641,14 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
 		}
 		
-		if (n%cDim == 1) {
+		if (dimOrder.toLowerCase().matches(".*splitsequentialc.*") && n%cDim == 1) {
 			ImageProcessor nextIP = fivStacks.get(stackNumber).getProcessor(vSliceNumber+1);
 			int dX=0;
 			int dY=0;
 			if (nextIP.getWidth()==1536) //Yale splitview setup
 			{
-				dX=isViewB?3:0;
-				dY=isViewB?4:0;
+				dX=isViewB?2:5;
+				dY=isViewB?7:2;
 				int xOri = 1024;
 				int yOri = 0;
 				ip.setRoi(xOri, yOri, 512, 512);
@@ -658,7 +666,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			}
 			if (rip1!=null && rip2!=null) {
 				rip1.copyBits(rip2, 0, 0, Blitter.DIVIDE);
-				rip1.setMinAndMax(0, 1024);
+				rip1.setMinAndMax(0, 255);
 				ip = rip1.convertToShort(true);
 			}
 		}
