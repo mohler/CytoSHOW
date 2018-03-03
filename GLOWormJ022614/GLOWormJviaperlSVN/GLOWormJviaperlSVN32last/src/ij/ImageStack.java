@@ -27,7 +27,7 @@ public class ImageStack {
 	private double max;
 	private float[] cTable;
 	private ArrayList<ImagePlus> ownerImps = new ArrayList<ImagePlus>();
-	
+	protected boolean edges;
 	/** Default constructor. */
 	public ImageStack() { }
 
@@ -285,6 +285,7 @@ public class ImageStack {
 		} else {
 			ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
 		}
+
 		return ip;
 	}
 	
@@ -618,6 +619,14 @@ public class ImageStack {
 
 	public void setSkewYperZ(double skewYperZ) {
 		this.skewYperZ = skewYperZ;
+	}
+
+	public boolean isEdges() {
+		return edges;
+	}
+
+	public void setEdges(boolean edges) {
+		this.edges = edges;
 	}
 
 }

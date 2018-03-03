@@ -2,12 +2,15 @@ package org.vcell.gloworm;
 
 import java.awt.BorderLayout;
 import java.awt.Button;
+import java.awt.Checkbox;
 import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.Panel;
 import java.awt.Polygon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.image.ColorModel;
 import java.io.BufferedReader;
@@ -189,6 +192,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 	private boolean autodepth;
 	private Button[][] fuseButton;
 	private Button[][] splitButton;
+	private Checkbox[][] edgeBox;
+
 	private String dirOrOMETiff;
 	String timecode = "" + -1;
 
@@ -1542,6 +1547,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 						splitButton[pos][1].setVisible(true);
 					}
 				}
+
 				impAs[pos].getWindow().pack();
 				impBs[pos].getWindow().pack();
 				
@@ -4775,5 +4781,4 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 		}
 
 	}
-
 }

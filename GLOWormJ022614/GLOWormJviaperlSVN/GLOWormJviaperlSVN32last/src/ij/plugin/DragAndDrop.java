@@ -26,6 +26,7 @@ import org.vcell.gloworm.MultiQTVirtualStack;
 import org.vcell.gloworm.QTMovieOpenerMultiMod;
 
 import client.RemoteMQTVSHandler;
+import client.RemoteMTVSHandler;
 
 /** This class opens images, roi's, luts and text files dragged and dropped on  the "ImageJ" window.
      It is based on the Draw_And_Drop plugin by Eric Kischell (keesh@ieee.org).
@@ -166,7 +167,8 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 								&& (tmp.toLowerCase().endsWith(".mov") 
 										|| tmp.toLowerCase().endsWith(".avi") 
 										|| tmp.toLowerCase().contains("scene.scn")
-										|| tmp.toLowerCase().endsWith(".obj"))){
+										|| tmp.toLowerCase().endsWith(".obj")
+										|| tmp.toLowerCase().endsWith(".tif"))){
 							if (IJ.debugMode) IJ.log(" stringinput");
 							list.add(tmp);
 						} else if ( !tmp.contains(File.separator) 
@@ -413,6 +415,35 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 									false, true, true, false, true, false, true, false, false);
 
 							ImagePlus stereoImp = rmqtvsh.getImagePlus();
+							MultiChannelController mcc = stereoImp.getMultiChannelController();
+							mcc.setChannelLUTChoice(0, 0);
+							CompositeImage ci = (CompositeImage)stereoImp;
+							ci.setPosition( 0+1, ci.getSlice(), ci.getFrame() );
+							IJ.doCommand(mcc.getChannelLUTChoice(0) );
+							mcc.setChannelLUTChoice(1, 4);
+							ci.setPosition( 1+1, ci.getSlice(), ci.getFrame() );
+							IJ.doCommand(mcc.getChannelLUTChoice(1) );
+							mcc.setSliceSpinner(0, 1);					
+							//							if (path.contains("_prx_")) {
+							//								mcc.setRotateAngleSpinner(0, 90);
+							//								mcc.setRotateAngleSpinner(1, 90);
+							//								rmqtvsh.setRotation(90);
+							//							}
+							stereoImp.getWindow().setVisible(true);
+
+							if (dropImp == null)
+								return;
+							dropImp.getCanvas().messageRois.remove("Pending drop "+nDrops);
+							dropImp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
+							//							IJ.log(nDrops+" nDrops");
+							nDrops--;
+						} else if (path.toLowerCase().endsWith(".tif") ) {
+							String pathListStereo = path;
+							//							new QTMovieOpenerMultiMod(pathListStereo, true, false);
+							RemoteMTVSHandler rmtvsh = RemoteMTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replaceAll("%2B", "\\+").replaceAll("%25", "%")+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/+" "+path.replaceAll("%2B", "\\+").replaceAll("%25", "%")+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
+									false, true, true, false, true, false, true, false, false);
+
+							ImagePlus stereoImp = rmtvsh.getImagePlus();
 							MultiChannelController mcc = stereoImp.getMultiChannelController();
 							mcc.setChannelLUTChoice(0, 0);
 							CompositeImage ci = (CompositeImage)stereoImp;

@@ -12,11 +12,13 @@ import ij.io.FileSaver;
 import ij.macro.Interpreter;
 import ij.measure.Calibration;
 import ij.plugin.Colors;
+import ij.plugin.MultiFileInfoVirtualStack;
 import ij.plugin.frame.Channels;
 import ij.plugin.frame.RoiManager;
 
 import java.awt.BorderLayout;
 import java.awt.Button;
+import java.awt.Checkbox;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.ComponentOrientation;
@@ -45,6 +47,8 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowEvent;
@@ -54,6 +58,7 @@ import java.awt.event.WindowStateListener;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -67,7 +72,7 @@ import org.vcell.gloworm.SliceStereoToggle;
 import com.sun.xml.internal.ws.util.StringUtils;
 
 /** A frame for displaying images. */
-public class ImageWindow extends JFrame implements FocusListener, WindowListener, WindowStateListener, MouseWheelListener {
+public class ImageWindow extends JFrame implements FocusListener, WindowListener, WindowStateListener, MouseWheelListener, ItemListener {
 
 	public static final int MIN_WIDTH = 128;
 	public static final int MIN_HEIGHT = 32;
@@ -135,6 +140,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 	public JButton sketchVVButton;
 	private JButton flattenTagsButton;
 	public JButton tagsButton;
+
 	
 	public ImageWindow(String title) {
 		super(title);
@@ -263,6 +269,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		overheadPanel.setLayout(new GridLayout(1, 1));
 		
 		toolbar = new Toolbar();
+		Toolbar.setInstance(toolbar);
 		toolbar.installBuiltinTool("LUT Menu");
 		toolbar.installBuiltinTool("Stacks Menu");
 		toolbar.installBuiltinTool("Developer Menu");
@@ -275,6 +282,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 //		overheadScrollPane.add(overheadPanel);
 
 		this.add(overheadPanel, BorderLayout.NORTH);
+//		Toolbar.setInstance(ij.toolbar);
 	}
 
 	public void addCommandButtons(ImagePlus imp) throws HeadlessException {
@@ -449,6 +457,14 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		viewing.setIcon(new ImageIcon(ImageWindow.class.getResource("images/TVviewSmall.png")));
 		viewing.setToolTipText("These buttons help you adjust your view of the scene...");
 //		viewButtonPanel.add(viewing, vspc);
+		fspc.gridy = y++;
+		fspc.weighty = 0.5;
+		fspc.fill = GridBagConstraints.BOTH;
+
+		JCheckBox edgeBox = new JCheckBox("Edges");
+		edgeBox.setToolTipText("Find Edges of Image Features");
+		viewButtonPanel.add(edgeBox, fspc);
+		edgeBox.addItemListener(this);
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
 		fspc.fill = GridBagConstraints.BOTH;
@@ -1223,6 +1239,21 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 						+overheadPanel.getHeight();
 		imp.getWindow().setSize(ic.dstWidth+padH, ic.dstHeight+padV);
 	}
+
+	public void itemStateChanged(ItemEvent e) {
+		if (e.getStateChange() == ItemEvent.SELECTED) {
+			imp.getStack().setEdges(true);
+			imp.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame()+1);
+			imp.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame()-1);
+		}else {
+			imp.getStack().setEdges(false);
+			imp.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame()+1);
+			imp.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame()-1);
+		}
+
+	}
+
+
 
 	
 } //class ImageWindow

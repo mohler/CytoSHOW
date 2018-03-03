@@ -1638,6 +1638,11 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 	public void setThreeDViewer(boolean threeDViewer) {
 		this.threeDViewer = threeDViewer;
 	}
+
+	public static void setInstance(Toolbar toolbar) {
+		instance = toolbar;
+		
+	}
 	
 	//public void repaint() {
 	//	super.repaint();

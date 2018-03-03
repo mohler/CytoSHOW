@@ -8,6 +8,7 @@ import ij.gui.ImageWindow;
 import ij.gui.StackWindow;
 import ij.plugin.BrowserLauncher;
 import ij.plugin.FileInfoVirtualStack;
+import ij.plugin.MultiFileInfoVirtualStack;
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
@@ -133,21 +134,16 @@ public class RemoteMTVS_Engine extends UnicastRemoteObject implements Compute {
             } catch (NoSuchObjectException nbe) {
             	Naming.rebind(sprName, engine);
             }
-            System.out.println("QTVSEngine bound on port "+portString);
+            System.out.println("MTVSEngine bound on port "+portString);
         } catch (Exception e) {
-            System.out.println("QTVSEngine exception:");
+            System.out.println("MTVSEngine exception:");
 //            e.printStackTrace();
         }
 
     }
 
 	public int setUpMovie(String[] names, String[] slices, int port, boolean rcsPrx)  throws RemoteException {
-		if (!QTSession.isInitialized())
-			try {
-				QTSession.open();
-			} catch (QTException e) {
-				e.printStackTrace();
-			}
+
 		ImagePlus impLocal = null;
 		VirtualStack vstack = null;
 		String[] nameChunks = names[0].split("_");
@@ -170,33 +166,29 @@ public class RemoteMTVS_Engine extends UnicastRemoteObject implements Compute {
 				}
 			}
 		}
-		QTFile[] mqtf = new QTFile[names.length];
+
 		int[] movieSlices =  new int[names.length];
-		for (int f=0;f<mqtf.length;f++) {
-			mqtf[f] = new QTFile(names[f]);
-			movieSlices[f]= Integer.parseInt(slices[f]);
-		}
-		try {
-            if (names[0].substring(names[0].lastIndexOf("/")).startsWith("/SW")
-             		|| names[0].substring(names[0].lastIndexOf("/")).startsWith("/RGB")
-//               	|| names[0].substring(names[0].lastIndexOf("/")).startsWith("/DUP")
-//            		|| names[0].substring(names[0].lastIndexOf("/")).startsWith("/Projectionsof")
-            		) {
-            	vstack = new MultiQTVirtualStack(mqtf, new ArrayList<String>(),new ArrayList<String>(),movieSlices, false, impLocal, true, true, false, false, false, false, rcsPrx, sceneFileName, sceneFileText);
-            } else {
-            	vstack = new MultiQTVirtualStack(mqtf, new ArrayList<String>(),new ArrayList<String>(),movieSlices, true, impLocal, false, true, false, false, false, false, rcsPrx, sceneFileName, sceneFileText);
-            }
-		} catch (IOException e) {
-			e.printStackTrace();
+
+
+		if (names[0].substring(names[0].lastIndexOf("/")).startsWith("/SW")
+				|| names[0].substring(names[0].lastIndexOf("/")).startsWith("/RGB")
+				//               	|| names[0].substring(names[0].lastIndexOf("/")).startsWith("/DUP")
+				//            		|| names[0].substring(names[0].lastIndexOf("/")).startsWith("/Projectionsof")
+				) {
+			vstack = new MultiFileInfoVirtualStack();
+		} else {
+			vstack = new MultiFileInfoVirtualStack();
 		}
 
-		impLocal = ((MultiQTVirtualStack) vstack).imp;
+
+		impLocal = new ImagePlus("NewMTVSImp", vstack);
+		
 		if  (maxSlicesSingleMovie == 0) {
 			Arrays.sort(movieSlices);
 			maxSlicesSingleMovie = movieSlices[movieSlices.length-1];
 			
 		}
-		impLocal.setDimensions(mqtf.length, maxSlicesSingleMovie, impLocal.getImageStackSize()/(maxSlicesSingleMovie*mqtf.length));
+		impLocal.setDimensions(1, maxSlicesSingleMovie, impLocal.getImageStackSize()/(maxSlicesSingleMovie));
 		movieTable.put(impLocal.getID(), impLocal);
         impLocal.setOpenAsHyperStack(true);
 

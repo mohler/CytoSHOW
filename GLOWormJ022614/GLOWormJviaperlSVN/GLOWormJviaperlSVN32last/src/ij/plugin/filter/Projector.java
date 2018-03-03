@@ -1509,5 +1509,128 @@ public class Projector implements PlugInFilter, TextListener {
 	public void textValueChanged(TextEvent e) {
 		checkbox.setState(true);
 	}
+	
+	public static void projectCursorAroundX (int projSlice, int nSlices, int ycenter, int zcenter, int projwidth, int projheight, int costheta, int sintheta) {
+		int     thispixel;			//current pixel to be projected
+		int    offset, offsetinit;		//precomputed offsets into an image buffer
+		int z;					//z-coordinate of points in current slice before rotation
+		int ynew, znew;			//y- and z-coordinates of current point after rotation
+		int zmax, zmin;			//z-coordinates of first and last slices before rotation
+		int zmaxminuszmintimes100;	//precomputed values to save time in loops
+		int c100minusDepthCueInt, c100minusDepthCueSurf;
+		boolean DepthCueIntLessThan100, DepthCueSurfLessThan100;
+		boolean OpacityOrNearestPt, OpacityAndNotNearestPt;
+		boolean MeanVal, BrightestPt;
+		int ysintheta, ycostheta;
+		int zsintheta, zcostheta, ysinthetainit, ycosthetainit;
+		short[] pixels;
+		int projsize = projwidth * projheight;
+		ImagePlus imp = WindowManager.getCurrentImage();
+
+		int top =0;
+		int left =0;
+		int right = imp.getWidth()-1;
+		int bottom = imp.getHeight()-1;
+
+		ycosthetainit = (top - ycenter - 1) * costheta;
+		ysinthetainit = (top - ycenter - 1) * sintheta;
+		offsetinit = ((projheight-bottom+top)/2) * projwidth + (projwidth - right + left)/2 - 1;
+		
+
+		if (imp.getCanvas().getCursorLoc()!=null) {
+			//			for (int k=1; k<=nSlices; k++) {
+			z = (int)((imp.getCurrentSlice()-1)*(imp.getCalibration().pixelDepth/imp.getCalibration().pixelWidth)+0.5) - zcenter;
+			zcostheta = z * costheta;
+			zsintheta = z * sintheta;
+			ycostheta = ycosthetainit;
+			ysintheta = ysinthetainit;
+			//				for (int j=top; j<bottom; j++) {
+			ycostheta = ycostheta + (int) (costheta * imp.getCanvas().getCursorLoc().getX()/imp.getWidth()) ;  //rotate about x-axis and find new y,z
+			ysintheta = ysintheta + (int) (sintheta * imp.getCanvas().getCursorLoc().getX()/imp.getWidth());  //x-coordinates will not change
+			ynew = (ycostheta - zsintheta)/BIGPOWEROF2 + ycenter - top;
+			znew = (ysintheta + zcostheta)/BIGPOWEROF2 + zcenter;
+
+			ynew = (offsetinit/projwidth) +ynew;
+
+			imp.setPosition(imp.getChannel(), znew, imp.getFrame());
+			Roi nextRoi = null;
+					
+			if (nextRoi == null)
+				nextRoi = new TextRoi((int)imp.getCanvas().getCursorLoc().getX(),ynew, ""+costheta+" "+sintheta);
+			else
+				nextRoi.setLocation((int)imp.getCanvas().getCursorLoc().getX(),ynew);
+
+			imp.setRoi(nextRoi);
+
+		}
+	} //  projectCursorAroundX()
+
+
+	/** Projects each pixel of a volume (stack of slices) onto a plane as the volume rotates about the y-axis. */
+	public void  projectCursorAroundY (int projSlice, int nSlices, int xcenter, int zcenter, int projwidth, int projheight, int costheta, int sintheta) {
+		//IJ.write("DoOneProjectionY: "+xcenter+" "+zcenter+" "+(double)costheta/BIGPOWEROF2+ " "+(double)sintheta/BIGPOWEROF2);
+		int thispixel;			//current pixel to be projected
+		int offset, offsetinit;		//precomputed offsets into an image buffer
+		int z;					//z-coordinate of points in current slice before rotation
+		int xnew, znew;			//y- and z-coordinates of current point after rotation
+		int zmax, zmin;			//z-coordinates of first and last slices before rotation
+		int zmaxminuszmintimes100; //precomputed values to save time in loops
+		int c100minusDepthCueInt, c100minusDepthCueSurf;
+		boolean DepthCueIntLessThan100, DepthCueSurfLessThan100;
+		boolean OpacityOrNearestPt, OpacityAndNotNearestPt;
+		boolean MeanVal, BrightestPt;
+		int xsintheta, xcostheta;
+		int zsintheta, zcostheta, xsinthetainit, xcosthetainit;
+		short[] pixels;
+		int projsize = projwidth * projheight;
+
+		//find z-coordinates of first and last slices
+		zmax = zcenter + projwidth/2;  
+		zmin = zcenter - projwidth/2;
+		zmaxminuszmintimes100 = 100 * (zmax-zmin);
+		c100minusDepthCueInt = 100 - depthCueInt;
+		c100minusDepthCueSurf = 100 - depthCueSurf;
+		DepthCueIntLessThan100 = (depthCueInt < 100);
+		DepthCueSurfLessThan100 = (depthCueSurf < 100);
+		OpacityOrNearestPt = ((projectionMethod==nearestPoint) || (opacity>0));
+		OpacityAndNotNearestPt = ((opacity>0) && (projectionMethod!=nearestPoint));
+		MeanVal = (projectionMethod==meanValue);
+		BrightestPt = (projectionMethod==brightestPoint);
+		xcosthetainit = (left - xcenter - 1) * costheta;
+		xsinthetainit = (left - xcenter - 1) * sintheta;
+
+
+		for(int r=0; r < roiArray.length; r++) {
+			//			for (int k=1; k<=nSlices; k++) {
+			z = (int)((roiArray[r].getZPosition()-1)*(imp.getCalibration().pixelDepth/imp.getCalibration().pixelWidth)+0.5) - zcenter;
+			zcostheta = z * costheta;
+			zsintheta = z * sintheta;
+			offsetinit = ((projheight-bottom+top)/2) * projwidth +(projwidth - right + left)/2 - projwidth;
+			//			IJ.log(""+offsetinit);
+			//			for (int j=top; j<bottom; j++) {
+			xcostheta = xcosthetainit;
+			xsintheta = xsinthetainit;
+			offsetinit = offsetinit + (int) (projwidth * roiArray[r].getBounds().getCenterY());
+			//			for (int i=left; i<right; i++) 
+			xcostheta = xcostheta + (int) (costheta * (roiArray[r].getBounds().getCenterX())) ;  //rotate about y-axis and find new x,z
+			xsintheta = xsintheta + (int) (sintheta * (roiArray[r].getBounds().getCenterX()));  //y-coordinates will not change
+			xnew = (xcostheta + zsintheta)/BIGPOWEROF2 + xcenter - left;
+			znew = (zcostheta - xsintheta)/BIGPOWEROF2 + zcenter;
+			offset = offsetinit + xnew;
+
+			xnew = xnew + ((projheight-bottom+top)/2) * projwidth +(projwidth - right + left)/2;
+			//			ynew = (offset/projwidth) + roiArray[r].getBounds().getCenterY();
+
+			Roi nextRoi = (Roi) roiArray[r].clone();
+			nextRoi.setLocation( (int) (xnew - nextRoi.getBounds().getWidth()/2), (int)((roiArray[r].getBounds().getCenterY() - nextRoi.getBounds().getHeight()/2)));
+			projImpD[loopC-firstC].setSlice(projSlice);
+			rmProj.addRoi(((Roi)nextRoi.clone()));
+			//			if (imp.getRoiManager() != null){
+			//				imp.getRoiManager().dispose();
+			//				WindowManager.removeWindow(imp.getRoiManager());
+			//			}
+		}
+	} // projectCursorAroundY()
+
 
 }

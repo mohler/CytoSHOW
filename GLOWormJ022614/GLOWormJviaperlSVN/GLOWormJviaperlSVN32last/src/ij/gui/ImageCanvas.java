@@ -12,6 +12,7 @@ import ij.measure.*;
 import ij.plugin.Colors;
 import ij.plugin.DragAndDrop;
 import ij.plugin.WandToolOptions;
+import ij.plugin.filter.Projector;
 import ij.plugin.frame.ColorLegend;
 import ij.plugin.frame.Recorder;
 import ij.plugin.frame.RoiManager;
@@ -2852,6 +2853,14 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				roi.handleMouseDrag(x, y, flags);
 			}
 		}
+		
+		int theta = (int)Math.round(Math.random()*360);
+		double thetarad = theta * Math.PI/180.0;
+		int BIGPOWEROF2 = 8192;
+		int costheta = (int)(BIGPOWEROF2*Math.cos(thetarad) + 0.5);
+		int sintheta = (int)(BIGPOWEROF2*Math.sin(thetarad) + 0.5);
+
+//		Projector.projectCursorAroundX(theta*imp.getNSlices()/360, imp.getNSlices(), (int)imp.getCanvas().getCursorLoc().y, imp.getNSlices()/2, imp.getWidth(), imp.getHeight(), costheta, sintheta);
 	}
 
 	protected void handleRoiMouseDown(MouseEvent e) {
@@ -3102,6 +3111,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 					imp.deleteRoi();
 			}
 		}
+
 	}
 
 	private boolean activateOverlayRoi(int ox, int oy) {
@@ -3341,6 +3351,13 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		if (imp.getRemoteMQTVSHandler() != null) {
 			IJ.run(imp, "This Slice", "");			
 		}
+		double theta = Math.random()*360;
+		double thetarad = theta * Math.PI/180.0;
+		int BIGPOWEROF2 = 8192;
+		int costheta = (int)(BIGPOWEROF2*Math.cos(thetarad) + 0.5);
+		int sintheta = (int)(BIGPOWEROF2*Math.sin(thetarad) + 0.5);
+
+//		Projector.projectCursorAroundX(1, imp.getNSlices(), imp.getHeight()/2, imp.getNSlices()/2, imp.getWidth(), imp.getHeight(), costheta, sintheta);
 	}
 
 	public boolean getShowOwnROIs() {

@@ -773,7 +773,6 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		if (isSketch3D() && rm!= null && rm.getColorLegend()!=null) {
 			pip  = rm.getColorLegend().processedIP(pip);
 		}
-
 		return pip;
 	}
 	

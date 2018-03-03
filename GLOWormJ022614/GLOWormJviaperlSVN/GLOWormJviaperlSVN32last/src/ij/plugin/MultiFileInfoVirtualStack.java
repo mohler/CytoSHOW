@@ -86,7 +86,10 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		dir = "";
 		if (!argFile.exists() || !argFile.isDirectory()) {
 			dir = IJ.getDirectory("Select Directory of TIFFs");
-			keyString = IJ.getString("Subdirectory Name Key String?", "Deconvolution");
+			String defaultKey = "Deconvolution";
+			if (dir.replace(File.separator, "/").matches(".*/Proj[XY]_Decon-Fuse.*/"))
+				defaultKey = "Color";
+			keyString = IJ.getString("Subdirectory Name Key String?", defaultKey);
 		}
 		else
 			dir = arg;
@@ -673,6 +676,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		
 		
 //		ip.setMinAndMax(min, max);
+		if (edges) {
+			ip.findEdges();
+		}
 		return ip;
 	 }
 

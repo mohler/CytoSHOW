@@ -252,9 +252,9 @@ public class RemoteMTVSHandler {
 		stkNSlices = qtDims[3];
 		stkNFrames = qtDims[4];
 		imp2 = new ImagePlus();
-		stack = new RemoteMQTVirtualStack(stkWidth, stkHeight,
+		stack = new RemoteMTVirtualStack(stkWidth, stkHeight,
 				ColorModel.getRGBdefault(), "", false, Color.black);
-		((RemoteMQTVirtualStack)stack).setStretchToFitOverlay(stretchToFitOverlay);
+		((RemoteMTVirtualStack)stack).setStretchToFitOverlay(stretchToFitOverlay);
 
 
 		if ((moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW_")
@@ -274,9 +274,9 @@ public class RemoteMTVSHandler {
 		//			imp2.setStack("fromServer:"+args[0]+""+remoteImpID+":"+serverReturnString, ((VirtualStack)stack));
 		imp2.setStack(moviePathNames.length +"-movie Scene - "+ moviePathNames[0].replaceAll(".*/", "") +" etc, "+imp2.getID(), ((VirtualStack)stack));
 
-		imp2.getCalibration().pixelDepth = ((RemoteMQTVirtualStack)stack).voxelDepth/1000;
-		imp2.getCalibration().pixelWidth = ((RemoteMQTVirtualStack)stack).voxelWidth/1000;
-		imp2.getCalibration().pixelHeight = ((RemoteMQTVirtualStack)stack).voxelWidth/1000;
+		imp2.getCalibration().pixelDepth = ((RemoteMTVirtualStack)stack).voxelDepth/1000;
+		imp2.getCalibration().pixelWidth = ((RemoteMTVirtualStack)stack).voxelWidth/1000;
+		imp2.getCalibration().pixelHeight = ((RemoteMTVirtualStack)stack).voxelWidth/1000;
 		imp2.getCalibration().setUnit("micron");
 
 		//			win2 = null;
@@ -649,7 +649,7 @@ public class RemoteMTVSHandler {
 					burnInComplete = false;
 
 					IJ.wait(jpegQuality==1?0:0);  //funky little setting...
-					if (((RemoteMQTVirtualStack)stack).selectedSlice == ((((StackWindow)imp2.getWindow()).zSelector.getValue()-1) * stkNSlices)
+					if (((RemoteMTVirtualStack)stack).selectedSlice == ((((StackWindow)imp2.getWindow()).zSelector.getValue()-1) * stkNSlices)
 							+ (((StackWindow)imp2.getWindow()).cSelector!=null
 							?((StackWindow)imp2.getWindow()).cSelector.getValue()
 									:1)){
@@ -677,7 +677,7 @@ public class RemoteMTVSHandler {
 					RemoteMTVSHandler.this.jpegQuality=100;
 
 					IJ.wait(0);  //funky little setting...
-					if ( (((RemoteMQTVirtualStack)stack).selectedSlice == ((((StackWindow)imp2.getWindow()).zSelector.getValue()-1) * stkNSlices)
+					if ( (((RemoteMTVirtualStack)stack).selectedSlice == ((((StackWindow)imp2.getWindow()).zSelector.getValue()-1) * stkNSlices)
 							+ (((StackWindow)imp2.getWindow()).cSelector!=null
 							?((StackWindow)imp2.getWindow()).cSelector.getValue()
 									:1)) 
@@ -743,22 +743,22 @@ public class RemoteMTVSHandler {
 		argArrayList.add(portOffset);
 		//		for (String path:pathlist.split(" "))
 		//			argArrayList.add(path);
-		RemoteMTVSHandler rmqtvsh = new RemoteMTVSHandler(argArrayList.toArray(new String[argArrayList.size()]));
+		RemoteMTVSHandler rmtvsh = new RemoteMTVSHandler(argArrayList.toArray(new String[argArrayList.size()]));
 		try {			
-			if (rmqtvsh.comp==null) {
+			if (rmtvsh.comp==null) {
 				IJ.log(lookupString + "failure to connect.3");
 				return null;
 			}
-			IJ.log(rmqtvsh.comp.toString() + "success on connect.4");
-			return rmqtvsh.compQ.getFileInputByteArray(pathlist);
+			IJ.log(rmtvsh.comp.toString() + "success on connect.4");
+			return rmtvsh.compQ.getFileInputByteArray(pathlist);
 		} catch (RemoteException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			if (rmqtvsh.comp==null) {
+			if (rmtvsh.comp==null) {
 				IJ.log(lookupString + "failure to connect.5");
 				return null;
 			}
-			IJ.log(rmqtvsh.comp.toString() + "failure to connect.6");
+			IJ.log(rmtvsh.comp.toString() + "failure to connect.6");
 		}
 		return null;
 	}
@@ -860,7 +860,7 @@ public class RemoteMTVSHandler {
 	}
 
 
-	public class RemoteMQTVirtualStack extends VirtualStack {
+	public class RemoteMTVirtualStack extends VirtualStack {
 		private double[] translateX = new double[stkNChannels];
 		private double[] translateY = new double[stkNChannels];
 		private int[] nSlicesSingleMovie = new int[stkNChannels];
@@ -895,7 +895,7 @@ public class RemoteMTVSHandler {
 		private ImagePlus openImp;
 		private ImagePlus saveImp;
 
-		private RemoteMQTVirtualStack(int width, int height, ColorModel cm,
+		private RemoteMTVirtualStack(int width, int height, ColorModel cm,
 				String path, boolean emptyImage, Color fillColor) {
 			super(width, height, cm, path, emptyImage, fillColor);
 			Arrays.fill(relativeFrameRateSingleMovie, 1);
@@ -1504,7 +1504,7 @@ public class RemoteMTVSHandler {
 				if(t.isAlive())
 					return false;
 			}
-			((StackWindow)imp2.getWindow()).zSelector.setValue(1+(((RemoteMQTVirtualStack)stack).selectedSlice 
+			((StackWindow)imp2.getWindow()).zSelector.setValue(1+(((RemoteMTVirtualStack)stack).selectedSlice 
 					- (((StackWindow)imp2.getWindow()).cSelector!=null
 					?((StackWindow)imp2.getWindow()).cSelector.getValue()
 							:1))/stkNSlices) ;
