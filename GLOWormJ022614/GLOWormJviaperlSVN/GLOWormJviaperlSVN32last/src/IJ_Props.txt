@@ -418,7 +418,7 @@ plug-in36="Max_Seeker", org.vcell.gloworm.MaxSeeker
 plug-in37="Tag_Tracker", org.vcell.gloworm.TagTracker
 plug-in38="TestRMIFTDownload", client.WGFileDownloadClient("//155.37.253.202:8084")
 plug-in39="TestRMIFTUpload", client.WGFileUploadClient("//155.37.253.202:8084")
-
+plug-in40="Edges", ij.plugin.EdgeToggler
 
 # Install user plugins located in ij.jar to Plugins>User Plugins submenu
 #user_plugins01="Red And Blue",RedAndBlue_

@@ -7,6 +7,7 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Menus;
 import ij.Prefs;
+import ij.VirtualStack;
 import ij.WindowManager;
 import ij.io.FileSaver;
 import ij.macro.Interpreter;
@@ -72,7 +73,7 @@ import org.vcell.gloworm.SliceStereoToggle;
 import com.sun.xml.internal.ws.util.StringUtils;
 
 /** A frame for displaying images. */
-public class ImageWindow extends JFrame implements FocusListener, WindowListener, WindowStateListener, MouseWheelListener, ItemListener {
+public class ImageWindow extends JFrame implements FocusListener, WindowListener, WindowStateListener, MouseWheelListener {
 
 	public static final int MIN_WIDTH = 128;
 	public static final int MIN_HEIGHT = 32;
@@ -460,14 +461,20 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
 		fspc.fill = GridBagConstraints.BOTH;
-
-		JCheckBox edgeBox = new JCheckBox("Edges");
-		edgeBox.setToolTipText("Find Edges of Image Features");
-		viewButtonPanel.add(edgeBox, fspc);
-		edgeBox.addItemListener(this);
-		fspc.gridy = y++;
-		fspc.weighty = 0.5;
-		fspc.fill = GridBagConstraints.BOTH;
+		
+		if(imp.getStack() instanceof VirtualStack) {
+			JButton edgeButton = new JButton();
+			edgeButton.setActionCommand("Edges");
+			edgeButton.setName("Edges");
+			edgeButton.setToolTipText("Find Edges of Image Features");
+			edgeButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Edges.png")));
+			edgeButton.addActionListener(ij);
+			viewButtonPanel.add(edgeButton, fspc);
+			fspc.gridy = y++;
+			fspc.weighty = 0.5;
+			fspc.fill = GridBagConstraints.BOTH;
+		}
+		
 		JButton displayButton = new JButton();
 		displayButton.setActionCommand("Adjust Display Contrast...");
 		displayButton.setName("Adjust Display Contrast...");
@@ -1251,6 +1258,12 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 			imp.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame()-1);
 		}
 
+	}
+
+	public void actionPerformed(ActionEvent e) {
+		if (e.getActionCommand() == "Edges") {
+			imp.getStack().setEdges(!imp.getStack().isEdges());
+		}
 	}
 
 

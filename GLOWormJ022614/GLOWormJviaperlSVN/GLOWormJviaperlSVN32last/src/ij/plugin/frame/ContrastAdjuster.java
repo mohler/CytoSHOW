@@ -2,6 +2,7 @@ package ij.plugin.frame;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.*;
+
 import ij.*;
 import ij.plugin.*;
 import ij.process.*;
@@ -954,17 +955,23 @@ ActionListener, AdjustmentListener, ItemListener {
 			for (int i=0; i<nImages; i++) {
 				ImagePlus img2 = WindowManager.getImage(list[i]);
 				if (img2==null) continue;
-				int nChannels2 = img2.getNChannels();
 				if (img2.isComposite() && img2.getBitDepth()==depth && img2.getID()!=id
 						&& img2.getNChannels()==nChannels && img2.getWindow()!=null) {
-					int channel = img2.getChannel();
-					for (int c=1; c<=nChannels; c++) {
-						LUT  lut = ((CompositeImage)img).getChannelLut(c);
-						img2.setPosition(c, img2.getSlice(), img2.getFrame());
-						img2.setDisplayRange(lut.min, lut.max);
-						img2.updateAndDraw();
+					int channel = img.getChannel();
+					int slice = img.getSlice();
+					int frame = img.getFrame();
+					int channel2 = img2.getChannel();
+					int slice2 = img2.getSlice();
+					int frame2 = img2.getFrame();
+					img2.setPosition(1, slice2, frame2);
+					img.setPosition(1, slice, frame);
+					((CompositeImage)img2).copyLuts(img);
+					if (img.getStack().isVirtual() && img2.getStack().isVirtual()) {
+						((VirtualStack)img2.getStack()).setEdges(((VirtualStack)img.getStack()).isEdges());
 					}
-					img2.setPosition(channel, img2.getSlice(), img2.getFrame());
+					img2.setPosition(channel2, slice2, frame2);
+					img.setPosition(channel, slice, frame);
+
 				}
 			}
 		} else {

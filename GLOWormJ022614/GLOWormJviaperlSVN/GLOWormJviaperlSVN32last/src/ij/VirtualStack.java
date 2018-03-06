@@ -165,6 +165,9 @@ public class VirtualStack extends ImageStack {
 		} else {
 			ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
 		}
+		if (edges) {
+			ip.findEdges();
+		}
 		return ip;
 	 }
  
