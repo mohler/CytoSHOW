@@ -44,10 +44,14 @@ public class StarryNiteFeeder implements PlugIn {
 				angle = 180+ angle;
 			}
 
+			int wasC = imp.getChannel();
+			int wasZ = imp.getSlice();
+			int wasT = imp.getFrame();
+			
 			for (int f = 1; f <= imp.getNFrames(); f++) {
 
 				imp.setRoi(theROI);
-				ImagePlus frameRedImp = (new MQTVS_Duplicator()).run(imp, 2, 2, 1, imp.getNSlices(), f, f, 1, false, 0);
+				ImagePlus frameRedImp = (new MQTVS_Duplicator()).run(imp, imp.getNChannels(), imp.getNChannels(), 1, imp.getNSlices(), f, f, 1, false, 0);
 				imp.setRoi(theROI);
 				ImagePlus frameGreenImp = (new MQTVS_Duplicator()).run(imp, 1, 1, 1, imp.getNSlices(), f, f, 1, false, 0);
 
@@ -84,6 +88,8 @@ public class StarryNiteFeeder implements PlugIn {
 				frameGreenImp.flush();
 
 			}
+			imp.setPosition(wasC, wasZ, wasT);
+			imp.setRoi(theROI);
 		}	
 	}
 
