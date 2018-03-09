@@ -70,14 +70,14 @@ public class Rotator implements ExtendedPlugInFilter, DialogListener {
 		imp.unlock();
 		if (imp.getStackSize()==1)
 			Undo.setup(Undo.COMPOUND_FILTER, imp);
-		IJ.run("Select All");
-		IJ.run("Rotate...", "angle="+angle);
+		IJ.run(imp, "Select All", "");
+		IJ.run(imp, "Rotate...", "angle="+angle);
 		Roi roi = imp.getRoi();
 		Rectangle r = roi.getBounds();
 		if (r.width<imp.getWidth()) r.width = imp.getWidth();
 		if (r.height<imp.getHeight()) r.height = imp.getHeight();
 		IJ.showStatus("Rotate: Enlarging...");
-		IJ.run("Canvas Size...", "width="+r.width+" height="+r.height+" position=Center "+(fillWithBackground?"":"zero"));
+		IJ.run(imp, "Canvas Size...", "width="+r.width+" height="+r.height+" position=Center "+(fillWithBackground?"":"zero"));
 		IJ.showStatus("Rotating...");
 	}
 
