@@ -83,7 +83,7 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 
 	private static Color foregroundColor = Prefs.getColor(Prefs.FCOLOR,Color.white);
 	private static Color backgroundColor = Prefs.getColor(Prefs.BCOLOR,Color.black);
-	private static int ovalType = OVAL_ROI;
+	private static int ovalType = ELLIPSE_ROI;
 	private static boolean multiPointMode = Prefs.multiPointMode;
 	private static boolean roundRectMode;
 	private static boolean arrowMode;
@@ -132,12 +132,12 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 		ovalPopup = new PopupMenu();
 		if (Menus.getFontSize()!=0)
 			ovalPopup.setFont(Menus.getFont());
-		ovalItem = new CheckboxMenuItem("Oval selections", ovalType==OVAL_ROI);
-		ovalItem.addItemListener(this);
-		ovalPopup.add(ovalItem);
 		ellipseItem = new CheckboxMenuItem("Elliptical selections", ovalType==ELLIPSE_ROI);
 		ellipseItem.addItemListener(this);
 		ovalPopup.add(ellipseItem);
+		ovalItem = new CheckboxMenuItem("Oval selections", ovalType==OVAL_ROI);
+		ovalItem.addItemListener(this);
+		ovalPopup.add(ovalItem);
 		brushItem = new CheckboxMenuItem("Selection Brush Tool", ovalType==BRUSH_ROI);
 		brushItem.addItemListener(this);
 		ovalPopup.add(brushItem);
