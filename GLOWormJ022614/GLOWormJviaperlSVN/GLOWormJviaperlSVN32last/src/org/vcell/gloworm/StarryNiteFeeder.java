@@ -72,14 +72,14 @@ public class StarryNiteFeeder implements PlugIn {
 				
 				IJ.run(frameGreenImp,"8-bit","");
 				
-				new File(outDir+subdir+"/tifr/").mkdirs();
+				new File(outDir+subdir+"/image/tifr/").mkdirs();
 
 				
 				String command1 = "format=TIFF start=1 name=aaa-t";
 				command1 += ""+IJ.pad(f,3)+" digits=0 ";
 				command1 += "save=";
 				
-				String command2 = "["+outDir+subdir+"/tifr]";
+				String command2 = "["+outDir+subdir+"/image/tifr]";
 				//print(command1+command2);
 				IJ.run(frameGreenImp, "StarryNite Image Sequence... ", command1+command2);
 

@@ -191,15 +191,15 @@ public class StarryNiteStackWriter implements PlugIn {
 			}
 			if (dim[3]>1) {
 				zs = IJ.pad(z, ndigits);
-				zs = "_p"+ zs;
+				zs = "-p"+ zs;
 			}
 			if (dim[4]>1) {
 				ts = IJ.pad(t, ndigits);
-				ts = "_t"+ts;
+				ts = "-t"+ts;
 			}
 			return ts+zs+cs;
 		} else {
-			return "_p"+IJ.pad(n+1, ndigits);
+			return "-p"+IJ.pad(n+1, ndigits);
 		}
 	}
 	

@@ -98,65 +98,94 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			dir = dir + File.separator;
 		infoDir = dir;
 		argFile = new File(dir);
-		String[] dirFileList = argFile.list();
-		dirFileList = StringSorter.sortNumerically(dirFileList);
+		
+		ArrayList<String> argPeerDirArrayList = new ArrayList<String>();
+		String[] peerDirList = new File(argFile.getParent()).list();
+		for (String peerDirName:peerDirList) {
+			if (!peerDirName.equals(argFile.getName()) && peerDirName.contains(argFile.getName())) {
+				argPeerDirArrayList.add(dir);
+				argPeerDirArrayList.add(argFile.getParent()+File.separator+peerDirName+File.separator);
+				break;
+			} else if (!peerDirName.equals(argFile.getName()) && argFile.getName().contains(peerDirName)) {
+				argPeerDirArrayList.add(argFile.getParent()+File.separator+peerDirName+File.separator);
+				argPeerDirArrayList.add(dir);
+				break;
+			}
+		}
+		if (argPeerDirArrayList.size()==0) {
+			argPeerDirArrayList.add(dir);
+		}
 
+		
+
+		
 		boolean allDirectories = true;
 //		String[] bigSubFileList = null;
 		ArrayList<String> bigSubFileArrayList = new ArrayList<String>();
 		ArrayList<String> cumulativeSubFileArrayList = new ArrayList<String>();
-		
+		ArrayList<ArrayList<String>> channelArrayLists = new ArrayList<ArrayList<String>>();
+
 		largestDirectoryLength = 0;
 		int tiffCount = 0;
-		for (String fileName:dirFileList) {
-			File subFile = new File(dir+fileName);
-			if (fileName.contains("DS_Store"))
-				;
-			else if ((keyString == "" || subFile.getName().matches(".*"+keyString+".*")) && !subFile.isDirectory()) {
-				allDirectories = false;
-				if (subFile.getName().toLowerCase().endsWith("tif")) {
-					cumulativeSubFileArrayList.add(dir+fileName);
-					tiffCount++;				
-				}
-			}
-		}
-		if (tiffCount == 0) {
-			ArrayList<ArrayList<String>> channelArraryLists = new ArrayList<ArrayList<String>>();
-			for (String fileName:dirFileList) {
+		
+		for (String argPeer:argPeerDirArrayList) {
+			File argPeerFile = new File(argPeer);
+			IJ.log("argPeer: "+argPeer);
+
+			String[] argPeerFileList = argPeerFile.list();
+			argPeerFileList = StringSorter.sortNumerically(argPeerFileList);
+
+			for (String fileName:argPeerFileList) {
 				File subFile = new File(dir+fileName);
 				if (fileName.contains("DS_Store"))
 					;
-				else if (keyString == "" || (subFile.getName().matches(".*"+keyString+".*") && !subFile.getName().startsWith("Proj_"))){
-					channelDirectories++;
-					String[] subFileList = subFile.list();
-					channelArraryLists.add(new ArrayList<String>());
-					//IJ.log(fileName +"???  "+keyString );
-					for (String subFileListElement:subFileList) {
-						if (!cumulativeSubFileArrayList.contains(dir+fileName+File.separator+subFileListElement)) {
-							if ((pos ==-1 ||subFileListElement.toLowerCase().contains("_pos"+pos+"."))
-									&&  subFileListElement.toLowerCase().endsWith("tif")) {
-								channelArraryLists.get(channelDirectories-1).add(dir+fileName+File.separator+subFileListElement);
-								cumulativeSubFileArrayList.add(dir+fileName+File.separator+subFileListElement);
+				else if ((keyString == "" || subFile.getName().matches(".*"+keyString+".*")) && !subFile.isDirectory()) {
+					allDirectories = false;
+					if (subFile.getName().toLowerCase().endsWith("tif")) {
+						cumulativeSubFileArrayList.add(argPeer+File.separator+fileName);
+						tiffCount++;				
+					}
+				}
+			}
+			if (tiffCount == 0) {
+				for (String fileName:argPeerFileList) {
+					File subFile = new File(argPeer+fileName);
+					if (fileName.contains("DS_Store"))
+						;
+					else if (keyString == "" || (subFile.isDirectory() && subFile.getName().matches(".*"+keyString+".*") && !subFile.getName().startsWith("Proj_"))){
+						channelDirectories++;
+						String[] subFileList = subFile.list();
+						channelArrayLists.add(new ArrayList<String>());
+						//IJ.log(fileName +"???  "+keyString );
+						if (subFileList != null) {						
+							for (String subFileListElement:subFileList) {
+								if (!cumulativeSubFileArrayList.contains(argPeer+fileName+File.separator+subFileListElement)) {
+									if ((pos ==-1 ||subFileListElement.toLowerCase().contains("_pos"+pos+"."))
+											&&  subFileListElement.toLowerCase().endsWith("tif")) {
+										channelArrayLists.get(channelDirectories-1).add(argPeer+fileName+File.separator+subFileListElement);
+										cumulativeSubFileArrayList.add(argPeer+fileName+File.separator+subFileListElement);
+									}
+								}
 							}
 						}
 					}
 				}
-			}
-			int lowestSpan = Integer.MAX_VALUE;
-			for (ArrayList<String> al:channelArraryLists) {
-				if (lowestSpan > al.size()){
-					lowestSpan = al.size();
-				}
-			}
-			for (ArrayList<String> al:channelArraryLists) {
-				for (int zap=al.size();zap>=lowestSpan;zap--) {
-					if (al.size()>zap) {
-						cumulativeSubFileArrayList.remove(al.get(zap-1));
+				int lowestSpan = Integer.MAX_VALUE;
+				for (ArrayList<String> al:channelArrayLists) {
+					if (lowestSpan > al.size()){
+						lowestSpan = al.size();
 					}
 				}
-			}
+				for (ArrayList<String> al:channelArrayLists) {
+					for (int zap=al.size();zap>=lowestSpan;zap--) {
+						if (al.size()>zap) {
+							cumulativeSubFileArrayList.remove(al.get(zap-1));
+						}
+					}
+				}
 
-			
+
+			}
 		}
 		if (cumulativeSubFileArrayList.size() != 0) {
 
@@ -186,7 +215,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					bigSubFileArrayList.add(cumulativeTiffFileArrayElement);
 			} else { 
 
-				for (String fileName:dirFileList) {
+				for (String fileName:new File(dir).list()) {
 					File subFile = new File(dir+fileName);
 					boolean noKeyString = keyString == "";
 					boolean subFileIsDir = subFile.isDirectory();
