@@ -29,6 +29,7 @@ public class StarryNiteFeeder implements PlugIn {
 			
 			String title = imp.getTitle();
 			String savetitle = title.replace(":","_");
+			new File(new File(outDir+savetitle+".roi").getParent()).mkdirs();
 			IJ.save(imp, outDir+savetitle+".roi");
 			int[] xpoints = imp.getRoi().getPolygon().xpoints;
 			int[] ypoints = imp.getRoi().getPolygon().ypoints;

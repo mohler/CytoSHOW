@@ -581,10 +581,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 						stackAs[pos] = new MultiFileInfoVirtualStack(
 								dirOrOMETiff, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
-								false, false);
+								false, false, true);
 						stackBs[pos] = new MultiFileInfoVirtualStack(
 								dirOrOMETiff, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
-								true, false);
+								true, false, true);
 
 						if (stackAs[pos].getSize() == 0) {
 							impAs[pos].flush();
@@ -934,7 +934,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 					impBs[pos].getOriginalFileInfo().fileName = dirOrOMETiff;
 					impBs[pos].getOriginalFileInfo().directory = dirOrOMETiff;
 
-					impAs[pos].setStack(new MultiFileInfoVirtualStack(mmPath, dimOrder, "MMStack_Pos"+pos, cDim, zDim, tDim, vDim, pos, false, false));
+					impAs[pos].setStack(new MultiFileInfoVirtualStack(mmPath, dimOrder, "MMStack_Pos"+pos, cDim, zDim, tDim, vDim, pos, false, false, true));
 					//					((MultiFileInfoVirtualStack)impAs[pos].getStack()).getOwnerImps().add(impAs[pos]);
 
 					int stackSize = impAs[pos].getImageStackSize();
@@ -994,7 +994,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 					impAs[pos].show();
 
 
-					impBs[pos].setStack(new MultiFileInfoVirtualStack(mmPath, dimOrder, "MMStack_Pos"+pos, cDim, zDim, tDim, vDim, pos, true, false));
+					impBs[pos].setStack(new MultiFileInfoVirtualStack(mmPath, dimOrder, "MMStack_Pos"+pos, cDim, zDim, tDim, vDim, pos, true, false, true));
 					//					((MultiFileInfoVirtualStack)impBs[pos].getStack()).getOwnerImps().add(impBs[pos]);
 
 					stackSize = impBs[pos].getImageStackSize();
@@ -1961,7 +1961,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 							stackAs[pos] = new MultiFileInfoVirtualStack(
 									dirOrOMETiff, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
-									false, false);
+									false, false, true);
 
 							ImagePlus impNext = new ImagePlus(impAs[pos].getTitle(), stackAs[pos]);
 							impNext.setOpenAsHyperStack(true);
@@ -2009,7 +2009,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 							stackBs[pos] = new MultiFileInfoVirtualStack(
 									dirOrOMETiff, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
-									true, false);
+									true, false, true);
 
 							impNext = new CompositeImage(new ImagePlus(impBs[pos].getTitle(), stackBs[pos]));
 							impNext.setOpenAsHyperStack(true);
@@ -4733,7 +4733,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 					stackAs[pos] = new MultiFileInfoVirtualStack(
 							dirOrOMETiff, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
-							false, false);
+							false, false, true);
 
 					ImagePlus impNext = new ImagePlus(impAs[pos].getTitle(), stackAs[pos]);
 					impNext.setOpenAsHyperStack(true);
@@ -4779,7 +4779,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 					stackBs[pos] = new MultiFileInfoVirtualStack(
 							dirOrOMETiff, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
-							true, false);
+							true, false, true);
 
 					impNext = new CompositeImage(new ImagePlus(impBs[pos].getTitle(), stackBs[pos]));
 					impNext.setOpenAsHyperStack(true);
