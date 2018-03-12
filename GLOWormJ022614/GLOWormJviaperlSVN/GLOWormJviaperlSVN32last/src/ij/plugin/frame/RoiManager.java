@@ -348,6 +348,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		addPopupItem("Realign by Tags");
 		addPopupItem("Realign by Parameters");
 		addPopupItem("Auto-advance when tagging");
+		addPopupItem("StarryNiteImporter");
 		add(pm);
 	}
 
@@ -880,6 +881,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			else if (command.equals("Auto-advance when tagging")) {
 				new ij.macro.MacroRunner(IJ.openUrlAsString("http://fsbill.cam.uchc.edu/gloworm/Xwords/WormAtlasLabelerMacro.txt"));
 			}
+			else if (command.equals("StarryNiteImporter")) {
+				importStarryNiteNuclei("");
+			}
 
 			this.imp.getCanvas().requestFocus();
 		}
@@ -1118,7 +1122,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		if (lineWidth>100) lineWidth = 1;
 		int n = listModel.getSize();
-		if (n>0 && !IJ.isMacro() && imp!=null) {
+		if (n>0 && !IJ.isMacro() && imp!=null && imp.getWindow()!=null) {
 			// check for duplicate
 			String label = (String) listModel.getElementAt(n-1);
 			Roi roi2 = (Roi)rois.get(label);
@@ -5273,6 +5277,57 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				}
 			}
 		}
+	}
+	
+	public void importStarryNiteNuclei(String dir) {
+		File dirFile = new File(dir);
+		if (!dirFile.canRead()) {;
+		
+			dir = IJ.getDirectory("Select the directory with <nuclei> files");
+			dirFile = new File(dir);
+		}
+		String[] list = dirFile.list();
+		String str ="";
+		for (int f=0; f<list.length;f++) {
+			String nextFile = dir + list[f];
+			str = str +list[f]+"\n"+ IJ.openAsString(nextFile);
+		}
+		String[] lines = str.split("\n");
+		int id = imp.getID();
+		imp.hide();
+		this.setVisible(false);
+		int frame =1;
+		for (int i = 0; i < lines.length; i++) {
+			String nextLine = lines[i];
+			String[] cellData = nextLine.split(",");
+			if (cellData.length ==1){
+				frame = Integer.parseInt(cellData[0].trim().replace("t","").replace("-nuclei",""));
+//				if (this.getCount()>0) {
+//					select(-1);
+//					saveMultiple(getAllShownIndexes(),dirFile.getParent()+File.separator+cellData[0].trim()+"RoiSet.zip");
+//				}
+			} else {
+				imp.setPositionWithoutUpdate(imp.getChannel(), imp.getSlice(), frame);
+
+				if (cellData[9] !=" ") {
+					imp.setPositionWithoutUpdate(imp.getChannel(), (int)Double.parseDouble(cellData[7].trim()), frame);
+
+					Roi newOval = new OvalRoi(Integer.parseInt(cellData[5].trim())-Integer.parseInt(cellData[8].trim())/2, Integer.parseInt(cellData[6].trim())-Integer.parseInt(cellData[8].trim())/2, Integer.parseInt(cellData[8].trim()), Integer.parseInt(cellData[8].trim()));
+					newOval.setImage(imp);
+					
+					addRoi(newOval, false, Color.white, 1);
+//					rename(cellData[5].trim(), new int[getCount()-1], false);
+					IJ.showStatus("importing nucleus "+getCount());
+				}
+			}
+		}
+		imp.show();
+		this.setVisible(true);
+		if (this.getCount()>0) {
+			select(-1);
+			saveMultiple(getAllShownIndexes(),dirFile.getParent()+File.separator+"NucleiRoiSet.zip");
+		}
+
 	}
 }
 

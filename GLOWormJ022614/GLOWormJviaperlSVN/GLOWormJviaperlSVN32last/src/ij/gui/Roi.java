@@ -1566,7 +1566,8 @@ public class Roi extends Object implements Cloneable, java.io.Serializable {
 	* @see ij.gui.Overlay
 	*/
 	public int getPosition() {
-		ImagePlus imp = WindowManager.getCurrentImage();
+		ImagePlus imp = getImage();
+		imp= WindowManager.getCurrentImage();
 		int c= channel;
 		int s= slice;
 		int f= frame;
