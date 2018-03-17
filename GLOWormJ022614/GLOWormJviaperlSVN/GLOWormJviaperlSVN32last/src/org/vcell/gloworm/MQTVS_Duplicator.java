@@ -292,9 +292,11 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 						ImageProcessor ip = imp.getProcessor();
 						ip.setRoi(roi);
 						String label = stack.getSliceLabel(n1);
-
-						if (roi!=null && (roi.getType() != Roi.RECTANGLE || roi.getBounds().width != imp.getWidth() || roi.getBounds().height != imp.getHeight() ))
+						
+						if (roi!=null && (roi.getType() != Roi.RECTANGLE || roi.getBounds().width != imp.getWidth() || roi.getBounds().height != imp.getHeight() )) {
+							ip.setColor(Color.black);
 							ip.fillOutside(roi);
+						}
 						if (!sliceSpecificROIs) ip = ip.crop();
 
 						stackT.addSlice(label, ip);

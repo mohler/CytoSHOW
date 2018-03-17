@@ -1,12 +1,18 @@
 package org.vcell.gloworm;
 
+import java.awt.Polygon;
 import java.io.File;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.ImageStack;
+import ij.VirtualStack;
 import ij.WindowManager;
 import ij.gui.Roi;
 import ij.plugin.PlugIn;
+import ij.plugin.RoiRotator;
+import ij.process.ImageProcessor;
+import ij.process.ShortProcessor;
 
 public class StarryNiteFeeder implements PlugIn {
 
@@ -49,15 +55,86 @@ public class StarryNiteFeeder implements PlugIn {
 			int wasZ = imp.getSlice();
 			int wasT = imp.getFrame();
 			
+			int wavelengths = imp.getNChannels();
+			
+			Roi theRotatedROI = RoiRotator.rotate(theROI, angle);
 			for (int f = 1; f <= imp.getNFrames(); f++) {
 
-				imp.setRoi(theROI);
-				ImagePlus frameRedImp = (new MQTVS_Duplicator()).run(imp, imp.getNChannels(), imp.getNChannels(), 1, imp.getNSlices(), f, f, 1, false, 0);
-				imp.setRoi(theROI);
-				ImagePlus frameGreenImp = (new MQTVS_Duplicator()).run(imp, 1, 1, 1, imp.getNSlices(), f, f, 1, false, 0);
+				ImageStack stack1 = new ImageStack((int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
+				ImageStack stack2 = new ImageStack((int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
+				imp.getWindow().setEnabled(false);
+
+
+				for (int i = 1; i <= imp.getNSlices(); i++) {
+					imp.setPositionWithoutUpdate(1, i, f);
+
+					ImageProcessor ip1 = imp.getProcessor().duplicate();
+
+					int[] ipHis = ip1.getHistogram();
+					double ipHisMode = 0.0;
+					int ipHisLength = ipHis.length;
+					int ipHisMaxBin = 0;
+					for (int h=0; h<ipHisLength; h++) {
+						if (ipHis[h] > ipHisMaxBin) {
+							ipHisMaxBin = ipHis[h];
+							ipHisMode = (double)h;
+						}
+					}
+					ip1.subtract(ipHisMode * 1);
+					
+					ip1.setRoi((Roi) theROI);
+					ip1.fillOutside((Roi) theROI);
+					ip1 = ip1.crop();
+					ImageProcessor ip1r = ip1.createProcessor((int)Math.sqrt(ip1.getWidth()*ip1.getWidth()+ip1.getHeight()*ip1.getHeight())
+															, (int)Math.sqrt(ip1.getWidth()*ip1.getWidth()+ip1.getHeight()*ip1.getHeight()));
+					ip1r.insert(ip1, (ip1r.getWidth()-ip1.getWidth())/2, (ip1r.getHeight()-ip1.getHeight())/2);
+					ip1= ip1r;
+					ip1.rotate(angle);
+					ip1.setRoi((int)(ip1.getWidth()-theRotatedROI.getBounds().getWidth())/2, (int)(ip1.getHeight()-theRotatedROI.getBounds().getHeight())/2
+								, (int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
+					ip1 = ip1.crop();
+
+					stack1.addSlice(ip1);
+
+					if (wavelengths >= 2) {
+						imp.setPositionWithoutUpdate(wavelengths, i, f);
+						ImageProcessor ip2 = imp.getProcessor().duplicate();
+						ipHis = ip2.getHistogram();
+						ipHisMode = 0.0;
+						ipHisLength = ipHis.length;
+						ipHisMaxBin = 0;
+						for (int h=0; h<ipHisLength; h++) {
+							if (ipHis[h] > ipHisMaxBin) {
+								ipHisMaxBin = ipHis[h];
+								ipHisMode = (double)h;
+							}
+						}
+
+						ip2.subtract(ipHisMode * 1);
+						
+						ip2.setRoi((Roi) theROI);
+						ip2.fillOutside((Roi) theROI);
+						ip2 = ip2.crop();
+						ImageProcessor ip2r = ip2.createProcessor((int)Math.sqrt(ip2.getWidth()*ip2.getWidth()+ip2.getHeight()*ip2.getHeight())
+																, (int)Math.sqrt(ip2.getWidth()*ip2.getWidth()+ip2.getHeight()*ip2.getHeight()));
+						ip2r.insert(ip2, (ip2r.getWidth()-ip2.getWidth())/2, (ip2r.getHeight()-ip2.getHeight())/2);
+						ip2= ip2r;
+						ip2.rotate(angle);
+						ip2.setRoi((int)(ip2.getWidth()-theRotatedROI.getBounds().getWidth())/2, (int)(ip2.getHeight()-theRotatedROI.getBounds().getHeight())/2
+									, (int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
+						ip2 = ip2.crop();
+
+						stack2.addSlice(ip2);
+					}
+				}
+
+
+				imp.getWindow().setEnabled(true);
+
+				ImagePlus frameRedImp = new ImagePlus("Ch2hisSubCrop",stack2);
+				ImagePlus frameGreenImp = new ImagePlus("Ch1hisSubCrop",stack1);
 
 				// Red channel:
-				IJ.run(frameRedImp,"Rotate... ", "angle="+angle+" grid=0 interpolation=Bicubic enlarge");
 				
 				String subdir = savetitle;
 				new File(outDir+subdir).mkdirs();
@@ -67,7 +144,6 @@ public class StarryNiteFeeder implements PlugIn {
 
 				
 				// Green channel:
-				IJ.run(frameGreenImp,"Rotate... ", "angle="+angle+" grid=0 interpolation=Bicubic enlarge");
 				
 				frameGreenImp.getProcessor().setMinAndMax(0, 5000);
 				

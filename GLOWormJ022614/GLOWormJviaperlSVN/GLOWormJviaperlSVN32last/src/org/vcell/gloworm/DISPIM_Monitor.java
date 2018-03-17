@@ -3434,6 +3434,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 							pAR = pA;
 
 							ipA1 = impAs[pos].getProcessor().duplicate();
+
 							int[] ipHis = ipA1.getHistogram();
 							double ipHisMode = 0.0;
 							int ipHisLength = ipHis.length;
@@ -3444,8 +3445,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 									ipHisMode = (double)h;
 								}
 							}
-							if (maxBkgd1 < ipHisMode )
-								maxBkgd1 = ipHisMode;
+//							if (maxBkgd1 < ipHisMode )
+//								maxBkgd1 = ipHisMode;
 							ipA1.subtract(ipHisMode * sliceTresholdVsModeA);
 							ipA1.setRoi((Roi) roiAs[pos]);
 							ipA1.fillOutside((Roi) roiAs[pos]);
@@ -3470,8 +3471,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 									}
 								}
 
-								if (maxBkgd2 < ipHisMode )
-									maxBkgd2 = ipHisMode;
+//								if (maxBkgd2 < ipHisMode )
+//									maxBkgd2 = ipHisMode;
 								ipA2.subtract(ipHisMode * sliceTresholdVsModeA);
 								ipA2.setRoi((Roi) roiAs[pos]);
 								ipA2.fillOutside((Roi) roiAs[pos]);
@@ -3549,8 +3550,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 											ipHisMode = (double)h;
 										}
 									}
-									if (maxBkgd1 < ipHisMode )
-										maxBkgd1 = ipHisMode;
+//									if (maxBkgd1 < ipHisMode )
+//										maxBkgd1 = ipHisMode;
 									ipB1.subtract(ipHisMode * sliceTresholdVsModeB);
 									ipB1.setRoi((Roi) roiBs[pos]);
 									ipB1.fillOutside((Roi) roiBs[pos]);
@@ -3576,8 +3577,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 											}
 										}
 
-										if (maxBkgd2 < ipHisMode )
-											maxBkgd2 = ipHisMode;
+//										if (maxBkgd2 < ipHisMode )
+//											maxBkgd2 = ipHisMode;
 										ipB2.subtract(ipHisMode * sliceTresholdVsModeB);
 										ipB2.setRoi((Roi) roiBs[pos]);
 										ipB2.fillOutside((Roi) roiBs[pos]);
