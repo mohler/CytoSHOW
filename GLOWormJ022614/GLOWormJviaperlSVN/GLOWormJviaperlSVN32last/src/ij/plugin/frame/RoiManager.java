@@ -5279,33 +5279,26 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 	}
 	
-	public void importStarryNiteNuclei(String dir) {
-		File dirFile = new File(dir);
-		if (!dirFile.canRead()) {;
+	public void importStarryNiteNuclei(String zipPath) {
+		File zipFile = new File(zipPath);
+		if (!zipFile.canRead()) {;
 		
-			dir = IJ.getDirectory("Select the directory with <nuclei> files");
-			dirFile = new File(dir);
+			zipPath = IJ.getFilePath("Select the zip file with <nuclei> files");
+			zipFile = new File(zipPath);
 		}
-		String[] list = dirFile.list();
-		String str ="";
-		for (int f=0; f<list.length;f++) {
-			String nextFile = dir + list[f];
-			str = str +list[f]+"\n"+ IJ.openAsString(nextFile);
-		}
+		String str = openZipNuclei(zipPath);
 		String[] lines = str.split("\n");
-		int id = imp.getID();
 		imp.hide();
 		this.setVisible(false);
 		int frame =1;
 		for (int i = 0; i < lines.length; i++) {
 			String nextLine = lines[i];
+			if (nextLine.length()==0) {
+				continue;
+			}
 			String[] cellData = nextLine.split(",");
 			if (cellData.length ==1){
-				frame = Integer.parseInt(cellData[0].trim().replace("t","").replace("-nuclei",""));
-//				if (this.getCount()>0) {
-//					select(-1);
-//					saveMultiple(getAllShownIndexes(),dirFile.getParent()+File.separator+cellData[0].trim()+"RoiSet.zip");
-//				}
+				frame = Integer.parseInt(cellData[0].trim().replace("nuclei/t","").replace("-nuclei",""));
 			} else {
 				imp.setPositionWithoutUpdate(imp.getChannel(), imp.getSlice(), frame);
 
@@ -5316,7 +5309,6 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					newOval.setImage(imp);
 					
 					addRoi(newOval, false, Color.white, 1);
-//					rename(cellData[5].trim(), new int[getCount()-1], false);
 					IJ.showStatus("importing nucleus "+getCount());
 				}
 			}
@@ -5325,10 +5317,46 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		this.setVisible(true);
 		if (this.getCount()>0) {
 			select(-1);
-			saveMultiple(getAllShownIndexes(),dirFile.getParent()+File.separator+"NucleiRoiSet.zip");
+			saveMultiple(getAllShownIndexes(),zipFile.getParent()+File.separator+"NucleiRoiSet.zip");
 		}
 
 	}
+	
+	String openZipNuclei(String path) { 
+
+		ZipInputStream in = null; 
+		ByteArrayOutputStream out;
+		String str = "";
+
+		try { 
+			in = new ZipInputStream(new FileInputStream(path)); 
+			
+			byte[] buf = new byte[1024*1024]; 
+			int len; 
+			ZipEntry entry = in.getNextEntry(); 
+			IJ.log("");
+
+			String string ="";
+
+			while (entry!=null) { 
+
+				String name = entry.getName(); 
+				IJ.log(name);
+				if (name.endsWith("-nuclei")) { 
+					out = new ByteArrayOutputStream(); 
+					while ((len = in.read(buf)) > 0) 
+						out.write(buf, 0, len); 
+					out.close(); 
+					string = out.toString();
+				} 
+				str = str+"\n"+name+"\n"+string;
+				entry = in.getNextEntry(); 
+			} 
+			in.close(); 
+		} catch (IOException e) {error(e.toString());} 
+		return str;
+	} 
+
 }
 
 

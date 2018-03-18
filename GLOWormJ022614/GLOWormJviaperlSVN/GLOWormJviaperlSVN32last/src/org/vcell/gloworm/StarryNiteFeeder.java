@@ -1,8 +1,16 @@
 package org.vcell.gloworm;
 
+import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.Polygon;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -10,8 +18,12 @@ import ij.ImageStack;
 import ij.VirtualStack;
 import ij.WindowManager;
 import ij.gui.Roi;
+import ij.gui.TextRoi;
+import ij.io.RoiDecoder;
+import ij.plugin.Colors;
 import ij.plugin.PlugIn;
 import ij.plugin.RoiRotator;
+import ij.plugin.frame.ColorLegend;
 import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
 
@@ -190,11 +202,5 @@ public class StarryNiteFeeder implements PlugIn {
 		}
 		return null;
 	}
-
-		
-	
-
-
-
 
 }
