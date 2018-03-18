@@ -2,6 +2,7 @@ package org.vcell.gloworm;
 
 import java.awt.Polygon;
 import java.io.File;
+import java.io.IOException;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -34,7 +35,7 @@ public class StarryNiteFeeder implements PlugIn {
 			int type = imp.getRoi().getType() ;
 			
 			String title = imp.getTitle();
-			String savetitle = title.replace(":","_");
+			String savetitle = title.replace(":","_").replace(" ","");
 			new File(new File(outDir+savetitle+".roi").getParent()).mkdirs();
 			IJ.save(imp, outDir+savetitle+".roi");
 			int[] xpoints = imp.getRoi().getPolygon().xpoints;
@@ -167,7 +168,26 @@ public class StarryNiteFeeder implements PlugIn {
 			}
 			imp.setPosition(wasC, wasZ, wasT);
 			imp.setRoi(theROI);
+			
+			try {
+				Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", "F:\\Matlab-R2018a\\bin\\matlab", "-nosplash", "-nodesktop", "-r", "addpath('C:\\Users\\SPIM\\Desktop\\TestLineaging\\Bill_distributionCopy\\source_code\\distribution_code\\'); detect_track_driver_allmatlab('2015_raw_view_dispim_param_boundarypercent0_2.txt','V:\\Bill\\DCFSNout\\Continue_20180216-1651_edges_DCR6834_bbs-8_72.7F_20C_M9_0.1625um_1um_75s_488-561_P0.75-0.5_5ms_s2_Leighton-Yale_Pos4_SPIMA\\Continue_20180216-1651_Edges_Leighton-Yale_Pos4_SPIMA\\','aaa','','V:\\Bill\\DCFSNout\\Continue_20180216-1651_edges_DCR6834_bbs-8_72.7F_20C_M9_0.1625um_1um_75s_488-561_P0.75-0.5_5ms_s2_Leighton-Yale_Pos4_SPIMA\\Continue_20180216-1651_Edges_Leighton-Yale_Pos4_SPIMA\\',0,true)"});
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 		}	
+	}
+
+	public static Process launchMatlabSN() {
+		try {
+			Process p = Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", "F:\\Matlab-R2018a\\bin\\matlab", "-nosplash", "-nodesktop", "-r", "addpath('C:\\\\Users\\\\SPIM\\\\Desktop\\\\TestLineaging\\\\Bill_distributionCopy\\\\source_code\\\\distribution_code\\\\'); detect_track_driver_allmatlab('2015_raw_view_dispim_param_boundarypercent0_2.txt','V:\\Bill\\DCFSNout\\Continue_20180216-1651_edges_DCR6834_bbs-8_72.7F_20C_M9_0.1625um_1um_75s_488-561_P0.75-0.5_5ms_s2_Leighton-Yale_Pos4_SPIMA\\Continue_20180216-1651_Edges_Leighton-Yale_Pos4_SPIMA\\','aaa','','V:\\Bill\\DCFSNout\\Continue_20180216-1651_edges_DCR6834_bbs-8_72.7F_20C_M9_0.1625um_1um_75s_488-561_P0.75-0.5_5ms_s2_Leighton-Yale_Pos4_SPIMA\\Continue_20180216-1651_Edges_Leighton-Yale_Pos4_SPIMA\\',0,true)"});
+			return p;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 		
