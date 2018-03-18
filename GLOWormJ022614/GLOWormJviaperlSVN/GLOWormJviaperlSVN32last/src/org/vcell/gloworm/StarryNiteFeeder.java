@@ -59,6 +59,8 @@ public class StarryNiteFeeder implements PlugIn {
 			int wavelengths = imp.getNChannels();
 			
 			Roi theRotatedROI = RoiRotator.rotate(theROI, angle);
+			String subdir = savetitle;
+
 			for (int f = 1; f <= imp.getNFrames(); f++) {
 
 				ImageStack stack1 = new ImageStack((int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
@@ -137,10 +139,9 @@ public class StarryNiteFeeder implements PlugIn {
 
 				// Red channel:
 				
-				String subdir = savetitle;
 				new File(outDir+subdir).mkdirs();
 				
-				// Do we need to save a stack?
+				// save a stack
 				IJ.save(frameRedImp, outDir+subdir+"/aaa"+f+".tif");
 
 				
@@ -170,7 +171,7 @@ public class StarryNiteFeeder implements PlugIn {
 			imp.setRoi(theROI);
 			
 			try {
-				Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", "F:\\Matlab-R2018a\\bin\\matlab", "-nosplash", "-nodesktop", "-r", "addpath('C:\\Users\\SPIM\\Desktop\\TestLineaging\\Bill_distributionCopy\\source_code\\distribution_code\\'); detect_track_driver_allmatlab('2015_raw_view_dispim_param_boundarypercent0_2.txt','V:\\Bill\\DCFSNout\\Continue_20180216-1651_edges_DCR6834_bbs-8_72.7F_20C_M9_0.1625um_1um_75s_488-561_P0.75-0.5_5ms_s2_Leighton-Yale_Pos4_SPIMA\\Continue_20180216-1651_Edges_Leighton-Yale_Pos4_SPIMA\\','aaa','','V:\\Bill\\DCFSNout\\Continue_20180216-1651_edges_DCR6834_bbs-8_72.7F_20C_M9_0.1625um_1um_75s_488-561_P0.75-0.5_5ms_s2_Leighton-Yale_Pos4_SPIMA\\Continue_20180216-1651_Edges_Leighton-Yale_Pos4_SPIMA\\',0,true)"});
+				Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", "F:\\Matlab-R2018a\\bin\\matlab", "-nosplash", "-nodesktop", "-r", "addpath('C:\\Users\\SPIM\\Desktop\\TestLineaging\\Bill_distributionCopy\\source_code\\distribution_code\\'); detect_track_driver_allmatlab('2015_raw_view_dispim_param_boundarypercent0_2.txt','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\','aaa','','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\',0,true)"});
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -181,7 +182,7 @@ public class StarryNiteFeeder implements PlugIn {
 
 	public static Process launchMatlabSN() {
 		try {
-			Process p = Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", "F:\\Matlab-R2018a\\bin\\matlab", "-nosplash", "-nodesktop", "-r", "addpath('C:\\\\Users\\\\SPIM\\\\Desktop\\\\TestLineaging\\\\Bill_distributionCopy\\\\source_code\\\\distribution_code\\\\'); detect_track_driver_allmatlab('2015_raw_view_dispim_param_boundarypercent0_2.txt','V:\\Bill\\DCFSNout\\Continue_20180216-1651_edges_DCR6834_bbs-8_72.7F_20C_M9_0.1625um_1um_75s_488-561_P0.75-0.5_5ms_s2_Leighton-Yale_Pos4_SPIMA\\Continue_20180216-1651_Edges_Leighton-Yale_Pos4_SPIMA\\','aaa','','V:\\Bill\\DCFSNout\\Continue_20180216-1651_edges_DCR6834_bbs-8_72.7F_20C_M9_0.1625um_1um_75s_488-561_P0.75-0.5_5ms_s2_Leighton-Yale_Pos4_SPIMA\\Continue_20180216-1651_Edges_Leighton-Yale_Pos4_SPIMA\\',0,true)"});
+			Process p = Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", "F:\\Matlab-R2018a\\bin\\matlab", "-nosplash", "-nodesktop", "-r", "addpath('C:\\Users\\SPIM\\Desktop\\TestLineaging\\Bill_distributionCopy\\source_code\\distribution_code\\'); detect_track_driver_allmatlab('2015_raw_view_dispim_param_boundarypercent0_2.txt','V:\\\\Bill\\\\DCFSNout\\\\Continue_20180216-1651_edges_DCR6834_bbs-8_72.7F_20C_M9_0.1625um_1um_75s_488-561_P0.75-0.5_5ms_s2_Leighton-Yale_Pos4_SPIMA\\\\Continue_20180216-1651_Edges_Leighton-Yale_Pos4_SPIMA\\\\','aaa','','V:\\\\Bill\\\\DCFSNout\\\\Continue_20180216-1651_edges_DCR6834_bbs-8_72.7F_20C_M9_0.1625um_1um_75s_488-561_P0.75-0.5_5ms_s2_Leighton-Yale_Pos4_SPIMA\\\\Continue_20180216-1651_Edges_Leighton-Yale_Pos4_SPIMA\\\\',0,true)"});
 			return p;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
