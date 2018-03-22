@@ -169,9 +169,14 @@ public class FileSaver {
 		fi.description = getDescriptionString();
 		if (virtualStack) {
 			FileInfo fiOrig = imp.getOriginalFileInfo();
-			if (path!=null && fiOrig!=null && fiOrig.directory!=null &&  fiOrig.fileName!=null && path.equals(fiOrig.directory+fiOrig.fileName)) {
-				error("TIFF virtual stacks cannot be saved in place.");
-				return false;
+//			if (path!=null && fiOrig!=null && fiOrig.directory!=null &&  fiOrig.fileName!=null && path.equals(fiOrig.directory+fiOrig.fileName)) {
+//				error("TIFF virtual stacks cannot be saved in place.");
+//				return false;
+//			}
+			int num_suffix=1;
+			while (path!=null && fiOrig!=null && fiOrig.directory!=null &&  fiOrig.fileName!=null && path.equals(fiOrig.directory+fiOrig.fileName)) {
+				path=path.replace(".tif", "_"+num_suffix+".tif");
+				num_suffix++;
 			}
 			String[] labels = null;
 			ImageStack vs = imp.getStack();
@@ -191,9 +196,9 @@ public class FileSaver {
 		fi.overlay = getOverlay(imp);
 		if (imp.isComposite()) saveDisplayRangesAndLuts(imp, fi);
 		try {
-			TiffEncoder file = new TiffEncoder(fi);
+			TiffEncoder tifEnc = new TiffEncoder(fi);
 			DataOutputStream out = new DataOutputStream(new BufferedOutputStream(new FileOutputStream(path)));
-			file.write(out);
+			tifEnc.write(out);
 			out.close();
 		}
 		catch (IOException e) {

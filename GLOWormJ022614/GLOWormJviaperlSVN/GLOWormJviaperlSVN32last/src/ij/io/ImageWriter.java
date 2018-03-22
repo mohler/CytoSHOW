@@ -43,6 +43,26 @@ public class ImageWriter {
 
 	void write8BitVirtualStack(OutputStream out, VirtualStack virtualStack)  throws IOException {
 		showProgressBar = false;
+		ImagePlus imp = null;
+		for(ImagePlus oImp:virtualStack.getOwnerImps()) {
+			if (oImp!=null && oImp==WindowManager.getCurrentImage()) {
+				imp = oImp;
+				if (imp.isDisplayedHyperStack() && imp.isComposite()) {
+					((CompositeImage)imp).setMode(CompositeImage.GRAYSCALE);
+					for(int t=1;t<=imp.getNFrames();t++) {
+						for(int z=1;z<=imp.getNSlices();z++) {
+							for(int c=1;c<=imp.getNChannels();c++) {
+								ImageProcessor ip = ((CompositeImage)imp).getProcessor();
+								byte[] pixels = (byte[])ip.getPixels();
+								write8BitImage(out, pixels);
+								IJ.showProgress((double)((t-1)*imp.getNSlices()*imp.getNChannels()+(z-1)*imp.getNChannels()+c)/fi.nImages);
+							}
+						}
+					}
+				}
+				return;
+			}
+		}
 		boolean flip = "FlipTheseImages".equals(fi.fileName);
 		for (int i=1; i<=fi.nImages; i++) {
 			IJ.showStatus("Writing: " + i + "/" + fi.nImages);
@@ -96,7 +116,29 @@ public class ImageWriter {
 
 	void write16BitVirtualStack(OutputStream out, VirtualStack virtualStack)  throws IOException {
 		showProgressBar = false;
+		ImagePlus imp = null;
+		for(ImagePlus oImp:virtualStack.getOwnerImps()) {
+			if (oImp!=null && oImp==WindowManager.getCurrentImage()) {
+				imp = oImp;
+				if (imp.isDisplayedHyperStack() && imp.isComposite()) {
+					((CompositeImage)imp).setMode(CompositeImage.GRAYSCALE);
+					for(int t=1;t<=imp.getNFrames();t++) {
+						for(int z=1;z<=imp.getNSlices();z++) {
+							for(int c=1;c<=imp.getNChannels();c++) {
+								imp.setPositionWithoutUpdate(c, z, t);
+								ImageProcessor ip = ((CompositeImage)imp).getProcessor();
+								short[] pixels = (short[])ip.getPixels();
+								write16BitImage(out, pixels);
+								IJ.showProgress((double)((t-1)*imp.getNSlices()*imp.getNChannels()+(z-1)*imp.getNChannels()+c)/fi.nImages);
+							}
+						}
+					}
+				}
+				return;
+			}
+		}
 		boolean flip = "FlipTheseImages".equals(fi.fileName);
+		
 		for (int i=1; i<=fi.nImages; i++) {
 			IJ.showStatus("Writing: " + i + "/" + fi.nImages);
 			ImageProcessor ip = virtualStack.getProcessor(i);

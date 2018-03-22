@@ -21,6 +21,7 @@ public class VirtualStack extends ImageStack {
 	Color fillColor = Color.black;
 	private boolean burnIn = false;
 	private ImagePlus lineageMapImage;
+	private String dimOrder = "xyczt";
 
 
 
@@ -259,6 +260,15 @@ public class VirtualStack extends ImageStack {
 	public void setLineageMapImage(ImagePlus lineageMapImage) {
 		this.lineageMapImage = lineageMapImage;
 		
+	}
+
+	public String getStackOrder() {
+		return dimOrder;
+	}
+
+	public void setStackOrder(String dimOrder) {
+		if (dimOrder.toLowerCase().startsWith("xy"))
+			this.dimOrder = dimOrder;
 	}
 
 	
