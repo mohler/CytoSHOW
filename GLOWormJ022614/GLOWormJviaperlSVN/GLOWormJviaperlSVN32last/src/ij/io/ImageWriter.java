@@ -48,6 +48,10 @@ public class ImageWriter {
 			if (oImp!=null && oImp==WindowManager.getCurrentImage()) {
 				imp = oImp;
 				if (imp.isDisplayedHyperStack() && imp.isComposite()) {
+					int mode = ((CompositeImage)imp).getMode();
+					int wasC = imp.getChannel();
+					int wasZ = imp.getSlice();
+					int wasT = imp.getFrame();
 					((CompositeImage)imp).setMode(CompositeImage.GRAYSCALE);
 					for(int t=1;t<=imp.getNFrames();t++) {
 						for(int z=1;z<=imp.getNSlices();z++) {
@@ -59,6 +63,8 @@ public class ImageWriter {
 							}
 						}
 					}
+					((CompositeImage)imp).setMode(mode);
+					imp.setPosition(wasC, wasZ, wasT);					
 				}
 				return;
 			}
@@ -121,6 +127,10 @@ public class ImageWriter {
 			if (oImp!=null && oImp==WindowManager.getCurrentImage()) {
 				imp = oImp;
 				if (imp.isDisplayedHyperStack() && imp.isComposite()) {
+					int mode = ((CompositeImage)imp).getMode();
+					int wasC = imp.getChannel();
+					int wasZ = imp.getSlice();
+					int wasT = imp.getFrame();
 					((CompositeImage)imp).setMode(CompositeImage.GRAYSCALE);
 					for(int t=1;t<=imp.getNFrames();t++) {
 						for(int z=1;z<=imp.getNSlices();z++) {
@@ -133,6 +143,8 @@ public class ImageWriter {
 							}
 						}
 					}
+					((CompositeImage)imp).setMode(mode);
+					imp.setPosition(wasC, wasZ, wasT);
 				}
 				return;
 			}
