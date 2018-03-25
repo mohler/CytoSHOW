@@ -15,10 +15,13 @@ import java.util.zip.ZipInputStream;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.Prefs;
 import ij.VirtualStack;
 import ij.WindowManager;
 import ij.gui.Roi;
 import ij.gui.TextRoi;
+import ij.io.DirectoryChooser;
+import ij.io.OpenDialog;
 import ij.io.RoiDecoder;
 import ij.plugin.Colors;
 import ij.plugin.PlugIn;
@@ -30,8 +33,22 @@ import ij.process.ShortProcessor;
 public class StarryNiteFeeder implements PlugIn {
 
 	public void run(String arg) {
-		final String outDir = IJ.getDirectory("Output directory for input into StarryNite?");
-		//print(outDir);
+		OpenDialog.setDefaultDirectory(Prefs.get("StarryNiteFeeder.parameterFileDirectory",""));
+		OpenDialog.setLastName(Prefs.get("StarryNiteFeeder.parameterFileName",""));
+		final String baseParameterFilePath = new OpenDialog("Parameter file for StarryNite?", OpenDialog.getDefaultDirectory(), OpenDialog.getLastName()).getPath();
+//		String[] baseParamChunks = baseParameterFilePath.split(">>");
+//		String timeRangePrompt="";
+//		if (baseParamChunks.length >0) {
+//			timeRangePrompt=baseParamChunks[1];
+//		}
+		Prefs.set("StarryNiteFeeder.parameterFileDirectory", new File(baseParameterFilePath).getParent()+File.separator);
+		Prefs.set("StarryNiteFeeder.parameterFileName", new File(baseParameterFilePath).getName());
+		
+		DirectoryChooser.setDefaultDirectory(Prefs.get("StarryNiteFeeder.outputPath",""));
+		final String outDir = IJ.getDirectory("Output directory for StarryNite?");
+		Prefs.set("StarryNiteFeeder.outputPath", outDir);
+		
+		
 
 		for (int w=1; w<=WindowManager.getImageCount(); w++){
 			ImagePlus imp = WindowManager.getImage(w);	
@@ -72,8 +89,17 @@ public class StarryNiteFeeder implements PlugIn {
 
 			Roi theRotatedROI = RoiRotator.rotate(theROI, angle);
 			final String subdir = savetitle;
-
-			for (int f = 1; f <= imp.getNFrames(); f++) {
+			new File(outDir+subdir).mkdirs();
+			final String impParameterPath = outDir+subdir+File.separator+savetitle+"_SNparamsFile.txt";
+			int endPoint = imp.getFrame();
+			IJ.saveString(IJ.openAsString(baseParameterFilePath).replaceAll("(.*end_time=)\\d+(;.*)", "$1"+endPoint+"$2")
+																.replaceAll("(.*ROI=)true(;.*)", "$1false$2")
+																.replaceAll("(.*ROI.min=)\\d+(;.*)", "$10$2")
+																.replaceAll("(.*ROIxmax=)\\d+(;.*)", "$1"+imp.getWidth()+"$2")
+																.replaceAll("(.*ROIymax=)\\d+(;.*)", "$1"+imp.getHeight()+"$2")
+										, impParameterPath);
+			
+			for (int f = 1; f <= endPoint; f++) {
 				if (!(new File(outDir+subdir+"/aaa"+f+".tif").canRead())) {
 					
 					ImageStack stack1 = new ImageStack((int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
@@ -187,9 +213,9 @@ public class StarryNiteFeeder implements PlugIn {
 			Thread linThread = new Thread(new Runnable() {
 				public void run() {
 					try {
-						IJ.log("F:\\Matlab-R2014b\\bin\\matlab -nosplash -nodesktop -r ver;addpath('C:\\Users\\SPIM\\Desktop\\TestLineaging\\Bill_distributionCopy\\source_code\\distribution_code\\'); detect_track_driver_allmatlab('2015_raw_view_dispim_param_boundarypercent0_2.txt','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\','aaa','','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\',0,true)");
+						IJ.log("F:\\Matlab-R2014b\\bin\\matlab -nosplash -nodesktop -r ver;addpath('C:\\Users\\SPIM\\Desktop\\TestLineaging\\Bill_distributionCopy\\source_code\\distribution_code\\'); detect_track_driver_allmatlab('"+impParameterPath+"','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\','aaa','','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\',0,true)");
 
-						Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", "F:\\Matlab-R2014b\\bin\\matlab", "-nosplash", "-nodesktop", "-r", "ver;addpath('C:\\Users\\SPIM\\Desktop\\TestLineaging\\Bill_distributionCopy\\source_code\\distribution_code\\'); detect_track_driver_allmatlab('2015_raw_view_dispim_param_boundarypercent0_2.txt','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\','aaa','','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\',0,true)"});
+						Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", "F:\\Matlab-R2014b\\bin\\matlab", "-nosplash", "-nodesktop", "-r", "ver;addpath('C:\\Users\\SPIM\\Desktop\\TestLineaging\\Bill_distributionCopy\\source_code\\distribution_code\\'); detect_track_driver_allmatlab('"+impParameterPath+"','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\','aaa','','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\',0,true)"});
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
