@@ -20,6 +20,7 @@ import ij.VirtualStack;
 import ij.WindowManager;
 import ij.gui.Roi;
 import ij.gui.TextRoi;
+import ij.gui.WaitForUserDialog;
 import ij.io.DirectoryChooser;
 import ij.io.OpenDialog;
 import ij.io.RoiDecoder;
@@ -48,8 +49,10 @@ public class StarryNiteFeeder implements PlugIn {
 		final String outDir = IJ.getDirectory("Output directory for StarryNite?");
 		Prefs.set("StarryNiteFeeder.outputPath", outDir);
 		
+		WaitForUserDialog wfud = new WaitForUserDialog("StarryNite Feeder", 
+														"Please position ROIs around the individual embryos to be lineaged.  \n\nThen adjust each embryo's t-slider to the last timepoint to be analyzed.  \n\nClick OK to launch analysis.");
+		wfud.show();
 		
-
 		for (int w=1; w<=WindowManager.getImageCount(); w++){
 			ImagePlus imp = WindowManager.getImage(w);	
 
@@ -92,13 +95,9 @@ public class StarryNiteFeeder implements PlugIn {
 			new File(outDir+subdir).mkdirs();
 			final String impParameterPath = outDir+subdir+File.separator+savetitle+"_SNparamsFile.txt";
 			int endPoint = imp.getFrame();
-			IJ.saveString(IJ.openAsString(baseParameterFilePath).replaceAll("(.*end_time=)\\d+(;.*)", "$1"+endPoint+"$2")
-																.replaceAll("(.*ROI=)true(;.*)", "$1false$2")
-																.replaceAll("(.*ROI.min=)\\d+(;.*)", "$10$2")
-																.replaceAll("(.*ROIxmax=)\\d+(;.*)", "$1"+imp.getWidth()+"$2")
-																.replaceAll("(.*ROIymax=)\\d+(;.*)", "$1"+imp.getHeight()+"$2")
-										, impParameterPath);
-			
+			int stackWidth=0;
+			int stackHeight=0;
+
 			for (int f = 1; f <= endPoint; f++) {
 				if (!(new File(outDir+subdir+"/aaa"+f+".tif").canRead())) {
 					
@@ -174,6 +173,8 @@ public class StarryNiteFeeder implements PlugIn {
 					imp.getWindow().setEnabled(true);
 
 					ImagePlus frameRedImp = new ImagePlus("Ch2hisSubCrop",stack2);
+					stackWidth = frameRedImp.getWidth();
+					stackHeight = frameRedImp.getHeight();
 					ImagePlus frameGreenImp = new ImagePlus("Ch1hisSubCrop",stack1);
 
 					// Red channel:
@@ -209,13 +210,19 @@ public class StarryNiteFeeder implements PlugIn {
 			}
 			imp.setPosition(wasC, wasZ, wasT);
 			imp.setRoi(theROI);
-			
+			IJ.saveString(IJ.openAsString(baseParameterFilePath).replaceAll("(.*end_time=)\\d+(;.*)", "$1"+endPoint+"$2")
+					.replaceAll("(.*ROI=)true(;.*)", "$1false$2")
+					.replaceAll("(.*ROI.min=)\\d+(;.*)", "$10$2")
+					.replaceAll("(.*ROIxmax=)\\d+(;.*)", "$1"+stackWidth+"$2")
+					.replaceAll("(.*ROIymax=)\\d+(;.*)", "$1"+stackHeight+"$2")
+					, impParameterPath);
+
 			Thread linThread = new Thread(new Runnable() {
 				public void run() {
 					try {
-						IJ.log("F:\\Matlab-R2014b\\bin\\matlab -nosplash -nodesktop -r ver;addpath('C:\\Users\\SPIM\\Desktop\\TestLineaging\\Bill_distributionCopy\\source_code\\distribution_code\\'); detect_track_driver_allmatlab('"+impParameterPath+"','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\','aaa','','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\',0,true)");
+						IJ.log("matlab -nosplash -nodesktop -r ver;addpath('C:\\Users\\SPIM\\Desktop\\TestLineaging\\Bill_distributionCopy\\source_code\\distribution_code\\'); detect_track_driver_allmatlab('"+impParameterPath+"','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\','aaa','','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\',0,true)");
 
-						Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", "F:\\Matlab-R2014b\\bin\\matlab", "-nosplash", "-nodesktop", "-r", "ver;addpath('C:\\Users\\SPIM\\Desktop\\TestLineaging\\Bill_distributionCopy\\source_code\\distribution_code\\'); detect_track_driver_allmatlab('"+impParameterPath+"','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\','aaa','','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\',0,true)"});
+						Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", "matlab", "-nosplash", "-nodesktop", "-r", "ver;addpath('C:\\Users\\SPIM\\Desktop\\TestLineaging\\Bill_distributionCopy\\source_code\\distribution_code\\'); detect_track_driver_allmatlab('"+impParameterPath+"','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\','aaa','','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\',0,true)"});
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
