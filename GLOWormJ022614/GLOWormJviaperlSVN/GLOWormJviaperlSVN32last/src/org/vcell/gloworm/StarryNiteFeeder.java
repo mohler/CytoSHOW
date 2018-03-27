@@ -220,9 +220,9 @@ public class StarryNiteFeeder implements PlugIn {
 			Thread linThread = new Thread(new Runnable() {
 				public void run() {
 					try {
-						IJ.log("matlab -nosplash -nodesktop -r ver;addpath('C:\\Users\\SPIM\\Desktop\\TestLineaging\\Bill_distributionCopy\\source_code\\distribution_code\\'); detect_track_driver_allmatlab('"+impParameterPath+"','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\','aaa','','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\',0,true)");
+						IJ.log("F:\\Matlab-R2014b\\bin\\matlab -nosplash -nodesktop -r ver;addpath('C:\\Users\\SPIM\\Desktop\\TestLineaging\\Bill_distributionCopy\\source_code\\distribution_code\\'); detect_track_driver_allmatlab('"+impParameterPath+"','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\','aaa','','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\',0,true)");
 
-						Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", "matlab", "-nosplash", "-nodesktop", "-r", "ver;addpath('C:\\Users\\SPIM\\Desktop\\TestLineaging\\Bill_distributionCopy\\source_code\\distribution_code\\'); detect_track_driver_allmatlab('"+impParameterPath+"','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\','aaa','','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\',0,true)"});
+						Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", "F:\\Matlab-R2014b\\bin\\matlab", "-nosplash", "-nodesktop", "-r", "ver;addpath('C:\\Users\\SPIM\\Desktop\\TestLineaging\\Bill_distributionCopy\\source_code\\distribution_code\\'); detect_track_driver_allmatlab('"+impParameterPath+"','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\','aaa','','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\',0,true)"});
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();

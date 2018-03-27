@@ -111,12 +111,12 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			String[] peerDirList = new File(argFile.getParent()).list();
 			for (String peerDirName:peerDirList) {
 				if (!peerDirName.equals(argFile.getName()) && peerDirName.contains(argFile.getName())) {
-					argPeerDirArrayList.add(dir);
 					argPeerDirArrayList.add(argFile.getParent()+File.separator+peerDirName+File.separator);
+					argPeerDirArrayList.add(dir);
 					break;
 				} else if (!peerDirName.equals(argFile.getName()) && argFile.getName().contains(peerDirName)) {
-					argPeerDirArrayList.add(argFile.getParent()+File.separator+peerDirName+File.separator);
 					argPeerDirArrayList.add(dir);
+					argPeerDirArrayList.add(argFile.getParent()+File.separator+peerDirName+File.separator);
 					break;
 				}
 			}
