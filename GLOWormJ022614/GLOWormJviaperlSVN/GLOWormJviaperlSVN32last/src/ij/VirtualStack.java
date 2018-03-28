@@ -7,6 +7,7 @@ import ij.util.Tools;
 import java.io.*;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.geom.AffineTransform;
 import java.awt.image.ColorModel;
 
 /** This class represents an array of disk-resident images. */
@@ -168,6 +169,7 @@ public class VirtualStack extends ImageStack {
 		}
 		if (edges) {
 			ip.findEdges();
+//			ip.doAffineTransform(new AffineTransform(1,0,0,1,0,0));
 		}
 		return ip;
 	 }

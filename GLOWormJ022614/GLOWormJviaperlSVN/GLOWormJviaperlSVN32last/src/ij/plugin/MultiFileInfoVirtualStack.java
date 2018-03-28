@@ -8,6 +8,7 @@ import ij.gui.*;
 import ij.io.*;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.io.*;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -790,6 +791,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		//		ip.setMinAndMax(min, max);
 		if (edges) {
 			ip.findEdges();
+			
+//			ip.doAffineTransform(new AffineTransform(1.075,0.25,0.2,1.075,0,0));
 		}
 		return ip;
 	}

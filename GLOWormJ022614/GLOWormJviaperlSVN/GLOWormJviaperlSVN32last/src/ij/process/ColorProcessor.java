@@ -2,7 +2,9 @@ package ij.process;
 
 import java.util.*;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.*;
+
 import ij.gui.*;
 import ij.ImageStack;
 
@@ -1324,6 +1326,12 @@ public class ColorProcessor extends ImageProcessor {
 	
 	public int getBitDepth() {
 		return 24;
+	}
+
+	
+	public void doAffineTransform(AffineTransform aTx) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

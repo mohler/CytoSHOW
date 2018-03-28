@@ -1,7 +1,10 @@
 package ij.process;
 import java.util.*;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.*;
+import java.beans.ConstructorProperties;
+
 import ij.gui.*;
 import ij.util.*;
 import ij.plugin.filter.GaussianBlur;
@@ -1998,6 +2001,16 @@ public abstract class ImageProcessor implements Cloneable {
 		@see ImageProcessor#setInterpolate
 	*/
   	public abstract void rotate(double angle);
+  	
+	/** Transforms the image or selection via an Affine matrix.
+	    @ConstructorProperties({ "scaleX", "shearY", "shearX", "scaleY", "translateX", "translateY" })
+    public AffineTransform(float m00, float m10,
+                           float m01, float m11,
+                           float m02, float m12) {
+
+	 */
+	public abstract void doAffineTransform(AffineTransform aTx);
+
   		
 	/**  Moves the image or selection vertically or horizontally by a specified 
 	      number of pixels. Positive x values move the image or selection to the 

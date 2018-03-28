@@ -2,7 +2,10 @@ package ij.process;
 
 import java.util.*;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 import java.awt.image.*;
+
 import ij.gui.*;
 
 /** This is an 32-bit floating-point image and methods that operate on that image. */
@@ -1034,6 +1037,21 @@ public class FloatProcessor extends ImageProcessor {
 	
 	public int getBitDepth() {
 		return 32;
+	}
+
+	
+	public void doAffineTransform(AffineTransform aTx) {
+
+		float[] pixels2 = (float[])getPixelsCopy();
+		ImageProcessor ip2 = null;
+		if (interpolationMethod==BICUBIC)
+			ip2 = new FloatProcessor(getWidth(), getHeight(), pixels2, null);
+		for (int x=0; x<getWidth();x++) {
+			for (int y=0; y<getHeight();y++) {
+				Point2D point2 = aTx.transform(new Point2D.Double(x,y), new Point2D.Double());
+				this.putPixel(x, y, ip2.getPixel((int)point2.getX(),(int)point2.getY()));
+			}
+		}		
 	}
 
 }
