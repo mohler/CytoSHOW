@@ -5288,12 +5288,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		String str = openZipNuclei(zipPath);
 		String[] lines = str.split("\n");
-		imp.hide();
-		this.setVisible(false);
+//		imp.hide();
+//		this.setVisible(false);
 		int frame =1;
 		for (int i = 0; i < lines.length; i++) {
 			String nextLine = lines[i];
 			if (nextLine.length()==0) {
+				continue;
+			}
+			if (nextLine.startsWith("parameters/")) {
 				continue;
 			}
 			String[] cellData = nextLine.split(",");
@@ -5309,12 +5312,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					newOval.setImage(imp);
 					
 					addRoi(newOval, false, Color.white, 1);
+					rename(cellData[9], new int[] {this.getCount()-1}, false);
 					IJ.showStatus("importing nucleus "+getCount());
 				}
 			}
 		}
-		imp.show();
-		this.setVisible(true);
+//		imp.show();
+//		this.setVisible(true);
 		if (this.getCount()>0) {
 			select(-1);
 			saveMultiple(getAllShownIndexes(),zipFile.getParent()+File.separator+"NucleiRoiSet.zip");
