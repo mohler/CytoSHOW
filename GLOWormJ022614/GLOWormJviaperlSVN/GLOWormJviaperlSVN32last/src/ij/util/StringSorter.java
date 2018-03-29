@@ -77,6 +77,7 @@ public class StringSorter {
 	//THIS MAY NOT BE WORKING ON WINDOWS??
 	public static String[] sortNumericallyViaRegex(String[] list) {
 		int n = list.length;
+		String[] listToPad = Arrays.copyOf(list, n);
 		int stringMaxLength = 0; 
 		int stringMinLength = Integer.MAX_VALUE; 
 		String[][] nameChunks = new String[n][];
@@ -93,32 +94,25 @@ public class StringSorter {
 		}
 		for(int i=0;i<n;i++) {
 			if(list[i].length() <= stringMaxLength) {
-				nameChunks[i] = list[i].split("\\d+");
-				if(nameChunks.length > 1) {
-					nameEnd[i] = nameChunks[i][nameChunks[i].length-1];
+				if (list[i].matches(".*\\d+.*")) {
+					nameChunks[i] = list[i].split("\\d+");
+					if(nameChunks[i].length > 1) {
+						nameEnd[i] = nameChunks[i][nameChunks[i].length-1];
+					} else {
+						nameEnd[i] = "";
+					}
 					nameRoot[i] = list[i].replaceAll("(.*\\D)\\d+"+nameEnd[i], "$1");
 					nameIncr[i] = list[i].replaceAll(".*\\D(\\d+)"+nameEnd[i], "$1");
-					list[i] = nameRoot[i] + IJ.pad(Integer.parseInt(nameIncr[i]), stringMaxLength - stringMinLength +1)
-								+nameEnd[i];
+					listToPad[i] = nameRoot[i] + IJ.pad(Integer.parseInt(nameIncr[i]), stringMaxLength - stringMinLength +1)
+							+nameEnd[i];
 				}
 			}
 		}
-		Arrays.sort(list);		
-		for(int i=0;i<n;i++) {
-			//IJ.log(list[i]);
-			if(list[i]!=null) {
-				nameChunks[i] = list[i].split("\\d+");
-				if(nameChunks.length > 1) {
-					nameEnd[i] = nameChunks[i][nameChunks[i].length-1];
-					nameRoot[i] = list[i].replaceAll("(.*\\D)\\d+"+nameEnd[i], "$1");
-					//IJ.log(nameRoot[i]);
-					//IJ.log(list[i]);
-					list[i] = list[i].replaceAll(nameRoot[i]+"[0]+([0-9])", nameRoot[i]+"$1");
-					//IJ.log(list[i]+"  !");
-				}
-			}
-		}
-		return list;
+		String[] sortedList = new String[n];
+		int[] indexes = Tools.rank(listToPad);
+		for (int i = 0; i < n; i++)
+			sortedList[i] = list[indexes[i]];
+		return sortedList;
 	}
 
 	// Pads individual numeric string components with zeroes for correct sorting

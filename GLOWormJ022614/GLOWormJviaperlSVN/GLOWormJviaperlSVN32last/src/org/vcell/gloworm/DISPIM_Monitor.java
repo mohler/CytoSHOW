@@ -36,6 +36,11 @@ import java.util.Hashtable;
 import java.util.regex.Pattern;
 
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerModel;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import ij.CompositeImage;
 import ij.IJ;
@@ -73,7 +78,7 @@ import ij.process.ImageStatistics;
 import ij.process.LUT;
 import ij.process.ShortProcessor;
 
-public class DISPIM_Monitor implements PlugIn, ActionListener {
+public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 
 	//Info from proximal tiff header in MMomeTIFF vvvvvvv
 	private double diSPIM_MM_LaserExposure_ms;
@@ -330,6 +335,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 	private MultiFileInfoVirtualStack[] stackAs;
 	private MultiFileInfoVirtualStack[] stackBs;
 	private String saveName;
+	private JSpinner[][] xSpinner;
+	private JSpinner[][] ySpinner;
+	private Panel[][] spinnerPanel;
 
 	public Process getRegDeconProcess() {
 		return regDeconProcess;
@@ -556,6 +564,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 					cropHeightB = new double[pDim];
 					fuseButton = new Button[pDim][2];
 					splitButton = new Button[pDim][2];
+					spinnerPanel = new Panel[pDim][2];
+					xSpinner = new JSpinner[pDim][2];
+					ySpinner = new JSpinner[pDim][2];
+					
 					wasEdgesA = new boolean[pDim];
 					wasEdgesB = new boolean[pDim];
 
@@ -907,6 +919,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				cropHeightB = new double[pDim];
 				fuseButton = new Button[pDim][2];
 				splitButton = new Button[pDim][2];
+				spinnerPanel = new Panel[pDim][2];
+				xSpinner = new JSpinner[pDim][2];
+				ySpinner = new JSpinner[pDim][2];
 				wasEdgesA = new boolean[pDim];
 				wasEdgesB = new boolean[pDim];
 
@@ -1122,6 +1137,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				oldLength = newLength;
 				fuseButton = new Button[pDim][2];
 				splitButton = new Button[pDim][2];
+				spinnerPanel = new Panel[pDim][2];
+				xSpinner = new JSpinner[pDim][2];
+				ySpinner = new JSpinner[pDim][2];
 
 			}
 
@@ -1551,6 +1569,48 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 						splitButton[pos][1].setVisible(true);
 					}
 				}
+				
+				spinnerPanel[pos][0] = new Panel();
+				if(xSpinner[pos][0] == null) {
+					xSpinner[pos][0] = new JSpinner(new SpinnerNumberModel(0, -100, 100, 1));
+					xSpinner[pos][0].setToolTipText("Adjust Channel X Alignment ViewA");
+					xSpinner[pos][0].addChangeListener(this);
+					spinnerPanel[pos][0].add(xSpinner[pos][0]);
+					fuseSplitPanel[pos][0].add(BorderLayout.CENTER, spinnerPanel[pos][0]);
+				}else {
+					xSpinner[pos][0].setVisible(true);
+				}
+				if(ySpinner[pos][0] == null) {
+					ySpinner[pos][0] = new JSpinner(new SpinnerNumberModel(0, -100, 100, 1));
+					ySpinner[pos][0].setToolTipText("Adjust Channel Y Alignment ViewA");
+					ySpinner[pos][0].addChangeListener(this);
+					spinnerPanel[pos][0].add(ySpinner[pos][0]);
+					fuseSplitPanel[pos][0].add(BorderLayout.CENTER, spinnerPanel[pos][0]);
+				}else {
+					ySpinner[pos][0].setVisible(true);
+				}
+
+				spinnerPanel[pos][1] = new Panel();
+				if(xSpinner[pos][1] == null) {
+					xSpinner[pos][1] = new JSpinner(new SpinnerNumberModel(0, -100, 100, 1));
+					xSpinner[pos][1].setToolTipText("Adjust Channel X Alignment ViewA");
+					xSpinner[pos][1].addChangeListener(this);
+					spinnerPanel[pos][1].add(xSpinner[pos][1]);
+					fuseSplitPanel[pos][1].add(BorderLayout.CENTER, spinnerPanel[pos][1]);
+				}else {
+					xSpinner[pos][1].setVisible(true);
+				}
+				if(ySpinner[pos][1] == null) {
+					ySpinner[pos][1] = new JSpinner(new SpinnerNumberModel(0, -100, 100, 1));
+					ySpinner[pos][1].setToolTipText("Adjust Channel Y Alignment ViewA");
+					ySpinner[pos][1].addChangeListener(this);
+					spinnerPanel[pos][1].add(ySpinner[pos][1]);
+					fuseSplitPanel[pos][1].add(BorderLayout.CENTER, spinnerPanel[pos][1]);
+				}else {
+					ySpinner[pos][1].setVisible(true);
+				}
+
+				
 				impAs[pos].getWindow().viewButtonPanel.add(fuseSplitPanel[pos][0]);
 				impAs[pos].getWindow().viewButtonPanel.validate();
 				impBs[pos].getWindow().viewButtonPanel.add(fuseSplitPanel[pos][1]);
@@ -4246,7 +4306,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 		} else {
 			diSPIMheader = open_diSPIMheaderAsString(dirOrOMETiffFile.getAbsolutePath());
 		}
+		IJ.log(diSPIMheader);
 		diSPIMheader = diSPIMheader.replaceAll("(.*\\$.\\#.*\\{\")(.*)", "\\{\"$2");
+		diSPIMheader = diSPIMheader.substring(0, diSPIMheader.lastIndexOf("}"));
+		
+		IJ.log(diSPIMheader);
 
 		String squareSetsSearchPattern=".*";
 		int squareSetsCount=0;
@@ -4256,9 +4320,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 				squareSetsCount++;
 			}
 		}
-
+		IJ.log(squareSetsSearchPattern);
+		IJ.log(""+squareSetsCount);
 		for(int capture=2;capture<=squareSetsCount;capture++) {
-			diSPIMheader = diSPIMheader.replace((diSPIMheader.replaceAll(squareSetsSearchPattern, "$"+capture)),
+			diSPIMheader = diSPIMheader
+					.replace((diSPIMheader.replaceAll(squareSetsSearchPattern, "$"+capture)),
 					(diSPIMheader.replaceAll(squareSetsSearchPattern, "$"+capture).replace(",",";")));
 		}
 		IJ.log("*************************");
@@ -4815,5 +4881,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener {
 
 		}
 
+	}
+
+	public void stateChanged(ChangeEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 }

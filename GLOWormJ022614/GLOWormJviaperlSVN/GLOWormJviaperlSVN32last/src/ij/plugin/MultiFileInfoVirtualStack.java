@@ -111,13 +111,14 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			ArrayList<String> argPeerDirArrayList = new ArrayList<String>();
 			String[] peerDirList = new File(argFile.getParent()).list();
 			for (String peerDirName:peerDirList) {
+				String peerDir = argFile.getParent()+File.separator+peerDirName+File.separator;
 				if (!peerDirName.equals(argFile.getName()) && peerDirName.contains(argFile.getName())) {
-					argPeerDirArrayList.add(argFile.getParent()+File.separator+peerDirName+File.separator);
 					argPeerDirArrayList.add(dir);
+					argPeerDirArrayList.add(peerDir);
 					break;
 				} else if (!peerDirName.equals(argFile.getName()) && argFile.getName().contains(peerDirName)) {
+					argPeerDirArrayList.add(peerDir);
 					argPeerDirArrayList.add(dir);
-					argPeerDirArrayList.add(argFile.getParent()+File.separator+peerDirName+File.separator);
 					break;
 				}
 			}
@@ -140,7 +141,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				IJ.log("argPeer: "+argPeer);
 
 				String[] argPeerFileList = argPeerFile.list();
-				argPeerFileList = StringSorter.sortNumerically(argPeerFileList);
+				argPeerFileList = StringSorter.sortNumericallyViaRegex(argPeerFileList);
 
 				for (String fileName:argPeerFileList) {
 					File subFile = new File(dir+fileName);
@@ -179,25 +180,25 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 							}
 						}
 					}
-//					int lowestSpan = Integer.MAX_VALUE;
-//					for (ArrayList<String> al:channelArrayLists) {
-//						if (lowestSpan > al.size()){
-//							lowestSpan = al.size();
-//						}
-//					}
-//					for (ArrayList<String> al:channelArrayLists) {
-//						for (int zap=al.size();zap>=lowestSpan;zap--) {
-//							if (al.size()>zap) {
-//								cumulativeSubFileArrayList.remove(al.get(zap-1));
-//							}
-//						}
-//					}
-
+					int lowestSpan = Integer.MAX_VALUE;
+					for (ArrayList<String> al:channelArrayLists) {
+						if (lowestSpan > al.size()){
+							lowestSpan = al.size();
+						}
+					}
+					for (ArrayList<String> al:channelArrayLists) {
+						for (int zap=al.size();zap>=lowestSpan;zap--) {
+							if (al.size()>zap) {
+								cumulativeSubFileArrayList.remove(al.get(zap-1));
+							}
+						}
+					}
+				
 				}
 			}
 		} else {
 			String[] dirFileList = argFile.list();
-			dirFileList = StringSorter.sortNumerically(dirFileList);
+			dirFileList = StringSorter.sortNumericallyViaRegex(dirFileList);
 
 			allDirectories = true;
 			//			String[] bigSubFileList = null;
@@ -278,7 +279,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				if (highT > 0)
 					dimOrder = "xyztc";
 			}
-			cumulativeTiffFileArray = StringSorter.sortNumerically(cumulativeTiffFileArray);
+//			cumulativeTiffFileArray = StringSorter.sortNumericallyViaRegex(cumulativeTiffFileArray);
 //			IJ.log("CumSubFileArray.length="+cumulativeTiffFileArray.length);
 			
 			if (cumulativeTiffFileArray.length >0){ 
@@ -298,7 +299,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 					} else if (noKeyString || (subFile.getName().matches(".*"+keyString+".*") && !subFile.getName().startsWith("Proj_"))){
 						String[] subFileList = subFile.list();
-						subFileList = StringSorter.sortNumerically(subFileList);
+						subFileList = StringSorter.sortNumericallyViaRegex(subFileList);
 						ArrayList<String> subFileTiffArrayList = new ArrayList<String>();
 
 
@@ -491,7 +492,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				zDim = (int) gd.getNextNumber();
 				tDim = (int) gd.getNextNumber();
 				nImages = cDim*zDim*tDim;
-			} else if (tDim == 1){
+			} else {
 				this.tDim =nImages/(this.cDim*this.zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
 			}
 
