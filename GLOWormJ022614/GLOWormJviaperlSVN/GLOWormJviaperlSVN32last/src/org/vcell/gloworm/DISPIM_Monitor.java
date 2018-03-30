@@ -3,6 +3,7 @@ package org.vcell.gloworm;
 import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Checkbox;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagLayout;
 import java.awt.Panel;
@@ -573,13 +574,27 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 
 					stackAs = new MultiFileInfoVirtualStack[pDim];
 					stackBs = new MultiFileInfoVirtualStack[pDim];
+					
+					File argFile = new File(dirOrOMETiff);
+					String titleRoot = (argFile.getName());
+					String[] peerDirList = new File(argFile.getParent()).list();
+					for (String peerDirName:peerDirList) {
+						String peerDir = argFile.getParent()+File.separator+peerDirName+File.separator;
+						if (!peerDirName.equals(argFile.getName()) && peerDirName.contains(argFile.getName())) {
+							titleRoot = (argFile.getName());
+							break;
+						} else if (!peerDirName.equals(argFile.getName()) && argFile.getName().contains(peerDirName)) {
+							titleRoot = (peerDirName);
+							break;
+						}
+					}
 
 					for (int pos=0; pos<pDim; pos++) {
 
 						impAs[pos] = new ImagePlus();
-						impAs[pos].setTitle(dirOrOMETiffFile.getName().replaceAll("(.*)Pos\\d+_\\d+.ome.tif", "$1.ome.tif") + "_Pos" +pos + ": SPIMA");
+						impAs[pos].setTitle(titleRoot.replaceAll("(.*)Pos\\d+_\\d+.ome.tif", "$1.ome.tif") + "_Pos" +pos + ": SPIMA");
 						impBs[pos] = new ImagePlus();
-						impBs[pos].setTitle(dirOrOMETiffFile.getName().replaceAll("(.*)Pos\\d+_\\d+.ome.tif", "$1.ome.tif") + "_Pos" +pos + ": SPIMB");
+						impBs[pos].setTitle(titleRoot.replaceAll("(.*)Pos\\d+_\\d+.ome.tif", "$1.ome.tif") + "_Pos" +pos + ": SPIMB");
 
 						impAs[pos].setFileInfo(new FileInfo());
 						impAs[pos].getOriginalFileInfo().fileName = dirOrOMETiff;
@@ -1555,59 +1570,68 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 				if ( splitChannels = true ) {
 
 					if(splitButton[pos][0] == null) {
-						splitButton[pos][0] = new Button("CSM");
-						splitButton[pos][0].addActionListener(this);
-						fuseSplitPanel[pos][0].add(BorderLayout.SOUTH, splitButton[pos][0]);
+//						splitButton[pos][0] = new Button("CSM");
+//						splitButton[pos][0].addActionListener(this);
+//						fuseSplitPanel[pos][0].add(BorderLayout.SOUTH, splitButton[pos][0]);
 					}else {
-						splitButton[pos][0].setVisible(true);
+//						splitButton[pos][0].setVisible(true);
 					}
 					if(splitButton[pos][1] == null) {
-						splitButton[pos][1] = new Button("CSM");
-						splitButton[pos][1].addActionListener(this);
-						fuseSplitPanel[pos][1].add(BorderLayout.SOUTH, splitButton[pos][1]);
+//						splitButton[pos][1] = new Button("CSM");
+//						splitButton[pos][1].addActionListener(this);
+//						fuseSplitPanel[pos][1].add(BorderLayout.SOUTH, splitButton[pos][1]);
 					}else {
-						splitButton[pos][1].setVisible(true);
+//						splitButton[pos][1].setVisible(true);
 					}
 				}
 				
 				spinnerPanel[pos][0] = new Panel();
 				if(xSpinner[pos][0] == null) {
-					xSpinner[pos][0] = new JSpinner(new SpinnerNumberModel(0, -100, 100, 1));
+					xSpinner[pos][0] = new JSpinner(new SpinnerNumberModel(((MultiFileInfoVirtualStack)impAs[pos].getStack()).getdXA(), -impAs[pos].getWidth(), impAs[pos].getWidth(), 1));
 					xSpinner[pos][0].setToolTipText("Adjust Channel X Alignment ViewA");
 					xSpinner[pos][0].addChangeListener(this);
-					spinnerPanel[pos][0].add(xSpinner[pos][0]);
-					fuseSplitPanel[pos][0].add(BorderLayout.CENTER, spinnerPanel[pos][0]);
+//					spinnerPanel[pos][0].add(xSpinner[pos][0]);
+//					fuseSplitPanel[pos][0].add(BorderLayout.CENTER, spinnerPanel[pos][0]);
+					fuseSplitPanel[pos][0].add(BorderLayout.CENTER, xSpinner[pos][0]);
+
 				}else {
 					xSpinner[pos][0].setVisible(true);
+					xSpinner[pos][0].setEnabled(true);
 				}
 				if(ySpinner[pos][0] == null) {
-					ySpinner[pos][0] = new JSpinner(new SpinnerNumberModel(0, -100, 100, 1));
+					ySpinner[pos][0] = new JSpinner(new SpinnerNumberModel(((MultiFileInfoVirtualStack)impAs[pos].getStack()).getdYA(), -impAs[pos].getHeight(), impAs[pos].getHeight(), 1));
 					ySpinner[pos][0].setToolTipText("Adjust Channel Y Alignment ViewA");
 					ySpinner[pos][0].addChangeListener(this);
-					spinnerPanel[pos][0].add(ySpinner[pos][0]);
-					fuseSplitPanel[pos][0].add(BorderLayout.CENTER, spinnerPanel[pos][0]);
+//					spinnerPanel[pos][0].add(ySpinner[pos][0]);
+//					fuseSplitPanel[pos][0].add(BorderLayout.CENTER, spinnerPanel[pos][0]);
+					fuseSplitPanel[pos][0].add(BorderLayout.SOUTH, ySpinner[pos][0]);
 				}else {
 					ySpinner[pos][0].setVisible(true);
+					ySpinner[pos][0].setEnabled(true);
 				}
 
 				spinnerPanel[pos][1] = new Panel();
 				if(xSpinner[pos][1] == null) {
-					xSpinner[pos][1] = new JSpinner(new SpinnerNumberModel(0, -100, 100, 1));
+					xSpinner[pos][1] = new JSpinner(new SpinnerNumberModel(((MultiFileInfoVirtualStack)impBs[pos].getStack()).getdXB(), -impBs[pos].getWidth(), impBs[pos].getWidth(), 1));
 					xSpinner[pos][1].setToolTipText("Adjust Channel X Alignment ViewA");
 					xSpinner[pos][1].addChangeListener(this);
-					spinnerPanel[pos][1].add(xSpinner[pos][1]);
-					fuseSplitPanel[pos][1].add(BorderLayout.CENTER, spinnerPanel[pos][1]);
+//					spinnerPanel[pos][1].add(xSpinner[pos][1]);
+//					fuseSplitPanel[pos][1].add(BorderLayout.CENTER, spinnerPanel[pos][1]);
+					fuseSplitPanel[pos][1].add(BorderLayout.CENTER, xSpinner[pos][1]);
 				}else {
 					xSpinner[pos][1].setVisible(true);
+					xSpinner[pos][1].setEnabled(true);
 				}
 				if(ySpinner[pos][1] == null) {
-					ySpinner[pos][1] = new JSpinner(new SpinnerNumberModel(0, -100, 100, 1));
+					ySpinner[pos][1] = new JSpinner(new SpinnerNumberModel(((MultiFileInfoVirtualStack)impBs[pos].getStack()).getdYB(), -impBs[pos].getHeight(), impBs[pos].getHeight(), 1));
 					ySpinner[pos][1].setToolTipText("Adjust Channel Y Alignment ViewA");
 					ySpinner[pos][1].addChangeListener(this);
-					spinnerPanel[pos][1].add(ySpinner[pos][1]);
-					fuseSplitPanel[pos][1].add(BorderLayout.CENTER, spinnerPanel[pos][1]);
+//					spinnerPanel[pos][1].add(ySpinner[pos][1]);
+//					fuseSplitPanel[pos][1].add(BorderLayout.CENTER, spinnerPanel[pos][1]);
+					fuseSplitPanel[pos][1].add(BorderLayout.SOUTH, ySpinner[pos][1]);
 				}else {
 					ySpinner[pos][1].setVisible(true);
+					ySpinner[pos][1].setEnabled(true);
 				}
 
 				
@@ -4884,7 +4908,53 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 	}
 
 	public void stateChanged(ChangeEvent e) {
-		// TODO Auto-generated method stub
+		if (e.getSource() instanceof JSpinner) {
+			for (int p=0; p<pDim; p++) {
+				if ( impAs[p]!=null && impAs[p].getWindow()!=null && impAs[p].getWindow().isAncestorOf((Component)e.getSource())) {
+					if(e.getSource().equals(xSpinner[p][0])) {
+						MultiFileInfoVirtualStack.setdXA((Integer) xSpinner[p][0].getValue());
+						for (int pp=0; pp<pDim; pp++) {
+							if (xSpinner[pp][0]!=null) {
+								xSpinner[pp][0].setValue(MultiFileInfoVirtualStack.getdXA());
+								((CompositeImage)impAs[pp]).updateAndDraw();
+							}
+						}
+						break;
+					}
+					if(e.getSource().equals(ySpinner[p][0])) {
+						MultiFileInfoVirtualStack.setdYA((Integer) ySpinner[p][0].getValue());
+						for (int pp=0; pp<pDim; pp++) {
+							if (ySpinner[pp][0]!=null) {
+								ySpinner[pp][0].setValue(MultiFileInfoVirtualStack.getdYA());
+								((CompositeImage)impAs[pp]).updateAndDraw();
+							}
+						}
+						break;
+					}
+				}else if ( impBs[p]!=null && impBs[p].getWindow()!=null && impBs[p].getWindow().isAncestorOf((Component)e.getSource())) {
+					if(e.getSource().equals(xSpinner[p][1])) {
+						MultiFileInfoVirtualStack.setdXB((Integer) xSpinner[p][1].getValue());
+						for (int pp=0; pp<pDim; pp++) {
+							if (xSpinner[pp][1]!=null) {
+								xSpinner[pp][1].setValue(MultiFileInfoVirtualStack.getdXB());
+								((CompositeImage)impBs[pp]).updateAndDraw();
+							}
+						}
+						break;
+					}
+					if(e.getSource().equals(ySpinner[p][1])) {
+						MultiFileInfoVirtualStack.setdYB((Integer) ySpinner[p][1].getValue());
+						for (int pp=0; pp<pDim; pp++) {
+							if (ySpinner[pp][1]!=null) {
+								ySpinner[pp][1].setValue(MultiFileInfoVirtualStack.getdYB());
+								((CompositeImage)impBs[pp]).updateAndDraw();
+							}						
+						}
+						break;
+					}
+				}
+			}
+		}
 		
 	}
 }

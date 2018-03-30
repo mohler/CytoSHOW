@@ -46,6 +46,11 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	public int sliceNumber;
 	private boolean isViewB;
 	private boolean monitoringDecon;
+	private static int dXA= Prefs.getInt("diSPIMmonitor.dXA", 5);
+	private static int dXB= Prefs.getInt("diSPIMmonitor.dXB", 2);
+	private static int dYA= Prefs.getInt("diSPIMmonitor.dYA", 2);
+	private static int dYB= Prefs.getInt("diSPIMmonitor.dYB", 7);
+
 
 	/* Default constructor. */
 	public MultiFileInfoVirtualStack() {}
@@ -712,8 +717,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				ip.setRoi(xOri, yOri, 512, 512);
 			} else if (ip.getWidth()==1536) //Yale splitview setup
 			{
-				dX=isViewB?2:5;
-				dY=isViewB?7:2;
+				dX=isViewB?dXB:dXA;
+				dY=isViewB?dYB:dYA;
+
 				int xOri = 0+((0+(n+1)%2)*(1024));
 				int yOri = 0+((1-(n+1)%2)*(0));
 				ip.setRoi(xOri, yOri, 512, 512);
@@ -889,6 +895,42 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (fivStacks == null)
 			return null;
 		return ((FileInfoVirtualStack)fivStacks.get(number));
+	}
+
+	public static int getdXA() {
+		return dXA;
+	}
+
+	public static void setdXA(int dXA) {
+		MultiFileInfoVirtualStack.dXA = dXA;
+		Prefs.set("diSPIMmonitor.dXA", dXA);
+	}
+
+	public static int getdXB() {
+		return dXB;
+	}
+
+	public static void setdXB(int dXB) {
+		MultiFileInfoVirtualStack.dXB = dXB;
+		Prefs.set("diSPIMmonitor.dXB", dXB);
+	}
+
+	public static int getdYA() {
+		return dYA;
+	}
+
+	public static void setdYA(int dYA) {
+		MultiFileInfoVirtualStack.dYA = dYA;
+		Prefs.set("diSPIMmonitor.dYA", dYA);
+	}
+
+	public static int getdYB() {
+		return dYB;
+	}
+
+	public static void setdYB(int dYB) {
+		MultiFileInfoVirtualStack.dYB = dYB;
+		Prefs.set("diSPIMmonitor.dYB", dYB);
 	}
 
 

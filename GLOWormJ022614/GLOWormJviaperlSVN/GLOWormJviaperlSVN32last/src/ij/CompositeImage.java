@@ -272,7 +272,7 @@ public class CompositeImage extends ImagePlus {
 		}
 		//IJ.log(nChannels+" "+ch+" "+currentChannel+"  "+newChannel);
 				
-		if (getSlice()!=currentSlice || getFrame()!=currentFrame) {
+		if (true  /*getSlice()!=currentSlice || getFrame()!=currentFrame*/) { //why was this obnoxious test here?
 			currentSlice = getSlice();
 			currentFrame = getFrame();
 			int position = getStackIndex(1, currentSlice, currentFrame);
