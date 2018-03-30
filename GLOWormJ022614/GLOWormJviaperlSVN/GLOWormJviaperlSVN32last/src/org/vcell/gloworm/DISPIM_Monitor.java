@@ -605,6 +605,17 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 						impBs[pos].getOriginalFileInfo().directory = dirOrOMETiff;
 
 						tDim = Math.max(diSPIM_MM_Frames, diSPIM_MM_numTimepoints);
+						if (cDim == 4 && wavelengths == 4 && splitChannels == true && dimOrder == "xySplitCzt") {
+							cDim = 2;
+							wavelengths = 2;
+							splitChannels = true;
+							dimOrder = "xySplitSequentialCzt";
+						} else if (cDim == 2 && wavelengths == 2 && splitChannels == true && dimOrder == "xySplitSequentialCzt") {
+							cDim = 4;
+							wavelengths = 4;
+							splitChannels = true;
+							dimOrder = "xySplitCzt";
+						}
 
 						stackAs[pos] = new MultiFileInfoVirtualStack(
 								dirOrOMETiff, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
