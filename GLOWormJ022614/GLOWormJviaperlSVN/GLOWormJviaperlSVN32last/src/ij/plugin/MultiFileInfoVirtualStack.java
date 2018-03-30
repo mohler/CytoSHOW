@@ -30,8 +30,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	private String dir;
 	private int channelDirectories;
 	private String keyString = "";
-	private String dimOrder;
-	private double min;
+//	private String dimOrder;     //already present in fields for VirtualStack;
+	private double min;  
 	private double max;
 	private int largestDirectoryLength;
 	private File largestDirectoryFile;
@@ -82,7 +82,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		this.zDim = zDim;
 		this.tDim = tDim;
 		this.vDim = vDim;
-		this.dimOrder = sliceOrder;
+		dimOrder = sliceOrder;
 		fivStacks = new ArrayList<FileInfoVirtualStack>();
 
 		infoCollectorArrayList =new ArrayList<FileInfo[]>();;
@@ -498,6 +498,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				tDim = (int) gd.getNextNumber();
 				nImages = cDim*zDim*tDim;
 			} else {
+/*why like this?*/
 				this.tDim =nImages/(this.cDim*this.zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
 			}
 
@@ -511,7 +512,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			int channels = channelDirectories * internalChannels;
 			cDim = channels;
 			zDim = fivStacks.get(0).nImages/(cDim/channelDirectories);
-			tDim = fivStacks.size()/cDim;
+//			tDim = fivStacks.size()/cDim;
+			this.tDim =nImages/(this.cDim*this.zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
 		} else {
 			zDim = fivStacks.get(0).nImages;
 			nImages = /*channelDirectories**/ fivStacks.size() * zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1);
@@ -522,7 +524,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			int channels = channelDirectories * internalChannels;
 			cDim = channels;
 			zDim = fivStacks.get(0).nImages/(cDim/channelDirectories);
-			tDim = fivStacks.size()/(cDim/internalChannels);
+//			tDim = fivStacks.size()/(cDim/internalChannels);
+			this.tDim =nImages/(this.cDim*this.zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
+
 		}
 
 		String[] dirChunks = dir.split("\\"+File.separator);
@@ -532,7 +536,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 						fivImpZero.getTitle().replaceAll("\\d+\\.", "\\."), this);
 		fivImpZero.flush();
 		imp.setOpenAsHyperStack(true);			
-		int cztDims = cDim*zDim*fivStacks.size();
+//		int cztDims = cDim*zDim*fivStacks.size();
+		int cztDims = cDim*zDim*tDim;
 		int impSize = imp.getStackSize()*vDim;
 		if (cztDims!= impSize) {
 			if (cztDims > impSize) {

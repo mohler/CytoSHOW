@@ -22,7 +22,7 @@ public class VirtualStack extends ImageStack {
 	Color fillColor = Color.black;
 	private boolean burnIn = false;
 	private ImagePlus lineageMapImage;
-	private String dimOrder = "xyczt";
+	protected String dimOrder;
 
 
 
@@ -35,6 +35,7 @@ public class VirtualStack extends ImageStack {
 	/** Creates a new, empty virtual stack. */
 	public VirtualStack(int width, int height, ColorModel cm, String path, boolean emptyImage, Color fillColor) {
 		super(width, height, cm);
+		dimOrder = "xyczt";
 		this.path = path;
 		this.emptyImage = emptyImage;
 		if (fillColor != null)

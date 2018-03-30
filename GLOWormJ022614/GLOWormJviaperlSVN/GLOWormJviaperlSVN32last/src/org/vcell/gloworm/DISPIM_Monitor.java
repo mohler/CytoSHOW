@@ -4815,7 +4815,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 					int zA = impAs[pos].getSlice();
 					int tA = impAs[pos].getFrame();
 					boolean tailing = tA==impAs[pos].getNFrames();
-					tDim = listA.length;
+					tDim = impAs[pos].getNFrames();
 
 					stackAs[pos] = new MultiFileInfoVirtualStack(
 							dirOrOMETiff, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
@@ -4861,7 +4861,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 					}
 
 					tailing = tB==impBs[pos].getNFrames();
-					tDim = listA.length;
+					tDim = impBs[pos].getNFrames();
 
 					stackBs[pos] = new MultiFileInfoVirtualStack(
 							dirOrOMETiff, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
