@@ -1570,18 +1570,18 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 				if ( splitChannels = true ) {
 
 					if(splitButton[pos][0] == null) {
-//						splitButton[pos][0] = new Button("CSM");
-//						splitButton[pos][0].addActionListener(this);
-//						fuseSplitPanel[pos][0].add(BorderLayout.SOUTH, splitButton[pos][0]);
+						splitButton[pos][0] = new Button("CSM");
+						splitButton[pos][0].addActionListener(this);
+						fuseSplitPanel[pos][0].add(BorderLayout.SOUTH, splitButton[pos][0]);
 					}else {
-//						splitButton[pos][0].setVisible(true);
+						splitButton[pos][0].setVisible(true);
 					}
 					if(splitButton[pos][1] == null) {
-//						splitButton[pos][1] = new Button("CSM");
-//						splitButton[pos][1].addActionListener(this);
-//						fuseSplitPanel[pos][1].add(BorderLayout.SOUTH, splitButton[pos][1]);
+						splitButton[pos][1] = new Button("CSM");
+						splitButton[pos][1].addActionListener(this);
+						fuseSplitPanel[pos][1].add(BorderLayout.SOUTH, splitButton[pos][1]);
 					}else {
-//						splitButton[pos][1].setVisible(true);
+						splitButton[pos][1].setVisible(true);
 					}
 				}
 				
@@ -1590,10 +1590,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 					xSpinner[pos][0] = new JSpinner(new SpinnerNumberModel(((MultiFileInfoVirtualStack)impAs[pos].getStack()).getdXA(), -impAs[pos].getWidth(), impAs[pos].getWidth(), 1));
 					xSpinner[pos][0].setToolTipText("Adjust Channel X Alignment ViewA");
 					xSpinner[pos][0].addChangeListener(this);
-//					spinnerPanel[pos][0].add(xSpinner[pos][0]);
-//					fuseSplitPanel[pos][0].add(BorderLayout.CENTER, spinnerPanel[pos][0]);
-					fuseSplitPanel[pos][0].add(BorderLayout.CENTER, xSpinner[pos][0]);
-
+					spinnerPanel[pos][0].add(xSpinner[pos][0]);
+					fuseSplitPanel[pos][0].add(BorderLayout.CENTER, spinnerPanel[pos][0]);
 				}else {
 					xSpinner[pos][0].setVisible(true);
 					xSpinner[pos][0].setEnabled(true);
@@ -1602,9 +1600,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 					ySpinner[pos][0] = new JSpinner(new SpinnerNumberModel(((MultiFileInfoVirtualStack)impAs[pos].getStack()).getdYA(), -impAs[pos].getHeight(), impAs[pos].getHeight(), 1));
 					ySpinner[pos][0].setToolTipText("Adjust Channel Y Alignment ViewA");
 					ySpinner[pos][0].addChangeListener(this);
-//					spinnerPanel[pos][0].add(ySpinner[pos][0]);
-//					fuseSplitPanel[pos][0].add(BorderLayout.CENTER, spinnerPanel[pos][0]);
-					fuseSplitPanel[pos][0].add(BorderLayout.SOUTH, ySpinner[pos][0]);
+					spinnerPanel[pos][0].add(ySpinner[pos][0]);
+					fuseSplitPanel[pos][0].add(BorderLayout.CENTER, spinnerPanel[pos][0]);
 				}else {
 					ySpinner[pos][0].setVisible(true);
 					ySpinner[pos][0].setEnabled(true);
@@ -1615,9 +1612,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 					xSpinner[pos][1] = new JSpinner(new SpinnerNumberModel(((MultiFileInfoVirtualStack)impBs[pos].getStack()).getdXB(), -impBs[pos].getWidth(), impBs[pos].getWidth(), 1));
 					xSpinner[pos][1].setToolTipText("Adjust Channel X Alignment ViewA");
 					xSpinner[pos][1].addChangeListener(this);
-//					spinnerPanel[pos][1].add(xSpinner[pos][1]);
-//					fuseSplitPanel[pos][1].add(BorderLayout.CENTER, spinnerPanel[pos][1]);
-					fuseSplitPanel[pos][1].add(BorderLayout.CENTER, xSpinner[pos][1]);
+					spinnerPanel[pos][1].add(xSpinner[pos][1]);
+					fuseSplitPanel[pos][1].add(BorderLayout.CENTER, spinnerPanel[pos][1]);
 				}else {
 					xSpinner[pos][1].setVisible(true);
 					xSpinner[pos][1].setEnabled(true);
@@ -1626,9 +1622,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 					ySpinner[pos][1] = new JSpinner(new SpinnerNumberModel(((MultiFileInfoVirtualStack)impBs[pos].getStack()).getdYB(), -impBs[pos].getHeight(), impBs[pos].getHeight(), 1));
 					ySpinner[pos][1].setToolTipText("Adjust Channel Y Alignment ViewA");
 					ySpinner[pos][1].addChangeListener(this);
-//					spinnerPanel[pos][1].add(ySpinner[pos][1]);
-//					fuseSplitPanel[pos][1].add(BorderLayout.CENTER, spinnerPanel[pos][1]);
-					fuseSplitPanel[pos][1].add(BorderLayout.SOUTH, ySpinner[pos][1]);
+					spinnerPanel[pos][1].add(ySpinner[pos][1]);
+					fuseSplitPanel[pos][1].add(BorderLayout.CENTER, spinnerPanel[pos][1]);
 				}else {
 					ySpinner[pos][1].setVisible(true);
 					ySpinner[pos][1].setEnabled(true);
