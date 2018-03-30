@@ -3,6 +3,7 @@ package org.vcell.gloworm;
 import java.awt.BorderLayout;
 import java.awt.Button;
 import java.awt.Checkbox;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagLayout;
@@ -196,6 +197,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 	private MultiFileInfoVirtualStack dfProjXmfivs;
 	private MultiFileInfoVirtualStack dfProjYmfivs;
 	private boolean autodepth;
+	private Button[][] dispimToolsButton;
 	private Button[][] fuseButton;
 	private Button[][] splitButton;
 	private Checkbox[][] edgeBox;
@@ -562,7 +564,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 					cropWidthA = new double[pDim];
 					cropHeightA = new double[pDim];
 					cropWidthB = new double[pDim];
-					cropHeightB = new double[pDim];
+					cropHeightB = new double[pDim];					
+					dispimToolsButton = new Button[pDim][2];
 					fuseButton = new Button[pDim][2];
 					splitButton = new Button[pDim][2];
 					spinnerPanel = new Panel[pDim][2];
@@ -943,6 +946,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 				cropHeightA = new double[pDim];
 				cropWidthB = new double[pDim];
 				cropHeightB = new double[pDim];
+				dispimToolsButton = new Button[pDim][2];
 				fuseButton = new Button[pDim][2];
 				splitButton = new Button[pDim][2];
 				spinnerPanel = new Panel[pDim][2];
@@ -1161,6 +1165,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 				impBs[0].setTitle("SPIMB: " + impBs[0].getTitle());
 
 				oldLength = newLength;
+				dispimToolsButton = new Button[pDim][2];
 				fuseButton = new Button[pDim][2];
 				splitButton = new Button[pDim][2];
 				spinnerPanel = new Panel[pDim][2];
@@ -1564,19 +1569,39 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 					fuseSplitPanel[pos][1] = new Panel(new BorderLayout());					
 				}
 
+				if(dispimToolsButton[pos][0] == null) {
+					dispimToolsButton[pos][0] = new Button("diSPIM");
+					dispimToolsButton[pos][0].addActionListener(this);
+					fuseSplitPanel[pos][0].add(BorderLayout.WEST, dispimToolsButton[pos][0]);
+					dispimToolsButton[pos][0].setVisible(true);
+				}else {
+					dispimToolsButton[pos][0].setVisible(true);
+				}
+
+				if(dispimToolsButton[pos][1] == null) {
+					dispimToolsButton[pos][1] = new Button("diSPIM");
+					dispimToolsButton[pos][1].addActionListener(this);
+					fuseSplitPanel[pos][1].add(BorderLayout.WEST, dispimToolsButton[pos][1]);
+					dispimToolsButton[pos][1].setVisible(true);
+				}else {
+					dispimToolsButton[pos][1].setVisible(true);
+				}
+
 				if(fuseButton[pos][0] == null) {
 					fuseButton[pos][0] = new Button("Fuse");
 					fuseButton[pos][0].addActionListener(this);
 					fuseSplitPanel[pos][0].add(BorderLayout.NORTH, fuseButton[pos][0]);
+					fuseButton[pos][0].setVisible(false);
 				}else {
-					fuseButton[pos][0].setVisible(true);
+					fuseButton[pos][0].setVisible(false);
 				}
 				if(fuseButton[pos][1] == null) {
 					fuseButton[pos][1] = new Button("Fuse");
 					fuseButton[pos][1].addActionListener(this);
 					fuseSplitPanel[pos][1].add(BorderLayout.NORTH, fuseButton[pos][1]);
+					fuseButton[pos][1].setVisible(false);
 				}else {
-					fuseButton[pos][1].setVisible(true);
+					fuseButton[pos][1].setVisible(false);
 				}
 				if ( splitChannels = true ) {
 
@@ -1584,65 +1609,68 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 						splitButton[pos][0] = new Button("CSM");
 						splitButton[pos][0].addActionListener(this);
 						fuseSplitPanel[pos][0].add(BorderLayout.SOUTH, splitButton[pos][0]);
+						splitButton[pos][0].setVisible(false);
 					}else {
-						splitButton[pos][0].setVisible(true);
+						splitButton[pos][0].setVisible(false);
 					}
 					if(splitButton[pos][1] == null) {
 						splitButton[pos][1] = new Button("CSM");
 						splitButton[pos][1].addActionListener(this);
 						fuseSplitPanel[pos][1].add(BorderLayout.SOUTH, splitButton[pos][1]);
+						splitButton[pos][1].setVisible(false);
 					}else {
-						splitButton[pos][1].setVisible(true);
+						splitButton[pos][1].setVisible(false);
+					}
+					
+					spinnerPanel[pos][0] = new Panel();
+					if(xSpinner[pos][0] == null) {
+						xSpinner[pos][0] = new JSpinner(new SpinnerNumberModel(((MultiFileInfoVirtualStack)impAs[pos].getStack()).getdXA(), -impAs[pos].getWidth(), impAs[pos].getWidth(), 1));
+						xSpinner[pos][0].setToolTipText("Adjust Channel X Alignment ViewA");
+						xSpinner[pos][0].addChangeListener(this);
+						spinnerPanel[pos][0].add(xSpinner[pos][0]);
+						fuseSplitPanel[pos][0].add(BorderLayout.CENTER, spinnerPanel[pos][0]);
+						xSpinner[pos][0].setVisible(false);
+					}else {
+						xSpinner[pos][0].setVisible(false);
+					}
+					if(ySpinner[pos][0] == null) {
+						ySpinner[pos][0] = new JSpinner(new SpinnerNumberModel(((MultiFileInfoVirtualStack)impAs[pos].getStack()).getdYA(), -impAs[pos].getHeight(), impAs[pos].getHeight(), 1));
+						ySpinner[pos][0].setToolTipText("Adjust Channel Y Alignment ViewA");
+						ySpinner[pos][0].addChangeListener(this);
+						spinnerPanel[pos][0].add(ySpinner[pos][0]);
+						fuseSplitPanel[pos][0].add(BorderLayout.CENTER, spinnerPanel[pos][0]);
+						ySpinner[pos][0].setVisible(false);
+					}else {
+						ySpinner[pos][0].setVisible(false);
+					}
+
+					spinnerPanel[pos][1] = new Panel();
+					if(xSpinner[pos][1] == null) {
+						xSpinner[pos][1] = new JSpinner(new SpinnerNumberModel(((MultiFileInfoVirtualStack)impBs[pos].getStack()).getdXB(), -impBs[pos].getWidth(), impBs[pos].getWidth(), 1));
+						xSpinner[pos][1].setToolTipText("Adjust Channel X Alignment ViewA");
+						xSpinner[pos][1].addChangeListener(this);
+						spinnerPanel[pos][1].add(xSpinner[pos][1]);
+						fuseSplitPanel[pos][1].add(BorderLayout.CENTER, spinnerPanel[pos][1]);
+						xSpinner[pos][1].setVisible(false);
+					}else {
+						xSpinner[pos][1].setVisible(false);
+					}
+					if(ySpinner[pos][1] == null) {
+						ySpinner[pos][1] = new JSpinner(new SpinnerNumberModel(((MultiFileInfoVirtualStack)impBs[pos].getStack()).getdYB(), -impBs[pos].getHeight(), impBs[pos].getHeight(), 1));
+						ySpinner[pos][1].setToolTipText("Adjust Channel Y Alignment ViewA");
+						ySpinner[pos][1].addChangeListener(this);
+						spinnerPanel[pos][1].add(ySpinner[pos][1]);
+						fuseSplitPanel[pos][1].add(BorderLayout.CENTER, spinnerPanel[pos][1]);
+						ySpinner[pos][1].setVisible(false);
+					}else {
+						ySpinner[pos][1].setVisible(false);
 					}
 				}
 				
-				spinnerPanel[pos][0] = new Panel();
-				if(xSpinner[pos][0] == null) {
-					xSpinner[pos][0] = new JSpinner(new SpinnerNumberModel(((MultiFileInfoVirtualStack)impAs[pos].getStack()).getdXA(), -impAs[pos].getWidth(), impAs[pos].getWidth(), 1));
-					xSpinner[pos][0].setToolTipText("Adjust Channel X Alignment ViewA");
-					xSpinner[pos][0].addChangeListener(this);
-					spinnerPanel[pos][0].add(xSpinner[pos][0]);
-					fuseSplitPanel[pos][0].add(BorderLayout.CENTER, spinnerPanel[pos][0]);
-				}else {
-					xSpinner[pos][0].setVisible(true);
-					xSpinner[pos][0].setEnabled(true);
-				}
-				if(ySpinner[pos][0] == null) {
-					ySpinner[pos][0] = new JSpinner(new SpinnerNumberModel(((MultiFileInfoVirtualStack)impAs[pos].getStack()).getdYA(), -impAs[pos].getHeight(), impAs[pos].getHeight(), 1));
-					ySpinner[pos][0].setToolTipText("Adjust Channel Y Alignment ViewA");
-					ySpinner[pos][0].addChangeListener(this);
-					spinnerPanel[pos][0].add(ySpinner[pos][0]);
-					fuseSplitPanel[pos][0].add(BorderLayout.CENTER, spinnerPanel[pos][0]);
-				}else {
-					ySpinner[pos][0].setVisible(true);
-					ySpinner[pos][0].setEnabled(true);
-				}
-
-				spinnerPanel[pos][1] = new Panel();
-				if(xSpinner[pos][1] == null) {
-					xSpinner[pos][1] = new JSpinner(new SpinnerNumberModel(((MultiFileInfoVirtualStack)impBs[pos].getStack()).getdXB(), -impBs[pos].getWidth(), impBs[pos].getWidth(), 1));
-					xSpinner[pos][1].setToolTipText("Adjust Channel X Alignment ViewA");
-					xSpinner[pos][1].addChangeListener(this);
-					spinnerPanel[pos][1].add(xSpinner[pos][1]);
-					fuseSplitPanel[pos][1].add(BorderLayout.CENTER, spinnerPanel[pos][1]);
-				}else {
-					xSpinner[pos][1].setVisible(true);
-					xSpinner[pos][1].setEnabled(true);
-				}
-				if(ySpinner[pos][1] == null) {
-					ySpinner[pos][1] = new JSpinner(new SpinnerNumberModel(((MultiFileInfoVirtualStack)impBs[pos].getStack()).getdYB(), -impBs[pos].getHeight(), impBs[pos].getHeight(), 1));
-					ySpinner[pos][1].setToolTipText("Adjust Channel Y Alignment ViewA");
-					ySpinner[pos][1].addChangeListener(this);
-					spinnerPanel[pos][1].add(ySpinner[pos][1]);
-					fuseSplitPanel[pos][1].add(BorderLayout.CENTER, spinnerPanel[pos][1]);
-				}else {
-					ySpinner[pos][1].setVisible(true);
-					ySpinner[pos][1].setEnabled(true);
-				}
-
-				
+				fuseSplitPanel[pos][0].setVisible(true);
 				impAs[pos].getWindow().viewButtonPanel.add(fuseSplitPanel[pos][0]);
 				impAs[pos].getWindow().viewButtonPanel.validate();
+				fuseSplitPanel[pos][1].setVisible(true);
 				impBs[pos].getWindow().viewButtonPanel.add(fuseSplitPanel[pos][1]);
 				impBs[pos].getWindow().viewButtonPanel.validate();
 
@@ -4783,6 +4811,31 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 		if (e.getActionCommand() == "Fuse") {
 			rerunArg = (dirOrOMETiff+"|"+"rerunWithDecon"+"|"+"newMM");
 			monitoring = false;
+		}
+		if (e.getActionCommand() == "diSPIM") {
+			
+			for (int pos=0; pos<pDim; pos++) {
+				if (e.getSource() == dispimToolsButton[pos][0]) {
+					boolean shown = fuseButton[pos][0].isVisible();
+					dispimToolsButton[pos][0].setBackground(!shown?Color.yellow:null);
+					fuseButton[pos][0].setVisible(!shown);
+					splitButton[pos][0].setVisible(!shown);
+					xSpinner[pos][0].setVisible(!shown);
+					ySpinner[pos][0].setVisible(!shown);
+					impAs[pos].getWindow().viewButtonPanel.validate();
+
+				}
+				if (e.getSource() == dispimToolsButton[pos][1]) {
+					boolean shown = fuseButton[pos][1].isVisible();
+					dispimToolsButton[pos][1].setBackground(!shown?Color.yellow:null);
+					fuseButton[pos][1].setVisible(!shown);
+					splitButton[pos][1].setVisible(!shown);
+					xSpinner[pos][1].setVisible(!shown);
+					ySpinner[pos][1].setVisible(!shown);
+					impBs[pos].getWindow().viewButtonPanel.validate();
+					
+				}
+			}
 		}
 		if (e.getActionCommand() == "CSM") {
 			if (cDim == 4 && wavelengths == 4 && splitChannels == true && dimOrder == "xySplitCzt") {
