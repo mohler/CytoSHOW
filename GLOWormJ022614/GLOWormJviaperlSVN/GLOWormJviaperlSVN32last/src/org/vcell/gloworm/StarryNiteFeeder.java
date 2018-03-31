@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -99,6 +100,7 @@ public class StarryNiteFeeder implements PlugIn {
 			int stackHeight=0;
 
 			for (int f = 1; f <= endPoint; f++) {
+				boolean paramsWritten = false;
 				if (!(new File(outDir+subdir+"/aaa"+f+".tif").canRead())) {
 					
 					ImageStack stack1 = new ImageStack((int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
@@ -175,6 +177,17 @@ public class StarryNiteFeeder implements PlugIn {
 					ImagePlus frameRedImp = new ImagePlus("Ch2hisSubCrop",stack2);
 					stackWidth = frameRedImp.getWidth();
 					stackHeight = frameRedImp.getHeight();
+					if (!paramsWritten) {
+						IJ.saveString(IJ.openAsString(baseParameterFilePath).replaceAll("(.*end_time=)\\d+(;.*)", "$1"+f+"$2")
+							.replaceAll("(.*ROI=)true(;.*)", "$1false$2")
+							.replaceAll("(.*ROI.min=)\\d+(;.*)", "$10$2")
+							.replaceAll("(.*ROIxmax=)\\d+(;.*)", "$1"+stackWidth+"$2")
+							.replaceAll("(.*ROIymax=)\\d+(;.*)", "$1"+stackHeight+"$2")
+							.replaceAll("(.*)ROIpoints=\\[\\d+.*\\];(.*)", "$1"+""+"$2")
+							, impParameterPath);
+						paramsWritten = true;
+					}
+					
 					ImagePlus frameGreenImp = new ImagePlus("Ch1hisSubCrop",stack1);
 
 					// Red channel:
@@ -210,12 +223,6 @@ public class StarryNiteFeeder implements PlugIn {
 			}
 			imp.setPosition(wasC, wasZ, wasT);
 			imp.setRoi(theROI);
-			IJ.saveString(IJ.openAsString(baseParameterFilePath).replaceAll("(.*end_time=)\\d+(;.*)", "$1"+endPoint+"$2")
-					.replaceAll("(.*ROI=)true(;.*)", "$1false$2")
-					.replaceAll("(.*ROI.min=)\\d+(;.*)", "$10$2")
-					.replaceAll("(.*ROIxmax=)\\d+(;.*)", "$1"+stackWidth+"$2")
-					.replaceAll("(.*ROIymax=)\\d+(;.*)", "$1"+stackHeight+"$2")
-					, impParameterPath);
 
 			Thread linThread = new Thread(new Runnable() {
 				public void run() {
@@ -232,14 +239,16 @@ public class StarryNiteFeeder implements PlugIn {
 					}
 					Process linMeasure = null;
 					try {
-						linMeasure=Runtime.getRuntime().exec(new String[]{"java", "-Xmx500m", "-cp", "C:\\Users\\SPIM\\Desktop\\TestLineaging\\Bill_distributionCopy\\source_code\\distribution_code\\acebatch2.jar", "Measure1", (outDir+subdir).replace("\\", "\\\\")+"\\\\aaa__edited.xml"});
+						linMeasure=Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", "java", "-Xmx500m", "-cp", "C:\\Users\\SPIM\\Desktop\\TestLineaging\\Bill_distributionCopy\\source_code\\distribution_code\\acebatch2.jar", "Measure1", (outDir+subdir).replace("\\", "\\\\")+"\\\\aaa__edited.xml"});
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 					if(linMeasure!=null) {
 						try {
+							IJ.log("Measuring for AuxInfo "+(new Date()).getTime());
 							linMeasure.waitFor();
+							IJ.log("Measuring Complete "+(new Date()).getTime());
 						} catch (InterruptedException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -247,14 +256,16 @@ public class StarryNiteFeeder implements PlugIn {
 					}
 					Process linGreenExtract = null;
 					try {
-						linGreenExtract=Runtime.getRuntime().exec(new String[]{"java", "-cp", "C:\\Users\\SPIM\\Desktop\\TestLineaging\\Bill_distributionCopy\\source_code\\distribution_code\\acebatch2.jar", "SixteenBitGreenExtractor1", (outDir+subdir).replace("\\", "\\\\")+"\\\\aaa__edited.xml", "400"});
+						linGreenExtract=Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", "java", "-cp", "C:\\Users\\SPIM\\Desktop\\TestLineaging\\Bill_distributionCopy\\source_code\\distribution_code\\acebatch2.jar", "SixteenBitGreenExtractor1", (outDir+subdir).replace("\\", "\\\\")+"\\\\aaa__edited.xml", "400"});
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 					if(linGreenExtract!=null) {
 						try {
+							IJ.log("Measuring Green channel "+(new Date()).getTime());
 							linGreenExtract.waitFor();
+							IJ.log("Measuring Green channel Complete "+(new Date()).getTime());
 						} catch (InterruptedException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
