@@ -81,9 +81,9 @@ public class StarryNiteFeeder implements PlugIn {
 				angle = imp.getRoi().getBounds().getHeight()>imp.getRoi().getBounds().getWidth()?90:0;
 			}
 
-			if (ypoints[0]>ypoints[1]){
-				angle = 180+ angle;
-			}
+//			if (ypoints[0]>ypoints[1]){
+//				angle = 180+ angle;
+//			}
 
 			int wasC = imp.getChannel();
 			int wasZ = imp.getSlice();

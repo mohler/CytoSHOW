@@ -185,6 +185,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 	private String[] diSPIM_MM_ChContrastMaxStrings;
 	private String dimOrder;
 	private WG_Uploader wgUploadJob;
+	private boolean autoUpload;
 	private boolean uploadPending;
 	private boolean uploadRunning;
 	private int iterations;
@@ -1173,22 +1174,25 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 			IJ.log("" + WindowManager.getImageCount());
 
 			//NEED TO FIGURE OUT FOR DECON LAUNNCH FROM NEW BUTTON ON WINDOW!
+			autoUpload = IJ.showMessageWithCancel("AutoUpload Data to WormGUIDES Server?", "Click to have CytoSHOW backup these data to the WormGUIDES server.");
 
-
-			Thread uploadThread = new Thread(new Runnable() {
-				public void run() {
-					if (wgUploadJob == null) 
-						wgUploadJob = new WG_Uploader();
-					if (wgUploadJob.getNewUploadProcess() != null)
-						uploadRunning = wgUploadJob.getNewUploadProcess().isAlive();
-					if(!uploadRunning)	{
-						wgUploadJob = new WG_Uploader();
-						wgUploadJob.run(dirOrOMETiffFinal);
+			if (autoUpload) {
+				Thread uploadThread = new Thread(new Runnable() {
+					public void run() {
+						wgUploadJob = WG_Uploader.getInstance();
+						if (wgUploadJob.getNewUploadProcess() != null)
+							uploadRunning = wgUploadJob.getNewUploadProcess().isAlive();
+						if(!uploadRunning)	{
+							wgUploadJob.run(dirOrOMETiffFinal);
+						} else {
+							String queuePath = IJ.getDirectory("home")+File.separator+"CytoSHOWCacheFiles"+File.separator+"WG_UploadQueue.txt";
+							IJ.append(dirOrOMETiffFinal, queuePath);
+						}
 					}
-				}
-			});
-			uploadThread.start();
-
+				});
+				uploadThread.start();
+			}
+			
 		} else {
 
 			SelectKeyChannelDialog d = new SelectKeyChannelDialog(
@@ -2845,31 +2849,24 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 			}
 
 
-			//				uploadRunning = wgUploadJob.getNewUploadProcess().isAlive();
-			//				if(!uploadRunning && uploadPending)	{
-			//					uploadPending = false;
-			//					wgUploadJob = new WG_Uploader();
-			//					wgUploadJob.run(dirOrOMETiff);
-			//				}
-
 			String dirOrOMETiffDirectory = dirOrOMETiff;
 			if (!new File(dirOrOMETiff).isDirectory())
 				dirOrOMETiffDirectory = new File(dirOrOMETiff).getParent();
 			final String dirOrOMETiffFinal = dirOrOMETiffDirectory;
 
-			//				Thread uploadWhileMonitoringThread = new Thread(new Runnable() {
-			//					public void run() {
-			//						if (wgUploadJob == null) 
-			//							wgUploadJob = new WG_Uploader();
-			//						if (wgUploadJob.getNewUploadProcess() != null)
-			//							uploadRunning = wgUploadJob.getNewUploadProcess().isAlive();
-			//						if(!uploadRunning)	{
-			//							wgUploadJob = new WG_Uploader();
-			//							wgUploadJob.run(dirOrOMETiffFinal);
-			//						}
-			//					}
-			//				});
-			//				uploadWhileMonitoringThread.start();
+			if (autoUpload) {
+				if (wgUploadJob == null) 
+					wgUploadJob = WG_Uploader.getInstance();
+				if (wgUploadJob.getNewUploadProcess() != null)
+					uploadRunning = wgUploadJob.getNewUploadProcess().isAlive();
+				if(!uploadRunning)	{
+					wgUploadJob.run(dirOrOMETiffFinal);
+				} else {
+					String queuePath = IJ.getDirectory("home")+File.separator+"CytoSHOWCacheFiles"+File.separator+"WG_UploadQueue.txt";
+					IJ.append(dirOrOMETiffFinal, queuePath);
+
+				}
+			}
 
 
 			if (doGPUdecon) {			
@@ -4311,19 +4308,25 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 				dirOrOMETiffDirectory = new File(dirOrOMETiff).getParent();
 			final String dirOrOMETiffFinal = dirOrOMETiffDirectory;
 
-			//				Thread uploadDeconPrjThread = new Thread(new Runnable() {
-			//					public void run() {
-			//						if (wgUploadJob == null) 
-			//							wgUploadJob = new WG_Uploader();
-			//						if (wgUploadJob.getNewUploadProcess() != null)
-			//							uploadRunning = wgUploadJob.getNewUploadProcess().isAlive();
-			//						if(!uploadRunning)	{
-			//							wgUploadJob = new WG_Uploader();
-			//							wgUploadJob.run(dirOrOMETiffFinal);
-			//						}
-			//					}
-			//				});
-			//				uploadDeconPrjThread.start();
+
+			if (autoUpload) {
+				Thread uploadDeconPrjThread = new Thread(new Runnable() {
+					public void run() {
+						if (wgUploadJob == null) 
+							wgUploadJob = new WG_Uploader();
+						if (wgUploadJob.getNewUploadProcess() != null)
+							uploadRunning = wgUploadJob.getNewUploadProcess().isAlive();
+						if(!uploadRunning)	{
+							wgUploadJob.run(dirOrOMETiffFinal);
+						} else {
+							String queuePath = IJ.getDirectory("home")+File.separator+"CytoSHOWCacheFiles"+File.separator+"WG_UploadQueue.txt";
+							IJ.append(dirOrOMETiffFinal, queuePath);
+
+						}
+					}
+				});
+				uploadDeconPrjThread.start();
+			}
 
 
 		}

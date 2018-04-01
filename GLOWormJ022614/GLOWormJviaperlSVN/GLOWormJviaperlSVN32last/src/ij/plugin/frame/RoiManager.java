@@ -134,6 +134,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	private boolean busy;
 	private Checkbox hyperstackCheckbox;
 	private boolean isEmbryonic = false;
+	private String recentName = "";
 
 
 
@@ -535,7 +536,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			String command = label;
 			if (command.equals("Add\n(ctrl-t)")) {
-				String newName = promptForName("name");
+				String newName = "";
+				if (getSelectedRoisAsArray().length>0) {
+					String selName = getSelectedRoisAsArray()[0].getName();
+					newName = promptForName(selName);
+				} else {
+					newName = promptForName(recentName);
+				}
 				Color existingColor = null;
 				Enumeration<Roi> roisElements = rois.elements();
 				while (roisElements.hasMoreElements()) {
@@ -653,7 +660,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				ArrayList<String> rootNames_rootFrames = new ArrayList<String>();
 				ArrayList<String> rootNames = new ArrayList<String>();
 
-				String newName = promptForName("name");
+				String newName = "";
+				if (getSelectedRoisAsArray().length>0) {
+					String selName = getSelectedRoisAsArray()[0].getName();
+					newName = promptForName(selName);
+				} else {
+					newName = promptForName(recentName);
+				}
 				Color existingColor = null;
 				Roi[] rois = getFullRoisAsArray();
 				int fraa = rois.length;
@@ -1137,6 +1150,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (true/*name == null*/)
 			if (!(textNamingField.getText().isEmpty()  || textNamingField.getText().contains("Name..."))) {
 				roi.setName(textNamingField.getText());
+				recentName = (textNamingField.getText());
 			}
 		if (isStandardName(name))
 			name = null;
@@ -1167,6 +1181,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		listModel.addElement(label);
 		fullListModel.addElement(label);
 		roi.setName(label);
+		recentName = (label);
 		if (imp != null)
 			roi.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame());
 		roiCopy = (Roi)roi.clone();
@@ -1314,6 +1329,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		listModel.addElement(label);
 		fullListModel.addElement(label);
 		roi.setName(label);
+		recentName = (label);
 		roiCopy = (Roi)roi.clone();
 		if (imp!=null) {
 			Calibration cal = imp.getCalibration();
@@ -1491,6 +1507,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			rename(label, null, true);
 
 			roi.setName(label);
+			recentName = label;
 			//			roi.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame());
 			//			roiCopy = (Roi)roi.clone();
 
@@ -1550,7 +1567,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				if (roi instanceof TextRoi)
 					name2 = promptForName(((TextRoi)roi).getText().replace("\n","|"));
 				else if (name.split("\"").length > 1)
-					name2 = promptForName(name.split("\"")[1]);
+					name2 = promptForName(name.split("\"")[1]).trim();
 				else
 					name2 = promptForName(name);
 			}
@@ -1575,6 +1592,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			label = getUniqueName(label);
 
 			roi.setName(label);
+			recentName = label;
 			rois.put(label, roi);
 			setUpRoisByNameAndNumbers(roi);
 
@@ -2254,6 +2272,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		rootNameRois.add(roi);
 		
 		roi.setName(newName);
+		recentName = newName;
 		listModel.setElementAt(newName, indexes[0]);
 		fullListModel.setElementAt(newName, indexes[0]);
 		RoiEncoder re = new RoiEncoder(dir+name2);
@@ -2980,6 +2999,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			Roi roi = (Roi)rois.get(name);
 			rois.remove(name);
 			roi.setName(name2);
+			recentName = name2;
 			roi.setPosition(0,0,0);
 			rois.put(name2, roi);
 			setUpRoisByNameAndNumbers(roi);		}

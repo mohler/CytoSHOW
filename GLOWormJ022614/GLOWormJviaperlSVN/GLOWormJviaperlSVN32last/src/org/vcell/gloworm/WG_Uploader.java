@@ -32,9 +32,11 @@ import org.apache.commons.net.ftp.FTPReply;
 
 public class WG_Uploader implements PlugIn {
 	
-	private ProcessBuilder jvm;
-	private  Process newUploadProcess;
-	
+	private static ProcessBuilder jvm;
+	private  static Process newUploadProcess;
+	private static ArrayList<String> iterativeDirPaths;
+	private static WG_Uploader instance;
+	private TextWindow tw;
 	public ProcessBuilder getJvm() {
 		return jvm;
 	}
@@ -42,7 +44,11 @@ public class WG_Uploader implements PlugIn {
 	public void run(String arg) {
 		if (arg == null || arg == "")
 			arg = (new DirectoryChooser("Upload Folder Contents")).getDirectory();
-		spawnNewUploadProcess(arg);
+		if (jvm == null) {
+			spawnNewUploadProcess(arg);
+		} else {
+			appendPathToCurrentUpload(arg);
+		}
 		
 	}
 
@@ -53,137 +59,158 @@ public class WG_Uploader implements PlugIn {
 	public WG_Uploader(String masterPath) {
 		if (masterPath == null)
 			return;
-
-		TextWindow tw = new TextWindow("WG_upload","","",400,80) {
-			 public void close() {
-				 if (!IJ.showMessageWithCancel("Finish this WG_upload job??", "Click Cancel to end this upload. Click OK to continue uploading.")) {
-					 newUploadProcess = null;
-					 System.exit(0);
-				 }
-			 }
-		};
+		if (tw == null) {
+			tw = new TextWindow("WG_upload","","",400,80) {
+				public void close() {
+					if (!IJ.showMessageWithCancel("Finish this WG_upload job??", "Click Cancel to end this upload. Click OK to continue uploading.")) {
+						newUploadProcess = null;
+						System.exit(0);
+					}
+				}
+			};
+		}
 		tw.setVisible(true);
 		tw.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		tw.setExtendedState(JFrame.ICONIFIED);
-		ArrayList<String> iterativeDirPaths = new ArrayList<String>();
-		iterativeDirPaths.add(masterPath);
+		iterativeDirPaths = new ArrayList<String>();
+//		iterativeDirPaths.add(masterPath);
+		String queuePath = IJ.getDirectory("home")+File.separator+"CytoSHOWCacheFiles"+File.separator+"WG_UploadQueue.txt";
+		IJ.append(masterPath, queuePath);
 		int increment = 0;
+	
 		int alSize = iterativeDirPaths.size();
-		while (increment < alSize) {
-			for (int i=increment;i<alSize;i++) {
-				String iPath = iterativeDirPaths.get(i);
-				String[] localDirFileNames = (new File(iPath)).list();
-				increment++;
-				for (String fileName:localDirFileNames) {
-					if ((new File(iPath+fileName)).isDirectory()) {
-						if (!iterativeDirPaths.contains(iPath+fileName+File.separator))
-							iterativeDirPaths.add(iPath+fileName+File.separator);
-					}
-				}
+		
+		while (true) {
+			
+			String queuedUploadPathString  = IJ.openAsString(queuePath);
+			while (queuedUploadPathString.trim()=="") {
+				queuedUploadPathString  = IJ.openAsString(queuePath);
+				IJ.wait(10000);
 			}
-			alSize = iterativeDirPaths.size();
-		}
-		String uniqueClientIdentifier;
-		try {
-			uniqueClientIdentifier = InetAddress.getLocalHost().getHostName() +"_"+ GetNetworkAddress.GetAddress("mac");
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			uniqueClientIdentifier = GetNetworkAddress.GetAddress("mac");
-		}
 
-		FTPClient ftpc = new FTPClient();
-		ftpc.setBufferSize(1024000);
-		try {
-			ftpc.connect("155.37.253.201");
-			int reply = ftpc.getReplyCode();
+			String[] queuedUploadPaths = queuedUploadPathString.split("\\n");
+			for (String qup:queuedUploadPaths ) {
+				iterativeDirPaths.add(qup);
+			}
 
-			if(!FTPReply.isPositiveCompletion(reply)) {
-				ftpc.disconnect();
-				IJ.log("FTP server refused connection.");
-			} else {
-//				uniqueClientIdentifier = ftpc.getLocalAddress().toString();
-
-				ftpc.enterLocalPassiveMode();
-				ftpc.login("glowormguest", "GLOWorm");
-				ftpc.makeDirectory("WormguidesUploads");
-				ftpc.changeWorkingDirectory("/WormguidesUploads");
-
-				ftpc.makeDirectory("/WormguidesUploads/"+uniqueClientIdentifier);
-				for (String path:iterativeDirPaths) {
-					ftpc.changeWorkingDirectory("/WormguidesUploads/"+uniqueClientIdentifier);
-					String[] pathChunks = path.replace(":","").split("\\"+File.separator);
-					for (String chunk:pathChunks) {
-						if (!chunk.equals("")) {
-							ftpc.makeDirectory(chunk);
-							ftpc.changeWorkingDirectory(chunk);
+			while (increment < alSize) {
+				for (int i=increment;i<alSize;i++) {
+					String iPath = iterativeDirPaths.get(i);
+					String[] localDirFileNames = (new File(iPath)).list();
+					increment++;
+					for (String fileName:localDirFileNames) {
+						if ((new File(iPath+fileName)).isDirectory()) {
+							if (!iterativeDirPaths.contains(iPath+fileName+File.separator))
+								iterativeDirPaths.add(iPath+fileName+File.separator);
 						}
 					}
-					String[] localDirFileNames = (new File(path)).list();
-					String[] remoteFileNames = ftpc.listNames();
-					for (String fileName:localDirFileNames) {
-						boolean alreadyDone= false;
-						File file = new File(path +File.separator +fileName);
-						Date fd = new Date(file.lastModified());
-						String dateTouchString = 20
-								+ IJ.pad(fd.getYear()-100, 2) 
-								+ IJ.pad(fd.getMonth()+1, 2)
-								+ IJ.pad(fd.getDate(), 2)
-								+ IJ.pad(fd.getHours(), 2)
-								+ IJ.pad(fd.getMinutes(), 2)
-								+ "."
-								+ IJ.pad(fd.getSeconds(), 2);
-						if (remoteFileNames != null) {
-							for (String remoteFileName:remoteFileNames) {
-								if (fileName.equals(remoteFileName)
-										|| remoteFileName.equals(fileName+"_"+dateTouchString)) {
-									alreadyDone = true;
-									IJ.append((new Date()).toString()+" "+path+File.separator+fileName+/*"_"+dateTouchString+*/" already backed up.", IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+"WG_UploadLog.log");
-									tw.append((new Date()).toString()+" "+path+File.separator+fileName+/*"_"+dateTouchString+*/" already backed up.");
-									break;
-								}
+				}
+				alSize = iterativeDirPaths.size();
+			}
+			IJ.saveString(IJ.getDirectory("home")+File.separator+"CytoSHOWCacheFiles"+File.separator+"WG_UploadQueue.txt", masterPath);
+			String uniqueClientIdentifier;
+			try {
+				uniqueClientIdentifier = InetAddress.getLocalHost().getHostName() +"_"+ GetNetworkAddress.GetAddress("mac");
+			} catch (UnknownHostException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				uniqueClientIdentifier = GetNetworkAddress.GetAddress("mac");
+			}
+
+			FTPClient ftpc = new FTPClient();
+			ftpc.setBufferSize(1024000);
+			try {
+				ftpc.connect("155.37.253.201");
+				int reply = ftpc.getReplyCode();
+
+				if(!FTPReply.isPositiveCompletion(reply)) {
+					ftpc.disconnect();
+					IJ.log("FTP server refused connection.");
+				} else {
+					//				uniqueClientIdentifier = ftpc.getLocalAddress().toString();
+
+					ftpc.enterLocalPassiveMode();
+					ftpc.login("glowormguest", "GLOWorm");
+					ftpc.makeDirectory("WormguidesUploads");
+					ftpc.changeWorkingDirectory("/WormguidesUploads");
+
+					ftpc.makeDirectory("/WormguidesUploads/"+uniqueClientIdentifier);
+					for (String path:iterativeDirPaths) {
+						ftpc.changeWorkingDirectory("/WormguidesUploads/"+uniqueClientIdentifier);
+						String[] pathChunks = path.replace(":","").split("\\"+File.separator);
+						for (String chunk:pathChunks) {
+							if (!chunk.equals("")) {
+								ftpc.makeDirectory(chunk);
+								ftpc.changeWorkingDirectory(chunk);
 							}
 						}
-						if (!file.isDirectory() && !alreadyDone) {
-							FileInputStream fis = new FileInputStream(path +File.separator +fileName);
-							ftpc.setFileType(FTPClient.BINARY_FILE_TYPE);
-							tw.append((new Date()).toString()+" "+path+File.separator+fileName+/*"_"+dateTouchString+*/" starting backup");
-							ftpc.enterLocalPassiveMode();
-//							ftpc.enterRemotePassiveMode();
-//							ftpc.enterLocalActiveMode();
-							ftpc.storeFile(fileName+"_" + dateTouchString+".tmp", fis);
-							
-							fis.close();
-							ftpc.rename(fileName+"_" + dateTouchString+".tmp", fileName+"_" + dateTouchString);
-							IJ.append((new Date()).toString()+" "+path+File.separator+fileName+/*"_"+dateTouchString+*/" newly backed up", IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+"WG_UploadLog.log");
-							tw.append((new Date()).toString()+" "+path+File.separator+fileName+/*"_"+dateTouchString+*/" newly backed up");
+						String[] localDirFileNames = (new File(path)).list();
+						String[] remoteFileNames = ftpc.listNames();
+						for (String fileName:localDirFileNames) {
+							boolean alreadyDone= false;
+							File file = new File(path +File.separator +fileName);
+							Date fd = new Date(file.lastModified());
+							String dateTouchString = 20
+									+ IJ.pad(fd.getYear()-100, 2) 
+									+ IJ.pad(fd.getMonth()+1, 2)
+									+ IJ.pad(fd.getDate(), 2)
+									+ IJ.pad(fd.getHours(), 2)
+									+ IJ.pad(fd.getMinutes(), 2)
+									+ "."
+									+ IJ.pad(fd.getSeconds(), 2);
+							if (remoteFileNames != null) {
+								for (String remoteFileName:remoteFileNames) {
+									if (fileName.equals(remoteFileName)
+											|| remoteFileName.equals(fileName+"_"+dateTouchString)) {
+										alreadyDone = true;
+										IJ.append((new Date()).toString()+" "+path+File.separator+fileName+/*"_"+dateTouchString+*/" already backed up.", IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+"WG_UploadLog.log");
+										tw.append((new Date()).toString()+" "+path+File.separator+fileName+/*"_"+dateTouchString+*/" already backed up.");
+										break;
+									}
+								}
+							}
+							if (!file.isDirectory() && !alreadyDone) {
+								FileInputStream fis = new FileInputStream(path +File.separator +fileName);
+								ftpc.setFileType(FTPClient.BINARY_FILE_TYPE);
+								tw.append((new Date()).toString()+" "+path+File.separator+fileName+/*"_"+dateTouchString+*/" starting backup");
+								ftpc.enterLocalPassiveMode();
+								//							ftpc.enterRemotePassiveMode();
+								//							ftpc.enterLocalActiveMode();
+								ftpc.storeFile(fileName+"_" + dateTouchString+".tmp", fis);
+
+								fis.close();
+								ftpc.rename(fileName+"_" + dateTouchString+".tmp", fileName+"_" + dateTouchString);
+								IJ.append((new Date()).toString()+" "+path+File.separator+fileName+/*"_"+dateTouchString+*/" newly backed up", IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+"WG_UploadLog.log");
+								tw.append((new Date()).toString()+" "+path+File.separator+fileName+/*"_"+dateTouchString+*/" newly backed up");
+							}
 						}
+						for (int c=IJ.isWindows()?0:1;c<pathChunks.length;c++) {
+							ftpc.changeToParentDirectory();
+						}
+						iterativeDirPaths.remove(path);
 					}
-					for (int c=IJ.isWindows()?0:1;c<pathChunks.length;c++) {
-						ftpc.changeToParentDirectory();
+					IJ.append("ENTIRE REQUESTED UPLOAD LIST COMPLETE: "+ masterPath, IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+"WG_UploadLog.log");
+					tw.append("ENTIRE REQUESTED UPLOAD LIST COMPLETE: "+ masterPath);
+					
+					ftpc.logout();
+				}
+			} catch (SocketException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} finally {
+				if(ftpc.isConnected()) {
+					try {
+						ftpc.disconnect();
+					} catch(IOException ioe) {
+						// do nothing
 					}
 				}
-				IJ.append("ENTIRE UPLOAD COMPLETE: "+ masterPath, IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+"WG_UploadLog.log");
-				tw.append("ENTIRE UPLOAD COMPLETE: "+ masterPath);
-				ftpc.logout();
 			}
-		} catch (SocketException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} finally {
-			if(ftpc.isConnected()) {
-				try {
-					ftpc.disconnect();
-				} catch(IOException ioe) {
-					// do nothing
-				}
-			}
+			IJ.saveString("", queuePath);
 		}
-		newUploadProcess = null;
-		 System.exit(0);
 	}
 	
 	public String spawnNewUploadProcess(String arg) {
@@ -236,5 +263,35 @@ public class WG_Uploader implements PlugIn {
 	public Process getNewUploadProcess() {
 		return newUploadProcess;
 	}
+	
+	public void appendPathToCurrentUpload(String newPath) {
+		ArrayList<String> additionalDirPaths = new ArrayList<String>();
+		additionalDirPaths.add(newPath);
+		int nincrement = 0;
+		int nalSize = additionalDirPaths.size();
+		while (nincrement < nalSize) {
+			for (int ni=nincrement;ni<nalSize;ni++) {
+				String iPath = additionalDirPaths.get(ni);
+				String[] localDirFileNames = (new File(iPath)).list();
+				nincrement++;
+				for (String fileName:localDirFileNames) {
+					if ((new File(iPath+fileName)).isDirectory()) {
+						if (!additionalDirPaths.contains(iPath+fileName+File.separator))
+							additionalDirPaths.add(iPath+fileName+File.separator);
+					}
+				}
+			}
+			nalSize = additionalDirPaths.size();
+		}
+		iterativeDirPaths.addAll(additionalDirPaths);
+	}
+
+	public static WG_Uploader getInstance() {
+		if (instance == null) {
+			instance = new WG_Uploader();
+		}
+		return instance;
+	}
+	
 
 }
