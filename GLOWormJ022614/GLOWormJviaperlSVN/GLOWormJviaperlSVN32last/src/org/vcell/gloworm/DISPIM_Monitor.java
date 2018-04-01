@@ -1180,13 +1180,16 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 				Thread uploadThread = new Thread(new Runnable() {
 					public void run() {
 						wgUploadJob = WG_Uploader.getInstance();
-						if (wgUploadJob.getNewUploadProcess() != null)
+						if (wgUploadJob.getNewUploadProcess() != null) {
 							uploadRunning = wgUploadJob.getNewUploadProcess().isAlive();
-						if(!uploadRunning)	{
+							if(!uploadRunning)	{
+								wgUploadJob.run(dirOrOMETiffFinal);
+							} else {
+								String queuePath = IJ.getDirectory("home")+File.separator+"CytoSHOWCacheFiles"+File.separator+"WG_UploadQueue.txt";
+								IJ.append(dirOrOMETiffFinal, queuePath);
+							}
+						}else {
 							wgUploadJob.run(dirOrOMETiffFinal);
-						} else {
-							String queuePath = IJ.getDirectory("home")+File.separator+"CytoSHOWCacheFiles"+File.separator+"WG_UploadQueue.txt";
-							IJ.append(dirOrOMETiffFinal, queuePath);
 						}
 					}
 				});
@@ -2857,14 +2860,16 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 			if (autoUpload) {
 				if (wgUploadJob == null) 
 					wgUploadJob = WG_Uploader.getInstance();
-				if (wgUploadJob.getNewUploadProcess() != null)
+				if (wgUploadJob.getNewUploadProcess() != null) {
 					uploadRunning = wgUploadJob.getNewUploadProcess().isAlive();
-				if(!uploadRunning)	{
+					if(!uploadRunning)	{
+						wgUploadJob.run(dirOrOMETiffFinal);
+					} else {
+						String queuePath = IJ.getDirectory("home")+File.separator+"CytoSHOWCacheFiles"+File.separator+"WG_UploadQueue.txt";
+						IJ.append(dirOrOMETiffFinal, queuePath);
+					}
+				}else {
 					wgUploadJob.run(dirOrOMETiffFinal);
-				} else {
-					String queuePath = IJ.getDirectory("home")+File.separator+"CytoSHOWCacheFiles"+File.separator+"WG_UploadQueue.txt";
-					IJ.append(dirOrOMETiffFinal, queuePath);
-
 				}
 			}
 
@@ -4313,15 +4318,17 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 				Thread uploadDeconPrjThread = new Thread(new Runnable() {
 					public void run() {
 						if (wgUploadJob == null) 
-							wgUploadJob = new WG_Uploader();
-						if (wgUploadJob.getNewUploadProcess() != null)
+							wgUploadJob = WG_Uploader.getInstance();
+						if (wgUploadJob.getNewUploadProcess() != null) {
 							uploadRunning = wgUploadJob.getNewUploadProcess().isAlive();
-						if(!uploadRunning)	{
-							wgUploadJob.run(dirOrOMETiffFinal);
-						} else {
-							String queuePath = IJ.getDirectory("home")+File.separator+"CytoSHOWCacheFiles"+File.separator+"WG_UploadQueue.txt";
-							IJ.append(dirOrOMETiffFinal, queuePath);
-
+							if(!uploadRunning)	{
+								wgUploadJob.run(dirOrOMETiffFinal);
+							} else {
+								String queuePath = IJ.getDirectory("home")+File.separator+"CytoSHOWCacheFiles"+File.separator+"WG_UploadQueue.txt";
+								IJ.append(dirOrOMETiffFinal, queuePath);
+							}
+						}else {
+								wgUploadJob.run(dirOrOMETiffFinal);
 						}
 					}
 				});
