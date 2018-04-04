@@ -224,6 +224,14 @@ public class StarryNiteFeeder implements PlugIn {
 			imp.setPosition(wasC, wasZ, wasT);
 			imp.setRoi(theROI);
 
+			IJ.saveString(IJ.openAsString(baseParameterFilePath).replaceAll("(.*end_time=)\\d+(;.*)", "$1"+endPoint+"$2")
+					.replaceAll("(.*ROI=)true(;.*)", "$1false$2")
+					.replaceAll("(.*ROI.min=)\\d+(;.*)", "$10$2")
+					.replaceAll("(.*ROIxmax=)\\d+(;.*)", "$1"+stackWidth+"$2")
+					.replaceAll("(.*ROIymax=)\\d+(;.*)", "$1"+stackHeight+"$2")
+					.replaceAll("(.*)ROIpoints=\\[\\d+.*\\];(.*)", "$1"+""+"$2")
+					, impParameterPath);
+
 			Thread linThread = new Thread(new Runnable() {
 				public void run() {
 					try {
