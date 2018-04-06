@@ -66,7 +66,10 @@ public class WG_Uploader implements PlugIn {
 		tw.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		tw.setExtendedState(JFrame.ICONIFIED);
 		ArrayList<String> iterativeDirPaths = new ArrayList<String>();
-		iterativeDirPaths.add(masterPath);
+		String[] masterPaths = masterPath.split("\\|");
+		for (String path:masterPaths) {
+			iterativeDirPaths.add(path);
+		}
 		int increment = 0;
 		int alSize = iterativeDirPaths.size();
 		while (increment < alSize) {

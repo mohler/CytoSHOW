@@ -44,7 +44,7 @@ import ij.measure.*;
 import ij3d.ImageJ3DViewer;
 
 /** This plugin implements the Analyze/Tools/Tag Manager command. */
-public class RoiManager extends PlugInFrame implements ActionListener, ItemListener, MouseListener, MouseWheelListener, KeyListener, ChangeListener, Runnable, ListSelectionListener, WindowListener, TextListener {
+public class RoiManager extends PlugInFrame implements ActionListener, ItemListener, MouseListener, MouseWheelListener, KeyListener, ChangeListener, ListSelectionListener, WindowListener, TextListener {
 	public static final String LOC_KEY = "manager.loc";
 	private static final int BUTTONS = 15;
 	private static final int DRAW=0, FILL=1, LABEL=2;
@@ -174,8 +174,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		imp.setRoiManager(this);
 		showWindow(false);
 		//		WindowManager.addWindow(this);
-		thread = new Thread(this, "Tag Manager");
-		thread.start();
+//		thread = new Thread(this, "Tag Manager");
+//		thread.start();
 
 	}
 
@@ -194,8 +194,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		imp.setRoiManager(this);
 		showWindow(!hideWindow);
 		//		WindowManager.addWindow(this);
-		thread = new Thread(this, "Tag Manager");
-		thread.start();
+//		thread = new Thread(this, "Tag Manager");
+//		thread.start();
 
 
 	}
@@ -217,8 +217,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		showWindow(!hideWindow);
 		//		WindowManager.addWindow(this);
-		thread = new Thread(this, "Tag Manager");
-		thread.start();
+//		thread = new Thread(this, "TagManagerThread");
+//		thread.start();
 
 
 	}
@@ -362,25 +362,35 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	public synchronized void actionPerformed(ActionEvent e) {
 		//				IJ.log(e.toString()+1);
 		this.actionEvent = e;
-		notify();
+//		notify();
+		thread = new Thread(new Runnable() {
+
+			public void run() {
+				doAction(actionEvent);
+			}
+			
+		});
+		thread.start();
 	}
 
 	// Separate thread that does the potentially time-consuming processing 
-	public void run() {
-		//		IJ.log(actionEvent!=null?actionEvent.toString()+2:"null");
-		while (!done) {
-			//			IJ.log(actionEvent!=null?actionEvent.toString()+2:"null");
-			synchronized(this) {
-				try {wait();}
-				catch(InterruptedException eIE) {}
-			}
-			if (done) return;
-			doAction(actionEvent);
-		}
-	}
+//	public void run() {
+//		//		IJ.log(actionEvent!=null?actionEvent.toString()+2:"null");
+//		while (!done) {
+//			//			IJ.log(actionEvent!=null?actionEvent.toString()+2:"null");
+//			synchronized(this) {
+//				try {wait();}
+//				catch(InterruptedException eIE) {}
+//			}
+////			if (done) return;
+//			doAction(actionEvent);
+//		}
+//	}
 
 	public void doAction(ActionEvent e) {
 		//				IJ.log(e.toString()+3);
+		if (e == null)
+			return;
 		if (e.getActionCommand().equals("Full\nSet")) {
 			imp.getRoiManager().getTextSearchField().setText("");
 			e.setSource(textSearchField); 
@@ -536,12 +546,16 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			String command = label;
 			if (command.equals("Add\n(ctrl-t)")) {
+				Roi roi = imp.getRoi();
 				String newName = "";
-				if (getSelectedRoisAsArray().length>0) {
-					String selName = getSelectedRoisAsArray()[0].getName();
-					newName = promptForName(selName);
-				} else {
-					newName = promptForName(recentName);
+				newName = roi.getName(); 
+				if (newName == "") {
+					if (getSelectedRoisAsArray().length>0) {
+						String selName = getSelectedRoisAsArray()[0].getName();
+						newName = promptForName(selName);
+					} else {
+						newName = promptForName(recentName);
+					}
 				}
 				Color existingColor = null;
 				Enumeration<Roi> roisElements = rois.elements();
@@ -900,8 +914,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 			this.imp.getCanvas().requestFocus();
 		}
-		//		IJ.log("DONE");
-		//		done = true;
+		IJ.log("THREAD DONE");
+		actionEvent = null;
 	}
 
 	private void sketchVolumeViewer(Object source) { 
@@ -1155,8 +1169,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (isStandardName(name))
 			name = null;
 		String label = name!=null?name:getLabel(imp, roi, -1);
-		if (promptForName)
-			label = promptForName(label);
+		if (promptForName) {
+//			label = promptForName(label);
+		}
 		else if (roi instanceof TextRoi)
 			if (imp != null) 
 				label = (((TextRoi)roi).getText().indexOf("\n")>0?("\""+((TextRoi)roi).getText().replace("\n"," ")+"\""):"Blank") +"_"+ imp.getChannel() +"_"+ imp.getSlice() +"_"+imp.getFrame();
@@ -1223,8 +1238,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		if (!Orthogonal_Views.isOrthoViewsImage(imp)) {
 			if (imp.getWindow()!=null) {
+				Roi[] roisFromSpans = new Roi[1]; 
+				roisFromSpans= (roisByNumbers.get((addRoiSpanC?0:roiCopy.getCPosition())+"_"+(addRoiSpanZ?0:roiCopy.getZPosition())+"_"+(addRoiSpanT?0:roiCopy.getTPosition()))).toArray(roisFromSpans);
 				if (imp.getWindow() instanceof StackWindow && ((StackWindow)imp.getWindow()).isWormAtlas()) {
-					for (Roi existingRoi:roisByNumbers.get((addRoiSpanC?0:roiCopy.getCPosition())+"_"+(addRoiSpanZ?0:roiCopy.getZPosition())+"_"+(addRoiSpanT?0:roiCopy.getTPosition()))){
+					for (Roi existingRoi:roisFromSpans){
 						//					if (imp.getSlice() == existingRoi.getZPosition() && imp.getFrame() == existingRoi.getTPosition()) {
 						if (roiCopy.contains((int)existingRoi.getBounds().getCenterX(), (int)existingRoi.getBounds().getCenterY())) {
 							if (existingRoi instanceof TextRoi && !(roiCopy instanceof TextRoi) && roiCopy.isArea()) {
@@ -1237,7 +1254,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						}
 					}
 				} else {
-					for (Roi existingRoi:roisByNumbers.get((addRoiSpanC?0:roiCopy.getCPosition())+"_"+(addRoiSpanZ?0:roiCopy.getZPosition())+"_"+(addRoiSpanT?0:roiCopy.getTPosition()))){
+					for (Roi existingRoi:roisFromSpans){
 						//					if (imp.getSlice() == existingRoi.getZPosition() && imp.getFrame() == existingRoi.getTPosition()) {
 						if (roiCopy.contains((int)existingRoi.getBounds().getCenterX(), (int)existingRoi.getBounds().getCenterY())) {
 							if (existingRoi instanceof TextRoi && !(roiCopy instanceof TextRoi) && roiCopy.isArea()) {
