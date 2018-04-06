@@ -5328,6 +5328,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //		imp.hide();
 //		this.setVisible(false);
 		int frame =1;
+		Hashtable<String,String[]> prevHash = new Hashtable<String,String[]>();
+		Hashtable<String,String[]> nextHash = new Hashtable<String,String[]>();
+
 		for (int i = 0; i < lines.length; i++) {
 			String nextLine = lines[i];
 			if (nextLine.length()==0) {
@@ -5336,26 +5339,59 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			if (nextLine.startsWith("parameters/")) {
 				continue;
 			}
-			String[] cellData = nextLine.split(",");
+			String[] cellData = nextLine.split(", *");
 			if (cellData.length ==1){
 				frame = Integer.parseInt(cellData[0].trim().replace("nuclei/t","").replace("-nuclei",""));
+				prevHash = nextHash;
+				nextHash = new Hashtable<String,String[]>();
 			} else {
 				imp.setPositionWithoutUpdate(imp.getChannel(), imp.getSlice(), frame);
-
 				if (cellData[9] !=" ") {
+					nextHash.put(cellData[0], new String[] {cellData[2],cellData[3],cellData[4],cellData[9]});
 					imp.setPositionWithoutUpdate(imp.getChannel(), (int)Double.parseDouble(cellData[7].trim()), frame);
 
 					Roi newOval = new OvalRoi(Integer.parseInt(cellData[5].trim())-Integer.parseInt(cellData[8].trim())/2, Integer.parseInt(cellData[6].trim())-Integer.parseInt(cellData[8].trim())/2, Integer.parseInt(cellData[8].trim()), Integer.parseInt(cellData[8].trim()));
 					newOval.setImage(imp);
 					
 					addRoi(newOval, false, Color.white, 1);
-					rename(cellData[9], new int[] {this.getCount()-1}, false);
+					String currID = cellData[0];
+					String prevCell = cellData[2];
+					String[] prevCellThings = null;
+					String prevCellDesc1 = "";
+					String prevCellDesc2 = "";
+
+					if (prevHash!=null) {
+						if (prevHash.get(cellData[2])!=null) {
+							prevCellThings = prevHash.get(cellData[2]);
+							if (prevHash.get(cellData[2])[1].equalsIgnoreCase(cellData[0])) {
+								prevCellDesc1 = prevHash.get(cellData[2])[1];
+								prevCellDesc2 = prevHash.get(cellData[2])[2];
+								if (!prevHash.get(cellData[2])[2].equalsIgnoreCase("-1")) {
+									rename(prevHash.get(cellData[2])[3]+"m", new int[] {this.getCount()-1}, false);
+									nextHash.put(cellData[0], new String[] {cellData[2],cellData[3],cellData[4],prevHash.get(cellData[2])[3]+"m"});
+
+								}else {
+									rename(prevHash.get(cellData[2])[3], new int[] {this.getCount()-1}, false);
+									nextHash.put(cellData[0], new String[] {cellData[2],cellData[3],cellData[4],prevHash.get(cellData[2])[3]});
+
+								}
+							}else if (prevHash.get(cellData[2])[2].equalsIgnoreCase(cellData[0])) {
+								rename(prevHash.get(cellData[2])[3]+"n", new int[] {this.getCount()-1}, false);
+								nextHash.put(cellData[0], new String[] {cellData[2],cellData[3],cellData[4],prevHash.get(cellData[2])[3]+"n"});
+							}
+						} else {
+							rename(cellData[9], new int[] {this.getCount()-1}, false);
+						}
+					}  else {
+						rename(cellData[9], new int[] {this.getCount()-1}, false);
+					}
+					
 					IJ.showStatus("importing nucleus "+getCount());
 				}
 			}
 		}
-//		imp.show();
-//		this.setVisible(true);
+
+
 		if (this.getCount()>0) {
 			select(-1);
 			saveMultiple(getAllShownIndexes(),zipFile.getParent()+File.separator+"NucleiRoiSet.zip");
