@@ -98,6 +98,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			if (dir.replace(File.separator, "/").matches(".*/Proj[XY]_Decon-Fuse.*/"))
 				defaultKey = "Color";
 			keyString = IJ.getString("Subdirectory Name Key String?", defaultKey);
+			args[0]=dir;
 		}
 		else
 			dir = args[0];
