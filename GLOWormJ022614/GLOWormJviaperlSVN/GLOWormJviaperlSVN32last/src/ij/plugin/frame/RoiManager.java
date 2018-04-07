@@ -360,35 +360,23 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 
 	public synchronized void actionPerformed(ActionEvent e) {
-		//				IJ.log(e.toString()+1);
-		this.actionEvent = e;
-//		notify();
+
+		final ActionEvent fe = e;
+
 		thread = new Thread(new Runnable() {
 
 			public void run() {
-				doAction(actionEvent);
+				doAction(fe);
 			}
 			
 		});
 		thread.start();
 	}
 
-	// Separate thread that does the potentially time-consuming processing 
-//	public void run() {
-//		//		IJ.log(actionEvent!=null?actionEvent.toString()+2:"null");
-//		while (!done) {
-//			//			IJ.log(actionEvent!=null?actionEvent.toString()+2:"null");
-//			synchronized(this) {
-//				try {wait();}
-//				catch(InterruptedException eIE) {}
-//			}
-////			if (done) return;
-//			doAction(actionEvent);
-//		}
-//	}
 
 	public void doAction(ActionEvent e) {
 		//				IJ.log(e.toString()+3);
+
 		if (e == null)
 			return;
 		if (e.getActionCommand().equals("Full\nSet")) {
@@ -404,7 +392,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			String thisWasTitle = this.getTitle();
 			String searchString = textSearchField.getText();
 			boolean isRegex = (searchString.startsWith("??"));
-			listModel.clear();
+			listModel.removeAllElements();
 			prevSearchString = searchString;
 			//			String[] listStrings = fullList.getItems();
 			String impTitle = this.imp.getTitle();
@@ -424,14 +412,6 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 			for (int i = 0; i < count; i++) {			
 				timeNow = System.currentTimeMillis();
-				//this.setTitle(  "Tag Manager" + ((i%100>50)?" SEARCHING!!!":" Searching...") );
-				if (i%100>50){
-					//					IJ.runMacro("print(\"\\\\Update:***Tag Manager is still searching tags...***\")");
-					//this.imp.setTitle("***"+ impTitle);
-				}else{
-					//					IJ.runMacro("print(\"\\\\Update:   Tag Manager is still searching tags...   \")");
-					//this.imp.setTitle("   "+ impTitle);
-				}
 				if (searchString.trim().equalsIgnoreCase("") || searchString.trim().equalsIgnoreCase(".*")) {
 					listModel.addElement(fullListModel.get(i));
 					//IJ.log(listStrings[i]);
@@ -481,7 +461,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							imp.getCanvas().getDefaultColor()));
 
 					imp.getCanvas().messageRois.put("Finding tags that match", messageRoi);
-					imp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
+//					imp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
 
 				}
 
@@ -496,15 +476,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			textCountLabel.setText(""+ listModel.size() +"/"+ fullListModel.size());
 			imp.getWindow().countLabel.setText(""+ listModel.size() +"/"+ fullListModel.size() +"");
 			imp.getWindow().countLabel.repaint();			
-			//imp.getWindow().tagsButton.setText(""+fullListModel.size());
 
 			imp.getWindow().tagsButton.repaint();			
-			//			//this.setTitle(  thisWasTitle  );
-			//this.imp.setTitle(impTitle);
 
 			IJ.runMacro("print(\"\\\\Update:\")");
 
-			//		sort();
 			if (!(imp.getWindow().getTitle().matches(".*[XY]Z +\\d+.*")))
 				this.showWindow(wasVis);
 			showAll(SHOW_ALL);
@@ -734,7 +710,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				int[] nameMatchIndexes = new int[nameMatchIndexArrayList.size()];
 				for (int n=0;n<nameMatchIndexes.length;n++)
 					nameMatchIndexes[n] = nameMatchIndexArrayList.get(n);
-				if (rename(null, nameMatchIndexes, true)) {
+				if (rename(newName, nameMatchIndexes, true)) {
 					if (existinghexName !="") {
 						for (int i=0; i < nameMatchIndexes.length; i++) {
 							this.select(nameMatchIndexes[i]);
@@ -914,8 +890,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 			this.imp.getCanvas().requestFocus();
 		}
-		IJ.log("THREAD DONE");
-		actionEvent = null;
+//		IJ.log("THREAD DONE");
 	}
 
 	private void sketchVolumeViewer(Object source) { 
