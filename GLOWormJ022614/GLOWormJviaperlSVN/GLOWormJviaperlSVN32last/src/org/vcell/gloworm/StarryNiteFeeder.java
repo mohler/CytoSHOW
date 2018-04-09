@@ -237,13 +237,13 @@ public class StarryNiteFeeder implements PlugIn {
 					if(new File((outDir+subdir).replace("\\", "\\\\")+"\\\\aaa__edited.xml").canRead()) {
 						new File((outDir+subdir).replace("\\", "\\\\")+"\\\\aaa__edited.xml").renameTo(
 								new File((outDir+subdir).replace("\\", "\\\\")+"\\\\aaa_"+
-										new File((outDir+subdir).replace("\\", "\\\\")+"\\\\aaa__edited.xml").lastModified()+"_edited.xml"));
+										(""+new File((outDir+subdir).replace("\\", "\\\\")+"\\\\aaa__edited.xml").lastModified()).substring(0, 10)+"_edited.xml"));
 					}
 					
 					try {
-						IJ.log("matlab -nosplash -nodesktop -r ver;addpath('C:\\Users\\SPIM\\Desktop\\TestLineaging\\Bill_distributionCopy\\source_code\\distribution_code\\'); detect_track_driver_allmatlab('"+impParameterPath+"','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\','aaa','','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\',0,true)");
+						IJ.log("matlab -nosplash -nodesktop -r ver;addpath('C:\\SN_Feeder_distribution_code\\'); detect_track_driver_allmatlab('"+impParameterPath+"','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\','aaa','','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\',0,true)");
 
-						Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", "matlab", "-nosplash", "-nodesktop", "-r", "ver;addpath('C:\\Users\\SPIM\\Desktop\\TestLineaging\\Bill_distributionCopy\\source_code\\distribution_code\\'); detect_track_driver_allmatlab('"+impParameterPath+"','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\','aaa','','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\',0,true)"});
+						Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", "matlab", "-nosplash", "-nodesktop", "-r", "ver;addpath('C:\\SN_Feeder_distribution_code\\'); detect_track_driver_allmatlab('"+impParameterPath+"','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\','aaa','','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\',0,true)"});
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -272,7 +272,7 @@ public class StarryNiteFeeder implements PlugIn {
 					}
 					Process linGreenExtract = null;
 					try {
-						ProcessBuilder linGreenExtractPB = new ProcessBuilder(new String[]{"cmd", "/c", "start", "java", "-cp", "C:\\Users\\SPIM\\Desktop\\TestLineaging\\Bill_distributionCopy\\source_code\\distribution_code\\acebatch2.jar", "SixteenBitGreenExtractor1", (outDir+subdir).replace("\\", "\\\\")+"\\\\aaa__edited.xml", ""+endPoint});
+						ProcessBuilder linGreenExtractPB = new ProcessBuilder(new String[]{"cmd", "/c", "start", "java", "-cp", "acebatch2.jar", "SixteenBitGreenExtractor1", (outDir+subdir).replace("\\", "\\\\")+"\\\\aaa__edited.xml", ""+endPoint});
 						linGreenExtractPB.directory(new File("C:\\SN_Feeder_distribution_code\\"));
 						linGreenExtract = linGreenExtractPB.start();
 					} catch (IOException e) {
