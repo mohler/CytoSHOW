@@ -95,7 +95,7 @@ public class StarryNiteFeeder implements PlugIn {
 			final String subdir = savetitle;
 			new File(outDir+subdir).mkdirs();
 			final String impParameterPath = outDir+subdir+File.separator+savetitle+"_SNparamsFile.txt";
-			int endPoint = imp.getFrame();
+			final int endPoint = imp.getFrame();
 			int stackWidth=0;
 			int stackHeight=0;
 
@@ -234,6 +234,12 @@ public class StarryNiteFeeder implements PlugIn {
 
 			Thread linThread = new Thread(new Runnable() {
 				public void run() {
+					if(new File((outDir+subdir).replace("\\", "\\\\")+"\\\\aaa__edited.xml").canRead()) {
+						new File((outDir+subdir).replace("\\", "\\\\")+"\\\\aaa__edited.xml").renameTo(
+								new File((outDir+subdir).replace("\\", "\\\\")+"\\\\aaa_"+
+										new File((outDir+subdir).replace("\\", "\\\\")+"\\\\aaa__edited.xml").lastModified()+"_edited.xml"));
+					}
+					
 					try {
 						IJ.log("matlab -nosplash -nodesktop -r ver;addpath('C:\\Users\\SPIM\\Desktop\\TestLineaging\\Bill_distributionCopy\\source_code\\distribution_code\\'); detect_track_driver_allmatlab('"+impParameterPath+"','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\','aaa','','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\',0,true)");
 
@@ -247,7 +253,9 @@ public class StarryNiteFeeder implements PlugIn {
 					}
 					Process linMeasure = null;
 					try {
-						linMeasure=Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", "java", "-Xmx500m", "-cp", "C:\\Users\\SPIM\\Desktop\\TestLineaging\\Bill_distributionCopy\\source_code\\distribution_code\\acebatch2.jar", "Measure1", (outDir+subdir).replace("\\", "\\\\")+"\\\\aaa__edited.xml"});
+						ProcessBuilder linMeasurePB = new ProcessBuilder(new String[]{"cmd", "/c", "start", "java", "-Xmx500m", "-cp", "acebatch2.jar", "Measure1", (outDir+subdir).replace("\\", "\\\\")+"\\\\aaa__edited.xml"});
+						linMeasurePB.directory(new File("C:\\SN_Feeder_distribution_code\\"));
+						linMeasure = linMeasurePB.start();
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -256,7 +264,7 @@ public class StarryNiteFeeder implements PlugIn {
 						try {
 							IJ.log("Measuring for AuxInfo "+(new Date()).getTime());
 							linMeasure.waitFor();
-							IJ.log("Measuring Complete "+(new Date()).getTime());
+							IJ.log("Measuring for AuxInfo Complete "+(new Date()).getTime());
 						} catch (InterruptedException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -264,7 +272,9 @@ public class StarryNiteFeeder implements PlugIn {
 					}
 					Process linGreenExtract = null;
 					try {
-						linGreenExtract=Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", "java", "-cp", "C:\\Users\\SPIM\\Desktop\\TestLineaging\\Bill_distributionCopy\\source_code\\distribution_code\\acebatch2.jar", "SixteenBitGreenExtractor1", (outDir+subdir).replace("\\", "\\\\")+"\\\\aaa__edited.xml", "400"});
+						ProcessBuilder linGreenExtractPB = new ProcessBuilder(new String[]{"cmd", "/c", "start", "java", "-cp", "C:\\Users\\SPIM\\Desktop\\TestLineaging\\Bill_distributionCopy\\source_code\\distribution_code\\acebatch2.jar", "SixteenBitGreenExtractor1", (outDir+subdir).replace("\\", "\\\\")+"\\\\aaa__edited.xml", ""+endPoint});
+						linGreenExtractPB.directory(new File("C:\\SN_Feeder_distribution_code\\"));
+						linGreenExtract = linGreenExtractPB.start();
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -284,16 +294,4 @@ public class StarryNiteFeeder implements PlugIn {
 			linThread.start();
 		}	
 	}
-
-	public static Process launchMatlabSN() {
-		try {
-			Process p = Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", "F:\\Matlab-R2018a\\bin\\matlab", "-nosplash", "-nodesktop", "-r", "ver;addpath('C:\\Users\\SPIM\\Desktop\\TestLineaging\\Bill_distributionCopy\\source_code\\distribution_code\\'); detect_track_driver_allmatlab('2015_raw_view_dispim_param_boundarypercent0_2.txt','V:\\\\Bill\\\\DCFSNout\\\\Continue_20180216-1651_edges_DCR6834_bbs-8_72.7F_20C_M9_0.1625um_1um_75s_488-561_P0.75-0.5_5ms_s2_Leighton-Yale_Pos4_SPIMA\\\\Continue_20180216-1651_Edges_Leighton-Yale_Pos4_SPIMA\\\\','aaa','','V:\\\\Bill\\\\DCFSNout\\\\Continue_20180216-1651_edges_DCR6834_bbs-8_72.7F_20C_M9_0.1625um_1um_75s_488-561_P0.75-0.5_5ms_s2_Leighton-Yale_Pos4_SPIMA\\\\Continue_20180216-1651_Edges_Leighton-Yale_Pos4_SPIMA\\\\',0,true)"});
-			return p;
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		return null;
-	}
-
 }

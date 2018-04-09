@@ -1954,7 +1954,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 		}
 
 
-		IJ.run("Tile");
+//		IJ.run("Tile");
 
 		monitoring = true;
 
