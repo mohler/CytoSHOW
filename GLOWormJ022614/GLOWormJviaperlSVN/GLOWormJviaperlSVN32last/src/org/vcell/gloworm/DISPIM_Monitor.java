@@ -1572,10 +1572,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 					doProcessing[pos] = false;
 					continue;
 				}
-				if (impAs[pos]==null || impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+				if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
 					doProcessing[pos] = false;
 					continue;
 				} 
+				Dimension sizeWinA = impAs[pos].getWindow().getSize();
+				Dimension sizeWinB = impBs[pos].getWindow().getSize();
 				if(fuseSplitPanel[pos][0] == null) {
 					fuseSplitPanel[pos][0] = new Panel(new BorderLayout());
 					
@@ -1690,11 +1692,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 				impBs[pos].getWindow().viewButtonPanel.validate();
 
 				impAs[pos].getWindow().pack();
+//				impAs[pos].getWindow().setSize(sizeWinA);
 				impBs[pos].getWindow().pack();
+//				impBs[pos].getWindow().setSize(sizeWinB);
 				
 				
 			}
-//			IJ.run("Tile");
+			IJ.run("Tile");
 		}
 
 		if (doMipavDecon || doGPUdecon) {
@@ -4816,43 +4820,58 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 		if (e.getActionCommand() == "diSPIM") {
 			
 			for (int pos=0; pos<pDim; pos++) {
+
 				if (e.getSource() == dispimToolsButton[pos][0]) {
+					if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+						continue;
+					}
 					boolean shown = fuseButton[pos][0].isVisible();
 					dispimToolsButton[pos][0].setBackground(!shown?Color.yellow:null);
 					fuseButton[pos][0].setVisible(!shown);
 					splitButton[pos][0].setVisible(!shown);
 					xSpinner[pos][0].setVisible(!shown);
 					ySpinner[pos][0].setVisible(!shown);
-					for (int pp=0; pp<pDim; pp++) {
-						if (xSpinner[pp][0]!=null) {
-							xSpinner[pp][0].setValue(MultiFileInfoVirtualStack.getdXA());
+					if (shown) {
+						for (int pp=0; pp<pDim; pp++) {
+							if (impAs[pp]==null || impAs[pp].hasNullStack() || impAs[pp].getWindow()==null  || !impAs[pp].getWindow().isVisible()) {
+								continue;
+							}
+							xSpinner[pp][0].setValue(((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdXA());
+
+							ySpinner[pp][0].setValue(((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdYA());
+
+							((CompositeImage)impAs[pp]).updateAndDraw();
 						}
-						if (ySpinner[pp][0]!=null) {
-							ySpinner[pp][0].setValue(MultiFileInfoVirtualStack.getdYA());
-						}
-						((CompositeImage)impAs[pp]).updateAndDraw();
-												
+						Prefs.set("diSPIMmonitor.dXA", ((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdXA());
+						Prefs.set("diSPIMmonitor.dYA", ((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdYA());
 					}
 					impAs[pos].getWindow().viewButtonPanel.validate();
 				}
 				if (e.getSource() == dispimToolsButton[pos][1]) {
+					if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+						continue;
+					}
 					boolean shown = fuseButton[pos][1].isVisible();
 					dispimToolsButton[pos][1].setBackground(!shown?Color.yellow:null);
 					fuseButton[pos][1].setVisible(!shown);
 					splitButton[pos][1].setVisible(!shown);
 					xSpinner[pos][1].setVisible(!shown);
 					ySpinner[pos][1].setVisible(!shown);
-					for (int pp=0; pp<pDim; pp++) {
-						if (xSpinner[pp][1]!=null) {
-							xSpinner[pp][1].setValue(MultiFileInfoVirtualStack.getdXB());
+					if (shown) {
+						for (int pp=0; pp<pDim; pp++) {
+							if (impBs[pp]==null || impBs[pp].hasNullStack() || impBs[pp].getWindow()==null  || !impBs[pp].getWindow().isVisible()) {
+								continue;
+							}
+							xSpinner[pp][1].setValue(((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdXB());
+
+							ySpinner[pp][1].setValue(((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdYB());
+
+							((CompositeImage)impBs[pp]).updateAndDraw();
 						}
-						if (ySpinner[pp][1]!=null) {
-							ySpinner[pp][1].setValue(MultiFileInfoVirtualStack.getdYB());
-						}
-						((CompositeImage)impBs[pp]).updateAndDraw();												
+						Prefs.set("diSPIMmonitor.dXB", ((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdXB());
+						Prefs.set("diSPIMmonitor.dYB", ((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdYB());
 					}
 					impBs[pos].getWindow().viewButtonPanel.validate();
-					
 				}
 			}
 		}
@@ -4990,23 +5009,23 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 			for (int p=0; p<pDim; p++) {
 				if ( impAs[p]!=null && impAs[p].getWindow()!=null && impAs[p].getWindow().isAncestorOf((Component)e.getSource())) {
 					if(e.getSource().equals(xSpinner[p][0])) {
-						MultiFileInfoVirtualStack.setdXA((Integer) xSpinner[p][0].getValue());
+						((MultiFileInfoVirtualStack)(impAs[p].getStack())).setdXA((Integer) xSpinner[p][0].getValue());
 						((CompositeImage)impAs[p]).updateAndDraw();
 						break;
 					}
 					if(e.getSource().equals(ySpinner[p][0])) {
-						MultiFileInfoVirtualStack.setdYA((Integer) ySpinner[p][0].getValue());
+						((MultiFileInfoVirtualStack)(impAs[p].getStack())).setdYA((Integer) ySpinner[p][0].getValue());
 						((CompositeImage)impAs[p]).updateAndDraw();
 						break;
 					}
 				}else if ( impBs[p]!=null && impBs[p].getWindow()!=null && impBs[p].getWindow().isAncestorOf((Component)e.getSource())) {
 					if(e.getSource().equals(xSpinner[p][1])) {
-						MultiFileInfoVirtualStack.setdXB((Integer) xSpinner[p][1].getValue());
+						((MultiFileInfoVirtualStack)(impBs[p].getStack())).setdXB((Integer) xSpinner[p][1].getValue());
 						((CompositeImage)impBs[p]).updateAndDraw();
 						break;
 					}
 					if(e.getSource().equals(ySpinner[p][1])) {
-						MultiFileInfoVirtualStack.setdYB((Integer) ySpinner[p][1].getValue());
+						((MultiFileInfoVirtualStack)(impBs[p].getStack())).setdYB((Integer) ySpinner[p][1].getValue());
 						((CompositeImage)impBs[p]).updateAndDraw();
 						break;
 					}

@@ -46,10 +46,10 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	public int sliceNumber;
 	private boolean isViewB;
 	private boolean monitoringDecon;
-	private static int dXA= Prefs.getInt("diSPIMmonitor.dXA", 5);
-	private static int dXB= Prefs.getInt("diSPIMmonitor.dXB", 2);
-	private static int dYA= Prefs.getInt("diSPIMmonitor.dYA", 2);
-	private static int dYB= Prefs.getInt("diSPIMmonitor.dYB", 7);
+	private  int dXA;
+	private  int dXB;
+	private  int dYA;
+	private  int dYB;
 
 
 	/* Default constructor. */
@@ -84,7 +84,10 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		this.vDim = vDim;
 		dimOrder = sliceOrder;
 		fivStacks = new ArrayList<FileInfoVirtualStack>();
-
+		dXA= Integer.parseInt(Prefs.get("diSPIMmonitor.dXA", "0"));
+		dXB= Integer.parseInt(Prefs.get("diSPIMmonitor.dXB", "0"));
+		dYA= Integer.parseInt(Prefs.get("diSPIMmonitor.dYA", "0"));
+		dYB= Integer.parseInt(Prefs.get("diSPIMmonitor.dYB", "0"));
 		infoCollectorArrayList =new ArrayList<FileInfo[]>();;
 		touchedFiles = new ArrayList<String>();
 
@@ -815,40 +818,36 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		return ((FileInfoVirtualStack)fivStacks.get(number));
 	}
 
-	public static int getdXA() {
+	public  int getdXA() {
 		return dXA;
 	}
 
-	public static void setdXA(int dXA) {
-		MultiFileInfoVirtualStack.dXA = dXA;
-		Prefs.set("diSPIMmonitor.dXA", dXA);
+	public  void setdXA(int dXA) {
+		this.dXA = dXA;
 	}
 
-	public static int getdXB() {
+	public  int getdXB() {
 		return dXB;
 	}
 
-	public static void setdXB(int dXB) {
-		MultiFileInfoVirtualStack.dXB = dXB;
-		Prefs.set("diSPIMmonitor.dXB", dXB);
+	public  void setdXB(int dXB) {
+		this.dXB = dXB;
 	}
 
-	public static int getdYA() {
+	public  int getdYA() {
 		return dYA;
 	}
 
-	public static void setdYA(int dYA) {
-		MultiFileInfoVirtualStack.dYA = dYA;
-		Prefs.set("diSPIMmonitor.dYA", dYA);
+	public  void setdYA(int dYA) {
+		this.dYA = dYA;
 	}
 
-	public static int getdYB() {
+	public  int getdYB() {
 		return dYB;
 	}
 
-	public static void setdYB(int dYB) {
-		MultiFileInfoVirtualStack.dYB = dYB;
-		Prefs.set("diSPIMmonitor.dYB", dYB);
+	public  void setdYB(int dYB) {
+		this.dYB = dYB;
 	}
 
 
