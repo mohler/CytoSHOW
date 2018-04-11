@@ -343,6 +343,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 	private JSpinner[][] ySpinner;
 	private Panel[][] spinnerPanel;
 	private String dirConcat;
+	private String diSPIM_MM_channelOrder = "GR";
 
 	public Process getRegDeconProcess() {
 		return regDeconProcess;
@@ -635,10 +636,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 						} 
 
 						stackAs[pos] = new MultiFileInfoVirtualStack(
-								dirConcat, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
+								dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
 								false, false, false);
 						stackBs[pos] = new MultiFileInfoVirtualStack(
-								dirConcat, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
+								dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
 								true, false, false);
 
 						if (stackAs[pos].getSize() == 0) {
@@ -2097,7 +2098,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 							tDim = listA.length;
 
 							stackAs[pos] = new MultiFileInfoVirtualStack(
-									dirConcat, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
+									dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
 									false, false, false);
 
 							ImagePlus impNext = new ImagePlus(impAs[pos].getTitle(), stackAs[pos]);
@@ -2145,7 +2146,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 							tDim = listA.length;
 
 							stackBs[pos] = new MultiFileInfoVirtualStack(
-									dirConcat, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
+									dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
 									true, false, false);
 
 							impNext = new CompositeImage(new ImagePlus(impBs[pos].getTitle(), stackBs[pos]));
@@ -4477,6 +4478,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 
 			if (chunk.trim().startsWith("\"config_\":")) {
 				diSPIM_MM_config_ArrayList.add(chunk.trim().split(":")[1].replace("\"", "").trim());
+				if (diSPIM_MM_config_ArrayList.size()==1) {
+					if  (diSPIM_MM_config_ArrayList.get(0).contains("488")) {
+						diSPIM_MM_channelOrder = "GR";
+					} else if  (diSPIM_MM_config_ArrayList.get(0).contains("561")) {
+						diSPIM_MM_channelOrder = "RG";
+					} 
+				}
 				diSPIM_MM_channel_config_index++;
 			}
 
@@ -4920,7 +4928,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 					tDim = impAs[pos].getNFrames();
 
 					stackAs[pos] = new MultiFileInfoVirtualStack(
-							dirConcat, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
+							dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
 							false, false, false);
 
 					ImagePlus impNext = new ImagePlus(impAs[pos].getTitle(), stackAs[pos]);
@@ -4966,7 +4974,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 					tDim = impBs[pos].getNFrames();
 
 					stackBs[pos] = new MultiFileInfoVirtualStack(
-							dirConcat, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
+							dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
 							true, false, false);
 
 					impNext = new CompositeImage(new ImagePlus(impBs[pos].getTitle(), stackBs[pos]));

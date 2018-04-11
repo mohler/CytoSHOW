@@ -50,6 +50,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	private  int dXB;
 	private  int dYA;
 	private  int dYB;
+	private boolean reverseChannelOrder;
 
 
 	/* Default constructor. */
@@ -78,6 +79,10 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	public MultiFileInfoVirtualStack(String arg, String sliceOrder, String keyString, int cDim, int zDim, int tDim, int vDim, int pos, boolean isViewB, boolean show, boolean findPeerFolders) {
 		this.keyString = keyString;
 		this.isViewB = isViewB;
+		if (cDim<0) {
+			cDim = cDim*(-1);
+			reverseChannelOrder=true;
+		}
 		this.cDim = cDim;
 		this.zDim = zDim;
 		this.tDim = tDim;
@@ -573,9 +578,15 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		stackNumber--;
 
 		sliceNumber = 1+(n) % (fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
+		
 		if (dimOrder.toLowerCase().matches(".*splitc.*")) {
 			sliceNumber = (sliceNumber/2);
 		}
+		
+		if (reverseChannelOrder) {
+			sliceNumber = sliceNumber%2==0?(sliceNumber+1):(sliceNumber-1);
+		}
+		
 
 
 		ImageProcessor ip = null;
