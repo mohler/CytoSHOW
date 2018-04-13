@@ -603,15 +603,15 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			if (vSliceNumber%2 == 0) {
 				vSliceNumber = vSliceNumber-1;
 			} else {
-				vSliceNumber = vSliceNumber-1+(2*dZ);
+				vSliceNumber = vSliceNumber-1;
 			}
 
 			if (vSliceNumber>fivStacks.get(stackNumber).getSize()) {
 				vSliceNumber = vSliceNumber-fivStacks.get(stackNumber).getSize();
 				stackNumber++;
 			}
-			initiateStack(stackNumber, vSliceNumber);
-			ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber);
+			initiateStack(stackNumber, 0);
+			ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber+(sliceNumber%2==0?0:dZ));
 		}
 		if (dimOrder.toLowerCase().matches(".*split.*c.*")) {
 
@@ -630,7 +630,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				if (vSliceNumber%2 == 0) {
 					vSliceNumber = vSliceNumber-1;
 				} else {
-					vSliceNumber = vSliceNumber-1+(2*dZ);
+					vSliceNumber = vSliceNumber-1;
 				}
 			}
 
@@ -639,8 +639,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				stackNumber++;
 			}
 
-			initiateStack(stackNumber, vSliceNumber);
-			ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber);
+			initiateStack(stackNumber, 0);
+			ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber+(sliceNumber%(2)==0?0:dZ*2));
 
 			ip.setInterpolationMethod(ImageProcessor.BICUBIC);
 			if (this.getOwnerImps() != null && this.getOwnerImps().size() > 0 && this.getOwnerImps().get(0) != null) {
@@ -666,12 +666,12 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			ip.translate((1-n%2)*dX, (1-n%2)*dY);
 		}
 		if (dimOrder == "xyzct") {
-			initiateStack(stackNumber, sliceNumber);
+			initiateStack(stackNumber, 0);
 			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber/cDim + ((sliceNumber%cDim)*fivStacks.get(stackNumber).getSize()/(vDim))+(sliceNumber%2==0?0:dZ)
 					+(isViewB?fivStacks.get(stackNumber).getSize()/(cDim*vDim):0));
 		}
 		if (dimOrder == "xyztc") {
-			initiateStack(stackNumber, sliceNumber);
+			initiateStack(stackNumber, 0);
 			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber+(sliceNumber%2==0?0:dZ));
 		}
 
@@ -867,5 +867,20 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		this.dYB = dYB;
 	}
 
+	public int getdZA() {
+		return dZA;
+	}
+
+	public void setdZA(int dZA) {
+		this.dZA = dZA;
+	}
+
+	public int getdZB() {
+		return dZB;
+	}
+
+	public void setdZB(int dZB) {
+		this.dZB = dZB;
+	}
 
 }
