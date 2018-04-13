@@ -567,9 +567,10 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 		if (dimOrder.toLowerCase().matches("xy.*czt")) {
 			int adjN =0;
-			while (n>zDim*cDim*(dimOrder.toLowerCase().matches(".*split.*c.*")?2:1)/vDim) {
-				adjN = adjN + (zDim*cDim*(dimOrder.toLowerCase().matches(".*split.*c.*")?2:1));
-				n = n-zDim*cDim*(dimOrder.toLowerCase().matches(".*split.*c.*")?2:1)/vDim;
+			int zxc = zDim*cDim*(dimOrder.toLowerCase().matches(".*split.*c.*")?2:1);
+			while (n>zxc/vDim) {
+				adjN = adjN + (zxc);
+				n = n-(zxc/vDim);
 			}
 			n=n+adjN;
 		}
@@ -592,8 +593,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		}
 		
 		int dZ = 0;
-		dZ=isViewB?dZB:dZA;
-
+		if (cDim/vDim>1) {
+			dZ=isViewB?dZB:dZA;
+		}
 
 		ImageProcessor ip = null;
 		if (dimOrder == "xyczt") {

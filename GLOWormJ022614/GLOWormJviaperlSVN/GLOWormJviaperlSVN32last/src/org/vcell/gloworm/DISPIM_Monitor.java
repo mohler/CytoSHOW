@@ -638,10 +638,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 						} 
 
 						stackAs[pos] = new MultiFileInfoVirtualStack(
-								dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
+								dirConcat, dimOrder, keyString, cDim*(cDim/vDim>1 && diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
 								false, false, false);
 						stackBs[pos] = new MultiFileInfoVirtualStack(
-								dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
+								dirConcat, dimOrder, keyString, cDim*(cDim/vDim>1 && diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
 								true, false, false);
 
 						if (stackAs[pos].getSize() == 0) {
@@ -2125,7 +2125,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 							tDim = listA.length;
 
 							stackAs[pos] = new MultiFileInfoVirtualStack(
-									dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
+									dirConcat, dimOrder, keyString, cDim*(cDim/vDim>1 && diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
 									false, false, false);
 
 							ImagePlus impNext = new ImagePlus(impAs[pos].getTitle(), stackAs[pos]);
@@ -2173,7 +2173,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 							tDim = listA.length;
 
 							stackBs[pos] = new MultiFileInfoVirtualStack(
-									dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
+									dirConcat, dimOrder, keyString, cDim*(cDim/vDim>1 && diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
 									true, false, false);
 
 							impNext = new CompositeImage(new ImagePlus(impBs[pos].getTitle(), stackBs[pos]));
@@ -4963,7 +4963,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 					tDim = impAs[pos].getNFrames();
 
 					stackAs[pos] = new MultiFileInfoVirtualStack(
-							dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
+							dirConcat, dimOrder, keyString, cDim*(cDim/vDim>1 && diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
 							false, false, false);
 
 					ImagePlus impNext = new ImagePlus(impAs[pos].getTitle(), stackAs[pos]);
@@ -5009,7 +5009,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 					tDim = impBs[pos].getNFrames();
 
 					stackBs[pos] = new MultiFileInfoVirtualStack(
-							dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
+							dirConcat, dimOrder, keyString, cDim*(cDim/vDim>1 && diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
 							true, false, false);
 
 					impNext = new CompositeImage(new ImagePlus(impBs[pos].getTitle(), stackBs[pos]));
