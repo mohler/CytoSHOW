@@ -100,11 +100,11 @@ public class Executer implements Runnable {
 			}
 		}else if (cmd.startsWith("is also expressed in")){
 			//			IJ.showMessage("!"+cmd+"!");
-			String cellPage = ("http://www.wormbase.org/db/get?name="+cmd.split(" ")[4]+";class=Anatomy_term");
+			String cellPage = ("https://www.wormbase.org/db/get?name="+cmd.split(" ")[4]+";class=Anatomy_term");
 			IJ.runPlugIn("ij.plugin.BrowserLauncher", cellPage );
 
 		}else if (cmd.startsWith("expresses")){
-			String genePage = ("http://www.wormbase.org/db/get?name="+cmd.split(" ")[1]+";class=gene");
+			String genePage = ("https://www.wormbase.org/db/get?name="+cmd.split(" ")[1]+";class=gene");
 			//			String genePage = ("http://legacy.wormbase.org/db/gene/gene?name="+cmd.split(" ")[1]+";class=Gene");
 			if (jumpToCytoSHOW && !jumpToWormAtlas) {
 				genePage = ("http://www.gloworm.org/p/genes.html");
@@ -114,7 +114,7 @@ public class Executer implements Runnable {
 				String oldLog = IJ.getLog();
 				IJ.log("\\Clear");
 				IJ.runMacro(""
-						+ "string = File.openUrlAsString(\"http://www.wormbase.org/db/get?name="
+						+ "string = File.openUrlAsString(\"https://www.wormbase.org/db/get?name="
 						+ cmd.split(" ")[1]
 								+ ";class=gene\");"
 								+ "print(string);");							
@@ -126,7 +126,7 @@ public class Executer implements Runnable {
 
 				IJ.log("\\Clear");
 				IJ.runMacro(""
-						+ "string = File.openUrlAsString(\"http://www.wormbase.org"
+						+ "string = File.openUrlAsString(\"https://www.wormbase.org"
 						+ restString
 						+ "\");"
 
@@ -204,7 +204,7 @@ public class Executer implements Runnable {
 			}
 		}else if (cmd.trim().startsWith("begets=>") || cmd.trim().startsWith("cellID=>")){
 			//			String cellPage = "http://legacy.wormbase.org/db/ontology/anatomy?name="+cmd.trim().substring(8,cmd.trim().indexOf(" "))+";open=show_Expr_pattern";
-			String cellPage = "http://www.wormbase.org/db/get?name="+cmd.trim().substring(8,cmd.trim().indexOf(" "))+";class=Anatomy_term";
+			String cellPage = "https://www.wormbase.org/db/get?name="+cmd.trim().substring(8,cmd.trim().indexOf(" "))+";class=Anatomy_term";
 			if (jumpToWormAtlas) cellPage = ("http://wormatlas.org/search_results.html?cx=016220512202578422943%3Amikvfhp2nri&cof=FORID%3A10&ie=UTF-8&q="
 					+cmd.trim().substring(cmd.trim().indexOf(" ")+1, cmd.trim().indexOf(":"))+ "&siteurl=wormatlas.org%252F");
 			if (jumpToCytoSHOW) cellPage = ("http://www.google.com/search?q="+ cmd.trim().substring(8).replaceAll("[:;]", " "));
@@ -215,7 +215,7 @@ public class Executer implements Runnable {
 		}else if (cmd.startsWith("descended from") || cmd.startsWith("analogous to")) {
 			//			IJ.log(cmd);
 			//			String cellPage = "http://legacy.wormbase.org/db/ontology/anatomy?name="+cmd.trim().substring(15)+";open=show_Expr_pattern";
-			String cellPage = "http://www.wormbase.org/db/get?name="+cmd.trim().substring(15)+";class=Anatomy_term";
+			String cellPage = "https://www.wormbase.org/db/get?name="+cmd.trim().substring(15)+";class=Anatomy_term";
 			if (jumpToWormAtlas) cellPage = ("http://wormatlas.org/search_results.html?cx=016220512202578422943%3Amikvfhp2nri&cof=FORID%3A10&ie=UTF-8&q="
 					+cmd.trim().substring(15)+ "&siteurl=wormatlas.org%252F");
 			if (jumpToCytoSHOW) cellPage = ("http://www.google.com/search?q="+cmd.trim().substring(15));
@@ -228,7 +228,7 @@ public class Executer implements Runnable {
 				|| cmd.startsWith("neuromuscular junctions")) {
 			//			IJ.log(cmd);
 			//			String cellPage = "http://legacy.wormbase.org/db/ontology/anatomy?name="+cmd.trim().substring(26,cmd.indexOf(":"))+";open=show_Expr_pattern";
-			String cellPage = "http://www.wormbase.org/db/get?name="+cmd.trim().substring(26,cmd.indexOf(":"))+";class=Anatomy_term";
+			String cellPage = "https://www.wormbase.org/db/get?name="+cmd.trim().substring(26,cmd.indexOf(":"))+";class=Anatomy_term";
 			if (jumpToWormAtlas) cellPage = ("http://wormatlas.org/search_results.html?cx=016220512202578422943%3Amikvfhp2nri&cof=FORID%3A10&ie=UTF-8&q="
 					+cmd.trim().substring(26,cmd.indexOf(":"))+ "&siteurl=wormatlas.org%252F");
 			if (jumpToCytoSHOW) cellPage = ("http://www.google.com/search?q="+cmd.trim().substring(26,cmd.indexOf(":")));

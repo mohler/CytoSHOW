@@ -1715,7 +1715,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 					//					genePopup.add(wbCellID);
 					//					IJ.log("\\Clear");
 					IJ.runMacro(""
-							+ "string = File.openUrlAsString(\"http://www.wormbase.org/db/get?name="
+							+ "string = File.openUrlAsString(\"https://www.wormbase.org/db/get?name="
 							+ cellName
 							+ ";class=Anatomy_term\");"
 							+ "print(string);");							
@@ -1728,7 +1728,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 						restString = logLines2[1].split("\"")[1];
 
 					IJ.runMacro(""
-							+ "string = File.openUrlAsString(\"http://www.wormbase.org"
+							+ "string = File.openUrlAsString(\"https://www.wormbase.org"
 							+ restString
 							+ "\");"
 

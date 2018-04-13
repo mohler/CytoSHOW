@@ -174,9 +174,9 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						} else if ( !tmp.contains(File.separator) 
 								&& (tmp.trim().split(" ")[0].toLowerCase().matches("\\D{3,5}-\\d{1,4}")
 										|| tmp.trim().split(" ")[0].toLowerCase().matches("\\D{1}\\d{1,2}\\D{1,2}\\d{1,2}\\.\\d{1,2}"))) {
-							//							IJ.log("http://www.wormbase.org/db/get?name="+ tmp.trim().split(" ")[0] + ";class=gene"
+							//							IJ.log("https://www.wormbase.org/db/get?name="+ tmp.trim().split(" ")[0] + ";class=gene"
 							//									+ (tmp.trim().split(" ").length>1?" "+tmp.trim().split(" ")[1]:""));
-							list.add("http://www.wormbase.org/db/get?name="+ tmp.trim().split(" ")[0] + ";class=gene"
+							list.add("https://www.wormbase.org/db/get?name="+ tmp.trim().split(" ")[0] + ";class=gene"
 									+ (tmp.trim().split(" ").length>1?" "+tmp.trim().split(" ")[tmp.trim().split(" ").length-1]:""));
 
 						} else if (tmp.endsWith("ColorLegend.lgd")){
@@ -191,7 +191,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							if (IJ.debugMode) IJ.log(" fileinput");
 							list.add(new File(tmp));
 						} else if (tmp.trim().split(" ")[0].toLowerCase().matches(".*expr\\d*.*")){
-							list.add("http://www.wormbase.org/species/c_elegans/expr_pattern/" +tmp.trim());
+							list.add("https://www.wormbase.org/species/c_elegans/expr_pattern/" +tmp.trim());
 						} else if (tmp.trim().equalsIgnoreCase("*") || tmp.trim().equalsIgnoreCase(".*")) {
 							imp.getRoiManager().getTextSearchField().setText("");
 							imp.getRoiManager().actionPerformed(new ActionEvent(imp.getRoiManager().getTextSearchField(),0,"",0,0));
@@ -516,7 +516,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							nDrops--;
 							return;
 						}
-					} else if (imp !=null && ((String)obj).contains("http://www.wormbase.org/")){
+					} else if (imp !=null && ((String)obj).contains("https://www.wormbase.org/")){
 						imp.getRoiManager().setBusy(true);
 						Graphics g = dropImp.getCanvas().getGraphics();
 						if (dropImp.getCanvas().messageRois.containsKey("Finding tags from drop"))
@@ -535,7 +535,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 
 
 						if ( ((String)obj).matches(".*/anatomy_term/WBbt:\\d*") ||
-								((String)obj).matches(".*http://www.wormbase.org/db/get\\?name=.*;class=Anatomy_term")){
+								((String)obj).matches(".*https://www.wormbase.org/db/get\\?name=.*;class=Anatomy_term")){
 							//							IJ.log("cellURL");
 							String cellColorCode = (((String)obj).split(" ").length>1?((String)obj).split(" ")[((String)obj).split(" ").length-1].trim():"");
 							String oldLog = IJ.getLog();
@@ -676,7 +676,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 								}
 							}
 						} else if ( ((String)obj).matches(".*/gene/WBGene\\d*.*") 
-								|| ((String)obj).matches(".*http://www.wormbase.org/db/get\\?name=.*;class=gene.*")){
+								|| ((String)obj).matches(".*https://www.wormbase.org/db/get\\?name=.*;class=gene.*")){
 							String cellColorCode = (((String)obj).split(" ").length>1?((String)obj).split(" ")[((String)obj).split(" ").length-1].trim():"");
 							String oldLog = IJ.getLog();
 							IJ.log("\\Clear");
@@ -693,7 +693,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 
 							IJ.log("\\Clear");
 							IJ.runMacro(""
-									+ "string = File.openUrlAsString(\"http://www.wormbase.org"
+									+ "string = File.openUrlAsString(\"https://www.wormbase.org"
 									+ restString
 									+ "\");"
 
@@ -834,7 +834,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 								}
 							}
 							dropImp.getCanvas().droppedGeneUrls = (dropImp.getCanvas().droppedGeneUrls != ""?dropImp.getCanvas().droppedGeneUrls:"(Live_from_WormBase...)\nCells_expressing:\n") 
-									+ ((String)obj).replace("http://www.wormbase.org/db/get?name=", "")
+									+ ((String)obj).replace("https://www.wormbase.org/db/get?name=", "")
 									.replace(";class=gene", "")
 									.replaceAll(".*/gene/", "").split(" ")[0]+ "&";
 
@@ -854,7 +854,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 
 							IJ.log("\\Clear");
 							IJ.runMacro(""
-									+ "string = File.openUrlAsString(\"http://www.wormbase.org"
+									+ "string = File.openUrlAsString(\"https://www.wormbase.org"
 									+ restString
 									+ "\");"
 

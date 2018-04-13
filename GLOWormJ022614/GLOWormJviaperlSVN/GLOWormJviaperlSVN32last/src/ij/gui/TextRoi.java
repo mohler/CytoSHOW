@@ -422,7 +422,7 @@ public class TextRoi extends Roi {
 //					"http://legacy.wormbase.org/db/ontology/anatomy?name="
 //							+ theText[0].replace("\'", "\\\'")
 //							+ ";open=show_Expr_pattern");
-					"http://www.wormbase.org/db/get?name="
+					"https://www.wormbase.org/db/get?name="
 							+ searchText
 							+ ";class=Anatomy_term");
 		}

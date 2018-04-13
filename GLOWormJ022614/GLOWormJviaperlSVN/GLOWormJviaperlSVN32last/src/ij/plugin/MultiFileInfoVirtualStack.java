@@ -50,6 +50,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	private  int dXB;
 	private  int dYA;
 	private  int dYB;
+	private  int dZA;
+	private  int dZB;
 	private boolean reverseChannelOrder;
 
 
@@ -93,6 +95,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		dXB= Integer.parseInt(Prefs.get("diSPIMmonitor.dXB", "0"));
 		dYA= Integer.parseInt(Prefs.get("diSPIMmonitor.dYA", "0"));
 		dYB= Integer.parseInt(Prefs.get("diSPIMmonitor.dYB", "0"));
+		dZA= Integer.parseInt(Prefs.get("diSPIMmonitor.dZA", "0"));
+		dZB= Integer.parseInt(Prefs.get("diSPIMmonitor.dZB", "0"));
 		infoCollectorArrayList =new ArrayList<FileInfo[]>();;
 		touchedFiles = new ArrayList<String>();
 
@@ -587,6 +591,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			sliceNumber = sliceNumber%2==0?(sliceNumber+1):(sliceNumber-1);
 		}
 		
+		int dZ = 0;
+		dZ=isViewB?dZB:dZA;
 
 
 		ImageProcessor ip = null;
@@ -597,7 +603,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			if (vSliceNumber%2 == 0) {
 				vSliceNumber = vSliceNumber-1;
 			} else {
-				vSliceNumber = vSliceNumber-1;
+				vSliceNumber = vSliceNumber-1+(2*dZ);
 			}
 
 			if (vSliceNumber>fivStacks.get(stackNumber).getSize()) {
@@ -611,6 +617,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 			int dX = 0;
 			int dY = 0;
+			
+			dX=isViewB?dXB:dXA;
+			dY=isViewB?dYB:dYA;
 
 			vSliceNumber = (sliceNumber)+(isViewB?zDim*(cDim/2)*(dimOrder.toLowerCase().matches(".*splitsequentialc.*")?2:1):0);
 
@@ -621,7 +630,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				if (vSliceNumber%2 == 0) {
 					vSliceNumber = vSliceNumber-1;
 				} else {
-					vSliceNumber = vSliceNumber-1;
+					vSliceNumber = vSliceNumber-1+(2*dZ);
 				}
 			}
 
@@ -647,11 +656,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				int xOri = 256+((1-(n+1)%2)*(1024));
 				int yOri = 0+((1-(n+1)%2)*(0));
 				ip.setRoi(xOri, yOri, 512, 512);
-			} else if (ip.getWidth()==1536) //Yale splitview setup
-			{
-				dX=isViewB?dXB:dXA;
-				dY=isViewB?dYB:dYA;
-
+			} else if (ip.getWidth()==1536) {		//Yale splitview setup
+			
 				int xOri = 0+((0+(n+1)%2)*(1024));
 				int yOri = 0+((1-(n+1)%2)*(0));
 				ip.setRoi(xOri, yOri, 512, 512);
@@ -661,12 +667,12 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		}
 		if (dimOrder == "xyzct") {
 			initiateStack(stackNumber, sliceNumber);
-			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber/cDim + ((sliceNumber%cDim)*fivStacks.get(stackNumber).getSize()/(vDim))
+			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber/cDim + ((sliceNumber%cDim)*fivStacks.get(stackNumber).getSize()/(vDim))+(sliceNumber%2==0?0:dZ)
 					+(isViewB?fivStacks.get(stackNumber).getSize()/(cDim*vDim):0));
 		}
 		if (dimOrder == "xyztc") {
 			initiateStack(stackNumber, sliceNumber);
-			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber);
+			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber+(sliceNumber%2==0?0:dZ));
 		}
 
 		if (ip instanceof FloatProcessor) {
