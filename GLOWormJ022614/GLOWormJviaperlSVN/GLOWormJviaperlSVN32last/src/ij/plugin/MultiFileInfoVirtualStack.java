@@ -53,6 +53,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	private  int dZA;
 	private  int dZB;
 	private boolean reverseChannelOrder;
+	private boolean rawdispimdata;
 
 
 	/* Default constructor. */
@@ -78,7 +79,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		this(dirOrOMETiff, "xyczt", string, 0, 0, 0, 1, -1, isViewB, show, false);
 	}
 
-	public MultiFileInfoVirtualStack(String arg, String sliceOrder, String keyString, int cDim, int zDim, int tDim, int vDim, int pos, boolean isViewB, boolean show, boolean findPeerFolders) {
+	public MultiFileInfoVirtualStack(String arg, String sliceOrder, String keyString, int cDim, int zDim, int tDim, int vDim, int pos, boolean isViewB, boolean show, boolean rawdispimdata) {
+		this.rawdispimdata = rawdispimdata;
 		this.keyString = keyString;
 		this.isViewB = isViewB;
 		if (cDim<0) {
@@ -593,7 +595,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		}
 		
 		int dZ = 0;
-		if (cDim/vDim>1) {
+		if (rawdispimdata && cDim/vDim>1 ) {
 			dZ=isViewB?dZB:dZA;
 		}
 
