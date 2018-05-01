@@ -683,8 +683,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				}
 
 				for (Roi selRoi:getSelectedRoisAsArray()) {
-					String rootName = selRoi.getName().contains("\"")?"\""+selRoi.getName().split("\"")[1]+"\"":selRoi.getName().split("_")[0].trim();
-//					rootName = rootName.contains(" ")?rootName.split("[_\\- ]")[0].trim():rootName;
+//					String rootName = selRoi.getName().contains("\"")?"\""+selRoi.getName().split("\"")[1]+"\"":selRoi.getName().split("_")[0].trim();
+
+					String rootName = selRoi.getName().contains("\"")?"\""+selRoi.getName().split("\"")[1].trim():selRoi.getName().split("_")[0].trim();
+
 					String[] rootChunks = selRoi.getName().split("_");
 					String rootFrame = rootChunks[rootChunks.length-1].replaceAll("[CZT]", "").split("-")[0];
 					if (!rootNames_rootFrames.contains(rootName+"_"+rootFrame)) {
@@ -694,6 +696,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				}
 				
 				ArrayList<Integer> nameMatchIndexArrayList = new ArrayList<Integer>();
+				ArrayList<String> nameReplacementArrayList = new ArrayList<String>();
 
 				for (int n=0; n<rootNames.size(); n++) {
 					String rootName = rootNames.get(n);
@@ -701,16 +704,20 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					int fraaa = rois2.length;
 					for (int r2=0; r2 < fraaa; r2++) {
 						String nextName = rois2[r2].getName();
-						if (nextName.startsWith(rootName)){
+						if (nextName.matches(rootName+"[m|n]* \".*")){
 							nameMatchIndexArrayList.add(r2);
+							nameReplacementArrayList.add(nextName.replaceAll(rootName+"([m|n]*)( \".*)", newName+"$1$2"));
 						}
 					}
 
 				}
 				int[] nameMatchIndexes = new int[nameMatchIndexArrayList.size()];
-				for (int n=0;n<nameMatchIndexes.length;n++)
+				String[] newNames = new String[nameMatchIndexArrayList.size()];
+				for (int n=0;n<nameMatchIndexes.length;n++) {
 					nameMatchIndexes[n] = nameMatchIndexArrayList.get(n);
-				if (rename(newName, nameMatchIndexes, true)) {
+					newNames[n] = nameReplacementArrayList.get(n);
+				}
+				if (rename(newNames, nameMatchIndexes, true)) {
 					if (existinghexName !="") {
 						for (int i=0; i < nameMatchIndexes.length; i++) {
 							this.select(nameMatchIndexes[i]);
@@ -1541,7 +1548,16 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		return true;
 	}
 
-	boolean rename(String name2,  int[] indexes, boolean updateCanvas) {
+	private void rename(String label2, int[] indexes, boolean updateCanvas) {
+		String[] newNames = new String[indexes.length];
+		for(String newName:newNames) {
+			newName=label2;
+		}
+		rename(newNames,  indexes, updateCanvas);
+		
+	}
+
+	boolean rename(String[] newNames,  int[] indexes, boolean updateCanvas) {
 		//		int index = list.getSelectedIndex();
 		//		Roi[] selectedRois = this.getSelectedRoisAsArray();
 		if (indexes == null)
@@ -1555,29 +1571,30 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			int c= roi.getCPosition()>0?roi.getCPosition(): imp.getChannel();
 			int z= roi.getZPosition()>0?roi.getZPosition(): imp.getSlice();
 			int t= roi.getTPosition()>0?roi.getTPosition(): imp.getFrame();
-			if (name2==null) {
+			if (newNames[i]==null) {
 				if (roi instanceof TextRoi)
-					name2 = promptForName(((TextRoi)roi).getText().replace("\n","|"));
+					newNames[i] = promptForName(((TextRoi)roi).getText().replace("\n","|"));
 				else if (name.split("\"").length > 1)
-					name2 = promptForName(name.split("\"")[1]).trim();
+					newNames[i] = promptForName(name.split("\"")[1]).trim();
 				else
-					name2 = promptForName(name);
+					newNames[i] = promptForName(name);
 			}
-			if (name2==null) return false;
+			if (newNames[i]==null) return false;
 			rois.remove(name);
 			String label = name!=null?name:getLabel(imp, roi, -1);
-			if (roi instanceof TextRoi)
+			if (roi instanceof TextRoi) {
 				if (imp != null) {
-					((TextRoi)roi).setText(name2);
+					((TextRoi)roi).setText(newNames[i]);
 					label = (((TextRoi)roi).getText().indexOf("\n")>0?("\""+((TextRoi)roi).getText().replace("\n"," ")+"\""):"Blank") +"_"+ c +"_"+ z +"_"+ t;
-				} else 
+				} else {
 					label = roi.getName();
-			else if (true){
+				}
+			} else if (true){
 				String altType = null;
 				if (roi instanceof EllipseRoi) altType = "Ellipse";
 				if (roi instanceof Arrow) altType = "Arrow";
 				if (imp != null) 
-					label = ("\""+name2+" \"")  +"_"+ c +"_"+ z +"_"+ t;
+					label = ("\""+newNames[i]+" \"")  +"_"+ c +"_"+ z +"_"+ t;
 				else 
 					label = roi.getName();
 			}
@@ -1621,7 +1638,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (updateCanvas)
 			updateShowAll();
 		if (record())
-			Recorder.record("roiManager", "Rename", name2);
+			Recorder.record("roiManager", "Rename", newNames[0]);
 		return true;
 	}
 

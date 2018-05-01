@@ -738,6 +738,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			}
 		}
 
+		//		ip.multiply(0.25);
 
 		//		ip.setMinAndMax(min, max);
 		if (edges) {
