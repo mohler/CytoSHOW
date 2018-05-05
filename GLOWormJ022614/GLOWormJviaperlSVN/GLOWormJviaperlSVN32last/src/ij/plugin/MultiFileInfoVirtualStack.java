@@ -410,7 +410,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 	void open(boolean show) {
 		String[] splitPath = cumulativeTiffFileArray[0].split(Pattern.quote(File.separator));
-		if (splitPath[splitPath.length-1].startsWith("MMStack_") && (cumulativeTiffFileArray.length >0)) { 
+		if (splitPath[splitPath.length-1].contains("MMStack_") && (cumulativeTiffFileArray.length >0)) { 
 			nImages = 0;
 			for (FileInfoVirtualStack mmStack:fivStacks) {
 				nImages = nImages + mmStack.getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1);

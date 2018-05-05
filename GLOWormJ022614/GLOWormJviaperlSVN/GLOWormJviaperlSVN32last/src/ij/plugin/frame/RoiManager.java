@@ -1550,8 +1550,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	private void rename(String label2, int[] indexes, boolean updateCanvas) {
 		String[] newNames = new String[indexes.length];
-		for(String newName:newNames) {
-			newName=label2;
+		for(int n=0;n<newNames.length;n++) {
+			newNames[n]=label2;
 		}
 		rename(newNames,  indexes, updateCanvas);
 		
