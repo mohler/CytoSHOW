@@ -13,6 +13,7 @@ import java.util.Date;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -30,6 +31,7 @@ import ij.plugin.PlugIn;
 import ij.plugin.RoiRotator;
 import ij.plugin.frame.ColorLegend;
 import ij.process.ImageProcessor;
+import ij.process.LUT;
 import ij.process.ShortProcessor;
 
 public class StarryNiteFeeder implements PlugIn {
@@ -56,7 +58,12 @@ public class StarryNiteFeeder implements PlugIn {
 		
 		for (int w=1; w<=WindowManager.getImageCount(); w++){
 			ImagePlus imp = WindowManager.getImage(w);	
-
+			LUT[] impLUTs = null;
+			int greenMax = 0;
+			if (imp.isComposite()) {
+				impLUTs = (((CompositeImage)imp).getLuts());
+				greenMax = (int) impLUTs[0].max;
+			}
 			while (imp.getRoi() == null) {
 				w++;
 				if (w>WindowManager.getImageCount()){
@@ -200,8 +207,12 @@ public class StarryNiteFeeder implements PlugIn {
 
 					// Green channel:
 
-					frameGreenImp.getProcessor().setMinAndMax(0, 5000);
-
+					if (greenMax>0) {
+						frameGreenImp.getProcessor().setMinAndMax(0, greenMax);
+					}else {
+						frameGreenImp.getProcessor().setMinAndMax(0, 5000);
+					}
+					
 					IJ.run(frameGreenImp,"8-bit","");
 
 					new File(outDir+subdir+"/image/tifr/").mkdirs();
