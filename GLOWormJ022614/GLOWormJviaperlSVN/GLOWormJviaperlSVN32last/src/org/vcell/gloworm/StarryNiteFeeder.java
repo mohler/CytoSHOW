@@ -31,8 +31,10 @@ import ij.plugin.PlugIn;
 import ij.plugin.RoiRotator;
 import ij.plugin.frame.ColorLegend;
 import ij.process.ImageProcessor;
+import ij.process.ImageStatistics;
 import ij.process.LUT;
 import ij.process.ShortProcessor;
+import ij.process.StackStatistics;
 
 public class StarryNiteFeeder implements PlugIn {
 
@@ -206,15 +208,28 @@ public class StarryNiteFeeder implements PlugIn {
 
 
 					// Green channel:
+					new File(outDir+subdir+"/image/tifr16/").mkdirs();
 
-					if (greenMax>0) {
+
+					String command16 = "format=TIFF start=1 name=aaa-t";
+					command16 += ""+IJ.pad(f,3)+" digits=0 ";
+					command16 += "save=";
+
+					String command162 = "["+outDir+subdir+"/image/tifr16]";
+					//print(command16+command162);
+					IJ.run(frameGreenImp, "StarryNite Image Sequence... ", command16+command162);
+					
+					if (greenMax==65535) {
+						ImageStatistics stkStats = new StackStatistics(frameGreenImp);
+						frameGreenImp.getProcessor().setMinAndMax(0,stkStats.max);
+					} else if (greenMax>0) {
 						frameGreenImp.getProcessor().setMinAndMax(0, greenMax);
 					}else {
 						frameGreenImp.getProcessor().setMinAndMax(0, 5000);
 					}
 					
 					IJ.run(frameGreenImp,"8-bit","");
-
+					
 					new File(outDir+subdir+"/image/tifr/").mkdirs();
 
 
