@@ -54,7 +54,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	private  int dZB;
 	private boolean reverseChannelOrder;
 	private boolean rawdispimdata;
-
+	private boolean initiatorRunning;
+	private int pos;
 
 	/* Default constructor. */
 	public MultiFileInfoVirtualStack() {}
@@ -91,6 +92,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		this.zDim = zDim;
 		this.tDim = tDim;
 		this.vDim = vDim;
+		this.pos = pos;
 		dimOrder = sliceOrder;
 		fivStacks = new ArrayList<FileInfoVirtualStack>();
 		dXA= Integer.parseInt(Prefs.get("diSPIMmonitor.dXA", "0"));
@@ -99,8 +101,45 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		dYB= Integer.parseInt(Prefs.get("diSPIMmonitor.dYB", "0"));
 		dZA= Integer.parseInt(Prefs.get("diSPIMmonitor.dZA", "0"));
 		dZB= Integer.parseInt(Prefs.get("diSPIMmonitor.dZB", "0"));
-		infoCollectorArrayList =new ArrayList<FileInfo[]>();;
+		infoCollectorArrayList =new ArrayList<FileInfo[]>();
+		
+		ObjectInputStream ois;
+		try {
+			ois = new ObjectInputStream(new FileInputStream(infoDir+"touchedFileFIs"+pos+".inf"));
+			try {
+				infoCollectorArrayList  = (ArrayList<FileInfo[]>) ois.readObject();
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			ois.close();
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
 		touchedFiles = new ArrayList<String>();
+		
+		ObjectInputStream tfis;
+		try {
+			tfis = new ObjectInputStream(new FileInputStream(infoDir+"touchedFileNames"+pos+".txt"));
+			try {
+				touchedFiles  = (ArrayList<String>) tfis.readObject();
+			} catch (ClassNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			tfis.close();
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 
 		String[] args = arg.split("\\|");
 		
@@ -303,42 +342,44 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			}	
 
 			if (channelDirectories >0) {
+				if (infoCollectorArrayList.size()==0){
+					for (String fileName:goDirFileList){
+						if ((new File(dir + fileName)).canRead() && fileName.toLowerCase().endsWith(".tif")) {
+							if (dummyInfoArray == null || fileName==lastFileNameOfBunch) {
+								TiffDecoder td = new TiffDecoder(dir, fileName);
+								if (IJ.debugMode) td.enableDebugging();
+								IJ.showStatus("Decoding TIFF header...");
+								try {infoCollectorArrayList.add(td.getTiffInfo(0));}
+								catch (IOException e) {
+									String msg = e.getMessage();
+									if (msg==null||msg.equals("")) msg = ""+e;
+									IJ.error("TiffDecoder", msg);
+									return;
+								}
+							} else {
+								TiffDecoder td = new TiffDecoder(dir, fileName);
+								if (IJ.debugMode) td.enableDebugging();
+								IJ.showStatus("Decoding  TIFF image headers..."+fileName);
+								infoCollectorArrayList.add(new FileInfo[dummyInfoArray.length]);
+								for (int si=0; si<infoCollectorArrayList.get(infoCollectorArrayList.size()-1).length; si++) {
+									infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[si] = (FileInfo) dummyInfoArray[si].clone();
+									infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[si].fileName = fileName;
+								}
 
-				for (String fileName:goDirFileList){
-					if ((new File(dir + fileName)).canRead() && fileName.toLowerCase().endsWith(".tif")) {
-						if (dummyInfoArray == null || fileName==lastFileNameOfBunch) {
-							TiffDecoder td = new TiffDecoder(dir, fileName);
-							if (IJ.debugMode) td.enableDebugging();
-							IJ.showStatus("Decoding TIFF header...");
-							try {infoCollectorArrayList.add(td.getTiffInfo(0));}
-							catch (IOException e) {
-								String msg = e.getMessage();
-								if (msg==null||msg.equals("")) msg = ""+e;
-								IJ.error("TiffDecoder", msg);
-								return;
 							}
-						} else {
-							TiffDecoder td = new TiffDecoder(dir, fileName);
-							if (IJ.debugMode) td.enableDebugging();
-							IJ.showStatus("Decoding  TIFF image headers..."+fileName);
-							infoCollectorArrayList.add(new FileInfo[dummyInfoArray.length]);
-							for (int si=0; si<infoCollectorArrayList.get(infoCollectorArrayList.size()-1).length; si++) {
-								infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[si] = (FileInfo) dummyInfoArray[si].clone();
-								infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[si].fileName = fileName;
+							if (infoCollectorArrayList==null || infoCollectorArrayList.size()==0) {
+								continue;
 							}
-
+							fivStacks.add(new FileInfoVirtualStack());
+							final int sizeWas = fivStacks.size();
+							fivStacks.get(sizeWas-1).infoArray = infoCollectorArrayList.get(infoCollectorArrayList.size()-1);
+							fivStacks.get(sizeWas-1).setupStack();
+						} else if (fileName.matches(".*channel.*-frame.* missing")) {
+							fivStacks.add(new FileInfoVirtualStack(new FileInfo(), false));
+							for (FileInfo sliceInfo:fivStacks.get(fivStacks.size()-1).infoArray)
+								sliceInfo.fileName = fileName;
+							fivStacks.get(fivStacks.size()-1).setupStack();
 						}
-						if (infoCollectorArrayList==null || infoCollectorArrayList.size()==0) {
-							continue;
-						}
-						fivStacks.add(new FileInfoVirtualStack());
-						fivStacks.get(fivStacks.size()-1).infoArray = infoCollectorArrayList.get(infoCollectorArrayList.size()-1);
-						fivStacks.get(fivStacks.size()-1).setupStack();
-					} else if (fileName.matches(".*channel.*-frame.* missing")) {
-						fivStacks.add(new FileInfoVirtualStack(new FileInfo(), false));
-						for (FileInfo sliceInfo:fivStacks.get(fivStacks.size()-1).infoArray)
-							sliceInfo.fileName = fileName;
-						fivStacks.get(fivStacks.size()-1).setupStack();
 					}
 				}
 				if (fivStacks.size() > 0) {
@@ -754,7 +795,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (fivStacks!=null && fivStacks.size()>stkNum && fivStacks.get(stkNum).infoArray.length>slcNum) {
 
 			String currentFileName =fivStacks.get(stkNum).infoArray[slcNum].fileName;
+			
 			if (!touchedFiles.contains(currentFileName)) {
+				initiatorRunning = true;
 				TiffDecoder td = new TiffDecoder(dir, currentFileName);
 				if (IJ.debugMode) td.enableDebugging();
 				IJ.showStatus("Decoding TIFF header...");
@@ -764,9 +807,29 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					if (msg==null||msg.equals("")) msg = ""+e;
 					IJ.error("TiffDecoder", msg);
 				}
+				ObjectOutputStream oos;
+				try {
+					oos = new ObjectOutputStream(new FileOutputStream(infoDir+"touchedFileFIs"+pos+".inf"));
+					oos.writeObject(infoCollectorArrayList);
+					oos.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				fivStacks.get(stkNum).infoArray = infoCollectorArrayList.get(stkNum);
 
 				touchedFiles.add(currentFileName);
+				ObjectOutputStream tfos;
+				try {
+					tfos = new ObjectOutputStream(new FileOutputStream(infoDir+"touchedFileNames"+pos+".txt"));
+					tfos.writeObject(touchedFiles);
+					tfos.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				initiatorRunning = false;
+
 			}
 		}
 	}
