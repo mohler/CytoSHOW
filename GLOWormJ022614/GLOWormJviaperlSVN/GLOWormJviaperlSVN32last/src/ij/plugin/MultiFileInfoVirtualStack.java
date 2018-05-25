@@ -103,44 +103,6 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		dZB= Integer.parseInt(Prefs.get("diSPIMmonitor.dZB", "0"));
 		infoCollectorArrayList =new ArrayList<FileInfo[]>();
 		
-		ObjectInputStream ois;
-		try {
-			ois = new ObjectInputStream(new FileInputStream(infoDir+"touchedFileFIs"+pos+".inf"));
-			try {
-				infoCollectorArrayList  = (ArrayList<FileInfo[]>) ois.readObject();
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			ois.close();
-		} catch (FileNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-
-		touchedFiles = new ArrayList<String>();
-		
-		ObjectInputStream tfis;
-		try {
-			tfis = new ObjectInputStream(new FileInputStream(infoDir+"touchedFileNames"+pos+".txt"));
-			try {
-				touchedFiles  = (ArrayList<String>) tfis.readObject();
-			} catch (ClassNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			tfis.close();
-		} catch (FileNotFoundException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
-
 		String[] args = arg.split("\\|");
 		
 		File argFile = new File(args[0]);
@@ -159,6 +121,48 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (dir.length() > 0 && !dir.endsWith(File.separator))
 			dir = dir + File.separator;
 		infoDir = dir;
+		
+		if (new File(infoDir+"touchedFileFIs"+pos+".inf").canRead()) {
+			ObjectInputStream ois;
+			try {
+				ois = new ObjectInputStream(new FileInputStream(infoDir+"touchedFileFIs"+pos+".inf"));
+				try {
+					infoCollectorArrayList  = (ArrayList<FileInfo[]>) ois.readObject();
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				ois.close();
+			} catch (FileNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
+		touchedFiles = new ArrayList<String>();
+		
+		if (new File(infoDir+"touchedFileNames"+pos+".txt").canRead()) {
+			ObjectInputStream tfis;
+			try {
+				tfis = new ObjectInputStream(new FileInputStream(infoDir+"touchedFileNames"+pos+".txt"));
+				try {
+					touchedFiles  = (ArrayList<String>) tfis.readObject();
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				tfis.close();
+			} catch (FileNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		}
+		
 		ArrayList<String> bigSubFileArrayList = new ArrayList<String>();
 		ArrayList<String> cumulativeSubFileArrayList = new ArrayList<String>();
 		ArrayList<ArrayList<String>> channelArrayLists = new ArrayList<ArrayList<String>>();
@@ -381,30 +385,38 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 							fivStacks.get(fivStacks.size()-1).setupStack();
 						}
 					}
-				}
-				if (fivStacks.size() > 0) {
-					ArrayList<FileInfo> infoArrayList = new ArrayList<FileInfo>();
-					for (FileInfo[] fia:infoCollectorArrayList) {
-						for (FileInfo fi:fia) {
-							infoArrayList.add(fi);
-						}
+				} else {
+					for (int i = 0; i<infoCollectorArrayList.size(); i++) {
+						fivStacks.add(new FileInfoVirtualStack());
+						final int sizeWas = fivStacks.size();
+						fivStacks.get(sizeWas-1).infoArray = infoCollectorArrayList.get(i);
+						fivStacks.get(sizeWas-1).setupStack();
 					}
-					infoArray = new FileInfo[infoArrayList.size()];
-					for (int f=0;f<infoArray.length;f++) {
-						infoArray[f] = (FileInfo) infoArrayList.get(f);
-//						IJ.log("fi "+(f+1)+infoArray[f].directory+File.separator+infoArray[f].fileName);
-					
-					}
-//					int cnt=0;
-//					for (int fs =0;fs<fivStacks.size();fs++) {
-//						IJ.log("fivStack "+(fs+1 )+"= "+fivStacks.get(fs).getSize()+"slices");
-//						cnt=cnt+fivStacks.get(fs).getSize();
-//					}
-//					IJ.log("fivStacks.size ="+fivStacks.size());
-//					IJ.log("fivStacks ="+cnt+" total images");
-					open(show);
 				}
 			}
+			if (fivStacks.size() > 0) {
+				ArrayList<FileInfo> infoArrayList = new ArrayList<FileInfo>();
+				for (FileInfo[] fia:infoCollectorArrayList) {
+					for (FileInfo fi:fia) {
+						infoArrayList.add(fi);
+					}
+				}
+				infoArray = new FileInfo[infoArrayList.size()];
+				for (int f=0;f<infoArray.length;f++) {
+					infoArray[f] = (FileInfo) infoArrayList.get(f);
+					//						IJ.log("fi "+(f+1)+infoArray[f].directory+File.separator+infoArray[f].fileName);
+
+				}
+				//					int cnt=0;
+				//					for (int fs =0;fs<fivStacks.size();fs++) {
+				//						IJ.log("fivStack "+(fs+1 )+"= "+fivStacks.get(fs).getSize()+"slices");
+				//						cnt=cnt+fivStacks.get(fs).getSize();
+				//					}
+				//					IJ.log("fivStacks.size ="+fivStacks.size());
+				//					IJ.log("fivStacks ="+cnt+" total images");
+				open(show);
+			}
+
 
 		}
 	}
