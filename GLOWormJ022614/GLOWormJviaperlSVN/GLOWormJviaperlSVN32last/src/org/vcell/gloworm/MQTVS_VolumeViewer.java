@@ -5,8 +5,6 @@ import java.awt.image.ColorModel;
 import java.io.File;
 import java.util.Date;
 
-import com.apple.laf.AquaButtonBorder.Toolbar;
-
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;

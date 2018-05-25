@@ -1242,9 +1242,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 				String savePathParent = IJ.getDirectory("Select where to make Output Folder");
 				if (savePathParent.contains(dirOrOMETiff)) { 
 					String shortName = (new File(dirOrOMETiff)).getName().replaceAll("_", "").replaceAll("&", "AND");
-					savePath = (new File(dirOrOMETiff)).getParent() + File.separator+shortName.substring(0, shortName.length()<90?shortName.length():85)+"..._Output"+ File.separator;
+					savePath = (new File(dirOrOMETiff)).getParent() + File.separator+"Decon_"+shortName.substring(0, shortName.length()<90?shortName.length():85).replaceAll("_", "").replaceAll("&", "AND")+"..._Output"+ File.separator;
 				} else {
-					savePath = savePathParent + File.separator + (new File(dirOrOMETiff)).getName().replaceAll("_", "").replaceAll("&", "AND") +"..._Output"+ File.separator;
+					savePath = savePathParent + File.separator +"Decon_"+ (new File(dirOrOMETiff)).getName().replaceAll("_", "").replaceAll("&", "AND") +"..._Output"+ File.separator;
 				}
 				
 				new File(savePath).mkdirs();
