@@ -24,8 +24,7 @@ import org.vcell.gloworm.QTVirtualStack;
 public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	ArrayList<FileInfoVirtualStack> fivStacks;
 	FileInfo[] infoArray;
-	ArrayList<FileInfo[]> infoCollectorArrayList;
-	ArrayList<String> touchedFiles;
+	public ArrayList<FileInfo[]> infoCollectorArrayList;
 	int nImages;
 	private String dir;
 	private int channelDirectories;
@@ -38,7 +37,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	private String[] cumulativeTiffFileArray;
 	private FileInfo[] dummyInfoArray;
 	private int largestDirectoryTiffCount;
-	private String infoDir;
+	public String infoDir;
 	private int  cDim, zDim;
 	public int tDim;
 	private int  vDim=1;
@@ -56,6 +55,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	private boolean rawdispimdata;
 	private boolean initiatorRunning;
 	private int pos;
+	private boolean newRealInfo;
 
 	/* Default constructor. */
 	public MultiFileInfoVirtualStack() {}
@@ -101,7 +101,6 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		dYB= Integer.parseInt(Prefs.get("diSPIMmonitor.dYB", "0"));
 		dZA= Integer.parseInt(Prefs.get("diSPIMmonitor.dZA", "0"));
 		dZB= Integer.parseInt(Prefs.get("diSPIMmonitor.dZB", "0"));
-		infoCollectorArrayList =new ArrayList<FileInfo[]>();
 		
 		String[] args = arg.split("\\|");
 		
@@ -122,47 +121,12 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			dir = dir + File.separator;
 		infoDir = dir;
 		
-		if (new File(infoDir+"touchedFileFIs"+pos+".inf").canRead()) {
-			ObjectInputStream ois;
-			try {
-				ois = new ObjectInputStream(new FileInputStream(infoDir+"touchedFileFIs"+pos+".inf"));
-				try {
-					infoCollectorArrayList  = (ArrayList<FileInfo[]>) ois.readObject();
-				} catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				ois.close();
-			} catch (FileNotFoundException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		}
-		touchedFiles = new ArrayList<String>();
+		infoCollectorArrayList =new ArrayList<FileInfo[]>();
+
+		getSavedExtractedFileInfos(pos);
+	
 		
-		if (new File(infoDir+"touchedFileNames"+pos+".txt").canRead()) {
-			ObjectInputStream tfis;
-			try {
-				tfis = new ObjectInputStream(new FileInputStream(infoDir+"touchedFileNames"+pos+".txt"));
-				try {
-					touchedFiles  = (ArrayList<String>) tfis.readObject();
-				} catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				tfis.close();
-			} catch (FileNotFoundException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		}
-		
+	
 		ArrayList<String> bigSubFileArrayList = new ArrayList<String>();
 		ArrayList<String> cumulativeSubFileArrayList = new ArrayList<String>();
 		ArrayList<ArrayList<String>> channelArrayLists = new ArrayList<ArrayList<String>>();
@@ -367,7 +331,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 								infoCollectorArrayList.add(new FileInfo[dummyInfoArray.length]);
 								for (int si=0; si<infoCollectorArrayList.get(infoCollectorArrayList.size()-1).length; si++) {
 									infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[si] = (FileInfo) dummyInfoArray[si].clone();
-									infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[si].fileName = fileName;
+									infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[si].fileName = fileName+"_dummy";
 								}
 
 							}
@@ -407,17 +371,36 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					//						IJ.log("fi "+(f+1)+infoArray[f].directory+File.separator+infoArray[f].fileName);
 
 				}
-				//					int cnt=0;
-				//					for (int fs =0;fs<fivStacks.size();fs++) {
-				//						IJ.log("fivStack "+(fs+1 )+"= "+fivStacks.get(fs).getSize()+"slices");
-				//						cnt=cnt+fivStacks.get(fs).getSize();
-				//					}
-				//					IJ.log("fivStacks.size ="+fivStacks.size());
-				//					IJ.log("fivStacks ="+cnt+" total images");
+
 				open(show);
 			}
 
 
+		}
+	}
+
+	public void getSavedExtractedFileInfos(int pos) {
+		if (new File(infoDir+"touchedFileFIs"+pos+".inf").canRead()) {
+			ObjectInputStream ois;
+			try {
+				ois = new ObjectInputStream(new FileInputStream(infoDir+"touchedFileFIs"+pos+".inf"));
+				try {
+					infoCollectorArrayList  = (ArrayList<FileInfo[]>) ois.readObject();
+				} catch (ClassNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}finally{
+					ois.close();
+				}
+			} catch (FileNotFoundException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}finally{
+
+			}
 		}
 	}
 
@@ -516,7 +499,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		ImagePlus imp = new ImagePlus(
 				dirChunks[dirChunks.length-1]+"_"+
 						fivImpZero.getTitle().replaceAll("\\d+\\.", "\\."), this);
+		
 		fivImpZero.flush();
+		
 		imp.setOpenAsHyperStack(true);			
 //		int cztDims = cDim*zDim*fivStacks.size();
 		int cztDims = cDim*zDim*tDim;
@@ -808,8 +793,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 			String currentFileName =fivStacks.get(stkNum).infoArray[slcNum].fileName;
 			
-			if (!touchedFiles.contains(currentFileName)) {
+			if (currentFileName.endsWith("_dummy")) {
 				initiatorRunning = true;
+				currentFileName = currentFileName.replace("_dummy","");
 				TiffDecoder td = new TiffDecoder(dir, currentFileName);
 				if (IJ.debugMode) td.enableDebugging();
 				IJ.showStatus("Decoding TIFF header...");
@@ -819,31 +805,14 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					if (msg==null||msg.equals("")) msg = ""+e;
 					IJ.error("TiffDecoder", msg);
 				}
-				ObjectOutputStream oos;
-				try {
-					oos = new ObjectOutputStream(new FileOutputStream(infoDir+"touchedFileFIs"+pos+".inf"));
-					oos.writeObject(infoCollectorArrayList);
-					oos.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				newRealInfo = true;
 				fivStacks.get(stkNum).infoArray = infoCollectorArrayList.get(stkNum);
 
-				touchedFiles.add(currentFileName);
-				ObjectOutputStream tfos;
-				try {
-					tfos = new ObjectOutputStream(new FileOutputStream(infoDir+"touchedFileNames"+pos+".txt"));
-					tfos.writeObject(touchedFiles);
-					tfos.close();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
 				initiatorRunning = false;
 
 			}
 		}
+		
 	}
 
 	/** Returns the number of images in this stack. */

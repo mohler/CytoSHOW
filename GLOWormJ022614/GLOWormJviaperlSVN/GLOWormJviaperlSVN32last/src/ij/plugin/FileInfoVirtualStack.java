@@ -11,7 +11,7 @@ import java.util.Properties;
 /** This plugin opens a multi-page TIFF file as a virtual stack. It
 	implements the File/Import/TIFF Virtual Stack command. */
 public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
-	FileInfo[] infoArray;
+	public FileInfo[] infoArray;
 	
 	public FileInfo[] getInfo() {
 		return infoArray;

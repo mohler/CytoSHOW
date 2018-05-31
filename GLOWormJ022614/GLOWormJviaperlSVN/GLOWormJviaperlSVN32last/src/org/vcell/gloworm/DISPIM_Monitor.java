@@ -17,10 +17,12 @@ import java.awt.event.KeyEvent;
 import java.awt.image.ColorModel;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.file.CopyOption;
@@ -590,13 +592,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 					String[] peerDirList = new File(argFile.getParent()).list();
 					for (String peerDirName:peerDirList) {
 						String peerDir = argFile.getParent()+File.separator+peerDirName+File.separator;
-						if (!peerDirName.equals(argFile.getName()) && peerDirName.contains(argFile.getName())) {
+						if (!peerDirName.equals(argFile.getName()) && (peerDirName.startsWith(argFile.getName()) ||  peerDirName.endsWith(argFile.getName())) ) {
 							argPeerDirArrayList.add(dirOrOMETiff);
 							argPeerDirArrayList.add(peerDir);
 							titleRoot = (argFile.getName());
 
 							break;
-						} else if (!peerDirName.equals(argFile.getName()) && argFile.getName().contains(peerDirName)) {
+						} else if (!peerDirName.equals(argFile.getName()) && (argFile.getName().startsWith(peerDirName)) || argFile.getName().endsWith(peerDirName)) {
 							argPeerDirArrayList.add(peerDir);
 							argPeerDirArrayList.add(dirOrOMETiff);
 							titleRoot = (peerDirName);
@@ -636,13 +638,35 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 							splitChannels = true;
 							dimOrder = "xySplitSequentialCzt";
 						} 
+						final int fPos = pos;
 
 						stackAs[pos] = new MultiFileInfoVirtualStack(
 								dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_Channels/vDim>1 && diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
-								false, false, true);
+								false, false, true){
+							
+							@Override
+							public void initiateStack(int stkNum, int slcNum){
+								super.initiateStack( stkNum,  slcNum);
+								if (stackBs[fPos]!=null){
+									stackBs[fPos].infoCollectorArrayList.set(stkNum, infoCollectorArrayList.get(stkNum));
+									stackBs[fPos].getFivStacks().get(stkNum).infoArray = infoCollectorArrayList.get(stkNum);
+								}
+							}
+						};
 						stackBs[pos] = new MultiFileInfoVirtualStack(
 								dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_Channels/vDim>1 && diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
-								true, false, true);
+								true, false, true){
+							
+							@Override
+							public void initiateStack(int stkNum, int slcNum){
+								super.initiateStack( stkNum,  slcNum);
+								if (stackAs[fPos]!=null){
+									stackAs[fPos].infoCollectorArrayList.set(stkNum, infoCollectorArrayList.get(stkNum));
+									stackAs[fPos].getFivStacks().get(stkNum).infoArray = infoCollectorArrayList.get(stkNum);
+								}
+							}
+
+						};
 
 						if (stackAs[pos].getSize() == 0) {
 							impAs[pos].flush();
@@ -666,7 +690,21 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 									calA.pixelDepth / calA.pixelWidth);
 						impAs[pos].setOpenAsHyperStack(true);
 						impAs[pos].setDimensions(cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim), zDim, sizeA/((cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim))*zDim));
-						impAs[pos] = new CompositeImage(impAs[pos]);
+						impAs[pos] = new CompositeImage(impAs[pos]){
+							@Override
+							public synchronized void flush(){
+								ObjectOutputStream oos;
+								try {
+									oos = new ObjectOutputStream(new FileOutputStream(stackAs[fPos].infoDir+"touchedFileFIs"+fPos+".inf"));
+									oos.writeObject(stackAs[fPos].infoCollectorArrayList);
+									oos.close();
+								} catch (IOException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+								super.flush();
+							}
+						};
 						while (!impAs[pos].isComposite()) {
 							IJ.wait(100);
 						}
@@ -686,7 +724,21 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 									-calB.pixelDepth / calB.pixelWidth);
 						impBs[pos].setOpenAsHyperStack(true);
 						impBs[pos].setDimensions(cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim), zDim, sizeB/((cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim))*zDim));
-						impBs[pos] = new CompositeImage(impBs[pos]);
+						impBs[pos] = new CompositeImage(impBs[pos]){
+							@Override
+							public synchronized void flush(){
+								ObjectOutputStream oos;
+								try {
+									oos = new ObjectOutputStream(new FileOutputStream(stackBs[fPos].infoDir+"touchedFileFIs"+fPos+".inf"));
+									oos.writeObject(stackBs[fPos].infoCollectorArrayList);
+									oos.close();
+								} catch (IOException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+								super.flush();
+							}
+						};
 						while (!impBs[pos].isComposite()) {
 							IJ.wait(100);
 						}

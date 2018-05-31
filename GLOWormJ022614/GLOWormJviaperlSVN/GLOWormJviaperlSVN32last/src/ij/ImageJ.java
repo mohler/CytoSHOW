@@ -954,6 +954,8 @@ public class ImageJ extends Frame implements ActionListener,
 
 	/** Called by ImageJ when the user selects Quit. */
 	public void quit() {
+		
+		IJ.run("Close All");
 		Thread thread = new Thread(this, "Quit");
 		thread.setPriority(Thread.NORM_PRIORITY);
 		thread.start();
