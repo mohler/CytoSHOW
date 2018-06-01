@@ -119,7 +119,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 		getSavedExtractedFileInfos(pos);
 	
-		if (infoCollectorArrayList.get(0)[0].channelShifts == null){
+		if (infoCollectorArrayList.size()==0 || infoCollectorArrayList.get(0)[0].channelShifts == null){
 			dXA= Integer.parseInt(Prefs.get("diSPIMmonitor.dXA", "0"));
 			dXB= Integer.parseInt(Prefs.get("diSPIMmonitor.dXB", "0"));
 			dYA= Integer.parseInt(Prefs.get("diSPIMmonitor.dYA", "0"));
@@ -128,10 +128,10 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			dZB= Integer.parseInt(Prefs.get("diSPIMmonitor.dZB", "0"));
 		} else {
 			dXA= infoCollectorArrayList.get(0)[0].channelShifts[0];
-			dXB= infoCollectorArrayList.get(0)[0].channelShifts[1];
-			dYA= infoCollectorArrayList.get(0)[0].channelShifts[2];
-			dYB= infoCollectorArrayList.get(0)[0].channelShifts[3];
-			dZA= infoCollectorArrayList.get(0)[0].channelShifts[4];
+			dYA= infoCollectorArrayList.get(0)[0].channelShifts[1];
+			dZA= infoCollectorArrayList.get(0)[0].channelShifts[2];
+			dXB= infoCollectorArrayList.get(0)[0].channelShifts[3];
+			dYB= infoCollectorArrayList.get(0)[0].channelShifts[4];
 			dZB= infoCollectorArrayList.get(0)[0].channelShifts[5];
 
 		}
