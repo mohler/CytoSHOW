@@ -4931,10 +4931,22 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 							zSpinner[pp][0].setValue(((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdZA());
 
 							((CompositeImage)impAs[pp]).updateAndDraw();
+							
+							for (FileInfo[] nextFIarray:stackAs[pp].infoCollectorArrayList){
+								for (FileInfo nextFI:nextFIarray){
+									if (nextFI.channelShifts == null || nextFI.channelShifts.length<6){
+										nextFI.channelShifts = new int[]{0,0,0,0,0,0,};
+									}
+									nextFI.channelShifts[0] = ((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdXA();
+									nextFI.channelShifts[1] = ((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdYA();
+									nextFI.channelShifts[2] = ((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdZA();
+								}
+							}
 						}
 						Prefs.set("diSPIMmonitor.dXA", ((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdXA());
 						Prefs.set("diSPIMmonitor.dYA", ((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdYA());
-						Prefs.set("diSPIMmonitor.dZA", ((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdZA());
+						Prefs.set("diSPIMmonitor.dZA", ((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdZA());							
+						
 					}
 					impAs[pos].getWindow().viewButtonPanel.validate();
 				}
@@ -4961,6 +4973,17 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 							zSpinner[pp][1].setValue(((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdZB());
 
 							((CompositeImage)impBs[pp]).updateAndDraw();
+							
+							for (FileInfo[] nextFIarray:stackAs[pp].infoCollectorArrayList){
+								for (FileInfo nextFI:nextFIarray){
+									if (nextFI.channelShifts == null || nextFI.channelShifts.length<6){
+										nextFI.channelShifts = new int[]{0,0,0,0,0,0,};
+									}
+									nextFI.channelShifts[3] = ((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdXA();
+									nextFI.channelShifts[4] = ((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdYA();
+									nextFI.channelShifts[5] = ((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdZA();
+								}
+							}
 						}
 						Prefs.set("diSPIMmonitor.dXB", ((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdXB());
 						Prefs.set("diSPIMmonitor.dYB", ((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdYB());

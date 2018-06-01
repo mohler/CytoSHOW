@@ -140,6 +140,7 @@ public class FileInfo implements Cloneable, Serializable {
 	public double[] displayRanges;
 	public byte[][] channelLuts;
 	public byte[] roi;
+	public int[] channelShifts;
 	public byte[][] overlay;
 	public int samplesPerPixel;
 	public String openNextDir, openNextName;
@@ -269,6 +270,7 @@ public class FileInfo implements Cloneable, Serializable {
 		nfi.displayRanges = displayRanges;
 		nfi.channelLuts = channelLuts;
 		nfi.roi = roi;
+		nfi.channelShifts = channelShifts;
 		nfi.overlay = overlay;
 		nfi.samplesPerPixel = samplesPerPixel;
 		nfi.openNextName = openNextName;

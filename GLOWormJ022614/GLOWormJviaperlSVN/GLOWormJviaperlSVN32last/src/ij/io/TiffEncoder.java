@@ -191,6 +191,12 @@ public class TiffEncoder {
 			nTypes++;
 		}
 
+		if (fi.channelShifts!=null) {
+			nMetaDataEntries++;
+			size += fi.channelShifts.length;
+			nTypes++;
+		}
+
 		if (fi.overlay!=null) {
 			for (int i=0; i<fi.overlay.length; i++) {
 				if (fi.overlay[i]!=null)
@@ -341,7 +347,7 @@ public class TiffEncoder {
 	}
 	
 	/** Writes image metadata ("info" image propery, 
-		stack slice labels, channel display ranges, luts, ROIs,
+		stack slice labels, channel display ranges, luts, ROIs, channelShifts
 		overlays and extra metadata). */
 	void writeMetaData(OutputStream out) throws IOException {
 	
@@ -363,6 +369,10 @@ public class TiffEncoder {
 		}
 		if (fi.roi!=null)
 			writeInt(out, fi.roi.length);
+		
+		if (fi.channelShifts!=null)
+			writeInt(out, fi.channelShifts.length);
+		
 		if (fi.overlay!=null) {
 			for (int i=0; i<fi.overlay.length; i++)
 				writeInt(out, fi.overlay[i].length);
@@ -392,6 +402,10 @@ public class TiffEncoder {
 			writeInt(out, TiffDecoder.ROI); // type="roi "
 			writeInt(out, 1); // count
 		}
+		if (fi.channelShifts!=null) {
+			writeInt(out, TiffDecoder.CHANNELSHIFTS); // type="chsh"
+			writeInt(out, 1); // count
+		}
 		if (fi.overlay!=null) {
 			writeInt(out, TiffDecoder.OVERLAY); // type="over"
 			writeInt(out, fi.overlay.length); // count
@@ -418,6 +432,10 @@ public class TiffEncoder {
 		}
 		if (fi.roi!=null)
 			out.write(fi.roi);
+		if (fi.channelShifts!=null){
+			for (int i=0; i<fi.channelShifts.length; i++)
+				writeInt(out, fi.channelShifts[i]);
+		}
 		if (fi.overlay!=null) {
 			for (int i=0; i<fi.overlay.length; i++)
 				out.write(fi.overlay[i]);
