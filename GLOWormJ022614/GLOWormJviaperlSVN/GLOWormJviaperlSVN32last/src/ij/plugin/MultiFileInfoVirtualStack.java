@@ -95,12 +95,6 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		this.pos = pos;
 		dimOrder = sliceOrder;
 		fivStacks = new ArrayList<FileInfoVirtualStack>();
-		dXA= Integer.parseInt(Prefs.get("diSPIMmonitor.dXA", "0"));
-		dXB= Integer.parseInt(Prefs.get("diSPIMmonitor.dXB", "0"));
-		dYA= Integer.parseInt(Prefs.get("diSPIMmonitor.dYA", "0"));
-		dYB= Integer.parseInt(Prefs.get("diSPIMmonitor.dYB", "0"));
-		dZA= Integer.parseInt(Prefs.get("diSPIMmonitor.dZA", "0"));
-		dZB= Integer.parseInt(Prefs.get("diSPIMmonitor.dZB", "0"));
 		
 		String[] args = arg.split("\\|");
 		
@@ -125,7 +119,23 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 		getSavedExtractedFileInfos(pos);
 	
-		
+		if (infoCollectorArrayList.get(0)[0].channelShifts == null){
+			dXA= Integer.parseInt(Prefs.get("diSPIMmonitor.dXA", "0"));
+			dXB= Integer.parseInt(Prefs.get("diSPIMmonitor.dXB", "0"));
+			dYA= Integer.parseInt(Prefs.get("diSPIMmonitor.dYA", "0"));
+			dYB= Integer.parseInt(Prefs.get("diSPIMmonitor.dYB", "0"));
+			dZA= Integer.parseInt(Prefs.get("diSPIMmonitor.dZA", "0"));
+			dZB= Integer.parseInt(Prefs.get("diSPIMmonitor.dZB", "0"));
+		} else {
+			dXA= infoCollectorArrayList.get(0)[0].channelShifts[0];
+			dXB= infoCollectorArrayList.get(0)[0].channelShifts[1];
+			dYA= infoCollectorArrayList.get(0)[0].channelShifts[2];
+			dYB= infoCollectorArrayList.get(0)[0].channelShifts[3];
+			dZA= infoCollectorArrayList.get(0)[0].channelShifts[4];
+			dZB= infoCollectorArrayList.get(0)[0].channelShifts[5];
+
+		}
+
 	
 		ArrayList<String> bigSubFileArrayList = new ArrayList<String>();
 		ArrayList<String> cumulativeSubFileArrayList = new ArrayList<String>();
