@@ -448,7 +448,11 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 
 
 	public ImagePlus duplicateHyperstack(ImagePlus imp, String newTitle) {
-		String saveRootForDup = (new File(IJ.getDirectory("image"))).getName()+"_";
+		String imagePath = IJ.getDirectory("image");
+		String saveRootForDup = imp.getTitle()+"_";
+		if (imp.getStack() instanceof MultiFileInfoVirtualStack && imagePath!=null){
+			saveRootForDup = (new File(imagePath)).getName()+"_";
+		}
 		newTitle = "DUP_tmp_" + saveRootForDup;
 		dupTitle = showHSDialog(imp, newTitle);
 		if (dupTitle==null)

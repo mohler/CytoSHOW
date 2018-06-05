@@ -3568,11 +3568,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 					IJ.log("! no winorstackB "+f+" "+pos);
 					continue;
 				} 
-				if (impPrxs[pos]!=null && impPrys[pos]!=null && impAs[pos].getNFrames() == impPrxs[pos].getNFrames() && impAs[pos].getNFrames() == impPrys[pos].getNFrames()
-						&& impBs[pos].getNFrames() == impPrxs[pos].getNFrames() && impBs[pos].getNFrames() == impPrys[pos].getNFrames()) {
-					doProcessing[pos] = false;
-					IJ.log("no unfinishedViewss "+f+" "+pos);
-					continue;
+				if (!IJ.shiftKeyDown()){
+					if (impPrxs[pos]!=null && impPrys[pos]!=null && impAs[pos].getNFrames() == impPrxs[pos].getNFrames() && impAs[pos].getNFrames() == impPrys[pos].getNFrames()
+							&& impBs[pos].getNFrames() == impPrxs[pos].getNFrames() && impBs[pos].getNFrames() == impPrys[pos].getNFrames()) {
+						doProcessing[pos] = false;
+						IJ.log("no unfinishedViewss "+f+" "+pos);
+						continue;
+					}
 				}
 
 				if (doProcessing[pos]) {
@@ -4979,9 +4981,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 									if (nextFI.channelShifts == null || nextFI.channelShifts.length<6){
 										nextFI.channelShifts = new int[]{0,0,0,0,0,0,};
 									}
-									nextFI.channelShifts[3] = ((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdXA();
-									nextFI.channelShifts[4] = ((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdYA();
-									nextFI.channelShifts[5] = ((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdZA();
+									nextFI.channelShifts[3] = ((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdXB();
+									nextFI.channelShifts[4] = ((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdYB();
+									nextFI.channelShifts[5] = ((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdZB();
 								}
 							}
 						}

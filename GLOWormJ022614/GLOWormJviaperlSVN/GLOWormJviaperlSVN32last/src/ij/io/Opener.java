@@ -277,7 +277,8 @@ public class Opener {
 								String pathListStereo = textPath;
 								new QTMovieOpenerMultiMod(pathListStereo, true, false);
 
-							}else if (textPath.toLowerCase().endsWith("scene.scn"))
+							}else if (textPath.toLowerCase().endsWith("scene.scn") || 
+									textPath.toLowerCase().endsWith("suite.ste"))
 								if (IJ.isMacOSX() || IJ.isLinux() ) 
 									textPath = textPath.replace("Q:\\", "/Volumes/GLOWORM_DATA/");
 							if(IJ.isWindows())
@@ -296,7 +297,8 @@ public class Opener {
 								textPath = "Q:\\" + ((String)obj);
 							if (IJ.debugMode) IJ.log(textPath + " is the path sent to QTMOMM");
 							pathList = pathList + textPath + "|";
-						} else if (( ((String)obj).toLowerCase().endsWith("scene.scn"))){
+						} else if ( ((String)obj).toLowerCase().endsWith("scene.scn") || 
+								((String)obj).toLowerCase().endsWith("suite.ste")){
 							String textPath = "";
 							if (IJ.isMacOSX() || IJ.isLinux() ) 
 								textPath = "/Volumes/GLOWORM_DATA/" + ((String)obj);
@@ -340,6 +342,9 @@ public class Opener {
 			case UNKNOWN:
 				if (path.toLowerCase().endsWith("suite.ste")) {
 					IJ.log("ASuiteFile!");
+					if (!(new File(path).canRead())){ 
+						path = path.replace("Q:\\", "/Volumes/GLOWORM_DATA/");
+					}
 					String[] suiteTextLines = null;
 					if ((new File(path)).canRead()) {
 						suiteTextLines = IJ.openAsString(path).split("\n");
