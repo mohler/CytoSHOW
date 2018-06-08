@@ -56,6 +56,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	private boolean initiatorRunning;
 	private int pos;
 	private boolean newRealInfo;
+	private ArrayList<FileInfo[]> savedInfoCollectorArrayList;
 
 	/* Default constructor. */
 	public MultiFileInfoVirtualStack() {}
@@ -117,7 +118,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		
 		infoCollectorArrayList =new ArrayList<FileInfo[]>();
 
-		getSavedExtractedFileInfos(pos);
+		new Thread (new Runnable(){
+			public void run(){getSavedExtractedFileInfos(pos);}
+		}).start();
 	
 		if (infoCollectorArrayList.size()==0 || infoCollectorArrayList.get(0)[0].channelShifts == null){
 			dXA= Integer.parseInt(Prefs.get("diSPIMmonitor.dXA", "0"));
@@ -395,7 +398,13 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			try {
 				ois = new ObjectInputStream(new FileInputStream(infoDir+"touchedFileFIs"+pos+".inf"));
 				try {
-					infoCollectorArrayList  = (ArrayList<FileInfo[]>) ois.readObject();
+					savedInfoCollectorArrayList  = (ArrayList<FileInfo[]>) ois.readObject();
+					if (savedInfoCollectorArrayList!=null){
+						infoCollectorArrayList = savedInfoCollectorArrayList;
+						for (int stkNum=0;stkNum<infoCollectorArrayList.size();stkNum++){
+							fivStacks.get(stkNum).infoArray = infoCollectorArrayList.get(stkNum);
+						}
+					}
 				} catch (ClassNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -801,7 +810,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		fivStacks.get(stkNum).setupStack();
 		if (fivStacks!=null && fivStacks.size()>stkNum && fivStacks.get(stkNum).infoArray.length>slcNum) {
 
-			String currentFileName =fivStacks.get(stkNum).infoArray[slcNum].fileName;
+			String currentFileName =fivStacks.get(stkNum).infoArray[0].fileName;
 			
 			if (currentFileName.endsWith("_dummy")) {
 				initiatorRunning = true;

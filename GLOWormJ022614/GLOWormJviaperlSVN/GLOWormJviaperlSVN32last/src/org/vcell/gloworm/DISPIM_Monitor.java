@@ -592,13 +592,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 					String[] peerDirList = new File(argFile.getParent()).list();
 					for (String peerDirName:peerDirList) {
 						String peerDir = argFile.getParent()+File.separator+peerDirName+File.separator;
-						if (!peerDirName.equals(argFile.getName()) && (peerDirName.startsWith(argFile.getName()) ||  peerDirName.endsWith(argFile.getName())) ) {
+						if ((!peerDirName.equals(argFile.getName())) && (peerDirName.startsWith(argFile.getName()) ||  peerDirName.endsWith(argFile.getName())) ) {
 							argPeerDirArrayList.add(dirOrOMETiff);
 							argPeerDirArrayList.add(peerDir);
 							titleRoot = (argFile.getName());
 
 							break;
-						} else if (!peerDirName.equals(argFile.getName()) && (argFile.getName().startsWith(peerDirName)) || argFile.getName().endsWith(peerDirName)) {
+						} else if ((!peerDirName.equals(argFile.getName())) && (argFile.getName().startsWith(peerDirName)) || argFile.getName().endsWith(peerDirName)) {
 							argPeerDirArrayList.add(peerDir);
 							argPeerDirArrayList.add(dirOrOMETiff);
 							titleRoot = (peerDirName);
