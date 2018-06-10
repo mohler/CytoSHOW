@@ -401,7 +401,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					savedInfoCollectorArrayList  = (ArrayList<FileInfo[]>) ois.readObject();
 					if (savedInfoCollectorArrayList!=null){
 						infoCollectorArrayList = savedInfoCollectorArrayList;
-						for (int stkNum=0;stkNum<infoCollectorArrayList.size();stkNum++){
+						for (int stkNum=0;stkNum<fivStacks.size();stkNum++){
 							fivStacks.get(stkNum).infoArray = infoCollectorArrayList.get(stkNum);
 						}
 					}
