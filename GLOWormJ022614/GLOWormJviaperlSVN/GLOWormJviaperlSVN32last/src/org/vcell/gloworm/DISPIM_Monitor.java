@@ -586,24 +586,28 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 					stackBs = new MultiFileInfoVirtualStack[pDim];
 					
 					File argFile = new File(dirOrOMETiff);
+					String argFileName = argFile.getName();
 					String titleRoot = (argFile.getName());
 
 					ArrayList<String> argPeerDirArrayList = new ArrayList<String>();
 					String[] peerDirList = new File(argFile.getParent()).list();
 					for (String peerDirName:peerDirList) {
-						String peerDir = argFile.getParent()+File.separator+peerDirName+File.separator;
-						if ((!peerDirName.equals(argFile.getName())) && (peerDirName.startsWith(argFile.getName()) ||  peerDirName.endsWith(argFile.getName())) ) {
-							argPeerDirArrayList.add(dirOrOMETiff);
-							argPeerDirArrayList.add(peerDir);
-							titleRoot = (argFile.getName());
+						String peerDir = argFile.getParent()+peerDirName+File.separator;
+						if (!peerDirName.equals(argFile.getName())){
+							if ((peerDirName.startsWith(argFileName) ||  peerDirName.endsWith(argFileName)) ) {
 
-							break;
-						} else if ((!peerDirName.equals(argFile.getName())) && (argFile.getName().startsWith(peerDirName)) || argFile.getName().endsWith(peerDirName)) {
-							argPeerDirArrayList.add(peerDir);
-							argPeerDirArrayList.add(dirOrOMETiff);
-							titleRoot = (peerDirName);
+								argPeerDirArrayList.add(dirOrOMETiff);
+								argPeerDirArrayList.add(peerDir);
+								titleRoot = (argFileName);
 
-							break;
+								break;
+							} else if ((argFileName.startsWith(peerDirName)) || argFileName.endsWith(peerDirName)) {
+								argPeerDirArrayList.add(peerDir);
+								argPeerDirArrayList.add(dirOrOMETiff);
+								titleRoot = (peerDirName);
+
+								break;
+							}
 						}
 					}
 					if (argPeerDirArrayList.size()==0) {
