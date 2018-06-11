@@ -592,18 +592,18 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 					ArrayList<String> argPeerDirArrayList = new ArrayList<String>();
 					String[] peerDirList = new File(argFile.getParent()).list();
 					for (String peerDirName:peerDirList) {
-						String peerDir = argFile.getParent()+peerDirName+File.separator;
+						String peerDir = argFile.getParent()+File.separator+peerDirName+File.separator;
 						if (!peerDirName.equals(argFile.getName())){
 							if ((peerDirName.startsWith(argFileName) ||  peerDirName.endsWith(argFileName)) ) {
 
-								argPeerDirArrayList.add(dirOrOMETiff);
-								argPeerDirArrayList.add(peerDir);
+								argPeerDirArrayList.add(dirOrOMETiff.replace("\\", "\\\\"));
+								argPeerDirArrayList.add(peerDir.replace("\\", "\\\\"));
 								titleRoot = (argFileName);
 
 								break;
 							} else if ((argFileName.startsWith(peerDirName)) || argFileName.endsWith(peerDirName)) {
-								argPeerDirArrayList.add(peerDir);
-								argPeerDirArrayList.add(dirOrOMETiff);
+								argPeerDirArrayList.add(peerDir.replace("\\", "\\\\"));
+								argPeerDirArrayList.add(dirOrOMETiff.replace("\\", "\\\\"));
 								titleRoot = (peerDirName);
 
 								break;
@@ -619,7 +619,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 						dirConcat = dirConcat + argPeer +"|";
 					}
 					dirOrOMETiff = dirConcat.split("\\|")[0];
-
+					IJ.log(dirConcat);
+					
 					for (int pos=0; pos<pDim; pos++) {
 
 						impAs[pos] = new ImagePlus();
