@@ -81,7 +81,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		this(dirOrOMETiff, "xyczt", string, 0, 0, 0, 1, -1, isViewB, show, false);
 	}
 
-	public MultiFileInfoVirtualStack(String arg, String sliceOrder, String keyString, int cDim, int zDim, int tDim, int vDim, int pos, boolean isViewB, boolean show, boolean rawdispimdata) {
+	public MultiFileInfoVirtualStack(String arg, String sliceOrder, String keyString, int cDim, int zDim, int tDim, int vDim, final int pos, boolean isViewB, boolean show, boolean rawdispimdata) {
 		this.rawdispimdata = rawdispimdata;
 		this.keyString = keyString;
 		this.isViewB = isViewB;
