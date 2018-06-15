@@ -466,6 +466,7 @@ public class FileOpener {
 				fi.directory += Prefs.separator;
 		    File f = new File(fi.directory + fi.fileName);
 		    if (gzip) fi.compression = FileInfo.COMPRESSION_UNKNOWN;
+//		    IJ.log(""+fi.fileName+" "+(f==null)+f.exists()+f.isDirectory()+validateFileInfo(f, fi));
 		    if (f==null || !f.exists() || f.isDirectory() || !validateFileInfo(f, fi))
 		    	is = null;
 		    else

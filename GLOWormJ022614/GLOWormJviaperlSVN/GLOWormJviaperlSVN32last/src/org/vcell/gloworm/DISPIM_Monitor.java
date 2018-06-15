@@ -347,6 +347,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 	private Panel[][] spinnerPanel;
 	private String dirConcat;
 	private String diSPIM_MM_channelOrder = "GR";
+	private String[] posArray;
 
 	public Process getRegDeconProcess() {
 		return regDeconProcess;
@@ -400,6 +401,17 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 					dirOrOMETiff = IJ
 							.getDirectory("Select a timepoint directory with MM diSPIM raw data");
 					keyString = (new File(dirOrOMETiff)).getName().split("_")[0];
+					IJ.log(dirOrOMETiff);
+					String[] dirChunks = dirOrOMETiff.split("\\|");
+					for (String s:dirChunks){
+						IJ.log(s);
+					}
+					dirOrOMETiff = dirChunks[0];
+					if (dirChunks.length>1){
+						posArray = Arrays.copyOfRange(dirChunks, 1, dirChunks.length-1);
+					}
+					IJ.log(dirOrOMETiff);
+
 					dirOrOMETiff = (new File(dirOrOMETiff)).getParent()+File.separator;
 					stackDualViewTimePoints = true;
 					singleImageTiffs = false;
@@ -460,7 +472,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 					stageScan = false;
 				}
 			}
-			IJ.log(dirOrOMETiff);
+			
+
 			Prefs.set("diSPIMmonitor.input", dirOrOMETiff);
 			String dirOrOMETiffDirectory = dirOrOMETiff;
 			if (!new File(dirOrOMETiff).isDirectory())

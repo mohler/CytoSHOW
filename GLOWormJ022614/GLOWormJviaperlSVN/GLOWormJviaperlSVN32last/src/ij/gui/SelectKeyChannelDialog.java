@@ -160,14 +160,14 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 //		modeFractionSpinnerA.setToolTipText("Fraction of image Mode to use for autocrop \nand background subtraction on Camera A");
 //		modeFractionSpinnerB = new JSpinner(new SpinnerNumberModel(/*1.012*/ 1, -1.0, 2.0, 0.001));  
 //		modeFractionSpinnerB.setToolTipText("Fraction of image Mode to use for autocrop \nand background subtraction on Camera B");
-//		iterationSpinner = new JSpinner(new SpinnerNumberModel(10, 1, 100, 1));  
-//		iterationSpinner.setToolTipText("Iterations of Deconvolution");
-//		optPanel = new Panel();
+		iterationSpinner = new JSpinner(new SpinnerNumberModel(10, 1, 100, 1));  
+		iterationSpinner.setToolTipText("Iterations of Deconvolution");
+		optPanel = new Panel();
 //		optPanel.add("West", depthSeek);
 //		optPanel.add("West", modeFractionSpinnerA);
 //		optPanel.add("Center", modeFractionSpinnerB);
-//		optPanel.add("East", iterationSpinner);
-//		add("East", optPanel);
+		optPanel.add("East", iterationSpinner);
+		add("East", optPanel);
 
 		pack();
 		GUI.center(this);
@@ -190,7 +190,7 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 
 //			subFractA = ((Double)modeFractionSpinnerA.getValue());
 //			subFractB = ((Double)modeFractionSpinnerB.getValue());
-//			iterations = ((Integer)iterationSpinner.getValue());
+			iterations = ((Integer)iterationSpinner.getValue());
 		}
 		closeDialog();
 	}
