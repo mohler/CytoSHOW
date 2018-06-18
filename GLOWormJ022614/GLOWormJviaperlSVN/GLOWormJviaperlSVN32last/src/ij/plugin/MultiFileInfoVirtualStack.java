@@ -113,7 +113,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			dir = args[0];
 		if (dir==null) return;
 		if (dir.length() > 0 && !dir.endsWith(File.separator))
-			dir = dir + File.separator;
+			dir = dir + File.separator+ File.separator;
 		infoDir = dir;
 		
 		infoCollectorArrayList =new ArrayList<FileInfo[]>();
@@ -149,7 +149,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		for (String subArg:args) {
 			if (subArg==null) return;
 			if (subArg.length() > 0 && !subArg.endsWith(File.separator))
-				subArg = subArg + File.separator;
+				subArg = subArg + File.separator+ File.separator;
 			argFile = new File(subArg);
 
 			String[] subArgFileList = argFile.list();
@@ -216,7 +216,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			for (int s=0; s<cumulativeTiffFileArray.length; s++) {
 				cumulativeTiffFileArray[s] = (String) cumulativeSubFileArrayList.get(s);
 //				IJ.log("tif "+(s+1)+" ="+cumulativeTiffFileArray[s]);
-				String[] subFilePathChunks = cumulativeTiffFileArray[s].split(File.separator.replace("\\", "\\\\"));
+				String[] subFilePathChunks = cumulativeTiffFileArray[s].split(Pattern.quote(File.separator));
 				String subFileName = subFilePathChunks[subFilePathChunks.length-1];
 				if (subFileName.matches(".*_t\\d+.*\\.tif")) {
 					int tValue = Integer.parseInt(subFileName.replaceAll(".*_t(\\d+).*\\.tif", "$1"));
@@ -399,21 +399,6 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				ois = new ObjectInputStream(new FileInputStream(infoDir+"touchedFileFIs"+pos+".inf"));
 				try {
 					savedInfoCollectorArrayList  = (ArrayList<FileInfo[]>) ois.readObject();
-					if (savedInfoCollectorArrayList!=null){
-						for(FileInfo[]  infoArray:savedInfoCollectorArrayList){
-							for(FileInfo fi:infoArray){
-								fi.directory= "";
-								String[] filePathChunks =  fi.fileName.split(Pattern.quote(File.separator));
-								int fpcl = filePathChunks.length;
-								fi.fileName= infoDir+ filePathChunks[fpcl-2]
-										+File.separator+filePathChunks[fpcl-1];
-							}
-						}
-						infoCollectorArrayList = savedInfoCollectorArrayList;
-						for (int stkNum=0;stkNum<fivStacks.size();stkNum++){
-							fivStacks.get(stkNum).infoArray = infoCollectorArrayList.get(stkNum);
-						}
-					}
 				} catch (ClassNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -427,7 +412,27 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}finally{
-
+			}
+			if (savedInfoCollectorArrayList!=null){
+				for(FileInfo[]  infoArray:savedInfoCollectorArrayList){
+					for(FileInfo fi:infoArray){
+						fi.directory= "";
+						String[] filePathChunks =  fi.fileName.replace("\\\\", "\\").split(Pattern.quote(File.separator));
+						int fpcl = filePathChunks.length;
+						String triplechunk = filePathChunks[fpcl-3]+File.separator+
+								filePathChunks[fpcl-2]+File.separator+
+								filePathChunks[fpcl-1];
+						for(String cumTiff:cumulativeTiffFileArray){
+							if (cumTiff.endsWith(triplechunk)){
+								fi.fileName=cumTiff;
+							}
+						}
+					}
+				}
+				infoCollectorArrayList = savedInfoCollectorArrayList;
+				for (int stkNum=0;stkNum<fivStacks.size();stkNum++){
+					fivStacks.get(stkNum).infoArray = infoCollectorArrayList.get(stkNum);
+				}
 			}
 		}
 	}
@@ -522,7 +527,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 		}
 
-		String[] dirChunks = dir.split("\\"+File.separator);
+		String[] dirChunks = dir.split(Pattern.quote(File.separator));
 		ImagePlus fivImpZero = fivStacks.get(0).open(false);
 		ImagePlus imp = new ImagePlus(
 				dirChunks[dirChunks.length-1]+"_"+
