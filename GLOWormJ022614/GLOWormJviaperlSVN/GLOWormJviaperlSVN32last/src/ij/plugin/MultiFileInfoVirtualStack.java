@@ -779,7 +779,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
 		}
 
-		if (dimOrder.toLowerCase().matches(".*splitsequentialc.*") && n%cDim == 1) {
+//FALSING OUT 488G/R RATIOING (06192018)
+		if (false && dimOrder.toLowerCase().matches(".*splitsequentialc.*") && n%cDim == 1) {
 			ImageProcessor nextIP = fivStacks.get(stackNumber).getProcessor(vSliceNumber+1);
 			int dX=0;
 			int dY=0;
