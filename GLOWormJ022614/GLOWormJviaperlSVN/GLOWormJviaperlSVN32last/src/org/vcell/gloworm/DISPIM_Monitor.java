@@ -3136,15 +3136,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener {
 //			}
 
 
-			if (doGPUdecon) {			
-				processFilesByMinGuoDeconvolution();
-			}
-
-
-
-			if (doMipavDecon) {			
-				processFilesByMipavDeconvolution();
-			}
+//			if (doGPUdecon) {			
+//				processFilesByMinGuoDeconvolution();
+//			}
+//
+//
+//
+//			if (doMipavDecon) {			
+//				processFilesByMipavDeconvolution();
+//			}
 			//			}
 		}
 		if (rerunArg !="")

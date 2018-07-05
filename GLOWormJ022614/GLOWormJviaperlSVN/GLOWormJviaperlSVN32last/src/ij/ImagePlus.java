@@ -1642,7 +1642,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			else
 				ip.resetRoi();
 		}
-		if (this.isDisplayedHyperStack()){
+		if (false   /*this.isDisplayedHyperStack()*/){
 			blinkOn=true;
 			if (schfut != null)
 				schfut.cancel(true);
