@@ -524,6 +524,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			String command = label;
 			if (command.equals("Add\n(ctrl-t)")) {
 				Roi roi = imp.getRoi();
+				if (roi==null) {
+					return;
+				}
 				String newName = "";
 				newName = roi.getName(); 
 				if (newName == "") {

@@ -1,5 +1,6 @@
 package ij;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.awt.image.*;
 import java.net.URL;
 import java.util.*;
@@ -106,8 +107,6 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	private Overlay overlay;
 	private boolean hideOverlay;
 	private static int default16bitDisplayRange;
-    private ScheduledThreadPoolExecutor blinkService = new ScheduledThreadPoolExecutor(1);
-    private ScheduledFuture schfut;
 
 
     /** Constructs an uninitialized ImagePlus. */
@@ -1642,41 +1641,53 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			else
 				ip.resetRoi();
 		}
-		if (false   /*this.isDisplayedHyperStack()*/){
+		if (this.isDisplayedHyperStack()){
 			blinkOn=true;
-			if (schfut != null)
-				schfut.cancel(true);
-			schfut = blinkService.scheduleAtFixedRate(new Runnable()
-			{
-				public void run()
-				{
-					double strokeWidthMagAdjust = roiStrokeWidth/win.getCanvas().getMagnification();
-					Roi dummyRoi = new Roi(0,0,0,0);
-					dummyRoi.setStrokeWidth(strokeWidthMagAdjust);
-					strokeWidthMagAdjust = dummyRoi.getStrokeWidth();
+			if (blinkTimer!=null) {
+				Thread oldBlinkTimer = blinkTimer;
+				oldBlinkTimer.setName("OLDBLINKTIMER");
+				oldBlinkTimer.stop();
+			}
+			blinkTimer = new Thread(new Runnable() {
+				public Roi blinkingRoi = roi;
+				public void run(){
+					while (getRoiManager().getSelectedRoisAsArray()[0]==blinkingRoi) {
+						double strokeWidthMagAdjust = roiStrokeWidth/win.getCanvas().getMagnification();
+						Roi dummyRoi = new Roi(0,0,0,0);
+						dummyRoi.setStrokeWidth(strokeWidthMagAdjust);
+						strokeWidthMagAdjust = dummyRoi.getStrokeWidth();
 
-					if (roi instanceof Line) 
-						roi.setStrokeWidth(strokeWidthMagAdjust);
-					else
-						roi.setStrokeWidth(roiStrokeWidth);
-					
-					if (blinkOn){
-						if (roi instanceof Arrow)
-							roi.setStrokeColor(roiStrokeColor.brighter());
-						roi.setFillColor(Roi.getDefaultFillColor());
-						if (roi instanceof TextRoi)
-							roi.setFillColor(Color.yellow);
+						if (blinkingRoi instanceof Line) 
+							blinkingRoi.setStrokeWidth(strokeWidthMagAdjust);
+						else
+							blinkingRoi.setStrokeWidth(roiStrokeWidth);
 
-						blinkOn = false;
-					} else {
-						if (roi instanceof Arrow)
-							roi.setStrokeColor(roiStrokeColor.darker());
-						roi.setFillColor(roiFillColor);
-						blinkOn =true;
+						if (blinkOn){
+							if (blinkingRoi instanceof Arrow)
+								blinkingRoi.setStrokeColor(roiStrokeColor.brighter());
+							blinkingRoi.setFillColor(Roi.getDefaultFillColor());
+							if (blinkingRoi instanceof TextRoi)
+								blinkingRoi.setFillColor(Color.yellow);
+
+							blinkOn = false;
+						} else {
+							if (blinkingRoi instanceof Arrow)
+								blinkingRoi.setStrokeColor(roiStrokeColor.darker());
+							blinkingRoi.setFillColor(roiFillColor);
+							blinkOn =true;
+						}
+						draw();
+						try {
+							Thread.sleep(500);
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}			
 					}
-					draw();
 				}
-			}, 0, 500, TimeUnit.MILLISECONDS);
+			});
+			blinkTimer.setName("blinkTimer");
+			blinkTimer.start();
 		}
 		if (roi!=null)
 			roi.setImage(this);
@@ -2200,6 +2211,8 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	public boolean skewY;
 
 	private RemoteMTVSHandler remoteMTVSHandler;
+
+	private Thread blinkTimer;
 
    
     /** Redisplays the (x,y) coordinates and pixel value (which may
