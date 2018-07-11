@@ -31,7 +31,7 @@ public class StackCombiner implements PlugIn {
 		ImageStack stack3 = vertical?combineVertically(stack1, stack2):combineHorizontally(stack1, stack2);
 		
 		imp3 = new ImagePlus(imp1.getTitle()+"&"+imp2.getTitle()+" Combined", stack3);
-		imp3.setMotherImp(imp1.getMotherImp(), imp1.getMotherFrame());
+		imp3.setMotherImp(imp1.getMotherImp(), imp1.getMotherID());
 		ColorLegend colorLegend = imp3.getMotherImp().getRoiManager().getColorLegend();
 		imp3.show();
 		imp3.getCanvas().addMouseMotionListener(colorLegend);

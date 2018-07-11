@@ -3853,7 +3853,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		int frames = guideImp.getNFrames();
 		BigDecimal framesBD = new BigDecimal("" + (frames+timeBalancer));
 		BigDecimal widthDenomBD = new BigDecimal("" + widthDenom);
-		BigDecimal tBD = new BigDecimal("" + (imp.getMotherFrame()>0?imp.getMotherFrame():0 + imp.getFrame()+timeBalancer));	
+		BigDecimal tBD = new BigDecimal("" + (imp.getMotherID()>0?imp.getMotherID():0 + imp.getFrame()+timeBalancer));	
 		BigDecimal impHeightBD = new BigDecimal(""+guideImp.getHeight());		
 		BigDecimal cellDiameterBD = impHeightBD.divide(widthDenomBD, MathContext.DECIMAL32).multiply(takeRoot(3, (framesBD.subtract(tBD).add(new BigDecimal("1"))).divide(tBD, MathContext.DECIMAL32), new BigDecimal(".001")), MathContext.DECIMAL32) ;
 

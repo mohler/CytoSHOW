@@ -112,7 +112,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 		int yzBitDepth = hyperstack?24:originalImp.getBitDepth();
 		if (yz_image==null || yz_image.getHeight()!=originalImp.getHeight() || yz_image.getBitDepth()!=yzBitDepth){
 			yz_image = new ImagePlus();
-			yz_image.setMotherImp(originalImp.getMotherImp(), originalImp.getMotherFrame());
+			yz_image.setMotherImp(originalImp.getMotherImp(), originalImp.getMotherID());
 //			IJ.log("SET MOTHERIMP XZ");
 		}
 		xz_image = WindowManager.getImage(xzID);
@@ -120,7 +120,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 		if (xz_image==null || xz_image.getWidth()!=originalImp.getWidth() || xz_image.getBitDepth()!=yzBitDepth) {
 			xz_image = new ImagePlus();
 //			IJ.log("NEW XZ");
-			xz_image.setMotherImp(originalImp.getMotherImp(), originalImp.getMotherFrame());
+			xz_image.setMotherImp(originalImp.getMotherImp(), originalImp.getMotherID());
 //			IJ.log("SET MOTHERIMP YZ");
 		}
 		xy_image = WindowManager.getImage(xyID);
@@ -128,7 +128,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 		if (xy_image==null || xy_image.getWidth()!=originalImp.getWidth() || xy_image.getBitDepth()!=yzBitDepth) {
 			xy_image = new ImagePlus();
 //			IJ.log("NEW xy");
-			xy_image.setMotherImp(originalImp.getMotherImp(), originalImp.getMotherFrame());
+			xy_image.setMotherImp(originalImp.getMotherImp(), originalImp.getMotherID());
 //			IJ.log("SET MOTHERIMP YZ");
 		}
 		instance = this;

@@ -1278,6 +1278,8 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 
 	public boolean zeroUpdateMode;
 
+	private boolean blinkStop;
+
 	/**
 	Returns the pixel value at (x,y) as a 4 element array. Grayscale values
 	are retuned in the first element. RGB values are returned in the first
@@ -1608,9 +1610,10 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	}
 
 	/** Assigns 'newRoi'  to this image and displays it if 'updateDisplay' is true. */
-	public void setRoi(Roi newRoi, boolean updateDisplay) {
-		if (newRoi==null)
+	public void setRoi( Roi newRoi, boolean updateDisplay) {
+		if (newRoi==null)		
 			{deleteRoi(); return;}
+		final Roi fNewRoi = (Roi)newRoi.clone();
 		Rectangle bounds = newRoi.getBounds();
 		if (newRoi.isVisible()) {
 			if ((newRoi instanceof Arrow) && newRoi.getState()==Roi.CONSTRUCTING && bounds.width==0 && bounds.height==0) {
@@ -1619,24 +1622,24 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 				roiFillColor = newRoi.getFillColor();
 				return;
 			}
-			newRoi = (Roi)newRoi.clone();
-			if (newRoi==null) {
+			
+			if (fNewRoi==null) {
 				deleteRoi(); 
 				return;
 			}
 		}
-		if (bounds.width==0 && bounds.height==0 && !(newRoi.getType()==Roi.POINT||newRoi.getType()==Roi.LINE))
+		if (bounds.width==0 && bounds.height==0 && !(fNewRoi.getType()==Roi.POINT||fNewRoi.getType()==Roi.LINE))
 			{deleteRoi(); return;}
-		roi = newRoi;
-		roiFillColor = roi.getFillColor();
-		roiStrokeWidth = roi.getStrokeWidth();
-		roiStrokeColor = roi.getStrokeColor();
+		
+		roiFillColor = newRoi.getFillColor();
+		roiStrokeWidth = newRoi.getStrokeWidth();
+		roiStrokeColor = newRoi.getStrokeColor();
 		if (roiStrokeColor ==null)
 			roiStrokeColor = Color.yellow;
 		
 		if (ip!=null) {
 			ip.setMask(null);
-			if (roi.isArea())
+			if (fNewRoi.isArea())
 				ip.setRoi(bounds);
 			else
 				ip.resetRoi();
@@ -1644,14 +1647,18 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		if (this.isDisplayedHyperStack()){
 			blinkOn=true;
 			if (blinkTimer!=null) {
-				Thread oldBlinkTimer = blinkTimer;
+				oldBlinkTimer = blinkTimer;
 				oldBlinkTimer.setName("OLDBLINKTIMER");
-				oldBlinkTimer.stop();
+				blinkStop = true;
+				while (oldBlinkTimer.isAlive());
+
 			}
 			blinkTimer = new Thread(new Runnable() {
-				public Roi blinkingRoi = roi;
+				public Roi blinkingRoi = fNewRoi;
 				public void run(){
-					while (getRoiManager().getSelectedRoisAsArray()[0]==blinkingRoi) {
+					blinkStop = false;
+
+					while (!blinkStop) {
 						double strokeWidthMagAdjust = roiStrokeWidth/win.getCanvas().getMagnification();
 						Roi dummyRoi = new Roi(0,0,0,0);
 						dummyRoi.setStrokeWidth(strokeWidthMagAdjust);
@@ -1689,6 +1696,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			blinkTimer.setName("blinkTimer");
 			blinkTimer.start();
 		}
+		roi = fNewRoi;
 		if (roi!=null)
 			roi.setImage(this);
 		if (updateDisplay) draw();
@@ -2028,6 +2036,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			roi = null;
 		}
 		Roi.previousRoi = null;
+		blinkStop = true;
 		properties = null;
 		calibration = null;
 		overlay = null;
@@ -2041,11 +2050,15 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		if (motherImp != null) {
 			motherImp = null;
 		}
-		if (getRemoteMQTVSHandler() != null)
-			getRemoteMQTVSHandler().dispose();
+		if (getRemoteMQTVSHandler() != null) {
+			remoteMQTVSHandler.dispose();
+			remoteMQTVSHandler = null;
+		}
 		getRoiManager().dispose();
-		if (getMultiChannelController() != null)
+		if (getMultiChannelController() != null) {
 			getMultiChannelController().dispose();
+			mcc=null;
+		}
 		if (getRoiManager() != null) {
 			getRoiManager().dispose();
 			rm = null;
@@ -2197,9 +2210,9 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	
     private int savex, savey;
 
-	private ImagePlus motherImp = this;
+	private ImagePlus motherImp;
 
-	private int motherFrame;
+	private int motherID;
 
 	private ImagePlus dupImp;
 
@@ -2213,6 +2226,8 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	private RemoteMTVSHandler remoteMTVSHandler;
 
 	private Thread blinkTimer;
+
+	private Thread oldBlinkTimer;
 
    
     /** Redisplays the (x,y) coordinates and pixel value (which may
@@ -2774,13 +2789,16 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			return this;
 	}
 
-	public void setMotherImp(ImagePlus imp, int frame) {
+	public void setMotherImp(ImagePlus imp, int id) {
 		this.motherImp = imp;
-		this.motherFrame = frame;
+		this.motherID = id;
 	}
 
-	public int getMotherFrame() {
-		return motherFrame;
+	public int getMotherID() {
+		if (motherID!=0)
+			return motherID;
+		else
+			return this.getID();
 	}
 
 	public Color getRoiFillColor() {
