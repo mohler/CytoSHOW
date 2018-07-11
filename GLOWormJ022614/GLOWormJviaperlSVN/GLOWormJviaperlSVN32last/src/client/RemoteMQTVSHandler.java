@@ -892,7 +892,6 @@ public class RemoteMQTVSHandler {
 		private String[] channelLUTName = new String[stkNChannels];
 		private String sceneFileText;
 		private String sceneFileName;
-		private ImagePlus openImp;
 		private ImagePlus saveImp;
 
 		private RemoteMQTVirtualStack(int width, int height, ColorModel cm,
@@ -981,6 +980,7 @@ public class RemoteMQTVSHandler {
 				ip.fill();
 
 			} else {
+				ImagePlus openImp;
 				if (dejaVuIPLinkedHashMap.get(adjustedSlice) != null) {
 					ip = dejaVuIPLinkedHashMap.get(adjustedSlice).duplicate();
 				} else if (moviePathNames[0].substring(moviePathNames[0].lastIndexOf("/")).startsWith("/SW_")
@@ -993,9 +993,7 @@ public class RemoteMQTVSHandler {
 						burnIn = this.isBurnIn() && !win.running && !win.running2 && !win.running3;
 					if ((new File(/*(IJ.isWindows()?"\\\\?\\":"")+*/localMovieDirs[stkNChannels-1]+"/"+adjustedSlice+".tif")).canRead()) {
 						openImp = (new Opener()).openImage(/*(IJ.isWindows()?"\\\\?\\":"")+*/localMovieDirs[stkNChannels-1]+"/"+adjustedSlice+".tif");
-						ip = openImp.getProcessor();
-						//						openImp.close();
-						//						openImp.flush();
+						ip = openImp.getProcessor().duplicate();
 						//dejaVuIPLinkedHashMap.put(adjustedSlice, ip.duplicate());
 					}else if (this.isBurnIn()) {
 						boolean cacheIt = false;
@@ -1025,9 +1023,7 @@ public class RemoteMQTVSHandler {
 
 				}else if ((new File(/*(IJ.isWindows()?"\\\\?\\":"")+*/localMovieDirs[(adjustedSlice-1)%stkNChannels]+"/"+((int)Math.floor((adjustedSlice-1)/stkNChannels)+1)+".tif")).canRead()) {
 					openImp = (new Opener()).openImage(/*(IJ.isWindows()?"\\\\?\\":"")+*/localMovieDirs[(adjustedSlice-1)%stkNChannels]+"/"+((int)Math.floor((adjustedSlice-1)/stkNChannels)+1)+".tif");
-					ip = openImp.getProcessor();
-					//					openImp.close();
-					//					openImp.flush();
+					ip = openImp.getProcessor().duplicate();
 					//dejaVuIPLinkedHashMap.put(adjustedSlice, ip.duplicate());
 				}else {
 					ip = getRemoteIP(adjustedSlice, 100, false);
