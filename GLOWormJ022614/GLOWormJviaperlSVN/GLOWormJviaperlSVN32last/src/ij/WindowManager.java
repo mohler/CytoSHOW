@@ -366,6 +366,11 @@ public class WindowManager {
 			currentWindow = null;
 		imageList.removeElementAt(index);
 		setTempCurrentImage(null);  //???
+		for (Object key:tempImageTable.keySet().toArray()) {
+			if(tempImageTable.get(key) == win.getImagePlus()) {
+				tempImageTable.remove(key);
+			}
+		}
 		int nonImageCount = nonImageList.size();
 		if (nonImageCount>0)
 			nonImageCount++;

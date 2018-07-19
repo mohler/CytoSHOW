@@ -44,9 +44,9 @@ public class ImageWriter {
 	void write8BitVirtualStack(OutputStream out, VirtualStack virtualStack)  throws IOException {
 		showProgressBar = false;
 		ImagePlus imp = null;
-		for(ImagePlus oImp:virtualStack.getOwnerImps()) {
-			if (oImp!=null && oImp==WindowManager.getCurrentImage()) {
-				imp = oImp;
+		for(int i=0;i<WindowManager.getIDList().length;i++) {
+			imp= WindowManager.getImage(i);
+			if (imp!=null && imp.getStack()==virtualStack) {
 				if (imp.isDisplayedHyperStack() && imp.isComposite()) {
 					int mode = ((CompositeImage)imp).getMode();
 					int wasC = imp.getChannel();
@@ -123,9 +123,9 @@ public class ImageWriter {
 	void write16BitVirtualStack(OutputStream out, VirtualStack virtualStack)  throws IOException {
 		showProgressBar = false;
 		ImagePlus imp = null;
-		for(ImagePlus oImp:virtualStack.getOwnerImps()) {
-			if (oImp!=null && oImp==WindowManager.getCurrentImage()) {
-				imp = oImp;
+		for(int i=0;i<WindowManager.getIDList().length;i++) {
+			imp= WindowManager.getImage(i);
+			if (imp!=null && imp.getStack()==virtualStack) {
 				if (imp.isDisplayedHyperStack() && imp.isComposite()) {
 					int mode = ((CompositeImage)imp).getMode();
 					int wasC = imp.getChannel();

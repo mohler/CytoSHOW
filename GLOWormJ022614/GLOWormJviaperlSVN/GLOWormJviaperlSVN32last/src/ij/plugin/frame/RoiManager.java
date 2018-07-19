@@ -992,6 +992,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			sketchImp.changes = false;
 			sketchImp.close();
 			sketchImp.flush();
+			sketchImp=null;
 			ImageJ3DViewer.select(null);
 		}
 	}
@@ -4392,6 +4393,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					}
 					bigImp.close();
 					bigImp.flush();
+					bigImp=null;
 
 				}
 
@@ -4589,10 +4591,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			projZImps.get(projZImps.size()-1).getWindow().setSize(ic.dstWidth+padH, ic.dstHeight+padV);
 
 			flipDupImp.flush();
+			flipDupImp=null;
 			rsImp.close();
 			rsImp.getRoiManager().dispose();
 			rsImp.setIgnoreFlush(false);
 			rsImp.flush();
+			rsImp=null;
 			IJ.wait(1000);
 			if (imp.getCanvas().droppedGeneUrls != null) {
 				IJ.setForegroundColor(255, 255, 255);

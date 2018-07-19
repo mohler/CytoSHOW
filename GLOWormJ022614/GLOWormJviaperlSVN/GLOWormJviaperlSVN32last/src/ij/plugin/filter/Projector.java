@@ -564,14 +564,9 @@ public class Projector implements PlugInFilter, TextListener {
 					buildImp.setMotherImp(buildImp, firstT);
 
 
-				while (WindowManager.getImage("Concatenated Stacks") != null) 
+				while (WindowManager.getImage("Concatenated Stacks") != null) {
 					WindowManager.getImage("Concatenated Stacks").close();
-				for (ImagePlus ownerImp:buildImp.getImageStack().getOwnerImps()) 
-					if (ownerImp.getTitle() == "Concatenated Stacks") {
-						buildImp.getImageStack().removeOwnerImp(ownerImp);
-						ownerImp.flush();
-					}
-
+				}
 				if (WindowManager.getImage("BuildStack")!= null) 
 					WindowManager.getImage("BuildStack").close();
 

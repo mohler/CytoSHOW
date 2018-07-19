@@ -682,6 +682,10 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		return imp;
 	}
 
+	public void setImage(ImagePlus imp) {
+		this.imp = imp;
+	}
+
 	/** Sets the cursor based on the current tool and cursor location. */
 	public void setCursor(int sx, int sy, int ox, int oy) {
 		setXMouse(ox);

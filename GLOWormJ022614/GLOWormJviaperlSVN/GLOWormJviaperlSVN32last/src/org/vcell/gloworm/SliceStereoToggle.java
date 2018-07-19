@@ -25,8 +25,8 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 	private String slcPath;
 	private String prxPath;
 	private String pryPath;
-	private ImagePlus imp;
-	protected ImagePlus newImp;
+	public ImagePlus imp;
+	public ImagePlus newImp;
 	protected Integer slice;
 	protected boolean keepOriginal;
 	protected int displaymode;

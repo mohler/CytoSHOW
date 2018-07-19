@@ -8,6 +8,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import org.vcell.gloworm.DISPIM_Monitor;
 import org.vcell.gloworm.ListVirtualStack;
 import org.vcell.gloworm.MultiChannelController;
 import org.vcell.gloworm.MultiQTVirtualStack;
@@ -107,7 +108,6 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	private Overlay overlay;
 	private boolean hideOverlay;
 	private static int default16bitDisplayRange;
-
 
     /** Constructs an uninitialized ImagePlus. */
     public ImagePlus() {
@@ -351,8 +351,10 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			//if (IJ.isWindows() && IJ.isJava14())
 			//	changes = false; // avoid 'save changes?' dialog and potential Java 1.5 deadlocks
 			dupImp = null;
-			if (dupImp!=null)
+			if (dupImp!=null) {
 				dupImp.flush();
+				dupImp = null;
+			}
 			win.close();
 			if (getMultiChannelController() != null) {
 				WindowManager.removeWindow(getMultiChannelController());
@@ -631,7 +633,6 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
     	ImageProcessor ip = newStack.getProcessor(currentSlice);
     	boolean dimensionsChanged = width>0 && height>0 && (width!=ip.getWidth()||height!=ip.getHeight());
     	this.stack = newStack;
-    	this.stack.addOwnerImp(this);
     	setProcessor2(title, ip, newStack);
 		if (win==null) {
 			if (resetCurrentSlice) setSlice(currentSlice);
@@ -2015,19 +2016,8 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		ip = null;
 		if (roi!=null) roi.setImage(null);
 		roi = null;
-		boolean preserveStack = false;		
 		if (stack!=null) {
-			preserveStack = stack.removeOwnerImp(this);
-			if (!preserveStack) {
-				Object[] arrays = stack.getImageArray();
-				if (arrays!=null) {
-					for (int i=0; i<arrays.length; i++)
-						arrays[i] = null;
-				}
-				if (isComposite())
-					((CompositeImage)this).setChannelsUpdated(); //flush
-				stack = null;
-			}
+			stack = null;
 		}
 		img = null;
 		win = null;
@@ -2041,8 +2031,16 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		calibration = null;
 		overlay = null;
 		flatteningCanvas = null;
-		if (getCanvas() != null)
+		if (getCanvas() != null) {
+			getCanvas().setImage(null);
 			this.getWindow().remove(getCanvas());
+		}
+		if (this.getWindow()!=null && this.getWindow().sst!=null) {
+			this.getWindow().sst.imp=null;
+			this.getWindow().sst.newImp=null;
+			
+		}
+		
 		if (dupImp != null) {
 			dupImp.flush();
 			dupImp = null;
@@ -2063,6 +2061,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			getRoiManager().dispose();
 			rm = null;
 		}
+		
 
 	}
 	

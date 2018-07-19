@@ -1660,6 +1660,8 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 
 	public void dispose() {
 		super.dispose();
+		imp=null;
+		lastImage=null;
 		this.removeKeyListener(IJ.getInstance());
 		location = getLocation();
 	}

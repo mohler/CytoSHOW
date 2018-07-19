@@ -534,6 +534,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 						fivImpZero.getTitle().replaceAll("\\d+\\.", "\\."), this);
 		
 		fivImpZero.flush();
+		fivImpZero=null;
 		
 		imp.setOpenAsHyperStack(true);			
 //		int cztDims = cDim*zDim*fivStacks.size();
@@ -720,11 +721,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber+(sliceNumber%(2)==0?0:dZ*2));
 
 			ip.setInterpolationMethod(ImageProcessor.BICUBIC);
-			if (this.getOwnerImps() != null && this.getOwnerImps().size() > 0 && this.getOwnerImps().get(0) != null) {
-				ip.translate(skewXperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1-this.getOwnerImps().get(this.getOwnerImps().size()-1).getNSlices()/2), skewYperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1-this.getOwnerImps().get(this.getOwnerImps().size()-1).getNSlices()/2));
-			} else {
-				ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
-			}
+			ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
 
 			if (ip.getWidth()==2048) //NIBIB splitview setup(?)
 			{
@@ -771,13 +768,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 
 		ip.setInterpolationMethod(ImageProcessor.BICUBIC);
-		if (this.getOwnerImps() != null && this.getOwnerImps().size() > 0 && this.getOwnerImps().get(0) != null) {
-			ip.translate(skewXperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1-this.getOwnerImps().get(this.getOwnerImps().size()-1).getNSlices()/2), skewYperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1-this.getOwnerImps().get(this.getOwnerImps().size()-1).getNSlices()/2));
-			ip2.copyBits(ip, 0, 0, Blitter.COPY_ZERO_TRANSPARENT);
-			ip = ip2;
-		} else {
-			ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
-		}
+		ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
 
 //FALSING OUT 488G/R RATIOING (06192018)
 		if (false && dimOrder.toLowerCase().matches(".*splitsequentialc.*") && n%cDim == 1) {

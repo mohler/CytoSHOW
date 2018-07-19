@@ -209,11 +209,7 @@ public class MultiChannelFileInfoVirtualStack extends VirtualStack implements Pl
 		int c = (n-1) % (fivStacks.size());
 		ImageProcessor ip = fivStacks.get(c).getProcessor((int)Math.floor(((double)n-1)/fivStacks.size()));
 		ip.setInterpolationMethod(ImageProcessor.BICUBIC);
-		if (this.getOwnerImps() != null && this.getOwnerImps().size() > 0 && this.getOwnerImps().get(0) != null) {
-			ip.translate(skewXperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1-this.getOwnerImps().get(this.getOwnerImps().size()-1).getNSlices()/2), skewYperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1-this.getOwnerImps().get(this.getOwnerImps().size()-1).getNSlices()/2));
-		} else {
-			ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
-		}
+		ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
 		return ip;
 	 }
  

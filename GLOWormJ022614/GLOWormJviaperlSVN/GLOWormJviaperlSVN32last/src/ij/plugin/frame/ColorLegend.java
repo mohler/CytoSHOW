@@ -432,6 +432,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
     public void dispose() {
     	while (bbImp != null || bbImpCopy != null) {
     		bbImp = null;
+    		bb2Imp=null;
     		bbImpCopy = null;
     	}
         this.removeKeyListener(IJ.getInstance());

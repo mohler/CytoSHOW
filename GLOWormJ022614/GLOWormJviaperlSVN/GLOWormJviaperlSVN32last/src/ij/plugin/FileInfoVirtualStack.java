@@ -136,6 +136,8 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 				imp2 = new CompositeImage(imp2, mode);
 			}
 		}
+		imp.flush();
+		imp = null;
 		if (show) imp2.show();
 		return imp2;
 	}
@@ -216,11 +218,7 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (imp!=null) {
 			ImageProcessor ip = imp.getProcessor();
 			ip.setInterpolationMethod(ImageProcessor.BICUBIC);
-			if (this.getOwnerImps() != null && this.getOwnerImps().size() > 0 && this.getOwnerImps().get(0) != null) {
-				ip.translate(skewXperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1-this.getOwnerImps().get(this.getOwnerImps().size()-1).getNSlices()/2), skewYperZ*(this.getOwnerImps().get(this.getOwnerImps().size()-1).getSlice()-1-this.getOwnerImps().get(this.getOwnerImps().size()-1).getNSlices()/2));
-			} else {
-				ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
-			}
+			ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
 			return ip;
 		} else {
 			int w=getWidth(), h=getHeight();
