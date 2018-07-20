@@ -3645,13 +3645,27 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			notifyAll();
 		}
 		if (rois != null) {
+			for (Roi roi:rois.values()) {
+				roi.setImage(null);
+				roi.setMotherImp(null);
+			}
 			rois.clear();
 			rois=null;
 		}
 		if (originalRois != null) {
+			for (Roi roi:originalRois) {
+				roi.setImage(null);
+				roi.setMotherImp(null);
+			}
 			originalRois = null;
 		}
 		if (roisByNumbers != null) {
+			for (ArrayList<Roi> roiAL:roisByNumbers.values()) {
+				for (Roi roi:roiAL) {
+					roi.setImage(null);
+					roi.setMotherImp(null);
+				}
+			}
 			roisByNumbers = null;
 		}
 		list = null;

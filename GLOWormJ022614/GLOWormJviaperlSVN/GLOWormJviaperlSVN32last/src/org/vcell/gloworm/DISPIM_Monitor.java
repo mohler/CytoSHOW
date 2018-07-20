@@ -232,16 +232,16 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 	String big5DFileListAString = ("");
 	String big5DFileListBString = ("");
 
-	ImagePlus[] impAs = new ImagePlus[1];
-	ImagePlus[] impBs  = new ImagePlus[1];
-	ImagePlus[] impDF1s  = new ImagePlus[1];
-	ImagePlus[] impDF2s  = new ImagePlus[1];
-	ImagePlus[] impPrxs  = new ImagePlus[1];
-	ImagePlus[] impPrys  = new ImagePlus[1];
+	ImagePlus[] impAs;
+	ImagePlus[] impBs;
+	ImagePlus[] impDF1s;
+	ImagePlus[] impDF2s;
+	ImagePlus[] impPrxs;
+	ImagePlus[] impPrys;
 
-	CompositeImage[] ciDFs  = new CompositeImage[1];
-	CompositeImage[] ciPrxs  = new CompositeImage[1];
-	CompositeImage[] ciPrys  = new CompositeImage[1];
+	CompositeImage[] ciDFs;
+	CompositeImage[] ciPrxs;
+	CompositeImage[] ciPrys;
 
 	Projector16bit[] prjXs = new Projector16bit[1];
 	Projector16bit[] prjYs = new Projector16bit[1];
