@@ -1523,6 +1523,7 @@ public class RemoteMQTVSHandler {
 	}
 
 	public void dispose() {
+		imp2 = null;
 		stack = null;
 	}
 

@@ -2027,7 +2027,11 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			
 		}
 		if (stack!=null) {
-			stack = null;
+			if (stack instanceof MultiFileInfoVirtualStack) {
+				stack = null;
+			} else {
+				stack = null;
+			}
 		}
 		img = null;
 		win = null;

@@ -798,8 +798,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						wasSliceB[pos] = impBs[pos].getSlice();
 						wasChannelA[pos] = impAs[pos].getChannel();
 						wasChannelB[pos] = impBs[pos].getChannel();
-						wasEdgesA[pos] = ((VirtualStack)impAs[pos].getStack()).isEdges();
-						wasEdgesB[pos] = ((VirtualStack)impBs[pos].getStack()).isEdges();
+						wasEdgesA[pos] = impAs[pos].getStack().isEdges();
+						wasEdgesB[pos] = impBs[pos].getStack().isEdges();
 
 						impAs[pos].show();
 						impBs[pos].show();
@@ -2017,11 +2017,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											.getDisplayRangeMin();
 									double oldMax = win.getImagePlus()
 											.getDisplayRangeMax();
-									boolean oldEdges = ((VirtualStack)win.getImagePlus().getStack()).isEdges();
+									boolean oldEdges = win.getImagePlus().getStack().isEdges();
 
 									ciDFs[pos].setWindow(win);
 									win.updateImage(ciDFs[pos]);
-									((VirtualStack)win.getImagePlus().getStack()).setEdges(oldEdges);
+									win.getImagePlus().getStack().setEdges(oldEdges);
 									win.setSize(oldW, oldH);
 									((StackWindow) win).addScrollbars(ciDFs[pos]);
 									win.getCanvas().setMagnification(oldMag);								
@@ -2093,11 +2093,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										double oldMax = prjXwin.getImagePlus()
 												.getDisplayRangeMax();
 										((CompositeImage)ciPrxs[pos]).copyLuts(prjXwin.getImagePlus());
-										boolean oldEdges = ((VirtualStack)prjXwin.getImagePlus().getStack()).isEdges();
+										boolean oldEdges = prjXwin.getImagePlus().getStack().isEdges();
 
 										ciPrxs[pos].setWindow(prjXwin);
 										prjXwin.updateImage(ciPrxs[pos]);
-										((VirtualStack)prjXwin.getImagePlus().getStack()).setEdges(oldEdges);
+										prjXwin.getImagePlus().getStack().setEdges(oldEdges);
 										prjXwin.setSize(oldW, oldH);
 										((StackWindow) prjXwin).addScrollbars(ciPrxs[pos]);
 										prjXwin.getCanvas().setMagnification(oldMag);
@@ -2129,11 +2129,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										double oldMax = prjYwin.getImagePlus()
 												.getDisplayRangeMax();
 										((CompositeImage)ciPrys[pos]).copyLuts(prjYwin.getImagePlus());
-										boolean oldEdges = ((VirtualStack)prjYwin.getImagePlus().getStack()).isEdges();
+										boolean oldEdges = prjYwin.getImagePlus().getStack().isEdges();
 
 										ciPrys[pos].setWindow(prjYwin);
 										prjYwin.updateImage(ciPrys[pos]);
-										((VirtualStack)prjYwin.getImagePlus().getStack()).setEdges(oldEdges);
+										prjYwin.getImagePlus().getStack().setEdges(oldEdges);
 										prjYwin.setSize(oldW, oldH);
 										((StackWindow) prjYwin).addScrollbars(ciPrys[pos]);
 										prjYwin.getCanvas().setMagnification(oldMag);								
@@ -2312,7 +2312,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							int cA = impAs[pos].getChannel();
 							int zA = impAs[pos].getSlice();
 							int tA = impAs[pos].getFrame();
-							boolean edgesA = ((VirtualStack)impAs[pos].getStack()).isEdges();
+							boolean edgesA = impAs[pos].getStack().isEdges();
 							boolean tailing = tA==impAs[pos].getNFrames();
 							tDim = listA.length;
 
@@ -2343,7 +2343,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								int nScrollbars = sw.getNScrollbars();
 								sw.addScrollbars(impAs[pos]);
 							}
-							((VirtualStack)impAs[pos].getStack()).setEdges(edgesA);
+							impAs[pos].getStack().setEdges(edgesA);
 							impAs[pos].setPosition(cA, zA, (tailing || tA > impAs[pos].getNFrames())? impAs[pos].getNFrames() : tA);
 							((CompositeImage)impAs[pos]).setMode(modeA);
 							win.getCanvas().setMagnification(zoomA);
@@ -2360,7 +2360,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							if (impBs[pos].isComposite()) {
 								modeB = ((CompositeImage)impBs[pos]).getCompositeMode();
 							}
-							boolean edgesB = ((VirtualStack)impBs[pos].getStack()).isEdges();
+							boolean edgesB = impBs[pos].getStack().isEdges();
 
 							tailing = tB==impBs[pos].getNFrames();
 							tDim = listA.length;
@@ -2391,7 +2391,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								int nScrollbars = sw.getNScrollbars();
 								sw.addScrollbars(impBs[pos]);
 							}
-							((VirtualStack)impBs[pos].getStack()).setEdges(edgesB);
+							impBs[pos].getStack().setEdges(edgesB);
 							impBs[pos].setPosition(cB, zB, (tailing || tB > impBs[pos].getNFrames())? impBs[pos].getNFrames() : tB);
 							((CompositeImage)impBs[pos]).setMode(modeB);
 							win.getCanvas().setMagnification(zoomB);
@@ -3273,7 +3273,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 						ImageStack stackA1 = new ImageStack((int)cropWidthA[pos], (int)cropHeightA[pos]);
 						ImageStack stackA2 = new ImageStack((int)cropWidthA[pos], (int)cropHeightA[pos]);
-						wasEdgesA[pos] = ((VirtualStack)impAs[pos].getStack()).isEdges();
+						wasEdgesA[pos] = impAs[pos].getStack().isEdges();
 						impAs[pos].getWindow().setEnabled(false);
 						for (int i = 1; i <= impAs[pos].getNSlices(); i++) {
 							impAs[pos].setPositionWithoutUpdate(1, i, f);
@@ -3352,7 +3352,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 						ImageStack stackB1 = new ImageStack((int)cropWidthB[pos], (int)cropHeightB[pos]);
 						ImageStack stackB2 = new ImageStack((int)cropWidthB[pos], (int)cropHeightB[pos]);
-						wasEdgesB[pos] = ((VirtualStack)impBs[pos].getStack()).isEdges();
+						wasEdgesB[pos] = impBs[pos].getStack().isEdges();
 						impBs[pos].getWindow().setEnabled(false);
 						for (int i = 1; i <= impBs[pos].getNSlices(); i++) {
 							impBs[pos].setPositionWithoutUpdate(1, i, f);
@@ -3435,8 +3435,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 					final String[] frameFileNamesFinal = frameFileNames;
 
-					((VirtualStack)impAs[pos].getStack()).setEdges(wasEdgesA[pos]);
-					((VirtualStack)impBs[pos].getStack()).setEdges(wasEdgesB[pos]);
+					impAs[pos].getStack().setEdges(wasEdgesA[pos]);
+					impBs[pos].getStack().setEdges(wasEdgesB[pos]);
 					impAs[pos].setPosition(wasChannelA[pos], wasSliceA[pos], wasFrameA[pos]);
 					impBs[pos].setPosition(wasChannelB[pos], wasSliceB[pos], wasFrameB[pos]);
 
@@ -3861,7 +3861,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 						stackA1 = new ImageStack((int)cropWidthA[pos]+2, (int)cropHeightA[pos]+2);
 						stackA2 = new ImageStack((int)cropWidthA[pos]+2, (int)cropHeightA[pos]+2);
-						wasEdgesA[pos] = ((VirtualStack)impAs[pos].getStack()).isEdges();
+						wasEdgesA[pos] = impAs[pos].getStack().isEdges();
 						impAs[pos].getWindow().setEnabled(false);
 
 						stackA1.addSlice(new ShortProcessor((int)cropWidthA[pos]+2, (int)cropHeightA[pos]+2));
@@ -3966,7 +3966,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 						stackB1 = new ImageStack((int)cropWidthB[pos]+2, (int)cropHeightB[pos]+2);
 						stackB2 = new ImageStack((int)cropWidthB[pos]+2, (int)cropHeightB[pos]+2);
-						wasEdgesB[pos] = ((VirtualStack)impBs[pos].getStack()).isEdges();
+						wasEdgesB[pos] = impBs[pos].getStack().isEdges();
 						impBs[pos].getWindow().setEnabled(false);
 
 						stackB1.addSlice(new ShortProcessor((int)cropWidthB[pos]+2, (int)cropHeightB[pos]+2));
@@ -4082,8 +4082,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						impAs[pos].updateAndDraw();
 						impBs[pos].setPosition(wasChannelB[pos], wasSliceB[pos], wasFrameB[pos]);
 						impBs[pos].updateAndDraw();
-						((VirtualStack)impAs[pos].getStack()).setEdges(wasEdgesA[pos]);
-						((VirtualStack)impBs[pos].getStack()).setEdges(wasEdgesB[pos]);
+						impAs[pos].getStack().setEdges(wasEdgesA[pos]);
+						impBs[pos].getStack().setEdges(wasEdgesB[pos]);
 
 						//							if (f==1)
 						//								IJ.wait(5000);
@@ -4465,7 +4465,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								} else {
 									win = null;
 								}
-
 								ciDFs[pos] = new CompositeImage(impDF1s[pos]);
 
 
@@ -4492,13 +4491,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											.getDisplayRangeMin();
 									double oldMax = win.getImagePlus()
 											.getDisplayRangeMax();
-									boolean oldEdges = ((VirtualStack)win.getImagePlus().getStack()).isEdges();
+									boolean oldEdges = win.getImagePlus().getStack().isEdges();
 									ciDFs[pos].copyLuts(win.getImagePlus());
 
 									win.setVisible(false);	
+									win.setImage(ciDFs[pos]);
 									ciDFs[pos].setWindow(win);
 									win.updateImage(ciDFs[pos]);
-									((VirtualStack)win.getImagePlus().getStack()).setEdges(oldEdges);
+									win.getImagePlus().getStack().setEdges(oldEdges);
 									win.setSize(oldW, oldH);
 									((StackWindow) win).addScrollbars(ciDFs[pos]);
 									win.getCanvas().setMagnification(oldMag);
@@ -4530,9 +4530,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								if (ciPrxs[pos] != null) {
 									prjXwin = ciPrxs[pos].getWindow();
 								}
+
 								ciPrxs[pos] = new CompositeImage(impPrxs[pos]);
 								ciPrxs[pos].setPosition(1, ciPrxs[pos].getNSlices()/2, ciPrxs[pos].getNFrames());
-
 
 								impPrys[pos] = new ImagePlus();
 								impPrys[pos].setStack("3DProjY_Decon-Fuse_"
@@ -4550,6 +4550,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								if (ciPrys[pos] != null) {
 									prjYwin = ciPrys[pos].getWindow();
 								}
+
 								ciPrys[pos] = new CompositeImage(impPrys[pos]);
 								ciPrys[pos].setPosition(1, ciPrys[pos].getNSlices()/2, ciPrys[pos].getNFrames());
 
@@ -4582,12 +4583,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											.getDisplayRangeMin();
 									oldMax = prjXwin.getImagePlus()
 											.getDisplayRangeMax();
-									oldEdges = ((VirtualStack)prjXwin.getImagePlus().getStack()).isEdges();
+									oldEdges = prjXwin.getImagePlus().getStack().isEdges();
 									((CompositeImage)ciPrxs[pos]).copyLuts(prjXwin.getImagePlus());
 
+									prjXwin.setImage(ciPrxs[pos]);
 									ciPrxs[pos].setWindow(prjXwin);
 									prjXwin.updateImage(ciPrxs[pos]);
-									((VirtualStack)prjXwin.getImagePlus().getStack()).setEdges(oldEdges);
+									prjXwin.getImagePlus().getStack().setEdges(oldEdges);
 									prjXwin.setSize(oldW, oldH);
 									((StackWindow) prjXwin).addScrollbars(ciPrxs[pos]);
 									prjXwin.getCanvas().setMagnification(oldMag);											
@@ -4618,12 +4620,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											.getDisplayRangeMin();
 									oldMax = prjYwin.getImagePlus()
 											.getDisplayRangeMax();
-									oldEdges = ((VirtualStack)prjYwin.getImagePlus().getStack()).isEdges();
+									oldEdges = prjYwin.getImagePlus().getStack().isEdges();
 									((CompositeImage)ciPrys[pos]).copyLuts(prjYwin.getImagePlus());
 
+									prjYwin.setImage(ciPrys[pos]);
 									ciPrys[pos].setWindow(prjYwin);
 									prjYwin.updateImage(ciPrys[pos]);
-									((VirtualStack)prjYwin.getImagePlus().getStack()).setEdges(oldEdges);
+									prjYwin.getImagePlus().getStack().setEdges(oldEdges);
 									prjYwin.setSize(oldW, oldH);
 									((StackWindow) prjYwin).addScrollbars(ciPrys[pos]);
 									prjYwin.getCanvas().setMagnification(oldMag);
@@ -4632,6 +4635,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									prjYwin.getImagePlus().setDisplayRange(oldMin, oldMax);
 									prjYwin.setSize(prjYwin.getSize().width,
 											prjYwin.getSize().height);
+									
 								}
 
 
@@ -5456,67 +5460,85 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 	}
 
 	public void imageClosed(ImagePlus closingImp) {
-		for (int a=0;a<impAs.length;a++) {
-			if (impAs[a] == closingImp) {
-//				ImagePlus.removeImageListener(this);
+		if (impAs!=null ) {
+			for (int a=0;a<impAs.length;a++) {
+				if (impAs[a] == closingImp) {
+					//				ImagePlus.removeImageListener(this);
 
-				impAs[a] = null;
+					impAs[a] = null;
+				}
 			}
 		}
-		for (int a=0;a<impBs.length;a++) {
-			if (impBs[a] == closingImp) {
-//				ImagePlus.removeImageListener(this);
+		if (impBs!=null ) {
+			for (int a=0;a<impBs.length;a++) {
+				if (impBs[a] == closingImp) {
+					//				ImagePlus.removeImageListener(this);
 
-				impBs[a] = null;
+					impBs[a] = null;
+				}
 			}
 		}
-		for (int a=0;a<ciDFs.length;a++) {
-			if (ciDFs[a] == closingImp) {
-//				ImagePlus.removeImageListener(this);
+		if (ciDFs!=null ) {
+			for (int a=0;a<ciDFs.length;a++) {
+				if (ciDFs[a] == closingImp) {
+					//				ImagePlus.removeImageListener(this);
 
-				ciDFs[a] = null;
+					ciDFs[a] = null;
+				}
 			}
 		}
-		for (int a=0;a<ciPrxs.length;a++) {
-			if (ciPrxs[a] == closingImp) {
-//				ImagePlus.removeImageListener(this);
+		if (ciPrxs!=null ) {
+			for (int a=0;a<ciPrxs.length;a++) {
+				if (ciPrxs[a] == closingImp) {
+					//				ImagePlus.removeImageListener(this);
 
-				ciPrxs[a] = null;
+					ciPrxs[a] = null;
+				}
 			}
 		}
-		for (int a=0;a<ciPrys.length;a++) {
-			if (ciPrys[a] == closingImp) {
-//				ImagePlus.removeImageListener(this);
+		if (ciPrys!=null ) {
+			for (int a=0;a<ciPrys.length;a++) {
+				if (ciPrys[a] == closingImp) {
+					//				ImagePlus.removeImageListener(this);
 
-				ciPrys[a] = null;
+					ciPrys[a] = null;
+				}
 			}
 		}
-		for (int a=0;a<impPrxs.length;a++) {
-			if (impPrxs[a] == closingImp) {
-//				ImagePlus.removeImageListener(this);
+		if (impPrxs!=null ) {
+			for (int a=0;a<impPrxs.length;a++) {
+				if (impPrxs[a] == closingImp) {
+					//				ImagePlus.removeImageListener(this);
 
-				impPrxs[a] = null;
+					impPrxs[a] = null;
+				}
 			}
 		}
-		for (int a=0;a<impPrys.length;a++) {
-			if (impPrys[a] == closingImp) {
-//				ImagePlus.removeImageListener(this);
+		if (impPrys!=null ) {
+			for (int a=0;a<impPrys.length;a++) {
+				if (impPrys[a] == closingImp) {
+					//				ImagePlus.removeImageListener(this);
 
-				impPrys[a] = null;
+					impPrys[a] = null;
+				}
 			}
 		}
-		for (int a=0;a<impDF1s.length;a++) {
-			if (impDF1s[a] == closingImp) {
-//				ImagePlus.removeImageListener(this);
+		if (impDF1s!=null ) {
+			for (int a=0;a<impDF1s.length;a++) {
+				if (impDF1s[a] == closingImp) {
+					//				ImagePlus.removeImageListener(this);
 
-				impDF1s[a] = null;
+					impDF1s[a] = null;
+				}
 			}
 		}
-		for (int a=0;a<impDF2s.length;a++) {
-			if (impDF2s[a] == closingImp) {
-//				ImagePlus.removeImageListener(this);
+		if (impDF1s!=null ) {
+			for (int a=0;a<impDF2s.length;a++) {
+				if (impDF2s[a] == closingImp) {
+					//				ImagePlus.removeImageListener(this);
 
-				impDF2s[a] = null;
+					impDF2s[a] = null;
+				}
 			}
 		}
 	}

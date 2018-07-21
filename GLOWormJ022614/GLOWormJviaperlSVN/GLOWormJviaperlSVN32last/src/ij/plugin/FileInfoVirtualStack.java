@@ -136,7 +136,8 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 				imp2 = new CompositeImage(imp2, mode);
 			}
 		}
-		imp.flush();
+		if (imp!= null)
+			imp.flush();
 		imp = null;
 		if (show) imp2.show();
 		return imp2;
