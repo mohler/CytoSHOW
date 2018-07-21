@@ -28,6 +28,7 @@ import ij.plugin.frame.ContrastAdjuster;
 import ij.plugin.frame.Recorder;
 import ij.plugin.frame.RoiManager;
 import ij.plugin.Converter;
+import ij.plugin.DragAndDrop;
 import ij.plugin.Duplicator;
 import ij.plugin.MultiFileInfoVirtualStack;
 import ij.plugin.RectToolOptions;
@@ -2016,6 +2017,15 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		ip = null;
 		if (roi!=null) roi.setImage(null);
 		roi = null;
+		if (getCanvas() != null) {
+			getCanvas().setImage(null);
+			this.getWindow().remove(getCanvas());
+		}
+		if (this.getWindow()!=null && this.getWindow().sst!=null) {
+			this.getWindow().sst.imp=null;
+			this.getWindow().sst.newImp=null;
+			
+		}
 		if (stack!=null) {
 			stack = null;
 		}
@@ -2031,15 +2041,6 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		calibration = null;
 		overlay = null;
 		flatteningCanvas = null;
-		if (getCanvas() != null) {
-			getCanvas().setImage(null);
-			this.getWindow().remove(getCanvas());
-		}
-		if (this.getWindow()!=null && this.getWindow().sst!=null) {
-			this.getWindow().sst.imp=null;
-			this.getWindow().sst.newImp=null;
-			
-		}
 		
 		if (dupImp != null) {
 			dupImp.flush();
@@ -2052,7 +2053,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			remoteMQTVSHandler.dispose();
 			remoteMQTVSHandler = null;
 		}
-		getRoiManager().dispose();
+
 		if (getMultiChannelController() != null) {
 			getMultiChannelController().dispose();
 			mcc=null;
@@ -2061,7 +2062,12 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			getRoiManager().dispose();
 			rm = null;
 		}
-		
+		if (DragAndDrop.getInstance().getImp() == this) {
+			DragAndDrop.getInstance().setImp(null);
+		}
+		if (DragAndDrop.getInstance().getDropImp() == this) {
+			DragAndDrop.getInstance().setDropImp(null);
+		}
 
 	}
 	

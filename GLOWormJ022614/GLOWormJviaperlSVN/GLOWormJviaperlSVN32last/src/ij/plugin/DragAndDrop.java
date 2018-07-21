@@ -77,15 +77,15 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 			dropImp = ((ImageCanvas) dtc).getImage();
 			if (dropImp == null)
 				dropImp = IJ.getImage();
-			imp = dropImp;
-			if (imp.getTitle().contains("Sketch3D") || true)
+			setImp(dropImp);
+			if (getImp().getTitle().contains("Sketch3D") || true)
 				doSketch3D = true;
-			if (imp.getMotherImp() != null && imp.getMotherImp() != imp)
-				imp = imp.getMotherImp();
+			if (getImp().getMotherImp() != null && getImp().getMotherImp() != getImp())
+				setImp(getImp().getMotherImp());
 		} else if (WindowManager.getCurrentImage() != null)
-			imp = WindowManager.getCurrentImage();
+			setImp(WindowManager.getCurrentImage());
 		else
-			imp = null;
+			setImp(null);
 		DataFlavor URI_LIST_FLAVOR =null;
 		try {
 			URI_LIST_FLAVOR = new DataFlavor( "text/uri-list;class=java.lang.String" );
@@ -182,7 +182,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						} else if (tmp.endsWith("ColorLegend.lgd")){
 							ColorLegend cl;
 							if (new File(tmp).exists()){
-								cl = new ColorLegend(imp, IJ.openAsString(tmp));
+								cl = new ColorLegend(getImp(), IJ.openAsString(tmp));
 								IJ.showStatus("");
 							} else
 								IJ.showStatus("badpath");
@@ -193,8 +193,8 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						} else if (tmp.trim().split(" ")[0].toLowerCase().matches(".*expr\\d*.*")){
 							list.add("https://www.wormbase.org/species/c_elegans/expr_pattern/" +tmp.trim());
 						} else if (tmp.trim().equalsIgnoreCase("*") || tmp.trim().equalsIgnoreCase(".*")) {
-							imp.getRoiManager().getTextSearchField().setText("");
-							imp.getRoiManager().actionPerformed(new ActionEvent(imp.getRoiManager().getTextSearchField(),0,"",0,0));
+							getImp().getRoiManager().getTextSearchField().setText("");
+							getImp().getRoiManager().actionPerformed(new ActionEvent(getImp().getRoiManager().getTextSearchField(),0,"",0,0));
 							return;
 						} else if (tmp.trim().split(" ")[0].matches(".*\\S.*")){
 							//							IJ.log("anatomyName?");
@@ -280,7 +280,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 	public void dropActionChanged(DropTargetDragEvent e) {}
 
 	public void run() {
-		ImagePlus imp = this.imp;
+		ImagePlus imp = this.getImp();
 		nDrops ++;
 		traceLineages = false;
 		traceForward = false;
@@ -1493,7 +1493,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						if (dropImp == null)
 							return;
 						dropImp.getCanvas().messageRois.remove("Pending drop "+nDrops);
-						dropImp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
+						dropImp.getCanvas().paintDoubleBuffered(getImp().getCanvas().getGraphics());
 						//							IJ.log(nDrops+" nDrops");
 						nDrops--;
 						return;
@@ -1555,5 +1555,21 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 
 	public void setIterator(Iterator iterator) {
 		this.iterator = iterator;
+	}
+
+	public ImagePlus getImp() {
+		return imp;
+	}
+
+	public void setImp(ImagePlus imp) {
+		this.imp = imp;
+	}
+
+	public ImagePlus getDropImp() {
+		return dropImp;
+	}
+
+	public void setDropImp(ImagePlus imp) {
+		dropImp = imp;		
 	}
 }
