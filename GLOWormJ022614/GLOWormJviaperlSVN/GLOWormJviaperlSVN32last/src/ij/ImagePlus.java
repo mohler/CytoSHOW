@@ -30,6 +30,7 @@ import ij.plugin.frame.RoiManager;
 import ij.plugin.Converter;
 import ij.plugin.DragAndDrop;
 import ij.plugin.Duplicator;
+import ij.plugin.FileInfoVirtualStack;
 import ij.plugin.MultiFileInfoVirtualStack;
 import ij.plugin.RectToolOptions;
 
@@ -2027,11 +2028,28 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			
 		}
 		if (stack!=null) {
-			if (stack instanceof MultiFileInfoVirtualStack) {
-				stack = null;
-			} else {
-				stack = null;
+			boolean soloStackUser = true;
+			if (WindowManager.getIDList()!=null) {
+				for (int impID:WindowManager.getIDList()) {
+					if (WindowManager.getImage(impID)!=this && WindowManager.getImage(impID).getStack()==stack) {
+						soloStackUser = false;
+					}
+				}
+				if (soloStackUser) {
+					while (stack.getSize()>0) {
+						stack.deleteLastSlice();
+					}
+				}
+				if (stack instanceof FileInfoVirtualStack) {
+					((FileInfoVirtualStack)stack).infoArray = null;
+				} else if (stack instanceof MultiFileInfoVirtualStack) {
+					for (FileInfoVirtualStack fivStk:((MultiFileInfoVirtualStack)stack).getFivStacks()) {
+						((FileInfoVirtualStack)fivStk).infoArray = null;
+					}
+					((MultiFileInfoVirtualStack)stack).infoArray = null;
+				}
 			}
+			stack=null;
 		}
 		img = null;
 		win = null;

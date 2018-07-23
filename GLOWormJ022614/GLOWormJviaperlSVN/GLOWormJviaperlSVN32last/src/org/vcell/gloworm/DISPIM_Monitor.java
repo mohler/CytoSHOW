@@ -4494,7 +4494,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									boolean oldEdges = win.getImagePlus().getStack().isEdges();
 									ciDFs[pos].copyLuts(win.getImagePlus());
 
-									win.setVisible(false);	
+//									win.setVisible(false);	
 									win.setImage(ciDFs[pos]);
 									ciDFs[pos].setWindow(win);
 									win.updateImage(ciDFs[pos]);
@@ -4508,7 +4508,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									win.setSize(win.getSize().width,
 											win.getSize().height);
 
-									win.setVisible(true);	
+//									win.setVisible(true);	
 								}
 
 								dfProjXmfivs = new MultiFileInfoVirtualStack(prxPath+File.separator, "Color", false);

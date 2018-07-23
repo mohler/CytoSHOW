@@ -23,7 +23,7 @@ import org.vcell.gloworm.QTVirtualStack;
 
 public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	ArrayList<FileInfoVirtualStack> fivStacks;
-	FileInfo[] infoArray;
+	public FileInfo[] infoArray;
 	public ArrayList<FileInfo[]> infoCollectorArrayList;
 	int nImages;
 	private String dir;
