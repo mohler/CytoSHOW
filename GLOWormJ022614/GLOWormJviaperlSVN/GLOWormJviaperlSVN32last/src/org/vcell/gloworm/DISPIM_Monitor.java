@@ -686,27 +686,27 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_Channels/vDim>1 && diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
 								false, false, true){
 							
-							@Override
-							public void initiateStack(int stkNum, int slcNum){
-								super.initiateStack( stkNum,  slcNum);
-								if (stackBs[fPos]!=null){
-									stackBs[fPos].infoCollectorArrayList.set(stkNum, infoCollectorArrayList.get(stkNum));
-									stackBs[fPos].getFivStacks().get(stkNum).infoArray = infoCollectorArrayList.get(stkNum);
-								}
-							}
+//							@Override
+//							public void initiateStack(int stkNum, int slcNum){
+//								super.initiateStack( stkNum,  slcNum);
+//								if (stackBs[fPos]!=null){
+//									stackBs[fPos].infoCollectorArrayList.set(stkNum, infoCollectorArrayList.get(stkNum));
+//									stackBs[fPos].getFivStacks().get(stkNum).infoArray = infoCollectorArrayList.get(stkNum);
+//								}
+//							}
 						};
 						stackBs[pos] = new MultiFileInfoVirtualStack(
 								dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_Channels/vDim>1 && diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
 								true, false, true){
 							
-							@Override
-							public void initiateStack(int stkNum, int slcNum){
-								super.initiateStack( stkNum,  slcNum);
-								if (stackAs[fPos]!=null){
-									stackAs[fPos].infoCollectorArrayList.set(stkNum, infoCollectorArrayList.get(stkNum));
-									stackAs[fPos].getFivStacks().get(stkNum).infoArray = infoCollectorArrayList.get(stkNum);
-								}
-							}
+//							@Override
+//							public void initiateStack(int stkNum, int slcNum){
+//								super.initiateStack( stkNum,  slcNum);
+//								if (stackAs[fPos]!=null){
+//									stackAs[fPos].infoCollectorArrayList.set(stkNum, infoCollectorArrayList.get(stkNum));
+//									stackAs[fPos].getFivStacks().get(stkNum).infoArray = infoCollectorArrayList.get(stkNum);
+//								}
+//							}
 
 						};
 
@@ -738,7 +738,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						impAs[pos] = new CompositeImage(impAs[pos]){
 							@Override
 							public synchronized void flush(){
-								super.flush();
 								ObjectOutputStream oos;
 								try {
 									oos = new ObjectOutputStream(new FileOutputStream(stackAs[fPos].infoDir+"touchedFileFIs"+fPos+".inf"));
@@ -748,6 +747,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									// TODO Auto-generated catch block
 									e.printStackTrace();
 								}
+								super.flush();
 							}
 						};
 						while (!impAs[pos].isComposite()) {
@@ -773,7 +773,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						impBs[pos] = new CompositeImage(impBs[pos]){
 							@Override
 							public synchronized void flush(){
-								super.flush();
 								ObjectOutputStream oos;
 								try {
 									oos = new ObjectOutputStream(new FileOutputStream(stackBs[fPos].infoDir+"touchedFileFIs"+fPos+".inf"));
@@ -783,6 +782,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									// TODO Auto-generated catch block
 									e.printStackTrace();
 								}
+								super.flush();
 							}
 						};
 						while (!impBs[pos].isComposite()) {

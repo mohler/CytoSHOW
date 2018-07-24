@@ -16,8 +16,8 @@ import java.util.Properties;
 public class MultiChannelFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	ArrayList<FileInfoVirtualStack> fivStacks = new ArrayList<FileInfoVirtualStack>();
 	FileInfo[] info;
-	int nImages;
-	int nSlices;
+//	int nImages;
+//	int nSlices;
 	private String dir;
 
 	public String getDir() {
@@ -68,7 +68,7 @@ public class MultiChannelFileInfoVirtualStack extends VirtualStack implements Pl
 			fivStacks.add(new FileInfoVirtualStack());
 			fivStacks.get(fivStacks.size()-1).infoArray = info;
 			fivStacks.get(fivStacks.size()-1).open(false);
-			nImages = fivStacks.size() * fivStacks.get(0).nImages;
+			nSlices = fivStacks.size() * fivStacks.get(0).nSlices;
 		}
 	}
 
@@ -104,7 +104,7 @@ public class MultiChannelFileInfoVirtualStack extends VirtualStack implements Pl
 			IJ.log(info[0].debugInfo);
 		fivStacks.add(new FileInfoVirtualStack());
 		fivStacks.get(fivStacks.size()-1).infoArray = fi;
-		nImages = fivStacks.size() * fivStacks.get(0).nImages;
+		nSlices = fivStacks.size() * fivStacks.get(0).nSlices;
 		Properties props = (new FileOpener(info[0])).decodeDescriptionString(info[0]);
 		nSlices = (int)getDouble(props,"slices");;
 	}
@@ -146,10 +146,10 @@ public class MultiChannelFileInfoVirtualStack extends VirtualStack implements Pl
 	}
 	
 	void open(boolean show) {
-		nImages = fivStacks.size() * fivStacks.get(0).nImages;
+		nSlices = fivStacks.size() * fivStacks.get(0).nSlices;
 		ImagePlus imp = new ImagePlus(fivStacks.get(0).open(false).getTitle().replaceAll("\\d+\\.", "\\."), this);
 		imp.setOpenAsHyperStack(true);
-		imp.setDimensions(fivStacks.size(), nSlices, fivStacks.get(0).nImages/nSlices);
+		imp.setDimensions(fivStacks.size(), nSlices, fivStacks.get(0).nSlices/nSlices);
 		if (imp.getOriginalFileInfo() == null) {
 			setUpFileInfo(imp);
 		}
@@ -186,22 +186,22 @@ public class MultiChannelFileInfoVirtualStack extends VirtualStack implements Pl
 		return s!=null&&s.equals("true")?true:false;
 	}
 
-	/** Deletes the specified image, were 1<=n<=nImages. */
+	/** Deletes the specified image, were 1<=n<=nSlices. */
 	public void deleteSlice(int n) {
-		if (n<1 || n>nImages)
+		if (n<1 || n>nSlices)
 			throw new IllegalArgumentException("Argument out of range: "+n);
-		if (nImages<1) return;
-		for (int i=n; i<nImages; i++)
+		if (nSlices<1) return;
+		for (int i=n; i<nSlices; i++)
 			info[i-1] = info[i];
-		info[nImages-1] = null;
-		nImages--;
+		info[nSlices-1] = null;
+		nSlices--;
 	}
 	
 	/** Returns an ImageProcessor for the specified image,
-		were 1<=n<=nImages. Returns null if the stack is empty.
+		were 1<=n<=nSlices. Returns null if the stack is empty.
 	*/
 	public ImageProcessor getProcessor(int n) {
-		if (n<1 || n>nImages) {
+		if (n<1 || n>nSlices) {
 			IJ.runMacro("waitForUser(\""+n+"\");");
 			return fivStacks.get(0).getProcessor(1);
 //			throw new IllegalArgumentException("Argument out of range: "+n);
@@ -215,15 +215,15 @@ public class MultiChannelFileInfoVirtualStack extends VirtualStack implements Pl
  
 	 /** Returns the number of images in this stack. */
 	public int getSize() {
-		return nImages;
+		return nSlices;
 	}
 
 	/** Returns the label of the Nth image. */
 	public String getSliceLabel(int n) {
-		if (n<1 || n>nImages)
+		if (n<1 || n>nSlices)
 			throw new IllegalArgumentException("Argument out of range: "+n);
-		if (info[0].sliceLabels==null || info[0].sliceLabels.length!=nImages) {
-			if (n<1 || n>nImages) {
+		if (info[0].sliceLabels==null || info[0].sliceLabels.length!=nSlices) {
+			if (n<1 || n>nSlices) {
 				IJ.runMacro("waitForUser(\""+n+"\");");
 				return fivStacks.get(0).infoArray[0].fileName;
 //				throw new IllegalArgumentException("Argument out of range: "+n);

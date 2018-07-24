@@ -892,43 +892,43 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
     
 	/** Removes this window from the window list and disposes of it.
 		Returns false if the user cancels the "save changes" dialog. */
-	public boolean close() {
-		boolean isRunning = running || running2 || running3;
-		running = running2 = running3 = false;
-		boolean virtual = imp.getStackSize()>1 && imp.getStack().isVirtual();
-		if (isRunning) IJ.wait(500);
-		if (ij==null || IJ.getApplet()!=null || Interpreter.isBatchMode() || IJ.macroRunning() || virtual)
-			imp.changes = false;
-		if (imp.changes) {
-			String msg;
-			String name = imp.getTitle();
-			if (name.length()>22)
-				msg = "Save changes to\n" + "\"" + name + "\"?";
-			else
-				msg = "Save changes to \"" + name + "\"?";
-			YesNoCancelDialog d = new YesNoCancelDialog(this, "ImageJ", msg);
-			if (d.cancelPressed())
-				return false;
-			else if (d.yesPressed()) {
-				FileSaver fs = new FileSaver(imp);
-				if (!fs.save()) return false;
-			}
-		}
-		closed = true;
-		if (WindowManager.getWindowCount()==0)
-			{xloc = 0; yloc = 0;}
-		WindowManager.removeWindow(this);
-		//setVisible(false);
-		if (ij!=null && ij.quitting())  // this may help avoid thread deadlocks
-			return true;
-		dispose();
-		if (ic != null)
-			this.remove(ic);
-		if (imp!=null)
-			imp.flush();
-		imp = null;
-		return true;
-	}
+    public boolean close() {
+    	boolean isRunning = running || running2 || running3;
+    	running = running2 = running3 = false;
+    	boolean virtual = imp.getStackSize()>1 && imp.getStack().isVirtual();
+    	if (isRunning) IJ.wait(500);
+    	if (ij==null || IJ.getApplet()!=null || Interpreter.isBatchMode() || IJ.macroRunning() || virtual)
+    		imp.changes = false;
+    	if (imp.changes) {
+    		String msg;
+    		String name = imp.getTitle();
+    		if (name.length()>22)
+    			msg = "Save changes to\n" + "\"" + name + "\"?";
+    		else
+    			msg = "Save changes to \"" + name + "\"?";
+    		YesNoCancelDialog d = new YesNoCancelDialog(this, "ImageJ", msg);
+    		if (d.cancelPressed())
+    			return false;
+    		else if (d.yesPressed()) {
+    			FileSaver fs = new FileSaver(imp);
+    			if (!fs.save()) return false;
+    		}
+    	}
+    	closed = true;
+    	//setVisible(false);
+    	if (ij!=null && ij.quitting())  // this may help avoid thread deadlocks
+    		return true;
+    	dispose();
+    	if (ic != null)
+    		this.remove(ic);
+    	if (imp!=null)
+    		imp.flush();
+    	imp = null;
+    	if (WindowManager.getWindowCount()==0)
+    		{xloc = 0; yloc = 0;}
+    	WindowManager.removeWindow(this);
+    	return true;
+    }
 	
 	public ImagePlus getImagePlus() {
 		return imp;

@@ -11,13 +11,14 @@ import java.util.Properties;
 /** This plugin opens a multi-page TIFF file as a virtual stack. It
 	implements the File/Import/TIFF Virtual Stack command. */
 public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
+//	private int nSlices;
+	
 	public FileInfo[] infoArray;
 	
 	public FileInfo[] getInfo() {
 		return infoArray;
 	}
 
-	int nImages;
 	
 	/* Default constructor. */
 	public FileInfoVirtualStack() {}
@@ -100,13 +101,12 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 				infoArray[i].longOffset = fi.getOffset() + i*(size + fi.gapBetweenImages);
 			}
 		}
-		nImages = infoArray.length;
-		nSlices = nImages;
-		names = new String[nImages+1];
-		labels = new String[nImages+1];
+		nSlices = infoArray.length;
+		names = new String[nSlices+1];
+		labels = new String[nSlices+1];
 		FileOpener fo = new FileOpener(infoArray[0] );
 		ImagePlus imp = fo.open(false);
-		if (nImages==1 && fi.fileType==FileInfo.RGB48) {
+		if (nSlices==1 && fi.fileType==FileInfo.RGB48) {
 			if (show) imp.show();
 			return imp;
 		}
@@ -122,7 +122,7 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 			int channels = getInt(props,"channels");
 			int slices = getInt(props,"slices");
 			int frames = getInt(props,"frames");
-			if (channels*slices*frames==nImages) {
+			if (channels*slices*frames==nSlices) {
 				imp2.setDimensions(channels, slices, frames);
 				if (getBoolean(props, "hyperstack"))
 					imp2.setOpenAsHyperStack(true);
@@ -155,10 +155,9 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 				infoArray[i].longOffset = fi.getOffset() + i*(size + fi.gapBetweenImages);
 			}
 		}
-		nImages = infoArray.length;
-		nSlices = nImages;
-		names = new String[nImages+1];
-		labels = new String[nImages+1];
+		nSlices = infoArray.length;
+		names = new String[nSlices+1];
+		labels = new String[nSlices+1];
 
 		
 		return;
@@ -185,7 +184,7 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 		return s!=null&&s.equals("true")?true:false;
 	}
 
-	/** Deletes the specified image, were 1<=n<=nImages. */
+	/** Deletes the specified image, were 1<=n<=nSlices. */
 	public void deleteSlice(int n) {
 		if (n<1 || n>nSlices)
 			throw new IllegalArgumentException("Argument out of range: "+n);
@@ -194,12 +193,11 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 			infoArray[i-1] = infoArray[i];
 		if (nSlices-1<infoArray.length)
 			infoArray[nSlices-1] = null;
-		nImages--;
 		nSlices--;
 	}
 	
 	/** Returns an ImageProcessor for the specified image,
-		were 1<=n<=nImages. Returns null if the stack is empty.
+		were 1<=n<=nSlices. Returns null if the stack is empty.
 	*/
 	public ImageProcessor getProcessor(int n) {
 		if (n<1 || n>nSlices)
@@ -208,7 +206,7 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (IJ.debugMode) IJ.log("FileInfoVirtualStack: "+n+", "+infoArray[n-1].getOffset());
 		//if (n>1) IJ.log("  "+(info[n-1].getOffset()-info[n-2].getOffset()));
 		ImagePlus imp = null;		
-		if (n<=nImages ) {
+		if (n<=nSlices ) {
 			while (infoArray.length < n-1) {
 				setupStack();
 			}
@@ -223,7 +221,7 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 			return ip;
 		} else {
 			int w=getWidth(), h=getHeight();
-			if (n<=nImages ) 
+			if (n<=nSlices ) 
 				/*IJ.log("Read error or file not found ("+n+"): "+info[n-1].directory+info[n-1].fileName)*/;
 			switch (getBitDepth()) {
 				case 8: return new ByteProcessor(w, h);
@@ -245,7 +243,7 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 	public String getSliceLabel(int n) {
 		if (n<1 || n>nSlices)
 			throw new IllegalArgumentException("Argument out of range: "+n);
-		if (infoArray[0].sliceLabels==null || infoArray[0].sliceLabels.length!=nImages)
+		if (infoArray[0].sliceLabels==null || infoArray[0].sliceLabels.length!=nSlices)
 			return infoArray[0].fileName + " slice "+ n;
 		else
 			return infoArray[0].sliceLabels[n-1];
