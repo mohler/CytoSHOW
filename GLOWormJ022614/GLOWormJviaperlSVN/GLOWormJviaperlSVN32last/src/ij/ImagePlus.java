@@ -2045,6 +2045,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 				} else if (stack instanceof MultiFileInfoVirtualStack) {
 					for (FileInfoVirtualStack fivStk:((MultiFileInfoVirtualStack)stack).getFivStacks()) {
 						((FileInfoVirtualStack)fivStk).infoArray = null;
+						fivStk=null;
 					}
 					((MultiFileInfoVirtualStack)stack).infoArray = null;
 				}

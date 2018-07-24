@@ -98,7 +98,7 @@ public class CompositeImage extends ImagePlus {
 		setOverlay(imp.getOverlay());
 		if (channels!=stackSize)
 			setOpenAsHyperStack(true);
-		imp.flush();
+//		imp.flush();
 	}
 
 	public Image getImage() {

@@ -5464,7 +5464,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			for (int a=0;a<impAs.length;a++) {
 				if (impAs[a] == closingImp) {
 					//				ImagePlus.removeImageListener(this);
-
+					stackAs[a] = null;
 					impAs[a] = null;
 				}
 			}
@@ -5473,7 +5473,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			for (int a=0;a<impBs.length;a++) {
 				if (impBs[a] == closingImp) {
 					//				ImagePlus.removeImageListener(this);
-
+					stackBs[a] = null;
 					impBs[a] = null;
 				}
 			}
@@ -5482,6 +5482,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			for (int a=0;a<ciDFs.length;a++) {
 				if (ciDFs[a] == closingImp) {
 					//				ImagePlus.removeImageListener(this);
+					stackDFs[a] = null;
 
 					ciDFs[a] = null;
 				}
@@ -5491,6 +5492,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			for (int a=0;a<ciPrxs.length;a++) {
 				if (ciPrxs[a] == closingImp) {
 					//				ImagePlus.removeImageListener(this);
+					stackPrxs[a] = null;
 
 					ciPrxs[a] = null;
 				}
@@ -5500,6 +5502,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			for (int a=0;a<ciPrys.length;a++) {
 				if (ciPrys[a] == closingImp) {
 					//				ImagePlus.removeImageListener(this);
+					stackPrys[a] = null;
 
 					ciPrys[a] = null;
 				}
@@ -5509,6 +5512,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			for (int a=0;a<impPrxs.length;a++) {
 				if (impPrxs[a] == closingImp) {
 					//				ImagePlus.removeImageListener(this);
+					stackPrxs[a] = null;
 
 					impPrxs[a] = null;
 				}
@@ -5519,6 +5523,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				if (impPrys[a] == closingImp) {
 					//				ImagePlus.removeImageListener(this);
 
+					stackPrys[a] = null;
 					impPrys[a] = null;
 				}
 			}
@@ -5527,6 +5532,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			for (int a=0;a<impDF1s.length;a++) {
 				if (impDF1s[a] == closingImp) {
 					//				ImagePlus.removeImageListener(this);
+					stackDFs[a] = null;
 
 					impDF1s[a] = null;
 				}
