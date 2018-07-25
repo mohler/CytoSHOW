@@ -12,7 +12,7 @@ This class represents an expandable array of images.
 public class ImageStack {
 	private static final int BYTE=0, SHORT=1, FLOAT=2, RGB=3, UNKNOWN=-1;
 	static final int INITIAL_SIZE = 25;
-	static final String outOfRange = "Argument out of range: ";
+	protected static final String outOfRange = "Argument out of range: ";
 	private int type = UNKNOWN;
 	public int nSlices = 0;
 	private Object[] stack;
@@ -146,7 +146,11 @@ public class ImageStack {
 	/** Deletes the last slice in the stack. */
 	public void deleteLastSlice() {
 		if (nSlices>0)
-			deleteSlice(nSlices);
+			try {
+				deleteSlice(nSlices);
+			} catch (IllegalArgumentException iae) {
+				deleteSlice(nSlices);
+			}
 	}
 	
     public int getWidth() {

@@ -607,18 +607,15 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	public void deleteSlice(int n) {
 
 		if (n<1 || n>nSlices) {
-			IJ.runMacro("waitForUser(\""+n+"\");");
+			throw new IllegalArgumentException(outOfRange+n);
 		}
 		int stackNumber = 0;
-		int total=0;
-		while (n > total && stackNumber<fivStacks.size()) {
-			total = total + fivStacks.get(stackNumber).getSize();
+		while (n > fivStacks.get(stackNumber).getSize()) {
+			n = n - fivStacks.get(stackNumber).getSize();
 			stackNumber++;
 		}
-		stackNumber--;
-		total = total - fivStacks.get(stackNumber).getSize();
 
-		sliceNumber = n - total;
+		sliceNumber = n;
 
 		fivStacks.get(stackNumber).deleteSlice(sliceNumber);
 
@@ -639,7 +636,6 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		stackNumber = 0;
 		sliceNumber = 1;
 		int  vSliceNumber = 0;
-		int total=0;
 
 		if (dimOrder.toLowerCase().matches("xy.*czt")) {
 			int adjN =0;
@@ -651,13 +647,21 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			n=n+adjN;
 		}
 
-		while (n > total) {
-			total = total + fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1);
+//		while (n > total) {
+//			total = total + fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1);
+//			stackNumber++;
+//		}
+//
+//		stackNumber--;
+//
+		while (n > fivStacks.get(stackNumber).getSize()) {
+			n = n - fivStacks.get(stackNumber).getSize();
 			stackNumber++;
 		}
 
-		stackNumber--;
+		sliceNumber = n;
 
+		
 		sliceNumber = 1+(n) % (fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
 		
 		if (dimOrder.toLowerCase().matches(".*splitc.*")) {
