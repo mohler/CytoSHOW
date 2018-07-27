@@ -2030,22 +2030,17 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		if (stack!=null) {
 			boolean soloStackUser = true;
 			if (WindowManager.getIDList()!=null) {
-				for (int impID:WindowManager.getIDList()) {
-					if (WindowManager.getImage(impID)!=this && WindowManager.getImage(impID).getStack()==stack) {
-						soloStackUser = false;
-					}
-				}
 				if (soloStackUser) {
-					while (stack.getSize()>0) {
+					while (stack.nSlices>0) {
 						stack.deleteLastSlice();
 					}
 				}
 				if (stack instanceof FileInfoVirtualStack) {
 					((FileInfoVirtualStack)stack).infoArray = null;
 				} else if (stack instanceof MultiFileInfoVirtualStack) {
-					for (FileInfoVirtualStack fivStk:((MultiFileInfoVirtualStack)stack).getFivStacks()) {
-						((FileInfoVirtualStack)fivStk).infoArray = null;
-						fivStk=null;
+					while (((MultiFileInfoVirtualStack)stack).getFivStacks().size()>0) {
+						((MultiFileInfoVirtualStack)stack).getFivStacks().get(0).infoArray = null;
+						((MultiFileInfoVirtualStack)stack).getFivStacks().remove(0);
 					}
 					((MultiFileInfoVirtualStack)stack).infoArray = null;
 				}

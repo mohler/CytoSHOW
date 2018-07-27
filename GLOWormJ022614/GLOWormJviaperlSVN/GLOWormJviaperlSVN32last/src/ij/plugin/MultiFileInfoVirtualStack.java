@@ -532,10 +532,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		ImagePlus imp = new ImagePlus(
 				dirChunks[dirChunks.length-1]+"_"+
 						fivImpZero.getTitle().replaceAll("\\d+\\.", "\\."), this);
-		
-		fivImpZero.flush();
-		fivImpZero=null;
-		
+				
 		imp.setOpenAsHyperStack(true);			
 //		int cztDims = cDim*zDim*fivStacks.size();
 		int cztDims = cDim*zDim*tDim;
@@ -614,6 +611,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			n = n - fivStacks.get(stackNumber).getSize();
 			stackNumber++;
 		}
+		if (stackNumber>=fivStacks.size()) {
+			stackNumber= fivStacks.size()-1;
+		}
 
 		sliceNumber = n;
 
@@ -647,18 +647,14 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			n=n+adjN;
 		}
 
-//		while (n > total) {
-//			total = total + fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1);
-//			stackNumber++;
-//		}
-//
-//		stackNumber--;
-//
-		while (n > fivStacks.get(stackNumber).getSize()) {
+		while (stackNumber < fivStacks.size() && n > fivStacks.get(stackNumber).getSize()) {
 			n = n - fivStacks.get(stackNumber).getSize();
 			stackNumber++;
 		}
-
+		if (stackNumber>=fivStacks.size()) {
+			stackNumber= fivStacks.size()-1;
+		}
+		
 		sliceNumber = n;
 
 		

@@ -30,7 +30,7 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 	Scrollbar bar;
 	private Icon icon;
 	private Icon icon2;
-	private StackWindow stackWindow;
+	StackWindow stackWindow;
 	transient AdjustmentListener adjustmentListener;
 	public char label;
 	private boolean iconEnabled;

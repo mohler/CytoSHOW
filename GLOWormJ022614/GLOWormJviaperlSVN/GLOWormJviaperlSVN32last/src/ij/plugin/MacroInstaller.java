@@ -170,6 +170,7 @@ public class MacroInstaller implements PlugIn, MacroConstants, ActionListener {
 		String word = nMacros==1?" macro":" macros";
 		if (isPluginsMacrosMenu)
 			IJ.showStatus(nMacros + word + " installed");
+		this.text = null;
 	}
 	
 	public int install(String text) {

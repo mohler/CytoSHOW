@@ -1987,6 +1987,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								int zSlicesDF1 = stackDFs[pos].getFivStacks().get(0)
 										.getSize();
 								impDF1s[pos].setOpenAsHyperStack(true);
+								IJ.log("outputWavelengths "+outputWavelengths+".  zSlicesDF1 "+zSlicesDF1+".  stkNSlicesDF "+stkNSlicesDF);
 								impDF1s[pos].setStack(impDF1s[pos].getStack(), outputWavelengths,
 										zSlicesDF1, stkNSlicesDF
 										/ (outputWavelengths * zSlicesDF1));

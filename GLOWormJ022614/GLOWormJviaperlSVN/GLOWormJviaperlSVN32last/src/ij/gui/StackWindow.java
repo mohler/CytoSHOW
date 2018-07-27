@@ -304,12 +304,93 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 //	}
 
 	public boolean close() {
-		if (!super.close())
+		if (animationSelector!=null) {
+			animationSelector.stackWindow = null;
+			animationSelector.bar.removeAdjustmentListener(animationSelector);
+			animationSelector.bar.removeMouseListener(animationSelector);
+			animationSelector.removeAdjustmentListener(this);
+			animationSelector.removeKeyListener(ij);
+			animationSelector.iconPanel=null;
+			animationSelector.icon2Panel=null;
+			
+			animationSelector.adjustmentListener=null;
+			animationSelector=null;
+		}
+		if (animationZSelector!=null) {
+			animationZSelector.stackWindow = null;
+			animationZSelector.bar.removeAdjustmentListener(animationZSelector);
+			animationZSelector.bar.removeMouseListener(animationZSelector);
+			animationZSelector.removeAdjustmentListener(this);
+			animationZSelector.removeKeyListener(ij);
+			animationZSelector.iconPanel=null;
+			animationZSelector.icon2Panel=null;
+			
+			animationZSelector.adjustmentListener=null;
+			animationZSelector=null;
+		}
+		if (cSelector!=null) {
+			cSelector.stackWindow = null;
+			cSelector.bar.removeAdjustmentListener(cSelector);
+			cSelector.bar.removeMouseListener(cSelector);
+			cSelector.removeAdjustmentListener(this);
+			cSelector.removeKeyListener(ij);
+			cSelector.iconPanel.removeMouseListener(cSelector.iconPanel.getMouseListeners()[0]);
+			cSelector.icon2Panel.removeMouseListener(cSelector.icon2Panel.getMouseListeners()[0]);
+			cSelector.iconPanel.removeActionListener(cSelector.iconPanel.getActionListeners()[0]);			
+			cSelector.icon2Panel.removeActionListener(cSelector.icon2Panel.getActionListeners()[0]);			
+			cSelector.iconPanel=null;
+			cSelector.icon2Panel=null;
+
+			cSelector.adjustmentListener=null;
+			cSelector=null;
+		}
+		if (tSelector!=null) {
+			tSelector.stackWindow = null;
+			tSelector.bar.removeAdjustmentListener(tSelector);
+			tSelector.bar.removeMouseListener(tSelector);
+			tSelector.removeAdjustmentListener(this);
+			tSelector.removeKeyListener(ij);
+//			tSelector.iconPanel.removeMouseListener(tSelector.iconPanel.getMouseListeners()[0]);
+//			tSelector.icon2Panel.removeMouseListener(tSelector.icon2Panel.getMouseListeners()[0]);
+			tSelector.iconPanel=null;
+			tSelector.icon2Panel=null;
+
+			tSelector.adjustmentListener=null;
+			tSelector=null;
+		}
+		if (zSelector!=null) {
+			zSelector.stackWindow = null;
+			zSelector.bar.removeAdjustmentListener(zSelector);
+			zSelector.bar.removeMouseListener(zSelector);
+			zSelector.removeAdjustmentListener(this);
+			zSelector.removeKeyListener(ij);
+//			zSelector.iconPanel.removeMouseListener(zSelector.iconPanel.getMouseListeners()[0]);
+//			zSelector.icon2Panel.removeMouseListener(zSelector.icon2Panel.getMouseListeners()[0]);
+			zSelector.iconPanel=null;
+			zSelector.icon2Panel=null;
+
+			zSelector.adjustmentListener=null;
+			zSelector=null;
+		}
+		if (activeScrollBars!=null) {
+			int asbs = activeScrollBars.size();
+			for (int asbl=0;asbl<asbs;asbl++) {
+				activeScrollBars.remove(0);
+			}
+			activeScrollBars=null;
+		}
+
+		if (!super.close()) {
 			return false;
+		}
 		synchronized(this) {
 			done = true;
 			notify();
 		}
+		this.removeFocusListener(this);
+		this.removeMouseWheelListener(this);
+		this.removeWindowListener(this);
+		this.removeWindowStateListener(this);
         return true;
 	}
 
