@@ -26,10 +26,10 @@ import javax.swing.SwingUtilities;
 	 and play-pause icons (T) to the stack and hyperstacks dimension sliders.
  * @author Joachim Walter
  */
-public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListener, AdjustmentListener {
+public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListener, AdjustmentListener, Action {
 	Scrollbar bar;
-	private Icon icon;
-	private Icon icon2;
+	Icon icon;
+	Icon icon2;
 	StackWindow stackWindow;
 	transient AdjustmentListener adjustmentListener;
 	public char label;
@@ -50,8 +50,8 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 		bar = new Scrollbar(Scrollbar.HORIZONTAL, value, visible, minimum, maximum);
 		bar.addMouseListener(this);
 		setBarCursor(label);
-		iconPanel = new IconButton();
-		icon2Panel = new IconButton();
+		iconPanel = new IconButton(this);
+		icon2Panel = new IconButton(this);
 		icon = new Icon(label);
 		icon2 = new Icon(label);
 		bi = new BufferedImage(Icon.WIDTH, Icon.HEIGHT, BufferedImage.TYPE_INT_ARGB);
@@ -211,6 +211,10 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 	public synchronized void removeKeyListener(KeyListener l) {
 		super.removeKeyListener(l);
 		bar.removeKeyListener(l);
+		if (iconPanel!=null)
+			iconPanel.removeKeyListener(l);
+		if (icon2Panel!=null)
+			icon2Panel.removeKeyListener(l);
 	}
 
 	/* 
@@ -338,117 +342,113 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 		return label;
 	}
 
+	public void actionPerformed(ActionEvent e) {
+		if (getType()!='t' && getType()!='z' && getType()!='c' || !iconEnabled) return;
+		int flags = e.getModifiers();
+		if ((flags&(Event.ALT_MASK|Event.META_MASK|Event.CTRL_MASK))!=0){
+			if (getType() =='t' || getType() =='z') IJ.doCommand("Animation Options...");
+			else if (getType() =='c') IJ.run("Channels Tool...");
+		}
+		else if (getType() =='t' )
+			IJ.doCommand("Start Animation [\\]");
+		else if (getType() == 'z' && stackWindow.getAnimationSelector().getType() == 'z')
+			IJ.doCommand("Start Animation [\\]");
+		else if (getType() =='z' )
+			IJ.doCommand("Start Z Animation");
+		else if (getType() =='c' ){
+			int origChannel = stackWindow.getImagePlus().getChannel();
+			if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 6 ){
+				((CompositeImage) stackWindow.getImagePlus()).setMode(1);
+				if (stackWindow.getImagePlus().getType() == ImagePlus.GRAY16) {
+					((CompositeImage) stackWindow.getImagePlus())
+						.setProcessor(new ShortProcessor(stackWindow.getImagePlus().getWidth(), stackWindow.getImagePlus().getHeight()));
+				} else if (stackWindow.getImagePlus().getType() == ImagePlus.GRAY8) {
+					((CompositeImage) stackWindow.getImagePlus())
+						.setProcessor(new ByteProcessor(stackWindow.getImagePlus().getWidth(), stackWindow.getImagePlus().getHeight()));
+				} else if (stackWindow.getImagePlus().getType() == ImagePlus.GRAY32) {
+					((CompositeImage) stackWindow.getImagePlus())
+						.setProcessor(new FloatProcessor(stackWindow.getImagePlus().getWidth(), stackWindow.getImagePlus().getHeight()));
+				}
+				boolean animationState = stackWindow.running2;
+				boolean animationZState = stackWindow.running3;
+				IJ.doCommand("Stop Animation");
+				for (int j=1; j<=stackWindow.getImagePlus().getNChannels(); j++){
+					stackWindow.setPosition(j, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame());
+				}
+				stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame());
 
-	class IconButton extends JButton implements ActionListener{
+
+				if (stackWindow.getImagePlus().isComposite()) {
+					int mode = ((CompositeImage)stackWindow.getImagePlus()).getMode();
+					((CompositeImage)stackWindow.getImagePlus()).setMode(1);
+					((CompositeImage)stackWindow.getImagePlus()).setMode(2);
+					((CompositeImage)stackWindow.getImagePlus()).setMode(3);
+					((CompositeImage)stackWindow.getImagePlus()).setMode(mode);
+				}
+				if (animationState) IJ.doCommand("Start Animation [\\]");
+				if (animationZState) IJ.doCommand("Start Z Animation");
+			}
+			else if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 1 ){
+				((CompositeImage) stackWindow.getImagePlus()).setMode(2);	
+//				if (stackWindow.getImagePlus().getNFrames()>1) {
+					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()+1);
+					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()-1);
+//				}
+			}
+			else if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 2 ){
+				((CompositeImage) stackWindow.getImagePlus()).setMode(3);
+//				if (stackWindow.getImagePlus().getNFrames()>1) {
+					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()+1);
+					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()-1);
+//				}
+			}
+			else if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 3 ){
+				((CompositeImage) stackWindow.getImagePlus()).setMode(5);
+//				if (stackWindow.getImagePlus().getNFrames()>1) {
+					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()+1);
+					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()-1);
+//				}
+			}
+			else if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 5 ){
+				((CompositeImage) stackWindow.getImagePlus()).setMode(6);
+//				if (stackWindow.getImagePlus().getNFrames()>1) {
+					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()+1);
+					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()-1);
+//				}
+			}
+			stackWindow.cSelector.updatePlayPauseIcon();
+		}
+	}
+
+
+	class IconButton extends JButton{
 
 
 		public IconButton() {
 			super();
-			this.addActionListener(this);
 			// TODO Auto-generated constructor stub
 		}
 
 		public IconButton(Action a) {
 			super(a);
-			this.addActionListener(this);
 			// TODO Auto-generated constructor stub
 		}
 
 		public IconButton(javax.swing.Icon icon) {
 			super(icon);
-			this.addActionListener(this);
 			// TODO Auto-generated constructor stub
 		}
 
 		public IconButton(String text, javax.swing.Icon icon) {
 			super(text, icon);
-			this.addActionListener(this);
 			// TODO Auto-generated constructor stub
 		}
 
 		public IconButton(String text) {
 			super(text);
-			this.addActionListener(this);
 			// TODO Auto-generated constructor stub
 		}
 
-		public void actionPerformed(ActionEvent e) {
-			if (getType()!='t' && getType()!='z' && getType()!='c' || !iconEnabled) return;
-			int flags = e.getModifiers();
-			if ((flags&(Event.ALT_MASK|Event.META_MASK|Event.CTRL_MASK))!=0){
-				if (getType() =='t' || getType() =='z') IJ.doCommand("Animation Options...");
-				else if (getType() =='c') IJ.run("Channels Tool...");
-			}
-			else if (getType() =='t' )
-				IJ.doCommand("Start Animation [\\]");
-			else if (getType() == 'z' && stackWindow.getAnimationSelector().getType() == 'z')
-				IJ.doCommand("Start Animation [\\]");
-			else if (getType() =='z' )
-				IJ.doCommand("Start Z Animation");
-			else if (getType() =='c' ){
-				int origChannel = stackWindow.getImagePlus().getChannel();
-				if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 6 ){
-					((CompositeImage) stackWindow.getImagePlus()).setMode(1);
-					if (stackWindow.getImagePlus().getType() == ImagePlus.GRAY16) {
-						((CompositeImage) stackWindow.getImagePlus())
-							.setProcessor(new ShortProcessor(stackWindow.getImagePlus().getWidth(), stackWindow.getImagePlus().getHeight()));
-					} else if (stackWindow.getImagePlus().getType() == ImagePlus.GRAY8) {
-						((CompositeImage) stackWindow.getImagePlus())
-							.setProcessor(new ByteProcessor(stackWindow.getImagePlus().getWidth(), stackWindow.getImagePlus().getHeight()));
-					} else if (stackWindow.getImagePlus().getType() == ImagePlus.GRAY32) {
-						((CompositeImage) stackWindow.getImagePlus())
-							.setProcessor(new FloatProcessor(stackWindow.getImagePlus().getWidth(), stackWindow.getImagePlus().getHeight()));
-					}
-					boolean animationState = stackWindow.running2;
-					boolean animationZState = stackWindow.running3;
-					IJ.doCommand("Stop Animation");
-					for (int j=1; j<=stackWindow.getImagePlus().getNChannels(); j++){
-						stackWindow.setPosition(j, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame());
-					}
-					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame());
-
-
-					if (stackWindow.getImagePlus().isComposite()) {
-						int mode = ((CompositeImage)stackWindow.getImagePlus()).getMode();
-						((CompositeImage)stackWindow.getImagePlus()).setMode(1);
-						((CompositeImage)stackWindow.getImagePlus()).setMode(2);
-						((CompositeImage)stackWindow.getImagePlus()).setMode(3);
-						((CompositeImage)stackWindow.getImagePlus()).setMode(mode);
-					}
-					if (animationState) IJ.doCommand("Start Animation [\\]");
-					if (animationZState) IJ.doCommand("Start Z Animation");
-				}
-				else if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 1 ){
-					((CompositeImage) stackWindow.getImagePlus()).setMode(2);	
-//					if (stackWindow.getImagePlus().getNFrames()>1) {
-						stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()+1);
-						stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()-1);
-//					}
-				}
-				else if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 2 ){
-					((CompositeImage) stackWindow.getImagePlus()).setMode(3);
-//					if (stackWindow.getImagePlus().getNFrames()>1) {
-						stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()+1);
-						stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()-1);
-//					}
-				}
-				else if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 3 ){
-					((CompositeImage) stackWindow.getImagePlus()).setMode(5);
-//					if (stackWindow.getImagePlus().getNFrames()>1) {
-						stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()+1);
-						stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()-1);
-//					}
-				}
-				else if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 5 ){
-					((CompositeImage) stackWindow.getImagePlus()).setMode(6);
-//					if (stackWindow.getImagePlus().getNFrames()>1) {
-						stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()+1);
-						stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()-1);
-//					}
-				}
-				stackWindow.cSelector.updatePlayPauseIcon();
-			}
-		}
 	}
 
 
@@ -567,6 +567,16 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 
 	public void setIcon(Icon icon) {
 		this.icon = icon;
+	}
+
+	public Object getValue(String key) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public void putValue(String key, Object value) {
+		// TODO Auto-generated method stub
+		
 	}
 
 

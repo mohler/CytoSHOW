@@ -3777,7 +3777,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					}
 				}
 			}
-			if (!go){
+			if (!go || !doProcessing[pos]){
 				continue;
 			}
 
@@ -4501,7 +4501,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									win.updateImage(ciDFs[pos]);
 									win.getImagePlus().getStack().setEdges(oldEdges);
 									win.setSize(oldW, oldH);
-									((StackWindow) win).addScrollbars(ciDFs[pos]);
+//									((StackWindow) win).addScrollbars(ciDFs[pos]);
 									win.getCanvas().setMagnification(oldMag);
 									win.getImagePlus().updateAndDraw();
 									win.getImagePlus().setPosition(oldC, oldZ, oldT);

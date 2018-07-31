@@ -26,7 +26,7 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 	protected Thread thread;
 	protected volatile boolean done;
 	protected volatile int slice;
-	private ScrollbarWithLabel animationSelector, animationZSelector;
+//	private ScrollbarWithLabel animationSelector, animationZSelector;
 	boolean hyperStack;
 	int nChannels=1, nSlices=1, nFrames=1;
 	int c=1, z=1, t=1;
@@ -138,8 +138,12 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 			((JComponent) zSelector.iconPanel).setToolTipText("<html>Left-Clicking this Slice selector's icon <br>plays/pauses animation through the Z dimension.<br>Right-clicking or control-clicking <br>activates the Animation Options Tool.</html>");		
 			((JComponent) zSelector.icon2Panel).setToolTipText("<html>Left-Clicking this Slice selector's icon <br>plays/pauses animation through the Z dimension.<br>Right-clicking or control-clicking <br>activates the Animation Options Tool.</html>");		
 
-			if (label=='t') animationSelector = zSelector;
-			if (label=='z') {animationZSelector = zSelector; setZAnimate(false); }
+//			if (label=='t') 
+//				animationSelector = zSelector;
+//			if (label=='z') {
+//				animationZSelector = zSelector; 
+//				setZAnimate(false); 
+//			}
 			sbgridbag.setConstraints(zSelector, sbgc);
 			sbgc.gridy = y++; 
 			scrollbarPanel.add(zSelector);
@@ -154,11 +158,11 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 
 		}
 		if (nFrames>1) {
-			animationSelector = tSelector = new ScrollbarWithLabel(this, 1, 1, 1, nFrames+1, 't');
+			/*animationSelector = */tSelector = new ScrollbarWithLabel(this, 1, 1, 1, nFrames+1, 't');
 			((JComponent) tSelector.iconPanel).setToolTipText("<html>Left-Clicking this Frame selector's icon <br>plays/pauses animation through the T dimension.<br>Right-clicking or control-clicking <br>activates the Animation Options Tool.</html>");		
 			((JComponent) tSelector.icon2Panel).setToolTipText("<html>Left-Clicking this Frame selector's icon <br>plays/pauses animation through the T dimension.<br>Right-clicking or control-clicking <br>activates the Animation Options Tool.</html>");		
 			if (wormAtlas) {
-				animationSelector = tSelector = new ScrollbarWithLabel(this, 1, 1, 1, nFrames+1, 'z');
+				/*animationSelector = */tSelector = new ScrollbarWithLabel(this, 1, 1, 1, nFrames+1, 'z');
 				((JComponent) tSelector.iconPanel).setToolTipText("<html>Left-Clicking this Slice selector's icon <br>plays/pauses animation through the Z dimension.<br>Right-clicking or control-clicking <br>activates the Animation Options Tool.</html>");		
 				((JComponent) tSelector.icon2Panel).setToolTipText("<html>Left-Clicking this Slice selector's icon <br>plays/pauses animation through the Z dimension.<br>Right-clicking or control-clicking <br>activates the Animation Options Tool.</html>");		
 			}
@@ -304,72 +308,169 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 //	}
 
 	public boolean close() {
-		if (animationSelector!=null) {
-			animationSelector.stackWindow = null;
-			animationSelector.bar.removeAdjustmentListener(animationSelector);
-			animationSelector.bar.removeMouseListener(animationSelector);
-			animationSelector.removeAdjustmentListener(this);
-			animationSelector.removeKeyListener(ij);
-			animationSelector.iconPanel=null;
-			animationSelector.icon2Panel=null;
-			
-			animationSelector.adjustmentListener=null;
-			animationSelector=null;
-		}
-		if (animationZSelector!=null) {
-			animationZSelector.stackWindow = null;
-			animationZSelector.bar.removeAdjustmentListener(animationZSelector);
-			animationZSelector.bar.removeMouseListener(animationZSelector);
-			animationZSelector.removeAdjustmentListener(this);
-			animationZSelector.removeKeyListener(ij);
-			animationZSelector.iconPanel=null;
-			animationZSelector.icon2Panel=null;
-			
-			animationZSelector.adjustmentListener=null;
-			animationZSelector=null;
-		}
+//		if (animationSelector!=null) {
+//			animationSelector.bar.removeAdjustmentListener(animationSelector);
+//			animationSelector.bar.removeMouseListener(animationSelector);
+//			animationSelector.removeAdjustmentListener(this);
+//			animationSelector.removeKeyListener(ij);
+//			while (animationSelector.getMouseListeners().length>0) 
+//				animationSelector.removeMouseListener(animationSelector.getMouseListeners()[0]);
+//			while (animationSelector.iconPanel.getMouseListeners().length>0) 
+//				animationSelector.iconPanel.removeMouseListener(animationSelector.iconPanel.getMouseListeners()[0]);
+//			while (animationSelector.icon2Panel.getMouseListeners().length>0) 
+//				animationSelector.icon2Panel.removeMouseListener(animationSelector.icon2Panel.getMouseListeners()[0]);
+//			ActionListener[] asipals=animationSelector.iconPanel.getActionListeners();;
+//			while (asipals.length>0) {
+//				animationSelector.iconPanel.removeActionListener(asipals[0]);	
+//				asipals=animationSelector.iconPanel.getActionListeners();
+//			}
+//			ActionListener[] asipals2=animationSelector.icon2Panel.getActionListeners();;
+//			while (asipals2.length>0) {
+//				animationSelector.icon2Panel.removeActionListener(asipals2[0]);	
+//				asipals2=animationSelector.icon2Panel.getActionListeners();
+//			}
+//			animationSelector.icon=null;
+//			animationSelector.icon2=null;
+//			animationSelector.iconPanel=null;
+//			animationSelector.icon2Panel=null;
+//			animationSelector.stackWindow = null;
+//
+//			animationSelector.adjustmentListener=null;
+//			animationSelector=null;
+//		}
+//		if (animationZSelector!=null) {
+//			animationZSelector.bar.removeAdjustmentListener(animationZSelector);
+//			animationZSelector.bar.removeMouseListener(animationZSelector);
+//			animationZSelector.removeAdjustmentListener(this);
+//			animationZSelector.removeKeyListener(ij);
+//			while (animationZSelector.getMouseListeners().length>0) 
+//				animationZSelector.removeMouseListener(animationZSelector.getMouseListeners()[0]);
+//			while (animationZSelector.iconPanel.getMouseListeners().length>0) 
+//				animationZSelector.iconPanel.removeMouseListener(animationZSelector.iconPanel.getMouseListeners()[0]);
+//			while (animationZSelector.icon2Panel.getMouseListeners().length>0) 
+//				animationZSelector.icon2Panel.removeMouseListener(animationZSelector.icon2Panel.getMouseListeners()[0]);
+//			ActionListener[] azsipals=animationZSelector.iconPanel.getActionListeners();
+//			while (azsipals.length>0) {
+//				animationZSelector.iconPanel.removeActionListener(azsipals[0]);	
+//				azsipals=animationZSelector.iconPanel.getActionListeners();
+//			}
+//			ActionListener[] azsipals2=animationZSelector.icon2Panel.getActionListeners();;
+//			while (azsipals2.length>0) {
+//				animationZSelector.icon2Panel.removeActionListener(azsipals2[0]);	
+//				azsipals2=animationZSelector.icon2Panel.getActionListeners();
+//			}
+//			animationZSelector.icon=null;
+//			animationZSelector.icon2=null;
+//			animationZSelector.iconPanel=null;
+//			animationZSelector.icon2Panel=null;
+//			animationZSelector.stackWindow = null;
+//			
+//			animationZSelector.adjustmentListener=null;
+//			animationZSelector=null;
+//		}
 		if (cSelector!=null) {
-			cSelector.stackWindow = null;
 			cSelector.bar.removeAdjustmentListener(cSelector);
 			cSelector.bar.removeMouseListener(cSelector);
 			cSelector.removeAdjustmentListener(this);
 			cSelector.removeKeyListener(ij);
-			cSelector.iconPanel.removeMouseListener(cSelector.iconPanel.getMouseListeners()[0]);
-			cSelector.icon2Panel.removeMouseListener(cSelector.icon2Panel.getMouseListeners()[0]);
-			cSelector.iconPanel.removeActionListener(cSelector.iconPanel.getActionListeners()[0]);			
-			cSelector.icon2Panel.removeActionListener(cSelector.icon2Panel.getActionListeners()[0]);			
+			while (cSelector.getMouseListeners().length>0) 
+				cSelector.removeMouseListener(cSelector.getMouseListeners()[0]);
+			while (cSelector.iconPanel.getMouseListeners().length>0) 
+				cSelector.iconPanel.removeMouseListener(cSelector.iconPanel.getMouseListeners()[0]);
+			while (cSelector.icon2Panel.getMouseListeners().length>0) 
+				cSelector.icon2Panel.removeMouseListener(cSelector.icon2Panel.getMouseListeners()[0]);
+			ActionListener[] csipals=cSelector.iconPanel.getActionListeners();
+			while (csipals.length>0) { 
+				cSelector.iconPanel.removeActionListener(csipals[0]);		
+				csipals=cSelector.iconPanel.getActionListeners();
+			}
+			ActionListener[] csipals2=cSelector.icon2Panel.getActionListeners();;
+			while (csipals2.length>0) {
+				cSelector.icon2Panel.removeActionListener(csipals2[0]);	
+				csipals2=cSelector.icon2Panel.getActionListeners();
+			}
+			
+			cSelector.icon=null;
+			cSelector.icon2=null;
 			cSelector.iconPanel=null;
 			cSelector.icon2Panel=null;
+			cSelector.bar = null;
+			cSelector.stackWindow = null;
 
 			cSelector.adjustmentListener=null;
+			cSelector.stackWindow = null;
 			cSelector=null;
 		}
 		if (tSelector!=null) {
-			tSelector.stackWindow = null;
 			tSelector.bar.removeAdjustmentListener(tSelector);
 			tSelector.bar.removeMouseListener(tSelector);
 			tSelector.removeAdjustmentListener(this);
 			tSelector.removeKeyListener(ij);
-//			tSelector.iconPanel.removeMouseListener(tSelector.iconPanel.getMouseListeners()[0]);
-//			tSelector.icon2Panel.removeMouseListener(tSelector.icon2Panel.getMouseListeners()[0]);
-			tSelector.iconPanel=null;
-			tSelector.icon2Panel=null;
+			while (tSelector.getMouseListeners().length>0) 
+				tSelector.removeMouseListener(tSelector.getMouseListeners()[0]);
+			if (tSelector.iconPanel!=null) {
+				while (tSelector.iconPanel.getMouseListeners().length>0) 
+					tSelector.iconPanel.removeMouseListener(tSelector.iconPanel.getMouseListeners()[0]);
+				while (tSelector.icon2Panel.getMouseListeners().length>0) 
+					tSelector.icon2Panel.removeMouseListener(tSelector.icon2Panel.getMouseListeners()[0]);
+				ActionListener[] tsipals=tSelector.iconPanel.getActionListeners();
+				while (tsipals.length>0) {
+					tSelector.iconPanel.removeActionListener(tsipals[0]);			
+					tsipals=tSelector.iconPanel.getActionListeners();
+				}
+				ActionListener[] tsipals2=tSelector.icon2Panel.getActionListeners();;
+				while (tsipals2.length>0) {
+					tSelector.icon2Panel.removeActionListener(tsipals2[0]);	
+					tsipals2=tSelector.icon2Panel.getActionListeners();
+				}
+				tSelector.iconPanel.setAction(null);
+				tSelector.icon2Panel.setAction(null);
+				tSelector.icon=null;
+				tSelector.icon2=null;
+				tSelector.iconPanel=null;
+				tSelector.icon2Panel=null;
+			}
+			tSelector.bar = null;
+			tSelector.stackWindow = null;
 
 			tSelector.adjustmentListener=null;
+			tSelector.stackWindow = null;
 			tSelector=null;
 		}
 		if (zSelector!=null) {
-			zSelector.stackWindow = null;
 			zSelector.bar.removeAdjustmentListener(zSelector);
 			zSelector.bar.removeMouseListener(zSelector);
 			zSelector.removeAdjustmentListener(this);
 			zSelector.removeKeyListener(ij);
-//			zSelector.iconPanel.removeMouseListener(zSelector.iconPanel.getMouseListeners()[0]);
-//			zSelector.icon2Panel.removeMouseListener(zSelector.icon2Panel.getMouseListeners()[0]);
-			zSelector.iconPanel=null;
-			zSelector.icon2Panel=null;
+			while (zSelector.getMouseListeners().length>0) 
+				zSelector.removeMouseListener(zSelector.getMouseListeners()[0]);
+			if (zSelector.iconPanel!=null) {
+				while (zSelector.iconPanel.getMouseListeners().length>0) 
+					zSelector.iconPanel.removeMouseListener(zSelector.iconPanel.getMouseListeners()[0]);
+				while (zSelector.icon2Panel.getMouseListeners().length>0) 
+					zSelector.icon2Panel.removeMouseListener(zSelector.icon2Panel.getMouseListeners()[0]);
+				ActionListener[] zsipals=zSelector.iconPanel.getActionListeners();
+				while (zsipals.length>0) {
+					zSelector.iconPanel.removeActionListener(zsipals[0]);		
+					zsipals=zSelector.iconPanel.getActionListeners();
+				}
+				ActionListener[] zasipals2=zSelector.icon2Panel.getActionListeners();
+				while (zasipals2.length>0) {
+					zSelector.icon2Panel.removeActionListener(zasipals2[0]);	
+					zasipals2=zSelector.icon2Panel.getActionListeners();
+				}
+				zSelector.iconPanel.setAction(null);
+				zSelector.icon2Panel.setAction(null);
+				zSelector.icon=null;
+				zSelector.icon2=null;
+				zSelector.iconPanel=null;
+				zSelector.icon2Panel=null;
+			}
+			zSelector.bar = null;
+			zSelector.stackWindow = null;
 
 			zSelector.adjustmentListener=null;
+			zSelector.stackWindow = null;
 			zSelector=null;
 		}
 		if (activeScrollBars!=null) {
@@ -546,14 +647,14 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
     }
     
     public void setAnimate(boolean b) {
-    	if (running2!=b && animationSelector!=null)
-    		animationSelector.updatePlayPauseIcon();
+    	if (running2!=b && getAnimationSelector()!=null)
+    		getAnimationSelector().updatePlayPauseIcon();
 		running2 = b;
     }
     
     public void setZAnimate(boolean b) {
-    	if (running3!=b && animationZSelector!=null)
-    		animationZSelector.updatePlayPauseIcon();
+    	if (running3!=b && getAnimationZSelector()!=null)
+    		getAnimationZSelector().updatePlayPauseIcon();
 		running3 = b;
     }
 
@@ -575,36 +676,148 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
     }
     
     void removeScrollbars() {
-    	remove(scrollbarPanel);
-    	if (cSelector!=null) {
-    		remove(cSelector);
+//    	if (cSelector!=null) {
+//    		scrollbarPanel.remove(cSelector);
+//			cSelector.removeAdjustmentListener(this);
+//    		cSelector = null;
+//    	}
+//    	if (zSelector!=null) {
+//    		scrollbarPanel.remove(zSelector);
+//			zSelector.removeAdjustmentListener(this);
+//    		zSelector = null;
+//    	}
+//    	if (tSelector!=null) {
+//    		scrollbarPanel.remove(tSelector);
+//			tSelector.removeAdjustmentListener(this);
+//    		tSelector = null;
+//    	}
+		if (cSelector!=null) {
+			cSelector.bar.removeAdjustmentListener(cSelector);
+			cSelector.bar.removeMouseListener(cSelector);
 			cSelector.removeAdjustmentListener(this);
-    		cSelector = null;
-    	}
-    	if (zSelector!=null) {
-    		remove(zSelector);
-			zSelector.removeAdjustmentListener(this);
-    		zSelector = null;
-    	}
-    	if (tSelector!=null) {
-    		remove(tSelector);
+			cSelector.removeKeyListener(ij);
+			while (cSelector.getMouseListeners().length>0) 
+				cSelector.removeMouseListener(cSelector.getMouseListeners()[0]);
+			while (cSelector.iconPanel.getMouseListeners().length>0) 
+				cSelector.iconPanel.removeMouseListener(cSelector.iconPanel.getMouseListeners()[0]);
+			while (cSelector.icon2Panel.getMouseListeners().length>0) 
+				cSelector.icon2Panel.removeMouseListener(cSelector.icon2Panel.getMouseListeners()[0]);
+			ActionListener[] csipals=cSelector.iconPanel.getActionListeners();
+			while (csipals.length>0) { 
+				cSelector.iconPanel.removeActionListener(csipals[0]);		
+				csipals=cSelector.iconPanel.getActionListeners();
+			}
+			ActionListener[] csipals2=cSelector.icon2Panel.getActionListeners();;
+			while (csipals2.length>0) {
+				cSelector.icon2Panel.removeActionListener(csipals2[0]);	
+				csipals2=cSelector.icon2Panel.getActionListeners();
+			}
+			
+			cSelector.icon=null;
+			cSelector.icon2=null;
+			cSelector.iconPanel=null;
+			cSelector.icon2Panel=null;
+			cSelector.bar = null;
+			cSelector.stackWindow = null;
+
+			cSelector.adjustmentListener=null;
+			cSelector.stackWindow = null;
+			cSelector=null;
+		}
+		if (tSelector!=null) {
+			tSelector.bar.removeAdjustmentListener(tSelector);
+			tSelector.bar.removeMouseListener(tSelector);
 			tSelector.removeAdjustmentListener(this);
-    		tSelector = null;
-    	}
+			tSelector.removeKeyListener(ij);
+			while (tSelector.getMouseListeners().length>0) 
+				tSelector.removeMouseListener(tSelector.getMouseListeners()[0]);
+			if (tSelector.iconPanel!=null) {
+				while (tSelector.iconPanel.getMouseListeners().length>0) 
+					tSelector.iconPanel.removeMouseListener(tSelector.iconPanel.getMouseListeners()[0]);
+				while (tSelector.icon2Panel.getMouseListeners().length>0) 
+					tSelector.icon2Panel.removeMouseListener(tSelector.icon2Panel.getMouseListeners()[0]);
+				ActionListener[] tsipals=tSelector.iconPanel.getActionListeners();
+				while (tsipals.length>0) {
+					tSelector.iconPanel.removeActionListener(tsipals[0]);			
+					tsipals=tSelector.iconPanel.getActionListeners();
+				}
+				ActionListener[] tsipals2=tSelector.icon2Panel.getActionListeners();;
+				while (tsipals2.length>0) {
+					tSelector.icon2Panel.removeActionListener(tsipals2[0]);	
+					tsipals2=tSelector.icon2Panel.getActionListeners();
+				}
+				tSelector.iconPanel.setAction(null);
+				tSelector.icon2Panel.setAction(null);
+				tSelector.icon=null;
+				tSelector.icon2=null;
+				tSelector.iconPanel=null;
+				tSelector.icon2Panel=null;
+			}
+			tSelector.bar = null;
+			tSelector.stackWindow = null;
+
+			tSelector.adjustmentListener=null;
+			tSelector.stackWindow = null;
+			tSelector=null;
+		}
+		if (zSelector!=null) {
+			zSelector.bar.removeAdjustmentListener(zSelector);
+			zSelector.bar.removeMouseListener(zSelector);
+			zSelector.removeAdjustmentListener(this);
+			zSelector.removeKeyListener(ij);
+			while (zSelector.getMouseListeners().length>0) 
+				zSelector.removeMouseListener(zSelector.getMouseListeners()[0]);
+			if (zSelector.iconPanel!=null) {
+				while (zSelector.iconPanel.getMouseListeners().length>0) 
+					zSelector.iconPanel.removeMouseListener(zSelector.iconPanel.getMouseListeners()[0]);
+				while (zSelector.icon2Panel.getMouseListeners().length>0) 
+					zSelector.icon2Panel.removeMouseListener(zSelector.icon2Panel.getMouseListeners()[0]);
+				ActionListener[] zsipals=zSelector.iconPanel.getActionListeners();
+				while (zsipals.length>0) {
+					zSelector.iconPanel.removeActionListener(zsipals[0]);		
+					zsipals=zSelector.iconPanel.getActionListeners();
+				}
+				ActionListener[] zasipals2=zSelector.icon2Panel.getActionListeners();
+				while (zasipals2.length>0) {
+					zSelector.icon2Panel.removeActionListener(zasipals2[0]);	
+					zasipals2=zSelector.icon2Panel.getActionListeners();
+				}
+				zSelector.iconPanel.setAction(null);
+				zSelector.icon2Panel.setAction(null);
+				zSelector.icon=null;
+				zSelector.icon2=null;
+				zSelector.iconPanel=null;
+				zSelector.icon2Panel=null;
+			}
+			zSelector.bar = null;
+			zSelector.stackWindow = null;
+
+			zSelector.adjustmentListener=null;
+			zSelector.stackWindow = null;
+			zSelector=null;
+		}
+		if (activeScrollBars!=null) {
+			int asbs = activeScrollBars.size();
+			for (int asbl=0;asbl<asbs;asbl++) {
+				activeScrollBars.remove(0);
+			}
+		}
+    	remove(scrollbarPanel);
+    	scrollbarPanel = null;
     }
 
 	public ScrollbarWithLabel getAnimationSelector() {
-		if (animationSelector != null) 
-			return animationSelector;
-		else
-			return tSelector != null? tSelector:(animationZSelector != null?animationZSelector:(zSelector != null? zSelector:null));
+//		if (animationSelector != null) 
+//			return animationSelector;
+//		else
+			return tSelector != null? tSelector:(zSelector != null? zSelector:null);
 	}
 
 	public ScrollbarWithLabel getAnimationZSelector() {
-		if (animationZSelector != null) 
-			return animationZSelector;
-		else
-			return zSelector != null? zSelector:(animationSelector != null?animationSelector:(tSelector != null? tSelector:null));
+//		if (animationZSelector != null) 
+//			return animationZSelector;
+//		else
+			return zSelector != null? zSelector:(tSelector != null? tSelector:null);
 	}
 
 	public void setWormAtlas(boolean wormAtlas) {

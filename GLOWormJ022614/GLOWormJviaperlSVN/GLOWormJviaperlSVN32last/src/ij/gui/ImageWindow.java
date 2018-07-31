@@ -919,15 +919,12 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
     	if (ij!=null && ij.quitting())  // this may help avoid thread deadlocks
     		return true;
     	dispose();
-    	if (toolbar != null) {
+    	if (toolbar != null)
     		this.remove(toolbar);
-    		Toolbar.setInstance(null);
-    	}
     	if (ic != null)
     		this.remove(ic);
     	if (imp!=null)
     		imp.flush();
-    	imp.setWindow(null);
     	imp = null;
     	if (WindowManager.getWindowCount()==0)
     		{xloc = 0; yloc = 0;}
