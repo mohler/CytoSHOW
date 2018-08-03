@@ -17,19 +17,19 @@ import ij3d.ImageWindow3D;
 /** The ImageJ toolbar. */
 public class Toolbar extends Canvas implements MouseListener, MouseMotionListener, ItemListener, ActionListener {
 
-	public static final int RECTANGLE = 0;
-	public static final int OVAL = 1;
-	public static final int POLYGON = 2;
-	public static final int FREEROI = 3;
-	public static final int LINE = 4;
-	public static final int POLYLINE = 5;
-	public static final int FREELINE = 6;
-	public static final int POINT = 7, CROSSHAIR = 7;
-	public static final int WAND = 8;
-	public static final int TEXT = 9;
-	public static final int SPARE1 = 10;
-	public static final int MAGNIFIER = 11;
-	public static final int HAND = 12;
+	public static final int MAGNIFIER = 0;
+	public static final int HAND = 1;
+	public static final int RECTANGLE = 2;
+	public static final int OVAL = 3;
+	public static final int POLYGON = 4;
+	public static final int FREEROI = 5;
+	public static final int LINE = 6;
+	public static final int POLYLINE = 7;
+	public static final int FREELINE = 8;
+	public static final int POINT = 9, CROSSHAIR = 9;
+	public static final int WAND = 10;
+	public static final int TEXT = 11;
+	public static final int SPARE1 = 12;
 	public static final int DROPPER = 13;
 	public static final int ANGLE = 14;
 	public static final int SPARE2 = 15;
@@ -115,6 +115,7 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 		icons[NUM_TOOLS-1] = "C900T1c12>T7c12>"; // ">>"
 		addPopupMenus();
 		if (IJ.isMacOSX() || IJ.isVista()) Prefs.antialiasedTools = true;
+		setTool(RECTANGLE);
 	}
 
 	void addPopupMenus() {
@@ -845,20 +846,20 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 	// Returns the toolbar position index of the specified tool
     int toolIndex(int tool) {
     	switch (tool) {
-			case RECTANGLE: return 0;
-			case OVAL: return 1;
-			case POLYGON: return 2;
-			case FREEROI: return 3;
-			case LINE: return 4;
-			case POLYLINE: return 4;
-			case FREELINE: return 4;
-			case POINT: return 6;
-			case WAND: return 7;
-			case TEXT: return 8;
-			case MAGNIFIER: return 9;
-			case HAND: return 10;
+    		case MAGNIFIER: return 0;
+    		case HAND: return 1;
+			case RECTANGLE: return 2;
+			case OVAL: return 3;
+			case POLYGON: return 4;
+			case FREEROI: return 5;
+			case LINE: return 6;
+			case POLYLINE: return 6;
+			case FREELINE: return 6;
+			case POINT: return 8;
+			case WAND: return 9;
+			case TEXT: return 10;
 			case DROPPER: return 11;
-			case ANGLE: return 5;
+			case ANGLE: return 7;
 			case SPARE1: return 12;
 			default: return tool - 2;
 		}
@@ -867,17 +868,17 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 	// Returns the tool corresponding to the specified tool position index
     int toolID(int index) {
     	switch (index) {
-			case 0: return RECTANGLE;
-			case 1: return OVAL;
-			case 2: return POLYGON;
-			case 3: return FREEROI;
-			case 4: return lineType;
-			case 5: return ANGLE;
-			case 6: return POINT;
-			case 7: return WAND;
-			case 8: return TEXT;
-			case 9: return MAGNIFIER;
-			case 10: return HAND;
+			case 0: return MAGNIFIER;
+			case 1: return HAND;
+			case 2: return RECTANGLE;
+			case 3: return OVAL;
+			case 4: return POLYGON;
+			case 5: return FREEROI;
+			case 6: return lineType;
+			case 7: return ANGLE;
+			case 8: return POINT;
+			case 9: return WAND;
+			case 10: return TEXT;
 			case 11: return DROPPER;
 			case 12: return SPARE1;
 			default: return index + 2;
