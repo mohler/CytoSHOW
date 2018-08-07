@@ -3766,7 +3766,27 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			}
 		}
 
-		int maxFrameCount = 0;
+//		int maxFrameCount = 0;
+//		for (int pos=0; pos<pDim; pos++) {
+//			boolean go = true;
+//			if (posIntArray!=null){
+//				go = false;
+//				for (int posInt:posIntArray){
+//					if (posInt == pos){
+//						go=true;
+//					}
+//				}
+//			}
+//			if (!go || !doProcessing[pos]){
+//				continue;
+//			}
+//
+//			if (impAs[pos].getNFrames() > maxFrameCount) {
+//				maxFrameCount = impAs[pos].getNFrames();
+//			}
+//		}
+		int maxFrameCount =0;
+		int[] posFrameEnd = new int[pDim];
 		for (int pos=0; pos<pDim; pos++) {
 			boolean go = true;
 			if (posIntArray!=null){
@@ -3781,8 +3801,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				continue;
 			}
 
-			if (impAs[pos].getNFrames() > maxFrameCount) {
-				maxFrameCount = impAs[pos].getNFrames();
+			posFrameEnd[pos] = impAs[pos].getFrame();
+					
+			if(maxFrameCount < impAs[pos].getFrame()) {
+				maxFrameCount = impAs[pos].getFrame();
 			}
 		}
 		String[][] frameFileNames = new String[pDim][maxFrameCount + 1];
@@ -3797,6 +3819,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							go=true;
 						}
 					}
+				}
+				if (posFrameEnd[pos]<f) {
+					go = false;
 				}
 				if (!go){
 					continue;

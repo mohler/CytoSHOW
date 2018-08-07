@@ -422,8 +422,16 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 						String triplechunk = filePathChunks[fpcl-3]+File.separator+
 								filePathChunks[fpcl-2]+File.separator+
 								filePathChunks[fpcl-1];
+//						IJ.log(triplechunk);
+//						IJ.log(fi.fileName);
 						for(String cumTiff:cumulativeTiffFileArray){
-							if (cumTiff.endsWith(triplechunk)){
+							String[] cumPathChunks =  cumTiff.replace("\\\\", "\\").split(Pattern.quote(File.separator));
+							int cpcl = cumPathChunks.length;
+							String cumtriplechunk = cumPathChunks[cpcl-3]+File.separator+
+									cumPathChunks[cpcl-2]+File.separator+
+									cumPathChunks[cpcl-1];
+							
+							if (cumtriplechunk.endsWith(triplechunk)){
 								fi.fileName=cumTiff;
 							}
 						}
@@ -532,7 +540,10 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		ImagePlus imp = new ImagePlus(
 				dirChunks[dirChunks.length-1]+"_"+
 						fivImpZero.getTitle().replaceAll("\\d+\\.", "\\."), this);
-				
+		
+		fivImpZero.flush();
+		fivImpZero=null;
+		
 		imp.setOpenAsHyperStack(true);			
 //		int cztDims = cDim*zDim*fivStacks.size();
 		int cztDims = cDim*zDim*tDim;
@@ -610,9 +621,6 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		while (n > fivStacks.get(stackNumber).getSize()) {
 			n = n - fivStacks.get(stackNumber).getSize();
 			stackNumber++;
-		}
-		if (stackNumber>=fivStacks.size()) {
-			stackNumber= fivStacks.size()-1;
 		}
 
 		sliceNumber = n;
