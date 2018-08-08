@@ -790,8 +790,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						}
 						((CompositeImage)impBs[pos]).setMode(CompositeImage.COMPOSITE);
 
-						impAs[pos].setPosition(1, zDim/2, impAs[pos].getNFrames());
-						impBs[pos].setPosition(1, zDim/2, impBs[pos].getNFrames());
+						impAs[pos].setPosition(1, zDim/2, impAs[pos].getNFrames()-1);
+						impBs[pos].setPosition(1, zDim/2, impBs[pos].getNFrames()-1);
 						wasFrameA[pos] = impAs[pos].getFrame();
 						wasFrameB[pos] = impBs[pos].getFrame();
 						wasSliceA[pos] = impAs[pos].getSlice();
@@ -1527,6 +1527,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 					roiAs[pos] = impAs[pos].getRoi();
 					roiBs[pos] = impBs[pos].getRoi();
+					wasFrameA[pos] = impAs[pos].getFrame();
+					wasFrameB[pos] = impBs[pos].getFrame();
+					wasSliceA[pos] = impAs[pos].getSlice();
+					wasSliceB[pos] = impBs[pos].getSlice();
+					wasChannelA[pos] = impAs[pos].getChannel();
+					wasChannelB[pos] = impBs[pos].getChannel();
+					wasEdgesA[pos] = impAs[pos].getStack().isEdges();
+					wasEdgesB[pos] = impBs[pos].getStack().isEdges();
 
 					cropWidthA[pos] = roiAs[pos].getBounds().width;
 					cropHeightA[pos] = roiAs[pos].getBounds().height;
@@ -1933,6 +1941,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 					roiAs[pos] = impAs[pos].getRoi();
 					roiBs[pos] = impBs[pos].getRoi();
+					wasFrameA[pos] = impAs[pos].getFrame();
+					wasFrameB[pos] = impBs[pos].getFrame();
+					wasSliceA[pos] = impAs[pos].getSlice();
+					wasSliceB[pos] = impBs[pos].getSlice();
+					wasChannelA[pos] = impAs[pos].getChannel();
+					wasChannelB[pos] = impBs[pos].getChannel();
+					wasEdgesA[pos] = impAs[pos].getStack().isEdges();
+					wasEdgesB[pos] = impBs[pos].getStack().isEdges();
 
 					if ((new File(savePath)).canRead()) {
 						// SETUP OF WINDOWS SHOWING PRE-EXISTING DECON OUTPUTS
@@ -3747,7 +3763,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					doProcessing[pos] = false;
 					continue;
 				}
-				if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+				if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible() ) {
 					doProcessing[pos] = false;
 					continue;
 				} 
@@ -3766,27 +3782,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			}
 		}
 
-//		int maxFrameCount = 0;
-//		for (int pos=0; pos<pDim; pos++) {
-//			boolean go = true;
-//			if (posIntArray!=null){
-//				go = false;
-//				for (int posInt:posIntArray){
-//					if (posInt == pos){
-//						go=true;
-//					}
-//				}
-//			}
-//			if (!go || !doProcessing[pos]){
-//				continue;
-//			}
-//
-//			if (impAs[pos].getNFrames() > maxFrameCount) {
-//				maxFrameCount = impAs[pos].getNFrames();
-//			}
-//		}
-		int maxFrameCount =0;
 		int[] posFrameEnd = new int[pDim];
+
 		for (int pos=0; pos<pDim; pos++) {
 			boolean go = true;
 			if (posIntArray!=null){
@@ -3800,16 +3797,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			if (!go || !doProcessing[pos]){
 				continue;
 			}
-
+			
 			posFrameEnd[pos] = impAs[pos].getFrame();
-					
-			if(maxFrameCount < impAs[pos].getFrame()) {
-				maxFrameCount = impAs[pos].getFrame();
+			if (posFrameEnd[pos] < impBs[pos].getFrame()) {
+				posFrameEnd[pos] = impBs[pos].getFrame();
 			}
 		}
-		String[][] frameFileNames = new String[pDim][maxFrameCount + 1];
+		String[][] frameFileNames = new String[pDim][tDim+1];
 
-		for (int f = 1; f <= maxFrameCount; f++) {
+		for (int f = 1; f <= tDim; f++) {
 			for (int pos=0; pos<pDim; pos++) {
 				boolean go = true;
 				if (posIntArray!=null){
@@ -3820,6 +3816,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						}
 					}
 				}
+				if(go) {
+					wasFrameA[pos] = impAs[pos].getFrame();
+					wasFrameB[pos] = impBs[pos].getFrame();
+					wasSliceA[pos] = impAs[pos].getSlice();
+					wasSliceB[pos] = impBs[pos].getSlice();
+					wasChannelA[pos] = impAs[pos].getChannel();
+					wasChannelB[pos] = impBs[pos].getChannel();
+				}
+								
 				if (posFrameEnd[pos]<f) {
 					go = false;
 				}

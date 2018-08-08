@@ -38,7 +38,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	private FileInfo[] dummyInfoArray;
 	private int largestDirectoryTiffCount;
 	public String infoDir;
-	private int  cDim, zDim;
+	private int  cDim;
+	public int zDim;
 	public int tDim;
 	private int  vDim=1;
 	public int stackNumber;
@@ -540,10 +541,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		ImagePlus imp = new ImagePlus(
 				dirChunks[dirChunks.length-1]+"_"+
 						fivImpZero.getTitle().replaceAll("\\d+\\.", "\\."), this);
-		
-		fivImpZero.flush();
-		fivImpZero=null;
-		
+				
 		imp.setOpenAsHyperStack(true);			
 //		int cztDims = cDim*zDim*fivStacks.size();
 		int cztDims = cDim*zDim*tDim;
@@ -618,7 +616,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			throw new IllegalArgumentException(outOfRange+n);
 		}
 		int stackNumber = 0;
-		while (n > fivStacks.get(stackNumber).getSize()) {
+		while (stackNumber<fivStacks.size() && n > fivStacks.get(stackNumber).getSize()) {
 			n = n - fivStacks.get(stackNumber).getSize();
 			stackNumber++;
 		}
