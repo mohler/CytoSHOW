@@ -5351,23 +5351,23 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_Channels/vDim>1 && diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
 							false, false, true);
 
-					ImagePlus impNext = new ImagePlus(impAs[pos].getTitle(), stackAs[pos]);
-					impNext.setOpenAsHyperStack(true);
-					impNext.setDimensions(cDim, zDim, tDim);
-					impNext = new CompositeImage(impNext);
-					((CompositeImage)impNext).setMode(modeA);
-					((CompositeImage)impNext).reset();
-					((CompositeImage)impNext).copyLuts(impAs[pos]);
-					impNext.setCalibration(impAs[pos].getCalibration());
+					ImagePlus impNextA = new ImagePlus(impAs[pos].getTitle(), stackAs[pos]);
+					impNextA.setOpenAsHyperStack(true);
+					impNextA.setDimensions(cDim, zDim, tDim);
+					impNextA = new CompositeImage(impNextA);
+					((CompositeImage)impNextA).setMode(modeA);
+					((CompositeImage)impNextA).reset();
+					((CompositeImage)impNextA).copyLuts(impAs[pos]);
+					impNextA.setCalibration(impAs[pos].getCalibration());
 					if (stageScan)
 						stackAs[pos].setSkewXperZ(
-								impNext.getCalibration().pixelDepth / impNext.getCalibration().pixelWidth);
+								impNextA.getCalibration().pixelDepth / impNextA.getCalibration().pixelWidth);
 
-					impAs[pos].flush();
-					impAs[pos] = impNext;
-
+					impAs[pos] = impNextA;
 
 					win.setImage(impAs[pos]);
+					impAs[pos].setWindow(win);
+					win.updateImage(impAs[pos]);
 					if (win instanceof StackWindow) {
 						StackWindow sw = (StackWindow)win;
 						int stackSize = impAs[pos].getStackSize();
@@ -5397,23 +5397,26 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					stackBs[pos] = new MultiFileInfoVirtualStack(
 							dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_Channels/vDim>1 && diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
 							true, false, true);
+					
+					ImagePlus impNextB = new ImagePlus(impAs[pos].getTitle(), stackAs[pos]);
 
-					impNext = new CompositeImage(new ImagePlus(impBs[pos].getTitle(), stackBs[pos]));
-					impNext.setOpenAsHyperStack(true);
-					impNext.setDimensions(cDim, zDim, tDim);
-					impNext = new CompositeImage(impNext);
-					((CompositeImage)impNext).setMode(modeB);
-					((CompositeImage)impNext).reset();
-					((CompositeImage)impNext).copyLuts(impBs[pos]);
-					impNext.setCalibration(impBs[pos].getCalibration());
+					impNextB = new CompositeImage(new ImagePlus(impBs[pos].getTitle(), stackBs[pos]));
+					impNextB.setOpenAsHyperStack(true);
+					impNextB.setDimensions(cDim, zDim, tDim);
+					impNextB = new CompositeImage(impNextB);
+					((CompositeImage)impNextB).setMode(modeB);
+					((CompositeImage)impNextB).reset();
+					((CompositeImage)impNextB).copyLuts(impBs[pos]);
+					impNextB.setCalibration(impBs[pos].getCalibration());
 					if (stageScan)
 						stackAs[pos].setSkewXperZ(
-								impNext.getCalibration().pixelDepth / impNext.getCalibration().pixelWidth);
+								impNextB.getCalibration().pixelDepth / impNextB.getCalibration().pixelWidth);
 
-					impBs[pos].flush();
-					impBs[pos] = impNext;
+					impBs[pos] = impNextB;
 
 					win.setImage(impBs[pos]);
+					impBs[pos].setWindow(win);
+					win.updateImage(impBs[pos]);
 					if (win instanceof StackWindow) {
 						StackWindow sw = (StackWindow)win;
 						int stackSize = impBs[pos].getStackSize();
