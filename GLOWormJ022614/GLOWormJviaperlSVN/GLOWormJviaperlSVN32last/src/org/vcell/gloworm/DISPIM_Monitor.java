@@ -1997,6 +1997,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								impDF1s[pos].setStack("Decon-Fuse_"
 										+ impAs[pos].getTitle().split(":")[0], stackDFs[pos]);
 								impDF1s[pos].setFileInfo(new FileInfo());
+								impDF1s[pos].getCalibration().setUnit(impAs[pos].getCalibration().getUnit());
+								impDF1s[pos].getCalibration().pixelWidth = impAs[pos].getCalibration().pixelWidth;
+								impDF1s[pos].getCalibration().pixelHeight = impAs[pos].getCalibration().pixelHeight;
+								impDF1s[pos].getCalibration().pixelDepth = impAs[pos].getCalibration().pixelWidth;
 
 								impDF1s[pos].getOriginalFileInfo().directory = dirOrOMETiff;
 								int stkNSlicesDF = impDF1s[pos].getStackSize();
@@ -4482,6 +4486,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								impDF1s[pos].setStack("Decon-Fuse_"
 										+ impAs[pos].getTitle().split(":")[0], deconmfivs);
 								impDF1s[pos].setFileInfo(new FileInfo());
+								impDF1s[pos].getCalibration().setUnit(impAs[pos].getCalibration().getUnit());
+								impDF1s[pos].getCalibration().pixelWidth = impAs[pos].getCalibration().pixelWidth;
+								impDF1s[pos].getCalibration().pixelHeight = impAs[pos].getCalibration().pixelHeight;
+								impDF1s[pos].getCalibration().pixelDepth = impAs[pos].getCalibration().pixelWidth;
 
 								impDF1s[pos].getOriginalFileInfo().directory = dirOrOMETiffFinal;
 								int stkNSlicesDF = impDF1s[pos].getStackSize();
