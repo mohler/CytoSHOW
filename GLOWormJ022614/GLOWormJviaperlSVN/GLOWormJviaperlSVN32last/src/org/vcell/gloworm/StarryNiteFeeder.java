@@ -39,20 +39,36 @@ import ij.process.StackStatistics;
 public class StarryNiteFeeder implements PlugIn {
 
 	public void run(String arg) {
-		OpenDialog.setDefaultDirectory(Prefs.get("StarryNiteFeeder.parameterFileDirectory",""));
-		OpenDialog.setLastName(Prefs.get("StarryNiteFeeder.parameterFileName",""));
-		final String baseParameterFilePath = new OpenDialog("Parameter file for StarryNite?", OpenDialog.getDefaultDirectory(), OpenDialog.getLastName()).getPath();
-//		String[] baseParamChunks = baseParameterFilePath.split(">>");
-//		String timeRangePrompt="";
-//		if (baseParamChunks.length >0) {
-//			timeRangePrompt=baseParamChunks[1];
-//		}
-		Prefs.set("StarryNiteFeeder.parameterFileDirectory", new File(baseParameterFilePath).getParent()+File.separator);
-		Prefs.set("StarryNiteFeeder.parameterFileName", new File(baseParameterFilePath).getName());
-		
-		DirectoryChooser.setDefaultDirectory(Prefs.get("StarryNiteFeeder.outputPath",""));
-		final String outDir = IJ.getDirectory("Output directory for StarryNite?");
-		Prefs.set("StarryNiteFeeder.outputPath", outDir);
+		String[] argChunks = arg.split("\\|");
+		String sourceDir = "";
+		String paramsPath = "";
+		String outputDir = "";
+		int skipFactor = 1;
+		if (argChunks.length == 4) {
+			sourceDir = argChunks[0];
+			paramsPath = argChunks[1];
+			outputDir = argChunks[2];
+			skipFactor = Integer.parseInt(argChunks[3]);
+		}
+		if (paramsPath == "") {
+			OpenDialog.setDefaultDirectory(Prefs.get("StarryNiteFeeder.parameterFileDirectory",""));
+			OpenDialog.setLastName(Prefs.get("StarryNiteFeeder.parameterFileName",""));
+			paramsPath = new OpenDialog("Parameter file for StarryNite?", OpenDialog.getDefaultDirectory(), OpenDialog.getLastName()).getPath();
+			//		String[] baseParamChunks = baseParameterFilePath.split(">>");
+			//		String timeRangePrompt="";
+			//		if (baseParamChunks.length >0) {
+			//			timeRangePrompt=baseParamChunks[1];
+			//		}
+			Prefs.set("StarryNiteFeeder.parameterFileDirectory", new File(paramsPath).getParent()+File.separator);
+			Prefs.set("StarryNiteFeeder.parameterFileName", new File(paramsPath).getName());
+		}
+		final String baseParameterFilePath = paramsPath;
+		if (outputDir == "") {
+			DirectoryChooser.setDefaultDirectory(Prefs.get("StarryNiteFeeder.outputPath",""));
+			outputDir = IJ.getDirectory("Output directory for StarryNite?");
+			Prefs.set("StarryNiteFeeder.outputPath", outputDir);
+		}
+		final String outDir = outputDir;
 		
 		WaitForUserDialog wfud = new WaitForUserDialog("StarryNite Feeder", 
 														"Please position ROIs around the individual embryos to be lineaged.  \n\nThen adjust each embryo's t-slider to the last timepoint to be analyzed.  \n\nClick OK to launch analysis.");
