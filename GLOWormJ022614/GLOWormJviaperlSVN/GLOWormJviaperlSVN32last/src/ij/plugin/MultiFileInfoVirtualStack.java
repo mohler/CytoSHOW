@@ -38,7 +38,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	private FileInfo[] dummyInfoArray;
 	private int largestDirectoryTiffCount;
 	public String infoDir;
-	private int  cDim;
+	public int  cDim;
 	public int zDim;
 	public int tDim;
 	private int  vDim=1;
@@ -124,12 +124,18 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		}).start();
 	
 		if (infoCollectorArrayList.size()==0 || infoCollectorArrayList.get(0)[0].channelShifts == null){
-			dXA= Integer.parseInt(Prefs.get("diSPIMmonitor.dXA", "0"));
-			dXB= Integer.parseInt(Prefs.get("diSPIMmonitor.dXB", "0"));
-			dYA= Integer.parseInt(Prefs.get("diSPIMmonitor.dYA", "0"));
-			dYB= Integer.parseInt(Prefs.get("diSPIMmonitor.dYB", "0"));
-			dZA= Integer.parseInt(Prefs.get("diSPIMmonitor.dZA", "0"));
-			dZB= Integer.parseInt(Prefs.get("diSPIMmonitor.dZB", "0"));
+//			dXA= Integer.parseInt(Prefs.get("diSPIMmonitor.dXA", "0"));
+//			dXB= Integer.parseInt(Prefs.get("diSPIMmonitor.dXB", "0"));
+//			dYA= Integer.parseInt(Prefs.get("diSPIMmonitor.dYA", "0"));
+//			dYB= Integer.parseInt(Prefs.get("diSPIMmonitor.dYB", "0"));
+//			dZA= Integer.parseInt(Prefs.get("diSPIMmonitor.dZA", "0"));
+//			dZB= Integer.parseInt(Prefs.get("diSPIMmonitor.dZB", "0"));
+			dXA= 0;
+			dXB= 0;
+			dYA= 0;
+			dYB= 0;
+			dZA= 0;
+			dZB= 0;
 		} else {
 			dXA= infoCollectorArrayList.get(0)[0].channelShifts[0];
 			dYA= infoCollectorArrayList.get(0)[0].channelShifts[1];
@@ -291,10 +297,10 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 			if (monitoringDecon)
 				goDirFileList = StringSorter.sortNumericallyViaRegex(goDirFileList);
-			String lastFileNameOfBunch = "";
+//			String lastFileNameOfBunch = "";
 
 			if (goDirFileList != null) {
-				lastFileNameOfBunch = goDirFileList[goDirFileList.length-1];
+//				lastFileNameOfBunch = goDirFileList[goDirFileList.length-1];
 				for (String fileName:goDirFileList){
 					if ((new File(fileName)).exists()) {
 
@@ -327,7 +333,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				if (infoCollectorArrayList.size()==0){
 					for (String fileName:goDirFileList){
 						if ((new File(dir + fileName)).canRead() && fileName.toLowerCase().endsWith(".tif")) {
-							if (dummyInfoArray == null || fileName==lastFileNameOfBunch) {
+							if (dummyInfoArray == null /*|| fileName==lastFileNameOfBunch*/) {
 								TiffDecoder td = new TiffDecoder(dir, fileName);
 								if (IJ.debugMode) td.enableDebugging();
 								IJ.showStatus("Decoding TIFF header...");
@@ -353,7 +359,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 								continue;
 							}
 							fivStacks.add(new FileInfoVirtualStack());
-							final int sizeWas = fivStacks.size();
+							 int sizeWas = fivStacks.size();
 							fivStacks.get(sizeWas-1).infoArray = infoCollectorArrayList.get(infoCollectorArrayList.size()-1);
 							fivStacks.get(sizeWas-1).setupStack();
 						} else if (fileName.matches(".*channel.*-frame.* missing")) {
@@ -366,7 +372,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				} else {
 					for (int i = 0; i<infoCollectorArrayList.size(); i++) {
 						fivStacks.add(new FileInfoVirtualStack());
-						final int sizeWas = fivStacks.size();
+						 int sizeWas = fivStacks.size();
 						fivStacks.get(sizeWas-1).infoArray = infoCollectorArrayList.get(i);
 						fivStacks.get(sizeWas-1).setupStack();
 					}

@@ -720,6 +720,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							impBs[pos]=null;
 							continue;
 						}
+						tDim = ((MultiFileInfoVirtualStack) stackAs[pos]).tDim;
 						impAs[pos].setStack(stackAs[pos]);
 						Calibration calA = impAs[pos].getCalibration();
 						calA.pixelWidth = vWidth;
@@ -734,6 +735,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									calA.pixelDepth / calA.pixelWidth);
 						impAs[pos].setOpenAsHyperStack(true);
 						impAs[pos].setDimensions(cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim), zDim, sizeA/((cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim))*zDim));
+//						impAs[pos].setDimensions(stackAs[pos].cDim, stackAs[pos].zDim, stackAs[pos].tDim);
 
 						impAs[pos] = new CompositeImage(impAs[pos]){
 							@Override
@@ -1111,8 +1113,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					impAs[pos].setStack(new MultiFileInfoVirtualStack(mmPath, dimOrder, "MMStack_Pos"+pos, cDim, zDim, tDim, vDim, pos, false, false, true));
 
 					int stackSize = impAs[pos].getImageStackSize();
-					int nChannels = cDim/(dimOrder=="xySplitCzt"?1:vDim);
-					int nSlices = zDim;
+//					int nChannels = cDim/(dimOrder=="xySplitCzt"?1:vDim);
+					int nChannels = ((MultiFileInfoVirtualStack)impAs[pos].getStack()).cDim;
+					int nSlices = ((MultiFileInfoVirtualStack)impAs[pos].getStack()).zDim;
 					int nFrames = ((MultiFileInfoVirtualStack)impAs[pos].getStack()).tDim;
 					//					dirOrOMETiff = ((MultiFileInfoVirtualStack)impAs[pos].getStack()).getFivStacks().get(0).getInfo()[pos].directory +
 					//							File.separator +
@@ -2060,6 +2063,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									impPrxs[pos].setStack("3DProjX_Decon-Fuse_"
 											+ impAs[pos].getTitle().split(":")[0], stackPrxs[pos]);
 									impPrxs[pos].setFileInfo(new FileInfo());
+									impPrxs[pos].getCalibration().setUnit(impDF1s[pos].getCalibration().getUnit());
+									impPrxs[pos].getCalibration().pixelWidth = impDF1s[pos].getCalibration().pixelWidth;
+									impPrxs[pos].getCalibration().pixelHeight = impDF1s[pos].getCalibration().pixelHeight;
+									impPrxs[pos].getCalibration().pixelDepth = impDF1s[pos].getCalibration().pixelWidth;
 
 									impPrxs[pos].getOriginalFileInfo().directory = prxPath + File.separator;
 									int stkNSlicesPrx = impPrxs[pos].getStackSize();
@@ -2079,6 +2086,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									impPrys[pos].setStack("3DProjY_Decon-Fuse_"
 											+ impAs[pos].getTitle().split(":")[0], stackPrys[pos]);
 									impPrys[pos].setFileInfo(new FileInfo());
+									impPrys[pos].getCalibration().setUnit(impDF1s[pos].getCalibration().getUnit());
+									impPrys[pos].getCalibration().pixelWidth = impDF1s[pos].getCalibration().pixelWidth;
+									impPrys[pos].getCalibration().pixelHeight = impDF1s[pos].getCalibration().pixelHeight;
+									impPrys[pos].getCalibration().pixelDepth = impDF1s[pos].getCalibration().pixelWidth;
 
 									impPrys[pos].getOriginalFileInfo().directory = pryPath + File.separator;
 									int stkNSlicesPry = impPrys[pos].getStackSize();
@@ -3820,14 +3831,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						}
 					}
 				}
-				if(go) {
-					wasFrameA[pos] = impAs[pos].getFrame();
-					wasFrameB[pos] = impBs[pos].getFrame();
-					wasSliceA[pos] = impAs[pos].getSlice();
-					wasSliceB[pos] = impBs[pos].getSlice();
-					wasChannelA[pos] = impAs[pos].getChannel();
-					wasChannelB[pos] = impBs[pos].getChannel();
-				}
 								
 				if (posFrameEnd[pos]<f) {
 					go = false;
@@ -3846,6 +3849,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					IJ.log("! no winorstackB "+f+" "+pos);
 					continue;
 				} 
+				if(go) {
+					wasFrameA[pos] = impAs[pos].getFrame();
+					wasFrameB[pos] = impBs[pos].getFrame();
+					wasSliceA[pos] = impAs[pos].getSlice();
+					wasSliceB[pos] = impBs[pos].getSlice();
+					wasChannelA[pos] = impAs[pos].getChannel();
+					wasChannelB[pos] = impBs[pos].getChannel();
+				}
 				if (!IJ.shiftKeyDown()){
 					if (impPrxs[pos]!=null && impPrys[pos]!=null && impAs[pos].getNFrames() == impPrxs[pos].getNFrames() && impAs[pos].getNFrames() == impPrys[pos].getNFrames()
 							&& impBs[pos].getNFrames() == impPrxs[pos].getNFrames() && impBs[pos].getNFrames() == impPrys[pos].getNFrames()) {
@@ -4557,6 +4568,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								impPrxs[pos].setStack("3DProjX_Decon-Fuse_"
 										+ impAs[pos].getTitle().split(":")[0], dfProjXmfivs);
 								impPrxs[pos].setFileInfo(new FileInfo());
+								impPrxs[pos].getCalibration().setUnit(impDF1s[pos].getCalibration().getUnit());
+								impPrxs[pos].getCalibration().pixelWidth = impDF1s[pos].getCalibration().pixelWidth;
+								impPrxs[pos].getCalibration().pixelHeight = impDF1s[pos].getCalibration().pixelHeight;
+								impPrxs[pos].getCalibration().pixelDepth = impDF1s[pos].getCalibration().pixelWidth;
 
 								impPrxs[pos].getOriginalFileInfo().directory = prxPath+File.separator;
 								int stkNSlicesPrx = impPrxs[pos].getStackSize();
@@ -4577,6 +4592,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								impPrys[pos].setStack("3DProjY_Decon-Fuse_"
 										+ impAs[pos].getTitle().split(":")[0], dfProjYmfivs);
 								impPrys[pos].setFileInfo(new FileInfo());
+								impPrys[pos].getCalibration().setUnit(impDF1s[pos].getCalibration().getUnit());
+								impPrys[pos].getCalibration().pixelWidth = impDF1s[pos].getCalibration().pixelWidth;
+								impPrys[pos].getCalibration().pixelHeight = impDF1s[pos].getCalibration().pixelHeight;
+								impPrxs[pos].getCalibration().pixelDepth = impDF1s[pos].getCalibration().pixelWidth;
 
 								impPrys[pos].getOriginalFileInfo().directory = pryPath+File.separator;
 								int stkNSlicesPry = impPrys[pos].getStackSize();
