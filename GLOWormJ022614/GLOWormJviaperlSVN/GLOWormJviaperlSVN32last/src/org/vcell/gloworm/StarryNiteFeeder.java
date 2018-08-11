@@ -238,7 +238,21 @@ public class StarryNiteFeeder implements PlugIn {
 					IJ.save(frameRedImp, outDir+subdir+"/aaa"+f+".tif");
 					IJ.save(frameRedImpSkipped, outDir+subdir+"Skipped"+"/aaa"+f+".tif");
 
+					new File(outDir+subdir+"/image/tif/").mkdirs();
+					new File(outDir+subdir+"Skipped"+"/image/tif/").mkdirs();
 
+
+					String command16b = "format=TIFF start=1 name=aaa-t";
+					command16b += ""+IJ.pad(f,3)+" digits=0 ";
+					command16b += "save=";
+
+					String command16a = "["+outDir+subdir+"/image/tif]";
+					String command16askipped = "["+outDir+subdir+"Skipped"+"/image/tif]";
+					//print(command16+command162);
+					IJ.run(frameRedImp, "StarryNite Image Sequence... ", command16b+command16a);
+					IJ.run(frameRedImpSkipped, "StarryNite Image Sequence... ", command16b+command16askipped);
+
+					
 					// Green channel:
 					new File(outDir+subdir+"/image/tifr16/").mkdirs();
 					new File(outDir+subdir+"Skipped"+"/image/tifr16/").mkdirs();

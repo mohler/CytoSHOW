@@ -175,8 +175,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		imp.setRoiManager(this);
 		showWindow(false);
 		//		WindowManager.addWindow(this);
-//		thread = new Thread(this, "Tag Manager");
-//		thread.start();
+		//		thread = new Thread(this, "Tag Manager");
+		//		thread.start();
 
 	}
 
@@ -195,8 +195,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		imp.setRoiManager(this);
 		showWindow(!hideWindow);
 		//		WindowManager.addWindow(this);
-//		thread = new Thread(this, "Tag Manager");
-//		thread.start();
+		//		thread = new Thread(this, "Tag Manager");
+		//		thread.start();
 
 
 	}
@@ -218,8 +218,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		showWindow(!hideWindow);
 		//		WindowManager.addWindow(this);
-//		thread = new Thread(this, "TagManagerThread");
-//		thread.start();
+		//		thread = new Thread(this, "TagManagerThread");
+		//		thread.start();
 
 
 	}
@@ -369,7 +369,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			public void run() {
 				doAction(fe);
 			}
-			
+
 		});
 		thread.start();
 	}
@@ -462,7 +462,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							imp.getCanvas().getDefaultColor()));
 
 					imp.getCanvas().messageRois.put("Finding tags that match", messageRoi);
-//					imp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
+					//					imp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
 
 				}
 
@@ -547,7 +547,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						break;
 					}
 				}
-				
+
 				String existinghexName = "";
 				if (existingColor!=null) {
 					int existingColorInt = existingColor.getRGB();
@@ -559,9 +559,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				}
 
 				add(shiftKeyDown, altKeyDown, controlKeyDown);
-				
+
 				if (existingColor != null) {
-						rois.get(getListModel().get(getListModel().getSize()-1)).setFillColor(existingColor);
+					rois.get(getListModel().get(getListModel().getSize()-1)).setFillColor(existingColor);
 
 				}
 
@@ -592,13 +592,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					Color fillColor = JColorChooser.showDialog(this.getFocusOwner(), "Pick a color for "+ this.getSelectedRoisAsArray()[0].getName()+"...", Colors.decode(hexName, Color.cyan));
 					String whackchacha = hexName.substring(0, 3);
 					if (whackchacha.equals("#00"))
-							whackchacha = "#88";
+						whackchacha = "#88";
 					String colorPickerString = Colors.colorToHexString(fillColor);
 					String alphaCorrFillColorString = colorPickerString;
 					while (!alphaCorrFillColorString.matches("#........"))
 						if (alphaCorrFillColorString.matches("#......")) 
 							alphaCorrFillColorString =  alphaCorrFillColorString.replaceAll("#", whackchacha);
-					
+
 					fillColor = Colors.decode(alphaCorrFillColorString, fillColor);
 
 					ArrayList<String> rootNames_rootFrames = new ArrayList<String>();
@@ -607,7 +607,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 					for (Roi selRoi:getSelectedRoisAsArray()) {
 						String rootName = selRoi.getName().contains("\"")?"\""+selRoi.getName().split("\"")[1]+"\"":selRoi.getName().split("_")[0].trim();
-//						rootName = rootName.contains(" ")?rootName.split("[_\\- ]")[0].trim():rootName;
+						//						rootName = rootName.contains(" ")?rootName.split("[_\\- ]")[0].trim():rootName;
 						String[] rootChunks = selRoi.getName().split("_");
 						String rootFrame = rootChunks[rootChunks.length-1].replaceAll("[CZT]", "").split("-")[0];
 						if (!rootNames_rootFrames.contains(rootName+"_"+rootFrame)) {
@@ -615,33 +615,33 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							rootNames.add(rootName);				
 						}
 					}
-					
+
 					ArrayList<Roi> nameMatchArrayList = new ArrayList<Roi>();
-//					Roi[] fullrois = getFullRoisAsArray();
+					//					Roi[] fullrois = getFullRoisAsArray();
 
 					for (int n=0; n<rootNames.size(); n++) {
 						String rootName = rootNames.get(n);
 						nameMatchArrayList.addAll(roisByRootName.get(rootName));
-//						int fraa = fullrois.length;
-//						for (int r=0; r < fraa; r++) {
-//							String nextName = fullrois[r].getName();
-//							if (nextName.startsWith(rootName)){
-//								nameMatchIndexArrayList.add(r);
-//							}
-//						}
+						//						int fraa = fullrois.length;
+						//						for (int r=0; r < fraa; r++) {
+						//							String nextName = fullrois[r].getName();
+						//							if (nextName.startsWith(rootName)){
+						//								nameMatchIndexArrayList.add(r);
+						//							}
+						//						}
 
 					}
-//					int[] nameMatchIndexes = new int[nameMatchIndexArrayList.size()];
+					//					int[] nameMatchIndexes = new int[nameMatchIndexArrayList.size()];
 					for (Roi nmRoi:nameMatchArrayList) {
-//						nameMatchIndexes[i] = nameMatchIndexArrayList.get(i);
-//						fullrois[nameMatchIndexes[i]].setFillColor(Colors.decode(alphaCorrFillColorString, fillColor));
+						//						nameMatchIndexes[i] = nameMatchIndexArrayList.get(i);
+						//						fullrois[nameMatchIndexes[i]].setFillColor(Colors.decode(alphaCorrFillColorString, fillColor));
 						nmRoi.setFillColor(Colors.decode(alphaCorrFillColorString, fillColor));
-						
+
 					}	
-//					this.setSelectedIndexes(nameMatchIndexes);
-//
-//					if (runCommand("set fill color", alphaCorrFillColorString)) {
-//					}
+					//					this.setSelectedIndexes(nameMatchIndexes);
+					//
+					//					if (runCommand("set fill color", alphaCorrFillColorString)) {
+					//					}
 
 				}
 				this.close();
@@ -759,8 +759,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				save();
 			}
 			else if (command.equals("Adv.")) {
-//				if (imp.getMotherImp().getRoiManager().getColorLegend(e.getSource()) != null)
-//					imp.getMotherImp().getRoiManager().getColorLegend(e.getSource()).setVisible(true);
+				//				if (imp.getMotherImp().getRoiManager().getColorLegend(e.getSource()) != null)
+				//					imp.getMotherImp().getRoiManager().getColorLegend(e.getSource()).setVisible(true);
 				this.showWindow(true);
 			}
 			else if (command.equals("Show")) {
@@ -836,7 +836,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				busy = true;
 				imp.getWindow().sketch3DButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/3D_42578.gif")));
 				sketch3D(e.getSource());
-//				sketchVolumeViewer(e.getSource());
+				//				sketchVolumeViewer(e.getSource());
 				busy = false;
 				imp.getWindow().sketch3DButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/3D_47973.gif")));
 			}
@@ -907,7 +907,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 			this.imp.getCanvas().requestFocus();
 		}
-//		IJ.log("THREAD DONE");
+		//		IJ.log("THREAD DONE");
 	}
 
 	private void sketchVolumeViewer(Object source) { 
@@ -1163,7 +1163,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			name = null;
 		String label = name!=null?name:getLabel(imp, roi, -1);
 		if (promptForName) {
-//			label = promptForName(label);
+			//			label = promptForName(label);
 		}
 		else if (roi instanceof TextRoi)
 			if (imp != null) 
@@ -1215,19 +1215,19 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (roiCopy!=null) { 
 			if (cl != null) {
 				Color clColor = cl.getBrainbowColors()
-									.get(roiCopy.getName().toLowerCase().split("_")[0].split("=")[0].replace("\"", "").trim());
+						.get(roiCopy.getName().toLowerCase().split("_")[0].split("=")[0].replace("\"", "").trim());
 				if (clColor !=null) {
 					String hexRed = Integer.toHexString(clColor.getRed());
 					String hexGreen = Integer.toHexString(clColor.getGreen());
 					String hexBlue = Integer.toHexString(clColor.getBlue());
 					roiCopy.setFillColor(Colors.decode("#ff"+(hexRed.length()==1?"0":"")+hexRed
-														+(hexGreen.length()==1?"0":"")+hexGreen
-														+(hexBlue.length()==1?"0":"")+hexBlue
-													, Color.white));
+							+(hexGreen.length()==1?"0":"")+hexGreen
+							+(hexBlue.length()==1?"0":"")+hexBlue
+							, Color.white));
 				}
 			}
 		} 
-	
+
 
 		if (!Orthogonal_Views.isOrthoViewsImage(imp)) {
 			if (imp.getWindow()!=null) {
@@ -1569,7 +1569,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			newNames[n]=label2;
 		}
 		rename(newNames,  indexes, updateCanvas);
-		
+
 	}
 
 	boolean rename(String[] newNames,  int[] indexes, boolean updateCanvas) {
@@ -1625,19 +1625,19 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			if (roi!=null) { 
 				if (cl != null) {
 					Color clColor = cl.getBrainbowColors()
-										.get(roi.getName().toLowerCase().split("_")[0].split("=")[0].replace("\"", "").trim());
+							.get(roi.getName().toLowerCase().split("_")[0].split("=")[0].replace("\"", "").trim());
 					if (clColor !=null) {
 						String hexRed = Integer.toHexString(clColor.getRed());
 						String hexGreen = Integer.toHexString(clColor.getGreen());
 						String hexBlue = Integer.toHexString(clColor.getBlue());
 						roi.setFillColor(Colors.decode("#ff"+(hexRed.length()==1?"0":"")+hexRed
-															+(hexGreen.length()==1?"0":"")+hexGreen
-															+(hexBlue.length()==1?"0":"")+hexBlue
-														, Color.white));
+								+(hexGreen.length()==1?"0":"")+hexGreen
+								+(hexBlue.length()==1?"0":"")+hexBlue
+								, Color.white));
 					}
 				}
 			} 
-		
+
 			listModel.setElementAt(label, indexes[i]);
 			fullListModel.setElementAt(label, fullListModel.indexOf(name));
 		}
@@ -1665,7 +1665,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			name2 = name.endsWith("|")?name.substring(0, name.length()-1):name;
 		}
 		return name2;
-		
+
 	}
 
 	boolean restore(ImagePlus imp, int index, boolean setSlice) {
@@ -1793,10 +1793,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			textCountLabel.setText(""+ listModel.size() +"/"+ fullListModel.size());
 			if (imp.getWindow()!=null) {
 				imp.getWindow().countLabel.setText(""+ listModel.size() +"/"+ fullListModel.size() +"");
-			imp.getWindow().countLabel.repaint();			
-			//imp.getWindow().tagsButton.setText(""+fullListModel.size());
+				imp.getWindow().countLabel.repaint();			
+				//imp.getWindow().tagsButton.setText(""+fullListModel.size());
 
-			imp.getWindow().tagsButton.repaint();
+				imp.getWindow().tagsButton.repaint();
 			}
 			return;			
 		}
@@ -1808,10 +1808,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			textCountLabel.setText(""+ listModel.size() +"/"+ fullListModel.size());
 			if (imp.getWindow()!=null) {
 				imp.getWindow().countLabel.setText(""+ listModel.size() +"/"+ fullListModel.size() +"");
-			imp.getWindow().countLabel.repaint();			
-			//imp.getWindow().tagsButton.setText(""+fullListModel.size());
+				imp.getWindow().countLabel.repaint();			
+				//imp.getWindow().tagsButton.setText(""+fullListModel.size());
 
-			imp.getWindow().tagsButton.repaint();
+				imp.getWindow().tagsButton.repaint();
 			}
 			return;			
 		}
@@ -2113,15 +2113,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					if (roi!=null) { 
 						if (cl != null) {
 							Color clColor = cl.getBrainbowColors()
-												.get(roi.getName().toLowerCase().split("_")[0].split("=")[0].replace("\"", "").trim());
+									.get(roi.getName().toLowerCase().split("_")[0].split("=")[0].replace("\"", "").trim());
 							if (clColor !=null) {
 								String hexRed = Integer.toHexString(clColor.getRed());
 								String hexGreen = Integer.toHexString(clColor.getGreen());
 								String hexBlue = Integer.toHexString(clColor.getBlue());
 								roi.setFillColor(Colors.decode("#ff"+(hexRed.length()==1?"0":"")+hexRed
-																	+(hexGreen.length()==1?"0":"")+hexGreen
-																	+(hexBlue.length()==1?"0":"")+hexBlue
-																, Color.white));
+										+(hexGreen.length()==1?"0":"")+hexGreen
+										+(hexBlue.length()==1?"0":"")+hexBlue
+										, Color.white));
 							}
 						}
 						roi.setImage(imp);
@@ -2187,11 +2187,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				entry = in.getNextEntry(); 
 			} 
 			in.close(); 
-//			//this.imp.setTitle(impTitle);
-//			if(imp.getCanvas()!=null) {
-//				if (imp.getCanvas().messageRois.containsKey("Loading Tags"))
-//					imp.getCanvas().messageRois.remove("Loading Tags");
-//			}
+			//			//this.imp.setTitle(impTitle);
+			//			if(imp.getCanvas()!=null) {
+			//				if (imp.getCanvas().messageRois.containsKey("Loading Tags"))
+			//					imp.getCanvas().messageRois.remove("Loading Tags");
+			//			}
 		} catch (IOException e) {error(e.toString());} 
 		if (in == null)
 			return;
@@ -2287,7 +2287,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			rootNameRois = roisByRootName.get(rootName);
 		}
 		rootNameRois.add(roi);
-		
+
 		roi.setName(newName);
 		recentName = newName;
 		listModel.setElementAt(newName, indexes[0]);
@@ -2669,14 +2669,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				String hexGreen = Integer.toHexString(fillColor.getGreen());
 				String hexBlue = Integer.toHexString(fillColor.getBlue());
 				String fillRGBstring = "#"+(hexAlpha.length()==1?"0":"")+hexAlpha
-												+(hexRed.length()==1?"0":"")+hexRed
-												+(hexGreen.length()==1?"0":"")+hexGreen
-												+(hexBlue.length()==1?"0":"")+hexBlue; 
+						+(hexRed.length()==1?"0":"")+hexRed
+						+(hexGreen.length()==1?"0":"")+hexGreen
+						+(hexBlue.length()==1?"0":"")+hexBlue; 
 				int fillRGB = fillColor.getRGB();
 				int currentRGB = currentBBColor!=null?currentBBColor.getRGB():0;
 				if (fillRGB == currentRGB)
 					return;
-				
+
 				while (cl.getBrainbowColors().contains(new Color(fillColor.getRGB())) && fillColor.getRGB() != currentRGB) {
 					if (fillColor.getBlue()<255) {
 						hexBlue = Integer.toHexString(fillColor.getBlue()+1);
@@ -3030,7 +3030,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	void options() {
 		Color c = ImageCanvas.getShowAllColor();
 		GenericDialog gd = new GenericDialog("Options");
-//		gd.addPanel(makeButtonPanel(gd), GridBagConstraints.CENTER, new Insets(5, 0, 0, 0));
+		//		gd.addPanel(makeButtonPanel(gd), GridBagConstraints.CENTER, new Insets(5, 0, 0, 0));
 		gd.addCheckbox("Associate \"Show All\" ROIs with slices", Prefs.showAllSliceOnly);
 		gd.addCheckbox("Restore ROIs centered", restoreCentered);
 		gd.addCheckbox("Use ROI names as labels", Prefs.useNamesAsLabels);
@@ -3742,8 +3742,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	public void mouseReleased (MouseEvent e) {}
 	public void mouseClicked (MouseEvent e) {}
 	public void mouseEntered (MouseEvent e) {
-//		IJ.runMacro("print(\"\\\\Clear\")");
-//		IJ.runMacro("print(\"\\\\Update:Tag Manager:\\\nLeft-Clicking a list item highlights the Tag tag in the movie window.\\\nButtons and other widgets modify the content of the list \\\nand the display of tags in the movie window.\\\n \")");
+		//		IJ.runMacro("print(\"\\\\Clear\")");
+		//		IJ.runMacro("print(\"\\\\Update:Tag Manager:\\\nLeft-Clicking a list item highlights the Tag tag in the movie window.\\\nButtons and other widgets modify the content of the list \\\nand the display of tags in the movie window.\\\n \")");
 
 	}
 	public void mouseExited (MouseEvent e) {}
@@ -3833,8 +3833,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			if (roiSetIn[i].getTPosition() == t || (roiSetIn[i].getTPosition() == 0 && getSpanners)) {
 				if ( roiSetIn[i].getZPosition() == z || (roiSetIn[i].getZPosition() == 0 && getSpanners)/*  && roiSetIn[i].getTPosition() > t - tSustain &&
 					roiSetIn[i].getTPosition() < t + tSustain */) {
-				matchedIndexes.add(i);
-				//				IJ.showMessage("");
+					matchedIndexes.add(i);
+					//				IJ.showMessage("");
 				}
 			}
 		}
@@ -4118,12 +4118,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					if (cellNames != null ) {
 						String[] cellNamesArray = cellNames.toArray(new String[cellNames.size()]);
 						for (int q=cellNamesArray.length-1; q>=0; q--){
-//							IJ.log(""+cellNames.get(q) + " "+ q +"?");
+							//							IJ.log(""+cellNames.get(q) + " "+ q +"?");
 							if (!selectedNamesStrings.contains(cellNames.get(q))) {
-//								IJ.log(""+cellNames.get(q) + " "+ q +"XXX");
+								//								IJ.log(""+cellNames.get(q) + " "+ q +"XXX");
 								cellNames.remove(q);
 							} else {
-//								IJ.log(""+cellNames.get(q) + " "+ q +"OK");
+								//								IJ.log(""+cellNames.get(q) + " "+ q +"OK");
 							}
 						}
 					}				
@@ -4177,14 +4177,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							searchText = searchText + " " + chunk;
 					if ( !cellNames.contains(searchText.trim())) {
 						cellNames.add(searchText.trim());
-//						IJ.log(""+cellNames.get(cellNames.size()-1) + " "+ cellNames.size());
+						//						IJ.log(""+cellNames.get(cellNames.size()-1) + " "+ cellNames.size());
 					}
 				}
 			}
 			if (cellNames == null) {
 				for (int r=0; r<fullCellNames.size(); r++){
 					cellNames.add(""+fullCellNames.get(r));			
-//					IJ.log(""+cellNames.get(cellNames.size()-1) + " "+ cellNames.size());
+					//					IJ.log(""+cellNames.get(cellNames.size()-1) + " "+ cellNames.size());
 
 				}
 			}
@@ -4253,7 +4253,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					shownRoisHash.put(cellNumbers[cellNumbers.length-2]+"_"+cellNumbers[cellNumbers.length-1].replaceAll("[CZT]", ""), new ArrayList<String>());
 				if (!shownRoisHash.get(cellNumbers[cellNumbers.length-2]+"_"+cellNumbers[cellNumbers.length-1].replaceAll("[CZT]", "")).contains(shownRois[j].getName())) { 
 					shownRoisHash.get(cellNumbers[cellNumbers.length-2]+"_"+cellNumbers[cellNumbers.length-1].replaceAll("[CZT]", "")).add(shownRois[j].getName());
-//					IJ.log(cellNumbers[cellNumbers.length-2]+"_"+cellNumbers[cellNumbers.length-1].replaceAll("[CZT]", "") +" "+j+" "+shownRois[j].getName());
+					//					IJ.log(cellNumbers[cellNumbers.length-2]+"_"+cellNumbers[cellNumbers.length-1].replaceAll("[CZT]", "") +" "+j+" "+shownRois[j].getName());
 				}
 
 			}
@@ -4330,25 +4330,25 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							for (Roi thisRoi:this.getSliceSpecificRoiArray((int)(z/fillZfactor), t, false))
 								theseSlcSpecRoiNames.add(thisRoi.getName());
 						}
-//						IJ.log(""+z);
+						//						IJ.log(""+z);
 						for(int j=0;j<theseSlcSpecRoiNames.size();j++){
-//							IJ.log(theseSlcSpecRoiNames.get(j));
+							//							IJ.log(theseSlcSpecRoiNames.get(j));
 							if (theseSlcSpecRoiNames.get(j) != null 
 									&& ((Roi) rois.get(theseSlcSpecRoiNames.get(j).trim()))!=null
 									/*&& z%fillZfactor == 0 */
 									&& ((Roi) rois.get(theseSlcSpecRoiNames.get(j).trim())).getZPosition() == (int)(z/fillZfactor)
 									&& ((Roi) rois.get(theseSlcSpecRoiNames.get(j).trim())).getTPosition() == t) {
-//								IJ.log(theseSlcSpecRoiNames.get(j));
+								//								IJ.log(theseSlcSpecRoiNames.get(j));
 								String[] searchTextChunks = theseSlcSpecRoiNames.get(j).split("[\"|=]")[1].split(" ");
 								String searchText = "";
 								for (String chunk:searchTextChunks)
 									if (!(chunk.matches("-?\\d+") || chunk.matches("\\++")))
 										searchText = searchText + " " + chunk;
 								String cellTagName = searchText.trim();
-//								IJ.log(cellTagName);
+								//								IJ.log(cellTagName);
 								if ((fatSynapses && theseSlcSpecRoiNames.get(j).startsWith("\"syn")) || isEmbryonic ){
 									if (cellNames.contains(cellTagName) && brainbowColors.get(cellTagName.toLowerCase())!=null){
-//										IJ.log("cell name matches");
+										//										IJ.log("cell name matches");
 										int maxRadius = synapseScale/2;
 										for (int step= -maxRadius;step< maxRadius;step++) {
 											if (z+step>0 && z+step<= outNSlices ) {
@@ -4356,7 +4356,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 												drawIP.setColor(brainbow?new Color(brainbowColors.get(cellTagName.toLowerCase()).getRGB()):eightBit?Color.WHITE: mowColors.get(cellTagName));
 												double radius = Math.pow( Math.pow((maxRadius),2) - Math.pow(step,2), 0.5 );
 												Roi thisRoi = ((Roi) rois.get(theseSlcSpecRoiNames.get(j).trim()));
-//												IJ.log(""+theseSlcSpecRoiNames.get(j).trim()+" "+radius);
+												//												IJ.log(""+theseSlcSpecRoiNames.get(j).trim()+" "+radius);
 												if (thisRoi != null)
 													drawIP.fill(new OvalRoi((int)thisRoi.getBounds().getCenterX()-radius,
 															(int)thisRoi.getBounds().getCenterY()-radius, 
@@ -4387,7 +4387,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 											drawIP.fill(thisRoi);
 									}
 								} else {
-//									IJ.log(""+cellTagName + brainbowColors.get(cellTagName.toLowerCase()));
+									//									IJ.log(""+cellTagName + brainbowColors.get(cellTagName.toLowerCase()));
 
 								}
 
@@ -4398,7 +4398,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						ImageProcessor bip = bigStack.getProcessor(s);
 						bip.setInterpolationMethod(ImageProcessor.BICUBIC);
 						sketchStack.addSlice(bip.resize(modelWidth, imp.getHeight()/(imp.getWidth()/modelWidth), false));
-//						IJ.log("RESIZE "+sketchStack.getSize());
+						//						IJ.log("RESIZE "+sketchStack.getSize());
 					}
 					miniStackSize = sketchStack.getSize();
 					ImagePlus bigImp = new ImagePlus("bigStack", bigStack);
@@ -5321,10 +5321,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						textCountLabel.setText(""+ listModel.size() +"/"+ fullListModel.size());
 						if (imp.getWindow()!=null) {
 							imp.getWindow().countLabel.setText(""+ listModel.size() +"/"+ fullListModel.size() +"");
-			imp.getWindow().countLabel.repaint();			
-			//imp.getWindow().tagsButton.setText(""+fullListModel.size());
+							imp.getWindow().countLabel.repaint();			
+							//imp.getWindow().tagsButton.setText(""+fullListModel.size());
 
-			imp.getWindow().tagsButton.repaint();
+							imp.getWindow().tagsButton.repaint();
 						}
 						ra = this.getFullRoisAsArray();
 					}
@@ -5332,18 +5332,18 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 		}
 	}
-	
+
 	public void importStarryNiteNuclei(String zipPath) {
 		File zipFile = new File(zipPath);
 		if (!zipFile.canRead()) {;
-		
-			zipPath = IJ.getFilePath("Select the zip file with <nuclei> files");
-			zipFile = new File(zipPath);
+
+		zipPath = IJ.getFilePath("Select the zip file with <nuclei> files");
+		zipFile = new File(zipPath);
 		}
 		String str = openZipNuclei(zipPath);
 		String[] lines = str.split("\n");
-//		imp.hide();
-//		this.setVisible(false);
+		//		imp.hide();
+		//		this.setVisible(false);
 		int frame =1;
 		Hashtable<String,String[]> prevHash = new Hashtable<String,String[]>();
 		Hashtable<String,String[]> nextHash = new Hashtable<String,String[]>();
@@ -5362,10 +5362,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				prevHash = nextHash;
 				nextHash = new Hashtable<String,String[]>();
 			} else {
-//				imp.setPositionWithoutUpdate(imp.getChannel(), imp.getSlice(), frame);
+				//				imp.setPositionWithoutUpdate(imp.getChannel(), imp.getSlice(), frame);
 				if (cellData[9] !=" ") {
 					nextHash.put(cellData[0], new String[] {cellData[2],cellData[3],cellData[4],cellData[9]});
-//					imp.setPositionWithoutUpdate(imp.getChannel(), (int)Double.parseDouble(cellData[7].trim()), frame);
+					//					imp.setPositionWithoutUpdate(imp.getChannel(), (int)Double.parseDouble(cellData[7].trim()), frame);
 
 					Roi newOval = new OvalRoi(Integer.parseInt(cellData[5].trim())-Integer.parseInt(cellData[8].trim())/2, Integer.parseInt(cellData[6].trim())-Integer.parseInt(cellData[8].trim())/2, Integer.parseInt(cellData[8].trim()), Integer.parseInt(cellData[8].trim()));
 					newOval.setImage(imp);
@@ -5402,7 +5402,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					}  else {
 						rename(cellData[9], new int[] {this.getCount()-1}, false);
 					}
-					
+
 					IJ.showStatus("importing nucleus "+getCount());
 				}
 			}
@@ -5414,8 +5414,45 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			saveMultiple(getAllShownIndexes(),zipFile.getParent()+File.separator+"NucleiRoiSet.zip");
 		}
 
+		if (!(zipPath.contains("Unskipped.zip"))){
+			respaceStarryNiteNuclei(zipPath, 6);
+		}
+
 	}
-	
+
+	public void respaceStarryNiteNuclei(String zipPath, int skipFactor) {
+		File zipFile = new File(zipPath);
+		if (!zipFile.canRead()) {
+
+			zipPath = IJ.getFilePath("Select the zip file with <nuclei> files");
+			zipFile = new File(zipPath);
+		}
+		String str = openZipNuclei(zipPath);
+		String outStr = "";
+		String[] lines = str.split("\n");
+
+		for (int i = 0; i < lines.length; i++) {
+			String nextLine = lines[i];
+			if (nextLine.length()==0) {
+//				continue;
+			}
+			if (nextLine.startsWith("parameters/")) {
+//				continue;
+			}
+			String[] cellData = nextLine.split(", *");
+			if (cellData.length ==1){
+//				continue;
+			} else {
+				if (cellData[9] !=" ") {
+					int slicePos = (int)Double.parseDouble(cellData[7].trim());
+					lines[i] = nextLine.replace(cellData[7].trim(), ""+(1+((slicePos-1)*skipFactor)));
+				}
+			}
+			outStr = outStr +"\n"+ lines[i];
+		}
+		saveZipNuclei(outStr, zipPath.replace(".zip", "Unskipped.zip"));
+	}
+
 	String openZipNuclei(String path) { 
 
 		ZipInputStream in = null; 
@@ -5424,7 +5461,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		try { 
 			in = new ZipInputStream(new FileInputStream(path)); 
-			
+
 			byte[] buf = new byte[1024*1024]; 
 			int len; 
 			ZipEntry entry = in.getNextEntry(); 
@@ -5451,6 +5488,35 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		return str;
 	} 
 
+
+
+
+	boolean saveZipNuclei(String nucString, String path) { 
+		String[] nucLines = nucString.split("\n");
+		try {
+			ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(new File(path)));
+			String nucleiFrame = "";
+			String nucleiLabel = "";			
+			for (int i=0; i<nucLines.length; i++) {
+				if (nucLines[i].contains("nuclei/t")) {
+					zos.putNextEntry(new ZipEntry(nucleiLabel));
+					byte[] data = nucleiFrame.getBytes();
+					zos.write(data, 0, data.length);					
+					zos.closeEntry();
+
+					nucleiLabel = nucLines[i];
+					nucleiFrame = "";
+				} else {
+					nucleiFrame = nucleiFrame + nucLines[i] + "\n" ;
+				}
+			}
+			zos.close();
+		}
+		catch (IOException e) {
+			error(""+e);
+			return false;
+		}
+		return true;
+	} 
+
 }
-
-
