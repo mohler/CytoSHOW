@@ -43,7 +43,7 @@ public class StarryNiteFeeder implements PlugIn {
 		String sourceDir = "";
 		String paramsPath = "";
 		String outputDir = "";
-		int skipFactor = 1;
+		int skipFactor = 6;
 		if (argChunks.length == 4) {
 			sourceDir = argChunks[0];
 			paramsPath = argChunks[1];
@@ -129,7 +129,11 @@ public class StarryNiteFeeder implements PlugIn {
 				if (!(new File(outDir+subdir+"/aaa"+f+".tif").canRead())) {
 					
 					ImageStack stack1 = new ImageStack((int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
+					ImageStack stack1skipped = new ImageStack((int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
+										
 					ImageStack stack2 = new ImageStack((int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
+					ImageStack stack2skipped = new ImageStack((int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
+
 					imp.getWindow().setEnabled(false);
 
 
@@ -163,6 +167,9 @@ public class StarryNiteFeeder implements PlugIn {
 						ip1 = ip1.crop();
 
 						stack1.addSlice(ip1);
+						if (i%skipFactor == 1) {
+							stack1skipped.addSlice(ip1.duplicate());
+						}
 
 						if (wavelengths >= 2) {
 							imp.setPositionWithoutUpdate(wavelengths, i, f);
@@ -193,6 +200,9 @@ public class StarryNiteFeeder implements PlugIn {
 							ip2 = ip2.crop();
 
 							stack2.addSlice(ip2);
+							if (i%skipFactor == 1) {
+								stack2skipped.addSlice(ip2.duplicate());
+							}
 						}
 					}
 
@@ -200,6 +210,8 @@ public class StarryNiteFeeder implements PlugIn {
 					imp.getWindow().setEnabled(true);
 
 					ImagePlus frameRedImp = new ImagePlus("Ch2hisSubCrop",stack2);
+					ImagePlus frameRedImpSkipped = new ImagePlus("Ch2hisSubCrop",stack2skipped);
+					
 					stackWidth = frameRedImp.getWidth();
 					stackHeight = frameRedImp.getHeight();
 					if (!paramsWritten) {
@@ -214,17 +226,22 @@ public class StarryNiteFeeder implements PlugIn {
 					}
 					
 					ImagePlus frameGreenImp = new ImagePlus("Ch1hisSubCrop",stack1);
+					ImagePlus frameGreenImpSkipped = new ImagePlus("Ch1hisSubCrop",stack1skipped);
 
 					// Red channel:
 
 					new File(outDir+subdir).mkdirs();
+					new File(outDir+subdir+"Skipped").mkdirs();
+					
 
 					// save a stack
 					IJ.save(frameRedImp, outDir+subdir+"/aaa"+f+".tif");
+					IJ.save(frameRedImpSkipped, outDir+subdir+"Skipped"+"/aaa"+f+".tif");
 
 
 					// Green channel:
 					new File(outDir+subdir+"/image/tifr16/").mkdirs();
+					new File(outDir+subdir+"Skipped"+"/image/tifr16/").mkdirs();
 
 
 					String command16 = "format=TIFF start=1 name=aaa-t";
@@ -232,21 +249,28 @@ public class StarryNiteFeeder implements PlugIn {
 					command16 += "save=";
 
 					String command162 = "["+outDir+subdir+"/image/tifr16]";
+					String command162skipped = "["+outDir+subdir+"Skipped"+"/image/tifr16]";
 					//print(command16+command162);
 					IJ.run(frameGreenImp, "StarryNite Image Sequence... ", command16+command162);
-					
+					IJ.run(frameGreenImpSkipped, "StarryNite Image Sequence... ", command16+command162skipped);
+
 					if (greenMax==65535) {
 						ImageStatistics stkStats = new StackStatistics(frameGreenImp);
 						frameGreenImp.getProcessor().setMinAndMax(0,stkStats.max);
+						frameGreenImpSkipped.getProcessor().setMinAndMax(0,stkStats.max);
 					} else if (greenMax>0) {
 						frameGreenImp.getProcessor().setMinAndMax(0, greenMax);
+						frameGreenImpSkipped.getProcessor().setMinAndMax(0, greenMax);
 					}else {
 						frameGreenImp.getProcessor().setMinAndMax(0, 5000);
+						frameGreenImpSkipped.getProcessor().setMinAndMax(0, 5000);
 					}
 					
 					IJ.run(frameGreenImp,"8-bit","");
-					
+					IJ.run(frameGreenImpSkipped,"8-bit","");
+
 					new File(outDir+subdir+"/image/tifr/").mkdirs();
+					new File(outDir+subdir+"Skipped"+"/image/tifr/").mkdirs();
 
 
 					String command1 = "format=TIFF start=1 name=aaa-t";
@@ -254,12 +278,16 @@ public class StarryNiteFeeder implements PlugIn {
 					command1 += "save=";
 
 					String command2 = "["+outDir+subdir+"/image/tifr]";
+					String command2skipped = "["+outDir+subdir+"Skipped"+"/image/tifr]";
 					//print(command1+command2);
 					IJ.run(frameGreenImp, "StarryNite Image Sequence... ", command1+command2);
+					IJ.run(frameGreenImpSkipped, "StarryNite Image Sequence... ", command1+command2skipped);
 
 
 					frameRedImp.flush();
+					frameRedImpSkipped.flush();
 					frameGreenImp.flush();
+					frameGreenImpSkipped.flush();
 
 				}
 			}
@@ -276,26 +304,26 @@ public class StarryNiteFeeder implements PlugIn {
 
 			Thread linThread = new Thread(new Runnable() {
 				public void run() {
-					if(new File((outDir+subdir).replace("\\", "\\\\")+"\\\\aaa__edited.xml").canRead()) {
-						new File((outDir+subdir).replace("\\", "\\\\")+"\\\\aaa__edited.xml").renameTo(
-								new File((outDir+subdir).replace("\\", "\\\\")+"\\\\aaa_"+
-										(""+new File((outDir+subdir).replace("\\", "\\\\")+"\\\\aaa__edited.xml").lastModified()).substring(0, 10)+"_edited.xml"));
+					if(new File((outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa__edited.xml").canRead()) {
+						new File((outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa__edited.xml").renameTo(
+								new File((outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa_"+
+										(""+new File((outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa__edited.xml").lastModified()).substring(0, 10)+"_edited.xml"));
 					}
 					
 					try {
-						IJ.log("matlab -nosplash -nodesktop -r ver;addpath('C:\\SN_Feeder_distribution_code\\'); detect_track_driver_allmatlab('"+impParameterPath+"','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\','aaa','','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\',0,true)");
+						IJ.log("matlab -nosplash -nodesktop -r ver;addpath('C:\\SN_Feeder_distribution_code\\'); detect_track_driver_allmatlab('"+impParameterPath+"','"+(outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\','aaa','','"+(outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\',0,true)");
 
-						Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", "matlab", "-nosplash", "-nodesktop", "-r", "ver;addpath('C:\\SN_Feeder_distribution_code\\'); detect_track_driver_allmatlab('"+impParameterPath+"','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\','aaa','','"+(outDir+subdir).replace("\\", "\\\\")+"\\\\',0,true)"});
+						Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", "matlab", "-nosplash", "-nodesktop", "-r", "ver;addpath('C:\\SN_Feeder_distribution_code\\'); detect_track_driver_allmatlab('"+impParameterPath+"','"+(outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\','aaa','','"+(outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\',0,true)"});
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					while (!(new File((outDir+subdir).replace("\\", "\\\\")+"\\\\aaa__edited.xml")).canRead()) {
+					while (!(new File((outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa__edited.xml")).canRead()) {
 						IJ.wait(1000);
 					}
 					Process linMeasure = null;
 					try {
-						ProcessBuilder linMeasurePB = new ProcessBuilder(new String[]{"cmd", "/c", "start", "java", "-Xmx500m", "-cp", "acebatch2.jar", "Measure1", (outDir+subdir).replace("\\", "\\\\")+"\\\\aaa__edited.xml"});
+						ProcessBuilder linMeasurePB = new ProcessBuilder(new String[]{"cmd", "/c", "start", "java", "-Xmx500m", "-cp", "acebatch2.jar", "Measure1", (outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa__edited.xml"});
 						linMeasurePB.directory(new File("C:\\SN_Feeder_distribution_code\\"));
 						linMeasure = linMeasurePB.start();
 					} catch (IOException e) {
@@ -314,7 +342,7 @@ public class StarryNiteFeeder implements PlugIn {
 					}
 					Process linGreenExtract = null;
 					try {
-						ProcessBuilder linGreenExtractPB = new ProcessBuilder(new String[]{"cmd", "/c", "start", "java", "-cp", "acebatch2.jar", "SixteenBitGreenExtractor1", (outDir+subdir).replace("\\", "\\\\")+"\\\\aaa__edited.xml", ""+endPoint});
+						ProcessBuilder linGreenExtractPB = new ProcessBuilder(new String[]{"cmd", "/c", "start", "java", "-cp", "acebatch2.jar", "SixteenBitGreenExtractor1", (outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa__edited.xml", ""+endPoint});
 						linGreenExtractPB.directory(new File("C:\\SN_Feeder_distribution_code\\"));
 						linGreenExtract = linGreenExtractPB.start();
 					} catch (IOException e) {
