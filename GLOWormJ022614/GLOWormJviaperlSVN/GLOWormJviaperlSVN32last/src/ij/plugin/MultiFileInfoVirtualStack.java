@@ -58,6 +58,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	private int pos;
 	private boolean newRealInfo;
 	private ArrayList<FileInfo[]> savedInfoCollectorArrayList;
+	private String infoLoadReport;
 
 	/* Default constructor. */
 	public MultiFileInfoVirtualStack() {}
@@ -118,34 +119,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		infoDir = dir;
 		
 		infoCollectorArrayList =new ArrayList<FileInfo[]>();
-
-		new Thread (new Runnable(){
-			public void run(){getSavedExtractedFileInfos(pos);}
-		}).start();
-	
-		if (infoCollectorArrayList.size()==0 || infoCollectorArrayList.get(0)[0].channelShifts == null){
-//			dXA= Integer.parseInt(Prefs.get("diSPIMmonitor.dXA", "0"));
-//			dXB= Integer.parseInt(Prefs.get("diSPIMmonitor.dXB", "0"));
-//			dYA= Integer.parseInt(Prefs.get("diSPIMmonitor.dYA", "0"));
-//			dYB= Integer.parseInt(Prefs.get("diSPIMmonitor.dYB", "0"));
-//			dZA= Integer.parseInt(Prefs.get("diSPIMmonitor.dZA", "0"));
-//			dZB= Integer.parseInt(Prefs.get("diSPIMmonitor.dZB", "0"));
-			dXA= 0;
-			dXB= 0;
-			dYA= 0;
-			dYB= 0;
-			dZA= 0;
-			dZB= 0;
-		} else {
-			dXA= infoCollectorArrayList.get(0)[0].channelShifts[0];
-			dYA= infoCollectorArrayList.get(0)[0].channelShifts[1];
-			dZA= infoCollectorArrayList.get(0)[0].channelShifts[2];
-			dXB= infoCollectorArrayList.get(0)[0].channelShifts[3];
-			dYB= infoCollectorArrayList.get(0)[0].channelShifts[4];
-			dZB= infoCollectorArrayList.get(0)[0].channelShifts[5];
-
-		}
-
+		infoLoadReport ="";
+		
 	
 		ArrayList<String> bigSubFileArrayList = new ArrayList<String>();
 		ArrayList<String> cumulativeSubFileArrayList = new ArrayList<String>();
@@ -241,6 +216,39 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 //			cumulativeTiffFileArray = StringSorter.sortNumericallyViaRegex(cumulativeTiffFileArray);
 //			IJ.log("CumSubFileArray.length="+cumulativeTiffFileArray.length);
 			
+			
+			new Thread (new Runnable(){
+				public void run(){getSavedExtractedFileInfos(pos);}
+			}).start();
+		
+			while (infoLoadReport=="" || (infoLoadReport=="success" && infoCollectorArrayList.size()==0)) {
+				IJ.wait(10);
+			}
+			
+			if (infoCollectorArrayList.size()==0 || infoCollectorArrayList.get(0)[0].channelShifts == null){
+//				dXA= Integer.parseInt(Prefs.get("diSPIMmonitor.dXA", "0"));
+//				dXB= Integer.parseInt(Prefs.get("diSPIMmonitor.dXB", "0"));
+//				dYA= Integer.parseInt(Prefs.get("diSPIMmonitor.dYA", "0"));
+//				dYB= Integer.parseInt(Prefs.get("diSPIMmonitor.dYB", "0"));
+//				dZA= Integer.parseInt(Prefs.get("diSPIMmonitor.dZA", "0"));
+//				dZB= Integer.parseInt(Prefs.get("diSPIMmonitor.dZB", "0"));
+				dXA= 0;
+				dXB= 0;
+				dYA= 0;
+				dYB= 0;
+				dZA= 0;
+				dZB= 0;
+			} else {
+				dXA= infoCollectorArrayList.get(0)[0].channelShifts[0];
+				dYA= infoCollectorArrayList.get(0)[0].channelShifts[1];
+				dZA= infoCollectorArrayList.get(0)[0].channelShifts[2];
+				dXB= infoCollectorArrayList.get(0)[0].channelShifts[3];
+				dYB= infoCollectorArrayList.get(0)[0].channelShifts[4];
+				dZB= infoCollectorArrayList.get(0)[0].channelShifts[5];
+
+			}
+
+
 			if (cumulativeTiffFileArray.length >0){ 
 				for (String cumulativeTiffFileArrayElement:cumulativeTiffFileArray)
 					bigSubFileArrayList.add(cumulativeTiffFileArrayElement);
@@ -406,6 +414,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				ois = new ObjectInputStream(new FileInputStream(infoDir+"touchedFileFIs"+pos+".inf"));
 				try {
 					savedInfoCollectorArrayList  = (ArrayList<FileInfo[]>) ois.readObject();
+					infoLoadReport = "success";
 				} catch (ClassNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -449,6 +458,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					fivStacks.get(stkNum).infoArray = infoCollectorArrayList.get(stkNum);
 				}
 			}
+		} else {
+			infoLoadReport = "failure";
 		}
 	}
 

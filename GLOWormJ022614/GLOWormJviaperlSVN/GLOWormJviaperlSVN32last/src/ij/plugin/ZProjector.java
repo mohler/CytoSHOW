@@ -1,6 +1,7 @@
 package ij.plugin; 
 import ij.*; 
 import ij.gui.GenericDialog; 
+import ij.io.FileInfo;
 import ij.process.*;
 import ij.plugin.filter.*; 
 import ij.util.Tools;
@@ -64,6 +65,7 @@ public class ZProjector implements PlugIn, TextListener {
 	private int lastT;
 	private int stepT;
 	private boolean saveAuto;
+	private static String zProjDir;
 
     public ZProjector() {
     }
@@ -157,6 +159,7 @@ public class ZProjector implements PlugIn, TextListener {
 		Prefs.set(METHOD_KEY, method);
 		if (isHyperstack) {
 			allTimeFrames = imp.getNFrames()>1&&imp.getNSlices()>1?showHSDialog(imp):showHSDialog(imp);
+			zProjDir = IJ.getDirectory(imp.getOriginalFileInfo().directory);
 			doHyperStackProjection(allTimeFrames);
 		} else if (imp.getType()==ImagePlus.COLOR_RGB)
 			doRGBProjection();
@@ -173,8 +176,12 @@ public class ZProjector implements PlugIn, TextListener {
 		imp.unlock();
 		
 		if (saveAuto) {
-			String saveDir = imp.getOriginalFileInfo().directory;
-			IJ.saveAsTiff(projImage, saveDir + File.separator + projImage.getTitle().replace(":","").replace(" ","_")+".tif");
+			String saveDir = zProjDir;
+			
+			String savePath = saveDir + File.separator + projImage.getTitle().replace(":","").replace(" ","_")+".tif";
+			IJ.saveAsTiff(projImage, savePath);
+			projImage.close();
+			IJ.run("TIFF Virtual Stack...", "open="+savePath);
 		}
 
 		IJ.register(ZProjector.class);
