@@ -6,6 +6,7 @@ import ij.plugin.filter.*;
 import ij.util.Tools;
 import ij.measure.Measurements;
 
+import java.io.File;
 import java.lang.*; 
 import java.awt.*; 
 import java.awt.event.*; 
@@ -62,6 +63,7 @@ public class ZProjector implements PlugIn, TextListener {
 	private int firstT;
 	private int lastT;
 	private int stepT;
+	private boolean saveAuto;
 
     public ZProjector() {
     }
@@ -169,6 +171,12 @@ public class ZProjector implements PlugIn, TextListener {
 		}
 
 		imp.unlock();
+		
+		if (saveAuto) {
+			String saveDir = imp.getOriginalFileInfo().directory;
+			IJ.saveAsTiff(projImage, saveDir + File.separator + projImage.getTitle().replace(":","").replace(" ","_")+".tif");
+		}
+
 		IJ.register(ZProjector.class);
 		return; 
     }
@@ -237,6 +245,7 @@ public class ZProjector implements PlugIn, TextListener {
 		gd.setInsets(12, 20, 8);
 		gd.addCheckbox("Z-Project hyperstack", true);
 		gd.addCheckbox("Crop via Tag Manager tags", false);
+		gd.addCheckbox("Auto Save Z-projected stack", true);
 		gd.addChoice("Projection type", METHODS, METHODS[method]); 
 		int nRangeFields = 0;
 		if (nChannels>1) {
@@ -266,7 +275,8 @@ public class ZProjector implements PlugIn, TextListener {
 			return false;
 		//String title = gd.getNextString();
 		boolean duplicateStack = gd.getNextBoolean();
-		boolean sliceSpecificROIs = gd.getNextBoolean();		
+		boolean sliceSpecificROIs = gd.getNextBoolean();
+		saveAuto = gd.getNextBoolean();
 		method = gd.getNextChoiceIndex();
 		if (nChannels>1) {
 			String[] range = Tools.split(gd.getNextString(), " -");

@@ -20,6 +20,7 @@ import ij.ImageStack;
 import ij.Prefs;
 import ij.VirtualStack;
 import ij.WindowManager;
+import ij.gui.Line;
 import ij.gui.Roi;
 import ij.gui.TextRoi;
 import ij.gui.WaitForUserDialog;
@@ -78,9 +79,11 @@ public class StarryNiteFeeder implements PlugIn {
 			ImagePlus imp = WindowManager.getImage(w);	
 			LUT[] impLUTs = null;
 			int greenMax = 0;
+			int redMax = 0;
 			if (imp.isComposite()) {
 				impLUTs = (((CompositeImage)imp).getLuts());
 				greenMax = (int) impLUTs[0].max;
+				redMax = (int) impLUTs[1].max;
 			}
 			while (imp.getRoi() == null) {
 				w++;
@@ -98,17 +101,17 @@ public class StarryNiteFeeder implements PlugIn {
 			IJ.save(imp, outDir+savetitle+".roi");
 			int[] xpoints = imp.getRoi().getPolygon().xpoints;
 			int[] ypoints = imp.getRoi().getPolygon().ypoints;
+			int npoints = xpoints.length;
 
 			double angle =0;
-			if (type > 0) {
-				angle = imp.getRoi().getFeretValues()[1];
+			if (type > Roi.OVAL) {
+//				angle = imp.getRoi().getFeretValues()[1];
+				angle = new Line(xpoints[0], ypoints[0], xpoints[npoints/2], ypoints[npoints/2]).getAngle();
 			} else {
 				angle = imp.getRoi().getBounds().getHeight()>imp.getRoi().getBounds().getWidth()?90:0;
 			}
 
-//			if (ypoints[0]>ypoints[1]){
-//				angle = 180+ angle;
-//			}
+			angle = 180+ angle;
 
 			int wasC = imp.getChannel();
 			int wasZ = imp.getSlice();
@@ -228,7 +231,7 @@ public class StarryNiteFeeder implements PlugIn {
 					ImagePlus frameGreenImp = new ImagePlus("Ch1hisSubCrop",stack1);
 					ImagePlus frameGreenImpSkipped = new ImagePlus("Ch1hisSubCrop",stack1skipped);
 
-					// Red channel:
+			// Red channel:
 
 					new File(outDir+subdir).mkdirs();
 					new File(outDir+subdir+"Skipped").mkdirs();
@@ -238,22 +241,53 @@ public class StarryNiteFeeder implements PlugIn {
 					IJ.save(frameRedImp, outDir+subdir+"/aaa"+f+".tif");
 					IJ.save(frameRedImpSkipped, outDir+subdir+"Skipped"+"/aaa"+f+".tif");
 
-					new File(outDir+subdir+"/image/tif/").mkdirs();
-					new File(outDir+subdir+"Skipped"+"/image/tif/").mkdirs();
+					new File(outDir+subdir+"/image/tif16/").mkdirs();
+					new File(outDir+subdir+"Skipped"+"/image/tif16/").mkdirs();
 
 
 					String command16b = "format=TIFF start=1 name=aaa-t";
 					command16b += ""+IJ.pad(f,3)+" digits=0 ";
 					command16b += "save=";
 
-					String command16a = "["+outDir+subdir+"/image/tif]";
-					String command16askipped = "["+outDir+subdir+"Skipped"+"/image/tif]";
+					String command16a = "["+outDir+subdir+"/image/tif16]";
+					String command16askipped = "["+outDir+subdir+"Skipped"+"/image/tif16]";
 					//print(command16+command162);
 					IJ.run(frameRedImp, "StarryNite Image Sequence... ", command16b+command16a);
 					IJ.run(frameRedImpSkipped, "StarryNite Image Sequence... ", command16b+command16askipped);
 
 					
-					// Green channel:
+					if (redMax==65535) {
+						ImageStatistics stkStats = new StackStatistics(frameRedImp);
+						frameRedImp.getProcessor().setMinAndMax(0,stkStats.max);
+						frameRedImpSkipped.getProcessor().setMinAndMax(0,stkStats.max);
+					} else if (redMax>0) {
+						frameRedImp.getProcessor().setMinAndMax(0, redMax);
+						frameRedImpSkipped.getProcessor().setMinAndMax(0, redMax);
+					}else {
+						frameRedImp.getProcessor().setMinAndMax(0, 5000);
+						frameRedImpSkipped.getProcessor().setMinAndMax(0, 5000);
+					}
+					
+					IJ.run(frameRedImp,"8-bit","");
+					IJ.run(frameRedImpSkipped,"8-bit","");
+
+					new File(outDir+subdir+"/image/tif/").mkdirs();
+					new File(outDir+subdir+"Skipped"+"/image/tif/").mkdirs();
+
+
+					String command1 = "format=TIFF start=1 name=aaa-t";
+					command1 += ""+IJ.pad(f,3)+" digits=0 ";
+					command1 += "save=";
+
+					String command2 = "["+outDir+subdir+"/image/tif]";
+					String command2skipped = "["+outDir+subdir+"Skipped"+"/image/tif]";
+					//print(command1+command2);
+					IJ.run(frameRedImp, "StarryNite Image Sequence... ", command1+command2);
+					IJ.run(frameRedImpSkipped, "StarryNite Image Sequence... ", command1+command2skipped);
+
+					
+					
+			// Green channel:
 					new File(outDir+subdir+"/image/tifr16/").mkdirs();
 					new File(outDir+subdir+"Skipped"+"/image/tifr16/").mkdirs();
 
@@ -287,12 +321,12 @@ public class StarryNiteFeeder implements PlugIn {
 					new File(outDir+subdir+"Skipped"+"/image/tifr/").mkdirs();
 
 
-					String command1 = "format=TIFF start=1 name=aaa-t";
+					 command1 = "format=TIFF start=1 name=aaa-t";
 					command1 += ""+IJ.pad(f,3)+" digits=0 ";
 					command1 += "save=";
 
-					String command2 = "["+outDir+subdir+"/image/tifr]";
-					String command2skipped = "["+outDir+subdir+"Skipped"+"/image/tifr]";
+					 command2 = "["+outDir+subdir+"/image/tifr]";
+					 command2skipped = "["+outDir+subdir+"Skipped"+"/image/tifr]";
 					//print(command1+command2);
 					IJ.run(frameGreenImp, "StarryNite Image Sequence... ", command1+command2);
 					IJ.run(frameGreenImpSkipped, "StarryNite Image Sequence... ", command1+command2skipped);
