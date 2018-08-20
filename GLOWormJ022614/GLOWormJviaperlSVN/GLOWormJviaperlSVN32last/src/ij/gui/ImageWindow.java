@@ -73,7 +73,7 @@ import org.vcell.gloworm.SliceStereoToggle;
 import com.sun.xml.internal.ws.util.StringUtils;
 
 /** A frame for displaying images. */
-public class ImageWindow extends JFrame implements FocusListener, WindowListener, WindowStateListener, MouseWheelListener {
+public class ImageWindow extends Frame implements FocusListener, WindowListener, WindowStateListener, MouseWheelListener {
 
 	public static final int MIN_WIDTH = 128;
 	public static final int MIN_HEIGHT = 32;

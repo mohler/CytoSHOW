@@ -159,7 +159,7 @@ public class ZProjector implements PlugIn, TextListener {
 		Prefs.set(METHOD_KEY, method);
 		if (isHyperstack) {
 			allTimeFrames = imp.getNFrames()>1&&imp.getNSlices()>1?showHSDialog(imp):showHSDialog(imp);
-			zProjDir = IJ.getDirectory(imp.getOriginalFileInfo().directory);
+			zProjDir = IJ.getDirectory("Choose a Folder for Saving Output.");
 			doHyperStackProjection(allTimeFrames);
 		} else if (imp.getType()==ImagePlus.COLOR_RGB)
 			doRGBProjection();
@@ -170,7 +170,9 @@ public class ZProjector implements PlugIn, TextListener {
 			long tstop = System.currentTimeMillis();
 			projImage.setCalibration(imp.getCalibration());
 			if (simpleComposite) IJ.run(projImage, "Grays", "");
-			projImage.show("ZProjector: " +IJ.d2s((tstop-tstart)/1000.0,2)+" seconds");
+			if (!saveAuto) {
+				projImage.show("ZProjector: " +IJ.d2s((tstop-tstart)/1000.0,2)+" seconds");
+			}
 		}
 
 		imp.unlock();
@@ -180,11 +182,14 @@ public class ZProjector implements PlugIn, TextListener {
 			
 			String savePath = saveDir + File.separator + projImage.getTitle().replace(":","").replace(" ","_")+".tif";
 			IJ.saveAsTiff(projImage, savePath);
-			projImage.close();
+			projImage.flush();
+			projImage=null;
+			
 			IJ.run("TIFF Virtual Stack...", "open="+savePath);
 		}
 
-		IJ.register(ZProjector.class);
+		imp = null;
+//		IJ.register(ZProjector.class);
 		return; 
     }
     
