@@ -60,6 +60,7 @@ import ij.VirtualStack;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.gui.ImageWindow;
+import ij.gui.Line;
 import ij.gui.Roi;
 import ij.gui.SelectKeyChannelDialog;
 import ij.gui.StackWindow;
@@ -246,8 +247,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 	Projector16bit[] prjXs = new Projector16bit[1];
 	Projector16bit[] prjYs = new Projector16bit[1];
 
-	Roi[] roiAs  = new Roi[1];
-	Roi[] roiBs  = new Roi[1];
+	Roi[] rectRoiAs  = new Roi[1];
+	Roi[] rectRoiBs  = new Roi[1];
 	int[] wasFrameA = new int[1];
 	int[] wasFrameB = new int[1];
 	int[] wasSliceA = new int[1];
@@ -352,6 +353,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 	private String dirConcat;
 	private String diSPIM_MM_channelOrder = "GR";
 	private int[] posIntArray;
+	private Roi[] origRoiAs;
+	private Roi[] origRoiBs;
 
 	public Process getRegDeconProcess() {
 		return regDeconProcess;
@@ -567,8 +570,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 					impAs = new ImagePlus[pDim];
 					impBs = new ImagePlus[pDim];
-					roiAs = new Roi[pDim];
-					roiBs = new Roi[pDim];
+					origRoiAs = new Roi[pDim];
+					origRoiBs = new Roi[pDim];
+					rectRoiAs = new Roi[pDim];
+					rectRoiBs = new Roi[pDim];
 					doProcessing= new boolean[pDim];
 					impDF1s  = new ImagePlus[pDim];
 					impDF2s  = new ImagePlus[pDim];
@@ -1033,8 +1038,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 				impAs = new ImagePlus[pDim];
 				impBs = new ImagePlus[pDim];
-				roiAs = new Roi[pDim];
-				roiBs = new Roi[pDim];
+				rectRoiAs = new Roi[pDim];
+				rectRoiBs = new Roi[pDim];
 				doProcessing= new boolean[pDim];
 				impDF1s  = new ImagePlus[pDim];
 				impDF2s  = new ImagePlus[pDim];
@@ -1409,13 +1414,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					continue;
 				} 
 
-				roiAs[pos] = impAs[pos].getRoi();
-				roiBs[pos] = impBs[pos].getRoi();
+				origRoiAs[pos] = impAs[pos].getRoi();
+				origRoiBs[pos] = impBs[pos].getRoi();
 				String[] savePathList = new File(savePath).list();
-				while (doProcessing[pos] && (roiAs[pos] == null || roiBs[pos] == null)) {
+				while (doProcessing[pos] && (rectRoiAs[pos] == null || rectRoiBs[pos] == null)) {
 
 					WindowManager.setTempCurrentImage(impAs[pos]);
-					if (roiAs[pos] == null) {
+					if (rectRoiAs[pos] == null) {
 						String matchString="blah";
 						for (String mightBe:savePathList) {
 							if (mightBe.matches(".*Pos" + pos + "A_(\\d+-\\d+)*crop.roi"))
@@ -1423,38 +1428,56 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						}
 						if (!((new File(savePath +  matchString)).canRead())) {
 							IJ.makeRectangle(0, 0, cropWidthDefault, cropHeightDefault);
-							roiAs[pos] = impAs[pos].getRoi();
+							origRoiAs[pos] = impAs[pos].getRoi();
 						} else {
 							IJ.open(savePath +  matchString);
-							roiAs[pos] = impAs[pos].getRoi();
+							origRoiAs[pos] = impAs[pos].getRoi();
 							if (matchString.matches(".*Pos" + pos + "A_(\\d+-\\d+)crop.roi")) {
 								String matchZSpan = matchString.replaceAll(".*Pos" + pos + "A_(\\d+-\\d+)crop.roi", "$1");
 								String[] matchEnds = matchZSpan.split("-");
 								zFirstA[pos] = Integer.parseInt(matchEnds[0]);
 								zLastA[pos] = Integer.parseInt(matchEnds[1]);
 							}
-							cropWidthA[pos] = roiAs[pos].getBounds().width;
-							cropHeightA[pos] = roiAs[pos].getBounds().height;
+							cropWidthA[pos] = origRoiAs[pos].getBounds().width;
+							cropHeightA[pos] = origRoiAs[pos].getBounds().height;
 						}
-					} else if (roiAs[pos].getType() != Roi.RECTANGLE
-							&& roiAs[pos].getFeretValues()[0] > cropHeightA[pos]
+					} else if (origRoiAs[pos].getType() != Roi.RECTANGLE
+							&& origRoiAs[pos].getFeretValues()[0] > cropHeightA[pos]
 									* impAs[pos].getCalibration().pixelHeight
-									|| (roiAs[pos].getType() == Roi.RECTANGLE && roiAs[pos].getBounds()
+									|| (origRoiAs[pos].getType() == Roi.RECTANGLE && origRoiAs[pos].getBounds()
 									.getHeight() > cropHeightA[pos])
-									|| (roiAs[pos].getType() == Roi.RECTANGLE && roiAs[pos].getBounds()
+									|| (origRoiAs[pos].getType() == Roi.RECTANGLE && origRoiAs[pos].getBounds()
 									.getWidth() > cropHeightA[pos])) {
-						impAs[pos].setRoi(roiAs[pos].getBounds().x
-								+ (roiAs[pos].getBounds().width - (int)cropWidthA[pos]) / 2,
-								roiAs[pos].getBounds().y
-								+ (roiAs[pos].getBounds().height - (int)cropHeightA[pos])
+						
+						int[] xApoints = origRoiAs[pos].getPolygon().xpoints;
+						int[] yApoints = origRoiAs[pos].getPolygon().ypoints;
+						int npoints = xApoints.length;
+
+						double angle =0;
+						if (origRoiAs[pos].getType() > Roi.OVAL) {
+//							angle = imp.getRoi().getFeretValues()[1];
+							angle = new Line(xApoints[0], yApoints[0], xApoints[npoints/2], yApoints[npoints/2]).getAngle();
+						} else {
+							angle = origRoiAs[pos].getBounds().getHeight() > origRoiAs[pos].getBounds().getWidth()?90:0;
+						}
+
+						angle = 180+ angle;
+
+						
+						impAs[pos].setRoi(rectRoiAs[pos].getBounds().x
+								+ (rectRoiAs[pos].getBounds().width - (int)cropWidthA[pos]) / 2,
+								rectRoiAs[pos].getBounds().y
+								+ (rectRoiAs[pos].getBounds().height - (int)cropHeightA[pos])
 								/ 2, (int)cropWidthA[pos], (int)cropHeightA[pos]);
 						impAs[pos].setRoi(
-								roiAs[pos].getBounds().x < 0 ? 0 : roiAs[pos].getBounds().x,
-										roiAs[pos].getBounds().y < 0 ? 0 : roiAs[pos].getBounds().y,
+								rectRoiAs[pos].getBounds().x < 0 ? 0 : rectRoiAs[pos].getBounds().x,
+										rectRoiAs[pos].getBounds().y < 0 ? 0 : rectRoiAs[pos].getBounds().y,
 												(int)cropWidthA[pos], (int)cropHeightA[pos]);
+						rectRoiAs[pos] = impAs[pos].getRoi();
 					}
+
 					WindowManager.setTempCurrentImage(impBs[pos]);
-					if (roiBs[pos] == null) {
+					if (rectRoiBs[pos] == null) {
 						String matchString="blah";
 						for (String mightBe:savePathList) {
 							if (mightBe.matches(".*Pos" + pos + "B_(\\d+-\\d+)*crop.roi"))
@@ -1462,36 +1485,54 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						}
 						if (!((new File(savePath +  matchString)).canRead())) {
 							IJ.makeRectangle(0, 0, cropWidthDefault, cropHeightDefault);
-							roiBs[pos] = impBs[pos].getRoi();
+							origRoiBs[pos] = impBs[pos].getRoi();
 						} else {
 							IJ.open(savePath +  matchString);
-							roiBs[pos] = impBs[pos].getRoi();
+							origRoiBs[pos] = impBs[pos].getRoi();
 							if (matchString.matches(".*Pos" + pos + "B_(\\d+-\\d+)crop.roi")) {
 								String matchZSpan = matchString.replaceAll(".*Pos" + pos + "B_(\\d+-\\d+)crop.roi", "$1");
 								String[] matchEnds = matchZSpan.split("-");
 								zFirstB[pos] = Integer.parseInt(matchEnds[0]);
 								zLastB[pos] = Integer.parseInt(matchEnds[1]);
 							}
+							cropWidthB[pos] = origRoiBs[pos].getBounds().width;
+							cropHeightB[pos] = origRoiBs[pos].getBounds().height;
 						}
-						cropWidthB[pos] = roiBs[pos].getBounds().width;
-						cropHeightB[pos] = roiBs[pos].getBounds().height;
-					} else if (roiBs[pos].getType() != Roi.RECTANGLE
-							&& roiBs[pos].getFeretValues()[0] > cropHeightB[pos]
+					} else if (origRoiBs[pos].getType() != Roi.RECTANGLE
+							&& origRoiBs[pos].getFeretValues()[0] > cropHeightB[pos]
 									* impBs[pos].getCalibration().pixelHeight
-									|| (roiBs[pos].getType() == Roi.RECTANGLE && roiBs[pos].getBounds()
-									.getWidth() > cropHeightB[pos])
-									|| (roiBs[pos].getType() == Roi.RECTANGLE && roiBs[pos].getBounds()
-									.getHeight() > cropHeightB[pos])) {
-						impBs[pos].setRoi(roiBs[pos].getBounds().x
-								+ (roiBs[pos].getBounds().width - (int)cropWidthB[pos]) / 2,
-								roiBs[pos].getBounds().y
-								+ (roiBs[pos].getBounds().height - (int)cropHeightB[pos])
+									|| (origRoiBs[pos].getType() == Roi.RECTANGLE && origRoiBs[pos].getBounds()
+									.getHeight() > cropHeightB[pos])
+									|| (origRoiBs[pos].getType() == Roi.RECTANGLE && origRoiBs[pos].getBounds()
+									.getWidth() > cropHeightB[pos])) {
+						
+						int[] xBpoints = origRoiBs[pos].getPolygon().xpoints;
+						int[] yBpoints = origRoiBs[pos].getPolygon().ypoints;
+						int npoints = xBpoints.length;
+
+						double angle =0;
+						if (origRoiBs[pos].getType() > Roi.OVAL) {
+//							angle = imp.getRoi().getFeretValues()[1];
+							angle = new Line(xBpoints[0], yBpoints[0], xBpoints[npoints/2], yBpoints[npoints/2]).getAngle();
+						} else {
+							angle = origRoiBs[pos].getBounds().getHeight() > origRoiBs[pos].getBounds().getWidth()?90:0;
+						}
+
+						angle = 180+ angle;
+
+						
+						impBs[pos].setRoi(rectRoiBs[pos].getBounds().x
+								+ (rectRoiBs[pos].getBounds().width - (int)cropWidthB[pos]) / 2,
+								rectRoiBs[pos].getBounds().y
+								+ (rectRoiBs[pos].getBounds().height - (int)cropHeightB[pos])
 								/ 2, (int)cropWidthB[pos], (int)cropHeightB[pos]);
 						impBs[pos].setRoi(
-								roiBs[pos].getBounds().x < 0 ? 0 : roiBs[pos].getBounds().x,
-										roiBs[pos].getBounds().y < 0 ? 0 : roiBs[pos].getBounds().y,
+								rectRoiBs[pos].getBounds().x < 0 ? 0 : rectRoiBs[pos].getBounds().x,
+										rectRoiBs[pos].getBounds().y < 0 ? 0 : rectRoiBs[pos].getBounds().y,
 												(int)cropWidthB[pos], (int)cropHeightB[pos]);
+						rectRoiBs[pos] = impBs[pos].getRoi();
 					}
+					
 					WindowManager.setTempCurrentImage(null);
 				}
 			}
@@ -1526,10 +1567,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					continue;
 				} 
 
-				if (doProcessing[pos] && !(roiAs[pos] == null || roiBs[pos] == null)) {
+				if (doProcessing[pos] && !(rectRoiAs[pos] == null || rectRoiBs[pos] == null)) {
 
-					roiAs[pos] = impAs[pos].getRoi();
-					roiBs[pos] = impBs[pos].getRoi();
+					rectRoiAs[pos] = impAs[pos].getRoi();
+					rectRoiBs[pos] = impBs[pos].getRoi();
 					wasFrameA[pos] = impAs[pos].getFrame();
 					wasFrameB[pos] = impBs[pos].getFrame();
 					wasSliceA[pos] = impAs[pos].getSlice();
@@ -1539,11 +1580,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					wasEdgesA[pos] = impAs[pos].getStack().isEdges();
 					wasEdgesB[pos] = impBs[pos].getStack().isEdges();
 
-					cropWidthA[pos] = roiAs[pos].getBounds().width;
-					cropHeightA[pos] = roiAs[pos].getBounds().height;
+					cropWidthA[pos] = rectRoiAs[pos].getBounds().width;
+					cropHeightA[pos] = rectRoiAs[pos].getBounds().height;
 
-					cropWidthB[pos] = roiBs[pos].getBounds().width;
-					cropHeightB[pos] = roiBs[pos].getBounds().height;
+					cropWidthB[pos] = rectRoiBs[pos].getBounds().width;
+					cropHeightB[pos] = rectRoiBs[pos].getBounds().height;
 
 
 					zFirstA[pos] = 1;
@@ -1558,7 +1599,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						zLastB[pos] = 0;
 
 						for (int zTest = 1; zTest<= impAs[pos].getNSlices(); zTest++) {
-							Roi impRoi = (Roi) roiAs[pos].clone();
+							Roi impRoi = (Roi) rectRoiAs[pos].clone();
 							Polygon pA = new Polygon(impRoi.getPolygon().xpoints,
 									impRoi.getPolygon().ypoints,
 									impRoi.getPolygon().npoints);
@@ -1583,7 +1624,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									ipHisMode = (double)h;
 								}
 							}
-							ipTest.setRoi((Roi) roiAs[pos]);
+							ipTest.setRoi((Roi) rectRoiAs[pos]);
 							ipTest = ipTest.crop();
 							double testmean = ipTest.getStatistics().mean;
 							if (testmean > ipHisMode*sliceTresholdVsModeA) {
@@ -1608,7 +1649,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										ipHisMode = (double)h;
 									}
 								}
-								ipTest.setRoi((Roi) roiAs[pos]);
+								ipTest.setRoi((Roi) rectRoiAs[pos]);
 								ipTest = ipTest.crop();
 								if (ipTest.getStatistics().mean > ipHisMode*sliceTresholdVsModeA) {
 									if (zFirstA[pos] == 0) {
@@ -1623,7 +1664,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						}
 
 						for (int zTest = 1; zTest<= impBs[pos].getNSlices(); zTest++) {
-							Roi impRoi = (Roi) roiBs[pos].clone();
+							Roi impRoi = (Roi) rectRoiBs[pos].clone();
 							Polygon pB = new Polygon(impRoi.getPolygon().xpoints,
 									impRoi.getPolygon().ypoints,
 									impRoi.getPolygon().npoints);
@@ -1648,7 +1689,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									ipHisMode = (double)h;
 								}
 							}
-							ipTest.setRoi((Roi) roiBs[pos]);
+							ipTest.setRoi((Roi) rectRoiBs[pos]);
 							ipTest = ipTest.crop();
 							if (ipTest.getStatistics().mean > ipHisMode*sliceTresholdVsModeB) {
 								if (zFirstB[pos] == 0) {
@@ -1672,7 +1713,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										ipHisMode = (double)h;
 									}
 								}
-								ipTest.setRoi((Roi) roiBs[pos]);
+								ipTest.setRoi((Roi) rectRoiBs[pos]);
 								ipTest = ipTest.crop();
 
 								if (ipTest.getStatistics().mean > ipHisMode*sliceTresholdVsModeB) {
@@ -1954,8 +1995,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					if (impBs[pos].hasNullStack())
 						continue;
 
-					roiAs[pos] = impAs[pos].getRoi();
-					roiBs[pos] = impBs[pos].getRoi();
+					rectRoiAs[pos] = impAs[pos].getRoi();
+					rectRoiBs[pos] = impBs[pos].getRoi();
 					wasFrameA[pos] = impAs[pos].getFrame();
 					wasFrameB[pos] = impBs[pos].getFrame();
 					wasSliceA[pos] = impAs[pos].getSlice();
@@ -3321,7 +3362,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						impAs[pos].getWindow().setEnabled(false);
 						for (int i = 1; i <= impAs[pos].getNSlices(); i++) {
 							impAs[pos].setPositionWithoutUpdate(1, i, f);
-							Roi impRoi = (Roi) roiAs[pos].clone();
+							Roi impRoi = (Roi) rectRoiAs[pos].clone();
 							Polygon pA = new Polygon(impRoi.getPolygon().xpoints,
 									impRoi.getPolygon().ypoints,
 									impRoi.getPolygon().npoints);
@@ -3400,7 +3441,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						impBs[pos].getWindow().setEnabled(false);
 						for (int i = 1; i <= impBs[pos].getNSlices(); i++) {
 							impBs[pos].setPositionWithoutUpdate(1, i, f);
-							Roi impRoi = (Roi) roiBs[pos].clone();
+							Roi impRoi = (Roi) rectRoiBs[pos].clone();
 							Polygon pB = new Polygon(impRoi.getPolygon().xpoints,
 									impRoi.getPolygon().ypoints,
 									impRoi.getPolygon().npoints);
@@ -3929,7 +3970,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						double maxBkgd2 = 0.0;
 						for (int i = zFirstA[pos]; i <= zLastA[pos]; i++) {
 							impAs[pos].setPositionWithoutUpdate(1, i, f);
-							impRoiA = (Roi) roiAs[pos].clone();
+							impRoiA = (Roi) rectRoiAs[pos].clone();
 							pA = new Polygon(impRoiA.getPolygon().xpoints,
 									impRoiA.getPolygon().ypoints,
 									impRoiA.getPolygon().npoints);
@@ -3957,8 +3998,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 //							if (maxBkgd1 < ipHisMode )
 //								maxBkgd1 = ipHisMode;
 							ipA1.subtract(ipHisMode * sliceTresholdVsModeA);
-							ipA1.setRoi((Roi) roiAs[pos]);
-							ipA1.fillOutside((Roi) roiAs[pos]);
+							ipA1.setRoi((Roi) rectRoiAs[pos]);
+							ipA1.fillOutside((Roi) rectRoiAs[pos]);
 							ipA1 = ipA1.crop();
 							ipA1r = ipA1.createProcessor((int)cropWidthA[pos]+2, (int)cropHeightA[pos]+2);
 							ipA1r.insert(ipA1, 1, 1);
@@ -3983,8 +4024,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 //								if (maxBkgd2 < ipHisMode )
 //									maxBkgd2 = ipHisMode;
 								ipA2.subtract(ipHisMode * sliceTresholdVsModeA);
-								ipA2.setRoi((Roi) roiAs[pos]);
-								ipA2.fillOutside((Roi) roiAs[pos]);
+								ipA2.setRoi((Roi) rectRoiAs[pos]);
+								ipA2.fillOutside((Roi) rectRoiAs[pos]);
 								ipA2 = ipA2.crop();
 								ipA2r = ipA2.createProcessor(
 										(int)cropWidthA[pos]+2, (int)cropHeightA[pos]+2);
@@ -4032,7 +4073,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 						for (int i = zFirstB[pos]; i <= zLastB[pos]; i++) {
 							impBs[pos].setPositionWithoutUpdate(1, i, f);
-							impRoiB = (Roi) roiBs[pos].clone();
+							impRoiB = (Roi) rectRoiBs[pos].clone();
 							pB = new Polygon(impRoiB.getPolygon().xpoints,
 									impRoiB.getPolygon().ypoints,
 									impRoiB.getPolygon().npoints);
@@ -4062,8 +4103,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 //									if (maxBkgd1 < ipHisMode )
 //										maxBkgd1 = ipHisMode;
 									ipB1.subtract(ipHisMode * sliceTresholdVsModeB);
-									ipB1.setRoi((Roi) roiBs[pos]);
-									ipB1.fillOutside((Roi) roiBs[pos]);
+									ipB1.setRoi((Roi) rectRoiBs[pos]);
+									ipB1.fillOutside((Roi) rectRoiBs[pos]);
 									ipB1 = ipB1.crop();
 
 									ipB1r = ipB1.createProcessor((int)cropWidthB[pos]+2,
@@ -4089,8 +4130,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 //										if (maxBkgd2 < ipHisMode )
 //											maxBkgd2 = ipHisMode;
 										ipB2.subtract(ipHisMode * sliceTresholdVsModeB);
-										ipB2.setRoi((Roi) roiBs[pos]);
-										ipB2.fillOutside((Roi) roiBs[pos]);
+										ipB2.setRoi((Roi) rectRoiBs[pos]);
+										ipB2.fillOutside((Roi) rectRoiBs[pos]);
 										ipB2 = ipB2.crop();
 										ipB2r = ipB2.createProcessor(
 												(int)cropWidthB[pos]+2, (int)cropHeightB[pos]+2);
