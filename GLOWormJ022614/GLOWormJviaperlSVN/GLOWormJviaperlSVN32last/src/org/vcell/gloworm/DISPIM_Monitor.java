@@ -1468,7 +1468,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							if (npoints == 4) {
 								double angle0 = new Line(xApoints[0], yApoints[0], xApoints[1], yApoints[1]).getAngle();
 								double angle2 = new Line(xApoints[2], yApoints[2], xApoints[3], yApoints[3]).getAngle();
-								if (Math.abs(angle0-angle2)>80 && Math.abs(angle0-angle2)<100) {
+								if (Math.abs(Math.abs(angle0)-Math.abs(angle2))>80 && Math.abs(Math.abs(angle0)-Math.abs(angle2))<100) {
 									angle = angle0;
 									
 									Roi convexHullRoi = new PolygonRoi(origRoiAs[pos].getConvexHull(), Roi.POLYGON);
@@ -1492,15 +1492,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						angle = 180+ angle;
 
 						
-						impAs[pos].setRoi(origRoiAs[pos].getBounds().x
-								+ (origRoiAs[pos].getBounds().width - (int)cropWidthA[pos]) / 2,
-								origRoiAs[pos].getBounds().y
-								+ (origRoiAs[pos].getBounds().height - (int)cropHeightA[pos])
-								/ 2, (int)cropWidthA[pos], (int)cropHeightA[pos]);
-						impAs[pos].setRoi(
-								origRoiAs[pos].getBounds().x < 0 ? 0 : origRoiAs[pos].getBounds().x,
-										origRoiAs[pos].getBounds().y < 0 ? 0 : origRoiAs[pos].getBounds().y,
-												(int)cropWidthA[pos], (int)cropHeightA[pos]);
+						impAs[pos].setRoi(ellipseRoiAs[pos].getBounds());
 					}
 					rectRoiAs[pos] = impAs[pos].getRoi();
 					impAs[pos].setRoi(origRoiAs[pos]);
@@ -1545,11 +1537,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							if (npoints == 4) {
 								double angle0 = new Line(xBpoints[0], yBpoints[0], xBpoints[1], yBpoints[1]).getAngle();
 								double angle2 = new Line(xBpoints[2], yBpoints[2], xBpoints[3], yBpoints[3]).getAngle();
-								if (Math.abs(angle0-angle2)>80 && Math.abs(angle0-angle2)<100) {
+								if (Math.abs(Math.abs(angle0)-Math.abs(angle2))>80 && Math.abs(Math.abs(angle0)-Math.abs(angle2))<100) {
 									angle = angle0;
 									
 									Roi convexHullRoi = new PolygonRoi(origRoiAs[pos].getConvexHull(), Roi.POLYGON);
-									impAs[pos].setRoi(convexHullRoi);
+									impBs[pos].setRoi(convexHullRoi);
 									ellipseRoiBs[pos] = new EllipseRoi(xBpoints[0], yBpoints[0], xBpoints[1], yBpoints[1], 
 											(new Line(xBpoints[2], yBpoints[2], xBpoints[3], yBpoints[3])).getLength()
 											/
@@ -1569,15 +1561,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						angle = 180+ angle;
 
 						
-						impBs[pos].setRoi(origRoiBs[pos].getBounds().x
-								+ (origRoiBs[pos].getBounds().width - (int)cropWidthB[pos]) / 2,
-								origRoiBs[pos].getBounds().y
-								+ (origRoiBs[pos].getBounds().height - (int)cropHeightB[pos])
-								/ 2, (int)cropWidthB[pos], (int)cropHeightB[pos]);
-						impBs[pos].setRoi(
-								origRoiBs[pos].getBounds().x < 0 ? 0 : origRoiBs[pos].getBounds().x,
-										origRoiBs[pos].getBounds().y < 0 ? 0 : origRoiBs[pos].getBounds().y,
-												(int)cropWidthB[pos], (int)cropHeightB[pos]);
+						impBs[pos].setRoi(ellipseRoiBs[pos].getBounds());
 					}
 					rectRoiBs[pos] = impBs[pos].getRoi();
 					impBs[pos].setRoi(origRoiBs[pos]);
@@ -1640,7 +1624,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						if (npoints == 4) {
 							double angle0 = new Line(xApoints[0], yApoints[0], xApoints[1], yApoints[1]).getAngle();
 							double angle2 = new Line(xApoints[2], yApoints[2], xApoints[3], yApoints[3]).getAngle();
-							if (Math.abs(angle0-angle2)>80 && Math.abs(angle0-angle2)<100) {
+							if (Math.abs(Math.abs(angle0)-Math.abs(angle2))>80 && Math.abs(Math.abs(angle0)-Math.abs(angle2))<100) {
 								angle = angle0;
 								
 								Roi convexHullRoi = new PolygonRoi(origRoiAs[pos].getConvexHull(), Roi.POLYGON);
@@ -1664,17 +1648,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					angle = 180+ angle;
 
 					
-					impAs[pos].setRoi(origRoiAs[pos].getBounds().x
-							+ (origRoiAs[pos].getBounds().width - (int)cropWidthA[pos]) / 2,
-							origRoiAs[pos].getBounds().y
-							+ (origRoiAs[pos].getBounds().height - (int)cropHeightA[pos])
-							/ 2, (int)cropWidthA[pos], (int)cropHeightA[pos]);
-					impAs[pos].setRoi(
-							origRoiAs[pos].getBounds().x < 0 ? 0 : origRoiAs[pos].getBounds().x,
-									origRoiAs[pos].getBounds().y < 0 ? 0 : origRoiAs[pos].getBounds().y,
-											(int)cropWidthA[pos], (int)cropHeightA[pos]);
+					impAs[pos].setRoi(ellipseRoiAs[pos].getBounds());
 				}
 				rectRoiAs[pos] = impAs[pos].getRoi();
+				impAs[pos].setRoi(rectRoiAs[pos]);
 				impAs[pos].setRoi(origRoiAs[pos]);
 
 				if (origRoiBs[pos] == null) {
@@ -1697,11 +1674,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						if (npoints == 4) {
 							double angle0 = new Line(xBpoints[0], yBpoints[0], xBpoints[1], yBpoints[1]).getAngle();
 							double angle2 = new Line(xBpoints[2], yBpoints[2], xBpoints[3], yBpoints[3]).getAngle();
-							if (Math.abs(angle0-angle2)>80 && Math.abs(angle0-angle2)<100) {
+							if (Math.abs(Math.abs(angle0)-Math.abs(angle2))>80 && Math.abs(Math.abs(angle0)-Math.abs(angle2))<100) {
 								angle = angle0;
 								
 								Roi convexHullRoi = new PolygonRoi(origRoiAs[pos].getConvexHull(), Roi.POLYGON);
-								impAs[pos].setRoi(convexHullRoi);
+								impBs[pos].setRoi(convexHullRoi);
 								ellipseRoiBs[pos] = new EllipseRoi(xBpoints[0], yBpoints[0], xBpoints[1], yBpoints[1], 
 										(new Line(xBpoints[2], yBpoints[2], xBpoints[3], yBpoints[3])).getLength()
 										/
@@ -1721,15 +1698,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					angle = 180+ angle;
 
 					
-					impBs[pos].setRoi(origRoiBs[pos].getBounds().x
-							+ (origRoiBs[pos].getBounds().width - (int)cropWidthB[pos]) / 2,
-							origRoiBs[pos].getBounds().y
-							+ (origRoiBs[pos].getBounds().height - (int)cropHeightB[pos])
-							/ 2, (int)cropWidthB[pos], (int)cropHeightB[pos]);
-					impBs[pos].setRoi(
-							origRoiBs[pos].getBounds().x < 0 ? 0 : origRoiBs[pos].getBounds().x,
-									origRoiBs[pos].getBounds().y < 0 ? 0 : origRoiBs[pos].getBounds().y,
-											(int)cropWidthB[pos], (int)cropHeightB[pos]);
+					impBs[pos].setRoi(ellipseRoiBs[pos].getBounds());
 				}
 				rectRoiBs[pos] = impBs[pos].getRoi();
 				impBs[pos].setRoi(origRoiBs[pos]);
