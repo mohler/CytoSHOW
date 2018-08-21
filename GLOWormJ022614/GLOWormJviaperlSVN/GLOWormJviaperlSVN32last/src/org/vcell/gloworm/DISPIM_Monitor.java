@@ -1458,44 +1458,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									
 						|| (origRoiAs[pos].getType() == Roi.RECTANGLE 
 									&& origRoiAs[pos].getBounds().getWidth() > cropWidthA[pos])) {
-												
-						int[] xApoints = origRoiAs[pos].getPolygon().xpoints;
-						int[] yApoints = origRoiAs[pos].getPolygon().ypoints;
-						int npoints = xApoints.length;
-
-						double angle =0;
-						if (origRoiAs[pos].getType() > Roi.OVAL) {
-							if (npoints == 4) {
-								double angle0 = new Line(xApoints[0], yApoints[0], xApoints[1], yApoints[1]).getAngle();
-								double angle2 = new Line(xApoints[2], yApoints[2], xApoints[3], yApoints[3]).getAngle();
-								if (Math.abs(Math.abs(angle0)-Math.abs(angle2))>80 && Math.abs(Math.abs(angle0)-Math.abs(angle2))<100) {
-									angle = angle0;
-									
-									Roi convexHullRoi = new PolygonRoi(origRoiAs[pos].getConvexHull(), Roi.POLYGON);
-									impAs[pos].setRoi(convexHullRoi);
-									ellipseRoiAs[pos] = new EllipseRoi(xApoints[0], yApoints[0], xApoints[1], yApoints[1], 
-											(new Line(xApoints[2], yApoints[2], xApoints[3], yApoints[3])).getLength()
-											/
-											(new Line(xApoints[0], yApoints[0], xApoints[1], yApoints[1])).getLength()
-													);
-									impAs[pos].setRoi(ellipseRoiAs[pos]);
-								}else {
-									angle = new Line(xApoints[0], yApoints[0], xApoints[2], yApoints[2]).getAngle();
-								}
-							} else {
-								angle = new Line(xApoints[0], yApoints[0], xApoints[npoints/2], yApoints[npoints/2]).getAngle();
-							}
-						} else {
-							angle = origRoiAs[pos].getBounds().getHeight() > origRoiAs[pos].getBounds().getWidth()?90:0;
-						}
-
-						angle = 180+ angle;
-
 						
-						impAs[pos].setRoi(ellipseRoiAs[pos].getBounds());
 					}
-					rectRoiAs[pos] = impAs[pos].getRoi();
-					impAs[pos].setRoi(origRoiAs[pos]);
+					rectRoiAs[pos] = new Roi(origRoiAs[pos].getBounds());
 
 					WindowManager.setTempCurrentImage(impBs[pos]);
 					if (origRoiBs[pos] == null) {
@@ -1528,44 +1493,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						|| (origRoiBs[pos].getType() == Roi.RECTANGLE 
 									&& origRoiBs[pos].getBounds().getWidth() > cropWidthB[pos])) {
 						
-						int[] xBpoints = origRoiBs[pos].getPolygon().xpoints;
-						int[] yBpoints = origRoiBs[pos].getPolygon().ypoints;
-						int npoints = xBpoints.length;
-
-						double angle =0;
-						if (origRoiBs[pos].getType() > Roi.OVAL) {
-							if (npoints == 4) {
-								double angle0 = new Line(xBpoints[0], yBpoints[0], xBpoints[1], yBpoints[1]).getAngle();
-								double angle2 = new Line(xBpoints[2], yBpoints[2], xBpoints[3], yBpoints[3]).getAngle();
-								if (Math.abs(Math.abs(angle0)-Math.abs(angle2))>80 && Math.abs(Math.abs(angle0)-Math.abs(angle2))<100) {
-									angle = angle0;
-									
-									Roi convexHullRoi = new PolygonRoi(origRoiAs[pos].getConvexHull(), Roi.POLYGON);
-									impBs[pos].setRoi(convexHullRoi);
-									ellipseRoiBs[pos] = new EllipseRoi(xBpoints[0], yBpoints[0], xBpoints[1], yBpoints[1], 
-											(new Line(xBpoints[2], yBpoints[2], xBpoints[3], yBpoints[3])).getLength()
-											/
-											(new Line(xBpoints[0], yBpoints[0], xBpoints[1], yBpoints[1])).getLength()
-													);
-									impBs[pos].setRoi(ellipseRoiBs[pos]);
-								}else {
-									angle = new Line(xBpoints[0], yBpoints[0], xBpoints[2], yBpoints[2]).getAngle();
-								}
-							} else {
-								angle = new Line(xBpoints[0], yBpoints[0], xBpoints[npoints/2], yBpoints[npoints/2]).getAngle();
-							}
-						} else {
-							angle = origRoiBs[pos].getBounds().getHeight() > origRoiBs[pos].getBounds().getWidth()?90:0;
-						}
-
-						angle = 180+ angle;
-
-						
-						impBs[pos].setRoi(ellipseRoiBs[pos].getBounds());
 					}
-					rectRoiBs[pos] = impBs[pos].getRoi();
-					impBs[pos].setRoi(origRoiBs[pos]);
-					
+					rectRoiBs[pos] = new Roi(origRoiBs[pos].getBounds());
+
 					WindowManager.setTempCurrentImage(null);
 				}
 			}
@@ -1626,15 +1556,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							double angle2 = new Line(xApoints[2], yApoints[2], xApoints[3], yApoints[3]).getAngle();
 							if (Math.abs(Math.abs(angle0)-Math.abs(angle2))>80 && Math.abs(Math.abs(angle0)-Math.abs(angle2))<100) {
 								angle = angle0;
-								
-								Roi convexHullRoi = new PolygonRoi(origRoiAs[pos].getConvexHull(), Roi.POLYGON);
-								impAs[pos].setRoi(convexHullRoi);
+					
 								ellipseRoiAs[pos] = new EllipseRoi(xApoints[0], yApoints[0], xApoints[1], yApoints[1], 
 										(new Line(xApoints[2], yApoints[2], xApoints[3], yApoints[3])).getLength()
 										/
 										(new Line(xApoints[0], yApoints[0], xApoints[1], yApoints[1])).getLength()
 												);
-								impAs[pos].setRoi(ellipseRoiAs[pos]);
+
+								rectRoiAs[pos] = new Roi(ellipseRoiAs[pos].getBounds());
+
 							}else {
 								angle = new Line(xApoints[0], yApoints[0], xApoints[2], yApoints[2]).getAngle();
 							}
@@ -1647,11 +1577,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 					angle = 180+ angle;
 
-					
-					impAs[pos].setRoi(ellipseRoiAs[pos].getBounds());
-				}
-				rectRoiAs[pos] = impAs[pos].getRoi();
-				impAs[pos].setRoi(rectRoiAs[pos]);
+								}
 				impAs[pos].setRoi(origRoiAs[pos]);
 
 				if (origRoiBs[pos] == null) {
@@ -1677,14 +1603,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							if (Math.abs(Math.abs(angle0)-Math.abs(angle2))>80 && Math.abs(Math.abs(angle0)-Math.abs(angle2))<100) {
 								angle = angle0;
 								
-								Roi convexHullRoi = new PolygonRoi(origRoiAs[pos].getConvexHull(), Roi.POLYGON);
-								impBs[pos].setRoi(convexHullRoi);
 								ellipseRoiBs[pos] = new EllipseRoi(xBpoints[0], yBpoints[0], xBpoints[1], yBpoints[1], 
 										(new Line(xBpoints[2], yBpoints[2], xBpoints[3], yBpoints[3])).getLength()
 										/
 										(new Line(xBpoints[0], yBpoints[0], xBpoints[1], yBpoints[1])).getLength()
 												);
-								impBs[pos].setRoi(ellipseRoiBs[pos]);
+								
+								rectRoiBs[pos] = new Roi(ellipseRoiBs[pos].getBounds());
+
+								
 							}else {
 								angle = new Line(xBpoints[0], yBpoints[0], xBpoints[2], yBpoints[2]).getAngle();
 							}
@@ -1698,9 +1625,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					angle = 180+ angle;
 
 					
-					impBs[pos].setRoi(ellipseRoiBs[pos].getBounds());
 				}
-				rectRoiBs[pos] = impBs[pos].getRoi();
 				impBs[pos].setRoi(origRoiBs[pos]);
 							
 				
