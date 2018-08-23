@@ -9,7 +9,6 @@
 	<classpathentry kind="lib" path="commons-net-3.3.jar"/>
 	<classpathentry kind="lib" path="javaws.jar"/>
 	<classpathentry kind="lib" path="QTJava.zip"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="jogamp-all-platforms/jar/jocl-android.jar"/>
 	<classpathentry kind="lib" path="jogamp-all-platforms/jar/jocl-test-android.jar"/>
 	<classpathentry kind="lib" path="jogamp-all-platforms/jar/jocl-test.jar"/>
@@ -91,5 +90,6 @@
 	<classpathentry kind="lib" path="imglib.jar"/>
 	<classpathentry kind="lib" path="Jama-1.0.3.jar"/>
 	<classpathentry kind="lib" path="junit-4.12.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="plugins"/>
 </classpath>

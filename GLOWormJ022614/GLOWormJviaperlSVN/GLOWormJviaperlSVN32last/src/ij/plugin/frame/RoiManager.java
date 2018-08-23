@@ -851,7 +851,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				mi2.addActionListener(this);
 				pm2.add(mi2);
 				pm2.getItem(getColorLegend().getChoice().getSelectedIndex())
-				.setLabel("Ã "+getColorLegend().getChoice().getSelectedItem()
+				.setLabel("ï¿½ "+getColorLegend().getChoice().getSelectedItem()
 						.replace("Both Checked & Unchecked", "All").replace("Checked", "Chosen"));
 				imp.getWindow().sketch3DButton.add(pm2);
 				pm2.show(imp.getWindow().sketch3DButton, 1, imp.getWindow().sketch3DButton.getHeight());
@@ -869,7 +869,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					if (command == "Clear Choices") {
 						getColorLegend().actionPerformed(new ActionEvent(getColorLegend().clearButton, ActionEvent.ACTION_PERFORMED, getColorLegend().clearButton.getActionCommand()));
 					} else {
-						getColorLegend().getChoice().select(command.replace("Ã ", "").replace("Chosen", "Checked").replace("All", "Both Checked & Unchecked"));
+						getColorLegend().getChoice().select(command.replace("ï¿½ ", "").replace("Chosen", "Checked").replace("All", "Both Checked & Unchecked"));
 						getColorLegend().itemStateChanged(new ItemEvent(getColorLegend().getChoice(), ItemEvent.ITEM_STATE_CHANGED, getColorLegend().getChoice(), ItemEvent.SELECTED));
 					}
 				}
@@ -5340,7 +5340,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		zipPath = IJ.getFilePath("Select the zip file with <nuclei> files");
 		zipFile = new File(zipPath);
 		}
-		String str = openZipNuclei(zipPath);
+		String str = openZipNucleiAsString(zipPath);
 		String[] lines = str.split("\n");
 		//		imp.hide();
 		//		this.setVisible(false);
@@ -5427,7 +5427,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			zipPath = IJ.getFilePath("Select the zip file with <nuclei> files");
 			zipFile = new File(zipPath);
 		}
-		String str = openZipNuclei(zipPath);
+		String str = openZipNucleiAsString(zipPath);
 		String outStr = "";
 		String[] lines = str.split("\n");
 
@@ -5453,7 +5453,80 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		saveZipNuclei(outStr, zipPath.replace(".zip", "Unskipped.zip"));
 	}
 
-	String openZipNuclei(String path) { 
+	
+//	public void respaceStarryNiteNucleiWithArrayList(String zipPath, int skipFactor) {
+//		File zipFile = new File(zipPath);
+//		if (!zipFile.canRead()) {
+//
+//			zipPath = IJ.getFilePath("Select the zip file with <nuclei> files");
+//			zipFile = new File(zipPath);
+//		}
+//		ArrayList<Object> timepoints= openZipNucleiAsObjects(zipPath);
+//
+//		for (int i = 0; i < timepoints.size(); i++) {
+//			Object nextTime = timepoints.get(i);
+//			String nextTimeString = (String)nextTime;
+//			String[] nextTimeLines = nextTimeString.split("\n");
+//			for (int j = 0; j < nextTimeLines.length; j++) {
+//				String nextLine = nextTimeLines[j];
+//				if (nextLine.length()==0) {
+//					//				continue;
+//				}
+//				if (nextLine.startsWith("parameters/")) {
+//					//				continue;
+//				}
+//				String[] cellData = nextLine.split(", *");
+//				if (cellData.length ==1){
+//					//				continue;
+//				} else {
+//					if (cellData[9] !=" ") {
+//						int slicePos = (int)Double.parseDouble(cellData[7].trim());
+//						nextTimeLines[j] = nextLine.replace(cellData[7].trim(), ""+(1+((slicePos-1)*skipFactor)));
+//					}
+//				}
+//				nextTimeString = nextTimeString.replace(nextLine, nextTimeLines[j]);
+//			}
+//			timepoints.set(i, nextTimeString);
+//		}
+//		saveZipNucleiFromArrayList(timepoints, zipPath.replace(".zip", "Unskipped.zip"));
+//	}
+
+//	ArrayList<Object> openZipNucleiAsObjects(String path) { 
+//
+//		ZipInputStream in = null; 
+//		ByteArrayOutputStream out;
+//		String str = "";
+//
+//		try { 
+//			in = new ZipInputStream(new FileInputStream(path)); 
+//
+//			byte[] buf = new byte[1024*1024]; 
+//			int len; 
+//			ZipEntry entry = in.getNextEntry(); 
+//			IJ.log("");
+//
+//			String string ="";
+//
+//			while (entry!=null) { 
+//
+//				String name = entry.getName(); 
+//				IJ.log(name);
+//				if (name.endsWith("-nuclei")) { 
+//					out = new ByteArrayOutputStream(); 
+//					while ((len = in.read(buf)) > 0) 
+//						out.write(buf, 0, len); 
+//					out.close(); 
+//					string = out.toString();
+//				} 
+//				str = str+"\n"+name+"\n"+string;
+//				entry = in.getNextEntry(); 
+//			} 
+//			in.close(); 
+//		} catch (IOException e) {error(e.toString());} 
+//		return str;
+//	} 
+
+	String openZipNucleiAsString(String path) { 
 
 		ZipInputStream in = null; 
 		ByteArrayOutputStream out;
@@ -5489,6 +5562,33 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	} 
 
 
+//	boolean saveZipNucleiFromArrayList(ArrayList<Object> timepoints, String path) { 
+//		try {
+//			ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(new File(path)));
+//			String nucleiFrame = "";
+//			String nucleiLabel = "";			
+//			for (int i=0; i<timepoints.size(); i++) {
+//				String[] nucLines = ((String)timepoints.get(i)).split("\n");
+//				if (nucLines[i].contains("nuclei/t")) {
+//					zos.putNextEntry(new ZipEntry(nucleiLabel));
+//					byte[] data = nucleiFrame.getBytes();
+//					zos.write(data, 0, data.length);					
+//					zos.closeEntry();
+//
+//					nucleiLabel = nucLines[i];
+//					nucleiFrame = "";
+//				} else {
+//					nucleiFrame = nucleiFrame + nucLines[i] + "\n" ;
+//				}
+//			}
+//			zos.close();
+//		}
+//		catch (IOException e) {
+//			error(""+e);
+//			return false;
+//		}
+//		return true;
+//	} 
 
 
 	boolean saveZipNuclei(String nucString, String path) { 
@@ -5499,11 +5599,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			String nucleiLabel = "";			
 			for (int i=0; i<nucLines.length; i++) {
 				if (nucLines[i].contains("nuclei/t")) {
-					zos.putNextEntry(new ZipEntry(nucleiLabel));
-					byte[] data = nucleiFrame.getBytes();
-					zos.write(data, 0, data.length);					
-					zos.closeEntry();
-
+					if (nucleiLabel != ""){
+						zos.putNextEntry(new ZipEntry(nucleiLabel));
+						byte[] data = nucleiFrame.getBytes();
+						zos.write(data, 0, data.length);					
+						zos.closeEntry();
+					}
 					nucleiLabel = nucLines[i];
 					nucleiFrame = "";
 				} else {

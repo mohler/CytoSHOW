@@ -3,11 +3,20 @@ package org.vcell.gloworm;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Polygon;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.zip.ZipEntry;
@@ -412,4 +421,36 @@ public class StarryNiteFeeder implements PlugIn {
 			linThread.start();
 		}	
 	}
+	
+	
+	//some clipped code that might demo editing within a zip.
+	static void modifyTextFileInZip(String zipPath) throws IOException {
+	    Path zipFilePath = Paths.get(zipPath);
+	    try (FileSystem fs = FileSystems.newFileSystem(zipFilePath, null)) {
+	        Path source = fs.getPath("/abc.txt");
+	        Path temp = fs.getPath("/___abc___.txt");
+	        if (Files.exists(temp)) {
+	            throw new IOException("temp file exists, generate another name");
+	        }
+	        Files.move(source, temp);
+	        streamCopy(temp, source);
+	        Files.delete(temp);
+	    }
+	}
+
+	static void streamCopy(Path src, Path dst) throws IOException {
+	    try (BufferedReader br = new BufferedReader(
+	            new InputStreamReader(Files.newInputStream(src)));
+	         BufferedWriter bw = new BufferedWriter(
+	            new OutputStreamWriter(Files.newOutputStream(dst)))) {
+
+	        String line;
+	        while ((line = br.readLine()) != null) {
+	            line = line.replace("key1=value1", "key1=value2");
+	            bw.write(line);
+	            bw.newLine();
+	        }
+	    }
+	}
+	
 }
