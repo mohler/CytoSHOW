@@ -1545,6 +1545,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					|| (origRoiAs[pos].getType() == Roi.RECTANGLE 
 								&& origRoiAs[pos].getBounds().getWidth() > cropWidthA[pos])) {
 											
+					IJ.saveAs(impAs[pos], "Selection", savePath +  "Pos" + pos + "A_"+(autodepth?(zFirstA[pos]+"-"+zLastA[pos]):"")+"original.roi");
+
 					int[] xApoints = origRoiAs[pos].getPolygon().xpoints;
 					int[] yApoints = origRoiAs[pos].getPolygon().ypoints;
 					int npoints = xApoints.length;
@@ -1562,8 +1564,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										/
 										(new Line(xApoints[0], yApoints[0], xApoints[1], yApoints[1])).getLength()
 												);
+								impAs[pos].setRoi(ellipseRoiAs[pos], false);
+								IJ.saveAs(impAs[pos], "Selection", savePath +  "Pos" + pos + "A_"+(autodepth?(zFirstA[pos]+"-"+zLastA[pos]):"")+"ellipse.roi");
 
 								rectRoiAs[pos] = new Roi(ellipseRoiAs[pos].getBounds());
+								impAs[pos].setRoi(rectRoiAs[pos], false);
+								IJ.saveAs(impAs[pos], "Selection", savePath +  "Pos" + pos + "A_"+(autodepth?(zFirstA[pos]+"-"+zLastA[pos]):"")+"rectangle.roi");
 
 							}else {
 								angle = new Line(xApoints[0], yApoints[0], xApoints[2], yApoints[2]).getAngle();
@@ -1591,6 +1597,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					|| (origRoiBs[pos].getType() == Roi.RECTANGLE 
 								&& origRoiBs[pos].getBounds().getWidth() > cropWidthB[pos])) {
 					
+					IJ.saveAs(impBs[pos], "Selection", savePath +  "Pos" + pos + "B_"+(autodepth?(zFirstB[pos]+"-"+zLastB[pos]):"")+"original.roi");
+
 					int[] xBpoints = origRoiBs[pos].getPolygon().xpoints;
 					int[] yBpoints = origRoiBs[pos].getPolygon().ypoints;
 					int npoints = xBpoints.length;
@@ -1608,8 +1616,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										/
 										(new Line(xBpoints[0], yBpoints[0], xBpoints[1], yBpoints[1])).getLength()
 												);
-								
+								impBs[pos].setRoi(ellipseRoiBs[pos], false);
+								IJ.saveAs(impBs[pos], "Selection", savePath +  "Pos" + pos + "B_"+(autodepth?(zFirstB[pos]+"-"+zLastB[pos]):"")+"ellipse.roi");
+
 								rectRoiBs[pos] = new Roi(ellipseRoiBs[pos].getBounds());
+								impBs[pos].setRoi(rectRoiBs[pos], false);
+								IJ.saveAs(impBs[pos], "Selection", savePath +  "Pos" + pos + "B_"+(autodepth?(zFirstB[pos]+"-"+zLastB[pos]):"")+"rectangle.roi");
 
 								
 							}else {
