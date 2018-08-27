@@ -112,7 +112,7 @@ public class StarryNiteFeeder implements PlugIn {
 			} else {
 
 				String title = imp.getTitle();
-				String savetitle = title.replace(":","_").replace(" ","");
+				String savetitle = title.replace(":","_").replace(" ","").replace("_dummy","");
 				String savePath = outDir+savetitle;
 				new File(new File(savePath+"original.roi").getParent()).mkdirs();
 				IJ.save(imp, savePath+"original.roi");

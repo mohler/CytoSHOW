@@ -111,7 +111,8 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 			return imp;
 		}
 		Properties props = fo.decodeDescriptionString(fi);
-		ImagePlus imp2 = new ImagePlus(fi.fileName, this);
+		String[] fpathchunks = fi.fileName.split(File.separator);
+		ImagePlus imp2 = new ImagePlus(fpathchunks[fpathchunks.length-1].replace("_dummy", ""), this);
 		imp2.setFileInfo(fi);
 		if (imp!=null && props!=null) {
 			setBitDepth(imp.getBitDepth());
