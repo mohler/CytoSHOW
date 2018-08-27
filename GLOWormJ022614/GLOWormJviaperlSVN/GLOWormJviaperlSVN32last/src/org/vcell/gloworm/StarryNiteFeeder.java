@@ -178,6 +178,9 @@ public class StarryNiteFeeder implements PlugIn {
 						ImageStack stack2 = new ImageStack((int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
 						ImageStack stack2skipped = new ImageStack((int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
 
+						ImageStack stack3 = new ImageStack((int)theRotatedROI.getBounds().getWidth()*2, (int)theRotatedROI.getBounds().getHeight());
+						ImageStack stack3skipped = new ImageStack((int)theRotatedROI.getBounds().getWidth()*2, (int)theRotatedROI.getBounds().getHeight());
+
 						imp.getWindow().setEnabled(false);
 
 
@@ -209,18 +212,24 @@ public class StarryNiteFeeder implements PlugIn {
 							ip1.setRoi((int)(ip1.getWidth()-theRotatedROI.getBounds().getWidth())/2, (int)(ip1.getHeight()-theRotatedROI.getBounds().getHeight())/2
 									, (int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
 							ip1 = ip1.crop();
-
+							
+							ImageProcessor ip3 = ip1.createProcessor(stack3.getWidth(), stack3.getHeight());
+		
 							if (!flipStack){
 								stack1.addSlice(ip1);
 								if (i%skipFactor == 1) {
 									stack1skipped.addSlice(ip1.duplicate());
 								}
+								ip3.insert(ip1, 0, 0);
+
 							} else {
 								ip1.flipVertical();
 								stack1.addSlice(null, ip1, 0);
 								if (i%skipFactor == 1) {
 									stack1skipped.addSlice(null, ip1.duplicate(),0);
 								}
+								ip3.insert(ip1, 0, 0);
+
 							}
 							
 							
@@ -257,12 +266,28 @@ public class StarryNiteFeeder implements PlugIn {
 									if (i%skipFactor == 1) {
 										stack2skipped.addSlice(ip2.duplicate());
 									}
+									
+									ip3.insert(ip2, ip3.getWidth()/2, 0);
+
+									stack3.addSlice(ip3);
+									if (i%skipFactor == 1) {
+										stack3skipped.addSlice(ip3.duplicate());
+									}
+
 								} else {
 									ip2.flipVertical();
 									stack2.addSlice(null, ip2, 0);
 									if (i%skipFactor == 1) {
 										stack2skipped.addSlice(null, ip2.duplicate(),0);
 									}
+									
+									ip3.insert(ip2, ip3.getWidth()/2, 0);
+
+									stack3.addSlice(null, ip3, 0);
+									if (i%skipFactor == 1) {
+										stack3skipped.addSlice(null, ip3.duplicate(), 0);
+									}
+
 								}
 								
 
@@ -291,6 +316,10 @@ public class StarryNiteFeeder implements PlugIn {
 						ImagePlus frameGreenImp = new ImagePlus("Ch1hisSubCrop",stack1);
 						ImagePlus frameGreenImpSkipped = new ImagePlus("Ch1hisSubCrop",stack1skipped);
 
+						ImagePlus frameRGsplitImp = new ImagePlus("Ch12hisSubCrop",stack3);
+						ImagePlus frameRGsplitImpSkipped = new ImagePlus("Ch12hisSubCrop",stack3skipped);
+
+						
 						// Red channel:
 
 						new File(outDir+subdir).mkdirs();
@@ -300,6 +329,9 @@ public class StarryNiteFeeder implements PlugIn {
 						// save a stack
 						IJ.save(frameRedImp, outDir+subdir+"/aaa"+f+".tif");
 						IJ.save(frameRedImpSkipped, outDir+subdir+"Skipped"+"/aaa"+f+".tif");
+
+						IJ.save(frameRGsplitImp, outDir+subdir+"/aaa-t"+f+".tif");
+						IJ.save(frameRGsplitImpSkipped, outDir+subdir+"Skipped"+"/aaa-t"+f+".tif");
 
 						new File(outDir+subdir+"/image/tif16/").mkdirs();
 						new File(outDir+subdir+"Skipped"+"/image/tif16/").mkdirs();
