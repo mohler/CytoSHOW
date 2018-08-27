@@ -259,7 +259,7 @@ public class StarryNiteFeeder implements PlugIn {
 									}
 								} else {
 									ip2.flipVertical();
-									stack1.addSlice(null, ip2, 0);
+									stack2.addSlice(null, ip2, 0);
 									if (i%skipFactor == 1) {
 										stack2skipped.addSlice(null, ip2.duplicate(),0);
 									}

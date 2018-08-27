@@ -7,6 +7,7 @@ import ij.io.*;
 import java.awt.*;
 import java.io.*;
 import java.util.Properties;
+import java.util.regex.Pattern;
 
 /** This plugin opens a multi-page TIFF file as a virtual stack. It
 	implements the File/Import/TIFF Virtual Stack command. */
@@ -111,7 +112,7 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 			return imp;
 		}
 		Properties props = fo.decodeDescriptionString(fi);
-		String[] fpathchunks = fi.fileName.split(File.separator);
+		String[] fpathchunks = fi.fileName.split(Pattern.quote(File.separator));
 		ImagePlus imp2 = new ImagePlus(fpathchunks[fpathchunks.length-1].replace("_dummy", ""), this);
 		imp2.setFileInfo(fi);
 		if (imp!=null && props!=null) {
