@@ -336,107 +336,109 @@ public class StarryNiteFeeder implements PlugIn {
 
 
 						// save a stack
-						IJ.save(frameRedImp, outDir+subdir+"/aaa"+f+".tif");
-						IJ.save(frameRedImpSkipped, outDir+subdir+"Skipped"+"/aaa"+f+".tif");
+//						IJ.save(frameRedImp, outDir+subdir+"/aaa"+f+".tif");
+//						IJ.save(frameRedImpSkipped, outDir+subdir+"Skipped"+"/aaa"+f+".tif");
 
-						IJ.save(frameRGsplitImp, outDir+subdir+"/aaa-t"+f+".tif");
-						IJ.save(frameRGsplitImpSkipped, outDir+subdir+"Skipped"+"/aaa-t"+f+".tif");
+						IJ.save(frameRGsplitImp, outDir+subdir+"/aaa_t"+f+".tif");
+						IJ.save(frameRGsplitImpSkipped, outDir+subdir+"Skipped"+"/aaa_t"+f+".tif");
 
-						new File(outDir+subdir+"/image/tif16/").mkdirs();
-						new File(outDir+subdir+"Skipped"+"/image/tif16/").mkdirs();
-
-
-						String command16b = "format=TIFF start=1 name=aaa-t";
-						command16b += ""+IJ.pad(f,3)+" digits=0 ";
-						command16b += "save=";
-
-						String command16a = "["+outDir+subdir+"/image/tif16]";
-						String command16askipped = "["+outDir+subdir+"Skipped"+"/image/tif16]";
-						//print(command16+command162);
-						IJ.run(frameRedImp, "StarryNite Image Sequence... ", command16b+command16a);
-						IJ.run(frameRedImpSkipped, "StarryNite Image Sequence... ", command16b+command16askipped);
-
-
-						if (redMax==65535) {
-							ImageStatistics stkStats = new StackStatistics(frameRedImp);
-							frameRedImp.getProcessor().setMinAndMax(0,stkStats.max);
-							frameRedImpSkipped.getProcessor().setMinAndMax(0,stkStats.max);
-						} else if (redMax>0) {
-							frameRedImp.getProcessor().setMinAndMax(0, redMax);
-							frameRedImpSkipped.getProcessor().setMinAndMax(0, redMax);
-						}else {
-							frameRedImp.getProcessor().setMinAndMax(0, 5000);
-							frameRedImpSkipped.getProcessor().setMinAndMax(0, 5000);
-						}
-
-						IJ.run(frameRedImp,"8-bit","");
-						IJ.run(frameRedImpSkipped,"8-bit","");
-
-						new File(outDir+subdir+"/image/tif/").mkdirs();
-						new File(outDir+subdir+"Skipped"+"/image/tif/").mkdirs();
-
-
-						String command1 = "format=TIFF start=1 name=aaa-t";
-						command1 += ""+IJ.pad(f,3)+" digits=0 ";
-						command1 += "save=";
-
-						String command2 = "["+outDir+subdir+"/image/tif]";
-						String command2skipped = "["+outDir+subdir+"Skipped"+"/image/tif]";
-						//print(command1+command2);
-						IJ.run(frameRedImp, "StarryNite Image Sequence... ", command1+command2);
-						IJ.run(frameRedImpSkipped, "StarryNite Image Sequence... ", command1+command2skipped);
-
-
-
-						// Green channel:
-						new File(outDir+subdir+"/image/tifr16/").mkdirs();
-						new File(outDir+subdir+"Skipped"+"/image/tifr16/").mkdirs();
-
-
-						String command16 = "format=TIFF start=1 name=aaa-t";
-						command16 += ""+IJ.pad(f,3)+" digits=0 ";
-						command16 += "save=";
-
-						String command162 = "["+outDir+subdir+"/image/tifr16]";
-						String command162skipped = "["+outDir+subdir+"Skipped"+"/image/tifr16]";
-						//print(command16+command162);
-						IJ.run(frameGreenImp, "StarryNite Image Sequence... ", command16+command162);
-						IJ.run(frameGreenImpSkipped, "StarryNite Image Sequence... ", command16+command162skipped);
-
-						if (greenMax==65535) {
-							ImageStatistics stkStats = new StackStatistics(frameGreenImp);
-							frameGreenImp.getProcessor().setMinAndMax(0,stkStats.max);
-							frameGreenImpSkipped.getProcessor().setMinAndMax(0,stkStats.max);
-						} else if (greenMax>0) {
-							frameGreenImp.getProcessor().setMinAndMax(0, greenMax);
-							frameGreenImpSkipped.getProcessor().setMinAndMax(0, greenMax);
-						}else {
-							frameGreenImp.getProcessor().setMinAndMax(0, 5000);
-							frameGreenImpSkipped.getProcessor().setMinAndMax(0, 5000);
-						}
-
-						IJ.run(frameGreenImp,"8-bit","");
-						IJ.run(frameGreenImpSkipped,"8-bit","");
-
-						new File(outDir+subdir+"/image/tifr/").mkdirs();
-						new File(outDir+subdir+"Skipped"+"/image/tifr/").mkdirs();
-
-
-						command1 = "format=TIFF start=1 name=aaa-t";
-						command1 += ""+IJ.pad(f,3)+" digits=0 ";
-						command1 += "save=";
-
-						command2 = "["+outDir+subdir+"/image/tifr]";
-						command2skipped = "["+outDir+subdir+"Skipped"+"/image/tifr]";
-						//print(command1+command2);
-						IJ.run(frameGreenImp, "StarryNite Image Sequence... ", command1+command2);
-						IJ.run(frameGreenImpSkipped, "StarryNite Image Sequence... ", command1+command2skipped);
+//						new File(outDir+subdir+"/image/tif16/").mkdirs();
+//						new File(outDir+subdir+"Skipped"+"/image/tif16/").mkdirs();
+//
+//
+//						String command16b = "format=TIFF start=1 name=aaa-t";
+//						command16b += ""+IJ.pad(f,3)+" digits=0 ";
+//						command16b += "save=";
+//
+//						String command16a = "["+outDir+subdir+"/image/tif16]";
+//						String command16askipped = "["+outDir+subdir+"Skipped"+"/image/tif16]";
+//						//print(command16+command162);
+//						IJ.run(frameRedImp, "StarryNite Image Sequence... ", command16b+command16a);
+//						IJ.run(frameRedImpSkipped, "StarryNite Image Sequence... ", command16b+command16askipped);
+//
+//
+//						if (redMax==65535) {
+//							ImageStatistics stkStats = new StackStatistics(frameRedImp);
+//							frameRedImp.getProcessor().setMinAndMax(0,stkStats.max);
+//							frameRedImpSkipped.getProcessor().setMinAndMax(0,stkStats.max);
+//						} else if (redMax>0) {
+//							frameRedImp.getProcessor().setMinAndMax(0, redMax);
+//							frameRedImpSkipped.getProcessor().setMinAndMax(0, redMax);
+//						}else {
+//							frameRedImp.getProcessor().setMinAndMax(0, 5000);
+//							frameRedImpSkipped.getProcessor().setMinAndMax(0, 5000);
+//						}
+//
+//						IJ.run(frameRedImp,"8-bit","");
+//						IJ.run(frameRedImpSkipped,"8-bit","");
+//
+//						new File(outDir+subdir+"/image/tif/").mkdirs();
+//						new File(outDir+subdir+"Skipped"+"/image/tif/").mkdirs();
+//
+//
+//						String command1 = "format=TIFF start=1 name=aaa-t";
+//						command1 += ""+IJ.pad(f,3)+" digits=0 ";
+//						command1 += "save=";
+//
+//						String command2 = "["+outDir+subdir+"/image/tif]";
+//						String command2skipped = "["+outDir+subdir+"Skipped"+"/image/tif]";
+//						//print(command1+command2);
+//						IJ.run(frameRedImp, "StarryNite Image Sequence... ", command1+command2);
+//						IJ.run(frameRedImpSkipped, "StarryNite Image Sequence... ", command1+command2skipped);
+//
+//
+//
+//						// Green channel:
+//						new File(outDir+subdir+"/image/tifr16/").mkdirs();
+//						new File(outDir+subdir+"Skipped"+"/image/tifr16/").mkdirs();
+//
+//
+//						String command16 = "format=TIFF start=1 name=aaa-t";
+//						command16 += ""+IJ.pad(f,3)+" digits=0 ";
+//						command16 += "save=";
+//
+//						String command162 = "["+outDir+subdir+"/image/tifr16]";
+//						String command162skipped = "["+outDir+subdir+"Skipped"+"/image/tifr16]";
+//						//print(command16+command162);
+//						IJ.run(frameGreenImp, "StarryNite Image Sequence... ", command16+command162);
+//						IJ.run(frameGreenImpSkipped, "StarryNite Image Sequence... ", command16+command162skipped);
+//
+//						if (greenMax==65535) {
+//							ImageStatistics stkStats = new StackStatistics(frameGreenImp);
+//							frameGreenImp.getProcessor().setMinAndMax(0,stkStats.max);
+//							frameGreenImpSkipped.getProcessor().setMinAndMax(0,stkStats.max);
+//						} else if (greenMax>0) {
+//							frameGreenImp.getProcessor().setMinAndMax(0, greenMax);
+//							frameGreenImpSkipped.getProcessor().setMinAndMax(0, greenMax);
+//						}else {
+//							frameGreenImp.getProcessor().setMinAndMax(0, 5000);
+//							frameGreenImpSkipped.getProcessor().setMinAndMax(0, 5000);
+//						}
+//
+//						IJ.run(frameGreenImp,"8-bit","");
+//						IJ.run(frameGreenImpSkipped,"8-bit","");
+//
+//						new File(outDir+subdir+"/image/tifr/").mkdirs();
+//						new File(outDir+subdir+"Skipped"+"/image/tifr/").mkdirs();
+//
+//
+//						command1 = "format=TIFF start=1 name=aaa-t";
+//						command1 += ""+IJ.pad(f,3)+" digits=0 ";
+//						command1 += "save=";
+//
+//						command2 = "["+outDir+subdir+"/image/tifr]";
+//						command2skipped = "["+outDir+subdir+"Skipped"+"/image/tifr]";
+//						//print(command1+command2);
+//						IJ.run(frameGreenImp, "StarryNite Image Sequence... ", command1+command2);
+//						IJ.run(frameGreenImpSkipped, "StarryNite Image Sequence... ", command1+command2skipped);
 
 
 						frameRedImp.flush();
 						frameRedImpSkipped.flush();
 						frameGreenImp.flush();
 						frameGreenImpSkipped.flush();
+						frameRGsplitImp.flush();
+						frameRGsplitImpSkipped.flush();
 
 					}
 				}
