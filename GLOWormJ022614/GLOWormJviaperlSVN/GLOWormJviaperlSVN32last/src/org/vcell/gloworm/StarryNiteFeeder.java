@@ -222,7 +222,7 @@ public class StarryNiteFeeder implements PlugIn {
 								}
 								ImageProcessor ip1fh = ip1.duplicate();
 								ip1fh.flipHorizontal();
-								ip3.insert(ip1fh, 0, 0);
+								ip3.insert(ip1fh, ip3.getWidth()/2, 0);
 
 							} else {
 								ip1.flipVertical();
@@ -233,7 +233,7 @@ public class StarryNiteFeeder implements PlugIn {
 								ImageProcessor ip1fh = ip1.duplicate();
 								ip1fh.flipHorizontal();
 
-								ip3.insert(ip1fh, 0, 0);
+								ip3.insert(ip1fh, ip3.getWidth()/2, 0);
 
 							}
 							
@@ -274,7 +274,7 @@ public class StarryNiteFeeder implements PlugIn {
 									
 									ImageProcessor ip2fh = ip2.duplicate();
 									ip2fh.flipHorizontal();
-									ip3.insert(ip2fh, ip3.getWidth()/2, 0);
+									ip3.insert(ip2fh, 0, 0);
 
 									stack3.addSlice(ip3);
 									if (i%skipFactor == 1) {
@@ -290,7 +290,7 @@ public class StarryNiteFeeder implements PlugIn {
 									
 									ImageProcessor ip2fh = ip2.duplicate();
 									ip2fh.flipHorizontal();
-									ip3.insert(ip2fh, ip3.getWidth()/2, 0);
+									ip3.insert(ip2fh, 0, 0);
 
 									stack3.addSlice(null, ip3, 0);
 									if (i%skipFactor == 1) {
