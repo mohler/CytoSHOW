@@ -41,6 +41,7 @@ import ij.plugin.Colors;
 import ij.plugin.PlugIn;
 import ij.plugin.RoiRotator;
 import ij.plugin.frame.ColorLegend;
+import ij.plugin.frame.RoiManager;
 import ij.process.ImageProcessor;
 import ij.process.ImageStatistics;
 import ij.process.LUT;
@@ -472,6 +473,16 @@ public class StarryNiteFeeder implements PlugIn {
 						while (!(new File((outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa__edited.xml")).canRead()) {
 							IJ.wait(1000);
 						}
+						
+						String unskippedXmlText = IJ.openAsString((outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa__edited.xml");
+						unskippedXmlText = unskippedXmlText.replace("Skipped", "");
+						unskippedXmlText = unskippedXmlText.replace("aaa__edited.zip", "aaa_Unskipped.zip");
+						unskippedXmlText = unskippedXmlText.replace("zRes=\"1\"", "zRes=\"0.1625\"");
+						unskippedXmlText = unskippedXmlText.replace("planeEnd=\"295\"", "planeEnd=\"320\"");
+						IJ.saveString(unskippedXmlText, (outDir+subdir).replace("\\", "\\\\")+"\\\\aaa__edited.xml");
+						
+						RoiManager.respaceStarryNiteNuclei((outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa_.zip", 6);
+						
 						Process linMeasure = null;
 						try {
 							ProcessBuilder linMeasurePB = new ProcessBuilder(new String[]{"cmd", "/c", "start", "java", "-Xmx500m", "-cp", "acebatch2.jar", "Measure1", (outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa__edited.xml"});

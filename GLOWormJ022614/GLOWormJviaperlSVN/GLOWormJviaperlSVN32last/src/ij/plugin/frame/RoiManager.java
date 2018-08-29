@@ -5420,7 +5420,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	}
 
-	public void respaceStarryNiteNuclei(String zipPath, int skipFactor) {
+	public static void respaceStarryNiteNuclei(String zipPath, int skipFactor) {
 		File zipFile = new File(zipPath);
 		if (!zipFile.canRead()) {
 
@@ -5450,7 +5450,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			outStr = outStr +"\n"+ lines[i];
 		}
-		saveZipNuclei(outStr, zipPath.replace(".zip", "Unskipped.zip"));
+		saveZipNuclei(outStr, zipPath.replace("Skipped", "").replace(".zip", "Unskipped.zip"));
 	}
 
 	
@@ -5526,7 +5526,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //		return str;
 //	} 
 
-	String openZipNucleiAsString(String path) { 
+	static String openZipNucleiAsString(String path) { 
 
 		ZipInputStream in = null; 
 		ByteArrayOutputStream out;
@@ -5557,7 +5557,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				entry = in.getNextEntry(); 
 			} 
 			in.close(); 
-		} catch (IOException e) {error(e.toString());} 
+		} catch (IOException e) {e.printStackTrace();} 
 		return str;
 	} 
 
@@ -5591,7 +5591,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //	} 
 
 
-	boolean saveZipNuclei(String nucString, String path) { 
+	static boolean saveZipNuclei(String nucString, String path) { 
 		String[] nucLines = nucString.split("\n");
 		try {
 			ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(new File(path)));
@@ -5614,7 +5614,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			zos.close();
 		}
 		catch (IOException e) {
-			error(""+e);
+			e.printStackTrace();
 			return false;
 		}
 		return true;
