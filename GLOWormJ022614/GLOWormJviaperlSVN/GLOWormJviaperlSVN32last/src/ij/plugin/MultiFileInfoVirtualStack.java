@@ -200,7 +200,10 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 //				IJ.log("tif "+(s+1)+" ="+cumulativeTiffFileArray[s]);
 				String[] subFilePathChunks = cumulativeTiffFileArray[s].split(Pattern.quote(File.separator));
 				String subFileName = subFilePathChunks[subFilePathChunks.length-1];
-				if (subFileName.matches(".*_t\\d+.*\\.tif")) {
+				
+//				which format was this for, now conflicting with SN 16-bit stack output names...
+//				if (subFileName.matches(".*_t\\d+.*\\.tif")) {
+				if (subFileName.matches(".*_t\\d+\\D+\\.tif")) {
 					int tValue = Integer.parseInt(subFileName.replaceAll(".*_t(\\d+).*\\.tif", "$1"));
 					if (tValue > highT)
 						highT = tValue;
