@@ -171,7 +171,7 @@ public class StarryNiteFeeder implements PlugIn {
 
 				for (int f = 1; f <= endPoint; f++) {
 					boolean paramsWritten = false;
-					if (!(new File(outDir+subdir+"/aaa"+f+".tif").canRead())) {
+					if (!((new File(outDir+subdir+"/aaa_t"+f+".tif").canRead())&&(new File(outDir+subdir+"Skipped"+"/aaa_t"+f+".tif").canRead()))) {
 
 						ImageStack stack1 = new ImageStack((int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
 						ImageStack stack1skipped = new ImageStack((int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
