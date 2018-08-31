@@ -229,12 +229,6 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			}
 			
 			if (infoCollectorArrayList.size()==0 || infoCollectorArrayList.get(0)[0].channelShifts == null){
-//				dXA= Integer.parseInt(Prefs.get("diSPIMmonitor.dXA", "0"));
-//				dXB= Integer.parseInt(Prefs.get("diSPIMmonitor.dXB", "0"));
-//				dYA= Integer.parseInt(Prefs.get("diSPIMmonitor.dYA", "0"));
-//				dYB= Integer.parseInt(Prefs.get("diSPIMmonitor.dYB", "0"));
-//				dZA= Integer.parseInt(Prefs.get("diSPIMmonitor.dZA", "0"));
-//				dZB= Integer.parseInt(Prefs.get("diSPIMmonitor.dZB", "0"));
 				dXA= 0;
 				dXB= 0;
 				dYA= 0;
@@ -641,6 +635,10 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			stackNumber++;
 		}
 
+		if (stackNumber >= fivStacks.size()){
+			stackNumber = fivStacks.size()-1;
+		}
+		
 		sliceNumber = n;
 
 		fivStacks.get(stackNumber).deleteSlice(sliceNumber);
@@ -714,6 +712,11 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				vSliceNumber = vSliceNumber-fivStacks.get(stackNumber).getSize();
 				stackNumber++;
 			}
+			
+			if (stackNumber >= fivStacks.size()){
+				stackNumber = fivStacks.size()-1;
+			}
+			
 			initiateStack(stackNumber, 0);
 			ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber+(sliceNumber%2==0?0:dZ));
 		}
@@ -743,6 +746,10 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				stackNumber++;
 			}
 
+			if (stackNumber >= fivStacks.size()){
+				stackNumber = fivStacks.size()-1;
+			}
+			
 			initiateStack(stackNumber, 0);
 			ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber+(sliceNumber%(2)==0?0:dZ*2));
 
@@ -839,8 +846,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	}
 
 	public void initiateStack(int stkNum, int slcNum) {
-		fivStacks.get(stkNum).setupStack();
 		if (fivStacks!=null && fivStacks.size()>stkNum && fivStacks.get(stkNum).infoArray.length>slcNum) {
+			fivStacks.get(stkNum).setupStack();
 
 			String currentFileName =fivStacks.get(stkNum).infoArray[0].fileName;
 			
