@@ -1430,15 +1430,21 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 					WindowManager.setTempCurrentImage(impAs[pos]);
 					if (origRoiAs[pos] == null) {
+						
+						origRoiAs[pos] = new Roi(0, 0, cropWidthDefault, cropHeightDefault);								 
+
 						String matchString="blah";
 						for (String mightBe:savePathList) {
 							if (mightBe.matches(".*Pos" + pos + "A_(\\d+-\\d+)*original.roi"))
 								matchString=mightBe;
 						}
 						if (!((new File(savePath +  matchString)).canRead())) {
-							IJ.makeRectangle(0, 0, cropWidthDefault, cropHeightDefault);
-							origRoiAs[pos] = impAs[pos].getRoi();
-						} else {
+							for (String mightBe:savePathList) {
+								if (mightBe.matches(".*Pos" + pos + "A_(\\d+-\\d+)*crop.roi"))
+									matchString=mightBe;
+							}
+						} 
+						if ((new File(savePath +  matchString)).canRead()) {
 							IJ.open(savePath +  matchString);
 							origRoiAs[pos] = impAs[pos].getRoi();
 							if (matchString.matches(".*Pos" + pos + "A_(\\d+-\\d+)original.roi")) {
@@ -1449,22 +1455,31 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							}
 							cropWidthA[pos] = origRoiAs[pos].getBounds().width;
 							cropHeightA[pos] = origRoiAs[pos].getBounds().height;
+						} else{
+							impAs[pos].setRoi(origRoiAs[pos]);
 						}
+							
 					}
 					
 					rectRoiAs[pos] = new Roi(origRoiAs[pos].getBounds());
 
 					WindowManager.setTempCurrentImage(impBs[pos]);
 					if (origRoiBs[pos] == null) {
+						
+						origRoiBs[pos] = new Roi(0, 0, cropWidthDefault, cropHeightDefault);								 
+
 						String matchString="blah";
 						for (String mightBe:savePathList) {
 							if (mightBe.matches(".*Pos" + pos + "B_(\\d+-\\d+)*original.roi"))
 								matchString=mightBe;
 						}
 						if (!((new File(savePath +  matchString)).canRead())) {
-							IJ.makeRectangle(0, 0, cropWidthDefault, cropHeightDefault);
-							origRoiBs[pos] = impBs[pos].getRoi();
-						} else {
+							for (String mightBe:savePathList) {
+								if (mightBe.matches(".*Pos" + pos + "B_(\\d+-\\d+)*crop.roi"))
+									matchString=mightBe;
+							}
+						} 
+						if ((new File(savePath +  matchString)).canRead()) {
 							IJ.open(savePath +  matchString);
 							origRoiBs[pos] = impBs[pos].getRoi();
 							if (matchString.matches(".*Pos" + pos + "B_(\\d+-\\d+)original.roi")) {
@@ -1475,9 +1490,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							}
 							cropWidthB[pos] = origRoiBs[pos].getBounds().width;
 							cropHeightB[pos] = origRoiBs[pos].getBounds().height;
+						} else{
+							impBs[pos].setRoi(origRoiBs[pos]);
 						}
+							
 					}
-
+					
 					rectRoiBs[pos] = new Roi(origRoiBs[pos].getBounds());
 
 					WindowManager.setTempCurrentImage(null);
