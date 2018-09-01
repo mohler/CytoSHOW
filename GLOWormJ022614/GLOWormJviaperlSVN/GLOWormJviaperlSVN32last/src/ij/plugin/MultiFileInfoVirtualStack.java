@@ -408,15 +408,16 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (new File(infoDir+"touchedFileFIs"+pos+".inf").canRead()) {
 			ObjectInputStream ois;
 			try {
-				ois = new ObjectInputStream(new FileInputStream(infoDir+"touchedFileFIs"+pos+".inf"));
+				ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(infoDir+"touchedFileFIs"+pos+(isViewB?"B":"A")+".inf")));
 				try {
 					savedInfoCollectorArrayList  = (ArrayList<FileInfo[]>) ois.readObject();
-					infoLoadReport = "success";
+
 				} catch (ClassNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}finally{
 					ois.close();
+					infoLoadReport = "success";
 				}
 			} catch (FileNotFoundException e1) {
 				// TODO Auto-generated catch block

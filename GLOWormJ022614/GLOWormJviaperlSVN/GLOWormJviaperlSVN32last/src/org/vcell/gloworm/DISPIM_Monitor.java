@@ -701,8 +701,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							public void initiateStack(int stkNum, int slcNum){
 								super.initiateStack( stkNum,  slcNum);
 								if (stackBs[fPos]!=null){
-									stackBs[fPos].infoCollectorArrayList.set(stkNum, infoCollectorArrayList.get(stkNum));
-									stackBs[fPos].getFivStacks().get(stkNum).infoArray = infoCollectorArrayList.get(stkNum);
+									stackBs[fPos].infoCollectorArrayList.set(stkNum, Arrays.copyOf(((FileInfo[])infoCollectorArrayList.get(stkNum)),((FileInfo[])infoCollectorArrayList.get(stkNum)).length));
+									stackBs[fPos].getFivStacks().get(stkNum).infoArray = Arrays.copyOf(((FileInfo[])infoCollectorArrayList.get(stkNum)),((FileInfo[])infoCollectorArrayList.get(stkNum)).length);
 								}
 							}
 						};
@@ -714,8 +714,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							public void initiateStack(int stkNum, int slcNum){
 								super.initiateStack( stkNum,  slcNum);
 								if (stackAs[fPos]!=null){
-									stackAs[fPos].infoCollectorArrayList.set(stkNum, infoCollectorArrayList.get(stkNum));
-									stackAs[fPos].getFivStacks().get(stkNum).infoArray = infoCollectorArrayList.get(stkNum);
+									stackAs[fPos].infoCollectorArrayList.set(stkNum, Arrays.copyOf(((FileInfo[])infoCollectorArrayList.get(stkNum)),((FileInfo[])infoCollectorArrayList.get(stkNum)).length));
+									stackAs[fPos].getFivStacks().get(stkNum).infoArray = Arrays.copyOf(((FileInfo[])infoCollectorArrayList.get(stkNum)),((FileInfo[])infoCollectorArrayList.get(stkNum)).length);
 								}
 							}
 
@@ -752,8 +752,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							public synchronized void flush(){
 								ObjectOutputStream oos;
 								try {
-									oos = new ObjectOutputStream(new FileOutputStream(stackAs[fPos].infoDir+"touchedFileFIs"+fPos+".inf"));
-									oos.writeObject(stackAs[fPos].infoCollectorArrayList);
+									oos = new ObjectOutputStream(new FileOutputStream(stackAs[fPos].infoDir+"touchedFileFIs"+fPos+"A.inf"));
+									oos.writeObject(((MultiFileInfoVirtualStack) getImageStack()).infoCollectorArrayList);
 									oos.close();
 								} catch (IOException e) {
 									// TODO Auto-generated catch block
@@ -787,8 +787,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							public synchronized void flush(){
 								ObjectOutputStream oos;
 								try {
-									oos = new ObjectOutputStream(new FileOutputStream(stackBs[fPos].infoDir+"touchedFileFIs"+fPos+".inf"));
-									oos.writeObject(stackBs[fPos].infoCollectorArrayList);
+									oos = new ObjectOutputStream(new FileOutputStream(stackBs[fPos].infoDir+"touchedFileFIs"+fPos+"B.inf"));
+									oos.writeObject(((MultiFileInfoVirtualStack) getImageStack()).infoCollectorArrayList);
 									oos.close();
 								} catch (IOException e) {
 									// TODO Auto-generated catch block
