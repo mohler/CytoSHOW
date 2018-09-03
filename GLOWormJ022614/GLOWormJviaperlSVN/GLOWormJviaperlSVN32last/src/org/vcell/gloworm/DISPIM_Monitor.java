@@ -359,6 +359,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 	private Roi[] origRoiBs;
 	private Roi[] ellipseRoiAs;
 	private Roi[] ellipseRoiBs;
+	private boolean lineageDecons;
+	private String paramsPath;
+	private int depthSkipFactor;
 
 	public Process getRegDeconProcess() {
 		return regDeconProcess;
@@ -1363,6 +1366,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				keyChannel = d.getKeyChannel();
 				abRelOriValue = d.getAbRelOriValue();
 				autodepth = d.isAutodepth();
+				lineageDecons = d.isLineage();
 				slaveChannel = keyChannel == 1 ? 2 : 1;
 				OpenDialog.setDefaultDirectory(Prefs.get("diSPIMmonitor.output", savePath));
 				String savePathParent = IJ.getDirectory("Select where to make Output Folder");
@@ -1375,6 +1379,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				
 				new File(savePath).mkdirs();
 				Prefs.set("diSPIMmonitor.output", new File(savePath).getParent());
+
+				if (lineageDecons) {
+					OpenDialog.setDefaultDirectory(Prefs.get("StarryNiteFeeder.parameterFileDirectory",""));
+					OpenDialog.setLastName(Prefs.get("StarryNiteFeeder.parameterFileName",""));
+					paramsPath = new OpenDialog("Parameter file for StarryNite?", OpenDialog.getDefaultDirectory(), OpenDialog.getLastName()).getPath();
+					Prefs.set("StarryNiteFeeder.parameterFileDirectory", new File(paramsPath).getParent()+File.separator);
+					Prefs.set("StarryNiteFeeder.parameterFileName", new File(paramsPath).getName());
+				}
 
 			} else {
 				doMipavDecon = false;
@@ -1603,7 +1615,16 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					int[] xBpoints = origRoiBs[pos].getPolygon().xpoints;
 					int[] yBpoints = origRoiBs[pos].getPolygon().ypoints;
 					int npoints = xBpoints.length;
+					
+					if (lineageDecons){
+						Roi snfRoi = (Roi) origRoiBs[pos].clone();
+						snfRoi.setLocation(0,0);
+						impBs[pos].setRoi(snfRoi);
+						IJ.saveAs(impBs[pos], "Selection", savePath + "Decon-Fuse_"
+								+ impAs[pos].getTitle().split(":")[0] +"originalSNF.roi");
 
+					}
+					
 					double angle =0;
 					if (origRoiBs[pos].getType() > Roi.OVAL) {
 						if (npoints == 4) {
@@ -3995,12 +4016,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				}
 
 				if (doProcessing[pos]) {
+					
 
 					if (impAs[pos].hasNullStack() || impAs[pos].getNFrames()<f-1)
 						continue;
 					if (impBs[pos].hasNullStack())
 						continue;
 
+					depthSkipFactor = ((int)(impBs[pos].getCalibration().pixelHeight/impBs[pos].getCalibration().pixelDepth));
+					
 					int fi=0;
 					dc1File = new File(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution1" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif");
 					dc2File = new File(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution2" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif");
@@ -4850,7 +4874,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 //				uploadDeconPrjThread.start();
 //			}
 
-
+		}
+		if (lineageDecons){
+			StarryNiteFeeder snf = new StarryNiteFeeder();
+			String deconPath = new File(savePath).getParent();
+			snf.run(""+deconPath +"|"+ paramsPath +"|"+ deconPath +"|"+ depthSkipFactor);
 		}
 	}
 

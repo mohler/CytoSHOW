@@ -203,7 +203,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				
 //				which format was this for, now conflicting with SN 16-bit stack output names...
 //				if (subFileName.matches(".*_t\\d+.*\\.tif")) {
-				if (subFileName.matches(".*_t\\d+\\D+\\.tif")) {
+				if (subFileName.matches(".*Decon_t\\d{4}\\.tif")) {
 					int tValue = Integer.parseInt(subFileName.replaceAll(".*_t(\\d+).*\\.tif", "$1"));
 					if (tValue > highT)
 						highT = tValue;
@@ -224,11 +224,14 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				public void run(){getSavedExtractedFileInfos(pos);}
 			}).start();
 		
-			while (infoLoadReport=="" || (infoLoadReport=="success" && infoCollectorArrayList.size()==0)) {
+			while (infoLoadReport=="" || (infoLoadReport=="success" && (savedInfoCollectorArrayList == null || savedInfoCollectorArrayList.size()==0))) {
+				IJ.log(infoLoadReport + (savedInfoCollectorArrayList != null?savedInfoCollectorArrayList.size():""));
+				
 				IJ.wait(10);
 			}
-			
-			if (infoCollectorArrayList.size()==0 || infoCollectorArrayList.get(0)[0].channelShifts == null){
+			IJ.log(infoLoadReport + (savedInfoCollectorArrayList != null?savedInfoCollectorArrayList.size():""));
+
+			if (savedInfoCollectorArrayList == null || savedInfoCollectorArrayList.size()==0 || savedInfoCollectorArrayList.get(0)[0].channelShifts == null){
 				dXA= 0;
 				dXB= 0;
 				dYA= 0;
@@ -236,12 +239,12 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				dZA= 0;
 				dZB= 0;
 			} else {
-				dXA= infoCollectorArrayList.get(0)[0].channelShifts[0];
-				dYA= infoCollectorArrayList.get(0)[0].channelShifts[1];
-				dZA= infoCollectorArrayList.get(0)[0].channelShifts[2];
-				dXB= infoCollectorArrayList.get(0)[0].channelShifts[3];
-				dYB= infoCollectorArrayList.get(0)[0].channelShifts[4];
-				dZB= infoCollectorArrayList.get(0)[0].channelShifts[5];
+				dXA= savedInfoCollectorArrayList.get(0)[0].channelShifts[0];
+				dYA= savedInfoCollectorArrayList.get(0)[0].channelShifts[1];
+				dZA= savedInfoCollectorArrayList.get(0)[0].channelShifts[2];
+				dXB= savedInfoCollectorArrayList.get(0)[0].channelShifts[3];
+				dYB= savedInfoCollectorArrayList.get(0)[0].channelShifts[4];
+				dZB= savedInfoCollectorArrayList.get(0)[0].channelShifts[5];
 
 			}
 
@@ -405,19 +408,19 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	}
 
 	public void getSavedExtractedFileInfos(int pos) {
-		if (new File(infoDir+"touchedFileFIs"+pos+".inf").canRead()) {
+		if (new File(infoDir+"touchedFileFIs"+pos+(isViewB?"B":"A")+".inf").canRead()) {
 			ObjectInputStream ois;
 			try {
 				ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(infoDir+"touchedFileFIs"+pos+(isViewB?"B":"A")+".inf")));
 				try {
 					savedInfoCollectorArrayList  = (ArrayList<FileInfo[]>) ois.readObject();
+					infoLoadReport = "success";
 
 				} catch (ClassNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}finally{
 					ois.close();
-					infoLoadReport = "success";
 				}
 			} catch (FileNotFoundException e1) {
 				// TODO Auto-generated catch block
@@ -456,6 +459,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					fivStacks.get(stkNum).infoArray = infoCollectorArrayList.get(stkNum);
 				}
 			}
+			infoLoadReport = "failure";
+
 		} else {
 			infoLoadReport = "failure";
 		}

@@ -9,6 +9,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -51,16 +52,22 @@ import ij.process.StackStatistics;
 public class StarryNiteFeeder implements PlugIn {
 
 	public void run(String arg) {
+		Boolean autoLaunch=false;
 		String[] argChunks = arg.split("\\|");
 		String sourceDir = "";
+		String[] sourceFileList = new String[0];
 		String paramsPath = "";
 		String outputDir = "";
 		int skipFactor = 6;
 		if (argChunks.length == 4) {
+			autoLaunch = true;
 			sourceDir = argChunks[0];
 			paramsPath = argChunks[1];
 			outputDir = argChunks[2];
 			skipFactor = Integer.parseInt(argChunks[3]);
+		}
+		if (sourceDir != ""){
+			sourceFileList = (new File(sourceDir).list());
 		}
 		if (paramsPath == "") {
 			OpenDialog.setDefaultDirectory(Prefs.get("StarryNiteFeeder.parameterFileDirectory",""));
@@ -79,12 +86,14 @@ public class StarryNiteFeeder implements PlugIn {
 			DirectoryChooser.setDefaultDirectory(Prefs.get("StarryNiteFeeder.outputPath",""));
 			outputDir = IJ.getDirectory("Output directory for StarryNite?");
 			Prefs.set("StarryNiteFeeder.outputPath", outputDir);
-		}
+		} 
 		final String outDir = outputDir;
 		
-		WaitForUserDialog wfud = new WaitForUserDialog("StarryNite Feeder", 
-														"Please position ROIs around the individual embryos to be lineaged.  \n\nThen adjust each embryo's t-slider to the last timepoint to be analyzed.  \n\nClick OK to launch analysis.");
-		wfud.show();
+		if (!autoLaunch){
+			WaitForUserDialog wfud = new WaitForUserDialog("StarryNite Feeder", 
+					"Please position ROIs around the individual embryos to be lineaged.  \n\nThen adjust each embryo's t-slider to the last timepoint to be analyzed.  \n\nClick OK to launch analysis.");
+			wfud.show();
+		}
 		
 		for (int w=1; w<=WindowManager.getImageCount(); w++){
 			ImagePlus imp = WindowManager.getImage(w);	
@@ -96,17 +105,27 @@ public class StarryNiteFeeder implements PlugIn {
 				greenMax = (int) impLUTs[0].max;
 				redMax = (int) impLUTs[1].max;
 			}
-			while (imp.getRoi() == null) {
+			
+			while (imp.getRoi() == null ) {
 				w++;
 				if (w>WindowManager.getImageCount()){
 					return;
 				}
 				imp = WindowManager.getImage(w);
+				for (String sourceDirFileName:sourceFileList){
+					if (sourceDirFileName.endsWith("originalSNF.roi")){
+						if (sourceDirFileName.startsWith(imp.getTitle())){
+							WindowManager.setTempCurrentImage(imp);
+							IJ.open(outDir + File.separator + sourceDirFileName);
+							WindowManager.setTempCurrentImage(null);
+						}
+					}
+				}
 			}
+			
 			Roi theROI = imp.getRoi();
 			int type = imp.getRoi().getType() ;
 			boolean flipStack = false;
-
 
 			if (theROI == null) {
 
@@ -115,8 +134,8 @@ public class StarryNiteFeeder implements PlugIn {
 				String title = imp.getTitle();
 				String savetitle = title.replace(":","_").replace(" ","").replace("_dummy","");
 				String savePath = outDir+savetitle;
-				new File(new File(savePath+"original.roi").getParent()).mkdirs();
-				IJ.save(imp, savePath+"original.roi");
+				new File(new File(savePath+"originalSNF.roi").getParent()).mkdirs();
+				IJ.saveAs(imp, "Selection", savePath+"originalSNF.roi");
 				int[] xpoints = imp.getRoi().getPolygon().xpoints;
 				int[] ypoints = imp.getRoi().getPolygon().ypoints;
 				int npoints = xpoints.length;
@@ -139,11 +158,11 @@ public class StarryNiteFeeder implements PlugIn {
 									);
 							imp.setRoi(ellipseRoi, false);
 							theROI = ellipseRoi;
-							IJ.saveAs(imp, "Selection", savePath +  "ellipse.roi");
+							IJ.saveAs(imp, "Selection", savePath +  "ellipseSNF.roi");
 
 							Roi rectRoi = new Roi(ellipseRoi.getBounds());
 							imp.setRoi(rectRoi, false);
-							IJ.saveAs(imp, "Selection", savePath + "rectangle.roi");
+							IJ.saveAs(imp, "Selection", savePath + "rectangleSNF.roi");
 
 						}else {
 							angle = new Line(xpoints[0], ypoints[0], xpoints[2], ypoints[2]).getAngle();
