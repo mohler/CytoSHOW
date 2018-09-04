@@ -484,9 +484,9 @@ public class StarryNiteFeeder implements PlugIn {
 //							IJ.log("matlab -nosplash -nodesktop -r ver;addpath('C:\\SN_Feeder_distribution_code\\'); detect_track_driver_allmatlab('"+impParameterPath+"','"+(outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\','aaa','','"+(outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\',0,true)");
 //
 //							Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", "matlab", "-nosplash", "-nodesktop", "-r", "ver;addpath('C:\\SN_Feeder_distribution_code\\'); detect_track_driver_allmatlab('"+impParameterPath+"','"+(outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\','aaa','','"+(outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\',0,true)"});
-							IJ.log("C:\\SNFeeder_compiled\\user\\detect_track_driver_allmatlab.exe "+impParameterPath.replace("\\", "\\\\")+"\\\\ " +(outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\ aaa  "+(outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\ 0 true");
+							IJ.log("C:\\SNFeeder_compiled\\user\\detect_track_driver_allmatlab.exe "+impParameterPath.replace("\\\\", "\\").replace("\\", "\\\\") +(outDir+subdir+"Skipped").replace("\\\\", "\\").replace("\\", "\\\\")+"\\\\ aaa emb "+(outDir+subdir+"Skipped").replace("\\\\", "\\").replace("\\", "\\\\")+"\\\\ 0 true");
 
-							Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", "C:\\SNFeeder_compiled\\user\\detect_track_driver_allmatlab.exe", impParameterPath.replace("\\", "\\\\")+"\\\\", (outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\", "aaa", "", (outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\", "0", "true"});
+							Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", "C:\\SNFeeder_compiled\\user\\detect_track_driver_allmatlab.exe", impParameterPath.replace("\\\\", "\\").replace("\\", "\\\\"), (outDir+subdir+"Skipped").replace("\\\\", "\\").replace("\\", "\\\\")+"\\\\", "aaa", "emb", (outDir+subdir+"Skipped").replace("\\\\", "\\").replace("\\", "\\\\")+"\\\\", "0", "true"});
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();

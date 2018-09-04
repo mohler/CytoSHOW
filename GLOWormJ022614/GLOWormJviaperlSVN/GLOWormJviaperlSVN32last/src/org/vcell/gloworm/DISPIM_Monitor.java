@@ -4864,7 +4864,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				}
 								
 			}
-			IJ.run("Tile");
+//			IJ.run("Tile");
 
 			String dirOrOMETiffDirectory = dirOrOMETiff;
 			if (!new File(dirOrOMETiff).isDirectory())
@@ -4884,9 +4884,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 		}
 		for (int pos=0; pos<pDim; pos++) {
-			ciDFs[pos].setPosition(1, ciDFs[pos].getNSlices()/2, posFrameEnd[pos]);
-			ciPrxs[pos].setPosition(1, 1, posFrameEnd[pos]);
-			ciPrys[pos].setPosition(1, 1, posFrameEnd[pos]);
+			if (doProcessing[pos]){
+				ciDFs[pos].setPosition(1, ciDFs[pos].getNSlices()/2, posFrameEnd[pos]);
+				ciPrxs[pos].setPosition(1, 1, posFrameEnd[pos]);
+				ciPrys[pos].setPosition(1, 1, posFrameEnd[pos]);
+			}
 		}
 
 	}
