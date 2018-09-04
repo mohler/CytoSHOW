@@ -1621,7 +1621,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						snfRoi.setLocation(0,0);
 						impBs[pos].setRoi(snfRoi);
 						IJ.saveAs(impBs[pos], "Selection", savePath + "Decon-Fuse_"
-								+ impAs[pos].getTitle().split(":")[0] +"originalSNF.roi");
+								+ impBs[pos].getTitle().split(":")[0] +"originalSNF.roi");
 
 					}
 					
@@ -2347,7 +2347,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 		
 		if (lineageDecons){
 			StarryNiteFeeder snf = new StarryNiteFeeder();
-			String deconPath = new File(savePath).getParent();
+			String deconPath = savePath;
 			snf.run(""+deconPath +"|"+ paramsPath +"|"+ deconPath +"|"+ depthSkipFactor);
 		}
 

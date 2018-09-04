@@ -87,7 +87,7 @@ public class StarryNiteFeeder implements PlugIn {
 			outputDir = IJ.getDirectory("Output directory for StarryNite?");
 			Prefs.set("StarryNiteFeeder.outputPath", outputDir);
 		} 
-		final String outDir = outputDir;
+		final String outDir = outputDir+ File.separator ;
 		
 		if (!autoLaunch){
 			WaitForUserDialog wfud = new WaitForUserDialog("StarryNite Feeder", 
@@ -107,23 +107,19 @@ public class StarryNiteFeeder implements PlugIn {
 			}
 			imp.killRoi();
 			
-			while (imp.getRoi() == null ) {
+			if (imp.getRoi() == null ) {
 				for (String sourceDirFileName:sourceFileList){
 					if (sourceDirFileName.endsWith("originalSNF.roi")){
 						if (sourceDirFileName.startsWith(imp.getTitle())){
 							WindowManager.setTempCurrentImage(imp);
-							IJ.open(outDir + File.separator + sourceDirFileName);
+							IJ.open(outDir+ sourceDirFileName);
 							WindowManager.setTempCurrentImage(null);
 						}
 					}
-				}
-				if (imp.getRoi() == null ) {
-					w++;
-					if (w>WindowManager.getImageCount()){
-						return;
-					}
-					imp = WindowManager.getImage(w);
-				}
+				}				
+			}
+			if (imp.getRoi() == null ) {
+				continue;
 			}
 			
 			Roi theROI = imp.getRoi();
@@ -137,7 +133,7 @@ public class StarryNiteFeeder implements PlugIn {
 				String title = imp.getTitle();
 				String savetitle = title.replace(":","_").replace(" ","").replace("_dummy","");
 				String savePath = outDir+savetitle;
-				new File(savePath+"originalSNF.roi").mkdirs();
+
 				IJ.saveAs(imp, "Selection", savePath+"originalSNF.roi");
 				int[] xpoints = imp.getRoi().getPolygon().xpoints;
 				int[] ypoints = imp.getRoi().getPolygon().ypoints;

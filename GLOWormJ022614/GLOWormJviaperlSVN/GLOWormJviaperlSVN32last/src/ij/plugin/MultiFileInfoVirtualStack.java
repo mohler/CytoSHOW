@@ -225,11 +225,11 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			}).start();
 		
 			while (infoLoadReport=="" || (infoLoadReport=="success" && (savedInfoCollectorArrayList == null || savedInfoCollectorArrayList.size()==0))) {
-				IJ.log(infoLoadReport + (savedInfoCollectorArrayList != null?savedInfoCollectorArrayList.size():""));
+//				IJ.log(infoLoadReport + (savedInfoCollectorArrayList != null?savedInfoCollectorArrayList.size():""));
 				
 				IJ.wait(10);
 			}
-			IJ.log(infoLoadReport + (savedInfoCollectorArrayList != null?savedInfoCollectorArrayList.size():""));
+//			IJ.log(infoLoadReport + (savedInfoCollectorArrayList != null?savedInfoCollectorArrayList.size():""));
 
 			if (savedInfoCollectorArrayList == null || savedInfoCollectorArrayList.size()==0 || savedInfoCollectorArrayList.get(0)[0].channelShifts == null){
 				dXA= 0;
