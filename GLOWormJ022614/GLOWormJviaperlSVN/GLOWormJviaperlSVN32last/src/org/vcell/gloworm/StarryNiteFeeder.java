@@ -105,13 +105,9 @@ public class StarryNiteFeeder implements PlugIn {
 				greenMax = (int) impLUTs[0].max;
 				redMax = (int) impLUTs[1].max;
 			}
+			imp.killRoi();
 			
 			while (imp.getRoi() == null ) {
-				w++;
-				if (w>WindowManager.getImageCount()){
-					return;
-				}
-				imp = WindowManager.getImage(w);
 				for (String sourceDirFileName:sourceFileList){
 					if (sourceDirFileName.endsWith("originalSNF.roi")){
 						if (sourceDirFileName.startsWith(imp.getTitle())){
@@ -120,6 +116,13 @@ public class StarryNiteFeeder implements PlugIn {
 							WindowManager.setTempCurrentImage(null);
 						}
 					}
+				}
+				if (imp.getRoi() == null ) {
+					w++;
+					if (w>WindowManager.getImageCount()){
+						return;
+					}
+					imp = WindowManager.getImage(w);
 				}
 			}
 			
@@ -134,7 +137,7 @@ public class StarryNiteFeeder implements PlugIn {
 				String title = imp.getTitle();
 				String savetitle = title.replace(":","_").replace(" ","").replace("_dummy","");
 				String savePath = outDir+savetitle;
-				new File(new File(savePath+"originalSNF.roi").getParent()).mkdirs();
+				new File(savePath+"originalSNF.roi").mkdirs();
 				IJ.saveAs(imp, "Selection", savePath+"originalSNF.roi");
 				int[] xpoints = imp.getRoi().getPolygon().xpoints;
 				int[] ypoints = imp.getRoi().getPolygon().ypoints;

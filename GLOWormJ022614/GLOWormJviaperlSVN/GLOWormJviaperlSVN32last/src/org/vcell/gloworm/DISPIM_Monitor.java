@@ -2344,7 +2344,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 			processFilesByMipavDeconvolution();
 		}
+		
+		if (lineageDecons){
+			StarryNiteFeeder snf = new StarryNiteFeeder();
+			String deconPath = new File(savePath).getParent();
+			snf.run(""+deconPath +"|"+ paramsPath +"|"+ deconPath +"|"+ depthSkipFactor);
+		}
 
+		
 
 //		IJ.run("Tile");
 
@@ -4023,7 +4030,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					if (impBs[pos].hasNullStack())
 						continue;
 
-					depthSkipFactor = ((int)(impBs[pos].getCalibration().pixelHeight/impBs[pos].getCalibration().pixelDepth));
+					depthSkipFactor = ((int)(impBs[pos].getCalibration().pixelDepth/impBs[pos].getCalibration().pixelHeight));
 					
 					int fi=0;
 					dc1File = new File(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution1" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif");
@@ -4874,11 +4881,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 //				uploadDeconPrjThread.start();
 //			}
 
-		}
-		if (lineageDecons){
-			StarryNiteFeeder snf = new StarryNiteFeeder();
-			String deconPath = new File(savePath).getParent();
-			snf.run(""+deconPath +"|"+ paramsPath +"|"+ deconPath +"|"+ depthSkipFactor);
 		}
 	}
 
