@@ -5430,7 +5430,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		String str = openZipNucleiAsString(zipPath);
 		String outStr = "";
 		String[] lines = str.split("\n");
-
+		StringBuilder sb = new StringBuilder();
+		
 		for (int i = 0; i < lines.length; i++) {
 			String nextLine = lines[i];
 			if (nextLine.length()==0) {
@@ -5448,7 +5449,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					lines[i] = nextLine.replace(cellData[7].trim(), ""+(1+((slicePos-1)*skipFactor)));
 				}
 			}
-			outStr = outStr +"\n"+ lines[i];
+//			outStr = outStr +"\n"+ lines[i];
+			sb.append("\n"+ lines[i]);
+			outStr = sb.toString();
 		}
 		saveZipNuclei(outStr, zipPath.replace("Skipped", "").replace(".zip", "Unskipped.zip"));
 	}
@@ -5595,6 +5598,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		String[] nucLines = nucString.split("\n");
 		try {
 			ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(new File(path)));
+			BufferedOutputStream bos = new BufferedOutputStream(zos);
 			String nucleiFrame = "";
 			String nucleiLabel = "";			
 			for (int i=0; i<nucLines.length; i++) {
@@ -5602,8 +5606,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					if (nucleiLabel != ""){
 						zos.putNextEntry(new ZipEntry(nucleiLabel));
 						byte[] data = nucleiFrame.getBytes();
-						zos.write(data, 0, data.length);					
-						zos.closeEntry();
+						bos.write(data, 0, data.length);					
+						bos.flush();
 					}
 					nucleiLabel = nucLines[i];
 					nucleiFrame = "";
