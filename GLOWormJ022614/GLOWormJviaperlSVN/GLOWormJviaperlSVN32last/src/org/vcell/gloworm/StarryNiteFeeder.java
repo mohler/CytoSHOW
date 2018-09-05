@@ -105,7 +105,7 @@ public class StarryNiteFeeder implements PlugIn {
 				greenMax = (int) impLUTs[0].max;
 				redMax = (int) impLUTs[1].max;
 			}
-			imp.killRoi();
+//			imp.killRoi();
 			
 			if (imp.getRoi() == null ) {
 				for (String sourceDirFileName:sourceFileList){
@@ -142,14 +142,19 @@ public class StarryNiteFeeder implements PlugIn {
 				double angle =0;
 				if (type > Roi.OVAL) {
 					if (npoints == 4) {
-						double angle0 = new Line(xpoints[0], ypoints[0], xpoints[1], ypoints[1]).getAngle();
-						double angle2 = new Line(xpoints[2], ypoints[2], xpoints[3], ypoints[3]).getAngle();
-						if (Math.abs(Math.abs(angle0)-Math.abs(angle2))>80 && Math.abs(Math.abs(angle0)-Math.abs(angle2))<100) {
-							angle = angle0;
-							flipStack = (angle0 - angle2 < 0);
-							IJ.log("flipStack = " + flipStack + ":angle0 - angle2 = " + angle0 +" - "+ angle2 + " = " + (angle0 - angle2));
+						double angleZero = new Line(xpoints[0], ypoints[0], xpoints[1], ypoints[1]).getAngle();
+						double angleTwo = new Line(xpoints[2], ypoints[2], xpoints[3], ypoints[3]).getAngle();
+						
+						double angleZeroPlusPi = angleZero + 180;
+						double angleTwoPlusPi = angleTwo + 180;
 
-							
+						double angleDelta = angleZeroPlusPi - angleTwoPlusPi;
+
+						if ( Math.abs(angleDelta)  >80 && Math.abs(angleDelta)  <100) {
+							angle = angleZero;
+							flipStack = (angleZeroPlusPi - angleTwoPlusPi < 0);
+							IJ.log("flipStack = " + flipStack + ":angle0PlusPi - angle2PlusPi = " + angleZeroPlusPi +" - "+ angleTwoPlusPi + " = " + (angleDelta));
+
 							Roi ellipseRoi = new EllipseRoi(xpoints[0], ypoints[0], xpoints[1], ypoints[1], 
 									(new Line(xpoints[2], ypoints[2], xpoints[3], ypoints[3])).getLength()
 									/

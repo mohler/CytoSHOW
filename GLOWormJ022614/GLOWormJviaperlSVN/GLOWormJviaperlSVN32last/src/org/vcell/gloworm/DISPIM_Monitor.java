@@ -1566,12 +1566,18 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 					double angle =0;
 					if (origRoiAs[pos].getType() > Roi.OVAL) {
+
 						if (npoints == 4) {
-							double angle0 = new Line(xApoints[0], yApoints[0], xApoints[1], yApoints[1]).getAngle();
-							double angle2 = new Line(xApoints[2], yApoints[2], xApoints[3], yApoints[3]).getAngle();
-							if (Math.abs(Math.abs(angle0)-Math.abs(angle2))>80 && Math.abs(Math.abs(angle0)-Math.abs(angle2))<100) {
-								angle = angle0;
-					
+							double angleZero = new Line(xApoints[0], yApoints[0], xApoints[1], yApoints[1]).getAngle();
+							double angleTwo = new Line(xApoints[2], yApoints[2], xApoints[3], yApoints[3]).getAngle();
+							double angleZeroPlusPi = angleZero + 180;
+							double angleTwoPlusPi = angleTwo + 180;
+
+							double angleDelta = angleZeroPlusPi - angleTwoPlusPi;
+
+							if ( Math.abs(angleDelta)  >80 && Math.abs(angleDelta)  <100) {
+								angle = angleZero;
+								
 								ellipseRoiAs[pos] = new EllipseRoi(xApoints[0], yApoints[0], xApoints[1], yApoints[1], 
 										(new Line(xApoints[2], yApoints[2], xApoints[3], yApoints[3])).getLength()
 										/
@@ -1584,6 +1590,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								impAs[pos].setRoi(rectRoiAs[pos], false);
 								IJ.saveAs(impAs[pos], "Selection", savePath +  "Pos" + pos + "A_"+(autodepth?(zFirstA[pos]+"-"+zLastA[pos]):"")+"rectangle.roi");
 
+								
 							}else {
 								angle = new Line(xApoints[0], yApoints[0], xApoints[2], yApoints[2]).getAngle();
 							}
@@ -1599,6 +1606,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				}
 				impAs[pos].setRoi(origRoiAs[pos]);
 
+				
 				if (origRoiBs[pos] == null) {
 
 				} else if (	(origRoiBs[pos].getType() != Roi.RECTANGLE
@@ -1627,11 +1635,17 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					
 					double angle =0;
 					if (origRoiBs[pos].getType() > Roi.OVAL) {
+
 						if (npoints == 4) {
-							double angle0 = new Line(xBpoints[0], yBpoints[0], xBpoints[1], yBpoints[1]).getAngle();
-							double angle2 = new Line(xBpoints[2], yBpoints[2], xBpoints[3], yBpoints[3]).getAngle();
-							if (Math.abs(Math.abs(angle0)-Math.abs(angle2))>80 && Math.abs(Math.abs(angle0)-Math.abs(angle2))<100) {
-								angle = angle0;
+							double angleZero = new Line(xBpoints[0], yBpoints[0], xBpoints[1], yBpoints[1]).getAngle();
+							double angleTwo = new Line(xBpoints[2], yBpoints[2], xBpoints[3], yBpoints[3]).getAngle();
+							double angleZeroPlusPi = angleZero + 180;
+							double angleTwoPlusPi = angleTwo + 180;
+
+							double angleDelta = angleZeroPlusPi - angleTwoPlusPi;
+
+							if ( Math.abs(angleDelta)  >80 && Math.abs(angleDelta)  <100) {
+								angle = angleZero;
 								
 								ellipseRoiBs[pos] = new EllipseRoi(xBpoints[0], yBpoints[0], xBpoints[1], yBpoints[1], 
 										(new Line(xBpoints[2], yBpoints[2], xBpoints[3], yBpoints[3])).getLength()
