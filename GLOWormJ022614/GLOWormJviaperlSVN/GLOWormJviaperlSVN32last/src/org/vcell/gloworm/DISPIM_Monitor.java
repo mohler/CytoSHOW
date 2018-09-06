@@ -1592,12 +1592,21 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 								
 							}else {
+								rectRoiAs[pos] = new Roi(origRoiAs[pos].getBounds());
+								impAs[pos].setRoi(rectRoiAs[pos], false);
+								IJ.saveAs(impAs[pos], "Selection", savePath +  "Pos" + pos + "A_"+(autodepth?(zFirstA[pos]+"-"+zLastA[pos]):"")+"rectangle.roi");
 								angle = new Line(xApoints[0], yApoints[0], xApoints[2], yApoints[2]).getAngle();
 							}
 						} else {
+							rectRoiAs[pos] = new Roi(origRoiAs[pos].getBounds());
+							impAs[pos].setRoi(rectRoiAs[pos], false);
+							IJ.saveAs(impAs[pos], "Selection", savePath +  "Pos" + pos + "A_"+(autodepth?(zFirstA[pos]+"-"+zLastA[pos]):"")+"rectangle.roi");
 							angle = new Line(xApoints[0], yApoints[0], xApoints[npoints/2], yApoints[npoints/2]).getAngle();
 						}
 					} else {
+						rectRoiAs[pos] = new Roi(origRoiAs[pos].getBounds());
+						impAs[pos].setRoi(rectRoiAs[pos], false);
+						IJ.saveAs(impAs[pos], "Selection", savePath +  "Pos" + pos + "A_"+(autodepth?(zFirstA[pos]+"-"+zLastA[pos]):"")+"rectangle.roi");
 						angle = origRoiAs[pos].getBounds().getHeight() > origRoiAs[pos].getBounds().getWidth()?90:0;
 					}
 
@@ -1661,12 +1670,21 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 								
 							}else {
+								rectRoiBs[pos] = new Roi(origRoiBs[pos].getBounds());
+								impBs[pos].setRoi(rectRoiBs[pos], false);
+								IJ.saveAs(impBs[pos], "Selection", savePath +  "Pos" + pos + "B_"+(autodepth?(zFirstB[pos]+"-"+zLastB[pos]):"")+"rectangle.roi");
 								angle = new Line(xBpoints[0], yBpoints[0], xBpoints[2], yBpoints[2]).getAngle();
 							}
 						} else {
+							rectRoiBs[pos] = new Roi(origRoiBs[pos].getBounds());
+							impBs[pos].setRoi(rectRoiBs[pos], false);
+							IJ.saveAs(impBs[pos], "Selection", savePath +  "Pos" + pos + "B_"+(autodepth?(zFirstB[pos]+"-"+zLastB[pos]):"")+"rectangle.roi");
 							angle = new Line(xBpoints[0], yBpoints[0], xBpoints[npoints/2], yBpoints[npoints/2]).getAngle();
 						}
 					} else {
+						rectRoiBs[pos] = new Roi(origRoiBs[pos].getBounds());
+						impBs[pos].setRoi(rectRoiBs[pos], false);
+						IJ.saveAs(impBs[pos], "Selection", savePath +  "Pos" + pos + "B_"+(autodepth?(zFirstB[pos]+"-"+zLastB[pos]):"")+"rectangle.roi");
 						angle = origRoiBs[pos].getBounds().getHeight() > origRoiBs[pos].getBounds().getWidth()?90:0;
 					}
 
