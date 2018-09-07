@@ -105,7 +105,7 @@ public class StarryNiteFeeder implements PlugIn {
 				greenMax = (int) impLUTs[0].max;
 				redMax = (int) impLUTs[1].max;
 			}
-//			imp.killRoi();
+			imp.killRoi();
 			
 			if (imp.getRoi() == null ) {
 				for (String sourceDirFileName:sourceFileList){

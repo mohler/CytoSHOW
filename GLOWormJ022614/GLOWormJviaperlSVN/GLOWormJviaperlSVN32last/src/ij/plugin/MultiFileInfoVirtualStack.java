@@ -641,9 +641,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			stackNumber++;
 		}
 
-		if (stackNumber >= fivStacks.size()){
-			stackNumber = fivStacks.size()-1;
-		}
+//		if (stackNumber >= fivStacks.size()){
+//			stackNumber = fivStacks.size()-1;
+//		}
 		
 		sliceNumber = n;
 
@@ -669,21 +669,21 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 		if (dimOrder.toLowerCase().matches("xy.*czt")) {
 			int adjN =0;
-			int zxc = zDim*cDim*(dimOrder.toLowerCase().matches(".*split.*c.*")?2:1);
-			while (n>zxc/vDim) {
-				adjN = adjN + (zxc);
-				n = n-(zxc/vDim);
+			int zc = zDim*cDim*(dimOrder.toLowerCase().matches(".*split.*c.*")?2:1);
+			while (n>zc/vDim) {
+				adjN = adjN + (zc);
+				n = n-(zc/vDim);
 			}
 			n=n+adjN;
 		}
 
-		while (stackNumber < fivStacks.size() && n > fivStacks.get(stackNumber).getSize()) {
-			n = n - fivStacks.get(stackNumber).getSize();
+		while (stackNumber < fivStacks.size() && n > fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1)) {
+			n = n - fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1);
 			stackNumber++;
 		}
-		if (stackNumber>=fivStacks.size()) {
-			stackNumber= fivStacks.size()-1;
-		}
+//		if (stackNumber>=fivStacks.size()) {
+//			stackNumber= fivStacks.size()-1;
+//		}
 		
 		sliceNumber = n;
 
@@ -719,9 +719,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				stackNumber++;
 			}
 			
-			if (stackNumber >= fivStacks.size()){
-				stackNumber = fivStacks.size()-1;
-			}
+//			if (stackNumber >= fivStacks.size()){
+//				stackNumber = fivStacks.size()-1;
+//			}
 			
 			initiateStack(stackNumber, 0);
 			ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber+(sliceNumber%2==0?0:dZ));
@@ -752,9 +752,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				stackNumber++;
 			}
 
-			if (stackNumber >= fivStacks.size()){
-				stackNumber = fivStacks.size()-1;
-			}
+//			if (stackNumber >= fivStacks.size()){
+//				stackNumber = fivStacks.size()-1;
+//			}
 			
 			initiateStack(stackNumber, 0);
 			ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber+(sliceNumber%(2)==0?0:dZ*2));
@@ -788,6 +788,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber+(sliceNumber%2==0?0:dZ));
 		}
 
+//		IJ.log(dimOrder+" "+stackNumber+" "+fivStacks.get(stackNumber).getSize()+" "+sliceNumber+" "+vSliceNumber+" ");
+		
 		if (ip instanceof FloatProcessor) {
 			//			ip = ip.convertToShort(false);
 		}
