@@ -188,9 +188,9 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 	/** Deletes the specified image, were 1<=n<=nSlices. */
 	public void deleteSlice(int n) {
+		if (nSlices<1) return;
 		if (n<1 || n>nSlices)
 			throw new IllegalArgumentException("Argument out of range: "+n);
-		if (nSlices<1) return;
 		for (int i=n; i<nSlices; i++)
 			infoArray[i-1] = infoArray[i];
 		if (nSlices-1<infoArray.length)
@@ -202,7 +202,7 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 		were 1<=n<=nSlices. Returns null if the stack is empty.
 	*/
 	public ImageProcessor getProcessor(int n) {
-		IJ.log(""+this.getInfo()[0].fileName);
+//		IJ.log(""+this.getInfo()[0].fileName);
 		if (n<1 || n>nSlices)
 			return getProcessor(1);
 //			throw new IllegalArgumentException("Argument out of range: "+n);

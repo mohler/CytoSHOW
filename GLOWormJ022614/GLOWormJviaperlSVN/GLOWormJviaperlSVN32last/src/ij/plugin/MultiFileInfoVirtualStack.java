@@ -636,18 +636,28 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			throw new IllegalArgumentException(outOfRange+n);
 		}
 		int stackNumber = 0;
-		while (stackNumber<fivStacks.size() && n > fivStacks.get(stackNumber).getSize()) {
-			n = n - fivStacks.get(stackNumber).getSize();
+
+		
+		while (stackNumber<fivStacks.size() && n > fivStacks.get(0).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1)) {
+			n = n - fivStacks.get(0).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1);
 			stackNumber++;
 		}
-
+		stackNumber--;
 //		if (stackNumber >= fivStacks.size()){
 //			stackNumber = fivStacks.size()-1;
 //		}
 		
-		sliceNumber = n;
-
-		fivStacks.get(stackNumber).deleteSlice(sliceNumber);
+		sliceNumber = n/(dimOrder.toLowerCase().matches(".*splitc.*")?2:1);
+		
+		if (dimOrder.toLowerCase().matches(".*splitc.*")){	//IS ALL THIS REALLY NECESSARY??? MIGHT BE FOR SPLITC
+			if (sliceNumber%2==0){
+				if (fivStacks.get(stackNumber).getSize()>0){
+					fivStacks.get(stackNumber).deleteSlice(sliceNumber>0?sliceNumber:1);
+				}
+			}
+		} else {
+			fivStacks.get(stackNumber).deleteSlice(sliceNumber);
+		}
 
 		nSlices--;
 	}

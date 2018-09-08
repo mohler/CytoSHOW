@@ -184,10 +184,10 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 	 */
 	public Dimension getPreferredSize() {
 		Dimension dim = new Dimension(0,0);
-		int width = bar.getPreferredSize().width;
+		int width = bar!=null?bar.getPreferredSize().width:0;
 		Dimension minSize = getMinimumSize();
 		if (width<minSize.width) width = minSize.width;		
-		int height = bar.getPreferredSize().height;
+		int height = bar!=null?bar.getPreferredSize().height:0;
 		dim = new Dimension(width, height);
 		return dim;
 	}
