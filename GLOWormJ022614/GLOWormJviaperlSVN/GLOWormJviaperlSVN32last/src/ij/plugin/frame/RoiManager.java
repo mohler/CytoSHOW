@@ -5453,7 +5453,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			sb.append("\n"+ lines[i]);
 			outStr = sb.toString();
 		}
-		saveZipNuclei(outStr, zipPath.replace("Skipped", "").replace(".zip", "Unskipped.zip"));
+		saveZipNuclei(outStr, zipPath.replace("Skipped", "").replace(".zip", "_Unskipped.zip"));
 	}
 
 	

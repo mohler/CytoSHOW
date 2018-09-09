@@ -148,11 +148,11 @@ public class StarryNiteFeeder implements PlugIn {
 						double angleZeroPlusPi = angleZero + 180;
 						double angleTwoPlusPi = angleTwo + 180;
 
-						double angleDelta = angleZeroPlusPi - angleTwoPlusPi;
+						double angleDelta = angleZeroPlusPi%180 - angleTwoPlusPi%180;
 
 						if ( Math.abs(angleDelta)  >80 && Math.abs(angleDelta)  <100) {
 							angle = angleZero;
-							flipStack = (angleZeroPlusPi - angleTwoPlusPi < 0);
+							flipStack = (angleZeroPlusPi - angleTwoPlusPi < 0 || angleZeroPlusPi - angleTwoPlusPi > 180);
 							IJ.log("flipStack = " + flipStack + ":angle0PlusPi - angle2PlusPi = " + angleZeroPlusPi +" - "+ angleTwoPlusPi + " = " + (angleDelta));
 
 							Roi ellipseRoi = new EllipseRoi(xpoints[0], ypoints[0], xpoints[1], ypoints[1], 
@@ -358,105 +358,6 @@ public class StarryNiteFeeder implements PlugIn {
 						new File(outDir+subdir).mkdirs();
 						new File(outDir+subdir+"Skipped").mkdirs();
 
-
-						// save a stack
-//						IJ.save(frameRedImp, outDir+subdir+"/aaa"+f+".tif");
-//						IJ.save(frameRedImpSkipped, outDir+subdir+"Skipped"+"/aaa"+f+".tif");
-
-						IJ.save(frameRGsplitImp, outDir+subdir+"/aaa_t"+f+".tif");
-						IJ.save(frameRGsplitImpSkipped, outDir+subdir+"Skipped"+"/aaa_t"+f+".tif");
-
-//						new File(outDir+subdir+"/image/tif16/").mkdirs();
-//						new File(outDir+subdir+"Skipped"+"/image/tif16/").mkdirs();
-//
-//
-//						String command16b = "format=TIFF start=1 name=aaa-t";
-//						command16b += ""+IJ.pad(f,3)+" digits=0 ";
-//						command16b += "save=";
-//
-//						String command16a = "["+outDir+subdir+"/image/tif16]";
-//						String command16askipped = "["+outDir+subdir+"Skipped"+"/image/tif16]";
-//						//print(command16+command162);
-//						IJ.run(frameRedImp, "StarryNite Image Sequence... ", command16b+command16a);
-//						IJ.run(frameRedImpSkipped, "StarryNite Image Sequence... ", command16b+command16askipped);
-//
-//
-//						if (redMax==65535) {
-//							ImageStatistics stkStats = new StackStatistics(frameRedImp);
-//							frameRedImp.getProcessor().setMinAndMax(0,stkStats.max);
-//							frameRedImpSkipped.getProcessor().setMinAndMax(0,stkStats.max);
-//						} else if (redMax>0) {
-//							frameRedImp.getProcessor().setMinAndMax(0, redMax);
-//							frameRedImpSkipped.getProcessor().setMinAndMax(0, redMax);
-//						}else {
-//							frameRedImp.getProcessor().setMinAndMax(0, 5000);
-//							frameRedImpSkipped.getProcessor().setMinAndMax(0, 5000);
-//						}
-//
-//						IJ.run(frameRedImp,"8-bit","");
-//						IJ.run(frameRedImpSkipped,"8-bit","");
-//
-//						new File(outDir+subdir+"/image/tif/").mkdirs();
-//						new File(outDir+subdir+"Skipped"+"/image/tif/").mkdirs();
-//
-//
-//						String command1 = "format=TIFF start=1 name=aaa-t";
-//						command1 += ""+IJ.pad(f,3)+" digits=0 ";
-//						command1 += "save=";
-//
-//						String command2 = "["+outDir+subdir+"/image/tif]";
-//						String command2skipped = "["+outDir+subdir+"Skipped"+"/image/tif]";
-//						//print(command1+command2);
-//						IJ.run(frameRedImp, "StarryNite Image Sequence... ", command1+command2);
-//						IJ.run(frameRedImpSkipped, "StarryNite Image Sequence... ", command1+command2skipped);
-//
-//
-//
-//						// Green channel:
-//						new File(outDir+subdir+"/image/tifr16/").mkdirs();
-//						new File(outDir+subdir+"Skipped"+"/image/tifr16/").mkdirs();
-//
-//
-//						String command16 = "format=TIFF start=1 name=aaa-t";
-//						command16 += ""+IJ.pad(f,3)+" digits=0 ";
-//						command16 += "save=";
-//
-//						String command162 = "["+outDir+subdir+"/image/tifr16]";
-//						String command162skipped = "["+outDir+subdir+"Skipped"+"/image/tifr16]";
-//						//print(command16+command162);
-//						IJ.run(frameGreenImp, "StarryNite Image Sequence... ", command16+command162);
-//						IJ.run(frameGreenImpSkipped, "StarryNite Image Sequence... ", command16+command162skipped);
-//
-//						if (greenMax==65535) {
-//							ImageStatistics stkStats = new StackStatistics(frameGreenImp);
-//							frameGreenImp.getProcessor().setMinAndMax(0,stkStats.max);
-//							frameGreenImpSkipped.getProcessor().setMinAndMax(0,stkStats.max);
-//						} else if (greenMax>0) {
-//							frameGreenImp.getProcessor().setMinAndMax(0, greenMax);
-//							frameGreenImpSkipped.getProcessor().setMinAndMax(0, greenMax);
-//						}else {
-//							frameGreenImp.getProcessor().setMinAndMax(0, 5000);
-//							frameGreenImpSkipped.getProcessor().setMinAndMax(0, 5000);
-//						}
-//
-//						IJ.run(frameGreenImp,"8-bit","");
-//						IJ.run(frameGreenImpSkipped,"8-bit","");
-//
-//						new File(outDir+subdir+"/image/tifr/").mkdirs();
-//						new File(outDir+subdir+"Skipped"+"/image/tifr/").mkdirs();
-//
-//
-//						command1 = "format=TIFF start=1 name=aaa-t";
-//						command1 += ""+IJ.pad(f,3)+" digits=0 ";
-//						command1 += "save=";
-//
-//						command2 = "["+outDir+subdir+"/image/tifr]";
-//						command2skipped = "["+outDir+subdir+"Skipped"+"/image/tifr]";
-//						//print(command1+command2);
-//						IJ.run(frameGreenImp, "StarryNite Image Sequence... ", command1+command2);
-//						IJ.run(frameGreenImpSkipped, "StarryNite Image Sequence... ", command1+command2skipped);
-
-
 						frameRedImp.flush();
 						frameRedImpSkipped.flush();
 						frameGreenImp.flush();
@@ -479,39 +380,37 @@ public class StarryNiteFeeder implements PlugIn {
 
 				Thread linThread = new Thread(new Runnable() {
 					public void run() {
-						if(new File((outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa__edited.xml").canRead()) {
-							new File((outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa__edited.xml").renameTo(
-									new File((outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa_"+
-											(""+new File((outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa__edited.xml").lastModified()).substring(0, 10)+"_edited.xml"));
+						if(new File((outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa_emb_edited.xml").canRead()) {
+							new File((outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa_emb_edited.xml").renameTo(
+									new File((outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa_emb_"+
+											(""+new File((outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa_emb_edited.xml").lastModified()).substring(0, 10)+"_edited.xml"));
 						}
 
 						try {
-//							IJ.log("matlab -nosplash -nodesktop -r ver;addpath('C:\\SN_Feeder_distribution_code\\'); detect_track_driver_allmatlab('"+impParameterPath+"','"+(outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\','aaa','','"+(outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\',0,true)");
-//
-//							Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", "matlab", "-nosplash", "-nodesktop", "-r", "ver;addpath('C:\\SN_Feeder_distribution_code\\'); detect_track_driver_allmatlab('"+impParameterPath+"','"+(outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\','aaa','','"+(outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\',0,true)"});
 							IJ.log("C:\\SNFeeder_compiled\\user\\detect_track_driver_allmatlab.exe "+impParameterPath.replace("\\\\", "\\").replace("\\", "\\\\") +(outDir+subdir+"Skipped").replace("\\\\", "\\").replace("\\", "\\\\")+"\\\\ aaa emb "+(outDir+subdir+"Skipped").replace("\\\\", "\\").replace("\\", "\\\\")+"\\\\ 0 true");
 
-							Runtime.getRuntime().exec(new String[]{"cmd", "/c", "start", "C:\\SNFeeder_compiled\\user\\detect_track_driver_allmatlab.exe", impParameterPath.replace("\\\\", "\\").replace("\\", "\\\\"), (outDir+subdir+"Skipped").replace("\\\\", "\\").replace("\\", "\\\\")+"\\\\", "aaa", "emb", (outDir+subdir+"Skipped").replace("\\\\", "\\").replace("\\", "\\\\")+"\\\\", "0", "true"});
+							Runtime.getRuntime().exec(new String[]{"cmd","/c","start","/min","/wait","C:\\SNFeeder_compiled\\user\\detect_track_driver_allmatlab.exe", impParameterPath.replace("\\\\", "\\").replace("\\", "\\\\"), (outDir+subdir+"Skipped").replace("\\\\", "\\").replace("\\", "\\\\")+"\\\\", "aaa", "emb", (outDir+subdir+"Skipped").replace("\\\\", "\\").replace("\\", "\\\\")+"\\\\", "0", "true"});
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
-						while (!(new File((outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa__edited.xml")).canRead()) {
+						while (!(new File((outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa_emb_edited.xml")).canRead()) {
 							IJ.wait(1000);
+							IJ.log("awaiting "+(outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa_emb_edited.xml");
 						}
 						
-						String unskippedXmlText = IJ.openAsString((outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa__edited.xml");
+						String unskippedXmlText = IJ.openAsString((outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa_emb_edited.xml");
 						unskippedXmlText = unskippedXmlText.replace("Skipped", "");
-						unskippedXmlText = unskippedXmlText.replace("aaa__edited.zip", "aaa_Unskipped.zip");
+						unskippedXmlText = unskippedXmlText.replace("aaa_emb_edited.zip", "aaa_emb_Unskipped.zip");
 						unskippedXmlText = unskippedXmlText.replace("zRes=\"1\"", "zRes=\"0.1625\"");
-						unskippedXmlText = unskippedXmlText.replace("planeEnd=\"295\"", "planeEnd=\"320\"");
-						IJ.saveString(unskippedXmlText, (outDir+subdir).replace("\\", "\\\\")+"\\\\aaa__edited.xml");
+						unskippedXmlText = unskippedXmlText.replace("planeEnd=\"296\"", "planeEnd=\"320\"");
+						IJ.saveString(unskippedXmlText, (outDir+subdir).replace("\\", "\\\\")+"\\\\aaa_emb_edited.xml");
 						
-						RoiManager.respaceStarryNiteNuclei((outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa_.zip", 6);
+						RoiManager.respaceStarryNiteNuclei((outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa_emb.zip", 6);
 						
 						Process linMeasure = null;
 						try {
-							ProcessBuilder linMeasurePB = new ProcessBuilder(new String[]{"cmd", "/c", "start", "java", "-Xmx500m", "-cp", "acebatch2.jar", "Measure1", (outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa__edited.xml"});
+							ProcessBuilder linMeasurePB = new ProcessBuilder(new String[]{"cmd","/c","start","/min","/wait","java", "-Xmx500m", "-cp", "acebatch2.jar", "Measure1", (outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa_emb_edited.xml"});
 							linMeasurePB.directory(new File("C:\\SN_Feeder_distribution_code\\"));
 							linMeasure = linMeasurePB.start();
 						} catch (IOException e) {
@@ -530,7 +429,7 @@ public class StarryNiteFeeder implements PlugIn {
 						}
 						Process linGreenExtract = null;
 						try {
-							ProcessBuilder linGreenExtractPB = new ProcessBuilder(new String[]{"cmd", "/c", "start", "java", "-cp", "acebatch2.jar", "SixteenBitGreenExtractor1", (outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa__edited.xml", ""+endPoint});
+							ProcessBuilder linGreenExtractPB = new ProcessBuilder(new String[]{"cmd","/c","start","/min","/wait","java", "-cp", "acebatch2.jar", "SixteenBitGreenExtractor1", (outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa_emb_edited.xml", ""+endPoint});
 							linGreenExtractPB.directory(new File("C:\\SN_Feeder_distribution_code\\"));
 							linGreenExtract = linGreenExtractPB.start();
 						} catch (IOException e) {

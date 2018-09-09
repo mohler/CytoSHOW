@@ -1573,7 +1573,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							double angleZeroPlusPi = angleZero + 180;
 							double angleTwoPlusPi = angleTwo + 180;
 
-							double angleDelta = angleZeroPlusPi - angleTwoPlusPi;
+							double angleDelta = angleZeroPlusPi%180 - angleTwoPlusPi%180;
 
 							if ( Math.abs(angleDelta)  >80 && Math.abs(angleDelta)  <100) {
 								angle = angleZero;
@@ -1651,7 +1651,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							double angleZeroPlusPi = angleZero + 180;
 							double angleTwoPlusPi = angleTwo + 180;
 
-							double angleDelta = angleZeroPlusPi - angleTwoPlusPi;
+							double angleDelta = angleZeroPlusPi%180 - angleTwoPlusPi%180;
 
 							if ( Math.abs(angleDelta)  >80 && Math.abs(angleDelta)  <100) {
 								angle = angleZero;
