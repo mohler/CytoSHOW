@@ -358,6 +358,13 @@ public class StarryNiteFeeder implements PlugIn {
 						new File(outDir+subdir).mkdirs();
 						new File(outDir+subdir+"Skipped").mkdirs();
 
+
+						// save a stack
+
+						IJ.save(frameRGsplitImp, outDir+subdir+"/aaa_t"+f+".tif");
+						IJ.save(frameRGsplitImpSkipped, outDir+subdir+"Skipped"+"/aaa_t"+f+".tif");
+
+
 						frameRedImp.flush();
 						frameRedImpSkipped.flush();
 						frameGreenImp.flush();
