@@ -52,7 +52,8 @@ import ij.process.StackStatistics;
 public class StarryNiteFeeder implements PlugIn {
 
 	public void run(String arg) {
-		Boolean autoLaunch=false;
+		boolean autoLaunch=false;
+		boolean concurrentWithDecon=false;
 		String[] argChunks = arg.split("\\|");
 		String sourceDir = "";
 		String[] sourceFileList = new String[0];
@@ -61,11 +62,13 @@ public class StarryNiteFeeder implements PlugIn {
 		int skipFactor = 6;
 		if (argChunks.length == 4) {
 			autoLaunch = true;
+			concurrentWithDecon=true;
 			sourceDir = argChunks[0];
 			paramsPath = argChunks[1];
 			outputDir = argChunks[2];
-			skipFactor = Integer.parseInt(argChunks[3]);
+			skipFactor = Integer.parseInt(argChunks[3]);			
 		}
+
 		if (sourceDir != ""){
 			sourceFileList = (new File(sourceDir).list());
 		}
@@ -176,7 +179,7 @@ public class StarryNiteFeeder implements PlugIn {
 					}
 				}
 
-//				angle = 180+ angle;
+				angle = 180+ angle;
 
 				int wasC = imp.getChannel();
 				int wasZ = imp.getSlice();
