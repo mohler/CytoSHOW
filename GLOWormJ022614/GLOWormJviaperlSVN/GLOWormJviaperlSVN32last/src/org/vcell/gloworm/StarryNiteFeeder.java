@@ -155,6 +155,8 @@ public class StarryNiteFeeder implements PlugIn {
 
 						if ( Math.abs(angleDelta)  >80 && Math.abs(angleDelta)  <100) {
 							angle = angleZero;
+
+//??? is flipstack correct??  or should it use deltas?!!?						
 							flipStack = (angleZeroPlusPi - angleTwoPlusPi < 0 || angleZeroPlusPi - angleTwoPlusPi > 180);
 							IJ.log("flipStack = " + flipStack + ":angle0PlusPi - angle2PlusPi = " + angleZeroPlusPi +" - "+ angleTwoPlusPi + " = " + (angleDelta));
 
