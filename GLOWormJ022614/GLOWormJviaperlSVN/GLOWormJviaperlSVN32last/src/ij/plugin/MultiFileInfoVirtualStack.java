@@ -399,7 +399,10 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					//						IJ.log("fi "+(f+1)+infoArray[f].directory+File.separator+infoArray[f].fileName);
 
 				}
-
+				if (fivStacks.get(0).getInfo()[0].fileName.matches(".*Decon-Fuse_.*aaa_.*")){
+					this.cDim = 2;
+					dimOrder = "xySplitCzt";
+				}
 				open(show);
 			}
 
@@ -541,6 +544,11 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			zDim = fivStacks.get(0).nSlices/(cDim/channelDirectories);
 //			tDim = fivStacks.size()/cDim;
 			this.tDim =nSlices/(this.cDim*this.zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
+		} else if (fivStacks.get(0).getInfo()[0].fileName.matches(".*Decon-Fuse_.*aaa_.*")){
+			zDim = fivStacks.get(0).nSlices;
+			cDim = 2;
+			tDim = fivStacks.size();
+			nSlices = cDim*zDim*tDim;
 		} else {
 			zDim = fivStacks.get(0).nSlices;
 			nSlices = /*channelDirectories**/ fivStacks.size() * zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1);
@@ -772,8 +780,14 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			ip.setInterpolationMethod(ImageProcessor.BICUBIC);
 			ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
 
-			if (ip.getWidth()==2048) //NIBIB splitview setup(?)
-			{
+			if (fivStacks.get(0).getInfo()[0].fileName.matches(".*Decon-Fuse_.*aaa_.*")){
+				int w = ip.getWidth();
+				int h = ip.getHeight();
+				int xOri = 0+((1-(n+1)%2)*(w/2));
+				int yOri = 0;
+				ip.flipHorizontal();
+				ip.setRoi(xOri, yOri, w/2, h);
+			}else if (ip.getWidth()==2048) { //NIBIB splitview setup(?)
 				dX=2;
 				dY=0;
 				int xOri = 256+((1-(n+1)%2)*(1024));
@@ -784,7 +798,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				int xOri = 0+((0+(n+1)%2)*(1024));
 				int yOri = 0+((1-(n+1)%2)*(0));
 				ip.setRoi(xOri, yOri, 512, 512);
-			}
+			} 
 			ip = ip.crop();
 			ip.translate((1-n%2)*dX, (1-n%2)*dY);
 		}

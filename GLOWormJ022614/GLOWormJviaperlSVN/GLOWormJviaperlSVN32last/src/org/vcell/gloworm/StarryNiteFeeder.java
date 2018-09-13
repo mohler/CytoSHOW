@@ -108,19 +108,23 @@ public class StarryNiteFeeder implements PlugIn {
 				greenMax = (int) impLUTs[0].max;
 				redMax = (int) impLUTs[1].max;
 			}
-			imp.killRoi();
 			
-			if (imp.getRoi() == null ) {
-				for (String sourceDirFileName:sourceFileList){
-					if (sourceDirFileName.endsWith("originalSNF.roi")){
-						if (sourceDirFileName.startsWith(imp.getTitle())){
-							WindowManager.setTempCurrentImage(imp);
-							IJ.open(outDir+ sourceDirFileName);
-							WindowManager.setTempCurrentImage(null);
+			if (autoLaunch){
+				imp.killRoi();
+
+				if (imp.getRoi() == null ) {
+					for (String sourceDirFileName:sourceFileList){
+						if (sourceDirFileName.endsWith("originalSNF.roi")){
+							if (sourceDirFileName.startsWith(imp.getTitle())){
+								WindowManager.setTempCurrentImage(imp);
+								IJ.open(outDir+ sourceDirFileName);
+								WindowManager.setTempCurrentImage(null);
+							}
 						}
-					}
-				}				
+					}				
+				}
 			}
+			
 			if (imp.getRoi() == null ) {
 				continue;
 			}
@@ -181,7 +185,6 @@ public class StarryNiteFeeder implements PlugIn {
 					}
 				}
 
-				angle = 180+ angle;
 
 				int wasC = imp.getChannel();
 				int wasZ = imp.getSlice();
