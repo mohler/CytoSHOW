@@ -569,6 +569,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		ImagePlus imp = new ImagePlus(
 				dirChunks[dirChunks.length-1]+"_"+
 						fivImpZero.getTitle().replaceAll("\\d+\\.", "\\."), this);
+		if (fivStacks.get(0).getInfo()[0].fileName.matches(".*Decon-Fuse_.*aaa_.*")){  //StarryNiteFeeder output
+			imp.setTitle(fivStacks.get(0).getInfo()[0].fileName.replaceAll("(.*)(Decon-Fuse_.*)("+Pattern.quote(File.separator)+"aaa_.*)", "$2"));
+		}
 				
 		imp.setOpenAsHyperStack(true);			
 //		int cztDims = cDim*zDim*fivStacks.size();
