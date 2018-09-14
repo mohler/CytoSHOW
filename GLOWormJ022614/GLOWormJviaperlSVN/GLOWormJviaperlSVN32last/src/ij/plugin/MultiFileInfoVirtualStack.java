@@ -780,12 +780,12 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			ip.setInterpolationMethod(ImageProcessor.BICUBIC);
 			ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
 
-			if (fivStacks.get(0).getInfo()[0].fileName.matches(".*Decon-Fuse_.*aaa_.*")){
+			if (fivStacks.get(0).getInfo()[0].fileName.matches(".*Decon-Fuse_.*aaa_.*")){  //StarryNiteFeeder output
 				int w = ip.getWidth();
 				int h = ip.getHeight();
 				int xOri = 0+((1-(n+1)%2)*(w/2));
 				int yOri = 0;
-				ip.flipHorizontal();
+
 				ip.setRoi(xOri, yOri, w/2, h);
 			}else if (ip.getWidth()==2048) { //NIBIB splitview setup(?)
 				dX=2;
@@ -800,6 +800,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				ip.setRoi(xOri, yOri, 512, 512);
 			} 
 			ip = ip.crop();
+			if (fivStacks.get(0).getInfo()[0].fileName.matches(".*Decon-Fuse_.*aaa_.*")){  //StarryNiteFeeder output
+				ip.flipHorizontal();
+			}
 			ip.translate((1-n%2)*dX, (1-n%2)*dY);
 		}
 		if (dimOrder == "xyzct") {
