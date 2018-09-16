@@ -4829,6 +4829,43 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								else
 									ciDFs[pos].setMode(CompositeImage.GRAYSCALE);
 
+								if (win==null) {
+									ciDFs[pos].show();
+									WindowManager.group(impBs[pos], ciDFs[pos]);
+									ciDFs[pos].setPosition(1, ciDFs[pos].getNSlices()/2, ciDFs[pos].getNFrames());
+
+								}else {
+									int oldW = win.getWidth();
+									int oldH = win.getHeight();
+									int oldC = win.getImagePlus().getChannel();
+									int oldZ = win.getImagePlus().getSlice();
+									int oldT = win.getImagePlus().getFrame();
+									double oldMag = win.getCanvas().getMagnification();
+									double oldMin = win.getImagePlus()
+											.getDisplayRangeMin();
+									double oldMax = win.getImagePlus()
+											.getDisplayRangeMax();
+									boolean oldEdges = win.getImagePlus().getStack().isEdges();
+									ciDFs[pos].copyLuts(win.getImagePlus());
+
+//									win.setVisible(false);	
+									win.setImage(ciDFs[pos]);
+									ciDFs[pos].setWindow(win);
+									win.updateImage(ciDFs[pos]);
+									win.getImagePlus().getStack().setEdges(oldEdges);
+									win.setSize(oldW, oldH);
+									((StackWindow) win).addScrollbars(ciDFs[pos]);
+									win.getCanvas().setMagnification(oldMag);
+									win.getImagePlus().updateAndDraw();
+									win.getImagePlus().setPosition(oldC, oldZ, oldT);
+									win.getImagePlus().setDisplayRange(oldMin, oldMax);
+									win.setSize(win.getSize().width,
+											win.getSize().height);
+
+//									win.setVisible(true);	
+								}
+
+
 
 ////////								
 
@@ -4846,21 +4883,21 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								String sourceDir = savePath;
 								String outDir = outputDir+ File.separator ;
 								String[] sourceFileList = new File(sourceDir).list();
-									currentDeconResultImp.killRoi();
+								currentDeconResultImp.killRoi();
 
-									if (currentDeconResultImp.getRoi() == null ) {
-										for (String sourceDirFileName:sourceFileList){
-											if (sourceDirFileName.endsWith("originalSNF.roi")){
-												if (sourceDirFileName.startsWith(currentDeconResultImp.getTitle())){
-													WindowManager.setTempCurrentImage(currentDeconResultImp);
-													IJ.open(outDir+ sourceDirFileName);
-													WindowManager.setTempCurrentImage(null);
-												}
+								if (currentDeconResultImp.getRoi() == null ) {
+									for (String sourceDirFileName:sourceFileList){
+										if (sourceDirFileName.endsWith("originalSNF.roi")){
+											if (sourceDirFileName.startsWith(currentDeconResultImp.getTitle())){
+												WindowManager.setTempCurrentImage(currentDeconResultImp);
+												IJ.open(outDir+ sourceDirFileName);
+												WindowManager.setTempCurrentImage(null);
 											}
-										}				
-									}
-								
-								
+										}
+									}				
+								}
+
+
 								if (currentDeconResultImp.getRoi() == null ) {
 									continue;
 								}
@@ -5135,42 +5172,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							
 //////////							
 								
-
-								if (win==null) {
-									ciDFs[pos].show();
-									WindowManager.group(impBs[pos], ciDFs[pos]);
-									ciDFs[pos].setPosition(1, ciDFs[pos].getNSlices()/2, ciDFs[pos].getNFrames());
-
-								}else {
-									int oldW = win.getWidth();
-									int oldH = win.getHeight();
-									int oldC = win.getImagePlus().getChannel();
-									int oldZ = win.getImagePlus().getSlice();
-									int oldT = win.getImagePlus().getFrame();
-									double oldMag = win.getCanvas().getMagnification();
-									double oldMin = win.getImagePlus()
-											.getDisplayRangeMin();
-									double oldMax = win.getImagePlus()
-											.getDisplayRangeMax();
-									boolean oldEdges = win.getImagePlus().getStack().isEdges();
-									ciDFs[pos].copyLuts(win.getImagePlus());
-
-//									win.setVisible(false);	
-									win.setImage(ciDFs[pos]);
-									ciDFs[pos].setWindow(win);
-									win.updateImage(ciDFs[pos]);
-									win.getImagePlus().getStack().setEdges(oldEdges);
-									win.setSize(oldW, oldH);
-									((StackWindow) win).addScrollbars(ciDFs[pos]);
-									win.getCanvas().setMagnification(oldMag);
-									win.getImagePlus().updateAndDraw();
-									win.getImagePlus().setPosition(oldC, oldZ, oldT);
-									win.getImagePlus().setDisplayRange(oldMin, oldMax);
-									win.setSize(win.getSize().width,
-											win.getSize().height);
-
-//									win.setVisible(true);	
-								}
 
 								dfProjXmfivs = new MultiFileInfoVirtualStack(prxPath+File.separator, "Color", false);
 								dfProjYmfivs = new MultiFileInfoVirtualStack(pryPath+File.separator, "Color", false);
