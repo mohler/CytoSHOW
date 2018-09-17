@@ -373,100 +373,150 @@ public class Animator implements PlugIn {
 
 	
 	void stopAnimation() {
-		if (swin.getAnimationSelector() != null) 
-			swin.getAnimationSelector().repaint();
-		swin.setAnimate(false);
-		IJ.wait(500+(int)(1000.0/animationRate));
-		swin.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame());
-		imp.updateStatusbarValue();
-		imp.unlock(); 
-		if (swin.getAnimationSelector() != null) 
-			swin.getAnimationSelector().updatePlayPauseIcon();
-
+		if (swin != null) {
+			if (swin.getAnimationSelector() != null) 
+				swin.getAnimationSelector().repaint();
+			swin.setAnimate(false);
+			IJ.wait(500+(int)(1000.0/animationRate));
+			swin.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame());
+			imp.updateStatusbarValue();
+			imp.unlock(); 
+			if (swin.getAnimationSelector() != null)
+				swin.getAnimationSelector().updatePlayPauseIcon();
+			if (swin.getAnimationZSelector() != null)
+				swin.getAnimationZSelector().updatePlayPauseIcon();
+		}
 	}
 
 	void stopZAnimation() {
-		if (swin.getAnimationZSelector() != null) 
-			swin.getAnimationZSelector().repaint();
+		if (swin != null) {
+			if (swin.getAnimationZSelector() != null) 
+				swin.getAnimationZSelector().repaint();
 
-		swin.setZAnimate(false);
-		IJ.wait(500+(int)(1000.0/animationRate));
-		imp.unlock(); 
-		if (swin.getAnimationZSelector() != null) {
-			swin.getAnimationSelector().updatePlayPauseIcon();
-			swin.getAnimationZSelector().updatePlayPauseIcon();
+			swin.setZAnimate(false);
+			IJ.wait(500+(int)(1000.0/animationRate));
+			imp.unlock(); 
+			if (swin.getAnimationSelector() != null)
+				swin.getAnimationSelector().updatePlayPauseIcon();
+			if (swin.getAnimationZSelector() != null)
+				swin.getAnimationZSelector().updatePlayPauseIcon();
 		}
 
 	}
 
 	void startAnimation() {
-		int first=firstFrame, last=lastFrame;
-		if (first<1 || first>nSlices || last<1 || last>nSlices)
+		if (swin != null) {
+			int first=firstFrame, last=lastFrame;
+			if (first<1 || first>nSlices || last<1 || last>nSlices)
 			{first=1; last=nSlices;}
-		if (swin.getAnimate())
+			if (swin.getAnimate())
 			{stopAnimation(); return;}
-		imp.unlock(); // so users can adjust brightness/contrast/threshold
-		swin.setAnimate(true);
-		long time, nextTime=System.currentTimeMillis();
-		Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-		int sliceIncrement = 1;
-		Calibration cal = imp.getCalibration();
-		if (cal.fps!=0.0)
-			animationRate = cal.fps;
-		if (animationRate<0.1)
-			animationRate = 1.0;
-		int frames = imp.getNFrames();
-		int slices = imp.getNSlices();
-		
-		//CASE OF A SPECIFIED T DIMENSION
-		if (imp.isDisplayedHyperStack() && frames>1) {
-			int frame = imp.getFrame();
-			first = 1;
-			last = frames;
-			while (swin.getAnimate()) {
-				if (swin.getZAnimate()) {
-					frame = imp.getFrame();
-					continue;
-				}
-				time = System.currentTimeMillis();
-				if (time<nextTime)
-					IJ.wait((int)(nextTime-time));
-				else
-					Thread.yield();
-				nextTime += (long)(1000.0/animationRate);
-				frame += sliceIncrement;
-				if (frame<first) {
-					frame = first+1;
-					sliceIncrement = 1;
-				}
-				if (frame>last) {
-					if (cal.loop) {
-						frame = last-1;
-						sliceIncrement = -1;
-					} else {
-						frame = first;
+			imp.unlock(); // so users can adjust brightness/contrast/threshold
+			swin.setAnimate(true);
+			long time, nextTime=System.currentTimeMillis();
+			Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+			int sliceIncrement = 1;
+			Calibration cal = imp.getCalibration();
+			if (cal.fps!=0.0)
+				animationRate = cal.fps;
+			if (animationRate<0.1)
+				animationRate = 1.0;
+			int frames = imp.getNFrames();
+			int slices = imp.getNSlices();
+
+			//CASE OF A SPECIFIED T DIMENSION
+			if (imp.isDisplayedHyperStack() && frames>1) {
+				int frame = imp.getFrame();
+				first = 1;
+				last = frames;
+				while (swin.getAnimate()) {
+					if (swin.getZAnimate()) {
+						frame = imp.getFrame();
+						continue;
+					}
+					time = System.currentTimeMillis();
+					if (time<nextTime)
+						IJ.wait((int)(nextTime-time));
+					else
+						Thread.yield();
+					nextTime += (long)(1000.0/animationRate);
+					frame += sliceIncrement;
+					if (frame<first) {
+						frame = first+1;
 						sliceIncrement = 1;
 					}
-				}
-				imp.setPosition(imp.getChannel(), imp.getSlice(), frame);
-				swin.getAnimationSelector().updatePlayPauseIcon();
-				swin.getAnimationZSelector().updatePlayPauseIcon();
+					if (frame>last) {
+						if (cal.loop) {
+							frame = last-1;
+							sliceIncrement = -1;
+						} else {
+							frame = first;
+							sliceIncrement = 1;
+						}
+					}
+					imp.setPosition(imp.getChannel(), imp.getSlice(), frame);
+					if (swin.getAnimationSelector() != null)
+						swin.getAnimationSelector().updatePlayPauseIcon();
+					if (swin.getAnimationZSelector() != null)
+						swin.getAnimationZSelector().updatePlayPauseIcon();
 
+				}
+				return;
 			}
-			return;
-		}
 
-		//CASE WITHOUT A SPECIFIED T DIMENSION, BUT WITH A SPECIFIED Z DIMENSION
-		if (imp.isDisplayedHyperStack() && slices>1) {
-			slice = imp.getSlice();
-			first = 1;
-			last = slices;
-			while (swin.getAnimate()) {
-				if (swin.getZAnimate()) {
-					slice = imp.getFrame();
-					continue;
+			//CASE WITHOUT A SPECIFIED T DIMENSION, BUT WITH A SPECIFIED Z DIMENSION
+			if (imp.isDisplayedHyperStack() && slices>1) {
+				slice = imp.getSlice();
+				first = 1;
+				last = slices;
+				while (swin.getAnimate()) {
+					if (swin.getZAnimate()) {
+						slice = imp.getFrame();
+						continue;
+					}
+					time = System.currentTimeMillis();
+					if (time<nextTime)
+						IJ.wait((int)(nextTime-time));
+					else
+						Thread.yield();
+					nextTime += (long)(1000.0/animationRate);
+					slice += sliceIncrement;
+					if (slice<first) {
+						slice = first+1;
+						sliceIncrement = 1;
+					}
+					if (slice>last) {
+						if (cal.loop) {
+							slice = last-1;
+							sliceIncrement = -1;
+						} else {
+							slice = first;
+							sliceIncrement = 1;
+						}
+					}
+					imp.setPosition(imp.getChannel(), slice, imp.getFrame());
+					if (swin.getAnimationSelector() != null)
+						swin.getAnimationSelector().updatePlayPauseIcon();
+					if (swin.getAnimationZSelector() != null)
+						swin.getAnimationZSelector().updatePlayPauseIcon();
+
 				}
+				return;
+			}
+
+			//CASE WITHOUT A SPECIFIED T OR Z DIMENSION, NOT A HYPERSTACK
+			long startTime=System.currentTimeMillis();
+			int count = 0;
+			double fps = 0.0;
+			while (swin.getAnimate()) {
 				time = System.currentTimeMillis();
+				count++;
+				if (time>startTime+1000L) {
+					startTime=System.currentTimeMillis();
+					fps=count;
+					count=0;
+				}
+				IJ.showStatus((int)(fps+0.5) + " fps");
 				if (time<nextTime)
 					IJ.wait((int)(nextTime-time));
 				else
@@ -486,106 +536,142 @@ public class Animator implements PlugIn {
 						sliceIncrement = 1;
 					}
 				}
-				imp.setPosition(imp.getChannel(), slice, imp.getFrame());
-				swin.getAnimationSelector().updatePlayPauseIcon();
-				swin.getAnimationZSelector().updatePlayPauseIcon();
+				swin.showSlice(slice);
+				if (swin.getAnimationSelector() != null)
+					swin.getAnimationSelector().updatePlayPauseIcon();
+				if (swin.getAnimationZSelector() != null)
+					swin.getAnimationZSelector().updatePlayPauseIcon();
 
 			}
-			return;
-		}
-		
-		//CASE WITHOUT A SPECIFIED T OR Z DIMENSION, NOT A HYPERSTACK
-		long startTime=System.currentTimeMillis();
-		int count = 0;
-		double fps = 0.0;
-		while (swin.getAnimate()) {
-			time = System.currentTimeMillis();
-			count++;
-			if (time>startTime+1000L) {
-				startTime=System.currentTimeMillis();
-				fps=count;
-				count=0;
-			}
-			IJ.showStatus((int)(fps+0.5) + " fps");
-			if (time<nextTime)
-				IJ.wait((int)(nextTime-time));
-			else
-				Thread.yield();
-			nextTime += (long)(1000.0/animationRate);
-			slice += sliceIncrement;
-			if (slice<first) {
-				slice = first+1;
-				sliceIncrement = 1;
-			}
-			if (slice>last) {
-				if (cal.loop) {
-					slice = last-1;
-					sliceIncrement = -1;
-				} else {
-					slice = first;
-					sliceIncrement = 1;
-				}
-			}
-			swin.showSlice(slice);
-			swin.getAnimationSelector().updatePlayPauseIcon();
-			swin.getAnimationZSelector().updatePlayPauseIcon();
-
 		}
 		return;
 	}
 	
 	
 	void startZAnimation() {
-		int firstZ=firstSlice, lastZ=lastSlice;
-		int firstT=firstFrame, lastT=lastFrame;
-		if (firstZ<1 || firstZ>nSlices || lastZ<1 || lastZ>nSlices)
+		if (swin != null) {
+			int firstZ=firstSlice, lastZ=lastSlice;
+			int firstT=firstFrame, lastT=lastFrame;
+			if (firstZ<1 || firstZ>nSlices || lastZ<1 || lastZ>nSlices)
 			{firstZ=1; lastZ=nSlices;}
-		if (firstT<1 || firstT>nSlices || lastT<1 || lastT>nSlices)
+			if (firstT<1 || firstT>nSlices || lastT<1 || lastT>nSlices)
 			{firstT=1; lastT=nSlices;}
-		
-		wasTAnimating = swin.getAnimate();
 
-		if (swin.getZAnimate()){
+			wasTAnimating = swin.getAnimate();
+
+			if (swin.getZAnimate()){
+				if (wasTAnimating) {
+					//IJ.log("wasTAnimating1 " + wasTAnimating);
+					stopAnimation();  //stops T
+				}
+				stopZAnimation(); 
+				if (wasTAnimating && !swin.getAnimate()){
+					//IJ.log("wasTAnimating2 " + wasTAnimating);
+					wasTAnimating = false;
+					startAnimation();  //restarts T
+				}
+				return;
+			}
+
 			if (wasTAnimating) {
-				//IJ.log("wasTAnimating1 " + wasTAnimating);
+				//IJ.log("wasTAnimating3 " + wasTAnimating);
 				stopAnimation();  //stops T
 			}
-			stopZAnimation(); 
-			if (wasTAnimating && !swin.getAnimate()){
-				//IJ.log("wasTAnimating2 " + wasTAnimating);
-				wasTAnimating = false;
-				startAnimation();  //restarts T
-			}
-			return;
-		}
+			imp.unlock(); // so users can adjust brightness/contrast/threshold
+			swin.setZAnimate(true);
+			long time, nextTime=System.currentTimeMillis();
+			Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+			int sliceIncrement = 1;
+			int frameIncrement = 1;
+			Calibration cal = imp.getCalibration();
+			if (cal.fps!=0.0)
+				animationRate = cal.fps;
+			if (animationRate<0.1)
+				animationRate = 1.0;
+			int frames = imp.getNFrames();
+			int slices = imp.getNSlices();
 
-		if (wasTAnimating) {
-			//IJ.log("wasTAnimating3 " + wasTAnimating);
-			stopAnimation();  //stops T
-		}
-		imp.unlock(); // so users can adjust brightness/contrast/threshold
-		swin.setZAnimate(true);
-		long time, nextTime=System.currentTimeMillis();
-		Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-		int sliceIncrement = 1;
-		int frameIncrement = 1;
-		Calibration cal = imp.getCalibration();
-		if (cal.fps!=0.0)
-			animationRate = cal.fps;
-		if (animationRate<0.1)
-			animationRate = 1.0;
-		int frames = imp.getNFrames();
-		int slices = imp.getNSlices();
-		
-		if (imp.isDisplayedHyperStack() && slices>1) {
-			int slice = imp.getSlice();
-			int frame = imp.getFrame();
-			firstZ = 1;
-			lastZ = slices;
-			firstT = 1;
-			lastT = frames;
+			if (imp.isDisplayedHyperStack() && slices>1) {
+				int slice = imp.getSlice();
+				int frame = imp.getFrame();
+				firstZ = 1;
+				lastZ = slices;
+				firstT = 1;
+				lastT = frames;
+				while (swin.getZAnimate()) {
+					time = System.currentTimeMillis();
+					if (time<nextTime)
+						IJ.wait((int)(nextTime-time));
+					else
+						Thread.yield();
+					nextTime += (long)(1000.0/animationRate);
+					slice += sliceIncrement;
+					if (slice<firstZ) {
+						slice = firstZ+1;
+						sliceIncrement = 1;
+					}
+					if (slice>lastZ) {
+						if (cal.loop) {
+							slice = lastZ-1;
+							sliceIncrement = -1;
+						} else {
+							slice = firstZ;
+							sliceIncrement = 1;
+						}
+					}
+					if (swin.getAnimate() ) {
+						frame += frameIncrement;
+						if (frame < firstT) {
+							frame = firstT + 1;
+							frameIncrement = 1;
+						}
+						if (frame > lastT) {
+							if (cal.loop) {
+								frame = lastT - 1;
+								frameIncrement = -1;
+							} else {
+								frame = firstT;
+								frameIncrement = 1;
+							}
+						}
+					}
+					if (Orthogonal_Views.isOrthoViewsImage(imp)) {
+						imp.setProcessor(Orthogonal_Views.getInstance().imageStack.getProcessor(slice));
+						imp.zeroUpdateMode = true;
+						imp.setPositionWithoutUpdate(imp.getChannel(), slice, imp.getFrame());
+						//				imp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
+						imp.zeroUpdateMode = false;
+						Orthogonal_Views.getInstance().update();
+					} else
+						imp.setPosition(imp.getChannel(), slice, frame);
+					if (wasTAnimating && !swin.getAnimate()){
+						//IJ.log("wasTAnimating4 " + wasTAnimating);
+						wasTAnimating = false;
+						swin.setAnimate(true);
+					}
+					//IJ.log("ZAnimating...");
+					if (swin.getAnimationSelector() != null)
+						swin.getAnimationSelector().updatePlayPauseIcon();
+					if (swin.getAnimationZSelector() != null)
+						swin.getAnimationZSelector().updatePlayPauseIcon();
+
+				}
+				return;
+			}
+
+			//CASE WITHOUT A SPECIFIED T OR Z DIMENSION, NOT A HYPERSTACK
+			long startTime=System.currentTimeMillis();
+			int count = 0;
+			double fps = 0.0;
 			while (swin.getZAnimate()) {
 				time = System.currentTimeMillis();
+				count++;
+				if (time>startTime+1000L) {
+					startTime=System.currentTimeMillis();
+					fps=count;
+					count=0;
+				}
+				IJ.showStatus((int)(fps+0.5) + " fps");
 				if (time<nextTime)
 					IJ.wait((int)(nextTime-time));
 				else
@@ -605,81 +691,12 @@ public class Animator implements PlugIn {
 						sliceIncrement = 1;
 					}
 				}
-				if (swin.getAnimate() ) {
-					frame += frameIncrement;
-					if (frame < firstT) {
-						frame = firstT + 1;
-						frameIncrement = 1;
-					}
-					if (frame > lastT) {
-						if (cal.loop) {
-							frame = lastT - 1;
-							frameIncrement = -1;
-						} else {
-							frame = firstT;
-							frameIncrement = 1;
-						}
-					}
-				}
-				if (Orthogonal_Views.isOrthoViewsImage(imp)) {
-					imp.setProcessor(Orthogonal_Views.getInstance().imageStack.getProcessor(slice));
-					imp.zeroUpdateMode = true;
-					imp.setPositionWithoutUpdate(imp.getChannel(), slice, imp.getFrame());
-					//				imp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
-					imp.zeroUpdateMode = false;
-					Orthogonal_Views.getInstance().update();
-				} else
-					imp.setPosition(imp.getChannel(), slice, frame);
-				if (wasTAnimating && !swin.getAnimate()){
-					//IJ.log("wasTAnimating4 " + wasTAnimating);
-					wasTAnimating = false;
-					swin.setAnimate(true);
-				}
-				//IJ.log("ZAnimating...");
-				if (swin != null && swin.getAnimationSelector() !=null){
+				swin.showSlice(slice);
+				if (swin.getAnimationSelector() != null)
 					swin.getAnimationSelector().updatePlayPauseIcon();
+				if (swin.getAnimationZSelector() != null)
 					swin.getAnimationZSelector().updatePlayPauseIcon();
-				}
-
 			}
-			return;
-		}
-
-		//CASE WITHOUT A SPECIFIED T OR Z DIMENSION, NOT A HYPERSTACK
-		long startTime=System.currentTimeMillis();
-		int count = 0;
-		double fps = 0.0;
-		while (swin.getZAnimate()) {
-			time = System.currentTimeMillis();
-			count++;
-			if (time>startTime+1000L) {
-				startTime=System.currentTimeMillis();
-				fps=count;
-				count=0;
-			}
-			IJ.showStatus((int)(fps+0.5) + " fps");
-			if (time<nextTime)
-				IJ.wait((int)(nextTime-time));
-			else
-				Thread.yield();
-			nextTime += (long)(1000.0/animationRate);
-			slice += sliceIncrement;
-			if (slice<firstZ) {
-				slice = firstZ+1;
-				sliceIncrement = 1;
-			}
-			if (slice>lastZ) {
-				if (cal.loop) {
-					slice = lastZ-1;
-					sliceIncrement = -1;
-				} else {
-					slice = firstZ;
-					sliceIncrement = 1;
-				}
-			}
-			swin.showSlice(slice);
-			swin.getAnimationSelector().updatePlayPauseIcon();
-			swin.getAnimationZSelector().updatePlayPauseIcon();
 		}
 		return;
 	}
