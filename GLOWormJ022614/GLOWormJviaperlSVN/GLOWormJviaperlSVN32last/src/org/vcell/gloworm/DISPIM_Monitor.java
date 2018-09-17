@@ -4095,7 +4095,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								continue;
 
 							depthSkipFactor = ((int)(pdB/phB));
-							if (dc1File.canRead() && dc2File.canRead()){
+							
+							
+							if (new File(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution1" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif").canRead() 
+									&& new File(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution2" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif").canRead()){
 								continue;
 							}
 							if (new File(savePath + "CropBkgdSub" + File.separator  + "SPIMA"+pos+"-"+f+"-1_1.tif").canRead() &&

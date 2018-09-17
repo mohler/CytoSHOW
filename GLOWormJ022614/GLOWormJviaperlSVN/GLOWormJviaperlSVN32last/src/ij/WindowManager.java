@@ -2,12 +2,15 @@ package ij;
 import ij.plugin.Converter;
 import ij.plugin.frame.Recorder;
 import ij.plugin.frame.Editor; 
+import ij.plugin.frame.RoiManager;
 import ij.macro.Interpreter;
 import ij.text.TextWindow;
 import ij.plugin.frame.PlugInFrame;
 import ij.util.Tools;
+
 import java.awt.*;
 import java.util.*;
+
 import ij.gui.*;
 
 /** This class consists of static methods used to manage ImageJ's windows. */
@@ -415,7 +418,9 @@ public class WindowManager {
 			return true;
 		for (int i=0; i<nonImages.length; i++) {
 			Frame frame = nonImages[i];
-			if ((frame instanceof PlugInFrame) && !(frame instanceof Editor))
+			if (frame instanceof RoiManager)
+				((RoiManager)frame).dispose();
+			else if ((frame instanceof PlugInFrame) && !(frame instanceof Editor))
 				((PlugInFrame)frame).close();
 			else if (frame instanceof TextWindow)
 				((TextWindow)frame).close();

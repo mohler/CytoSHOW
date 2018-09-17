@@ -636,8 +636,10 @@ public class Animator implements PlugIn {
 					swin.setAnimate(true);
 				}
 				//IJ.log("ZAnimating...");
-				swin.getAnimationSelector().updatePlayPauseIcon();
-				swin.getAnimationZSelector().updatePlayPauseIcon();
+				if (swin != null && swin.getAnimationSelector() !=null){
+					swin.getAnimationSelector().updatePlayPauseIcon();
+					swin.getAnimationZSelector().updatePlayPauseIcon();
+				}
 
 			}
 			return;

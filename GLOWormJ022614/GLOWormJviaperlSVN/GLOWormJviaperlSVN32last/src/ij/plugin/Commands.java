@@ -77,6 +77,8 @@ public class Commands implements PlugIn {
 		Frame frame = WindowManager.getFrontWindow();
 		if (frame==null || (Interpreter.isBatchMode() && frame instanceof ImageWindow))
 			closeImage(imp);
+		else if (frame instanceof RoiManager)
+			((RoiManager)frame).dispose();
 		else if (frame instanceof PlugInFrame)
 			((PlugInFrame)frame).close();
 		else if (frame instanceof TextWindow)

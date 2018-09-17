@@ -3,6 +3,7 @@ import ij.*;
 import ij.measure.Calibration;
 import ij.plugin.*;
 import ij.plugin.frame.PlugInFrame;
+import ij.plugin.frame.RoiManager;
 //import ij.plugin.frame;
 import ij.gui.*;
 import ij.io.*;
