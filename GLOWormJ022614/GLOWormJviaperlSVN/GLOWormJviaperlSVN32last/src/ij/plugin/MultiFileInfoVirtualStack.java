@@ -185,7 +185,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				}
 				for (ArrayList<String> al:channelArrayLists) {
 					for (int zap=al.size();zap>=lowestSpan;zap--) {
-						if (al.size()>zap) {
+						if (al.size()>zap && zap>0) {
 							cumulativeSubFileArrayList.remove(al.get(zap-1));
 						}
 					}
