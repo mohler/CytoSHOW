@@ -364,6 +364,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 	private boolean lineageDecons;
 	private String paramsPath;
 	private int depthSkipFactor;
+	private boolean haveAxesRoiA;
+	private boolean haveAxesRoiDF;
+	private boolean haveAxesRoiB;
 
 	public Process getRegDeconProcess() {
 		return regDeconProcess;
@@ -1578,6 +1581,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							double angleDelta = angleZeroPlusPi%180 - angleTwoPlusPi%180;
 
 							if ( Math.abs(angleDelta)  >80 && Math.abs(angleDelta)  <100) {
+								haveAxesRoiA = true;
 								angle = angleZero;
 								
 								ellipseRoiAs[pos] = new EllipseRoi(xApoints[0], yApoints[0], xApoints[1], yApoints[1], 
@@ -1656,6 +1660,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							double angleDelta = angleZeroPlusPi%180 - angleTwoPlusPi%180;
 
 							if ( Math.abs(angleDelta)  >80 && Math.abs(angleDelta)  <100) {
+								haveAxesRoiB = true;
 								angle = angleZero;
 								
 								ellipseRoiBs[pos] = new EllipseRoi(xBpoints[0], yBpoints[0], xBpoints[1], yBpoints[1], 
@@ -4993,6 +4998,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 												double angleDelta = angleZeroPlusPi%180 - angleTwoPlusPi%180;
 
 												if ( Math.abs(angleDelta)  >80 && Math.abs(angleDelta)  <100) {
+													haveAxesRoiDF = true;
 													angle = angleZero;
 
 													//??? is flipstack correct??  or should it use deltas?!!?						
