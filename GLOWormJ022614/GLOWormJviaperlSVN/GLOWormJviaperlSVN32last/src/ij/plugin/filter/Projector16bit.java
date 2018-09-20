@@ -194,7 +194,7 @@ public class Projector16bit implements PlugInFilter, TextListener {
 			lastC = firstC;
 
 		if (imp.getWindow()!=null) {
-			imp.getWindow().setEnabled(false);
+			imp.getWindow().setVisible(false);
 		}
 
 		Frame rm = imp.getRoiManager();
@@ -272,7 +272,7 @@ public class Projector16bit implements PlugInFilter, TextListener {
 					ImagePlus impD = null;
 
 					if ( imp.getNFrames() >= 1 || (roi!=null && roi.isArea() && roi.getType()!=Roi.RECTANGLE) ) {
-						impD = (new MQTVS_Duplicator()).run(imp, loopC, loopC, firstZ, lastZ, loopT, loopT, 1, sliceSpecificROIs, tempTime);
+						impD = (new MQTVS_Duplicator()).run(imp, loopC, loopC, firstZ, lastZ, loopT, loopT, 1, sliceSpecificROIs, tempTime, false);
 					}
 					impD.setCalibration(imp.getCalibration());
 					//					impD.show();
@@ -445,7 +445,7 @@ public class Projector16bit implements PlugInFilter, TextListener {
 					imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() - 1);
 				}
 
-				imp.setRoi(manualRoi);
+//				imp.setRoi(manualRoi);
 //				if(imp.getWindow()!=null)
 //					imp.getWindow().setVisible(true);
 
@@ -586,7 +586,7 @@ public class Projector16bit implements PlugInFilter, TextListener {
 						.getDisplayRangeMin();
 				double oldMax = buildWin.getImagePlus()
 						.getDisplayRangeMax();
-				buildWin.setVisible(false);				
+//				buildWin.setVisible(false);				
 				buildImp.setWindow(buildWin);
 				buildWin.updateImage(buildImp);
 				buildWin.setSize(oldW, oldH);
@@ -602,7 +602,7 @@ public class Projector16bit implements PlugInFilter, TextListener {
 			}
 		}		
 		if (imp.getWindow()!=null)
-			imp.getWindow().setEnabled(true);
+			imp.getWindow().setVisible(true);
 		
 		if (Projector.getTempDir()=="")
 			buildWin.setVisible(true);				

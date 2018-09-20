@@ -1283,6 +1283,16 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 
 	private boolean blinkStop;
 
+	private boolean fastCopyMode;
+
+	public boolean isFastCopyMode() {
+		return fastCopyMode;
+	}
+
+	public void setFastCopyMode(boolean fastCopyMode) {
+		this.fastCopyMode = fastCopyMode;
+	}
+
 	/**
 	Returns the pixel value at (x,y) as a 4 element array. Grayscale values
 	are retuned in the first element. RGB values are returned in the first
@@ -1647,7 +1657,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			else
 				ip.resetRoi();
 		}
-		if (this.isDisplayedHyperStack()){
+		if (this.isDisplayedHyperStack() && !fastCopyMode){
 			blinkOn=true;
 			if (blinkTimer!=null) {
 				oldBlinkTimer = blinkTimer;

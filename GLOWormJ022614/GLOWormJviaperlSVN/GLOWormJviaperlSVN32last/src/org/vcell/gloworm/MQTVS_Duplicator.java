@@ -215,7 +215,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 		if ( imp.isComposite()) {
 			compositeMode = ((CompositeImage)imp).getMode();
 			if (!copyMergedImage)
-				((CompositeImage)imp).setMode(3);
+				((CompositeImage)imp).setMode(CompositeImage.GRAYSCALE);
 
 		}
 		finalFrames = 0;
@@ -258,7 +258,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 
 		//		String stackPath = "";
 		ImagePlus impT = null;
-		
+		imp.setFastCopyMode(true);
 		for (int t=firstT; t<=lastT; t=t+stepT) {
 			ImageStack stackT = new ImageStack(width, height);
 			long memoryFree = Runtime.getRuntime().freeMemory();
@@ -277,14 +277,13 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 					for (int c=firstC; c<=lastC; c++) {
 						IJ.runMacro("print(\"\\\\Update:***Duplicating selected region(s) of time-point "+t+", channel "+c+", slice "+z+"...*** \")");
 
-						imp.setPosition(c, z, t);			// THIS LINE CHANGED FROM ORIGINAL PLUGIN.  THIS CHANGE MAKES IT COMPATIBLE WITH MQTVS					/*********/         //ip = imp.getProcessor();						// ALSO SEEMS TO WORK FINE WITH non-virtual HyperStacks
+						imp.setPositionWithoutUpdate(c, z, t);			// THIS LINE CHANGED FROM ORIGINAL PLUGIN.  THIS CHANGE MAKES IT COMPATIBLE WITH MQTVS					/*********/         //ip = imp.getProcessor();						// ALSO SEEMS TO WORK FINE WITH non-virtual HyperStacks
 
 						inMin[c-1] = imp.getChannelProcessor().getMin();
 						inMax[c-1] = imp.getChannelProcessor().getMax();
 						cm[c-1] = imp.getChannelProcessor().getColorModel();
 
 						if (sliceSpecificROIs && rm != null) roi = rm.getSliceSpecificRoi(imp, z, t);
-						imp.setRoi(roi);
 
 						int n1 = imp.getStackIndex(c, z, t);
 						if (imp.isComposite())
@@ -328,6 +327,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 			}
 			
 		}
+		imp.setFastCopyMode(false);
 		imp.killRoi();
 		if (wasBurnIn)
 			((VirtualStack)stack).setBurnIn(true);
@@ -457,7 +457,8 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 		dupTitle = showHSDialog(imp, newTitle);
 		if (dupTitle==null)
 			return null;
-		imp.getCanvas().setVisible(false);
+//		imp.getCanvas().setVisible(false);
+		imp.getWindow().setVisible(false);
 		ImagePlus imp2 = null;
 		Roi roi = imp.getRoi();
 		Roi manualRoi = null;
@@ -609,7 +610,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 		}
 		if(imp.getWindow()!=null)
 			imp.getWindow().dupButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/download_button_animatedStill.png")));
-		imp.getCanvas().setVisible(true);
+		imp.getWindow().setVisible(true);
 		//		IJ.saveAs(imp2, "Tiff", "");
 		return imp2;
 

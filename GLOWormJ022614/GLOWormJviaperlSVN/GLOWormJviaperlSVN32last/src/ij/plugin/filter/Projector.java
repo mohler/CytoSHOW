@@ -202,7 +202,7 @@ public class Projector implements PlugInFilter, TextListener {
 			lastC = firstC;
 
 		if (imp.getWindow()!=null) {
-			imp.getWindow().setEnabled(false);
+			imp.getWindow().setVisible(false);
 		}
 
 		Frame rm = imp.getRoiManager();
@@ -282,7 +282,7 @@ public class Projector implements PlugInFilter, TextListener {
 					ImagePlus impD = null;
 
 					if ( imp.getNFrames() >= 1 || (roi!=null && roi.isArea() && roi.getType()!=Roi.RECTANGLE) ) {
-						impD = (new MQTVS_Duplicator()).run(imp, loopC, loopC, firstZ, lastZ, loopT, loopT, 1, sliceSpecificROIs, tempTime);
+						impD = (new MQTVS_Duplicator()).run(imp, loopC, loopC, firstZ, lastZ, loopT, loopT, 1, sliceSpecificROIs, tempTime, false);
 					}
 					impD.setCalibration(imp.getCalibration());
 					//					impD.show();
@@ -455,7 +455,7 @@ public class Projector implements PlugInFilter, TextListener {
 					imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() - 1);
 				}
 
-				imp.setRoi(manualRoi);
+//				imp.setRoi(manualRoi);
 //				if(imp.getWindow()!=null)
 //					imp.getWindow().setVisible(true);
 
@@ -567,6 +567,7 @@ public class Projector implements PlugInFilter, TextListener {
 				while (WindowManager.getImage("Concatenated Stacks") != null) {
 					WindowManager.getImage("Concatenated Stacks").close();
 				}
+				
 				if (WindowManager.getImage("BuildStack")!= null) 
 					WindowManager.getImage("BuildStack").close();
 
@@ -595,7 +596,7 @@ public class Projector implements PlugInFilter, TextListener {
 						.getDisplayRangeMin();
 				double oldMax = buildWin.getImagePlus()
 						.getDisplayRangeMax();
-				buildWin.setVisible(false);				
+//				buildWin.setVisible(false);				
 				buildImp.setWindow(buildWin);
 				buildWin.updateImage(buildImp);
 				buildWin.setSize(oldW, oldH);
