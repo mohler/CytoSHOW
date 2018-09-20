@@ -243,6 +243,7 @@ public class Projector16bit implements PlugInFilter, TextListener {
 		if (!correctSaveRoot) {
 			saveRootDir = (new File(saveRootDir)).getParent();
 		}
+		
 		File tempDirFile = null;
 		if (Projector.getTempDir()!="")
 			tempDirFile = new File(Projector.getTempDir());
@@ -250,6 +251,32 @@ public class Projector16bit implements PlugInFilter, TextListener {
 			tempDirFile = new File(saveRootDir + File.separator + saveRootPrefix +"Proj_"+imp.getTitle().replaceAll("[,. ;:]","").replace(File.separator, "_") + tempTime);
 
 		tempDirFile.mkdirs();
+		if (!tempDirFile.exists()) {
+			saveRootDir = IJ.getDirectory("temp");
+		} else if (IJ.getDirectory("image") != null){
+		
+			saveRootDir = (new File(IJ.getDirectory("image"))).getParent()/*)*/ ;
+			saveRootPrefix = (new File(IJ.getDirectory("image"))).getName()+"_";
+		}else {
+			saveRootDir = IJ.getDirectory("temp");
+		}
+		for (File saveSibFile: (new File(saveRootDir)).listFiles()) {
+			if (saveSibFile.isDirectory() || (!saveSibFile.getName().toLowerCase().endsWith(".tif")
+												&& !saveSibFile.getName().toLowerCase().contains("ds_store"))) {
+				correctSaveRoot = true;
+			}
+		}
+		if (!correctSaveRoot) {
+			saveRootDir = (new File(saveRootDir)).getParent();
+		}
+		tempDirFile = new File(saveRootDir + File.separator + "PROJ_"+ saveRootPrefix.replaceAll("[,. ;:]","").replace(File.separator, "_") + tempTime);
+		tempDirFile.mkdirs();		
+		if (!tempDirFile.exists()) {
+			IJ.error("Projection failed", "Unable to save copied stacks to" + tempDirFile.getPath());
+			return;
+		}
+
+
 
 		for (loopT = firstT; loopT < lastT +1; loopT=loopT+stepT) { 
 			long memoryFree = Runtime.getRuntime().freeMemory();
@@ -386,7 +413,7 @@ public class Projector16bit implements PlugInFilter, TextListener {
 					IJ.runMacro("print(\"\\\\Update:\\\n \")");
 
 					if ( loopC == firstC && loopT == firstT)  {
-						//						tempDir.mkdir();
+						//						tempDirFile.mkdir();
 						finalSlices = projImpD[loopC-firstC].getStackSize();
 					}
 					//					projImpD[loopC-firstC].show();

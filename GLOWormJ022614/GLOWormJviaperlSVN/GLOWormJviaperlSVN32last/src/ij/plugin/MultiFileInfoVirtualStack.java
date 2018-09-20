@@ -709,7 +709,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		sliceNumber = n;
 
 		
-		sliceNumber = 1+(n) % (fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
+//		sliceNumber = 1+(n) % (fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
 		
 		if (dimOrder.toLowerCase().matches(".*splitc.*")) {
 			sliceNumber = (sliceNumber/2);
@@ -729,11 +729,11 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			vSliceNumber = (sliceNumber)+(isViewB?fivStacks.get(stackNumber).getSize()/vDim:0);
 			//ADJUSTMENTS BELOW DEAL WITH CALLING RG CHANNELS CORRECTLY
 			//I DO NOT FULLY UNDERSTAND HOW OR WHY IT WORKS!!!???
-			if (vSliceNumber%2 == 0) {
-				vSliceNumber = vSliceNumber-1;
-			} else {
-				vSliceNumber = vSliceNumber-1;
-			}
+//			if (vSliceNumber%2 == 0) {
+//				vSliceNumber = vSliceNumber-1;
+//			} else {
+//				vSliceNumber = vSliceNumber-1;
+//			}
 
 			if (vSliceNumber>fivStacks.get(stackNumber).getSize()) {
 				vSliceNumber = vSliceNumber-fivStacks.get(stackNumber).getSize();
@@ -760,13 +760,13 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 			//ADJUSTMENTS BELOW DEAL WITH CALLING C1 AND C4 FOR CSM MODE SWITCH TO JUST 2 MAIN RG CHANNELS
 			//I DO NOT FULLY UNDERSTAND HOW OR WHY IT WORKS!!!???
-			if (dimOrder.toLowerCase().matches(".*splitsequentialc.*")) {
-				if (vSliceNumber%2 == 0) {
-					vSliceNumber = vSliceNumber-1;
-				} else {
-					vSliceNumber = vSliceNumber-1;
-				}
-			}
+//			if (dimOrder.toLowerCase().matches(".*splitsequentialc.*")) {
+//				if (vSliceNumber%2 == 0) {
+//					vSliceNumber = vSliceNumber-1;
+//				} else {
+//					vSliceNumber = vSliceNumber-1;
+//				}
+//			}
 
 			if (vSliceNumber>fivStacks.get(stackNumber).getSize()) {
 				vSliceNumber = vSliceNumber-fivStacks.get(stackNumber).getSize();
