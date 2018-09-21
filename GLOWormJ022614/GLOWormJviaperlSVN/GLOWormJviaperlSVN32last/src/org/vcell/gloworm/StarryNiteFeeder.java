@@ -106,7 +106,10 @@ public class StarryNiteFeeder implements PlugIn {
 			if (imp.isComposite()) {
 				impLUTs = (((CompositeImage)imp).getLuts());
 				greenMax = (int) impLUTs[0].max;
-				redMax = (int) impLUTs[1].max;
+				if (impLUTs.length>1)
+					redMax = (int) impLUTs[1].max;
+				else
+					redMax = greenMax;
 			}
 			
 			if (autoLaunch){
