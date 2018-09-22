@@ -106,12 +106,12 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (!argFile.exists() || !argFile.isDirectory()) {
 			dir = IJ.getDirectory("Select Directory of TIFFs");
 			String defaultKey = "Deconvolution";
-			if (dir.replace(File.separator, "/").matches(".*/Proj[XY]_Decon-Fuse.*/"))
+			if (dir.replace(File.separator, "/").matches(".*/Proj[XY]_Decon-Fuse.*/")
+					|| dir.replace(File.separator, "/").matches(".*/Max[XYZ]_Decon-Fuse.*/"))
 				defaultKey = "Color";
 			keyString = IJ.getString("Subdirectory Name Key String?", defaultKey);
 			args[0]=dir;
-		}
-		else
+		} else
 			dir = args[0];
 		if (dir==null) return;
 		if (dir.length() > 0 && !dir.endsWith(File.separator))
@@ -210,6 +210,11 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				}
 				if (subFileName.matches("proj._\\d+_\\d+.tif")) {
 					int tValue = Integer.parseInt(subFileName.replaceAll("proj._\\d+_(\\d+).tif", "$1"));
+					if (tValue > highT)
+						highT = tValue;
+				}
+				if (subFileName.matches("max._\\d+_\\d+.tif")) {
+					int tValue = Integer.parseInt(subFileName.replaceAll("max._\\d+_(\\d+).tif", "$1"));
 					if (tValue > highT)
 						highT = tValue;
 				}
