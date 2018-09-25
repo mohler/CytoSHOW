@@ -38,6 +38,16 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 	private Double subFractB;
 	private Checkbox depthSeek;
 	private Checkbox lineageCheckbox;
+	private Checkbox orientationPreviewCheckbox;
+
+	public boolean isOrientationPreview() {
+		return orient;
+	}
+
+	public void setOrientationPreview(boolean orientationPreview) {
+		this.orientationPreviewCheckbox.setState(orientationPreview);
+	}
+
 	private boolean lineage;
 	public boolean isLineage() {
 		return lineage;
@@ -50,6 +60,7 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 	private boolean autodepth;
 	private Choice abRelOriChoices;
 	private int abRelOriValue;
+	private boolean orient;
 	
 	public double getSubFractA() {
 //		return subFractA;
@@ -180,6 +191,9 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 		lineageCheckbox = new Checkbox("Auto-Launch StarryNite lineaging of Fused Volumes?", 
 												Prefs.get("diSPIMmonitor.lineage", false));
 		optPanel.add("South", lineageCheckbox);
+		orientationPreviewCheckbox = new Checkbox("Define volume output orientation in preview?", 
+				Prefs.get("diSPIMmonitor.orientaionPreview", false));
+		optPanel.add("South", orientationPreviewCheckbox);
 		add("East", optPanel);
 
 		pack();
@@ -205,8 +219,9 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 //			subFractB = ((Double)modeFractionSpinnerB.getValue());
 			iterations = ((Integer)iterationSpinner.getValue());
 			lineage = lineageCheckbox.getState();
+			orient = orientationPreviewCheckbox.getState();
 			Prefs.set("diSPIMmonitor.lineage", lineage);
-
+			Prefs.get("diSPIMmonitor.orientaionPreview", orient);
 		}
 		closeDialog();
 	}
