@@ -112,21 +112,22 @@ public class StarryNiteFeeder implements PlugIn {
 					redMax = greenMax;
 			}
 			
-			if (autoLaunch){
-				imp.killRoi();
-
-				if (imp.getRoi() == null ) {
-					for (String sourceDirFileName:sourceFileList){
-						if (sourceDirFileName.endsWith("originalSNF.roi")){
-							if (sourceDirFileName.startsWith(imp.getTitle())){
-								WindowManager.setTempCurrentImage(imp);
-								IJ.open(outDir+ sourceDirFileName);
-								WindowManager.setTempCurrentImage(null);
-							}
-						}
-					}				
-				}
-			}
+//  COMMENTED OUT FOR NOW WHILE USING BIG BOX FOR SPIMFUSION.EXE...
+//			if (autoLaunch){
+//				imp.killRoi();
+//
+//				if (imp.getRoi() == null ) {
+//					for (String sourceDirFileName:sourceFileList){
+//						if (sourceDirFileName.endsWith("originalSNF.roi")){
+//							if (sourceDirFileName.startsWith(imp.getTitle())){
+//								WindowManager.setTempCurrentImage(imp);
+//								IJ.open(outDir+ sourceDirFileName);
+//								WindowManager.setTempCurrentImage(null);
+//							}
+//						}
+//					}				
+//				}
+//			}
 			
 			if (imp.getRoi() == null ) {
 				continue;
@@ -412,9 +413,15 @@ public class StarryNiteFeeder implements PlugIn {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
+						boolean bip=true;
 						while (!(new File((outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa_emb_edited.xml")).canRead()) {
 							IJ.wait(1000);
-							IJ.log("awaiting "+(outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa_emb_edited.xml");
+							if (bip)
+								IJ.log("\\Update:Awaiting "+(outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa_emb_edited.xml");
+							else
+								IJ.log("\\Update:***Awaiting "+(outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa_emb_edited.xml");
+							bip=!bip;
+								
 						}
 						
 						String unskippedXmlText = IJ.openAsString((outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa_emb_edited.xml");

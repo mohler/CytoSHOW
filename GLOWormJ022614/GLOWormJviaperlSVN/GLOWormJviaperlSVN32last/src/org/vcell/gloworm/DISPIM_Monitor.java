@@ -786,15 +786,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						impAs[pos] = new CompositeImage(impAs[pos]){
 							@Override
 							public synchronized void flush(){
-								ObjectOutputStream oos;
-								try {
-									oos = new ObjectOutputStream(new FileOutputStream(new RandomAccessFile(stackAs[fPos].infoDir+"touchedFileFIs"+fPos+"A.inf","rw").getFD()));
-									oos.writeObject(((MultiFileInfoVirtualStack) getImageStack()).infoCollectorArrayList);
-									oos.close();
-								} catch (IOException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
+//								ObjectOutputStream oos;
+//								try {
+//									oos = new ObjectOutputStream(new FileOutputStream(new RandomAccessFile(stackAs[fPos].infoDir+"touchedFileFIs"+fPos+"A.inf","rw").getFD()));
+//									oos.writeObject(((MultiFileInfoVirtualStack) getImageStack()).infoCollectorArrayList);
+//									oos.close();
+//								} catch (IOException e) {
+//									// TODO Auto-generated catch block
+//									e.printStackTrace();
+//								}
 								super.flush();
 							}
 						};
@@ -821,15 +821,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						impBs[pos] = new CompositeImage(impBs[pos]){
 							@Override
 							public synchronized void flush(){
-								ObjectOutputStream oos;
-								try {
-									oos = new ObjectOutputStream(new FileOutputStream(new RandomAccessFile(stackBs[fPos].infoDir+"touchedFileFIs"+fPos+"B.inf","rw").getFD()));
-									oos.writeObject(((MultiFileInfoVirtualStack) getImageStack()).infoCollectorArrayList);
-									oos.close();
-								} catch (IOException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
+//								ObjectOutputStream oos;
+//								try {
+//									oos = new ObjectOutputStream(new FileOutputStream(new RandomAccessFile(stackBs[fPos].infoDir+"touchedFileFIs"+fPos+"B.inf","rw").getFD()));
+//									oos.writeObject(((MultiFileInfoVirtualStack) getImageStack()).infoCollectorArrayList);
+//									oos.close();
+//								} catch (IOException e) {
+//									// TODO Auto-generated catch block
+//									e.printStackTrace();
+//								}
 								super.flush();
 							}
 						};
@@ -5065,7 +5065,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									String outDir = outputDir+ File.separator ;
 									String[] sourceFileList = new File(sourceDir).list();
 									currentDeconResultImp.killRoi();
-									currentDeconResultImp.setRoi(0, 0, currentDeconResultImp.getWidth(), currentDeconResultImp.getHeight());
+
 //									if (currentDeconResultImp.getRoi() == null ) {
 //										for (String sourceDirFileName:sourceFileList){
 //											if (sourceDirFileName.endsWith("originalSNF.roi")){
@@ -5079,12 +5079,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 //									}
 
 
-									if (currentDeconResultImp.getRoi() == null ) {
-										continue;
-									}
+//									if (currentDeconResultImp.getRoi() == null ) {
+//										continue;
+//									}
 
-									Roi theROI = currentDeconResultImp.getRoi();
-									int type = currentDeconResultImp.getRoi().getType() ;
+									Roi theROI = new Roi(0,0,currentDeconResultImp.getWidth(),currentDeconResultImp.getHeight());
+									int type = Roi.RECTANGLE ;
 									boolean flipStack = false;
 
 									if (theROI == null) {
@@ -5095,9 +5095,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										String savetitle = title.replace(":","_").replace(" ","").replace("_dummy","");
 										String savePath = outDir+savetitle;
 
-										IJ.saveAs(currentDeconResultImp, "Selection", savePath+"originalSNF.roi");
-										int[] xpoints = currentDeconResultImp.getRoi().getPolygon().xpoints;
-										int[] ypoints = currentDeconResultImp.getRoi().getPolygon().ypoints;
+//										IJ.saveAs(currentDeconResultImp, "Selection", savePath+"originalSNF.roi");
+										int[] xpoints = theROI.getPolygon().xpoints;
+										int[] ypoints = theROI.getPolygon().ypoints;
 										int npoints = xpoints.length;
 
 										double angle =0;
@@ -5345,7 +5345,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											}
 										}
 										currentDeconResultImp.setPosition(wasC, wasZ, wasT);
-										currentDeconResultImp.setRoi(theROI);
+//										currentDeconResultImp.setRoi(theROI,false);
 
 										IJ.saveString(IJ.openAsString(paramsPath).replaceAll("(.*end_time=)\\d+(;.*)", "$1"+endPoint+"$2")
 												.replaceAll("(.*ROI=)true(;.*)", "$1false$2")
@@ -5355,7 +5355,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 												.replaceAll("(.*)ROIpoints=\\[\\d+.*\\];(.*)", "$1"+""+"$2")
 												, impParameterPath);
 
-										currentDeconResultImp.killRoi();
+//										currentDeconResultImp.killRoi();
 
 
 									}
@@ -6555,7 +6555,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 	public void imageClosed(ImagePlus closingImp) {
 		if (closingImp != null){
-			closingImp.setRoi(null, true);;
+			closingImp.killRoi();
 		}
 		if (impAs!=null ) {
 			for (int a=0;a<impAs.length;a++) {

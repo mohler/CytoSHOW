@@ -352,7 +352,6 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		if (win!=null) {
 			//if (IJ.isWindows() && IJ.isJava14())
 			//	changes = false; // avoid 'save changes?' dialog and potential Java 1.5 deadlocks
-			dupImp = null;
 			if (dupImp!=null) {
 				dupImp.flush();
 				dupImp = null;
@@ -1704,6 +1703,8 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 							e.printStackTrace();
 						}			
 					}
+					blinkingRoi.setImage(null);
+					blinkingRoi=null;
 				}
 			});
 			blinkTimer.setName("blinkTimer");
@@ -1785,9 +1786,13 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	public void deleteRoi() {
 		if (roi!=null) {
 			saveRoi();
+			roi.setImage(null);
 			roi = null;
+			blinkStop = true;
+
 			if (ip!=null)
 				ip.resetRoi();
+			
 			draw();
 		}
 	}
@@ -2077,17 +2082,18 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		if (motherImp != null) {
 			motherImp = null;
 		}
-		if (getRemoteMQTVSHandler() != null) {
+		if (remoteMQTVSHandler != null) {
 			remoteMQTVSHandler.dispose();
 			remoteMQTVSHandler = null;
 		}
 
-		if (getMultiChannelController() != null) {
-			getMultiChannelController().dispose();
+		if (mcc != null) {
+			mcc.dispose();
 			mcc=null;
 		}
-		if (getRoiManager() != null) {
-			getRoiManager().dispose();
+		if (rm != null) {
+			rm.setImagePlus(null);
+			rm.dispose();
 			rm = null;
 		}
 		if (DragAndDrop.getInstance().getImp() == this) {

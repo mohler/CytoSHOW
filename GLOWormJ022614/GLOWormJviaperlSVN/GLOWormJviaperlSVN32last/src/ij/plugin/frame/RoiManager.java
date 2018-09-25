@@ -3674,13 +3674,20 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		fullListModel = null;
 
 		if (this.colorLegend != null){
-			colorLegend.dispose();
+			if (imp.getWindow()!=null){
+				imp.getWindow().removeFocusListener(colorLegend);
+				imp.getWindow().removeWindowListener(colorLegend);
+			}
 			colorLegend.setRoiManager(null);
+			colorLegend.dispose();
 			WindowManager.removeWindow(colorLegend);
 		}
 		if (list != null)
 			list.removeKeyListener(IJ.getInstance());
 		this.removeKeyListener(IJ.getInstance());
+		this.removeMouseListener(this);
+		this.removeMouseWheelListener(this);
+
 		//    	thread.interrupt();
 		//    	thread = null;
 		//		this.imp.getWindow().removeWindowListener(this);
