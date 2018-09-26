@@ -13,6 +13,7 @@ import ij.io.FileSaver;
 import ij.macro.Interpreter;
 import ij.measure.Calibration;
 import ij.plugin.Colors;
+import ij.plugin.DragAndDrop;
 import ij.plugin.MultiFileInfoVirtualStack;
 import ij.plugin.frame.Channels;
 import ij.plugin.frame.RoiManager;
@@ -56,6 +57,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.event.WindowStateListener;
 
+import javax.swing.AbstractButton;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -919,10 +921,29 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
     	if (ij!=null && ij.quitting())  // this may help avoid thread deadlocks
     		return true;
     	dispose();
+    	while (this.getComponentCount()>0 && this.getComponents()[0]!=null){
+    		Component comp = this.getComponents()[0];
+    		if (comp instanceof AbstractButton)
+    		while (((AbstractButton)comp).getActionListeners().length>0 && ((AbstractButton)comp).getActionListeners()[0]!=null){
+    			((AbstractButton) comp).removeActionListener(((AbstractButton)comp).getActionListeners()[0]);
+    		}
+    		this.remove(comp);
+    	}
     	if (toolbar != null)
     		this.remove(toolbar);
-    	if (ic != null)
+    	if (ic != null){
+    		while(ic.getMouseListeners().length>0){
+    			ic.removeMouseListener(ic.getMouseListeners()[0]);
+    		}
+    		while(ic.getMouseMotionListeners().length>0){
+    			ic.removeMouseMotionListener(ic.getMouseMotionListeners()[0]);
+    		}
+    		while(ic.getKeyListeners().length>0){
+    			ic.removeKeyListener(ic.getKeyListeners()[0]);
+    		}
+    		ic.setDropTarget(null);
     		this.remove(ic);
+    	}
     	if (imp!=null)
     		imp.flush();
     	imp = null;

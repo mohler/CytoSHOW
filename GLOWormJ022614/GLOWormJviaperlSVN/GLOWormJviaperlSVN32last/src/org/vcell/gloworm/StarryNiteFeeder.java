@@ -112,22 +112,21 @@ public class StarryNiteFeeder implements PlugIn {
 					redMax = greenMax;
 			}
 			
-//  COMMENTED OUT FOR NOW WHILE USING BIG BOX FOR SPIMFUSION.EXE...
-//			if (autoLaunch){
-//				imp.killRoi();
-//
-//				if (imp.getRoi() == null ) {
-//					for (String sourceDirFileName:sourceFileList){
-//						if (sourceDirFileName.endsWith("originalSNF.roi")){
-//							if (sourceDirFileName.startsWith(imp.getTitle())){
-//								WindowManager.setTempCurrentImage(imp);
-//								IJ.open(outDir+ sourceDirFileName);
-//								WindowManager.setTempCurrentImage(null);
-//							}
-//						}
-//					}				
-//				}
-//			}
+			if (autoLaunch){
+				imp.killRoi();
+
+				if (imp.getRoi() == null ) {
+					for (String sourceDirFileName:sourceFileList){
+						if (sourceDirFileName.endsWith("originalSNF.roi")){
+							if (sourceDirFileName.startsWith(imp.getTitle())){
+								WindowManager.setTempCurrentImage(imp);
+								IJ.open(outDir+ sourceDirFileName);
+								WindowManager.setTempCurrentImage(null);
+							}
+						}
+					}				
+				}
+			}
 			
 			if (imp.getRoi() == null ) {
 				continue;

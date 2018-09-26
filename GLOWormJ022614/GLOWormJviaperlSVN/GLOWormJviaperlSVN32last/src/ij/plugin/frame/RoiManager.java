@@ -9,6 +9,7 @@ import java.util.*;
 import java.awt.List;
 import java.util.zip.*;
 
+import javax.swing.AbstractButton;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -3668,11 +3669,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			roisByNumbers = null;
 		}
+		if (list != null)
+			list.removeKeyListener(IJ.getInstance());
 		list = null;
 		listModel = null;
 		fullList = null;
 		fullListModel = null;
-
+		
 		if (this.colorLegend != null){
 			if (imp.getWindow()!=null){
 				imp.getWindow().removeFocusListener(colorLegend);
@@ -3682,12 +3685,82 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			colorLegend.dispose();
 			WindowManager.removeWindow(colorLegend);
 		}
-		if (list != null)
-			list.removeKeyListener(IJ.getInstance());
 		this.removeKeyListener(IJ.getInstance());
+		this.removeFocusListener(this);
+		this.removeWindowListener(this);
 		this.removeMouseListener(this);
 		this.removeMouseWheelListener(this);
+		while (this.getComponentCount()>0 && this.getComponents()[0]!=null){
+			Component comp = this.getComponents()[0];
+			if (comp instanceof Panel){
+				while (((Panel)comp).getComponentCount()>0 && ((Panel)comp).getComponents()[0]!=null){
+					Component pComp = ((Panel)comp).getComponents()[0];
+					if (pComp instanceof Button){
+						while (((Button)pComp).getActionListeners().length>0){
+							((Button) pComp).removeActionListener(((Button)pComp).getActionListeners()[0]);
+						}
+						while (((Button)pComp).getMouseListeners().length>0){
+							((Button) pComp).removeMouseListener(((Button)pComp).getMouseListeners()[0]);
+						}
+					}
+					if (pComp instanceof TextField){
+						while (((TextField)pComp).getActionListeners().length>0 && ((TextField)pComp).getActionListeners()[0]!=null){
+							((TextField) pComp).removeActionListener(((TextField)pComp).getActionListeners()[0]);
+						}
+					}
+					if (pComp instanceof Choice){
+						while (((Choice)pComp).getItemListeners().length>0){
+							((Choice) pComp).removeItemListener(((Choice)pComp).getItemListeners()[0]);
+						}
+					}
+					if (pComp instanceof Checkbox){
+						while (((Checkbox)pComp).getItemListeners().length>0){
+							((Checkbox) pComp).removeItemListener(((Checkbox)pComp).getItemListeners()[0]);
+						}
+					}
+					((Panel)comp).remove(pComp);
+				}
+			}
+			if (comp instanceof Button){
+				while (((Button)comp).getActionListeners().length>0){
+					((Button) comp).removeActionListener(((Button)comp).getActionListeners()[0]);
+				}
+				while (((Button)comp).getMouseListeners().length>0){
+					((Button) comp).removeMouseListener(((Button)comp).getMouseListeners()[0]);
+				}
+			}
+			if (comp instanceof TextField){
+				while (((TextField)comp).getActionListeners().length>0){
+					((TextField) comp).removeActionListener(((TextField)comp).getActionListeners()[0]);
+				}
+			}
+			if (comp instanceof Choice){
+				while (((Choice)comp).getItemListeners().length>0){
+					((Choice) comp).removeItemListener(((Choice)comp).getItemListeners()[0]);
+				}
+			}
+			if (comp instanceof Checkbox){
+				while (((Checkbox)comp).getItemListeners().length>0){
+					((Checkbox) comp).removeItemListener(((Checkbox)comp).getItemListeners()[0]);
+				}
+			}
 
+			while ((comp).getKeyListeners().length>0){
+				(comp).removeKeyListener((comp).getKeyListeners()[0]);
+			}
+			this.remove(comp);
+		}
+   		while(pm.getItemCount()>0){
+   			while(pm.getItem(0).getActionListeners().length>0){
+   				pm.getItem(0).removeActionListener(pm.getItem(0).getActionListeners()[0]);
+   			}
+   			pm.remove(0);
+   		}
+   		while(pm.getActionListeners().length>0){
+   			pm.removeActionListener(pm.getActionListeners()[0]);
+   		}
+   		this.remove(pm);
+    		
 		//    	thread.interrupt();
 		//    	thread = null;
 		//		this.imp.getWindow().removeWindowListener(this);

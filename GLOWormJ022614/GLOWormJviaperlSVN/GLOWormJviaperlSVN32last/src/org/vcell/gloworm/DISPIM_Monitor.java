@@ -786,15 +786,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						impAs[pos] = new CompositeImage(impAs[pos]){
 							@Override
 							public synchronized void flush(){
-//								ObjectOutputStream oos;
-//								try {
-//									oos = new ObjectOutputStream(new FileOutputStream(new RandomAccessFile(stackAs[fPos].infoDir+"touchedFileFIs"+fPos+"A.inf","rw").getFD()));
-//									oos.writeObject(((MultiFileInfoVirtualStack) getImageStack()).infoCollectorArrayList);
-//									oos.close();
-//								} catch (IOException e) {
-//									// TODO Auto-generated catch block
-//									e.printStackTrace();
-//								}
+								ObjectOutputStream oos;
+								try {
+									oos = new ObjectOutputStream(new FileOutputStream(new RandomAccessFile(stackAs[fPos].infoDir+"touchedFileFIs"+fPos+"A.inf","rw").getFD()));
+									oos.writeObject(((MultiFileInfoVirtualStack) getImageStack()).infoCollectorArrayList);
+									oos.close();
+								} catch (IOException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
 								super.flush();
 							}
 						};
@@ -821,15 +821,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						impBs[pos] = new CompositeImage(impBs[pos]){
 							@Override
 							public synchronized void flush(){
-//								ObjectOutputStream oos;
-//								try {
-//									oos = new ObjectOutputStream(new FileOutputStream(new RandomAccessFile(stackBs[fPos].infoDir+"touchedFileFIs"+fPos+"B.inf","rw").getFD()));
-//									oos.writeObject(((MultiFileInfoVirtualStack) getImageStack()).infoCollectorArrayList);
-//									oos.close();
-//								} catch (IOException e) {
-//									// TODO Auto-generated catch block
-//									e.printStackTrace();
-//								}
+								ObjectOutputStream oos;
+								try {
+									oos = new ObjectOutputStream(new FileOutputStream(new RandomAccessFile(stackBs[fPos].infoDir+"touchedFileFIs"+fPos+"B.inf","rw").getFD()));
+									oos.writeObject(((MultiFileInfoVirtualStack) getImageStack()).infoCollectorArrayList);
+									oos.close();
+								} catch (IOException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
 								super.flush();
 							}
 						};

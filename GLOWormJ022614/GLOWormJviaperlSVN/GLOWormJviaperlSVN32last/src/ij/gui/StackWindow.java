@@ -308,66 +308,7 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 //	}
 
 	public boolean close() {
-//		if (animationSelector!=null) {
-//			animationSelector.bar.removeAdjustmentListener(animationSelector);
-//			animationSelector.bar.removeMouseListener(animationSelector);
-//			animationSelector.removeAdjustmentListener(this);
-//			animationSelector.removeKeyListener(ij);
-//			while (animationSelector.getMouseListeners().length>0) 
-//				animationSelector.removeMouseListener(animationSelector.getMouseListeners()[0]);
-//			while (animationSelector.iconPanel.getMouseListeners().length>0) 
-//				animationSelector.iconPanel.removeMouseListener(animationSelector.iconPanel.getMouseListeners()[0]);
-//			while (animationSelector.icon2Panel.getMouseListeners().length>0) 
-//				animationSelector.icon2Panel.removeMouseListener(animationSelector.icon2Panel.getMouseListeners()[0]);
-//			ActionListener[] asipals=animationSelector.iconPanel.getActionListeners();;
-//			while (asipals.length>0) {
-//				animationSelector.iconPanel.removeActionListener(asipals[0]);	
-//				asipals=animationSelector.iconPanel.getActionListeners();
-//			}
-//			ActionListener[] asipals2=animationSelector.icon2Panel.getActionListeners();;
-//			while (asipals2.length>0) {
-//				animationSelector.icon2Panel.removeActionListener(asipals2[0]);	
-//				asipals2=animationSelector.icon2Panel.getActionListeners();
-//			}
-//			animationSelector.icon=null;
-//			animationSelector.icon2=null;
-//			animationSelector.iconPanel=null;
-//			animationSelector.icon2Panel=null;
-//			animationSelector.stackWindow = null;
-//
-//			animationSelector.adjustmentListener=null;
-//			animationSelector=null;
-//		}
-//		if (animationZSelector!=null) {
-//			animationZSelector.bar.removeAdjustmentListener(animationZSelector);
-//			animationZSelector.bar.removeMouseListener(animationZSelector);
-//			animationZSelector.removeAdjustmentListener(this);
-//			animationZSelector.removeKeyListener(ij);
-//			while (animationZSelector.getMouseListeners().length>0) 
-//				animationZSelector.removeMouseListener(animationZSelector.getMouseListeners()[0]);
-//			while (animationZSelector.iconPanel.getMouseListeners().length>0) 
-//				animationZSelector.iconPanel.removeMouseListener(animationZSelector.iconPanel.getMouseListeners()[0]);
-//			while (animationZSelector.icon2Panel.getMouseListeners().length>0) 
-//				animationZSelector.icon2Panel.removeMouseListener(animationZSelector.icon2Panel.getMouseListeners()[0]);
-//			ActionListener[] azsipals=animationZSelector.iconPanel.getActionListeners();
-//			while (azsipals.length>0) {
-//				animationZSelector.iconPanel.removeActionListener(azsipals[0]);	
-//				azsipals=animationZSelector.iconPanel.getActionListeners();
-//			}
-//			ActionListener[] azsipals2=animationZSelector.icon2Panel.getActionListeners();;
-//			while (azsipals2.length>0) {
-//				animationZSelector.icon2Panel.removeActionListener(azsipals2[0]);	
-//				azsipals2=animationZSelector.icon2Panel.getActionListeners();
-//			}
-//			animationZSelector.icon=null;
-//			animationZSelector.icon2=null;
-//			animationZSelector.iconPanel=null;
-//			animationZSelector.icon2Panel=null;
-//			animationZSelector.stackWindow = null;
-//			
-//			animationZSelector.adjustmentListener=null;
-//			animationZSelector=null;
-//		}
+		removeScrollbars();
 		if (cSelector!=null) {
 			cSelector.bar.removeAdjustmentListener(cSelector);
 			cSelector.bar.removeMouseListener(cSelector);
@@ -390,6 +331,11 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 				csipals2=cSelector.icon2Panel.getActionListeners();
 			}
 			
+			cSelector.iconPanel.setAction(null);
+			cSelector.icon2Panel.setAction(null);
+			while (cSelector.getComponents().length >0){
+				cSelector.remove(0);
+			}
 			cSelector.icon=null;
 			cSelector.icon2=null;
 			cSelector.iconPanel=null;
@@ -425,6 +371,9 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 				}
 				tSelector.iconPanel.setAction(null);
 				tSelector.icon2Panel.setAction(null);
+				while (tSelector.getComponents().length >0){
+					tSelector.remove(0);
+				}
 				tSelector.icon=null;
 				tSelector.icon2=null;
 				tSelector.iconPanel=null;
@@ -461,6 +410,9 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 				}
 				zSelector.iconPanel.setAction(null);
 				zSelector.icon2Panel.setAction(null);
+				while (zSelector.getComponents().length >0){
+					zSelector.remove(0);
+				}
 				zSelector.icon=null;
 				zSelector.icon2=null;
 				zSelector.iconPanel=null;
@@ -480,7 +432,6 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 			}
 			activeScrollBars=null;
 		}
-
 		if (!super.close()) {
 			return false;
 		}
@@ -492,6 +443,7 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 		this.removeMouseWheelListener(this);
 		this.removeWindowListener(this);
 		this.removeWindowStateListener(this);
+		this.dispose();
         return true;
 	}
 
