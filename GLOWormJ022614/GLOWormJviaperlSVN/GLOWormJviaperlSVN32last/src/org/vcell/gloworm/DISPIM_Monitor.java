@@ -5000,8 +5000,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								} else {
 									win = null;
 								}
+								ImagePlus flushingImp=ciDFs[pos];
 								ciDFs[pos] = new CompositeImage(impDF1s[pos]);
-
+								flushingImp.flush();
+								impDF1s[pos].flush();
 
 
 								if (wavelengths > 1)
