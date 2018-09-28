@@ -5871,41 +5871,55 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 		});
 		updateWindowsAndWriteSNFFilesThread.start();
 		
-		for (int pos=0; pos<pDim; pos++) {
-			if (doProcessing[pos]){
-				boolean go = true;
-				if (posIntArray!=null){
-					go = false;
-					for (int posInt:posIntArray){
-						if (posInt == pos){
-							go=true;
+		boolean repeatScan = true;
+		while (repeatScan){
+			repeatScan = false;
+
+			for (int pos=0; pos<pDim; pos++) {
+				if (doProcessing[pos]){
+					boolean go = true;
+					if (posIntArray!=null){
+						go = false;
+						for (int posInt:posIntArray){
+							if (posInt == pos){
+								go=true;
+							}
 						}
 					}
-				}
 
-				if (!go){
-					continue;
-				}
+					if (!go){
+						continue;
+					}
 
-				doProcessing[pos] = true;
+					doProcessing[pos] = true;
 
-				if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
-					doProcessing[pos] = false;
-					IJ.log("! no winorstackA "+pos);
-					continue;
+					if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+						doProcessing[pos] = false;
+						IJ.log("! no winorstackA "+pos);
+						continue;
+					}
+					if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+						doProcessing[pos] = false;
+						IJ.log("! no winorstackB "+pos);
+						continue;
+					} 
+
+
+					posFrameEnd[pos] = impAs[pos].getFrame();
+					if (posFrameEnd[pos] < impBs[pos].getFrame()) {
+						posFrameEnd[pos] = impBs[pos].getFrame();
+					}
+
+					if (posFrameEnd[pos]>ciDFs[pos].getNFrames()){
+						repeatScan=true;
+					} else {
+						ciDFs[pos].setPosition(1, ciDFs[pos].getNSlices()/2, posFrameEnd[pos]);
+						ciPrxs[pos].setPosition(1, 1, posFrameEnd[pos]);
+						ciPrys[pos].setPosition(1, 1, posFrameEnd[pos]);
+					}
 				}
-				if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
-					doProcessing[pos] = false;
-					IJ.log("! no winorstackB "+pos);
-					continue;
-				} 
-				
-				ciDFs[pos].setPosition(1, ciDFs[pos].getNSlices()/2, posFrameEnd[pos]);
-				ciPrxs[pos].setPosition(1, 1, posFrameEnd[pos]);
-				ciPrys[pos].setPosition(1, 1, posFrameEnd[pos]);
 			}
 		}
-
 	}
 
 
