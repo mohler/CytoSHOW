@@ -393,6 +393,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 	private double[] anglesB;
 	private double[] longAxesA;
 	private double[] longAxesB;
+	private double[][] rotZYXs;
 
 	public Process getRegDeconProcess() {
 		return regDeconProcess;
@@ -652,7 +653,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					anglesB = new double[pDim];					
 					longAxesA = new double[pDim];					
 					longAxesB = new double[pDim];					
-
+					rotZYXs = new double[pDim][3];
+					
 					dispimToolsButton = new JButton[pDim][2];
 					fuseButton = new JButton[pDim][2];
 					splitButton = new JButton[pDim][2];
@@ -2242,6 +2244,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							if (stackDFs[pos]!=null && stackDFs[pos].getSize() > 0) {
 								impDF1s[pos] = new ImagePlus();
 								impDF1s[pos].getRoiManager().setImagePlus(null);
+								impDF1s[pos].getRoiManager().dispose();
 								impDF1s[pos].setRoiManager(null);
 								impDF1s[pos].setStack("Decon-Fuse_"
 										+ impAs[pos].getTitle().split(":")[0], stackDFs[pos]);
@@ -2307,6 +2310,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 									impPrxs[pos] = new ImagePlus();
 									impPrxs[pos].getRoiManager().setImagePlus(null);
+									impPrxs[pos].getRoiManager().dispose();
 									impPrxs[pos].setRoiManager(null);
 									impPrxs[pos].setStack("3DProjX_Decon-Fuse_"
 											+ impAs[pos].getTitle().split(":")[0], stackPrxs[pos]);
@@ -2332,6 +2336,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 									impPrys[pos] = new ImagePlus();
 									impPrys[pos].getRoiManager().setImagePlus(null);
+									impPrys[pos].getRoiManager().dispose();
 									impPrys[pos].setRoiManager(null);
 									impPrys[pos].setStack("3DProjY_Decon-Fuse_"
 											+ impAs[pos].getTitle().split(":")[0], stackPrys[pos]);
@@ -4024,7 +4029,19 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 	public void processFilesByMinGuoDeconvolution() {
 		//START PROCESSING ALREADY SAVED RAW DATA 
-
+		if (new File(savePath+"fineRotations.txt").canRead()){
+			String rotFileText = IJ.openAsString(savePath+"fineRotations.txt");
+			String[] rotFileLines = rotFileText.split("\n");
+			for (String line:rotFileLines){
+				String[] rotLineChunks = line.split(",");
+				if (rotLineChunks.length==4){
+					rotZYXs[Integer.parseInt(rotLineChunks[0])][0] = Double.parseDouble(rotLineChunks[1]);
+					rotZYXs[Integer.parseInt(rotLineChunks[0])][1] = Double.parseDouble(rotLineChunks[2]);
+					rotZYXs[Integer.parseInt(rotLineChunks[0])][2] = Double.parseDouble(rotLineChunks[3]);
+				}
+			}
+		}
+		
 		if (wavelengths >=1) {
 			new File("" + savePath + "CropBkgdSub").mkdirs();
 			new File("" + savePath + "RegDecon" + File.separator + "TMX").mkdirs();
@@ -4443,1313 +4460,1417 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 		prepStacksThread.start();
 		
 		
-		for (int f = 1; f <= tDim; f++) {
-			for (int pos=0; pos<pDim; pos++) {
-				boolean go = true;
-				if (posIntArray!=null){
-					go = false;
-					for (int posInt:posIntArray){
-						if (posInt == pos){
-							go=true;
-						}
-					}
-				}
+		Thread deconFuseThread = new Thread(new Runnable(){
 
-				if (posFrameEnd[pos]<f) {
-					go = false;
-				}
-				if (!go){
-					continue;
-				}
+			public void run() {		
+				for (int f = 1; f <= tDim; f++) {
 
-				doProcessing[pos] = true;
-
-				if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible() || f>impAs[pos].getNFrames()) {
-					doProcessing[pos] = false;
-					IJ.log("! no winorstackA "+f+" "+pos);
-					continue;
-				}
-				if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible() || f>impBs[pos].getNFrames()) {
-					doProcessing[pos] = false;
-					IJ.log("! no winorstackB "+f+" "+pos);
-					continue;
-				} 
-				if(go) {
-					wasFrameA[pos] = impAs[pos].getFrame();
-					wasFrameB[pos] = impBs[pos].getFrame();
-					wasSliceA[pos] = impAs[pos].getSlice();
-					wasSliceB[pos] = impBs[pos].getSlice();
-					wasChannelA[pos] = impAs[pos].getChannel();
-					wasChannelB[pos] = impBs[pos].getChannel();
-				}
-				if (!IJ.shiftKeyDown()){
-					if (impPrxs[pos]!=null && impPrys[pos]!=null && impAs[pos].getNFrames() == impPrxs[pos].getNFrames() && impAs[pos].getNFrames() == impPrys[pos].getNFrames()
-							&& impBs[pos].getNFrames() == impPrxs[pos].getNFrames() && impBs[pos].getNFrames() == impPrys[pos].getNFrames()) {
-						doProcessing[pos] = false;
-						IJ.log("no unfinishedViewss "+f+" "+pos);
-						continue;
-					}
-				}
-
-				if (doProcessing[pos]) {
-					while (!(new File(savePath + "CropBkgdSub" + File.separator + "SPIMA"+pos+"-"+f+"-1_1.tif").canRead()) ||
-							!(new File(savePath + "CropBkgdSub" + File.separator + "SPIMA"+pos+"-"+f+"-2_1.tif").canRead()) ||
-							!(new File(savePath + "CropBkgdSub" + File.separator + "SPIMB"+pos+"-"+f+"-1_1.tif").canRead()) ||
-							!(new File(savePath + "CropBkgdSub" + File.separator + "SPIMB"+pos+"-"+f+"-2_1.tif").canRead()) ){
-						IJ.wait(100);
-					}
-					double pwA = impAs[pos].getCalibration().pixelWidth;
-					double phA = impAs[pos].getCalibration().pixelHeight;
-					double pdA = impAs[pos].getCalibration().pixelDepth;
-					double pwB = impBs[pos].getCalibration().pixelWidth;
-					double phB = impBs[pos].getCalibration().pixelHeight;
-					double pdB = impBs[pos].getCalibration().pixelDepth;
-
-
-
-					if (impAs[pos].hasNullStack() || impAs[pos].getNFrames()<f-1)
-						continue;
-					if (impBs[pos].hasNullStack())
-						continue;
-
-
-					int fi=0;
-					dc1File = new File(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution1" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif");
-					dc2File = new File(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution2" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif");
-
-					if ((wavelengths ==1 && dc1File.canRead())
-							||
-							(wavelengths >= 2 && dc1File.canRead()
-							&& dc2File.canRead())) {
-						IJ.log("already done: " + pos +" "+ impAs[pos].getChannel()+" "+ impAs[pos].getSlice()+" "+ f);
-						continue;
-					} else {
-						IJ.log("starting " + pos +" "+ impAs[pos].getChannel()+" "+ impAs[pos].getSlice()+" "+ f);
-						
-						int type = origRoiBs[pos].getType();
-						int[] xpoints = origRoiBs[pos].getPolygon().xpoints;
-						int[] ypoints = origRoiBs[pos].getPolygon().ypoints;
-						
-						int npoints = xpoints.length;
-								
-						double zRotAngle =0;
-						double yRotAngle =0;
-						double xRotAngle =0;
-						if (type > Roi.OVAL) {
-							if (npoints == 4) {
-								double angleZero = new Line(xpoints[0], ypoints[0], xpoints[1], ypoints[1]).getAngle();
-								double angleTwo = new Line(xpoints[2], ypoints[2], xpoints[3], ypoints[3]).getAngle();
-
-								double angleZeroPlusPi = angleZero + 180;
-								double angleTwoPlusPi = angleTwo + 180;
-
-								double angleDelta = angleZeroPlusPi%180 - angleTwoPlusPi%180;
-
-								if ( Math.abs(angleDelta)  >80 && Math.abs(angleDelta)  <100) {
-									haveAxesRoiDF = true;
-									zRotAngle = angleZero;
-
-								}else {
-									zRotAngle = new Line(xpoints[0], ypoints[0], xpoints[2], ypoints[2]).getAngle();
+					for (int pos=0; pos<pDim; pos++) {
+						boolean go = true;
+						if (posIntArray!=null){
+							go = false;
+							for (int posInt:posIntArray){
+								if (posInt == pos){
+									go=true;
 								}
+							}
+						}
+
+						if (posFrameEnd[pos]<f) {
+							go = false;
+						}
+						if (!go){
+							continue;
+						}
+
+						doProcessing[pos] = true;
+
+						if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible() || f>impAs[pos].getNFrames()) {
+							doProcessing[pos] = false;
+							IJ.log("! no winorstackA "+f+" "+pos);
+							continue;
+						}
+						if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible() || f>impBs[pos].getNFrames()) {
+							doProcessing[pos] = false;
+							IJ.log("! no winorstackB "+f+" "+pos);
+							continue;
+						} 
+						if(go) {
+							wasFrameA[pos] = impAs[pos].getFrame();
+							wasFrameB[pos] = impBs[pos].getFrame();
+							wasSliceA[pos] = impAs[pos].getSlice();
+							wasSliceB[pos] = impBs[pos].getSlice();
+							wasChannelA[pos] = impAs[pos].getChannel();
+							wasChannelB[pos] = impBs[pos].getChannel();
+						}
+						if (!IJ.shiftKeyDown()){
+							if (impPrxs[pos]!=null && impPrys[pos]!=null && impAs[pos].getNFrames() == impPrxs[pos].getNFrames() && impAs[pos].getNFrames() == impPrys[pos].getNFrames()
+									&& impBs[pos].getNFrames() == impPrxs[pos].getNFrames() && impBs[pos].getNFrames() == impPrys[pos].getNFrames()) {
+								doProcessing[pos] = false;
+								IJ.log("no unfinishedViewss "+f+" "+pos);
+								continue;
+							}
+						}
+
+						if (doProcessing[pos]) {
+							while (!(new File(savePath + "CropBkgdSub" + File.separator + "SPIMA"+pos+"-"+f+"-1_1.tif").canRead()) ||
+									!(new File(savePath + "CropBkgdSub" + File.separator + "SPIMA"+pos+"-"+f+"-2_1.tif").canRead()) ||
+									!(new File(savePath + "CropBkgdSub" + File.separator + "SPIMB"+pos+"-"+f+"-1_1.tif").canRead()) ||
+									!(new File(savePath + "CropBkgdSub" + File.separator + "SPIMB"+pos+"-"+f+"-2_1.tif").canRead()) ){
+								IJ.wait(100);
+							}
+							double pwA = impAs[pos].getCalibration().pixelWidth;
+							double phA = impAs[pos].getCalibration().pixelHeight;
+							double pdA = impAs[pos].getCalibration().pixelDepth;
+							double pwB = impBs[pos].getCalibration().pixelWidth;
+							double phB = impBs[pos].getCalibration().pixelHeight;
+							double pdB = impBs[pos].getCalibration().pixelDepth;
+
+
+
+							if (impAs[pos].hasNullStack() || impAs[pos].getNFrames()<f-1)
+								continue;
+							if (impBs[pos].hasNullStack())
+								continue;
+
+
+							int fi=0;
+							dc1File = new File(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution1" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif");
+							dc2File = new File(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution2" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif");
+
+							if ((wavelengths ==1 && dc1File.canRead())
+									||
+									(wavelengths >= 2 && dc1File.canRead()
+									&& dc2File.canRead())) {
+								IJ.log("already done: " + pos +" "+ impAs[pos].getChannel()+" "+ impAs[pos].getSlice()+" "+ f);
+								continue;
 							} else {
-								zRotAngle = new Line(xpoints[0], ypoints[0], xpoints[npoints/2], ypoints[npoints/2]).getAngle();
-							}
-						}
+								IJ.log("starting " + pos +" "+ impAs[pos].getChannel()+" "+ impAs[pos].getSlice()+" "+ f);
 
+								int type = origRoiBs[pos].getType();
+								int[] xpoints = origRoiBs[pos].getPolygon().xpoints;
+								int[] ypoints = origRoiBs[pos].getPolygon().ypoints;
 
-						for (fi=1; fi<=f; fi++) {
-							tmxFile = new File("" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx");
-							if (tmxFile.canRead() ){
-								lastMatrix[pos] = IJ.openAsString("" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx");
-								break;
-							}
-						}
+								int npoints = xpoints.length;
 
-						final int ff = f;
+								double zRotAngle = rotZYXs[pos][0];
+								double yRotAngle =  rotZYXs[pos][1];
+								double xRotAngle =  rotZYXs[pos][2];
+								if (type > Roi.OVAL) {
+									if (npoints == 4) {
+										double angleZero = new Line(xpoints[0], ypoints[0], xpoints[1], ypoints[1]).getAngle();
+										double angleTwo = new Line(xpoints[2], ypoints[2], xpoints[3], ypoints[3]).getAngle();
 
-						//							timecode = "" + (new Date()).getTime();
-						final String ftimecode = timecode;
+										double angleZeroPlusPi = angleZero + 180;
+										double angleTwoPlusPi = angleTwo + 180;
 
-						try {
-							while (regDeconProcess!= null && regDeconProcess.isAlive()) {
-								IJ.wait(100);
-							}
-							//							} catch (IOException e) {
-							//								// TODO Auto-generated catch block
-							//								e.printStackTrace();
-						}finally {
-							if (regDeconProcess!= null) {
-								IJ.log("rdpExit="+regDeconProcess.exitValue());
-								try {
-									if (regDeconProcess.getOutputStream() != null) {
-										regDeconProcess.getOutputStream().close();
-									}
-								} catch (final IOException ioe) {
-									// ignore
-								}
-								try {
-									if (regDeconProcess.getInputStream() != null) {
-										regDeconProcess.getInputStream().close();
-									}
-								} catch (final IOException ioe) {
-									// ignore
-								}
-								try {
-									if (regDeconProcess.getErrorStream() != null) {
-										regDeconProcess.getErrorStream().close();
-									}
-								} catch (final IOException ioe) {
-									// ignore
-								}
-								regDeconProcess.destroyForcibly();
-							}
-						}
+										double angleDelta = angleZeroPlusPi%180 - angleTwoPlusPi%180;
 
-						prxPath = savePath  + "ProjX_"+("Decon-Fuse_"
-								+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
-						pryPath = savePath  + "ProjY_"+("Decon-Fuse_"
-								+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
-						maxXPath = savePath  + "MaxX_"+("Decon-Fuse_"
-								+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
-						maxYPath = savePath  + "MaxY_"+("Decon-Fuse_"
-								+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
-						maxZPath = savePath  + "MaxZ_"+("Decon-Fuse_"
-								+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
+										if ( Math.abs(angleDelta)  >80 && Math.abs(angleDelta)  <100) {
+											haveAxesRoiDF = true;
+											zRotAngle = angleZero;
 
-						//						IJ.log(prxPath);
-//						IJ.log(pryPath);
-						prxColor1File = new File(prxPath+File.separator+"Color1");
-						pryColor1File = new File(pryPath+File.separator+"Color1");
-						maxXColor1File = new File(maxXPath+File.separator+"Color1");
-						maxYColor1File = new File(maxYPath+File.separator+"Color1");
-						maxZColor1File = new File(maxZPath+File.separator+"Color1");
-						prxColor1File.mkdirs();
-						pryColor1File.mkdirs();
-						maxXColor1File.mkdirs();
-						maxYColor1File.mkdirs();
-						maxZColor1File.mkdirs();
-						
-						if (wavelengths >= 2) {
-							prxColor2File = new File(prxPath+File.separator+"Color2");
-							pryColor2File = new File(pryPath+File.separator+"Color2");
-							maxXColor2File = new File(maxXPath+File.separator+"Color2");
-							maxYColor2File = new File(maxYPath+File.separator+"Color2");
-							maxZColor2File = new File(maxZPath+File.separator+"Color2");
-							prxColor2File.mkdirs();
-							pryColor2File.mkdirs(); 
-							maxXColor2File.mkdirs();
-							maxYColor2File.mkdirs();
-							maxZColor2File.mkdirs();
-						}
-						String threeDorientationIndex= ""+abRelOriValue;
-
-						//							String threeDorientationIndex= "1";
-						//							if (diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
-						//								threeDorientationIndex =  "-1";
-						//							}							
-						if (wavelengths == 1) {
-							if (!new File(savePath + "CropBkgdSub" + File.separator  + "SPIMA"+pos+"-"+f+"-1_1.tif").canRead() ||
-									!new File(savePath + "CropBkgdSub" + File.separator  + "SPIMB"+pos+"-"+f+"-1_1.tif").canRead()){ 
-								IJ.wait(100);
-							}
-							try {
-								String[] cmdln =null;
-								if (this.omeTiffs){
-									if (lineageDecons)
-										cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_", savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
-									else
-										cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_", savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
-								}else{
-									if (lineageDecons)
-										cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_", savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
-									else
-										cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_", savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
-								}
-								
-								regDeconProcess = Runtime.getRuntime().exec(cmdln);
-								while (regDeconProcess!= null && regDeconProcess.isAlive()) {
-									IJ.wait(100);
-								}
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}finally {
-								if (regDeconProcess!= null) {
-									IJ.log("rdpExit="+regDeconProcess.exitValue());
-									try {
-										if (regDeconProcess.getOutputStream() != null) {
-											regDeconProcess.getOutputStream().close();
+										}else {
+											zRotAngle = new Line(xpoints[0], ypoints[0], xpoints[2], ypoints[2]).getAngle();
 										}
-									} catch (final IOException ioe) {
-										// ignore
+									} else {
+										zRotAngle = new Line(xpoints[0], ypoints[0], xpoints[npoints/2], ypoints[npoints/2]).getAngle();
 									}
-									try {
-										if (regDeconProcess.getInputStream() != null) {
-											regDeconProcess.getInputStream().close();
+								}
+
+
+								for (fi=1; fi<=f; fi++) {
+									tmxFile = new File("" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx");
+									if (tmxFile.canRead() ){
+										lastMatrix[pos] = IJ.openAsString("" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx");
+										break;
+									}
+								}
+
+								final int ff = f;
+
+								//							timecode = "" + (new Date()).getTime();
+								final String ftimecode = timecode;
+
+								try {
+									while (regDeconProcess!= null && regDeconProcess.isAlive()) {
+										IJ.wait(100);
+									}
+									//							} catch (IOException e) {
+									//								// TODO Auto-generated catch block
+									//								e.printStackTrace();
+								}finally {
+									if (regDeconProcess!= null) {
+										IJ.log("rdpExit="+regDeconProcess.exitValue());
+										try {
+											if (regDeconProcess.getOutputStream() != null) {
+												regDeconProcess.getOutputStream().close();
+											}
+										} catch (final IOException ioe) {
+											// ignore
 										}
-									} catch (final IOException ioe) {
-										// ignore
-									}
-									try {
-										if (regDeconProcess.getErrorStream() != null) {
-											regDeconProcess.getErrorStream().close();
+										try {
+											if (regDeconProcess.getInputStream() != null) {
+												regDeconProcess.getInputStream().close();
+											}
+										} catch (final IOException ioe) {
+											// ignore
 										}
-									} catch (final IOException ioe) {
-										// ignore
+										try {
+											if (regDeconProcess.getErrorStream() != null) {
+												regDeconProcess.getErrorStream().close();
+											}
+										} catch (final IOException ioe) {
+											// ignore
+										}
+										regDeconProcess.destroyForcibly();
 									}
-									regDeconProcess.destroyForcibly();
-
-								}
-							}
-							try {
-								int waitCount = 0;
-								while (!(new File(savePath + "RegDecon" + File.separator + "Decon" + File.separator + "Decon_1.tif").canRead()) && waitCount<100) {
-									IJ.wait(100);
-									waitCount++;
 								}
 
-								if(new File(savePath + "RegDecon" + File.separator + "Decon" + File.separator + "Decon_1.tif").canRead()) {
-									Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon" + File.separator + "Decon_1.tif"),
-											Paths.get(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution"+ keyChannel + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif"), StandardCopyOption.REPLACE_EXISTING);
+								prxPath = savePath  + "ProjX_"+("Decon-Fuse_"
+										+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
+								pryPath = savePath  + "ProjY_"+("Decon-Fuse_"
+										+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
+								maxXPath = savePath  + "MaxX_"+("Decon-Fuse_"
+										+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
+								maxYPath = savePath  + "MaxY_"+("Decon-Fuse_"
+										+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
+								maxZPath = savePath  + "MaxZ_"+("Decon-Fuse_"
+										+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
 
-									//											IJ.runMacro("waitForUser;");
-									IJ.log(""+ pos+ "old=> " + lastMatrix[pos]);
-									if (new File("" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").canRead()) {
-										lastMatrix[pos] = IJ.openAsString("" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
-										IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx");
-										IJ.log(""+ pos+ "new=> " + lastMatrix[pos]);
+								//						IJ.log(prxPath);
+								//						IJ.log(pryPath);
+								prxColor1File = new File(prxPath+File.separator+"Color1");
+								pryColor1File = new File(pryPath+File.separator+"Color1");
+								maxXColor1File = new File(maxXPath+File.separator+"Color1");
+								maxYColor1File = new File(maxYPath+File.separator+"Color1");
+								maxZColor1File = new File(maxZPath+File.separator+"Color1");
+								prxColor1File.mkdirs();
+								pryColor1File.mkdirs();
+								maxXColor1File.mkdirs();
+								maxYColor1File.mkdirs();
+								maxZColor1File.mkdirs();
+
+								if (wavelengths >= 2) {
+									prxColor2File = new File(prxPath+File.separator+"Color2");
+									pryColor2File = new File(pryPath+File.separator+"Color2");
+									maxXColor2File = new File(maxXPath+File.separator+"Color2");
+									maxYColor2File = new File(maxYPath+File.separator+"Color2");
+									maxZColor2File = new File(maxZPath+File.separator+"Color2");
+									prxColor2File.mkdirs();
+									pryColor2File.mkdirs(); 
+									maxXColor2File.mkdirs();
+									maxYColor2File.mkdirs();
+									maxZColor2File.mkdirs();
+								}
+								String threeDorientationIndex= ""+abRelOriValue;
+
+								//							String threeDorientationIndex= "1";
+								//							if (diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
+								//								threeDorientationIndex =  "-1";
+								//							}							
+								if (wavelengths == 1) {
+									if (!new File(savePath + "CropBkgdSub" + File.separator  + "SPIMA"+pos+"-"+f+"-1_1.tif").canRead() ||
+											!new File(savePath + "CropBkgdSub" + File.separator  + "SPIMB"+pos+"-"+f+"-1_1.tif").canRead()){ 
+										IJ.wait(100);
 									}
-
-								}
-
-								int k = f;
-
-								if (new File(prxPath+File.separator+"Color1"+File.separator+"proj_"+k+"_1.tif").canRead() && new File(pryPath+File.separator+"Color1"+File.separator+"proj_"+k+"_1.tif").canRead()
-										&&  (wavelengths >= 2 && new File(prxPath+File.separator+"Color2"+File.separator+"proj_"+k+"_1.tif").canRead() && new File(pryPath+File.separator+"Color2"+File.separator+"proj_"+k+"_1.tif").canRead()))
-									continue;
-								else {
 									try {
-										Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Xaxis"+ File.separator +"MP_3D_Xaxis_1.tif"),
-												Paths.get(prxPath+File.separator +"Color1"+ File.separator +"projX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-										Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Yaxis"+ File.separator +"MP_3D_Yaxis_1.tif"),
-												Paths.get(pryPath+File.separator +"Color1"+ File.separator +"projY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-										Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_XProj"+ File.separator +"MP_YZ_1.tif"),
-												Paths.get(maxXPath+File.separator +"Color1"+ File.separator +"maxX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-										Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_YProj"+ File.separator +"MP_ZX_1.tif"),
-												Paths.get(maxYPath+File.separator +"Color1"+ File.separator +"maxY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-										Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_ZProj"+ File.separator +"MP_XY_1.tif"),
-												Paths.get(maxZPath+File.separator +"Color1"+ File.separator +"maxZ_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+										String[] cmdln =null;
+										if (omeTiffs){
+											if (lineageDecons)
+												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_", savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
+											else
+												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_", savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
+										}else{
+											if (lineageDecons)
+												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_", savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
+											else
+												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_", savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
+										}
+
+										regDeconProcess = Runtime.getRuntime().exec(cmdln);
+										while (regDeconProcess!= null && regDeconProcess.isAlive()) {
+											IJ.wait(100);
+										}
+									} catch (IOException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}finally {
+										if (regDeconProcess!= null) {
+											IJ.log("rdpExit="+regDeconProcess.exitValue());
+											try {
+												if (regDeconProcess.getOutputStream() != null) {
+													regDeconProcess.getOutputStream().close();
+												}
+											} catch (final IOException ioe) {
+												// ignore
+											}
+											try {
+												if (regDeconProcess.getInputStream() != null) {
+													regDeconProcess.getInputStream().close();
+												}
+											} catch (final IOException ioe) {
+												// ignore
+											}
+											try {
+												if (regDeconProcess.getErrorStream() != null) {
+													regDeconProcess.getErrorStream().close();
+												}
+											} catch (final IOException ioe) {
+												// ignore
+											}
+											regDeconProcess.destroyForcibly();
+
+										}
+									}
+									try {
+										int waitCount = 0;
+										while (!(new File(savePath + "RegDecon" + File.separator + "Decon" + File.separator + "Decon_1.tif").canRead()) && waitCount<100) {
+											IJ.wait(100);
+											waitCount++;
+										}
+
+										if(new File(savePath + "RegDecon" + File.separator + "Decon" + File.separator + "Decon_1.tif").canRead()) {
+											Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon" + File.separator + "Decon_1.tif"),
+													Paths.get(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution"+ keyChannel + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif"), StandardCopyOption.REPLACE_EXISTING);
+
+											//											IJ.runMacro("waitForUser;");
+											IJ.log(""+ pos+ "old=> " + lastMatrix[pos]);
+											if (new File("" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").canRead()) {
+												lastMatrix[pos] = IJ.openAsString("" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
+												IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx");
+												IJ.log(""+ pos+ "new=> " + lastMatrix[pos]);
+											}
+
+										}
+
+										int k = f;
+
+										if (new File(prxPath+File.separator+"Color1"+File.separator+"proj_"+k+"_1.tif").canRead() && new File(pryPath+File.separator+"Color1"+File.separator+"proj_"+k+"_1.tif").canRead()
+												&&  (wavelengths >= 2 && new File(prxPath+File.separator+"Color2"+File.separator+"proj_"+k+"_1.tif").canRead() && new File(pryPath+File.separator+"Color2"+File.separator+"proj_"+k+"_1.tif").canRead()))
+											continue;
+										else {
+											try {
+												Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Xaxis"+ File.separator +"MP_3D_Xaxis_1.tif"),
+														Paths.get(prxPath+File.separator +"Color1"+ File.separator +"projX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+												Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Yaxis"+ File.separator +"MP_3D_Yaxis_1.tif"),
+														Paths.get(pryPath+File.separator +"Color1"+ File.separator +"projY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+												Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_XProj"+ File.separator +"MP_YZ_1.tif"),
+														Paths.get(maxXPath+File.separator +"Color1"+ File.separator +"maxX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+												Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_YProj"+ File.separator +"MP_ZX_1.tif"),
+														Paths.get(maxYPath+File.separator +"Color1"+ File.separator +"maxY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+												Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_ZProj"+ File.separator +"MP_XY_1.tif"),
+														Paths.get(maxZPath+File.separator +"Color1"+ File.separator +"maxZ_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+											} catch (IOException e) {
+												// TODO Auto-generated catch block
+												e.printStackTrace();
+											}
+
+										}
+
 									} catch (IOException e) {
 										// TODO Auto-generated catch block
 										e.printStackTrace();
 									}
 
+
 								}
 
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
 
-
-						}
-
-
-						//	NEW TWO CALL VERSION TO REUSE FIT ON CH 2						
-						if (wavelengths >= 2) {
-							if (!new File(savePath + "CropBkgdSub" + File.separator  + "SPIMA"+pos+"-"+f+"-1_1.tif").canRead() ||
-									!new File(savePath + "CropBkgdSub" + File.separator  + "SPIMB"+pos+"-"+f+"-1_1.tif").canRead() ||
-									!new File(savePath + "CropBkgdSub" + File.separator  + "SPIMA"+pos+"-"+f+"-2_1.tif").canRead() ||
-									!new File(savePath + "CropBkgdSub" + File.separator  + "SPIMB"+pos+"-"+f+"-2_1.tif").canRead()){
-								IJ.wait(100);
-							}
-							try {
-								String[] cmdln = {""};
-								if (keyChannel ==1){
-									if (this.omeTiffs){
-										if (lineageDecons)
-											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
-										else
-											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
-									}else{
-										if (lineageDecons)
-											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
-										else
-											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
-									}
-								}else{
-									if (this.omeTiffs){
-										if (lineageDecons)
-											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-2_","SPIMA"+pos+"-"+f+"-2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
-										else
-											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-2_","SPIMA"+pos+"-"+f+"-2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
-									}else{
-										if (lineageDecons)
-											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-2_","SPIMB"+pos+"-"+f+"-2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
-										else
-											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-2_","SPIMB"+pos+"-"+f+"-2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
-									}
-								}
-								//								IJ.log(cmdln);
-								IJ.log(Arrays.toString(cmdln));
-								regDeconProcess = Runtime.getRuntime().exec(cmdln);
-								while (regDeconProcess!= null && regDeconProcess.isAlive()) {
-									IJ.wait(100);
-								}
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}finally {
-								if (regDeconProcess!= null) {
-									IJ.log("rdpExit="+regDeconProcess.exitValue());
-									try {
-										if (regDeconProcess.getOutputStream() != null) {
-											regDeconProcess.getOutputStream().close();
-										}
-									} catch (final IOException ioe) {
-										// ignore
+								//	NEW TWO CALL VERSION TO REUSE FIT ON CH 2						
+								if (wavelengths >= 2) {
+									if (!new File(savePath + "CropBkgdSub" + File.separator  + "SPIMA"+pos+"-"+f+"-1_1.tif").canRead() ||
+											!new File(savePath + "CropBkgdSub" + File.separator  + "SPIMB"+pos+"-"+f+"-1_1.tif").canRead() ||
+											!new File(savePath + "CropBkgdSub" + File.separator  + "SPIMA"+pos+"-"+f+"-2_1.tif").canRead() ||
+											!new File(savePath + "CropBkgdSub" + File.separator  + "SPIMB"+pos+"-"+f+"-2_1.tif").canRead()){
+										IJ.wait(100);
 									}
 									try {
-										if (regDeconProcess.getInputStream() != null) {
-											regDeconProcess.getInputStream().close();
+										String[] cmdln = {""};
+										if (keyChannel ==1){
+											if (omeTiffs){
+												if (lineageDecons)
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
+												else
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
+											}else{
+												if (lineageDecons)
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
+												else
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
+											}
+										}else{
+											if (omeTiffs){
+												if (lineageDecons)
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-2_","SPIMA"+pos+"-"+f+"-2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
+												else
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-2_","SPIMA"+pos+"-"+f+"-2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
+											}else{
+												if (lineageDecons)
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-2_","SPIMB"+pos+"-"+f+"-2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
+												else
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-2_","SPIMB"+pos+"-"+f+"-2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"1", threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
+											}
 										}
-									} catch (final IOException ioe) {
-										// ignore
-									}
-									try {
-										if (regDeconProcess.getErrorStream() != null) {
-											regDeconProcess.getErrorStream().close();
+										//								IJ.log(cmdln);
+										IJ.log(Arrays.toString(cmdln));
+										regDeconProcess = Runtime.getRuntime().exec(cmdln);
+										while (regDeconProcess!= null && regDeconProcess.isAlive()) {
+											IJ.wait(100);
 										}
-									} catch (final IOException ioe) {
-										// ignore
-									}
-									regDeconProcess.destroyForcibly();
-
-								}
-							}
-
-							try {
-								int waitCount = 0;
-								outputDCFile = new File(savePath + "RegDecon" + File.separator + "Decon" + File.separator + "Decon_1.tif");
-								while (!(dc1File.canRead()) && waitCount<100) {
-									IJ.wait(100);
-									waitCount++;
-								}
-								if(outputDCFile.canRead()) {
-									Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon" + File.separator + "Decon_1.tif"),
-											Paths.get(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution"+ keyChannel + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif"), StandardCopyOption.REPLACE_EXISTING);
-
-									IJ.log(""+ pos+ "old=> " + lastMatrix[pos]);
-									outputTmxFile = new File("" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
-									if (outputTmxFile.canRead()) {
-										lastMatrix[pos] = IJ.openAsString("" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
-										IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx");
-										IJ.log(""+ pos+ "new=> " + lastMatrix[pos]);
-									}
-								}
-
-
-
-								int k = f;
-
-								//									if (prxColor1File.canRead() && pryColor1File.canRead()
-								//											&&  (wavelengths == 2 && prxColor2File.canRead() && pryColor2File.canRead()))
-								//										continue;
-								//									else {
-								try {
-									Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Xaxis"+ File.separator +"MP_3D_Xaxis_1.tif"),
-											Paths.get(prxPath+File.separator +"Color"+ keyChannel+ File.separator +"projX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-									Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Yaxis"+ File.separator +"MP_3D_Yaxis_1.tif"),
-											Paths.get(pryPath+File.separator +"Color"+ keyChannel+ File.separator +"projY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-									Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_XProj"+ File.separator +"MP_YZ_1.tif"),
-											Paths.get(maxXPath+File.separator +"Color"+ keyChannel+ File.separator +"maxX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-									Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_YProj"+ File.separator +"MP_ZX_1.tif"),
-											Paths.get(maxYPath+File.separator +"Color"+ keyChannel+ File.separator +"maxY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-									Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_ZProj"+ File.separator +"MP_XY_1.tif"),
-											Paths.get(maxZPath+File.separator +"Color"+ keyChannel+ File.separator +"maxZ_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-								} catch (IOException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-
-								//									}
-
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-
-							//NOW REG slavechannel Using new key channel tmx
-							try {
-								String[] cmdln = {""};
-								if (keyChannel ==1){
-									if (this.omeTiffs){
-										if (lineageDecons)
-											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-2_","SPIMA"+pos+"-"+f+"-2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
-										else
-											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-2_","SPIMA"+pos+"-"+f+"-2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
-									}else{
-										if (lineageDecons)
-											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-2_","SPIMB"+pos+"-"+f+"-2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
-										else
-											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-2_","SPIMB"+pos+"-"+f+"-2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
-									}
-								}else{
-									if (this.omeTiffs){
-										if (lineageDecons)
-											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
-										else
-											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
-									}else{
-										if (lineageDecons)
-											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
-										else
-											cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
-									}
-								}
-								//								IJ.log(cmdln);
-								IJ.log(Arrays.toString(cmdln));
-								regDeconProcess = Runtime.getRuntime().exec(cmdln);
-								while (regDeconProcess!= null && regDeconProcess.isAlive()) {
-									IJ.wait(100);
-								}
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}finally {
-								if (regDeconProcess!= null) {
-									IJ.log("rdpExit="+regDeconProcess.exitValue());
-									try {
-										if (regDeconProcess.getOutputStream() != null) {
-											regDeconProcess.getOutputStream().close();
-										}
-									} catch (final IOException ioe) {
-										// ignore
-									}
-									try {
-										if (regDeconProcess.getInputStream() != null) {
-											regDeconProcess.getInputStream().close();
-										}
-									} catch (final IOException ioe) {
-										// ignore
-									}
-									try {
-										if (regDeconProcess.getErrorStream() != null) {
-											regDeconProcess.getErrorStream().close();
-										}
-									} catch (final IOException ioe) {
-										// ignore
-									}
-									regDeconProcess.destroyForcibly();
-
-								}
-							}
-							try {
-								int waitCount = 0;
-								while (!(dc1File.canRead()) && waitCount<100) {
-									IJ.wait(100);
-									waitCount++;
-								}
-
-								if(outputDCFile.canRead()) {
-									Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon" + File.separator + "Decon_1.tif"),
-											Paths.get(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution"+ slaveChannel + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif"), StandardCopyOption.REPLACE_EXISTING);
-
-								}
-
-
-
-								int k = f;
-
-								//									if (new File(prxPath+File.separator+"Color1"+File.separator+"proj_"+k+"_1.tif").canRead() && new File(pryPath+File.separator+"Color1"+File.separator+"proj_"+k+"_1.tif").canRead()
-								//											&&  (wavelengths == 2 && new File(prxPath+File.separator+"Color2"+File.separator+"proj_"+k+"_1.tif").canRead() && new File(pryPath+File.separator+"Color2"+File.separator+"proj_"+k+"_1.tif").canRead()))
-								//										continue;
-								//									else {
-								try {
-									Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Xaxis"+ File.separator +"MP_3D_Xaxis_1.tif"),
-											Paths.get(prxPath+File.separator +"Color"+ slaveChannel+ File.separator +"projX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-									Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Yaxis"+ File.separator +"MP_3D_Yaxis_1.tif"),
-											Paths.get(pryPath+File.separator +"Color"+ slaveChannel+ File.separator +"projY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-									Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_XProj"+ File.separator +"MP_YZ_1.tif"),
-											Paths.get(maxXPath+File.separator +"Color"+ slaveChannel+ File.separator +"maxX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-									Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_YProj"+ File.separator +"MP_ZX_1.tif"),
-											Paths.get(maxYPath+File.separator +"Color"+ slaveChannel+ File.separator +"maxY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-									Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_ZProj"+ File.separator +"MP_XY_1.tif"),
-											Paths.get(maxZPath+File.separator +"Color"+ slaveChannel+ File.separator +"maxZ_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-								} catch (IOException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-
-								//									}
-
-
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						}
-						IJ.log("finishing " + pos +" "+ impAs[pos].getChannel()+" "+ impAs[pos].getSlice()+" "+ f);
-
-					}
-
-					saveFile = new File(savePath);
-					if ((saveFile).canRead()) {
-						// SETUP OF WINDOWS SHOWING NEW AND PRE-EXISTING DECON OUTPUTS
-
-						deconmfivs = null;
-						deconmfivsPathFile = new File(savePath+ File.separator + "RegDecon" + File.separator + "Pos" + pos);
-						if (true) {
-							if (deconmfivsPathFile.canRead() ) {
-								deconmfivs = new MultiFileInfoVirtualStack(savePath
-										+ File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution",
-										false);
-							}
-
-							if (deconmfivs!=null && deconmfivs.getSize() > 0) {
-								impDF1s[pos] = new ImagePlus();
-								impDF1s[pos].setStack("Decon-Fuse_"
-										+ impAs[pos].getTitle().split(":")[0], deconmfivs);
-								impDF1s[pos].setFileInfo(new FileInfo());
-								impDF1s[pos].getCalibration().setUnit(impAs[pos].getCalibration().getUnit());
-								impDF1s[pos].getCalibration().pixelWidth = pwA;
-								impDF1s[pos].getCalibration().pixelHeight = phA;
-								impDF1s[pos].getCalibration().pixelDepth = pwA;
-
-								impDF1s[pos].getOriginalFileInfo().directory = dirOrOMETiffFinal;
-								int stkNSlicesDF = impDF1s[pos].getStackSize();
-								int zSlicesDF1 = deconmfivs.getFivStacks().get(0)
-										.getSize();
-								impDF1s[pos].setOpenAsHyperStack(true);
-								impDF1s[pos].setStack(impDF1s[pos].getStack(), outputWavelengths,
-										zSlicesDF1, stkNSlicesDF
-										/ (outputWavelengths * zSlicesDF1));
-								if (ciDFs[pos] != null) {
-									win = ciDFs[pos].getWindow();
-								} else {
-									win = null;
-								}
-
-								ciDFs[pos] = new CompositeImage(impDF1s[pos]);
-
-
-								if (wavelengths > 1)
-									ciDFs[pos].setMode(CompositeImage.COMPOSITE);
-								else
-									ciDFs[pos].setMode(CompositeImage.GRAYSCALE);
-
-								if (win==null) {
-									ciDFs[pos].show();
-									WindowManager.group(impBs[pos], ciDFs[pos]);
-									ciDFs[pos].setPosition(1, ciDFs[pos].getNSlices()/2, ciDFs[pos].getNFrames());
-
-								}else {
-									int oldW = win.getWidth();
-									int oldH = win.getHeight();
-									int oldC = win.getImagePlus().getChannel();
-									int oldZ = win.getImagePlus().getSlice();
-									int oldT = win.getImagePlus().getFrame();
-									double oldMag = win.getCanvas().getMagnification();
-									double oldMin = win.getImagePlus()
-											.getDisplayRangeMin();
-									double oldMax = win.getImagePlus()
-											.getDisplayRangeMax();
-									boolean oldEdges = win.getImagePlus().getStack().isEdges();
-									ciDFs[pos].copyLuts(win.getImagePlus());
-
-									//									win.setVisible(false);	
-									win.setImage(ciDFs[pos]);
-									ciDFs[pos].setWindow(win);
-									win.updateImage(ciDFs[pos]);
-									win.getImagePlus().getStack().setEdges(oldEdges);
-									win.setSize(oldW, oldH);
-									((StackWindow) win).addScrollbars(ciDFs[pos]);
-									win.getCanvas().setMagnification(oldMag);
-									win.getImagePlus().updateAndDraw();
-									win.getImagePlus().setPosition(oldC, oldZ, oldT);
-									win.getImagePlus().setDisplayRange(oldMin, oldMax);
-									win.setSize(win.getSize().width,
-											win.getSize().height);
-
-									//									win.setVisible(true);	
-								}
-
-
-
-								////////								
-								if (lineageDecons){
-
-									ImagePlus currentDeconResultImp = ciDFs[pos];	
-									LUT[] impLUTs = null;
-									int greenMax = 0;
-									int redMax = 0;
-									if (currentDeconResultImp.isComposite()) {
-										impLUTs = (((CompositeImage)currentDeconResultImp).getLuts());
-										greenMax = (int) impLUTs[0].max;
-										redMax = (int) impLUTs[1].max;
-									}
-
-									String outputDir = savePath;
-									String sourceDir = savePath;
-									String outDir = outputDir+ File.separator ;
-									String[] sourceFileList = new File(sourceDir).list();
-									currentDeconResultImp.killRoi();
-
-//									if (currentDeconResultImp.getRoi() == null ) {
-//										for (String sourceDirFileName:sourceFileList){
-//											if (sourceDirFileName.endsWith("originalSNF.roi")){
-//												if (sourceDirFileName.startsWith(currentDeconResultImp.getTitle())){
-//													WindowManager.setTempCurrentImage(currentDeconResultImp);
-//													IJ.open(outDir+ sourceDirFileName);
-//													WindowManager.setTempCurrentImage(null);
-//												}
-//											}
-//										}				
-//									}
-
-
-//									if (currentDeconResultImp.getRoi() == null ) {
-//										continue;
-//									}
-
-									Roi theROI = new Roi(0,0,currentDeconResultImp.getWidth(),currentDeconResultImp.getHeight());
-									int type = Roi.RECTANGLE ;
-									boolean flipStack = false;
-
-									if (theROI == null) {
-
-									} else {
-
-										String title = currentDeconResultImp.getTitle();
-										String savetitle = title.replace(":","_").replace(" ","").replace("_dummy","");
-										String savePath = outDir+savetitle;
-
-//										IJ.saveAs(currentDeconResultImp, "Selection", savePath+"originalSNF.roi");
-										int[] xpoints = theROI.getPolygon().xpoints;
-										int[] ypoints = theROI.getPolygon().ypoints;
-										int npoints = xpoints.length;
-
-										double angle =0;
-										if (type > Roi.OVAL) {
-											if (npoints == 4) {
-												double angleZero = new Line(xpoints[0], ypoints[0], xpoints[1], ypoints[1]).getAngle();
-												double angleTwo = new Line(xpoints[2], ypoints[2], xpoints[3], ypoints[3]).getAngle();
-
-												double angleZeroPlusPi = angleZero + 180;
-												double angleTwoPlusPi = angleTwo + 180;
-
-												double angleDelta = angleZeroPlusPi%180 - angleTwoPlusPi%180;
-
-												if ( Math.abs(angleDelta)  >80 && Math.abs(angleDelta)  <100) {
-													haveAxesRoiDF = true;
-													angle = angleZero;
-
-													//??? is flipstack correct??  or should it use deltas?!!?						
-													flipStack = (angleZeroPlusPi - angleTwoPlusPi < 0 || angleZeroPlusPi - angleTwoPlusPi > 180);
-													IJ.log("flipStack = " + flipStack + ":angle0PlusPi - angle2PlusPi = " + angleZeroPlusPi +" - "+ angleTwoPlusPi + " = " + (angleDelta));
-
-													Roi ellipseRoi = new EllipseRoi(xpoints[0], ypoints[0], xpoints[1], ypoints[1], 
-															(new Line(xpoints[2], ypoints[2], xpoints[3], ypoints[3])).getLength()
-															/
-															(new Line(xpoints[0], ypoints[0], xpoints[1], ypoints[1])).getLength()
-															);
-													currentDeconResultImp.setRoi(ellipseRoi, false);
-													theROI = ellipseRoi;
-													IJ.saveAs(currentDeconResultImp, "Selection", savePath +  "ellipseSNF.roi");
-
-													Roi rectRoi = new Roi(ellipseRoi.getBounds());
-													currentDeconResultImp.setRoi(rectRoi, false);
-													IJ.saveAs(currentDeconResultImp, "Selection", savePath + "rectangleSNF.roi");
-
-												}else {
-													angle = new Line(xpoints[0], ypoints[0], xpoints[2], ypoints[2]).getAngle();
+									} catch (IOException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}finally {
+										if (regDeconProcess!= null) {
+											IJ.log("rdpExit="+regDeconProcess.exitValue());
+											try {
+												if (regDeconProcess.getOutputStream() != null) {
+													regDeconProcess.getOutputStream().close();
 												}
-											} else {
-												angle = new Line(xpoints[0], ypoints[0], xpoints[npoints/2], ypoints[npoints/2]).getAngle();
+											} catch (final IOException ioe) {
+												// ignore
+											}
+											try {
+												if (regDeconProcess.getInputStream() != null) {
+													regDeconProcess.getInputStream().close();
+												}
+											} catch (final IOException ioe) {
+												// ignore
+											}
+											try {
+												if (regDeconProcess.getErrorStream() != null) {
+													regDeconProcess.getErrorStream().close();
+												}
+											} catch (final IOException ioe) {
+												// ignore
+											}
+											regDeconProcess.destroyForcibly();
+
+										}
+									}
+
+									try {
+										int waitCount = 0;
+										outputDCFile = new File(savePath + "RegDecon" + File.separator + "Decon" + File.separator + "Decon_1.tif");
+										while (!(dc1File.canRead()) && waitCount<100) {
+											IJ.wait(100);
+											waitCount++;
+										}
+										if(outputDCFile.canRead()) {
+											Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon" + File.separator + "Decon_1.tif"),
+													Paths.get(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution"+ keyChannel + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif"), StandardCopyOption.REPLACE_EXISTING);
+
+											IJ.log(""+ pos+ "old=> " + lastMatrix[pos]);
+											outputTmxFile = new File("" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
+											if (outputTmxFile.canRead()) {
+												lastMatrix[pos] = IJ.openAsString("" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
+												IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx");
+												IJ.log(""+ pos+ "new=> " + lastMatrix[pos]);
 											}
 										}
 
 
-										int wasC = currentDeconResultImp.getChannel();
-										int wasZ = currentDeconResultImp.getSlice();
-										int wasT = currentDeconResultImp.getFrame();
 
-										int wavelengths = currentDeconResultImp.getNChannels();
+										int k = f;
 
-										Roi theRotatedROI = RoiRotator.rotate(theROI, angle);
-										final String subdir = savetitle;
-										new File(outDir+subdir).mkdirs();
-										final String impParameterPath = outDir+subdir+File.separator+savetitle+"_SNparamsFile.txt";
-										final int endPoint = currentDeconResultImp.getNFrames();
-										int stackWidth=0;
-										int stackHeight=0;
+										//									if (prxColor1File.canRead() && pryColor1File.canRead()
+										//											&&  (wavelengths == 2 && prxColor2File.canRead() && pryColor2File.canRead()))
+										//										continue;
+										//									else {
+										try {
+											Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Xaxis"+ File.separator +"MP_3D_Xaxis_1.tif"),
+													Paths.get(prxPath+File.separator +"Color"+ keyChannel+ File.separator +"projX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+											Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Yaxis"+ File.separator +"MP_3D_Yaxis_1.tif"),
+													Paths.get(pryPath+File.separator +"Color"+ keyChannel+ File.separator +"projY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+											Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_XProj"+ File.separator +"MP_YZ_1.tif"),
+													Paths.get(maxXPath+File.separator +"Color"+ keyChannel+ File.separator +"maxX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+											Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_YProj"+ File.separator +"MP_ZX_1.tif"),
+													Paths.get(maxYPath+File.separator +"Color"+ keyChannel+ File.separator +"maxY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+											Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_ZProj"+ File.separator +"MP_XY_1.tif"),
+													Paths.get(maxZPath+File.separator +"Color"+ keyChannel+ File.separator +"maxZ_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+										} catch (IOException e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
+										}
 
-										for (int frame = 1; frame <= endPoint; frame++) {
-											boolean paramsWritten = false;
-											if (!((new File(outDir+subdir+"/aaa_t"+frame+".tif").canRead())&&(new File(outDir+subdir+"Skipped"+"/aaa_t"+frame+".tif").canRead()))) {
+										//									}
 
-												ImageStack stack1 = new ImageStack((int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
-												ImageStack stack1skipped = new ImageStack((int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
+									} catch (IOException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
 
-												ImageStack stack2 = new ImageStack((int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
-												ImageStack stack2skipped = new ImageStack((int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
-
-//												ImageStack stack3 = new ImageStack((int)theRotatedROI.getBounds().getWidth()*2, (int)theRotatedROI.getBounds().getHeight());
-//												ImageStack stack3skipped = new ImageStack((int)theRotatedROI.getBounds().getWidth()*2, (int)theRotatedROI.getBounds().getHeight());
-
-												ImageStack stack3 = new ImageStack((int)currentDeconResultImp.getProcessor().getWidth()*2, (int)currentDeconResultImp.getProcessor().getHeight());
-												ImageStack stack3skipped = new ImageStack((int)currentDeconResultImp.getProcessor().getWidth()*2, (int)currentDeconResultImp.getProcessor().getHeight());
-
-												currentDeconResultImp.getWindow().setEnabled(false);
-
-
-												for (int i = 1; i <= currentDeconResultImp.getNSlices(); i++) {
-													currentDeconResultImp.setPositionWithoutUpdate(1, i, frame);
-
-													ImageProcessor ip1 = currentDeconResultImp.getProcessor().duplicate();
-
-													int[] ipHis = ip1.getHistogram();
-													double ipHisMode = 0.0;
-													int ipHisLength = ipHis.length;
-													int ipHisMaxBin = 0;
-													for (int h=0; h<ipHisLength; h++) {
-														if (ipHis[h] > ipHisMaxBin) {
-															ipHisMaxBin = ipHis[h];
-															ipHisMode = (double)h;
-														}
-													}
-													ip1.subtract(ipHisMode * 1);
-
-//													ip1.setRoi((Roi) theROI);
-//													ip1.fillOutside((Roi) theROI);
-//													ip1 = ip1.crop();
-//													ImageProcessor ip1r = ip1.createProcessor((int)Math.sqrt(ip1.getWidth()*ip1.getWidth()+ip1.getHeight()*ip1.getHeight())
-//															, (int)Math.sqrt(ip1.getWidth()*ip1.getWidth()+ip1.getHeight()*ip1.getHeight()));
-//													ip1r.insert(ip1, (ip1r.getWidth()-ip1.getWidth())/2, (ip1r.getHeight()-ip1.getHeight())/2);
-//													ip1= ip1r;
-//													ip1.rotate(angle);
-//													ip1.setRoi((int)(ip1.getWidth()-theRotatedROI.getBounds().getWidth())/2, (int)(ip1.getHeight()-theRotatedROI.getBounds().getHeight())/2
-//															, (int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
-//													ip1 = ip1.crop();
-
-													ImageProcessor ip3 = ip1.createProcessor(stack3.getWidth(), stack3.getHeight());
-
-													flipStack = false;  //NO LONGER NEED DOUBLEFLIP IF USING ZYX ROTATIONS TO CORRECT!
-													
-													if (!flipStack){
-//														stack1.addSlice(ip1);
-//														if (i%depthSkipFactor == 1) {
-//															stack1skipped.addSlice(ip1.duplicate());
-//														}
-														ImageProcessor ip1fh = ip1.duplicate();
-														ip1fh.flipHorizontal();
-														ip3.insert(ip1fh, ip3.getWidth()/2, 0);
-
-													} else {
-														ip1.flipVertical();
-//														stack1.addSlice(null, ip1, 0);
-//														if (i%depthSkipFactor == 1) {
-//															stack1skipped.addSlice(null, ip1.duplicate(),0);
-//														}
-														ImageProcessor ip1fh = ip1.duplicate();
-														ip1fh.flipHorizontal();
-
-														ip3.insert(ip1fh, ip3.getWidth()/2, 0);
-
-													}
-
-
-													if (wavelengths >= 2) {
-														currentDeconResultImp.setPositionWithoutUpdate(wavelengths, i, frame);
-														ImageProcessor ip2 = currentDeconResultImp.getProcessor().duplicate();
-														ipHis = ip2.getHistogram();
-														ipHisMode = 0.0;
-														ipHisLength = ipHis.length;
-														ipHisMaxBin = 0;
-														for (int h=0; h<ipHisLength; h++) {
-															if (ipHis[h] > ipHisMaxBin) {
-																ipHisMaxBin = ipHis[h];
-																ipHisMode = (double)h;
-															}
-														}
-
-														ip2.subtract(ipHisMode * 1);
-
-//														ip2.setRoi((Roi) theROI);
-//														ip2.fillOutside((Roi) theROI);
-//														ip2 = ip2.crop();
-//														ImageProcessor ip2r = ip2.createProcessor((int)Math.sqrt(ip2.getWidth()*ip2.getWidth()+ip2.getHeight()*ip2.getHeight())
-//																, (int)Math.sqrt(ip2.getWidth()*ip2.getWidth()+ip2.getHeight()*ip2.getHeight()));
-//														ip2r.insert(ip2, (ip2r.getWidth()-ip2.getWidth())/2, (ip2r.getHeight()-ip2.getHeight())/2);
-//														ip2= ip2r;
-//														ip2.rotate(angle);
-//														ip2.setRoi((int)(ip2.getWidth()-theRotatedROI.getBounds().getWidth())/2, (int)(ip2.getHeight()-theRotatedROI.getBounds().getHeight())/2
-//																, (int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
-//														ip2 = ip2.crop();
-
-														if (!flipStack){
-//															stack2.addSlice(ip2);
-//															if (i%depthSkipFactor == 1) {
-//																stack2skipped.addSlice(ip2.duplicate());
-//															}
-
-															ImageProcessor ip2fh = ip2.duplicate();
-															ip2fh.flipHorizontal();
-															ip3.insert(ip2fh, 0, 0);
-
-															stack3.addSlice(ip3);
-															if (i%depthSkipFactor == 1) {
-																stack3skipped.addSlice(ip3.duplicate());
-															}
-
-														} else {
-															ip2.flipVertical();
-//															stack2.addSlice(null, ip2, 0);
-//															if (i%depthSkipFactor == 1) {
-//																stack2skipped.addSlice(null, ip2.duplicate(),0);
-//															}
-
-															ImageProcessor ip2fh = ip2.duplicate();
-															ip2fh.flipHorizontal();
-															ip3.insert(ip2fh, 0, 0);
-
-															stack3.addSlice(null, ip3, 0);
-															if (i%depthSkipFactor == 1) {
-																stack3skipped.addSlice(null, ip3.duplicate(), 0);
-															}
-
-														}
-
-
-													}
-												}
-
-
-												currentDeconResultImp.getWindow().setEnabled(true);
-
-//												ImagePlus frameRedImp = new ImagePlus("Ch2hisSubCrop",stack2);
-//												ImagePlus frameRedImpSkipped = new ImagePlus("Ch2hisSubCrop",stack2skipped);
-
-
-//												ImagePlus frameGreenImp = new ImagePlus("Ch1hisSubCrop",stack1);
-//												ImagePlus frameGreenImpSkipped = new ImagePlus("Ch1hisSubCrop",stack1skipped);
-
-												ImagePlus frameRGsplitImp = new ImagePlus("Ch12hisSubCrop",stack3);
-												ImagePlus frameRGsplitImpSkipped = new ImagePlus("Ch12hisSubCrop",stack3skipped);
-
-												
-												stackWidth = frameRGsplitImp.getWidth()/2;
-												stackHeight = frameRGsplitImp.getHeight();
-												if (!paramsWritten) {
-													IJ.saveString(IJ.openAsString(paramsPath).replaceAll("(.*end_time=)\\d+(;.*)", "$1"+frame+"$2")
-															.replaceAll("(.*ROI=)true(;.*)", "$1false$2")
-															.replaceAll("(.*ROI.min=)\\d+(;.*)", "$10$2")
-															.replaceAll("(.*ROIxmax=)\\d+(;.*)", "$1"+stackWidth+"$2")
-															.replaceAll("(.*ROIymax=)\\d+(;.*)", "$1"+stackHeight+"$2")
-															.replaceAll("(.*)ROIpoints=\\[\\d+.*\\];(.*)", "$1"+""+"$2")
-															, impParameterPath);
-													paramsWritten = true;
-												}
-
-
-												// Red channel:
-
-												new File(outDir+subdir).mkdirs();
-												new File(outDir+subdir+"Skipped").mkdirs();
-
-
-												// save a stack
-
-												IJ.save(frameRGsplitImp, outDir+subdir+"/aaa_t"+frame+".tif");
-												IJ.save(frameRGsplitImpSkipped, outDir+subdir+"Skipped"+"/aaa_t"+frame+".tif");
-
-
-//												frameRedImp.flush();
-//												frameRedImpSkipped.flush();
-//												frameGreenImp.flush();
-//												frameGreenImpSkipped.flush();
-												frameRGsplitImp.flush();
-												frameRGsplitImpSkipped.flush();
-
+									//NOW REG slavechannel Using new key channel tmx
+									try {
+										String[] cmdln = {""};
+										if (keyChannel ==1){
+											if (omeTiffs){
+												if (lineageDecons)
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-2_","SPIMA"+pos+"-"+f+"-2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
+												else
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-2_","SPIMA"+pos+"-"+f+"-2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
+											}else{
+												if (lineageDecons)
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-2_","SPIMB"+pos+"-"+f+"-2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
+												else
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-2_","SPIMB"+pos+"-"+f+"-2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
+											}
+										}else{
+											if (omeTiffs){
+												if (lineageDecons)
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
+												else
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
+											}else{
+												if (lineageDecons)
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
+												else
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
 											}
 										}
-										currentDeconResultImp.setPosition(wasC, wasZ, wasT);
-//										currentDeconResultImp.setRoi(theROI,false);
+										//								IJ.log(cmdln);
+										IJ.log(Arrays.toString(cmdln));
+										regDeconProcess = Runtime.getRuntime().exec(cmdln);
+										while (regDeconProcess!= null && regDeconProcess.isAlive()) {
+											IJ.wait(100);
+										}
+									} catch (IOException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}finally {
+										if (regDeconProcess!= null) {
+											IJ.log("rdpExit="+regDeconProcess.exitValue());
+											try {
+												if (regDeconProcess.getOutputStream() != null) {
+													regDeconProcess.getOutputStream().close();
+												}
+											} catch (final IOException ioe) {
+												// ignore
+											}
+											try {
+												if (regDeconProcess.getInputStream() != null) {
+													regDeconProcess.getInputStream().close();
+												}
+											} catch (final IOException ioe) {
+												// ignore
+											}
+											try {
+												if (regDeconProcess.getErrorStream() != null) {
+													regDeconProcess.getErrorStream().close();
+												}
+											} catch (final IOException ioe) {
+												// ignore
+											}
+											regDeconProcess.destroyForcibly();
 
-										IJ.saveString(IJ.openAsString(paramsPath).replaceAll("(.*end_time=)\\d+(;.*)", "$1"+endPoint+"$2")
-												.replaceAll("(.*ROI=)true(;.*)", "$1false$2")
-												.replaceAll("(.*ROI.min=)\\d+(;.*)", "$10$2")
-												.replaceAll("(.*ROIxmax=)\\d+(;.*)", "$1"+stackWidth+"$2")
-												.replaceAll("(.*ROIymax=)\\d+(;.*)", "$1"+stackHeight+"$2")
-												.replaceAll("(.*)ROIpoints=\\[\\d+.*\\];(.*)", "$1"+""+"$2")
-												, impParameterPath);
+										}
+									}
+									try {
+										int waitCount = 0;
+										while (!(dc1File.canRead()) && waitCount<100) {
+											IJ.wait(100);
+											waitCount++;
+										}
 
-//										currentDeconResultImp.killRoi();
+										if(outputDCFile.canRead()) {
+											Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon" + File.separator + "Decon_1.tif"),
+													Paths.get(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution"+ slaveChannel + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif"), StandardCopyOption.REPLACE_EXISTING);
+
+										}
 
 
+
+										int k = f;
+
+										//									if (new File(prxPath+File.separator+"Color1"+File.separator+"proj_"+k+"_1.tif").canRead() && new File(pryPath+File.separator+"Color1"+File.separator+"proj_"+k+"_1.tif").canRead()
+										//											&&  (wavelengths == 2 && new File(prxPath+File.separator+"Color2"+File.separator+"proj_"+k+"_1.tif").canRead() && new File(pryPath+File.separator+"Color2"+File.separator+"proj_"+k+"_1.tif").canRead()))
+										//										continue;
+										//									else {
+										try {
+											Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Xaxis"+ File.separator +"MP_3D_Xaxis_1.tif"),
+													Paths.get(prxPath+File.separator +"Color"+ slaveChannel+ File.separator +"projX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+											Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Yaxis"+ File.separator +"MP_3D_Yaxis_1.tif"),
+													Paths.get(pryPath+File.separator +"Color"+ slaveChannel+ File.separator +"projY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+											Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_XProj"+ File.separator +"MP_YZ_1.tif"),
+													Paths.get(maxXPath+File.separator +"Color"+ slaveChannel+ File.separator +"maxX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+											Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_YProj"+ File.separator +"MP_ZX_1.tif"),
+													Paths.get(maxYPath+File.separator +"Color"+ slaveChannel+ File.separator +"maxY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+											Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_ZProj"+ File.separator +"MP_XY_1.tif"),
+													Paths.get(maxZPath+File.separator +"Color"+ slaveChannel+ File.separator +"maxZ_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+										} catch (IOException e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
+										}
+
+										//									}
+
+
+									} catch (IOException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
 									}
 								}
-								//////////							
-
-
-								dfProjXmfivs = new MultiFileInfoVirtualStack(prxPath+File.separator, "Color", false);
-								dfProjYmfivs = new MultiFileInfoVirtualStack(pryPath+File.separator, "Color", false);
-//								dfMaxXmfivs = new MultiFileInfoVirtualStack(maxXPath+File.separator, "Color", false);
-//								dfMaxYmfivs = new MultiFileInfoVirtualStack(maxYPath+File.separator, "Color", false);
-//								dfMaxZmfivs = new MultiFileInfoVirtualStack(maxZPath+File.separator, "Color", false);
-
-								impPrxs[pos] = new ImagePlus();
-								impPrxs[pos].setStack("3DProjX_Decon-Fuse_"
-										+ impAs[pos].getTitle().split(":")[0], dfProjXmfivs);
-								impPrxs[pos].setFileInfo(new FileInfo());
-								impPrxs[pos].getCalibration().setUnit(impDF1s[pos].getCalibration().getUnit());
-								impPrxs[pos].getCalibration().pixelWidth = impDF1s[pos].getCalibration().pixelWidth;
-								impPrxs[pos].getCalibration().pixelHeight = impDF1s[pos].getCalibration().pixelHeight;
-								impPrxs[pos].getCalibration().pixelDepth = impDF1s[pos].getCalibration().pixelWidth;
-
-								impPrxs[pos].getOriginalFileInfo().directory = prxPath+File.separator;
-								int stkNSlicesPrx = impPrxs[pos].getStackSize();
-								int zSlicesPrx = dfProjXmfivs.getFivStacks().get(0)
-										.getSize();
-								impPrxs[pos].setOpenAsHyperStack(true);
-								impPrxs[pos].setStack(impPrxs[pos].getStack(), outputWavelengths,
-										zSlicesPrx, stkNSlicesPrx
-										/ (outputWavelengths * zSlicesPrx));
-								if (ciPrxs[pos] != null) {
-									prjXwin = ciPrxs[pos].getWindow();
-								}
-
-								ciPrxs[pos] = new CompositeImage(impPrxs[pos]);
-								ciPrxs[pos].setPosition(1, ciPrxs[pos].getNSlices()/2, ciPrxs[pos].getNFrames());
-
-								if (wavelengths > 1)
-									ciPrxs[pos].setMode(CompositeImage.COMPOSITE);
-								else
-									ciPrxs[pos].setMode(CompositeImage.GRAYSCALE);
-
-								int oldW;
-								int oldH;
-								int oldC;
-								int oldZ;
-								int oldT;
-								double oldMag;
-								double oldMin;
-								double oldMax;
-								boolean oldEdges;
-								if (prjXwin==null) {
-									ciPrxs[pos].show();
-									WindowManager.group(ciDFs[pos], ciPrxs[pos]);
-									ciPrxs[pos].setPosition(1, ciPrxs[pos].getNSlices()/2, ciPrxs[pos].getNFrames());
-								} else {
-									oldW = prjXwin.getWidth();
-									oldH = prjXwin.getHeight();
-									oldC = prjXwin.getImagePlus().getChannel();
-									oldZ = prjXwin.getImagePlus().getSlice();
-									oldT = prjXwin.getImagePlus().getFrame();
-									oldMag = prjXwin.getCanvas().getMagnification();
-									oldMin = prjXwin.getImagePlus()
-											.getDisplayRangeMin();
-									oldMax = prjXwin.getImagePlus()
-											.getDisplayRangeMax();
-									oldEdges = prjXwin.getImagePlus().getStack().isEdges();
-									((CompositeImage)ciPrxs[pos]).copyLuts(prjXwin.getImagePlus());
-
-									prjXwin.setImage(ciPrxs[pos]);
-									ciPrxs[pos].setWindow(prjXwin);
-									prjXwin.updateImage(ciPrxs[pos]);
-									prjXwin.getImagePlus().getStack().setEdges(oldEdges);
-									prjXwin.setSize(oldW, oldH);
-									((StackWindow) prjXwin).addScrollbars(ciPrxs[pos]);
-									prjXwin.getCanvas().setMagnification(oldMag);											
-									prjXwin.getImagePlus().updateAndDraw();
-									prjXwin.getImagePlus().setPosition(oldC, oldZ, oldT);
-									prjXwin.getImagePlus().setDisplayRange(oldMin, oldMax);
-									prjXwin.setSize(prjXwin.getSize().width,
-											prjXwin.getSize().height);
-
-
-								}
-								
-								
-								impPrys[pos] = new ImagePlus();
-								impPrys[pos].setStack("3DProjY_Decon-Fuse_"
-										+ impAs[pos].getTitle().split(":")[0], dfProjYmfivs);
-								impPrys[pos].setFileInfo(new FileInfo());
-								impPrys[pos].getCalibration().setUnit(impDF1s[pos].getCalibration().getUnit());
-								impPrys[pos].getCalibration().pixelWidth = impDF1s[pos].getCalibration().pixelWidth;
-								impPrys[pos].getCalibration().pixelHeight = impDF1s[pos].getCalibration().pixelHeight;
-								impPrys[pos].getCalibration().pixelDepth = impDF1s[pos].getCalibration().pixelWidth;
-
-								impPrys[pos].getOriginalFileInfo().directory = pryPath+File.separator;
-								int stkNSlicesPry = impPrys[pos].getStackSize();
-								int zSlicesPry = dfProjYmfivs.getFivStacks().get(0)
-										.getSize();
-								impPrys[pos].setOpenAsHyperStack(true);
-								impPrys[pos].setStack(impPrys[pos].getStack(), outputWavelengths,
-										zSlicesPry, stkNSlicesPry
-										/ (outputWavelengths * zSlicesPry));
-								if (ciPrys[pos] != null) {
-									prjYwin = ciPrys[pos].getWindow();
-								}
-
-								ciPrys[pos] = new CompositeImage(impPrys[pos]);
-								ciPrys[pos].setPosition(1, ciPrys[pos].getNSlices()/2, ciPrys[pos].getNFrames());
-
-
-								if (wavelengths > 1)
-									ciPrys[pos].setMode(CompositeImage.COMPOSITE);
-								else
-									ciPrys[pos].setMode(CompositeImage.GRAYSCALE);
-								if (prjYwin==null) {
-									ciPrys[pos].show();
-									WindowManager.group(ciPrxs[pos], ciPrys[pos]);
-									ciPrys[pos].setPosition(1, ciPrys[pos].getNSlices()/2, ciPrys[pos].getNFrames());
-								} else {
-									oldW = prjYwin.getWidth();
-									oldH = prjYwin.getHeight();
-									oldC = prjYwin.getImagePlus().getChannel();
-									oldZ = prjYwin.getImagePlus().getSlice();
-									oldT = prjYwin.getImagePlus().getFrame();
-									oldMag = prjYwin.getCanvas().getMagnification();
-									oldMin = prjYwin.getImagePlus()
-											.getDisplayRangeMin();
-									oldMax = prjYwin.getImagePlus()
-											.getDisplayRangeMax();
-									oldEdges = prjYwin.getImagePlus().getStack().isEdges();
-									((CompositeImage)ciPrys[pos]).copyLuts(prjYwin.getImagePlus());
-
-									prjYwin.setImage(ciPrys[pos]);
-									ciPrys[pos].setWindow(prjYwin);
-									prjYwin.updateImage(ciPrys[pos]);
-									prjYwin.getImagePlus().getStack().setEdges(oldEdges);
-									prjYwin.setSize(oldW, oldH);
-									((StackWindow) prjYwin).addScrollbars(ciPrys[pos]);
-									prjYwin.getCanvas().setMagnification(oldMag);
-									prjYwin.getImagePlus().updateAndDraw();
-									prjYwin.getImagePlus().setPosition(oldC, oldZ, oldT);
-									prjYwin.getImagePlus().setDisplayRange(oldMin, oldMax);
-									prjYwin.setSize(prjYwin.getSize().width,
-											prjYwin.getSize().height);
-
-								}
-
-
-							
-//								impMaxXs[pos] = new ImagePlus();
-//								impMaxXs[pos].setStack("3DMaxX_Decon-Fuse_"
-//										+ impAs[pos].getTitle().split(":")[0], dfMaxXmfivs);
-//								impMaxXs[pos].setFileInfo(new FileInfo());
-//								impMaxXs[pos].getCalibration().setUnit(impDF1s[pos].getCalibration().getUnit());
-//								impMaxXs[pos].getCalibration().pixelWidth = impDF1s[pos].getCalibration().pixelWidth;
-//								impMaxXs[pos].getCalibration().pixelHeight = impDF1s[pos].getCalibration().pixelHeight;
-//								impMaxXs[pos].getCalibration().pixelDepth = impDF1s[pos].getCalibration().pixelWidth;
-//
-//								impMaxXs[pos].getOriginalFileInfo().directory = maxXPath+File.separator;
-//								int stkNSlicesMaxX = impMaxXs[pos].getStackSize();
-//								int zSlicesMaxX = dfMaxXmfivs.getFivStacks().get(0)
-//										.getSize();
-//								impMaxXs[pos].setOpenAsHyperStack(true);
-//								impMaxXs[pos].setStack(impMaxXs[pos].getStack(), outputWavelengths,
-//										zSlicesMaxX, stkNSlicesMaxX
-//										/ (outputWavelengths * zSlicesMaxX));
-//								if (ciMaxXs[pos] != null) {
-//									maxXwin = ciMaxXs[pos].getWindow();
-//								}
-//
-//								ciMaxXs[pos] = new CompositeImage(impMaxXs[pos]);
-//								ciMaxXs[pos].setPosition(1, ciMaxXs[pos].getNSlices()/2, ciMaxXs[pos].getNFrames());
-//
-//
-//								if (wavelengths > 1)
-//									ciMaxXs[pos].setMode(CompositeImage.COMPOSITE);
-//								else
-//									ciMaxXs[pos].setMode(CompositeImage.GRAYSCALE);
-//								if (maxXwin==null) {
-//									ciMaxXs[pos].show();
-//									WindowManager.group(ciPrxs[pos], ciMaxXs[pos]);
-//									ciMaxXs[pos].setPosition(1, ciMaxXs[pos].getNSlices()/2, ciMaxXs[pos].getNFrames());
-//								} else {
-//									oldW = maxXwin.getWidth();
-//									oldH = maxXwin.getHeight();
-//									oldC = maxXwin.getImagePlus().getChannel();
-//									oldZ = maxXwin.getImagePlus().getSlice();
-//									oldT = maxXwin.getImagePlus().getFrame();
-//									oldMag = maxXwin.getCanvas().getMagnification();
-//									oldMin = maxXwin.getImagePlus()
-//											.getDisplayRangeMin();
-//									oldMax = maxXwin.getImagePlus()
-//											.getDisplayRangeMax();
-//									oldEdges = maxXwin.getImagePlus().getStack().isEdges();
-//									((CompositeImage)ciMaxXs[pos]).copyLuts(maxXwin.getImagePlus());
-//
-//									maxXwin.setImage(ciMaxXs[pos]);
-//									ciMaxXs[pos].setWindow(maxXwin);
-//									maxXwin.updateImage(ciMaxXs[pos]);
-//									maxXwin.getImagePlus().getStack().setEdges(oldEdges);
-//									maxXwin.setSize(oldW, oldH);
-//									((StackWindow) maxXwin).addScrollbars(ciMaxXs[pos]);
-//									maxXwin.getCanvas().setMagnification(oldMag);
-//									maxXwin.getImagePlus().updateAndDraw();
-//									maxXwin.getImagePlus().setPosition(oldC, oldZ, oldT);
-//									maxXwin.getImagePlus().setDisplayRange(oldMin, oldMax);
-//									maxXwin.setSize(maxXwin.getSize().width,
-//											maxXwin.getSize().height);
-//
-//								}
-//
-//
-//							
-//								impMaxYs[pos] = new ImagePlus();
-//								impMaxYs[pos].setStack("3DMaxY_Decon-Fuse_"
-//										+ impAs[pos].getTitle().split(":")[0], dfMaxYmfivs);
-//								impMaxYs[pos].setFileInfo(new FileInfo());
-//								impMaxYs[pos].getCalibration().setUnit(impDF1s[pos].getCalibration().getUnit());
-//								impMaxYs[pos].getCalibration().pixelWidth = impDF1s[pos].getCalibration().pixelWidth;
-//								impMaxYs[pos].getCalibration().pixelHeight = impDF1s[pos].getCalibration().pixelHeight;
-//								impMaxYs[pos].getCalibration().pixelDepth = impDF1s[pos].getCalibration().pixelWidth;
-//
-//								impMaxYs[pos].getOriginalFileInfo().directory = maxYPath+File.separator;
-//								int stkNSlicesMaxY = impMaxYs[pos].getStackSize();
-//								int zSlicesMaxY = dfMaxYmfivs.getFivStacks().get(0)
-//										.getSize();
-//								impMaxYs[pos].setOpenAsHyperStack(true);
-//								impMaxYs[pos].setStack(impMaxYs[pos].getStack(), outputWavelengths,
-//										zSlicesMaxY, stkNSlicesMaxY
-//										/ (outputWavelengths * zSlicesMaxY));
-//								if (ciMaxYs[pos] != null) {
-//									maxYwin = ciMaxYs[pos].getWindow();
-//								}
-//
-//								ciMaxYs[pos] = new CompositeImage(impMaxYs[pos]);
-//								ciMaxYs[pos].setPosition(1, ciMaxYs[pos].getNSlices()/2, ciMaxYs[pos].getNFrames());
-//
-//
-//								if (wavelengths > 1)
-//									ciMaxYs[pos].setMode(CompositeImage.COMPOSITE);
-//								else
-//									ciMaxYs[pos].setMode(CompositeImage.GRAYSCALE);
-//								if (maxYwin==null) {
-////									ciMaxYs[pos].show();
-////									WindowManager.group(ciMaxXs[pos], ciMaxYs[pos]);
-////									ciMaxYs[pos].setPosition(1, ciMaxYs[pos].getNSlices()/2, ciMaxYs[pos].getNFrames());
-//								} else {
-//									oldW = maxYwin.getWidth();
-//									oldH = maxYwin.getHeight();
-//									oldC = maxYwin.getImagePlus().getChannel();
-//									oldZ = maxYwin.getImagePlus().getSlice();
-//									oldT = maxYwin.getImagePlus().getFrame();
-//									oldMag = maxYwin.getCanvas().getMagnification();
-//									oldMin = maxYwin.getImagePlus()
-//											.getDisplayRangeMin();
-//									oldMax = maxYwin.getImagePlus()
-//											.getDisplayRangeMax();
-//									oldEdges = maxYwin.getImagePlus().getStack().isEdges();
-//									((CompositeImage)ciMaxYs[pos]).copyLuts(maxYwin.getImagePlus());
-//
-//									maxYwin.setImage(ciMaxYs[pos]);
-//									ciMaxYs[pos].setWindow(maxYwin);
-//									maxYwin.updateImage(ciMaxYs[pos]);
-//									maxYwin.getImagePlus().getStack().setEdges(oldEdges);
-//									maxYwin.setSize(oldW, oldH);
-//									((StackWindow) maxYwin).addScrollbars(ciMaxYs[pos]);
-//									maxYwin.getCanvas().setMagnification(oldMag);
-//									maxYwin.getImagePlus().updateAndDraw();
-//									maxYwin.getImagePlus().setPosition(oldC, oldZ, oldT);
-//									maxYwin.getImagePlus().setDisplayRange(oldMin, oldMax);
-//									maxYwin.setSize(maxYwin.getSize().width,
-//											maxYwin.getSize().height);
-//
-//								}
-//
-//
-//							
-//								impMaxZs[pos] = new ImagePlus();
-//								impMaxZs[pos].setStack("3DMaxZ_Decon-Fuse_"
-//										+ impAs[pos].getTitle().split(":")[0], dfMaxZmfivs);
-//								impMaxZs[pos].setFileInfo(new FileInfo());
-//								impMaxZs[pos].getCalibration().setUnit(impDF1s[pos].getCalibration().getUnit());
-//								impMaxZs[pos].getCalibration().pixelWidth = impDF1s[pos].getCalibration().pixelWidth;
-//								impMaxZs[pos].getCalibration().pixelHeight = impDF1s[pos].getCalibration().pixelHeight;
-//								impMaxZs[pos].getCalibration().pixelDepth = impDF1s[pos].getCalibration().pixelWidth;
-//
-//								impMaxZs[pos].getOriginalFileInfo().directory = maxZPath+File.separator;
-//								int stkNSlicesMaxZ = impMaxZs[pos].getStackSize();
-//								int zSlicesMaxZ = dfMaxZmfivs.getFivStacks().get(0)
-//										.getSize();
-//								impMaxZs[pos].setOpenAsHyperStack(true);
-//								impMaxZs[pos].setStack(impMaxZs[pos].getStack(), outputWavelengths,
-//										zSlicesMaxZ, stkNSlicesMaxZ
-//										/ (outputWavelengths * zSlicesMaxZ));
-//								if (ciMaxZs[pos] != null) {
-//									maxZwin = ciMaxZs[pos].getWindow();
-//								}
-//
-//								ciMaxZs[pos] = new CompositeImage(impMaxZs[pos]);
-//								ciMaxZs[pos].setPosition(1, ciMaxZs[pos].getNSlices()/2, ciMaxZs[pos].getNFrames());
-//
-//
-//								if (wavelengths > 1)
-//									ciMaxZs[pos].setMode(CompositeImage.COMPOSITE);
-//								else
-//									ciMaxZs[pos].setMode(CompositeImage.GRAYSCALE);
-//								if (maxZwin==null) {
-//									ciMaxZs[pos].show();
-//									WindowManager.group(ciMaxXs[pos], ciMaxZs[pos]);
-//									ciMaxZs[pos].setPosition(1, ciMaxZs[pos].getNSlices()/2, ciMaxZs[pos].getNFrames());
-//								} else {
-//									oldW = maxZwin.getWidth();
-//									oldH = maxZwin.getHeight();
-//									oldC = maxZwin.getImagePlus().getChannel();
-//									oldZ = maxZwin.getImagePlus().getSlice();
-//									oldT = maxZwin.getImagePlus().getFrame();
-//									oldMag = maxZwin.getCanvas().getMagnification();
-//									oldMin = maxZwin.getImagePlus()
-//											.getDisplayRangeMin();
-//									oldMax = maxZwin.getImagePlus()
-//											.getDisplayRangeMax();
-//									oldEdges = maxZwin.getImagePlus().getStack().isEdges();
-//									((CompositeImage)ciMaxZs[pos]).copyLuts(maxZwin.getImagePlus());
-//
-//									maxZwin.setImage(ciMaxZs[pos]);
-//									ciMaxZs[pos].setWindow(maxZwin);
-//									maxZwin.updateImage(ciMaxZs[pos]);
-//									maxZwin.getImagePlus().getStack().setEdges(oldEdges);
-//									maxZwin.setSize(oldW, oldH);
-//									((StackWindow) maxZwin).addScrollbars(ciMaxZs[pos]);
-//									maxZwin.getCanvas().setMagnification(oldMag);
-//									maxZwin.getImagePlus().updateAndDraw();
-//									maxZwin.getImagePlus().setPosition(oldC, oldZ, oldT);
-//									maxZwin.getImagePlus().setDisplayRange(oldMin, oldMax);
-//									maxZwin.setSize(maxZwin.getSize().width,
-//											maxZwin.getSize().height);
-//
-//								}
+								IJ.log("finishing " + pos +" "+ impAs[pos].getChannel()+" "+ impAs[pos].getSlice()+" "+ f);
 
 							}
 						}
 					}
 				}
 			}
-//			IJ.run("Tile");
+		});
+		deconFuseThread.start();
+		
+		
+		
+		Thread updateWindowsAndWriteSNFFilesThread = new Thread(new Runnable(){
 
-			String dirOrOMETiffDirectory = dirOrOMETiff;
-			if (!new File(dirOrOMETiff).isDirectory())
-				dirOrOMETiffDirectory = new File(dirOrOMETiff).getParent();
-			final String dirOrOMETiffFinal = dirOrOMETiffDirectory;
+			public void run() {		
+				for (int f = 1; f <= tDim; f++) {
+
+					for (int pos=0; pos<pDim; pos++) {
+						boolean go = true;
+						if (posIntArray!=null){
+							go = false;
+							for (int posInt:posIntArray){
+								if (posInt == pos){
+									go=true;
+								}
+							}
+						}
+
+						if (posFrameEnd[pos]<f) {
+							go = false;
+						}
+						if (!go){
+							continue;
+						}
+
+						doProcessing[pos] = true;
+
+						if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible() || f>impAs[pos].getNFrames()) {
+							doProcessing[pos] = false;
+							IJ.log("! no winorstackA "+f+" "+pos);
+							continue;
+						}
+						if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible() || f>impBs[pos].getNFrames()) {
+							doProcessing[pos] = false;
+							IJ.log("! no winorstackB "+f+" "+pos);
+							continue;
+						} 
+						if(go) {
+							wasFrameA[pos] = impAs[pos].getFrame();
+							wasFrameB[pos] = impBs[pos].getFrame();
+							wasSliceA[pos] = impAs[pos].getSlice();
+							wasSliceB[pos] = impBs[pos].getSlice();
+							wasChannelA[pos] = impAs[pos].getChannel();
+							wasChannelB[pos] = impBs[pos].getChannel();
+						}
+						if (!IJ.shiftKeyDown()){
+							if (impPrxs[pos]!=null && impPrys[pos]!=null && impAs[pos].getNFrames() == impPrxs[pos].getNFrames() && impAs[pos].getNFrames() == impPrys[pos].getNFrames()
+									&& impBs[pos].getNFrames() == impPrxs[pos].getNFrames() && impBs[pos].getNFrames() == impPrys[pos].getNFrames()) {
+								doProcessing[pos] = false;
+								IJ.log("no unfinishedViewss "+f+" "+pos);
+								continue;
+							}
+						}
+
+						if (doProcessing[pos]) {
+							
+							while (!(new File(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution"+ slaveChannel + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif").canRead()) ||
+									!(new File(prxPath+File.separator +"Color"+ slaveChannel+ File.separator +"projX_"+pos+"_"+f+".tif").canRead()) ||
+									!(new File(pryPath+File.separator +"Color"+ slaveChannel+ File.separator +"projY_"+pos+"_"+f+".tif").canRead()) ){
+								IJ.wait(100);
+							}
+							double pwA = impAs[pos].getCalibration().pixelWidth;
+							double phA = impAs[pos].getCalibration().pixelHeight;
+							double pdA = impAs[pos].getCalibration().pixelDepth;
+							double pwB = impBs[pos].getCalibration().pixelWidth;
+							double phB = impBs[pos].getCalibration().pixelHeight;
+							double pdB = impBs[pos].getCalibration().pixelDepth;
 
 
-//			if (autoUpload) {
-//				Thread uploadDeconPrjThread = new Thread(new Runnable() {
-//					public void run() {
-//						wgUploadJob = WG_Uploader.getInstance();
-//						wgUploadJob.run(dirOrOMETiffFinal);
-//											}
-//				});
-//				uploadDeconPrjThread.start();
-//			}
 
-		}
+							if (impAs[pos].hasNullStack() || impAs[pos].getNFrames()<f-1)
+								continue;
+							if (impBs[pos].hasNullStack())
+								continue;
+
+
+
+
+							saveFile = new File(savePath);
+							if ((saveFile).canRead()) {
+								// SETUP OF WINDOWS SHOWING NEW AND PRE-EXISTING DECON OUTPUTS
+
+								deconmfivs = null;
+								deconmfivsPathFile = new File(savePath+ File.separator + "RegDecon" + File.separator + "Pos" + pos);
+								if (true) {
+									if (deconmfivsPathFile.canRead() ) {
+										deconmfivs = new MultiFileInfoVirtualStack(savePath
+												+ File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution",
+												false);
+									}
+
+									if (deconmfivs!=null && deconmfivs.getSize() > 0) {
+										impDF1s[pos] = new ImagePlus();
+										impDF1s[pos].getRoiManager().setImagePlus(null);
+										impDF1s[pos].getRoiManager().dispose();
+										impDF1s[pos].setRoiManager(null);
+										impDF1s[pos].setStack("Decon-Fuse_"
+												+ impAs[pos].getTitle().split(":")[0], deconmfivs);
+										impDF1s[pos].setFileInfo(new FileInfo());
+										impDF1s[pos].getCalibration().setUnit(impAs[pos].getCalibration().getUnit());
+										impDF1s[pos].getCalibration().pixelWidth = pwA;
+										impDF1s[pos].getCalibration().pixelHeight = phA;
+										impDF1s[pos].getCalibration().pixelDepth = pwA;
+
+										impDF1s[pos].getOriginalFileInfo().directory = dirOrOMETiffFinal;
+										int stkNSlicesDF = impDF1s[pos].getStackSize();
+										int zSlicesDF1 = deconmfivs.getFivStacks().get(0)
+												.getSize();
+										impDF1s[pos].setOpenAsHyperStack(true);
+										impDF1s[pos].setStack(impDF1s[pos].getStack(), outputWavelengths,
+												zSlicesDF1, stkNSlicesDF
+												/ (outputWavelengths * zSlicesDF1));
+										if (ciDFs[pos] != null) {
+											win = ciDFs[pos].getWindow();
+										} else {
+											win = null;
+										}
+
+										ciDFs[pos] = new CompositeImage(impDF1s[pos]);
+
+
+										if (wavelengths > 1)
+											ciDFs[pos].setMode(CompositeImage.COMPOSITE);
+										else
+											ciDFs[pos].setMode(CompositeImage.GRAYSCALE);
+
+										if (win==null) {
+											ciDFs[pos].show();
+											WindowManager.group(impBs[pos], ciDFs[pos]);
+											ciDFs[pos].setPosition(1, ciDFs[pos].getNSlices()/2, ciDFs[pos].getNFrames());
+
+										}else {
+											int oldW = win.getWidth();
+											int oldH = win.getHeight();
+											int oldC = win.getImagePlus().getChannel();
+											int oldZ = win.getImagePlus().getSlice();
+											int oldT = win.getImagePlus().getFrame();
+											double oldMag = win.getCanvas().getMagnification();
+											double oldMin = win.getImagePlus()
+													.getDisplayRangeMin();
+											double oldMax = win.getImagePlus()
+													.getDisplayRangeMax();
+											boolean oldEdges = win.getImagePlus().getStack().isEdges();
+											ciDFs[pos].copyLuts(win.getImagePlus());
+
+											//									win.setVisible(false);	
+											win.setImage(ciDFs[pos]);
+											ciDFs[pos].setWindow(win);
+											win.updateImage(ciDFs[pos]);
+											win.getImagePlus().getStack().setEdges(oldEdges);
+											win.setSize(oldW, oldH);
+											((StackWindow) win).addScrollbars(ciDFs[pos]);
+											win.getCanvas().setMagnification(oldMag);
+											win.getImagePlus().updateAndDraw();
+											win.getImagePlus().setPosition(oldC, oldZ, oldT);
+											win.getImagePlus().setDisplayRange(oldMin, oldMax);
+											win.setSize(win.getSize().width,
+													win.getSize().height);
+
+											//									win.setVisible(true);	
+										}
+
+
+
+
+										dfProjXmfivs = new MultiFileInfoVirtualStack(prxPath+File.separator, "Color", false);
+										dfProjYmfivs = new MultiFileInfoVirtualStack(pryPath+File.separator, "Color", false);
+										//								dfMaxXmfivs = new MultiFileInfoVirtualStack(maxXPath+File.separator, "Color", false);
+										//								dfMaxYmfivs = new MultiFileInfoVirtualStack(maxYPath+File.separator, "Color", false);
+										//								dfMaxZmfivs = new MultiFileInfoVirtualStack(maxZPath+File.separator, "Color", false);
+
+										impPrxs[pos] = new ImagePlus();
+										impPrxs[pos].getRoiManager().setImagePlus(null);
+										impPrxs[pos].getRoiManager().dispose();
+										impPrxs[pos].setRoiManager(null);
+										impPrxs[pos].setStack("3DProjX_Decon-Fuse_"
+												+ impAs[pos].getTitle().split(":")[0], dfProjXmfivs);
+										impPrxs[pos].setFileInfo(new FileInfo());
+										impPrxs[pos].getCalibration().setUnit(impDF1s[pos].getCalibration().getUnit());
+										impPrxs[pos].getCalibration().pixelWidth = impDF1s[pos].getCalibration().pixelWidth;
+										impPrxs[pos].getCalibration().pixelHeight = impDF1s[pos].getCalibration().pixelHeight;
+										impPrxs[pos].getCalibration().pixelDepth = impDF1s[pos].getCalibration().pixelWidth;
+
+										impPrxs[pos].getOriginalFileInfo().directory = prxPath+File.separator;
+										int stkNSlicesPrx = impPrxs[pos].getStackSize();
+										int zSlicesPrx = dfProjXmfivs.getFivStacks().get(0)
+												.getSize();
+										impPrxs[pos].setOpenAsHyperStack(true);
+										impPrxs[pos].setStack(impPrxs[pos].getStack(), outputWavelengths,
+												zSlicesPrx, stkNSlicesPrx
+												/ (outputWavelengths * zSlicesPrx));
+										if (ciPrxs[pos] != null) {
+											prjXwin = ciPrxs[pos].getWindow();
+										}
+
+										ciPrxs[pos] = new CompositeImage(impPrxs[pos]);
+										ciPrxs[pos].setPosition(1, ciPrxs[pos].getNSlices()/2, ciPrxs[pos].getNFrames());
+
+										if (wavelengths > 1)
+											ciPrxs[pos].setMode(CompositeImage.COMPOSITE);
+										else
+											ciPrxs[pos].setMode(CompositeImage.GRAYSCALE);
+
+										int oldW;
+										int oldH;
+										int oldC;
+										int oldZ;
+										int oldT;
+										double oldMag;
+										double oldMin;
+										double oldMax;
+										boolean oldEdges;
+										if (prjXwin==null) {
+											ciPrxs[pos].show();
+											WindowManager.group(ciDFs[pos], ciPrxs[pos]);
+											ciPrxs[pos].setPosition(1, ciPrxs[pos].getNSlices()/2, ciPrxs[pos].getNFrames());
+										} else {
+											oldW = prjXwin.getWidth();
+											oldH = prjXwin.getHeight();
+											oldC = prjXwin.getImagePlus().getChannel();
+											oldZ = prjXwin.getImagePlus().getSlice();
+											oldT = prjXwin.getImagePlus().getFrame();
+											oldMag = prjXwin.getCanvas().getMagnification();
+											oldMin = prjXwin.getImagePlus()
+													.getDisplayRangeMin();
+											oldMax = prjXwin.getImagePlus()
+													.getDisplayRangeMax();
+											oldEdges = prjXwin.getImagePlus().getStack().isEdges();
+											((CompositeImage)ciPrxs[pos]).copyLuts(prjXwin.getImagePlus());
+
+											prjXwin.setImage(ciPrxs[pos]);
+											ciPrxs[pos].setWindow(prjXwin);
+											prjXwin.updateImage(ciPrxs[pos]);
+											prjXwin.getImagePlus().getStack().setEdges(oldEdges);
+											prjXwin.setSize(oldW, oldH);
+											((StackWindow) prjXwin).addScrollbars(ciPrxs[pos]);
+											prjXwin.getCanvas().setMagnification(oldMag);											
+											prjXwin.getImagePlus().updateAndDraw();
+											prjXwin.getImagePlus().setPosition(oldC, oldZ, oldT);
+											prjXwin.getImagePlus().setDisplayRange(oldMin, oldMax);
+											prjXwin.setSize(prjXwin.getSize().width,
+													prjXwin.getSize().height);
+
+
+										}
+
+
+										impPrys[pos] = new ImagePlus();
+										impPrys[pos].getRoiManager().setImagePlus(null);
+										impPrys[pos].getRoiManager().dispose();
+										impPrys[pos].setRoiManager(null);
+										impPrys[pos].setStack("3DProjY_Decon-Fuse_"
+												+ impAs[pos].getTitle().split(":")[0], dfProjYmfivs);
+										impPrys[pos].setFileInfo(new FileInfo());
+										impPrys[pos].getCalibration().setUnit(impDF1s[pos].getCalibration().getUnit());
+										impPrys[pos].getCalibration().pixelWidth = impDF1s[pos].getCalibration().pixelWidth;
+										impPrys[pos].getCalibration().pixelHeight = impDF1s[pos].getCalibration().pixelHeight;
+										impPrys[pos].getCalibration().pixelDepth = impDF1s[pos].getCalibration().pixelWidth;
+
+										impPrys[pos].getOriginalFileInfo().directory = pryPath+File.separator;
+										int stkNSlicesPry = impPrys[pos].getStackSize();
+										int zSlicesPry = dfProjYmfivs.getFivStacks().get(0)
+												.getSize();
+										impPrys[pos].setOpenAsHyperStack(true);
+										impPrys[pos].setStack(impPrys[pos].getStack(), outputWavelengths,
+												zSlicesPry, stkNSlicesPry
+												/ (outputWavelengths * zSlicesPry));
+										if (ciPrys[pos] != null) {
+											prjYwin = ciPrys[pos].getWindow();
+										}
+
+										ciPrys[pos] = new CompositeImage(impPrys[pos]);
+										ciPrys[pos].setPosition(1, ciPrys[pos].getNSlices()/2, ciPrys[pos].getNFrames());
+
+
+										if (wavelengths > 1)
+											ciPrys[pos].setMode(CompositeImage.COMPOSITE);
+										else
+											ciPrys[pos].setMode(CompositeImage.GRAYSCALE);
+										if (prjYwin==null) {
+											ciPrys[pos].show();
+											WindowManager.group(ciPrxs[pos], ciPrys[pos]);
+											ciPrys[pos].setPosition(1, ciPrys[pos].getNSlices()/2, ciPrys[pos].getNFrames());
+										} else {
+											oldW = prjYwin.getWidth();
+											oldH = prjYwin.getHeight();
+											oldC = prjYwin.getImagePlus().getChannel();
+											oldZ = prjYwin.getImagePlus().getSlice();
+											oldT = prjYwin.getImagePlus().getFrame();
+											oldMag = prjYwin.getCanvas().getMagnification();
+											oldMin = prjYwin.getImagePlus()
+													.getDisplayRangeMin();
+											oldMax = prjYwin.getImagePlus()
+													.getDisplayRangeMax();
+											oldEdges = prjYwin.getImagePlus().getStack().isEdges();
+											((CompositeImage)ciPrys[pos]).copyLuts(prjYwin.getImagePlus());
+
+											prjYwin.setImage(ciPrys[pos]);
+											ciPrys[pos].setWindow(prjYwin);
+											prjYwin.updateImage(ciPrys[pos]);
+											prjYwin.getImagePlus().getStack().setEdges(oldEdges);
+											prjYwin.setSize(oldW, oldH);
+											((StackWindow) prjYwin).addScrollbars(ciPrys[pos]);
+											prjYwin.getCanvas().setMagnification(oldMag);
+											prjYwin.getImagePlus().updateAndDraw();
+											prjYwin.getImagePlus().setPosition(oldC, oldZ, oldT);
+											prjYwin.getImagePlus().setDisplayRange(oldMin, oldMax);
+											prjYwin.setSize(prjYwin.getSize().width,
+													prjYwin.getSize().height);
+
+										}
+
+										////////								
+										if (lineageDecons){
+
+											ImagePlus currentDeconResultImp = ciDFs[pos];	
+											LUT[] impLUTs = null;
+											int greenMax = 0;
+											int redMax = 0;
+											if (currentDeconResultImp.isComposite()) {
+												impLUTs = (((CompositeImage)currentDeconResultImp).getLuts());
+												greenMax = (int) impLUTs[0].max;
+												redMax = (int) impLUTs[1].max;
+											}
+
+											String outputDir = savePath;
+											String sourceDir = savePath;
+											String outDir = outputDir+ File.separator ;
+											String[] sourceFileList = new File(sourceDir).list();
+											currentDeconResultImp.killRoi();
+
+											//									if (currentDeconResultImp.getRoi() == null ) {
+											//										for (String sourceDirFileName:sourceFileList){
+											//											if (sourceDirFileName.endsWith("originalSNF.roi")){
+											//												if (sourceDirFileName.startsWith(currentDeconResultImp.getTitle())){
+											//													WindowManager.setTempCurrentImage(currentDeconResultImp);
+											//													IJ.open(outDir+ sourceDirFileName);
+											//													WindowManager.setTempCurrentImage(null);
+											//												}
+											//											}
+											//										}				
+											//									}
+
+
+											//									if (currentDeconResultImp.getRoi() == null ) {
+											//										continue;
+											//									}
+
+											Roi theROI = new Roi(0,0,currentDeconResultImp.getWidth(),currentDeconResultImp.getHeight());
+											int type = Roi.RECTANGLE ;
+											boolean flipStack = false;
+
+											if (theROI == null) {
+
+											} else {
+
+												String title = currentDeconResultImp.getTitle();
+												String savetitle = title.replace(":","_").replace(" ","").replace("_dummy","");
+												String savePath = outDir+savetitle;
+
+												//										IJ.saveAs(currentDeconResultImp, "Selection", savePath+"originalSNF.roi");
+												int[] xpoints = theROI.getPolygon().xpoints;
+												int[] ypoints = theROI.getPolygon().ypoints;
+												int npoints = xpoints.length;
+
+												double angle =0;
+												if (type > Roi.OVAL) {
+													if (npoints == 4) {
+														double angleZero = new Line(xpoints[0], ypoints[0], xpoints[1], ypoints[1]).getAngle();
+														double angleTwo = new Line(xpoints[2], ypoints[2], xpoints[3], ypoints[3]).getAngle();
+
+														double angleZeroPlusPi = angleZero + 180;
+														double angleTwoPlusPi = angleTwo + 180;
+
+														double angleDelta = angleZeroPlusPi%180 - angleTwoPlusPi%180;
+
+														if ( Math.abs(angleDelta)  >80 && Math.abs(angleDelta)  <100) {
+															haveAxesRoiDF = true;
+															angle = angleZero;
+
+															//??? is flipstack correct??  or should it use deltas?!!?						
+															flipStack = (angleZeroPlusPi - angleTwoPlusPi < 0 || angleZeroPlusPi - angleTwoPlusPi > 180);
+															IJ.log("flipStack = " + flipStack + ":angle0PlusPi - angle2PlusPi = " + angleZeroPlusPi +" - "+ angleTwoPlusPi + " = " + (angleDelta));
+
+															Roi ellipseRoi = new EllipseRoi(xpoints[0], ypoints[0], xpoints[1], ypoints[1], 
+																	(new Line(xpoints[2], ypoints[2], xpoints[3], ypoints[3])).getLength()
+																	/
+																	(new Line(xpoints[0], ypoints[0], xpoints[1], ypoints[1])).getLength()
+																	);
+															currentDeconResultImp.setRoi(ellipseRoi, false);
+															theROI = ellipseRoi;
+															IJ.saveAs(currentDeconResultImp, "Selection", savePath +  "ellipseSNF.roi");
+
+															Roi rectRoi = new Roi(ellipseRoi.getBounds());
+															currentDeconResultImp.setRoi(rectRoi, false);
+															IJ.saveAs(currentDeconResultImp, "Selection", savePath + "rectangleSNF.roi");
+
+														}else {
+															angle = new Line(xpoints[0], ypoints[0], xpoints[2], ypoints[2]).getAngle();
+														}
+													} else {
+														angle = new Line(xpoints[0], ypoints[0], xpoints[npoints/2], ypoints[npoints/2]).getAngle();
+													}
+												}
+
+
+												int wasC = currentDeconResultImp.getChannel();
+												int wasZ = currentDeconResultImp.getSlice();
+												int wasT = currentDeconResultImp.getFrame();
+
+												int wavelengths = currentDeconResultImp.getNChannels();
+
+												Roi theRotatedROI = RoiRotator.rotate(theROI, angle);
+												final String subdir = savetitle;
+												new File(outDir+subdir).mkdirs();
+												final String impParameterPath = outDir+subdir+File.separator+savetitle+"_SNparamsFile.txt";
+												final int endPoint = currentDeconResultImp.getNFrames();
+												int stackWidth=0;
+												int stackHeight=0;
+
+												for (int frame = 1; frame <= endPoint; frame++) {
+													boolean paramsWritten = false;
+													if (!((new File(outDir+subdir+"/aaa_t"+frame+".tif").canRead())&&(new File(outDir+subdir+"Skipped"+"/aaa_t"+frame+".tif").canRead()))) {
+
+														ImageStack stack1 = new ImageStack((int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
+														ImageStack stack1skipped = new ImageStack((int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
+
+														ImageStack stack2 = new ImageStack((int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
+														ImageStack stack2skipped = new ImageStack((int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
+
+														//												ImageStack stack3 = new ImageStack((int)theRotatedROI.getBounds().getWidth()*2, (int)theRotatedROI.getBounds().getHeight());
+														//												ImageStack stack3skipped = new ImageStack((int)theRotatedROI.getBounds().getWidth()*2, (int)theRotatedROI.getBounds().getHeight());
+
+														ImageStack stack3 = new ImageStack((int)currentDeconResultImp.getProcessor().getWidth()*2, (int)currentDeconResultImp.getProcessor().getHeight());
+														ImageStack stack3skipped = new ImageStack((int)currentDeconResultImp.getProcessor().getWidth()*2, (int)currentDeconResultImp.getProcessor().getHeight());
+
+														currentDeconResultImp.getWindow().setEnabled(false);
+
+
+														for (int i = 1; i <= currentDeconResultImp.getNSlices(); i++) {
+															currentDeconResultImp.setPositionWithoutUpdate(1, i, frame);
+
+															ImageProcessor ip1 = currentDeconResultImp.getProcessor().duplicate();
+
+															int[] ipHis = ip1.getHistogram();
+															double ipHisMode = 0.0;
+															int ipHisLength = ipHis.length;
+															int ipHisMaxBin = 0;
+															for (int h=0; h<ipHisLength; h++) {
+																if (ipHis[h] > ipHisMaxBin) {
+																	ipHisMaxBin = ipHis[h];
+																	ipHisMode = (double)h;
+																}
+															}
+															ip1.subtract(ipHisMode * 1);
+
+															//													ip1.setRoi((Roi) theROI);
+															//													ip1.fillOutside((Roi) theROI);
+															//													ip1 = ip1.crop();
+															//													ImageProcessor ip1r = ip1.createProcessor((int)Math.sqrt(ip1.getWidth()*ip1.getWidth()+ip1.getHeight()*ip1.getHeight())
+															//															, (int)Math.sqrt(ip1.getWidth()*ip1.getWidth()+ip1.getHeight()*ip1.getHeight()));
+															//													ip1r.insert(ip1, (ip1r.getWidth()-ip1.getWidth())/2, (ip1r.getHeight()-ip1.getHeight())/2);
+															//													ip1= ip1r;
+															//													ip1.rotate(angle);
+															//													ip1.setRoi((int)(ip1.getWidth()-theRotatedROI.getBounds().getWidth())/2, (int)(ip1.getHeight()-theRotatedROI.getBounds().getHeight())/2
+															//															, (int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
+															//													ip1 = ip1.crop();
+
+															ImageProcessor ip3 = ip1.createProcessor(stack3.getWidth(), stack3.getHeight());
+
+															flipStack = false;  //NO LONGER NEED DOUBLEFLIP IF USING ZYX ROTATIONS TO CORRECT!
+
+															if (!flipStack){
+																//														stack1.addSlice(ip1);
+																//														if (i%depthSkipFactor == 1) {
+																//															stack1skipped.addSlice(ip1.duplicate());
+																//														}
+																ImageProcessor ip1fh = ip1.duplicate();
+																ip1fh.flipHorizontal();
+																ip3.insert(ip1fh, ip3.getWidth()/2, 0);
+
+															} else {
+																ip1.flipVertical();
+																//														stack1.addSlice(null, ip1, 0);
+																//														if (i%depthSkipFactor == 1) {
+																//															stack1skipped.addSlice(null, ip1.duplicate(),0);
+																//														}
+																ImageProcessor ip1fh = ip1.duplicate();
+																ip1fh.flipHorizontal();
+
+																ip3.insert(ip1fh, ip3.getWidth()/2, 0);
+
+															}
+
+
+															if (wavelengths >= 2) {
+																currentDeconResultImp.setPositionWithoutUpdate(wavelengths, i, frame);
+																ImageProcessor ip2 = currentDeconResultImp.getProcessor().duplicate();
+																ipHis = ip2.getHistogram();
+																ipHisMode = 0.0;
+																ipHisLength = ipHis.length;
+																ipHisMaxBin = 0;
+																for (int h=0; h<ipHisLength; h++) {
+																	if (ipHis[h] > ipHisMaxBin) {
+																		ipHisMaxBin = ipHis[h];
+																		ipHisMode = (double)h;
+																	}
+																}
+
+																ip2.subtract(ipHisMode * 1);
+
+																//														ip2.setRoi((Roi) theROI);
+																//														ip2.fillOutside((Roi) theROI);
+																//														ip2 = ip2.crop();
+																//														ImageProcessor ip2r = ip2.createProcessor((int)Math.sqrt(ip2.getWidth()*ip2.getWidth()+ip2.getHeight()*ip2.getHeight())
+																//																, (int)Math.sqrt(ip2.getWidth()*ip2.getWidth()+ip2.getHeight()*ip2.getHeight()));
+																//														ip2r.insert(ip2, (ip2r.getWidth()-ip2.getWidth())/2, (ip2r.getHeight()-ip2.getHeight())/2);
+																//														ip2= ip2r;
+																//														ip2.rotate(angle);
+																//														ip2.setRoi((int)(ip2.getWidth()-theRotatedROI.getBounds().getWidth())/2, (int)(ip2.getHeight()-theRotatedROI.getBounds().getHeight())/2
+																//																, (int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
+																//														ip2 = ip2.crop();
+
+																if (!flipStack){
+																	//															stack2.addSlice(ip2);
+																	//															if (i%depthSkipFactor == 1) {
+																	//																stack2skipped.addSlice(ip2.duplicate());
+																	//															}
+
+																	ImageProcessor ip2fh = ip2.duplicate();
+																	ip2fh.flipHorizontal();
+																	ip3.insert(ip2fh, 0, 0);
+
+																	stack3.addSlice(ip3);
+																	if (i%depthSkipFactor == 1) {
+																		stack3skipped.addSlice(ip3.duplicate());
+																	}
+
+																} else {
+																	ip2.flipVertical();
+																	//															stack2.addSlice(null, ip2, 0);
+																	//															if (i%depthSkipFactor == 1) {
+																	//																stack2skipped.addSlice(null, ip2.duplicate(),0);
+																	//															}
+
+																	ImageProcessor ip2fh = ip2.duplicate();
+																	ip2fh.flipHorizontal();
+																	ip3.insert(ip2fh, 0, 0);
+
+																	stack3.addSlice(null, ip3, 0);
+																	if (i%depthSkipFactor == 1) {
+																		stack3skipped.addSlice(null, ip3.duplicate(), 0);
+																	}
+
+																}
+
+
+															}
+														}
+
+
+														currentDeconResultImp.getWindow().setEnabled(true);
+
+														//												ImagePlus frameRedImp = new ImagePlus("Ch2hisSubCrop",stack2);
+														//												ImagePlus frameRedImpSkipped = new ImagePlus("Ch2hisSubCrop",stack2skipped);
+
+
+														//												ImagePlus frameGreenImp = new ImagePlus("Ch1hisSubCrop",stack1);
+														//												ImagePlus frameGreenImpSkipped = new ImagePlus("Ch1hisSubCrop",stack1skipped);
+
+														ImagePlus frameRGsplitImp = new ImagePlus("Ch12hisSubCrop",stack3);
+														ImagePlus frameRGsplitImpSkipped = new ImagePlus("Ch12hisSubCrop",stack3skipped);
+
+
+														stackWidth = frameRGsplitImp.getWidth()/2;
+														stackHeight = frameRGsplitImp.getHeight();
+														if (!paramsWritten) {
+															IJ.saveString(IJ.openAsString(paramsPath).replaceAll("(.*end_time=)\\d+(;.*)", "$1"+frame+"$2")
+																	.replaceAll("(.*ROI=)true(;.*)", "$1false$2")
+																	.replaceAll("(.*ROI.min=)\\d+(;.*)", "$10$2")
+																	.replaceAll("(.*ROIxmax=)\\d+(;.*)", "$1"+stackWidth+"$2")
+																	.replaceAll("(.*ROIymax=)\\d+(;.*)", "$1"+stackHeight+"$2")
+																	.replaceAll("(.*)ROIpoints=\\[\\d+.*\\];(.*)", "$1"+""+"$2")
+																	, impParameterPath);
+															paramsWritten = true;
+														}
+
+
+														// Red channel:
+
+														new File(outDir+subdir).mkdirs();
+														new File(outDir+subdir+"Skipped").mkdirs();
+
+
+														// save a stack
+
+														IJ.save(frameRGsplitImp, outDir+subdir+"/aaa_t"+frame+".tif");
+														IJ.save(frameRGsplitImpSkipped, outDir+subdir+"Skipped"+"/aaa_t"+frame+".tif");
+
+
+														//												frameRedImp.flush();
+														//												frameRedImpSkipped.flush();
+														//												frameGreenImp.flush();
+														//												frameGreenImpSkipped.flush();
+														frameRGsplitImp.flush();
+														frameRGsplitImpSkipped.flush();
+
+													}
+												}
+												currentDeconResultImp.setPosition(wasC, wasZ, wasT);
+												//										currentDeconResultImp.setRoi(theROI,false);
+
+												IJ.saveString(IJ.openAsString(paramsPath).replaceAll("(.*end_time=)\\d+(;.*)", "$1"+endPoint+"$2")
+														.replaceAll("(.*ROI=)true(;.*)", "$1false$2")
+														.replaceAll("(.*ROI.min=)\\d+(;.*)", "$10$2")
+														.replaceAll("(.*ROIxmax=)\\d+(;.*)", "$1"+stackWidth+"$2")
+														.replaceAll("(.*ROIymax=)\\d+(;.*)", "$1"+stackHeight+"$2")
+														.replaceAll("(.*)ROIpoints=\\[\\d+.*\\];(.*)", "$1"+""+"$2")
+														, impParameterPath);
+
+												//										currentDeconResultImp.killRoi();
+
+
+											}
+										}
+										//////////							
+
+
+
+										//								impMaxXs[pos] = new ImagePlus();
+										//								impMaxXs[pos].setStack("3DMaxX_Decon-Fuse_"
+										//										+ impAs[pos].getTitle().split(":")[0], dfMaxXmfivs);
+										//								impMaxXs[pos].setFileInfo(new FileInfo());
+										//								impMaxXs[pos].getCalibration().setUnit(impDF1s[pos].getCalibration().getUnit());
+										//								impMaxXs[pos].getCalibration().pixelWidth = impDF1s[pos].getCalibration().pixelWidth;
+										//								impMaxXs[pos].getCalibration().pixelHeight = impDF1s[pos].getCalibration().pixelHeight;
+										//								impMaxXs[pos].getCalibration().pixelDepth = impDF1s[pos].getCalibration().pixelWidth;
+										//
+										//								impMaxXs[pos].getOriginalFileInfo().directory = maxXPath+File.separator;
+										//								int stkNSlicesMaxX = impMaxXs[pos].getStackSize();
+										//								int zSlicesMaxX = dfMaxXmfivs.getFivStacks().get(0)
+										//										.getSize();
+										//								impMaxXs[pos].setOpenAsHyperStack(true);
+										//								impMaxXs[pos].setStack(impMaxXs[pos].getStack(), outputWavelengths,
+										//										zSlicesMaxX, stkNSlicesMaxX
+										//										/ (outputWavelengths * zSlicesMaxX));
+										//								if (ciMaxXs[pos] != null) {
+										//									maxXwin = ciMaxXs[pos].getWindow();
+										//								}
+										//
+										//								ciMaxXs[pos] = new CompositeImage(impMaxXs[pos]);
+										//								ciMaxXs[pos].setPosition(1, ciMaxXs[pos].getNSlices()/2, ciMaxXs[pos].getNFrames());
+										//
+										//
+										//								if (wavelengths > 1)
+										//									ciMaxXs[pos].setMode(CompositeImage.COMPOSITE);
+										//								else
+										//									ciMaxXs[pos].setMode(CompositeImage.GRAYSCALE);
+										//								if (maxXwin==null) {
+										//									ciMaxXs[pos].show();
+										//									WindowManager.group(ciPrxs[pos], ciMaxXs[pos]);
+										//									ciMaxXs[pos].setPosition(1, ciMaxXs[pos].getNSlices()/2, ciMaxXs[pos].getNFrames());
+										//								} else {
+										//									oldW = maxXwin.getWidth();
+										//									oldH = maxXwin.getHeight();
+										//									oldC = maxXwin.getImagePlus().getChannel();
+										//									oldZ = maxXwin.getImagePlus().getSlice();
+										//									oldT = maxXwin.getImagePlus().getFrame();
+										//									oldMag = maxXwin.getCanvas().getMagnification();
+										//									oldMin = maxXwin.getImagePlus()
+										//											.getDisplayRangeMin();
+										//									oldMax = maxXwin.getImagePlus()
+										//											.getDisplayRangeMax();
+										//									oldEdges = maxXwin.getImagePlus().getStack().isEdges();
+										//									((CompositeImage)ciMaxXs[pos]).copyLuts(maxXwin.getImagePlus());
+										//
+										//									maxXwin.setImage(ciMaxXs[pos]);
+										//									ciMaxXs[pos].setWindow(maxXwin);
+										//									maxXwin.updateImage(ciMaxXs[pos]);
+										//									maxXwin.getImagePlus().getStack().setEdges(oldEdges);
+										//									maxXwin.setSize(oldW, oldH);
+										//									((StackWindow) maxXwin).addScrollbars(ciMaxXs[pos]);
+										//									maxXwin.getCanvas().setMagnification(oldMag);
+										//									maxXwin.getImagePlus().updateAndDraw();
+										//									maxXwin.getImagePlus().setPosition(oldC, oldZ, oldT);
+										//									maxXwin.getImagePlus().setDisplayRange(oldMin, oldMax);
+										//									maxXwin.setSize(maxXwin.getSize().width,
+										//											maxXwin.getSize().height);
+										//
+										//								}
+										//
+										//
+										//							
+										//								impMaxYs[pos] = new ImagePlus();
+										//								impMaxYs[pos].setStack("3DMaxY_Decon-Fuse_"
+										//										+ impAs[pos].getTitle().split(":")[0], dfMaxYmfivs);
+										//								impMaxYs[pos].setFileInfo(new FileInfo());
+										//								impMaxYs[pos].getCalibration().setUnit(impDF1s[pos].getCalibration().getUnit());
+										//								impMaxYs[pos].getCalibration().pixelWidth = impDF1s[pos].getCalibration().pixelWidth;
+										//								impMaxYs[pos].getCalibration().pixelHeight = impDF1s[pos].getCalibration().pixelHeight;
+										//								impMaxYs[pos].getCalibration().pixelDepth = impDF1s[pos].getCalibration().pixelWidth;
+										//
+										//								impMaxYs[pos].getOriginalFileInfo().directory = maxYPath+File.separator;
+										//								int stkNSlicesMaxY = impMaxYs[pos].getStackSize();
+										//								int zSlicesMaxY = dfMaxYmfivs.getFivStacks().get(0)
+										//										.getSize();
+										//								impMaxYs[pos].setOpenAsHyperStack(true);
+										//								impMaxYs[pos].setStack(impMaxYs[pos].getStack(), outputWavelengths,
+										//										zSlicesMaxY, stkNSlicesMaxY
+										//										/ (outputWavelengths * zSlicesMaxY));
+										//								if (ciMaxYs[pos] != null) {
+										//									maxYwin = ciMaxYs[pos].getWindow();
+										//								}
+										//
+										//								ciMaxYs[pos] = new CompositeImage(impMaxYs[pos]);
+										//								ciMaxYs[pos].setPosition(1, ciMaxYs[pos].getNSlices()/2, ciMaxYs[pos].getNFrames());
+										//
+										//
+										//								if (wavelengths > 1)
+										//									ciMaxYs[pos].setMode(CompositeImage.COMPOSITE);
+										//								else
+										//									ciMaxYs[pos].setMode(CompositeImage.GRAYSCALE);
+										//								if (maxYwin==null) {
+										////									ciMaxYs[pos].show();
+										////									WindowManager.group(ciMaxXs[pos], ciMaxYs[pos]);
+										////									ciMaxYs[pos].setPosition(1, ciMaxYs[pos].getNSlices()/2, ciMaxYs[pos].getNFrames());
+										//								} else {
+										//									oldW = maxYwin.getWidth();
+										//									oldH = maxYwin.getHeight();
+										//									oldC = maxYwin.getImagePlus().getChannel();
+										//									oldZ = maxYwin.getImagePlus().getSlice();
+										//									oldT = maxYwin.getImagePlus().getFrame();
+										//									oldMag = maxYwin.getCanvas().getMagnification();
+										//									oldMin = maxYwin.getImagePlus()
+										//											.getDisplayRangeMin();
+										//									oldMax = maxYwin.getImagePlus()
+										//											.getDisplayRangeMax();
+										//									oldEdges = maxYwin.getImagePlus().getStack().isEdges();
+										//									((CompositeImage)ciMaxYs[pos]).copyLuts(maxYwin.getImagePlus());
+										//
+										//									maxYwin.setImage(ciMaxYs[pos]);
+										//									ciMaxYs[pos].setWindow(maxYwin);
+										//									maxYwin.updateImage(ciMaxYs[pos]);
+										//									maxYwin.getImagePlus().getStack().setEdges(oldEdges);
+										//									maxYwin.setSize(oldW, oldH);
+										//									((StackWindow) maxYwin).addScrollbars(ciMaxYs[pos]);
+										//									maxYwin.getCanvas().setMagnification(oldMag);
+										//									maxYwin.getImagePlus().updateAndDraw();
+										//									maxYwin.getImagePlus().setPosition(oldC, oldZ, oldT);
+										//									maxYwin.getImagePlus().setDisplayRange(oldMin, oldMax);
+										//									maxYwin.setSize(maxYwin.getSize().width,
+										//											maxYwin.getSize().height);
+										//
+										//								}
+										//
+										//
+										//							
+										//								impMaxZs[pos] = new ImagePlus();
+										//								impMaxZs[pos].setStack("3DMaxZ_Decon-Fuse_"
+										//										+ impAs[pos].getTitle().split(":")[0], dfMaxZmfivs);
+										//								impMaxZs[pos].setFileInfo(new FileInfo());
+										//								impMaxZs[pos].getCalibration().setUnit(impDF1s[pos].getCalibration().getUnit());
+										//								impMaxZs[pos].getCalibration().pixelWidth = impDF1s[pos].getCalibration().pixelWidth;
+										//								impMaxZs[pos].getCalibration().pixelHeight = impDF1s[pos].getCalibration().pixelHeight;
+										//								impMaxZs[pos].getCalibration().pixelDepth = impDF1s[pos].getCalibration().pixelWidth;
+										//
+										//								impMaxZs[pos].getOriginalFileInfo().directory = maxZPath+File.separator;
+										//								int stkNSlicesMaxZ = impMaxZs[pos].getStackSize();
+										//								int zSlicesMaxZ = dfMaxZmfivs.getFivStacks().get(0)
+										//										.getSize();
+										//								impMaxZs[pos].setOpenAsHyperStack(true);
+										//								impMaxZs[pos].setStack(impMaxZs[pos].getStack(), outputWavelengths,
+										//										zSlicesMaxZ, stkNSlicesMaxZ
+										//										/ (outputWavelengths * zSlicesMaxZ));
+										//								if (ciMaxZs[pos] != null) {
+										//									maxZwin = ciMaxZs[pos].getWindow();
+										//								}
+										//
+										//								ciMaxZs[pos] = new CompositeImage(impMaxZs[pos]);
+										//								ciMaxZs[pos].setPosition(1, ciMaxZs[pos].getNSlices()/2, ciMaxZs[pos].getNFrames());
+										//
+										//
+										//								if (wavelengths > 1)
+										//									ciMaxZs[pos].setMode(CompositeImage.COMPOSITE);
+										//								else
+										//									ciMaxZs[pos].setMode(CompositeImage.GRAYSCALE);
+										//								if (maxZwin==null) {
+										//									ciMaxZs[pos].show();
+										//									WindowManager.group(ciMaxXs[pos], ciMaxZs[pos]);
+										//									ciMaxZs[pos].setPosition(1, ciMaxZs[pos].getNSlices()/2, ciMaxZs[pos].getNFrames());
+										//								} else {
+										//									oldW = maxZwin.getWidth();
+										//									oldH = maxZwin.getHeight();
+										//									oldC = maxZwin.getImagePlus().getChannel();
+										//									oldZ = maxZwin.getImagePlus().getSlice();
+										//									oldT = maxZwin.getImagePlus().getFrame();
+										//									oldMag = maxZwin.getCanvas().getMagnification();
+										//									oldMin = maxZwin.getImagePlus()
+										//											.getDisplayRangeMin();
+										//									oldMax = maxZwin.getImagePlus()
+										//											.getDisplayRangeMax();
+										//									oldEdges = maxZwin.getImagePlus().getStack().isEdges();
+										//									((CompositeImage)ciMaxZs[pos]).copyLuts(maxZwin.getImagePlus());
+										//
+										//									maxZwin.setImage(ciMaxZs[pos]);
+										//									ciMaxZs[pos].setWindow(maxZwin);
+										//									maxZwin.updateImage(ciMaxZs[pos]);
+										//									maxZwin.getImagePlus().getStack().setEdges(oldEdges);
+										//									maxZwin.setSize(oldW, oldH);
+										//									((StackWindow) maxZwin).addScrollbars(ciMaxZs[pos]);
+										//									maxZwin.getCanvas().setMagnification(oldMag);
+										//									maxZwin.getImagePlus().updateAndDraw();
+										//									maxZwin.getImagePlus().setPosition(oldC, oldZ, oldT);
+										//									maxZwin.getImagePlus().setDisplayRange(oldMin, oldMax);
+										//									maxZwin.setSize(maxZwin.getSize().width,
+										//											maxZwin.getSize().height);
+										//
+										//								}
+
+									}
+								}
+							}
+						}
+					}
+					//			IJ.run("Tile");
+
+					String dirOrOMETiffDirectory = dirOrOMETiff;
+					if (!new File(dirOrOMETiff).isDirectory())
+						dirOrOMETiffDirectory = new File(dirOrOMETiff).getParent();
+					final String dirOrOMETiffFinal = dirOrOMETiffDirectory;
+
+
+					//			if (autoUpload) {
+					//				Thread uploadDeconPrjThread = new Thread(new Runnable() {
+					//					public void run() {
+					//						wgUploadJob = WG_Uploader.getInstance();
+					//						wgUploadJob.run(dirOrOMETiffFinal);
+					//											}
+					//				});
+					//				uploadDeconPrjThread.start();
+					//			}
+
+				}
+			}
+
+
+
+		});
+		updateWindowsAndWriteSNFFilesThread.start();
+		
 		for (int pos=0; pos<pDim; pos++) {
 			if (doProcessing[pos]){
 				boolean go = true;
