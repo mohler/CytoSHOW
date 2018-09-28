@@ -2722,7 +2722,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	public void setRoiManager(RoiManager rm) {
 		
 		this.rm = rm;
-		if (this.getWindow() != null) {
+		if (this.getWindow() != null && rm != null) {
 			if (this.getMultiChannelController() == null &&
 					this.getWindow().getBackground().equals(IJ.getInstance().getBackground())) {
 				String[] hexChoices = { "77",/*"88","99","aa",*/

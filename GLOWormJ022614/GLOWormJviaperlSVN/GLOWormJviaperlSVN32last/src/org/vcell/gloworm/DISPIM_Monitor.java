@@ -389,6 +389,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 //	private CompositeImage[] ciMaxZs;
 //	private ImageWindow maxZwin;
 	private boolean orientBeforeLineage;
+	private double[] anglesA;
+	private double[] anglesB;
+	private double[] longAxesA;
+	private double[] longAxesB;
 
 	public Process getRegDeconProcess() {
 		return regDeconProcess;
@@ -643,7 +647,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					cropWidthA = new double[pDim];
 					cropHeightA = new double[pDim];
 					cropWidthB = new double[pDim];
-					cropHeightB = new double[pDim];					
+					cropHeightB = new double[pDim];			
+					anglesA = new double[pDim];					
+					anglesB = new double[pDim];					
+					longAxesA = new double[pDim];					
+					longAxesB = new double[pDim];					
+
 					dispimToolsButton = new JButton[pDim][2];
 					fuseButton = new JButton[pDim][2];
 					splitButton = new JButton[pDim][2];
@@ -1603,6 +1612,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 						if (npoints == 4) {
 							double angleZero = new Line(xApoints[0], yApoints[0], xApoints[1], yApoints[1]).getAngle();
+							longAxesA[pos] = new Line(xApoints[0], yApoints[0], xApoints[1], yApoints[1]).getLength();
 							double angleTwo = new Line(xApoints[2], yApoints[2], xApoints[3], yApoints[3]).getAngle();
 							double angleZeroPlusPi = angleZero + 180;
 							double angleTwoPlusPi = angleTwo + 180;
@@ -1612,6 +1622,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							if ( Math.abs(angleDelta)  >80 && Math.abs(angleDelta)  <100) {
 								haveAxesRoiA = true;
 								angle = angleZero;
+								anglesA[pos] = angle;
 								
 								ellipseRoiAs[pos] = new EllipseRoi(xApoints[0], yApoints[0], xApoints[1], yApoints[1], 
 										(new Line(xApoints[2], yApoints[2], xApoints[3], yApoints[3])).getLength()
@@ -1631,18 +1642,21 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								impAs[pos].setRoi(rectRoiAs[pos], false);
 								IJ.saveAs(impAs[pos], "Selection", savePath +  "Pos" + pos + "A_"+(autodepth?(zFirstA[pos]+"-"+zLastA[pos]):"")+"rectangle.roi");
 								angle = new Line(xApoints[0], yApoints[0], xApoints[2], yApoints[2]).getAngle();
+								longAxesA[pos] = new Line(xApoints[0], yApoints[0], xApoints[2], yApoints[2]).getLength();
 							}
 						} else {
 							rectRoiAs[pos] = new Roi(origRoiAs[pos].getBounds());
 							impAs[pos].setRoi(rectRoiAs[pos], false);
 							IJ.saveAs(impAs[pos], "Selection", savePath +  "Pos" + pos + "A_"+(autodepth?(zFirstA[pos]+"-"+zLastA[pos]):"")+"rectangle.roi");
 							angle = new Line(xApoints[0], yApoints[0], xApoints[npoints/2], yApoints[npoints/2]).getAngle();
+							longAxesA[pos] = new Line(xApoints[0], yApoints[0], xApoints[npoints/2], yApoints[npoints/2]).getLength();
 						}
 					} else {
 						rectRoiAs[pos] = new Roi(origRoiAs[pos].getBounds());
 						impAs[pos].setRoi(rectRoiAs[pos], false);
 						IJ.saveAs(impAs[pos], "Selection", savePath +  "Pos" + pos + "A_"+(autodepth?(zFirstA[pos]+"-"+zLastA[pos]):"")+"rectangle.roi");
 						angle = origRoiAs[pos].getBounds().getHeight() > origRoiAs[pos].getBounds().getWidth()?90:0;
+						longAxesA[pos] = origRoiAs[pos].getBounds().getHeight() > origRoiAs[pos].getBounds().getWidth()?origRoiAs[pos].getBounds().getHeight():origRoiAs[pos].getBounds().getWidth();
 					}
 
 					angle = 180+ angle;
@@ -1682,6 +1696,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 						if (npoints == 4) {
 							double angleZero = new Line(xBpoints[0], yBpoints[0], xBpoints[1], yBpoints[1]).getAngle();
+							longAxesB[pos] = new Line(xBpoints[0], yBpoints[0], xBpoints[1], yBpoints[1]).getLength();
 							double angleTwo = new Line(xBpoints[2], yBpoints[2], xBpoints[3], yBpoints[3]).getAngle();
 							double angleZeroPlusPi = angleZero + 180;
 							double angleTwoPlusPi = angleTwo + 180;
@@ -1691,6 +1706,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							if ( Math.abs(angleDelta)  >80 && Math.abs(angleDelta)  <100) {
 								haveAxesRoiB = true;
 								angle = angleZero;
+								anglesB[pos] = angle;
 								
 								ellipseRoiBs[pos] = new EllipseRoi(xBpoints[0], yBpoints[0], xBpoints[1], yBpoints[1], 
 										(new Line(xBpoints[2], yBpoints[2], xBpoints[3], yBpoints[3])).getLength()
@@ -1710,18 +1726,22 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								impBs[pos].setRoi(rectRoiBs[pos], false);
 								IJ.saveAs(impBs[pos], "Selection", savePath +  "Pos" + pos + "B_"+(autodepth?(zFirstB[pos]+"-"+zLastB[pos]):"")+"rectangle.roi");
 								angle = new Line(xBpoints[0], yBpoints[0], xBpoints[2], yBpoints[2]).getAngle();
+								longAxesB[pos] = new Line(xBpoints[0], yBpoints[0], xBpoints[2], yBpoints[2]).getLength();
 							}
 						} else {
 							rectRoiBs[pos] = new Roi(origRoiBs[pos].getBounds());
 							impBs[pos].setRoi(rectRoiBs[pos], false);
 							IJ.saveAs(impBs[pos], "Selection", savePath +  "Pos" + pos + "B_"+(autodepth?(zFirstB[pos]+"-"+zLastB[pos]):"")+"rectangle.roi");
 							angle = new Line(xBpoints[0], yBpoints[0], xBpoints[npoints/2], yBpoints[npoints/2]).getAngle();
+							longAxesB[pos] = new Line(xBpoints[0], yBpoints[0], xBpoints[npoints/2], yBpoints[npoints/2]).getLength();
 						}
 					} else {
 						rectRoiBs[pos] = new Roi(origRoiBs[pos].getBounds());
 						impBs[pos].setRoi(rectRoiBs[pos], false);
 						IJ.saveAs(impBs[pos], "Selection", savePath +  "Pos" + pos + "B_"+(autodepth?(zFirstB[pos]+"-"+zLastB[pos]):"")+"rectangle.roi");
 						angle = origRoiBs[pos].getBounds().getHeight() > origRoiBs[pos].getBounds().getWidth()?90:0;
+						longAxesB[pos] = origRoiBs[pos].getBounds().getHeight() > origRoiBs[pos].getBounds().getWidth()?origRoiBs[pos].getBounds().getHeight():origRoiBs[pos].getBounds().getWidth();
+						
 					}
 
 					angle = 180+ angle;
@@ -2221,6 +2241,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							}
 							if (stackDFs[pos]!=null && stackDFs[pos].getSize() > 0) {
 								impDF1s[pos] = new ImagePlus();
+								impDF1s[pos].getRoiManager().setImagePlus(null);
+								impDF1s[pos].setRoiManager(null);
 								impDF1s[pos].setStack("Decon-Fuse_"
 										+ impAs[pos].getTitle().split(":")[0], stackDFs[pos]);
 								impDF1s[pos].setFileInfo(new FileInfo());
@@ -2284,6 +2306,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								if (stackPrxs[pos]!=null && stackPrys[pos]!=null) {
 
 									impPrxs[pos] = new ImagePlus();
+									impPrxs[pos].getRoiManager().setImagePlus(null);
+									impPrxs[pos].setRoiManager(null);
 									impPrxs[pos].setStack("3DProjX_Decon-Fuse_"
 											+ impAs[pos].getTitle().split(":")[0], stackPrxs[pos]);
 									impPrxs[pos].setFileInfo(new FileInfo());
@@ -2307,6 +2331,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									ciPrxs[pos].setPosition(1, ciPrxs[pos].getNSlices()/2, ciPrxs[pos].getNFrames());
 
 									impPrys[pos] = new ImagePlus();
+									impPrys[pos].getRoiManager().setImagePlus(null);
+									impPrys[pos].setRoiManager(null);
 									impPrys[pos].setStack("3DProjY_Decon-Fuse_"
 											+ impAs[pos].getTitle().split(":")[0], stackPrys[pos]);
 									impPrys[pos].setFileInfo(new FileInfo());
@@ -4123,7 +4149,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							}
 						}
 
-						int hypotenuse = (int)(Math.sqrt((cropWidthA[pos]*cropWidthA[pos]) + (cropHeightA[pos]*cropHeightA[pos])));
+						int longAxisLength = (int)longAxesA[pos];
 						if (doProcessing[pos]) {
 							double pwA = impAs[pos].getCalibration().pixelWidth;
 							double phA = impAs[pos].getCalibration().pixelHeight;
@@ -4166,14 +4192,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								frameFileNames[pos][f] = "t" + f;
 							//							timecode = "" + (new Date()).getTime();
 
-							stackA1 = new ImageStack(hypotenuse, hypotenuse);
-							stackA2 = new ImageStack(hypotenuse, hypotenuse);
+							stackA1 = new ImageStack(longAxisLength, longAxisLength);
+							stackA2 = new ImageStack(longAxisLength, longAxisLength);
 							wasEdgesA[pos] = impAs[pos].getStack().isEdges();
 							impAs[pos].getWindow().setEnabled(false);
 
 							 
-							stackA1.addSlice(new ShortProcessor(hypotenuse, hypotenuse));
-							stackA2.addSlice(new ShortProcessor(hypotenuse, hypotenuse));
+							stackA1.addSlice(new ShortProcessor(longAxisLength, longAxisLength));
+							stackA2.addSlice(new ShortProcessor(longAxisLength, longAxisLength));
 
 							double maxBkgd1 = 0.0;
 							double maxBkgd2 = 0.0;
@@ -4215,8 +4241,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								ipA1 = ipA1r;
 
 //								stackA1.addSlice(ipA1);							
-								stackA1.addSlice(new ShortProcessor(hypotenuse, hypotenuse));
-								stackA1.getProcessor(stackA1.getSize()).insert(ipA1, (hypotenuse/2)-(ipA1.getWidth()/2), (hypotenuse/2)-(ipA1.getHeight()/2));
+								stackA1.addSlice(new ShortProcessor(longAxisLength, longAxisLength));
+								stackA1.getProcessor(stackA1.getSize()).insert(ipA1, (longAxisLength/2)-(ipA1.getWidth()/2), (longAxisLength/2)-(ipA1.getHeight()/2));
 
 								if (wavelengths >= 2) {
 									impAs[pos].setPositionWithoutUpdate(wavelengths, i, f);
@@ -4242,13 +4268,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									ipA2r.insert(ipA2, 1, 1);
 									ipA2 = ipA2r;
 //									stackA2.addSlice(ipA2);
-									stackA2.addSlice(new ShortProcessor(hypotenuse, hypotenuse));
-									stackA2.getProcessor(stackA2.getSize()).insert(ipA2, (hypotenuse/2)-(ipA2.getWidth()/2), (hypotenuse/2)-(ipA2.getHeight()/2));
+									stackA2.addSlice(new ShortProcessor(longAxisLength, longAxisLength));
+									stackA2.getProcessor(stackA2.getSize()).insert(ipA2, (longAxisLength/2)-(ipA2.getWidth()/2), (longAxisLength/2)-(ipA2.getHeight()/2));
 								}
 							}
 
-							stackA1.addSlice(new ShortProcessor(hypotenuse, hypotenuse));
-							stackA2.addSlice(new ShortProcessor(hypotenuse, hypotenuse));
+							stackA1.addSlice(new ShortProcessor(longAxisLength, longAxisLength));
+							stackA2.addSlice(new ShortProcessor(longAxisLength, longAxisLength));
 
 							impAs[pos].getWindow().setEnabled(true);
 							impXA1 = new ImagePlus();
@@ -4274,14 +4300,18 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								}
 
 							}
+							
+							
+							
+							longAxisLength = (int)longAxesB[pos];
 
-							stackB1 = new ImageStack(hypotenuse, hypotenuse);
-							stackB2 = new ImageStack(hypotenuse, hypotenuse);
+							stackB1 = new ImageStack(longAxisLength, longAxisLength);
+							stackB2 = new ImageStack(longAxisLength, longAxisLength);
 							wasEdgesB[pos] = impBs[pos].getStack().isEdges();
 							impBs[pos].getWindow().setEnabled(false);
 
-							stackB1.addSlice(new ShortProcessor(hypotenuse, hypotenuse));
-							stackB2.addSlice(new ShortProcessor(hypotenuse, hypotenuse));
+							stackB1.addSlice(new ShortProcessor(longAxisLength, longAxisLength));
+							stackB2.addSlice(new ShortProcessor(longAxisLength, longAxisLength));
 
 							for (int i = zFirstB[pos]; i <= zLastB[pos]; i++) {
 								impBs[pos].setPositionWithoutUpdate(1, i, f);
@@ -4325,8 +4355,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										// ip1.subtract(minLimit[2]);
 //										stackB1.addSlice(ipB1);
 
-										stackB1.addSlice(new ShortProcessor(hypotenuse, hypotenuse));
-										stackB1.getProcessor(stackB1.getSize()).insert(ipB1, (hypotenuse/2)-(ipB1.getWidth()/2), (hypotenuse/2)-(ipB1.getHeight()/2));
+										stackB1.addSlice(new ShortProcessor(longAxisLength, longAxisLength));
+										stackB1.getProcessor(stackB1.getSize()).insert(ipB1, (longAxisLength/2)-(ipB1.getWidth()/2), (longAxisLength/2)-(ipB1.getHeight()/2));
 
 										if (wavelengths >= 2) {
 											impBs[pos].setPositionWithoutUpdate(wavelengths, i, f);
@@ -4353,14 +4383,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											ipB2 = ipB2r;
 											// ip2.subtract(minLimit[3]);
 //											stackB2.addSlice(ipB2);
-											stackB2.addSlice(new ShortProcessor(hypotenuse, hypotenuse));
-											stackB2.getProcessor(stackB2.getSize()).insert(ipB2, (hypotenuse/2)-(ipB2.getWidth()/2), (hypotenuse/2)-(ipB2.getHeight()/2));
+											stackB2.addSlice(new ShortProcessor(longAxisLength, longAxisLength));
+											stackB2.getProcessor(stackB2.getSize()).insert(ipB2, (longAxisLength/2)-(ipB2.getWidth()/2), (longAxisLength/2)-(ipB2.getHeight()/2));
 
 										}
 							}
 
-							stackB1.addSlice(new ShortProcessor(hypotenuse, hypotenuse));
-							stackB2.addSlice(new ShortProcessor(hypotenuse, hypotenuse));
+							stackB1.addSlice(new ShortProcessor(longAxisLength, longAxisLength));
+							stackB2.addSlice(new ShortProcessor(longAxisLength, longAxisLength));
 
 							impBs[pos].getWindow().setEnabled(true);
 							impXB1 = new ImagePlus();
@@ -5000,10 +5030,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								} else {
 									win = null;
 								}
-								ImagePlus flushingImp=ciDFs[pos];
+
 								ciDFs[pos] = new CompositeImage(impDF1s[pos]);
-								flushingImp.flush();
-								impDF1s[pos].flush();
 
 
 								if (wavelengths > 1)
