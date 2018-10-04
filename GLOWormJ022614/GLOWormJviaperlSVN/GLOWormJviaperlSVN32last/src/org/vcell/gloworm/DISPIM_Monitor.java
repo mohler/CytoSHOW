@@ -2455,6 +2455,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 		if (lineageDecons){
 			StarryNiteFeeder snf = new StarryNiteFeeder();
 			String deconPath = savePath;
+			IJ.log(""+deconPath +"|"+ paramsPath +"|"+ deconPath +"|"+ depthSkipFactor);
 			snf.run(""+deconPath +"|"+ paramsPath +"|"+ deconPath +"|"+ depthSkipFactor);
 		}
 
@@ -5082,6 +5083,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							while (!(new File(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution"+ slaveChannel + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif").canRead()) ||
 									!(new File(prxPath+File.separator +"Color"+ slaveChannel+ File.separator +"projX_"+pos+"_"+f+".tif").canRead()) ||
 									!(new File(pryPath+File.separator +"Color"+ slaveChannel+ File.separator +"projY_"+pos+"_"+f+".tif").canRead()) ){
+								IJ.log("waiting for decon output "+pos+" "+f);
 								IJ.wait(100);
 							}
 							double pwA = impAs[pos].getCalibration().pixelWidth;
@@ -5649,198 +5651,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											}
 										}
 										//////////							
-
-
-
-										//								impMaxXs[pos] = new ImagePlus();
-										//								impMaxXs[pos].setStack("3DMaxX_Decon-Fuse_"
-										//										+ impAs[pos].getTitle().split(":")[0], dfMaxXmfivs);
-										//								impMaxXs[pos].setFileInfo(new FileInfo());
-										//								impMaxXs[pos].getCalibration().setUnit(impDF1s[pos].getCalibration().getUnit());
-										//								impMaxXs[pos].getCalibration().pixelWidth = impDF1s[pos].getCalibration().pixelWidth;
-										//								impMaxXs[pos].getCalibration().pixelHeight = impDF1s[pos].getCalibration().pixelHeight;
-										//								impMaxXs[pos].getCalibration().pixelDepth = impDF1s[pos].getCalibration().pixelWidth;
-										//
-										//								impMaxXs[pos].getOriginalFileInfo().directory = maxXPath+File.separator;
-										//								int stkNSlicesMaxX = impMaxXs[pos].getStackSize();
-										//								int zSlicesMaxX = dfMaxXmfivs.getFivStacks().get(0)
-										//										.getSize();
-										//								impMaxXs[pos].setOpenAsHyperStack(true);
-										//								impMaxXs[pos].setStack(impMaxXs[pos].getStack(), outputWavelengths,
-										//										zSlicesMaxX, stkNSlicesMaxX
-										//										/ (outputWavelengths * zSlicesMaxX));
-										//								if (ciMaxXs[pos] != null) {
-										//									maxXwin = ciMaxXs[pos].getWindow();
-										//								}
-										//
-										//								ciMaxXs[pos] = new CompositeImage(impMaxXs[pos]);
-										//								ciMaxXs[pos].setPosition(1, ciMaxXs[pos].getNSlices()/2, ciMaxXs[pos].getNFrames());
-										//
-										//
-										//								if (wavelengths > 1)
-										//									ciMaxXs[pos].setMode(CompositeImage.COMPOSITE);
-										//								else
-										//									ciMaxXs[pos].setMode(CompositeImage.GRAYSCALE);
-										//								if (maxXwin==null) {
-										//									ciMaxXs[pos].show();
-										//									WindowManager.group(ciPrxs[pos], ciMaxXs[pos]);
-										//									ciMaxXs[pos].setPosition(1, ciMaxXs[pos].getNSlices()/2, ciMaxXs[pos].getNFrames());
-										//								} else {
-										//									oldW = maxXwin.getWidth();
-										//									oldH = maxXwin.getHeight();
-										//									oldC = maxXwin.getImagePlus().getChannel();
-										//									oldZ = maxXwin.getImagePlus().getSlice();
-										//									oldT = maxXwin.getImagePlus().getFrame();
-										//									oldMag = maxXwin.getCanvas().getMagnification();
-										//									oldMin = maxXwin.getImagePlus()
-										//											.getDisplayRangeMin();
-										//									oldMax = maxXwin.getImagePlus()
-										//											.getDisplayRangeMax();
-										//									oldEdges = maxXwin.getImagePlus().getStack().isEdges();
-										//									((CompositeImage)ciMaxXs[pos]).copyLuts(maxXwin.getImagePlus());
-										//
-										//									maxXwin.setImage(ciMaxXs[pos]);
-										//									ciMaxXs[pos].setWindow(maxXwin);
-										//									maxXwin.updateImage(ciMaxXs[pos]);
-										//									maxXwin.getImagePlus().getStack().setEdges(oldEdges);
-										//									maxXwin.setSize(oldW, oldH);
-										//									((StackWindow) maxXwin).addScrollbars(ciMaxXs[pos]);
-										//									maxXwin.getCanvas().setMagnification(oldMag);
-										//									maxXwin.getImagePlus().updateAndDraw();
-										//									maxXwin.getImagePlus().setPosition(oldC, oldZ, oldT);
-										//									maxXwin.getImagePlus().setDisplayRange(oldMin, oldMax);
-										//									maxXwin.setSize(maxXwin.getSize().width,
-										//											maxXwin.getSize().height);
-										//
-										//								}
-										//
-										//
-										//							
-										//								impMaxYs[pos] = new ImagePlus();
-										//								impMaxYs[pos].setStack("3DMaxY_Decon-Fuse_"
-										//										+ impAs[pos].getTitle().split(":")[0], dfMaxYmfivs);
-										//								impMaxYs[pos].setFileInfo(new FileInfo());
-										//								impMaxYs[pos].getCalibration().setUnit(impDF1s[pos].getCalibration().getUnit());
-										//								impMaxYs[pos].getCalibration().pixelWidth = impDF1s[pos].getCalibration().pixelWidth;
-										//								impMaxYs[pos].getCalibration().pixelHeight = impDF1s[pos].getCalibration().pixelHeight;
-										//								impMaxYs[pos].getCalibration().pixelDepth = impDF1s[pos].getCalibration().pixelWidth;
-										//
-										//								impMaxYs[pos].getOriginalFileInfo().directory = maxYPath+File.separator;
-										//								int stkNSlicesMaxY = impMaxYs[pos].getStackSize();
-										//								int zSlicesMaxY = dfMaxYmfivs.getFivStacks().get(0)
-										//										.getSize();
-										//								impMaxYs[pos].setOpenAsHyperStack(true);
-										//								impMaxYs[pos].setStack(impMaxYs[pos].getStack(), outputWavelengths,
-										//										zSlicesMaxY, stkNSlicesMaxY
-										//										/ (outputWavelengths * zSlicesMaxY));
-										//								if (ciMaxYs[pos] != null) {
-										//									maxYwin = ciMaxYs[pos].getWindow();
-										//								}
-										//
-										//								ciMaxYs[pos] = new CompositeImage(impMaxYs[pos]);
-										//								ciMaxYs[pos].setPosition(1, ciMaxYs[pos].getNSlices()/2, ciMaxYs[pos].getNFrames());
-										//
-										//
-										//								if (wavelengths > 1)
-										//									ciMaxYs[pos].setMode(CompositeImage.COMPOSITE);
-										//								else
-										//									ciMaxYs[pos].setMode(CompositeImage.GRAYSCALE);
-										//								if (maxYwin==null) {
-										////									ciMaxYs[pos].show();
-										////									WindowManager.group(ciMaxXs[pos], ciMaxYs[pos]);
-										////									ciMaxYs[pos].setPosition(1, ciMaxYs[pos].getNSlices()/2, ciMaxYs[pos].getNFrames());
-										//								} else {
-										//									oldW = maxYwin.getWidth();
-										//									oldH = maxYwin.getHeight();
-										//									oldC = maxYwin.getImagePlus().getChannel();
-										//									oldZ = maxYwin.getImagePlus().getSlice();
-										//									oldT = maxYwin.getImagePlus().getFrame();
-										//									oldMag = maxYwin.getCanvas().getMagnification();
-										//									oldMin = maxYwin.getImagePlus()
-										//											.getDisplayRangeMin();
-										//									oldMax = maxYwin.getImagePlus()
-										//											.getDisplayRangeMax();
-										//									oldEdges = maxYwin.getImagePlus().getStack().isEdges();
-										//									((CompositeImage)ciMaxYs[pos]).copyLuts(maxYwin.getImagePlus());
-										//
-										//									maxYwin.setImage(ciMaxYs[pos]);
-										//									ciMaxYs[pos].setWindow(maxYwin);
-										//									maxYwin.updateImage(ciMaxYs[pos]);
-										//									maxYwin.getImagePlus().getStack().setEdges(oldEdges);
-										//									maxYwin.setSize(oldW, oldH);
-										//									((StackWindow) maxYwin).addScrollbars(ciMaxYs[pos]);
-										//									maxYwin.getCanvas().setMagnification(oldMag);
-										//									maxYwin.getImagePlus().updateAndDraw();
-										//									maxYwin.getImagePlus().setPosition(oldC, oldZ, oldT);
-										//									maxYwin.getImagePlus().setDisplayRange(oldMin, oldMax);
-										//									maxYwin.setSize(maxYwin.getSize().width,
-										//											maxYwin.getSize().height);
-										//
-										//								}
-										//
-										//
-										//							
-										//								impMaxZs[pos] = new ImagePlus();
-										//								impMaxZs[pos].setStack("3DMaxZ_Decon-Fuse_"
-										//										+ impAs[pos].getTitle().split(":")[0], dfMaxZmfivs);
-										//								impMaxZs[pos].setFileInfo(new FileInfo());
-										//								impMaxZs[pos].getCalibration().setUnit(impDF1s[pos].getCalibration().getUnit());
-										//								impMaxZs[pos].getCalibration().pixelWidth = impDF1s[pos].getCalibration().pixelWidth;
-										//								impMaxZs[pos].getCalibration().pixelHeight = impDF1s[pos].getCalibration().pixelHeight;
-										//								impMaxZs[pos].getCalibration().pixelDepth = impDF1s[pos].getCalibration().pixelWidth;
-										//
-										//								impMaxZs[pos].getOriginalFileInfo().directory = maxZPath+File.separator;
-										//								int stkNSlicesMaxZ = impMaxZs[pos].getStackSize();
-										//								int zSlicesMaxZ = dfMaxZmfivs.getFivStacks().get(0)
-										//										.getSize();
-										//								impMaxZs[pos].setOpenAsHyperStack(true);
-										//								impMaxZs[pos].setStack(impMaxZs[pos].getStack(), outputWavelengths,
-										//										zSlicesMaxZ, stkNSlicesMaxZ
-										//										/ (outputWavelengths * zSlicesMaxZ));
-										//								if (ciMaxZs[pos] != null) {
-										//									maxZwin = ciMaxZs[pos].getWindow();
-										//								}
-										//
-										//								ciMaxZs[pos] = new CompositeImage(impMaxZs[pos]);
-										//								ciMaxZs[pos].setPosition(1, ciMaxZs[pos].getNSlices()/2, ciMaxZs[pos].getNFrames());
-										//
-										//
-										//								if (wavelengths > 1)
-										//									ciMaxZs[pos].setMode(CompositeImage.COMPOSITE);
-										//								else
-										//									ciMaxZs[pos].setMode(CompositeImage.GRAYSCALE);
-										//								if (maxZwin==null) {
-										//									ciMaxZs[pos].show();
-										//									WindowManager.group(ciMaxXs[pos], ciMaxZs[pos]);
-										//									ciMaxZs[pos].setPosition(1, ciMaxZs[pos].getNSlices()/2, ciMaxZs[pos].getNFrames());
-										//								} else {
-										//									oldW = maxZwin.getWidth();
-										//									oldH = maxZwin.getHeight();
-										//									oldC = maxZwin.getImagePlus().getChannel();
-										//									oldZ = maxZwin.getImagePlus().getSlice();
-										//									oldT = maxZwin.getImagePlus().getFrame();
-										//									oldMag = maxZwin.getCanvas().getMagnification();
-										//									oldMin = maxZwin.getImagePlus()
-										//											.getDisplayRangeMin();
-										//									oldMax = maxZwin.getImagePlus()
-										//											.getDisplayRangeMax();
-										//									oldEdges = maxZwin.getImagePlus().getStack().isEdges();
-										//									((CompositeImage)ciMaxZs[pos]).copyLuts(maxZwin.getImagePlus());
-										//
-										//									maxZwin.setImage(ciMaxZs[pos]);
-										//									ciMaxZs[pos].setWindow(maxZwin);
-										//									maxZwin.updateImage(ciMaxZs[pos]);
-										//									maxZwin.getImagePlus().getStack().setEdges(oldEdges);
-										//									maxZwin.setSize(oldW, oldH);
-										//									((StackWindow) maxZwin).addScrollbars(ciMaxZs[pos]);
-										//									maxZwin.getCanvas().setMagnification(oldMag);
-										//									maxZwin.getImagePlus().updateAndDraw();
-										//									maxZwin.getImagePlus().setPosition(oldC, oldZ, oldT);
-										//									maxZwin.getImagePlus().setDisplayRange(oldMin, oldMax);
-										//									maxZwin.setSize(maxZwin.getSize().width,
-										//											maxZwin.getSize().height);
-										//
-										//								}
 
 									}
 								}
