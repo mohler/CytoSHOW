@@ -5672,7 +5672,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 				if(nextFile.isDirectory() && nextFile.list().length>0) {
 					for (String listFile:nextFile.list()){
-						if (listFile.contains("MMStack")) {
+						if (listFile.contains("MMStack") && listFile.toLowerCase().endsWith(".ome.tif")) {
 							IJ.log(nextFile.getPath()+File.separator+listFile);
 							if (diSPIMheader == "")
 								diSPIMheader = open_diSPIMheaderAsString(nextFile.getPath()+File.separator+listFile);
@@ -5680,7 +5680,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							break;
 						}
 					}
-				} else if (fileName.contains("MMStack")) {
+				} else if (fileName.contains("MMStack") && fileName.toLowerCase().endsWith(".ome.tif")) {
 					IJ.log(nextFile.getPath());
 					if (diSPIMheader == "")
 						diSPIMheader = open_diSPIMheaderAsString(nextFile.getPath());
