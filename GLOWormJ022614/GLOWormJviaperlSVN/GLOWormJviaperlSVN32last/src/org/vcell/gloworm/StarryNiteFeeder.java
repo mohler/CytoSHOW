@@ -32,6 +32,7 @@ import ij.VirtualStack;
 import ij.WindowManager;
 import ij.gui.EllipseRoi;
 import ij.gui.Line;
+import ij.gui.OvalRoi;
 import ij.gui.Roi;
 import ij.gui.TextRoi;
 import ij.gui.WaitForUserDialog;
@@ -91,7 +92,7 @@ public class StarryNiteFeeder implements PlugIn {
 			Prefs.set("StarryNiteFeeder.outputPath", outputDir);
 		} 
 		final String outDir = outputDir+ File.separator ;
-		
+
 		if (!autoLaunch){
 			WaitForUserDialog wfud = new WaitForUserDialog("StarryNite Feeder", 
 					"Please position ROIs around the individual embryos to be lineaged.  \n\nThen adjust each embryo's t-slider to the last timepoint to be analyzed.  \n\nClick OK to launch analysis.");
@@ -119,13 +120,12 @@ public class StarryNiteFeeder implements PlugIn {
 					for (String sourceDirFileName:sourceFileList){
 						if (sourceDirFileName.endsWith("originalSNF.roi")){
 							if (sourceDirFileName.startsWith(imp.getTitle())){
-								WindowManager.setTempCurrentImage(imp);
-								IJ.open(outDir+ sourceDirFileName);
-								WindowManager.setTempCurrentImage(null);
+								imp.setRoi(new OvalRoi(0, 0, imp.getWidth(), imp.getHeight()));
 							}
 						}
 					}				
 				}
+
 			}
 			
 			if (imp.getRoi() == null ) {
@@ -134,6 +134,8 @@ public class StarryNiteFeeder implements PlugIn {
 			
 			Roi theROI = imp.getRoi();
 			int type = imp.getRoi().getType() ;
+			IJ.log(theROI.toString());
+			
 			boolean flipStack = false;
 
 			if (theROI == null) {
@@ -207,17 +209,10 @@ public class StarryNiteFeeder implements PlugIn {
 					boolean paramsWritten = false;
 					if (!((new File(outDir+subdir+"/aaa_t"+f+".tif").canRead())&&(new File(outDir+subdir+"Skipped"+"/aaa_t"+f+".tif").canRead()))) {
 
-						ImageStack stack1 = new ImageStack((int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
-						ImageStack stack1skipped = new ImageStack((int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
-
-						ImageStack stack2 = new ImageStack((int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
-						ImageStack stack2skipped = new ImageStack((int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
-
 						ImageStack stack3 = new ImageStack((int)theRotatedROI.getBounds().getWidth()*2, (int)theRotatedROI.getBounds().getHeight());
 						ImageStack stack3skipped = new ImageStack((int)theRotatedROI.getBounds().getWidth()*2, (int)theRotatedROI.getBounds().getHeight());
 
 						imp.getWindow().setEnabled(false);
-
 
 						for (int i = 1; i <= imp.getNSlices(); i++) {
 							imp.setPositionWithoutUpdate(1, i, f);
@@ -236,8 +231,8 @@ public class StarryNiteFeeder implements PlugIn {
 							}
 							ip1.subtract(ipHisMode * 1);
 
-							ip1.setRoi((Roi) theROI);
-							ip1.fillOutside((Roi) theROI);
+							ip1.setRoi(theROI);
+							ip1.fillOutside(theROI);
 							ip1 = ip1.crop();
 							ImageProcessor ip1r = ip1.createProcessor((int)Math.sqrt(ip1.getWidth()*ip1.getWidth()+ip1.getHeight()*ip1.getHeight())
 									, (int)Math.sqrt(ip1.getWidth()*ip1.getWidth()+ip1.getHeight()*ip1.getHeight()));
@@ -251,20 +246,12 @@ public class StarryNiteFeeder implements PlugIn {
 							ImageProcessor ip3 = ip1.createProcessor(stack3.getWidth(), stack3.getHeight());
 		
 							if (!flipStack){
-								stack1.addSlice(ip1);
-								if (i%skipFactor == 1) {
-									stack1skipped.addSlice(ip1.duplicate());
-								}
 								ImageProcessor ip1fh = ip1.duplicate();
 								ip1fh.flipHorizontal();
 								ip3.insert(ip1fh, ip3.getWidth()/2, 0);
 
 							} else {
 								ip1.flipVertical();
-								stack1.addSlice(null, ip1, 0);
-								if (i%skipFactor == 1) {
-									stack1skipped.addSlice(null, ip1.duplicate(),0);
-								}
 								ImageProcessor ip1fh = ip1.duplicate();
 								ip1fh.flipHorizontal();
 
@@ -302,10 +289,6 @@ public class StarryNiteFeeder implements PlugIn {
 								ip2 = ip2.crop();
 
 								if (!flipStack){
-									stack2.addSlice(ip2);
-									if (i%skipFactor == 1) {
-										stack2skipped.addSlice(ip2.duplicate());
-									}
 									
 									ImageProcessor ip2fh = ip2.duplicate();
 									ip2fh.flipHorizontal();
@@ -318,10 +301,6 @@ public class StarryNiteFeeder implements PlugIn {
 
 								} else {
 									ip2.flipVertical();
-									stack2.addSlice(null, ip2, 0);
-									if (i%skipFactor == 1) {
-										stack2skipped.addSlice(null, ip2.duplicate(),0);
-									}
 									
 									ImageProcessor ip2fh = ip2.duplicate();
 									ip2fh.flipHorizontal();
@@ -341,11 +320,9 @@ public class StarryNiteFeeder implements PlugIn {
 
 						imp.getWindow().setEnabled(true);
 
-						ImagePlus frameRedImp = new ImagePlus("Ch2hisSubCrop",stack2);
-						ImagePlus frameRedImpSkipped = new ImagePlus("Ch2hisSubCrop",stack2skipped);
 
-						stackWidth = frameRedImp.getWidth();
-						stackHeight = frameRedImp.getHeight();
+						stackWidth = (int)theRotatedROI.getBounds().getWidth();
+						stackHeight = (int)theRotatedROI.getBounds().getHeight();
 						if (!paramsWritten) {
 							IJ.saveString(IJ.openAsString(baseParameterFilePath).replaceAll("(.*end_time=)\\d+(;.*)", "$1"+f+"$2")
 									.replaceAll("(.*ROI=)true(;.*)", "$1false$2")
@@ -356,9 +333,6 @@ public class StarryNiteFeeder implements PlugIn {
 									, impParameterPath);
 							paramsWritten = true;
 						}
-
-						ImagePlus frameGreenImp = new ImagePlus("Ch1hisSubCrop",stack1);
-						ImagePlus frameGreenImpSkipped = new ImagePlus("Ch1hisSubCrop",stack1skipped);
 
 						ImagePlus frameRGsplitImp = new ImagePlus("Ch12hisSubCrop",stack3);
 						ImagePlus frameRGsplitImpSkipped = new ImagePlus("Ch12hisSubCrop",stack3skipped);
@@ -376,10 +350,6 @@ public class StarryNiteFeeder implements PlugIn {
 						IJ.save(frameRGsplitImpSkipped, outDir+subdir+"Skipped"+"/aaa_t"+f+".tif");
 
 
-						frameRedImp.flush();
-						frameRedImpSkipped.flush();
-						frameGreenImp.flush();
-						frameGreenImpSkipped.flush();
 						frameRGsplitImp.flush();
 						frameRGsplitImpSkipped.flush();
 

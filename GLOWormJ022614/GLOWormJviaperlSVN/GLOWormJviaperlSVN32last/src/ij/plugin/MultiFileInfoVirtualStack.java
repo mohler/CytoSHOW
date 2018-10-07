@@ -203,6 +203,11 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				
 //				which format was this for, now conflicting with SN 16-bit stack output names...
 //				if (subFileName.matches(".*_t\\d+.*\\.tif")) {
+				if (subFileName.matches(".*Decon_(reg_)?\\d+\\.tif")) {
+					int tValue = Integer.parseInt(subFileName.replaceAll(".*_(\\d+)\\.tif", "$1"));
+					if (tValue > highT)
+						highT = tValue;
+				}
 				if (subFileName.matches(".*Decon_t\\d{4}\\.tif")) {
 					int tValue = Integer.parseInt(subFileName.replaceAll(".*_t(\\d+).*\\.tif", "$1"));
 					if (tValue > highT)
@@ -308,7 +313,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			if (dir.length() > 0 && !dir.endsWith(File.separator))
 				dir = dir + File.separator;
 
-			if (monitoringDecon)
+//			if (monitoringDecon)
+			if (true)
 				goDirFileList = StringSorter.sortNumericallyViaRegex(goDirFileList);
 //			String lastFileNameOfBunch = "";
 
@@ -404,7 +410,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					//						IJ.log("fi "+(f+1)+infoArray[f].directory+File.separator+infoArray[f].fileName);
 
 				}
-				if (fivStacks.get(0).getInfo()[0].fileName.matches(".*Decon-Fuse_.*aaa_.*")){
+				if (fivStacks.get(0).getInfo()[0].fileName.matches(".*Decon(-Fuse|_reg)_.*aaa_.*")){
 					this.cDim = 2;
 					dimOrder = "xySplitCzt";
 				}
@@ -549,7 +555,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			zDim = fivStacks.get(0).nSlices/(cDim/channelDirectories);
 //			tDim = fivStacks.size()/cDim;
 			this.tDim =nSlices/(this.cDim*this.zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
-		} else if (fivStacks.get(0).getInfo()[0].fileName.matches(".*Decon-Fuse_.*aaa_.*")){
+		} else if (fivStacks.get(0).getInfo()[0].fileName.matches(".*Decon(-Fuse|_reg)_.*aaa_.*")){
 			zDim = fivStacks.get(0).nSlices;
 			cDim = 2;
 			tDim = fivStacks.size();
@@ -574,8 +580,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		ImagePlus imp = new ImagePlus(
 				dirChunks[dirChunks.length-1]+"_"+
 						fivImpZero.getTitle().replaceAll("\\d+\\.", "\\."), this);
-		if (fivStacks.get(0).getInfo()[0].fileName.matches(".*Decon-Fuse_.*aaa_.*")){  //StarryNiteFeeder output
-			imp.setTitle(fivStacks.get(0).getInfo()[0].fileName.replaceAll("(.*)(Decon-Fuse_.*)("+Pattern.quote(File.separator)+"aaa_.*)", "$2"));
+		if (fivStacks.get(0).getInfo()[0].fileName.matches(".*Decon(-Fuse|_reg)_.*aaa_.*")){  //StarryNiteFeeder output
+			imp.setTitle(fivStacks.get(0).getInfo()[0].fileName.replaceAll("(.*)(Decon(-Fuse|_reg)_.*)("+Pattern.quote(File.separator)+"aaa_.*)", "$2"));
 		}
 				
 		imp.setOpenAsHyperStack(true);			
@@ -788,7 +794,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			ip.setInterpolationMethod(ImageProcessor.BICUBIC);
 			ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
 
-			if (fivStacks.get(0).getInfo()[0].fileName.matches(".*Decon-Fuse_.*aaa_.*")){  //StarryNiteFeeder output
+			if (fivStacks.get(0).getInfo()[0].fileName.matches(".*Decon(-Fuse|_reg)_.*aaa_.*")){  //StarryNiteFeeder output
 				int w = ip.getWidth();
 				int h = ip.getHeight();
 				int xOri = 0+((1-(n+1)%2)*(w/2));
@@ -808,7 +814,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				ip.setRoi(xOri, yOri, 512, 512);
 			} 
 			ip = ip.crop();
-			if (fivStacks.get(0).getInfo()[0].fileName.matches(".*Decon-Fuse_.*aaa_.*")){  //StarryNiteFeeder output
+			if (fivStacks.get(0).getInfo()[0].fileName.matches(".*Decon(-Fuse|_reg)_.*aaa_.*")){  //StarryNiteFeeder output
 				ip.flipHorizontal();
 			}
 			ip.translate((1-n%2)*dX, (1-n%2)*dY);
