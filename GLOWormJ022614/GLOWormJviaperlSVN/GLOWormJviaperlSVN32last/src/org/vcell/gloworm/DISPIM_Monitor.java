@@ -2194,6 +2194,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					continue;
 				} 
 
+				
+				
 				if (doProcessing[pos]) {
 					double pwA = impAs[pos].getCalibration().pixelWidth;
 					double phA = impAs[pos].getCalibration().pixelHeight;
@@ -2208,6 +2210,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						continue;
 					if (impBs[pos].hasNullStack())
 						continue;
+
+					depthSkipFactor = ((int)(pdB/phB)) ;
 
 					origRoiAs[pos] = impAs[pos].getRoi();
 					origRoiBs[pos] = impBs[pos].getRoi();
@@ -4204,7 +4208,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							if (impBs[pos].hasNullStack())
 								continue;
 
-							depthSkipFactor = ((int)(pdB/phB));
+							depthSkipFactor = ((int)(pdB/phB)) ;
 							
 							
 							if (new File(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution1" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif").canRead() 
@@ -5132,10 +5136,19 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								deconmfivs = null;
 								deconmfivsPathFile = new File(savePath+ File.separator + "RegDecon" + File.separator + "Pos" + pos);
 
-								if (deconmfivsPathFile.canRead() ) {
+								if (deconmfivsPathFile.canRead() 
+										&& new File(savePath + File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution1").list().length>0
+										){
+
+
+									while (new File(savePath + File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution1").list().length
+											!= new File(savePath + File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution2").list().length){
+										IJ.wait(100);
+									}
 									deconmfivs = new MultiFileInfoVirtualStack(savePath
-											+ File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution",
-											false);
+												+ File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution",
+												false);
+									
 								}
 
 								if (deconmfivs!=null && deconmfivs.getSize() > 0 && (impDF1s[pos]==null || deconmfivs.getSize() > impDF1s[pos].getStack().getSize())) {
@@ -5596,7 +5609,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								}
 							}
 						}
-						if (posFrameEnd[pos] > deconmfivs.getFivStacks().size()) {
+						if (ciDFs[pos]==null || posFrameEnd[pos] > ciDFs[pos].getNFrames()) {
 							posAllDone=false;
 						}
 					}
