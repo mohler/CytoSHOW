@@ -5133,7 +5133,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							if ((saveFile).canRead()) {
 								// SETUP OF WINDOWS SHOWING NEW AND PRE-EXISTING DECON OUTPUTS
 
-								deconmfivs = null;
+								stackDFs[pos] = null;
 								deconmfivsPathFile = new File(savePath+ File.separator + "RegDecon" + File.separator + "Pos" + pos);
 
 								if (deconmfivsPathFile.canRead() 
@@ -5145,19 +5145,19 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											!= new File(savePath + File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution2").list().length){
 										IJ.wait(100);
 									}
-									deconmfivs = new MultiFileInfoVirtualStack(savePath
+									stackDFs[pos] = new MultiFileInfoVirtualStack(savePath
 												+ File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution",
 												false);
 									
 								}
 
-								if (deconmfivs!=null && deconmfivs.getSize() > 0 && (impDF1s[pos]==null || deconmfivs.getSize() > impDF1s[pos].getStack().getSize())) {
+								if (stackDFs[pos]!=null && stackDFs[pos].getSize() > 0 && (impDF1s[pos]==null || stackDFs[pos].getSize() > impDF1s[pos].getStack().getSize())) {
 									impDF1s[pos] = new ImagePlus();
 									impDF1s[pos].getRoiManager().setImagePlus(null);
 									impDF1s[pos].getRoiManager().dispose();
 									impDF1s[pos].setRoiManager(null);
 									impDF1s[pos].setStack("Decon-Fuse_"
-											+ impAs[pos].getTitle().split(":")[0], deconmfivs);
+											+ impAs[pos].getTitle().split(":")[0], stackDFs[pos]);
 									impDF1s[pos].setFileInfo(new FileInfo());
 									impDF1s[pos].getCalibration().setUnit(impAs[pos].getCalibration().getUnit());
 									impDF1s[pos].getCalibration().pixelWidth = pwA;
@@ -5166,7 +5166,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 									impDF1s[pos].getOriginalFileInfo().directory = dirOrOMETiffFinal;
 									int stkNSlicesDF = impDF1s[pos].getStackSize();
-									int zSlicesDF1 = deconmfivs.getFivStacks().get(0)
+									int zSlicesDF1 = stackDFs[pos].getFivStacks().get(0)
 											.getSize();
 									impDF1s[pos].setOpenAsHyperStack(true);
 									impDF1s[pos].setStack(impDF1s[pos].getStack(), outputWavelengths,
@@ -5224,9 +5224,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 
 
+									while (new File(pryPath, "Color1").list().length
+											!= new File(pryPath, "Color2").list().length){
+										IJ.wait(100);
+									}
 
-									dfProjXmfivs = new MultiFileInfoVirtualStack(prxPath+File.separator, "Color", false);
-									dfProjYmfivs = new MultiFileInfoVirtualStack(pryPath+File.separator, "Color", false);
+									stackPrxs[pos] = new MultiFileInfoVirtualStack(prxPath+File.separator, "Color", false);
+									stackPrys[pos] = new MultiFileInfoVirtualStack(pryPath+File.separator, "Color", false);
 									//								dfMaxXmfivs = new MultiFileInfoVirtualStack(maxXPath+File.separator, "Color", false);
 									//								dfMaxYmfivs = new MultiFileInfoVirtualStack(maxYPath+File.separator, "Color", false);
 									//								dfMaxZmfivs = new MultiFileInfoVirtualStack(maxZPath+File.separator, "Color", false);
@@ -5236,7 +5240,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									impPrxs[pos].getRoiManager().dispose();
 									impPrxs[pos].setRoiManager(null);
 									impPrxs[pos].setStack("3DProjX_Decon-Fuse_"
-											+ impAs[pos].getTitle().split(":")[0], dfProjXmfivs);
+											+ impAs[pos].getTitle().split(":")[0], stackPrxs[pos]);
 									impPrxs[pos].setFileInfo(new FileInfo());
 									impPrxs[pos].getCalibration().setUnit(impDF1s[pos].getCalibration().getUnit());
 									impPrxs[pos].getCalibration().pixelWidth = impDF1s[pos].getCalibration().pixelWidth;
@@ -5245,7 +5249,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 									impPrxs[pos].getOriginalFileInfo().directory = prxPath+File.separator;
 									int stkNSlicesPrx = impPrxs[pos].getStackSize();
-									int zSlicesPrx = dfProjXmfivs.getFivStacks().get(0)
+									int zSlicesPrx = stackPrxs[pos].getFivStacks().get(0)
 											.getSize();
 									impPrxs[pos].setOpenAsHyperStack(true);
 									impPrxs[pos].setStack(impPrxs[pos].getStack(), outputWavelengths,
@@ -5312,7 +5316,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									impPrys[pos].getRoiManager().dispose();
 									impPrys[pos].setRoiManager(null);
 									impPrys[pos].setStack("3DProjY_Decon-Fuse_"
-											+ impAs[pos].getTitle().split(":")[0], dfProjYmfivs);
+											+ impAs[pos].getTitle().split(":")[0], stackPrys[pos]);
 									impPrys[pos].setFileInfo(new FileInfo());
 									impPrys[pos].getCalibration().setUnit(impDF1s[pos].getCalibration().getUnit());
 									impPrys[pos].getCalibration().pixelWidth = impDF1s[pos].getCalibration().pixelWidth;
@@ -5321,7 +5325,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 									impPrys[pos].getOriginalFileInfo().directory = pryPath+File.separator;
 									int stkNSlicesPry = impPrys[pos].getStackSize();
-									int zSlicesPry = dfProjYmfivs.getFivStacks().get(0)
+									int zSlicesPry = stackPrys[pos].getFivStacks().get(0)
 											.getSize();
 									impPrys[pos].setOpenAsHyperStack(true);
 									impPrys[pos].setStack(impPrys[pos].getStack(), outputWavelengths,
