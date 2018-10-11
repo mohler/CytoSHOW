@@ -758,6 +758,11 @@ public class TiffDecoder {
 		Vector info;
 //		IJ.log(directory+"***"+name);
 		if (in==null) {
+			int waitCount=0;
+			while (!(new File(directory+name).canRead()) && waitCount<100){
+				IJ.wait(100);
+				waitCount++;
+			}
 			in = new RandomAccessStream(new RandomAccessFile(new File(directory+name), "r"));
 		}
 		info = new Vector();
