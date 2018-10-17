@@ -795,21 +795,22 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						impAs[pos].setOpenAsHyperStack(true);
 						impAs[pos].setDimensions(cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim), zDim, sizeA/((cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim))*zDim));
 
-						impAs[pos] = new CompositeImage(impAs[pos]){
-							@Override
-							public synchronized void flush(){
-								ObjectOutputStream oos;
-								try {
-									oos = new ObjectOutputStream(new FileOutputStream(new RandomAccessFile(stackAs[fPos].infoDir+"touchedFileFIs"+fPos+"A.inf","rw").getFD()));
-									oos.writeObject(((MultiFileInfoVirtualStack) getImageStack()).infoCollectorArrayList);
-									oos.close();
-								} catch (IOException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-								super.flush();
-							}
-						};
+						impAs[pos] = new CompositeImage(impAs[pos]);
+//						{
+//							@Override
+//							public synchronized void flush(){
+//								ObjectOutputStream oos;
+//								try {
+//									oos = new ObjectOutputStream(new FileOutputStream(new RandomAccessFile(stackAs[fPos].infoDir+"touchedFileFIs"+fPos+"A.inf","rw").getFD()));
+//									oos.writeObject(((MultiFileInfoVirtualStack) getImageStack()).infoCollectorArrayList);
+//									oos.close();
+//								} catch (IOException e) {
+//									// TODO Auto-generated catch block
+//									e.printStackTrace();
+//								}
+//								super.flush();
+//							}
+//						};
 						while (!impAs[pos].isComposite()) {
 							IJ.wait(100);
 						}
@@ -830,21 +831,22 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						impBs[pos].setOpenAsHyperStack(true);
 						impBs[pos].setDimensions(cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim), zDim, sizeB/((cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim))*zDim));
 
-						impBs[pos] = new CompositeImage(impBs[pos]){
-							@Override
-							public synchronized void flush(){
-								ObjectOutputStream oos;
-								try {
-									oos = new ObjectOutputStream(new FileOutputStream(new RandomAccessFile(stackBs[fPos].infoDir+"touchedFileFIs"+fPos+"B.inf","rw").getFD()));
-									oos.writeObject(((MultiFileInfoVirtualStack) getImageStack()).infoCollectorArrayList);
-									oos.close();
-								} catch (IOException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-								super.flush();
-							}
-						};
+						impBs[pos] = new CompositeImage(impBs[pos]);
+//						{
+//							@Override
+//							public synchronized void flush(){
+//								ObjectOutputStream oos;
+//								try {
+//									oos = new ObjectOutputStream(new FileOutputStream(new RandomAccessFile(stackBs[fPos].infoDir+"touchedFileFIs"+fPos+"B.inf","rw").getFD()));
+//									oos.writeObject(((MultiFileInfoVirtualStack) getImageStack()).infoCollectorArrayList);
+//									oos.close();
+//								} catch (IOException e) {
+//									// TODO Auto-generated catch block
+//									e.printStackTrace();
+//								}
+//								super.flush();
+//							}
+//						};
 						while (!impBs[pos].isComposite()) {
 							IJ.wait(100);
 						}

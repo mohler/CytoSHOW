@@ -423,57 +423,58 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 	public void getSavedExtractedFileInfos(int pos) {
 		if (new File(infoDir+"touchedFileFIs"+pos+(isViewB?"B":"A")+".inf").canRead()) {
-			ObjectInputStream ois;
-			try {
-				ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(infoDir+"touchedFileFIs"+pos+(isViewB?"B":"A")+".inf")));
-				try {
-					savedInfoCollectorArrayList  = (ArrayList<FileInfo[]>) ois.readObject();
-					infoLoadReport = "success";
-
-				} catch (ClassNotFoundException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}finally{
-					ois.close();
-				}
-			} catch (FileNotFoundException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}finally{
-			}
-			if (savedInfoCollectorArrayList!=null){
-				for(FileInfo[]  infoArray:savedInfoCollectorArrayList){
-					for(FileInfo fi:infoArray){
-						fi.directory= "";
-						String[] filePathChunks =  fi.fileName.replace("\\\\", "\\").split(Pattern.quote(File.separator));
-						int fpcl = filePathChunks.length;
-						String triplechunk = filePathChunks[fpcl-3]+File.separator+
-								filePathChunks[fpcl-2]+File.separator+
-								filePathChunks[fpcl-1];
-//						IJ.log(triplechunk);
-//						IJ.log(fi.fileName);
-						for(String cumTiff:cumulativeTiffFileArray){
-							String[] cumPathChunks =  cumTiff.replace("\\\\", "\\").split(Pattern.quote(File.separator));
-							int cpcl = cumPathChunks.length;
-							String cumtriplechunk = cumPathChunks[cpcl-3]+File.separator+
-									cumPathChunks[cpcl-2]+File.separator+
-									cumPathChunks[cpcl-1];
-							
-							if (cumtriplechunk.endsWith(triplechunk)){
-								fi.fileName=cumTiff;
-							}
-						}
-					}
-				}
-				infoCollectorArrayList = savedInfoCollectorArrayList;
-				for (int stkNum=0;stkNum<fivStacks.size();stkNum++){
-					fivStacks.get(stkNum).infoArray = infoCollectorArrayList.get(stkNum);
-				}
-			}
-			infoLoadReport = "failure";
+			
+//			ObjectInputStream ois;
+//			try {
+//				ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(infoDir+"touchedFileFIs"+pos+(isViewB?"B":"A")+".inf")));
+//				try {
+//					savedInfoCollectorArrayList  = (ArrayList<FileInfo[]>) ois.readObject();
+//					infoLoadReport = "success";
+//
+//				} catch (ClassNotFoundException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}finally{
+//					ois.close();
+//				}
+//			} catch (FileNotFoundException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			} catch (IOException e1) {
+//				// TODO Auto-generated catch block
+//				e1.printStackTrace();
+//			}finally{
+//			}
+//			if (savedInfoCollectorArrayList!=null){
+//				for(FileInfo[]  infoArray:savedInfoCollectorArrayList){
+//					for(FileInfo fi:infoArray){
+//						fi.directory= "";
+//						String[] filePathChunks =  fi.fileName.replace("\\\\", "\\").split(Pattern.quote(File.separator));
+//						int fpcl = filePathChunks.length;
+//						String triplechunk = filePathChunks[fpcl-3]+File.separator+
+//								filePathChunks[fpcl-2]+File.separator+
+//								filePathChunks[fpcl-1];
+////						IJ.log(triplechunk);
+////						IJ.log(fi.fileName);
+//						for(String cumTiff:cumulativeTiffFileArray){
+//							String[] cumPathChunks =  cumTiff.replace("\\\\", "\\").split(Pattern.quote(File.separator));
+//							int cpcl = cumPathChunks.length;
+//							String cumtriplechunk = cumPathChunks[cpcl-3]+File.separator+
+//									cumPathChunks[cpcl-2]+File.separator+
+//									cumPathChunks[cpcl-1];
+//							
+//							if (cumtriplechunk.endsWith(triplechunk)){
+//								fi.fileName=cumTiff;
+//							}
+//						}
+//					}
+//				}
+//				infoCollectorArrayList = savedInfoCollectorArrayList;
+//				for (int stkNum=0;stkNum<fivStacks.size();stkNum++){
+//					fivStacks.get(stkNum).infoArray = infoCollectorArrayList.get(stkNum);
+//				}
+//			}
+//			infoLoadReport = "failure";
 
 		} else {
 			infoLoadReport = "failure";
