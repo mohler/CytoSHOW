@@ -343,7 +343,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 	private File outputTmxFile;
 	private File outputDCFile;
 	private File saveFile;
-	private File deconmfivsPathFile;
 	private MultiFileInfoVirtualStack[] stackDFs;
 	private MultiFileInfoVirtualStack[] stackPrxs;
 	private MultiFileInfoVirtualStack[] stackPrys;
@@ -4490,6 +4489,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 		
 		Thread deconFuseThread = new Thread(new Runnable(){
 
+			private File output3DxFile;
+			private File output3DyFile;
+			private File outputMaxxFile;
+			private File outputMaxyFile;
+			private File outputMaxzFile;
+
 			public void run() {		
 				for (int f = 1; f <= tDim; f++) {
 
@@ -4697,7 +4702,17 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								//							if (diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
 								//								threeDorientationIndex =  "-1";
 								//							}							
+
+								outputDCFile = new File(savePath + "RegDecon" + File.separator + "Decon" + File.separator + "Decon_1.tif");
+								output3DxFile = new File(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Xaxis"+ File.separator +"MP_3D_Xaxis_1.tif");
+								output3DyFile = new File(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Yaxis"+ File.separator +"MP_3D_Yaxis_1.tif");
+								outputMaxxFile = new File(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_XProj"+ File.separator +"MP_YZ_1.tif");
+								outputMaxyFile = new File(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_YProj"+ File.separator +"MP_ZX_1.tif");
+								outputMaxzFile = new File(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_ZProj"+ File.separator +"MP_XY_1.tif");
+
+								
 								if (wavelengths == 1) {
+									
 									if (!new File(savePath + "CropBkgdSub" + File.separator  + "SPIMA"+pos+"-"+f+"-1_1.tif").canRead() ||
 											!new File(savePath + "CropBkgdSub" + File.separator  + "SPIMB"+pos+"-"+f+"-1_1.tif").canRead()){ 
 										IJ.wait(100);
@@ -4753,14 +4768,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									}
 									try {
 										int waitCount = 0;
-										while (!(new File(savePath + "RegDecon" + File.separator + "Decon" + File.separator + "Decon_1.tif").canRead()) && waitCount<100) {
+										while (!(outputDCFile.canRead()) && waitCount<100) {
 											IJ.wait(100);
 											waitCount++;
 										}
 
-										if(new File(savePath + "RegDecon" + File.separator + "Decon" + File.separator + "Decon_1.tif").canRead()) {
+										if(outputDCFile.canRead()) {
 											Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon" + File.separator + "Decon_1.tif"),
-													Paths.get(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution"+ keyChannel + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif"), StandardCopyOption.REPLACE_EXISTING);
+													Paths.get(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution1" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif"), StandardCopyOption.REPLACE_EXISTING);
 
 											//											IJ.runMacro("waitForUser;");
 											IJ.log(""+ pos+ "old=> " + lastMatrix[pos]);
@@ -4774,10 +4789,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 										int k = f;
 
-										if (new File(prxPath+File.separator+"Color1"+File.separator+"proj_"+k+"_1.tif").canRead() && new File(pryPath+File.separator+"Color1"+File.separator+"proj_"+k+"_1.tif").canRead()
-												&&  (wavelengths >= 2 && new File(prxPath+File.separator+"Color2"+File.separator+"proj_"+k+"_1.tif").canRead() && new File(pryPath+File.separator+"Color2"+File.separator+"proj_"+k+"_1.tif").canRead()))
-											continue;
-										else {
+										waitCount = 0;
+										while (!(output3DxFile.canRead() && output3DyFile.canRead()) && waitCount<100) {
+											IJ.wait(100);
+											waitCount++;
+										}
+
+										if (output3DxFile.canRead() && output3DyFile.canRead()) {
 											try {
 												Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Xaxis"+ File.separator +"MP_3D_Xaxis_1.tif"),
 														Paths.get(prxPath+File.separator +"Color1"+ File.separator +"projX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
@@ -4880,49 +4898,51 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 									try {
 										int waitCount = 0;
-										outputDCFile = new File(savePath + "RegDecon" + File.separator + "Decon" + File.separator + "Decon_1.tif");
-										while (!(dc1File.canRead()) && waitCount<100) {
+										while (!(outputDCFile.canRead()) && waitCount<100) {
 											IJ.wait(100);
 											waitCount++;
 										}
+
 										if(outputDCFile.canRead()) {
 											Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon" + File.separator + "Decon_1.tif"),
 													Paths.get(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution"+ keyChannel + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif"), StandardCopyOption.REPLACE_EXISTING);
 
+											//											IJ.runMacro("waitForUser;");
 											IJ.log(""+ pos+ "old=> " + lastMatrix[pos]);
-											outputTmxFile = new File("" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
-											if (outputTmxFile.canRead()) {
+											if (new File("" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").canRead()) {
 												lastMatrix[pos] = IJ.openAsString("" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
 												IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx");
 												IJ.log(""+ pos+ "new=> " + lastMatrix[pos]);
 											}
+
 										}
-
-
 
 										int k = f;
 
-										//									if (prxColor1File.canRead() && pryColor1File.canRead()
-										//											&&  (wavelengths == 2 && prxColor2File.canRead() && pryColor2File.canRead()))
-										//										continue;
-										//									else {
-										try {
-											Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Xaxis"+ File.separator +"MP_3D_Xaxis_1.tif"),
-													Paths.get(prxPath+File.separator +"Color"+ keyChannel+ File.separator +"projX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-											Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Yaxis"+ File.separator +"MP_3D_Yaxis_1.tif"),
-													Paths.get(pryPath+File.separator +"Color"+ keyChannel+ File.separator +"projY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-											Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_XProj"+ File.separator +"MP_YZ_1.tif"),
-													Paths.get(maxXPath+File.separator +"Color"+ keyChannel+ File.separator +"maxX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-											Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_YProj"+ File.separator +"MP_ZX_1.tif"),
-													Paths.get(maxYPath+File.separator +"Color"+ keyChannel+ File.separator +"maxY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-											Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_ZProj"+ File.separator +"MP_XY_1.tif"),
-													Paths.get(maxZPath+File.separator +"Color"+ keyChannel+ File.separator +"maxZ_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-										} catch (IOException e) {
-											// TODO Auto-generated catch block
-											e.printStackTrace();
+										waitCount = 0;
+										while (!(output3DxFile.canRead() && output3DyFile.canRead()) && waitCount<100) {
+											IJ.wait(100);
+											waitCount++;
 										}
 
-										//									}
+										if (output3DxFile.canRead() && output3DyFile.canRead()) {
+											try {
+												Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Xaxis"+ File.separator +"MP_3D_Xaxis_1.tif"),
+														Paths.get(prxPath+File.separator +"Color"+ keyChannel+ File.separator +"projX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+												Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Yaxis"+ File.separator +"MP_3D_Yaxis_1.tif"),
+														Paths.get(pryPath+File.separator +"Color"+ keyChannel+ File.separator +"projY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+												Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_XProj"+ File.separator +"MP_YZ_1.tif"),
+														Paths.get(maxXPath+File.separator +"Color"+ keyChannel+ File.separator +"maxX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+												Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_YProj"+ File.separator +"MP_ZX_1.tif"),
+														Paths.get(maxYPath+File.separator +"Color"+ keyChannel+ File.separator +"maxY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+												Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_ZProj"+ File.separator +"MP_XY_1.tif"),
+														Paths.get(maxZPath+File.separator +"Color"+ keyChannel+ File.separator +"maxZ_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+											} catch (IOException e) {
+												// TODO Auto-generated catch block
+												e.printStackTrace();
+											}
+
+										}
 
 									} catch (IOException e) {
 										// TODO Auto-generated catch block
@@ -4996,12 +5016,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									}
 									try {
 										int waitCount = 0;
-										while (!(dc1File.canRead()) && waitCount<100) {
+										while (!(outputDCFile.canRead()) && waitCount<100) {
 											IJ.wait(100);
 											waitCount++;
 										}
 
 										if(outputDCFile.canRead()) {
+											
 											Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon" + File.separator + "Decon_1.tif"),
 													Paths.get(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution"+ slaveChannel + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif"), StandardCopyOption.REPLACE_EXISTING);
 
@@ -5011,27 +5032,30 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 										int k = f;
 
-										//									if (new File(prxPath+File.separator+"Color1"+File.separator+"proj_"+k+"_1.tif").canRead() && new File(pryPath+File.separator+"Color1"+File.separator+"proj_"+k+"_1.tif").canRead()
-										//											&&  (wavelengths == 2 && new File(prxPath+File.separator+"Color2"+File.separator+"proj_"+k+"_1.tif").canRead() && new File(pryPath+File.separator+"Color2"+File.separator+"proj_"+k+"_1.tif").canRead()))
-										//										continue;
-										//									else {
-										try {
-											Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Xaxis"+ File.separator +"MP_3D_Xaxis_1.tif"),
-													Paths.get(prxPath+File.separator +"Color"+ slaveChannel+ File.separator +"projX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-											Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Yaxis"+ File.separator +"MP_3D_Yaxis_1.tif"),
-													Paths.get(pryPath+File.separator +"Color"+ slaveChannel+ File.separator +"projY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-											Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_XProj"+ File.separator +"MP_YZ_1.tif"),
-													Paths.get(maxXPath+File.separator +"Color"+ slaveChannel+ File.separator +"maxX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-											Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_YProj"+ File.separator +"MP_ZX_1.tif"),
-													Paths.get(maxYPath+File.separator +"Color"+ slaveChannel+ File.separator +"maxY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-											Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_ZProj"+ File.separator +"MP_XY_1.tif"),
-													Paths.get(maxZPath+File.separator +"Color"+ slaveChannel+ File.separator +"maxZ_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-										} catch (IOException e) {
-											// TODO Auto-generated catch block
-											e.printStackTrace();
+										waitCount = 0;
+										while (!(output3DxFile.canRead() && output3DyFile.canRead()) && waitCount<100) {
+											IJ.wait(100);
+											waitCount++;
 										}
 
-										//									}
+										if (output3DxFile.canRead() && output3DyFile.canRead()) {
+											try {
+												Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Xaxis"+ File.separator +"MP_3D_Xaxis_1.tif"),
+														Paths.get(prxPath+File.separator +"Color"+ slaveChannel+ File.separator +"projX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+												Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Yaxis"+ File.separator +"MP_3D_Yaxis_1.tif"),
+														Paths.get(pryPath+File.separator +"Color"+ slaveChannel+ File.separator +"projY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+												Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_XProj"+ File.separator +"MP_YZ_1.tif"),
+														Paths.get(maxXPath+File.separator +"Color"+ slaveChannel+ File.separator +"maxX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+												Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_YProj"+ File.separator +"MP_ZX_1.tif"),
+														Paths.get(maxYPath+File.separator +"Color"+ slaveChannel+ File.separator +"maxY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+												Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_ZProj"+ File.separator +"MP_XY_1.tif"),
+														Paths.get(maxZPath+File.separator +"Color"+ slaveChannel+ File.separator +"maxZ_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+											} catch (IOException e) {
+												// TODO Auto-generated catch block
+												e.printStackTrace();
+											}
+
+										}
 
 
 									} catch (IOException e) {
@@ -5081,12 +5105,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 						if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible() || posFrameEnd[pos]>impAs[pos].getNFrames()) {
 							doProcessing[pos] = false;
-							//							IJ.log("! no winorstackA "+f+" "+pos);
 							continue;
 						}
 						if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible() || posFrameEnd[pos]>impBs[pos].getNFrames()) {
 							doProcessing[pos] = false;
-							//							IJ.log("! no winorstackB "+f+" "+pos);
 							continue;
 						} 
 						if(go) {
@@ -5097,23 +5119,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							wasChannelA[pos] = impAs[pos].getChannel();
 							wasChannelB[pos] = impBs[pos].getChannel();
 						}
-						//						if (!IJ.shiftKeyDown()){
-						//							if (impPrxs[pos]!=null && impPrys[pos]!=null && impAs[pos].getNFrames() == impPrxs[pos].getNFrames() && impAs[pos].getNFrames() == impPrys[pos].getNFrames()
-						//									&& impBs[pos].getNFrames() == impPrxs[pos].getNFrames() && impBs[pos].getNFrames() == impPrys[pos].getNFrames()) {
-						//								doProcessing[pos] = false;
-						//								IJ.log("no unfinishedViewss "+f+" "+pos);
-						//								continue;
-						//							}
-						//						}
 
 						if (doProcessing[pos]) {
 
-							//							while (!(new File(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution"+ slaveChannel + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif").canRead()) ||
-							//									!(new File(prxPath+File.separator +"Color"+ slaveChannel+ File.separator +"projX_"+pos+"_"+f+".tif").canRead()) ||
-							//									!(new File(pryPath+File.separator +"Color"+ slaveChannel+ File.separator +"projY_"+pos+"_"+f+".tif").canRead()) ){
-							//								IJ.log("waiting for decon output "+pos+" "+f);
-							//								IJ.wait(100);
-							//							}
 							double pwA = impAs[pos].getCalibration().pixelWidth;
 							double phA = impAs[pos].getCalibration().pixelHeight;
 							double pdA = impAs[pos].getCalibration().pixelDepth;
@@ -5123,7 +5131,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 
 
-							if (impAs[pos].hasNullStack() || impAs[pos].getNFrames()<posFrameEnd[pos]-1)
+							if (impAs[pos].hasNullStack())
 								continue;
 							if (impBs[pos].hasNullStack())
 								continue;
@@ -5141,16 +5149,17 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								// SETUP OF WINDOWS SHOWING NEW AND PRE-EXISTING DECON OUTPUTS
 
 								stackDFs[pos] = null;
-								deconmfivsPathFile = new File(savePath+ File.separator + "RegDecon" + File.separator + "Pos" + pos);
+								File deconmfivsPathFile = new File(savePath+ File.separator + "RegDecon" + File.separator + "Pos" + pos);
 
 								if (deconmfivsPathFile.canRead() 
 										&& new File(savePath + File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution1").list(tiffNameFilter).length>0
 										){
 
-
-									while (new File(savePath + File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution1").list(tiffNameFilter).length
-											!= new File(savePath + File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution2").list(tiffNameFilter).length){
-										IJ.wait(100);
+									if (wavelengths == 2){
+										while (new File(savePath + File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution1").list(tiffNameFilter).length
+												!= new File(savePath + File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution2").list(tiffNameFilter).length){
+											IJ.wait(100);
+										}
 									}
 									stackDFs[pos] = new MultiFileInfoVirtualStack(savePath
 												+ File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution",
@@ -5169,11 +5178,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									impDF1s[pos].getCalibration().setUnit(impAs[pos].getCalibration().getUnit());
 									impDF1s[pos].getCalibration().pixelWidth = pwA;
 									impDF1s[pos].getCalibration().pixelHeight = phA;
-									impDF1s[pos].getCalibration().pixelDepth = pwA;
+									impDF1s[pos].getCalibration().pixelDepth = pwA;  //isotropic!
 
 									impDF1s[pos].getOriginalFileInfo().directory = dirOrOMETiffFinal;
 									int stkNSlicesDF = impDF1s[pos].getStackSize();
-									int zSlicesDF1 = stackDFs[pos].getFivStacks().get(0)
+									int zSlicesDF1 = ((MultiFileInfoVirtualStack)impDF1s[pos].getStack()).getFivStacks().get(0)
 											.getSize();
 									impDF1s[pos].setOpenAsHyperStack(true);
 									impDF1s[pos].setStack(impDF1s[pos].getStack(), outputWavelengths,
@@ -5197,7 +5206,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										ciDFs[pos].show();
 										WindowManager.group(impBs[pos], ciDFs[pos]);
 										ciDFs[pos].setPosition(1, ciDFs[pos].getNSlices()/2, ciDFs[pos].getNFrames());
-
+										win = ciDFs[pos].getWindow();
 									}else {
 										int oldW = win.getWidth();
 										int oldH = win.getHeight();
@@ -5235,13 +5244,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											IJ.wait(100);
 										}
 
-										while (new File(prxPath, "Color1").list(tiffNameFilter).length
-												!= new File(prxPath, "Color2").list(tiffNameFilter).length){
-											IJ.wait(100);
-										}
-										while (new File(pryPath, "Color1").list(tiffNameFilter).length
-												!= new File(pryPath, "Color2").list(tiffNameFilter).length){
-											IJ.wait(100);
+										if (wavelengths == 2){
+											while (new File(prxPath, "Color1").list(tiffNameFilter).length
+													!= new File(prxPath, "Color2").list(tiffNameFilter).length){
+												IJ.wait(100);
+											}
+											while (new File(pryPath, "Color1").list(tiffNameFilter).length
+													!= new File(pryPath, "Color2").list(tiffNameFilter).length){
+												IJ.wait(100);
+											}
 										}
 
 										stackPrxs[pos] = null;
@@ -5250,9 +5261,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										stackPrys[pos] = new MultiFileInfoVirtualStack(pryPath+File.separator, "Color", false);
 
 									}
-									//								dfMaxXmfivs = new MultiFileInfoVirtualStack(maxXPath+File.separator, "Color", false);
-									//								dfMaxYmfivs = new MultiFileInfoVirtualStack(maxYPath+File.separator, "Color", false);
-									//								dfMaxZmfivs = new MultiFileInfoVirtualStack(maxZPath+File.separator, "Color", false);
 
 									if (stackPrxs[pos]!=null && stackPrxs[pos].getSize() > 0 && (impPrxs[pos]==null || stackPrxs[pos].getSize() > impPrxs[pos].getStack().getSize())) {
 										impPrxs[pos] = new ImagePlus();
@@ -5269,7 +5277,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 										impPrxs[pos].getOriginalFileInfo().directory = prxPath+File.separator;
 										int stkNSlicesPrx = impPrxs[pos].getStackSize();
-										int zSlicesPrx = stackPrxs[pos].getFivStacks().get(0)
+										int zSlicesPrx = ((MultiFileInfoVirtualStack)impPrxs[pos].getStack()).getFivStacks().get(0)
 												.getSize();
 										impPrxs[pos].setOpenAsHyperStack(true);
 										impPrxs[pos].setStack(impPrxs[pos].getStack(), outputWavelengths,
@@ -5280,7 +5288,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										}
 
 										ciPrxs[pos] = new CompositeImage(impPrxs[pos]);
-										ciPrxs[pos].setPosition(1, ciPrxs[pos].getNSlices()/2, ciPrxs[pos].getNFrames());
+										ciPrxs[pos].setPosition(1, 1, ciPrxs[pos].getNFrames());
 
 										if (wavelengths > 1)
 											ciPrxs[pos].setMode(CompositeImage.COMPOSITE);
@@ -5299,7 +5307,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										if (prjXwin==null) {
 											ciPrxs[pos].show();
 											WindowManager.group(ciDFs[pos], ciPrxs[pos]);
-											ciPrxs[pos].setPosition(1, ciPrxs[pos].getNSlices()/2, ciPrxs[pos].getNFrames());
+											ciPrxs[pos].setPosition(1, 1, ciPrxs[pos].getNFrames());
 										} else {
 											oldW = prjXwin.getWidth();
 											oldH = prjXwin.getHeight();
@@ -5347,7 +5355,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 										impPrys[pos].getOriginalFileInfo().directory = pryPath+File.separator;
 										int stkNSlicesPry = impPrys[pos].getStackSize();
-										int zSlicesPry = stackPrys[pos].getFivStacks().get(0)
+										int zSlicesPry = ((MultiFileInfoVirtualStack)impPrys[pos].getStack()).getFivStacks().get(0)
 												.getSize();
 										impPrys[pos].setOpenAsHyperStack(true);
 										impPrys[pos].setStack(impPrys[pos].getStack(), outputWavelengths,
@@ -5358,7 +5366,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										}
 
 										ciPrys[pos] = new CompositeImage(impPrys[pos]);
-										ciPrys[pos].setPosition(1, ciPrys[pos].getNSlices()/2, ciPrys[pos].getNFrames());
+										ciPrys[pos].setPosition(1, 1, ciPrys[pos].getNFrames());
 
 
 										if (wavelengths > 1)
@@ -5378,7 +5386,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										if (prjYwin==null) {
 											ciPrys[pos].show();
 											WindowManager.group(ciPrxs[pos], ciPrys[pos]);
-											ciPrys[pos].setPosition(1, ciPrys[pos].getNSlices()/2, ciPrys[pos].getNFrames());
+											ciPrys[pos].setPosition(1, 1, ciPrys[pos].getNFrames());
 										} else {
 											oldW = prjYwin.getWidth();
 											oldH = prjYwin.getHeight();
@@ -5412,12 +5420,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									////////								
 									if (lineageDecons){
 
-										ImagePlus currentDeconResultImp = ciDFs[pos];	
 										LUT[] impLUTs = null;
 										int greenMax = 0;
 										int redMax = 0;
-										if (currentDeconResultImp.isComposite()) {
-											impLUTs = (((CompositeImage)currentDeconResultImp).getLuts());
+										if (ciDFs[pos].isComposite()) {
+											impLUTs = (((CompositeImage)ciDFs[pos]).getLuts());
 											greenMax = (int) impLUTs[0].max;
 											redMax = (int) impLUTs[1].max;
 										}
@@ -5426,9 +5433,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										String sourceDir = savePath;
 										String outDir = outputDir+ File.separator ;
 										String[] sourceFileList = new File(sourceDir).list();
-										currentDeconResultImp.killRoi();
+										ciDFs[pos].killRoi();
 
-										Roi theROI = new Roi(0,0,currentDeconResultImp.getWidth(),currentDeconResultImp.getHeight());
+										Roi theROI = new Roi(0,0,ciDFs[pos].getWidth(),ciDFs[pos].getHeight());
 										int type = Roi.RECTANGLE ;
 										boolean flipStack = false;
 
@@ -5436,11 +5443,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 										} else {
 
-											String title = currentDeconResultImp.getTitle();
+											String title = ciDFs[pos].getTitle();
 											String savetitle = title.replace(":","_").replace(" ","").replace("_dummy","");
 											String savePath = outDir+savetitle;
 
-											//										IJ.saveAs(currentDeconResultImp, "Selection", savePath+"originalSNF.roi");
 											int[] xpoints = theROI.getPolygon().xpoints;
 											int[] ypoints = theROI.getPolygon().ypoints;
 											int npoints = xpoints.length;
@@ -5469,13 +5475,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 //																/
 //																(new Line(xpoints[0], ypoints[0], xpoints[1], ypoints[1])).getLength()
 //																);
-//														currentDeconResultImp.setRoi(ellipseRoi, false);
+//														ciDFs[pos].setRoi(ellipseRoi, false);
 //														theROI = ellipseRoi;
-//														IJ.saveAs(currentDeconResultImp, "Selection", savePath +  "ellipseSNF.roi");
+//														IJ.saveAs(ciDFs[pos], "Selection", savePath +  "ellipseSNF.roi");
 //
 //														Roi rectRoi = new Roi(ellipseRoi.getBounds());
-//														currentDeconResultImp.setRoi(rectRoi, false);
-//														IJ.saveAs(currentDeconResultImp, "Selection", savePath + "rectangleSNF.roi");
+//														ciDFs[pos].setRoi(rectRoi, false);
+//														IJ.saveAs(ciDFs[pos], "Selection", savePath + "rectangleSNF.roi");
 //
 //													}else {
 //														angle = new Line(xpoints[0], ypoints[0], xpoints[2], ypoints[2]).getAngle();
@@ -5486,17 +5492,17 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 //											}
 
 
-											int wasC = currentDeconResultImp.getChannel();
-											int wasZ = currentDeconResultImp.getSlice();
-											int wasT = currentDeconResultImp.getFrame();
+											int wasC = ciDFs[pos].getChannel();
+											int wasZ = ciDFs[pos].getSlice();
+											int wasT = ciDFs[pos].getFrame();
 
-											int wavelengths = currentDeconResultImp.getNChannels();
+											int wavelengths = ciDFs[pos].getNChannels();
 
 //											Roi theRotatedROI = RoiRotator.rotate(theROI, angle);
 											final String subdir = savetitle;
 											new File(outDir+subdir).mkdirs();
 											final String impParameterPath = outDir+subdir+File.separator+savetitle+"_SNparamsFile.txt";
-											final int endPoint = currentDeconResultImp.getNFrames();
+											final int endPoint = ciDFs[pos].getNFrames();
 											int stackWidth=0;
 											int stackHeight=0;
 
@@ -5504,16 +5510,16 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 												boolean paramsWritten = false;
 												if (!((new File(outDir+subdir+"/aaa_t"+frame+".tif").canRead())&&(new File(outDir+subdir+"Skipped"+"/aaa_t"+frame+".tif").canRead()))) {
 
-													ImageStack stack3 = new ImageStack((int)currentDeconResultImp.getProcessor().getWidth()*2, (int)currentDeconResultImp.getProcessor().getHeight());
-													ImageStack stack3skipped = new ImageStack((int)currentDeconResultImp.getProcessor().getWidth()*2, (int)currentDeconResultImp.getProcessor().getHeight());
+													ImageStack stack3 = new ImageStack((int)ciDFs[pos].getProcessor().getWidth()*2, (int)ciDFs[pos].getProcessor().getHeight());
+													ImageStack stack3skipped = new ImageStack((int)ciDFs[pos].getProcessor().getWidth()*2, (int)ciDFs[pos].getProcessor().getHeight());
 
-													currentDeconResultImp.getWindow().setEnabled(false);
+													ciDFs[pos].getWindow().setEnabled(false);
 
 
-													for (int i = 1; i <= currentDeconResultImp.getNSlices(); i++) {
-														currentDeconResultImp.setPositionWithoutUpdate(1, i, frame);
+													for (int i = 1; i <= ciDFs[pos].getNSlices(); i++) {
+														ciDFs[pos].setPositionWithoutUpdate(1, i, frame);
 
-														ImageProcessor ip1 = currentDeconResultImp.getProcessor().duplicate();
+														ImageProcessor ip1 = ciDFs[pos].getProcessor().duplicate();
 
 														int[] ipHis = ip1.getHistogram();
 														double ipHisMode = 0.0;
@@ -5547,8 +5553,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 
 														if (wavelengths >= 2) {
-															currentDeconResultImp.setPositionWithoutUpdate(wavelengths, i, frame);
-															ImageProcessor ip2 = currentDeconResultImp.getProcessor().duplicate();
+															ciDFs[pos].setPositionWithoutUpdate(wavelengths, i, frame);
+															ImageProcessor ip2 = ciDFs[pos].getProcessor().duplicate();
 															ipHis = ip2.getHistogram();
 															ipHisMode = 0.0;
 															ipHisLength = ipHis.length;
@@ -5592,7 +5598,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 													}
 
 
-													currentDeconResultImp.getWindow().setEnabled(true);
+													ciDFs[pos].getWindow().setEnabled(true);
 
 													ImagePlus frameRGsplitImp = new ImagePlus("Ch12hisSubCrop",stack3);
 													ImagePlus frameRGsplitImpSkipped = new ImagePlus("Ch12hisSubCrop",stack3skipped);
@@ -5628,7 +5634,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 												}
 											}
-											currentDeconResultImp.setPosition(wasC, wasZ, wasT);
+											ciDFs[pos].setPosition(wasC, wasZ, wasT);
 
 											IJ.saveString(IJ.openAsString(paramsPath).replaceAll("(.*end_time=)\\d+(;.*)", "$1"+endPoint+"$2")
 													.replaceAll("(.*ROI=)true(;.*)", "$1false$2")
