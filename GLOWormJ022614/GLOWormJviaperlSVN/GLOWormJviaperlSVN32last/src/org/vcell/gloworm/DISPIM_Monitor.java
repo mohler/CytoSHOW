@@ -5652,7 +5652,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								}
 							}
 						}
-						if (ciDFs[pos]==null || posFrameEnd[pos] > ciDFs[pos].getNFrames()) {
+						if (doProcessing[pos] &&(ciDFs[pos]==null || posFrameEnd[pos] > ciDFs[pos].getNFrames())) {
 							posAllDone=false;
 						}
 					}
