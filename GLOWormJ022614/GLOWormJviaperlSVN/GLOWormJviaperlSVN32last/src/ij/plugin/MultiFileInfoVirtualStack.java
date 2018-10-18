@@ -313,8 +313,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			if (dir.length() > 0 && !dir.endsWith(File.separator))
 				dir = dir + File.separator;
 
-//			if (monitoringDecon)
-			if (true)
+			if (monitoringDecon)
+//			if (true)
 				goDirFileList = StringSorter.sortNumericallyViaRegex(goDirFileList);
 //			String lastFileNameOfBunch = "";
 
