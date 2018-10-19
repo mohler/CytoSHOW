@@ -2358,7 +2358,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										prjXwin = ciPrxs[pos].getWindow();
 									}
 									ciPrxs[pos] = new CompositeImage(impPrxs[pos]);
-									ciPrxs[pos].setPosition(1, ciPrxs[pos].getNSlices()/2, ciPrxs[pos].getNFrames());
+									ciPrxs[pos].setPosition(1, 1, ciPrxs[pos].getNFrames());
 
 									impPrys[pos] = new ImagePlus();
 									impPrys[pos].getRoiManager().setImagePlus(null);
@@ -2384,7 +2384,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										prjYwin = ciPrys[pos].getWindow();
 									}
 									ciPrys[pos] = new CompositeImage(impPrys[pos]);
-									ciPrys[pos].setPosition(1, ciPrys[pos].getNSlices()/2, ciPrys[pos].getNFrames());
+									ciPrys[pos].setPosition(1, 1, ciPrys[pos].getNFrames());
 
 									if (wavelengths > 1)
 										ciPrxs[pos].setMode(CompositeImage.COMPOSITE);
@@ -2393,7 +2393,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									if (prjXwin==null) {
 										ciPrxs[pos].show();
 										WindowManager.group(ciDFs[pos], ciPrxs[pos]);
-										ciPrxs[pos].setPosition(1, ciPrxs[pos].getNSlices()/2, ciPrxs[pos].getNFrames());
+										ciPrxs[pos].setPosition(1, 1, ciPrxs[pos].getNFrames());
 									} else {
 										int oldW = prjXwin.getWidth();
 										int oldH = prjXwin.getHeight();
@@ -2429,7 +2429,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									if (prjYwin==null) {
 										ciPrys[pos].show();
 										WindowManager.group(ciPrxs[pos], ciPrys[pos]);
-										ciPrys[pos].setPosition(1, ciPrys[pos].getNSlices()/2, ciPrys[pos].getNFrames());
+										ciPrys[pos].setPosition(1, 1, ciPrys[pos].getNFrames());
 									} else {
 										int oldW = prjYwin.getWidth();
 										int oldH = prjYwin.getHeight();
