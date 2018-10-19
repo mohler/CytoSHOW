@@ -5145,24 +5145,25 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								}
 							};
 
-							saveFile = new File(openPath);
+							String openDFPath = savePath;
+							saveFile = new File(openDFPath );
 							if ((saveFile).canRead()) {
 								// SETUP OF WINDOWS SHOWING NEW AND PRE-EXISTING DECON OUTPUTS
 
 								stackDFs[pos] = null;
-								File deconmfivsPathFile = new File(openPath+ File.separator + "RegDecon" + File.separator + "Pos" + pos);
+								File deconmfivsPathFile = new File(openDFPath+ File.separator + "RegDecon" + File.separator + "Pos" + pos);
 
 								if (deconmfivsPathFile.canRead() 
-										&& new File(openPath + File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution1").list(tiffNameFilter).length>0
+										&& new File(openDFPath + File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution1").list(tiffNameFilter).length>0
 										){
 
 									if (wavelengths == 2){
-										while (new File(openPath + File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution1").list(tiffNameFilter).length
-												!= new File(openPath + File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution2").list(tiffNameFilter).length){
+										while (new File(openDFPath + File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution1").list(tiffNameFilter).length
+												!= new File(openDFPath + File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution2").list(tiffNameFilter).length){
 											IJ.wait(100);
 										}
 									}
-									stackDFs[pos] = new MultiFileInfoVirtualStack(openPath
+									stackDFs[pos] = new MultiFileInfoVirtualStack(openDFPath
 												+ File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution",
 												false);
 									
@@ -5242,7 +5243,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										//									win.setVisible(true);	
 									}
 
-
+									String openPrxPath = openDFPath  + "ProjX_"+("Decon-Fuse_"
+											+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
+									String openPryPath = openDFPath  + "ProjY_"+("Decon-Fuse_"
+											+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
 									if (new File(openPryPath).canRead() ){
 										while (new File(openPryPath, "Color1").list(tiffNameFilter).length<1){
 											IJ.wait(100);
@@ -5445,8 +5449,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											redMax = (int) impLUTs[1].max;
 										}
 
-										String outputDir = openPath;
-										String sourceDir = openPath;
+										String outputDir = openDFPath;
+										String sourceDir = openDFPath;
 										String outDir = outputDir+ File.separator ;
 										String[] sourceFileList = new File(sourceDir).list();
 										ciDFs[pos].killRoi();
@@ -5461,7 +5465,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 											String title = ciDFs[pos].getTitle();
 											String savetitle = title.replace(":","_").replace(" ","").replace("_dummy","");
-											String openPath = outDir+savetitle;
+											String openingPath = outDir+savetitle;
 
 											int[] xpoints = theROI.getPolygon().xpoints;
 											int[] ypoints = theROI.getPolygon().ypoints;
