@@ -4546,10 +4546,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						}
 
 						if (doProcessing[pos]) {
-							while (!(new File(savePath + "CropBkgdSub" + File.separator + "SPIMA"+pos+"-"+f+"-1_1.tif").canRead()) ||
-									!(new File(savePath + "CropBkgdSub" + File.separator + "SPIMA"+pos+"-"+f+"-2_1.tif").canRead()) ||
-									!(new File(savePath + "CropBkgdSub" + File.separator + "SPIMB"+pos+"-"+f+"-1_1.tif").canRead()) ||
-									!(new File(savePath + "CropBkgdSub" + File.separator + "SPIMB"+pos+"-"+f+"-2_1.tif").canRead()) ){
+							String saveDFPath = savePath;
+							while (!(new File(saveDFPath  + "CropBkgdSub" + File.separator + "SPIMA"+pos+"-"+f+"-1_1.tif").canRead()) ||
+									!(new File(saveDFPath + "CropBkgdSub" + File.separator + "SPIMA"+pos+"-"+f+"-2_1.tif").canRead()) ||
+									!(new File(saveDFPath + "CropBkgdSub" + File.separator + "SPIMB"+pos+"-"+f+"-1_1.tif").canRead()) ||
+									!(new File(saveDFPath + "CropBkgdSub" + File.separator + "SPIMB"+pos+"-"+f+"-2_1.tif").canRead()) ){
 								IJ.wait(100);
 							}
 							double pwA = impAs[pos].getCalibration().pixelWidth;
@@ -4568,8 +4569,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 
 							int fi=0;
-							dc1File = new File(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution1" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif");
-							dc2File = new File(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution2" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif");
+							dc1File = new File(saveDFPath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution1" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif");
+							dc2File = new File(saveDFPath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution2" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif");
 
 							if ((wavelengths ==1 && dc1File.canRead())
 									||
@@ -4613,9 +4614,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 
 								for (fi=1; fi<=f; fi++) {
-									tmxFile = new File("" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx");
+									tmxFile = new File("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx");
 									if (tmxFile.canRead() ){
-										lastMatrix[pos] = IJ.openAsString("" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx");
+										lastMatrix[pos] = IJ.openAsString("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx");
 										break;
 									}
 								}
@@ -4660,24 +4661,24 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									}
 								}
 
-								prxPath = savePath  + "ProjX_"+("Decon-Fuse_"
+								String savePrxPath = saveDFPath  + "ProjX_"+("Decon-Fuse_"
 										+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
-								pryPath = savePath  + "ProjY_"+("Decon-Fuse_"
+								String savePryPath = saveDFPath  + "ProjY_"+("Decon-Fuse_"
 										+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
-								maxXPath = savePath  + "MaxX_"+("Decon-Fuse_"
+								String saveMaxXPath = saveDFPath  + "MaxX_"+("Decon-Fuse_"
 										+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
-								maxYPath = savePath  + "MaxY_"+("Decon-Fuse_"
+								String saveMaxYPath = saveDFPath  + "MaxY_"+("Decon-Fuse_"
 										+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
-								maxZPath = savePath  + "MaxZ_"+("Decon-Fuse_"
+								String saveMaxZPath = saveDFPath  + "MaxZ_"+("Decon-Fuse_"
 										+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
 
-								//						IJ.log(prxPath);
-								//						IJ.log(pryPath);
-								prxColor1File = new File(prxPath+File.separator+"Color1");
-								pryColor1File = new File(pryPath+File.separator+"Color1");
-								maxXColor1File = new File(maxXPath+File.separator+"Color1");
-								maxYColor1File = new File(maxYPath+File.separator+"Color1");
-								maxZColor1File = new File(maxZPath+File.separator+"Color1");
+								//						IJ.log(savePrxPath);
+								//						IJ.log(savePryPath);
+								prxColor1File = new File(savePrxPath+File.separator+"Color1");
+								pryColor1File = new File(savePryPath+File.separator+"Color1");
+								maxXColor1File = new File(saveMaxXPath+File.separator+"Color1");
+								maxYColor1File = new File(saveMaxYPath+File.separator+"Color1");
+								maxZColor1File = new File(saveMaxZPath+File.separator+"Color1");
 								prxColor1File.mkdirs();
 								pryColor1File.mkdirs();
 								maxXColor1File.mkdirs();
@@ -4685,11 +4686,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								maxZColor1File.mkdirs();
 
 								if (wavelengths >= 2) {
-									prxColor2File = new File(prxPath+File.separator+"Color2");
-									pryColor2File = new File(pryPath+File.separator+"Color2");
-									maxXColor2File = new File(maxXPath+File.separator+"Color2");
-									maxYColor2File = new File(maxYPath+File.separator+"Color2");
-									maxZColor2File = new File(maxZPath+File.separator+"Color2");
+									prxColor2File = new File(savePrxPath+File.separator+"Color2");
+									pryColor2File = new File(savePryPath+File.separator+"Color2");
+									maxXColor2File = new File(saveMaxXPath+File.separator+"Color2");
+									maxYColor2File = new File(saveMaxYPath+File.separator+"Color2");
+									maxZColor2File = new File(saveMaxZPath+File.separator+"Color2");
 									prxColor2File.mkdirs();
 									pryColor2File.mkdirs(); 
 									maxXColor2File.mkdirs();
@@ -4703,32 +4704,32 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								//								threeDorientationIndex =  "-1";
 								//							}							
 
-								outputDCFile = new File(savePath + "RegDecon" + File.separator + "Decon" + File.separator + "Decon_1.tif");
-								output3DxFile = new File(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Xaxis"+ File.separator +"MP_3D_Xaxis_1.tif");
-								output3DyFile = new File(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Yaxis"+ File.separator +"MP_3D_Yaxis_1.tif");
-								outputMaxxFile = new File(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_XProj"+ File.separator +"MP_YZ_1.tif");
-								outputMaxyFile = new File(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_YProj"+ File.separator +"MP_ZX_1.tif");
-								outputMaxzFile = new File(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_ZProj"+ File.separator +"MP_XY_1.tif");
+								outputDCFile = new File(saveDFPath + "RegDecon" + File.separator + "Decon" + File.separator + "Decon_1.tif");
+								output3DxFile = new File(saveDFPath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Xaxis"+ File.separator +"MP_3D_Xaxis_1.tif");
+								output3DyFile = new File(saveDFPath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Yaxis"+ File.separator +"MP_3D_Yaxis_1.tif");
+								outputMaxxFile = new File(saveDFPath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_XProj"+ File.separator +"MP_YZ_1.tif");
+								outputMaxyFile = new File(saveDFPath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_YProj"+ File.separator +"MP_ZX_1.tif");
+								outputMaxzFile = new File(saveDFPath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_ZProj"+ File.separator +"MP_XY_1.tif");
 
 								
 								if (wavelengths == 1) {
 									
-									if (!new File(savePath + "CropBkgdSub" + File.separator  + "SPIMA"+pos+"-"+f+"-1_1.tif").canRead() ||
-											!new File(savePath + "CropBkgdSub" + File.separator  + "SPIMB"+pos+"-"+f+"-1_1.tif").canRead()){ 
+									if (!new File(saveDFPath + "CropBkgdSub" + File.separator  + "SPIMA"+pos+"-"+f+"-1_1.tif").canRead() ||
+											!new File(saveDFPath + "CropBkgdSub" + File.separator  + "SPIMB"+pos+"-"+f+"-1_1.tif").canRead()){ 
 										IJ.wait(100);
 									}
 									try {
 										String[] cmdln =null;
 										if (omeTiffs){
 											if (lineageDecons)
-												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_", savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"1", threeDorientationIndex,"0", ((doRegPriming && f>1)?"1":"0"),savePath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
+												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_", saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"1", threeDorientationIndex,"0", ((doRegPriming && f>1)?"1":"0"),saveDFPath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
 											else
-												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_", savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"1", threeDorientationIndex,"0", ((doRegPriming && f>1)?"1":"0"),savePath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
+												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_", saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"1", threeDorientationIndex,"0", ((doRegPriming && f>1)?"1":"0"),saveDFPath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
 										}else{
 											if (lineageDecons)
-												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_", savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"1", threeDorientationIndex,"0", ((doRegPriming && f>1)?"1":"0"),savePath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
+												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_", saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"1", threeDorientationIndex,"0", ((doRegPriming && f>1)?"1":"0"),saveDFPath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
 											else
-												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_", savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"1", threeDorientationIndex,"0", ((doRegPriming && f>1)?"1":"0"),savePath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
+												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_", saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"1", threeDorientationIndex,"0", ((doRegPriming && f>1)?"1":"0"),saveDFPath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
 										}
 
 										regDeconProcess = Runtime.getRuntime().exec(cmdln);
@@ -4774,14 +4775,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										}
 
 										if(outputDCFile.canRead()) {
-											Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon" + File.separator + "Decon_1.tif"),
-													Paths.get(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution1" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif"), StandardCopyOption.REPLACE_EXISTING);
+											Files.move(Paths.get(saveDFPath + "RegDecon" + File.separator + "Decon" + File.separator + "Decon_1.tif"),
+													Paths.get(saveDFPath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution1" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif"), StandardCopyOption.REPLACE_EXISTING);
 
 											//											IJ.runMacro("waitForUser;");
 											IJ.log(""+ pos+ "old=> " + lastMatrix[pos]);
-											if (new File("" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").canRead()) {
-												lastMatrix[pos] = IJ.openAsString("" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
-												IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx");
+											if (new File("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").canRead()) {
+												lastMatrix[pos] = IJ.openAsString("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
+												IJ.saveString(lastMatrix[pos], "" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx");
 												IJ.log(""+ pos+ "new=> " + lastMatrix[pos]);
 											}
 
@@ -4797,16 +4798,16 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 										if (output3DxFile.canRead() && output3DyFile.canRead()) {
 											try {
-												Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Xaxis"+ File.separator +"MP_3D_Xaxis_1.tif"),
-														Paths.get(prxPath+File.separator +"Color1"+ File.separator +"projX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-												Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Yaxis"+ File.separator +"MP_3D_Yaxis_1.tif"),
-														Paths.get(pryPath+File.separator +"Color1"+ File.separator +"projY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-												Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_XProj"+ File.separator +"MP_YZ_1.tif"),
-														Paths.get(maxXPath+File.separator +"Color1"+ File.separator +"maxX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-												Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_YProj"+ File.separator +"MP_ZX_1.tif"),
-														Paths.get(maxYPath+File.separator +"Color1"+ File.separator +"maxY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-												Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_ZProj"+ File.separator +"MP_XY_1.tif"),
-														Paths.get(maxZPath+File.separator +"Color1"+ File.separator +"maxZ_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+												Files.move(Paths.get(saveDFPath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Xaxis"+ File.separator +"MP_3D_Xaxis_1.tif"),
+														Paths.get(savePrxPath+File.separator +"Color1"+ File.separator +"projX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+												Files.move(Paths.get(saveDFPath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Yaxis"+ File.separator +"MP_3D_Yaxis_1.tif"),
+														Paths.get(savePryPath+File.separator +"Color1"+ File.separator +"projY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+												Files.move(Paths.get(saveDFPath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_XProj"+ File.separator +"MP_YZ_1.tif"),
+														Paths.get(saveMaxXPath+File.separator +"Color1"+ File.separator +"maxX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+												Files.move(Paths.get(saveDFPath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_YProj"+ File.separator +"MP_ZX_1.tif"),
+														Paths.get(saveMaxYPath+File.separator +"Color1"+ File.separator +"maxY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+												Files.move(Paths.get(saveDFPath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_ZProj"+ File.separator +"MP_XY_1.tif"),
+														Paths.get(saveMaxZPath+File.separator +"Color1"+ File.separator +"maxZ_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
 											} catch (IOException e) {
 												// TODO Auto-generated catch block
 												e.printStackTrace();
@@ -4825,10 +4826,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 								//	NEW TWO CALL VERSION TO REUSE FIT ON CH 2						
 								if (wavelengths >= 2) {
-									if (!new File(savePath + "CropBkgdSub" + File.separator  + "SPIMA"+pos+"-"+f+"-1_1.tif").canRead() ||
-											!new File(savePath + "CropBkgdSub" + File.separator  + "SPIMB"+pos+"-"+f+"-1_1.tif").canRead() ||
-											!new File(savePath + "CropBkgdSub" + File.separator  + "SPIMA"+pos+"-"+f+"-2_1.tif").canRead() ||
-											!new File(savePath + "CropBkgdSub" + File.separator  + "SPIMB"+pos+"-"+f+"-2_1.tif").canRead()){
+									if (!new File(saveDFPath + "CropBkgdSub" + File.separator  + "SPIMA"+pos+"-"+f+"-1_1.tif").canRead() ||
+											!new File(saveDFPath + "CropBkgdSub" + File.separator  + "SPIMB"+pos+"-"+f+"-1_1.tif").canRead() ||
+											!new File(saveDFPath + "CropBkgdSub" + File.separator  + "SPIMA"+pos+"-"+f+"-2_1.tif").canRead() ||
+											!new File(saveDFPath + "CropBkgdSub" + File.separator  + "SPIMB"+pos+"-"+f+"-2_1.tif").canRead()){
 										IJ.wait(100);
 									}
 									try {
@@ -4836,26 +4837,26 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										if (keyChannel ==1){
 											if (omeTiffs){
 												if (lineageDecons)
-													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"1", threeDorientationIndex,"0", ((doRegPriming && f>1)?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"1", threeDorientationIndex,"0", ((doRegPriming && f>1)?"1":"0"),saveDFPath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
 												else
-													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"1", threeDorientationIndex,"0", ((doRegPriming && f>1)?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"1", threeDorientationIndex,"0", ((doRegPriming && f>1)?"1":"0"),saveDFPath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
 											}else{
 												if (lineageDecons)
-													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"1", threeDorientationIndex,"0", ((doRegPriming && f>1)?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"1", threeDorientationIndex,"0", ((doRegPriming && f>1)?"1":"0"),saveDFPath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
 												else
-													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"1", threeDorientationIndex,"0", ((doRegPriming && f>1)?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"1", threeDorientationIndex,"0", ((doRegPriming && f>1)?"1":"0"),saveDFPath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
 											}
 										}else{
 											if (omeTiffs){
 												if (lineageDecons)
-													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-2_","SPIMA"+pos+"-"+f+"-2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"1", threeDorientationIndex,"0", ((doRegPriming && f>1)?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-2_","SPIMA"+pos+"-"+f+"-2_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"1", threeDorientationIndex,"0", ((doRegPriming && f>1)?"1":"0"),saveDFPath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
 												else
-													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-2_","SPIMA"+pos+"-"+f+"-2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"1", threeDorientationIndex,"0", ((doRegPriming && f>1)?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-2_","SPIMA"+pos+"-"+f+"-2_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"1", threeDorientationIndex,"0", ((doRegPriming && f>1)?"1":"0"),saveDFPath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
 											}else{
 												if (lineageDecons)
-													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-2_","SPIMB"+pos+"-"+f+"-2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"1", threeDorientationIndex,"0", ((doRegPriming && f>1)?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-2_","SPIMB"+pos+"-"+f+"-2_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"1", threeDorientationIndex,"0", ((doRegPriming && f>1)?"1":"0"),saveDFPath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
 												else
-													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-2_","SPIMB"+pos+"-"+f+"-2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"1", threeDorientationIndex,"0", ((doRegPriming && f>1)?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-2_","SPIMB"+pos+"-"+f+"-2_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"1", threeDorientationIndex,"0", ((doRegPriming && f>1)?"1":"0"),saveDFPath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
 											}
 										}
 										//								IJ.log(cmdln);
@@ -4904,14 +4905,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										}
 
 										if(outputDCFile.canRead()) {
-											Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon" + File.separator + "Decon_1.tif"),
-													Paths.get(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution"+ keyChannel + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif"), StandardCopyOption.REPLACE_EXISTING);
+											Files.move(Paths.get(saveDFPath + "RegDecon" + File.separator + "Decon" + File.separator + "Decon_1.tif"),
+													Paths.get(saveDFPath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution"+ keyChannel + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif"), StandardCopyOption.REPLACE_EXISTING);
 
 											//											IJ.runMacro("waitForUser;");
 											IJ.log(""+ pos+ "old=> " + lastMatrix[pos]);
-											if (new File("" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").canRead()) {
-												lastMatrix[pos] = IJ.openAsString("" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
-												IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx");
+											if (new File("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").canRead()) {
+												lastMatrix[pos] = IJ.openAsString("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
+												IJ.saveString(lastMatrix[pos], "" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx");
 												IJ.log(""+ pos+ "new=> " + lastMatrix[pos]);
 											}
 
@@ -4927,16 +4928,16 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 										if (output3DxFile.canRead() && output3DyFile.canRead()) {
 											try {
-												Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Xaxis"+ File.separator +"MP_3D_Xaxis_1.tif"),
-														Paths.get(prxPath+File.separator +"Color"+ keyChannel+ File.separator +"projX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-												Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Yaxis"+ File.separator +"MP_3D_Yaxis_1.tif"),
-														Paths.get(pryPath+File.separator +"Color"+ keyChannel+ File.separator +"projY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-												Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_XProj"+ File.separator +"MP_YZ_1.tif"),
-														Paths.get(maxXPath+File.separator +"Color"+ keyChannel+ File.separator +"maxX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-												Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_YProj"+ File.separator +"MP_ZX_1.tif"),
-														Paths.get(maxYPath+File.separator +"Color"+ keyChannel+ File.separator +"maxY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-												Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_ZProj"+ File.separator +"MP_XY_1.tif"),
-														Paths.get(maxZPath+File.separator +"Color"+ keyChannel+ File.separator +"maxZ_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+												Files.move(Paths.get(saveDFPath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Xaxis"+ File.separator +"MP_3D_Xaxis_1.tif"),
+														Paths.get(savePrxPath+File.separator +"Color"+ keyChannel+ File.separator +"projX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+												Files.move(Paths.get(saveDFPath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Yaxis"+ File.separator +"MP_3D_Yaxis_1.tif"),
+														Paths.get(savePryPath+File.separator +"Color"+ keyChannel+ File.separator +"projY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+												Files.move(Paths.get(saveDFPath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_XProj"+ File.separator +"MP_YZ_1.tif"),
+														Paths.get(saveMaxXPath+File.separator +"Color"+ keyChannel+ File.separator +"maxX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+												Files.move(Paths.get(saveDFPath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_YProj"+ File.separator +"MP_ZX_1.tif"),
+														Paths.get(saveMaxYPath+File.separator +"Color"+ keyChannel+ File.separator +"maxY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+												Files.move(Paths.get(saveDFPath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_ZProj"+ File.separator +"MP_XY_1.tif"),
+														Paths.get(saveMaxZPath+File.separator +"Color"+ keyChannel+ File.separator +"maxZ_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
 											} catch (IOException e) {
 												// TODO Auto-generated catch block
 												e.printStackTrace();
@@ -4955,26 +4956,26 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										if (keyChannel ==1){
 											if (omeTiffs){
 												if (lineageDecons)
-													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-2_","SPIMA"+pos+"-"+f+"-2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-2_","SPIMA"+pos+"-"+f+"-2_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),saveDFPath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
 												else
-													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-2_","SPIMA"+pos+"-"+f+"-2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-2_","SPIMA"+pos+"-"+f+"-2_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),saveDFPath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
 											}else{
 												if (lineageDecons)
-													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-2_","SPIMB"+pos+"-"+f+"-2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-2_","SPIMB"+pos+"-"+f+"-2_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),saveDFPath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
 												else
-													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-2_","SPIMB"+pos+"-"+f+"-2_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-2_","SPIMB"+pos+"-"+f+"-2_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),saveDFPath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
 											}
 										}else{
 											if (omeTiffs){
 												if (lineageDecons)
-													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),saveDFPath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
 												else
-													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),saveDFPath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
 											}else{
 												if (lineageDecons)
-													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),saveDFPath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
 												else
-													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", savePath + "CropBkgdSub" + File.separator  , savePath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_"  , savePath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),savePath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"4",threeDorientationIndex,"0", (doRegPriming?"1":"0"),saveDFPath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
 											}
 										}
 										//								IJ.log(cmdln);
@@ -5023,8 +5024,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 										if(outputDCFile.canRead()) {
 											
-											Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon" + File.separator + "Decon_1.tif"),
-													Paths.get(savePath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution"+ slaveChannel + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif"), StandardCopyOption.REPLACE_EXISTING);
+											Files.move(Paths.get(saveDFPath + "RegDecon" + File.separator + "Decon" + File.separator + "Decon_1.tif"),
+													Paths.get(saveDFPath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution"+ slaveChannel + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif"), StandardCopyOption.REPLACE_EXISTING);
 
 										}
 
@@ -5040,16 +5041,16 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 										if (output3DxFile.canRead() && output3DyFile.canRead()) {
 											try {
-												Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Xaxis"+ File.separator +"MP_3D_Xaxis_1.tif"),
-														Paths.get(prxPath+File.separator +"Color"+ slaveChannel+ File.separator +"projX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-												Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Yaxis"+ File.separator +"MP_3D_Yaxis_1.tif"),
-														Paths.get(pryPath+File.separator +"Color"+ slaveChannel+ File.separator +"projY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-												Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_XProj"+ File.separator +"MP_YZ_1.tif"),
-														Paths.get(maxXPath+File.separator +"Color"+ slaveChannel+ File.separator +"maxX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-												Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_YProj"+ File.separator +"MP_ZX_1.tif"),
-														Paths.get(maxYPath+File.separator +"Color"+ slaveChannel+ File.separator +"maxY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
-												Files.move(Paths.get(savePath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_ZProj"+ File.separator +"MP_XY_1.tif"),
-														Paths.get(maxZPath+File.separator +"Color"+ slaveChannel+ File.separator +"maxZ_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+												Files.move(Paths.get(saveDFPath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Xaxis"+ File.separator +"MP_3D_Xaxis_1.tif"),
+														Paths.get(savePrxPath+File.separator +"Color"+ slaveChannel+ File.separator +"projX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+												Files.move(Paths.get(saveDFPath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_3D_Yaxis"+ File.separator +"MP_3D_Yaxis_1.tif"),
+														Paths.get(savePryPath+File.separator +"Color"+ slaveChannel+ File.separator +"projY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+												Files.move(Paths.get(saveDFPath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_XProj"+ File.separator +"MP_YZ_1.tif"),
+														Paths.get(saveMaxXPath+File.separator +"Color"+ slaveChannel+ File.separator +"maxX_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+												Files.move(Paths.get(saveDFPath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_YProj"+ File.separator +"MP_ZX_1.tif"),
+														Paths.get(saveMaxYPath+File.separator +"Color"+ slaveChannel+ File.separator +"maxY_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
+												Files.move(Paths.get(saveDFPath + "RegDecon" + File.separator + "Decon"+ File.separator +"MP_ZProj"+ File.separator +"MP_XY_1.tif"),
+														Paths.get(saveMaxZPath+File.separator +"Color"+ slaveChannel+ File.separator +"maxZ_"+pos+"_"+k+".tif"), StandardCopyOption.REPLACE_EXISTING);
 											} catch (IOException e) {
 												// TODO Auto-generated catch block
 												e.printStackTrace();
@@ -5144,34 +5145,37 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								}
 							};
 
-							saveFile = new File(savePath);
+							saveFile = new File(openPath);
 							if ((saveFile).canRead()) {
 								// SETUP OF WINDOWS SHOWING NEW AND PRE-EXISTING DECON OUTPUTS
 
 								stackDFs[pos] = null;
-								File deconmfivsPathFile = new File(savePath+ File.separator + "RegDecon" + File.separator + "Pos" + pos);
+								File deconmfivsPathFile = new File(openPath+ File.separator + "RegDecon" + File.separator + "Pos" + pos);
 
 								if (deconmfivsPathFile.canRead() 
-										&& new File(savePath + File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution1").list(tiffNameFilter).length>0
+										&& new File(openPath + File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution1").list(tiffNameFilter).length>0
 										){
 
 									if (wavelengths == 2){
-										while (new File(savePath + File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution1").list(tiffNameFilter).length
-												!= new File(savePath + File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution2").list(tiffNameFilter).length){
+										while (new File(openPath + File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution1").list(tiffNameFilter).length
+												!= new File(openPath + File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution2").list(tiffNameFilter).length){
 											IJ.wait(100);
 										}
 									}
-									stackDFs[pos] = new MultiFileInfoVirtualStack(savePath
+									stackDFs[pos] = new MultiFileInfoVirtualStack(openPath
 												+ File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution",
 												false);
 									
 								}
 
 								if (stackDFs[pos]!=null && stackDFs[pos].getSize() > 0 && (impDF1s[pos]==null || stackDFs[pos].getSize() > impDF1s[pos].getStack().getSize())) {
-									impDF1s[pos] = new ImagePlus();
-									impDF1s[pos].getRoiManager().setImagePlus(null);
-									impDF1s[pos].getRoiManager().dispose();
-									impDF1s[pos].setRoiManager(null);
+									if (impDF1s[pos] != null){
+										impDF1s[pos].getRoiManager().setImagePlus(null);
+										impDF1s[pos].getRoiManager().dispose();
+										impDF1s[pos].setRoiManager(null);
+									} else {
+										impDF1s[pos] = new ImagePlus();
+									}
 									impDF1s[pos].setStack("Decon-Fuse_"
 											+ impAs[pos].getTitle().split(":")[0], stackDFs[pos]);
 									impDF1s[pos].setFileInfo(new FileInfo());
@@ -5239,34 +5243,37 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									}
 
 
-									if (new File(pryPath).canRead() ){
-										while (new File(pryPath, "Color1").list(tiffNameFilter).length<1){
+									if (new File(openPryPath).canRead() ){
+										while (new File(openPryPath, "Color1").list(tiffNameFilter).length<1){
 											IJ.wait(100);
 										}
 
 										if (wavelengths == 2){
-											while (new File(prxPath, "Color1").list(tiffNameFilter).length
-													!= new File(prxPath, "Color2").list(tiffNameFilter).length){
+											while (new File(openPrxPath, "Color1").list(tiffNameFilter).length
+													!= new File(openPrxPath, "Color2").list(tiffNameFilter).length){
 												IJ.wait(100);
 											}
-											while (new File(pryPath, "Color1").list(tiffNameFilter).length
-													!= new File(pryPath, "Color2").list(tiffNameFilter).length){
+											while (new File(openPryPath, "Color1").list(tiffNameFilter).length
+													!= new File(openPryPath, "Color2").list(tiffNameFilter).length){
 												IJ.wait(100);
 											}
 										}
 
 										stackPrxs[pos] = null;
 										stackPrys[pos] = null;
-										stackPrxs[pos] = new MultiFileInfoVirtualStack(prxPath+File.separator, "Color", false);
-										stackPrys[pos] = new MultiFileInfoVirtualStack(pryPath+File.separator, "Color", false);
+										stackPrxs[pos] = new MultiFileInfoVirtualStack(openPrxPath+File.separator, "Color", false);
+										stackPrys[pos] = new MultiFileInfoVirtualStack(openPryPath+File.separator, "Color", false);
 
 									}
 
 									if (stackPrxs[pos]!=null && stackPrxs[pos].getSize() > 0 && (impPrxs[pos]==null || stackPrxs[pos].getSize() > impPrxs[pos].getStack().getSize())) {
-										impPrxs[pos] = new ImagePlus();
-										impPrxs[pos].getRoiManager().setImagePlus(null);
-										impPrxs[pos].getRoiManager().dispose();
-										impPrxs[pos].setRoiManager(null);
+										if (impPrxs[pos] != null){
+											impPrxs[pos].getRoiManager().setImagePlus(null);
+											impPrxs[pos].getRoiManager().dispose();
+											impPrxs[pos].setRoiManager(null);
+										}else {
+											impPrxs[pos] = new ImagePlus();
+										}
 										impPrxs[pos].setStack("3DProjX_Decon-Fuse_"
 												+ impAs[pos].getTitle().split(":")[0], stackPrxs[pos]);
 										impPrxs[pos].setFileInfo(new FileInfo());
@@ -5275,7 +5282,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										impPrxs[pos].getCalibration().pixelHeight = impDF1s[pos].getCalibration().pixelHeight;
 										impPrxs[pos].getCalibration().pixelDepth = impDF1s[pos].getCalibration().pixelWidth;
 
-										impPrxs[pos].getOriginalFileInfo().directory = prxPath+File.separator;
+										impPrxs[pos].getOriginalFileInfo().directory = openPrxPath+File.separator;
 										int stkNSlicesPrx = impPrxs[pos].getStackSize();
 										int zSlicesPrx = ((MultiFileInfoVirtualStack)impPrxs[pos].getStack()).getFivStacks().get(0)
 												.getSize();
@@ -5285,6 +5292,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 												/ (outputWavelengths * zSlicesPrx));
 										if (ciPrxs[pos] != null) {
 											prjXwin = ciPrxs[pos].getWindow();
+										} else {
+											prjXwin = null;
 										}
 
 										ciPrxs[pos] = new CompositeImage(impPrxs[pos]);
@@ -5308,6 +5317,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											ciPrxs[pos].show();
 											WindowManager.group(ciDFs[pos], ciPrxs[pos]);
 											ciPrxs[pos].setPosition(1, 1, ciPrxs[pos].getNFrames());
+											prjXwin = ciPrxs[pos].getWindow();
 										} else {
 											oldW = prjXwin.getWidth();
 											oldH = prjXwin.getHeight();
@@ -5341,10 +5351,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									
 									if (stackPrys[pos]!=null && stackPrys[pos].getSize() > 0 && (impPrys[pos]==null || stackPrys[pos].getSize() > impPrys[pos].getStack().getSize())) {
 
-										impPrys[pos] = new ImagePlus();
-										impPrys[pos].getRoiManager().setImagePlus(null);
-										impPrys[pos].getRoiManager().dispose();
-										impPrys[pos].setRoiManager(null);
+										if (impPrys[pos] != null) {
+											impPrys[pos].getRoiManager().setImagePlus(null);
+											impPrys[pos].getRoiManager().dispose();
+											impPrys[pos].setRoiManager(null);
+										} else {
+											impPrys[pos] = new ImagePlus();
+										}
 										impPrys[pos].setStack("3DProjY_Decon-Fuse_"
 												+ impAs[pos].getTitle().split(":")[0], stackPrys[pos]);
 										impPrys[pos].setFileInfo(new FileInfo());
@@ -5353,7 +5366,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										impPrys[pos].getCalibration().pixelHeight = impDF1s[pos].getCalibration().pixelHeight;
 										impPrys[pos].getCalibration().pixelDepth = impDF1s[pos].getCalibration().pixelWidth;
 
-										impPrys[pos].getOriginalFileInfo().directory = pryPath+File.separator;
+										impPrys[pos].getOriginalFileInfo().directory = openPryPath+File.separator;
 										int stkNSlicesPry = impPrys[pos].getStackSize();
 										int zSlicesPry = ((MultiFileInfoVirtualStack)impPrys[pos].getStack()).getFivStacks().get(0)
 												.getSize();
@@ -5363,6 +5376,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 												/ (outputWavelengths * zSlicesPry));
 										if (ciPrys[pos] != null) {
 											prjYwin = ciPrys[pos].getWindow();
+										} else {
+											prjYwin = null;
 										}
 
 										ciPrys[pos] = new CompositeImage(impPrys[pos]);
@@ -5387,6 +5402,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											ciPrys[pos].show();
 											WindowManager.group(ciPrxs[pos], ciPrys[pos]);
 											ciPrys[pos].setPosition(1, 1, ciPrys[pos].getNFrames());
+											prjYwin = ciPrys[pos].getWindow();
 										} else {
 											oldW = prjYwin.getWidth();
 											oldH = prjYwin.getHeight();
@@ -5429,8 +5445,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											redMax = (int) impLUTs[1].max;
 										}
 
-										String outputDir = savePath;
-										String sourceDir = savePath;
+										String outputDir = openPath;
+										String sourceDir = openPath;
 										String outDir = outputDir+ File.separator ;
 										String[] sourceFileList = new File(sourceDir).list();
 										ciDFs[pos].killRoi();
@@ -5445,7 +5461,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 											String title = ciDFs[pos].getTitle();
 											String savetitle = title.replace(":","_").replace(" ","").replace("_dummy","");
-											String savePath = outDir+savetitle;
+											String openPath = outDir+savetitle;
 
 											int[] xpoints = theROI.getPolygon().xpoints;
 											int[] ypoints = theROI.getPolygon().ypoints;
@@ -5477,11 +5493,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 //																);
 //														ciDFs[pos].setRoi(ellipseRoi, false);
 //														theROI = ellipseRoi;
-//														IJ.saveAs(ciDFs[pos], "Selection", savePath +  "ellipseSNF.roi");
+//														IJ.saveAs(ciDFs[pos], "Selection", openPath +  "ellipseSNF.roi");
 //
 //														Roi rectRoi = new Roi(ellipseRoi.getBounds());
 //														ciDFs[pos].setRoi(rectRoi, false);
-//														IJ.saveAs(ciDFs[pos], "Selection", savePath + "rectangleSNF.roi");
+//														IJ.saveAs(ciDFs[pos], "Selection", openPath + "rectangleSNF.roi");
 //
 //													}else {
 //														angle = new Line(xpoints[0], ypoints[0], xpoints[2], ypoints[2]).getAngle();
