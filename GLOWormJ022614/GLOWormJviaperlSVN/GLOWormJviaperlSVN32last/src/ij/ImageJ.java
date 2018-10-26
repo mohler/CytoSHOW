@@ -267,6 +267,7 @@ public class ImageJ extends Frame implements ActionListener,
 		//	new SocketListener();
 		configureProxy();
 		loadCursors();
+		IJ.log(""+UIManager.getLookAndFeel().getDescription());
  	}
  	
  	private void loadCursors() {

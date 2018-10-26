@@ -314,9 +314,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				dir = dir + File.separator;
 
 			if (monitoringDecon)
-//			if (true)
 				goDirFileList = StringSorter.sortNumericallyViaRegex(goDirFileList);
-//			String lastFileNameOfBunch = "";
 
 			if (goDirFileList != null) {
 //				lastFileNameOfBunch = goDirFileList[goDirFileList.length-1];
