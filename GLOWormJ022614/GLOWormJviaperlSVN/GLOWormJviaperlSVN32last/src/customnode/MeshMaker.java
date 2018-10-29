@@ -9,17 +9,30 @@
 package customnode;
 
 import ij.IJ;
+
 import javax.vecmath.Point3f;
 import javax.vecmath.Vector3f;
+
+import java.awt.HeadlessException;
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
+
 import ij3d.Pipe;
 
 public class MeshMaker {
 
 	public static void main(String[] args) {
-		new ij.ImageJ();
+		try {
+			new ij.ImageJ();
+		} catch (HeadlessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		IJ.runPlugIn("ij3d.Mesh_Maker", "");
 	}
 

@@ -1,8 +1,10 @@
 package ij.util;
 import ij.*;
-import ij.Prefs;
+
 import java.awt.*;
+
 import javax.swing.*;
+import javax.swing.UIManager.LookAndFeelInfo;
 
 /**
 This class contains static methods that use the Java 2 API. They are isolated 
@@ -43,11 +45,28 @@ public class Java2 {
 	
 	/** Sets the Swing look and feel to the system look and feel (Windows only). */
 	public static void setSystemLookAndFeel() {
-		if (lookAndFeelSet || !IJ.isWindows()) return;
+		if (lookAndFeelSet || !IJ.isWindows()) 
+			return;
 		try {
-//			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-			UIManager.setLookAndFeel(UIManager.getInstalledLookAndFeels()[(int)Math.random()*(UIManager.getInstalledLookAndFeels().length-1)].getClassName());
-		} catch(Throwable t) {}
+		    for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+		        if ("Nimbus".equals(info.getName())) {
+		            UIManager.setLookAndFeel(info.getClassName());
+		            break;
+		        }
+		    }
+		} catch (Exception e) {
+		    // If Nimbus is not available, fall back to cross-platform
+		    try {
+		        UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
+		    } catch (Exception ex) {
+				try {
+					UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+				} catch(Throwable t) {}
+		    }
+		}
+//		try {
+////			UIManager.setLookAndFeel(UIManager.getInstalledLookAndFeels()[(int)Math.random()*(UIManager.getInstalledLookAndFeels().length-1)].getClassName());
+//		} catch(Throwable t) {}
 		lookAndFeelSet = true;
 		IJ.register(Java2.class);
 	}

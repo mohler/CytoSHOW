@@ -7,8 +7,10 @@ import ij.gui.GUI;
 import ij.plugin.PlugIn;
 import isosurface.MeshExporter;
 
+import java.awt.HeadlessException;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -24,7 +26,15 @@ public class ImageJ3DViewer implements PlugIn {
 
 	public static void main(String[] args) {
 		  if (IJ.getInstance() == null)
-			new ij.ImageJ();
+			try {
+				new ij.ImageJ();
+			} catch (HeadlessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (URISyntaxException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		  IJ.runPlugIn("ij3d.ImageJ3DViewer", "");
 	}
 

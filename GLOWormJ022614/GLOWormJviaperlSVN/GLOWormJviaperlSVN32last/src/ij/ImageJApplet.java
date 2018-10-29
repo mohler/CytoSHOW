@@ -1,5 +1,7 @@
 package ij;
 import java.applet.Applet;
+import java.awt.HeadlessException;
+import java.net.URISyntaxException;
 
 /**
 	Runs ImageJ as an applet and optionally opens up to 
@@ -26,7 +28,15 @@ public class ImageJApplet extends Applet {
     public void init() {
     	ImageJ ij = IJ.getInstance();
      	if (ij==null || (ij!=null && !ij.isShowing()))
-			new ImageJ(this);
+			try {
+				new ImageJ(this);
+			} catch (HeadlessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (URISyntaxException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		for (int i=1; i<=9; i++) {
 			String url = getParameter("url"+i);
 			if (url==null) break;

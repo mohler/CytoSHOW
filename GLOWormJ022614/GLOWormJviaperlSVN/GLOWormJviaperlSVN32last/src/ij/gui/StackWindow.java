@@ -20,7 +20,7 @@ import org.vcell.gloworm.MultiQTVirtualStack;
 /** This class is an extended ImageWindow used to display image stacks. */
 public class StackWindow extends ImageWindow implements Runnable, AdjustmentListener, ActionListener, MouseWheelListener {
 
-	protected Scrollbar sliceSelector; // for backward compatibity with Image5D
+	protected JScrollBar sliceSelector; // for backward compatibity with Image5D
 	public ScrollbarWithLabel cSelector, zSelector, tSelector;
 	public ArrayList<ScrollbarWithLabel> activeScrollBars = new ArrayList<ScrollbarWithLabel>();
 	protected Thread thread;
@@ -43,7 +43,7 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 		addScrollbars(imp);
 		addMouseWheelListener(this);
 		if (sliceSelector==null && this.getClass().getName().indexOf("Image5D")!=-1) {
-			sliceSelector = new Scrollbar(); // prevents Image5D from crashing
+			sliceSelector = new JScrollBar(); // prevents Image5D from crashing
 		}
 		//IJ.log(nChannels+" "+nSlices+" "+nFrames);
 		pack();

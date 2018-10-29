@@ -143,26 +143,40 @@ public class ImageJ extends Frame implements ActionListener,
 	boolean hotkey;
 	private ArrayList<JPopupMenu> openPopupsArrayList;
 	
-	/** Creates a new ImageJ frame that runs as an application. */
-	public ImageJ() {
+	/** Creates a new ImageJ frame that runs as an application. 
+	 * @throws URISyntaxException 
+	 * @throws HeadlessException */
+	public ImageJ() throws HeadlessException, URISyntaxException {
 		this(null, STANDALONE);
 	}
 	
-	/** Creates a new ImageJ frame that runs as an application in the specified mode. */
-	public ImageJ(int mode) {
+	/** Creates a new ImageJ frame that runs as an application in the specified mode. 
+	 * @throws URISyntaxException 
+	 * @throws HeadlessException */
+	public ImageJ(int mode) throws HeadlessException, URISyntaxException {
 		this(null, mode);
 	}
 
-	/** Creates a new ImageJ frame that runs as an applet. */
-	public ImageJ(java.applet.Applet applet) {
+	/** Creates a new ImageJ frame that runs as an applet. 
+	 * @throws URISyntaxException 
+	 * @throws HeadlessException */
+	public ImageJ(java.applet.Applet applet) throws HeadlessException, URISyntaxException {
 		this(applet, STANDALONE);
 	}
 
 	/** If 'applet' is not null, creates a new ImageJ frame that runs as an applet.
 		If  'mode' is ImageJ.EMBEDDED and 'applet is null, creates an embedded 
-		(non-standalone) version of ImageJ. */
-	public ImageJ(java.applet.Applet applet, int mode) {
-		super("CytoSHOW "/*+ UIManager.getLookAndFeel().getDescription()*/);
+		(non-standalone) version of ImageJ. 
+	 * @throws URISyntaxException 
+	 * @throws HeadlessException */
+	public ImageJ(java.applet.Applet applet, int mode) throws HeadlessException, URISyntaxException {
+		super("CytoSHOW ["+ 
+				(ImageJ.class.getProtectionDomain().getCodeSource().getLocation().toURI().getScheme().equals("file")?
+				new File(ImageJ.class.getProtectionDomain().getCodeSource().getLocation().toURI()).getName():
+					(ImageJ.class.getProtectionDomain().getCodeSource().getLocation().toURI().getScheme().equals("http")?
+					("webstart=>"+ImageJ.class.getProtectionDomain().getCodeSource().getLocation().toURI().toString()
+							.replaceAll(".*/.*(BETA\\d*).jar", "$1")):
+					ImageJ.class.getProtectionDomain().getCodeSource().getLocation().toURI().getScheme())) +"]" 	);
 	    try {
 	        SingleInstanceService singleInstanceService =
 	            (SingleInstanceService)ServiceManager.
@@ -267,7 +281,6 @@ public class ImageJ extends Frame implements ActionListener,
 		//	new SocketListener();
 		configureProxy();
 		loadCursors();
-		IJ.log(""+UIManager.getLookAndFeel().getDescription());
  	}
  	
  	private void loadCursors() {
@@ -1031,7 +1044,15 @@ public class ImageJ extends Frame implements ActionListener,
   			return;
  		ImageJ ij = IJ.getInstance();    	
 		if (!noGUI && (ij==null || (ij!=null && !ij.isShowing()))) {
-			ij = new ImageJ(null, mode);
+			try {
+				ij = new ImageJ(null, mode);
+			} catch (HeadlessException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (URISyntaxException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			ij.exitWhenQuitting = true;
 		}
 		int macros = 0;
