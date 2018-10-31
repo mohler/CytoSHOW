@@ -6219,6 +6219,48 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getActionCommand() == "Fuse") {
+			for (int pos=0; pos<pDim; pos++) {
+				boolean go = true;
+				if (posIntArray!=null){
+					go = false;
+					for (int posInt:posIntArray){
+						if (posInt == pos){
+							go=true;
+						}
+					}
+				}
+				if (!go){
+					continue;
+				}
+
+				doProcessing[pos] = true;
+
+				if (e.getSource() == dispimToolsButton[pos][0]) {
+					if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+						continue;
+					}
+					dispimToolsButton[pos][0].setBackground(null);
+					fuseButton[pos][0].setVisible(false);
+					splitButton[pos][0].setVisible(false);
+					xSpinner[pos][0].setVisible(false);
+					ySpinner[pos][0].setVisible(false);
+					zSpinner[pos][0].setVisible(false);
+					impAs[pos].getWindow().viewButtonPanel.validate();
+
+				}
+				if (e.getSource() == dispimToolsButton[pos][1]) {
+					if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+						continue;
+					}
+					dispimToolsButton[pos][1].setBackground(null);
+					fuseButton[pos][1].setVisible(false);
+					splitButton[pos][1].setVisible(false);
+					xSpinner[pos][1].setVisible(false);
+					ySpinner[pos][1].setVisible(false);
+					zSpinner[pos][1].setVisible(false);
+					impBs[pos].getWindow().viewButtonPanel.validate();
+				}
+			}
 			rerunArg = (dirOrOMETiff+"|"+"rerunWithDecon"+"|"+"newMM");
 			monitoring = false;
 		}
@@ -6262,7 +6304,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 							zSpinner[pp][0].setValue(((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdZA());
 
+							dispimToolsButton[pp][0].setBackground(fuseButton[pp][0].isVisible()?Color.yellow:null);
 							((CompositeImage)impAs[pp]).updateAndDraw();
+							impAs[pp].getWindow().viewButtonPanel.validate();
 							
 							for (FileInfo[] nextFIarray:stackAs[pp].infoCollectorArrayList){
 								for (FileInfo nextFI:nextFIarray){
@@ -6304,8 +6348,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 							zSpinner[pp][1].setValue(((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdZB());
 
+							dispimToolsButton[pp][1].setBackground(fuseButton[pp][1].isVisible()?Color.yellow:null);
 							((CompositeImage)impBs[pp]).updateAndDraw();
-							
+							impBs[pp].getWindow().viewButtonPanel.validate();
+
 							for (FileInfo[] nextFIarray:stackAs[pp].infoCollectorArrayList){
 								for (FileInfo nextFI:nextFIarray){
 									if (nextFI.channelShifts == null || nextFI.channelShifts.length<6){
