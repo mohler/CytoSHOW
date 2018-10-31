@@ -4916,6 +4916,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 												IJ.log(""+ pos+ "new=> " + lastMatrix[pos]);
 											}
 
+										} else {
+											posFrameEnd[pos]--;
 										}
 
 										int k = f;
