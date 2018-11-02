@@ -1989,7 +1989,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 							} else {
 								mi = new JMenuItem("near "
 										+ hit
-												+ " within "+ (maxInPlaneDiameter/2 * imp.getCalibration().pixelWidth)+"µm at frames {"+ hitPlaneString+ "} in \""
+												+ " within "+ (maxInPlaneDiameter/2 * imp.getCalibration().pixelWidth)+"ï¿½m at frames {"+ hitPlaneString+ "} in \""
 												+ (rm.getImagePlus().getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
 														(rm.getImagePlus().getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
 															(rm.getImagePlus().getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
