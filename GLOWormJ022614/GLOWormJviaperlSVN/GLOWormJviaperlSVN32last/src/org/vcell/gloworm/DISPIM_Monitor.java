@@ -742,7 +742,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 						stackAs[pos] = new MultiFileInfoVirtualStack(
 								dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_Channels/vDim>1 && diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
-								false, false, true){
+								false, false, true, false){
 							
 							@Override
 							public void initiateStack(int stkNum, int slcNum){
@@ -755,7 +755,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						};
 						stackBs[pos] = new MultiFileInfoVirtualStack(
 								dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_Channels/vDim>1 && diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
-								true, false, true){
+								true, false, true, false){
 							
 							@Override
 							public void initiateStack(int stkNum, int slcNum){
@@ -1206,7 +1206,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					impBs[pos].getOriginalFileInfo().fileName = dirOrOMETiff;
 					impBs[pos].getOriginalFileInfo().directory = dirOrOMETiff;
 
-					impAs[pos].setStack(new MultiFileInfoVirtualStack(mmPath, dimOrder, "MMStack_Pos"+pos, cDim, zDim, tDim, vDim, pos, false, false, true));
+					impAs[pos].setStack(new MultiFileInfoVirtualStack(mmPath, dimOrder, "MMStack_Pos"+pos, cDim, zDim, tDim, vDim, pos, false, false, true, true));
 
 					int stackSizeA = impAs[pos].getImageStackSize();
 //					int nChannels = cDim/(dimOrder=="xySplitCzt"?1:vDim);
@@ -1268,7 +1268,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					impAs[pos].show();
 
 
-					impBs[pos].setStack(new MultiFileInfoVirtualStack(mmPath, dimOrder, "MMStack_Pos"+pos, cDim, zDim, tDim, vDim, pos, true, false, true));
+					impBs[pos].setStack(new MultiFileInfoVirtualStack(mmPath, dimOrder, "MMStack_Pos"+pos, cDim, zDim, tDim, vDim, pos, true, false, true, true));
 
 					int stackSizeB = impBs[pos].getImageStackSize();
 					int nChannelsB = ((MultiFileInfoVirtualStack)impBs[pos].getStack()).cDim;
@@ -2661,7 +2661,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 							stackAs[pos] = new MultiFileInfoVirtualStack(
 									dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_Channels/vDim>1 && diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
-									false, false, true);
+									false, false, true, new File(this.dirOrOMETiff).isDirectory() && this.dirOrOMETiff.endsWith(".ome.tif"));
 
 							ImagePlus impNext = new ImagePlus(impAs[pos].getTitle(), stackAs[pos]);
 							impNext.setOpenAsHyperStack(true);
@@ -2710,7 +2710,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 							stackBs[pos] = new MultiFileInfoVirtualStack(
 									dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_Channels/vDim>1 && diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
-									true, false, true);
+									true, false, true, new File(this.dirOrOMETiff).isDirectory() && this.dirOrOMETiff.endsWith(".ome.tif"));
 
 							impNext = new CompositeImage(new ImagePlus(impBs[pos].getTitle(), stackBs[pos]));
 							impNext.setOpenAsHyperStack(true);
@@ -6461,7 +6461,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 					stackAs[pos] = new MultiFileInfoVirtualStack(
 							dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_Channels/vDim>1 && diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
-							false, false, true);
+							false, false, true, new File(this.dirOrOMETiff).isDirectory() && this.dirOrOMETiff.endsWith(".ome.tif"));
 
 					ImagePlus impNextA = new ImagePlus(impAs[pos].getTitle(), stackAs[pos]);
 					impNextA.setOpenAsHyperStack(true);
@@ -6508,7 +6508,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 					stackBs[pos] = new MultiFileInfoVirtualStack(
 							dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_Channels/vDim>1 && diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
-							true, false, true);
+							true, false, true, new File(this.dirOrOMETiff).isDirectory() && this.dirOrOMETiff.endsWith(".ome.tif"));
 					
 					ImagePlus impNextB = new ImagePlus(impAs[pos].getTitle(), stackAs[pos]);
 

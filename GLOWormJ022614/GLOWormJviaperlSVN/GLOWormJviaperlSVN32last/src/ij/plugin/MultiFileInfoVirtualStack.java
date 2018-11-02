@@ -76,14 +76,14 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	}
 
 	public MultiFileInfoVirtualStack(String dirOrOMETiff, String string, boolean show) {
-		this(dirOrOMETiff, "xyczt", string, 0, 0, 0, 1, -1, false, show, false);
+		this(dirOrOMETiff, "xyczt", string, 0, 0, 0, 1, -1, false, show, false, false);
 	}
 
 	public MultiFileInfoVirtualStack(String dirOrOMETiff, String string, boolean isViewB, boolean show) {
-		this(dirOrOMETiff, "xyczt", string, 0, 0, 0, 1, -1, isViewB, show, false);
+		this(dirOrOMETiff, "xyczt", string, 0, 0, 0, 1, -1, isViewB, show, false, false);
 	}
 
-	public MultiFileInfoVirtualStack(String arg, String sliceOrder, String keyString, int cDim, int zDim, int tDim, int vDim, final int pos, boolean isViewB, boolean show, boolean rawdispimdata) {
+	public MultiFileInfoVirtualStack(String arg, String sliceOrder, String keyString, int cDim, int zDim, int tDim, int vDim, final int pos, boolean isViewB, boolean show, boolean rawdispimdata, boolean omeMegaTiff) {
 		this.rawdispimdata = rawdispimdata;
 		this.keyString = keyString;
 		this.isViewB = isViewB;
@@ -317,32 +317,29 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				goDirFileList = StringSorter.sortNumericallyViaRegex(goDirFileList);
 
 			if (goDirFileList != null) {
-//				lastFileNameOfBunch = goDirFileList[goDirFileList.length-1];
-				for (String fileName:goDirFileList){
-					if ((new File(fileName)).exists()) {
+				if (!omeMegaTiff)
+					for (String fileName:goDirFileList){{
+						if ((new File(fileName)).exists()) {
 
-						TiffDecoder td = new TiffDecoder(dir, fileName);
-						if (IJ.debugMode) td.enableDebugging();
-						IJ.showStatus("Decoding TIFF header...");
-						try {dummyInfoArray = td.getTiffInfo(0);}
-						catch (IOException e) {
-							String msg = e.getMessage();
-							if (msg==null||msg.equals("")) msg = ""+e;
-							IJ.error("TiffDecoder", msg);
-							return;
-						}
-						//					int prevOffset = 0;
-						//					for (FileInfo fi:dummyInfoArray) {
-						//						IJ.log(" "+fi.offset+" "+(fi.offset-prevOffset)+" "+fi.longOffset+" "+fi.gapBetweenSlices);
-						//						prevOffset = fi.offset;
-						//					}
-						if (dummyInfoArray==null || dummyInfoArray.length==0) {
-							continue;
-						} else {
-							break;
+							TiffDecoder td = new TiffDecoder(dir, fileName);
+							if (IJ.debugMode) td.enableDebugging();
+							IJ.showStatus("Decoding TIFF header...");
+							try {dummyInfoArray = td.getTiffInfo(0);}
+							catch (IOException e) {
+								String msg = e.getMessage();
+								if (msg==null||msg.equals("")) msg = ""+e;
+								IJ.error("TiffDecoder", msg);
+								return;
+							}
+
+							if (dummyInfoArray==null || dummyInfoArray.length==0) {
+								continue;
+							} else {
+								break;
+							}
 						}
 					}
-				}
+					}
 
 			}	
 
@@ -350,7 +347,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				if (infoCollectorArrayList.size()==0){
 					for (String fileName:goDirFileList){
 						if ((new File(dir + fileName)).canRead() && fileName.toLowerCase().endsWith(".tif")) {
-							if (dummyInfoArray == null /*|| fileName==lastFileNameOfBunch*/) {
+							if (dummyInfoArray == null) {
 								TiffDecoder td = new TiffDecoder(dir, fileName);
 								if (IJ.debugMode) td.enableDebugging();
 								IJ.showStatus("Decoding TIFF header...");
