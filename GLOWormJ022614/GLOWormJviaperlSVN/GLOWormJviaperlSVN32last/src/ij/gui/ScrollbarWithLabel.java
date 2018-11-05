@@ -27,7 +27,7 @@ import javax.swing.SwingUtilities;
  * @author Joachim Walter
  */
 public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListener, AdjustmentListener, Action {
-	JScrollBar bar;
+	Scrollbar bar; //DO NOT CHANGE TO JSCROLLBAR!  breaks animator...
 	Icon icon;
 	Icon icon2;
 	StackWindow stackWindow;
@@ -47,7 +47,7 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 		addMouseListener(this);
 		this.stackWindow = stackWindow;
 		this.label = label;
-		bar = new JScrollBar(Scrollbar.HORIZONTAL, value, visible, minimum, maximum);
+		bar = new Scrollbar(Scrollbar.HORIZONTAL, value, visible, minimum, maximum);
 		bar.addMouseListener(this);
 		setBarCursor(label);
 		iconPanel = new IconButton(this);

@@ -14,12 +14,18 @@ import javax.swing.SpinnerNumberModel;
 public class SelectKeyChannelDialog extends Dialog implements ActionListener, KeyListener, ItemListener {
     private Choice channelChoices;
     private Choice methodChoices;
+    private Choice viewChoices;
 
     private Button yesB, noB, cancelB;
     private boolean cancelPressed, yesPressed;
 	private boolean firstPaint = true;
 	private int keyChannel=1;
 	private String regDeconMethod;
+	private String regDeconView;
+	public String getRegDeconView() {
+		return regDeconView;
+	}
+
 	private JSpinner modeFractionSpinnerA, modeFractionSpinnerB;
 	public JSpinner getSubtractionFractionSpinnerA() {
 		return modeFractionSpinnerA;
@@ -128,6 +134,9 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 		methodChoices = new Choice();
 		methodChoices.add("MinGuo GPU method");
 		methodChoices.add("mipav CPU method");
+		viewChoices = new Choice();
+		viewChoices.add("A");
+		viewChoices.add("B");
 		matrixPriming = new Choice();
 		matrixPriming.add("Prime registration with previous matrix");
 		matrixPriming.add("Fresh registration for every volume");
@@ -138,6 +147,8 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 		abRelOriChoices.select(Prefs.get("diSPIMmonitor.relativeOrientation", "Input Volumes Rel. Orientation = +1"));
 		panel.add(methodChoices);
 		methodChoices.select(Prefs.get("diSPIMmonitor.fusionMethod", "MinGuo GPU method"));
+		panel.add(viewChoices);
+		viewChoices.select(Prefs.get("diSPIMmonitor.fusionView", "B"));
 		panel.add(matrixPriming);
 		matrixPriming.select(Prefs.get("diSPIMmonitor.matrixPrimimg", "Prime registration with previous matrix"));
 
@@ -157,6 +168,7 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 		channelChoices.addItemListener(this);
 		abRelOriChoices.addItemListener(this);
 		methodChoices.addItemListener(this);
+		viewChoices.addItemListener(this);
 		matrixPriming.addItemListener(this);
 		yesB.addActionListener(this);
 		noB.addActionListener(this);
@@ -212,6 +224,8 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 			Prefs.set("diSPIMmonitor.relativeOrientation", abRelOriChoices.getSelectedItem());
 			regDeconMethod = methodChoices.getSelectedItem();	
 			Prefs.set("diSPIMmonitor.fusionMethod", methodChoices.getSelectedItem());
+			regDeconView = viewChoices.getSelectedItem();	
+			Prefs.set("diSPIMmonitor.fusionView", viewChoices.getSelectedItem());
 			matPrimMethod = matrixPriming.getSelectedItem();
 			Prefs.set("diSPIMmonitor.matrixPrimimg", matrixPriming.getSelectedItem());
 

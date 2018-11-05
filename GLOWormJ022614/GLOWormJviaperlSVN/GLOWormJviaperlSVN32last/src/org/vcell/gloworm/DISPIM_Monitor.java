@@ -394,6 +394,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 	private double[] longAxesB;
 	private double[][] rotZYXs;
 	private boolean snfCycleComplete = false;
+	private String keyView;
 
 	public Process getRegDeconProcess() {
 		return regDeconProcess;
@@ -1452,6 +1453,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 				}
 				keyChannel = d.getKeyChannel();
+				keyView = d.getRegDeconView();
 				abRelOriValue = d.getAbRelOriValue();
 				autodepth = d.isAutodepth();
 				lineageDecons = d.isLineage();
@@ -4606,6 +4608,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								int type = origRoiBs[pos].getType();
 								int[] xpoints = origRoiBs[pos].getPolygon().xpoints;
 								int[] ypoints = origRoiBs[pos].getPolygon().ypoints;
+								if (keyView=="A"){
+									 type = origRoiAs[pos].getType();
+									 xpoints = origRoiAs[pos].getPolygon().xpoints;
+									 ypoints = origRoiAs[pos].getPolygon().ypoints;
+								}
 
 								int npoints = xpoints.length;
 
@@ -4742,7 +4749,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									}
 									try {
 										String[] cmdln =null;
-										if (omeTiffs){
+										if (keyView == "B"){
 											if (lineageDecons)
 												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_", saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"1", threeDorientationIndex,"0", ((doRegPriming && f>1)?"1":"0"),saveDFPath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
 											else
@@ -4859,7 +4866,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									try {
 										String[] cmdln = {""};
 										if (keyChannel ==1){
-											if (omeTiffs){
+											if (keyView == "B"){
 												if (lineageDecons)
 													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"1", threeDorientationIndex,"0", ((doRegPriming && f>1)?"1":"0"),saveDFPath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
 												else
@@ -4871,7 +4878,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"1", threeDorientationIndex,"0", ((doRegPriming && f>1)?"1":"0"),saveDFPath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
 											}
 										}else{
-											if (omeTiffs){
+											if (keyView == "B"){
 												if (lineageDecons)
 													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-2_","SPIMA"+pos+"-"+f+"-2_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"1", threeDorientationIndex,"0", ((doRegPriming && f>1)?"1":"0"),saveDFPath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f-fi, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
 												else
@@ -4980,7 +4987,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									try {
 										String[] cmdln = {""};
 										if (keyChannel ==1){
-											if (omeTiffs){
+											if (keyView == "B"){
 												if (lineageDecons)
 													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-2_","SPIMA"+pos+"-"+f+"-2_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"4",threeDorientationIndex,"0", (doRegPriming?"1":"1"),saveDFPath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
 												else
@@ -4992,7 +4999,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-2_","SPIMB"+pos+"-"+f+"-2_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,"4",threeDorientationIndex,"0", (doRegPriming?"1":"1"),saveDFPath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0"};
 											}
 										}else{
-											if (omeTiffs){
+											if (keyView == "B"){
 												if (lineageDecons)
 													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\spimfusion_withRotationOptions_zyx.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,"4",threeDorientationIndex,"0", (doRegPriming?"1":"1"),saveDFPath + "RegDecon"  + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\DataForTest\\PSFA128.tif","C:\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
 												else
