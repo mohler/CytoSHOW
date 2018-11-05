@@ -858,7 +858,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 			if (((StackWindow)originalImp.getWindow()).zSelector != null)
 				((StackWindow)originalImp.getWindow()).zSelector.setEnabled(true);
 		}
-		xy_image.close();
+//		xy_image.close();
 		originalImp.setPosition(originalImp.getChannel(), recentZ, originalImp.getFrame());
 		originalImp.setPosition(originalImp.getChannel(), recentZ+1, originalImp.getFrame());
 		originalImp.setPosition(originalImp.getChannel(), recentZ, originalImp.getFrame());
