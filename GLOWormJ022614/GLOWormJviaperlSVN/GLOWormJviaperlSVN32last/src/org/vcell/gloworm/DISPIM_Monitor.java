@@ -4348,7 +4348,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							impXA1 = new ImagePlus();
 							impXA1.setStack(stackA1);
 							if (diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
-								IJ.run(impXA1, "Rotate 90 Degrees Left", "stack");
+								//THERE IS A LONG STORY BEHIND THIS CHOICE OF TWO OPTION...SHROFF LAB WHIMS...
+//								IJ.run(impXA1, "Rotate 90 Degrees Left", "stack");
 							}
 							impXA1.setCalibration(impAs[pos].getCalibration());
 							IJ.saveAs(impXA1, "Tiff", savePath + "CropBkgdSub" + File.separator + "SPIMA"+pos+"-"+f+"-1_1.tif");
@@ -4359,7 +4360,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								impXA2 = new ImagePlus();
 								impXA2.setStack(stackA2);
 								if (diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
-									IJ.run(impXA2, "Rotate 90 Degrees Left", "stack");
+									//THERE IS A LONG STORY BEHIND THIS CHOICE OF TWO OPTION...SHROFF LAB WHIMS...
+//									IJ.run(impXA2, "Rotate 90 Degrees Left", "stack");
 								}
 								impXA2.setCalibration(impAs[pos].getCalibration());
 								IJ.saveAs(impXA2, "Tiff", savePath + "CropBkgdSub" + File.separator + "SPIMA"+pos+"-"+f+"-2_1.tif");
@@ -4464,8 +4466,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							impXB1 = new ImagePlus();
 							impXB1.setStack(stackB1);
 							if (diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
-								//								IJ.run(impXB1, "Flip Horizontally", "stack");
-								IJ.run(impXB1, "Rotate 90 Degrees Right", "stack");
+								//THERE IS A LONG STORY BEHIND THIS CHOICE OF TWO OPTION...SHROFF LAB WHIMS...
+								IJ.run(impXB1, "Flip Horizontally", "stack");
+//								IJ.run(impXB1, "Rotate 90 Degrees Right", "stack");
 							}
 							impXB1.setCalibration(impBs[pos].getCalibration());
 							IJ.saveAs(impXB1, "Tiff", savePath + "CropBkgdSub" + File.separator + "SPIMB"+pos+"-"+f+"-1_1.tif");
@@ -4476,8 +4479,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								impXB2 = new ImagePlus();
 								impXB2.setStack(stackB2);
 								if (diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
-									//									IJ.run(impXB2, "Flip Horizontally", "stack");
-									IJ.run(impXB2, "Rotate 90 Degrees Right", "stack");
+									//THERE IS A LONG STORY BEHIND THIS CHOICE OF TWO OPTION...SHROFF LAB WHIMS...
+									IJ.run(impXB2, "Flip Horizontally", "stack");
+//									IJ.run(impXB2, "Rotate 90 Degrees Right", "stack");
 								}
 								impXB2.setCalibration(impBs[pos].getCalibration());
 								IJ.saveAs(impXB2, "Tiff", savePath + "CropBkgdSub" + File.separator + "SPIMB"+pos+"-"+f+"-2_1.tif");
