@@ -140,7 +140,7 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 		matrixPriming = new Choice();
 		matrixPriming.add("Prime registration with previous matrix");
 		matrixPriming.add("Fresh registration for every volume");
-		
+		matrixPriming.add("Force registration with default matrix");
 		panel.add(channelChoices);
 		channelChoices.select(Prefs.get("diSPIMmonitor.keyChannel", "Key registration on Channel 1"));
 		panel.add(abRelOriChoices);
