@@ -4263,14 +4263,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								frameFileNames[pos][f] = "t" + f;
 							//							timecode = "" + (new Date()).getTime();
 
-							stackA1 = new ImageStack((int)cropWidthA[pos]+2, (int)cropHeightA[pos]+2);
-							stackA2 = new ImageStack((int)cropWidthA[pos]+2, (int)cropHeightA[pos]+2);
+							stackA1 = new ImageStack(longAxisLength, longAxisLength);
+							stackA2 = new ImageStack(longAxisLength, longAxisLength);
 							wasEdgesA[pos] = impAs[pos].getStack().isEdges();
 							impAs[pos].getWindow().setEnabled(false);
 
 							 
-							stackA1.addSlice(new ShortProcessor((int)cropWidthA[pos]+2, (int)cropHeightA[pos]+2));
-							stackA2.addSlice(new ShortProcessor((int)cropWidthA[pos]+2, (int)cropHeightA[pos]+2));
+							stackA1.addSlice(new ShortProcessor(longAxisLength, longAxisLength));
+							stackA2.addSlice(new ShortProcessor(longAxisLength, longAxisLength));
 
 							double maxBkgd1 = 0.0;
 							double maxBkgd2 = 0.0;
@@ -4312,8 +4312,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								ipA1 = ipA1r;
 
 //								stackA1.addSlice(ipA1);							
-								stackA1.addSlice(new ShortProcessor((int)cropWidthA[pos]+2, (int)cropHeightA[pos]+2));
-								stackA1.getProcessor(stackA1.getSize()).insert(ipA1, 0, 0);
+								stackA1.addSlice(new ShortProcessor(longAxisLength, longAxisLength));
+								stackA1.getProcessor(stackA1.getSize()).insert(ipA1, (longAxisLength/2)-(ipA1.getWidth()/2), (longAxisLength/2)-(ipA1.getHeight()/2));
 
 								if (wavelengths >= 2) {
 									impAs[pos].setPositionWithoutUpdate(wavelengths, i, f);
@@ -4339,13 +4339,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									ipA2r.insert(ipA2, 1, 1);
 									ipA2 = ipA2r;
 //									stackA2.addSlice(ipA2);
-									stackA2.addSlice(new ShortProcessor((int)cropWidthA[pos]+2, (int)cropHeightA[pos]+2));
-									stackA2.getProcessor(stackA2.getSize()).insert(ipA2, 0, 0);
+									stackA2.addSlice(new ShortProcessor(longAxisLength, longAxisLength));
+									stackA2.getProcessor(stackA2.getSize()).insert(ipA2, (longAxisLength/2)-(ipA2.getWidth()/2), (longAxisLength/2)-(ipA2.getHeight()/2));
 								}
 							}
 
-							stackA1.addSlice(new ShortProcessor((int)cropWidthA[pos]+2, (int)cropHeightA[pos]+2));
-							stackA2.addSlice(new ShortProcessor((int)cropWidthA[pos]+2, (int)cropHeightA[pos]+2));
+							stackA1.addSlice(new ShortProcessor(longAxisLength, longAxisLength));
+							stackA2.addSlice(new ShortProcessor(longAxisLength, longAxisLength));
 
 							impAs[pos].getWindow().setEnabled(true);
 							impXA1 = new ImagePlus();
@@ -4378,13 +4378,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							
 							longAxisLength = (int)longAxesB[pos];
 
-							stackB1 = new ImageStack((int)cropWidthB[pos]+2, (int)cropHeightB[pos]+2);
-							stackB2 = new ImageStack((int)cropWidthB[pos]+2, (int)cropHeightB[pos]+2);
+							stackB1 = new ImageStack(longAxisLength, longAxisLength);
+							stackB2 = new ImageStack(longAxisLength, longAxisLength);
 							wasEdgesB[pos] = impBs[pos].getStack().isEdges();
 							impBs[pos].getWindow().setEnabled(false);
 
-							stackB1.addSlice(new ShortProcessor((int)cropWidthB[pos]+2, (int)cropHeightB[pos]+2));
-							stackB2.addSlice(new ShortProcessor((int)cropWidthB[pos]+2, (int)cropHeightB[pos]+2));
+							stackB1.addSlice(new ShortProcessor(longAxisLength, longAxisLength));
+							stackB2.addSlice(new ShortProcessor(longAxisLength, longAxisLength));
 
 							for (int i = zFirstB[pos]; i <= zLastB[pos]; i++) {
 								impBs[pos].setPositionWithoutUpdate(1, i, f);
@@ -4428,8 +4428,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										// ip1.subtract(minLimit[2]);
 //										stackB1.addSlice(ipB1);
 
-										stackB1.addSlice(new ShortProcessor((int)cropWidthB[pos]+2, (int)cropHeightB[pos]+2));
-										stackB1.getProcessor(stackB1.getSize()).insert(ipB1, 0, 0);
+										stackB1.addSlice(new ShortProcessor(longAxisLength, longAxisLength));
+										stackB1.getProcessor(stackB1.getSize()).insert(ipB1, (longAxisLength/2)-(ipB1.getWidth()/2), (longAxisLength/2)-(ipB1.getHeight()/2));
 
 										if (wavelengths >= 2) {
 											impBs[pos].setPositionWithoutUpdate(wavelengths, i, f);
@@ -4456,14 +4456,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											ipB2 = ipB2r;
 											// ip2.subtract(minLimit[3]);
 //											stackB2.addSlice(ipB2);
-											stackB2.addSlice(new ShortProcessor((int)cropWidthB[pos]+2, (int)cropHeightB[pos]+2));
-											stackB2.getProcessor(stackB2.getSize()).insert(ipB2, 0, 0);
+											stackB2.addSlice(new ShortProcessor(longAxisLength, longAxisLength));
+											stackB2.getProcessor(stackB2.getSize()).insert(ipB2, (longAxisLength/2)-(ipB2.getWidth()/2), (longAxisLength/2)-(ipB2.getHeight()/2));
 
 										}
 							}
 
-							stackB1.addSlice(new ShortProcessor((int)cropWidthB[pos]+2, (int)cropHeightB[pos]+2));
-							stackB2.addSlice(new ShortProcessor((int)cropWidthB[pos]+2, (int)cropHeightB[pos]+2));
+							stackB1.addSlice(new ShortProcessor(longAxisLength, longAxisLength));
+							stackB2.addSlice(new ShortProcessor(longAxisLength, longAxisLength));
 
 							impBs[pos].getWindow().setEnabled(true);
 							impXB1 = new ImagePlus();
