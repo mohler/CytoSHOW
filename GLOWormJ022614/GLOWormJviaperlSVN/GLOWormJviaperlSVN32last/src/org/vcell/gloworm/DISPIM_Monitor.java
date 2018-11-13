@@ -4470,7 +4470,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							impXB1.setStack(stackB1);
 							if (diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
 								//THERE IS A LONG STORY BEHIND THIS CHOICE OF TWO OPTION...SHROFF LAB WHIMS...
-								IJ.run(impXB1, "Flip Horizontally", "stack");
+//								IJ.run(impXB1, "Flip Horizontally", "stack");
 //								IJ.run(impXB1, "Rotate 90 Degrees Right", "stack");
 							}
 							impXB1.setCalibration(impBs[pos].getCalibration());
@@ -4483,7 +4483,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								impXB2.setStack(stackB2);
 								if (diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
 									//THERE IS A LONG STORY BEHIND THIS CHOICE OF TWO OPTION...SHROFF LAB WHIMS...
-									IJ.run(impXB2, "Flip Horizontally", "stack");
+//									IJ.run(impXB2, "Flip Horizontally", "stack");
 //									IJ.run(impXB2, "Rotate 90 Degrees Right", "stack");
 								}
 								impXB2.setCalibration(impBs[pos].getCalibration());
