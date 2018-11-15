@@ -272,9 +272,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 	int wavelengths = 1;
 	int outputWavelengths = 1;
 	int zSlices = 1;
-	ImageWindow win = null;
-	ImageWindow prjXwin = null;
-	ImageWindow prjYwin = null;
 	private boolean monitoring;
 	private String rerunArg;
 
@@ -2294,6 +2291,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 												false);
 							}
 							if (stackDFs[pos]!=null && stackDFs[pos].getSize() > 0) {
+								ImageWindow win = null;
 								impDF1s[pos] = new ImagePlus();
 								impDF1s[pos].getRoiManager().setImagePlus(null);
 								impDF1s[pos].getRoiManager().dispose();
@@ -2359,6 +2357,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								}
 
 								if (stackPrxs[pos]!=null && stackPrys[pos]!=null) {
+									ImageWindow prjXwin = null;
+									ImageWindow prjYwin = null;
 
 									impPrxs[pos] = new ImagePlus();
 									impPrxs[pos].getRoiManager().setImagePlus(null);
@@ -2653,6 +2653,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							if (impBs[pos].hasNullStack())
 								continue;
 
+							ImageWindow win = null;
 
 							win = impAs[pos].getWindow();
 							double zoomA = win.getCanvas().getMagnification();
@@ -2951,6 +2952,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							if (impBs[pos].hasNullStack())
 								continue;
 
+							ImageWindow win = null;
 
 							win = impAs[pos].getWindow();
 							int cA = impAs[pos].getChannel();
@@ -3091,6 +3093,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						ImagePlus impTmpA = foA.openFolder(new File(dirOrOMETiff)
 						.getParent());
 
+						ImageWindow win = null;
+
 						// NOT WORKING YET!!!!
 						win = impAs[pos].getWindow();
 						//						ColorModel cmA = impAs[pos].getProcessor().getColorModel();
@@ -3218,6 +3222,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 
 						TiffDecoder tdA = new TiffDecoder("", dirOrOMETiff);
+						ImageWindow win = null;
 						win = impAs[pos].getWindow();
 						int cA = impAs[pos].getChannel();
 						int zA = impAs[pos].getSlice();
@@ -5210,6 +5215,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								}
 
 								if (stackDFs[pos]!=null && stackDFs[pos].getSize() > 0 && (impDF1s[pos]==null || stackDFs[pos].getSize() > impDF1s[pos].getStack().getSize())) {
+									ImageWindow win = null;
 									if (impDF1s[pos] != null){
 										impDF1s[pos].getRoiManager().setImagePlus(null);
 										impDF1s[pos].getRoiManager().dispose();
@@ -5311,6 +5317,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									}
 
 									if (stackPrxs[pos]!=null && stackPrxs[pos].getSize() > 0 && (impPrxs[pos]==null || stackPrxs[pos].getSize() > impPrxs[pos].getStack().getSize())) {
+										ImageWindow prjXwin = null;
 										if (impPrxs[pos] != null){
 											impPrxs[pos].getRoiManager().setImagePlus(null);
 											impPrxs[pos].getRoiManager().dispose();
@@ -5394,6 +5401,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									}
 									
 									if (stackPrys[pos]!=null && stackPrys[pos].getSize() > 0 && (impPrys[pos]==null || stackPrys[pos].getSize() > impPrys[pos].getStack().getSize())) {
+										ImageWindow prjYwin = null;
 
 										if (impPrys[pos] != null) {
 											impPrys[pos].getRoiManager().setImagePlus(null);
@@ -6464,6 +6472,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					continue;
 
 				if (doProcessing[pos]) {
+					ImageWindow win = null;
 
 					win = impAs[pos].getWindow();
 					double zoomA = win.getCanvas().getMagnification();
@@ -6490,6 +6499,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								impNextA.getCalibration().pixelDepth / impNextA.getCalibration().pixelWidth);
 
 					impAs[pos] = impNextA;
+					
+					win = null;
 
 					win.setImage(impAs[pos]);
 					impAs[pos].setWindow(win);
@@ -6688,6 +6699,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 					stackPrys[a] = null;
 					impPrys[a] = null;
+
 				}
 			}
 		}
