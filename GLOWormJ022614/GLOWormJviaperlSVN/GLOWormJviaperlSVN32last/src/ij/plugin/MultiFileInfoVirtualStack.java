@@ -961,6 +961,14 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	}
 
 	public void setDimOrder(String dimOrder) {
+		if (this.dimOrder.contains("Split") && !dimOrder.contains("Split")){
+			nSlices=nSlices/2;
+			cDim=cDim/2;
+		}
+		if (!this.dimOrder.contains("Split") && dimOrder.contains("Split")){
+			nSlices=nSlices*2;
+			cDim=cDim*2;
+		}
 		this.dimOrder = dimOrder;
 	}
 

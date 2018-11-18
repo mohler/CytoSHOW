@@ -516,6 +516,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					omeTiffs = false;
 					stackLabviewTimePoints = true;
 					stageScan = true;
+				}else if (arg.contains("currentStacks")) {
+					dirOrOMETiff = IJ
+							.getDirectory("image");
+					stackDualViewTimePoints = false;
+					singleImageTiffs = false;
+					omeTiffs = false;
+					stackLabviewTimePoints = false;
+					stageScan = false;
 				} else {
 					dirOrOMETiff = IJ
 							.getDirectory("Select master directory with LabView diSPIM raw data");
@@ -582,7 +590,86 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				//				zSlices = (int) gd.getNextNumber();
 			}
 			dirOrOMETiffFile = new File(dirOrOMETiff);
-			if (dirOrOMETiffFile.isDirectory()) {
+			if (arg.contains("currentStacks") || WindowManager.getImageCount()==2){
+				pDim=1;
+				impAs = new ImagePlus[pDim];
+				impBs = new ImagePlus[pDim];
+				origRoiAs = new Roi[pDim];
+				origRoiBs = new Roi[pDim];
+				ellipseRoiAs = new Roi[pDim];
+				ellipseRoiBs = new Roi[pDim];
+				rectRoiAs = new Roi[pDim];
+				rectRoiBs = new Roi[pDim];
+				doProcessing= new boolean[pDim];
+				impDF1s  = new ImagePlus[pDim];
+				impDF2s  = new ImagePlus[pDim];
+				impPrxs = new ImagePlus[pDim];
+				impPrys = new ImagePlus[pDim];
+
+				ciDFs  = new CompositeImage[pDim];
+				ciPrxs  = new CompositeImage[pDim];
+				ciPrys  = new CompositeImage[pDim];
+
+				prjXs = new Projector16bit[pDim];
+				prjYs = new Projector16bit[pDim];
+
+				wasFrameA = new int[pDim];
+				wasFrameB = new int[pDim];
+				wasSliceA = new int[pDim];
+				wasSliceB = new int[pDim];
+				wasChannelA = new int[pDim];
+				wasChannelB = new int[pDim];
+				zFirstA = new int[pDim];
+				zLastA = new int[pDim];
+				zFirstB = new int[pDim];
+				zLastB = new int[pDim];
+				lastMatrix = new String[pDim];
+				cropWidthA = new double[pDim];
+				cropHeightA = new double[pDim];
+				cropWidthB = new double[pDim];
+				cropHeightB = new double[pDim];			
+				anglesA = new double[pDim];					
+				anglesB = new double[pDim];					
+				longAxesA = new double[pDim];					
+				longAxesB = new double[pDim];					
+				rotZYXs = new double[pDim][3];
+				
+				dispimToolsButton = new JButton[pDim][2];
+				fuseButton = new JButton[pDim][2];
+				splitButton = new JButton[pDim][2];
+				spinnerPanel = new Panel[pDim][2];
+				xSpinner = new JSpinner[pDim][2];
+				ySpinner = new JSpinner[pDim][2];
+				zSpinner = new JSpinner[pDim][2];
+
+				wasEdgesA = new boolean[pDim];
+				wasEdgesB = new boolean[pDim];
+
+				stackAs = new MultiFileInfoVirtualStack[pDim];
+				stackBs = new MultiFileInfoVirtualStack[pDim];
+
+				impAs[0] = WindowManager.getImage(1);
+				impBs[0] = WindowManager.getImage(2);
+				
+				stackAs[0] = (MultiFileInfoVirtualStack) impAs[0].getImageStack();
+				if (stackAs[0].getWidth()==2048 && stackAs[0].getHeight()==512){
+					int wasC = impAs[0].getNChannels();
+					int wasZ = impAs[0].getNSlices();
+					int wasT = impAs[0].getNFrames();
+					stackAs[0].setDimOrder("xySplitCzt");
+					impAs[0].setStack(stackAs[0],2*wasC, wasZ, wasT);
+				}
+				stackBs[0] = (MultiFileInfoVirtualStack) impBs[0].getImageStack();
+				if (stackBs[0].getWidth()==2048 && stackBs[0].getHeight()==512){
+					int wasC = impBs[0].getNChannels();
+					int wasZ = impBs[0].getNSlices();
+					int wasT = impBs[0].getNFrames();
+					stackBs[0].setDimOrder("xySplitCzt");
+					impBs[0].setStack(stackBs[0],2*wasC, wasZ, wasT);
+				}
+
+				
+			}else if (dirOrOMETiffFile.isDirectory()) {
 				if (omeTiffs) {
 					fileListA = new File("" + dirOrOMETiff).list();
 
@@ -2518,7 +2605,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 		while (monitoring) {
 			boolean focus = false;
-			if ((new File(dirOrOMETiff)).isDirectory()) {
+			if (arg.contains("currentStacks") || WindowManager.getImageCount()==2){
+
+			} else if ((new File(dirOrOMETiff)).isDirectory()) {
 				if (omeTiffs) {
 					fileListA = new File("" + dirOrOMETiff).list();
 					String[] newlist = new String[fileListA.length];
