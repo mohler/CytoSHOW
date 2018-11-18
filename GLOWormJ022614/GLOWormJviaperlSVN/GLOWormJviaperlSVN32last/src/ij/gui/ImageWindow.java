@@ -224,6 +224,7 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
 			boolean unlocked = imp.lockSilently();
 			boolean changes = imp.changes;
 			imp.changes = false;
+			previousWindow.imp=null;
 			previousWindow.close();
 			imp.changes = changes;
 			if (unlocked)
@@ -899,11 +900,11 @@ public class ImageWindow extends Frame implements FocusListener, WindowListener,
     public boolean close() {
     	boolean isRunning = running || running2 || running3;
     	running = running2 = running3 = false;
-    	boolean virtual = imp.getStackSize()>1 && imp.getStack().isVirtual();
+    	boolean virtual = imp!=null && imp.getStackSize()>1 && imp.getStack().isVirtual();
     	if (isRunning) IJ.wait(500);
-    	if (ij==null || IJ.getApplet()!=null || Interpreter.isBatchMode() || IJ.macroRunning() || virtual)
+    	if (imp!=null && ij==null || IJ.getApplet()!=null || Interpreter.isBatchMode() || IJ.macroRunning() || virtual)
     		imp.changes = false;
-    	if (imp.changes) {
+    	if (imp!=null && imp.changes) {
     		String msg;
     		String name = imp.getTitle();
     		if (name.length()>22)
