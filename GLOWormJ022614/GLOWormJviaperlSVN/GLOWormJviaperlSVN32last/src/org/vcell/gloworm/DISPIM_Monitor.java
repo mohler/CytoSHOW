@@ -658,6 +658,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					int wasT = impAs[0].getNFrames();
 					stackAs[0].setDimOrder("xySplitCzt");
 					impAs[0].setStack(stackAs[0],2*wasC, wasZ, wasT);
+					wavelengths = impAs[0].getNChannels();
 				}
 				stackBs[0] = (MultiFileInfoVirtualStack) impBs[0].getImageStack();
 				if (stackBs[0].getWidth()==2048 && stackBs[0].getHeight()==512){
@@ -4444,7 +4445,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							impAs[pos].getWindow().setEnabled(true);
 							impXA1 = new ImagePlus();
 							impXA1.setStack(stackA1);
-							if (diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
+							if (diSPIM_MM_ComputerName!=null && diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
 								//THERE IS A LONG STORY BEHIND THIS CHOICE OF TWO OPTION...SHROFF LAB WHIMS...
 //								IJ.run(impXA1, "Rotate 90 Degrees Left", "stack");
 							}
@@ -4456,7 +4457,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							if (wavelengths >= 2) {
 								impXA2 = new ImagePlus();
 								impXA2.setStack(stackA2);
-								if (diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
+								if (diSPIM_MM_ComputerName!=null && diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
 									//THERE IS A LONG STORY BEHIND THIS CHOICE OF TWO OPTION...SHROFF LAB WHIMS...
 //									IJ.run(impXA2, "Rotate 90 Degrees Left", "stack");
 								}
@@ -4562,7 +4563,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							impBs[pos].getWindow().setEnabled(true);
 							impXB1 = new ImagePlus();
 							impXB1.setStack(stackB1);
-							if (diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
+							if (diSPIM_MM_ComputerName!=null && diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
 								//THERE IS A LONG STORY BEHIND THIS CHOICE OF TWO OPTION...SHROFF LAB WHIMS...
 //								IJ.run(impXB1, "Flip Horizontally", "stack");
 //								IJ.run(impXB1, "Rotate 90 Degrees Right", "stack");
@@ -4575,7 +4576,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							if (wavelengths >= 2) {
 								impXB2 = new ImagePlus();
 								impXB2.setStack(stackB2);
-								if (diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
+								if (diSPIM_MM_ComputerName!=null && diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
 									//THERE IS A LONG STORY BEHIND THIS CHOICE OF TWO OPTION...SHROFF LAB WHIMS...
 //									IJ.run(impXB2, "Flip Horizontally", "stack");
 //									IJ.run(impXB2, "Rotate 90 Degrees Right", "stack");
@@ -4830,7 +4831,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								String threeDorientationIndex= ""+abRelOriValue;
 
 								//							String threeDorientationIndex= "1";
-								//							if (diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
+								//							if (diSPIM_MM_ComputerName!=null && diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
 								//								threeDorientationIndex =  "-1";
 								//							}							
 
