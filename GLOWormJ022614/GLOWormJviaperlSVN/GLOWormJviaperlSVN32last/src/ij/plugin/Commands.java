@@ -112,10 +112,15 @@ public class Commands implements PlugIn {
 				if (gd.wasCanceled()) return;
 			}
 			for (int i=0; i<list.length; i++) {
-				ImagePlus imp = WindowManager.getImage(list[i]);
+				final ImagePlus imp = WindowManager.getImage(list[i]);
 				if (imp!=null) {
 					imp.changes = false;
-					imp.close();
+					new Thread(new Runnable(){
+						public void run(){
+							imp.close();
+						}
+					});
+					
 				}
 			}
     	}

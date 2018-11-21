@@ -590,7 +590,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				//				zSlices = (int) gd.getNextNumber();
 			}
 			dirOrOMETiffFile = new File(dirOrOMETiff);
-			if (arg.contains("currentStacks") || WindowManager.getImageCount()==2){
+			if (arg.contains("currentStacks") && WindowManager.getImageCount()==2){
 				pDim=1;
 				impAs = new ImagePlus[pDim];
 				impBs = new ImagePlus[pDim];
@@ -659,6 +659,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					stackAs[0].setDimOrder("xySplitCzt");
 					impAs[0].setStack(stackAs[0],2*wasC, wasZ, wasT);
 					wavelengths = impAs[0].getNChannels();
+					cDim = impAs[0].getNChannels();
+					zDim = impAs[0].getNSlices();
+					tDim = impAs[0].getNFrames();
+					vDim = 2;
+					impAs[0].getCalibration().setUnit("micron");
+					impAs[0].getCalibration().pixelWidth = 0.1625;
+					impAs[0].getCalibration().pixelHeight = 0.1625;
+					impAs[0].getCalibration().pixelDepth = 1;
 				}
 				stackBs[0] = (MultiFileInfoVirtualStack) impBs[0].getImageStack();
 				if (stackBs[0].getWidth()==2048 && stackBs[0].getHeight()==512){
@@ -667,6 +675,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					int wasT = impBs[0].getNFrames();
 					stackBs[0].setDimOrder("xySplitCzt");
 					impBs[0].setStack(stackBs[0],2*wasC, wasZ, wasT);
+					impBs[0].getCalibration().setUnit("micron");
+					impBs[0].getCalibration().pixelWidth = 0.1625;
+					impBs[0].getCalibration().pixelHeight = 0.1625;
+					impBs[0].getCalibration().pixelDepth = 1;
 				}
 
 				
@@ -2606,7 +2618,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 		while (monitoring) {
 			boolean focus = false;
-			if (arg.contains("currentStacks") || WindowManager.getImageCount()==2){
+			if (arg.contains("currentStacks")){
 
 			} else if ((new File(dirOrOMETiff)).isDirectory()) {
 				if (omeTiffs) {
@@ -6427,7 +6439,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					boolean shown = fuseButton[pos][0].isVisible();
 					dispimToolsButton[pos][0].setBackground(!shown?Color.yellow:null);
 					fuseButton[pos][0].setVisible(!shown);
-					splitButton[pos][0].setVisible(!shown);
+					splitButton[pos][0].setVisible(dimOrder.contains("Sequential") && !shown);
 					xSpinner[pos][0].setVisible(!shown);
 					ySpinner[pos][0].setVisible(!shown);
 					zSpinner[pos][0].setVisible(!shown);
@@ -6471,7 +6483,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					boolean shown = fuseButton[pos][1].isVisible();
 					dispimToolsButton[pos][1].setBackground(!shown?Color.yellow:null);
 					fuseButton[pos][1].setVisible(!shown);
-					splitButton[pos][1].setVisible(!shown);
+					splitButton[pos][1].setVisible(dimOrder.contains("Sequential") && !shown);
 					xSpinner[pos][1].setVisible(!shown);
 					ySpinner[pos][1].setVisible(!shown);
 					zSpinner[pos][1].setVisible(!shown);

@@ -728,7 +728,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		}
 		
 		int dZ = 0;
-		if (rawdispimdata && cDim/vDim>1 ) {
+		if (rawdispimdata /*&& cDim/vDim>1*/ ) {
 			dZ=isViewB?dZB:dZA;
 		}
 
@@ -799,8 +799,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 				ip.setRoi(xOri, yOri, w/2, h);
 			}else if (ip.getWidth()==2048) { //NIBIB splitview setup(?)
-				dX=2;
-				dY=0;
+//				dX=2;
+//				dY=0;
 				int xOri = 256+((1-(n+1)%2)*(1024));
 				int yOri = 0+((1-(n+1)%2)*(0));
 				ip.setRoi(xOri, yOri, 512, 512);
