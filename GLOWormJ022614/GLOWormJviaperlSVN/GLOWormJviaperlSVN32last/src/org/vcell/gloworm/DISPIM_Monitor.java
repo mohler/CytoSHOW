@@ -1534,8 +1534,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 			SelectKeyChannelDialog d = new SelectKeyChannelDialog(
 					IJ.getInstance(),
-					"Deconvolve while aquiring?",
-					"Would you like volumes to be deconvolved/fused \nas soon as they are captured?  \n\nChoose this option if you are ready \nto initiate time-lapse recording.");
+					"Deconvolve/Fuse diSPIM Raw Data Volumes ",
+					"New raw data will be deconvolved/fused \nas soon as they are captured.");
 			// d.setVisible(true);
 			if (d.cancelPressed()) {
 				doMipavDecon = false;

@@ -13,7 +13,7 @@ import javax.swing.SpinnerNumberModel;
 	"Yes", "No" and "Cancel" buttons. */
 public class SelectKeyChannelDialog extends Dialog implements ActionListener, KeyListener, ItemListener {
     private Choice channelChoices;
-    private Choice methodChoices;
+//    private Choice methodChoices;
     private Choice viewChoices;
 
     private Button yesB, noB, cancelB;
@@ -131,8 +131,8 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 		abRelOriChoices.add("Input Volumes Rel. Orientation = +1");
 		abRelOriChoices.add("Input Volumes Rel. Orientation = 0");
 		abRelOriChoices.add("Input Volumes Rel. Orientation = -1");
-		methodChoices = new Choice();
-		methodChoices.add("MinGuo GPU method");
+//		methodChoices = new Choice();
+//		methodChoices.add("MinGuo GPU method");
 //		methodChoices.add("mipav CPU method");             
 		viewChoices = new Choice();
 		viewChoices.add("A");
@@ -145,8 +145,8 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 		channelChoices.select(Prefs.get("diSPIMmonitor.keyChannel", "Key registration on Channel 1"));
 		panel.add(abRelOriChoices);
 		abRelOriChoices.select(Prefs.get("diSPIMmonitor.relativeOrientation", "Input Volumes Rel. Orientation = +1"));
-		panel.add(methodChoices);
-		methodChoices.select(Prefs.get("diSPIMmonitor.fusionMethod", "MinGuo GPU method"));
+//		panel.add(methodChoices);
+//		methodChoices.select(Prefs.get("diSPIMmonitor.fusionMethod", "MinGuo GPU method"));
 		panel.add(viewChoices);
 		viewChoices.select(Prefs.get("diSPIMmonitor.fusionView", "B"));
 		panel.add(matrixPriming);
@@ -167,7 +167,7 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 		}
 		channelChoices.addItemListener(this);
 		abRelOriChoices.addItemListener(this);
-		methodChoices.addItemListener(this);
+//		methodChoices.addItemListener(this);
 		viewChoices.addItemListener(this);
 		matrixPriming.addItemListener(this);
 		yesB.addActionListener(this);
@@ -199,6 +199,7 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 //		optPanel.add("West", depthSeek);
 //		optPanel.add("West", modeFractionSpinnerA);
 //		optPanel.add("Center", modeFractionSpinnerB);
+		optPanel.add("West", new Label("Iterations of Deconvolution"));
 		optPanel.add("East", iterationSpinner);
 		lineageCheckbox = new Checkbox("Auto-Launch StarryNite lineaging of Fused Volumes?", 
 												Prefs.get("diSPIMmonitor.lineage", false));
@@ -222,8 +223,9 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 			Prefs.set("diSPIMmonitor.keyChannel", channelChoices.getSelectedItem());
 			abRelOriValue = 1-abRelOriChoices.getSelectedIndex();
 			Prefs.set("diSPIMmonitor.relativeOrientation", abRelOriChoices.getSelectedItem());
-			regDeconMethod = methodChoices.getSelectedItem();	
-			Prefs.set("diSPIMmonitor.fusionMethod", methodChoices.getSelectedItem());
+			regDeconMethod = "MinGuo GPU method";	
+//			regDeconMethod = methodChoices.getSelectedItem();	
+//			Prefs.set("diSPIMmonitor.fusionMethod", methodChoices.getSelectedItem());
 			regDeconView = viewChoices.getSelectedItem();	
 			Prefs.set("diSPIMmonitor.fusionView", viewChoices.getSelectedItem());
 			matPrimMethod = matrixPriming.getSelectedItem();
@@ -296,21 +298,21 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 		if (e.getSource()==depthSeek) {
 			autodepth = false;
 		}
-		if (e.getSource() == methodChoices) {
-			regDeconMethod = methodChoices.getSelectedItem();		
-			IJ.log("regDeconMethod "+ regDeconMethod);
-			if (regDeconMethod.contains("GPU") ) {
-				if (optPanel!=null) {
-					optPanel.setVisible(true);
-				}
-				this.pack();
-			} else {
-				if (optPanel != null) {
-					optPanel.setVisible(false);
-					this.pack();
-				}
-			}
-		}
+//		if (e.getSource() == methodChoices) {
+//			regDeconMethod = methodChoices.getSelectedItem();		
+//			IJ.log("regDeconMethod "+ regDeconMethod);
+//			if (regDeconMethod.contains("GPU") ) {
+//				if (optPanel!=null) {
+//					optPanel.setVisible(true);
+//				}
+//				this.pack();
+//			} else {
+//				if (optPanel != null) {
+//					optPanel.setVisible(false);
+//					this.pack();
+//				}
+//			}
+//		}
 	}
 
 	public boolean isAutodepth() {
