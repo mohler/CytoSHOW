@@ -133,7 +133,7 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 		abRelOriChoices.add("Input Volumes Rel. Orientation = -1");
 		methodChoices = new Choice();
 		methodChoices.add("MinGuo GPU method");
-		methodChoices.add("mipav CPU method");
+//		methodChoices.add("mipav CPU method");             
 		viewChoices = new Choice();
 		viewChoices.add("A");
 		viewChoices.add("B");
