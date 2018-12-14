@@ -4292,7 +4292,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							}
 						}
 
-						if (orientBeforeLineage && (posFrameStart[pos]!=f || posFrameEnd[pos]!=f)) {
+						if (orientBeforeLineage && (posFrameStart[pos]!=f && posFrameEnd[pos]!=f)) {
 							go = false;
 						}else if (posFrameStart[pos]>f || posFrameEnd[pos]<f) {
 							go = false;
