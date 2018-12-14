@@ -389,7 +389,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 	private double[] anglesB;
 	private double[] longAxesA;
 	private double[] longAxesB;
-	private double[][] rotZYXs;
+	private double[][] rotXYZs;
 	private boolean snfCycleComplete = false;
 	private String keyView;
 	private boolean doForceDefaultRegTMX;
@@ -632,7 +632,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				anglesB = new double[pDim];					
 				longAxesA = new double[pDim];					
 				longAxesB = new double[pDim];					
-				rotZYXs = new double[pDim][3];
+				rotXYZs = new double[pDim][3];
 				
 				dispimToolsButton = new JButton[pDim][2];
 				fuseButton = new JButton[pDim][2];
@@ -752,7 +752,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					anglesB = new double[pDim];					
 					longAxesA = new double[pDim];					
 					longAxesB = new double[pDim];					
-					rotZYXs = new double[pDim][3];
+					rotXYZs = new double[pDim][3];
 					
 					dispimToolsButton = new JButton[pDim][2];
 					fuseButton = new JButton[pDim][2];
@@ -801,7 +801,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					for (String argPeer:argPeerDirArrayList) {
 						dirConcat = dirConcat + argPeer +"|";
 					}
-					dirOrOMETiff = dirConcat.split("\\|")[0];
+					String dirOrOMETiff0 = dirConcat.split("\\|")[0];
 					IJ.log(dirConcat);
 					
 					for (int pos=0; pos<pDim; pos++) {
@@ -823,12 +823,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						impBs[pos].setTitle(titleRoot.replaceAll("(.*)Pos\\d+_\\d+.ome.tif", "$1.ome.tif") + "_Pos" +pos + ": SPIMB");
 
 						impAs[pos].setFileInfo(new FileInfo());
-						impAs[pos].getOriginalFileInfo().fileName = dirOrOMETiff;
-						impAs[pos].getOriginalFileInfo().directory = dirOrOMETiff;
+						impAs[pos].getOriginalFileInfo().fileName = dirOrOMETiff0;
+						impAs[pos].getOriginalFileInfo().directory = dirOrOMETiff0;
 
 						impBs[pos].setFileInfo(new FileInfo());
-						impBs[pos].getOriginalFileInfo().fileName = dirOrOMETiff;
-						impBs[pos].getOriginalFileInfo().directory = dirOrOMETiff;
+						impBs[pos].getOriginalFileInfo().fileName = dirOrOMETiff0;
+						impBs[pos].getOriginalFileInfo().directory = dirOrOMETiff0;
 
 						tDim = Math.max(diSPIM_MM_Frames, diSPIM_MM_numTimepoints);
 						if (cDim == 4 && wavelengths == 4 && splitChannels == true && dimOrder == "xySplitCzt") {
@@ -1252,7 +1252,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				anglesB = new double[pDim];					
 				longAxesA = new double[pDim];					
 				longAxesB = new double[pDim];					
-				rotZYXs = new double[pDim][3];
+				rotXYZs = new double[pDim][3];
 				
 				dispimToolsButton = new JButton[pDim][2];
 				fuseButton = new JButton[pDim][2];
@@ -1560,11 +1560,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				slaveChannel = keyChannel == 1 ? 2 : 1;
 				OpenDialog.setDefaultDirectory(Prefs.get("diSPIMmonitor.output", savePath));
 				String savePathParent = IJ.getDirectory("Select where to make Output Folder");
+				String prefix = "Decon"+(orientBeforeLineage?"Preview":"")+"_";
 				if (savePathParent.contains(dirOrOMETiff)) { 
 					String shortName = (new File(dirOrOMETiff)).getName().replaceAll("_", "").replaceAll("&", "AND");
-					savePath = (new File(dirOrOMETiff)).getParent() + File.separator+"Decon_"+shortName.substring(0, shortName.length()<90?shortName.length():85).replaceAll("_", "").replaceAll("&", "AND")+"..._Output"+ File.separator;
+					savePath = (new File(dirOrOMETiff)).getParent() + File.separator+prefix+shortName.substring(0, shortName.length()<90?shortName.length():85).replaceAll("_", "").replaceAll("&", "AND")+"..._Output"+ File.separator;
 				} else {
-					savePath = savePathParent + File.separator +"Decon_"+ (new File(dirOrOMETiff)).getName().replaceAll("_", "").replaceAll("&", "AND") +"..._Output"+ File.separator;
+					savePath = savePathParent + File.separator +prefix+ (new File(dirOrOMETiff)).getName().replaceAll("_", "").replaceAll("&", "AND") +"..._Output"+ File.separator;
 				}
 				
 				new File(savePath).mkdirs();
@@ -4195,9 +4196,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			for (String line:rotFileLines){
 				String[] rotLineChunks = line.split(",");
 				if (rotLineChunks.length==4){
-					rotZYXs[Integer.parseInt(rotLineChunks[0])][0] = Double.parseDouble(rotLineChunks[1]);
-					rotZYXs[Integer.parseInt(rotLineChunks[0])][1] = Double.parseDouble(rotLineChunks[2]);
-					rotZYXs[Integer.parseInt(rotLineChunks[0])][2] = Double.parseDouble(rotLineChunks[3]);
+					rotXYZs[Integer.parseInt(rotLineChunks[0])][0] = Double.parseDouble(rotLineChunks[1]);
+					rotXYZs[Integer.parseInt(rotLineChunks[0])][1] = Double.parseDouble(rotLineChunks[2]);
+					rotXYZs[Integer.parseInt(rotLineChunks[0])][2] = Double.parseDouble(rotLineChunks[3]);
 				}
 			}
 		}
@@ -4291,7 +4292,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							}
 						}
 
-						if (posFrameStart[pos]>f || posFrameEnd[pos]<f) {
+						if (orientBeforeLineage && (posFrameStart[pos]!=f || posFrameEnd[pos]!=f)) {
+							go = false;
+						}else if (posFrameStart[pos]>f || posFrameEnd[pos]<f) {
 							go = false;
 						}
 						if (!go){
@@ -4730,9 +4733,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 								int npoints = xpoints.length;
 
-								double zRotAngle = rotZYXs[pos][0];
-								double yRotAngle =  rotZYXs[pos][1];
-								double xRotAngle =  rotZYXs[pos][2];
+								double xRotAngle = rotXYZs[pos][0];
+								double yRotAngle =  rotXYZs[pos][1];
+								double zRotAngle =  rotXYZs[pos][2];
 								if (type > Roi.OVAL) {
 									if (npoints == 4) {
 										double angleZero = new Line(xpoints[0], ypoints[0], xpoints[1], ypoints[1]).getAngle();
