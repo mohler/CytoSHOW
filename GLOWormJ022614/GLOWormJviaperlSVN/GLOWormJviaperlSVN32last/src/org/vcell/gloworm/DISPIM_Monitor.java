@@ -69,6 +69,7 @@ import ij.gui.SelectKeyChannelDialog;
 import ij.gui.StackWindow;
 import ij.gui.YesNoCancelDialog;
 import ij.io.FileInfo;
+import ij.io.FileOpener;
 import ij.io.OpenDialog;
 import ij.io.TiffDecoder;
 import ij.macro.MacroRunner;
@@ -428,6 +429,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 		IJ.log(dirOrOMETiff);
 		//		keyString = "";
 		boolean fullRun = !(arg.contains("rerunWithDecon"));
+		
 
 		String uniqueClientIdentifier;
 		try {
@@ -4296,6 +4298,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							go = false;
 						}else if (posFrameStart[pos]>f || posFrameEnd[pos]<f) {
 							go = false;
+						} else{
+							IJ.log("else");
 						}
 						if (!go){
 							continue;
@@ -4650,8 +4654,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							}
 						}
 
-						if (posFrameStart[pos]>f || posFrameEnd[pos]<f) {
+						if (orientBeforeLineage && (posFrameStart[pos]!=f && posFrameEnd[pos]!=f)) {
 							go = false;
+						}else if (posFrameStart[pos]>f || posFrameEnd[pos]<f) {
+							go = false;
+						} else{
+							IJ.log("else");
 						}
 						if (!go){
 							continue;
