@@ -4658,7 +4658,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					for (int pos=0; pos<pDim; pos++) {
 						boolean doForceDefaultRegTMXiterated = false;
 						boolean doRegPrimingIterated = false;
-						IJ.log("failIteration" + failIteration);
 						if (failIteration==0){
 							doForceDefaultRegTMXiterated = false;
 							doRegPrimingIterated = false;
@@ -4726,6 +4725,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						}
 
 						if (doProcessing[pos]) {
+							IJ.log("failIteration" + failIteration + " pos"+pos + " t"+f);
+
 							String saveDFPath = savePath;
 							while (!(new File(saveDFPath  + "CropBkgdSub" + File.separator + "SPIMA"+pos+"-"+f+"-1_1.tif").canRead()) ||
 									!(new File(saveDFPath + "CropBkgdSub" + File.separator + "SPIMA"+pos+"-"+f+"-2_1.tif").canRead()) ||
@@ -4984,7 +4985,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 												lastMatrix[pos] = IJ.openAsString("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
 												//												IJ.saveString(lastMatrix[pos], "" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx");
 												Files.move(Paths.get("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx"),
-														Paths.get(lastMatrix[pos], "" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx"));												IJ.log(""+ pos+ "new=> " + lastMatrix[pos]);
+														Paths.get("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx"));												IJ.log(""+ pos+ "new=> " + lastMatrix[pos]);
 												IJ.log(""+ pos+ "new=> " + lastMatrix[pos]);
 											}
 
@@ -5109,7 +5110,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										}
 
 										if(!(new File("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").canRead())) {
-											
+//											NEED TO INCREMENT FROM FRESH TO PRIME TO FORCE WITH LAST
+											failIteration++;
+											pos--;
+											continue;
 										}
 										
 										
@@ -5129,7 +5133,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 												lastMatrix[pos] = IJ.openAsString("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
 //												IJ.saveString(lastMatrix[pos], "" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx");
 												Files.move(Paths.get("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx"),
-														Paths.get(lastMatrix[pos], "" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx"));												IJ.log(""+ pos+ "new=> " + lastMatrix[pos]);
+														Paths.get("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx"));												
 												IJ.log(""+ pos+ "new=> " + lastMatrix[pos]);
 											}
 
