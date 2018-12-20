@@ -4919,6 +4919,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										}
 
 										regDeconProcess = Runtime.getRuntime().exec(cmdln);
+										
+										while (!(new File("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").canRead())) {
+											IJ.wait(100);
+										}
+										new File("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").delete();
+										
 										while (regDeconProcess!= null && regDeconProcess.isAlive()) {
 											IJ.wait(100);
 										}
@@ -5067,6 +5073,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										//								IJ.log(cmdln);
 										IJ.log(Arrays.toString(cmdln));
 										regDeconProcess = Runtime.getRuntime().exec(cmdln);
+
+										while (!(new File("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").canRead())) {
+											IJ.wait(100);
+										}
+										new File("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").delete();
+
 										while (regDeconProcess!= null && regDeconProcess.isAlive()) {
 											IJ.wait(100);
 										}
