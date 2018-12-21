@@ -4920,14 +4920,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 										regDeconProcess = Runtime.getRuntime().exec(cmdln);
 										
-										while (!(new File("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").canRead())) {
-											IJ.wait(100);
-										}
-										new File("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").delete();
-										
 										while (regDeconProcess!= null && regDeconProcess.isAlive()) {
 											IJ.wait(100);
 										}
+
+
 									} catch (IOException e) {
 										// TODO Auto-generated catch block
 										e.printStackTrace();
@@ -4992,6 +4989,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 												//												IJ.saveString(lastMatrix[pos], "" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx");
 												Files.move(Paths.get("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx"),
 														Paths.get("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx"));												IJ.log(""+ pos+ "new=> " + lastMatrix[pos]);
+													
+												new File("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").delete();
 												IJ.log(""+ pos+ "new=> " + lastMatrix[pos]);
 											}
 
@@ -5074,14 +5073,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										IJ.log(Arrays.toString(cmdln));
 										regDeconProcess = Runtime.getRuntime().exec(cmdln);
 
-										while (!(new File("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").canRead())) {
-											IJ.wait(100);
-										}
-										new File("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").delete();
-
 										while (regDeconProcess!= null && regDeconProcess.isAlive()) {
 											IJ.wait(100);
 										}
+
 									} catch (IOException e) {
 										// TODO Auto-generated catch block
 										e.printStackTrace();
@@ -5146,6 +5141,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 //												IJ.saveString(lastMatrix[pos], "" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx");
 												Files.move(Paths.get("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx"),
 														Paths.get("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx"));												
+												new File("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").delete();
 												IJ.log(""+ pos+ "new=> " + lastMatrix[pos]);
 											}
 
@@ -5256,6 +5252,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											IJ.wait(100);
 											waitCount++;
 										}
+
+										new File("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").delete();
 
 										if(outputDCFile.canRead()) {
 											
@@ -5473,8 +5471,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										win.getImagePlus().updateAndDraw();
 										win.getImagePlus().setPosition(oldC, oldZ, oldT);
 										win.getImagePlus().setDisplayRange(oldMin, oldMax);
-										win.setSize(win.getSize().width,
-												win.getSize().height);
+//										win.setSize(win.getSize().width,
+//												win.getSize().height);
 
 										//									win.setVisible(true);	
 									}
@@ -5583,8 +5581,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											prjXwin.getImagePlus().updateAndDraw();
 											prjXwin.getImagePlus().setPosition(oldC, oldZ, oldT);
 											prjXwin.getImagePlus().setDisplayRange(oldMin, oldMax);
-											prjXwin.setSize(prjXwin.getSize().width,
-													prjXwin.getSize().height);
+//											prjXwin.setSize(prjXwin.getSize().width,
+//													prjXwin.getSize().height);
 
 
 										}
@@ -5669,8 +5667,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											prjYwin.getImagePlus().updateAndDraw();
 											prjYwin.getImagePlus().setPosition(oldC, oldZ, oldT);
 											prjYwin.getImagePlus().setDisplayRange(oldMin, oldMax);
-											prjYwin.setSize(prjYwin.getSize().width,
-													prjYwin.getSize().height);
+//											prjYwin.setSize(prjYwin.getSize().width,
+//													prjYwin.getSize().height);
 
 										}
 									}
