@@ -4968,6 +4968,16 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											failIteration++;
 											pos--;
 											continue;
+										} else {
+											lastMatrix[pos] = IJ.openAsString("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
+											if (Double.parseDouble(lastMatrix[pos].split("\\t")[10])< 0.8){
+												IJ.log("Bah Humbug");
+												failIteration++;
+												pos--;
+												continue;
+											}else{
+												IJ.log("Merry Xmas");
+											}
 										}
 										
 										
@@ -4992,9 +5002,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 													
 												new File("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").delete();
 												IJ.log(""+ pos+ "new=> " + lastMatrix[pos]);
-												if (Double.parseDouble(lastMatrix[pos].split("\\t")[10])< 0.8){
-													IJ.log("Bah Humbug");
-												}
 											}
 
 										} else {
@@ -5124,6 +5131,16 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											failIteration++;
 											pos--;
 											continue;
+										} else {
+											lastMatrix[pos] = IJ.openAsString("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
+											if (Double.parseDouble(lastMatrix[pos].split("\\t")[10])< 0.8){
+												IJ.log("Bah Humbug");
+												failIteration++;
+												pos--;
+												continue;
+											}else{
+												IJ.log("Merry Xmas");
+											}
 										}
 										
 										
@@ -5146,9 +5163,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 														Paths.get("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx"));												
 												new File("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").delete();
 												IJ.log(""+ pos+ "new=> " + lastMatrix[pos]);
-												if (Double.parseDouble(lastMatrix[pos].split("\\t")[10])< 0.8){
-													IJ.log("Bah Humbug");
-												}
 											}
 
 										} else {
