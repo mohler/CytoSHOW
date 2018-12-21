@@ -4666,11 +4666,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							doForceDefaultRegTMXiterated = false;
 							doRegPrimingIterated = true;
 						}
-						if (failIteration==3){
+						if (failIteration==2){
 							doForceDefaultRegTMXiterated = true;
 							doRegPrimingIterated = false;
 						}
-						if (failIteration==4){
+						if (failIteration==3){
 							continue;
 						}
 
