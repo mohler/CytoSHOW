@@ -4648,14 +4648,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 			public void run() {		
 				for (int f = 1; f <= tDim; f++) {
-					int failIteration = 0;
-					if (doRegPriming){
-						failIteration = 1;
-					}
-					if (doForceDefaultRegTMX){
-						failIteration = 2;
-					}
 					for (int pos=0; pos<pDim; pos++) {
+						int failIteration = 0;
+						if (doRegPriming){
+							failIteration = 1;
+						}
+						if (doForceDefaultRegTMX){
+							failIteration = 2;
+						}
 						boolean doForceDefaultRegTMXiterated = false;
 						boolean doRegPrimingIterated = false;
 						if (failIteration==0){
@@ -5320,7 +5320,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								IJ.log("finishing " + pos +" "+ impAs[pos].getChannel()+" "+ impAs[pos].getSlice()+" "+ f);
 							}
 						}
-						failIteration = 0;
 					}
 				}
 			}
