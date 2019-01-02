@@ -19,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -375,14 +376,16 @@ public class StarryNiteFeeder implements PlugIn {
 						}
 
 						try {
-							IJ.log("C:\\SNFeeder_compiled\\user\\detect_track_driver_allmatlab.exe "+impParameterPath.replace("\\\\", "\\").replace("\\", "\\\\") +(outDir+subdir+"Skipped").replace("\\\\", "\\").replace("\\", "\\\\")+"\\\\ aaa emb "+(outDir+subdir+"Skipped").replace("\\\\", "\\").replace("\\", "\\\\")+"\\\\ 0 true");
-
+							IJ.log("C:\\SNFeeder_compiled\\user\\detect_track_driver_allmatlab.exe "+impParameterPath.replace("\\\\", "\\").replace("\\", "\\\\") +" "+ (outDir+subdir+"Skipped").replace("\\\\", "\\").replace("\\", "\\\\")+"\\\\ aaa emb "+(outDir+subdir+"Skipped").replace("\\\\", "\\").replace("\\", "\\\\")+"\\\\ 0 true");
+							IJ.log(String.join(" ", Arrays.asList(new String[]{"cmd","/c","start","/min","/wait","C:\\SNFeeder_compiled\\user\\detect_track_driver_allmatlab.exe", impParameterPath.replace("\\\\", "\\").replace("\\", "\\\\"), (outDir+subdir+"Skipped").replace("\\\\", "\\").replace("\\", "\\\\")+"\\\\", "aaa", "emb", (outDir+subdir+"Skipped").replace("\\\\", "\\").replace("\\", "\\\\")+"\\\\", "0", "true"})));
 							Runtime.getRuntime().exec(new String[]{"cmd","/c","start","/min","/wait","C:\\SNFeeder_compiled\\user\\detect_track_driver_allmatlab.exe", impParameterPath.replace("\\\\", "\\").replace("\\", "\\\\"), (outDir+subdir+"Skipped").replace("\\\\", "\\").replace("\\", "\\\\")+"\\\\", "aaa", "emb", (outDir+subdir+"Skipped").replace("\\\\", "\\").replace("\\", "\\\\")+"\\\\", "0", "true"});
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 						boolean bip=true;
+						IJ.log("Finding "+(outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa_emb_edited.xml");
+
 						while (!(new File((outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa_emb_edited.xml")).canRead()) {
 							IJ.wait(1000);
 							if (bip)

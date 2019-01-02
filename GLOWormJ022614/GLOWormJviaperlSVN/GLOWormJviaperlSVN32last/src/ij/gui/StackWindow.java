@@ -754,7 +754,7 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 				activeScrollBars.remove(0);
 			}
 		}
-    	remove(scrollbarPanel);
+//    	remove(scrollbarPanel);
     	scrollbarPanel = null;
     }
 

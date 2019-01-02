@@ -4648,29 +4648,31 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 			public void run() {		
 				for (int f = 1; f <= tDim; f++) {
+					int[] failIteration = new int[pDim];
+					Arrays.fill(failIteration, 0);
+
 					for (int pos=0; pos<pDim; pos++) {
-						int failIteration = 0;
 						if (doRegPriming){
-							failIteration = 1;
+							failIteration[pos] = 1;
 						}
 						if (doForceDefaultRegTMX){
-							failIteration = 2;
+							failIteration[pos] = 2;
 						}
 						boolean doForceDefaultRegTMXiterated = false;
 						boolean doRegPrimingIterated = false;
-						if (failIteration==0){
+						if (failIteration[pos]==0){
 							doForceDefaultRegTMXiterated = false;
 							doRegPrimingIterated = false;
 						}
-						if (failIteration==1){
+						if (failIteration[pos]==1){
 							doForceDefaultRegTMXiterated = false;
 							doRegPrimingIterated = true;
 						}
-						if (failIteration==2){
+						if (failIteration[pos]==2){
 							doForceDefaultRegTMXiterated = true;
 							doRegPrimingIterated = false;
 						}
-						if (failIteration==3){
+						if (failIteration[pos]==3){
 							continue;
 						}
 
@@ -4725,7 +4727,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						}
 
 						if (doProcessing[pos]) {
-							IJ.log("failIteration" + failIteration + " pos"+pos + " t"+f);
+							IJ.log("failIteration[pos]" + failIteration[pos] + " pos"+pos + " t"+f);
 
 							String saveDFPath = savePath;
 							while (!(new File(saveDFPath  + "CropBkgdSub" + File.separator + "SPIMA"+pos+"-"+f+"-1_1.tif").canRead()) ||
@@ -4965,14 +4967,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 										if(!(new File("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").canRead())) {
 //											NEED TO INCREMENT FROM FRESH TO PRIME TO FORCE WITH LAST
-											failIteration++;
+											failIteration[pos]++;
 											pos--;
 											continue;
 										} else {
 											lastMatrix[pos] = IJ.openAsString("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
 											if (Double.parseDouble(lastMatrix[pos].split("\\t")[10])< 0.8){
 												IJ.log("Bah Humbug");
-												failIteration++;
+												failIteration[pos]++;
 												pos--;
 												continue;
 											}else{
@@ -5128,14 +5130,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 										if(!(new File("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").canRead())) {
 //											NEED TO INCREMENT FROM FRESH TO PRIME TO FORCE WITH LAST
-											failIteration++;
+											failIteration[pos]++;
 											pos--;
 											continue;
 										} else {
 											lastMatrix[pos] = IJ.openAsString("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
 											if (Double.parseDouble(lastMatrix[pos].split("\\t")[10])< 0.8){
 												IJ.log("Bah Humbug");
-												failIteration++;
+												failIteration[pos]++;
 												pos--;
 												continue;
 											}else{
@@ -5688,6 +5690,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											prjYwin.getImagePlus().setDisplayRange(oldMin, oldMax);
 //											prjYwin.setSize(prjYwin.getSize().width,
 //													prjYwin.getSize().height);
+											
 
 										}
 									}
