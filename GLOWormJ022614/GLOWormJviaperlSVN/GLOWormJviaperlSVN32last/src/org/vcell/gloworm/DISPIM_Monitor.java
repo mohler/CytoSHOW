@@ -5149,7 +5149,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											continue;
 										} else {
 											lastMatrix[pos] = IJ.openAsString("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
-											if (Double.parseDouble(lastMatrix[pos].split("\\t")[10])< 0.8){
+											if (lastMatrix[pos].startsWith("Error") || Double.parseDouble(lastMatrix[pos].split("\\t")[10])< 0.8){
 												IJ.log("Bah Humbug");
 												failIteration[pos]++;
 												pos--;
