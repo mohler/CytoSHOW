@@ -4663,6 +4663,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						if (doForceDefaultRegTMX){
 							failIteration[pos] = 3;
 						}
+					}
+					for (int pos=0; pos<pDim; pos++) {
+
 						boolean doForceDefaultRegTMXiterated = false;
 						boolean doPrimeFromDefaultRegTMXiterated = false;
 						boolean doSerialRegPrimingIterated = false;
