@@ -217,6 +217,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 	private MultiFileInfoVirtualStack dfProjYmfivs;
 	private boolean autodepth;
 	private JButton[][] dispimToolsButton;
+	private JButton[][] dispimPreviewButton;
 	private JButton[][] fuseButton;
 	private JButton[][] splitButton;
 	private Checkbox[][] edgeBox;
@@ -4287,7 +4288,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 		}
 		final String[][] frameFileNames = new String[pDim][tDim+1];
 
-		Thread prepStacksThread = new Thread(new Runnable(){
+		Thread prepStacksThread = new Thread(null, new Runnable(){
 			
 			public void run() {
 				for (int f = 1; f <= tDim; f++) {
@@ -4636,11 +4637,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				}
 			}
 			
-		});
+		}, "prepStacksThread");
 		prepStacksThread.start();
 		
 		
-		Thread deconFuseThread = new Thread(new Runnable(){
+		Thread deconFuseThread = new Thread(null, new Runnable(){
 
 			private File output3DxFile;
 			private File output3DyFile;
@@ -5342,12 +5343,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					}
 				}
 			}
-		});
+		}, "deconFuseThread");
 		deconFuseThread.start();
 		
 		
 		
-		Thread updateWindowsAndWriteSNFFilesThread = new Thread(new Runnable(){
+		Thread updateWindowsAndWriteSNFFilesThread = new Thread(null, new Runnable(){
 
 			public void run() {		
 				snfCycleComplete=false;
@@ -5449,7 +5450,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									} else {
 										impDF1s[pos] = new ImagePlus();
 									}
-									impDF1s[pos].setStack("Decon-Fuse_"
+									impDF1s[pos].setStack((orientBeforeLineage?"Preview_":"") + "Decon-Fuse_"
 											+ impAs[pos].getTitle().split(":")[0], stackDFs[pos]);
 									impDF1s[pos].setFileInfo(new FileInfo());
 									impDF1s[pos].getCalibration().setUnit(impAs[pos].getCalibration().getUnit());
@@ -5551,7 +5552,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										}else {
 											impPrxs[pos] = new ImagePlus();
 										}
-										impPrxs[pos].setStack("3DProjX_Decon-Fuse_"
+										impPrxs[pos].setStack((orientBeforeLineage?"Preview_":"") + "3DProjX_Decon-Fuse_"
 												+ impAs[pos].getTitle().split(":")[0], stackPrxs[pos]);
 										impPrxs[pos].setFileInfo(new FileInfo());
 										impPrxs[pos].getCalibration().setUnit(impDF1s[pos].getCalibration().getUnit());
@@ -5636,7 +5637,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										} else {
 											impPrys[pos] = new ImagePlus();
 										}
-										impPrys[pos].setStack("3DProjY_Decon-Fuse_"
+										impPrys[pos].setStack((orientBeforeLineage?"Preview_":"") + "3DProjY_Decon-Fuse_"
 												+ impAs[pos].getTitle().split(":")[0], stackPrys[pos]);
 										impPrys[pos].setFileInfo(new FileInfo());
 										impPrys[pos].getCalibration().setUnit(impDF1s[pos].getCalibration().getUnit());
@@ -5710,6 +5711,53 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											
 
 										}
+										
+										Panel[] diSPIMPreviewPanel = new Panel[2];
+											Dimension sizeWinA = ciPrys[pos].getWindow().getSize();
+											if(diSPIMPreviewPanel[0] == null) {
+												diSPIMPreviewPanel[0] = new Panel(new BorderLayout());
+											}
+											if(diSPIMPreviewPanel[1] == null) {
+												diSPIMPreviewPanel[1] = new Panel(new BorderLayout());
+											}
+
+											if(dispimPreviewButton[pos][0] == null) {
+												dispimPreviewButton[pos][0] = new JButton("diSPIM Preview");
+												dispimPreviewButton[pos][0].addActionListener(DISPIM_Monitor.this);
+												diSPIMPreviewPanel[0].add(BorderLayout.WEST, dispimPreviewButton[pos][0]);
+												dispimPreviewButton[pos][0].setBackground(Color.orange);
+
+												dispimPreviewButton[pos][0].setVisible(true);
+											}else {
+												dispimPreviewButton[pos][0].setVisible(true);
+											}
+
+											if(dispimPreviewButton[pos][1] == null) {
+												dispimPreviewButton[pos][1] = new JButton("diSPIM Preview");
+												dispimPreviewButton[pos][1].addActionListener(DISPIM_Monitor.this);
+												diSPIMPreviewPanel[1].add(BorderLayout.WEST, dispimPreviewButton[pos][0]);
+												dispimPreviewButton[pos][1].setBackground(Color.orange);
+
+												dispimPreviewButton[pos][1].setVisible(true);
+											}else {
+												dispimPreviewButton[pos][1].setVisible(true);
+											}
+
+											diSPIMPreviewPanel[0].setVisible(true);
+											ciPrxs[pos].getWindow().viewButtonPanel.add(diSPIMPreviewPanel[0]);
+											ciPrxs[pos].getWindow().viewButtonPanel.validate();
+											diSPIMPreviewPanel[1].setVisible(true);
+											ciPrys[pos].getWindow().viewButtonPanel.add(diSPIMPreviewPanel[1]);
+											ciPrys[pos].getWindow().viewButtonPanel.validate();
+
+											ciPrxs[pos].getWindow().pack();
+//											impAs[pos].getWindow().setSize(sizeWinA);
+											ciPrys[pos].getWindow().pack();
+//											impBs[pos].getWindow().setSize(sizeWinB);
+											
+											
+										
+										IJ.run("Tile");
 									}
 
 									////////								
@@ -5963,7 +6011,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				snfCycleComplete = true;
 
 			}
-		});
+		}, "updateWindowsAndWriteSNFFilesThread");
 		updateWindowsAndWriteSNFFilesThread.start();
 		
 		
@@ -6646,6 +6694,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				}
 			}
 		}
+		
+		if (e.getActionCommand() == "diSPIM Preview"){
+			IJ.beep();
+			IJ.showMessage("what now?");
+		}
+		
 		if (e.getActionCommand() == "CCM") {
 			if (cDim == 4 && wavelengths == 4 && splitChannels == true && dimOrder == "xySplitCzt") {
 				cDim = 2;
