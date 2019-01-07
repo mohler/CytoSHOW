@@ -2411,7 +2411,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								impDF1s[pos].getRoiManager().setImagePlus(null);
 								impDF1s[pos].getRoiManager().dispose();
 								impDF1s[pos].setRoiManager(null);
-								impDF1s[pos].setStack("Decon-Fuse_"
+								impDF1s[pos].setStack((orientBeforeLineage?"Preview_":"") + "Decon-Fuse_"
 										+ impAs[pos].getTitle().split(":")[0], stackDFs[pos]);
 								impDF1s[pos].setFileInfo(new FileInfo());
 								impDF1s[pos].getCalibration().setUnit(impAs[pos].getCalibration().getUnit());
@@ -2479,7 +2479,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									impPrxs[pos].getRoiManager().setImagePlus(null);
 									impPrxs[pos].getRoiManager().dispose();
 									impPrxs[pos].setRoiManager(null);
-									impPrxs[pos].setStack("3DProjX_Decon-Fuse_"
+									impPrxs[pos].setStack((orientBeforeLineage?"Preview_":"") + "3DProjX_Decon-Fuse_"
 											+ impAs[pos].getTitle().split(":")[0], stackPrxs[pos]);
 									impPrxs[pos].setFileInfo(new FileInfo());
 									impPrxs[pos].getCalibration().setUnit(impDF1s[pos].getCalibration().getUnit());
@@ -2505,7 +2505,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									impPrys[pos].getRoiManager().setImagePlus(null);
 									impPrys[pos].getRoiManager().dispose();
 									impPrys[pos].setRoiManager(null);
-									impPrys[pos].setStack("3DProjY_Decon-Fuse_"
+									impPrys[pos].setStack((orientBeforeLineage?"Preview_":"") + "3DProjY_Decon-Fuse_"
 											+ impAs[pos].getTitle().split(":")[0], stackPrys[pos]);
 									impPrys[pos].setFileInfo(new FileInfo());
 									impPrys[pos].getCalibration().setUnit(impDF1s[pos].getCalibration().getUnit());
@@ -2598,48 +2598,67 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 												prjYwin.getSize().height);
 
 									}
-									Panel[] diSPIMPreviewPanel = new Panel[2];
-									Dimension sizeWinA = ciPrys[pos].getWindow().getSize();
-									if(diSPIMPreviewPanel[0] == null) {
-										diSPIMPreviewPanel[0] = new Panel(new BorderLayout());
+									if (orientBeforeLineage) {
+										Panel[] diSPIMPreviewPanel = new Panel[2];
+										Dimension sizeWinA = ciPrys[pos]
+												.getWindow().getSize();
+										if (diSPIMPreviewPanel[0] == null) {
+											diSPIMPreviewPanel[0] = new Panel(
+													new BorderLayout());
+										}
+										if (diSPIMPreviewPanel[1] == null) {
+											diSPIMPreviewPanel[1] = new Panel(
+													new BorderLayout());
+										}
+										if (dispimPreviewButton[pos][0] == null) {
+											dispimPreviewButton[pos][0] = new JButton(
+													"diSPIM Preview");
+											dispimPreviewButton[pos][0]
+													.addActionListener(DISPIM_Monitor.this);
+											diSPIMPreviewPanel[0]
+													.add(BorderLayout.WEST,
+															dispimPreviewButton[pos][0]);
+											dispimPreviewButton[pos][0]
+													.setBackground(Color.orange);
+
+											dispimPreviewButton[pos][0]
+													.setVisible(true);
+										} else {
+											dispimPreviewButton[pos][0]
+													.setVisible(true);
+										}
+										if (dispimPreviewButton[pos][1] == null) {
+											dispimPreviewButton[pos][1] = new JButton(
+													"diSPIM Preview");
+											dispimPreviewButton[pos][1]
+													.addActionListener(DISPIM_Monitor.this);
+											diSPIMPreviewPanel[1]
+													.add(BorderLayout.WEST,
+															dispimPreviewButton[pos][1]);
+											dispimPreviewButton[pos][1]
+													.setBackground(Color.orange);
+
+											dispimPreviewButton[pos][1]
+													.setVisible(true);
+										} else {
+											dispimPreviewButton[pos][1]
+													.setVisible(true);
+										}
+										diSPIMPreviewPanel[0].setVisible(true);
+										ciPrxs[pos].getWindow().viewButtonPanel
+												.add(diSPIMPreviewPanel[0]);
+										ciPrxs[pos].getWindow().viewButtonPanel
+												.validate();
+										diSPIMPreviewPanel[1].setVisible(true);
+										ciPrys[pos].getWindow().viewButtonPanel
+												.add(diSPIMPreviewPanel[1]);
+										ciPrys[pos].getWindow().viewButtonPanel
+												.validate();
+										ciPrxs[pos].getWindow().pack();
+										//									impAs[pos].getWindow().setSize(sizeWinA);
+										ciPrys[pos].getWindow().pack();
+										//									impBs[pos].getWindow().setSize(sizeWinB);
 									}
-									if(diSPIMPreviewPanel[1] == null) {
-										diSPIMPreviewPanel[1] = new Panel(new BorderLayout());
-									}
-
-									if(dispimPreviewButton[pos][0] == null) {
-										dispimPreviewButton[pos][0] = new JButton("diSPIM Preview");
-										dispimPreviewButton[pos][0].addActionListener(DISPIM_Monitor.this);
-										diSPIMPreviewPanel[0].add(BorderLayout.WEST, dispimPreviewButton[pos][0]);
-										dispimPreviewButton[pos][0].setBackground(Color.orange);
-
-										dispimPreviewButton[pos][0].setVisible(true);
-									}else {
-										dispimPreviewButton[pos][0].setVisible(true);
-									}
-
-									if(dispimPreviewButton[pos][1] == null) {
-										dispimPreviewButton[pos][1] = new JButton("diSPIM Preview");
-										dispimPreviewButton[pos][1].addActionListener(DISPIM_Monitor.this);
-										diSPIMPreviewPanel[1].add(BorderLayout.WEST, dispimPreviewButton[pos][1]);
-										dispimPreviewButton[pos][1].setBackground(Color.orange);
-
-										dispimPreviewButton[pos][1].setVisible(true);
-									}else {
-										dispimPreviewButton[pos][1].setVisible(true);
-									}
-
-									diSPIMPreviewPanel[0].setVisible(true);
-									ciPrxs[pos].getWindow().viewButtonPanel.add(diSPIMPreviewPanel[0]);
-									ciPrxs[pos].getWindow().viewButtonPanel.validate();
-									diSPIMPreviewPanel[1].setVisible(true);
-									ciPrys[pos].getWindow().viewButtonPanel.add(diSPIMPreviewPanel[1]);
-									ciPrys[pos].getWindow().viewButtonPanel.validate();
-
-									ciPrxs[pos].getWindow().pack();
-//									impAs[pos].getWindow().setSize(sizeWinA);
-									ciPrys[pos].getWindow().pack();
-//									impBs[pos].getWindow().setSize(sizeWinB);
 									
 
 								}
@@ -5759,48 +5778,69 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 										}
 										
-										Panel[] diSPIMPreviewPanel = new Panel[2];
-											Dimension sizeWinA = ciPrys[pos].getWindow().getSize();
-											if(diSPIMPreviewPanel[0] == null) {
-												diSPIMPreviewPanel[0] = new Panel(new BorderLayout());
+										if (orientBeforeLineage) {
+											Panel[] diSPIMPreviewPanel = new Panel[2];
+											Dimension sizeWinA = ciPrys[pos]
+													.getWindow().getSize();
+											if (diSPIMPreviewPanel[0] == null) {
+												diSPIMPreviewPanel[0] = new Panel(
+														new BorderLayout());
 											}
-											if(diSPIMPreviewPanel[1] == null) {
-												diSPIMPreviewPanel[1] = new Panel(new BorderLayout());
+											if (diSPIMPreviewPanel[1] == null) {
+												diSPIMPreviewPanel[1] = new Panel(
+														new BorderLayout());
 											}
+											if (dispimPreviewButton[pos][0] == null) {
+												dispimPreviewButton[pos][0] = new JButton(
+														"diSPIM Preview");
+												dispimPreviewButton[pos][0]
+														.addActionListener(DISPIM_Monitor.this);
+												diSPIMPreviewPanel[0]
+														.add(BorderLayout.WEST,
+																dispimPreviewButton[pos][0]);
+												dispimPreviewButton[pos][0]
+														.setBackground(Color.orange);
 
-											if(dispimPreviewButton[pos][0] == null) {
-												dispimPreviewButton[pos][0] = new JButton("diSPIM Preview");
-												dispimPreviewButton[pos][0].addActionListener(DISPIM_Monitor.this);
-												diSPIMPreviewPanel[0].add(BorderLayout.WEST, dispimPreviewButton[pos][0]);
-												dispimPreviewButton[pos][0].setBackground(Color.orange);
-
-												dispimPreviewButton[pos][0].setVisible(true);
-											}else {
-												dispimPreviewButton[pos][0].setVisible(true);
+												dispimPreviewButton[pos][0]
+														.setVisible(true);
+											} else {
+												dispimPreviewButton[pos][0]
+														.setVisible(true);
 											}
+											if (dispimPreviewButton[pos][1] == null) {
+												dispimPreviewButton[pos][1] = new JButton(
+														"diSPIM Preview");
+												dispimPreviewButton[pos][1]
+														.addActionListener(DISPIM_Monitor.this);
+												diSPIMPreviewPanel[1]
+														.add(BorderLayout.WEST,
+																dispimPreviewButton[pos][1]);
+												dispimPreviewButton[pos][1]
+														.setBackground(Color.orange);
 
-											if(dispimPreviewButton[pos][1] == null) {
-												dispimPreviewButton[pos][1] = new JButton("diSPIM Preview");
-												dispimPreviewButton[pos][1].addActionListener(DISPIM_Monitor.this);
-												diSPIMPreviewPanel[1].add(BorderLayout.WEST, dispimPreviewButton[pos][1]);
-												dispimPreviewButton[pos][1].setBackground(Color.orange);
-
-												dispimPreviewButton[pos][1].setVisible(true);
-											}else {
-												dispimPreviewButton[pos][1].setVisible(true);
+												dispimPreviewButton[pos][1]
+														.setVisible(true);
+											} else {
+												dispimPreviewButton[pos][1]
+														.setVisible(true);
 											}
-
-											diSPIMPreviewPanel[0].setVisible(true);
-											ciPrxs[pos].getWindow().viewButtonPanel.add(diSPIMPreviewPanel[0]);
-											ciPrxs[pos].getWindow().viewButtonPanel.validate();
-											diSPIMPreviewPanel[1].setVisible(true);
-											ciPrys[pos].getWindow().viewButtonPanel.add(diSPIMPreviewPanel[1]);
-											ciPrys[pos].getWindow().viewButtonPanel.validate();
-
+											diSPIMPreviewPanel[0]
+													.setVisible(true);
+											ciPrxs[pos].getWindow().viewButtonPanel
+													.add(diSPIMPreviewPanel[0]);
+											ciPrxs[pos].getWindow().viewButtonPanel
+													.validate();
+											diSPIMPreviewPanel[1]
+													.setVisible(true);
+											ciPrys[pos].getWindow().viewButtonPanel
+													.add(diSPIMPreviewPanel[1]);
+											ciPrys[pos].getWindow().viewButtonPanel
+													.validate();
 											ciPrxs[pos].getWindow().pack();
-//											impAs[pos].getWindow().setSize(sizeWinA);
+											//											impAs[pos].getWindow().setSize(sizeWinA);
 											ciPrys[pos].getWindow().pack();
-//											impBs[pos].getWindow().setSize(sizeWinB);
+											//											impBs[pos].getWindow().setSize(sizeWinB);
+										}
 											
 											
 										
