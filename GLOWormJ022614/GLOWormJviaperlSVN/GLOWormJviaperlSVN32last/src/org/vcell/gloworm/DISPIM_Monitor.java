@@ -4371,8 +4371,16 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							}
 						}
 
-						if (orientBeforeLineage && (posFrameStart[pos]!=f && posFrameEnd[pos]!=f)) {
-							go = false;
+						if (orientBeforeLineage){ 
+							if(posFrameStart[pos]!=f && posFrameEnd[pos]!=f) {
+								go = false;
+							}else{
+								if (posFrameStart[pos]==f){
+									f=posFrameEnd[pos];
+								} else if (posFrameEnd[pos]==f){
+									f=posFrameStart[pos];
+								}
+							}
 						}else if (posFrameStart[pos]>f || posFrameEnd[pos]<f) {
 							go = false;
 						} else{
@@ -6804,10 +6812,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				double xRotRead=0;
 				double yRotRead=0;
 				double zRotRead=0;
-				if (ciPrxs[pos].isVisible()){
+				if (ciPrxs[pos] != null && ciPrxs[pos].isVisible()){
 					xRotRead = (ciPrxs[pos].getSlice()-1)*10;
 				}
-				if (ciPrys[pos].isVisible()){
+				if (ciPrys[pos] != null && ciPrys[pos].isVisible()){
 					yRotRead = (ciPrys[pos].getSlice()-10)*10;
 					if (yRotRead < 0){
 						yRotRead = 360+yRotRead;
