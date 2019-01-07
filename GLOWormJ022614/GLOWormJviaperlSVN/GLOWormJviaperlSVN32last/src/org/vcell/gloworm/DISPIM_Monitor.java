@@ -4360,6 +4360,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			
 			public void run() {
 				for (int f = 1; f <= tDim; f++) {
+					if (orientBeforeLineage){
+						f=tDim-f+1;
+					}
 					for (int pos=0; pos<pDim; pos++) {
 						boolean go = true;
 						if (posIntArray!=null){
@@ -4727,6 +4730,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 			public void run() {		
 				for (int f = 1; f <= tDim; f++) {
+					if (orientBeforeLineage){
+						f=tDim-f+1;
+					}
 					int[] failIteration = new int[pDim];
 					Arrays.fill(failIteration, 0);
 
@@ -5248,6 +5254,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 												continue;
 											}else{
 												IJ.log("Merry Xmas");
+												if (orientBeforeLineage) {
+													Files.copy(Paths.get("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx"),
+															Paths.get("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ "0000"+".tmx"), StandardCopyOption.REPLACE_EXISTING);												
+												}
 											}
 										}
 										
