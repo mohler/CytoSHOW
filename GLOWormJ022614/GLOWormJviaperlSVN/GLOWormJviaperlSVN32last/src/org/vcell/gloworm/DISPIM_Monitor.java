@@ -1268,6 +1268,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				
 				dispimToolsButton = new JButton[pDim][2];
 				dispimPreviewButton = new JButton[pDim][2];
+				fuseButton = new JButton[pDim][2];
 				splitButton = new JButton[pDim][2];
 				spinnerPanel = new Panel[pDim][2];
 				xSpinner = new JSpinner[pDim][2];
@@ -4373,16 +4374,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							}
 						}
 
-						if (orientBeforeLineage){ 
-							if(posFrameStart[pos]!=f && posFrameEnd[pos]!=f) {
-								go = false;
-							}else{
-								if (posFrameStart[pos]==f){
-									f=posFrameEnd[pos];
-								} else if (posFrameEnd[pos]==f){
-									f=posFrameStart[pos];
-								}
-							}
+						if (orientBeforeLineage && (posFrameStart[pos]!=f && posFrameEnd[pos]!=f)) {
+							go = false;
 						}else if (posFrameStart[pos]>f || posFrameEnd[pos]<f) {
 							go = false;
 						} else{
@@ -4783,16 +4776,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							}
 						}
 
-						if (orientBeforeLineage){ 
-							if(posFrameStart[pos]!=f && posFrameEnd[pos]!=f) {
-								go = false;
-							}else{
-								if (posFrameStart[pos]==f){
-									f=posFrameEnd[pos];
-								}else if (posFrameEnd[pos]==f){
-									f=posFrameStart[pos];
-								}
-							}
+						if (orientBeforeLineage && (posFrameStart[pos]!=f && posFrameEnd[pos]!=f)) {
+							go = false;
 						}else if (posFrameStart[pos]>f || posFrameEnd[pos]<f) {
 							go = false;
 						} else{
