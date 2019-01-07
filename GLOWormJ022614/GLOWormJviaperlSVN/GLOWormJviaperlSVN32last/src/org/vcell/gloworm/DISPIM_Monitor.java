@@ -4268,7 +4268,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 	public void processFilesByMinGuoDeconvolution() {
 		//START PROCESSING ALREADY SAVED RAW DATA 
-		if (orientBeforeLineage) {
+		if (!orientBeforeLineage) {
 
 			if (new File(savePath+"fineRotations.txt").canRead()){
 				String rotFileText = IJ.openAsString(savePath+"fineRotations.txt");
