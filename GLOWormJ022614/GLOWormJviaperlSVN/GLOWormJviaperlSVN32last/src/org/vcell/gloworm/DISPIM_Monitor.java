@@ -4361,7 +4361,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 		Thread prepStacksThread = new Thread(null, new Runnable(){
 			
 			public void run() {
-				for (int f = 1; f <= tDim; f++) {
+				for (int f = (orientBeforeLineage?tDim:1); (orientBeforeLineage?(f>=1):(f<=tDim)); f=(orientBeforeLineage?(f-1):(f+1))) {
 					for (int pos=0; pos<pDim; pos++) {
 						boolean go = true;
 						if (posIntArray!=null){
@@ -4728,7 +4728,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			private File outputMaxzFile;
 
 			public void run() {		
-				for (int f = 1; f <= tDim; f++) {
+				for (int f = (orientBeforeLineage?tDim:1); (orientBeforeLineage?(f>=1):(f<=tDim)); f=(orientBeforeLineage?(f-1):(f+1))) {
 
 					int[] failIteration = new int[pDim];
 					Arrays.fill(failIteration, 0);
