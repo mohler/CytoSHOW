@@ -4313,6 +4313,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					doProcessing[pos] = false;
 					continue;
 				} 
+				
 				lastMatrix[pos] = IJ.openAsString("C:\\DataForTest\\Matrix_0.tmx");
 
 				if (new File("" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(0, 4)+".tmx").canRead() )
@@ -4345,6 +4346,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				continue;
 			}
 			
+			tDim = impAs[pos].getNFrames();
 			posFrameStart[pos] = impAs[pos].getFrame();
 			
 			posFrameEnd[pos] = impBs[pos].getFrame();
@@ -4360,9 +4362,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			
 			public void run() {
 				for (int f = 1; f <= tDim; f++) {
-					if (orientBeforeLineage){
-						f=tDim-f+1;
-					}
 					for (int pos=0; pos<pDim; pos++) {
 						boolean go = true;
 						if (posIntArray!=null){
@@ -4730,9 +4729,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 			public void run() {		
 				for (int f = 1; f <= tDim; f++) {
-					if (orientBeforeLineage){
-						f=tDim-f+1;
-					}
+
 					int[] failIteration = new int[pDim];
 					Arrays.fill(failIteration, 0);
 
