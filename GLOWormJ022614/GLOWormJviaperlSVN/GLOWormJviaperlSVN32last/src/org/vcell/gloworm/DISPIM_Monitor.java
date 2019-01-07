@@ -4786,8 +4786,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							}else{
 								if (posFrameStart[pos]==f){
 									f=posFrameEnd[pos];
-								}
-								if (posFrameEnd[pos]==f){
+								}else if (posFrameEnd[pos]==f){
 									f=posFrameStart[pos];
 								}
 							}
