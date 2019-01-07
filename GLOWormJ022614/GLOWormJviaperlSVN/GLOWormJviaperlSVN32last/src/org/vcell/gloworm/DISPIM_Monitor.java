@@ -4267,19 +4267,21 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 	public void processFilesByMinGuoDeconvolution() {
 		//START PROCESSING ALREADY SAVED RAW DATA 
-		if (new File(savePath+"fineRotations.txt").canRead()){
-			String rotFileText = IJ.openAsString(savePath+"fineRotations.txt");
-			String[] rotFileLines = rotFileText.split("\n");
-			for (String line:rotFileLines){
-				String[] rotLineChunks = line.split(",");
-				if (rotLineChunks.length==4){
-					rotXYZs[Integer.parseInt(rotLineChunks[0])][0] = Double.parseDouble(rotLineChunks[1]);
-					rotXYZs[Integer.parseInt(rotLineChunks[0])][1] = Double.parseDouble(rotLineChunks[2]);
-					rotXYZs[Integer.parseInt(rotLineChunks[0])][2] = Double.parseDouble(rotLineChunks[3]);
+		if (orientBeforeLineage) {
+
+			if (new File(savePath+"fineRotations.txt").canRead()){
+				String rotFileText = IJ.openAsString(savePath+"fineRotations.txt");
+				String[] rotFileLines = rotFileText.split("\n");
+				for (String line:rotFileLines){
+					String[] rotLineChunks = line.split(",");
+					if (rotLineChunks.length==4){
+						rotXYZs[Integer.parseInt(rotLineChunks[0])][0] = Double.parseDouble(rotLineChunks[1]);
+						rotXYZs[Integer.parseInt(rotLineChunks[0])][1] = Double.parseDouble(rotLineChunks[2]);
+						rotXYZs[Integer.parseInt(rotLineChunks[0])][2] = Double.parseDouble(rotLineChunks[3]);
+					}
 				}
 			}
 		}
-		
 		if (wavelengths >=1) {
 			new File("" + savePath + "CropBkgdSub").mkdirs();
 			new File("" + savePath + "RegDecon" + File.separator + "TMX").mkdirs();
@@ -4770,8 +4772,17 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							}
 						}
 
-						if (orientBeforeLineage && (posFrameStart[pos]!=f && posFrameEnd[pos]!=f)) {
-							go = false;
+						if (orientBeforeLineage){ 
+							if(posFrameStart[pos]!=f && posFrameEnd[pos]!=f) {
+								go = false;
+							}else{
+								if (posFrameStart[pos]==f){
+									f=posFrameEnd[pos];
+								}
+								if (posFrameEnd[pos]==f){
+									f=posFrameStart[pos];
+								}
+							}
 						}else if (posFrameStart[pos]>f || posFrameEnd[pos]<f) {
 							go = false;
 						} else{
@@ -5050,7 +5061,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										}
 
 										if(!(new File("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").canRead())) {
-//											NEED TO INCREMENT FROM FRESH TO PRIME TO FORCE WITH LAST
+											//NEED TO INCREMENT FROM FRESH TO PRIME TO FORCE WITH LAST
 											failIteration[pos]++;
 											pos--;
 											continue;
@@ -5063,6 +5074,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 												continue;
 											}else{
 												IJ.log("Merry Xmas");
+												if (orientBeforeLineage) {
+													Files.copy(Paths.get("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx"),
+															Paths.get("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ "0000"+".tmx"), StandardCopyOption.REPLACE_EXISTING);												
+												}
 											}
 										}
 										
@@ -5084,7 +5099,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 												lastMatrix[pos] = IJ.openAsString("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
 												//												IJ.saveString(lastMatrix[pos], "" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx");
 												Files.move(Paths.get("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx"),
-														Paths.get("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx"));												IJ.log(""+ pos+ "new=> " + lastMatrix[pos]);
+														Paths.get("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx"), StandardCopyOption.REPLACE_EXISTING);												IJ.log(""+ pos+ "new=> " + lastMatrix[pos]);
 													
 												new File("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").delete();
 												IJ.log(""+ pos+ "new=> " + lastMatrix[pos]);
@@ -5246,7 +5261,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 												lastMatrix[pos] = IJ.openAsString("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
 //												IJ.saveString(lastMatrix[pos], "" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx");
 												Files.move(Paths.get("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx"),
-														Paths.get("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx"));												
+														Paths.get("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx"), StandardCopyOption.REPLACE_EXISTING);												
 												new File("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").delete();
 												IJ.log(""+ pos+ "new=> " + lastMatrix[pos]);
 											}
