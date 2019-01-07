@@ -6758,7 +6758,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						yRotRead = 360+yRotRead;
 					}
 				}
-				IJ.append("" + pos +","+ xRotRead +","+ yRotRead +","+ zRotRead + "\\n", savePath+"fineRotations.txt");
+				IJ.append("" + pos +","+ xRotRead +","+ yRotRead +","+ zRotRead+"\n\n", savePath+"fineRotations.txt");
 			}
 		}
 		
