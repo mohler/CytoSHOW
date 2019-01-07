@@ -6744,7 +6744,22 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 		
 		if (e.getActionCommand() == "diSPIM Preview"){
 			IJ.beep();
-			IJ.showMessage("what now?");
+			IJ.log("Preview adjustment details saved to disk");
+			for (int pos=0; pos<pDim; pos++) {
+				double xRotRead=0;
+				double yRotRead=0;
+				double zRotRead=0;
+				if (ciPrxs[pos].isVisible()){
+					xRotRead = (ciPrxs[pos].getSlice()-1)*10;
+				}
+				if (ciPrys[pos].isVisible()){
+					yRotRead = (ciPrys[pos].getSlice()-10)*10;
+					if (yRotRead < 0){
+						yRotRead = 360+yRotRead;
+					}
+				}
+				IJ.append("" + pos +","+ xRotRead +","+ yRotRead +","+ zRotRead, savePath+"fineRotations.txt");
+			}
 		}
 		
 		if (e.getActionCommand() == "CCM") {
