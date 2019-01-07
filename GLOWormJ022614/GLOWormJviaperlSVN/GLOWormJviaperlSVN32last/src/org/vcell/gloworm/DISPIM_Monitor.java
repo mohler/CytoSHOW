@@ -5054,6 +5054,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											IJ.wait(100);
 											waitCount++;
 										}
+										IJ.log(""+ pos+ "old=> " + lastMatrix[pos]);
 
 										if(!(new File("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").canRead())) {
 											//NEED TO INCREMENT FROM FRESH TO PRIME TO FORCE WITH LAST
@@ -5089,7 +5090,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 													Paths.get(saveDFPath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution1" + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif"), StandardCopyOption.REPLACE_EXISTING);
 
 											//											IJ.runMacro("waitForUser;");
-											IJ.log(""+ pos+ "old=> " + lastMatrix[pos]);
 											if (new File("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").canRead()) {
 												lastMatrix[pos] = IJ.openAsString("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
 												//												IJ.saveString(lastMatrix[pos], "" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx");
@@ -5221,6 +5221,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											IJ.wait(100);
 											waitCount++;
 										}
+										IJ.log(""+ pos+ "old=> " + lastMatrix[pos]);
 
 										if(!(new File("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").canRead())) {
 //											NEED TO INCREMENT FROM FRESH TO PRIME TO FORCE WITH LAST
@@ -5255,7 +5256,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 													Paths.get(saveDFPath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"Deconvolution"+ keyChannel + File.separator + "Pos" + pos + "_Decon_t"+ IJ.pad(f, 4)+".tif"), StandardCopyOption.REPLACE_EXISTING);
 
 											//											IJ.runMacro("waitForUser;");
-											IJ.log(""+ pos+ "old=> " + lastMatrix[pos]);
 											if (new File("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").canRead()) {
 												lastMatrix[pos] = IJ.openAsString("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
 //												IJ.saveString(lastMatrix[pos], "" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(f, 4)+".tmx");
