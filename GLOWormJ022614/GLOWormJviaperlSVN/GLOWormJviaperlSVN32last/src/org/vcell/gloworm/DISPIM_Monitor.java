@@ -6814,7 +6814,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					}
 					
 					ImagePlus xImp = (new ImagePlus("testX",ciPrxs[pos].getProcessor()));
-					maxReferenceIntensity = xImp.getProcessor().getMax();
+					maxReferenceIntensity = xImp.getStatistics().max;
 					xImp.flush();
 				}
 				if (ciPrys[pos] != null && ciPrys[pos].isVisible()){
@@ -6828,7 +6828,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						}
 					}
 					ImagePlus yImp = (new ImagePlus("testY",ciPrys[pos].getProcessor()));
-					maxReferenceIntensity = yImp.getProcessor().getMax();
+					maxReferenceIntensity = yImp.getStatistics().max;
 					yImp.flush();
 				}
 				if (xRotRead < 0){
