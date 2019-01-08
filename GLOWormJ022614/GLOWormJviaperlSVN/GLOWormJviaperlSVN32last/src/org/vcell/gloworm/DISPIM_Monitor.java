@@ -1266,6 +1266,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				longAxesA = new double[pDim];					
 				longAxesB = new double[pDim];					
 				rotXYZs = new double[pDim][3];
+				intensityCues = new double[pDim];
 				
 				dispimToolsButton = new JButton[pDim][2];
 				dispimPreviewButton = new JButton[pDim][2];
