@@ -6809,7 +6809,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					Roi xRoi = ciPrxs[pos].getRoi();
 					if (xRoi != null){
 						if (xRoi.getType() == Roi.LINE){
-							yRotRead = 0-(((Line)xRoi).getAngle()-180);
+							yRotRead = 0+(((Line)xRoi).getAngle()-180);
 						}
 					}
 					
