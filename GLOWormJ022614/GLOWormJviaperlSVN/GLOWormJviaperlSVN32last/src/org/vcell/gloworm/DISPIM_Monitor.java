@@ -6803,16 +6803,36 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				double xRotRead=0;
 				double yRotRead=0;
 				double zRotRead=0;
+				double maxReferenceIntensity = 0;
 				if (ciPrxs[pos] != null && ciPrxs[pos].isVisible()){
 					xRotRead = (ciPrxs[pos].getSlice()-1)*10;
+					Roi xRoi = ciPrxs[pos].getRoi();
+					if (xRoi != null){
+						if (xRoi.getType() == Roi.LINE){
+							yRotRead = 0-((Line)xRoi).getAngle();
+						}
+					}
+					maxReferenceIntensity = ciPrxs[pos].getProcessor(ciPrxs[pos].getChannel()).getMax();
 				}
 				if (ciPrys[pos] != null && ciPrys[pos].isVisible()){
-					yRotRead = (ciPrys[pos].getSlice()-10)*10;
-					if (yRotRead < 0){
-						yRotRead = 360+yRotRead;
+					if (yRotRead ==0 ){
+						yRotRead = (ciPrys[pos].getSlice()-10)*10;
 					}
+					Roi yRoi = ciPrxs[pos].getRoi();
+					if (yRoi != null){
+						if (yRoi.getType() == Roi.LINE){
+							xRotRead = 90-((Line)yRoi).getAngle();
+						}
+					}
+					maxReferenceIntensity = ciPrys[pos].getProcessor(ciPrys[pos].getChannel()).getMax();
 				}
-				IJ.append("" + pos +","+ xRotRead +","+ yRotRead +","+ zRotRead, savePath+"fineRotations.txt");
+				if (xRotRead < 0){
+					xRotRead = 360+xRotRead;
+				}
+				if (yRotRead < 0){
+					yRotRead = 360+yRotRead;
+				}
+				IJ.append("" + pos +","+ xRotRead +","+ yRotRead +","+ zRotRead +","+ maxReferenceIntensity, savePath+"fineRotations.txt");
 			}
 		}
 		
