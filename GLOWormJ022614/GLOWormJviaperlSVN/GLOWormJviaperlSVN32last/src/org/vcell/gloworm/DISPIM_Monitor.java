@@ -398,6 +398,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 	private double[] longAxesA;
 	private double[] longAxesB;
 	private double[][] rotXYZs;
+	private double[] intensityCues;
 	private boolean snfCycleComplete = false;
 	private String keyView;
 	private boolean doPrimeFromDefaultRegTMX;
@@ -4284,6 +4285,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						rotXYZs[Integer.parseInt(rotLineChunks[0])][0] = Double.parseDouble(rotLineChunks[1]);
 						rotXYZs[Integer.parseInt(rotLineChunks[0])][1] = Double.parseDouble(rotLineChunks[2]);
 						rotXYZs[Integer.parseInt(rotLineChunks[0])][2] = Double.parseDouble(rotLineChunks[3]);
+						intensityCues[Integer.parseInt(rotLineChunks[0])] = Double.parseDouble(rotLineChunks[4]);
 					}
 				}
 			}
