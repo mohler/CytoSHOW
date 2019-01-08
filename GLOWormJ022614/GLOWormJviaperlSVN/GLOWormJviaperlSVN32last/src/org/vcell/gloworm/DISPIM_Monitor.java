@@ -4274,8 +4274,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				String rotFileText = IJ.openAsString(savePath+"fineRotations.txt");
 				String[] rotFileLines = rotFileText.split("\n");
 				for (String line:rotFileLines){
-					String[] rotLineChunks = line.split(",");
+					String[] rotLineChunks = line.split(",");   
 					if (rotLineChunks.length==4){
+						rotXYZs[Integer.parseInt(rotLineChunks[0])][0] = Double.parseDouble(rotLineChunks[1]);
+						rotXYZs[Integer.parseInt(rotLineChunks[0])][1] = Double.parseDouble(rotLineChunks[2]);
+						rotXYZs[Integer.parseInt(rotLineChunks[0])][2] = Double.parseDouble(rotLineChunks[3]);
+					}
+					if (rotLineChunks.length==5){
 						rotXYZs[Integer.parseInt(rotLineChunks[0])][0] = Double.parseDouble(rotLineChunks[1]);
 						rotXYZs[Integer.parseInt(rotLineChunks[0])][1] = Double.parseDouble(rotLineChunks[2]);
 						rotXYZs[Integer.parseInt(rotLineChunks[0])][2] = Double.parseDouble(rotLineChunks[3]);
