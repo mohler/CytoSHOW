@@ -6813,8 +6813,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						}
 					}
 					
-					(new ImagePlus("testX",ciPrxs[pos].getProcessor())).show();
-					maxReferenceIntensity = ciPrxs[pos].getProcessor().getMax();
+					ImagePlus xImp = (new ImagePlus("testX",ciPrxs[pos].getProcessor()));
+					maxReferenceIntensity = xImp.getProcessor().getMax();
+					xImp.flush();
 				}
 				if (ciPrys[pos] != null && ciPrys[pos].isVisible()){
 					if (yRotRead ==0 ){
@@ -6826,8 +6827,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							xRotRead = 90-((Line)yRoi).getAngle();
 						}
 					}
-					(new ImagePlus("testY",ciPrys[pos].getProcessor())).show();
-					maxReferenceIntensity = ciPrys[pos].getProcessor().getMax();
+					ImagePlus yImp = (new ImagePlus("testY",ciPrys[pos].getProcessor()));
+					maxReferenceIntensity = yImp.getProcessor().getMax();
+					yImp.flush();
 				}
 				if (xRotRead < 0){
 					xRotRead = 360+xRotRead;
