@@ -403,6 +403,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 	private String keyView;
 	private boolean doPrimeFromDefaultRegTMX;
 	private boolean doForceDefaultRegTMX;
+	private String argField;
 
 	public Process getRegDeconProcess() {
 		return regDeconProcess;
@@ -431,6 +432,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 	 */
 	public void run(final String arg) {
 		ImagePlus.addImageListener(this);
+		argField = arg;
 		String[] args = arg.split("\\|");
 		IJ.log(arg);
 		dirOrOMETiff = "";
@@ -6700,7 +6702,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					impBs[pos].getWindow().viewButtonPanel.validate();
 				}
 			}
-			rerunArg = (dirOrOMETiff+"|"+"rerunWithDecon"+"|"+"newMM");
+			rerunArg = (dirOrOMETiff+"|"+"rerunWithDecon"+"|"+argField);
 			monitoring = false;
 		}
 		if (e.getActionCommand() == "diSPIM") {
