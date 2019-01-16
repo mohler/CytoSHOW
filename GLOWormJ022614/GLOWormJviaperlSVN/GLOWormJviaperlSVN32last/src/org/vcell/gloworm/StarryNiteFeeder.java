@@ -61,6 +61,7 @@ public class StarryNiteFeeder implements PlugIn {
 		String[] sourceFileList = new String[0];
 		String paramsPath = "";
 		String outputDir = "";
+		double intensityCue = 1000;
 		int skipFactor = 6;
 		if (argChunks.length == 4) {
 			autoLaunch = true;
@@ -206,167 +207,172 @@ public class StarryNiteFeeder implements PlugIn {
 				int stackWidth=0;
 				int stackHeight=0;
 
-				for (int f = 1; f <= endPoint; f++) {
-					boolean paramsWritten = false;
-					if (!((new File(outDir+subdir+"/aaa_t"+f+".tif").canRead())&&(new File(outDir+subdir+"Skipped"+"/aaa_t"+f+".tif").canRead()))) {
+				if (!autoLaunch){
 
-						ImageStack stack3 = new ImageStack((int)theRotatedROI.getBounds().getWidth()*2, (int)theRotatedROI.getBounds().getHeight());
-						ImageStack stack3skipped = new ImageStack((int)theRotatedROI.getBounds().getWidth()*2, (int)theRotatedROI.getBounds().getHeight());
+					for (int f = 1; f <= endPoint; f++) {
+						boolean paramsWritten = false;
+						if (!((new File(outDir+subdir+"/aaa_t"+f+".tif").canRead())&&(new File(outDir+subdir+"Skipped"+"/aaa_t"+f+".tif").canRead()))) {
 
-						imp.getWindow().setEnabled(false);
+							ImageStack stack3 = new ImageStack((int)theRotatedROI.getBounds().getWidth()*2, (int)theRotatedROI.getBounds().getHeight());
+							ImageStack stack3skipped = new ImageStack((int)theRotatedROI.getBounds().getWidth()*2, (int)theRotatedROI.getBounds().getHeight());
 
-						for (int i = 1; i <= imp.getNSlices(); i++) {
-							imp.setPositionWithoutUpdate(1, i, f);
+							imp.getWindow().setEnabled(false);
 
-							ImageProcessor ip1 = imp.getProcessor().duplicate();
+							for (int i = 1; i <= imp.getNSlices(); i++) {
+								imp.setPositionWithoutUpdate(1, i, f);
 
-							int[] ipHis = ip1.getHistogram();
-							double ipHisMode = 0.0;
-							int ipHisLength = ipHis.length;
-							int ipHisMaxBin = 0;
-							for (int h=0; h<ipHisLength; h++) {
-								if (ipHis[h] > ipHisMaxBin) {
-									ipHisMaxBin = ipHis[h];
-									ipHisMode = (double)h;
-								}
-							}
-							ip1.subtract(ipHisMode * 1);
+								ImageProcessor ip1 = imp.getProcessor().duplicate();
 
-							ip1.setRoi(theROI);
-							ip1.fillOutside(theROI);
-							ip1 = ip1.crop();
-							ImageProcessor ip1r = ip1.createProcessor((int)Math.sqrt(ip1.getWidth()*ip1.getWidth()+ip1.getHeight()*ip1.getHeight())
-									, (int)Math.sqrt(ip1.getWidth()*ip1.getWidth()+ip1.getHeight()*ip1.getHeight()));
-							ip1r.insert(ip1, (ip1r.getWidth()-ip1.getWidth())/2, (ip1r.getHeight()-ip1.getHeight())/2);
-							ip1= ip1r;
-							ip1.rotate(angle);
-							ip1.setRoi((int)(ip1.getWidth()-theRotatedROI.getBounds().getWidth())/2, (int)(ip1.getHeight()-theRotatedROI.getBounds().getHeight())/2
-									, (int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
-							ip1 = ip1.crop();
-							
-							ImageProcessor ip3 = ip1.createProcessor(stack3.getWidth(), stack3.getHeight());
-		
-							if (!flipStack){
-								ImageProcessor ip1fh = ip1.duplicate();
-								ip1fh.flipHorizontal();
-								ip3.insert(ip1fh, ip3.getWidth()/2, 0);
-
-							} else {
-								ip1.flipVertical();
-								ImageProcessor ip1fh = ip1.duplicate();
-								ip1fh.flipHorizontal();
-
-								ip3.insert(ip1fh, ip3.getWidth()/2, 0);
-
-							}
-							
-							
-							if (wavelengths >= 2) {
-								imp.setPositionWithoutUpdate(wavelengths, i, f);
-								ImageProcessor ip2 = imp.getProcessor().duplicate();
-								ipHis = ip2.getHistogram();
-								ipHisMode = 0.0;
-								ipHisLength = ipHis.length;
-								ipHisMaxBin = 0;
+								int[] ipHis = ip1.getHistogram();
+								double ipHisMode = 0.0;
+								int ipHisLength = ipHis.length;
+								int ipHisMaxBin = 0;
 								for (int h=0; h<ipHisLength; h++) {
 									if (ipHis[h] > ipHisMaxBin) {
 										ipHisMaxBin = ipHis[h];
 										ipHisMode = (double)h;
 									}
 								}
+								ip1.subtract(ipHisMode * 1);
 
-								ip2.subtract(ipHisMode * 1);
-
-								ip2.setRoi((Roi) theROI);
-								ip2.fillOutside((Roi) theROI);
-								ip2 = ip2.crop();
-								ImageProcessor ip2r = ip2.createProcessor((int)Math.sqrt(ip2.getWidth()*ip2.getWidth()+ip2.getHeight()*ip2.getHeight())
-										, (int)Math.sqrt(ip2.getWidth()*ip2.getWidth()+ip2.getHeight()*ip2.getHeight()));
-								ip2r.insert(ip2, (ip2r.getWidth()-ip2.getWidth())/2, (ip2r.getHeight()-ip2.getHeight())/2);
-								ip2= ip2r;
-								ip2.rotate(angle);
-								ip2.setRoi((int)(ip2.getWidth()-theRotatedROI.getBounds().getWidth())/2, (int)(ip2.getHeight()-theRotatedROI.getBounds().getHeight())/2
+								ip1.setRoi(theROI);
+								ip1.fillOutside(theROI);
+								ip1 = ip1.crop();
+								ImageProcessor ip1r = ip1.createProcessor((int)Math.sqrt(ip1.getWidth()*ip1.getWidth()+ip1.getHeight()*ip1.getHeight())
+										, (int)Math.sqrt(ip1.getWidth()*ip1.getWidth()+ip1.getHeight()*ip1.getHeight()));
+								ip1r.insert(ip1, (ip1r.getWidth()-ip1.getWidth())/2, (ip1r.getHeight()-ip1.getHeight())/2);
+								ip1= ip1r;
+								ip1.rotate(angle);
+								ip1.setRoi((int)(ip1.getWidth()-theRotatedROI.getBounds().getWidth())/2, (int)(ip1.getHeight()-theRotatedROI.getBounds().getHeight())/2
 										, (int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
-								ip2 = ip2.crop();
+								ip1 = ip1.crop();
+
+								ImageProcessor ip3 = ip1.createProcessor(stack3.getWidth(), stack3.getHeight());
 
 								if (!flipStack){
-									
-									ImageProcessor ip2fh = ip2.duplicate();
-									ip2fh.flipHorizontal();
-									ip3.insert(ip2fh, 0, 0);
-
-									stack3.addSlice(ip3);
-									if (i%skipFactor == 1) {
-										stack3skipped.addSlice(ip3.duplicate());
-									}
+									ImageProcessor ip1fh = ip1.duplicate();
+									ip1fh.flipHorizontal();
+									ip3.insert(ip1fh, ip3.getWidth()/2, 0);
 
 								} else {
-									ip2.flipVertical();
-									
-									ImageProcessor ip2fh = ip2.duplicate();
-									ip2fh.flipHorizontal();
-									ip3.insert(ip2fh, 0, 0);
+									ip1.flipVertical();
+									ImageProcessor ip1fh = ip1.duplicate();
+									ip1fh.flipHorizontal();
 
-									stack3.addSlice(null, ip3, 0);
-									if (i%skipFactor == 1) {
-										stack3skipped.addSlice(null, ip3.duplicate(), 0);
-									}
+									ip3.insert(ip1fh, ip3.getWidth()/2, 0);
 
 								}
-								
 
+
+								if (wavelengths >= 2) {
+									imp.setPositionWithoutUpdate(wavelengths, i, f);
+									ImageProcessor ip2 = imp.getProcessor().duplicate();
+									ipHis = ip2.getHistogram();
+									ipHisMode = 0.0;
+									ipHisLength = ipHis.length;
+									ipHisMaxBin = 0;
+									for (int h=0; h<ipHisLength; h++) {
+										if (ipHis[h] > ipHisMaxBin) {
+											ipHisMaxBin = ipHis[h];
+											ipHisMode = (double)h;
+										}
+									}
+
+									ip2.subtract(ipHisMode * 1);
+
+									ip2.setRoi((Roi) theROI);
+									ip2.fillOutside((Roi) theROI);
+									ip2 = ip2.crop();
+									ImageProcessor ip2r = ip2.createProcessor((int)Math.sqrt(ip2.getWidth()*ip2.getWidth()+ip2.getHeight()*ip2.getHeight())
+											, (int)Math.sqrt(ip2.getWidth()*ip2.getWidth()+ip2.getHeight()*ip2.getHeight()));
+									ip2r.insert(ip2, (ip2r.getWidth()-ip2.getWidth())/2, (ip2r.getHeight()-ip2.getHeight())/2);
+									ip2= ip2r;
+									ip2.rotate(angle);
+									ip2.setRoi((int)(ip2.getWidth()-theRotatedROI.getBounds().getWidth())/2, (int)(ip2.getHeight()-theRotatedROI.getBounds().getHeight())/2
+											, (int)theRotatedROI.getBounds().getWidth(), (int)theRotatedROI.getBounds().getHeight());
+									ip2 = ip2.crop();
+
+									if (!flipStack){
+
+										ImageProcessor ip2fh = ip2.duplicate();
+										ip2fh.flipHorizontal();
+										ip3.insert(ip2fh, 0, 0);
+
+										stack3.addSlice(ip3);
+										if (i%skipFactor == 1) {
+											stack3skipped.addSlice(ip3.duplicate());
+										}
+
+									} else {
+										ip2.flipVertical();
+
+										ImageProcessor ip2fh = ip2.duplicate();
+										ip2fh.flipHorizontal();
+										ip3.insert(ip2fh, 0, 0);
+
+										stack3.addSlice(null, ip3, 0);
+										if (i%skipFactor == 1) {
+											stack3skipped.addSlice(null, ip3.duplicate(), 0);
+										}
+
+									}
+
+
+								}
 							}
+
+
+							imp.getWindow().setEnabled(true);
+
+
+							stackWidth = (int)theRotatedROI.getBounds().getWidth();
+							stackHeight = (int)theRotatedROI.getBounds().getHeight();
+							if (!paramsWritten) {
+								IJ.saveString(IJ.openAsString(baseParameterFilePath).replaceAll("(.*end_time=)\\d+(;.*)", "$1"+f+"$2")
+										.replaceAll("(.*ROI=)true(;.*)", "$1false$2")
+										.replaceAll("(.*ROI.min=)\\d+(;.*)", "$10$2")
+										.replaceAll("(.*ROIxmax=)\\d+(;.*)", "$1"+stackWidth+"$2")
+										.replaceAll("(.*ROIymax=)\\d+(;.*)", "$1"+stackHeight+"$2")
+										.replaceAll("(.*)ROIpoints=\\[\\d+.*\\];(.*)", "$1"+""+"$2")
+										.replaceAll("(.*parameters.intensitythreshold=\\[.*\\]\\.\\/)(\\d+)(\\ .*;.*)", "$1\\($2\\*"+1000/intensityCue+"\\)$3")
+										, impParameterPath);
+								paramsWritten = true;
+							}
+
+							ImagePlus frameRGsplitImp = new ImagePlus("Ch12hisSubCrop",stack3);
+							ImagePlus frameRGsplitImpSkipped = new ImagePlus("Ch12hisSubCrop",stack3skipped);
+
+
+							// Red channel:
+
+							new File(outDir+subdir).mkdirs();
+							new File(outDir+subdir+"Skipped").mkdirs();
+
+
+							// save a stack
+
+							IJ.save(frameRGsplitImp, outDir+subdir+"/aaa_t"+f+".tif");
+							IJ.save(frameRGsplitImpSkipped, outDir+subdir+"Skipped"+"/aaa_t"+f+".tif");
+
+
+							frameRGsplitImp.flush();
+							frameRGsplitImpSkipped.flush();
+
 						}
-
-
-						imp.getWindow().setEnabled(true);
-
-
-						stackWidth = (int)theRotatedROI.getBounds().getWidth();
-						stackHeight = (int)theRotatedROI.getBounds().getHeight();
-						if (!paramsWritten) {
-							IJ.saveString(IJ.openAsString(baseParameterFilePath).replaceAll("(.*end_time=)\\d+(;.*)", "$1"+f+"$2")
-									.replaceAll("(.*ROI=)true(;.*)", "$1false$2")
-									.replaceAll("(.*ROI.min=)\\d+(;.*)", "$10$2")
-									.replaceAll("(.*ROIxmax=)\\d+(;.*)", "$1"+stackWidth+"$2")
-									.replaceAll("(.*ROIymax=)\\d+(;.*)", "$1"+stackHeight+"$2")
-									.replaceAll("(.*)ROIpoints=\\[\\d+.*\\];(.*)", "$1"+""+"$2")
-									, impParameterPath);
-							paramsWritten = true;
-						}
-
-						ImagePlus frameRGsplitImp = new ImagePlus("Ch12hisSubCrop",stack3);
-						ImagePlus frameRGsplitImpSkipped = new ImagePlus("Ch12hisSubCrop",stack3skipped);
-
-						
-						// Red channel:
-
-						new File(outDir+subdir).mkdirs();
-						new File(outDir+subdir+"Skipped").mkdirs();
-
-
-						// save a stack
-
-						IJ.save(frameRGsplitImp, outDir+subdir+"/aaa_t"+f+".tif");
-						IJ.save(frameRGsplitImpSkipped, outDir+subdir+"Skipped"+"/aaa_t"+f+".tif");
-
-
-						frameRGsplitImp.flush();
-						frameRGsplitImpSkipped.flush();
-
 					}
+					imp.setPosition(wasC, wasZ, wasT);
+					imp.setRoi(theROI);
+
+					IJ.saveString(IJ.openAsString(baseParameterFilePath).replaceAll("(.*end_time=)\\d+(;.*)", "$1"+endPoint+"$2")
+							.replaceAll("(.*ROI=)true(;.*)", "$1false$2")
+							.replaceAll("(.*ROI.min=)\\d+(;.*)", "$10$2")
+							.replaceAll("(.*ROIxmax=)\\d+(;.*)", "$1"+stackWidth+"$2")
+							.replaceAll("(.*ROIymax=)\\d+(;.*)", "$1"+stackHeight+"$2")
+							.replaceAll("(.*)ROIpoints=\\[\\d+.*\\];(.*)", "$1"+""+"$2")
+							, impParameterPath);
+
 				}
-				imp.setPosition(wasC, wasZ, wasT);
-				imp.setRoi(theROI);
-
-				IJ.saveString(IJ.openAsString(baseParameterFilePath).replaceAll("(.*end_time=)\\d+(;.*)", "$1"+endPoint+"$2")
-						.replaceAll("(.*ROI=)true(;.*)", "$1false$2")
-						.replaceAll("(.*ROI.min=)\\d+(;.*)", "$10$2")
-						.replaceAll("(.*ROIxmax=)\\d+(;.*)", "$1"+stackWidth+"$2")
-						.replaceAll("(.*ROIymax=)\\d+(;.*)", "$1"+stackHeight+"$2")
-						.replaceAll("(.*)ROIpoints=\\[\\d+.*\\];(.*)", "$1"+""+"$2")
-						, impParameterPath);
-
+				
 				Thread linThread = new Thread(new Runnable() {
 					public void run() {
 						if(new File((outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa_emb_edited.xml").canRead()) {
