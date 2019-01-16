@@ -4820,8 +4820,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							wasChannelB[pos] = impBs[pos].getChannel();
 						}
 						if (!IJ.shiftKeyDown()){
-							if (impPrxs[pos]!=null && impPrys[pos]!=null && impAs[pos].getNFrames() == impPrxs[pos].getNFrames() && impAs[pos].getNFrames() == impPrys[pos].getNFrames()
-									&& impBs[pos].getNFrames() == impPrxs[pos].getNFrames() && impBs[pos].getNFrames() == impPrys[pos].getNFrames()) {
+							if (ciDFs[pos]!=null && impAs[pos].getNFrames() == ciDFs[pos].getNFrames() 
+									&& ciDFs[pos]!=null && impBs[pos].getNFrames() == ciDFs[pos].getNFrames() 
+									&& impPrxs[pos]!=null && impPrys[pos]!=null 
+									&& impAs[pos].getNFrames() == impPrxs[pos].getNFrames() 
+									&& impAs[pos].getNFrames() == impPrys[pos].getNFrames()
+									&& impBs[pos].getNFrames() == impPrxs[pos].getNFrames() 
+									&& impBs[pos].getNFrames() == impPrys[pos].getNFrames()) {
 								doProcessing[pos] = false;
 								IJ.log("no unfinishedViewss "+f+" "+pos);
 								continue;
@@ -6072,7 +6077,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 																.replaceAll("(.*ROIxmax=)\\d+(;.*)", "$1"+stackWidth+"$2")
 																.replaceAll("(.*ROIymax=)\\d+(;.*)", "$1"+stackHeight+"$2")
 																.replaceAll("(.*)ROIpoints=\\[\\d+.*\\];(.*)", "$1"+""+"$2")
-																.replaceAll("(.*parameters.intensitythreshold=\\[.*\\]\\.\\/)(\\d+)(\\ .*;.*)", "$1\\($2\\*"+3000/intensityCues[pos]+"\\)$3")
+																.replaceAll("(.*parameters.intensitythreshold=\\[.*\\]\\.\\/)(\\d+)(\\ .*;.*)", "$1\\($2\\*"+intensityCues[pos]/3000+"\\)$3")
 																, impParameterPath);
 														paramsWritten = true;
 													}
