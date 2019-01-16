@@ -6077,7 +6077,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 																.replaceAll("(.*ROIxmax=)\\d+(;.*)", "$1"+stackWidth+"$2")
 																.replaceAll("(.*ROIymax=)\\d+(;.*)", "$1"+stackHeight+"$2")
 																.replaceAll("(.*)ROIpoints=\\[\\d+.*\\];(.*)", "$1"+""+"$2")
-																.replaceAll("(.*parameters.intensitythreshold=\\[.*\\]\\.\\/)(\\d+)(\\ .*;.*)", "$1\\($2\\*"+intensityCues[pos]/3000+"\\)$3")
+																.replaceAll("(.*parameters.intensitythreshold=\\[.*\\]\\.\\/)(\\d+)(\\ .*;.*)", "$1\\($2\\*"+1000/intensityCues[pos]+"\\)$3")
 																, impParameterPath);
 														paramsWritten = true;
 													}
@@ -6107,7 +6107,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 													.replaceAll("(.*ROIxmax=)\\d+(;.*)", "$1"+stackWidth+"$2")
 													.replaceAll("(.*ROIymax=)\\d+(;.*)", "$1"+stackHeight+"$2")
 													.replaceAll("(.*)ROIpoints=\\[\\d+.*\\];(.*)", "$1"+""+"$2")
-													.replaceAll("(.*parameters.intensitythreshold=\\[.*\\]\\.\\/)(\\d+)(\\ .*;.*)", "$1\\($2\\*"+intensityCues[pos]/3000+"\\)$3")
+													.replaceAll("(.*parameters.intensitythreshold=\\[.*\\]\\.\\/)(\\d+)(\\ .*;.*)", "$1\\($2\\*"+1000/intensityCues[pos]+"\\)$3")
 													, impParameterPath);
 
 
