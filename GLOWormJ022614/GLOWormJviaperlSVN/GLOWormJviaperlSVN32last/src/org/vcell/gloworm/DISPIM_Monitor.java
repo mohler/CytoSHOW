@@ -5081,8 +5081,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										} else {
 											lastMatrix[pos] = IJ.openAsString("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
 											if (lastMatrix[pos].startsWith("Error") 
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[0])< 0.8
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[0])> 1.2
+													|| Double.parseDouble(lastMatrix[pos].split("\\t")[0])< 0.95
+													|| Double.parseDouble(lastMatrix[pos].split("\\t")[0])> 1.05
 													|| Double.parseDouble(lastMatrix[pos].split("\\t")[5])< 0.8
 													|| Double.parseDouble(lastMatrix[pos].split("\\t")[5])> 1.2
 													|| Double.parseDouble(lastMatrix[pos].split("\\t")[10])< 0.8
@@ -5257,8 +5257,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										} else {
 											lastMatrix[pos] = IJ.openAsString("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
 											if (lastMatrix[pos].startsWith("Error") 
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[0])< 0.8
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[0])> 1.2
+													|| Double.parseDouble(lastMatrix[pos].split("\\t")[0])< 0.95
+													|| Double.parseDouble(lastMatrix[pos].split("\\t")[0])> 1.05
 													|| Double.parseDouble(lastMatrix[pos].split("\\t")[5])< 0.8
 													|| Double.parseDouble(lastMatrix[pos].split("\\t")[5])> 1.2
 													|| Double.parseDouble(lastMatrix[pos].split("\\t")[10])< 0.8
