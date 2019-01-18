@@ -5084,11 +5084,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 													|| Double.parseDouble(lastMatrix[pos].split("\\t")[0])< 0.8
 													|| Double.parseDouble(lastMatrix[pos].split("\\t")[0])> 1.2
 													|| Double.parseDouble(lastMatrix[pos].split("\\t")[5])< 0.8
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[5])< 1.2
+													|| Double.parseDouble(lastMatrix[pos].split("\\t")[5])> 1.2
 													|| Double.parseDouble(lastMatrix[pos].split("\\t")[10])< 0.8
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[10])< 1.2
+													|| Double.parseDouble(lastMatrix[pos].split("\\t")[10])> 1.2
 													|| Double.parseDouble(lastMatrix[pos].split("\\t")[15])< 0.8
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[15])< 1.2
+													|| Double.parseDouble(lastMatrix[pos].split("\\t")[15])> 1.2
 													){
 												IJ.log("Bah Humbug");
 												failIteration[pos]++;
@@ -5260,11 +5260,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 													|| Double.parseDouble(lastMatrix[pos].split("\\t")[0])< 0.8
 													|| Double.parseDouble(lastMatrix[pos].split("\\t")[0])> 1.2
 													|| Double.parseDouble(lastMatrix[pos].split("\\t")[5])< 0.8
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[5])< 1.2
+													|| Double.parseDouble(lastMatrix[pos].split("\\t")[5])> 1.2
 													|| Double.parseDouble(lastMatrix[pos].split("\\t")[10])< 0.8
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[10])< 1.2
+													|| Double.parseDouble(lastMatrix[pos].split("\\t")[10])> 1.2
 													|| Double.parseDouble(lastMatrix[pos].split("\\t")[15])< 0.8
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[15])< 1.2
+													|| Double.parseDouble(lastMatrix[pos].split("\\t")[15])> 1.2
 													){
 												IJ.log("Bah Humbug");
 												failIteration[pos]++;
