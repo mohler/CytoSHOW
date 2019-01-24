@@ -5127,7 +5127,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											}
 
 										} else {
-											posFrameEnd[pos]--;
+//  I THINK THI MAY NOW CAUSE PROBLEMS											posFrameEnd[pos]--;
 										}
 
 										int k = f;
@@ -5301,7 +5301,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											}
 
 										} else {
-											posFrameEnd[pos]--;
+//  I THINK THI MAY NOW CAUSE PROBLEMS											posFrameEnd[pos]--;
 										}
 
 										int k = f;
@@ -5482,9 +5482,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							}
 						}
 
-						//						if (posFrameStart[pos]>f || posFrameEnd[pos]<f) {
-						//							go = false;
-						//						}
 						if (!go){
 							continue;
 						}
@@ -5579,8 +5576,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											.getSize();
 									impDF1s[pos].setOpenAsHyperStack(true);
 									impDF1s[pos].setStack(impDF1s[pos].getStack(), outputWavelengths,
-											zSlicesDF1, stkNSlicesDF
-											/ (outputWavelengths * zSlicesDF1));
+											zSlicesDF1, stkNSlicesDF / (outputWavelengths * zSlicesDF1));
 									if (ciDFs[pos] != null) {
 										win = ciDFs[pos].getWindow();
 									} else {
@@ -6136,7 +6132,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								}
 							}
 						}
-						if (doProcessing[pos] &&(ciDFs[pos]==null || (orientBeforeLineage?2:(posFrameEnd[pos]-posFrameStart[pos])) > ciDFs[pos].getNFrames())) {
+						if (doProcessing[pos] &&(ciDFs[pos]==null || (orientBeforeLineage?2:(posFrameEnd[pos]-posFrameStart[pos])) >= ciDFs[pos].getNFrames())) {
 							posAllDone=false;
 						}
 					}
