@@ -6135,6 +6135,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						if (doProcessing[pos] &&(ciDFs[pos]==null || (orientBeforeLineage?2:(posFrameEnd[pos]-posFrameStart[pos])) > ciDFs[pos].getNFrames())) {
 							posAllDone=false;
 						}
+						IJ.log(""+pos+"...POSALLDONE = "+ posAllDone);
 					}
 				}
 				//			IJ.run("Tile");
