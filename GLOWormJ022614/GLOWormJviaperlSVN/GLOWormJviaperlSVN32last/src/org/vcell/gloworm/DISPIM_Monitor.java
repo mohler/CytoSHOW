@@ -5517,25 +5517,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							}
 						};
 
-
-						
-						if (!IJ.shiftKeyDown()){
-							if (ciDFs[pos]!=null && impAs[pos].getNFrames() == ciDFs[pos].getNFrames() 
-									&& ciDFs[pos]!=null && impBs[pos].getNFrames() == ciDFs[pos].getNFrames() 
-									&& impPrxs[pos]!=null && impPrys[pos]!=null 
-									&& impAs[pos].getNFrames() == impPrxs[pos].getNFrames() 
-									&& impAs[pos].getNFrames() == impPrys[pos].getNFrames()
-									&& impBs[pos].getNFrames() == impPrxs[pos].getNFrames() 
-									&& impBs[pos].getNFrames() == impPrys[pos].getNFrames()) {
-								if (new File(savePath + File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution2").list(tiffNameFilter).length
-										== new File(savePath + File.separator + ciDFs[pos].getTitle().replace(":","_").replace(" ","").replace("_dummy","")).list(tiffNameFilter).length){
-									doProcessing[pos] = false;
-									IJ.log("no unfinishedViewss "+pos);
-									continue;
-								}
-							}
-						}
-
 						if (doProcessing[pos]) {
 							
 
