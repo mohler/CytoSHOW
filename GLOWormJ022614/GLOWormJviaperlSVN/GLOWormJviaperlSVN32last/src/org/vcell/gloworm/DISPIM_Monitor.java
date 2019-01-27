@@ -4418,8 +4418,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							wasChannelB[pos] = impBs[pos].getChannel();
 						}
 						if (!IJ.shiftKeyDown()){
-							if (impPrxs[pos]!=null && impPrys[pos]!=null && impAs[pos].getNFrames() == impPrxs[pos].getNFrames() && impAs[pos].getNFrames() == impPrys[pos].getNFrames()
-									&& impBs[pos].getNFrames() == impPrxs[pos].getNFrames() && impBs[pos].getNFrames() == impPrys[pos].getNFrames()) {
+							if (ciDFs[pos]!=null && impAs[pos].getNFrames() == ciDFs[pos].getNFrames() 
+									&& ciDFs[pos]!=null && impBs[pos].getNFrames() == ciDFs[pos].getNFrames() 
+									&& impPrxs[pos]!=null && impPrys[pos]!=null 
+									&& impAs[pos].getNFrames() == impPrxs[pos].getNFrames() 
+									&& impAs[pos].getNFrames() == impPrys[pos].getNFrames()
+									&& impBs[pos].getNFrames() == impPrxs[pos].getNFrames() 
+									&& impBs[pos].getNFrames() == impPrys[pos].getNFrames()) {
 								doProcessing[pos] = false;
 								IJ.log("no unfinishedViewss "+f+" "+pos);
 								continue;
@@ -5504,6 +5509,32 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							wasChannelA[pos] = impAs[pos].getChannel();
 							wasChannelB[pos] = impBs[pos].getChannel();
 						}
+						
+						FilenameFilter tiffNameFilter = new FilenameFilter() {
+							@Override
+							public boolean accept(File dir, String name) {
+								return name.toLowerCase().endsWith(".tif");
+							}
+						};
+
+
+						
+						if (!IJ.shiftKeyDown()){
+							if (ciDFs[pos]!=null && impAs[pos].getNFrames() == ciDFs[pos].getNFrames() 
+									&& ciDFs[pos]!=null && impBs[pos].getNFrames() == ciDFs[pos].getNFrames() 
+									&& impPrxs[pos]!=null && impPrys[pos]!=null 
+									&& impAs[pos].getNFrames() == impPrxs[pos].getNFrames() 
+									&& impAs[pos].getNFrames() == impPrys[pos].getNFrames()
+									&& impBs[pos].getNFrames() == impPrxs[pos].getNFrames() 
+									&& impBs[pos].getNFrames() == impPrys[pos].getNFrames()) {
+								if (new File(savePath + File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution2").list(tiffNameFilter).length
+										== new File(savePath + File.separator + ciDFs[pos].getTitle().replace(":","_").replace(" ","").replace("_dummy","")).list(tiffNameFilter).length){
+									doProcessing[pos] = false;
+									IJ.log("no unfinishedViewss "+pos);
+									continue;
+								}
+							}
+						}
 
 						if (doProcessing[pos]) {
 
@@ -5521,13 +5552,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							if (impBs[pos].hasNullStack())
 								continue;
 
-
-							FilenameFilter tiffNameFilter = new FilenameFilter() {
-								@Override
-								public boolean accept(File dir, String name) {
-									return name.toLowerCase().endsWith(".tif");
-								}
-							};
 
 							String openDFPath = savePath;
 							saveFile = new File(openDFPath );
