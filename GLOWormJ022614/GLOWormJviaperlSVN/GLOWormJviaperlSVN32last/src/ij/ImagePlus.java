@@ -1670,7 +1670,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 				public void run(){
 					blinkStop = false;
 
-					while (!blinkStop) {
+					while (!blinkStop && win != null) {
 						double strokeWidthMagAdjust = roiStrokeWidth/win.getCanvas().getMagnification();
 						Roi dummyRoi = new Roi(0,0,0,0);
 						dummyRoi.setStrokeWidth(strokeWidthMagAdjust);
