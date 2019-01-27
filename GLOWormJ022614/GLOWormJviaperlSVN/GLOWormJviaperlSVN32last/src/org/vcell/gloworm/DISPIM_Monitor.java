@@ -5537,6 +5537,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						}
 
 						if (doProcessing[pos]) {
+							
 
 							double pwA = impAs[pos].getCalibration().pixelWidth;
 							double phA = impAs[pos].getCalibration().pixelHeight;
@@ -5915,7 +5916,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										
 //										IJ.run("Tile");
 									}
-
+								}
 									////////								
 									if (lineageDecons){
 
@@ -6153,11 +6154,17 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									}
 									//////////							
 
-								}
+
 							}
 						}
-						if (doProcessing[pos] &&(ciDFs[pos]==null || (orientBeforeLineage?2:(posFrameEnd[pos]-posFrameStart[pos])) > ciDFs[pos].getNFrames())) {
-							posAllDone=false;
+						if (doProcessing[pos] &&(ciDFs[pos]==null 
+												|| (orientBeforeLineage?2:(posFrameEnd[pos]-posFrameStart[pos])) > ciDFs[pos].getNFrames())
+								|| (new File(savePath + File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution2").list(tiffNameFilter).length
+										!= new File(savePath + File.separator + ciDFs[pos].getTitle().replace(":","_").replace(" ","").replace("_dummy","")).list(tiffNameFilter).length)
+								) {
+							
+								posAllDone=false;
+							
 						}
 						IJ.log(""+pos+"...POSALLDONE = "+ posAllDone);
 					}
