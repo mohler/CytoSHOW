@@ -633,7 +633,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
     	if (resetCurrentSlice) setCurrentSlice(newStackSize);
     	ImageProcessor ip = newStack.getProcessor(currentSlice);
     	boolean dimensionsChanged = width>0 && height>0 && (width!=ip.getWidth()||height!=ip.getHeight());
-		if (this.stack!=null) {
+		if (this.stack!=null && this.stack != newStack) {
 			boolean soloStackUser = true;
 			if (WindowManager.getIDList()!=null) {
 				if (soloStackUser) {
@@ -658,7 +658,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			}
 			stack=null;
 		}
-this.stack = newStack;
+		this.stack = newStack;
     	setProcessor2(title, ip, newStack);
 		if (win==null) {
 			if (resetCurrentSlice) setSlice(currentSlice);
