@@ -633,7 +633,32 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
     	if (resetCurrentSlice) setCurrentSlice(newStackSize);
     	ImageProcessor ip = newStack.getProcessor(currentSlice);
     	boolean dimensionsChanged = width>0 && height>0 && (width!=ip.getWidth()||height!=ip.getHeight());
-    	this.stack = newStack;
+		if (this.stack!=null) {
+			boolean soloStackUser = true;
+			if (WindowManager.getIDList()!=null) {
+				if (soloStackUser) {
+					while (stack.nSlices>0) {
+						stack.deleteLastSlice();
+					}
+				}
+				if (stack instanceof FileInfoVirtualStack) {
+					((FileInfoVirtualStack)stack).infoArray = null;
+				} else if (stack instanceof MultiFileInfoVirtualStack) {
+					while (((MultiFileInfoVirtualStack)stack).getFivStacks().size()>0) {
+						for (FileInfo fi:((MultiFileInfoVirtualStack)stack).getFivStacks().get(0).infoArray){
+							
+							fi = null;
+						}
+						((MultiFileInfoVirtualStack)stack).getFivStacks().get(0).infoArray = null;
+						((MultiFileInfoVirtualStack)stack).getFivStacks().remove(0);
+					}
+					((MultiFileInfoVirtualStack)stack).infoArray = null;
+					((MultiFileInfoVirtualStack)stack).setFivStacks(null);
+				}
+			}
+			stack=null;
+		}
+this.stack = newStack;
     	setProcessor2(title, ip, newStack);
 		if (win==null) {
 			if (resetCurrentSlice) setSlice(currentSlice);
