@@ -667,7 +667,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		
 		sliceNumber = n/(dimOrder.toLowerCase().matches(".*splitc.*")?2:1);
 		if (sliceNumber <1) sliceNumber = 1;
-		
+		if (stackNumber<0) stackNumber = 0;
 		if (dimOrder.toLowerCase().matches(".*splitc.*")){	//IS ALL THIS REALLY NECESSARY??? MIGHT BE FOR SPLITC
 			if (sliceNumber%2==0){
 				if (fivStacks.get(stackNumber).getSize()>0){

@@ -682,6 +682,17 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					impAs[0].getCalibration().pixelWidth = 0.1625;
 					impAs[0].getCalibration().pixelHeight = 0.1625;
 					impAs[0].getCalibration().pixelDepth = 1;
+				}else{
+					wavelengths = impAs[0].getNChannels();
+					cDim = impAs[0].getNChannels();
+					zDim = impAs[0].getNSlices();
+					tDim = impAs[0].getNFrames();
+					vDim = 2;
+					impAs[0].getCalibration().setUnit("micron");
+					impAs[0].getCalibration().pixelWidth = 0.1625;
+					impAs[0].getCalibration().pixelHeight = 0.1625;
+					impAs[0].getCalibration().pixelDepth = 1;
+	
 				}
 				stackBs[0] = (MultiFileInfoVirtualStack) impBs[0].getImageStack();
 				if (stackBs[0].getWidth()==2048 && stackBs[0].getHeight()==512){
@@ -694,6 +705,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					impBs[0].getCalibration().pixelWidth = 0.1625;
 					impBs[0].getCalibration().pixelHeight = 0.1625;
 					impBs[0].getCalibration().pixelDepth = 1;
+				}else{
+					impBs[0].getCalibration().setUnit("micron");
+					impBs[0].getCalibration().pixelWidth = 0.1625;
+					impBs[0].getCalibration().pixelHeight = 0.1625;
+					impBs[0].getCalibration().pixelDepth = 1;
+
 				}
 
 				
@@ -6148,7 +6165,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								posAllDone=false;
 							
 						}
-						IJ.log(""+pos+"...POSALLDONE = "+ posAllDone);
+//						IJ.log(""+pos+"...POSALLDONE = "+ posAllDone);
 					}
 				}
 				//			IJ.run("Tile");
