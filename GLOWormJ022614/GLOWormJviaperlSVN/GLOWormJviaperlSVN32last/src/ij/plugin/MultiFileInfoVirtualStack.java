@@ -348,8 +348,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					if (infoCollectorArrayList.size()==0){
 						for (String fileName:goDirFileList){
 							if ((new File(dir + fileName)).canRead() && fileName.toLowerCase().endsWith(".tif")) {
-								if (dummyInfoArray == null || (new File(dir + fileName)).length() < firstFileSize*0.98
-															|| (new File(dir + fileName)).length() > firstFileSize*1.02) {
+								if (dummyInfoArray == null || (new File(dir + fileName)).length() < firstFileSize*0.998
+															|| (new File(dir + fileName)).length() > firstFileSize*1.002) {
 									TiffDecoder td = new TiffDecoder(dir, fileName);
 									if (IJ.debugMode) td.enableDebugging();
 									IJ.showStatus("Decoding TIFF header...");
