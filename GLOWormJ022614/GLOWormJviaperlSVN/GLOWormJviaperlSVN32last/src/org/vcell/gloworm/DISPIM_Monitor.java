@@ -5105,12 +5105,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											if (lastMatrix[pos].startsWith("Error") 
 													|| Double.parseDouble(lastMatrix[pos].split("\\t")[0])< 0.95
 													|| Double.parseDouble(lastMatrix[pos].split("\\t")[0])> 1.05
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[5])< 0.8
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[5])> 1.2
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[10])< 0.8
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[10])> 1.2
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[15])< 0.8
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[15])> 1.2
+													|| Double.parseDouble(lastMatrix[pos].split("\\t")[5])< 0.95
+													|| Double.parseDouble(lastMatrix[pos].split("\\t")[5])> 1.05
+													|| Double.parseDouble(lastMatrix[pos].split("\\t")[10])< 0.90
+													|| Double.parseDouble(lastMatrix[pos].split("\\t")[10])> 1.1
+													|| Double.parseDouble(lastMatrix[pos].split("\\t")[15])< 0.95
+													|| Double.parseDouble(lastMatrix[pos].split("\\t")[15])> 1.05
 													){
 												IJ.log("Bah Humbug");
 												failIteration[pos]++;
@@ -5281,12 +5281,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											if (lastMatrix[pos].startsWith("Error") 
 													|| Double.parseDouble(lastMatrix[pos].split("\\t")[0])< 0.95
 													|| Double.parseDouble(lastMatrix[pos].split("\\t")[0])> 1.05
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[5])< 0.8
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[5])> 1.2
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[10])< 0.8
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[10])> 1.2
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[15])< 0.8
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[15])> 1.2
+													|| Double.parseDouble(lastMatrix[pos].split("\\t")[5])< 0.95
+													|| Double.parseDouble(lastMatrix[pos].split("\\t")[5])> 1.05
+													|| Double.parseDouble(lastMatrix[pos].split("\\t")[10])< 0.90
+													|| Double.parseDouble(lastMatrix[pos].split("\\t")[10])> 1.1
+													|| Double.parseDouble(lastMatrix[pos].split("\\t")[15])< 0.95
+													|| Double.parseDouble(lastMatrix[pos].split("\\t")[15])> 1.05
 													){
 												IJ.log("Bah Humbug");
 												failIteration[pos]++;
