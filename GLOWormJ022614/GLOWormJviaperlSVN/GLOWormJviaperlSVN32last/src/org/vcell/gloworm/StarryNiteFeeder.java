@@ -334,7 +334,7 @@ public class StarryNiteFeeder implements PlugIn {
 										.replaceAll("(.*ROIxmax=)\\d+(;.*)", "$1"+stackWidth+"$2")
 										.replaceAll("(.*ROIymax=)\\d+(;.*)", "$1"+stackHeight+"$2")
 										.replaceAll("(.*)ROIpoints=\\[\\d+.*\\];(.*)", "$1"+""+"$2")
-										.replaceAll("(.*parameters.intensitythreshold=\\[.*\\]\\.\\/)(\\d+)(\\ .*;.*)", "$1\\($2\\*"+1000/intensityCue+"\\)$3")
+										.replaceAll("(.*parameters.intensitythreshold=\\[.*\\]\\.\\/)(\\d+)(\\ .*;.*)", "$1\\($2\\*"+2000/intensityCue+"\\)$3")
 										, impParameterPath);
 								paramsWritten = true;
 							}
