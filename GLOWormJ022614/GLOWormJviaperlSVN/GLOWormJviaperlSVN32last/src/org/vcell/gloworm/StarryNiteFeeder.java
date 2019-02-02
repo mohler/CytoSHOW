@@ -52,6 +52,8 @@ import ij.process.ShortProcessor;
 import ij.process.StackStatistics;
 
 public class StarryNiteFeeder implements PlugIn {
+	
+	public static double INTENSITY_BASE = 645.0;
 
 	public void run(String arg) {
 		boolean autoLaunch=false;
@@ -61,7 +63,7 @@ public class StarryNiteFeeder implements PlugIn {
 		String[] sourceFileList = new String[0];
 		String paramsPath = "";
 		String outputDir = "";
-		double intensityCue = 1000;
+		double intensityCue = INTENSITY_BASE;
 		int skipFactor = 6;
 		if (argChunks.length == 4) {
 			autoLaunch = true;
@@ -334,7 +336,7 @@ public class StarryNiteFeeder implements PlugIn {
 										.replaceAll("(.*ROIxmax=)\\d+(;.*)", "$1"+stackWidth+"$2")
 										.replaceAll("(.*ROIymax=)\\d+(;.*)", "$1"+stackHeight+"$2")
 										.replaceAll("(.*)ROIpoints=\\[\\d+.*\\];(.*)", "$1"+""+"$2")
-										.replaceAll("(.*parameters.intensitythreshold=\\[.*\\]\\.\\/)(\\d+)(\\ .*;.*)", "$1\\($2\\*"+2000/intensityCue+"\\)$3")
+										.replaceAll("(.*parameters.intensitythreshold=\\[.*\\]\\.\\/)(\\d+)(\\ .*;.*)", "$1\\($2\\*"+INTENSITY_BASE/intensityCue+"\\)$3")
 										, impParameterPath);
 								paramsWritten = true;
 							}

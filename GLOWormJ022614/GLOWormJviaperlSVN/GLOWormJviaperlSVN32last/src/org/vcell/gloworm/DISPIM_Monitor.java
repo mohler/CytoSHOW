@@ -786,6 +786,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					longAxesB = new double[pDim];					
 					rotXYZs = new double[pDim][3];
 					intensityCues = new double[pDim];
+					Arrays.fill(intensityCues, StarryNiteFeeder.INTENSITY_BASE);
 					
 					dispimToolsButton = new JButton[pDim][2];
 					dispimPreviewButton = new JButton[pDim][2];
@@ -1288,6 +1289,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				longAxesB = new double[pDim];					
 				rotXYZs = new double[pDim][3];
 				intensityCues = new double[pDim];
+				Arrays.fill(intensityCues, StarryNiteFeeder.INTENSITY_BASE);
 				
 				dispimToolsButton = new JButton[pDim][2];
 				dispimPreviewButton = new JButton[pDim][2];
@@ -6032,9 +6034,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 														}
 														ip1.subtract(ipHisMode * 1);
 
-														//NUCLEUS CHANNEL INTENSITY BALANCER?
-														//ip1.multiply(3000/intensityCues[pos]);
-
 														ImageProcessor ip3 = ip1.createProcessor(stack3.getWidth(), stack3.getHeight());
 
 														flipStack = false;  //NO LONGER NEED DOUBLEFLIP IF USING ZYX ROTATIONS TO CORRECT!
@@ -6115,7 +6114,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 																.replaceAll("(.*ROIxmax=)\\d+(;.*)", "$1"+stackWidth+"$2")
 																.replaceAll("(.*ROIymax=)\\d+(;.*)", "$1"+stackHeight+"$2")
 																.replaceAll("(.*)ROIpoints=\\[\\d+.*\\];(.*)", "$1"+""+"$2")
-																.replaceAll("(.*parameters.intensitythreshold=\\[.*\\]\\.\\/)(\\d+)(\\ .*;.*)", "$1\\($2\\*"+2000/intensityCues[pos]+"\\)$3")
+																.replaceAll("(.*parameters.intensitythreshold=\\[.*\\]\\.\\/)(\\d+)(\\ .*;.*)", "$1\\($2\\*"+StarryNiteFeeder.INTENSITY_BASE/intensityCues[pos]+"\\)$3")
 																, impParameterPath);
 														paramsWritten = true;
 													}
@@ -6145,7 +6144,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 													.replaceAll("(.*ROIxmax=)\\d+(;.*)", "$1"+stackWidth+"$2")
 													.replaceAll("(.*ROIymax=)\\d+(;.*)", "$1"+stackHeight+"$2")
 													.replaceAll("(.*)ROIpoints=\\[\\d+.*\\];(.*)", "$1"+""+"$2")
-													.replaceAll("(.*parameters.intensitythreshold=\\[.*\\]\\.\\/)(\\d+)(\\ .*;.*)", "$1\\($2\\*"+2000/intensityCues[pos]+"\\)$3")
+													.replaceAll("(.*parameters.intensitythreshold=\\[.*\\]\\.\\/)(\\d+)(\\ .*;.*)", "$1\\($2\\*"+StarryNiteFeeder.INTENSITY_BASE/intensityCues[pos]+"\\)$3")
 													, impParameterPath);
 
 
