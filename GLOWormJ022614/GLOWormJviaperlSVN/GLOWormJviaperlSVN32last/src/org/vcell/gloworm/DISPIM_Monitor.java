@@ -61,6 +61,7 @@ import ij.VirtualStack;
 import ij.WindowManager;
 import ij.gui.EllipseRoi;
 import ij.gui.GenericDialog;
+import ij.gui.ImageCanvas;
 import ij.gui.ImageWindow;
 import ij.gui.Line;
 import ij.gui.PolygonRoi;
@@ -2618,7 +2619,22 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											prjXwin.viewButtonPanel
 											.validate();
 											prjXwin.pack();
-											prjXwin.setSize(winW, winH);
+											ImageCanvas ic = prjXwin.getImagePlus().getCanvas();
+											int padH = 1+prjXwin.getInsets().left
+													+prjXwin.getInsets().right
+													+(prjXwin.optionsPanel.isVisible()?prjXwin.optionsPanel.getWidth():0)
+													+prjXwin.viewButtonPanel.getWidth();
+											int padV = prjXwin.getInsets().top
+													+prjXwin.getInsets().bottom
+													+(prjXwin instanceof StackWindow?
+															((StackWindow)prjXwin).getNScrollbars()
+															*(((StackWindow)prjXwin).zSelector!=null?
+																	((StackWindow)prjXwin).zSelector.getHeight():
+																		((StackWindow)prjXwin).tSelector.getHeight())
+															:0)
+													+prjXwin.overheadPanel.getHeight();
+											prjXwin.setSize(ic.dstWidth+padH, ic.dstHeight+padV);
+
 										}
 									
 
@@ -2691,8 +2707,21 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										prjYwin.viewButtonPanel
 										.validate();
 										prjYwin.pack();
-										prjYwin.setSize(winW, winH);
-									}
+										ImageCanvas ic = prjYwin.getImagePlus().getCanvas();
+										int padH = 1+prjYwin.getInsets().left
+												+prjYwin.getInsets().right
+												+(prjYwin.optionsPanel.isVisible()?prjYwin.optionsPanel.getWidth():0)
+												+prjYwin.viewButtonPanel.getWidth();
+										int padV = prjYwin.getInsets().top
+												+prjYwin.getInsets().bottom
+												+(prjYwin instanceof StackWindow?
+														((StackWindow)prjYwin).getNScrollbars()
+														*(((StackWindow)prjYwin).zSelector!=null?
+																((StackWindow)prjYwin).zSelector.getHeight():
+																	((StackWindow)prjYwin).tSelector.getHeight())
+														:0)
+												+prjYwin.overheadPanel.getHeight();
+										prjYwin.setSize(ic.dstWidth+padH, ic.dstHeight+padV);									}
 									
 
 								}
