@@ -1866,6 +1866,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		Hashtable<String, String> sConnLayerHash = new Hashtable<String,String>();
 
 		String fillColor;
+		String cellName;
 		long count =0;
 		long nRois =0;
 		for (int cell=1; cell<sCells.length; cell++) {
@@ -1877,8 +1878,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			int offsetY = Integer.parseInt(sCell.split("(;fill:|;\")").length>1 && sCell.split("(;fill:|;\")")[0].split("transform=\"matrix\\(").length>1
 					?(sCell.split("(;fill:|;\")")[0].split("transform=\"matrix\\(")[1]).split("[,\\.]")[10]:"0");
 
+			cellName = (sCell.split("title=\"")[1].split("\"").length>1?sCell.split("title=\"")[1].split("\"")[0]:"");
 			fillColor = (sCell.split("(;fill:|;\")").length>1?(sCell.split("(;fill:|;\")")[1].startsWith("#")?sCell.split("(;fill:|;\")")[1]:""):"");
-			IJ.log(fillColor+" "+offsetX+" "+offsetY);
+			IJ.log(cellName+" "+fillColor+" "+offsetX+" "+offsetY);
 			String[] sCellAreas = sCell.split("<t2_area");
 			int maxReps =0;
 			int reps =0;
@@ -1886,7 +1888,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				String slicePosition = (sCellArea.split("\"").length>1?sCellArea.split("\"")[1]:"");
 				for(int k=1; k< sCellArea.split("t2_path d=\"").length; k++) {
 					reps =k;
-					IJ.log(fillColor+"_"+slicePosition+"_"+k+" "+offsetX+" "+offsetY);
+//					IJ.log(fillColor+"_"+slicePosition+"_"+k+" "+offsetX+" "+offsetY);
 					cellAreaHash.put(fillColor+"_"+slicePosition+"_"+k, sCellArea.split("t2_path d=\"").length>1?sCellArea.split("t2_path d=\"")[k].split("\"")[0]:"");
 				}
 				maxReps = maxReps<reps?reps:maxReps;
@@ -1925,16 +1927,17 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						}
 						Roi pRoi = new PolygonRoi(xCoords,yCoords,yCoords.length,Roi.FREEROI);
 						pRoi.setImage(imp);
-						listModel.addElement(fillColor); 
-						fullListModel.addElement(fillColor);
-						rois.put(fillColor, pRoi); 
+						pRoi.setName(cellName);
+						listModel.addElement(cellName); 
+						fullListModel.addElement(cellName);
+						rois.put(cellName, pRoi); 
 						setUpRoisByNameAndNumbers(pRoi);
 						nRois++;
 
 						pRoi.setFillColor(Colors.decode(fillColor.replace("#", "#33"), defaultColor));
 						pRoi.setPosition(1,1,sliceNumber);
 						//						list.setSelectedIndex(this.getCount()-1);
-						this.rename(fillColor, new int[] {this.getCount()-1}, false);
+						this.rename(cellName, new int[] {this.getCount()-1}, false);
 					}
 				}
 			}
