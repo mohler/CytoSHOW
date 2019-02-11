@@ -5818,7 +5818,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 															.addActionListener(DISPIM_Monitor.this);
 													diSPIMPreviewPanel
 															.add(BorderLayout.WEST,
-																	dispimPreviewButton[pos][1]);
+																	dispimPreviewButton[pos][0]);
 													dispimPreviewButton[pos][0]
 															.setBackground(Color.orange);
 

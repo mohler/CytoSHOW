@@ -25,6 +25,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.vcell.gloworm.MQTVSSceneLoader64;
 import org.vcell.gloworm.MQTVS_VolumeViewer;
 import org.vcell.gloworm.MultiQTVirtualStack;
 import org.vcell.gloworm.RoiLabelByNumbersSorter;
@@ -1854,6 +1855,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		boolean wasVis = this.isVisible();
 		this.setVisible(false);
 		//		showAll(SHOW_ALL);
+		String universalCLURL = MQTVSSceneLoader64.class.getResource("docs/fullUniversal_ColorLegend.lgd").toString();
+		String clStr = IJ.openUrlAsString(universalCLURL);
+	
+		ColorLegend cl = new ColorLegend(imp, clStr);
+		this.setColorLegend(cl);
 		String s = IJ.openAsString(path);
 		//		IJ.log(s);
 		String impTitle = this.imp.getTitle();
@@ -1880,6 +1886,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 			cellName = (sCell.split("title=\"")[1].split("\"").length>1?sCell.split("title=\"")[1].split("\"")[0]:"");
 			fillColor = (sCell.split("(;fill:|;\")").length>1?(sCell.split("(;fill:|;\")")[1].startsWith("#")?sCell.split("(;fill:|;\")")[1]:""):"");
+			cl.getBrainbowColors().put(cellName.toLowerCase(), Colors.decode(fillColor, Color.white));
 			IJ.log(cellName+" "+fillColor+" "+offsetX+" "+offsetY);
 			String[] sCellAreas = sCell.split("<t2_area");
 			int maxReps =0;
@@ -2006,6 +2013,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		updateShowAll();
 		//this.imp.setTitle(impTitle);
 		this.setVisible(wasVis);
+		colorLegend  = new ColorLegend(this);
 		busy = false;
 	}
 
@@ -4772,13 +4780,17 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					|| this.getProjZImps().contains(source)) {
 			}else{
 				if (source instanceof ImagePlus)
-					return ((ImagePlus)source).getRoiManager().getColorLegend(source);
+					colorLegend =  ((ImagePlus)source).getRoiManager().getColorLegend(source);
 				if (source instanceof RoiManager)
-					return ((RoiManager)source).getColorLegend(source);
-				return colorLegend;
+					colorLegend =  ((RoiManager)source).getColorLegend(source);
+			
 			}
-		} else if (this.colorLegend == null) {
-			return imp.getMotherImp().getRoiManager().getColorLegend();
+		} else if (this.colorLegend == null){ 
+			if (imp!=null && imp.getMotherImp()!=null && imp.getMotherImp().getRoiManager() != null && imp.getMotherImp().getRoiManager().getColorLegend() != null) {
+				colorLegend =  imp.getMotherImp().getRoiManager().getColorLegend();
+			} else {
+				colorLegend =  new ColorLegend(this);
+			}
 		}
 		//		colorLegend.setVisible(true);
 		return colorLegend;
