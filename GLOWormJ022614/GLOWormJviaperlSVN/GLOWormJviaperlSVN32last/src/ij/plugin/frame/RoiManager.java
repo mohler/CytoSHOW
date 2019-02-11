@@ -1896,7 +1896,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				for(int k=1; k< sCellArea.split("t2_path d=\"").length; k++) {
 					reps =k;
 //					IJ.log(fillColor+"_"+slicePosition+"_"+k+" "+offsetX+" "+offsetY);
-					cellAreaHash.put(fillColor+"_"+slicePosition+"_"+k, sCellArea.split("t2_path d=\"").length>1?sCellArea.split("t2_path d=\"")[k].split("\"")[0]:"");
+					cellAreaHash.put(cellName+"_"+fillColor+"_"+slicePosition+"_"+k, sCellArea.split("t2_path d=\"").length>1?sCellArea.split("t2_path d=\"")[k].split("\"")[0]:"");
 				}
 				maxReps = maxReps<reps?reps:maxReps;
 			}
@@ -1915,10 +1915,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 				String sLayer=sLayers[sl];
 				int sliceNumber = 0;
-				IJ.log(cellAreaHash.get(fillColor+"_"+sLayer.split("\"")[0]));
+				IJ.log(cellAreaHash.get(cellName+"_"+fillColor+"_"+sLayer.split("\"")[0]));
 				String areaString = null;
 				for (int rep=1; rep<maxReps; rep++) {
-					areaString = cellAreaHash.get(fillColor+"_"+sLayer.split("\"")[0]+"_"+rep);
+					areaString = cellAreaHash.get(cellName+"_"+fillColor+"_"+sLayer.split("\"")[0]+"_"+rep);
 					if (areaString != null) {
 						sliceNumber = Integer.parseInt(sLayer.split("file_path=")[1].split("\"")[1].replaceAll(".*_", "").replaceAll(".tiff*", ""));
 						sConnLayerHash.put(sLayer.split("\"")[0], ""+sliceNumber);
