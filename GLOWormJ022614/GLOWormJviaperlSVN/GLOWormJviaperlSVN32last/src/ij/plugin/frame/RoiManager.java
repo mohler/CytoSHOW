@@ -1875,6 +1875,23 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		String cellName;
 		long count =0;
 		long nRois =0;
+		
+		ArrayList<Integer> sliceValues = new ArrayList<Integer>();
+
+		for (int sl=0; sl< sLayers.length; sl++) {
+			String sLayer=sLayers[sl];
+			sliceValues.add(Integer.parseInt(sLayer.split("file_path=")[1].split("\"")[1].replaceAll(".*_", "").replaceAll(".tiff*", ""))
+								- ((sLayer.split("file_path=")[1].split("\"")[1]).contains("VC_")?10000000:0));
+			
+		}
+		int maxBaseSlice = 0;
+		for (int sv:sliceValues){
+			if (maxBaseSlice<sv){
+				maxBaseSlice=sv;
+			}
+		}
+
+		
 		for (int cell=1; cell<sCells.length; cell++) {
 			//			counter++;
 			//			if (counter<=1) continue;
@@ -1917,25 +1934,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				int sliceNumber = 0;
 				IJ.log(cellAreaHash.get(cellName+"_"+fillColor+"_"+sLayer.split("\"")[0]));
 				String areaString = null;
-				ArrayList<Integer> sliceValues = new ArrayList<Integer>();
-				for (int rep=1; rep<maxReps; rep++) {
-					areaString = cellAreaHash.get(cellName+"_"+fillColor+"_"+sLayer.split("\"")[0]+"_"+rep);
-					if (areaString != null) {
-						sliceValues.add(Integer.parseInt(sLayer.split("file_path=")[1].split("\"")[1].replaceAll(".*_", "").replaceAll(".tiff*", ""))
-										- ((sLayer.split("file_path=")[1].split("\"")[1]).contains("VC_")?10000000:0));
-					}
-				}
-				int maxBaseSlice = 0;
-				for (int sv:sliceValues){
-					if (maxBaseSlice<sv){
-						maxBaseSlice=sv;
-					}
-				}
+
 				for (int rep=1; rep<maxReps; rep++) {
 					areaString = cellAreaHash.get(cellName+"_"+fillColor+"_"+sLayer.split("\"")[0]+"_"+rep);
 					if (areaString != null) {
 						sliceNumber = Integer.parseInt(sLayer.split("file_path=")[1].split("\"")[1].replaceAll(".*_", "").replaceAll(".tiff*", ""))
-										- ((sLayer.split("file_path=")[1].split("\"")[1]).contains("VC_")?maxBaseSlice+1:0);
+										+ ((sLayer.split("file_path=")[1].split("\"")[1]).contains("VC_")?maxBaseSlice+1:0);
 						sConnLayerHash.put(sLayer.split("\"")[0], ""+sliceNumber);
 						String[] coordStrings = areaString.replaceAll("M", "").split(" L ");
 						int[] xCoords = new int[coordStrings.length];
