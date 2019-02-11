@@ -1878,7 +1878,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		
 		ArrayList<Integer> sliceValues = new ArrayList<Integer>();
 
-		for (int sl=0; sl< sLayers.length; sl++) {
+		for (int sl=1; sl< sLayers.length; sl++) {
 			String sLayer=sLayers[sl];
 			sliceValues.add(Integer.parseInt(sLayer.split("file_path=")[1].split("\"")[1].replaceAll(".*_", "").replaceAll(".tiff*", ""))
 								- ((sLayer.split("file_path=")[1].split("\"")[1]).contains("VC_")?10000000:0));
