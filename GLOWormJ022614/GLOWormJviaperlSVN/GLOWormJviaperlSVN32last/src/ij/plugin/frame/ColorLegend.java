@@ -435,6 +435,15 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
     		bb2Imp=null;
     		bbImpCopy = null;
     	}
+    	for (Checkbox cb:checkbox){
+    		for (ItemListener il:cb.getItemListeners()){
+    			cb.removeItemListener(il);
+    		}
+    		for (MouseListener ml:cb.getMouseListeners()){
+    			cb.removeMouseListener(ml);
+    		}
+    		
+    	}
         this.removeKeyListener(IJ.getInstance());
         super.dispose();
     }

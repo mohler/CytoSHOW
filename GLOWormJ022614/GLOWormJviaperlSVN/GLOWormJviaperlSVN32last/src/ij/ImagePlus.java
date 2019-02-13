@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.vcell.gloworm.DISPIM_Monitor;
 import org.vcell.gloworm.ListVirtualStack;
+import org.vcell.gloworm.MQTVSSceneLoader64;
 import org.vcell.gloworm.MultiChannelController;
 import org.vcell.gloworm.MultiQTVirtualStack;
 
@@ -2745,6 +2746,11 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			return rm;
 		else {
 			rm = new RoiManager(this, true);
+			String universalCLURL = MQTVSSceneLoader64.class.getResource("docs/fullUniversal_ColorLegend.lgd").toString();
+			String clStr = IJ.openUrlAsString(universalCLURL);
+		
+			ColorLegend cl = new ColorLegend(this, clStr);
+			rm.setColorLegend(cl);
 			return rm;
 		}
 	}

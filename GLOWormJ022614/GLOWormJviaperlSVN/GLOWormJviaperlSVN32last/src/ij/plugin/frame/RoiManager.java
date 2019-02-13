@@ -138,6 +138,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	private boolean isEmbryonic = false;
 	private String recentName = "";
 	private boolean propagateRenamesThruLineage = false;
+	private double roiRescaleFactor = 1d;
 
 
 
@@ -1449,6 +1450,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (fullCount==index.length && !replacing) {
 			rois.clear();
 			roisByNumbers.clear();
+			roisByRootName.clear();
 			listModel.removeAllElements();
 			fullListModel.removeAllElements();
 		} else {
@@ -1461,9 +1463,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				if (delete) {
 					Roi roi = rois.get(listModel.getElementAt(i));
 					if (roi!=null) {
-						int c = roi.getCPosition();
+						String rootName = roi.getName().contains("\"")?"\""+roi.getName().split("\"")[1]+"\"":roi.getName().split("_")[0].trim();						int c = roi.getCPosition();
 						int z = roi.getZPosition();
 						int t = roi.getTPosition();
+						
+						if (roisByNumbers.containsKey(rootName)) {
+							roisByNumbers.get(rootName).remove(roi);
+						}
 
 						if (roisByNumbers.containsKey(c+"_"+z+"_"+t)) {
 							roisByNumbers.get(c+"_"+z+"_"+t).remove(roi);
@@ -1788,6 +1794,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (Recorder.record && !Recorder.scriptMode())
 			Recorder.record("roiManager", "Open", path);
 		if (path.endsWith(".zip")) {
+			roiRescaleFactor = IJ.getNumber("Rescale incoming tags to fit resized image?", roiRescaleFactor);
 			String origTitle = this.title;
 			//this.setTitle("Tag Manager LOADING!!!");
 			openZip(path);
@@ -1850,16 +1857,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		updateShowAll();
 	}
 
-	private void openXml(String path) {
+	private void openXml(String path) {			//for TrakEM2 output
 		busy = true;
 		boolean wasVis = this.isVisible();
 		this.setVisible(false);
 		//		showAll(SHOW_ALL);
-		String universalCLURL = MQTVSSceneLoader64.class.getResource("docs/fullUniversal_ColorLegend.lgd").toString();
-		String clStr = IJ.openUrlAsString(universalCLURL);
-	
-		ColorLegend cl = new ColorLegend(imp, clStr);
-		this.setColorLegend(cl);
 		String s = IJ.openAsString(path);
 		//		IJ.log(s);
 		String impTitle = this.imp.getTitle();
@@ -1903,7 +1905,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 			cellName = (sCell.split("title=\"")[1].split("\"").length>1?sCell.split("title=\"")[1].split("\"")[0]:"");
 			fillColor = (sCell.split("(;fill:|;\")").length>1?(sCell.split("(;fill:|;\")")[1].startsWith("#")?sCell.split("(;fill:|;\")")[1]:""):"");
-			cl.getBrainbowColors().put(cellName.toLowerCase(), Colors.decode(fillColor, Color.white));
+			getColorLegend().getBrainbowColors().put(cellName.toLowerCase(), Colors.decode(fillColor, Color.white));
 			IJ.log(cellName+" "+fillColor+" "+offsetX+" "+offsetY);
 			String[] sCellAreas = sCell.split("<t2_area");
 			int maxReps =0;
@@ -2136,7 +2138,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						out.write(buf, 0, len); 
 					out.close(); 
 					byte[] bytes = out.toByteArray(); 
-					RoiDecoder rd = new RoiDecoder(bytes, name); 
+					RoiDecoder rd = new RoiDecoder(roiRescaleFactor, bytes, name); 
 					Roi roi = rd.getRoi(); 
 					//
 					ColorLegend cl = getColorLegend();
@@ -2231,17 +2233,17 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		Roi[] roiArray = getFullRoisAsArray();
 		int n = roiArray.length;
-		Roi[] clonedArray = new Roi[n];
-		for (int i=0; i<n; i++) {
-			if (roiArray[i] instanceof TextRoi)
-				clonedArray[i] = (TextRoi) roiArray[i].clone();
-			else
-				clonedArray[i] = (Roi) roiArray[i].clone();
-
-			clonedArray[i].setPosition(roiArray[i].getCPosition(), roiArray[i].getZPosition(), roiArray[i].getTPosition());
-		}
-		originalRois = clonedArray;
-		originalsCloned = true;
+//		Roi[] clonedArray = new Roi[n];
+//		for (int i=0; i<n; i++) {
+//			if (roiArray[i] instanceof TextRoi)
+//				clonedArray[i] = (TextRoi) roiArray[i].clone();
+//			else
+//				clonedArray[i] = (Roi) roiArray[i].clone();
+//
+//			clonedArray[i].setPosition(roiArray[i].getCPosition(), roiArray[i].getZPosition(), roiArray[i].getTPosition());
+//		}
+//		originalRois = clonedArray;
+//		originalsCloned = true;
 		if (imp.getMultiChannelController()!=null)
 			imp.getMultiChannelController().updateRoiManager();
 		this.setVisible(wasVis);
@@ -3699,6 +3701,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			roisByNumbers = null;
 		}
+		if (roisByRootName != null) {
+			for (ArrayList<Roi> roiAL:roisByRootName.values()) {
+				for (Roi roi:roiAL) {
+					roi.setImage(null);
+					roi.setMotherImp(null);
+				}
+			}
+			roisByRootName = null;
+		}
 		if (list != null)
 			list.removeKeyListener(IJ.getInstance());
 		list = null;
@@ -3707,9 +3718,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		fullListModel = null;
 		
 		if (this.colorLegend != null){
-			if (imp.getWindow()!=null){
-				imp.getWindow().removeFocusListener(colorLegend);
-				imp.getWindow().removeWindowListener(colorLegend);
+			if (imp != null){
+				if (imp.getWindow()!=null){
+					imp.getWindow().removeFocusListener(colorLegend);
+					imp.getWindow().removeWindowListener(colorLegend);
+				}
 			}
 			colorLegend.setRoiManager(null);
 			colorLegend.dispose();
@@ -5094,7 +5107,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	}
 
-	private void openCsv(String path) {
+	private void openCsv(String path) {			//for StarryNite output
 		boolean wasVis = this.isVisible();
 		this.setVisible(false);
 		busy = true;
@@ -5736,6 +5749,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			return false;
 		}
 		return true;
+	}
+
+	public double getRoiRescaleFactor() {
+		return roiRescaleFactor;
+	}
+
+	public void setRoiRescaleFactor(double roiRescaleFactor) {
+		this.roiRescaleFactor = roiRescaleFactor;
 	} 
 
 }

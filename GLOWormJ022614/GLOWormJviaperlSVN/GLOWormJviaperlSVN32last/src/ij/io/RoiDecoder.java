@@ -103,14 +103,28 @@ public class RoiDecoder {
 	private InputStream is;
 	private String name;
 	private int size;
+	private double scaleFactor = 1d;
 
 	/** Constructs an RoiDecoder using a file path. */
 	public RoiDecoder(String path) {
 		this.path = path;
 	}
 
+	/** Constructs an RoiDecoder using a file path, while specifying a scaleFactor. */
+	public RoiDecoder(double scaleFactor, String path) {
+		this.scaleFactor = scaleFactor;
+		this.path = path;
+	}
+
 	/** Constructs an RoiDecoder using a byte array. */
 	public RoiDecoder(byte[] bytes, String name) {
+		this(1d, bytes, name);
+	}
+
+	
+	/** Constructs an RoiDecoder using a byte array, while specifying a scaleFactor. */
+	public RoiDecoder(double scaleFactor, byte[] bytes, String name) {
+		this.scaleFactor = scaleFactor;
 		is = new ByteArrayInputStream(bytes);	
 		this.name = name;
 		this.size = bytes.length;
@@ -193,18 +207,18 @@ public class RoiDecoder {
 		switch (type) {
 			case rect:
 				if (subPixelRect)
-					roi = new Roi(xd, yd, widthd, heightd);
+					roi = new Roi(xd*scaleFactor, yd*scaleFactor, widthd*scaleFactor, heightd*scaleFactor);
 				else
-					roi = new Roi(left, top, width, height);
+					roi = new Roi(left*scaleFactor, top*scaleFactor, width*scaleFactor, height*scaleFactor);
 				int arcSize = getShort(ROUNDED_RECT_ARC_SIZE);
 				if (arcSize>0)
-					roi.setCornerDiameter(arcSize);
+					roi.setCornerDiameter((int) (arcSize*scaleFactor));
 				break;
 			case oval:
 				if (subPixelRect)
-					roi = new OvalRoi(xd, yd, widthd, heightd);
+					roi = new OvalRoi(xd*scaleFactor, yd*scaleFactor, widthd*scaleFactor, heightd*scaleFactor);
 				else
-					roi = new OvalRoi(left, top, width, height);
+					roi = new OvalRoi(left*scaleFactor, top*scaleFactor, width*scaleFactor, height*scaleFactor);
 				break;
 			case line:
 				double x1 = getFloat(X1);		
@@ -212,7 +226,7 @@ public class RoiDecoder {
 				double x2 = getFloat(X2);		
 				double y2 = getFloat(Y2);
 				if (subtype==ARROW) {
-					roi = new Arrow(x1, y1, x2, y2);		
+					roi = new Arrow(x1*scaleFactor, y1*scaleFactor, x2*scaleFactor, y2*scaleFactor);		
 					((Arrow)roi).setDoubleHeaded((options&DOUBLE_HEADED)!=0);
 					((Arrow)roi).setOutline((options&OUTLINE)!=0);
 					int style = getByte(ARROW_STYLE);
@@ -220,9 +234,9 @@ public class RoiDecoder {
 						((Arrow)roi).setStyle(style);
 					int headSize = getByte(ARROW_HEAD_SIZE);
 					if (headSize>=0 && style<=30)
-						((Arrow)roi).setHeadSize(headSize);
+						((Arrow)roi).setHeadSize(headSize*scaleFactor);
 				} else {
-					roi = new Line(x1, y1, x2, y2);
+					roi = new Line(x1*scaleFactor, y1*scaleFactor, x2*scaleFactor, y2*scaleFactor);
 					roi.setDrawOffset(drawOffset);
 				}
 				//IJ.write("line roi: "+x1+" "+y1+" "+x2+" "+y2);
@@ -244,8 +258,8 @@ public class RoiDecoder {
 						if (xtmp<0) xtmp = 0;
 						ytmp = getShort(base2+i*2);
 						if (ytmp<0) ytmp = 0;
-						x[i] = left+xtmp;
-						y[i] = top+ytmp;
+						x[i] = (int) ((left+xtmp)*scaleFactor);
+						y[i] = (int) ((top+ytmp)*scaleFactor);
 						//IJ.write(i+" "+getShort(base1+i*2)+" "+getShort(base2+i*2));
 					}
 					if (subPixelResolution) {
@@ -254,15 +268,16 @@ public class RoiDecoder {
 						base1 = COORDINATES+4*n;
 						base2 = base1+4*n;
 						for (int i=0; i<n; i++) {
-							xf[i] = getFloat(base1+i*4);
-							yf[i] = getFloat(base2+i*4);
+							xf[i] = (float) (getFloat(base1+i*4)*scaleFactor);
+							yf[i] = (float) (getFloat(base2+i*4)*scaleFactor);
 						}
 					}
 					if (type==point) {
-						if (subPixelResolution)
+						if (subPixelResolution){
 							roi = new PointRoi(xf, yf, n);
-						else
+						}else{
 							roi = new PointRoi(x, y, n);
+						}
 						break;
 					}
 					int roiType;
@@ -276,7 +291,7 @@ public class RoiDecoder {
 							double ex2 = getFloat(X2);		
 							double ey2 = getFloat(Y2);
 							double aspectRatio = getFloat(ELLIPSE_ASPECT_RATIO);
-							roi = new EllipseRoi(ex1,ey1,ex2,ey2,aspectRatio);
+							roi = new EllipseRoi(ex1*scaleFactor,ey1*scaleFactor,ex2*scaleFactor,ey2*scaleFactor,aspectRatio);
 							break;
 						}
 					} else if (type==traced)
@@ -394,13 +409,13 @@ public class RoiDecoder {
 			name[i] = (char)getShort(hdrSize+16+i*2);
 		for (int i=0; i<textLength; i++)
 			text[i] = (char)getShort(hdrSize+16+nameLength*2+i*2);
-		Font font = new Font(new String(name), style, size);
+		Font font = new Font(new String(name), style, (int) (size*scaleFactor));
 		Roi roi2 = null;
 		if (roi.subPixelResolution()) {
 			FloatPolygon fp = roi.getFloatPolygon();
-			roi2 = new TextRoi(fp.xpoints[0], fp.ypoints[0], new String(text), font);
+			roi2 = new TextRoi(fp.xpoints[0]*scaleFactor, fp.ypoints[0]*scaleFactor, new String(text), font);
 		} else
-			roi2 = new TextRoi(r.x, r.y, new String(text), font);
+			roi2 = new TextRoi(r.x*scaleFactor, r.y*scaleFactor, new String(text), font);
 		roi2.setStrokeColor(roi.getStrokeColor());
 		roi2.setFillColor(roi.getFillColor());
 		roi2.setName(getRoiName());
@@ -415,7 +430,9 @@ public class RoiDecoder {
 		for (int i=0; i<size; i++)
 			bytes[i] = (byte)getByte(COORDINATES+i);
 		ImagePlus imp = new Opener().deserialize(bytes);
-		ImageRoi roi2 = new ImageRoi(r.x, r.y, imp.getProcessor());
+		ImageProcessor ip = imp.getProcessor();
+		ip.scale(scaleFactor, scaleFactor);
+		ImageRoi roi2 = new ImageRoi((int)(r.x*scaleFactor), (int)(r.y*scaleFactor), ip);
 		roi2.setOpacity(opacity/255.0);
 		return roi2;
 	}
