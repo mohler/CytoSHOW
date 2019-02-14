@@ -914,6 +914,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 
 	private void sketchVolumeViewer(Object source) { 
+		double scaleFactor = 500d/imp.getWidth();
 		IJ.setForegroundColor(255, 255, 255);
 		IJ.setBackgroundColor(0, 0, 0);
 		if (getSelectedRoisAsArray().length<1)
@@ -937,25 +938,21 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		MQTVS_VolumeViewer vv = new MQTVS_VolumeViewer(); 
 		for (int n=0; n<rootNames_rootFrames.size(); n++) {
-			ImagePlus sketchImp = NewImage.createImage("SketchVolumeViewer_"+rootNames_rootFrames.get(0),imp.getWidth(), imp.getHeight(), imp.getNSlices()*imp.getNFrames(), 8, NewImage.FILL_BLACK, false);
+			ImagePlus sketchImp = NewImage.createImage("SketchVolumeViewer_"+rootNames_rootFrames.get(0),(int)(imp.getWidth()*scaleFactor), (int)(imp.getHeight()*scaleFactor), imp.getNSlices()*imp.getNFrames(), 8, NewImage.FILL_BLACK, false);
 			sketchImp.setDimensions(1, imp.getNSlices(), imp.getNFrames());
 			sketchImp.setCalibration(imp.getCalibration());
+			sketchImp.getCalibration().pixelWidth = sketchImp.getCalibration().pixelWidth/scaleFactor;
+			sketchImp.getCalibration().pixelHeight = sketchImp.getCalibration().pixelHeight/scaleFactor;
+
 			String rootName = rootNames.get(n);
 			sketchImp.setTitle("SketchVolumeViewer_"+rootName);
-			IJ.run(sketchImp, "Select All","");
-			IJ.run(sketchImp, "Clear","stack");
-			if (!sketchImp.isVisible()) {
-				sketchImp.show();
-				sketchImp.setRoiManager(new RoiManager(false));
-				sketchImp.getRoiManager().select(-1);
-				IJ.wait(50);
-				if (sketchImp.getRoiManager().getCount() >0)
-					sketchImp.getRoiManager().runCommand("Delete");
-			} else {
-				sketchImp.getRoiManager().select(-1);
-				IJ.wait(50);
+			sketchImp.show();
+			sketchImp.getRoiManager().select(-1);
+			IJ.wait(50);
+			if (sketchImp.getRoiManager().getCount()>0){
 				sketchImp.getRoiManager().runCommand("Delete");
 			}
+			
 			select(-1);
 			IJ.wait(50);
 			ArrayList<Integer> nameMatchIndexArrayList = new ArrayList<Integer>();
@@ -980,7 +977,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				int nextSlice = Integer.parseInt(nextChunks[nextChunks.length-2]);
 				int nextFrame = Integer.parseInt(nextChunks[nextChunks.length-1].replaceAll("[CZT]", "").split("-")[0]);
 				sketchImp.setPosition(1, nextSlice, nextFrame);
-				sketchImp.getRoiManager().addRoi(((Roi)nextRoi.clone()));
+				Roi scaledRoi=null;
+				try {
+					scaledRoi = new RoiDecoder(scaleFactor, RoiEncoder.saveAsByteArray(nextRoi), nextRoi.getName()).getRoi();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				sketchImp.getRoiManager().addRoi(scaledRoi);
 			}		
 			sketchImp.getRoiManager().select(-1);
 			sketchImp.getRoiManager().drawOrFill(FILL);
@@ -1963,7 +1967,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						nRois++;
 
 						pRoi.setFillColor(Colors.decode(fillColor.replace("#", "#33"), defaultColor));
-						pRoi.setPosition(1,1,sliceNumber);
+						pRoi.setPosition(1,sliceNumber,1);
 						//						list.setSelectedIndex(this.getCount()-1);
 						this.rename(cellName, new int[] {this.getCount()-1}, false);
 					}
@@ -2233,6 +2237,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		Roi[] roiArray = getFullRoisAsArray();
 		int n = roiArray.length;
+		
 //		Roi[] clonedArray = new Roi[n];
 //		for (int i=0; i<n; i++) {
 //			if (roiArray[i] instanceof TextRoi)
@@ -2244,6 +2249,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //		}
 //		originalRois = clonedArray;
 //		originalsCloned = true;
+		
 		if (imp.getMultiChannelController()!=null)
 			imp.getMultiChannelController().updateRoiManager();
 		this.setVisible(wasVis);
@@ -4608,7 +4614,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			int outNSlices = 0;
 			for (int c2=0; c2<outChannels; c2++) {
 				IJ.showStatus("Processing "+(c2+1)+"/"+outChannels+" channels...");
-				ImageStack sketchStack = new ImageStack(200, imp.getHeight()/(imp.getWidth()/200));
+				ImageStack sketchStack = new ImageStack((int)(imp.getWidth()*imp.getCalibration().pixelWidth/imp.getCalibration().pixelDepth), 
+														(int)(imp.getHeight()*imp.getCalibration().pixelWidth/imp.getCalibration().pixelDepth));
 				fillZfactor = (isEmbryonic?sketchStack.getHeight():imp.getNSlices())/imp.getNSlices();
 				Color frameColor = Color.WHITE;
 				outNSlices = (int) (isEmbryonic?sketchStack.getHeight()*0.9:imp.getNSlices());
@@ -4655,13 +4662,16 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							}
 						}
 						sketchStack.addSlice(drawIP
-								.resize(200, imp.getHeight()/(imp.getWidth()/200), false));
+								.resize((int)(imp.getWidth()*imp.getCalibration().pixelWidth/imp.getCalibration().pixelDepth), 
+										(int)(imp.getHeight()*imp.getCalibration().pixelWidth/imp.getCalibration().pixelDepth)));
 					}
 				}
 
 				ImagePlus sketchImp = new ImagePlus("Sketch_"+(splitThem?(nameLists!=null?nameLists.get(nameLists.size()-1):cellNames).get(c2):"Composite"), sketchStack);
 				outImps[c2]=sketchImp;
-				outImps[c2].getCalibration().pixelDepth = imp.getCalibration().pixelDepth/10>1?imp.getCalibration().pixelDepth/10:1;
+				outImps[c2].getCalibration().pixelWidth = imp.getCalibration().pixelWidth;
+				outImps[c2].getCalibration().pixelHeight = imp.getCalibration().pixelWidth;
+				outImps[c2].getCalibration().pixelDepth = imp.getCalibration().pixelWidth;
 				outImps[c2].setMotherImp(imp, 1);
 				StackReverser sr = new StackReverser();
 				sr.flipStack(outImps[c2]);
@@ -4698,6 +4708,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			IJ.run(flipDupImp,"Reslice ...", "output=1.000 start=Left");
 			ImagePlus rsImp = IJ.getImage();
 			rsImp.setTitle("tempDupReslice");
+			rsImp.getCalibration().pixelWidth = imp.getCalibration().pixelWidth;
+			rsImp.getCalibration().pixelHeight = imp.getCalibration().pixelWidth;
+			rsImp.getCalibration().pixelDepth = imp.getCalibration().pixelWidth;
 			if (Channels.getInstance()!=null) ((Channels)Channels.getInstance()).close();
 			IJ.run(rsImp, "3D Project...", "projection=[Nearest Point] axis=Y-Axis initial=0 total=360 rotation=10 lower=1 upper=255 opacity=0 surface=0 interior=0 all");
 			projZImps.add(WindowManager.getImage("Projections of tempDupReslice"));

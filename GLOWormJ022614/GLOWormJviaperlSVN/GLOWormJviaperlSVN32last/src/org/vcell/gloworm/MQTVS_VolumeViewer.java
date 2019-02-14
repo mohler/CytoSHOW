@@ -85,11 +85,12 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 				for (int ch=duper.getFirstC(); ch<=duper.getLastC(); ch++) {
 					imp.setRoi(impRoi);
 					ImagePlus impD = imp;
-					if (!imp.getTitle().startsWith("SketchVolumeViewer"))
+					if (!imp.getTitle().startsWith("SketchVolumeViewer")){
 						impD = duper.run(imp, ch, ch, duper.getFirstZ(), duper.getLastZ(), singleSave?tpt:duper.getFirstT(), singleSave?tpt:duper.getLastT(), singleSave?1:duper.getStepT(), false, msec);
-					impD.show();
-					impD.setTitle(imp.getShortTitle()+"_DUP_"+ch+"_"+tpt);
-					impD.changes = false;
+						impD.show();
+						impD.setTitle(imp.getShortTitle()+"_DUP_"+ch+"_"+tpt);
+						impD.changes = false;
+					}
 					Color white = Colors.decode("#ff229900", Color.white);
 					
 					Color channelColor = assignedColorString!=null?Colors.decode(assignedColorString, null):null;
@@ -112,9 +113,10 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 							scaleFactor  = 1;
 						threshold = 1;
 					}
-					IJ.run(impD, "Scale...", "x="+(scaleFactor)+" y="+(scaleFactor)+" z=1.0 interpolation=Bicubic average process create" );
-					ImagePlus impDS = IJ.getImage();
-					impD = impDS;
+//NOW HANDLE SCALING BEFORE CALL TO HIS METHOD					
+//					IJ.run(impD, "Scale...", "x="+(scaleFactor)+" y="+(scaleFactor)+" z=1.0 interpolation=Bicubic average process create" );
+//					ImagePlus impDS = IJ.getImage();
+//					impD = impDS;
 					IJ.run(impD, "8-bit", "");
 					String objectName = cellName;
 					if (objectName =="")
@@ -138,9 +140,11 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 					ImageJ3DViewer.select(null);
 					IJ.getInstance().toFront();
 					IJ.setTool(ij.gui.Toolbar.HAND);
-					impD.changes = false;
-					impD.getWindow().close();
-					impD.flush();
+					if (impD != imp){
+						impD.changes = false;
+						impD.getWindow().close();
+						impD.flush();
+					}
 				}
 			}
 			
