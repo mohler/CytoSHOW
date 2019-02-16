@@ -2746,11 +2746,12 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			return rm;
 		else {
 			rm = new RoiManager(this, true);
-			String universalCLURL = MQTVSSceneLoader64.class.getResource("docs/fullUniversal_ColorLegend.lgd").toString();
-			String clStr = IJ.openUrlAsString(universalCLURL);
-		
-			ColorLegend cl = new ColorLegend(this, clStr);
-			rm.setColorLegend(cl);
+//			LEAVING BELOW LINES ACTIVE CAUSES AND ENORMOUS RESOURCE LEAK IN DISPIM MONITOR
+			//			String universalCLURL = MQTVSSceneLoader64.class.getResource("docs/fullUniversal_ColorLegend.lgd").toString();
+//			String clStr = IJ.openUrlAsString(universalCLURL);
+//		
+//			ColorLegend cl = new ColorLegend(this, clStr);
+//			rm.setColorLegend(cl);
 			return rm;
 		}
 	}

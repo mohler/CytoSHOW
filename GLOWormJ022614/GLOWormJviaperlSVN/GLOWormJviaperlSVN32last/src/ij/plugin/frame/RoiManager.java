@@ -1888,7 +1888,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		for (int sl=1; sl< sLayers.length; sl++) {
 			String sLayer=sLayers[sl];
 			sliceValues.add(Integer.parseInt(sLayer.split("file_path=")[1].split("\"")[1].replaceAll(".*_", "").replaceAll(".tiff*", "").replaceAll("(.*)(\\d+)(.*)", "$2"))
-								- ((sLayer.split("file_path=")[1].split("\"")[1]).contains("VC_")?10000000:0));
+					- ((sLayer.split("file_path=")[1].split("\"")[1]).contains("VC_")?10000000:0));
 			
 		}
 		int maxBaseSlice = 0;
@@ -4814,8 +4814,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		else if (imp!=null && imp.getMotherImp() != imp) {
 			colorLegend = imp.getMotherImp().getRoiManager().getColorLegend();
 			return colorLegend;
-		} else 
+		} else {
+//			String universalCLURL = MQTVSSceneLoader64.class.getResource("docs/fullUniversal_ColorLegend.lgd").toString();
+//			String clStr = IJ.openUrlAsString(universalCLURL);
+//			colorLegend = new ColorLegend(this.imp, clStr);
+//
+//			return colorLegend;
 			return null;
+		}
 	}
 
 	public ColorLegend getColorLegend(Object source) {
