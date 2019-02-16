@@ -914,6 +914,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 
 	private void sketchVolumeViewer(Object source) { 
+		boolean singleSave = IJ.shiftKeyDown();
 		double scaleFactor = 500d/imp.getWidth();
 		IJ.setForegroundColor(255, 255, 255);
 		IJ.setBackgroundColor(0, 0, 0);
@@ -994,7 +995,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			roiColorString = roiColorString.substring(roiColorString.length()-6);
 			assignedColorString = "#ff" + roiColorString;
 			(new StackReverser()).flipStack(sketchImp);
-			vv.runVolumeViewer(sketchImp, rootName, assignedColorString);
+			vv.runVolumeViewer(sketchImp, rootName, assignedColorString, true);
 
 			sketchImp.changes = false;
 			sketchImp.close();

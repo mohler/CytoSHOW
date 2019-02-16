@@ -26,11 +26,16 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 	public void run(String arg) {
 		String cellName = arg;
 		ImagePlus imp = IJ.getImage();
-		runVolumeViewer(imp, cellName, null);
+		runVolumeViewer(imp, cellName, null, false);
 	}
 	
 	public void runVolumeViewer(ImagePlus imp, String cellName, String assignedColorString) {
-		boolean singleSave = IJ.shiftKeyDown();
+		runVolumeViewer(imp, cellName, assignedColorString, false);
+	}
+	
+	public void runVolumeViewer(ImagePlus imp, String cellName, String assignedColorString, boolean saveSingly) {
+		boolean singleSave = IJ.shiftKeyDown() || saveSingly;
+		
 		if (imp != null) {
 			if (imp.getStack() instanceof MultiQTVirtualStack) {
 				String firstMovieName = ((MultiQTVirtualStack)imp.getStack()).getVirtualStack(0).getMovieName();
