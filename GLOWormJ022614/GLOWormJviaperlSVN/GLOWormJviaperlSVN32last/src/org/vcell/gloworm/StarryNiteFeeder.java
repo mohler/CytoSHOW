@@ -384,9 +384,9 @@ public class StarryNiteFeeder implements PlugIn {
 						}
 
 						try {
-							IJ.log("C:\\SNFeeder_compiled\\user\\detect_track_driver_allmatlab.exe "+impParameterPath.replace("\\\\", "\\").replace("\\", "\\\\") +" "+ (outDir+subdir+"Skipped").replace("\\\\", "\\").replace("\\", "\\\\")+"\\\\ aaa emb "+(outDir+subdir+"Skipped").replace("\\\\", "\\").replace("\\", "\\\\")+"\\\\ 0 true");
-							IJ.log(String.join(" ", Arrays.asList(new String[]{"cmd","/c","start","/min","/wait","C:\\SNFeeder_compiled\\user\\detect_track_driver_allmatlab.exe", impParameterPath.replace("\\\\", "\\").replace("\\", "\\\\"), (outDir+subdir+"Skipped").replace("\\\\", "\\").replace("\\", "\\\\")+"\\\\", "aaa", "emb", (outDir+subdir+"Skipped").replace("\\\\", "\\").replace("\\", "\\\\")+"\\\\", "0", "true"})));
-							Runtime.getRuntime().exec(new String[]{"cmd","/c","start","/min","/wait","C:\\SNFeeder_compiled\\user\\detect_track_driver_allmatlab.exe", impParameterPath.replace("\\\\", "\\").replace("\\", "\\\\"), (outDir+subdir+"Skipped").replace("\\\\", "\\").replace("\\", "\\\\")+"\\\\", "aaa", "emb", (outDir+subdir+"Skipped").replace("\\\\", "\\").replace("\\", "\\\\")+"\\\\", "0", "true"});
+							IJ.log("C:\\CytoSHOWextrasForC\\SNFeeder_compiled\\user\\detect_track_driver_allmatlab.exe "+impParameterPath.replace("\\\\", "\\").replace("\\", "\\\\") +" "+ (outDir+subdir+"Skipped").replace("\\\\", "\\").replace("\\", "\\\\")+"\\\\ aaa emb "+(outDir+subdir+"Skipped").replace("\\\\", "\\").replace("\\", "\\\\")+"\\\\ 0 true");
+							IJ.log(String.join(" ", Arrays.asList(new String[]{"cmd","/c","start","/min","/wait","C:\\CytoSHOWextrasForC\\SNFeeder_compiled\\user\\detect_track_driver_allmatlab.exe", impParameterPath.replace("\\\\", "\\").replace("\\", "\\\\"), (outDir+subdir+"Skipped").replace("\\\\", "\\").replace("\\", "\\\\")+"\\\\", "aaa", "emb", (outDir+subdir+"Skipped").replace("\\\\", "\\").replace("\\", "\\\\")+"\\\\", "0", "true"})));
+							Runtime.getRuntime().exec(new String[]{"cmd","/c","start","/min","/wait","C:\\CytoSHOWextrasForC\\SNFeeder_compiled\\user\\detect_track_driver_allmatlab.exe", impParameterPath.replace("\\\\", "\\").replace("\\", "\\\\"), (outDir+subdir+"Skipped").replace("\\\\", "\\").replace("\\", "\\\\")+"\\\\", "aaa", "emb", (outDir+subdir+"Skipped").replace("\\\\", "\\").replace("\\", "\\\\")+"\\\\", "0", "true"});
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -416,7 +416,7 @@ public class StarryNiteFeeder implements PlugIn {
 						Process linMeasure = null;
 						try {
 							ProcessBuilder linMeasurePB = new ProcessBuilder(new String[]{"cmd","/c","start","/min","/wait","java", "-Xmx500m", "-cp", "acebatch2.jar", "Measure1", (outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa_emb_edited.xml"});
-							linMeasurePB.directory(new File("C:\\SN_Feeder_distribution_code\\"));
+							linMeasurePB.directory(new File("C:\\CytoSHOWextrasForC\\SN_Feeder_distribution_code\\"));
 							linMeasure = linMeasurePB.start();
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
@@ -435,7 +435,7 @@ public class StarryNiteFeeder implements PlugIn {
 						Process linGreenExtract = null;
 						try {
 							ProcessBuilder linGreenExtractPB = new ProcessBuilder(new String[]{"cmd","/c","start","/min","/wait","java", "-cp", "acebatch2.jar", "SixteenBitGreenExtractor1", (outDir+subdir+"Skipped").replace("\\", "\\\\")+"\\\\aaa_emb_edited.xml", ""+endPoint});
-							linGreenExtractPB.directory(new File("C:\\SN_Feeder_distribution_code\\"));
+							linGreenExtractPB.directory(new File("C:\\CytoSHOWextrasForC\\SN_Feeder_distribution_code\\"));
 							linGreenExtract = linGreenExtractPB.start();
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
