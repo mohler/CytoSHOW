@@ -97,7 +97,7 @@ public class IJ {
 		return ij;
 	}
 	
-	/**Returns a reference to the "ImageJ" frame.*/
+	/**Returns a reference to the "ImageJ3DViewer" frame.*/
 	public static ImageJ3DViewer getIJ3DVInstance() {
 		if (ij3dv == null) {
 			ij3dv = new ImageJ3DViewer();

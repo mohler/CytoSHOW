@@ -995,7 +995,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			roiColorString = roiColorString.substring(roiColorString.length()-6);
 			assignedColorString = "#ff" + roiColorString;
 			(new StackReverser()).flipStack(sketchImp);
-			vv.runVolumeViewer(sketchImp, rootName, assignedColorString, true);
+			vv.runVolumeViewer(sketchImp, rootName, assignedColorString, true, null);
 
 			sketchImp.changes = false;
 			sketchImp.close();

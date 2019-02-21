@@ -5,6 +5,8 @@ import java.awt.image.ColorModel;
 import java.io.File;
 import java.util.Date;
 
+import javax.vecmath.Color3f;
+
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
@@ -16,25 +18,39 @@ import ij.plugin.Scaler;
 import ij.plugin.filter.Projector;
 import ij.plugin.frame.RoiManager;
 import ij3d.ColorTable;
+import ij3d.Content;
+import ij3d.Image3DUniverse;
 import ij3d.ImageJ3DViewer;
 
 
 public class MQTVS_VolumeViewer  implements PlugIn {
 
 	public static ImageJ3DViewer ij3dv;
+	private Image3DUniverse univ;
 
 	public void run(String arg) {
 		String cellName = arg;
 		ImagePlus imp = IJ.getImage();
-		runVolumeViewer(imp, cellName, null, false);
+		runVolumeViewer(imp, cellName, null, false, new Image3DUniverse());
 	}
 	
-	public void runVolumeViewer(ImagePlus imp, String cellName, String assignedColorString) {
-		runVolumeViewer(imp, cellName, assignedColorString, false);
+	public void runVolumeViewer(ImagePlus imp, String cellName, String assignedColorString, Image3DUniverse univ) {
+		runVolumeViewer(imp, cellName, assignedColorString, false, univ);
 	}
 	
-	public void runVolumeViewer(ImagePlus imp, String cellName, String assignedColorString, boolean saveSingly) {
+	public void runVolumeViewer(ImagePlus imp, String cellName, String assignedColorString, boolean saveSingly, Image3DUniverse univ) {
 		boolean singleSave = IJ.shiftKeyDown() || saveSingly;
+		if (univ == null){
+			if (this.univ == null){	
+				this.univ = new Image3DUniverse();
+			}
+				univ = this.univ;
+				if (univ.getWindow() == null){
+					univ.show();
+				}
+				univ.getWindow().setTitle("howyoulike?");
+				WindowManager.addWindow(univ.getWindow());
+		}
 		
 		if (imp != null) {
 			if (imp.getStack() instanceof MultiQTVirtualStack) {
@@ -59,9 +75,11 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 		}
 		
 		MQTVS_Duplicator duper = new MQTVS_Duplicator();
-		if (ij3dv==null) {
-			ij3dv = IJ.getIJ3DVInstance();
-		}
+//		if (ij3dv==null) {
+//			ij3dv = IJ.getIJ3DVInstance();
+//		}
+		
+
 		Roi impRoi = imp.getRoi();
 		if (true /*(imp.getStack().isVirtual() && imp.getNFrames() > 1) || imp.getRoi() != null*/) {
 			
@@ -126,23 +144,24 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 					String objectName = cellName;
 					if (objectName =="")
 						objectName = impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_");
-					try {
-						ImageJ3DViewer.add(impD.getTitle(), ColorTable.colorNames[ch+2], ""+objectName/*+"_"+ch+"_"+tpt*/, ""+threshold, "true", "true", "true", ""+binFactor, "2");
-					} catch (NullPointerException npe) {
-						ij3dv.run(".");
-						ImageJ3DViewer.add(impD.getTitle(), ColorTable.colorNames[ch+2], ""+objectName/*+"_"+ch+"_"+tpt*/, ""+threshold, "true", "true", "true", ""+binFactor, "2");
-					}
-					ImageJ3DViewer.select(""+objectName/*+"_"+ch+"_"+tpt*/);
-					ImageJ3DViewer.setColor(""+channelColor.getRed(), ""+channelColor.getGreen(), ""+channelColor.getBlue());
-					ImageJ3DViewer.lock();
-					ImageJ3DViewer.exportContent("wavefront", (IJ.getDirectory("home")+File.separator+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"+objectName.replaceAll(":","").replaceAll("(/|\\s+)","")+"_"+ch+"_"+tpt+".obj"));
-					if (singleSave) {
-						ImageJ3DViewer.select(""+objectName/*+"_"+ch+"_"+tpt*/);
-						ImageJ3DViewer.unlock();
-						ImageJ3DViewer.delete();
-					}
+//					try {
+//						ImageJ3DViewer.add(impD.getTitle(), ColorTable.colorNames[ch+2], ""+objectName/*+"_"+ch+"_"+tpt*/, ""+threshold, "true", "true", "true", ""+binFactor, "2");
+//					} catch (NullPointerException npe) {
+//						ij3dv.run(".");
+//						ImageJ3DViewer.add(impD.getTitle(), ColorTable.colorNames[ch+2], ""+objectName/*+"_"+ch+"_"+tpt*/, ""+threshold, "true", "true", "true", ""+binFactor, "2");
+//					}
+//					ImageJ3DViewer.select(""+objectName/*+"_"+ch+"_"+tpt*/);
+//					ImageJ3DViewer.setColor(""+channelColor.getRed(), ""+channelColor.getGreen(), ""+channelColor.getBlue());
+//					ImageJ3DViewer.lock();
+//					ImageJ3DViewer.exportContent("wavefront", (IJ.getDirectory("home")+File.separator+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"+objectName.replaceAll(":","").replaceAll("(/|\\s+)","")+"_"+ch+"_"+tpt+".obj"));
+//					if (singleSave) {
+//						ImageJ3DViewer.select(""+objectName/*+"_"+ch+"_"+tpt*/);
+//						ImageJ3DViewer.unlock();
+//						ImageJ3DViewer.delete();
+//					}
+					univ.addContent(impD, new Color3f(channelColor), objectName, threshold, new boolean[]{true,true, true}, binFactor, Content.SURFACE);
 
-					ImageJ3DViewer.select(null);
+//					ImageJ3DViewer.select(null);
 					IJ.getInstance().toFront();
 					IJ.setTool(ij.gui.Toolbar.HAND);
 					if (impD != imp){
@@ -157,7 +176,7 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 				imp.getWindow().setVisible(true);
 				imp.getWindow().setAlwaysOnTop(false);
 			}
-			ImageJ3DViewer.select(null);
+//			ImageJ3DViewer.select(null);
 			IJ.getInstance().toFront();
 			IJ.setTool(ij.gui.Toolbar.HAND);
 			if (rm != null) rm.setVisible(rmWasVis);
