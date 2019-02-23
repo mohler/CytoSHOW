@@ -24,6 +24,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.vecmath.Color3f;
 
 import org.vcell.gloworm.MQTVSSceneLoader64;
 import org.vcell.gloworm.MQTVS_VolumeViewer;
@@ -43,6 +44,8 @@ import ij.plugin.StackReverser;
 import ij.util.*;
 import ij.macro.*;
 import ij.measure.*;
+import ij3d.Content;
+import ij3d.Image3DUniverse;
 import ij3d.ImageJ3DViewer;
 
 /** This plugin implements the Analyze/Tools/Tag Manager command. */
@@ -941,6 +944,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		for (int n=0; n<rootNames_rootFrames.size(); n++) {
 			ImagePlus sketchImp = NewImage.createImage("SketchVolumeViewer_"+rootNames_rootFrames.get(0),(int)(imp.getWidth()*scaleFactor), (int)(imp.getHeight()*scaleFactor), imp.getNSlices()*imp.getNFrames(), 8, NewImage.FILL_BLACK, false);
 			sketchImp.setDimensions(1, imp.getNSlices(), imp.getNFrames());
+			sketchImp.setMotherImp(imp, imp.getID());
 			sketchImp.setCalibration(imp.getCalibration());
 			sketchImp.getCalibration().pixelWidth = sketchImp.getCalibration().pixelWidth/scaleFactor;
 			sketchImp.getCalibration().pixelHeight = sketchImp.getCalibration().pixelHeight/scaleFactor;
@@ -1003,6 +1007,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			sketchImp=null;
 			ImageJ3DViewer.select(null);
 		}
+		Image3DUniverse univ = vv.getUniv();
+		Hashtable<String, Content> contents = univ.getContentsHT();
+		for (Object content:contents.values()){
+				((Content)content).setVisible(true);
+		}
+
 	}
 
 	public void itemStateChanged(ItemEvent e) {

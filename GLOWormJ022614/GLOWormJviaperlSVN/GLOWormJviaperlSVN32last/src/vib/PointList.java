@@ -2,6 +2,7 @@ package vib;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.gui.Roi;
 import ij.io.FileInfo;
 import ij.io.OpenDialog;
 import ij.io.SaveDialog;
@@ -17,10 +18,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.Reader;
-
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import math3d.Point3d;
 
@@ -189,6 +191,32 @@ public class PointList implements Iterable<BenesNamedPoint>{
 					continue;
 				res.add(new BenesNamedPoint("point" + i,
 					(i % w) * pw, (i / w) * ph, z * pd));
+			}
+		}
+		return res;
+	}
+
+	public static PointList fromImpRois(ImagePlus imp, String name) {
+		PointList res = new PointList();
+		int w = imp.getWidth();
+		int h = imp.getHeight();
+		int d = imp.getStackSize();
+		Calibration cal = imp.getCalibration();
+		double pw = cal.pixelWidth, ph = cal.pixelHeight;
+		double pd = cal.pixelDepth;
+
+		for(int z = 0; z < d; z++) {
+			ArrayList<Roi> matchRoiSet = imp.getRoiManager().getROIsByNumbers().get(""+z);
+			for (Object matchObject:matchRoiSet){
+				Roi matchRoi = ((Roi)matchObject);
+				if (matchRoi.getName().startsWith(name)){
+					int[] xs = matchRoi.getPolygon().xpoints;
+					int[] ys = matchRoi.getPolygon().ypoints;
+					for(int i = 0; i < xs.length; i++) {
+						res.add(new BenesNamedPoint("point" + i,
+							xs[i] * pw, ys[i] * ph, z * pd));
+					}
+				}
 			}
 		}
 		return res;

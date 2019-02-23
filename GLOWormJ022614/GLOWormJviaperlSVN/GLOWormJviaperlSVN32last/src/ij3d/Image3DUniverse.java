@@ -1471,6 +1471,17 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	}
 
 	/**
+	 * Returns a Collection containing the references to all the
+	 * contents of this universe.
+	 * @return
+	 */
+	public Hashtable getContentsHT() {
+		if(contents == null)
+			return null;
+		return contents;
+	}
+
+	/**
 	 * Returns true if a Content with the specified name is present in
 	 * this universe.
 	 * @param name

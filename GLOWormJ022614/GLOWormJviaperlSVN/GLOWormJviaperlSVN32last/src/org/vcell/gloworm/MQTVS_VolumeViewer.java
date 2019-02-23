@@ -4,6 +4,7 @@ import java.awt.Frame;
 import java.awt.image.ColorModel;
 import java.io.File;
 import java.util.Date;
+import java.util.Hashtable;
 
 import javax.vecmath.Color3f;
 
@@ -44,12 +45,13 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 			if (this.univ == null){	
 				this.univ = new Image3DUniverse();
 			}
-				univ = this.univ;
-				if (univ.getWindow() == null){
-					univ.show();
-				}
-				univ.getWindow().setTitle("howyoulike?");
+			univ = this.univ;
+			if (univ.getWindow() == null){
+				univ.show();
+				univ.getWindow().setTitle(imp.getMotherImp().getTitle()+" [IJ3DV]");
+
 				WindowManager.addWindow(univ.getWindow());
+			}
 		}
 		
 		if (imp != null) {
@@ -159,10 +161,16 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 //						ImageJ3DViewer.unlock();
 //						ImageJ3DViewer.delete();
 //					}
+					Hashtable<String, Content> contents = univ.getContentsHT();
 					univ.addContent(impD, new Color3f(channelColor), objectName, threshold, new boolean[]{true,true, true}, binFactor, Content.SURFACE);
-
+					for (Object content:contents.values()){
+						if (((Content)content).getName() != objectName){
+							((Content)content).setVisible(false);
+						}
+					}
+					
 //					ImageJ3DViewer.select(null);
-					IJ.getInstance().toFront();
+//					IJ.getInstance().toFront();
 					IJ.setTool(ij.gui.Toolbar.HAND);
 					if (impD != imp){
 						impD.changes = false;
@@ -171,17 +179,25 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 					}
 				}
 			}
-			
+
 			if (!imp.getTitle().startsWith("SketchVolumeViewer")) {
 				imp.getWindow().setVisible(true);
 				imp.getWindow().setAlwaysOnTop(false);
 			}
 //			ImageJ3DViewer.select(null);
-			IJ.getInstance().toFront();
+//			IJ.getInstance().toFront();
 			IJ.setTool(ij.gui.Toolbar.HAND);
 			if (rm != null) rm.setVisible(rmWasVis);
 			if (mcc != null) mcc.setVisible(mccWasVis);
 		}
 
+	}
+
+	public Image3DUniverse getUniv() {
+		return this.univ;
+	}
+
+	public void setUniv(Image3DUniverse univ) {
+		this.univ = univ;
 	}
 }
