@@ -918,7 +918,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	private void sketchVolumeViewer(Object source) { 
 		boolean singleSave = IJ.shiftKeyDown();
-		double scaleFactor = 500d/imp.getWidth();
+		double scaleFactor = 1024d/imp.getWidth();
 		IJ.setForegroundColor(255, 255, 255);
 		IJ.setBackgroundColor(0, 0, 0);
 		if (getSelectedRoisAsArray().length<1)

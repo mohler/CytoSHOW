@@ -393,7 +393,9 @@ public class ContentInstant extends BranchGroup implements UniverseListener, Con
 						setTempColor(ContentInstant.this.trueColor);
 						blinkOn = false;
 					} else {
-						setTempColor(new Color3f(0.5f,0.5f,0.5f));
+						setTempColor(new Color3f(ContentInstant.this.trueColor.x*0.7f,
+												ContentInstant.this.trueColor.y*0.7f,
+												ContentInstant.this.trueColor.z*0.7f));
 						blinkOn =true;
 					}
 				}

@@ -118,13 +118,22 @@ public class Volume {
 	private void setLUTsFromImage(ImagePlus imp) {
 		switch(imp.getType()) {
 			case ImagePlus.GRAY8:
-			case ImagePlus.COLOR_256:
 				IndexColorModel cm = (IndexColorModel)imp.
-					getProcessor().getCurrentColorModel();
+				getProcessor().getCurrentColorModel();
 				for(int i = 0; i < 256; i++) {
 					rLUT[i] = cm.getRed(i);
 					gLUT[i] = cm.getGreen(i);
 					bLUT[i] = cm.getBlue(i);
+					aLUT[i] = Math.min(255, (rLUT[i] + gLUT[i] + bLUT[i]) / 3);
+				}
+				break;
+			case ImagePlus.COLOR_256:
+				IndexColorModel cmc256 = (IndexColorModel)imp.
+					getProcessor().getCurrentColorModel();
+				for(int i = 0; i < 256; i++) {
+					rLUT[i] = cmc256.getRed(i);
+					gLUT[i] = cmc256.getGreen(i);
+					bLUT[i] = cmc256.getBlue(i);
 					aLUT[i] = Math.min(254, (rLUT[i] + gLUT[i] + bLUT[i]) / 3);
 				}
 				break;

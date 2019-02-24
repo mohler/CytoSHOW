@@ -142,7 +142,9 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 //					IJ.run(impD, "Scale...", "x="+(scaleFactor)+" y="+(scaleFactor)+" z=1.0 interpolation=Bicubic average process create" );
 //					ImagePlus impDS = IJ.getImage();
 //					impD = impDS;
-					IJ.run(impD, "8-bit", "");
+					if (impD.getBitDepth()!=8){
+						IJ.run(impD, "8-bit", "");
+					}
 					String objectName = cellName;
 					if (objectName =="")
 						objectName = impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_");
@@ -162,7 +164,7 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 //						ImageJ3DViewer.delete();
 //					}
 					Hashtable<String, Content> contents = univ.getContentsHT();
-					univ.addContent(impD, new Color3f(channelColor), objectName, threshold, new boolean[]{true,true, true}, binFactor, Content.SURFACE);
+					univ.addContent(impD, new Color3f(channelColor), objectName, threshold, new boolean[]{true, true, true}, binFactor, Content.SURFACE);
 					for (Object content:contents.values()){
 						if (((Content)content).getName() != objectName){
 							((Content)content).setVisible(false);
