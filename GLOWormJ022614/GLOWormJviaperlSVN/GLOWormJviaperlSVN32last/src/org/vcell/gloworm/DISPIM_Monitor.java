@@ -7001,9 +7001,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			String fullSetSavePath = previewPath.replace("DeconPreview_", "Decon_");
 			
 			try {
-				Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","robocopy",previewPath, fullSetSavePath,"/mir"});
-				Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","for", "/d", "%G", "in", "("+fullSetSavePath+File.separator+"*Decon-Fuse*)", "do", "rd", "/s", "/q", "%~G"});
-				Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","for", "/d", "%G", "in", "("+fullSetSavePath+File.separator+"RegDecon"+File.separator+"Pos*)", "do", "rd", "/s", "/q", "%~G"});
+				Process cloneProcess = Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","robocopy",previewPath, fullSetSavePath,"/mir"});
+				while (cloneProcess.isAlive()){
+					IJ.wait(100);
+				}
+				Process cleanProcess = Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","for", "/d", "%G", "in", "("+fullSetSavePath+File.separator+"*Decon-Fuse*)", "do", "rd", "/s", "/q", "%~G"});
+				Process clipProcess = Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","for", "/d", "%H", "in", "("+fullSetSavePath+File.separator+"RegDecon"+File.separator+"Pos*)", "do", "rd", "/s", "/q", "%~H"});
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
