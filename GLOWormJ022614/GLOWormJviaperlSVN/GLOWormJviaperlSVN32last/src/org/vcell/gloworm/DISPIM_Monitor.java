@@ -7011,6 +7011,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
+			rerunArg = (dirOrOMETiff+"|"+"rerunWithDecon"+"|"+argField);
+			run(rerunArg);
 		}
 		
 		if (e.getActionCommand() == "CCM") {
