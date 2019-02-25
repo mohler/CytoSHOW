@@ -6945,7 +6945,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				firstTime = false;
 			}
 			if (firstTime) {
-				IJ.append(" ", savePath+"fineRotations.txt");
+				IJ.append("!!", savePath+"fineRotations.txt");
 			}
 			for (int pos=0; pos<pDim; pos++) {
 				double xRotRead=0;
@@ -6960,7 +6960,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							yRotRead = 0 + (((Line)xRoi).getAngle()-180);
 						}
 					}
-
+					
 					ImagePlus xImp = (new ImagePlus("testX",ciPrxs[pos].getProcessor()));
 					maxReferenceIntensity = xImp.getStatistics().max;
 					xImp.flush();
@@ -6988,8 +6988,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				if (firstTime){
 					IJ.append("" + pos +","+ xRotRead +","+ yRotRead +","+ zRotRead +","+ maxReferenceIntensity, savePath+"fineRotations.txt");
 				} else {
-					previewFileText = previewFileText.replaceAll(".*\n"+pos +",.*,.*,.*,.*\n.*",
-							"" + pos +","+ xRotRead +","+ yRotRead +","+ zRotRead +","+ maxReferenceIntensity);
+					previewFileText = previewFileText.replaceAll("(.*\n)"+pos +",.*,.*,.*,.*(\n.*)",
+							"$1" + pos +","+ xRotRead +","+ yRotRead +","+ zRotRead +","+ maxReferenceIntensity+"$2");
 					IJ.saveString(previewFileText, savePath+"fineRotations.txt");
 				}
 			}
@@ -7001,12 +7001,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			savePath = previewPath.replace("DeconPreview_", "Decon_");
 			
 				try {
-					String[] paramsCopyStringcmdln = new String[] {"cmd","/c","start","/min","/wait","xcopy",previewPath+File.separator+"*", ""+savePath, "/I", "/Y"};
-					IJ.log("cmd /c start /min /wait xcopy "+previewPath+File.separator+"* "+ savePath+" /I /Y");
-					Runtime.getRuntime().exec(paramsCopyStringcmdln);
-					String[] tmxsCopyStringcmdln = new String[] {"cmd","/c","start","/min","/wait","xcopy",previewPath+File.separator+"RegDecon"+File.separator+"TMX"+File.separator+"*", savePath+File.separator+"RegDecon"+File.separator+"TMX", "/I", "/Y"};
-					IJ.log("cmd /c start /min /wait xcopy "+previewPath+File.separator+"RegDecon"+File.separator+"TMX"+File.separator+"* "+ savePath+File.separator+"RegDecon"+File.separator+"TMX /I /Y");
-					Runtime.getRuntime().exec(tmxsCopyStringcmdln);
+					Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","robocopy",previewPath, savePath,"/mir"});
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
