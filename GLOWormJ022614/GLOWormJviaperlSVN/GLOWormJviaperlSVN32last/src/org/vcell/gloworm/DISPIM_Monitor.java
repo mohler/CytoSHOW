@@ -6987,8 +6987,18 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			}
 			IJ.saveString(previewFileText, savePath+"fineRotations.txt");
 			
-//			WOW! NEED TO ADD HERE SETUP OF ALL NON_PREVIEW FOLDERS WITH HELPER FILES
+//			WOW! NEED TO ADD HERE SETUP OF ALL NON_PREVIEW FOLDERS WITH KEY HELPER FILES
 //			THEN RELAUNCH WITH NEW PARAMETERS CALLED UP....
+			
+			String previewPath = savePath;
+			savePath = previewPath.replace("DeconPreview_", "Decon_");
+			
+				try {
+					Runtime.getRuntime().exec("robocopy "+previewPath+", "+ savePath+ " /mir");
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 		}
 		
 		if (e.getActionCommand() == "CCM") {
