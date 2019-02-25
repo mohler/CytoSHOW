@@ -7000,12 +7000,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			String previewPath = savePath;
 			String fullSetSavePath = previewPath.replace("DeconPreview_", "Decon_");
 			
-				try {
-					Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","robocopy",previewPath, fullSetSavePath,"/mir"});
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+			try {
+				Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","robocopy",previewPath, fullSetSavePath,"/mir"});
+				Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","rd", fullSetSavePath+File.separator+"*Decon-Fuse*","/s","/q"});
+				Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","rd", fullSetSavePath+File.separator+"RegDecon"+File.separator+"Pos*","/s","/q"});
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 		}
 		
 		if (e.getActionCommand() == "CCM") {
