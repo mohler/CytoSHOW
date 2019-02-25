@@ -7002,8 +7002,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			
 			try {
 				Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","robocopy",previewPath, fullSetSavePath,"/mir"});
-				Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","rd","/s","/q", fullSetSavePath+File.separator+"*Decon-Fuse*"});
-				Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","rd","/s","/q", fullSetSavePath+File.separator+"RegDecon"+File.separator+"Pos*"});
+				Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","for", "/f", "%i", "in", "('dir /a:d /s /b A*')", "do", "rd", "/q", "%i", fullSetSavePath+File.separator+"*Decon-Fuse*"});
+				Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","for", "/d", "%G", "in", "("+fullSetSavePath+File.separator+"*Decon-Fuse*)", "do", "rd", "/s", "/q", "%~G"});
+				Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","for", "/d", "%G", "in", "("+fullSetSavePath+File.separator+"RegDecon"+File.separator+"Pos*)", "do", "rd", "/s", "/q", "%~G"});
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
