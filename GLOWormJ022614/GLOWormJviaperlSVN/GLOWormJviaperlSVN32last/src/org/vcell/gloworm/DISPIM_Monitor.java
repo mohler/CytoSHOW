@@ -7002,8 +7002,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			
 			try {
 				Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","robocopy",previewPath, fullSetSavePath,"/mir"});
-				Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","rd", fullSetSavePath+File.separator+"*Decon-Fuse*","/s","/q"});
-				Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","rd", fullSetSavePath+File.separator+"RegDecon"+File.separator+"Pos*","/s","/q"});
+				Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","rd","/s","/q", fullSetSavePath+File.separator+"*Decon-Fuse*"});
+				Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","rd","/s","/q", fullSetSavePath+File.separator+"RegDecon"+File.separator+"Pos*"});
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
