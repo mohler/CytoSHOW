@@ -7002,10 +7002,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			
 				try {
 					String[] paramsCopyStringcmdln = new String[] {"cmd","/c","start","/min","/wait","xcopy",previewPath+File.separator+"*", savePath, "/I", "/Y"};
-					IJ.log(paramsCopyStringcmdln.toString());
+					IJ.log("cmd /c start /min /wait xcopy "+previewPath+File.separator+"* "+ savePath+"* /I /Y");
 					Runtime.getRuntime().exec(paramsCopyStringcmdln);
 					String[] tmxsCopyStringcmdln = new String[] {"cmd","/c","start","/min","/wait","xcopy",previewPath+File.separator+"RegDecon"+File.separator+"TMX"+File.separator+"*", savePath+File.separator+"RegDecon"+File.separator+"TMX", "/I", "/Y"};
-					IJ.log(tmxsCopyStringcmdln.toString());
+					IJ.log("cmd /c start /min /wait xcopy "+previewPath+File.separator+"RegDecon"+File.separator+"TMX"+File.separator+"* "+ savePath+File.separator+"RegDecon"+File.separator+"TMX /I /Y");
 					Runtime.getRuntime().exec(tmxsCopyStringcmdln);
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
