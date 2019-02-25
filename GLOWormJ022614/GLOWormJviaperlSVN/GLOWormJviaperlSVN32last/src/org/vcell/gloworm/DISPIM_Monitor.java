@@ -6998,10 +6998,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 //			THEN RELAUNCH WITH NEW PARAMETERS CALLED UP....
 			
 			String previewPath = savePath;
-			savePath = previewPath.replace("DeconPreview_", "Decon_");
+			String fullSetSavePath = previewPath.replace("DeconPreview_", "Decon_");
 			
 				try {
-					Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","robocopy",previewPath, savePath,"/mir"});
+					Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","robocopy",previewPath, fullSetSavePath,"/mir"});
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
