@@ -6937,7 +6937,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 		
 		if (e.getActionCommand() == "diSPIM Preview"){
 			IJ.beep();
-			IJ.log("Preview adjustment details saved to disk");
+			IJ.log("Preview orientation adjustment details saved to disk");
+			String previewFileText = "\n";
+			if (new File(savePath+"fineRotations.txt").canRead()){
+				previewFileText = IJ.openAsString(savePath+"fineRotations.txt");
+			}
+
 			for (int pos=0; pos<pDim; pos++) {
 				double xRotRead=0;
 				double yRotRead=0;
@@ -6976,8 +6981,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				if (yRotRead < 0){
 					yRotRead = 360+yRotRead;
 				}
-				IJ.append("" + pos +","+ xRotRead +","+ yRotRead +","+ zRotRead +","+ maxReferenceIntensity, savePath+"fineRotations.txt");
+//				IJ.append("" + pos +","+ xRotRead +","+ yRotRead +","+ zRotRead +","+ maxReferenceIntensity, savePath+"fineRotations.txt");
+				previewFileText = previewFileText.replaceAll(".*\n"+pos +",.*,.*,.*,.*,",
+															"" + pos +","+ xRotRead +","+ yRotRead +","+ zRotRead +","+ maxReferenceIntensity);
 			}
+			IJ.saveString(previewFileText, savePath+"fineRotations.txt");
+			
+//			WOW! NEED TO ADD HERE SETUP OF ALL NON_PREVIEW FOLDERS WITH HELPER FILES
+//			THEN RELAUNCH WITH NEW PARAMETERS CALLED UP....
 		}
 		
 		if (e.getActionCommand() == "CCM") {

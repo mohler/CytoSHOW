@@ -35,6 +35,9 @@ public class MCTriangulator implements Triangulator {
 		return l;
 	}
 
+	
+	//WOW HERE IS (BASICALLY) WHAT i have been seeking!!!!
+	//CANN PROBABLY SPEED UP MCCube.getTri by windowing on ROI bounds...
 	public List getTriangles(ImagePlus image, Roi[] rois, int threshold, int resamplingF) {
 
 		image = NewImage.createImage("fake", image.getWidth(), image.getHeight()

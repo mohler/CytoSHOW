@@ -218,7 +218,8 @@ public final class MCCube {
 		}	
 		return tri;
 	}
-
+	//WOW HERE IS (BASICALLY) WHAT i have been seeking but requires imgLib as is!!!!
+	//CAN PROBABLY SPEED UP MCCube.getTri by windowing on ROI bounds from TagManager...
 	/** Identical to getTriangles, but iterates only the minimal necessary bounding box, by asking the shapes objects. */
 	private static final void getShapeListImageTriangles(final ImgLibVolume volume, final Carrier car, final List<Point3f> tri) {
 		final ShapeList sli = (ShapeList) volume.getImage().getContainer();
