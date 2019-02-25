@@ -6939,8 +6939,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			IJ.beep();
 			IJ.log("Preview orientation adjustment details saved to disk");
 			String previewFileText = "\n";
+			boolean firstTime = true;
 			if (new File(savePath+"fineRotations.txt").canRead()){
 				previewFileText = IJ.openAsString(savePath+"fineRotations.txt");
+				firstTime = false;
 			}
 
 			for (int pos=0; pos<pDim; pos++) {
@@ -6981,11 +6983,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				if (yRotRead < 0){
 					yRotRead = 360+yRotRead;
 				}
-//				IJ.append("" + pos +","+ xRotRead +","+ yRotRead +","+ zRotRead +","+ maxReferenceIntensity, savePath+"fineRotations.txt");
-				previewFileText = previewFileText.replaceAll(".*\n"+pos +",.*,.*,.*,.*,",
+				if (firstTime){
+					IJ.append("" + pos +","+ xRotRead +","+ yRotRead +","+ zRotRead +","+ maxReferenceIntensity, savePath+"fineRotations.txt");
+				} else {
+					previewFileText = previewFileText.replaceAll(".*\n"+pos +",.*,.*,.*,.*,",
 															"" + pos +","+ xRotRead +","+ yRotRead +","+ zRotRead +","+ maxReferenceIntensity);
-			}
-			IJ.saveString(previewFileText, savePath+"fineRotations.txt");
+					IJ.saveString(previewFileText, savePath+"fineRotations.txt");
+				}
+				}
 			
 //			WOW! NEED TO ADD HERE SETUP OF ALL NON_PREVIEW FOLDERS WITH KEY HELPER FILES
 //			THEN RELAUNCH WITH NEW PARAMETERS CALLED UP....
@@ -6994,7 +6999,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			savePath = previewPath.replace("DeconPreview_", "Decon_");
 			
 				try {
-					Runtime.getRuntime().exec("robocopy "+previewPath+", "+ savePath+ " /mir");
+					Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","robocopy",previewPath, savePath,"/mir"});
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
