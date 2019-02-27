@@ -1557,7 +1557,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					if (newFileListItem.endsWith(".tif"))
 						newLength++;
 
-				wavelengths = 2;  //OLD DEFAULT VALUES OFTEN USED.  NEED TO TREAT SMARTLY SOON
+				wavelengths = 1;  //OLD DEFAULT VALUES OFTEN USED.  NEED TO TREAT SMARTLY SOON
 				zSlices = 50;
 				while (Math.floor(newLength / (wavelengths * 2 * zSlices)) == 0) {
 
@@ -1574,17 +1574,20 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								+ "] number="
 								+ newLength
 								+ " starting=1 increment=1 scale=100 file=Cam2 or=[] sort use");
-				IJ.run("Stack to Hyperstack...",
-						"order=xyczt(default) channels="
-								+ wavelengths
-								+ " slices="
-								+ zSlices
-								+ " frames="
-								+ (Math.floor(newLength
-										/ (wavelengths * 2 * zSlices)))
-										+ " display=Composite");
-				// IJ.getImage().setTitle("SPIMA: "+IJ.getImage().getTitle());
+//				IJ.run("Stack to Hyperstack...",
+//						"order=xyczt(default) channels="
+//								+ wavelengths
+//								+ " slices="
+//								+ zSlices
+//								+ " frames="
+//								+ (Math.floor(newLength
+//										/ (wavelengths * 2 * zSlices)))
+//										+ " display=Composite");
+//				// IJ.getImage().setTitle("SPIMA: "+IJ.getImage().getTitle());
 				/*impA = */ impAs[0] = WindowManager.getCurrentImage();
+				impAs[0].setOpenAsHyperStack(true);
+				impAs[0].setDimensions(wavelengths, zSlices, (int)(Math.floor(newLength/ (wavelengths * 2 * zSlices))));
+				impAs[0].updateAndRepaintWindow();
 				Calibration calA = impAs[0].getCalibration();
 				calA.pixelWidth = vWidth;
 				calA.pixelHeight = vHeight;
@@ -1601,17 +1604,21 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								+ "] number="
 								+ newLength
 								+ " starting=1 increment=1 scale=100 file=Cam1 or=[] sort use");
-				IJ.run("Stack to Hyperstack...",
-						"order=xyczt(default) channels="
-								+ wavelengths
-								+ " slices="
-								+ zSlices
-								+ " frames="
-								+ (Math.floor(newLength
-										/ (wavelengths * 2 * zSlices)))
-										+ " display=Composite");
-				// IJ.getImage().setTitle("SPIMB: "+IJ.getImage().getTitle());
+//				IJ.run("Stack to Hyperstack...",
+//						"order=xyczt(default) channels="
+//								+ wavelengths
+//								+ " slices="
+//								+ zSlices
+//								+ " frames="
+//								+ (Math.floor(newLength
+//										/ (wavelengths * 2 * zSlices)))
+//										+ " display=Composite");
+//				// IJ.getImage().setTitle("SPIMB: "+IJ.getImage().getTitle());
 				/*impB = */ impBs[0] = WindowManager.getCurrentImage();
+				impBs[0].setOpenAsHyperStack(true);
+				impBs[0].setDimensions(wavelengths, zSlices, (int)(Math.floor(newLength/ (wavelengths * 2 * zSlices))));
+				impBs[0].updateAndRepaintWindow();
+
 				Calibration calB = impBs[0].getCalibration();
 				calB.pixelWidth = vWidth;
 				calB.pixelHeight = vHeight;
@@ -1630,7 +1637,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				xSpinner = new JSpinner[pDim][2];
 				ySpinner = new JSpinner[pDim][2];
 				zSpinner = new JSpinner[pDim][2];
-
+				splitChannels=false;
 			}
 
 			IJ.run("Tile");
@@ -2331,7 +2338,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				spinnerPanel[pos][1] = new Panel();
 				spinnerPanel[pos][1].setLayout(new BorderLayout());
 
-				if ( splitChannels = true ) {
+				if ( splitChannels == true ) {
 
 					if(splitButton[pos][0] == null) {
 						splitButton[pos][0] = new JButton("CCM");
