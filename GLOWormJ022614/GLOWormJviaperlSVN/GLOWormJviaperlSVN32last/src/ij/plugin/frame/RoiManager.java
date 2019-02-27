@@ -918,7 +918,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	private void sketchVolumeViewer(Object source) { 
 		boolean singleSave = IJ.shiftKeyDown();
-		double scaleFactor = 1024d/imp.getWidth();
+		double scaleFactor = 500d/imp.getWidth();
 		IJ.setForegroundColor(255, 255, 255);
 		IJ.setBackgroundColor(0, 0, 0);
 		if (getSelectedRoisAsArray().length<1)
@@ -1008,9 +1008,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			ImageJ3DViewer.select(null);
 		}
 		Image3DUniverse univ = vv.getUniv();
+		
 		Hashtable<String, Content> contents = univ.getContentsHT();
+		
 		for (Object content:contents.values()){
-				((Content)content).setVisible(true);
+			((Content)content).setLocked(true);
+			((Content)content).setVisible(true);
 		}
 
 	}
@@ -1892,7 +1895,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		String cellName;
 		long count =0;
 		long nRois =0;
-		
+		String universalCLURL = MQTVSSceneLoader64.class.getResource("docs/fullUniversal_ColorLegend.lgd").toString();
+		String clStr = IJ.openUrlAsString(universalCLURL);
+		setColorLegend(new ColorLegend(this.imp, clStr));
 		ArrayList<Integer> sliceValues = new ArrayList<Integer>();
 
 		for (int sl=1; sl< sLayers.length; sl++) {

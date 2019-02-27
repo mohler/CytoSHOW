@@ -2279,11 +2279,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					dispimToolsButton[pos][0] = new JButton("diSPIM");
 					dispimToolsButton[pos][0].addActionListener(this);
 					diSPIMPanel[pos][0].add(BorderLayout.WEST, dispimToolsButton[pos][0]);
-					if ( ((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdXA() == 0 &&
-							((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdYA() == 0 &&
-							((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdZA() == 0) {
-						
-						dispimToolsButton[pos][0].setBackground(Color.orange);
+					if (impAs[pos].getStack() instanceof MultiFileInfoVirtualStack){
+						if ( ((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdXA() == 0 &&
+								((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdYA() == 0 &&
+								((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdZA() == 0) {
+
+							dispimToolsButton[pos][0].setBackground(Color.orange);
+						}
 					}
 					dispimToolsButton[pos][0].setVisible(true);
 				}else {
@@ -2294,11 +2296,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					dispimToolsButton[pos][1] = new JButton("diSPIM");
 					dispimToolsButton[pos][1].addActionListener(this);
 					diSPIMPanel[pos][1].add(BorderLayout.WEST, dispimToolsButton[pos][1]);
-					if ( ((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdXA() == 0 &&
-							((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdYA() == 0 &&
-							((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdZA() == 0) {
-						
-						dispimToolsButton[pos][1].setBackground(Color.orange);
+					if (impBs[pos].getStack() instanceof MultiFileInfoVirtualStack){
+						if ( ((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdXA() == 0 &&
+								((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdYA() == 0 &&
+								((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdZA() == 0) {
+
+							dispimToolsButton[pos][1].setBackground(Color.orange);
+						}
 					}
 					dispimToolsButton[pos][1].setVisible(true);
 				}else {
