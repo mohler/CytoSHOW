@@ -1667,8 +1667,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					continue;
 				} 
 
-				origRoiAs[pos] = impAs[pos].getRoi();
-				origRoiBs[pos] = impBs[pos].getRoi();
+				if (origRoiAs[pos] == null || origRoiBs[pos] == null ){
+					origRoiAs[pos] = impAs[pos].getRoi();
+					origRoiBs[pos] = impBs[pos].getRoi();
+				} else{
+					impAs[pos].killRoi();
+					impAs[pos].setRoi(origRoiAs[pos]);
+					impBs[pos].killRoi();
+					impBs[pos].setRoi(origRoiBs[pos]);
+				}
 				String[] savePathList = new File(savePath).list();
 				
 				while (doProcessing[pos] && (rectRoiAs[pos] == null || rectRoiBs[pos] == null)) {
