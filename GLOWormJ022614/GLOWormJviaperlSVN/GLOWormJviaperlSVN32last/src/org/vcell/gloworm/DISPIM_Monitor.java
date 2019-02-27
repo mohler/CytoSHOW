@@ -1584,10 +1584,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 //										/ (wavelengths * 2 * zSlices)))
 //										+ " display=Composite");
 //				// IJ.getImage().setTitle("SPIMA: "+IJ.getImage().getTitle());
-				/*impA = */ impAs[0] = WindowManager.getCurrentImage();
+				ImagePlus impTmpA =  WindowManager.getCurrentImage();
+//				impTmpA.getWindow().setVisible(false);
+				
+				impAs[0].setStack(new VirtusalStack(impTmpA.getWidth(), impTmpA.getHeight(), null, dirOrOMETiff, false, null), wavelengths, zSlices, (int)(Math.floor(newLength/ (wavelengths * 2 * zSlices))));
+				((VirtualStack)impAs[0].getStack()).setBitDepth(16);
 				impAs[0].setOpenAsHyperStack(true);
 				impAs[0].setDimensions(wavelengths, zSlices, (int)(Math.floor(newLength/ (wavelengths * 2 * zSlices))));
-				impAs[0].updateAndRepaintWindow();
+				impAs[0].show();
+				
 				Calibration calA = impAs[0].getCalibration();
 				calA.pixelWidth = vWidth;
 				calA.pixelHeight = vHeight;
@@ -1614,10 +1619,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 //										/ (wavelengths * 2 * zSlices)))
 //										+ " display=Composite");
 //				// IJ.getImage().setTitle("SPIMB: "+IJ.getImage().getTitle());
-				/*impB = */ impBs[0] = WindowManager.getCurrentImage();
+				ImagePlus impTmpB =  WindowManager.getCurrentImage();
+				impTmpB.getWindow().setVisible(false);
+				impBs[0].setStack(impTmpB.getStack(), wavelengths, zSlices, (int)(Math.floor(newLength/ (wavelengths * 2 * zSlices))));
 				impBs[0].setOpenAsHyperStack(true);
 				impBs[0].setDimensions(wavelengths, zSlices, (int)(Math.floor(newLength/ (wavelengths * 2 * zSlices))));
-				impBs[0].updateAndRepaintWindow();
+				impBs[0].show();
 
 				Calibration calB = impBs[0].getCalibration();
 				calB.pixelWidth = vWidth;
