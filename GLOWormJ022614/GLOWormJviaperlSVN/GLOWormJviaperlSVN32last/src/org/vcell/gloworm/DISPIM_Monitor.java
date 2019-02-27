@@ -1470,6 +1470,87 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					impBs[pos].show();
 				}
 			} else if (dirOrOMETiff.matches(".*_\\d{9}_\\d{3}_.*.tif")) {
+//				readInMMdiSPIMheader(dirOrOMETiffFile);
+
+//				//Reading in diSPIM header from MM tiffs ^^^^^^
+//
+//				if (dimOrder == null || dimOrder == "")
+//					dimOrder = (diSPIM_MM_channelMode!=null && diSPIM_MM_channelMode.contains("VOLUME")?"xyzct":"xyczt");
+//
+//				if (!dimOrder.toLowerCase().matches(".*split.*c.*"))
+//					wavelengths = cDim/vDim; 
+//				else
+//					wavelengths = cDim;
+//				vWidth = diSPIM_MM_PixelSize_um;
+//				vHeight = diSPIM_MM_PixelSize_um;
+//				vDepthRaw = diSPIM_MM_zStep_um;
+
+				pDim=1;
+				impAs = new ImagePlus[pDim];
+				impBs = new ImagePlus[pDim];
+				origRoiAs = new Roi[pDim];
+				origRoiBs = new Roi[pDim];
+				ellipseRoiAs = new Roi[pDim];
+				ellipseRoiBs = new Roi[pDim];
+				rectRoiAs = new Roi[pDim];
+				rectRoiBs = new Roi[pDim];
+				doProcessing= new boolean[pDim];
+				impDF1s  = new ImagePlus[pDim];
+				impDF2s  = new ImagePlus[pDim];
+				impPrxs = new ImagePlus[pDim];
+				impPrys = new ImagePlus[pDim];
+
+				ciDFs  = new CompositeImage[pDim];
+				ciPrxs  = new CompositeImage[pDim];
+				ciPrys  = new CompositeImage[pDim];
+//				impMaxXs = new ImagePlus[pDim];
+//				ciMaxXs  = new CompositeImage[pDim];
+//				impMaxYs = new ImagePlus[pDim];
+//				ciMaxYs  = new CompositeImage[pDim];
+//				impMaxZs = new ImagePlus[pDim];
+//				ciMaxZs  = new CompositeImage[pDim];
+
+				prjXs = new Projector16bit[pDim];
+				prjYs = new Projector16bit[pDim];
+
+				wasFrameA = new int[pDim];
+				wasFrameB = new int[pDim];
+				wasSliceA = new int[pDim];
+				wasSliceB = new int[pDim];
+				wasChannelA = new int[pDim];
+				wasChannelB = new int[pDim];
+				zFirstA = new int[pDim];
+				zLastA = new int[pDim];
+				zFirstB = new int[pDim];
+				zLastB = new int[pDim];
+				lastMatrix = new String[pDim];
+				cropWidthA = new double[pDim];
+				cropHeightA = new double[pDim];
+				cropWidthB = new double[pDim];
+				cropHeightB = new double[pDim];			
+				anglesA = new double[pDim];					
+				anglesB = new double[pDim];					
+				longAxesA = new double[pDim];					
+				longAxesB = new double[pDim];					
+				rotXYZs = new double[pDim][3];
+				intensityCues = new double[pDim];
+				Arrays.fill(intensityCues, StarryNiteFeeder.INTENSITY_BASE);
+				
+				dispimToolsButton = new JButton[pDim][2];
+				dispimPreviewButton = new JButton[pDim][2];
+				fuseButton = new JButton[pDim][2];
+				splitButton = new JButton[pDim][2];
+				spinnerPanel = new Panel[pDim][2];
+				xSpinner = new JSpinner[pDim][2];
+				ySpinner = new JSpinner[pDim][2];
+				zSpinner = new JSpinner[pDim][2];
+
+				wasEdgesA = new boolean[pDim];
+				wasEdgesB = new boolean[pDim];
+
+				stackAs = new MultiFileInfoVirtualStack[pDim];
+				stackBs = new MultiFileInfoVirtualStack[pDim];
+				
 				listB = new File(dirOrOMETiff).getParentFile().list();
 				int newLength = 0;
 				for (String newFileListItem : listB)
