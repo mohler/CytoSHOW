@@ -18,7 +18,7 @@ public class WaitForUserDialog extends Dialog implements ActionListener, KeyList
 	private boolean escPressed;
 	
 	public WaitForUserDialog(String title, String text) {
-		super(getFrame(), title, false);
+		super(IJ.getInstance(), title, false);
 		label = new MultiLineLabel(text, 175);
 		if (!IJ.isLinux()) label.setFont(new Font("SansSerif", Font.PLAIN, 14));
 		RoiManager rm = null;
@@ -60,6 +60,7 @@ public class WaitForUserDialog extends Dialog implements ActionListener, KeyList
 
 	public void show() {
 		super.show();
+		
 		//IJ.beep();
 		synchronized(this) {  //wait for OK
 			try {wait();}

@@ -56,6 +56,7 @@ import ij.ImageJ;
 import ij.ImageListener;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.Macro;
 import ij.Prefs;
 import ij.VirtualStack;
 import ij.WindowManager;
@@ -68,11 +69,13 @@ import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.gui.SelectKeyChannelDialog;
 import ij.gui.StackWindow;
+import ij.gui.WaitForUserDialog;
 import ij.gui.YesNoCancelDialog;
 import ij.io.FileInfo;
 import ij.io.FileOpener;
 import ij.io.OpenDialog;
 import ij.io.TiffDecoder;
+import ij.macro.Interpreter;
 import ij.macro.MacroRunner;
 import ij.measure.Calibration;
 import ij.measure.Measurements;
@@ -1746,12 +1749,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				}
 			}
 
-			IJ.runMacro("waitForUser(\"Select the regions containing the specimens"
-					+ "\\\n for deconvolution/fusion processing."
-					// + "\\\nAlso, set the minimum Brightness limit."
-					+
-					"\\\nWhen you are then ready, click OK here to commence processing."
-					+ "\");");
+//			IJ.runMacro("waitForUser(\"Select the regions containing the specimens"
+//					+ "\\\n for deconvolution/fusion processing."
+//					// + "\\\nAlso, set the minimum Brightness limit."
+//					+
+//					"\\\nWhen you are then ready, click OK here to commence processing."
+//					+ "\");");
+
+			WaitForUserDialog waitForUserDialog = new WaitForUserDialog("Check Over Your Selections", "Select the regions containing the specimens\n for deconvolution/fusion processing.\nWhen you are then ready, click OK here to commence processing.");
+			waitForUserDialog.show();
 
 			for (int pos=0; pos<pDim; pos++) {
 				boolean go = true;
@@ -7011,8 +7017,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			rerunArg = (dirOrOMETiff+"|"+"rerunWithDecon"+"|"+argField);
-			run(rerunArg);
+
+			monitoring = false;
 		}
 		
 		if (e.getActionCommand() == "CCM") {
