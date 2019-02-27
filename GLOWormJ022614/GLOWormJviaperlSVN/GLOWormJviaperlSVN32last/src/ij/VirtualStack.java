@@ -23,6 +23,12 @@ public class VirtualStack extends ImageStack {
 	private boolean burnIn = false;
 	private ImagePlus lineageMapImage;
 	protected String dimOrder;
+	protected  int dXA;
+	protected  int dXB;
+	protected  int dYA;
+	protected  int dYB;
+	protected  int dZA;
+	protected  int dZB;
 
 
 
@@ -270,7 +276,55 @@ public class VirtualStack extends ImageStack {
 			this.dimOrder = dimOrder;
 	}
 
-	
+
+	public  int getdXA() {
+		return dXA;
+	}
+
+	public  void setdXA(int dXA) {
+		this.dXA = dXA;
+	}
+
+	public  int getdXB() {
+		return dXB;
+	}
+
+	public  void setdXB(int dXB) {
+		this.dXB = dXB;
+	}
+
+	public  int getdYA() {
+		return dYA;
+	}
+
+	public  void setdYA(int dYA) {
+		this.dYA = dYA;
+	}
+
+	public  int getdYB() {
+		return dYB;
+	}
+
+	public  void setdYB(int dYB) {
+		this.dYB = dYB;
+	}
+
+	public int getdZA() {
+		return dZA;
+	}
+
+	public void setdZA(int dZA) {
+		this.dZA = dZA;
+	}
+
+	public int getdZB() {
+		return dZB;
+	}
+
+	public void setdZB(int dZB) {
+		this.dZB = dZB;
+	}
+
 
 } 
 

@@ -2279,10 +2279,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					dispimToolsButton[pos][0] = new JButton("diSPIM");
 					dispimToolsButton[pos][0].addActionListener(this);
 					diSPIMPanel[pos][0].add(BorderLayout.WEST, dispimToolsButton[pos][0]);
-					if (impAs[pos].getStack() instanceof MultiFileInfoVirtualStack){
-						if ( ((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdXA() == 0 &&
-								((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdYA() == 0 &&
-								((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdZA() == 0) {
+					if (impAs[pos].getStack() instanceof VirtualStack){
+						if ( ((VirtualStack)(impAs[pos].getStack())).getdXA() == 0 &&
+								((VirtualStack)(impAs[pos].getStack())).getdYA() == 0 &&
+								((VirtualStack)(impAs[pos].getStack())).getdZA() == 0) {
 
 							dispimToolsButton[pos][0].setBackground(Color.orange);
 						}
@@ -2296,10 +2296,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					dispimToolsButton[pos][1] = new JButton("diSPIM");
 					dispimToolsButton[pos][1].addActionListener(this);
 					diSPIMPanel[pos][1].add(BorderLayout.WEST, dispimToolsButton[pos][1]);
-					if (impBs[pos].getStack() instanceof MultiFileInfoVirtualStack){
-						if ( ((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdXA() == 0 &&
-								((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdYA() == 0 &&
-								((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdZA() == 0) {
+					if (impBs[pos].getStack() instanceof VirtualStack){
+						if ( ((VirtualStack)(impBs[pos].getStack())).getdXA() == 0 &&
+								((VirtualStack)(impBs[pos].getStack())).getdYA() == 0 &&
+								((VirtualStack)(impBs[pos].getStack())).getdZA() == 0) {
 
 							dispimToolsButton[pos][1].setBackground(Color.orange);
 						}
@@ -2353,7 +2353,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					}
 					
 					if(xSpinner[pos][0] == null) {
-						xSpinner[pos][0] = new JSpinner(new SpinnerNumberModel(((MultiFileInfoVirtualStack)impAs[pos].getStack()).getdXA(), -impAs[pos].getWidth(), impAs[pos].getWidth(), 1));
+						xSpinner[pos][0] = new JSpinner(new SpinnerNumberModel(((VirtualStack)impAs[pos].getStack()).getdXA(), -impAs[pos].getWidth(), impAs[pos].getWidth(), 1));
 						xSpinner[pos][0].setToolTipText("Adjust Channel X Alignment ViewA");
 						xSpinner[pos][0].addChangeListener(this);
 						spinnerPanel[pos][0].add(BorderLayout.NORTH, xSpinner[pos][0]);
@@ -2362,7 +2362,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						xSpinner[pos][0].setVisible(false);
 					}
 					if(ySpinner[pos][0] == null) {
-						ySpinner[pos][0] = new JSpinner(new SpinnerNumberModel(((MultiFileInfoVirtualStack)impAs[pos].getStack()).getdYA(), -impAs[pos].getHeight(), impAs[pos].getHeight(), 1));
+						ySpinner[pos][0] = new JSpinner(new SpinnerNumberModel(((VirtualStack)impAs[pos].getStack()).getdYA(), -impAs[pos].getHeight(), impAs[pos].getHeight(), 1));
 						ySpinner[pos][0].setToolTipText("Adjust Channel Y Alignment ViewA");
 						ySpinner[pos][0].addChangeListener(this);
 						spinnerPanel[pos][0].add(BorderLayout.CENTER, ySpinner[pos][0]);
@@ -2372,7 +2372,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					}
 
 					if(xSpinner[pos][1] == null) {
-						xSpinner[pos][1] = new JSpinner(new SpinnerNumberModel(((MultiFileInfoVirtualStack)impBs[pos].getStack()).getdXB(), -impBs[pos].getWidth(), impBs[pos].getWidth(), 1));
+						xSpinner[pos][1] = new JSpinner(new SpinnerNumberModel(((VirtualStack)impBs[pos].getStack()).getdXB(), -impBs[pos].getWidth(), impBs[pos].getWidth(), 1));
 						xSpinner[pos][1].setToolTipText("Adjust Channel X Alignment ViewB");
 						xSpinner[pos][1].addChangeListener(this);
 						spinnerPanel[pos][1].add(BorderLayout.NORTH, xSpinner[pos][1]);
@@ -2381,7 +2381,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						xSpinner[pos][1].setVisible(false);
 					}
 					if(ySpinner[pos][1] == null) {
-						ySpinner[pos][1] = new JSpinner(new SpinnerNumberModel(((MultiFileInfoVirtualStack)impBs[pos].getStack()).getdYB(), -impBs[pos].getHeight(), impBs[pos].getHeight(), 1));
+						ySpinner[pos][1] = new JSpinner(new SpinnerNumberModel(((VirtualStack)impBs[pos].getStack()).getdYB(), -impBs[pos].getHeight(), impBs[pos].getHeight(), 1));
 						ySpinner[pos][1].setToolTipText("Adjust Channel Y Alignment ViewB");
 						ySpinner[pos][1].addChangeListener(this);
 						spinnerPanel[pos][1].add(BorderLayout.CENTER, ySpinner[pos][1]);
@@ -2392,7 +2392,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				}
 				
 				if(zSpinner[pos][0] == null) {
-					zSpinner[pos][0] = new JSpinner(new SpinnerNumberModel(((MultiFileInfoVirtualStack)impAs[pos].getStack()).getdZA(), -impAs[pos].getNSlices(), impAs[pos].getNSlices(), 1));
+					zSpinner[pos][0] = new JSpinner(new SpinnerNumberModel(((VirtualStack)impAs[pos].getStack()).getdZA(), -impAs[pos].getNSlices(), impAs[pos].getNSlices(), 1));
 					zSpinner[pos][0].setToolTipText("Adjust Channel Z Alignment ViewA");
 					zSpinner[pos][0].addChangeListener(this);
 					spinnerPanel[pos][0].add(BorderLayout.SOUTH, zSpinner[pos][0]);
@@ -2403,7 +2403,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				diSPIMPanel[pos][0].add(BorderLayout.CENTER, spinnerPanel[pos][0]);
 				
 				if(zSpinner[pos][1] == null) {
-					zSpinner[pos][1] = new JSpinner(new SpinnerNumberModel(((MultiFileInfoVirtualStack)impAs[pos].getStack()).getdZB(), -impBs[pos].getNSlices(), impBs[pos].getNSlices(), 1));
+					zSpinner[pos][1] = new JSpinner(new SpinnerNumberModel(((VirtualStack)impAs[pos].getStack()).getdZB(), -impBs[pos].getNSlices(), impBs[pos].getNSlices(), 1));
 					zSpinner[pos][1].setToolTipText("Adjust Channel Z Alignment ViewB");
 					zSpinner[pos][1].addChangeListener(this);
 					spinnerPanel[pos][1].add(BorderLayout.SOUTH, zSpinner[pos][1]);
