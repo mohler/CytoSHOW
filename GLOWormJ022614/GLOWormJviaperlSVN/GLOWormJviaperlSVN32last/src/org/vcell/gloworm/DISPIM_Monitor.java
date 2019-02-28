@@ -6415,8 +6415,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 
 
-	public void readInMMdiSPIMheader(File dirOrOMETiffFile)
-			throws NumberFormatException {
+	public void readInMMdiSPIMheader(File dirOrOMETiffFile) throws NumberFormatException {
 		String diSPIMheader = "";
 		if (dirOrOMETiffFile.isDirectory()) {
 			for (String fileName:dirOrOMETiffFile.list()) {
@@ -6440,6 +6439,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					break;
 				}
 			}
+		} else if (new File(dirOrOMETiffFile.getParent()+File.separator+"metadata.txt").canRead()){
+			diSPIMheader = open_diSPIMmetadatatxtAsString(dirOrOMETiffFile.getAbsolutePath());
 		} else {
 			diSPIMheader = open_diSPIMheaderAsString(dirOrOMETiffFile.getAbsolutePath());
 		}
@@ -6838,6 +6839,44 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			}
 		}
 	}
+	
+	public String open_diSPIMmetadatatxtAsString(String path) {
+		IJ.log(path);
+		if (path==null || path.equals("")) {
+			OpenDialog od = new OpenDialog("Open Text File", "");
+			String directory = od.getDirectory();
+			String name = od.getFileName();
+			if (name==null) return null;
+			path = directory + name;
+		}
+		String str = "";
+		File file = new File(path);
+		if (!file.exists())
+			return "Error: file not found";
+		try {
+			StringBuffer sb = new StringBuffer(5000);
+			BufferedReader r = new BufferedReader(new FileReader(file));
+			String s ="";
+			while (!s.contains("\"Positions\":")) {
+				//			for (int l=0;l<2;l++) {
+				s=r.readLine();
+				//				IJ.log(s);
+				if (s==null){
+					break;
+				}else{
+					IJ.log(s);
+					sb.append(s+"\n");
+				}
+			}
+			r.close();
+			str = new String(sb);
+		}
+		catch (Exception e) {
+			str = "Error: "+e.getMessage();
+		}
+		return str;
+	}
+
 
 	public Polygon rotatePolygon(Polygon p1, double angle) {
 		double theta = angle * Math.PI / 180;
