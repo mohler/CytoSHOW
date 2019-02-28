@@ -1585,18 +1585,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 //										+ " display=Composite");
 //				// IJ.getImage().setTitle("SPIMA: "+IJ.getImage().getTitle());
 				ImagePlus impTmpA =  WindowManager.getCurrentImage();
-//				impTmpA.getWindow().setVisible(false);
-				
-				impAs[0].setStack(new VirtualStack(impTmpA.getWidth(), impTmpA.getHeight(), null, dirOrOMETiff, false, null), wavelengths, zSlices, (int)(Math.floor(newLength/ (wavelengths * 2 * zSlices))));
-				((VirtualStack)impAs[0].getStack()).setBitDepth(16);
-				String[] list = (new File(dirOrOMETiff)).list();
-				for (int slice=1; slice<=newLength; slice++) {
-					((VirtualStack)impAs[0].getStack()).addSlice(list[slice]);
-				}
+				impTmpA.getWindow().setVisible(false);
+				impAs[0] = new ImagePlus();
+				impAs[0].setStack(impTmpA.getStack());
 				impAs[0].setOpenAsHyperStack(true);
 				impAs[0].setDimensions(wavelengths, zSlices, (int)(Math.floor(newLength/ (wavelengths * 2 * zSlices))));
 				impAs[0].show();
-				
+				impTmpA.hide();
 				Calibration calA = impAs[0].getCalibration();
 				calA.pixelWidth = vWidth;
 				calA.pixelHeight = vHeight;
@@ -1625,15 +1620,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 //				// IJ.getImage().setTitle("SPIMB: "+IJ.getImage().getTitle());
 				ImagePlus impTmpB =  WindowManager.getCurrentImage();
 				impTmpB.getWindow().setVisible(false);
-				impBs[0].setStack(new VirtualStack(impTmpB.getWidth(), impTmpB.getHeight(), null, dirOrOMETiff, false, null), wavelengths, zSlices, (int)(Math.floor(newLength/ (wavelengths * 2 * zSlices))));
-				((VirtualStack)impBs[0].getStack()).setBitDepth(16);
-				list = (new File(dirOrOMETiff)).list();
-				for (int slice=1; slice<=newLength; slice++) {
-					((VirtualStack)impBs[0].getStack()).addSlice(list[slice]);
-				}
+				impBs[0] = new ImagePlus();
+				impBs[0].setStack(impTmpB.getStack());
 				impBs[0].setOpenAsHyperStack(true);
 				impBs[0].setDimensions(wavelengths, zSlices, (int)(Math.floor(newLength/ (wavelengths * 2 * zSlices))));
 				impBs[0].show();
+				impTmpB.hide();
 
 				Calibration calB = impBs[0].getCalibration();
 				calB.pixelWidth = vWidth;
