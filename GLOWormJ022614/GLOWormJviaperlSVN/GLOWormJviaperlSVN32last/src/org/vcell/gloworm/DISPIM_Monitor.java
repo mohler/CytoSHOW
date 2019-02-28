@@ -5021,9 +5021,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 							String saveDFPath = savePath;
 							while (!(new File(saveDFPath  + "CropBkgdSub" + File.separator + "SPIMA"+pos+"-"+f+"-1_1.tif").canRead()) ||
-									!(new File(saveDFPath + "CropBkgdSub" + File.separator + "SPIMA"+pos+"-"+f+"-2_1.tif").canRead()) ||
+									(wavelengths>=2 && !(new File(saveDFPath + "CropBkgdSub" + File.separator + "SPIMA"+pos+"-"+f+"-2_1.tif").canRead())) ||
 									!(new File(saveDFPath + "CropBkgdSub" + File.separator + "SPIMB"+pos+"-"+f+"-1_1.tif").canRead()) ||
-									!(new File(saveDFPath + "CropBkgdSub" + File.separator + "SPIMB"+pos+"-"+f+"-2_1.tif").canRead()) ){
+									(wavelengths>=2 && !(new File(saveDFPath + "CropBkgdSub" + File.separator + "SPIMB"+pos+"-"+f+"-2_1.tif").canRead())) ){
 								IJ.wait(100);
 							}
 							double pwA = impAs[pos].getCalibration().pixelWidth;
