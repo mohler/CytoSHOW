@@ -1470,7 +1470,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					impBs[pos].show();
 				}
 			} else if (dirOrOMETiff.matches(".*_\\d{9}_\\d{3}_.*.tif")) {
-				readInMMdiSPIMheader(new File (dirOrOMETiffFile.getParent()+File.separator+"metadata.txt"));
+//				readInMMdiSPIMheader(new File (dirOrOMETiffFile.getParent()+File.separator+"metadata.txt"));
 
 //				//Reading in diSPIM header from MM tiffs ^^^^^^
 //
