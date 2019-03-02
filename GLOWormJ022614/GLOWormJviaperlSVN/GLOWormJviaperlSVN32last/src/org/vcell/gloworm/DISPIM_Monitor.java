@@ -1351,7 +1351,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 					int stackSizeA = impAs[pos].getImageStackSize();
 //					int nChannels = cDim/(dimOrder=="xySplitCzt"?1:vDim);
-					int nChannelsA = ((MultiFileInfoVirtualStack)impAs[pos].getStack()).cDim;
+					int nChannelsA = ((MultiFileInfoVirtualStack)impAs[pos].getStack()).cDim /((MultiFileInfoVirtualStack)impAs[pos].getStack()).vDim;
 					int nSlicesA = ((MultiFileInfoVirtualStack)impAs[pos].getStack()).zDim;
 					int nFramesA = ((MultiFileInfoVirtualStack)impAs[pos].getStack()).tDim;
 					//					dirOrOMETiff = ((MultiFileInfoVirtualStack)impAs[pos].getStack()).getFivStacks().get(0).getInfo()[pos].directory +
