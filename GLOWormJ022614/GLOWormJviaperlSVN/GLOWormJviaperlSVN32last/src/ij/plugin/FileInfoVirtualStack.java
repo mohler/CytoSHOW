@@ -216,6 +216,7 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 			infoArray[n-1].nImages = 1; 
 			FileOpener fo = new FileOpener(infoArray[n-1]);
 			imp = fo.open(false);
+			
 		}
 		if (imp!=null) {
 			ImageProcessor ip = imp.getProcessor();
