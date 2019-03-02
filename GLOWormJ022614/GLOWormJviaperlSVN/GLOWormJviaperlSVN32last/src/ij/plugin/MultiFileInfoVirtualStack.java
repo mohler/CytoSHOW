@@ -41,7 +41,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	public int  cDim;
 	public int zDim;
 	public int tDim;
-	private int  vDim=1;
+	public int  vDim=1;
 	public int stackNumber;
 	public int sliceNumber;
 	private boolean isViewB;
@@ -212,11 +212,17 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					if (tValue > highT)
 						highT = tValue;
 				}
+				if (subFileName.matches("SPIM.-\\d+.tif")) {
+					int tValue = Integer.parseInt(subFileName.replaceAll("SPIM.-(\\d+).tif", "$1"));
+					if (tValue > highT)
+						highT = tValue;
+				}
 				if (subFileName.matches("max._\\d+_\\d+.tif")) {
 					int tValue = Integer.parseInt(subFileName.replaceAll("max._\\d+_(\\d+).tif", "$1"));
 					if (tValue > highT)
 						highT = tValue;
 				}
+
 				if (highT > 0)
 					dimOrder = "xyztc";
 			}
@@ -611,7 +617,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 						imp.getStack().addSlice(imp.getProcessor().createProcessor(imp.getWidth(), imp.getHeight()));
 				}
 			} else if (cztDims < impSize) {
-				for (int a=imp.getStackSize();a>cDim*zDim*tDim;a--) {
+				for (int a=impSize;a>cztDims;a--) {
 					imp.getStack().deleteSlice(a);
 				}
 			}else {
@@ -752,7 +758,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 		ImageProcessor ip = null;
 		if (dimOrder == "xyczt") {
-			vSliceNumber = (sliceNumber)+(isViewB?fivStacks.get(stackNumber).getSize()/vDim:0);
+			//vSliceNumber = (sliceNumber)+(isViewB?fivStacks.get(stackNumber).getSize()/vDim:0); //worked ever?///
+			vSliceNumber = (sliceNumber)+(isViewB?zDim*cDim/vDim:0);  //WORKS 02012019 for Mark's old megatiff
+
 			//ADJUSTMENTS BELOW DEAL WITH CALLING RG CHANNELS CORRECTLY
 			//I DO NOT FULLY UNDERSTAND HOW OR WHY IT WORKS!!!???
 //			if (vSliceNumber%2 == 0) {
