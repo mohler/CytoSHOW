@@ -2,8 +2,13 @@ package marchingcubes;
 
 import java.util.List;
 import java.util.ArrayList;
+
 import javax.vecmath.Point3f;
+
 import ij.IJ;
+import ij.gui.Roi;
+import ij.gui.ShapeRoi;
+import ij.plugin.frame.RoiManager;
 import ij3d.Volume;
 
 import java.awt.Polygon;
@@ -12,6 +17,7 @@ import java.awt.Shape;
 import java.awt.geom.Area;
 import java.awt.geom.PathIterator;
 import java.util.HashMap;
+
 import mpicbg.imglib.container.shapelist.ShapeList;
 import ij3d.ImgLibVolume;
 
@@ -30,7 +36,7 @@ public final class MCCube {
 		for(int i = 0; i < 12; i++)
 			e[i] = new Point3f();
 	}
-	
+
 	/**
 	 * initializes a MCCube object
 	 *        _________           0______x
@@ -50,7 +56,7 @@ public final class MCCube {
 		v[6].set(x + 1, y + 1, z + 1);
 		v[7].set(x,     y + 1, z + 1);
 	} 
-	
+
 	/**
 	 * computes the interpolated point along a specified whose 
 	 * intensity equals the reference value
@@ -61,8 +67,8 @@ public final class MCCube {
 	 * @return false if the interpolated point is beyond edge boundaries
 	 */
 	private boolean computeEdge(Point3f v1, int i1,
-				    Point3f v2, int i2,
-				    Point3f result, final Carrier car) {
+			Point3f v2, int i2,
+			Point3f result, final Carrier car) {
 
 		// 30 --- 50 --- 70 : t=0.5
 		// 70 --- 50 --- 30 : t=0.5
@@ -102,18 +108,18 @@ public final class MCCube {
 		this.computeEdge(v[1], i1, v[2], i2, e[1], car);
 		this.computeEdge(v[2], i2, v[3], i3, e[2], car);
 		this.computeEdge(v[3], i3, v[0], i0, e[3], car);
-		
+
 		this.computeEdge(v[4], i4, v[5], i5, e[4], car);
 		this.computeEdge(v[5], i5, v[6], i6, e[5], car);
 		this.computeEdge(v[6], i6, v[7], i7, e[6], car);
 		this.computeEdge(v[7], i7, v[4], i4, e[7], car);
-		
+
 		this.computeEdge(v[0], i0, v[4], i4, e[8], car);
 		this.computeEdge(v[1], i1, v[5], i5, e[9], car);
 		this.computeEdge(v[3], i3, v[7], i7, e[10], car);
 		this.computeEdge(v[2], i2, v[6], i6, e[11], car);
 	}
-	
+
 	/**
 	 * indicates if a number corresponds to an ambigous case
 	 * @param n number of the case to test
@@ -121,12 +127,12 @@ public final class MCCube {
 	 */
 	private static boolean isAmbigous(int n) {
 		boolean result = false;
-	        for (int index = 0; index < MCCube.ambigous.length; index++) {
+		for (int index = 0; index < MCCube.ambigous.length; index++) {
 			result |= MCCube.ambigous[index] == n;
 		}
 		return result;
 	}
-	
+
 	private void getTriangles(List<Point3f> list, final Carrier car){
 		int cn = caseNumber(car);
 		boolean directTable = !(isAmbigous(cn));
@@ -153,11 +159,11 @@ public final class MCCube {
 	private int caseNumber(final Carrier car) {
 		int caseNumber = 0;
 		for (int index = -1; 
-			++index < v.length; 
-			caseNumber += 
-				(car.intensity(v[index]) - car.threshold > 0) 
-					? 1 << index
-					: 0);
+				++index < v.length; 
+				caseNumber += 
+						(car.intensity(v[index]) - car.threshold > 0) 
+						? 1 << index
+								: 0);
 		return caseNumber;
 	}
 
@@ -171,7 +177,7 @@ public final class MCCube {
 
 		final int intensity(final Point3f p) {
 			if(p.x < 0 || p.y < 0 || p.z < 0
-				|| p.x >= w || p.y >= h || p.z >= d)
+					|| p.x >= w || p.y >= h || p.z >= d)
 				return 0;
 			return volume.load((int)p.x, (int)p.y, (int)p.z);
 		}
@@ -195,6 +201,8 @@ public final class MCCube {
 
 		if (volume instanceof ImgLibVolume && ((ImgLibVolume)volume).getImage().getContainer() instanceof ShapeList) {
 			getShapeListImageTriangles((ImgLibVolume)volume, car, tri);
+		} else if (IJ.getInstance().getTitle().startsWith("CytoSHOW")) {
+			getCytoSHOWImageTriangles(volume, car, tri, volume.getImagePlus().getTitle().split("_| ")[1]);
 		} else {
 			MCCube cube = new MCCube();
 			for(int z = -1; z < car.d+1; z+=1){
@@ -260,17 +268,17 @@ public final class MCCube {
 			final float[] coords = new float[6];
 			for (final PathIterator pit = scanAreas[i].getPathIterator(null); !pit.isDone(); pit.next()) {
 				switch (pit.currentSegment(coords)) {
-					case PathIterator.SEG_MOVETO:
-					case PathIterator.SEG_LINETO:
-						pol.addPoint((int)coords[0], (int)coords[1]);
-						break;
-					case PathIterator.SEG_CLOSE:
-						bs.add(pol.getBounds());
-						pol = new Polygon();
-						break;
-					default:
-						System.out.println("WARNING: unhandled seg type.");
-						break;
+				case PathIterator.SEG_MOVETO:
+				case PathIterator.SEG_LINETO:
+					pol.addPoint((int)coords[0], (int)coords[1]);
+					break;
+				case PathIterator.SEG_CLOSE:
+					bs.add(pol.getBounds());
+					pol = new Polygon();
+					break;
+				default:
+					System.out.println("WARNING: unhandled seg type.");
+					break;
 				}
 			}
 			sectionBounds.put(i, bs);
@@ -298,6 +306,87 @@ public final class MCCube {
 			IJ.showProgress(z, car.d-2);
 		}
 	}
+
+	private static final void getCytoSHOWImageTriangles(final Volume volume, final Carrier car, final List<Point3f> tri, String name) {
+		final RoiManager rm = volume.getImagePlus().getMotherImp().getRoiManager();
+		final Roi[] selRois = rm.getSelectedRoisAsArray();
+		final ArrayList<Area> sectionAreas = new ArrayList<Area>();
+		// Create one Area for each section, composed of the addition of all Shape instances
+
+		int next = -1;
+
+
+		ArrayList<Roi> rbnm =rm.getROIsByName().get("\""+name+" \"");
+		for(int z=1; z<=volume.getImagePlus().getNSlices(); z++){
+			final Area a = new Area();
+			for (Roi rbnRoi:rbnm){
+				if (rbnRoi.getZPosition() == z){
+					a.add(new Area(new ShapeRoi(rbnRoi).getShape()));
+				}
+			}
+			sectionAreas.add(a);
+		}
+
+
+		// Fuse Area instances for previous and next sections
+		final Area[] scanAreas = new Area[sectionAreas.size()];
+		for (int i=0; i<sectionAreas.size(); i++) {
+			if (null == sectionAreas.get(i)) continue;
+			final Area a = new Area(sectionAreas.get(i));
+			if (i-1 < 0 || null == sectionAreas.get(i-1)) {}
+			else a.add(sectionAreas.get(i-1));
+			if (i+1 > sectionAreas.size() -1 || null == sectionAreas.get(i+1)) {}
+			else a.add(sectionAreas.get(i+1));
+			scanAreas[i] = a;
+		}
+		// Collect the bounds of all subareas in each scanArea:
+		final HashMap<Integer,ArrayList<Rectangle>> sectionBounds = new HashMap<Integer,ArrayList<Rectangle>>();
+		for (int i=0; i<scanAreas.length; i++) {
+			if (null == scanAreas[i]) continue;
+			final ArrayList<Rectangle> bs = new ArrayList<Rectangle>();
+			Polygon pol = new Polygon();
+			final float[] coords = new float[6];
+			for (final PathIterator pit = scanAreas[i].getPathIterator(null); !pit.isDone(); pit.next()) {
+				switch (pit.currentSegment(coords)) {
+				case PathIterator.SEG_MOVETO:
+				case PathIterator.SEG_LINETO:
+					pol.addPoint((int)coords[0], (int)coords[1]);
+					break;
+				case PathIterator.SEG_CLOSE:
+					bs.add(pol.getBounds());
+					pol = new Polygon();
+					break;
+				default:
+					System.out.println("WARNING: unhandled seg type.");
+					break;
+				}
+			}
+			sectionBounds.put(i, bs);
+		}
+
+		// Add Z paddings on top and bottom
+		sectionBounds.put(-1, sectionBounds.get(0));
+		sectionBounds.put(car.d, sectionBounds.get(car.d-1));
+
+		// Scan only relevant areas:
+		final MCCube cube = new MCCube();
+		for (int z = -1; z < car.d + 1; z += 1) {
+			final ArrayList<Rectangle> bs = sectionBounds.get(z);
+			if (null == bs || bs.isEmpty()) continue;
+			for (final Rectangle bounds : bs) {
+				for (int x = bounds.x -1; x < bounds.x + bounds.width +2; x+=1) {
+					for (int y = bounds.y -1; y < bounds.y + bounds.height +2; y+=1) {
+						cube.init(x, y, z);
+						cube.computeEdges(car);
+						cube.getTriangles(tri, car);
+					}
+				}
+			}
+
+			IJ.showProgress(z, car.d-2);
+		}
+	}
+
 
 	protected static final int ambigous[] = {
 		250,
@@ -364,7 +453,7 @@ public final class MCCube {
 
 	// triangles to be drawn in each case
 	private static final int faces[] =
-	{
+		{
 		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 		0, 8, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 		0, 1, 9, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -621,5 +710,5 @@ public final class MCCube {
 		0, 9, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 		0, 3, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
-	};
+		};
 }

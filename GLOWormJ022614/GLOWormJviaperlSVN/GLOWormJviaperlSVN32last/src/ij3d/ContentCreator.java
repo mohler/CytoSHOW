@@ -155,10 +155,14 @@ public class ContentCreator {
 	 */
 	public static ImagePlus[] getImages(ImagePlus imp) {
 		ImagePlus[] ret = new ImagePlus[imp.getNFrames()];
-		int i = 0;
-		for(ImagePlus frame : HyperStackIterator.getIterable(imp)) {
+		if (ret.length ==1){
+			ret[0] = imp;
+		} else {
+			int i = 0;
+			for(ImagePlus frame : HyperStackIterator.getIterable(imp)) {
 
-			ret[i++] = frame;			
+				ret[i++] = frame;			
+			}
 		}
 		return ret;
 	}
