@@ -1,5 +1,6 @@
 package marchingcubes;
 
+import java.util.Hashtable;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -227,7 +228,7 @@ public final class MCCube {
 		return tri;
 	}
 	//WOW HERE IS (BASICALLY) WHAT i have been seeking but requires imgLib as is!!!!
-	//CAN PROBABLY SPEED UP MCCube.getTri by windowing on ROI bounds from TagManager...
+	//CAN PROBABLY SPEED UP MCCube.getTri by windowing on ROI bounds from TagManager...See below
 	/** Identical to getTriangles, but iterates only the minimal necessary bounding box, by asking the shapes objects. */
 	private static final void getShapeListImageTriangles(final ImgLibVolume volume, final Carrier car, final List<Point3f> tri) {
 		final ShapeList sli = (ShapeList) volume.getImage().getContainer();
@@ -308,62 +309,30 @@ public final class MCCube {
 	}
 
 	private static final void getCytoSHOWImageTriangles(final Volume volume, final Carrier car, final List<Point3f> tri, String name) {
-		final RoiManager rm = volume.getImagePlus().getMotherImp().getRoiManager();
-		final Roi[] selRois = rm.getSelectedRoisAsArray();
-		final ArrayList<Area> sectionAreas = new ArrayList<Area>();
-		// Create one Area for each section, composed of the addition of all Shape instances
+		final RoiManager rm = volume.getImagePlus().getRoiManager();
+		final Hashtable<String, ArrayList<Roi>> roisByNum = rm.getROIsByNumbers();
 
-		int next = -1;
-
-
-		ArrayList<Roi> rbnm =rm.getROIsByName().get("\""+name+" \"");
-		for(int z=1; z<=volume.getImagePlus().getNSlices(); z++){
-			final Area a = new Area();
-			for (Roi rbnRoi:rbnm){
-				if (rbnRoi.getZPosition() == z){
-					a.add(new Area(new ShapeRoi(rbnRoi).getShape()));
-				}
-			}
-			sectionAreas.add(a);
-		}
-
-
-		// Fuse Area instances for previous and next sections
-		final Area[] scanAreas = new Area[sectionAreas.size()];
-		for (int i=0; i<sectionAreas.size(); i++) {
-			if (null == sectionAreas.get(i)) continue;
-			final Area a = new Area(sectionAreas.get(i));
-			if (i-1 < 0 || null == sectionAreas.get(i-1)) {}
-			else a.add(sectionAreas.get(i-1));
-			if (i+1 > sectionAreas.size() -1 || null == sectionAreas.get(i+1)) {}
-			else a.add(sectionAreas.get(i+1));
-			scanAreas[i] = a;
-		}
-		// Collect the bounds of all subareas in each scanArea:
+		// Collect the bounds of all rois in each slice:
 		final HashMap<Integer,ArrayList<Rectangle>> sectionBounds = new HashMap<Integer,ArrayList<Rectangle>>();
-		for (int i=0; i<scanAreas.length; i++) {
-			if (null == scanAreas[i]) continue;
-			final ArrayList<Rectangle> bs = new ArrayList<Rectangle>();
-			Polygon pol = new Polygon();
-			final float[] coords = new float[6];
-			for (final PathIterator pit = scanAreas[i].getPathIterator(null); !pit.isDone(); pit.next()) {
-				switch (pit.currentSegment(coords)) {
-				case PathIterator.SEG_MOVETO:
-				case PathIterator.SEG_LINETO:
-					pol.addPoint((int)coords[0], (int)coords[1]);
-					break;
-				case PathIterator.SEG_CLOSE:
-					bs.add(pol.getBounds());
-					pol = new Polygon();
-					break;
-				default:
-					System.out.println("WARNING: unhandled seg type.");
-					break;
-				}
-			}
-			sectionBounds.put(i, bs);
-		}
+		{
+			int next = -1;
 
+
+			for(int z=1; z<=volume.getImagePlus().getNSlices(); z++){
+				next++;
+				ArrayList<Roi> roisZ = roisByNum.get("1_"+z+"_1");
+				if (roisZ==null || roisZ.isEmpty()) {
+					continue;
+				}
+				final ArrayList<Rectangle> bs = new ArrayList<Rectangle>();
+				for (Roi roi:roisZ){
+					if (roi!=null){
+						bs.add(roi.getBounds());					
+					}
+				}
+				sectionBounds.put(volume.getImagePlus().getNSlices()+1-z, bs);
+			}
+		}
 		// Add Z paddings on top and bottom
 		sectionBounds.put(-1, sectionBounds.get(0));
 		sectionBounds.put(car.d, sectionBounds.get(car.d-1));
@@ -385,6 +354,7 @@ public final class MCCube {
 
 			IJ.showProgress(z, car.d-2);
 		}
+		IJ.showProgress(car.d-2, car.d-2);
 	}
 
 
