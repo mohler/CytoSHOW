@@ -22,6 +22,7 @@ import ij3d.ColorTable;
 import ij3d.Content;
 import ij3d.Image3DUniverse;
 import ij3d.ImageJ3DViewer;
+import isosurface.MeshExporter;
 
 
 public class MQTVS_VolumeViewer  implements PlugIn {
@@ -165,6 +166,25 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 //					}
 					Hashtable<String, Content> contents = univ.getContentsHT();
 					univ.addContent(impD, new Color3f(channelColor), objectName, threshold, new boolean[]{true, true, true}, binFactor, Content.SURFACE);
+					univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
+					Content sel = univ.getSelected();
+					try {
+						float r = Integer.parseInt(""+channelColor.getRed()) / 256f;
+						float g = Integer.parseInt(""+channelColor.getGreen()) / 256f;
+						float b = Integer.parseInt(""+channelColor.getBlue()) / 256f;
+						if(univ != null && univ.getSelected() != null) {
+							sel.setColor(new Color3f(r, g, b));
+						}
+					} catch(NumberFormatException e) {
+						sel.setColor(null);
+					}
+					univ.getSelected().setLocked(true);
+					if (singleSave) {
+						MeshExporter.saveAsWaveFront(univ.getContents(), new File((IJ.getDirectory("home")+File.separator+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"+objectName.replaceAll(":","").replaceAll("(/|\\s+)","")+"_"+ch+"_"+tpt+".obj")), univ.getStartTime(), univ.getEndTime());
+						univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
+						univ.getSelected().setLocked(false);
+						univ.removeContent(univ.getSelected().getName());
+					}
 					for (Object content:contents.values()){
 						if (((Content)content).getName() != objectName){
 							((Content)content).setVisible(false);
