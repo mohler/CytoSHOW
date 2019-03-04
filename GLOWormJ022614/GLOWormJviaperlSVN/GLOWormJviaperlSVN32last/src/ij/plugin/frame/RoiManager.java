@@ -1008,6 +1008,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			sketchImp.flush();
 			sketchImp=null;
 			ImageJ3DViewer.select(null);
+			Runtime.getRuntime().gc();
 		}
 		Image3DUniverse univ = vv.getUniv();
 		
