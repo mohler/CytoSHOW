@@ -1971,8 +1971,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						String[] pathChunks = filePath.split("/");
 						String nameChunk = pathChunks[pathChunks.length-1];
 						String fvalue = nameChunk.replaceAll("(.*_)(\\d+)(.tiff?)", "$2");
-						sliceValues.add(Integer.parseInt(fvalue)
-										+ ((sLayer.split("file_path=")[1].split("\"")[1]).contains("VC_")?maxBaseSlice+1:0));
+						sliceNumber = Integer.parseInt(fvalue)
+								+ ((sLayer.split("file_path=")[1].split("\"")[1]).contains("VC_")?maxBaseSlice+1:0);
 						sConnLayerHash.put(sLayer.split("\"")[0], ""+sliceNumber);
 						String[] coordStrings = areaString.replaceAll("M", "").split(" L ");
 						int[] xCoords = new int[coordStrings.length];
