@@ -308,6 +308,8 @@ public final class MCCube {
 		}
 	}
 
+	
+	//THIS WORKS INCREDIBLY FAST!!
 	private static final void getCytoSHOWImageTriangles(final Volume volume, final Carrier car, final List<Point3f> tri, String name) {
 		final RoiManager rm = volume.getImagePlus().getRoiManager();
 		final Hashtable<String, ArrayList<Roi>> roisByNum = rm.getROIsByNumbers();

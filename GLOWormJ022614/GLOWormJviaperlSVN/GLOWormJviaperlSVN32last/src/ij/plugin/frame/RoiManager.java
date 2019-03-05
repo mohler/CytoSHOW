@@ -40,6 +40,8 @@ import ij.plugin.Colors;
 import ij.plugin.DragAndDrop;
 import ij.plugin.Orthogonal_Views;
 import ij.plugin.RGBStackMerge;
+import ij.plugin.RoiEnlarger;
+import ij.plugin.Selection;
 import ij.plugin.StackReverser;
 import ij.util.*;
 import ij.macro.*;
@@ -357,6 +359,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		addPopupItem("Realign by Parameters");
 		addPopupItem("Auto-advance when tagging");
 		addPopupItem("StarryNiteImporter");
+		addPopupItem("Map Neighbors");
 		add(pm);
 	}
 
@@ -909,6 +912,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			else if (command.equals("StarryNiteImporter")) {
 				importStarryNiteNuclei("");
+			}
+			else if (command.equals("Map Neighbors")) {
+				mapNearNeighborContacts();
 			}
 
 			this.imp.getCanvas().requestFocus();
@@ -5805,4 +5811,24 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		this.roiRescaleFactor = roiRescaleFactor;
 	} 
 
+	public void mapNearNeighborContacts(){
+		Roi[] selRois = this.getSelectedRoisAsArray();
+		Roi[] shownRois = this.getShownRoisAsArray();
+		for (Roi roi:selRois){
+			int zPos = roi.getZPosition();
+			Roi dupRoi = (Roi)roi.clone();
+			for (Roi testRoi:shownRois){
+				if (zPos!=testRoi.getZPosition() || testRoi==roi){
+					continue;
+				}
+				String andName=""+roi.getName()+"<"+testRoi.getName();
+				testRoi = RoiEnlarger.enlarge(testRoi, 4);
+				Roi andRoi = (new ShapeRoi(testRoi).and(new ShapeRoi(dupRoi)));
+				if (andRoi!=null && andRoi.getBounds().getWidth()>0){
+					andRoi.setName(andName);
+					this.add(imp,andRoi,-1);
+				}
+			}
+		}
+	}
 }
