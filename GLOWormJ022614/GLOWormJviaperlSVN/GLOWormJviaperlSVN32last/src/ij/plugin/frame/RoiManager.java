@@ -1905,7 +1905,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		for (int sl=1; sl< sLayers.length; sl++) {
 			String sLayer=sLayers[sl];
-			sliceValues.add(Integer.parseInt(sLayer.split("file_path=")[1].split("\"")[1].replaceAll(".*_", "").replaceAll(".tiff*", "").replaceAll("(.*)(\\d+)(.*)", "$2"))
+			String filePath = sLayer.split("file_path=")[1].split("\"")[1];
+			String[] pathChunks = filePath.split("/");
+			String nameChunk = pathChunks[pathChunks.length-1];
+			String fvalue = nameChunk.replaceAll("(.*_)(\\d+)(.tiff?)", "$2");
+			sliceValues.add(Integer.parseInt(fvalue)
 					- ((sLayer.split("file_path=")[1].split("\"")[1]).contains("VC_")?10000000:0));
 			
 		}
@@ -1963,8 +1967,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				for (int rep=1; rep<maxReps; rep++) {
 					areaString = cellAreaHash.get(cellName+"_"+fillColor+"_"+sLayer.split("\"")[0]+"_"+rep);
 					if (areaString != null) {
-						sliceNumber = Integer.parseInt(sLayer.split("file_path=")[1].split("\"")[1].replaceAll(".*_", "").replaceAll("(.*)(\\d{3})(\\.tiff*)", "$2"))
-										+ ((sLayer.split("file_path=")[1].split("\"")[1]).contains("VC_")?maxBaseSlice+1:0);
+						String filePath = sLayer.split("file_path=")[1].split("\"")[1];
+						String[] pathChunks = filePath.split("/");
+						String nameChunk = pathChunks[pathChunks.length-1];
+						String fvalue = nameChunk.replaceAll("(.*_)(\\d+)(.tiff?)", "$2");
+						sliceValues.add(Integer.parseInt(fvalue)
+										+ ((sLayer.split("file_path=")[1].split("\"")[1]).contains("VC_")?maxBaseSlice+1:0));
 						sConnLayerHash.put(sLayer.split("\"")[0], ""+sliceNumber);
 						String[] coordStrings = areaString.replaceAll("M", "").split(" L ");
 						int[] xCoords = new int[coordStrings.length];
