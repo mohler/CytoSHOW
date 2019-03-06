@@ -5838,7 +5838,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				Roi[] sameSliceRois = this.getROIsByNumbers().get(""+cPos+"_"+zPos+"_"+tPos).toArray(new Roi[1]);
 				for (Roi testRoi:sameSliceRois){
 					if (zPos!=testRoi.getZPosition() || queryRoi.getName().split("\"")[1].equalsIgnoreCase(testRoi.getName().split("\"")[1])
-							|| testRoi.getName().split("\"")[1].trim().startsWith(""+queryRoi.getName().split("\"")[1].trim()+"by")){
+							|| testRoi.getName().split("\"")[1].trim().contains("by")){
 						continue;
 					}
 					Color testColor = testRoi.getFillColor();
