@@ -1165,6 +1165,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		else if (color==null && defaultColor!=null)
 			color = defaultColor;
 		Color fillColor = imp.getRoiFillColor();
+		if (color==null && roi.getFillColor()!=null)
+			fillColor = roi.getFillColor();
+		else if (color==null && defaultColor!=null)
+			fillColor = defaultColor;
 		//		IJ.log(""+imp.getRoiFillColor());
 		if (lineWidth<0) {
 			int sw = (int)roi.getStrokeWidth();
