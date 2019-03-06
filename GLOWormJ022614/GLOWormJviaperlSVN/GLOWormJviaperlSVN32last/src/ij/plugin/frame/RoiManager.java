@@ -1142,14 +1142,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	/** Adds the specified ROI. */
 	public void addRoi(Roi roi) {
-		addRoi(roi, false, null, -1);
+		addRoi(roi, false, null, -1, true);
 	}
 
 	boolean addRoi(boolean promptForName) {
-		return addRoi(null, promptForName, null, -1);
+		return addRoi(null, promptForName, null, -1, true);
 	}
 
-	boolean addRoi(Roi roi, boolean promptForName, Color color, int lineWidth) {
+	boolean addRoi(Roi roi, boolean promptForName, Color color, int lineWidth, boolean addToCurrentImpPosition) {
 		ImagePlus imp = this.imp;
 		if (roi==null) {
 			if (imp==null)
@@ -1204,15 +1204,23 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			String altType = null;
 			if (roi instanceof EllipseRoi) altType = "Ellipse";
 			if (roi instanceof Arrow) altType = "Arrow";
-			if (imp != null) 
+			if (imp != null && addToCurrentImpPosition) {
 				if (roi.getName() != null && roi.getName().split("\"").length>1)
 					label = "\""+roi.getName().split("\"")[1].trim()+" \"" +"_"+ imp.getChannel() +"_"+ imp.getSlice() +"_"+imp.getFrame();
 				else if (roi.getName() != null)
 					label = "\""+roi.getName()+" \"" +"_"+ imp.getChannel() +"_"+ imp.getSlice() +"_"+imp.getFrame();
 				else
 					label = ((altType != null)?altType:roi.getTypeAsString() ) +"_"+ imp.getChannel() +"_"+ imp.getSlice() +"_"+imp.getFrame();
-			else 
+			} else if (roi.getPosition()!=0){
+				if (roi.getName() != null && roi.getName().split("\"").length>1)
+					label = "\""+roi.getName().split("\"")[1].trim()+" \"" +"_"+ roi.getCPosition() +"_"+ roi.getZPosition() +"_"+roi.getTPosition();
+				else if (roi.getName() != null)
+					label = "\""+roi.getName()+" \"" +"_"+ roi.getCPosition() +"_"+ roi.getZPosition() +"_"+roi.getTPosition();
+				else
+					label = ((altType != null)?altType:roi.getTypeAsString() ) +"_"+ roi.getCPosition() +"_"+ roi.getZPosition() +"_"+roi.getTPosition();				
+			}else {
 				label = roi.getName();
+			}
 		}
 		label = getUniqueName(label);
 		if (label==null) return false;
@@ -1220,7 +1228,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		fullListModel.addElement(label);
 		roi.setName(label);
 		recentName = (label);
-		if (imp != null && roi.getPosition()==0)
+		if (imp != null && addToCurrentImpPosition && roi.getPosition()==0)
 			roi.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame());
 		roiCopy = (Roi)roi.clone();
 
@@ -3603,7 +3611,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			addRoi(true);
 		else {
 			Color color = hexColor!=null?Colors.decode(hexColor, Color.cyan):null;
-			addRoi(null, false, color, (int)Math.round(lineWidth));
+			addRoi(null, false, color, (int)Math.round(lineWidth), true);
 		}
 		return true;	
 	}
@@ -5549,7 +5557,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					Roi newOval = new OvalRoi(Integer.parseInt(cellData[5].trim())-Integer.parseInt(cellData[8].trim())/2, Integer.parseInt(cellData[6].trim())-Integer.parseInt(cellData[8].trim())/2, Integer.parseInt(cellData[8].trim()), Integer.parseInt(cellData[8].trim()));
 					newOval.setImage(imp);
 					newOval.setPosition(imp.getChannel(), (int)Double.parseDouble(cellData[7].trim()), frame);
-					addRoi(newOval, false, Color.white, 1);
+					addRoi(newOval, false, Color.white, 1, false);
 					String currID = cellData[0];
 					String prevCell = cellData[2];
 					String[] prevCellThings = null;
@@ -5813,20 +5821,30 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	public void mapNearNeighborContacts(){
 		Roi[] selRois = this.getSelectedRoisAsArray();
-		Roi[] shownRois = this.getShownRoisAsArray();
 		for (Roi roi:selRois){
-			int zPos = roi.getZPosition();
-			Roi dupRoi = (Roi)roi.clone();
-			for (Roi testRoi:shownRois){
-				if (zPos!=testRoi.getZPosition() || testRoi==roi){
+			for (Roi queryRoi:this.getROIsByName().get("\""+roi.getName().split("\"")[1]+"\"")){
+				if (!queryRoi.getName().split("\"")[1].equalsIgnoreCase(roi.getName().split("\"")[1])){
 					continue;
 				}
-				String andName=""+roi.getName()+"<"+testRoi.getName();
-				testRoi = RoiEnlarger.enlarge(testRoi, 4);
-				Roi andRoi = (new ShapeRoi(testRoi).and(new ShapeRoi(dupRoi)));
-				if (andRoi!=null && andRoi.getBounds().getWidth()>0){
-					andRoi.setName(andName);
-					this.add(imp,andRoi,-1);
+				int cPos = queryRoi.getCPosition();
+				int zPos = queryRoi.getZPosition();
+				int tPos = queryRoi.getTPosition();
+				Roi dupRoi = (Roi)queryRoi.clone();
+
+				Roi[] sameSliceRois = this.getROIsByNumbers().get(""+cPos+"_"+zPos+"_"+tPos).toArray(new Roi[1]);
+				for (Roi testRoi:sameSliceRois){
+					if (zPos!=testRoi.getZPosition() || queryRoi.getName().split("\"")[1].equalsIgnoreCase(testRoi.getName().split("\"")[1])){
+						continue;
+					}
+					Color testColor = testRoi.getFillColor();
+					String andName=""+queryRoi.getName().split("\"")[1].trim()+"<<"+testRoi.getName().split("\"")[1].trim();
+					testRoi = RoiEnlarger.enlarge(testRoi, 10);
+					Roi andRoi = (new ShapeRoi(testRoi).and(new ShapeRoi(dupRoi)));
+					if (andRoi!=null && andRoi.getBounds().getWidth()>0){
+						andRoi.setName(andName);
+						andRoi.setPosition(cPos, zPos, tPos);
+						this.addRoi(andRoi, false, testColor, -1, false);
+					}
 				}
 			}
 		}
