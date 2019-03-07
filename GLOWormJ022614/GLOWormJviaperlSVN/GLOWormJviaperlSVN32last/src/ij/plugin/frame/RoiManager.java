@@ -5845,8 +5845,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					}
 					Color testColor = testRoi.getFillColor();
 					String andName=""+queryRoi.getName().split("\"")[1].trim()+"by"+testRoi.getName().split("\"")[1].trim();
-					testRoi = RoiEnlarger.enlarge(testRoi, 3);
-					Roi andRoi = (new ShapeRoi(testRoi).and(new ShapeRoi(dupRoi)));
+//					testRoi = RoiEnlarger.enlarge(testRoi, 3);
+					Roi scaledRoi=null;
+					try {
+						scaledRoi = new RoiDecoder((testRoi.getBounds().getWidth()+3)/testRoi.getBounds().getWidth(), RoiEncoder.saveAsByteArray(testRoi), testRoi.getName()).getRoi();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					Roi andRoi = (new ShapeRoi(scaledRoi).and(new ShapeRoi(dupRoi)));
 					if (andRoi!=null && andRoi.getBounds().getWidth()>0){
 						andRoi.setName(andName);
 						andRoi.setPosition(cPos, zPos, tPos);
