@@ -873,7 +873,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				busy = false;
 				imp.getWindow().sketchVVButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/VV_57282.gif")));
 			}
-			else if (e.getSource() instanceof MenuItem && getColorLegend()!=null) {
+			else if (e.getSource() instanceof MenuItem && ((MenuItem)e.getSource()).getParent() instanceof ColorLegend && getColorLegend()!=null) {
 				if (command != null) {
 					if (command == "Clear Choices") {
 						getColorLegend().actionPerformed(new ActionEvent(getColorLegend().clearButton, ActionEvent.ACTION_PERFORMED, getColorLegend().clearButton.getActionCommand()));
@@ -924,7 +924,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	private void sketchVolumeViewer(Object source) { 
 		boolean singleSave = IJ.shiftKeyDown();
-		double scaleFactor = 0.5;
+		double scaleFactor = 1024d/imp.getWidth();
 		IJ.setForegroundColor(255, 255, 255);
 		IJ.setBackgroundColor(0, 0, 0);
 		if (getSelectedRoisAsArray().length<1)
@@ -957,7 +957,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 			String rootName = rootNames.get(n);
 			sketchImp.setTitle("SketchVolumeViewer_"+rootName);
-			sketchImp.show();
+//			sketchImp.show();
 			sketchImp.getRoiManager().select(-1);
 			IJ.wait(50);
 			if (sketchImp.getRoiManager().getCount()>0){
@@ -984,7 +984,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				nameMatchIndexes[i] = nameMatchIndexArrayList.get(i);
 				nextRoi = ((Roi)rois[nameMatchIndexArrayList.get(i)]);
 				String[] nextChunks = nextRoi.getName().split("_");
-				sketchImp.getWindow().setVisible(true);
+//				sketchImp.getWindow().setVisible(true);
 				int nextSlice = Integer.parseInt(nextChunks[nextChunks.length-2]);
 				int nextFrame = Integer.parseInt(nextChunks[nextChunks.length-1].replaceAll("[CZT]", "").split("-")[0]);
 				sketchImp.setPosition(1, nextSlice, nextFrame);

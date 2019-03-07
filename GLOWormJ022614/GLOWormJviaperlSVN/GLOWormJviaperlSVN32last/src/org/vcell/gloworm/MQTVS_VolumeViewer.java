@@ -71,22 +71,17 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 				}
 			}
 		} else {
-//			IJ.runPlugIn("ImageJ_3D_Viewer", "");
 			ImageJ3DViewer ij3dv = IJ.getIJ3DVInstance();			
 			
 			return;
 		}
 		
-		MQTVS_Duplicator duper = new MQTVS_Duplicator();
-//		if (ij3dv==null) {
-//			ij3dv = IJ.getIJ3DVInstance();
-//		}
-		
+		MQTVS_Duplicator duper = new MQTVS_Duplicator();		
 
 		Roi impRoi = imp.getRoi();
 		if (true /*(imp.getStack().isVirtual() && imp.getNFrames() > 1) || imp.getRoi() != null*/) {
 			
-			imp.getWindow().setVisible(false);
+//			imp.getWindow().setVisible(false);
 			RoiManager rm = imp.getRoiManager();
 			boolean rmWasVis = false;
 			if (rm != null) {
@@ -149,21 +144,7 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 					String objectName = cellName;
 					if (objectName =="")
 						objectName = impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_");
-//					try {
-//						ImageJ3DViewer.add(impD.getTitle(), ColorTable.colorNames[ch+2], ""+objectName/*+"_"+ch+"_"+tpt*/, ""+threshold, "true", "true", "true", ""+binFactor, "2");
-//					} catch (NullPointerException npe) {
-//						ij3dv.run(".");
-//						ImageJ3DViewer.add(impD.getTitle(), ColorTable.colorNames[ch+2], ""+objectName/*+"_"+ch+"_"+tpt*/, ""+threshold, "true", "true", "true", ""+binFactor, "2");
-//					}
-//					ImageJ3DViewer.select(""+objectName/*+"_"+ch+"_"+tpt*/);
-//					ImageJ3DViewer.setColor(""+channelColor.getRed(), ""+channelColor.getGreen(), ""+channelColor.getBlue());
-//					ImageJ3DViewer.lock();
-//					ImageJ3DViewer.exportContent("wavefront", (IJ.getDirectory("home")+File.separator+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"+objectName.replaceAll(":","").replaceAll("(/|\\s+)","")+"_"+ch+"_"+tpt+".obj"));
-//					if (singleSave) {
-//						ImageJ3DViewer.select(""+objectName/*+"_"+ch+"_"+tpt*/);
-//						ImageJ3DViewer.unlock();
-//						ImageJ3DViewer.delete();
-//					}
+//					impD.show();
 					Hashtable<String, Content> contents = univ.getContentsHT();
 					univ.addContent(impD, new Color3f(channelColor), objectName, threshold, new boolean[]{true, true, true}, binFactor, Content.SURFACE);
 					univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
@@ -180,10 +161,12 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 					}
 					univ.getSelected().setLocked(true);
 					if (singleSave) {
-						MeshExporter.saveAsWaveFront(univ.getContents(), new File((IJ.getDirectory("home")+File.separator+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"+objectName.replaceAll(":","").replaceAll("(/|\\s+)","")+"_"+ch+"_"+tpt+".obj")), univ.getStartTime(), univ.getEndTime());
-						univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
-						univ.getSelected().setLocked(false);
-						univ.removeContent(univ.getSelected().getName());
+						Hashtable<String, Content> newestContent = new Hashtable<String, Content>();
+						newestContent.put(""+objectName, univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
+						MeshExporter.saveAsWaveFront(newestContent.values(), new File((IJ.getDirectory("home")+File.separator+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"+objectName.replaceAll(":","").replaceAll("(/|\\s+)","")+"_"+ch+"_"+tpt+".obj")), univ.getStartTime(), univ.getEndTime());
+//						univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
+//						univ.getSelected().setLocked(false);
+//						univ.removeContent(univ.getSelected().getName());
 					}
 					for (Object content:contents.values()){
 						if (((Content)content).getName() != objectName){

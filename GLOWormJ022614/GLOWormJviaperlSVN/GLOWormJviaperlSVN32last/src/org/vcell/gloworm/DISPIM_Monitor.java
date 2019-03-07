@@ -7090,6 +7090,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 		if (e.getActionCommand() == "diSPIM Preview"){
 			IJ.beep();
 			IJ.log("Preview orientation adjustment details saved to disk");
+			
 			String previewFileText = "\n";
 			boolean firstTime = true;
 			if (new File(savePath+"fineRotations.txt").canRead()){
@@ -7105,6 +7106,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				double zRotRead=0;
 				double maxReferenceIntensity = 0;
 				if (ciPrxs[pos] != null && ciPrxs[pos].isVisible()){
+					dispimPreviewButton[pos][0].setVisible(false);
 					xRotRead = (ciPrxs[pos].getSlice()-1)*10;
 					Roi xRoi = ciPrxs[pos].getRoi();
 					if (xRoi != null){
@@ -7118,6 +7120,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					xImp.flush();
 				}
 				if (ciPrys[pos] != null && ciPrys[pos].isVisible()){
+					dispimPreviewButton[pos][1].setVisible(false);
 					if (yRotRead ==0 ){
 						yRotRead = (ciPrys[pos].getSlice()-10)*10;
 					}
@@ -7147,7 +7150,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			}
 			
 //			WOW! NEED TO ADD HERE SETUP OF ALL NON_PREVIEW FOLDERS WITH KEY HELPER FILES
-//			THEN RELAUNCH WITH NEW PARAMETERS CALLED UP....
+//			THEN RELAUNCH WITH NEW PARAMETERS CALLED UP....DONE!
 			
 			String previewPath = savePath;
 			String fullSetSavePath = previewPath.replace("DeconPreview_", "Decon_");
