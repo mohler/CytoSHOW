@@ -144,6 +144,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	private String recentName = "";
 	private boolean propagateRenamesThruLineage = false;
 	private double roiRescaleFactor = 1d;
+	private double expansionDistance = 10d;
 
 
 
@@ -5827,6 +5828,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	public void mapNearNeighborContacts(){
 		Roi[] selRois = this.getSelectedRoisAsArray();
+		expansionDistance = IJ.getNumber("Distance for contact partner search", expansionDistance);
 		for (Roi roi:selRois){
 			for (Roi queryRoi:this.getROIsByName().get("\""+roi.getName().split("\"")[1]+"\"")){
 				if (!queryRoi.getName().split("\"")[1].equalsIgnoreCase(roi.getName().split("\"")[1])){
@@ -5848,7 +5850,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //					testRoi = RoiEnlarger.enlarge(testRoi, 3);
 					Roi scaledRoi=null;
 					try {
-						scaledRoi = new RoiDecoder((testRoi.getBounds().getWidth()+3)/testRoi.getBounds().getWidth(), RoiEncoder.saveAsByteArray(testRoi), testRoi.getName()).getRoi();
+						scaledRoi = new RoiDecoder((testRoi.getBounds().getWidth()+2*expansionDistance)/testRoi.getBounds().getWidth(), RoiEncoder.saveAsByteArray(testRoi), testRoi.getName()).getRoi();
+						scaledRoi.setLocation((scaledRoi.getBounds().getX()/((testRoi.getBounds().getWidth()+2*expansionDistance)/testRoi.getBounds().getWidth()))-expansionDistance
+											, (scaledRoi.getBounds().getY()/((testRoi.getBounds().getWidth()+2*expansionDistance)/testRoi.getBounds().getWidth())-expansionDistance));
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
