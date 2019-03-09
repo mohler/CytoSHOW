@@ -5829,7 +5829,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	public void mapNearNeighborContacts(){
 		Roi[] selRois = this.getSelectedRoisAsArray();
 		expansionDistance = IJ.getNumber("Distance for contact partner search", expansionDistance);
+		ArrayList<String> cellsAlreadyMapped = new ArrayList<String>();
 		for (Roi roi:selRois){
+			if (cellsAlreadyMapped.contains(roi.getName().split("\"")[1])){
+				continue;
+			}
 			for (Roi queryRoi:this.getROIsByName().get("\""+roi.getName().split("\"")[1]+"\"")){
 				if (!queryRoi.getName().split("\"")[1].equalsIgnoreCase(roi.getName().split("\"")[1])){
 					continue;
@@ -5866,6 +5870,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					}
 				}
 			}
+			cellsAlreadyMapped.add(roi.getName().split("\"")[1]);
 		}
 	}
 }
