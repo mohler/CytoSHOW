@@ -2405,7 +2405,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		try {
 			ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(new File(path)));
-			DataOutputStream out = new DataOutputStream(new BufferedOutputStream(zos));
+			ZipOutputStream out = zos; 
+//			DataOutputStream out = new DataOutputStream(new BufferedOutputStream(zos));
 			RoiEncoder re = new RoiEncoder(out);
 			for (int i=0; i<indexes.length; i++) {
 				String label = (String) listModel.getElementAt(indexes[i]);
@@ -5872,5 +5873,5 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			cellsAlreadyMapped.add(roi.getName().split("\"")[1]);
 		}
-	}
+	}		
 }
