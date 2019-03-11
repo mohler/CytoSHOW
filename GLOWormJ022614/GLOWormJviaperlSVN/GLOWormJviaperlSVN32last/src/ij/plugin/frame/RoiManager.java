@@ -925,7 +925,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	private void sketchVolumeViewer(Object source) { 
 		boolean singleSave = IJ.shiftKeyDown();
-		double scaleFactor = 1024d/imp.getWidth();
+		double scaleFactor = 1d;
 		IJ.setForegroundColor(255, 255, 255);
 		IJ.setBackgroundColor(0, 0, 0);
 		if (getSelectedRoisAsArray().length<1)
@@ -5865,6 +5865,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					Roi andRoi = (new ShapeRoi(scaledRoi).and(new ShapeRoi(dupRoi)));
 					if (andRoi!=null && andRoi.getBounds().getWidth()>0){
 						andRoi.setName(andName);
+						try {
+							andRoi = new RoiDecoder((andRoi.getBounds().getWidth()+2)/andRoi.getBounds().getWidth(), RoiEncoder.saveAsByteArray(andRoi), andRoi.getName()).getRoi();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
 						andRoi.setPosition(cPos, zPos, tPos);
 						andRoi.setFillColor(testColor);
 						this.addRoi(andRoi, false, testColor, -1, false);
