@@ -462,6 +462,7 @@ public class TextRoi extends Roi {
 		if (nullg) 
 			g = ic.getGraphics();
 				Java2.setAntialiasedText(g, antialiased);
+		if (g==null) return;
 		FontMetrics metrics = g.getFontMetrics(font);
 		int fontHeight = (int)(metrics.getHeight()/mag);
 		int descent = metrics.getDescent();

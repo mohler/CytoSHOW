@@ -532,7 +532,7 @@ public class CompositeImage extends ImagePlus {
 			ip.setColorModel(ip.getDefaultColorModel());
 		Channels channels = Channels.getInstance();
 		if (channels!=null) ((Channels)channels).update();
-		if (win instanceof StackWindow)
+		if (win instanceof StackWindow && ((StackWindow)win).cSelector!=null)
 			((StackWindow)win).cSelector.updatePlayPauseIcon();
 	}
 

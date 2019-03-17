@@ -366,7 +366,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 							drawRoi(g, roi, drawLabels?i:-1);
 							roi.setStrokeColor(origColor);
 							labelShapes.put(roi, roi instanceof Arrow?((Arrow)roi).getShapeRoi():new ShapeRoi(roi));
-							if (labelShapes.get(roi) != null) labelShapes.get(roi).setName(roi.getName());
+							if (labelShapes!=null && roi!= null)
+								if (labelShapes.get(roi) != null) labelShapes.get(roi).setName(roi.getName()!=null?roi.getName():"unNamedRoi");
 						}
 					} else {
 						int position = roi.getPosition();
@@ -618,8 +619,10 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 					yOffset = yOffset + r.get(i).height;
 				}
 			}
-			g.clearRect(0,0,this.getWidth(),this.getHeight());
-			g.drawImage(offScreenImage, 0, 0, null);
+			if (g!=null){
+				g.clearRect(0,0,this.getWidth(),this.getHeight());
+				g.drawImage(offScreenImage, 0, 0, null);
+			}
 		}
 		catch(OutOfMemoryError e) {IJ.outOfMemory("Paint");}
 	}
