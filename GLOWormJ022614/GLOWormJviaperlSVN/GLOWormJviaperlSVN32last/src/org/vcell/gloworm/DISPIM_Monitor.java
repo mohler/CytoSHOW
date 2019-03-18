@@ -7088,7 +7088,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 		}
 		
 		if (e.getActionCommand() == "diSPIM Preview"){
+			
 			IJ.beep();
+			WaitForUserDialog waitForUserDialog = new WaitForUserDialog("Check Over Your Lineaging Preview Selections", "Select the long-axis Z position for each ProjY window."
+																		+"\nMake a Line selection on the 4-cell stage to indicate ADL orientation"
+																		+ "\nfor deconvolution/fusion processing.\nWhen you are then ready, click OK to commence processing.");
+			waitForUserDialog.show();
+
 			IJ.log("Preview orientation adjustment details saved to disk");
 			
 			String previewFileText = "\n";
@@ -7115,9 +7121,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						}
 					}
 					
+					ciPrxs[pos].setPosition(keyChannel, ciPrxs[pos].getSlice(), ciPrxs[pos].getNFrames());
 					ImagePlus xImp = (new ImagePlus("testX",ciPrxs[pos].getProcessor()));
 					maxReferenceIntensity = xImp.getStatistics().max;
 					xImp.flush();
+					ciPrxs[pos].flush();
+					ciPrxs[pos]=null;
 				}
 				if (ciPrys[pos] != null && ciPrys[pos].isVisible()){
 					dispimPreviewButton[pos][1].setVisible(false);
@@ -7130,10 +7139,19 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							xRotRead = 90-((Line)yRoi).getAngle();
 						}
 					}
+
+					ciPrys[pos].setPosition(keyChannel, ciPrys[pos].getSlice(), ciPrys[pos].getNFrames());
 					ImagePlus yImp = (new ImagePlus("testY",ciPrys[pos].getProcessor()));
 					maxReferenceIntensity = yImp.getStatistics().max;
 					yImp.flush();
+					ciPrys[pos].flush();
+					ciPrys[pos]=null;
 				}
+				if (ciDFs[pos] != null && ciDFs[pos].isVisible()){
+					ciDFs[pos].flush();
+					ciDFs[pos]=null;
+				}
+
 				if (xRotRead < 0){
 					xRotRead = 360+xRotRead;
 				}
