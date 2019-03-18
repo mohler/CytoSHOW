@@ -5255,23 +5255,25 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											pos--;
 											continue;
 										} else {
-											lastMatrix[pos] = IJ.openAsString("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
-											if (lastMatrix[pos].startsWith("Error") 
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[0])< 0.75
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[0])> 1.25
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[5])< 0.95
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[5])> 1.05
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[10])< 0.90
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[10])> 1.1
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[15])< 0.95
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[15])> 1.05
+											String matrixOne = IJ.openAsString("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
+											if (matrixOne.startsWith("Error") 
+													|| Double.parseDouble(matrixOne.split("\\t")[0])< 0.75
+													|| Double.parseDouble(matrixOne.split("\\t")[0])> 1.25
+													|| Double.parseDouble(matrixOne.split("\\t")[5])< 0.95
+													|| Double.parseDouble(matrixOne.split("\\t")[5])> 1.05
+													|| Double.parseDouble(matrixOne.split("\\t")[10])< 0.90
+													|| Double.parseDouble(matrixOne.split("\\t")[10])> 1.1
+													|| Double.parseDouble(matrixOne.split("\\t")[15])< 0.95
+													|| Double.parseDouble(matrixOne.split("\\t")[15])> 1.05
 													){
 												IJ.log("Bah Humbug, poor registration");
-												IJ.log(""+ pos+ "new=> " + lastMatrix[pos]);
+												IJ.log(""+ pos+ "new=> " + matrixOne);
+
 												failIteration[pos]++;
 												pos--;
 												continue;
 											}else{
+												lastMatrix[pos] = matrixOne;
 												IJ.log("Merry Xmas");
 												if (orientBeforeLineage && !(new File("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ "0000"+".tmx").canRead())) {
 													Files.copy(Paths.get("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx"),
@@ -5433,24 +5435,25 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											pos--;
 											continue;
 										} else {
-											lastMatrix[pos] = IJ.openAsString("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
-											if (lastMatrix[pos].startsWith("Error") 
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[0])< 0.75
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[0])> 1.25
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[5])< 0.95
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[5])> 1.05
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[10])< 0.90
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[10])> 1.1
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[15])< 0.95
-													|| Double.parseDouble(lastMatrix[pos].split("\\t")[15])> 1.05
+											String matrixOne = IJ.openAsString("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
+											if (matrixOne.startsWith("Error") 
+													|| Double.parseDouble(matrixOne.split("\\t")[0])< 0.75
+													|| Double.parseDouble(matrixOne.split("\\t")[0])> 1.25
+													|| Double.parseDouble(matrixOne.split("\\t")[5])< 0.95
+													|| Double.parseDouble(matrixOne.split("\\t")[5])> 1.05
+													|| Double.parseDouble(matrixOne.split("\\t")[10])< 0.90
+													|| Double.parseDouble(matrixOne.split("\\t")[10])> 1.1
+													|| Double.parseDouble(matrixOne.split("\\t")[15])< 0.95
+													|| Double.parseDouble(matrixOne.split("\\t")[15])> 1.05
 													){
 												IJ.log("Bah Humbug, poor registration");
-												IJ.log(""+ pos+ "new=> " + lastMatrix[pos]);
+												IJ.log(""+ pos+ "new=> " + matrixOne);
 
 												failIteration[pos]++;
 												pos--;
 												continue;
 											}else{
+												lastMatrix[pos] = matrixOne;
 												IJ.log("Merry Xmas");
 												if (orientBeforeLineage && !(new File("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ "0000"+".tmx").canRead())) {
 													Files.copy(Paths.get("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx"),
@@ -5481,7 +5484,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											}
 
 										} else {
-//  I THINK THI MAY NOW CAUSE PROBLEMS											posFrameEnd[pos]--;
+//  I THINK THI MAY NOW CAUSE PROBLEMS		posFrameEnd[pos]--;
 										}
 
 										int k = f;
