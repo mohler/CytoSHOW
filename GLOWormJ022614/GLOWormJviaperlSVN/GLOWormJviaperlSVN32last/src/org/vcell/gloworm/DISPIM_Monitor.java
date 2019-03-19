@@ -4471,40 +4471,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			if (doSerialRegPriming){
 			}
 		}
-		if (doForceDefaultRegTMX || doSerialRegPriming){
-			for (int pos=0; pos<pDim; pos++) {
-				boolean go = true;
-				if (posIntArray!=null){
-					go = false;
-					for (int posInt:posIntArray){
-						if (posInt == pos){
-							go=true;
-						}
-					}
-				}
-				if (!go){
-					continue;
-				}
-				
-				doProcessing[pos] = true;
-
-				if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
-					doProcessing[pos] = false;
-					continue;
-				}
-				if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible() ) {
-					doProcessing[pos] = false;
-					continue;
-				} 
-				
-				lastMatrix[pos] = IJ.openAsString("C:\\CytoSHOWextrasForC\\DataForTest\\Matrix_0.tmx");
-
-				if (new File("" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(0, 4)+".tmx").canRead() )
-					lastMatrix[pos] = IJ.openAsString("" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(0, 4)+".tmx");
-				else 
-					IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(0, 4)+".tmx");
-			}
-		}
 		for (int posForPathSetup=0; posForPathSetup<pDim; posForPathSetup++) {
 			new File("" + savePath + "RegDecon" + File.separator + "Pos"+ posForPathSetup + File.separator +"Deconvolution1").mkdirs();
 			if (wavelengths >= 2) {
@@ -4986,6 +4952,19 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							IJ.log("! no winorstackB "+f+" "+pos);
 							continue;
 						} 
+						
+						if (doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated){
+								
+								lastMatrix[pos] = IJ.openAsString("C:\\CytoSHOWextrasForC\\DataForTest\\Matrix_0.tmx");
+
+								if (new File("" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(0, 4)+".tmx").canRead() )
+									lastMatrix[pos] = IJ.openAsString("" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(0, 4)+".tmx");
+								else 
+									IJ.saveString(lastMatrix[pos], "" + savePath + "RegDecon" + File.separator + "TMX" + File.separator + "RegMatrix_Pos"+pos+"_t"+ IJ.pad(0, 4)+".tmx");
+							
+						}
+
+						
 						if(go) {
 							wasFrameA[pos] = impAs[pos].getFrame();
 							wasFrameB[pos] = impBs[pos].getFrame();
@@ -5204,6 +5183,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 										regDeconProcess = Runtime.getRuntime().exec(cmdln);
 										
+										while (regDeconProcess == null ) {
+											IJ.wait(100);
+										}
 										while (regDeconProcess!= null && regDeconProcess.isAlive()) {
 											IJ.wait(100);
 										}
@@ -5268,6 +5250,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 													){
 												IJ.log("Bah Humbug, poor registration");
 												IJ.log(""+ pos+ "new=> " + matrixOne);
+												new File("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").delete();
 
 												failIteration[pos]++;
 												pos--;
@@ -5384,6 +5367,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										IJ.log(Arrays.toString(cmdln));
 										regDeconProcess = Runtime.getRuntime().exec(cmdln);
 
+										while (regDeconProcess == null ) {
+											IJ.wait(100);
+										}
 										while (regDeconProcess!= null && regDeconProcess.isAlive()) {
 											IJ.wait(100);
 										}
@@ -5448,6 +5434,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 													){
 												IJ.log("Bah Humbug, poor registration");
 												IJ.log(""+ pos+ "new=> " + matrixOne);
+												new File("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").delete();
 
 												failIteration[pos]++;
 												pos--;
@@ -5550,6 +5537,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										//								IJ.log(cmdln);
 										IJ.log(Arrays.toString(cmdln));
 										regDeconProcess = Runtime.getRuntime().exec(cmdln);
+										
+										while (regDeconProcess == null ) {
+											IJ.wait(100);
+										}
 										while (regDeconProcess!= null && regDeconProcess.isAlive()) {
 											IJ.wait(100);
 										}
