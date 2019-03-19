@@ -7161,6 +7161,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			
 			String previewPath = savePath;
 			String fullSetSavePath = previewPath.replace("DeconPreview_", "Decon_");
+			if (new File(fullSetSavePath).exists()){
+				String newDeconOutputPath = fullSetSavePath.replace(new File(fullSetSavePath).getParent(), new File(fullSetSavePath).getParent()+"_B");
+				new File(newDeconOutputPath).mkdirs();
+				fullSetSavePath = newDeconOutputPath;
+			}
 			
 			try {
 				Process cloneProcess = Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","robocopy",previewPath, fullSetSavePath,"/mir"});
