@@ -5261,8 +5261,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 													|| Double.parseDouble(matrixOne.split("\\t")[0])> 1.25
 													|| Double.parseDouble(matrixOne.split("\\t")[5])< 0.95
 													|| Double.parseDouble(matrixOne.split("\\t")[5])> 1.05
-													|| Double.parseDouble(matrixOne.split("\\t")[10])< 0.90
-													|| Double.parseDouble(matrixOne.split("\\t")[10])> 1.1
+													|| Double.parseDouble(matrixOne.split("\\t")[10])< 0.75
+													|| Double.parseDouble(matrixOne.split("\\t")[10])> 1.25
 													|| Double.parseDouble(matrixOne.split("\\t")[15])< 0.95
 													|| Double.parseDouble(matrixOne.split("\\t")[15])> 1.05
 													){
@@ -5441,8 +5441,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 													|| Double.parseDouble(matrixOne.split("\\t")[0])> 1.25
 													|| Double.parseDouble(matrixOne.split("\\t")[5])< 0.95
 													|| Double.parseDouble(matrixOne.split("\\t")[5])> 1.05
-													|| Double.parseDouble(matrixOne.split("\\t")[10])< 0.90
-													|| Double.parseDouble(matrixOne.split("\\t")[10])> 1.1
+													|| Double.parseDouble(matrixOne.split("\\t")[10])< 0.75
+													|| Double.parseDouble(matrixOne.split("\\t")[10])> 1.25
 													|| Double.parseDouble(matrixOne.split("\\t")[15])< 0.95
 													|| Double.parseDouble(matrixOne.split("\\t")[15])> 1.05
 													){
@@ -7092,11 +7092,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 		
 		if (e.getActionCommand() == "diSPIM Preview"){
 			
-			IJ.beep();
-			WaitForUserDialog waitForUserDialog = new WaitForUserDialog("Check Over Your Lineaging Preview Selections", "Select the long-axis Z position for each ProjY window."
-																		+"\nMake a Line selection on the 4-cell stage to indicate ADL orientation"
-																		+ "\nfor deconvolution/fusion processing.\nWhen you are then ready, click OK to commence processing.");
-			waitForUserDialog.show();
 
 			IJ.log("Preview orientation adjustment details saved to disk");
 			
@@ -7115,7 +7110,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				double zRotRead=0;
 				double maxReferenceIntensity = 0;
 				if (ciPrxs[pos] != null && ciPrxs[pos].isVisible()){
-					dispimPreviewButton[pos][0].setVisible(false);
+//					dispimPreviewButton[pos][0].setVisible(false);
 					xRotRead = (ciPrxs[pos].getSlice()-1)*10;
 					Roi xRoi = ciPrxs[pos].getRoi();
 					if (xRoi != null){
@@ -7128,7 +7123,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					ImagePlus xImp = (new ImagePlus("testX",ciPrxs[pos].getProcessor()));
 					maxReferenceIntensity = xImp.getStatistics().max;
 					xImp.flush();
-					ciPrxs[pos].flush();
+					ciPrxs[pos].getWindow().close();
 					ciPrxs[pos]=null;
 				}
 				if (ciPrys[pos] != null && ciPrys[pos].isVisible()){
@@ -7147,11 +7142,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					ImagePlus yImp = (new ImagePlus("testY",ciPrys[pos].getProcessor()));
 					maxReferenceIntensity = yImp.getStatistics().max;
 					yImp.flush();
-					ciPrys[pos].flush();
+					ciPrys[pos].getWindow().close();
 					ciPrys[pos]=null;
 				}
 				if (ciDFs[pos] != null && ciDFs[pos].isVisible()){
-					ciDFs[pos].flush();
+					ciDFs[pos].getWindow().close();
 					ciDFs[pos]=null;
 				}
 
