@@ -78,7 +78,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 			if (dropImp == null)
 				dropImp = IJ.getImage();
 			setImp(dropImp);
-			if (getImp().getTitle().contains("Sketch3D") || true)
+			if (getImp().getTitle().contains("Sketch3D"))
 				doSketch3D = true;
 			if (getImp().getMotherImp() != null && getImp().getMotherImp() != getImp())
 				setImp(getImp().getMotherImp());
