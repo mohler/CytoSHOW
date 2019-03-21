@@ -7162,17 +7162,128 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			String previewPath = savePath;
 			String fullSetSavePath = previewPath.replace("DeconPreview_", "Decon_");
 			
+			Process cloneProcess = null;
 			try {
-				Process cloneProcess = Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","robocopy",previewPath, fullSetSavePath,"/mir"});
-				while (cloneProcess.isAlive()){
+				cloneProcess = Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","robocopy",previewPath, fullSetSavePath,"/mir"});
+				while (cloneProcess==null){
 					IJ.wait(100);
 				}
-				Process cleanProcess = Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","for", "/d", "%G", "in", "("+fullSetSavePath+File.separator+"*Decon-Fuse*)", "do", "rd", "/s", "/q", "%~G"});
-				Process clipProcess = Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","for", "/d", "%H", "in", "("+fullSetSavePath+File.separator+"RegDecon"+File.separator+"Pos*)", "do", "rd", "/s", "/q", "%~H"});
+				while (cloneProcess!=null && cloneProcess.isAlive()){
+					IJ.wait(100);
+				}
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
+			} finally {
+				if (cloneProcess!= null) {
+					IJ.log("rdpExit="+cloneProcess.exitValue());
+					try {
+						if (cloneProcess.getOutputStream() != null) {
+							cloneProcess.getOutputStream().close();
+						}
+					} catch (final IOException ioe) {
+						// ignore
+					}
+					try {
+						if (cloneProcess.getInputStream() != null) {
+							cloneProcess.getInputStream().close();
+						}
+					} catch (final IOException ioe) {
+						// ignore
+					}
+					try {
+						if (cloneProcess.getErrorStream() != null) {
+							cloneProcess.getErrorStream().close();
+						}
+					} catch (final IOException ioe) {
+						// ignore
+					}
+					cloneProcess.destroyForcibly();
+				}
+
 			}
+			Process cleanProcess = null;
+			try {
+				cleanProcess = Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","for", "/d", "%G", "in", "("+fullSetSavePath+File.separator+"*Decon-Fuse*)", "do", "rd", "/s", "/q", "%~G"});
+				while (cleanProcess==null){
+					IJ.wait(100);
+				}
+				while (cleanProcess!=null && cleanProcess.isAlive()){
+					IJ.wait(100);
+				}
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} finally {
+				if (cleanProcess!= null) {
+					IJ.log("rdpExit="+cleanProcess.exitValue());
+					try {
+						if (cleanProcess.getOutputStream() != null) {
+							cleanProcess.getOutputStream().close();
+						}
+					} catch (final IOException ioe) {
+						// ignore
+					}
+					try {
+						if (cleanProcess.getInputStream() != null) {
+							cleanProcess.getInputStream().close();
+						}
+					} catch (final IOException ioe) {
+						// ignore
+					}
+					try {
+						if (cleanProcess.getErrorStream() != null) {
+							cleanProcess.getErrorStream().close();
+						}
+					} catch (final IOException ioe) {
+						// ignore
+					}
+					cleanProcess.destroyForcibly();
+				}
+
+			}
+
+			Process clipProcess = null;
+			try {
+				clipProcess = Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","for", "/d", "%H", "in", "("+fullSetSavePath+File.separator+"RegDecon"+File.separator+"Pos*)", "do", "rd", "/s", "/q", "%~H"});
+				while (clipProcess==null){
+					IJ.wait(100);
+				}
+				while (clipProcess!=null && clipProcess.isAlive()){
+					IJ.wait(100);
+				}
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} finally {
+				if (clipProcess!= null) {
+					IJ.log("rdpExit="+clipProcess.exitValue());
+					try {
+						if (clipProcess.getOutputStream() != null) {
+							clipProcess.getOutputStream().close();
+						}
+					} catch (final IOException ioe) {
+						// ignore
+					}
+					try {
+						if (clipProcess.getInputStream() != null) {
+							clipProcess.getInputStream().close();
+						}
+					} catch (final IOException ioe) {
+						// ignore
+					}
+					try {
+						if (clipProcess.getErrorStream() != null) {
+							clipProcess.getErrorStream().close();
+						}
+					} catch (final IOException ioe) {
+						// ignore
+					}
+					clipProcess.destroyForcibly();
+				}
+
+			}
+
 
 			monitoring = false;
 		}
