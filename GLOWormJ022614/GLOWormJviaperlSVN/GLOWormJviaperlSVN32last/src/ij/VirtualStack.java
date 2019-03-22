@@ -23,12 +23,12 @@ public class VirtualStack extends ImageStack {
 	private boolean burnIn = false;
 	private ImagePlus lineageMapImage;
 	protected String dimOrder;
-	protected  int dXA;
-	protected  int dXB;
-	protected  int dYA;
-	protected  int dYB;
-	protected  int dZA;
-	protected  int dZB;
+	protected  int[] dXA;
+	protected  int[] dXB;
+	protected  int[] dYA;
+	protected  int[] dYB;
+	protected  int[] dZA;
+	protected  int[] dZB;
 
 
 
@@ -277,51 +277,51 @@ public class VirtualStack extends ImageStack {
 	}
 
 
-	public  int getdXA() {
+	public  int[] getdXA() {
 		return dXA;
 	}
 
-	public  void setdXA(int dXA) {
+	public  void setdXA(int[] dXA) {
 		this.dXA = dXA;
 	}
 
-	public  int getdXB() {
+	public  int[] getdXB() {
 		return dXB;
 	}
 
-	public  void setdXB(int dXB) {
+	public  void setdXB(int[] dXB) {
 		this.dXB = dXB;
 	}
 
-	public  int getdYA() {
+	public  int[] getdYA() {
 		return dYA;
 	}
 
-	public  void setdYA(int dYA) {
+	public  void setdYA(int[] dYA) {
 		this.dYA = dYA;
 	}
 
-	public  int getdYB() {
+	public  int[] getdYB() {
 		return dYB;
 	}
 
-	public  void setdYB(int dYB) {
+	public  void setdYB(int[] dYB) {
 		this.dYB = dYB;
 	}
 
-	public int getdZA() {
+	public int[] getdZA() {
 		return dZA;
 	}
 
-	public void setdZA(int dZA) {
+	public void setdZA(int[] dZA) {
 		this.dZA = dZA;
 	}
 
-	public int getdZB() {
+	public int[] getdZB() {
 		return dZB;
 	}
 
-	public void setdZB(int dZB) {
+	public void setdZB(int[] dZB) {
 		this.dZB = dZB;
 	}
 

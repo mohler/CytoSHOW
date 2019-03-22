@@ -240,25 +240,44 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 //				IJ.wait(10);
 //			}
 ////			IJ.log(infoLoadReport + (savedInfoCollectorArrayList != null?savedInfoCollectorArrayList.size():""));
-
+			dXA = new int[tDim*cDim*vDim];
+			dYA = new int[tDim*cDim*vDim];
+			dZA = new int[tDim*cDim*vDim];
+			dXB = new int[tDim*cDim*vDim];
+			dYB = new int[tDim*cDim*vDim];
+			dZB = new int[tDim*cDim*vDim];
 			if (savedInfoCollectorArrayList == null || savedInfoCollectorArrayList.size()==0 || savedInfoCollectorArrayList.get(0)[0].channelShifts == null){
-				dXA= 0;
-				dXB= 0;
-				dYA= 0;
-				dYB= 0;
-				dZA= 0;
-				dZB= 0;
+				Arrays.fill(dXA,0);
+				Arrays.fill(dYA,0);
+				Arrays.fill(dZA,0);
+				Arrays.fill(dXB,0);
+				Arrays.fill(dYB,0);
+				Arrays.fill(dZB,0);
 			} else {
-				dXA= savedInfoCollectorArrayList.get(0)[0].channelShifts[0];
-				dYA= savedInfoCollectorArrayList.get(0)[0].channelShifts[1];
-				dZA= savedInfoCollectorArrayList.get(0)[0].channelShifts[2];
-				dXB= savedInfoCollectorArrayList.get(0)[0].channelShifts[3];
-				dYB= savedInfoCollectorArrayList.get(0)[0].channelShifts[4];
-				dZB= savedInfoCollectorArrayList.get(0)[0].channelShifts[5];
+				Arrays.fill(dXA, savedInfoCollectorArrayList.get(0)[0].channelShifts[0]);
+				Arrays.fill(dYA, savedInfoCollectorArrayList.get(0)[0].channelShifts[1]);
+				Arrays.fill(dZA, savedInfoCollectorArrayList.get(0)[0].channelShifts[2]);
+				Arrays.fill(dXB, savedInfoCollectorArrayList.get(0)[0].channelShifts[3]);
+				Arrays.fill(dYB, savedInfoCollectorArrayList.get(0)[0].channelShifts[4]);
+				Arrays.fill(dZB, savedInfoCollectorArrayList.get(0)[0].channelShifts[5]);
 
 			}
 
-
+			File correctiveShiftsFile = new File(infoDir + "correctiveShifts.txt");
+			if (correctiveShiftsFile.canRead()){
+				String correctiveShiftsString = IJ.openAsString(infoDir + "correctiveShifts.txt");
+				String[] correctiveShiftsLines = correctiveShiftsString.split("\n");
+				int[][] shiftArrays = new int[][]{dXA,dYA,dZA,dXB,dYB,dZB};
+				for (int l = 0; l<correctiveShiftsLines.length; l++){
+					String[] correctiveShiftsLineChunks = correctiveShiftsLines[l].split(",");
+					for (int m=0; m<shiftArrays[l].length; m++){
+						if (m<correctiveShiftsLineChunks.length){
+							shiftArrays[l][m] = Integer.parseInt(correctiveShiftsLineChunks[m]);
+						}
+					}
+				}
+			}
+			
 			if (cumulativeTiffFileArray.length >0){ 
 				for (String cumulativeTiffFileArrayElement:cumulativeTiffFileArray)
 					bigSubFileArrayList.add(cumulativeTiffFileArrayElement);
@@ -753,7 +772,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		
 		int dZ = 0;
 		if (rawdispimdata /*&& cDim/vDim>1*/ ) {
-			dZ=isViewB?dZB:dZA;
+			dZ=isViewB?dZB[0]:dZA[0];
 		}
 
 		ImageProcessor ip = null;
@@ -786,9 +805,6 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			int dX = 0;
 			int dY = 0;
 			
-			dX=isViewB?dXB:dXA;
-			dY=isViewB?dYB:dYA;
-
 			vSliceNumber = (sliceNumber)+(isViewB?zDim*(cDim/2)*(dimOrder.toLowerCase().matches(".*splitsequentialc.*")?2:1):0);
 
 
@@ -810,6 +826,10 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 //			if (stackNumber >= fivStacks.size()){
 //				stackNumber = fivStacks.size()-1;
 //			}
+			
+			dX=isViewB?dXB[stackNumber]:dXA[stackNumber];
+			dY=isViewB?dYB[stackNumber]:dYA[stackNumber];
+			dZ=isViewB?dZB[stackNumber]:dZA[stackNumber];
 			
 			initiateStack(stackNumber, 0);
 			ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber+(sliceNumber%(2)==0?0:dZ*2));

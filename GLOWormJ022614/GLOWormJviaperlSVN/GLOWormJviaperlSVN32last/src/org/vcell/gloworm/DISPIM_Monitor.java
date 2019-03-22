@@ -2295,9 +2295,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					dispimToolsButton[pos][0].addActionListener(this);
 					diSPIMPanel[pos][0].add(BorderLayout.WEST, dispimToolsButton[pos][0]);
 					if (impAs[pos].getStack() instanceof VirtualStack){
-						if ( ((VirtualStack)(impAs[pos].getStack())).getdXA() == 0 &&
-								((VirtualStack)(impAs[pos].getStack())).getdYA() == 0 &&
-								((VirtualStack)(impAs[pos].getStack())).getdZA() == 0) {
+						if ( ((VirtualStack)(impAs[pos].getStack())).getdXA()[0] == 0 &&
+								((VirtualStack)(impAs[pos].getStack())).getdYA()[0] == 0 &&
+								((VirtualStack)(impAs[pos].getStack())).getdZA()[0] == 0) {
 
 							dispimToolsButton[pos][0].setBackground(Color.orange);
 						}
@@ -2312,9 +2312,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					dispimToolsButton[pos][1].addActionListener(this);
 					diSPIMPanel[pos][1].add(BorderLayout.WEST, dispimToolsButton[pos][1]);
 					if (impBs[pos].getStack() instanceof VirtualStack){
-						if ( ((VirtualStack)(impBs[pos].getStack())).getdXA() == 0 &&
-								((VirtualStack)(impBs[pos].getStack())).getdYA() == 0 &&
-								((VirtualStack)(impBs[pos].getStack())).getdZA() == 0) {
+						if ( ((VirtualStack)(impBs[pos].getStack())).getdXA()[0] == 0 &&
+								((VirtualStack)(impBs[pos].getStack())).getdYA()[0] == 0 &&
+								((VirtualStack)(impBs[pos].getStack())).getdZA()[0] == 0) {
 
 							dispimToolsButton[pos][1].setBackground(Color.orange);
 						}
@@ -2368,7 +2368,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					}
 					
 					if(xSpinner[pos][0] == null) {
-						xSpinner[pos][0] = new JSpinner(new SpinnerNumberModel(((VirtualStack)impAs[pos].getStack()).getdXA(), -impAs[pos].getWidth(), impAs[pos].getWidth(), 1));
+						xSpinner[pos][0] = new JSpinner(new SpinnerNumberModel(((VirtualStack)impAs[pos].getStack()).getdXA()[0], -impAs[pos].getWidth(), impAs[pos].getWidth(), 1));
 						xSpinner[pos][0].setToolTipText("Adjust Channel X Alignment ViewA");
 						xSpinner[pos][0].addChangeListener(this);
 						spinnerPanel[pos][0].add(BorderLayout.NORTH, xSpinner[pos][0]);
@@ -2377,7 +2377,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						xSpinner[pos][0].setVisible(false);
 					}
 					if(ySpinner[pos][0] == null) {
-						ySpinner[pos][0] = new JSpinner(new SpinnerNumberModel(((VirtualStack)impAs[pos].getStack()).getdYA(), -impAs[pos].getHeight(), impAs[pos].getHeight(), 1));
+						ySpinner[pos][0] = new JSpinner(new SpinnerNumberModel(((VirtualStack)impAs[pos].getStack()).getdYA()[0], -impAs[pos].getHeight(), impAs[pos].getHeight(), 1));
 						ySpinner[pos][0].setToolTipText("Adjust Channel Y Alignment ViewA");
 						ySpinner[pos][0].addChangeListener(this);
 						spinnerPanel[pos][0].add(BorderLayout.CENTER, ySpinner[pos][0]);
@@ -2387,7 +2387,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					}
 
 					if(xSpinner[pos][1] == null) {
-						xSpinner[pos][1] = new JSpinner(new SpinnerNumberModel(((VirtualStack)impBs[pos].getStack()).getdXB(), -impBs[pos].getWidth(), impBs[pos].getWidth(), 1));
+						xSpinner[pos][1] = new JSpinner(new SpinnerNumberModel(((VirtualStack)impBs[pos].getStack()).getdXB()[0], -impBs[pos].getWidth(), impBs[pos].getWidth(), 1));
 						xSpinner[pos][1].setToolTipText("Adjust Channel X Alignment ViewB");
 						xSpinner[pos][1].addChangeListener(this);
 						spinnerPanel[pos][1].add(BorderLayout.NORTH, xSpinner[pos][1]);
@@ -2396,7 +2396,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						xSpinner[pos][1].setVisible(false);
 					}
 					if(ySpinner[pos][1] == null) {
-						ySpinner[pos][1] = new JSpinner(new SpinnerNumberModel(((VirtualStack)impBs[pos].getStack()).getdYB(), -impBs[pos].getHeight(), impBs[pos].getHeight(), 1));
+						ySpinner[pos][1] = new JSpinner(new SpinnerNumberModel(((VirtualStack)impBs[pos].getStack()).getdYB()[0], -impBs[pos].getHeight(), impBs[pos].getHeight(), 1));
 						ySpinner[pos][1].setToolTipText("Adjust Channel Y Alignment ViewB");
 						ySpinner[pos][1].addChangeListener(this);
 						spinnerPanel[pos][1].add(BorderLayout.CENTER, ySpinner[pos][1]);
@@ -2407,7 +2407,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				}
 				
 				if(zSpinner[pos][0] == null) {
-					zSpinner[pos][0] = new JSpinner(new SpinnerNumberModel(((VirtualStack)impAs[pos].getStack()).getdZA(), -impAs[pos].getNSlices(), impAs[pos].getNSlices(), 1));
+					zSpinner[pos][0] = new JSpinner(new SpinnerNumberModel(((VirtualStack)impAs[pos].getStack()).getdZA()[0], -impAs[pos].getNSlices(), impAs[pos].getNSlices(), 1));
 					zSpinner[pos][0].setToolTipText("Adjust Channel Z Alignment ViewA");
 					zSpinner[pos][0].addChangeListener(this);
 					spinnerPanel[pos][0].add(BorderLayout.SOUTH, zSpinner[pos][0]);
@@ -2418,7 +2418,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				diSPIMPanel[pos][0].add(BorderLayout.CENTER, spinnerPanel[pos][0]);
 				
 				if(zSpinner[pos][1] == null) {
-					zSpinner[pos][1] = new JSpinner(new SpinnerNumberModel(((VirtualStack)impAs[pos].getStack()).getdZB(), -impBs[pos].getNSlices(), impBs[pos].getNSlices(), 1));
+					zSpinner[pos][1] = new JSpinner(new SpinnerNumberModel(((VirtualStack)impAs[pos].getStack()).getdZB()[0], -impBs[pos].getNSlices(), impBs[pos].getNSlices(), 1));
 					zSpinner[pos][1].setToolTipText("Adjust Channel Z Alignment ViewB");
 					zSpinner[pos][1].addChangeListener(this);
 					spinnerPanel[pos][1].add(BorderLayout.SOUTH, zSpinner[pos][1]);
@@ -7007,11 +7007,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							if (impAs[pp]==null || impAs[pp].hasNullStack() || impAs[pp].getWindow()==null  || !impAs[pp].getWindow().isVisible()) {
 								continue;
 							}
-							xSpinner[pp][0].setValue(((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdXA());
+							xSpinner[pp][0].setValue(((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdXA()[0]);
 
-							ySpinner[pp][0].setValue(((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdYA());
+							ySpinner[pp][0].setValue(((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdYA()[0]);
 
-							zSpinner[pp][0].setValue(((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdZA());
+							zSpinner[pp][0].setValue(((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdZA()[0]);
 
 							dispimToolsButton[pp][0].setBackground(fuseButton[pp][0].isVisible()?Color.yellow:null);
 							((CompositeImage)impAs[pp]).updateAndDraw();
@@ -7022,15 +7022,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									if (nextFI.channelShifts == null || nextFI.channelShifts.length<6){
 										nextFI.channelShifts = new int[]{0,0,0,0,0,0,};
 									}
-									nextFI.channelShifts[0] = ((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdXA();
-									nextFI.channelShifts[1] = ((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdYA();
-									nextFI.channelShifts[2] = ((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdZA();
+									nextFI.channelShifts[0] = ((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdXA()[0];
+									nextFI.channelShifts[1] = ((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdYA()[0];
+									nextFI.channelShifts[2] = ((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdZA()[0];
 								}
 							}
 						}
-						Prefs.set("diSPIMmonitor.dXA", ((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdXA());
-						Prefs.set("diSPIMmonitor.dYA", ((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdYA());
-						Prefs.set("diSPIMmonitor.dZA", ((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdZA());							
+						Prefs.set("diSPIMmonitor.dXA", ((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdXA()[0]);
+						Prefs.set("diSPIMmonitor.dYA", ((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdYA()[0]);
+						Prefs.set("diSPIMmonitor.dZA", ((MultiFileInfoVirtualStack)(impAs[pos].getStack())).getdZA()[0]);							
 						
 					}
 					impAs[pos].getWindow().viewButtonPanel.validate();
@@ -7051,11 +7051,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							if (impBs[pp]==null || impBs[pp].hasNullStack() || impBs[pp].getWindow()==null  || !impBs[pp].getWindow().isVisible()) {
 								continue;
 							}
-							xSpinner[pp][1].setValue(((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdXB());
+							xSpinner[pp][1].setValue(((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdXB()[0]);
 
-							ySpinner[pp][1].setValue(((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdYB());
+							ySpinner[pp][1].setValue(((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdYB()[0]);
 
-							zSpinner[pp][1].setValue(((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdZB());
+							zSpinner[pp][1].setValue(((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdZB()[0]);
 
 							dispimToolsButton[pp][1].setBackground(fuseButton[pp][1].isVisible()?Color.yellow:null);
 							((CompositeImage)impBs[pp]).updateAndDraw();
@@ -7066,117 +7066,137 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									if (nextFI.channelShifts == null || nextFI.channelShifts.length<6){
 										nextFI.channelShifts = new int[]{0,0,0,0,0,0,};
 									}
-									nextFI.channelShifts[3] = ((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdXB();
-									nextFI.channelShifts[4] = ((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdYB();
-									nextFI.channelShifts[5] = ((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdZB();
+									nextFI.channelShifts[3] = ((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdXB()[0];
+									nextFI.channelShifts[4] = ((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdYB()[0];
+									nextFI.channelShifts[5] = ((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdZB()[0];
 								}
 							}
 						}
-						Prefs.set("diSPIMmonitor.dXB", ((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdXB());
-						Prefs.set("diSPIMmonitor.dYB", ((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdYB());
-						Prefs.set("diSPIMmonitor.dZB", ((MultiFileInfoVirtualStack)(impBs[pos].getStack())).getdZB());
+						Prefs.set("diSPIMmonitor.dXB",
+								((MultiFileInfoVirtualStack) (impBs[pos]
+										.getStack())).getdXB()[0]);
+						Prefs.set("diSPIMmonitor.dYB",
+								((MultiFileInfoVirtualStack) (impBs[pos]
+										.getStack())).getdYB()[0]);
+						Prefs.set("diSPIMmonitor.dZB",
+								((MultiFileInfoVirtualStack) (impBs[pos]
+										.getStack())).getdZB()[0]);
 					}
 					impBs[pos].getWindow().viewButtonPanel.validate();
 				}
 			}
 		}
-		
-		if (e.getActionCommand() == "diSPIM Preview"){
-			
+
+		if (e.getActionCommand() == "diSPIM Preview") {
 
 			IJ.log("Preview orientation adjustment details saved to disk");
-			
+
 			String previewFileText = "\n";
 			boolean firstTime = true;
-			if (new File(savePath+"fineRotations.txt").canRead()){
-				previewFileText = IJ.openAsString(savePath+"fineRotations.txt");
+			if (new File(savePath + "fineRotations.txt").canRead()) {
+				previewFileText = IJ.openAsString(savePath
+						+ "fineRotations.txt");
 				firstTime = false;
 			}
 			if (firstTime) {
-				IJ.append("!!", savePath+"fineRotations.txt");
+				IJ.append("!!", savePath + "fineRotations.txt");
 			}
-			for (int pos=0; pos<pDim; pos++) {
-				double xRotRead=0;
-				double yRotRead=0;
-				double zRotRead=0;
+			for (int pos = 0; pos < pDim; pos++) {
+				double xRotRead = 0;
+				double yRotRead = 0;
+				double zRotRead = 0;
 				double maxReferenceIntensity = 0;
-				if (ciPrxs[pos] != null && ciPrxs[pos].isVisible()){
-//					dispimPreviewButton[pos][0].setVisible(false);
-					xRotRead = (ciPrxs[pos].getSlice()-1)*10;
+				if (ciPrxs[pos] != null && ciPrxs[pos].isVisible()) {
+					// dispimPreviewButton[pos][0].setVisible(false);
+					xRotRead = (ciPrxs[pos].getSlice() - 1) * 10;
 					Roi xRoi = ciPrxs[pos].getRoi();
-					if (xRoi != null){
-						if (xRoi.getType() == Roi.LINE){
-							yRotRead = 0 + (((Line)xRoi).getAngle()-180);
+					if (xRoi != null) {
+						if (xRoi.getType() == Roi.LINE) {
+							yRotRead = 0 + (((Line) xRoi).getAngle() - 180);
 						}
 					}
-					
-					ciPrxs[pos].setPosition(keyChannel, ciPrxs[pos].getSlice(), ciPrxs[pos].getNFrames());
-					ImagePlus xImp = (new ImagePlus("testX",ciPrxs[pos].getProcessor()));
+
+					ciPrxs[pos].setPosition(keyChannel, ciPrxs[pos].getSlice(),
+							ciPrxs[pos].getNFrames());
+					ImagePlus xImp = (new ImagePlus("testX",
+							ciPrxs[pos].getProcessor()));
 					maxReferenceIntensity = xImp.getStatistics().max;
 					xImp.flush();
 					ciPrxs[pos].getWindow().close();
-					ciPrxs[pos]=null;
+					ciPrxs[pos] = null;
 				}
-				if (ciPrys[pos] != null && ciPrys[pos].isVisible()){
+				if (ciPrys[pos] != null && ciPrys[pos].isVisible()) {
 					dispimPreviewButton[pos][1].setVisible(false);
-					if (yRotRead ==0 ){
-						yRotRead = (ciPrys[pos].getSlice()-10)*10;
+					if (yRotRead == 0) {
+						yRotRead = (ciPrys[pos].getSlice() - 10) * 10;
 					}
 					Roi yRoi = ciPrys[pos].getRoi();
-					if (yRoi != null){
-						if (yRoi.getType() == Roi.LINE){
-							xRotRead = 90-((Line)yRoi).getAngle();
+					if (yRoi != null) {
+						if (yRoi.getType() == Roi.LINE) {
+							xRotRead = 90 - ((Line) yRoi).getAngle();
 						}
 					}
 
-					ciPrys[pos].setPosition(keyChannel, ciPrys[pos].getSlice(), ciPrys[pos].getNFrames());
-					ImagePlus yImp = (new ImagePlus("testY",ciPrys[pos].getProcessor()));
+					ciPrys[pos].setPosition(keyChannel, ciPrys[pos].getSlice(),
+							ciPrys[pos].getNFrames());
+					ImagePlus yImp = (new ImagePlus("testY",
+							ciPrys[pos].getProcessor()));
 					maxReferenceIntensity = yImp.getStatistics().max;
 					yImp.flush();
 					ciPrys[pos].getWindow().close();
-					ciPrys[pos]=null;
+					ciPrys[pos] = null;
 				}
-				if (ciDFs[pos] != null && ciDFs[pos].isVisible()){
+				if (ciDFs[pos] != null && ciDFs[pos].isVisible()) {
 					ciDFs[pos].getWindow().close();
-					ciDFs[pos]=null;
+					ciDFs[pos] = null;
 				}
 
-				if (xRotRead < 0){
-					xRotRead = 360+xRotRead;
+				if (xRotRead < 0) {
+					xRotRead = 360 + xRotRead;
 				}
-				if (yRotRead < 0){
-					yRotRead = 360+yRotRead;
+				if (yRotRead < 0) {
+					yRotRead = 360 + yRotRead;
 				}
-				if (firstTime){
-					IJ.append("" + pos +","+ xRotRead +","+ yRotRead +","+ zRotRead +","+ maxReferenceIntensity, savePath+"fineRotations.txt");
+				if (firstTime) {
+					IJ.append("" + pos + "," + xRotRead + "," + yRotRead + ","
+							+ zRotRead + "," + maxReferenceIntensity, savePath
+							+ "fineRotations.txt");
 				} else {
-					previewFileText = previewFileText.replaceAll("(.*\n)"+pos +",.*,.*,.*,.*(\n.*)",
-							"$1" + pos +","+ xRotRead +","+ yRotRead +","+ zRotRead +","+ maxReferenceIntensity+"$2");
-					IJ.saveString(previewFileText, savePath+"fineRotations.txt");
+					previewFileText = previewFileText.replaceAll("(.*\n)" + pos
+							+ ",.*,.*,.*,.*(\n.*)", "$1" + pos + "," + xRotRead
+							+ "," + yRotRead + "," + zRotRead + ","
+							+ maxReferenceIntensity + "$2");
+					IJ.saveString(previewFileText, savePath
+							+ "fineRotations.txt");
 				}
 			}
-			
-//			WOW! NEED TO ADD HERE SETUP OF ALL NON_PREVIEW FOLDERS WITH KEY HELPER FILES
-//			THEN RELAUNCH WITH NEW PARAMETERS CALLED UP....DONE!
-			
+
+			// WOW! NEED TO ADD HERE SETUP OF ALL NON_PREVIEW FOLDERS WITH KEY
+			// HELPER FILES
+			// THEN RELAUNCH WITH NEW PARAMETERS CALLED UP....DONE!
+
 			String previewPath = savePath;
-			String fullSetSavePath = previewPath.replace("DeconPreview_", "Decon_");
-			
+			String fullSetSavePath = previewPath.replace("DeconPreview_",
+					"Decon_");
+
 			Process cloneProcess = null;
 			try {
-				cloneProcess = Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","robocopy",previewPath, fullSetSavePath,"/mir"});
-				while (cloneProcess==null){
+				cloneProcess = Runtime.getRuntime().exec(
+						new String[] { "cmd", "/c", "start", "/min", "/wait",
+								"robocopy", previewPath, fullSetSavePath,
+								"/mir" });
+				while (cloneProcess == null) {
 					IJ.wait(100);
 				}
-				while (cloneProcess!=null && cloneProcess.isAlive()){
+				while (cloneProcess != null && cloneProcess.isAlive()) {
 					IJ.wait(100);
 				}
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			} finally {
-				if (cloneProcess!= null) {
-					IJ.log("rdpExit="+cloneProcess.exitValue());
+				if (cloneProcess != null) {
+					IJ.log("rdpExit=" + cloneProcess.exitValue());
 					try {
 						if (cloneProcess.getOutputStream() != null) {
 							cloneProcess.getOutputStream().close();
@@ -7204,19 +7224,32 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			}
 			Process cleanProcess = null;
 			try {
-				cleanProcess = Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","for", "/d", "%G", "in", "("+fullSetSavePath+File.separator+"*Decon-Fuse*)", "do", "rd", "/s", "/q", "%~G"});
-				while (cleanProcess==null){
+				cleanProcess = Runtime.getRuntime().exec(
+						new String[] {
+								"cmd",
+								"/c",
+								"start",
+								"/min",
+								"/wait",
+								"for",
+								"/d",
+								"%G",
+								"in",
+								"(" + fullSetSavePath + File.separator
+										+ "*Decon-Fuse*)", "do", "rd", "/s",
+								"/q", "%~G" });
+				while (cleanProcess == null) {
 					IJ.wait(100);
 				}
-				while (cleanProcess!=null && cleanProcess.isAlive()){
+				while (cleanProcess != null && cleanProcess.isAlive()) {
 					IJ.wait(100);
 				}
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			} finally {
-				if (cleanProcess!= null) {
-					IJ.log("rdpExit="+cleanProcess.exitValue());
+				if (cleanProcess != null) {
+					IJ.log("rdpExit=" + cleanProcess.exitValue());
 					try {
 						if (cleanProcess.getOutputStream() != null) {
 							cleanProcess.getOutputStream().close();
@@ -7245,19 +7278,33 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 			Process clipProcess = null;
 			try {
-				clipProcess = Runtime.getRuntime().exec(new String[] {"cmd","/c","start","/min","/wait","for", "/d", "%H", "in", "("+fullSetSavePath+File.separator+"RegDecon"+File.separator+"Pos*)", "do", "rd", "/s", "/q", "%~H"});
-				while (clipProcess==null){
+				clipProcess = Runtime
+						.getRuntime()
+						.exec(new String[] {
+								"cmd",
+								"/c",
+								"start",
+								"/min",
+								"/wait",
+								"for",
+								"/d",
+								"%H",
+								"in",
+								"(" + fullSetSavePath + File.separator
+										+ "RegDecon" + File.separator + "Pos*)",
+								"do", "rd", "/s", "/q", "%~H" });
+				while (clipProcess == null) {
 					IJ.wait(100);
 				}
-				while (clipProcess!=null && clipProcess.isAlive()){
+				while (clipProcess != null && clipProcess.isAlive()) {
 					IJ.wait(100);
 				}
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			} finally {
-				if (clipProcess!= null) {
-					IJ.log("rdpExit="+clipProcess.exitValue());
+				if (clipProcess != null) {
+					IJ.log("rdpExit=" + clipProcess.exitValue());
 					try {
 						if (clipProcess.getOutputStream() != null) {
 							clipProcess.getOutputStream().close();
@@ -7284,17 +7331,18 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 			}
 
-
 			monitoring = false;
 		}
-		
+
 		if (e.getActionCommand() == "CCM") {
-			if (cDim == 4 && wavelengths == 4 && splitChannels == true && dimOrder == "xySplitCzt") {
+			if (cDim == 4 && wavelengths == 4 && splitChannels == true
+					&& dimOrder == "xySplitCzt") {
 				cDim = 2;
 				wavelengths = 2;
 				splitChannels = true;
 				dimOrder = "xySplitSequentialCzt";
-			} else if (cDim == 2 && wavelengths == 2 && splitChannels == true && dimOrder == "xySplitSequentialCzt") {
+			} else if (cDim == 2 && wavelengths == 2 && splitChannels == true
+					&& dimOrder == "xySplitSequentialCzt") {
 				cDim = 4;
 				wavelengths = 4;
 				splitChannels = true;
@@ -7304,36 +7352,39 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			MultiFileInfoVirtualStack[] stackAs = new MultiFileInfoVirtualStack[pDim];
 			MultiFileInfoVirtualStack[] stackBs = new MultiFileInfoVirtualStack[pDim];
 
-			for (int pos=0; pos<pDim; pos++) {
+			for (int pos = 0; pos < pDim; pos++) {
 				boolean go = true;
-				if (posIntArray!=null){
+				if (posIntArray != null) {
 					go = false;
-					for (int posInt:posIntArray){
-						if (posInt == pos){
-							go=true;
+					for (int posInt : posIntArray) {
+						if (posInt == pos) {
+							go = true;
 						}
 					}
 				}
-				if (!go){
+				if (!go) {
 					continue;
 				}
 
-				
-				if(e.getSource()!= splitButton[pos][0] && e.getSource()!= splitButton[pos][1]){
+				if (e.getSource() != splitButton[pos][0]
+						&& e.getSource() != splitButton[pos][1]) {
 					continue;
 				}
-				
+
 				doProcessing[pos] = true;
 
-				if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+				if (impAs[pos] == null || impAs[pos].hasNullStack()
+						|| impAs[pos].getWindow() == null
+						|| !impAs[pos].getWindow().isVisible()) {
 					doProcessing[pos] = false;
 					continue;
 				}
-				if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+				if (impBs[pos] == null || impBs[pos].hasNullStack()
+						|| impBs[pos].getWindow() == null
+						|| !impBs[pos].getWindow().isVisible()) {
 					doProcessing[pos] = false;
 					continue;
-				} 
-
+				}
 
 				if (impAs[pos].hasNullStack())
 					continue;
@@ -7348,45 +7399,55 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					int cA = impAs[pos].getChannel();
 					int zA = impAs[pos].getSlice();
 					int tA = impAs[pos].getFrame();
-					boolean tailing = tA==impAs[pos].getNFrames();
+					boolean tailing = tA == impAs[pos].getNFrames();
 					tDim = impAs[pos].getNFrames();
 
 					stackAs[pos] = new MultiFileInfoVirtualStack(
-							dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_Channels/vDim>1 && diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
-							false, false, true, new File(this.dirOrOMETiff).isDirectory() && this.dirOrOMETiff.endsWith(".ome.tif"));
+							dirConcat,
+							dimOrder,
+							keyString,
+							cDim
+									* (diSPIM_MM_Channels / vDim > 1
+											&& diSPIM_MM_channelOrder == "RG" ? -1
+											: 1), zDim, tDim, vDim, pos, false,
+							false, true,
+							new File(this.dirOrOMETiff).isDirectory()
+									&& this.dirOrOMETiff.endsWith(".ome.tif"));
 
-					ImagePlus impNextA = new ImagePlus(impAs[pos].getTitle(), stackAs[pos]);
+					ImagePlus impNextA = new ImagePlus(impAs[pos].getTitle(),
+							stackAs[pos]);
 					impNextA.setOpenAsHyperStack(true);
 					impNextA.setDimensions(cDim, zDim, tDim);
 					impNextA = new CompositeImage(impNextA);
-					((CompositeImage)impNextA).setMode(modeA);
-					((CompositeImage)impNextA).reset();
-					((CompositeImage)impNextA).copyLuts(impAs[pos]);
+					((CompositeImage) impNextA).setMode(modeA);
+					((CompositeImage) impNextA).reset();
+					((CompositeImage) impNextA).copyLuts(impAs[pos]);
 					impNextA.setCalibration(impAs[pos].getCalibration());
 					if (stageScan)
-						stackAs[pos].setSkewXperZ(
-								impNextA.getCalibration().pixelDepth / impNextA.getCalibration().pixelWidth);
+						stackAs[pos]
+								.setSkewXperZ(impNextA.getCalibration().pixelDepth
+										/ impNextA.getCalibration().pixelWidth);
 
 					impAs[pos] = impNextA;
-					
+
 					win = null;
 
 					win.setImage(impAs[pos]);
 					impAs[pos].setWindow(win);
 					win.updateImage(impAs[pos]);
 					if (win instanceof StackWindow) {
-						StackWindow sw = (StackWindow)win;
+						StackWindow sw = (StackWindow) win;
 						int stackSize = impAs[pos].getStackSize();
 						int nScrollbars = sw.getNScrollbars();
 						sw.addScrollbars(impAs[pos]);
 					}
-					impAs[pos].setPosition(cA, zA, (tailing || tA > impAs[pos].getNFrames())? impAs[pos].getNFrames() : tA);
-					((CompositeImage)impAs[pos]).setMode(modeA);
+					impAs[pos].setPosition(cA, zA, (tailing || tA > impAs[pos]
+							.getNFrames()) ? impAs[pos].getNFrames() : tA);
+					((CompositeImage) impAs[pos]).setMode(modeA);
 					win.getCanvas().setMagnification(zoomA);
 					Dimension winSize = win.getSize();
 					win.pack();
 					win.setSize(winSize);
-
 
 					win = impBs[pos].getWindow();
 					double zoomB = win.getCanvas().getMagnification();
@@ -7394,29 +7455,41 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					int zB = impBs[pos].getSlice();
 					int tB = impBs[pos].getFrame();
 					if (impBs[pos].isComposite()) {
-						modeB = ((CompositeImage)impBs[pos]).getCompositeMode();
+						modeB = ((CompositeImage) impBs[pos])
+								.getCompositeMode();
 					}
 
-					tailing = tB==impBs[pos].getNFrames();
+					tailing = tB == impBs[pos].getNFrames();
 					tDim = impBs[pos].getNFrames();
 
 					stackBs[pos] = new MultiFileInfoVirtualStack(
-							dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_Channels/vDim>1 && diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
-							true, false, true, new File(this.dirOrOMETiff).isDirectory() && this.dirOrOMETiff.endsWith(".ome.tif"));
-					
-					ImagePlus impNextB = new ImagePlus(impAs[pos].getTitle(), stackAs[pos]);
+							dirConcat,
+							dimOrder,
+							keyString,
+							cDim
+									* (diSPIM_MM_Channels / vDim > 1
+											&& diSPIM_MM_channelOrder == "RG" ? -1
+											: 1), zDim, tDim, vDim, pos, true,
+							false, true,
+							new File(this.dirOrOMETiff).isDirectory()
+									&& this.dirOrOMETiff.endsWith(".ome.tif"));
 
-					impNextB = new CompositeImage(new ImagePlus(impBs[pos].getTitle(), stackBs[pos]));
+					ImagePlus impNextB = new ImagePlus(impAs[pos].getTitle(),
+							stackAs[pos]);
+
+					impNextB = new CompositeImage(new ImagePlus(
+							impBs[pos].getTitle(), stackBs[pos]));
 					impNextB.setOpenAsHyperStack(true);
 					impNextB.setDimensions(cDim, zDim, tDim);
 					impNextB = new CompositeImage(impNextB);
-					((CompositeImage)impNextB).setMode(modeB);
-					((CompositeImage)impNextB).reset();
-					((CompositeImage)impNextB).copyLuts(impBs[pos]);
+					((CompositeImage) impNextB).setMode(modeB);
+					((CompositeImage) impNextB).reset();
+					((CompositeImage) impNextB).copyLuts(impBs[pos]);
 					impNextB.setCalibration(impBs[pos].getCalibration());
 					if (stageScan)
-						stackAs[pos].setSkewXperZ(
-								impNextB.getCalibration().pixelDepth / impNextB.getCalibration().pixelWidth);
+						stackAs[pos]
+								.setSkewXperZ(impNextB.getCalibration().pixelDepth
+										/ impNextB.getCalibration().pixelWidth);
 
 					impBs[pos] = impNextB;
 
@@ -7424,28 +7497,35 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					impBs[pos].setWindow(win);
 					win.updateImage(impBs[pos]);
 					if (win instanceof StackWindow) {
-						StackWindow sw = (StackWindow)win;
+						StackWindow sw = (StackWindow) win;
 						int stackSize = impBs[pos].getStackSize();
 						int nScrollbars = sw.getNScrollbars();
 						sw.addScrollbars(impBs[pos]);
 					}
-					impBs[pos].setPosition(cB, zB, (tailing || tB > impBs[pos].getNFrames())? impBs[pos].getNFrames() : tB);
-					((CompositeImage)impBs[pos]).setMode(modeB);
+					impBs[pos].setPosition(cB, zB, (tailing || tB > impBs[pos]
+							.getNFrames()) ? impBs[pos].getNFrames() : tB);
+					((CompositeImage) impBs[pos]).setMode(modeB);
 					win.getCanvas().setMagnification(zoomB);
 					winSize = win.getSize();
 					win.pack();
 					win.setSize(winSize);
-					
-					((MultiFileInfoVirtualStack)(impAs[pos].getStack())).setdXA((Integer) xSpinner[pos][0].getValue());
-					((MultiFileInfoVirtualStack)(impAs[pos].getStack())).setdYA((Integer) ySpinner[pos][0].getValue());
-					((MultiFileInfoVirtualStack)(impAs[pos].getStack())).setdZA((Integer) zSpinner[pos][0].getValue());
-					((MultiFileInfoVirtualStack)(impBs[pos].getStack())).setdXB((Integer) xSpinner[pos][1].getValue());
-					((MultiFileInfoVirtualStack)(impBs[pos].getStack())).setdYB((Integer) ySpinner[pos][1].getValue());
-					((MultiFileInfoVirtualStack)(impBs[pos].getStack())).setdZB((Integer) zSpinner[pos][1].getValue());
 
-					((CompositeImage)impAs[pos]).updateAndDraw();
+					((MultiFileInfoVirtualStack) (impAs[pos].getStack()))
+							.getdXA()[0] =((Integer) xSpinner[pos][0].getValue());
+					((MultiFileInfoVirtualStack) (impAs[pos].getStack()))
+							.getdYA()[0] =((Integer) ySpinner[pos][0].getValue());
+					((MultiFileInfoVirtualStack) (impAs[pos].getStack()))
+							.getdZA()[0] =((Integer) zSpinner[pos][0].getValue());
+					((MultiFileInfoVirtualStack) (impBs[pos].getStack()))
+							.getdXB()[0] =((Integer) xSpinner[pos][1].getValue());
+					((MultiFileInfoVirtualStack) (impBs[pos].getStack()))
+							.getdYB()[0] =((Integer) ySpinner[pos][1].getValue());
+					((MultiFileInfoVirtualStack) (impBs[pos].getStack()))
+							.getdZB()[0] =((Integer) zSpinner[pos][1].getValue());
 
-					((CompositeImage)impBs[pos]).updateAndDraw();
+					((CompositeImage) impAs[pos]).updateAndDraw();
+
+					((CompositeImage) impBs[pos]).updateAndDraw();
 				}
 			}
 
@@ -7455,116 +7535,128 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 	public void stateChanged(ChangeEvent e) {
 		if (e.getSource() instanceof JSpinner) {
-			for (int p=0; p<pDim; p++) {
-				if ( impAs[p]!=null && impAs[p].getWindow()!=null && impAs[p].getWindow().isAncestorOf((Component)e.getSource())) {
-					if(e.getSource().equals(xSpinner[p][0])) {
-						((MultiFileInfoVirtualStack)(impAs[p].getStack())).setdXA((Integer) xSpinner[p][0].getValue());
-						((CompositeImage)impAs[p]).updateAndDraw();
+			for (int p = 0; p < pDim; p++) {
+				if (impAs[p] != null
+						&& impAs[p].getWindow() != null
+						&& impAs[p].getWindow().isAncestorOf(
+								(Component) e.getSource())) {
+					if (e.getSource().equals(xSpinner[p][0])) {
+						Arrays.fill(((MultiFileInfoVirtualStack) (impAs[p].getStack()))
+								.getdXA(), ((Integer) xSpinner[p][0].getValue()));
+						((CompositeImage) impAs[p]).updateAndDraw();
 						break;
 					}
-					if(e.getSource().equals(ySpinner[p][0])) {
-						((MultiFileInfoVirtualStack)(impAs[p].getStack())).setdYA((Integer) ySpinner[p][0].getValue());
-						((CompositeImage)impAs[p]).updateAndDraw();
+					if (e.getSource().equals(ySpinner[p][0])) {
+						Arrays.fill(((MultiFileInfoVirtualStack) (impAs[p].getStack()))
+								.getdYA(), ((Integer) ySpinner[p][0].getValue()));
+						((CompositeImage) impAs[p]).updateAndDraw();
 						break;
 					}
-					if(e.getSource().equals(zSpinner[p][0])) {
-						((MultiFileInfoVirtualStack)(impAs[p].getStack())).setdZA((Integer) zSpinner[p][0].getValue());
-						((CompositeImage)impAs[p]).updateAndDraw();
+					if (e.getSource().equals(zSpinner[p][0])) {
+						Arrays.fill(((MultiFileInfoVirtualStack) (impAs[p].getStack()))
+								.getdZA(), ((Integer) zSpinner[p][0].getValue()));
+						((CompositeImage) impAs[p]).updateAndDraw();
 						break;
 					}
-				}else if ( impBs[p]!=null && impBs[p].getWindow()!=null && impBs[p].getWindow().isAncestorOf((Component)e.getSource())) {
-					if(e.getSource().equals(xSpinner[p][1])) {
-						((MultiFileInfoVirtualStack)(impBs[p].getStack())).setdXB((Integer) xSpinner[p][1].getValue());
-						((CompositeImage)impBs[p]).updateAndDraw();
+				} else if (impBs[p] != null
+						&& impBs[p].getWindow() != null
+						&& impBs[p].getWindow().isAncestorOf(
+								(Component) e.getSource())) {
+					if (e.getSource().equals(xSpinner[p][1])) {
+						Arrays.fill(((MultiFileInfoVirtualStack) (impBs[p].getStack()))
+								.getdXB(), ((Integer) xSpinner[p][1].getValue()));
+						((CompositeImage) impBs[p]).updateAndDraw();
 						break;
 					}
-					if(e.getSource().equals(ySpinner[p][1])) {
-						((MultiFileInfoVirtualStack)(impBs[p].getStack())).setdYB((Integer) ySpinner[p][1].getValue());
-						((CompositeImage)impBs[p]).updateAndDraw();
+					if (e.getSource().equals(ySpinner[p][1])) {
+						Arrays.fill(((MultiFileInfoVirtualStack) (impBs[p].getStack()))
+								.getdYB(), ((Integer) ySpinner[p][1].getValue()));
+						((CompositeImage) impBs[p]).updateAndDraw();
 						break;
 					}
-					if(e.getSource().equals(zSpinner[p][1])) {
-						((MultiFileInfoVirtualStack)(impBs[p].getStack())).setdZB((Integer) zSpinner[p][1].getValue());
-						((CompositeImage)impBs[p]).updateAndDraw();
+					if (e.getSource().equals(zSpinner[p][1])) {
+						Arrays.fill(((MultiFileInfoVirtualStack) (impBs[p].getStack()))
+								.getdZB(), ((Integer) zSpinner[p][1].getValue()));
+						((CompositeImage) impBs[p]).updateAndDraw();
 						break;
 					}
 				}
 			}
 		}
-		
+
 	}
 
 	public void imageOpened(ImagePlus imp) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	public void imageClosed(ImagePlus closingImp) {
-		if (closingImp != null){
+		if (closingImp != null) {
 			closingImp.killRoi();
 		}
-		if (impAs!=null ) {
-			for (int a=0;a<impAs.length;a++) {
+		if (impAs != null) {
+			for (int a = 0; a < impAs.length; a++) {
 				if (impAs[a] == closingImp) {
-					//				ImagePlus.removeImageListener(this);
+					// ImagePlus.removeImageListener(this);
 					stackAs[a] = null;
 					impAs[a] = null;
 				}
 			}
 		}
-		if (impBs!=null ) {
-			for (int a=0;a<impBs.length;a++) {
+		if (impBs != null) {
+			for (int a = 0; a < impBs.length; a++) {
 				if (impBs[a] == closingImp) {
-					//				ImagePlus.removeImageListener(this);
+					// ImagePlus.removeImageListener(this);
 					stackBs[a] = null;
 					impBs[a] = null;
 				}
 			}
 		}
-		if (ciDFs!=null ) {
-			for (int a=0;a<ciDFs.length;a++) {
+		if (ciDFs != null) {
+			for (int a = 0; a < ciDFs.length; a++) {
 				if (ciDFs[a] == closingImp) {
-					//				ImagePlus.removeImageListener(this);
+					// ImagePlus.removeImageListener(this);
 					stackDFs[a] = null;
 					impDF1s[a] = null;
 					ciDFs[a] = null;
 				}
 			}
 		}
-		if (ciPrxs!=null ) {
-			for (int a=0;a<ciPrxs.length;a++) {
+		if (ciPrxs != null) {
+			for (int a = 0; a < ciPrxs.length; a++) {
 				if (ciPrxs[a] == closingImp) {
-					//				ImagePlus.removeImageListener(this);
+					// ImagePlus.removeImageListener(this);
 					stackPrxs[a] = null;
 					impPrxs[a] = null;
 					ciPrxs[a] = null;
 				}
 			}
 		}
-		if (ciPrys!=null ) {
-			for (int a=0;a<ciPrys.length;a++) {
+		if (ciPrys != null) {
+			for (int a = 0; a < ciPrys.length; a++) {
 				if (ciPrys[a] == closingImp) {
-					//				ImagePlus.removeImageListener(this);
+					// ImagePlus.removeImageListener(this);
 					stackPrys[a] = null;
 					impPrys[a] = null;
 					ciPrys[a] = null;
 				}
 			}
 		}
-		if (impPrxs!=null ) {
-			for (int a=0;a<impPrxs.length;a++) {
+		if (impPrxs != null) {
+			for (int a = 0; a < impPrxs.length; a++) {
 				if (impPrxs[a] == closingImp) {
-					//				ImagePlus.removeImageListener(this);
+					// ImagePlus.removeImageListener(this);
 					stackPrxs[a] = null;
 
 					impPrxs[a] = null;
 				}
 			}
 		}
-		if (impPrys!=null ) {
-			for (int a=0;a<impPrys.length;a++) {
+		if (impPrys != null) {
+			for (int a = 0; a < impPrys.length; a++) {
 				if (impPrys[a] == closingImp) {
-					//				ImagePlus.removeImageListener(this);
+					// ImagePlus.removeImageListener(this);
 
 					stackPrys[a] = null;
 					impPrys[a] = null;
@@ -7572,20 +7664,20 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				}
 			}
 		}
-		if (impDF1s!=null ) {
-			for (int a=0;a<impDF1s.length;a++) {
+		if (impDF1s != null) {
+			for (int a = 0; a < impDF1s.length; a++) {
 				if (impDF1s[a] == closingImp) {
-					//				ImagePlus.removeImageListener(this);
+					// ImagePlus.removeImageListener(this);
 					stackDFs[a] = null;
 
 					impDF1s[a] = null;
 				}
 			}
 		}
-		if (impDF2s!=null ) {
-			for (int a=0;a<impDF2s.length;a++) {
+		if (impDF2s != null) {
+			for (int a = 0; a < impDF2s.length; a++) {
 				if (impDF2s[a] == closingImp) {
-					//				ImagePlus.removeImageListener(this);
+					// ImagePlus.removeImageListener(this);
 
 					impDF2s[a] = null;
 				}
@@ -7595,6 +7687,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 	public void imageUpdated(ImagePlus imp) {
 		// TODO Auto-generated method stub
-		
+
 	}
 }
