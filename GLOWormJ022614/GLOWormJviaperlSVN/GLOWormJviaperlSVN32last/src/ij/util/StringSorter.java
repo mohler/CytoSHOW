@@ -92,6 +92,8 @@ public class StringSorter {
 				stringMinLength = list[i].length();
 			}
 		}
+		int nameIncrMin=0;
+		int nameIncrMax=0;
 		for(int i=0;i<n;i++) {
 			if(list[i].length() <= stringMaxLength) {
 				if (list[i].matches(".*\\d+.*")) {
@@ -103,8 +105,23 @@ public class StringSorter {
 					}
 					nameRoot[i] = list[i].replaceAll("(.*\\D)\\d+"+nameEnd[i], "$1");
 					nameIncr[i] = list[i].replaceAll(".*\\D(\\d+)"+nameEnd[i], "$1");
+					if(nameIncr[i].length() > nameIncrMax) {
+						nameIncrMax = nameIncr[i].length();
+					}
+					if(nameIncr[i].length() < nameIncrMin) {
+						nameIncrMin = nameIncr[i].length();
+					}
+				}
+			}
+		}
+		
+		nameIncrMin=0;
+		
+		for(int i=0;i<n;i++) {
+			if(list[i].length() <= stringMaxLength) {
+				if (list[i].matches(".*\\d+.*")) {
 					if (!nameIncr[i].startsWith("0")) {
-						nameIncr[i] = IJ.pad(Integer.parseInt(nameIncr[i]), stringMaxLength - stringMinLength +1);
+						nameIncr[i] = IJ.pad(Integer.parseInt(nameIncr[i]), nameIncrMax - nameIncrMin +1);
 					}
 					listToPad[i] = nameRoot[i] + nameIncr[i] +nameEnd[i];
 				}

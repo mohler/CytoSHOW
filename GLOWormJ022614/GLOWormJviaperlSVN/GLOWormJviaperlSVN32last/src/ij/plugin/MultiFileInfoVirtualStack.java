@@ -202,8 +202,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				String subFileName = subFilePathChunks[subFilePathChunks.length-1];
 				
 //				which format was this for, now conflicting with SN 16-bit stack output names...
-//				if (subFileName.matches(".*_t\\d+.*\\.tif")) {
-				
+//				if (subFileName.matches(".*_t\\d+.*\\.tif")) 
 				if (subFileName.matches(".*Decon_(reg_)?\\d+\\.tif")) {
 					int tValue = Integer.parseInt(subFileName.replaceAll(".*_(\\d+)\\.tif", "$1"));
 					if (tValue > highT)
