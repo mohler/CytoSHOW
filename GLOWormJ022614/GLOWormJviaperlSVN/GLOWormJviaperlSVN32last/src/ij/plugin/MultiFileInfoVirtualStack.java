@@ -53,6 +53,12 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	private boolean newRealInfo;
 	private ArrayList<FileInfo[]> savedInfoCollectorArrayList;
 	private String infoLoadReport;
+	private int[] corrXA;
+	private int[] corrYA;
+	private int[] corrZA;
+	private int[] corrXB;
+	private int[] corrYB;
+	private int[] corrZB;
 
 	/* Default constructor. */
 	public MultiFileInfoVirtualStack() {}
@@ -592,20 +598,28 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		dXB = new int[tDim*cDim*vDim];
 		dYB = new int[tDim*cDim*vDim];
 		dZB = new int[tDim*cDim*vDim];
+
+		
+		corrXA = new int[tDim*cDim*vDim];
+		corrYA = new int[tDim*cDim*vDim];
+		corrZA = new int[tDim*cDim*vDim];
+		corrXB = new int[tDim*cDim*vDim];
+		corrYB = new int[tDim*cDim*vDim];
+		corrZB = new int[tDim*cDim*vDim];
 		if (savedInfoCollectorArrayList == null || savedInfoCollectorArrayList.size()==0 || savedInfoCollectorArrayList.get(0)[0].channelShifts == null){
-			Arrays.fill(dXA,0);
-			Arrays.fill(dYA,0);
-			Arrays.fill(dZA,0);
-			Arrays.fill(dXB,0);
-			Arrays.fill(dYB,0);
-			Arrays.fill(dZB,0);
+			Arrays.fill(corrXA,0);
+			Arrays.fill(corrYA,0);
+			Arrays.fill(corrZA,0);
+			Arrays.fill(corrXB,0);
+			Arrays.fill(corrYB,0);
+			Arrays.fill(corrZB,0);
 		} else {
-			Arrays.fill(dXA, savedInfoCollectorArrayList.get(0)[0].channelShifts[0]);
-			Arrays.fill(dYA, savedInfoCollectorArrayList.get(0)[0].channelShifts[1]);
-			Arrays.fill(dZA, savedInfoCollectorArrayList.get(0)[0].channelShifts[2]);
-			Arrays.fill(dXB, savedInfoCollectorArrayList.get(0)[0].channelShifts[3]);
-			Arrays.fill(dYB, savedInfoCollectorArrayList.get(0)[0].channelShifts[4]);
-			Arrays.fill(dZB, savedInfoCollectorArrayList.get(0)[0].channelShifts[5]);
+			Arrays.fill(corrXA, savedInfoCollectorArrayList.get(0)[0].channelShifts[0]);
+			Arrays.fill(corrYA, savedInfoCollectorArrayList.get(0)[0].channelShifts[1]);
+			Arrays.fill(corrZA, savedInfoCollectorArrayList.get(0)[0].channelShifts[2]);
+			Arrays.fill(corrXB, savedInfoCollectorArrayList.get(0)[0].channelShifts[3]);
+			Arrays.fill(corrYB, savedInfoCollectorArrayList.get(0)[0].channelShifts[4]);
+			Arrays.fill(corrZB, savedInfoCollectorArrayList.get(0)[0].channelShifts[5]);
 
 		}
 
@@ -613,7 +627,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (correctiveShiftsFile.canRead()){
 			String correctiveShiftsString = IJ.openAsString(infoDir + "correctiveShifts.txt");
 			String[] correctiveShiftsLines = correctiveShiftsString.split("\n");
-			int[][] shiftArrays = new int[][]{dXA,dYA,dZA,dXB,dYB,dZB};
+			int[][] shiftArrays = new int[][]{corrXA,corrYA,corrZA,corrXB,corrYB,corrZB};
 			for (int l = 0; l<correctiveShiftsLines.length; l++){
 				String[] correctiveShiftsLineChunks = correctiveShiftsLines[l].split(",");
 				for (int m=0; m<shiftArrays[l].length; m++){
@@ -771,10 +785,15 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (reverseChannelOrder) {
 			sliceNumber = sliceNumber%2==0?(sliceNumber+1):(sliceNumber-1);
 		}
-		int dX = 0;
-		int dY = 0;
-
-		int dZ = 0;
+		
+		int dX = isViewB?dXB[0]:dXA[0];;
+		int dY = isViewB?dYB[0]:dYA[0];;
+		int dZ = isViewB?dZB[0]:dZA[0];;
+		
+		int corrX = 0;
+		int corrY = 0;
+		int corrZ = 0;
+		
 		if (rawdispimdata /*&& cDim/vDim>1*/ ) {
 			dZ=isViewB?dZB[0]:dZA[0];
 		}
@@ -800,12 +819,13 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 //			if (stackNumber >= fivStacks.size()){
 //				stackNumber = fivStacks.size()-1;
 //			}
-			dX=isViewB?dXB[stackNumber+1]:dXA[stackNumber+1];
-			dY=isViewB?dYB[stackNumber+1]:dYA[stackNumber+1];
-			dZ=isViewB?dZB[stackNumber+1]:dZA[stackNumber+1];
+			corrX=isViewB?corrXB[stackNumber+1]:corrXA[stackNumber+1];
+			corrY=isViewB?corrYB[stackNumber+1]:corrYA[stackNumber+1];
+			corrZ=isViewB?corrZB[stackNumber+1]:corrZA[stackNumber+1];
 
 			initiateStack(stackNumber, 0);
-			ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber+(sliceNumber%2==0?0:dZ));
+			ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber+(sliceNumber%2==0?0:dZ)+corrZ);
+			ip.translate(corrX, corrY);
 		}
 		if (dimOrder.toLowerCase().matches(".*split.*c.*")) {
 
@@ -832,12 +852,12 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 //				stackNumber = fivStacks.size()-1;
 //			}
 			
-			dX=isViewB?dXB[stackNumber+1]:dXA[stackNumber+1];
-			dY=isViewB?dYB[stackNumber+1]:dYA[stackNumber+1];
-			dZ=isViewB?dZB[stackNumber+1]:dZA[stackNumber+1];
+			corrX=isViewB?corrXB[stackNumber+1]:corrXA[stackNumber+1];
+			corrY=isViewB?corrYB[stackNumber+1]:corrYA[stackNumber+1];
+			corrZ=isViewB?corrZB[stackNumber+1]:corrZA[stackNumber+1];
 			
 			initiateStack(stackNumber, 0);
-			ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber+(sliceNumber%(2)==0?0:dZ*2));
+			ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber+(sliceNumber%(2)==0?0:dZ*2)+corrZ);
 
 			ip.setInterpolationMethod(ImageProcessor.BICUBIC);
 			ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
@@ -866,15 +886,26 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				ip.flipHorizontal();
 			}
 			ip.translate((1-n%2)*dX, (1-n%2)*dY);
+			ip.translate(corrX, corrY);
 		}
 		if (dimOrder == "xyzct") {
+			corrX=isViewB?corrXB[stackNumber+1]:corrXA[stackNumber+1];
+			corrY=isViewB?corrYB[stackNumber+1]:corrYA[stackNumber+1];
+			corrZ=isViewB?corrZB[stackNumber+1]:corrZA[stackNumber+1];
+			
 			initiateStack(stackNumber, 0);
 			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber/cDim + ((sliceNumber%cDim)*fivStacks.get(stackNumber).getSize()/(vDim))+(sliceNumber%2==0?0:dZ)
-					+(isViewB?fivStacks.get(stackNumber).getSize()/(cDim*vDim):0));
+					+(isViewB?fivStacks.get(stackNumber).getSize()/(cDim*vDim):0)+corrZ);
+			ip.translate(corrX, corrY);
 		}
 		if (dimOrder == "xyztc") {
+			corrX=isViewB?corrXB[stackNumber+1]:corrXA[stackNumber+1];
+			corrY=isViewB?corrYB[stackNumber+1]:corrYA[stackNumber+1];
+			corrZ=isViewB?corrZB[stackNumber+1]:corrZA[stackNumber+1];
+			
 			initiateStack(stackNumber, 0);
-			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber+(sliceNumber%2==0?0:dZ));
+			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber+(sliceNumber%2==0?0:dZ)+corrZ);
+			ip.translate(corrX, corrY);
 		}
 
 //		IJ.log(dimOrder+" "+stackNumber+" "+fivStacks.get(stackNumber).getSize()+" "+sliceNumber+" "+vSliceNumber+" ");
