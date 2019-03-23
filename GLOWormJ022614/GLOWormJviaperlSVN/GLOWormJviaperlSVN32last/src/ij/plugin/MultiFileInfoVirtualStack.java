@@ -831,9 +831,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 //			if (stackNumber >= fivStacks.size()){
 //				stackNumber = fivStacks.size()-1;
 //			}
-			corrX=isViewB?corrXB[stackNumber+1]:corrXA[stackNumber+1];
-			corrY=isViewB?corrYB[stackNumber+1]:corrYA[stackNumber+1];
-			corrZ=isViewB?corrZB[stackNumber+1]:corrZA[stackNumber+1];
+			corrX=isViewB?corrXB[((stackNumber)%tDim)]:corrXA[((stackNumber)%tDim)];
+			corrY=isViewB?corrYB[((stackNumber)%tDim)]:corrYA[((stackNumber)%tDim)];
+			corrZ=isViewB?corrZB[((stackNumber)%tDim)]:corrZA[((stackNumber)%tDim)];
 
 			initiateStack(stackNumber, 0);
 			ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber+(sliceNumber%2==0?0:dZ)+corrZ);
@@ -864,9 +864,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 //				stackNumber = fivStacks.size()-1;
 //			}
 			
-			corrX=isViewB?corrXB[stackNumber+1]:corrXA[stackNumber+1];
-			corrY=isViewB?corrYB[stackNumber+1]:corrYA[stackNumber+1];
-			corrZ=isViewB?corrZB[stackNumber+1]:corrZA[stackNumber+1];
+			corrX=isViewB?corrXB[stackNumber]:corrXA[stackNumber];
+			corrY=isViewB?corrYB[stackNumber]:corrYA[stackNumber];
+			corrZ=isViewB?corrZB[stackNumber]:corrZA[stackNumber];
 			
 			initiateStack(stackNumber, 0);
 			ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber+(sliceNumber%(2)==0?0:dZ*2)+corrZ);
@@ -901,9 +901,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			ip.translate(corrX, corrY);
 		}
 		if (dimOrder == "xyzct") {
-			corrX=isViewB?corrXB[stackNumber+1]:corrXA[stackNumber+1];
-			corrY=isViewB?corrYB[stackNumber+1]:corrYA[stackNumber+1];
-			corrZ=isViewB?corrZB[stackNumber+1]:corrZA[stackNumber+1];
+			corrX=isViewB?corrXB[((stackNumber)%tDim)]:corrXA[((stackNumber)%tDim)];
+			corrY=isViewB?corrYB[((stackNumber)%tDim)]:corrYA[((stackNumber)%tDim)];
+			corrZ=isViewB?corrZB[((stackNumber)%tDim)]:corrZA[((stackNumber)%tDim)];
 
 			initiateStack(stackNumber, 0);
 			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber/cDim + ((sliceNumber%cDim)*fivStacks.get(stackNumber).getSize()/(vDim))+(sliceNumber%2==0?0:dZ)
@@ -911,10 +911,10 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			ip.translate(corrX, corrY);
 		}
 		if (dimOrder == "xyztc") {
-			corrX=isViewB?corrXB[stackNumber+1]:corrXA[stackNumber+1];
-			corrY=isViewB?corrYB[stackNumber+1]:corrYA[stackNumber+1];
-			corrZ=isViewB?corrZB[stackNumber+1]:corrZA[stackNumber+1];
-
+			corrX=isViewB?corrXB[((stackNumber)%tDim)]:corrXA[((stackNumber)%tDim)];
+			corrY=isViewB?corrYB[((stackNumber)%tDim)]:corrYA[((stackNumber)%tDim)];
+			corrZ=isViewB?corrZB[((stackNumber)%tDim)]:corrZA[((stackNumber)%tDim)];
+			IJ.log(""+stackNumber+" "+corrX+" "+corrY+" "+corrZ);
 			initiateStack(stackNumber, 0);
 			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber+(sliceNumber%2==0?0:dZ)+corrZ);
 			ip.translate(corrX, corrY);
