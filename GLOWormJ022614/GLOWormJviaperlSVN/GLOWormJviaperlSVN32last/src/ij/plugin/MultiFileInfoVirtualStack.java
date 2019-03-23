@@ -889,20 +889,20 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			ip.translate(corrX, corrY);
 		}
 		if (dimOrder == "xyzct") {
-			corrX=isViewB?corrXB[stackNumber+1]:corrXA[stackNumber+1];
-			corrY=isViewB?corrYB[stackNumber+1]:corrYA[stackNumber+1];
-			corrZ=isViewB?corrZB[stackNumber+1]:corrZA[stackNumber+1];
-			
+			dX=isViewB?dXB[stackNumber+1]:dXA[stackNumber+1];
+			dY=isViewB?dYB[stackNumber+1]:dYA[stackNumber+1];
+			dZ=isViewB?dZB[stackNumber+1]:dZA[stackNumber+1];
+
 			initiateStack(stackNumber, 0);
 			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber/cDim + ((sliceNumber%cDim)*fivStacks.get(stackNumber).getSize()/(vDim))+(sliceNumber%2==0?0:dZ)
 					+(isViewB?fivStacks.get(stackNumber).getSize()/(cDim*vDim):0)+corrZ);
 			ip.translate(corrX, corrY);
 		}
 		if (dimOrder == "xyztc") {
-			corrX=isViewB?corrXB[stackNumber+1]:corrXA[stackNumber+1];
-			corrY=isViewB?corrYB[stackNumber+1]:corrYA[stackNumber+1];
-			corrZ=isViewB?corrZB[stackNumber+1]:corrZA[stackNumber+1];
-			
+			dX=isViewB?dXB[stackNumber+1]:dXA[stackNumber+1];
+			dY=isViewB?dYB[stackNumber+1]:dYA[stackNumber+1];
+			dZ=isViewB?dZB[stackNumber+1]:dZA[stackNumber+1];
+
 			initiateStack(stackNumber, 0);
 			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber+(sliceNumber%2==0?0:dZ)+corrZ);
 			ip.translate(corrX, corrY);
