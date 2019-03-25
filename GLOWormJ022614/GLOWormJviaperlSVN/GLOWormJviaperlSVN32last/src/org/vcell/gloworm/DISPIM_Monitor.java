@@ -5506,6 +5506,30 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										e.printStackTrace();
 									}
 
+									ImagePlus newPryImp = new ImagePlus(savePryPath+File.separator +"Color"+ keyChannel+ File.separator +"projY_"+pos+"_"+pos+".tif");
+									ImageProcessor shiftSensorIP = newPryImp.getStack().getProcessor(10);
+									int shiftX = (int)(shiftSensorIP.getStatistics().xCenterOfMass);
+									int shiftY = (int)(shiftSensorIP.getStatistics().yCenterOfMass);
+									File correctiveShiftsFile = new File(saveDFPath + "correctiveShifts.txt");
+									if (correctiveShiftsFile.canRead()){
+										String correctiveShiftsString = IJ.openAsString(saveDFPath + "correctiveShifts.txt");
+										String[] correctiveShiftsLines = correctiveShiftsString.split("\n");
+										IJ.saveString("", saveDFPath + "correctiveShifts.txt");
+										for (int l = 0; l<correctiveShiftsLines.length; l++){
+											if (l % 3 == 0){
+												correctiveShiftsLines[l]= correctiveShiftsLines[l] + ",0";
+											} else if (l % 3 == 1){
+												int yZero = Integer.parseInt(correctiveShiftsLines[l].split(",")[0]);
+												correctiveShiftsLines[l]= correctiveShiftsLines[l] + ","+(yZero-shiftY);
+											} else if (l % 3 == 2){
+												int xZero = Integer.parseInt(correctiveShiftsLines[l].split(",")[0]);
+												correctiveShiftsLines[l]= correctiveShiftsLines[l] + ","+(shiftX-xZero);
+											}
+											IJ.append(correctiveShiftsLines[l], saveDFPath + "correctiveShifts.txt");
+										}
+									}
+									newPryImp.flush();
+									
 									//NOW REG slavechannel Using new key channel tmx
 									try {
 										String[] cmdln = {""};
