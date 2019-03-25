@@ -5511,15 +5511,15 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									ImageProcessor shiftSensorIP = newPryImp.getImageStack().getProcessor(10);
 									int shiftX = (int)(shiftSensorIP.getStatistics().xCenterOfMass);
 									int shiftY = (int)(shiftSensorIP.getStatistics().yCenterOfMass);
-									File correctiveShiftsFile = new File(saveDFPath + "correctiveShifts.txt");
+									File correctiveShiftsFile = new File(saveDFPath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"correctiveShifts.txt");
 									if (!correctiveShiftsFile.canRead()){
-										IJ.saveString(" \n \n \n \n \n ", saveDFPath + "correctiveShifts.txt");
+										IJ.saveString(" \n \n \n \n \n ", saveDFPath + "RegDecon" + File.separator  + "Pos"+ pos + File.separator +"correctiveShifts.txt");
 
 									}
 									if (correctiveShiftsFile.canRead()){
-										String correctiveShiftsString = IJ.openAsString(saveDFPath + "correctiveShifts.txt");
+										String correctiveShiftsString = IJ.openAsString(saveDFPath  + "RegDecon" + File.separator  + "Pos"+ pos + File.separator+ "correctiveShifts.txt");
 										String[] correctiveShiftsLines = correctiveShiftsString.split("\n");
-										IJ.saveString("", saveDFPath + "correctiveShifts.txt");
+										IJ.saveString("", saveDFPath  + "RegDecon" + File.separator  + "Pos"+ pos + File.separator+ "correctiveShifts.txt");
 										
 										for (int l = 0; l<correctiveShiftsLines.length; l++){
 											if (l % 3 == 0){
@@ -5529,7 +5529,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											} else if (l % 3 == 2){
 												correctiveShiftsLines[l]= correctiveShiftsLines[l] +shiftX +",";
 											}
-											IJ.append(correctiveShiftsLines[l], saveDFPath + "correctiveShifts.txt");
+											IJ.append(correctiveShiftsLines[l],saveDFPath  + "RegDecon" + File.separator  + "Pos"+ pos + File.separator+ "correctiveShifts.txt");
 										}
 									}
 									newPryImp.flush();

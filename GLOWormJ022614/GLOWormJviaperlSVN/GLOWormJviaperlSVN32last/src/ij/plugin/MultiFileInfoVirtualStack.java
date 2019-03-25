@@ -640,9 +640,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				for (int m=0; m<shiftArrays[l].length; m++){
 					if (m<correctiveShiftsLineChunks.length){
 						if(l%3==1){
-							shiftArrays[l][m] = Integer.parseInt(correctiveShiftsLineChunks[0])-Integer.parseInt(correctiveShiftsLineChunks[m]);
+							shiftArrays[l][m] = Integer.parseInt(correctiveShiftsLineChunks[0].trim())-Integer.parseInt(correctiveShiftsLineChunks[m].trim());
 						} else if(l%3==2){
-							shiftArrays[l][m] = Integer.parseInt(correctiveShiftsLineChunks[m])-Integer.parseInt(correctiveShiftsLineChunks[0]);
+							shiftArrays[l][m] = Integer.parseInt(correctiveShiftsLineChunks[m].trim())-Integer.parseInt(correctiveShiftsLineChunks[0].trim());
 						}
 
 					}
