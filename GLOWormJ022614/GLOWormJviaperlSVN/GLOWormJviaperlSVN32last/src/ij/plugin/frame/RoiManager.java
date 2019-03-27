@@ -5175,7 +5175,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	}
 
-	private void openCsv(String path) {			//for StarryNite output
+	private void openCsv(String path) {			//for Elegance output
 		boolean wasVis = this.isVisible();
 		this.setVisible(false);
 		busy = true;
@@ -5184,13 +5184,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		String[] objectLines = s.split("\n");
 		int fullCount = objectLines.length;
 
-		String s2 = null, name2=null, path2=null;
 		ArrayList<Integer> missingZs = new ArrayList<Integer>();
 		if (path.contains("object") && s.contains("OBJ_Name")) {
 			int[] sliceNumbers = new int[fullCount];
 			for (int f=0; f < fullCount; f++) {
 				if(objectLines[f].contains("N2UNR"))
 					sliceNumbers[f] = Integer.parseInt(objectLines[f].substring(objectLines[f].indexOf("N2UNR")+5, objectLines[f].indexOf("N2UNR")+8));
+				if(objectLines[f].contains("JSHJSH"))
+					sliceNumbers[f] = Integer.parseInt(objectLines[f].substring(objectLines[f].indexOf("JSHJSH")+6, objectLines[f].indexOf("JSHJSH")+9));
 				IJ.log(""+sliceNumbers[f]);
 			}
 			Arrays.sort(sliceNumbers);
@@ -5210,24 +5211,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 
 
-			OpenDialog od = new OpenDialog("Open Contin file...", "");
-			String directory = od.getDirectory();
-			name2 = od.getFileName();
-			if (name2==null)
-				return;
-			path2 = directory + name2;
-			s2  = IJ.openAsString(path2);
 		} else {
 			this.setVisible(true);
 			return;
 		}
 		//		IJ.log(s);
-		String impTitle = this.imp.getTitle();
 
 		long count = 0;
-		String[] continLines = s2.split("\n");
 
-		Hashtable<String, String> continHash = new Hashtable<String,String>();
 		Hashtable<String, String> objectHash = new Hashtable<String,String>();
 		String centerZtestString = objectLines[1].split(",")[4].replace("\"", "");
 		String centerZroot = null;
@@ -5242,11 +5233,6 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		long nRois =0;
 
-		for (int i=1; i<continLines.length; i++){
-			String continLine=continLines[i];
-			continHash.put(continLine.split(",")[1].replace("\"", ""), continLine);
-		}
-
 		for (int i=1; i<objectLines.length; i++){
 			String objectLine=objectLines[i];
 			objectHash.put(objectLine.split(",")[0].replace("\"", ""), objectLine);
@@ -5259,175 +5245,35 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			count++;
 			IJ.showStatus(""+count+"/"+fullCount+" Tags loaded for "+ imp.getTitle());
 			String sObj = objectLines[obj];
-			String roiName="";
-			String roiColorName="";
 			String objType = sObj.split(",")[6].replace("\"", "");
-
+			String imageNumber = sObj.split(",")[4].replace("\"", "");
+			int zSustain = Integer.parseInt(sObj.split(",")[21].replace("\"", "").replace("zS", ""));
+			String roiName="\""+sObj.split(",")[17].replace("\"", "")+objType+"_"+sObj.split(",")[18].replace("\"", "")+"_"+sObj.split(",")[12].replace("\"", "")+imageNumber+"_zs"+sObj.split(",")[21].replace("\"", "")+" \"";
+			Color roiColor= objType.contains("chemical")?Color.white:Color.yellow;
+			if (roiName.contains("uncertain"))
+				roiColor= objType.contains("chemical")?Color.pink:Color.orange;
 			int centerX = (int)(Integer.parseInt(sObj.split(",")[1].replace("\"", ""))/shrinkFactor) ;
 			int centerY = (int)(Integer.parseInt(sObj.split(",")[2].replace("\"", ""))/shrinkFactor);
 			int centerZ = Integer.parseInt(sObj.split(",")[4].replace("\"", "")
 					.replace(centerZroot, ("")));
-			//SPECIAL FIX FOR N2UNR, but now generalized
 			int adjustmentZ =0;
-			for (int mz = 0; mz<missingZs.size(); mz++){
-				int missingZ = missingZs.get(mz);
-				if (missingZ<centerZ)
-					adjustmentZ = missingZs.indexOf(missingZ);
-			}
-			centerZ = centerZ-adjustmentZ-1;
-
-			int objNumber =Integer.parseInt(sObj.split(",")[0].replace("\"", ""));
-			int conNumber = Integer.parseInt(sObj.split(",")[5].replace("\"", ""));
-			//				fillColor = (sCell.split("(;fill:|;\")").length>1?(sCell.split("(;fill:|;\")")[1].startsWith("#")?sCell.split("(;fill:|;\")")[1]:""):"");
-
-			String continLine = continHash.get(""+conNumber);
-			if (continLine != null){
-				roiName = continLine.split(",")[2].replace("\"", "") + "|=" +continLine.split(",")[3].replace("\"", "") + "|" + objType;
-				roiColorName = continLine.split(",")[3].split("[\"-]")[1];
-			} else {
-				roiName = "unmatchedObject" + "|=" +sObj.split(",")[0].replace("\"", "") + "|" + objType;;
-			}
-
-			IJ.log(""+objNumber+" "+roiName+" "+roiColorName+" "+centerX+" "+centerY +" "+ centerZ);
-
-			Color fillColor = Color.black;
-			if (roiColorName.contains("blue"))
-				fillColor = Color.blue;
-			if (roiColorName.contains("magenta"))
-				fillColor = Color.magenta;
-			if (roiColorName.contains("green"))
-				fillColor = Color.green;
-			if (roiColorName.contains("orange"))
-				fillColor = Color.orange;
-			if (roiColorName.contains("pink"))
-				fillColor = Color.pink;
-			if (roiColorName.contains("yellow"))
-				fillColor = Color.yellow;
-			if (roiColorName.contains("cyan"))
-				fillColor = Color.cyan;
-			if (roiColorName.contains("red"))
-				fillColor = Color.red;
-			String redCode = Integer.toHexString(fillColor.getRed());
-			redCode = redCode.length() == 2 ? "" + redCode : "0"
-					+ redCode;
-			String greenCode = Integer
-					.toHexString(fillColor.getGreen());
-			greenCode = greenCode.length() == 2 ? "" + greenCode : "0"
-					+ greenCode;
-			String blueCode = Integer.toHexString(fillColor.getBlue());
-			blueCode = blueCode.length() == 2 ? "" + blueCode : "0"
-					+ blueCode;
-			Color fillColorNew = Colors.decode("#33" + redCode
-					+ greenCode + blueCode, defaultColor);
-			Color strokeColorNew = Colors.decode("#55" + redCode
-					+ greenCode + blueCode, defaultColor);
-
-			if (roiName.contains("|cell")) {
-				Roi tRoi = new TextRoi(centerX, centerY, roiName);
-				tRoi.setImage(imp);
-
-				//				IJ.log(""+fillColorNew.getAlpha());
-				listModel.addElement(roiName);
-				fullListModel.addElement(roiName);
-				rois.put(roiName, tRoi);
-				setUpRoisByNameAndNumbers(tRoi);
-				nRois++;
-				tRoi.setFillColor(fillColorNew);
-				//					imp.setRoi(tRoi, true);
-				if (imp.getCanvas()!=null) {
-					((TextRoi)tRoi).updateBounds(imp.getCanvas().getGraphics());
+			for (int susStep=-zSustain/2;susStep<=zSustain/2;zSustain++){
+				centerZ = centerZ+susStep -adjustmentZ;
+				if (centerZ<1||centerZ>imp.getNSlices()){
+					continue;
 				}
-				tRoi.setLocation((int)(centerX - tRoi.getBounds().getWidth()/4), 
-						(int)(centerY - tRoi.getBounds().getHeight()/1.2));
-				tRoi.setPosition(1, 1, centerZ);
-				this.rename(roiName, new int[] { this.getCount() - 1 },
-						false);
-				//					IJ.log(""+tRoi.getFillColor().getAlpha() +tRoi.getFillColor().toString());
-			} else {
-				String fromObj = sObj.replace("\",NULL,\"", "\",\"NULL\",\"").replace("\",,\"", "\",\"NULL\",\"").split("\",\"")[7];
-				IJ.log(fromObj);
-				String[] toObjs = sObj.replace("\",NULL,\"", "\",\"NULL\",\"").replace("\",,\"", "\",\"NULL\",\"").split("\",\"")[8].split(",");
-				IJ.log(toObjs.toString()+" "+toObjs.length);
-				int[] indexes = new int[toObjs.length*2];
-				String fromName = "";
-				String toName = "";
-				for (int i=0; i<toObjs.length; i++) {
-					String toObj = toObjs[i];
-					IJ.log(toObj);
-					String fromObjectLine = objectHash.get(fromObj);
-					int fromX = centerX;
-					int fromY = centerY;
-					if (fromObjectLine != null) {
-						int synFromConNumber = Integer.parseInt(fromObjectLine.split(",")[5].replace("\"", ""));
-						String synFromConLine = continHash.get(""+ synFromConNumber);
-						if (fromObjectLine != null && synFromConLine != null) {
-							fromX = (int)(Integer.parseInt(fromObjectLine.split(",")[1].replace("\"", ""))/shrinkFactor);
-							fromY = (int)(Integer.parseInt(fromObjectLine.split(",")[2].replace("\"", ""))/shrinkFactor);
-							if (fromName.equals(""))
-								fromName = fromName + synFromConLine.split(",")[2].replace("\"", "");
-						}
-					}
-					String toObjectLine = objectHash.get(toObj);
-					int toX = centerX;
-					int toY = centerY;
-					if (fromObjectLine != null && toObjectLine != null) {
-						int synFromConNumber = Integer.parseInt(fromObjectLine.split(",")[5].replace("\"", ""));
-						int synToConNumber = Integer.parseInt(toObjectLine.split(",")[5].replace("\"", ""));
-						String synToConLine = continHash.get(""+ synToConNumber);
-						if (toObjectLine != null && synToConLine != null) {
-							toX = (int)(Integer.parseInt(toObjectLine.split(",")[1].replace("\"", ""))/shrinkFactor);
-							toY = (int)(Integer.parseInt(toObjectLine.split(",")[2].replace("\"", ""))/shrinkFactor);
-							toName = toName+(toName.equals("")?"":",")+ synToConLine.split(",")[2].replace("\"", "");
-						}
-					}
 
-					Roi lRoi = new Line(fromX, fromY, centerX, centerY);
-					lRoi.setStrokeColor(strokeColorNew);
-					lRoi.setStrokeWidth(2);
-					lRoi.setImage(imp);
-					listModel.addElement(roiName);
-					fullListModel.addElement(roiName);
-					rois.put(roiName, lRoi);
-					setUpRoisByNameAndNumbers(lRoi);
-					nRois++;
-					lRoi.setPosition(1, 1, centerZ);
-					indexes[2*i] = listModel.getSize() - 1;
-					this.rename(roiName, new int[] { listModel.getSize() - 1 },
-							false);
+				if (roiName.contains("|cell")) {
+				} else {
 
-					Roi aRoi = new Arrow(centerX, centerY, toX, toY);
-					aRoi.setStrokeColor(strokeColorNew);
-					aRoi.setImage(imp);
-					listModel.addElement(roiName);
-					fullListModel.addElement(roiName);
-					rois.put(roiName, aRoi);
-					setUpRoisByNameAndNumbers(aRoi);
-					nRois++;
-					aRoi.setPosition(1, 1, centerZ);
-					indexes[(2*i)+1] = listModel.getSize() - 1;
-					this.rename(roiName, new int[] { listModel.getSize() - 1 },
-							false);
-				}
-				//					IJ.runMacro("waitForUser;");
-				this.combineRois(imp, indexes);
+					int roiDiameter = 25;
+					Roi oRoi= new OvalRoi(centerX-roiDiameter/2, centerY-roiDiameter/2, roiDiameter, roiDiameter);
+					oRoi.setName(roiName);
+					oRoi.setFillColor(roiColor);
+					oRoi.setPosition(1, centerZ,1 );
+					imp.setPosition(1, centerZ, 1);
+					this.addRoi(oRoi);
 
-				if (imp.getRoi() != null){
-					listModel.addElement(roiName);
-					fullListModel.addElement(roiName);
-					Roi roi = imp.getRoi();
-					rois.put(roiName, roi);
-					setUpRoisByNameAndNumbers(roi);
-					nRois++;
-				}
-				list.clearSelection();
-				list.setSelectedIndices(indexes);
-				this.delete(false);
-				this.rename("synapse:"+(fromName==""?"unknownCell":fromName)+">"+(toName==""?"unknownCell":toName)+"|="+roiName, new int[] { listModel.getSize() - 1 },
-						false);
-				Roi cRoi = (Roi)rois.get(listModel.elementAt(listModel.getSize() - 1));
-				if (cRoi!=null) {
-					cRoi.setPosition(1, 1, centerZ);
-					cRoi.setFillColor(strokeColorNew);
 				}
 			}
 		}
