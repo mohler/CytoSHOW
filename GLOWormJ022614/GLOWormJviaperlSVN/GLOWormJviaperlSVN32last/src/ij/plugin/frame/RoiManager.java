@@ -97,8 +97,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	private JSpinner tSustainSpinner ;
 	private int  zSustain =1;
 	private int  tSustain =1;
-	private TextField textSearchField =new TextField("Find...");
-	private TextField textNamingField =new TextField("Name...");
+	private TextField textSearchField;
+	private TextField textNamingField;
 	public Label textCountLabel =new Label("", Label.CENTER);
 
 	private static boolean measureAll = true;
@@ -235,6 +235,18 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	public void showWindow(boolean visOn) {
 		ImageJ ij = IJ.getInstance();
+		
+		list.removeListSelectionListener(this);
+		list.removeKeyListener(ij);
+		list.removeMouseListener(this);
+		list.removeMouseWheelListener(this);
+		String lastSearch = "Find...";
+		if (textSearchField != null)
+			lastSearch = textSearchField.getText();
+		String lastName = "Name...";
+		if (textNamingField != null)
+			lastName = textNamingField.getText();
+
 		this.removeAll();
 		addKeyListener(ij);
 		addMouseListener(this);
@@ -265,6 +277,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		addButton("Update [u]");
 		addButton("Delete");
 		addButton("Rename");
+		
+		textNamingField =new TextField(lastName);
 		panel.add(textNamingField);
 
 		addButton("Sort");
@@ -289,9 +303,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		panel.add(textCountLabel);
 		textCountLabel.setText(""+ listModel.size() +"/"+ fullListModel.size());
 		textCountLabel.setFont(Font.decode("Arial-9"));
-		//		labelsCheckbox.addItemListener(this);
-		//		panel.add(labelsCheckbox);
-		//		panel.add( textSearchField );		
+
+		textSearchField =new TextField(lastSearch);
 		add("South", textSearchField);
 		textSearchField.addKeyListener(this);
 		textSearchField.addActionListener(this);
@@ -374,14 +387,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		final ActionEvent fe = e;
 
-		thread = new Thread(new Runnable() {
+		Thread actThread = new Thread(new Runnable() {
 
 			public void run() {
 				doAction(fe);
 			}
 
 		});
-		thread.start();
+		actThread.start();
 	}
 
 
@@ -407,7 +420,6 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			prevSearchString = searchString;
 			//			String[] listStrings = fullList.getItems();
 			String impTitle = this.imp.getTitle();
-			int numAdded = 0;
 			int count = fullListModel.getSize();
 			Dimension dim = list.getSize();
 			list.setSize(0,0);
@@ -426,7 +438,6 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				if (searchString.trim().equalsIgnoreCase("") || searchString.trim().equalsIgnoreCase(".*")) {
 					listModel.addElement(fullListModel.get(i));
 					//IJ.log(listStrings[i]);
-					numAdded++;
 					if (timeNow > timeLast + 100) {
 						timeLast = timeNow;
 						Graphics g = imp.getCanvas().getGraphics();
@@ -449,12 +460,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 				if (isRegex && ((String) fullListModel.get(i)).toLowerCase().matches(searchString.substring(2).toLowerCase() ) ){
 					listModel.addElement(fullListModel.get(i));
-					numAdded++;
 				}
 				if (!isRegex && ((String) fullListModel.get(i)).toLowerCase().contains(
 						searchString.toLowerCase())) {
 					listModel.addElement(fullListModel.get(i));
-					numAdded++;
 				}
 				if (timeNow > timeLast + 100 && !imp.getCanvas().messageRois.containsKey("Finding tags from drop")) {
 					timeLast = timeNow;
@@ -2192,10 +2201,45 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					byte[] bytes = out.toByteArray(); 
 					RoiDecoder rd = new RoiDecoder(roiRescaleFactor, bytes, name); 
 					Roi roi = rd.getRoi(); 
+					
+					
+					
+
 					//
 					ColorLegend cl = getColorLegend();
 					//
+					
 					if (roi!=null) { 
+						name = name.substring(0, name.length()-4);
+
+						int c = roi.getCPosition();
+						int z = roi.getZPosition();
+						int t = roi.getTPosition();
+						if (name.split("_").length == 4) {
+							c = Integer.parseInt(name.split("_")[1]);
+							z = Integer.parseInt(name.split("_")[2]);
+							t = Integer.parseInt(name.split("_")[3].split("[CZT-]")[0]);
+						}
+						int oldZ = z;
+
+		//  SPECIAL CASE FOR FILLING GAPS AT Z56 z162-166				
+//						if (z>55){
+//							z++;
+//						}
+//						if (z>162){
+//							z++;
+//							z++;
+//							z++;
+//							z++;
+//							
+//						}
+						
+						roi.setPosition(c, z, t);
+						if(imp.getNSlices()==1)
+							roi.setPosition(c, 1, t);
+						name= name.replace("_"+oldZ+"_", "_"+z+"_");
+						name = getUniqueName(name); 
+
 						if (cl != null) {
 							Color clColor = cl.getBrainbowColors()
 									.get(roi.getName().toLowerCase().split("_")[0].split("=")[0].replace("\"", "").trim());
@@ -2210,8 +2254,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							}
 						}
 						roi.setImage(imp);
-						name = name.substring(0, name.length()-4);
-						name = getUniqueName(name); 
+
 						if (roi instanceof TextRoi) {
 							name = (((TextRoi)roi).getText().indexOf("\n")>0?
 									("\""+((TextRoi)roi).getText().replace("\n"," ")+"\""):"Blank") 
@@ -2241,15 +2284,6 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						nRois++;
 						String nameEndReader = name;
 						ImagePlus imp = this.imp;
-
-						int c = roi.getCPosition();
-						int z = roi.getZPosition();
-						int t = roi.getTPosition();
-						if (name.split("_").length == 4) {
-							c = Integer.parseInt(name.split("_")[1]);
-							z = Integer.parseInt(name.split("_")[2]);
-							t = Integer.parseInt(name.split("_")[3].split("[CZT-]")[0]);
-						}
 						while (nameEndReader.endsWith("C") || nameEndReader.endsWith("Z") || nameEndReader.endsWith("T") ) {
 							if (nameEndReader.endsWith("C") ){
 								c = 0;
@@ -2264,9 +2298,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								nameEndReader = nameEndReader.substring(0, nameEndReader.length()-1);
 							}
 						}
-						roi.setPosition(c, z, t);
-						if(imp.getNSlices()==1)
-							roi.setPosition(c, 1, t);
+
+
 					} 
 				} 
 				entry = in.getNextEntry(); 
@@ -5184,7 +5217,6 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		String[] objectLines = s.split("\n");
 		int fullCount = objectLines.length;
 
-		ArrayList<Integer> missingZs = new ArrayList<Integer>();
 		if (path.contains("object") && s.contains("OBJ_Name")) {
 			int[] sliceNumbers = new int[fullCount];
 			for (int f=0; f < fullCount; f++) {
@@ -5193,19 +5225,6 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				if(objectLines[f].contains("JSHJSH"))
 					sliceNumbers[f] = Integer.parseInt(objectLines[f].substring(objectLines[f].indexOf("JSHJSH")+6, objectLines[f].indexOf("JSHJSH")+9));
 				IJ.log(""+sliceNumbers[f]);
-			}
-			Arrays.sort(sliceNumbers);
-			for (int e=0; e < sliceNumbers[fullCount-1]; e++) {
-				boolean gotit = false;
-				for (int f=0; f < fullCount; f++) {
-					if (e == sliceNumbers[f]){
-						gotit= true;
-					}
-				}
-				if (!gotit) {
-					IJ.log("missing" + e);
-					missingZs.add(e);
-				}
 			}
 
 
@@ -5248,7 +5267,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			String objType = sObj.split(",")[6].replace("\"", "");
 			String imageNumber = sObj.split(",")[4].replace("\"", "");
 			int zSustain = Integer.parseInt(sObj.split(",")[21].replace("\"", "").replace("zS", ""));
-			String roiName="\""+sObj.split(",")[17].replace("\"", "")+objType+"_"+sObj.split(",")[18].replace("\"", "")+"_"+sObj.split(",")[12].replace("\"", "")+imageNumber+"_zs"+sObj.split(",")[21].replace("\"", "")+" \"";
+			String roiName="\""+sObj.split(",")[17].replace("\"", "")+objType+sObj.split(",")[18].replace("\"", "")+"_"+sObj.split(",")[12].replace("\"", "")+imageNumber+"_zs"+sObj.split(",")[21].replace("\"", "")+" \"";
 			Color roiColor= objType.contains("chemical")?Color.white:Color.yellow;
 			if (roiName.contains("uncertain"))
 				roiColor= objType.contains("chemical")?Color.pink:Color.orange;
@@ -5257,8 +5276,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			int centerZ = Integer.parseInt(sObj.split(",")[4].replace("\"", "")
 					.replace(centerZroot, ("")));
 			int adjustmentZ =0;
-			for (int susStep=-zSustain/2;susStep<=zSustain/2;zSustain++){
-				centerZ = centerZ+susStep -adjustmentZ;
+			for (int susStep=-zSustain/2;susStep<=zSustain/2;susStep++){
+				int plotZ = centerZ+susStep -adjustmentZ;
 				if (centerZ<1||centerZ>imp.getNSlices()){
 					continue;
 				}
@@ -5270,8 +5289,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					Roi oRoi= new OvalRoi(centerX-roiDiameter/2, centerY-roiDiameter/2, roiDiameter, roiDiameter);
 					oRoi.setName(roiName);
 					oRoi.setFillColor(roiColor);
-					oRoi.setPosition(1, centerZ,1 );
-					imp.setPosition(1, centerZ, 1);
+					oRoi.setPosition(1, plotZ,1 );
+					imp.setPosition(1, plotZ, 1);
 					this.addRoi(oRoi);
 
 				}
@@ -5350,7 +5369,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		Roi[] ra = this.getFullRoisAsArray();
 		for (int r=0;r<ra.length;r++) {
 			Roi roi= ra[r];
-			for (int s=ra.length;s>r;s--) {
+			for (int s=ra.length-1;s>r;s--) {
 				Roi roi2= ra[s];
 				if (roi.getName() != (roi2).getName()){
 					boolean duplicated = roi.equals(roi2);
@@ -5368,6 +5387,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							imp.getWindow().tagsButton.repaint();
 						}
 						ra = this.getFullRoisAsArray();
+						s--;
+						r--;
 					}
 				}
 			}
