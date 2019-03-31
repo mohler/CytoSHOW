@@ -230,7 +230,15 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 					g2d.drawLine(0, 0, 7, 2);
 					g2d.drawLine(0, 0, 8, 8);
 					g2d.drawString(cursorString, 1, img.getHeight(null)-1);
-					win.canvas3D.setCursor(tk.createCustomCursor(img,new Point(0,0),"searchCursor"));
+					
+					if(IJ.isWindows()){
+						win.canvas3D.getGraphics2D().setColor(Color.yellow);
+						win.canvas3D.getGraphics2D().drawChars(cursorString.toCharArray(), 0, cursorString.length(), e.getX()+10, e.getY()+20);
+						win.canvas3D.repaint();
+					} else {
+						win.canvas3D.setCursor(tk.createCustomCursor(img,new Point(0,0),"searchCursor"));
+					}
+					
 				} else {
 					IJ.showStatus("");
 					win.canvas3D.setCursor(ImageCanvas.defaultCursor);
