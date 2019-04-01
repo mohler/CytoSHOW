@@ -233,8 +233,9 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 					
 					if(IJ.isWindows()){
 						win.canvas3D.getGraphics2D().setColor(Color.yellow);
-						win.canvas3D.getGraphics2D().drawChars(cursorString.toCharArray(), 0, cursorString.length(), e.getX()+10, e.getY()+20);
-						win.canvas3D.repaint();
+						win.canvas3D.getGraphics2D().setFont(new Font("Arial", Font.BOLD, 18));
+						win.canvas3D.getGraphics2D().drawChars(cursorString.toCharArray(), 0, cursorString.length(), e.getX()+20, e.getY()+30);
+						win.canvas3D.repaint(e.getX(), e.getY(),  50,  20);
 					} else {
 						win.canvas3D.setCursor(tk.createCustomCursor(img,new Point(0,0),"searchCursor"));
 					}
