@@ -13,6 +13,7 @@ import ij.measure.Calibration;
 import ij.measure.ResultsTable;
 import ij.measure.Measurements;
 import ij3d.ImageJ3DViewer;
+import ij3d.ImageWindow3D;
 
 import java.awt.event.*;
 import java.text.*;
@@ -97,8 +98,17 @@ public class IJ {
 		return ij;
 	}
 	
-	/**Returns a reference to the "ImageJ3DViewer" frame.*/
+	/**Returns a reference to the currently focused "ImageJ3DViewer" frame.*/
 	public static ImageJ3DViewer getIJ3DVInstance() {
+		
+//		Frame[] frames = WindowManager.getNonImageWindows();
+//		for (Frame frame:frames){
+//			if (frame instanceof ImageWindow3D){
+//				if (frame.isActive()){
+//					ij3dv.setUniv(((ImageWindow3D)frame).getUniverse());
+//				}
+//			}
+//		}
 		if (ij3dv == null) {
 			ij3dv = new ImageJ3DViewer();
 			ij3dv.run(".");

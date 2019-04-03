@@ -24,6 +24,8 @@ import customnode.u3d.U3DExporter;
 
 public class ImageJ3DViewer implements PlugIn {
 
+	private static Image3DUniverse univ;
+
 	public static void main(String[] args) {
 		  if (IJ.getInstance() == null)
 			try {
@@ -42,7 +44,7 @@ public class ImageJ3DViewer implements PlugIn {
 	public void run(String arg) {
 		ImagePlus image = WindowManager.getCurrentImage();
 		try {
-			Image3DUniverse univ = new Image3DUniverse();
+			univ = new Image3DUniverse();
 			univ.show();
 			GUI.center(univ.getWindow());
 			if(arg != null && !arg.equals(""))
@@ -73,9 +75,17 @@ public class ImageJ3DViewer implements PlugIn {
 		}
 	}
 
+	public void setUniv(DefaultUniverse defaultUniverse) {
+		this.univ = (Image3DUniverse) defaultUniverse;
+	}
+
+
 	private static Image3DUniverse getUniv() {
-		if(Image3DUniverse.universes.size() > 0)
+		if (univ != null){
+			return univ;
+		} else if(Image3DUniverse.universes.size() > 0){
 			return Image3DUniverse.universes.get(0);
+		}
 		return null;
 	}
 

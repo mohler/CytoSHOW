@@ -12,6 +12,7 @@ import ij.WindowManager;
 import ij.gui.ImageWindow;
 import ij.gui.ImageCanvas;
 import ij.gui.Toolbar;
+import ij.plugin.DragAndDrop;
 import ij.plugin.frame.Channels;
 import ij.process.ColorProcessor;
 import ij.macro.Interpreter;
@@ -100,6 +101,10 @@ public class ImageWindow3D extends JFrame implements FocusListener, WindowListen
 		imp.setTitle("ImageJ 3D Viewer");
 		this.universe = universe;
 		this.canvas3D = (ImageCanvas3D)universe.getCanvas();
+		DragAndDrop dnd = DragAndDrop.getInstance();
+		if (dnd!=null)
+			dnd.addDropTarget(this.canvas3D);
+
 		this.setResizable(false);
 		ic = this.canvas3D.getRoiCanvas();
 		this.setLayout(bl);

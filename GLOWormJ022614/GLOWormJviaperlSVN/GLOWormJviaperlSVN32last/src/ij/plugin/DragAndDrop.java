@@ -5,6 +5,7 @@ import ij.io.*;
 import ij.plugin.frame.ColorLegend;
 import ij3d.ColorTable;
 import ij3d.ImageJ3DViewer;
+import ij3d.ImageWindow3D;
 
 import java.io.*;
 import java.awt.Checkbox;
@@ -50,6 +51,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 	private boolean traceForward = false;
 	private boolean traceBackward = false;
 	private ImageJ3DViewer ij3dv;
+	private DropTargetDropEvent dtde;
 
 	public static DragAndDrop getInstance() {
 		return instance;
@@ -70,6 +72,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 	}
 
 	public void drop(DropTargetDropEvent dtde)  {
+		this.dtde = dtde;
 		dtde.acceptDrop(DnDConstants.ACTION_COPY);
 		Component dtc = dtde.getDropTargetContext().getDropTarget().getComponent();
 		dropImp = WindowManager.getCurrentImage();
@@ -492,9 +495,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							return;
 
 						}else if (path.toLowerCase().endsWith(".obj")) {
-							if (ij3dv==null) {
-								ij3dv = IJ.getIJ3DVInstance();
-							}
+							ij3dv = IJ.getIJ3DVInstance();
 							try {
 								ImageJ3DViewer.importContent(path);
 							} catch (Exception e) {
@@ -1235,9 +1236,27 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					MQTVSSceneLoader64.runMQTVS_SceneLoader64( ((File)obj).getPath() );
 
 			}else if (obj!=null && ( ((File)obj).getPath().toLowerCase().endsWith(".obj"))) {
-				if (ij3dv==null) {
-					ij3dv = IJ.getIJ3DVInstance();
+//				ij3dv = null;		
+				Frame[] frames = WindowManager.getNonImageWindows();
+				for (Frame frame:frames){
+					if (frame instanceof ImageWindow3D){
+						if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow3D)frame).getUniverse().getCanvas()){
+							ij3dv.setUniv(((ImageWindow3D)frame).getUniverse());
+						}
+					}
 				}
+				if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == IJ.getInstance()
+						|| this.dtde.getDropTargetContext().getDropTarget().getComponent() == Toolbar.getInstance()
+						|| this.dtde.getDropTargetContext().getDropTarget().getComponent() == IJ.getInstance().getStatusBar()){
+					ij3dv = null;		
+
+				}
+
+				if (ij3dv == null) {
+					ij3dv = new ImageJ3DViewer();
+					ij3dv.run(".");
+				}
+//				ij3dv = IJ.getIJ3DVInstance();
 				try {
 					ImageJ3DViewer.importContent(((File)obj).getPath());
 				} catch (Exception e) {

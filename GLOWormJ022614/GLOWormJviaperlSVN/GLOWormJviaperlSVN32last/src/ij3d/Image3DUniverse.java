@@ -276,7 +276,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 	public void show() {
 		menubar = new Image3DMenubar(this);
-		init(new ImageWindow3D("ImageJ 3D Viewer", this));
+		init(new ImageWindow3D("ImageJ 3D Viewer [" + universes.size() +"]", this));
 		//		win.pack();
 		//		win.setVisible(true);
 	}
