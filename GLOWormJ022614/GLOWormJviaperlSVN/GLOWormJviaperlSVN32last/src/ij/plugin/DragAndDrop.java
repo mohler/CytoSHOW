@@ -52,6 +52,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 	private boolean traceBackward = false;
 	private ImageJ3DViewer ij3dv;
 	private DropTargetDropEvent dtde;
+	private boolean freshDrop;
 
 	public static DragAndDrop getInstance() {
 		return instance;
@@ -73,6 +74,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 
 	public void drop(DropTargetDropEvent dtde)  {
 		this.dtde = dtde;
+		freshDrop = true;
 		dtde.acceptDrop(DnDConstants.ACTION_COPY);
 		Component dtc = dtde.getDropTargetContext().getDropTarget().getComponent();
 		dropImp = WindowManager.getCurrentImage();
@@ -1236,7 +1238,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					MQTVSSceneLoader64.runMQTVS_SceneLoader64( ((File)obj).getPath() );
 
 			}else if (obj!=null && ( ((File)obj).getPath().toLowerCase().endsWith(".obj"))) {
-//				ij3dv = null;		
+				ImageJ3DViewer ij3dvNew = null;		
 				Frame[] frames = WindowManager.getNonImageWindows();
 				for (Frame frame:frames){
 					if (frame instanceof ImageWindow3D){
@@ -1248,15 +1250,18 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 				if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == IJ.getInstance()
 						|| this.dtde.getDropTargetContext().getDropTarget().getComponent() == Toolbar.getInstance()
 						|| this.dtde.getDropTargetContext().getDropTarget().getComponent() == IJ.getInstance().getStatusBar()){
-					ij3dv = null;		
-
+					if (freshDrop){
+						ij3dv = null;		
+					}
 				}
 
 				if (ij3dv == null) {
 					ij3dv = new ImageJ3DViewer();
 					ij3dv.run(".");
 				}
-//				ij3dv = IJ.getIJ3DVInstance();
+
+				freshDrop = false;
+				
 				try {
 					ImageJ3DViewer.importContent(((File)obj).getPath());
 				} catch (Exception e) {
