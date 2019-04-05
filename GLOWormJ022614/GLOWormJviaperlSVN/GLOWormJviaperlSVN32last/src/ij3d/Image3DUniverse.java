@@ -231,11 +231,11 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 					g2d.drawLine(0, 0, 8, 8);
 					g2d.drawString(cursorString, 1, img.getHeight(null)-1);
 					
-					if( IJ.isWindows()){
+					if( true || IJ.isWindows()){
 						Graphics2D g2Dcanv = win.canvas3D.getGraphics2D();
-
 						g2Dcanv.drawImage(img, e.getX(), e.getY(), null);
 						win.canvas3D.render();
+						g2Dcanv.clearRect(e.getX(), e.getY(), img.getWidth(null), img.getHeight(null));
 
 					} else {
 						win.canvas3D.setCursor(tk.createCustomCursor(img,new Point(0,0),"searchCursor"));
