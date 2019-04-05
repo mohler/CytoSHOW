@@ -14,7 +14,9 @@ import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.CheckboxMenuItem;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsDevice;
 import java.awt.Image;
@@ -59,6 +61,7 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JRootPane;
 import javax.swing.SwingUtilities;
@@ -79,6 +82,8 @@ import customnode.CustomPointMesh;
 import customnode.CustomQuadMesh;
 import customnode.CustomTriangleMesh;
 import customnode.MeshLoader;
+
+
 
 public class Image3DUniverse extends DefaultAnimatableUniverse {
 
@@ -161,6 +166,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		UniverseSettings.load();
 	}
 
+	private String cursorString;
+
 	/**
 	 * Default constructor.
 	 * Creates a new universe using the Universe settings - either default
@@ -194,10 +201,12 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		// add mouse listeners
 		canvas.addMouseMotionListener(new MouseMotionAdapter() {
 
+
 			public void mouseMoved(MouseEvent e) {
+				Image3DUniverse.this.e = e;
 				Content c = picker.getPickedContent(
 						e.getX(), e.getY());
-				String cursorString = " ";
+				cursorString = " ";
 				Toolkit tk = Toolkit.getDefaultToolkit();
 				if(c != null) {
 					IJ.showStatus(c.getName().split("( |_)=")[0]);
@@ -231,11 +240,12 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 					g2d.drawLine(0, 0, 8, 8);
 					g2d.drawString(cursorString, 1, img.getHeight(null)-1);
 					
-					if(IJ.isWindows()){
-						win.canvas3D.getGraphics2D().setColor(Color.yellow);
-						win.canvas3D.getGraphics2D().setFont(new Font("Arial", Font.BOLD, 18));
-						win.canvas3D.getGraphics2D().drawChars(cursorString.toCharArray(), 0, cursorString.length(), e.getX()+20, e.getY()+30);
-						win.canvas3D.repaint(e.getX(), e.getY(),  50,  20);
+					if(true || IJ.isWindows()){
+						
+						
+
+						
+
 					} else {
 						win.canvas3D.setCursor(tk.createCustomCursor(img,new Point(0,0),"searchCursor"));
 					}
@@ -321,6 +331,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		win.pack();
 		win.setVisible(true);
 		win.getJMenuBar().setVisible(true);
+		win.setGlassPane(new TextCursorGlassPane());
+		win.getGlassPane().setVisible(true);
 	}
 
 	/**
@@ -1805,6 +1817,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 	private ExecutorService adder = Executors.newFixedThreadPool(1);
 
+	private MouseEvent e;
+
 	/**
 	 * Add the specified Content to the universe. It is assumed that the
 	 * specified Content is constructed correctly.
@@ -1934,5 +1948,36 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		});
 		return all;
 	}
+	
+
+	class TextCursorGlassPane extends Component {
+
+		private Image img;
+
+		public TextCursorGlassPane() {
+			
+					addMouseMotionListener(new MouseMotionAdapter() {
+						public void mouseMoved(MouseEvent e) {
+							paintComponent(getGraphics());
+						}
+					});
+
+		}
+		
+
+
+			
+
+		protected void paintComponent(Graphics g){
+				cursorString = "blablablooey";
+				g.setColor(Color.yellow);
+				g.setFont(new Font("Arial", Font.BOLD, 18));
+				g.drawChars(cursorString.toCharArray(), 0, cursorString.length(), e.getX()+20, e.getY()+30);
+				repaint(e.getX(), e.getY(),  50,  20);
+			
+		}
+
+	}
 }
+
 
