@@ -193,8 +193,11 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 		// add mouse listeners
 		canvas.addMouseMotionListener(new MouseMotionAdapter() {
-
+			private Graphics2D g2Dcanv;
 			public void mouseMoved(MouseEvent e) {
+				 if (g2Dcanv == null)
+					 g2Dcanv = win.canvas3D.getGraphics2D();
+
 				Content c = picker.getPickedContent(
 						e.getX(), e.getY());
 				String cursorString = " ";
@@ -232,9 +235,10 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 					g2d.drawString(cursorString, 1, img.getHeight(null)-1);
 					
 					if(true || IJ.isWindows()){
-						win.canvas3D.getGraphics2D().setClip(e.getX(), e.getY(), img.getWidth(null), img.getHeight(null));
-						win.canvas3D.getGraphics2D().drawImage(img, e.getX(), e.getY(), null);
-						win.canvas3D.repaint();
+//						g2Dcanv.setClip(e.getX(), e.getY(), img.getWidth(null), img.getHeight(null));
+						g2Dcanv.drawImage(img, e.getX(), e.getY(), null);
+//						win.canvas3D.repaint();
+						
 					} else {
 						win.canvas3D.setCursor(tk.createCustomCursor(img,new Point(0,0),"searchCursor"));
 					}
