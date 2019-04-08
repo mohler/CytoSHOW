@@ -231,7 +231,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 					g2d.drawLine(0, 0, 8, 8);
 					g2d.drawString(cursorString, 1, img.getHeight(null)-1);
 					
-					if( true || IJ.isWindows()){
+					if(  IJ.isWindows()){
 
 						Graphics2D g2Dcanv = win.canvas3D.getGraphics2D();
 						win.canvas3D.stopRenderer();
@@ -1850,6 +1850,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 					timedObjFileNames.add(nextfilename);
 				}
 			}
+		} else {
+			timedObjFileNames.add(new File(filePath).getName());
 		}
 		Object[] timedObjFileNms = timedObjFileNames.toArray();
 		Arrays.sort(timedObjFileNms);
@@ -1859,7 +1861,10 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		for (Object nextmatchingfilename: timedObjFileNms) {
 			String nextmatchingfilePath = file.getParent() +File.separator + (String)nextmatchingfilename;
 			String[] tptParse = ((String)nextmatchingfilename).split("_");
-			int nextTpt = Integer.parseInt(tptParse[tptParse.length-1].replace(".obj", ""));
+			int nextTpt =0;
+			if (tptParse[tptParse.length-1].matches("\\d+.obj")) {
+				nextTpt = Integer.parseInt(tptParse[tptParse.length-1].replace(".obj", ""));
+			}
 			Map<String,CustomMesh> meshes = MeshLoader.load(nextmatchingfilePath);
 			if(meshes == null)
 				return;

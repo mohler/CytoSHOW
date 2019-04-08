@@ -497,16 +497,38 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							return;
 
 						}else if (path.toLowerCase().endsWith(".obj")) {
-							ij3dv = IJ.getIJ3DVInstance();
+							ImageJ3DViewer ij3dvNew = null;		
+							Frame[] frames = WindowManager.getNonImageWindows();
+							for (Frame frame:frames){
+								if (frame instanceof ImageWindow3D){
+									if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow3D)frame).getUniverse().getCanvas()){
+										ij3dv.setUniv(((ImageWindow3D)frame).getUniverse());
+									}
+								}
+							}
+							if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == IJ.getInstance()
+									|| this.dtde.getDropTargetContext().getDropTarget().getComponent() == Toolbar.getInstance()
+									|| this.dtde.getDropTargetContext().getDropTarget().getComponent() == IJ.getInstance().getStatusBar()){
+								if (freshDrop){
+									ij3dv = null;		
+								}
+							}
+
+							if (ij3dv == null) {
+								ij3dv = new ImageJ3DViewer();
+								ij3dv.run(".");
+							}
+
+							freshDrop = false;
+							
 							try {
-								ImageJ3DViewer.importContent(path);
+								ImageJ3DViewer.importContent(((File)obj).getPath());
 							} catch (Exception e) {
 								ij3dv.run(".");
-								ImageJ3DViewer.importContent(path);
+								ImageJ3DViewer.importContent(((File)obj).getPath());
 							}
 							ImageJ3DViewer.lock();
-							nDrops--;
-							return;
+
 
 						} else {
 							imp = new Opener().openURL((String)obj);
@@ -1042,19 +1064,38 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					else
 						MQTVSSceneLoader64.runMQTVS_SceneLoader64(path);
 				}else if (((String)obj).toLowerCase().endsWith(".obj")) {
-					if (ij3dv==null) {
-						ij3dv = IJ.getIJ3DVInstance();
+					ImageJ3DViewer ij3dvNew = null;		
+					Frame[] frames = WindowManager.getNonImageWindows();
+					for (Frame frame:frames){
+						if (frame instanceof ImageWindow3D){
+							if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow3D)frame).getUniverse().getCanvas()){
+								ij3dv.setUniv(((ImageWindow3D)frame).getUniverse());
+							}
+						}
 					}
+					if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == IJ.getInstance()
+							|| this.dtde.getDropTargetContext().getDropTarget().getComponent() == Toolbar.getInstance()
+							|| this.dtde.getDropTargetContext().getDropTarget().getComponent() == IJ.getInstance().getStatusBar()){
+						if (freshDrop){
+							ij3dv = null;		
+						}
+					}
+
+					if (ij3dv == null) {
+						ij3dv = new ImageJ3DViewer();
+						ij3dv.run(".");
+					}
+
+					freshDrop = false;
+					
 					try {
-						ImageJ3DViewer.importContent(((String)obj));
+						ImageJ3DViewer.importContent(((File)obj).getPath());
 					} catch (Exception e) {
 						ij3dv.run(".");
-						ImageJ3DViewer.importContent(((String)obj));
+						ImageJ3DViewer.importContent(((File)obj).getPath());
 					}
 					ImageJ3DViewer.lock();
 
-					nDrops--;
-					return;
 
 				} else if (( ((String)obj).toLowerCase().trim().equals("or"))){
 					or = true;

@@ -129,7 +129,6 @@ public class ImageWindow3D extends JFrame implements FocusListener, WindowListen
 		addFocusListener(this);
 		addWindowListener(this);
 		updateImagePlus();
-		setIgnoreRepaint(true);
 		WindowManager.addWindow(this);
 
 	}
