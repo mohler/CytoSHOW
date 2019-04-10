@@ -1018,25 +1018,25 @@ public class IJ3dExecuter {
 					thresh_adjuster.exec(e.getValue(), ci, univ);
 				}
 			});
-			gd.addSlider("Transparency", 0, 100, oldTr*100);
-
-			((Scrollbar)gd.getSliders().get(1)).setEnabled(imageData);
-			((Scrollbar)gd.getSliders().get(1)).addAdjustmentListener(new AdjustmentListener() {			
-				public void adjustmentValueChanged(AdjustmentEvent e) {
-					if(!transp_adjuster.go)
-						transp_adjuster.start();
-					transp_adjuster.exec(e.getValue(), ci, univ);
-				}
-			});
 		}
+		gd.addSlider("Transparency", 0, 100, oldTr*100);
+
+		((Scrollbar)gd.getSliders().get(imageData?1:0)).setEnabled(true);
+		((Scrollbar)gd.getSliders().get(imageData?1:0)).addAdjustmentListener(new AdjustmentListener() {			
+			public void adjustmentValueChanged(AdjustmentEvent e) {
+				if(!transp_adjuster.go)
+					transp_adjuster.start();
+				transp_adjuster.exec(e.getValue(), ci, univ);
+			}
+		});
 
 		gd.addSlider("Red",0,255,oldC == null ? 255 : oldC.x*255);
 		gd.addSlider("Green",0,255,oldC == null ? 0 : oldC.y*255);
 		gd.addSlider("Blue",0,255,oldC == null ? 0 : oldC.z*255);
 
-		final Scrollbar rSlider = (Scrollbar)gd.getSliders().get(imageData?2:0);
-		final Scrollbar gSlider = (Scrollbar)gd.getSliders().get(imageData?3:1);
-		final Scrollbar bSlider = (Scrollbar)gd.getSliders().get(imageData?4:2);
+		final Scrollbar rSlider = (Scrollbar)gd.getSliders().get(imageData?2:1);
+		final Scrollbar gSlider = (Scrollbar)gd.getSliders().get(imageData?3:2);
+		final Scrollbar bSlider = (Scrollbar)gd.getSliders().get(imageData?4:3);
 
 		rSlider.setEnabled(oldC != null);
 		gSlider.setEnabled(oldC != null);
