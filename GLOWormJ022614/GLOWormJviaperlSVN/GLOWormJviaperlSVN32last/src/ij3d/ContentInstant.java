@@ -671,8 +671,22 @@ public class ContentInstant extends BranchGroup implements UniverseListener, Con
 		if(Math.abs(transparency - this.transparency) < 0.01)
 			return;
 		this.transparency = transparency;
-		if(contentNode != null)
+		if(contentNode != null){
+			CustomMesh mesh = null;
+			switch(type) {
+			case SURFACE:
+				mesh = ((MeshGroup)contentNode).getMesh();
+				break;
+			case CUSTOM:
+				mesh = ((CustomMeshNode)contentNode).getMesh();
+				break;
+			}
+			if(mesh == null)
+				return;
+			mesh.setTransparency(transparency);
 			contentNode.transparencyUpdated(this.transparency);
+		}
+
 	}
 
 	/* ************************************************************

@@ -97,6 +97,7 @@ public class ContentCreator {
 			ContentInstant contInst = new ContentInstant(name);
 			contInst.image = imp;
 			contInst.color = color;
+			contInst.transparency = 0.02f;
 			contInst.threshold = thresh;
 			contInst.channels = channels;
 			contInst.resamplingF = resf;
