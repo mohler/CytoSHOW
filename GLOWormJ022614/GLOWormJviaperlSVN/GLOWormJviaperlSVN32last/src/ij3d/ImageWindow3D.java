@@ -43,6 +43,7 @@ import java.awt.Robot;
 import java.awt.image.BufferedImage;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.KeyListener;
 import java.awt.event.WindowListener;
 import java.awt.event.WindowStateListener;
 import java.awt.event.WindowEvent;
@@ -322,6 +323,10 @@ public class ImageWindow3D extends JFrame implements FocusListener, WindowListen
 		displayButton.setFont(buttonPanelFont);
 		viewButtonPanel.add(displayButton, fspc);
 		displayButton.addActionListener(menubar);
+		displayButton.addKeyListener(ij);
+		
+		this.addKeyListener(ij);
+		
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
 		fspc.fill = GridBagConstraints.BOTH;
@@ -710,6 +715,14 @@ public class ImageWindow3D extends JFrame implements FocusListener, WindowListen
 
 		if (null != universe.getWindow())
 			universe.cleanup();
+		for (Component comp:this.getComponents()){
+			for (KeyListener l:comp.getKeyListeners()){
+				comp.removeKeyListener(l);
+			}
+		}
+		for (KeyListener l:this.getKeyListeners()){
+			this.removeKeyListener(l);
+		}
 
 		imp_updater.quit();
 		canvas3D.flush();

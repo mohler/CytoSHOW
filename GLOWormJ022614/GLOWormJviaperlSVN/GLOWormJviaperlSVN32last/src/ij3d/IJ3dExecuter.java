@@ -959,54 +959,101 @@ public class IJ3dExecuter {
 		gd.showDialog();
 	}
 
-	public void changeThreshold(final Content c) {
+	public void changeThreshold(Content c) {
 		boolean imageData = true;
-		if(!checkSel(c))
-			return;
-		if(c.getImage() == null) {
-			//			IJ.error("The selected object contains no image data,\n" +
-			//					"therefore the threshold can't be changed");
-			//			return;
-			imageData = false;
+		boolean noSelection = false;
+		final boolean others = IJ.shiftKeyDown();
+		if(!checkSel(c)){
+			noSelection = true;
+//			return;
 		}
+		ContentInstant ci=null;
+		if (c!= null){
+			if ( !others){
+				if(c.getImage() == null) {
+					//			IJ.error("The selected object contains no image data,\n" +
+					//					"therefore the threshold can't be changed");
+					//			return;
+					imageData = false;
+				}
 
-		final ContentInstant ci = c.getCurrentInstant();
+				ci = c.getCurrentInstant();
+			} else {
+				imageData = false;
+				noSelection = c==null;
+				ci = c.getCurrentInstant();
+			}
+		} else {
+			imageData = false;
+			noSelection = c==null;
+			c = new Content(noSelection?"All Objects":"Other Objects");
+			ci = c.getCurrentInstant();
+		}
+		final Content finalC= c;
+		final ContentInstant finalCi = ci;
+		final boolean finalNoSelection = noSelection;
 		final SliderAdjuster thresh_adjuster = new SliderAdjuster() {
 
 			public synchronized final void setValue(ContentInstant ci, int v) {
 				ci.setThreshold(v);
-				univ.fireContentChanged(c);
+				univ.fireContentChanged(finalC);
 			}
 		};
 		final SliderAdjuster transp_adjuster = new SliderAdjuster() {
 
 			public synchronized final void setValue(ContentInstant ci, int v) {
-				ci.setTransparency(v / 100f);
-				univ.fireContentChanged(c);
+				if (!(finalNoSelection || others)){
+					finalC.setTransparency(v / 100f);
+					univ.fireContentChanged(finalC);
+				} else {
+					for (Object nextC:univ.getContents()){
+						if (nextC!=finalC) {
+							((Content) nextC).getCurrentInstant().setTransparency(v / 100f);
+							univ.fireContentChanged(((Content) nextC));
+						}
+					}
+				}
 			}
 		};
 
 		final ColorListener colorListener = new ColorListener() {
 
 			public void colorChanged(Color3f color) {
-				ci.setColor(color);
-				univ.fireContentChanged(c);
+				if (!(finalNoSelection || others)){
+					finalCi.setColor(color);
+					univ.fireContentChanged(finalC);
+				} else {
+					for (Object nextC:univ.getContents()){
+						if (nextC!=finalC) {
+							((Content) nextC).getCurrentInstant().setColor(color);
+							univ.fireContentChanged(((Content) nextC));
+						}
+					}
+				}
 			}
-
 
 			public void ok(final GenericDialog gd) {
 				// gd.wasOKed: apply to all time points
-				c.setColor(ci.getColor());
-				univ.fireContentChanged(c);
+				if (!(finalNoSelection || others)){
+					finalC.setColor(finalCi.getColor());
+					univ.fireContentChanged(finalC);
+				} else {
+					for (Object nextC:univ.getContents()){
+						if (nextC!=finalC) {
+							((Content) nextC).setColor(((Content) nextC).getCurrentInstant().getColor());
+							univ.fireContentChanged(((Content) nextC));
+						}
+					}
+				}
 			}
 		};
 
-		final int oldThr = ci.getThreshold();
-		final double oldTr = ci.getTransparency();
-		final Color3f oldC = ci.getColor();
+		final int oldThr = finalCi.getThreshold();
+		final double oldTr = finalCi.getTransparency();
+		final Color3f oldC = finalCi.getColor();
 
 		final GenericDialog gd =
-				new GenericDialog(c.getName()+ ": Adjust Display...", univ.getWindow());
+				new GenericDialog((others?"Other Objects":finalC.getName()) + ": Adjust Display...", univ.getWindow());
 		if (imageData ) {
 			gd.addSlider("Threshold", 0, 255, oldThr);
 			((Scrollbar)gd.getSliders().get(0)).setEnabled(imageData);
@@ -1015,7 +1062,7 @@ public class IJ3dExecuter {
 					// start adjuster and request an action
 					if(!thresh_adjuster.go)
 						thresh_adjuster.start();
-					thresh_adjuster.exec(e.getValue(), ci, univ);
+					thresh_adjuster.exec(e.getValue(), finalCi, univ);
 				}
 			});
 		}
@@ -1026,11 +1073,11 @@ public class IJ3dExecuter {
 			public void adjustmentValueChanged(AdjustmentEvent e) {
 				if(!transp_adjuster.go)
 					transp_adjuster.start();
-				transp_adjuster.exec(e.getValue(), ci, univ);
+				transp_adjuster.exec(e.getValue(), finalCi, univ);
 			}
 		});
 
-		gd.addSlider("Red",0,255,oldC == null ? 255 : oldC.x*255);
+		gd.addSlider("Red",0,255,oldC == null ? 0 : oldC.x*255);
 		gd.addSlider("Green",0,255,oldC == null ? 0 : oldC.y*255);
 		gd.addSlider("Blue",0,255,oldC == null ? 0 : oldC.z*255);
 
@@ -1038,9 +1085,12 @@ public class IJ3dExecuter {
 		final Scrollbar gSlider = (Scrollbar)gd.getSliders().get(imageData?3:2);
 		final Scrollbar bSlider = (Scrollbar)gd.getSliders().get(imageData?4:3);
 
-		rSlider.setEnabled(oldC != null);
-		gSlider.setEnabled(oldC != null);
-		bSlider.setEnabled(oldC != null);
+//		rSlider.setEnabled(oldC != null);
+//		gSlider.setEnabled(oldC != null);
+//		bSlider.setEnabled(oldC != null);
+		rSlider.setEnabled(true);
+		gSlider.setEnabled(true);
+		bSlider.setEnabled(true);
 
 		AdjustmentListener cListener = new AdjustmentListener() {
 
@@ -1065,22 +1115,22 @@ public class IJ3dExecuter {
 			public void windowClosed(WindowEvent e) {
 				try {
 					if(gd.wasCanceled()) {
-						ci.setThreshold((int) oldThr);
-						univ.fireContentChanged(c);
+						finalCi.setThreshold((int) oldThr);
+						univ.fireContentChanged(finalC);
 						float newTr = (float) (oldTr / 100f);
-						ci.setTransparency(newTr);
-						univ.fireContentChanged(c);
-						ci.setColor(oldC);
-						univ.fireContentChanged(c);
+						finalCi.setTransparency(newTr);
+						univ.fireContentChanged(finalC);
+						finalCi.setColor(oldC);
+						univ.fireContentChanged(finalC);
 						return;
 					}
 					// apply to other time points
 //					if(aBox.getState())
 //						c.setThreshold(ci.getThreshold());
 
-					record(SET_THRESHOLD,
+						record(SET_THRESHOLD,
 							Integer.toString(
-									c.getThreshold()));
+									finalC.getThreshold()));
 				} finally {
 					// [ This code block executes even when
 					//   calling return above ]
@@ -1806,7 +1856,7 @@ public class IJ3dExecuter {
 
 	private final boolean checkSel(Content c) {
 		if(c == null) {
-			IJ.error("Selection required");
+//			IJ.error("Selection required");
 			return false;
 		}
 		return true;
