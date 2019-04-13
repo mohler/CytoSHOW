@@ -286,6 +286,9 @@ public abstract class DefaultAnimatableUniverse extends DefaultUniverse {
 	 */
 	public void pauseAnimation() {
 		animation.pause();
+		while (!animation.isPaused())
+			IJ.wait(100);
+		animationPaused();
 	}
 
 	/**

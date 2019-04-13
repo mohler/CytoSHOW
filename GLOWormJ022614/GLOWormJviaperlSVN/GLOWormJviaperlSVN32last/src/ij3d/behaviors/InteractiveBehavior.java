@@ -4,7 +4,6 @@ import ij.IJ;
 
 import java.util.Enumeration;
 import java.util.List;
-
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.InputEvent;
@@ -14,6 +13,7 @@ import java.awt.AWTEvent;
 import ij3d.Content;
 import ij3d.ContentInstant;
 import ij3d.DefaultUniverse;
+import ij3d.IJ3dExecuter;
 import ij3d.ImageCanvas3D;
 import ij3d.Image3DUniverse;
 
@@ -21,6 +21,7 @@ import javax.media.j3d.Behavior;
 import javax.media.j3d.WakeupCondition;
 import javax.media.j3d.WakeupOnAWTEvent;
 import javax.media.j3d.WakeupOr;
+import javax.vecmath.Vector3f;
 
 import orthoslice.OrthoGroup;
 import voltex.VolumeRenderer;
@@ -202,14 +203,17 @@ public class InteractiveBehavior extends Behavior {
 		canvas.keyPressed(e);
 		if(!isXYZKey(e))
 			consumed = false;
-		else
-			return;
+//		else
+//			return;
 
 		/*
 		 * Handle escape key, which switches between the
 		 * HAND tool and the last used tool.
 		 */
 		if (code == KeyEvent.VK_ESCAPE) {
+			
+			((Image3DUniverse)univ).pauseAnimation();
+
 			if(((Image3DUniverse)univ).isFullScreen())
 				((Image3DUniverse)univ).setFullScreen(false);
 			else if (univ.ui.isHandTool())
@@ -223,12 +227,16 @@ public class InteractiveBehavior extends Behavior {
 
 		Content c = univ.getSelected();
 		int axis = -1;
-		if(canvas.isKeyDown(KeyEvent.VK_X))
+		if(code == KeyEvent.VK_X){
 			axis = VolumeRenderer.X_AXIS;
-		else if(canvas.isKeyDown(KeyEvent.VK_Y))
+			
+		} else if(code == KeyEvent.VK_Y){
 			axis = VolumeRenderer.Y_AXIS;
-		else if(canvas.isKeyDown(KeyEvent.VK_Z))
+			
+		} else if(code == KeyEvent.VK_Z){
 			axis = VolumeRenderer.Z_AXIS;
+			
+		}
 		// Consume events if used, to avoid other listeners from reusing the event
 		if(e.isShiftDown()) {
 			if(c != null && !c.isLocked())
@@ -287,6 +295,23 @@ public class InteractiveBehavior extends Behavior {
 			}
 			if(changed)
 				univ.fireContentChanged(c);
+		} else if( axis != -1) {
+			((Image3DUniverse)univ).pauseAnimation();
+
+			Vector3f axisV = new Vector3f();
+			switch(axis) {
+			case VolumeRenderer.X_AXIS: axisV.x = 1; axisV.y = 0; axisV.z = 0; break;
+			case VolumeRenderer.Y_AXIS: axisV.x = 0; axisV.y = 1; axisV.z = 0; break;
+			case VolumeRenderer.Z_AXIS: axisV.x = 0; axisV.y = 0; axisV.z = 1; break;
+			}
+
+			float interval = -((Image3DUniverse)univ).getRotationInterval();
+			((Image3DUniverse)univ).setRotationAxis(axisV);
+			((Image3DUniverse)univ).setRotationInterval(interval);	
+			
+			((Image3DUniverse)univ).startAnimation();
+			return;
+
 		} else {
 			if(c != null && !c.isLocked())
 				contentTransformer.init(c, 0, 0);
