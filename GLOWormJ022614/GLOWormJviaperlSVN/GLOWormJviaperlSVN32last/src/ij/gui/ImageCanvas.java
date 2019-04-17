@@ -1519,7 +1519,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 
 			if (rm != null && (labelShapes != null || brainbowSelection)) {
-				Roi[] fullRoisArray = rm.getFullRoisAsArray();
+//				Roi[] fullRoisArray = rm.getFullRoisAsArray();
 				DefaultListModel listModel = rm.getListModel();
 				int n;
 				if (labelShapes == null)
@@ -1856,160 +1856,163 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 					mi.addActionListener(ij);
 					relationshipsPopup.add(mi);
 
-					if (!rm.getImagePlus().getTitle().startsWith("Projections") && rm.getFullListModel().size()>0) {
-
-						JMenu nearPopup = new JMenu(cellName+": Nearby cells >", true);
-						nearPopup.setIcon(new ImageIcon(ImageWindow.class.getResource("images/NearIcon.png")));
-						nearPopup.getPopupMenu().addPopupMenuListener(ij);
-						mi =  new JMenuItem("^--------------------^");
-						mi.addActionListener(ij);
-						nearPopup.add(mi);
-						
-						ImagePlus guideImp = rm.getImagePlus();
-						if (rm.getImagePlus().getMotherImp() != null)
-							guideImp = rm.getImagePlus().getMotherImp();
-						int frames = guideImp.getNFrames();
-
-						ArrayList<Roi> sameCellRois = new ArrayList<Roi>(); 
-						ArrayList<String> sameCellTrimmedNames = new ArrayList<String>(); 
-						ArrayList<Integer> sameCellZs = new ArrayList<Integer>(); 
-						ArrayList<Integer> sameCellTs = new ArrayList<Integer>(); 
-						
-						for (Roi nextRoi:fullRoisArray) {
-							if (nextRoi.getName().startsWith("\""+cellName+" ")) {
-								sameCellRois.add(nextRoi);
-								sameCellTrimmedNames.add(nextRoi.getName());
-								sameCellZs.add(nextRoi.getZPosition());
-								sameCellTs.add(nextRoi.getTPosition());
-							}
-						}
-
-						int zRadius=1;
-						double inPlaneDiameter=0;
-						double maxInPlaneDiameter=0;
-						ArrayList<Roi> nearHits = new ArrayList<Roi>();
-						ArrayList<String> nearHitNames = new ArrayList<String>();
-						Hashtable<String,ArrayList<Roi>> hitNameRoisHashtable = new Hashtable<String,ArrayList<Roi>>();
-						String[] targetChunks = sliceRoisArray[targetTag[0]].getName().split("_");
-						int targetZ = Integer.parseInt(targetChunks[targetChunks.length-2]);
-						int tFrame = Integer.parseInt(targetChunks[targetChunks.length-1]
-								.replace("C", "").replace("Z", "").replace("T", "").split("-")[0]);
-						
-						double threeDZdiagonal = Math.sqrt(
-															Math.pow(
-																	Math.sqrt(Math.pow(guideImp.getWidth(), 2)
-																				+Math.pow(guideImp.getHeight(), 2)
-																			 ) 
-																, 2)
-															+
-															Math.pow(
-																	guideImp.getNSlices()
-																	*(guideImp.getCalibration().pixelDepth/guideImp.getCalibration().pixelWidth)
-																,2)
-														);
-						
-						double zxRatio = guideImp.getCalibration().pixelDepth/guideImp.getCalibration().pixelWidth;
-
-						
-						while (nearHits.size() < 10 && (zRadius< threeDZdiagonal)) {
-							for (int zSliceAdjust=0-(zRadius-1);zSliceAdjust<=0+(zRadius-1);zSliceAdjust++) {
-
-								for (int sc=0;sc<sameCellRois.size();sc++) {
-									int zSlice = sameCellRois.get(sc).getZPosition() + zSliceAdjust;
-									if (zSlice < 1 || zSlice > rm.getImagePlus().getNSlices())
-										continue;
-									if (guideImp.getTitle().contains("SW_")) {
-										zSlice = sameCellZs.get(sc);
-										inPlaneDiameter = 10 * zxRatio * zRadius;
-									}
-									if (!guideImp.getTitle().contains("SW_")) {
-										double legXYSquared = Math.pow(zRadius,2)-Math.pow((zSlice-targetZ),2);
-										inPlaneDiameter = 2 * zxRatio * Math.sqrt(legXYSquared>0?legXYSquared:0);
-									}
-									if (inPlaneDiameter>maxInPlaneDiameter)
-										maxInPlaneDiameter = inPlaneDiameter;
-									Roi hoodRoi = new OvalRoi(sameCellRois.get(sc).getBounds().getCenterX() - (inPlaneDiameter / 2),
-											sameCellRois.get(sc).getBounds().getCenterY() - (inPlaneDiameter / 2), 
-											inPlaneDiameter, inPlaneDiameter);
-									Roi[] nearbyROIs = rm.getSliceSpecificRoiArray(zSlice,
-											sameCellTs.get(sc), false);
-									for (int h = 0; h < nearbyROIs.length; h++) {
-										Roi nextNearRoi = nearbyROIs[h];
-										String nnrn = nextNearRoi.getName().split("[\"|=]")[1].trim().split(" ")[0];
-										if (((OvalRoi)hoodRoi).contains((int) nextNearRoi
-												.getBounds().getCenterX(),
-												(int) nextNearRoi.getBounds()
-												.getCenterY())
-												&& !clickedROIstring.startsWith("\""+nnrn) ){
-											String hitTrimName = nextNearRoi.getName().split("[\"|=]")[1].trim().split(" ")[0];
-											if (hitNameRoisHashtable.get(hitTrimName)==null) {
-												hitNameRoisHashtable.put(hitTrimName, new ArrayList<Roi>());
-											}
-											hitNameRoisHashtable.get(hitTrimName).add(nextNearRoi);
-											boolean notGotYet = !nearHits.contains(nextNearRoi)  && !nearHitNames.contains(nextNearRoi.getName().split("[\"|=]")[1].trim().split(" ")[0]);
-											if (notGotYet && nearHits.size()<100) {
-												nearHits.add(nextNearRoi);
-												nearHitNames.add(nextNearRoi.getName().split("[\"|=]")[1].trim().split(" ")[0]);
-											}
-										}
-									}
-								}
-								if (guideImp.getTitle().contains("SW_")) 
-									zSliceAdjust = targetZ+zRadius+1;
-							}
-								zRadius = (int) (zRadius+1);
-						}
-
-						for (String hit:hitNameRoisHashtable.keySet()) {
-							ArrayList<Roi> hitRois = hitNameRoisHashtable.get(hit);
-							
-							if (imp.getTitle().contains("SW_")){
-
-							}
-							
-							String hitPlaneString ="";
-							int[] hitPlaneArray = new int[hitRois.size()];
-							
-							if(guideImp.getTitle().contains("SW_")) {
-								for (int q=0;q<hitRois.size();q++)
-									hitPlaneArray[q]=hitRois.get(q).getZPosition();
-							} else {
-								for (int q=0;q<hitRois.size();q++)
-									hitPlaneArray[q]=hitRois.get(q).getTPosition();
-							}
-							Arrays.sort(hitPlaneArray);
-							for (Object plane:hitPlaneArray)
-								if (!hitPlaneString.contains(" " +(Integer)plane+","))
-									hitPlaneString = hitPlaneString +" " +(Integer)plane+",";
-							hitPlaneString = hitPlaneString.replaceAll("(.*),", "$1 ");
-							if(guideImp.getTitle().contains("SW_")) {
-								mi = new JMenuItem("near "
-										+ hit
-										+ " within "+ (maxInPlaneDiameter/2 * imp.getCalibration().pixelWidth*1000) +"nm at slices {"+ hitPlaneString+ "} in \""
-										+ (rm.getImagePlus().getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
-												(rm.getImagePlus().getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
-													(rm.getImagePlus().getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
-							} else {
-								mi = new JMenuItem("near "
-										+ hit
-												+ " within "+ (maxInPlaneDiameter/2 * imp.getCalibration().pixelWidth)+"�m at frames {"+ hitPlaneString+ "} in \""
-												+ (rm.getImagePlus().getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
-														(rm.getImagePlus().getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
-															(rm.getImagePlus().getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
-							}
-							mi.setActionCommand("near "
-									+ hitNameRoisHashtable.get(hit).get(0).getName() + ": "
-									+ rm.getImagePlus().getTitle());
-							popupInfo[1] = popupInfo[1]+ mi.getText()+"\n";
-
-							mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/See.png")));
-							mi.addActionListener(ij);
-							nearPopup.add(mi);
-
-						}
-
-						relationshipsPopup.add(nearPopup);			
-					}
+//					if (!rm.getImagePlus().getTitle().startsWith("Projections") && rm.getFullListModel().size()>0) {
+//
+//						JMenu nearPopup = new JMenu(cellName+": Nearby cells >", true);
+//						nearPopup.setIcon(new ImageIcon(ImageWindow.class.getResource("images/NearIcon.png")));
+//						nearPopup.getPopupMenu().addPopupMenuListener(ij);
+//						mi =  new JMenuItem("^--------------------^");
+//						mi.addActionListener(ij);
+//						nearPopup.add(mi);
+//						
+//						ImagePlus guideImp = rm.getImagePlus();
+//						if (rm.getImagePlus().getMotherImp() != null)
+//							guideImp = rm.getImagePlus().getMotherImp();
+//						int frames = guideImp.getNFrames();
+//
+//						ArrayList<Roi> sameCellRois = new ArrayList<Roi>(); 
+//						ArrayList<String> sameCellTrimmedNames = new ArrayList<String>(); 
+//						ArrayList<Integer> sameCellZs = new ArrayList<Integer>(); 
+//						ArrayList<Integer> sameCellTs = new ArrayList<Integer>(); 
+//						
+//						for (Roi nextRoi:this.getImage().getRoiManager().getROIsByName().get("\""+roi.getName().split("\"")[1]+"\"")){
+//							if (!nextRoi.getName().split("\"")[1].equalsIgnoreCase(roi.getName().split("\"")[1])){
+//								continue;
+//							}
+//							sameCellRois.add(nextRoi);
+//							sameCellTrimmedNames.add(nextRoi.getName());
+//							sameCellZs.add(nextRoi.getZPosition());
+//							sameCellTs.add(nextRoi.getTPosition());
+//
+//						}
+//
+//						int zRadius=1;
+//						double inPlaneDiameter=0;
+//						double maxInPlaneDiameter=0;
+//						ArrayList<Roi> nearHits = new ArrayList<Roi>();
+//						ArrayList<String> nearHitNames = new ArrayList<String>();
+//						Hashtable<String,ArrayList<Roi>> hitNameRoisHashtable = new Hashtable<String,ArrayList<Roi>>();
+//						String[] targetChunks = sliceRoisArray[targetTag[0]].getName().split("_");
+//						int targetZ = Integer.parseInt(targetChunks[targetChunks.length-2]);
+//						int tFrame = Integer.parseInt(targetChunks[targetChunks.length-1]
+//								.replace("C", "").replace("Z", "").replace("T", "").split("-")[0]);
+//						
+//						double threeDZdiagonal = Math.sqrt(
+//															Math.pow(
+//																	Math.sqrt(Math.pow(guideImp.getWidth(), 2)
+//																				+Math.pow(guideImp.getHeight(), 2)
+//																			 ) 
+//																, 2)
+//															+
+//															Math.pow(
+//																	guideImp.getNSlices()
+//																	*(guideImp.getCalibration().pixelDepth/guideImp.getCalibration().pixelWidth)
+//																,2)
+//														);
+//						
+//						double zxRatio = guideImp.getCalibration().pixelDepth/guideImp.getCalibration().pixelWidth;
+//
+//						
+//						while (nearHits.size() < 10 && (zRadius< threeDZdiagonal)) {
+//							for (int zSliceAdjust=0-(zRadius-1);zSliceAdjust<=0+(zRadius-1);zSliceAdjust++) {
+//
+//								for (int sc=0;sc<sameCellRois.size();sc++) {
+//									int zSlice = sameCellRois.get(sc).getZPosition() + zSliceAdjust;
+//									if (zSlice < 1 || zSlice > rm.getImagePlus().getNSlices())
+//										continue;
+//									if (guideImp.getTitle().contains("SW_")) {
+//										zSlice = sameCellZs.get(sc);
+//										inPlaneDiameter = 10 * zxRatio * zRadius;
+//									}
+//									if (!guideImp.getTitle().contains("SW_")) {
+//										double legXYSquared = Math.pow(zRadius,2)-Math.pow((zSlice-targetZ),2);
+//										inPlaneDiameter = 2 * zxRatio * Math.sqrt(legXYSquared>0?legXYSquared:0);
+//									}
+//									if (inPlaneDiameter>maxInPlaneDiameter)
+//										maxInPlaneDiameter = inPlaneDiameter;
+//									Roi hoodRoi = new OvalRoi(sameCellRois.get(sc).getBounds().getCenterX() - (inPlaneDiameter / 2),
+//											sameCellRois.get(sc).getBounds().getCenterY() - (inPlaneDiameter / 2), 
+//											inPlaneDiameter, inPlaneDiameter);
+////									Roi[] nearbyROIs = rm.getSliceSpecificRoiArray(zSlice,
+////											sameCellTs.get(sc), false);
+//									Roi[] nearbyROIs = this.getImage().getRoiManager().getROIsByNumbers().get(""+1+"_"+zSlice+"_"+sameCellTs.get(sc)).toArray(new Roi[1]);
+//									for (int h = 0; h < nearbyROIs.length; h++) {
+//										Roi nextNearRoi = nearbyROIs[h];
+//										String nnrn = nextNearRoi.getName().split("[\"|=]")[1].trim().split(" ")[0];
+//										if (((OvalRoi)hoodRoi).contains((int) nextNearRoi
+//												.getBounds().getCenterX(),
+//												(int) nextNearRoi.getBounds()
+//												.getCenterY())
+//												&& !clickedROIstring.startsWith("\""+nnrn) ){
+//											String hitTrimName = nextNearRoi.getName().split("[\"|=]")[1].trim().split(" ")[0];
+//											if (hitNameRoisHashtable.get(hitTrimName)==null) {
+//												hitNameRoisHashtable.put(hitTrimName, new ArrayList<Roi>());
+//											}
+//											hitNameRoisHashtable.get(hitTrimName).add(nextNearRoi);
+//											boolean notGotYet = !nearHits.contains(nextNearRoi)  && !nearHitNames.contains(nextNearRoi.getName().split("[\"|=]")[1].trim().split(" ")[0]);
+//											if (notGotYet && nearHits.size()<100) {
+//												nearHits.add(nextNearRoi);
+//												nearHitNames.add(nextNearRoi.getName().split("[\"|=]")[1].trim().split(" ")[0]);
+//											}
+//										}
+//									}
+//								}
+//								if (guideImp.getTitle().contains("SW_")) 
+//									zSliceAdjust = targetZ+zRadius+1;
+//							}
+//								zRadius = (int) (zRadius+1);
+//						}
+//
+//						for (String hit:hitNameRoisHashtable.keySet()) {
+//							ArrayList<Roi> hitRois = hitNameRoisHashtable.get(hit);
+//							
+//							if (imp.getTitle().contains("SW_")){
+//
+//							}
+//							
+//							String hitPlaneString ="";
+//							int[] hitPlaneArray = new int[hitRois.size()];
+//							
+//							if(guideImp.getTitle().contains("SW_")) {
+//								for (int q=0;q<hitRois.size();q++)
+//									hitPlaneArray[q]=hitRois.get(q).getZPosition();
+//							} else {
+//								for (int q=0;q<hitRois.size();q++)
+//									hitPlaneArray[q]=hitRois.get(q).getTPosition();
+//							}
+//							Arrays.sort(hitPlaneArray);
+//							for (Object plane:hitPlaneArray)
+//								if (!hitPlaneString.contains(" " +(Integer)plane+","))
+//									hitPlaneString = hitPlaneString +" " +(Integer)plane+",";
+//							hitPlaneString = hitPlaneString.replaceAll("(.*),", "$1 ");
+//							if(guideImp.getTitle().contains("SW_")) {
+//								mi = new JMenuItem("near "
+//										+ hit
+//										+ " within "+ (maxInPlaneDiameter/2 * imp.getCalibration().pixelWidth*1000) +"nm at slices {"+ hitPlaneString+ "} in \""
+//										+ (rm.getImagePlus().getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
+//												(rm.getImagePlus().getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
+//													(rm.getImagePlus().getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
+//							} else {
+//								mi = new JMenuItem("near "
+//										+ hit
+//												+ " within "+ (maxInPlaneDiameter/2 * imp.getCalibration().pixelWidth)+"�m at frames {"+ hitPlaneString+ "} in \""
+//												+ (rm.getImagePlus().getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
+//														(rm.getImagePlus().getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
+//															(rm.getImagePlus().getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
+//							}
+//							mi.setActionCommand("near "
+//									+ hitNameRoisHashtable.get(hit).get(0).getName() + ": "
+//									+ rm.getImagePlus().getTitle());
+//							popupInfo[1] = popupInfo[1]+ mi.getText()+"\n";
+//
+//							mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/See.png")));
+//							mi.addActionListener(ij);
+//							nearPopup.add(mi);
+//
+//						}
+//
+//						relationshipsPopup.add(nearPopup);			
+//					}
 					popupInfo[1] = popupInfo[1] +"\n";
 
 					String analogName ="";
