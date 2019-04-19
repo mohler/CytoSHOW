@@ -919,7 +919,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			corrX=isViewB?corrXB[((stackNumber)%tDim)]:corrXA[((stackNumber)%tDim)];
 			corrY=isViewB?corrYB[((stackNumber)%tDim)]:corrYA[((stackNumber)%tDim)];
 			corrZ=isViewB?corrZB[((stackNumber)%tDim)]:corrZA[((stackNumber)%tDim)];
-			IJ.log(""+stackNumber+" "+corrX+" "+corrY+" "+corrZ);
+			//IJ.log(""+stackNumber+" "+corrX+" "+corrY+" "+corrZ);
 			initiateStack(stackNumber, 0);
 			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber+(sliceNumber%2==0?0:dZ)+corrZ);
 			ip.translate(corrX, corrY);
