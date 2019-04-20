@@ -7209,22 +7209,23 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 			Process cloneProcess = null;
 			try {
-				cloneProcess = Runtime.getRuntime().exec(
-						new String[] { "cmd", "/c", "start", "/min", "/wait",
-								"robocopy", previewPath, fullSetSavePath,
-								"/mir" });
+				String[] cloneCmd = 
+						new String[] { "cmd", "/c", "start", "/min", "/wait", "robocopy", previewPath, fullSetSavePath, "/mir" };
+				cloneProcess = Runtime.getRuntime().exec(cloneCmd);
 				while (cloneProcess == null) {
 					IJ.wait(100);
 				}
 				while (cloneProcess != null && cloneProcess.isAlive()) {
 					IJ.wait(100);
 				}
+				IJ.log("cloneProcess rdpExit=" + cloneProcess.exitValue());
+
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			} finally {
 				if (cloneProcess != null) {
-					IJ.log("rdpExit=" + cloneProcess.exitValue());
+					IJ.log("cloneProcess rdpExit=" + cloneProcess.exitValue());
 					try {
 						if (cloneProcess.getOutputStream() != null) {
 							cloneProcess.getOutputStream().close();
@@ -7252,32 +7253,22 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			}
 			Process cleanProcess = null;
 			try {
-				cleanProcess = Runtime.getRuntime().exec(
-						new String[] {
-								"cmd",
-								"/c",
-								"start",
-								"/min",
-								"/wait",
-								"for",
-								"/d",
-								"%G",
-								"in",
-								"(" + fullSetSavePath + File.separator
-										+ "*Decon-Fuse*)", "do", "rd", "/s",
-								"/q", "%~G" });
+				String[] cleanCmd = new String[] {"cmd", "/c", "start", "/min", "/wait", "cmd", "/c", "for", "/d", "%G", "in", "(" + fullSetSavePath + File.separator + "*Decon-Fuse*)", "do", "rd", "/s", "/q", "%~G" };
+				cleanProcess = Runtime.getRuntime().exec(cleanCmd);
 				while (cleanProcess == null) {
 					IJ.wait(100);
 				}
 				while (cleanProcess != null && cleanProcess.isAlive()) {
 					IJ.wait(100);
 				}
+				IJ.log("cleanProcess rdpExit=" + cleanProcess.exitValue());
+
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			} finally {
 				if (cleanProcess != null) {
-					IJ.log("rdpExit=" + cleanProcess.exitValue());
+					IJ.log("cleanProcess rdpExit=" + cleanProcess.exitValue());
 					try {
 						if (cleanProcess.getOutputStream() != null) {
 							cleanProcess.getOutputStream().close();
@@ -7306,33 +7297,22 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 			Process clipProcess = null;
 			try {
-				clipProcess = Runtime
-						.getRuntime()
-						.exec(new String[] {
-								"cmd",
-								"/c",
-								"start",
-								"/min",
-								"/wait",
-								"for",
-								"/d",
-								"%H",
-								"in",
-								"(" + fullSetSavePath + File.separator
-										+ "RegDecon" + File.separator + "Pos*)",
-								"do", "rd", "/s", "/q", "%~H" });
+				String[] clipCmd = new String[] { "cmd", "/c", "start", "/min", "/wait", "cmd", "/c", "for", "/d", "%H", "in", "(" + fullSetSavePath + File.separator + "RegDecon" + File.separator + "Pos*)", "do", "rd", "/s", "/q", "%~H" };
+				clipProcess = Runtime.getRuntime().exec(clipCmd);
 				while (clipProcess == null) {
 					IJ.wait(100);
 				}
 				while (clipProcess != null && clipProcess.isAlive()) {
 					IJ.wait(100);
 				}
+				IJ.log("clipProcess rdpExit=" + clipProcess.exitValue());
+
 			} catch (IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			} finally {
 				if (clipProcess != null) {
-					IJ.log("rdpExit=" + clipProcess.exitValue());
+					IJ.log("clipProcess rdpExit=" + clipProcess.exitValue());
 					try {
 						if (clipProcess.getOutputStream() != null) {
 							clipProcess.getOutputStream().close();
