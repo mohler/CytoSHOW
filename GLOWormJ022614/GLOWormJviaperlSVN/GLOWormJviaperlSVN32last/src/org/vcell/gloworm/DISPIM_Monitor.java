@@ -1859,7 +1859,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 //					"\\\nWhen you are then ready, click OK here to commence processing."
 //					+ "\");");
 
-			WaitForUserDialog waitForUserDialog = new WaitForUserDialog("Check Over Your Selections", "Select the regions containing the specimens\n for deconvolution/fusion processing.\nWhen you are then ready, click OK here to commence processing.");
+			WaitForUserDialog waitForUserDialog = new WaitForUserDialog("Check Over Your Selections", "Select the regions containing the specimens\n for deconvolution/fusion processing.\nAlso specify start and end timepoints.\nWhen you are then ready, click OK here to commence processing.");
 			waitForUserDialog.show();
 
 			for (int pos=0; pos<pDim; pos++) {

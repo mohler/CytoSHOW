@@ -757,7 +757,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	 */
 	public ImageProcessor getProcessor(int n) {
 		if (n<1 || n>nSlices) {
-			IJ.runMacro("waitForUser(\""+n+"\");");
+//			IJ.runMacro("waitForUser(\""+n+"\");");
 			return fivStacks.get(0).getProcessor(1);
 			//			throw new IllegalArgumentException("Argument out of range: "+n);
 		}
@@ -1028,7 +1028,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			throw new IllegalArgumentException("Argument out of range: "+n);
 		if (infoArray==null || infoArray[0].sliceLabels==null || infoArray[0].sliceLabels.length!=nSlices) {
 			if (n<1 || n>nSlices) {
-				IJ.runMacro("waitForUser(\""+n+"\");");
+//				IJ.runMacro("waitForUser(\""+n+"\");");
 				return fivStacks.get(0).infoArray[0].fileName;
 				//				throw new IllegalArgumentException("Argument out of range: "+n);
 			}
