@@ -13,9 +13,11 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.Roi;
+import ij.plugin.ChannelSplitter;
 import ij.plugin.Colors;
 import ij.plugin.PlugIn;
 import ij.plugin.Scaler;
+import ij.plugin.SubHyperstackMaker;
 import ij.plugin.filter.Projector;
 import ij.plugin.frame.RoiManager;
 import ij3d.ColorTable;
@@ -47,14 +49,14 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 				this.univ = new Image3DUniverse();
 			}
 			univ = this.univ;
-			if (univ.getWindow() == null){
-				univ.show();
-				univ.getWindow().setTitle(imp.getMotherImp().getTitle()+" [IJ3DV]");
-
-				WindowManager.addWindow(univ.getWindow());
-			}
 		}
-		
+		if (univ.getWindow() == null){
+			univ.show();
+			univ.getWindow().setTitle(imp.getMotherImp().getTitle()+" [IJ3DV]");
+
+			WindowManager.addWindow(univ.getWindow());
+		}
+
 		if (imp != null) {
 			if (imp.getStack() instanceof MultiQTVirtualStack) {
 				String firstMovieName = ((MultiQTVirtualStack)imp.getStack()).getVirtualStack(0).getMovieName();
@@ -95,25 +97,27 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 				mcc.setVisible(false);
 			}
 			
-			String duperString = ""; 
-			if (imp.getRoiManager().getSelectedRoisAsArray().length == 0)
-				duperString = duper.showHSDialog(imp, imp.getTitle()+"_DUP");
+//			String duperString = ""; 
+			ImagePlus impDup = null;
+			if (imp.getRoiManager().getSelectedRoisAsArray().length == 0)  //??????WHY??????
+//				duperString = duper.showHSDialog(imp, imp.getTitle()+"_DUP");
+				impDup = duper.duplicateHyperstack(imp, imp.getTitle()+"_DUP");
 			Date currentDate = new Date();
 			long msec = currentDate.getTime();	
 			long sec = msec/1000;
 
-			for (int tpt = (singleSave?duper.getFirstT():0); tpt<=(singleSave?duper.getLastT():0); tpt = tpt+(singleSave?duper.getStepT():1)) {
+			
+			if (impDup!=null){
+				
+				
 				for (int ch=duper.getFirstC(); ch<=duper.getLastC(); ch++) {
 					imp.setRoi(impRoi);
-					ImagePlus impD = imp;
-					if (!imp.getTitle().startsWith("SketchVolumeViewer")){
-						impD = duper.run(imp, ch, ch, duper.getFirstZ(), duper.getLastZ(), singleSave?tpt:duper.getFirstT(), singleSave?tpt:duper.getLastT(), singleSave?1:duper.getStepT(), false, msec);
-						impD.show();
-						impD.setTitle(imp.getShortTitle()+"_DUP_"+ch+"_"+tpt);
-						impD.changes = false;
-					}
+					ImagePlus impD = SubHyperstackMaker.makeSubhyperstack(impDup, ""+ch, "1-"+impDup.getNSlices(), "1-"+impDup.getNFrames());
+					impD.show();
+					impD.setRoi(0, 0, impD.getWidth(), impD.getHeight());
+
 					Color white = Colors.decode("#ff229900", Color.white);
-					
+
 					Color channelColor = assignedColorString!=null?Colors.decode(assignedColorString, null):null;
 					if (channelColor == null) {
 						channelColor = imp instanceof CompositeImage?((CompositeImage)imp).getChannelColor(ch-1):white;
@@ -134,17 +138,17 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 							scaleFactor  = 1;
 						threshold = 1;
 					}
-//NOW HANDLE SCALING BEFORE CALL TO HIS METHOD					
-//					IJ.run(impD, "Scale...", "x="+(scaleFactor)+" y="+(scaleFactor)+" z=1.0 interpolation=Bicubic average process create" );
-//					ImagePlus impDS = IJ.getImage();
-//					impD = impDS;
+					//NOW HANDLE SCALING BEFORE CALL TO HIS METHOD					
+					//					IJ.run(impD, "Scale...", "x="+(scaleFactor)+" y="+(scaleFactor)+" z=1.0 interpolation=Bicubic average process create" );
+					//					ImagePlus impDS = IJ.getImage();
+					//					impD = impDS;
 					if (impD.getBitDepth()!=8){
 						IJ.run(impD, "8-bit", "");
 					}
 					String objectName = cellName;
 					if (objectName =="")
 						objectName = impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_");
-//					impD.show();
+
 					Hashtable<String, Content> contents = univ.getContentsHT();
 					univ.addContent(impD, new Color3f(channelColor), objectName, threshold, new boolean[]{true, true, true}, binFactor, Content.SURFACE);
 					univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
@@ -160,27 +164,110 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 						sel.setColor(null);
 					}
 					univ.getSelected().setLocked(true);
-					if (singleSave) {
-						Hashtable<String, Content> newestContent = new Hashtable<String, Content>();
-						newestContent.put(""+objectName, univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
-						MeshExporter.saveAsWaveFront(newestContent.values(), new File((IJ.getDirectory("home")+File.separator+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"+objectName.replaceAll(":","").replaceAll("(/|\\s+)","")+"_"+ch+"_"+tpt+".obj")), univ.getStartTime(), univ.getEndTime());
-//						univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
-//						univ.getSelected().setLocked(false);
-//						univ.removeContent(univ.getSelected().getName());
-					}
-					for (Object content:contents.values()){
-						if (((Content)content).getName() != objectName){
-							((Content)content).setVisible(false);
-						}
-					}
-					
-//					ImageJ3DViewer.select(null);
-//					IJ.getInstance().toFront();
+//					if (singleSave) {
+//						Hashtable<String, Content> newestContent = new Hashtable<String, Content>();
+//						newestContent.put(""+objectName, univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
+//						MeshExporter.saveAsWaveFront(newestContent.values(), new File((IJ.getDirectory("home")+File.separator+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"+objectName.replaceAll(":","").replaceAll("(/|\\s+)","")+"_"+ch+"_"+0+".obj")), univ.getStartTime(), univ.getEndTime());
+//						//						univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
+//						//						univ.getSelected().setLocked(false);
+//						//						univ.removeContent(univ.getSelected().getName());
+//					}
+//					for (Object content:contents.values()){
+//						if (((Content)content).getName() != objectName){
+//							((Content)content).setVisible(false);
+//						}
+//					}
+
+					//					ImageJ3DViewer.select(null);
+					//					IJ.getInstance().toFront();
 					IJ.setTool(ij.gui.Toolbar.HAND);
-					if (impD != imp){
-						impD.changes = false;
-						impD.getWindow().close();
-						impD.flush();
+//					if (impD != imp){
+//						impD.changes = false;
+//						impD.getWindow().close();
+//						impD.flush();
+//					}
+				}
+			} else {
+				for (int tpt = (singleSave?duper.getFirstT():0); tpt<=(singleSave?duper.getLastT():0); tpt = tpt+(singleSave?duper.getStepT():1)) {
+					for (int ch=duper.getFirstC(); ch<=duper.getLastC(); ch++) {
+						imp.setRoi(impRoi);
+						ImagePlus impD = imp;
+						if (!imp.getTitle().startsWith("SketchVolumeViewer")){
+							impD = duper.run(imp, ch, ch, duper.getFirstZ(), duper.getLastZ(), singleSave?tpt:duper.getFirstT(), singleSave?tpt:duper.getLastT(), singleSave?1:duper.getStepT(), false, msec);
+							impD.show();
+							impD.setTitle(imp.getShortTitle()+"_DUP_"+ch+"_"+tpt);
+							impD.changes = false;
+						}
+						Color white = Colors.decode("#ff229900", Color.white);
+
+						Color channelColor = assignedColorString!=null?Colors.decode(assignedColorString, null):null;
+						if (channelColor == null) {
+							channelColor = imp instanceof CompositeImage?((CompositeImage)imp).getChannelColor(ch-1):white;
+							if (channelColor == Color.black)
+								channelColor = white;
+							if (cellName != "" && imp.getMotherImp().getRoiManager().getColorLegend() != null)
+								channelColor = imp.getMotherImp().getRoiManager().getColorLegend().getBrainbowColors().get(cellName.split(" =")[0].split(" \\|")[0].toLowerCase());
+							if (channelColor == null)
+								channelColor = white;
+						}
+						int binFactor = 2;
+						double scaleFactor  = 1.0;
+						int threshold = 90;
+						if (imp.getTitle().startsWith("SketchVolumeViewer")) {
+							binFactor = 1;
+							scaleFactor  = 0.1;
+							if (!(imp.getMotherImp().getTitle().contains("SW_") || imp.getMotherImp().getTitle().contains("RGB_")))
+								scaleFactor  = 1;
+							threshold = 1;
+						}
+						//NOW HANDLE SCALING BEFORE CALL TO HIS METHOD					
+						//					IJ.run(impD, "Scale...", "x="+(scaleFactor)+" y="+(scaleFactor)+" z=1.0 interpolation=Bicubic average process create" );
+						//					ImagePlus impDS = IJ.getImage();
+						//					impD = impDS;
+						if (impD.getBitDepth()!=8){
+							IJ.run(impD, "8-bit", "");
+						}
+						String objectName = cellName;
+						if (objectName =="")
+							objectName = impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_");
+						//					impD.show();
+						Hashtable<String, Content> contents = univ.getContentsHT();
+						univ.addContent(impD, new Color3f(channelColor), objectName, threshold, new boolean[]{true, true, true}, binFactor, Content.SURFACE);
+						univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
+						Content sel = univ.getSelected();
+						try {
+							float r = Integer.parseInt(""+channelColor.getRed()) / 256f;
+							float g = Integer.parseInt(""+channelColor.getGreen()) / 256f;
+							float b = Integer.parseInt(""+channelColor.getBlue()) / 256f;
+							if(univ != null && univ.getSelected() != null) {
+								sel.setColor(new Color3f(r, g, b));
+							}
+						} catch(NumberFormatException e) {
+							sel.setColor(null);
+						}
+						univ.getSelected().setLocked(true);
+						if (singleSave) {
+							Hashtable<String, Content> newestContent = new Hashtable<String, Content>();
+							newestContent.put(""+objectName, univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
+							MeshExporter.saveAsWaveFront(newestContent.values(), new File((IJ.getDirectory("home")+File.separator+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"+objectName.replaceAll(":","").replaceAll("(/|\\s+)","")+"_"+ch+"_"+tpt+".obj")), univ.getStartTime(), univ.getEndTime());
+							//						univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
+							//						univ.getSelected().setLocked(false);
+							//						univ.removeContent(univ.getSelected().getName());
+						}
+						for (Object content:contents.values()){
+							if (((Content)content).getName() != objectName){
+								((Content)content).setVisible(false);
+							}
+						}
+
+						//					ImageJ3DViewer.select(null);
+						//					IJ.getInstance().toFront();
+						IJ.setTool(ij.gui.Toolbar.HAND);
+						if (impD != imp){
+							impD.changes = false;
+							impD.getWindow().close();
+							impD.flush();
+						}
 					}
 				}
 			}
