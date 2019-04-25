@@ -202,7 +202,7 @@ public final class MCCube {
 
 		if (volume instanceof ImgLibVolume && ((ImgLibVolume)volume).getImage().getContainer() instanceof ShapeList) {
 			getShapeListImageTriangles((ImgLibVolume)volume, car, tri);
-		} else if (IJ.getInstance().getTitle().startsWith("CytoSHOW")) {
+		} else if (IJ.getInstance().getTitle().startsWith("CytoSHOW") && volume.getImagePlus().getTitle().startsWith("SketchVolumeViewer")) {
 			getCytoSHOWImageTriangles(volume, car, tri, volume.getImagePlus().getTitle().split("_| ")[1]);
 		} else {
 			MCCube cube = new MCCube();
