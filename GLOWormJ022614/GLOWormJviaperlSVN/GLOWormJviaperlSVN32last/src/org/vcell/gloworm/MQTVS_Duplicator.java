@@ -64,7 +64,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 		String newTitle = WindowManager.getUniqueName((imp.isSketch3D()?"Sketch3D_":"")+"DUP_"+title.replaceAll("Sketch3D_*", ""));
 		if (!IJ.altKeyDown()||stackSize>1) {
 			if (imp.isHyperStack() || imp.getWindow() instanceof StackWindow) {
-				duplicateHyperstack(imp, newTitle);
+				duplicateHyperstack(imp, newTitle, true);
 				return;
 			} else
 				newTitle = showDialog(imp, "Duplicate...", "Title: ", newTitle);
@@ -447,7 +447,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 
 
 
-	public ImagePlus duplicateHyperstack(ImagePlus imp, String newTitle) {
+	public ImagePlus duplicateHyperstack(ImagePlus imp, String newTitle, boolean show) {
 		String imagePath = IJ.getDirectory("image");
 		String saveRootForDup = imp.getTitle()+"_";
 		if (imp.getStack() instanceof MultiFileInfoVirtualStack && imagePath!=null){
@@ -537,7 +537,8 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 		imp2.setPosition(inChannel-getFirstC()+1, inSlice-getFirstZ() +1, inFrame-getFirstT()+1);
 		//		IJ.log(""+imp2.getOpenAsHyperStack());
 
-		imp2.show();
+		if (show)
+			imp2.show();
 		if (imp2.getWindow() != null) {
 			imp2.getWindow().setVisible(false);
 

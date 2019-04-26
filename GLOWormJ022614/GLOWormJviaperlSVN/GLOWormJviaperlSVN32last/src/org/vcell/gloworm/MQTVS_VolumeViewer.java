@@ -20,6 +20,7 @@ import ij.plugin.Scaler;
 import ij.plugin.SubHyperstackMaker;
 import ij.plugin.filter.Projector;
 import ij.plugin.frame.RoiManager;
+import ij.process.ImageProcessor;
 import ij3d.ColorTable;
 import ij3d.Content;
 import ij3d.Image3DUniverse;
@@ -99,9 +100,11 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 			
 //			String duperString = ""; 
 			ImagePlus impDup = null;
-			if (imp.getRoiManager().getSelectedRoisAsArray().length == 0)  //??????WHY??????
+			if (imp.getRoiManager().getSelectedRoisAsArray().length == 0){  //??????WHY??????
 //				duperString = duper.showHSDialog(imp, imp.getTitle()+"_DUP");
-				impDup = duper.duplicateHyperstack(imp, imp.getTitle()+"_DUP");
+				impDup = duper.duplicateHyperstack(imp, imp.getTitle()+"_DUP", false);
+				impDup.hide();
+			}
 			Date currentDate = new Date();
 			long msec = currentDate.getTime();	
 			long sec = msec/1000;
@@ -113,7 +116,8 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 				for (int ch=duper.getFirstC(); ch<=duper.getLastC(); ch++) {
 					imp.setRoi(impRoi);
 					ImagePlus impD = SubHyperstackMaker.makeSubhyperstack(impDup, ""+ch, "1-"+impDup.getNSlices(), "1-"+impDup.getNFrames());
-					impD.show();
+					impD.setTitle(impD.getTitle()+"_"+ch);
+//					impD.show();
 					impD.setRoi(0, 0, impD.getWidth(), impD.getHeight());
 
 					Color white = Colors.decode("#ff229900", Color.white);
@@ -143,6 +147,13 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 					//					ImagePlus impDS = IJ.getImage();
 					//					impD = impDS;
 					if (impD.getBitDepth()!=8){
+						ImageProcessor chip = imp.getProcessor();
+						if (imp.isComposite()){
+							chip = ((CompositeImage)imp).getProcessor(ch);
+						}
+						double chmin = chip.getMin();
+						double chmax = chip.getMax();
+						chip.setMinAndMax(chmin, chmax);
 						IJ.run(impD, "8-bit", "");
 					}
 					String objectName = cellName;
@@ -164,30 +175,38 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 						sel.setColor(null);
 					}
 					univ.getSelected().setLocked(true);
-//					if (singleSave) {
-//						Hashtable<String, Content> newestContent = new Hashtable<String, Content>();
-//						newestContent.put(""+objectName, univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
-//						MeshExporter.saveAsWaveFront(newestContent.values(), new File((IJ.getDirectory("home")+File.separator+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"+objectName.replaceAll(":","").replaceAll("(/|\\s+)","")+"_"+ch+"_"+0+".obj")), univ.getStartTime(), univ.getEndTime());
-//						//						univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
-//						//						univ.getSelected().setLocked(false);
-//						//						univ.removeContent(univ.getSelected().getName());
-//					}
+					if (singleSave) {
+						Hashtable<String, Content> newestContent = new Hashtable<String, Content>();
+						newestContent.put(""+objectName, univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
+						MeshExporter.saveAsWaveFront(newestContent.values(), new File((IJ.getDirectory("home")+File.separator+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"+objectName.replaceAll(":","").replaceAll("(/|\\s+)","")+"_"+ch+"_"+0+".obj")), univ.getStartTime(), univ.getEndTime());
+												univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
+												univ.getSelected().setLocked(false);
+												univ.removeContent(univ.getSelected().getName());
+					}
 //					for (Object content:contents.values()){
 //						if (((Content)content).getName() != objectName){
 //							((Content)content).setVisible(false);
 //						}
 //					}
 
-					//					ImageJ3DViewer.select(null);
-					//					IJ.getInstance().toFront();
 					IJ.setTool(ij.gui.Toolbar.HAND);
-//					if (impD != imp){
-//						impD.changes = false;
-//						impD.getWindow().close();
-//						impD.flush();
-//					}
+					if (impD != imp){
+						impD.changes = false;
+						if (impD.getWindow() != null)
+							impD.getWindow().close();
+						impD.flush();
+					}
+
 				}
-			} else {
+				if (impDup != imp){
+					impDup.changes = false;
+					if (impDup.getWindow() != null)
+						impDup.getWindow().close();
+					impDup.flush();
+				}
+				ImageJ3DViewer.select(null);
+				IJ.getInstance().toFront();
+			} else {  //NOW BASICALLY DEAD LEGACY CODE...THE WAY THINGS WERE BEFORE ~4/23/2019...WORKED FOR ROI BUT NOT IMAGES
 				for (int tpt = (singleSave?duper.getFirstT():0); tpt<=(singleSave?duper.getLastT():0); tpt = tpt+(singleSave?duper.getStepT():1)) {
 					for (int ch=duper.getFirstC(); ch<=duper.getLastC(); ch++) {
 						imp.setRoi(impRoi);

@@ -44,6 +44,26 @@ public class ChannelSplitter implements PlugIn {
 		bImp.show();
 	}
 
+	private void split123(ImagePlus imp) {
+		boolean keepSource = IJ.altKeyDown();
+		String title = imp.getTitle();
+		Calibration cal = imp.getCalibration();
+		ImageStack[] channels = splitRGB(imp.getStack(), keepSource);
+		if (!keepSource)
+			{imp.unlock(); imp.changes=false; imp.close();}
+		ImagePlus rImp = new ImagePlus(title+" (Ch1)", channels[0]);
+		rImp.setCalibration(cal);
+		rImp.show();
+		if (IJ.isMacOSX()) IJ.wait(500);
+		ImagePlus gImp = new ImagePlus(title+" (Ch2)", channels[1]);
+		gImp.setCalibration(cal);
+		gImp.show();
+		if (IJ.isMacOSX()) IJ.wait(500);
+		ImagePlus bImp = new ImagePlus(title+" (Ch3)", channels[2]);
+		bImp.setCalibration(cal);
+		bImp.show();
+	}
+
 	/** Splits the specified image into separate channels. */
 	public static ImagePlus[] split(ImagePlus imp) {
 		if (imp.getType()==ImagePlus.COLOR_RGB) {

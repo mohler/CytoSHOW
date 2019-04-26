@@ -995,7 +995,7 @@ public class IJ3dExecuter {
 		final SliderAdjuster thresh_adjuster = new SliderAdjuster() {
 
 			public synchronized final void setValue(ContentInstant ci, int v) {
-				ci.setThreshold(v);
+				finalC.setThreshold(v);
 				univ.fireContentChanged(finalC);
 			}
 		};
@@ -1020,12 +1020,12 @@ public class IJ3dExecuter {
 
 			public void colorChanged(Color3f color) {
 				if (!(finalNoSelection || others)){
-					finalCi.setColor(color);
+					finalC.setColor(color);
 					univ.fireContentChanged(finalC);
 				} else {
 					for (Object nextC:univ.getContents()){
 						if (nextC!=finalC) {
-							((Content) nextC).getCurrentInstant().setColor(color);
+							((Content) nextC).setColor(color);
 							univ.fireContentChanged(((Content) nextC));
 						}
 					}
