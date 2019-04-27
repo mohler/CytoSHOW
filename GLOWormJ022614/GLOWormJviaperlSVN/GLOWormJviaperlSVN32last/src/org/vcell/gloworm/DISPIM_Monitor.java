@@ -6153,7 +6153,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										} else {
 
 											String title = ciDFs[pos].getTitle();
-											String savetitle = title.replace(":","_").replace(" ","").replace("_dummy","");
+											String savetitle = title.replace(":","_").replace(" ","").replace("_dummy","").replaceAll("&", "AND");
 											String openingPath = outDir+savetitle;
 
 											int[] xpoints = theROI.getPolygon().xpoints;
