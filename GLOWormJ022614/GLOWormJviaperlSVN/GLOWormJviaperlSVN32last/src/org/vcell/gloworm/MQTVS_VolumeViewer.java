@@ -147,11 +147,11 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 					//					ImagePlus impDS = IJ.getImage();
 					//					impD = impDS;
 					if (impD.getBitDepth()!=8){
-						ImageProcessor chip = imp.getProcessor();
-						if (imp.isComposite()){
-							chip = ((CompositeImage)imp).getProcessor(ch);
+						ImageProcessor chip = impD.getProcessor();
+						if (impD.isComposite()){
+							chip = ((CompositeImage)impD).getProcessor(ch);
 						} else {
-							chip = imp.getProcessor();
+							chip = impD.getProcessor();
 						}
 						double chmin = chip.getMin();
 						double chmax = chip.getMax();
