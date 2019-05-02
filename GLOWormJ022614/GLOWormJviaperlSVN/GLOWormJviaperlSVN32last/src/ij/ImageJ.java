@@ -969,7 +969,7 @@ public class ImageJ extends Frame implements ActionListener,
 	/** Called by ImageJ when the user selects Quit. */
 	public void quit() {
 		
-		IJ.run("Close All");
+//		IJ.run("Close All");
 		Thread thread = new Thread(this, "Quit");
 		thread.setPriority(Thread.NORM_PRIORITY);
 		thread.start();
@@ -1174,39 +1174,41 @@ public class ImageJ extends Frame implements ActionListener,
 		quitting = true;
 		boolean changes = false;
 		int[] wList = WindowManager.getIDList();
-		if (wList!=null) {
-			for (int i=0; i<wList.length; i++) {
-				ImagePlus imp = WindowManager.getImage(wList[i]);
-				if (imp!=null && imp.changes==true) {
-					changes = true;
-					break;
-				}
-			}
-		}
-		Frame[] frames = WindowManager.getNonImageWindows();
-		if (frames!=null) {
-			for (int i=0; i<frames.length; i++) {
-				if (frames[i]!=null && (frames[i] instanceof Editor)) {
-					if (((Editor)frames[i]).fileChanged()) {
-						changes = true;
-						break;
-					}
-				}
-			}
-		}
-		if (windowClosed && !changes && Menus.window.getItemCount()>Menus.WINDOW_MENU_ITEMS && !(IJ.macroRunning()&&WindowManager.getImageCount()==0)) {
+//		if (wList!=null) {
+//			for (int i=0; i<wList.length; i++) {
+//				ImagePlus imp = WindowManager.getImage(wList[i]);
+//				if (imp!=null && imp.changes==true) {
+//					changes = true;
+//					break;
+//				}
+//			}
+//		}
+//		Frame[] frames = WindowManager.getNonImageWindows();
+//		if (frames!=null) {
+//			for (int i=0; i<frames.length; i++) {
+//				if (frames[i]!=null && (frames[i] instanceof Editor)) {
+//					if (((Editor)frames[i]).fileChanged()) {
+//						changes = true;
+//						break;
+//					}
+//				}
+//			}
+//		}
+		
+		if (quitting /*&& windowClosed && !changes*/ /*&& Menus.window.getItemCount()>Menus.WINDOW_MENU_ITEMS*/ /*&& !(IJ.macroRunning()&&WindowManager.getImageCount()==0)*/) {
 			GenericDialog gd = new GenericDialog("CytoSHOW", this);
-			gd.addMessage("Are you sure you want to quit CytoSHOW?");
+			gd.addMessage("Are you sure you want to quit CytoSHOW?"
+					+ "\nNo additional work will be saved if you proceed!!");
 			gd.showDialog();
 			quitting = !gd.wasCanceled();
 			windowClosed = false;
 		}
 		if (!quitting)
 			return;
-		if (!WindowManager.closeAllWindows()) {
-			quitting = false;
-			return;
-		}
+//		if (!WindowManager.closeAllWindows()) {
+//			quitting = false;
+//			return;
+//		}
 		//IJ.log("savePreferences");
 		if (applet==null) {
 			saveWindowLocations();
