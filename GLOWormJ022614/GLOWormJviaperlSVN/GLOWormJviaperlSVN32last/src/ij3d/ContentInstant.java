@@ -93,7 +93,7 @@ public class ContentInstant extends BranchGroup implements UniverseListener, Con
 
 	private boolean available = true;
 
-    private ScheduledThreadPoolExecutor blinkService = new ScheduledThreadPoolExecutor(1);
+    private static ScheduledThreadPoolExecutor blinkService;
 	private ScheduledFuture schfut;
 
 	public ContentInstant(String name) {
@@ -102,6 +102,10 @@ public class ContentInstant extends BranchGroup implements UniverseListener, Con
 		setCapability(BranchGroup.ALLOW_DETACH);
 		setCapability(BranchGroup.ENABLE_PICK_REPORTING);
 
+		if (blinkService ==null){
+			blinkService = new ScheduledThreadPoolExecutor(1);
+		}
+		
 		// create transformation for pickeing
 		localTranslate = new TransformGroup();
 		localTranslate.setCapability(TransformGroup.ALLOW_TRANSFORM_READ);

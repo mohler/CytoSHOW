@@ -121,7 +121,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	private String title;
 	protected volatile boolean done;
 	private ActionEvent actionEvent;
-	private Thread thread;
+//	private Thread thread;
 	private boolean showAll;
 	private Roi[] originalRois = null;
 	private boolean originalsCloned = false;
@@ -374,6 +374,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		addPopupItem("Auto-advance when tagging");
 		addPopupItem("StarryNiteImporter");
 		addPopupItem("Map Neighbors");
+		addPopupItem("Color Synapses by Bundle Rules");
 		add(pm);
 	}
 
@@ -925,6 +926,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			else if (command.equals("Map Neighbors")) {
 				mapNearNeighborContacts();
+			}
+			else if (command.equals("Color Synapses by Bundle Rules")) {
+				colorSynapsesByBundleRules();
 			}
 
 			this.imp.getCanvas().requestFocus();
@@ -5227,9 +5231,6 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				IJ.log(""+sliceNumbers[f]);
 			}
 
-
-
-
 		} else {
 			this.setVisible(true);
 			return;
@@ -5747,5 +5748,62 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			cellsAlreadyMapped.add(roi.getName().split("\"")[1]);
 		}
-	}		
+	}
+	
+	public void colorSynapsesByBundleRules() {
+		//Red bundle:
+		String[] redBundleArray = new String[]{"red","CEPDL","CEPDR","CEPVL","CEPVR","IL1DL","IL1DR","IL1L","IL1R","IL1VL",
+												"IL1VR","IL2DL","IL2DR","IL2L","IL2R","IL2VL","IL2VR","OLLL","OLLR","OLQDL",
+												"OLQDR","OLQVL","OLQVR","RIAL","RIAR","RIH","RIPL","RIPR","RMDDL","RMDDR",
+												"RMDVL","RMDVR","RMED","RMEL","RMER","RMEV","URADL","URADR","URAVL","URAVR",
+												"URBL","URBR","URYDL","URYDR","URYVL","URYVR"};
+
+		//Purple bundle:
+		String[] purpleBundleArray = new String[]{"magenta", "ADER","ADEL","ALNL","ALNR","AVKL","AVKR","AVL","DVC","PLNL","PLNR",
+													"PVT","RICL","RICR","RIVL","RIVR","RMDL","RMDR","RMFL","RMFR","RMHL","RMHR",
+													"SAADL","SAADR","SAAVL","SAAVR","SIADL","SIADR","SIAVL","SIAVR","SIBDL","SIBDR",
+													"SMBDL","SMBDR","SMBVL","SMBVR","SMDDL","SMDDR","SMDVL","SMDVR"};
+
+		//Blue bundle:
+		String[] blueBundleArray = new String[]{"blue","ADAL","ADAR","ADLL","ADLR","AIML","AIMR","ALA","ALML","ALMR","AQR",
+												"ASHL","ASHR","ASJL","ASJR","ASKL","ASKR","AVBL","AVBR","AVDL","AVDR","AVFL",
+												"AVFR","AVHL","AVHR","AVJL","AVJR","AVM","BDUL","BDUR","DVA","HSNL","HSNR",
+												"PVCL","PVCR","PVNL","PVNR","PVPL","PVPR","PVQL","PVQR","RID","RIFL","RIFR"};
+
+		//Green bundle:
+		String[] greenBundleArray = new String[]{"green","ADFL","ADFR","AFDL","AFDR","AIAR","AIAL","AINL","AINR","AIYL","AIYR",
+													"ASEL","ASER","ASGL","ASGR","ASIL","ASIR","AUAL","AUAR","AWBL","AWBR","AWCL",
+													"AWCR","BAGL","BAGR"};
+
+		//Yellow unbundled:
+		String[] yellowUnbundledArray = new String[]{"yellow","AIBL","AIBR","AIZL","AIZR","AVAL","AVAR","AVEL","AVER","AWAL",
+														"AWAR","FLPL","FLPR","PVR","RIBL","RIBR","RIGL","RIGR","RIML","RIMR",
+														"RIR","RIS","RMGL","RMGR","SDQL","SDQR","SIBVL","SIBVR","URXL","URXR","VB01"};
+
+		String[][] allBundleArrays = new String[][]{redBundleArray, purpleBundleArray, blueBundleArray, greenBundleArray, yellowUnbundledArray};
+	
+		for (String[] currentBundleArray:allBundleArrays){
+			for (String synapseRoiName:rois.keySet()){
+				boolean outsideOfBundle = true;
+				for (String currentBundleNeuron:currentBundleArray){
+					String synapseRoiNameCleaned = synapseRoiName.replace("\"", "").replace("[", "").replace("]", "");
+					if (synapseRoiNameCleaned.startsWith(currentBundleNeuron)){
+						String[] postSynapticCells = synapseRoiNameCleaned.split("_")[0].replaceAll(".*(electrical|chemical)(.*)", "$2").split("\\&");
+						boolean noHitInBundle = true;
+						for (String postSC:postSynapticCells){
+							for (String nextBundleNeuron:currentBundleArray){
+								if (postSC.equals(nextBundleNeuron)){
+									noHitInBundle = false;
+								}
+							}
+						}
+						outsideOfBundle = outsideOfBundle && noHitInBundle;
+					}
+				}
+				if (!outsideOfBundle){
+					rois.get(synapseRoiName).setFillColor(Colors.getColor(currentBundleArray[0], Color.DARK_GRAY));
+				}
+			}
+		}
+	}
 }

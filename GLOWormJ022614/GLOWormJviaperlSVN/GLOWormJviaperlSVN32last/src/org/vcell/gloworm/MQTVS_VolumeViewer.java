@@ -256,6 +256,9 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 						univ.addContent(impD, new Color3f(channelColor), objectName, threshold, new boolean[]{true, true, true}, binFactor, Content.SURFACE);
 						univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
 						Content sel = univ.getSelected();
+						while (sel==null){
+							IJ.wait(100);
+						}
 						try {
 							float r = Integer.parseInt(""+channelColor.getRed()) / 256f;
 							float g = Integer.parseInt(""+channelColor.getGreen()) / 256f;
@@ -265,6 +268,9 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 							}
 						} catch(NumberFormatException e) {
 							sel.setColor(null);
+						}
+						while (univ.getSelected()==null){
+							IJ.wait(100);
 						}
 						univ.getSelected().setLocked(true);
 						if (singleSave) {

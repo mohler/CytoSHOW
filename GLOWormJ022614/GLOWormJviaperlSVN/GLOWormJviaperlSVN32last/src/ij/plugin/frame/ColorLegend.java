@@ -41,9 +41,9 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 	private RoiManager rm;
 	private ImagePlus bbImp;
 	private ImagePlus bbImpCopy;
-	private ScheduledThreadPoolExecutor blinkService = new ScheduledThreadPoolExecutor(1);
+	private static ScheduledThreadPoolExecutor blinkService;
     private ScheduledFuture schfut;
-	private ScheduledThreadPoolExecutor blinkService2 = new ScheduledThreadPoolExecutor(1);
+	private static ScheduledThreadPoolExecutor blinkService2;
     private ScheduledFuture schfut2;
 	private Color selectColor;
 	private ImageProcessor ip;
@@ -69,6 +69,10 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 		ij = IJ.getInstance();
 		bbImp = imp;
 		this.rm = bbImp.getRoiManager();
+		if (blinkService == null)
+			blinkService = new ScheduledThreadPoolExecutor(1);
+		if (blinkService2 == null)
+			blinkService2 = new ScheduledThreadPoolExecutor(1);
 		rm.setColorLegend(this);
 		if (bbImp.getCanvas() != null) {
 			bbImp.getCanvas().addMouseMotionListener(this);
@@ -210,6 +214,10 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 		this.setVisible(false);
 		ij = IJ.getInstance();
 		this.rm = rm;
+		if (blinkService == null)
+			blinkService = new ScheduledThreadPoolExecutor(1);
+		if (blinkService2 == null)
+			blinkService2 = new ScheduledThreadPoolExecutor(1);
 		bbImp = WindowManager.getCurrentImage();
 		bbImp.getCanvas().addMouseMotionListener(this);
 		bbImp.getCanvas().addMouseListener(this);
