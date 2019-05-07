@@ -5784,10 +5784,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	
 		for (String[] currentBundleArray:allBundleArrays){
 			for (String synapseRoiName:rois.keySet()){
-				boolean outsideOfBundle = true;
+				boolean presynInBundle = false;
+				boolean postsynOutsideOfBundle = true;
 				for (String currentBundleNeuron:currentBundleArray){
 					String synapseRoiNameCleaned = synapseRoiName.replace("\"", "").replace("[", "").replace("]", "");
 					if (synapseRoiNameCleaned.startsWith(currentBundleNeuron)){
+						presynInBundle = true;
 						String[] postSynapticCells = synapseRoiNameCleaned.split("_")[0].replaceAll(".*(electrical|chemical)(.*)", "$2").split("\\&");
 						boolean noHitInBundle = true;
 						for (String postSC:postSynapticCells){
@@ -5797,11 +5799,25 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								}
 							}
 						}
-						outsideOfBundle = outsideOfBundle && noHitInBundle;
+						postsynOutsideOfBundle = postsynOutsideOfBundle && noHitInBundle;
 					}
 				}
-				if (!outsideOfBundle){
-					rois.get(synapseRoiName).setFillColor(Colors.getColor(currentBundleArray[0], Color.DARK_GRAY));
+				if (presynInBundle){
+					if (!postsynOutsideOfBundle){
+						rois.get(synapseRoiName).setFillColor(Colors.getColor(currentBundleArray[0], Color.DARK_GRAY));
+					} else {
+						rois.get(synapseRoiName).setFillColor(Colors.getColor(currentBundleArray[0], Color.DARK_GRAY).darker().darker());
+					}
+					String rootName = synapseRoiName.contains("\"")?synapseRoiName.split("\"")[1].trim():"";
+					rootName = rootName.contains(" ")?rootName.split("[_\\- ]")[0].trim():rootName;
+
+					if (!Image3DUniverse.universes.isEmpty()){
+						for (Image3DUniverse univ:Image3DUniverse.universes){
+							if (univ.getContent(rootName)!=null){
+								univ.getContent(rootName).setColor(new Color3f(rois.get(synapseRoiName).getFillColor()));
+							}
+						}
+					}
 				}
 			}
 		}
