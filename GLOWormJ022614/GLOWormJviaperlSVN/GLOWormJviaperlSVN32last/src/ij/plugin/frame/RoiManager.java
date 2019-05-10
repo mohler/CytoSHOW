@@ -5782,9 +5782,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 														"RIR","RIS","RMGL","RMGR","SDQL","SDQR","SIBVL","SIBVR","URXL","URXR","VB01"};
 
 		String[][] allBundleArrays = new String[][]{redBundleArray, purpleBundleArray, blueBundleArray, greenBundleArray, yellowUnbundledArray};
-		String[][] specificBundleArrays = new String[][]{yellowUnbundledArray};
+		String[][] specificBundleArrays = new String[][]{redBundleArray};
+//		String[][] specificBundleArrays = allBundleArrays;
 	
 		for (String[] currentBundleArray:specificBundleArrays){
+			ArrayList<ArrayList<String>> synapseByBundles = new ArrayList<ArrayList<String>>();
+			for (String[] bundleArray:allBundleArrays){
+				synapseByBundles.add(new ArrayList<String>());
+				synapseByBundles.get(synapseByBundles.size()-1).add(""+currentBundleArray[0]+"-"+bundleArray[0] + ">>");
+			}
 			for (String synapseRoiName:rois.keySet()){
 				boolean presynInBundle = false;
 				boolean postsynOutsideOfBundle = true;
@@ -5809,19 +5815,27 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				if (presynInBundle){
 					if (!postsynOutsideOfBundle){
 						rois.get(synapseRoiName).setFillColor(Colors.getColor(currentBundleArray[0], Color.DARK_GRAY));
+						for (int ba=0; ba<allBundleArrays.length; ba++){
+							if (allBundleArrays[ba] == currentBundleArray){
+								if (!synapseByBundles.get(ba).contains(rootName)){
+									synapseByBundles.get(ba).add(rootName);
+								}
+							}
+						}
 					} else {
-						for (String[] targetBundleArray:allBundleArrays){
-							if (targetBundleArray==currentBundleArray){
-								continue;
-							} else {
-								for (String targetBundleNeuron:targetBundleArray){
-									for (String postSC:postSynapticCells){
-										if (postSC.equals(targetBundleNeuron)){
-											rois.get(synapseRoiName).setFillColor(Colors.getColor(targetBundleArray[0], Color.DARK_GRAY));
+						for (int ba=0; ba<allBundleArrays.length; ba++){
+							String[] targetBundleArray = allBundleArrays[ba];
+							for (String targetBundleNeuron:targetBundleArray){
+								for (String postSC:postSynapticCells){
+									if (postSC.equals(targetBundleNeuron)){
+										rois.get(synapseRoiName).setFillColor(Colors.getColor(targetBundleArray[0], Color.DARK_GRAY));
+										if (!synapseByBundles.get(ba).contains(rootName)){
+											synapseByBundles.get(ba).add(rootName);
 										}
 									}
 								}
 							}
+
 						}
 //						rois.get(synapseRoiName).setFillColor(Colors.getColor(currentBundleArray[0], Color.DARK_GRAY).darker().darker());
 					}
@@ -5849,6 +5863,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						}
 					}
 				}
+			}
+			for (ArrayList<String> synapsePartners:synapseByBundles){
+				for(String synapseName:synapsePartners){
+					IJ.log(synapseName);
+				}
+				IJ.log(synapsePartners.get(0) +": "+ (synapsePartners.size()-1) + " synapses\n\n");
 			}
 		}
 	}
