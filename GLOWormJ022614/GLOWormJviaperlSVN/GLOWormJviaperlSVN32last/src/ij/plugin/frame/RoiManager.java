@@ -5288,6 +5288,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 					int roiDiameter = 25;
 					Roi oRoi= new OvalRoi(centerX-roiDiameter/2, centerY-roiDiameter/2, roiDiameter, roiDiameter);
+//					Roi oRoi= new Roi(centerX-roiDiameter/2, centerY-roiDiameter/2, roiDiameter, roiDiameter);
 					oRoi.setName(roiName);
 					oRoi.setFillColor(roiColor);
 					oRoi.setPosition(1, plotZ,1 );
@@ -5781,16 +5782,19 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 														"RIR","RIS","RMGL","RMGR","SDQL","SDQR","SIBVL","SIBVR","URXL","URXR","VB01"};
 
 		String[][] allBundleArrays = new String[][]{redBundleArray, purpleBundleArray, blueBundleArray, greenBundleArray, yellowUnbundledArray};
+		String[][] specificBundleArrays = new String[][]{yellowUnbundledArray};
 	
-		for (String[] currentBundleArray:allBundleArrays){
+		for (String[] currentBundleArray:specificBundleArrays){
 			for (String synapseRoiName:rois.keySet()){
 				boolean presynInBundle = false;
 				boolean postsynOutsideOfBundle = true;
+				String synapseRoiNameCleaned = synapseRoiName.replace("\"", "").replace("[", "").replace("]", "");
+				String rootName = synapseRoiName.contains("\"")?synapseRoiName.split("\"")[1].trim():"";
+				rootName = rootName.contains(" ")?rootName.split("[_\\- ]")[0].trim():rootName;
+				String[] postSynapticCells = synapseRoiNameCleaned.split("_")[0].replaceAll(".*(electrical|chemical)(.*)", "$2").split("\\&");
 				for (String currentBundleNeuron:currentBundleArray){
-					String synapseRoiNameCleaned = synapseRoiName.replace("\"", "").replace("[", "").replace("]", "");
 					if (synapseRoiNameCleaned.startsWith(currentBundleNeuron)){
 						presynInBundle = true;
-						String[] postSynapticCells = synapseRoiNameCleaned.split("_")[0].replaceAll(".*(electrical|chemical)(.*)", "$2").split("\\&");
 						boolean noHitInBundle = true;
 						for (String postSC:postSynapticCells){
 							for (String nextBundleNeuron:currentBundleArray){
@@ -5806,15 +5810,41 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					if (!postsynOutsideOfBundle){
 						rois.get(synapseRoiName).setFillColor(Colors.getColor(currentBundleArray[0], Color.DARK_GRAY));
 					} else {
-						rois.get(synapseRoiName).setFillColor(Colors.getColor(currentBundleArray[0], Color.DARK_GRAY).darker().darker());
+						for (String[] targetBundleArray:allBundleArrays){
+							if (targetBundleArray==currentBundleArray){
+								continue;
+							} else {
+								for (String targetBundleNeuron:targetBundleArray){
+									for (String postSC:postSynapticCells){
+										if (postSC.equals(targetBundleNeuron)){
+											rois.get(synapseRoiName).setFillColor(Colors.getColor(targetBundleArray[0], Color.DARK_GRAY));
+										}
+									}
+								}
+							}
+						}
+//						rois.get(synapseRoiName).setFillColor(Colors.getColor(currentBundleArray[0], Color.DARK_GRAY).darker().darker());
 					}
-					String rootName = synapseRoiName.contains("\"")?synapseRoiName.split("\"")[1].trim():"";
-					rootName = rootName.contains(" ")?rootName.split("[_\\- ]")[0].trim():rootName;
 
 					if (!Image3DUniverse.universes.isEmpty()){
 						for (Image3DUniverse univ:Image3DUniverse.universes){
 							if (univ.getContent(rootName)!=null){
 								univ.getContent(rootName).setColor(new Color3f(rois.get(synapseRoiName).getFillColor()));
+								univ.getContent(rootName).setTransparency(0.0f);;
+							}
+						}
+					}
+				} else {
+					Color roiColor= synapseRoiName.contains("chemical")?Color.white:Color.yellow;
+					if (synapseRoiName.contains("uncertain")){
+						roiColor= synapseRoiName.contains("chemical")?Color.pink:Color.orange;
+					}
+					rois.get(synapseRoiName).setFillColor(roiColor);
+					if (!Image3DUniverse.universes.isEmpty()){
+						for (Image3DUniverse univ:Image3DUniverse.universes){
+							if (univ.getContent(rootName)!=null){
+								univ.getContent(rootName).setColor(new Color3f(rois.get(synapseRoiName).getFillColor()));
+								univ.getContent(rootName).setTransparency(0.9f);;
 							}
 						}
 					}

@@ -281,6 +281,7 @@ public class IJ3dExecuter {
 
 	public void saveAsWaveFront() {
 		File obj_file = promptForFile("Save WaveFront", "untitled", ".obj");
+		obj_file = new File(obj_file.getParent()+ File.separator + obj_file.getName().replace(" ", "_"));
 		if(obj_file == null)
 			return;
 		MeshExporter.saveAsWaveFront(univ.getContents(), obj_file, univ.getStartTime(), univ.getEndTime());
