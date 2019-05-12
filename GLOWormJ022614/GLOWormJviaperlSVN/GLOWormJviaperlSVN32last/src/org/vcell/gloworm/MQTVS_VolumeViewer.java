@@ -53,8 +53,9 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 		}
 		if (univ.getWindow() == null){
 			univ.show();
+			WindowManager.removeWindow(univ.getWindow());
+			
 			univ.getWindow().setTitle(imp.getMotherImp().getTitle()+" [IJ3DV]");
-
 			WindowManager.addWindow(univ.getWindow());
 		}
 
