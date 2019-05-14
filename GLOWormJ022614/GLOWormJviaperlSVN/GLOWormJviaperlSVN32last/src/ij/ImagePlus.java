@@ -111,9 +111,15 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	private Overlay overlay;
 	private boolean hideOverlay;
 	private static int default16bitDisplayRange;
+    private static ScheduledThreadPoolExecutor blinkService;
+    private ScheduledFuture schfut;
+
 
     /** Constructs an uninitialized ImagePlus. */
     public ImagePlus() {
+		if (blinkService ==null){
+			blinkService = new ScheduledThreadPoolExecutor(1);
+		}
     	ID = --currentID;
 		title="null";
     }
@@ -122,6 +128,9 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		argument will be used as the title of the window that displays the image.
 		Throws an IllegalStateException if an error occurs while loading the image. */
     public ImagePlus(String title, Image img) {
+		if (blinkService ==null){
+			blinkService = new ScheduledThreadPoolExecutor(1);
+		}
 		this.title = title;
     	ID = --currentID;
 		if (img!=null)
@@ -130,6 +139,9 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
     
     /** Constructs an ImagePlus from an ImageProcessor. */
     public ImagePlus(String title, ImageProcessor ip) {
+		if (blinkService ==null){
+			blinkService = new ScheduledThreadPoolExecutor(1);
+		}
  		setProcessor(title, ip);
    		ID = --currentID;
     }
@@ -138,6 +150,9 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		PGM, GIF or JPRG specified by a path or from a TIFF, DICOM,
 		GIF or JPEG specified by a URL. */
     public ImagePlus(String pathOrURL) {
+		if (blinkService ==null){
+			blinkService = new ScheduledThreadPoolExecutor(1);
+		}
     	Opener opener = new Opener();
     	ImagePlus imp = null;
     	boolean isURL = pathOrURL.indexOf("://")>0;
@@ -160,10 +175,13 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
    				this.url = pathOrURL;
    			ID = --currentID;
     	}
-    }
+   }
 
 	/** Constructs an ImagePlus from a stack. */
     public ImagePlus(String title, ImageStack stack) {
+		if (blinkService ==null){
+			blinkService = new ScheduledThreadPoolExecutor(1);
+		}
     	setStack(title, stack);
     	ID = --currentID;
     }
@@ -1306,8 +1324,6 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 
 	public boolean zeroUpdateMode;
 
-	private boolean blinkStop;
-
 	private boolean fastCopyMode;
 
 	public boolean isFastCopyMode() {
@@ -1651,7 +1667,6 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	public void setRoi( Roi newRoi, boolean updateDisplay) {
 		if (newRoi==null)		
 			{deleteRoi(); return;}
-		final Roi fNewRoi = (Roi)newRoi.clone();
 		Rectangle bounds = newRoi.getBounds();
 		if (newRoi.isVisible()) {
 			if ((newRoi instanceof Arrow) && newRoi.getState()==Roi.CONSTRUCTING && bounds.width==0 && bounds.height==0) {
@@ -1660,83 +1675,64 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 				roiFillColor = newRoi.getFillColor();
 				return;
 			}
-			
-			if (fNewRoi==null) {
+			newRoi = (Roi)newRoi.clone();
+			if (newRoi==null) {
 				deleteRoi(); 
 				return;
 			}
 		}
-		if (bounds.width==0 && bounds.height==0 && !(fNewRoi.getType()==Roi.POINT||fNewRoi.getType()==Roi.LINE))
+		if (bounds.width==0 && bounds.height==0 && !(newRoi.getType()==Roi.POINT||newRoi.getType()==Roi.LINE))
 			{deleteRoi(); return;}
-		
-		roiFillColor = newRoi.getFillColor();
-		roiStrokeWidth = newRoi.getStrokeWidth();
-		roiStrokeColor = newRoi.getStrokeColor();
+		roi = newRoi;
+		roiFillColor = roi.getFillColor();
+		roiStrokeWidth = roi.getStrokeWidth();
+		roiStrokeColor = roi.getStrokeColor();
 		if (roiStrokeColor ==null)
 			roiStrokeColor = Color.yellow;
 		
 		if (ip!=null) {
 			ip.setMask(null);
-			if (fNewRoi.isArea())
+			if (roi.isArea())
 				ip.setRoi(bounds);
 			else
 				ip.resetRoi();
 		}
-		if (this.isDisplayedHyperStack() && !fastCopyMode){
+		if (!fastCopyMode   /*this.isDisplayedHyperStack()*/){
 			blinkOn=true;
-			if (blinkTimer!=null) {
-				oldBlinkTimer = blinkTimer;
-				oldBlinkTimer.setName("OLDBLINKTIMER");
-				blinkStop = true;
-				while (oldBlinkTimer.isAlive());
+			if (schfut != null)
+				schfut.cancel(true);
+			schfut = blinkService.scheduleAtFixedRate(new Runnable()
+			{
+				public void run()
+				{
+					double strokeWidthMagAdjust = roiStrokeWidth/win.getCanvas().getMagnification();
+					Roi dummyRoi = new Roi(0,0,0,0);
+					dummyRoi.setStrokeWidth(strokeWidthMagAdjust);
+					strokeWidthMagAdjust = dummyRoi.getStrokeWidth();
 
-			}
-			blinkTimer = new Thread(new Runnable() {
-				public Roi blinkingRoi = fNewRoi;
-				public void run(){
-					blinkStop = false;
+					if (roi instanceof Line) 
+						roi.setStrokeWidth(strokeWidthMagAdjust);
+					else
+						roi.setStrokeWidth(roiStrokeWidth);
+					
+					if (blinkOn){
+						if (roi instanceof Arrow)
+							roi.setStrokeColor(roiStrokeColor.brighter());
+						roi.setFillColor(Roi.getDefaultFillColor());
+						if (roi instanceof TextRoi)
+							roi.setFillColor(Color.yellow);
 
-					while (!blinkStop && win != null) {
-						double strokeWidthMagAdjust = roiStrokeWidth/win.getCanvas().getMagnification();
-						Roi dummyRoi = new Roi(0,0,0,0);
-						dummyRoi.setStrokeWidth(strokeWidthMagAdjust);
-						strokeWidthMagAdjust = dummyRoi.getStrokeWidth();
-
-						if (blinkingRoi instanceof Line) 
-							blinkingRoi.setStrokeWidth(strokeWidthMagAdjust);
-						else
-							blinkingRoi.setStrokeWidth(roiStrokeWidth);
-
-						if (blinkOn){
-							if (blinkingRoi instanceof Arrow)
-								blinkingRoi.setStrokeColor(roiStrokeColor.brighter());
-							blinkingRoi.setFillColor(Roi.getDefaultFillColor());
-							if (blinkingRoi instanceof TextRoi)
-								blinkingRoi.setFillColor(Color.yellow);
-
-							blinkOn = false;
-						} else {
-							if (blinkingRoi instanceof Arrow)
-								blinkingRoi.setStrokeColor(roiStrokeColor.darker());
-							blinkingRoi.setFillColor(roiFillColor);
-							blinkOn =true;
-						}
-						draw();
-						try {
-							Thread.sleep(500);
-						} catch (InterruptedException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}			
+						blinkOn = false;
+					} else {
+						if (roi instanceof Arrow)
+							roi.setStrokeColor(roiStrokeColor.darker());
+						roi.setFillColor(roiFillColor);
+						blinkOn =true;
 					}
-					blinkingRoi.setImage(null);
-					blinkingRoi=null;
+					draw();
 				}
-			});
-			blinkTimer.setName("blinkTimer");
-			blinkTimer.start();
+			}, 0, 500, TimeUnit.MILLISECONDS);
 		}
-		roi = fNewRoi;
 		if (roi!=null)
 			roi.setImage(this);
 		if (updateDisplay) draw();
@@ -1814,11 +1810,8 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			saveRoi();
 			roi.setImage(null);
 			roi = null;
-			blinkStop = true;
-
 			if (ip!=null)
 				ip.resetRoi();
-			
 			draw();
 		}
 	}
@@ -2100,7 +2093,6 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			roi = null;
 		}
 		Roi.previousRoi = null;
-		blinkStop = true;
 		properties = null;
 		calibration = null;
 		overlay = null;
@@ -2294,10 +2286,6 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	public boolean skewY;
 
 	private RemoteMTVSHandler remoteMTVSHandler;
-
-	private Thread blinkTimer;
-
-	private Thread oldBlinkTimer;
 
    
     /** Redisplays the (x,y) coordinates and pixel value (which may
