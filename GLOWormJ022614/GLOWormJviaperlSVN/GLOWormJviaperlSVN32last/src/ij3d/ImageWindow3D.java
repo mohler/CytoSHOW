@@ -60,35 +60,35 @@ import javax.vecmath.Color3f;
 
 import org.vcell.gloworm.SliceStereoToggle;
 
-public class ImageWindow3D extends JFrame implements FocusListener, WindowListener, UniverseListener {
+public class ImageWindow3D extends ImageWindow implements FocusListener, WindowListener, UniverseListener {
 
 	private DefaultUniverse universe;
 	ImageCanvas3D canvas3D;
 	private Label status = new Label("");
 	private boolean noOffScreen = true;
 	private ErrorListener error_listener;
-	private ImagePlus imp;
-	private ImageCanvas ic;
+//	private ImagePlus imp;
+//	private ImageCanvas ic;
 	private Panel overheadPanel;
 	private Toolbar toolbar;
-	protected ImageJ ij;
-	private Panel tagButtonPanel;
-	private Panel viewButtonPanel;
-	private Panel modeButtonPanel;
-	private Label countLabel;
-	private JButton fullSetButton;
-	private JButton hideShowButton;
-	private JButton sketch3DButton;
-	private JButton sketchVVButton;
-	private JButton dupButton;
-	private JButton modeButton;
-	private JButton slice4dButton;
-	private JButton stereo4dxButton;
-	private JButton stereo4dyButton;
-	private JButton stereo4dXrcButton;
-	private SliceStereoToggle sst;
-	private JButton stereo4dYrcButton;
-	private Panel optionsPanel;
+//	protected ImageJ ij;
+//	private Panel tagButtonPanel;
+//	private Panel viewButtonPanel;
+//	private Panel modeButtonPanel;
+//	private Label countLabel;
+//	private JButton fullSetButton;
+//	private JButton hideShowButton;
+//	private JButton sketch3DButton;
+//	private JButton sketchVVButton;
+//	private JButton dupButton;
+//	private JButton modeButton;
+//	private JButton slice4dButton;
+//	private JButton stereo4dxButton;
+//	private JButton stereo4dyButton;
+//	private JButton stereo4dXrcButton;
+//	private SliceStereoToggle sst;
+//	private JButton stereo4dYrcButton;
+//	private Panel optionsPanel;
 
 
 	public ImageWindow3D(String title, DefaultUniverse universe) {
@@ -130,7 +130,7 @@ public class ImageWindow3D extends JFrame implements FocusListener, WindowListen
 		addFocusListener(this);
 		addWindowListener(this);
 		updateImagePlus();
-		WindowManager.addImageWindow3D(-1, this);
+		WindowManager.addWindow(-1, this);
 
 	}
 

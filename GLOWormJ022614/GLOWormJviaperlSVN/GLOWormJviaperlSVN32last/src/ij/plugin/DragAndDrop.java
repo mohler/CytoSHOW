@@ -77,7 +77,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 		freshDrop = true;
 		dtde.acceptDrop(DnDConstants.ACTION_COPY);
 		Component dtc = dtde.getDropTargetContext().getDropTarget().getComponent();
-		dropImp = WindowManager.getCurrentImage();
+//		dropImp = WindowManager.getCurrentImage();
 		if (dtc instanceof ImageCanvas) {
 			dropImp = ((ImageCanvas) dtc).getImage();
 			if (dropImp == null)
@@ -88,7 +88,8 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 			if (getImp().getMotherImp() != null && getImp().getMotherImp() != getImp())
 				setImp(getImp().getMotherImp());
 		} else if (WindowManager.getCurrentImage() != null)
-			setImp(WindowManager.getCurrentImage());
+//			setImp(WindowManager.getCurrentImage());
+			;
 		else
 			setImp(null);
 		DataFlavor URI_LIST_FLAVOR =null;

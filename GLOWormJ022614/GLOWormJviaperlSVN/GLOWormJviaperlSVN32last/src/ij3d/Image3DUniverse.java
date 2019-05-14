@@ -322,9 +322,10 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		setMenubar(menubar);
 		//		menubar.setVisible(true);
 		JRootPane rootPane = win.getRootPane();
+		win.getJMenuBar().setVisible(true);
 		win.pack();
 		win.setVisible(true);
-		win.getJMenuBar().setVisible(true);
+		win.pack();
 	}
 
 	/**
@@ -372,7 +373,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				dev.setFullScreenWindow(null);
 			}
 		}
-		win.setVisible(true);
+//		win.setVisible(true);
 		menubar.updateMenus();
 	}
 
