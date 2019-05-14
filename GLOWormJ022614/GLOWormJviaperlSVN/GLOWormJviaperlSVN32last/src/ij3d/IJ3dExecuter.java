@@ -1022,12 +1022,12 @@ public class IJ3dExecuter {
 			public void colorChanged(Color3f color) {
 				if (!(finalNoSelection || others)){
 					finalC.setColor(color);
-					univ.fireContentChanged(finalC);
+//					univ.fireContentChanged(finalC);
 				} else {
 					for (Object nextC:univ.getContents()){
 						if (nextC!=finalC) {
 							((Content) nextC).setColor(color);
-							univ.fireContentChanged(((Content) nextC));
+//							univ.fireContentChanged(((Content) nextC));
 						}
 					}
 				}

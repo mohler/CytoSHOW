@@ -130,7 +130,7 @@ public class ImageWindow3D extends JFrame implements FocusListener, WindowListen
 		addFocusListener(this);
 		addWindowListener(this);
 		updateImagePlus();
-		WindowManager.addWindow(this);
+		WindowManager.addImageWindow3D(-1, this);
 
 	}
 

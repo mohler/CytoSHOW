@@ -12,6 +12,7 @@ import java.awt.*;
 import java.util.*;
 
 import ij.gui.*;
+import ij3d.ImageWindow3D;
 
 /** This class consists of static methods used to manage ImageJ's windows. */
 public class WindowManager {
@@ -28,8 +29,10 @@ public class WindowManager {
 	}
 
 	/** Makes the image contained in the specified window the active image. */
-	public static void setCurrentWindow(ImageWindow win) {
-		if (win==null || win.isClosed() || win.getImagePlus()==null) // deadlock-"wait to lock"
+	public static void setCurrentWindow(Frame win) {
+		if (win==null ) // deadlock-"wait to lock"
+			return;
+		if (win instanceof ImageWindow && (((ImageWindow)win).isClosed() || ((ImageWindow)win).getImagePlus()==null))
 			return;
 		//IJ.log("setCurrentWindow: "+win.getImagePlus().getTitle()+" ("+(currentWindow!=null?currentWindow.getImagePlus().getTitle():"null") + ")");
 		setWindow(win);
@@ -46,10 +49,11 @@ public class WindowManager {
 			}
 		}
 		Undo.reset();
-		currentWindow = win;
+		if (win instanceof ImageWindow)
+			currentWindow = (ImageWindow)win;
 		Menus.updateMenus();
-		if (Recorder.record && !IJ.isMacro())
-			Recorder.record("selectWindow", win.getImagePlus().getTitle());
+//		if (Recorder.record && !IJ.isMacro())
+//			Recorder.record("selectWindow", win.getImagePlus().getTitle());
 	}
 	
 	/** Returns the active ImageWindow. */
@@ -101,9 +105,13 @@ public class WindowManager {
 			return currentWindow.getImagePlus();
 		else if (frontWindow!=null && (frontWindow instanceof ImageWindow))
 			return ((ImageWindow)frontWindow).getImagePlus();
-		else 	if (imageList.size()>0) {	
-			ImageWindow win = (ImageWindow)imageList.elementAt(imageList.size()-1);
-			return win.getImagePlus();
+		else 	if (imageList.size()>0) {
+			if (imageList.elementAt(imageList.size()-1) instanceof ImageWindow){
+				ImageWindow win = (ImageWindow)imageList.elementAt(imageList.size()-1);
+				return win.getImagePlus();
+			}else{
+				return null;
+			}
 		} else
 			return Interpreter.getLastBatchModeImage(); 
 	}
@@ -146,8 +154,10 @@ public class WindowManager {
 			list[i] = batchModeImages[i];
 		int index = 0;
 		for (int i=nBatchImages; i<nBatchImages+nWindows; i++) {
-			ImageWindow win = (ImageWindow)imageList.elementAt(index++);
-			list[i] = win.getImagePlus().getID();
+			if (imageList.elementAt(index) instanceof ImageWindow){
+				ImageWindow win = (ImageWindow)imageList.elementAt(index++);
+				list[i] = win.getImagePlus().getID();
+			}
 		}
 		return list;
 	}
@@ -246,6 +256,8 @@ public class WindowManager {
 			return;
 		else if (win instanceof ImageWindow)
 			addImageWindow((ImageWindow)win);
+		else if (win instanceof ImageWindow3D)
+			addImageWindow3D((ImageWindow3D)win);
 		else {
 			Menus.insertWindowMenuItem(win);
 			nonImageList.addElement(win);
@@ -259,6 +271,8 @@ public class WindowManager {
 			return;
 		else if (win instanceof ImageWindow)
 			addImageWindow(n, (ImageWindow)win);
+		else if (win instanceof ImageWindow3D)
+			addImageWindow3D(n, (ImageWindow3D)win);
 		else {
 			Menus.insertWindowMenuItem(win);
 			nonImageList.add(n, win);
@@ -284,6 +298,22 @@ public class WindowManager {
 			imageList.add(n, win);
         Menus.addWindowMenuItem(n, imp);
         setCurrentWindow(win);
+    }
+
+	private static void addImageWindow3D(ImageWindow3D win3d) {
+		addImageWindow3D(-1, win3d);
+	}
+	
+	public static void addImageWindow3D(int n, ImageWindow3D win3d) {
+		ImagePlus imp = win3d.getImagePlus();
+		if (imp==null) return;
+		checkForDuplicateName(imp);
+		if (n<0)
+			imageList.addElement(win3d);
+		else
+			imageList.add(n, win3d);
+        Menus.addWindowMenuItem(n, imp);
+        setCurrentWindow(win3d);
     }
 
 	static void checkForDuplicateName(ImagePlus imp) {
