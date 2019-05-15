@@ -291,7 +291,6 @@ public class WindowManager {
 		ImagePlus imp = win.getImagePlus();
 		if (imp==null) return;
 		checkForDuplicateName(imp);
-        imp.getWindow().setImage(imp);
 		if (n<0)
 			imageList.addElement(win);
 		else
