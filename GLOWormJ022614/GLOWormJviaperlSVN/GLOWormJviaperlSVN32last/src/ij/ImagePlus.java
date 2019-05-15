@@ -764,7 +764,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	}
 	
 	/** Returns the ImageCanvas being used to
-		display this image, or null. */
+		display this image, or null...??? */
 	public ImageCanvas getCanvas() {
 		return win!=null?win.getCanvas():flatteningCanvas;
 	}

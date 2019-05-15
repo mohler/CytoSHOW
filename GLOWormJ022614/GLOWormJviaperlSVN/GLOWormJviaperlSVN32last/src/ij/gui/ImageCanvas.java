@@ -20,6 +20,7 @@ import ij.plugin.tool.PlugInTool;
 import ij.macro.*;
 import ij.*;
 import ij.util.*;
+import ij3d.ImageWindow3D;
 
 import java.awt.event.*;
 import java.awt.font.FontRenderContext;
@@ -105,15 +106,20 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 	public ImageCanvas(ImagePlus imp) {
 		this.imp = imp;
 		//		sketchyMQTVS = false;
-		if (imp.getMotherImp().getStack() instanceof MultiQTVirtualStack) {
-			if (((MultiQTVirtualStack) imp.getMotherImp().getStack()).getVirtualStack(0) != null) {
+		
+		if (imp.getWindow() instanceof ImageWindow3D){
+			
+		} else {
+			if (imp.getMotherImp().getStack() instanceof MultiQTVirtualStack) {
+				if (((MultiQTVirtualStack) imp.getMotherImp().getStack()).getVirtualStack(0) != null) {
 
-				for (int i=0;i<imp.getNChannels();i++) {
-					if (((MultiQTVirtualStack) imp.getMotherImp().getStack()).getVirtualStack(i) != null) {
-						if ( ((MultiQTVirtualStack) imp.getMotherImp().getStack()).getVirtualStack(i).getMovieName()
-								.startsWith("Sketch3D")) {
-							sketchyMQTVS = true;
-							//					IJ.showStatus(""+sketchyMQTVS);
+					for (int i=0;i<imp.getNChannels();i++) {
+						if (((MultiQTVirtualStack) imp.getMotherImp().getStack()).getVirtualStack(i) != null) {
+							if ( ((MultiQTVirtualStack) imp.getMotherImp().getStack()).getVirtualStack(i).getMovieName()
+									.startsWith("Sketch3D")) {
+								sketchyMQTVS = true;
+								//					IJ.showStatus(""+sketchyMQTVS);
+							}
 						}
 					}
 				}
@@ -594,29 +600,31 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				imageUpdated = false;
 				imp.updateImage();
 			}
-			Graphics offScreenGraphics = offScreenImage.getGraphics();
-			setInterpolation(offScreenGraphics, Prefs.interpolateScaledImages);
-			Image img = imp.getImage();
-			if (img!=null)
-				offScreenGraphics.drawImage(img, 0, 0, srcRectWidthMag, srcRectHeightMag,
-						srcRect.x, srcRect.y, srcRect.x+srcRect.width, srcRect.y+srcRect.height, null);
-			if (overlay!=null) drawOverlay(offScreenGraphics);
-			if (showAllROIs) drawAllROIs(offScreenGraphics);
-			if (roi!=null) drawRoi(roi, offScreenGraphics);
-			if (srcRect.width<imageWidth ||srcRect.height<imageHeight)
-				drawZoomIndicator(offScreenGraphics);
-			if (IJ.debugMode) showFrameRate(offScreenGraphics);
-			if (messageRois != null) {
-				Enumeration<Roi> mRoiEnum = messageRois.elements();
-				ArrayList<Roi> r = new ArrayList<Roi>();
-				while (mRoiEnum.hasMoreElements()){
-					r.add(mRoiEnum.nextElement());
-				}
-				int yOffset =0;
-				for (int i=0; i< r.size(); i++) {
-					r.get(i).setLocation(srcRect.x, srcRect.y+yOffset);
-					drawRoi(offScreenGraphics, (Roi)r.get(i), -1);
-					yOffset = yOffset + r.get(i).height;
+			if (offScreenImage!=null){
+				Graphics offScreenGraphics = offScreenImage.getGraphics();
+				setInterpolation(offScreenGraphics, Prefs.interpolateScaledImages);
+				Image img = imp.getImage();
+				if (img!=null)
+					offScreenGraphics.drawImage(img, 0, 0, srcRectWidthMag, srcRectHeightMag,
+							srcRect.x, srcRect.y, srcRect.x+srcRect.width, srcRect.y+srcRect.height, null);
+				if (overlay!=null) drawOverlay(offScreenGraphics);
+				if (showAllROIs) drawAllROIs(offScreenGraphics);
+				if (roi!=null) drawRoi(roi, offScreenGraphics);
+				if (srcRect.width<imageWidth ||srcRect.height<imageHeight)
+					drawZoomIndicator(offScreenGraphics);
+				if (IJ.debugMode) showFrameRate(offScreenGraphics);
+				if (messageRois != null) {
+					Enumeration<Roi> mRoiEnum = messageRois.elements();
+					ArrayList<Roi> r = new ArrayList<Roi>();
+					while (mRoiEnum.hasMoreElements()){
+						r.add(mRoiEnum.nextElement());
+					}
+					int yOffset =0;
+					for (int i=0; i< r.size(); i++) {
+						r.get(i).setLocation(srcRect.x, srcRect.y+yOffset);
+						drawRoi(offScreenGraphics, (Roi)r.get(i), -1);
+						yOffset = yOffset + r.get(i).height;
+					}
 				}
 			}
 			if (g!=null){
@@ -1004,7 +1012,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 											((StackWindow)imp.getWindow()).tSelector.getHeight():
 												((StackWindow)imp.getWindow()).cSelector.getHeight())
 						:0)
-						+imp.getWindow().overheadPanel.getHeight();
+						+(imp.getWindow().overheadPanel!=null?imp.getWindow().overheadPanel.getHeight():0);
 		if (Math.abs(srcRatio-imageRatio)>0.05) {
 			double scale = oldMag/newMag;
 			int newSrcWidth = (int)Math.round(srcRect.width*scale);

@@ -49,7 +49,9 @@ public class WindowManager {
 			}
 		}
 		Undo.reset();
-		if (win instanceof ImageWindow)
+		if (win instanceof ImageWindow3D)
+			currentWindow = (ImageWindow3D)win;
+		else if (win instanceof ImageWindow)
 			currentWindow = (ImageWindow)win;
 		Menus.updateMenus();
 //		if (Recorder.record && !IJ.isMacro())
@@ -157,6 +159,7 @@ public class WindowManager {
 			if (imageList.elementAt(index) instanceof ImageWindow){
 				ImageWindow win = (ImageWindow)imageList.elementAt(index++);
 				list[i] = win.getImagePlus().getID();
+				win.getImagePlus().setWindow(win);
 			}
 		}
 		return list;
@@ -256,8 +259,6 @@ public class WindowManager {
 			return;
 		else if (win instanceof ImageWindow)
 			addImageWindow((ImageWindow)win);
-		else if (win instanceof ImageWindow3D)
-			addImageWindow3D((ImageWindow3D)win);
 		else {
 			Menus.insertWindowMenuItem(win);
 			nonImageList.addElement(win);
@@ -271,8 +272,6 @@ public class WindowManager {
 			return;
 		else if (win instanceof ImageWindow)
 			addImageWindow(n, (ImageWindow)win);
-		else if (win instanceof ImageWindow3D)
-			addImageWindow3D(n, (ImageWindow3D)win);
 		else {
 			Menus.insertWindowMenuItem(win);
 			nonImageList.add(n, win);
@@ -292,28 +291,13 @@ public class WindowManager {
 		ImagePlus imp = win.getImagePlus();
 		if (imp==null) return;
 		checkForDuplicateName(imp);
+        imp.getWindow().setImage(imp);
 		if (n<0)
 			imageList.addElement(win);
 		else
 			imageList.add(n, win);
         Menus.addWindowMenuItem(n, imp);
         setCurrentWindow(win);
-    }
-
-	private static void addImageWindow3D(ImageWindow3D win3d) {
-		addImageWindow3D(-1, win3d);
-	}
-	
-	public static void addImageWindow3D(int n, ImageWindow3D win3d) {
-		ImagePlus imp = win3d.getImagePlus();
-		if (imp==null) return;
-		checkForDuplicateName(imp);
-		if (n<0)
-			imageList.addElement(win3d);
-		else
-			imageList.add(n, win3d);
-        Menus.addWindowMenuItem(n, imp);
-        setCurrentWindow(win3d);
     }
 
 	static void checkForDuplicateName(ImagePlus imp) {
