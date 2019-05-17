@@ -85,6 +85,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	public static ArrayList<Image3DUniverse> universes =
 			new ArrayList<Image3DUniverse>();
 
+	public static int numUniversesLaunched;
+
 	private static final UniverseSynchronizer synchronizer =
 			new UniverseSynchronizer();
 
@@ -177,6 +179,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 */
 	public Image3DUniverse(int width, int height) {
 		super(width, height);
+		numUniversesLaunched++;
 		canvas = (ImageCanvas3D)getCanvas();
 		iJ3dExecuter = new IJ3dExecuter(this);
 		this.timeline = new Timeline(this);
@@ -280,9 +283,13 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 	public void show() {
 		menubar = new Image3DMenubar(this);
-		init(new ImageWindow3D("ImageJ 3D Viewer [" + universes.size() +"]", this));
-		//		win.pack();
-		//		win.setVisible(true);
+//		init(new ImageWindow3D("ImageJ 3D Viewer [" + numUniversesLaunched +"]", this));
+		init(new ImageWindow3D("ImageJ 3D Viewer [IJ3DV]", this));
+		win.pack();
+		win.setVisible(true);
+		win.invalidate();
+		win.validate();
+		win.repaint();
 	}
 
 	/**
@@ -308,8 +315,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		// AWT heavyweight and Swing lightweight components.
 		// Unfortunately, not everything is working so far, so
 		// comment out the check for the Java version.
-		// 		if(System.getProperty("java.version").compareTo("1.6.0_12") < 0)
-		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
+		if(System.getProperty("java.version").compareTo("1.6.0_12") < 0)
+			JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		plDialog = new PointListDialog(this.win);
 		plDialog.addWindowListener(new WindowAdapter() {
 
@@ -319,13 +326,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		});
 		registrationMenubar = new RegistrationMenubar(this);
 		shortcuts = new ShortCuts(menubar);
-		setMenubar(menubar);
-		//		menubar.setVisible(true);
-		JRootPane rootPane = win.getRootPane();
-		win.getJMenuBar().setVisible(true);
-		win.pack();
-		win.setVisible(true);
-		win.pack();
+//		setMenubar(menubar);
 	}
 
 	/**
@@ -455,8 +456,10 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 * @param mb
 	 */
 	public void setMenubar(JMenuBar mb) {
-		if(win != null)
-			win.setJMenuBar(mb);
+		if(win != null){
+			win.getRootPane().setJMenuBar(mb);
+			win.getRootPane().setVisible(true);
+		}
 	}
 
 	/**

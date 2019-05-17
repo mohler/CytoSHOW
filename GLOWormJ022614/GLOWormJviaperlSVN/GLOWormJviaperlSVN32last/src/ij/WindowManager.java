@@ -165,6 +165,19 @@ public class WindowManager {
 		return list;
 	}
 
+	/** Returns an array containing a list of the ImageWindow Frames. */
+	public static Frame[] getImageWindows() {
+		ArrayList list = new ArrayList();
+		for (int i=0; i<imageList.size(); i++) {
+			Object win = imageList.elementAt(i);
+			if (win instanceof Frame)
+				list.add(win);
+		}
+		Frame[] frames = new Frame[list.size()];
+		list.toArray(frames);
+		return frames;
+	}
+
 	/** Returns an array containing a list of the non-image Frames. */
 	public synchronized static Frame[] getNonImageWindows() {
 		ArrayList list = new ArrayList();

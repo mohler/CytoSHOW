@@ -21,6 +21,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenuBar;
 
 import java.awt.AWTException;
 import java.awt.GridBagConstraints;
@@ -71,6 +72,7 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 //	private ImageCanvas ic;
 	private Panel overheadPanel;
 	private Toolbar toolbar;
+	private Image3DMenubar menubar;
 //	protected ImageJ ij;
 //	private Panel tagButtonPanel;
 //	private Panel viewButtonPanel;
@@ -93,6 +95,7 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 
 	public ImageWindow3D(String title, DefaultUniverse universe) {
 		super(title);
+		menubar = ((Image3DMenubar)((Image3DUniverse)universe).getMenuBar());
 		BorderLayout bl = new BorderLayout();
 		String j3dNoOffScreen = System.getProperty("j3d.noOffScreen");
 		if (j3dNoOffScreen != null && j3dNoOffScreen.equals("true"))
@@ -107,7 +110,7 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 		if (dnd!=null)
 			dnd.addDropTarget(this.canvas3D);
 
-		this.setResizable(false);
+		this.setResizable(true);
 		ic = this.canvas3D.getRoiCanvas();
 		this.setLayout(bl);
 
@@ -115,11 +118,11 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 		error_listener.addTo(universe);
 
 		
+		add(canvas3D, BorderLayout.CENTER);
+
 		addToolBarPanel();
 //
 		addCommandButtons(imp);
-
-		add(canvas3D, BorderLayout.CENTER);
 
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
@@ -139,13 +142,14 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 
 	public void addToolBarPanel() {
 		overheadPanel = new Panel();
-		overheadPanel.setLayout(new GridLayout(1, 1));
+		overheadPanel.setLayout(new GridLayout(2,1));
 		
 		toolbar = new Toolbar();
 		toolbar.setThreeDViewer(true);
 
 		toolbar.addKeyListener(ij);
 		toolbar.addMouseListener(toolbar);
+		overheadPanel.add(menubar);
 		overheadPanel.add(toolbar);
 
 		this.add(overheadPanel, BorderLayout.NORTH);
@@ -158,7 +162,6 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 		GridBagConstraints fspc = new GridBagConstraints();
 		GridBagLayout viewgridbag = new GridBagLayout();
 		GridBagConstraints vspc = new GridBagConstraints();
-		Image3DMenubar menubar = ((Image3DMenubar)((Image3DUniverse)getUniverse()).getMenuBar());
 
 		tagButtonPanel = new Panel(fspgridbag);
 		viewButtonPanel = new Panel(viewgridbag);
@@ -859,6 +862,14 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 	public void focusLost(FocusEvent e) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	public Image3DMenubar getMenubar() {
+		return menubar;
+	}
+
+	public void setMenubar(Image3DMenubar menubar) {
+		this.menubar = menubar;
 	}
 }
 

@@ -498,8 +498,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							return;
 
 						}else if (path.toLowerCase().endsWith(".obj")) {
-							ImageJ3DViewer ij3dvNew = null;		
-							Frame[] frames = WindowManager.getNonImageWindows();
+							Frame[] frames = WindowManager.getImageWindows();
 							for (Frame frame:frames){
 								if (frame instanceof ImageWindow3D){
 									if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow3D)frame).getUniverse().getCanvas()){
@@ -1065,8 +1064,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					else
 						MQTVSSceneLoader64.runMQTVS_SceneLoader64(path);
 				}else if (((String)obj).toLowerCase().endsWith(".obj")) {
-					ImageJ3DViewer ij3dvNew = null;		
-					Frame[] frames = WindowManager.getNonImageWindows();
+					Frame[] frames = WindowManager.getImageWindows();
 					for (Frame frame:frames){
 						if (frame instanceof ImageWindow3D){
 							if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow3D)frame).getUniverse().getCanvas()){
@@ -1280,8 +1278,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					MQTVSSceneLoader64.runMQTVS_SceneLoader64( ((File)obj).getPath() );
 
 			}else if (obj!=null && ( ((File)obj).getPath().toLowerCase().endsWith(".obj"))) {
-				ImageJ3DViewer ij3dvNew = null;		
-				Frame[] frames = WindowManager.getNonImageWindows();
+				Frame[] frames = WindowManager.getImageWindows();
 				for (Frame frame:frames){
 					if (frame instanceof ImageWindow3D){
 						if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow3D)frame).getUniverse().getCanvas()){
