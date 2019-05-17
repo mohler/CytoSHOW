@@ -102,7 +102,7 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 			noOffScreen = true;
 		ij = IJ.getInstance();
 		imp = new ImagePlus();
-		imp.setTitle("ImageJ 3D Viewer");
+		imp.setTitle(title);
 		imp.setWindow(this);
 		this.universe = universe;
 		this.canvas3D = (ImageCanvas3D)universe.getCanvas();
@@ -133,7 +133,7 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 		universe.addUniverseListener(this);
 		addFocusListener(this);
 		addWindowListener(this);
-		updateImagePlus();
+//		updateImagePlus();
 		this.imp.setWindow(this);
 
 		WindowManager.addWindow(-1, this);
@@ -566,7 +566,8 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 	}
 
 	public void updateImagePlus() {
-		this.imp = getNewImagePlus();
+		int id = this.imp.getID();
+//		this.imp = getNewImagePlus();
 		imp_updater.update();
 		this.imp.setWindow(this);
 	}
@@ -613,7 +614,7 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 					}
 					u = update;
 				}
-				ImageWindow3D.this.imp = getNewImagePlus();
+				ImageWindow3D.this.imp.setImage(getNewImagePlus());
 				synchronized (this) {
 					if (u != update) continue; // try again, there was a new request
 					// Else, done:
@@ -658,7 +659,7 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 					w - left - right, h - top - bottom);
 			BufferedImage bImage = robot.createScreenCapture(r);
 			ColorProcessor cp = new ColorProcessor(bImage);
-			ImagePlus result = new ImagePlus("3d", cp);
+			ImagePlus result = new ImagePlus(this.getTitle(), cp);
 			result.setRoi(canvas3D.getRoi());
 			return result;
 		}
@@ -691,7 +692,7 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 
 
 		ColorProcessor cp = new ColorProcessor(bImage);
-		ImagePlus result = new ImagePlus("3d", cp);
+		ImagePlus result = new ImagePlus(this.getTitle(), cp);
 		result.setRoi(canvas3D.getRoi());
 		return result;
 	}

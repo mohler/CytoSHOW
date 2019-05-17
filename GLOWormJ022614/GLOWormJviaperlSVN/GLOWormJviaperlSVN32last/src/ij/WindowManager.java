@@ -543,7 +543,7 @@ public class WindowManager {
 		}
 		int lastSpace = menuItemLabel.lastIndexOf(' ');
 		if (lastSpace>0) // remove image size (e.g., " 90K")
-		menuItemLabel = menuItemLabel.substring(0, lastSpace);
+			menuItemLabel = menuItemLabel.substring(0, lastSpace);
 		String idString = item.getActionCommand();
 		int id = (int)Tools.parseDouble(idString, 0);
 		ImagePlus imp = WindowManager.getImage(id);

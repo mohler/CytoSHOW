@@ -34,6 +34,7 @@ import ij.plugin.Duplicator;
 import ij.plugin.FileInfoVirtualStack;
 import ij.plugin.MultiFileInfoVirtualStack;
 import ij.plugin.RectToolOptions;
+import ij3d.ImageWindow3D;
 
 
 /**
@@ -951,9 +952,11 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		if (title==null)
 			return;
     	if (win!=null) {
-    		if (ij!=null)
+    		if (ij!=null){
 				Menus.updateWindowMenuItem(this.title, title);
+    		}
 			String virtual = stack!=null && stack.isVirtual()?" (V)":"";
+			String threeD = (win instanceof ImageWindow3D)?" (IJ3DV)":"";
 			String global = getGlobalCalibration()!=null?" (G)":"";
 				
 			String scale = "";
@@ -963,7 +966,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 				int digits = percent>100.0||percent==(int)percent?0:1;
 				scale = " (" + IJ.d2s(percent,digits) + "%)";
 			}
-			win.setTitle(title+virtual+global+scale);
+			win.setTitle(title+threeD+virtual+global+scale);
     	}
     	this.title = title;
     	if (rm !=null) {

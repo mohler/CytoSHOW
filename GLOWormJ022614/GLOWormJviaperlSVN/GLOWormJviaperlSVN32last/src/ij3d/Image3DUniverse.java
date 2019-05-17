@@ -2,6 +2,7 @@ package ij3d;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.Menus;
 import ij.gui.ImageCanvas;
 import ij.plugin.Colors;
 import ij3d.contextmenu.ContextMenu;
@@ -283,8 +284,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 	public void show() {
 		menubar = new Image3DMenubar(this);
-//		init(new ImageWindow3D("ImageJ 3D Viewer [" + numUniversesLaunched +"]", this));
-		init(new ImageWindow3D("ImageJ 3D Viewer [IJ3DV]", this));
+		init(new ImageWindow3D("ImageJ 3D Viewer [" + numUniversesLaunched +"]", this));
+//		init(new ImageWindow3D("ImageJ 3D Viewer [IJ3DV]", this));
 		win.pack();
 		win.setVisible(true);
 		win.invalidate();
@@ -1847,6 +1848,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	public void addContentLater(String filePath) {
 		ArrayList<String> timedObjFileNames = new ArrayList<String>();
 		File file = new File(filePath);
+		String titleName = file.getName();
 		if (filePath.matches(".*_\\d+.obj")) {
 			for(String nextfilename: file.getParentFile().list()) {
 				String fileNameRoot = file.getName().split("_\\d+.obj")[0];
@@ -1897,6 +1899,10 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			Content content = new Content(cName, cInstants.get(cName), false);
 			this.addContent(content);
 			content.setLocked(true);
+		}
+		if (win.getTitle().matches("ImageJ 3D Viewer.*")){
+			win.getImagePlus().setWindow(win);
+			win.getImagePlus().setTitle(titleName);
 		}
 	}
 
