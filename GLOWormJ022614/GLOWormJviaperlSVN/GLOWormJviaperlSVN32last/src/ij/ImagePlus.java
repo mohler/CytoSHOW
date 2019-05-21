@@ -108,7 +108,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	private boolean openAsHyperStack;
 	private int[] position = {1,1,1};
 	private boolean noUpdateMode;
-	private ImageCanvas flatteningCanvas;
+	public ImageCanvas flatteningCanvas;
 	private Overlay overlay;
 	private boolean hideOverlay;
 	private static int default16bitDisplayRange;
@@ -2626,6 +2626,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		flatteningCanvas.setShowAllROIs(this.getCanvas().getShowAllROIs());
 		flatteningCanvas.paint(bi.getGraphics());
 		if (Recorder.record) Recorder.recordCall("imp = IJ.getImage().flatten();");
+		flatteningCanvas = null;
 		return new ImagePlus(title, new ColorProcessor(bi));
 	}
 	

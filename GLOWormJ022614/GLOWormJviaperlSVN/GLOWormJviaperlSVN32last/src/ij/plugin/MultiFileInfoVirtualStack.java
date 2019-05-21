@@ -384,7 +384,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 								if (infoCollectorArrayList==null || infoCollectorArrayList.size()==0) {
 									continue;
 								}
-								fivStacks.add(new FileInfoVirtualStack());
+								FileInfo openingFi = infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[0];
+								openingFi.fileName = openingFi.fileName.replace("_dummy", "");
+								fivStacks.add(new FileInfoVirtualStack(openingFi,false));
 								int sizeWas = fivStacks.size();
 								fivStacks.get(sizeWas-1).infoArray = infoCollectorArrayList.get(infoCollectorArrayList.size()-1);
 								fivStacks.get(sizeWas-1).setupStack();
@@ -625,6 +627,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		ImagePlus imp = new ImagePlus(
 				dirChunks[dirChunks.length-1]+"_"+
 						fivImpZero.getTitle().replaceAll("\\d+\\.", "\\."), this);
+		imp.setCalibration(fivImpZero.getCalibration());
 		if (fivStacks.get(0).getInfo()[0].fileName.matches(".*Decon(-Fuse|_reg)_.*aaa_.*")){  //StarryNiteFeeder output
 			imp.setTitle(fivStacks.get(0).getInfo()[0].fileName.replaceAll("(.*)(Decon(-Fuse|_reg)_.*)("+Pattern.quote(File.separator)+"aaa_.*)", "$2"));
 		}

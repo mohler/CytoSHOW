@@ -118,6 +118,7 @@ public class FlattenerOfTags implements PlugIn, TextListener {
 				ip = null; 
 			}
 			ImagePlus imp2 = new ImagePlus(imp.getTitle()+"_flat_"+IJ.pad(t,6), stack);
+			imp2.setCalibration(imp.getCalibration());
 			IJ.saveAs(imp2,"Tiff", dir+File.separator+imp2.getTitle()+".tif");
 			imp2.close();
 			stack = null;

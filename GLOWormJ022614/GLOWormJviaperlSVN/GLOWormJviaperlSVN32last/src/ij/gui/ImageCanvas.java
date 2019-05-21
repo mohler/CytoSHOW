@@ -330,7 +330,6 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				Roi roi = null;
 				try {
 					roi = sliceRoisArray[i];
-					roi= (Roi)roi.clone();
 					label = roi.getName();
 				} catch(Exception e) {
 					roi = null;
@@ -496,6 +495,11 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		int type = roi.getType();
 		ImagePlus imp2 = roi.getImage();
 		roi.setImage(imp);
+		if(roi.getImage() != null && roi.getImage().flatteningCanvas != null){
+			roi.ic = roi.getImage().flatteningCanvas;
+			roi.mag =1.0;
+		}
+
 		Color saveColor = roi.getStrokeColor();
 		if (saveColor==null)
 			roi.setStrokeColor(getDefaultColor());
