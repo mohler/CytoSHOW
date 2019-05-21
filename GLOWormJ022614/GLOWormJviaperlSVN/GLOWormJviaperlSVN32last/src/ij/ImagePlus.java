@@ -2620,37 +2620,11 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	
 	/** Returns a "flattened" version of this image, in RGB format. */
 	public ImagePlus flatten() {
-		ImagePlus imp2 = createImagePlus();
 		String title = "Flat_"+getTitle();
-		ImageCanvas ic2 = new ImageCanvas(imp2);
-		imp2.flatteningCanvas = ic2;
-		imp2.setRoi(getRoi());
-		if (getStackSize()>1) {
-			imp2.setStack(getStack());
-			imp2.setSlice(getCurrentSlice());
-			if (isHyperStack()) {
-				imp2.setDimensions(getNChannels(),getNSlices(),getNFrames());
-				imp2.setPosition(getChannel(),getSlice(),getFrame());
-				imp2.setOpenAsHyperStack(true);
-			}
-		}
-		ImageCanvas ic = getCanvas();
-		Overlay overlay2 = getOverlay();
-		ic2.setOverlay(overlay2);
-		if (ic!=null) {
-			ic2.setShowAllROIs(ic.getShowAllROIs());
-			//double mag = ic.getMagnification();
-			//if (mag<1.0) ic2.setMagnification(mag);
-		}
 		BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-		boolean showing = this.getCanvas().getShowAllROIs();
-		this.getCanvas().setShowAllROIs(true);
-		this.getCanvas().paint(bi.getGraphics());
-//		BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-//		Graphics g = bi.getGraphics();
-//		g.drawImage(getImage(), 0, 0, null);
-//		ic2.paint(g);
-//		imp2.flatteningCanvas = null;
+		flatteningCanvas = new ImageCanvas(this);
+		flatteningCanvas.setShowAllROIs(this.getCanvas().getShowAllROIs());
+		flatteningCanvas.paint(bi.getGraphics());
 		if (Recorder.record) Recorder.recordCall("imp = IJ.getImage().flatten();");
 		return new ImagePlus(title, new ColorProcessor(bi));
 	}

@@ -90,7 +90,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 	protected int ySrcStart;
 	protected int flags;
 
-	private Image offScreenImage;
+	public Image offScreenImage;
 	private int offScreenWidth = 0;
 	private int offScreenHeight = 0;
 	private boolean mouseExited = true;
@@ -198,7 +198,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 	public void paint(Graphics g) {
 		Roi roi = imp.getRoi();
-		if (roi!=null || showAllROIs || overlay!=null) {
+		if (this == imp.getCanvas() && (roi!=null || showAllROIs || overlay!=null)) {
 			if (roi!=null) roi.updatePaste();
 			if (/*!IJ.isMacOSX() &&*/ imageWidth!=0) {
 				paintDoubleBuffered(g);
@@ -330,6 +330,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				Roi roi = null;
 				try {
 					roi = sliceRoisArray[i];
+					roi= (Roi)roi.clone();
 					label = roi.getName();
 				} catch(Exception e) {
 					roi = null;

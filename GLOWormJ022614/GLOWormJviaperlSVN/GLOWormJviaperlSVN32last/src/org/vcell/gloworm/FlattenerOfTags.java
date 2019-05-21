@@ -29,7 +29,7 @@ public class FlattenerOfTags implements PlugIn, TextListener {
 
 	public void run(String arg) {
 		ImagePlus imp = IJ.getImage();
-		IJ.run("View 100%");
+//		IJ.run("View 100%");
 		int nChannels = imp.getNChannels();
 		int nSlices = imp.getNSlices();
 		int nFrames = imp.getNFrames();
