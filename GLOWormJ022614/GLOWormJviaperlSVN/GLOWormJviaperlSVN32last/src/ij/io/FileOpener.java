@@ -59,7 +59,8 @@ public class FileOpener {
 		Object pixels;
 		ProgressBar pb=null;
 	    ImageProcessor ip;
-		
+	    fi.fileName = fi.fileName.replace("_dummy", "");
+
 		ColorModel cm = createColorModel(fi);
 		if (fi.nImages>1)
 			{return openStack(cm, show);}
