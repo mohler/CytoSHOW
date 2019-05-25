@@ -975,7 +975,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			sketchImp.getRoiManager().select(-1);
 			IJ.wait(50);
 			if (sketchImp.getRoiManager().getCount()>0){
-				sketchImp.getRoiManager().runCommand("Delete");
+				sketchImp.getRoiManager().delete(false);
 			}
 			
 			select(-1);
@@ -998,7 +998,6 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				nameMatchIndexes[i] = nameMatchIndexArrayList.get(i);
 				nextRoi = ((Roi)rois[nameMatchIndexArrayList.get(i)]);
 				String[] nextChunks = nextRoi.getName().split("_");
-//				sketchImp.getWindow().setVisible(true);
 				int nextSlice = Integer.parseInt(nextChunks[nextChunks.length-2]);
 				int nextFrame = Integer.parseInt(nextChunks[nextChunks.length-1].replaceAll("[CZT]", "").split("-")[0]);
 				sketchImp.setPosition(1, nextSlice, nextFrame);
@@ -1012,7 +1011,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				sketchImp.getRoiManager().addRoi(scaledRoi);
 			}		
 			sketchImp.getRoiManager().select(-1);
-			sketchImp.getRoiManager().drawOrFill(FILL);
+			boolean filled=false;
+			filled = sketchImp.getRoiManager().drawOrFill(FILL);
+
+			while(!filled){
+				IJ.wait(100);
+			}
 			sketchImp.setMotherImp(imp, imp.getID());
 			sketchImp.getRoiManager().setSelectedIndexes(sketchImp.getRoiManager().getFullListIndexes());
 			roiColorString = Colors.colorToHexString(nextRoi.getFillColor());
@@ -2703,10 +2707,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			indexes = getAllShownIndexes();
 		ImagePlus imp = this.imp;
 		imp.deleteRoi();
-		ImageProcessor ip = imp.getProcessor();
-		ip.setColor(Toolbar.getForegroundColor());
-		ip.snapshot();
-		Undo.setup(Undo.FILTER, imp);
+		ImageProcessor ip = null;
 		Filler filler = mode==LABEL?new Filler():null;
 		int slice = imp.getCurrentSlice();
 		for (int i=0; i<indexes.length; i++) {
@@ -2716,12 +2717,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			if (roi==null) continue;
 			if (mode==FILL&&(type==Roi.POLYLINE||type==Roi.FREELINE||type==Roi.ANGLE))
 				mode = DRAW;
-			int slice2 = getSliceNumber(roi, name);
-			if (slice2>=1 && slice2<=imp.getStackSize()) {
-				imp.setSlice(slice2);
+			if (roi.getZPosition()!=0){
+				imp.setPosition(roi.getCPosition(), roi.getZPosition(), roi.getTPosition());
 				ip = imp.getProcessor();
 				ip.setColor(Toolbar.getForegroundColor());
-				if (slice2!=slice) Undo.reset();
 			}
 			switch (mode) {
 			case DRAW: roi.drawPixels(ip); break;
