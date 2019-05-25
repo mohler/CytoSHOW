@@ -28,7 +28,7 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 	public FileInfoVirtualStack(FileInfo fi) {
 		infoArray = new FileInfo[1];
 		infoArray[0] = fi;
-		open(true);
+//		open(true);
 	}
 
 	/* Constructs a FileInfoVirtualStack from a FileInfo 
@@ -36,14 +36,14 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 	public FileInfoVirtualStack(FileInfo fi, boolean show) {
 		infoArray = new FileInfo[1];
 		infoArray[0] = fi;
-		open(show);
+//		open(show);
 	}
 
 	/* Constructs a FileInfoVirtualStack from an array of FileInfo 
 	objects and displays it if 'show' is true. */
 	public FileInfoVirtualStack(FileInfo[] fiArray, boolean show) {
 		infoArray = fiArray;
-		open(show);
+//		open(show);
 	}
 	
 	public  ImageStack createStack(String path, boolean show) {

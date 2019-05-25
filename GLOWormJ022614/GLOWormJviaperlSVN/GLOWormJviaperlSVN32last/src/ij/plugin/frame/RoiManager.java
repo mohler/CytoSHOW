@@ -224,8 +224,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (imp != null){
 			//			//this.setTitle(getTitle()+":"+ imp.getTitle());
 			imp.setRoiManager(this);
+			showWindow(!hideWindow);
 		}
-		showWindow(!hideWindow);
 		//		WindowManager.addWindow(this);
 		//		thread = new Thread(this, "TagManagerThread");
 		//		thread.start();
@@ -946,7 +946,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		ArrayList<String> rootNames_rootFrames = new ArrayList<String>();
 		ArrayList<String> rootNames = new ArrayList<String>();
 		String roiColorString = Colors.colorToHexString(this.getSelectedRoisAsArray()[0].getFillColor());
-		roiColorString = roiColorString.substring(roiColorString.length()-6);
+		roiColorString = roiColorString.substring(3 /*roiColorString.length()-6*/);
 		String assignedColorString = "#ff" + roiColorString;
 
 		for (Roi selRoi:getSelectedRoisAsArray()) {
@@ -1016,7 +1016,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			sketchImp.setMotherImp(imp, imp.getID());
 			sketchImp.getRoiManager().setSelectedIndexes(sketchImp.getRoiManager().getFullListIndexes());
 			roiColorString = Colors.colorToHexString(nextRoi.getFillColor());
-			roiColorString = roiColorString.substring(roiColorString.length()-6);
+			roiColorString = roiColorString.substring(3 /*roiColorString.length()-6*/);
 			assignedColorString = "#ff" + roiColorString;
 			(new StackReverser()).flipStack(sketchImp);
 			sketchImp.setMotherImp(imp, imp.getID());
@@ -1159,11 +1159,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		addRoi(roi, false, null, -1, true);
 	}
 
-	boolean addRoi(boolean promptForName) {
+	public boolean addRoi(boolean promptForName) {
 		return addRoi(null, promptForName, null, -1, true);
 	}
 
-	boolean addRoi(Roi roi, boolean promptForName, Color color, int lineWidth, boolean addToCurrentImpPosition) {
+	public boolean addRoi(Roi roi, boolean promptForName, Color color, int lineWidth, boolean addToCurrentImpPosition) {
 		ImagePlus imp = this.imp;
 		if (roi==null) {
 			if (imp==null)
@@ -1178,7 +1178,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			color = roi.getStrokeColor();
 		else if (color==null && defaultColor!=null)
 			color = defaultColor;
-		Color fillColor = imp.getRoiFillColor();
+		Color fillColor =null;
+		if (imp!=null) 
+			imp.getRoiFillColor();
 		if (color!=null)
 			fillColor = color;
 		else if ( roi.getFillColor()!=null)
@@ -1204,7 +1206,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		prevID = imp!=null?imp.getID():0;
 		String name = roi.getName();
-		if (true/*name == null*/)
+		if (textNamingField!=null) //true/*name == null*/)
 			if (!(textNamingField.getText().isEmpty()  || textNamingField.getText().contains("Name..."))) {
 				roi.setName(textNamingField.getText());
 				recentName = (textNamingField.getText());
@@ -1288,7 +1290,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 
 		if (!Orthogonal_Views.isOrthoViewsImage(imp)) {
-			if (imp.getWindow()!=null) {
+			if (imp!=null && imp.getWindow()!=null) {
 				Roi[] roisFromSpans = new Roi[1]; 
 				roisFromSpans= (roisByNumbers.get((addRoiSpanC?0:roiCopy.getCPosition())+"_"+(addRoiSpanZ?0:roiCopy.getZPosition())+"_"+(addRoiSpanT?0:roiCopy.getTPosition()))).toArray(roisFromSpans);
 				if (imp.getWindow() instanceof StackWindow && ((StackWindow)imp.getWindow()).isWormAtlas()) {
@@ -1342,7 +1344,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (record())
 			recordAdd(defaultColor, defaultLineWidth);
 		textCountLabel.setText(""+ listModel.size() +"/"+ fullListModel.size());
-		if (imp.getWindow()!=null) {
+		if (imp!=null && imp.getWindow()!=null) {
 			imp.getWindow().countLabel.setText(""+ listModel.size() +"/"+ fullListModel.size() +"");
 			imp.getWindow().countLabel.repaint();			
 			//imp.getWindow().tagsButton.setText(""+fullListModel.size());
@@ -3885,16 +3887,18 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			this.remove(comp);
 		}
-   		while(pm.getItemCount()>0){
-   			while(pm.getItem(0).getActionListeners().length>0){
-   				pm.getItem(0).removeActionListener(pm.getItem(0).getActionListeners()[0]);
-   			}
-   			pm.remove(0);
-   		}
-   		while(pm.getActionListeners().length>0){
-   			pm.removeActionListener(pm.getActionListeners()[0]);
-   		}
-   		this.remove(pm);
+		if(pm!=null){
+			while(pm.getItemCount()>0){
+				while(pm.getItem(0).getActionListeners().length>0){
+					pm.getItem(0).removeActionListener(pm.getItem(0).getActionListeners()[0]);
+				}
+				pm.remove(0);
+			}
+			while(pm.getActionListeners().length>0){
+				pm.removeActionListener(pm.getActionListeners()[0]);
+			}
+			this.remove(pm);
+		}
     		
 		//    	thread.interrupt();
 		//    	thread = null;

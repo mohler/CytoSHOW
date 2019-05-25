@@ -384,9 +384,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 								if (infoCollectorArrayList==null || infoCollectorArrayList.size()==0) {
 									continue;
 								}
-								FileInfo openingFi = infoCollectorArrayList.get(infoCollectorArrayList.size()-1)[0];
-//								openingFi.fileName = openingFi.fileName.replace("_dummy", "");
-								fivStacks.add(new FileInfoVirtualStack(openingFi,false));
+								fivStacks.add(new FileInfoVirtualStack());
 								int sizeWas = fivStacks.size();
 								fivStacks.get(sizeWas-1).infoArray = infoCollectorArrayList.get(infoCollectorArrayList.size()-1);
 								fivStacks.get(sizeWas-1).setupStack();
@@ -530,7 +528,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		new MultiFileInfoVirtualStack(arg, "", true);
 	}
 
-	void open(boolean show) {
+	public ImagePlus open(boolean show) {
 		String[] splitPath = cumulativeTiffFileArray[0].split(Pattern.quote(File.separator));
 		if (splitPath[splitPath.length-1].contains("MMStack_") && (cumulativeTiffFileArray.length >0)) { 
 			nSlices = 0;
@@ -543,7 +541,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				gd.addNumericField("Slices (z):", 50, 0);
 				gd.addNumericField("Frames (t):", nSlices/(50*2*2), 0);
 				gd.showDialog();
-				if (gd.wasCanceled()) return;
+				if (gd.wasCanceled()) return null;
 				cDim = (int) gd.getNextNumber();
 				zDim = (int) gd.getNextNumber();
 				tDim = (int) gd.getNextNumber();
@@ -672,7 +670,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				}
 			}else {
 				IJ.error("HyperStack Converter", "channels x slices x frames <> stack size");
-				return;
+				return null;
 			}
 		}
 
@@ -690,6 +688,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		}
 		if (show)
 			imp.show();
+		return imp;
 	}
 
 	public void setUpFileInfo(ImagePlus imp) {

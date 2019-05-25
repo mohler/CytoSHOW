@@ -1,6 +1,7 @@
 package org.vcell.gloworm;
 
 import java.awt.Checkbox;
+import java.awt.Color;
 import java.awt.TextField;
 import java.awt.event.TextEvent;
 import java.awt.event.TextListener;
@@ -11,8 +12,11 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.GenericDialog;
+import ij.gui.Roi;
+import ij.plugin.Colors;
 import ij.plugin.MultiFileInfoVirtualStack;
 import ij.plugin.PlugIn;
+import ij.plugin.frame.RoiManager;
 import ij.process.ImageProcessor;
 import ij.util.Tools;
 
@@ -106,25 +110,37 @@ public class FlattenerOfTags implements PlugIn, TextListener {
 
 		String dir = IJ.getDirectory("home")+"CytoSHOWCacheFiles" +File.separator+ imp.getTitle()+"_flat";
 		new File(dir).mkdir();
-		for (int t=firstT; t<=lastT; t++) {
-//			if (new File(dir+File.separator+imp.getTitle()+"_flat_"+IJ.pad(t,6)+".tif").exists())
-//				continue;
-			ImageStack stack = new ImageStack(imp.getWidth(), imp.getHeight());
-			for(int z=firstZ;z<=lastZ;z++) {
-				imp.setPositionWithoutUpdate(imp.getChannel(),z,t);						
-				IJ.wait(20);
-				ImageProcessor ip = imp.flatten().getProcessor();
-				stack.addSlice(ip);
-				ip = null; 
+		RoiManager newRM = new RoiManager(null,true);
+		for (int c=firstC; c<=lastC; c++) {
+			for (int t=firstT; t<=lastT; t++) {
+				ImageStack stack = new ImageStack(imp.getWidth(), imp.getHeight());
+				for(int z=firstZ;z<=lastZ;z++) {
+					imp.setPositionWithoutUpdate(imp.getChannel(),z,t);						
+					IJ.wait(20);
+					ImageProcessor ip = imp.flatten().getProcessor();
+					stack.addSlice(ip);
+					ip = null; 
+					if (imp.getRoiManager().getROIsByNumbers().get(c+"_"+z+"_"+t)!=null){
+						for (Roi roi:imp.getRoiManager().getROIsByNumbers().get(c+"_"+z+"_"+t)){
+							Roi cRoi = (Roi)roi.clone();
+							cRoi.setPosition(cRoi.getCPosition(), cRoi.getZPosition()-firstZ+1, cRoi.getTPosition()-firstT+1);
+							newRM.addRoi(cRoi, false, Colors.decode(Colors.colorToHexString(cRoi.getFillColor()).replaceAll("#..(......)","#00$1"), Color.white), -1, false);					
+						}
+					}
+				}
+				ImagePlus imp2 = new ImagePlus(imp.getTitle()+"_flat_"+IJ.pad(t,6), stack);
+				imp2.setCalibration(imp.getCalibration());
+				IJ.saveAs(imp2,"Tiff", dir+File.separator+imp2.getTitle()+".tif");
+				imp2.close();
+				stack = null;
+				imp2.flush();
 			}
-			ImagePlus imp2 = new ImagePlus(imp.getTitle()+"_flat_"+IJ.pad(t,6), stack);
-			imp2.setCalibration(imp.getCalibration());
-			IJ.saveAs(imp2,"Tiff", dir+File.separator+imp2.getTitle()+".tif");
-			imp2.close();
-			stack = null;
-			imp2.flush();
 		}
-		ImagePlus imp3 = new ImagePlus(imp.getTitle()+"_flat", new MultiFileInfoVirtualStack(dir, "", true));
+		ImagePlus imp3 = new MultiFileInfoVirtualStack(dir, "", false).open(false);
+		imp3.setRoiManager(newRM);
+		newRM.setImagePlus(imp3);
+		newRM.setShowAllCheckbox(true);
+		imp3.show();
 	}
 
 	public void textValueChanged(TextEvent e) {
