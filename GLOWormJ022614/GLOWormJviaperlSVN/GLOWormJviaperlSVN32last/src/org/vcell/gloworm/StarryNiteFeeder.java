@@ -53,7 +53,7 @@ import ij.process.StackStatistics;
 
 public class StarryNiteFeeder implements PlugIn {
 	
-	public static double INTENSITY_BASE = 645.0;
+	public static double INTENSITY_BASE = 3885;     //645.0;
 
 	public void run(String arg) {
 		boolean autoLaunch=false;
