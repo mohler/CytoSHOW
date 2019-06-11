@@ -888,12 +888,18 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				int yOri = 0;
 
 				ip.setRoi(xOri, yOri, w/2, h);
-			}else if (ip.getWidth()==2048) { //NIBIB splitview setup(?)
+			}else if (ip.getWidth()==2048 && vDim ==2) { //NIBIB splitview setup(?)
 //				dX=2;
 //				dY=0;
 				int xOri = 256+((1-(n+1)%2)*(1024));
 				int yOri = 0+((1-(n+1)%2)*(0));
 				ip.setRoi(xOri, yOri, 512, 512);
+			}else if (ip.getWidth()==2048 && vDim ==1) { //Yale ratio setup(?)
+//				dX=2;
+//				dY=0;
+				int xOri = 0+((1-(n+1)%2)*(1024));
+				int yOri = 0+((1-(n+1)%2)*(0));
+				ip.setRoi(xOri, yOri, 1024, 2048);
 			} else if (ip.getWidth()==1536) {		//Yale splitview setup
 			
 				int xOri = 0+((0+(n+1)%2)*(1024));

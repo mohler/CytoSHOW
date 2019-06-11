@@ -56,7 +56,8 @@ new10="diSPIM Monitor (Stage-Scan LabView)", org.vcell.gloworm.DISPIM_Monitor("s
 new11="diSPIM Monitor (Stage-Scan MicroManager)", org.vcell.gloworm.DISPIM_Monitor("stageScanMM")
 new12="diSPIM Monitor (Stage-Scan WG_MicroManager)", org.vcell.gloworm.DISPIM_Monitor("stageScansstMM")
 new13="diSPIM Monitor (Currently Open Stack Pair)", org.vcell.gloworm.DISPIM_Monitor("currentStacks")
-new14="Scene Editor",ij.plugin.frame.SceneEditor
+new14="Ratio Chaser (megaTiff MicroManager)", org.vcell.gloworm.DISPIM_Monitor("megaTiffMMrc")
+new15="Scene Editor",ij.plugin.frame.SceneEditor
 
 # Plugins installed in the File/Import submenu
 import01="Image Sequence...",ij.plugin.FolderOpener
