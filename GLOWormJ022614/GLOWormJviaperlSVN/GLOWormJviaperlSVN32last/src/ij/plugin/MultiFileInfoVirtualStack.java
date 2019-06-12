@@ -795,7 +795,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 //		sliceNumber = 1+(n) % (fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
 		
 		if (dimOrder.toLowerCase().matches(".*split(ratio)?c.*")) {
-			sliceNumber = (sliceNumber/2);
+			sliceNumber = (sliceNumber/2+1);
 		}
 		
 		if (reverseChannelOrder) {
@@ -875,13 +875,16 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 //				stackNumber = fivStacks.size()-1;
 //			}
 			
+			int localstacknumber = stackNumber;
 			corrX=isViewB?corrXB[stackNumber]:corrXA[stackNumber];
 			corrY=isViewB?corrYB[stackNumber]:corrYA[stackNumber];
 			corrZ=isViewB?corrZB[stackNumber]:corrZA[stackNumber];
-			
 			initiateStack(stackNumber, 0);
-			ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber+(sliceNumber%(2)==0?0:dZ*2)+corrZ);
-
+			if (dimOrder.toLowerCase().matches(".*splitratioc.*")){
+				ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber+(n%2));			
+			} else {
+				ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber+(sliceNumber%(2)==0?0:dZ*2)+corrZ);
+			}
 			ip.setInterpolationMethod(ImageProcessor.BICUBIC);
 			ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
 
