@@ -711,7 +711,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					impAs[0].getCalibration().pixelDepth = 1;
 	
 				}
-				if (!arg.contains("megaTiffMMrc")){
 
 					stackBs[0] = (MultiFileInfoVirtualStack) impBs[0].getImageStack();
 					if (stackBs[0].getWidth()==2048 && stackBs[0].getHeight()==512){
@@ -732,7 +731,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 					}
 
-				}
+				
 			}else if (dirOrOMETiffFile.isDirectory()) {
 				if (omeTiffs) {
 					fileListA = new File("" + dirOrOMETiff).list();
@@ -896,7 +895,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						stackAs[pos] = new MultiFileInfoVirtualStack(
 								dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_Channels/vDim>1 && diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
 								false, false, true, false){
-							
+
 							@Override
 							public void initiateStack(int stkNum, int slcNum){
 								super.initiateStack( stkNum,  slcNum);
@@ -906,34 +905,32 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								}
 							}
 						};
-						if (!arg.contains("megaTiffMMrc")){
-							stackBs[pos] = new MultiFileInfoVirtualStack(
-									dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_Channels/vDim>1 && diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
-									true, false, true, false){
+						stackBs[pos] = new MultiFileInfoVirtualStack(
+								dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_Channels/vDim>1 && diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
+								true, false, true, false){
 
-								@Override
-								public void initiateStack(int stkNum, int slcNum){
-									super.initiateStack( stkNum,  slcNum);
-									if (stackAs[fPos]!=null){
-										stackAs[fPos].infoCollectorArrayList.set(stkNum, Arrays.copyOf(((FileInfo[])infoCollectorArrayList.get(stkNum)),((FileInfo[])infoCollectorArrayList.get(stkNum)).length));
-										stackAs[fPos].getFivStacks().get(stkNum).infoArray = Arrays.copyOf(((FileInfo[])infoCollectorArrayList.get(stkNum)),((FileInfo[])infoCollectorArrayList.get(stkNum)).length);
-									}
+							@Override
+							public void initiateStack(int stkNum, int slcNum){
+								super.initiateStack( stkNum,  slcNum);
+								if (stackAs[fPos]!=null){
+									stackAs[fPos].infoCollectorArrayList.set(stkNum, Arrays.copyOf(((FileInfo[])infoCollectorArrayList.get(stkNum)),((FileInfo[])infoCollectorArrayList.get(stkNum)).length));
+									stackAs[fPos].getFivStacks().get(stkNum).infoArray = Arrays.copyOf(((FileInfo[])infoCollectorArrayList.get(stkNum)),((FileInfo[])infoCollectorArrayList.get(stkNum)).length);
 								}
+							}
 
-							};
-						}
+						};
+
 						if (stackAs[pos].getSize() == 0) {
 							impAs[pos].flush();
 							impAs[pos]=null;
 							continue;
 						}
-						if (!arg.contains("megaTiffMMrc")){
-							if (stackBs[pos].getSize() == 0) {
-								impBs[pos].flush();
-								impBs[pos]=null;
-								continue;
-							}
+						if (stackBs[pos].getSize() == 0) {
+							impBs[pos].flush();
+							impBs[pos]=null;
+							continue;
 						}
+
 						tDim = ((MultiFileInfoVirtualStack) stackAs[pos]).tDim;
 						impAs[pos].setStack(stackAs[pos]);
 						Calibration calA = impAs[pos].getCalibration();
@@ -953,78 +950,77 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						}
 
 						IJ.log(""+ sizeA+" "+shouldBeSizeA+" "+stackAs[pos].getSize());
-						
+
 						impAs[pos].setOpenAsHyperStack(true);
 						impAs[pos].setDimensions(cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim), zDim, sizeA/((cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim))*zDim));
 
 						impAs[pos] = new CompositeImage(impAs[pos]);
-//						{
-//							@Override
-//							public synchronized void flush(){
-//								ObjectOutputStream oos;
-//								try {
-//									oos = new ObjectOutputStream(new FileOutputStream(new RandomAccessFile(stackAs[fPos].infoDir+"touchedFileFIs"+fPos+"A.inf","rw").getFD()));
-//									oos.writeObject(((MultiFileInfoVirtualStack) getImageStack()).infoCollectorArrayList);
-//									oos.close();
-//								} catch (IOException e) {
-//									// TODO Auto-generated catch block
-//									e.printStackTrace();
-//								}
-//								super.flush();
-//							}
-//						};
+						//						{
+						//							@Override
+						//							public synchronized void flush(){
+						//								ObjectOutputStream oos;
+						//								try {
+						//									oos = new ObjectOutputStream(new FileOutputStream(new RandomAccessFile(stackAs[fPos].infoDir+"touchedFileFIs"+fPos+"A.inf","rw").getFD()));
+						//									oos.writeObject(((MultiFileInfoVirtualStack) getImageStack()).infoCollectorArrayList);
+						//									oos.close();
+						//								} catch (IOException e) {
+						//									// TODO Auto-generated catch block
+						//									e.printStackTrace();
+						//								}
+						//								super.flush();
+						//							}
+						//						};
 						while (!impAs[pos].isComposite()) {
 							IJ.wait(100);
 						}
 						((CompositeImage)impAs[pos]).setMode(CompositeImage.COMPOSITE);
 
 
-						if (!arg.contains("megaTiffMMrc")){
-							impBs[pos].setStack(stackBs[pos]);
-							Calibration calB = impBs[pos].getCalibration();
-							calB.pixelWidth = vWidth;
-							calB.pixelHeight = vHeight;
-							calB.pixelDepth = vDepthRaw;
-							calB.setUnit(vUnit);
+						impBs[pos].setStack(stackBs[pos]);
+						Calibration calB = impBs[pos].getCalibration();
+						calB.pixelWidth = vWidth;
+						calB.pixelHeight = vHeight;
+						calB.pixelDepth = vDepthRaw;
+						calB.setUnit(vUnit);
 
-							int sizeB = stackBs[pos].getSize();
+						int sizeB = stackBs[pos].getSize();
 
-							int shouldBeSizeB = (cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim) ) * zDim * (sizeB/((cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim))*zDim));
+						int shouldBeSizeB = (cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim) ) * zDim * (sizeB/((cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim))*zDim));
 
-							for (int d=1;d<=sizeB-shouldBeSizeB;d++){
-								stackBs[pos].deleteSlice(1);
-							}
-
-							IJ.log(""+ sizeB+" "+shouldBeSizeB+" "+stackBs[pos].getSize());
-
-
-							if (stageScan)
-								stackBs[pos].setSkewXperZ(
-										-calB.pixelDepth / calB.pixelWidth);
-							impBs[pos].setOpenAsHyperStack(true);
-							impBs[pos].setDimensions(cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim), zDim, sizeB/((cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim))*zDim));
-
-							impBs[pos] = new CompositeImage(impBs[pos]);
-							//						{
-							//							@Override
-							//							public synchronized void flush(){
-							//								ObjectOutputStream oos;
-							//								try {
-							//									oos = new ObjectOutputStream(new FileOutputStream(new RandomAccessFile(stackBs[fPos].infoDir+"touchedFileFIs"+fPos+"B.inf","rw").getFD()));
-							//									oos.writeObject(((MultiFileInfoVirtualStack) getImageStack()).infoCollectorArrayList);
-							//									oos.close();
-							//								} catch (IOException e) {
-							//									// TODO Auto-generated catch block
-							//									e.printStackTrace();
-							//								}
-							//								super.flush();
-							//							}
-							//						};
-							while (!impBs[pos].isComposite()) {
-								IJ.wait(100);
-							}
-							((CompositeImage)impBs[pos]).setMode(CompositeImage.COMPOSITE);
+						for (int d=1;d<=sizeB-shouldBeSizeB;d++){
+							stackBs[pos].deleteSlice(1);
 						}
+
+						IJ.log(""+ sizeB+" "+shouldBeSizeB+" "+stackBs[pos].getSize());
+
+
+						if (stageScan)
+							stackBs[pos].setSkewXperZ(
+									-calB.pixelDepth / calB.pixelWidth);
+						impBs[pos].setOpenAsHyperStack(true);
+						impBs[pos].setDimensions(cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim), zDim, sizeB/((cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim))*zDim));
+
+						impBs[pos] = new CompositeImage(impBs[pos]);
+						//						{
+						//							@Override
+						//							public synchronized void flush(){
+						//								ObjectOutputStream oos;
+						//								try {
+						//									oos = new ObjectOutputStream(new FileOutputStream(new RandomAccessFile(stackBs[fPos].infoDir+"touchedFileFIs"+fPos+"B.inf","rw").getFD()));
+						//									oos.writeObject(((MultiFileInfoVirtualStack) getImageStack()).infoCollectorArrayList);
+						//									oos.close();
+						//								} catch (IOException e) {
+						//									// TODO Auto-generated catch block
+						//									e.printStackTrace();
+						//								}
+						//								super.flush();
+						//							}
+						//						};
+						while (!impBs[pos].isComposite()) {
+							IJ.wait(100);
+						}
+						((CompositeImage)impBs[pos]).setMode(CompositeImage.COMPOSITE);
+
 						impAs[pos].setPosition(1, zDim/2, impAs[pos].getNFrames()-1);
 						impBs[pos].setPosition(1, zDim/2, impBs[pos].getNFrames()-1);
 						wasFrameA[pos] = impAs[pos].getFrame();
@@ -1037,9 +1033,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						wasEdgesB[pos] = impBs[pos].getStack().isEdges();
 
 						impAs[pos].show();
-						if (!arg.contains("megaTiffMMrc")){
-							impBs[pos].show();
-						}
+						impBs[pos].show();
+
 					}
 				} else {
 					fileListA = new File("" + dirOrOMETiff + "SPIMA").list();
@@ -1254,7 +1249,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				TiffDecoder tdB = new TiffDecoder("",dirOrOMETiff);
 
 				String mmPath = (new File(dirOrOMETiff)).getParent();
-
+				if (arg.contains("megaTiffMMrc")){
+					vDim = 1;
+					dimOrder = "xysplitRatioCzt";
+				}
 				if (dimOrder == null || dimOrder == "")
 					dimOrder = ((diSPIM_MM_channelMode!=null && diSPIM_MM_channelMode.contains("VOLUME"))?"xyzct":"xyczt");
 
@@ -1430,10 +1428,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					impAs[pos].show();
 
 
-					impBs[pos].setStack(new MultiFileInfoVirtualStack(mmPath, dimOrder, "MMStack_Pos"+pos, cDim, zDim, tDim, vDim, pos, true, false, true, true));
+					impBs[pos].setStack(new MultiFileInfoVirtualStack(mmPath, dimOrder, "MMStack_Pos"+pos, cDim, zDim, tDim, vDim, pos, !(arg.contains("megaTiffMMrc")), false, true, true));
 
 					int stackSizeB = impBs[pos].getImageStackSize();
-					int nChannelsB = ((MultiFileInfoVirtualStack)impBs[pos].getStack()).cDim;
+					int nChannelsB = ((MultiFileInfoVirtualStack)impBs[pos].getStack()).cDim /((MultiFileInfoVirtualStack)impBs[pos].getStack()).vDim;
 					int nSlicesB = ((MultiFileInfoVirtualStack)impBs[pos].getStack()).zDim;
 					int nFramesB = ((MultiFileInfoVirtualStack)impBs[pos].getStack()).tDim;
 					//					dirOrOMETiff = ((MultiFileInfoVirtualStack)impBs[pos].getStack()).getFivStacks().get(0).getInfo()[pos].directory +

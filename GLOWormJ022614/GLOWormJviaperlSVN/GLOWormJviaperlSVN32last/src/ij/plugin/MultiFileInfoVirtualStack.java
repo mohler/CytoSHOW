@@ -532,9 +532,11 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		String[] splitPath = cumulativeTiffFileArray[0].split(Pattern.quote(File.separator));
 		if (splitPath[splitPath.length-1].contains("MMStack_") && (cumulativeTiffFileArray.length >0)) { 
 			nSlices = 0;
-			for (FileInfoVirtualStack mmStack:fivStacks) {
-				nSlices = nSlices + mmStack.getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1);
-			}
+				for (FileInfoVirtualStack mmStack:fivStacks) {
+					nSlices = nSlices + mmStack.getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1)
+											*(dimOrder.toLowerCase().matches(".*splitratioc.*")?2:1);
+				}
+			
 			if (cDim == 0 || zDim == 0 || tDim == 0) {
 				GenericDialog gd = new GenericDialog("Dimensions of HyperStacks");
 				gd.addNumericField("Channels (c):", 2, 0);
@@ -779,8 +781,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			n=n+adjN;
 		}
 
-		while (stackNumber < fivStacks.size() && n > fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1)) {
-			n = n - fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1);
+		while (stackNumber < fivStacks.size() && n > fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*split(ratio)?c.*")?2:1)) {
+			n = n - fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*split(ratio)?c.*")?2:1);
 			stackNumber++;
 		}
 //		if (stackNumber>=fivStacks.size()) {
@@ -792,7 +794,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		
 //		sliceNumber = 1+(n) % (fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
 		
-		if (dimOrder.toLowerCase().matches(".*splitc.*")) {
+		if (dimOrder.toLowerCase().matches(".*split(ratio)?c.*")) {
 			sliceNumber = (sliceNumber/2);
 		}
 		
@@ -848,10 +850,12 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		}
 		if (dimOrder.toLowerCase().matches(".*split.*c.*")) {
 
+			if (dimOrder.toLowerCase().matches(".*splitratioc.*")){
+				vSliceNumber = (sliceNumber);
+			} else {
+				vSliceNumber = (sliceNumber)+(isViewB?zDim*(cDim/2)*(dimOrder.toLowerCase().matches(".*splitsequentialc.*")?2:1):0);
+			}
 			
-			vSliceNumber = (sliceNumber)+(isViewB?zDim*(cDim/2)*(dimOrder.toLowerCase().matches(".*splitsequentialc.*")?2:1):0);
-
-
 			//ADJUSTMENTS BELOW DEAL WITH CALLING C1 AND C4 FOR CSM MODE SWITCH TO JUST 2 MAIN RG CHANNELS
 			//I DO NOT FULLY UNDERSTAND HOW OR WHY IT WORKS!!!???
 //			if (dimOrder.toLowerCase().matches(".*splitsequentialc.*")) {
