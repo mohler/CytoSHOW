@@ -794,9 +794,6 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		
 //		sliceNumber = 1+(n) % (fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
 		
-		if (dimOrder.toLowerCase().matches(".*split(ratio)?c.*")) {
-			sliceNumber = (sliceNumber/2-1);
-		}
 		
 		if (reverseChannelOrder) {
 			sliceNumber = sliceNumber%2==0?(sliceNumber+1):(sliceNumber-1);
@@ -843,7 +840,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			corrX=isViewB?corrXB[((stackNumber)%tDim)]:corrXA[((stackNumber)%tDim)];
 			corrY=isViewB?corrYB[((stackNumber)%tDim)]:corrYA[((stackNumber)%tDim)];
 			corrZ=isViewB?corrZB[((stackNumber)%tDim)]:corrZA[((stackNumber)%tDim)];
-IJ.log("stk="+stackNumber +"  vslc="+vSliceNumber);
+//IJ.log("stk="+stackNumber +"  vslc="+vSliceNumber);
 			initiateStack(stackNumber, 0);
 			ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber+(sliceNumber%2==0?0:dZ)+corrZ);
 			ip.translate(corrX, corrY);
@@ -851,7 +848,7 @@ IJ.log("stk="+stackNumber +"  vslc="+vSliceNumber);
 		if (dimOrder.toLowerCase().matches(".*split.*c.*")) {
 
 			if (dimOrder.toLowerCase().matches(".*splitratioc.*")){
-				vSliceNumber = (sliceNumber);
+				vSliceNumber = (n%2 + sliceNumber/2);
 			} else {
 				vSliceNumber = (sliceNumber)+(isViewB?zDim*(cDim/2)*(dimOrder.toLowerCase().matches(".*splitsequentialc.*")?2:1):0);
 			}
@@ -879,10 +876,10 @@ IJ.log("stk="+stackNumber +"  vslc="+vSliceNumber);
 			corrX=isViewB?corrXB[stackNumber]:corrXA[stackNumber];
 			corrY=isViewB?corrYB[stackNumber]:corrYA[stackNumber];
 			corrZ=isViewB?corrZB[stackNumber]:corrZA[stackNumber];
-			IJ.log("stk="+stackNumber +"  vslc="+vSliceNumber);
+//			IJ.log("stk="+stackNumber +"  vslc="+vSliceNumber);
 			initiateStack(stackNumber, 0);
 			if (dimOrder.toLowerCase().matches(".*splitratioc.*")){
-				ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber+(2-n%2));			
+				ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber);			
 			} else {
 				ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber+(sliceNumber%(2)==0?0:dZ*2)+corrZ);
 			}
