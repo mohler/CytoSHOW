@@ -760,7 +760,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	/** Returns an ImageProcessor for the specified image,
 		where 1<=n<=nSlices. Returns null if the stack is empty.
 	 */
-	public ImageProcessor getProcessor(int n) {
+	public ImageProcessor getProcessor(int slice) {
+		int n =slice;
 		if (n<1 || n>nSlices) {
 //			IJ.runMacro("waitForUser(\""+n+"\");");
 			return fivStacks.get(0).getProcessor(1);
@@ -903,7 +904,6 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			}else if (ip.getWidth()==2048 && vDim ==1) { //Yale ratio setup(?)
 //				dX=2;
 //				dY=0;
-				new RankFilters().rank(ip, 2, RankFilters.MEDIAN, 0, 0);
 				int xOri = 0+(((n+1)%2)*(1024));
 				int yOri = 0+(((n+1)%2)*(0));
 				ip.setRoi(xOri, yOri, 1024, 2048);
@@ -913,12 +913,17 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				int yOri = 0+((1-(n+1)%2)*(0));
 				ip.setRoi(xOri, yOri, 512, 512);
 			} 
+			new RankFilters().rank(ip, 2, RankFilters.MEDIAN, 0, 0);
 			ip = ip.crop();
 			if (fivStacks.get(0).getInfo()[0].fileName.matches(".*Decon(-Fuse|_reg)_.*aaa_.*")){  //StarryNiteFeeder output
 				ip.flipHorizontal();
 			}
 			ip.translate((1-n%2)*dX, (1-n%2)*dY);
 			ip.translate(corrX, corrY);
+			
+			ImageProcessor maskIP = ip.duplicate();
+			maskIP.autoThreshold();
+			new ImagePlus(""+slice, maskIP).show();
 		}
 		if (dimOrder == "xyzct") {
 			corrX=isViewB?corrXB[((stackNumber)%tDim)]:corrXA[((stackNumber)%tDim)];
