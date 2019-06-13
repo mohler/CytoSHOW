@@ -2,6 +2,7 @@ package ij.plugin;
 
 import ij.*;
 import ij.measure.Calibration;
+import ij.plugin.filter.RankFilters;
 import ij.process.*;
 import ij.util.StringSorter;
 import ij.gui.*;
@@ -911,6 +912,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				int yOri = 0+((1-(n+1)%2)*(0));
 				ip.setRoi(xOri, yOri, 512, 512);
 			} 
+			new RankFilters().rank(ip, 2, RankFilters.MEDIAN, 0, 0);
 			ip = ip.crop();
 			if (fivStacks.get(0).getInfo()[0].fileName.matches(".*Decon(-Fuse|_reg)_.*aaa_.*")){  //StarryNiteFeeder output
 				ip.flipHorizontal();
