@@ -2,6 +2,7 @@ package ij.plugin;
 
 import ij.*;
 import ij.measure.Calibration;
+import ij.plugin.filter.ParticleAnalyzer;
 import ij.plugin.filter.RankFilters;
 import ij.process.*;
 import ij.util.StringSorter;
@@ -888,6 +889,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			ip.setInterpolationMethod(ImageProcessor.BICUBIC);
 			ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
 
+			boolean ratioing = false;
 			if (fivStacks.get(0).getInfo()[0].fileName.matches(".*Decon(-Fuse|_reg)_.*aaa_.*")){  //StarryNiteFeeder output
 				int w = ip.getWidth();
 				int h = ip.getHeight();
@@ -904,26 +906,54 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			}else if (ip.getWidth()==2048 && vDim ==1) { //Yale ratio setup(?)
 //				dX=2;
 //				dY=0;
+				ratioing = true;
 				int xOri = 0+(((n+1)%2)*(1024));
 				int yOri = 0+(((n+1)%2)*(0));
 				ip.setRoi(xOri, yOri, 1024, 2048);
+				new RankFilters().rank(ip, 2, RankFilters.MEDIAN, 0, 0);			
+				
+			
 			} else if (ip.getWidth()==1536) {		//Yale splitview setup
 			
 				int xOri = 0+((0+(n+1)%2)*(1024));
 				int yOri = 0+((1-(n+1)%2)*(0));
 				ip.setRoi(xOri, yOri, 512, 512);
 			} 
-			new RankFilters().rank(ip, 2, RankFilters.MEDIAN, 0, 0);
 			ip = ip.crop();
 			if (fivStacks.get(0).getInfo()[0].fileName.matches(".*Decon(-Fuse|_reg)_.*aaa_.*")){  //StarryNiteFeeder output
 				ip.flipHorizontal();
 			}
 			ip.translate((1-n%2)*dX, (1-n%2)*dY);
 			ip.translate(corrX, corrY);
-			
-			ImageProcessor maskIP = ip.duplicate();
-			maskIP.autoThreshold();
-			new ImagePlus(""+slice, maskIP).show();
+			if (ratioing && n%2==0){
+				ImageProcessor maskIP = ip.duplicate();
+				int[] ipHis = maskIP.getHistogram();
+				double ipHisMode = 0.0;
+				int ipHisLength = ipHis.length;
+				int ipHisMaxBin = 0;
+				for (int h=0; h<ipHisLength; h++) {
+					if (ipHis[h] > ipHisMaxBin) {
+						ipHisMaxBin = ipHis[h];
+						ipHisMode = (double)h;
+					}
+				}
+
+				maskIP.threshold((int) (ipHisMode*1.035));
+				maskIP.invert();
+				ImagePlus maskImp = new ImagePlus("Mask", maskIP);
+									
+				new ImageConverter(maskImp).convertToGray8();
+				
+				ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES+ParticleAnalyzer.SHOW_RESULTS+ParticleAnalyzer.SHOW_MASKS,0, null, 1000, 2500, 0.1,0.1759); 
+				pa.setHideOutputImage(true);
+				pa.analyze(maskImp);
+				pa.getOutputImage().setRoi((int)pa.getOutputImage().getProcessor().getStatistics().xCenterOfMass-100, (int)pa.getOutputImage().getProcessor().getStatistics().yCenterOfMass-100, 200,200);
+				ImageProcessor isoIP = pa.getOutputImage().getProcessor().crop();
+				isoIP.invert();
+				isoIP = isoIP.resize(500);
+				ip.insert(isoIP, 0,0);
+
+			}
 		}
 		if (dimOrder == "xyzct") {
 			corrX=isViewB?corrXB[((stackNumber)%tDim)]:corrXA[((stackNumber)%tDim)];
