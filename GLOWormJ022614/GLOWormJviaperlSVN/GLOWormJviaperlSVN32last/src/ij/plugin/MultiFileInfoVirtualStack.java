@@ -2,6 +2,7 @@ package ij.plugin;
 
 import ij.*;
 import ij.measure.Calibration;
+import ij.measure.ResultsTable;
 import ij.plugin.filter.ParticleAnalyzer;
 import ij.plugin.filter.RankFilters;
 import ij.process.*;
@@ -850,7 +851,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		}
 		if (dimOrder.toLowerCase().matches(".*split.*c.*")) {
 
-			if (dimOrder.toLowerCase().matches(".*splitratioc.*")){
+			if (dimOrder.toLowerCase().matches(".*split(ratio)?c.*")){
 				vSliceNumber = (n%2 + sliceNumber/2);
 			} else {
 				vSliceNumber = (sliceNumber)+(isViewB?zDim*(cDim/2)*(dimOrder.toLowerCase().matches(".*splitsequentialc.*")?2:1):0);
@@ -943,16 +944,16 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				ImagePlus maskImp = new ImagePlus("Mask", maskIP);
 									
 				new ImageConverter(maskImp).convertToGray8();
-				
-				ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES+ParticleAnalyzer.SHOW_RESULTS+ParticleAnalyzer.SHOW_MASKS,0, null, 1000, 2500, 0.1,0.1759); 
+				ResultsTable resTab = new ResultsTable();
+				ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES+ ParticleAnalyzer.SHOW_RESULTS, ParticleAnalyzer.AREA+ ParticleAnalyzer.CENTER_OF_MASS+ ParticleAnalyzer.CIRCULARITY+ ParticleAnalyzer.MEAN+ ParticleAnalyzer.PERIMETER, resTab, 1000, 2500, 0.1,0.1759); 
 				pa.setHideOutputImage(true);
 				pa.analyze(maskImp);
 				pa.getOutputImage().setRoi((int)pa.getOutputImage().getProcessor().getStatistics().xCenterOfMass-100, (int)pa.getOutputImage().getProcessor().getStatistics().yCenterOfMass-100, 200,200);
 				ImageProcessor isoIP = pa.getOutputImage().getProcessor().crop();
-				isoIP.invert();
-				isoIP = isoIP.resize(500);
+//				isoIP.invert();
+				isoIP = isoIP.resize(700);
 				ip.insert(isoIP, 0,0);
-
+				resTab.show("Results");
 			}
 		}
 		if (dimOrder == "xyzct") {
