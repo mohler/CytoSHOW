@@ -942,15 +942,19 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				maskIP.threshold((int) (ipHisMode*1.035));
 				maskIP.invert();
 				ImagePlus maskImp = new ImagePlus("Mask", maskIP);
+				maskImp.setMotherImp(IJ.getImage(),IJ.getImage().getID());
 									
 				new ImageConverter(maskImp).convertToGray8();
 				ResultsTable resTab = new ResultsTable();
-				ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES+ ParticleAnalyzer.SHOW_RESULTS, ParticleAnalyzer.AREA+ ParticleAnalyzer.CENTER_OF_MASS+ ParticleAnalyzer.CIRCULARITY+ ParticleAnalyzer.MEAN+ ParticleAnalyzer.PERIMETER, resTab, 1000, 2500, 0.1,0.1759); 
+				ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES+ ParticleAnalyzer.SHOW_RESULTS+ ParticleAnalyzer.SHOW_MASKS+ ParticleAnalyzer.ADD_TO_MANAGER, ParticleAnalyzer.AREA+ ParticleAnalyzer.CENTER_OF_MASS+ ParticleAnalyzer.CIRCULARITY+ ParticleAnalyzer.MEAN+ ParticleAnalyzer.PERIMETER , resTab, 1000, 2500, 0.1,0.1759); 
 				pa.setHideOutputImage(true);
 				pa.analyze(maskImp);
+//				maskImp.show();
+			
+			
 				pa.getOutputImage().setRoi((int)pa.getOutputImage().getProcessor().getStatistics().xCenterOfMass-100, (int)pa.getOutputImage().getProcessor().getStatistics().yCenterOfMass-100, 200,200);
 				ImageProcessor isoIP = pa.getOutputImage().getProcessor().crop();
-//				isoIP.invert();
+				isoIP.invert();
 				isoIP = isoIP.resize(700);
 				ip.insert(isoIP, 0,0);
 				resTab.show("Results");
