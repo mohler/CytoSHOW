@@ -913,7 +913,6 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				int xOri = 0+(((n+1)%2)*(1024));
 				int yOri = 0+(((n+1)%2)*(0));
 				ip.setRoi(xOri, yOri, 1024, 2048);
-				new RankFilters().rank(ip, 2, RankFilters.MEDIAN, 0, 0);			
 				
 			
 			} else if (ip.getWidth()==1536) {		//Yale splitview setup
@@ -940,8 +939,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 						ipHisMode = (double)h;
 					}
 				}
-
-				maskIP.threshold((int) (ipHisMode*1.035));
+				maskIP.subtract(ipHisMode);
+				new RankFilters().rank(maskIP, 2, RankFilters.MEDIAN, 0, 0);			
+				maskIP.threshold((int) (ipHisMode*0.035));
 				maskIP.invert();
 				ImagePlus maskImp = new ImagePlus("Mask", maskIP);
 				maskImp.setMotherImp(this.ownerImp, 0);
@@ -951,7 +951,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES+ ParticleAnalyzer.ADD_TO_MANAGER, ParticleAnalyzer.AREA+ ParticleAnalyzer.CENTER_OF_MASS+ ParticleAnalyzer.CIRCULARITY+ ParticleAnalyzer.MEAN+ ParticleAnalyzer.PERIMETER , resTab, 1000, 2500, 0.1,0.1759); 
 				pa.setHideOutputImage(true);
 				pa.analyze(maskImp);
-//				maskImp.flush();
+				maskImp.flush();
 			
 				resTab.show("Results");
 			}
