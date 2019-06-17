@@ -1254,7 +1254,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		fullListModel.addElement(label);
 		roi.setName(label);
 		recentName = (label);
-		if (imp != null && addToCurrentImpPosition && roi.getPosition()==0)
+		if (imp != null && imp.getWindow()!=null && addToCurrentImpPosition && roi.getPosition()==0)
 			roi.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame());
 		roiCopy = (Roi)roi.clone();
 
@@ -1327,7 +1327,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 		}
 
-		if (imp != null && roiCopy.getPosition()==0) {
+		if (imp != null && imp.getWindow()!=null && roiCopy.getPosition()==0) {
 			int c = imp.getChannel();
 			int z = imp.getSlice();
 			int t = imp.getFrame();

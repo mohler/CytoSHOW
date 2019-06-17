@@ -62,6 +62,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	private int[] corrXB;
 	private int[] corrYB;
 	private int[] corrZB;
+	private ImagePlus ownerImp;
 
 	/* Default constructor. */
 	public MultiFileInfoVirtualStack() {}
@@ -79,14 +80,14 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	}
 
 	public MultiFileInfoVirtualStack(String dirOrOMETiff, String string, boolean show) {
-		this(dirOrOMETiff, "xyczt", string, 0, 0, 0, 1, -1, false, show, false, false);
+		this(dirOrOMETiff, "xyczt", string, 0, 0, 0, 1, -1, false, show, false, false, null);
 	}
 
 	public MultiFileInfoVirtualStack(String dirOrOMETiff, String string, boolean isViewB, boolean show) {
-		this(dirOrOMETiff, "xyczt", string, 0, 0, 0, 1, -1, isViewB, show, false, false);
+		this(dirOrOMETiff, "xyczt", string, 0, 0, 0, 1, -1, isViewB, show, false, false, null);
 	}
 
-	public MultiFileInfoVirtualStack(String arg, String sliceOrder, String keyString, int cDim, int zDim, int tDim, int vDim, final int pos, boolean isViewB, boolean show, boolean rawdispimdata, boolean omeMegaTiff) {
+	public MultiFileInfoVirtualStack(String arg, String sliceOrder, String keyString, int cDim, int zDim, int tDim, int vDim, final int pos, boolean isViewB, boolean show, boolean rawdispimdata, boolean omeMegaTiff, ImagePlus ownerImp) {
 		this.rawdispimdata = rawdispimdata;
 		this.keyString = keyString;
 		this.isViewB = isViewB;
@@ -99,6 +100,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		this.tDim = tDim;
 		this.vDim = vDim;
 		this.pos = pos;
+		this.ownerImp = ownerImp;
 		dimOrder = sliceOrder;
 		fivStacks = new ArrayList<FileInfoVirtualStack>();
 		
@@ -310,8 +312,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			if (goDirFileList != null) {
 				long firstFileSize = (new File(dir + goDirFileList[0])).length();
 
-				if (!omeMegaTiff)
-					for (String fileName:goDirFileList){{
+				if (!omeMegaTiff){
+					for (String fileName:goDirFileList){
 						if ((new File(fileName)).exists()) {
 
 							TiffDecoder td = new TiffDecoder(dir, fileName);
@@ -942,21 +944,15 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				maskIP.threshold((int) (ipHisMode*1.035));
 				maskIP.invert();
 				ImagePlus maskImp = new ImagePlus("Mask", maskIP);
-				maskImp.setMotherImp(IJ.getImage(),IJ.getImage().getID());
+				maskImp.setMotherImp(this.ownerImp, 0);
 									
 				new ImageConverter(maskImp).convertToGray8();
 				ResultsTable resTab = new ResultsTable();
-				ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES+ ParticleAnalyzer.SHOW_RESULTS+ ParticleAnalyzer.SHOW_MASKS+ ParticleAnalyzer.ADD_TO_MANAGER, ParticleAnalyzer.AREA+ ParticleAnalyzer.CENTER_OF_MASS+ ParticleAnalyzer.CIRCULARITY+ ParticleAnalyzer.MEAN+ ParticleAnalyzer.PERIMETER , resTab, 1000, 2500, 0.1,0.1759); 
+				ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES+ ParticleAnalyzer.ADD_TO_MANAGER, ParticleAnalyzer.AREA+ ParticleAnalyzer.CENTER_OF_MASS+ ParticleAnalyzer.CIRCULARITY+ ParticleAnalyzer.MEAN+ ParticleAnalyzer.PERIMETER , resTab, 1000, 2500, 0.1,0.1759); 
 				pa.setHideOutputImage(true);
 				pa.analyze(maskImp);
-//				maskImp.show();
+//				maskImp.flush();
 			
-			
-				pa.getOutputImage().setRoi((int)pa.getOutputImage().getProcessor().getStatistics().xCenterOfMass-100, (int)pa.getOutputImage().getProcessor().getStatistics().yCenterOfMass-100, 200,200);
-				ImageProcessor isoIP = pa.getOutputImage().getProcessor().crop();
-				isoIP.invert();
-				isoIP = isoIP.resize(700);
-				ip.insert(isoIP, 0,0);
 				resTab.show("Results");
 			}
 		}
@@ -1149,6 +1145,14 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (fivStacks == null)
 			return null;
 		return ((FileInfoVirtualStack)fivStacks.get(number));
+	}
+
+	public ImagePlus getOwnerImp() {
+		return ownerImp;
+	}
+
+	public void setOwnerImp(ImagePlus ownerImp) {
+		this.ownerImp = ownerImp;
 	}
 
 }

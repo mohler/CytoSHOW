@@ -875,6 +875,10 @@ public class ParticleAnalyzer implements PlugInFilter, Measurements {
 			rt.addValue("YStart", stats.ystart);
 		}
 		if (addToManager) {
+			roiManager = imp.getMotherImp().getRoiManager();
+			if (roiManager==null) {
+				return;
+			}
 			if (roiManager==null) {
 				if (Macro.getOptions()!=null && Interpreter.isBatchMode())
 					roiManager = Interpreter.getBatchModeRoiManager();
@@ -890,11 +894,14 @@ public class ParticleAnalyzer implements PlugInFilter, Measurements {
 				if (resetCounter)
 					roiManager.runCommand("reset");
 			}
-			if (imp.getStackSize()>1)
-				roi.setPosition(imp, imp.getCurrentSlice());
+			if (imp.getStackSize()>=1){
+//				roi.setPosition(imp, imp.getCurrentSlice());
+				roi.setPosition(imp.getMotherImp().getChannel(), imp.getMotherImp().getSlice(), imp.getMotherImp().getFrame());
+			}
 			if (lineWidth!=1)
 				roi.setStrokeWidth(lineWidth);
-			roiManager.add(imp, roi, rt.getCounter());
+//			roiManager.add(imp, roi, rt.getCounter());
+			roiManager.addRoi(roi);
 		}
 		if (showResultsWindow && showResults)
 			rt.addResults();
