@@ -7075,7 +7075,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
 						continue;
 					}
-					((MultiFileInfoVirtualStack)impAs[pos].getStack()).setSegmentLiveNeuron(true);
+					((MultiFileInfoVirtualStack)impBs[pos].getStack()).setSegmentLiveNeuron(true);
 				}
 			}
 			rerunArg = ("");
