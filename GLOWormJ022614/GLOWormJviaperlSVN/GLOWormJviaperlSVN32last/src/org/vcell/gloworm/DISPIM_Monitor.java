@@ -7064,18 +7064,18 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 				doProcessing[pos] = true;
 
-				if (e.getSource() == dispimToolsButton[pos][0]) {
+				if (e.getSource() == fuseButton[pos][0]) {
 					if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
 						continue;
 					}
-					((MultiFileInfoVirtualStack)impAs[pos].getStack()).setSegmentLiveNeuron(true);
+					((MultiFileInfoVirtualStack)impAs[pos].getStack()).setSegmentLiveNeuron(!((MultiFileInfoVirtualStack)impAs[pos].getStack()).getSegmentLiveNeuron());
 
 				}
-				if (e.getSource() == dispimToolsButton[pos][1]) {
+				if (e.getSource() == fuseButton[pos][1]) {
 					if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
 						continue;
 					}
-					((MultiFileInfoVirtualStack)impBs[pos].getStack()).setSegmentLiveNeuron(true);
+					((MultiFileInfoVirtualStack)impAs[pos].getStack()).setSegmentLiveNeuron(!((MultiFileInfoVirtualStack)impAs[pos].getStack()).getSegmentLiveNeuron());
 				}
 			}
 			rerunArg = ("");
@@ -7099,7 +7099,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 				doProcessing[pos] = true;
 
-				if (e.getSource() == dispimToolsButton[pos][0]) {
+				if (e.getSource() == fuseButton[pos][0]) {
 					if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
 						continue;
 					}
@@ -7112,8 +7112,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					impAs[pos].getWindow().viewButtonPanel.validate();
 
 				}
-				if (e.getSource() == dispimToolsButton[pos][1]) {
-					if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+				if (e.getSource() == fuseButton[pos][1]) {
+					if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
 						continue;
 					}
 					dispimToolsButton[pos][1].setBackground(null);

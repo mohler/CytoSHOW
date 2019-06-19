@@ -1162,4 +1162,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		this.segmentLiveNeuron = true;
 	}
 
+	public boolean getSegmentLiveNeuron() {
+		
+		return this.segmentLiveNeuron;
+	}
+
 }
