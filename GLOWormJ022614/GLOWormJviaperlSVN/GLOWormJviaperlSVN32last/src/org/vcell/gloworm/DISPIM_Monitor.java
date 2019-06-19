@@ -2311,7 +2311,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					diSPIMPanel[pos][1] = new Panel(new BorderLayout());					
 				}
 
-				if (arg != "megaTiffMMrc") {
+				if (!arg.contains("megaTiffMMrc")) {
 					if (dispimToolsButton[pos][0] == null) {
 						dispimToolsButton[pos][0] = new JButton("diSPIM");
 						dispimToolsButton[pos][0].addActionListener(this);

@@ -28,8 +28,8 @@
 	<classpathentry kind="lib" path="jogamp-all-platforms/jar/gluegen-test-util.jar"/>
 	<classpathentry kind="lib" path="jogamp-all-platforms/jar/gluegen.jar"/>
 	<classpathentry kind="lib" path="jogamp-java3d/j3dutils.jar"/>
-	<classpathentry kind="lib" path="jogamp-java3d/j3dcore.jar"/>
-	<classpathentry kind="lib" path="jogamp-java3d/vecmath.jar"/>
+	<classpathentry kind="lib" path="jogamp-java3d/j3dcore.jar" sourcepath="/Users/wmohler/Downloads/java3d-core-1.6.2.zip"/>
+	<classpathentry kind="lib" path="jogamp-java3d/vecmath.jar" sourcepath="/Users/wmohler/Downloads/vecmath-master (1).zip"/>
 	<classpathentry kind="lib" path="jogamp-all-platforms/jar/jocl-natives-linux-amd64.jar"/>
 	<classpathentry kind="lib" path="jogamp-all-platforms/jar/jocl-natives-linux-armv6.jar"/>
 	<classpathentry kind="lib" path="jogamp-all-platforms/jar/jocl-natives-linux-armv6hf.jar"/>
