@@ -2311,57 +2311,128 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					diSPIMPanel[pos][1] = new Panel(new BorderLayout());					
 				}
 
-				if(dispimToolsButton[pos][0] == null) {
-					dispimToolsButton[pos][0] = new JButton("diSPIM");
-					dispimToolsButton[pos][0].addActionListener(this);
-					diSPIMPanel[pos][0].add(BorderLayout.WEST, dispimToolsButton[pos][0]);
-					if (impAs[pos].getStack() instanceof VirtualStack){
-						if ( ((VirtualStack)(impAs[pos].getStack())).getdXA()[0] == 0 &&
-								((VirtualStack)(impAs[pos].getStack())).getdYA()[0] == 0 &&
-								((VirtualStack)(impAs[pos].getStack())).getdZA()[0] == 0) {
+				if (arg != "megaTiffMMrc") {
+					if (dispimToolsButton[pos][0] == null) {
+						dispimToolsButton[pos][0] = new JButton("diSPIM");
+						dispimToolsButton[pos][0].addActionListener(this);
+						diSPIMPanel[pos][0].add(BorderLayout.WEST,
+								dispimToolsButton[pos][0]);
+						if (impAs[pos].getStack() instanceof VirtualStack) {
+							if (((VirtualStack) (impAs[pos].getStack()))
+									.getdXA()[0] == 0
+									&& ((VirtualStack) (impAs[pos].getStack()))
+											.getdYA()[0] == 0
+									&& ((VirtualStack) (impAs[pos].getStack()))
+											.getdZA()[0] == 0) {
 
-							dispimToolsButton[pos][0].setBackground(Color.orange);
+								dispimToolsButton[pos][0]
+										.setBackground(Color.orange);
+							}
 						}
+						dispimToolsButton[pos][0].setVisible(true);
+					} else {
+						dispimToolsButton[pos][0].setVisible(true);
 					}
-					dispimToolsButton[pos][0].setVisible(true);
-				}else {
-					dispimToolsButton[pos][0].setVisible(true);
-				}
+					if (dispimToolsButton[pos][1] == null) {
+						dispimToolsButton[pos][1] = new JButton("diSPIM");
+						dispimToolsButton[pos][1].addActionListener(this);
+						diSPIMPanel[pos][1].add(BorderLayout.WEST,
+								dispimToolsButton[pos][1]);
+						if (impBs[pos].getStack() instanceof VirtualStack) {
+							if (((VirtualStack) (impBs[pos].getStack()))
+									.getdXA()[0] == 0
+									&& ((VirtualStack) (impBs[pos].getStack()))
+											.getdYA()[0] == 0
+									&& ((VirtualStack) (impBs[pos].getStack()))
+											.getdZA()[0] == 0) {
 
-				if(dispimToolsButton[pos][1] == null) {
-					dispimToolsButton[pos][1] = new JButton("diSPIM");
-					dispimToolsButton[pos][1].addActionListener(this);
-					diSPIMPanel[pos][1].add(BorderLayout.WEST, dispimToolsButton[pos][1]);
-					if (impBs[pos].getStack() instanceof VirtualStack){
-						if ( ((VirtualStack)(impBs[pos].getStack())).getdXA()[0] == 0 &&
-								((VirtualStack)(impBs[pos].getStack())).getdYA()[0] == 0 &&
-								((VirtualStack)(impBs[pos].getStack())).getdZA()[0] == 0) {
-
-							dispimToolsButton[pos][1].setBackground(Color.orange);
+								dispimToolsButton[pos][1]
+										.setBackground(Color.orange);
+							}
 						}
+						dispimToolsButton[pos][1].setVisible(true);
+					} else {
+						dispimToolsButton[pos][1].setVisible(true);
 					}
-					dispimToolsButton[pos][1].setVisible(true);
-				}else {
-					dispimToolsButton[pos][1].setVisible(true);
-				}
+					if(fuseButton[pos][0] == null) {
+						fuseButton[pos][0] = new JButton("Fuse");
+						fuseButton[pos][0].addActionListener(this);
+						diSPIMPanel[pos][0].add(BorderLayout.NORTH, fuseButton[pos][0]);
+						fuseButton[pos][0].setVisible(false);
+					}else {
+						fuseButton[pos][0].setVisible(false);
+					}
+					if(fuseButton[pos][1] == null) {
+						fuseButton[pos][1] = new JButton("Fuse");
+						fuseButton[pos][1].addActionListener(this);
+						diSPIMPanel[pos][1].add(BorderLayout.NORTH, fuseButton[pos][1]);
+						fuseButton[pos][1].setVisible(false);
+					}else {
+						fuseButton[pos][1].setVisible(false);
+					}
+				} else {
 
-				if(fuseButton[pos][0] == null) {
-					fuseButton[pos][0] = new JButton("Fuse");
-					fuseButton[pos][0].addActionListener(this);
-					diSPIMPanel[pos][0].add(BorderLayout.NORTH, fuseButton[pos][0]);
-					fuseButton[pos][0].setVisible(false);
-				}else {
-					fuseButton[pos][0].setVisible(false);
+					if (dispimToolsButton[pos][0] == null) {
+						dispimToolsButton[pos][0] = new JButton("RatioChaser");
+						dispimToolsButton[pos][0].addActionListener(this);
+						diSPIMPanel[pos][0].add(BorderLayout.WEST,
+								dispimToolsButton[pos][0]);
+						if (impAs[pos].getStack() instanceof VirtualStack) {
+							if (((VirtualStack) (impAs[pos].getStack()))
+									.getdXA()[0] == 0
+									&& ((VirtualStack) (impAs[pos].getStack()))
+											.getdYA()[0] == 0
+									&& ((VirtualStack) (impAs[pos].getStack()))
+											.getdZA()[0] == 0) {
+
+								dispimToolsButton[pos][0]
+										.setBackground(Color.orange);
+							}
+						}
+						dispimToolsButton[pos][0].setVisible(true);
+					} else {
+						dispimToolsButton[pos][0].setVisible(true);
+					}
+					if (dispimToolsButton[pos][1] == null) {
+						dispimToolsButton[pos][1] = new JButton("RatioChaser");
+						dispimToolsButton[pos][1].addActionListener(this);
+						diSPIMPanel[pos][1].add(BorderLayout.WEST,
+								dispimToolsButton[pos][1]);
+						if (impBs[pos].getStack() instanceof VirtualStack) {
+							if (((VirtualStack) (impBs[pos].getStack()))
+									.getdXA()[0] == 0
+									&& ((VirtualStack) (impBs[pos].getStack()))
+											.getdYA()[0] == 0
+									&& ((VirtualStack) (impBs[pos].getStack()))
+											.getdZA()[0] == 0) {
+
+								dispimToolsButton[pos][1]
+										.setBackground(Color.orange);
+							}
+						}
+						dispimToolsButton[pos][1].setVisible(true);
+					} else {
+						dispimToolsButton[pos][1].setVisible(true);
+					}
+					if(fuseButton[pos][0] == null) {
+						fuseButton[pos][0] = new JButton("TrackNeurons");
+						fuseButton[pos][0].addActionListener(this);
+						diSPIMPanel[pos][0].add(BorderLayout.NORTH, fuseButton[pos][0]);
+						fuseButton[pos][0].setVisible(false);
+					}else {
+						fuseButton[pos][0].setVisible(false);
+					}
+					if(fuseButton[pos][1] == null) {
+						fuseButton[pos][1] = new JButton("TrackNeurons");
+						fuseButton[pos][1].addActionListener(this);
+						diSPIMPanel[pos][1].add(BorderLayout.NORTH, fuseButton[pos][1]);
+						fuseButton[pos][1].setVisible(false);
+					}else {
+						fuseButton[pos][1].setVisible(false);
+					}
+					
 				}
-				if(fuseButton[pos][1] == null) {
-					fuseButton[pos][1] = new JButton("Fuse");
-					fuseButton[pos][1].addActionListener(this);
-					diSPIMPanel[pos][1].add(BorderLayout.NORTH, fuseButton[pos][1]);
-					fuseButton[pos][1].setVisible(false);
-				}else {
-					fuseButton[pos][1].setVisible(false);
-				}
-				
+			
 				spinnerPanel[pos][0] = new Panel();
 				spinnerPanel[pos][0].setLayout(new BorderLayout());
 				spinnerPanel[pos][1] = new Panel();
@@ -6976,6 +7047,41 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 	}
 
 	public void actionPerformed(ActionEvent e) {
+		if (e.getActionCommand() == "TrackNeurons") {
+			for (int pos=0; pos<pDim; pos++) {
+				boolean go = true;
+				if (posIntArray!=null){
+					go = false;
+					for (int posInt:posIntArray){
+						if (posInt == pos){
+							go=true;
+						}
+					}
+				}
+				if (!go){
+					continue;
+				}
+
+				doProcessing[pos] = true;
+
+				if (e.getSource() == dispimToolsButton[pos][0]) {
+					if (impAs[pos]==null || impAs[pos].hasNullStack() || impAs[pos].getWindow()==null  || !impAs[pos].getWindow().isVisible()) {
+						continue;
+					}
+					((MultiFileInfoVirtualStack)impAs[pos].getStack()).setSegmentLiveNeuron(true);
+
+				}
+				if (e.getSource() == dispimToolsButton[pos][1]) {
+					if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+						continue;
+					}
+					((MultiFileInfoVirtualStack)impAs[pos].getStack()).setSegmentLiveNeuron(true);
+				}
+			}
+			rerunArg = ("");
+			monitoring = false;
+		}
+		
 		if (e.getActionCommand() == "Fuse") {
 			for (int pos=0; pos<pDim; pos++) {
 				boolean go = true;
@@ -7022,7 +7128,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			rerunArg = (dirOrOMETiff+"|"+"rerunWithDecon"+"|"+argField);
 			monitoring = false;
 		}
-		if (e.getActionCommand() == "diSPIM") {
+		if (e.getActionCommand() == "diSPIM" || e.getActionCommand() == "RatioChaser") {
 			
 			for (int pos=0; pos<pDim; pos++) {
 				boolean go = true;

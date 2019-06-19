@@ -63,6 +63,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	private int[] corrYB;
 	private int[] corrZB;
 	private ImagePlus ownerImp;
+	private boolean segmentLiveNeuron;
 
 	/* Default constructor. */
 	public MultiFileInfoVirtualStack() {}
@@ -928,32 +929,34 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			ip.translate((1-n%2)*dX, (1-n%2)*dY);
 			ip.translate(corrX, corrY);
 			if (ratioing && n%2==0){
-				ImageProcessor maskIP = ip.duplicate();
-				int[] ipHis = maskIP.getHistogram();
-				double ipHisMode = 0.0;
-				int ipHisLength = ipHis.length;
-				int ipHisMaxBin = 0;
-				for (int h=0; h<ipHisLength; h++) {
-					if (ipHis[h] > ipHisMaxBin) {
-						ipHisMaxBin = ipHis[h];
-						ipHisMode = (double)h;
+				if(segmentLiveNeuron){
+					ImageProcessor maskIP = ip.duplicate();
+					int[] ipHis = maskIP.getHistogram();
+					double ipHisMode = 0.0;
+					int ipHisLength = ipHis.length;
+					int ipHisMaxBin = 0;
+					for (int h=0; h<ipHisLength; h++) {
+						if (ipHis[h] > ipHisMaxBin) {
+							ipHisMaxBin = ipHis[h];
+							ipHisMode = (double)h;
+						}
 					}
+					maskIP.subtract(ipHisMode);
+					new RankFilters().rank(maskIP, 2, RankFilters.MEDIAN, 0, 0);			
+					maskIP.threshold((int) (ipHisMode*0.035));
+					maskIP.invert();
+					ImagePlus maskImp = new ImagePlus("Mask", maskIP);
+					maskImp.setMotherImp(this.ownerImp, 0);
+
+					new ImageConverter(maskImp).convertToGray8();
+					ResultsTable resTab = new ResultsTable();
+					ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES+ ParticleAnalyzer.ADD_TO_MANAGER, ParticleAnalyzer.AREA+ ParticleAnalyzer.CENTER_OF_MASS+ ParticleAnalyzer.CIRCULARITY+ ParticleAnalyzer.MEAN+ ParticleAnalyzer.PERIMETER , resTab, 1000, 2500, 0.1,0.1759); 
+					pa.setHideOutputImage(true);
+					pa.analyze(maskImp);
+					maskImp.flush();
+
+					resTab.show("Results");
 				}
-				maskIP.subtract(ipHisMode);
-				new RankFilters().rank(maskIP, 2, RankFilters.MEDIAN, 0, 0);			
-				maskIP.threshold((int) (ipHisMode*0.035));
-				maskIP.invert();
-				ImagePlus maskImp = new ImagePlus("Mask", maskIP);
-				maskImp.setMotherImp(this.ownerImp, 0);
-									
-				new ImageConverter(maskImp).convertToGray8();
-				ResultsTable resTab = new ResultsTable();
-				ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES+ ParticleAnalyzer.ADD_TO_MANAGER, ParticleAnalyzer.AREA+ ParticleAnalyzer.CENTER_OF_MASS+ ParticleAnalyzer.CIRCULARITY+ ParticleAnalyzer.MEAN+ ParticleAnalyzer.PERIMETER , resTab, 1000, 2500, 0.1,0.1759); 
-				pa.setHideOutputImage(true);
-				pa.analyze(maskImp);
-				maskImp.flush();
-			
-				resTab.show("Results");
 			}
 		}
 		if (dimOrder == "xyzct") {
@@ -1153,6 +1156,10 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 	public void setOwnerImp(ImagePlus ownerImp) {
 		this.ownerImp = ownerImp;
+	}
+
+	public void setSegmentLiveNeuron(boolean b) {
+		this.segmentLiveNeuron = true;
 	}
 
 }
