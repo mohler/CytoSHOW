@@ -1428,7 +1428,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					impAs[pos].getOriginalFileInfo().directory = dirOrOMETiff;
 					impAs[pos].show();
 
-					if (arg.contains("megaTiffMMrc")){
+					if (!arg.contains("megaTiffMMrc")){
 
 
 						impBs[pos].setStack(new MultiFileInfoVirtualStack(mmPath, dimOrder, "MMStack_Pos"+pos, cDim, zDim, tDim, vDim, pos, !(arg.contains("megaTiffMMrc")), false, true, true, impBs[pos]));
@@ -2301,18 +2301,24 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					doProcessing[pos] = false;
 					continue;
 				}
+				if (!arg.contains("megaTiffMMrc")){
 				if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
 					doProcessing[pos] = false;
 					continue;
 				} 
+				}
 				Dimension sizeWinA = impAs[pos].getWindow().getSize();
+				if (!arg.contains("megaTiffMMrc")){
 				Dimension sizeWinB = impBs[pos].getWindow().getSize();
+				}
 				if(diSPIMPanel[pos][0] == null) {
 					diSPIMPanel[pos][0] = new Panel(new BorderLayout());
 					
 				}
+				if (!arg.contains("megaTiffMMrc")){
 				if(diSPIMPanel[pos][1] == null) {
 					diSPIMPanel[pos][1] = new Panel(new BorderLayout());					
+				}
 				}
 
 				if (!arg.contains("megaTiffMMrc")) {
@@ -2337,6 +2343,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					} else {
 						dispimToolsButton[pos][0].setVisible(true);
 					}
+					
 					if (dispimToolsButton[pos][1] == null) {
 						dispimToolsButton[pos][1] = new JButton("diSPIM");
 						dispimToolsButton[pos][1].addActionListener(this);
@@ -2418,14 +2425,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 //					} else {
 //						dispimToolsButton[pos][1].setVisible(true);
 //					}
-//					if(fuseButton[pos][0] == null) {
-//						fuseButton[pos][0] = new JButton("TrackNeurons");
-//						fuseButton[pos][0].addActionListener(this);
-//						diSPIMPanel[pos][0].add(BorderLayout.NORTH, fuseButton[pos][0]);
-//						fuseButton[pos][0].setVisible(false);
-//					}else {
-//						fuseButton[pos][0].setVisible(false);
-//					}
+					if(fuseButton[pos][0] == null) {
+						fuseButton[pos][0] = new JButton("TrackNeurons");
+						fuseButton[pos][0].addActionListener(this);
+						diSPIMPanel[pos][0].add(BorderLayout.NORTH, fuseButton[pos][0]);
+						fuseButton[pos][0].setVisible(false);
+					}else {
+						fuseButton[pos][0].setVisible(false);
+					}
 //					if(fuseButton[pos][1] == null) {
 //						fuseButton[pos][1] = new JButton("TrackNeurons");
 //						fuseButton[pos][1].addActionListener(this);
@@ -7087,12 +7094,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					((MultiFileInfoVirtualStack)impAs[pos].getStack()).setSegmentLiveNeuron(!((MultiFileInfoVirtualStack)impAs[pos].getStack()).getSegmentLiveNeuron());
 
 				}
-				if (e.getSource() == fuseButton[pos][1]) {
-					if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
-						continue;
-					}
-					((MultiFileInfoVirtualStack)impAs[pos].getStack()).setSegmentLiveNeuron(!((MultiFileInfoVirtualStack)impAs[pos].getStack()).getSegmentLiveNeuron());
-				}
+//				if (e.getSource() == fuseButton[pos][1]) {
+//					if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+//						continue;
+//					}
+//					((MultiFileInfoVirtualStack)impAs[pos].getStack()).setSegmentLiveNeuron(!((MultiFileInfoVirtualStack)impAs[pos].getStack()).getSegmentLiveNeuron());
+//				}
 			}
 			rerunArg = ("");
 			monitoring = false;
@@ -7206,6 +7213,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					}
 					impAs[pos].getWindow().viewButtonPanel.validate();
 				}
+				if (! (e.getActionCommand() == "RatioChaser")){
 				if (e.getSource() == dispimToolsButton[pos][1]) {
 					if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
 						continue;
@@ -7254,6 +7262,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										.getStack())).getdZB()[0]);
 					}
 					impBs[pos].getWindow().viewButtonPanel.validate();
+				}
 				}
 			}
 		}
