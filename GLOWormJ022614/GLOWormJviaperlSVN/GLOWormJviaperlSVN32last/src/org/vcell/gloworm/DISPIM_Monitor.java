@@ -2429,6 +2429,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						fuseButton[pos][0] = new JButton("TrackNeurons");
 						fuseButton[pos][0].addActionListener(this);
 						diSPIMPanel[pos][0].add(BorderLayout.NORTH, fuseButton[pos][0]);
+						fuseButton[pos][0].setBackground( Color.orange);
 						fuseButton[pos][0].setVisible(false);
 					}else {
 						fuseButton[pos][0].setVisible(false);
@@ -7092,7 +7093,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						continue;
 					}
 					((MultiFileInfoVirtualStack)impAs[pos].getStack()).setSegmentLiveNeuron(!((MultiFileInfoVirtualStack)impAs[pos].getStack()).getSegmentLiveNeuron());
-
+					fuseButton[pos][0].setBackground(((MultiFileInfoVirtualStack)impAs[pos].getStack()).getSegmentLiveNeuron()==true? Color.green: Color.orange);
+					if (((MultiFileInfoVirtualStack)impAs[pos].getStack()).getSegmentLiveNeuron()){
+						impAs[pos].getRoiManager().actionPerformed(new ActionEvent(impAs[0].getWindow().hideShowButton,  ActionEvent.ACTION_PERFORMED, "Show"));
+					} else {
+//						impAs[pos].getRoiManager().actionPerformed(new ActionEvent(impAs[0].getWindow().hideShowButton,  ActionEvent.ACTION_PERFORMED, "Hide"));					
+					}
 				}
 //				if (e.getSource() == fuseButton[pos][1]) {
 //					if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
