@@ -952,7 +952,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					ResultsTable resTab = new ResultsTable();
 					ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES+ ParticleAnalyzer.ADD_TO_MANAGER, ParticleAnalyzer.AREA+ ParticleAnalyzer.CENTER_OF_MASS+ ParticleAnalyzer.CIRCULARITY+ ParticleAnalyzer.MEAN+ ParticleAnalyzer.PERIMETER , resTab, 1000, 2500, 0.1,0.1759); 
 					pa.setHideOutputImage(true);
-					pa.analyze(maskImp);
+					while (!pa.analyze(maskImp)){
+						IJ.wait(10);
+					};
 					maskImp.flush();
 
 					resTab.show("Results");
