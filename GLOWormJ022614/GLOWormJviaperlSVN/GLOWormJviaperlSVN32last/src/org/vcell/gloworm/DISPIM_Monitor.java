@@ -7096,6 +7096,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					fuseButton[pos][0].setBackground(((MultiFileInfoVirtualStack)impAs[pos].getStack()).getSegmentLiveNeuron()==true? Color.green: Color.orange);
 					if (((MultiFileInfoVirtualStack)impAs[pos].getStack()).getSegmentLiveNeuron()){
 						impAs[pos].getRoiManager().actionPerformed(new ActionEvent(impAs[0].getWindow().hideShowButton,  ActionEvent.ACTION_PERFORMED, "Show"));
+						((MultiFileInfoVirtualStack)impAs[pos].getStack()).setTrackingDialog(null);
 					} else {
 //						impAs[pos].getRoiManager().actionPerformed(new ActionEvent(impAs[0].getWindow().hideShowButton,  ActionEvent.ACTION_PERFORMED, "Hide"));					
 					}

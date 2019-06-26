@@ -64,6 +64,12 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	private int[] corrZB;
 	private ImagePlus ownerImp;
 	private boolean segmentLiveNeuron;
+	private GenericDialog trackingDialog;
+	double threshModeCoeff = 0.12;
+	double minSize = 4000;
+	double maxSize = 20000;
+	double minCirc = 0.1;
+	double maxCirc = 0.25;
 
 	/* Default constructor. */
 	public MultiFileInfoVirtualStack() {}
@@ -945,12 +951,27 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 //					double maxCirc = 0.2;
 					
 //new 06252019 data 10x lens, double 488 power
-					double threshModeCoeff = 0.12;
-					double minSize = 4000;
-					double maxSize = 20000;
-					double minCirc = 0.1;
-					double maxCirc = 0.25;
 
+					if (trackingDialog == null){
+						trackingDialog = new GenericDialog("Tracking Parameters");
+						trackingDialog.addSlider("thresholdCoeff", .001, 1, threshModeCoeff);
+						trackingDialog.addSlider("minSize", 1, 100000, minSize);
+						trackingDialog.addSlider("maxSize", 1, 100000, maxSize);
+						trackingDialog.addSlider("minCirc", .001, 1, minCirc);
+						trackingDialog.addSlider("maxCirc", .001, 1, maxCirc);
+						trackingDialog.centerDialog(true);
+						trackingDialog.pack();
+						trackingDialog.show();
+						if (!trackingDialog.wasCanceled()){
+							 threshModeCoeff = trackingDialog.getNextNumber();
+							 minSize = trackingDialog.getNextNumber();
+							 maxSize = trackingDialog.getNextNumber();
+							 minCirc = trackingDialog.getNextNumber();							
+							 maxCirc = trackingDialog.getNextNumber();
+						}
+					}else {
+						
+					}
 					
 					ImageProcessor maskIP = ip.duplicate();
 					int[] ipHis = maskIP.getHistogram();
@@ -1196,6 +1217,14 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	public boolean getSegmentLiveNeuron() {
 		
 		return this.segmentLiveNeuron;
+	}
+
+	public GenericDialog getTrackingDialog() {
+		return trackingDialog;
+	}
+
+	public void setTrackingDialog(GenericDialog trackingDialog) {
+		this.trackingDialog = trackingDialog;
 	}
 
 }
