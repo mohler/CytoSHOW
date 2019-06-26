@@ -762,7 +762,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				}
 			}
 		} else {
-			fivStacks.get(stackNumber).deleteSlice(sliceNumber);
+			fivStacks.get(stackNumber).deleteSlice(fivStacks.get(stackNumber).getSize());
 		}
 
 		nSlices--;
@@ -1002,7 +1002,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 																	, minSize, maxSize
 																	, minCirc, maxCirc); 
 					pa.setHideOutputImage(true);
-					while (!pa.analyze(maskImp)){
+					boolean analysisDone = pa.analyze(maskImp);
+					while (!analysisDone){
 						IJ.wait(10);
 					};
 					maskImp.flush();
