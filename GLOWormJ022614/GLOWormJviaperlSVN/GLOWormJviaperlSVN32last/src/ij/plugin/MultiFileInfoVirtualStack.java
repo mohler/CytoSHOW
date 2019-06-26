@@ -930,6 +930,28 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			ip.translate(corrX, corrY);
 			if (ratioing && n%2==0){
 				if(segmentLiveNeuron){
+//Original 06052019 data 5x lens
+//					double threshModeCoeff = 0.035;
+//					double minSize = 1000;
+//					double maxSize = 2500;
+//					double minCirc = 0.1;
+//					double maxCirc = 0.1759;
+
+//new 06252019 data 5x lens, double 488 power
+//					double threshModeCoeff = 0.062;
+//					double minSize = 1000;
+//					double maxSize = 2500;
+//					double minCirc = 0.1;
+//					double maxCirc = 0.2;
+					
+//new 06252019 data 10x lens, double 488 power
+					double threshModeCoeff = 0.12;
+					double minSize = 4000;
+					double maxSize = 20000;
+					double minCirc = 0.1;
+					double maxCirc = 0.25;
+
+					
 					ImageProcessor maskIP = ip.duplicate();
 					int[] ipHis = maskIP.getHistogram();
 					double ipHisMode = 0.0;
@@ -943,14 +965,21 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					}
 					maskIP.subtract(ipHisMode);
 					new RankFilters().rank(maskIP, 2, RankFilters.MEDIAN, 0, 0);			
-					maskIP.threshold((int) (ipHisMode*0.035));
+					maskIP.threshold((int) (ipHisMode*threshModeCoeff));
 					maskIP.invert();
 					ImagePlus maskImp = new ImagePlus("Mask", maskIP);
 					maskImp.setMotherImp(this.ownerImp, 0);
 
 					new ImageConverter(maskImp).convertToGray8();
 					ResultsTable resTab = new ResultsTable();
-					ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES+ ParticleAnalyzer.ADD_TO_MANAGER, ParticleAnalyzer.AREA+ ParticleAnalyzer.CENTER_OF_MASS+ ParticleAnalyzer.CIRCULARITY+ ParticleAnalyzer.MEAN+ ParticleAnalyzer.PERIMETER , resTab, 1000, 2500, 0.1,0.1759); 
+					ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES
+																	+ ParticleAnalyzer.ADD_TO_MANAGER
+																, ParticleAnalyzer.AREA+ ParticleAnalyzer.CENTER_OF_MASS
+																	+ ParticleAnalyzer.CIRCULARITY+ ParticleAnalyzer.MEAN
+																	+ ParticleAnalyzer.PERIMETER 
+																	, resTab
+																	, minSize, maxSize
+																	, minCirc, maxCirc); 
 					pa.setHideOutputImage(true);
 					while (!pa.analyze(maskImp)){
 						IJ.wait(10);
