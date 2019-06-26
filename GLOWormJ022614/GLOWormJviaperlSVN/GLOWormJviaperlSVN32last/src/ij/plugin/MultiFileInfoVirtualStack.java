@@ -954,11 +954,11 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 					if (trackingDialog == null){
 						trackingDialog = new GenericDialog("Tracking Parameters");
-						trackingDialog.addSlider("thresholdCoeff", .001, 1, threshModeCoeff);
-						trackingDialog.addSlider("minSize", 1, 100000, minSize);
-						trackingDialog.addSlider("maxSize", 1, 100000, maxSize);
-						trackingDialog.addSlider("minCirc", .001, 1, minCirc);
-						trackingDialog.addSlider("maxCirc", .001, 1, maxCirc);
+						trackingDialog.addNumericField("thresholdCoeff", threshModeCoeff, 4);
+						trackingDialog.addNumericField("minSize", minSize, 0);
+						trackingDialog.addNumericField("maxSize", maxSize, 0);
+						trackingDialog.addNumericField("minCirc", minCirc, 4);
+						trackingDialog.addNumericField("maxCirc", maxCirc, 4);
 						trackingDialog.centerDialog(true);
 						trackingDialog.pack();
 						trackingDialog.show();
