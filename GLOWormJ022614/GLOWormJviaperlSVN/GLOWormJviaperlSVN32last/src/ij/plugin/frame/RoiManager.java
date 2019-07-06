@@ -5755,46 +5755,80 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 	
 	public void colorSynapsesByBundleRules() {
-		//Red bundle:
-		String[] redBundleArray = new String[]{"red","CEPDL","CEPDR","CEPVL","CEPVR","IL1DL","IL1DR","IL1L","IL1R","IL1VL",
-												"IL1VR","IL2DL","IL2DR","IL2L","IL2R","IL2VL","IL2VR","OLLL","OLLR","OLQDL",
-												"OLQDR","OLQVL","OLQVR","RIAL","RIAR","RIH","RIPL","RIPR","RMDDL","RMDDR",
-												"RMDVL","RMDVR","RMED","RMEL","RMER","RMEV","URADL","URADR","URAVL","URAVR",
-												"URBL","URBR","URYDL","URYDR","URYVL","URYVR"};
 
-		//Purple bundle:
-		String[] purpleBundleArray = new String[]{"magenta", "ADER","ADEL","ALNL","ALNR","AVKL","AVKR","AVL","DVC","PLNL","PLNR",
-													"PVT","RICL","RICR","RIVL","RIVR","RMDL","RMDR","RMFL","RMFR","RMHL","RMHR",
-													"SAADL","SAADR","SAAVL","SAAVR","SIADL","SIADR","SIAVL","SIAVR","SIBDL","SIBDR",
-													"SMBDL","SMBDR","SMBVL","SMBVR","SMDDL","SMDDR","SMDVL","SMDVR"};
+//		//Red bundle:
+//		String[] redBundleArray = new String[]{"red","CEPDL","CEPDR","CEPVL","CEPVR","IL1DL","IL1DR","IL1L","IL1R","IL1VL",
+//												"IL1VR","IL2DL","IL2DR","IL2L","IL2R","IL2VL","IL2VR","OLLL","OLLR","OLQDL",
+//												"OLQDR","OLQVL","OLQVR","RIAL","RIAR","RIH","RIPL","RIPR","RMDDL","RMDDR",
+//												"RMDVL","RMDVR","RMED","RMEL","RMER","RMEV","URADL","URADR","URAVL","URAVR",
+//												"URBL","URBR","URYDL","URYDR","URYVL","URYVR"};
+//
+//		//Purple bundle:
+//		String[] purpleBundleArray = new String[]{"magenta", "ADER","ADEL","ALNL","ALNR","AVKL","AVKR","AVL","DVC","PLNL","PLNR",
+//													"PVT","RICL","RICR","RIVL","RIVR","RMDL","RMDR","RMFL","RMFR","RMHL","RMHR",
+//													"SAADL","SAADR","SAAVL","SAAVR","SIADL","SIADR","SIAVL","SIAVR","SIBDL","SIBDR",
+//													"SMBDL","SMBDR","SMBVL","SMBVR","SMDDL","SMDDR","SMDVL","SMDVR"};
+//
+//		//Blue bundle:
+//		String[] blueBundleArray = new String[]{"blue","ADAL","ADAR","ADLL","ADLR","AIML","AIMR","ALA","ALML","ALMR","AQR",
+//												"ASHL","ASHR","ASJL","ASJR","ASKL","ASKR","AVBL","AVBR","AVDL","AVDR","AVFL",
+//												"AVFR","AVHL","AVHR","AVJL","AVJR","AVM","BDUL","BDUR","DVA","HSNL","HSNR",
+//												"PVCL","PVCR","PVNL","PVNR","PVPL","PVPR","PVQL","PVQR","RID","RIFL","RIFR"};
+//
+//		//Green bundle:
+//		String[] greenBundleArray = new String[]{"green","ADFL","ADFR","AFDL","AFDR","AIAR","AIAL","AINL","AINR","AIYL","AIYR",
+//													"ASEL","ASER","ASGL","ASGR","ASIL","ASIR","AUAL","AUAR","AWBL","AWBR","AWCL",
+//													"AWCR","BAGL","BAGR"};
+//
+//		//Yellow unbundled:
+//		String[] yellowUnbundledArray = new String[]{"yellow","AIBL","AIBR","AIZL","AIZR","AVAL","AVAR","AVEL","AVER","AWAL",
+//														"AWAR","FLPL","FLPR","PVR","RIBL","RIBR","RIGL","RIGR","RIML","RIMR",
+//														"RIR","RIS","RMGL","RMGR","SDQL","SDQR","SIBVL","SIBVR","URXL","URXR","VB01"};
+//
+		String[] tableRows = IJ.openAsString(IJ.getFilePath("Table of Cell Groups?")).split("\n");
+		String[][] table2Darray = new String[tableRows[0].split(",").length][tableRows.length];
+		for (int row=0; row<tableRows.length; row++){
+			String[] rowChunks = tableRows[row].split(",");
+			for (int col=0; col<rowChunks.length; col++){
+				table2Darray[col][row] = rowChunks[col];
+			}
+		}
+		
+		int header =0;
+		int leftMargin =0;
+		if (table2Darray[0][0].equalsIgnoreCase("Group")){
+			header++;
+			leftMargin++;
+			if (table2Darray[0][1].equalsIgnoreCase("Color")){
+				header++;
+			}
+		}
+		
+//		String[][] allBundleArrays = new String[][]{redBundleArray, purpleBundleArray, blueBundleArray, greenBundleArray, yellowUnbundledArray};
+//		String[][] specificBundleArrays = new String[][]{redBundleArray};
 
-		//Blue bundle:
-		String[] blueBundleArray = new String[]{"blue","ADAL","ADAR","ADLL","ADLR","AIML","AIMR","ALA","ALML","ALMR","AQR",
-												"ASHL","ASHR","ASJL","ASJR","ASKL","ASKR","AVBL","AVBR","AVDL","AVDR","AVFL",
-												"AVFR","AVHL","AVHR","AVJL","AVJR","AVM","BDUL","BDUR","DVA","HSNL","HSNR",
-												"PVCL","PVCR","PVNL","PVNR","PVPL","PVPR","PVQL","PVQR","RID","RIFL","RIFR"};
-
-		//Green bundle:
-		String[] greenBundleArray = new String[]{"green","ADFL","ADFR","AFDL","AFDR","AIAR","AIAL","AINL","AINR","AIYL","AIYR",
-													"ASEL","ASER","ASGL","ASGR","ASIL","ASIR","AUAL","AUAR","AWBL","AWBR","AWCL",
-													"AWCR","BAGL","BAGR"};
-
-		//Yellow unbundled:
-		String[] yellowUnbundledArray = new String[]{"yellow","AIBL","AIBR","AIZL","AIZR","AVAL","AVAR","AVEL","AVER","AWAL",
-														"AWAR","FLPL","FLPR","PVR","RIBL","RIBR","RIGL","RIGR","RIML","RIMR",
-														"RIR","RIS","RMGL","RMGR","SDQL","SDQR","SIBVL","SIBVR","URXL","URXR","VB01"};
-
-		String[][] allBundleArrays = new String[][]{redBundleArray, purpleBundleArray, blueBundleArray, greenBundleArray, yellowUnbundledArray};
-		String[][] specificBundleArrays = new String[][]{redBundleArray};
-//		String[][] specificBundleArrays = allBundleArrays;
+		String[][] allBundleArrays = new String[tableRows[0].split(",").length-leftMargin][tableRows.length-header];
+		String[] allBundleNames = new String[tableRows[0].split(",").length-leftMargin];
+		String[] allBundleColorStrings = new String[tableRows[0].split(",").length-leftMargin];
+		for (int c=0;c<tableRows[0].split(",").length-leftMargin;c++){
+			for (int r=0;r<tableRows.length-header;r++){
+				allBundleArrays[c][r]=table2Darray[c+leftMargin][r+header];
+			}
+			if (header>0) allBundleNames[c] = table2Darray[c+leftMargin][0];
+			if (header==2) allBundleColorStrings[c] = table2Darray[c+leftMargin][1];
+		}
+		String[][] specificBundleArrays = allBundleArrays;
 	
+		
 		for (String[] currentBundleArray:specificBundleArrays){
+			
 			ArrayList<ArrayList<String>> synapseByBundles = new ArrayList<ArrayList<String>>();
 			for (String[] bundleArray:allBundleArrays){
 				synapseByBundles.add(new ArrayList<String>());
 				synapseByBundles.get(synapseByBundles.size()-1).add(""+currentBundleArray[0]+"-"+bundleArray[0] + ">>");
 			}
 			for (String synapseRoiName:rois.keySet()){
+				if (synapseRoiName==null) continue;
 				boolean presynInBundle = false;
 				boolean postsynOutsideOfBundle = true;
 				String synapseRoiNameCleaned = synapseRoiName.replace("\"", "").replace("[", "").replace("]", "");
@@ -5802,6 +5836,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				rootName = rootName.contains(" ")?rootName.split("[_\\- ]")[0].trim():rootName;
 				String[] postSynapticCells = synapseRoiNameCleaned.split("_")[0].replaceAll(".*(electrical|chemical)(.*)", "$2").split("\\&");
 				for (String currentBundleNeuron:currentBundleArray){
+					if (currentBundleNeuron==null) continue;
 					if (synapseRoiNameCleaned.startsWith(currentBundleNeuron)){
 						presynInBundle = true;
 						boolean noHitInBundle = true;
@@ -5829,7 +5864,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						for (int ba=0; ba<allBundleArrays.length; ba++){
 							String[] targetBundleArray = allBundleArrays[ba];
 							for (String targetBundleNeuron:targetBundleArray){
+								if (targetBundleNeuron==null) continue;
 								for (String postSC:postSynapticCells){
+									if (postSC==null) continue;
 									if (postSC.equals(targetBundleNeuron)){
 										rois.get(synapseRoiName).setFillColor(Colors.getColor(targetBundleArray[0], Color.DARK_GRAY));
 										if (!synapseByBundles.get(ba).contains(rootName)){
