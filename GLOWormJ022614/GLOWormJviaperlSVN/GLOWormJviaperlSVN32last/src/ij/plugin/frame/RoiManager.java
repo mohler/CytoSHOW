@@ -5820,12 +5820,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		String[][] specificBundleArrays = allBundleArrays;
 	
 		
-		for (String[] currentBundleArray:specificBundleArrays){
-			
+		for (int i=0;i<specificBundleArrays.length; i++){
+			String[] currentBundleArray=specificBundleArrays[i];
 			ArrayList<ArrayList<String>> synapseByBundles = new ArrayList<ArrayList<String>>();
-			for (String[] bundleArray:allBundleArrays){
+			for (int j=0; j<allBundleArrays.length; j++){
 				synapseByBundles.add(new ArrayList<String>());
-				synapseByBundles.get(synapseByBundles.size()-1).add(""+currentBundleArray[0]+"-"+bundleArray[0] + ">>");
+				synapseByBundles.get(synapseByBundles.size()-1).add(""+allBundleColorStrings[i]+"-"+allBundleColorStrings[j] + ">>");
 			}
 			for (String synapseRoiName:rois.keySet()){
 				if (synapseRoiName==null) continue;
@@ -5852,7 +5852,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				}
 				if (presynInBundle){
 					if (!postsynOutsideOfBundle){
-						rois.get(synapseRoiName).setFillColor(Colors.getColor(currentBundleArray[0], Color.DARK_GRAY));
+						rois.get(synapseRoiName).setFillColor(Colors.getColor(allBundleColorStrings[i], Color.DARK_GRAY));
 						for (int ba=0; ba<allBundleArrays.length; ba++){
 							if (allBundleArrays[ba] == currentBundleArray){
 								if (!synapseByBundles.get(ba).contains(rootName)){
@@ -5868,7 +5868,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								for (String postSC:postSynapticCells){
 									if (postSC==null) continue;
 									if (postSC.equals(targetBundleNeuron)){
-										rois.get(synapseRoiName).setFillColor(Colors.getColor(targetBundleArray[0], Color.DARK_GRAY));
+										rois.get(synapseRoiName).setFillColor(Colors.getColor(allBundleColorStrings[i], Color.DARK_GRAY));
 										if (!synapseByBundles.get(ba).contains(rootName)){
 											synapseByBundles.get(ba).add(rootName);
 										}
@@ -5910,6 +5910,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				}
 				IJ.log(synapsePartners.get(0) +": "+ (synapsePartners.size()-1) + " synapses\n\n");
 			}
+			IJ.wait(1);
 		}
 	}
 }
