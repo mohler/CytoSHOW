@@ -5243,10 +5243,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		long count = 0;
 
 		Hashtable<String, String> objectHash = new Hashtable<String,String>();
-		String centerZtestString = objectLines[1].split("\t")[4].replace("\"", "");
+		String centerZtestString = objectLines[1].split(",")[4].replace("\"", "");
 		String centerZroot = null;
 		for (int i=0; i<centerZtestString.length(); i++){
-			if (objectLines[2].split("\t")[4].replace("\"", "")
+			if (objectLines[2].split(",")[4].replace("\"", "")
 					.contains(centerZtestString.substring(0,i))
 					&& !centerZtestString.substring(i-1>=0?i-1:0,centerZtestString.length()-1).matches("\\d*")) {
 				centerZroot = centerZtestString.substring(0,i);
@@ -5258,7 +5258,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		for (int i=1; i<objectLines.length; i++){
 			String objectLine=objectLines[i];
-			objectHash.put(objectLine.split("\t")[0].replace("\"", ""), objectLine);
+			objectHash.put(objectLine.split(",")[0].replace("\"", ""), objectLine);
 		}
 		double shrinkFactor = 1/IJ.getNumber("XY dimension should be reduced in scale by what factor?", 1);
 
@@ -5268,16 +5268,16 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			count++;
 			IJ.showStatus(""+count+"/"+fullCount+" Tags loaded for "+ imp.getTitle());
 			String sObj = objectLines[obj];
-			String objType = sObj.split("\t")[6].replace("\"", "");
-			String imageNumber = sObj.split("\t")[4].replace("\"", "");
-			int zSustain = Integer.parseInt(sObj.split("\t")[21].replace("\"", "").replace("zS", ""));
-			String roiName="\""+sObj.split("\t")[17].replace("\"", "")+objType+sObj.split("\t")[18].replace("\"", "")+"_"+sObj.split("\t")[12].replace("\"", "")+imageNumber+"_zs"+sObj.split("\t")[21].replace("\"", "")+" \"";
+			String objType = sObj.split(",")[6].replace("\"", "");
+			String imageNumber = sObj.split(",")[4].replace("\"", "");
+			int zSustain = Integer.parseInt(sObj.split(",")[21].replace("\"", "").replace("zS", ""));
+			String roiName="\""+sObj.split(",")[17].replace("\"", "")+objType+sObj.split(",")[18].replace("\"", "")+"_"+sObj.split(",")[12].replace("\"", "")+imageNumber+"_zs"+sObj.split(",")[21].replace("\"", "")+" \"";
 			Color roiColor= objType.contains("chemical")?Color.white:Color.yellow;
 			if (roiName.contains("uncertain"))
 				roiColor= objType.contains("chemical")?Color.pink:Color.orange;
-			int centerX = (int)(Integer.parseInt(sObj.split("\t")[1].replace("\"", ""))/shrinkFactor) ;
-			int centerY = (int)(Integer.parseInt(sObj.split("\t")[2].replace("\"", ""))/shrinkFactor);
-			int centerZ = Integer.parseInt(sObj.split("\t")[4].replace("\"", "")
+			int centerX = (int)(Integer.parseInt(sObj.split(",")[1].replace("\"", ""))/shrinkFactor) ;
+			int centerY = (int)(Integer.parseInt(sObj.split(",")[2].replace("\"", ""))/shrinkFactor);
+			int centerZ = Integer.parseInt(sObj.split(",")[4].replace("\"", "")
 					.replace(centerZroot, ("")));
 			int adjustmentZ =0;
 			for (int susStep=-zSustain/2;susStep<=zSustain/2;susStep++){
@@ -5787,9 +5787,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //
 		String xlsPath = IJ.getFilePath("Table of Cell Groups?");
 		String[] tableRows = IJ.openAsString(xlsPath).split("\n");
-		String[][] table2Darray = new String[tableRows[0].split("\t").length][tableRows.length];
+		String rowSplitter = "\t";
+		if (xlsPath.endsWith(".csv")){
+			rowSplitter = ",";
+		}
+		String[][] table2Darray = new String[tableRows[0].split(rowSplitter).length][tableRows.length];
 		for (int row=0; row<tableRows.length; row++){
-			String[] rowChunks = tableRows[row].split("\t");
+			String[] rowChunks = tableRows[row].split(rowSplitter);
 			for (int col=0; col<rowChunks.length; col++){
 				table2Darray[col][row] = rowChunks[col];
 			}
@@ -5805,15 +5809,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 		}
 		
-//		String[][] allBundleArrays = new String[][]{redBundleArray, purpleBundleArray, blueBundleArray, greenBundleArray, yellowUnbundledArray};
-//		String[][] specificBundleArrays = new String[][]{redBundleArray};
-
-		String[][] allBundleArrays = new String[tableRows[0].split("\t").length-leftMargin][tableRows.length-header];
-		String[] allBundleNames = new String[tableRows[0].split("\t").length-leftMargin];
-		String[] allBundleColorStrings = new String[tableRows[0].split("\t").length-leftMargin];
-		for (int c=0;c<tableRows[0].split("\t").length-leftMargin;c++){
+		String[][] allBundleArrays = new String[tableRows[0].split(rowSplitter).length-leftMargin][tableRows.length-header];
+		String[] allBundleNames = new String[tableRows[0].split(rowSplitter).length-leftMargin];
+		String[] allBundleColorStrings = new String[tableRows[0].split(rowSplitter).length-leftMargin];
+		for (int c=0;c<tableRows[0].split(rowSplitter).length-leftMargin;c++){
 			for (int r=0;r<tableRows.length-header;r++){
-				allBundleArrays[c][r]=table2Darray[c+leftMargin][r+header];
+				if (table2Darray[c+leftMargin][r+header] != null && table2Darray[c+leftMargin][r+header].length()>0){
+					allBundleArrays[c][r]=table2Darray[c+leftMargin][r+header];
+				}
 			}
 			if (header>0) allBundleNames[c] = table2Darray[c+leftMargin][0];
 			if (header==2) allBundleColorStrings[c] = table2Darray[c+leftMargin][1];
