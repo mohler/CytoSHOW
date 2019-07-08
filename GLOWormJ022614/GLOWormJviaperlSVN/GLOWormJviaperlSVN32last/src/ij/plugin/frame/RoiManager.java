@@ -1160,7 +1160,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	/** Adds the specified ROI. */
 	public void addRoi(Roi roi) {
-		addRoi(roi, false, null, -1, true);
+		addRoi(roi, false, roi.getFillColor(), -1, true);
 	}
 
 	public boolean addRoi(boolean promptForName) {
@@ -5243,10 +5243,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		long count = 0;
 
 		Hashtable<String, String> objectHash = new Hashtable<String,String>();
-		String centerZtestString = objectLines[1].split(",")[4].replace("\"", "");
+		String centerZtestString = objectLines[1].split("\t")[4].replace("\"", "");
 		String centerZroot = null;
 		for (int i=0; i<centerZtestString.length(); i++){
-			if (objectLines[2].split(",")[4].replace("\"", "")
+			if (objectLines[2].split("\t")[4].replace("\"", "")
 					.contains(centerZtestString.substring(0,i))
 					&& !centerZtestString.substring(i-1>=0?i-1:0,centerZtestString.length()-1).matches("\\d*")) {
 				centerZroot = centerZtestString.substring(0,i);
@@ -5258,7 +5258,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		for (int i=1; i<objectLines.length; i++){
 			String objectLine=objectLines[i];
-			objectHash.put(objectLine.split(",")[0].replace("\"", ""), objectLine);
+			objectHash.put(objectLine.split("\t")[0].replace("\"", ""), objectLine);
 		}
 		double shrinkFactor = 1/IJ.getNumber("XY dimension should be reduced in scale by what factor?", 1);
 
@@ -5268,16 +5268,16 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			count++;
 			IJ.showStatus(""+count+"/"+fullCount+" Tags loaded for "+ imp.getTitle());
 			String sObj = objectLines[obj];
-			String objType = sObj.split(",")[6].replace("\"", "");
-			String imageNumber = sObj.split(",")[4].replace("\"", "");
-			int zSustain = Integer.parseInt(sObj.split(",")[21].replace("\"", "").replace("zS", ""));
-			String roiName="\""+sObj.split(",")[17].replace("\"", "")+objType+sObj.split(",")[18].replace("\"", "")+"_"+sObj.split(",")[12].replace("\"", "")+imageNumber+"_zs"+sObj.split(",")[21].replace("\"", "")+" \"";
+			String objType = sObj.split("\t")[6].replace("\"", "");
+			String imageNumber = sObj.split("\t")[4].replace("\"", "");
+			int zSustain = Integer.parseInt(sObj.split("\t")[21].replace("\"", "").replace("zS", ""));
+			String roiName="\""+sObj.split("\t")[17].replace("\"", "")+objType+sObj.split("\t")[18].replace("\"", "")+"_"+sObj.split("\t")[12].replace("\"", "")+imageNumber+"_zs"+sObj.split("\t")[21].replace("\"", "")+" \"";
 			Color roiColor= objType.contains("chemical")?Color.white:Color.yellow;
 			if (roiName.contains("uncertain"))
 				roiColor= objType.contains("chemical")?Color.pink:Color.orange;
-			int centerX = (int)(Integer.parseInt(sObj.split(",")[1].replace("\"", ""))/shrinkFactor) ;
-			int centerY = (int)(Integer.parseInt(sObj.split(",")[2].replace("\"", ""))/shrinkFactor);
-			int centerZ = Integer.parseInt(sObj.split(",")[4].replace("\"", "")
+			int centerX = (int)(Integer.parseInt(sObj.split("\t")[1].replace("\"", ""))/shrinkFactor) ;
+			int centerY = (int)(Integer.parseInt(sObj.split("\t")[2].replace("\"", ""))/shrinkFactor);
+			int centerZ = Integer.parseInt(sObj.split("\t")[4].replace("\"", "")
 					.replace(centerZroot, ("")));
 			int adjustmentZ =0;
 			for (int susStep=-zSustain/2;susStep<=zSustain/2;susStep++){
@@ -5785,10 +5785,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //														"AWAR","FLPL","FLPR","PVR","RIBL","RIBR","RIGL","RIGR","RIML","RIMR",
 //														"RIR","RIS","RMGL","RMGR","SDQL","SDQR","SIBVL","SIBVR","URXL","URXR","VB01"};
 //
-		String[] tableRows = IJ.openAsString(IJ.getFilePath("Table of Cell Groups?")).split("\n");
-		String[][] table2Darray = new String[tableRows[0].split(",").length][tableRows.length];
+		String xlsPath = IJ.getFilePath("Table of Cell Groups?");
+		String[] tableRows = IJ.openAsString(xlsPath).split("\n");
+		String[][] table2Darray = new String[tableRows[0].split("\t").length][tableRows.length];
 		for (int row=0; row<tableRows.length; row++){
-			String[] rowChunks = tableRows[row].split(",");
+			String[] rowChunks = tableRows[row].split("\t");
 			for (int col=0; col<rowChunks.length; col++){
 				table2Darray[col][row] = rowChunks[col];
 			}
@@ -5807,10 +5808,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //		String[][] allBundleArrays = new String[][]{redBundleArray, purpleBundleArray, blueBundleArray, greenBundleArray, yellowUnbundledArray};
 //		String[][] specificBundleArrays = new String[][]{redBundleArray};
 
-		String[][] allBundleArrays = new String[tableRows[0].split(",").length-leftMargin][tableRows.length-header];
-		String[] allBundleNames = new String[tableRows[0].split(",").length-leftMargin];
-		String[] allBundleColorStrings = new String[tableRows[0].split(",").length-leftMargin];
-		for (int c=0;c<tableRows[0].split(",").length-leftMargin;c++){
+		String[][] allBundleArrays = new String[tableRows[0].split("\t").length-leftMargin][tableRows.length-header];
+		String[] allBundleNames = new String[tableRows[0].split("\t").length-leftMargin];
+		String[] allBundleColorStrings = new String[tableRows[0].split("\t").length-leftMargin];
+		for (int c=0;c<tableRows[0].split("\t").length-leftMargin;c++){
 			for (int r=0;r<tableRows.length-header;r++){
 				allBundleArrays[c][r]=table2Darray[c+leftMargin][r+header];
 			}
@@ -5822,11 +5823,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		
 		for (int i=0;i<specificBundleArrays.length; i++){
 			String[] currentBundleArray=specificBundleArrays[i];
+			if (currentBundleArray==null) continue;
+			RoiManager specificBundleRM = new RoiManager(null, true);
 			ArrayList<ArrayList<String>> synapseByBundles = new ArrayList<ArrayList<String>>();
+			//Add a labeling first entry to each color pairing set...
 			for (int j=0; j<allBundleArrays.length; j++){
 				synapseByBundles.add(new ArrayList<String>());
 				synapseByBundles.get(synapseByBundles.size()-1).add(""+allBundleColorStrings[i]+"-"+allBundleColorStrings[j] + ">>");
 			}
+			ArrayList<Roi> newRois = new ArrayList<Roi>();
 			for (String synapseRoiName:rois.keySet()){
 				if (synapseRoiName==null) continue;
 				boolean presynInBundle = false;
@@ -5851,7 +5856,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					}
 				}
 				if (presynInBundle){
-					if (!postsynOutsideOfBundle){
+					if (false){ // !postsynOutsideOfBundle){
 						rois.get(synapseRoiName).setFillColor(Colors.getColor(allBundleColorStrings[i], Color.DARK_GRAY));
 						for (int ba=0; ba<allBundleArrays.length; ba++){
 							if (allBundleArrays[ba] == currentBundleArray){
@@ -5863,21 +5868,28 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					} else {
 						for (int ba=0; ba<allBundleArrays.length; ba++){
 							String[] targetBundleArray = allBundleArrays[ba];
+							if (targetBundleArray==null) continue;
 							for (String targetBundleNeuron:targetBundleArray){
 								if (targetBundleNeuron==null) continue;
+								int[][] psps = new int[][]{{-1,-1},{+1,+1},{-1,+1},{+1,-1},}; 
+								int psc=0;
+								int shift = 5;
 								for (String postSC:postSynapticCells){
 									if (postSC==null) continue;
 									if (postSC.equals(targetBundleNeuron)){
-										rois.get(synapseRoiName).setFillColor(Colors.getColor(allBundleColorStrings[i], Color.DARK_GRAY));
+										Roi newRoi = ((Roi)rois.get(synapseRoiName).clone());
+										newRoi.setLocation(rois.get(synapseRoiName).getBounds().x + psps[psc][0]*shift, rois.get(synapseRoiName).getBounds().y + psps[psc][1]*shift);
+										newRoi.setFillColor(Colors.getColor(allBundleColorStrings[ba], Color.DARK_GRAY));
+										newRois.add(newRoi);
 										if (!synapseByBundles.get(ba).contains(rootName)){
 											synapseByBundles.get(ba).add(rootName);
 										}
 									}
+									psc++;
 								}
 							}
 
 						}
-//						rois.get(synapseRoiName).setFillColor(Colors.getColor(currentBundleArray[0], Color.DARK_GRAY).darker().darker());
 					}
 
 					if (!Image3DUniverse.universes.isEmpty()){
@@ -5889,11 +5901,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						}
 					}
 				} else {
-					Color roiColor= synapseRoiName.contains("chemical")?Color.white:Color.yellow;
-					if (synapseRoiName.contains("uncertain")){
-						roiColor= synapseRoiName.contains("chemical")?Color.pink:Color.orange;
-					}
-					rois.get(synapseRoiName).setFillColor(roiColor);
+//					Color roiColor= synapseRoiName.contains("chemical")?Color.white:Color.yellow;
+//					if (synapseRoiName.contains("uncertain")){
+//						roiColor= synapseRoiName.contains("chemical")?Color.pink:Color.orange;
+//					}
+//					rois.get(synapseRoiName).setFillColor(roiColor);
 					if (!Image3DUniverse.universes.isEmpty()){
 						for (Image3DUniverse univ:Image3DUniverse.universes){
 							if (univ.getContent(rootName)!=null){
@@ -5910,7 +5922,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				}
 				IJ.log(synapsePartners.get(0) +": "+ (synapsePartners.size()-1) + " synapses\n\n");
 			}
-			IJ.wait(1);
+			for(Roi nextRoi:newRois){
+				specificBundleRM.addRoi(nextRoi);
+			}
+			specificBundleRM.setSelectedIndexes(specificBundleRM.getFullListIndexes());
+			specificBundleRM.saveMultiple(specificBundleRM.getSelectedIndexes(), xlsPath + "_" + allBundleNames[i] + "_RoiSet.zip");
+			IJ.wait(10000);
 		}
 	}
 }
