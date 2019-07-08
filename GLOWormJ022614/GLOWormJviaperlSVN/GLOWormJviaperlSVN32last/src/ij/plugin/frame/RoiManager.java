@@ -5873,8 +5873,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								if (targetBundleNeuron==null) continue;
 								int[][] psps = new int[][]{{-1,-1},{+1,+1},{-1,+1},{+1,-1},}; 
 								int psc=0;
-								int shift = 5;
+								int shift = postSynapticCells.length>1?5:0;
 								for (String postSC:postSynapticCells){
+									 
 									if (postSC==null) continue;
 									if (postSC.equals(targetBundleNeuron)){
 										Roi newRoi = ((Roi)rois.get(synapseRoiName).clone());
@@ -5927,7 +5928,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			specificBundleRM.setSelectedIndexes(specificBundleRM.getFullListIndexes());
 			specificBundleRM.saveMultiple(specificBundleRM.getSelectedIndexes(), xlsPath + "_" + allBundleNames[i] + "_RoiSet.zip");
-			IJ.wait(10000);
+			IJ.wait(1);
 		}
 	}
 }
