@@ -946,8 +946,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		ArrayList<String> rootNames_rootFrames = new ArrayList<String>();
 		ArrayList<String> rootNames = new ArrayList<String>();
 		String roiColorString = Colors.colorToHexString(this.getSelectedRoisAsArray()[0].getFillColor());
-		roiColorString = roiColorString.substring(3 /*roiColorString.length()-6*/);
-		String assignedColorString = "#ff" + roiColorString;
+//		roiColorString = roiColorString.substring(3 /*roiColorString.length()-6*/);
+		String assignedColorString = roiColorString;
 
 		for (Roi selRoi:getSelectedRoisAsArray()) {
 			String rootName = selRoi.getName().contains("\"")?selRoi.getName().split("\"")[1].trim():"";
@@ -1020,8 +1020,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			sketchImp.setMotherImp(imp, imp.getID());
 			sketchImp.getRoiManager().setSelectedIndexes(sketchImp.getRoiManager().getFullListIndexes());
 			roiColorString = Colors.colorToHexString(nextRoi.getFillColor());
-			roiColorString = roiColorString.substring(3 /*roiColorString.length()-6*/);
-			assignedColorString = "#ff" + roiColorString;
+//			roiColorString = roiColorString.substring(3 /*roiColorString.length()-6*/);
+			assignedColorString = roiColorString;
 			(new StackReverser()).flipStack(sketchImp);
 			sketchImp.setMotherImp(imp, imp.getID());
 
@@ -5843,6 +5843,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				String rootName = synapseRoiName.contains("\"")?synapseRoiName.split("\"")[1].trim():"";
 				rootName = rootName.contains(" ")?rootName.split("[_\\- ]")[0].trim():rootName;
 				String[] postSynapticCells = synapseRoiNameCleaned.split("_")[0].replaceAll(".*(electrical|chemical)(.*)", "$2").split("\\&");
+				if (postSynapticCells[0].contains("by")){
+					postSynapticCells[0] = postSynapticCells[0].split("by")[1].trim();
+				}
 				for (String currentBundleNeuron:currentBundleArray){
 					if (currentBundleNeuron==null) continue;
 					if (synapseRoiNameCleaned.startsWith(currentBundleNeuron)){
@@ -5880,7 +5883,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								for (String postSC:postSynapticCells){
 									 
 									if (postSC==null) continue;
-									if (postSC.equals(targetBundleNeuron)){
+									if (postSC.equals(targetBundleNeuron) && postsynOutsideOfBundle){
 										Roi newRoi = ((Roi)rois.get(synapseRoiName).clone());
 										newRoi.setLocation(rois.get(synapseRoiName).getBounds().x + psps[psc][0]*shift, rois.get(synapseRoiName).getBounds().y + psps[psc][1]*shift);
 										newRoi.setFillColor(Colors.getColor(allBundleColorStrings[ba], Color.DARK_GRAY));
