@@ -1724,7 +1724,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				lineageDecons = d.isLineage();
 				useSavedPreview = d.isUseSavedPreview();
 				orientBeforeLineage = d.isOrientationPreview();
-				if (lineageDecons) useSavedPreview = true;
+				if (lineageDecons || orientBeforeLineage) useSavedPreview = true;
 
 				slaveChannel = keyChannel == 1 ? 2 : 1;
 				OpenDialog.setDefaultDirectory(Prefs.get("diSPIMmonitor.output", savePath));
