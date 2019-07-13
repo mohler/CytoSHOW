@@ -44,15 +44,9 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 	private Double subFractB;
 	private Checkbox depthSeek;
 	private Checkbox lineageCheckbox;
+	private Checkbox useSavedPreviewCheckbox;
 	private Checkbox orientationPreviewCheckbox;
 
-	public boolean isOrientationPreview() {
-		return orient;
-	}
-
-	public void setOrientationPreview(boolean orientationPreview) {
-		this.orientationPreviewCheckbox.setState(orientationPreview);
-	}
 
 	private boolean lineage;
 	public boolean isLineage() {
@@ -67,7 +61,24 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 	private Choice abRelOriChoices;
 	private int abRelOriValue;
 	private boolean orient;
+	public boolean isOrientationPreview() {
+		return orient;
+	}
+
+	public void setOrientationPreview(boolean orientationPreview) {
+		this.orientationPreviewCheckbox.setState(orientationPreview);
+	}
 	
+	private boolean usePreview;
+	
+	public boolean isUseSavedPreview() {
+		return usePreview;
+	}
+
+	public void setUseSavedPreview(boolean usePreview) {
+		this.usePreview = usePreview;
+	}
+
 	public double getSubFractA() {
 //		return subFractA;
 		return 1;
@@ -202,10 +213,13 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 //		optPanel.add("Center", modeFractionSpinnerB);
 		optPanel.add("West", new Label("Iterations of Deconvolution"));
 		optPanel.add("East", iterationSpinner);
-		lineageCheckbox = new Checkbox("Auto-Launch StarryNite lineaging of Fused Volumes?", 
+		lineageCheckbox = new Checkbox("Auto-Launch StarryNite lineaging?", 
 												Prefs.get("diSPIMmonitor.lineage", false));
 		optPanel.add("South", lineageCheckbox);
-		orientationPreviewCheckbox = new Checkbox("Define volume output orientation in preview?", 
+		useSavedPreviewCheckbox = new Checkbox("Use Saved Preview?", 
+				Prefs.get("diSPIMmonitor.lineage", false));
+		optPanel.add("South", useSavedPreviewCheckbox);
+		orientationPreviewCheckbox = new Checkbox("Create New preview?", 
 				Prefs.get("diSPIMmonitor.orientaionPreview", false));
 		optPanel.add("South", orientationPreviewCheckbox);
 		add("East", optPanel);
@@ -236,6 +250,7 @@ public class SelectKeyChannelDialog extends Dialog implements ActionListener, Ke
 //			subFractB = ((Double)modeFractionSpinnerB.getValue());
 			iterations = ((Integer)iterationSpinner.getValue());
 			lineage = lineageCheckbox.getState();
+			usePreview = useSavedPreviewCheckbox.getState();
 			orient = orientationPreviewCheckbox.getState();
 			Prefs.set("diSPIMmonitor.lineage", lineage);
 			Prefs.get("diSPIMmonitor.orientaionPreview", orient);
