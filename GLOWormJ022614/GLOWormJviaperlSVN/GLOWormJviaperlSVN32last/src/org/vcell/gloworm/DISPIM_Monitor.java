@@ -5947,10 +5947,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											win.setSize(oldW, oldH);
 											((StackWindow) win).addScrollbars(ciDFs[pos]);
 											win.getCanvas().setMagnification(oldMag);
-											win.getImagePlus().updateAndDraw();
 											win.getImagePlus().setPosition(oldC, oldZ, oldT);
 											win.getImagePlus().setDisplayRange(oldMin, oldMax);
 											((CompositeImage)win.getImagePlus()).setMode(oldMode);
+											win.getImagePlus().updateAndDraw();
 											//										win.setSize(win.getSize().width,
 											//												win.getSize().height);
 
@@ -6061,10 +6061,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 												prjXwin.setSize(oldW, oldH);
 												((StackWindow) prjXwin).addScrollbars(ciPrxs[pos]);
 												prjXwin.getCanvas().setMagnification(oldMag);											
-												prjXwin.getImagePlus().updateAndDraw();
 												prjXwin.getImagePlus().setPosition(oldC, oldZ, oldT);
 												prjXwin.getImagePlus().setDisplayRange(oldMin, oldMax);
 												((CompositeImage)prjXwin.getImagePlus()).setMode(oldMode);
+												prjXwin.getImagePlus().updateAndDraw();
 												//											prjXwin.setSize(prjXwin.getSize().width,
 												//													prjXwin.getSize().height);
 
@@ -6198,10 +6198,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 												prjYwin.setSize(oldW, oldH);
 												((StackWindow) prjYwin).addScrollbars(ciPrys[pos]);
 												prjYwin.getCanvas().setMagnification(oldMag);
-												prjYwin.getImagePlus().updateAndDraw();
 												prjYwin.getImagePlus().setPosition(oldC, oldZ, oldT);
 												prjYwin.getImagePlus().setDisplayRange(oldMin, oldMax);
 												((CompositeImage)prjYwin.getImagePlus()).setMode(oldMode);
+												prjYwin.getImagePlus().updateAndDraw();
 												//											prjYwin.setSize(prjYwin.getSize().width,
 												//													prjYwin.getSize().height);
 
@@ -6496,15 +6496,17 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 							}
 						}
-						if (doProcessing[pos] &&(ciDFs[pos]==null 
-												|| (orientBeforeLineage?2:(posFrameEnd[pos]-posFrameStart[pos])) > ciDFs[pos].getNFrames())
-								|| (new File(savePath + File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution2").list(tiffNameFilter).length
-										!= new File(savePath + File.separator + ciDFs[pos].getTitle().replace(":","_").replace(" ","").replace("_dummy","")).list(tiffNameFilter).length)
-								) {
-							
+
+							if (doProcessing[pos] &&(ciDFs[pos]==null 
+									|| (orientBeforeLineage?2:(posFrameEnd[pos]-posFrameStart[pos])) > ciDFs[pos].getNFrames())
+									|| (lineageDecons && new File(savePath + File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution2").list(tiffNameFilter).length
+											!= new File(savePath + File.separator + ciDFs[pos].getTitle().replace(":","_").replace(" ","").replace("_dummy","")).list(tiffNameFilter).length)
+									) {
+
 								posAllDone=false;
-							
-						}
+
+							}
+						
 //						IJ.log(""+pos+"...POSALLDONE = "+ posAllDone);
 					}
 				}
