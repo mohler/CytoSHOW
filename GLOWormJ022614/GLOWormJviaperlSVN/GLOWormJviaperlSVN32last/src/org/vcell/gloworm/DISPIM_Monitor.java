@@ -5910,10 +5910,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										ciDFs[pos] = new CompositeImage(impDF1s[pos]);
 
 
-										if (wavelengths > 1)
-											ciDFs[pos].setMode(CompositeImage.COMPOSITE);
-										else
-											ciDFs[pos].setMode(CompositeImage.GRAYSCALE);
+//										if (wavelengths > 1)
+//											ciDFs[pos].setMode(CompositeImage.COMPOSITE);
+//										else
+//											ciDFs[pos].setMode(CompositeImage.GRAYSCALE);
 
 										if (win==null) {
 											ciDFs[pos].show();
@@ -5932,6 +5932,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											double oldMax = win.getImagePlus()
 													.getDisplayRangeMax();
 											boolean oldEdges = win.getImagePlus().getStack().isEdges();
+											int oldMode = ((CompositeImage)win.getImagePlus()).getMode();
 											ciDFs[pos].copyLuts(win.getImagePlus());
 
 											//									win.setVisible(false);	
@@ -5945,6 +5946,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											win.getImagePlus().updateAndDraw();
 											win.getImagePlus().setPosition(oldC, oldZ, oldT);
 											win.getImagePlus().setDisplayRange(oldMin, oldMax);
+											((CompositeImage)win.getImagePlus()).setMode(oldMode);
 											//										win.setSize(win.getSize().width,
 											//												win.getSize().height);
 
@@ -6012,10 +6014,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											ciPrxs[pos] = new CompositeImage(impPrxs[pos]);
 											ciPrxs[pos].setPosition(1, 1, ciPrxs[pos].getNFrames());
 
-											if (wavelengths > 1)
-												ciPrxs[pos].setMode(CompositeImage.COMPOSITE);
-											else
-												ciPrxs[pos].setMode(CompositeImage.GRAYSCALE);
+//											if (wavelengths > 1)
+//												ciPrxs[pos].setMode(CompositeImage.COMPOSITE);
+//											else
+//												ciPrxs[pos].setMode(CompositeImage.GRAYSCALE);
 
 											int oldW;
 											int oldH;
@@ -6026,6 +6028,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											double oldMin;
 											double oldMax;
 											boolean oldEdges;
+											int oldMode;
 											if (prjXwin==null) {
 												ciPrxs[pos].show();
 												WindowManager.group(ciDFs[pos], ciPrxs[pos]);
@@ -6043,6 +6046,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 												oldMax = prjXwin.getImagePlus()
 														.getDisplayRangeMax();
 												oldEdges = prjXwin.getImagePlus().getStack().isEdges();
+												oldMode = ((CompositeImage)prjXwin.getImagePlus()).getMode();
+
 												((CompositeImage)ciPrxs[pos]).copyLuts(prjXwin.getImagePlus());
 
 												prjXwin.setImage(ciPrxs[pos]);
@@ -6055,6 +6060,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 												prjXwin.getImagePlus().updateAndDraw();
 												prjXwin.getImagePlus().setPosition(oldC, oldZ, oldT);
 												prjXwin.getImagePlus().setDisplayRange(oldMin, oldMax);
+												((CompositeImage)prjXwin.getImagePlus()).setMode(oldMode);
 												//											prjXwin.setSize(prjXwin.getSize().width,
 												//													prjXwin.getSize().height);
 
@@ -6146,10 +6152,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											ciPrys[pos].setPosition(1, 1, ciPrys[pos].getNFrames());
 
 
-											if (wavelengths > 1)
-												ciPrys[pos].setMode(CompositeImage.COMPOSITE);
-											else
-												ciPrys[pos].setMode(CompositeImage.GRAYSCALE);
+//											if (wavelengths > 1)
+//												ciPrys[pos].setMode(CompositeImage.COMPOSITE);
+//											else
+//												ciPrys[pos].setMode(CompositeImage.GRAYSCALE);
 
 											int oldW;
 											int oldH;
@@ -6160,6 +6166,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											double oldMin;
 											double oldMax;
 											boolean oldEdges;
+											int oldMode;
 											if (prjYwin==null) {
 												ciPrys[pos].show();
 												WindowManager.group(ciPrxs[pos], ciPrys[pos]);
@@ -6177,6 +6184,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 												oldMax = prjYwin.getImagePlus()
 														.getDisplayRangeMax();
 												oldEdges = prjYwin.getImagePlus().getStack().isEdges();
+												oldMode = ((CompositeImage)prjYwin.getImagePlus()).getMode();
 												((CompositeImage)ciPrys[pos]).copyLuts(prjYwin.getImagePlus());
 
 												prjYwin.setImage(ciPrys[pos]);
@@ -6189,6 +6197,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 												prjYwin.getImagePlus().updateAndDraw();
 												prjYwin.getImagePlus().setPosition(oldC, oldZ, oldT);
 												prjYwin.getImagePlus().setDisplayRange(oldMin, oldMax);
+												((CompositeImage)prjYwin.getImagePlus()).setMode(oldMode);
 												//											prjYwin.setSize(prjYwin.getSize().width,
 												//													prjYwin.getSize().height);
 

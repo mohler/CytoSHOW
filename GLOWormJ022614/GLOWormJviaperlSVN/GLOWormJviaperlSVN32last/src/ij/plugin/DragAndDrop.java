@@ -1088,10 +1088,10 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					freshDrop = false;
 					
 					try {
-						ImageJ3DViewer.importContent(((File)obj).getPath());
+						ImageJ3DViewer.importContent(new File((String) obj).getPath());
 					} catch (Exception e) {
 						ij3dv.run(".");
-						ImageJ3DViewer.importContent(((File)obj).getPath());
+						ImageJ3DViewer.importContent(new File((String) obj).getPath());
 					}
 					ImageJ3DViewer.lock();
 
