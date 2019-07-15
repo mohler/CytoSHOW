@@ -1720,6 +1720,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				keyChannel = d.getKeyChannel();
 				keyView = d.getRegDeconView();
 				abRelOriValue = d.getAbRelOriValue();
+				
+//	Added to neutralize conflict between "+1" and "A".....			
+				abRelOriValue = keyView.startsWith("A")?-1*abRelOriValue:abRelOriValue;
+						
 				autodepth = d.isAutodepth();
 				lineageDecons = d.isLineage();
 				useSavedPreview = d.isUseSavedPreview();
