@@ -1,0 +1,164 @@
+# MTL File
+
+newmtl mat_YELLOW
+Ns 96.078431
+Ka 0.0 0.0 0.0
+Kd 0.99609375 0.99609375 0.0
+Ks 0.5 0.5 0.5
+Ni 1.0
+d 0.98
+illum 2
+
+newmtl mat_ORANGE
+Ns 96.078431
+Ka 0.0 0.0 0.0
+Kd 0.99609375 0.8 0.5
+Ks 0.5 0.5 0.5
+Ni 1.0
+d 0.98
+illum 2
+
+newmtl mat_RED
+Ns 96.078431
+Ka 0.0 0.0 0.0
+Kd 0.99609375 0.0 0.0
+Ks 0.5 0.5 0.5
+Ni 1.0
+d 0.98
+illum 2
+
+newmtl mat_BLUE
+Ns 96.078431
+Ka 0.0 0.0 0.0
+Kd 0.0 0.0 0.99609375
+Ks 0.5 0.5 0.5
+Ni 1.0
+d 0.98
+illum 2
+
+newmtl mat_GREEN
+Ns 96.078431
+Ka 0.0 0.0 0.0
+Kd 0.0 0.99609375 0.0
+Ks 0.5 0.5 0.5
+Ni 1.0
+d 0.98
+illum 2
+
+newmtl mat_MAGENTA
+Ns 96.078431
+Ka 0.0 0.0 0.0
+Kd 0.99609375 0.0 0.99609375
+Ks 0.5 0.5 0.5
+Ni 1.0
+d 0.98
+illum 2
+
+newmtl mat_CYAN
+Ns 96.078431
+Ka 0.0 0.0 0.0
+Kd 0.0  0.99609375 0.99609375
+Ks 0.5 0.5 0.5
+Ni 1.0
+d 0.98
+illum 2
+
+newmtl mat_GRAY
+Ns 96.078431
+Ka 0.0 0.0 0.0
+Kd 0.5 0.5 0.5
+Ks 0.5 0.5 0.5
+Ni 1.0
+d 0.98
+illum 2
+
+newmtl mat_WHITE
+Ns 96.078431
+Ka 0.0 0.0 0.0
+Kd 0.99609375 0.99609375 0.99609375
+Ks 0.5 0.5 0.5
+Ni 1.0
+d 0.98
+illum 2
+
+newmtl mat_BLACK
+Ns 96.078431
+Ka 0.0 0.0 0.0
+Kd 0.0 0.0 0.0
+Ks 0.5 0.5 0.5
+Ni 1.0
+d 0.98
+illum 2
+
+newmtl mat_PINK
+Ns 96.078431
+Ka 0.0 0.0 0.0
+Kd 0.99609375 0.8 0.8
+Ks 0.5 0.5 0.5
+Ni 1.0
+d 0.98
+illum 2
+
+newmtl mat_AZURE
+Ns 96.078431
+Ka 0.0 0.0 0.0
+Kd 0.8 0.8 0.99609375
+Ks 0.5 0.5 0.5
+Ni 1.0
+d 0.98
+illum 2
+
+newmtl mat_SPRING
+Ns 96.078431
+Ka 0.0 0.0 0.0
+Kd 0.8 0.99609375 0.8
+Ks 0.5 0.5 0.5
+Ni 1.0
+d 0.98
+illum 2
+
+newmtl mat_BUTTER
+Ns 96.078431
+Ka 0.0 0.0 0.0
+Kd 0.99609375 0.99609375 0.8
+Ks 0.5 0.5 0.5
+Ni 1.0
+d 0.98
+illum 2
+
+newmtl mat_SUNSET
+Ns 96.078431
+Ka 0.0 0.0 0.0
+Kd 0.99609375 0.8 0.9
+Ks 0.5 0.5 0.5
+Ni 1.0
+d 0.98
+illum 2
+
+newmtl mat_TURQUOISE
+Ns 96.078431
+Ka 0.0 0.0 0.0
+Kd 0.8 0.99609375 0.99609375
+Ks 0.5 0.5 0.5
+Ni 1.0
+d 0.98
+illum 2
+
+newmtl mat_WISTERIA
+Ns 96.078431
+Ka 0.0 0.0 0.0
+Kd 0.99609375 0.8 0.99609375
+Ks 0.5 0.5 0.5
+Ni 1.0
+d 0.98
+illum 2
+
+newmtl mat_LIGHTGRAY
+Ns 96.078431
+Ka 0.0 0.0 0.0
+Kd 0.8 0.8 0.8
+Ks 0.5 0.5 0.5
+Ni 1.0
+d 0.98
+illum 2
+
