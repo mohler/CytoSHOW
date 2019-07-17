@@ -5972,8 +5972,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				synapseByGroups.add(new ArrayList<String>());
 				synapseByGroups.get(synapseByGroups.size()-1).add(""+allGroupColorStrings[i]+"-"+allGroupColorStrings[j] + ">>");
 			}
-			ArrayList<String> newObjNames = new ArrayList<String>();
-			ArrayList<String> oldObjNames = new ArrayList<String>();
+			ArrayList<String> newObjNamesforGroupPatches = new ArrayList<String>();
+			ArrayList<String> oldObjNamesforGroupPatches = new ArrayList<String>();
+			ArrayList<String> newObjNamesforCellPatches = new ArrayList<String>();
+			ArrayList<String> oldObjNamesforCellPatches = new ArrayList<String>();
 			ArrayList<String> cellNameDirs = new ArrayList<String>();
 			String[] objDirList = new File(objDirPath).list();
 			for (String synapseObjFileName:objDirList){
@@ -6009,37 +6011,36 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					}
 				}
 				if (presynInGroup){
-					
-					if (true) {
-						for (int ba=0; ba<allGroupArrays.length; ba++){
-							String[] targetGroupArray = allGroupArrays[ba];
-							if (targetGroupArray==null) continue;
-							for (String targetGroupNeuron:targetGroupArray){
-								if (targetGroupNeuron==null) continue;
-								int[][] psps = new int[][]{{-1,-1},{+1,+1},{-1,+1},{+1,-1}}; 
-								int psc=0;
-								int shift = postSynapticCells.length>1?5:0;
-								for (String postSC:postSynapticCells){
-									 
-									if (postSC==null) continue;
-									if (postSC.equals(targetGroupNeuron) && postsynOutsideOfGroup){
-										String newObjFileName = synapseObjFileName;
 
-										newObjFileName = newObjFileName.replace(".obj", "_"+allGroupColorStrings[ba]+".obj");
-										newObjNames.add(newObjFileName);
-										oldObjNames.add(synapseObjFileName);
-										if (!synapseByGroups.get(ba).contains(rootName)){
-											synapseByGroups.get(ba).add(rootName);
-										}
+					for (int ba=0; ba<allGroupArrays.length; ba++){
+						String[] targetGroupArray = allGroupArrays[ba];
+						if (targetGroupArray==null) continue;
+						for (String targetGroupNeuron:targetGroupArray){
+							if (targetGroupNeuron==null) continue;
+							int[][] psps = new int[][]{{-1,-1},{+1,+1},{-1,+1},{+1,-1}}; 
+							int psc=0;
+							int shift = postSynapticCells.length>1?5:0;
+							for (String postSC:postSynapticCells){
+
+								if (postSC==null) continue;
+								if (postSC.equals(targetGroupNeuron)) {
+									String newObjFileName = synapseObjFileName;
+									newObjFileName = newObjFileName.replace(".obj", "_"+allGroupColorStrings[ba]+".obj");
+									if (postsynOutsideOfGroup){
+										newObjNamesforGroupPatches.add(newObjFileName);
+										oldObjNamesforGroupPatches.add(synapseObjFileName);
 									}
-									psc++;
-								}
-							}
+									newObjNamesforCellPatches.add(newObjFileName);
+									oldObjNamesforCellPatches.add(synapseObjFileName);
 
+									if (!synapseByGroups.get(ba).contains(rootName)){
+										synapseByGroups.get(ba).add(rootName);
+									}
+								}
+								psc++;
+							}
 						}
 					}
-
-				} else {
 				}
 			}
 			for (ArrayList<String> synapsePartners:synapseByGroups){
@@ -6048,15 +6049,25 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				}
 				IJ.log(synapsePartners.get(0) +": "+ (synapsePartners.size()-1) + " Objs\n\n");
 			}
-			for(String nextObjName:newObjNames){
+			for(String nextObjName:newObjNamesforGroupPatches){
 				if (nextObjName.toLowerCase().endsWith(".obj")){
-					String oldObjName = oldObjNames.get(newObjNames.indexOf(nextObjName));
+					String oldObjName = oldObjNamesforGroupPatches.get(newObjNamesforGroupPatches.indexOf(nextObjName));
 					String[] newObjNameChunks = nextObjName.split("_");
 					String newObjColorName = newObjNameChunks[newObjNameChunks.length-1].toUpperCase().replace(".OBJ", "");
 					String newObjBodyText = IJ.openAsString(objDirPath+File.separator+ oldObjName)
 							.replaceAll("(.*mtllib ).*(\n.*)", "$1"+"UniversalColorPallet_firstVersion.mtl"+"$2")
 							.replaceAll("(.*usemtl mat_).*(\n.*)", "$1"+newObjColorName+"$2");
 					IJ.saveString(newObjBodyText, specificGroupOutputDirPath + File.separator + nextObjName);
+				}
+			}
+			for(String nextObjName:newObjNamesforCellPatches){
+				if (nextObjName.toLowerCase().endsWith(".obj")){
+					String oldObjName = oldObjNamesforCellPatches.get(newObjNamesforGroupPatches.indexOf(nextObjName));
+					String[] newObjNameChunks = nextObjName.split("_");
+					String newObjColorName = newObjNameChunks[newObjNameChunks.length-1].toUpperCase().replace(".OBJ", "");
+					String newObjBodyText = IJ.openAsString(objDirPath+File.separator+ oldObjName)
+							.replaceAll("(.*mtllib ).*(\n.*)", "$1"+"UniversalColorPallet_firstVersion.mtl"+"$2")
+							.replaceAll("(.*usemtl mat_).*(\n.*)", "$1"+newObjColorName+"$2");
 					for (String currentNeuron:cellNameDirs){
 						if (nextObjName.contains("_"+currentNeuron)){
 							IJ.saveString(newObjBodyText, newCellOutDirPath+File.separator+currentNeuron+ File.separator + nextObjName);			
