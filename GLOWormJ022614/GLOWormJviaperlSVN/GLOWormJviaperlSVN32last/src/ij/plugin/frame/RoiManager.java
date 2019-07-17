@@ -5918,6 +5918,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		String xlsPath = IJ.getFilePath("Table of Cell Groups?");
 		String objDirPath = IJ.getDirectory("Folder of Objs to Sort and Color?");
+		String newCellOutDirPath = objDirPath.substring(0, objDirPath.lastIndexOf(File.separator))+"_asCells";
+		String newGroupOutDirPath = objDirPath.substring(0, objDirPath.lastIndexOf(File.separator))+"_asGroups";
+
 		String[] tableRows = IJ.openAsString(xlsPath).split("\n");
 		String rowSplitter = "\t";
 		if (xlsPath.endsWith(".csv")){
@@ -5959,7 +5962,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		for (int i=0;i<specificGroupArrays.length; i++){
 			String[] currentGroupArray=specificGroupArrays[i];
 			if (currentGroupArray==null) continue;
-			String specificGroupOutputDirPath = objDirPath+File.separator + allGroupNames[i]+"_"+allGroupColorStrings[i];
+			String specificGroupOutputDirPath = newGroupOutDirPath+File.separator + allGroupNames[i]+"_"+allGroupColorStrings[i];
 			new File(specificGroupOutputDirPath).mkdirs();
 			String universalMtlColorURL = MQTVSSceneLoader64.class.getResource("docs/UniversalColorPallet_firstVersion.mtl").toString();
 			IJ.saveString(IJ.openUrlAsString(universalMtlColorURL), specificGroupOutputDirPath+File.separator+"UniversalColorPallet_firstVersion.mtl");
@@ -5971,6 +5974,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			ArrayList<String> newObjNames = new ArrayList<String>();
 			ArrayList<String> oldObjNames = new ArrayList<String>();
+			ArrayList<String> cellNameDirs = new ArrayList<String>();
 			String[] objDirList = new File(objDirPath).list();
 			for (String synapseObjFileName:objDirList){
 				if (synapseObjFileName==null || !synapseObjFileName.toLowerCase().endsWith(".obj")) continue;
@@ -5987,6 +5991,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				for (String currentGroupNeuron:currentGroupArray){
 					if (currentGroupNeuron==null) continue;
 					if (rootName.startsWith(currentGroupNeuron)){
+						if (!cellNameDirs.contains(currentGroupNeuron)){
+							cellNameDirs.add(currentGroupNeuron);
+							new File(newCellOutDirPath+File.separator+currentGroupNeuron).mkdirs();
+							IJ.saveString(IJ.openUrlAsString(universalMtlColorURL), newCellOutDirPath+File.separator+currentGroupNeuron+File.separator+"UniversalColorPallet_firstVersion.mtl");
+						}
 						presynInGroup = true;
 						boolean noHitInGroup = true;
 						for (String postSC:postSynapticCells){
@@ -6000,6 +6009,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					}
 				}
 				if (presynInGroup){
+					
 					if (true) {
 						for (int ba=0; ba<allGroupArrays.length; ba++){
 							String[] targetGroupArray = allGroupArrays[ba];
@@ -6047,6 +6057,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							.replaceAll("(.*mtllib ).*(\n.*)", "$1"+"UniversalColorPallet_firstVersion.mtl"+"$2")
 							.replaceAll("(.*usemtl mat_).*(\n.*)", "$1"+newObjColorName+"$2");
 					IJ.saveString(newObjBodyText, specificGroupOutputDirPath + File.separator + nextObjName);
+					for (String currentNeuron:cellNameDirs){
+						if (nextObjName.contains("_"+currentNeuron)){
+							IJ.saveString(newObjBodyText, newCellOutDirPath+File.separator+currentNeuron+ File.separator + nextObjName);			
+						}
+					}
 				}
 			}
 			IJ.wait(1);
