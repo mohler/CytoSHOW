@@ -374,7 +374,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		addPopupItem("Auto-advance when tagging");
 		addPopupItem("StarryNiteImporter");
 		addPopupItem("Map Neighbors");
-		addPopupItem("Color Synapses by Bundle Rules");
+		addPopupItem("Color Tags by Group Interaction Rules");
+		addPopupItem("Color Objs by Group Interaction Rules");
 		add(pm);
 	}
 
@@ -927,8 +928,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			else if (command.equals("Map Neighbors")) {
 				mapNearNeighborContacts();
 			}
-			else if (command.equals("Color Synapses by Bundle Rules")) {
-				colorSynapsesByBundleRules();
+			else if (command.equals("Color Tags by Group Interaction Rules")) {
+				colorTagsByGroupInteractionRules();
+			}
+			else if (command.equals("Color Objs by Group Interaction Rules")) {
+				colorObjsByGroupInteractionRules();
 			}
 
 			this.imp.getCanvas().requestFocus();
@@ -5754,37 +5758,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 	}
 	
-	public void colorSynapsesByBundleRules() {
+	public void colorTagsByGroupInteractionRules() {
 
-//		//Red bundle:
-//		String[] redBundleArray = new String[]{"red","CEPDL","CEPDR","CEPVL","CEPVR","IL1DL","IL1DR","IL1L","IL1R","IL1VL",
-//												"IL1VR","IL2DL","IL2DR","IL2L","IL2R","IL2VL","IL2VR","OLLL","OLLR","OLQDL",
-//												"OLQDR","OLQVL","OLQVR","RIAL","RIAR","RIH","RIPL","RIPR","RMDDL","RMDDR",
-//												"RMDVL","RMDVR","RMED","RMEL","RMER","RMEV","URADL","URADR","URAVL","URAVR",
-//												"URBL","URBR","URYDL","URYDR","URYVL","URYVR"};
-//
-//		//Purple bundle:
-//		String[] purpleBundleArray = new String[]{"magenta", "ADER","ADEL","ALNL","ALNR","AVKL","AVKR","AVL","DVC","PLNL","PLNR",
-//													"PVT","RICL","RICR","RIVL","RIVR","RMDL","RMDR","RMFL","RMFR","RMHL","RMHR",
-//													"SAADL","SAADR","SAAVL","SAAVR","SIADL","SIADR","SIAVL","SIAVR","SIBDL","SIBDR",
-//													"SMBDL","SMBDR","SMBVL","SMBVR","SMDDL","SMDDR","SMDVL","SMDVR"};
-//
-//		//Blue bundle:
-//		String[] blueBundleArray = new String[]{"blue","ADAL","ADAR","ADLL","ADLR","AIML","AIMR","ALA","ALML","ALMR","AQR",
-//												"ASHL","ASHR","ASJL","ASJR","ASKL","ASKR","AVBL","AVBR","AVDL","AVDR","AVFL",
-//												"AVFR","AVHL","AVHR","AVJL","AVJR","AVM","BDUL","BDUR","DVA","HSNL","HSNR",
-//												"PVCL","PVCR","PVNL","PVNR","PVPL","PVPR","PVQL","PVQR","RID","RIFL","RIFR"};
-//
-//		//Green bundle:
-//		String[] greenBundleArray = new String[]{"green","ADFL","ADFR","AFDL","AFDR","AIAR","AIAL","AINL","AINR","AIYL","AIYR",
-//													"ASEL","ASER","ASGL","ASGR","ASIL","ASIR","AUAL","AUAR","AWBL","AWBR","AWCL",
-//													"AWCR","BAGL","BAGR"};
-//
-//		//Yellow unbundled:
-//		String[] yellowUnbundledArray = new String[]{"yellow","AIBL","AIBR","AIZL","AIZR","AVAL","AVAR","AVEL","AVER","AWAL",
-//														"AWAR","FLPL","FLPR","PVR","RIBL","RIBR","RIGL","RIGR","RIML","RIMR",
-//														"RIR","RIS","RMGL","RMGR","SDQL","SDQR","SIBVL","SIBVR","URXL","URXR","VB01"};
-//
 		String xlsPath = IJ.getFilePath("Table of Cell Groups?");
 		String[] tableRows = IJ.openAsString(xlsPath).split("\n");
 		String rowSplitter = "\t";
@@ -5936,5 +5911,146 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			specificBundleRM.saveMultiple(specificBundleRM.getSelectedIndexes(), xlsPath + "_" + allBundleNames[i] + "_RoiSet.zip");
 			IJ.wait(1);
 		}
+	}
+	
+	public void colorObjsByGroupInteractionRules() {
+
+
+		String xlsPath = IJ.getFilePath("Table of Cell Groups?");
+		String objDirPath = IJ.getDirectory("Folder of Objs to Sort and Color?");
+		String[] tableRows = IJ.openAsString(xlsPath).split("\n");
+		String rowSplitter = "\t";
+		if (xlsPath.endsWith(".csv")){
+			rowSplitter = ",";
+		}
+		String[][] table2Darray = new String[tableRows[0].split(rowSplitter).length][tableRows.length];
+		for (int row=0; row<tableRows.length; row++){
+			String[] rowChunks = tableRows[row].split(rowSplitter);
+			for (int col=0; col<rowChunks.length; col++){
+				table2Darray[col][row] = rowChunks[col];
+			}
+		}
+		
+		int header =0;
+		int leftMargin =0;
+		if (table2Darray[0][0].equalsIgnoreCase("Group")){
+			header++;
+			leftMargin++;
+			if (table2Darray[0][1].equalsIgnoreCase("Color")){
+				header++;
+			}
+		}
+		
+		String[][] allGroupArrays = new String[tableRows[0].split(rowSplitter).length-leftMargin][tableRows.length-header];
+		String[] allGroupNames = new String[tableRows[0].split(rowSplitter).length-leftMargin];
+		String[] allGroupColorStrings = new String[tableRows[0].split(rowSplitter).length-leftMargin];
+		for (int c=0;c<tableRows[0].split(rowSplitter).length-leftMargin;c++){
+			for (int r=0;r<tableRows.length-header;r++){
+				if (table2Darray[c+leftMargin][r+header] != null && table2Darray[c+leftMargin][r+header].length()>0){
+					allGroupArrays[c][r]=table2Darray[c+leftMargin][r+header];
+				}
+			}
+			if (header>0) allGroupNames[c] = table2Darray[c+leftMargin][0];
+			if (header==2) allGroupColorStrings[c] = table2Darray[c+leftMargin][1];
+		}
+		String[][] specificGroupArrays = allGroupArrays;
+	
+		
+		for (int i=0;i<specificGroupArrays.length; i++){
+			String[] currentGroupArray=specificGroupArrays[i];
+			if (currentGroupArray==null) continue;
+			String specificGroupOutputDirPath = objDirPath+File.separator + allGroupNames[i]+"_"+allGroupColorStrings[i];
+			new File(specificGroupOutputDirPath).mkdirs();
+			String universalMtlColorURL = MQTVSSceneLoader64.class.getResource("docs/UniversalColorPallet_firstVersion.mtl").toString();
+			IJ.saveString(IJ.openUrlAsString(universalMtlColorURL), specificGroupOutputDirPath+File.separator+"UniversalColorPallet_firstVersion.mtl");
+			ArrayList<ArrayList<String>> synapseByGroups = new ArrayList<ArrayList<String>>();
+			//Add a labeling first entry to each color pairing set...
+			for (int j=0; j<allGroupArrays.length; j++){
+				synapseByGroups.add(new ArrayList<String>());
+				synapseByGroups.get(synapseByGroups.size()-1).add(""+allGroupColorStrings[i]+"-"+allGroupColorStrings[j] + ">>");
+			}
+			ArrayList<String> newObjNames = new ArrayList<String>();
+			ArrayList<String> oldObjNames = new ArrayList<String>();
+			String[] objDirList = new File(objDirPath).list();
+			for (String synapseObjFileName:objDirList){
+				if (synapseObjFileName==null || !synapseObjFileName.toLowerCase().endsWith(".obj")) continue;
+				boolean presynInGroup = false;
+				boolean postsynOutsideOfGroup = true;
+				String synapseObjNameCleaned = synapseObjFileName.replace("\"", "").replace("[", "").replace("]", "");
+				String rootName = synapseObjFileName.contains("\"")?synapseObjFileName.split("\"")[1].trim():"";
+				rootName = rootName.contains(" ")?rootName.split("[_\\- ]")[0].trim():rootName;
+				String[] postSynapticCells = synapseObjNameCleaned.split("_")[1].replaceAll(".*(electrical|chemical)(.*)", "$2").split("\\&");
+				if (postSynapticCells[0].contains("by")){
+					rootName = postSynapticCells[0];
+					postSynapticCells[0] = postSynapticCells[0].split("by")[1].trim();
+				}
+				for (String currentGroupNeuron:currentGroupArray){
+					if (currentGroupNeuron==null) continue;
+					if (rootName.startsWith(currentGroupNeuron)){
+						presynInGroup = true;
+						boolean noHitInGroup = true;
+						for (String postSC:postSynapticCells){
+							for (String nextGroupNeuron:currentGroupArray){
+								if (postSC.equals(nextGroupNeuron)){
+									noHitInGroup = false;
+								}
+							}
+						}
+						postsynOutsideOfGroup = postsynOutsideOfGroup && noHitInGroup;
+					}
+				}
+				if (presynInGroup){
+					if (true) {
+						for (int ba=0; ba<allGroupArrays.length; ba++){
+							String[] targetGroupArray = allGroupArrays[ba];
+							if (targetGroupArray==null) continue;
+							for (String targetGroupNeuron:targetGroupArray){
+								if (targetGroupNeuron==null) continue;
+								int[][] psps = new int[][]{{-1,-1},{+1,+1},{-1,+1},{+1,-1}}; 
+								int psc=0;
+								int shift = postSynapticCells.length>1?5:0;
+								for (String postSC:postSynapticCells){
+									 
+									if (postSC==null) continue;
+									if (postSC.equals(targetGroupNeuron) && postsynOutsideOfGroup){
+										String newObjFileName = synapseObjFileName;
+
+										newObjFileName = newObjFileName.replace(".obj", "_"+allGroupColorStrings[ba]+".obj");
+										newObjNames.add(newObjFileName);
+										oldObjNames.add(synapseObjFileName);
+										if (!synapseByGroups.get(ba).contains(rootName)){
+											synapseByGroups.get(ba).add(rootName);
+										}
+									}
+									psc++;
+								}
+							}
+
+						}
+					}
+
+				} else {
+				}
+			}
+			for (ArrayList<String> synapsePartners:synapseByGroups){
+				for(String synapseName:synapsePartners){
+					IJ.log(synapseName);
+				}
+				IJ.log(synapsePartners.get(0) +": "+ (synapsePartners.size()-1) + " Objs\n\n");
+			}
+			for(String nextObjName:newObjNames){
+				if (nextObjName.toLowerCase().endsWith(".obj")){
+					String oldObjName = oldObjNames.get(newObjNames.indexOf(nextObjName));
+					String[] newObjNameChunks = nextObjName.split("_");
+					String newObjColorName = newObjNameChunks[newObjNameChunks.length-1].toUpperCase().replace(".OBJ", "");
+					String newObjBodyText = IJ.openAsString(objDirPath+File.separator+ oldObjName)
+							.replaceAll("(.*mtllib ).*(\n.*)", "$1"+"UniversalColorPallet_firstVersion.mtl"+"$2")
+							.replaceAll("(.*usemtl mat_).*(\n.*)", "$1"+newObjColorName+"$2");
+					IJ.saveString(newObjBodyText, specificGroupOutputDirPath + File.separator + nextObjName);
+				}
+			}
+			IJ.wait(1);
+		}
+	
 	}
 }
