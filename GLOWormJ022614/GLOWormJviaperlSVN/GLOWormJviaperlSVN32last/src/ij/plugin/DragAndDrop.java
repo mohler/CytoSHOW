@@ -107,6 +107,8 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 			setIterator(null);
 			flavors = t.getTransferDataFlavors();
 			if (IJ.debugMode) IJ.log("DragAndDrop.drop: "+flavors.length+" flavors");
+			ArrayList droppedItemsArrayList = new ArrayList();
+
 			for (int i=0; i<flavors.length; i++) {
 				if (IJ.debugMode) IJ.log("  flavor["+i+"]: "+flavors[i].getMimeType());
 				boolean consumed = false;
@@ -115,22 +117,24 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					try {
 
 						List transferData = (List) transferable.getTransferData(DataFlavor.javaFileListFlavor);
-						ArrayList list = new ArrayList();
 						if (transferData != null && transferData.size() > 0) {
-//							IJ.log("You dropped " + transferData.size() + " files");							
+							//							IJ.log("You dropped " + transferData.size() + " files");							
 							dtde.dropComplete(true);
-						if (transferData.get(0) instanceof File && ((File)transferData.get(0)).isDirectory() 
-								&& (((File)transferData.get(0)).list()[((File)transferData.get(0)).list().length-1].endsWith(".obj")
-									|| ((File)transferData.get(0)).list()[0].endsWith(".obj"))){
-							for (File file:((File)transferData.get(0)).listFiles()){
-								list.add(file);
+							if (transferData.get(0) instanceof File && ((File)transferData.get(0)).isDirectory() 
+									&& (((File)transferData.get(0)).list()[((File)transferData.get(0)).list().length-1].endsWith(".obj")
+											|| ((File)transferData.get(0)).list()[0].endsWith(".obj"))){
+								for (int j=0; j<transferData.size();j++){
+									for (File file:((File)transferData.get(j)).listFiles()){
+										if (file.getName().toLowerCase().endsWith(".obj"))
+											droppedItemsArrayList.add(file);
+									}
+								}
+								setIterator(droppedItemsArrayList.iterator());
+							} else{
+								setIterator(((List)transferData).iterator());
 							}
-							setIterator(list.iterator());
-						} else{
-							setIterator(((List)transferData).iterator());
-						}
-						consumed = true;
-						break;
+							consumed = true;
+							break;
 						}
 
 					} catch (Exception ex) {
@@ -160,12 +164,12 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					if (IJ.debugMode) IJ.log(s+" is the input string from drop");
 					if (IJ.isLinux() && s.length()>1 && (int)s.charAt(1)==0)
 						s = fixLinuxString(s);
-					ArrayList list = new ArrayList();
+
 					if (s.indexOf("href=\"")!=-1 || s.indexOf("src=\"")!=-1) {
 						s = parseHTML(s);
 						if (IJ.debugMode) IJ.log("  url: "+s);
-						list.add(s);
-						this.setIterator(list.iterator());
+						droppedItemsArrayList.add(s);
+						this.setIterator(droppedItemsArrayList.iterator());
 						break;
 					}
 					BufferedReader br = new BufferedReader(new StringReader(s));
@@ -178,7 +182,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						}
 						if (IJ.debugMode) IJ.log("  content: "+tmp);
 						if (tmp.contains("http://")) {
-							list.add(tmp);
+							droppedItemsArrayList.add(tmp);
 						} else if ( !tmp.contains(File.separator)  
 								&& (tmp.toLowerCase().endsWith(".mov") 
 										|| tmp.toLowerCase().endsWith(".avi") 
@@ -186,13 +190,13 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 										|| tmp.toLowerCase().endsWith(".obj")
 										|| tmp.toLowerCase().endsWith(".tif"))){
 							if (IJ.debugMode) IJ.log(" stringinput");
-							list.add(tmp);
+							droppedItemsArrayList.add(tmp);
 						} else if ( !tmp.contains(File.separator) 
 								&& (tmp.trim().split(" ")[0].toLowerCase().matches("\\D{3,5}-\\d{1,4}")
 										|| tmp.trim().split(" ")[0].toLowerCase().matches("\\D{1}\\d{1,2}\\D{1,2}\\d{1,2}\\.\\d{1,2}"))) {
 							//							IJ.log("https://www.wormbase.org/db/get?name="+ tmp.trim().split(" ")[0] + ";class=gene"
 							//									+ (tmp.trim().split(" ").length>1?" "+tmp.trim().split(" ")[1]:""));
-							list.add("https://www.wormbase.org/db/get?name="+ tmp.trim().split(" ")[0] + ";class=gene"
+							droppedItemsArrayList.add("https://www.wormbase.org/db/get?name="+ tmp.trim().split(" ")[0] + ";class=gene"
 									+ (tmp.trim().split(" ").length>1?" "+tmp.trim().split(" ")[tmp.trim().split(" ").length-1]:""));
 
 						} else if (tmp.endsWith("ColorLegend.lgd")){
@@ -205,19 +209,19 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							return;
 						} else if(tmp.contains(File.separator)){
 							if (IJ.debugMode) IJ.log(" fileinput");
-							list.add(new File(tmp));
+							droppedItemsArrayList.add(new File(tmp));
 						} else if (tmp.trim().split(" ")[0].toLowerCase().matches(".*expr\\d*.*")){
-							list.add("https://www.wormbase.org/species/c_elegans/expr_pattern/" +tmp.trim());
+							droppedItemsArrayList.add("https://www.wormbase.org/species/c_elegans/expr_pattern/" +tmp.trim());
 						} else if (tmp.trim().equalsIgnoreCase("*") || tmp.trim().equalsIgnoreCase(".*")) {
 							getImp().getRoiManager().getTextSearchField().setText("");
 							getImp().getRoiManager().actionPerformed(new ActionEvent(getImp().getRoiManager().getTextSearchField(),0,"",0,0));
 							return;
 						} else if (tmp.trim().split(" ")[0].matches(".*\\S.*")){
 							//							IJ.log("anatomyName?");
-							list.add(tmp.trim());
+							droppedItemsArrayList.add(tmp.trim());
 						}	
 					}
-					this.setIterator(list.iterator());
+					this.setIterator(droppedItemsArrayList.iterator());
 					break;
 				}
 			}
