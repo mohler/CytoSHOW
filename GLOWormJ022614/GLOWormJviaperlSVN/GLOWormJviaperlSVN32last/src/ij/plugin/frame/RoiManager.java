@@ -5728,12 +5728,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					}
 					Color testColor = testRoi.getFillColor();
 					String andName=""+queryRoi.getName().split("\"")[1].trim()+"by"+testRoi.getName().split("\"")[1].trim();
-//					testRoi = RoiEnlarger.enlarge(testRoi, 3);
 					Roi scaledRoi=null;
 					try {
-						scaledRoi = new RoiDecoder((testRoi.getBounds().getWidth()+2*expansionDistance)/testRoi.getBounds().getWidth(), RoiEncoder.saveAsByteArray(testRoi), testRoi.getName()).getRoi();
-						scaledRoi.setLocation((scaledRoi.getBounds().getX()/((testRoi.getBounds().getWidth()+2*expansionDistance)/testRoi.getBounds().getWidth()))-expansionDistance
-											, (scaledRoi.getBounds().getY()/((testRoi.getBounds().getWidth()+2*expansionDistance)/testRoi.getBounds().getWidth())-expansionDistance));
+						scaledRoi = new RoiDecoder((testRoi.getBounds().getWidth()+(2*expansionDistance))/testRoi.getBounds().getWidth()
+								, RoiEncoder.saveAsByteArray(testRoi), testRoi.getName()).getRoi();
+						scaledRoi.setLocation((scaledRoi.getBounds().getX())-(((testRoi.getBounds().getWidth()+(2*expansionDistance))/testRoi.getBounds().getWidth())/2)
+											,(scaledRoi.getBounds().getY())-(((testRoi.getBounds().getWidth()+(2*expansionDistance))/testRoi.getBounds().getWidth())/2));
 					} catch (IOException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -5742,7 +5742,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					if (andRoi!=null && andRoi.getBounds().getWidth()>0){
 						andRoi.setName(andName);
 						try {
-							andRoi = new RoiDecoder((andRoi.getBounds().getWidth()+2)/andRoi.getBounds().getWidth(), RoiEncoder.saveAsByteArray(andRoi), andRoi.getName()).getRoi();
+							andRoi = new RoiDecoder((andRoi.getBounds().getWidth()+2*expansionDistance)/andRoi.getBounds().getWidth()
+									, RoiEncoder.saveAsByteArray(andRoi), andRoi.getName()).getRoi();
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
