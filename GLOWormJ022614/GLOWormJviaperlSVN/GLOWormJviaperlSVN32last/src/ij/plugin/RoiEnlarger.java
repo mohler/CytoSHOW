@@ -84,7 +84,7 @@ public class RoiEnlarger implements PlugIn {
 		boolean bb = Prefs.blackBackground;
 		Prefs.blackBackground = true;
 		new EDM().toEDM(ip);
-		//new ImagePlus("ip", ip).show();
+//		new ImagePlus("ip", ip).show();
 		Prefs.blackBackground = bb;
 		ip.setThreshold(0, n, ImageProcessor.NO_LUT_UPDATE);
 		Roi roi2 = (new ThresholdToSelection()).convert(ip);

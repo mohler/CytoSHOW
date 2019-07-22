@@ -289,11 +289,11 @@ public class ThresholdToSelection implements PlugInFilter {
 			path.append((Polygon)polygons.get(i), false);
 
 		ShapeRoi shape = new ShapeRoi(path);
-		Roi roi = shape!=null?shape.shapeToRoi():null; // try to convert to non-composite ROI
-		IJ.showProgress(1,1);
-		if (roi!=null)
-			return roi;
-		else
+//		Roi roi = shape!=null?shape.shapeToRoi():null; // try to convert to non-composite ROI
+//		IJ.showProgress(1,1);
+//		if (roi!=null)
+//			return roi;
+//		else
 			return shape;
 	}
 

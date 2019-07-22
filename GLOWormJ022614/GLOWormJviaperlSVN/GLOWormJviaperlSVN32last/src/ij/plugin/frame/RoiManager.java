@@ -5728,27 +5728,30 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					}
 					Color testColor = testRoi.getFillColor();
 					String andName=""+queryRoi.getName().split("\"")[1].trim()+"by"+testRoi.getName().split("\"")[1].trim();
+
 					Roi scaledRoi=null;
-					try {
-						scaledRoi = new RoiDecoder((testRoi.getBounds().getWidth()+(2*expansionDistance))/testRoi.getBounds().getWidth()
-								, RoiEncoder.saveAsByteArray(testRoi), testRoi.getName()).getRoi();
-						scaledRoi.setLocation((scaledRoi.getBounds().getX())-(((testRoi.getBounds().getWidth()+(2*expansionDistance))/testRoi.getBounds().getWidth())/2)
-											,(scaledRoi.getBounds().getY())-(((testRoi.getBounds().getWidth()+(2*expansionDistance))/testRoi.getBounds().getWidth())/2));
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+						
+					scaledRoi = RoiEnlarger.enlarge(testRoi, expansionDistance);
+					
+//					try {
+//						scaledRoi = new RoiDecoder((testRoi.getBounds().getWidth()+2*expansionDistance)/testRoi.getBounds().getWidth(), RoiEncoder.saveAsByteArray(testRoi), testRoi.getName()).getRoi();
+//						scaledRoi.setLocation((testRoi.getBounds().getX()-expansionDistance/2)
+//											, (testRoi.getBounds().getY()-expansionDistance/2));
+//					} catch (IOException e) {
+//						// TODO Auto-generated catch block
+//						e.printStackTrace();
+//					}
+					
 					Roi andRoi = (new ShapeRoi(scaledRoi).and(new ShapeRoi(dupRoi)));
 					if (andRoi!=null && andRoi.getBounds().getWidth()>0){
+//						try {
+//							andRoi = new RoiDecoder( RoiEncoder.saveAsByteArray(andRoi), andRoi.getName()).getRoi();
+//						} catch (IOException e) {
+//							// TODO Auto-generated catch block
+//							e.printStackTrace();
+//						}
 						andRoi.setName(andName);
-						try {
-							andRoi = new RoiDecoder((andRoi.getBounds().getWidth()+2*expansionDistance)/andRoi.getBounds().getWidth()
-									, RoiEncoder.saveAsByteArray(andRoi), andRoi.getName()).getRoi();
-						} catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						
+
 						andRoi.setPosition(cPos, zPos, tPos);
 						andRoi.setFillColor(testColor);
 						this.addRoi(andRoi, false, testColor, -1, false);
