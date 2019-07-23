@@ -2451,19 +2451,17 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			path = dir+name;
 		}
 		try {
-			ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(new File(path)));
-			ZipOutputStream out = zos; 
-//			DataOutputStream out = new DataOutputStream(new BufferedOutputStream(zos));
-			RoiEncoder re = new RoiEncoder(out);
+			ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(new File(path))));
+			RoiEncoder re = new RoiEncoder(zos);
 			for (int i=0; i<indexes.length; i++) {
 				String label = (String) listModel.getElementAt(indexes[i]);
 				Roi roi = (Roi)rois.get(label);
 				if (!label.endsWith(".roi")) label += ".roi";
 				zos.putNextEntry(new ZipEntry(label));
 				re.write(roi);
-				out.flush();
+				zos.closeEntry();
 			}
-			out.close();
+			zos.close();
 		}
 		catch (IOException e) {
 			error(""+e);
