@@ -1953,6 +1953,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			String[] pathChunks = filePath.split("/");
 			String nameChunk = pathChunks[pathChunks.length-1];
 			String fvalue = nameChunk.replaceAll("(.*_)(\\d+)(.tiff?)", "$2");
+			fvalue = fvalue.replaceAll("(\\D*)(\\d+)(.tiff?)", "$2");
 			sliceValues.add(Integer.parseInt(fvalue)
 					- ((sLayer.split("file_path=")[1].split("\"")[1]).contains("VC_")?10000000:0));
 			
@@ -2015,6 +2016,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						String[] pathChunks = filePath.split("/");
 						String nameChunk = pathChunks[pathChunks.length-1];
 						String fvalue = nameChunk.replaceAll("(.*_)(\\d+)(.tiff?)", "$2");
+						fvalue = fvalue.replaceAll("(\\D*)(\\d+)(.tiff?)", "$2");
 						sliceNumber = Integer.parseInt(fvalue)
 								+ ((sLayer.split("file_path=")[1].split("\"")[1]).contains("VC_")?maxBaseSlice+1:0);
 						sConnLayerHash.put(sLayer.split("\"")[0], ""+sliceNumber);
@@ -2236,7 +2238,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						}
 						int oldZ = z;
 
-		//  SPECIAL CASE FOR FILLING GAPS AT Z56 z162-166				
+////		  SPECIAL CASE ONLY FOR honoring JSH image GAPS AT Z56 z162-166				
 //						if (z>55){
 //							z++;
 //						}
@@ -2244,8 +2246,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //							z++;
 //							z++;
 //							z++;
-//							z++;
-//							
+//							z++;							
 //						}
 						
 						roi.setPosition(c, z, t);
@@ -6064,7 +6065,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			for(String nextObjName:newObjNamesforCellPatches){
 				if (nextObjName.toLowerCase().endsWith(".obj")){
-					String oldObjName = oldObjNamesforCellPatches.get(newObjNamesforGroupPatches.indexOf(nextObjName));
+					String oldObjName = oldObjNamesforCellPatches.get(newObjNamesforCellPatches.indexOf(nextObjName));
 					String[] newObjNameChunks = nextObjName.split("_");
 					String newObjColorName = newObjNameChunks[newObjNameChunks.length-1].toUpperCase().replace(".OBJ", "");
 					String newObjBodyText = IJ.openAsString(objDirPath+File.separator+ oldObjName)
