@@ -2310,23 +2310,23 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					continue;
 				}
 				if (!arg.contains("megaTiffMMrc")){
-				if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
-					doProcessing[pos] = false;
-					continue;
-				} 
+					if (impBs[pos]==null || impBs[pos].hasNullStack() || impBs[pos].getWindow()==null  || !impBs[pos].getWindow().isVisible()) {
+						doProcessing[pos] = false;
+						continue;
+					} 
 				}
 				Dimension sizeWinA = impAs[pos].getWindow().getSize();
 				if (!arg.contains("megaTiffMMrc")){
-				Dimension sizeWinB = impBs[pos].getWindow().getSize();
+					Dimension sizeWinB = impBs[pos].getWindow().getSize();
 				}
 				if(diSPIMPanel[pos][0] == null) {
 					diSPIMPanel[pos][0] = new Panel(new BorderLayout());
 					
 				}
 				if (!arg.contains("megaTiffMMrc")){
-				if(diSPIMPanel[pos][1] == null) {
-					diSPIMPanel[pos][1] = new Panel(new BorderLayout());					
-				}
+					if(diSPIMPanel[pos][1] == null) {
+						diSPIMPanel[pos][1] = new Panel(new BorderLayout());					
+					}
 				}
 
 				if (!arg.contains("megaTiffMMrc")) {
