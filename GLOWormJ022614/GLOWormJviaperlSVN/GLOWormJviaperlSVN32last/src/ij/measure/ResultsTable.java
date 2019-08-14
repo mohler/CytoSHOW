@@ -51,6 +51,14 @@ public class ResultsTable implements Cloneable {
 	private int precision = 3;
 	private String rowLabelHeading = "";
 	private char delimiter = '\t';
+	public char getDelimiter() {
+		return delimiter;
+	}
+
+	public void setDelimiter(char delimiter) {
+		this.delimiter = delimiter;
+	}
+
 	private boolean headingSet; 
 	private boolean showRowNumbers = true;
 	private boolean autoFormat = true;

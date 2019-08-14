@@ -12,6 +12,7 @@ import ij.plugin.Binner;
 import ij.process.AutoThresholder.Method;
 import ij.gui.Roi;
 import ij.gui.ShapeRoi;
+import ij.measure.Measurements;
 import ij.gui.Overlay;
 import ij.Prefs;
 
@@ -2368,7 +2369,16 @@ public abstract class ImageProcessor implements Cloneable {
 		centroid, center of mass, 256 bin histogram) for this image or ROI. */
 	public ImageStatistics getStatistics() {
 		// 127 = AREA+MEAN+STD_DEV+MODE+MIN_MAX+CENTROID+CENTER_OF_MASS
-		return ImageStatistics.getStatistics(this, 127, null);
+		int mOptions = Measurements.AREA
+						+Measurements.MEAN
+						+Measurements.STD_DEV
+						+Measurements.MODE
+						+Measurements.MIN_MAX
+						+Measurements.CENTROID
+						+Measurements.CENTER_OF_MASS
+						+Measurements.ELLIPSE
+						+Measurements.AREA_FRACTION;
+		return ImageStatistics.getStatistics(this, mOptions, null);
 	}
 	
 	/* Returns the PlugInFilter slice number. */

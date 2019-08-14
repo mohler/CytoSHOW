@@ -409,6 +409,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 	private boolean doForceDefaultRegTMX;
 	private String argField;
 	private boolean useSavedPreview;
+	private String metaDataFilePath;
 
 	public Process getRegDeconProcess() {
 		return regDeconProcess;
@@ -503,6 +504,26 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					;
 					dirOrOMETiff = IJ
 							.getFilePath("Select a file with megaTiff MM ratiometric raw data");
+					String[] metaDataFileNameCandidates = new File(dirOrOMETiff).getParentFile().list();
+					for (String name:metaDataFileNameCandidates) {
+						if (name.endsWith("_metadata.txt")) {
+							metaDataFilePath = new File(dirOrOMETiff).getParent()+File.separator+name;
+							String[] metaDataFileChunks = IJ.openAsString(metaDataFilePath).split("\"FrameKey-\\d+-\\d+-\\d+\"");
+							IJ.log(metaDataFilePath+" "+metaDataFileChunks.length);
+							double[] stageXarray = new double[metaDataFileChunks.length];
+							double[] stageYarray = new double[metaDataFileChunks.length];
+							double[] stageZarray = new double[metaDataFileChunks.length];
+							for (int chunk=1; chunk<metaDataFileChunks.length; chunk++) {
+								String chewedChunk = metaDataFileChunks[chunk].replace("\n", "")
+										.replace(":", "")
+										.replace(" ", "")
+										.replace("\"", "");
+								stageXarray[chunk]= Double.parseDouble(chewedChunk.replaceAll(".*MeasuredStageX(.*?)\\,.*", "$1"));
+								stageYarray[chunk]= Double.parseDouble(chewedChunk.replaceAll(".*MeasuredStageY(.*?)\\,.*", "$1"));
+								stageZarray[chunk]= Double.parseDouble(chewedChunk.replaceAll(".*MeasuredStageZ(.*?)\\,.*", "$1"));
+							}
+						}
+					}
 					stackDualViewTimePoints = false;
 					singleImageTiffs = false;
 					omeTiffs = true;
