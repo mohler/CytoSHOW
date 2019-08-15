@@ -946,7 +946,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					 minSize = 900;
 					 maxSize = 3000;
 					 minCirc = 0.00;
-					 maxCirc = .4000;
+					 maxCirc = .2500;
 
 					if (false /*trackingDialog == null*/){
 						trackingDialog = new GenericDialog("Tracking Parameters");
