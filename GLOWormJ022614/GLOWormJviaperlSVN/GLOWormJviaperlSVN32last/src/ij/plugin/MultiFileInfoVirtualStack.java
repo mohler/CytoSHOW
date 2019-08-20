@@ -28,11 +28,11 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	ArrayList<FileInfoVirtualStack> fivStacks;
 	public FileInfo[] infoArray;
 	public ArrayList<FileInfo[]> infoCollectorArrayList;
-//	int nSlices;  //already present in fields for FileInfoVirtualStack;
+	//	int nSlices;  //already present in fields for FileInfoVirtualStack;
 	private String dir;
 	private int channelDirectories;
 	private String keyString = "";
-//	private String dimOrder;     //already present in fields for VirtualStack;
+	//	private String dimOrder;     //already present in fields for VirtualStack;
 	private double min;  
 	private double max;
 	private int largestDirectoryLength;
@@ -81,7 +81,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	}
 
 	/* Constructs a MultiFileInfoVirtualStack from a FileInfo 
-	array and displays it if 'show' is true. */
+array and displays it if 'show' is true. */
 	public MultiFileInfoVirtualStack(FileInfo[] fiArray, boolean show) {
 		infoArray = fiArray;
 		open(show);
@@ -111,9 +111,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		this.ownerImp = ownerImp;
 		dimOrder = sliceOrder;
 		fivStacks = new ArrayList<FileInfoVirtualStack>();
-		
+
 		String[] args = arg.split("\\|");
-		
+
 		File argFile = new File(args[0]);
 		dir = "";
 		if (!argFile.exists() || !argFile.isDirectory()) {
@@ -130,11 +130,11 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (dir.length() > 0 && !dir.endsWith(File.separator))
 			dir = dir + File.separator+ File.separator;
 		infoDir = dir;
-		
+
 		infoCollectorArrayList =new ArrayList<FileInfo[]>();
 		infoLoadReport ="";
-		
-	
+
+
 		ArrayList<String> bigSubFileArrayList = new ArrayList<String>();
 		ArrayList<String> cumulativeSubFileArrayList = new ArrayList<String>();
 		ArrayList<ArrayList<String>> channelArrayLists = new ArrayList<ArrayList<String>>();
@@ -162,7 +162,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 					if (subFile.getName().toLowerCase().endsWith("tif")) {
 						allDirectories = false;
 						cumulativeSubFileArrayList.add(subArg+fileName);
-						tiffCount++;				
+						tiffCount++;	
 					}
 				}
 			}
@@ -210,12 +210,12 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			int highT = 0;
 			for (int s=0; s<cumulativeTiffFileArray.length; s++) {
 				cumulativeTiffFileArray[s] = (String) cumulativeSubFileArrayList.get(s);
-//				IJ.log("tif "+(s+1)+" ="+cumulativeTiffFileArray[s]);
+				//	IJ.log("tif "+(s+1)+" ="+cumulativeTiffFileArray[s]);
 				String[] subFilePathChunks = cumulativeTiffFileArray[s].split(Pattern.quote(File.separator));
 				String subFileName = subFilePathChunks[subFilePathChunks.length-1];
-				
-//				which format was this for, now conflicting with SN 16-bit stack output names...
-//				if (subFileName.matches(".*_t\\d+.*\\.tif")) 
+
+				//	which format was this for, now conflicting with SN 16-bit stack output names...
+				//	if (subFileName.matches(".*_t\\d+.*\\.tif")) 
 				if (subFileName.matches(".*Decon_(reg_)?\\d+\\.tif")) {
 					int tValue = Integer.parseInt(subFileName.replaceAll(".*_(\\d+)\\.tif", "$1"));
 					if (tValue > highT)
@@ -245,20 +245,20 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				if (highT > 0)
 					dimOrder = "xyztc";
 			}
-//			cumulativeTiffFileArray = StringSorter.sortNumericallyViaRegex(cumulativeTiffFileArray);
-//			IJ.log("CumSubFileArray.length="+cumulativeTiffFileArray.length);
-			
-			
-//			new Thread (new Runnable(){
-//				public void run(){getSavedExtractedFileInfos(pos);}
-//			}).start();
-//		
-//			while (infoLoadReport=="" || (infoLoadReport=="success" && (savedInfoCollectorArrayList == null || savedInfoCollectorArrayList.size()==0))) {
-////				IJ.log(infoLoadReport + (savedInfoCollectorArrayList != null?savedInfoCollectorArrayList.size():""));
-//				
-//				IJ.wait(10);
-//			}
-////			IJ.log(infoLoadReport + (savedInfoCollectorArrayList != null?savedInfoCollectorArrayList.size():""));
+			//	cumulativeTiffFileArray = StringSorter.sortNumericallyViaRegex(cumulativeTiffFileArray);
+			//	IJ.log("CumSubFileArray.length="+cumulativeTiffFileArray.length);
+
+
+			//	new Thread (new Runnable(){
+			//	public void run(){getSavedExtractedFileInfos(pos);}
+			//	}).start();
+			//	
+			//	while (infoLoadReport=="" || (infoLoadReport=="success" && (savedInfoCollectorArrayList == null || savedInfoCollectorArrayList.size()==0))) {
+			////	IJ.log(infoLoadReport + (savedInfoCollectorArrayList != null?savedInfoCollectorArrayList.size():""));
+			//	
+			//	IJ.wait(10);
+			//	}
+			////	IJ.log(infoLoadReport + (savedInfoCollectorArrayList != null?savedInfoCollectorArrayList.size():""));
 
 			if (cumulativeTiffFileArray.length >0){ 
 				for (String cumulativeTiffFileArrayElement:cumulativeTiffFileArray)
@@ -296,7 +296,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			String[] goDirFileList = {""};
 
 			if (allDirectories) {
-				//			dimOrder = "xyztc";
+				//	dimOrder = "xyztc";
 				dir = "";
 
 				goDirFileList = new String[bigSubFileArrayList.size()];
@@ -305,7 +305,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				}
 
 			} else {
-				//			dimOrder = "xyczt";
+				//	dimOrder = "xyczt";
 				dir = "";
 				channelDirectories = 1;
 				largestDirectoryTiffCount = tiffCount;
@@ -350,7 +350,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 						for (String fileName:goDirFileList){
 							if ((new File(dir + fileName)).canRead() && fileName.toLowerCase().endsWith(".tif")) {
 								if (dummyInfoArray == null || (new File(dir + fileName)).length() < firstFileSize*0.998
-															|| (new File(dir + fileName)).length() > firstFileSize*1.002) {
+										|| (new File(dir + fileName)).length() > firstFileSize*1.002) {
 									TiffDecoder td = new TiffDecoder(dir, fileName);
 									if (IJ.debugMode) td.enableDebugging();
 									IJ.showStatus("Decoding TIFF header...");
@@ -429,7 +429,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				infoArray = new FileInfo[infoArrayList.size()];
 				for (int f=0;f<infoArray.length;f++) {
 					infoArray[f] = (FileInfo) infoArrayList.get(f);
-					//						IJ.log("fi "+(f+1)+infoArray[f].directory+File.separator+infoArray[f].fileName);
+					//	IJ.log("fi "+(f+1)+infoArray[f].directory+File.separator+infoArray[f].fileName);
 
 				}
 				if (fivStacks.get(0).getInfo()[0].fileName.matches(".*Decon(-Fuse|_reg)_.*aaa_.*")){
@@ -443,7 +443,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 	public void getSavedExtractedFileInfos(int pos) {
 		if (new File(infoDir+"touchedFileFIs"+pos+(isViewB?"B":"A")+".inf").canRead()) {
-			
+
 			ObjectInputStream ois;
 			try {
 				ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(infoDir+"touchedFileFIs"+pos+(isViewB?"B":"A")+".inf")));
@@ -474,15 +474,15 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 						String Quadrachunk = filePathChunks[fpcl-3]+File.separator+
 								filePathChunks[fpcl-2]+File.separator+
 								filePathChunks[fpcl-1];
-//						IJ.log(Quadrachunk);
-//						IJ.log(fi.fileName);
+						//	IJ.log(Quadrachunk);
+						//	IJ.log(fi.fileName);
 						for(String cumTiff:cumulativeTiffFileArray){
 							String[] cumPathChunks =  cumTiff.replace("\\\\", "\\").split(Pattern.quote(File.separator));
 							int cpcl = cumPathChunks.length;
 							String cumQuadrachunk = cumPathChunks[cpcl-3]+File.separator+
 									cumPathChunks[cpcl-2]+File.separator+
 									cumPathChunks[cpcl-1];
-							
+
 							if (cumQuadrachunk.endsWith(Quadrachunk)){
 								fi.fileName=cumTiff;
 							}
@@ -545,11 +545,11 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		String[] splitPath = cumulativeTiffFileArray[0].split(Pattern.quote(File.separator));
 		if (splitPath[splitPath.length-1].contains("MMStack_") && (cumulativeTiffFileArray.length >0)) { 
 			nSlices = 0;
-				for (FileInfoVirtualStack mmStack:fivStacks) {
-					nSlices = nSlices + mmStack.getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1)
-											*(dimOrder.toLowerCase().matches(".*splitratioc.*")?2:1);
-				}
-			
+			for (FileInfoVirtualStack mmStack:fivStacks) {
+				nSlices = nSlices + mmStack.getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1)
+						*(dimOrder.toLowerCase().matches(".*splitratioc.*")?2:1);
+			}
+
 			if (cDim == 0 || zDim == 0 || tDim == 0) {
 				GenericDialog gd = new GenericDialog("Dimensions of HyperStacks");
 				gd.addNumericField("Channels (c):", 2, 0);
@@ -562,7 +562,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				tDim = (int) gd.getNextNumber();
 				nSlices = cDim*zDim*tDim;
 			} else {
-/*why like this?*/
+				/*why like this?*/
 				this.tDim =nSlices/(this.cDim*this.zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
 			}
 
@@ -572,11 +572,11 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 			int internalChannels = ((new FileOpener(fivStacks.get(0).infoArray[0])).decodeDescriptionString(fivStacks.get(0).infoArray[0]) != null
 					?(fivStacks.get(0).getInt((new FileOpener(fivStacks.get(0).infoArray[0])).decodeDescriptionString(fivStacks.get(0).infoArray[0]), "channels"))
-							:1);		
+							:1);	
 			int channels = channelDirectories * internalChannels;
 			cDim = channels;
 			zDim = fivStacks.get(0).nSlices/(cDim/channelDirectories);
-//			tDim = fivStacks.size()/cDim;
+			//	tDim = fivStacks.size()/cDim;
 			this.tDim =nSlices/(this.cDim*this.zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
 		} else if (fivStacks.get(0).getInfo()[0].fileName.matches(".*Decon(-Fuse|_reg)_.*aaa_.*")){
 			zDim = fivStacks.get(0).nSlices;
@@ -589,11 +589,11 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 			int internalChannels = ((new FileOpener(fivStacks.get(0).infoArray[0])).decodeDescriptionString(fivStacks.get(0).infoArray[0]) != null
 					?(fivStacks.get(0).getInt((new FileOpener(fivStacks.get(0).infoArray[0])).decodeDescriptionString(fivStacks.get(0).infoArray[0]), "channels"))
-							:1);		
+							:1);	
 			int channels = channelDirectories * internalChannels;
 			cDim = channels;
 			zDim = fivStacks.get(0).nSlices/(cDim/channelDirectories);
-//			tDim = fivStacks.size()/(cDim/internalChannels);
+			//	tDim = fivStacks.size()/(cDim/internalChannels);
 			this.tDim =nSlices/(this.cDim*this.zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
 
 		}
@@ -611,7 +611,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		Arrays.fill(dYB,0);
 		Arrays.fill(dZB,0);
 
-		
+
 		corrXA = new int[tDim*cDim*vDim];
 		corrYA = new int[tDim*cDim*vDim];
 		corrZA = new int[tDim*cDim*vDim];
@@ -644,31 +644,33 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		if (fivStacks.get(0).getInfo()[0].fileName.matches(".*Decon(-Fuse|_reg)_.*aaa_.*")){  //StarryNiteFeeder output
 			imp.setTitle(fivStacks.get(0).getInfo()[0].fileName.replaceAll("(.*)(Decon(-Fuse|_reg)_.*)("+Pattern.quote(File.separator)+"aaa_.*)", "$2"));
 		}
-				
+
 
 		File correctiveShiftsFile = new File(infoDir + "correctiveShifts.txt");
 		if (correctiveShiftsFile.canRead()){
 			String correctiveShiftsString = IJ.openAsString(infoDir + "correctiveShifts.txt");
 			String[] correctiveShiftsLines = correctiveShiftsString.split("\n");
 			int[][] shiftArrays = new int[][]{corrXA,corrYA,corrZA,corrXB,corrYB,corrZB};
-			for (int l = 0; l<correctiveShiftsLines.length; l++){
-				String[] correctiveShiftsLineChunks = correctiveShiftsLines[l].split(",");
-				for (int m=0; m<shiftArrays[l].length; m++){
+			for (int line = 0; line<correctiveShiftsLines.length; line++){
+				String[] correctiveShiftsLineChunks = correctiveShiftsLines[line].split(",");
+				for (int m=0; m<shiftArrays[line].length; m++){
 					if (m<correctiveShiftsLineChunks.length){
-						if(l%3==1){
-							shiftArrays[l][m] = Integer.parseInt(correctiveShiftsLineChunks[0].trim())-Integer.parseInt(correctiveShiftsLineChunks[m].trim());
-						} else if(l%3==2){
-							shiftArrays[l][m] = Integer.parseInt(correctiveShiftsLineChunks[m].trim())-Integer.parseInt(correctiveShiftsLineChunks[0].trim());
+						if(line%3==0){
+							shiftArrays[line][m] = (int)(Double.parseDouble(correctiveShiftsLineChunks[m].trim()));
+						} else if(line%3==1){
+							shiftArrays[line][m] = (int)(Double.parseDouble(correctiveShiftsLineChunks[m].trim()));
+						} else if(line%3==2){
+							shiftArrays[line][m] = (int)(Double.parseDouble(correctiveShiftsLineChunks[m].trim()));
 						}
 
 					}
 				}
 			}
 		}
-		
 
-		imp.setOpenAsHyperStack(true);			
-//		int cztDims = cDim*zDim*fivStacks.size();
+
+		imp.setOpenAsHyperStack(true);	
+		//	int cztDims = cDim*zDim*fivStacks.size();
 		int cztDims = cDim*zDim*tDim;
 		int impSize = imp.getStackSize()*vDim;
 		if (cztDims!= impSize) {
@@ -743,16 +745,16 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 		}
 		int stackNumber = 0;
 
-		
+
 		while (stackNumber<fivStacks.size() && n > fivStacks.get(0).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1)) {
 			n = n - fivStacks.get(0).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1);
 			stackNumber++;
 		}
 		stackNumber--;
-//		if (stackNumber >= fivStacks.size()){
-//			stackNumber = fivStacks.size()-1;
-//		}
-		
+		//	if (stackNumber >= fivStacks.size()){
+		//	stackNumber = fivStacks.size()-1;
+		//	}
+
 		sliceNumber = n/(dimOrder.toLowerCase().matches(".*splitc.*")?2:1);
 		if (sliceNumber <1) sliceNumber = 1;
 		if (stackNumber<0) stackNumber = 0;
@@ -770,14 +772,14 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	}
 
 	/** Returns an ImageProcessor for the specified image,
-		where 1<=n<=nSlices. Returns null if the stack is empty.
+where 1<=n<=nSlices. Returns null if the stack is empty.
 	 */
 	public ImageProcessor getProcessor(int slice) {
 		int n =slice;
 		if (n<1 || n>nSlices) {
-//			IJ.runMacro("waitForUser(\""+n+"\");");
+			//	IJ.runMacro("waitForUser(\""+n+"\");");
 			return fivStacks.get(0).getProcessor(1);
-			//			throw new IllegalArgumentException("Argument out of range: "+n);
+			//	throw new IllegalArgumentException("Argument out of range: "+n);
 		}
 
 
@@ -799,33 +801,33 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			n = n - fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*split(ratio)?c.*")?2:1);
 			stackNumber++;
 		}
-//		if (stackNumber>=fivStacks.size()) {
-//			stackNumber= fivStacks.size()-1;
-//		}
-		
+		//	if (stackNumber>=fivStacks.size()) {
+		//	stackNumber= fivStacks.size()-1;
+		//	}
+
 		sliceNumber = n;
 
-		
-//		sliceNumber = 1+(n) % (fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
-		
-		
+
+		//	sliceNumber = 1+(n) % (fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
+
+
 		if (reverseChannelOrder) {
 			sliceNumber = sliceNumber%2==0?(sliceNumber+1):(sliceNumber-1);
 		}
 		int dX =0;;
 		int dY =0;;
 		int dZ =0;;
-		
+
 		if (dXA!= null && dXB!= null && dYA!= null && dYB!= null && dZA!= null && dZB!= null){
 			dX = isViewB?dXB[0]:dXA[0];;
 			dY = isViewB?dYB[0]:dYA[0];;
 			dZ = isViewB?dZB[0]:dZA[0];;
 		}
-		
+
 		int corrX = 0;
 		int corrY = 0;
 		int corrZ = 0;
-		
+
 		if (rawdispimdata /*&& cDim/vDim>1*/ ) {
 			dZ=isViewB?dZB[0]:dZA[0];
 		}
@@ -837,24 +839,24 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 			//ADJUSTMENTS BELOW DEAL WITH CALLING RG CHANNELS CORRECTLY
 			//I DO NOT FULLY UNDERSTAND HOW OR WHY IT WORKS!!!???
-//			if (vSliceNumber%2 == 0) {
-//				vSliceNumber = vSliceNumber-1;
-//			} else {
-//				vSliceNumber = vSliceNumber-1;
-//			}
+			//	if (vSliceNumber%2 == 0) {
+			//	vSliceNumber = vSliceNumber-1;
+			//	} else {
+			//	vSliceNumber = vSliceNumber-1;
+			//	}
 
 			if (vSliceNumber>fivStacks.get(stackNumber).getSize()) {
 				vSliceNumber = vSliceNumber-fivStacks.get(stackNumber).getSize();
 				stackNumber++;
 			}
-			
-//			if (stackNumber >= fivStacks.size()){
-//				stackNumber = fivStacks.size()-1;
-//			}
+
+			//	if (stackNumber >= fivStacks.size()){
+			//	stackNumber = fivStacks.size()-1;
+			//	}
 			corrX=isViewB?corrXB[((stackNumber)%tDim)]:corrXA[((stackNumber)%tDim)];
 			corrY=isViewB?corrYB[((stackNumber)%tDim)]:corrYA[((stackNumber)%tDim)];
 			corrZ=isViewB?corrZB[((stackNumber)%tDim)]:corrZA[((stackNumber)%tDim)];
-//IJ.log("stk="+stackNumber +"  vslc="+vSliceNumber);
+			//IJ.log("stk="+stackNumber +"  vslc="+vSliceNumber);
 			initiateStack(stackNumber, 0);
 			ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber+(sliceNumber%2==0?0:dZ)+corrZ);
 			ip.translate(corrX, corrY);
@@ -866,34 +868,34 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			} else {
 				vSliceNumber = (sliceNumber)+(isViewB?zDim*(cDim/2)*(dimOrder.toLowerCase().matches(".*splitsequentialc.*")?2:1):0);
 			}
-			
+
 			//ADJUSTMENTS BELOW DEAL WITH CALLING C1 AND C4 FOR CSM MODE SWITCH TO JUST 2 MAIN RG CHANNELS
 			//I DO NOT FULLY UNDERSTAND HOW OR WHY IT WORKS!!!???
-//			if (dimOrder.toLowerCase().matches(".*splitsequentialc.*")) {
-//				if (vSliceNumber%2 == 0) {
-//					vSliceNumber = vSliceNumber-1;
-//				} else {
-//					vSliceNumber = vSliceNumber-1;
-//				}
-//			}
+			//	if (dimOrder.toLowerCase().matches(".*splitsequentialc.*")) {
+			//	if (vSliceNumber%2 == 0) {
+			//	vSliceNumber = vSliceNumber-1;
+			//	} else {
+			//	vSliceNumber = vSliceNumber-1;
+			//	}
+			//	}
 
 			if (vSliceNumber>fivStacks.get(stackNumber).getSize()) {
 				vSliceNumber = vSliceNumber-fivStacks.get(stackNumber).getSize();
 				stackNumber++;
 			}
 
-//			if (stackNumber >= fivStacks.size()){
-//				stackNumber = fivStacks.size()-1;
-//			}
-			
-			int localstacknumber = stackNumber;
-			corrX=isViewB?corrXB[stackNumber]:corrXA[stackNumber];
-			corrY=isViewB?corrYB[stackNumber]:corrYA[stackNumber];
-			corrZ=isViewB?corrZB[stackNumber]:corrZA[stackNumber];
-//			IJ.log("stk="+stackNumber +"  vslc="+vSliceNumber);
+			//	if (stackNumber >= fivStacks.size()){
+			//	stackNumber = fivStacks.size()-1;
+			//	}
+
+			int frameNumber = (slice-1)/(cDim*zDim*vDim);
+			corrX=isViewB?corrXB[frameNumber]:corrXA[frameNumber];
+			corrY=isViewB?corrYB[frameNumber]:corrYA[frameNumber];
+			corrZ=isViewB?corrZB[frameNumber]:corrZA[frameNumber];
+			//	IJ.log("stk="+stackNumber +"  vslc="+vSliceNumber);
 			initiateStack(stackNumber, 0);
 			if (dimOrder.toLowerCase().matches(".*splitratioc.*")){
-				ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber);			
+				ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber);	
 			} else {
 				ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber+(sliceNumber%(2)==0?0:dZ*2)+corrZ);
 			}
@@ -909,22 +911,22 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 				ip.setRoi(xOri, yOri, w/2, h);
 			}else if (ip.getWidth()==2048 && vDim ==2) { //NIBIB splitview setup(?)
-//				dX=2;
-//				dY=0;
+				//	dX=2;
+				//	dY=0;
 				int xOri = 256+((1-(n+1)%2)*(1024));
 				int yOri = 0+((1-(n+1)%2)*(0));
 				ip.setRoi(xOri, yOri, 512, 512);
 			}else if (ip.getWidth()==2048 && vDim ==1) { //Yale ratio setup(?)
-//				dX=2;
-//				dY=0;
+				//	dX=2;
+				//	dY=0;
 				ratioing = true;
 				int xOri = 0+(((n+1)%2)*(1024));
 				int yOri = 0+(((n+1)%2)*(0));
 				ip.setRoi(xOri, yOri, 1024, 2048);
-				
-			
-			} else if (ip.getWidth()==1536) {		//Yale splitview setup
-			
+
+
+			} else if (ip.getWidth()==1536) {	//Yale splitview setup
+
 				int xOri = 0+((0+(n+1)%2)*(1024));
 				int yOri = 0+((1-(n+1)%2)*(0));
 				ip.setRoi(xOri, yOri, 512, 512);
@@ -934,173 +936,198 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				ip.flipHorizontal();
 			}
 			ip.translate((1-n%2)*dX, (1-n%2)*dY);
-			ip.translate(corrX, corrY);
-			if (ratioing && n%2!=0){
-				statsIP = ip.duplicate();
-			}
-			if (ratioing && n%2==0){
-				if(segmentLiveNeuron){
+			double corediffX = corrX-corrXA[0];
+			double corediffY = corrY-corrYA[0];
 
-// pushing limits 08082019
-					 threshModeCoeff = 0.090;  
-					 minSize = 900;
-					 maxSize = 3000;
-					 minCirc = 0.00;
-					 maxCirc = .2500;
+			if (ratioing) {
+				ImageProcessor bigIP = null;
+				if (isViewB) {
+					bigIP = new FloatProcessor(907, 1200);
 
-					if (false /*trackingDialog == null*/){
-						trackingDialog = new GenericDialog("Tracking Parameters");
-						trackingDialog.addNumericField("thresholdCoeff", threshModeCoeff, 4);
-						trackingDialog.addNumericField("minSize", minSize, 0);
-						trackingDialog.addNumericField("maxSize", maxSize, 0);
-						trackingDialog.addNumericField("minCirc", minCirc, 4);
-						trackingDialog.addNumericField("maxCirc", maxCirc, 4);
-						trackingDialog.centerDialog(true);
-						trackingDialog.pack();
-						trackingDialog.show();
-						if (!trackingDialog.wasCanceled()){
-							threshModeCoeff = trackingDialog.getNextNumber();
-							minSize = trackingDialog.getNextNumber();
-							maxSize = trackingDialog.getNextNumber();
-							minCirc = trackingDialog.getNextNumber();							
-							maxCirc = trackingDialog.getNextNumber();
-						}
-					}else {
-
-					}
-
-					if( ownerImp.getRoiManager().getROIsByNumbers().get(""+ownerImp.getChannel()+"_"+ownerImp.getSlice()+"_"+ownerImp.getFrame())==null) {
-						ImageProcessor maskIP = ip.duplicate();
-						
-						int[] ipHis = maskIP.getHistogram();
-						double ipHisMode = 0.0;
-						int ipHisLength = ipHis.length;
-						int ipHisMaxBin = 0;
-						for (int h=0; h<ipHisLength; h++) {
-							if (ipHis[h] > ipHisMaxBin) {
-								ipHisMaxBin = ipHis[h];
-								ipHisMode = (double)h;
-							}
-						}
-						maskIP.subtract(ipHisMode);
-						new RankFilters().rank(maskIP, 2, RankFilters.MEDIAN, 0, 0);			
-						maskIP.threshold((int) (ipHisMode*threshModeCoeff));
-						maskIP.invert();
-						ImagePlus maskImp = new ImagePlus("Mask", maskIP);
-						maskImp.setMotherImp(this.ownerImp, 0);
-
-						new ImageConverter(maskImp).convertToGray8();
-						ResultsTable resTab = new ResultsTable();
-						resTab.setDelimiter(',');
-						ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES
-								+ ParticleAnalyzer.ADD_TO_MANAGER
-								, ParticleAnalyzer.AREA+ ParticleAnalyzer.CENTER_OF_MASS
-								+ ParticleAnalyzer.CIRCULARITY+ ParticleAnalyzer.MEAN
-								+ ParticleAnalyzer.FERET 
-								+ ParticleAnalyzer.PERIMETER 
-								, resTab
-								, minSize, maxSize
-								, minCirc, maxCirc); 
-						pa.setHideOutputImage(true);
-						
-						boolean analysisDone = pa.analyze(maskImp);
-						while (!analysisDone){
-							IJ.wait(10);
-						};
-						maskImp.flush();
-						double hiRGRatio =0;
-						double hiProduct = 0; 
-						double hiFeret = 0; 
-						double	loPARatio = 1000000;
-						double hiQuadraStandard = 0;
-						Roi hiRGRoi = null;
-						Roi hiProductRoi=null;
-						Roi hiFeretRoi=null;
-						Roi loPARatioRoi=null;
-						Roi hiQuadraRoi = null;
-						
-						ArrayList<Roi> roisbn = ownerImp.getRoiManager().getROIsByNumbers().get(""+ownerImp.getChannel()+"_"+ownerImp.getSlice()+"_"+ownerImp.getFrame());
-
-						if (roisbn !=null && statsIP != null) {
-							for (int r=0;r<roisbn.size();r++) {
-								ImageProcessor greenIP = statsIP.duplicate();
-								ImageProcessor redIP = ip.duplicate();
-
-								greenIP.setRoi(roisbn.get(r));
-								redIP.setRoi(roisbn.get(r));
-								
-								ImageStatistics greenStat = greenIP.getStatistics();
-								ImageStatistics redStat = redIP.getStatistics();
-
-								double roiRGMeanRatio = redStat.mean/greenStat.mean;
-								double roiStdDevProduct = greenStat.stdDev*redStat.stdDev;
-								double roiFeretDiameterRatio = greenStat.major
-															/greenStat.minor;
-								double roiPARatio = roisbn.get(r).getLength()
-													/greenStat.area;
-
-								double roiQuadraTest = (Math.pow(roiRGMeanRatio,7))*(Math.pow(roiStdDevProduct,1))*(Math.pow(roiFeretDiameterRatio,1))/(Math.pow(roiPARatio,1));
-
-								if (roiQuadraTest > hiQuadraStandard || hiQuadraStandard ==0) {
-									hiQuadraStandard = roiQuadraTest;
-									hiQuadraRoi = roisbn.get(r);
-								}
-								if (roiRGMeanRatio > hiRGRatio || hiRGRatio ==0) {
-									hiRGRatio = roiRGMeanRatio;
-									hiRGRoi = roisbn.get(r);
-								}
-								if (roiStdDevProduct > hiProduct || hiProduct ==0) {
-
-									hiProduct = roiStdDevProduct;
-
-									hiProductRoi = roisbn.get(r);
-
-								} 	
-								if (roiFeretDiameterRatio > hiFeret || hiFeret==0) {
-
-									hiFeret = roiFeretDiameterRatio;
-
-									hiFeretRoi = roisbn.get(r);
-
-								} 							
-								if (roiPARatio < loPARatio || loPARatio == 1000000) {
-
-									loPARatio = roiPARatio;
-
-									loPARatioRoi = roisbn.get(r);
-
-								} 
-							}
-							for (Object thisRoi:roisbn.toArray()) {
-								Roi roi = (Roi)thisRoi;
-								if (roi != hiQuadraRoi
-//														  && roi != hiRGRoi
-//														  && roi != hiProductRoi 
-//														  && roi != hiFeretRoi 
-//														  && roi != loPARatioRoi
-														 ) {
-									ownerImp.getRoiManager().setSelectedIndexes(new int[]{ownerImp.getRoiManager().getListModel().indexOf(roi.getName())});
-									ownerImp.getRoiManager().delete(false);
-									IJ.log("deleted stray roi");
-								}
-							}
-						}
-						if (hiRGRoi!=null)
-							hiRGRoi.setFillColor(Colors.decode("#ff00ffff", Color.cyan));
-						if (hiProductRoi!=null)
-							hiProductRoi.setFillColor(Colors.decode("#ff8844ff", Color.magenta));
-						if (hiFeretRoi!=null)
-							hiFeretRoi.setFillColor(Colors.decode("#ffff0000", Color.red));
-						if (loPARatioRoi!=null)
-							loPARatioRoi.setFillColor(Colors.decode("#ffffff00", Color.yellow));
-						if (hiQuadraRoi!=null)
-							hiQuadraRoi.setFillColor(Colors.decode("#ffffaa88", Color.orange));
-						
-//						ownerImp.getCanvas().repaint();
-						//					resTab.show("Results");
+					double[] ramp = new double[bigIP.getWidth()];
+					for (double i=0; i<bigIP.getWidth(); i++)
+						ramp[(int)i] = (double)(18d+(i*5d/(double)bigIP.getWidth()));
+					int offset;
+					for (int y=0; y<bigIP.getHeight(); y++) {
+						offset = y*bigIP.getWidth();
+						for (int x=0; x<bigIP.getWidth(); x++)
+							bigIP.putPixelValue(x,y,(ramp[x]));
 					}
 				}
+
+
+				if (n%2!=0){
+					statsIP = ip.duplicate();
+				}
+				if (n%2==0){
+					if(segmentLiveNeuron && !isViewB){
+
+						// pushing limits 08082019
+						threshModeCoeff = 0.099;  
+						minSize = 900;
+						maxSize = 100000;
+						minCirc = 0.00;
+						maxCirc = 1.000;
+
+						if (false /*trackingDialog == null*/){
+							trackingDialog = new GenericDialog("Tracking Parameters");
+							trackingDialog.addNumericField("thresholdCoeff", threshModeCoeff, 4);
+							trackingDialog.addNumericField("minSize", minSize, 0);
+							trackingDialog.addNumericField("maxSize", maxSize, 0);
+							trackingDialog.addNumericField("minCirc", minCirc, 4);
+							trackingDialog.addNumericField("maxCirc", maxCirc, 4);
+							trackingDialog.centerDialog(true);
+							trackingDialog.pack();
+							trackingDialog.show();
+							if (!trackingDialog.wasCanceled()){
+								threshModeCoeff = trackingDialog.getNextNumber();
+								minSize = trackingDialog.getNextNumber();
+								maxSize = trackingDialog.getNextNumber();
+								minCirc = trackingDialog.getNextNumber();	
+								maxCirc = trackingDialog.getNextNumber();
+							}
+						}else {
+
+						}
+
+						if( ownerImp.getRoiManager().getROIsByNumbers().get(""+ownerImp.getChannel()+"_"+ownerImp.getSlice()+"_"+ownerImp.getFrame())==null
+								|| ownerImp.getRoiManager().getROIsByNumbers().get(""+ownerImp.getChannel()+"_"+ownerImp.getSlice()+"_"+ownerImp.getFrame()).isEmpty()) {
+							ImageProcessor maskIP = ip.duplicate();
+
+							int[] ipHis = maskIP.getHistogram();
+							double ipHisMode = 0.0;
+							int ipHisLength = ipHis.length;
+							int ipHisMaxBin = 0;
+							for (int h=0; h<ipHisLength; h++) {
+								if (ipHis[h] > ipHisMaxBin) {
+									ipHisMaxBin = ipHis[h];
+									ipHisMode = (double)h;
+								}
+							}
+							maskIP.subtract(ipHisMode);
+							new RankFilters().rank(maskIP, 2, RankFilters.MEDIAN, 0, 0);	
+							maskIP.threshold((int) (ipHisMode*threshModeCoeff));
+							maskIP.invert();
+							ImagePlus maskImp = new ImagePlus("Mask", maskIP);
+							maskImp.setMotherImp(this.ownerImp, 0);
+
+							new ImageConverter(maskImp).convertToGray8();
+							ResultsTable resTab = new ResultsTable();
+							resTab.setDelimiter(',');
+							ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES
+									+ ParticleAnalyzer.ADD_TO_MANAGER
+									, ParticleAnalyzer.AREA+ ParticleAnalyzer.CENTER_OF_MASS
+									+ ParticleAnalyzer.CIRCULARITY+ ParticleAnalyzer.MEAN
+									+ ParticleAnalyzer.FERET 
+									+ ParticleAnalyzer.PERIMETER 
+									, resTab
+									, minSize, maxSize
+									, minCirc, maxCirc); 
+							pa.setHideOutputImage(true);
+
+							while (!pa.analyze(maskImp)){
+								IJ.wait(150);
+							}
+							IJ.wait(150);
+							maskImp.flush();
+							double hiRGRatio =0;
+							double hiProduct = 0; 
+							double hiFeret = 0; 
+							double	loPARatio = 1000000;
+							double hiQuadraStandard = 0;
+							Roi hiRGRoi = null;
+							Roi hiProductRoi=null;
+							Roi hiFeretRoi=null;
+							Roi loPARatioRoi=null;
+							Roi hiQuadraRoi = null;
+
+							ArrayList<Roi> roisbn = ownerImp.getRoiManager().getROIsByNumbers().get(""+ownerImp.getChannel()+"_"+ownerImp.getSlice()+"_"+ownerImp.getFrame());
+
+							if (roisbn !=null && statsIP != null) {
+								for (int r=0;r<roisbn.size();r++) {
+									ImageProcessor greenIP = statsIP.duplicate();
+									ImageProcessor redIP = ip.duplicate();
+
+									greenIP.setRoi(roisbn.get(r));
+									redIP.setRoi(roisbn.get(r));
+
+									ImageStatistics greenStat = greenIP.getStatistics();
+									ImageStatistics redStat = redIP.getStatistics();
+
+									double roiRGMeanRatio = redStat.mean/greenStat.mean;
+									double roiStdDevProduct = greenStat.stdDev*redStat.stdDev;
+									double roiFeretDiameterRatio = greenStat.major
+											/greenStat.minor;
+									double roiPARatio = roisbn.get(r).getLength()
+											/greenStat.area;
+
+									double roiQuadraTest = (Math.pow(roiRGMeanRatio,7))*(Math.pow(roiStdDevProduct,1))*(Math.pow(roiFeretDiameterRatio,1))/(Math.pow(roiPARatio,1));
+
+									if (roiQuadraTest > hiQuadraStandard || hiQuadraStandard ==0) {
+										hiQuadraStandard = roiQuadraTest;
+										hiQuadraRoi = roisbn.get(r);
+									}
+									if (roiRGMeanRatio > hiRGRatio || hiRGRatio ==0) {
+										hiRGRatio = roiRGMeanRatio;
+										hiRGRoi = roisbn.get(r);
+									}
+									if (roiStdDevProduct > hiProduct || hiProduct ==0) {
+
+										hiProduct = roiStdDevProduct;
+
+										hiProductRoi = roisbn.get(r);
+
+									} 
+									if (roiFeretDiameterRatio > hiFeret || hiFeret==0) {
+
+										hiFeret = roiFeretDiameterRatio;
+
+										hiFeretRoi = roisbn.get(r);
+
+									} 
+									if (roiPARatio < loPARatio || loPARatio == 1000000) {
+
+										loPARatio = roiPARatio;
+
+										loPARatioRoi = roisbn.get(r);
+
+									} 
+								}
+								for (Object thisRoi:roisbn.toArray()) {
+									Roi roi = (Roi)thisRoi;
+									if (roi != hiQuadraRoi
+											//	 && roi != hiRGRoi
+											//	 && roi != hiProductRoi 
+											//	 && roi != hiFeretRoi 
+											//	 && roi != loPARatioRoi
+											) {
+										ownerImp.getRoiManager().setSelectedIndexes(new int[]{ownerImp.getRoiManager().getListModel().indexOf(roi.getName())});
+										ownerImp.getRoiManager().delete(false);
+										IJ.log("deleted stray roi");
+									}
+								}
+							}
+							if (hiRGRoi!=null)
+								hiRGRoi.setFillColor(Colors.decode("#ff00ffff", Color.cyan));
+							if (hiProductRoi!=null)
+								hiProductRoi.setFillColor(Colors.decode("#ff8844ff", Color.magenta));
+							if (hiFeretRoi!=null)
+								hiFeretRoi.setFillColor(Colors.decode("#ffff0000", Color.red));
+							if (loPARatioRoi!=null)
+								loPARatioRoi.setFillColor(Colors.decode("#ffffff00", Color.yellow));
+							if (hiQuadraRoi!=null) {
+								hiQuadraRoi.setFillColor(Colors.decode("#ffffaa88", Color.orange));
+							}
+						}
+					}
+				}
+				if (isViewB) {
+					bigIP.insert(ip.resize(10, 20), 450+(int)corediffX/100, 590+(int)corediffY/100);
+					ip = bigIP;
+				}
+
 			}
+
 		}
 		if (dimOrder == "xyzct") {
 			corrX=isViewB?corrXB[((stackNumber)%tDim)]:corrXA[((stackNumber)%tDim)];
@@ -1122,30 +1149,30 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			ip.translate(corrX, corrY);
 		}
 
-//		IJ.log(dimOrder+" "+stackNumber+" "+fivStacks.get(stackNumber).getSize()+" "+sliceNumber+" "+vSliceNumber+" ");
-		
-		if (ip instanceof FloatProcessor) {
-			//			ip = ip.convertToShort(false);
-		}
-		int[] ipHis = ip.getHistogram();
-		double ipHisMode = 0.0;
-		int ipHisLength = ipHis.length;
-		int ipHisMaxBin = 0;
-		for (int h=0; h<ipHisLength; h++) {
-			if (ipHis[h] > ipHisMaxBin) {
-				ipHisMaxBin = ipHis[h];
-				ipHisMode = (double)h;
-			}
-		}
-		ImageProcessor ip2 = ip.duplicate();
-		ip2.setValue(ipHisMode);
-		ip2.fill();
+		//	IJ.log(dimOrder+" "+stackNumber+" "+fivStacks.get(stackNumber).getSize()+" "+sliceNumber+" "+vSliceNumber+" ");
 
+		if (ip instanceof FloatProcessor) {
+			//	ip = ip.convertToShort(false);
+		} else {
+			int[] ipHis = ip.getHistogram();
+			double ipHisMode = 0.0;
+			int ipHisLength = ipHis.length;
+			int ipHisMaxBin = 0;
+			for (int h=0; h<ipHisLength; h++) {
+				if (ipHis[h] > ipHisMaxBin) {
+					ipHisMaxBin = ipHis[h];
+					ipHisMode = (double)h;
+				}
+			}
+			ImageProcessor ip2 = ip.duplicate();
+			ip2.setValue(ipHisMode);
+			ip2.fill();
+		}
 
 		ip.setInterpolationMethod(ImageProcessor.BICUBIC);
 		ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
 
-//FALSING OUT 488G/R RATIOING (06192018)
+		//FALSING OUT 488G/R RATIOING (06192018)
 		if (false && dimOrder.toLowerCase().matches(".*splitsequentialc.*") && n%cDim == 1) {
 			ImageProcessor nextIP = fivStacks.get(stackNumber).getProcessor(vSliceNumber+1);
 
@@ -1175,13 +1202,13 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			}
 		}
 
-		//		ip.multiply(0.25);
+		//	ip.multiply(0.25);
 
-		//		ip.setMinAndMax(min, max);
+		//	ip.setMinAndMax(min, max);
 		if (edges) {
 			ip.findEdges();
-			
-//			ip.doAffineTransform(new AffineTransform(1.075,0.25,0.2,1.075,0,0));
+
+			//	ip.doAffineTransform(new AffineTransform(1.075,0.25,0.2,1.075,0,0));
 		}
 		return ip;
 	}
@@ -1191,7 +1218,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			fivStacks.get(stkNum).setupStack();
 
 			String currentFileName =fivStacks.get(stkNum).infoArray[0].fileName;
-			
+
 			if (currentFileName.endsWith("_dummy")) {
 				initiatorRunning = true;
 				currentFileName = currentFileName.replace("_dummy","");
@@ -1211,7 +1238,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 			}
 		}
-		
+
 	}
 
 	/** Returns the number of images in this stack. */
@@ -1225,9 +1252,9 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 			throw new IllegalArgumentException("Argument out of range: "+n);
 		if (infoArray==null || infoArray[0].sliceLabels==null || infoArray[0].sliceLabels.length!=nSlices) {
 			if (n<1 || n>nSlices) {
-//				IJ.runMacro("waitForUser(\""+n+"\");");
+				//	IJ.runMacro("waitForUser(\""+n+"\");");
 				return fivStacks.get(0).infoArray[0].fileName;
-				//				throw new IllegalArgumentException("Argument out of range: "+n);
+				//	throw new IllegalArgumentException("Argument out of range: "+n);
 			}
 			int z = n % fivStacks.get(0).nSlices;
 			int t = (int) Math.floor(n/fivStacks.get(0).nSlices);
@@ -1235,7 +1262,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 				z = fivStacks.get(0).nSlices;
 				t=t-1;
 			}
-			//			IJ.log(""+n+" "+z+" "+t);
+			//	IJ.log(""+n+" "+z+" "+t);
 			return fivStacks.get(0).infoArray[0].fileName + " slice "+ sliceNumber;
 		}
 		else
@@ -1306,7 +1333,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	}
 
 	public boolean getSegmentLiveNeuron() {
-		
+
 		return this.segmentLiveNeuron;
 	}
 
