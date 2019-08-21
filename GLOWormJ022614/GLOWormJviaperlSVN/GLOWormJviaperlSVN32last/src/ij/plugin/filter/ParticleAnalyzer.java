@@ -739,12 +739,12 @@ public class ParticleAnalyzer implements PlugInFilter, Measurements {
 		if (t1==ImageProcessor.NO_THRESHOLD) {
 			ImageStatistics stats = imp.getStatistics();
 			if (imageType!=BYTE || (stats.histogram[0]+stats.histogram[255]!=stats.pixelCount)) {
-				IJ.error("Particle Analyzer",
-					"A thresholded image or 8-bit binary image is\n"
-					+"required. Threshold levels can be set using\n"
+				IJ.log("Particle Analyzer: "
+					+"A thresholded image or 8-bit binary image is "
+					+"required. Threshold levels can be set using "
 					+"the Image->Adjust->Threshold tool.");
 				canceled = true;
-				return false;
+				return true;
 			}
 			boolean threshold255 = invertedLut;
 			if (Prefs.blackBackground)

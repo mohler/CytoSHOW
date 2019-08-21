@@ -1007,11 +1007,11 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 							maskIP.subtract(ipHisMode);
 							new RankFilters().rank(maskIP, 2, RankFilters.MEDIAN, 0, 0);	
 							maskIP.threshold((int) (ipHisMode*threshModeCoeff));
-							maskIP.invert();
+							maskIP.setThreshold(255,255,ImageProcessor.NO_LUT_UPDATE);
+
 							ImagePlus maskImp = new ImagePlus("Mask", maskIP);
 							maskImp.setMotherImp(this.ownerImp, 0);
 
-							new ImageConverter(maskImp).convertToGray8();
 							ResultsTable resTab = new ResultsTable();
 							resTab.setDelimiter(',');
 							ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES
@@ -1025,10 +1025,10 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 									, minCirc, maxCirc); 
 							pa.setHideOutputImage(true);
 
-							while (!pa.analyze(maskImp)){
-								IJ.wait(150);
+							while (!pa.analyze(maskImp, maskIP)){
+								IJ.wait(50);
 							}
-							IJ.wait(150);
+							IJ.wait(50);
 							maskImp.flush();
 							double hiRGRatio =0;
 							double hiProduct = 0; 
