@@ -1543,7 +1543,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						impBs[pos].show();
 						if (arg.contains("megaTiffMMrc")) {
 								IJ.run(impBs[pos],"Ice","");
-								IJ.setMinAndMax(impBs[pos], 18, 28);
+								impBs[pos].setDisplayRange(18, 28, 7);
 						}
 					}
 				}

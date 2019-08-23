@@ -958,6 +958,15 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 								for (int x=0; x<bigIP.getWidth(); x++)
 									bigIP.putPixelValue(x,y,(ramp[x]));
 							}
+							for (int t=0; t<ownerImp.getNFrames(); t++){
+								double drawX = corrXB[t]-corrXA[0];
+								double drawY = corrYB[t]-corrYA[0];
+
+								ImageProcessor stampIP = new FloatProcessor(5,5);
+								Arrays.fill((float[])stampIP.getPixels(), ((float)(((t)-1)*0.033)));
+								bigIP.insert(stampIP, ((bigIP.getWidth()-2)/2)+(int)drawX/100, ((bigIP.getHeight()-2)/2)+(int)drawY/100);
+
+							}
 						}
 					}
 
@@ -1130,7 +1139,7 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 					}
 				}
 				if (isViewB) {
-					bigIP.insert(ip.resize(10, 20), ((bigIP.getWidth()-10)/2)+(int)corediffX/100, ((bigIP.getHeight()-20)/2)+(int)corediffY/100);
+					ownerImp.setRoi(((bigIP.getWidth()-2)/2)+(int)corediffX/100, ((bigIP.getHeight()-2)/2)+(int)corediffY/100, 5, 5);
 //					IJ.saveAsTiff(new ImagePlus("",bigIP), wormTraceMapPath);
 					ip = bigIP;
 				}
