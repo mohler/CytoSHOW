@@ -975,6 +975,19 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 
 				if (n%2!=0){
 					statsIP = ip.duplicate();
+					int[] ipHis = statsIP.getHistogram();
+					double ipHisMode = 0.0;
+					int ipHisLength = ipHis.length;
+					int ipHisMaxBin = 0;
+					for (int h=0; h<ipHisLength; h++) {
+						if (ipHis[h] > ipHisMaxBin) {
+							ipHisMaxBin = ipHis[h];
+							ipHisMode = (double)h;
+						}
+					}
+					statsIP.subtract(ipHisMode);
+					new RankFilters().rank(statsIP, 2, RankFilters.MEDIAN, 0, 0);	
+
 				}
 				if (n%2==0){
 					if(segmentLiveNeuron && !isViewB){
@@ -1023,6 +1036,8 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 							}
 							maskIP.subtract(ipHisMode);
 							new RankFilters().rank(maskIP, 2, RankFilters.MEDIAN, 0, 0);	
+							ImageProcessor preppedIP = maskIP.duplicate();
+							
 							maskIP.threshold((int) (ipHisMode*threshModeCoeff));
 							maskIP.setThreshold(255,255,ImageProcessor.NO_LUT_UPDATE);
 
@@ -1063,7 +1078,7 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 							if (roisbn !=null && statsIP != null) {
 								for (int r=0;r<roisbn.size();r++) {
 									ImageProcessor greenIP = statsIP.duplicate();
-									ImageProcessor redIP = ip.duplicate();
+									ImageProcessor redIP = preppedIP.duplicate();
 
 									greenIP.setRoi(roisbn.get(r));
 									redIP.setRoi(roisbn.get(r));
@@ -1120,7 +1135,7 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 											) {
 										ownerImp.getRoiManager().setSelectedIndexes(new int[]{ownerImp.getRoiManager().getListModel().indexOf(roi.getName())});
 										ownerImp.getRoiManager().delete(false);
-										IJ.log("deleted stray roi");
+//										IJ.log("deleted stray roi");
 									}
 								}
 							}
@@ -1134,6 +1149,32 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 								loPARatioRoi.setFillColor(Colors.decode("#ffffff00", Color.yellow));
 							if (hiQuadraRoi!=null) {
 								hiQuadraRoi.setFillColor(Colors.decode("#ffffaa88", Color.orange));
+								ImageProcessor greenIP = statsIP.duplicate();
+								ImageProcessor redIP = preppedIP.duplicate();
+
+								greenIP.setRoi(hiQuadraRoi);
+								greenIP.fillOutside(hiQuadraRoi);
+								greenIP.setMask(greenIP.getMask());
+//								new ImagePlus("greentest", greenIP.crop()).show();
+
+								redIP.setRoi(hiQuadraRoi);
+								redIP.fillOutside(hiQuadraRoi);
+								redIP.setMask(redIP.getMask());
+//								new ImagePlus("redtest", redIP.crop()).show();
+								
+								ImageProcessor ratioIP = redIP.crop().toFloat(1, null);
+								ratioIP.copyBits(greenIP.crop().toFloat(1, null), 0, 0, Blitter.DIVIDE);
+//								new ImagePlus("ratiotest",ratioIP).show();
+								
+								ImageStatistics greenStat = greenIP.getStatistics();
+								ImageStatistics redStat = redIP.getStatistics();
+								ImageStatistics ratioStat = ratioIP.getStatistics();
+								
+								double roiRGMeanRatio = redStat.mean/greenStat.mean;
+								double ratioIPmean = ratioStat.mean;
+								IJ.log(""+roiRGMeanRatio+" =? "+ratioIPmean);
+								
+
 							}
 						}
 					}
