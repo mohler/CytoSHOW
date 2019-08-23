@@ -605,8 +605,8 @@ array and displays it if 'show' is true. */
 		dXB = new int[tDim*cDim*vDim];
 		dYB = new int[tDim*cDim*vDim];
 		dZB = new int[tDim*cDim*vDim];
-		Arrays.fill(dXA,0);
-		Arrays.fill(dYA,0);
+		Arrays.fill(dXA,dimOrder.toLowerCase().matches(".*splitratioc.*")?25:0);
+		Arrays.fill(dYA,dimOrder.toLowerCase().matches(".*splitratioc.*")?-8:0);
 		Arrays.fill(dZA,0);
 		Arrays.fill(dXB,0);
 		Arrays.fill(dYB,0);
@@ -946,7 +946,8 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 				if (isViewB) {
 					if (bigIP == null){
 						if (new File(wormTraceMapPath).canRead()){
-							bigIP = IJ.openImage(wormTraceMapPath , 1).getProcessor();
+							ImagePlus bigImp = new ImagePlus(wormTraceMapPath);
+							bigIP = bigImp.getProcessor();
 						} else {
 							bigIP = new FloatProcessor(907, 1200);
 							double[] ramp = new double[bigIP.getWidth()];
@@ -970,217 +971,219 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 						}
 					}
 
-				}
+				} else {
 
 
-				if (n%2!=0){
-					statsIP = ip.duplicate();
-					int[] ipHis = statsIP.getHistogram();
-					double ipHisMode = 0.0;
-					int ipHisLength = ipHis.length;
-					int ipHisMaxBin = 0;
-					for (int h=0; h<ipHisLength; h++) {
-						if (ipHis[h] > ipHisMaxBin) {
-							ipHisMaxBin = ipHis[h];
-							ipHisMode = (double)h;
+					if (n%2!=0){
+						statsIP = ip.duplicate();
+						int[] ipHis = statsIP.getHistogram();
+						double ipHisMode = 0.0;
+						int ipHisLength = ipHis.length;
+						int ipHisMaxBin = 0;
+						for (int h=0; h<ipHisLength; h++) {
+							if (ipHis[h] > ipHisMaxBin) {
+								ipHisMaxBin = ipHis[h];
+								ipHisMode = (double)h;
+							}
 						}
+						statsIP.subtract(ipHisMode);
+						new RankFilters().rank(statsIP, 2, RankFilters.MEDIAN, 0, 0);	
+
 					}
-					statsIP.subtract(ipHisMode);
-					new RankFilters().rank(statsIP, 2, RankFilters.MEDIAN, 0, 0);	
+					if (n%2==0){
+						if(segmentLiveNeuron && !isViewB){
 
-				}
-				if (n%2==0){
-					if(segmentLiveNeuron && !isViewB){
+							// pushing limits 08082019
+							threshModeCoeff = 0.099;  
+							minSize = 900;
+							maxSize = 100000;
+							minCirc = 0.00;
+							maxCirc = 1.000;
 
-						// pushing limits 08082019
-						threshModeCoeff = 0.099;  
-						minSize = 900;
-						maxSize = 100000;
-						minCirc = 0.00;
-						maxCirc = 1.000;
-
-						if (false /*trackingDialog == null*/){
-							trackingDialog = new GenericDialog("Tracking Parameters");
-							trackingDialog.addNumericField("thresholdCoeff", threshModeCoeff, 4);
-							trackingDialog.addNumericField("minSize", minSize, 0);
-							trackingDialog.addNumericField("maxSize", maxSize, 0);
-							trackingDialog.addNumericField("minCirc", minCirc, 4);
-							trackingDialog.addNumericField("maxCirc", maxCirc, 4);
-							trackingDialog.centerDialog(true);
-							trackingDialog.pack();
-							trackingDialog.show();
-							if (!trackingDialog.wasCanceled()){
-								threshModeCoeff = trackingDialog.getNextNumber();
-								minSize = trackingDialog.getNextNumber();
-								maxSize = trackingDialog.getNextNumber();
-								minCirc = trackingDialog.getNextNumber();	
-								maxCirc = trackingDialog.getNextNumber();
-							}
-						}else {
-
-						}
-
-						if( ownerImp.getRoiManager().getROIsByNumbers().get(""+ownerImp.getChannel()+"_"+ownerImp.getSlice()+"_"+ownerImp.getFrame())==null
-								|| ownerImp.getRoiManager().getROIsByNumbers().get(""+ownerImp.getChannel()+"_"+ownerImp.getSlice()+"_"+ownerImp.getFrame()).isEmpty()) {
-							ImageProcessor maskIP = ip.duplicate();
-
-							int[] ipHis = maskIP.getHistogram();
-							double ipHisMode = 0.0;
-							int ipHisLength = ipHis.length;
-							int ipHisMaxBin = 0;
-							for (int h=0; h<ipHisLength; h++) {
-								if (ipHis[h] > ipHisMaxBin) {
-									ipHisMaxBin = ipHis[h];
-									ipHisMode = (double)h;
+							if (false /*trackingDialog == null*/){
+								trackingDialog = new GenericDialog("Tracking Parameters");
+								trackingDialog.addNumericField("thresholdCoeff", threshModeCoeff, 4);
+								trackingDialog.addNumericField("minSize", minSize, 0);
+								trackingDialog.addNumericField("maxSize", maxSize, 0);
+								trackingDialog.addNumericField("minCirc", minCirc, 4);
+								trackingDialog.addNumericField("maxCirc", maxCirc, 4);
+								trackingDialog.centerDialog(true);
+								trackingDialog.pack();
+								trackingDialog.show();
+								if (!trackingDialog.wasCanceled()){
+									threshModeCoeff = trackingDialog.getNextNumber();
+									minSize = trackingDialog.getNextNumber();
+									maxSize = trackingDialog.getNextNumber();
+									minCirc = trackingDialog.getNextNumber();	
+									maxCirc = trackingDialog.getNextNumber();
 								}
+							}else {
+
 							}
-							maskIP.subtract(ipHisMode);
-							new RankFilters().rank(maskIP, 2, RankFilters.MEDIAN, 0, 0);	
-							ImageProcessor preppedIP = maskIP.duplicate();
-							
-							maskIP.threshold((int) (ipHisMode*threshModeCoeff));
-							maskIP.setThreshold(255,255,ImageProcessor.NO_LUT_UPDATE);
 
-							ImagePlus maskImp = new ImagePlus("Mask", maskIP);
-							maskImp.setMotherImp(this.ownerImp, 0);
+							if( ownerImp.getRoiManager().getROIsByNumbers().get(""+ownerImp.getChannel()+"_"+ownerImp.getSlice()+"_"+ownerImp.getFrame())==null
+									|| ownerImp.getRoiManager().getROIsByNumbers().get(""+ownerImp.getChannel()+"_"+ownerImp.getSlice()+"_"+ownerImp.getFrame()).isEmpty()) {
+								ImageProcessor maskIP = ip.duplicate();
 
-							ResultsTable resTab = new ResultsTable();
-							resTab.setDelimiter(',');
-							ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES
-									+ ParticleAnalyzer.ADD_TO_MANAGER
-									, ParticleAnalyzer.AREA+ ParticleAnalyzer.CENTER_OF_MASS
-									+ ParticleAnalyzer.CIRCULARITY+ ParticleAnalyzer.MEAN
-									+ ParticleAnalyzer.FERET 
-									+ ParticleAnalyzer.PERIMETER 
-									, resTab
-									, minSize, maxSize
-									, minCirc, maxCirc); 
-							pa.setHideOutputImage(true);
+								int[] ipHis = maskIP.getHistogram();
+								double ipHisMode = 0.0;
+								int ipHisLength = ipHis.length;
+								int ipHisMaxBin = 0;
+								for (int h=0; h<ipHisLength; h++) {
+									if (ipHis[h] > ipHisMaxBin) {
+										ipHisMaxBin = ipHis[h];
+										ipHisMode = (double)h;
+									}
+								}
+								maskIP.subtract(ipHisMode);
+								new RankFilters().rank(maskIP, 2, RankFilters.MEDIAN, 0, 0);	
+								ImageProcessor preppedIP = maskIP.duplicate();
 
-							while (!pa.analyze(maskImp, maskIP)){
+								maskIP.threshold((int) (ipHisMode*threshModeCoeff));
+								maskIP.setThreshold(255,255,ImageProcessor.NO_LUT_UPDATE);
+
+								ImagePlus maskImp = new ImagePlus("Mask", maskIP);
+								maskImp.setMotherImp(this.ownerImp, 0);
+
+								ResultsTable resTab = new ResultsTable();
+								resTab.setDelimiter(',');
+								ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES
+										+ ParticleAnalyzer.ADD_TO_MANAGER
+										, ParticleAnalyzer.AREA+ ParticleAnalyzer.CENTER_OF_MASS
+										+ ParticleAnalyzer.CIRCULARITY+ ParticleAnalyzer.MEAN
+										+ ParticleAnalyzer.FERET 
+										+ ParticleAnalyzer.PERIMETER 
+										, resTab
+										, minSize, maxSize
+										, minCirc, maxCirc); 
+								pa.setHideOutputImage(true);
+
+								while (!pa.analyze(maskImp, maskIP)){
+									IJ.wait(50);
+								}
 								IJ.wait(50);
-							}
-							IJ.wait(50);
-							maskImp.flush();
-							double hiRGRatio =0;
-							double hiProduct = 0; 
-							double hiFeret = 0; 
-							double	loPARatio = 1000000;
-							double hiQuadraStandard = 0;
-							Roi hiRGRoi = null;
-							Roi hiProductRoi=null;
-							Roi hiFeretRoi=null;
-							Roi loPARatioRoi=null;
-							Roi hiQuadraRoi = null;
+								maskImp.flush();
+								double hiRGRatio =0;
+								double hiProduct = 0; 
+								double hiFeret = 0; 
+								double	loPARatio = 1000000;
+								double hiQuadraStandard = 0;
+								Roi hiRGRoi = null;
+								Roi hiProductRoi=null;
+								Roi hiFeretRoi=null;
+								Roi loPARatioRoi=null;
+								Roi hiQuadraRoi = null;
 
-							ArrayList<Roi> roisbn = ownerImp.getRoiManager().getROIsByNumbers().get(""+ownerImp.getChannel()+"_"+ownerImp.getSlice()+"_"+ownerImp.getFrame());
+								ArrayList<Roi> roisbn = ownerImp.getRoiManager().getROIsByNumbers().get(""+ownerImp.getChannel()+"_"+ownerImp.getSlice()+"_"+ownerImp.getFrame());
 
-							if (roisbn !=null && statsIP != null) {
-								for (int r=0;r<roisbn.size();r++) {
+								if (roisbn !=null && statsIP != null) {
+									for (int r=0;r<roisbn.size();r++) {
+										ImageProcessor greenIP = statsIP.duplicate();
+										ImageProcessor redIP = preppedIP.duplicate();
+
+										greenIP.setRoi(roisbn.get(r));
+										redIP.setRoi(roisbn.get(r));
+
+										ImageStatistics greenStat = greenIP.getStatistics();
+										ImageStatistics redStat = redIP.getStatistics();
+
+										double roiRGMeanRatio = redStat.mean/greenStat.mean;
+										double roiStdDevProduct = greenStat.stdDev*redStat.stdDev;
+										double roiFeretDiameterRatio = greenStat.major
+												/greenStat.minor;
+										double roiPARatio = roisbn.get(r).getLength()
+												/greenStat.area;
+
+										double roiQuadraTest = (Math.pow(roiRGMeanRatio,7))*(Math.pow(roiStdDevProduct,1))*(Math.pow(roiFeretDiameterRatio,1))/(Math.pow(roiPARatio,1));
+
+										if (roiQuadraTest > hiQuadraStandard || hiQuadraStandard ==0) {
+											hiQuadraStandard = roiQuadraTest;
+											hiQuadraRoi = roisbn.get(r);
+										}
+										if (roiRGMeanRatio > hiRGRatio || hiRGRatio ==0) {
+											hiRGRatio = roiRGMeanRatio;
+											hiRGRoi = roisbn.get(r);
+										}
+										if (roiStdDevProduct > hiProduct || hiProduct ==0) {
+
+											hiProduct = roiStdDevProduct;
+
+											hiProductRoi = roisbn.get(r);
+
+										} 
+										if (roiFeretDiameterRatio > hiFeret || hiFeret==0) {
+
+											hiFeret = roiFeretDiameterRatio;
+
+											hiFeretRoi = roisbn.get(r);
+
+										} 
+										if (roiPARatio < loPARatio || loPARatio == 1000000) {
+
+											loPARatio = roiPARatio;
+
+											loPARatioRoi = roisbn.get(r);
+
+										} 
+									}
+									for (Object thisRoi:roisbn.toArray()) {
+										Roi roi = (Roi)thisRoi;
+										if (roi != hiQuadraRoi
+												//	 && roi != hiRGRoi
+												//	 && roi != hiProductRoi 
+												//	 && roi != hiFeretRoi 
+												//	 && roi != loPARatioRoi
+												) {
+											ownerImp.getRoiManager().setSelectedIndexes(new int[]{ownerImp.getRoiManager().getListModel().indexOf(roi.getName())});
+											ownerImp.getRoiManager().delete(false);
+											//										IJ.log("deleted stray roi");
+										}
+									}
+								}
+								if (hiRGRoi!=null)
+									hiRGRoi.setFillColor(Colors.decode("#ff00ffff", Color.cyan));
+								if (hiProductRoi!=null)
+									hiProductRoi.setFillColor(Colors.decode("#ff8844ff", Color.magenta));
+								if (hiFeretRoi!=null)
+									hiFeretRoi.setFillColor(Colors.decode("#ffff0000", Color.red));
+								if (loPARatioRoi!=null)
+									loPARatioRoi.setFillColor(Colors.decode("#ffffff00", Color.yellow));
+								if (hiQuadraRoi!=null) {
+									hiQuadraRoi.setFillColor(Colors.decode("#ffffaa88", Color.orange));
 									ImageProcessor greenIP = statsIP.duplicate();
 									ImageProcessor redIP = preppedIP.duplicate();
 
-									greenIP.setRoi(roisbn.get(r));
-									redIP.setRoi(roisbn.get(r));
+									greenIP.setRoi(hiQuadraRoi);
+									greenIP.fillOutside(hiQuadraRoi);
+									greenIP.setMask(greenIP.getMask());
+									//								new ImagePlus("greentest", greenIP.crop()).show();
+
+									redIP.setRoi(hiQuadraRoi);
+									redIP.fillOutside(hiQuadraRoi);
+									redIP.setMask(redIP.getMask());
+									//								new ImagePlus("redtest", redIP.crop()).show();
+
+									ImageProcessor ratioIP = redIP.crop().toFloat(1, null);
+									ratioIP.copyBits(greenIP.crop().toFloat(1, null), 0, 0, Blitter.DIVIDE);
+									//								new ImagePlus("ratiotest",ratioIP).show();
 
 									ImageStatistics greenStat = greenIP.getStatistics();
 									ImageStatistics redStat = redIP.getStatistics();
+									ImageStatistics ratioStat = ratioIP.getStatistics();
 
 									double roiRGMeanRatio = redStat.mean/greenStat.mean;
-									double roiStdDevProduct = greenStat.stdDev*redStat.stdDev;
-									double roiFeretDiameterRatio = greenStat.major
-											/greenStat.minor;
-									double roiPARatio = roisbn.get(r).getLength()
-											/greenStat.area;
+									double ratioIPmean = ratioStat.mean;
+									IJ.log(""+roiRGMeanRatio+" =? "+ratioIPmean);
 
-									double roiQuadraTest = (Math.pow(roiRGMeanRatio,7))*(Math.pow(roiStdDevProduct,1))*(Math.pow(roiFeretDiameterRatio,1))/(Math.pow(roiPARatio,1));
 
-									if (roiQuadraTest > hiQuadraStandard || hiQuadraStandard ==0) {
-										hiQuadraStandard = roiQuadraTest;
-										hiQuadraRoi = roisbn.get(r);
-									}
-									if (roiRGMeanRatio > hiRGRatio || hiRGRatio ==0) {
-										hiRGRatio = roiRGMeanRatio;
-										hiRGRoi = roisbn.get(r);
-									}
-									if (roiStdDevProduct > hiProduct || hiProduct ==0) {
-
-										hiProduct = roiStdDevProduct;
-
-										hiProductRoi = roisbn.get(r);
-
-									} 
-									if (roiFeretDiameterRatio > hiFeret || hiFeret==0) {
-
-										hiFeret = roiFeretDiameterRatio;
-
-										hiFeretRoi = roisbn.get(r);
-
-									} 
-									if (roiPARatio < loPARatio || loPARatio == 1000000) {
-
-										loPARatio = roiPARatio;
-
-										loPARatioRoi = roisbn.get(r);
-
-									} 
 								}
-								for (Object thisRoi:roisbn.toArray()) {
-									Roi roi = (Roi)thisRoi;
-									if (roi != hiQuadraRoi
-											//	 && roi != hiRGRoi
-											//	 && roi != hiProductRoi 
-											//	 && roi != hiFeretRoi 
-											//	 && roi != loPARatioRoi
-											) {
-										ownerImp.getRoiManager().setSelectedIndexes(new int[]{ownerImp.getRoiManager().getListModel().indexOf(roi.getName())});
-										ownerImp.getRoiManager().delete(false);
-//										IJ.log("deleted stray roi");
-									}
-								}
-							}
-							if (hiRGRoi!=null)
-								hiRGRoi.setFillColor(Colors.decode("#ff00ffff", Color.cyan));
-							if (hiProductRoi!=null)
-								hiProductRoi.setFillColor(Colors.decode("#ff8844ff", Color.magenta));
-							if (hiFeretRoi!=null)
-								hiFeretRoi.setFillColor(Colors.decode("#ffff0000", Color.red));
-							if (loPARatioRoi!=null)
-								loPARatioRoi.setFillColor(Colors.decode("#ffffff00", Color.yellow));
-							if (hiQuadraRoi!=null) {
-								hiQuadraRoi.setFillColor(Colors.decode("#ffffaa88", Color.orange));
-								ImageProcessor greenIP = statsIP.duplicate();
-								ImageProcessor redIP = preppedIP.duplicate();
-
-								greenIP.setRoi(hiQuadraRoi);
-								greenIP.fillOutside(hiQuadraRoi);
-								greenIP.setMask(greenIP.getMask());
-//								new ImagePlus("greentest", greenIP.crop()).show();
-
-								redIP.setRoi(hiQuadraRoi);
-								redIP.fillOutside(hiQuadraRoi);
-								redIP.setMask(redIP.getMask());
-//								new ImagePlus("redtest", redIP.crop()).show();
-								
-								ImageProcessor ratioIP = redIP.crop().toFloat(1, null);
-								ratioIP.copyBits(greenIP.crop().toFloat(1, null), 0, 0, Blitter.DIVIDE);
-//								new ImagePlus("ratiotest",ratioIP).show();
-								
-								ImageStatistics greenStat = greenIP.getStatistics();
-								ImageStatistics redStat = redIP.getStatistics();
-								ImageStatistics ratioStat = ratioIP.getStatistics();
-								
-								double roiRGMeanRatio = redStat.mean/greenStat.mean;
-								double ratioIPmean = ratioStat.mean;
-								IJ.log(""+roiRGMeanRatio+" =? "+ratioIPmean);
-								
-
 							}
 						}
 					}
 				}
 				if (isViewB) {
-					ownerImp.setRoi(((bigIP.getWidth()-2)/2)+(int)corediffX/100, ((bigIP.getHeight()-2)/2)+(int)corediffY/100, 5, 5);
+					if (ownerImp!=null)
+						ownerImp.setRoi(((bigIP.getWidth()-2)/2)+(int)corediffX/100, ((bigIP.getHeight()-2)/2)+(int)corediffY/100, 5, 5);
 //					IJ.saveAsTiff(new ImagePlus("",bigIP), wormTraceMapPath);
 					ip = bigIP;
 				}

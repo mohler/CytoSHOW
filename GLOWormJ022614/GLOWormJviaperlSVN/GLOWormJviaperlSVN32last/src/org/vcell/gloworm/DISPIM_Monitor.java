@@ -1474,6 +1474,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					impAs[pos].getOriginalFileInfo().directory = dirOrOMETiff;
 					impAs[pos].show();
 					if (arg.contains("megaTiffMMrc")) {
+						impAs[pos].setPosition(1, 1, 1);	
 
 						IJ.setMinAndMax(impAs[pos], 20, 300);
 					}
@@ -1545,7 +1546,13 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								IJ.run(impBs[pos],"Ice","");
 								impBs[pos].setDisplayRange(18, 28, 7);
 								IJ.saveAsTiff(new ImagePlus("ThermoTraceMap.tif", impBs[pos].getProcessor()), mmPath + File.separator + "ThermoTraceMap.tif");
+								SyncWindows syncEm = new SyncWindows();
+								impBs[pos].setPosition(1, 1, 1);	
+								syncEm.addImp(impAs[pos]);
+								syncEm.addImp(impBs[pos]);
+								IJ.run("Tile");
 						}
+						
 					}
 				}
 
