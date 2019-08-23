@@ -71,6 +71,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	double minCirc = 0.09;
 	double maxCirc = 0.25;
 	private ImageProcessor statsIP;
+	private ImageProcessor bigIP;
 
 	/* Default constructor. */
 	public MultiFileInfoVirtualStack() {}
@@ -940,19 +941,26 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 			double corediffY = corrY-corrYA[0];
 
 			if (ratioing) {
-				ImageProcessor bigIP = null;
+				String wormTraceMapPath = infoDir + File.separator + "ThermoTraceMap.tif";
+				bigIP=null;
 				if (isViewB) {
-					bigIP = new FloatProcessor(907, 1200);
-
-					double[] ramp = new double[bigIP.getWidth()];
-					for (double i=0; i<bigIP.getWidth(); i++)
-						ramp[(int)i] = (double)(18d+(i*5d/(double)bigIP.getWidth()));
-					int offset;
-					for (int y=0; y<bigIP.getHeight(); y++) {
-						offset = y*bigIP.getWidth();
-						for (int x=0; x<bigIP.getWidth(); x++)
-							bigIP.putPixelValue(x,y,(ramp[x]));
+					if (bigIP == null){
+						if (new File(wormTraceMapPath).canRead()){
+							bigIP = IJ.openImage(wormTraceMapPath , 1).getProcessor();
+						} else {
+							bigIP = new FloatProcessor(907, 1200);
+							double[] ramp = new double[bigIP.getWidth()];
+							for (double i=0; i<bigIP.getWidth(); i++)
+								ramp[(int)i] = (double)(18d+(i*5d/(double)bigIP.getWidth()));
+							int offset;
+							for (int y=0; y<bigIP.getHeight(); y++) {
+								offset = y*bigIP.getWidth();
+								for (int x=0; x<bigIP.getWidth(); x++)
+									bigIP.putPixelValue(x,y,(ramp[x]));
+							}
+						}
 					}
+
 				}
 
 
@@ -1122,7 +1130,8 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 					}
 				}
 				if (isViewB) {
-					bigIP.insert(ip.resize(10, 20), 450+(int)corediffX/100, 590+(int)corediffY/100);
+					bigIP.insert(ip.resize(10, 20), ((bigIP.getWidth()-10)/2)+(int)corediffX/100, ((bigIP.getHeight()-20)/2)+(int)corediffY/100);
+//					IJ.saveAsTiff(new ImagePlus("",bigIP), wormTraceMapPath);
 					ip = bigIP;
 				}
 

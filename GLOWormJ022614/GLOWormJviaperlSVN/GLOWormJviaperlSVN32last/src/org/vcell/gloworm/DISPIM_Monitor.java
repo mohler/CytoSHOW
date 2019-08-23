@@ -84,6 +84,7 @@ import ij.measure.ResultsTable;
 import ij.plugin.FFT;
 import ij.plugin.FileInfoVirtualStack;
 import ij.plugin.FolderOpener;
+import ij.plugin.LutLoader;
 import ij.plugin.MultiFileInfoVirtualStack;
 import ij.plugin.PlugIn;
 import ij.plugin.RoiRotator;
@@ -1472,6 +1473,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					impAs[pos].getOriginalFileInfo().fileName = dirOrOMETiff;
 					impAs[pos].getOriginalFileInfo().directory = dirOrOMETiff;
 					impAs[pos].show();
+					if (arg.contains("megaTiffMMrc")) {
+
+						IJ.setMinAndMax(impAs[pos], 20, 300);
+					}
 
 					if (true /*!arg.contains("megaTiffMMrc")*/){
 
@@ -1536,6 +1541,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						impBs[pos].getOriginalFileInfo().fileName = dirOrOMETiff;
 						impBs[pos].getOriginalFileInfo().directory = dirOrOMETiff;
 						impBs[pos].show();
+						if (arg.contains("megaTiffMMrc")) {
+								IJ.run(impBs[pos],"Ice","");
+								IJ.setMinAndMax(impBs[pos], 18, 28);
+						}
 					}
 				}
 
@@ -1718,6 +1727,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				splitChannels=false;
 			}
 
+			
 			IJ.run("Tile");
 			IJ.log("" + WindowManager.getImageCount());
 

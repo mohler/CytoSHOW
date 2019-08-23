@@ -29,12 +29,12 @@ public class RoiLabelByNumbersSorter {
 		for (int i=0; i<listLength; i++) {
 			//Replace needed here before split to handle the quote-quote issue without exceptions 
 			int len =0;
-			try {len = labels[i].replace("\'", "$").split("_")[mode].length();}
+			try {len = labels[i].replace("\'", "$").split("_")[mode].split("-")[0].length();}
 			catch (java.lang.ArrayIndexOutOfBoundsException e) {continue;}
 			String num = "";
 			for (int j=0; j<len; j++) {
 				//Replace needed here before split to handle the quote-quote issue without exceptions 
-				ch = labels[i].replace("\'", "$").split("_")[mode].charAt(j);
+				ch = labels[i].replace("\'", "$").split("_")[mode].split("-")[0].charAt(j);
 				if (ch>=48 && ch<=57) num += ch;
 			}
 			if (num.length()==0) num = "aaaaaa";
