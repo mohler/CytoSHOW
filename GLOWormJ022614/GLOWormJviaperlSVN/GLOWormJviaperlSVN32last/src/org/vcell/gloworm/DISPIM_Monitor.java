@@ -1544,6 +1544,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						if (arg.contains("megaTiffMMrc")) {
 								IJ.run(impBs[pos],"Ice","");
 								impBs[pos].setDisplayRange(18, 28, 7);
+								IJ.saveAsTiff(new ImagePlus("ThermoTraceMap.tif", impBs[pos].getProcessor()), mmPath + File.separator + "ThermoTraceMap.tif");
 						}
 					}
 				}
