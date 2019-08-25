@@ -6062,7 +6062,6 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					String newObjBodyText = IJ.openAsString(objDirPath+File.separator+ oldObjName)
 							.replaceAll("(.*mtllib ).*(\n.*)", "$1"+"UniversalColorPallet_firstVersion.mtl"+"$2")
 							.replaceAll("(.*usemtl mat_).*(\n.*)", "$1"+newObjColorName+"$2");
-					newObjBodyText.replaceAll("\nv (\\d+) (\\d+) (\\d+)", "\nv "+Double.parseDouble("$1")+xyShiftsForPolyadicSynapses.get(newObjNamesforGroupPatches.indexOf(nextObjName))+" $2 $3");
 					IJ.saveString(newObjBodyText, specificGroupOutputDirPath + File.separator + nextObjName);
 				}
 			}
