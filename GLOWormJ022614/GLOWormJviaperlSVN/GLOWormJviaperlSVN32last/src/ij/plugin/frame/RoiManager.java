@@ -5861,7 +5861,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								for (String postSC:postSynapticCells){
 									 
 									if (postSC==null) continue;
-									if (postSC.equals(targetBundleNeuron) && postsynOutsideOfBundle){
+									if (postSC.equals(targetBundleNeuron)/* && postsynOutsideOfBundle*/){
 										Roi newRoi = ((Roi)rois.get(synapseRoiName).clone());
 										newRoi.setLocation(rois.get(synapseRoiName).getBounds().x + psps[psc][0]*shift, rois.get(synapseRoiName).getBounds().y + psps[psc][1]*shift);
 										newRoi.setFillColor(Colors.getColor(allBundleColorStrings[ba], Color.DARK_GRAY));

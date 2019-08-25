@@ -14,7 +14,7 @@ public class Colors implements PlugIn, ItemListener {
 	private static final String[] colors2 = {"Red","Green","Blue","Magenta","Cyan","Yellow","Orange","Black","White"};
 	private Choice fchoice, bchoice, schoice;
 	private Color fc2, bc2, sc2;
-
+	private static Hashtable<String,String> kaleidoColors;
  	public void run(String arg) {
 		showDialog();
 	}
@@ -95,6 +95,20 @@ public class Colors implements PlugIn, ItemListener {
 	public static Color getColor(String name, Color defaultColor) {
 		if (name==null) return defaultColor;
 		name = name.toLowerCase(Locale.US);
+		kaleidoColors = new Hashtable<String,String>();
+		kaleidoColors.put("plum","#ffe64cff");
+		kaleidoColors.put("royal","#ff66e6ff");
+		kaleidoColors.put("azure","#ffccccff");
+		kaleidoColors.put("pink","#ffffcccc");
+		kaleidoColors.put("spring","#ffccffcc");
+		kaleidoColors.put("wisteria","#ffffccff");
+		kaleidoColors.put("sunset","#ffffcce6");
+		kaleidoColors.put("turquoise","#ffccffff");
+		kaleidoColors.put("butter","#ffffffcc");
+		String colorHex = kaleidoColors.get(name);
+		if (colorHex!=null)
+			return Colors.decode(colorHex, Color.gray);
+				
 		Color c = defaultColor;
 		if (name.equals(colors[0])) c = Color.red;
 		else if (name.equals(colors[1])) c = Color.green;
