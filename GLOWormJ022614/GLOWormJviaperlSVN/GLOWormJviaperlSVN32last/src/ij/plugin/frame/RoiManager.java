@@ -5979,6 +5979,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			ArrayList<String> oldObjNamesforGroupPatches = new ArrayList<String>();
 			ArrayList<String> newObjNamesforCellPatches = new ArrayList<String>();
 			ArrayList<String> oldObjNamesforCellPatches = new ArrayList<String>();
+			ArrayList<int[]> xyShiftsForPolyadicSynapses = new ArrayList<int[]>();
 			ArrayList<String> cellNameDirs = new ArrayList<String>();
 			String[] objDirList = new File(objDirPath).list();
 			for (String synapseObjFileName:objDirList){
@@ -6032,6 +6033,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 									if (postsynOutsideOfGroup){
 										newObjNamesforGroupPatches.add(newObjFileName);
 										oldObjNamesforGroupPatches.add(synapseObjFileName);
+										xyShiftsForPolyadicSynapses.add(new int[]{psps[psc][0]*shift, psps[psc][1]*shift});
 									}
 									newObjNamesforCellPatches.add(newObjFileName);
 									oldObjNamesforCellPatches.add(synapseObjFileName);
@@ -6060,6 +6062,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					String newObjBodyText = IJ.openAsString(objDirPath+File.separator+ oldObjName)
 							.replaceAll("(.*mtllib ).*(\n.*)", "$1"+"UniversalColorPallet_firstVersion.mtl"+"$2")
 							.replaceAll("(.*usemtl mat_).*(\n.*)", "$1"+newObjColorName+"$2");
+					newObjBodyText.replaceAll("\nv (\\d+) (\\d+) (\\d+)", "\nv "+Double.parseDouble("$1")+xyShiftsForPolyadicSynapses.get(newObjNamesforGroupPatches.indexOf(nextObjName))+" $2 $3");
 					IJ.saveString(newObjBodyText, specificGroupOutputDirPath + File.separator + nextObjName);
 				}
 			}
