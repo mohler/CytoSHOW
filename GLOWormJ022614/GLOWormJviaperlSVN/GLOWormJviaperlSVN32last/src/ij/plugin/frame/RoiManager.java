@@ -6036,8 +6036,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 									newObjNamesforCellPatches.add(newObjFileName);
 									oldObjNamesforCellPatches.add(synapseObjFileName);
 
-									if (!synapseByGroups.get(ba).contains(rootName)){
-										synapseByGroups.get(ba).add(rootName);
+									if (!synapseByGroups.get(ba).contains(rootName+"->"+postSC)){
+										synapseByGroups.get(ba).add(rootName+"->"+postSC);
 									}
 								}
 								psc++;
