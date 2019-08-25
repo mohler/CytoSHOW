@@ -5986,13 +5986,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				boolean presynInGroup = false;
 				boolean postsynOutsideOfGroup = true;
 				String synapseObjNameCleaned = synapseObjFileName.replace("\"", "").replace("[", "").replace("]", "");
-				String rootName = synapseObjFileName.contains("\"")?synapseObjFileName.split("\"")[1].trim():"";
+				String rootName = synapseObjFileName.contains("\"")?synapseObjFileName.split("\"")[1].trim():synapseObjNameCleaned.replaceAll("(.*_zs\\d+_)(.*)(electrical|chemical)(.*)", "$2");
 				rootName = rootName.contains(" ")?rootName.split("[_\\- ]")[0].trim():rootName;
 				String[] postSynapticCells = synapseObjNameCleaned.split("_")[1].replaceAll(".*(electrical|chemical)(.*)", "$2").split("\\&");
 				if (postSynapticCells[0].contains("by")){
 					rootName = postSynapticCells[0];
 					postSynapticCells[0] = postSynapticCells[0].split("by")[1].trim();
-				}
+				} 
 				for (String currentGroupNeuron:currentGroupArray){
 					if (currentGroupNeuron==null) continue;
 					if (rootName.startsWith(currentGroupNeuron)){
