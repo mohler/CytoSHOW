@@ -6066,14 +6066,16 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							.replaceAll("(.*\ng )(.*)(\n.*)", "$1"+"$2_"+newObjNameChunks[newObjNameChunks.length-1].toLowerCase().replace(".obj", "")+"$3")							
 							.replaceAll("(.*usemtl mat_).*(\n.*)", "$1"+newObjColorName+"$2");
 					String[] newObjBodyTextVertexLines = newObjBodyText.split("(\nv |\nusemtl)");
+					String rebuildObjBodyText = newObjBodyTextVertexLines[0];
 					for (int v=1; v<newObjBodyTextVertexLines.length-1;v++) {
 						String[] vertexLineChunks = ("\nv " + newObjBodyTextVertexLines[v]).split(" ");
 						String shiftedObjBodyTextVertexLine = "\nv "+(Double.parseDouble(vertexLineChunks[1]) + xyShiftsForPolyadicGroupSynapses.get(newObjNamesforGroupPatches.indexOf(nextObjName))[0])
 														+ " " +(Double.parseDouble(vertexLineChunks[2]) + xyShiftsForPolyadicGroupSynapses.get(newObjNamesforGroupPatches.indexOf(nextObjName))[1])
 														+ " " +vertexLineChunks[3];
-						newObjBodyText = newObjBodyText.replace(("\nv " + newObjBodyTextVertexLines[v]), shiftedObjBodyTextVertexLine);
+						rebuildObjBodyText = rebuildObjBodyText +shiftedObjBodyTextVertexLine;
 					}
-					IJ.saveString(newObjBodyText, specificGroupOutputDirPath + File.separator + nextObjName);
+					rebuildObjBodyText = rebuildObjBodyText + newObjBodyTextVertexLines[newObjBodyTextVertexLines.length-1];
+					IJ.saveString(rebuildObjBodyText, specificGroupOutputDirPath + File.separator + nextObjName);
 				}
 			}
 			for(String nextObjName:newObjNamesforCellPatches){
@@ -6086,16 +6088,18 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							.replaceAll("(.*\ng )(.*)(\n.*)", "$1"+"$2_"+newObjNameChunks[newObjNameChunks.length-1].toLowerCase().replace(".obj", "")+"$3")							
 							.replaceAll("(.*usemtl mat_).*(\n.*)", "$1"+newObjColorName+"$2");
 					String[] newObjBodyTextVertexLines = newObjBodyText.split("(\nv |\nusemtl)");
+					String rebuildObjBodyText = newObjBodyTextVertexLines[0];
 					for (int v=1; v<newObjBodyTextVertexLines.length-1;v++) {
 						String[] vertexLineChunks = ("\nv " + newObjBodyTextVertexLines[v]).split(" ");
 						String shiftedObjBodyTextVertexLine = "\nv "+(Double.parseDouble(vertexLineChunks[1]) + xyShiftsForPolyadicCellSynapses.get(newObjNamesforCellPatches.indexOf(nextObjName))[0])
 														+ " " +(Double.parseDouble(vertexLineChunks[2]) + xyShiftsForPolyadicCellSynapses.get(newObjNamesforCellPatches.indexOf(nextObjName))[1])
 														+ " " +vertexLineChunks[3];
-						newObjBodyText = newObjBodyText.replace(("\nv " + newObjBodyTextVertexLines[v]), shiftedObjBodyTextVertexLine);
+						rebuildObjBodyText = rebuildObjBodyText +shiftedObjBodyTextVertexLine;
 					}
+					rebuildObjBodyText = rebuildObjBodyText + newObjBodyTextVertexLines[newObjBodyTextVertexLines.length-1];
 					for (String currentNeuron:cellNameDirs){
 						if (nextObjName.contains("_"+currentNeuron)){
-							IJ.saveString(newObjBodyText, newCellOutDirPath+File.separator+currentNeuron+ File.separator + nextObjName);			
+							IJ.saveString(rebuildObjBodyText, newCellOutDirPath+File.separator+currentNeuron+ File.separator + nextObjName);			
 						}
 					}
 				}
