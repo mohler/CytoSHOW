@@ -989,7 +989,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			Roi[] rois = getFullRoisAsArray();
 			for (int r=0; r < fraa; r++) {
 				String nextName = rois[r].getName();
-				if (nextName.startsWith("\""+rootName.split("_")[0])
+				if (nextName.startsWith("\""+rootName/*.split("_")[0]*/)
 						/*&&
 						rootName.endsWith(nextName.split("_")[nextName.split("_").length-1].replaceAll("[CZT]", "").split("-")[0])*/
 						){
