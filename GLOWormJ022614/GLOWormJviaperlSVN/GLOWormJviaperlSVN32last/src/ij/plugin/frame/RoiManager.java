@@ -6074,7 +6074,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 														+ " " +vertexLineChunks[3];
 						rebuildObjBodyText = rebuildObjBodyText +shiftedObjBodyTextVertexLine;
 					}
-					rebuildObjBodyText = rebuildObjBodyText + newObjBodyTextVertexLines[newObjBodyTextVertexLines.length-1];
+					rebuildObjBodyText = rebuildObjBodyText + "\nusemtl" + newObjBodyTextVertexLines[newObjBodyTextVertexLines.length-1];
 					IJ.saveString(rebuildObjBodyText, specificGroupOutputDirPath + File.separator + nextObjName);
 				}
 			}
@@ -6096,7 +6096,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 														+ " " +vertexLineChunks[3];
 						rebuildObjBodyText = rebuildObjBodyText +shiftedObjBodyTextVertexLine;
 					}
-					rebuildObjBodyText = rebuildObjBodyText + newObjBodyTextVertexLines[newObjBodyTextVertexLines.length-1];
+					rebuildObjBodyText = rebuildObjBodyText + "\nusemtl" + newObjBodyTextVertexLines[newObjBodyTextVertexLines.length-1];
 					for (String currentNeuron:cellNameDirs){
 						if (nextObjName.contains("_"+currentNeuron)){
 							IJ.saveString(rebuildObjBodyText, newCellOutDirPath+File.separator+currentNeuron+ File.separator + nextObjName);			
