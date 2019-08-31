@@ -2009,7 +2009,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				IJ.log(cellAreaHash.get(cellName+"_"+fillColor+"_"+sLayer.split("\"")[0]));
 				String areaString = null;
 
-				for (int rep=1; rep<maxReps; rep++) {
+				for (int rep=1; rep<=maxReps; rep++) {
 					areaString = cellAreaHash.get(cellName+"_"+fillColor+"_"+sLayer.split("\"")[0]+"_"+rep);
 					if (areaString != null) {
 						String filePath = sLayer.split("file_path=")[1].split("\"")[1];
