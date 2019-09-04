@@ -65,11 +65,11 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	private ImagePlus ownerImp;
 	private boolean segmentLiveNeuron;
 	private GenericDialog trackingDialog;
-	double threshModeCoeff = 0.08;
-	double minSize = 1000;
-	double maxSize = 2900;
-	double minCirc = 0.09;
-	double maxCirc = 0.25;
+	double threshModeCoeff = 0.079;  
+	double minSize = 900;
+	double maxSize = 100000;
+	double minCirc = 0.00;
+	double maxCirc = 1.000;
 	private ImageProcessor statsIP;
 	private ImageProcessor bigIP;
 
@@ -994,13 +994,13 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 						if(segmentLiveNeuron && !isViewB){
 
 							// pushing limits 08082019
-							threshModeCoeff = 0.099;  
-							minSize = 900;
-							maxSize = 100000;
-							minCirc = 0.00;
-							maxCirc = 1.000;
+//							threshModeCoeff = 0.079;  
+//							minSize = 900;
+//							maxSize = 100000;
+//							minCirc = 0.00;
+//							maxCirc = 1.000;
 
-							if (false /*trackingDialog == null*/){
+							if (trackingDialog == null){
 								trackingDialog = new GenericDialog("Tracking Parameters");
 								trackingDialog.addNumericField("thresholdCoeff", threshModeCoeff, 4);
 								trackingDialog.addNumericField("minSize", minSize, 0);
