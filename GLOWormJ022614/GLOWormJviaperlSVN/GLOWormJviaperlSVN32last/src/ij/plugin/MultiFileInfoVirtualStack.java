@@ -11,6 +11,7 @@ import ij.gui.*;
 import ij.io.*;
 
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
 import java.io.*;
 import java.net.InetAddress;
@@ -948,7 +949,9 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 						if (new File(wormTraceMapPath).canRead()){
 							ImagePlus bigImp = new ImagePlus(wormTraceMapPath);
 							bigIP = bigImp.getProcessor();
-						} else {
+						}
+						
+						if (bigIP == null){
 							bigIP = new FloatProcessor(907, 1200);
 							double[] ramp = new double[bigIP.getWidth()];
 							for (double i=0; i<bigIP.getWidth(); i++)
@@ -1137,6 +1140,7 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 											ownerImp.getRoiManager().setSelectedIndexes(new int[]{ownerImp.getRoiManager().getListModel().indexOf(roi.getName())});
 											ownerImp.getRoiManager().delete(false);
 											//										IJ.log("deleted stray roi");
+										} else {
 										}
 									}
 								}
@@ -1175,7 +1179,79 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 									double ratioIPmean = ratioStat.mean;
 									IJ.log(""+roiRGMeanRatio+" =? "+ratioIPmean);
 
+									
+									
+									maskIP = redIP.duplicate();
 
+									ipHis = maskIP.getHistogram();
+									ipHisMode = 0.0;
+									ipHisLength = ipHis.length;
+									ipHisMaxBin = 0;
+									for (int h=0; h<ipHisLength; h++) {
+										if (ipHis[h] > ipHisMaxBin) {
+											ipHisMaxBin = ipHis[h];
+											ipHisMode = (double)h;
+										}
+									}
+									maskIP.subtract(ipHisMode);
+									new RankFilters().rank(maskIP, 2, RankFilters.MEDIAN, 0, 0);	
+									preppedIP = maskIP.duplicate();
+
+									maskIP.threshold((int) (redStat.max/10));
+									maskIP.setThreshold(255,255,ImageProcessor.NO_LUT_UPDATE);
+
+									maskImp = new ImagePlus("Mask", maskIP);
+									maskImp.setMotherImp(this.ownerImp, 0);
+
+									resTab = new ResultsTable();
+									resTab.setDelimiter(',');
+									pa = new ParticleAnalyzer(ParticleAnalyzer.EXCLUDE_EDGE_PARTICLES
+											+ ParticleAnalyzer.ADD_TO_MANAGER
+											, ParticleAnalyzer.AREA+ ParticleAnalyzer.CENTER_OF_MASS
+											+ ParticleAnalyzer.CIRCULARITY+ ParticleAnalyzer.MEAN
+											+ ParticleAnalyzer.FERET 
+											+ ParticleAnalyzer.PERIMETER 
+											, resTab
+											, minSize/10, minSize
+											, minCirc, maxCirc); 
+									pa.setHideOutputImage(true);
+
+									while (!pa.analyze(maskImp, maskIP)){
+										IJ.wait(50);
+									}
+									IJ.wait(50);
+									maskImp.flush();
+
+									if (roisbn!=null && roisbn.size()>1) {
+										int rHits = roisbn.size();
+										Roi headFitRoi = null;
+										Roi tailFitRoi = null;
+										for (int r=1; r<roisbn.size(); r++) {
+											maskIP.setRoi(roisbn.get(r));
+											ImageStatistics stats = maskIP.getStatistics();										
+											double dx = stats.major*Math.cos(stats.angle/180.0*Math.PI)/2.0;
+											double dy = - stats.major*Math.sin(stats.angle/180.0*Math.PI)/2.0;
+											double x1 = stats.xCentroid - dx;
+											double x2 = stats.xCentroid + dx;
+											double y1 = stats.yCentroid - dy;
+											double y2 = stats.yCentroid + dy;
+											double aspectRatio = stats.minor/stats.major;
+											if (aspectRatio < 0.3){
+												ownerImp.getRoiManager().setSelectedIndexes(new int[]{ownerImp.getRoiManager().getListModel().indexOf(roisbn.get(r).getName())});
+												ownerImp.getRoiManager().delete(false);
+												r--;
+												continue;
+											}
+											Roi headEllipse = new EllipseRoi(x1,y1,x2,y2,aspectRatio);
+											headEllipse = RoiEnlarger.enlarge(headEllipse, (stats.minor));
+											headFitRoi = (new ShapeRoi(headEllipse).and(new ShapeRoi(hiQuadraRoi)));
+											headFitRoi.setPosition(ownerImp.getChannel(), ownerImp.getSlice(), ownerImp.getFrame());
+											tailFitRoi = (new ShapeRoi(headFitRoi).xor(new ShapeRoi(hiQuadraRoi)));
+											tailFitRoi.setPosition(ownerImp.getChannel(), ownerImp.getSlice(), ownerImp.getFrame());
+										}
+											ownerImp.getRoiManager().addRoi(headFitRoi, false, Color.blue, 1, false);
+											ownerImp.getRoiManager().addRoi(tailFitRoi, false, Color.red, 1, false);
+									}
 								}
 							}
 						}

@@ -728,9 +728,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					for (int r2=0; r2 < fraaa; r2++) {
 						String nextName = rois2[r2].getName();
 						if (!rootName.replace("\"", "").trim().equals("") ){
-							if (nextName.matches("(\"?)"+rootName.replace("\"", "").trim()+(propagateRenamesThruLineage?"[m|n]*":"")+"( \"?).*")){
+							if (nextName.matches("(\"?)"+rootName.replace("\"", "").trim()+(propagateRenamesThruLineage?"[m|n]*":"")+"(( \")?).*")){
 								nameMatchIndexArrayList.add(r2);
-								nameReplacementArrayList.add(nextName.replaceAll("(\"?)"+rootName.replace("\"", "").trim()+"([m|n]*)( \"?)(.*)", newName+"$2"));
+								nameReplacementArrayList.add(nextName.replaceAll("(\"?)"+rootName.replace("\"", "").trim()+"([m|n]*)(( \")?)(.*)", newName+"$2"));
 							}
 						} else {
 							if (nextName.matches("(\"?)"+rootName.replace("\"", "")+"(\"?).*")){

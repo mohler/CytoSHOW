@@ -371,6 +371,7 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 		for (int c=firstC; c<=(flattenTags?firstC:lastC); c++) {
 			for (int z=firstZ; z<=lastZ; z++) {
 				for (int t=firstT; t<=lastT; t= t + stepT) {
+					
 					IJ.showProgress(z, zDim);
 					//        			IJ.showStatus(z+"/"+zDim);
 					ImageProcessor ip = null;      // get the image to write ...
@@ -382,6 +383,8 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 						//        					imp.setPositionWithoutUpdate(channel, z+1, frame);
 						//        				else if (saveChannels)
 						//        					imp.setPositionWithoutUpdate(z+1, slice, frame);
+						imp.setPositionWithoutUpdate(channel, z, t);
+
 						ImagePlus imp2 = imp;
 						if (isOverlay) {
 							if (!(saveFrames||saveSlices||saveChannels))
