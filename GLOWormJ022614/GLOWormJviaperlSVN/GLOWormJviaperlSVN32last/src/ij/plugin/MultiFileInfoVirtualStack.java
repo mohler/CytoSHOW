@@ -1131,12 +1131,7 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 									}
 									for (Object thisRoi:roisbn.toArray()) {
 										Roi roi = (Roi)thisRoi;
-										if (roi != hiQuadraRoi
-												//	 && roi != hiRGRoi
-												//	 && roi != hiProductRoi 
-												//	 && roi != hiFeretRoi 
-												//	 && roi != loPARatioRoi
-												) {
+										if (roi != hiQuadraRoi) {
 											ownerImp.getRoiManager().setSelectedIndexes(new int[]{ownerImp.getRoiManager().getListModel().indexOf(roi.getName())});
 											ownerImp.getRoiManager().delete(false);
 											//										IJ.log("deleted stray roi");
@@ -1223,7 +1218,6 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 									maskImp.flush();
 
 									if (roisbn!=null && roisbn.size()>1) {
-										int rHits = roisbn.size();
 										Roi headFitRoi = null;
 										Roi tailFitRoi = null;
 										for (int r=1; r<roisbn.size(); r++) {
@@ -1249,8 +1243,10 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 											tailFitRoi = (new ShapeRoi(headFitRoi).xor(new ShapeRoi(hiQuadraRoi)));
 											tailFitRoi.setPosition(ownerImp.getChannel(), ownerImp.getSlice(), ownerImp.getFrame());
 										}
-											ownerImp.getRoiManager().addRoi(headFitRoi, false, Color.blue, 1, false);
-											ownerImp.getRoiManager().addRoi(tailFitRoi, false, Color.red, 1, false);
+											if (headFitRoi !=null)
+												ownerImp.getRoiManager().addRoi(headFitRoi, false, Color.blue, 1, false);
+											if (tailFitRoi !=null)
+												ownerImp.getRoiManager().addRoi(tailFitRoi, false, Color.red, 1, false);
 									}
 								}
 							}

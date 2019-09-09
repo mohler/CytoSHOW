@@ -786,7 +786,8 @@ public class ShapeRoi extends Roi {
 		PathIterator pIt = shape.getPathIterator(new AffineTransform());
 		Vector h = new Vector(); // handles
 		Vector s = new Vector(); // segment types
-		if (!(parsePath(pIt, null, s, null, h))) return null;
+		if (!(parsePath(pIt, null, s, null, h))) 
+			return null;
 		float[] result = new float[7*s.size()];
 		Point2D.Double p;
 		int segType;
@@ -925,7 +926,11 @@ public class ShapeRoi extends Roi {
 		while (!done) {
 			coords = new double[6];
 			ucoords = new double[6];
+			try {
 			segType = pIter.currentSegment(coords);
+			} catch (ArrayIndexOutOfBoundsException e) {
+				return false;
+			}
 			segments.add(new Integer(segType));
 			count++;
 			System.arraycopy(coords,0,ucoords,0,coords.length);

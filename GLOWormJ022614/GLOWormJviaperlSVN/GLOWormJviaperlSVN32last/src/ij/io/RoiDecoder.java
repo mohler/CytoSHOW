@@ -146,6 +146,8 @@ public class RoiDecoder {
 		while (total<size)
 			total += is.read(data, total, size-total);
 		is.close();
+		if (getByte(0)==0)
+			return null;
 		if (getByte(0)!=73 || getByte(1)!=111)  //"Iout"
 			throw new IOException("This is not an ImageJ ROI");
 		int version = getShort(VERSION_OFFSET);
@@ -455,7 +457,10 @@ public class RoiDecoder {
 	}
 
 	int getByte(int base) {
-		return data[base]&255;
+		if (data.length > base)
+			return data[base]&255;
+		else
+			return 0;
 	}
 
 	int getShort(int base) {

@@ -92,7 +92,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	private Checkbox showOwnROIsCheckbox = new Checkbox("Only own notes", false);
 	private ImagePlus imp = null;
 
-	private Checkbox labelsCheckbox = new Checkbox("Number Labels", false);
+	private Checkbox labelsCheckbox = new Checkbox("Number", false);
 	private JSpinner zSustainSpinner ;
 	private JSpinner tSustainSpinner ;
 	private int  zSustain =1;
@@ -266,7 +266,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		add("Center", scrollPane);
 		panel = new Panel();
 		int nButtons = BUTTONS;
-		panel.setLayout(new GridLayout(nButtons+1, 1, 5, 0));
+		panel.setLayout(new GridLayout(nButtons+2, 1, 5, 0));
 		addButton("Add\n(ctrl-t)");
 		addRoiSpanCCheckbox.addItemListener(this);
 		panel.add(addRoiSpanCCheckbox);
@@ -290,6 +290,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		//		panel.add(showOwnROIsCheckbox);
 		showAllCheckbox.addItemListener(this);
 		panel.add(showAllCheckbox);
+		
+		labelsCheckbox.addItemListener(this);
+		panel.add(labelsCheckbox);
 		zSustainSpinner =  new JSpinner(
 				new SpinnerNumberModel(zSustain<=getImage().getNSlices()?zSustain:getImage().getNSlices(), 1, getImage().getNSlices(), 1));
 		zSustainSpinner.setToolTipText("Adjust Z-depth to sustain display of Tags");
