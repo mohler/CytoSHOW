@@ -5978,6 +5978,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			for (int j=0; j<allGroupArrays.length; j++){
 				synapseSummaryByGroups.add(new ArrayList<String>());
 				synapseSummaryByGroups.get(synapseSummaryByGroups.size()-1).add(""+allGroupColorStrings[i]+"-"+allGroupColorStrings[j] + ">>");
+				synapseDetailByGroups.add(new ArrayList<String>());
+				synapseDetailByGroups.get(synapseDetailByGroups.size()-1).add(""+allGroupColorStrings[i]+"-"+allGroupColorStrings[j] + ">>>>");
 			}
 			ArrayList<String> newObjNamesforGroupPatches = new ArrayList<String>();
 			ArrayList<String> oldObjNamesforGroupPatches = new ArrayList<String>();
@@ -6053,6 +6055,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 									}
 									newPreSynObjNamesforCellPatches.add(newPreSynObjFileName);
 									newPostSynObjNamesforCellPatches.add(newPostSynObjFileName);
+									
 									oldObjNamesforCellPatches.add(synapseObjFileName);
 									xyShiftsForPolyadicCellSynapses.add(new int[]{psps[psc][0]*shift, psps[psc][1]*shift});
 									
@@ -6123,8 +6126,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					}
 					rebuildObjBodyText = rebuildObjBodyText + "\nusemtl" + newObjBodyTextVertexLines[newObjBodyTextVertexLines.length-1];
 					for (String currentNeuron:preSynCellNameDirs){
-						if (nextObjName.contains("_"+currentNeuron)){
-							IJ.saveString(rebuildObjBodyText, newCellOutDirPath+File.separator+currentNeuron+"_PreSyn"+ File.separator + nextObjName);			
+						if (nextObjName.contains("_"+currentNeuron.replaceAll("(_PreSyn|_PostSyn)", ""))){
+							IJ.saveString(rebuildObjBodyText, newCellOutDirPath+File.separator+currentNeuron+ File.separator + nextObjName);			
 						}
 					}
 				}
@@ -6149,9 +6152,25 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					}
 					rebuildObjBodyText = rebuildObjBodyText + "\nusemtl" + newObjBodyTextVertexLines[newObjBodyTextVertexLines.length-1];
 					for (String currentNeuron:postSynCellNameDirs){
-						if (!nextObjName.contains("_"+currentNeuron) && nextObjName.contains(currentNeuron)){
-							IJ.saveString(rebuildObjBodyText, newCellOutDirPath+File.separator+currentNeuron+"_PostSyn"+ File.separator + nextObjName);			
+						boolean breakOut = false;
+						if (!nextObjName.contains("_"+currentNeuron.replaceAll("(_PreSyn|_PostSyn)", "")) && nextObjName.contains(currentNeuron.replaceAll("(_PreSyn|_PostSyn)", ""))){
+							String[] currentNeuronDirList = new File(newCellOutDirPath+File.separator+currentNeuron).list();
+							boolean currentSynapseNew = true;
+							if (currentNeuronDirList!=null){
+								for (String fileName:currentNeuronDirList){
+									String nextObjStart =nextObjName.replaceAll("(_zs\\d+).*", "$1");
+									if (fileName.startsWith(nextObjStart)){
+										currentSynapseNew = false;
+									}
+								}
+							}
+							if (currentSynapseNew){
+								IJ.saveString(rebuildObjBodyText, newCellOutDirPath+File.separator+currentNeuron+ File.separator + nextObjName);
+								breakOut=true;
+							}
 						}
+						if (breakOut)
+							break;  //only one hit allowed per postsyn name...
 					}
 				}
 			}
