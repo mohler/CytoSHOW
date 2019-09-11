@@ -116,7 +116,7 @@ public class AVI_Reader extends VirtualStack implements PlugIn {
 
     //four-character codes for avi chunk types
     //NOTE: byte sequence is reversed - ints in Intel (little endian) byte order!
-    private final static int   FOURCC_RIFF = 0x464952;   //'RIFF'
+    private final static int   FOURCC_RIFF = 0x46464952;   //'RIFF'
     private final static int   FOURCC_AVI =  0x20495641;   //'AVI '
     private final static int   FOURCC_AVIX = 0x58495641;   //'AVIX'  // extended AVI
     private final static int   FOURCC_ix00 = 0x30307869;   //'ix00'  // index within
