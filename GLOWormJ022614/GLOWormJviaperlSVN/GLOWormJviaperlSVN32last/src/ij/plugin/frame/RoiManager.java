@@ -6176,20 +6176,24 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					rebuildObjBodyText = rebuildObjBodyText + "\nusemtl" + newObjBodyTextVertexLines[newObjBodyTextVertexLines.length-1];
 					for (String currentNeuron:postSynCellNameDirs){
 						boolean breakOut = false;
-						if (!nextObjName.contains("_"+currentNeuron.replaceAll("(_PreSyn|_PostSyn)", "")) && nextObjName.contains(currentNeuron.replaceAll("(_PreSyn|_PostSyn)", ""))){
-							String[] currentNeuronDirList = new File(newCellOutDirPath+File.separator+currentNeuron).list();
-							boolean currentSynapseNew = true;
-							if (currentNeuronDirList!=null){
-								for (String fileName:currentNeuronDirList){
-									String nextObjStart =nextObjName.replaceAll("(_zs\\d+).*", "$1");
-									if (fileName.startsWith(nextObjStart)){
-										currentSynapseNew = false;
+						String[] nextObjNameChunks = nextObjName.split("chemical|electrical|\\&|_(un)?certain");
+						for (String nextChunk:nextObjNameChunks){
+							if (!nextChunk.equals("_"+currentNeuron.replaceAll("(_PreSyn|_PostSyn)", "")) 
+									&& nextChunk.equals(currentNeuron.replaceAll("(_PreSyn|_PostSyn)", ""))){
+								String[] currentNeuronDirList = new File(newCellOutDirPath+File.separator+currentNeuron).list();
+								boolean currentSynapseNew = true;
+								if (currentNeuronDirList!=null){
+									for (String fileName:currentNeuronDirList){
+										String nextObjStart =nextObjName.replaceAll("(_zs\\d+).*", "$1");
+										if (fileName.startsWith(nextObjStart)){
+											currentSynapseNew = false;
+										}
 									}
 								}
-							}
-							if (currentSynapseNew){
-								IJ.saveString(rebuildObjBodyText, newCellOutDirPath+File.separator+currentNeuron+ File.separator + nextObjName);
-								breakOut=true;
+								if (currentSynapseNew){
+									IJ.saveString(rebuildObjBodyText, newCellOutDirPath+File.separator+currentNeuron+ File.separator + nextObjName);
+									breakOut=true;
+								}
 							}
 						}
 						if (breakOut)
