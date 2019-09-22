@@ -1284,7 +1284,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (fillColor!=null)
 			roiCopy.setFillColor(fillColor);
 		rois.put(label, roiCopy);
-		setUpRoisByNameAndNumbers(roiCopy);
+//		setUpRoisByNameAndNumbers(roiCopy);
 
 		ColorLegend cl = getColorLegend();
 		//
@@ -1355,6 +1355,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			roiCopy.setPosition(c, z, t);
 			//IJ.log("addSingleRoi" + roiCopy.getCPosition()+roiCopy.getZPosition()+roiCopy.getTPosition() );
 		}
+		setUpRoisByNameAndNumbers(roiCopy);
 		//		if (false)
 		updateShowAll();
 		if (record())
@@ -1923,7 +1924,41 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			name = getUniqueName(name);
 			listModel.addElement(name);
 			fullListModel.addElement(name);
+			roi.setName(name);
 			rois.put(name, roi);
+			int c = 0;
+			int z = 0;
+			int t = 0;
+
+			if (imp != null && imp.getWindow()!=null && roi.getPosition()==0) {
+				c = imp.getChannel();
+				z = imp.getSlice();
+				t = imp.getFrame();
+				roi.setPosition(c, z, t);
+				//IJ.log("addSingleRoi" + roiCopy.getCPosition()+roiCopy.getZPosition()+roiCopy.getTPosition() );
+			} else {
+				c = roi.getCPosition();
+				z = roi.getZPosition();
+				t = roi.getTPosition();
+			}
+			if (roi.getName() != null && roi.getName().split("_").length>3) {
+				if (roi.getName().split("_")[3].contains("C"))
+					c=0;
+				if (roi.getName().split("_")[3].contains("Z"))
+					z=0;
+				if (roi.getName().split("_")[3].contains("T"))
+					t=0;
+			}
+			if (addRoiSpanC) {
+				c = 0;
+			}
+			if (addRoiSpanZ) {
+				z = 0;
+			}
+			if (addRoiSpanT) {
+				t = 0;
+			}
+			roi.setPosition(c, z, t);
 			setUpRoisByNameAndNumbers(roi);
 		}		
 		showAll(SHOW_ALL);
@@ -2288,6 +2323,22 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						fullListModel.addElement(name);
 						rois.put(name, roi); 
 						((Roi) rois.get(name)).setName(name);  //weird but necessary, and logically so
+						String nameEndReader = name;
+						while (nameEndReader.endsWith("C") || nameEndReader.endsWith("Z") || nameEndReader.endsWith("T") ) {
+							if (nameEndReader.endsWith("C") ){
+								c = 0;
+								nameEndReader = nameEndReader.substring(0, nameEndReader.length()-1);
+							}
+							if (nameEndReader.endsWith("Z") ){
+								z = 0;
+								nameEndReader = nameEndReader.substring(0, nameEndReader.length()-1);
+							}
+							if (nameEndReader.endsWith("T") ){
+								t = 0;
+								nameEndReader = nameEndReader.substring(0, nameEndReader.length()-1);
+							}
+						}
+						roi.setPosition(c, z, t);
 						String rbnKey = roi.getCPosition()+"_"+(imp.getNSlices()==1?1:roi.getZPosition())+"_"+roi.getTPosition();
 						ArrayList<Roi> sliceRois = roisByNumbers.get(rbnKey);
 						if (sliceRois == null) {
@@ -2305,22 +2356,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						rootNameRois.add(roi);
 
 						nRois++;
-						String nameEndReader = name;
 						ImagePlus imp = this.imp;
-						while (nameEndReader.endsWith("C") || nameEndReader.endsWith("Z") || nameEndReader.endsWith("T") ) {
-							if (nameEndReader.endsWith("C") ){
-								c = 0;
-								nameEndReader = nameEndReader.substring(0, nameEndReader.length()-1);
-							}
-							if (nameEndReader.endsWith("Z") ){
-								z = 0;
-								nameEndReader = nameEndReader.substring(0, nameEndReader.length()-1);
-							}
-							if (nameEndReader.endsWith("T") ){
-								t = 0;
-								nameEndReader = nameEndReader.substring(0, nameEndReader.length()-1);
-							}
-						}
 
 
 					} 
