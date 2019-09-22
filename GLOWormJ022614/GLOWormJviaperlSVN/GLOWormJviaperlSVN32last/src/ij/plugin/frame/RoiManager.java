@@ -949,7 +949,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	private void sketchVolumeViewer(Object source) { 
 		boolean singleSave = IJ.shiftKeyDown();
-		double scaleFactor = 1d;
+		double scaleFactor = 0.5d;
 		IJ.setForegroundColor(255, 255, 255);
 		IJ.setBackgroundColor(0, 0, 0);
 		if (getSelectedRoisAsArray().length<1)
@@ -973,12 +973,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		MQTVS_VolumeViewer vv = new MQTVS_VolumeViewer(); 
 		for (int n=0; n<rootNames_rootFrames.size(); n++) {
-			ImagePlus sketchImp = NewImage.createImage("SketchVolumeViewer_"+rootNames_rootFrames.get(0),(int)(imp.getWidth()*scaleFactor), (int)(imp.getHeight()*scaleFactor), imp.getNSlices()*imp.getNFrames(), 8, NewImage.FILL_BLACK, false);
-			sketchImp.setDimensions(1, imp.getNSlices(), imp.getNFrames());
+			ImagePlus sketchImp = NewImage.createImage("SketchVolumeViewer_"+rootNames_rootFrames.get(0),(int)(imp.getWidth()*scaleFactor), (int)(imp.getHeight()*scaleFactor), imp.getNSlices()*imp.getNFrames()*2, 8, NewImage.FILL_BLACK, false);
+			sketchImp.setDimensions(1, imp.getNSlices()*2, imp.getNFrames());
 			sketchImp.setMotherImp(imp, imp.getID());
 			sketchImp.setCalibration(imp.getCalibration());
 			sketchImp.getCalibration().pixelWidth = sketchImp.getCalibration().pixelWidth/scaleFactor;
 			sketchImp.getCalibration().pixelHeight = sketchImp.getCalibration().pixelHeight/scaleFactor;
+			sketchImp.getCalibration().pixelDepth = sketchImp.getCalibration().pixelDepth/2;
 
 			String rootName = rootNames.get(n);
 			sketchImp.setTitle("SketchVolumeViewer_"+rootName);
@@ -1009,9 +1010,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				nameMatchIndexes[i] = nameMatchIndexArrayList.get(i);
 				nextRoi = ((Roi)rois[nameMatchIndexArrayList.get(i)]);
 				String[] nextChunks = nextRoi.getName().split("_");
-				int nextSlice = Integer.parseInt(nextChunks[nextChunks.length-2]);
+				int nextSlice = Integer.parseInt(nextChunks[nextChunks.length-2])*2;
 				int nextFrame = Integer.parseInt(nextChunks[nextChunks.length-1].replaceAll("[CZT]", "").split("-")[0]);
-				sketchImp.setPosition(1, nextSlice, nextFrame);
 				Roi scaledRoi=null;
 				try {
 					scaledRoi = new RoiDecoder(scaleFactor, RoiEncoder.saveAsByteArray(nextRoi), nextRoi.getName()).getRoi();
@@ -1019,6 +1019,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				sketchImp.setPosition(1, nextSlice, nextFrame);
+				sketchImp.getRoiManager().addRoi(scaledRoi);
+				sketchImp.setPosition(1, nextSlice-1, nextFrame);
 				sketchImp.getRoiManager().addRoi(scaledRoi);
 			}		
 			sketchImp.getRoiManager().select(-1);
