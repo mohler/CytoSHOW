@@ -6048,11 +6048,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					IJ.wait(1);
 				if (synapseObjFileName==null || !synapseObjFileName.toLowerCase().endsWith(".obj")) continue;
 				boolean presynInGroup = false;
+				boolean rootIsPostSyn = false;
 				boolean postsynOutsideOfGroup = true;
 				String synapseObjNameCleaned = synapseObjFileName.replace("\"", "").replace("[", "").replace("]", "");
 				boolean postShape = synapseObjNameCleaned.toLowerCase().endsWith("postsyn.obj");
 				String rootName = synapseObjFileName.contains("\"")?synapseObjFileName.split("\"")[1].trim():synapseObjNameCleaned.replaceAll("(.*_zs\\d+_)(.*)(electrical|chemical)(.*)", "$2");
-				rootName = rootName.contains(" ")?rootName.split("[_\\- ]")[0].trim():rootName;
+				rootName = rootName.contains(" ")?rootName.split("[_\\- ]")[0].trim():rootName.trim();
 				String[] postSynapticCells = synapseObjNameCleaned.split("_")[1].replaceAll(".*(electrical|chemical)(.*)", "$2").split("\\&");
 				if (postSynapticCells[0].contains("by")){
 					rootName = postSynapticCells[0];
@@ -6062,7 +6063,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					if (currentGroupNeuron==null) continue;
 					if (!allCellNamesFromTable.contains(currentGroupNeuron)) 
 						continue;
-					if (rootName.startsWith(currentGroupNeuron)){
+					if (rootName.equals(currentGroupNeuron)){
 						if (!preSynCellNameDirs.contains(currentGroupNeuron+"_PreSyn")){
 							preSynCellNameDirs.add(currentGroupNeuron+"_PreSyn");
 							new File(newCellOutDirPath+File.separator+currentGroupNeuron+"_PreSyn").mkdirs();
@@ -6073,7 +6074,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						for (String postSC : postSynapticCells){
 							if (!allCellNamesFromTable.contains(postSC)) 
 								continue;
-							
+
 							if (!postSynCellNameDirs.contains(postSC+"_PostSyn")){
 								postSynCellNameDirs.add(postSC+"_PostSyn");
 								new File(newCellOutDirPath+File.separator+postSC+"_PostSyn").mkdirs();
@@ -6087,10 +6088,16 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							}
 						}
 						postsynOutsideOfGroup = postsynOutsideOfGroup && noHitInGroup;
+					} else {
+						for (String postSC : postSynapticCells){
+							if (postSC.equals(currentGroupNeuron)){
+								rootIsPostSyn = true;
+							}
+						}
 					}
 				}
-				if (presynInGroup){
 
+				if (presynInGroup){
 					for (int ba=0; ba<allGroupArrays.length; ba++){
 						String[] targetGroupArray = allGroupArrays[ba];
 						if (targetGroupArray==null) continue;
@@ -6110,19 +6117,19 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 									String newPostSynObjFileName = synapseObjFileName.endsWith("preSyn.obj")?"":synapseObjFileName;;
 									newPostSynObjFileName = newPostSynObjFileName.replace(".obj", "_"+allGroupColorStrings[i]+"-"+psc+".obj");
 									if (postsynOutsideOfGroup){
-											newObjNamesforGroupPatches.add(newPreSynObjFileName);
-											oldObjNamesforGroupPatches.add(synapseObjFileName);
-											xyShiftsForPolyadicGroupSynapses.add(new int[]{psps[psc][0]*shift, psps[psc][1]*shift});
-										
+										newObjNamesforGroupPatches.add(newPreSynObjFileName);
+										oldObjNamesforGroupPatches.add(synapseObjFileName);
+										xyShiftsForPolyadicGroupSynapses.add(new int[]{psps[psc][0]*shift, psps[psc][1]*shift});
+
 									}
-									
+
 									newPreSynObjNamesforCellPatches.add(newPreSynObjFileName);
 
 									newPostSynObjNamesforCellPatches.add(newPostSynObjFileName);
 
 									oldObjNamesforCellPatches.add(synapseObjFileName);
 									xyShiftsForPolyadicCellSynapses.add(new int[]{psps[psc][0]*shift, psps[psc][1]*shift});
-									
+
 									if (!synapseSummaryByGroups.get(ba).contains(rootName+"->"+postSC)){
 										synapseSummaryByGroups.get(ba).add(rootName+"->"+postSC);
 									}
@@ -6132,9 +6139,28 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								}
 								psc++;
 							}
+
 						}
 					}
-				}
+
+				}else if (rootIsPostSyn && !presynInGroup){
+					for (int ba=0; ba<allGroupArrays.length; ba++){
+						String[] targetGroupArray = allGroupArrays[ba];
+						if (targetGroupArray==null) continue;
+						for (String targetGroupNeuron:targetGroupArray){
+							if (targetGroupNeuron==null) continue;
+							int psc=0;
+							if (rootName.equals(targetGroupNeuron)){
+								String newPostSynObjFileName = synapseObjFileName.endsWith("preSyn.obj")?"":synapseObjFileName;;
+								newPostSynObjFileName = newPostSynObjFileName.replace(".obj", "_"+allGroupColorStrings[ba]+"-"+psc+".obj");
+								newObjNamesforGroupPatches.add(newPostSynObjFileName);
+								oldObjNamesforGroupPatches.add(synapseObjFileName);
+								xyShiftsForPolyadicGroupSynapses.add(new int[]{0, 0});
+							}
+						}
+					}
+				} 
+
 			}
 			for (ArrayList<String> synapseSPartners:synapseSummaryByGroups){
 				for(String synapseSName:synapseSPartners){
