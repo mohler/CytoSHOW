@@ -5323,6 +5323,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			String imageNumber = sObj.split(",")[4].replace("\"", "");
 			int zSustain = Integer.parseInt(sObj.split(",")[21].replace("\"", "").replace("zS", ""));
 			String roiName="\""+sObj.split(",")[17].replace("\"", "")+objType+sObj.split(",")[18].replace("\"", "")+"_"+sObj.split(",")[12].replace("\"", "")+imageNumber+"_zs"+sObj.split(",")[21].replace("\"", "")+" \"";
+			roiName = roiName.replaceAll("(\\[|\\])", "");
 			Color roiColor= objType.contains("chemical")?Color.white:Color.yellow;
 			if (roiName.contains("uncertain"))
 				roiColor= objType.contains("chemical")?Color.pink:Color.orange;
