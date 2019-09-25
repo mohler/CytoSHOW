@@ -145,6 +145,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	private boolean propagateRenamesThruLineage = false;
 	private double roiRescaleFactor = 1d;
 	private double expansionDistance = 10d;
+	private String lastRoiOpenPath;
 
 
 
@@ -960,6 +961,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		String roiColorString = Colors.colorToHexString(this.getSelectedRoisAsArray()[0].getFillColor());
 //		roiColorString = roiColorString.substring(3 /*roiColorString.length()-6*/);
 		String assignedColorString = roiColorString;
+		
+		String outDir = IJ.getDirectory("Choose Location to Save Output OBJ/MTL Files...");
+		outDir = outDir + new File(lastRoiOpenPath).getName().replace(".zip", "_SingleOBJs");
+		new File(outDir).mkdirs();
 
 		for (Roi selRoi:getSelectedRoisAsArray()) {
 			String rootName = selRoi.getName().contains("\"")?selRoi.getName().split("\"")[1].trim():"";
@@ -1040,7 +1045,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			(new StackReverser()).flipStack(sketchImp);
 			sketchImp.setMotherImp(imp, imp.getID());
 
-			vv.runVolumeViewer(sketchImp, rootName, assignedColorString, true, null);
+			vv.runVolumeViewer(sketchImp, rootName, assignedColorString, true, null, outDir);
 
 			sketchImp.changes = false;
 			sketchImp.close();
@@ -1869,6 +1874,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				return;
 			path = directory + name;
 		}
+		lastRoiOpenPath = path;
 		if (Recorder.record && !Recorder.scriptMode())
 			Recorder.record("roiManager", "Open", path);
 		if (path.endsWith(".zip")) {
@@ -5329,12 +5335,25 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				roiColor= objType.contains("chemical")?Color.pink:Color.orange;
 			int centerX = (int)(Integer.parseInt(sObj.split(",")[1].replace("\"", ""))/shrinkFactor) ;
 			int centerY = (int)(Integer.parseInt(sObj.split(",")[2].replace("\"", ""))/shrinkFactor);
-			int centerZ = Integer.parseInt(sObj.split(",")[4].replace("\"", "")
+			int frontZ = Integer.parseInt(sObj.split(",")[4].replace("\"", "")
 					.replace(centerZroot, ("")));
+
+////		  SPECIAL CASE ONLY FOR honoring JSH image GAPS AT Z56 z162-166				
+			if (frontZ>55){
+				frontZ++;
+			}
+			if (frontZ>162){
+				frontZ++;
+				frontZ++;
+				frontZ++;
+				frontZ++;							
+			}
+
+			
 			int adjustmentZ =0;
 			for (int susStep=0;susStep<zSustain;susStep++){
-				int plotZ = centerZ+susStep -adjustmentZ;
-				if (centerZ<1||centerZ>imp.getNSlices()){
+				int plotZ = frontZ+susStep -adjustmentZ;
+				if (plotZ<1||plotZ>imp.getNSlices()){
 					continue;
 				}
 

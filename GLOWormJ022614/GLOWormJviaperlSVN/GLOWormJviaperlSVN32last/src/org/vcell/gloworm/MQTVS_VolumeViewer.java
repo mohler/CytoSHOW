@@ -36,14 +36,14 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 	public void run(String arg) {
 		String cellName = arg;
 		ImagePlus imp = IJ.getImage();
-		runVolumeViewer(imp, cellName, null, false, new Image3DUniverse());
+		runVolumeViewer(imp, cellName, null, false, new Image3DUniverse(), null);
 	}
 	
 	public void runVolumeViewer(ImagePlus imp, String cellName, String assignedColorString, Image3DUniverse univ) {
-		runVolumeViewer(imp, cellName, assignedColorString, false, univ);
+		runVolumeViewer(imp, cellName, assignedColorString, false, univ, null);
 	}
 	
-	public void runVolumeViewer(ImagePlus imp, String cellName, String assignedColorString, boolean saveSingly, Image3DUniverse univ) {
+	public void runVolumeViewer(ImagePlus imp, String cellName, String assignedColorString, boolean saveSingly, Image3DUniverse univ, String outDir) {
 		boolean singleSave = IJ.shiftKeyDown() || saveSingly;
 		if (univ == null){
 			if (this.univ == null){	
@@ -181,10 +181,10 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 					if (singleSave) {
 						Hashtable<String, Content> newestContent = new Hashtable<String, Content>();
 						newestContent.put(""+objectName, univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
-						MeshExporter.saveAsWaveFront(newestContent.values(), new File((IJ.getDirectory("home")+File.separator+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"+objectName.replaceAll(":","").replaceAll("(/|\\s+)","")+"_"+ch+"_"+0+".obj")), univ.getStartTime(), univ.getEndTime());
-												univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
-												univ.getSelected().setLocked(false);
-												univ.removeContent(univ.getSelected().getName());
+						MeshExporter.saveAsWaveFront(newestContent.values(), new File(((outDir==null?IJ.getDirectory("home"):outDir)+File.separator+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"+objectName.replaceAll(":","").replaceAll("(/|\\s+)","")+"_"+ch+"_"+0+".obj")), univ.getStartTime(), univ.getEndTime());
+						univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
+						univ.getSelected().setLocked(false);
+						univ.removeContent(univ.getSelected().getName());
 					}
 //					for (Object content:contents.values()){
 //						if (((Content)content).getName() != objectName){
@@ -277,7 +277,7 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 						if (singleSave) {
 							Hashtable<String, Content> newestContent = new Hashtable<String, Content>();
 							newestContent.put(""+objectName, univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
-							MeshExporter.saveAsWaveFront(newestContent.values(), new File((IJ.getDirectory("home")+File.separator+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"+objectName.replaceAll(":","").replaceAll("(/|\\s+)","")+"_"+ch+"_"+tpt+".obj")), univ.getStartTime(), univ.getEndTime());
+							MeshExporter.saveAsWaveFront(newestContent.values(), new File(((outDir==null?IJ.getDirectory("home"):outDir)+File.separator+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"+objectName.replaceAll(":","").replaceAll("(/|\\s+)","")+"_"+ch+"_"+tpt+".obj")), univ.getStartTime(), univ.getEndTime());
 							//						univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
 							//						univ.getSelected().setLocked(false);
 							//						univ.removeContent(univ.getSelected().getName());
