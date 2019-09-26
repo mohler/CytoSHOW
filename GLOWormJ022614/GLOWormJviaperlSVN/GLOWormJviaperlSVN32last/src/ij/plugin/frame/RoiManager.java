@@ -950,8 +950,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	private void sketchVolumeViewer(Object source) { 
 		boolean singleSave = IJ.shiftKeyDown();
-		double scaleFactor = 0.33333d;
-		double zPadFactor = 1.0d/scaleFactor;
+		double scaleFactor = IJ.getNumber("Downscale for faster rendring?", 0.3d);
+		double zPadFactor = 3;
 		IJ.setForegroundColor(255, 255, 255);
 		IJ.setBackgroundColor(0, 0, 0);
 		if (getSelectedRoisAsArray().length<1)
