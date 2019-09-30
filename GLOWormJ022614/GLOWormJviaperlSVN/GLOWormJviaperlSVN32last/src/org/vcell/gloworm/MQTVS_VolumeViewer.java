@@ -136,27 +136,15 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 					int binFactor = 2;
 					double scaleFactor  = 1.0;
 					int threshold = 90;
-					if (imp.getTitle().startsWith("SketchVolumeViewer")) {
+					if (imp.getTitle().startsWith("SVV")) {
 						binFactor = 1;
 						scaleFactor  = 0.1;
 						if (!(imp.getMotherImp().getTitle().contains("SW_") || imp.getMotherImp().getTitle().contains("RGB_")))
 							scaleFactor  = 1;
 						threshold = 1;
 					}
-					//NOW HANDLE SCALING BEFORE CALL TO HIS METHOD					
-					//					IJ.run(impD, "Scale...", "x="+(scaleFactor)+" y="+(scaleFactor)+" z=1.0 interpolation=Bicubic average process create" );
-					//					ImagePlus impDS = IJ.getImage();
-					//					impD = impDS;
 					if (impD.getBitDepth()!=8){
-//						ImageProcessor chip = impD.getProcessor();
-//						if (impD.isComposite()){
-//							chip = ((CompositeImage)impD).getProcessor(ch);
-//						} else {
-//							chip = impD.getProcessor();
-//						}
-//						double chmin = chip.getMin();
-//						double chmax = chip.getMax();
-//						chip.setMinAndMax(chmin, chmax);
+
 						IJ.run(impD, "8-bit", "");
 					}
 					String objectName = cellName;
@@ -209,12 +197,12 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 				}
 				ImageJ3DViewer.select(null);
 				IJ.getInstance().toFront();
-			} else {  //NOW BASICALLY DEAD LEGACY CODE...THE WAY THINGS WERE BEFORE ~4/23/2019...WORKED FOR ROI BUT NOT IMAGES
+			} else {  
 				for (int tpt = (singleSave?duper.getFirstT():0); tpt<=(singleSave?duper.getLastT():0); tpt = tpt+(singleSave?duper.getStepT():1)) {
 					for (int ch=duper.getFirstC(); ch<=duper.getLastC(); ch++) {
 						imp.setRoi(impRoi);
 						ImagePlus impD = imp;
-						if (!imp.getTitle().startsWith("SketchVolumeViewer")){
+						if (!imp.getTitle().startsWith("SVV")){
 							impD = duper.run(imp, ch, ch, duper.getFirstZ(), duper.getLastZ(), singleSave?tpt:duper.getFirstT(), singleSave?tpt:duper.getLastT(), singleSave?1:duper.getStepT(), false, msec);
 							impD.show();
 							impD.setTitle(imp.getShortTitle()+"_DUP_"+ch+"_"+tpt);
@@ -235,7 +223,7 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 						int binFactor = 2;
 						double scaleFactor  = 1.0;
 						int threshold = 90;
-						if (imp.getTitle().startsWith("SketchVolumeViewer")) {
+						if (imp.getTitle().startsWith("SVV")) {
 							binFactor = 1;
 							scaleFactor  = 0.1;
 							if (!(imp.getMotherImp().getTitle().contains("SW_") || imp.getMotherImp().getTitle().contains("RGB_")))
@@ -300,7 +288,7 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 				}
 			}
 
-			if (!imp.getTitle().startsWith("SketchVolumeViewer")) {
+			if (!imp.getTitle().startsWith("SVV")) {
 				imp.getWindow().setVisible(true);
 				imp.getWindow().setAlwaysOnTop(false);
 			}

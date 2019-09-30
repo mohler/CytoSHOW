@@ -963,7 +963,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		String assignedColorString = roiColorString;
 		
 		String outDir = IJ.getDirectory("Choose Location to Save Output OBJ/MTL Files...");
-		outDir = outDir + new File(lastRoiOpenPath).getName().replace(".zip", "_SingleOBJs");
+		outDir = outDir + (lastRoiOpenPath!=null?new File(lastRoiOpenPath).getName().replace(".zip", "_SingleOBJs"):"RenderedROIs_SingleOBJs");
 		new File(outDir).mkdirs();
 
 		for (Roi selRoi:getSelectedRoisAsArray()) {
@@ -979,7 +979,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		MQTVS_VolumeViewer vv = new MQTVS_VolumeViewer(); 
 		for (int n=0; n<rootNames_rootFrames.size(); n++) {
-			ImagePlus sketchImp = NewImage.createImage("SketchVolumeViewer_"+rootNames_rootFrames.get(0),(int)(imp.getWidth()*scaleFactor), (int)(imp.getHeight()*scaleFactor), (int)(imp.getNSlices()*imp.getNFrames()*zPadFactor), 8, NewImage.FILL_BLACK, false);
+			ImagePlus sketchImp = NewImage.createImage("SVV_"+rootNames_rootFrames.get(0),(int)(imp.getWidth()*scaleFactor), (int)(imp.getHeight()*scaleFactor), (int)(imp.getNSlices()*imp.getNFrames()*zPadFactor), 8, NewImage.FILL_BLACK, false);
 			sketchImp.setDimensions(1, (int)(imp.getNSlices()*zPadFactor), imp.getNFrames());
 			sketchImp.setMotherImp(imp, imp.getID());
 			sketchImp.setCalibration(imp.getCalibration());
@@ -988,7 +988,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			sketchImp.getCalibration().pixelDepth = sketchImp.getCalibration().pixelDepth/zPadFactor;
 
 			String rootName = rootNames.get(n);
-			sketchImp.setTitle("SketchVolumeViewer_"+rootName);
+			sketchImp.setTitle("SVV_"+rootName);
 //			sketchImp.show();
 			sketchImp.getRoiManager().select(-1);
 			IJ.wait(50);
@@ -1044,7 +1044,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			assignedColorString = roiColorString;
 			(new StackReverser()).flipStack(sketchImp);
 			sketchImp.setMotherImp(imp, imp.getID());
-
+//			sketchImp.show();
 			vv.runVolumeViewer(sketchImp, rootName, assignedColorString, true, null, outDir);
 
 			sketchImp.changes = false;
@@ -6293,9 +6293,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	
 	public void swapSynapseObjTypes() {
 
-		String electricalObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SketchVolumeViewer_zapsym_zapsym_1_1_0000.obj").toString());
-		String postSynObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SketchVolumeViewer_smallerdiamond_smallerdiamond_1_1_0000.obj").toString());
-		String preSynObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SketchVolumeViewer_smallerercircle_smallerercircle_1_1_0000.obj").toString());
+		String electricalObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_zapsym_zapsym_1_1_0000.obj").toString());
+		String postSynObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_smallerdiamond_smallerdiamond_1_1_0000.obj").toString());
+		String preSynObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_smallerercircle_smallerercircle_1_1_0000.obj").toString());
 		IJ.log(preSynObj+postSynObj+electricalObj);
 		String[] preSynSections = preSynObj.split("(\ng |\ns )");
 		String[] postSynSections = postSynObj.split("(\ng |\ns )");
