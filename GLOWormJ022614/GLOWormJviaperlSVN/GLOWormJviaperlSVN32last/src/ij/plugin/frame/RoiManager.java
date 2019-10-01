@@ -963,7 +963,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		String assignedColorString = roiColorString;
 		
 		String outDir = IJ.getDirectory("Choose Location to Save Output OBJ/MTL Files...");
-		outDir = outDir + (lastRoiOpenPath!=null?new File(lastRoiOpenPath).getName().replace(".zip", "_SingleOBJs"):"RenderedROIs_SingleOBJs");
+		outDir = outDir + (lastRoiOpenPath!=null?(new File(lastRoiOpenPath).getName().replace(".zip", "")+"_SVV_SingleOBJs"):"SVV_RenderedROIs_SingleOBJs");
 		new File(outDir).mkdirs();
 
 		for (Roi selRoi:getSelectedRoisAsArray()) {
@@ -6293,9 +6293,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	
 	public void swapSynapseObjTypes() {
 
-		String electricalObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_zapsym_zapsym_1_1_0000.obj").toString());
-		String postSynObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_smallerdiamond_smallerdiamond_1_1_0000.obj").toString());
-		String preSynObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_smallerercircle_smallerercircle_1_1_0000.obj").toString());
+		String electricalObj =  IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_newZap25_newZap25_1_1_0000.obj").toString());
+		String postSynObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_newDiamond25_newDiamond25_1_1_0000.obj").toString());
+		String preSynObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_newCircle19_newCircle19_1_1_0000.obj").toString());
 		IJ.log(preSynObj+postSynObj+electricalObj);
 		String[] preSynSections = preSynObj.split("(\ng |\ns )");
 		String[] postSynSections = postSynObj.split("(\ng |\ns )");
