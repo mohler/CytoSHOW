@@ -66,7 +66,18 @@ public class InteractiveMeshDecimation {
 		});
 	}
 
-	private int simplify(EdgeContraction ec, int n) {
+	public static int runNonInteractive( CustomTriangleMesh ctm,  int n) {
+
+		FullInfoMesh fim = new FullInfoMesh(ctm.getMesh());
+		EdgeContraction ec = new EdgeContraction(fim, false);
+		int v = simplify(ec, n);
+		ctm.setMesh(fim.getMesh());
+		
+		return v;
+	}
+
+	
+	private static int simplify(EdgeContraction ec, int n) {
 		int part = n / 10;
 		int last = n % 10;
 		int ret = 0;
