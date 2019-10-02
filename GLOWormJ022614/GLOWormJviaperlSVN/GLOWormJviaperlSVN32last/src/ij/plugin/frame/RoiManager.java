@@ -6293,9 +6293,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	
 	public void swapSynapseObjTypes() {
 
-		String electricalObj =  IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_newZap25_newZap25_1_1_0000.obj").toString());
-		String postSynObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_newDiamond25_newDiamond25_1_1_0000.obj").toString());
-		String preSynObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_newCircle19_newCircle19_1_1_0000.obj").toString());
+		String electricalObj =  IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_newZap25_newZap25_960_0000.obj").toString());
+		String postSynObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_newDiamond25_newDiamond25_386_0000.obj").toString());
+		String preSynObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_newCircle19_newCircle19_326_0000.obj").toString());
 		IJ.log(preSynObj+postSynObj+electricalObj);
 		String[] preSynSections = preSynObj.split("(\ng |\ns )");
 		String[] postSynSections = postSynObj.split("(\ng |\ns )");
