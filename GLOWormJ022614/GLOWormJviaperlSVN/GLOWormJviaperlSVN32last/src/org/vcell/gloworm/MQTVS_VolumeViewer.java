@@ -8,6 +8,10 @@ import java.util.Hashtable;
 
 import javax.vecmath.Color3f;
 
+import customnode.CustomMeshNode;
+import customnode.CustomTriangleMesh;
+import customnode.EdgeContraction;
+import customnode.FullInfoMesh;
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
@@ -23,9 +27,12 @@ import ij.plugin.frame.RoiManager;
 import ij.process.ImageProcessor;
 import ij3d.ColorTable;
 import ij3d.Content;
+import ij3d.ContentNode;
 import ij3d.Image3DUniverse;
 import ij3d.ImageJ3DViewer;
+import ij3d.gui.InteractiveMeshDecimation;
 import isosurface.MeshExporter;
+import isosurface.MeshGroup;
 
 
 public class MQTVS_VolumeViewer  implements PlugIn {
@@ -166,6 +173,7 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 						sel.setColor(null);
 					}
 					univ.getSelected().setLocked(true);
+
 					if (singleSave) {
 						Hashtable<String, Content> newestContent = new Hashtable<String, Content>();
 						newestContent.put(""+objectName, univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
@@ -245,9 +253,39 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 						univ.addContent(impD, new Color3f(channelColor), objectName, threshold, new boolean[]{true, true, true}, binFactor, Content.SURFACE);
 						univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
 						Content sel = univ.getSelected();
+						
 						while (sel==null){
 							IJ.wait(100);
 						}
+
+						ContentNode node = sel.getContentNode();
+						CustomTriangleMesh ctm=null;
+						FullInfoMesh fim=null;
+						EdgeContraction ec=null;
+						if(node instanceof CustomMeshNode) {
+							if(((CustomMeshNode)node).getMesh() instanceof CustomTriangleMesh)
+								ctm = (CustomTriangleMesh)((CustomMeshNode) node).getMesh();
+						} else if (node instanceof MeshGroup) {
+							ctm = ((MeshGroup)node).getMesh();
+						}
+						if (ctm != null){
+							int vfimStart = new FullInfoMesh(ctm.getMesh()).getVertexCount();
+							int  vfim =0;
+							int  vrni =0;
+							do{
+								fim = new FullInfoMesh(ctm.getMesh());
+								vfim = fim.getVertexCount();
+								vrni = InteractiveMeshDecimation.runNonInteractive(ctm, 100);
+								while (vrni == vfim ){
+									IJ.wait(100);
+								}
+								IJ.log("decimated!");
+								Runtime.getRuntime().gc();
+							} while(vrni > vfimStart*0.20);
+
+						}
+						
+						
 						try {
 							float r = Integer.parseInt(""+channelColor.getRed()) / 256f;
 							float g = Integer.parseInt(""+channelColor.getGreen()) / 256f;

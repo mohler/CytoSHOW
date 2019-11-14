@@ -9,6 +9,9 @@ import java.awt.TextField;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+
+import javax.vecmath.Point3f;
 
 import customnode.CustomTriangleMesh;
 import customnode.EdgeContraction;
@@ -69,11 +72,18 @@ public class InteractiveMeshDecimation {
 	public static int runNonInteractive( CustomTriangleMesh ctm,  int n) {
 
 		FullInfoMesh fim = new FullInfoMesh(ctm.getMesh());
-		EdgeContraction ec = new EdgeContraction(fim, false);
-		int v = simplify(ec, n);
-		ctm.setMesh(fim.getMesh());
-		
-		return v;
+		ArrayList<ArrayList<Point3f>> fimsubs = fim.getSubmeshes();
+		int sumV=0;
+		for (int f=0;f<fimsubs.size(); f++){
+			
+			FullInfoMesh fsfim =new FullInfoMesh(fimsubs.get(f));
+			EdgeContraction ec = new EdgeContraction(fsfim, true);
+			int v = simplify(ec, n);
+			sumV = sumV+v;
+			fimsubs.set(f, (ArrayList<Point3f>) fsfim.getMesh());
+		}
+		ctm.setMesh(fim.getMergedSubmeshes(fimsubs));
+		return sumV;
 	}
 
 	

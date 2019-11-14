@@ -381,6 +381,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		addPopupItem("Color Tags by Group Interaction Rules");
 		addPopupItem("Color Objs by Group Interaction Rules");
 		addPopupItem("Substitute synapse type objs");
+		addPopupItem("Plot objs to coords");
 		add(pm);
 	}
 
@@ -941,6 +942,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			else if (command.equals("Substitute synapse type objs")) {
 				swapSynapseObjTypes();
+			}
+			else if (command.equals("Plot objs to coords")) {
+				plotSynapseObjsToCoords();
 			}
 
 			this.imp.getCanvas().requestFocus();
@@ -6556,6 +6560,193 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				IJ.saveString(outputBObj, outputBPath);
 
 			}
+		}
+		
+		
+	}
+	
+	
+	public void plotSynapseObjsToCoords() {
+
+		String electricalObj =  IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_newZap25_newZap25_960_0000.obj").toString());
+		String postSynObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_newDiamond25_newDiamond25_386_0000.obj").toString());
+		String preSynObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_newCircle19_newCircle19_326_0000.obj").toString());
+		IJ.log(preSynObj+postSynObj+electricalObj);
+		String[] preSynSections = preSynObj.split("(\ng |\ns )");
+		String[] postSynSections = postSynObj.split("(\ng |\ns )");
+		String[] electricalSections = electricalObj.split("(\ng |\ns )");	
+		IJ.log(""+preSynSections.length+ postSynSections.length +electricalSections.length);
+		String[] electricalVertices = electricalSections[1].split("\n");
+		String[] electricalFacets = electricalSections[2].split("\n");
+		String[] postSynVertices = postSynSections[1].split("\n");
+		String[] postSynFacets = postSynSections[2].split("\n");
+		String[] preSynVertices = preSynSections[1].split("\n");
+		String[] preSynFacets = preSynSections[2].split("\n");
+		ArrayList<Double> electricalVXs = new ArrayList<Double>();
+		ArrayList<Double> electricalVYs = new ArrayList<Double>();
+		ArrayList<Double> electricalVZs = new ArrayList<Double>();
+		ArrayList<Double> postSynVXs = new ArrayList<Double>();
+		ArrayList<Double> postSynVYs = new ArrayList<Double>();
+		ArrayList<Double> postSynVZs = new ArrayList<Double>();
+		ArrayList<Double> preSynVXs = new ArrayList<Double>();
+		ArrayList<Double> preSynVYs = new ArrayList<Double>();
+		ArrayList<Double> preSynVZs = new ArrayList<Double>();
+		ArrayList<Double> electricalFXs = new ArrayList<Double>();
+		ArrayList<Double> electricalFYs = new ArrayList<Double>();
+		ArrayList<Double> electricalFZs = new ArrayList<Double>();
+		ArrayList<Double> postSynFXs = new ArrayList<Double>();
+		ArrayList<Double> postSynFYs = new ArrayList<Double>();
+		ArrayList<Double> postSynFZs = new ArrayList<Double>();
+		ArrayList<Double> preSynFXs = new ArrayList<Double>();
+		ArrayList<Double> preSynFYs = new ArrayList<Double>();
+		ArrayList<Double> preSynFZs = new ArrayList<Double>();
+		for(int x=0;x<electricalVertices.length;x++){
+			if (electricalVertices[x].startsWith("v ")){
+				electricalVXs.add(Double.parseDouble(electricalVertices[x].split(" ")[1]));
+				electricalVYs.add(Double.parseDouble(electricalVertices[x].split(" ")[2]));
+				electricalVZs.add(Double.parseDouble(electricalVertices[x].split(" ")[3]));
+			}
+		}
+		for(int x=0;x<electricalFacets.length;x++){
+			if (electricalFacets[x].startsWith("f ")){
+				electricalFXs.add(Double.parseDouble(electricalFacets[x].split(" ")[1]));
+				electricalFYs.add(Double.parseDouble(electricalFacets[x].split(" ")[2]));
+				electricalFZs.add(Double.parseDouble(electricalFacets[x].split(" ")[3]));
+			}
+		}
+		for(int x=0;x<postSynVertices.length;x++){
+			if (postSynVertices[x].startsWith("v ")){
+				postSynVXs.add(Double.parseDouble(postSynVertices[x].split(" ")[1]));
+				postSynVYs.add(Double.parseDouble(postSynVertices[x].split(" ")[2]));
+				postSynVZs.add(Double.parseDouble(postSynVertices[x].split(" ")[3]));
+			}
+		}
+		for(int x=0;x<postSynFacets.length;x++){
+			if (postSynFacets[x].startsWith("f ")){
+				postSynFXs.add(Double.parseDouble(postSynFacets[x].split(" ")[1]));
+				postSynFYs.add(Double.parseDouble(postSynFacets[x].split(" ")[2]));
+				postSynFZs.add(Double.parseDouble(postSynFacets[x].split(" ")[3]));
+			}
+		}
+		for(int x=0;x<preSynVertices.length;x++){
+			if (preSynVertices[x].startsWith("v ")){
+				preSynVXs.add(Double.parseDouble(preSynVertices[x].split(" ")[1]));
+				preSynVYs.add(Double.parseDouble(preSynVertices[x].split(" ")[2]));
+				preSynVZs.add(Double.parseDouble(preSynVertices[x].split(" ")[3]));
+			}
+		}
+		for(int x=0;x<preSynFacets.length;x++){
+			if (preSynFacets[x].startsWith("f ")){
+				preSynFXs.add(Double.parseDouble(preSynFacets[x].split(" ")[1]));
+				preSynFYs.add(Double.parseDouble(preSynFacets[x].split(" ")[2]));
+				preSynFZs.add(Double.parseDouble(preSynFacets[x].split(" ")[3]));
+			}
+		}
+		
+		Object[] evxs = (electricalVXs.toArray());
+		Arrays.sort(evxs);
+		double evxMedian = (double)evxs[evxs.length/2];
+		Object[] postvxs = (postSynVXs.toArray());
+		Arrays.sort(postvxs);
+		double postvxMedian = (double)postvxs[postvxs.length/2];
+		Object[] prevxs = (preSynVXs.toArray());
+		Arrays.sort(prevxs);
+		double prevxMedian = (double)prevxs[prevxs.length/2];
+		Object[] evys = (electricalVYs.toArray());
+		Arrays.sort(evys);
+		double evyMedian = (double)evys[evys.length/2];
+		Object[] postvys = (postSynVYs.toArray());
+		Arrays.sort(postvys);
+		double postvyMedian = (double)postvys[postvys.length/2];
+		Object[] prevys = (preSynVYs.toArray());
+		Arrays.sort(prevys);
+		double prevyMedian = (double)prevys[prevys.length/2];
+		Object[] evzs = (electricalVZs.toArray());
+		Arrays.sort(evzs);
+		double evzMedian = (double)evzs[evzs.length/2];
+		double evzMin = (double)evzs[0];
+		double evzMax = (double)evzs[evzs.length-1];
+		Object[] postvzs = (postSynVZs.toArray());
+		Arrays.sort(postvzs);
+		double postvzMedian = (double)postvzs[postvzs.length/2];
+		double postvzMin = (double)postvzs[0];
+		double postvzMax = (double)postvzs[postvzs.length-1];
+		Object[] prevzs = (preSynVZs.toArray());
+		Arrays.sort(prevzs);
+		double prevzMedian = (double)prevzs[prevzs.length/2];
+		double prevzMin = (double)prevzs[0];
+		double prevzMax = (double)prevzs[prevzs.length-1];
+		Object[] efxs = (electricalFXs.toArray());
+		Arrays.sort(efxs);
+		double efxMedian = (double)efxs[efxs.length/2];
+		Object[] postfxs = (postSynFXs.toArray());
+		Arrays.sort(postfxs);
+		double postfxMedian = (double)postfxs[postfxs.length/2];
+		Object[] prefxs = (preSynFXs.toArray());
+		Arrays.sort(prefxs);
+		double prefxMedian = (double)prefxs[prefxs.length/2];
+		Object[] efys = (electricalFYs.toArray());
+		Arrays.sort(efys);
+		double efyMedian = (double)efys[efys.length/2];
+		Object[] postfys = (postSynFYs.toArray());
+		Arrays.sort(postfys);
+		double postfyMedian = (double)postfys[postfys.length/2];
+		Object[] prefys = (preSynFYs.toArray());
+		Arrays.sort(prefys);
+		double prefyMedian = (double)prefys[prefys.length/2];
+		Object[] efzs = (electricalFZs.toArray());
+		Arrays.sort(efzs);
+		double efzMedian = (double)efzs[efzs.length/2];
+		Object[] postfzs = (postSynFZs.toArray());
+		Arrays.sort(postfzs);
+		double postfzMedian = (double)postfzs[postfzs.length/2];
+		Object[] prefzs = (preSynFZs.toArray());
+		Arrays.sort(prefzs);
+		double prefzMedian = (double)prefzs[prefzs.length/2];
+
+		IJ.wait(1);
+		String inputPath = IJ.getFilePath("Select csv file with PHATE data");
+		File inputFile = new File(inputPath);
+		String inputParent = inputFile.getParent();
+		String inputPhateData = IJ.openAsString(inputPath);
+		String[] inputPhateList = inputPhateData.split("\n");
+		for (String phateLine:inputPhateList){
+			if (phateLine.startsWith("serialNumber")) 
+				continue;
+			String[] phateLineChunks = phateLine.split(",");
+			
+			String outputTag = phateLineChunks[5];
+			String outputPath = inputPath+"_"+outputTag+"nifty.obj";
+			String[] outputSections = postSynSections;	
+			String[] outputVertices = postSynVertices;
+			String[] outputFacets = postSynFacets;
+			ArrayList<Double> outputVXs = postSynVXs;
+			ArrayList<Double> outputVYs = postSynVYs;
+			ArrayList<Double> outputVZs = postSynVZs;
+			ArrayList<Double> outputFXs = postSynFXs;
+			ArrayList<Double> outputFYs = postSynFYs;
+			ArrayList<Double> outputFZs = postSynFZs;
+
+			double offsetVX = Double.parseDouble(phateLineChunks[1])/10 - (postvxMedian);
+			double offsetVY = Double.parseDouble(phateLineChunks[2])/10 - (postvyMedian);
+			double offsetVZ = Double.parseDouble(phateLineChunks[3])/10 - (postvzMedian);
+			double zScale = 1;
+			String outputObj = "";
+			outputObj = outputObj + "# OBJ File\nmtllib SVV_newDiamond25_newDiamond25_386_0000.mtl\ng " + phateLineChunks[5] + "\n";
+			for (int i=0; i<outputVXs.size(); i++){
+				outputObj = outputObj + "v " +(outputVXs.get(i)+offsetVX) 
+									  + " " +(outputVYs.get(i)+offsetVY) 
+									  + " " +(((outputVZs.get(i))*zScale)+offsetVZ) + "\n";
+			}
+			outputObj = outputObj + "usemtl mat_"+ phateLineChunks[4] ;
+			
+			outputObj = outputObj + "\ns " + outputFacets[0] + "\n";
+			for (int i=0; i<outputFXs.size(); i++){
+				outputObj = outputObj + "f " +outputFXs.get(i).intValue() + " " +outputFYs.get(i).intValue() + " " +outputFZs.get(i).intValue() + "\n";
+			}
+			outputObj = outputObj + outputFacets[outputFacets.length-1] + "\n";	
+			IJ.saveString(outputObj, outputPath);
+			
 		}
 		
 		

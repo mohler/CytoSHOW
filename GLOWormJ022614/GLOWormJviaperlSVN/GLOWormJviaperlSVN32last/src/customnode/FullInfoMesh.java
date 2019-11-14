@@ -47,6 +47,16 @@ public class FullInfoMesh {
 		return ret;
 	}
 
+	public List<Point3f> getMergedSubmeshes(ArrayList<ArrayList<Point3f>> submeshes) {
+		List<Point3f> ret = new ArrayList<Point3f>();
+		for (ArrayList<Point3f> submesh:submeshes){
+			for (Point3f subp3f:submesh){
+					ret.add(subp3f);
+			}
+		}
+		return ret;
+	}
+
 	public Set<Point3f> getVertices() {
 		return vertexToIndex.keySet();
 	}
