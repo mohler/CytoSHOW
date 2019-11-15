@@ -6571,6 +6571,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		String electricalObj =  IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_newZap25_newZap25_960_0000.obj").toString());
 		String postSynObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_newDiamond25_newDiamond25_386_0000.obj").toString());
 		String preSynObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_newCircle19_newCircle19_326_0000.obj").toString());
+
+//		postSynObj = electricalObj;
+		
 		IJ.log(preSynObj+postSynObj+electricalObj);
 		String[] preSynSections = preSynObj.split("(\ng |\ns )");
 		String[] postSynSections = postSynObj.split("(\ng |\ns )");
@@ -6706,8 +6709,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		IJ.wait(1);
 		String inputPath = IJ.getFilePath("Select csv file with PHATE data");
+		String mtlPath = IJ.getFilePath("Select mtl file with color rules");
 		File inputFile = new File(inputPath);
-		String inputParent = inputFile.getParent();
+		File mtlFile = new File(mtlPath);
+		String outputDir = inputFile.getParent()+File.separator+inputFile.getName().replace(".csv", "")+File.separator;
+		new File(outputDir).mkdirs();
+		IJ.saveString(IJ.openAsString(mtlPath), outputDir+mtlFile.getName());
 		String inputPhateData = IJ.openAsString(inputPath);
 		String[] inputPhateList = inputPhateData.split("\n");
 		for (String phateLine:inputPhateList){
@@ -6716,7 +6723,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			String[] phateLineChunks = phateLine.split(",");
 			
 			String outputTag = phateLineChunks[5];
-			String outputPath = inputPath+"_"+outputTag+"nifty.obj";
+			String outputPath = outputDir+inputFile.getName()+"_"+outputTag+"plot.obj";
 			String[] outputSections = postSynSections;	
 			String[] outputVertices = postSynVertices;
 			String[] outputFacets = postSynFacets;
@@ -6727,12 +6734,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			ArrayList<Double> outputFYs = postSynFYs;
 			ArrayList<Double> outputFZs = postSynFZs;
 
-			double offsetVX = Double.parseDouble(phateLineChunks[1])/10 - (postvxMedian);
-			double offsetVY = Double.parseDouble(phateLineChunks[2])/10 - (postvyMedian);
-			double offsetVZ = Double.parseDouble(phateLineChunks[3])/10 - (postvzMedian);
+			double offsetVX = Double.parseDouble(phateLineChunks[1])*1000 - (postvxMedian);
+			double offsetVY = Double.parseDouble(phateLineChunks[2])*1000 - (postvyMedian);
+			double offsetVZ = Double.parseDouble(phateLineChunks[3])*1000 - (postvzMedian);
 			double zScale = 1;
 			String outputObj = "";
-			outputObj = outputObj + "# OBJ File\nmtllib SVV_newDiamond25_newDiamond25_386_0000.mtl\ng " + phateLineChunks[5] + "\n";
+			outputObj = outputObj + "# OBJ File\nmtllib "+mtlFile.getName()+"\ng " + phateLineChunks[5] + "\n";
 			for (int i=0; i<outputVXs.size(); i++){
 				outputObj = outputObj + "v " +(outputVXs.get(i)+offsetVX) 
 									  + " " +(outputVYs.get(i)+offsetVY) 
