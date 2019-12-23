@@ -59,6 +59,7 @@ public class ImageCanvas3D extends Canvas3D implements KeyListener {
 		super(SimpleUniverse.getPreferredConfiguration());
 		this.ui = uia;
 		setPreferredSize(new Dimension(width, height));
+//		this.setOffScreenLocation(getLocationOnScreen());
 		ByteProcessor ip = new ByteProcessor(width, height);
 		roiImagePlus = new RoiImagePlus("RoiImage", ip);
 		roiImageCanvas = new ImageCanvas(roiImagePlus) {

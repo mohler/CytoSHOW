@@ -7,19 +7,23 @@ import ij.gui.GUI;
 import ij.plugin.PlugIn;
 import isosurface.MeshExporter;
 
+import java.awt.Color;
 import java.awt.HeadlessException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.TreeMap;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Color3f;
+import javax.vecmath.Point3f;
 
 import orthoslice.OrthoGroup;
 import voltex.VoltexGroup;
 import voltex.VolumeRenderer;
+import customnode.Sphere;
 import customnode.u3d.U3DExporter;
 
 public class ImageJ3DViewer implements PlugIn {
@@ -53,6 +57,15 @@ public class ImageJ3DViewer implements PlugIn {
 			// from a macro
 			else if(image != null && !IJ.isMacro())
 				univ.getExecuter().addContent(image, null);
+//			Sphere sph80 = new Sphere(new Point3f(1f,1f,1f),80);
+//			sph80.setColor(new Color3f(1f,1f,1f));
+//			univ.addCustomMesh(sph80,"sphere80").setLocked(true);
+//			univ.addCustomMesh(new Sphere(new Point3f(1f,200f,1f),95),"sphere95").setLocked(true);
+//			univ.addCustomMesh(new Sphere(new Point3f(1f,1f,200f),50),"sphere50").setLocked(true);
+//			univ.addCustomMesh(new Sphere(new Point3f(200f,1f,1f),30),"sphere30").setLocked(true);
+//
+//			univ.addCustomMesh(new Sphere(new Point3f(-100f,-100f,-100f),100),"sphere100").setLocked(true);
+
 
 		} catch(Exception e) {
 			StringBuffer buf = new StringBuffer();

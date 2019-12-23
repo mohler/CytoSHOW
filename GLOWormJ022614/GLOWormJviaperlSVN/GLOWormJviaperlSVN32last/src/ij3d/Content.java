@@ -41,7 +41,7 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 	private int currentTimePoint;
 	private Switch contentSwitch;
 	private boolean showAllTimepoints = false;
-	private final String name;
+	private String name;
 	private boolean showPointList = false;
 
 	private final boolean swapTimelapseData;
