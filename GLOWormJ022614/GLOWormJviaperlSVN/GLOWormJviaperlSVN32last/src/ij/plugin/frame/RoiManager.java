@@ -25,12 +25,16 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.vecmath.Color3f;
+import javax.vecmath.Point3f;
 
 import org.vcell.gloworm.MQTVSSceneLoader64;
 import org.vcell.gloworm.MQTVS_VolumeViewer;
 import org.vcell.gloworm.MultiQTVirtualStack;
 import org.vcell.gloworm.RoiLabelByNumbersSorter;
 
+import customnode.CustomMesh;
+import customnode.CustomMultiMesh;
+import customnode.Sphere;
 import ij.*;
 import ij.process.*;
 import ij.gui.*;
@@ -381,7 +385,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		addPopupItem("Color Tags by Group Interaction Rules");
 		addPopupItem("Color Objs by Group Interaction Rules");
 		addPopupItem("Substitute synapse type objs");
-		addPopupItem("Plot objs to coords");
+		addPopupItem("Plot synapses to coords");
+		addPopupItem("Plot phate spheres to coords");
 		add(pm);
 	}
 
@@ -943,8 +948,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			else if (command.equals("Substitute synapse type objs")) {
 				swapSynapseObjTypes();
 			}
-			else if (command.equals("Plot objs to coords")) {
+			else if (command.equals("Plot synapses to coords")) {
 				plotSynapseObjsToCoords();
+			}
+			else if (command.equals("Plot phate spheres to coords")) {
+				plotPhateObjsToCoords();
 			}
 
 			this.imp.getCanvas().requestFocus();
@@ -6758,4 +6766,102 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		
 		
 	}
+	
+	public void plotPhateObjsToCoords() {
+ 
+		IJ.wait(1);
+		String inputPath = IJ.getFilePath("Select csv file with PHATE data");
+		String condensationSNpath = IJ.getFilePath("Select csv file with condensation cluster data");
+//		String mtlPath = IJ.getFilePath("Select mtl file with color rules");
+		File inputFile = new File(inputPath);
+		File conSNFile = new File(condensationSNpath);
+//		File mtlFile = new File(mtlPath);
+		String outputDir = inputFile.getParent()+File.separator+inputFile.getName().replace(".csv", "")+File.separator;
+		new File(outputDir).mkdirs();
+//		IJ.saveString(IJ.openAsString(mtlPath), outputDir+mtlFile.getName());
+		String inputPhateData = IJ.openAsString(inputPath);
+		String[] inputPhateList = inputPhateData.split("\n");
+		String conSNData = IJ.openAsString(condensationSNpath);
+		String[] conSNList = conSNData.split("\n");
+		ImageJ3DViewer ij3dv = new ImageJ3DViewer();
+		ij3dv.run(".");
+		Image3DUniverse univ = Image3DUniverse.universes.get(0);
+		String[] cellHeaders = null; 
+		int previousMaxSN = 0;
+		int nextMaxSN =0;
+		Hashtable<Integer,String> serialRosters = new Hashtable<Integer,String>();
+		for(int iteration=0;iteration<conSNList.length;iteration++){
+			String[] csnChunks = conSNList[iteration].split(",");
+			if (iteration==0){
+				cellHeaders = csnChunks;
+			}
+			for (int cell=0;cell<cellHeaders.length;cell++){
+				int sn =0;
+				if (iteration==0){
+					sn = previousMaxSN+cell;
+				}else{
+					sn = previousMaxSN+Integer.parseInt(csnChunks[cell]);
+				}
+				IJ.log(cellHeaders[cell]+" "+iteration+" "+csnChunks[cell]+" "+sn);
+				if (serialRosters.get(sn) == null){
+					serialRosters.put(sn, cellHeaders[cell]);
+				} else {
+					serialRosters.put(sn, serialRosters.get(sn)+"_"+cellHeaders[cell]);
+				}
+				if (sn> nextMaxSN){
+					nextMaxSN =sn;
+				}
+			}
+			previousMaxSN=nextMaxSN;
+		}
+		
+		for (String phateLine:inputPhateList){
+			if (phateLine.startsWith("serialNumber")) 
+				continue;
+			String[] phateLineChunks = phateLine.split(",");
+			String serial = phateLineChunks[0];
+			String outputTag = serialRosters.get(Integer.parseInt(serial))+"_"+serial;
+			float offsetVX = (float) (Double.parseDouble(phateLineChunks[1])*1000-50000);
+			float offsetVY = (float) (Double.parseDouble(phateLineChunks[2])*1000-50000);
+			float offsetVZ = (float) (Double.parseDouble(phateLineChunks[3])*1000-50000);
+			Sphere sph800 = new Sphere(new Point3f(offsetVX,offsetVY,offsetVZ),400);
+			String colorString = phateLineChunks[4];
+			float cycle = Float.parseFloat(phateLineChunks[9]);
+			if (colorString.equals("1"))
+				sph800.setColor(new Color3f(1f,1-cycle/25f,1f));
+			if (colorString.equals("2"))
+				sph800.setColor(new Color3f(1-cycle/25f,1-cycle/25f,1f));
+			if (colorString.equals("3"))
+				sph800.setColor(new Color3f(1f,1-cycle/25f,1-cycle/25f));
+			if (colorString.equals("4"))
+				sph800.setColor(new Color3f(1-cycle/25f,1f,1-cycle/25f));
+			if (colorString.equals("5"))
+				sph800.setColor(new Color3f(1-cycle/25f,1-cycle/25f,1-cycle/25f));
+			if (colorString.equals("6"))
+				sph800.setColor(new Color3f(1-cycle/25f,1-cycle/25f,1-cycle/25f));
+			sph800.setName(outputTag);
+			Object[] existingContents =  univ.getContents().toArray();
+			boolean condensed = false;
+
+			for (int s=0;s<existingContents.length;s++){
+				Content existingContent = (Content)existingContents[s];
+				String ecName = existingContent.getName();
+				String currSN = "_"+serial;
+				if(ecName.endsWith(currSN)){
+//					existingContent.setName(phateLineChunks[5]+"_"+ecName);
+					condensed=true;
+					s=existingContents.length;
+				}
+			}
+			
+			if (!condensed)
+				IJ.log(outputTag+"\n");
+				univ.addCustomMesh(sph800,outputTag).setLocked(true);
+
+		}
+//		univ.addCustomMesh(bigmesh,"multi");
+
+		
+	}
+	
 }
