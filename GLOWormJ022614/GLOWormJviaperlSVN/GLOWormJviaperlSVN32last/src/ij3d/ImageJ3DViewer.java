@@ -18,7 +18,9 @@ import java.util.TreeMap;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Color3f;
+import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
+import javax.vecmath.Tuple3d;
 
 import orthoslice.OrthoGroup;
 import voltex.VoltexGroup;
@@ -88,8 +90,8 @@ public class ImageJ3DViewer implements PlugIn {
 		}
 	}
 
-	public void setUniv(DefaultUniverse defaultUniverse) {
-		this.univ = (Image3DUniverse) defaultUniverse;
+	public static void setUniv(DefaultUniverse defaultUniverse) {
+		univ = (Image3DUniverse) defaultUniverse;
 	}
 
 
@@ -355,10 +357,35 @@ public class ImageJ3DViewer implements PlugIn {
 //	}
 
 	public static void importContent(String path) {
-		Image3DUniverse univ = getUniv();
-		univ.getExecuter().addSavedContent(path, null);
+		univ.addContentLater(path);
+		univ.sync(true);
 	}
 
+
+	
+	public static void importContentRightEye(String path) {
+		univ.addContentLater(path);
+		Content c = ((Content)univ.getContents().toArray()[univ.getContents().toArray().length-1]);
+		c.setLocked(false);
+		Point3d centerContent = new Point3d();
+		c.getContentNode().getCenter(centerContent);
+		Point3d centerUniv = univ.getGlobalCenterPoint();
+//		c.setTranslation(((float)(centerUniv.x-centerContent.x)), ((float)(centerUniv.y-centerContent.y)), ((float)(centerUniv.z-centerContent.z)));
+		c.setTranslation(1000f,1000f,1000f);
+//		c.setRotation(1, 10d);
+//		c.setTranslation(-((float)(centerUniv.x-centerContent.x)), -((float)(centerUniv.y-centerContent.y)), -((float)(centerUniv.z-centerContent.z)));
+		c.setLocked(true);
+
+		//		c.applyTransform(new double[]{0.985, 0d, -0.174d, 0d
+//									  , 0d, 1d, 0d, 0d
+//									  , 0.174d, 0d, 0.985d, 0d
+//									  , 0d, 0d, 0d, 1d});
+//		
+		univ.sync(true);
+	}
+
+
+	
 	public static void exportTransformed() {
 		Image3DUniverse univ = getUniv();
 		if(univ != null && univ.getSelected() != null)
