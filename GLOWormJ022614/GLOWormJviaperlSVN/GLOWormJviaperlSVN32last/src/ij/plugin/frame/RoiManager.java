@@ -5333,6 +5333,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		imp.getWindow().setVisible(false);
 
+		Hashtable<String, ArrayList<String>> synapsePairFrequencyHashtable = new Hashtable<String, ArrayList<String>>();
+		
 		for (int obj=1; obj<objectLines.length; obj++) {
 			count++;
 			IJ.showStatus(""+count+"/"+fullCount+" Tags loaded for "+ imp.getTitle());
@@ -5340,6 +5342,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			String objType = sObj.split(",")[6].replace("\"", "");
 			String imageNumber = sObj.split(",")[4].replace("\"", "");
 			int zSustain = Integer.parseInt(sObj.split(",")[21].replace("\"", "").replace("zS", ""));
+			String presynName= sObj.split(",")[17].replace("\"", "");
+			String[] postsynNames= sObj.split(",")[18].replace("\"", "").split("&");
+
 			String roiName="\""+sObj.split(",")[17].replace("\"", "")+objType+sObj.split(",")[18].replace("\"", "")+"_"+sObj.split(",")[12].replace("\"", "")+imageNumber+"_zs"+sObj.split(",")[21].replace("\"", "")+" \"";
 			roiName = roiName.replaceAll("(\\[|\\])", "");
 			Color roiColor= objType.contains("chemical")?Color.white:Color.yellow;
@@ -5351,16 +5356,17 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					.replace(centerZroot, ("")));
 
 ////		  SPECIAL CASE ONLY FOR honoring JSH image GAPS AT Z56 z162-166				
-			if (frontZ>55){
-				frontZ++;
+			if (imageNumber.startsWith("JSHJSH")){
+				if (frontZ>55){
+					frontZ++;
+				}
+				if (frontZ>162){
+					frontZ++;
+					frontZ++;
+					frontZ++;
+					frontZ++;							
+				}
 			}
-			if (frontZ>162){
-				frontZ++;
-				frontZ++;
-				frontZ++;
-				frontZ++;							
-			}
-
 			
 			int adjustmentZ =0;
 			for (int susStep=0;susStep<zSustain;susStep++){
@@ -5380,7 +5386,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					oRoi.setPosition(1, plotZ,1 );
 					imp.setPosition(1, plotZ, 1);
 					this.addRoi(oRoi);
-
+					for (String postsynName:postsynNames){
+						IJ.log(presynName+","+postsynName+","+plotZ+","+1+","+objType);
+						if (synapsePairFrequencyHashtable.get(presynName+","+postsynName+","+objType)==null){
+							synapsePairFrequencyHashtable.put(presynName+","+postsynName+","+objType, new ArrayList<String>());
+						}
+						synapsePairFrequencyHashtable.get(presynName+","+postsynName+","+objType).add(presynName+","+postsynName+","+plotZ+","+1+","+objType);
+					}
 				}
 			}
 		}
@@ -5389,6 +5401,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		imp.getWindow().setVisible(true);
 		this.setVisible(wasVis);
 		busy = false;
+		for (Object key:synapsePairFrequencyHashtable.keySet()){
+			IJ.log(((String)key)+"="+synapsePairFrequencyHashtable.get((String)key).size());
+		}
 	}
 
 	public void windowClosed(WindowEvent e) {
@@ -6824,9 +6839,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			float offsetVX = (float) (Double.parseDouble(phateLineChunks[1])*1000-50000);
 			float offsetVY = (float) (Double.parseDouble(phateLineChunks[2])*1000-50000);
 			float offsetVZ = (float) (Double.parseDouble(phateLineChunks[3])*1000-50000);
-			Sphere sph800 = new Sphere(new Point3f(offsetVX,offsetVY,offsetVZ),400);
+			Sphere sph800 = new Sphere(new Point3f(offsetVX,offsetVY,offsetVZ),800);
 			String colorString = phateLineChunks[4];
 			float cycle = Float.parseFloat(phateLineChunks[9]);
+/*hack*/ cycle =25f;
 			if (colorString.equals("1"))
 				sph800.setColor(new Color3f(1f,1-cycle/25f,1f));
 			if (colorString.equals("2"))
