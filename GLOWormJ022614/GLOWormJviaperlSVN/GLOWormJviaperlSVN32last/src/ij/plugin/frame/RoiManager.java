@@ -6839,22 +6839,41 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			float offsetVX = (float) (Double.parseDouble(phateLineChunks[1])*1000-50000);
 			float offsetVY = (float) (Double.parseDouble(phateLineChunks[2])*1000-50000);
 			float offsetVZ = (float) (Double.parseDouble(phateLineChunks[3])*1000-50000);
-			Sphere sph800 = new Sphere(new Point3f(offsetVX,offsetVY,offsetVZ),800);
+			Sphere sph800 = new Sphere(new Point3f(offsetVX,offsetVY,offsetVZ),800,50,50);
+
 			String colorString = phateLineChunks[4];
 			float cycle = Float.parseFloat(phateLineChunks[9]);
-/*hack*/ cycle =25f;
-			if (colorString.equals("1"))
-				sph800.setColor(new Color3f(1f,1-cycle/25f,1f));
-			if (colorString.equals("2"))
-				sph800.setColor(new Color3f(1-cycle/25f,1-cycle/25f,1f));
-			if (colorString.equals("3"))
-				sph800.setColor(new Color3f(1f,1-cycle/25f,1-cycle/25f));
-			if (colorString.equals("4"))
-				sph800.setColor(new Color3f(1-cycle/25f,1f,1-cycle/25f));
-			if (colorString.equals("5"))
-				sph800.setColor(new Color3f(1-cycle/25f,1-cycle/25f,1-cycle/25f));
-			if (colorString.equals("6"))
-				sph800.setColor(new Color3f(1-cycle/25f,1-cycle/25f,1-cycle/25f));
+
+			cycle = 25f;    //hack to give full colors
+			if (inputPath.toLowerCase().contains("n2u")){
+				if (colorString.equals("1"))
+					sph800.setColor(new Color3f(1f,1-cycle/25f,1f));
+				if (colorString.equals("2"))
+					sph800.setColor(new Color3f(1-cycle/25f,1-cycle/25f,1f));
+				if (colorString.equals("3"))
+					sph800.setColor(new Color3f(1f,1-cycle/25f,1-cycle/25f));
+				if (colorString.equals("4"))
+					sph800.setColor(new Color3f(1-cycle/25f,1f,1-cycle/25f));
+				if (colorString.equals("5"))
+					sph800.setColor(new Color3f(1.5f-cycle/25f,1.5f-cycle/25f,1.5f-cycle/25f));
+				if (colorString.equals("6"))
+					sph800.setColor(new Color3f(1.5f-cycle/25f,1.5f-cycle/25f,1.5f-cycle/25f));
+			}
+			if (inputPath.toLowerCase().contains("jsh")){
+				if (colorString.equals("1"))
+					sph800.setColor(new Color3f(1-cycle/25f,1-cycle/25f,1f));
+				if (colorString.equals("2"))
+					sph800.setColor(new Color3f(1-cycle/25f,1-cycle/25f,1f));
+				if (colorString.equals("3"))
+					sph800.setColor(new Color3f(1f,1-cycle/25f,1f));
+				if (colorString.equals("4"))
+					sph800.setColor(new Color3f(1f,1-cycle/25f,1-cycle/25f));
+				if (colorString.equals("5"))
+					sph800.setColor(new Color3f(1-cycle/25f,1f,1-cycle/25f));
+				if (colorString.equals("6"))
+					sph800.setColor(new Color3f(1.5f-cycle/25f,1.5f-cycle/25f,1.5f-cycle/25f));
+			}
+
 			sph800.setName(outputTag);
 			Object[] existingContents =  univ.getContents().toArray();
 			boolean condensed = false;
