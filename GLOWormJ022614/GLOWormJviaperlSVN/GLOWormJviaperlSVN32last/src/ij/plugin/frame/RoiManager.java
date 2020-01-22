@@ -387,6 +387,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		addPopupItem("Substitute synapse type objs");
 		addPopupItem("Plot synapses to coords");
 		addPopupItem("Plot phate spheres to coords");
+		addPopupItem("Plot phate icospheres to coords");
 		add(pm);
 	}
 
@@ -952,7 +953,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				plotSynapseObjsToCoords();
 			}
 			else if (command.equals("Plot phate spheres to coords")) {
-				plotPhateObjsToCoords();
+				plotPhateObjsToCoordsSpheres();
+			}
+			else if (command.equals("Plot phate icospheres to coords")) {
+				plotPhateObjsToCoordsIcospheres();
 			}
 
 			this.imp.getCanvas().requestFocus();
@@ -6782,7 +6786,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		
 	}
 	
-	public void plotPhateObjsToCoords() {
+	public void plotPhateObjsToCoordsSpheres() {
  
 		IJ.wait(1);
 		String inputPath = IJ.getFilePath("Select csv file with PHATE data");
@@ -6835,7 +6839,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				continue;
 			String[] phateLineChunks = phateLine.split(",");
 			String serial = phateLineChunks[0];
-			String outputTag = serialRosters.get(Integer.parseInt(serial))+"_"+serial;
+			String outputTag = serialRosters.get(Integer.parseInt(serial))+"-"+serial;
 			float offsetVX = (float) (Double.parseDouble(phateLineChunks[1])*1000-50000);
 			float offsetVY = (float) (Double.parseDouble(phateLineChunks[2])*1000-50000);
 			float offsetVZ = (float) (Double.parseDouble(phateLineChunks[3])*1000-50000);
@@ -6881,7 +6885,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			for (int s=0;s<existingContents.length;s++){
 				Content existingContent = (Content)existingContents[s];
 				String ecName = existingContent.getName();
-				String currSN = "_"+serial;
+				String currSN = "-"+serial;
 				if(ecName.endsWith(currSN)){
 //					existingContent.setName(phateLineChunks[5]+"_"+ecName);
 					condensed=true;
@@ -6893,6 +6897,148 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				IJ.log(outputTag+"\n");
 				univ.addCustomMesh(sph800,outputTag).setLocked(true);
 
+		}
+//		univ.addCustomMesh(bigmesh,"multi");
+
+		
+	}
+	
+	public void plotPhateObjsToCoordsIcospheres() {
+		 
+		IJ.wait(1);
+		String icosphereObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/icosphereOut_0000.obj").toString());
+		File mtlFile = new File(MQTVSSceneLoader64.class.getResource("docs/icosphereOut_0000.mtl").toString());
+		
+		IJ.log(icosphereObj);
+		String[] icosphereSections = icosphereObj.split("(\ng |\ns )");
+		IJ.log(""+icosphereSections.length);
+		String[] icosphereVertices = icosphereSections[1].split("\n");
+		String[] icosphereFacets = icosphereSections[2].split("\n");
+		ArrayList<Double> icosphereVXs = new ArrayList<Double>();
+		ArrayList<Double> icosphereVYs = new ArrayList<Double>();
+		ArrayList<Double> icosphereVZs = new ArrayList<Double>();
+		ArrayList<Double> icosphereFXs = new ArrayList<Double>();
+		ArrayList<Double> icosphereFYs = new ArrayList<Double>();
+		ArrayList<Double> icosphereFZs = new ArrayList<Double>();
+		
+		for(int x=0;x<icosphereVertices.length;x++){
+			if (icosphereVertices[x].startsWith("v ")){
+				icosphereVXs.add(Double.parseDouble(icosphereVertices[x].split(" ")[1])*800d);
+				icosphereVYs.add(Double.parseDouble(icosphereVertices[x].split(" ")[2])*800d);
+				icosphereVZs.add(Double.parseDouble(icosphereVertices[x].split(" ")[3])*800d);
+			}
+		}
+		for(int x=0;x<icosphereFacets.length;x++){
+			if (icosphereFacets[x].startsWith("f ")){
+				icosphereFXs.add(Double.parseDouble(icosphereFacets[x].split(" ")[1]));
+				icosphereFYs.add(Double.parseDouble(icosphereFacets[x].split(" ")[2]));
+				icosphereFZs.add(Double.parseDouble(icosphereFacets[x].split(" ")[3]));
+			}
+		}
+		
+		Object[] icospherevxs = (icosphereVXs.toArray());
+		Arrays.sort(icospherevxs);
+		double icospherevxMedian = (double)icospherevxs[icospherevxs.length/2];
+		Object[] icospherevys = (icosphereVYs.toArray());
+		Arrays.sort(icospherevys);
+		double icospherevyMedian = (double)icospherevys[icospherevys.length/2];
+		Object[] icospherevzs = (icosphereVZs.toArray());
+		Arrays.sort(icospherevzs);
+		double icospherevzMedian = (double)icospherevzs[icospherevzs.length/2];
+		double icospherevzMin = (double)icospherevzs[0];
+		double icospherevzMax = (double)icospherevzs[icospherevzs.length-1];
+		Object[] icospherefxs = (icosphereFXs.toArray());
+		Arrays.sort(icospherefxs);
+		double icospherefxMedian = (double)icospherefxs[icospherefxs.length/2];
+		Object[] icospherefys = (icosphereFYs.toArray());
+		Arrays.sort(icospherefys);
+		double icospherefyMedian = (double)icospherefys[icospherefys.length/2];
+		Object[] icospherefzs = (icosphereFZs.toArray());
+		Arrays.sort(icospherefzs);
+		double icospherefzMedian = (double)icospherefzs[icospherefzs.length/2];
+
+
+		String inputPath = IJ.getFilePath("Select csv file with PHATE data");
+		String condensationSNpath = IJ.getFilePath("Select csv file with condensation cluster data");
+//		String mtlPath = IJ.getFilePath("Select mtl file with color rules");
+		File inputFile = new File(inputPath);
+		File conSNFile = new File(condensationSNpath);
+//		File mtlFile = new File(mtlPath);
+		String outputDir = inputFile.getParent()+File.separator+inputFile.getName().replace(".csv", "")+File.separator;
+		new File(outputDir).mkdirs();
+//		IJ.saveString(IJ.openAsString(mtlPath), outputDir+mtlFile.getName());
+		String inputPhateData = IJ.openAsString(inputPath);
+		String[] inputPhateList = inputPhateData.split("\n");
+		String conSNData = IJ.openAsString(condensationSNpath);
+		String[] conSNList = conSNData.split("\n");
+		String[] cellHeaders = null; 
+		int previousMaxSN = 0;
+		int nextMaxSN =0;
+		Hashtable<Integer,String> serialRosters = new Hashtable<Integer,String>();
+		for(int iteration=0;iteration<conSNList.length;iteration++){
+			String[] csnChunks = conSNList[iteration].split(",");
+			if (iteration==0){
+				cellHeaders = csnChunks;
+			}
+			for (int cell=0;cell<cellHeaders.length;cell++){
+				int sn =0;
+				if (iteration==0){
+					sn = previousMaxSN+cell;
+				}else{
+					sn = previousMaxSN+Integer.parseInt(csnChunks[cell]);
+				}
+				IJ.log(cellHeaders[cell]+" "+iteration+" "+csnChunks[cell]+" "+sn);
+				if (serialRosters.get(sn) == null){
+					serialRosters.put(sn, cellHeaders[cell]);
+				} else {
+					serialRosters.put(sn, serialRosters.get(sn)+"_"+cellHeaders[cell]);
+				}
+				if (sn> nextMaxSN){
+					nextMaxSN =sn;
+				}
+			}
+			previousMaxSN=nextMaxSN;
+		}
+		
+		for (String phateLine:inputPhateList){
+			if (phateLine.startsWith("serialNumber")) 
+				continue;
+			String[] phateLineChunks = phateLine.split(",");
+			String serial = phateLineChunks[0];
+
+//			String outputTag = phateLineChunks[5]+"-"+serial;
+			String outputTag = serialRosters.get(Integer.parseInt(serial))+"-"+serial;
+			String outputPath = outputDir+inputFile.getName()+"-"+serial+".obj";
+			String[] outputSections = icosphereSections;	
+			String[] outputVertices = icosphereVertices;
+			String[] outputFacets = icosphereFacets;
+			ArrayList<Double> outputVXs = icosphereVXs;
+			ArrayList<Double> outputVYs = icosphereVYs;
+			ArrayList<Double> outputVZs = icosphereVZs;
+			ArrayList<Double> outputFXs = icosphereFXs;
+			ArrayList<Double> outputFYs = icosphereFYs;
+			ArrayList<Double> outputFZs = icosphereFZs;
+
+			double offsetVX = Double.parseDouble(phateLineChunks[1])*1000 - (icospherevxMedian);
+			double offsetVY = Double.parseDouble(phateLineChunks[2])*1000 - (icospherevyMedian);
+			double offsetVZ = Double.parseDouble(phateLineChunks[3])*1000 - (icospherevzMedian);
+			double zScale = 1;
+			String outputObj = "";
+			outputObj = outputObj + "# OBJ File\nmtllib "+mtlFile.getName()+"\ng " + outputTag + "\n";
+			for (int i=0; i<outputVXs.size(); i++){
+				outputObj = outputObj + "v " +(outputVXs.get(i)+offsetVX) 
+									  + " " +(outputVYs.get(i)+offsetVY) 
+									  + " " +(((outputVZs.get(i))*zScale)+offsetVZ) + "\n";
+			}
+			outputObj = outputObj + "usemtl mat_"+ phateLineChunks[4] ;
+			
+			outputObj = outputObj + "\ns " + outputFacets[0] + "\n";
+			for (int i=0; i<outputFXs.size(); i++){
+				outputObj = outputObj + "f " +outputFXs.get(i).intValue() + " " +outputFYs.get(i).intValue() + " " +outputFZs.get(i).intValue() + "\n";
+			}
+			outputObj = outputObj + outputFacets[outputFacets.length-1] + "\n";	
+			IJ.saveString(outputObj, outputPath);
+			
 		}
 //		univ.addCustomMesh(bigmesh,"multi");
 

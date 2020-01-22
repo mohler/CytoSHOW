@@ -537,13 +537,9 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							
 							try {
 								ImageJ3DViewer.importContent(((File)obj).getPath());
-								ij3dv.run(".");
-								ImageJ3DViewer.importContentRightEye(((File)obj).getPath());
 							} catch (Exception e) {
 								ij3dv.run(".");
 								ImageJ3DViewer.importContent(((File)obj).getPath());
-								ij3dv.run(".");
-								ImageJ3DViewer.importContentRightEye(((File)obj).getPath());
 							}
 							ImageJ3DViewer.lock();
 
@@ -1300,8 +1296,6 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 				for (Frame frame:frames){
 					if (frame instanceof ImageWindow3D){
 						if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow3D)frame).getUniverse().getCanvas()){
-							if (ij3dv == null) 
-								ij3dv = new ImageJ3DViewer();
 							ij3dv.setUniv(((ImageWindow3D)frame).getUniverse());
 						}
 					}
@@ -1323,13 +1317,9 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 				
 				try {
 					ImageJ3DViewer.importContent(((File)obj).getPath());
-					ij3dv.run(".");
-					ImageJ3DViewer.importContentRightEye(((File)obj).getPath());
 				} catch (Exception e) {
 					ij3dv.run(".");
 					ImageJ3DViewer.importContent(((File)obj).getPath());
-					ij3dv.run(".");
-					ImageJ3DViewer.importContentRightEye(((File)obj).getPath());
 				}
 				ImageJ3DViewer.lock();
 
