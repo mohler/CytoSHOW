@@ -358,7 +358,7 @@ public class ImageJ3DViewer implements PlugIn {
 
 	public static void importContent(String path) {
 		univ.addContentLater(path);
-		univ.sync(true);
+//		univ.sync(true);
 	}
 
 
@@ -381,7 +381,7 @@ public class ImageJ3DViewer implements PlugIn {
 //									  , 0.174d, 0d, 0.985d, 0d
 //									  , 0d, 0d, 0d, 1d});
 //		
-		univ.sync(true);
+//		univ.sync(true);
 	}
 
 
