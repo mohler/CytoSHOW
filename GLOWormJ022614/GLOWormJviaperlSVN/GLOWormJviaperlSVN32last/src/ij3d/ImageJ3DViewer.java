@@ -7,25 +7,19 @@ import ij.gui.GUI;
 import ij.plugin.PlugIn;
 import isosurface.MeshExporter;
 
-import java.awt.Color;
 import java.awt.HeadlessException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.Set;
 import java.util.TreeMap;
 
 import javax.media.j3d.Transform3D;
 import javax.vecmath.Color3f;
-import javax.vecmath.Point3d;
-import javax.vecmath.Point3f;
-import javax.vecmath.Tuple3d;
 
 import orthoslice.OrthoGroup;
 import voltex.VoltexGroup;
 import voltex.VolumeRenderer;
-import customnode.Sphere;
 import customnode.u3d.U3DExporter;
 
 public class ImageJ3DViewer implements PlugIn {
@@ -59,15 +53,6 @@ public class ImageJ3DViewer implements PlugIn {
 			// from a macro
 			else if(image != null && !IJ.isMacro())
 				univ.getExecuter().addContent(image, null);
-//			Sphere sph80 = new Sphere(new Point3f(1f,1f,1f),80);
-//			sph80.setColor(new Color3f(1f,1f,1f));
-//			univ.addCustomMesh(sph80,"sphere80").setLocked(true);
-//			univ.addCustomMesh(new Sphere(new Point3f(1f,200f,1f),95),"sphere95").setLocked(true);
-//			univ.addCustomMesh(new Sphere(new Point3f(1f,1f,200f),50),"sphere50").setLocked(true);
-//			univ.addCustomMesh(new Sphere(new Point3f(200f,1f,1f),30),"sphere30").setLocked(true);
-//
-//			univ.addCustomMesh(new Sphere(new Point3f(-100f,-100f,-100f),100),"sphere100").setLocked(true);
-
 
 		} catch(Exception e) {
 			StringBuffer buf = new StringBuffer();
@@ -90,8 +75,8 @@ public class ImageJ3DViewer implements PlugIn {
 		}
 	}
 
-	public static void setUniv(DefaultUniverse defaultUniverse) {
-		univ = (Image3DUniverse) defaultUniverse;
+	public void setUniv(DefaultUniverse defaultUniverse) {
+		this.univ = (Image3DUniverse) defaultUniverse;
 	}
 
 
@@ -357,35 +342,10 @@ public class ImageJ3DViewer implements PlugIn {
 //	}
 
 	public static void importContent(String path) {
-		univ.addContentLater(path);
-//		univ.sync(true);
+		Image3DUniverse univ = getUniv();
+		univ.getExecuter().addSavedContent(path, null);
 	}
 
-
-	
-	public static void importContentRightEye(String path) {
-		univ.addContentLater(path);
-		Content c = ((Content)univ.getContents().toArray()[univ.getContents().toArray().length-1]);
-		c.setLocked(false);
-		Point3d centerContent = new Point3d();
-		c.getContentNode().getCenter(centerContent);
-		Point3d centerUniv = univ.getGlobalCenterPoint();
-//		c.setTranslation(((float)(centerUniv.x-centerContent.x)), ((float)(centerUniv.y-centerContent.y)), ((float)(centerUniv.z-centerContent.z)));
-		c.setTranslation(1000f,1000f,1000f);
-//		c.setRotation(1, 10d);
-//		c.setTranslation(-((float)(centerUniv.x-centerContent.x)), -((float)(centerUniv.y-centerContent.y)), -((float)(centerUniv.z-centerContent.z)));
-		c.setLocked(true);
-
-		//		c.applyTransform(new double[]{0.985, 0d, -0.174d, 0d
-//									  , 0d, 1d, 0d, 0d
-//									  , 0.174d, 0d, 0.985d, 0d
-//									  , 0d, 0d, 0d, 1d});
-//		
-//		univ.sync(true);
-	}
-
-
-	
 	public static void exportTransformed() {
 		Image3DUniverse univ = getUniv();
 		if(univ != null && univ.getSelected() != null)
