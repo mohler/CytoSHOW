@@ -5371,6 +5371,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					frontZ++;							
 				}
 			}
+
 			
 			int adjustmentZ =0;
 			for (int susStep=0;susStep<zSustain;susStep++){
@@ -6326,7 +6327,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		String electricalObj =  IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_newZap25_newZap25_960_0000.obj").toString());
 		String postSynObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_newDiamond25_newDiamond25_386_0000.obj").toString());
-		String preSynObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_newCircle19_newCircle19_326_0000.obj").toString());
+//		String preSynObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_newCircle19_newCircle19_326_0000.obj").toString());
+		String preSynObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/icosphereOut_0000.obj").toString());
 		IJ.log(preSynObj+postSynObj+electricalObj);
 		String[] preSynSections = preSynObj.split("(\ng |\ns )");
 		String[] postSynSections = postSynObj.split("(\ng |\ns )");
@@ -6386,9 +6388,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		for(int x=0;x<preSynVertices.length;x++){
 			if (preSynVertices[x].startsWith("v ")){
-				preSynVXs.add(Double.parseDouble(preSynVertices[x].split(" ")[1]));
-				preSynVYs.add(Double.parseDouble(preSynVertices[x].split(" ")[2]));
-				preSynVZs.add(Double.parseDouble(preSynVertices[x].split(" ")[3]));
+				preSynVXs.add(Double.parseDouble(preSynVertices[x].split(" ")[1])*250d);
+				preSynVYs.add(Double.parseDouble(preSynVertices[x].split(" ")[2])*250d);
+				preSynVZs.add(Double.parseDouble(preSynVertices[x].split(" ")[3])*250d);
 			}
 		}
 		for(int x=0;x<preSynFacets.length;x++){
@@ -6532,8 +6534,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 			double offsetVX = ivxMedian - (outputTag=="gapJxn"?evxMedian:postvxMedian);
 			double offsetVY = ivyMedian - (outputTag=="gapJxn"?evyMedian:postvyMedian);
-			double offsetVZ = ivzMin;
-			double zScale = (ivzMax-ivzMin)/((outputTag=="gapJxn"?evzMax:postvzMax)-(outputTag=="gapJxn"?evzMin:postvzMin));
+//			double offsetVZ = ivzMin;
+//			double zScale = (ivzMax-ivzMin)/((outputTag=="gapJxn"?evzMax:postvzMax)-(outputTag=="gapJxn"?evzMin:postvzMin));
+			double offsetVZ = ivzMedian - (outputTag=="gapJxn"?evzMedian:postvzMedian);
+			double zScale = 1;
 			outputObj = outputObj + inputSections[0] + "\ng " + inputVertices[0] + (outputTag=="gapJxn"?"":"_post") + "\n";
 			for (int i=0; i<outputVXs.size(); i++){
 				outputObj = outputObj + "v " +(outputVXs.get(i)+offsetVX) 
@@ -6568,9 +6572,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 				double offsetBVX = ivxMedian - (outputBTag=="gapJxn"?evxMedian:prevxMedian);
 				double offsetBVY = ivyMedian - (outputBTag=="gapJxn"?evyMedian:prevyMedian);
-				double offsetBVZ = ivzMin ;
-				double zScaleB = (ivzMax-ivzMin)/((outputBTag=="gapJxn"?evzMax:prevzMax)-(outputBTag=="gapJxn"?evzMin:prevzMin));
-				
+//				double offsetBVZ = ivzMin ;
+//				double zScaleB = (ivzMax-ivzMin)/((outputBTag=="gapJxn"?evzMax:prevzMax)-(outputBTag=="gapJxn"?evzMin:prevzMin));
+				double offsetBVZ = ivzMedian - (outputTag=="gapJxn"?evzMedian:postvzMedian);
+				double zScaleB = 1;
+
 				outputBObj = outputBObj + inputSections[0] + "\ng " + inputVertices[0] + (outputBTag=="gapJxn"?"":"_pre") + "\n";
 				for (int i=0; i<outputBVXs.size(); i++){
 					outputBObj = outputBObj + "v " +(outputBVXs.get(i)+offsetBVX) 
@@ -6597,7 +6603,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		String electricalObj =  IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_newZap25_newZap25_960_0000.obj").toString());
 		String postSynObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_newDiamond25_newDiamond25_386_0000.obj").toString());
-		String preSynObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_newCircle19_newCircle19_326_0000.obj").toString());
+//		String preSynObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_newCircle19_newCircle19_326_0000.obj").toString());
+		String preSynObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/icosphereOut_0000.obj").toString());
 
 //		postSynObj = electricalObj;
 		
@@ -6923,9 +6930,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		
 		for(int x=0;x<icosphereVertices.length;x++){
 			if (icosphereVertices[x].startsWith("v ")){
-				icosphereVXs.add(Double.parseDouble(icosphereVertices[x].split(" ")[1])*800d);
-				icosphereVYs.add(Double.parseDouble(icosphereVertices[x].split(" ")[2])*800d);
-				icosphereVZs.add(Double.parseDouble(icosphereVertices[x].split(" ")[3])*800d);
+				icosphereVXs.add(Double.parseDouble(icosphereVertices[x].split(" ")[1])*400d);
+				icosphereVYs.add(Double.parseDouble(icosphereVertices[x].split(" ")[2])*400d);
+				icosphereVZs.add(Double.parseDouble(icosphereVertices[x].split(" ")[3])*400d);
 			}
 		}
 		for(int x=0;x<icosphereFacets.length;x++){
