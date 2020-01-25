@@ -6388,9 +6388,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		for(int x=0;x<preSynVertices.length;x++){
 			if (preSynVertices[x].startsWith("v ")){
-				preSynVXs.add(Double.parseDouble(preSynVertices[x].split(" ")[1])*220d);
-				preSynVYs.add(Double.parseDouble(preSynVertices[x].split(" ")[2])*220d);
-				preSynVZs.add(Double.parseDouble(preSynVertices[x].split(" ")[3])*220d);
+				double rScale = (210d);
+				preSynVXs.add(Double.parseDouble(preSynVertices[x].split(" ")[1])*rScale);
+				preSynVYs.add(Double.parseDouble(preSynVertices[x].split(" ")[2])*rScale);
+				preSynVZs.add(Double.parseDouble(preSynVertices[x].split(" ")[3])*rScale);
 			}
 		}
 		for(int x=0;x<preSynFacets.length;x++){
@@ -6537,7 +6538,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //			double offsetVZ = ivzMin;
 //			double zScale = (ivzMax-ivzMin)/((outputTag=="gapJxn"?evzMax:postvzMax)-(outputTag=="gapJxn"?evzMin:postvzMin));
 			double offsetVZ = ivzMedian - (outputTag=="gapJxn"?evzMedian:postvzMedian);
-			double zScale = 1;
+			double zScale = 1.4;
 			outputObj = outputObj + inputSections[0] + "\ng " + inputVertices[0] + (outputTag=="gapJxn"?"":"_post") + "\n";
 			for (int i=0; i<outputVXs.size(); i++){
 				outputObj = outputObj + "v " +(outputVXs.get(i)+offsetVX) 
@@ -6574,7 +6575,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				double offsetBVY = ivyMedian - (outputBTag=="gapJxn"?evyMedian:prevyMedian);
 //				double offsetBVZ = ivzMin ;
 //				double zScaleB = (ivzMax-ivzMin)/((outputBTag=="gapJxn"?evzMax:prevzMax)-(outputBTag=="gapJxn"?evzMin:prevzMin));
-				double offsetBVZ = ivzMedian; //- (outputTag=="gapJxn"?evzMedian:postvzMedian);
+				double offsetBVZ = ivzMedian+30d; //- (outputTag=="gapJxn"?evzMedian:postvzMedian);
 				double zScaleB = 1;
 
 				outputBObj = outputBObj + inputSections[0] + "\ng " + inputVertices[0] + (outputBTag=="gapJxn"?"":"_pre") + "\n";
