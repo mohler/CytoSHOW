@@ -80,7 +80,6 @@ import customnode.CustomPointMesh;
 import customnode.CustomQuadMesh;
 import customnode.CustomTriangleMesh;
 import customnode.MeshLoader;
-import customnode.Sphere;
 
 public class Image3DUniverse extends DefaultAnimatableUniverse {
 
@@ -1261,7 +1260,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	}
 
 	public Content createContent(CustomMultiMesh node, String name) {
-		return ContentCreator.createContent(node, name, 0);
+		return ContentCreator.createContent(node, name);
 	}
 
 	/**
@@ -1332,7 +1331,6 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	public Content addPointMesh(List<Point3f> mesh, Color3f color,
 			float ptsize, String name) {
 		CustomPointMesh tmesh = new CustomPointMesh(mesh, color, 0);
-		tmesh.setAntiAliasing(true);
 		tmesh.setPointSize(ptsize);
 		return addCustomMesh(tmesh, name);
 	}

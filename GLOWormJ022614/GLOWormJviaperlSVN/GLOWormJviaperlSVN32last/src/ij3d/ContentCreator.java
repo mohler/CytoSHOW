@@ -135,18 +135,6 @@ public class ContentCreator {
 		return createContent(node, name, 0);
 	}
 
-//	public static Content createContent(CustomMultiMesh node, String name, int tp) {
-//		Content c = new Content(name, tp);
-//		ContentInstant content = c.getInstant(tp);
-//		content.color = null;
-//		content.transparency = 0f;
-//		content.shaded = true;
-//		content.showCoordinateSystem(
-//			UniverseSettings.showLocalCoordinateSystemsByDefault);
-//		content.display(node);
-//		return c;
-//	}
-//
 	public static Content createContent(CustomMultiMesh node, String name, int tp) {
 		Content c = new Content(name, tp);
 		ContentInstant content = c.getInstant(tp);

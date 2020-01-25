@@ -162,21 +162,13 @@ public class IJ3dExecuter {
 	}
 
 	public void addSavedContent(final String path, final File file) {
-		addSavedContent(path, file, false);
-	}
-	
-	public void addSavedContent(final String path, final File file, boolean threadIt) {
-		if (threadIt){
-			new Thread() {
-				{ setPriority(Thread.NORM_PRIORITY); }
+		new Thread() {
+			{ setPriority(Thread.NORM_PRIORITY); }
 
-				public void run() {
-					univ.addContentLater(path);
-				}
-			}.start();
-		} else {
-			univ.addContentLater(path);
-		}
+			public void run() {
+				univ.addContentLater(path);
+			}
+		}.start();
 	}
 
 	public void addContent(final ImagePlus image, final File file) {
