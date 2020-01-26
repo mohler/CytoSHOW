@@ -6325,7 +6325,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	
 	public void swapSynapseObjTypes() {
 
-		String electricalObj =  IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_newZap25_newZap25_960_0000.obj").toString());
+//		String electricalObj =  IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_newZap25_newZap25_960_0000.obj").toString());
+		String electricalObj =  IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/3dZap_0000.obj").toString());
 		String postSynObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_newDiamond25_newDiamond25_386_0000.obj").toString());
 //		String preSynObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/SVV_newCircle19_newCircle19_326_0000.obj").toString());
 		String preSynObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/icosphereOut_0000.obj").toString());
@@ -6360,9 +6361,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		ArrayList<Double> preSynFZs = new ArrayList<Double>();
 		for(int x=0;x<electricalVertices.length;x++){
 			if (electricalVertices[x].startsWith("v ")){
-				electricalVXs.add(Double.parseDouble(electricalVertices[x].split(" ")[1]));
-				electricalVYs.add(Double.parseDouble(electricalVertices[x].split(" ")[2]));
-				electricalVZs.add(Double.parseDouble(electricalVertices[x].split(" ")[3]));
+				double scale = 15d;
+				electricalVXs.add(Double.parseDouble(electricalVertices[x].split(" ")[1])*scale);
+				electricalVYs.add(Double.parseDouble(electricalVertices[x].split(" ")[2])*scale);
+				electricalVZs.add(Double.parseDouble(electricalVertices[x].split(" ")[3])*scale);
 			}
 		}
 		for(int x=0;x<electricalFacets.length;x++){
