@@ -6097,12 +6097,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			for (String synapseObjFileName:objDirList){
 				if (synapseObjFileName.contains("electrical"))
 					IJ.wait(1);
-				if (synapseObjFileName==null || !synapseObjFileName.toLowerCase().endsWith(".obj")) continue;
+				if (synapseObjFileName==null || !synapseObjFileName.toLowerCase().endsWith(".obj")) 
+					continue;
 				boolean presynInGroup = false;
 				boolean rootIsPostSyn = false;
 				boolean postsynOutsideOfGroup = true;
 				String synapseObjNameCleaned = synapseObjFileName.replace("\"", "").replace("[", "").replace("]", "");
-				boolean postShape = synapseObjNameCleaned.toLowerCase().endsWith("postsyn.obj");
+
 				String rootName = synapseObjFileName.contains("\"")?synapseObjFileName.split("\"")[1].trim():synapseObjNameCleaned.replaceAll("(.*_zs\\d+_)(.*)(electrical|chemical)(.*)", "$2");
 				rootName = rootName.contains(" ")?rootName.split("[_\\- ]")[0].trim():rootName.trim();
 				String[] postSynapticCells = synapseObjNameCleaned.split("_")[1].replaceAll(".*(electrical|chemical)(.*)", "$2").split("\\&");
@@ -6197,9 +6198,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				}else if (rootIsPostSyn && !presynInGroup){
 					for (int ba=0; ba<allGroupArrays.length; ba++){
 						String[] targetGroupArray = allGroupArrays[ba];
-						if (targetGroupArray==null) continue;
+						if (targetGroupArray==null) 
+							continue;
 						for (String targetGroupNeuron:targetGroupArray){
-							if (targetGroupNeuron==null) continue;
+							if (targetGroupNeuron==null) 
+								continue;
 							int psc=0;
 							if (rootName.equals(targetGroupNeuron)){
 								String newPostSynObjFileName = synapseObjFileName.endsWith("preSyn.obj")?"":synapseObjFileName;;
