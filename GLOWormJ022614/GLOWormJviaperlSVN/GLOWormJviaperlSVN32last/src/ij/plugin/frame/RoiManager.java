@@ -6106,10 +6106,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 				String rootName = synapseObjFileName.contains("\"")?synapseObjFileName.split("\"")[1].trim():synapseObjNameCleaned.replaceAll("(.*_zs\\d+_)(.*)(electrical|chemical)(.*)", "$2");
 				rootName = rootName.contains(" ")?rootName.split("[_\\- ]")[0].trim():rootName.trim();
-				String[] postSynapticCells = synapseObjNameCleaned.split("_")[1].replaceAll(".*(electrical|chemical)(.*)", "$2").split("\\&");
-				if (postSynapticCells[0].contains("by")){
-					rootName = postSynapticCells[0];
-					postSynapticCells[0] = postSynapticCells[0].split("by")[1].trim();
+				String[] postSynapticCellArray = synapseObjNameCleaned.split("_")[1].replaceAll(".*(electrical|chemical)(.*)", "$2").split("\\&");
+				if (postSynapticCellArray[0].contains("by")){
+					rootName = postSynapticCellArray[0];
+					postSynapticCellArray[0] = postSynapticCellArray[0].split("by")[1].trim();
+				}
+				ArrayList<String> postSynapticCells = new ArrayList<String>();
+				for (String s:postSynapticCellArray) {
+					postSynapticCells.add(s);
 				}
 				for (String currentGroupNeuron:currentGroupArray){
 					if (currentGroupNeuron==null) continue;
@@ -6123,7 +6127,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						}
 						presynInGroup = true;
 						boolean noHitInGroup = true;
-						for (String postSC : postSynapticCells){
+						for (String postSC : postSynapticCellArray){
 							if (!allCellNamesFromTable.contains(postSC)) 
 								continue;
 
@@ -6135,11 +6139,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 							for (String nextGroupNeuron:currentGroupArray){
 								if (postSC.equals(nextGroupNeuron)){
-									noHitInGroup = false;
+//									noHitInGroup = false;
+									postSynapticCells.remove(nextGroupNeuron);
 								}
 							}
 						}
-						postsynOutsideOfGroup = postsynOutsideOfGroup && noHitInGroup;
+//						postsynOutsideOfGroup = postsynOutsideOfGroup && noHitInGroup;
 					} else {
 						for (String postSC : postSynapticCells){
 							if (postSC.equals(currentGroupNeuron)){
@@ -6157,7 +6162,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							if (targetGroupNeuron==null) continue;
 							int[][] psps = new int[][]{{-1,-1},{+1,+1},{-1,+1},{+1,-1}}; 
 							int psc=0;
-							int shift = postSynapticCells.length>1?50:0;
+							int shift = postSynapticCells.size()>1?50:0;
 							for (String postSC:postSynapticCells){
 
 								if (postSC==null) continue;
@@ -6213,7 +6218,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							}
 						}
 					}
-				} 
+				} else {
+					IJ.wait(1);
+				}
 
 			}
 			for (ArrayList<String> synapseSPartners:synapseSummaryByGroups){
