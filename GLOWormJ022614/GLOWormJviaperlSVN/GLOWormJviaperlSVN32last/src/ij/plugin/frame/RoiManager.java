@@ -6111,9 +6111,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					rootName = postSynapticCellArray[0];
 					postSynapticCellArray[0] = postSynapticCellArray[0].split("by")[1].trim();
 				}
-				ArrayList<String> postSynapticCells = new ArrayList<String>();
+				ArrayList<String> postSynapticCellsTransBundle = new ArrayList<String>();
 				for (String s:postSynapticCellArray) {
-					postSynapticCells.add(s);
+					postSynapticCellsTransBundle.add(s);
 				}
 				for (String currentGroupNeuron:currentGroupArray){
 					if (currentGroupNeuron==null) continue;
@@ -6140,13 +6140,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							for (String nextGroupNeuron:currentGroupArray){
 								if (postSC.equals(nextGroupNeuron)){
 //									noHitInGroup = false;
-									postSynapticCells.remove(nextGroupNeuron);
+									postSynapticCellsTransBundle.remove(nextGroupNeuron);
 								}
 							}
 						}
 //						postsynOutsideOfGroup = postsynOutsideOfGroup && noHitInGroup;
 					} else {
-						for (String postSC : postSynapticCells){
+						for (String postSC : postSynapticCellsTransBundle){
 							if (postSC.equals(currentGroupNeuron)){
 								rootIsPostSyn = true;
 							}
@@ -6162,8 +6162,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							if (targetGroupNeuron==null) continue;
 							int[][] psps = new int[][]{{-1,-1},{+1,+1},{-1,+1},{+1,-1}}; 
 							int psc=0;
-							int shift = postSynapticCells.size()>1?50:0;
-							for (String postSC:postSynapticCells){
+							int shift = postSynapticCellsTransBundle.size()>1?50:0;
+							for (String postSC:postSynapticCellArray){
 
 								if (postSC==null) continue;
 								if (postSC.equals(targetGroupNeuron)) {
@@ -6173,7 +6173,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 									newPreSynObjFileName = newPreSynObjFileName.replace(".obj", "_"+allGroupColorStrings[ba]+"-"+psc+".obj");
 									String newPostSynObjFileName = synapseObjFileName.endsWith("preSyn.obj")?"":synapseObjFileName;;
 									newPostSynObjFileName = newPostSynObjFileName.replace(".obj", "_"+allGroupColorStrings[i]+"-"+psc+".obj");
-									if (postsynOutsideOfGroup){
+									if (postSynapticCellsTransBundle.contains(postSC)){
 										newObjNamesforGroupPatches.add(newPreSynObjFileName);
 										oldObjNamesforGroupPatches.add(synapseObjFileName);
 										xyShiftsForPolyadicGroupSynapses.add(new int[]{psps[psc][0]*shift, psps[psc][1]*shift});
