@@ -294,7 +294,7 @@ public class Selection implements PlugIn, Measurements {
 		imp.setRoi(p);
 	}
 	
-	private void transferProperties(Roi roi1, Roi roi2) {
+	public static void transferProperties(Roi roi1, Roi roi2) {
 		if (roi1==null || roi2==null)
 			return;
 		roi2.setStrokeColor(roi1.getStrokeColor());

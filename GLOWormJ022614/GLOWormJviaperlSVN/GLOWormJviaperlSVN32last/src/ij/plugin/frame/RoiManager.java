@@ -966,7 +966,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	private void sketchVolumeViewer(Object source) { 
 		boolean singleSave = IJ.shiftKeyDown();
-		double scaleFactor = IJ.getNumber("Downscale for faster rendring?", 0.3d);
+		double scaleFactor = IJ.getNumber("Downscale for faster rendering?", 1.0d);
 		double zPadFactor = 3;
 		IJ.setForegroundColor(255, 255, 255);
 		IJ.setBackgroundColor(0, 0, 0);
@@ -1036,7 +1036,31 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				int nextFrame = Integer.parseInt(nextChunks[nextChunks.length-1].replaceAll("[CZT]", "").split("-")[0]);
 				Roi scaledRoi=null;
 				try {
-					scaledRoi = new RoiDecoder(scaleFactor, RoiEncoder.saveAsByteArray(nextRoi), nextRoi.getName()).getRoi();
+					
+					if (!nextRoi.isArea()) {
+							ImageProcessor ip2 = new ByteProcessor(imp.getWidth(), imp.getHeight());
+							ip2.setColor(255);
+							if (nextRoi.getType()==Roi.LINE) {
+								 if(!(nextRoi.getStrokeWidth()>1)) {
+									 nextRoi.setStrokeWidth(2d);
+								 }
+								ip2.fillPolygon(nextRoi.getPolygon());
+							} else {
+								(nextRoi).drawPixels(ip2);
+							}
+							ip2.setThreshold(255, 255, ImageProcessor.NO_LUT_UPDATE);
+							ThresholdToSelection tts = new ThresholdToSelection();
+							Roi roi2 = tts.convert(ip2);
+							Selection.transferProperties(nextRoi, roi2);	
+							nextRoi = roi2;
+
+					}
+					
+					if (nextRoi instanceof TextRoi) {
+						scaledRoi= nextRoi;
+					} else {
+						scaledRoi = new RoiDecoder(scaleFactor, RoiEncoder.saveAsByteArray(nextRoi), nextRoi.getName()).getRoi();
+					}
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -1048,7 +1072,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}		
 			sketchImp.getRoiManager().select(-1);
 			boolean filled=false;
-			filled = sketchImp.getRoiManager().drawOrFill(FILL);
+			filled = sketchImp.getRoiManager().drawOrFill(nextRoi instanceof TextRoi?DRAW:FILL);
 
 			while(!filled){
 				IJ.wait(100);
