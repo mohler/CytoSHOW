@@ -20,26 +20,26 @@ public class MeshGroup extends ContentNode {
 
 	private CustomTriangleMesh mesh;
 	private Triangulator triangulator = new MCTriangulator();
-	private ContentInstant c;
+	private ContentInstant ci;
 	private Point3f min, max, center;
 
 	public MeshGroup (Content c) {
 		this(c.getCurrentInstant());
 	}
 
-	public MeshGroup (ContentInstant c) {
+	public MeshGroup (ContentInstant ci) {
 		super();
-		this.c = c;
-		Color3f color = c.getColor();
-		List tri = triangulator.getTriangles(c.getImage(),
-			c.getThreshold(), c.getChannels(),
-			c.getResamplingFactor());
+		this.ci = ci;
+		Color3f color = ci.getColor();
+		List tri = triangulator.getTriangles(ci.getImage(),
+			ci.getThreshold(), ci.getChannels(),
+			ci.getResamplingFactor());
 		if(color == null) {
-			int value = c.getImage().getProcessor().
-				getColorModel().getRGB(c.getThreshold());
+			int value = ci.getImage().getProcessor().
+				getColorModel().getRGB(ci.getThreshold());
 			color = new Color3f(new Color(value));
 		}
-		mesh = new CustomTriangleMesh(tri, color, c.getTransparency());
+		mesh = new CustomTriangleMesh(tri, color, ci.getTransparency());
 		calculateMinMaxCenterPoint();
 		addChild(mesh);
 	}
@@ -65,14 +65,22 @@ public class MeshGroup extends ContentNode {
 	}
 
 	public void thresholdUpdated(int threshold) {
-		if(c.getImage() == null) {
+		if(ci.getImage() == null) {
 			IJ.error("Mesh was not calculated of a grayscale " +
 				"image. Can't change threshold");
 			return;
 		}
-		List tri = triangulator.getTriangles(c.getImage(),
-				c.getThreshold(), c.getChannels(),
-				c.getResamplingFactor());
+		boolean noImg = ci.getImage().getImage() == null;
+		boolean noIp = ci.getImage().getProcessor() == null;
+		if( noImg  && noIp) {
+			IJ.error("No img or ip in source imp... " +
+					"image. Can't change threshold");
+				return;
+			
+		}
+		List tri = triangulator.getTriangles(ci.getImage(),
+				ci.getThreshold(), ci.getChannels(),
+				ci.getResamplingFactor());
 		mesh.setMesh(tri);
 	}
 
@@ -81,14 +89,14 @@ public class MeshGroup extends ContentNode {
 	}
 
 	public void channelsUpdated(boolean[] channels) {
-		if(c.getImage() == null) {
+		if(ci.getImage() == null) {
 			IJ.error("Mesh was not calculated of a grayscale " +
 				"image. Can't change channels");
 			return;
 		}
-		List tri = triangulator.getTriangles(c.getImage(),
-			c.getThreshold(), c.getChannels(),
-			c.getResamplingFactor());
+		List tri = triangulator.getTriangles(ci.getImage(),
+			ci.getThreshold(), ci.getChannels(),
+			ci.getResamplingFactor());
 		mesh.setMesh(tri);
 	}
 
@@ -112,8 +120,8 @@ public class MeshGroup extends ContentNode {
 
 	public void colorUpdated(Color3f newColor) {
 		if(newColor == null){
-			int val = c.getImage().getProcessor().
-				getColorModel().getRGB(c.getThreshold());
+			int val = ci.getImage().getProcessor().
+				getColorModel().getRGB(ci.getThreshold());
 			newColor = new Color3f(new Color(val));
 		}
 		mesh.setColor(newColor);

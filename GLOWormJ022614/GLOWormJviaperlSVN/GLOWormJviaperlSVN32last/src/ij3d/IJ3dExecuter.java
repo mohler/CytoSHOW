@@ -1885,7 +1885,7 @@ public class IJ3dExecuter {
 	private abstract class SliderAdjuster extends Thread {
 		boolean go = false;
 		int newV;
-		ContentInstant content;
+		ContentInstant contentInstant;
 		Image3DUniverse univ;
 		final Object lock = new Object();
 
@@ -1901,7 +1901,7 @@ public class IJ3dExecuter {
 		void exec(final int newV, final ContentInstant content, final Image3DUniverse univ) {
 			synchronized (lock) {
 				this.newV = newV;
-				this.content = content;
+				this.contentInstant = content;
 				this.univ = univ;
 			}
 			synchronized (this) { notify(); }
@@ -1923,27 +1923,27 @@ public class IJ3dExecuter {
 			go = true;
 			while (go) {
 				try {
-					if (null == content) {
+					if (null == contentInstant) {
 						synchronized (this) { wait(); }
 					}
 					if (!go) return;
 					// 1 - cache vars, to free the lock very quickly
-					ContentInstant c;
+					ContentInstant ci;
 					int transp = 0;
 					Image3DUniverse u;
 					synchronized (lock) {
-						c = this.content;
+						ci = this.contentInstant;
 						transp = this.newV;
 						u = this.univ;
 					}
 					// 2 - exec cached vars
-					if (null != c) {
-						setValue(c, transp);
+					if (null != ci) {
+						setValue(ci, transp);
 					}
 					// 3 - done: reset only if no new request was put
 					synchronized (lock) {
-						if (c == this.content) {
-							this.content = null;
+						if (ci == this.contentInstant) {
+							this.contentInstant = null;
 							this.univ = null;
 						}
 					}

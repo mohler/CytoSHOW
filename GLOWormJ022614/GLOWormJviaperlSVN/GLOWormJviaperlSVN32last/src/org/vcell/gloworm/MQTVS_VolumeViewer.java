@@ -185,7 +185,7 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 						impD.changes = false;
 						if (impD.getWindow() != null)
 							impD.getWindow().close();
-						impD.flush();
+//						impD.flush();
 					}
 
 				}
@@ -193,7 +193,7 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 					impDup.changes = false;
 					if (impDup.getWindow() != null)
 						impDup.getWindow().close();
-					impDup.flush();
+//					impDup.flush();
 				}
 				ImageJ3DViewer.select(null);
 				IJ.getInstance().toFront();
@@ -282,7 +282,7 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 						if (impD != imp){
 							impD.changes = false;
 							impD.getWindow().close();
-							impD.flush();
+//							impD.flush();
 						}
 					}
 				}
