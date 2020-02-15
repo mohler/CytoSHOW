@@ -6,6 +6,8 @@ import ij.VirtualStack;
 import ij.WindowManager;
 import ij.gui.ImageWindow;
 import ij.gui.StackWindow;
+import ij.io.FileInfo;
+import ij.io.TiffDecoder;
 import ij.plugin.BrowserLauncher;
 import ij.plugin.FileInfoVirtualStack;
 import ij.plugin.MultiFileInfoVirtualStack;
@@ -31,9 +33,6 @@ import java.math.BigDecimal;
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.rmi.Naming;
 import java.rmi.NoSuchObjectException;
 import java.rmi.NotBoundException;
@@ -175,9 +174,19 @@ public class RemoteMTVS_Engine extends UnicastRemoteObject implements Compute {
 				//               	|| names[0].substring(names[0].lastIndexOf("/")).startsWith("/DUP")
 				//            		|| names[0].substring(names[0].lastIndexOf("/")).startsWith("/Projectionsof")
 				) {
-			vstack = new MultiFileInfoVirtualStack();
+			try {
+				vstack = new FileInfoVirtualStack((new TiffDecoder(names[0],names[0].split("\\")[names[0].split("\\").length-1])).getTiffInfo(0), false);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		} else {
-			vstack = new MultiFileInfoVirtualStack();
+			try {
+				vstack = new FileInfoVirtualStack((new TiffDecoder(names[0],names[0].split("\\")[names[0].split("\\").length-1])).getTiffInfo(0), false);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 
@@ -280,10 +289,10 @@ public class RemoteMTVS_Engine extends UnicastRemoteObject implements Compute {
 			int attempts =0;
 			String returnString = "";
 			String line = "";			
-			while(!line.contains("QTVSEngine bound on port") && attempts<3) {
+			while(!line.contains("MTVSEngine bound on port") && attempts<3) {
 				serverPort = "" + (8085 +((int)(Math.random()*1000)));
 				jvm = new ProcessBuilder("java","-d32", "-Xmx1000M", "-Xdock:name=\"CytoSHOW "+macID+":"+RemoteServer.getClientHost()+">"+serverPort+"\"", 
-						"-jar", "/Users/wmohler/Documents/RemoteQTVS_jpgEngine.jar", macID+":"+RemoteServer.getClientHost()+">"+serverIP+":"+serverPort+"/QTVS");
+						"-jar", "/Users/wmohler/Documents/RemoteMTVS_Engine.jar", macID+":"+RemoteServer.getClientHost()+">"+serverIP+":"+serverPort+"/MTVS");
 				attempts++;
 				jvm.redirectErrorStream(true);
 				newServerProcess = jvm.start();
@@ -291,12 +300,12 @@ public class RemoteMTVS_Engine extends UnicastRemoteObject implements Compute {
 				StringBuilder builder = new StringBuilder();
 				line = br.readLine();
 			} 
-			if (line.contains("QTVSEngine bound on port")) {
-				returnString = macID+":"+RemoteServer.getClientHost()+">"+serverIP+":"+serverPort+"/QTVS";
+			if (line.contains("MTVSEngine bound on port")) {
+				returnString = macID+":"+RemoteServer.getClientHost()+">"+serverIP+":"+serverPort+"/MTVS";
 			} else {
 				serverPort = "80";
 //				jvm = new ProcessBuilder("java","-d32", "-Xmx500M", "-Xdock:name=\"CytoSHOW "+macID+":"+RemoteServer.getClientHost()+">"+serverPort+"\"", 
-//						"-jar", "/Users/wmohler/Documents/RemoteQTVS_jpgEngine.jar", macID+":"+RemoteServer.getClientHost()+">"+serverIP+":"+serverPort+"/HEAD");				
+//						"-jar", "/Users/wmohler/Documents/RemoteMTVS_jpgEngine.jar", macID+":"+RemoteServer.getClientHost()+">"+serverIP+":"+serverPort+"/HEAD");				
 				returnString = macID+":"+RemoteServer.getClientHost()+">"+serverIP+":"+serverPort+"/HEAD";
 //				jvm.redirectErrorStream(true);
 //				newServerProcess = jvm.start();
@@ -398,9 +407,9 @@ public class RemoteMTVS_Engine extends UnicastRemoteObject implements Compute {
 			            } catch (NoSuchObjectException nbe) {
 			            	Naming.rebind(sprName, engine);
 			            }
-			            System.out.println("QTVSEngine bound on port "+portString);
+			            System.out.println("MTVSEngine bound on port "+portString);
 			        } catch (Exception e) {
-			            System.out.println("QTVSEngine exception:");
+			            System.out.println("MTVSEngine exception:");
 //			            e.printStackTrace();
 			        }
 

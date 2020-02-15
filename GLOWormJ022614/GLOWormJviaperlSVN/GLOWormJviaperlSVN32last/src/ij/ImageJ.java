@@ -1079,6 +1079,7 @@ public class ImageJ extends Frame implements ActionListener,
 					remote = true;
 					if (IJ.rmiURL == null || !IJ.rmiURL.matches("\\/\\/\\d\\d?\\d?\\.\\d\\d?\\d?\\.\\d\\d?\\d?\\.\\d\\d?\\d?:\\d\\d?\\d?\\d? \\d\\d?\\d?\\d?")) {
 						IJ.rmiURL = "//155.37.253.202:8084 1";
+//						IJ.rmiURL = "//155.37.249.169:8084 1";
 					}
 					if (args.length > i+2) {
 						if (args[i+1].matches("\\/\\/\\d\\d?\\d?\\.\\d\\d?\\d?\\.\\d\\d?\\d?\\.\\d\\d?\\d?:\\d\\d?\\d?\\d?")

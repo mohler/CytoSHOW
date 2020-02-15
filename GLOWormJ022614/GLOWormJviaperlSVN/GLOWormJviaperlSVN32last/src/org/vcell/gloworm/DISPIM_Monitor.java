@@ -5894,7 +5894,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						}
 
 						FilenameFilter tiffNameFilter = new FilenameFilter() {
-							@Override
+							
 							public boolean accept(File dir, String name) {
 								return name.toLowerCase().endsWith(".tif");
 							}

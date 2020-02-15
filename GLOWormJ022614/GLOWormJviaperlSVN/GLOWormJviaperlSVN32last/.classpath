@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry excluding="src/" kind="src" path=""/>
 	<classpathentry kind="lib" path="precompiled-mpicbg_.jar"/>
 	<classpathentry kind="lib" path="precompiled-mpicbg.jar"/>
 	<classpathentry kind="lib" path="jdom.jar"/>

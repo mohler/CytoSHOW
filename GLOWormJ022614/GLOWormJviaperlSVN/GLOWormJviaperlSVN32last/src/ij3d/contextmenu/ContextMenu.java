@@ -5,6 +5,7 @@ import ij3d.ContentConstants;
 import ij3d.IJ3dExecuter;
 import ij3d.Image3DUniverse;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -28,10 +29,17 @@ public class ContextMenu implements ActionListener, ItemListener, ContentConstan
 	private JMenuItem slices, updateVol, fill, smoothMesh, smoothAllMeshes, smoothDialog, colorSurface, decimateMesh;
 	private JCheckBoxMenuItem shaded, saturated;
 
+	private JMenuItem cellInfo;
+	private int clickX, clickY;
+
 	public ContextMenu (Image3DUniverse univ) {
 
 		this.univ = univ;
 		this.iJ3dExecuter = univ.getExecuter();
+		
+		cellInfo = new JMenuItem("About this object...");
+		cellInfo.addActionListener(this);
+		popup.add(cellInfo);
 
 		slices = new JMenuItem("Adjust slices");
 		slices.addActionListener(this);
@@ -82,6 +90,9 @@ public class ContextMenu implements ActionListener, ItemListener, ContentConstan
 
 	public void showPopup(MouseEvent e) {
 		content = univ.getPicker().getPickedContent(e.getX(), e.getY());
+		clickX = e.getX();
+		clickY = e.getY();
+
 		if(content == null)
 			return;
 		univ.select(content);
@@ -103,7 +114,9 @@ public class ContextMenu implements ActionListener, ItemListener, ContentConstan
 	
 	public void actionPerformed(ActionEvent e) {
 		Object src = e.getSource();
-		if (src == updateVol)
+		if (src == cellInfo)
+			univ.getWindow().getCanvas().handlePopupMenu(new MouseEvent(univ.getWindow(), 0, 0, 0, clickX, clickY, 1, false));
+		else if (src == updateVol)
 			iJ3dExecuter.updateVolume(content);
 		else if (src == slices)
 			iJ3dExecuter.changeSlices(content);

@@ -168,7 +168,7 @@ public class RemoteMTVSHandler {
 			IJ.log("contacting CytoSHOW server...");
 			comp = (Compute) Naming.lookup(remoteEngineName);
 			IJ.log(comp.toString()+"success on connect.7");
-			while (spawnStrings == null || serverReturnString.contains("Exception")) {
+			while (spawnStrings == null || serverReturnString == null || serverReturnString.contains("Exception")) {
 				spawnStrings = new String[] {""+System.currentTimeMillis(),
 						"blank", 
 						args[0].replaceAll("/", "").split(":")[0], ""+(Integer.parseInt(args[0].split(":")[1])+Integer.parseInt(args[1]))};
@@ -213,6 +213,8 @@ public class RemoteMTVSHandler {
 			e.printStackTrace();
 		} 
 
+		IJ.log("compQ =" +compQ);
+		
 		if (moviePathNames.length>0) {
 			try {
 				remoteImpID = compQ.setUpMovie(moviePathNames, movieSlices, Integer.parseInt(args[0].split(":")[1])+Integer.parseInt(args[1]), rcsPrX);

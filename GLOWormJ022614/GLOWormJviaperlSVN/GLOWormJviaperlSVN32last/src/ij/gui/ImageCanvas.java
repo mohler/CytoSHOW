@@ -1530,8 +1530,9 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 					&& (imp.getTitle().contains("Sketch3D") 
 							|| sketchyMQTVS);
 
-
-			if (rm != null && (labelShapes != null || brainbowSelection)) {
+			boolean ij3dSelection = e.getSource() instanceof ImageWindow3D;
+			
+			if (rm != null && (labelShapes != null || brainbowSelection || ij3dSelection)) {
 //				Roi[] fullRoisArray = rm.getFullRoisAsArray();
 				DefaultListModel listModel = rm.getListModel();
 				int n;
@@ -1577,46 +1578,52 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 					mi.addActionListener(ij);
 					popup.add(mi);
 				}
+				
+				if (ij3dSelection) {
+					cellName = ((ImageWindow3D)e.getSource()).getUniverse().getSelected().getName();
+				}
 
-				Roi[] sliceRoisArray = new Roi[sliceRois.size()];
-				for (int sr=0;sr<sliceRoisArray.length;sr++)
-					sliceRoisArray[sr] = ((Roi)sliceRois.get(sr));
-				for (int r=0; r<sliceRoisArray.length; r++) {  
-					//					IJ.log(""+r);
-					if ((!lineageMap && this.getLabelShapes().get(sliceRoisArray[r]) != null
-							&& this.getLabelShapes().get(sliceRoisArray[r]).contains(xOS, yOS))
-							|| (brainbowSelection /*&& rm.getImagePlus().getCanvas().getLabelShapes().get(r).intersects(new Rectangle (xOS*10-200, yOS*10-200,400,400))*/)
-							|| (lineageMap && logLines.length >0 && logLines[logLines.length-1].startsWith(">")
-									&& (this.getLabelShapes().get(sliceRoisArray[r]).getName()).startsWith("\""+logLines[logLines.length-1].split("[> ,]")[1]+" " + logLines[logLines.length-1].split("[> ,]")[2])) ) {
-						mi = null;
-						targetTag[0] = r;
-						targetTag[1] = (int) this.getLabelShapes().get(sliceRoisArray[r]).getBounds().getCenterX();
-						targetTag[2] = (int) this.getLabelShapes().get(sliceRoisArray[r]).getBounds().getCenterY();
+				if (sliceRois!=null) {
+					Roi[] sliceRoisArray = new Roi[sliceRois.size()];
+					for (int sr=0;sr<sliceRoisArray.length;sr++)
+						sliceRoisArray[sr] = ((Roi)sliceRois.get(sr));
+					for (int r=0; r<sliceRoisArray.length; r++) {  
+						//					IJ.log(""+r);
+						if ((!lineageMap && this.getLabelShapes().get(sliceRoisArray[r]) != null
+								&& this.getLabelShapes().get(sliceRoisArray[r]).contains(xOS, yOS))
+								|| (brainbowSelection /*&& rm.getImagePlus().getCanvas().getLabelShapes().get(r).intersects(new Rectangle (xOS*10-200, yOS*10-200,400,400))*/)
+								|| (lineageMap && logLines.length >0 && logLines[logLines.length-1].startsWith(">")
+										&& (this.getLabelShapes().get(sliceRoisArray[r]).getName()).startsWith("\""+logLines[logLines.length-1].split("[> ,]")[1]+" " + logLines[logLines.length-1].split("[> ,]")[2])) ) {
+							mi = null;
+							targetTag[0] = r;
+							targetTag[1] = (int) this.getLabelShapes().get(sliceRoisArray[r]).getBounds().getCenterX();
+							targetTag[2] = (int) this.getLabelShapes().get(sliceRoisArray[r]).getBounds().getCenterY();
 
-						if (!brainbowSelection) {
-							cellTag = this.getLabelShapes().get(sliceRoisArray[r]).getName();
-							cellName = cellTag.split("[\"|=]")[1].trim();
-							if (cellName.split(" ").length >1 
-									&& cellName.split(" ")[1].matches("-*\\d*") 
-									&& (cellName.split(" ").length <3?true:cellName.split(" ")[2].matches("\\+*")) ){
-								cellName = cellName.split(" ")[0];
-							} 
+							if (!brainbowSelection) {
+								cellTag = this.getLabelShapes().get(sliceRoisArray[r]).getName();
+								cellName = cellTag.split("[\"|=]")[1].trim();
+								if (cellName.split(" ").length >1 
+										&& cellName.split(" ")[1].matches("-*\\d*") 
+										&& (cellName.split(" ").length <3?true:cellName.split(" ")[2].matches("\\+*")) ){
+									cellName = cellName.split(" ")[0];
+								} 
 
-							mi =new JMenuItem("\""+cellName + " \": synch all windows to this tag" );
-							mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Synch.png")));
-							clickedROIstring = this.getLabelShapes().get(sliceRoisArray[r]).getName() + ": "
-									+ rm.getImagePlus().getTitle();
-							mi.addActionListener(ij);
-							popup.add(mi);
+								mi =new JMenuItem("\""+cellName + " \": synch all windows to this tag" );
+								mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Synch.png")));
+								clickedROIstring = this.getLabelShapes().get(sliceRoisArray[r]).getName() + ": "
+										+ rm.getImagePlus().getTitle();
+								mi.addActionListener(ij);
+								popup.add(mi);
 
-//							mi = new JMenuItem(listModel.get(r) + ": "
-//									+ rm.getImagePlus().getTitle());
-//							clickedROIstring = listModel.get(r) + ": "
-//									+ rm.getImagePlus().getTitle();
-//							mi.addActionListener(ij);
-//							popup.add(mi);
+								//							mi = new JMenuItem(listModel.get(r) + ": "
+								//									+ rm.getImagePlus().getTitle());
+								//							clickedROIstring = listModel.get(r) + ": "
+								//									+ rm.getImagePlus().getTitle();
+								//							mi.addActionListener(ij);
+								//							popup.add(mi);
+							}
+							if (true) r=sliceRoisArray.length;
 						}
-						if (true) r=sliceRoisArray.length;
 					}
 				}
 				for (int i = 0; i < impIDs.length; i++) {

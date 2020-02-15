@@ -1,6 +1,8 @@
 package org.vcell.gloworm;
 import java.awt.Color;
 import java.awt.Frame;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.awt.image.ColorModel;
 import java.io.File;
 import java.util.Date;
@@ -28,10 +30,11 @@ import ij3d.ImageJ3DViewer;
 import isosurface.MeshExporter;
 
 
-public class MQTVS_VolumeViewer  implements PlugIn {
+public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 
 	public static ImageJ3DViewer ij3dv;
 	private Image3DUniverse univ;
+	private ImagePlus impDup;
 
 	public void run(String arg) {
 		String cellName = arg;
@@ -53,6 +56,7 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 		}
 		if (!saveSingly && univ.getWindow() == null){
 			univ.show();
+			univ.getWindow().addWindowListener(this);
 			WindowManager.removeWindow(univ.getWindow());
 			
 			univ.getWindow().setTitle(imp.getMotherImp().getTitle()+" [IJ3DV]");
@@ -99,8 +103,7 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 				mcc.setVisible(false);
 			}
 			
-//			String duperString = ""; 
-			ImagePlus impDup = null;
+			impDup = null;
 			if (imp.getRoiManager().getSelectedRoisAsArray().length == 0){  //??????WHY??????
 //				duperString = duper.showHSDialog(imp, imp.getTitle()+"_DUP");
 				impDup = duper.duplicateHyperstack(imp, imp.getTitle()+"_DUP", false);
@@ -307,5 +310,49 @@ public class MQTVS_VolumeViewer  implements PlugIn {
 
 	public void setUniv(Image3DUniverse univ) {
 		this.univ = univ;
+	}
+
+	
+	public void windowOpened(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	
+	public void windowClosing(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	
+	public void windowClosed(WindowEvent e) {
+		univ.getWindow().removeWindowListener(this);
+		impDup.getWindow().dispose();
+		impDup.flush();
+		//I don't think this is really cleaning up memory...
+	}
+
+	
+	public void windowIconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	
+	public void windowDeiconified(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	
+	public void windowActivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	
+	public void windowDeactivated(WindowEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 }

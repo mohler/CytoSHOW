@@ -2122,7 +2122,7 @@ public class IJ {
 	}
 
 	static ExceptionHandler exceptionHandler;
-	public static String rmiURL;
+	public static String rmiURL, rmiURLT;
 
 	public static void addEventListener(IJEventListener listener) {
 		eventListeners.addElement(listener);

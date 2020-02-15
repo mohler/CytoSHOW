@@ -460,7 +460,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						} else if (path.toLowerCase().endsWith(".tif") ) {
 							String pathListStereo = path;
 							//							new QTMovieOpenerMultiMod(pathListStereo, true, false);
-							RemoteMTVSHandler rmtvsh = RemoteMTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replaceAll("%2B", "\\+").replaceAll("%25", "%")+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/+" "+path.replaceAll("%2B", "\\+").replaceAll("%25", "%")+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
+							RemoteMTVSHandler rmtvsh = RemoteMTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replaceAll("%2B", "\\+").replaceAll("%25", "%")+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
 									false, true, true, false, true, false, true, false, false);
 
 							ImagePlus stereoImp = rmtvsh.getImagePlus();
