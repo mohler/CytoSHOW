@@ -865,8 +865,8 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 		}
 		if (dimOrder.toLowerCase().matches(".*split.*c.*")) {
 
-			if (dimOrder.toLowerCase().matches(".*split(ratio)?c.*")){
-				vSliceNumber = (n%2 + sliceNumber/2);
+			if (dimOrder.toLowerCase().matches(".*split(ratio)*c.*")){
+				vSliceNumber = (n%2 + sliceNumber/2) + (isViewB?zDim*(cDim/2)*(dimOrder.toLowerCase().matches(".*splitsequentialc.*")?2:1):0);
 			} else {
 				vSliceNumber = (sliceNumber)+(isViewB?zDim*(cDim/2)*(dimOrder.toLowerCase().matches(".*splitsequentialc.*")?2:1):0);
 			}
