@@ -6907,7 +6907,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			}
 			if (chunk.trim().startsWith("\"Channels\":")) {
 				diSPIM_MM_Channels= Integer.parseInt(chunk.split(":")[1].replace("\"", "").trim());
-				cDim = diSPIM_MM_Channels;
+//				cDim = diSPIM_MM_Channels;
 			}
 			if (chunk.trim().startsWith("\"AcqusitionName\":")) {
 				diSPIM_MM_AcqusitionName= chunk.split(":")[1].replace("\"", "").trim();
