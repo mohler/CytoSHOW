@@ -565,7 +565,7 @@ array and displays it if 'show' is true. */
 				nSlices = cDim*zDim*tDim;
 			} else {
 				/*why like this?*/
-				this.tDim =nSlices/(this.cDim*this.zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
+				this.tDim =nSlices/(this.cDim*this.zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?(cDim/2):1));
 			}
 
 		} else if (monitoringDecon){
@@ -866,7 +866,7 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 		if (dimOrder.toLowerCase().matches(".*split.*c.*")) {
 
 			if (dimOrder.toLowerCase().matches(".*split(ratio)*c.*")){
-				vSliceNumber = (n%2 + sliceNumber/2) + (isViewB?zDim*(cDim/2)*(dimOrder.toLowerCase().matches(".*splitsequentialc.*")?2:1):0);
+				vSliceNumber = (n%2 + sliceNumber/2)+(isViewB?zDim*(cDim/2):0);
 			} else {
 				vSliceNumber = (sliceNumber)+(isViewB?zDim*(cDim/2)*(dimOrder.toLowerCase().matches(".*splitsequentialc.*")?2:1):0);
 			}
