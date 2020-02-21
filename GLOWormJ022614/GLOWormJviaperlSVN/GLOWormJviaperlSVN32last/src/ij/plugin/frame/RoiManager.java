@@ -1404,7 +1404,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			roiCopy.setPosition(c, z, t);
 			//IJ.log("addSingleRoi" + roiCopy.getCPosition()+roiCopy.getZPosition()+roiCopy.getTPosition() );
 		}
-		setUpRoisByNameAndNumbers(roiCopy);
+
 		//		if (false)
 		updateShowAll();
 		if (record())

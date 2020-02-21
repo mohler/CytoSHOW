@@ -450,14 +450,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 		boolean fullRun = !(arg.contains("rerunWithDecon") || arg.contains("resumeMonitor"));
 
 
-		String uniqueClientIdentifier;
-		try {
-			uniqueClientIdentifier = InetAddress.getLocalHost().getHostName() +"_"+ GetNetworkAddress.GetAddress("mac");
-		} catch (UnknownHostException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			uniqueClientIdentifier = GetNetworkAddress.GetAddress("mac");
-		}
+//		String uniqueClientIdentifier;
+//		try {
+//			uniqueClientIdentifier = InetAddress.getLocalHost().getHostName() +"_"+ GetNetworkAddress.GetAddress("mac");
+//		} catch (UnknownHostException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//			uniqueClientIdentifier = GetNetworkAddress.GetAddress("mac");
+//		}
 
 		if (fullRun) {
 			OpenDialog.setDefaultDirectory(Prefs.get("diSPIMmonitor.input", dirOrOMETiff));
