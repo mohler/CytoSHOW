@@ -62,7 +62,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	public static final int SHOW_ALL=0, SHOW_NONE=1, LABELS=2, NO_LABELS=3;
 	private static final int MENU=0, COMMAND=1;
 	private static final int SHOW_OWN = 4;
-	private static int rows = 15;
+	private static int rows =  15;
 	private static int lastNonShiftClick = -1;
 	private static boolean allowMultipleSelections = true; 
 	private static String moreButtonLabel = "More "+'\u00bb';
