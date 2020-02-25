@@ -211,6 +211,17 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 					if (IJ.isWindows())
 						cursorString = c.getName().split("( |_)=")[0];
 					Font font = Font.decode("Arial-Outline-18");
+					String[] cursorWords = cursorString.replace("_", " ").split(" ");
+					int cursorLineCount = cursorWords.length/5 + (cursorWords.length%5==0?0:1) ;
+					String[] cursorStringCRs = new String[cursorLineCount] ;
+					int l =0;
+					for (int word=0; word<cursorWords.length; word=word+1) {
+						if ((word+1)%5==0)
+							l++;
+						if (cursorStringCRs[l] == null) 
+							cursorStringCRs[l] = "";
+						cursorStringCRs[l] = cursorStringCRs[l] + " "+ cursorWords[word];
+					}
 
 					//create the FontRenderContext object which helps us to measure the text
 					FontRenderContext frc = new FontRenderContext(null, true, true);
@@ -219,7 +230,9 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 					Rectangle2D bounds = font.getStringBounds(cursorString, frc);
 					int w = (int) bounds.getWidth();
 					int ht = (int) bounds.getHeight();
-					Image img = new BufferedImage(w, ht, BufferedImage.TYPE_INT_ARGB_PRE);
+//					Image img = new BufferedImage(w, ht, BufferedImage.TYPE_INT_ARGB_PRE);
+					Image img = new BufferedImage(400, 600, BufferedImage.TYPE_INT_ARGB_PRE);
+				
 
 					//		img.getGraphics().setColor(Colors.decode("00000000", Color.white));
 					Graphics2D g2d = (Graphics2D) img.getGraphics();
@@ -233,9 +246,12 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 					g2d.drawLine(0, 0, 2, 7);
 					g2d.drawLine(0, 0, 7, 2);
 					g2d.drawLine(0, 0, 8, 8);
-					g2d.drawString(cursorString, 1, img.getHeight(null)-1);
-					
-					if(  IJ.isWindows()){
+//					g2d.drawString(cursorString, 1, img.getHeight(null)-1);
+					for (int line=0; line<cursorStringCRs.length; line++) {
+						if (cursorStringCRs[line]!=null)
+						g2d.drawString(cursorStringCRs[line], 1, (line+1) *18 + 8);
+					}
+					if(IJ.isWindows()){
 
 						Graphics2D g2Dcanv = win.canvas3D.getGraphics2D();
 						win.canvas3D.stopRenderer();
