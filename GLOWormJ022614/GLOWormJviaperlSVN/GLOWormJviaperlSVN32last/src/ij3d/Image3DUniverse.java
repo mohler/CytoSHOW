@@ -197,78 +197,88 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 		// add mouse listeners
 		canvas.addMouseMotionListener(new MouseMotionAdapter() {
+			
+			Content recentContent ;
+			int recentX, recentY;
 			public void mouseMoved(MouseEvent e) {
 
 				Content c = picker.getPickedContent(
 						e.getX(), e.getY());
-				String cursorString = " ";
-				Toolkit tk = Toolkit.getDefaultToolkit();
-				if(c != null) {
-					IJ.showStatus(c.getName().split("( |_)=")[0]);
-					cursorString = c.getName().split("( |_)=")[0];
 				
-					
-					if (IJ.isWindows())
-						cursorString = c.getName().split("( |_)=")[0];
-					Font font = Font.decode("Arial-Outline-18");
-					String[] cursorWords = cursorString.replace("_", " ").split(" ");
-					int cursorLineCount = cursorWords.length/5 + (cursorWords.length%5==0?0:1) ;
-					String[] cursorStringCRs = new String[cursorLineCount] ;
-					int l =0;
-					for (int word=0; word<cursorWords.length; word=word+1) {
-						if ((word+1)%5==0)
-							l++;
-						if (cursorStringCRs[l] == null) 
-							cursorStringCRs[l] = "";
-						cursorStringCRs[l] = cursorStringCRs[l] + " "+ cursorWords[word];
-					}
-
-					//create the FontRenderContext object which helps us to measure the text
-					FontRenderContext frc = new FontRenderContext(null, true, true);
-
-					//get the height and width of the text
-					Rectangle2D bounds = font.getStringBounds(cursorString, frc);
-					int w = (int) bounds.getWidth();
-					int ht = (int) bounds.getHeight();
-//					Image img = new BufferedImage(w, ht, BufferedImage.TYPE_INT_ARGB_PRE);
-					Image img = new BufferedImage(400, 600, BufferedImage.TYPE_INT_ARGB_PRE);
-				
-
-					//		img.getGraphics().setColor(Colors.decode("00000000", Color.white));
-					Graphics2D g2d = (Graphics2D) img.getGraphics();
-
-					g2d.setFont(font);
-
-					g2d.setColor(Colors.decode("#66111111",Color.gray));
-					g2d.fillRect(0, 0, w, ht);
-					g2d.setColor(Color.YELLOW);
-					g2d.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
-					g2d.drawLine(0, 0, 2, 7);
-					g2d.drawLine(0, 0, 7, 2);
-					g2d.drawLine(0, 0, 8, 8);
-//					g2d.drawString(cursorString, 1, img.getHeight(null)-1);
-					for (int line=0; line<cursorStringCRs.length; line++) {
-						if (cursorStringCRs[line]!=null)
-						g2d.drawString(cursorStringCRs[line], 1, (line+1) *18 + 8);
-					}
-					if(IJ.isWindows()){
-
-						Graphics2D g2Dcanv = win.canvas3D.getGraphics2D();
-						win.canvas3D.stopRenderer();
-						win.canvas3D.swap();
-						g2Dcanv.drawImage(img, e.getX(), e.getY(), null);
-						win.canvas3D.swap();
-						win.canvas3D.startRenderer();
-
-					} else {
-						win.canvas3D.setCursor(tk.createCustomCursor(img,new Point(0,0),"searchCursor"));
-					}
+				if (c == recentContent && (( Math.abs(recentX-e.getX()))<3) && ( Math.abs((recentY-e.getY()))<3)) {
 					
 				} else {
-					IJ.showStatus("");
-					win.canvas3D.setCursor(ImageCanvas.defaultCursor);
-				}
+					recentContent = c;
+					recentX=e.getX();
+					recentY=e.getY();
+					String cursorString = " ";
+					Toolkit tk = Toolkit.getDefaultToolkit();
+					if(c != null) {
+						IJ.showStatus(c.getName().split("( |_)=")[0]);
+						cursorString = c.getName().split("( |_)=")[0];
 
+
+						if (IJ.isWindows())
+							cursorString = c.getName().split("( |_)=")[0];
+						Font font = Font.decode("Arial-Outline-18");
+						String[] cursorWords = cursorString.replace("_", " ").split(" ");
+						int cursorLineCount = cursorWords.length/5 + (cursorWords.length%5==0?0:1) ;
+						String[] cursorStringCRs = new String[cursorLineCount] ;
+						int l =0;
+						for (int word=0; word<cursorWords.length; word=word+1) {
+							if ((word+1)%5==0)
+								l++;
+							if (cursorStringCRs[l] == null) 
+								cursorStringCRs[l] = "";
+							cursorStringCRs[l] = cursorStringCRs[l] + " "+ cursorWords[word];
+						}
+
+						//create the FontRenderContext object which helps us to measure the text
+						FontRenderContext frc = new FontRenderContext(null, true, true);
+
+						//get the height and width of the text
+						Rectangle2D bounds = font.getStringBounds(cursorString, frc);
+						int w = (int) bounds.getWidth();
+						int ht = (int) bounds.getHeight();
+						//					Image img = new BufferedImage(w, ht, BufferedImage.TYPE_INT_ARGB_PRE);
+						Image img = new BufferedImage(400, 600, BufferedImage.TYPE_INT_ARGB_PRE);
+
+
+						//		img.getGraphics().setColor(Colors.decode("00000000", Color.white));
+						Graphics2D g2d = (Graphics2D) img.getGraphics();
+
+						g2d.setFont(font);
+
+						g2d.setColor(Colors.decode("#66111111",Color.gray));
+						g2d.fillRect(0, 0, w, ht);
+						g2d.setColor(Color.YELLOW);
+						g2d.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
+						g2d.drawLine(0, 0, 2, 7);
+						g2d.drawLine(0, 0, 7, 2);
+						g2d.drawLine(0, 0, 8, 8);
+						//					g2d.drawString(cursorString, 1, img.getHeight(null)-1);
+						for (int line=0; line<cursorStringCRs.length; line++) {
+							if (cursorStringCRs[line]!=null)
+								g2d.drawString(cursorStringCRs[line], 1, (line+1) *18 + 8);
+						}
+						if(true /*IJ.isWindows()*/){
+
+							Graphics2D g2Dcanv = win.canvas3D.getGraphics2D();
+							win.canvas3D.stopRenderer();
+							win.canvas3D.swap();
+							g2Dcanv.drawImage(img, e.getX(), e.getY(), null);
+							win.canvas3D.swap();
+							win.canvas3D.startRenderer();
+
+						} else {
+							win.canvas3D.setCursor(tk.createCustomCursor(img,new Point(0,0),"searchCursor"));
+						}
+
+					} else {
+						IJ.showStatus("");
+						win.canvas3D.setCursor(ImageCanvas.defaultCursor);
+					}
+				}
 			}
 		});
 
