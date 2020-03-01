@@ -7011,12 +7011,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		String[] cellHeaders = null; 
 		int previousMaxSN = 0;
 		int nextMaxSN =0;
+		int iterationOfSix =0;
 		Hashtable<Integer,String> serialRosters = new Hashtable<Integer,String>();
 		for(int iteration=0;iteration<conSNList.length;iteration++){
 			String[] csnChunks = conSNList[iteration].split(",");
 			if (iteration==0){
 				cellHeaders = csnChunks;
 			}
+			int maxGroupNum =0;
 			for (int cell=0;cell<cellHeaders.length;cell++){
 				int sn =0;
 				if (iteration==0){
@@ -7033,8 +7035,21 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				if (sn> nextMaxSN){
 					nextMaxSN =sn;
 				}
+				if (iteration>0 && Integer.parseInt(csnChunks[cell]) > maxGroupNum) {
+					maxGroupNum = Integer.parseInt(csnChunks[cell]);
+				}
+			}
+			if (maxGroupNum == 6) {
+				iterationOfSix = iteration;
 			}
 			previousMaxSN=nextMaxSN;
+		}
+		
+		Hashtable<String, Integer> clusterColorTable = new Hashtable<String, Integer>();
+		
+		for (int cell=0;cell<cellHeaders.length;cell++){
+			String[] csnChunks = conSNList[iterationOfSix].split(",");
+			clusterColorTable.put(cellHeaders[cell], Integer.parseInt(csnChunks[cell]));
 		}
 		
 		for (String phateLine:inputPhateList){
@@ -7068,7 +7083,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 									  + " " +(outputVYs.get(i)+offsetVY) 
 									  + " " +(((outputVZs.get(i))*zScale)+offsetVZ) + "\n";
 			}
-			outputObj = outputObj + "usemtl mat_"+ phateLineChunks[4] ;
+//			outputObj = outputObj + "usemtl mat_"+ phateLineChunks[4] ;
+			String leadCellName = "";
+			if (outputTag.split("_")[0].contains("-")) {
+				leadCellName = outputTag.split("-")[0];
+			} else {
+				leadCellName = outputTag.split("_")[0];
+			}
+			outputObj = outputObj + "usemtl mat_"+ clusterColorTable.get(leadCellName) ;
 			
 			outputObj = outputObj + "\ns " + outputFacets[0] + "\n";
 			for (int i=0; i<outputFXs.size(); i++){
