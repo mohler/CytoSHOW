@@ -6960,9 +6960,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		
 		for(int x=0;x<icosphereVertices.length;x++){
 			if (icosphereVertices[x].startsWith("v ")){
-				icosphereVXs.add(Double.parseDouble(icosphereVertices[x].split(" ")[1])*400d);
-				icosphereVYs.add(Double.parseDouble(icosphereVertices[x].split(" ")[2])*400d);
-				icosphereVZs.add(Double.parseDouble(icosphereVertices[x].split(" ")[3])*400d);
+				icosphereVXs.add(Double.parseDouble(icosphereVertices[x].split(" ")[1]));
+				icosphereVYs.add(Double.parseDouble(icosphereVertices[x].split(" ")[2]));
+				icosphereVZs.add(Double.parseDouble(icosphereVertices[x].split(" ")[3]));
 			}
 		}
 		for(int x=0;x<icosphereFacets.length;x++){
@@ -7043,9 +7043,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			String[] phateLineChunks = phateLine.split(",");
 			String serial = phateLineChunks[0];
 
-//			String outputTag = phateLineChunks[5]+"-"+serial;
-			String outputTag = serialRosters.get(Integer.parseInt(serial))+"-"+serial;
-			String outputPath = outputDir+inputFile.getName()+"-"+serial+".obj";
+			String outputTag = phateLineChunks[5]+"-"+serial;
+//			String outputTag = serialRosters.get(Integer.parseInt(serial))+"-"+serial;
+			
+			String outputPath = outputDir+inputFile.getName()+"-"+serial+"-"+outputTag.split("_")[0]+".obj";
 			String[] outputSections = icosphereSections;	
 			String[] outputVertices = icosphereVertices;
 			String[] outputFacets = icosphereFacets;

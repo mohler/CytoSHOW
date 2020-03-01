@@ -226,11 +226,12 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 						String[] cursorStringCRs = new String[cursorLineCount] ;
 						int l =0;
 						for (int word=0; word<cursorWords.length; word=word+1) {
-							if ((word+1)%5==0)
+							if (word >0 && (word)%5==0)
 								l++;
 							if (cursorStringCRs[l] == null) 
-								cursorStringCRs[l] = "";
-							cursorStringCRs[l] = cursorStringCRs[l] + " "+ cursorWords[word];
+								cursorStringCRs[l] = cursorWords[word];
+							else
+								cursorStringCRs[l] = cursorStringCRs[l] + " "+ cursorWords[word];
 						}
 
 						//create the FontRenderContext object which helps us to measure the text
