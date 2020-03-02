@@ -1580,7 +1580,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				}
 				
 				if (ij3dSelection) {
-					cellName = ((ImageWindow3D)e.getSource()).getUniverse().getSelected().getName();
+					cellName = ((ImageWindow3D)e.getSource()).getUniverse().getSelected().getName().split("-")[0];
 				}
 
 				if (sliceRois!=null) {

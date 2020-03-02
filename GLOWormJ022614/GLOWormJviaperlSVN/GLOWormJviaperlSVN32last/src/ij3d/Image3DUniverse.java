@@ -222,7 +222,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 							cursorString = c.getName().split("( |_)=")[0];
 						Font font = Font.decode("Arial-Outline-18");
 						String[] cursorWords = cursorString.replace("_", " ").split(" ");
-						int cursorLineCount = cursorWords.length/5 + (cursorWords.length%5==0?0:1) ;
+						int cursorLineCount = cursorWords.length/5 + (cursorWords.length%5==0?0:1) +3;
 						String[] cursorStringCRs = new String[cursorLineCount] ;
 						int l =0;
 						for (int word=0; word<cursorWords.length; word=word+1) {
@@ -233,6 +233,11 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 							else
 								cursorStringCRs[l] = cursorStringCRs[l] + " "+ cursorWords[word];
 						}
+						Point3d pickCenter = new Point3d();
+						c.getBounds().getCenter(pickCenter);
+						cursorStringCRs[cursorLineCount-3] = "x="+pickCenter.x/1000000;
+						cursorStringCRs[cursorLineCount-2] = "y="+pickCenter.y/1000000;
+						cursorStringCRs[cursorLineCount-1] = "z="+pickCenter.z/1000000;
 
 						//create the FontRenderContext object which helps us to measure the text
 						FontRenderContext frc = new FontRenderContext(null, true, true);
