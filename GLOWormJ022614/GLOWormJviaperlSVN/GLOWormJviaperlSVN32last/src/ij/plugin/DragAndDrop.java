@@ -4,6 +4,7 @@ import ij.gui.*;
 import ij.io.*;
 import ij.plugin.frame.ColorLegend;
 import ij3d.ColorTable;
+import ij3d.Image3DUniverse;
 import ij3d.ImageJ3DViewer;
 import ij3d.ImageWindow3D;
 
@@ -516,7 +517,9 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							for (Frame frame:frames){
 								if (frame instanceof ImageWindow3D){
 									if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow3D)frame).getUniverse().getCanvas()){
-										ij3dv.setUniv(((ImageWindow3D)frame).getUniverse());
+										Image3DUniverse i3duniv = (Image3DUniverse)((ImageWindow3D)frame).getUniverse();
+										i3duniv.setAutoAdjustView(false);
+										ij3dv.setUniv(i3duniv);
 									}
 								}
 							}
@@ -1082,7 +1085,10 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					for (Frame frame:frames){
 						if (frame instanceof ImageWindow3D){
 							if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow3D)frame).getUniverse().getCanvas()){
-								ij3dv.setUniv(((ImageWindow3D)frame).getUniverse());
+								Image3DUniverse i3duniv = (Image3DUniverse)((ImageWindow3D)frame).getUniverse();
+								i3duniv.setAutoAdjustView(false);
+								ij3dv.setUniv(i3duniv);
+
 							}
 						}
 					}
@@ -1296,7 +1302,10 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 				for (Frame frame:frames){
 					if (frame instanceof ImageWindow3D){
 						if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow3D)frame).getUniverse().getCanvas()){
-							ij3dv.setUniv(((ImageWindow3D)frame).getUniverse());
+							Image3DUniverse i3duniv = (Image3DUniverse)((ImageWindow3D)frame).getUniverse();
+							i3duniv.setAutoAdjustView(false);
+							ij3dv.setUniv(i3duniv);
+
 						}
 					}
 				}

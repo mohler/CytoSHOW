@@ -66,7 +66,7 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 	private DefaultUniverse universe;
 	ImageCanvas3D canvas3D;
 	private Label status = new Label("");
-	private boolean noOffScreen = true;
+	private boolean noOffScreen = false;
 	private ErrorListener error_listener;
 //	private ImagePlus imp;
 //	private ImageCanvas ic;
@@ -333,6 +333,28 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 		
 		this.addKeyListener(ij);
 		
+		fspc.gridy = y++;
+		fspc.weighty = 0.5;
+		fspc.fill = GridBagConstraints.BOTH;
+		JButton autoButton = new JButton();
+		autoButton.setActionCommand("No adjust while adding");
+		autoButton.setName("No adjust while adding");
+		autoButton.setToolTipText("No adjust while adding");
+		autoButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/NOautoButton32.png")));
+		autoButton.setFont(buttonPanelFont);
+		viewButtonPanel.add(autoButton, fspc);
+		autoButton.addActionListener(menubar);
+		fspc.gridy = y++;
+		fspc.weighty = 0.5;
+		fspc.fill = GridBagConstraints.BOTH;
+		JButton syncButton = new JButton();
+		syncButton.setActionCommand("Synched 3D controls");
+		syncButton.setName("Synched 3D controls");
+		syncButton.setToolTipText("Synched 3D controls");
+		syncButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Syncbutton32.png")));
+		syncButton.setFont(buttonPanelFont);
+		viewButtonPanel.add(syncButton, fspc);
+		syncButton.addActionListener(menubar);
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
 		fspc.fill = GridBagConstraints.BOTH;

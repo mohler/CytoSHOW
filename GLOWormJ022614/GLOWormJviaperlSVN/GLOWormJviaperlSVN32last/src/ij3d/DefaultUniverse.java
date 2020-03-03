@@ -544,7 +544,7 @@ public abstract class DefaultUniverse extends SimpleUniverse
 	 * Flag indicating if the window of this universe should be brought
 	 * to front when
 	 */
-	protected boolean useToFront = true;
+	protected boolean useToFront = false;
 
 	/**
 	 * For some interactive applications, the use of toFront() in

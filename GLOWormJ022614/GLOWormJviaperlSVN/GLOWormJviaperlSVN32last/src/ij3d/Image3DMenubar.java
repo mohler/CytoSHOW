@@ -1,6 +1,7 @@
 package ij3d;
 
 import ij.ImagePlus;
+import ij.gui.ImageWindow;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -8,6 +9,8 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
 import javax.media.j3d.View;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -684,7 +687,33 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 			iJ3dExecuter.addCone();
 		} else if(src == tube) {
 			iJ3dExecuter.addTube();
+		}else if (e.getActionCommand().toLowerCase().contains("synched 3d controls")) {
+			((JButton)e.getSource()).setActionCommand("Solo 3D controls");
+			((JButton)e.getSource()).setName("Solo 3D controls");
+			((JButton)e.getSource()).setToolTipText("Solo 3D controls");
+			((JButton)e.getSource()).setIcon(new ImageIcon(ImageWindow.class.getResource("images/Solobutton32.png")));
+			iJ3dExecuter.sync(true);
+		}else if (e.getActionCommand().toLowerCase().contains("solo 3d controls")) {
+			((JButton)e.getSource()).setActionCommand("Synched 3D controls");
+			((JButton)e.getSource()).setName("Synched 3D controls");
+			((JButton)e.getSource()).setToolTipText("Synched 3D controls");
+			((JButton)e.getSource()).setIcon(new ImageIcon(ImageWindow.class.getResource("images/Syncbutton32.png")));
+			iJ3dExecuter.sync(false);
+		}else if (e.getActionCommand().toLowerCase().contains("auto adjust while adding")) {
+			((JButton)e.getSource()).setActionCommand("No adjust while adding");
+			((JButton)e.getSource()).setName("No adjust while adding");
+			((JButton)e.getSource()).setToolTipText("No adjust while adding");
+			((JButton)e.getSource()).setIcon(new ImageIcon(ImageWindow.class.getResource("images/NOautoButton32.png")));
+			((Image3DUniverse)(((ImageWindow3D)this.getParent().getParent().getParent().getParent().getParent()).getUniverse())).setAutoAdjustView(true);
+		}else if (e.getActionCommand().toLowerCase().contains("no adjust while adding")) {
+			((JButton)e.getSource()).setActionCommand("Auto adjust while adding");
+			((JButton)e.getSource()).setName("Auto adjust while adding");
+			((JButton)e.getSource()).setToolTipText("Auto adjust while adding");
+			((JButton)e.getSource()).setIcon(new ImageIcon(ImageWindow.class.getResource("images/autoButton32.png")));
+			((Image3DUniverse)(((ImageWindow3D)this.getParent().getParent().getParent().getParent().getParent()).getUniverse())).setAutoAdjustView(false);
 		}
+
+
 	}
 
 	
