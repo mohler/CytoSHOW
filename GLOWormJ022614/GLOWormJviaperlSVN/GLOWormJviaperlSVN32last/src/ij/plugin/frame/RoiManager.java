@@ -7012,38 +7012,121 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		int previousMaxSN = 0;
 		int nextMaxSN =0;
 		int iterationOfSix =0;
-		Hashtable<Integer,String> serialRosters = new Hashtable<Integer,String>();
+		Hashtable<Integer,String> serialToRosterStringHashtable = new Hashtable<Integer,String>();
+		Hashtable<Integer,ArrayList<String>> serialToRosterArrayHashtable = new Hashtable<Integer,ArrayList<String>>();
+
+		Hashtable<String,Integer[][]> nameToRanksAndSNsHashtable = new Hashtable<String,Integer[][]>();
+		
 		for(int iteration=0;iteration<conSNList.length;iteration++){
 			String[] csnChunks = conSNList[iteration].split(",");
 			if (iteration==0){
 				cellHeaders = csnChunks;
+			} else {
+				int maxGroupNum =0;
+				for (int cell=0;cell<cellHeaders.length;cell++){
+					if (nameToRanksAndSNsHashtable.get(cellHeaders[cell]) == null){
+						nameToRanksAndSNsHashtable.put(cellHeaders[cell], new Integer[2][conSNList.length]);
+					}
+					int sn =0;
+					if (iteration==0){
+						sn = previousMaxSN+cell;
+					}else{
+						sn = previousMaxSN+Integer.parseInt(csnChunks[cell]);
+					}
+
+					nameToRanksAndSNsHashtable.get(cellHeaders[cell])[0][iteration] = Integer.parseInt(csnChunks[cell]);
+					nameToRanksAndSNsHashtable.get(cellHeaders[cell])[1][iteration] = sn;
+
+
+					IJ.log(cellHeaders[cell]+" "+iteration+" "+csnChunks[cell]+" "+sn);
+					if (serialToRosterStringHashtable.get(sn) == null){
+						serialToRosterStringHashtable.put(sn, cellHeaders[cell]);
+						serialToRosterArrayHashtable.put(sn, new ArrayList<String>());
+						serialToRosterArrayHashtable.get(sn).add(cellHeaders[cell]);
+					} else {
+						serialToRosterStringHashtable.put(sn, serialToRosterStringHashtable.get(sn)+"_"+cellHeaders[cell]);
+						serialToRosterArrayHashtable.get(sn).add(cellHeaders[cell]);
+					}
+					if (sn> nextMaxSN){
+						nextMaxSN =sn;
+					}
+					if (iteration>0 && Integer.parseInt(csnChunks[cell]) > maxGroupNum) {
+						maxGroupNum = Integer.parseInt(csnChunks[cell]);
+					}
+				}
+				if (maxGroupNum == 6) {
+					iterationOfSix = iteration;
+				}
+				previousMaxSN=nextMaxSN;
 			}
-			int maxGroupNum =0;
-			for (int cell=0;cell<cellHeaders.length;cell++){
-				int sn =0;
-				if (iteration==0){
-					sn = previousMaxSN+cell;
-				}else{
-					sn = previousMaxSN+Integer.parseInt(csnChunks[cell]);
-				}
-				IJ.log(cellHeaders[cell]+" "+iteration+" "+csnChunks[cell]+" "+sn);
-				if (serialRosters.get(sn) == null){
-					serialRosters.put(sn, cellHeaders[cell]);
-				} else {
-					serialRosters.put(sn, serialRosters.get(sn)+"_"+cellHeaders[cell]);
-				}
-				if (sn> nextMaxSN){
-					nextMaxSN =sn;
-				}
-				if (iteration>0 && Integer.parseInt(csnChunks[cell]) > maxGroupNum) {
-					maxGroupNum = Integer.parseInt(csnChunks[cell]);
-				}
-			}
-			if (maxGroupNum == 6) {
-				iterationOfSix = iteration;
-			}
-			previousMaxSN=nextMaxSN;
 		}
+		String cluster_assignments_rebuiltAGtoMKfmt ="";
+		for (int iter=0; iter<conSNList.length; iter++) {
+			if (iter>0) {
+				boolean[] fixedAlready = new boolean[cellHeaders.length];
+				int correctedRank = 0;
+				int nJumps =0;
+				for (int colIndex=0; colIndex < cellHeaders.length; colIndex++) {
+					correctedRank = colIndex+1;
+					if (nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter]!=correctedRank) {
+						
+						if (nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter]< correctedRank) {
+							if(!fixedAlready[colIndex]) {
+								int numToFix = nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter];
+								fixedAlready[colIndex]=true;
+								for (int remainingCol= colIndex;remainingCol<cellHeaders.length;remainingCol++) {
+									String chrc = cellHeaders[remainingCol];
+									int ntrasnhtchrcoi = nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter];
+									if (ntrasnhtchrcoi == numToFix) {
+										if(!fixedAlready[remainingCol]) {
+											fixedAlready[remainingCol]=true;
+										
+											nJumps++;
+										}
+									} else {
+										if(!fixedAlready[remainingCol]) {
+											if (ntrasnhtchrcoi == remainingCol - nJumps) {
+												nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter] = remainingCol + 1 ;
+											} else {
+												nJumps++;
+											}
+										}
+									}
+								}
+							}
+						} else {
+							if(!fixedAlready[colIndex]) {
+								int numToFix = nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter];
+								nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter]=correctedRank;
+								fixedAlready[colIndex]=true;
+								for (int remainingCol= colIndex;remainingCol<cellHeaders.length;remainingCol++) {
+									if (nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter] == numToFix) {
+										if(!fixedAlready[remainingCol]) {
+											nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter]=correctedRank;
+											fixedAlready[remainingCol]=true;
+										}
+									} else {
+										if(!fixedAlready[remainingCol]) {
+											nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter]++;
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+				for (int colIndex=0; colIndex < cellHeaders.length; colIndex++) {
+					cluster_assignments_rebuiltAGtoMKfmt = cluster_assignments_rebuiltAGtoMKfmt +(colIndex>0?",":"") +nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter];
+				}
+				cluster_assignments_rebuiltAGtoMKfmt = cluster_assignments_rebuiltAGtoMKfmt + "\n";
+			} else {
+				for (int colIndex=0; colIndex < cellHeaders.length; colIndex++) {
+					cluster_assignments_rebuiltAGtoMKfmt = cluster_assignments_rebuiltAGtoMKfmt +(colIndex>0?",":"") +cellHeaders[colIndex];
+				}
+				cluster_assignments_rebuiltAGtoMKfmt = cluster_assignments_rebuiltAGtoMKfmt + "\n";
+			}
+		}
+		IJ.saveString(cluster_assignments_rebuiltAGtoMKfmt, condensationSNpath.replace(".csv", "")+"_rebuiltAGtoMKfmt.csv");
 		
 		Hashtable<String, Integer> clusterColorTable = new Hashtable<String, Integer>();
 		
