@@ -7064,23 +7064,25 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		for (int iter=0; iter<conSNList.length; iter++) {
 			if (iter>0) {
 				boolean[] fixedAlready = new boolean[cellHeaders.length];
-				int correctedRank = 0;
-				int nJumps =0;
+				int ungroupedRank = 0;
 				for (int colIndex=0; colIndex < cellHeaders.length; colIndex++) {
-					correctedRank = colIndex+1;
-					if (nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter]!=correctedRank) {
+
+					ungroupedRank = colIndex+1;
+					if (nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter] != ungroupedRank) {
+						IJ.log(""+ungroupedRank +"->"+ nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter]+" "+iter+" "+colIndex);
 						
-						if (nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter]< correctedRank) {
+						if (nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter]< ungroupedRank) {
 							if(!fixedAlready[colIndex]) {
 								int numToFix = nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter];
 								fixedAlready[colIndex]=true;
+								int nJumps =0;
 								for (int remainingCol= colIndex;remainingCol<cellHeaders.length;remainingCol++) {
-									String chrc = cellHeaders[remainingCol];
+
 									int ntrasnhtchrcoi = nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter];
 									if (ntrasnhtchrcoi == numToFix) {
 										if(!fixedAlready[remainingCol]) {
+
 											fixedAlready[remainingCol]=true;
-										
 											nJumps++;
 										}
 									} else {
@@ -7094,20 +7096,31 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 									}
 								}
 							}
-						} else {
+						} else if (nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter] > ungroupedRank) {
 							if(!fixedAlready[colIndex]) {
 								int numToFix = nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter];
-								nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter]=correctedRank;
-								fixedAlready[colIndex]=true;
+								int fixedNum = colIndex+1;
+
+								int nJumps =0;
 								for (int remainingCol= colIndex;remainingCol<cellHeaders.length;remainingCol++) {
-									if (nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter] == numToFix) {
+
+									int ntrasnhtchrcoi = nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter];
+									if (ntrasnhtchrcoi == numToFix) {
 										if(!fixedAlready[remainingCol]) {
-											nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter]=correctedRank;
+											nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter]=fixedNum;
 											fixedAlready[remainingCol]=true;
+											nJumps++;
 										}
 									} else {
+										if (iter==14) {
+											IJ.wait(1);
+										}
 										if(!fixedAlready[remainingCol]) {
-											nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter]++;
+											if (ntrasnhtchrcoi == remainingCol - nJumps) {
+												nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter] = remainingCol + 1 ;
+											} else {
+												nJumps++;
+											}
 										}
 									}
 								}
@@ -7128,61 +7141,61 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		IJ.saveString(cluster_assignments_rebuiltAGtoMKfmt, condensationSNpath.replace(".csv", "")+"_rebuiltAGtoMKfmt.csv");
 		
-		Hashtable<String, Integer> clusterColorTable = new Hashtable<String, Integer>();
-		
-		for (int cell=0;cell<cellHeaders.length;cell++){
-			String[] csnChunks = conSNList[iterationOfSix].split(",");
-			clusterColorTable.put(cellHeaders[cell], Integer.parseInt(csnChunks[cell]));
-		}
-		
-		for (String phateLine:inputPhateList){
-			if (phateLine.startsWith("serialNumber")) 
-				continue;
-			String[] phateLineChunks = phateLine.split(",");
-			String serial = phateLineChunks[0];
-
-			String outputTag = phateLineChunks[5]+"-"+serial;
-//			String outputTag = serialRosters.get(Integer.parseInt(serial))+"-"+serial;
-			
-			String outputPath = outputDir+inputFile.getName()+"-"+serial+"-"+outputTag.split("_")[0]+".obj";
-			String[] outputSections = icosphereSections;	
-			String[] outputVertices = icosphereVertices;
-			String[] outputFacets = icosphereFacets;
-			ArrayList<Double> outputVXs = icosphereVXs;
-			ArrayList<Double> outputVYs = icosphereVYs;
-			ArrayList<Double> outputVZs = icosphereVZs;
-			ArrayList<Double> outputFXs = icosphereFXs;
-			ArrayList<Double> outputFYs = icosphereFYs;
-			ArrayList<Double> outputFZs = icosphereFZs;
-
-			double offsetVX = Double.parseDouble(phateLineChunks[1])*1000 - (icospherevxMedian);
-			double offsetVY = Double.parseDouble(phateLineChunks[2])*1000 - (icospherevyMedian);
-			double offsetVZ = Double.parseDouble(phateLineChunks[3])*1000 - (icospherevzMedian);
-			double zScale = 1;
-			String outputObj = "";
-			outputObj = outputObj + "# OBJ File\nmtllib "+mtlFile.getName()+"\ng " + outputTag + "\n";
-			for (int i=0; i<outputVXs.size(); i++){
-				outputObj = outputObj + "v " +(outputVXs.get(i)+offsetVX) 
-									  + " " +(outputVYs.get(i)+offsetVY) 
-									  + " " +(((outputVZs.get(i))*zScale)+offsetVZ) + "\n";
-			}
-//			outputObj = outputObj + "usemtl mat_"+ phateLineChunks[4] ;
-			String leadCellName = "";
-			if (outputTag.split("_")[0].contains("-")) {
-				leadCellName = outputTag.split("-")[0];
-			} else {
-				leadCellName = outputTag.split("_")[0];
-			}
-			outputObj = outputObj + "usemtl mat_"+ clusterColorTable.get(leadCellName) ;
-			
-			outputObj = outputObj + "\ns " + outputFacets[0] + "\n";
-			for (int i=0; i<outputFXs.size(); i++){
-				outputObj = outputObj + "f " +outputFXs.get(i).intValue() + " " +outputFYs.get(i).intValue() + " " +outputFZs.get(i).intValue() + "\n";
-			}
-			outputObj = outputObj + outputFacets[outputFacets.length-1] + "\n";	
-			IJ.saveString(outputObj, outputPath);
-			
-		}
+//		Hashtable<String, Integer> clusterColorTable = new Hashtable<String, Integer>();
+//		
+//		for (int cell=0;cell<cellHeaders.length;cell++){
+//			String[] csnChunks = conSNList[iterationOfSix].split(",");
+//			clusterColorTable.put(cellHeaders[cell], Integer.parseInt(csnChunks[cell]));
+//		}
+//		
+//		for (String phateLine:inputPhateList){
+//			if (phateLine.startsWith("serialNumber")) 
+//				continue;
+//			String[] phateLineChunks = phateLine.split(",");
+//			String serial = phateLineChunks[0];
+//
+//			String outputTag = phateLineChunks[5]+"-"+serial;
+////			String outputTag = serialRosters.get(Integer.parseInt(serial))+"-"+serial;
+//			
+//			String outputPath = outputDir+inputFile.getName()+"-"+serial+"-"+outputTag.split("_")[0]+".obj";
+//			String[] outputSections = icosphereSections;	
+//			String[] outputVertices = icosphereVertices;
+//			String[] outputFacets = icosphereFacets;
+//			ArrayList<Double> outputVXs = icosphereVXs;
+//			ArrayList<Double> outputVYs = icosphereVYs;
+//			ArrayList<Double> outputVZs = icosphereVZs;
+//			ArrayList<Double> outputFXs = icosphereFXs;
+//			ArrayList<Double> outputFYs = icosphereFYs;
+//			ArrayList<Double> outputFZs = icosphereFZs;
+//
+//			double offsetVX = Double.parseDouble(phateLineChunks[1])*1000 - (icospherevxMedian);
+//			double offsetVY = Double.parseDouble(phateLineChunks[2])*1000 - (icospherevyMedian);
+//			double offsetVZ = Double.parseDouble(phateLineChunks[3])*1000 - (icospherevzMedian);
+//			double zScale = 1;
+//			String outputObj = "";
+//			outputObj = outputObj + "# OBJ File\nmtllib "+mtlFile.getName()+"\ng " + outputTag + "\n";
+//			for (int i=0; i<outputVXs.size(); i++){
+//				outputObj = outputObj + "v " +(outputVXs.get(i)+offsetVX) 
+//									  + " " +(outputVYs.get(i)+offsetVY) 
+//									  + " " +(((outputVZs.get(i))*zScale)+offsetVZ) + "\n";
+//			}
+////			outputObj = outputObj + "usemtl mat_"+ phateLineChunks[4] ;
+//			String leadCellName = "";
+//			if (outputTag.split("_")[0].contains("-")) {
+//				leadCellName = outputTag.split("-")[0];
+//			} else {
+//				leadCellName = outputTag.split("_")[0];
+//			}
+//			outputObj = outputObj + "usemtl mat_"+ clusterColorTable.get(leadCellName) ;
+//			
+//			outputObj = outputObj + "\ns " + outputFacets[0] + "\n";
+//			for (int i=0; i<outputFXs.size(); i++){
+//				outputObj = outputObj + "f " +outputFXs.get(i).intValue() + " " +outputFYs.get(i).intValue() + " " +outputFZs.get(i).intValue() + "\n";
+//			}
+//			outputObj = outputObj + outputFacets[outputFacets.length-1] + "\n";	
+//			IJ.saveString(outputObj, outputPath);
+//			
+//		}
 //		univ.addCustomMesh(bigmesh,"multi");
 
 		
