@@ -7065,53 +7065,29 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			if (iter>0) {
 				boolean[] fixedAlready = new boolean[cellHeaders.length];
 				int ungroupedRank = 0;
+				
 				for (int colIndex=0; colIndex < cellHeaders.length; colIndex++) {
 
 					ungroupedRank = colIndex+1;
 					if (nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter] != ungroupedRank) {
 						IJ.log(""+ungroupedRank +"->"+ nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter]+" "+iter+" "+colIndex);
 						
-						if (nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter]< ungroupedRank) {
-//							if(!fixedAlready[colIndex]) {
-//								int numToFix = nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter];
-//								fixedAlready[colIndex]=true;
-//								int nJumps =0;
-//								for (int remainingCol= colIndex;remainingCol<cellHeaders.length;remainingCol++) {
-//
-//									int ntrasnhtchrcoi = nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter];
-//									if (ntrasnhtchrcoi == numToFix) {
-//										if(!fixedAlready[remainingCol]) {
-//
-//											fixedAlready[remainingCol]=true;
-//											nJumps++;
-//										}
-//									} else {
-//										if(!fixedAlready[remainingCol]) {
-//											if (ntrasnhtchrcoi == remainingCol - nJumps) {
-//												nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter] = remainingCol + 1 ;
-//											} else {
-//												nJumps++;
-//											}
-//										}
-//									}
-//								}
-//							}
-						} else if (nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter] > ungroupedRank) {
+						if (nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter] > ungroupedRank) {
 							if(!fixedAlready[colIndex]) {
 								int numToFix = nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter];
 								int fixedNum = colIndex+1;
 								int nJumps = -1;
+								if (iter>=15) {
+									IJ.wait(1);
+								}
 								for (int remainingCol= colIndex;remainingCol<cellHeaders.length;remainingCol++) {
 									String cellName = cellHeaders[remainingCol];
 									Integer[] cellRanks= nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0];
 									int ntrasnhtchrcoi = nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter];
-									if (iter>=13) {
-										IJ.wait(1);
-									}
 									if (ntrasnhtchrcoi == numToFix) {
 										if(!fixedAlready[remainingCol]) {
 											nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter]=fixedNum;
-											fixedAlready[remainingCol]=true;
+//											fixedAlready[remainingCol]=true;
 											nJumps++;
 										}
 									} else {
@@ -7119,8 +7095,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 											if (ntrasnhtchrcoi == remainingCol - nJumps) {
 												nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter] = remainingCol + 1 ;
 											} else if (ntrasnhtchrcoi>colIndex) {
-												nJumps++;
-												nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter] =  nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter]+nJumps;
+//												nJumps++;
+												nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter] =  nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter]++;
 											} else if (ntrasnhtchrcoi<=colIndex){
 												nJumps++;
 											}
@@ -7131,6 +7107,44 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						}
 					}
 				}
+				
+				fixedAlready = new boolean[cellHeaders.length];
+
+				for (int colIndex=0; colIndex < cellHeaders.length; colIndex++) {
+
+					ungroupedRank = colIndex+1;
+					if (nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter] != ungroupedRank) {
+						IJ.log(""+ungroupedRank +"->"+ nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter]+" "+iter+" "+colIndex);
+						
+						if (nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter] < ungroupedRank) {
+							if(!fixedAlready[colIndex]) {
+								int numToFix = nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter];
+								int fixedNum = colIndex+1;
+								int nJumps =0;
+								for (int remainingCol= colIndex;remainingCol<cellHeaders.length;remainingCol++) {
+									String cellName = cellHeaders[remainingCol];
+									Integer[] cellRanks= nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0];
+									int ntrasnhtchrcoi = nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter];
+									
+									if (ntrasnhtchrcoi == numToFix) {
+										for (int previousCol =0;previousCol<remainingCol;previousCol++) {
+											if (nameToRanksAndSNsHashtable.get(cellHeaders[previousCol])[0][iter] 
+													== nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter]) {
+												fixedAlready[remainingCol] =true;
+											}
+										}
+										boolean b = fixedAlready[remainingCol];
+										if(!fixedAlready[remainingCol]) {
+											nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter] = fixedNum;
+											fixedAlready[remainingCol]=true;
+										}										
+									} 
+								}
+							}
+						} 
+					}
+				}				
+				
 				for (int colIndex=0; colIndex < cellHeaders.length; colIndex++) {
 					cluster_assignments_rebuiltAGtoMKfmt = cluster_assignments_rebuiltAGtoMKfmt +(colIndex>0?",":"") +nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter];
 				}
