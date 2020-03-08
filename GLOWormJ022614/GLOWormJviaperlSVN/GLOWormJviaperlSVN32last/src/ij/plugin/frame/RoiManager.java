@@ -7080,41 +7080,29 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //
 //
 //					🙏🙏🙏🙏🙏🙏🤞🤞🤞🤞🤞
+				
+				
+				
 
+				ArrayList<Integer> lockedCols = new ArrayList<Integer>();
+				int hits = 0;
 				for (int colIndex=0; colIndex < cellHeaders.length; colIndex++) {
-
 					int numToLock = nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter];
-					
-					ArrayList<Integer> fixedCols = new ArrayList<Integer>();
-					for (int remainingCol= colIndex;remainingCol<cellHeaders.length;remainingCol++) {
-								String cellName = cellHeaders[remainingCol];
-								Integer[] cellRanks= nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0];
-								int ntrasnhtchrcoi = nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter];
-
-						if (ntrasnhtchrcoi == numToLock && colIndex<remainingCol) {
-							fixedAlready[remainingCol] =true;
-							fixedCols.add(remainingCol);
-						}
+					if (numToLock != colIndex+1-lockedCols.size()) {
+						lockedCols.add(numToLock);
 					}
-
-					for (int remainingCol= colIndex;remainingCol<cellHeaders.length;remainingCol++) {
-								String cellName = cellHeaders[remainingCol];
-								Integer[] cellRanks= nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0];
-								int ntrasnhtchrcoi = nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter];
-								
-						int skips = 0;
-						for (int fixedCol:fixedCols) {
-							skips = skips +(remainingCol>fixedCol?1:0);
-						}
-						if (!fixedAlready[remainingCol]) {
-							nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter]
-									= nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter] + skips;
-						}
-					} 
-
 				}				
-				
-				
+				for (int colIndex=0; colIndex < cellHeaders.length; colIndex++) {
+					if (iter >=12)
+						IJ.wait(1);
+					if (!lockedCols.contains(nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter])) {
+						nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter]
+								= colIndex +1+ hits;
+					} else if (nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter] != colIndex+1){
+						hits++;
+					}
+				}
+				IJ.wait(1);
 //				for (int colIndex=0; colIndex < cellHeaders.length; colIndex++) {
 //					if (nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter] > colIndex+1) {
 //						for (int remainingCol=colIndex;remainingCol<cellHeaders.length;remainingCol++) {
