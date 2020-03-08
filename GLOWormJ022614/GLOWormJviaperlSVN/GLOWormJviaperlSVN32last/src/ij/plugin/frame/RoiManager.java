@@ -7064,87 +7064,68 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		for (int iter=0; iter<conSNList.length; iter++) {
 			if (iter>0) {
 				boolean[] fixedAlready = new boolean[cellHeaders.length];
-				int ungroupedRank = 0;
 				
+//				For any entry, working from left:
+//					1.  Search for hits right.  Count hits in nJumps and record nJump increment positions.   Lock all hits including N source.
+//
+//					2.  Scan right.  Bump+ any unlocked value position-specific nJumps higher than N the source.
+//
+//					3.  Ratchet N right and repeat 1-2 to end.
+//
+//					4.  Start at left, find value too high for column.  Renumber to column number. Lock.
+//
+//					5.  Search right for cells matching original N source value.  Renumber to N column number. Lock.
+//
+//					6.  Repeat 4-5 to end.
+//
+//
+//					🙏🙏🙏🙏🙏🙏🤞🤞🤞🤞🤞
+
 				for (int colIndex=0; colIndex < cellHeaders.length; colIndex++) {
 
-					ungroupedRank = colIndex+1;
-					if (nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter] != ungroupedRank) {
-						IJ.log(""+ungroupedRank +"->"+ nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter]+" "+iter+" "+colIndex);
-						
-						if (nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter] > ungroupedRank) {
-							if(!fixedAlready[colIndex]) {
-								int numToFix = nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter];
-								int fixedNum = colIndex+1;
-								int nJumps = -1;
-								if (iter>=15) {
-									IJ.wait(1);
-								}
-								for (int remainingCol= colIndex;remainingCol<cellHeaders.length;remainingCol++) {
-									String cellName = cellHeaders[remainingCol];
-									Integer[] cellRanks= nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0];
-									int ntrasnhtchrcoi = nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter];
-									if (ntrasnhtchrcoi == numToFix) {
-										if(!fixedAlready[remainingCol]) {
-											nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter]=fixedNum;
-//											fixedAlready[remainingCol]=true;
-											nJumps++;
-										}
-									} else {
-										if(!fixedAlready[remainingCol]) {
-											if (ntrasnhtchrcoi == remainingCol - nJumps) {
-												nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter] = remainingCol + 1 ;
-											} else if (ntrasnhtchrcoi>colIndex) {
-//												nJumps++;
-												nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter] =  nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter]++;
-											} else if (ntrasnhtchrcoi<=colIndex){
-												nJumps++;
-											}
-										}
-									}
-								}
-							}
+					int numToLock = nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter];
+					
+					ArrayList<Integer> fixedCols = new ArrayList<Integer>();
+					for (int remainingCol= colIndex;remainingCol<cellHeaders.length;remainingCol++) {
+								String cellName = cellHeaders[remainingCol];
+								Integer[] cellRanks= nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0];
+								int ntrasnhtchrcoi = nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter];
+
+						if (ntrasnhtchrcoi == numToLock && colIndex<remainingCol) {
+							fixedAlready[remainingCol] =true;
+							fixedCols.add(remainingCol);
 						}
 					}
-				}
-				
-				fixedAlready = new boolean[cellHeaders.length];
 
-				for (int colIndex=0; colIndex < cellHeaders.length; colIndex++) {
+					for (int remainingCol= colIndex;remainingCol<cellHeaders.length;remainingCol++) {
+								String cellName = cellHeaders[remainingCol];
+								Integer[] cellRanks= nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0];
+								int ntrasnhtchrcoi = nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter];
+								
+						int skips = 0;
+						for (int fixedCol:fixedCols) {
+							skips = skips +(remainingCol>fixedCol?1:0);
+						}
+						if (!fixedAlready[remainingCol]) {
+							nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter]
+									= nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter] + skips;
+						}
+					} 
 
-					ungroupedRank = colIndex+1;
-					if (nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter] != ungroupedRank) {
-						IJ.log(""+ungroupedRank +"->"+ nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter]+" "+iter+" "+colIndex);
-						
-						if (nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter] < ungroupedRank) {
-							if(!fixedAlready[colIndex]) {
-								int numToFix = nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter];
-								int fixedNum = colIndex+1;
-								int nJumps =0;
-								for (int remainingCol= colIndex;remainingCol<cellHeaders.length;remainingCol++) {
-									String cellName = cellHeaders[remainingCol];
-									Integer[] cellRanks= nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0];
-									int ntrasnhtchrcoi = nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter];
-									
-									if (ntrasnhtchrcoi == numToFix) {
-										for (int previousCol =0;previousCol<remainingCol;previousCol++) {
-											if (nameToRanksAndSNsHashtable.get(cellHeaders[previousCol])[0][iter] 
-													== nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter]) {
-												fixedAlready[remainingCol] =true;
-											}
-										}
-										boolean b = fixedAlready[remainingCol];
-										if(!fixedAlready[remainingCol]) {
-											nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter] = fixedNum;
-											fixedAlready[remainingCol]=true;
-										}										
-									} 
-								}
-							}
-						} 
-					}
 				}				
 				
+				
+//				for (int colIndex=0; colIndex < cellHeaders.length; colIndex++) {
+//					if (nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter] > colIndex+1) {
+//						for (int remainingCol=colIndex;remainingCol<cellHeaders.length;remainingCol++) {
+//							if (nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter] == nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter]) {
+//								nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter] = colIndex+1;
+//								fixedAlready[remainingCol] =true;
+//							}
+//						}
+//					}
+//				}
+
 				for (int colIndex=0; colIndex < cellHeaders.length; colIndex++) {
 					cluster_assignments_rebuiltAGtoMKfmt = cluster_assignments_rebuiltAGtoMKfmt +(colIndex>0?",":"") +nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter];
 				}
