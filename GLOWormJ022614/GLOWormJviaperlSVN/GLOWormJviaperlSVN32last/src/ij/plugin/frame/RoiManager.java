@@ -7087,36 +7087,53 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					rowNArray[colIndex] = nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter];
 				}				
 				
-				int targetValue=-1;
-
+				int targetValue = -1;
+				int deviantIndex = -1;
+				int deviantValue = -1;
+				ArrayList<Integer> deviantValuesProcessed = new ArrayList<Integer>();
 				for (int countingIndex=0; countingIndex < cellHeaders.length-1; countingIndex++) {
-					if (targetValue<0) 
-						targetValue= rowNArray[countingIndex]+1;
-					
-					if (rowNArray[countingIndex+1] !=  targetValue) {
-						int deviantValue = rowNArray[countingIndex+1];
-						ArrayList<Integer> deviantValuesScanned = new ArrayList<Integer>();
-						ArrayList<Integer> deviantIndexes = new ArrayList<Integer>();
-
-						for (int dvi=0; dvi < cellHeaders.length; dvi++) {
-							if (!deviantValuesScanned.contains(deviantValue)) {
-								deviantValuesScanned.add(deviantValue);
-								deviantIndexes.add(dvi);
-							}
-							if (rowNArray[dvi] == deviantValue) {
-								deviantIndexes.add(dvi+1);
+					if (targetValue<0) {
+						targetValue = rowNArray[countingIndex]+1;
+					}
+					if (rowNArray[countingIndex+1] != targetValue) {
+						deviantValue = rowNArray[countingIndex+1];
+						deviantIndex = countingIndex+1;
+					} else {
+						targetValue = -1;  //push on to next target
+						continue;
+					}
+					if (!deviantValuesProcessed.contains(deviantValue)) {
+						deviantValuesProcessed.add(deviantValue);
+						ArrayList<Integer> deviantHitIndexes = new ArrayList<Integer>();
+						for (int scanningIndex=0; scanningIndex < cellHeaders.length-1; scanningIndex++) {
+							if (rowNArray[scanningIndex] == deviantValue) {
+								deviantHitIndexes.add(scanningIndex);
 							}
 						}
+						int minDevHitIndex = cellHeaders.length;
+						for (int dhi:deviantHitIndexes) {
+							if (dhi < minDevHitIndex)				{
+								minDevHitIndex = dhi;
+							}
+						}
+						for(int fixingIndex:deviantHitIndexes) {
+							rowOneArray[fixingIndex] = minDevHitIndex+1;
+						}
 					} else {
-						targetValue = -1;
-					}					
+						deviantIndex = -1;  //push on to next deviant
+						deviantValue = -1;
+						continue;
+					}
+
+					
 				}
 				IJ.wait(1);
 
 				for (int colIndex=0; colIndex < cellHeaders.length; colIndex++) {
-					cluster_assignments_rebuiltAGtoMKfmt = cluster_assignments_rebuiltAGtoMKfmt +(colIndex>0?",":"") +nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter];
+					cluster_assignments_rebuiltAGtoMKfmt = cluster_assignments_rebuiltAGtoMKfmt +(colIndex>0?",":"")+  rowOneArray[colIndex];
 				}
 				cluster_assignments_rebuiltAGtoMKfmt = cluster_assignments_rebuiltAGtoMKfmt + "\n";
+
 			} else {
 				for (int colIndex=0; colIndex < cellHeaders.length; colIndex++) {
 					cluster_assignments_rebuiltAGtoMKfmt = cluster_assignments_rebuiltAGtoMKfmt +(colIndex>0?",":"") +cellHeaders[colIndex];
