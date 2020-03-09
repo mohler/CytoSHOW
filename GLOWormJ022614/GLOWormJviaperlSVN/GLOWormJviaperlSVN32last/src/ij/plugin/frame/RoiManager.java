@@ -7095,6 +7095,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					if (targetValue<0) {
 						targetValue = rowNArray[countingIndex]+1;
 					}
+					if (targetValue>177) {
+						IJ.wait(1);
+					}
 					if (rowNArray[countingIndex+1] != targetValue) {
 						deviantValue = rowNArray[countingIndex+1];
 						deviantIndex = countingIndex+1;
@@ -7105,7 +7108,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					if (!deviantValuesProcessed.contains(deviantValue)) {
 						deviantValuesProcessed.add(deviantValue);
 						ArrayList<Integer> deviantHitIndexes = new ArrayList<Integer>();
-						for (int scanningIndex=0; scanningIndex < cellHeaders.length-1; scanningIndex++) {
+						for (int scanningIndex=0; scanningIndex < cellHeaders.length; scanningIndex++) {
 							if (rowNArray[scanningIndex] == deviantValue) {
 								deviantHitIndexes.add(scanningIndex);
 							}
