@@ -7062,57 +7062,51 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		String cluster_assignments_rebuiltAGtoMKfmt ="";
 		for (int iter=0; iter<conSNList.length; iter++) {
-			if (iter>0) {
-				boolean[] fixedAlready = new boolean[cellHeaders.length];
+			if (iter>0) {							
 				
-//				For any entry, working from left:
-//					1.  Search for hits right.  Count hits in nJumps and record nJump increment positions.   Lock all hits including N source.
-//
-//					2.  Scan right.  Bump+ any unlocked value position-specific nJumps higher than N the source.
-//
-//					3.  Ratchet N right and repeat 1-2 to end.
-//
-//					4.  Start at left, find value too high for column.  Renumber to column number. Lock.
-//
-//					5.  Search right for cells matching original N source value.  Renumber to N column number. Lock.
-//
-//					6.  Repeat 4-5 to end.
+//				Manually in Excel:
 //
 //
-//					🙏🙏🙏🙏🙏🙏🤞🤞🤞🤞🤞
-				
-				
-				
+//					Paste copy of original Alex line 12 or greater in a place separate from rest of sheet.  Bring tally cells along.
+//					Paste copy of original Alex line 1  (columns with 1-178) below it.   Bring tally cells along.
+//
+//					Read upper row from left, looking for interruptions to the continuous upward number flow.  
+//
+//					At each deviant cell, record the substituted value and scan (usually backward) until you find another instance of the same number.
+//					Read below the second instance and record the "normal" position that it corresponds to.  Return to the original deviation spot, and enter that number into the cell below the deviation.
+//
+//					Repeat the process, moving to the right.  Pay special attention to omit the correctly ordered cells from substitution:
+//					After correct 13 followed by eg two deviations, find 14.  Do not substitute for these original in sequence instances of each number.  For any earlier or later deviant entries of 14, do the swap process.
+//
+//					Need to enact this with arraylists...  Actually, arrays should work!!!  Just need to create row arrays.
 
-				ArrayList<Integer> lockedCols = new ArrayList<Integer>();
-				int hits = 0;
+				int[] rowOneArray = new int[cellHeaders.length];
+				int[] rowNArray  = new int[cellHeaders.length];
 				for (int colIndex=0; colIndex < cellHeaders.length; colIndex++) {
-					int numToLock = nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter];
-					if (numToLock != colIndex+1-lockedCols.size()) {
-						lockedCols.add(numToLock);
-					}
+					rowOneArray[colIndex] = nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][1];
+					rowNArray[colIndex] = nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter];
 				}				
-				for (int colIndex=0; colIndex < cellHeaders.length; colIndex++) {
-					if (iter >=12)
-						IJ.wait(1);
-					if (!lockedCols.contains(nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter])) {
-						nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter]
-								= colIndex +1+ hits;
-					} else if (nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter] != colIndex+1){
-						hits++;
-					}
+				
+				int targetValue = -1;
+				int deviantIndex = -1;
+				for (int countingIndex=1; countingIndex < cellHeaders.length; countingIndex++) {
+					if (targetValue <0)
+						targetValue= rowNArray[countingIndex-1]+1;
+					if (rowNArray[countingIndex] !=  targetValue) {
+						int deviantValue = rowNArray[countingIndex];
+						for (int dvi=0; dvi < cellHeaders.length; dvi++) {
+							if (deviantIndex <0)
+								deviantIndex = countingIndex;
+							if (rowNArray[dvi] == deviantValue) {
+								rowOneArray[dvi] = deviantIndex;
+							}
+						}
+					} else {
+						targetValue = -1;
+						deviantIndex = -1;
+					}					
 				}
 				IJ.wait(1);
-//				for (int colIndex=0; colIndex < cellHeaders.length; colIndex++) {
-//					if (nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter] > colIndex+1) {
-//						for (int remainingCol=colIndex;remainingCol<cellHeaders.length;remainingCol++) {
-//							if (nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter] == nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter]) {
-//								nameToRanksAndSNsHashtable.get(cellHeaders[remainingCol])[0][iter] = colIndex+1;
-//								fixedAlready[remainingCol] =true;
-//							}
-//						}
-//					}
-//				}
 
 				for (int colIndex=0; colIndex < cellHeaders.length; colIndex++) {
 					cluster_assignments_rebuiltAGtoMKfmt = cluster_assignments_rebuiltAGtoMKfmt +(colIndex>0?",":"") +nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter];
