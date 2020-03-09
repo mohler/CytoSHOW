@@ -7087,23 +7087,28 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					rowNArray[colIndex] = nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter];
 				}				
 				
-				int targetValue = -1;
-				int deviantIndex = -1;
-				for (int countingIndex=1; countingIndex < cellHeaders.length; countingIndex++) {
-					if (targetValue <0)
-						targetValue= rowNArray[countingIndex-1]+1;
-					if (rowNArray[countingIndex] !=  targetValue) {
-						int deviantValue = rowNArray[countingIndex];
+				int targetValue=-1;
+
+				for (int countingIndex=0; countingIndex < cellHeaders.length-1; countingIndex++) {
+					if (targetValue<0) 
+						targetValue= rowNArray[countingIndex]+1;
+					
+					if (rowNArray[countingIndex+1] !=  targetValue) {
+						int deviantValue = rowNArray[countingIndex+1];
+						ArrayList<Integer> deviantValuesScanned = new ArrayList<Integer>();
+						ArrayList<Integer> deviantIndexes = new ArrayList<Integer>();
+
 						for (int dvi=0; dvi < cellHeaders.length; dvi++) {
-							if (deviantIndex <0)
-								deviantIndex = countingIndex;
+							if (!deviantValuesScanned.contains(deviantValue)) {
+								deviantValuesScanned.add(deviantValue);
+								deviantIndexes.add(dvi);
+							}
 							if (rowNArray[dvi] == deviantValue) {
-								rowOneArray[dvi] = deviantIndex;
+								deviantIndexes.add(dvi+1);
 							}
 						}
 					} else {
 						targetValue = -1;
-						deviantIndex = -1;
 					}					
 				}
 				IJ.wait(1);
