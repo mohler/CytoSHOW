@@ -6940,7 +6940,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		
 	}
 	
-	public void plotPhateObjsToCoordsIcospheres() {
+	public void plotOriginalPhateObjsToCoordsIcospheres() {
 		 
 		IJ.wait(1);
 		String icosphereObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/icosphereOut_0000.obj").toString());
@@ -7471,8 +7471,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		
 	}
 	
-	public void plotManikFmtPhateObjsToCoordsIcospheres() {
-		 
+//	public void plotManikFmtPhateObjsToCoordsIcospheres() {
+	public void plotPhateObjsToCoordsIcospheres() {
+	 
 		IJ.wait(1);
 		String icosphereObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/icosphereOut_0000.obj").toString());
 		File mtlFile = new File(MQTVSSceneLoader64.class.getResource("docs/icosphereOut_0000.mtl").toString());
@@ -7550,21 +7551,49 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		
 		for(int iteration=0;iteration<conSNList.length;iteration++){
 			String[] csnChunks = conSNList[iteration].split(",");
+			String[] clusterNumberings = csnChunks;
+			int[] clusterNumbers = new int[clusterNumberings.length];
 			if (iteration==0){
 				cellHeaders = csnChunks;
 			} else {
 				int maxGroupNum =0;
+////			NEW WAY FOR CSV DIRECTLY CONVERTED ALEX -> MANIK FORMAT....
+				for (int s=0; s<clusterNumberings.length; s++) {
+					clusterNumbers[s] = Integer.parseInt(clusterNumberings[s]);
+				}
+				ArrayList<Integer> clusterNumbersListToCrunch = new ArrayList<Integer> ();
+				for (int q=0; q<clusterNumbers.length; q++) {
+					if (!clusterNumbersListToCrunch.contains(clusterNumbers[q])) {
+						clusterNumbersListToCrunch.add(clusterNumbers[q]);
+					}
+				}
+				Hashtable<Integer, Integer> clusterCrunchHT = new Hashtable<Integer, Integer>();
+				for (int c =0; c<clusterNumbersListToCrunch.size(); c++) {
+					clusterCrunchHT.put(clusterNumbersListToCrunch.get(c), c+1);
+				}
+////
 				for (int cell=0;cell<cellHeaders.length;cell++){
 					if (nameToRanksAndSNsHashtable.get(cellHeaders[cell]) == null){
 						nameToRanksAndSNsHashtable.put(cellHeaders[cell], new Integer[2][conSNList.length]);
 					}
+					
+////					OLD WAY FOR CSV DIRECTLY FROM ALEX....
+//					int sn =0;
+//					if (iteration==0){
+//						sn = previousMaxSN+cell;
+//					}else{
+//						sn = previousMaxSN+Integer.parseInt(csnChunks[cell]);
+//					}
+////
+					
+////				NEW WAY FOR CSV DIRECTLY CONVERTED ALEX -> MANIK FORMAT....					
 					int sn =0;
 					if (iteration==0){
 						sn = previousMaxSN+cell;
 					}else{
-						sn = previousMaxSN+Integer.parseInt(csnChunks[cell]);
+						sn = previousMaxSN+ clusterCrunchHT.get(Integer.parseInt(csnChunks[cell]));
 					}
-
+////
 					nameToRanksAndSNsHashtable.get(cellHeaders[cell])[0][iteration] = Integer.parseInt(csnChunks[cell]);
 					nameToRanksAndSNsHashtable.get(cellHeaders[cell])[1][iteration] = sn;
 
@@ -7581,8 +7610,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					if (sn> nextMaxSN){
 						nextMaxSN =sn;
 					}
-					if (iteration>0 && Integer.parseInt(csnChunks[cell]) > maxGroupNum) {
-						maxGroupNum = Integer.parseInt(csnChunks[cell]);
+					if (iteration>0 && clusterCrunchHT.get(Integer.parseInt(csnChunks[cell])) > maxGroupNum) {
+						maxGroupNum = clusterCrunchHT.get(Integer.parseInt(csnChunks[cell]));
 					}
 				}
 				if (maxGroupNum == 6) {
@@ -7591,97 +7620,118 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				previousMaxSN=nextMaxSN;
 			}
 		}
-		String cluster_assignments_rebuiltAGtoMKfmt ="";
-		for (int iter=0; iter<conSNList.length; iter++) {
-			if (iter>0) {							
-				
-//				Manually in Excel:
+		
+		
+//		String cluster_assignments_rebuiltAGtoMKfmt ="";
+//		for (int iter=0; iter<conSNList.length; iter++) {
+//			if (iter>0) {							
+//				
+////				Manually in Excel:
+////
+////
+////					Paste copy of original Alex line 12 or greater in a place separate from rest of sheet.  Bring tally cells along.
+////					Paste copy of original Alex line 1  (columns with 1-178) below it.   Bring tally cells along.
+////
+////					Read upper row from left, looking for interruptions to the continuous upward number flow.  
+////
+////					At each deviant cell, record the substituted value and scan (usually backward) until you find another instance of the same number.
+////					Read below the second instance and record the "normal" position that it corresponds to.  Return to the original deviation spot, and enter that number into the cell below the deviation.
+////
+////					Repeat the process, moving to the right.  Pay special attention to omit the correctly ordered cells from substitution:
+////					After correct 13 followed by eg two deviations, find 14.  Do not substitute for these original in sequence instances of each number.  For any earlier or later deviant entries of 14, do the swap process.
+////
+////					Need to enact this with arraylists...  Actually, arrays should work!!!  Just need to create row arrays.
 //
+//				int[] rowOneArray = new int[cellHeaders.length];
+//				int[] rowNArray  = new int[cellHeaders.length];
+//				for (int colIndex=0; colIndex < cellHeaders.length; colIndex++) {
+//					rowOneArray[colIndex] = nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][1];
+//					rowNArray[colIndex] = nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter];
+//				}				
+//				
+//				int targetValue = -1;
+//				int deviantIndex = -1;
+//				int deviantValue = -1;
+//				ArrayList<Integer> deviantValuesProcessed = new ArrayList<Integer>();
+//				for (int countingIndex=0; countingIndex < cellHeaders.length-1; countingIndex++) {
+//					if (targetValue<0) {
+//						targetValue = rowNArray[countingIndex]+1;
+//					}
+//					if (targetValue>177) {
+//						IJ.wait(1);
+//					}
+//					if (rowNArray[countingIndex+1] != targetValue) {
+//						deviantValue = rowNArray[countingIndex+1];
+//						deviantIndex = countingIndex+1;
+//					} else {
+//						targetValue = -1;  //push on to next target
+//						continue;
+//					}
+//					if (!deviantValuesProcessed.contains(deviantValue)) {
+//						deviantValuesProcessed.add(deviantValue);
+//						ArrayList<Integer> deviantHitIndexes = new ArrayList<Integer>();
+//						for (int scanningIndex=0; scanningIndex < cellHeaders.length; scanningIndex++) {
+//							if (rowNArray[scanningIndex] == deviantValue) {
+//								deviantHitIndexes.add(scanningIndex);
+//							}
+//						}
+//						int minDevHitIndex = cellHeaders.length;
+//						for (int dhi:deviantHitIndexes) {
+//							if (dhi < minDevHitIndex)				{
+//								minDevHitIndex = dhi;
+//							}
+//						}
+//						for(int fixingIndex:deviantHitIndexes) {
+//							rowOneArray[fixingIndex] = minDevHitIndex+1;
+//						}
+//					} else {
+//						deviantIndex = -1;  //push on to next deviant
+//						deviantValue = -1;
+//						continue;
+//					}
 //
-//					Paste copy of original Alex line 12 or greater in a place separate from rest of sheet.  Bring tally cells along.
-//					Paste copy of original Alex line 1  (columns with 1-178) below it.   Bring tally cells along.
+//					
+//				}
+//				IJ.wait(1);
 //
-//					Read upper row from left, looking for interruptions to the continuous upward number flow.  
+//				for (int colIndex=0; colIndex < cellHeaders.length; colIndex++) {
+//					cluster_assignments_rebuiltAGtoMKfmt = cluster_assignments_rebuiltAGtoMKfmt +(colIndex>0?",":"")+  rowOneArray[colIndex];
+//				}
+//				cluster_assignments_rebuiltAGtoMKfmt = cluster_assignments_rebuiltAGtoMKfmt + "\n";
 //
-//					At each deviant cell, record the substituted value and scan (usually backward) until you find another instance of the same number.
-//					Read below the second instance and record the "normal" position that it corresponds to.  Return to the original deviation spot, and enter that number into the cell below the deviation.
-//
-//					Repeat the process, moving to the right.  Pay special attention to omit the correctly ordered cells from substitution:
-//					After correct 13 followed by eg two deviations, find 14.  Do not substitute for these original in sequence instances of each number.  For any earlier or later deviant entries of 14, do the swap process.
-//
-//					Need to enact this with arraylists...  Actually, arrays should work!!!  Just need to create row arrays.
-
-				int[] rowOneArray = new int[cellHeaders.length];
-				int[] rowNArray  = new int[cellHeaders.length];
-				for (int colIndex=0; colIndex < cellHeaders.length; colIndex++) {
-					rowOneArray[colIndex] = nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][1];
-					rowNArray[colIndex] = nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter];
-				}				
-				
-				int targetValue = -1;
-				int deviantIndex = -1;
-				int deviantValue = -1;
-				ArrayList<Integer> deviantValuesProcessed = new ArrayList<Integer>();
-				for (int countingIndex=0; countingIndex < cellHeaders.length-1; countingIndex++) {
-					if (targetValue<0) {
-						targetValue = rowNArray[countingIndex]+1;
-					}
-					if (targetValue>177) {
-						IJ.wait(1);
-					}
-					if (rowNArray[countingIndex+1] != targetValue) {
-						deviantValue = rowNArray[countingIndex+1];
-						deviantIndex = countingIndex+1;
-					} else {
-						targetValue = -1;  //push on to next target
-						continue;
-					}
-					if (!deviantValuesProcessed.contains(deviantValue)) {
-						deviantValuesProcessed.add(deviantValue);
-						ArrayList<Integer> deviantHitIndexes = new ArrayList<Integer>();
-						for (int scanningIndex=0; scanningIndex < cellHeaders.length; scanningIndex++) {
-							if (rowNArray[scanningIndex] == deviantValue) {
-								deviantHitIndexes.add(scanningIndex);
-							}
-						}
-						int minDevHitIndex = cellHeaders.length;
-						for (int dhi:deviantHitIndexes) {
-							if (dhi < minDevHitIndex)				{
-								minDevHitIndex = dhi;
-							}
-						}
-						for(int fixingIndex:deviantHitIndexes) {
-							rowOneArray[fixingIndex] = minDevHitIndex+1;
-						}
-					} else {
-						deviantIndex = -1;  //push on to next deviant
-						deviantValue = -1;
-						continue;
-					}
-
-					
-				}
-				IJ.wait(1);
-
-				for (int colIndex=0; colIndex < cellHeaders.length; colIndex++) {
-					cluster_assignments_rebuiltAGtoMKfmt = cluster_assignments_rebuiltAGtoMKfmt +(colIndex>0?",":"")+  rowOneArray[colIndex];
-				}
-				cluster_assignments_rebuiltAGtoMKfmt = cluster_assignments_rebuiltAGtoMKfmt + "\n";
-
-			} else {
-				for (int colIndex=0; colIndex < cellHeaders.length; colIndex++) {
-					cluster_assignments_rebuiltAGtoMKfmt = cluster_assignments_rebuiltAGtoMKfmt +(colIndex>0?",":"") +cellHeaders[colIndex];
-				}
-				cluster_assignments_rebuiltAGtoMKfmt = cluster_assignments_rebuiltAGtoMKfmt + "\n";
-			}
-		}
-		IJ.saveString(cluster_assignments_rebuiltAGtoMKfmt, condensationSNpath.replace(".csv", "")+"_rebuiltAGtoMKfmt.csv");
+//			} else {
+//				for (int colIndex=0; colIndex < cellHeaders.length; colIndex++) {
+//					cluster_assignments_rebuiltAGtoMKfmt = cluster_assignments_rebuiltAGtoMKfmt +(colIndex>0?",":"") +cellHeaders[colIndex];
+//				}
+//				cluster_assignments_rebuiltAGtoMKfmt = cluster_assignments_rebuiltAGtoMKfmt + "\n";
+//			}
+//		}
+//		IJ.saveString(cluster_assignments_rebuiltAGtoMKfmt, condensationSNpath.replace(".csv", "")+"_rebuiltAGtoMKfmt.csv");
+		
+		
 		
 		Hashtable<String, Integer> clusterColorTable = new Hashtable<String, Integer>();
 		
+		String[] csnSixChunks = conSNList[iterationOfSix].split(",");
 		for (int cell=0;cell<cellHeaders.length;cell++){
-			String[] csnChunks = conSNList[iterationOfSix].split(",");
-			clusterColorTable.put(cellHeaders[cell], Integer.parseInt(csnChunks[cell]));
+			String[] clusterNumberings = csnSixChunks;
+			int[] clusterNumbers = new int[clusterNumberings.length];
+
+				for (int s=0; s<clusterNumberings.length; s++) {
+					clusterNumbers[s] = Integer.parseInt(clusterNumberings[s]);
+				}
+				ArrayList<Integer> clusterNumbersListToCrunch = new ArrayList<Integer> ();
+				for (int q=0; q<clusterNumbers.length; q++) {
+					if (!clusterNumbersListToCrunch.contains(clusterNumbers[q])) {
+						clusterNumbersListToCrunch.add(clusterNumbers[q]);
+					}
+				}
+				Hashtable<Integer, Integer> clusterCrunchHT = new Hashtable<Integer, Integer>();
+				for (int c =0; c<clusterNumbersListToCrunch.size(); c++) {
+					clusterCrunchHT.put(clusterNumbersListToCrunch.get(c), c+1);
+				}
+				
+			clusterColorTable.put(cellHeaders[cell], clusterCrunchHT.get(Integer.parseInt(csnSixChunks[cell])));
 		}
 		
 		for (String phateLine:inputPhateList){
@@ -7704,9 +7754,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			ArrayList<Double> outputFYs = icosphereFYs;
 			ArrayList<Double> outputFZs = icosphereFZs;
 
-			double offsetVX = Double.parseDouble(phateLineChunks[1])*1000 - (icospherevxMedian);
-			double offsetVY = Double.parseDouble(phateLineChunks[2])*1000 - (icospherevyMedian);
-			double offsetVZ = Double.parseDouble(phateLineChunks[3])*1000 - (icospherevzMedian);
+			double offsetVX = Double.parseDouble(phateLineChunks[1])*1000000 - (icospherevxMedian);
+			double offsetVY = Double.parseDouble(phateLineChunks[2])*1000000 - (icospherevyMedian);
+			double offsetVZ = Double.parseDouble(phateLineChunks[3])*1000000 - (icospherevzMedian);
 			double zScale = 1;
 			String outputObj = "";
 			outputObj = outputObj + "# OBJ File\nmtllib "+mtlFile.getName()+"\ng " + outputTag + "\n";
