@@ -7541,7 +7541,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		String conSNData = IJ.openAsString(condensationSNpath);
 		String[] conSNList = conSNData.split("\n");
 		String[] cellHeaders = null; 
-		int previousMaxSN = 0;
+		int previousMaxSN = -1;
 		int nextMaxSN =0;
 		int iterationOfSix =0;
 		Hashtable<Integer,String> serialToRosterStringHashtable = new Hashtable<Integer,String>();
@@ -7741,9 +7741,20 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			String serial = phateLineChunks[0];
 
 //			String outputTag = phateLineChunks[5]+"-"+serial;
-			String outputTag = serialToRosterStringHashtable.get(Integer.parseInt(serial))+"-"+serial;
-			
-			String outputPath = outputDir+inputFile.getName()+"-"+serial+"-"+outputTag.split("_")[0]+".obj";
+			String outputTag = serialToRosterStringHashtable.get(Integer.parseInt(serial));
+			Integer[] groups = nameToRanksAndSNsHashtable.get(outputTag.split("[_-]")[0])[0];
+			Integer[] SNs = nameToRanksAndSNsHashtable.get(outputTag.split("[_-]")[0])[1];
+			int itr = -1;
+			int grp = -1;
+			for (int s=1; s<SNs.length; s++) {
+				if (SNs[s] == Integer.parseInt(serial)) {
+					itr = s;
+					grp = groups[s];
+				}
+			}
+			outputTag = outputTag+"-i"+itr+"-g"+grp+"-s"+serial;
+
+			String outputPath = outputDir+inputFile.getName()+".i"+itr+".g"+grp+".s"+serial+"."+outputTag.split("[_-]")[0]+".obj";
 			String[] outputSections = icosphereSections;	
 			String[] outputVertices = icosphereVertices;
 			String[] outputFacets = icosphereFacets;
