@@ -7274,9 +7274,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		String conSNData = IJ.openAsString(condensationSNpath);
 		String[] conSNList = conSNData.split("\n");
 		String[] cellHeaders = null; 
-		int previousMaxSN = 0;
+		int previousMaxSN = -1;
 		int nextMaxSN =0;
 		int iterationOfSix =0;
+		int iterationOfFour =0;
 		Hashtable<Integer,String> serialToRosterStringHashtable = new Hashtable<Integer,String>();
 		Hashtable<Integer,ArrayList<String>> serialToRosterArrayHashtable = new Hashtable<Integer,ArrayList<String>>();
 
@@ -7322,100 +7323,27 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				if (maxGroupNum == 6) {
 					iterationOfSix = iteration;
 				}
+				if (maxGroupNum == 4) {
+					iterationOfFour = iteration;
+				}
+
 				previousMaxSN=nextMaxSN;
 			}
 		}
-		String cluster_assignments_rebuiltAGtoMKfmt ="";
-		for (int iter=0; iter<conSNList.length; iter++) {
-			if (iter>0) {							
-				
-//				Manually in Excel:
-//
-//
-//					Paste copy of original Alex line 12 or greater in a place separate from rest of sheet.  Bring tally cells along.
-//					Paste copy of original Alex line 1  (columns with 1-178) below it.   Bring tally cells along.
-//
-//					Read upper row from left, looking for interruptions to the continuous upward number flow.  
-//
-//					At each deviant cell, record the substituted value and scan (usually backward) until you find another instance of the same number.
-//					Read below the second instance and record the "normal" position that it corresponds to.  Return to the original deviation spot, and enter that number into the cell below the deviation.
-//
-//					Repeat the process, moving to the right.  Pay special attention to omit the correctly ordered cells from substitution:
-//					After correct 13 followed by eg two deviations, find 14.  Do not substitute for these original in sequence instances of each number.  For any earlier or later deviant entries of 14, do the swap process.
-//
-//					Need to enact this with arraylists...  Actually, arrays should work!!!  Just need to create row arrays.
 
-				int[] rowOneArray = new int[cellHeaders.length];
-				int[] rowNArray  = new int[cellHeaders.length];
-				for (int colIndex=0; colIndex < cellHeaders.length; colIndex++) {
-					rowOneArray[colIndex] = nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][1];
-					rowNArray[colIndex] = nameToRanksAndSNsHashtable.get(cellHeaders[colIndex])[0][iter];
-				}				
-				
-				int targetValue = -1;
-				int deviantIndex = -1;
-				int deviantValue = -1;
-				ArrayList<Integer> deviantValuesProcessed = new ArrayList<Integer>();
-				for (int countingIndex=0; countingIndex < cellHeaders.length-1; countingIndex++) {
-					if (targetValue<0) {
-						targetValue = rowNArray[countingIndex]+1;
-					}
-					if (targetValue>177) {
-						IJ.wait(1);
-					}
-					if (rowNArray[countingIndex+1] != targetValue) {
-						deviantValue = rowNArray[countingIndex+1];
-						deviantIndex = countingIndex+1;
-					} else {
-						targetValue = -1;  //push on to next target
-						continue;
-					}
-					if (!deviantValuesProcessed.contains(deviantValue)) {
-						deviantValuesProcessed.add(deviantValue);
-						ArrayList<Integer> deviantHitIndexes = new ArrayList<Integer>();
-						for (int scanningIndex=0; scanningIndex < cellHeaders.length; scanningIndex++) {
-							if (rowNArray[scanningIndex] == deviantValue) {
-								deviantHitIndexes.add(scanningIndex);
-							}
-						}
-						int minDevHitIndex = cellHeaders.length;
-						for (int dhi:deviantHitIndexes) {
-							if (dhi < minDevHitIndex)				{
-								minDevHitIndex = dhi;
-							}
-						}
-						for(int fixingIndex:deviantHitIndexes) {
-							rowOneArray[fixingIndex] = minDevHitIndex+1;
-						}
-					} else {
-						deviantIndex = -1;  //push on to next deviant
-						deviantValue = -1;
-						continue;
-					}
-
-					
-				}
-				IJ.wait(1);
-
-				for (int colIndex=0; colIndex < cellHeaders.length; colIndex++) {
-					cluster_assignments_rebuiltAGtoMKfmt = cluster_assignments_rebuiltAGtoMKfmt +(colIndex>0?",":"")+  rowOneArray[colIndex];
-				}
-				cluster_assignments_rebuiltAGtoMKfmt = cluster_assignments_rebuiltAGtoMKfmt + "\n";
-
-			} else {
-				for (int colIndex=0; colIndex < cellHeaders.length; colIndex++) {
-					cluster_assignments_rebuiltAGtoMKfmt = cluster_assignments_rebuiltAGtoMKfmt +(colIndex>0?",":"") +cellHeaders[colIndex];
-				}
-				cluster_assignments_rebuiltAGtoMKfmt = cluster_assignments_rebuiltAGtoMKfmt + "\n";
-			}
-		}
-		IJ.saveString(cluster_assignments_rebuiltAGtoMKfmt, condensationSNpath.replace(".csv", "")+"_rebuiltAGtoMKfmt.csv");
 		
 		Hashtable<String, Integer> clusterColorTable = new Hashtable<String, Integer>();
 		
-		for (int cell=0;cell<cellHeaders.length;cell++){
-			String[] csnChunks = conSNList[iterationOfSix].split(",");
-			clusterColorTable.put(cellHeaders[cell], Integer.parseInt(csnChunks[cell]));
+		if (inputPath.toLowerCase().contains("n2u")) {
+			for (int cell=0;cell<cellHeaders.length;cell++){
+				String[] csnChunks = conSNList[iterationOfSix].split(",");
+				clusterColorTable.put(cellHeaders[cell], Integer.parseInt(csnChunks[cell]));
+			}
+		} else if (inputPath.toLowerCase().contains("jsh")) {
+			for (int cell=0;cell<cellHeaders.length;cell++){
+				String[] csnChunks = conSNList[iterationOfFour].split(",");
+				clusterColorTable.put(cellHeaders[cell], Integer.parseInt(csnChunks[cell]));
+			}
 		}
 		
 		for (String phateLine:inputPhateList){
@@ -7425,9 +7353,21 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			String serial = phateLineChunks[0];
 
 //			String outputTag = phateLineChunks[5]+"-"+serial;
-			String outputTag = serialToRosterStringHashtable.get(Integer.parseInt(serial))+"-"+serial;
+			String outputTag = serialToRosterStringHashtable.get(Integer.parseInt(serial));
+			Integer[] groups = nameToRanksAndSNsHashtable.get(outputTag.split("[_-]")[0])[0];
+			Integer[] SNs = nameToRanksAndSNsHashtable.get(outputTag.split("[_-]")[0])[1];
+			int itr = -1;
+			int grp = -1;
+			for (int s=1; s<SNs.length; s++) {
+				if (SNs[s] == Integer.parseInt(serial)) {
+					itr = s;
+					grp = groups[s];
+				}
+			}
+			outputTag = outputTag+"-i"+itr+"-g"+grp+"-s"+serial;
+
+			String outputPath = outputDir+inputFile.getName()+".i"+itr+".g"+grp+".s"+serial+"."+outputTag.split("[_-]")[0]+".obj";
 			
-			String outputPath = outputDir+inputFile.getName()+"-"+serial+"-"+outputTag.split("_")[0]+".obj";
 			String[] outputSections = icosphereSections;	
 			String[] outputVertices = icosphereVertices;
 			String[] outputFacets = icosphereFacets;
@@ -7529,10 +7469,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		String inputPath = IJ.getFilePath("Select csv file with PHATE data");
 		String condensationSNpath = IJ.getFilePath("Select csv file with condensation cluster data");
-//		String mtlPath = IJ.getFilePath("Select mtl file with color rules");
+		String mtlPath = IJ.getFilePath("Select mtl file with color rules");
 		File inputFile = new File(inputPath);
 		File conSNFile = new File(condensationSNpath);
-//		File mtlFile = new File(mtlPath);
+		mtlFile = new File(mtlPath);
 		String outputDir = inputFile.getParent()+File.separator+inputFile.getName().replace(".csv", "")+File.separator;
 		new File(outputDir).mkdirs();
 //		IJ.saveString(IJ.openAsString(mtlPath), outputDir+mtlFile.getName());
@@ -7765,9 +7705,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			ArrayList<Double> outputFYs = icosphereFYs;
 			ArrayList<Double> outputFZs = icosphereFZs;
 
-			double offsetVX = Double.parseDouble(phateLineChunks[1])*1000000 - (icospherevxMedian);
-			double offsetVY = Double.parseDouble(phateLineChunks[2])*1000000 - (icospherevyMedian);
-			double offsetVZ = Double.parseDouble(phateLineChunks[3])*1000000 - (icospherevzMedian);
+			double offsetVX = Double.parseDouble(phateLineChunks[1])*100 - (icospherevxMedian);
+			double offsetVY = Double.parseDouble(phateLineChunks[2])*100 - (icospherevyMedian);
+			double offsetVZ = Double.parseDouble(phateLineChunks[3])*100 - (icospherevzMedian);
 			double zScale = 1;
 			String outputObj = "";
 			outputObj = outputObj + "# OBJ File\nmtllib "+mtlFile.getName()+"\ng " + outputTag + "\n";
