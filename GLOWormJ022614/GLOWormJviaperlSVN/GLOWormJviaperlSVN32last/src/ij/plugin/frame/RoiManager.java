@@ -5,6 +5,9 @@ import java.awt.geom.AffineTransform;
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.awt.List;
 import java.util.zip.*;
@@ -386,8 +389,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		addPopupItem("Color Objs by Group Interaction Rules");
 		addPopupItem("Substitute synapse type objs");
 		addPopupItem("Plot synapses to coords");
-		addPopupItem("Plot phate spheres to coords");
-		addPopupItem("Plot phate icospheres to coords");
+//		addPopupItem("Plot phate spheres to coords");
+		addPopupItem("Plot MK c-phate icospheres to coords");
+		addPopupItem("Plot AG c-phate icospheres to coords");
+//		addPopupItem("fixcrap");
 		add(pm);
 	}
 
@@ -955,8 +960,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			else if (command.equals("Plot phate spheres to coords")) {
 				plotPhateObjsToCoordsSpheres();
 			}
-			else if (command.equals("Plot phate icospheres to coords")) {
-				plotPhateObjsToCoordsIcospheres();
+			else if (command.equals("Plot MK c-phate icospheres to coords")) {
+				plotManikFmtPhateObjsToCoordsIcospheres();
+			}
+			else if (command.equals("Plot AG c-phate icospheres to coords")) {
+				plotAlexFmtPhateObjsToCoordsIcospheres();
+			}
+			else if (command.equals("fixcrap")) {
+				fixdamnJSHs();
 			}
 
 			this.imp.getCanvas().requestFocus();
@@ -7262,10 +7273,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		String inputPath = IJ.getFilePath("Select csv file with PHATE data");
 		String condensationSNpath = IJ.getFilePath("Select csv file with condensation cluster data");
-//		String mtlPath = IJ.getFilePath("Select mtl file with color rules");
+		String mtlPath = IJ.getFilePath("Select mtl file with color rules");
 		File inputFile = new File(inputPath);
 		File conSNFile = new File(condensationSNpath);
-//		File mtlFile = new File(mtlPath);
+		mtlFile = new File(mtlPath);
 		String outputDir = inputFile.getParent()+File.separator+inputFile.getName().replace(".csv", "")+File.separator;
 		new File(outputDir).mkdirs();
 //		IJ.saveString(IJ.openAsString(mtlPath), outputDir+mtlFile.getName());
@@ -7378,9 +7389,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			ArrayList<Double> outputFYs = icosphereFYs;
 			ArrayList<Double> outputFZs = icosphereFZs;
 
-			double offsetVX = Double.parseDouble(phateLineChunks[1])*1000 - (icospherevxMedian);
-			double offsetVY = Double.parseDouble(phateLineChunks[2])*1000 - (icospherevyMedian);
-			double offsetVZ = Double.parseDouble(phateLineChunks[3])*1000 - (icospherevzMedian);
+			double offsetVX = Double.parseDouble(phateLineChunks[1])*(inputPath.toLowerCase().contains("n2u")?400:400000) - (icospherevxMedian);
+			double offsetVY = Double.parseDouble(phateLineChunks[2])*(inputPath.toLowerCase().contains("n2u")?400:400000) - (icospherevyMedian);
+			double offsetVZ = Double.parseDouble(phateLineChunks[3])*(inputPath.toLowerCase().contains("n2u")?400:400000) - (icospherevzMedian);
 			double zScale = 1;
 			String outputObj = "";
 			outputObj = outputObj + "# OBJ File\nmtllib "+mtlFile.getName()+"\ng " + outputTag + "\n";
@@ -7404,6 +7415,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			outputObj = outputObj + outputFacets[outputFacets.length-1] + "\n";	
 			IJ.saveString(outputObj, outputPath);
+			try {
+				Files.copy(mtlFile.toPath(), Paths.get(outputDir+mtlFile.getName()));
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
 		}
 //		univ.addCustomMesh(bigmesh,"multi");
@@ -7411,8 +7428,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		
 	}
 	
-//	public void plotManikFmtPhateObjsToCoordsIcospheres() {
-	public void plotPhateObjsToCoordsIcospheres() {
+	public void plotManikFmtPhateObjsToCoordsIcospheres() {
 	 
 		IJ.wait(1);
 		String icosphereObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/icosphereOut_0000.obj").toString());
@@ -7484,6 +7500,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		int previousMaxSN = -1;
 		int nextMaxSN =0;
 		int iterationOfSix =0;
+		int iterationOfFour =0;
 		Hashtable<Integer,String> serialToRosterStringHashtable = new Hashtable<Integer,String>();
 		Hashtable<Integer,ArrayList<String>> serialToRosterArrayHashtable = new Hashtable<Integer,ArrayList<String>>();
 
@@ -7557,6 +7574,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				if (maxGroupNum == 6) {
 					iterationOfSix = iteration;
 				}
+				if (maxGroupNum == 4) {
+					iterationOfFour = iteration;
+				}
+
 				previousMaxSN=nextMaxSN;
 			}
 		}
@@ -7652,26 +7673,50 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		
 		Hashtable<String, Integer> clusterColorTable = new Hashtable<String, Integer>();
 		
-		String[] csnSixChunks = conSNList[iterationOfSix].split(",");
-		for (int cell=0;cell<cellHeaders.length;cell++){
-			String[] clusterNumberings = csnSixChunks;
-			int[] clusterNumbers = new int[clusterNumberings.length];
+		if (inputPath.toLowerCase().contains("n2u")) {
+			String[] csnSixChunks = conSNList[iterationOfSix].split(",");
+			for (int cell=0;cell<cellHeaders.length;cell++){
+				String[] clusterNumberings = csnSixChunks;
+				int[] clusterNumbers = new int[clusterNumberings.length];
 
-				for (int s=0; s<clusterNumberings.length; s++) {
-					clusterNumbers[s] = Integer.parseInt(clusterNumberings[s]);
-				}
-				ArrayList<Integer> clusterNumbersListToCrunch = new ArrayList<Integer> ();
-				for (int q=0; q<clusterNumbers.length; q++) {
-					if (!clusterNumbersListToCrunch.contains(clusterNumbers[q])) {
-						clusterNumbersListToCrunch.add(clusterNumbers[q]);
+					for (int s=0; s<clusterNumberings.length; s++) {
+						clusterNumbers[s] = Integer.parseInt(clusterNumberings[s]);
 					}
-				}
-				Hashtable<Integer, Integer> clusterCrunchHT = new Hashtable<Integer, Integer>();
-				for (int c =0; c<clusterNumbersListToCrunch.size(); c++) {
-					clusterCrunchHT.put(clusterNumbersListToCrunch.get(c), c+1);
-				}
-				
-			clusterColorTable.put(cellHeaders[cell], clusterCrunchHT.get(Integer.parseInt(csnSixChunks[cell])));
+					ArrayList<Integer> clusterNumbersListToCrunch = new ArrayList<Integer> ();
+					for (int q=0; q<clusterNumbers.length; q++) {
+						if (!clusterNumbersListToCrunch.contains(clusterNumbers[q])) {
+							clusterNumbersListToCrunch.add(clusterNumbers[q]);
+						}
+					}
+					Hashtable<Integer, Integer> clusterCrunchHT = new Hashtable<Integer, Integer>();
+					for (int c =0; c<clusterNumbersListToCrunch.size(); c++) {
+						clusterCrunchHT.put(clusterNumbersListToCrunch.get(c), c+1);
+					}
+					
+				clusterColorTable.put(cellHeaders[cell], clusterCrunchHT.get(Integer.parseInt(csnSixChunks[cell])));
+			}
+		} else if (inputPath.toLowerCase().contains("jsh")) {
+			String[] csnFourChunks = conSNList[iterationOfSix].split(",");
+			for (int cell=0;cell<cellHeaders.length;cell++){
+				String[] clusterNumberings = csnFourChunks;
+				int[] clusterNumbers = new int[clusterNumberings.length];
+
+					for (int s=0; s<clusterNumberings.length; s++) {
+						clusterNumbers[s] = Integer.parseInt(clusterNumberings[s]);
+					}
+					ArrayList<Integer> clusterNumbersListToCrunch = new ArrayList<Integer> ();
+					for (int q=0; q<clusterNumbers.length; q++) {
+						if (!clusterNumbersListToCrunch.contains(clusterNumbers[q])) {
+							clusterNumbersListToCrunch.add(clusterNumbers[q]);
+						}
+					}
+					Hashtable<Integer, Integer> clusterCrunchHT = new Hashtable<Integer, Integer>();
+					for (int c =0; c<clusterNumbersListToCrunch.size(); c++) {
+						clusterCrunchHT.put(clusterNumbersListToCrunch.get(c), c+1);
+					}
+					
+				clusterColorTable.put(cellHeaders[cell], clusterCrunchHT.get(Integer.parseInt(csnFourChunks[cell])));
+			}
 		}
 		
 		for (String phateLine:inputPhateList){
@@ -7705,9 +7750,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			ArrayList<Double> outputFYs = icosphereFYs;
 			ArrayList<Double> outputFZs = icosphereFZs;
 
-			double offsetVX = Double.parseDouble(phateLineChunks[1])*100 - (icospherevxMedian);
-			double offsetVY = Double.parseDouble(phateLineChunks[2])*100 - (icospherevyMedian);
-			double offsetVZ = Double.parseDouble(phateLineChunks[3])*100 - (icospherevzMedian);
+			double offsetVX = Double.parseDouble(phateLineChunks[1])*500000 - (icospherevxMedian);
+			double offsetVY = Double.parseDouble(phateLineChunks[2])*500000 - (icospherevyMedian);
+			double offsetVZ = Double.parseDouble(phateLineChunks[3])*500000 - (icospherevzMedian);
 			double zScale = 1;
 			String outputObj = "";
 			outputObj = outputObj + "# OBJ File\nmtllib "+mtlFile.getName()+"\ng " + outputTag + "\n";
@@ -7736,5 +7781,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //		univ.addCustomMesh(bigmesh,"multi");
 
 		
+	}
+	
+	void fixdamnJSHs() {
+		String dir = IJ.getDirectory("");
+		for (String name:new File(dir).list()) {
+			IJ.saveString(IJ.openAsString(dir+name).replaceAll(",(\\d,)", ",JSH00$1,").replaceAll(",(\\d\\d,)", ",JSH0$1,").replaceAll(",(\\d\\d\\d,)", ",JSH$1,"), dir+name);
+		}
 	}
 }
