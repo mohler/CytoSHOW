@@ -7358,7 +7358,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		
 		for (String phateLine:inputPhateList){
-			if (phateLine.startsWith("serialNumber")) 
+			if (phateLine.startsWith("serialNumber") || phateLine.startsWith("")) 
 				continue;
 			String[] phateLineChunks = phateLine.split(",");
 			String serial = phateLineChunks[0];
@@ -7491,7 +7491,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		mtlFile = new File(mtlPath);
 		String outputDir = inputFile.getParent()+File.separator+inputFile.getName().replace(".csv", "")+File.separator;
 		new File(outputDir).mkdirs();
-//		IJ.saveString(IJ.openAsString(mtlPath), outputDir+mtlFile.getName());
+		IJ.saveString(IJ.openAsString(mtlPath), outputDir+mtlFile.getName());
 		String inputPhateData = IJ.openAsString(inputPath);
 		String[] inputPhateList = inputPhateData.split("\n");
 		String conSNData = IJ.openAsString(condensationSNpath);
@@ -7720,7 +7720,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		
 		for (String phateLine:inputPhateList){
-			if (phateLine.startsWith("serialNumber")) 
+			if (phateLine.startsWith("serialNumber") || phateLine.startsWith(",0,1,2")) 
 				continue;
 			String[] phateLineChunks = phateLine.split(",");
 			String serial = phateLineChunks[0];
@@ -7786,7 +7786,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	void fixdamnJSHs() {
 		String dir = IJ.getDirectory("");
 		for (String name:new File(dir).list()) {
-			IJ.saveString(IJ.openAsString(dir+name).replaceAll(",(\\d,)", ",JSH00$1,").replaceAll(",(\\d\\d,)", ",JSH0$1,").replaceAll(",(\\d\\d\\d,)", ",JSH$1,"), dir+name);
+			IJ.saveString(IJ.openAsString(dir+name).replaceAll(",(\\d,)", ",JSH00$1").replaceAll(",(\\d\\d,)", ",JSH0$1").replaceAll(",(\\d\\d\\d,)", ",JSH$1"), dir+name);
 		}
 	}
 }
