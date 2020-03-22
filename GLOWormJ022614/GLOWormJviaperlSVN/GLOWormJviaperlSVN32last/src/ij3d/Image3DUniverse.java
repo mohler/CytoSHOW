@@ -1870,7 +1870,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				}
 				univ.fireContentAdded(c);
 				univ.addUniverseListener(c);
-//WHY WAS THIS EVER CALLED??				univ.waitForNextFrame();
+//WHY WAS THIS EVER CALLED??				
+//				univ.waitForNextFrame();
 				univ.fireTransformationUpdated();
 				return c;
 			}

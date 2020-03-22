@@ -7279,7 +7279,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		mtlFile = new File(mtlPath);
 		String outputDir = inputFile.getParent()+File.separator+inputFile.getName().replace(".csv", "")+File.separator;
 		new File(outputDir).mkdirs();
-//		IJ.saveString(IJ.openAsString(mtlPath), outputDir+mtlFile.getName());
+		IJ.saveString(IJ.openAsString(mtlPath), outputDir+mtlFile.getName());
 		String inputPhateData = IJ.openAsString(inputPath);
 		String[] inputPhateList = inputPhateData.split("\n");
 		String conSNData = IJ.openAsString(condensationSNpath);
@@ -7358,11 +7358,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		
 		for (String phateLine:inputPhateList){
-			if (phateLine.startsWith("serialNumber") || phateLine.startsWith("")) 
+			if (phateLine.startsWith("serialNumber") || phateLine.startsWith(",0,1,2")) 
 				continue;
 			String[] phateLineChunks = phateLine.split(",");
 			String serial = phateLineChunks[0];
 
+			
 //			String outputTag = phateLineChunks[5]+"-"+serial;
 			String outputTag = serialToRosterStringHashtable.get(Integer.parseInt(serial));
 			Integer[] groups = nameToRanksAndSNsHashtable.get(outputTag.split("[_-]")[0])[0];
@@ -7415,12 +7416,6 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			outputObj = outputObj + outputFacets[outputFacets.length-1] + "\n";	
 			IJ.saveString(outputObj, outputPath);
-			try {
-				Files.copy(mtlFile.toPath(), Paths.get(outputDir+mtlFile.getName()));
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
 			
 		}
 //		univ.addCustomMesh(bigmesh,"multi");
