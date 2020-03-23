@@ -220,14 +220,30 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 						if (IJ.isWindows())
 							cursorString = c.getName().split("( |_)=")[0];
-						Font font = Font.decode("Arial-Outline-18");
+						Font font = Font.decode("Arial-18");
 						String[] cursorWords = cursorString.replace("_", " ").split(" ");
 						int cursorLineCount = cursorWords.length/5 + (cursorWords.length%5==0?0:1) +3;
-						String[] cursorStringCRs = new String[cursorLineCount] ;
+						String[] cursorStringCRs = new String[cursorLineCount+1] ;
 						int l =0;
 						for (int word=0; word<cursorWords.length; word=word+1) {
-							if (word >0 && (word)%5==0)
+							if (word >0 && (word)%5==0) {
 								l++;
+							} 
+							if (word == cursorWords.length-1 && cursorWords[word].matches("(.*)(-i\\d+-g\\d+-s\\d+)")) {
+								if (cursorStringCRs[l] == null) {
+									cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)(-i\\d+-g\\d+-s\\d+)", "$1");
+									l++;
+									cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)(-i\\d+-g\\d+-s\\d+)", "$2").replace("-", " ")
+															+ " count=" + cursorWords.length;
+									continue;
+								} else {
+									cursorStringCRs[l] = cursorStringCRs[l] + " "+ cursorWords[word].replaceAll("(.*)(-i\\d+-g\\d+-s\\d+)", "$1");
+									l++;
+									cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)(-i\\d+-g\\d+-s\\d+)", "$2").replace("-", " ")
+															+ " count=" + cursorWords.length;
+									continue;
+								}
+							}
 							if (cursorStringCRs[l] == null) 
 								cursorStringCRs[l] = cursorWords[word];
 							else
@@ -235,9 +251,9 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 						}
 						Point3d pickCenter = new Point3d();
 						c.getBounds().getCenter(pickCenter);
-						cursorStringCRs[cursorLineCount-3] = "x="+pickCenter.x/1000000;
-						cursorStringCRs[cursorLineCount-2] = "y="+pickCenter.y/1000000;
-						cursorStringCRs[cursorLineCount-1] = "z="+pickCenter.z/1000000;
+//						cursorStringCRs[cursorLineCount-3] = "x="+pickCenter.x/1000000;
+//						cursorStringCRs[cursorLineCount-2] = "y="+pickCenter.y/1000000;
+//						cursorStringCRs[cursorLineCount-1] = "z="+pickCenter.z/1000000;
 
 						//create the FontRenderContext object which helps us to measure the text
 						FontRenderContext frc = new FontRenderContext(null, true, true);
@@ -247,7 +263,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 						int w = (int) bounds.getWidth();
 						int ht = (int) bounds.getHeight();
 						//					Image img = new BufferedImage(w, ht, BufferedImage.TYPE_INT_ARGB_PRE);
-						Image img = new BufferedImage(400, 600, BufferedImage.TYPE_INT_ARGB_PRE);
+						Image img = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB_PRE);
 
 
 						//		img.getGraphics().setColor(Colors.decode("00000000", Color.white));

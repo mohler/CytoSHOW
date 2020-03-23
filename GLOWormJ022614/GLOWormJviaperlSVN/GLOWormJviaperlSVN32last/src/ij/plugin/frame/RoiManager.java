@@ -7390,9 +7390,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			ArrayList<Double> outputFYs = icosphereFYs;
 			ArrayList<Double> outputFZs = icosphereFZs;
 
-			double offsetVX = Double.parseDouble(phateLineChunks[1])*(inputPath.toLowerCase().contains("n2u")?400:400000) - (icospherevxMedian);
-			double offsetVY = Double.parseDouble(phateLineChunks[2])*(inputPath.toLowerCase().contains("n2u")?400:400000) - (icospherevyMedian);
-			double offsetVZ = Double.parseDouble(phateLineChunks[3])*(inputPath.toLowerCase().contains("n2u")?400:400000) - (icospherevzMedian);
+			double offsetVX = Double.parseDouble(phateLineChunks[1])*(inputPath.toLowerCase().contains("n2u")?400000:400000) - (icospherevxMedian);
+			double offsetVY = Double.parseDouble(phateLineChunks[2])*(inputPath.toLowerCase().contains("n2u")?400000:400000) - (icospherevyMedian);
+			double offsetVZ = Double.parseDouble(phateLineChunks[3])*(inputPath.toLowerCase().contains("n2u")?400000:400000) - (icospherevzMedian);
 			double zScale = 1;
 			String outputObj = "";
 			outputObj = outputObj + "# OBJ File\nmtllib "+mtlFile.getName()+"\ng " + outputTag + "\n";
