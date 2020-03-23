@@ -207,12 +207,13 @@ public abstract class DefaultAnimatableUniverse extends DefaultUniverse {
 			animationTG.setTransform(rotate);
 			fireTransformationUpdated();
 			getCanvas().getView().renderOnce();
-			win.updateImagePlusAndWait();
+			win.updateImagePlus();
 			ip = win.getImagePlus().getProcessor();
 			int w = ip.getWidth(), h = ip.getHeight();
 			if(stack == null)
 				stack = new ImageStack(w, h);
 			stack.addSlice("", ip);
+			IJ.wait(100);
 		}
 
 		// restart the view and animation
