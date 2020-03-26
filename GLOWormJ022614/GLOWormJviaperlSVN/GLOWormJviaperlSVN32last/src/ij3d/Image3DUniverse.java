@@ -229,17 +229,17 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 							if (word >0 && (word)%5==0) {
 								l++;
 							} 
-							if (word == cursorWords.length-1 && cursorWords[word].matches("(.*)(-i\\d+-g\\d+-s\\d+)")) {
+							if (word == cursorWords.length-1 && cursorWords[word].matches("(.*)(-i\\d+-(c|g)\\d+-s\\d+)")) {
 								if (cursorStringCRs[l] == null) {
-									cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)(-i\\d+-g\\d+-s\\d+)", "$1");
+									cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)(-i\\d+-(c|g)\\d+-s\\d+)", "$1");
 									l++;
-									cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)(-i\\d+-g\\d+-s\\d+)", "$2").replace("-", " ")
+									cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)(-i\\d+-(c|g)\\d+-s\\d+)", "$2").replace("-", " ")
 															+ " count=" + cursorWords.length;
 									continue;
 								} else {
-									cursorStringCRs[l] = cursorStringCRs[l] + " "+ cursorWords[word].replaceAll("(.*)(-i\\d+-g\\d+-s\\d+)", "$1");
+									cursorStringCRs[l] = cursorStringCRs[l] + " "+ cursorWords[word].replaceAll("(.*)(-i\\d+-(c|g)\\d+-s\\d+)", "$1");
 									l++;
-									cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)(-i\\d+-g\\d+-s\\d+)", "$2").replace("-", " ")
+									cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)(-i\\d+-(c|g)\\d+-s\\d+)", "$2").replace("-", " ")
 															+ " count=" + cursorWords.length;
 									continue;
 								}

@@ -7271,19 +7271,22 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		double icospherefzMedian = (double)icospherefzs[icospherefzs.length/2];
 
 
-		String inputPath = IJ.getFilePath("Select csv file with PHATE data");
-		String condensationSNpath = IJ.getFilePath("Select csv file with condensation cluster data");
+		String inputPhateCoordinatesPath = IJ.getFilePath("Select csv file with PHATE coordinates data");
+		String clusterAssignmentsPath = IJ.getFilePath("Select csv file with condensation cluster assignment data");
+		String clusterAssignmentsCOMPPath = IJ.getFilePath("!!Select csv file with condensation cluster assignment data to compare!!");
 		String mtlPath = IJ.getFilePath("Select mtl file with color rules");
-		File inputFile = new File(inputPath);
-		File conSNFile = new File(condensationSNpath);
+		File inputFile = new File(inputPhateCoordinatesPath);
+		File clustAsnFile = new File(clusterAssignmentsPath);
 		mtlFile = new File(mtlPath);
 		String outputDir = inputFile.getParent()+File.separator+inputFile.getName().replace(".csv", "")+File.separator;
 		new File(outputDir).mkdirs();
 		IJ.saveString(IJ.openAsString(mtlPath), outputDir+mtlFile.getName());
-		String inputPhateData = IJ.openAsString(inputPath);
-		String[] inputPhateList = inputPhateData.split("\n");
-		String conSNData = IJ.openAsString(condensationSNpath);
-		String[] conSNList = conSNData.split("\n");
+		String inputPhateCoordinatesData = IJ.openAsString(inputPhateCoordinatesPath);
+		String[] inputPhateCoordinatesRows = inputPhateCoordinatesData.split("\n");
+		String clusterAsgnData = IJ.openAsString(clusterAssignmentsPath);
+		String[] clusterAsgnRows = clusterAsgnData.split("\n");
+		String clusterAsgnCOMPData = IJ.openAsString(clusterAssignmentsCOMPPath);
+		String[] clusterAsgnCOMPRows = clusterAsgnCOMPData.split("\n");
 		String[] cellHeaders = null; 
 		int previousMaxSN = -1;
 		int nextMaxSN =0;
@@ -7292,30 +7295,48 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		Hashtable<Integer,String> serialToRosterStringHashtable = new Hashtable<Integer,String>();
 		Hashtable<Integer,ArrayList<String>> serialToRosterArrayHashtable = new Hashtable<Integer,ArrayList<String>>();
 
-		Hashtable<String,Integer[][]> nameToRanksAndSNsHashtable = new Hashtable<String,Integer[][]>();
+		Hashtable<String,Integer[][]> nameToClustersAndSNsHashtable = new Hashtable<String,Integer[][]>();
+		Hashtable<String,Integer[][]> nameToCOMPClustersAndSNsHashtable = new Hashtable<String,Integer[][]>();
+
+		Hashtable<Integer, Double[]> snToCoordsHashtable = new Hashtable<Integer, Double[]>();
+
+		Hashtable<String, Double[]> name_iterationToCoordsHashtable = new Hashtable<String, Double[]>();
 		
-		for(int iteration=0;iteration<conSNList.length;iteration++){
-			String[] csnChunks = conSNList[iteration].split(",");
+		for (String phateCoordsRow:inputPhateCoordinatesRows){
+			if (phateCoordsRow.startsWith("serialNumber") || phateCoordsRow.startsWith(",0,1,2")) 
+				continue;
+			String[] phateCoordsRowChunks = phateCoordsRow.split(",");
+			String serial = phateCoordsRowChunks[0];
+			double x = Double.parseDouble(phateCoordsRowChunks[1]);
+			double y = Double.parseDouble(phateCoordsRowChunks[2]);
+			double z = Double.parseDouble(phateCoordsRowChunks[3]);
+			Double[] coords = {x, y, z};
+			snToCoordsHashtable.put(Integer.parseInt(serial), coords);
+		}
+		
+		for(int iteration=0;iteration<clusterAsgnRows.length;iteration++){
+			String[] clusterAsgnChunks = clusterAsgnRows[iteration].split(",");
 			if (iteration==0){
-				cellHeaders = csnChunks;
+				cellHeaders = clusterAsgnChunks;
 			} else {
 				int maxGroupNum =0;
 				for (int cell=0;cell<cellHeaders.length;cell++){
-					if (nameToRanksAndSNsHashtable.get(cellHeaders[cell]) == null){
-						nameToRanksAndSNsHashtable.put(cellHeaders[cell], new Integer[2][conSNList.length]);
+					if (nameToClustersAndSNsHashtable.get(cellHeaders[cell]) == null){
+						nameToClustersAndSNsHashtable.put(cellHeaders[cell], new Integer[2][clusterAsgnRows.length]);
+						int ipcrl = inputPhateCoordinatesRows.length;
 					}
 					int sn =0;
 					if (iteration==0){
 						sn = previousMaxSN+cell;
 					}else{
-						sn = previousMaxSN+Integer.parseInt(csnChunks[cell]);
+						sn = previousMaxSN+Integer.parseInt(clusterAsgnChunks[cell]);
 					}
 
-					nameToRanksAndSNsHashtable.get(cellHeaders[cell])[0][iteration] = Integer.parseInt(csnChunks[cell]);
-					nameToRanksAndSNsHashtable.get(cellHeaders[cell])[1][iteration] = sn;
+					nameToClustersAndSNsHashtable.get(cellHeaders[cell])[0][iteration] = Integer.parseInt(clusterAsgnChunks[cell]);
+					nameToClustersAndSNsHashtable.get(cellHeaders[cell])[1][iteration] = sn;
+					name_iterationToCoordsHashtable.put(cellHeaders[cell] +"_"+ iteration, snToCoordsHashtable.get(sn));
 
-
-					IJ.log(cellHeaders[cell]+" "+iteration+" "+csnChunks[cell]+" "+sn);
+					IJ.log(cellHeaders[cell]+" "+iteration+" "+clusterAsgnChunks[cell]+" "+sn);
 					if (serialToRosterStringHashtable.get(sn) == null){
 						serialToRosterStringHashtable.put(sn, cellHeaders[cell]);
 						serialToRosterArrayHashtable.put(sn, new ArrayList<String>());
@@ -7327,58 +7348,87 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					if (sn> nextMaxSN){
 						nextMaxSN =sn;
 					}
-					if (iteration>0 && Integer.parseInt(csnChunks[cell]) > maxGroupNum) {
-						maxGroupNum = Integer.parseInt(csnChunks[cell]);
+					if (iteration>0 && Integer.parseInt(clusterAsgnChunks[cell]) > maxGroupNum) {
+						maxGroupNum = Integer.parseInt(clusterAsgnChunks[cell]);
 					}
 				}
-				if (maxGroupNum == 6) {
-					iterationOfSix = iteration;
-				}
-				if (maxGroupNum == 4) {
-					iterationOfFour = iteration;
-				}
-
 				previousMaxSN=nextMaxSN;
 			}
 		}
 
 		
-		Hashtable<String, Integer> clusterColorTable = new Hashtable<String, Integer>();
 		
-		if (inputPath.toLowerCase().contains("n2u")) {
-			for (int cell=0;cell<cellHeaders.length;cell++){
-				String[] csnChunks = conSNList[iterationOfSix].split(",");
-				clusterColorTable.put(cellHeaders[cell], Integer.parseInt(csnChunks[cell]));
+		for(int iteration=0;iteration<clusterAsgnCOMPRows.length;iteration++){
+			String[] clusterAsgnCOMPChunks = clusterAsgnCOMPRows[iteration].split(",");
+			if (iteration==0){
+				cellHeaders = clusterAsgnCOMPChunks;
+			} else {
+				int maxGroupNum =0;
+				for (int cell=0;cell<cellHeaders.length;cell++){
+					if (nameToCOMPClustersAndSNsHashtable.get(cellHeaders[cell]) == null){
+						nameToCOMPClustersAndSNsHashtable.put(cellHeaders[cell], new Integer[2][clusterAsgnRows.length]);
+						int ipcrl = inputPhateCoordinatesRows.length;
+					}
+					int sn =0;
+					if (iteration==0){
+						sn = previousMaxSN+cell;
+					}else{
+						sn = previousMaxSN+Integer.parseInt(clusterAsgnCOMPChunks[cell]);
+					}
+
+					if (iteration<nameToCOMPClustersAndSNsHashtable.get(cellHeaders[cell])[0].length) {
+						nameToCOMPClustersAndSNsHashtable.get(cellHeaders[cell])[0][iteration] = Integer.parseInt(clusterAsgnCOMPChunks[cell]);
+						nameToCOMPClustersAndSNsHashtable.get(cellHeaders[cell])[1][iteration] = sn;
+					}
+					
+					if (iteration>0 && Integer.parseInt(clusterAsgnCOMPChunks[cell]) > maxGroupNum) {
+						maxGroupNum = Integer.parseInt(clusterAsgnCOMPChunks[cell]);
+					}
+					if (maxGroupNum == 6) {
+						iterationOfSix = iteration;
+					}
+					if (maxGroupNum == 4) {
+						iterationOfFour = iteration;
+					}
+				}
 			}
-		} else if (inputPath.toLowerCase().contains("jsh")) {
+		}
+
+		
+		Hashtable<String, Integer> nameKeyclusterTable = new Hashtable<String, Integer>();
+		
+		if (inputPhateCoordinatesPath.toLowerCase().contains("n2u")) {
 			for (int cell=0;cell<cellHeaders.length;cell++){
-				String[] csnChunks = conSNList[iterationOfFour].split(",");
-				clusterColorTable.put(cellHeaders[cell], Integer.parseInt(csnChunks[cell]));
+				nameKeyclusterTable.put(cellHeaders[cell], nameToCOMPClustersAndSNsHashtable.get(cellHeaders[cell])[0][iterationOfSix!=0?iterationOfSix:5]);
+			}
+		} else if (inputPhateCoordinatesPath.toLowerCase().contains("jsh")) {
+			for (int cell=0;cell<cellHeaders.length;cell++){
+				nameKeyclusterTable.put(cellHeaders[cell], nameToCOMPClustersAndSNsHashtable.get(cellHeaders[cell])[0][iterationOfFour!=0?iterationOfFour:iterationOfSix!=0?iterationOfSix:5]);
 			}
 		}
 		
-		for (String phateLine:inputPhateList){
-			if (phateLine.startsWith("serialNumber") || phateLine.startsWith(",0,1,2")) 
+		for (String phateCoordsRow:inputPhateCoordinatesRows){
+			if (phateCoordsRow.startsWith("serialNumber") || phateCoordsRow.startsWith(",0,1,2")) 
 				continue;
-			String[] phateLineChunks = phateLine.split(",");
-			String serial = phateLineChunks[0];
+			String[] phateCoordsRowChunks = phateCoordsRow.split(",");
+			String serial = phateCoordsRowChunks[0];
 
 			
 //			String outputTag = phateLineChunks[5]+"-"+serial;
 			String outputTag = serialToRosterStringHashtable.get(Integer.parseInt(serial));
-			Integer[] groups = nameToRanksAndSNsHashtable.get(outputTag.split("[_-]")[0])[0];
-			Integer[] SNs = nameToRanksAndSNsHashtable.get(outputTag.split("[_-]")[0])[1];
+			Integer[] clusters = nameToClustersAndSNsHashtable.get(outputTag.split("[_-]")[0])[0];
+			Integer[] SNs = nameToClustersAndSNsHashtable.get(outputTag.split("[_-]")[0])[1];
 			int itr = -1;
-			int grp = -1;
+			int cluster = -1;
 			for (int s=1; s<SNs.length; s++) {
 				if (SNs[s] == Integer.parseInt(serial)) {
 					itr = s;
-					grp = groups[s];
+					cluster = clusters[s];
 				}
 			}
-			outputTag = outputTag+"-i"+itr+"-g"+grp+"-s"+serial;
+			outputTag = outputTag+"-i"+itr+"-c"+cluster+"-s"+serial;
 
-			String outputPath = outputDir+inputFile.getName()+".i"+itr+".g"+grp+".s"+serial+"."+outputTag.split("[_-]")[0]+".obj";
+			String outputPath = outputDir+inputFile.getName()+".i"+itr+".c"+cluster+".s"+serial+"."+outputTag.split("[_-]")[0]+".obj";
 			
 			String[] outputSections = icosphereSections;	
 			String[] outputVertices = icosphereVertices;
@@ -7390,9 +7440,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			ArrayList<Double> outputFYs = icosphereFYs;
 			ArrayList<Double> outputFZs = icosphereFZs;
 
-			double offsetVX = Double.parseDouble(phateLineChunks[1])*(inputPath.toLowerCase().contains("n2u")?400000:400000) - (icospherevxMedian);
-			double offsetVY = Double.parseDouble(phateLineChunks[2])*(inputPath.toLowerCase().contains("n2u")?400000:400000) - (icospherevyMedian);
-			double offsetVZ = Double.parseDouble(phateLineChunks[3])*(inputPath.toLowerCase().contains("n2u")?400000:400000) - (icospherevzMedian);
+
+			double offsetVX = snToCoordsHashtable.get(Integer.parseInt(serial))[0]*400000 - (icospherevxMedian);
+			double offsetVY = snToCoordsHashtable.get(Integer.parseInt(serial))[1]*400000 - (icospherevyMedian);
+			double offsetVZ = snToCoordsHashtable.get(Integer.parseInt(serial))[2]*400000 - (icospherevzMedian);
+
+			
 			double zScale = 1;
 			String outputObj = "";
 			outputObj = outputObj + "# OBJ File\nmtllib "+mtlFile.getName()+"\ng " + outputTag + "\n";
@@ -7401,14 +7454,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 									  + " " +(outputVYs.get(i)+offsetVY) 
 									  + " " +(((outputVZs.get(i))*zScale)+offsetVZ) + "\n";
 			}
-//			outputObj = outputObj + "usemtl mat_"+ phateLineChunks[4] ;
+
 			String leadCellName = "";
 			if (outputTag.split("_")[0].contains("-")) {
 				leadCellName = outputTag.split("-")[0];
 			} else {
 				leadCellName = outputTag.split("_")[0];
 			}
-			outputObj = outputObj + "usemtl mat_"+ clusterColorTable.get(leadCellName) ;
+			outputObj = outputObj + "usemtl mat_"+ nameKeyclusterTable.get(leadCellName) ;
 			
 			outputObj = outputObj + "\ns " + outputFacets[0] + "\n";
 			for (int i=0; i<outputFXs.size(); i++){
