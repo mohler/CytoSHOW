@@ -220,10 +220,15 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 						if (IJ.isWindows())
 							cursorString = c.getName().split("( |_)=")[0];
-						Font font = Font.decode("Arial-18");
-						String[] cursorWords = cursorString.replace("_", " ").split(" ");
+						String[] cursorWords = cursorString.replaceAll(("(-i\\d+-(c|g)\\d+-s\\d+)"), "").replace("_", " ").split(" ");
+						Arrays.sort(cursorWords);
+						cursorWords[cursorWords.length-1] = cursorWords[cursorWords.length-1] 
+															+ cursorString.replaceAll(("(.*)(-i\\d+-(c|g)\\d+-s\\d+)"), "$2");
 						int cursorLineCount = cursorWords.length/5 + (cursorWords.length%5==0?0:1) +3;
+						int fontSize = 18-(4*cursorLineCount/18);
+						Font font = Font.decode("Arial-"+(fontSize));
 						String[] cursorStringCRs = new String[cursorLineCount+1] ;
+						cursorStringCRs[0] = "    ";
 						int l =0;
 						for (int word=0; word<cursorWords.length; word=word+1) {
 							if (word >0 && (word)%5==0) {
@@ -244,9 +249,9 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 									continue;
 								}
 							}
-							if (cursorStringCRs[l] == null) 
-								cursorStringCRs[l] = cursorWords[word];
-							else
+							if (cursorStringCRs[l] == null) {
+								cursorStringCRs[l] = cursorStringCRs[l] = cursorWords[word];
+							} else
 								cursorStringCRs[l] = cursorStringCRs[l] + " "+ cursorWords[word];
 						}
 						Point3d pickCenter = new Point3d();
@@ -281,7 +286,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 						//					g2d.drawString(cursorString, 1, img.getHeight(null)-1);
 						for (int line=0; line<cursorStringCRs.length; line++) {
 							if (cursorStringCRs[line]!=null)
-								g2d.drawString(cursorStringCRs[line], 1, (line+1) *18 + 8);
+								g2d.drawString(cursorStringCRs[line], 1, (line+1) * fontSize + 8);
 						}
 						if(true /*IJ.isWindows()*/){
 
