@@ -20,6 +20,7 @@ import ij.plugin.tool.PlugInTool;
 import ij.macro.*;
 import ij.*;
 import ij.util.*;
+import ij3d.ImageCanvas3D;
 import ij3d.ImageWindow3D;
 
 import java.awt.event.*;
@@ -27,6 +28,7 @@ import java.awt.font.FontRenderContext;
 import java.util.*;
 import java.awt.geom.*;
 
+import javax.media.j3d.Canvas3D;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -1479,7 +1481,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		g2d.drawLine(0, 0, 7, 2);
 		g2d.drawLine(0, 0, 8, 8);
 		g2d.drawString(cursorString, 1, img.getHeight(null)-1);
-		this.setCursor(tk.createCustomCursor(img,new Point(0,0),"searchCursor"));
+		Cursor searchCursor = tk.createCustomCursor(img,new Point(0,0),"searchCursor");
+		((Canvas)e.getSource()).setCursor(searchCursor);
 
 
 		boolean getGenes = true /*|| e.getSource() instanceof Checkbox*/;
@@ -1530,7 +1533,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 					&& (imp.getTitle().contains("Sketch3D") 
 							|| sketchyMQTVS);
 
-			boolean ij3dSelection = e.getSource() instanceof ImageWindow3D;
+			boolean ij3dSelection = e.getSource() instanceof ImageCanvas3D;
 			
 			if (rm != null && (labelShapes != null || brainbowSelection || ij3dSelection)) {
 //				Roi[] fullRoisArray = rm.getFullRoisAsArray();
@@ -1581,7 +1584,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				}
 				
 				if (ij3dSelection) {
-					cellName = ((ImageWindow3D)e.getSource()).getUniverse().getSelected().getName().split("-")[0];
+					cellName = ((ImageWindow3D)((ImageCanvas3D)e.getSource())
+							.getParent().getParent().getParent().getParent()).getUniverse().getSelected().getName().split("-")[0];
 				}
 
 				if (sliceRois!=null) {
@@ -1722,6 +1726,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 							cartoonButton.setToolTipText(fCellDescription);
 							cartoonPanel.add(cartoonButton);
 							cartoonPanel.setBackground(Color.white);
+							popup.add(finalCellName);
 							popup.add(cartoonPanel, 1);
 						}
 					}

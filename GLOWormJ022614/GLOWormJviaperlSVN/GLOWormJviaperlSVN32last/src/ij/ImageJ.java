@@ -472,6 +472,7 @@ public class ImageJ extends Frame implements ActionListener,
 							} else if (comp instanceof JPanel) {
 								JPanel compCopy = new JPanel();
 								JButton compCopyButton = new JButton(((JButton)((JPanel)comp).getComponent(0)).getIcon());
+								compCopyButton.setToolTipText(((JButton)(((JPanel)comp).getComponent(0))).getToolTipText());
 								compCopy.add(compCopyButton);
 								fspp.add(compCopy, c);
 								c.gridy++;

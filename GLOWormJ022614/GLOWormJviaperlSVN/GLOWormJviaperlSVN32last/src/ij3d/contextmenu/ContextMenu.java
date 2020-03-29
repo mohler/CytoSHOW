@@ -115,7 +115,7 @@ public class ContextMenu implements ActionListener, ItemListener, ContentConstan
 	public void actionPerformed(ActionEvent e) {
 		Object src = e.getSource();
 		if (src == cellInfo)
-			univ.getWindow().getCanvas().handlePopupMenu(new MouseEvent(univ.getWindow(), 0, 0, 0, clickX, clickY, 1, false));
+			univ.getWindow().getCanvas().handlePopupMenu(new MouseEvent(univ.getCanvas(), 0, 0, 0, clickX, clickY, 1, false));
 		else if (src == updateVol)
 			iJ3dExecuter.updateVolume(content);
 		else if (src == slices)
