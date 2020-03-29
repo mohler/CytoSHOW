@@ -81,6 +81,7 @@ public class WavefrontLoader {
 				readFace();
 			}
 		}
+		in.close();
 		if(name != null && indices.size() > 0) {
 			CustomMesh cm = createCustomMesh();
 			if(cm != null)
