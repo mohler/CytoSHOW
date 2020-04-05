@@ -145,6 +145,9 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 	public JButton sketchVVButton;
 	private JButton flattenTagsButton;
 	public JButton tagsButton;
+	public JButton edgeButton;
+	public JButton sqrtButton;
+	public JButton logButton;
 
 	
 	public ImageWindow(String title) {
@@ -468,20 +471,20 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		fspc.fill = GridBagConstraints.BOTH;
 		
 		if(imp.getStack() instanceof VirtualStack) {
-			JButton logButton = new JButton();
+			logButton = new JButton();
 			logButton.setActionCommand("LogScale");
 			logButton.setName("LogScale");
-			logButton.setToolTipText("Logarithmic Disply Scaling");
+			logButton.setToolTipText("Logarithmic Display Scaling");
 			logButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/LogScale.png")));
 			logButton.addActionListener(ij);
 			viewButtonPanel.add(logButton, fspc);
 			fspc.gridy = y++;
 			fspc.weighty = 0.5;
 			fspc.fill = GridBagConstraints.BOTH;
-			JButton sqrtButton = new JButton();
+			sqrtButton = new JButton();
 			sqrtButton.setActionCommand("SqRtScale");
 			sqrtButton.setName("SqRtScale");
-			sqrtButton.setToolTipText("Sqare Root Disply Scaling");
+			sqrtButton.setToolTipText("Square Root Display Scaling");
 			sqrtButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/SqrtScale.png")));
 			sqrtButton.addActionListener(ij);
 			viewButtonPanel.add(sqrtButton, fspc);
@@ -489,7 +492,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 			fspc.weighty = 0.5;
 			fspc.fill = GridBagConstraints.BOTH;
 		
-			JButton edgeButton = new JButton();
+			edgeButton = new JButton();
 			edgeButton.setActionCommand("Edges");
 			edgeButton.setName("Edges");
 			edgeButton.setToolTipText("Find Edges of Image Features");
@@ -1377,15 +1380,15 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 //	}
 
 	public void actionPerformed(ActionEvent e) {
-		if (e.getActionCommand() == "Edges") {
-			imp.getStack().setEdges(!imp.getStack().isEdges());
-		}
-		if (e.getActionCommand() == "LogScale") {
-			imp.getStack().setLogScale(!imp.getStack().isLogScale());
-		}
-		if (e.getActionCommand() == "SqRtScale") {
-			imp.getStack().setSqRtScale(!imp.getStack().isSqRtScale());
-		}
+//		if (e.getActionCommand() == "Edges") {
+//			imp.getStack().setEdges(!imp.getStack().isEdges());
+//		}
+//		if (e.getActionCommand() == "LogScale") {
+//			imp.getStack().setLogScale(!imp.getStack().isLogScale());
+//		}
+//		if (e.getActionCommand() == "SqRtScale") {
+//			imp.getStack().setSqRtScale(!imp.getStack().isSqRtScale());
+//		}
 	}
 
 
