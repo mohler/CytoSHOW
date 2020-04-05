@@ -1346,6 +1346,12 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 
 			//	ip.doAffineTransform(new AffineTransform(1.075,0.25,0.2,1.075,0,0));
 		}
+		if (logScale) {
+			ip.log();
+		}
+		if (sqrtScale) {
+			ip.sqrt();
+		}
 		return ip;
 	}
 

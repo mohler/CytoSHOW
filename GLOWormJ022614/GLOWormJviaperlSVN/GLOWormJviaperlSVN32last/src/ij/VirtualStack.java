@@ -174,6 +174,12 @@ public class VirtualStack extends ImageStack {
 			ip.findEdges();
 //			ip.doAffineTransform(new AffineTransform(1,0,0,1,0,0));
 		}
+		if (logScale) {
+			ip.log();
+		}
+		if (sqrtScale) {
+			ip.sqrt();
+		}
 		return ip;
 	 }
  

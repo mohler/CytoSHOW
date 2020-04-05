@@ -468,6 +468,27 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		fspc.fill = GridBagConstraints.BOTH;
 		
 		if(imp.getStack() instanceof VirtualStack) {
+			JButton logButton = new JButton();
+			logButton.setActionCommand("LogScale");
+			logButton.setName("LogScale");
+			logButton.setToolTipText("Logarithmic Disply Scaling");
+			logButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/LogScale.png")));
+			logButton.addActionListener(ij);
+			viewButtonPanel.add(logButton, fspc);
+			fspc.gridy = y++;
+			fspc.weighty = 0.5;
+			fspc.fill = GridBagConstraints.BOTH;
+			JButton sqrtButton = new JButton();
+			sqrtButton.setActionCommand("SqRtScale");
+			sqrtButton.setName("SqRtScale");
+			sqrtButton.setToolTipText("Sqare Root Disply Scaling");
+			sqrtButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/SqrtScale.png")));
+			sqrtButton.addActionListener(ij);
+			viewButtonPanel.add(sqrtButton, fspc);
+			fspc.gridy = y++;
+			fspc.weighty = 0.5;
+			fspc.fill = GridBagConstraints.BOTH;
+		
 			JButton edgeButton = new JButton();
 			edgeButton.setActionCommand("Edges");
 			edgeButton.setName("Edges");
@@ -1342,22 +1363,28 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		imp.getWindow().setSize(ic.dstWidth+padH, ic.dstHeight+padV);
 	}
 
-	public void itemStateChanged(ItemEvent e) {
-		if (e.getStateChange() == ItemEvent.SELECTED) {
-			imp.getStack().setEdges(true);
-			imp.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame()+1);
-			imp.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame()-1);
-		}else {
-			imp.getStack().setEdges(false);
-			imp.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame()+1);
-			imp.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame()-1);
-		}
-
-	}
+//	public void itemStateChanged(ItemEvent e) {
+//		if (e.getStateChange() == ItemEvent.SELECTED) {
+//			imp.getStack().setEdges(true);
+//			imp.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame()+1);
+//			imp.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame()-1);
+//		}else {
+//			imp.getStack().setEdges(false);
+//			imp.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame()+1);
+//			imp.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame()-1);
+//		}
+//
+//	}
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getActionCommand() == "Edges") {
 			imp.getStack().setEdges(!imp.getStack().isEdges());
+		}
+		if (e.getActionCommand() == "LogScale") {
+			imp.getStack().setLogScale(!imp.getStack().isLogScale());
+		}
+		if (e.getActionCommand() == "SqRtScale") {
+			imp.getStack().setSqRtScale(!imp.getStack().isSqRtScale());
 		}
 	}
 

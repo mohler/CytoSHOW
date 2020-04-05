@@ -27,6 +27,8 @@ public class ImageStack {
 	private double max;
 	private float[] cTable;
 	protected boolean edges;
+	protected boolean logScale;
+	protected boolean sqrtScale;
 	/** Default constructor. */
 	public ImageStack() { }
 
@@ -614,6 +616,22 @@ public class ImageStack {
 
 	public void setEdges(boolean edges) {
 		this.edges = edges;
+	}
+
+	public boolean isLogScale() {
+		return logScale;
+	}
+
+	public void setLogScale(boolean logScale) {
+		this.logScale = logScale;
+	}
+
+	public boolean isSqRtScale() {
+		return sqrtScale;
+	}
+
+	public void setSqRtScale(boolean sqrtScale) {
+		this.sqrtScale = sqrtScale;
 	}
 
 }
