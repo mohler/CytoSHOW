@@ -393,7 +393,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //		addPopupItem("Plot phate spheres to coords");
 //		addPopupItem("Plot MK c-phate icospheres to coords");
 		addPopupItem("Plot AG c-phate icospheres to coords");
-//		addPopupItem("fixcrap");
+		addPopupItem("fixcrappynames");
 		add(pm);
 	}
 
@@ -970,8 +970,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			else if (command.equals("Plot AG c-phate icospheres to coords")) {
 				plotAlexFmtPhateObjsToCoordsIcospheres();
 			}
-			else if (command.equals("fixcrap")) {
-				fixdamnJSHs();
+			else if (command.equals("fixcrappynames")) {
+				fixdamnRedundantNames();
 			}
 
 			this.imp.getCanvas().requestFocus();
@@ -7852,4 +7852,119 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			IJ.saveString(IJ.openAsString(dir+name).replaceAll(",(\\d,)", ",JSH00$1").replaceAll(",(\\d\\d,)", ",JSH0$1").replaceAll(",(\\d\\d\\d,)", ",JSH$1"), dir+name);
 		}
 	}
+	
+	void fixdamnRedundantNames() {
+//		String input = 	IJ.getFilePath("SpazzyFile?");
+		String inputDir = 	IJ.getDirectory("SpazzyFileFolder?")+File.separator;
+		File inputDirFile = new File(inputDir);
+		String[] inputDirFileList = inputDirFile.list();
+		for (String input:inputDirFileList) {
+			File inputFile = new File(input);
+			//		String inputDir = inputFile.getParent() +"/";
+			String inputName = inputFile.getName();
+			String inputRoot = inputName.replaceAll("(.*)(\\....)", "$1");
+
+			IJ.log(input);
+			IJ.log(inputRoot);
+
+			String lrss = longestStutteredSubstring(inputRoot);
+			IJ.log(lrss);
+			String inputRootFixed = inputRoot.replace(lrss+lrss,lrss).replace("SketchVolumeViewer_", "");
+			IJ.log(inputRootFixed);
+			IJ.log(inputDir+inputRootFixed);
+			IJ.saveString(IJ.openAsString(inputDir+input).replace(inputRoot, inputRootFixed), inputDir+inputRootFixed+".obj");
+		}
+	}
+	
+	String longestRepeatedSubstring(String str) { 
+		int n = str.length(); 
+		int LCSRe[][] = new int[n + 1][n + 1]; 
+
+		String res = ""; // To store result 
+		int res_length = 0; // To store length of result 
+
+		// building table in bottom-up manner 
+		int i, index = 0; 
+		for (i = 1; i <= n; i++) { 
+			for (int j = i + 1; j <= n; j++) { 
+				// (j-i) > LCSRe[i-1][j-1] to remove 
+				// overlapping 
+				if (str.charAt(i - 1) == str.charAt(j - 1) 
+						&& LCSRe[i - 1][j - 1] < (j - i)) { 
+					LCSRe[i][j] = LCSRe[i - 1][j - 1] + 1; 
+
+					// updating maximum length of the 
+					// substring and updating the finishing 
+					// index of the suffix 
+					if (LCSRe[i][j] > res_length) { 
+						res_length = LCSRe[i][j]; 
+						index = Math.max(i, index); 
+					} 
+				} else { 
+					LCSRe[i][j] = 0; 
+				} 
+			} 
+		} 
+
+		// If we have non-empty result, then insert all 
+		// characters from first character to last 
+		// character of String 
+		if (res_length > 0) { 
+			for (i = index - res_length + 1; i <= index; i++) { 
+				res += str.charAt(i - 1); 
+			} 
+		} 
+
+		return res; 
+	} 
+
+	String longestStutteredSubstring(String str) { 
+		int n = str.length(); 
+		int LCSRe[][] = new int[n + 1][n + 1]; 
+
+		String res = ""; // To store result 
+		int res_length = 0; // To store length of result 
+
+		// building table in bottom-up manner 
+		int i, index = 0; 
+		for (i = 1; i <= n; i++) { 
+			for (int j = i + 1; j <= n; j++) { 
+				// (j-i) > LCSRe[i-1][j-1] to remove 
+				// overlapping 
+				if (str.charAt(i - 1) == str.charAt(j - 1) 
+						&& LCSRe[i - 1][j - 1] < (j - i)) { 
+					LCSRe[i][j] = LCSRe[i - 1][j - 1] + 1; 
+
+					// updating maximum length of the 
+					// substring and updating the finishing 
+					// index of the suffix 
+					if (LCSRe[i][j] > res_length) { 
+						res_length = LCSRe[i][j]; 
+						index = Math.max(i, index); 
+					} 
+				} else { 
+					LCSRe[i][j] = 0; 
+				} 
+			} 
+		} 
+
+		// If we have non-empty result, then insert all 
+		// characters from first character to last 
+		// character of String 
+		if (res_length > 0) { 
+			for (i = index - res_length + 1; i <= index; i++) { 
+				res += str.charAt(i - 1); 
+			} 
+		} 
+		
+		if (str.contains(res+res)) {
+
+			return res; 
+		
+		} else {
+			return "";
+		}
+		
+	} 
+
 }
