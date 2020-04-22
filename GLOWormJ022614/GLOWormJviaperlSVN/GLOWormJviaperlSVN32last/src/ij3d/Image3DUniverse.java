@@ -215,23 +215,33 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 					Toolkit tk = Toolkit.getDefaultToolkit();
 					if(c != null) {
 						IJ.showStatus(c.getName().split("( |_)=")[0]);
-						cursorString = c.getName().split("( |_)=")[0];
+						cursorString = c.getName().replace("electrical", "_electrical_")
+													.replace("chemical", "_chemical_")
+													.replace("certain", "")
+													.replace("uncertain", "")
+													.split("( |_)=")[0];
 
 
 						if (IJ.isWindows())
-							cursorString = c.getName().split("( |_)=")[0];
+							cursorString = c.getName().replace("electrical", "_electrical_")
+							.replace("chemical", "_chemical_")
+							.replace("certain", "")
+							.replace("uncertain", "")
+							.split("( |_)=")[0];
+
 						String[] cursorWords = cursorString.replaceAll(("(-i\\d+-(c|g)\\d+-s\\d+)"), "").replace("_", " ").split(" ");
-						Arrays.sort(cursorWords);
-						cursorWords[cursorWords.length-1] = cursorWords[cursorWords.length-1] 
-															+ cursorString.replaceAll(("(.*)(-i\\d+-(c|g)\\d+-s\\d+)"), "$2");
-						int cursorLineCount = cursorWords.length/5 + (cursorWords.length%5==0?0:1) +3;
+//						Arrays.sort(cursorWords);
+						cursorWords[cursorWords.length-1] = cursorWords[cursorWords.length-1] ;
+//															+ cursorString.replaceAll(("(.*)(-i\\d+-(c|g)\\d+-s\\d+)"), "$2");
+						int wordsPerRow = (cursorString.contains("chemical")||cursorString.contains("electrical"))?3:5;
+						int cursorLineCount = cursorWords.length/wordsPerRow + (cursorWords.length%3==0?0:1) +wordsPerRow;
 						int fontSize = 18-(4*cursorLineCount/18);
 						Font font = Font.decode("Arial-"+(fontSize));
 						String[] cursorStringCRs = new String[cursorLineCount+1] ;
 						cursorStringCRs[0] = "    ";
 						int l =0;
 						for (int word=0; word<cursorWords.length; word=word+1) {
-							if (word >0 && (word)%5==0) {
+							if (word >0 && (word)%wordsPerRow==0) {
 								l++;
 							} 
 							if (word == cursorWords.length-1 && cursorWords[word].matches("(.*)(-i\\d+-(c|g)\\d+-s\\d+)")) {
@@ -250,7 +260,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 								}
 							}
 							if (cursorStringCRs[l] == null) {
-								cursorStringCRs[l] = cursorStringCRs[l] = cursorWords[word];
+								cursorStringCRs[l] = cursorWords[word];
 							} else
 								cursorStringCRs[l] = cursorStringCRs[l] + " "+ cursorWords[word];
 						}
