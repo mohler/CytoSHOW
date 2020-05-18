@@ -7304,9 +7304,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		String clusterAsgnCOMPData = IJ.openAsString(clusterAssignmentsCOMPPath);
 		String[] clusterAsgnCOMPRows = clusterAsgnCOMPData.split("\n");
 		String[] cellHeaders = null; 
-		String cellNamesFromMeiLabData = IJ.openAsString(cellNamesFromMeiLabPath);
-		String[] cellNamesFromMeiLabRows = cellNamesFromMeiLabData.split("\n");
+		String cellNamesFromMeiLabData;
+		String[] cellNamesFromMeiLabRows = null;
 		String[] cellNames = null; 
+		if (cellNamesFromMeiLabPath!=null) {
+			cellNamesFromMeiLabData = IJ.openAsString(cellNamesFromMeiLabPath);
+			cellNamesFromMeiLabRows = cellNamesFromMeiLabData.split("\n");
+			cellNames = null; 
+		}
 
 		int previousMaxSN = -1;
 		int nextMaxSN =0;
@@ -7337,17 +7342,19 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			snToCoordsHashtable.put(Integer.parseInt(serial), coords);
 		}
 		
-		for (String cellNamesFromMeiLabRow:cellNamesFromMeiLabRows){
-			if (cellNamesFromMeiLabRow.startsWith("%") || cellNamesFromMeiLabRow.equals("") || cellNamesFromMeiLabRow.startsWith("0")) {
-				continue;
-			}
-			String[] cellNamesFromMeiLabRowChunks = cellNamesFromMeiLabRow.split(" ");
-			String serialNumber = cellNamesFromMeiLabRowChunks[0];
-			String name = cellNamesFromMeiLabRowChunks[40];
-			
-			meiSNtoNameHashtable.put(serialNumber, name);
-		}
+		if (cellNamesFromMeiLabPath!=null) {
+			for (String cellNamesFromMeiLabRow:cellNamesFromMeiLabRows){
 
+				if (cellNamesFromMeiLabRow.startsWith("%") || cellNamesFromMeiLabRow.equals("") || cellNamesFromMeiLabRow.startsWith("0")) {
+					continue;
+				}
+				String[] cellNamesFromMeiLabRowChunks = cellNamesFromMeiLabRow.split(" ");
+				String serialNumber = cellNamesFromMeiLabRowChunks[0];
+				String name = cellNamesFromMeiLabRowChunks[40];
+
+				meiSNtoNameHashtable.put(serialNumber, name);
+			}
+		}
 		
 		for(int iteration=0;iteration<clusterAsgnRows.length;iteration++){
 			String[] clusterAsgnChunks = clusterAsgnRows[iteration].split(",");
@@ -7358,8 +7365,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				int maxGroupNum =0;
 				for (int cell=0;cell<cellHeaders.length;cell++){
 					String cellName = cellHeaders[cell].split("_")[0];
-					cellName = meiSNtoNameHashtable.get(cellName.replace("Label ", "")).replace("\"", "");
-
+					if (cellNamesFromMeiLabPath!=null) {
+						cellName = meiSNtoNameHashtable.get(cellName.replace("Label ", "")).replace("\"", "").replace("-", "");
+					}
 					if (nameToClustersAndSNsHashtable.get(cellName) == null){
 						nameToClustersAndSNsHashtable.put(cellName, new Integer[2][clusterAsgnRows.length]);
 						int ipcrl = inputPhateCoordinatesRows.length;
@@ -7462,8 +7470,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			
 //			String outputTag = phateLineChunks[5]+"-"+serial;
 			String outputTag = serialToRosterStringHashtable.get(Integer.parseInt(serial));
-			Integer[] clusters = nameToClustersAndSNsHashtable.get(outputTag.split("[_]")[0])[0];
-			Integer[] SNs = nameToClustersAndSNsHashtable.get(outputTag.split("[_]")[0])[1];
+			Integer[] clusters = null;
+			Integer[] SNs = null;
+			if (cellNamesFromMeiLabPath==null) {
+				clusters = nameToClustersAndSNsHashtable.get(outputTag.split("[_-]")[0])[0];
+				SNs = nameToClustersAndSNsHashtable.get(outputTag.split("[_-]")[0])[1];
+			} else if (cellNamesFromMeiLabPath!=null) {
+				clusters = nameToClustersAndSNsHashtable.get(outputTag.split("[_-]")[0])[0];
+				SNs = nameToClustersAndSNsHashtable.get(outputTag.split("[_-]")[0])[1];				
+			}
 			int itr = -1;
 			int cluster = -1;
 			for (int s=1; s<SNs.length; s++) {

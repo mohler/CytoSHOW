@@ -230,9 +230,9 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 							.split("( |_)=")[0];
 
 						String[] cursorWords = cursorString.replaceAll(("(-i\\d+-(c|g)\\d+-s\\d+)"), "").replace("_", " ").split(" ");
-//						Arrays.sort(cursorWords);
-						cursorWords[cursorWords.length-1] = cursorWords[cursorWords.length-1] ;
-//															+ cursorString.replaceAll(("(.*)(-i\\d+-(c|g)\\d+-s\\d+)"), "$2");
+						Arrays.sort(cursorWords);
+						cursorWords[cursorWords.length-1] = cursorWords[cursorWords.length-1] 
+															+ cursorString.replaceAll(("(.*)(-i\\d+-(c|g)\\d+-s\\d+)"), "$2");
 						int wordsPerRow = (cursorString.contains("chemical")||cursorString.contains("electrical"))?3:5;
 						int cursorLineCount = cursorWords.length/wordsPerRow + (cursorWords.length%3==0?0:1) +wordsPerRow;
 						int fontSize = 18-(4*cursorLineCount/18);

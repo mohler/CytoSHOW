@@ -114,6 +114,7 @@ import javax.swing.filechooser.*;
 			{Macro.abort(); return;}
 		name = file.getName();
 		dir = fc.getCurrentDirectory().getPath()+File.separator;
+		setDefaultDirectory(dir);
 	}
 
 	// Run JFileChooser on event dispatch thread to avoid deadlocks
@@ -138,6 +139,7 @@ import javax.swing.filechooser.*;
 					{Macro.abort(); return;}
 				name = file.getName();
 				dir = fc.getCurrentDirectory().getPath()+File.separator;
+				setDefaultDirectory(dir);
 				}
 			});
 		} catch (Exception e) {}
