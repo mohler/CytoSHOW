@@ -7285,11 +7285,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		Arrays.sort(icospherefzs);
 		double icospherefzMedian = (double)icospherefzs[icospherefzs.length/2];
 
-
+		IJ.log("Select csv file with PHATE coordinates data");
 		String inputPhateCoordinatesPath = IJ.getFilePath("Select csv file with PHATE coordinates data");
+		IJ.log("Select csv file with condensation cluster assignment data");
 		String clusterAssignmentsPath = IJ.getFilePath("Select csv file with condensation cluster assignment data");
+		IJ.log("!!Select csv file with condensation cluster assignment data to compare!!");
 		String clusterAssignmentsCOMPPath = IJ.getFilePath("!!Select csv file with condensation cluster assignment data to compare!!");
+		IJ.log("Select Mei Lab metadata for naming");
 		String cellNamesFromMeiLabPath = IJ.getFilePath("Select Mei Lab metadata for naming");
+		IJ.log("Select mtl file with color rules");
 		String mtlPath = IJ.getFilePath("Select mtl file with color rules");
 		File inputFile = new File(inputPhateCoordinatesPath);
 		File clustAsnFile = new File(clusterAssignmentsPath);
