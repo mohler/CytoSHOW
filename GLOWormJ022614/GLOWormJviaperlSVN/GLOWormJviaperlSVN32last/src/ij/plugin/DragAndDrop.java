@@ -520,6 +520,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 										Image3DUniverse i3duniv = (Image3DUniverse)((ImageWindow3D)frame).getUniverse();
 										i3duniv.setAutoAdjustView(false);
 										ij3dv.setUniv(i3duniv);
+
 									}
 								}
 							}
@@ -538,6 +539,81 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 
 							freshDrop = false;
 							
+							File file = new File(path) ;
+							BufferedReader in = null;
+							PrintWriter out = null;
+
+							
+							if (path.startsWith("/Volumes/GLOWORM_DATA/")
+									|| path.contains("\\GLOWORM_DATA\\")) {	
+
+								File cacheFile = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+path);
+								if (!(new File(cacheFile.getParent())).canWrite()) {
+									//Crappy loop seems necessary for windows...							
+									while (!(new File(cacheFile.getParent())).mkdirs()) { 
+										while (!(new File(new File(cacheFile.getParent()).getParent())).mkdirs()) {
+											while (!(new File(new File(new File(cacheFile.getParent()).getParent()).getParent())).mkdirs()) {
+												while (!(new File(new File(new File(new File(cacheFile.getParent()).getParent()).getParent()).getParent()).mkdirs())) {
+
+												}
+											}
+										}
+									}
+								}
+								if (cacheFile.canRead()) {
+									try {
+										in = new BufferedReader(new FileReader(cacheFile));
+									} catch (FileNotFoundException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+								}else {
+									in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
+											RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replace(".obj", ".mtl").replaceAll("%2B", "\\+").replaceAll("%25", "%").replace("|", "")))));
+									try {
+										out = new PrintWriter(
+												new BufferedWriter(
+														new FileWriter(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path.replace(".obj", ".mtl")) ), true);
+										String line = "";
+										if (line != null) {
+											while (line != null && !line.contains("End of parameter list")) {
+												line = in.readLine();
+												if (out!=null)
+													out.println(line);
+											}
+										}
+										out.close();
+									} catch (IOException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+
+									
+									in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
+											RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replaceAll("%2B", "\\+").replaceAll("%25", "%").replace("|", "")))));
+									try {
+										out = new PrintWriter(
+												new BufferedWriter(
+														new FileWriter(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path) ), true);
+										String line = "";
+										if (line != null) {
+											while (line != null && !line.contains("End of parameter list")) {
+												line = in.readLine();
+												if (out!=null)
+													out.println(line);
+											}
+										}
+										out.close();
+										obj = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path);
+									} catch (IOException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+								}
+							} else {
+
+							}
+							
 							try {
 								ImageJ3DViewer.importContent(((File)obj).getPath());
 							} catch (Exception e) {
@@ -545,7 +621,6 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 								ImageJ3DViewer.importContent(((File)obj).getPath());
 							}
 							ImageJ3DViewer.lock();
-
 
 						} else {
 							imp = new Opener().openURL((String)obj);
@@ -1107,6 +1182,82 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 
 					freshDrop = false;
 					
+					String path = (String)obj;
+					File file = new File(path) ;
+					BufferedReader in = null;
+					PrintWriter out = null;
+
+					
+					if (path.startsWith("/Volumes/GLOWORM_DATA/")
+							|| path.contains("\\GLOWORM_DATA\\")) {	
+
+						File cacheFile = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+path);
+						if (!(new File(cacheFile.getParent())).canWrite()) {
+							//Crappy loop seems necessary for windows...							
+							while (!(new File(cacheFile.getParent())).mkdirs()) { 
+								while (!(new File(new File(cacheFile.getParent()).getParent())).mkdirs()) {
+									while (!(new File(new File(new File(cacheFile.getParent()).getParent()).getParent())).mkdirs()) {
+										while (!(new File(new File(new File(new File(cacheFile.getParent()).getParent()).getParent()).getParent()).mkdirs())) {
+
+										}
+									}
+								}
+							}
+						}
+						if (cacheFile.canRead()) {
+							try {
+								in = new BufferedReader(new FileReader(cacheFile));
+							} catch (FileNotFoundException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}else {
+							in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
+									RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replace(".obj", ".mtl").replaceAll("%2B", "\\+").replaceAll("%25", "%").replace("|", "")))));
+							try {
+								out = new PrintWriter(
+										new BufferedWriter(
+												new FileWriter(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path.replace(".obj", ".mtl")) ), true);
+								String line = "";
+								if (line != null) {
+									while (line != null && !line.contains("End of parameter list")) {
+										line = in.readLine();
+										if (out!=null)
+											out.println(line);
+									}
+								}
+								out.close();
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+
+							
+							in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
+									RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replaceAll("%2B", "\\+").replaceAll("%25", "%").replace("|", "")))));
+							try {
+								out = new PrintWriter(
+										new BufferedWriter(
+												new FileWriter(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path) ), true);
+								String line = "";
+								if (line != null) {
+									while (line != null && !line.contains("End of parameter list")) {
+										line = in.readLine();
+										if (out!=null)
+											out.println(line);
+									}
+								}
+								out.close();
+								obj = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path);
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+					} else {
+
+					}
+					
 					try {
 						ImageJ3DViewer.importContent(new File((String) obj).getPath());
 					} catch (Exception e) {
@@ -1323,6 +1474,82 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 				}
 
 				freshDrop = false;
+				
+				String path = ((File) obj).getPath();
+				File file = new File(path) ;
+				BufferedReader in = null;
+				PrintWriter out = null;
+
+				
+				if (path.startsWith("/Volumes/GLOWORM_DATA/")
+						|| path.contains("\\GLOWORM_DATA\\")) {	
+
+					File cacheFile = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+path);
+					if (!(new File(cacheFile.getParent())).canWrite()) {
+						//Crappy loop seems necessary for windows...							
+						while (!(new File(cacheFile.getParent())).mkdirs()) { 
+							while (!(new File(new File(cacheFile.getParent()).getParent())).mkdirs()) {
+								while (!(new File(new File(new File(cacheFile.getParent()).getParent()).getParent())).mkdirs()) {
+									while (!(new File(new File(new File(new File(cacheFile.getParent()).getParent()).getParent()).getParent()).mkdirs())) {
+
+									}
+								}
+							}
+						}
+					}
+					if (cacheFile.canRead()) {
+						try {
+							in = new BufferedReader(new FileReader(cacheFile));
+						} catch (FileNotFoundException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}else {
+						in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
+								RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replace(".obj", ".mtl").replaceAll("%2B", "\\+").replaceAll("%25", "%").replace("|", "")))));
+						try {
+							out = new PrintWriter(
+									new BufferedWriter(
+											new FileWriter(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path.replace(".obj", ".mtl")) ), true);
+							String line = "";
+							if (line != null) {
+								while (line != null && !line.contains("End of parameter list")) {
+									line = in.readLine();
+									if (out!=null)
+										out.println(line);
+								}
+							}
+							out.close();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+
+						
+						in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
+								RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replaceAll("%2B", "\\+").replaceAll("%25", "%").replace("|", "")))));
+						try {
+							out = new PrintWriter(
+									new BufferedWriter(
+											new FileWriter(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path) ), true);
+							String line = "";
+							if (line != null) {
+								while (line != null && !line.contains("End of parameter list")) {
+									line = in.readLine();
+									if (out!=null)
+										out.println(line);
+								}
+							}
+							out.close();
+							obj = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				} else {
+
+				}
 				
 				try {
 					ImageJ3DViewer.importContent(((File)obj).getPath());
