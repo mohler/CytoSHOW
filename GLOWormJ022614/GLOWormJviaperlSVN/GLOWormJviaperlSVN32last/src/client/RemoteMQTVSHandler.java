@@ -6,6 +6,7 @@ import ij.ImageJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.VirtualStack;
+import ij.plugin.DragAndDrop;
 import ij.plugin.frame.ColorLegend;
 import ij.plugin.frame.RoiManager;
 import ij.process.ByteProcessor;
@@ -214,14 +215,18 @@ public class RemoteMQTVSHandler {
 		} 
 
 		if (moviePathNames.length>0) {
-			try {
-				remoteImpID = compQ.setUpMovie(moviePathNames, movieSlices, Integer.parseInt(args[0].split(":")[1])+Integer.parseInt(args[1]), rcsPrX);
-			} catch (NumberFormatException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (RemoteException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
+			if (moviePathNames[0].contains(".obj")) {
+				return;
+			} else {
+				try {
+					remoteImpID = compQ.setUpMovie(moviePathNames, movieSlices, Integer.parseInt(args[0].split(":")[1])+Integer.parseInt(args[1]), rcsPrX);
+				} catch (NumberFormatException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (RemoteException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 		}
 		if (remoteImpID == 0) {
