@@ -44,7 +44,7 @@ public class StrictPaster {
           noncongruent geometrically.  Automatically true if either
           is null.*/
 	//**/IJ.write((roi1 == null) + " " + (roi2 == null));
-	Rectangle rect1, rect2;
+	Rectangle rect1 = null, rect2;
 	return (((roi1 == null) || (roi2 == null)) ||
 		!roi1.getClass().equals(roi2.getClass()) ||
 		((roi1 instanceof PolygonRoi)?

@@ -16,7 +16,6 @@ import java.util.Date;
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 
-import javafx.scene.control.Spinner;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;

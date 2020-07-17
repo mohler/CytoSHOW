@@ -49,8 +49,6 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import com.sun.scenario.effect.impl.prism.ps.PPSInvertMaskPeer;
-
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImageJ;
