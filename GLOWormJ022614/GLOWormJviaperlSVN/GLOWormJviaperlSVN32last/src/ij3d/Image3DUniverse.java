@@ -1591,8 +1591,10 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 * Syncs this window.
 	 */
 	public void sync(boolean b) {
-		if(b)
+		if(b) {
+			setContentTfmsAndResetView();
 			synchronizer.addUniverse(this);
+		}
 		else
 			synchronizer.removeUniverse(this);
 	}
@@ -1610,7 +1612,44 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	public void loadView(final String file) throws IOException {
 		SaveSession.loadView(this, file);
 	}
+	
+	/**
+	 * Records current view transform, then does resetView.  Sets all contents to the recorded view transform.
+	 * Desired effect is to reposition default view for corrected synching, eg.
+	 */
 
+	public void setContentTfmsAndResetView() {
+		//NO IDEA WHY, but the resetView() method assigns this weird insideout identity matrix...
+		double[] resetTransformMatrix = new double[]{1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
+
+		fireTransformationStarted();
+		Transform3D t1 = new Transform3D();
+		this.getRotationTG().getTransform(t1);
+		IJ.log("t1 \n"+ t1.toString()+"\n");
+
+		resetView();
+		double[] univTransformMatrix = new double[16];
+		t1.get(univTransformMatrix);
+
+		double[] contentTransformMatrix = new double[16];
+		for (int i =0; i<16; i++) {
+				contentTransformMatrix[i] = univTransformMatrix[15-i];
+		}
+		Transform3D contentTransform = new Transform3D(contentTransformMatrix);
+		IJ.log("contentTransform \n"+ contentTransform.toString()+"\n");
+
+		for (Object o: getContents()) {
+			Content c = ((Content)o);
+			c.setTransform(contentTransform);
+		}
+		
+		this.getRotationTG().setTransform(t1);
+		
+		fireTransformationUpdated();
+		fireTransformationFinished();
+//		resetView();
+	}
+	
 	/**
 	 * Reset the transformations of the view side of the scene graph
 	 * as if the Contents of this universe were just displayed.
