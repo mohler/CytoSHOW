@@ -191,6 +191,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		BranchGroup bg = new BranchGroup();
 		scene.addChild(bg);
 
+		flipViewAroundX();
 		resetView();
 
 		contextmenu = new ContextMenu(this);
@@ -1619,8 +1620,6 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 */
 
 	public void setContentTfmsAndResetView() {
-		//NO IDEA WHY, but the resetView() method assigns this weird insideout identity matrix...
-		double[] resetTransformMatrix = new double[]{1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, -1.0, 1.0, 1.0, 1.0, 1.0, 1.0};
 
 		fireTransformationStarted();
 		Transform3D t1 = new Transform3D();
@@ -1630,24 +1629,27 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		resetView();
 		double[] univTransformMatrix = new double[16];
 		t1.get(univTransformMatrix);
+		double[][] univTransformMatrix4x4 = new double[4][4];
+		for (int i =0; i<16; i++) {
+			 univTransformMatrix4x4[i/4][i%4] = univTransformMatrix[i] ;
+		}
 
+		//WOW, APPARENTLY NEED TO TRANSPOSE BEFORE APPLYING TO CONTENT...NOT SURE WHY!?
 		double[] contentTransformMatrix = new double[16];
 		for (int i =0; i<16; i++) {
-				contentTransformMatrix[i] = univTransformMatrix[15-i];
+				contentTransformMatrix[i] = univTransformMatrix4x4[i%4][i/4];
 		}
+		
+		
 		Transform3D contentTransform = new Transform3D(contentTransformMatrix);
 		IJ.log("contentTransform \n"+ contentTransform.toString()+"\n");
 
 		for (Object o: getContents()) {
 			Content c = ((Content)o);
-			c.setTransform(contentTransform);
+			c.applyTransform(contentTransform);
 		}
-		
-		this.getRotationTG().setTransform(t1);
-		
 		fireTransformationUpdated();
 		fireTransformationFinished();
-//		resetView();
 	}
 	
 	/**
@@ -1655,6 +1657,31 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 * as if the Contents of this universe were just displayed.
 	 */
 	public void resetView() {
+		fireTransformationStarted();
+
+		// rotate so that y shows downwards
+		Transform3D t = new Transform3D();
+		AxisAngle4d aa = new AxisAngle4d(1, 0, 0, 0);
+		t.set(aa);
+		getRotationTG().setTransform(t);
+
+		t.setIdentity();
+		getTranslateTG().setTransform(t);
+		getZoomTG().setTransform(t);
+		recalculateGlobalMinMax();
+		getViewPlatformTransformer().centerAt(globalCenter);
+		// reset zoom
+		double d = oldRange / Math.tan(Math.PI/8);
+		getViewPlatformTransformer().zoomTo(d);
+		fireTransformationUpdated();
+		fireTransformationFinished();
+	}
+
+	/**
+	 * Flips the transformations of the view side of the scene graph
+	 * so the Contents of this universe are rightsideup.
+	 */
+	public void flipViewAroundX() {
 		fireTransformationStarted();
 
 		// rotate so that y shows downwards
