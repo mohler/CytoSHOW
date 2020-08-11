@@ -54,6 +54,7 @@ import java.util.concurrent.Future;
 
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Canvas3D;
+import javax.media.j3d.PointLight;
 import javax.media.j3d.Switch;
 import javax.media.j3d.Transform3D;
 import javax.swing.JCheckBoxMenuItem;
@@ -191,7 +192,6 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		BranchGroup bg = new BranchGroup();
 		scene.addChild(bg);
 
-		flipViewAroundX();
 		resetView();
 
 		contextmenu = new ContextMenu(this);
@@ -1626,7 +1626,11 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		this.getRotationTG().getTransform(t1);
 		IJ.log("t1 \n"+ t1.toString()+"\n");
 
-		resetView();
+		Transform3D t = new Transform3D();
+		AxisAngle4d aa = new AxisAngle4d(1, 0, 0, 0);
+		t.set(aa);
+		getRotationTG().setTransform(t);
+
 		double[] univTransformMatrix = new double[16];
 		t1.get(univTransformMatrix);
 		double[][] univTransformMatrix4x4 = new double[4][4];
@@ -1659,49 +1663,63 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	public void resetView() {
 		fireTransformationStarted();
 
-		// rotate so that y shows downwards
-		Transform3D t = new Transform3D();
-		AxisAngle4d aa = new AxisAngle4d(1, 0, 0, 0);
-		t.set(aa);
-		getRotationTG().setTransform(t);
+		reflectThruYZ();
 
-		t.setIdentity();
+		Transform3D t = new Transform3D();
+
+		getRotationTG().getTransform(t);
+
+		IJ.log("t \n"+ t.toString()+"\n");
+
+//		t.setIdentity();
 		getTranslateTG().setTransform(t);
-		getZoomTG().setTransform(t);
 		recalculateGlobalMinMax();
 		getViewPlatformTransformer().centerAt(globalCenter);
-		// reset zoom
+//		// reset zoom
 		double d = oldRange / Math.tan(Math.PI/8);
+		
 		getViewPlatformTransformer().zoomTo(d);
+		Transform3D z = new Transform3D();
+		this.getZoomTG().getTransform(z);
+//		getZoomTG().setTransform(z);
+		IJ.log("z \n"+ z.toString()+"\n");
+		
 		fireTransformationUpdated();
 		fireTransformationFinished();
+		
 	}
 
 	/**
-	 * Flips the transformations of the view side of the scene graph
-	 * so the Contents of this universe are rightsideup.
+	 * Reflect universe thru YZ plane
 	 */
-	public void flipViewAroundX() {
-		fireTransformationStarted();
+	public void reflectThruYZ() {
 
-		// rotate so that y shows downwards
-		Transform3D t = new Transform3D();
-		AxisAngle4d aa = new AxisAngle4d(1, 0, 0, Math.PI);
-		t.set(aa);
-		getRotationTG().setTransform(t);
+		Transform3D t1 = new Transform3D();
+		this.getRotationTG().getTransform(t1);
+		IJ.log("t1 \n"+ t1.toString()+"\n");
 
-		t.setIdentity();
-		getTranslateTG().setTransform(t);
-		getZoomTG().setTransform(t);
-		recalculateGlobalMinMax();
-		getViewPlatformTransformer().centerAt(globalCenter);
-		// reset zoom
-		double d = oldRange / Math.tan(Math.PI/8);
-		getViewPlatformTransformer().zoomTo(d);
-		fireTransformationUpdated();
-		fireTransformationFinished();
+		t1.mul(t1, new Transform3D(new double[]{-1.0, 0.0, 0.0, 0.0,
+		                                  	0.0, 1.0, 0.0, 0.0,
+		                                  	0.0, 0.0, 1.0, 0.0,
+		                                  	0.0, 0.0, 0.0, 1.0}));
+		
+		oldRange = -oldRange;
+		
+		IJ.log("t2 \n"+ t1.toString()+"\n");
+
+		this.getRotationTG().setTransform(t1);
+		
+		Transform3D z1 = new Transform3D();
+		this.getZoomTG().getTransform(z1);
+		IJ.log("z1 \n"+ z1.toString()+"\n");
+
+		Point3f lpos = new Point3f();
+		getLight().getPosition(lpos);	
+		IJ.log(lpos.toString());
 	}
-
+	
+	
+	
 	/**
 	 * Rotate the universe, using the given axis of rotation and angle;
 	 * The center of rotation is the global center.
@@ -1913,6 +1931,13 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			updateStartAndEndTime(st, e);
 
 			this.scene.addChild(c);
+			
+			//ADDED THIS TO MAKE resetView() ACTUALLY RESET TO IDENTITY MATRIX INSTEAD OF WEIRD X-180 THING
+			Transform3D t = new Transform3D();
+			AxisAngle4d aa = new AxisAngle4d(1, 0, 0, Math.PI);
+			t.set(aa);
+			c.setTransform(t);
+			
 			this.contents.put(name, c);
 			this.recalculateGlobalMinMax(c);
 
@@ -1965,10 +1990,11 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 						univ.ensureScale(range);
 					}
 				}
-				univ.fireContentAdded(c);
-				univ.addUniverseListener(c);
 //WHY WAS THIS EVER CALLED??				
 //				univ.waitForNextFrame();
+				univ.fireContentAdded(c);
+				univ.addUniverseListener(c);
+
 				univ.fireTransformationUpdated();
 				return c;
 			}
