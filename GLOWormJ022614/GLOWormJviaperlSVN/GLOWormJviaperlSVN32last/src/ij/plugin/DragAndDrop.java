@@ -611,10 +611,18 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							}
 							
 							try {
-								ImageJ3DViewer.importContent(((File)obj).getPath());
+								if (openAsVirtualStack) {
+									ImageJ3DViewer.importContentFlipXcoords(((File)obj).getPath());
+								} else {
+									ImageJ3DViewer.importContent(((File)obj).getPath());
+								}
 							} catch (Exception e) {
 								ij3dv.run(".");
-								ImageJ3DViewer.importContent(((File)obj).getPath());
+								if (openAsVirtualStack) {
+									ImageJ3DViewer.importContentFlipXcoords(((File)obj).getPath());
+								} else {
+									ImageJ3DViewer.importContent(((File)obj).getPath());
+								}
 							}
 							ImageJ3DViewer.lock();
 
@@ -1255,10 +1263,18 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					}
 					
 					try {
-						ImageJ3DViewer.importContent(new File((String) obj).getPath());
+						if (openAsVirtualStack) {
+							ImageJ3DViewer.importContentFlipXcoords(((File)obj).getPath());
+						} else {
+							ImageJ3DViewer.importContent(((File)obj).getPath());
+						}
 					} catch (Exception e) {
 						ij3dv.run(".");
-						ImageJ3DViewer.importContent(new File((String) obj).getPath());
+						if (openAsVirtualStack) {
+							ImageJ3DViewer.importContentFlipXcoords(((File)obj).getPath());
+						} else {
+							ImageJ3DViewer.importContent(((File)obj).getPath());
+						}
 					}
 					ImageJ3DViewer.lock();
 
@@ -1548,10 +1564,18 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 				}
 				
 				try {
-					ImageJ3DViewer.importContent(((File)obj).getPath());
+					if (openAsVirtualStack) {
+						ImageJ3DViewer.importContentFlipXcoords(((File)obj).getPath());
+					} else {
+						ImageJ3DViewer.importContent(((File)obj).getPath());
+					}
 				} catch (Exception e) {
 					ij3dv.run(".");
-					ImageJ3DViewer.importContent(((File)obj).getPath());
+					if (openAsVirtualStack) {
+						ImageJ3DViewer.importContentFlipXcoords(((File)obj).getPath());
+					} else {
+						ImageJ3DViewer.importContent(((File)obj).getPath());
+					}
 				}
 				ImageJ3DViewer.lock();
 

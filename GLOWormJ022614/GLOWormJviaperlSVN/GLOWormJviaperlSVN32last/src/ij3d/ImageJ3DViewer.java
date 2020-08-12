@@ -343,7 +343,12 @@ public class ImageJ3DViewer implements PlugIn {
 
 	public static void importContent(String path) {
 		Image3DUniverse univ = getUniv();
-		univ.getExecuter().addSavedContent(path, null);
+		univ.getExecuter().addSavedContent(path, null, false);
+	}
+
+	public static void importContentFlipXcoords(String path) {
+		Image3DUniverse univ = getUniv();
+		univ.getExecuter().addSavedContent(path, null, true);
 	}
 
 	public static void exportTransformed() {

@@ -9,6 +9,7 @@ import ij3d.contextmenu.ContextMenu;
 import ij3d.pointlist.PointListDialog;
 import ij3d.shortcuts.ShortCuts;
 import customnode.MeshMaker;
+import customnode.WavefrontLoader;
 import ij3d.IJ3dExecuter;
 
 import java.awt.BasicStroke;
@@ -1663,7 +1664,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	public void resetView() {
 		fireTransformationStarted();
 
-		reflectThruYZ();
+//		reflectThruYZ();
 
 		Transform3D t = new Transform3D();
 
@@ -1677,11 +1678,14 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		getViewPlatformTransformer().centerAt(globalCenter);
 //		// reset zoom
 		double d = oldRange / Math.tan(Math.PI/8);
-		
+		GlobalTransform gt = new GlobalTransform();
+		this.getGlobalTransform(gt);
+		IJ.log(""+gt.transforms.length);
 		getViewPlatformTransformer().zoomTo(d);
 		Transform3D z = new Transform3D();
 		this.getZoomTG().getTransform(z);
-//		getZoomTG().setTransform(z);
+//		z.invert();
+		getZoomTG().setTransform(z);
 		IJ.log("z \n"+ z.toString()+"\n");
 		
 		fireTransformationUpdated();
@@ -1698,7 +1702,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		this.getRotationTG().getTransform(t1);
 		IJ.log("t1 \n"+ t1.toString()+"\n");
 
-		t1.mul(t1, new Transform3D(new double[]{-1.0, 0.0, 0.0, 0.0,
+		t1.mulInverse(t1, new Transform3D(new double[]{-1.0, 0.0, 0.0, 0.0,
 		                                  	0.0, 1.0, 0.0, 0.0,
 		                                  	0.0, 0.0, 1.0, 0.0,
 		                                  	0.0, 0.0, 0.0, 1.0}));
@@ -1712,10 +1716,12 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		Transform3D z1 = new Transform3D();
 		this.getZoomTG().getTransform(z1);
 		IJ.log("z1 \n"+ z1.toString()+"\n");
-
-		Point3f lpos = new Point3f();
-		getLight().getPosition(lpos);	
-		IJ.log(lpos.toString());
+		z1.mulInverse(z1, new Transform3D(new double[]{-1.0, 0.0, 0.0, 0.0,
+				0.0, 1.0, 0.0, 0.0,
+				0.0, 0.0, 1.0, 0.0,
+				0.0, 0.0, 0.0, 1.0}));
+		
+		IJ.log("z2 \n"+ z1.toString()+"\n");
 	}
 	
 	
@@ -1968,6 +1974,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 	private ExecutorService adder = Executors.newFixedThreadPool(1);
 
+	private boolean flipXonImport;
+
 	/**
 	 * Add the specified Content to the universe. It is assumed that the
 	 * specified Content is constructed correctly.
@@ -2027,7 +2035,14 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			if (tptParse[tptParse.length-1].matches("\\d+.obj")) {
 				nextTpt = Integer.parseInt(tptParse[tptParse.length-1].replace(".obj", ""));
 			}
-			Map<String,CustomMesh> meshes = MeshLoader.load(nextmatchingfilePath);
+			
+			Map<String, CustomMesh> meshes= null;
+			try {
+				meshes = WavefrontLoader.load(nextmatchingfilePath, flipXonImport);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			if(meshes == null)
 				return;
 
@@ -2058,7 +2073,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		}
 		if (win.getTitle().matches("ImageJ 3D Viewer.*")){
 			win.getImagePlus().setWindow(win);
-			win.getImagePlus().setTitle(titleName);
+			win.getImagePlus().setTitle((this.flipXonImport?"FlipX_":"")+titleName);
 		}
 	}
 
@@ -2108,6 +2123,13 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			}
 		});
 		return all;
+	}
+
+	public boolean getFlipXonImport() {
+		return flipXonImport;
+	}
+	public void setFlipXonImport(boolean flipXcoords) {
+		flipXonImport = flipXcoords;
 	}
 }
 

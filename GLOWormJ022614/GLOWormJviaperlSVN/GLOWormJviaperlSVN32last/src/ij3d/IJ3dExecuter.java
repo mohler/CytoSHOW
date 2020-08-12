@@ -161,11 +161,12 @@ public class IJ3dExecuter {
 		addContentFromImage(image);
 	}
 
-	public void addSavedContent(final String path, final File file) {
+	public void addSavedContent(final String path, final File file, boolean flipXcoords) {
 		new Thread() {
 			{ setPriority(Thread.NORM_PRIORITY); }
 
 			public void run() {
+				univ.setFlipXonImport(flipXcoords);
 				univ.addContentLater(path);
 			}
 		}.start();

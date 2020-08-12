@@ -17,7 +17,7 @@ public class MeshLoader {
 
 	public static Map<String, CustomMesh> loadWavefront(String file) {
 		try {
-			return WavefrontLoader.load(file);
+			return WavefrontLoader.load(file, false);
 		} catch(Exception e) {
 			e.printStackTrace();
 		}

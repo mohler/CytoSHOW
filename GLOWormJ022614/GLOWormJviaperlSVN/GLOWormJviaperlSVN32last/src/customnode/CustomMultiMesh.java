@@ -178,7 +178,8 @@ public class CustomMultiMesh extends CustomMeshNode {
 		HashMap<String, CustomMesh> contents = null;
 		customMeshes = null;
 		try {
-			contents = WavefrontLoader.load(path);
+			//NO WAY TO SPECIFY FLIPPEDXCOORDS HERE...
+			contents = WavefrontLoader.load(path, false);
 			for(int i = 0; i < contents.size(); i++) {
 				CustomMesh cm = contents.get(name + "###" + i);
 				customMeshes.add(cm);

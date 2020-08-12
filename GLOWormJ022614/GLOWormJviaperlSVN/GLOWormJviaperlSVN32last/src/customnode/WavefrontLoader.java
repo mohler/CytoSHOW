@@ -19,11 +19,11 @@ public class WavefrontLoader {
 	 * a hash map, mapping the object names to the corresponding
 	 * <code>CustomMesh</code> objects.
 	 */
-	public static HashMap<String, CustomMesh> load(String objfile)
+	public static HashMap<String, CustomMesh> load(String objfile, boolean flipXcoords)
 						throws IOException {
 		WavefrontLoader wl = new WavefrontLoader();
 		try {
-			wl.parse(objfile);
+			wl.parse(objfile, flipXcoords);
 		} catch(RuntimeException e) {
 			System.out.println("error reading " + wl.name);
 			throw e;
@@ -46,7 +46,7 @@ public class WavefrontLoader {
 	private int type = -1;
 	private String objfile = null;
 
-	private void parse(String objfile) throws IOException {
+	private void parse(String objfile, boolean flipXcoords) throws IOException {
 		this.objfile = objfile;
 		File f = new File(objfile);
 
@@ -72,7 +72,7 @@ public class WavefrontLoader {
 				if(materials != null)
 					material = materials.get(line.split("\\s+")[1]);
 			} else if(line.startsWith("v ")) {
-				readVertex();
+				readVertex(flipXcoords);
 			} else if(line.startsWith("f ")) {
 				readFace();
 			} else if(line.startsWith("l ")) {
@@ -84,6 +84,7 @@ public class WavefrontLoader {
 		in.close();
 		if(name != null && indices.size() > 0) {
 			CustomMesh cm = createCustomMesh();
+			cm.setFlippedXCoords(flipXcoords);
 			if(cm != null)
 				meshes.put(name, cm);
 			indices = new ArrayList<Point3f>();
@@ -135,10 +136,11 @@ public class WavefrontLoader {
 		}
 	}
 
-	private void readVertex() {
+	private void readVertex(boolean flipXcoords) {
 		String[] sp = line.split("\\s+");
+		int flipXCoef = flipXcoords?-1:1;
 		vertices.add(new Point3f(
-			Float.parseFloat(sp[1]),
+			flipXCoef*Float.parseFloat(sp[1]),
 			Float.parseFloat(sp[2]),
 			Float.parseFloat(sp[3])));
 	}

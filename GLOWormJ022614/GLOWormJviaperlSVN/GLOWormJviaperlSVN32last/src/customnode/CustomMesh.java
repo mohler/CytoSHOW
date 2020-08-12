@@ -38,6 +38,7 @@ public abstract class CustomMesh extends Shape3D {
 	protected List<Point3f> mesh = null;
 	protected float transparency = 0;
 	protected boolean shaded = true;
+	protected boolean flippedXCoords = false;
 
 	protected String loadedFromName = null;
 	protected String loadedFromFile = null;
@@ -389,7 +390,7 @@ public abstract class CustomMesh extends Shape3D {
 	public void restoreDisplayedData(String path, String name) {
 		HashMap<String, CustomMesh> contents = null;
 		try {
-			contents = WavefrontLoader.load(path);
+			contents = WavefrontLoader.load(path, flippedXCoords);
 		} catch(IOException e) {
 			e.printStackTrace();
 		}
@@ -418,4 +419,12 @@ public abstract class CustomMesh extends Shape3D {
 	}
 
 	protected abstract GeometryArray createGeometry();
+
+	public boolean isFlippedXCoords() {
+		return flippedXCoords;
+	}
+
+	public void setFlippedXCoords(boolean flippedXCoords) {
+		this.flippedXCoords = flippedXCoords;
+	}
 }
