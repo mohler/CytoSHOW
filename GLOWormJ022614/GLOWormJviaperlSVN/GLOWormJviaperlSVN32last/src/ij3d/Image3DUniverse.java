@@ -883,6 +883,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	@Deprecated
 	private VolumeOctree octree = null;
 
+	private boolean synchNewState;
+
 	/**
 	 * @deprecated The octree methods will be outsourced into a different
 	 * plugin.
@@ -1594,7 +1596,9 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 */
 	public void sync(boolean b) {
 		if(b) {
-			setContentTfmsAndResetView();
+			if (synchNewState) {
+				setContentTfmsAndResetView();
+			}
 			synchronizer.addUniverse(this);
 		}
 		else
@@ -2130,6 +2134,14 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	}
 	public void setFlipXonImport(boolean flipXcoords) {
 		flipXonImport = flipXcoords;
+	}
+
+	public boolean isSynchNewState() {
+		return synchNewState;
+	}
+
+	public void setSynchNewState(boolean synchNewState) {
+		this.synchNewState = synchNewState;
 	}
 }
 

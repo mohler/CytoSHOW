@@ -7,6 +7,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 import javax.media.j3d.View;
 import javax.swing.ImageIcon;
@@ -21,7 +23,7 @@ import javax.swing.SwingUtilities;
 @SuppressWarnings("serial")
 public class Image3DMenubar extends JMenuBar implements ActionListener,
 					 		ItemListener,
-							UniverseListener {
+							UniverseListener, MouseListener {
 
 	private Image3DUniverse univ;
 	private IJ3dExecuter iJ3dExecuter;
@@ -688,17 +690,9 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 		} else if(src == tube) {
 			iJ3dExecuter.addTube();
 		}else if (e.getActionCommand().toLowerCase().contains("synched 3d controls")) {
-			((JButton)e.getSource()).setActionCommand("Solo 3D controls");
-			((JButton)e.getSource()).setName("Solo 3D controls");
-			((JButton)e.getSource()).setToolTipText("Solo 3D controls");
-			((JButton)e.getSource()).setIcon(new ImageIcon(ImageWindow.class.getResource("images/Solobutton32.png")));
-			iJ3dExecuter.sync(true);
+			//sync(true) now done by mouseclicked...
 		}else if (e.getActionCommand().toLowerCase().contains("solo 3d controls")) {
-			((JButton)e.getSource()).setActionCommand("Synched 3D controls");
-			((JButton)e.getSource()).setName("Synched 3D controls");
-			((JButton)e.getSource()).setToolTipText("Synched 3D controls");
-			((JButton)e.getSource()).setIcon(new ImageIcon(ImageWindow.class.getResource("images/Syncbutton32.png")));
-			iJ3dExecuter.sync(false);
+			//sync(false) now done by mouseclicked...
 		}else if (e.getActionCommand().toLowerCase().contains("auto adjust while adding")) {
 			((JButton)e.getSource()).setActionCommand("No adjust while adding");
 			((JButton)e.getSource()).setName("No adjust while adding");
@@ -881,6 +875,53 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 		displayAsSurfacePlot.setEnabled(
 				t != Content.SURFACE_PLOT2D && i != null);
 		displayAsMultiOrtho.setEnabled(t != Content.MULTIORTHO && i != null);
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+		if (e.isShiftDown()) {
+			univ.setSynchNewState(true);
+		} else {
+			univ.setSynchNewState(false);
+		}
+		if (((JButton)e.getSource()).getName() == "Solo 3D controls") {
+			univ.sync(false);
+			((JButton)e.getSource()).setActionCommand("Synched 3D controls");
+			((JButton)e.getSource()).setName("Synched 3D controls");
+			((JButton)e.getSource()).setToolTipText("Synched 3D controls");
+			((JButton)e.getSource()).setIcon(new ImageIcon(ImageWindow.class.getResource("images/Syncbutton32.png")));
+		} else if (((JButton)e.getSource()).getName() == "Synched 3D controls") {
+			univ.sync(true);
+			((JButton)e.getSource()).setActionCommand("Solo 3D controls");
+			((JButton)e.getSource()).setName("Solo 3D controls");
+			((JButton)e.getSource()).setToolTipText("Solo 3D controls");
+			((JButton)e.getSource()).setIcon(new ImageIcon(ImageWindow.class.getResource("images/Solobutton32.png")));
+		}
+
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 }
 

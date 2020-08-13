@@ -355,6 +355,7 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 		syncButton.setFont(buttonPanelFont);
 		viewButtonPanel.add(syncButton, fspc);
 		syncButton.addActionListener(menubar);
+		syncButton.addMouseListener(menubar);
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
 		fspc.fill = GridBagConstraints.BOTH;
