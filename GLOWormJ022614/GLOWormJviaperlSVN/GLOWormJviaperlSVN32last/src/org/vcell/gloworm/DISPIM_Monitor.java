@@ -7216,10 +7216,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					}
 					dispimToolsButton[pos][0].setBackground(null);
 					fuseButton[pos][0].setVisible(false);
-					splitButton[pos][0].setVisible(false);
-					xSpinner[pos][0].setVisible(false);
-					ySpinner[pos][0].setVisible(false);
-					zSpinner[pos][0].setVisible(false);
+					if (splitButton[pos][0]!=null){
+						splitButton[pos][0].setVisible(false);
+						xSpinner[pos][0].setVisible(false);
+						ySpinner[pos][0].setVisible(false);
+						zSpinner[pos][0].setVisible(false);
+					}
 					impAs[pos].getWindow().viewButtonPanel.validate();
 
 				}
@@ -7229,10 +7231,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					}
 					dispimToolsButton[pos][1].setBackground(null);
 					fuseButton[pos][1].setVisible(false);
-					splitButton[pos][1].setVisible(false);
-					xSpinner[pos][1].setVisible(false);
-					ySpinner[pos][1].setVisible(false);
-					zSpinner[pos][1].setVisible(false);
+					if (splitButton[pos][1]!=null){
+						splitButton[pos][1].setVisible(false);
+						xSpinner[pos][1].setVisible(false);
+						ySpinner[pos][1].setVisible(false);
+						zSpinner[pos][1].setVisible(false);
+					}
 					impBs[pos].getWindow().viewButtonPanel.validate();
 				}
 			}
@@ -7264,10 +7268,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					boolean shown = fuseButton[pos][0].isVisible();
 					dispimToolsButton[pos][0].setBackground(!shown?Color.yellow:null);
 					fuseButton[pos][0].setVisible(!shown);
-					splitButton[pos][0].setVisible(dimOrder.contains("Sequential") && !shown);
-					xSpinner[pos][0].setVisible(!shown);
-					ySpinner[pos][0].setVisible(!shown);
-					zSpinner[pos][0].setVisible(!shown);
+					if (splitButton[pos][0]!=null){
+						splitButton[pos][0].setVisible(dimOrder.contains("Sequential") && !shown);
+						xSpinner[pos][0].setVisible(!shown);
+						ySpinner[pos][0].setVisible(!shown);
+						zSpinner[pos][0].setVisible(!shown);
+					}
 					if (shown) {
 						for (int pp=0; pp<pDim; pp++) {
 							if (impAs[pp]==null || impAs[pp].hasNullStack() || impAs[pp].getWindow()==null  || !impAs[pp].getWindow().isVisible()) {
@@ -7309,10 +7315,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						boolean shown = fuseButton[pos][1].isVisible();
 						dispimToolsButton[pos][1].setBackground(!shown?Color.yellow:null);
 						fuseButton[pos][1].setVisible(!shown);
-						splitButton[pos][1].setVisible(dimOrder.contains("Sequential") && !shown);
-						xSpinner[pos][1].setVisible(!shown);
-						ySpinner[pos][1].setVisible(!shown);
-						zSpinner[pos][1].setVisible(!shown);
+						if (splitButton[pos][1]!=null){
+							splitButton[pos][1].setVisible(dimOrder.contains("Sequential") && !shown);
+							xSpinner[pos][1].setVisible(!shown);
+							ySpinner[pos][1].setVisible(!shown);
+							zSpinner[pos][1].setVisible(!shown);
+						}
 						if (shown) {
 							for (int pp=0; pp<pDim; pp++) {
 								if (impBs[pp]==null || impBs[pp].hasNullStack() || impBs[pp].getWindow()==null  || !impBs[pp].getWindow().isVisible()) {

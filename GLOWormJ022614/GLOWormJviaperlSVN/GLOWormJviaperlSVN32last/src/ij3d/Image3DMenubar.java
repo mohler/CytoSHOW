@@ -879,6 +879,17 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
+
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
 		if (e.isShiftDown()) {
 			univ.setSynchNewState(true);
 		} else {
@@ -897,18 +908,6 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 			((JButton)e.getSource()).setToolTipText("Solo 3D controls");
 			((JButton)e.getSource()).setIcon(new ImageIcon(ImageWindow.class.getResource("images/Solobutton32.png")));
 		}
-
-	}
-
-	@Override
-	public void mousePressed(MouseEvent e) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent e) {
-		// TODO Auto-generated method stub
 		
 	}
 
