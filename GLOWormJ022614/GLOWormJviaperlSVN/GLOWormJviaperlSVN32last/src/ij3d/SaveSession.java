@@ -278,9 +278,9 @@ public class SaveSession {
 		out.println("zoom = " + toString(t3d));
 		univ.getAnimationTG().getTransform(t3d);
 		out.println("animate = " + toString(t3d));
-		univ.getContentRotTG().getTransform(t3d);
-		out.println("contentTranslate = " + toString(t3d));
 		univ.getContentTranTG().getTransform(t3d);
+		out.println("contentTranslate = " + toString(t3d));
+		univ.getContentRotTG().getTransform(t3d);
 		out.println("contentRotate = " + toString(t3d));
 		out.println("EndView");
 	}
