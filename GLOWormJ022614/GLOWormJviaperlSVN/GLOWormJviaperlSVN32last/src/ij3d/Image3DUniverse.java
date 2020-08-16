@@ -58,6 +58,7 @@ import javax.media.j3d.Canvas3D;
 import javax.media.j3d.PointLight;
 import javax.media.j3d.Switch;
 import javax.media.j3d.Transform3D;
+import javax.media.j3d.TransformGroup;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -70,6 +71,8 @@ import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 import javax.vecmath.Vector3d;
+
+import com.sun.j3d.utils.universe.MultiTransformGroup;
 
 import octree.VolumeOctree;
 import view4d.Timeline;
@@ -135,6 +138,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 	private ContextMenu contextmenu;
 
+
+	
 	/**
 	 * A flag indicating whether the view is adjusted each time a
 	 * Content is added
@@ -1620,47 +1625,71 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	}
 	
 	/**
-	 * Records current view transform, then does resetView.  Sets all contents to the recorded view transform.
+	 * Records current view transform.  Sets all contents to the recorded view transform
+	 * , then does resetView.
 	 * Desired effect is to reposition default view for corrected synching, eg.
 	 */
 
 	public void setContentTfmsAndResetView() {
 
 		fireTransformationStarted();
-		Transform3D t1 = new Transform3D();
-		this.getRotationTG().getTransform(t1);
-		IJ.log("t1 \n"+ t1.toString()+"\n");
+		Transform3D tRot = new Transform3D();
+		this.getRotationTG().getTransform(tRot);
+		IJ.log("tRot \n"+ tRot.toString()+"\n");
+		
+		Transform3D tTrans = new Transform3D();
+		this.getTranslateTG().getTransform(tTrans);
+		IJ.log("tTrans \n"+ tTrans.toString()+"\n");
 
-		Transform3D t = new Transform3D();
-		AxisAngle4d aa = new AxisAngle4d(1, 0, 0, 0);
-		t.set(aa);
-		getRotationTG().setTransform(t);
-
-		double[] univTransformMatrix = new double[16];
-		t1.get(univTransformMatrix);
-		double[][] univTransformMatrix4x4 = new double[4][4];
+		double[] univTransTransformMatrix = new double[16];
+		tTrans.get(univTransTransformMatrix);
+		double[][] univTransTransformMatrix4x4 = new double[4][4];
 		for (int i =0; i<16; i++) {
-			 univTransformMatrix4x4[i/4][i%4] = univTransformMatrix[i] ;
+			 univTransTransformMatrix4x4[i/4][i%4] = univTransTransformMatrix[i] ;
 		}
 
-		//WOW, APPARENTLY NEED TO TRANSPOSE BEFORE APPLYING TO CONTENT...NOT SURE WHY!?
-		double[] contentTransformMatrix = new double[16];
+		//NEED TO negate values to create inverse translation matrix of univTTM
+		double[] contentTransTransformMatrix = new double[16];
 		for (int i =0; i<16; i++) {
-				contentTransformMatrix[i] = univTransformMatrix4x4[i%4][i/4];
+				contentTransTransformMatrix[i] = univTransTransformMatrix4x4[i/4][i%4]; //untransposed
+				if ((i+1)%4 == 0) {
+					contentTransTransformMatrix[i] = -contentTransTransformMatrix[i];
+				}
+		}
+		
+		double[] univRotTransformMatrix = new double[16];
+		tRot.get(univRotTransformMatrix);
+		double[][] univRotTransformMatrix4x4 = new double[4][4];
+		for (int i =0; i<16; i++) {
+			 univRotTransformMatrix4x4[i/4][i%4] = univRotTransformMatrix[i] ;
+		}
+
+		//NEED TO TRANSPOSE to create inverse rotation matrix of univRTM...
+		double[] contentRotTransformMatrix = new double[16];
+		for (int i =0; i<16; i++) {
+				contentRotTransformMatrix[i] = univRotTransformMatrix4x4[i%4][i/4];  //transposed
 		}
 		
 		
-		Transform3D contentTransform = new Transform3D(contentTransformMatrix);
-		IJ.log("contentTransform \n"+ contentTransform.toString()+"\n");
+		Transform3D contentTransTransform = new Transform3D(contentTransTransformMatrix);
+		IJ.log("contentTransTransform \n"+ contentTransTransform.toString()+"\n");
+
+		Transform3D contentRotTransform = new Transform3D(contentRotTransformMatrix);
+		IJ.log("contentRotTransform \n"+ contentRotTransform.toString()+"\n");
 
 		for (Object o: getContents()) {
 			Content c = ((Content)o);
-			c.applyTransform(contentTransform);
+			c.applyTransform(contentTransTransform);
+			c.applyTransform(contentRotTransform);
 		}
+
+		resetView();
+		
 		fireTransformationUpdated();
 		fireTransformationFinished();
 	}
 	
+	/**
 	/**
 	 * Reset the transformations of the view side of the scene graph
 	 * as if the Contents of this universe were just displayed.
@@ -1668,33 +1697,22 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	public void resetView() {
 		fireTransformationStarted();
 
-//		reflectThruYZ();
-
+		// rotate so that y shows downwards
 		Transform3D t = new Transform3D();
+		AxisAngle4d aa = new AxisAngle4d(1, 0, 0, 0);
+		t.set(aa);
+		getRotationTG().setTransform(t);
 
-		getRotationTG().getTransform(t);
-
-		IJ.log("t \n"+ t.toString()+"\n");
-
-//		t.setIdentity();
+		t.setIdentity();
 		getTranslateTG().setTransform(t);
+		getZoomTG().setTransform(t);
 		recalculateGlobalMinMax();
 		getViewPlatformTransformer().centerAt(globalCenter);
-//		// reset zoom
+		// reset zoom
 		double d = oldRange / Math.tan(Math.PI/8);
-		GlobalTransform gt = new GlobalTransform();
-		this.getGlobalTransform(gt);
-		IJ.log(""+gt.transforms.length);
 		getViewPlatformTransformer().zoomTo(d);
-		Transform3D z = new Transform3D();
-		this.getZoomTG().getTransform(z);
-//		z.invert();
-		getZoomTG().setTransform(z);
-		IJ.log("z \n"+ z.toString()+"\n");
-		
 		fireTransformationUpdated();
 		fireTransformationFinished();
-		
 	}
 
 	/**
@@ -2143,5 +2161,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	public void setSynchNewState(boolean synchNewState) {
 		this.synchNewState = synchNewState;
 	}
+	
+
 }
 

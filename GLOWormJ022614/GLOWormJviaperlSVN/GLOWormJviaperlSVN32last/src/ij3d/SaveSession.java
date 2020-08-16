@@ -277,6 +277,10 @@ public class SaveSession {
 		out.println("zoom = " + toString(t3d));
 		univ.getAnimationTG().getTransform(t3d);
 		out.println("animate = " + toString(t3d));
+		((Content)univ.getContents().toArray()[0]).getLocalTranslate(t3d);
+		out.println("contentTranslate = " + toString(t3d));
+		((Content)univ.getContents().toArray()[0]).getLocalRotate(t3d);
+		out.println("contentRotate = " + toString(t3d));
 		out.println("EndView");
 	}
 
@@ -318,6 +322,18 @@ public class SaveSession {
 			univ.getZoomTG().setTransform(t(tmp));
 		if((tmp = props.get("animate")) != null)
 			univ.getAnimationTG().setTransform(t(tmp));
+		if((tmp = props.get("contentTranslate")) != null) {
+			for (Object o: univ.getContents()) {
+				Content c = ((Content)o);
+				c.applyTransform(t(tmp));
+			}
+		}
+		if((tmp = props.get("contentRotate")) != null) {
+			for (Object o: univ.getContents()) {
+				Content c = ((Content)o);
+				c.applyTransform(t(tmp));
+			}
+		}
 
 		univ.getViewPlatformTransformer().updateFrontBackClip();
 	}
