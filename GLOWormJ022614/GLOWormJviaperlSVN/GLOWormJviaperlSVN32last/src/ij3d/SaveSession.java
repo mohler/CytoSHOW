@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import javax.media.j3d.Transform3D;
 
 import javax.vecmath.Color3f;
+import javax.vecmath.Vector3d;
 
 import java.awt.Panel;
 import java.awt.Button;
@@ -277,9 +278,9 @@ public class SaveSession {
 		out.println("zoom = " + toString(t3d));
 		univ.getAnimationTG().getTransform(t3d);
 		out.println("animate = " + toString(t3d));
-		((Content)univ.getContents().toArray()[0]).getLocalTranslate(t3d);
+		univ.getContentRotTG().getTransform(t3d);
 		out.println("contentTranslate = " + toString(t3d));
-		((Content)univ.getContents().toArray()[0]).getLocalRotate(t3d);
+		univ.getContentTranTG().getTransform(t3d);
 		out.println("contentRotate = " + toString(t3d));
 		out.println("EndView");
 	}
@@ -323,12 +324,14 @@ public class SaveSession {
 		if((tmp = props.get("animate")) != null)
 			univ.getAnimationTG().setTransform(t(tmp));
 		if((tmp = props.get("contentTranslate")) != null) {
+			univ.getContentTranTG().setTransform(t(tmp));
 			for (Object o: univ.getContents()) {
 				Content c = ((Content)o);
 				c.applyTransform(t(tmp));
 			}
 		}
 		if((tmp = props.get("contentRotate")) != null) {
+			univ.getContentRotTG().setTransform(t(tmp));
 			for (Object o: univ.getContents()) {
 				Content c = ((Content)o);
 				c.applyTransform(t(tmp));

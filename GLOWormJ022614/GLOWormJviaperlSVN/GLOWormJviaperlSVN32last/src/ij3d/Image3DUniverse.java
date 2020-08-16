@@ -138,6 +138,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 	private ContextMenu contextmenu;
 
+	private TransformGroup contentRotTG = new TransformGroup();
+	private TransformGroup contentTranTG = new TransformGroup();
 
 	
 	/**
@@ -1652,7 +1654,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		double[] contentTransTransformMatrix = new double[16];
 		for (int i =0; i<16; i++) {
 				contentTransTransformMatrix[i] = univTransTransformMatrix4x4[i/4][i%4]; //untransposed
-				if ((i+1)%4 == 0) {
+				if ((i+1)%4 == 0 && i<15) {
 					contentTransTransformMatrix[i] = -contentTransTransformMatrix[i];
 				}
 		}
@@ -1672,9 +1674,11 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		
 		
 		Transform3D contentTransTransform = new Transform3D(contentTransTransformMatrix);
+		contentTranTG.setTransform(contentTransTransform);
 		IJ.log("contentTransTransform \n"+ contentTransTransform.toString()+"\n");
 
 		Transform3D contentRotTransform = new Transform3D(contentRotTransformMatrix);
+		contentRotTG.setTransform(contentRotTransform);
 		IJ.log("contentRotTransform \n"+ contentRotTransform.toString()+"\n");
 
 		for (Object o: getContents()) {
@@ -1682,7 +1686,13 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			c.applyTransform(contentTransTransform);
 			c.applyTransform(contentRotTransform);
 		}
-
+		Transform3D clt = new Transform3D();
+		((Content)getContents().toArray()[0]).getLocalTranslate().getTransform(clt);
+		IJ.log("clt: " +clt);
+		Transform3D clr = new Transform3D();
+		((Content)getContents().toArray()[0]).getLocalRotate().getTransform(clr);
+		IJ.log("clr: " +clr);
+		
 		resetView();
 		
 		fireTransformationUpdated();
@@ -2160,6 +2170,22 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 	public void setSynchNewState(boolean synchNewState) {
 		this.synchNewState = synchNewState;
+	}
+
+	public TransformGroup getContentRotTG() {
+		return contentRotTG;
+	}
+
+	public void setContentRotTG(TransformGroup contentRotTG) {
+		this.contentRotTG = contentRotTG;
+	}
+
+	public TransformGroup getContentTranTG() {
+		return contentTranTG;
+	}
+
+	public void setContentTranTG(TransformGroup contentTranTG) {
+		this.contentTranTG = contentTranTG;
 	}
 	
 
