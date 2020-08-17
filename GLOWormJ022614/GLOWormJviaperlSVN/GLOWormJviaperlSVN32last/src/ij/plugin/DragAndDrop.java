@@ -300,8 +300,11 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 			else
 				IJ.showStatus("<<Drag and Drop>>");
 		} else {
-			openAsVirtualStack = (e.getDropTargetContext().getDropTarget().getComponent() instanceof ImageCanvas3D)
-									&& IJ.shiftKeyDown();
+			Point loc = e.getLocation();
+			int buttonSize = Toolbar.getButtonSize();
+			int width = e.getDropTargetContext().getDropTarget().getComponent().getSize().width;
+			openAsVirtualStack = width-loc.x<=buttonSize && 
+					(e.getDropTargetContext().getDropTarget().getComponent() instanceof ImageCanvas3D);
 
 		}
 	}
@@ -532,6 +535,9 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 									if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow3D)frame).getUniverse().getCanvas()){
 										Image3DUniverse i3duniv = (Image3DUniverse)((ImageWindow3D)frame).getUniverse();
 										i3duniv.setAutoAdjustView(true);
+										if (freshDrop){
+											ij3dv = null;		
+										}
 										if (ij3dv == null) {
 											ij3dv = new ImageJ3DViewer();
 											ij3dv.setUniv(i3duniv);
@@ -1183,6 +1189,9 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow3D)frame).getUniverse().getCanvas()){
 								Image3DUniverse i3duniv = (Image3DUniverse)((ImageWindow3D)frame).getUniverse();
 								i3duniv.setAutoAdjustView(true);
+								if (freshDrop){
+									ij3dv = null;		
+								}
 								if (ij3dv == null) {
 									ij3dv = new ImageJ3DViewer();
 									ij3dv.setUniv(i3duniv);
@@ -1488,6 +1497,9 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow3D)frame).getUniverse().getCanvas()){
 							Image3DUniverse i3duniv = (Image3DUniverse)((ImageWindow3D)frame).getUniverse();
 							i3duniv.setAutoAdjustView(true);
+							if (freshDrop){
+								ij3dv = null;		
+							}
 							if (ij3dv == null) {
 								ij3dv = new ImageJ3DViewer();
 								ij3dv.setUniv(i3duniv);
