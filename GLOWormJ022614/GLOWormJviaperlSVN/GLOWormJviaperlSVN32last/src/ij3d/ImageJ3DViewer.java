@@ -38,8 +38,7 @@ public class ImageJ3DViewer implements PlugIn {
 //				e.printStackTrace();
 //			}
 		
-//		  IJ.runPlugIn("ij3d.ImageJ3DViewer", "");s
-		  new Image3DUniverse().show();
+		  IJ.runPlugIn("ij3d.ImageJ3DViewer", "");
 	}
 
 	
@@ -345,12 +344,14 @@ public class ImageJ3DViewer implements PlugIn {
 
 	public static void importContent(String path) {
 		Image3DUniverse univ = getUniv();
-		univ.getExecuter().addSavedContent(path, null, false);
+		univ.setFlipXonImport(false);
+		univ.addContentLater(path);
 	}
 
 	public static void importContentFlipXcoords(String path) {
 		Image3DUniverse univ = getUniv();
-		univ.getExecuter().addSavedContent(path, null, true);
+		univ.setFlipXonImport(true);
+		univ.addContentLater(path);
 	}
 
 	public static void exportTransformed() {

@@ -102,6 +102,7 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 	private JMenu fileMenu;
 	private JMenu helpMenu;
 	private JMenu addMenu;
+	private JMenuItem newViewer;
 
 	public Image3DMenubar(Image3DUniverse univ) {
 		super();
@@ -134,6 +135,10 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 	public JMenu createFileMenu() {
 		JMenu file = new JMenu("File");
 
+		newViewer = new JMenuItem("New Viewer");
+		newViewer.addActionListener(this);
+		file.add(newViewer);
+		
 		open = new JMenuItem("Open...");
 		open.addActionListener(this);
 		file.add(open);
@@ -705,7 +710,10 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 			((JButton)e.getSource()).setToolTipText("Auto adjust while adding");
 			((JButton)e.getSource()).setIcon(new ImageIcon(ImageWindow.class.getResource("images/autoButton32.png")));
 			((Image3DUniverse)(((ImageWindow3D)this.getParent().getParent().getParent().getParent().getParent()).getUniverse())).setAutoAdjustView(false);
+		} else if(src == newViewer) {
+			  new Image3DUniverse().show();
 		}
+
 
 
 	}

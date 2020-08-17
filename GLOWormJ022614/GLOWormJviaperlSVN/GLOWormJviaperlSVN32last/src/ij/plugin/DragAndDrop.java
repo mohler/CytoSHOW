@@ -531,7 +531,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 								if (frame instanceof ImageWindow3D){
 									if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow3D)frame).getUniverse().getCanvas()){
 										Image3DUniverse i3duniv = (Image3DUniverse)((ImageWindow3D)frame).getUniverse();
-										i3duniv.setAutoAdjustView(false);
+										i3duniv.setAutoAdjustView(true);
 										if (ij3dv == null) {
 											ij3dv = new ImageJ3DViewer();
 											ij3dv.setUniv(i3duniv);
@@ -641,7 +641,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 									ImageJ3DViewer.importContent(((File)obj).getPath());
 								}
 							}
-							ImageJ3DViewer.lock();
+							//ImageJ3DViewer.lock();
 
 						} else {
 							imp = new Opener().openURL((String)obj);
@@ -1182,7 +1182,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						if (frame instanceof ImageWindow3D){
 							if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow3D)frame).getUniverse().getCanvas()){
 								Image3DUniverse i3duniv = (Image3DUniverse)((ImageWindow3D)frame).getUniverse();
-								i3duniv.setAutoAdjustView(false);
+								i3duniv.setAutoAdjustView(true);
 								if (ij3dv == null) {
 									ij3dv = new ImageJ3DViewer();
 									ij3dv.setUniv(i3duniv);
@@ -1297,7 +1297,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							ImageJ3DViewer.importContent(((File)obj).getPath());
 						}
 					}
-					ImageJ3DViewer.lock();
+					//ImageJ3DViewer.lock();
 
 
 				} else if (( ((String)obj).toLowerCase().trim().equals("or"))){
@@ -1487,7 +1487,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					if (frame instanceof ImageWindow3D){
 						if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow3D)frame).getUniverse().getCanvas()){
 							Image3DUniverse i3duniv = (Image3DUniverse)((ImageWindow3D)frame).getUniverse();
-							i3duniv.setAutoAdjustView(false);
+							i3duniv.setAutoAdjustView(true);
 							if (ij3dv == null) {
 								ij3dv = new ImageJ3DViewer();
 								ij3dv.setUniv(i3duniv);
@@ -1603,7 +1603,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						ImageJ3DViewer.importContent(((File)obj).getPath());
 					}
 				}
-				ImageJ3DViewer.lock();
+				//ImageJ3DViewer.lock();
 
 			} else if (obj!=null && ((File)obj).getPath().endsWith("ColorLegend.lgd")){
 				ColorLegend cl;

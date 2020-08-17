@@ -161,6 +161,8 @@ public class IJ3dExecuter {
 		addContentFromImage(image);
 	}
 
+
+	//I GET WEIRD BEHAVIOR WHEN CALLING THID FROM DRAGNDROP...?
 	public void addSavedContent(final String path, final File file, boolean flipXcoords) {
 		new Thread() {
 			{ setPriority(Thread.NORM_PRIORITY); }
@@ -253,6 +255,7 @@ public class IJ3dExecuter {
 		IJ.log("path: " + path);
 		Object ob;
 		try {
+			univ.setFlipXonImport(false);
 			univ.addContentLater(path);
 			record(IMPORT, path);
 			ob = univ;
