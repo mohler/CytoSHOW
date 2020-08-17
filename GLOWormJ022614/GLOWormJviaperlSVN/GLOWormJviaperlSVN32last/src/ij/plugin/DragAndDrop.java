@@ -5,6 +5,7 @@ import ij.io.*;
 import ij.plugin.frame.ColorLegend;
 import ij3d.ColorTable;
 import ij3d.Image3DUniverse;
+import ij3d.ImageCanvas3D;
 import ij3d.ImageJ3DViewer;
 import ij3d.ImageWindow3D;
 
@@ -20,6 +21,8 @@ import java.awt.dnd.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.util.*;
+
+import javax.media.j3d.Canvas3D;
 
 import org.vcell.gloworm.MQTVSSceneLoader64;
 import org.vcell.gloworm.MQTVSSceneLoader64;
@@ -60,12 +63,14 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 	}
 
 	public void run(String arg) {
-		ImageJ ij = IJ.getInstance();
 		instance = this;
-		ij.setDropTarget(null);
-		new DropTarget(ij, this);
-		new DropTarget(Toolbar.getInstance(), this);
-		new DropTarget(ij.getStatusBar(), this);
+		ImageJ ij = IJ.getInstance();
+		if (ij!=null) {
+			ij.setDropTarget(null);
+			new DropTarget(ij, this);
+			new DropTarget(Toolbar.getInstance(), this);
+			new DropTarget(ij.getStatusBar(), this);
+		}
 	}  
 
 	public void addDropTarget(Component c) {
@@ -281,18 +286,24 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 	public void dragOver(DropTargetDragEvent e) {
 		if (IJ.debugMode) IJ.log("DragOver: "+e.getLocation());
 		ImageJ ij = IJ.getInstance();
-		Point loc = e.getLocation();
-		int buttonSize = Toolbar.getButtonSize();
-		int width = ij.getSize().width;
-		openAsVirtualStack = width-loc.x<=buttonSize && 
-				(e.getDropTargetContext().getDropTarget().getComponent().equals(ij) ||
-						e.getDropTargetContext().getDropTarget().getComponent().equals(Toolbar.getInstance()) ||
-						e.getDropTargetContext().getDropTarget().getComponent().equals(ij.getStatusBar()));
+		if (ij!=null) {
+			Point loc = e.getLocation();
+			int buttonSize = Toolbar.getButtonSize();
+			int width = ij.getSize().width;
+			openAsVirtualStack = width-loc.x<=buttonSize && 
+					(e.getDropTargetContext().getDropTarget().getComponent().equals(ij) ||
+							e.getDropTargetContext().getDropTarget().getComponent().equals(Toolbar.getInstance()) ||
+							e.getDropTargetContext().getDropTarget().getComponent().equals(ij.getStatusBar()));
 
-		if (openAsVirtualStack)
-			IJ.showStatus("<<Open with Special Settings>>");
-		else
-			IJ.showStatus("<<Drag and Drop>>");
+			if (openAsVirtualStack)
+				IJ.showStatus("<<Open with Special Settings>>");
+			else
+				IJ.showStatus("<<Drag and Drop>>");
+		} else {
+			openAsVirtualStack = (e.getDropTargetContext().getDropTarget().getComponent() instanceof ImageCanvas3D)
+									&& IJ.shiftKeyDown();
+
+		}
 	}
 
 	public void dragExit(DropTargetEvent e) {
@@ -351,7 +362,9 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 		}
 		boolean or = false;
 		IJ.log("");
-		String[] partsListLogLines2 = IJ.getLog().split("\n");
+		String[] partsListLogLines2 = {""};
+		if (IJ.getLog()!= null)
+			 partsListLogLines2 = IJ.getLog().split("\n");
 
 		boolean partsLoaded = false;
 		ArrayList<String> newSubDropsList = new ArrayList<String>();
@@ -519,16 +532,20 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 									if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow3D)frame).getUniverse().getCanvas()){
 										Image3DUniverse i3duniv = (Image3DUniverse)((ImageWindow3D)frame).getUniverse();
 										i3duniv.setAutoAdjustView(false);
-										ij3dv.setUniv(i3duniv);
-
+										if (ij3dv == null) {
+											ij3dv = new ImageJ3DViewer();
+											ij3dv.setUniv(i3duniv);
+										}
 									}
 								}
 							}
-							if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == IJ.getInstance()
-									|| this.dtde.getDropTargetContext().getDropTarget().getComponent() == Toolbar.getInstance()
-									|| this.dtde.getDropTargetContext().getDropTarget().getComponent() == IJ.getInstance().getStatusBar()){
-								if (freshDrop){
-									ij3dv = null;		
+							if (IJ.getInstance()!=null) {
+								if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == IJ.getInstance()
+										|| this.dtde.getDropTargetContext().getDropTarget().getComponent() == Toolbar.getInstance()
+										|| this.dtde.getDropTargetContext().getDropTarget().getComponent() == IJ.getInstance().getStatusBar()){
+									if (freshDrop){
+										ij3dv = null;		
+									}
 								}
 							}
 
@@ -1166,16 +1183,20 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow3D)frame).getUniverse().getCanvas()){
 								Image3DUniverse i3duniv = (Image3DUniverse)((ImageWindow3D)frame).getUniverse();
 								i3duniv.setAutoAdjustView(false);
-								ij3dv.setUniv(i3duniv);
-
+								if (ij3dv == null) {
+									ij3dv = new ImageJ3DViewer();
+									ij3dv.setUniv(i3duniv);
+								}
 							}
 						}
 					}
-					if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == IJ.getInstance()
-							|| this.dtde.getDropTargetContext().getDropTarget().getComponent() == Toolbar.getInstance()
-							|| this.dtde.getDropTargetContext().getDropTarget().getComponent() == IJ.getInstance().getStatusBar()){
-						if (freshDrop){
-							ij3dv = null;		
+					if (IJ.getInstance()!=null) {
+						if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == IJ.getInstance()
+								|| this.dtde.getDropTargetContext().getDropTarget().getComponent() == Toolbar.getInstance()
+								|| this.dtde.getDropTargetContext().getDropTarget().getComponent() == IJ.getInstance().getStatusBar()){
+							if (freshDrop){
+								ij3dv = null;		
+							}
 						}
 					}
 
@@ -1467,16 +1488,21 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow3D)frame).getUniverse().getCanvas()){
 							Image3DUniverse i3duniv = (Image3DUniverse)((ImageWindow3D)frame).getUniverse();
 							i3duniv.setAutoAdjustView(false);
-							ij3dv.setUniv(i3duniv);
+							if (ij3dv == null) {
+								ij3dv = new ImageJ3DViewer();
+								ij3dv.setUniv(i3duniv);
+							}
 
 						}
 					}
 				}
-				if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == IJ.getInstance()
-						|| this.dtde.getDropTargetContext().getDropTarget().getComponent() == Toolbar.getInstance()
-						|| this.dtde.getDropTargetContext().getDropTarget().getComponent() == IJ.getInstance().getStatusBar()){
-					if (freshDrop){
-						ij3dv = null;		
+				if (IJ.getInstance()!=null) {
+					if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == IJ.getInstance()
+							|| this.dtde.getDropTargetContext().getDropTarget().getComponent() == Toolbar.getInstance()
+							|| this.dtde.getDropTargetContext().getDropTarget().getComponent() == IJ.getInstance().getStatusBar()){
+						if (freshDrop){
+							ij3dv = null;		
+						}
 					}
 				}
 

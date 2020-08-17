@@ -27,17 +27,19 @@ public class ImageJ3DViewer implements PlugIn {
 	private static Image3DUniverse univ;
 
 	public static void main(String[] args) {
-		  if (IJ.getInstance() == null)
-			try {
-				new ij.ImageJ();
-			} catch (HeadlessException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (URISyntaxException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		  IJ.runPlugIn("ij3d.ImageJ3DViewer", "");
+//		  if (IJ.getInstance() == null)
+//			try {
+//				new ij.ImageJ();
+//			} catch (HeadlessException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			} catch (URISyntaxException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+		
+//		  IJ.runPlugIn("ij3d.ImageJ3DViewer", "");s
+		  new Image3DUniverse().show();
 	}
 
 	

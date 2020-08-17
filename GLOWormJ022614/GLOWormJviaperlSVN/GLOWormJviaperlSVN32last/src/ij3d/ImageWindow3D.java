@@ -109,6 +109,11 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 		DragAndDrop dnd = DragAndDrop.getInstance();
 		if (dnd!=null)
 			dnd.addDropTarget(this.canvas3D);
+		else {
+			IJ.runPlugIn("ij.plugin.DragAndDrop", "");
+			dnd = DragAndDrop.getInstance();
+			dnd.addDropTarget(this.canvas3D);
+		}
 
 		this.setResizable(true);
 		ic = this.canvas3D.getRoiCanvas();
