@@ -7,7 +7,7 @@ import org.vcell.gloworm.MQTVSSceneLoader64;
 import ij3d.Image3DUniverse;
 import ij3d.ImageJ3DViewer;
 
-public class CytoSHOW3D {
+public class DC_PHATE_VIEWER {
 
 	public static void main(String[] args) {
 //			ImageJ3DViewer.main(args);
