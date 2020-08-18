@@ -2046,11 +2046,15 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		File file = new File(filePath);
 		String titleName = file.getName();
 		if (filePath.matches(".*_\\d+.obj")) {
-			for(String nextfilename: file.getParentFile().list()) {
-				String fileNameRoot = file.getName().split("_\\d+.obj")[0];
-				if (nextfilename.matches(fileNameRoot+"_\\d+.obj")) {
-					timedObjFileNames.add(nextfilename);
+			if (file.getParentFile() != null && file.getParentFile().list() != null){
+				for(String nextfilename: file.getParentFile().list()) {
+					String fileNameRoot = file.getName().split("_\\d+.obj")[0];
+					if (nextfilename.matches(fileNameRoot+"_\\d+.obj")) {
+						timedObjFileNames.add(nextfilename);
+					}
 				}
+			} else {
+				timedObjFileNames.add(new File(filePath).getName());
 			}
 		} else {
 			timedObjFileNames.add(new File(filePath).getName());
