@@ -263,7 +263,7 @@ public class MeshExporter {
 			surfaces.add(vertices);
 		}
 		
-		String header = "Binary STL created by ImageJ 3D Viewer.";
+		String header = "Binary STL created by CytoSHOW3D.";
 		for (int i = header.length(); i < 80; i++){
 			header = header+".";
 		}

@@ -590,7 +590,7 @@ public abstract class DefaultUniverse extends SimpleUniverse
 	 * Show this universe in a new window.
 	 */
 	public void show() {
-		win = new ImageWindow3D("ImageJ 3D Viewer", this);
+		win = new ImageWindow3D("CytoSHOW3D", this);
 	}
 
 	/**

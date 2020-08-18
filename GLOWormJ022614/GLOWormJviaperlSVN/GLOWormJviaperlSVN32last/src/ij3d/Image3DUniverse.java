@@ -356,8 +356,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 	public void show() {
 		menubar = new Image3DMenubar(this);
-		init(new ImageWindow3D("ImageJ 3D Viewer [" + numUniversesLaunched +"]", this));
-//		init(new ImageWindow3D("ImageJ 3D Viewer [IJ3DV]", this));
+		init(new ImageWindow3D("CytoSHOW3D [" + numUniversesLaunched +"]", this));
+//		init(new ImageWindow3D("CytoSHOW3D [IJ3DV]", this));
 		win.pack();
 		win.setVisible(true);
 		win.invalidate();
@@ -428,7 +428,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		win.dispose();
 		dev.setFullScreenWindow(null);
 
-		win = new ImageWindow3D("ImageJ 3D Viewer", this);
+		win = new ImageWindow3D("CytoSHOW3D", this);
 
 		if(!f) {
 			win.setUndecorated(false);
@@ -2103,7 +2103,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			this.addContent(content);
 			content.setLocked(true);
 		}
-		if (win.getTitle().matches("ImageJ 3D Viewer.*")){
+		if (win.getTitle().matches("CytoSHOW3D.*")){
 			win.getImagePlus().setWindow(win);
 			win.getImagePlus().setTitle((this.flipXonImport?"FlipX_":"")+titleName);
 		}

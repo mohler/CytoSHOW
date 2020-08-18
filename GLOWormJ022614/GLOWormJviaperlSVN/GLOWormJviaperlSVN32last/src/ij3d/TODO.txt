@@ -1,4 +1,4 @@
-TODO for the ImageJ 3D Viewer
+TODO for the CytoSHOW3D
 ===========================================================
 
 * volume textures by ref.

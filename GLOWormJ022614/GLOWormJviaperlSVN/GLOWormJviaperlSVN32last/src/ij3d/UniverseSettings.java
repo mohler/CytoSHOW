@@ -51,7 +51,7 @@ public class UniverseSettings {
 		for(String key : shortcuts.keySet())
 			properties.put("shortcut." + key, shortcuts.get(key));
 		try {
-			properties.store(new FileOutputStream(propsfile), "ImageJ 3D Viewer properties");
+			properties.store(new FileOutputStream(propsfile), "CytoSHOW3D properties");
 		} catch(Exception e) {
 			System.err.println(e.getMessage());
 		}
