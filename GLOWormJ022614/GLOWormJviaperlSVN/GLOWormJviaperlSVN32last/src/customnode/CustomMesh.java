@@ -390,7 +390,7 @@ public abstract class CustomMesh extends Shape3D {
 	public void restoreDisplayedData(String path, String name) {
 		HashMap<String, CustomMesh> contents = null;
 		try {
-			contents = WavefrontLoader.load(path, flippedXCoords);
+			contents = WavefrontLoader.load(path, null, flippedXCoords);
 		} catch(IOException e) {
 			e.printStackTrace();
 		}

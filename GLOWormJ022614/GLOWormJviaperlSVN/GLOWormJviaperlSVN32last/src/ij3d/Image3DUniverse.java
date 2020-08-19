@@ -39,6 +39,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1621,9 +1622,10 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 	/**
 	 * Load view transformations from file
+	 * @param jshviewIn 
 	 */
-	public void loadView(final String file) throws IOException {
-		SaveSession.loadView(this, file);
+	public void loadView(final String file, InputStream stream) throws IOException {
+		SaveSession.loadView(this, file, stream);
 	}
 	
 	/**
@@ -2041,7 +2043,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		});
 	}
 
-	public void addContentLater(String filePath) {
+	public void addContentLater(String filePath, InputStream[] objmtlStreams) {
 		ArrayList<String> timedObjFileNames = new ArrayList<String>();
 		File file = new File(filePath);
 		String titleName = file.getName();
@@ -2074,7 +2076,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			
 			Map<String, CustomMesh> meshes= null;
 			try {
-				meshes = WavefrontLoader.load(nextmatchingfilePath, flipXonImport);
+				meshes = WavefrontLoader.load(nextmatchingfilePath, objmtlStreams, flipXonImport);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -2190,8 +2192,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 	public void setContentTranTG(TransformGroup contentTranTG) {
 		this.contentTranTG = contentTranTG;
-	}
-	
+	}	
 
 }
 

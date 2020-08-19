@@ -16,6 +16,8 @@ import customnode.CustomMesh;
 import customnode.CustomMultiMesh;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.io.PrintWriter;
 import java.io.FileWriter;
@@ -53,10 +55,15 @@ public class SaveSession {
 		out.close();
 	}
 
-	public static void loadView(Image3DUniverse univ, String path)
+	public static void loadView(Image3DUniverse univ, String path, InputStream stream)
 							throws IOException {
 		SaveSession sase = new SaveSession();
-		BufferedReader in = new BufferedReader(new FileReader(path));
+		BufferedReader in = null;
+		if (stream==null) {
+			in = new BufferedReader(new FileReader(path));
+		}else {
+			in = new BufferedReader(new InputStreamReader(stream));
+		}
 		HashMap<String, String> view = sase.readView(in, univ);
 		in.close();
 		sase.apply(view, univ);

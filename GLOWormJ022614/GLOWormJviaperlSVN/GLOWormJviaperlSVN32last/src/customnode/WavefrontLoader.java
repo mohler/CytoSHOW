@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.BufferedReader;
@@ -18,12 +20,13 @@ public class WavefrontLoader {
 	 * Load the specified obj file and returns the result as
 	 * a hash map, mapping the object names to the corresponding
 	 * <code>CustomMesh</code> objects.
+	 * @param objmtlStreams 
 	 */
-	public static HashMap<String, CustomMesh> load(String objfile, boolean flipXcoords)
+	public static HashMap<String, CustomMesh> load(String objfile, InputStream[] objmtlStreams, boolean flipXcoords)
 						throws IOException {
 		WavefrontLoader wl = new WavefrontLoader();
 		try {
-			wl.parse(objfile, flipXcoords);
+			wl.parse(objfile, objmtlStreams, flipXcoords);
 		} catch(RuntimeException e) {
 			System.out.println("error reading " + wl.name);
 			throw e;
@@ -46,11 +49,16 @@ public class WavefrontLoader {
 	private int type = -1;
 	private String objfile = null;
 
-	private void parse(String objfile, boolean flipXcoords) throws IOException {
+	private void parse(String objfile, InputStream[] objmtlStreams, boolean flipXcoords) throws IOException {
 		this.objfile = objfile;
-		File f = new File(objfile);
+		File f = null;
+		if (objmtlStreams[0]==null) {
+			f = new File(objfile);
+			in = new BufferedReader(new FileReader(objfile));
+		}else {
+			in = new BufferedReader(new InputStreamReader(objmtlStreams[0]));
+		}
 
-		in = new BufferedReader(new FileReader(objfile));
 		HashMap<String, Color4f> materials = null;
 
 		meshes = new HashMap<String, CustomMesh>();
@@ -58,7 +66,7 @@ public class WavefrontLoader {
 		while((line = in.readLine()) != null) {
 			if(line.startsWith("mtllib")) {
 				String mtlName = line.split("\\s+")[1].trim();
-				materials = readMaterials(f, mtlName);
+				materials = readMaterials(f, mtlName, objmtlStreams[1]);
 			} else if(line.startsWith("g ")) {
 				if(name != null) {
 					CustomMesh cm = createCustomMesh();
@@ -146,7 +154,11 @@ public class WavefrontLoader {
 	}
 
 	private HashMap<String, Color4f> readMaterials(
-			File objfile, String mtlFileName) throws IOException {
+			File objfile, String mtlFileName, InputStream mtlStream) throws IOException {
+
+		if(mtlStream!=null)
+			return readMaterials(mtlFileName, mtlStream);
+			
 		File mtlFile = new File(objfile.getParentFile(), mtlFileName);
 		if(mtlFile.exists())
 			return readMaterials(mtlFile);
@@ -159,20 +171,25 @@ public class WavefrontLoader {
 
 	private static HashMap<String, Color4f> readMaterials(File f)
 							throws IOException {
-		return readMaterials(f.getAbsolutePath());
+		return readMaterials(f.getAbsolutePath(), null);
 	}
 
-	private static HashMap<String, Color4f> readMaterials(String file)
+	private static HashMap<String, Color4f> readMaterials(String file, InputStream mtlStream)
 							throws IOException {
 		String name = null;
 		Color4f color = null;
 
 		HashMap<String, Color4f> materials =
 				new HashMap<String, Color4f>();
-
-		BufferedReader in = new BufferedReader(new FileReader(file));
+		
+		BufferedReader mtlInReader = null;
+		if (mtlStream ==null) {
+			mtlInReader = new BufferedReader(new FileReader(file));
+		}else {
+			mtlInReader = new BufferedReader(new InputStreamReader(mtlStream));
+		}
 		String line;
-		while((line = in.readLine()) != null) {
+		while((line = mtlInReader.readLine()) != null) {
 			// newmtl: if we've read one before
 			// add it to the hash map
 			if(line.startsWith("newmtl")) {
@@ -199,6 +216,7 @@ public class WavefrontLoader {
 				color.w = 1 - Float.parseFloat(sp[1]);
 			}
 		}
+		mtlInReader.close();
 
 		if(name != null && color != null)
 			materials.put(name, color);

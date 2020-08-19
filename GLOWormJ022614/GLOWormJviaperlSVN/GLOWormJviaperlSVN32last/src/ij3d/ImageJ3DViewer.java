@@ -345,13 +345,13 @@ public class ImageJ3DViewer implements PlugIn {
 	public static void importContent(String path) {
 		Image3DUniverse univ = getUniv();
 		univ.setFlipXonImport(false);
-		univ.addContentLater(path);
+		univ.addContentLater(path, null);
 	}
 
 	public static void importContentFlipXcoords(String path) {
 		Image3DUniverse univ = getUniv();
 		univ.setFlipXonImport(true);
-		univ.addContentLater(path);
+		univ.addContentLater(path, null);
 	}
 
 	public static void exportTransformed() {

@@ -169,7 +169,7 @@ public class IJ3dExecuter {
 
 			public void run() {
 				univ.setFlipXonImport(flipXcoords);
-				univ.addContentLater(path);
+				univ.addContentLater(path, null);
 			}
 		}.start();
 	}
@@ -256,7 +256,7 @@ public class IJ3dExecuter {
 		Object ob;
 		try {
 			univ.setFlipXonImport(false);
-			univ.addContentLater(path);
+			univ.addContentLater(path, null);
 			record(IMPORT, path);
 			ob = univ;
 		} catch (Exception e) {
@@ -359,7 +359,7 @@ public class IJ3dExecuter {
 		if(dir == null || name == null)
 			return;
 		try {
-			univ.loadView(dir + name);
+			univ.loadView(dir + name, null);
 		} catch(Exception e) {
 			IJ.error(e.getMessage());
 		}
