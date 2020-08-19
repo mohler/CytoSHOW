@@ -52,7 +52,7 @@ public class WavefrontLoader {
 	private void parse(String objfile, InputStream[] objmtlStreams, boolean flipXcoords) throws IOException {
 		this.objfile = objfile;
 		File f = null;
-		if (objmtlStreams[0]==null) {
+		if (objmtlStreams==null || objmtlStreams[0]==null) {
 			f = new File(objfile);
 			in = new BufferedReader(new FileReader(objfile));
 		}else {
@@ -66,7 +66,7 @@ public class WavefrontLoader {
 		while((line = in.readLine()) != null) {
 			if(line.startsWith("mtllib")) {
 				String mtlName = line.split("\\s+")[1].trim();
-				materials = readMaterials(f, mtlName, objmtlStreams[1]);
+				materials = readMaterials(f, mtlName, objmtlStreams);
 			} else if(line.startsWith("g ")) {
 				if(name != null) {
 					CustomMesh cm = createCustomMesh();
@@ -154,10 +154,10 @@ public class WavefrontLoader {
 	}
 
 	private HashMap<String, Color4f> readMaterials(
-			File objfile, String mtlFileName, InputStream mtlStream) throws IOException {
+			File objfile, String mtlFileName, InputStream[] objmtlStreams) throws IOException {
 
-		if(mtlStream!=null)
-			return readMaterials(mtlFileName, mtlStream);
+		if(objmtlStreams!=null)
+			return readMaterials(mtlFileName, objmtlStreams[1]);
 			
 		File mtlFile = new File(objfile.getParentFile(), mtlFileName);
 		if(mtlFile.exists())
