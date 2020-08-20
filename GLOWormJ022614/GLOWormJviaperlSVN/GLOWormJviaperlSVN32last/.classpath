@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry excluding="src/" kind="src" path=""/>
+	<classpathentry excluding="src/|jogamp-java3d/" kind="src" path=""/>
 	<classpathentry kind="lib" path="precompiled-mpicbg_.jar"/>
 	<classpathentry kind="lib" path="precompiled-mpicbg.jar"/>
 	<classpathentry kind="lib" path="jdom.jar"/>
@@ -92,5 +92,6 @@
 	<classpathentry kind="lib" path="Jama-1.0.3.jar"/>
 	<classpathentry kind="lib" path="junit-4.12.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="jogamp-java3d"/>
 	<classpathentry kind="output" path="plugins"/>
 </classpath>

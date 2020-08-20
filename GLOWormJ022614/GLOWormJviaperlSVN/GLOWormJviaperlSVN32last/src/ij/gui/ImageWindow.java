@@ -17,6 +17,7 @@ import ij.plugin.DragAndDrop;
 import ij.plugin.MultiFileInfoVirtualStack;
 import ij.plugin.frame.Channels;
 import ij.plugin.frame.RoiManager;
+import ij3d.ImageWindow3D;
 
 import java.awt.BorderLayout;
 import java.awt.Button;
@@ -911,7 +912,8 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 
     public void paint(Graphics g) {
 		//if (IJ.debugMode) IJ.log("wPaint: " + imp.getTitle());
-		drawInfo(g);
+		if (!(this instanceof ImageWindow3D))
+			drawInfo(g);
 		Rectangle r = ic.getBounds();
 		int extraWidth = MIN_WIDTH - r.width;
 		int extraHeight = MIN_HEIGHT - r.height;

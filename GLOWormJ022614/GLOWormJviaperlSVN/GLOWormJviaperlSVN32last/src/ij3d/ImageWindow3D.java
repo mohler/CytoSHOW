@@ -116,18 +116,22 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 		}
 
 		this.setResizable(true);
+		if (IJ.isMacOSX())
+			this.setResizable(false);
 		ic = this.canvas3D.getRoiCanvas();
 		this.setLayout(bl);
 
 		error_listener = new ErrorListener();
 		error_listener.addTo(universe);
 
-		
 		add(canvas3D, BorderLayout.CENTER);
 
 		addToolBarPanel();
+		overheadPanel.setVisible(false);
+//		this.toolbar.setVisible(false);
+//		this.menubar.setVisible(false);
 //
-		addCommandButtons(imp);
+//		addCommandButtons(imp);
 
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
@@ -365,9 +369,9 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 		fspc.weighty = 0.5;
 		fspc.fill = GridBagConstraints.BOTH;
 		JButton photoButton = new JButton();
-		photoButton.setActionCommand("Save JPEG snapshot of IJ3DV...");
-		photoButton.setName("Save JPEG snapshot of IJ3DV...");
-		photoButton.setToolTipText("Save JPEG snapshot of IJ3DV...");
+		photoButton.setActionCommand("Save JPEG snapshot...");
+		photoButton.setName("Save JPEG snapshot...");
+		photoButton.setToolTipText("Save JPEG snapshot...");
 		photoButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/photoIcon32.png")));
 		photoButton.setFont(buttonPanelFont);
 		viewButtonPanel.add(photoButton, fspc);
@@ -552,6 +556,9 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 		modeButtonPanel.setVisible(false);
 		optionsPanel.setVisible(true);
 		viewButtonPanel.setVisible(true);
+		videoButton.setVisible(false);
+		shareButton.setVisible(false);
+		autoButton.setVisible(false);
 
 //		
 	}
