@@ -135,7 +135,8 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
-				close();
+//				close();
+				System.exit(0);
 			}
 		});
 

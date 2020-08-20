@@ -15,12 +15,10 @@ import ij3d.Image3DUniverse;
 public class DC_PHATE_Viewer {
 
 	public static void main(String[] args) {
-		//			ImageJ3DViewer.main(args);
 
 		InputStream[] jshObjmtlStreams = new InputStream[2];
 
-		Image3DUniverse jshUniv = new Image3DUniverse();
-//		jshUniv.setAutoAdjustView(false);
+		Image3DUniverse jshUniv = new Image3DUniverse();//		jshUniv.setAutoAdjustView(false);
 		jshUniv.show();
 		InputStream jshobjIn = MQTVSSceneLoader64.class.getResourceAsStream("docs/jsh_dccphate_2017b_0000.obj");
 		InputStream jshmtlIn = MQTVSSceneLoader64.class.getResourceAsStream("docs/jsh_dccphate_2017b_0000.mtl");			
@@ -38,12 +36,10 @@ public class DC_PHATE_Viewer {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-//		jshUniv.setAutoAdjustView(true);
 
 		InputStream[] n2uObjmtlStreams = new InputStream[2];
 
 		Image3DUniverse n2uUniv = new Image3DUniverse();
-//		n2uUniv.setAutoAdjustView(false);
 		n2uUniv.show();
 		InputStream n2uobjIn = MQTVSSceneLoader64.class.getResourceAsStream("docs/n2u_dccphate_2017b_flipX_0000_0000.obj");
 		InputStream n2umtlIn = MQTVSSceneLoader64.class.getResourceAsStream("docs/n2u_dccphate_2017b_flipX_0000_0000.mtl");	
@@ -60,7 +56,6 @@ public class DC_PHATE_Viewer {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
-//		n2uUniv.setAutoAdjustView(true);
 
 		
 		jshUniv.sync(true);

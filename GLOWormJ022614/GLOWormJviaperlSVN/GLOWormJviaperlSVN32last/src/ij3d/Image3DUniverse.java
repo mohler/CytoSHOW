@@ -339,12 +339,16 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 
 			public void mousePressed(MouseEvent e) {
-				contextmenu.showPopup(e);
+//				contextmenu.showPopup(e);
+				contextmenu.showPopup(new MouseEvent(e.getComponent(),e.getID(),e.getWhen(),e.getModifiers(),e.getX(),e.getY(),e.getClickCount(),false));   
+				//to mute popup 
 			}
 
 
 			public void mouseReleased(MouseEvent e) {
-				contextmenu.showPopup(e);
+//				contextmenu.showPopup(e);
+				contextmenu.showPopup(new MouseEvent(e.getComponent(),e.getID(),e.getWhen(),e.getModifiers(),e.getX(),e.getY(),e.getClickCount(),false));   
+				//to mute popup 
 			}
 		});
 
