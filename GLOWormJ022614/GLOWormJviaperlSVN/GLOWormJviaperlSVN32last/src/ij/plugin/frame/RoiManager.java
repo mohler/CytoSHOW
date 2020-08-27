@@ -5871,23 +5871,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						
 					scaledRoi = RoiEnlarger.enlarge(testRoi, expansionDistance);
 					
-//					try {
-//						scaledRoi = new RoiDecoder((testRoi.getBounds().getWidth()+2*expansionDistance)/testRoi.getBounds().getWidth(), RoiEncoder.saveAsByteArray(testRoi), testRoi.getName()).getRoi();
-//						scaledRoi.setLocation((testRoi.getBounds().getX()-expansionDistance/2)
-//											, (testRoi.getBounds().getY()-expansionDistance/2));
-//					} catch (IOException e) {
-//						// TODO Auto-generated catch block
-//						e.printStackTrace();
-//					}
 					
 					Roi andRoi = (new ShapeRoi(scaledRoi).and(new ShapeRoi(dupRoi)));
 					if (andRoi!=null && andRoi.getBounds().getWidth()>0){
-//						try {
-//							andRoi = new RoiDecoder( RoiEncoder.saveAsByteArray(andRoi), andRoi.getName()).getRoi();
-//						} catch (IOException e) {
-//							// TODO Auto-generated catch block
-//							e.printStackTrace();
-//						}
+
 						andRoi.setName(andName);
 
 						andRoi.setPosition(cPos, zPos, tPos);
