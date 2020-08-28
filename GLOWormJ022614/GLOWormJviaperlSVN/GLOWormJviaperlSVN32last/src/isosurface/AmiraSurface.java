@@ -39,7 +39,7 @@ public class AmiraSurface implements PlugIn {
 			IJ.error("Could not read '" + arg + "': " + e);
 			return;
 		}
-		universe.show();
+		universe.show(false);
 	}
 
 	public static void addMeshes(Image3DUniverse universe, String fileName)

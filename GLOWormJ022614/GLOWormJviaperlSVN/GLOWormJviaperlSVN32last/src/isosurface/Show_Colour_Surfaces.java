@@ -260,7 +260,7 @@ public class Show_Colour_Surfaces implements PlugIn {
 		Image3DUniverse univ;
 		if( chosenIndex == choices.length - 1 ) {
 			univ = new Image3DUniverse(512, 512);
-			univ.show();
+			univ.show(false);
 			GUI.center(univ.getWindow());
 		} else
 			univ = Image3DUniverse.universes.get(chosenIndex);

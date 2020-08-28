@@ -173,7 +173,7 @@ public class CustomTransparentTriangleMesh extends CustomTriangleMesh {
 	}
 	public static void main(String[] args) {
 		ij3d.Image3DUniverse u = new ij3d.Image3DUniverse();
-		u.show();
+		u.show(false);
 
 		List<Point3f> pts = new ArrayList<Point3f>();
 		pts.add(new Point3f(0, 0, 0));

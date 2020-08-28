@@ -24,7 +24,7 @@ public class Mesh_Maker extends MeshMaker implements PlugIn {
 
 	public void run(String arg) {
 		Image3DUniverse univ = new Image3DUniverse(512, 512);
-		univ.show();
+		univ.show(false);
 
 		// define two spheres: an X,Y,Z point with a radius
 		double x1 = 10,

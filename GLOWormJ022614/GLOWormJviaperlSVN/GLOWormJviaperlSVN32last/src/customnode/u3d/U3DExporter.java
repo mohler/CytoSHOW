@@ -39,7 +39,7 @@ public class U3DExporter {
 
 	public static void main(String[] args) throws IOException {
 		Image3DUniverse univ = new Image3DUniverse();
-		univ.show();
+		univ.show(false);
 
 		// List<Point3f> l = customnode.MeshMaker.createSphere(0, 0, 0, 1f);
 		List<Point3f> l = customnode.MeshMaker.createIcosahedron(1, 1f);

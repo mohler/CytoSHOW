@@ -19,7 +19,7 @@ public class DC_PHATE_Viewer {
 		InputStream[] jshObjmtlStreams = new InputStream[2];
 
 		Image3DUniverse jshUniv = new Image3DUniverse();//		jshUniv.setAutoAdjustView(false);
-		jshUniv.show();
+		jshUniv.show(true);
 		InputStream jshobjIn = MQTVSSceneLoader64.class.getResourceAsStream("docs/jsh_dccphate_2017b_0000.obj");
 		InputStream jshmtlIn = MQTVSSceneLoader64.class.getResourceAsStream("docs/jsh_dccphate_2017b_0000.mtl");			
 		jshObjmtlStreams[0] =jshobjIn;
@@ -40,7 +40,7 @@ public class DC_PHATE_Viewer {
 		InputStream[] n2uObjmtlStreams = new InputStream[2];
 
 		Image3DUniverse n2uUniv = new Image3DUniverse();
-		n2uUniv.show();
+		n2uUniv.show(true);
 		InputStream n2uobjIn = MQTVSSceneLoader64.class.getResourceAsStream("docs/n2u_dccphate_2017b_flipX_0000_0000.obj");
 		InputStream n2umtlIn = MQTVSSceneLoader64.class.getResourceAsStream("docs/n2u_dccphate_2017b_flipX_0000_0000.mtl");	
 		n2uObjmtlStreams[0] =n2uobjIn;

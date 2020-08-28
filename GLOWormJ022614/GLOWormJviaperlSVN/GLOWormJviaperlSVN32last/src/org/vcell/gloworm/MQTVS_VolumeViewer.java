@@ -55,7 +55,7 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 			univ = this.univ;
 		}
 		if (!saveSingly && univ.getWindow() == null){
-			univ.show();
+			univ.show(false);
 			univ.getWindow().addWindowListener(this);
 			WindowManager.removeWindow(univ.getWindow());
 			

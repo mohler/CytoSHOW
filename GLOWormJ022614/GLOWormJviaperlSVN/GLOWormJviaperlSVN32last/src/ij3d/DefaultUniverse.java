@@ -589,8 +589,12 @@ public abstract class DefaultUniverse extends SimpleUniverse
 	/**
 	 * Show this universe in a new window.
 	 */
-	public void show() {
-		win = new ImageWindow3D("CytoSHOW3D", this);
+	public void show(boolean simpleWindow) {
+		if (simpleWindow) {
+			win = new SimpleImageWindow3D("CytoSHOW3D", this);
+		} else {
+			win = new ImageWindow3D("CytoSHOW3D", this);
+		}
 	}
 
 	/**

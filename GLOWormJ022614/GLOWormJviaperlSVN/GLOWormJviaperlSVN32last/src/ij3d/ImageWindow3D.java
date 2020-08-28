@@ -63,16 +63,16 @@ import org.vcell.gloworm.SliceStereoToggle;
 
 public class ImageWindow3D extends ImageWindow implements FocusListener, WindowListener, UniverseListener {
 
-	private DefaultUniverse universe;
+	protected DefaultUniverse universe;
 	ImageCanvas3D canvas3D;
-	private Label status = new Label("");
-	private boolean noOffScreen = false;
-	private ErrorListener error_listener;
+	protected Label status = new Label("");
+	protected boolean noOffScreen = false;
+	protected ErrorListener error_listener;
 //	private ImagePlus imp;
 //	private ImageCanvas ic;
-	private Panel overheadPanel;
-	private Toolbar toolbar;
-	private Image3DMenubar menubar;
+	protected Panel overheadPanel;
+	protected Toolbar toolbar;
+	protected Image3DMenubar menubar;
 //	protected ImageJ ij;
 //	private Panel tagButtonPanel;
 //	private Panel viewButtonPanel;
@@ -116,27 +116,22 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 		}
 
 		this.setResizable(true);
-		if (IJ.isMacOSX())
-			this.setResizable(false);
 		ic = this.canvas3D.getRoiCanvas();
 		this.setLayout(bl);
 
 		error_listener = new ErrorListener();
 		error_listener.addTo(universe);
 
+		
 		add(canvas3D, BorderLayout.CENTER);
 
 		addToolBarPanel();
-		overheadPanel.setVisible(false);
-//		this.toolbar.setVisible(false);
-//		this.menubar.setVisible(false);
 //
-//		addCommandButtons(imp);
+		addCommandButtons(imp);
 
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
-//				close();
-				System.exit(0);
+				close();
 			}
 		});
 
@@ -557,9 +552,6 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 		modeButtonPanel.setVisible(false);
 		optionsPanel.setVisible(true);
 		viewButtonPanel.setVisible(true);
-		videoButton.setVisible(false);
-		shareButton.setVisible(false);
-		autoButton.setVisible(false);
 
 //		
 	}

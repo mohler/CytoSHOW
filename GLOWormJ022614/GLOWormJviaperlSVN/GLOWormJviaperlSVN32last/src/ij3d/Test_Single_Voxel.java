@@ -41,7 +41,7 @@ public class Test_Single_Voxel implements PlugIn {
 		ImagePlus i = new ImagePlus("test",stack);
 		i.show();
 		Image3DUniverse univ = new Image3DUniverse(512, 512);
-		univ.show();
+		univ.show(false);
 		GUI.center(univ.getWindow());
 		boolean [] channels = { true, true, true };
 		Content c = univ.addContent(i,

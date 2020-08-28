@@ -711,7 +711,7 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 			((JButton)e.getSource()).setIcon(new ImageIcon(ImageWindow.class.getResource("images/autoButton32.png")));
 			((Image3DUniverse)(((ImageWindow3D)this.getParent().getParent().getParent().getParent().getParent()).getUniverse())).setAutoAdjustView(false);
 		} else if(src == newViewer) {
-			  new Image3DUniverse().show();
+			  new Image3DUniverse().show(false);
 		}
 
 

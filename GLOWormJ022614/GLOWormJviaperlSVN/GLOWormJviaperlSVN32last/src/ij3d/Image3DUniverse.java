@@ -340,14 +340,16 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 			public void mousePressed(MouseEvent e) {
 //				contextmenu.showPopup(e);
-				contextmenu.showPopup(new MouseEvent(e.getComponent(),e.getID(),e.getWhen(),e.getModifiers(),e.getX(),e.getY(),e.getClickCount(),false));   
+				boolean showPopup = !(win instanceof SimpleImageWindow3D);
+				contextmenu.showPopup(new MouseEvent(e.getComponent(),e.getID(),e.getWhen(),e.getModifiers(),e.getX(),e.getY(),e.getClickCount(), showPopup));   
 				//to mute popup 
 			}
 
 
 			public void mouseReleased(MouseEvent e) {
 //				contextmenu.showPopup(e);
-				contextmenu.showPopup(new MouseEvent(e.getComponent(),e.getID(),e.getWhen(),e.getModifiers(),e.getX(),e.getY(),e.getClickCount(),false));   
+				boolean showPopup = !(win instanceof SimpleImageWindow3D);
+				contextmenu.showPopup(new MouseEvent(e.getComponent(),e.getID(),e.getWhen(),e.getModifiers(),e.getX(),e.getY(),e.getClickCount(), showPopup));   
 				//to mute popup 
 			}
 		});
@@ -357,11 +359,16 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 	/**
 	 * Display this universe in a window (an ImageWindow3D).
+	 * @param simpleWindow3D 
 	 */
 
-	public void show() {
+	public void show(boolean simpleWindow3D) {
 		menubar = new Image3DMenubar(this);
-		init(new ImageWindow3D("CytoSHOW3D [" + numUniversesLaunched +"]", this));
+		if (simpleWindow3D) {
+			init(new SimpleImageWindow3D("CytoSHOW3D [" + numUniversesLaunched +"]", this));	
+		} else {
+			init(new ImageWindow3D("CytoSHOW3D [" + numUniversesLaunched +"]", this));
+		}
 //		init(new ImageWindow3D("CytoSHOW3D [IJ3DV]", this));
 		win.pack();
 		win.setVisible(true);
