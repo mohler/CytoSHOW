@@ -1726,7 +1726,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 		// rotate so that y shows downwards
 		Transform3D t = new Transform3D();
-		AxisAngle4d aa = new AxisAngle4d(1, 0, 0, 0);
+		AxisAngle4d aa = new AxisAngle4d(1, 0, 0, Math.PI);
 		t.set(aa);
 		getRotationTG().setTransform(t);
 
@@ -1987,11 +1987,11 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 			this.scene.addChild(c);
 			
-			//ADDED THIS TO MAKE resetView() ACTUALLY RESET TO IDENTITY MATRIX INSTEAD OF WEIRD X-180 THING
-			Transform3D t = new Transform3D();
-			AxisAngle4d aa = new AxisAngle4d(1, 0, 0, Math.PI);
-			t.set(aa);
-			c.setTransform(t);
+//			//ADDED THIS TO MAKE resetView() ACTUALLY RESET TO IDENTITY MATRIX INSTEAD OF WEIRD X-180 THING
+//			Transform3D t = new Transform3D();
+//			AxisAngle4d aa = new AxisAngle4d(1, 0, 0, Math.PI);
+//			t.set(aa);
+//			c.setTransform(t);
 			
 			this.contents.put(name, c);
 			this.recalculateGlobalMinMax(c);
