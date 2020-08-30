@@ -340,7 +340,9 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 			public void mousePressed(MouseEvent e) {
 //				contextmenu.showPopup(e);
-				boolean showPopup = !(win instanceof SimpleImageWindow3D);
+				boolean cd = e.isControlDown();
+				int cbi = e.getButton();
+				boolean showPopup = !(win instanceof SimpleImageWindow3D) && (cd || cbi!=1);
 				contextmenu.showPopup(new MouseEvent(e.getComponent(),e.getID(),e.getWhen(),e.getModifiers(),e.getX(),e.getY(),e.getClickCount(), showPopup));   
 				//to mute popup 
 			}
@@ -348,7 +350,9 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 			public void mouseReleased(MouseEvent e) {
 //				contextmenu.showPopup(e);
-				boolean showPopup = !(win instanceof SimpleImageWindow3D);
+				boolean cd = e.isControlDown();
+				int cbi = e.getButton();
+				boolean showPopup = !(win instanceof SimpleImageWindow3D) && (cd || cbi!=1);
 				contextmenu.showPopup(new MouseEvent(e.getComponent(),e.getID(),e.getWhen(),e.getModifiers(),e.getX(),e.getY(),e.getClickCount(), showPopup));   
 				//to mute popup 
 			}
