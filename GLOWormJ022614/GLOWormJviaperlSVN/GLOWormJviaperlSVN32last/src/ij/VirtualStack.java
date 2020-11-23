@@ -23,12 +23,12 @@ public class VirtualStack extends ImageStack {
 	private boolean burnIn = false;
 	private ImagePlus lineageMapImage;
 	protected String dimOrder;
-	protected  int[] dXA;
-	protected  int[] dXB;
-	protected  int[] dYA;
-	protected  int[] dYB;
-	protected  int[] dZA;
-	protected  int[] dZB;
+	protected  int[] dXA = new int[]{0};
+	protected  int[] dXB = new int[]{0};
+	protected  int[] dYA = new int[]{0};
+	protected  int[] dYB = new int[]{0};
+	protected  int[] dZA = new int[]{0};
+	protected  int[] dZB = new int[]{0};
 
 
 

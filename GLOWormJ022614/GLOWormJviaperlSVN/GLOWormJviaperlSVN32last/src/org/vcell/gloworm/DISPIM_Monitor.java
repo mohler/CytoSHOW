@@ -2398,12 +2398,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						diSPIMPanel[pos][0].add(BorderLayout.WEST,
 								dispimToolsButton[pos][0]);
 						if (impAs[pos].getStack() instanceof VirtualStack) {
-							if (((VirtualStack) (impAs[pos].getStack()))
-									.getdXA()[0] == 0
-									&& ((VirtualStack) (impAs[pos].getStack()))
-									.getdYA()[0] == 0
-									&& ((VirtualStack) (impAs[pos].getStack()))
-									.getdZA()[0] == 0) {
+							VirtualStack vstk = ((VirtualStack) (impAs[pos].getStack()));
+							if ((vstk.getdXA() == null || vstk.getdXA()[0] == 0)
+									&& (vstk.getdYA() == null || vstk.getdYA()[0] == 0)
+											&& (vstk.getdZA() == null || vstk.getdZA()[0] == 0)) {
 
 								dispimToolsButton[pos][0]
 										.setBackground(Color.orange);
@@ -2420,12 +2418,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						diSPIMPanel[pos][1].add(BorderLayout.WEST,
 								dispimToolsButton[pos][1]);
 						if (impBs[pos].getStack() instanceof VirtualStack) {
-							if (((VirtualStack) (impBs[pos].getStack()))
-									.getdXA()[0] == 0
-									&& ((VirtualStack) (impBs[pos].getStack()))
-									.getdYA()[0] == 0
-									&& ((VirtualStack) (impBs[pos].getStack()))
-									.getdZA()[0] == 0) {
+							VirtualStack vstk = ((VirtualStack) (impBs[pos].getStack()));
+							if ((vstk.getdXA() == null || vstk.getdXA()[0] == 0)
+									&& (vstk.getdYA() == null || vstk.getdYA()[0] == 0)
+											&& (vstk.getdZA() == null || vstk.getdZA()[0] == 0)) {
 
 								dispimToolsButton[pos][1]
 										.setBackground(Color.orange);

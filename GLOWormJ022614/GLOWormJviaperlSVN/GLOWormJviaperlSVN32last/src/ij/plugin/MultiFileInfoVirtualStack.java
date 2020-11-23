@@ -652,6 +652,13 @@ array and displays it if 'show' is true. */
 		if (correctiveShiftsFile.canRead()){
 			String correctiveShiftsString = IJ.openAsString(infoDir + "correctiveShifts.txt");
 			String[] correctiveShiftsLines = correctiveShiftsString.split("\n");
+			ArrayList<String> cslAL = new ArrayList<String>();
+			for (int line = 0; line<correctiveShiftsLines.length; line++){
+				if (correctiveShiftsLines[line].contains(",")) {
+					cslAL.add(correctiveShiftsLines[line]);
+				}
+			}
+			correctiveShiftsLines = cslAL.toArray(new String[cslAL.size()]);
 			int[][] shiftArrays = new int[][]{corrXA,corrYA,corrZA,corrXB,corrYB,corrZB};
 			for (int line = 0; line<correctiveShiftsLines.length; line++){
 				String[] correctiveShiftsLineChunks = correctiveShiftsLines[line].split(",");
@@ -855,9 +862,9 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 			//	if (stackNumber >= fivStacks.size()){
 			//	stackNumber = fivStacks.size()-1;
 			//	}
-			corrX=isViewB?corrXB[((stackNumber)%tDim)]:corrXA[((stackNumber)%tDim)];
-			corrY=isViewB?corrYB[((stackNumber)%tDim)]:corrYA[((stackNumber)%tDim)];
-			corrZ=isViewB?corrZB[((stackNumber)%tDim)]:corrZA[((stackNumber)%tDim)];
+			corrX=isViewB?corrXB[((stackNumber)%tDim)]-corrXB[0]:corrXA[((stackNumber)%tDim)]-corrXA[0];
+			corrY=isViewB?corrYB[((stackNumber)%tDim)]-corrYB[0]:corrYA[((stackNumber)%tDim)]-corrYA[0];
+			corrZ=isViewB?corrZB[((stackNumber)%tDim)]-corrZB[0]:corrZA[((stackNumber)%tDim)]-corrZA[0];
 			//IJ.log("stk="+stackNumber +"  vslc="+vSliceNumber);
 			initiateStack(stackNumber, 0);
 			ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber+(sliceNumber%2==0?0:dZ)+corrZ);
@@ -940,8 +947,8 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 				ip.flipHorizontal();
 			}
 			ip.translate((1-n%2)*dX, (1-n%2)*dY);
-			double corediffX = corrX-corrXA[0];
-			double corediffY = corrY-corrYA[0];
+			double corrdiffX = corrX-corrXA[0];
+			double corrdiffY = corrY-corrYA[0];
 
 			if (ratioing) {
 				String wormTraceMapPath = infoDir + File.separator + "ThermoTraceMap.tif";
@@ -1257,7 +1264,7 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 				}
 				if (isViewB) {
 					if (ownerImp!=null)
-						ownerImp.setRoi(((bigIP.getWidth()-2)/2)+(int)corediffX/100, ((bigIP.getHeight()-2)/2)+(int)corediffY/100, 5, 5);
+						ownerImp.setRoi(((bigIP.getWidth()-2)/2)+(int)corrdiffX/100, ((bigIP.getHeight()-2)/2)+(int)corrdiffY/100, 5, 5);
 //					IJ.saveAsTiff(new ImagePlus("",bigIP), wormTraceMapPath);
 					ip = bigIP;
 				}
@@ -1266,22 +1273,25 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 
 		}
 		if (dimOrder == "xyzct") {
-			corrX=isViewB?corrXB[((stackNumber)%tDim)]:corrXA[((stackNumber)%tDim)];
-			corrY=isViewB?corrYB[((stackNumber)%tDim)]:corrYA[((stackNumber)%tDim)];
-			corrZ=isViewB?corrZB[((stackNumber)%tDim)]:corrZA[((stackNumber)%tDim)];
-
+			vSliceNumber = (sliceNumber);
+			corrX=isViewB?corrXB[((stackNumber)%tDim)]-corrXB[0]:corrXA[((stackNumber)%tDim)]-corrXA[0];
+			corrY=isViewB?corrYB[((stackNumber)%tDim)]-corrYB[0]:corrYA[((stackNumber)%tDim)]-corrYA[0];
+			corrZ=isViewB?corrZB[((stackNumber)%tDim)]-corrZB[0]:corrZA[((stackNumber)%tDim)]-corrZA[0];
+			//IJ.log("stk="+stackNumber +"  vslc="+vSliceNumber);
 			initiateStack(stackNumber, 0);
-			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber/cDim + ((sliceNumber%cDim)*fivStacks.get(stackNumber).getSize()/(vDim))+(sliceNumber%2==0?0:dZ)
-					+(isViewB?fivStacks.get(stackNumber).getSize()/(cDim*vDim):0)+corrZ);
+			int corrSlc = vSliceNumber+corrZ;
+			ip = fivStacks.get(stackNumber).getProcessor(corrSlc);
 			ip.translate(corrX, corrY);
 		}
 		if (dimOrder == "xyztc") {
-			corrX=isViewB?corrXB[((stackNumber)%tDim)]:corrXA[((stackNumber)%tDim)];
-			corrY=isViewB?corrYB[((stackNumber)%tDim)]:corrYA[((stackNumber)%tDim)];
-			corrZ=isViewB?corrZB[((stackNumber)%tDim)]:corrZA[((stackNumber)%tDim)];
-			//IJ.log(""+stackNumber+" "+corrX+" "+corrY+" "+corrZ);
+			vSliceNumber = (sliceNumber);
+			corrX=isViewB?corrXB[((stackNumber)%tDim)]-corrXB[0]:corrXA[((stackNumber)%tDim)]-corrXA[0];
+			corrY=isViewB?corrYB[((stackNumber)%tDim)]-corrYB[0]:corrYA[((stackNumber)%tDim)]-corrYA[0];
+			corrZ=isViewB?corrZB[((stackNumber)%tDim)]-corrZB[0]:corrZA[((stackNumber)%tDim)]-corrZA[0];
+			//IJ.log("stk="+stackNumber +"  vslc="+vSliceNumber);
 			initiateStack(stackNumber, 0);
-			ip = fivStacks.get(stackNumber).getProcessor(sliceNumber+(sliceNumber%2==0?0:dZ)+corrZ);
+			int corrSlc = vSliceNumber+corrZ;
+			ip = fivStacks.get(stackNumber).getProcessor(corrSlc);
 			ip.translate(corrX, corrY);
 		}
 

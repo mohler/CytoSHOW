@@ -1235,7 +1235,8 @@ public class ImageJ extends Frame implements ActionListener,
 					if (rmqtvsh == null)
 						return;
 					ImagePlus imp = rmqtvsh.getImagePlus();
-					imp.getWindow().setVisible(true);
+					if (imp!=null)
+						imp.getWindow().setVisible(true);
 			} else {
 				for (String scene:concat.split("\\|")) {
 					if (concat.contains("scene.scn")){

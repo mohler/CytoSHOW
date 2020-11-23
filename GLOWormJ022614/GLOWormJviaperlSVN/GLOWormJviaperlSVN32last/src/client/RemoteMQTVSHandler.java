@@ -214,7 +214,7 @@ public class RemoteMQTVSHandler {
 			e.printStackTrace();
 		} 
 
-		if (moviePathNames.length>0) {
+		if (moviePathNames.length>0 && moviePathNames[0]!="") {
 			if (moviePathNames[0].contains(".obj")) {
 				return;
 			} else {
