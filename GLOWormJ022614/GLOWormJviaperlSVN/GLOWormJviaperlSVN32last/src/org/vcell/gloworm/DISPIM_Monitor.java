@@ -998,7 +998,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						IJ.log(""+ sizeA+" "+shouldBeSizeA+" "+stackAs[pos].getSize());
 
 						impAs[pos].setOpenAsHyperStack(true);
-						impAs[pos].setDimensions(cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim), zDim, sizeA/((cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim))*zDim));
+						//impAs[pos].setDimensions(cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim), zDim, sizeA/((cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim))*zDim));
+						impAs[pos].setDimensions(cDim/(dimOrder.matches("xySplit.*Czt")?1:1), zDim, sizeA/((cDim/(dimOrder.matches("xySplit.*Czt")?1:1))*zDim));
 
 						impAs[pos] = new CompositeImage(impAs[pos]);
 						//	{
@@ -1044,7 +1045,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							stackBs[pos].setSkewXperZ(
 									-calB.pixelDepth / calB.pixelWidth);
 						impBs[pos].setOpenAsHyperStack(true);
-						impBs[pos].setDimensions(cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim), zDim, sizeB/((cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim))*zDim));
+//						impBs[pos].setDimensions(cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim), zDim, sizeB/((cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim))*zDim));
+						impBs[pos].setDimensions(cDim/(dimOrder.matches("xySplit.*Czt")?1:1), zDim, sizeB/((cDim/(dimOrder.matches("xySplit.*Czt")?1:1))*zDim));
 
 						impBs[pos] = new CompositeImage(impBs[pos]);
 						//	{
