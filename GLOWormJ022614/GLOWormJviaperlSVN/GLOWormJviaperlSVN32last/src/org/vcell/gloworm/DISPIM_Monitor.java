@@ -795,7 +795,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						dimOrder = (diSPIM_MM_channelMode!=null && diSPIM_MM_channelMode.contains("VOLUME")?"xyzct":"xyczt");
 
 					if (!dimOrder.toLowerCase().matches(".*split.*c.*"))
-						wavelengths = cDim/vDim; 
+						wavelengths = cDim; 
 					else
 						wavelengths = cDim;
 					vWidth = diSPIM_MM_PixelSize_um;
@@ -939,7 +939,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						final int fPos = pos;
 
 						stackAs[pos] = new MultiFileInfoVirtualStack(
-								dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_Channels/vDim>1 && diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
+								dirConcat, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
 								false, false, true, false, null){
 
 							@Override
@@ -952,7 +952,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							}
 						};
 						stackBs[pos] = new MultiFileInfoVirtualStack(
-								dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_Channels/vDim>1 && diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
+								dirConcat, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
 								true, false, true, false, null){
 
 							@Override
@@ -989,7 +989,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						if (stageScan)
 							stackAs[pos].setSkewXperZ(
 									calA.pixelDepth / calA.pixelWidth);
-						int shouldBeSizeA = (cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim) ) * zDim * (sizeA/((cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim))*zDim));
+						int shouldBeSizeA = (cDim*(dimOrder.matches("xySplit.*Czt")?1:1) ) * zDim * (sizeA/((cDim*(dimOrder.matches("xySplit.*Czt")?1:1))*zDim));
 
 						for (int d=1;d<=sizeA-shouldBeSizeA;d++){
 							stackAs[pos].deleteSlice(1);
@@ -998,8 +998,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						IJ.log(""+ sizeA+" "+shouldBeSizeA+" "+stackAs[pos].getSize());
 
 						impAs[pos].setOpenAsHyperStack(true);
-						//impAs[pos].setDimensions(cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim), zDim, sizeA/((cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim))*zDim));
-						impAs[pos].setDimensions(cDim/(dimOrder.matches("xySplit.*Czt")?1:1), zDim, sizeA/((cDim/(dimOrder.matches("xySplit.*Czt")?1:1))*zDim));
+						impAs[pos].setDimensions(cDim*(dimOrder.matches("xySplit.*Czt")?1:1), zDim, sizeA/(cDim*(dimOrder.matches("xySplit.*Czt")?1:1)*zDim));
 
 						impAs[pos] = new CompositeImage(impAs[pos]);
 						//	{
@@ -1032,7 +1031,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 						int sizeB = stackBs[pos].getSize();
 
-						int shouldBeSizeB = (cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim) ) * zDim * (sizeB/((cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim))*zDim));
+						int shouldBeSizeB = (cDim*(dimOrder.matches("xySplit.*Czt")?1:1) ) * zDim * (sizeB/((cDim*(dimOrder.matches("xySplit.*Czt")?1:1))*zDim));
 
 						for (int d=1;d<=sizeB-shouldBeSizeB;d++){
 							stackBs[pos].deleteSlice(1);
@@ -1045,8 +1044,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							stackBs[pos].setSkewXperZ(
 									-calB.pixelDepth / calB.pixelWidth);
 						impBs[pos].setOpenAsHyperStack(true);
-//						impBs[pos].setDimensions(cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim), zDim, sizeB/((cDim/(dimOrder.matches("xySplit.*Czt")?1:vDim))*zDim));
-						impBs[pos].setDimensions(cDim/(dimOrder.matches("xySplit.*Czt")?1:1), zDim, sizeB/((cDim/(dimOrder.matches("xySplit.*Czt")?1:1))*zDim));
+						impBs[pos].setDimensions(cDim*(dimOrder.matches("xySplit.*Czt")?1:1), zDim, sizeB/(cDim*(dimOrder.matches("xySplit.*Czt")?1:1)*zDim));
 
 						impBs[pos] = new CompositeImage(impBs[pos]);
 						//	{
@@ -1305,7 +1303,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					dimOrder = ((diSPIM_MM_channelMode!=null && diSPIM_MM_channelMode.contains("VOLUME"))?"xyzct":"xyczt");
 
 				if (!dimOrder.toLowerCase().matches(".*split.*c.*"))
-					wavelengths = cDim/vDim; 
+					wavelengths = cDim; 
 				else
 					wavelengths = cDim;
 				vWidth = diSPIM_MM_PixelSize_um;
@@ -3206,7 +3204,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							tDim = listA.length;
 
 							stackAs[pos] = new MultiFileInfoVirtualStack(
-									dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_Channels/vDim>1 && diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
+									dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_Channels/2>1 && diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
 									false, false, true, new File(this.dirOrOMETiff).isDirectory() && this.dirOrOMETiff.endsWith(".ome.tif"),null);
 
 							ImagePlus impNext = new ImagePlus(impAs[pos].getTitle(), stackAs[pos]);
@@ -3255,7 +3253,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							tDim = listA.length;
 
 							stackBs[pos] = new MultiFileInfoVirtualStack(
-									dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_Channels/vDim>1 && diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
+									dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_Channels/2>1 && diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
 									true, false, true, new File(this.dirOrOMETiff).isDirectory() && this.dirOrOMETiff.endsWith(".ome.tif"), null);
 
 							impNext = new CompositeImage(new ImagePlus(impBs[pos].getTitle(), stackBs[pos]));

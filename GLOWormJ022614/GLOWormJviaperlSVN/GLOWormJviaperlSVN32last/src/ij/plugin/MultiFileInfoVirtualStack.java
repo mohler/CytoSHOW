@@ -548,9 +548,8 @@ array and displays it if 'show' is true. */
 		if (splitPath[splitPath.length-1].contains("MMStack_") && (cumulativeTiffFileArray.length >0)) { 
 			nSlices = 0;
 			for (FileInfoVirtualStack mmStack:fivStacks) {
-				int fivStackSize = mmStack.getSize();
-				nSlices = nSlices + fivStackSize*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1)
-														*(dimOrder.toLowerCase().matches(".*splitratioc.*")?2:1);
+				nSlices = nSlices + mmStack.getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1)
+						*(dimOrder.toLowerCase().matches(".*splitratioc.*")?2:1);
 			}
 
 			if (cDim == 0 || zDim == 0 || tDim == 0) {
@@ -566,8 +565,7 @@ array and displays it if 'show' is true. */
 				nSlices = cDim*zDim*tDim;
 			} else {
 				/*why like this?*/
-				//this.tDim =nSlices/(this.cDim*this.zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?(cDim/2):1));
-				this.tDim =nSlices/(this.cDim*this.zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?(cDim/2):1)*vDim);
+				this.tDim =nSlices/(this.cDim*this.zDim*vDim*(dimOrder.toLowerCase().matches(".*splitc.*")?(cDim/2):1));
 			}
 
 		} else if (monitoringDecon){
@@ -683,7 +681,6 @@ array and displays it if 'show' is true. */
 		imp.setOpenAsHyperStack(true);	
 		//	int cztDims = cDim*zDim*fivStacks.size();
 		int cztDims = cDim*zDim*tDim;
-		//int impSize = imp.getStackSize()*vDim;
 		int impSize = imp.getStackSize();
 		if (cztDims!= impSize) {
 			if (cztDims > impSize) {
@@ -801,7 +798,7 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 
 		if (dimOrder.toLowerCase().matches("xy.*czt")) {
 			int adjN =0;
-			int zc = zDim*cDim*(dimOrder.toLowerCase().matches(".*split.*c.*")?2:1);
+			int zc = zDim*cDim*(dimOrder.toLowerCase().matches(".*split.*c.*")?1:1);
 			while (n>zc) {
 				adjN = adjN + (zc*vDim);
 				n = n-(zc);
@@ -810,7 +807,7 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 		}
 
 		while (stackNumber < fivStacks.size() && n > fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*split(ratio)?c.*")?2:1)) {
-			n = 								 n - fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*split(ratio)?c.*")?2:1);
+			n = n - fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*split(ratio)?c.*")?2:1);
 			stackNumber++;
 		}
 		//	if (stackNumber>=fivStacks.size()) {
@@ -844,13 +841,10 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 			dZ=isViewB?dZB[0]:dZA[0];
 		}
 
-		IJ.log("A=> stk="+stackNumber +"  vslc="+vSliceNumber+"  n="+n+"  slice="+slice );
-
 		ImageProcessor ip = null;
 		if (dimOrder == "xyczt") {
-//			vSliceNumber = (sliceNumber)+(isViewB?fivStacks.get(stackNumber).getSize()/vDim:0); //worked ever?///
-			vSliceNumber = (sliceNumber)+(isViewB?zDim*cDim:0);  //WORKS 02012019 for Mark's old megatiff.....but 11242020 not working for unsplit multipos MMdata from 2017
-//			vSliceNumber = (sliceNumber);  
+			//vSliceNumber = (sliceNumber)+(isViewB?fivStacks.get(stackNumber).getSize()/vDim:0); //worked ever?///
+			vSliceNumber = (sliceNumber)+(isViewB?zDim*cDim:0);  //WORKS 02012019 for Mark's old megatiff
 
 			//ADJUSTMENTS BELOW DEAL WITH CALLING RG CHANNELS CORRECTLY
 			//I DO NOT FULLY UNDERSTAND HOW OR WHY IT WORKS!!!???
@@ -859,7 +853,6 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 			//	} else {
 			//	vSliceNumber = vSliceNumber-1;
 			//	}
-			IJ.log("B=> stk="+stackNumber +"  vslc="+vSliceNumber+"  n="+n+"  slice="+slice );
 
 			if (vSliceNumber>fivStacks.get(stackNumber).getSize()) {
 				vSliceNumber = vSliceNumber-fivStacks.get(stackNumber).getSize();
@@ -872,7 +865,7 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 			corrX=isViewB?corrXB[((stackNumber)%tDim)]-corrXB[0]:corrXA[((stackNumber)%tDim)]-corrXA[0];
 			corrY=isViewB?corrYB[((stackNumber)%tDim)]-corrYB[0]:corrYA[((stackNumber)%tDim)]-corrYA[0];
 			corrZ=isViewB?corrZB[((stackNumber)%tDim)]-corrZB[0]:corrZA[((stackNumber)%tDim)]-corrZA[0];
-			IJ.log("C=> stk="+stackNumber +"  vslc="+vSliceNumber+"  n="+n+"  slice="+slice );
+			//IJ.log("stk="+stackNumber +"  vslc="+vSliceNumber);
 			initiateStack(stackNumber, 0);
 			ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber+(sliceNumber%2==0?0:dZ)+corrZ);
 			ip.translate(corrX, corrY);
