@@ -100,6 +100,8 @@ import ij.process.ShortProcessor;
 
 public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, ImageListener {
 
+	//comment to test github connection 11292020
+	
 	//Info from proximal tiff header in MMomeTIFF vvvvvvv
 	static int All_images_dependently = 1;
 	static int All_images_independently = 2;
