@@ -6565,7 +6565,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						if (doProcessing[pos] &&(ciDFs[pos]==null 
 								|| (orientBeforeLineage?2:(posFrameEnd[pos]-posFrameStart[pos])) > ciDFs[pos].getNFrames())
 								|| (lineageDecons && new File(savePath + File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution2").list(tiffNameFilter).length
-										!= new File(savePath + File.separator + ciDFs[pos].getTitle().replace(":","_").replace(" ","").replace("_dummy","")).list(tiffNameFilter).length)
+										!= new File(savePath + File.separator + ciDFs[pos].getTitle().replaceAll("(Preview_)*(Decon-Fuse_).*(Pos\\d+).*","$1$2ForSN_$3")).list(tiffNameFilter).length)
 								) {
 
 							posAllDone=false;

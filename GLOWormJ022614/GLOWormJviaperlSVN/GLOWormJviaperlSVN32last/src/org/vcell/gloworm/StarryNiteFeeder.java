@@ -147,7 +147,7 @@ public class StarryNiteFeeder implements PlugIn {
 			} else {
 
 				String title = imp.getTitle();
-				String savetitle = title.replace(":","_").replace(" ","").replace("_dummy","");
+				String savetitle = title.replaceAll("(Preview_)*(Decon-Fuse_).*(Pos\\d+).*","$1$2ForSN_$3");
 				String savePath = outDir+savetitle;
 
 				IJ.saveAs(imp, "Selection", savePath+"originalSNF.roi");
