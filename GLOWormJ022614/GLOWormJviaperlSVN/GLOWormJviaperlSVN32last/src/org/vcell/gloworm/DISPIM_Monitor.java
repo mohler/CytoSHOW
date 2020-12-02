@@ -414,6 +414,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 	private String argField;
 	private boolean useSavedPreview;
 	private String metaDataFilePath;
+	private boolean ayyBeforeBee;
 
 	public Process getRegDeconProcess() {
 		return regDeconProcess;
@@ -942,7 +943,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 						stackAs[pos] = new MultiFileInfoVirtualStack(
 								dirConcat, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
-								false, false, true, false, null){
+								!ayyBeforeBee, false, true, false, null){
 
 							@Override
 							public void initiateStack(int stkNum, int slcNum){
@@ -955,7 +956,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						};
 						stackBs[pos] = new MultiFileInfoVirtualStack(
 								dirConcat, dimOrder, keyString, cDim, zDim, tDim, vDim, pos,
-								true, false, true, false, null){
+								ayyBeforeBee, false, true, false, null){
 
 							@Override
 							public void initiateStack(int stkNum, int slcNum){
@@ -2702,10 +2703,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									stackDFs[pos] = new MultiFileInfoVirtualStack(savePath
 											+ File.separator + "RegDecon" + File.separator + "Pos" + pos,  "Deconvolution", false,
 											false);
-									prxPath = savePath + File.separator + "ProjX_"+("Decon-Fuse_"
-											+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
-									pryPath = savePath + File.separator + "ProjY_"+("Decon-Fuse_"
-											+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
+									prxPath = savePath + File.separator + "ProjX_Decon-Fuse_Pos"+pos+"_FullVolume";
+									pryPath = savePath + File.separator + "ProjY_Decon-Fuse_Pos"+pos+"_FullVolume";
 									IJ.log(prxPath);
 									IJ.log(pryPath);
 									if (new File(prxPath).canRead() && new File(pryPath).canRead()) {
@@ -3207,7 +3206,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 							stackAs[pos] = new MultiFileInfoVirtualStack(
 									dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_Channels/2>1 && diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
-									false, false, true, new File(this.dirOrOMETiff).isDirectory() && this.dirOrOMETiff.endsWith(".ome.tif"),null);
+									!ayyBeforeBee, false, true, new File(this.dirOrOMETiff).isDirectory() && this.dirOrOMETiff.endsWith(".ome.tif"),null);
 
 							ImagePlus impNext = new ImagePlus(impAs[pos].getTitle(), stackAs[pos]);
 							impNext.setOpenAsHyperStack(true);
@@ -3256,7 +3255,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 							stackBs[pos] = new MultiFileInfoVirtualStack(
 									dirConcat, dimOrder, keyString, cDim*(diSPIM_MM_Channels/2>1 && diSPIM_MM_channelOrder == "RG"?-1:1), zDim, tDim, vDim, pos,
-									true, false, true, new File(this.dirOrOMETiff).isDirectory() && this.dirOrOMETiff.endsWith(".ome.tif"), null);
+									ayyBeforeBee, false, true, new File(this.dirOrOMETiff).isDirectory() && this.dirOrOMETiff.endsWith(".ome.tif"), null);
 
 							impNext = new CompositeImage(new ImagePlus(impBs[pos].getTitle(), stackBs[pos]));
 							impNext.setOpenAsHyperStack(true);
@@ -5294,16 +5293,22 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									}
 								}
 
-								String savePrxPath = saveDFPath  + "ProjX_"+("Decon-Fuse_"
-										+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
-								String savePryPath = saveDFPath  + "ProjY_"+("Decon-Fuse_"
-										+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
-								String saveMaxXPath = saveDFPath  + "MaxX_"+("Decon-Fuse_"
-										+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
-								String saveMaxYPath = saveDFPath  + "MaxY_"+("Decon-Fuse_"
-										+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
-								String saveMaxZPath = saveDFPath  + "MaxZ_"+("Decon-Fuse_"
-										+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
+//								String savePrxPath = saveDFPath  + "ProjX_"+("Decon-Fuse_"
+//										+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
+//								String savePryPath = saveDFPath  + "ProjY_"+("Decon-Fuse_"
+//										+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
+//								String saveMaxXPath = saveDFPath  + "MaxX_"+("Decon-Fuse_"
+//										+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
+//								String saveMaxYPath = saveDFPath  + "MaxY_"+("Decon-Fuse_"
+//										+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
+//								String saveMaxZPath = saveDFPath  + "MaxZ_"+("Decon-Fuse_"
+//										+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
+
+								String savePrxPath = saveDFPath  + "ProjX_Decon-Fuse_Pos"+pos+"_FullVolume";
+								String savePryPath = saveDFPath  + "ProjY_Decon-Fuse_Pos"+pos+"_FullVolume";
+								String saveMaxXPath = saveDFPath  + "MaxX_Decon-Fuse_Pos"+pos+"_FullVolume";
+								String saveMaxYPath = saveDFPath  + "MaxY_Decon-Fuse_Pos"+pos+"_FullVolume";
+								String saveMaxZPath = saveDFPath  + "MaxZ_Decon-Fuse_Pos"+pos+"_FullVolume";
 
 								//	IJ.log(savePrxPath);
 								//	IJ.log(savePryPath);
@@ -6017,10 +6022,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											//	win.setVisible(true);	
 										}
 
-										String openPrxPath = openDFPath  + "ProjX_"+("Decon-Fuse_"
-												+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
-										String openPryPath = openDFPath  + "ProjY_"+("Decon-Fuse_"
-												+ impAs[pos].getTitle().split(":")[0]).replaceAll("[,. ;:]","").replace(File.separator, "_") + "_FullVolume";
+										String openPrxPath = openDFPath  + "ProjX_Decon-Fuse_Pos"+pos+"_FullVolume";
+										String openPryPath = openDFPath  + "ProjY_Decon-Fuse_Pos"+pos+"_FullVolume";
 										if (new File(openPryPath).canRead() ){
 											while (new File(openPryPath, "Color1").list(tiffNameFilter).length<1){
 												IJ.wait(100);
@@ -6346,7 +6349,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										} else {
 
 											String title = ciDFs[pos].getTitle();
-											String savetitle = title.replace(":","_").replace(" ","").replace("_dummy","").replaceAll("&", "AND");
+//											String savetitle = title.replace(":","_").replace(" ","").replace("_dummy","").replaceAll("&", "AND");
+											String savetitle = title.replaceAll("(Preview_)*(Decon-Fuse_).*(Pos\\d+).*","$1$2ForSN_$3");
+
 											String openingPath = outDir+savetitle;
 
 											int[] xpoints = theROI.getPolygon().xpoints;
@@ -7032,6 +7037,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			}
 		}
 		if (diSPIM_MM_Width == 1536 ) {
+			ayyBeforeBee = true;
 			if (diSPIM_MM_channelMode==null || diSPIM_MM_channelMode.startsWith("NONE")) {
 				if(diSPIM_MM_useChannels==false) {
 					cDim = 2;    //using diSPIM_MM_channel_use_index value doesn' work for Shroff system (counts 4, duh)
@@ -7664,7 +7670,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							cDim
 							* (diSPIM_MM_Channels / vDim > 1
 									&& diSPIM_MM_channelOrder == "RG" ? -1
-											: 1), zDim, tDim, vDim, pos, false,
+											: 1), zDim, tDim, vDim, pos, !ayyBeforeBee,
 											false, true,
 											new File(this.dirOrOMETiff).isDirectory()
 											&& this.dirOrOMETiff.endsWith(".ome.tif"), null);
@@ -7724,7 +7730,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							cDim
 							* (diSPIM_MM_Channels / vDim > 1
 									&& diSPIM_MM_channelOrder == "RG" ? -1
-											: 1), zDim, tDim, vDim, pos, true,
+											: 1), zDim, tDim, vDim, pos, ayyBeforeBee,
 											false, true,
 											new File(this.dirOrOMETiff).isDirectory()
 											&& this.dirOrOMETiff.endsWith(".ome.tif"), null);
