@@ -7463,6 +7463,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			try {
 				String[] cloneCmd = 
 						new String[] { "cmd", "/c", "start", "/min", "/wait", "robocopy", previewPath, fullSetSavePath, "/mir" };
+				IJ.log(cloneCmd.toString());
 				cloneProcess = Runtime.getRuntime().exec(cloneCmd);
 				while (cloneProcess == null) {
 					IJ.wait(100);
@@ -7506,6 +7507,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			Process cleanProcess = null;
 			try {
 				String[] cleanCmd = new String[] {"cmd", "/c", "start", "/min", "/wait", "cmd", "/c", "for", "/d", "%G", "in", "(" + fullSetSavePath + File.separator + "*Decon-Fuse*)", "do", "rd", "/s", "/q", "%~G" };
+				IJ.log(cleanCmd.toString());
 				cleanProcess = Runtime.getRuntime().exec(cleanCmd);
 				while (cleanProcess == null) {
 					IJ.wait(100);
@@ -7550,6 +7552,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			Process clipProcess = null;
 			try {
 				String[] clipCmd = new String[] { "cmd", "/c", "start", "/min", "/wait", "cmd", "/c", "for", "/d", "%H", "in", "(" + fullSetSavePath + File.separator + "RegDecon" + File.separator + "Pos*)", "do", "rd", "/s", "/q", "%~H" };
+				IJ.log(clipCmd.toString());
 				clipProcess = Runtime.getRuntime().exec(clipCmd);
 				while (clipProcess == null) {
 					IJ.wait(100);
