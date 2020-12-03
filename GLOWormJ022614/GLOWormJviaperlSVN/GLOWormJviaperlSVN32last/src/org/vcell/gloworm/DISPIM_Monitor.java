@@ -7593,7 +7593,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				}
 
 			}
-
+			rerunArg = (dirOrOMETiff+"|"+"rerunWithDecon"+"|"+argField);
 			monitoring = false;
 		}
 
