@@ -6572,7 +6572,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 						}
 
-						//	IJ.log(""+pos+"...POSALLDONE = "+ posAllDone);
+							IJ.log(""+pos+"...POSALLDONE = "+ posAllDone);
 					}
 				}
 				//	IJ.run("Tile");

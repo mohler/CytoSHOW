@@ -694,8 +694,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				ArrayList<String> rootNames = new ArrayList<String>();
 
 				String newName = "";
+				int selectedTime = 0;
 				if (getSelectedRoisAsArray().length>0) {
 					String selName = getSelectedRoisAsArray()[0].getName();
+					selectedTime = getSelectedRoisAsArray()[0].getTPosition();
 					newName = promptForName(selName);
 				} else {
 					newName = promptForName(recentName);
@@ -746,9 +748,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					for (int r2=0; r2 < fraaa; r2++) {
 						String nextName = rois2[r2].getName();
 						if (!rootName.replace("\"", "").trim().equals("") ){
-							if (nextName.matches("(\"?)"+rootName.replace("\"", "").trim()+(propagateRenamesThruLineage?"[m|n]*":"")+"(( \")?).*")){
-								nameMatchIndexArrayList.add(r2);
-								nameReplacementArrayList.add(nextName.replaceAll("(\"?)"+rootName.replace("\"", "").trim()+"([m|n]*)(( \")?)(.*)", newName+"$2"));
+							if (nextName.matches("(\"?)"+rootName.replace("\"", "").trim()+(propagateRenamesThruLineage?"[m|n|l|r|a|p|d|v]*":"")+"(( \")?).*")){
+								if (!propagateRenamesThruLineage || selectedTime <= rois2[r2].getTPosition()){
+									nameMatchIndexArrayList.add(r2);
+									nameReplacementArrayList.add(nextName.replaceAll("(\"?)"+rootName.replace("\"", "").trim()+"([m|n|l|r|a|p|d|v]*)(( \")?)(.*)", newName+"$2"));
+								}
 							}
 						} else {
 							if (nextName.matches("(\"?)"+rootName.replace("\"", "")+"(\"?).*")){
@@ -1714,7 +1718,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		for(int n=0;n<newNames.length;n++) {
 			newNames[n]=label2;
 		}
-		rename(newNames,  indexes, updateCanvas);
+		rename(newNames,  indexes, false);
+		updateShowAll();
 
 	}
 
@@ -1724,6 +1729,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (indexes == null)
 			indexes = this.getSelectedIndexes();
 		//			return error("Exactly one item in the list must be selected.");
+		
+		
 		for (int i=0; i<indexes.length; i++) {
 			String name = (String) listModel.getElementAt(indexes[i]);
 			Roi roi = (Roi)rois.get(name);
