@@ -772,7 +772,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				if (rename(newNames, nameMatchIndexes, false)) {
 					if (existinghexName !="") {
 						for (int i=0; i < nameMatchIndexes.length; i++) {
-							this.select(nameMatchIndexes[i]);
+//							this.select(nameMatchIndexes[i]);
 
 							rois[nameMatchIndexes[i]].setFillColor(existingColor);
 
