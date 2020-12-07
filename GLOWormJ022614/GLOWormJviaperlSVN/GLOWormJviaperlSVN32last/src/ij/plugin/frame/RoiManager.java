@@ -698,9 +698,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				if (getSelectedRoisAsArray().length>0) {
 					String selName = getSelectedRoisAsArray()[0].getName();
 					selectedTime = getSelectedRoisAsArray()[0].getTPosition();
-					newName = promptForName(selName);
+					newName = promptForName(selName.split(" ")[0].replace("\"", "").trim());
 				} else {
 					newName = promptForName(recentName);
+				}
+				if (newName==null){
+					return;
 				}
 				Color existingColor = null;
 				Roi[] rois = getFullRoisAsArray();
