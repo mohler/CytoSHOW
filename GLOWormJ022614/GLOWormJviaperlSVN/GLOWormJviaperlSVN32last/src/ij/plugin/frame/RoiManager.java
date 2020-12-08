@@ -695,10 +695,18 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 				String newName = "";
 				int selectedTime = 0;
-				if (getSelectedRoisAsArray().length>0) {
-					String selName = getSelectedRoisAsArray()[0].getName();
-					selectedTime = getSelectedRoisAsArray()[0].getTPosition();
+				Roi[] selRois = getSelectedRoisAsArray();
+				int[] selIndexes = getSelectedIndexes();
+				if (selRois.length==1) {
+					String selName = selRois[0].getName();
+					selectedTime = selRois[0].getTPosition();
 					newName = promptForName(selName.split(" ")[0].replace("\"", "").trim());
+				} else if (selRois.length>1) {
+					String selName = selRois[0].getName();
+					selectedTime = selRois[0].getTPosition();
+					newName = promptForName(selName.split(" ")[0].replace("\"", "").trim());
+					rename(newName, selIndexes, false);
+					return;
 				} else {
 					newName = promptForName(recentName);
 				}
@@ -730,7 +738,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					existinghexName = "#"+existinghexInt;
 				}
 
-				for (Roi selRoi:getSelectedRoisAsArray()) {
+				for (Roi selRoi:selRois) {
 
 					String rootName = selRoi.getName().contains("\"")?("\""+selRoi.getName().split("\"")[1]+"\""):selRoi.getName().split("_")[0];
 
