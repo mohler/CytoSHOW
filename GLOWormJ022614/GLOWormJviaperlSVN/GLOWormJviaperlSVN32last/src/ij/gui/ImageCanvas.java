@@ -44,7 +44,7 @@ import javax.swing.JPopupMenu;
 import org.vcell.gloworm.MultiQTVirtualStack;
 
 /** This is a Canvas used to display images in a Window. */
-public class ImageCanvas extends Canvas implements MouseListener, MouseMotionListener, Cloneable {
+public class ImageCanvas extends Canvas implements MouseListener, MouseMotionListener, MouseWheelListener, Cloneable {
 
 	public static Cursor defaultCursor = new Cursor(Cursor.DEFAULT_CURSOR);
 	protected static Cursor handCursor = new Cursor(Cursor.HAND_CURSOR);
@@ -144,6 +144,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 		addMouseListener(this);
 		addMouseMotionListener(this);
+		addMouseWheelListener (this);
 		addKeyListener(ij);  // ImageJ handles keyboard shortcuts
 		setFocusTraversalKeysEnabled(false);
 	}
@@ -3561,6 +3562,26 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 	public void setRotation(int i) {
 		this.rotation = i;
+	}
+
+	
+	public void mouseWheelMoved(MouseWheelEvent e) {
+		int rot = e.getWheelRotation();
+		int modifiers = e.getModifiers();
+		boolean altKeyDown = (modifiers&ActionEvent.ALT_MASK)!=0 || IJ.altKeyDown();
+		boolean shiftKeyDown = (modifiers&ActionEvent.SHIFT_MASK)!=0 || IJ.shiftKeyDown();
+		boolean controlKeyDown = (modifiers&ActionEvent.CTRL_MASK)!=0 || IJ.controlKeyDown();
+		IJ.setKeyUp(KeyEvent.VK_ALT);
+		IJ.setKeyUp(KeyEvent.VK_SHIFT);
+		IJ.setKeyUp(KeyEvent.VK_CONTROL);
+		if (shiftKeyDown){
+			imp.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame()+rot);
+		} else if (controlKeyDown){
+			imp.setPosition(imp.getChannel()+rot, imp.getSlice(), imp.getFrame());
+		} else {
+			imp.setPosition(imp.getChannel(), imp.getSlice()+rot, imp.getFrame());
+		}
+		e.consume();
 	}
 
 }
