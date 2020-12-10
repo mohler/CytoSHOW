@@ -153,6 +153,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	private double roiRescaleFactor = 1d;
 	private double expansionDistance = 10d;
 	private String lastRoiOpenPath;
+	private int lastSelectedIndex =0;
 
 
 
@@ -3824,7 +3825,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 			restore(imp, index, true);
 		}
-
+		lastSelectedIndex = index;
 	}
 
 	public void select(int index, boolean shiftKeyDown, boolean altKeyDown) {
@@ -4046,14 +4047,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	public void mouseWheelMoved(MouseWheelEvent event) {
 		synchronized(this) {
 			int index = list.getSelectedIndex();
+			if (index<0) index = lastSelectedIndex;
 			int rot = event.getWheelRotation();
 			if (rot<-1) rot = -1;
 			if (rot>1) rot = 1;
 			index += rot;
-			if (index<0) index = 0;
 			if (index>=listModel.getSize()) index = listModel.getSize();
-			//IJ.log(index+"  "+rot);
-			//			select(index);
+//			IJ.log(index+"  "+rot+"  "+event.getSource());
+			select(index);
+			event.consume();
 			if (IJ.isWindows())
 				list.requestFocusInWindow();
 		}
