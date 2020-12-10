@@ -98,7 +98,29 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
             public void mouseEntered(MouseEvent e) {
                 pressed = true;
             }                    
+            
         });
+		iconPanel.addMouseWheelListener(new MouseAdapter(){
+            @Override
+            public void mouseWheelMoved(MouseWheelEvent e) {
+            	int rot = e.getWheelRotation();
+            	rot = rot-1;
+
+            	int adjustedMode = ((CompositeImage) stackWindow.getImagePlus()).getMode() + rot;
+            	if (adjustedMode <0) adjustedMode = adjustedMode + 5;
+            	if (adjustedMode >5) adjustedMode = adjustedMode - 6;
+            	if (rot<0 && adjustedMode<3){
+            		adjustedMode =5;
+            	}
+            	((CompositeImage) stackWindow.getImagePlus()).setMode(adjustedMode);
+            	actionPerformed(new ActionEvent(iconPanel, ActionEvent.ACTION_PERFORMED, "scroll"));
+            	e.consume();
+            }
+
+
+       });
+		
+
 		icon2Panel.addMouseListener(new MouseAdapter(){
             boolean pressed;
 
@@ -138,8 +160,35 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
             @Override
             public void mouseEntered(MouseEvent e) {
                 pressed = true;
-            }                    
+            }   
+            
+ 
         });
+		
+		icon2Panel.addMouseWheelListener(new MouseAdapter(){
+             @Override
+            public void mouseWheelMoved(MouseWheelEvent e) {
+    			int rot = e.getWheelRotation();
+    			rot = rot-1;
+    			
+    			int adjustedMode = ((CompositeImage) stackWindow.getImagePlus()).getMode() + rot;
+    			if (adjustedMode <0){
+    				adjustedMode = adjustedMode + 5;
+    			}
+    			if (adjustedMode >5){
+    				adjustedMode = adjustedMode - 6;
+    			}
+            	if (rot<0 && adjustedMode<3){
+            		adjustedMode =5;
+            	}
+      			((CompositeImage) stackWindow.getImagePlus()).setMode(adjustedMode);
+    			actionPerformed(new ActionEvent(icon2Panel, ActionEvent.ACTION_PERFORMED, "scroll"));
+    			e.consume();
+    		}
+
+
+        });
+		
 		add(iconPanel, BorderLayout.WEST);
 		add(bar, BorderLayout.CENTER);
 		add(icon2Panel, BorderLayout.EAST);
@@ -357,7 +406,7 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 			IJ.doCommand("Start Z Animation");
 		else if (getType() =='c' ){
 			int origChannel = stackWindow.getImagePlus().getChannel();
-			if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 6 ){
+			if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 5 ){
 				((CompositeImage) stackWindow.getImagePlus()).setMode(1);
 				if (stackWindow.getImagePlus().getType() == ImagePlus.GRAY16) {
 					((CompositeImage) stackWindow.getImagePlus())
@@ -403,14 +452,14 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 //				}
 			}
 			else if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 3 ){
-				((CompositeImage) stackWindow.getImagePlus()).setMode(5);
+				((CompositeImage) stackWindow.getImagePlus()).setMode(4);
 //				if (stackWindow.getImagePlus().getNFrames()>1) {
 					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()+1);
 					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()-1);
 //				}
 			}
-			else if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 5 ){
-				((CompositeImage) stackWindow.getImagePlus()).setMode(6);
+			else if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 4 ){
+				((CompositeImage) stackWindow.getImagePlus()).setMode(5);
 //				if (stackWindow.getImagePlus().getNFrames()>1) {
 					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()+1);
 					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()-1);
@@ -421,7 +470,7 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 	}
 
 
-	class IconButton extends JButton{
+	class IconButton extends JButton {
 
 
 		public IconButton() {
@@ -552,7 +601,6 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 		public void setType(char type) {
 			this.type = type;
 		}
-
 	} // StartStopIcon class
 
 
