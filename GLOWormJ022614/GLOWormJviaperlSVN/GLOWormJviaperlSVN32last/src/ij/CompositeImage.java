@@ -11,7 +11,8 @@ import java.awt.image.*;
 public class CompositeImage extends ImagePlus {
 
 	// Note: TRANSPARENT mode has not yet been implemented
-	public static final int COMPOSITE=1, COLOR=2, GRAYSCALE=3, TRANSPARENT=4, RATIO12=5, RATIO21=6;
+//	public static final int COMPOSITE=1, COLOR=2, GRAYSCALE=3, TRANSPARENT=4, RATIO12=5, RATIO21=6;
+	public static final int COMPOSITE=1, COLOR=2, GRAYSCALE=3, RATIO12=4, RATIO21=5;
 	public static final int MAX_CHANNELS = 36;
 	int[] rgbPixels;
 	boolean newPixels;
@@ -528,7 +529,9 @@ public class CompositeImage extends ImagePlus {
 			awtImage = null;
 			currentChannel = 0;
 		}
-		if (mode==GRAYSCALE || mode==TRANSPARENT || mode==RATIO12 || mode==RATIO21)
+//		if (mode==GRAYSCALE || mode==TRANSPARENT || mode==RATIO12 || mode==RATIO21)
+		if (mode==GRAYSCALE || mode==RATIO12 || mode==RATIO21)
+
 			ip.setColorModel(ip.getDefaultColorModel());
 		Channels channels = Channels.getInstance();
 		if (channels!=null) ((Channels)channels).update();
