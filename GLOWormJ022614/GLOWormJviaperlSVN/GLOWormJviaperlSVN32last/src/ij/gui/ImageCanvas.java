@@ -3575,11 +3575,20 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		IJ.setKeyUp(KeyEvent.VK_SHIFT);
 		IJ.setKeyUp(KeyEvent.VK_CONTROL);
 		if (shiftKeyDown){
-			imp.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame()+rot);
+			int newT = imp.getFrame()+rot;
+			if (newT > imp.getNFrames()) newT = 1;
+			if (newT <  1) newT = imp.getNFrames();
+			imp.setPosition(imp.getChannel(), imp.getSlice(), newT);
 		} else if (controlKeyDown){
-			imp.setPosition(imp.getChannel()+rot, imp.getSlice(), imp.getFrame());
+			int newC = imp.getChannel()+rot;
+			if (newC > imp.getNChannels()) newC = 1;
+			if (newC <  1) newC = imp.getNChannels();
+			imp.setPosition(newC, imp.getSlice(), imp.getFrame());
 		} else {
-			imp.setPosition(imp.getChannel(), imp.getSlice()+rot, imp.getFrame());
+			int newZ = imp.getSlice()+rot;
+			if (newZ > imp.getNSlices()) newZ = 1;
+			if (newZ <  1) newZ = imp.getNSlices();
+			imp.setPosition(imp.getChannel(), newZ, imp.getFrame());
 		}
 		e.consume();
 	}

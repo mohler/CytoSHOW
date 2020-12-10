@@ -104,8 +104,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	private JSpinner tSustainSpinner ;
 	private int  zSustain =1;
 	private int  tSustain =1;
-	private TextField textSearchField;
-	private TextField textNamingField;
+	private TextField textFilterField;
+	private TextField textFindingField;
 	public Label textCountLabel =new Label("", Label.CENTER);
 
 	private static boolean measureAll = true;
@@ -249,12 +249,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		list.removeKeyListener(ij);
 		list.removeMouseListener(this);
 		list.removeMouseWheelListener(this);
-		String lastSearch = "Find...";
-		if (textSearchField != null)
-			lastSearch = textSearchField.getText();
-		String lastName = "Name...";
-		if (textNamingField != null)
-			lastName = textNamingField.getText();
+		String lastSearch = "Filter...";
+		if (textFilterField != null)
+			lastSearch = textFilterField.getText();
+		String lastFind = "Find...";
+		if (textFindingField != null)
+			lastFind = textFindingField.getText();
 
 		this.removeAll();
 		addKeyListener(ij);
@@ -287,8 +287,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		addButton("Delete");
 		addButton("Rename");
 		
-		textNamingField =new TextField(lastName);
-		panel.add(textNamingField);
+		textFindingField =new TextField(lastFind);
+		textFindingField.addTextListener(this);
+		panel.add(textFindingField);
 
 		addButton("Sort");
 		addButton("Deselect");
@@ -316,10 +317,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		textCountLabel.setText(""+ listModel.size() +"/"+ fullListModel.size());
 		textCountLabel.setFont(Font.decode("Arial-9"));
 
-		textSearchField =new TextField(lastSearch);
-		add("South", textSearchField);
-		textSearchField.addKeyListener(this);
-		textSearchField.addActionListener(this);
+		textFilterField =new TextField(lastSearch);
+		add("South", textFilterField);
+		textFilterField.addKeyListener(this);
+		textFilterField.addActionListener(this);
 
 		add("East", panel);		
 		addPopupMenu();
@@ -426,16 +427,16 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			return;
 		if (e.getActionCommand().equals("Full\nSet")) {
 			imp.getRoiManager().getTextSearchField().setText("");
-			e.setSource(textSearchField); 
+			e.setSource(textFilterField); 
 		}
 		boolean wasVis = this.isVisible();
 
-		if (e.getSource() == textSearchField) {
+		if (e.getSource() == textFilterField) {
 			this.setVisible(false);
 			showAll(SHOW_NONE);
 
 			String thisWasTitle = this.getTitle();
-			String searchString = textSearchField.getText();
+			String searchString = textFilterField.getText();
 			boolean isRegex = (searchString.startsWith("??"));
 			listModel.removeAllElements();
 			prevSearchString = searchString;
@@ -1301,11 +1302,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		prevID = imp!=null?imp.getID():0;
 		String name = roi.getName();
-		if (textNamingField!=null) //true/*name == null*/)
-			if (!(textNamingField.getText().isEmpty()  || textNamingField.getText().contains("Name..."))) {
-				roi.setName(textNamingField.getText());
-				recentName = (textNamingField.getText());
-			}
+		if (textFindingField!=null) //true/*name == null*/)
+//			if (!(textFindingField.getText().isEmpty()  || textFindingField.getText().contains("Name..."))) {
+//				roi.setName(textFindingField.getText());
+//				recentName = (textFindingField.getText());
+//			}
 		if (isStandardName(name))
 			name = null;
 		String label = name!=null?name:getLabel(imp, roi, -1);
@@ -1815,7 +1816,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	String promptForName(String name) {
 		String name2 = "";		
-		if (textNamingField.getText().isEmpty()  || textNamingField.getText().contains("Name...")) {
+//		if (textFindingField.getText().isEmpty()  || textFindingField.getText().contains("Name...")) {
+		if (true) {
 			GenericDialog gd = new GenericDialog("Tag Manager");
 			gd.addStringField("Rename As:", name.endsWith("|")?name.substring(0, name.length()-1):name, 20);
 			gd.addCheckbox("Propagate Lineage Renaming", propagateRenamesThruLineage);
@@ -1826,7 +1828,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			propagateRenamesThruLineage = gd.getNextBoolean();
 			//		name2 = getUniqueName(name2);
 		} else {
-			name = textNamingField.getText();
+			name = textFindingField.getText();
 			name2 = name.endsWith("|")?name.substring(0, name.length()-1):name;
 		}
 		return name2;
@@ -5498,7 +5500,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 
 	public TextField getTextSearchField() {
-		return textSearchField;
+		return textFilterField;
 	}
 
 	public boolean isSearching() {
@@ -5529,7 +5531,17 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 
 	public void textValueChanged(TextEvent e) {
-		hyperstackCheckbox.setState(true);
+//		hyperstackCheckbox.setState(true);   //what the hell is this?
+		if (e.getSource() == textFindingField){
+			String searchString = textFindingField.getText().toLowerCase();
+			for (int i=0; i<listModel.getSize(); i++){
+				String hitCandidate = listModel.get(i).toLowerCase();
+				if (hitCandidate.contains(searchString)){
+					list.ensureIndexIsVisible(i);
+					break;
+				}
+			}
+		}
 	}
 
 	public void zapDuplicateRois() {
