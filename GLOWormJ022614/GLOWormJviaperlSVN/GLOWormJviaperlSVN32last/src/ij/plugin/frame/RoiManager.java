@@ -5835,8 +5835,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //	} 
 
 	public void exportROIsAsZippedStarryNiteNuclei(String zipPath) {
-		
-		
+				
 //		File zipFile = new File(zipPath);
 //		sortmode = 3;
 //		this.sort();
