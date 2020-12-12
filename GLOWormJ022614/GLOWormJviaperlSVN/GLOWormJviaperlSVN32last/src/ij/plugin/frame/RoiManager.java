@@ -762,7 +762,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						String nextName = rois2[r2].getName();
 						if (!rootName.replace("\"", "").trim().equals("") ){
 							if (nextName.matches("(\"?)"+rootName.replace("\"", "").trim()+(propagateRenamesThruLineage?"[m|n|l|r|a|p|d|v]*":"")+"(( \")?).*")){
-								if (!propagateRenamesThruLineage || selectedTime <= rois2[r2].getTPosition()){
+								if (!propagateRenamesThruLineage || selectedTime < rois2[r2].getTPosition() || selRois[0] == rois2[r2]){
 									nameMatchIndexArrayList.add(r2);
 									nameReplacementArrayList.add(nextName.replaceAll("(\"?)"+rootName.replace("\"", "").trim()+"([m|n|l|r|a|p|d|v]*)(( \")?)(.*)", newName+"$2"));
 								}
@@ -5576,7 +5576,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	public void importStarryNiteNuclei(String zipPath) {
 		File zipFile = new File(zipPath);
-		if (!zipFile.canRead()) {;
+		if (!zipFile.canRead()) {
 
 		zipPath = IJ.getFilePath("Select the zip file with <nuclei> files");
 		zipFile = new File(zipPath);
@@ -5770,7 +5770,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //		return str;
 //	} 
 
-	static String openZipNucleiAsString(String path) { 
+	public static String openZipNucleiAsString(String path) { 
 
 		ZipInputStream in = null; 
 		ByteArrayOutputStream out;
@@ -5833,6 +5833,78 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //		}
 //		return true;
 //	} 
+
+	public void exportROIsAsZippedStarryNiteNuclei(String zipPath) {
+//		File zipFile = new File(zipPath);
+//		sortmode = 3;
+//		this.sort();
+//
+//		Roi[] rois = this.getSelectedRoisAsArray();
+//		if (rois.length == 0){
+//			rois = this.getFullRoisAsArray();
+//		}
+//		
+//		int frame =1;
+//
+//		String nucString = "parameters/\n";
+//
+//		for (int i = 0; i < rois.length; i++) {
+//
+//			String[] cellData = nextLine.split(", *");
+//			if (cellData.length ==1){
+//				frame = Integer.parseInt(cellData[0].trim().replace("nuclei/t","").replace("-nuclei",""));
+//				prevHash = nextHash;
+//				nextHash = new Hashtable<String,String[]>();
+//			} else {
+//				//				imp.setPositionWithoutUpdate(imp.getChannel(), imp.getSlice(), frame);
+//				if (cellData[9] !=" ") {
+//					nextHash.put(cellData[0], new String[] {cellData[2],cellData[3],cellData[4],cellData[9]});
+//					//					imp.setPositionWithoutUpdate(imp.getChannel(), (int)Double.parseDouble(cellData[7].trim()), frame);
+//
+//					Roi newOval = new OvalRoi(Integer.parseInt(cellData[5].trim())-Integer.parseInt(cellData[8].trim())/2, Integer.parseInt(cellData[6].trim())-Integer.parseInt(cellData[8].trim())/2, Integer.parseInt(cellData[8].trim()), Integer.parseInt(cellData[8].trim()));
+//					newOval.setImage(imp);
+//					newOval.setPosition(imp.getChannel(), (int)Double.parseDouble(cellData[7].trim()), frame);
+//					addRoi(newOval, false, Color.white, 1, false);
+//					String currID = cellData[0];
+//					String prevCell = cellData[2];
+//					String[] prevCellThings = null;
+//					String prevCellDesc1 = "";
+//					String prevCellDesc2 = "";
+//
+//					if (prevHash!=null) {
+//						if (prevHash.get(cellData[2])!=null) {
+//							prevCellThings = prevHash.get(cellData[2]);
+//							if (prevHash.get(cellData[2])[1].equalsIgnoreCase(cellData[0])) {
+//								prevCellDesc1 = prevHash.get(cellData[2])[1];
+//								prevCellDesc2 = prevHash.get(cellData[2])[2];
+//								if (!prevHash.get(cellData[2])[2].equalsIgnoreCase("-1")) {
+//									rename(prevHash.get(cellData[2])[3]+"m", new int[] {this.getCount()-1}, false);
+//									nextHash.put(cellData[0], new String[] {cellData[2],cellData[3],cellData[4],prevHash.get(cellData[2])[3]+"m"});
+//
+//								}else {
+//									rename(prevHash.get(cellData[2])[3], new int[] {this.getCount()-1}, false);
+//									nextHash.put(cellData[0], new String[] {cellData[2],cellData[3],cellData[4],prevHash.get(cellData[2])[3]});
+//
+//								}
+//							}else if (prevHash.get(cellData[2])[2].equalsIgnoreCase(cellData[0])) {
+//								rename(prevHash.get(cellData[2])[3]+"n", new int[] {this.getCount()-1}, false);
+//								nextHash.put(cellData[0], new String[] {cellData[2],cellData[3],cellData[4],prevHash.get(cellData[2])[3]+"n"});
+//							}
+//						} else {
+//							rename(cellData[9], new int[] {this.getCount()-1}, false);
+//						}
+//					}  else {
+//						rename(cellData[9], new int[] {this.getCount()-1}, false);
+//					}
+//
+//					IJ.showStatus("importing nucleus "+getCount());
+//				}
+//			}
+//		}
+//
+//
+//		saveZipNuclei(nucString, zipPath);
+	}
 
 
 	static boolean saveZipNuclei(String nucString, String path) { 
