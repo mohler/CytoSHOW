@@ -555,11 +555,11 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 					string = "CM";
 					g.setColor(Color.yellow);
 				}
-				else if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 5 ){
+				else if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 4 ){
 					string = "1:2";
 					g.setColor(Color.cyan);
 				}
-				else if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 6 ){
+				else if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 5 ){
 					string = "2:1";
 					g.setColor(Color.orange);
 				}
