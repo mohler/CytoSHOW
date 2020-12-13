@@ -5864,10 +5864,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		Hashtable<String,Integer> NameTimeToTnumberHashtable = new Hashtable<String,Integer>();
 
 		for (int t=1; t<=maxT; t++) {
-			nucString = nucString + "\nnuclei/t" +IJ.pad(t,padLength)+ "-nuclei\n";
 			int hitCountA =0;
 			for (Roi roi:rois) {
-				if (roi.getTPosition() == t) {
+				if (roi.getTPosition() == t && !roi.getName().contains("polar")) {
 					hitCountA++;
 					NameTimeToTnumberHashtable.put(roi.getName().split("\"")[1].trim()+"_"+t, hitCountA);
 				}
@@ -5875,10 +5874,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 
 		for (int t=1; t<=maxT; t++) {
+			nucString = nucString + "\nnuclei/t" +IJ.pad(t,padLength)+ "-nuclei\n";
 			int hitCountB =0;
 			for (Roi roi:rois) {
 				String roiNameTrim = roi.getName().split("\"")[1].trim();
-				if (roi.getTPosition() == t) {
+				if (roi.getTPosition() == t && !roi.getName().contains("polar")) {
 					hitCountB++;
 					boolean alreadyNextHit =false;
 					int prevHit = -1;
