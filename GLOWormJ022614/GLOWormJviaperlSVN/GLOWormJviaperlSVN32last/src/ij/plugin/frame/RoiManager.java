@@ -386,6 +386,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		addPopupItem("Realign by Parameters");
 		addPopupItem("Auto-advance when tagging");
 		addPopupItem("StarryNiteImporter");
+		addPopupItem("StarryNiteExporter");
 		addPopupItem("Map Neighbors");
 		addPopupItem("Color Tags by Group Interaction Rules");
 		addPopupItem("Color Objs by Group Interaction Rules");
@@ -959,6 +960,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			else if (command.equals("StarryNiteImporter")) {
 				importStarryNiteNuclei("");
+			}
+			else if (command.equals("StarryNiteExporter")) {
+				this.exportROIsAsZippedStarryNiteNuclei(IJ.getFilePath("Save zipped SN nuclei"));
 			}
 			else if (command.equals("Map Neighbors")) {
 				mapNearNeighborContacts();
@@ -5621,21 +5625,21 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					if (prevHash!=null) {
 						if (prevHash.get(cellData[2])!=null) {
 							prevCellThings = prevHash.get(cellData[2]);
-							if (prevHash.get(cellData[2])[1].equalsIgnoreCase(cellData[0])) {
-								prevCellDesc1 = prevHash.get(cellData[2])[1];
-								prevCellDesc2 = prevHash.get(cellData[2])[2];
-								if (!prevHash.get(cellData[2])[2].equalsIgnoreCase("-1")) {
-									rename(prevHash.get(cellData[2])[3]+"m", new int[] {this.getCount()-1}, false);
-									nextHash.put(cellData[0], new String[] {cellData[2],cellData[3],cellData[4],prevHash.get(cellData[2])[3]+"m"});
+							if (prevCellThings[1].equalsIgnoreCase(cellData[0])) {
+								prevCellDesc1 = prevCellThings[1];
+								prevCellDesc2 = prevCellThings[2];
+								if (!prevCellThings[2].equalsIgnoreCase("-1")) {
+									rename(prevCellThings[3]+"m", new int[] {this.getCount()-1}, false);
+									nextHash.put(cellData[0], new String[] {cellData[2],cellData[3],cellData[4],prevCellThings[3]+"m"});
 
 								}else {
-									rename(prevHash.get(cellData[2])[3], new int[] {this.getCount()-1}, false);
-									nextHash.put(cellData[0], new String[] {cellData[2],cellData[3],cellData[4],prevHash.get(cellData[2])[3]});
+									rename(prevCellThings[3], new int[] {this.getCount()-1}, false);
+									nextHash.put(cellData[0], new String[] {cellData[2],cellData[3],cellData[4],prevCellThings[3]});
 
 								}
-							}else if (prevHash.get(cellData[2])[2].equalsIgnoreCase(cellData[0])) {
-								rename(prevHash.get(cellData[2])[3]+"n", new int[] {this.getCount()-1}, false);
-								nextHash.put(cellData[0], new String[] {cellData[2],cellData[3],cellData[4],prevHash.get(cellData[2])[3]+"n"});
+							}else if (prevCellThings[2].equalsIgnoreCase(cellData[0])) {
+								rename(prevCellThings[3]+"n", new int[] {this.getCount()-1}, false);
+								nextHash.put(cellData[0], new String[] {cellData[2],cellData[3],cellData[4],prevCellThings[3]+"n"});
 							}
 						} else {
 							rename(cellData[9], new int[] {this.getCount()-1}, false);
@@ -5834,78 +5838,84 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //		return true;
 //	} 
 
-	public void exportROIsAsZippedStarryNiteNuclei(String zipPath) {
-				
-//		File zipFile = new File(zipPath);
-//		sortmode = 3;
-//		this.sort();
-//
-//		Roi[] rois = this.getSelectedRoisAsArray();
-//		if (rois.length == 0){
-//			rois = this.getFullRoisAsArray();
-//		}
-//		
-//		int frame =1;
-//
-//		String nucString = "parameters/\n";
-//
-//		for (int i = 0; i < rois.length; i++) {
-//
-//			String[] cellData = nextLine.split(", *");
-//			if (cellData.length ==1){
-//				frame = Integer.parseInt(cellData[0].trim().replace("nuclei/t","").replace("-nuclei",""));
-//				prevHash = nextHash;
-//				nextHash = new Hashtable<String,String[]>();
-//			} else {
-//				//				imp.setPositionWithoutUpdate(imp.getChannel(), imp.getSlice(), frame);
-//				if (cellData[9] !=" ") {
-//					nextHash.put(cellData[0], new String[] {cellData[2],cellData[3],cellData[4],cellData[9]});
-//					//					imp.setPositionWithoutUpdate(imp.getChannel(), (int)Double.parseDouble(cellData[7].trim()), frame);
-//
-//					Roi newOval = new OvalRoi(Integer.parseInt(cellData[5].trim())-Integer.parseInt(cellData[8].trim())/2, Integer.parseInt(cellData[6].trim())-Integer.parseInt(cellData[8].trim())/2, Integer.parseInt(cellData[8].trim()), Integer.parseInt(cellData[8].trim()));
-//					newOval.setImage(imp);
-//					newOval.setPosition(imp.getChannel(), (int)Double.parseDouble(cellData[7].trim()), frame);
-//					addRoi(newOval, false, Color.white, 1, false);
-//					String currID = cellData[0];
-//					String prevCell = cellData[2];
-//					String[] prevCellThings = null;
-//					String prevCellDesc1 = "";
-//					String prevCellDesc2 = "";
-//
-//					if (prevHash!=null) {
-//						if (prevHash.get(cellData[2])!=null) {
-//							prevCellThings = prevHash.get(cellData[2]);
-//							if (prevHash.get(cellData[2])[1].equalsIgnoreCase(cellData[0])) {
-//								prevCellDesc1 = prevHash.get(cellData[2])[1];
-//								prevCellDesc2 = prevHash.get(cellData[2])[2];
-//								if (!prevHash.get(cellData[2])[2].equalsIgnoreCase("-1")) {
-//									rename(prevHash.get(cellData[2])[3]+"m", new int[] {this.getCount()-1}, false);
-//									nextHash.put(cellData[0], new String[] {cellData[2],cellData[3],cellData[4],prevHash.get(cellData[2])[3]+"m"});
-//
-//								}else {
-//									rename(prevHash.get(cellData[2])[3], new int[] {this.getCount()-1}, false);
-//									nextHash.put(cellData[0], new String[] {cellData[2],cellData[3],cellData[4],prevHash.get(cellData[2])[3]});
-//
-//								}
-//							}else if (prevHash.get(cellData[2])[2].equalsIgnoreCase(cellData[0])) {
-//								rename(prevHash.get(cellData[2])[3]+"n", new int[] {this.getCount()-1}, false);
-//								nextHash.put(cellData[0], new String[] {cellData[2],cellData[3],cellData[4],prevHash.get(cellData[2])[3]+"n"});
-//							}
-//						} else {
-//							rename(cellData[9], new int[] {this.getCount()-1}, false);
-//						}
-//					}  else {
-//						rename(cellData[9], new int[] {this.getCount()-1}, false);
-//					}
-//
-//					IJ.showStatus("importing nucleus "+getCount());
-//				}
-//			}
-//		}
-//
-//
-//		saveZipNuclei(nucString, zipPath);
-	}
+	public void exportROIsAsZippedStarryNiteNuclei(String zipPath) {		
+
+		File zipFile = new File(zipPath);
+		sortmode = 3;
+		this.sort();
+
+		Roi[] rois = this.getSelectedRoisAsArray();
+		if (rois.length == 0){
+			rois = this.getFullRoisAsArray();
+		}
+
+		int maxT = 0;
+		int padLength = 0;
+		for (Roi roi:rois) {
+			if (maxT < roi.getTPosition()) {
+				maxT = roi.getTPosition();
+				padLength= (""+maxT).length();
+			}
+		}
+		String nucString = "parameters/\n";
+		
+		int frame =1;
+
+		Hashtable<String,Integer> NameTimeToTnumberHashtable = new Hashtable<String,Integer>();
+
+		for (int t=1; t<=maxT; t++) {
+			nucString = nucString + "\nnuclei/t" +IJ.pad(t,padLength)+ "-nuclei\n";
+			int hitCountA =0;
+			for (Roi roi:rois) {
+				if (roi.getTPosition() == t) {
+					hitCountA++;
+					NameTimeToTnumberHashtable.put(roi.getName().split("\"")[1].trim()+"_"+t, hitCountA);
+				}
+			}
+		}
+
+		for (int t=1; t<=maxT; t++) {
+			int hitCountB =0;
+			for (Roi roi:rois) {
+				String roiNameTrim = roi.getName().split("\"")[1].trim();
+				if (roi.getTPosition() == t) {
+					hitCountB++;
+					boolean alreadyNextHit =false;
+					int prevHit = -1;
+					int nextHit = -1;
+					int otherNextHit = -1;
+					if (NameTimeToTnumberHashtable.get(roiNameTrim+"_"+(t-1)) != null) {
+						prevHit = NameTimeToTnumberHashtable.get(roiNameTrim+"_"+(t-1));
+					} 
+					if (NameTimeToTnumberHashtable.get(roiNameTrim.substring(0, roiNameTrim.length()-1)+"_"+(t-1)) != null) {
+						prevHit = NameTimeToTnumberHashtable.get(roiNameTrim.substring(0, roiNameTrim.length()-1)+"_"+(t-1));
+					} 
+					
+					if (NameTimeToTnumberHashtable.get(roiNameTrim+"_"+(t+1)) != null) {
+						nextHit = NameTimeToTnumberHashtable.get(roiNameTrim+"_"+(t+1));
+					} 
+
+					for (String suffix:new String[]{"a","p","m","n"}) {
+						if (!alreadyNextHit && NameTimeToTnumberHashtable.get(roiNameTrim+suffix+"_"+(t+1)) != null) {
+							nextHit = NameTimeToTnumberHashtable.get(roiNameTrim+suffix+"_"+(t+1));
+							alreadyNextHit = true;
+						}
+						if (alreadyNextHit && NameTimeToTnumberHashtable.get(roiNameTrim+suffix+"_"+(t+1)) != null) {
+							otherNextHit = NameTimeToTnumberHashtable.get(roiNameTrim+suffix+"_"+(t+1));
+						}
+					}
+					String cellString = "" + hitCountB+",  1,  "+prevHit+",  "+nextHit+",  "+otherNextHit+",  "+(int)roi.getBounds().getCenterX()+",  "+(int)roi.getBounds().getCenterY()+",  "+roi.getZPosition()+",  "+roi.getBounds().width+",  "+roiNameTrim+",  0,  0, 0, 0, , 0, 0, 0, 0, 0,";
+					nucString = nucString + cellString +"\n";
+				}
+
+			}
+		}
+		nucString = nucString + "\nnuclei/t" +"end"+ "-nuclei\n";
+		IJ.log(nucString);
+		saveZipNuclei(nucString, zipPath);
+
+
+}
 
 
 	static boolean saveZipNuclei(String nucString, String path) { 
@@ -5914,7 +5924,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			ZipOutputStream zos = new ZipOutputStream(new FileOutputStream(new File(path)));
 			BufferedOutputStream bos = new BufferedOutputStream(zos);
 			String nucleiFrame = "";
-			String nucleiLabel = "";			
+			String nucleiLabel = "";		
+			//kind of stupid looping, but works if catch last i...
 			for (int i=0; i<nucLines.length; i++) {
 				if (nucLines[i].contains("nuclei/t")) {
 					if (nucleiLabel != ""){
