@@ -5891,11 +5891,74 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						prevHit = NameTimeToTnumberHashtable.get(roiNameTrim.substring(0, roiNameTrim.length()-1)+"_"+(t-1));
 					} 
 					
+					if (roiNameTrim.equals("E")) {
+						if (NameTimeToTnumberHashtable.get("EMS"+"_"+(t-1)) != null) {
+							prevHit = NameTimeToTnumberHashtable.get("EMS"+"_"+(t-1));
+						}
+					}
+					if (roiNameTrim.equals("MS")) {
+						if (NameTimeToTnumberHashtable.get("EMS"+"_"+(t-1)) != null) {
+							prevHit = NameTimeToTnumberHashtable.get("EMS"+"_"+(t-1));
+						}
+					}
+					
+					if (roiNameTrim.equals("P3")) {
+						if (NameTimeToTnumberHashtable.get("P2"+"_"+(t-1)) != null) {
+							prevHit = NameTimeToTnumberHashtable.get("P2"+"_"+(t-1));
+						}
+					}
+					if (roiNameTrim.equals("C")) {
+						if (NameTimeToTnumberHashtable.get("P2"+"_"+(t-1)) != null) {
+							prevHit = NameTimeToTnumberHashtable.get("P2"+"_"+(t-1));
+						}
+					}
+
+					if (roiNameTrim.equals("P4")) {
+						if (NameTimeToTnumberHashtable.get("P3"+"_"+(t-1)) != null) {
+							prevHit = NameTimeToTnumberHashtable.get("P3"+"_"+(t-1));
+						}
+					}
+					if (roiNameTrim.equals("D")) {
+						if (NameTimeToTnumberHashtable.get("P3"+"_"+(t-1)) != null) {
+							prevHit = NameTimeToTnumberHashtable.get("P3"+"_"+(t-1));
+						}
+					}
+
+
 					if (NameTimeToTnumberHashtable.get(roiNameTrim+"_"+(t+1)) != null) {
 						nextHit = NameTimeToTnumberHashtable.get(roiNameTrim+"_"+(t+1));
 					} 
 
-					for (String suffix:new String[]{"a","p","m","n"}) {
+					
+				
+					if (roiNameTrim.equals("EMS")) {
+						if (NameTimeToTnumberHashtable.get("E"+"_"+(t+1)) != null) {
+							nextHit = NameTimeToTnumberHashtable.get("E"+"_"+(t+1));
+						}
+						if (NameTimeToTnumberHashtable.get("MS"+"_"+(t+1)) != null) {
+							otherNextHit = NameTimeToTnumberHashtable.get("MS"+"_"+(t+1));
+						}
+					}
+					
+					if (roiNameTrim.equals("P2")) {
+						if (NameTimeToTnumberHashtable.get("P3"+"_"+(t+1)) != null) {
+							nextHit = NameTimeToTnumberHashtable.get("P3"+"_"+(t+1));
+						}
+						if (NameTimeToTnumberHashtable.get("C"+"_"+(t+1)) != null) {
+							otherNextHit = NameTimeToTnumberHashtable.get("C"+"_"+(t+1));
+						}
+					}
+					
+					if (roiNameTrim.equals("P3")) {
+						if (NameTimeToTnumberHashtable.get("P4"+"_"+(t+1)) != null) {
+							nextHit = NameTimeToTnumberHashtable.get("P4"+"_"+(t+1));
+						}
+						if (NameTimeToTnumberHashtable.get("D"+"_"+(t+1)) != null) {
+							otherNextHit = NameTimeToTnumberHashtable.get("D"+"_"+(t+1));
+						}
+					}
+					
+					for (String suffix:new String[]{"a","p","m","n","l","r"}) {
 						if (!alreadyNextHit && NameTimeToTnumberHashtable.get(roiNameTrim+suffix+"_"+(t+1)) != null) {
 							nextHit = NameTimeToTnumberHashtable.get(roiNameTrim+suffix+"_"+(t+1));
 							alreadyNextHit = true;
