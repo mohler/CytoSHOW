@@ -324,7 +324,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		add("East", panel);		
 		addPopupMenu();
-		pack();
+		if (visOn)
+			pack();
 		Dimension size = getSize();
 		if (size.width>270)
 			setSize(size.width-40, size.height);
