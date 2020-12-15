@@ -763,10 +763,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					for (int r2=0; r2 < fraaa; r2++) {
 						String nextName = rois2[r2].getName();
 						if (!rootName.replace("\"", "").trim().equals("") ){
-							if (nextName.matches("(\"?)"+rootName.replace("\"", "").trim()+(propagateRenamesThruLineage?"[m|n|l|r|a|p|d|v]*":"")+"(( \")?).*")){
+							if (nextName.matches("\""+rootName.replace("\"", "").trim()+(propagateRenamesThruLineage?"[m|n|l|r|a|p|d|v]*":" ")+" \".*")){
 								if (!propagateRenamesThruLineage || selectedTime < rois2[r2].getTPosition() || selRois[0] == rois2[r2]){
 									nameMatchIndexArrayList.add(r2);
-									nameReplacementArrayList.add(nextName.replaceAll("(\"?)"+rootName.replace("\"", "").trim()+"([m|n|l|r|a|p|d|v]*)(( \")?)(.*)", newName+"$2"));
+									nameReplacementArrayList.add(nextName.replaceAll("\""+rootName.replace("\"", "").trim()+"([m|n|l|r|a|p|d|v]*) \".*", newName+"$1 "));
 								}
 							}
 						} else {
@@ -776,7 +776,6 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							}
 						}
 					}
-
 				}
 				int[] nameMatchIndexes = new int[nameMatchIndexArrayList.size()];
 				String[] newNames = new String[nameMatchIndexArrayList.size()];
