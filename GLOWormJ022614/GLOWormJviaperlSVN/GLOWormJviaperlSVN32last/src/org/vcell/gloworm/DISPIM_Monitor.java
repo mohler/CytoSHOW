@@ -2780,7 +2780,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									double oldMax = win.getImagePlus()
 											.getDisplayRangeMax();
 									boolean oldEdges = win.getImagePlus().getStack().isEdges();
-
+									
+									while(!win.isEnabled()){
+										IJ.wait(10);
+									}
 									ciDFs[pos].setWindow(win);
 									win.updateImage(ciDFs[pos]);
 									win.getImagePlus().getStack().setEdges(oldEdges);
@@ -6005,6 +6008,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											ciDFs[pos].copyLuts(win.getImagePlus());
 
 											//	win.setVisible(false);	
+											while(!win.isEnabled()){
+												IJ.wait(10);
+											}
 											win.setImage(ciDFs[pos]);
 											ciDFs[pos].setWindow(win);
 											win.updateImage(ciDFs[pos]);
@@ -6359,45 +6365,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											int npoints = xpoints.length;
 
 											double angle =0;
-											//	if (type > Roi.OVAL) {
-											//	if (npoints == 4) {
-											//	double angleZero = new Line(xpoints[0], ypoints[0], xpoints[1], ypoints[1]).getAngle();
-											//	double angleTwo = new Line(xpoints[2], ypoints[2], xpoints[3], ypoints[3]).getAngle();
-											//
-											//	double angleZeroPlusPi = angleZero + 180;
-											//	double angleTwoPlusPi = angleTwo + 180;
-											//
-											//	double angleDelta = angleZeroPlusPi%180 - angleTwoPlusPi%180;
-											//
-											//	if ( Math.abs(angleDelta)  >80 && Math.abs(angleDelta)  <100) {
-											//	haveAxesRoiDF = true;
-											//	angle = angleZero;
-											//
-											//	//??? is flipstack correct??  or should it use deltas?!!?	
-											//	flipStack = (angleZeroPlusPi - angleTwoPlusPi < 0 || angleZeroPlusPi - angleTwoPlusPi > 180);
-											//	IJ.log("flipStack = " + flipStack + ":angle0PlusPi - angle2PlusPi = " + angleZeroPlusPi +" - "+ angleTwoPlusPi + " = " + (angleDelta));
-											//
-											//	Roi ellipseRoi = new EllipseRoi(xpoints[0], ypoints[0], xpoints[1], ypoints[1], 
-											//	(new Line(xpoints[2], ypoints[2], xpoints[3], ypoints[3])).getLength()
-											//	/
-											//	(new Line(xpoints[0], ypoints[0], xpoints[1], ypoints[1])).getLength()
-											//	);
-											//	ciDFs[pos].setRoi(ellipseRoi, false);
-											//	theROI = ellipseRoi;
-											//	IJ.saveAs(ciDFs[pos], "Selection", openPath +  "ellipseSNF.roi");
-											//
-											//	Roi rectRoi = new Roi(ellipseRoi.getBounds());
-											//	ciDFs[pos].setRoi(rectRoi, false);
-											//	IJ.saveAs(ciDFs[pos], "Selection", openPath + "rectangleSNF.roi");
-											//
-											//	}else {
-											//	angle = new Line(xpoints[0], ypoints[0], xpoints[2], ypoints[2]).getAngle();
-											//	}
-											//	} else {
-											//	angle = new Line(xpoints[0], ypoints[0], xpoints[npoints/2], ypoints[npoints/2]).getAngle();
-											//	}
-											//	}
-
 
 											int wasC = ciDFs[pos].getChannel();
 											int wasZ = ciDFs[pos].getSlice();
