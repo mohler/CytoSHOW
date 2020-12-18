@@ -1025,10 +1025,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								ArrayList<Integer> thatIndexes = new ArrayList<Integer>();
 
 								for (int i=0;i<selROIs.length;i++){
-									if (selROIs[i].getName().startsWith("\""+thisName +" \"")){
+									if (selROIs[i].getName().startsWith("\""+thisName)){
 										thisIndexes.add(i);
 									}
-									if (selROIs[i].getName().startsWith("\""+thatName +" \"")){
+									if (selROIs[i].getName().startsWith("\""+thatName)){
 										thatIndexes.add(i);
 									}
 								}
@@ -1040,22 +1040,34 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								for (int p=0;p<thatIndexes.size();p++){
 									thatIndexesArray[p] = thatIndexes.get(p);
 								}
-								
-								if (thisName.matches("(E.(m|n))|(AB.(m|n))")){
-									if (thisZ<thatZ) {
-										rename(thisRoi.getName().replace("\"","").split(" ")[0].trim().replace(thisName, thisName.substring(0,thisName.length()-1) + "l"), thisIndexesArray,false);
-										rename(thatRoi.getName().replace("\"","").split(" ")[0].trim().replace(thatName, thatName.substring(0,thatName.length()-1) + "r"), thatIndexesArray,false);
-									}else{
-										rename(thisRoi.getName().replace("\"","").split(" ")[0].trim().replace(thisName, thisName.substring(0,thisName.length()-1) + "r"), thisIndexesArray,false);
-										rename(thatRoi.getName().replace("\"","").split(" ")[0].trim().replace(thatName, thatName.substring(0,thatName.length()-1) + "l"), thatIndexesArray,false);
+								for (int thisHit:thisIndexesArray){
+									if (thisName.matches("(E.(m|n))|(AB.(m|n))")){
+										if (thisZ<thatZ) {
+											rename(selROIs[thisHit].getName().replace("\"","").split(" ")[0].trim().replace(thisName, thisName.substring(0,thisName.length()-1) + "l"), new int[]{thisHit},false);
+										}else{
+											rename(selROIs[thisHit].getName().replace("\"","").split(" ")[0].trim().replace(thisName, thisName.substring(0,thisName.length()-1) + "r"), new int[]{thisHit},false);
+										}
+									} else {
+										if (thisX<thatX) {
+											rename(selROIs[thisHit].getName().replace("\"","").split(" ")[0].trim().replace(thisName, thisName.substring(0,thisName.length()-1) + "a"), new int[]{thisHit},false);
+										}else{
+											rename(selROIs[thisHit].getName().replace("\"","").split(" ")[0].trim().replace(thisName, thisName.substring(0,thisName.length()-1) + "p"), new int[]{thisHit},false);
+										}
 									}
-								} else {
-									if (thisX<thatX) {
-										rename(thisRoi.getName().replace("\"","").split(" ")[0].trim().replace(thisName, thisName.substring(0,thisName.length()-1) + "a"), thisIndexesArray,false);
-										rename(thatRoi.getName().replace("\"","").split(" ")[0].trim().replace(thatName, thatName.substring(0,thatName.length()-1) + "p"), thatIndexesArray,false);
-									}else{
-										rename(thisRoi.getName().replace("\"","").split(" ")[0].trim().replace(thisName, thisName.substring(0,thisName.length()-1) + "p"), thisIndexesArray,false);
-										rename(thatRoi.getName().replace("\"","").split(" ")[0].trim().replace(thatName, thatName.substring(0,thatName.length()-1) + "a"), thatIndexesArray,false);
+								}
+								for (int thatHit:thatIndexesArray){
+									if (thatName.matches("(E.(m|n))|(AB.(m|n))")){
+										if (thisZ<thatZ) {
+											rename(selROIs[thatHit].getName().replace("\"","").split(" ")[0].trim().replace(thatName, thatName.substring(0,thatName.length()-1) + "r"), new int[]{thatHit},false);
+										}else{
+											rename(selROIs[thatHit].getName().replace("\"","").split(" ")[0].trim().replace(thatName, thatName.substring(0,thatName.length()-1) + "l"), new int[]{thatHit},false);
+										}
+									} else {
+										if (thisX<thatX) {
+											rename(selROIs[thatHit].getName().replace("\"","").split(" ")[0].trim().replace(thatName, thatName.substring(0,thatName.length()-1) + "p"), new int[]{thatHit},false);
+										}else{
+											rename(selROIs[thatHit].getName().replace("\"","").split(" ")[0].trim().replace(thatName, thatName.substring(0,thatName.length()-1) + "a"), new int[]{thatHit},false);
+										}
 									}
 								}
 							}
