@@ -1040,34 +1040,49 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								for (int p=0;p<thatIndexes.size();p++){
 									thatIndexesArray[p] = thatIndexes.get(p);
 								}
+								String momName = thisName.substring(0,thisName.length()-1);
 								for (int thisHit:thisIndexesArray){
-									if (thisName.matches("(E.(m|n))|(AB.(m|n))")){
-										if (thisZ<thatZ) {
-											rename(selROIs[thisHit].getName().replace("\"","").split(" ")[0].trim().replace(thisName, thisName.substring(0,thisName.length()-1) + "l"), new int[]{thisHit},false);
-										}else{
-											rename(selROIs[thisHit].getName().replace("\"","").split(" ")[0].trim().replace(thisName, thisName.substring(0,thisName.length()-1) + "r"), new int[]{thisHit},false);
-										}
-									} else {
+									String thisHitName = selROIs[thisHit].getName().replace("\"","").split(" ")[0].trim();
+									if (thisName.substring(0,thisName.length()-1).matches("(P2|P3|P4)")){
 										if (thisX<thatX) {
-											rename(selROIs[thisHit].getName().replace("\"","").split(" ")[0].trim().replace(thisName, thisName.substring(0,thisName.length()-1) + "a"), new int[]{thisHit},false);
+											rename(thisHitName.replace(thisName, momName.equals("P2")?"C":(momName.equals("P3")?"D":"Z2")), new int[]{thisHit},false);
 										}else{
-											rename(selROIs[thisHit].getName().replace("\"","").split(" ")[0].trim().replace(thisName, thisName.substring(0,thisName.length()-1) + "p"), new int[]{thisHit},false);
+											rename(thisHitName.replace(thisName, momName.equals("P2")?"P3":(momName.equals("P3")?"P4":"Z3")), new int[]{thisHit},false);
 										}
+									} else if (thisName.matches("(E.(m|n))|(AB.(m|n))")){
+//										if (thisZ<thatZ) {
+//											rename(thisHitName.replace(thisName, thisName.substring(0,thisName.length()-1) + "l"), new int[]{thisHit},false);
+//										}else{
+//											rename(thisHitName.replace(thisName, thisName.substring(0,thisName.length()-1) + "r"), new int[]{thisHit},false);
+//										}
+									} else {
+//										if (thisX<thatX) {
+//											rename(thisHitName.replace(thisName, thisName.substring(0,thisName.length()-1) + "a"), new int[]{thisHit},false);
+//										}else{
+//											rename(thisHitName.replace(thisName, thisName.substring(0,thisName.length()-1) + "p"), new int[]{thisHit},false);
+//										}
 									}
 								}
 								for (int thatHit:thatIndexesArray){
-									if (thatName.matches("(E.(m|n))|(AB.(m|n))")){
-										if (thisZ<thatZ) {
-											rename(selROIs[thatHit].getName().replace("\"","").split(" ")[0].trim().replace(thatName, thatName.substring(0,thatName.length()-1) + "r"), new int[]{thatHit},false);
-										}else{
-											rename(selROIs[thatHit].getName().replace("\"","").split(" ")[0].trim().replace(thatName, thatName.substring(0,thatName.length()-1) + "l"), new int[]{thatHit},false);
-										}
-									} else {
+									String thatHitName = selROIs[thatHit].getName().replace("\"","").split(" ")[0].trim();
+									if (thatName.substring(0,thatName.length()-1).matches("(P2|P3|P4)")){
 										if (thisX<thatX) {
-											rename(selROIs[thatHit].getName().replace("\"","").split(" ")[0].trim().replace(thatName, thatName.substring(0,thatName.length()-1) + "p"), new int[]{thatHit},false);
+											rename(thatHitName.replace(thisName, momName.equals("P2")?"P3":(momName.equals("P3")?"P4":"Z3")), new int[]{thatHit},false);
 										}else{
-											rename(selROIs[thatHit].getName().replace("\"","").split(" ")[0].trim().replace(thatName, thatName.substring(0,thatName.length()-1) + "a"), new int[]{thatHit},false);
+											rename(thatHitName.replace(thisName, momName.equals("P2")?"C":(momName.equals("P3")?"D":"Z2")), new int[]{thatHit},false);
 										}
+									} else if (thatName.matches("(E.(m|n))|(AB.(m|n))")){
+//										if (thisZ<thatZ) {
+//											rename(thatHitName.replace(thatName, thatName.substring(0,thatName.length()-1) + "r"), new int[]{thatHit},false);
+//										}else{
+//											rename(thatHitName.replace(thatName, thatName.substring(0,thatName.length()-1) + "l"), new int[]{thatHit},false);
+//										}
+									} else {
+//										if (thisX<thatX) {
+//											rename(thatHitName.replace(thatName, thatName.substring(0,thatName.length()-1) + "p"), new int[]{thatHit},false);
+//										}else{
+//											rename(thatHitName.replace(thatName, thatName.substring(0,thatName.length()-1) + "a"), new int[]{thatHit},false);
+//										}
 									}
 								}
 							}
