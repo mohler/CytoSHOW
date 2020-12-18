@@ -387,6 +387,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		addPopupItem("Realign by Parameters");
 		addPopupItem("Auto-advance when tagging");
 		addPopupItem("StarryNiteImporter");
+		addPopupItem("Resolve a-p l-r sisters");
 		addPopupItem("StarryNiteExporter");
 		addPopupItem("Map Neighbors");
 		addPopupItem("Color Tags by Group Interaction Rules");
@@ -964,6 +965,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			else if (command.equals("StarryNiteImporter")) {
 				importStarryNiteNuclei("");
 			}
+			else if (command.equals("Resolve a-p l-r sisters")) {
+				resolveMNsisters();
+			}
 			else if (command.equals("StarryNiteExporter")) {
 				this.exportROIsAsZippedStarryNiteNuclei(IJ.getFilePath("Save zipped SN nuclei"));
 			}
@@ -1001,6 +1005,65 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			this.imp.getCanvas().requestFocus();
 		}
 		//		IJ.log("THREAD DONE");
+	}
+
+	private void resolveMNsisters() {
+		Roi[] selROIs = getSelectedRoisAsArray();
+		for (Roi thisRoi:selROIs){
+			String thisName = thisRoi.getName().replace("\"","").split(" ")[0].trim();
+			int thisX = (int) thisRoi.getBounds().getCenterX();
+			int thisZ = thisRoi.getZPosition();
+			if (thisName.endsWith("m") || thisName.endsWith("n")){
+				for (Roi thatRoi:selROIs){
+					String thatName = thatRoi.getName().replace("\"","").split(" ")[0].trim();
+					int thatX = (int) thatRoi.getBounds().getCenterX();
+					int thatZ = thisRoi.getZPosition();
+					if (!thisName.equals(thatName)){
+						if (thatName.endsWith("m") || thatName.endsWith("n")){
+							if (thisName.substring(0,thisName.length()-1).equals(thatName.substring(0,thatName.length()-1))){
+								ArrayList<Integer> thisIndexes = new ArrayList<>();
+								ArrayList<Integer> thatIndexes = new ArrayList<Integer>();
+
+								for (int i=0;i<selROIs.length;i++){
+									if (selROIs[i].getName().startsWith("\""+thisName +" \"")){
+										thisIndexes.add(i);
+									}
+									if (selROIs[i].getName().startsWith("\""+thatName +" \"")){
+										thatIndexes.add(i);
+									}
+								}
+								int[] thisIndexesArray = new int[thisIndexes.size()];
+								int[] thatIndexesArray = new int[thatIndexes.size()];
+								for (int p=0;p<thisIndexes.size();p++){
+									thisIndexesArray[p] = thisIndexes.get(p);
+								}
+								for (int p=0;p<thatIndexes.size();p++){
+									thatIndexesArray[p] = thatIndexes.get(p);
+								}
+								
+								if (thisName.matches("(E.(m|n))|(AB.(m|n))")){
+									if (thisZ<thatZ) {
+										rename(thisRoi.getName().replace("\"","").split(" ")[0].trim().replace(thisName, thisName.substring(0,thisName.length()-1) + "l"), thisIndexesArray,false);
+										rename(thatRoi.getName().replace("\"","").split(" ")[0].trim().replace(thatName, thatName.substring(0,thatName.length()-1) + "r"), thatIndexesArray,false);
+									}else{
+										rename(thisRoi.getName().replace("\"","").split(" ")[0].trim().replace(thisName, thisName.substring(0,thisName.length()-1) + "r"), thisIndexesArray,false);
+										rename(thatRoi.getName().replace("\"","").split(" ")[0].trim().replace(thatName, thatName.substring(0,thatName.length()-1) + "l"), thatIndexesArray,false);
+									}
+								} else {
+									if (thisX<thatX) {
+										rename(thisRoi.getName().replace("\"","").split(" ")[0].trim().replace(thisName, thisName.substring(0,thisName.length()-1) + "a"), thisIndexesArray,false);
+										rename(thatRoi.getName().replace("\"","").split(" ")[0].trim().replace(thatName, thatName.substring(0,thatName.length()-1) + "p"), thatIndexesArray,false);
+									}else{
+										rename(thisRoi.getName().replace("\"","").split(" ")[0].trim().replace(thisName, thisName.substring(0,thisName.length()-1) + "p"), thisIndexesArray,false);
+										rename(thatRoi.getName().replace("\"","").split(" ")[0].trim().replace(thatName, thatName.substring(0,thatName.length()-1) + "a"), thatIndexesArray,false);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	private void sketchVolumeViewer(Object source) { 
@@ -1739,7 +1802,6 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			newNames[n]=label2;
 		}
 		rename(newNames,  indexes, false);
-		updateShowAll();
 
 	}
 
