@@ -790,7 +790,6 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				if (rename(newNames, nameMatchIndexes, false)) {
 					if (existinghexName !="") {
 						for (int i=0; i < nameMatchIndexes.length; i++) {
-//							this.select(nameMatchIndexes[i]);
 
 							rois[nameMatchIndexes[i]].setFillColor(existingColor);
 
@@ -1088,24 +1087,85 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			String thisTargetString = thisName.replace("\"","").split(" ")[0].trim();
 			String thatTargetString = thatName.replace("\"","").split(" ")[0].trim();
+			String thisSwapString = "";
+			String thatSwapString = "";
 
-			if (thisTargetString.matches("(E.(m|n))|(AB.(m|n))")){
-				if (thisZ<thatZ) {
-					rename(thisTargetString.replace(thisTargetString, thisTargetString.substring(0,thisTargetString.length()-1) + "l"), thisIndexesArray,false);
-					rename(thatTargetString.replace(thatTargetString, thatTargetString.substring(0,thatTargetString.length()-1) + "r"), thatIndexesArray,false);
+			if (thisTargetString.substring(0,thisTargetString.length()-1).matches("(P2|P3|P4)")){
+				String momName = thisTargetString.substring(0,thisTargetString.length()-1);
+				if (thisX<thatX) {
+					thisSwapString = thisTargetString.replace(thisTargetString, momName.equals("P2")?"C":(momName.equals("P3")?"D":"Z2"));
+					thatSwapString = thatTargetString.replace(thatTargetString, momName.equals("P2")?"P3":(momName.equals("P3")?"P4":"Z3"));
 				}else{
-					rename(thisTargetString.replace(thisTargetString, thisTargetString.substring(0,thisTargetString.length()-1) + "r"), thisIndexesArray,false);
-					rename(thatTargetString.replace(thatTargetString, thatTargetString.substring(0,thatTargetString.length()-1) + "l"), thatIndexesArray,false);
+					thisSwapString = thisTargetString.replace(thisTargetString, momName.equals("P2")?"P3":(momName.equals("P3")?"P4":"Z3"));
+					thatSwapString = thatTargetString.replace(thatTargetString, momName.equals("P2")?"C":(momName.equals("P3")?"D":"Z2"));
+				}
+			} else if (thisTargetString.matches("(E.(m|n))|(AB.(m|n))")){
+				if (thisZ<thatZ) {
+					thisSwapString = thisTargetString.replace(thisTargetString, thisTargetString.substring(0,thisTargetString.length()-1) + "l");
+					thatSwapString = thatTargetString.replace(thatTargetString, thatTargetString.substring(0,thatTargetString.length()-1) + "r");
+				}else{
+					thisSwapString = thisTargetString.replace(thisTargetString, thisTargetString.substring(0,thisTargetString.length()-1) + "r");
+					thatSwapString = thatTargetString.replace(thatTargetString, thatTargetString.substring(0,thatTargetString.length()-1) + "l");
 				}
 			} else {
 				if (thisX<thatX) {
-					rename(thisTargetString.replace(thisTargetString, thisTargetString.substring(0,thisTargetString.length()-1) + "a"), thisIndexesArray,false);
-					rename(thatTargetString.replace(thatTargetString, thatTargetString.substring(0,thatTargetString.length()-1) + "p"), thatIndexesArray,false);
+					thisSwapString = thisTargetString.replace(thisTargetString, thisTargetString.substring(0,thisTargetString.length()-1) + "a");
+					thatSwapString = thatTargetString.replace(thatTargetString, thatTargetString.substring(0,thatTargetString.length()-1) + "p");
 				}else{
-					rename(thisTargetString.replace(thisTargetString, thisTargetString.substring(0,thisTargetString.length()-1) + "p"), thisIndexesArray,false);
-					rename(thatTargetString.replace(thatTargetString, thatTargetString.substring(0,thatTargetString.length()-1) + "a"), thatIndexesArray,false);
+					thisSwapString = thisTargetString.replace(thisTargetString, thisTargetString.substring(0,thisTargetString.length()-1) + "p");
+					thatSwapString = thatTargetString.replace(thatTargetString, thatTargetString.substring(0,thatTargetString.length()-1) + "a");
 				}
 			}
+			rename(thisSwapString, thisIndexesArray,false);
+			rename(thatSwapString, thatIndexesArray,false);
+
+// this root propagation code copied over from the doAction->Replace method.  I think I should be able to make it fit with this ap lr method...?			
+//			for (Roi selRoi:selRois) {
+//
+//				String rootName = selRoi.getName().contains("\"")?("\""+selRoi.getName().split("\"")[1]+"\""):selRoi.getName().split("_")[0];
+//
+//				String[] rootChunks = selRoi.getName().split("_");
+//				String rootFrame = rootChunks[rootChunks.length-1].replaceAll("[CZT]", "").split("-")[0];
+//				if (!rootNames_rootFrames.contains(rootName+"_"+rootFrame)) {
+//					rootNames_rootFrames.add(rootName+"_"+rootFrame);
+//					rootNames.add(rootName);				
+//				}
+//			}
+//			ArrayList<Integer> nameMatchIndexArrayList = new ArrayList<Integer>();
+//			ArrayList<String> nameReplacementArrayList = new ArrayList<String>();
+//
+//			for (int n=0; n<rootNames.size(); n++) {
+//				String rootName = rootNames.get(n);
+//				Roi[] rois2 = getFullRoisAsArray();
+//				int fraaa = rois2.length;
+//				for (int r2=0; r2 < fraaa; r2++) {
+//					String nextName = rois2[r2].getName();
+//					if (!rootName.replace("\"", "").trim().equals("") ){
+//						String rootMatch = "\""+rootName.replace("\"", "").trim()+(propagateRenamesThruLineage?"[m|n|l|r|a|p|d|v]*":"")+" +\".*";
+//						if (nextName.matches(rootMatch)){
+//							if (!propagateRenamesThruLineage){
+//								
+//							} else if (selectedTime < rois2[r2].getTPosition() || selRois[0] == rois2[r2]){
+//								nameMatchIndexArrayList.add(r2);
+//								nameReplacementArrayList.add(nextName.replaceAll("\""+rootName.replace("\"", "").trim()+"([m|n|l|r|a|p|d|v]*) +\".*", newName+"$1"));
+//							}
+//						}
+//					} else {
+//						if (nextName.matches("(\"?)"+rootName.replace("\"", "")+"(\"?).*")){
+//							nameMatchIndexArrayList.add(r2);
+//							nameReplacementArrayList.add(nextName.replaceAll("(\"?)"+rootName.replace("\"", "")+"(\"?)(.*)", newName));
+//						}
+//					}
+//				}
+//			}
+//			int[] nameMatchIndexes = new int[nameMatchIndexArrayList.size()];
+//			String[] newNames = new String[nameMatchIndexArrayList.size()];
+//			for (int n=0;n<nameMatchIndexes.length;n++) {
+//				nameMatchIndexes[n] = nameMatchIndexArrayList.get(n);
+//				newNames[n] = nameReplacementArrayList.get(n);
+//			}
+//			if (rename(newNames, nameMatchIndexes, false)) {
+//			}
 		}
 	}
 
