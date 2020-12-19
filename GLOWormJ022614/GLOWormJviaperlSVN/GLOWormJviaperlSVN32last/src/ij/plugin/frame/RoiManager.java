@@ -1015,13 +1015,17 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				maxT = roi.getTPosition();
 			}
 		}
-		for (String rootName:roisByRootName.keySet()){
-			if (rootName == " " || rootName.startsWith("Nuc")) continue;
+		String[] roiNameKeys = roisByRootName.keySet().toArray(new String[roisByRootName.keySet().size()]);
+		Arrays.sort(roiNameKeys);
+		for (String rootName:roiNameKeys){
+			if (rootName == "\" \"" || rootName.startsWith("\"Nuc")) 
+				continue;
 			ArrayList<Roi> theseRois = roisByRootName.get(rootName);
 			String thisName = rootName;
 			String thatName = "";
 			int thisX = (int)theseRois.get(0).getBounds().getCenterX();
 			int thisZ = theseRois.get(0).getZPosition();
+			int thisT = theseRois.get(0).getTPosition();
 			if (thisName.endsWith("m \"")) {
 				thatName = thisName.substring(0, thisName.length()-3)+"n \"";
 			}
@@ -1035,9 +1039,27 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			if (thoseRois == null){
 				continue;
 			}
+			
 			int thatX = (int)thoseRois.get(0).getBounds().getCenterX();
 			int thatZ = thoseRois.get(0).getZPosition();
+			int thatT = thoseRois.get(0).getTPosition();
+			if (thatT != thisT)
+				continue;
+			int[] thisIndexesArray = new int[theseRois.size()];
+			int[] thatIndexesArray = new int[thoseRois.size()];
+			int thisHitCount =0;
+			int thatHitCount =0;
+			for (int r=0;r<fullROIs.length;r++){
+				if (theseRois.contains(fullROIs[r])){
+					thisIndexesArray[thisHitCount] = r;
+					thisHitCount++;
+				}
+				if (thoseRois.contains(fullROIs[r])){
+					thatIndexesArray[thatHitCount] = r;
+					thatHitCount++;
+				}
 
+			}
 			if (thisX<thatX) {
 				IJ.log(theseRois.get(0).getName().replace(thisName, thisName.substring(0, thisName.length()-3)+"a") 
 						+ "  " +thoseRois.get(0).getName().replace(thatName, thatName.substring(0, thatName.length()-3)+"p"));
@@ -1045,24 +1067,26 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				IJ.log(theseRois.get(0).getName().replace(thisName, thisName.substring(0, thisName.length()-3)+"p") 
 						+ "  " +thoseRois.get(0).getName().replace(thatName, thatName.substring(0, thatName.length()-3)+"a"));				
 			}
+			String thisTargetString = thisName.replace("\"","").split(" ")[0].trim();
+			String thatTargetString = thatName.replace("\"","").split(" ")[0].trim();
 
-//			if (thisName.matches("(E.(m|n))|(AB.(m|n))")){
-//				if (thisZ<thatZ) {
-//					rename(thisRoi.getName().replace("\"","").split(" ")[0].trim().replace(thisName, thisName.substring(0,thisName.length()-1) + "l"), thisIndexesArray,false);
-//					rename(thatRoi.getName().replace("\"","").split(" ")[0].trim().replace(thatName, thatName.substring(0,thatName.length()-1) + "r"), thatIndexesArray,false);
-//				}else{
-//					rename(thisRoi.getName().replace("\"","").split(" ")[0].trim().replace(thisName, thisName.substring(0,thisName.length()-1) + "r"), thisIndexesArray,false);
-//					rename(thatRoi.getName().replace("\"","").split(" ")[0].trim().replace(thatName, thatName.substring(0,thatName.length()-1) + "l"), thatIndexesArray,false);
-//				}
-//			} else {
-//				if (thisX<thatX) {
-//					rename(thisRoi.getName().replace("\"","").split(" ")[0].trim().replace(thisName, thisName.substring(0,thisName.length()-1) + "a"), thisIndexesArray,false);
-//					rename(thatRoi.getName().replace("\"","").split(" ")[0].trim().replace(thatName, thatName.substring(0,thatName.length()-1) + "p"), thatIndexesArray,false);
-//				}else{
-//					rename(thisRoi.getName().replace("\"","").split(" ")[0].trim().replace(thisName, thisName.substring(0,thisName.length()-1) + "p"), thisIndexesArray,false);
-//					rename(thatRoi.getName().replace("\"","").split(" ")[0].trim().replace(thatName, thatName.substring(0,thatName.length()-1) + "a"), thatIndexesArray,false);
-//				}
-//			}
+			if (thisName.matches("(E.(m|n))|(AB.(m|n))")){
+				if (thisZ<thatZ) {
+					rename(thisTargetString.replace(thisTargetString, thisTargetString.substring(0,thatTargetString.length()-1) + "l"), thisIndexesArray,false);
+					rename(thatTargetString.replace(thatTargetString, thatTargetString.substring(0,thatTargetString.length()-1) + "r"), thatIndexesArray,false);
+				}else{
+					rename(thisTargetString.replace(thisTargetString, thisTargetString.substring(0,thatTargetString.length()-1) + "r"), thisIndexesArray,false);
+					rename(thatTargetString.replace(thatTargetString, thatTargetString.substring(0,thatTargetString.length()-1) + "l"), thatIndexesArray,false);
+				}
+			} else {
+				if (thisX<thatX) {
+					rename(thisTargetString.replace(thisTargetString, thisTargetString.substring(0,thatTargetString.length()-1) + "a"), thisIndexesArray,false);
+					rename(thatTargetString.replace(thatTargetString, thatTargetString.substring(0,thatTargetString.length()-1) + "p"), thatIndexesArray,false);
+				}else{
+					rename(thisTargetString.replace(thisTargetString, thisTargetString.substring(0,thatTargetString.length()-1) + "p"), thisIndexesArray,false);
+					rename(thatTargetString.replace(thatTargetString, thatTargetString.substring(0,thatTargetString.length()-1) + "a"), thatIndexesArray,false);
+				}
+			}
 		}
 	}
 
