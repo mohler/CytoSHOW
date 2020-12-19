@@ -1089,7 +1089,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			String thisTargetString = thisName.replace("\"","").split(" ")[0].trim();
 			String thatTargetString = thatName.replace("\"","").split(" ")[0].trim();
 
-			if (thisName.matches("(E.(m|n))|(AB.(m|n))")){
+			if (thisTargetString.matches("(E.(m|n))|(AB.(m|n))")){
 				if (thisZ<thatZ) {
 					rename(thisTargetString.replace(thisTargetString, thisTargetString.substring(0,thisTargetString.length()-1) + "l"), thisIndexesArray,false);
 					rename(thatTargetString.replace(thatTargetString, thatTargetString.substring(0,thatTargetString.length()-1) + "r"), thatIndexesArray,false);
