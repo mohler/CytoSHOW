@@ -1045,21 +1045,40 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			int thatT = thoseRois.get(0).getTPosition();
 			if (thatT != thisT)
 				continue;
-			int[] thisIndexesArray = new int[theseRois.size()];
-			int[] thatIndexesArray = new int[thoseRois.size()];
+			ArrayList<Integer> thisIndexesArrayList = new ArrayList<Integer>();
+			ArrayList<Integer> thatIndexesArrayList = new ArrayList<Integer>();
+			ArrayList<Roi> theseAlreadyHit = new ArrayList<Roi>();
+			ArrayList<Roi> thoseAlreadyHit = new ArrayList<Roi>();
 			int thisHitCount =0;
 			int thatHitCount =0;
 			for (int r=0;r<fullROIs.length;r++){
-				if (theseRois.contains(fullROIs[r])){
-					thisIndexesArray[thisHitCount] = r;
-					thisHitCount++;
+				if (fullROIs[r]!=null){
+					if (theseRois.contains(fullROIs[r])){
+						if (!theseAlreadyHit.contains(fullROIs[r])){
+							thisIndexesArrayList.add(r);
+							theseAlreadyHit.add(fullROIs[r]);
+							thisHitCount++;
+						}else 
+							IJ.wait(1);
+					} else if (thoseRois.contains(fullROIs[r])){
+						if (!thoseAlreadyHit.contains(fullROIs[r])){
+							thatIndexesArrayList.add(r);
+							thoseAlreadyHit.add(fullROIs[r]);
+							thatHitCount++;
+						}else 
+							IJ.wait(1);
+					}
 				}
-				if (thoseRois.contains(fullROIs[r])){
-					thatIndexesArray[thatHitCount] = r;
-					thatHitCount++;
-				}
-
 			}
+			int[] thisIndexesArray = new int[thisIndexesArrayList.size()];
+			for (int t=0;t<thisIndexesArray.length;t++){
+				thisIndexesArray[t] = thisIndexesArrayList.get(t);
+			}
+			int[] thatIndexesArray = new int[thatIndexesArrayList.size()];
+			for (int t=0;t<thatIndexesArray.length;t++){
+				thatIndexesArray[t] = thatIndexesArrayList.get(t);
+			}
+
 			if (thisX<thatX) {
 				IJ.log(theseRois.get(0).getName().replace(thisName, thisName.substring(0, thisName.length()-3)+"a") 
 						+ "  " +thoseRois.get(0).getName().replace(thatName, thatName.substring(0, thatName.length()-3)+"p"));
@@ -1072,18 +1091,18 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 			if (thisName.matches("(E.(m|n))|(AB.(m|n))")){
 				if (thisZ<thatZ) {
-					rename(thisTargetString.replace(thisTargetString, thisTargetString.substring(0,thatTargetString.length()-1) + "l"), thisIndexesArray,false);
+					rename(thisTargetString.replace(thisTargetString, thisTargetString.substring(0,thisTargetString.length()-1) + "l"), thisIndexesArray,false);
 					rename(thatTargetString.replace(thatTargetString, thatTargetString.substring(0,thatTargetString.length()-1) + "r"), thatIndexesArray,false);
 				}else{
-					rename(thisTargetString.replace(thisTargetString, thisTargetString.substring(0,thatTargetString.length()-1) + "r"), thisIndexesArray,false);
+					rename(thisTargetString.replace(thisTargetString, thisTargetString.substring(0,thisTargetString.length()-1) + "r"), thisIndexesArray,false);
 					rename(thatTargetString.replace(thatTargetString, thatTargetString.substring(0,thatTargetString.length()-1) + "l"), thatIndexesArray,false);
 				}
 			} else {
 				if (thisX<thatX) {
-					rename(thisTargetString.replace(thisTargetString, thisTargetString.substring(0,thatTargetString.length()-1) + "a"), thisIndexesArray,false);
+					rename(thisTargetString.replace(thisTargetString, thisTargetString.substring(0,thisTargetString.length()-1) + "a"), thisIndexesArray,false);
 					rename(thatTargetString.replace(thatTargetString, thatTargetString.substring(0,thatTargetString.length()-1) + "p"), thatIndexesArray,false);
 				}else{
-					rename(thisTargetString.replace(thisTargetString, thisTargetString.substring(0,thatTargetString.length()-1) + "p"), thisIndexesArray,false);
+					rename(thisTargetString.replace(thisTargetString, thisTargetString.substring(0,thisTargetString.length()-1) + "p"), thisIndexesArray,false);
 					rename(thatTargetString.replace(thatTargetString, thatTargetString.substring(0,thatTargetString.length()-1) + "a"), thatIndexesArray,false);
 				}
 			}
