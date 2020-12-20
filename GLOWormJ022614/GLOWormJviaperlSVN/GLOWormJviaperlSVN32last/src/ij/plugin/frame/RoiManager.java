@@ -1031,10 +1031,34 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				continue;
 			ArrayList<Roi> theseRois = roisByRootName.get(rootName);
 			String thisName = rootName;
+			if (thisName.startsWith("\"ABan "))
+				IJ.wait(1);
 			String thatName = "";
-			int thisX = (int)theseRois.get(0).getBounds().getCenterX();
-			int thisZ = theseRois.get(0).getZPosition();
-			int thisT = theseRois.get(0).getTPosition();
+			
+			int maxThisT = 0;
+			int minThisT = Integer.MAX_VALUE;
+			for (Roi roi:theseRois){
+				if (maxThisT < roi.getTPosition()){
+					maxThisT = roi.getTPosition();
+				}
+				if (minThisT > roi.getTPosition()){
+					minThisT = roi.getTPosition();
+				}
+			}
+			ArrayList<Roi> theseTSortedRois = new ArrayList<Roi>();
+			for (int t=minThisT; t<=maxThisT; t++){
+				for (Roi roi:theseRois){
+					if (roi.getTPosition()==t){
+						theseTSortedRois.add(roi);
+					}
+				}
+			}
+			theseRois = theseTSortedRois;
+			Roi thisRoi = theseRois.get(0);
+
+			int thisX = (int)thisRoi.getBounds().getCenterX();
+			int thisZ = thisRoi.getZPosition();
+			int thisT = thisRoi.getTPosition();
 			if (thisName.endsWith("m \"")) {
 				thatName = thisName.substring(0, thisName.length()-3)+"n \"";
 			}
@@ -1049,9 +1073,29 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				continue;
 			}
 			
-			int thatX = (int)thoseRois.get(0).getBounds().getCenterX();
-			int thatZ = thoseRois.get(0).getZPosition();
-			int thatT = thoseRois.get(0).getTPosition();
+			int maxThatT = 0;
+			int minThatT = Integer.MAX_VALUE;
+			for (Roi roi:thoseRois){
+				if (maxThatT < roi.getTPosition()){
+					maxThatT = roi.getTPosition();
+				}
+				if (minThatT > roi.getTPosition()){
+					minThatT = roi.getTPosition();
+				}
+			}
+			ArrayList<Roi> thoseTSortedRois = new ArrayList<Roi>();
+			for (int t=minThatT; t<=maxThatT; t++){
+				for (Roi roi:thoseRois){
+					if (roi.getTPosition()==t){
+						thoseTSortedRois.add(roi);
+					}
+				}
+			}
+			thoseRois = thoseTSortedRois;
+			Roi thatRoi = thoseRois.get(0);
+			int thatX = (int)thatRoi.getBounds().getCenterX();
+			int thatZ = thatRoi.getZPosition();
+			int thatT = thatRoi.getTPosition();
 			if (thatT != thisT)
 				continue;
 			ArrayList<Integer> thisIndexesArrayList = new ArrayList<Integer>();
@@ -1089,34 +1133,24 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 
 			if (thisX<thatX) {
-				IJ.log(theseRois.get(0).getName().replace(thisName, thisName.substring(0, thisName.length()-3)+"a") 
-						+ "  " +thoseRois.get(0).getName().replace(thatName, thatName.substring(0, thatName.length()-3)+"p"));
+				IJ.log(thisRoi.getName().replace(thisName, thisName.substring(0, thisName.length()-3)+"a") 
+						+ "  " +thatRoi.getName().replace(thatName, thatName.substring(0, thatName.length()-3)+"p"));
 			} else {
-				IJ.log(theseRois.get(0).getName().replace(thisName, thisName.substring(0, thisName.length()-3)+"p") 
-						+ "  " +thoseRois.get(0).getName().replace(thatName, thatName.substring(0, thatName.length()-3)+"a"));				
+				IJ.log(thisRoi.getName().replace(thisName, thisName.substring(0, thisName.length()-3)+"p") 
+						+ "  " +thatRoi.getName().replace(thatName, thatName.substring(0, thatName.length()-3)+"a"));				
 			}
 			String thisTargetString = thisName.replace("\"","").split(" ")[0].trim();
 			String thatTargetString = thatName.replace("\"","").split(" ")[0].trim();
 			String thisSwapString = "";
 			String thatSwapString = "";
 
-//			if (thisTargetString.substring(0,thisTargetString.length()-1).matches("(P2|P3|P4)")){
-//				String momName = thisTargetString.substring(0,thisTargetString.length()-1);
-//				if (thisX<thatX) {
-//					thisSwapString = thisTargetString.replace(thisTargetString, momName.equals("P2")?"C":(momName.equals("P3")?"D":"Z2"));
-//					thatSwapString = thatTargetString.replace(thatTargetString, momName.equals("P2")?"P3":(momName.equals("P3")?"P4":"Z3"));
-//				}else{
-//					thisSwapString = thisTargetString.replace(thisTargetString, momName.equals("P2")?"P3":(momName.equals("P3")?"P4":"Z3"));
-//					thatSwapString = thatTargetString.replace(thatTargetString, momName.equals("P2")?"C":(momName.equals("P3")?"D":"Z2"));
-//				}
-//			} else 
-			if (thisTargetString.matches("(E.(m|n))|(AB.(m|n))")){
-				if (thisZ<thatZ) {
-					thisSwapString = thisTargetString.replace(thisTargetString, thisTargetString.substring(0,thisTargetString.length()-1) + "l");
-					thatSwapString = thatTargetString.replace(thatTargetString, thatTargetString.substring(0,thatTargetString.length()-1) + "r");
+			if (thisTargetString.matches("EMS(m|n)")){
+				if (thisX<thatX) {
+					thisSwapString = thisTargetString.replace(thisTargetString, "MS");
+					thatSwapString = thatTargetString.replace(thatTargetString, "E");
 				}else{
-					thisSwapString = thisTargetString.replace(thisTargetString, thisTargetString.substring(0,thisTargetString.length()-1) + "r");
-					thatSwapString = thatTargetString.replace(thatTargetString, thatTargetString.substring(0,thatTargetString.length()-1) + "l");
+					thisSwapString = thisTargetString.replace(thisTargetString, "E");
+					thatSwapString = thatTargetString.replace(thatTargetString, "MS");
 				}
 			} else {
 				if (thisX<thatX) {
@@ -1177,9 +1211,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 				String thisName = rootName;
 				String thatName = "";
-				int thisX = (int)theseRois.get(0).getBounds().getCenterX();
-				int thisZ = theseRois.get(0).getZPosition();
-				int thisT = theseRois.get(0).getTPosition();
+				Roi thisRoi = theseRois.get(0);
+				int thisX = (int)thisRoi.getBounds().getCenterX();
+				int thisZ = thisRoi.getZPosition();
+				int thisT = thisRoi.getTPosition();
 				if (!thisName.matches("\"P"+pIteration+". \"")){
 					continue;
 				}
@@ -1208,10 +1243,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				if (thoseRois == null){
 					continue;
 				}
+				Roi thatRoi = thoseRois.get(0);
 
-				int thatX = (int)thoseRois.get(0).getBounds().getCenterX();
-				int thatZ = thoseRois.get(0).getZPosition();
-				int thatT = thoseRois.get(0).getTPosition();
+				int thatX = (int)thatRoi.getBounds().getCenterX();
+				int thatZ = thatRoi.getZPosition();
+				int thatT = thatRoi.getTPosition();
 				if (thatT != thisT)
 					continue;
 				ArrayList<Integer> thisIndexesArrayList = new ArrayList<Integer>();
@@ -1268,6 +1304,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					//				rename(thisSwapString, thisIndexesArray,false);
 					//				rename(thatSwapString, thatIndexesArray,false);
 				} 
+
 				ArrayList<Integer> nameMatchIndexArrayList = new ArrayList<Integer>();
 				ArrayList<String> nameReplacementArrayList = new ArrayList<String>();
 				boolean propRenameLin = true;
@@ -1303,6 +1340,148 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				}
 				if (rename(newNames, nameMatchIndexes, false)) {
 				}
+			}
+		}
+		
+		String[] roiNameKeysThree = roisByRootName.keySet().toArray(new String[roisByRootName.keySet().size()]);
+		Arrays.sort(roiNameKeysThree);
+		String[] roiFlippedKeysThree =  new String[roiNameKeysThree.length];
+		for (int k=0;k<roiNameKeysThree.length;k++){
+			roiFlippedKeysThree[roiNameKeysThree.length-1-k] = roiNameKeysThree[k];
+		}
+		roiNameKeysThree = roiFlippedKeysThree;
+		
+
+		for (String rootName:roiNameKeysThree){
+			ArrayList<Roi> theseRois = roisByRootName.get(rootName);
+
+			String thisName = rootName;
+			String thatName = "";
+			Roi thisRoi = theseRois.get(0);
+			int thisX = (int)thisRoi.getBounds().getCenterX();
+			int thisZ = thisRoi.getZPosition();
+			int thisT = thisRoi.getTPosition();
+			if (thisName.startsWith("\"E"))
+				IJ.wait(1);
+			if (!thisName.matches("\"E.(m|n|a|p) \"") && !thisName.matches("\"AB.(m|n|a|p) \"")){
+				continue;
+			}
+			if (thisName.endsWith("m \"")) {
+				thatName = thisName.substring(0, thisName.length()-3)+"n \"";
+			}
+			else if (thisName.endsWith("n \"")) {
+				thatName = thisName.substring(0, thisName.length()-3)+"m \"";
+			}
+			else if (thisName.endsWith("a \"")) {
+				thatName = thisName.substring(0, thisName.length()-3)+"p \"";
+			}
+			else if (thisName.endsWith("p \"")) {
+				thatName = thisName.substring(0, thisName.length()-3)+"a \"";
+			}
+			else if (thisName.endsWith("l \"")) {
+				thatName = thisName.substring(0, thisName.length()-3)+"r \"";
+			}
+			else if (thisName.endsWith("r \"")) {
+				thatName = thisName.substring(0, thisName.length()-3)+"l \"";
+			}
+			else {
+				continue;
+			}
+			ArrayList<Roi> thoseRois = roisByRootName.get(thatName);
+			if (thoseRois == null){
+				continue;
+			}
+			Roi thatRoi = thoseRois.get(0);
+
+			int thatX = (int)thatRoi.getBounds().getCenterX();
+			int thatZ = thatRoi.getZPosition();
+			int thatT = thatRoi.getTPosition();
+			if (thatT != thisT)
+				continue;
+			ArrayList<Integer> thisIndexesArrayList = new ArrayList<Integer>();
+			ArrayList<Integer> thatIndexesArrayList = new ArrayList<Integer>();
+			ArrayList<Roi> theseAlreadyHit = new ArrayList<Roi>();
+			ArrayList<Roi> thoseAlreadyHit = new ArrayList<Roi>();
+			int thisHitCount =0;
+			int thatHitCount =0;
+			for (int r=0;r<fullROIs.length;r++){
+				if (fullROIs[r]!=null){
+					if (theseRois.contains(fullROIs[r])){
+						if (!theseAlreadyHit.contains(fullROIs[r])){
+							thisIndexesArrayList.add(r);
+							theseAlreadyHit.add(fullROIs[r]);
+							thisHitCount++;
+						}else 
+							IJ.wait(1);
+					} else if (thoseRois.contains(fullROIs[r])){
+						if (!thoseAlreadyHit.contains(fullROIs[r])){
+							thatIndexesArrayList.add(r);
+							thoseAlreadyHit.add(fullROIs[r]);
+							thatHitCount++;
+						}else 
+							IJ.wait(1);
+					}
+				}
+			}
+			int[] thisIndexesArray = new int[thisIndexesArrayList.size()];
+			for (int t=0;t<thisIndexesArray.length;t++){
+				thisIndexesArray[t] = thisIndexesArrayList.get(t);
+			}
+			int[] thatIndexesArray = new int[thatIndexesArrayList.size()];
+			for (int t=0;t<thatIndexesArray.length;t++){
+				thatIndexesArray[t] = thatIndexesArrayList.get(t);
+			}
+
+			String thisTargetString = thisName.replace("\"","").split(" ")[0].trim();
+			String thatTargetString = thatName.replace("\"","").split(" ")[0].trim();
+			String thisSwapString = "";
+			String thatSwapString = "";
+
+			if (thisTargetString.matches("(E.(m|n|a|p))|(AB.(m|n|a|p))")){
+				if (thisZ<thatZ) {
+					thisSwapString = thisTargetString.replace(thisTargetString, thisTargetString.substring(0,thisTargetString.length()-1) + "l");
+					thatSwapString = thatTargetString.replace(thatTargetString, thatTargetString.substring(0,thatTargetString.length()-1) + "r");
+				}else{
+					thisSwapString = thisTargetString.replace(thisTargetString, thisTargetString.substring(0,thisTargetString.length()-1) + "r");
+					thatSwapString = thatTargetString.replace(thatTargetString, thatTargetString.substring(0,thatTargetString.length()-1) + "l");
+				}
+				IJ.log(thisTargetString+"->"+thisSwapString+" "+thatTargetString+"->"+thatSwapString);
+			} 
+			
+			ArrayList<Integer> nameMatchIndexArrayList = new ArrayList<Integer>();
+			ArrayList<String> nameReplacementArrayList = new ArrayList<String>();
+			boolean propRenameLin = true;
+			String propCandidateName = thisTargetString;
+			Roi[] rois2 = getFullRoisAsArray();
+			int fraaa = rois2.length;
+			for (int r2=0; r2 < fraaa; r2++) {
+				String nextName = rois2[r2].getName();
+				if (!propCandidateName.replace("\"", "").trim().equals("") ){
+					String rootMatch = "\""+propCandidateName.replace("\"", "").trim()+(propRenameLin?"[m|n|l|r|a|p|d|v]*":"")+" +\".*";
+					if (nextName.matches(rootMatch)){
+						if (!propRenameLin){
+
+						} else if (thisT <= rois2[r2].getTPosition()/* || selRois[0] == rois2[r2]*/){
+							nameMatchIndexArrayList.add(r2);
+							String nameReplacement = nextName.replaceAll("\""+propCandidateName.replace("\"", "").trim()+"([m|n|l|r|a|p|d|v]*) +\".*", thisSwapString+"$1");
+							nameReplacementArrayList.add(nameReplacement);
+						}
+					}
+				} else {
+					if (nextName.matches("(\"?)"+propCandidateName.replace("\"", "")+"(\"?).*")){
+						nameMatchIndexArrayList.add(r2);
+						nameReplacementArrayList.add(nextName.replaceAll("(\"?)"+propCandidateName.replace("\"", "")+"(\"?)(.*)", thisSwapString));
+					}
+				}
+			}
+
+			int[] nameMatchIndexes = new int[nameMatchIndexArrayList.size()];
+			String[] newNames = new String[nameMatchIndexArrayList.size()];
+			for (int n=0;n<nameMatchIndexes.length;n++) {
+				nameMatchIndexes[n] = nameMatchIndexArrayList.get(n);
+				newNames[n] = nameReplacementArrayList.get(n);
+			}
+			if (rename(newNames, nameMatchIndexes, false)) {
 			}
 		}
 	}
