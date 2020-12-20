@@ -1016,6 +1016,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		String[] roiNameKeys = roisByRootName.keySet().toArray(new String[roisByRootName.keySet().size()]);
 		Arrays.sort(roiNameKeys);
+		String[] roiFlippedKeys =  new String[roiNameKeys.length];
+		for (int k=0;k<roiNameKeys.length;k++){
+			roiFlippedKeys[roiNameKeys.length-1-k] = roiNameKeys[k];
+		}
+		roiNameKeys = roiFlippedKeys;
 		
 		ArrayList<String> propCandidateNames_rootFrames = new ArrayList<String>();
 		ArrayList<String> propCandidateNames = new ArrayList<String>();
@@ -1134,8 +1139,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				}
 			}
 			
-			rename(thisSwapString, thisIndexesArray,false);
-			rename(thatSwapString, thatIndexesArray,false);
+//			rename(thisSwapString, thisIndexesArray,false);
+//			rename(thatSwapString, thatIndexesArray,false);
 
 			ArrayList<Integer> nameMatchIndexArrayList = new ArrayList<Integer>();
 			ArrayList<String> nameReplacementArrayList = new ArrayList<String>();
@@ -1150,9 +1155,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					if (nextName.matches(rootMatch)){
 						if (!propRenameLin){
 
-						} else if (thisT < rois2[r2].getTPosition()/* || selRois[0] == rois2[r2]*/){
+						} else if (thisT <= rois2[r2].getTPosition()/* || selRois[0] == rois2[r2]*/){
 							nameMatchIndexArrayList.add(r2);
-							nameReplacementArrayList.add(nextName.replaceAll("\""+propCandidateName.replace("\"", "").trim()+"([m|n|l|r|a|p|d|v]*) +\".*", thisSwapString+"$1"));
+							String nameReplacement = nextName.replaceAll("\""+propCandidateName.replace("\"", "").trim()+"([m|n|l|r|a|p|d|v]*) +\".*", thisSwapString+"$1");
+							nameReplacementArrayList.add(nameReplacement);
 						}
 					}
 				} else {
