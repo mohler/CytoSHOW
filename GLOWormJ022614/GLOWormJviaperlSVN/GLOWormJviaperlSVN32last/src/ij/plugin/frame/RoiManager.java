@@ -399,6 +399,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //		addPopupItem("Plot MK c-phate icospheres to coords");
 		addPopupItem("Plot AG c-phate icospheres to coords");
 		addPopupItem("fixcrappynames");
+		addPopupItem("HiLite lineage name conflicts");
 		add(pm);
 	}
 
@@ -999,6 +1000,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			else if (command.equals("fixcrappynames")) {
 				fixdamnRedundantNames();
+			}
+			else if (command.equals("HiLite lineage name conflicts")) {
+				scanForRedundantContemporaneousNames();
 			}
 
 			this.imp.getCanvas().requestFocus();
@@ -8593,6 +8597,64 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			IJ.log(inputRootFixed);
 			IJ.log(inputDir+inputRootFixed);
 			IJ.saveString(IJ.openAsString(inputDir+input).replace(inputRoot, inputRootFixed), inputDir+inputRootFixed+".obj");
+		}
+	}
+	
+	void scanForRedundantContemporaneousNames(){
+		Roi[] fullROIs = getFullRoisAsArray();
+		int maxT = 0;
+		int minT = Integer.MAX_VALUE;
+		int maxZ = 0;
+		int minZ = Integer.MAX_VALUE;
+		int maxC = 0;
+		int minC = Integer.MAX_VALUE;
+		for (Roi roi:fullROIs){
+			if (maxT < roi.getTPosition()){
+				maxT = roi.getTPosition();
+			}
+			if (minT > roi.getTPosition()){
+				minT = roi.getTPosition();
+			}
+			if (maxZ < roi.getZPosition()){
+				maxZ = roi.getZPosition();
+			}
+			if (minZ > roi.getZPosition()){
+				minZ = roi.getZPosition();
+			}
+			if (maxC < roi.getZPosition()){
+				maxC = roi.getZPosition();
+			}
+			if (minC > roi.getCPosition()){
+				minC = roi.getCPosition();
+			}
+		}
+		ArrayList<Roi> redundantContempROIs = new ArrayList<Roi>();		
+		for (int t=minT;t<=maxT;t++){
+			ArrayList<Roi> contempROIs = new ArrayList<Roi>();
+			for (int z=minZ;z<=maxZ;z++){
+				for (int c=minC;c<=maxC;c++){
+					if (getROIsByNumbers().get(""+c+"_"+z+"_"+t)!=null){
+						contempROIs.addAll(getROIsByNumbers().get(""+c+"_"+z+"_"+t));
+					}
+				}
+			}
+			for (Roi qRoi:contempROIs){
+				for (Roi uRoi:contempROIs){
+					if ((qRoi != uRoi)){
+						String qStart = qRoi.getName().split(" ")[0];
+						String uStart = uRoi.getName().split(" ")[0];
+						if ((qRoi.getName().startsWith(uStart)) || uRoi.getName().startsWith(qStart)){
+							if(!redundantContempROIs.contains(qRoi))
+								redundantContempROIs.add(qRoi);
+							if(!redundantContempROIs.contains(uRoi))
+								redundantContempROIs.add(uRoi);
+						}
+					}
+				}
+			}
+		}
+		for(Roi badRoi:redundantContempROIs){
+			badRoi.setFillColor(Color.white);
 		}
 	}
 	
