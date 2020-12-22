@@ -13,6 +13,7 @@ import java.awt.List;
 import java.util.zip.*;
 
 import javax.swing.AbstractButton;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -21,6 +22,7 @@ import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
+import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
@@ -43,6 +45,7 @@ import ij.process.*;
 import ij.gui.*;
 import ij.io.*;
 import ij.plugin.filter.*;
+import ij.plugin.frame.RoiManager.ModCellRenderer;
 import ij.plugin.Colors;
 import ij.plugin.DragAndDrop;
 import ij.plugin.Orthogonal_Views;
@@ -59,6 +62,8 @@ import ij3d.ImageJ3DViewer;
 
 /** This plugin implements the Analyze/Tools/Tag Manager command. */
 public class RoiManager extends PlugInFrame implements ActionListener, ItemListener, MouseListener, MouseWheelListener, KeyListener, ChangeListener, ListSelectionListener, WindowListener, TextListener {
+
+	
 	public static final String LOC_KEY = "manager.loc";
 	private static final int BUTTONS = 15;
 	private static final int DRAW=0, FILL=1, LABEL=2;
@@ -185,6 +190,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		//		//this.setTitle(getTitle()+":"+ imp.getTitle());
 		list = new JList<String>();
+		list.setCellRenderer(new ModCellRenderer());
 		fullList = new JList<String>();		
 		listModel = new DefaultListModel<String>();
 		fullListModel = new DefaultListModel<String>();
@@ -204,6 +210,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		//		//this.setTitle(getTitle()+":"+ imp.getTitle());
 		Prefs.showAllSliceOnly = true;
 		list = new JList<String>();
+		list.setCellRenderer(new ModCellRenderer());
 		fullList = new JList<String>();
 		listModel = new DefaultListModel<String>();
 		fullListModel = new DefaultListModel<String>();
@@ -224,6 +231,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		this.imp = imp;
 		Prefs.showAllSliceOnly = true;
 		list = new JList<String>();
+		list.setCellRenderer(new ModCellRenderer());
 		fullList = new JList<String>();	
 		listModel = new DefaultListModel<String>();
 		fullListModel = new DefaultListModel<String>();
@@ -8654,9 +8662,26 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 		}
 		for(Roi badRoi:redundantContempROIs){
-			badRoi.setFillColor(Color.white);
+			badRoi.setFillColor(Colors.decode("#33FFFF00", Color.YELLOW));
 		}
 	}
+	
+	public class ModCellRenderer extends DefaultListCellRenderer {
+
+		@Override
+		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus){
+			super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+			Color bg = Color.gray;
+			if (rois!=null && rois.get(value)!=null){
+				bg = rois.get(value).getFillColor();
+			}
+			setBackground(isSelected?bg.darker().darker():bg);
+			setOpaque(true); // otherwise, it's transparent
+			return this;
+		}
+
+	}
+
 	
 	String longestRepeatedSubstring(String str) { 
 		int n = str.length(); 
