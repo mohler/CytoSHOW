@@ -8646,6 +8646,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					}
 				}
 			}
+			IJ.log("t"+IJ.pad(t, 4)+"        "+contempROIs.size());
 			for (Roi qRoi:contempROIs){
 				for (Roi uRoi:contempROIs){
 					if ((qRoi != uRoi)){
