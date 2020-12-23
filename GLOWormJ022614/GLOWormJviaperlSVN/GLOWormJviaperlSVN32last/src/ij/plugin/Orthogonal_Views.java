@@ -365,6 +365,8 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 			if (!rgb) sfp1.setMinAndMax(min, max);
 			xz_image.setProcessor("XZ "+p.y +" "+ xy_image.getTitle(), sfp1);
 		} else {
+			fp1.setInterpolate(true);
+			ImageProcessor sfp1=fp1.resize(width2, height2);
 			if (!rgb) fp1.setMinAndMax(min, max);
 	    	xz_image.setProcessor("XZ "+p.y+" "+ xy_image.getTitle(), fp1);
 		}
@@ -389,6 +391,8 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 			if (!rgb) sfp2.setMinAndMax(min, max);
 			yz_image.setProcessor(title+p.x+" "+ xy_image.getTitle(), sfp2);
 		} else {
+			fp1.setInterpolate(true);
+			ImageProcessor sfp2=fp2.resize(width2, height2);
 			if (!rgb) fp2.setMinAndMax(min, max);
 			yz_image.setProcessor(title+p.x+" "+ xy_image.getTitle(), fp2);
 		}
@@ -413,7 +417,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 
 		} else {
 			ImageCanvas ic = yz_image.getWindow().getCanvas();
-			yz_image.getRoiManager().showAll(RoiManager.SHOW_ALL);
+//			yz_image.getRoiManager().showAll(RoiManager.SHOW_ALL);
 		}
 		if (xz_image.getWindow()==null) {
 			xz_image.show();
@@ -432,7 +436,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 
 		} else {
 			ImageCanvas ic = xz_image.getWindow().getCanvas();
-			xz_image.getRoiManager().showAll(RoiManager.SHOW_ALL);			
+//			xz_image.getRoiManager().showAll(RoiManager.SHOW_ALL);			
 		}
  
 	}
@@ -539,16 +543,20 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 		//loop will set up RoiManager
 		xz_image.getRoiManager().getListModel().removeAllElements();
 		xz_image.getRoiManager().getROIs().clear();
+		xz_image.getRoiManager().getRoisByNumbers().clear();
+		xz_image.getRoiManager().getRoisByRootName().clear();
+		xz_image.getRoiManager().getFullListModel().removeAllElements();
+
 		if (xz_image.getWindow() != null && originalImp.getRoiManager().isShowAll()) {
 			if ( stackRois[0] != null) {
-				ArrayList<Roi> cloneRois = new ArrayList<Roi>();
+				ArrayList<Roi> clonedRois = new ArrayList<Roi>();
 				for (int r = 0; r < stackRois.length; r++) {
 					Rectangle srb = stackRois[r].getBounds();
 					for (int x = 0; x < width; x++) {
-						if (srb.contains(x, y) && !cloneRois.contains(stackRois[r])) {
+						if (srb.contains(x, y) && !clonedRois.contains(stackRois[r])) {
 							if (stackRois[r] instanceof TextRoi || stackRois[r] instanceof OvalRoi || !(stackRois[r] instanceof ShapeRoi)) {
 								Roi nextRoi = (Roi) stackRois[r].clone();
-								cloneRois.add(stackRois[r]);
+								clonedRois.add(stackRois[r]);
 								nextRoi.setLocation(
 										(int) (nextRoi.getBounds().x) ,
 										(int) (nextRoi.getZPosition()
@@ -562,7 +570,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 					}
 				}
 			}
-			xz_image.getRoiManager().showAll(RoiManager.SHOW_ALL);
+//			xz_image.getRoiManager().showAll(RoiManager.SHOW_ALL);
 		}
 
 		// XZ
@@ -681,16 +689,19 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 		//loop will set up RoiManager
 		yz_image.getRoiManager().getListModel().removeAllElements();
 		yz_image.getRoiManager().getROIs().clear();
+		yz_image.getRoiManager().getRoisByNumbers().clear();
+		yz_image.getRoiManager().getRoisByRootName().clear();
+		yz_image.getRoiManager().getFullListModel().removeAllElements();
 		if (yz_image.getWindow() != null  && originalImp.getRoiManager().isShowAll()) {
 			if (stackRois[0] != null ) {
-				ArrayList<Roi> cloneRois = new ArrayList<Roi>();
+				ArrayList<Roi> clonedRois = new ArrayList<Roi>();
 				for (int r = 0; r < stackRois.length; r++) {
 					Rectangle srb = stackRois[r].getBounds();
 					for (int y = 0; y < height; y++) {
-						if (srb.contains(x, y) && !cloneRois.contains(stackRois[r])) {
+						if (srb.contains(x, y) && !clonedRois.contains(stackRois[r])) {
 							if (stackRois[r] instanceof TextRoi || stackRois[r] instanceof OvalRoi || !(stackRois[r] instanceof ShapeRoi)) {
 								Roi nextRoi = (Roi) stackRois[r].clone();
-								cloneRois.add(stackRois[r]);
+								clonedRois.add(stackRois[r]);
 								nextRoi.setLocation((int) (nextRoi.getZPosition()
 										* originalImp.getCalibration().pixelDepth/originalImp.getCalibration().pixelHeight -
 										srb.getWidth() / 2),
@@ -703,7 +714,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 					}
 				}
 			}
-			yz_image.getRoiManager().showAll(RoiManager.SHOW_ALL);
+//			yz_image.getRoiManager().showAll(RoiManager.SHOW_ALL);
 		}
 		
 		if (ip instanceof FloatProcessor) {

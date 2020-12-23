@@ -84,11 +84,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	private Hashtable<String,  ArrayList<Roi>> roisByRootName = new Hashtable<String, ArrayList<Roi>>();
 
 	public Hashtable<String, ArrayList<Roi>> getROIsByName() {
-		return roisByRootName;
+		return getRoisByRootName();
 	}
 
 	public void setROIsByName(Hashtable<String, ArrayList<Roi>> roisByName) {
-		this.roisByRootName = roisByName;
+		this.setRoisByRootName(roisByName);
 	}
 
 	private Roi roiCopy;
@@ -674,7 +674,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 					for (int n=0; n<rootNames.size(); n++) {
 						String rootName = rootNames.get(n);
-						nameMatchArrayList.addAll(roisByRootName.get(rootName));
+						nameMatchArrayList.addAll(getRoisByRootName().get(rootName));
 						//						int fraa = fullrois.length;
 						//						for (int r=0; r < fraa; r++) {
 						//							String nextName = fullrois[r].getName();
@@ -1026,7 +1026,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				maxT = roi.getTPosition();
 			}
 		}
-		String[] roiNameKeys = roisByRootName.keySet().toArray(new String[roisByRootName.keySet().size()]);
+		String[] roiNameKeys = getRoisByRootName().keySet().toArray(new String[getRoisByRootName().keySet().size()]);
 		Arrays.sort(roiNameKeys);
 		String[] roiFlippedKeys =  new String[roiNameKeys.length];
 		for (int k=0;k<roiNameKeys.length;k++){
@@ -1041,7 +1041,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		for (String rootName:roiNameKeys){
 			if (rootName == "\" \"" || rootName.startsWith("\"Nuc")) 
 				continue;
-			ArrayList<Roi> theseRois = roisByRootName.get(rootName);
+			ArrayList<Roi> theseRois = getRoisByRootName().get(rootName);
 			String thisName = rootName;
 			if (thisName.startsWith("\"ABan "))
 				IJ.wait(1);
@@ -1080,7 +1080,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			else {
 				continue;
 			}
-			ArrayList<Roi> thoseRois = roisByRootName.get(thatName);
+			ArrayList<Roi> thoseRois = getRoisByRootName().get(thatName);
 			if (thoseRois == null){
 				continue;
 			}
@@ -1215,11 +1215,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		
 		for (int pIteration =2;pIteration<=4;pIteration++){
-			String[] roiNameKeysTwo = roisByRootName.keySet().toArray(new String[roisByRootName.keySet().size()]);
+			String[] roiNameKeysTwo = getRoisByRootName().keySet().toArray(new String[getRoisByRootName().keySet().size()]);
 			Arrays.sort(roiNameKeysTwo);
 
 			for (String rootName:roiNameKeysTwo){
-				ArrayList<Roi> theseRois = roisByRootName.get(rootName);
+				ArrayList<Roi> theseRois = getRoisByRootName().get(rootName);
 
 				String thisName = rootName;
 				String thatName = "";
@@ -1251,7 +1251,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				else {
 					continue;
 				}
-				ArrayList<Roi> thoseRois = roisByRootName.get(thatName);
+				ArrayList<Roi> thoseRois = getRoisByRootName().get(thatName);
 				if (thoseRois == null){
 					continue;
 				}
@@ -1355,7 +1355,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 		}
 		
-		String[] roiNameKeysThree = roisByRootName.keySet().toArray(new String[roisByRootName.keySet().size()]);
+		String[] roiNameKeysThree = getRoisByRootName().keySet().toArray(new String[getRoisByRootName().keySet().size()]);
 		Arrays.sort(roiNameKeysThree);
 		String[] roiFlippedKeysThree =  new String[roiNameKeysThree.length];
 		for (int k=0;k<roiNameKeysThree.length;k++){
@@ -1365,7 +1365,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		
 
 		for (String rootName:roiNameKeysThree){
-			ArrayList<Roi> theseRois = roisByRootName.get(rootName);
+			ArrayList<Roi> theseRois = getRoisByRootName().get(rootName);
 
 			String thisName = rootName;
 			String thatName = "";
@@ -1399,7 +1399,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			else {
 				continue;
 			}
-			ArrayList<Roi> thoseRois = roisByRootName.get(thatName);
+			ArrayList<Roi> thoseRois = getRoisByRootName().get(thatName);
 			if (thoseRois == null){
 				continue;
 			}
@@ -1892,7 +1892,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (!Orthogonal_Views.isOrthoViewsImage(imp)) {
 			if (imp!=null && imp.getWindow()!=null) {
 				Roi[] roisFromSpans = new Roi[1]; 
-				roisFromSpans= (roisByNumbers.get((addRoiSpanC?0:roiCopy.getCPosition())+"_"+(addRoiSpanZ?0:roiCopy.getZPosition())+"_"+(addRoiSpanT?0:roiCopy.getTPosition()))).toArray(roisFromSpans);
+				roisFromSpans= (getRoisByNumbers().get((addRoiSpanC?0:roiCopy.getCPosition())+"_"+(addRoiSpanZ?0:roiCopy.getZPosition())+"_"+(addRoiSpanT?0:roiCopy.getTPosition()))).toArray(roisFromSpans);
 				if (imp.getWindow() instanceof StackWindow && ((StackWindow)imp.getWindow()).isWormAtlas()) {
 					for (Roi existingRoi:roisFromSpans){
 						//					if (imp.getSlice() == existingRoi.getZPosition() && imp.getFrame() == existingRoi.getTPosition()) {
@@ -1956,19 +1956,19 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 
 	public void setUpRoisByNameAndNumbers(Roi roi) {
-		ArrayList<Roi> sliceRois = roisByNumbers.get((addRoiSpanC?0:roi.getCPosition())+"_"+(addRoiSpanZ?0:roi.getZPosition())+"_"+(addRoiSpanT?0:roi.getTPosition()));
+		ArrayList<Roi> sliceRois = getRoisByNumbers().get((addRoiSpanC?0:roi.getCPosition())+"_"+(addRoiSpanZ?0:roi.getZPosition())+"_"+(addRoiSpanT?0:roi.getTPosition()));
 		if (sliceRois == null) {
-			roisByNumbers.put((addRoiSpanC?0:roi.getCPosition())+"_"+(addRoiSpanZ?0:roi.getZPosition())+"_"+(addRoiSpanT?0:roi.getTPosition()), new ArrayList<Roi>());
-			sliceRois = roisByNumbers.get((addRoiSpanC?0:roi.getCPosition())+"_"+(addRoiSpanZ?0:roi.getZPosition())+"_"+(addRoiSpanT?0:roi.getTPosition()));
+			getRoisByNumbers().put((addRoiSpanC?0:roi.getCPosition())+"_"+(addRoiSpanZ?0:roi.getZPosition())+"_"+(addRoiSpanT?0:roi.getTPosition()), new ArrayList<Roi>());
+			sliceRois = getRoisByNumbers().get((addRoiSpanC?0:roi.getCPosition())+"_"+(addRoiSpanZ?0:roi.getZPosition())+"_"+(addRoiSpanT?0:roi.getTPosition()));
 		}
 		sliceRois.add(roi);
 
 		String rootName = roi.getName().contains("\"")?"\""+roi.getName().split("\"")[1]+"\"":roi.getName().split("_")[0].trim();
 
-		ArrayList<Roi> rootNameRois = roisByRootName.get(rootName);
+		ArrayList<Roi> rootNameRois = getRoisByRootName().get(rootName);
 		if (rootNameRois == null) {
-			roisByRootName.put(rootName, new ArrayList<Roi>());
-			rootNameRois = roisByRootName.get(rootName);
+			getRoisByRootName().put(rootName, new ArrayList<Roi>());
+			rootNameRois = getRoisByRootName().get(rootName);
 		}
 		rootNameRois.add(roi);
 	}
@@ -2107,8 +2107,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		if (fullCount==index.length && !replacing) {
 			rois.clear();
-			roisByNumbers.clear();
-			roisByRootName.clear();
+			getRoisByNumbers().clear();
+			getRoisByRootName().clear();
 			listModel.removeAllElements();
 			fullListModel.removeAllElements();
 		} else {
@@ -2125,12 +2125,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						int z = roi.getZPosition();
 						int t = roi.getTPosition();
 						
-						if (roisByNumbers.containsKey(rootName)) {
-							roisByNumbers.get(rootName).remove(roi);
+						if (getRoisByNumbers().containsKey(rootName)) {
+							getRoisByNumbers().get(rootName).remove(roi);
 						}
 
-						if (roisByNumbers.containsKey(c+"_"+z+"_"+t)) {
-							roisByNumbers.get(c+"_"+z+"_"+t).remove(roi);
+						if (getRoisByNumbers().containsKey(c+"_"+z+"_"+t)) {
+							getRoisByNumbers().get(c+"_"+z+"_"+t).remove(roi);
 						}
 						rois.remove(roi.getName());
 					}
@@ -2928,18 +2928,18 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						}
 						roi.setPosition(c, z, t);
 						String rbnKey = roi.getCPosition()+"_"+(imp.getNSlices()==1?1:roi.getZPosition())+"_"+roi.getTPosition();
-						ArrayList<Roi> sliceRois = roisByNumbers.get(rbnKey);
+						ArrayList<Roi> sliceRois = getRoisByNumbers().get(rbnKey);
 						if (sliceRois == null) {
-							roisByNumbers.put(rbnKey, new ArrayList<Roi>());
-							sliceRois = roisByNumbers.get(rbnKey);
+							getRoisByNumbers().put(rbnKey, new ArrayList<Roi>());
+							sliceRois = getRoisByNumbers().get(rbnKey);
 						}
 						sliceRois.add(roi);
 						String rootName = roi.getName().contains("\"")?"\""+roi.getName().split("\"")[1]+"\"":roi.getName().split("_")[0].trim();
 
-						ArrayList<Roi> rootNameRois = roisByRootName.get(rootName);
+						ArrayList<Roi> rootNameRois = getRoisByRootName().get(rootName);
 						if (rootNameRois == null) {
-							roisByRootName.put(rootName, new ArrayList<Roi>());
-							rootNameRois = roisByRootName.get(rootName);
+							getRoisByRootName().put(rootName, new ArrayList<Roi>());
+							rootNameRois = getRoisByRootName().get(rootName);
 						}
 						rootNameRois.add(roi);
 
@@ -3040,18 +3040,18 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (!name2.endsWith(".roi")) name2 = name2+".roi";
 		String newName = name2.substring(0, name2.length()-4);
 		rois.put(newName, roi);
-		ArrayList<Roi> sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
+		ArrayList<Roi> sliceRois = getRoisByNumbers().get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
 		if (sliceRois == null) {
-			roisByNumbers.put(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition(), new ArrayList<Roi>());
-			sliceRois = roisByNumbers.get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
+			getRoisByNumbers().put(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition(), new ArrayList<Roi>());
+			sliceRois = getRoisByNumbers().get(roi.getCPosition()+"_"+roi.getZPosition()+"_"+roi.getTPosition());
 		}
 		sliceRois.add(roi);
 		String rootName = newName.contains("\"")?"\""+roi.getName().split("\"")[1]+"\"":roi.getName().split("_")[0].trim();
 
-		ArrayList<Roi> rootNameRois = roisByRootName.get(rootName);
+		ArrayList<Roi> rootNameRois = getRoisByRootName().get(rootName);
 		if (rootNameRois == null) {
-			roisByRootName.put(rootName, new ArrayList<Roi>());
-			rootNameRois = roisByRootName.get(rootName);
+			getRoisByRootName().put(rootName, new ArrayList<Roi>());
+			rootNameRois = getRoisByRootName().get(rootName);
 		}
 		rootNameRois.add(roi);
 
@@ -3995,7 +3995,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 
 	public Hashtable<String, ArrayList<Roi>> getROIsByNumbers() {
-		return roisByNumbers;
+		return getRoisByNumbers();
 	}
 
 	/** Returns the selection list.
@@ -4420,23 +4420,23 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			originalRois = null;
 		}
-		if (roisByNumbers != null) {
-			for (ArrayList<Roi> roiAL:roisByNumbers.values()) {
+		if (getRoisByNumbers() != null) {
+			for (ArrayList<Roi> roiAL:getRoisByNumbers().values()) {
 				for (Roi roi:roiAL) {
 					roi.setImage(null);
 					roi.setMotherImp(null);
 				}
 			}
-			roisByNumbers = null;
+			setRoisByNumbers(null);
 		}
-		if (roisByRootName != null) {
-			for (ArrayList<Roi> roiAL:roisByRootName.values()) {
+		if (getRoisByRootName() != null) {
+			for (ArrayList<Roi> roiAL:getRoisByRootName().values()) {
 				for (Roi roi:roiAL) {
 					roi.setImage(null);
 					roi.setMotherImp(null);
 				}
 			}
-			roisByRootName = null;
+			setRoisByRootName(null);
 		}
 		if (list != null)
 			list.removeKeyListener(IJ.getInstance());
@@ -8675,7 +8675,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			if (rois!=null && rois.get(value)!=null){
 				bg = rois.get(value).getFillColor();
 			}
-			setBackground(isSelected?bg.darker().darker():bg);
+			setBackground(isSelected?Color.black:bg);
+			setForeground(isSelected?Color.white:Color.BLACK);
 			setOpaque(true); // otherwise, it's transparent
 			return this;
 		}
@@ -8772,6 +8773,22 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			return "";
 		}
 		
+	}
+
+	public Hashtable<String,  ArrayList<Roi>> getRoisByNumbers() {
+		return roisByNumbers;
+	}
+
+	public void setRoisByNumbers(Hashtable<String,  ArrayList<Roi>> roisByNumbers) {
+		this.roisByNumbers = roisByNumbers;
+	}
+
+	public Hashtable<String,  ArrayList<Roi>> getRoisByRootName() {
+		return roisByRootName;
+	}
+
+	public void setRoisByRootName(Hashtable<String,  ArrayList<Roi>> roisByRootName) {
+		this.roisByRootName = roisByRootName;
 	} 
 
 }

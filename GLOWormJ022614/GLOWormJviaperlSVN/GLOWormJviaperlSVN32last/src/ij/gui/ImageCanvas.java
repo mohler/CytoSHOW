@@ -324,6 +324,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		}
 
 		if (sliceRois.size() > 0) {
+//			IJ.log(""+sliceRois.size());
 			Roi[] sliceRoisArray = new Roi[sliceRois.size()];
 			for (int sr=0;sr<sliceRoisArray.length;sr++)
 				sliceRoisArray[sr] = ((Roi)sliceRois.get(sr));
