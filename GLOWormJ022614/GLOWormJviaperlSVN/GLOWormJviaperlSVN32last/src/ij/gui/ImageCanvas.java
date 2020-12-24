@@ -637,7 +637,9 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				}
 			}
 			if (g!=null){
-				g.clearRect(0,0,this.getWidth(),this.getHeight());
+// COMMENTING OUT NEXT LINE WAS ESSENTIAL IN ELIMINATING MOUSE-MOVED SCREEN FLICKER FOR MQTVS WINDOWS.
+//  WAS IT EVER NEEDED??  WHY NO EFFECT IN OTHER WINDOWS?  WEIRD!!!  12242020
+//				g.clearRect(0,0,this.getWidth(),this.getHeight());
 				g.drawImage(offScreenImage, 0, 0, null);
 			}
 		}

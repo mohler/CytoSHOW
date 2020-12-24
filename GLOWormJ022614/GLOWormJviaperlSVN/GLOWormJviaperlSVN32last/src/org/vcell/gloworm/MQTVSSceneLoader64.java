@@ -931,7 +931,7 @@ public class MQTVSSceneLoader64 implements PlugIn {
 					
 					
 					RoiManager rm = getImp().getRoiManager();
-					String clStr;
+					String clStr = null;
 					if (clFileName != null) {
 						if (movieFileList.contains("/Volumes/GLOWORM_DATA") ) {
 							clStr = IJ.openAsString("/Volumes/GLOWORM_DATA/" + clFileName);
@@ -956,11 +956,13 @@ public class MQTVSSceneLoader64 implements PlugIn {
 							}
 						}
 					} else {
-						String universalCLURL = MQTVSSceneLoader64.class.getResource("docs/fullUniversal_ColorLegend.lgd").toString();
-						clStr = IJ.openUrlAsString(universalCLURL);
+//						String universalCLURL = MQTVSSceneLoader64.class.getResource("docs/fullUniversal_ColorLegend.lgd").toString();
+//						clStr = IJ.openUrlAsString(universalCLURL);
 					}
-					ColorLegend cl = new ColorLegend(getImp(), clStr);
-					rm.setColorLegend(cl);
+					if (clStr!=null) {
+						ColorLegend cl = new ColorLegend(getImp(), clStr);
+						rm.setColorLegend(cl);
+					}
 
 					
 					if (roiFileName != null) {

@@ -141,8 +141,13 @@ public class RoiProperties {
 			listCoordinates = gd.getNextBoolean();
 		if (linec !="")
 			strokeColor = Colors.decode(linec, Roi.getColor());
-		if (fillc !="")
-			fillColor = Colors.decode(fillc, null);
+		if (fillc.length()==9 || fillc.length()==8)
+			fillColor = Colors.decode(fillc, fillColor);
+		else if (fillc.length()==7 || fillc.length()==8)
+			fillColor = Colors.decode(fillc, fillColor);
+		else if (fillc.length()==3 || fillc.length()==2)
+			fillColor = Colors.decode(fillc+"f0f0f0", fillColor);
+			
 		if (isText) {
 			TextRoi troi = (TextRoi)roi;
 			Font font = troi.getCurrentFont();

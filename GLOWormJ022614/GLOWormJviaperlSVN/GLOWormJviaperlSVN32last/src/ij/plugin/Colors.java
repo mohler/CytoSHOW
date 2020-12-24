@@ -122,20 +122,24 @@ public class Colors implements PlugIn, ItemListener {
 		return c;
 	}
 
-	public static Color decode(String hexColor, Color defaultColor) {
-		Color color = getColor(hexColor, Color.gray);
+	public static Color decode(String hexColorString, Color defaultColor) {
+		Color color = getColor(hexColorString, Color.gray);
 		if (color==Color.gray) {
-			if (hexColor.startsWith("#"))
-				hexColor = hexColor.substring(1);
-			int len = hexColor.length();
-			if (!(len==6 || len==8))
-				return defaultColor;
-			float alpha = len==8?parseHex(hexColor.substring(0,2)):1f;
+			if (hexColorString.startsWith("#"))
+				hexColorString = hexColorString.substring(1);
+			int len = hexColorString.length();
+			if (!(len==6 || len==8)) {
+//				return defaultColor;
+				hexColorString = hexColorString + IJ.pad(0, 8-hexColorString.length());
+				
+//				hexColor = hexColor+defaultHexString.substring(hexColor.length()+1, defaultHexString.length());
+			}
+			float alpha = len==8?parseHex(hexColorString.substring(0,2)):1f;
 			if (len==8)
-				hexColor = hexColor.substring(2);
-			float red = parseHex(hexColor.substring(0,2));
-			float green = parseHex(hexColor.substring(2,4));
-			float blue = parseHex(hexColor.substring(4,6));
+				hexColorString = hexColorString.substring(2);
+			float red = parseHex(hexColorString.substring(0,2));
+			float green = parseHex(hexColorString.substring(2,4));
+			float blue = parseHex(hexColorString.substring(4,6));
 			color = new Color(red, green, blue, alpha);
 		}
 		return color;

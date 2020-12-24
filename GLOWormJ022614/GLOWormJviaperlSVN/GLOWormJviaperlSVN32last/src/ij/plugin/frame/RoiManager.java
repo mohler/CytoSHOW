@@ -3384,6 +3384,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		Font font = null;
 		int justification = TextRoi.LEFT;
 		double opacity = -1;
+		String alphaPrefix = "";
 		if (showDialog) {
 			String label = (String) listModel.getElementAt(indexes[0]);
 			rpRoi = (Roi)rois.get(label);
@@ -3404,6 +3405,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			defaultLineWidth = lineWidth;
 			color =  rpRoi.getStrokeColor();
 			fillColor =  rpRoi.getFillColor();
+			if (Colors.colorToHexString(fillColor).endsWith("f0f0f0")) {
+				alphaPrefix = Colors.colorToHexString(fillColor).substring(0,3);
+			}
 			defaultColor = color;
 			if (rpRoi instanceof TextRoi) {
 				font = ((TextRoi)rpRoi).getCurrentFont();
@@ -3421,54 +3425,58 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		ColorLegend cl = this.getColorLegend();
 		if (cl!=null) {
-			ArrayList<Integer> hitIndexes = new ArrayList<Integer>();
-			for (int i=0; i<n; i++) {
-				String label = (String) listModel.getElementAt(indexes[i]);
-				Color currentBBColor = this.getSelectedRoisAsArray()[0].getFillColor();
-				String hexAlpha = Integer.toHexString(fillColor.getAlpha());
-				String hexRed = Integer.toHexString(fillColor.getRed());
-				String hexGreen = Integer.toHexString(fillColor.getGreen());
-				String hexBlue = Integer.toHexString(fillColor.getBlue());
-				String fillRGBstring = "#"+(hexAlpha.length()==1?"0":"")+hexAlpha
-						+(hexRed.length()==1?"0":"")+hexRed
-						+(hexGreen.length()==1?"0":"")+hexGreen
-						+(hexBlue.length()==1?"0":"")+hexBlue; 
-				int fillRGB = fillColor.getRGB();
-				int currentRGB = currentBBColor!=null?currentBBColor.getRGB():0;
-				if (fillRGB == currentRGB)
-					return;
-
-				while (cl.getBrainbowColors().contains(new Color(fillColor.getRGB())) && fillColor.getRGB() != currentRGB) {
-					if (fillColor.getBlue()<255) {
-						hexBlue = Integer.toHexString(fillColor.getBlue()+1);
-					} else if (fillColor.getGreen()<255) {
-						hexGreen = Integer.toHexString(fillColor.getGreen()+1);
-					} else if (fillColor.getRed()<255) {
-						hexRed = Integer.toHexString(fillColor.getRed()+1);
-					} 
-					fillRGBstring = "#"+(hexAlpha.length()==1?"0":"")+hexAlpha
-							+(hexRed.length()==1?"0":"")+hexRed
-							+(hexGreen.length()==1?"0":"")+hexGreen
-							+(hexBlue.length()==1?"0":"")+hexBlue; 
-					fillColor = Colors.decode(fillRGBstring, fillColor);
-				}
-				cl.getBrainbowColors().put(label.split(" =")[0].replace("\"","").toLowerCase(), new Color(fillColor.getRGB()));				
-				for (Checkbox cbC:cl.getCheckbox()) {
-					if (cbC.getName().equals(label.split(" =")[0].replace("\"",""))){
-						cbC.setBackground(new Color(fillColor.getRGB()));
-					}
-				}
-				for (int l=0; l<listModel.size(); l++) {
-					if (((String) listModel.getElementAt(l)).startsWith(label.split(" =")[0])) {
-						hitIndexes.add(l);
-					}
-				}
-			}
-			indexes = new int[hitIndexes.size()];
-			n=indexes.length;
-			for (int h=0;h<indexes.length;h++) {
-				indexes[h] = ((int)hitIndexes.get(h));
-			}
+//			ArrayList<Integer> hitIndexes = new ArrayList<Integer>();
+//			Roi[] targetRois = getSelectedRoisAsArray();
+//			if (targetRois.length<1)
+//				targetRois = getFullRoisAsArray();
+//			for (int i=0; i<n; i++) {
+//				String label = (String) listModel.getElementAt(indexes[i]);
+//				Color currentBBColor = targetRois[0].getFillColor();
+//				String hexAlpha = Integer.toHexString(fillColor.getAlpha());
+//				String hexRed = Integer.toHexString(fillColor.getRed());
+//				String hexGreen = Integer.toHexString(fillColor.getGreen());
+//				String hexBlue = Integer.toHexString(fillColor.getBlue());
+//				String fillRGBstring = "#"+(hexAlpha.length()==1?"0":"")+hexAlpha
+//						+(hexRed.length()==1?"0":"")+hexRed
+//						+(hexGreen.length()==1?"0":"")+hexGreen
+//						+(hexBlue.length()==1?"0":"")+hexBlue; 
+//				int fillRGB = fillColor.getRGB();
+//				int currentRGB = currentBBColor!=null?currentBBColor.getRGB():0;
+//				if (fillRGB == currentRGB)
+//					return;
+//
+//				while (cl.getBrainbowColors().contains(new Color(fillColor.getRGB())) && fillColor.getRGB() != currentRGB) {
+//					if (fillColor.getBlue()<255) {
+//						hexBlue = Integer.toHexString(fillColor.getBlue()+1);
+//					} else if (fillColor.getGreen()<255) {
+//						hexGreen = Integer.toHexString(fillColor.getGreen()+1);
+//					} else if (fillColor.getRed()<255) {
+//						hexRed = Integer.toHexString(fillColor.getRed()+1);
+//					} 
+//					fillRGBstring = "#"+(hexAlpha.length()==1?"0":"")+hexAlpha
+//							+(hexRed.length()==1?"0":"")+hexRed
+//							+(hexGreen.length()==1?"0":"")+hexGreen
+//							+(hexBlue.length()==1?"0":"")+hexBlue; 
+//					fillColor = Colors.decode(fillRGBstring, fillColor);
+//				}
+//				cl.getBrainbowColors().put(label.split(" ")[0].replace("\"","").toLowerCase(), new Color(fillColor.getRGB()));				
+//				for (Checkbox cbC:cl.getCheckbox()) {
+//					String cbcName=cbC.getName();
+//					if (cbcName.equals(label.split(" ")[0].replace("\"",""))){
+//						cbC.setBackground(new Color(fillColor.getRGB()));
+//					}
+//				}
+//				for (int l=0; l<listModel.size(); l++) {
+//					if (((String) listModel.getElementAt(l)).startsWith(label.split(" =")[0])) {
+//						hitIndexes.add(l);
+//					}
+//				}
+//			}
+//			indexes = new int[hitIndexes.size()];
+//			n=indexes.length;
+//			for (int h=0;h<indexes.length;h++) {
+//				indexes[h] = ((int)hitIndexes.get(h));
+//			}
 		}
 		for (int i=0; i<n; i++) {
 			String label = (String) listModel.getElementAt(indexes[i]);
@@ -3478,11 +3486,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				roi.setStrokeColor(color);
 			if (lineWidth>=0) 
 				roi.setStrokeWidth(lineWidth);
-			roi.setFillColor(fillColor);
+			if (alphaPrefix!="") {
+				String iRoiColorStr = Colors.colorToHexString(roi.getFillColor());
+				roi.setFillColor(Colors.decode(alphaPrefix+iRoiColorStr.substring(iRoiColorStr.length()-6,iRoiColorStr.length()),fillColor));
+			} else
+				roi.setFillColor(fillColor);
 			if (brainbowColors == null)
 				brainbowColors = new Hashtable<String, Color>();
 			if (fillColor!=null)
-				brainbowColors.put(label.split(" =")[0].replace("\"","").toLowerCase(), new Color(fillColor.getRGB()));
+				brainbowColors.put(label.split(" ")[0].replace("\"","").toLowerCase(), new Color(fillColor.getRGB()));
 			if (roi!=null && (roi instanceof TextRoi)) {
 				roi.setImage(imp);
 				if (font!=null)
@@ -3524,6 +3536,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				Recorder.record("roiManager", "Set Line Width", lineWidth);
 			}
 		}
+		list.repaint();
 	}
 
 	void flatten() {
