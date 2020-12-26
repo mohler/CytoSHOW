@@ -611,7 +611,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					existinghexName = "#"+existinghexInt;
 				}
 
-				add(shiftKeyDown, altKeyDown, controlKeyDown);
+				add(roi, shiftKeyDown, altKeyDown, controlKeyDown);
 
 				if (existingColor != null) {
 					rois.get(getListModel().get(getListModel().getSize()-1)).setFillColor(existingColor);
@@ -775,8 +775,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						if (!rootName.replace("\"", "").trim().equals("") ){
 							String rootMatch = "\""+rootName.replace("\"", "").trim()+(propagateRenamesThruLineage?"[m|n|l|r|a|p|d|v|g|h]*":"")+" +\".*";
 							if (nextName.matches(rootMatch)){
-								if (!propagateRenamesThruLineage){
-									
+								if (!propagateRenamesThruLineage && selRois[0] == rois2[r2]){
+									nameMatchIndexArrayList.add(r2);
+									nameReplacementArrayList.add(nextName.replaceAll("\""+rootName.replace("\"", "").trim()+"([m|n|l|r|a|p|d|v|g|h]*) +\".*", newName+"$1"));									
 								} else if (selectedTime < rois2[r2].getTPosition() || selRois[0] == rois2[r2]){
 									nameMatchIndexArrayList.add(r2);
 									nameReplacementArrayList.add(nextName.replaceAll("\""+rootName.replace("\"", "").trim()+"([m|n|l|r|a|p|d|v|g|h]*) +\".*", newName+"$1"));
@@ -974,7 +975,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				importStarryNiteNuclei("");
 			}
 			else if (command.equals("Resolve a-p l-r sisters")) {
-				resolveMNsisters();
+				resolveMNGHsisters();
 			}
 			else if (command.equals("StarryNiteExporter")) {
 				this.exportROIsAsZippedStarryNiteNuclei(IJ.getFilePath("Save zipped SN nuclei"));
@@ -1018,7 +1019,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		//		IJ.log("THREAD DONE");
 	}
 
-	private void resolveMNsisters() {
+	private void resolveMNGHsisters() {
 		Roi[] fullROIs = getFullRoisAsArray();
 		int maxT = 0;
 		for (Roi roi:fullROIs){
@@ -1734,23 +1735,23 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		this.repaint();
 	}
 
-	void add(boolean shiftKeyDown, boolean altKeyDown, boolean controlKeyDown) {
+	void add(Roi roi, boolean shiftKeyDown, boolean altKeyDown, boolean controlKeyDown) {
 		if (controlKeyDown) {
 			addRoiSpanC = true;
-			addRoi(false);
+			addRoi(roi);
 			addRoiSpanC = false;
 		}
 		else if (altKeyDown) {
 			addRoiSpanZ = true;
-			addRoi(false);
+			addRoi(roi);
 			addRoiSpanZ = false;
 		}
 		else if (shiftKeyDown) {
 			addRoiSpanT = true;
-			addRoi(false);
+			addRoi(roi);
 			addRoiSpanT = false;
 		} else
-			addRoi(false);
+			addRoi(roi);
 	}
 
 	/** Adds the specified ROI. */
@@ -1778,10 +1779,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		else if (color==null && defaultColor!=null)
 			color = defaultColor;
 		Color fillColor =null;
-		if (imp!=null) 
-			imp.getRoiFillColor();
 		if (color!=null)
 			fillColor = color;
+		else if (imp!=null) 
+			imp.getRoiFillColor();
 		else if ( roi.getFillColor()!=null)
 			fillColor =  roi.getFillColor();
 		else
@@ -2247,7 +2248,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		
 		
 		for (int i=0; i<indexes.length; i++) {
-			String name = (String) fullListModel.getElementAt(indexes[i]);
+			String name = (String) listModel.getElementAt(indexes[i]);
 			Roi roi = (Roi)rois.get(name);
 			if (roi == null)
 				continue;
@@ -2306,8 +2307,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				}
 			} 
 
-			fullListModel.setElementAt(label, indexes[i]);
-			listModel.setElementAt(label, listModel.indexOf(name));
+			listModel.setElementAt(label, indexes[i]);
+			fullListModel.setElementAt(label, fullListModel.indexOf(name));
 		}
 		if (updateCanvas)
 			updateShowAll();
@@ -4152,7 +4153,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			ImagePlus imp = this.imp;
 			Roi roi = imp!=null?imp.getRoi():null;
 			if (roi!=null) roi.setPosition(imp, 0);
-			add(shift, alt, false);
+			add(roi, shift, alt, false);
 		} else if (cmd.equals("add & draw"))
 			addAndDraw(false);
 		else if (cmd.equals("update"))
@@ -8678,6 +8679,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		for(Roi badRoi:redundantContempROIs){
 			badRoi.setFillColor(Colors.decode("#33FFFF00", Color.YELLOW));
 		}
+		list.repaint();
 	}
 	
 	public class ModCellRenderer extends DefaultListCellRenderer {
