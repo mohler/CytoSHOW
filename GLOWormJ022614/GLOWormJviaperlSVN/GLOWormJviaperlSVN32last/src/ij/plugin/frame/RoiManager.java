@@ -2403,7 +2403,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //					.replaceFirst("_", "")
 //					.replaceAll("(.*)C", "$1");
 			String numbersKey = "0_"+z+"_"+t;
-			String nameRoot = "\""+name.split("\"")[1]+" \"";
+			String nameRoot = "\""+name.split("\"")[1]+"\"";
 			roisByRootName.get(nameRoot).remove(roi);
 			roisByNumbers.get(numbersKey).remove(roi);
 			rois.remove(name);
