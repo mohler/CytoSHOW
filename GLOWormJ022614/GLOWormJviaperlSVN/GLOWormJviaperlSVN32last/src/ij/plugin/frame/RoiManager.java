@@ -25,6 +25,7 @@ import javax.swing.JSpinner;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.ToolTipManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
@@ -59,6 +60,7 @@ import ij.measure.*;
 import ij3d.Content;
 import ij3d.Image3DUniverse;
 import ij3d.ImageJ3DViewer;
+import javafx.scene.control.Tooltip;
 
 /** This plugin implements the Analyze/Tools/Tag Manager command. */
 public class RoiManager extends PlugInFrame implements ActionListener, ItemListener, MouseListener, MouseWheelListener, KeyListener, ChangeListener, ListSelectionListener, WindowListener, TextListener {
@@ -159,6 +161,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	private double expansionDistance = 10d;
 	private String lastRoiOpenPath;
 	private int lastSelectedIndex =0;
+	private int toolTipDefaultDismissDelay;
+	private int toolTipDefaultInitialDelay;
 
 
 
@@ -715,6 +719,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					String selName = selRois[0].getName();
 					selectedTime = selRois[0].getTPosition();
 					newName = promptForName(selName.split(" ")[0].replace("\"", "").trim());
+					if (!propagateRenamesThruLineage){
+						rename(newName, selIndexes, false);
+						return;
+					}
 				} else if (selRois.length>1 || !propagateRenamesThruLineage) {
 					String selName = selRois[0].getName();
 					selectedTime = selRois[0].getTPosition();
@@ -4697,6 +4705,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 
 	public void mouseWheelMoved(MouseWheelEvent event) {
+		if (event.getSource() == list){
+			ToolTipManager.sharedInstance().setDismissDelay(0);
+			ToolTipManager.sharedInstance().setInitialDelay(Integer.MAX_VALUE);
+		}	
+
 		synchronized(this) {
 			int index = list.getSelectedIndex();
 			if (index<0) index = lastSelectedIndex;
@@ -4744,11 +4757,18 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	public void mouseReleased (MouseEvent e) {}
 	public void mouseClicked (MouseEvent e) {}
 	public void mouseEntered (MouseEvent e) {
-		//		IJ.runMacro("print(\"\\\\Clear\")");
-		//		IJ.runMacro("print(\"\\\\Update:Tag Manager:\\\nLeft-Clicking a list item highlights the Tag tag in the movie window.\\\nButtons and other widgets modify the content of the list \\\nand the display of tags in the movie window.\\\n \")");
-
+		if (e.getSource() == list){
+			toolTipDefaultDismissDelay = ToolTipManager.sharedInstance().getDismissDelay();
+			toolTipDefaultInitialDelay = ToolTipManager.sharedInstance().getInitialDelay();
+			
+		}	
 	}
-	public void mouseExited (MouseEvent e) {}
+	public void mouseExited (MouseEvent e) {
+		if (e.getSource() == list){
+			ToolTipManager.sharedInstance().setDismissDelay(toolTipDefaultDismissDelay);
+			ToolTipManager.sharedInstance().setInitialDelay(toolTipDefaultInitialDelay);				
+		}
+	}
 
 	public void keyPressed(KeyEvent arg0) {
 		// TODO Auto-generated method stub
