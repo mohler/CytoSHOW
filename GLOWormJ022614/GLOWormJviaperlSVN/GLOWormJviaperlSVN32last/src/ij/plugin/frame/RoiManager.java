@@ -33,6 +33,10 @@ import javax.swing.event.ListSelectionListener;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point3f;
 
+import org.rhwlab.acetree.AceTree;
+import org.rhwlab.acetree.AceTreeNoUI;
+import org.rhwlab.tree.VTreeImpl;
+import org.rhwlab.tree.VTreeImpl.TestCanvas;
 import org.vcell.gloworm.MQTVSSceneLoader64;
 import org.vcell.gloworm.MQTVS_VolumeViewer;
 import org.vcell.gloworm.MultiQTVirtualStack;
@@ -60,6 +64,7 @@ import ij.measure.*;
 import ij3d.Content;
 import ij3d.Image3DUniverse;
 import ij3d.ImageJ3DViewer;
+import javafx.scene.control.Cell;
 import javafx.scene.control.Tooltip;
 
 /** This plugin implements the Analyze/Tools/Tag Manager command. */
@@ -4755,7 +4760,19 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 
 	public void mouseReleased (MouseEvent e) {}
-	public void mouseClicked (MouseEvent e) {}
+	public void mouseClicked (MouseEvent e) {
+		if(e.getSource() instanceof TestCanvas){
+			org.rhwlab.tree.Cell cell = ((TestCanvas)e.getSource()).findIt(e.getX(), e.getY());
+			int cellIndex = -1;
+			for (int i=0;i<listModel.getSize();i++){
+				String tagName = "\""+cell.getName()+" \"_.+_.+_"+cell.getIntTime()+".*";
+				if (listModel.get(i).matches(tagName)){
+					cellIndex = i;
+				}
+			}
+			this.select(cellIndex);
+		}
+	}
 	public void mouseEntered (MouseEvent e) {
 		if (e.getSource() == list){
 			toolTipDefaultDismissDelay = ToolTipManager.sharedInstance().getDismissDelay();
@@ -6507,6 +6524,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	public void exportROIsAsZippedStarryNiteNuclei(String zipPath) {		
 
 		File zipFile = new File(zipPath);
+		String configPath = zipPath.replace(".zip", ".xml");
 		sortmode = 3;
 		this.sort();
 
@@ -6660,7 +6678,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		nucString = nucString + "\nnuclei/t" +"end"+ "-nuclei\n";
 		IJ.log(nucString);
 		saveZipNuclei(nucString, zipPath);
-
+		File pngFile = new File(zipPath.replace(".zip", ".png"));
+		String[] paramStrings = new String[]{"P0",""+maxT,"-500","5000","10","2","0"};
+		VTreeImpl vti = AceTree.getAceTree(configPath).getVtree().getiVTreeImpl();
+		vti.printTree(paramStrings, true, true, pngFile.getName(), pngFile.getParent());
+		vti.showTree(paramStrings, true, true);
+		vti.getTestCanvas().addMouseListener(this);
 
 }
 
