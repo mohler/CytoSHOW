@@ -863,6 +863,13 @@ public class IJ {
 		return str;
 	}
 
+	public static String padLong(long n, int digits) {
+		String str = ""+n;
+		while (str.length()<digits)
+			str = "0"+str;
+		return str;
+	}
+	
 	/** Adds the specified class to a Vector to keep it from being garbage
 	collected, which would cause the classes static fields to be reset. 
 	Probably not needed with Java 1.2 or later. */
@@ -2162,5 +2169,5 @@ public class IJ {
 		else
 			return properties.get(key);
 	}
-	
+
 }

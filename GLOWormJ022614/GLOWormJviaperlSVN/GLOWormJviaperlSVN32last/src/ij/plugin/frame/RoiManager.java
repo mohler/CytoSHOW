@@ -168,6 +168,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	private int lastSelectedIndex =0;
 	private int toolTipDefaultDismissDelay;
 	private int toolTipDefaultInitialDelay;
+	private AceTree aceTree;
 
 
 
@@ -405,6 +406,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		addPopupItem("Auto-advance when tagging");
 		addPopupItem("StarryNiteImporter");
 		addPopupItem("Resolve a-p l-r sisters");
+		addPopupItem("UpdateAceTreeLineage");
 		addPopupItem("StarryNiteExporter");
 		addPopupItem("Map Neighbors");
 		addPopupItem("Color Tags by Group Interaction Rules");
@@ -990,6 +992,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			else if (command.equals("Resolve a-p l-r sisters")) {
 				resolveMNGHsisters();
 			}
+			else if (command.equals("UpdateAceTreeLineage")) {
+				FileInfo fileInfo = imp.getOriginalFileInfo();
+				String impDir = fileInfo.directory;
+				this.exportROIsAsZippedStarryNiteNuclei(impDir + "aaa_emb_Unskipped.zip");
+			}
 			else if (command.equals("StarryNiteExporter")) {
 				this.exportROIsAsZippedStarryNiteNuclei(IJ.getFilePath("Save zipped SN nuclei"));
 			}
@@ -1100,6 +1107,24 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				}
 				else if (thisName.endsWith("n \"")) {
 					thatName = thisName.substring(0, thisName.length()-3)+"m \"";
+				}
+				else if (thisName.endsWith("a \"")) {
+					thatName = thisName.substring(0, thisName.length()-3)+"p \"";
+				}
+				else if (thisName.endsWith("p \"")) {
+					thatName = thisName.substring(0, thisName.length()-3)+"a \"";
+				}
+				else if (thisName.endsWith("l \"")) {
+					thatName = thisName.substring(0, thisName.length()-3)+"r \"";
+				}
+				else if (thisName.endsWith("r \"")) {
+					thatName = thisName.substring(0, thisName.length()-3)+"l \"";
+				}
+				else if (thisName.endsWith("g \"")) {
+					thatName = thisName.substring(0, thisName.length()-3)+"h \"";
+				}
+				else if (thisName.endsWith("h \"")) {
+					thatName = thisName.substring(0, thisName.length()-3)+"g \"";
 				}
 				else {
 					continue;
@@ -1377,7 +1402,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						IJ.log(momName+" "+thisTargetString+"->"+thisSwapString+" "+thatTargetString+"->"+thatSwapString);
 						//				rename(thisSwapString, thisIndexesArray,false);
 						//				rename(thatSwapString, thatIndexesArray,false);
-					} else if (thisTargetString.endsWith("n \"")||thisTargetString.endsWith("m \"")) {
+					} else if (thisTargetString.endsWith("n \"")||thisTargetString.endsWith("m \"")||thisTargetString.endsWith("g \"")||thisTargetString.endsWith("h \"")) {
 						if (thisTargetString.matches("Enn")||thisTargetString.matches("Enm")){
 							IJ.wait(1);
 						}
@@ -2104,7 +2129,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		sliceRois.add(roi);
 
-		String rootName = roi.getName().contains("\"")?"\""+roi.getName().split("\"")[1]+"\"":roi.getName().split("_")[0].trim();
+		String rootName = roi.getName().contains("\"")?"\""+roi.getName().split("\"")[1]+"\"": "\""+ roi.getName().split("_")[0].trim()+" \"";
 
 		ArrayList<Roi> rootNameRois = getRoisByRootName().get(rootName);
 		if (rootNameRois == null) {
@@ -2408,7 +2433,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //					.replaceFirst("_", "")
 //					.replaceAll("(.*)C", "$1");
 			String numbersKey = "0_"+z+"_"+t;
-			String nameRoot = "\""+name.split("\"")[1]+"\"";
+			String nameRoot =  name.contains("\"")?"\""+name.split("\"")[1]+"\"": "\""+ name.split("_")[0].trim()+" \"";
 			roisByRootName.get(nameRoot).remove(roi);
 			roisByNumbers.get(numbersKey).remove(roi);
 			rois.remove(name);
@@ -6524,7 +6549,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	public void exportROIsAsZippedStarryNiteNuclei(String zipPath) {		
 
 		File zipFile = new File(zipPath);
-		String configPath = zipPath.replace(".zip", ".xml");
+		String configPath = zipPath.replace("Unskipped.zip","edited.xml");
 		sortmode = 3;
 		this.sort();
 
@@ -6676,14 +6701,23 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 		}
 		nucString = nucString + "\nnuclei/t" +"end"+ "-nuclei\n";
+		File oldZipFile = new File(zipPath);
+		if (oldZipFile.canRead()){
+			oldZipFile.renameTo(new File(zipPath.replace("Unskipped", "Unskipped"+ oldZipFile.lastModified())));
+		}
 		IJ.log(nucString);
 		saveZipNuclei(nucString, zipPath);
-		File pngFile = new File(zipPath.replace(".zip", ".png"));
+		File pngFile = new File(zipPath.replace(".zip", "Lineage.png"));
 		String[] paramStrings = new String[]{"P0",""+maxT,"-500","5000","10","2","0"};
-		VTreeImpl vti = AceTree.getAceTree(configPath).getVtree().getiVTreeImpl();
+		if (aceTree != null){
+			aceTree.exit();
+		}
+		aceTree = AceTree.getAceTree(configPath);
+		VTreeImpl vti = aceTree.getVtree().getiVTreeImpl();
 		vti.printTree(paramStrings, true, true, pngFile.getName(), pngFile.getParent());
 		vti.showTree(paramStrings, true, true);
 		vti.getTestCanvas().addMouseListener(this);
+		aceTree.saveNuclei(new File(zipPath.replace("Unskipped", "UnskippedAutoCorrected")));
 
 }
 
