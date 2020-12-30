@@ -121,7 +121,7 @@ public class StringSorter {
 			if(list[i].length() <= stringMaxLength) {
 				if (list[i].matches(".*\\d+.*")) {
 					if (!nameIncr[i].startsWith("0")) {
-						nameIncr[i] = IJ.pad(Integer.parseInt(nameIncr[i]), nameIncrMax - nameIncrMin +1);
+						nameIncr[i] = IJ.padLong(Long.parseLong(nameIncr[i]), nameIncrMax - nameIncrMin +1);
 					}
 					listToPad[i] = nameRoot[i] + nameIncr[i] +nameEnd[i];
 				}
