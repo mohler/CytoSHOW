@@ -2731,6 +2731,25 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		boolean wasVis = this.isVisible();
 		this.setVisible(false);
 		//		showAll(SHOW_ALL);
+		String[] sibFileNames = new File(path).getParentFile().list();
+		String meta = "";
+		Hashtable<String,String> metaNamingHash = new Hashtable<String,String>();
+		for (String sibName:sibFileNames) {
+			if (sibName.endsWith("VAST_segmentation_metadata.txt")) {
+				meta = IJ.openAsString(new File(path).getParent()+File.separator+sibName);
+				break;
+			}
+		}
+		if (meta !="") {
+			String[] metaLines = meta.split("\n");
+			for (String metaLine:metaLines) {
+				if (metaLine.matches("(\\d+ )(.*\")(([A-Z]|\\d)+(-([A-Z]|\\d)*)? )(.*\")")){
+					String keyNumbStr = metaLine.replaceAll("(\\d+ )(.*\")(([A-Z]|\\d)*+(-([A-Z]|\\d)*)? )(.*\")","$1").trim();
+					String cellNameStr = metaLine.replaceAll("(\\d+ )(.*\")(([A-Z]|\\d)+(-([A-Z]|\\d)*)? )(.*\")","$3").trim();
+					metaNamingHash.put("Label "+keyNumbStr, cellNameStr);
+				}
+			}
+		}
 		String s = IJ.openAsString(path);
 		//		IJ.log(s);
 		String impTitle = this.imp.getTitle();
@@ -2758,6 +2777,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			String nameChunk = pathChunks[pathChunks.length-1];
 			String fvalue = nameChunk.replaceAll("(.*_)(\\d+)(.tiff?)", "$2");
 			fvalue = fvalue.replaceAll("(\\D*)(\\d+)(.tiff?)", "$2");
+			if (fvalue.contentEquals(nameChunk)){
+				fvalue = nameChunk.replaceAll("(.*#slice=)(\\d+)", "$2");
+			}
 			sliceValues.add(Integer.parseInt(fvalue)
 					- ((sLayer.split("file_path=")[1].split("\"")[1]).contains("VC_")?10000000:0));
 			
@@ -2779,7 +2801,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			int offsetY = Integer.parseInt(sCell.split("(;fill:|;\")").length>1 && sCell.split("(;fill:|;\")")[0].split("transform=\"matrix\\(").length>1
 					?(sCell.split("(;fill:|;\")")[0].split("transform=\"matrix\\(")[1]).split("[,\\.]")[10]:"0");
 
-			cellName = (sCell.split("title=\"")[1].split("\"").length>1?sCell.split("title=\"")[1].split("\"")[0]:"");
+			String cellLabel = (sCell.split("title=\"")[1].split("\"").length>1?sCell.split("title=\"")[1].split("\"")[0]:"");
+			if (metaNamingHash.get(cellLabel)!=null) {
+				cellName = metaNamingHash.get(cellLabel).trim();
+			} else {
+				continue;
+			}
 			fillColor = (sCell.split("(;fill:|;\")").length>1?(sCell.split("(;fill:|;\")")[1].startsWith("#")?sCell.split("(;fill:|;\")")[1]:""):"");
 			getColorLegend().getBrainbowColors().put(cellName.toLowerCase(), Colors.decode(fillColor, Color.white));
 			IJ.log(cellName+" "+fillColor+" "+offsetX+" "+offsetY);
@@ -2821,6 +2848,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						String nameChunk = pathChunks[pathChunks.length-1];
 						String fvalue = nameChunk.replaceAll("(.*_)(\\d+)(.tiff?)", "$2");
 						fvalue = fvalue.replaceAll("(\\D*)(\\d+)(.tiff?)", "$2");
+						if (fvalue.contentEquals(nameChunk)){
+							fvalue = nameChunk.replaceAll("(.*#slice=)(\\d+)", "$2");
+						}
 						sliceNumber = Integer.parseInt(fvalue)
 								+ ((sLayer.split("file_path=")[1].split("\"")[1]).contains("VC_")?maxBaseSlice+1:0);
 						sConnLayerHash.put(sLayer.split("\"")[0], ""+sliceNumber);
@@ -2840,11 +2870,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						listModel.addElement(cellName); 
 						fullListModel.addElement(cellName);
 						rois.put(cellName, pRoi); 
+						pRoi.setFillColor(Colors.decode(fillColor.replace("#", "#33"), defaultColor));
+						pRoi.setPosition(1,sliceNumber,1);
 						setUpRoisByNameAndNumbers(pRoi);
 						nRois++;
 
-						pRoi.setFillColor(Colors.decode(fillColor.replace("#", "#33"), defaultColor));
-						pRoi.setPosition(1,sliceNumber,1);
 						//						list.setSelectedIndex(this.getCount()-1);
 						this.rename(cellName, new int[] {this.getCount()-1}, false);
 					}
