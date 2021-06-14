@@ -1636,6 +1636,10 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 					}
 				}
 				
+				if (cellName.toLowerCase().matches("bwm-[a-z]+0\\d+")){
+					cellName = cellName.toLowerCase().replaceAll("(bwm-)([a-z]+)(0)(\\d+)", "$2$4");
+				}
+				
 				String oldLog1 = IJ.getLog();
 				IJ.log(cellName);
 				IJ.runMacro(""
@@ -1796,10 +1800,18 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 					genePopup.add(mi);
 					//					genePopup.add(wbCellID);
 					//					IJ.log("\\Clear");
+
+//		OLD OBSOLETE WORMBASE QUERY SYNTAX...replacing on 06102021					
+//					IJ.runMacro(""
+//							+ "string = File.openUrlAsString(\"https://www.wormbase.org/db/get?name="
+//							+ cellName
+//							+ ";class=Anatomy_term\");"
+//							+ "print(string);");							
+
 					IJ.runMacro(""
-							+ "string = File.openUrlAsString(\"https://www.wormbase.org/db/get?name="
+							+ "string = File.openUrlAsString(\"https://wormbase.org/species/c_elegans/anatomy_term/"
 							+ cellName
-							+ ";class=Anatomy_term\");"
+							+ "\");"
 							+ "print(string);");							
 					logLines2 = IJ.getLog().split("wname=\"associations\"");
 					//					IJ.log("\\Clear");

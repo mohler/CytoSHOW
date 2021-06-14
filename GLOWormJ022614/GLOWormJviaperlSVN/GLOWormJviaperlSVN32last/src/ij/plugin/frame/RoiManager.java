@@ -41,6 +41,7 @@ import org.vcell.gloworm.MQTVSSceneLoader64;
 import org.vcell.gloworm.MQTVS_VolumeViewer;
 import org.vcell.gloworm.MultiQTVirtualStack;
 import org.vcell.gloworm.RoiLabelByNumbersSorter;
+import org.vcell.gloworm.ObjEditor;
 
 import customnode.CustomMesh;
 import customnode.CustomMultiMesh;
@@ -419,6 +420,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		addPopupItem("Plot AG c-phate icospheres to coords");
 		addPopupItem("fixcrappynames");
 		addPopupItem("HiLite lineage name conflicts");
+		addPopupItem("Edit scale and shift of saved OBJs");
 		add(pm);
 	}
 
@@ -1032,6 +1034,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			else if (command.equals("HiLite lineage name conflicts")) {
 				scanForRedundantContemporaneousNames();
+			}
+			else if (command.equals("Edit scale and shift of saved OBJs")) {
+				new ObjEditor().run("");
 			}
 
 			this.imp.getCanvas().requestFocus();
