@@ -1673,8 +1673,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	private void sketchVolumeViewer(Object source) { 
 		boolean singleSave = IJ.shiftKeyDown();
 		double scaleFactor = IJ.getNumber("Downscale for faster rendering?", 1.0d);
-//		double zPadFactor = 3;
-		double zPadFactor = imp.getCalibration().pixelDepth/imp.getCalibration().pixelWidth;
+		double zPadFactor = 3;
 		IJ.setForegroundColor(255, 255, 255);
 		IJ.setBackgroundColor(0, 0, 0);
 		if (getSelectedRoisAsArray().length<1)
@@ -1709,8 +1708,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			select(-1);
 			IJ.wait(50);
 			ArrayList<Integer> nameMatchIndexArrayList = new ArrayList<Integer>();
-			int fraa = this.getFullRoisAsArray().length;
 			Roi[] rois = getFullRoisAsArray();
+			int fraa = rois.length;
 			int minX= Integer.MAX_VALUE;
 			int minY= Integer.MAX_VALUE;
 			int minZ= Integer.MAX_VALUE;
@@ -1733,10 +1732,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 				}
 			}
-			
+			IJ.log(rootName+" "+minX+" "+minY+" "+minZ+" "+maxX+" "+maxY+" "+maxZ);
 //			sketchImp = NewImage.createImage("SVV_"+rootNames_rootFrames.get(0),(int)(imp.getWidth()*scaleFactor), (int)(imp.getHeight()*scaleFactor), (int)(imp.getNSlices()*imp.getNFrames()*zPadFactor), 8, NewImage.FILL_BLACK, false);
-			sketchImp = NewImage.createImage("SVV_"+rootNames_rootFrames.get(0),(int)((maxX-minX+20)*imp.getCalibration().pixelWidth*scaleFactor), (int)((maxY-minY+20)*imp.getCalibration().pixelHeight*scaleFactor), (int)((maxZ-minZ+2)*imp.getNFrames()*zPadFactor), 8, NewImage.FILL_BLACK, false);
-			sketchImp.setDimensions(1, (int)((maxZ-minZ+2)*zPadFactor), imp.getNFrames());
+			sketchImp = NewImage.createImage("SVV_"+rootNames_rootFrames.get(0),(int)((maxX-minX)*imp.getCalibration().pixelWidth*scaleFactor)+20, (int)((maxY-minY)*imp.getCalibration().pixelHeight*scaleFactor)+20, (int)((maxZ-minZ)*zPadFactor)+2, 8, NewImage.FILL_BLACK, false);
+			sketchImp.setDimensions(1, (int)((maxZ-minZ)*zPadFactor)+2, imp.getNFrames());
 			sketchImp.setMotherImp(imp, imp.getID());
 			sketchImp.setCalibration(imp.getCalibration());
 			sketchImp.getCalibration().pixelWidth = sketchImp.getCalibration().pixelWidth/scaleFactor;
@@ -1782,10 +1781,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					}
 					
 					if (nextRoi instanceof TextRoi) {
-						scaledRoi= nextRoi;
+						scaledRoi= (Roi) nextRoi.clone();
 					} else {
 						scaledRoi = new RoiDecoder(scaleFactor, RoiEncoder.saveAsByteArray(nextRoi), nextRoi.getName()).getRoi();
 					}
+					nextRoi.setLocation(nextRoi.getBounds().x+minX-10, nextRoi.getBounds().y+minY-10);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -1811,8 +1811,16 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			sketchImp.setMotherImp(imp, imp.getID());
 //			sketchImp.show();
 			vv.runVolumeViewer(sketchImp, rootName, assignedColorString, true, null, outDir);
-			new ObjEditor().run("1.0|1.0|1.0|"+(minX-10)*sketchImp.getCalibration().pixelWidth+"|"+(minY-10)*sketchImp.getCalibration().pixelHeight+"|"+(minZ-1)*sketchImp.getCalibration().pixelDepth+"|"+outDir+File.separator+"SVV_"+rootName+"_"+rootName+"_1_1_0000.obj"+"|"+outDir+File.separator);
-
+			new ObjEditor().run("1.0|1.0|1.0|"+(minX-10)*sketchImp.getCalibration().pixelWidth+"|"
+											  +(minY-10)*sketchImp.getCalibration().pixelHeight+"|"
+											  +(-maxZ-1)*sketchImp.getCalibration().pixelDepth*zPadFactor+"|"
+											  +outDir+File.separator+"SVV_"+rootName+"_"+rootName+"_1_1_0000.obj"+"|"
+											  +outDir+File.separator);
+			IJ.log("1.0|1.0|1.0|"+(minX-10)*sketchImp.getCalibration().pixelWidth+"|"
+					  +(minY-10)*sketchImp.getCalibration().pixelHeight+"|"
+/*maxZ b\c stackflip*/+(-maxZ-1)*sketchImp.getCalibration().pixelDepth*zPadFactor+"|"
+					  +outDir+File.separator+"SVV_"+rootName+"_"+rootName+"_1_1_0000.obj"+"|"
+					  +outDir+File.separator);
 			sketchImp.changes = false;
 			sketchImp.close();
 			sketchImp.flush();

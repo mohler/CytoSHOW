@@ -22,15 +22,15 @@ public class ObjEditor implements PlugIn {
 				objDir = args[a];
 			} else if (a==args.length-1) {
 				outDir = args[a];
-				autofilled = true;
 			}
 		}
-		double scaleX = scalesAndShifts[0];
-		double scaleY = scalesAndShifts[1];
-		double scaleZ = scalesAndShifts[2];
-		double shiftX = scalesAndShifts[3];
-		double shiftY = scalesAndShifts[4];
-		double shiftZ = scalesAndShifts[5];
+		autofilled = args.length==8;
+		double scaleX = autofilled?scalesAndShifts[0]:0;
+		double scaleY = autofilled?scalesAndShifts[1]:0;
+		double scaleZ = autofilled?scalesAndShifts[2]:0;
+		double shiftX = autofilled?scalesAndShifts[3]:0;
+		double shiftY = autofilled?scalesAndShifts[4]:0;
+		double shiftZ = autofilled?scalesAndShifts[5]:0;
 		if (!autofilled) {
 			GenericDialog gd = new GenericDialog("Specify scaling and translations for objs");
 			gd.addNumericField("scaleX", 1.0, 0, 0, "");
