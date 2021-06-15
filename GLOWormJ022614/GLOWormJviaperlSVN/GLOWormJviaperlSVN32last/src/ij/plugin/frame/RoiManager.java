@@ -1735,7 +1735,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			
 //			sketchImp = NewImage.createImage("SVV_"+rootNames_rootFrames.get(0),(int)(imp.getWidth()*scaleFactor), (int)(imp.getHeight()*scaleFactor), (int)(imp.getNSlices()*imp.getNFrames()*zPadFactor), 8, NewImage.FILL_BLACK, false);
-			sketchImp = NewImage.createImage("SVV_"+rootNames_rootFrames.get(0),(int)((maxX-minX+20)*scaleFactor), (int)((maxY-minY+20)*scaleFactor), (int)((maxZ-minZ+2)*imp.getNFrames()*zPadFactor), 8, NewImage.FILL_BLACK, false);
+			sketchImp = NewImage.createImage("SVV_"+rootNames_rootFrames.get(0),(int)((maxX-minX+20)*imp.getCalibration().pixelWidth*scaleFactor), (int)((maxY-minY+20)*imp.getCalibration().pixelHeight*scaleFactor), (int)((maxZ-minZ+2)*imp.getNFrames()*zPadFactor), 8, NewImage.FILL_BLACK, false);
 			sketchImp.setDimensions(1, (int)((maxZ-minZ+2)*zPadFactor), imp.getNFrames());
 			sketchImp.setMotherImp(imp, imp.getID());
 			sketchImp.setCalibration(imp.getCalibration());
@@ -1758,7 +1758,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				String[] nextChunks = nextRoi.getName().split("_");
 				int nextSlice = ((Integer.parseInt(nextChunks[nextChunks.length-2])-minZ)*(int)zPadFactor);
 				int nextFrame = Integer.parseInt(nextChunks[nextChunks.length-1].replaceAll("[CZT]", "").split("-")[0]);
-				nextRoi.setLocation(nextRoi.getBounds().x-minX+10/imp.getCalibration().pixelWidth, nextRoi.getBounds().y-minY+10/imp.getCalibration().pixelHeight);
+				nextRoi.setLocation(nextRoi.getBounds().x-minX+10, nextRoi.getBounds().y-minY+10);
 				Roi scaledRoi=null;
 				try {
 					

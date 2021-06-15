@@ -62,7 +62,7 @@ public class ObjEditor implements PlugIn {
 		for (String objName:objDirList) {
 			if (objName.toLowerCase().endsWith(".obj")) {
 				String[] objLines = IJ.openAsString(objDir+File.separator+objName).split("\n");
-				File outFile = new File(outDir+objName);
+				File outFile = new File(outDir+objName.replace(".obj", "Fix.obj"));
 				if (outFile.exists())
 					outFile.delete();
 				for (String objLine:objLines) {
@@ -72,9 +72,9 @@ public class ObjEditor implements PlugIn {
 						Double objVertY = Double.parseDouble(objVertChunks[2]);
 						Double objVertZ = Double.parseDouble(objVertChunks[3]);
 						String objNewLine = "v " + ((objVertX*scaleX)+shiftX) + " " + ((objVertY*scaleY)+shiftY) + " " + ((objVertZ*scaleZ)+shiftZ);
-						IJ.append(objNewLine, outDir+objName);
+						IJ.append(objNewLine, outDir+objName.replace(".obj", "Fix.obj"));
 					} else {
-						IJ.append(objLine, outDir+objName);
+						IJ.append(objLine, outDir+objName.replace(".obj", "Fix.obj"));
 					}
 				}
 				//IJ.saveString(objOutPutString, outDir+objName);
