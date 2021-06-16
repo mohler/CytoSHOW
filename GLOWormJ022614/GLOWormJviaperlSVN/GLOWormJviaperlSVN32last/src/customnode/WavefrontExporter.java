@@ -74,11 +74,47 @@ public class WavefrontExporter {
 			String mtlFileName,
 			Writer objWriter,
 			Writer mtlWriter) throws IOException {
+		save(
+				meshes,
+				mtlFileName,
+				objWriter,
+				mtlWriter,
+				null);
+	}
 
-		objWriter.write("# OBJ File\n");
+		public static void save(
+				Map<String, CustomMesh> meshes,
+				String mtlFileName,
+				Writer objWriter,
+				Writer mtlWriter,
+				String scaleShiftString) throws IOException {
+
+			objWriter.write("# OBJ File\n");
 		objWriter.write("mtllib ");
 		objWriter.write(mtlFileName);
 		objWriter.write('\n');
+		
+		Double scaleX = 1.0, scaleY = 1.0, scaleZ = 1.0, shiftX = 0.0, shiftY = 0.0, shiftZ = 0.0;
+		
+		String[] scaleShiftChunks = null;
+		if (scaleShiftString!= null) {
+			scaleShiftChunks = scaleShiftString.split("\\|");
+			double[] scalesAndShifts = new double[scaleShiftChunks.length];
+			for (int a=0; a<scaleShiftChunks.length; a++) {
+				scalesAndShifts[a] = Double.parseDouble(scaleShiftChunks[a]);
+				switch (a) {
+				case 0: scaleX = scalesAndShifts[a];
+				case 1: scaleY = scalesAndShifts[a];
+				case 2: scaleZ = scalesAndShifts[a];
+				case 3: shiftX = scalesAndShifts[a];
+				case 4: shiftY = scalesAndShifts[a];
+				case 5: shiftZ = scalesAndShifts[a];
+				}
+
+			}
+
+
+		}
 
 		final HashMap<Mtl, Mtl> ht_mat = new HashMap<Mtl, Mtl>();
 
@@ -130,9 +166,9 @@ public class WavefrontExporter {
 					ht_points.put(p, j);
 					// append vertex
 					tmp.append('v').append(' ')
-					   .append(p.x).append(' ')
-					   .append(p.y).append(' ')
-					   .append(p.z).append('\n');
+					   .append(p.x*scaleX+shiftX).append(' ')
+					   .append(p.y*scaleY+shiftY).append(' ')
+					   .append(p.z*scaleZ+shiftZ).append('\n');
 					objWriter.write(tmp.toString());
 					tmp.setLength(0);
 					j++;

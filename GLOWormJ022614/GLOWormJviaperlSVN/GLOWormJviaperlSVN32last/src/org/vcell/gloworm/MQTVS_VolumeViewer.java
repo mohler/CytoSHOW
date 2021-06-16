@@ -39,14 +39,17 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 	public void run(String arg) {
 		String cellName = arg;
 		ImagePlus imp = IJ.getImage();
-		runVolumeViewer(imp, cellName, null, false, new Image3DUniverse(), null);
+		runVolumeViewer(imp, cellName, null, false, new Image3DUniverse(), null, null);
 	}
 	
 	public void runVolumeViewer(ImagePlus imp, String cellName, String assignedColorString, Image3DUniverse univ) {
-		runVolumeViewer(imp, cellName, assignedColorString, false, univ, null);
+		runVolumeViewer(imp, cellName, assignedColorString, false, univ, null, null);
 	}
 	
-	public void runVolumeViewer(ImagePlus imp, String cellName, String assignedColorString, boolean saveSingly, Image3DUniverse univ, String outDir) {
+	public void runVolumeViewer(ImagePlus imp, String cellName, String assignedColorString, Image3DUniverse univ, String outDir) {
+		runVolumeViewer(imp, cellName, assignedColorString, false, univ, outDir, null);
+	}
+	public void runVolumeViewer(ImagePlus imp, String cellName, String assignedColorString, boolean saveSingly, Image3DUniverse univ, String outDir, String scaleShiftString) {
 		boolean singleSave = IJ.shiftKeyDown() || saveSingly;
 		if (univ == null){
 			if (this.univ == null){	
@@ -268,7 +271,14 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 						if (singleSave) {
 							Hashtable<String, Content> newestContent = new Hashtable<String, Content>();
 							newestContent.put(""+objectName, univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
-							MeshExporter.saveAsWaveFront(newestContent.values(), new File(((outDir==null?IJ.getDirectory("home"):outDir)+File.separator+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"+objectName.replaceAll(":","").replaceAll("(/|\\s+)","")+"_"+ch+"_"+tpt+".obj")), univ.getStartTime(), univ.getEndTime());
+							MeshExporter.saveAsWaveFront(newestContent.values(), 
+															new File(((outDir==null?IJ.getDirectory("home"):outDir)+File.separator
+																	+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"
+																	+objectName.replaceAll(":","").replaceAll("(/|\\s+)","")
+																	+"_"+ch+"_"+tpt+".obj")), 
+															univ.getStartTime(), 
+															univ.getEndTime(),
+															scaleShiftString);
 							//						univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
 							//						univ.getSelected().setLocked(false);
 							//						univ.removeContent(univ.getSelected().getName());

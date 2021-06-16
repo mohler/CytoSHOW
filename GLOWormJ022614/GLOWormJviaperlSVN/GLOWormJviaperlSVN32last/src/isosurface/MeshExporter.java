@@ -70,11 +70,14 @@ public class MeshExporter {
 		saveAsWaveFront(contents_, obj_file, 0,0);
 	}
 
+	static public void saveAsWaveFront(Collection contents_, File obj_file, int startInt, int endInt) {
+		saveAsWaveFront( contents_,  obj_file,  startInt,  endInt, null);
+	}
 
 	/** Accepts a collection of MeshGroup objects. 
 	 * @param j 
 	 * @param i */
-	static public void saveAsWaveFront(Collection contents_, File obj_file, int startInt, int endInt) {
+	static public void saveAsWaveFront(Collection contents_, File obj_file, int startInt, int endInt, String scaleShiftString) {
 		if (null == contents_ || 0 == contents_.size())
 			return;
 		String obj_filename = obj_file.getName();
@@ -98,7 +101,7 @@ public class MeshExporter {
 			try {
 				dos_obj = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(obj_file)), "8859_1"); // encoding in Latin 1 (for macosx not to mess around
 				dos_mtl = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(mtl_file)), "8859_1"); // encoding in Latin 1 (for macosx not to mess around
-				writeAsWaveFront(contents, mtl_filename, dos_obj, dos_mtl);
+				writeAsWaveFront(contents, mtl_filename, dos_obj, dos_mtl, scaleShiftString);
 				dos_obj.flush();
 				dos_mtl.flush();
 			} catch (IOException e) {
@@ -478,6 +481,10 @@ public class MeshExporter {
 	}
 
 	static public void writeAsWaveFront(Collection contents, String mtl_filename, Writer w_obj, Writer w_mtl) throws IOException {
+		writeAsWaveFront( contents,  mtl_filename,  w_obj,  w_mtl, null);
+	}
+	
+	static public void writeAsWaveFront(Collection contents, String mtl_filename, Writer w_obj, Writer w_mtl, String scaleShiftString) throws IOException {
 		HashMap<String, CustomMesh> meshes = new HashMap<String, CustomMesh>();
 
 		for(Iterator it = contents.iterator(); it.hasNext(); ) {
@@ -501,7 +508,7 @@ public class MeshExporter {
 				continue;
 			}
 		}
-		WavefrontExporter.save(meshes, mtl_filename, w_obj, w_mtl);
+		WavefrontExporter.save(meshes, mtl_filename, w_obj, w_mtl, scaleShiftString);
 	}
 
 	/** A Material, but avoiding name colisions. Not thread-safe. */

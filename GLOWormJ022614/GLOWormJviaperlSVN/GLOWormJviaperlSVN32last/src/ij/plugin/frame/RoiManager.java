@@ -1810,12 +1810,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			(new StackReverser()).flipStack(sketchImp);
 			sketchImp.setMotherImp(imp, imp.getID());
 //			sketchImp.show();
-			vv.runVolumeViewer(sketchImp, rootName, assignedColorString, true, null, outDir);
-			new ObjEditor().run("1.0|1.0|1.0|"+(minX-10)*sketchImp.getCalibration().pixelWidth*scaleFactor+"|"
-											  +(minY-10)*sketchImp.getCalibration().pixelHeight*scaleFactor+"|"
-											  +(-maxZ-1)*sketchImp.getCalibration().pixelDepth*zPadFactor+"|"
-											  +outDir+File.separator+"SVV_"+rootName+"_"+rootName+"_1_1_0000.obj"+"|"
-											  +outDir+File.separator);
+			String scaleShiftString = "1.0|1.0|1.0|"+(minX-10)*sketchImp.getCalibration().pixelWidth*scaleFactor+"|"
+					  +(minY-10)*sketchImp.getCalibration().pixelHeight*scaleFactor+"|"
+					  +(-maxZ-1)*sketchImp.getCalibration().pixelDepth*zPadFactor;
+			vv.runVolumeViewer(sketchImp, rootName, assignedColorString, true, null, outDir, scaleShiftString);
+//			new ObjEditor().run("1.0|1.0|1.0|"+(minX-10)*sketchImp.getCalibration().pixelWidth*scaleFactor+"|"
+//											  +(minY-10)*sketchImp.getCalibration().pixelHeight*scaleFactor+"|"
+//											  +(-maxZ-1)*sketchImp.getCalibration().pixelDepth*zPadFactor+"|"
+//											  +outDir+File.separator+"SVV_"+rootName+"_"+rootName+"_1_1_0000.obj"+"|"
+//											  +outDir+File.separator);
 			IJ.log("1.0|1.0|1.0|"+(minX-10)*sketchImp.getCalibration().pixelWidth+"|"
 					  +(minY-10)*sketchImp.getCalibration().pixelHeight+"|"
 /*maxZ b\c stackflip*/+(-maxZ-1)*sketchImp.getCalibration().pixelDepth*zPadFactor+"|"
