@@ -274,7 +274,7 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 							MeshExporter.saveAsWaveFront(newestContent.values(), 
 															new File(((outDir==null?IJ.getDirectory("home"):outDir)+File.separator
 																	+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"
-																	+objectName.replaceAll(":","").replaceAll("(/|\\s+)","")
+																	//+objectName.replaceAll(":","").replaceAll("(/|\\s+)","")
 																	+"_"+ch+"_"+tpt+".obj")), 
 															univ.getStartTime(), 
 															univ.getEndTime(),

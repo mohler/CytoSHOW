@@ -1761,28 +1761,21 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		MQTVS_VolumeViewer vv = new MQTVS_VolumeViewer(); 
 		for (int n=0; n<rootNames_rootFrames.size(); n++) {
-			ImagePlus sketchImp = NewImage.createImage("SVV_"+rootNames_rootFrames.get(0),(int)(imp.getWidth()*scaleFactor), (int)(imp.getHeight()*scaleFactor), (int)(imp.getNSlices()*imp.getNFrames()*zPadFactor), 8, NewImage.FILL_BLACK, false);
-			sketchImp.setDimensions(1, (int)(imp.getNSlices()*zPadFactor), imp.getNFrames());
-			sketchImp.setMotherImp(imp, imp.getID());
-			sketchImp.setCalibration(imp.getCalibration());
-			sketchImp.getCalibration().pixelWidth = sketchImp.getCalibration().pixelWidth/scaleFactor;
-			sketchImp.getCalibration().pixelHeight = sketchImp.getCalibration().pixelHeight/scaleFactor;
-			sketchImp.getCalibration().pixelDepth = sketchImp.getCalibration().pixelDepth/zPadFactor;
-
+			ImagePlus sketchImp = null;
+			
 			String rootName = rootNames.get(n);
-			sketchImp.setTitle("SVV_"+rootName);
-//			sketchImp.show();
-			sketchImp.getRoiManager().select(-1);
-			IJ.wait(50);
-			if (sketchImp.getRoiManager().getCount()>0){
-				sketchImp.getRoiManager().delete(false);
-			}
 			
 			select(-1);
 			IJ.wait(50);
 			ArrayList<Integer> nameMatchIndexArrayList = new ArrayList<Integer>();
-			int fraa = this.getFullRoisAsArray().length;
 			Roi[] rois = getFullRoisAsArray();
+			int fraa = rois.length;
+			int minX= Integer.MAX_VALUE;
+			int minY= Integer.MAX_VALUE;
+			int minZ= Integer.MAX_VALUE;
+			int maxX= Integer.MIN_VALUE;
+			int maxY= Integer.MIN_VALUE;
+			int maxZ= Integer.MIN_VALUE;
 			for (int r=0; r < fraa; r++) {
 				String nextName = rois[r].getName();
 				if (nextName.startsWith("\""+rootName/*.split("_")[0]*/)
@@ -1790,7 +1783,31 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						rootName.endsWith(nextName.split("_")[nextName.split("_").length-1].replaceAll("[CZT]", "").split("-")[0])*/
 						){
 					nameMatchIndexArrayList.add(r);
+					minX = minX>rois[r].getBounds().x?rois[r].getBounds().x:minX;
+					minY = minY>rois[r].getBounds().y?rois[r].getBounds().y:minY;
+					minZ = minZ>rois[r].getZPosition()-1?rois[r].getZPosition()-1:minZ;   //minZ = 0 for full stack...
+					maxX = maxX<rois[r].getBounds().x+rois[r].getBounds().width?rois[r].getBounds().x+rois[r].getBounds().width:maxX;
+					maxY = maxY<rois[r].getBounds().y+rois[r].getBounds().height?rois[r].getBounds().y+rois[r].getBounds().height:maxY;
+					maxZ = maxZ<rois[r].getZPosition()?rois[r].getZPosition():maxZ;
+
 				}
+			}
+			IJ.log(rootName+" "+minX+" "+minY+" "+minZ+" "+maxX+" "+maxY+" "+maxZ);
+//			sketchImp = NewImage.createImage("SVV_"+rootNames_rootFrames.get(0),(int)(imp.getWidth()*scaleFactor), (int)(imp.getHeight()*scaleFactor), (int)(imp.getNSlices()*imp.getNFrames()*zPadFactor), 8, NewImage.FILL_BLACK, false);
+			sketchImp = NewImage.createImage("SVV_"+rootNames_rootFrames.get(0),(int)((maxX-minX)*imp.getCalibration().pixelWidth*scaleFactor)+20, (int)((maxY-minY)*imp.getCalibration().pixelHeight*scaleFactor)+20, (int)((maxZ-minZ)*zPadFactor)+2, 8, NewImage.FILL_BLACK, false);
+			sketchImp.setDimensions(1, (int)((maxZ-minZ)*zPadFactor)+2, imp.getNFrames());
+			sketchImp.setMotherImp(imp, imp.getID());
+			sketchImp.setCalibration(imp.getCalibration());
+			sketchImp.getCalibration().pixelWidth = sketchImp.getCalibration().pixelWidth/scaleFactor;
+			sketchImp.getCalibration().pixelHeight = sketchImp.getCalibration().pixelHeight/scaleFactor;
+			sketchImp.getCalibration().pixelDepth = sketchImp.getCalibration().pixelDepth/zPadFactor;
+
+			sketchImp.setTitle("SVV_"+rootName);
+//			sketchImp.show();
+			sketchImp.getRoiManager().select(-1);
+			IJ.wait(50);
+			if (sketchImp.getRoiManager().getCount()>0){
+				sketchImp.getRoiManager().delete(false);
 			}
 			int[] nameMatchIndexes = new int[nameMatchIndexArrayList.size()];
 			Roi nextRoi = ((Roi)rois[0]);
@@ -1798,8 +1815,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				nameMatchIndexes[i] = nameMatchIndexArrayList.get(i);
 				nextRoi = ((Roi)rois[nameMatchIndexArrayList.get(i)]);
 				String[] nextChunks = nextRoi.getName().split("_");
-				int nextSlice = (Integer.parseInt(nextChunks[nextChunks.length-2])*(int)zPadFactor);
+				int nextSlice = ((Integer.parseInt(nextChunks[nextChunks.length-2])-minZ)*(int)zPadFactor);
 				int nextFrame = Integer.parseInt(nextChunks[nextChunks.length-1].replaceAll("[CZT]", "").split("-")[0]);
+				nextRoi.setLocation(nextRoi.getBounds().x-minX+10, nextRoi.getBounds().y-minY+10);
 				Roi scaledRoi=null;
 				try {
 					
@@ -1823,10 +1841,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					}
 					
 					if (nextRoi instanceof TextRoi) {
-						scaledRoi= nextRoi;
+						scaledRoi= (Roi) nextRoi.clone();
 					} else {
 						scaledRoi = new RoiDecoder(scaleFactor, RoiEncoder.saveAsByteArray(nextRoi), nextRoi.getName()).getRoi();
 					}
+					nextRoi.setLocation(nextRoi.getBounds().x+minX-10, nextRoi.getBounds().y+minY-10);
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -1851,14 +1870,26 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			(new StackReverser()).flipStack(sketchImp);
 			sketchImp.setMotherImp(imp, imp.getID());
 //			sketchImp.show();
-			vv.runVolumeViewer(sketchImp, rootName, assignedColorString, true, null, outDir);
-
+			String scaleShiftString = "1.0|1.0|1.0|"+(minX-10)*sketchImp.getCalibration().pixelWidth*scaleFactor+"|"
+					  +(minY-10)*sketchImp.getCalibration().pixelHeight*scaleFactor+"|"
+					  +(-maxZ-1)*sketchImp.getCalibration().pixelDepth*zPadFactor;
+			vv.runVolumeViewer(sketchImp, rootName, assignedColorString, true, null, outDir, scaleShiftString);
+//			new ObjEditor().run("1.0|1.0|1.0|"+(minX-10)*sketchImp.getCalibration().pixelWidth*scaleFactor+"|"
+//											  +(minY-10)*sketchImp.getCalibration().pixelHeight*scaleFactor+"|"
+//											  +(-maxZ-1)*sketchImp.getCalibration().pixelDepth*zPadFactor+"|"
+//											  +outDir+File.separator+"SVV_"+rootName+"_"+rootName+"_1_1_0000.obj"+"|"
+//											  +outDir+File.separator);
+			IJ.log("1.0|1.0|1.0|"+(minX-10)*sketchImp.getCalibration().pixelWidth+"|"
+					  +(minY-10)*sketchImp.getCalibration().pixelHeight+"|"
+/*maxZ b\c stackflip*/+(-maxZ-1)*sketchImp.getCalibration().pixelDepth*zPadFactor+"|"
+					  +outDir+File.separator+"SVV_"+rootName+"_"+rootName+"_1_1_0000.obj"+"|"
+					  +outDir+File.separator);
 			sketchImp.changes = false;
 			sketchImp.close();
 			sketchImp.flush();
 			sketchImp=null;
 			ImageJ3DViewer.select(null);
-			Runtime.getRuntime().gc();
+//			Runtime.getRuntime().gc();
 		}
 		Image3DUniverse univ = vv.getUniv();
 		
