@@ -9393,7 +9393,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	
 	public void setRoiFillColor(Roi roi, Color color, boolean reNameInListNow){
 		roi.setFillColor(color);
-		if (roi.getName() != null){
+		if (roi.getName() != null && roi.getName().contains(" \"_")){
 			String roiColorChunk = roi.getName().split("_")[1];
 			String newColorName = roiColorChunk.startsWith("#")? 
 					roi.getName().replace(roiColorChunk, Colors.colorToHexString(color)):
