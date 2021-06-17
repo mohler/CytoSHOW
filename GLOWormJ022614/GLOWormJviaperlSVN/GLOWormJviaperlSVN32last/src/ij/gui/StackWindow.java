@@ -310,6 +310,11 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 	public boolean close() {
 		removeScrollbars();
 		if (cSelector!=null) {
+			while (cSelector.iconPanel.getMouseWheelListeners().length>0) 
+				cSelector.iconPanel.removeMouseWheelListener(cSelector.iconPanel.getMouseWheelListeners()[0]);
+			while (cSelector.icon2Panel.getMouseWheelListeners().length>0) 
+				cSelector.icon2Panel.removeMouseWheelListener(cSelector.icon2Panel.getMouseWheelListeners()[0]);
+			
 			cSelector.bar.removeAdjustmentListener(cSelector);
 			cSelector.bar.removeMouseListener(cSelector);
 			cSelector.removeAdjustmentListener(this);

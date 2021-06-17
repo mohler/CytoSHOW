@@ -117,11 +117,11 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 	public boolean running3 = false;
 	private int origICtop;
 	private Color subTitleBkgdColor = (Color.white);
-	public Panel tagButtonPanel;
-	public Panel viewButtonPanel;
-	public Panel modeButtonPanel;
+	public JPanel tagButtonPanel;
+	public JPanel viewButtonPanel;
+	public JPanel modeButtonPanel;
 	public JButton fullSetButton;
-	public Panel optionsPanel;
+	public JPanel optionsPanel;
 	public JButton hideShowButton;
 	public JButton sketch3DButton;
 	public Label countLabel;
@@ -301,9 +301,9 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		GridBagLayout viewgridbag = new GridBagLayout();
 		GridBagConstraints vspc = new GridBagConstraints();
 
-		tagButtonPanel = new Panel(fspgridbag);
-		viewButtonPanel = new Panel(viewgridbag);
-		modeButtonPanel = new Panel(viewgridbag);
+		tagButtonPanel = new JPanel(fspgridbag);
+		viewButtonPanel = new JPanel(viewgridbag);
+		modeButtonPanel = new JPanel(viewgridbag);
 		fspgridbag.setConstraints(tagButtonPanel, fspc);
 		fspgridbag.setConstraints(viewButtonPanel, vspc);
 		fspgridbag.setConstraints(modeButtonPanel, vspc);
@@ -695,7 +695,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		stereo4dYrcButton.addActionListener(sst);
 
 		BorderLayout optbl = new BorderLayout();
-		optionsPanel = new Panel();
+		optionsPanel = new JPanel();
 		optionsPanel.setLayout(optbl);
 		optionsPanel.add(tagButtonPanel, BorderLayout.EAST);
 		optionsPanel.add(modeButtonPanel, BorderLayout.WEST);
@@ -910,7 +910,8 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
      	return s+"; "+s2+s3;
     }
 
-    public void paint(Graphics g) {
+    public void paintComponent(Graphics g) {  //VERY KEY TO PROPER JFRAME BEHAVIOR!!!!!!!  DON'T USE PAINT!!!
+    	super.paintComponents(g);
 		//if (IJ.debugMode) IJ.log("wPaint: " + imp.getTitle());
 		if (!(this instanceof ImageWindow3D))
 			drawInfo(g);
@@ -964,15 +965,15 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		this.removeMouseWheelListener(this);
 		while (this.getComponentCount()>0 && this.getComponents()[0]!=null){
 			Component comp = this.getComponents()[0];
-			if (comp instanceof Panel){
+			if (comp instanceof JPanel){
 				while (((Panel)comp).getComponentCount()>0 && ((Panel)comp).getComponents()[0]!=null){
 					Component pComp = ((Panel)comp).getComponents()[0];
-					if (pComp instanceof Button){
-						while (((Button)pComp).getActionListeners().length>0){
-							((Button) pComp).removeActionListener(((Button)pComp).getActionListeners()[0]);
+					if (pComp instanceof JButton){
+						while (((JButton)pComp).getActionListeners().length>0){
+							((JButton) pComp).removeActionListener(((JButton)pComp).getActionListeners()[0]);
 						}
-						while (((Button)pComp).getMouseListeners().length>0){
-							((Button) pComp).removeMouseListener(((Button)pComp).getMouseListeners()[0]);
+						while (((JButton)pComp).getMouseListeners().length>0){
+							((JButton) pComp).removeMouseListener(((JButton)pComp).getMouseListeners()[0]);
 						}
 					}
 					if (pComp instanceof TextField){
@@ -993,12 +994,12 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 					((Panel)comp).remove(pComp);
 				}
 			}
-			if (comp instanceof Button){
-				while (((Button)comp).getActionListeners().length>0){
-					((Button) comp).removeActionListener(((Button)comp).getActionListeners()[0]);
+			if (comp instanceof JButton){
+				while (((JButton)comp).getActionListeners().length>0){
+					((JButton) comp).removeActionListener(((JButton)comp).getActionListeners()[0]);
 				}
-				while (((Button)comp).getMouseListeners().length>0){
-					((Button) comp).removeMouseListener(((Button)comp).getMouseListeners()[0]);
+				while (((JButton)comp).getMouseListeners().length>0){
+					((JButton) comp).removeMouseListener(((JButton)comp).getMouseListeners()[0]);
 				}
 			}
 			if (comp instanceof TextField){
@@ -1035,6 +1036,9 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
     		}
     		while(ic.getMouseMotionListeners().length>0){
     			ic.removeMouseMotionListener(ic.getMouseMotionListeners()[0]);
+    		}
+    		while(ic.getMouseWheelListeners().length>0){
+    			ic.removeMouseWheelListener(ic.getMouseWheelListeners()[0]);
     		}
     		while(ic.getKeyListeners().length>0){
     			ic.removeKeyListener(ic.getKeyListeners()[0]);

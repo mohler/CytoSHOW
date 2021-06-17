@@ -23,6 +23,7 @@ import java.awt.event.ItemEvent;
 import java.util.*;
 
 import javax.media.j3d.Canvas3D;
+import javax.swing.JCheckBox;
 
 import org.vcell.gloworm.MQTVSSceneLoader64;
 import org.vcell.gloworm.MQTVSSceneLoader64;
@@ -126,9 +127,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						if (transferData != null && transferData.size() > 0) {
 							//							IJ.log("You dropped " + transferData.size() + " files");							
 							dtde.dropComplete(true);
-							if (transferData.get(0) instanceof File && ((File)transferData.get(0)).isDirectory() 
-									&& (((File)transferData.get(0)).list()[((File)transferData.get(0)).list().length-1].endsWith(".obj")
-											|| ((File)transferData.get(0)).list()[0].endsWith(".obj"))){
+							if (transferData.get(0) instanceof File && ((File)transferData.get(0)).isDirectory()){
 								for (int j=0; j<transferData.size();j++){
 									for (File file:((File)transferData.get(j)).listFiles()){
 										if (file.getName().toLowerCase().endsWith(".obj"))
@@ -770,7 +769,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 								}
 							}
 							if (traceLineages) {
-								for (Checkbox cbq:impCL.getCheckbox()) {
+						for (JCheckBox cbq:impCL.getJCheckBox()) {
 									if ((traceForward 
 											&& (cbq.getName().toUpperCase().trim().startsWith(s.toUpperCase().trim())
 													|| (s.toUpperCase().matches("P1") && cbq.getName().toUpperCase().matches("P.|C.*|D.*|E.*|MS.*|Z."))
@@ -925,7 +924,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 									}
 								}
 								if (traceLineages) {
-									for (Checkbox cbq:impCL.getCheckbox()) {
+									for (JCheckBox cbq:impCL.getJCheckBox()) {
 										if ((traceForward 
 												&& (cbq.getName().toUpperCase().trim().startsWith(s.toUpperCase().trim())
 														|| (s.toUpperCase().matches("P1") && cbq.getName().toUpperCase().matches("P.|C.*|D.*|E.*|MS.*|Z."))
@@ -1086,7 +1085,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 									}
 								}
 								if (traceLineages) {
-									for (Checkbox cbq:impCL.getCheckbox()) {
+									for (JCheckBox cbq:impCL.getJCheckBox()) {
 										if ((traceForward 
 												&& (cbq.getName().toUpperCase().trim().startsWith(s.toUpperCase().trim())
 														|| (s.toUpperCase().matches("P1") && cbq.getName().toUpperCase().matches("P.|C.*|D.*|E.*|MS.*|Z."))
@@ -1426,7 +1425,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					}
 					if (traceLineages) {
 						for (String ns:ssHits) {
-							for (Checkbox cbq:impCL.getCheckbox()) {
+							for (JCheckBox cbq:impCL.getJCheckBox()) {
 								if ((traceForward 
 										&& (cbq.getName().toUpperCase().trim().startsWith(ns.toUpperCase().trim())
 												|| (ns.toUpperCase().matches("P1") && cbq.getName().toUpperCase().matches("P.|C.*|D.*|E.*|MS.*|Z."))
@@ -1769,8 +1768,8 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					hideState = cl.getChoice().getSelectedItem();
 					cl.getChoice().select("Hide Checked");
 					cl.itemStateChanged(new ItemEvent(cl.getChoice(), ItemEvent.ITEM_STATE_CHANGED, cl.getChoice(), ItemEvent.SELECTED));
-					for (Checkbox cb:cl.getCheckbox()){
-						cb.setState(false);
+					for (JCheckBox cb:cl.getJCheckBox()){
+						cb.setSelected(false);
 					}
 				}
 				imp.getRoiManager().getTextSearchField().setText(cellsRegex);

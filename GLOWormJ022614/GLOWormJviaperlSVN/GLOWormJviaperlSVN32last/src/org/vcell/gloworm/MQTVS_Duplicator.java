@@ -403,7 +403,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 
 
 
-	String showDialog(ImagePlus imp, String title, String prompt, String defaultString) {
+public	String showDialog(ImagePlus imp, String title, String prompt, String defaultString) {
 		int stackSize = imp.getStackSize();
 		duplicateSubstack = stackSize>1 && (stackSize==imp.getNSlices()||stackSize==imp.getNFrames());
 		GenericDialog gd = new GenericDialog(title);
@@ -620,7 +620,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 
 
 
-	String showHSDialog(ImagePlus imp, String newTitle) {
+public	String showHSDialog(ImagePlus imp, String newTitle) {
 		int nChannels = imp.getNChannels();
 		int nSlices = imp.getNSlices();
 		int nFrames = imp.getNFrames();

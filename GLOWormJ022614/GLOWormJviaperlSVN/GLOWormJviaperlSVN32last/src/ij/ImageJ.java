@@ -27,6 +27,7 @@ import javax.jnlp.SingleInstanceService;
 import javax.jnlp.UnavailableServiceException;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -706,9 +707,9 @@ public class ImageJ extends Frame implements ActionListener,
 				if (imp.getMotherImp()!=imp ){
 					if (imp.getMotherImp().getRoiManager().getColorLegend()!=null){
 						if (keyCode==KeyEvent.VK_ESCAPE) {
-							for (Checkbox cb:imp.getMotherImp().getRoiManager().getColorLegend().getCheckbox()){
-								if (cb.getState()) {
-									cb.setState(false);
+							for (JCheckBox cb:imp.getMotherImp().getRoiManager().getColorLegend().getJCheckBox()){
+								if (cb.isSelected()) {
+									cb.setSelected(false);
 									imp.getMotherImp().getRoiManager().getColorLegend().itemStateChanged
 										(new ItemEvent(cb, ItemEvent.ITEM_STATE_CHANGED, cb, ItemEvent.SELECTED));
 								}

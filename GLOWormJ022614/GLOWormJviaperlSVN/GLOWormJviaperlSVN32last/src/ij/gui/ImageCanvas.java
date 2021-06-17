@@ -109,7 +109,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		this.imp = imp;
 		//		sketchyMQTVS = false;
 		
-		if (imp.getWindow() instanceof ImageWindow3D){
+		if (imp.getWindow()!=null && imp.getWindow() instanceof ImageWindow3D){
 			
 		} else {
 			if (imp.getMotherImp().getStack() instanceof MultiQTVirtualStack) {
@@ -1527,7 +1527,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			ColorLegend colorLegend = null;
 			if (imp.getMotherImp() != null) 
 				colorLegend = imp.getMotherImp().getRoiManager().getColorLegend();
-			Checkbox clccb = null;
+			JCheckBox clccb = null;
 			if (colorLegend!=null){
 				clccb = colorLegend.getChosenCB();
 				colorLegend.setChosenCB(null);
@@ -3392,7 +3392,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			}else if (imp.getMotherImp().getRoiManager().getColorLegend() != null){
 				//			IJ.showStatus("bling");
 				Graphics g = getGraphics();
-				Checkbox cursorCB = imp.getMotherImp().getRoiManager().getColorLegend().getChosenCB();
+				JCheckBox cursorCB = imp.getMotherImp().getRoiManager().getColorLegend().getChosenCB();
 				if (cursorCB != null) {
 					String cursorString = cursorCB.getName();
 					if (IJ.isWindows()) {

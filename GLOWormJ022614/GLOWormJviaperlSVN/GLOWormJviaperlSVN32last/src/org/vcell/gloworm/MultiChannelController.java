@@ -5,6 +5,7 @@ package org.vcell.gloworm;
 import ij.plugin.frame.*;
 import ij.*;
 import ij.plugin.*;
+import ij.plugin.filter.AVI_Writer;
 import ij.gui.*;
 import ij.io.SaveDialog;
 
@@ -13,6 +14,7 @@ import java.awt.event.*;
 import java.io.*;
 import java.net.SocketException;
 import java.util.Date;
+import java.util.Vector;
 
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -27,6 +29,7 @@ import javax.swing.event.ChangeListener;
 
 import ij.text.TextWindow;
 import ij.util.Java2;
+import ij.util.Tools;
 import quicktime.QTException;
 import quicktime.QTSession;
 import quicktime.io.QTFile;
@@ -44,7 +47,7 @@ import client.RemoteMQTVSHandler.RemoteMQTVirtualStack;
  * @author mohler
  *
  */
-public class MultiChannelController extends PlugInFrame implements PlugIn, ItemListener, MouseListener, ActionListener /*, AdjustmentListener*/, ChangeListener {
+public class MultiChannelController extends PlugInFrame implements PlugIn, ItemListener, MouseListener, ActionListener /*, AdjustmentListener*/, ChangeListener, TextListener {
 	private boolean firstBuild;
 	private static String[] modes = {"Composite", "Color", "Gray"};
 	private static String[] menuItems = {"Save Scene", "Share Scene", "-", "Make Composite", "Convert to RGB", "Split Channels", "Merge Channels...", "Edit LUT..."};
@@ -113,6 +116,16 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 	private File saveFile;
 	private boolean nonMovieMCC;
 	private Panel dropFramesPanel;
+	private TextField[] rangeFields;
+	public int compressionIndex;
+	public int firstC;
+	public int lastC;
+	public int firstZ;
+	public int lastZ;
+	public int firstT;
+	public int lastT;
+	public int stepT;
+	public boolean flattenTags;
 
 
 	public boolean isSharing() {
@@ -159,6 +172,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 			if (gds.wasOKed()) {
 				sharing  = gds.getNextChoice().equals("Share Scene");
 				nonMovieMCC = true;
+				if (!showDialog(imp)) return;
 				this.actionPerformed(new ActionEvent(this, 0, "Save Scene") );
 			} 
 //			this.dispose();
@@ -1332,8 +1346,8 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 						maxs[c] = imp.getChannelProcessor().getMin();
 						imp.getChannelProcessor().setMinAndMax(0, 255);
 					
-						IJ.run(imp, "AVI... ", "compression=PNG frame=10"+" channels="+c+"-"+c+" slices=1-"+imp.getNSlices()
-								+" frames=1-"+imp.getNFrames()+" save=["+path.replace("_1.avi", "_"+c+".avi")+"]");				
+						IJ.run(imp, "AVI... ", "compression="+AVI_Writer.COMPRESSION_STRINGS[compressionIndex]+" frame=10"+" channels="+c+"-"+c+" slices="+firstZ+"-"+lastZ
+								+" frames="+firstT+"-"+lastT+" save=["+path.replace("_1.avi", "_"+c+".avi")+"]");				
 						deNovoMovieFile = new java.io.File(path);
 
 						imp.getChannelProcessor().setMinAndMax(mins[c], maxs[c]);
@@ -1344,8 +1358,8 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 
 				}  else {
 					imp.getCanvas().unzoom();
-					IJ.run(imp, "AVI... ", "compression=PNG frame=10"+" channels=1-"+imp.getNChannels()+" slices=1-"+imp.getNSlices()
-							+" frames=1-"+imp.getNFrames()+" save=["+path+"]");				
+					IJ.run(imp, "AVI... ", "compression="+AVI_Writer.COMPRESSION_STRINGS[compressionIndex]+" frame=10"+" channels="+c+"-"+c+" slices="+firstZ+"-"+lastZ
+							+" frames="+firstT+"-"+lastT+" save=["+path+"]");				
 					deNovoMovieFile = new java.io.File(path);
 				}
 				if (roi != null)
@@ -2155,6 +2169,110 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 
 	public void setDropFramesFieldText(String text, int index) {
 		this.dropFramesField[index].setText(text);
+	}
+
+	boolean showDialog(ImagePlus imp) {
+		int nChannels = imp.getNChannels();
+		int nSlices = imp.getNSlices();
+		int nFrames = imp.getNFrames();
+		String options = Macro.getOptions();
+		if (options!=null && options.indexOf("compression=")==-1)
+			Macro.setOptions("compression=Uncompressed "+options);
+		double fps = getFrameRate(imp);
+		int decimalPlaces = (int) fps == fps?0:1;
+		GenericDialog gd = new GenericDialog("Save as AVI...");
+		gd.addChoice("Compression:", AVI_Writer.COMPRESSION_STRINGS, AVI_Writer.COMPRESSION_STRINGS[2]);
+		//gd.addNumericField("JPEG Quality (0-100):", jpegQuality, 0, 3, "");
+		gd.addNumericField("Frame Rate:", fps, decimalPlaces, 3, "fps");
+		int nRangeFields = 0;
+		if (nChannels>1) {
+			gd.setInsets(2, 30, 3);
+			gd.addStringField("Channels (c):", 1 +"-"+ nChannels);
+			nRangeFields++;
+		}
+		if (nSlices>1) {
+			gd.setInsets(2, 30, 3);
+			gd.addStringField("Slices (z):", imp.getSlice() +"-"+ imp.getSlice());
+			nRangeFields++;
+		}
+		if (nFrames>1) {
+			gd.setInsets(2, 30, 3);
+			gd.addStringField("Frames (t):", ""+ 1 +"-"+ imp.getNFrames());
+			nRangeFields++;
+		}
+		Vector v = gd.getStringFields();
+		rangeFields = new TextField[3];
+		for (int i=0; i<nRangeFields; i++) {
+			rangeFields[i] = (TextField)v.elementAt(i);
+			rangeFields[i].addTextListener(this);
+		}
+		gd.addCheckbox("Flatten channels and tags into one layer?  \nThis will also apply current zoom and window boundaries.", true);
+		gd.showDialog();
+		if (gd.wasCanceled())
+			return false;
+
+
+		compressionIndex = gd.getNextChoiceIndex();
+		//jpegQuality = (int)gd.getNextNumber();
+		fps = gd.getNextNumber();
+		if (fps<=0.5) fps = 0.5;
+		//if (fps>60.0) fps = 60.0;
+		imp.getCalibration().fps = fps;
+
+
+		if (nChannels>1) {
+			String[] range = Tools.split(gd.getNextString(), " -");
+			double c1 = Tools.parseDouble(range[0]);
+			double c2 = range.length==2?Tools.parseDouble(range[1]):Double.NaN;
+			firstC = Double.isNaN(c1)?1:(int)c1;
+			lastC = Double.isNaN(c2)?(int)firstC:(int)c2;
+			if (firstC<1) firstC = 1;
+			if (lastC>nChannels) lastC = nChannels;
+			if (firstC>lastC) {firstC=1; lastC=nChannels;}
+		} else
+			firstC = lastC = 1;
+		if (nSlices>1) {
+			String[] range = Tools.split(gd.getNextString(), " -");
+			double z1 = Tools.parseDouble(range[0]);
+			double z2 = range.length==2?Tools.parseDouble(range[1]):Double.NaN;
+			firstZ = Double.isNaN(z1)?1:(int)z1;
+			lastZ = Double.isNaN(z2)?firstZ:(int)z2;
+			if (firstZ<1) firstZ = 1;
+			if (lastZ>nSlices) lastZ = nSlices;
+			if (firstZ>lastZ) {firstZ=1; lastZ=nSlices;}
+		} else
+			firstZ = lastZ = 1;
+		if (nFrames>1) {
+			String[] range = Tools.split(gd.getNextString(), " -");
+			double t1 = Tools.parseDouble(range[0]);
+			double t2 = range.length>=2?Tools.parseDouble(range[1]):Double.NaN;
+			double t3 = range.length==3?Tools.parseDouble(range[2]):Double.NaN;
+			firstT= Double.isNaN(t1)?1:(int)t1;
+			lastT = Double.isNaN(t2)?firstT:(int)t2;
+			stepT = Double.isNaN(t3)?1:(int)t3;
+			if (firstT<1) firstT = 1;
+			if (lastT>nFrames) lastT = nFrames;
+			if (firstT>lastT) {firstT=1; lastT=nFrames;}
+		} else
+			firstT = lastT = 1;
+
+		flattenTags = gd.getNextBoolean();
+		return true;
+	}
+
+	private double getFrameRate(ImagePlus imp) {
+		double rate = imp.getCalibration().fps;
+		if (rate==0.0)
+			rate = Animator.getFrameRate();
+		if (rate<=0.5) rate = 0.5;
+		//if (rate>60.0) rate = 60.0;
+		return rate;
+	}
+
+	@Override
+	public void textValueChanged(TextEvent arg0) {
+		// TODO Auto-generated method stub
+		
 	}
 
 

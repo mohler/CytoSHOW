@@ -7348,7 +7348,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			if (firstTime) {
 				IJ.append("!!", savePath + "fineRotations.txt");
 			}
+			boolean[] updateFR = new boolean[pDim];
 			for (int pos = 0; pos < pDim; pos++) {
+				updateFR[pos] = false;
 				double xRotRead = 0;
 				double yRotRead = 0;
 				double zRotRead = 0;
@@ -7371,6 +7373,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					xImp.flush();
 					ciPrxs[pos].getWindow().close();
 					ciPrxs[pos] = null;
+					updateFR[pos] = true;
 				}
 				if (ciPrys[pos] != null && ciPrys[pos].isVisible()) {
 					dispimPreviewButton[pos][1].setVisible(false);
@@ -7392,6 +7395,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					yImp.flush();
 					ciPrys[pos].getWindow().close();
 					ciPrys[pos] = null;
+					updateFR[pos] = true;
 				}
 				if (ciDFs[pos] != null && ciDFs[pos].isVisible()) {
 					ciDFs[pos].getWindow().close();
@@ -7409,12 +7413,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							+ zRotRead + "," + maxReferenceIntensity, savePath
 							+ "fineRotations.txt");
 				} else {
-					previewFileText = previewFileText.replaceAll("(.*\n)" + pos
-							+ ",.*,.*,.*,.*(\n.*)", "$1" + pos + "," + xRotRead
-							+ "," + yRotRead + "," + zRotRead + ","
-							+ maxReferenceIntensity + "$2");
-					IJ.saveString(previewFileText, savePath
-							+ "fineRotations.txt");
+					if (updateFR[pos]){
+						previewFileText = previewFileText.replaceAll("(.*\n)" + pos
+								+ ",.*,.*,.*,.*(\n.*)", "$1" + pos + "," + xRotRead
+								+ "," + yRotRead + "," + zRotRead + ","
+								+ maxReferenceIntensity + "$2");
+						IJ.saveString(previewFileText, savePath
+								+ "fineRotations.txt");
+					}
 				}
 			}
 
@@ -7429,7 +7435,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			Process cloneProcess = null;
 			try {
 				String[] cloneCmd = 
-						new String[] { "cmd", "/c", "start", "/min", "/wait", "robocopy", previewPath, fullSetSavePath, "/mir" };
+						new String[] { "cmd", "/c", "start", "/min", "/wait", "robocopy", previewPath, fullSetSavePath, "/e" };
 				IJ.log(cloneCmd.toString());
 				cloneProcess = Runtime.getRuntime().exec(cloneCmd);
 				while (cloneProcess == null) {

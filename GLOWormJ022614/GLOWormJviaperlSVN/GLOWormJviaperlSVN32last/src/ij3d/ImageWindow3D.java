@@ -22,6 +22,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuBar;
+import javax.swing.JPanel;
 
 import java.awt.AWTException;
 import java.awt.GridBagConstraints;
@@ -168,9 +169,9 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 		GridBagLayout viewgridbag = new GridBagLayout();
 		GridBagConstraints vspc = new GridBagConstraints();
 
-		tagButtonPanel = new Panel(fspgridbag);
-		viewButtonPanel = new Panel(viewgridbag);
-		modeButtonPanel = new Panel(viewgridbag);
+		tagButtonPanel = new JPanel(fspgridbag);
+		viewButtonPanel = new JPanel(viewgridbag);
+		modeButtonPanel = new JPanel(viewgridbag);
 		fspgridbag.setConstraints(tagButtonPanel, fspc);
 		fspgridbag.setConstraints(viewButtonPanel, vspc);
 		fspgridbag.setConstraints(modeButtonPanel, vspc);
@@ -541,7 +542,7 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 		stereo4dYrcButton.addActionListener(sst);
 
 		BorderLayout optbl = new BorderLayout();
-		optionsPanel = new Panel();
+		optionsPanel = new JPanel();
 		optionsPanel.setLayout(optbl);
 		optionsPanel.add(tagButtonPanel, BorderLayout.EAST);
 		optionsPanel.add(modeButtonPanel, BorderLayout.WEST);

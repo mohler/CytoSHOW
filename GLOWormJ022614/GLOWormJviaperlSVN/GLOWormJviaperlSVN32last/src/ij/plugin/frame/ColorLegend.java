@@ -19,6 +19,8 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import javax.swing.JCheckBox;
+
 import org.vcell.gloworm.MultiQTVirtualStack;
 
 import SmartCaptureLite.r;
@@ -32,7 +34,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 	boolean hideChecked;
 	private  String moreLabel = "More "+'\u00bb';
 	private Choice choice;
-	private Checkbox[] checkbox;
+	private JCheckBox[] checkbox;
 	private Button moreButton;
 
 	private int id;
@@ -48,10 +50,10 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 	private Color selectColor;
 	private ImageProcessor ip;
 	private ImageProcessor ipCopy;
-	private Checkbox chosenCB;
+	private JCheckBox chosenCB;
 	private Color mouseLocColor;
 	private Hashtable<String, Color> brainbowColors;
-	private Hashtable<Color, Checkbox> checkboxHash;
+	private Hashtable<Color, JCheckBox> checkboxHash;
 	private ImagePlus bb2Imp;
 	private ImageJ ij;
 	private boolean popupHappened;
@@ -110,16 +112,16 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 		fspc.insets = new Insets(0, 0, 0, 0);
 		brainbowColors = new Hashtable<String,Color>();
 
-		checkboxHash = new Hashtable<Color,Checkbox>();
+		checkboxHash = new Hashtable<Color,JCheckBox>();
 		int count=0;
 		int panelWidth =0;
 		int panelHeight =0;
 		String[] clLines = clStr.split("\n");
-		checkbox = new Checkbox[clLines.length];
+		checkbox = new JCheckBox[clLines.length];
 		for (int i=0; i<clLines.length; i++) {		
 //			IJ.log(clLines[i]);
-			checkbox[i] = new Checkbox();
-			((Checkbox)checkbox[i]).setSize(150, 10);
+			checkbox[i] = new JCheckBox();
+			((JCheckBox)checkbox[i]).setSize(150, 10);
 			checkbox[i].setLabel(clLines[i].split(",")[0].length()<20?clLines[i].split(",")[0]:clLines[i].split(",")[0].substring(0, 20) + "...");
 			checkbox[i].setName(clLines[i].split(",")[0]);			
 			checkbox[i].setBackground(Colors.decode(clLines[i].split(",")[2], Color.white));
@@ -255,7 +257,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 		CompositeImage ci = getImage();
 		int nCheckBoxes = ci!=null?ci.getNChannels():3;
 		if (nCheckBoxes>CompositeImage.MAX_CHANNELS)
-			nCheckBoxes = CompositeImage.MAX_CHANNELS;//		checkbox = new Checkbox[nCheckBoxes];
+			nCheckBoxes = CompositeImage.MAX_CHANNELS;//		checkbox = new JCheckBox[nCheckBoxes];
 		ArrayList<String> fullCellNames = new ArrayList<String>(); 
 		if (rm.getFullCellNames()!=null) {
 			for (int i =0;i<rm.getFullCellNames().size();i++)
@@ -279,14 +281,14 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 			rm.setColorLegend(this);
 			brainbowColors = this.getBrainbowColors();
 		}
-		checkbox = new Checkbox[fullCellNames.size()];
-		checkboxHash = new Hashtable<Color,Checkbox>();
+		checkbox = new JCheckBox[fullCellNames.size()];
+		checkboxHash = new Hashtable<Color,JCheckBox>();
 		int count=0;
 		int panelWidth =0;
 		int panelHeight =0;
 		for (int i=0; i<fullCellNames.size(); i++) {
-			checkbox[i] = new Checkbox();
-			((Checkbox)checkbox[i]).setSize(150, 10);
+			checkbox[i] = new JCheckBox();
+			((JCheckBox)checkbox[i]).setSize(150, 10);
 			checkbox[i].setLabel(fullCellNames.get(i).length()<20?fullCellNames.get(i):fullCellNames.get(i).substring(0, 20) + "...");
 			checkbox[i].setName(fullCellNames.get(i));			
 			checkbox[i].setBackground(brainbowColors.get(fullCellNames.get(i).toLowerCase()));
@@ -399,7 +401,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 			changedCBorChoice = true;
 			bbImp.updateAndRepaintWindow();
 		}
-		if (source instanceof Checkbox /*&& (!bbImp.equals(rm.getImagePlus()) || sketchyMQTVS)*/) {
+		if (source instanceof JCheckBox /*&& (!bbImp.equals(rm.getImagePlus()) || sketchyMQTVS)*/) {
 //			IJ.showStatus("CLICK");
 			changedCBorChoice = true;
 //			droppedCellColors.clear();
@@ -417,9 +419,9 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 			IJ.doCommand("Stack to RGB");
 		else if (e.getSource() == clearButton) {
 			droppedCellColors.clear();
-			for (Checkbox cbq:checkbox) {
-				if (cbq.getState()) {
-					cbq.setState(false);
+			for (JCheckBox cbq:checkbox) {
+				if (cbq.isSelected()) {
+					cbq.setSelected(false);
 				}
 			}
 			this.itemStateChanged(new ItemEvent(checkbox[0], ItemEvent.ITEM_STATE_CHANGED, checkbox[0], ItemEvent.SELECTED));
@@ -444,7 +446,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
     		bbImpCopy = null;
     	}
     	if(checkbox!=null) {
-    		for (Checkbox cb:checkbox){
+    		for (JCheckBox cb:checkbox){
     			for (ItemListener il:cb.getItemListeners()){
     				cb.removeItemListener(il);
     			}
@@ -486,7 +488,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 		}
 //		IJ.showStatus(""+sketchyMQTVS+1);
 
-		for (Checkbox cbC:checkbox) {
+		for (JCheckBox cbC:checkbox) {
 			if (cbC.getBackground().equals(mouseLocColor)){
 //				IJ.showStatus(""+sketchyMQTVS+1);
 				chosenCB = cbC;
@@ -529,7 +531,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 				if (bbImp.equals(rm.getCompImps().get(i<rm.getCompImps().size()?i:rm.getCompImps().size()-1))
 						|| bbImp.equals(rm.getProjYImps().get(i<rm.getProjYImps().size()?i:rm.getProjYImps().size()-1)) 
 						|| bbImp.equals(rm.getProjZImps().get(i<rm.getProjZImps().size()?i:rm.getProjZImps().size()-1))) {
-					for (Checkbox cb:checkbox){
+					for (JCheckBox cb:checkbox){
 //						cb.setBackground(rm.getBrainbowColors().get(cb.getName()));
 						if (rm.getNameLists().get(i).contains(cb.getName())) {
 							cb.setLabel(cb.getLabel().replaceAll("[()]", ""));
@@ -560,7 +562,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 		boolean selectLineage = IJ.altKeyDown();
 //		IJ.showStatus("mouseclick");
 		Object source = e.getSource();
-		if (source instanceof Checkbox)
+		if (source instanceof JCheckBox)
 			return;
 		if (bbImp!=null && bbImp.getCanvas()!= (ImageCanvas)source)
 			bbImp=null;
@@ -571,21 +573,21 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 				.getColor(bbImp.getCanvas().offScreenX(e.getX()),
 					bbImp.getCanvas().offScreenY(e.getY()));
 			if (!selectMore && mouseLocColor!=null && !mouseLocColor.equals(Color.black)){
-				for (Checkbox cbq:checkbox) {
-					if (cbq.getState()) {
-						cbq.setState(false);
+				for (JCheckBox cbq:checkbox) {
+					if (cbq.isSelected()) {
+						cbq.setSelected(false);
 //						this.itemStateChanged(new ItemEvent(cbq,0,null,ItemEvent.DESELECTED));
 					}
 				}
 			}
-			Checkbox cbC = checkboxHash.get(mouseLocColor);
+			JCheckBox cbC = checkboxHash.get(mouseLocColor);
 			if (cbC == null)
 				cbC = checkboxHash.get(mouseLocColor.darker().darker());
 			if (cbC != null) {	
 				chosenCB = cbC;
-				chosenCB.setState(true);
+				chosenCB.setSelected(true);
 				if (selectLineage) {
-					for (Checkbox cbq:checkbox) {
+					for (JCheckBox cbq:checkbox) {
 						if (cbq.getName().trim().contains(cbC.getName().trim())
 								|| cbC.getName().trim().contains(cbq.getName().trim())
 								|| (cbC.getName().matches("P1") && cbq.getName().matches("P.|C.*|D.*|E.*|MS.*|Z."))
@@ -599,7 +601,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 								|| (cbq.getName().matches("P4") && cbC.getName().matches("P.|Z."))
 								|| (cbq.getName().matches("EMS") && cbC.getName().matches("E.*|MS.*"))
 								) {
-							cbq.setState(true);
+							cbq.setSelected(true);
 						}
 					}
 				}
@@ -621,7 +623,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 	}
 
 	public void mousePressed(MouseEvent e) {
-		if (e.isPopupTrigger() && e.getSource() instanceof Checkbox) {
+		if (e.isPopupTrigger() && e.getSource() instanceof JCheckBox) {
 			for (int i=0; i<rm.getCompImps().size(); i++){
 				if (rm.getCompImps().get(i) != null) {
 					rm.getCompImps().get(i).getCanvas().handlePopupMenu(e);
@@ -642,11 +644,11 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 		return rm;
 	}
 
-	public Checkbox[] getCheckbox() {
+	public JCheckBox[] getJCheckBox() {
 		return checkbox;
 	}
 
-	public void setCheckbox(Checkbox[] checkbox) {
+	public void setJCheckBox(JCheckBox[] checkbox) {
 		this.checkbox = checkbox;
 	}
 
@@ -658,11 +660,11 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 		this.choice = choice;
 	}
 
-	public Checkbox getChosenCB() {
+	public JCheckBox getChosenCB() {
 		return chosenCB;
 	}
 
-	public void setChosenCB(Checkbox chosenCB) {
+	public void setChosenCB(JCheckBox chosenCB) {
 		this.chosenCB = chosenCB;
 	}
 
@@ -682,7 +684,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 	public void save(String path) throws IOException {
 		File clFile = new File(path);
 		String clString = "";
-		for (Checkbox cb:getCheckbox()) {
+		for (JCheckBox cb:getJCheckBox()) {
 			clString = clString + cb.getName() +","+ cb.getLabel() +","
 						+ Colors.colorToString(cb.getBackground()) +","
 						+ cb.getBackground().getRed() +","
@@ -698,7 +700,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 	
 	public ColorLegend clone(ImagePlus imp) {
 		String clString = "";
-		for (Checkbox cb:getCheckbox()) {
+		for (JCheckBox cb:getJCheckBox()) {
 			clString = clString + cb.getName() +","+ cb.getLabel() +","
 						+ Colors.colorToString(cb.getBackground()) +","
 						+ cb.getBackground().getRed() +","
@@ -721,8 +723,8 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 		lastIp = ip;
 		ipCopy = ip2.duplicate();
 		selectedColorRGBs = new Hashtable<Integer,String>();
-		for (Checkbox cbOther:checkbox) {
-			if (cbOther.getState()) {
+		for (JCheckBox cbOther:checkbox) {
+			if (cbOther.isSelected()) {
 				selectedColorRGBs.put(brainbowColors.get(cbOther.getName().toLowerCase()).getRGB(),""+brainbowColors.get(cbOther.getName().toLowerCase()).getRGB());
 //				selectedColorRGBs.add(brainbowColors.get(cbOther.getName()).darker().getRGB());
 //				selectedColorRGBs.add(brainbowColors.get(cbOther.getName()).darker().darker().getRGB());
@@ -800,8 +802,8 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 	public void checkFromCellsRegex(ImagePlus dropImp, String cellsRegex) {
 		bbImp = dropImp;
 		countHits =0;
-		for (Checkbox cb:checkbox) {
-			cb.setState((cb.getName().toLowerCase().trim()+" ").matches(cellsRegex.toLowerCase()));
+		for (JCheckBox cb:checkbox) {
+			cb.setSelected((cb.getName().toLowerCase().trim()+" ").matches(cellsRegex.toLowerCase()));
 			countHits++;
 		}
 //		this.itemStateChanged(new ItemEvent(checkbox[0],ItemEvent.ITEM_STATE_CHANGED,checkbox[0],ItemEvent.SELECTED));

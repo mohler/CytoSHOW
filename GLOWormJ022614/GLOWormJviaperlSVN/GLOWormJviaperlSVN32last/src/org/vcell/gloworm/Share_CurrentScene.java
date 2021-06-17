@@ -18,16 +18,17 @@ public class Share_CurrentScene implements PlugIn {
 		if (imp!=null)
 			 mcc = imp.getMultiChannelController();
 		if (mcc!=null) {
+			if(!mcc.showDialog(imp)) return;
 			mcc.setSharing(true);
 			mcc.actionPerformed(new ActionEvent(mcc, 0, "Save Scene") );
 		}
 		else if (mcc == null) {
 			imp.setMultiChannelController(new MultiChannelController(imp));
 			mcc = imp.getMultiChannelController();
-//			if (mcc!=null && imp.getImageStack() instanceof ImageStack) {
-//				mcc.setSharing(true);
-//				mcc.actionPerformed(new ActionEvent(mcc, 0, "Save Scene") );
-//			}
+			if (mcc!=null && imp.getImageStack() instanceof ImageStack) {
+				mcc.setSharing(true);
+				mcc.actionPerformed(new ActionEvent(mcc, 0, "Save Scene") );
+			}
 		}
 	
 	}

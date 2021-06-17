@@ -46,7 +46,7 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 	//compression options: dialog parameters
 	private static int      compressionIndex = 2; //0=none, 1=PNG, 2=JPEG
 	private static int      jpegQuality = 100;    //0 is worst, 100 best (not currently used)
-	private final static String[] COMPRESSION_STRINGS = new String[] {"Uncompressed", "PNG", "JPEG"};
+	public final static String[] COMPRESSION_STRINGS = new String[] {"Uncompressed", "PNG", "JPEG"};
 	private final static int[] COMPRESSION_TYPES = new int[] {NO_COMPRESSION, PNG_COMPRESSION, JPEG_COMPRESSION};
 
 	private ImagePlus imp;
@@ -66,7 +66,8 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 	private TextField[] rangeFields;
 	private int firstC, lastC, firstZ, lastZ, firstT, lastT;
 	private int stepT = 1;
-	private boolean flattenTags;
+	private boolean flattenTags=false;
+	private boolean useShownScale=true;
 
 	public int setup(String arg, ImagePlus imp) {
 		this.imp = imp;
@@ -202,7 +203,7 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 		boolean isComposite = imp.isComposite();
 		boolean isHyperstack = imp.isHyperStack();
 		boolean isOverlay = imp.getOverlay()!=null && !imp.getHideOverlay();
-		if (flattenTags) {
+		if (flattenTags || useShownScale) {
 			xDim = imp.getCanvas().getWidth();   //image width
 			yDim = imp.getCanvas().getHeight();   //image height
 		} else {
@@ -396,19 +397,24 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 						if (imp.isComposite() && ((CompositeImage)imp).getMode() <= CompositeImage.RATIO12) {
 							((CompositeImage)imp).setMode(CompositeImage.GRAYSCALE);
 						}
-						
+						Double zoomScale = useShownScale?imp.getCanvas().getMagnification():1;
+						zoomScale = 1d;
 						if (imp.getStack().getBitDepth() == 8 || imp.getStack().getBitDepth() == 16) {
 							if (imp.isComposite() ) {
 								if (((CompositeImage)imp).getMode() <= CompositeImage.RATIO12) {
 									ip = new ByteProcessor(imp.getImage());
+									ip.scale(zoomScale, zoomScale);
 								}else {
 									ip = new ColorProcessor(imp.getImage());
+									ip.scale(zoomScale, zoomScale);
 								}
 							} else {
 								ip = new ByteProcessor(imp.getImage());
+								ip.scale(zoomScale, zoomScale);
 							} 
 						}else {
 							ip = new ColorProcessor(imp.getImage());
+							ip.scale(zoomScale, zoomScale);
 						}
 						//						022516: WHY WAS I USING THIS????? SCREWY!!!!
 						//						ip = imp.getStack().getProcessor(

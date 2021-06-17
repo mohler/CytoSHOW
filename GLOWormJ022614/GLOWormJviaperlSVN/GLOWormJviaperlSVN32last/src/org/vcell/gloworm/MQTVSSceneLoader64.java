@@ -64,6 +64,7 @@ public class MQTVSSceneLoader64 implements PlugIn {
 	private String sceneFileText;
 	private String sceneFileName;
 	private String specTag;
+	private int roiScaleFactor = 1;
 
 	/*  */	
 	//constructor for calling by static method:
@@ -221,6 +222,10 @@ public class MQTVSSceneLoader64 implements PlugIn {
 						if (lineSegments[0].contains("ROIfile") ) {
 							roiFileName = lineSegments[1];
 							//if (IJ.debugMode) IJ.log("roiFileName = " + roiFileName);
+						}
+
+						if (lineSegments[0].contains("ROIscaleFactor") ) {
+							roiScaleFactor = Integer.parseInt(lineSegments[1]);							
 						}
 
 						if (lineSegments[0].contains("ColorLegendFile") ) {
@@ -980,8 +985,8 @@ public class MQTVSSceneLoader64 implements PlugIn {
 								getImp().setRoiManager(new RoiManager(getImp(), true));
 								rm = getImp().getRoiManager();
 							}
-
-							rm.runCommand("Open", roiFilePath);
+							rm.setRoiRescaleFactor(roiScaleFactor);
+							rm.open(roiFilePath);
 							rm.setZSustain(ZsustainROIs);
 							rm.setTSustain(TsustainROIs);
 							rm.runCommand("show all");

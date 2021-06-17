@@ -1,5 +1,7 @@
 package org.vcell.gloworm;
 
+import java.util.Arrays;
+
 import ij.IJ;
 
 /** A simple QuickSort for String arrays. */
@@ -29,12 +31,18 @@ public class RoiLabelByNumbersSorter {
 		for (int i=0; i<listLength; i++) {
 			//Replace needed here before split to handle the quote-quote issue without exceptions 
 			int len =0;
-			try {len = labels[i].replace("\'", "$").split("_")[mode].split("-")[0].length();}
+			if (labels[i].contains("Nuc")) {
+				IJ.wait(0);
+			}
+			String labelDollared = labels[i].replace("\'", "$");
+			String[] labelDollaredChunks = labelDollared.split("_");
+			int lDCChunksLength = labelDollaredChunks.length;
+			try {len = labelDollaredChunks[lDCChunksLength - 5 + mode].split("-")[0].length();}
 			catch (java.lang.ArrayIndexOutOfBoundsException e) {continue;}
 			String num = "";
 			for (int j=0; j<len; j++) {
 				//Replace needed here before split to handle the quote-quote issue without exceptions 
-				ch = labels[i].replace("\'", "$").split("_")[mode].split("-")[0].charAt(j);
+				ch = labelDollaredChunks[lDCChunksLength - 5 + mode].split("-")[0].charAt(j);
 				if (ch>=48 && ch<=57) num += ch;
 			}
 			if (num.length()==0) num = "aaaaaa";
@@ -43,7 +51,7 @@ public class RoiLabelByNumbersSorter {
 			labels[i] = num + labels[i];
 		}
 		if (labels!=null) {
-			ij.util.StringSorter.sort(labels);
+			Arrays.sort(labels);
 			for (int i=0; i<listLength; i++) {
 				labels[i] = labels[i].substring(maxDigits);
 			}

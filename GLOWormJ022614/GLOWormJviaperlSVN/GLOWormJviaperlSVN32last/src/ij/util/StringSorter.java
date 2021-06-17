@@ -27,10 +27,21 @@ public class StringSorter {
 	}
 		
 	private static String restructure(String string) {
+		String[] quoteSplit = string.split("\"");
+		String nameChunk = "";
 		String[] stringSplit = string.split("_");
+		if (quoteSplit.length >1){
+			nameChunk = quoteSplit[1].split(" ")[0];
+			stringSplit = string.replace(nameChunk, "").split("_");
+		} else {
+			nameChunk = stringSplit[0].split(" ")[0];
+		}
 		String stringRestructured;
 		if (stringSplit.length == 4)
-			stringRestructured = stringSplit[0].split(" ")[0] + "_" + padNumbers(stringSplit[3]) + "_" + padNumbers(stringSplit[2]) + "_" + padNumbers(stringSplit[1]);
+			stringRestructured = nameChunk + "_" + padNumbers(stringSplit[3]) + "_" + padNumbers(stringSplit[2]) + "_" + padNumbers(stringSplit[1]);
+		else if (stringSplit.length == 5) //This case allows for sorting of tags without reference to their colorcode.
+			stringRestructured = nameChunk + "_" + padNumbers(stringSplit[4]) + "_" + padNumbers(stringSplit[3]) + "_" + padNumbers(stringSplit[2]);
+
 		else
 			stringRestructured = string;
 
