@@ -3324,12 +3324,13 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				for (int i=0; i<sliceRoisArray.length; i++) {  
 					if (sliceRoisArray[i] instanceof Arrow
 							&& getLabelShapes().get(sliceRoisArray[i]) != null
-							&& getLabelShapes().get(sliceRoisArray[i]).contains(getXMouse(), getYMouse())) {
+							&& getLabelShapes().get(sliceRoisArray[i]).contains(getXMouse(), getYMouse())
+							 && showAllROIs) {
 						cursorString = sliceRoisArray[i].getName().split("[\"|=]")[1];
 						i = sliceRoisArray.length;
 					}
 				}
-				if (cursorString == null) {
+				if (cursorString == null && showAllROIs) {
 					for (int i=0; i<sliceRoisArray.length; i++) {  
 						if (getLabelShapes().get(sliceRoisArray[i]) != null 
 								&& getLabelShapes().get(sliceRoisArray[i]).contains(getXMouse(), getYMouse())
