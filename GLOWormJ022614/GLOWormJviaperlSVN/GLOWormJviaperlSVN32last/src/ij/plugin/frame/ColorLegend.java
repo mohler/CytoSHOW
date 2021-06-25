@@ -201,10 +201,10 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 				for (String key:this.getBrainbowColors().keySet()) {
 
 // THESE CONDITIONS WILL CERTAINLY NEED ADJUSTMENT TO GET ALL CASES NEEDED CORRECT
-					if (content.getName().toLowerCase().contentEquals(key.toLowerCase())
-						|| content.getName().toLowerCase().endsWith("by" + key.toLowerCase())
-						|| content.getName().toLowerCase().contains("_" + key.toLowerCase())
-						|| content.getName().toLowerCase().startsWith(key.toLowerCase() + "_")) {		
+					if (content.getName().split("-")[0].toLowerCase().contentEquals(key.toLowerCase())
+						|| content.getName().split("-")[0].toLowerCase().endsWith("by" + key.toLowerCase())
+						|| content.getName().split("-")[0].toLowerCase().contains("_" + key.toLowerCase())
+						|| content.getName().split("-")[0].toLowerCase().startsWith(key.toLowerCase() + "_")) {		
 						content.setColor(new Color3f(this.getBrainbowColors().get(key)));
 					}
 				}
