@@ -680,7 +680,9 @@ public class IJ3dExecuter {
 		} else {
 			return;
 		}
-		new InteractiveMeshDecimation().run(ctm);
+		InteractiveMeshDecimation.runNonInteractive(ctm, ctm.getMesh().size()/10);
+
+//		new InteractiveMeshDecimation().run(ctm);
 	}
 
 	/* ----------------------------------------------------------

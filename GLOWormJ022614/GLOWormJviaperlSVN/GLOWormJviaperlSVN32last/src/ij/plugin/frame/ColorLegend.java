@@ -3,6 +3,10 @@ import ij.*;
 import ij.plugin.*;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
+import ij3d.Content;
+import ij3d.DefaultUniverse;
+import ij3d.Image3DUniverse;
+import ij3d.ImageWindow3D;
 import ij.gui.*;
 
 import java.awt.*;
@@ -14,12 +18,14 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.JCheckBox;
+import javax.vecmath.Color3f;
 
 import org.vcell.gloworm.MultiQTVirtualStack;
 
@@ -187,27 +193,44 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 		} else
 			setLocation(location);
 //		this.setVisible(true);
-		
-		for (Roi roi:rm.getROIs().values()) {
-			if (roi!=null) { 
-				if (this != null) {
-					Color clColor = this.getBrainbowColors()
-							.get(roi.getName().toLowerCase().split("_")[0].split("=")[0].replace("\"", "").trim());
-					if (clColor !=null) {
-						String hexRed = Integer.toHexString(clColor.getRed());
-						String hexGreen = Integer.toHexString(clColor.getGreen());
-						String hexBlue = Integer.toHexString(clColor.getBlue());
-						roi.setFillColor(Colors.decode("#ff"+(hexRed.length()==1?"0":"")+hexRed
-								+(hexGreen.length()==1?"0":"")+hexGreen
-								+(hexBlue.length()==1?"0":"")+hexBlue
-								, Color.white));
+		if (imp.getWindow()!=null && imp.getWindow() instanceof ImageWindow3D) {
+			DefaultUniverse univ = ((ImageWindow3D)imp.getWindow()).getUniverse();
+			Iterator contents = ((Image3DUniverse)univ).contents();
+			while (contents.hasNext()) {
+				Content content = (Content) contents.next();
+				for (String key:this.getBrainbowColors().keySet()) {
+
+// THESE CONDITIONS WILL CERTAINLY NEED ADJUSTMENT TO GET ALL CASES NEEDED CORRECT
+					if (content.getName().toLowerCase().contentEquals(key.toLowerCase())
+						|| content.getName().toLowerCase().endsWith("by" + key.toLowerCase())
+						|| content.getName().toLowerCase().contains("_" + key.toLowerCase())
+						|| content.getName().toLowerCase().startsWith(key.toLowerCase() + "_")) {		
+						content.setColor(new Color3f(this.getBrainbowColors().get(key)));
 					}
 				}
-				roi.setImage(imp);
 			}
+		}else {
+			for (Roi roi:rm.getROIs().values()) {
+				if (roi!=null) { 
+					if (this != null) {
+						Color clColor = this.getBrainbowColors()
+								.get(roi.getName().toLowerCase().split("_")[0].split("=")[0].replace("\"", "").trim());
+						if (clColor !=null) {
+							String hexRed = Integer.toHexString(clColor.getRed());
+							String hexGreen = Integer.toHexString(clColor.getGreen());
+							String hexBlue = Integer.toHexString(clColor.getBlue());
+							roi.setFillColor(Colors.decode("#ff"+(hexRed.length()==1?"0":"")+hexRed
+									+(hexGreen.length()==1?"0":"")+hexGreen
+									+(hexBlue.length()==1?"0":"")+hexBlue
+									, Color.white));
+						}
+					}
+					roi.setImage(imp);
+				}
 
+			}
+			imp.updateAndRepaintWindow();
 		}
-		imp.updateAndRepaintWindow();
 	}
 	
 	

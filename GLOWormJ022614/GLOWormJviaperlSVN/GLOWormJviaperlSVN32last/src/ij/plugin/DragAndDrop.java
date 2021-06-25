@@ -130,7 +130,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							if (transferData.get(0) instanceof File && ((File)transferData.get(0)).isDirectory()){
 								for (int j=0; j<transferData.size();j++){
 									for (File file:((File)transferData.get(j)).listFiles()){
-										if (file.getName().toLowerCase().endsWith(".obj"))
+										if (file.getName().toLowerCase().endsWith(".obj")  || file.getName().toLowerCase().endsWith("ColorLegend.lgd"))
 											droppedItemsArrayList.add(file);
 									}
 								}
@@ -206,6 +206,18 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 
 						} else if (tmp.endsWith("ColorLegend.lgd")){
 							ColorLegend cl;
+							Frame[] frames = WindowManager.getImageWindows();
+							if (this.dtde.getDropTargetContext().getDropTarget().getComponent() instanceof ImageCanvas3D) {
+								for (Frame frame:frames){
+									if (frame instanceof ImageWindow3D){
+										if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow3D)frame).getUniverse().getCanvas()){
+											Image3DUniverse i3duniv = (Image3DUniverse)((ImageWindow3D)frame).getUniverse();
+											imp = i3duniv.getWindow().getImagePlus();
+										}
+									}
+								}
+							}
+
 							if (new File(tmp).exists()){
 								cl = new ColorLegend(getImp(), IJ.openAsString(tmp));
 								IJ.showStatus("");
@@ -390,18 +402,18 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 				IJ.log(oldLog);
 				partsLoaded = true;
 			}
-			Object obj = iterator.next();
-			if (obj!=null && (obj instanceof String) ) {
-				if ( ((String)obj).startsWith("http")) {
-					if ( ((String)obj).contains("http://fsbill.cam.uchc.edu/") ||
-							((String)obj).contains("http://fsbill.vcell.uchc.edu/")){
+			Object nextItem = iterator.next();
+			if (nextItem!=null && (nextItem instanceof String) ) {
+				if ( ((String)nextItem).startsWith("http")) {
+					if ( ((String)nextItem).contains("http://fsbill.cam.uchc.edu/") ||
+							((String)nextItem).contains("http://fsbill.vcell.uchc.edu/")){
 
 						//						String macro = IJ.openUrlAsString("http://fsbill.cam.uchc.edu/gloworm/Xwords/Mount_GLOWORM_DATAmacro.txt");
 						//						if (macro.contains("Remount GLOWORM_DATA")){
 						//							IJ.runMacro(macro);
 						//						}
 
-						String[] fn = ((String)obj).replaceAll("%25", "%").split("/") ;
+						String[] fn = ((String)nextItem).replaceAll("%25", "%").split("/") ;
 						String fileName = fn[fn.length-1];	
 						String viewName= null;
 						if (fileName.contains("MOVIE=") ) {
@@ -527,12 +539,13 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							nDrops--;
 							return;
 
-						}else if (path.toLowerCase().endsWith(".obj")) {
+						}else if (path.toLowerCase().endsWith(".obj") || path.toLowerCase().endsWith("ColorLegend.lgd")) {
 							Frame[] frames = WindowManager.getImageWindows();
 							for (Frame frame:frames){
 								if (frame instanceof ImageWindow3D){
 									if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow3D)frame).getUniverse().getCanvas()){
 										Image3DUniverse i3duniv = (Image3DUniverse)((ImageWindow3D)frame).getUniverse();
+										imp = i3duniv.getWindow().getImagePlus();
 										i3duniv.setAutoAdjustView(true);
 										if (freshDrop){
 											ij3dv = null;		
@@ -584,7 +597,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 								}
 								if (cacheFile.canRead()) {
 									//										in = new BufferedReader(new FileReader(cacheFile));
-									obj = cacheFile;
+									nextItem = cacheFile;
 								}else {
 									in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
 											RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replace(".obj", ".mtl").replaceAll("%2B", "\\+").replaceAll("%25", "%").replace("|", "")))));
@@ -622,7 +635,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 											}
 										}
 										out.close();
-										obj = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path);
+										nextItem = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path);
 									} catch (IOException e) {
 										// TODO Auto-generated catch block
 										e.printStackTrace();
@@ -634,22 +647,22 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							
 							try {
 								if (openAsVirtualStack) {
-									ImageJ3DViewer.importContentFlipXcoords(((File)obj).getPath());
+									ImageJ3DViewer.importContentFlipXcoords(((File)nextItem).getPath());
 								} else {
-									ImageJ3DViewer.importContent(((File)obj).getPath());
+									ImageJ3DViewer.importContent(((File)nextItem).getPath());
 								}
 							} catch (Exception e) {
 								ij3dv.run(".");
 								if (openAsVirtualStack) {
-									ImageJ3DViewer.importContentFlipXcoords(((File)obj).getPath());
+									ImageJ3DViewer.importContentFlipXcoords(((File)nextItem).getPath());
 								} else {
-									ImageJ3DViewer.importContent(((File)obj).getPath());
+									ImageJ3DViewer.importContent(((File)nextItem).getPath());
 								}
 							}
 							//ImageJ3DViewer.lock();
 
 						} else {
-							imp = new Opener().openURL((String)obj);
+							imp = new Opener().openURL((String)nextItem);
 							imp.show();
 							if (dropImp == null)
 								return;
@@ -659,7 +672,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							nDrops--;
 							return;
 						}
-					} else if (imp !=null && ((String)obj).contains("https://www.wormbase.org/")){
+					} else if (imp !=null && ((String)nextItem).contains("https://www.wormbase.org/")){
 						imp.getRoiManager().setBusy(true);
 						Graphics g = dropImp.getCanvas().getGraphics();
 						if (dropImp.getCanvas().messageRois.containsKey("Finding tags from drop"))
@@ -677,14 +690,14 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						dropImp.getCanvas().paintDoubleBuffered(dropImp.getCanvas().getGraphics());
 
 
-						if ( ((String)obj).matches(".*/anatomy_term/WBbt:\\d*") ||
-								((String)obj).matches(".*https://www.wormbase.org/db/get\\?name=.*;class=Anatomy_term")){
+						if ( ((String)nextItem).matches(".*/anatomy_term/WBbt:\\d*") ||
+								((String)nextItem).matches(".*https://www.wormbase.org/db/get\\?name=.*;class=Anatomy_term")){
 							//							IJ.log("cellURL");
-							String cellColorCode = (((String)obj).split(" ").length>1?((String)obj).split(" ")[((String)obj).split(" ").length-1].trim():"");
+							String cellColorCode = (((String)nextItem).split(" ").length>1?((String)nextItem).split(" ")[((String)nextItem).split(" ").length-1].trim():"");
 							String oldLog = IJ.getLog();
 							IJ.log("\\Clear");
 							IJ.runMacro(""
-									+ "string = File.openUrlAsString(\""+((String)obj)+"\");"
+									+ "string = File.openUrlAsString(\""+((String)nextItem)+"\");"
 									+ "print(string);");							
 							String[] logLines2 = IJ.getLog().split("<title>WormBase:  anatomy_term Summary: ");
 							IJ.log("\\Clear");
@@ -818,13 +831,13 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 									}
 								}
 							}
-						} else if ( ((String)obj).matches(".*/gene/WBGene\\d*.*") 
-								|| ((String)obj).matches(".*https://www.wormbase.org/db/get\\?name=.*;class=gene.*")){
-							String cellColorCode = (((String)obj).split(" ").length>1?((String)obj).split(" ")[((String)obj).split(" ").length-1].trim():"");
+						} else if ( ((String)nextItem).matches(".*/gene/WBGene\\d*.*") 
+								|| ((String)nextItem).matches(".*https://www.wormbase.org/db/get\\?name=.*;class=gene.*")){
+							String cellColorCode = (((String)nextItem).split(" ").length>1?((String)nextItem).split(" ")[((String)nextItem).split(" ").length-1].trim():"");
 							String oldLog = IJ.getLog();
 							IJ.log("\\Clear");
 							IJ.runMacro(""
-									+ "string = File.openUrlAsString(\""+((String)obj).split(" ")[0].trim()+"\");"
+									+ "string = File.openUrlAsString(\""+((String)nextItem).split(" ")[0].trim()+"\");"
 									+ "print(string);");							
 							String[] logLines2 = IJ.getLog().split("wname=\"expression\"");
 							IJ.log("\\Clear");
@@ -977,17 +990,17 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 								}
 							}
 							dropImp.getCanvas().droppedGeneUrls = (dropImp.getCanvas().droppedGeneUrls != ""?dropImp.getCanvas().droppedGeneUrls:"(Live_from_WormBase...)\nCells_expressing:\n") 
-									+ ((String)obj).replace("https://www.wormbase.org/db/get?name=", "")
+									+ ((String)nextItem).replace("https://www.wormbase.org/db/get?name=", "")
 									.replace(";class=gene", "")
 									.replaceAll(".*/gene/", "").split(" ")[0]+ "&";
 
-						} else if ( ((String)obj).matches(".*/expr_pattern/Expr\\d*")){
+						} else if ( ((String)nextItem).matches(".*/expr_pattern/Expr\\d*")){
 							//							IJ.log("exprURL");							
-							String cellColorCode = (((String)obj).split(" ").length>1?((String)obj).split(" ")[((String)obj).split(" ").length-1].trim():"");
+							String cellColorCode = (((String)nextItem).split(" ").length>1?((String)nextItem).split(" ")[((String)nextItem).split(" ").length-1].trim():"");
 							String oldLog = IJ.getLog();
 							IJ.log("\\Clear");
 							IJ.runMacro(""
-									+ "string = File.openUrlAsString(\""+((String)obj)+"\");"
+									+ "string = File.openUrlAsString(\""+((String)nextItem)+"\");"
 									+ "print(string);");							
 							String[] logLines2 = IJ.getLog().split("wname=\"details\"");
 							IJ.log("\\Clear");
@@ -1138,10 +1151,10 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 								}
 							}
 							dropImp.getCanvas().droppedGeneUrls = (dropImp.getCanvas().droppedGeneUrls != ""?dropImp.getCanvas().droppedGeneUrls:"(Live_from_WormBase...)\nCells_expressing:\n") 
-									+ ((String)obj).replaceAll(".*/expr_pattern/", "")+ "&";
+									+ ((String)nextItem).replaceAll(".*/expr_pattern/", "")+ "&";
 
 						} else {
-							imp = new Opener().openURL((String)obj);
+							imp = new Opener().openURL((String)nextItem);
 							imp.show();
 							if (dropImp == null)
 								return;
@@ -1152,41 +1165,42 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							return;
 						}
 					} else {
-						imp = new Opener().openURL((String)obj);
+						imp = new Opener().openURL((String)nextItem);
 						imp.show();
 					}
-				} else if ( ((String)obj).toLowerCase().endsWith(".mov") || ((String)obj).toLowerCase().endsWith(".avi") ){
+				} else if ( ((String)nextItem).toLowerCase().endsWith(".mov") || ((String)nextItem).toLowerCase().endsWith(".avi") ){
 					String path = "";
-					if (!((String)obj).contains(File.separator) && !((String)obj).startsWith("/Volumes/GLOWORM_DATA/")) {
+					if (!((String)nextItem).contains(File.separator) && !((String)nextItem).startsWith("/Volumes/GLOWORM_DATA/")) {
 						if (IJ.isMacOSX()  || IJ.isLinux()) 
-							path = "/Volumes/GLOWORM_DATA/" + ((String)obj);
+							path = "/Volumes/GLOWORM_DATA/" + ((String)nextItem);
 						if(IJ.isWindows())
-							path = "Q:\\" + ((String)obj);
+							path = "Q:\\" + ((String)nextItem);
 					}else
-						path = ((String)obj);
+						path = ((String)nextItem);
 					if (IJ.debugMode) IJ.log(path + " is the path sent to QTMOMM");
 					pathList = pathList + path +  ((iterator.hasNext()  || openAsVirtualStack)? "|": "");
-				} else if (( ((String)obj).toLowerCase().contains("scene.scn"))){
+				} else if (( ((String)nextItem).toLowerCase().contains("scene.scn"))){
 					String path = "";
-					if (!((String)obj).contains(File.separator) && !((String)obj).startsWith("/Volumes/GLOWORM_DATA/")) {
+					if (!((String)nextItem).contains(File.separator) && !((String)nextItem).startsWith("/Volumes/GLOWORM_DATA/")) {
 						if (IJ.isMacOSX() || IJ.isLinux()) {
-							path = "/Volumes/GLOWORM_DATA/" + ((String)obj);
+							path = "/Volumes/GLOWORM_DATA/" + ((String)nextItem);
 						}
 						if(IJ.isWindows())
-							path = "Q:\\" + ((String)obj);
+							path = "Q:\\" + ((String)nextItem);
 					} else
-						path = ((String)obj);
+						path = ((String)nextItem);
 					if (IJ.debugMode) IJ.log(path + " is the path sent to QTMOMM");
 					if (IJ.is64Bit())
 						MQTVSSceneLoader64.runMQTVS_SceneLoader64(path);
 					else
 						MQTVSSceneLoader64.runMQTVS_SceneLoader64(path);
-				}else if (((String)obj).toLowerCase().endsWith(".obj")) {
+				}else if (((String)nextItem).toLowerCase().endsWith(".obj") || ((String)nextItem).toLowerCase().endsWith("ColorLegend.lgd")) {
 					Frame[] frames = WindowManager.getImageWindows();
 					for (Frame frame:frames){
 						if (frame instanceof ImageWindow3D){
 							if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow3D)frame).getUniverse().getCanvas()){
 								Image3DUniverse i3duniv = (Image3DUniverse)((ImageWindow3D)frame).getUniverse();
+								imp = i3duniv.getWindow().getImagePlus();
 								i3duniv.setAutoAdjustView(true);
 								if (freshDrop){
 									ij3dv = null;		
@@ -1215,7 +1229,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 
 					freshDrop = false;
 					
-					String path = (String)obj;
+					String path = (String)nextItem;
 					File file = new File(path) ;
 					BufferedReader in = null;
 					PrintWriter out = null;
@@ -1281,7 +1295,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 									}
 								}
 								out.close();
-								obj = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path);
+								nextItem = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path);
 							} catch (IOException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
@@ -1293,38 +1307,38 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					
 					try {
 						if (openAsVirtualStack) {
-							ImageJ3DViewer.importContentFlipXcoords(((File)obj).getPath());
+							ImageJ3DViewer.importContentFlipXcoords(((File)nextItem).getPath());
 						} else {
-							ImageJ3DViewer.importContent(((File)obj).getPath());
+							ImageJ3DViewer.importContent(((File)nextItem).getPath());
 						}
 					} catch (Exception e) {
 						ij3dv.run(".");
 						if (openAsVirtualStack) {
-							ImageJ3DViewer.importContentFlipXcoords(((File)obj).getPath());
+							ImageJ3DViewer.importContentFlipXcoords(((File)nextItem).getPath());
 						} else {
-							ImageJ3DViewer.importContent(((File)obj).getPath());
+							ImageJ3DViewer.importContent(((File)nextItem).getPath());
 						}
 					}
 					//ImageJ3DViewer.lock();
 
 
-				} else if (( ((String)obj).toLowerCase().trim().equals("or"))){
+				} else if (( ((String)nextItem).toLowerCase().trim().equals("or"))){
 					or = true;
-				} else if (( ((String)obj).toLowerCase().trim().contains("trace"))){
+				} else if (( ((String)nextItem).toLowerCase().trim().contains("trace"))){
 					traceLineages = true;
 					traceForward = true;
 					traceBackward = true;
-					if (( ((String)obj).toLowerCase().trim().contains("back"))){
+					if (( ((String)nextItem).toLowerCase().trim().contains("back"))){
 						traceForward = false;
 						traceBackward = true;
 					}
-					if (( ((String)obj).toLowerCase().trim().contains("forward"))){
+					if (( ((String)nextItem).toLowerCase().trim().contains("forward"))){
 						traceForward = true;
 						traceBackward = false;
 					}
 				}else {
-					String cellColorCode = (((String)obj).split(" ").length>1?((String)obj).split(" ")[((String)obj).split(" ").length-1].trim():"");
-					String s = ((String)obj);
+					String cellColorCode = (((String)nextItem).split(" ").length>1?((String)nextItem).split(" ")[((String)nextItem).split(" ").length-1].trim():"");
+					String s = ((String)nextItem);
 					String ss = s.split(" ")[0].replaceAll("(?<!(\\.))\\*", "\\.\\*").trim();
 					rawCellSet.add(ss.toUpperCase().trim());  //to search with
 					//						IJ.log(ss +" ss1");
@@ -1480,21 +1494,22 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					//							IJ.showStatus("newdropcolor");
 				}	
 			}
-			else if (obj!=null && ( ((File)obj).getPath().toLowerCase().endsWith(".mov") 
-					|| ((File)obj).getPath().toLowerCase().endsWith(".avi"))) 
-				pathList = pathList + ((File)obj).getPath() +  ((iterator.hasNext()  || openAsVirtualStack)? "|": "");
-			else if (obj!=null && ((File)obj).getPath().toLowerCase().contains("scene.scn")) {
+			else if (nextItem!=null && ( ((File)nextItem).getPath().toLowerCase().endsWith(".mov") 
+					|| ((File)nextItem).getPath().toLowerCase().endsWith(".avi"))) 
+				pathList = pathList + ((File)nextItem).getPath() +  ((iterator.hasNext()  || openAsVirtualStack)? "|": "");
+			else if (nextItem!=null && ((File)nextItem).getPath().toLowerCase().contains("scene.scn")) {
 				if (IJ.is64Bit())
-					MQTVSSceneLoader64.runMQTVS_SceneLoader64( ((File)obj).getPath() );
+					MQTVSSceneLoader64.runMQTVS_SceneLoader64( ((File)nextItem).getPath() );
 				else
-					MQTVSSceneLoader64.runMQTVS_SceneLoader64( ((File)obj).getPath() );
+					MQTVSSceneLoader64.runMQTVS_SceneLoader64( ((File)nextItem).getPath() );
 
-			}else if (obj!=null && ( ((File)obj).getPath().toLowerCase().endsWith(".obj"))) {
+			}else if (nextItem!=null && ( ((File)nextItem).getPath().toLowerCase().endsWith(".obj"))  || ((File)nextItem).getPath().toLowerCase().endsWith("ColorLegend.lgd")) {
 				Frame[] frames = WindowManager.getImageWindows();
 				for (Frame frame:frames){
 					if (frame instanceof ImageWindow3D){
 						if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow3D)frame).getUniverse().getCanvas()){
 							Image3DUniverse i3duniv = (Image3DUniverse)((ImageWindow3D)frame).getUniverse();
+							imp = i3duniv.getWindow().getImagePlus();
 							i3duniv.setAutoAdjustView(true);
 							if (freshDrop){
 								ij3dv = null;		
@@ -1524,7 +1539,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 
 				freshDrop = false;
 				
-				String path = ((File) obj).getPath();
+				String path = ((File) nextItem).getPath();
 				File file = new File(path) ;
 				BufferedReader in = null;
 				PrintWriter out = null;
@@ -1590,7 +1605,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 								}
 							}
 							out.close();
-							obj = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path);
+							nextItem = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path);
 						} catch (IOException e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -1602,24 +1617,36 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 				
 				try {
 					if (openAsVirtualStack) {
-						ImageJ3DViewer.importContentFlipXcoords(((File)obj).getPath());
+						ImageJ3DViewer.importContentFlipXcoords(((File)nextItem).getPath());
 					} else {
-						ImageJ3DViewer.importContent(((File)obj).getPath());
+						ImageJ3DViewer.importContent(((File)nextItem).getPath());
 					}
 				} catch (Exception e) {
 					ij3dv.run(".");
 					if (openAsVirtualStack) {
-						ImageJ3DViewer.importContentFlipXcoords(((File)obj).getPath());
+						ImageJ3DViewer.importContentFlipXcoords(((File)nextItem).getPath());
 					} else {
-						ImageJ3DViewer.importContent(((File)obj).getPath());
+						ImageJ3DViewer.importContent(((File)nextItem).getPath());
 					}
 				}
 				//ImageJ3DViewer.lock();
 
-			} else if (obj!=null && ((File)obj).getPath().endsWith("ColorLegend.lgd")){
+			} else if (nextItem!=null && ((File)nextItem).getPath().endsWith("ColorLegend.lgd")){
 				ColorLegend cl;
-				if (new File(((File)obj).getPath()).exists()){
-					cl = new ColorLegend(imp, IJ.openAsString(((File)obj).getPath()));
+				if (new File(((File)nextItem).getPath()).exists()){
+					Frame[] frames = WindowManager.getImageWindows();
+					if (this.dtde.getDropTargetContext().getDropTarget().getComponent() instanceof ImageCanvas3D) {
+						for (Frame frame:frames){
+							if (frame instanceof ImageWindow3D){
+								if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow3D)frame).getUniverse().getCanvas()){
+									Image3DUniverse i3duniv = (Image3DUniverse)((ImageWindow3D)frame).getUniverse();
+									imp = i3duniv.getWindow().getImagePlus();
+									dropImp = imp;
+								}
+							}
+						}
+					}
+					cl = new ColorLegend(imp, IJ.openAsString(((File)nextItem).getPath()));
 					impCL = imp.getRoiManager().getColorLegend();
 					IJ.showStatus("");
 					dropImp.getCanvas().messageRois.remove("Pending drop "+nDrops);
@@ -1628,11 +1655,11 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					return;
 				} else
 					IJ.showStatus("badpath");
-			} else if (obj!=null && IJ.isWindows() && ((File)obj).getPath().endsWith(".url")){
-				IJ.log(obj.toString());
+			} else if (nextItem!=null && IJ.isWindows() && ((File)nextItem).getPath().endsWith(".url")){
+				IJ.log(nextItem.toString());
 				BufferedReader reader=null;
 				try {
-					reader = new BufferedReader( new FileReader ((File)obj));
+					reader = new BufferedReader( new FileReader ((File)nextItem));
 				} catch (FileNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -1656,11 +1683,11 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							+ fs.replaceAll("(.*MOVIE=)(.*scene.scn)(.*)", "$2"));
 				}
 
-			} else if (obj!=null && IJ.isLinux()){
-				IJ.log(obj.toString());
+			} else if (nextItem!=null && IJ.isLinux()){
+				IJ.log(nextItem.toString());
 				BufferedReader reader=null;
 				try {
-					reader = new BufferedReader( new FileReader ((File)obj));
+					reader = new BufferedReader( new FileReader ((File)nextItem));
 				} catch (FileNotFoundException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -1685,7 +1712,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 				}
 
 			} else
-				openFile((File)obj);
+				openFile((File)nextItem);
 
 		}
 		if (newSubDropsList.size()>0 ) {
