@@ -1889,7 +1889,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			sketchImp.flush();
 			sketchImp=null;
 			ImageJ3DViewer.select(null);
-//			Runtime.getRuntime().gc();
+			
+//			THIS GARBAGECOLLECTOR CALL IS ABSOLUTELY REQUIRED FOR BIG DATA!!!!
+			System.gc();
 		}
 		Image3DUniverse univ = vv.getUniv();
 		
@@ -3339,6 +3341,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (path.startsWith("/Volumes/GLOWORM_DATA/") && !(new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path)).exists()) {
 			saveMultiple(this.getFullListIndexes(), IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path);
 		}
+		System.gc();
 	} 
 
 

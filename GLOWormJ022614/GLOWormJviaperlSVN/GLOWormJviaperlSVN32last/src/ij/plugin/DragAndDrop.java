@@ -1788,7 +1788,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 			cellsRegex= cellsRegex + finalSuffix;
 			//				IJ.log(cellsRegex);
 
-			if (dropImp!=null && (!dropImp.isSketch3D() || (dropImp != imp && IJ.altKeyDown()))) {
+			if (dropImp!=null && (!(dropImp.getWindow() instanceof ImageWindow3D)) && (!dropImp.isSketch3D() || (dropImp != imp && IJ.altKeyDown()))) {
 				ColorLegend cl = imp.getRoiManager().getColorLegend();
 				String hideState = ""; 
 				if (cl != null) {

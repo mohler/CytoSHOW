@@ -1060,6 +1060,7 @@ public class ImageJ extends Frame implements ActionListener,
 			}
 			ij.exitWhenQuitting = true;
 		}
+		MemoryMonitor mm = new MemoryMonitor();
 		int macros = 0;
 		for (int i=0; i<nArgs; i++) {
 			String arg = args[i];

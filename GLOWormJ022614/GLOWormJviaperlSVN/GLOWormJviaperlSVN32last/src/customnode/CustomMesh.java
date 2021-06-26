@@ -32,7 +32,8 @@ import javax.vecmath.Point3f;
 
 public abstract class CustomMesh extends Shape3D {
 
-	public static final Color3f DEFAULT_COLOR = new Color3f(0, 1, 0);
+//	public static final Color3f DEFAULT_COLOR = new Color3f(0, 1, 0);
+	public static final Color3f DEFAULT_COLOR = new Color3f(0.3f,0.3f, 0.3f);
 
 	protected Color3f color = DEFAULT_COLOR;
 	protected List<Point3f> mesh = null;
