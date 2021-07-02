@@ -375,9 +375,15 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 								roi.setStrokeColor(origColor.darker());
 							drawRoi(g, roi, drawLabels?i:-1);
 							roi.setStrokeColor(origColor);
-							labelShapes.put(roi, roi instanceof Arrow?((Arrow)roi).getShapeRoi():new ShapeRoi(roi));
-							if (labelShapes!=null && roi!= null)
-								if (labelShapes.get(roi) != null) labelShapes.get(roi).setName(roi.getName()!=null?roi.getName():"unNamedRoi");
+							if (roi instanceof ShapeRoi) {
+								labelShapes.put(roi, (ShapeRoi)roi);
+							}else{
+								labelShapes.put(roi,(roi instanceof Arrow?((Arrow)roi).getShapeRoi():new ShapeRoi(roi)));
+								if (labelShapes!=null && roi!= null)
+									if (labelShapes.get(roi) != null) {
+										labelShapes.get(roi).setName(roi.getName());
+									}
+							}
 						}
 					} else {
 						int position = roi.getPosition();
@@ -1619,6 +1625,9 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 										&& (cellName.split(" ").length <3?true:cellName.split(" ")[2].matches("\\+*")) ){
 									cellName = cellName.split(" ")[0];
 								} 
+								if (cellName.matches("[A-Z]+by([A-Z]+)")){
+									cellName = cellName.replaceAll("[A-Z]+by([A-Z]+)","$1");
+								}
 
 								mi =new JMenuItem("\""+cellName + " \": synch all windows to this tag" );
 								mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Synch.png")));

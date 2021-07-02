@@ -90,7 +90,7 @@
 	<classpathentry kind="lib" path="imglib.jar"/>
 	<classpathentry kind="lib" path="Jama-1.0.3.jar"/>
 	<classpathentry kind="lib" path="junit-4.12.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/J2SE-1.5"/>
 	<classpathentry kind="lib" path="jogamp-java3d"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/AceTreeLegacyModForCytoSHOWsynchB"/>
 	<classpathentry kind="output" path="plugins"/>

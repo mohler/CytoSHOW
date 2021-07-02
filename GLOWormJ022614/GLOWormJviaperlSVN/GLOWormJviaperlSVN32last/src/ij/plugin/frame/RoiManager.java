@@ -2,6 +2,7 @@ package ij.plugin.frame;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.GeneralPath;
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -1851,8 +1852,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					e.printStackTrace();
 				}
 				for (int zp=0;zp<(int)zPadFactor;zp++){
-					sketchImp.setPosition(1, nextSlice-zp, nextFrame);
-					sketchImp.getRoiManager().addRoi(scaledRoi);
+//					sketchImp.setPosition(1, nextSlice-zp, nextFrame);  ***
+					scaledRoi.setPosition(1, nextSlice-zp, nextFrame);
+					sketchImp.getRoiManager().addRoi(scaledRoi, false, scaledRoi.getFillColor(), -1, false);
 				}
 			}		
 			sketchImp.getRoiManager().select(-1);
@@ -3177,7 +3179,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					byte[] bytes = out.toByteArray(); 
 					RoiDecoder rd = new RoiDecoder(roiRescaleFactor, bytes, name); 
 					Roi roi = rd.getRoi(); 
-					
+					if (roi instanceof ShapeRoi) {
+//						IJ.wait(1);
+					}
 					
 					
 

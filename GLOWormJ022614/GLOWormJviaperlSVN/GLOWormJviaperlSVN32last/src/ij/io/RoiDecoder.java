@@ -192,7 +192,8 @@ public class RoiDecoder {
 		
 		if (name!=null && name.endsWith(".roi"))
 			name = name.substring(0, name.length()-4);
-		boolean isComposite = getInt(SHAPE_ROI_SIZE)>0;
+		int shapeRoiSize = getInt(SHAPE_ROI_SIZE);
+		boolean isComposite = shapeRoiSize>0;
 		
 		Roi roi = null;
 		if (isComposite) {
@@ -378,10 +379,10 @@ public class RoiDecoder {
 		int type = getByte(TYPE);
 		if (type!=rect)
 			throw new IllegalArgumentException("Invalid composite ROI type");
-		int top= getShort(TOP);
-		int left = getShort(LEFT);
-		int bottom = getShort(BOTTOM);
-		int right = getShort(RIGHT);
+		int top= (int) (getShort(TOP)*scaleFactor);
+		int left = (int) (getShort(LEFT)*scaleFactor);
+		int bottom = (int) (getShort(BOTTOM)*scaleFactor);
+		int right = (int) (getShort(RIGHT)*scaleFactor);
 		int width = right-left;
 		int height = bottom-top;
 		int n = getInt(SHAPE_ROI_SIZE);
@@ -390,7 +391,7 @@ public class RoiDecoder {
 		float[] shapeArray = new float[n];
 		int base = COORDINATES;
 		for(int i=0; i<n; i++) {
-			shapeArray[i] = getFloat(base);
+			shapeArray[i] = (float) (getFloat(base)*scaleFactor);
 			base += 4;
 		}
 		roi = new ShapeRoi(shapeArray);

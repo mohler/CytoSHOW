@@ -648,7 +648,7 @@ public class ShapeRoi extends Roi {
 	public double getLength() {
 		double length = 0.0;
 		Roi[] rois = getRois();
-		if (rois!=null) {
+		if (rois!=null || rois.length>0) {
 			for (int i=0; i<rois.length; i++)
 				length += rois[i].getLength();
 		}
@@ -1028,7 +1028,7 @@ public class ShapeRoi extends Roi {
 				if (rois!=null) {
 					roiType = shapeToRoi?TRACED_ROI:guessType(count+1, linesOnly, curvesOnly, closed);
 					Roi r = createRoi(xCoords, yCoords, roiType);
-					if (r!=null)
+					if (r!=null && r!=this)
 						rois.addElement(r);
 				}
 			}
