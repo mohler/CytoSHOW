@@ -1796,13 +1796,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			IJ.log(rootName+" "+minX+" "+minY+" "+minZ+" "+maxX+" "+maxY+" "+maxZ);
 //			sketchImp = NewImage.createImage("SVV_"+rootNames_rootFrames.get(0),(int)(imp.getWidth()*scaleFactor), (int)(imp.getHeight()*scaleFactor), (int)(imp.getNSlices()*imp.getNFrames()*zPadFactor), 8, NewImage.FILL_BLACK, false);
-			sketchImp = NewImage.createImage("SVV_"+rootNames_rootFrames.get(0),(int)((maxX-minX)*imp.getCalibration().pixelWidth*scaleFactor)+20, (int)((maxY-minY)*imp.getCalibration().pixelHeight*scaleFactor)+20, (int)((maxZ-minZ)*zPadFactor)+2, 8, NewImage.FILL_BLACK, false);
+			sketchImp = NewImage.createImage("SVV_"+rootNames_rootFrames.get(0),(int)((maxX-minX)*scaleFactor)+20, (int)((maxY-minY)*scaleFactor)+20, (int)((maxZ-minZ)*zPadFactor)+2, 8, NewImage.FILL_BLACK, false);
 			sketchImp.setDimensions(1, (int)((maxZ-minZ)*zPadFactor)+2, imp.getNFrames());
 			sketchImp.setMotherImp(imp, imp.getID());
 			sketchImp.setCalibration(imp.getCalibration());
-			sketchImp.getCalibration().pixelWidth = sketchImp.getCalibration().pixelWidth/scaleFactor;
-			sketchImp.getCalibration().pixelHeight = sketchImp.getCalibration().pixelHeight/scaleFactor;
-			sketchImp.getCalibration().pixelDepth = sketchImp.getCalibration().pixelDepth/zPadFactor;
+			sketchImp.getCalibration().pixelWidth = imp.getCalibration().pixelWidth/scaleFactor;
+			sketchImp.getCalibration().pixelHeight = imp.getCalibration().pixelHeight/scaleFactor;
+			sketchImp.getCalibration().pixelDepth = imp.getCalibration().pixelDepth/zPadFactor;
 
 			sketchImp.setTitle("SVV_"+rootName);
 //			sketchImp.show();
@@ -1873,16 +1873,22 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			(new StackReverser()).flipStack(sketchImp);
 			sketchImp.setMotherImp(imp, imp.getID());
 //			sketchImp.show();
-			String scaleShiftString = "1.0|1.0|1.0|"+(minX-10)*sketchImp.getCalibration().pixelWidth*scaleFactor+"|"
-					  +(minY-10)*sketchImp.getCalibration().pixelHeight*scaleFactor+"|"
-					  +(-maxZ-1)*sketchImp.getCalibration().pixelDepth*zPadFactor;
+			String scaleShiftString = ""+1.0+"|"
+					+1.0+"|"
+					+1.0+"|"
+					+(minX-10)*sketchImp.getCalibration().pixelWidth+"|"
+					  +(minY-10)*sketchImp.getCalibration().pixelHeight+"|"
+/*maxZ b\c stackflip*/+(-maxZ-1)*sketchImp.getCalibration().pixelDepth*zPadFactor;
 			vv.runVolumeViewer(sketchImp, rootName, assignedColorString, true, null, outDir, scaleShiftString);
 //			new ObjEditor().run("1.0|1.0|1.0|"+(minX-10)*sketchImp.getCalibration().pixelWidth*scaleFactor+"|"
 //											  +(minY-10)*sketchImp.getCalibration().pixelHeight*scaleFactor+"|"
 //											  +(-maxZ-1)*sketchImp.getCalibration().pixelDepth*zPadFactor+"|"
 //											  +outDir+File.separator+"SVV_"+rootName+"_"+rootName+"_1_1_0000.obj"+"|"
 //											  +outDir+File.separator);
-			IJ.log("1.0|1.0|1.0|"+(minX-10)*sketchImp.getCalibration().pixelWidth+"|"
+			IJ.log(""+1.0+"|"
+					+1.0+"|"
+					+1.0+"|"
+					+(minX-10)*sketchImp.getCalibration().pixelWidth+"|"
 					  +(minY-10)*sketchImp.getCalibration().pixelHeight+"|"
 /*maxZ b\c stackflip*/+(-maxZ-1)*sketchImp.getCalibration().pixelDepth*zPadFactor+"|"
 					  +outDir+File.separator+"SVV_"+rootName+"_"+rootName+"_1_1_0000.obj"+"|"
