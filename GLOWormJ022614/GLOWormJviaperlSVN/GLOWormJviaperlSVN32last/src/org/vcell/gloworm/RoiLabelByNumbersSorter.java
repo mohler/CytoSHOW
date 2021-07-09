@@ -37,12 +37,13 @@ public class RoiLabelByNumbersSorter {
 			String labelDollared = labels[i].replace("\'", "$");
 			String[] labelDollaredChunks = labelDollared.split("_");
 			int lDCChunksLength = labelDollaredChunks.length;
-			try {len = labelDollaredChunks[lDCChunksLength - 5 + mode].split("-")[0].length();}
+			try {
+				len = labelDollaredChunks[/* lDCChunksLength - 5 + */ mode].split("-")[0].length();}
 			catch (java.lang.ArrayIndexOutOfBoundsException e) {continue;}
 			String num = "";
 			for (int j=0; j<len; j++) {
 				//Replace needed here before split to handle the quote-quote issue without exceptions 
-				ch = labelDollaredChunks[lDCChunksLength - 5 + mode].split("-")[0].charAt(j);
+				ch = labelDollaredChunks[/* lDCChunksLength - 5 */ + mode].split("-")[0].charAt(j);
 				if (ch>=48 && ch<=57) num += ch;
 			}
 			if (num.length()==0) num = "aaaaaa";
