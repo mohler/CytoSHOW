@@ -948,12 +948,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				multiMeasure();
 			else if (command.equals("Sort")) {
 				sortmode = 0;
-				if (controlKeyDown) sortmode = 1;
-				if (altKeyDown) sortmode = 2;
-				if (shiftKeyDown) sortmode = 3;
-				if (listModel.size()>0 && listModel.get(0).split("_").length == 5){
-					if (sortmode>1)
-						sortmode++;
+				if (listModel.size()>0 /*&& listModel.get(0).split("_").length == 5*/){
+					int chunksLength = listModel.get(0).split("_").length;
+					if (controlKeyDown) sortmode = chunksLength-1;
+					if (altKeyDown) sortmode = chunksLength-3;
+					if (shiftKeyDown) sortmode = chunksLength-2;
+//					if (sortmode>1)
+//						sortmode++;
 				}
 				sort();
 			}
