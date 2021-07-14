@@ -1876,8 +1876,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			String scaleShiftString = ""+1.0+"|"
 					+1.0+"|"
 					+1.0+"|"
-					+(minX-10)*sketchImp.getCalibration().pixelWidth+"|"
-					  +(minY-10)*sketchImp.getCalibration().pixelHeight+"|"
+					+(minX-10)*sketchImp.getCalibration().pixelWidth*scaleFactor+"|"
+					  +(minY-10)*sketchImp.getCalibration().pixelHeight*scaleFactor+"|"
 /*maxZ b\c stackflip*/+(-maxZ-1)*sketchImp.getCalibration().pixelDepth*zPadFactor;
 			vv.runVolumeViewer(sketchImp, rootName, assignedColorString, true, null, outDir, scaleShiftString);
 //			new ObjEditor().run("1.0|1.0|1.0|"+(minX-10)*sketchImp.getCalibration().pixelWidth*scaleFactor+"|"
@@ -2903,6 +2903,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		for (int sl=1; sl< sLayers.length; sl++) {
 			String sLayer=sLayers[sl];
+			if (!sLayer.contains("file_path="))
+				continue;
 			String filePath = sLayer.split("file_path=")[1].split("\"")[1];
 			String[] pathChunks = filePath.split("/");
 			String nameChunk = pathChunks[pathChunks.length-1];
@@ -2910,8 +2912,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			if (nameChunk.contains("-#slice=")) {
 				fvalue = nameChunk.replaceAll("(.*#slice=)(\\d+)", "$2");
 			} else {
-				fvalue = nameChunk.replaceAll("(.*_)(\\d+)(.tiff?)", "$2");
-				fvalue = fvalue.replaceAll("(\\D*)(\\d+)(.tiff?)", "$2");
+				fvalue = nameChunk.replaceAll("(.*_s?)(\\d+)(.png|.tiff?)", "$2");
+				fvalue = fvalue.replaceAll("(\\D*)(\\d+)(.png|.tiff?)", "$2");
 			}
 			sliceValues.add(Integer.parseInt(fvalue)
 					- ((sLayer.split("file_path=")[1].split("\"")[1]).contains("VC_")?10000000:0));
@@ -2938,7 +2940,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			if (metaNamingHash.get(cellLabel)!=null) {
 				cellName = metaNamingHash.get(cellLabel).trim();
 			} else {
-				continue;
+				cellName = cellLabel;
+				cellName = cellName.replaceAll("(.*)(_\\d+)", "$1");
+				cellName = cellName.replace("BWM_", "BWM-");
 			}
 			fillColor = (sCell.split("(;fill:|;\")").length>1?(sCell.split("(;fill:|;\")")[1].startsWith("#")?sCell.split("(;fill:|;\")")[1]:""):"");
 			getColorLegend().getBrainbowColors().put(cellName.toLowerCase(), Colors.decode(fillColor, Color.white));
@@ -2969,6 +2973,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				} 
 
 				String sLayer=sLayers[sl];
+				if (!sLayer.contains("file_path="))
+					continue;
 				int sliceNumber = 0;
 				IJ.log(cellAreaHash.get(cellName+"_"+fillColor+"_"+sLayer.split("\"")[0]));
 				String areaString = null;
@@ -2983,8 +2989,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						if (nameChunk.contains("-#slice=")) {
 							fvalue = nameChunk.replaceAll("(.*#slice=)(\\d+)", "$2");
 						} else {
-							fvalue = nameChunk.replaceAll("(.*_)(\\d+)(.tiff?)", "$2");
-							fvalue = fvalue.replaceAll("(\\D*)(\\d+)(.tiff?)", "$2");
+							fvalue = nameChunk.replaceAll("(.*_s?)(\\d+)(.png|.tiff?)", "$2");
+							fvalue = fvalue.replaceAll("(\\D*)(\\d+)(.png|.tiff?)", "$2");
 						}
 						sliceNumber = Integer.parseInt(fvalue)
 								+ ((sLayer.split("file_path=")[1].split("\"")[1]).contains("VC_")?maxBaseSlice+1:0);
