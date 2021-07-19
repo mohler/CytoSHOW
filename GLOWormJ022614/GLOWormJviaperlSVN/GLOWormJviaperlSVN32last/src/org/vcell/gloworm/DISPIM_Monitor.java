@@ -1643,12 +1643,30 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 				listB = new File(dirOrOMETiff).getParentFile().list();
 				int newLength = 0;
-				for (String newFileListItem : listB)
-					if (newFileListItem.endsWith(".tif"))
+				long stackMax = 0;
+				ArrayList<String> wavelengthNames = new ArrayList<String>();
+				for (String newFileListItem : listB){
+					if (newFileListItem.endsWith(".tif")){
 						newLength++;
+						String wString = newFileListItem.replaceAll(".*Cam.-(.*).tif", "$1");
+						if (!wavelengthNames.contains(wString)){
+							wavelengthNames.add(wString);
+						}
+						long stackIndex = Long.parseLong(newFileListItem.replaceAll(".*_(\\d\\d\\d)_Cam.-.*.tif", "$1"));
+						if (stackIndex > stackMax){
+							stackMax = stackIndex;
+						}
+					}
+				}
 
-				wavelengths = 1;  //OLD DEFAULT VALUES OFTEN USED.  NEED TO TREAT SMARTLY SOON
-				zSlices = 50;
+//				wavelengths = 1;  //OLD DEFAULT VALUES OFTEN USED.  NEED TO TREAT SMARTLY SOON
+//				zSlices = 50;
+				wavelengths = wavelengthNames.size();  
+				zSlices = (int) (stackMax+1);
+				
+				
+				
+				
 				while (Math.floor(newLength / (wavelengths * 2 * zSlices)) == 0) {
 
 					IJ.wait(10);
@@ -1680,6 +1698,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				impAs[0].setStack(impTmpA.getStack());
 				impAs[0].setOpenAsHyperStack(true);
 				impAs[0].setDimensions(wavelengths, zSlices, (int)(Math.floor(newLength/ (wavelengths * 2 * zSlices))));
+				impAs[0] = new CompositeImage(impAs[0], CompositeImage.COMPOSITE);
 				impAs[0].show();
 				impTmpA.hide();
 				Calibration calA = impAs[0].getCalibration();
@@ -1714,6 +1733,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				impBs[0].setStack(impTmpB.getStack());
 				impBs[0].setOpenAsHyperStack(true);
 				impBs[0].setDimensions(wavelengths, zSlices, (int)(Math.floor(newLength/ (wavelengths * 2 * zSlices))));
+				impBs[0] = new CompositeImage(impBs[0], CompositeImage.COMPOSITE);
 				impBs[0].show();
 				impTmpB.hide();
 
