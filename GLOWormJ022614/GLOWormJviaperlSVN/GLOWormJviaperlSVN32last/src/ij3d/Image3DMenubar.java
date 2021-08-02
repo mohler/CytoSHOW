@@ -103,6 +103,7 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 	private JMenu helpMenu;
 	private JMenu addMenu;
 	private JMenuItem newViewer;
+	private JMenuItem saveCLView;
 
 	public Image3DMenubar(Image3DUniverse univ) {
 		super();
@@ -177,6 +178,12 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 		exportU3D = new JMenuItem("U3D");
 		exportU3D.addActionListener(this);
 		subMenu.add(exportU3D);
+
+		file.addSeparator();
+
+		saveCLView = new JMenuItem("Save ColorLegend");
+		saveCLView.addActionListener(this);
+		file.add(saveCLView);
 
 		file.addSeparator();
 
@@ -654,6 +661,8 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 			iJ3dExecuter.saveAsDXF();
 		else if (src == exportObj)
 			iJ3dExecuter.saveAsWaveFront();
+		else if (src == saveCLView)
+			iJ3dExecuter.saveColorLegend(null);
 		else if (src == exportU3D)
 			iJ3dExecuter.saveAsU3D();
 		else if (src == exportAsciiSTL)

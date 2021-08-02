@@ -122,114 +122,116 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 		int count=0;
 		int panelWidth =0;
 		int panelHeight =0;
-		String[] clLines = clStr.split("\n");
-		checkbox = new JCheckBox[clLines.length];
-		for (int i=0; i<clLines.length; i++) {		
-//			IJ.log(clLines[i]);
-			checkbox[i] = new JCheckBox();
-			((JCheckBox)checkbox[i]).setSize(150, 10);
-			checkbox[i].setLabel(clLines[i].split(",")[0].length()<20?clLines[i].split(",")[0]:clLines[i].split(",")[0].substring(0, 20) + "...");
-			checkbox[i].setName(clLines[i].split(",")[0]);			
-			checkbox[i].setBackground(Colors.decode(clLines[i].split(",")[2], Color.white));
-			brainbowColors.put(checkbox[i].getName().toLowerCase(), Colors.decode(clLines[i].split(",")[2], Color.white));	
+		if (clStr != null) {
+			String[] clLines = clStr.split("\n");
+			checkbox = new JCheckBox[clLines.length];
+			for (int i=0; i<clLines.length; i++) {		
+				//			IJ.log(clLines[i]);
+				checkbox[i] = new JCheckBox();
+				((JCheckBox)checkbox[i]).setSize(150, 10);
+				checkbox[i].setLabel(clLines[i].split(",")[0].length()<20?clLines[i].split(",")[0]:clLines[i].split(",")[0].substring(0, 20) + "...");
+				checkbox[i].setName(clLines[i].split(",")[0]);			
+				checkbox[i].setBackground(Colors.decode(clLines[i].split(",")[2], Color.white));
+				brainbowColors.put(checkbox[i].getName().toLowerCase(), Colors.decode(clLines[i].split(",")[2], Color.white));	
 				if (clLines[i].split(",")[0] != clLines[i].split(",")[1])
 					brainbowColors.put(clLines[i].split(",")[1].toLowerCase(), Colors.decode(clLines[i].split(",")[2], Color.white));	
 
-			checkboxHash.put(Colors.decode(clLines[i].split(",")[2], Color.white), checkbox[i]);
-			checkbox[i].setFont(Menus.getFont().deriveFont(8));
-//			IJ.log("WHATUP?");
+				checkboxHash.put(Colors.decode(clLines[i].split(",")[2], Color.white), checkbox[i]);
+				checkbox[i].setFont(Menus.getFont().deriveFont(8));
+				//			IJ.log("WHATUP?");
 
-			if (!clLines[i].split(",")[0].contains("NOTE:")) {
-				fspp.add(checkbox[i],fspc);
-				if (count==0) {
-					panelWidth = panelWidth + checkbox[i].getWidth();
-					count++;
-					panelHeight = panelHeight+checkbox[i].getHeight();
-					fspc.gridx++;
-				} else if (count>=1 && fspc.gridx < 4){
-					if (count < 4){
+				if (!clLines[i].split(",")[0].contains("NOTE:")) {
+					fspp.add(checkbox[i],fspc);
+					if (count==0) {
 						panelWidth = panelWidth + checkbox[i].getWidth();
+						count++;
+						panelHeight = panelHeight+checkbox[i].getHeight();
 						fspc.gridx++;
-//						count=0;
+					} else if (count>=1 && fspc.gridx < 4){
+						if (count < 4){
+							panelWidth = panelWidth + checkbox[i].getWidth();
+							fspc.gridx++;
+							//						count=0;
+						}
+					} else {
+						fspc.gridy++;
+						fspc.gridx=0;
 					}
-				} else {
-					fspc.gridy++;
-					fspc.gridx=0;
-				}
-				checkbox[i].addItemListener(this);
-				checkbox[i].addMouseListener(this);
-			}
-		}
-		
-		fspc.gridx =0;
-		fspc.gridy= clLines.length/4+1;		
-		choice = new Choice();
-		for (int i=0; i<modes.length; i++)
-			choice.addItem(modes[i]);
-		choice.select(3);
-		choice.addItemListener(this);
-//		if (sketchyMQTVS)
-//			choice.setEnabled(false);
-		update();
-		addKeyListener(IJ.getInstance());  // ImageJ handles keyboard shortcuts
-
-		setLayout(new BorderLayout());
-		add(choice, BorderLayout.PAGE_START);
-		Panel p = new Panel();
-		p.setLayout(new BorderLayout());
-		p.add(clearButton, BorderLayout.NORTH);
-		clearButton.addActionListener(this);
-		p.add(fsp, BorderLayout.CENTER);
-		add(p, BorderLayout.CENTER);
-
-//		hideChecked = true;
-		
-		this.setResizable(true);
-		this.pack();
-		this.setSize(fspp.getWidth()+30, fspp.getHeight()+30+choice.getHeight());
-		if (location==null) {
-			GUI.center(this);
-			location = getLocation();
-		} else
-			setLocation(location);
-//		this.setVisible(true);
-		if (imp.getWindow()!=null && imp.getWindow() instanceof ImageWindow3D) {
-			DefaultUniverse univ = ((ImageWindow3D)imp.getWindow()).getUniverse();
-			Iterator contents = ((Image3DUniverse)univ).contents();
-			while (contents.hasNext()) {
-				Content content = (Content) contents.next();
-				for (String key:this.getBrainbowColors().keySet()) {
-
-// THESE CONDITIONS WILL CERTAINLY NEED ADJUSTMENT TO GET ALL CASES NEEDED CORRECT
-					if (content.getName().split("-")[0].toLowerCase().contentEquals(key.toLowerCase())
-						|| content.getName().split("-")[0].toLowerCase().endsWith("by" + key.toLowerCase())
-						|| content.getName().split("-")[0].toLowerCase().contains("_" + key.toLowerCase())
-						|| content.getName().split("-")[0].toLowerCase().startsWith(key.toLowerCase() + "_")) {		
-						content.setColor(new Color3f(this.getBrainbowColors().get(key)));
-					}
+					checkbox[i].addItemListener(this);
+					checkbox[i].addMouseListener(this);
 				}
 			}
-		}else {
-			for (Roi roi:rm.getROIs().values()) {
-				if (roi!=null) { 
-					if (this != null) {
-						Color clColor = this.getBrainbowColors()
-								.get(roi.getName().toLowerCase().split("_")[0].split("=")[0].replace("\"", "").trim());
-						if (clColor !=null) {
-							String hexRed = Integer.toHexString(clColor.getRed());
-							String hexGreen = Integer.toHexString(clColor.getGreen());
-							String hexBlue = Integer.toHexString(clColor.getBlue());
-							roi.setFillColor(Colors.decode("#ff"+(hexRed.length()==1?"0":"")+hexRed
-									+(hexGreen.length()==1?"0":"")+hexGreen
-									+(hexBlue.length()==1?"0":"")+hexBlue
-									, Color.white));
+
+			fspc.gridx =0;
+			fspc.gridy= clLines.length/4+1;		
+			choice = new Choice();
+			for (int i=0; i<modes.length; i++)
+				choice.addItem(modes[i]);
+			choice.select(3);
+			choice.addItemListener(this);
+			//		if (sketchyMQTVS)
+			//			choice.setEnabled(false);
+			update();
+			addKeyListener(IJ.getInstance());  // ImageJ handles keyboard shortcuts
+
+			setLayout(new BorderLayout());
+			add(choice, BorderLayout.PAGE_START);
+			Panel p = new Panel();
+			p.setLayout(new BorderLayout());
+			p.add(clearButton, BorderLayout.NORTH);
+			clearButton.addActionListener(this);
+			p.add(fsp, BorderLayout.CENTER);
+			add(p, BorderLayout.CENTER);
+
+			//		hideChecked = true;
+
+			this.setResizable(true);
+			this.pack();
+			this.setSize(fspp.getWidth()+30, fspp.getHeight()+30+choice.getHeight());
+			if (location==null) {
+				GUI.center(this);
+				location = getLocation();
+			} else
+				setLocation(location);
+			//		this.setVisible(true);
+			if (imp.getWindow()!=null && imp.getWindow() instanceof ImageWindow3D) {
+				DefaultUniverse univ = ((ImageWindow3D)imp.getWindow()).getUniverse();
+				Iterator contents = ((Image3DUniverse)univ).contents();
+				while (contents.hasNext()) {
+					Content content = (Content) contents.next();
+					for (String key:this.getBrainbowColors().keySet()) {
+
+						// THESE CONDITIONS WILL CERTAINLY NEED ADJUSTMENT TO GET ALL CASES NEEDED CORRECT
+						if (content.getName().split("-")[0].toLowerCase().contentEquals(key.toLowerCase())
+								|| content.getName().split("-")[0].toLowerCase().endsWith("by" + key.toLowerCase())
+								|| content.getName().split("-")[0].toLowerCase().contains("_" + key.toLowerCase())
+								|| content.getName().split("-")[0].toLowerCase().startsWith(key.toLowerCase() + "_")) {		
+							content.setColor(new Color3f(this.getBrainbowColors().get(key)));
 						}
 					}
-					roi.setImage(imp);
 				}
+			}else {
+				for (Roi roi:rm.getROIs().values()) {
+					if (roi!=null) { 
+						if (this != null) {
+							Color clColor = this.getBrainbowColors()
+									.get(roi.getName().toLowerCase().split("_")[0].split("=")[0].replace("\"", "").trim());
+							if (clColor !=null) {
+								String hexRed = Integer.toHexString(clColor.getRed());
+								String hexGreen = Integer.toHexString(clColor.getGreen());
+								String hexBlue = Integer.toHexString(clColor.getBlue());
+								roi.setFillColor(Colors.decode("#ff"+(hexRed.length()==1?"0":"")+hexRed
+										+(hexGreen.length()==1?"0":"")+hexGreen
+										+(hexBlue.length()==1?"0":"")+hexBlue
+										, Color.white));
+							}
+						}
+						roi.setImage(imp);
+					}
 
+				}
+				imp.updateAndRepaintWindow();
 			}
-			imp.updateAndRepaintWindow();
 		}
 	}
 	
@@ -720,6 +722,37 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 		out.write(clString);
 		out.close();
 	}
+	
+	public void saveCLfromIJ3D(String path) throws IOException {
+		if (bbImp.getWindow() instanceof ImageWindow3D) {
+			Iterator contentIterator = ((ImageWindow3D)bbImp.getWindow()).getUniverse().contents();
+			int ciLength = 0;
+			while (contentIterator.hasNext()) {
+				ciLength++;
+				Content content = (Content) contentIterator.next();
+			}
+			checkbox = new JCheckBox[ciLength];
+			contentIterator = ((ImageWindow3D)bbImp.getWindow()).getUniverse().contents();
+			int i=0;
+			while (contentIterator.hasNext()) {
+				Content content = (Content) contentIterator.next();
+				//		IJ.log(clLines[i]);
+				checkbox[i] = new JCheckBox();
+				((JCheckBox)checkbox[i]).setSize(150, 10);
+				checkbox[i].setLabel(content.getName());
+				checkbox[i].setName(content.getName());			
+				checkbox[i].setBackground(content.getColor().get());
+				brainbowColors.put(checkbox[i].getName().toLowerCase(), content.getColor().get());	
+
+				checkboxHash.put(content.getColor().get(), checkbox[i]);
+				checkbox[i].setFont(Menus.getFont().deriveFont(8));
+				//		IJ.log("WHATUP?");
+				i++;
+			}
+			save(path);
+		}
+	}
+
 	
 	public ColorLegend clone(ImagePlus imp) {
 		String clString = "";

@@ -8,6 +8,7 @@ import ij.gui.YesNoCancelDialog;
 import ij.io.DirectoryChooser;
 import ij.io.OpenDialog;
 import ij.io.SaveDialog;
+import ij.plugin.frame.ColorLegend;
 import ij.plugin.frame.Recorder;
 import ij.text.TextWindow;
 import ij3d.gui.ContentCreatorDialog;
@@ -42,6 +43,7 @@ import java.awt.event.TextListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -289,7 +291,21 @@ public class IJ3dExecuter {
 		if(obj_file == null)
 			return;
 		MeshExporter.saveAsWaveFront(univ.getContents(), obj_file, univ.getStartTime(), univ.getEndTime());
+		saveColorLegend(obj_file);
 		record(EXPORT, "WaveFront", obj_file.getAbsolutePath());
+	}
+
+
+	public void saveColorLegend(File obj_file) {
+		if (obj_file == null)
+			obj_file = promptForFile("Save ColorLegend", "untitled", "_ColorLegend.lgd");
+		ColorLegend cl = new ColorLegend(univ.getWindow().getImagePlus(), null);
+		try {
+			cl.saveCLfromIJ3D(obj_file.getPath().replace(".obj", "_ColorLegend.lgd").replace("_ColorLegend.lgd_ColorLegend.lgd",  "_ColorLegend.lgd"));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public void saveAsAsciiSTL(){
