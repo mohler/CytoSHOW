@@ -1077,6 +1077,7 @@ public class IJ3dExecuter {
 
 		final GenericDialog gd =
 				new GenericDialog((others?"Other Objects":finalC.getName()) + ": Adjust Display...", univ.getWindow());
+		final boolean fImageData = imageData;
 		if (imageData ) {
 			gd.addSlider("Threshold", 0, 255, oldThr);
 			((Scrollbar)gd.getSliders().get(0)).setEnabled(imageData);
@@ -1092,6 +1093,7 @@ public class IJ3dExecuter {
 		gd.addSlider("Transparency", 0, 100, oldTr*100);
 
 		((Scrollbar)gd.getSliders().get(imageData?1:0)).setEnabled(true);
+		((TextField)gd.getNumericFields().get(imageData?1:0)).setEnabled(true);
 		((Scrollbar)gd.getSliders().get(imageData?1:0)).addAdjustmentListener(new AdjustmentListener() {			
 			public void adjustmentValueChanged(AdjustmentEvent e) {
 				if(!transp_adjuster.go)
@@ -1099,6 +1101,14 @@ public class IJ3dExecuter {
 				transp_adjuster.exec(e.getValue(), finalCi, univ);
 			}
 		});
+		((TextField)gd.getNumericFields().get(imageData?1:0)).addTextListener(new TextListener() {
+			public void textValueChanged(TextEvent e) {
+						if(!transp_adjuster.go)
+							transp_adjuster.start();
+						transp_adjuster.exec(Integer.parseInt(((TextField)gd.getNumericFields().get(fImageData?1:0)).getText()), finalCi, univ);
+			}
+		});
+
 
 		gd.addSlider("Red",0,255,oldC == null ? 0 : oldC.x*255);
 		gd.addSlider("Green",0,255,oldC == null ? 0 : oldC.y*255);
@@ -1107,6 +1117,9 @@ public class IJ3dExecuter {
 		final Scrollbar rSlider = (Scrollbar)gd.getSliders().get(imageData?2:1);
 		final Scrollbar gSlider = (Scrollbar)gd.getSliders().get(imageData?3:2);
 		final Scrollbar bSlider = (Scrollbar)gd.getSliders().get(imageData?4:3);
+		final TextField rNumField = (TextField)gd.getNumericFields().get(imageData?2:1);
+		final TextField gNumField = (TextField)gd.getNumericFields().get(imageData?3:2);
+		final TextField bNumField = (TextField)gd.getNumericFields().get(imageData?4:3);
 
 //		rSlider.setEnabled(oldC != null);
 //		gSlider.setEnabled(oldC != null);
@@ -1127,6 +1140,19 @@ public class IJ3dExecuter {
 		rSlider.addAdjustmentListener(cListener);
 		gSlider.addAdjustmentListener(cListener);
 		bSlider.addAdjustmentListener(cListener);
+		
+		TextListener tListener = new TextListener() {
+
+			public void textValueChanged(TextEvent e) {
+				colorListener.colorChanged(new Color3f(
+						rSlider.getValue() / 255f,
+						gSlider.getValue() / 255f,
+						bSlider.getValue() / 255f));
+			}
+		};
+		rNumField.addTextListener(tListener);
+		gNumField.addTextListener(tListener);
+		bNumField.addTextListener(tListener);
 
 
 //		gd.addCheckbox("Apply to all timepoints", true);

@@ -123,16 +123,16 @@ public class Colors implements PlugIn, ItemListener {
 	}
 
 	public static Color decode(String hexColorString, Color defaultColor) {
-		Color color = getColor(hexColorString, Color.gray);
-		if (color==Color.gray) {
+		Color color = getColor(hexColorString, defaultColor);
+		if (color==defaultColor) {
 			if (hexColorString.startsWith("#"))
 				hexColorString = hexColorString.substring(1);
 			int len = hexColorString.length();
 			if (!(len==6 || len==8)) {
-//				return defaultColor;
-				hexColorString = hexColorString + IJ.pad(0, 8-hexColorString.length());
-				
-//				hexColor = hexColor+defaultHexString.substring(hexColor.length()+1, defaultHexString.length());
+				return defaultColor;
+//				hexColorString = hexColorString + IJ.pad(0, 8-hexColorString.length());
+//				
+////				hexColor = hexColor+defaultHexString.substring(hexColor.length()+1, defaultHexString.length());
 			}
 			float alpha = len==8?parseHex(hexColorString.substring(0,2)):1f;
 			if (len==8)

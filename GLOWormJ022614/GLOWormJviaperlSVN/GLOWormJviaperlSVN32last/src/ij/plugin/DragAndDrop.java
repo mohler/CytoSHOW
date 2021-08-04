@@ -179,6 +179,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					}
 					BufferedReader br = new BufferedReader(new StringReader(s));
 					String tmp;
+					String clStr = "";
 					while (null != (tmp = br.readLine())) {
 						tmp = java.net.URLDecoder.decode(tmp.replaceAll("\\+","%2b"), "UTF-8");
 						if (tmp.contains("file://")) {
@@ -235,8 +236,37 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							return;
 						} else if (tmp.trim().split(" ")[0].matches(".*\\S.*")){
 							//							IJ.log("anatomyName?");
+							if ((tmp.trim().split(",").length ==2 && Colors.decode(tmp.split(",")[1], null) != null) ||
+								(tmp.trim().split(",").length >2 && Colors.decode(tmp.split(",")[2], null) != null)){
+//								if (tmp.equals(tmp.replaceAll("([A-Za-z]+),([A-Za-z]+),(.*)", "$1,$1,$3"))) {
+//										IJ.wait(1); 
+										Color testColor3 = Colors.decode(tmp.split(",")[1], null);
+										if (testColor3 != null) {
+											tmp = tmp.replaceAll("([A-Za-z]+,)(.*)", "$1$1$2");
+										}
+										clStr = clStr + tmp +"\n";
+										continue;
+									
+//								}
+							}
 							droppedItemsArrayList.add(tmp.trim());
 						}	
+					}
+					if (!clStr.contentEquals("")) {
+						Frame[] frames = WindowManager.getImageWindows();
+						if (this.dtde.getDropTargetContext().getDropTarget().getComponent() instanceof ImageCanvas3D) {
+							for (Frame frame:frames){
+								if (frame instanceof ImageWindow3D){
+									if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow3D)frame).getUniverse().getCanvas()){
+										Image3DUniverse i3duniv = (Image3DUniverse)((ImageWindow3D)frame).getUniverse();
+										imp = i3duniv.getWindow().getImagePlus();
+										dropImp = imp;
+									}
+								}
+							}
+						}
+						ColorLegend cl = new ColorLegend(imp, clStr);
+						return;
 					}
 					this.setIterator(droppedItemsArrayList.iterator());
 					break;
@@ -334,7 +364,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 		Iterator iterator = this.getIterator();
 //		IJ.log(iterator.toString());
 		Roi messageRoi = new TextRoi(0,0,"");
-		if (imp != null) {
+		if (imp != null && !(imp.getWindow() instanceof ImageWindow3D)) {
 			messageRoi = new TextRoi(dropImp.getCanvas().getSrcRect().x, dropImp.getCanvas().getSrcRect().y,
 					"   New drop queued...");
 
