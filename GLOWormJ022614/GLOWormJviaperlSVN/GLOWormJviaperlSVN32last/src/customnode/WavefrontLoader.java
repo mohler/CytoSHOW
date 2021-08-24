@@ -152,25 +152,65 @@ public class WavefrontLoader {
 //			Float.parseFloat(sp[2]),
 //			Float.parseFloat(sp[3])));
 
-//		FOR JSH
+////		FOR JSH
 //		float x = 20803.52f;
 //		float y = 12784.513f;
 //		float z = -4789.9414f;
-//		float w = 26905f-14701f;
+//		float w = 50000;
 //		vertices.add(new Point3f(
-//			w*(flipXCoef*(Float.parseFloat(sp[1]) - x))/x,
-//			w*(Float.parseFloat(sp[2]) - y)/x,
-//			w*(Float.parseFloat(sp[3]) -z)/x));
+//			w*(flipXCoef*(Float.parseFloat(sp[1]) - x))/(x-14701),
+//			w*(Float.parseFloat(sp[2]) - y)/(x-14701),
+//			w*(Float.parseFloat(sp[3]) -z)/(x-14701)));
+//
+////		FOR MEI ADULT
+//		float x = 10800.0f;
+//		float y = 10816.0f;
+//		float z =  -8844.971f;
+//		float w = 50000;
+//		vertices.add(new Point3f(
+//		w*(Float.parseFloat(sp[3]) -z)/(x-4736),
+//		w*(Float.parseFloat(sp[2]) - y)/(x-4736),
+//		w*(flipXCoef*(Float.parseFloat(sp[1]) - x))/(-x+4736)));
 
-//		FOR MEI ADULT
-		float x = 10800.0f;
-		float y = 10816.0f;
-		float z =  -8844.971f;
-		float w = 17224f - 4376f;
-		vertices.add(new Point3f(
-			-w*(flipXCoef*(Float.parseFloat(sp[3]) - z))/z,
-			-w*(Float.parseFloat(sp[2]) - y)/z,
-			w*(Float.parseFloat(sp[1]) - x)/z));
+////		FOR L3
+//		float x = 13793f;
+//		float y = 13302f;
+//		float z = -4242f;
+//		float w = 50000;
+//		vertices.add(new Point3f(
+//			w*(flipXCoef*(Float.parseFloat(sp[1]) - x))/(-x+8829),
+//			w*(Float.parseFloat(sp[2]) - y)/(x-8829),
+//			w*(Float.parseFloat(sp[3]) -z)/(x-8829)));
+
+////		FOR L2_2
+//		float x = 8002f;
+//		float y = 5648f;
+//		float z = -4090f;
+//		float w = 50000;
+//		vertices.add(new Point3f(
+//			w*(flipXCoef*(Float.parseFloat(sp[1]) - x))/(x-2804),
+//			w*(Float.parseFloat(sp[2]) - y)/(x-2804),
+//			w*(Float.parseFloat(sp[3]) -z)/(x-2804)));
+
+////	FOR L1_3
+//	float x = 8316f;
+//	float y = 6042f;
+//	float z = -2470f;
+//	float w = 50000;
+//	vertices.add(new Point3f(
+//		w*(flipXCoef*(Float.parseFloat(sp[1]) - x))/(x-4412),
+//		w*(Float.parseFloat(sp[2]) - y)/(x-4412),
+//		w*(Float.parseFloat(sp[3]) -z)/(x-4412)));
+
+////	FOR L1_2
+	float x = 12564f;
+	float y = 7782f;
+	float z =  -3865f;
+	float w = 50000;
+	vertices.add(new Point3f(
+	w*(Float.parseFloat(sp[3]) -z)/(x-8788),
+	w*(Float.parseFloat(sp[2]) - y)/(x-8788),
+	w*(flipXCoef*(Float.parseFloat(sp[1]) - x))/(-x+8788)));
 
 
 	}
