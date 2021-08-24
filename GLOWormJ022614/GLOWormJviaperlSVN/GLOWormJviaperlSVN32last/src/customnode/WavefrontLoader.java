@@ -147,10 +147,32 @@ public class WavefrontLoader {
 	private void readVertex(boolean flipXcoords) {
 		String[] sp = line.split("\\s+");
 		int flipXCoef = flipXcoords?-1:1;
+//		vertices.add(new Point3f(
+//			flipXCoef*Float.parseFloat(sp[1]),
+//			Float.parseFloat(sp[2]),
+//			Float.parseFloat(sp[3])));
+
+//		FOR JSH
+//		float x = 20803.52f;
+//		float y = 12784.513f;
+//		float z = -4789.9414f;
+//		float w = 26905f-14701f;
+//		vertices.add(new Point3f(
+//			w*(flipXCoef*(Float.parseFloat(sp[1]) - x))/x,
+//			w*(Float.parseFloat(sp[2]) - y)/x,
+//			w*(Float.parseFloat(sp[3]) -z)/x));
+
+//		FOR MEI ADULT
+		float x = 10800.0f;
+		float y = 10816.0f;
+		float z =  -8844.971f;
+		float w = 17224f - 4376f;
 		vertices.add(new Point3f(
-			flipXCoef*Float.parseFloat(sp[1]),
-			Float.parseFloat(sp[2]),
-			Float.parseFloat(sp[3])));
+			-w*(flipXCoef*(Float.parseFloat(sp[3]) - z))/z,
+			-w*(Float.parseFloat(sp[2]) - y)/z,
+			w*(Float.parseFloat(sp[1]) - x)/z));
+
+
 	}
 
 	private HashMap<String, Color4f> readMaterials(

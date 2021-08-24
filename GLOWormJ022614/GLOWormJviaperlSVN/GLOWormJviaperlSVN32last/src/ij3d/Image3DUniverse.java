@@ -96,6 +96,34 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 	private static final UniverseSynchronizer synchronizer =
 			new UniverseSynchronizer();
+	
+	private Point3f uMaxCoords = new Point3f(Float.MIN_VALUE,Float.MIN_VALUE,Float.MIN_VALUE);
+	private Point3f uMinCoords = new Point3f(Float.MAX_VALUE,Float.MAX_VALUE,Float.MAX_VALUE);
+	private Point3f uCenterCoords = new Point3f(0f,0f,0f);
+
+	public Point3f getuCenterCoords() {
+		return uCenterCoords;
+	}
+
+	public void setuCenterCoords(Point3f uCenterCoords) {
+		this.uCenterCoords = uCenterCoords;
+	}
+
+	public Point3f getuMaxCoords() {
+		return uMaxCoords;
+	}
+
+	public void setuMaxCoords(Point3f uMaxCoords) {
+		this.uMaxCoords = uMaxCoords;
+	}
+
+	public Point3f getuMinCoords() {
+		return uMinCoords;
+	}
+
+	public void setuMinCoords(Point3f uMinCoords) {
+		this.uMinCoords = uMinCoords;
+	}
 
 	/** The current time point */
 	private int currentTimepoint = 0;
@@ -2105,6 +2133,21 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				String name = entry.getKey();
 				name = getSafeContentName(name);
 				CustomMesh mesh = entry.getValue();
+				for (Object index:mesh.getMesh()) {
+					Point3f a = (Point3f)index;
+					if (a.x<uMinCoords.x)
+						uMinCoords.x = a.x;
+					if (a.y<uMinCoords.y)
+						uMinCoords.y = a.y;
+					if (a.z<uMinCoords.z)
+						uMinCoords.z = a.z;
+					if (a.x>uMaxCoords.x)
+						uMaxCoords.x = a.x;
+					if (a.y>uMaxCoords.y)
+						uMaxCoords.y = a.y;
+					if (a.z>uMaxCoords.z)
+						uMaxCoords.z = a.z;
+				}
 				if (!cInstants.containsKey(name)) {
 					cInstants.put(name, new TreeMap<Integer, ContentInstant>());
 				}
@@ -2130,6 +2173,11 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			win.getImagePlus().setWindow(win);
 			win.getImagePlus().setTitle((this.flipXonImport?"FlipX_":"")+titleName);
 		}
+		uCenterCoords.x = (uMinCoords.x + uMaxCoords.x)/2;
+		uCenterCoords.y =  (uMinCoords.y + uMaxCoords.y)/2;
+		uCenterCoords.z =  (uMinCoords.z + uMaxCoords.z)/2;
+				
+		IJ.log(""+getuMinCoords().toString()+getuCenterCoords().toString()+getuMaxCoords().toString());
 	}
 
 
