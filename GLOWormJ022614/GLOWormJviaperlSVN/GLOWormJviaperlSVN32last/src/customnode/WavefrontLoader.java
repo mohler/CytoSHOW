@@ -208,10 +208,10 @@ public class WavefrontLoader {
 	float z =  -3865f;
 	float w = 50000;
 	vertices.add(new Point3f(
-	w*(Float.parseFloat(sp[3]) -z)/(x-8788),
+	-w*(Float.parseFloat(sp[3]) -z)/(x-8788),
 	w*(Float.parseFloat(sp[2]) - y)/(x-8788),
-	w*(flipXCoef*(Float.parseFloat(sp[1]) - x))/(-x+8788)));
-
+	-w*(flipXCoef*(Float.parseFloat(sp[1]) - x))/(x-8788)));
+//
 
 	}
 
