@@ -328,25 +328,33 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 		if (IJ.debugMode) IJ.log("DragOver: "+e.getLocation());
 		ImageJ ij = IJ.getInstance();
 		if (ij!=null) {
-			Point loc = e.getLocation();
-			int buttonSize = Toolbar.getButtonSize();
-			int width = ij.getSize().width;
-			openAsVirtualStack = width-loc.x<=buttonSize && 
-					(e.getDropTargetContext().getDropTarget().getComponent().equals(ij) ||
-							e.getDropTargetContext().getDropTarget().getComponent().equals(Toolbar.getInstance()) ||
-							e.getDropTargetContext().getDropTarget().getComponent().equals(ij.getStatusBar()));
+			if (e.getDropTargetContext().getDropTarget().getComponent().equals(ij) ||
+					e.getDropTargetContext().getDropTarget().getComponent().equals(ij.toolbar) ||
+					e.getDropTargetContext().getDropTarget().getComponent().equals(ij.getStatusBar())) {
+				Point loc = e.getLocation();
+				int buttonSize = Toolbar.getButtonSize();
+				int width = ij.getSize().width;
+				openAsVirtualStack = width-loc.x<=buttonSize && 
+						(e.getDropTargetContext().getDropTarget().getComponent().equals(ij) ||
+								e.getDropTargetContext().getDropTarget().getComponent().equals(ij.toolbar) ||
+								e.getDropTargetContext().getDropTarget().getComponent().equals(ij.getStatusBar()));
 
-			if (openAsVirtualStack)
-				IJ.showStatus("<<Open with Special Settings>>");
-			else
-				IJ.showStatus("<<Drag and Drop>>");
-		} else {
-			Point loc = e.getLocation();
-			int buttonSize = Toolbar.getButtonSize();
-			int width = e.getDropTargetContext().getDropTarget().getComponent().getSize().width;
-			openAsVirtualStack = width-loc.x<=buttonSize && 
-					(e.getDropTargetContext().getDropTarget().getComponent() instanceof ImageCanvas3D);
+				if (openAsVirtualStack)
+					IJ.showStatus("<<Open with Special Settings>>");
+				else
+					IJ.showStatus("<<Drag and Drop>>");
+			} else {
+				Point loc = e.getLocation();
+				int buttonSize = Toolbar.getButtonSize();
+				int width = e.getDropTargetContext().getDropTarget().getComponent().getSize().width;
+				openAsVirtualStack = width-loc.x<=buttonSize && 
+						(e.getDropTargetContext().getDropTarget().getComponent() instanceof ImageCanvas3D);
+				if (openAsVirtualStack)
+					IJ.showStatus("<<Open with Special Settings>> in existing IJ3DViewer");
+				else
+					IJ.showStatus("<<Drag and Drop>> in existing IJ3DViewer");
 
+			}
 		}
 	}
 
