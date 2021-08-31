@@ -175,9 +175,9 @@ public class WavefrontLoader {
 			float z =  -8844.971f;
 			float w = 50000;
 			vertices.add(new Point3f(
-					(float)(Math.cos(-0.227)*(w*(Float.parseFloat(sp[3]) -z)/(x-4736)) -  Math.sin(-0.227)*(w*((Float.parseFloat(sp[1]) - x))/(-x+4736))),
-					w*(Float.parseFloat(sp[2]) - y)/(x-4736),
-					(float)(Math.sin(-0.227)*(w*(Float.parseFloat(sp[3]) -z)/(x-4736)) +  Math.cos(-0.227)*(w*((Float.parseFloat(sp[1]) - x))/(-x+4736)))));
+					(float)(Math.cos(Math.toRadians(-17))*(Math.cos(Math.toRadians(-13))*(w*(Float.parseFloat(sp[3]) -z)/(x-4736)) -  Math.sin(Math.toRadians(-13))*(w*((Float.parseFloat(sp[1]) - x))/(-x+4736))) - Math.sin(Math.toRadians(-17))*w*(Float.parseFloat(sp[2]) - y)/(x-4736)),
+					(float)(Math.sin(Math.toRadians(-17))*(Math.cos(Math.toRadians(-13))*(w*(Float.parseFloat(sp[3]) -z)/(x-4736)) -  Math.sin(Math.toRadians(-13))*(w*((Float.parseFloat(sp[1]) - x))/(-x+4736))) + Math.cos(Math.toRadians(-17))*w*(Float.parseFloat(sp[2]) - y)/(x-4736)),
+					(float)(Math.sin(Math.toRadians(-13))*(w*(Float.parseFloat(sp[3]) -z)/(x-4736)) +  Math.cos(Math.toRadians(-13))*(w*((Float.parseFloat(sp[1]) - x))/(-x+4736)))));
 
 			////		FOR L3
 		} else if (objfile.contains("L3") && flipXcoords) {
