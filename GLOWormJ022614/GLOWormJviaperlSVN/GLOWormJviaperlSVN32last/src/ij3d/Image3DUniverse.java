@@ -2134,35 +2134,79 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				name = getSafeContentName(name);
 				CustomMesh mesh = entry.getValue();
 				float wNorm = 5000f;
-				float xard = 0f;
-				float yard = 0f;
-				float zard = 0f;
+				double xard = 0;
+				double yard = 0;
+				double zard = 0;
 				float xflip = 1f;
 				float yflip = 1f;
 				float zflip = 1f;
-				for (Object index:mesh.getMesh()) {
-					Point3f a = (Point3f)index;
+				for (int p3f = 0;p3f<mesh.getMesh().size();p3f++) {
+					Point3f a = (Point3f)mesh.getMesh().get(p3f);
 					Point3f aRot = new Point3f(0f,0f,0f);
 
 					if (filePath.contains("JSH_L4") && flipXonImport) {
-						xard = 0f;
-						yard = 0f;
-						zard = 0f;
+						xard = 0;
+						yard = 0;
+						zard = 0;
 					} else if (filePath.contains("MeiAdult") && flipXonImport) {
-						xard = 0f;
-						yard = -13f;
-						zard = -17;
+						xard = 0;
+						yard = 45;
+						zard = 0;
 					} 
 						
 					// rot around z axis
-					aRot.x =		a.x *(float)(Math.cos(Math.toRadians(zard)) - Math.sin(Math.toRadians(zard)));
-					aRot.y =		a.y *(float)(Math.sin(Math.toRadians(zard)) + Math.cos(Math.toRadians(zard)));
+					double zarr = Math.toRadians(zard);
+					double szarr = Math.sin(zarr);
+					double czarr = Math.cos(zarr);
+					float fszarr = (float)szarr;
+					float fczarr = (float)czarr;
+					float yszarr = a.y * fszarr;
+					float yczarr = a.y * fczarr;
+					float xczarr = a.x * fczarr;
+					float xszarr = a.x * fszarr;
+
+					aRot.x =		xczarr - yszarr;
+					aRot.y =		xszarr + yczarr;
+					aRot.z =		a.z;
+				
+//					aRot.x =		a.x * ((float)(((float)Math.cos(Math.toRadians(zard))) - a.y *((float)Math.sin(Math.toRadians(zard)))));
+//					aRot.y =		a.x * ((float)(((float)Math.sin(Math.toRadians(zard))) + a.y *((float)Math.cos(Math.toRadians(zard)))));
+
 					// rot around y axis
-					aRot.x =		a.x *(float)(Math.cos(Math.toRadians(yard)) - Math.sin(Math.toRadians(yard)));
-					aRot.z =		a.z *(float)(Math.sin(Math.toRadians(yard)) + Math.cos(Math.toRadians(yard)));
+					double yarr = Math.toRadians(yard);
+					double syarr = Math.sin(yarr);
+					double cyarr = Math.cos(yarr);
+					float fsyarr = (float)syarr;
+					float fcyarr = (float)cyarr;
+					float zsyarr = aRot.z * fsyarr;
+					float zcyarr = aRot.z * fcyarr;
+					float xcyarr = aRot.x * fcyarr;
+					float xsyarr = aRot.x * fsyarr;
+
+					aRot.x =		xcyarr - zsyarr;
+					aRot.z =		xsyarr + zcyarr;
+					
+//					aRot.x =		a.x * ((float)(((float)Math.cos(Math.toRadians(yard))) - a.z *((float)Math.sin(Math.toRadians(yard)))));
+//					aRot.z =		a.x * ((float)(((float)Math.sin(Math.toRadians(yard))) + a.z *((float)Math.cos(Math.toRadians(yard)))));
+
 					// rot around x axis
-					aRot.y =		a.y *(float)(Math.cos(Math.toRadians(xard)) - Math.sin(Math.toRadians(xard)));
-					aRot.z =		a.z *(float)(Math.sin(Math.toRadians(xard)) + Math.cos(Math.toRadians(xard)));
+
+					double xarr = Math.toRadians(xard);
+					double sxarr = Math.sin(xarr);
+					double cxarr = Math.cos(xarr);
+					float fsxarr = (float)sxarr;
+					float fcxarr = (float)cxarr;
+					float zcxarr = aRot.z * fcxarr;
+					float zsxarr = aRot.z * fsxarr;
+					float ysxarr = aRot.y * fsxarr;
+					float ycxarr = aRot.y * fcxarr;
+
+					aRot.y =		ycxarr - zsxarr;
+					aRot.z =		ysxarr + zcxarr;
+					
+					
+//					aRot.y =		a.y * ((float)(((float)Math.cos(Math.toRadians(xard))) - a.z *((float)Math.sin(Math.toRadians(xard)))));
+//					aRot.z =		a.y * ((float)(((float)Math.sin(Math.toRadians(xard))) + a.z *((float)Math.cos(Math.toRadians(xard)))));
 
 					if (aRot.x<uMinCoords.x)
 						uMinCoords.x = aRot.x;
@@ -2176,6 +2220,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 						uMaxCoords.y = aRot.y;
 					if (aRot.z>uMaxCoords.z)
 						uMaxCoords.z = aRot.z;
+					
+					mesh.getMesh().set(p3f, aRot);
 				}
 				uCenterCoords.x = (uMinCoords.x + uMaxCoords.x)/2;
 				uCenterCoords.y =  (uMinCoords.y + uMaxCoords.y)/2;
@@ -2183,11 +2229,19 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				
 				for (Object index:mesh.getMesh()) {
 					Point3f a = (Point3f)index;
-					a.x = xflip * wNorm * (a.x - uCenterCoords.x)/(uCenterCoords.x - uMinCoords.x);
-					a.y = yflip * wNorm * (a.y - uCenterCoords.y)/(uCenterCoords.x - uMinCoords.x);
-					a.z = zflip * wNorm * (a.z - uCenterCoords.z)/(uCenterCoords.x - uMinCoords.x);
+					if (a.x<uMinCoords.x)
+						uMinCoords.x = a.x;
+					if (a.y<uMinCoords.y)
+						uMinCoords.y = a.y;
+					if (a.z<uMinCoords.z)
+						uMinCoords.z = a.z;
+					if (a.x>uMaxCoords.x)
+						uMaxCoords.x = a.x;
+					if (a.y>uMaxCoords.y)
+						uMaxCoords.y = a.y;
+					if (a.z>uMaxCoords.z)
+						uMaxCoords.z = a.z;
 				}
-				
 				if (!cInstants.containsKey(name)) {
 					cInstants.put(name, new TreeMap<Integer, ContentInstant>());
 				}
