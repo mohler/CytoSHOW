@@ -97,7 +97,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	private static final UniverseSynchronizer synchronizer =
 			new UniverseSynchronizer();
 	
-	private Point3f uMaxCoords = new Point3f(Float.MIN_VALUE,Float.MIN_VALUE,Float.MIN_VALUE);
+	private Point3f uMaxCoords = new Point3f(-Float.MAX_VALUE,-Float.MAX_VALUE,-Float.MAX_VALUE);
 	private Point3f uMinCoords = new Point3f(Float.MAX_VALUE,Float.MAX_VALUE,Float.MAX_VALUE);
 	private Point3f uCenterCoords = new Point3f(0f,0f,0f);
 
@@ -2133,21 +2133,61 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				String name = entry.getKey();
 				name = getSafeContentName(name);
 				CustomMesh mesh = entry.getValue();
+				float wNorm = 5000f;
+				float xard = 0f;
+				float yard = 0f;
+				float zard = 0f;
+				float xflip = 1f;
+				float yflip = 1f;
+				float zflip = 1f;
 				for (Object index:mesh.getMesh()) {
 					Point3f a = (Point3f)index;
-					if (a.x<uMinCoords.x)
-						uMinCoords.x = a.x;
-					if (a.y<uMinCoords.y)
-						uMinCoords.y = a.y;
-					if (a.z<uMinCoords.z)
-						uMinCoords.z = a.z;
-					if (a.x>uMaxCoords.x)
-						uMaxCoords.x = a.x;
-					if (a.y>uMaxCoords.y)
-						uMaxCoords.y = a.y;
-					if (a.z>uMaxCoords.z)
-						uMaxCoords.z = a.z;
+					Point3f aRot = new Point3f(0f,0f,0f);
+
+					if (filePath.contains("JSH_L4") && flipXonImport) {
+						xard = 0f;
+						yard = 0f;
+						zard = 0f;
+					} else if (filePath.contains("MeiAdult") && flipXonImport) {
+						xard = 0f;
+						yard = -13f;
+						zard = -17;
+					} 
+						
+					// rot around z axis
+					aRot.x =		a.x *(float)(Math.cos(Math.toRadians(zard)) - Math.sin(Math.toRadians(zard)));
+					aRot.y =		a.y *(float)(Math.sin(Math.toRadians(zard)) + Math.cos(Math.toRadians(zard)));
+					// rot around y axis
+					aRot.x =		a.x *(float)(Math.cos(Math.toRadians(yard)) - Math.sin(Math.toRadians(yard)));
+					aRot.z =		a.z *(float)(Math.sin(Math.toRadians(yard)) + Math.cos(Math.toRadians(yard)));
+					// rot around x axis
+					aRot.y =		a.y *(float)(Math.cos(Math.toRadians(xard)) - Math.sin(Math.toRadians(xard)));
+					aRot.z =		a.z *(float)(Math.sin(Math.toRadians(xard)) + Math.cos(Math.toRadians(xard)));
+
+					if (aRot.x<uMinCoords.x)
+						uMinCoords.x = aRot.x;
+					if (aRot.y<uMinCoords.y)
+						uMinCoords.y = aRot.y;
+					if (aRot.z<uMinCoords.z)
+						uMinCoords.z = aRot.z;
+					if (aRot.x>uMaxCoords.x)
+						uMaxCoords.x = aRot.x;
+					if (aRot.y>uMaxCoords.y)
+						uMaxCoords.y = aRot.y;
+					if (aRot.z>uMaxCoords.z)
+						uMaxCoords.z = aRot.z;
 				}
+				uCenterCoords.x = (uMinCoords.x + uMaxCoords.x)/2;
+				uCenterCoords.y =  (uMinCoords.y + uMaxCoords.y)/2;
+				uCenterCoords.z =  (uMinCoords.z + uMaxCoords.z)/2;
+				
+				for (Object index:mesh.getMesh()) {
+					Point3f a = (Point3f)index;
+					a.x = xflip * wNorm * (a.x - uCenterCoords.x)/(uCenterCoords.x - uMinCoords.x);
+					a.y = yflip * wNorm * (a.y - uCenterCoords.y)/(uCenterCoords.x - uMinCoords.x);
+					a.z = zflip * wNorm * (a.z - uCenterCoords.z)/(uCenterCoords.x - uMinCoords.x);
+				}
+				
 				if (!cInstants.containsKey(name)) {
 					cInstants.put(name, new TreeMap<Integer, ContentInstant>());
 				}
