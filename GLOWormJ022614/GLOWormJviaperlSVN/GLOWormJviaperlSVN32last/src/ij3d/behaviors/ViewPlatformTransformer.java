@@ -50,7 +50,7 @@ public class ViewPlatformTransformer {
 	private TransformGroup translateTG;
 
 	private Transform3D centerXform = new Transform3D();
-	private Transform3D rotationXform = new Transform3D();
+	private Transform3D rotationTransform = new Transform3D();
 	private Transform3D zoomXform = new Transform3D();
 	private Transform3D translateXform = new Transform3D();
 
@@ -285,12 +285,12 @@ public class ViewPlatformTransformer {
 		tmp.set(aa);
 
 		// first apply the old transform
-		rotationTG.getTransform(rotationXform);
+		rotationTG.getTransform(rotationTransform);
 		// rotate
-		rotationXform.mul(tmp, rotationXform);
+		rotationTransform.mul(tmp, rotationTransform);
 
-		rotationTG.setTransform(rotationXform);
-		transformChanged(BehaviorCallback.ROTATE, rotationXform);
+		rotationTG.setTransform(rotationTransform);
+		transformChanged(BehaviorCallback.ROTATE, rotationTransform);
 	}
 
 	private AxisAngle4d aa2 = new AxisAngle4d();
@@ -311,14 +311,14 @@ public class ViewPlatformTransformer {
 		tmp2.set(aa2);
 
 		// first apply the old transform
-		rotationTG.getTransform(rotationXform);
+		rotationTG.getTransform(rotationTransform);
 		// rotate x
-		rotationXform.mul(tmp, rotationXform);
+		rotationTransform.mul(tmp, rotationTransform);
 		// rotate y
-		rotationXform.mul(tmp2, rotationXform);
+		rotationTransform.mul(tmp2, rotationTransform);
 
-		rotationTG.setTransform(rotationXform);
-		transformChanged(BehaviorCallback.ROTATE, rotationXform);
+		rotationTG.setTransform(rotationTransform);
+		transformChanged(BehaviorCallback.ROTATE, rotationTransform);
 	}
 
 	/**

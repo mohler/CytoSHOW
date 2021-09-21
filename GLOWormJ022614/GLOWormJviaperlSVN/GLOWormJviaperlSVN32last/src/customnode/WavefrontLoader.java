@@ -146,7 +146,7 @@ public class WavefrontLoader {
 
 	private void readVertex(boolean flipXcoords) {
 		String[] sp = line.split("\\s+");
-		int flipXCoef = flipXcoords?-1:1;
+		int flipXCoef = flipXcoords?1:1;
 
 		vertices.add(new Point3f(
 				flipXCoef*Float.parseFloat(sp[1]),
