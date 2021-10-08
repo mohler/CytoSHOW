@@ -6363,108 +6363,242 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					sliceNumbers[f] = Integer.parseInt(objectLines[f].substring(objectLines[f].indexOf("JSHJSH")+6, objectLines[f].indexOf("JSHJSH")+9));
 				IJ.log(""+sliceNumbers[f]);
 			}
+			//		IJ.log(s);
 
-		} else {
-			this.setVisible(true);
-			return;
-		}
-		//		IJ.log(s);
+			long count = 0;
 
-		long count = 0;
-
-		Hashtable<String, String> objectHash = new Hashtable<String,String>();
-		String centerZtestString = objectLines[1].split(",")[4].replace("\"", "");
-		String centerZroot = null;
-		for (int i=0; i<centerZtestString.length(); i++){
-			if (objectLines[2].split(",")[4].replace("\"", "")
-					.contains(centerZtestString.substring(0,i))
-					&& !centerZtestString.substring(i-1>=0?i-1:0,centerZtestString.length()-1).matches("\\d*")) {
-				centerZroot = centerZtestString.substring(0,i);
-			}
-		}
-
-
-		long nRois =0;
-
-		for (int i=1; i<objectLines.length; i++){
-			String objectLine=objectLines[i];
-			objectHash.put(objectLine.split(",")[0].replace("\"", ""), objectLine);
-		}
-		double shrinkFactor = 1/IJ.getNumber("XY dimension should be reduced in scale by what factor?", 1);
-
-		imp.getWindow().setVisible(false);
-
-		Hashtable<String, ArrayList<String>> synapsePairFrequencyHashtable = new Hashtable<String, ArrayList<String>>();
-		
-		for (int obj=1; obj<objectLines.length; obj++) {
-			count++;
-			IJ.showStatus(""+count+"/"+fullCount+" Tags loaded for "+ imp.getTitle());
-			String sObj = objectLines[obj];
-			String objType = sObj.split(",")[6].replace("\"", "");
-			String imageNumber = sObj.split(",")[4].replace("\"", "");
-			int zSustain = Integer.parseInt(sObj.split(",")[21].replace("\"", "").replace("zS", ""));
-			String presynName= sObj.split(",")[17].replace("\"", "");
-			String[] postsynNames= sObj.split(",")[18].replace("\"", "").split("&");
-
-			String roiName="\""+sObj.split(",")[17].replace("\"", "")+objType+sObj.split(",")[18].replace("\"", "")+"_"+sObj.split(",")[12].replace("\"", "")+imageNumber+"_zs"+sObj.split(",")[21].replace("\"", "")+" \"";
-			roiName = roiName.replaceAll("(\\[|\\])", "");
-			Color roiColor= objType.contains("chemical")?Color.white:Color.yellow;
-			if (roiName.contains("uncertain"))
-				roiColor= objType.contains("chemical")?Color.pink:Color.orange;
-			int centerX = (int)(Integer.parseInt(sObj.split(",")[1].replace("\"", ""))/shrinkFactor) ;
-			int centerY = (int)(Integer.parseInt(sObj.split(",")[2].replace("\"", ""))/shrinkFactor);
-			int frontZ = Integer.parseInt(sObj.split(",")[4].replace("\"", "")
-					.replace(centerZroot, ("")));
-
-////		  SPECIAL CASE ONLY FOR honoring JSH image GAPS AT Z56 z162-166				
-			if (imageNumber.startsWith("JSHJSH")){
-				if (frontZ>55){
-					frontZ++;
-				}
-				if (frontZ>162){
-					frontZ++;
-					frontZ++;
-					frontZ++;
-					frontZ++;							
+			Hashtable<String, String> objectHash = new Hashtable<String,String>();
+			String centerZtestString = objectLines[1].split(",")[4].replace("\"", "");
+			String centerZroot = null;
+			for (int i=0; i<centerZtestString.length(); i++){
+				if (objectLines[2].split(",")[4].replace("\"", "")
+						.contains(centerZtestString.substring(0,i))
+						&& !centerZtestString.substring(i-1>=0?i-1:0,centerZtestString.length()-1).matches("\\d*")) {
+					centerZroot = centerZtestString.substring(0,i);
 				}
 			}
 
-			
-			int adjustmentZ =0;
-			for (int susStep=0;susStep<zSustain;susStep++){
-				int plotZ = frontZ+susStep -adjustmentZ;
-				if (plotZ<1||plotZ>imp.getNSlices()){
-					continue;
+
+			long nRois =0;
+
+			for (int i=1; i<objectLines.length; i++){
+				String objectLine=objectLines[i];
+				objectHash.put(objectLine.split(",")[0].replace("\"", ""), objectLine);
+			}
+			double shrinkFactor = 1/IJ.getNumber("XY dimension should be reduced in scale by what factor?", 1);
+
+			imp.getWindow().setVisible(false);
+
+			Hashtable<String, ArrayList<String>> synapsePairFrequencyHashtable = new Hashtable<String, ArrayList<String>>();
+
+			for (int obj=1; obj<objectLines.length; obj++) {
+				count++;
+				IJ.showStatus(""+count+"/"+fullCount+" Tags loaded for "+ imp.getTitle());
+				String sObj = objectLines[obj];
+				String objType = sObj.split(",")[6].replace("\"", "");
+				String imageNumber = sObj.split(",")[4].replace("\"", "");
+				int zSustain = Integer.parseInt(sObj.split(",")[21].replace("\"", "").replace("zS", ""));
+				String presynName= sObj.split(",")[17].replace("\"", "");
+				String[] postsynNames= sObj.split(",")[18].replace("\"", "").split("&");
+
+				String roiName="\""+sObj.split(",")[17].replace("\"", "")+objType+sObj.split(",")[18].replace("\"", "")+"_"+sObj.split(",")[12].replace("\"", "")+imageNumber+"_zs"+sObj.split(",")[21].replace("\"", "")+" \"";
+				roiName = roiName.replaceAll("(\\[|\\])", "");
+				Color roiColor= objType.contains("chemical")?Color.white:Color.yellow;
+				if (roiName.contains("uncertain"))
+					roiColor= objType.contains("chemical")?Color.pink:Color.orange;
+				int centerX = (int)(Integer.parseInt(sObj.split(",")[1].replace("\"", ""))/shrinkFactor) ;
+				int centerY = (int)(Integer.parseInt(sObj.split(",")[2].replace("\"", ""))/shrinkFactor);
+				int frontZ = Integer.parseInt(sObj.split(",")[4].replace("\"", "")
+						.replace(centerZroot, ("")));
+
+				////		  SPECIAL CASE ONLY FOR honoring JSH image GAPS AT Z56 z162-166				
+				if (imageNumber.startsWith("JSHJSH")){
+					if (frontZ>55){
+						frontZ++;
+					}
+					if (frontZ>162){
+						frontZ++;
+						frontZ++;
+						frontZ++;
+						frontZ++;							
+					}
 				}
 
-				if (roiName.contains("|cell")) {
-				} else {
 
-					int roiDiameter = 25;
-					Roi oRoi= new OvalRoi(centerX-roiDiameter/2, centerY-roiDiameter/2, roiDiameter, roiDiameter);
-//					Roi oRoi= new Roi(centerX-roiDiameter/2, centerY-roiDiameter/2, roiDiameter, roiDiameter);
-					oRoi.setName(roiName);
-					this.setRoiFillColor(oRoi, roiColor);
-					oRoi.setPosition(1, plotZ,1 );
-					imp.setPosition(1, plotZ, 1);
-					this.addRoi(oRoi);
-					for (String postsynName:postsynNames){
-						IJ.log(presynName+","+postsynName+","+plotZ+","+1+","+objType);
-						if (synapsePairFrequencyHashtable.get(presynName+","+postsynName+","+objType)==null){
-							synapsePairFrequencyHashtable.put(presynName+","+postsynName+","+objType, new ArrayList<String>());
+				int adjustmentZ =0;
+				for (int susStep=0;susStep<zSustain;susStep++){
+					int plotZ = frontZ+susStep -adjustmentZ;
+					if (plotZ<1||plotZ>imp.getNSlices()){
+						continue;
+					}
+
+					if (roiName.contains("|cell")) {
+					} else {
+
+						int roiDiameter = 25;
+						Roi oRoi= new OvalRoi(centerX-roiDiameter/2, centerY-roiDiameter/2, roiDiameter, roiDiameter);
+						//					Roi oRoi= new Roi(centerX-roiDiameter/2, centerY-roiDiameter/2, roiDiameter, roiDiameter);
+						oRoi.setName(roiName);
+						this.setRoiFillColor(oRoi, roiColor);
+						oRoi.setPosition(1, plotZ,1 );
+						imp.setPosition(1, plotZ, 1);
+						this.addRoi(oRoi);
+						for (String postsynName:postsynNames){
+							IJ.log(presynName+","+postsynName+","+plotZ+","+1+","+objType);
+							if (synapsePairFrequencyHashtable.get(presynName+","+postsynName+","+objType)==null){
+								synapsePairFrequencyHashtable.put(presynName+","+postsynName+","+objType, new ArrayList<String>());
+							}
+							synapsePairFrequencyHashtable.get(presynName+","+postsynName+","+objType).add(presynName+","+postsynName+","+plotZ+","+1+","+objType);
 						}
-						synapsePairFrequencyHashtable.get(presynName+","+postsynName+","+objType).add(presynName+","+postsynName+","+plotZ+","+1+","+objType);
 					}
 				}
 			}
-		}
-		updateShowAll();
-		//this.imp.setTitle(impTitle);
-		imp.getWindow().setVisible(true);
-		this.setVisible(wasVis);
-		busy = false;
-		for (Object key:synapsePairFrequencyHashtable.keySet()){
-			IJ.log(((String)key)+"="+synapsePairFrequencyHashtable.get((String)key).size());
+			updateShowAll();
+			//this.imp.setTitle(impTitle);
+			imp.getWindow().setVisible(true);
+			this.setVisible(wasVis);
+			busy = false;
+			for (Object key:synapsePairFrequencyHashtable.keySet()){
+				IJ.log(((String)key)+"="+synapsePairFrequencyHashtable.get((String)key).size());
+			}
+		} else if (path.contains("synapse_key")) {
+			
+			int[] sliceNumbers = new int[fullCount];
+			String[] pres = new String[fullCount];
+			String[][] posts = new String[fullCount][];
+			String[] segments = new String[fullCount];
+			String[] xs = new String[fullCount];
+			String[] ys = new String[fullCount];
+			String[] zs = new String[fullCount];
+
+			for (int f=0; f < fullCount; f++) {
+				if (objectLines[f].startsWith("Presynaptic"))
+					continue;
+				if (objectLines[f].contains("\"")) {
+					sliceNumbers[f] = Integer.parseInt(objectLines[f].split("\"")[2].split(",")[4]);
+					pres[f] = objectLines[f].split(",")[0];
+					posts[f] = objectLines[f].split("\"")[1].split(",");
+					segments[f] = objectLines[f].split("\"")[2].split(",")[1];
+					xs[f] = objectLines[f].split("\"")[2].split(",")[2];
+					ys[f] = objectLines[f].split("\"")[2].split(",")[3];
+					zs[f] = objectLines[f].split("\"")[2].split(",")[4];
+				} else {
+					
+					sliceNumbers[f] = Integer.parseInt(objectLines[f].split(",")[5]);
+					pres[f] = objectLines[f].split(",")[0];
+					posts[f] = new String[] {objectLines[f].split(",")[1]};
+					segments[f] = objectLines[f].split(",")[2];
+					xs[f] = objectLines[f].split(",")[3];
+					ys[f] = objectLines[f].split(",")[4];
+					zs[f] = objectLines[f].split(",")[5];
+				}
+				IJ.log(""+sliceNumbers[f]);
+			}
+			//		IJ.log(s);
+
+			long count = 0;
+
+			Hashtable<String, String> objectHash = new Hashtable<String,String>();
+//			String centerZtestString = objectLines[1].split(",")[4].replace("\"", "");
+//			String centerZroot = null;
+//			for (int i=0; i<centerZtestString.length(); i++){
+//				if (objectLines[2].split(",")[4].replace("\"", "")
+//						.contains(centerZtestString.substring(0,i))
+//						&& !centerZtestString.substring(i-1>=0?i-1:0,centerZtestString.length()-1).matches("\\d*")) {
+//					centerZroot = centerZtestString.substring(0,i);
+//				}
+//			}
+
+
+			long nRois =0;
+
+			for (int i=0; i<objectLines.length; i++){
+				String objectLine=objectLines[i];
+				if (pres[i]!=null)
+					objectHash.put(pres[i], objectLine);
+			}
+			double shrinkFactor = 1/IJ.getNumber("XY dimension should be reduced in scale by what factor?", 1);
+			shrinkFactor = shrinkFactor*imp.getCalibration().pixelWidth;
+
+			imp.getWindow().setVisible(false);
+
+			Hashtable<String, ArrayList<String>> synapsePairFrequencyHashtable = new Hashtable<String, ArrayList<String>>();
+
+			for (int obj=0; obj<objectLines.length; obj++) {
+				if (objectLines[obj].startsWith("Presynaptic"))
+					continue;
+				count++;
+				IJ.showStatus(""+count+"/"+fullCount+" Tags loaded for "+ imp.getTitle());
+				String sObj = objectLines[obj];
+				String objType = "undefined";
+				String imageNumber = zs[obj];
+				int zSustain = 1;
+				String presynName= pres[obj];
+				String[] postsynNames= posts[obj];
+
+				String roiName="\""+presynName+objType+Arrays.deepToString(postsynNames).replace("[","").replace("]","").replace(", ","&")+" \"";
+				roiName = roiName.replaceAll("(\\[|\\])", "");
+				Color roiColor= objType.contains("chemical")?Color.white:Color.yellow;
+				if (roiName.contains("uncertain"))
+					roiColor= objType.contains("chemical")?Color.pink:Color.orange;
+				int centerX = (int)(Integer.parseInt(xs[obj])/shrinkFactor) ;
+				int centerY = (int)(Integer.parseInt(ys[obj])/shrinkFactor);
+				int frontZ = Integer.parseInt(zs[obj]);
+
+				////		  SPECIAL CASE ONLY FOR honoring JSH image GAPS AT Z56 z162-166				
+				if (imageNumber.startsWith("JSHJSH")){
+					if (frontZ>55){
+						frontZ++;
+					}
+					if (frontZ>162){
+						frontZ++;
+						frontZ++;
+						frontZ++;
+						frontZ++;							
+					}
+				}
+
+
+				int adjustmentZ =0;
+				for (int susStep=0;susStep<zSustain;susStep++){
+					int plotZ = frontZ+susStep -adjustmentZ;
+					if (plotZ<1||plotZ>imp.getNSlices()){
+						continue;
+					}
+
+					if (roiName.contains("|cell")) {
+					} else {
+
+						int roiDiameter = 25;
+						Roi oRoi= new OvalRoi(centerX-roiDiameter/2, centerY-roiDiameter/2, roiDiameter, roiDiameter);
+						//					Roi oRoi= new Roi(centerX-roiDiameter/2, centerY-roiDiameter/2, roiDiameter, roiDiameter);
+						oRoi.setName(roiName);
+						this.setRoiFillColor(oRoi, roiColor);
+						oRoi.setPosition(1, plotZ,1 );
+						imp.setPosition(1, plotZ, 1);
+						this.addRoi(oRoi);
+						for (String postsynName:postsynNames){
+							IJ.log(presynName+","+postsynName+","+plotZ+","+1+","+objType);
+							if (synapsePairFrequencyHashtable.get(presynName+","+postsynName+","+objType)==null){
+								synapsePairFrequencyHashtable.put(presynName+","+postsynName+","+objType, new ArrayList<String>());
+							}
+							synapsePairFrequencyHashtable.get(presynName+","+postsynName+","+objType).add(presynName+","+postsynName+","+plotZ+","+1+","+objType);
+						}
+					}
+				}
+			}
+			updateShowAll();
+			//this.imp.setTitle(impTitle);
+			imp.getWindow().setVisible(true);
+			this.setVisible(wasVis);
+			busy = false;
+			for (Object key:synapsePairFrequencyHashtable.keySet()){
+				IJ.log(((String)key)+"="+synapsePairFrequencyHashtable.get((String)key).size());
+			}
+		
+		} else {
+			this.setVisible(true);
+			return;
 		}
 	}
 

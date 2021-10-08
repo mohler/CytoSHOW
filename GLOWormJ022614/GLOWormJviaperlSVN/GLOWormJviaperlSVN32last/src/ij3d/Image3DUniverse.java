@@ -2265,16 +2265,12 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			Point3d cMax = new Point3d(), cMin = new Point3d();
 			content.getMax(cMax);
 			content.getMin(cMin);
-//			content.applyTranslation((float)((cMax.x - cMin.x)/2)-uCenterCoords.x,
-//										(float)((cMax.y - cMin.y)/2)-uCenterCoords.y,
-//										(float)((cMax.z - cMin.z)/2)-uCenterCoords.z);
-//			content.applyRotation(Content.X_AXIS, xard);
-//			content.applyRotation(Content.Y_AXIS, yard);
-//			content.applyRotation(Content.Z_AXIS, zard);
-			Matrix3d ri = new Matrix3d(	1,	0,	0,
-										0, 	1,	0,
-										0,	0,	1);
-
+			content.applyTranslation((float)((cMax.x - cMin.x)/2)-uCenterCoords.x,
+										(float)((cMax.y - cMin.y)/2)-uCenterCoords.y,
+										(float)((cMax.z - cMin.z)/2)-uCenterCoords.z);
+			content.applyRotation(Content.X_AXIS, xard);
+			content.applyRotation(Content.Y_AXIS, yard);
+			content.applyRotation(Content.Z_AXIS, zard);
 			Matrix3d rx = new Matrix3d(	1,	0,								0,
 										0, 	Math.cos(Math.toRadians(xard)),	-Math.sin(Math.toRadians(xard)),
 										0, 	Math.sin(Math.toRadians(xard)),	Math.cos(Math.toRadians(xard)));
@@ -2290,19 +2286,11 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			Matrix3d m1 = new Matrix3d(rz); 
 			m1.mul(ry);
 			m1.mul(rx);
-			
-			Vector3d t1 = new Vector3d(	(uMaxCoords.x),
-										(uMaxCoords.y),
-										(uMaxCoords.z));
-			Vector3d t2 = new Vector3d(		0,
-											0,
-											0);
-
+			Vector3d t1 = new Vector3d(	((cMax.x - cMin.x)/2)-uCenterCoords.x,
+										((cMax.y - cMin.y)/2)-uCenterCoords.y,
+										((cMax.z - cMin.z)/2)-uCenterCoords.z);
 			double s = 1d;
-			if (flipXonImport) {
-				content.applyTransform(new Transform3D(m1, t2, s));
-				content.applyTransform(new Transform3D(ri, t1, s));
-			}
+//			content.applyTransform(new Transform3D(m1, t1, s));
 			content.setLocked(true);
 		}
 		if (win.getTitle().matches("CytoSHOW3D.*")){
