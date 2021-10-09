@@ -69,7 +69,6 @@ import javax.swing.JRootPane;
 import javax.swing.SwingUtilities;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Color3f;
-import javax.vecmath.Matrix3d;
 import javax.vecmath.Point3d;
 import javax.vecmath.Point3f;
 import javax.vecmath.Vector3d;
@@ -97,34 +96,6 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 	private static final UniverseSynchronizer synchronizer =
 			new UniverseSynchronizer();
-	
-	private Point3f uMaxCoords = new Point3f(-Float.MAX_VALUE,-Float.MAX_VALUE,-Float.MAX_VALUE);
-	private Point3f uMinCoords = new Point3f(Float.MAX_VALUE,Float.MAX_VALUE,Float.MAX_VALUE);
-	private Point3f uCenterCoords = new Point3f(0f,0f,0f);
-
-	public Point3f getuCenterCoords() {
-		return uCenterCoords;
-	}
-
-	public void setuCenterCoords(Point3f uCenterCoords) {
-		this.uCenterCoords = uCenterCoords;
-	}
-
-	public Point3f getuMaxCoords() {
-		return uMaxCoords;
-	}
-
-	public void setuMaxCoords(Point3f uMaxCoords) {
-		this.uMaxCoords = uMaxCoords;
-	}
-
-	public Point3f getuMinCoords() {
-		return uMinCoords;
-	}
-
-	public void setuMinCoords(Point3f uMinCoords) {
-		this.uMinCoords = uMinCoords;
-	}
 
 	/** The current time point */
 	private int currentTimepoint = 0;
@@ -823,10 +794,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	public void recalculateGlobalMinMax() {
 		if(contents.isEmpty())
 			return;
-//		Point3d min = new Point3d();
-//		Point3d max = new Point3d();
-		Point3d min = new Point3d(Double.MAX_VALUE,Double.MAX_VALUE,Double.MAX_VALUE);
-		Point3d max = new Point3d(-Double.MAX_VALUE,-Double.MAX_VALUE,-Double.MAX_VALUE);
+		Point3d min = new Point3d();
+		Point3d max = new Point3d();
 
 		Iterator it = contents();
 		Content c = (Content)it.next();
@@ -1894,7 +1863,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		c.getCurrentInstant().getLocalToVworld(localToVWorld);
 		localToVWorld.transform(center);
 
-		centerAt(center);
+		getViewPlatformTransformer().centerAt(center);
 	}
 
 	/**
@@ -2081,7 +2050,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 					}
 				}
 //WHY WAS THIS EVER CALLED??				
-				univ.waitForNextFrame();
+//				univ.waitForNextFrame();
 				univ.fireContentAdded(c);
 				univ.addUniverseListener(c);
 
@@ -2114,12 +2083,6 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		List<Content>contents = new ArrayList<Content>();
 		Hashtable<String, TreeMap<Integer, ContentInstant>> cInstants = new Hashtable<String, TreeMap<Integer, ContentInstant>>();
 
-				double xard = 0;
-				double yard = 0;
-				double zard = 0;
-				float xflip = 1f;
-				float yflip = 1f;
-				float zflip = 1f;
 		for (Object nextmatchingfilename: timedObjFileNms) {
 			String nextmatchingfilePath = file.getParent() +File.separator + (String)nextmatchingfilename;
 			String[] tptParse = ((String)nextmatchingfilename).split("_");
@@ -2142,101 +2105,6 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				String name = entry.getKey();
 				name = getSafeContentName(name);
 				CustomMesh mesh = entry.getValue();
-				float wNorm = 5000f;
-//				for (int p3f = 0;p3f<mesh.getMesh().size();p3f++) {
-//					List<Point3f> meshList = mesh.getMesh();
-//					Point3f a = meshList.get(p3f);
-////					if (p3f%1000 == 0) {
-////						IJ.log(""+a.toString());
-////					}
-//					Point3f aRot = new Point3f(0f,0f,0f);
-//
-					if (filePath.contains("JSH_L4") && flipXonImport) {
-						xard = 0;
-						yard = 0;
-						zard = 0;
-					} else if (filePath.contains("MeiAdult") && flipXonImport) {
-						xard = 0;
-						yard = 90;
-						zard = 0;
-					} 
-//						
-//					// rot around z axis
-//					double zarr = Math.toRadians(zard);
-//					double szarr = Math.sin(zarr);
-//					double czarr = Math.cos(zarr);
-//					float fszarr = (float)szarr;
-//					float fczarr = (float)czarr;
-//					float yszarr = a.y * fszarr;
-//					float yczarr = a.y * fczarr;
-//					float xczarr = a.x * fczarr;
-//					float xszarr = a.x * fszarr;
-//
-//					aRot.x =		xczarr - yszarr;
-//					aRot.y =		xszarr + yczarr;
-//					aRot.z =		a.z;
-//				
-////					aRot.x =		a.x * ((float)(((float)Math.cos(Math.toRadians(zard))) - a.y *((float)Math.sin(Math.toRadians(zard)))));
-////					aRot.y =		a.x * ((float)(((float)Math.sin(Math.toRadians(zard))) + a.y *((float)Math.cos(Math.toRadians(zard)))));
-//
-//					// rot around y axis
-//					double yarr = Math.toRadians(yard);
-//					double syarr = Math.sin(yarr);
-//					double cyarr = Math.cos(yarr);
-//					float fsyarr = (float)syarr;
-//					float fcyarr = (float)cyarr;
-//					float zsyarr = a.z * fsyarr;
-//					float zcyarr = a.z * fcyarr;
-//					float xcyarr = a.x * fcyarr;
-//					float xsyarr = a.x * fsyarr;
-//
-//					aRot.x =		xcyarr - zsyarr;
-//					aRot.z =		xsyarr + zcyarr;
-//					aRot.y = a.y;
-////					if (p3f%1000 == 0) {
-////						IJ.log(""+a.toString());
-////						IJ.wait(1);
-////					}
-////					aRot.x =		a.x * ((float)(((float)Math.cos(Math.toRadians(yard))) - a.z *((float)Math.sin(Math.toRadians(yard)))));
-////					aRot.z =		a.x * ((float)(((float)Math.sin(Math.toRadians(yard))) + a.z *((float)Math.cos(Math.toRadians(yard)))));
-//
-//					// rot around x axis
-//
-//					double xarr = Math.toRadians(xard);
-//					double sxarr = Math.sin(xarr);
-//					double cxarr = Math.cos(xarr);
-//					float fsxarr = (float)sxarr;
-//					float fcxarr = (float)cxarr;
-//					float zcxarr = aRot.z * fcxarr;
-//					float zsxarr = aRot.z * fsxarr;
-//					float ysxarr = aRot.y * fsxarr;
-//					float ycxarr = aRot.y * fcxarr;
-//
-//					aRot.y =		ycxarr - zsxarr;
-//					aRot.z =		ysxarr + zcxarr;
-//					
-//					
-////					aRot.y =		a.y * ((float)(((float)Math.cos(Math.toRadians(xard))) - a.z *((float)Math.sin(Math.toRadians(xard)))));
-////					aRot.z =		a.y * ((float)(((float)Math.sin(Math.toRadians(xard))) + a.z *((float)Math.cos(Math.toRadians(xard)))));
-//
-//					mesh.getMesh().set(p3f, aRot);
-//				}
-				
-				for (Object index:mesh.getMesh()) {
-					Point3f a = (Point3f)index;
-					if (a.x<uMinCoords.x)
-						uMinCoords.x = a.x;
-					if (a.y<uMinCoords.y)
-						uMinCoords.y = a.y;
-					if (a.z<uMinCoords.z)
-						uMinCoords.z = a.z;
-					if (a.x>uMaxCoords.x)
-						uMaxCoords.x = a.x;
-					if (a.y>uMaxCoords.y)
-						uMaxCoords.y = a.y;
-					if (a.z>uMaxCoords.z)
-						uMaxCoords.z = a.z;
-				}
 				if (!cInstants.containsKey(name)) {
 					cInstants.put(name, new TreeMap<Integer, ContentInstant>());
 				}
@@ -2253,54 +2121,15 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				cInstants.get(name).put(nextTpt,contInst);
 			}
 		}
-//		uCenterCoords.x = (uMinCoords.x + uMaxCoords.x)/2;
-//		uCenterCoords.y =  (uMinCoords.y + uMaxCoords.y)/2;
-//		uCenterCoords.z =  (uMinCoords.z + uMaxCoords.z)/2;
 		for (String cName:cInstants.keySet()) {
 			Content content = new Content(cName, cInstants.get(cName), false);
 			this.addContent(content);
-			uCenterCoords.x = getuCenterCoords().x;
-			uCenterCoords.y =  getuCenterCoords().x;
-			uCenterCoords.z =  getuCenterCoords().x;
-			Point3d cMax = new Point3d(), cMin = new Point3d();
-			content.getMax(cMax);
-			content.getMin(cMin);
-			content.applyTranslation((float)((cMax.x - cMin.x)/2)-uCenterCoords.x,
-										(float)((cMax.y - cMin.y)/2)-uCenterCoords.y,
-										(float)((cMax.z - cMin.z)/2)-uCenterCoords.z);
-			content.applyRotation(Content.X_AXIS, xard);
-			content.applyRotation(Content.Y_AXIS, yard);
-			content.applyRotation(Content.Z_AXIS, zard);
-			Matrix3d rx = new Matrix3d(	1,	0,								0,
-										0, 	Math.cos(Math.toRadians(xard)),	-Math.sin(Math.toRadians(xard)),
-										0, 	Math.sin(Math.toRadians(xard)),	Math.cos(Math.toRadians(xard)));
-			
-			Matrix3d ry= new Matrix3d(	Math.cos(Math.toRadians(yard)),	0,	Math.sin(Math.toRadians(yard)),
-										0, 								1,	0,
-										-Math.sin(Math.toRadians(yard)), 0,	Math.cos(Math.toRadians(yard)));
-			
-			Matrix3d rz = new Matrix3d(	Math.cos(Math.toRadians(zard)),	-Math.sin(Math.toRadians(zard)),	0, 	
-										Math.sin(Math.toRadians(zard)),	Math.cos(Math.toRadians(zard)),		0,	
-										0,								0,									1 	);
-			
-			Matrix3d m1 = new Matrix3d(rz); 
-			m1.mul(ry);
-			m1.mul(rx);
-			Vector3d t1 = new Vector3d(	((cMax.x - cMin.x)/2)-uCenterCoords.x,
-										((cMax.y - cMin.y)/2)-uCenterCoords.y,
-										((cMax.z - cMin.z)/2)-uCenterCoords.z);
-			double s = 1d;
-//			content.applyTransform(new Transform3D(m1, t1, s));
 			content.setLocked(true);
 		}
 		if (win.getTitle().matches("CytoSHOW3D.*")){
 			win.getImagePlus().setWindow(win);
 			win.getImagePlus().setTitle((this.flipXonImport?"FlipX_":"")+titleName);
 		}
-		
-		IJ.log(""+getuMinCoords().toString()+getuCenterCoords().toString()+getuMaxCoords().toString());
-				
-		resetView();
 	}
 
 
