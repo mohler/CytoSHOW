@@ -209,18 +209,18 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		canvas.addMouseMotionListener(new MouseMotionAdapter() {
 			
 			Content recentContent ;
-			int recentX, recentY;
+
 			public void mouseMoved(MouseEvent e) {
 
 				Content c = picker.getPickedContent(
 						e.getX(), e.getY());
 				
-				if (c == recentContent && (( Math.abs(recentX-e.getX()))<3) && ( Math.abs((recentY-e.getY()))<3)) {
+				if (c == recentContent && (( Math.abs(win.canvas3D.recentX-e.getX()))<3) && ( Math.abs((win.canvas3D.recentY-e.getY()))<3)) {
 					
 				} else {
 					recentContent = c;
-					recentX=e.getX();
-					recentY=e.getY();
+					win.canvas3D.recentX=e.getX();
+					win.canvas3D.recentY=e.getY();
 					String cursorString = " ";
 					Toolkit tk = Toolkit.getDefaultToolkit();
 					if(c != null) {
@@ -289,12 +289,11 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 						Rectangle2D bounds = font.getStringBounds(cursorString, frc);
 						int w = (int) bounds.getWidth();
 						int ht = (int) bounds.getHeight();
-						//					Image img = new BufferedImage(w, ht, BufferedImage.TYPE_INT_ARGB_PRE);
-						Image img = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB_PRE);
+						win.canvas3D.crsrImg = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB_PRE);
 
 
 						//		img.getGraphics().setColor(Colors.decode("00000000", Color.white));
-						Graphics2D g2d = (Graphics2D) img.getGraphics();
+						Graphics2D g2d = (Graphics2D) win.canvas3D.crsrImg.getGraphics();
 
 						g2d.setFont(font);
 
@@ -315,12 +314,12 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 							Graphics2D g2Dcanv = win.canvas3D.getGraphics2D();
 							win.canvas3D.stopRenderer();
 							win.canvas3D.swap();
-							g2Dcanv.drawImage(img, e.getX(), e.getY(), null);
+							g2Dcanv.drawImage(win.canvas3D.crsrImg, e.getX(), e.getY(), null);
 							win.canvas3D.swap();
 							win.canvas3D.startRenderer();
 
 						} else {
-							win.canvas3D.setCursor(tk.createCustomCursor(img,new Point(0,0),"searchCursor"));
+							win.canvas3D.setCursor(tk.createCustomCursor(win.canvas3D.crsrImg,new Point(0,0),"searchCursor"));
 						}
 
 					} else {

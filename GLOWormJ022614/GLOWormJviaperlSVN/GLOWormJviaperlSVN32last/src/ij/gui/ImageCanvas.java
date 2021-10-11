@@ -641,6 +641,9 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 						yOffset = yOffset + r.get(i).height;
 					}
 				}
+				if (getCursorRoi() != null) {
+					drawRoi(offScreenGraphics, getCursorRoi(), -1);
+				}
 			}
 			if (g!=null){
 // COMMENTING OUT NEXT LINE WAS ESSENTIAL IN ELIMINATING MOUSE-MOVED SCREEN FLICKER FOR MQTVS WINDOWS.
@@ -877,6 +880,14 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		1/8.0, 1/6.0, 1/4.0, 1/3.0, 1/2.0, 0.75, 1.0, 1.5,
 		2.0, 3.0, 4.0, 6.0, 8.0, 12.0, 16.0, 24.0, 32.0 };
 	private Roi cursorRoi;
+	public Roi getCursorRoi() {
+		return cursorRoi;
+	}
+
+	public void setCursorRoi(Roi cursorRoi) {
+		this.cursorRoi = cursorRoi;
+	}
+
 	private int rotation;
 
 	public static double getLowerZoomLevel(double currentMag) {
@@ -3356,10 +3367,11 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				if (cursorString != null) {
 					if (IJ.isWindows()) {
 						//				IJ.log(cursorString);
-						cursorRoi = new TextRoi(getXMouse()+10/ getMagnification(), getYMouse(), cursorString);
-						((TextRoi) cursorRoi).setCurrentFont(g.getFont().deriveFont((float) (16 / getMagnification())));
 						try {
+							cursorRoi = null;
 							paint(g);
+							cursorRoi = new TextRoi(getXMouse()+10/ getMagnification(), getYMouse(), cursorString);
+							((TextRoi) cursorRoi).setCurrentFont(g.getFont().deriveFont((float) (16 / getMagnification())));
 							cursorRoi.setStrokeColor(Color.black);
 							cursorRoi.setFillColor(Colors.decode("#99ffffff",
 									getDefaultColor()));

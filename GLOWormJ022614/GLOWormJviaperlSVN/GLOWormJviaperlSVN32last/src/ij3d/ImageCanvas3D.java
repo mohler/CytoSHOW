@@ -17,7 +17,8 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 
 import java.awt.Dimension;
-
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -37,6 +38,9 @@ public class ImageCanvas3D extends Canvas3D implements KeyListener {
 	private Background background;
 	private UIAdapter ui;
 	final private ExecutorService exec = Executors.newSingleThreadExecutor();
+	public int recentX, recentY;
+	public Image crsrImg;
+
 
 	protected void flush() {
 		exec.shutdown();
