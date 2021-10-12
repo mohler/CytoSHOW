@@ -53,6 +53,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import javax.media.j3d.BranchGroup;
 import javax.media.j3d.Canvas3D;
@@ -170,6 +173,11 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 */
 	private final Object lock = new Object();
 
+    private static ScheduledThreadPoolExecutor blinkService;
+	private ScheduledFuture schfut;
+	private boolean blinkOn;
+
+	
 	static{
 		UniverseSettings.load();
 	}
@@ -191,6 +199,9 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	public Image3DUniverse(int width, int height) {
 		super(width, height);
 		numUniversesLaunched++;
+		if (blinkService ==null){
+			blinkService = new ScheduledThreadPoolExecutor(1);
+		}
 		canvas = (ImageCanvas3D)getCanvas();
 		iJ3dExecuter = new IJ3dExecuter(this);
 		this.timeline = new Timeline(this);
@@ -335,7 +346,9 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			public void mouseClicked(MouseEvent e) {
 				if (e.isConsumed())
 					return;
-				select(picker.getPickedContent(e.getX(), e.getY()));
+				selected = picker.getPickedContent(e.getX(), e.getY());
+				select(selected);
+
 			}
 
 
@@ -712,19 +725,56 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 * @param c
 	 */
 	public void select(Content c) {
-		if(selected != null) {
-			selected.setSelected(false);
-			selected = null;
-		}
 		if(c != null && c.isVisibleAt(currentTimepoint)) {
-			c.setSelected(true);
-			
+			if (c.trueColor == null)
+				c.trueColor = c.getColor();
+			if (true /* schfut != null && c != selected */) {
+				if (schfut != null)
+					schfut.cancel(true);
+				schfut = null;
+				c.setSelected(false);
+				c.setColor(c.trueColor);
+//			} else {
+				c.setSelected(true);
+				schfut = blinkService.scheduleAtFixedRate(new Runnable()
+				{
+					public void run()
+					{
+
+						if (blinkOn){
+							c.setTempColor(c.trueColor);
+							blinkOn = false;
+						} else {
+							c.setTempColor(new Color3f(c.trueColor.x*0.7f,
+									c.trueColor.y*0.7f,
+									c.trueColor.z*0.7f));
+							blinkOn =true;
+						}
+					}
+				}, 0, 500, TimeUnit.MILLISECONDS);
+				if(selected != null) {
+					selected.setSelected(false);
+					selected.setColor(selected.trueColor);
+					selected = null;
+				}
+			}
+
 			selected = c;
+		} else {
+			if (schfut != null) {
+				schfut.cancel(true);
+				schfut = null;
+			}
+			if(selected != null) {
+				selected.setSelected(false);
+				selected.setColor(selected.trueColor);
+				selected = null;
+			}
 		}
 		String st = c != null ? c.getName() : "none";
 		IJ.showStatus("selected: " + st);
 
-		fireContentSelected(selected);
+		fireContentSelected(c);
 
 		if(c != null && ij.plugin.frame.Recorder.record)
 			IJ3dExecuter.record("select", c.getName());

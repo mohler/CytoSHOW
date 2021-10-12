@@ -93,8 +93,8 @@ public class ContentInstant extends BranchGroup implements UniverseListener, Con
 
 	private boolean available = true;
 
-    private static ScheduledThreadPoolExecutor blinkService;
-	private ScheduledFuture schfut;
+//    private static ScheduledThreadPoolExecutor blinkService;
+//	private ScheduledFuture schfut;
 
 	public ContentInstant(String name) {
 		// create BranchGroup for this image
@@ -102,9 +102,9 @@ public class ContentInstant extends BranchGroup implements UniverseListener, Con
 		setCapability(BranchGroup.ALLOW_DETACH);
 		setCapability(BranchGroup.ENABLE_PICK_REPORTING);
 
-		if (blinkService ==null){
-			blinkService = new ScheduledThreadPoolExecutor(1);
-		}
+//		if (blinkService ==null){
+//			blinkService = new ScheduledThreadPoolExecutor(1);
+//		}
 		
 		// create transformation for pickeing
 		localTranslate = new TransformGroup();
@@ -317,9 +317,9 @@ public class ContentInstant extends BranchGroup implements UniverseListener, Con
 	private String displayedDataSwapfile = null;
 	private String originalDataSwapfile = null;
 
-	private boolean blinkOn;
+//	private boolean blinkOn;
 
-	private Color3f trueColor;
+	Color3f trueColor;
 
 	private String getOriginalDataSwapfile() {
 		if(originalDataSwapfile != null)
@@ -379,32 +379,32 @@ public class ContentInstant extends BranchGroup implements UniverseListener, Con
 
 	public void setSelected(boolean selected) {
 		this.selected = selected;
-		blinkOn=true;
-		if (this.trueColor == null)
-			this.trueColor = getColor();
+//		blinkOn=true;
+//		if (this.trueColor == null)
+//			this.trueColor = getColor();
 //		final Color3f realColor = this.trueColor;
-		if (schfut != null && !selected) {
-			schfut.cancel(true);
-			schfut = null;
-			setColor(this.trueColor);
-		} else {
-			schfut = blinkService.scheduleAtFixedRate(new Runnable()
-			{
-				public void run()
-				{
-
-					if (blinkOn){
-						setTempColor(ContentInstant.this.trueColor);
-						blinkOn = false;
-					} else {
-						setTempColor(new Color3f(ContentInstant.this.trueColor.x*0.7f,
-												ContentInstant.this.trueColor.y*0.7f,
-												ContentInstant.this.trueColor.z*0.7f));
-						blinkOn =true;
-					}
-				}
-			}, 0, 500, TimeUnit.MILLISECONDS);
-		}
+//		if (schfut != null && !selected) {
+//			schfut.cancel(true);
+//			schfut = null;
+//			setColor(this.trueColor);
+//		} else {
+//			schfut = blinkService.scheduleAtFixedRate(new Runnable()
+//			{
+//				public void run()
+//				{
+//
+//					if (blinkOn){
+//						setTempColor(ContentInstant.this.trueColor);
+//						blinkOn = false;
+//					} else {
+//						setTempColor(new Color3f(ContentInstant.this.trueColor.x*0.7f,
+//												ContentInstant.this.trueColor.y*0.7f,
+//												ContentInstant.this.trueColor.z*0.7f));
+//						blinkOn =true;
+//					}
+//				}
+//			}, 0, 500, TimeUnit.MILLISECONDS);
+//		}
 	}
 
 	/* ************************************************************

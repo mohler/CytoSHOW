@@ -29,6 +29,9 @@ import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
 
 import java.util.TreeMap;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.HashMap;
 
 import java.util.regex.Matcher;
@@ -45,6 +48,14 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 	private boolean showPointList = false;
 
 	private final boolean swapTimelapseData;
+	
+//    private static ScheduledThreadPoolExecutor blinkService;
+//	private ScheduledFuture schfut;
+//	private boolean blinkOn;
+	Color3f trueColor;
+	boolean selected;
+	private Color3f color;
+
 
 	public Content(String name) {
 		this(name, 0);
@@ -53,6 +64,9 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 	public Content(String name, int tp) {
 		this.name = name;
 		this.swapTimelapseData = false;
+//		if (blinkService ==null){
+//			blinkService = new ScheduledThreadPoolExecutor(1);
+//		}
 		setCapability(BranchGroup.ALLOW_DETACH);
 		setCapability(BranchGroup.ENABLE_PICK_REPORTING);
 		setTimepointToSwitchIndex(new HashMap<Integer, Integer>());
@@ -76,6 +90,9 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 	public Content(String name, TreeMap<Integer, ContentInstant> instants, boolean swapTimelapseData) {
 		this.name = name;
 		this.swapTimelapseData = swapTimelapseData;
+//		if (blinkService ==null){
+//			blinkService = new ScheduledThreadPoolExecutor(1);
+//		}
 		setCapability(BranchGroup.ALLOW_DETACH);
 		setCapability(BranchGroup.ENABLE_PICK_REPORTING);
 		this.contentInstants = instants;
@@ -249,9 +266,36 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 	}
 
 	public void setSelected(boolean selected) {
+		this.selected = selected;
 		// TODO really all?
-		for(ContentInstant ci : contentInstants.values())
+//		if (this.trueColor == null)
+//		this.trueColor = getColor();
+//		if (schfut != null && !selected) {
+//			schfut.cancel(true);
+//			schfut = null;
+//			setColor(trueColor);
+//		} else {
+//			schfut = blinkService.scheduleAtFixedRate(new Runnable()
+//			{
+//				public void run()
+//				{
+//
+//					if (blinkOn){
+//						setTempColor(trueColor);
+//						blinkOn = false;
+//					} else {
+//						setTempColor(new Color3f(trueColor.x*0.7f,
+//								trueColor.y*0.7f,
+//								trueColor.z*0.7f));
+//						blinkOn =true;
+//					}
+//				}
+//			}, 0, 500, TimeUnit.MILLISECONDS);
+//		}
+		for(ContentInstant ci : contentInstants.values()) {
 			ci.setSelected(selected);
+
+		}
 	}
 
 	/* ************************************************************
@@ -516,10 +560,26 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 	}
 
 	public void setColor(Color3f color) {
+		if ((this.color == null && color == null) ||
+				(this.color != null && color != null &&
+				 this.color.equals(color)))
+			return;
+		this.trueColor = color;
+		this.color = color;
 		for(ContentInstant ci : contentInstants.values())
 			ci.setColor(color);
 	}
 
+	public void setTempColor(Color3f color) {
+		if ((this.color == null && color == null) ||
+				(this.color != null && color != null &&
+				 this.color.equals(color)))
+			return;
+		this.color = color;
+		for(ContentInstant ci : contentInstants.values())
+			ci.setTempColor(color);
+	}
+	
 	public synchronized void setTransparency(float transparency) {
 		for(ContentInstant ci : contentInstants.values())
 			ci.setTransparency(transparency);
