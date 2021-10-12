@@ -228,10 +228,13 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				
 				if (c == recentContent && (( Math.abs(win.canvas3D.recentX-e.getX()))<3) && ( Math.abs((win.canvas3D.recentY-e.getY()))<3)) {
 					
+				} else if (c == null){
+				
 				} else {
-					recentContent = c;
 					win.canvas3D.recentX=e.getX();
 					win.canvas3D.recentY=e.getY();
+
+					recentContent = c;
 					String cursorString = " ";
 					Toolkit tk = Toolkit.getDefaultToolkit();
 					if(c != null) {
@@ -346,8 +349,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			public void mouseClicked(MouseEvent e) {
 				if (e.isConsumed())
 					return;
-				selected = picker.getPickedContent(e.getX(), e.getY());
-				select(selected);
+				Content picked = picker.getPickedContent(e.getX(), e.getY());
+				select(picked);
 
 			}
 
@@ -749,6 +752,16 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 									c.trueColor.y*0.7f,
 									c.trueColor.z*0.7f));
 							blinkOn =true;
+						}
+						if(true /*IJ.isWindows()*/){
+
+							Graphics2D g2Dcanv = win.canvas3D.getGraphics2D();
+							win.canvas3D.stopRenderer();
+							win.canvas3D.swap();
+							g2Dcanv.drawImage(win.canvas3D.crsrImg, win.canvas3D.recentX, win.canvas3D.recentY, null);
+							win.canvas3D.swap();
+							win.canvas3D.startRenderer();
+
 						}
 					}
 				}, 0, 500, TimeUnit.MILLISECONDS);
