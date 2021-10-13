@@ -229,7 +229,13 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				if (c == recentContent && (( Math.abs(win.canvas3D.recentX-e.getX()))<3) && ( Math.abs((win.canvas3D.recentY-e.getY()))<3)) {
 					
 				} else if (c == null){
-				
+//					Graphics2D g2d = (Graphics2D) win.canvas3D.crsrImg.getGraphics();
+//					g2d.setColor(Colors.decode("#00000000",Color.gray));
+//					g2d.fillRect(0, 0, 800, 800);
+//					win.canvas3D.stopRenderer();
+//					win.canvas3D.swap();
+//					win.canvas3D.startRenderer();
+
 				} else {
 					win.canvas3D.recentX=e.getX();
 					win.canvas3D.recentY=e.getY();
@@ -783,6 +789,11 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				selected.setColor(selected.trueColor);
 				selected = null;
 			}
+			win.canvas3D.crsrImg = null;
+			win.canvas3D.stopRenderer();
+			win.canvas3D.swap();
+			win.canvas3D.startRenderer();
+
 		}
 		String st = c != null ? c.getName() : "none";
 		IJ.showStatus("selected: " + st);
