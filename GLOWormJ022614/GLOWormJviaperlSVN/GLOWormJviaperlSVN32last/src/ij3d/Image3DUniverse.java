@@ -229,12 +229,13 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				if (c == recentContent && (( Math.abs(win.canvas3D.recentX-e.getX()))<3) && ( Math.abs((win.canvas3D.recentY-e.getY()))<3)) {
 					
 				} else if (c == null){
-//					Graphics2D g2d = (Graphics2D) win.canvas3D.crsrImg.getGraphics();
-//					g2d.setColor(Colors.decode("#00000000",Color.gray));
-//					g2d.fillRect(0, 0, 800, 800);
-//					win.canvas3D.stopRenderer();
+					win.canvas3D.crsrImg = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB_PRE);
+					Graphics2D g2Dcanv = win.canvas3D.getGraphics2D();
+					win.canvas3D.stopRenderer();
 //					win.canvas3D.swap();
-//					win.canvas3D.startRenderer();
+					g2Dcanv.drawImage(win.canvas3D.crsrImg, e.getX(), e.getY(), null);
+//					win.canvas3D.swap();
+					win.canvas3D.startRenderer();
 
 				} else {
 					win.canvas3D.recentX=e.getX();
@@ -298,9 +299,6 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 						}
 						Point3d pickCenter = new Point3d();
 						c.getBounds().getCenter(pickCenter);
-//						cursorStringCRs[cursorLineCount-3] = "x="+pickCenter.x/1000000;
-//						cursorStringCRs[cursorLineCount-2] = "y="+pickCenter.y/1000000;
-//						cursorStringCRs[cursorLineCount-1] = "z="+pickCenter.z/1000000;
 
 						//create the FontRenderContext object which helps us to measure the text
 						FontRenderContext frc = new FontRenderContext(null, true, true);
@@ -333,9 +331,9 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 							Graphics2D g2Dcanv = win.canvas3D.getGraphics2D();
 							win.canvas3D.stopRenderer();
-							win.canvas3D.swap();
+//							win.canvas3D.swap();
 							g2Dcanv.drawImage(win.canvas3D.crsrImg, e.getX(), e.getY(), null);
-							win.canvas3D.swap();
+//							win.canvas3D.swap();
 							win.canvas3D.startRenderer();
 
 						} else {
@@ -763,9 +761,9 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 							Graphics2D g2Dcanv = win.canvas3D.getGraphics2D();
 							win.canvas3D.stopRenderer();
-							win.canvas3D.swap();
+//							win.canvas3D.swap();
 							g2Dcanv.drawImage(win.canvas3D.crsrImg, win.canvas3D.recentX, win.canvas3D.recentY, null);
-							win.canvas3D.swap();
+//							win.canvas3D.swap();
 							win.canvas3D.startRenderer();
 
 						}
@@ -789,7 +787,6 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				selected.setColor(selected.trueColor);
 				selected = null;
 			}
-			win.canvas3D.crsrImg = null;
 			win.canvas3D.stopRenderer();
 			win.canvas3D.swap();
 			win.canvas3D.startRenderer();

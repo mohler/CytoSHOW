@@ -15,7 +15,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -26,6 +26,7 @@ import ij.process.ByteProcessor;
 import ij.gui.ImageCanvas;
 import ij.ImagePlus;
 import ij.gui.Roi;
+import ij.plugin.Colors;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
