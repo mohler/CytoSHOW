@@ -206,7 +206,11 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 								||content.getName().split("-")[0].toLowerCase().contentEquals(key.toLowerCase())
 								|| content.getName().split("-")[0].toLowerCase().endsWith("by" + key.toLowerCase())
 								|| content.getName().split("-")[0].toLowerCase().contains("_" + key.toLowerCase())
-								|| content.getName().split("-")[0].toLowerCase().startsWith(key.toLowerCase() + "_")) {		
+								|| content.getName().split("-")[0].toLowerCase().matches(".*"+"(undefined|&)" + key.toLowerCase()+".*"+"_pre")
+								|| content.getName().split("-")[0].toLowerCase().matches(key.toLowerCase()+"(undefined|&)" + ".*"+"_post")
+//								|| content.getName().split("-")[0].toLowerCase().contains("chemical" + key.toLowerCase())
+//								|| content.getName().split("-")[0].toLowerCase().contains("electrical" + key.toLowerCase())
+							|| content.getName().split("-")[0].toLowerCase().startsWith(key.toLowerCase() + "_")) {		
 							content.setColor(new Color3f(this.getBrainbowColors().get(key)));
 						}
 					}

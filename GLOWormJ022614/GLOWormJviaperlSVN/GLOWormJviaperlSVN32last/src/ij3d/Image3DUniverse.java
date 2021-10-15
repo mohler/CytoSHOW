@@ -787,10 +787,11 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				selected.setColor(selected.trueColor);
 				selected = null;
 			}
-			win.canvas3D.stopRenderer();
-			win.canvas3D.swap();
-			win.canvas3D.startRenderer();
-
+			if (win != null) {
+				win.canvas3D.stopRenderer();
+				win.canvas3D.swap();
+				win.canvas3D.startRenderer();
+			}
 		}
 		String st = c != null ? c.getName() : "none";
 		IJ.showStatus("selected: " + st);

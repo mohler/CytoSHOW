@@ -6390,6 +6390,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			imp.getWindow().setVisible(false);
 
 			Hashtable<String, ArrayList<String>> synapsePairFrequencyHashtable = new Hashtable<String, ArrayList<String>>();
+			Hashtable<String, ArrayList<String>> synapseNameTallyHashtable = new Hashtable<String, ArrayList<String>>();
+
 
 			for (int obj=1; obj<objectLines.length; obj++) {
 				count++;
@@ -6401,10 +6403,19 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				String presynName= sObj.split(",")[17].replace("\"", "");
 				String[] postsynNames= sObj.split(",")[18].replace("\"", "").split("&");
 
-				String roiName="\""+sObj.split(",")[17].replace("\"", "")+objType+sObj.split(",")[18].replace("\"", "")+"_"+sObj.split(",")[12].replace("\"", "")+imageNumber+"_zs"+sObj.split(",")[21].replace("\"", "")+" \"";
-				roiName = roiName.replaceAll("(\\[|\\])", "");
+				String roiNameStart="\""+presynName+objType+Arrays.deepToString(postsynNames).replace("[","").replace("]","").replace(", ","&");
+				roiNameStart = roiNameStart.replaceAll("(\\[|\\])", "");
+				if (synapseNameTallyHashtable.get(roiNameStart)==null){
+					synapseNameTallyHashtable.put(roiNameStart, new ArrayList<String>());
+				}
+				Character incChar = 'A';
+				incChar--;
+				for (int c=0; c<=synapseNameTallyHashtable.get(roiNameStart).size(); c++) {
+					incChar++;
+				}
+				synapseNameTallyHashtable.get(roiNameStart).add(roiNameStart + "~" + incChar+" \"");
 				Color roiColor= objType.contains("chemical")?Color.white:Color.yellow;
-				if (roiName.contains("uncertain"))
+				if (roiNameStart.contains("uncertain"))
 					roiColor= objType.contains("chemical")?Color.pink:Color.orange;
 				int centerX = (int)(Integer.parseInt(sObj.split(",")[1].replace("\"", ""))/shrinkFactor) ;
 				int centerY = (int)(Integer.parseInt(sObj.split(",")[2].replace("\"", ""))/shrinkFactor);
@@ -6432,13 +6443,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						continue;
 					}
 
-					if (roiName.contains("|cell")) {
+					if (roiNameStart.contains("|cell")) {
 					} else {
 
 						int roiDiameter = 25;
 						Roi oRoi= new OvalRoi(centerX-roiDiameter/2, centerY-roiDiameter/2, roiDiameter, roiDiameter);
 						//					Roi oRoi= new Roi(centerX-roiDiameter/2, centerY-roiDiameter/2, roiDiameter, roiDiameter);
-						oRoi.setName(roiName);
+						oRoi.setName(roiNameStart + "~"  + incChar+" \"");
 						this.setRoiFillColor(oRoi, roiColor);
 						oRoi.setPosition(1, plotZ,1 );
 						imp.setPosition(1, plotZ, 1);
@@ -6523,6 +6534,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			imp.getWindow().setVisible(false);
 
 			Hashtable<String, ArrayList<String>> synapsePairFrequencyHashtable = new Hashtable<String, ArrayList<String>>();
+			Hashtable<String, ArrayList<String>> synapseNameTallyHashtable = new Hashtable<String, ArrayList<String>>();
 
 			for (int obj=0; obj<objectLines.length; obj++) {
 				if (objectLines[obj].startsWith("Presynaptic"))
@@ -6536,10 +6548,19 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				String presynName= pres[obj];
 				String[] postsynNames= posts[obj];
 
-				String roiName="\""+presynName+objType+Arrays.deepToString(postsynNames).replace("[","").replace("]","").replace(", ","&")+" \"";
-				roiName = roiName.replaceAll("(\\[|\\])", "");
+				String roiNameStart="\""+presynName+objType+Arrays.deepToString(postsynNames).replace("[","").replace("]","").replace(", ","&");
+				roiNameStart = roiNameStart.replaceAll("(\\[|\\])", "");
+				if (synapseNameTallyHashtable.get(roiNameStart)==null){
+					synapseNameTallyHashtable.put(roiNameStart, new ArrayList<String>());
+				}
+				Character incChar = 'A';
+				incChar--;
+				for (int c=0; c<=synapseNameTallyHashtable.get(roiNameStart).size(); c++) {
+					incChar++;
+				}
+				synapseNameTallyHashtable.get(roiNameStart).add(roiNameStart + "~" + incChar+" \"");
 				Color roiColor= objType.contains("chemical")?Color.white:Color.yellow;
-				if (roiName.contains("uncertain"))
+				if (roiNameStart.contains("uncertain"))
 					roiColor= objType.contains("chemical")?Color.pink:Color.orange;
 				int centerX = (int)(Integer.parseInt(xs[obj])/shrinkFactor) ;
 				int centerY = (int)(Integer.parseInt(ys[obj])/shrinkFactor);
@@ -6566,13 +6587,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						continue;
 					}
 
-					if (roiName.contains("|cell")) {
+					if (roiNameStart.contains("|cell")) {
 					} else {
 
 						int roiDiameter = 25;
 						Roi oRoi= new OvalRoi(centerX-roiDiameter/2, centerY-roiDiameter/2, roiDiameter, roiDiameter);
-						//					Roi oRoi= new Roi(centerX-roiDiameter/2, centerY-roiDiameter/2, roiDiameter, roiDiameter);
-						oRoi.setName(roiName);
+
+						oRoi.setName(roiNameStart + "~"  + incChar+" \"");
 						this.setRoiFillColor(oRoi, roiColor);
 						oRoi.setPosition(1, plotZ,1 );
 						imp.setPosition(1, plotZ, 1);
