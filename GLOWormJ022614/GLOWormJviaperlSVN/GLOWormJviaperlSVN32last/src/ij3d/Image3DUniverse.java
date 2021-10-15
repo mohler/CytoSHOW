@@ -354,8 +354,9 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				if (e.isConsumed())
 					return;
 				Content picked = picker.getPickedContent(e.getX(), e.getY());
-				select(picked);
-
+				if (!(win instanceof SimpleImageWindow3D) && (e.getButton()==1)){
+					select(picked);
+				}
 			}
 
 
