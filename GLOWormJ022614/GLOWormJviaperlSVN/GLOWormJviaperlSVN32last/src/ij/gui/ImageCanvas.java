@@ -1606,7 +1606,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				
 				if (ij3dSelection) {
 					cellName = ((ImageWindow3D)((ImageCanvas3D)e.getSource())
-							.getParent().getParent().getParent().getParent()).getUniverse().getSelected().getName().split("-")[0];
+							.getParent().getParent().getParent().getParent()).getUniverse().getPicker().getPickedContent(e.getX(), e.getY()).getName().split("-")[0];
 					if (cellName.matches("[A-Z]+by([A-Z]+)")){
 						cellName = cellName.replaceAll("[A-Z]+by([A-Z]+)","$1");
 					}
@@ -2922,6 +2922,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			if (IJ.isLinux()) IJ.wait(10);
 
 			popup.show((Component)e.getSource(), x, y);
+
+			((Canvas)e.getSource()).setCursor(defaultCursor);
 		}
 	}
 
