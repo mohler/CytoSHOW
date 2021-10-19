@@ -6077,8 +6077,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //		for (Roi roi:getShownRoisAsArray())
 //			roi.setLocation((int)roi.getBounds().getX(), (int)(roi.getBounds().getY() + shiftY));
 //		for (Roi roi:getShownRoisAsArray())
-			String rbnoKey ="" + 0 +"_" +roi.getZPosition() +"_" +roi.getTPosition();
-			String rbnsKey ="" + 0 +"_" +(roi.getZPosition()+shiftZ) +"_" +(roi.getTPosition()+shiftT);
+			String rbnoKey ="" + roi.getCPosition() +"_" +roi.getZPosition() +"_" +roi.getTPosition();
+			String rbnsKey ="" + (roi.getCPosition()+shiftC )+"_" +(roi.getZPosition()+shiftZ) +"_" +(roi.getTPosition()+shiftT);
 			ArrayList<Roi> rbnOriginal = roisByNumbers.get(rbnoKey);
 			ArrayList<Roi> rbnShifted = roisByNumbers.get(rbnsKey);
 			roi.setPosition(roi.getCPosition(), roi.getZPosition()+shiftZ, roi.getTPosition()+shiftT);
