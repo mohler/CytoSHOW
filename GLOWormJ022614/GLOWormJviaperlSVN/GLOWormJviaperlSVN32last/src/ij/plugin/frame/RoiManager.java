@@ -7905,16 +7905,19 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		double evzMedian = (double)evzs[evzs.length/2];
 		double evzMin = (double)evzs[0];
 		double evzMax = (double)evzs[evzs.length-1];
+		double evzMean = (evzMax+evzMin)/2;
 		Object[] postvzs = (postSynVZs.toArray());
 		Arrays.sort(postvzs);
 		double postvzMedian = (double)postvzs[postvzs.length/2];
 		double postvzMin = (double)postvzs[0];
 		double postvzMax = (double)postvzs[postvzs.length-1];
+		double postvzMean = (postvzMax+postvzMin)/2;
 		Object[] prevzs = (preSynVZs.toArray());
 		Arrays.sort(prevzs);
 		double prevzMedian = (double)prevzs[prevzs.length/2];
 		double prevzMin = (double)prevzs[0];
 		double prevzMax = (double)prevzs[prevzs.length-1];
+		double prevzMean = (prevzMax+prevzMin)/2;
 		Object[] efxs = (electricalFXs.toArray());
 		Arrays.sort(efxs);
 		double efxMedian = (double)efxs[efxs.length/2];
@@ -7988,6 +7991,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			double ivzMedian = (double)ivzs[ivzs.length/2];
 			double ivzMin = (double)ivzs[0];
 			double ivzMax = (double)ivzs[ivzs.length-1];
+			double ivzMean = (ivzMax+ivzMin)/2;
 			Object[] ifxs = (inputFXs.toArray());
 			Arrays.sort(ifxs);
 			double ifxMedian = (double)ifxs[ifxs.length/2];
@@ -8013,16 +8017,16 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			ArrayList<Double> outputFYs = outputTag=="gapJxn"?electricalFYs:postSynFYs;
 			ArrayList<Double> outputFZs = outputTag=="gapJxn"?electricalFZs:postSynFZs;
 
+			double zScale = allBalls?1.0:1.4;
 			double offsetVX = ivxMedian - (outputTag=="gapJxn"?evxMedian:postvxMedian);
 			double offsetVY = ivyMedian - (outputTag=="gapJxn"?evyMedian:postvyMedian);
-			double offsetVZ = ivzMin;
+			double offsetVZ = ivzMean + (outputTag=="gapJxn"?(evzMean-evzMin):(postvzMean-postvzMin));
 //			double zScale = (ivzMax-ivzMin)/((outputTag=="gapJxn"?evzMax:postvzMax)-(outputTag=="gapJxn"?evzMin:postvzMin));
-			double zScale = allBalls?1.0:1.4;
 			outputObj = outputObj + inputSections[0] + "\ng " + inputVertices[0] + (outputTag=="gapJxn"?"":"_post") + "\n";
 			for (int i=0; i<outputVXs.size(); i++){
 				outputObj = outputObj + "v " +(outputVXs.get(i)+offsetVX) 
 									  + " " +(outputVYs.get(i)+offsetVY) 
-									  + " " +(((outputVZs.get(i) - (outputTag=="gapJxn"?evzMin:postvzMin))*zScale)+offsetVZ) + "\n";
+									  + " " +(outputVZs.get(i)*zScale + offsetVZ) + "\n";
 //				outputObj = outputObj + "v " +(outputVXs.get(i)+offsetVX) 
 //						  + " " +(outputVYs.get(i)+offsetVY) 
 //						  + " " +(outputVZs.get(i)+offsetVZ) + "\n";
@@ -8050,16 +8054,16 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				ArrayList<Double> outputBFYs = outputBTag=="gapJxn"?electricalFYs:preSynFYs;
 				ArrayList<Double> outputBFZs = outputBTag=="gapJxn"?electricalFZs:preSynFZs;
 
+				double zScaleB = 1;				
 				double offsetBVX = ivxMedian - (outputBTag=="gapJxn"?evxMedian:prevxMedian);
 				double offsetBVY = ivyMedian - (outputBTag=="gapJxn"?evyMedian:prevyMedian);
-				double offsetBVZ = ivzMin ;
+				double offsetBVZ = ivzMean - (outputTag=="gapJxn"?(evzMean-evzMin):(prevzMean-prevzMin));
 //				double zScaleB = (ivzMax-ivzMin)/((outputBTag=="gapJxn"?evzMax:prevzMax)-(outputBTag=="gapJxn"?evzMin:prevzMin));
-				double zScaleB = 1;				
 				outputBObj = outputBObj + inputSections[0] + "\ng " + inputVertices[0] + (outputBTag=="gapJxn"?"":"_pre") + "\n";
 				for (int i=0; i<outputBVXs.size(); i++){
 					outputBObj = outputBObj + "v " +(outputBVXs.get(i)+offsetBVX) 
 										  + " " +(outputBVYs.get(i)+offsetBVY) 
-										  + " " +(((outputBVZs.get(i) - (outputBTag=="gapJxn"?evzMin:prevzMin))*zScaleB)+offsetBVZ) + "\n";
+										  + " " +(outputBVZs.get(i) + offsetBVZ) + "\n";
 				}
 				outputBObj = outputBObj + inputVertices[inputVertices.length-1] + "\n";
 				
