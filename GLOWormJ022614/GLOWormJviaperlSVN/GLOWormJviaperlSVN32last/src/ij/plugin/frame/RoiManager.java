@@ -8492,7 +8492,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 			double offsetVX = ivxMedian - (outputTag == "gapJxn" ? evxMedian : postvxMedian);
 			double offsetVY = ivyMedian - (outputTag == "gapJxn" ? evyMedian : postvyMedian);
-			double offsetVZ = ivzMean - (outputTag == "gapJxn" ? (evzMean - evzMin) : (postvzMean));
+			double offsetVZ = ivzMin - (outputTag == "gapJxn" ? (evzMean - evzMin) : (postvzMean));
 //			double zScale = (ivzMax-ivzMin)/((outputTag=="gapJxn"?evzMax:postvzMax)-(outputTag=="gapJxn"?evzMin:postvzMin));
 			outputObj = outputObj + inputSections[0] + "\ng " + inputVertices[0]
 					+ (outputTag == "gapJxn" ? "" : "_post") + "\n";
@@ -8530,7 +8530,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 				double offsetBVX = ivxMedian - (outputBTag == "gapJxn" ? evxMedian : prevxMedian);
 				double offsetBVY = ivyMedian - (outputBTag == "gapJxn" ? evyMedian : prevyMedian);
-				double offsetBVZ = ivzMean - (outputTag == "gapJxn" ? (evzMean - evzMin) : (prevzMean - prevzMin));
+				double offsetBVZ = ivzMin - (outputTag == "gapJxn" ? (evzMean - evzMin) : (prevzMean - prevzMin));
 //				double zScaleB = (ivzMax-ivzMin)/((outputBTag=="gapJxn"?evzMax:prevzMax)-(outputBTag=="gapJxn"?evzMin:prevzMin));
 				outputBObj = outputBObj + inputSections[0] + "\ng " + inputVertices[0]
 						+ (outputBTag == "gapJxn" ? "" : "_pre") + "\n";
