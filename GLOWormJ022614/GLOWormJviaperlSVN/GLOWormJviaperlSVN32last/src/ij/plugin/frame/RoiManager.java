@@ -6765,11 +6765,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				count++;
 				IJ.showStatus("" + count + "/" + fullCount + " Tags loaded for " + imp.getTitle());
 				String sObj = objectLines[obj];
-				String objType = sObj.split(",")[6].replace("\"", "");
-				String imageNumber = sObj.split(",")[4].replace("\"", "");
-				int zSustain = Integer.parseInt(sObj.split(",")[21].replace("\"", "").replace("zS", ""));
-				String presynName = sObj.split(",")[17].replace("\"", "");
-				String[] postsynNames = sObj.split(",")[18].replace("\"", "").split("&");
+				String[] objChunks = sObj.replace(",,,",",NULL,NULL,").replace(",NULL,NULL,", ",\"NULL\",\"NULL\",").replace(",,",",NULL,").replace(",NULL,", ",\"NULL\",").split(",\"");
+				String objType = objChunks[6].replace("\"", "");
+				String imageNumber = objChunks[4].replace("\"", "");
+				int zSustain = Integer.parseInt(objChunks[21].replace(","," ").replace("\"", "").replace("zS", "").trim());
+				String presynName = objChunks[17].replace("\"", "");
+				String[] postsynNames = objChunks[18].replace("\"", "").split("[,&]");
 
 				String roiNameStart = "\"" + presynName + objType
 						+ Arrays.deepToString(postsynNames).replace("[", "").replace("]", "").replace(", ", "&");
