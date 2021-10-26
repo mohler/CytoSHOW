@@ -208,6 +208,10 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 								|| content.getName().split("-")[0].toLowerCase().contains("_" + key.toLowerCase())
 								|| content.getName().split("-")[0].toLowerCase().matches(".*"+"(undefined|&)" + key.toLowerCase()+".*"+"_pre")
 								|| content.getName().split("-")[0].toLowerCase().matches(key.toLowerCase()+"(undefined|&)" + ".*"+"_post")
+								|| content.getName().split("-")[0].toLowerCase().matches(".*"+"(chemical|&)" + key.toLowerCase()+".*"+"_pre")
+								|| content.getName().split("-")[0].toLowerCase().matches(key.toLowerCase()+"(chemical|&)" + ".*"+"_post")
+								|| content.getName().split("-")[0].toLowerCase().matches(".*"+"(electrical|&)" + key.toLowerCase()+".*")
+								|| content.getName().split("-")[0].toLowerCase().matches(key.toLowerCase()+"(electrical|&)" + ".*")
 //								|| content.getName().split("-")[0].toLowerCase().contains("chemical" + key.toLowerCase())
 //								|| content.getName().split("-")[0].toLowerCase().contains("electrical" + key.toLowerCase())
 							|| content.getName().split("-")[0].toLowerCase().startsWith(key.toLowerCase() + "_")) {		
