@@ -6722,7 +6722,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		String[] objectLines = s.split("\n");
 		int fullCount = objectLines.length;
 
-		if (path.contains("object") && s.contains("OBJ_Name")) {
+		if ((path.contains("object") || path.contains("innerjoin")) && s.contains("OBJ_Name")) {
 			int[] sliceNumbers = new int[fullCount];
 			for (int f = 0; f < fullCount; f++) {
 				if (objectLines[f].contains("N2UNR"))
@@ -6738,15 +6738,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			long count = 0;
 
 			Hashtable<String, String> objectHash = new Hashtable<String, String>();
-			String centerZtestString = objectLines[1].split(",")[4].replace("\"", "");
-			String centerZroot = null;
-			for (int i = 0; i < centerZtestString.length(); i++) {
-				if (objectLines[2].split(",")[4].replace("\"", "").contains(centerZtestString.substring(0, i))
-						&& !centerZtestString.substring(i - 1 >= 0 ? i - 1 : 0, centerZtestString.length() - 1)
-								.matches("\\d*")) {
-					centerZroot = centerZtestString.substring(0, i);
-				}
-			}
+//			String centerZtestString = objectLines[1].split(",")[4].replace("\"", "");
+//			String centerZroot = null;
+//			for (int i = 0; i < centerZtestString.length(); i++) {
+//				if (objectLines[2].split(",")[4].replace("\"", "").contains(centerZtestString.substring(0, i))
+//						&& !centerZtestString.substring(i - 1 >= 0 ? i - 1 : 0, centerZtestString.length() - 1)
+//								.matches("\\d*")) {
+//					centerZroot = centerZtestString.substring(0, i);
+//				}
+//			}
 
 			long nRois = 0;
 
@@ -6773,7 +6773,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				String[] postsynNames = objChunks[18].replace("\"", "").split("[,&]");
 
 				String roiNameStart = "\"" + presynName + objType
-						+ Arrays.deepToString(postsynNames).replace("[", "").replace("]", "").replace(", ", "&");
+						+ Arrays.deepToString(postsynNames).replace("[", "").replace("]", "").replace("_", "").replace(", ", "&");
 				roiNameStart = roiNameStart.replaceAll("(\\[|\\])", "");
 				if (synapseNameTallyHashtable.get(roiNameStart) == null) {
 					synapseNameTallyHashtable.put(roiNameStart, new ArrayList<String>());
@@ -6789,6 +6789,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					roiColor = objType.contains("chemical") ? Color.pink : Color.orange;
 				int centerX = (int) (Integer.parseInt(sObj.split(",")[1].replace("\"", "")) / shrinkFactor);
 				int centerY = (int) (Integer.parseInt(sObj.split(",")[2].replace("\"", "")) / shrinkFactor);
+				String centerZtestString = sObj.split(",")[4].replace("\"", "");
+				String centerZroot = null;
+				for (int i = 0; i < centerZtestString.length(); i++) {
+					if (sObj.split(",")[4].replace("\"", "").contains(centerZtestString.substring(0, i))
+							&& !centerZtestString.substring(i - 1 >= 0 ? i - 1 : 0, centerZtestString.length() - 1)
+									.matches("\\d*")) {
+						centerZroot = centerZtestString.substring(0, i);
+					}
+				}
 				int frontZ = Integer.parseInt(sObj.split(",")[4].replace("\"", "").replace(centerZroot, ("")));
 
 				//// SPECIAL CASE ONLY FOR honoring JSH image GAPS AT Z56 z162-166

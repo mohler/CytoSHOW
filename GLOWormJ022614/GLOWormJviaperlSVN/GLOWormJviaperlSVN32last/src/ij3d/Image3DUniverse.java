@@ -248,6 +248,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 						IJ.showStatus(c.getName().split("( |_)=")[0]);
 						cursorString = c.getName().replace("electrical", "_electrical_")
 													.replace("chemical", "_chemical_")
+													.replace("undefined", "_undefined_")
 													.replace("certain", "")
 													.replace("uncertain", "")
 													.split("( |_)=")[0];
@@ -256,18 +257,22 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 						if (IJ.isWindows())
 							cursorString = c.getName().replace("electrical", "_electrical_")
 							.replace("chemical", "_chemical_")
+							.replace("undefined", "_undefined_")
 							.replace("certain", "")
 							.replace("uncertain", "")
 							.split("( |_)=")[0];
 
 						String[] cursorWords = cursorString.replaceAll(("(-i\\d+-(c|g)\\d+-s\\d+)"), "").replace("_", " ").split(" ");
-						Arrays.sort(cursorWords);
-						if (cursorWords.length >1) {
-							cursorWords[cursorWords.length-1] = cursorWords[cursorWords.length-1] 
-															+ cursorString.replaceAll(("(.*)(-i\\d+-(c|g)\\d+-s\\d+)"), "$2");
+						if (cursorString.matches("(.*)(-i\\d+-(c|g)\\d+-s\\d+)")) {
+							Arrays.sort(cursorWords);
+							if (cursorWords.length >1) {
+								cursorWords[cursorWords.length-1] = cursorWords[cursorWords.length-1] 
+										+ cursorString.replaceAll(("(.*)(-i\\d+-(c|g)\\d+-s\\d+)"), "$2");
+							}
 						}
-						int wordsPerRow = (cursorString.contains("chemical")||cursorString.contains("electrical"))?3:5;
-						int cursorLineCount = cursorWords.length/wordsPerRow + (cursorWords.length%3==0?0:1) +wordsPerRow;
+						int wordsPerRow = (cursorString.contains("chemical")||cursorString.contains("electrical")||cursorString.contains("undefined"))?1:5;
+						int cursorLineCount = cursorWords.length / wordsPerRow
+								+ (cursorWords.length % 3 == 0 ? 0 : 1) /* +wordsPerRow */;
 						int fontSize = 18-(4*cursorLineCount/18);
 						Font font = Font.decode("Arial-"+(fontSize));
 						String[] cursorStringCRs = new String[cursorLineCount+1] ;
@@ -297,6 +302,12 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 							} else
 								cursorStringCRs[l] = cursorStringCRs[l] + " "+ cursorWords[word];
 						}
+						String longestString = "";
+						for (String cscrString:cursorStringCRs) {
+							if (cscrString!=null && longestString.length() < cscrString.length()) {
+								longestString = cscrString;
+							}
+						}
 						Point3d pickCenter = new Point3d();
 						c.getBounds().getCenter(pickCenter);
 
@@ -304,7 +315,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 						FontRenderContext frc = new FontRenderContext(null, true, true);
 
 						//get the height and width of the text
-						Rectangle2D bounds = font.getStringBounds(cursorString, frc);
+						Font rectFont = font.deriveFont((long)(fontSize+2));
+						Rectangle2D bounds = rectFont.getStringBounds(longestString, frc);
 						int w = (int) bounds.getWidth();
 						int ht = (int) bounds.getHeight();
 						win.canvas3D.crsrImg = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB_PRE);
@@ -315,8 +327,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 						g2d.setFont(font);
 
-						g2d.setColor(Colors.decode("#66111111",Color.gray));
-						g2d.fillRect(0, 0, w, ht);
+						g2d.setColor(Colors.decode("#88111111",Color.gray));
+						g2d.fillRect(0, 0, w, 10+ht*cursorLineCount);
 						g2d.setColor(Color.YELLOW);
 						g2d.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
 						g2d.drawLine(0, 0, 2, 7);
