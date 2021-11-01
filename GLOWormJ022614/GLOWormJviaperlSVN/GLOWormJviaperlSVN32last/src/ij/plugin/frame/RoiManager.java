@@ -3508,6 +3508,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 
 	public String getUniqueName(String name) {
+		if (name.matches(".*(-\\d+)")){
+			//clean up stray suffix strings in some saved rois
+			name = name.replaceAll("(.*?)((-\\d+)+)(-\\d+)", "$1$4");
+		}
 		String name2 = name + (addRoiSpanC ? "C" : "") + (addRoiSpanZ ? "Z" : "") + (addRoiSpanT ? "T" : "");
 		String suffix = "";
 		while (name2.endsWith("C") || name2.endsWith("Z") || name2.endsWith("T")) {
@@ -6432,6 +6436,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		shiftT = ((int) gd.getNextNumber());
 		shiftC = ((int) gd.getNextNumber());
 		for (Roi roi : getShownRoisAsArray()) {
+			String roiWasName = roi.getName();
 			roi.setLocation((int) (roi.getBounds().getX() + shiftX), (int) roi.getBounds().getY() + shiftY);
 //		for (Roi roi:getShownRoisAsArray())
 //			roi.setLocation((int)roi.getBounds().getX(), (int)(roi.getBounds().getY() + shiftY));
@@ -6453,9 +6458,28 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					IJ.log(roisByNumbers.containsKey(rbnsKey) + " " + roisByNumbers.containsValue(rbnShifted) + " "
 							+ rbnShifted.contains(roi));
 				} else {
-					rbnShifted.add(roi);
+					if (roi.getName().contains("~")){
+						rbnShifted.add(0,roi);
+					}else {
+						rbnShifted.add(roi);
+					}
 				}
 				IJ.log(roisByNumbers.get(rbnsKey).toString());
+				String label ="";
+				if (roi.getName() != null && roi.getName().split("\"").length > 1){
+					label = "\"" + roi.getName().split("\"")[1].trim() + " \"" + "_" +Colors.colorToHexString(roi.getFillColor()) + "_" + roi.getCPosition() + "_"
+							+ roi.getZPosition() + "_" + roi.getTPosition();
+				}else if (roi.getName() != null){
+					label = "\"" + roi.getName() + " \"" + "_" +Colors.colorToHexString(roi.getFillColor()) + "_" + roi.getCPosition() + "_" + roi.getZPosition() + "_"
+							+ roi.getTPosition();
+				}
+				label = getUniqueName(label);
+				listModel.set(listModel.indexOf(roiWasName), label);
+				fullListModel.set(fullListModel.indexOf(roiWasName), label);
+				roi.setName(label);
+				rois.remove(roiWasName);
+				rois.put(roi.getName(), roi);
+				
 			}
 		}
 		showAll(SHOW_ALL);
@@ -6762,8 +6786,6 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			Hashtable<String, ArrayList<String>> synapseNameTallyHashtable = new Hashtable<String, ArrayList<String>>();
 
 			for (int obj = 1; obj < objectLines.length; obj++) {
-				count++;
-				IJ.showStatus("" + count + "/" + fullCount + " Tags loaded for " + imp.getTitle());
 				String sObj = objectLines[obj];
 				String[] objChunks = sObj.replace(",,,",",NULL,NULL,").replace(",NULL,NULL,", ",\"NULL\",\"NULL\",").replace(",,",",NULL,").replace(",NULL,", ",\"NULL\",").split(",\"");
 				String objType = objChunks[6].replace("\"", "");
@@ -6812,7 +6834,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						frontZ++;
 					}
 				}
-
+				if (imageNumber.startsWith("N2UNR")) {
+					IJ.wait(0);
+				}
+				if (imageNumber.startsWith("N2UVC")) {
+					frontZ = frontZ + 200;
+				}
+				if (imageNumber.startsWith("N2UDC")||imageNumber.startsWith("N2ULEFT")||imageNumber.startsWith("N2URIGHT")) {
+					continue;
+				}
 				int adjustmentZ = 0;
 				for (int susStep = 0; susStep < zSustain; susStep++) {
 					int plotZ = frontZ + susStep - adjustmentZ;
@@ -6845,6 +6875,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						}
 					}
 				}
+			count++;
+			IJ.showStatus("" + count + "/" + fullCount + " Tags loaded for " + imp.getTitle());
 			}
 			updateShowAll();
 			// this.imp.setTitle(impTitle);
