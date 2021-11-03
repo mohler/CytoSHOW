@@ -2294,7 +2294,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			sliceRois = getRoisByNumbers().get((addRoiSpanC ? 0 : roi.getCPosition()) + "_"
 					+ (addRoiSpanZ ? 0 : roi.getZPosition()) + "_" + (addRoiSpanT ? 0 : roi.getTPosition()));
 		}
-		sliceRois.add(roi);
+		//						sliceRois.add(roi);
+		if (roi.getName().contains("~")){
+			sliceRois.add(0,roi);
+		}else {
+			sliceRois.add(roi);
+		}
 
 		String rootName = roi.getName().contains("\"") ? "\"" + roi.getName().split("\"")[1] + "\""
 				: "\"" + roi.getName().split("_")[0].trim() + " \"";
@@ -3441,7 +3446,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							getRoisByNumbers().put(rbnKey, new ArrayList<Roi>());
 							sliceRois = getRoisByNumbers().get(rbnKey);
 						}
-						sliceRois.add(roi);
+//						sliceRois.add(roi);
+						if (roi.getName().contains("~")){
+							sliceRois.add(0,roi);
+						}else {
+							sliceRois.add(roi);
+						}
 						String rootName = roi.getName().contains("\"") ? "\"" + roi.getName().split("\"")[1] + "\""
 								: roi.getName().split("_")[0].trim();
 
@@ -6838,12 +6848,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					IJ.wait(0);
 				}
 				if (imageNumber.startsWith("N2UVC")) {
-					frontZ = frontZ + 200;
+					frontZ = frontZ + 182;
 				}
 				if (imageNumber.startsWith("N2UDC")||imageNumber.startsWith("N2ULEFT")||imageNumber.startsWith("N2URIGHT")) {
 					continue;
 				}
 				int adjustmentZ = 0;
+//				
+	zSustain =1;		//choice to eliminate stupid depth traces (highly inaccurate in several ways.	
+//				
 				for (int susStep = 0; susStep < zSustain; susStep++) {
 					int plotZ = frontZ + susStep - adjustmentZ;
 					if (plotZ < 1 || plotZ > imp.getNSlices()) {
@@ -6861,8 +6874,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						oRoi.setName(roiNameStart + "~" + incChar + " \"");
 						this.setRoiFillColor(oRoi, roiColor);
 						oRoi.setPosition(1, plotZ, 1);
-						imp.setPosition(1, plotZ, 1);
-						this.addRoi(oRoi);
+//						imp.setPosition(1, plotZ, 1);
+//						this.addRoi(oRoi);
+						this.addRoi(oRoi, false, oRoi.getFillColor(), -1, false);
 						for (String postsynName : postsynNames) {
 							IJ.log(presynName + "," + postsynName + "," + plotZ + "," + 1 + "," + objType);
 							if (synapsePairFrequencyHashtable
@@ -7010,8 +7024,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						oRoi.setName(roiNameStart + "~" + incChar + " \"");
 						this.setRoiFillColor(oRoi, roiColor);
 						oRoi.setPosition(1, plotZ, 1);
-						imp.setPosition(1, plotZ, 1);
-						this.addRoi(oRoi);
+//						imp.setPosition(1, plotZ, 1);
+//						this.addRoi(oRoi);
+						this.addRoi(oRoi, false, oRoi.getFillColor(), -1, false);
 						for (String postsynName : postsynNames) {
 							IJ.log(presynName + "," + postsynName + "," + plotZ + "," + 1 + "," + objType);
 							if (synapsePairFrequencyHashtable
