@@ -6866,7 +6866,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					if (roiNameStart.contains("|cell")) {
 					} else {
 
-						int roiDiameter = 25;
+						int roiDiameter = (int) (25/shrinkFactor);
 						Roi oRoi = new OvalRoi(centerX - roiDiameter / 2, centerY - roiDiameter / 2, roiDiameter,
 								roiDiameter);
 						// Roi oRoi= new Roi(centerX-roiDiameter/2, centerY-roiDiameter/2, roiDiameter,
@@ -7017,7 +7017,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					if (roiNameStart.contains("|cell")) {
 					} else {
 
-						int roiDiameter = 25;
+						int roiDiameter = (int) (25/shrinkFactor);
 						Roi oRoi = new OvalRoi(centerX - roiDiameter / 2, centerY - roiDiameter / 2, roiDiameter,
 								roiDiameter);
 
@@ -8332,13 +8332,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/icosphereOut_0000.obj").toString());
 		}
 		if (!allBalls) {
-			postSynObj = IJ.openUrlAsString(
+			preSynObj = IJ.openUrlAsString(
 					MQTVSSceneLoader64.class.getResource("docs/SVV_newDiamond25_newDiamond25_386_0000.obj").toString());
 		} else {
-			postSynObj = IJ
+			preSynObj = IJ
 					.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/icosphereOut_0000.obj").toString());
 		}
-		preSynObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/icosphereOut_0000.obj").toString());
+		postSynObj = IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/icosphereOut_0000.obj").toString());
 		IJ.log(preSynObj + postSynObj + electricalObj);
 		String[] preSynSections = preSynObj.split("(\ng |\ns )");
 		String[] postSynSections = postSynObj.split("(\ng |\ns )");
