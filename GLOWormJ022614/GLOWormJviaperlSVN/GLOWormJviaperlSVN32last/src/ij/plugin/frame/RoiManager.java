@@ -8386,7 +8386,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			if (postSynVertices[x].startsWith("v ")) {
 				postSynVXs.add(Double.parseDouble(postSynVertices[x].split(" ")[1]));
 				postSynVYs.add(Double.parseDouble(postSynVertices[x].split(" ")[2]));
-				postSynVZs.add(Double.parseDouble(postSynVertices[x].split(" ")[3]) * 1.4);
+				postSynVZs.add(Double.parseDouble(postSynVertices[x].split(" ")[3]));
 			}
 		}
 		for (int x = 0; x < postSynFacets.length; x++) {
@@ -8400,7 +8400,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			if (preSynVertices[x].startsWith("v ")) {
 				preSynVXs.add(Double.parseDouble(preSynVertices[x].split(" ")[1]));
 				preSynVYs.add(Double.parseDouble(preSynVertices[x].split(" ")[2]));
-				preSynVZs.add(Double.parseDouble(preSynVertices[x].split(" ")[3]));
+				preSynVZs.add(Double.parseDouble(preSynVertices[x].split(" ")[3]) * 1.8);
 			}
 		}
 		for (int x = 0; x < preSynFacets.length; x++) {
@@ -8532,43 +8532,46 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			double ifzMedian = (double) ifzs[ifzs.length / 2];
 
 			File inputFile = new File(inputPath);
-			String outputTag = inputFile.getName().contains("electrical") ? "gapJxn" : "postSyn";
-			String outputPath = inputPath.replace(".obj", outputTag + ".obj");
-			String outputObj = "";
-			String[] outputSections = outputTag == "gapJxn" ? electricalSections : postSynSections;
-			String[] outputVertices = outputTag == "gapJxn" ? electricalVertices : postSynVertices;
-			String[] outputFacets = outputTag == "gapJxn" ? electricalFacets : postSynFacets;
-			ArrayList<Double> outputVXs = outputTag == "gapJxn" ? electricalVXs : postSynVXs;
-			ArrayList<Double> outputVYs = outputTag == "gapJxn" ? electricalVYs : postSynVYs;
-			ArrayList<Double> outputVZs = outputTag == "gapJxn" ? electricalVZs : postSynVZs;
-			ArrayList<Double> outputFXs = outputTag == "gapJxn" ? electricalFXs : postSynFXs;
-			ArrayList<Double> outputFYs = outputTag == "gapJxn" ? electricalFYs : postSynFYs;
-			ArrayList<Double> outputFZs = outputTag == "gapJxn" ? electricalFZs : postSynFZs;
+			String outputTag = "";
+			String[] postSynNames = inputFile.getName().split("&");
+			for (int psn =0; psn<postSynNames.length; psn++){
+				outputTag = inputFile.getName().contains("electrical") ? "gapJxn" : (psn+1)+"postSyn";
+				String outputPath = inputPath.replace(".obj", outputTag + ".obj");
+				String outputObj = "";
+				String[] outputSections = outputTag == "gapJxn" ? electricalSections : postSynSections;
+				String[] outputVertices = outputTag == "gapJxn" ? electricalVertices : postSynVertices;
+				String[] outputFacets = outputTag == "gapJxn" ? electricalFacets : postSynFacets;
+				ArrayList<Double> outputVXs = outputTag == "gapJxn" ? electricalVXs : postSynVXs;
+				ArrayList<Double> outputVYs = outputTag == "gapJxn" ? electricalVYs : postSynVYs;
+				ArrayList<Double> outputVZs = outputTag == "gapJxn" ? electricalVZs : postSynVZs;
+				ArrayList<Double> outputFXs = outputTag == "gapJxn" ? electricalFXs : postSynFXs;
+				ArrayList<Double> outputFYs = outputTag == "gapJxn" ? electricalFYs : postSynFYs;
+				ArrayList<Double> outputFZs = outputTag == "gapJxn" ? electricalFZs : postSynFZs;
 
+				double stepShiftZ = (postvzMax - postvzMin)*0.25;
+				double offsetVX = ivxMedian - (outputTag == "gapJxn" ? evxMedian : postvxMedian);
+				double offsetVY = ivyMedian - (outputTag == "gapJxn" ? evyMedian : postvyMedian);
+				double offsetVZ =  stepShiftZ*psn + ivzMin - (outputTag == "gapJxn" ? (evzMean - evzMin) : (postvzMean - postvzMin));
+				//			double zScale = (ivzMax-ivzMin)/((outputTag=="gapJxn"?evzMax:postvzMax)-(outputTag=="gapJxn"?evzMin:postvzMin));
+				outputObj = outputObj + inputSections[0] + "\ng " + inputVertices[0]
+						+ (outputTag == "gapJxn" ? "" : "_post"+(psn+1)) + "\n";
+				for (int i = 0; i < outputVXs.size(); i++) {
+					outputObj = outputObj + "v " + (outputVXs.get(i) + offsetVX) + " " + (outputVYs.get(i) + offsetVY) + " "
+							+ (outputVZs.get(i) + offsetVZ) + "\n";
+					//				outputObj = outputObj + "v " +(outputVXs.get(i)+offsetVX) 
+					//						  + " " +(outputVYs.get(i)+offsetVY) 
+					//						  + " " +(outputVZs.get(i)+offsetVZ) + "\n";
+				}
+				outputObj = outputObj + inputVertices[inputVertices.length - 1] + "\n";
 
-			double offsetVX = ivxMedian - (outputTag == "gapJxn" ? evxMedian : postvxMedian);
-			double offsetVY = ivyMedian - (outputTag == "gapJxn" ? evyMedian : postvyMedian);
-			double offsetVZ = ivzMin - (outputTag == "gapJxn" ? (evzMean - evzMin) : (postvzMean));
-//			double zScale = (ivzMax-ivzMin)/((outputTag=="gapJxn"?evzMax:postvzMax)-(outputTag=="gapJxn"?evzMin:postvzMin));
-			outputObj = outputObj + inputSections[0] + "\ng " + inputVertices[0]
-					+ (outputTag == "gapJxn" ? "" : "_post") + "\n";
-			for (int i = 0; i < outputVXs.size(); i++) {
-				outputObj = outputObj + "v " + (outputVXs.get(i) + offsetVX) + " " + (outputVYs.get(i) + offsetVY) + " "
-						+ (outputVZs.get(i) + offsetVZ) + "\n";
-//				outputObj = outputObj + "v " +(outputVXs.get(i)+offsetVX) 
-//						  + " " +(outputVYs.get(i)+offsetVY) 
-//						  + " " +(outputVZs.get(i)+offsetVZ) + "\n";
-			}
-			outputObj = outputObj + inputVertices[inputVertices.length - 1] + "\n";
-
-			outputObj = outputObj + "\ns " + outputFacets[0] + "\n";
-			for (int i = 0; i < outputFXs.size(); i++) {
-				outputObj = outputObj + "f " + outputFXs.get(i).intValue() + " " + outputFYs.get(i).intValue() + " "
-						+ outputFZs.get(i).intValue() + "\n";
-			}
-			outputObj = outputObj + outputFacets[outputFacets.length - 1] + "\n";
-			IJ.saveString(outputObj, outputPath);
-
+				outputObj = outputObj + "\ns " + outputFacets[0] + "\n";
+				for (int i = 0; i < outputFXs.size(); i++) {
+					outputObj = outputObj + "f " + outputFXs.get(i).intValue() + " " + outputFYs.get(i).intValue() + " "
+							+ outputFZs.get(i).intValue() + "\n";
+				}
+				outputObj = outputObj + outputFacets[outputFacets.length - 1] + "\n";
+				IJ.saveString(outputObj, outputPath);
+}
 			if (outputTag != "gapJxn") {
 				String outputBTag = inputFile.getName().contains("electrical") ? "gapJxn" : "preSyn";
 				String outputBPath = inputPath.replace(".obj", outputBTag + ".obj");
@@ -8586,7 +8589,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 				double offsetBVX = ivxMedian - (outputBTag == "gapJxn" ? evxMedian : prevxMedian);
 				double offsetBVY = ivyMedian - (outputBTag == "gapJxn" ? evyMedian : prevyMedian);
-				double offsetBVZ = ivzMin - (outputTag == "gapJxn" ? (evzMean - evzMin) : (prevzMean - prevzMin));
+				double offsetBVZ = ivzMin - (outputTag == "gapJxn" ? (evzMean - evzMin) : (prevzMean));
 //				double zScaleB = (ivzMax-ivzMin)/((outputBTag=="gapJxn"?evzMax:prevzMax)-(outputBTag=="gapJxn"?evzMin:prevzMin));
 				outputBObj = outputBObj + inputSections[0] + "\ng " + inputVertices[0]
 						+ (outputBTag == "gapJxn" ? "" : "_pre") + "\n";

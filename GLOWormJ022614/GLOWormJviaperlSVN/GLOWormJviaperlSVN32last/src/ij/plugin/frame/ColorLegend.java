@@ -206,16 +206,22 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 								||content.getName().split("-")[0].toLowerCase().contentEquals(key.toLowerCase())
 								|| content.getName().split("-")[0].toLowerCase().endsWith("by" + key.toLowerCase())
 								|| content.getName().split("-")[0].toLowerCase().contains("_" + key.toLowerCase())
-								|| content.getName().split("-")[0].toLowerCase().matches(".*"+"(undefined|&)" + key.toLowerCase()+".*"+"_post")
 								|| content.getName().split("-")[0].toLowerCase().matches(".*"+key.toLowerCase()+"(undefined)" + ".*"+"_pre")
-								|| content.getName().split("-")[0].toLowerCase().matches(".*"+"(chemical|&)" + key.toLowerCase()+".*"+"_post")
 								|| content.getName().split("-")[0].toLowerCase().matches(".*"+key.toLowerCase()+"(chemical)" + ".*"+"_pre")
 								|| content.getName().split("-")[0].toLowerCase().matches(".*"+"(electrical|&)" + key.toLowerCase()+".*"+"_gapjxn")
-								|| content.getName().split("-")[0].toLowerCase().matches(".*"+key.toLowerCase()+"(electrical)" + ".*")
+								|| content.getName().split("-")[0].toLowerCase().matches(".*"+key.toLowerCase()+"(electrical)" + ".*"+"_gapjxn")
 ////								|| content.getName().split("-")[0].toLowerCase().contains("chemical" + key.toLowerCase())
 ////								|| content.getName().split("-")[0].toLowerCase().contains("electrical" + key.toLowerCase())
 							|| content.getName().split("-")[0].toLowerCase().startsWith(key.toLowerCase() + "_")) {		
 							content.setColor(new Color3f(this.getBrainbowColors().get(key)));
+						} else if (content.getName().split("-")[0].toLowerCase().matches(".*"+"(undefined|&)" + key.toLowerCase()+".*"+"_post(\\d)*")
+									|| content.getName().split("-")[0].toLowerCase().matches(".*"+"(chemical|&)" + key.toLowerCase()+".*"+"_post(\\d)*")) {
+							String[] postSynNames = content.getName().toLowerCase().split("-")[0].split("(undefined|chemical|~)")[1].split("&");
+							for (int psn=1; psn<= postSynNames.length; psn++) {
+								if (content.getName().endsWith("post"+psn )&& postSynNames[psn-1].toLowerCase().equals(key.toLowerCase())) {
+									content.setColor(new Color3f(this.getBrainbowColors().get(key)));
+								}
+							}
 						} else {
 							IJ.wait(0);
 						}
