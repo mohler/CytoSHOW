@@ -8400,7 +8400,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			if (preSynVertices[x].startsWith("v ")) {
 				preSynVXs.add(Double.parseDouble(preSynVertices[x].split(" ")[1]));
 				preSynVYs.add(Double.parseDouble(preSynVertices[x].split(" ")[2]));
-				preSynVZs.add(Double.parseDouble(preSynVertices[x].split(" ")[3]) * 1.8);
+				preSynVZs.add(Double.parseDouble(preSynVertices[x].split(" ")[3]) * 2.0);
 			}
 		}
 		for (int x = 0; x < preSynFacets.length; x++) {
@@ -8551,7 +8551,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				double stepShiftZ = (postvzMax - postvzMin)*0.25;
 				double offsetVX = ivxMedian - (outputTag == "gapJxn" ? evxMedian : postvxMedian);
 				double offsetVY = ivyMedian - (outputTag == "gapJxn" ? evyMedian : postvyMedian);
-				double offsetVZ =  stepShiftZ*psn + ivzMin - (outputTag == "gapJxn" ? (evzMean - evzMin) : (postvzMean - postvzMin));
+				double stepIncrement = stepShiftZ*((double)psn) -stepShiftZ*(((double)postSynNames.length-1)/2);
+				double offsetVZ = stepIncrement + ivzMin - (outputTag == "gapJxn" ? (evzMean - evzMin) : (postvzMean - postvzMin));
 				//			double zScale = (ivzMax-ivzMin)/((outputTag=="gapJxn"?evzMax:postvzMax)-(outputTag=="gapJxn"?evzMin:postvzMin));
 				outputObj = outputObj + inputSections[0] + "\ng " + inputVertices[0]
 						+ (outputTag == "gapJxn" ? "" : "_post"+(psn+1)) + "\n";

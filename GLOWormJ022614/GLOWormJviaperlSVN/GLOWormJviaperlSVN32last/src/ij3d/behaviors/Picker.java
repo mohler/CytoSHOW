@@ -281,27 +281,34 @@ public class Picker {
 			PickInfo[] result = pickCanvas.pickAllSorted();
 			if(result == null)
 				return null;
+			Content closestPick = null;
 			for(int i = 0; i < result.length; i++) {
 				SceneGraphPath path = result[i].getSceneGraphPath();
 				Content c = null;
 				for(int j = path.nodeCount()-1; j >= 0; j--)
 					if(path.getNode(j) instanceof Content)
 						c = (Content)path.getNode(j);
-
+				if (closestPick == null) {
+					closestPick = c;
+				}
 				if(c == null)
 					continue;
 
 				if(c.getType() != Content.VOLUME
-					&& c.getType() != Content.ORTHO)
+						&& c.getType() != Content.ORTHO) {
+					if (c.getTransparency() >= .70) {
+						continue;
+					}
 					return c;
-
+				}
 				Point3d intersection = result[i].getClosestIntersectionPoint();
 
 				float v = getVolumePoint(c, intersection);
 				if(v > 20)
 					return c;
 			}
-			return null;
+			return closestPick;
+			//			return null;
 		} catch(Exception ex) {
 			return null;
 		}
