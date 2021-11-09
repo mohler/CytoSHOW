@@ -50,7 +50,7 @@ import customnode.CustomMeshNode;
 public class ContentInstant extends BranchGroup implements UniverseListener, ContentConstants {
 
 	// time point for this ContentInstant
-	int timepoint = 0;
+	public int timepoint = 0;
 
 	// attributes
 	private final String name;

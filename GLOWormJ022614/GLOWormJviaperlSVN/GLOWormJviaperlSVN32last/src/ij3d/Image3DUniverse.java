@@ -6,6 +6,7 @@ import ij.Menus;
 import ij.gui.ImageCanvas;
 import ij.plugin.Colors;
 import ij3d.contextmenu.ContextMenu;
+import ij3d.gui.Content3DManager;
 import ij3d.pointlist.PointListDialog;
 import ij3d.shortcuts.ShortCuts;
 import customnode.MeshMaker;
@@ -2111,6 +2112,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 	private boolean flipXonImport;
 
+	private Content3DManager c3Dm;
+
 	/**
 	 * Add the specified Content to the universe. It is assumed that the
 	 * specified Content is constructed correctly.
@@ -2293,7 +2296,14 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 	public void setContentTranTG(TransformGroup contentTranTG) {
 		this.contentTranTG = contentTranTG;
+	}
+
+	public void setContent3DManager(Content3DManager content3dManager) {
+		this.c3Dm = content3dManager;
 	}	
 
+	public Content3DManager getContent3DManager() {
+		return this.c3Dm;
+	}	
 }
 

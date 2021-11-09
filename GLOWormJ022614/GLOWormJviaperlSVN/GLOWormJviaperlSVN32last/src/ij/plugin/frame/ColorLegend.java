@@ -7,6 +7,7 @@ import ij3d.Content;
 import ij3d.DefaultUniverse;
 import ij3d.Image3DUniverse;
 import ij3d.ImageWindow3D;
+import ij3d.gui.Content3DManager;
 import ij.gui.*;
 
 import java.awt.*;
@@ -34,7 +35,7 @@ import SmartCaptureLite.r;
 /** Displays the CytoSHOW ColorLegend window. */
 public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, ActionListener, MouseMotionListener, WindowFocusListener, MouseListener  {
 
-	String[] modes = {"Display Both Checked & Unchecked", "Hide Checked", "Show Checked", "Blink Checked"};
+	public String[] modes = {"Display Both Checked & Unchecked", "Hide Checked", "Show Checked", "Blink Checked"};
 	boolean blinkChecked = true;
 	boolean showChecked;
 	boolean hideChecked;
@@ -65,7 +66,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 	private boolean popupHappened;
 	private Color chosenColor;
 	private Hashtable<Integer, String> selectedColorRGBs;
-	Button clearButton = new Button("Clear All CheckBoxes");
+	public Button clearButton = new Button("Clear All CheckBoxes");
 	private boolean sketchyMQTVS = true;
 	private ImageProcessor lastIp;
 	private boolean changedCBorChoice;
@@ -394,6 +395,12 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 		show();
 	}
 	
+	public ColorLegend(Content3DManager content3dManager) {
+		super("Color Legend");
+		//not sure what will get invoked here once this is called...
+	}
+
+
 	public void update() {
 	}
 	
