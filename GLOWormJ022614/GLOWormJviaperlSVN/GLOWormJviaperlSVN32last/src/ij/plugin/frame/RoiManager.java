@@ -6810,12 +6810,20 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				if (synapseNameTallyHashtable.get(roiNameStart) == null) {
 					synapseNameTallyHashtable.put(roiNameStart, new ArrayList<String>());
 				}
-				Character incChar = 'A';
-				incChar--;
+				Character incChar = 'A'-1;
+				Character prefixChar = 'A'-1;
+				String incString = "";
 				for (int c = 0; c <= synapseNameTallyHashtable.get(roiNameStart).size(); c++) {
 					incChar++;
+					if (incChar > 'Z') { 
+						prefixChar++;
+						incChar = 'A';
+						if (prefixChar > 'A')
+							IJ.wait(10);
+					}
+					incString = ""+(prefixChar > ((char)('A'-1))?prefixChar:"")+""+incChar;
 				}
-				synapseNameTallyHashtable.get(roiNameStart).add(roiNameStart + "~" + incChar + " \"");
+				synapseNameTallyHashtable.get(roiNameStart).add(roiNameStart + "~" + incString + " \"");
 				Color roiColor = objType.contains("chemical") ? Color.white : Color.yellow;
 				if (roiNameStart.contains("uncertain"))
 					roiColor = objType.contains("chemical") ? Color.pink : Color.orange;
@@ -6871,7 +6879,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								roiDiameter);
 						// Roi oRoi= new Roi(centerX-roiDiameter/2, centerY-roiDiameter/2, roiDiameter,
 						// roiDiameter);
-						oRoi.setName(roiNameStart + "~" + incChar + " \"");
+						oRoi.setName(roiNameStart + "~" + incString + " \"");
 						this.setRoiFillColor(oRoi, roiColor);
 						oRoi.setPosition(1, plotZ, 1);
 //						imp.setPosition(1, plotZ, 1);
@@ -6981,12 +6989,21 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				if (synapseNameTallyHashtable.get(roiNameStart) == null) {
 					synapseNameTallyHashtable.put(roiNameStart, new ArrayList<String>());
 				}
-				Character incChar = 'A';
-				incChar--;
+				Character incChar = 'A'-1;
+				Character prefixChar = 'A'-1;
+				String incString = "";
 				for (int c = 0; c <= synapseNameTallyHashtable.get(roiNameStart).size(); c++) {
 					incChar++;
+					if (incChar > 'Z') { 
+						prefixChar++;
+						incChar = 'A';
+						if (prefixChar > 'A')
+							IJ.wait(10);
+					}
+					incString = ""+(prefixChar > ((char)('A'-1))?prefixChar:"")+""+incChar;
 				}
-				synapseNameTallyHashtable.get(roiNameStart).add(roiNameStart + "~" + incChar + " \"");
+				synapseNameTallyHashtable.get(roiNameStart).add(roiNameStart + "~" + incString + " \"");
+
 				Color roiColor = objType.contains("chemical") ? Color.white : Color.yellow;
 				if (roiNameStart.contains("uncertain"))
 					roiColor = objType.contains("chemical") ? Color.pink : Color.orange;
@@ -7021,7 +7038,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						Roi oRoi = new OvalRoi(centerX - roiDiameter / 2, centerY - roiDiameter / 2, roiDiameter,
 								roiDiameter);
 
-						oRoi.setName(roiNameStart + "~" + incChar + " \"");
+						oRoi.setName(roiNameStart + "~" + incString + " \"");
 						this.setRoiFillColor(oRoi, roiColor);
 						oRoi.setPosition(1, plotZ, 1);
 //						imp.setPosition(1, plotZ, 1);
