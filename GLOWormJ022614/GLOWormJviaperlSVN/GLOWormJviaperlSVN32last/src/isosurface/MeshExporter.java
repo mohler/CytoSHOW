@@ -67,17 +67,17 @@ public class MeshExporter {
 		File obj_file = IJ3dExecuter.promptForFile("Save WaveFront", "untitled", ".obj");
 		if(obj_file == null)
 			return;
-		saveAsWaveFront(contents_, obj_file, 0,0);
+		saveAsWaveFront(contents_, obj_file, 0,0, true);
 	}
 
-	static public void saveAsWaveFront(Collection contents_, File obj_file, int startInt, int endInt) {
-		saveAsWaveFront( contents_,  obj_file,  startInt,  endInt, null);
+	static public void saveAsWaveFront(Collection contents_, File obj_file, int startInt, int endInt, boolean oneFile) {
+		saveAsWaveFront( contents_,  obj_file,  startInt,  endInt, null, oneFile);
 	}
 
 	/** Accepts a collection of MeshGroup objects. 
 	 * @param j 
 	 * @param i */
-	static public void saveAsWaveFront(Collection contents_, File obj_file, int startInt, int endInt, String scaleShiftString) {
+	static public void saveAsWaveFront(Collection contents_, File obj_file, int startInt, int endInt, String scaleShiftString, boolean oneFile) {
 		if (null == contents_ || 0 == contents_.size())
 			return;
 		String obj_filename = obj_file.getName();
@@ -101,7 +101,7 @@ public class MeshExporter {
 			try {
 				dos_obj = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(obj_file)), "8859_1"); // encoding in Latin 1 (for macosx not to mess around
 				dos_mtl = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(mtl_file)), "8859_1"); // encoding in Latin 1 (for macosx not to mess around
-				writeAsWaveFront(contents, mtl_filename, dos_obj, dos_mtl, scaleShiftString);
+				writeAsWaveFront(contents, obj_file.getAbsolutePath(), mtl_filename, dos_obj, dos_mtl, scaleShiftString, oneFile);
 				dos_obj.flush();
 				dos_mtl.flush();
 			} catch (IOException e) {
@@ -468,11 +468,11 @@ public class MeshExporter {
 	 * - the contents of the .mtl file with material data
 	 */
 	@Deprecated
-	static public String[] createWaveFront(Collection contents, String mtl_filename) {
+	static public String[] createWaveFront(Collection contents, String objFilePathString, String mtl_filename) {
 		StringWriter sw_obj = new StringWriter();
 		StringWriter sw_mtl = new StringWriter();
 		try {
-			writeAsWaveFront(contents, mtl_filename, sw_obj, sw_mtl);
+			writeAsWaveFront(contents, objFilePathString, mtl_filename, sw_obj, sw_mtl, true);
 			return new String[]{sw_obj.toString(), sw_mtl.toString()};
 		} catch(IOException ioe) {
 			ioe.printStackTrace();
@@ -480,11 +480,11 @@ public class MeshExporter {
 		return null;
 	}
 
-	static public void writeAsWaveFront(Collection contents, String mtl_filename, Writer w_obj, Writer w_mtl) throws IOException {
-		writeAsWaveFront( contents,  mtl_filename,  w_obj,  w_mtl, null);
+	static public void writeAsWaveFront(Collection contents, String objFilePathString, String mtl_filename, Writer w_obj, Writer w_mtl, boolean oneFile) throws IOException {
+		writeAsWaveFront( contents, objFilePathString,  mtl_filename,  w_obj,  w_mtl, null, oneFile);
 	}
 	
-	static public void writeAsWaveFront(Collection contents, String mtl_filename, Writer w_obj, Writer w_mtl, String scaleShiftString) throws IOException {
+	static public void writeAsWaveFront(Collection contents, String objFilePathString, String mtl_filename, Writer w_obj, Writer w_mtl, String scaleShiftString,boolean oneFile) throws IOException {
 		HashMap<String, CustomMesh> meshes = new HashMap<String, CustomMesh>();
 
 		for(Iterator it = contents.iterator(); it.hasNext(); ) {
@@ -508,7 +508,7 @@ public class MeshExporter {
 				continue;
 			}
 		}
-		WavefrontExporter.save(meshes, mtl_filename, w_obj, w_mtl, scaleShiftString);
+		WavefrontExporter.save(meshes, objFilePathString, mtl_filename, w_obj, w_mtl, scaleShiftString, oneFile);
 	}
 
 	/** A Material, but avoiding name colisions. Not thread-safe. */

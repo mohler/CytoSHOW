@@ -175,7 +175,7 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 					if (singleSave) {
 						Hashtable<String, Content> newestContent = new Hashtable<String, Content>();
 						newestContent.put(""+objectName, univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
-						MeshExporter.saveAsWaveFront(newestContent.values(), new File(((outDir==null?IJ.getDirectory("home"):outDir)+File.separator+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"+objectName.replaceAll(":","").replaceAll("(/|\\s+)","")+"_"+ch+"_"+0+".obj")), univ.getStartTime(), univ.getEndTime());
+						MeshExporter.saveAsWaveFront(newestContent.values(), new File(((outDir==null?IJ.getDirectory("home"):outDir)+File.separator+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"+objectName.replaceAll(":","").replaceAll("(/|\\s+)","")+"_"+ch+"_"+0+".obj")), univ.getStartTime(), univ.getEndTime(), true);
 						univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
 						univ.getSelected().setLocked(false);
 						univ.removeContent(univ.getSelected().getName());
@@ -278,7 +278,7 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 																	+"_"+ch+"_"+tpt+".obj")), 
 															univ.getStartTime(), 
 															univ.getEndTime(),
-															scaleShiftString);
+															scaleShiftString, true);
 							//						univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
 							//						univ.getSelected().setLocked(false);
 							//						univ.removeContent(univ.getSelected().getName());

@@ -22,9 +22,16 @@ public class WavefrontExporter {
 
 	public static void save(
 			Map<String, CustomMesh> meshes,
-			String objFile) throws IOException {
-		File objF = new File(objFile);
+			String objFilePathString) throws IOException {
+		
+		save(meshes,objFilePathString,true);
+	}
+	
+	public static void save(
+			Map<String, CustomMesh> meshes,
+			String objFilePathString, boolean oneFile) throws IOException {
 
+		File objF = new File(objFilePathString);
 		String objname = objF.getName();
 		String mtlname = objname;
 		if(mtlname.endsWith(".obj"))
@@ -42,12 +49,12 @@ public class WavefrontExporter {
 				new FileOutputStream(
 				new File(objF.getParent(), mtlname))),
 				"8859_1");
-			save(meshes, mtlname, dos_obj, dos_mtl);
+			save(meshes, objFilePathString, mtlname, dos_obj, dos_mtl, null, oneFile);
 			dos_obj.flush();
 			dos_obj.flush();
 			for(String n : meshes.keySet()) {
 				CustomMesh m = meshes.get(n);
-				m.loadedFromFile = objFile;
+				m.loadedFromFile = objFilePathString;
 				m.loadedFromName = n.replaceAll(" ", "_").
 					replaceAll("#", "--");
 				m.changed = false;
@@ -71,29 +78,39 @@ public class WavefrontExporter {
 	 */
 	public static void save(
 			Map<String, CustomMesh> meshes,
+			String objFilePathString, 
 			String mtlFileName,
 			Writer objWriter,
 			Writer mtlWriter) throws IOException {
 		save(
 				meshes,
+				objFilePathString, 
 				mtlFileName,
 				objWriter,
 				mtlWriter,
 				null);
 	}
 
-		public static void save(
+	public static void save(
+			Map<String, CustomMesh> meshes,
+			String objFilePathString, 
+			String mtlFileName,
+			Writer objWriter,
+			Writer mtlWriter,
+			String scaleShiftString) throws IOException {
+		save (meshes, objFilePathString, mtlFileName, objWriter, mtlWriter, scaleShiftString, false);
+	}
+
+	
+	public static void save(
 				Map<String, CustomMesh> meshes,
+				String objFilePathString, 
 				String mtlFileName,
 				Writer objWriter,
 				Writer mtlWriter,
-				String scaleShiftString) throws IOException {
+				String scaleShiftString,
+				boolean oneFile) throws IOException {
 
-			objWriter.write("# OBJ File\n");
-		objWriter.write("mtllib ");
-		objWriter.write(mtlFileName);
-		objWriter.write('\n');
-		
 		Double scaleX = 1.0, scaleY = 1.0, scaleZ = 1.0, shiftX = 0.0, shiftY = 0.0, shiftZ = 0.0;
 		
 		String[] scaleShiftChunks = null;
@@ -110,10 +127,7 @@ public class WavefrontExporter {
 				case 4: shiftY = scalesAndShifts[a];
 				case 5: shiftZ = scalesAndShifts[a];
 				}
-
 			}
-
-
 		}
 
 		final HashMap<Mtl, Mtl> ht_mat = new HashMap<Mtl, Mtl>();
@@ -124,7 +138,40 @@ public class WavefrontExporter {
 
 		final StringBuffer tmp = new StringBuffer(100);
 
+		if (oneFile) {
+			objWriter.write("# OBJ File\n");
+			objWriter.write("mtllib ");
+			objWriter.write(mtlFileName);
+			objWriter.write('\n');
+		}
+	
 		for(String name : meshes.keySet()) {
+			Writer singleObjWriter =null;
+			Writer singleMtlWriter =null;
+			HashMap<Mtl, Mtl> single_ht_mat = null;
+			if (!oneFile) {
+				String singleObjPathRoot = objFilePathString.replace(".obj", "").replace(".OBJ", "");
+				File objF = new File(singleObjPathRoot+"_"+name.replace("\\~", "-")+".obj");
+				String mtlFilePathString = objF.getAbsolutePath().replace(".obj",".mtl");
+				singleObjWriter = new OutputStreamWriter(
+						new BufferedOutputStream(
+								new FileOutputStream(objF)), "8859_1");
+				singleMtlWriter = new OutputStreamWriter(
+						new BufferedOutputStream(
+								new FileOutputStream(
+										new File(mtlFilePathString))),
+												"8859_1");			
+				singleObjWriter.write("# OBJ File\n");
+				singleObjWriter.write("mtllib ");
+				singleObjWriter.write(mtlFilePathString);
+				singleObjWriter.write('\n');
+
+				single_ht_mat = new HashMap<Mtl, Mtl>();
+				j=1;
+			} else {
+				singleObjWriter = objWriter;
+				single_ht_mat = ht_mat;
+			}
 			CustomMesh cmesh = meshes.get(name);
 
 			final List<Point3f> vertices = cmesh.getMesh();
@@ -137,19 +184,19 @@ public class WavefrontExporter {
 			}
 			Mtl mat = new Mtl(1 - cmesh.getTransparency(),
 					color);
-			if(ht_mat.containsKey(mat))
-				mat = ht_mat.get(mat);
+			if(single_ht_mat.containsKey(mat))
+				mat = single_ht_mat.get(mat);
 			else
-				ht_mat.put(mat, mat);
+				single_ht_mat.put(mat, mat);
 
 			// make list of vertices
 			String title = name.replaceAll(" ", "_").
 					replaceAll("#", "--");
 			HashMap<Point3f, Integer> ht_points =
 					new HashMap<Point3f, Integer>();
-			objWriter.write("g ");
-			objWriter.write(title);
-			objWriter.write('\n');
+			singleObjWriter.write("g ");
+			singleObjWriter.write(title);
+			singleObjWriter.write('\n');
 			final int len = vertices.size();
 			int[] index = new int[len];
 
@@ -169,32 +216,32 @@ public class WavefrontExporter {
 					   .append(p.x*scaleX+shiftX).append(' ')
 					   .append(p.y*scaleY+shiftY).append(' ')
 					   .append(p.z*scaleZ+shiftZ).append('\n');
-					objWriter.write(tmp.toString());
+					singleObjWriter.write(tmp.toString());
 					tmp.setLength(0);
 					j++;
 				}
 				k++;
 			}
-			objWriter.write("usemtl ");
-			objWriter.write(mat.name);
-			objWriter.write('\n');
+			singleObjWriter.write("usemtl ");
+			singleObjWriter.write(mat.name);
+			singleObjWriter.write('\n');
 			// print faces
 			if(cmesh.getClass() == CustomTriangleMesh.class)
-				writeTriangleFaces(index, objWriter, name);
+				writeTriangleFaces(index, singleObjWriter, name);
 			else if(cmesh.getClass() == CustomQuadMesh.class)
-				writeQuadFaces(index, objWriter, name);
+				writeQuadFaces(index, singleObjWriter, name);
 			else if(cmesh.getClass() == CustomPointMesh.class)
-				writePointFaces(index, objWriter, name);
+				writePointFaces(index, singleObjWriter, name);
 			else if(cmesh.getClass() == CustomLineMesh.class) {
 				CustomLineMesh clm = (CustomLineMesh)cmesh;
 				switch(clm.getMode()) {
 				case CustomLineMesh.PAIRWISE:
 					writePairwiseLineFaces(
-						index, objWriter, name);
+						index, singleObjWriter, name);
 					break;
 				case CustomLineMesh.CONTINUOUS:
 					writeContinuousLineFaces(
-						index, objWriter, name);
+						index, singleObjWriter, name);
 					break;
 				default: throw new IllegalArgumentException(
 					"Unknown line mesh mode");
@@ -204,13 +251,28 @@ public class WavefrontExporter {
 					"Unknown custom mesh class: " +
 					cmesh.getClass());
 			}
+			if(!oneFile) {
+				// make mtl file
+				singleMtlWriter.write("# MTL File\n");
+				for(Mtl singleMat : single_ht_mat.keySet()) {
+					StringBuffer sb = new StringBuffer(150);
+					singleMat.fill(sb);
+					singleMtlWriter.write(sb.toString());
+				}
+				singleMtlWriter.flush();
+				singleMtlWriter.close();
+				singleObjWriter.flush();
+				singleObjWriter.close();
+			}
 		}
-		// make mtl file
-		mtlWriter.write("# MTL File\n");
-		for(Mtl mat : ht_mat.keySet()) {
-			StringBuffer sb = new StringBuffer(150);
-			mat.fill(sb);
-			mtlWriter.write(sb.toString());
+		if(oneFile) {
+			// make mtl file
+			mtlWriter.write("# MTL File\n");
+			for(Mtl mat : ht_mat.keySet()) {
+				StringBuffer sb = new StringBuffer(150);
+				mat.fill(sb);
+				mtlWriter.write(sb.toString());
+			}
 		}
 	}
 

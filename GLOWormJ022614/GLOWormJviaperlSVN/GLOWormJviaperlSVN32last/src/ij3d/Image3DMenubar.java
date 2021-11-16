@@ -63,6 +63,7 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 	private JMenuItem saveTransform;
 	private JMenuItem exportTransformed;
 	private JMenuItem exportObj;
+	private JMenuItem exportObjs;
 	private JMenuItem exportDXF;
 	private JMenuItem exportAsciiSTL;
 	private JMenuItem exportBinarySTL;
@@ -159,9 +160,13 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 
 		JMenu subMenu = new JMenu("Export surfaces");
 		file.add(subMenu);
-		exportObj = new JMenuItem("WaveFront");
+		exportObj = new JMenuItem("Compound WaveFront File");
 		exportObj.addActionListener(this);
 		subMenu.add(exportObj);
+
+		exportObjs = new JMenuItem("Individual WaveFront Files");
+		exportObjs.addActionListener(this);
+		subMenu.add(exportObjs);
 
 		exportDXF = new JMenuItem("DXF");
 		exportDXF.addActionListener(this);
@@ -660,7 +665,9 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 		else if (src == exportDXF)
 			iJ3dExecuter.saveAsDXF();
 		else if (src == exportObj)
-			iJ3dExecuter.saveAsWaveFront();
+			iJ3dExecuter.saveAsWaveFront(true);
+		else if (src == exportObjs)
+			iJ3dExecuter.saveAsWaveFront(false);
 		else if (src == saveCLView)
 			iJ3dExecuter.saveColorLegend(null);
 		else if (src == exportU3D)

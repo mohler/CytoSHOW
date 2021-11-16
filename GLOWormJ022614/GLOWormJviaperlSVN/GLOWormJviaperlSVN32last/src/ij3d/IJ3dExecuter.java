@@ -285,12 +285,12 @@ public class IJ3dExecuter {
 		record(EXPORT, "DXF", dxf_file.getAbsolutePath());
 	}
 
-	public void saveAsWaveFront() {
+	public void saveAsWaveFront(boolean oneFile) {
 		File obj_file = promptForFile("Save WaveFront", "untitled", ".obj");
 		obj_file = new File(obj_file.getParent()+ File.separator + obj_file.getName().replace(" ", "_"));
 		if(obj_file == null)
 			return;
-		MeshExporter.saveAsWaveFront(univ.getContents(), obj_file, univ.getStartTime(), univ.getEndTime());
+		MeshExporter.saveAsWaveFront(univ.getContents(), obj_file, univ.getStartTime(), univ.getEndTime(), oneFile);
 		saveColorLegend(obj_file);
 		record(EXPORT, "WaveFront", obj_file.getAbsolutePath());
 	}
