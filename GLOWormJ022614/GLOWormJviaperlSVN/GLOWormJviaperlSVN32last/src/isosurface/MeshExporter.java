@@ -102,8 +102,8 @@ public class MeshExporter {
 				dos_obj = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(obj_file)), "8859_1"); // encoding in Latin 1 (for macosx not to mess around
 				dos_mtl = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(mtl_file)), "8859_1"); // encoding in Latin 1 (for macosx not to mess around
 				writeAsWaveFront(contents, obj_file.getAbsolutePath(), mtl_filename, dos_obj, dos_mtl, scaleShiftString, oneFile);
-				dos_obj.flush();
-				dos_mtl.flush();
+				try { if (null != dos_obj) dos_obj.flush();} catch (Exception e) {}
+				try { if (null != dos_mtl) dos_mtl.flush();} catch (Exception e) {}
 			} catch (IOException e) {
 				IJ.log("Some error ocurred while saving to wavefront:\n" + e);
 				e.printStackTrace();
