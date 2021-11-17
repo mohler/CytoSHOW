@@ -1,6 +1,7 @@
 package customnode;
 
 import customnode.CustomMesh;
+import ij.IJ;
 
 import java.io.File;
 import java.io.Writer;
@@ -149,10 +150,12 @@ public class WavefrontExporter {
 			Writer singleObjWriter =null;
 			Writer singleMtlWriter =null;
 			HashMap<Mtl, Mtl> single_ht_mat = null;
+			String objOutPathString = "";
 			if (!oneFile) {
-				String singleObjPathRoot = objFilePathString.replace(".obj", "").replace(".OBJ", "");
-				File objF = new File(singleObjPathRoot+"_"+name.replace("\\~", "-")+".obj");
-				String mtlFilePathString = objF.getAbsolutePath().replace(".obj",".mtl");
+				String singleObjPathRoot = objFilePathString.replace("0000", "").replace(".obj", "").replace(".OBJ", "");
+				objOutPathString = singleObjPathRoot+name.replace("\\~", "-")+".obj";
+				File objF = new File(objOutPathString);
+				String mtlFilePathString = singleObjPathRoot+name.replace("\\~", "-")+".mtl";
 				singleObjWriter = new OutputStreamWriter(
 						new BufferedOutputStream(
 								new FileOutputStream(objF)), "8859_1");
@@ -263,6 +266,15 @@ public class WavefrontExporter {
 				singleMtlWriter.close();
 				singleObjWriter.flush();
 				singleObjWriter.close();
+//				String commandString = "cmd /c start /min /wait for %f in ("+objOutPathString+") do (set g=%f&& npx obj2gltf -i %f&& npx gltf-pipeline -i %g:.obj=.gltf% -o %g:.obj=.gltf% -d)";
+				String[] commandStringArrayA = new String[]{"cmd","/c","npx","obj2gltf","-i",objOutPathString};
+				Runtime.getRuntime().exec(commandStringArrayA);
+				String gltfOutPathString = objOutPathString.replace(".obj", ".gltf");
+				String[] commandStringArrayB = new String[]{"cmd","/c","npx","gltf-pipeline","-i",gltfOutPathString,"-o",gltfOutPathString,"-d"};
+				while (!new File (gltfOutPathString).canRead())
+					IJ.wait(10);
+				Runtime.getRuntime().exec(commandStringArrayB);
+
 			}
 		}
 		if(oneFile) {
@@ -273,6 +285,17 @@ public class WavefrontExporter {
 				mat.fill(sb);
 				mtlWriter.write(sb.toString());
 			}
+			mtlWriter.flush();
+			mtlWriter.close();
+			objWriter.flush();
+			objWriter.close();
+			String[] commandStringArrayA = new String[]{"cmd","/c","npx","obj2gltf","-i",objFilePathString};
+			Runtime.getRuntime().exec(commandStringArrayA);
+			String gltfOutPathString = objFilePathString.replace(".obj", ".gltf");
+			String[] commandStringArrayB = new String[]{"cmd","/c","npx","gltf-pipeline","-i",gltfOutPathString,"-o",gltfOutPathString,"-d"};
+			while (!new File (gltfOutPathString).canRead())
+				IJ.wait(10);
+			Runtime.getRuntime().exec(commandStringArrayB);
 		}
 	}
 
