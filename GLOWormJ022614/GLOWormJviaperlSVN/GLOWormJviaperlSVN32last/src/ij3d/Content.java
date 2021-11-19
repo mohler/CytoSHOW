@@ -74,6 +74,7 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 		ContentInstant ci = new ContentInstant(name + "_#" + tp);
 		ci.timepoint = tp;
 		contentInstants.put(tp, ci);
+		ci.getContentsContainingThisInstant().put(0, this);
 		getTimepointToSwitchIndex().put(tp, 0);
 		setContentSwitch(new Switch());
 		getContentSwitch().setCapability(Switch.ALLOW_SWITCH_WRITE);
@@ -106,6 +107,7 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 			ci.timepoint = i;
 			getTimepointToSwitchIndex().put(i, getContentSwitch().numChildren());
 			getContentSwitch().addChild(ci);
+			ci.getContentsContainingThisInstant().put(0, this);
 		}
 		addChild(getContentSwitch());
 	}
@@ -115,6 +117,7 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 		int timepoint = ci.timepoint;
 //		ci.detach();
 		contentInstants.put(timepoint, ci);
+		ci.getContentsContainingThisInstant().put(0, this);
 		if(!contentInstants.containsKey(timepoint)) {
 			getTimepointToSwitchIndex().put(timepoint, getContentSwitch().numChildren());
 			getContentSwitch().addChild(ci);
@@ -129,6 +132,7 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 			return;
 		int sIdx = getTimepointToSwitchIndex().get(timepoint);
 		getContentSwitch().removeChild(sIdx);
+		contentInstants.get(timepoint).getContentsContainingThisInstant().remove(0);
 		contentInstants.remove(timepoint);
 		getTimepointToSwitchIndex().remove(timepoint);
 		// update the following switch indices.

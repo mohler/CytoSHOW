@@ -219,6 +219,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 									content.setColor(new Color3f(ColorLegend.this.getBrainbowColors().get(key)));
 								}
 							}).start();
+							IJ.log(content.getName()+" "+key+" "+ColorLegend.this.getBrainbowColors().get(key));
 						} else if (content.getName().split("-")[0].toLowerCase().matches(".*"+"(undefined|&)" + key.toLowerCase()+".*"+"_post(\\d)*")
 									|| content.getName().split("-")[0].toLowerCase().matches(".*"+"(chemical|&)" + key.toLowerCase()+".*"+"_post(\\d)*")) {
 							String[] postSynNames = content.getName().toLowerCase().split("-")[0].split("(undefined|chemical|~)")[1].split("&");
@@ -230,6 +231,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 											content.setColor(new Color3f(ColorLegend.this.getBrainbowColors().get(key)));
 										}
 									}).start();
+									IJ.log(content.getName()+" "+key+" "+ColorLegend.this.getBrainbowColors().get(key));
 								}
 							}
 						} else {
@@ -237,6 +239,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 						}
 					}
 				}
+				IJ.log("All content color-adjusted per ColorLegend");
 			}else {
 				for (Roi roi:rm.getROIs().values()) {
 					if (roi!=null) { 

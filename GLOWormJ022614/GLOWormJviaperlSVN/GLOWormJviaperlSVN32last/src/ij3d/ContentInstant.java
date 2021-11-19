@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Enumeration;
+import java.util.TreeMap;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -90,6 +91,16 @@ public class ContentInstant extends BranchGroup implements UniverseListener, Con
 
 	protected TransformGroup localRotate;
 	protected TransformGroup localTranslate;
+	private TreeMap<Integer, Content> contentsContainingThisInstant;
+
+
+	public TreeMap<Integer, Content> getContentsContainingThisInstant() {
+		return contentsContainingThisInstant;
+	}
+
+	public void setContentsContainingThisInstant(TreeMap<Integer, Content> contentsContainingThisInstant) {
+		this.contentsContainingThisInstant = contentsContainingThisInstant;
+	}
 
 	private boolean available = true;
 
