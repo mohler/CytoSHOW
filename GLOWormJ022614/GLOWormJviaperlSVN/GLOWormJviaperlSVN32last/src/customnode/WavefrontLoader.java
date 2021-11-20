@@ -144,11 +144,12 @@ public class WavefrontLoader {
 		}
 	}
 
-	private void readVertex(boolean flipXcoords) {
+	private void readVertex(boolean specialDrop) {
 		String[] sp = line.split("\\s+");
-		int flipXCoef = flipXcoords?-1:1;
+		int flipXCoef = specialDrop?-1:1;
 		String objFileGrandParentName = new File(objfile).getParentFile().getParentFile().getName();
-		if (new File(objfile).getParentFile().getParentFile().getParentFile().getName().contains("AllNineBrains_")) {
+		if (new File(objfile).getParentFile().getParentFile().getParentFile().getName().contains("AllNineBrains_")
+				&& !specialDrop) {
 			flipXCoef = 1;
 			//		FOR JSH
 			if (objFileGrandParentName.contains("JSH")) {

@@ -149,6 +149,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 	public JButton edgeButton;
 	public JButton sqrtButton;
 	public JButton logButton;
+	public JButton advancedButton;
 
 	
 	public ImageWindow(String title) {
@@ -382,7 +383,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		saveButton.addActionListener(imp.getRoiManager());
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
-		JButton advancedButton = new JButton();
+		advancedButton = new JButton();
 		advancedButton.setActionCommand("Adv.");
 		advancedButton.setName("Adv.");
 		advancedButton.setToolTipText("Advanced Controls for Tags");

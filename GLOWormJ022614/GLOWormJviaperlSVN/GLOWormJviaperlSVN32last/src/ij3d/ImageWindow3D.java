@@ -64,14 +64,14 @@ import org.vcell.gloworm.SliceStereoToggle;
 
 public class ImageWindow3D extends ImageWindow implements FocusListener, WindowListener, UniverseListener {
 
-	protected DefaultUniverse universe;
+	protected DefaultUniverse univ;
 	ImageCanvas3D canvas3D;
 	protected Label status = new Label("");
 	protected boolean noOffScreen = false;
 	protected ErrorListener error_listener;
 //	private ImagePlus imp;
 //	private ImageCanvas ic;
-	protected Panel overheadPanel;
+//	protected Panel overheadPanel;
 	protected Toolbar toolbar;
 	protected Image3DMenubar menubar;
 //	protected ImageJ ij;
@@ -105,7 +105,7 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 		imp = new ImagePlus();
 		imp.setTitle(title);
 		imp.setWindow(this);
-		this.universe = universe;
+		this.univ = universe;
 		this.canvas3D = (ImageCanvas3D)universe.getCanvas();
 		DragAndDrop dnd = DragAndDrop.getInstance();
 		if (dnd!=null)
@@ -147,7 +147,7 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 	}
 
 	public void addToolBarPanel() {
-		overheadPanel = new Panel();
+		overheadPanel = new JPanel();
 		overheadPanel.setLayout(new GridLayout(2,1));
 		
 		toolbar = new Toolbar();
@@ -196,100 +196,99 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 		fspc.weighty = 0.5;
 		fspc.fill = GridBagConstraints.BOTH;
 		JButton addButton = new JButton();
-//		addButton.setActionCommand("Add\n(ctrl-t)");
-//		addButton.setName("Add\n(ctrl-t)");
-//		addButton.setToolTipText("Add Selection as a Tag");
-//		addButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/plusicon.png")));
-//		addButton.setFont(buttonPanelFont);
-//		tagButtonPanel.add(addButton, fspc);
-////		viewButtonPanel.add(addButton, fspc);
-//		addButton.addActionListener(imp.getRoiManager());
-//		fspc.gridy = y++;
-//		fspc.weighty = 0.5;
-//		JButton paintButton = new JButton();
-//		paintButton.setActionCommand("Color");
-//		paintButton.setName("Color");
-//		paintButton.setToolTipText("Re-Color Selected Tag");
-//		paintButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/DIYPaintbrush.png")));
-//		paintButton.setFont(buttonPanelFont);
-//		tagButtonPanel.add(paintButton, fspc);
-////		viewButtonPanel.add(renameButton, fspc);
-//		paintButton.addActionListener(imp.getRoiManager());
-//		fspc.gridy = y++;
-//		fspc.weighty = 0.5;
-//		JButton renameButton = new JButton();
-//		renameButton.setActionCommand("Rename");
-//		renameButton.setName("Rename");
-//		renameButton.setToolTipText("Rename Selected Tag");
-//		renameButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/editIcon.png")));
-//		renameButton.setFont(buttonPanelFont);
-//		tagButtonPanel.add(renameButton, fspc);
-////		viewButtonPanel.add(renameButton, fspc);
-//		renameButton.addActionListener(imp.getRoiManager());
-//		fspc.gridy = y++;
-//		fspc.weighty = 0.5;
-//		JButton deleteButton = new JButton();
-//		deleteButton.setActionCommand("Delete ");
-//		deleteButton.setName("Delete ");
-//		deleteButton.setToolTipText("Delete Selected Tag");
-//		deleteButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/menu_eraser.png")));
-//		deleteButton.setFont(buttonPanelFont);
-//		tagButtonPanel.add(deleteButton, fspc);
-////		viewButtonPanel.add(deleteButton, fspc);
-//		deleteButton.addActionListener(imp.getRoiManager());
-//		fspc.gridy = y++;
-//		fspc.weighty = 0.5;
-//		JButton saveButton = new JButton();
-//		saveButton.setActionCommand("Save");
-//		saveButton.setName("Save");
-//		saveButton.setToolTipText("Save the Tag Set");
-//		saveButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/SaveIcon.png")));
-//		saveButton.setFont(buttonPanelFont);
-//		tagButtonPanel.add(saveButton, fspc);
-////		viewButtonPanel.add(saveButton, fspc);
-//		saveButton.addActionListener(imp.getRoiManager());
-//		fspc.gridy = y++;
-//		fspc.weighty = 0.5;
-//		JButton advancedButton = new JButton();
-//		advancedButton.setActionCommand("Adv.");
-//		advancedButton.setName("Adv.");
-//		advancedButton.setToolTipText("Advanced Controls for Tags");
-//		advancedButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/gearIcon.png")));
-//		advancedButton.setFont(buttonPanelFont);
-//		tagButtonPanel.add(advancedButton, fspc);
-////		viewButtonPanel.add(advancedButton, fspc);
-//		advancedButton.addActionListener(imp.getRoiManager());
-//		fspc.gridy = y++;
-//		fspc.weightx = 1.0;
-//		fspc.weighty = 0.1;
-//		countLabel = new Label(imp.getRoiManager().textCountLabel.getText(),Label.CENTER);
-//		countLabel.setFont(buttonPanelFont);
-//		tagButtonPanel.add(countLabel, fspc);
-////		viewButtonPanel.add(countLabel, fspc);
-//		fspc.gridy = y++;
-//		fspc.weighty = 0.5;
-//		fullSetButton = new JButton();
-//		fullSetButton.setActionCommand("Full\nSet");
-//		fullSetButton.setName("Full\nSet");
-//		fullSetButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/refreshIcon.png")));
-//		fullSetButton.setToolTipText("Refresh Tag Set");
-//		fullSetButton.setFont(buttonPanelFont);
-//		tagButtonPanel.add(fullSetButton, fspc);
-////		viewButtonPanel.add(fullSetButton, fspc);
-//		fullSetButton.addActionListener(imp.getRoiManager());
-//		fspc.gridy = y++;
-//		fspc.weighty = 0.5;
-//		hideShowButton = new JButton();
-//		hideShowButton.setActionCommand("Hide");
-//		hideShowButton.setName("Hide");
-//		hideShowButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/showIcon.png")));
-//		hideShowButton.setToolTipText("Showing Tags...click to Hide Tags");
-//		hideShowButton.setFont(buttonPanelFont);
-//		tagButtonPanel.add(hideShowButton, fspc);
-////		viewButtonPanel.add(hideShowButton, fspc);
-//		hideShowButton.addActionListener(imp.getRoiManager());
-//		fspc.gridy = y++;
-//		fspc.weighty = 0.5;
+		addButton.setActionCommand("Add\n(ctrl-t)");
+		addButton.setName("Add\n(ctrl-t)");
+		addButton.setToolTipText("Add Selection as a Tag");
+		addButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/plusicon.png")));
+		addButton.setFont(buttonPanelFont);
+		tagButtonPanel.add(addButton, fspc);
+//		viewButtonPanel.add(addButton, fspc);
+		addButton.addActionListener(((Image3DUniverse) univ).getContent3DManager());
+		fspc.gridy = y++;
+		fspc.weighty = 0.5;
+		JButton paintButton = new JButton();
+		paintButton.setActionCommand("Color");
+		paintButton.setName("Color");
+		paintButton.setToolTipText("Re-Color Selected Tag");
+		paintButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/DIYPaintbrush.png")));
+		paintButton.setFont(buttonPanelFont);
+		tagButtonPanel.add(paintButton, fspc);
+//		viewButtonPanel.add(renameButton, fspc);
+		paintButton.addActionListener(((Image3DUniverse) univ).getContent3DManager());
+		fspc.gridy = y++;
+		fspc.weighty = 0.5;
+		JButton renameButton = new JButton();
+		renameButton.setActionCommand("Rename");
+		renameButton.setName("Rename");
+		renameButton.setToolTipText("Rename Selected Tag");
+		renameButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/editIcon.png")));
+		renameButton.setFont(buttonPanelFont);
+		tagButtonPanel.add(renameButton, fspc);
+//		viewButtonPanel.add(renameButton, fspc);
+		renameButton.addActionListener(((Image3DUniverse) univ).getContent3DManager());
+		fspc.gridy = y++;
+		fspc.weighty = 0.5;
+		JButton deleteButton = new JButton();
+		deleteButton.setActionCommand("Delete ");
+		deleteButton.setName("Delete ");
+		deleteButton.setToolTipText("Delete Selected Tag");
+		deleteButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/menu_eraser.png")));
+		deleteButton.setFont(buttonPanelFont);
+		tagButtonPanel.add(deleteButton, fspc);
+//		viewButtonPanel.add(deleteButton, fspc);
+		deleteButton.addActionListener(((Image3DUniverse) univ).getContent3DManager());
+		fspc.gridy = y++;
+		fspc.weighty = 0.5;
+		JButton saveButton = new JButton();
+		saveButton.setActionCommand("Save");
+		saveButton.setName("Save");
+		saveButton.setToolTipText("Save the Tag Set");
+		saveButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/SaveIcon.png")));
+		saveButton.setFont(buttonPanelFont);
+		tagButtonPanel.add(saveButton, fspc);
+//		viewButtonPanel.add(saveButton, fspc);
+		saveButton.addActionListener(((Image3DUniverse) univ).getContent3DManager());
+		fspc.gridy = y++;
+		fspc.weighty = 0.5;
+		advancedButton = new JButton();
+		advancedButton.setActionCommand("Adv.");
+		advancedButton.setName("Adv.");
+		advancedButton.setToolTipText("Advanced Controls for Tags");
+		advancedButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/gearIcon.png")));
+		advancedButton.setFont(buttonPanelFont);
+		tagButtonPanel.add(advancedButton, fspc);
+//		viewButtonPanel.add(advancedButton, fspc);
+		advancedButton.addActionListener(((Image3DUniverse) univ).getContent3DManager());
+		fspc.gridy = y++;
+		fspc.weightx = 1.0;
+		fspc.weighty = 0.1;
+		countLabel = new Label(((Image3DUniverse) univ).getContent3DManager().textCountLabel.getText(),Label.CENTER);
+		countLabel.setFont(buttonPanelFont);
+		tagButtonPanel.add(countLabel, fspc);
+//		viewButtonPanel.add(countLabel, fspc);
+		fspc.gridy = y++;
+		fspc.weighty = 0.5;
+		fullSetButton = new JButton();
+		fullSetButton.setActionCommand("Full\nSet");
+		fullSetButton.setName("Full\nSet");
+		fullSetButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/refreshIcon.png")));
+		fullSetButton.setToolTipText("Refresh Tag Set");
+		fullSetButton.setFont(buttonPanelFont);
+		tagButtonPanel.add(fullSetButton, fspc);
+//		viewButtonPanel.add(fullSetButton, fspc);
+		fullSetButton.addActionListener(((Image3DUniverse) univ).getContent3DManager());
+		fspc.gridy = y++;
+		fspc.weighty = 0.5;
+		hideShowButton = new JButton();
+		hideShowButton.setActionCommand("Hide");
+		hideShowButton.setName("Hide");
+		hideShowButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/showIcon.png")));
+		hideShowButton.setToolTipText("Showing Tags...click to Hide Tags");
+		hideShowButton.setFont(buttonPanelFont);
+		tagButtonPanel.add(hideShowButton, fspc);
+		hideShowButton.addActionListener(((Image3DUniverse) univ).getContent3DManager());
+		fspc.gridy = y++;
+		fspc.weighty = 0.5;
 //		sketch3DButton = new JButton();
 //		sketch3DButton.setActionCommand("Sketch\n3D");
 //		sketch3DButton.setName("Sketch\n3D");
@@ -298,7 +297,7 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 //		sketch3DButton.setFont(buttonPanelFont);
 //		tagButtonPanel.add(sketch3DButton, fspc);
 ////		viewButtonPanel.add(sketch3DButton, fspc);
-//		sketch3DButton.addActionListener(imp.getRoiManager());
+//		sketch3DButton.addActionListener(univ.getContent3DManager());
 //		fspc.gridy = y++;
 //		fspc.weighty = 0.5;
 //		sketchVVButton = new JButton();
@@ -309,7 +308,7 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 //		sketchVVButton.setFont(buttonPanelFont);
 //		tagButtonPanel.add(sketchVVButton, fspc);
 ////		viewButtonPanel.add(sketch3DButton, fspc);
-//		sketchVVButton.addActionListener(imp.getRoiManager());
+//		sketchVVButton.addActionListener(univ.getContent3DManager());
 //		
 ////		
 //		y = 0;
@@ -476,13 +475,13 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
 		fspc.fill = GridBagConstraints.BOTH;
-		JButton tagsButton = new JButton();
+		tagsButton = new JButton();
 		tagsButton.setActionCommand("Show/Hide Tagging Tools");
 		tagsButton.setName("Show/Hide Tagging Tools");
 		tagsButton.setToolTipText("Show Tag-Editing Tools");
 		tagsButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/TagsThin.png")));
 		tagsButton.setFont(buttonPanelFont);
-//		viewButtonPanel.add(tagsButton, fspc);
+		viewButtonPanel.add(tagsButton, fspc);
 		tagsButton.addActionListener(ij);
 		
 		fspc.gridy = y++;
@@ -558,7 +557,7 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 	}
 
 	public DefaultUniverse getUniverse() {
-		return universe;
+		return univ;
 	}
 
 	public ImageCanvas getCanvas() {
@@ -584,7 +583,7 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 		sOff.setPhysicalScreenWidth(sOn.getPhysicalScreenWidth());
 		sOff.setPhysicalScreenHeight(sOn.getPhysicalScreenHeight());
 
-		universe.getViewer().getView().addCanvas3D(offScreenCanvas3D);
+		univ.getViewer().getView().addCanvas3D(offScreenCanvas3D);
 
 		return offScreenCanvas3D;
 	}
@@ -672,7 +671,7 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 		if (getWidth() <= 0 || getHeight() <= 0)
 			return makeDummyImagePlus();
 		if (noOffScreen) {
-			if (universe != null && universe.getUseToFront())
+			if (univ != null && univ.getUseToFront())
 				toFront();
 			Point p = canvas3D.getLocationOnScreen();
 			int w = canvas3D.getWidth();
@@ -710,7 +709,7 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 			offScreenCanvas3D.setOffScreenBuffer(null);
 		} catch (Exception e) {
 			noOffScreen = true;
-			universe.getViewer().getView()
+			univ.getViewer().getView()
 				.removeCanvas3D(offScreenCanvas3D);
 			offScreenCanvas3D = null;
 			System.err.println("Java3D error: " +
@@ -731,9 +730,9 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 	}
 
 	public boolean close() {
-		if (null == universe) return false;
+		if (null == univ) return false;
 		WindowManager.removeWindow(this);
-		universe.removeUniverseListener(this);
+		univ.removeUniverseListener(this);
 
 		// Must remove the listener so this instance can be garbage
 		// collected and removed from the Canvas3D, overcomming the limit
@@ -743,15 +742,15 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 					"removeRenderingErrorListener",
 					new Class[]{RenderingErrorListener.class});
 			if (null != m)
-				m.invoke(universe, new Object[]{error_listener});
+				m.invoke(univ, new Object[]{error_listener});
 		} catch (Exception ex) {
 			System.out.println(
 					"Could NOT remove the RenderingErrorListener!");
 			ex.printStackTrace();
 		}
 
-		if (null != universe.getWindow())
-			universe.cleanup();
+		if (null != univ.getWindow())
+			univ.cleanup();
 		for (Component comp:this.getComponents()){
 			for (KeyListener l:comp.getKeyListeners()){
 				comp.removeKeyListener(l);
@@ -763,7 +762,7 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 
 		imp_updater.quit();
 		canvas3D.flush();
-		universe = null;
+		univ = null;
 		dispose();
 		return true;
 	}

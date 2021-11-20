@@ -5,6 +5,7 @@ import ij.ImagePlus;
 import ij.Menus;
 import ij.gui.ImageCanvas;
 import ij.plugin.Colors;
+import ij.plugin.frame.RoiManager;
 import ij3d.contextmenu.ContextMenu;
 import ij3d.gui.Content3DManager;
 import ij3d.pointlist.PointListDialog;
@@ -49,6 +50,7 @@ import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -173,6 +175,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 * locking.
 	 */
 	private final Object lock = new Object();
+	
+	private Content3DManager c3dm;
 
     private static ScheduledThreadPoolExecutor blinkService;
 	private ScheduledFuture schfut;
@@ -205,6 +209,9 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		}
 		canvas = (ImageCanvas3D)getCanvas();
 		iJ3dExecuter = new IJ3dExecuter(this);
+		
+		c3dm = new Content3DManager(this, false);
+		
 		this.timeline = new Timeline(this);
 		this.timelineGUI = new TimelineGUI(timeline);
 		canvas.addKeyListener(timelineGUI);
@@ -2112,8 +2119,6 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 	private boolean flipXonImport;
 
-	private Content3DManager c3Dm;
-
 	/**
 	 * Add the specified Content to the universe. It is assumed that the
 	 * specified Content is constructed correctly.
@@ -2151,7 +2156,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		ArrayList<String> timedObjFileNames = new ArrayList<String>();
 		File file = new File(filePath);
 		String titleName = file.getName();
-		if (filePath.matches(".*_\\d+.obj")) {
+		if (false/*filePath.matches(".*_\\d+.obj")*/) {
 			if (file.getParentFile() != null && file.getParentFile().list() != null){
 				for(String nextfilename: file.getParentFile().list()) {
 					String fileNameRoot = file.getName().split("_\\d+.obj")[0];
@@ -2163,7 +2168,9 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				timedObjFileNames.add(new File(filePath).getName());
 			}
 		} else {
-			timedObjFileNames.add(new File(filePath).getName());
+			if (filePath.matches(".*\\.obj")) {
+				timedObjFileNames.add(new File(filePath).getName());
+			}
 		}
 		Object[] timedObjFileNms = timedObjFileNames.toArray();
 		Arrays.sort(timedObjFileNms);
@@ -2209,9 +2216,16 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			}
 		}
 		for (String cName:cInstants.keySet()) {
-			Content content = new Content(cName, cInstants.get(cName), false);
-			this.addContent(content);
-			content.setLocked(true);
+			for (Map.Entry<String, TreeMap<Integer, ContentInstant>> ciMap: cInstants.entrySet()) {
+				TreeMap<Integer, ContentInstant> ciTreeMap = ciMap.getValue();
+				for (Map.Entry<Integer,ContentInstant> ciEntry: ciTreeMap.entrySet()) {
+						c3dm.addContentInstant(ciEntry.getValue());					
+				}
+				
+				Content content = new Content(cName, cInstants.get(cName), false);
+				this.addContent(content);
+				content.setLocked(true);
+			}
 		}
 		if (win.getTitle().matches("CytoSHOW3D.*")){
 			win.getImagePlus().setWindow(win);
@@ -2299,11 +2313,19 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	}
 
 	public void setContent3DManager(Content3DManager content3dManager) {
-		this.c3Dm = content3dManager;
+		this.c3dm = content3dManager;
 	}	
 
 	public Content3DManager getContent3DManager() {
-		return this.c3Dm;
+		if (c3dm!=null)
+			return c3dm;
+		else {
+			c3dm = new Content3DManager(this, false);
+			return c3dm;
+		}
+
 	}	
+	
+	
 }
 

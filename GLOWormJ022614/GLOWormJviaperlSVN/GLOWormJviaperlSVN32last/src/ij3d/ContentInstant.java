@@ -110,6 +110,7 @@ public class ContentInstant extends BranchGroup implements UniverseListener, Con
 	public ContentInstant(String name) {
 		// create BranchGroup for this image
 		this.name = name;
+		this.contentsContainingThisInstant = new TreeMap<Integer,Content>();
 		setCapability(BranchGroup.ALLOW_DETACH);
 		setCapability(BranchGroup.ENABLE_PICK_REPORTING);
 

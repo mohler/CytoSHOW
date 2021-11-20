@@ -200,38 +200,39 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 				Iterator contents = ((Image3DUniverse)univ).contents();
 				while (contents.hasNext()) {
 					Content content = (Content) contents.next();
+					String fixedName = content.getName().replace("BWM-", "BWM");
 					for (String key:this.getBrainbowColors().keySet()) {
 
 						// THESE CONDITIONS WILL CERTAINLY NEED ADJUSTMENT TO GET ALL CASES NEEDED CORRECT
-						if (content.getName().toLowerCase().contentEquals(key.toLowerCase())
-								||content.getName().split("-")[0].toLowerCase().contentEquals(key.toLowerCase())
-								|| content.getName().split("-")[0].toLowerCase().endsWith("by" + key.toLowerCase())
-								|| content.getName().split("-")[0].toLowerCase().contains("_" + key.toLowerCase())
-								|| content.getName().split("-")[0].toLowerCase().matches(".*"+key.toLowerCase()+"(undefined)" + ".*"+"_pre")
-								|| content.getName().split("-")[0].toLowerCase().matches(".*"+key.toLowerCase()+"(chemical)" + ".*"+"_pre")
-								|| content.getName().split("-")[0].toLowerCase().matches(".*"+"(electrical|&)" + key.toLowerCase()+".*"+"_gapjxn")
-								|| content.getName().split("-")[0].toLowerCase().matches(".*"+key.toLowerCase()+"(electrical)" + ".*"+"_gapjxn")
-////								|| content.getName().split("-")[0].toLowerCase().contains("chemical" + key.toLowerCase())
-////								|| content.getName().split("-")[0].toLowerCase().contains("electrical" + key.toLowerCase())
-							|| content.getName().split("-")[0].toLowerCase().startsWith(key.toLowerCase() + "_")) {		
+						if (fixedName.toLowerCase().contentEquals(key.toLowerCase())
+								||fixedName.split("-")[0].toLowerCase().contentEquals(key.toLowerCase())
+								|| fixedName.split("-")[0].toLowerCase().endsWith("by" + key.toLowerCase())
+								|| fixedName.split("-")[0].toLowerCase().contains("_" + key.toLowerCase())
+								|| fixedName.split("-")[0].toLowerCase().matches(".*"+key.toLowerCase()+"(undefined)" + ".*"+"_pre")
+								|| fixedName.split("-")[0].toLowerCase().matches(".*"+key.toLowerCase()+"(chemical)" + ".*"+"_pre")
+								|| fixedName.split("-")[0].toLowerCase().matches(".*"+"(electrical|&)" + key.toLowerCase()+".*"+"_gapjxn")
+								|| fixedName.split("-")[0].toLowerCase().matches(".*"+key.toLowerCase()+"(electrical)" + ".*"+"_gapjxn")
+////								|| fixedName.split("-")[0].toLowerCase().contains("chemical" + key.toLowerCase())
+////								|| fixedName.split("-")[0].toLowerCase().contains("electrical" + key.toLowerCase())
+							|| fixedName.split("-")[0].toLowerCase().startsWith(key.toLowerCase() + "_")) {		
 							new Thread(new Runnable() {
 								public void run() {
 									content.setColor(new Color3f(ColorLegend.this.getBrainbowColors().get(key)));
 								}
 							}).start();
-							IJ.log(content.getName()+" "+key+" "+ColorLegend.this.getBrainbowColors().get(key));
-						} else if (content.getName().split("-")[0].toLowerCase().matches(".*"+"(undefined|&)" + key.toLowerCase()+".*"+"_post(\\d)*")
-									|| content.getName().split("-")[0].toLowerCase().matches(".*"+"(chemical|&)" + key.toLowerCase()+".*"+"_post(\\d)*")) {
-							String[] postSynNames = content.getName().toLowerCase().split("-")[0].split("(undefined|chemical|~)")[1].split("&");
+							IJ.log(fixedName+" "+key+" "+ColorLegend.this.getBrainbowColors().get(key));
+						} else if (fixedName.split("-")[0].toLowerCase().matches(".*"+"(undefined|&)" + key.toLowerCase()+".*"+"_post(\\d)*")
+									|| fixedName.split("-")[0].toLowerCase().matches(".*"+"(chemical|&)" + key.toLowerCase()+".*"+"_post(\\d)*")) {
+							String[] postSynNames = fixedName.toLowerCase().split("-")[0].split("(undefined|chemical|~)")[1].split("&");
 							for (int psn=1; psn<= postSynNames.length; psn++) {
-								if (content.getName().endsWith("post"+psn )&& postSynNames[psn-1].toLowerCase().equals(key.toLowerCase())) {
+								if (fixedName.endsWith("post"+psn )&& postSynNames[psn-1].toLowerCase().equals(key.toLowerCase())) {
 //									content.setColor(new Color3f(this.getBrainbowColors().get(key)));
 									new Thread(new Runnable() {
 										public void run() {
 											content.setColor(new Color3f(ColorLegend.this.getBrainbowColors().get(key)));
 										}
 									}).start();
-									IJ.log(content.getName()+" "+key+" "+ColorLegend.this.getBrainbowColors().get(key));
+									IJ.log(fixedName+" "+key+" "+ColorLegend.this.getBrainbowColors().get(key));
 								}
 							}
 						} else {

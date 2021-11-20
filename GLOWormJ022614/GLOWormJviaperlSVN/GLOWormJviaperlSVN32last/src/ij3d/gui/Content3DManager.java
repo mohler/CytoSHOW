@@ -86,13 +86,15 @@ import ij.macro.*;
 import ij.measure.*;
 import ij3d.Content;
 import ij3d.ContentInstant;
+import ij3d.DefaultUniverse;
 import ij3d.Image3DUniverse;
 import ij3d.ImageJ3DViewer;
+import ij3d.ImageWindow3D;
 import ij3d.gui.Content3DManager.ModCellRenderer;
 import javafx.scene.control.Cell;
 import javafx.scene.control.Tooltip;
 
-/** This plugin implements the Analyze/Tools/Tag Manager command. */
+/** This plugin implements the Analyze/Tools/Content3D Manager command. */
 public class Content3DManager extends PlugInFrame implements ActionListener, ItemListener, MouseListener, MouseWheelListener,
 		KeyListener, ChangeListener, ListSelectionListener, WindowListener, DocumentListener {
 
@@ -134,8 +136,8 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 	private JCheckBox addContentInstantSpanTCheckbox = new JCheckBox("Span T", false);
 	private JCheckBox showAllCheckbox = new JCheckBox("Show", true);
 	private JCheckBox showOwnROIsCheckbox = new JCheckBox("Only own notes", false);
-	private Image3DUniverse univ = null;
-	private ImagePlus imp = null;
+	private DefaultUniverse univ;
+	private ImagePlus imp;
 
 	private JCheckBox labelsCheckbox = new JCheckBox("Number", false);
 	private JSpinner zSustainSpinner;
@@ -202,32 +204,10 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 	private int shiftC;
 
 	public Content3DManager() {
-		super("Tag Manager");
-		this.imp = WindowManager.getCurrentImage();
-		if (imp.getNDimensions() < 3) {
-			for (int i = 0; i < WindowManager.getIDList().length; i++) {
-				if (WindowManager.getImage(WindowManager.getIDList()[i]).getStack() instanceof MultiQTVirtualStack
-						&& ((MultiQTVirtualStack) WindowManager.getImage(WindowManager.getIDList()[i]).getStack())
-								.getLineageMapImage() == imp) {
-					imp = WindowManager.getImage(WindowManager.getIDList()[i]);
-				}
-			}
-		}
-		if (imp.getMotherImp() != null) {
-			ColorLegend cl = imp.getMotherImp().getRoiManager().getColorLegend();
-			if (cl != null) {
-				if (cl.isPopupHappened()) {
-					imp = imp.getMotherImp();
-					cl.setPopupHappened(false);
-				}
+		super("Content3D Manager");
+		this.univ = (WindowManager.getCurrentWindow() instanceof ImageWindow3D)?
+				((ImageWindow3D)WindowManager.getCurrentWindow()).getUniverse():null;
 
-			}
-		}
-//		if (imp.getRoiManager()!=null) {
-//			imp.getRoiManager().setVisible(true);
-//			imp.getRoiManager().toFront();
-//			return;
-//		}
 		// //this.setTitle(getTitle()+":"+ imp.getTitle());
 		list = new JList<String>();
 		list.setCellRenderer(new ModCellRenderer());
@@ -236,17 +216,17 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 		fullListModel = new DefaultListModel<String>();
 		list.setModel(listModel);
 		fullList.setModel(fullListModel);
-		univ.setContent3DManager(this);
 		showWindow(false);
 		// WindowManager.addWindow(this);
-		// thread = new Thread(this, "Tag Manager");
+		// thread = new Thread(this, "Content3D Manager");
 		// thread.start();
 
 	}
 
 	public Content3DManager(boolean hideWindow) {
-		super("Tag Manager");
-		this.imp = WindowManager.getCurrentImage();
+		super("Content3D Manager");
+		this.univ = (WindowManager.getCurrentWindow() instanceof ImageWindow3D)?
+			((ImageWindow3D)WindowManager.getCurrentWindow()).getUniverse():null;
 		// //this.setTitle(getTitle()+":"+ imp.getTitle());
 		Prefs.showAllSliceOnly = true;
 		list = new JList<String>();
@@ -256,17 +236,15 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 		fullListModel = new DefaultListModel<String>();
 		list.setModel(listModel);
 		fullList.setModel(fullListModel);
-
-		univ.setContent3DManager(this);
 		showWindow(!hideWindow);
 		// WindowManager.addWindow(this);
-		// thread = new Thread(this, "Tag Manager");
+		// thread = new Thread(this, "Content3D Manager");
 		// thread.start();
 
 	}
 
 	public Content3DManager(ImagePlus imp, boolean hideWindow) {
-		super("Tag Manager");
+		super("Content3D Manager");
 		this.imp = imp;
 		Prefs.showAllSliceOnly = true;
 		list = new JList<String>();
@@ -278,6 +256,29 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 		fullList.setModel(fullListModel);
 
 		if (imp != null) {
+			// //this.setTitle(getTitle()+":"+ imp.getTitle());
+			((Image3DUniverse)univ).setContent3DManager(this);
+			showWindow(!hideWindow);
+		}
+		// WindowManager.addWindow(this);
+		// thread = new Thread(this, "TagManagerThread");
+		// thread.start();
+
+	}
+
+	public Content3DManager(Image3DUniverse univ, boolean hideWindow) {
+		super("Content3D Manager");
+		this.univ = univ;
+		Prefs.showAllSliceOnly = true;
+		list = new JList<String>();
+		list.setCellRenderer(new ModCellRenderer());
+		fullList = new JList<String>();
+		listModel = new DefaultListModel<String>();
+		fullListModel = new DefaultListModel<String>();
+		list.setModel(listModel);
+		fullList.setModel(fullListModel);
+
+		if (univ != null) {
 			// //this.setTitle(getTitle()+":"+ imp.getTitle());
 			univ.setContent3DManager(this);
 			showWindow(!hideWindow);
@@ -385,7 +386,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 		this.setResizable(true);
 		pack();
 		if (visOn) {
-			ImageWindow imgWin = imp.getWindow();
+			ImageWindow imgWin = univ.getWindow();
 			this.setVisible(true);
 			if (imgWin != null)
 				setLocation(imgWin.getLocationOnScreen().x + imgWin.getWidth() + 5, imgWin.getLocationOnScreen().y);
@@ -481,7 +482,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 		if (e == null)
 			return;
 		if (e.getActionCommand().equals("Full\nSet")) {
-			univ.getContent3DManager().getTextSearchField().setText("");
+			((Image3DUniverse) univ).getContent3DManager().getTextSearchField().setText("");
 			e.setSource(textFilterField);
 		}
 		boolean wasVis = this.isVisible();
@@ -497,17 +498,15 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 			boolean isLinTrace = (searchString.toLowerCase().startsWith("?lt?"));
 			listModel.removeAllElements();
 			prevSearchString = searchString;
-			// String[] listStrings = fullList.getItems();
-			String impTitle = this.imp.getTitle();
 			int count = fullListModel.getSize();
 			Dimension dim = list.getSize();
 			list.setSize(0, 0);
 			textCountLabel.setText("?" + "/" + fullListModel.size());
-			imp.getWindow().countLabel.setText("" + listModel.size() + "/" + fullListModel.size() + "");
-			imp.getWindow().countLabel.repaint();
+			univ.getWindow().countLabel.setText("" + listModel.size() + "/" + fullListModel.size() + "");
+			univ.getWindow().countLabel.repaint();
 			// imp.getWindow().tagsButton.setText(""+fullListModel.size());
 
-			imp.getWindow().tagsButton.repaint();
+			univ.getWindow().tagsButton.repaint();
 			searching = true;
 			long timeLast = 0;
 			long timeNow = 0;
@@ -517,23 +516,23 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 				if (searchString.trim().equalsIgnoreCase("") || searchString.trim().equalsIgnoreCase(".*")) {
 					listModel.addElement(fullListModel.get(i));
 					// IJ.log(listStrings[i]);
-					if (timeNow > timeLast + 100) {
-						timeLast = timeNow;
-						Graphics g = imp.getCanvas().getGraphics();
-						if (imp.getCanvas().messageRois.containsKey("Loading Tags"))
-							imp.getCanvas().messageRois.remove("Loading Tags");
-
-						Roi messageRoi = new TextRoi(imp.getCanvas().getSrcRect().x, imp.getCanvas().getSrcRect().y,
-								"   Finding tags that match:\n   " + "Reloading full set" + "..."
-										+ univ.getContent3DManager().getListModel().getSize() + "");
-
-						((TextRoi) messageRoi).setCurrentFont(
-								g.getFont().deriveFont((float) (imp.getCanvas().getSrcRect().width / 16)));
-						messageRoi.setStrokeColor(Color.black);
-						imp.getRoiManager().setRoiFillColor(messageRoi, Colors.decode("#99ffffdd", imp.getCanvas().getDefaultColor()));
-						imp.getCanvas().messageRois.put("Loading Tags", messageRoi);
-						imp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
-					}
+//					if (timeNow > timeLast + 100) {
+//						timeLast = timeNow;
+//						Graphics g = imp.getCanvas().getGraphics();
+//						if (imp.getCanvas().messageRois.containsKey("Loading Tags"))
+//							imp.getCanvas().messageRois.remove("Loading Tags");
+//
+//						Roi messageRoi = new TextRoi(imp.getCanvas().getSrcRect().x, imp.getCanvas().getSrcRect().y,
+//								"   Finding tags that match:\n   " + "Reloading full set" + "..."
+//										+ ((Image3DUniverse) univ).getContent3DManager().getListModel().getSize() + "");
+//
+//						((TextRoi) messageRoi).setCurrentFont(
+//								g.getFont().deriveFont((float) (imp.getCanvas().getSrcRect().width / 16)));
+//						messageRoi.setStrokeColor(Color.black);
+//						imp.getRoiManager().setRoiFillColor(messageRoi, Colors.decode("#99ffffdd", imp.getCanvas().getDefaultColor()));
+//						imp.getCanvas().messageRois.put("Loading Tags", messageRoi);
+//						imp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
+//					}
 					continue;
 				}
 
@@ -566,70 +565,70 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 				} else if (((String) fullListModel.get(i)).toLowerCase().contains(searchString.toLowerCase())) {
 					listModel.addElement(fullListModel.get(i));
 				}
-				if (timeNow > timeLast + 100 && !imp.getCanvas().messageRois.containsKey("Finding tags from drop")) {
-					timeLast = timeNow;
-					Graphics g = imp.getCanvas().getGraphics();
-					if (imp.getCanvas().messageRois.containsKey("Finding tags that match"))
-						imp.getCanvas().messageRois.remove("Finding tags that match");
-
-					TextRoi messageRoi = new TextRoi(imp.getCanvas().getSrcRect().x, imp.getCanvas().getSrcRect().y,
-							"   Finding tags that match:\n   \"" + searchString + "\"..."
-									+ univ.getContent3DManager().getListModel().getSize() + " found.");
-
-					((TextRoi) messageRoi)
-							.setCurrentFont(g.getFont().deriveFont((float) (imp.getCanvas().getSrcRect().width / 16)));
-					messageRoi.setStrokeColor(Color.black);
-					imp.getRoiManager().setRoiFillColor(messageRoi, Colors.decode("#99ffffdd", imp.getCanvas().getDefaultColor()));
-
-					imp.getCanvas().messageRois.put("Finding tags that match", messageRoi);
-					// imp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
-
-				}
+//				if (timeNow > timeLast + 100 && !imp.getCanvas().messageRois.containsKey("Finding tags from drop")) {
+//					timeLast = timeNow;
+//					Graphics g = imp.getCanvas().getGraphics();
+//					if (imp.getCanvas().messageRois.containsKey("Finding tags that match"))
+//						imp.getCanvas().messageRois.remove("Finding tags that match");
+//
+//					TextRoi messageRoi = new TextRoi(imp.getCanvas().getSrcRect().x, imp.getCanvas().getSrcRect().y,
+//							"   Finding tags that match:\n   \"" + searchString + "\"..."
+//									+ ((Image3DUniverse) univ).getContent3DManager().getListModel().getSize() + " found.");
+//
+//					((TextRoi) messageRoi)
+//							.setCurrentFont(g.getFont().deriveFont((float) (imp.getCanvas().getSrcRect().width / 16)));
+//					messageRoi.setStrokeColor(Color.black);
+//					imp.getRoiManager().setRoiFillColor(messageRoi, Colors.decode("#99ffffdd", imp.getCanvas().getDefaultColor()));
+//
+//					imp.getCanvas().messageRois.put("Finding tags that match", messageRoi);
+//					// imp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
+//
+//				}
 
 			}
-			if (imp.getCanvas().messageRois.containsKey("Finding tags that match"))
-				imp.getCanvas().messageRois.remove("Finding tags that match");
-			if (imp.getCanvas().messageRois.containsKey("Loading Tags"))
-				imp.getCanvas().messageRois.remove("Loading Tags");
+//			if (imp.getCanvas().messageRois.containsKey("Finding tags that match"))
+//				imp.getCanvas().messageRois.remove("Finding tags that match");
+//			if (imp.getCanvas().messageRois.containsKey("Loading Tags"))
+//				imp.getCanvas().messageRois.remove("Loading Tags");
 
 			searching = false;
 			list.setSize(dim);
 			textCountLabel.setText("" + listModel.size() + "/" + fullListModel.size());
-			imp.getWindow().countLabel.setText("" + listModel.size() + "/" + fullListModel.size() + "");
-			imp.getWindow().countLabel.repaint();
+			univ.getWindow().countLabel.setText("" + listModel.size() + "/" + fullListModel.size() + "");
+			univ.getWindow().countLabel.repaint();
 
-			imp.getWindow().tagsButton.repaint();
+			univ.getWindow().tagsButton.repaint();
 
 			IJ.runMacro("print(\"\\\\Update:\")");
 
-			if (!(imp.getWindow().getTitle().matches(".*[XY]Z +\\d+.*"))) {
-				ImageWindow imgWin = imp.getWindow();
+			if (!(univ.getWindow().getTitle().matches(".*[XY]Z +\\d+.*"))) {
+				ImageWindow imgWin = univ.getWindow();
 				this.setVisible(wasVis);
 				if (imgWin != null)
 					setLocation(imgWin.getLocationOnScreen().x + imgWin.getWidth() + 5, imgWin.getLocationOnScreen().y);
 			}
 
-			if (this.getDisplayedContentInstantsAsArray( imp.getFrame()).length < 1) {
-//				int nearestTagIndex = -1;
-//				int closestYet = imp.getNSlices() + imp.getNFrames();
-//				ContentInstant[] contentInstants = getShownContentInstantsAsArray();
-//				for (int r = 0; r < contentInstants.length; r++) {
-//					if (Math.abs(contentInstants[r].getZPosition() - imp.getSlice())
-//							+ Math.abs(contentInstants[r].getTimepoint() - imp.getFrame()) < closestYet) {
-//						closestYet = Math.abs(contentInstants[r].getZPosition() - imp.getSlice())
-//								+ Math.abs(contentInstants[r].getTimepoint() - imp.getFrame());
-//						nearestTagIndex = r;
-//					}
-//					// IJ.log(""+closestYet);
-//				}
-//				if (nearestTagIndex >= 0) {
-//					new ij.macro.MacroRunner("contentInstantManager('select', " + nearestTagIndex + ", " + imp.getID() + ");");
-//					select(-1);
-//					while (univ.getSelected().getCurrentInstant() == null)
-//						IJ.wait(100);
-//					imp.killContentInstant();
-//				}
-			}
+//			if (this.getDisplayedContentInstantsAsArray( imp.getFrame()).length < 1) {
+////				int nearestTagIndex = -1;
+////				int closestYet = imp.getNSlices() + imp.getNFrames();
+////				ContentInstant[] contentInstants = getShownContentInstantsAsArray();
+////				for (int r = 0; r < contentInstants.length; r++) {
+////					if (Math.abs(contentInstants[r].getZPosition() - imp.getSlice())
+////							+ Math.abs(contentInstants[r].getTimepoint() - imp.getFrame()) < closestYet) {
+////						closestYet = Math.abs(contentInstants[r].getZPosition() - imp.getSlice())
+////								+ Math.abs(contentInstants[r].getTimepoint() - imp.getFrame());
+////						nearestTagIndex = r;
+////					}
+////					// IJ.log(""+closestYet);
+////				}
+////				if (nearestTagIndex >= 0) {
+////					new ij.macro.MacroRunner("contentInstantManager('select', " + nearestTagIndex + ", " + imp.getID() + ");");
+////					select(-1);
+////					while (univ.getSelected().getCurrentInstant() == null)
+////						IJ.wait(100);
+////					imp.killContentInstant();
+////				}
+//			}
 
 		} else {
 
@@ -684,7 +683,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 				add(contentInstant, shiftKeyDown, altKeyDown, controlKeyDown);
 
 				if (existingColor != null) {
-					univ.getContent3DManager().setContentInstantFillColor(contentInstants.get(getListModel().get(getListModel().getSize() - 1)), existingColor);
+					((Image3DUniverse) univ).getContent3DManager().setContentInstantFillColor(contentInstants.get(getListModel().get(getListModel().getSize() - 1)), existingColor);
 
 				}
 
@@ -759,7 +758,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 						// nameMatchIndexes[i] = nameMatchIndexArrayList.get(i);
 						// fullcontentInstants[nameMatchIndexes[i]]imp.getRoiManager().setRoiFillColor(Colors.decode(alphaCorrFillColorString,
 						// fillColor));
-						univ.getContent3DManager().setContentInstantFillColor(nmContentInstant, Colors.decode(alphaCorrFillColorString, fillColor));
+						((Image3DUniverse) univ).getContent3DManager().setContentInstantFillColor(nmContentInstant, Colors.decode(alphaCorrFillColorString, fillColor));
 
 					}
 					// this.setSelectedIndexes(nameMatchIndexes);
@@ -880,7 +879,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 					if (existinghexName != "") {
 						for (int i = 0; i < nameMatchIndexes.length; i++) {
 
-							univ.getContent3DManager().setContentInstantFillColor(contentInstants[nameMatchIndexes[i]], existingColor);
+							((Image3DUniverse) univ).getContent3DManager().setContentInstantFillColor(contentInstants[nameMatchIndexes[i]], existingColor);
 
 						}
 					}
@@ -904,6 +903,13 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 				select(-1);
 				save();
 
+			} else if (command.equals("Adv.")) {
+				// if (imp.getMotherImp().getRoiManager().getColorLegend(e.getSource()) != null)
+				// imp.getMotherImp().getRoiManager().getColorLegend(e.getSource()).setVisible(true);
+				ImageWindow imgWin = univ.getWindow();
+				this.setVisible(true);
+				if (imgWin != null)
+					setLocation(imgWin.getLocationOnScreen().x + imgWin.getWidth() + 5, imgWin.getLocationOnScreen().y);
 			} else if (command.equals("Deselect"))
 				select(-1);
 			else if (command.equals(moreButtonLabel)) {
@@ -965,9 +971,9 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 	}
 
 	public boolean addContentInstant(ContentInstant contentInstant, boolean promptForName, Color color, int lineWidth, boolean addToCurrentUnivPosition) {
-		Image3DUniverse univ = this.univ;
+		Image3DUniverse univ = (Image3DUniverse) this.univ;
 		if (contentInstant == null) {
-			if (imp == null)
+			if (univ == null)
 				return false;
 			contentInstant = univ.getSelected().getCurrentInstant();
 			if (contentInstant == null) {
@@ -1044,12 +1050,12 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 													 * contentInstant.getZPosition()==0 && contentInstant.getTimepoint()==0
 													 */ )
 			contentInstant.timepoint = univ.getCurrentTimepoint();
-		contentInstantCopy = (ContentInstant) contentInstant.cloneNode(true);
+		contentInstantCopy = contentInstant;
 
 		if (fillColor != null)
 			univ.getContent3DManager().setContentInstantFillColor(contentInstantCopy, fillColor, false);
 		contentInstants.put(label, contentInstantCopy);
-		setUpContentInstantsByNameAndNumbers(contentInstantCopy);
+//		setUpContentInstantsByNameAndNumbers(contentInstantCopy);
 
 		ColorLegend cl = getColorLegend();
 		//
@@ -1079,7 +1085,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 		// if (false)
 
 		textCountLabel.setText("" + listModel.size() + "/" + fullListModel.size());
-		if (imp != null && univ.getWindow() != null) {
+		if (univ != null && univ.getWindow() != null) {
 			univ.getWindow().countLabel.setText("" + listModel.size() + "/" + fullListModel.size() + "");
 			univ.getWindow().countLabel.repaint();
 			// univ.getWindow().tagsButton.setText(""+fullListModel.size());
@@ -1187,7 +1193,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 	}
 
 	public boolean delete(boolean replacing) {
-		Image3DUniverse univ = this.univ;
+		Image3DUniverse univ = (Image3DUniverse) this.univ;
 		int count = listModel.getSize();
 		int fullCount = fullListModel.getSize();
 		if (count == 0)
@@ -1199,7 +1205,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 				msg = "Replace items on the list?";
 			canceled = false;
 			if (!IJ.isMacro() && !macro) {
-				YesNoCancelDialog d = new YesNoCancelDialog(this, "Tag Manager", msg);
+				YesNoCancelDialog d = new YesNoCancelDialog(this, "Content3D Manager", msg);
 				if (d.cancelPressed()) {
 					canceled = true;
 					return false;
@@ -1318,7 +1324,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 			contentInstantsByRootName.get(nameRoot).remove(contentInstant);
 			contentInstantsByNumbers.get(numbersKey).remove(contentInstant);
 			contentInstants.remove(name);
-			String label = name != null ? name : getLabel(univ, contentInstant, -1);
+			String label = name != null ? name : getLabel((Image3DUniverse) univ, contentInstant, -1);
 			 if (true) {
 					label = contentInstant.getName();
 			}
@@ -1339,7 +1345,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 						String hexRed = Integer.toHexString(clColor.getRed());
 						String hexGreen = Integer.toHexString(clColor.getGreen());
 						String hexBlue = Integer.toHexString(clColor.getBlue());
-						univ.getContent3DManager().setContentInstantFillColor(contentInstant,
+						((Image3DUniverse) univ).getContent3DManager().setContentInstantFillColor(contentInstant,
 								Colors.decode("#ff" + (hexRed.length() == 1 ? "0" : "") + hexRed
 										+ (hexGreen.length() == 1 ? "0" : "") + hexGreen
 										+ (hexBlue.length() == 1 ? "0" : "") + hexBlue, Color.white));
@@ -1362,7 +1368,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 		String name2 = "";
 //		if (textFindingField.getText().isEmpty()  || textFindingField.getText().contains("Name...")) {
 		if (true) {
-			GenericDialog gd = new GenericDialog("Tag Manager");
+			GenericDialog gd = new GenericDialog("Content3D Manager");
 			gd.addStringField("Rename As:", name.endsWith("|") ? name.substring(0, name.length() - 1) : name, 20);
 			gd.addCheckbox("Propagate Lineage Renaming", propagateRenamesThruLineage);
 			gd.showDialog();
@@ -1515,7 +1521,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 //		}
 //		ImagePlus imp = this.imp;
 //		if (n == listModel.getSize() && n > 1 && !IJ.isMacro()) {
-//			GenericDialog gd = new GenericDialog("Tag Manager");
+//			GenericDialog gd = new GenericDialog("Content3D Manager");
 //			gd.addMessage("Apply changes to all " + n + " selections?");
 //			gd.showDialog();
 //			if (gd.wasCanceled())
@@ -1673,7 +1679,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 		// labels[index++] = (String)en.nextElement();
 		listModel.removeAllElements();
 		fullListModel.removeAllElements();
-		// this.setTitle( "Tag Manager SORTING!!!") ;
+		// this.setTitle( "Content3D Manager SORTING!!!") ;
 
 		if (sortmode > 0) {
 			RoiLabelByNumbersSorter.sort(labels, sortmode);
@@ -1688,7 +1694,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 		// Dimension dim = list.getSize();
 		// list.setSize(0,0);
 		for (int i = 0; i < labels.length; i++) {
-			// this.setTitle( "Tag Manager" + ((numSorted%100>50)?" SORTING!!!":"
+			// this.setTitle( "Content3D Manager" + ((numSorted%100>50)?" SORTING!!!":"
 			// Sorting...") );
 			listModel.addElement(labels[i]);
 			numSorted++;
@@ -1697,7 +1703,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 		for (int i = 0; i < fullLabels.length; i++) {
 			fullListModel.addElement(fullLabels[i]);
 		}
-		// this.setTitle( "Tag Manager" );
+		// this.setTitle( "Content3D Manager" );
 
 		if (record())
 			Recorder.record("contentInstantManager", "Sort");
@@ -1765,7 +1771,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 	}
 
 	/**
-	 * Returns a reference to the Tag Manager or null if it is not open.
+	 * Returns a reference to the Content3D Manager or null if it is not open.
 	 */
 	public static Content3DManager getInstance(ImagePlus queryImp) {
 		if (queryImp != null) {
@@ -1790,7 +1796,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 	}
 
 	/**
-	 * Returns a reference to the Tag Manager window or to the macro batch mode
+	 * Returns a reference to the Content3D Manager window or to the macro batch mode
 	 * ContentInstantManager, or null if neither exists.
 	 */
 	public static Content3DManager getInstance2() {
@@ -1923,7 +1929,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 	}
 
 	/**
-	 * Executes the Tag Manager "Add", "Add & Draw", "Update", "Delete", "Measure",
+	 * Executes the Content3D Manager "Add", "Add & Draw", "Update", "Delete", "Measure",
 	 * "Draw", "Show All", Show None", "Fill", "Deselect", "Select All", "Combine",
 	 * "AND", "XOR", "Split", "Sort" or "Multi Measure" command. Returns false if
 	 * <code>cmd</code> is not one of these strings.
@@ -1959,7 +1965,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 	}
 
 	/**
-	 * Executes the Tag Manager "Open", "Save" or "Rename" command. Returns false if
+	 * Executes the Content3D Manager "Open", "Save" or "Rename" command. Returns false if
 	 * <code>cmd</code> is not "Open", "Save" or "Rename", or if an error occurs.
 	 */
 	public boolean runCommand(String cmd, String name) {
@@ -1967,7 +1973,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 }
 
 	/**
-	 * Adds the current selection to the Tag Manager, using the specified color (a 6
+	 * Adds the current selection to the Content3D Manager, using the specified color (a 6
 	 * digit hex string) and line width.
 	 */
 	public boolean runCommand(String cmd, String hexColor, double lineWidth) {
@@ -2069,7 +2075,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 		list.setSelectedIndices(getSelectedIndexes());
 		ContentInstant contentInstant = (ContentInstant) contentInstants.get(label);
 		if (contentInstant != null) {
-			univ.select(((Content)contentInstant.getContentsContainingThisInstant().get(0)));
+			((Image3DUniverse) univ).select(((Content)contentInstant.getContentsContainingThisInstant().get(0)));
 		}
 	}
 
@@ -2310,8 +2316,8 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 	/**
 	 * Temporarily selects multiple ROIs, where 'indexes' is an array of integers,
 	 * each greater than or equal to 0 and less than the value returned by
-	 * getCount(). The selected ROIs are not highlighted in the Tag Manager list and
-	 * are no longer selected after the next Tag Manager command is executed.
+	 * getCount(). The selected ROIs are not highlighted in the Content3D Manager list and
+	 * are no longer selected after the next Content3D Manager command is executed.
 	 */
 	public void setSelectedIndexes(int[] indexes) {
 		int count = getCount();
@@ -2700,7 +2706,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 //					cl.getRoiManager().altKeyDown = false;
 //					if (altKeyDown)
 //						cl = null;
-//					IJ.log("Passing to original Tag Manager...");
+//					IJ.log("Passing to original Content3D Manager...");
 //					return;
 //				} else if (altKeyDown) {
 //					if (this.getCount() < 1) {
