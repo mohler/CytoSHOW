@@ -748,7 +748,9 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 					"Could NOT remove the RenderingErrorListener!");
 			ex.printStackTrace();
 		}
-
+		if (univ instanceof Image3DUniverse) {
+			((Image3DUniverse) univ).getContent3DManager().dispose();
+		}
 		if (null != univ.getWindow())
 			univ.cleanup();
 		for (Component comp:this.getComponents()){

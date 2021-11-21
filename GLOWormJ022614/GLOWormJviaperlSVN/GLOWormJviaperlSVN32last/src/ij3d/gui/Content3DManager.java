@@ -2021,36 +2021,45 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 
 		if (list.getSelectedIndices().length <= 1) {
 
-			restore(imp, index, true);
-			if (aceTree != null) {
-				ContentInstant cContentInstant = contentInstants.get(listModel.get(getSelectedIndexes()[0]));
-				VTreeImpl vti = aceTree.getVtree().getiVTreeImpl();
-				if (vti != null && vti.getTestCanvas() != null) {
-					for (int i = 0; i < vti.iCellLines.size(); i++) {
-						Object o = vti.iCellLines.get(i);
-						if (!(o instanceof CellLine))
-							continue;
-						CellLine cL = (CellLine) o;
-						org.rhwlab.tree.Cell c = cL.c;
-						if (c.getName()
-								.equals(listModel.get(getSelectedIndexes()[0]).replace("\"", "").split(" ")[0])) {
-							int cStart = c.getTime();
-							int cEnd = c.getEndTime();
-							int rTime = cContentInstant.getTimepoint();
-							if (cStart <= rTime && cEnd >= rTime) {
-								c.setIntTime(rTime);
-								for (MouseListener ml : vti.getTestCanvas().getMouseListeners()) {
-									if (ml != this) {
-										ml.mouseClicked(new MouseEvent(vti.getTestCanvas(), 0, 0, 0,
-												c.getIntTime() + 100, cL.y1 + 5, 1, false, MouseEvent.BUTTON1));
-									}
-								}
-							}
-							break;
-						}
-					}
+//			restore(imp, index, true);
+				String selectedLabel = list.getSelectedValue();
+				String editedLabel = selectedLabel.replace("_#0_#0 \"_0", "").replace("\"", "");
+				Content c = ((Content)((Image3DUniverse) univ).getContent(editedLabel));
+				if (c.getInstants().containsValue(contentInstants.get(selectedLabel))) {
+					((Image3DUniverse)univ).select(c);
+
 				}
-			}
+			
+			
+//			if (aceTree != null) {
+//				ContentInstant cContentInstant = contentInstants.get(listModel.get(getSelectedIndexes()[0]));
+//				VTreeImpl vti = aceTree.getVtree().getiVTreeImpl();
+//				if (vti != null && vti.getTestCanvas() != null) {
+//					for (int i = 0; i < vti.iCellLines.size(); i++) {
+//						Object o = vti.iCellLines.get(i);
+//						if (!(o instanceof CellLine))
+//							continue;
+//						CellLine cL = (CellLine) o;
+//						org.rhwlab.tree.Cell c = cL.c;
+//						if (c.getName()
+//								.equals(listModel.get(getSelectedIndexes()[0]).replace("\"", "").split(" ")[0])) {
+//							int cStart = c.getTime();
+//							int cEnd = c.getEndTime();
+//							int rTime = cContentInstant.getTimepoint();
+//							if (cStart <= rTime && cEnd >= rTime) {
+//								c.setIntTime(rTime);
+//								for (MouseListener ml : vti.getTestCanvas().getMouseListeners()) {
+//									if (ml != this) {
+//										ml.mouseClicked(new MouseEvent(vti.getTestCanvas(), 0, 0, 0,
+//												c.getIntTime() + 100, cL.y1 + 5, 1, false, MouseEvent.BUTTON1));
+//									}
+//								}
+//							}
+//							break;
+//						}
+//					}
+//				}
+//			}
 		}
 		if (this.isVisible()) {
 			list.revalidate();
@@ -3728,9 +3737,16 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 		index = list.getSelectedIndices()[0];
 		if (index < 0)
 			index = 0;
-		if (imp != null) {
+		if (univ != null) {
 			if (list.getSelectedIndices().length <= 1) {
-				restore(imp, index, true);
+//				restore(imp, index, true);
+				String selectedLabel = list.getSelectedValue();
+				String editedLabel = selectedLabel.replace("_#0_#0 \"_0", "").replace("\"", "");
+				Content c = ((Content)((Image3DUniverse) univ).getContent(editedLabel));
+				if (c.getInstants().containsValue(contentInstants.get(selectedLabel))) {
+					((Image3DUniverse)univ).select(c);
+
+				}
 			}
 			if (record()) {
 				if (Recorder.scriptMode())
