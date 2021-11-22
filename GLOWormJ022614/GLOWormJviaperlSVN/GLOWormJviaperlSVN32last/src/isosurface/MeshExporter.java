@@ -484,28 +484,32 @@ public class MeshExporter {
 		writeAsWaveFront( contents, objFilePathString,  mtl_filename,  w_obj,  w_mtl, null, oneFile);
 	}
 	
-	static public void writeAsWaveFront(Collection contents, String objFilePathString, String mtl_filename, Writer w_obj, Writer w_mtl, String scaleShiftString,boolean oneFile) throws IOException {
+	static public void writeAsWaveFront(Collection contents, String objFilePathString, String mtl_filename, 
+										Writer w_obj, Writer w_mtl, String scaleShiftString,boolean oneFile) throws IOException {
+		
 		HashMap<String, CustomMesh> meshes = new HashMap<String, CustomMesh>();
 
 		for(Iterator it = contents.iterator(); it.hasNext(); ) {
 			Content mob = (Content)it.next();
-			ContentNode node = mob.getContentNode();
+			if (mob.isVisible()) {
+				ContentNode node = mob.getContentNode();
 
-			// First CustomMultiMesh, which is also a CustomMeshNode:
-			if (node instanceof CustomMultiMesh) {
-				CustomMultiMesh multi = (CustomMultiMesh)node;
-				for (int i=0; i<multi.size(); i++) {
-					meshes.put(mob.getName() + " [" + (i+1) + "]", multi.getMesh(i));
+				// First CustomMultiMesh, which is also a CustomMeshNode:
+				if (node instanceof CustomMultiMesh) {
+					CustomMultiMesh multi = (CustomMultiMesh)node;
+					for (int i=0; i<multi.size(); i++) {
+						meshes.put(mob.getName() + " [" + (i+1) + "]", multi.getMesh(i));
+					}
+					// Then CustomMeshNode (all custom meshes):
+				} else if (node instanceof CustomMeshNode) {
+					meshes.put(mob.getName(), ((CustomMeshNode)node).getMesh());
+					// An image volume rendered as isosurface:
+				} else if (node instanceof MeshGroup) {
+					meshes.put(mob.getName(), ((MeshGroup)node).getMesh());
+				} else {
+					IJ.log("Ignoring " + mob.getName() + " with node of class " + node.getClass());
+					continue;
 				}
-			// Then CustomMeshNode (all custom meshes):
-			} else if (node instanceof CustomMeshNode) {
-				meshes.put(mob.getName(), ((CustomMeshNode)node).getMesh());
-			// An image volume rendered as isosurface:
-			} else if (node instanceof MeshGroup) {
-				meshes.put(mob.getName(), ((MeshGroup)node).getMesh());
-			} else {
-				IJ.log("Ignoring " + mob.getName() + " with node of class " + node.getClass());
-				continue;
 			}
 		}
 		WavefrontExporter.save(meshes, objFilePathString, mtl_filename, w_obj, w_mtl, scaleShiftString, oneFile);

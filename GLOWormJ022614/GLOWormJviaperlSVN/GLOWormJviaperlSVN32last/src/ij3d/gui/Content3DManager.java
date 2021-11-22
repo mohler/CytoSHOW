@@ -515,6 +515,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 				timeNow = System.currentTimeMillis();
 				if (searchString.trim().equalsIgnoreCase("") || searchString.trim().equalsIgnoreCase(".*")) {
 					listModel.addElement(fullListModel.get(i));
+					contentInstants.get(fullListModel.get(i)).setVisible(true);
 					// IJ.log(listStrings[i]);
 //					if (timeNow > timeLast + 100) {
 //						timeLast = timeNow;
@@ -536,8 +537,13 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 					continue;
 				}
 
-				if (isRegex && ((String) fullListModel.get(i)).matches(searchString.substring(2))) {
+				if (isRegex) {
+					if (((String) fullListModel.get(i)).matches(searchString.substring(2))) {
 					listModel.addElement(fullListModel.get(i));
+					contentInstants.get(fullListModel.get(i)).setVisible(true);
+				} else {
+					contentInstants.get(fullListModel.get(i)).setVisible(false);
+				}				
 				} else if (isLinBackTrace) { // Uses complex regex lookahead query to anticipate various terminations of
 												// ancestor names
 					String matchString = "^\"" + searchString.charAt(5);
@@ -548,7 +554,11 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 					matchString = matchString + " \".*$";
 					if (((String) fullListModel.get(i)).matches(matchString)) {
 						listModel.addElement(fullListModel.get(i));
+						contentInstants.get(fullListModel.get(i)).setVisible(true);
+					} else {
+						contentInstants.get(fullListModel.get(i)).setVisible(false);
 					}
+
 
 				} else if (isLinTrace) {// Uses complex regex lookahead query to anticipate various terminations of
 										// ancestor names
@@ -560,10 +570,17 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 					matchString = matchString + ".* \".*$";
 					if (((String) fullListModel.get(i)).matches(matchString)) {
 						listModel.addElement(fullListModel.get(i));
+						contentInstants.get(fullListModel.get(i)).setVisible(true);
+					} else {
+						contentInstants.get(fullListModel.get(i)).setVisible(false);
 					}
+
 
 				} else if (((String) fullListModel.get(i)).toLowerCase().contains(searchString.toLowerCase())) {
 					listModel.addElement(fullListModel.get(i));
+					contentInstants.get(fullListModel.get(i)).setVisible(true);
+				} else {
+					contentInstants.get(fullListModel.get(i)).setVisible(false);
 				}
 //				if (timeNow > timeLast + 100 && !imp.getCanvas().messageRois.containsKey("Finding tags from drop")) {
 //					timeLast = timeNow;
