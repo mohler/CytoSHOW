@@ -46,6 +46,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
@@ -56,6 +57,7 @@ import javax.media.j3d.Background;
 import javax.media.j3d.PointLight;
 import javax.media.j3d.Transform3D;
 import javax.swing.JFileChooser;
+import javax.swing.ListModel;
 import javax.vecmath.Color3f;
 import javax.vecmath.Matrix4d;
 import javax.vecmath.Matrix4f;
@@ -1022,6 +1024,7 @@ public class IJ3dExecuter {
 				univ.fireContentChanged(finalC);
 			}
 		};
+		
 		final SliderAdjuster transp_adjuster = new SliderAdjuster() {
 
 			public synchronized final void setValue(ContentInstant ci, int v) {
@@ -1029,11 +1032,12 @@ public class IJ3dExecuter {
 					finalC.setTransparency(v / 100f);
 					univ.fireContentChanged(finalC);
 				} else {
-					for (Object nextC:univ.getContents()){
-						if (nextC!=finalC) {
-							((Content) nextC).getCurrentInstant().setTransparency(v / 100f);
-							univ.fireContentChanged(((Content) nextC));
-						}
+					Hashtable<String, ContentInstant> contentInstants = ((Image3DUniverse)univ).getContent3DManager().getCIs();
+					ListModel lm = ((Image3DUniverse)univ).getContent3DManager().getListModel();
+					for (int index =0; index < lm.getSize(); index++) {
+						String hashkey = (String) lm.getElementAt(index);
+						ContentInstant cinst = contentInstants.get(hashkey);
+						cinst.setTransparency(v / 100f);						
 					}
 				}
 			}

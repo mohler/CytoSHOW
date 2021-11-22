@@ -564,6 +564,10 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 	}
 
 	public void setColor(Color3f color) {
+		setColor(color, true);
+	}
+
+		public void setColor(Color3f color, boolean colorAllInatants) {
 		if ((this.color == null && color == null) ||
 				(this.color != null && color != null &&
 				 this.color.equals(color)))
@@ -571,7 +575,8 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 		this.trueColor = color;
 		this.color = color;
 		for(ContentInstant ci : contentInstants.values())
-			ci.setColor(color);
+			if (colorAllInatants || ci.isVisible())
+				ci.setColor(color);
 	}
 
 	public void setTempColor(Color3f color) {

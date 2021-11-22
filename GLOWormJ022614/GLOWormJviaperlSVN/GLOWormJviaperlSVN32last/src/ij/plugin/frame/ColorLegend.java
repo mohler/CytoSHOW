@@ -4,6 +4,7 @@ import ij.plugin.*;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
 import ij3d.Content;
+import ij3d.ContentInstant;
 import ij3d.DefaultUniverse;
 import ij3d.Image3DUniverse;
 import ij3d.ImageWindow3D;
@@ -26,6 +27,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.JCheckBox;
+import javax.swing.ListModel;
 import javax.vecmath.Color3f;
 
 import org.vcell.gloworm.MultiQTVirtualStack;
@@ -197,10 +199,12 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 			//		this.setVisible(true);
 			if (imp.getWindow()!=null && imp.getWindow() instanceof ImageWindow3D) {
 				DefaultUniverse univ = ((ImageWindow3D)imp.getWindow()).getUniverse();
-				Iterator contents = ((Image3DUniverse)univ).contents();
-				while (contents.hasNext()) {
-					Content content = (Content) contents.next();
-					String fixedName = content.getName().replace("BWM-", "BWM");
+				Hashtable<String, ContentInstant> contentInstants = ((Image3DUniverse)univ).getContent3DManager().getCIs();
+				ListModel lm = ((Image3DUniverse)univ).getContent3DManager().getListModel();
+				for (int index =0; index < lm.getSize(); index++) {
+					String hashkey = (String) lm.getElementAt(index);
+					ContentInstant ci = contentInstants.get(hashkey);
+					String fixedName = ci.getName().replace("BWM-", "BWM");
 					for (String key:this.getBrainbowColors().keySet()) {
 
 						// THESE CONDITIONS WILL CERTAINLY NEED ADJUSTMENT TO GET ALL CASES NEEDED CORRECT
@@ -217,7 +221,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 							|| fixedName.split("-")[0].toLowerCase().startsWith(key.toLowerCase() + "_")) {		
 							new Thread(new Runnable() {
 								public void run() {
-									content.setColor(new Color3f(ColorLegend.this.getBrainbowColors().get(key)));
+									ci.setColor(new Color3f(ColorLegend.this.getBrainbowColors().get(key)));
 								}
 							}).start();
 							IJ.log(fixedName+" "+key+" "+ColorLegend.this.getBrainbowColors().get(key));
@@ -229,7 +233,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 //									content.setColor(new Color3f(this.getBrainbowColors().get(key)));
 									new Thread(new Runnable() {
 										public void run() {
-											content.setColor(new Color3f(ColorLegend.this.getBrainbowColors().get(key)));
+											ci.setColor(new Color3f(ColorLegend.this.getBrainbowColors().get(key)));
 										}
 									}).start();
 									IJ.log(fixedName+" "+key+" "+ColorLegend.this.getBrainbowColors().get(key));
