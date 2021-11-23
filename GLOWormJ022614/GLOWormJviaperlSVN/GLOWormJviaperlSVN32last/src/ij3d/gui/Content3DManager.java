@@ -1233,6 +1233,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 			indexes = getAllShownIndexes();
 		}
 		if (fullCount == indexes.length && !replacing) {
+			univ.removeAllContents();
 			contentInstants.clear();
 			getContentInstantsByNumbers().clear();
 			getContentInstantsByRootName().clear();
@@ -1264,8 +1265,8 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 					}
 					fullListModel.removeElement(listModel.getElementAt(i));
 					listModel.remove(i);
-					if (univ.contains(contentInstant.getContentNode().getName()))
-						univ.removeContent(contentInstant.getContentNode().getName());
+					if (univ.contains(contentInstant.getName().replace("_#0", "")))
+						univ.removeContent(contentInstant.getName().replace("_#0", ""));
 				}
 			}
 			list.setModel(listModel);
