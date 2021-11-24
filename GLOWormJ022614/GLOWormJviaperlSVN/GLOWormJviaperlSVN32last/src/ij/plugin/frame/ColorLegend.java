@@ -204,7 +204,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 				for (int index =0; index < lm.getSize(); index++) {
 					String hashkey = (String) lm.getElementAt(index);
 					ContentInstant ci = contentInstants.get(hashkey);
-					String fixedName = ci.getName().replace("BWM-", "BWM");
+					String fixedName = ci.getName().replace("BWM-", "BWM").replace("_#0_#0", "");
 					for (String key:this.getBrainbowColors().keySet()) {
 
 						// THESE CONDITIONS WILL CERTAINLY NEED ADJUSTMENT TO GET ALL CASES NEEDED CORRECT
