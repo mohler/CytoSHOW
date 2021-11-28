@@ -1,5 +1,6 @@
 package ij3d;
 
+import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.ImageWindow;
 
@@ -18,6 +19,8 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.SwingUtilities;
+
+import com.sun.j3d.utils.universe.Viewer;
 
 
 @SuppressWarnings("serial")
@@ -105,6 +108,7 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 	private JMenu addMenu;
 	private JMenuItem newViewer;
 	private JMenuItem saveCLView;
+	private JMenuItem renameViewer;
 
 	public Image3DMenubar(Image3DUniverse univ) {
 		super();
@@ -140,6 +144,10 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 		newViewer = new JMenuItem("New Viewer");
 		newViewer.addActionListener(this);
 		file.add(newViewer);
+		
+		renameViewer = new JMenuItem("Rename Viewer");
+		renameViewer.addActionListener(this);
+		file.add(renameViewer);
 		
 		open = new JMenuItem("Open...");
 		open.addActionListener(this);
@@ -566,6 +574,8 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 
 		if(src == color)
 			iJ3dExecuter.changeColor(getSelected());
+		else if (src == renameViewer)
+			univ.setTitle(IJ.getString("Rename Viewer...", univ.getTitle()));
 		else if (src == bgColor)
 			iJ3dExecuter.changeBackgroundColor();
 		else if(src == scalebar)

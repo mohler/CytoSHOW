@@ -1,6 +1,7 @@
 package ij3d;
 
 import ij.IJ;
+import ij.ImageJ;
 import ij.ImagePlus;
 import ij.Menus;
 import ij.gui.ImageCanvas;
@@ -412,8 +413,10 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		menubar = new Image3DMenubar(this);
 		if (simpleWindow3D) {
 			init(new SimpleImageWindow3D("CytoSHOW3D [" + numUniversesLaunched +"]", this));	
+			this.title = "CytoSHOW3D [" + numUniversesLaunched +"]";
 		} else {
 			init(new ImageWindow3D("CytoSHOW3D [" + numUniversesLaunched +"]", this));
+			this.title = "CytoSHOW3D [" + numUniversesLaunched +"]";
 		}
 //		init(new ImageWindow3D("CytoSHOW3D [IJ3DV]", this));
 		win.pack();
@@ -2121,6 +2124,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 	private boolean flipXonImport;
 
+	private String title;
+
 	/**
 	 * Add the specified Content to the universe. It is assumed that the
 	 * specified Content is constructed correctly.
@@ -2327,6 +2332,50 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 	}	
 	
-	
+	/** Sets the image name. */
+	public void setTitle(String newTitle) {
+		if (newTitle==null)
+			return;
+    	if (win!=null) {
+    		if (IJ.getInstance()!=null){
+				Menus.updateWindowMenuItem(this.title, newTitle);
+    		}
+//			String virtual = stack!=null && stack.isVirtual()?" (V)":"";
+			String virtual = "";
+			String threeD = (win instanceof ImageWindow3D)?" (IJ3DV)":"";
+//			String global = getGlobalCalibration()!=null?" (G)":"";
+			String global = "";
+				
+			String scale = "";
+			double magnification = win.getCanvas().getMagnification();
+			if (magnification!=1.0) {
+				double percent = magnification*100.0;
+				int digits = percent>100.0||percent==(int)percent?0:1;
+				scale = " (" + IJ.d2s(percent,digits) + "%)";
+			}
+			win.setTitle(newTitle+threeD+virtual+global+scale);
+    	}
+    	this.title = newTitle;
+    	if (c3dm !=null) {
+			String oldTitle = c3dm.getTitle();
+    		c3dm.setTitle("Tag Manager: "+newTitle);
+    		if (c3dm.getColorLegend()!=null) {
+    			oldTitle = c3dm.getColorLegend().getTitle();
+    			c3dm.getColorLegend().setTitle("Color Legend: "+newTitle);
+    		}
+    	}
+//    	if (mcc !=null) {
+//			String oldTitle = mcc.getTitle();
+//    		mcc.setTitle("Multi-Channel Controller: "+title);
+//    	}
+
+    }
+
+	public String getTitle() {
+		return title;
+	}
+
+
+
 }
 

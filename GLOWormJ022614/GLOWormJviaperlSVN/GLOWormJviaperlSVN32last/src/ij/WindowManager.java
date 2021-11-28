@@ -12,6 +12,7 @@ import java.awt.*;
 import java.util.*;
 
 import ij.gui.*;
+import ij3d.Image3DUniverse;
 import ij3d.ImageWindow3D;
 
 /** This class consists of static methods used to manage ImageJ's windows. */
@@ -285,6 +286,8 @@ public class WindowManager {
 			return;
 		else if (win instanceof ImageWindow)
 			addImageWindow(n, (ImageWindow)win);
+		else if (win instanceof ImageWindow3D)
+			addImageWindow3D(n, (ImageWindow3D)win);
 		else {
 			Menus.insertWindowMenuItem(win);
 			nonImageList.add(n, win);
@@ -309,6 +312,18 @@ public class WindowManager {
 		else
 			imageList.add(n, win);
         Menus.addWindowMenuItem(n, imp);
+        setCurrentWindow(win);
+    }
+
+	private static void addImageWindow3D(int n, ImageWindow3D win) {
+		Image3DUniverse univ = (Image3DUniverse)win.getUniverse();
+		if (univ==null) return;
+		checkForDuplicateName(new ImagePlus(univ.getTitle()));
+		if (n<0)
+			imageList.addElement(win);
+		else
+			imageList.add(n, win);
+        Menus.addWindowMenuItem(n, new ImagePlus(univ.getTitle()));
         setCurrentWindow(win);
     }
 

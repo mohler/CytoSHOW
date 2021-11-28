@@ -288,7 +288,7 @@ public class IJ3dExecuter {
 	}
 
 	public void saveAsWaveFront(boolean oneFile) {
-		File obj_file = promptForFile("Save WaveFront", "untitled", ".obj");
+		File obj_file = promptForFile("Save WaveFront", univ.getTitle(), ".obj");
 		obj_file = new File(obj_file.getParent()+ File.separator + obj_file.getName().replace(" ", "_"));
 		if(obj_file == null)
 			return;
