@@ -462,6 +462,8 @@ utilities10="ImageJ Properties...",ij.plugin.JavaProperties
 utilities11="Threads...",ij.plugin.ThreadLister
 utilities12="Benchmark",ij.plugin.filter.Benchmark
 utilities13="Reset...",ij.plugin.SimpleCommands("reset")
+utilities14="Fix Objs Recursively...",ij.FixMTLnamesInObjs
+
 
 # Plugins installed in the Plugins/New submenu
 new_01="Macro",ij.plugin.NewPlugin("macro")
