@@ -574,9 +574,11 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 
 		if(src == color)
 			iJ3dExecuter.changeColor(getSelected());
-		else if (src == renameViewer)
-			univ.setTitle(IJ.getString("Rename Viewer...", univ.getTitle()));
-		else if (src == bgColor)
+		else if (src == renameViewer) {
+			String newTitle = IJ.getString("Rename Viewer...", univ.getTitle());
+			if (!newTitle.contentEquals(""))
+					univ.setTitle(newTitle);
+		}else if (src == bgColor)
 			iJ3dExecuter.changeBackgroundColor();
 		else if(src == scalebar)
 			iJ3dExecuter.editScalebar();

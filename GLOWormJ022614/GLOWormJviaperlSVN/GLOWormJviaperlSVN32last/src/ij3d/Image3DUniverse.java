@@ -377,6 +377,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				Content picked = picker.getPickedContent(e.getX(), e.getY());
 				if (!(win instanceof SimpleImageWindow3D) && (e.getButton()==1)){
 					select(picked);
+					e.consume();
 				}
 			}
 
@@ -2236,7 +2237,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		}
 		if (win.getTitle().matches("CytoSHOW3D.*")){
 			win.getImagePlus().setWindow(win);
-			win.getImagePlus().setTitle((this.flipXonImport?"FlipX_":"")+titleName);
+			if (!titleName.contentEquals("."))
+				setTitle((this.flipXonImport?"FlipX_":"")+titleName);
 		}
 	}
 
@@ -2335,7 +2337,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	
 	/** Sets the image name. */
 	public void setTitle(String newTitle) {
-		if (newTitle==null)
+		if (newTitle==null || newTitle == "")
 			return;
     	if (win!=null) {
     		if (IJ.getInstance()!=null){
