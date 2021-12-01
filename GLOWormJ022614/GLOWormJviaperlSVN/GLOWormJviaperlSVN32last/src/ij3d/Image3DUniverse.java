@@ -2154,6 +2154,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				univ.addUniverseListener(c);
 
 				univ.fireTransformationUpdated();
+				canvas.revalidate();
 				return c;
 			}
 		});
