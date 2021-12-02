@@ -77,6 +77,7 @@ import ij.plugin.RGBStackMerge;
 import ij.plugin.RoiEnlarger;
 import ij.plugin.Selection;
 import ij.plugin.StackReverser;
+import ij.plugin.Zoom;
 import ij.util.*;
 import ij.macro.*;
 import ij.measure.*;
@@ -224,6 +225,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		// //this.setTitle(getTitle()+":"+ imp.getTitle());
 		list = new JList<String>();
 		list.setCellRenderer(new ModCellRenderer());
+		list.addMouseListener(this);
 		fullList = new JList<String>();
 		listModel = new DefaultListModel<String>();
 		fullListModel = new DefaultListModel<String>();
@@ -5333,6 +5335,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				}
 			}
 			this.select(cellIndex);
+		} 
+
+		if (e.getSource() instanceof JList) {
+			JList clickedList = (JList)e.getSource();
+			if (e.getClickCount() > 1) {
+				new Zoom().run("to");
+			}
 		}
 	}
 

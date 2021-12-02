@@ -12,6 +12,7 @@ import ij.measure.*;
 import ij.plugin.Colors;
 import ij.plugin.DragAndDrop;
 import ij.plugin.WandToolOptions;
+import ij.plugin.Zoom;
 import ij.plugin.filter.Projector;
 import ij.plugin.frame.ColorLegend;
 import ij.plugin.frame.Recorder;
@@ -3488,7 +3489,67 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 	}
 
 	public void mouseClicked(MouseEvent e) {
+
+		showCursorStatus = true;
+		int toolID = Toolbar.getToolId();
+		ImageWindow win = imp.getWindow();
+		if (win!=null && (win.running2 || win.running3) && toolID!=Toolbar.MAGNIFIER) {
+			if (win instanceof StackWindow) {
+				((StackWindow)win).setAnimate(false);
+				((StackWindow)win).setZAnimate(false);
+			} else
+				win.running2 = win.running3 = false;
+			return;
+		}
+
+		int x = e.getX();
+		int y = e.getY();
+
+		int ox = offScreenX(x);
+		int oy = offScreenY(y);
+		setXMouse(ox); setYMouse(oy);
 		PlugInTool tool = Toolbar.getPlugInTool();
+
+		boolean doubleClick =  (e.getClickCount() >1);
+		//		if (cursorRoi != null) {
+		if (this.getCursor().getType() == Cursor.CUSTOM_CURSOR) {
+			if (doubleClick) {
+				Roi roi = imp.getRoiManager().getSelectedRoisAsArray()[0];
+
+				if (roi != null) 
+					currentRoi = roi;
+				//			if (doubleClick && roi instanceof TextRoi) 
+				//				((TextRoi)roi).searchWormbase();
+				if (roi instanceof Roi) {
+					//				IJ.setKeyDown(KeyEvent.VK_ALT);
+					//				IJ.setKeyDown(KeyEvent.VK_SHIFT);
+
+					TextRoi fakeTR = new TextRoi(0,0,imp.getRoiManager().getSelectedRoisAsArray()[0]
+							.getName().split("[\"|=]")[1].trim());
+					fakeTR.searchWormbase();
+					//				IJ.setKeyUp(KeyEvent.VK_ALT);
+					//				IJ.setKeyUp(KeyEvent.VK_SHIFT);
+
+				}
+			}
+		}
+		Roi impRoi = imp.getRoi();
+		if ( roiManagerSelect(ox, oy)) {
+			if (doubleClick) {
+				Roi roi = imp.getRoiManager().getSelectedRoisAsArray()[0];
+
+				if (roi != null) 
+					currentRoi = roi;
+				//			if (doubleClick && roi instanceof TextRoi) 
+				//				((TextRoi)roi).searchWormbase();
+				if (roi instanceof Roi) {
+					imp.getRoiManager().select(imp.getRoiManager().getListModel().indexOf(roi.getName()));
+					new Zoom().run("to");
+				}
+			}
+			return;
+		}
+		
 		if (tool!=null)
 			tool.mouseClicked(imp, e);
 		if (imp.getRemoteMQTVSHandler() != null) {
