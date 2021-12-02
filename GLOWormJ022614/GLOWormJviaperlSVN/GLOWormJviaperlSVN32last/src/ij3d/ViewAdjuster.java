@@ -180,7 +180,7 @@ public class ViewAdjuster {
 		// adjust zoom
 		univ.getZoomTG().getTransform(t3d);
 		t3d.get(transl);
-		transl.z += eye.z - oldEye.z;
+		transl.z += (eye.z - oldEye.z);
 		t3d.set(transl);
 		univ.getZoomTG().setTransform(t3d);
 

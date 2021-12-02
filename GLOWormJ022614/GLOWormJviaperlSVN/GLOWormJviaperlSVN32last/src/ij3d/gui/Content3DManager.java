@@ -81,6 +81,7 @@ import ij.plugin.Orthogonal_Views;
 import ij.plugin.RGBStackMerge;
 import ij.plugin.Selection;
 import ij.plugin.StackReverser;
+import ij.plugin.Zoom;
 import ij.util.*;
 import ij.macro.*;
 import ij.measure.*;
@@ -2346,6 +2347,17 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 			}
 			this.select(cellIndex);
 		}
+		
+		if (e.getSource() instanceof JList) {
+			JList clickedList = (JList)e.getSource();
+			if (e.getClickCount() > 1) {
+				if (univ instanceof Image3DUniverse) {
+					((Image3DUniverse)univ).adjustView(univ.getSelected());
+					((Image3DUniverse)univ).centerSelected(univ.getSelected());
+				}
+			}
+		}
+
 	}
 
 	public void mouseEntered(MouseEvent e) {
