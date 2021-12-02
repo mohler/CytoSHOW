@@ -378,7 +378,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				Content picked = picker.getPickedContent(e.getX(), e.getY());
 				if (!(win instanceof SimpleImageWindow3D) && (e.getButton()==1)){
 					select(picked);
-						if (e.getClickCount() > 1) {
+						if (e.getClickCount() > 1 && picked!=null) {
 								adjustView(Image3DUniverse.this.getSelected());
 								centerSelected(Image3DUniverse.this.getSelected());
 							
@@ -828,9 +828,11 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		IJ.showStatus("selected: " + st);
 
 		fireContentSelected(c);
-		int q = c3dm.getListModel().indexOf("\""+selected.getName()+"_#0_#0 \"_0");
-		c3dm.getList().setSelectedIndex(q);
-		c3dm.getList().ensureIndexIsVisible(q);
+		if (selected != null) {
+			int q = c3dm.getListModel().indexOf("\""+selected.getName()+"_#0_#0 \"_0");
+			c3dm.getList().setSelectedIndex(q);
+			c3dm.getList().ensureIndexIsVisible(q);
+		}
 		if(c != null && ij.plugin.frame.Recorder.record)
 			IJ3dExecuter.record("select", c.getName());
 	}
