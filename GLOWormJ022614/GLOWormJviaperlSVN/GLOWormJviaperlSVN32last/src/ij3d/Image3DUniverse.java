@@ -68,6 +68,7 @@ import javax.media.j3d.Switch;
 import javax.media.j3d.Transform3D;
 import javax.media.j3d.TransformGroup;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -377,6 +378,11 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				Content picked = picker.getPickedContent(e.getX(), e.getY());
 				if (!(win instanceof SimpleImageWindow3D) && (e.getButton()==1)){
 					select(picked);
+						if (e.getClickCount() > 1) {
+								adjustView(Image3DUniverse.this.getSelected());
+								centerSelected(Image3DUniverse.this.getSelected());
+							
+						}					
 					e.consume();
 				}
 			}
