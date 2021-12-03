@@ -1824,20 +1824,26 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		fireTransformationFinished();
 	}
 	
-	/**
+
+	
+	public void resetView() {
+		resetView(true);
+	}
+/**
 	/**
 	 * Reset the transformations of the view side of the scene graph
 	 * as if the Contents of this universe were just displayed.
 	 */
-	public void resetView() {
+	public void resetView(boolean resetRotation) {
 		fireTransformationStarted();
 
-		// rotate so that y shows downwards
 		Transform3D t = new Transform3D();
-		AxisAngle4d aa = new AxisAngle4d(1, 0, 0, Math.PI);
-		t.set(aa);
-		getRotationTG().setTransform(t);
-
+		if (resetRotation) {
+			// rotate so that y shows downwards
+			AxisAngle4d aa = new AxisAngle4d(1, 0, 0, Math.PI);
+			t.set(aa);
+			getRotationTG().setTransform(t);
+		}
 		t.setIdentity();
 		getTranslateTG().setTransform(t);
 		getZoomTG().setTransform(t);
