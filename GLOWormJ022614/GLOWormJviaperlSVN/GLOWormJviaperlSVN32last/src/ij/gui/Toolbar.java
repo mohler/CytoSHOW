@@ -4,6 +4,8 @@ import java.awt.event.*;
 import java.io.File;
 import java.util.*;
 
+import javax.swing.SwingUtilities;
+
 import ij.*;
 import ij.plugin.frame.Recorder; 
 import ij.plugin.frame.Editor; 
@@ -101,7 +103,10 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 	public int localCurrent;
 	private boolean threeDViewer;
 	private Window win;
-	private MouseEvent sameEvent;
+	private MouseEvent sameClickEvent;
+	private MouseEvent samePressEvent;
+	private int oldTool;
+	private MouseEvent sameDoubleClick;
 
 
 	public Toolbar() {
@@ -656,13 +661,12 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 				}
 			case POLYGON: return "polygon";
 			case FREEROI: return "freehand";
-			case LINE: 
-				switch (lineType) {
-					case LINE: return arrowMode?"arrow":"line";
-					case POLYLINE: return "polyline";
-					case FREELINE: return "freeline";
-					case ANGLE: return "angle";
-				}
+
+			case LINE: return arrowMode?"arrow":"line";
+			case POLYLINE: return "polyline";
+			case FREELINE: return "freeline";
+			case ANGLE: return "angle";
+
 
 			case POINT: return Prefs.multiPointMode?"multipoint":"point";
 			case WAND: return "wand";
@@ -689,7 +693,6 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 	}
 		
 	public void setTool2(int tool) {
-		IJ.log("settool2");
 		if (!isValidTool(tool)) return;
 		paint(g);
 		if (isThreeDViewer() && tool != HAND && tool != MAGNIFIER)
@@ -897,7 +900,7 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
     }
 
 	public void mousePressed(MouseEvent e) {
-		if (e == sameEvent)
+		if (e == samePressEvent)
 			return;
 		int x = e.getX();
 		int tool = getToolId();
@@ -952,10 +955,9 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 				String name = names[newTool].endsWith(" ")?names[newTool]:names[newTool]+" ";
 				tools[newTool].runMacroTool(name+"Options");
 			}
-			sameEvent = e;
+			samePressEvent = e;
 			e.consume();
-//			setTool2(tool);
-
+//			setTool2(newTool);
 	}
 	
 	void showSwitchPopupMenu(MouseEvent e) {
@@ -1108,8 +1110,13 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 	public void mouseReleased(MouseEvent e) {}
 	public void mouseExited(MouseEvent e) {}
 	public void mouseClicked(MouseEvent e) {
+		if (e.getSource()!=this || e == sameClickEvent  || e == sameDoubleClick)
+			return;
+		boolean doubleClick = e.getClickCount()>1;
 		int x = e.getX();
 		int newTool = 0;
+		if (!doubleClick)
+			oldTool = current;
 		for (int i=0; i<NUM_BUTTONS; i++) {
 			if (x>i*SIZE && x<i*SIZE+SIZE)
 				newTool = toolID(i);
@@ -1123,7 +1130,6 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 			menus[newTool].show(e.getComponent(), e.getX(), e.getY());
 			return;
 		}
-		boolean doubleClick = e.getClickCount()>1;
 		if (e.isMetaDown())
 			return;
 		if (!doubleClick) {
@@ -1148,7 +1154,6 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 					tools[newTool].runMacroTool(name+"Selected");
 				}
 			}
-			setTool2(newTool);
 		} else { //double click
 			if (isMacroTool(current)) {
 				String name = names[current].endsWith(" ")?names[current]:names[current]+" ";
@@ -1171,8 +1176,7 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 				showBrushDialog();
 				break;
 			case MAGNIFIER:
-				Container c = this.getParent().getParent();
-				int tool = getToolId();
+				Container c = SwingUtilities.windowForComponent(this);
 				if (c instanceof ImageWindow) {
 					this.win = (ImageWindow)c;
 					if (!(win instanceof ImageWindow3D)) {
@@ -1180,6 +1184,7 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 							ImageCanvas ic = imp.getCanvas();
 							if (ic!=null) {
 								ic.unzoom();
+								c.validate();
 							}
 						}
 					}else {
@@ -1189,7 +1194,11 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 						}
 					}
 				}
-				setTool(tool);
+				if (oldTool > -1) {
+					setTool2(oldTool);
+					sameDoubleClick = e;
+					return;
+				}
 				break;
 			case LINE: case POLYLINE: case FREELINE:
 				if (current==LINE && arrowMode) {
@@ -1220,7 +1229,12 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 			default:
 			}
 		}
-
+		setTool2(newTool);
+		if (doubleClick)
+			sameDoubleClick = e;
+		else
+			sameClickEvent = e;
+	
 	}
 	public void mouseEntered(MouseEvent e) {}
     public void mouseDragged(MouseEvent e) {}
@@ -1229,15 +1243,18 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 		CheckboxMenuItem item = (CheckboxMenuItem)e.getSource();
 		String previousName = getToolName();
 		int previousTool = getToolId();
+		String gotToolName = "";
 		if (item==rectItem || item==roundRectItem) {
 			roundRectMode = item==roundRectItem;
+			setTool2(RECTANGLE);		
 			repaintTool(RECTANGLE);
 			showMessage(RECTANGLE);
 			ImagePlus imp = WindowManager.getCurrentImage();
 			Roi roi = imp!=null?imp.getRoi():null;
 			if (roi!=null && roi.getType()==Roi.RECTANGLE)
 				roi.setCornerDiameter(roundRectMode?arcSize:0);
-			if (!previousName.equals(getToolName()))
+			gotToolName = getToolName();
+			if (!previousName.equals(gotToolName))
 				IJ.notifyEventListeners(IJEventListener.TOOL_CHANGED);
 		} else if (item==ovalItem || item==ellipseItem || item==brushItem) {
 			if (item==brushItem)
@@ -1246,46 +1263,56 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 				ovalType = ELLIPSE_ROI;
 			else
 				ovalType = OVAL_ROI;
+			setTool2(OVAL);		
 			repaintTool(OVAL);
 			showMessage(OVAL);
-			if (!previousName.equals(getToolName()))
+			
+			gotToolName = getToolName();
+			if (!previousName.equals(gotToolName))
 				IJ.notifyEventListeners(IJEventListener.TOOL_CHANGED);
 		} else if (item==pointItem || item==multiPointItem) {
 			multiPointMode = item==multiPointItem;
 			Prefs.multiPointMode = multiPointMode;
+			setTool2(POINT);		
 			repaintTool(POINT);
 			showMessage(POINT);
-			if (!previousName.equals(getToolName()))
+			gotToolName = getToolName();
+			if (!previousName.equals(gotToolName))
 				IJ.notifyEventListeners(IJEventListener.TOOL_CHANGED);
 		} else if (item==straightLineItem) {
 			lineType = LINE;
 			arrowMode = false;
-//			setTool2(LINE);
+			setTool2(LINE);
 			repaintTool(LINE);
 			showMessage(LINE);
-			if (!previousName.equals(getToolName()))
+			gotToolName = getToolName();
+			if (!previousName.equals(gotToolName))
 				IJ.notifyEventListeners(IJEventListener.TOOL_CHANGED);
 		} else if (item==polyLineItem) {
 			lineType = POLYLINE;
-//			setTool2(POLYLINE);
-			repaintTool(LINE);
+			setTool2(POLYLINE);
+			repaintTool(POLYLINE);
 			showMessage(POLYLINE);
-			if (!previousName.equals(getToolName()))
+			gotToolName = getToolName();
+			if (!previousName.equals(gotToolName))
 				IJ.notifyEventListeners(IJEventListener.TOOL_CHANGED);
 		} else if (item==freeLineItem) {
 			lineType = FREELINE;
-//			setTool2(FREELINE);
-			repaintTool(LINE);
+			setTool2(FREELINE);
+			repaintTool(FREELINE);
 			showMessage(FREELINE);
-			if (!previousName.equals(getToolName()))
+			gotToolName = getToolName();
+			if (!previousName.equals(gotToolName))
 				IJ.notifyEventListeners(IJEventListener.TOOL_CHANGED);
 		} else if (item==arrowItem) {
 			lineType = LINE;
 			arrowMode = true;
-//			setTool2(LINE);
+			setTool2(LINE);
 			repaintTool(LINE);
 			showMessage(LINE);
-			if (!previousName.equals(getToolName()))
+			
+			gotToolName = getToolName();
+			if (!previousName.equals(gotToolName))
 				IJ.notifyEventListeners(IJEventListener.TOOL_CHANGED);
 		} else {
 			String label = item.getLabel();
