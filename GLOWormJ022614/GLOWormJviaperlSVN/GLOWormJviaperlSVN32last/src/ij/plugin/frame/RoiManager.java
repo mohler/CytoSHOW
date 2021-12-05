@@ -493,11 +493,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		boolean wasVis = this.isVisible();
 
 		if (e.getSource() == textFilterField) {
-			this.setVisible(false);
+//			this.setVisible(false);
 			showAll(SHOW_NONE);
 
 			String thisWasTitle = this.getTitle();
-			String searchString = textFilterField.getText();
+			String searchString = textFilterField.getText().toUpperCase();
 			boolean isRegex = (searchString.startsWith("??"));
 			boolean isLinBackTrace = (searchString.toLowerCase().startsWith("?lbt?"));
 			boolean isLinTrace = (searchString.toLowerCase().startsWith("?lt?"));

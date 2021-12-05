@@ -2,6 +2,7 @@ package ij3d;
 
 import com.sun.j3d.utils.universe.SimpleUniverse;
 import javax.media.j3d.J3DGraphics2D;
+import javax.swing.SwingUtilities;
 import javax.media.j3d.Canvas3D;
 import javax.media.j3d.Background;
 import javax.vecmath.Color3f;
@@ -188,6 +189,10 @@ public class ImageCanvas3D extends Canvas3D implements KeyListener {
 			roi.draw(g3d);
 		}
 		g3d.flush(true);
+	}
+
+	public Image3DUniverse getUniverse() {
+		return (Image3DUniverse) ((ImageWindow3D)SwingUtilities.windowForComponent(this)).getUniverse();
 	}
 }
 

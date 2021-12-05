@@ -58,6 +58,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 	private ImageJ3DViewer ij3dv;
 	private DropTargetDropEvent dtde;
 	private boolean freshDrop;
+	private Image3DUniverse dropUniverse;
 
 	public static DragAndDrop getInstance() {
 		return instance;
@@ -94,6 +95,11 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 				doSketch3D = true;
 			if (getImp().getMotherImp() != null && getImp().getMotherImp() != getImp())
 				setImp(getImp().getMotherImp());
+		} else if (dtc instanceof ImageCanvas3D) {
+			dropUniverse = ((ImageCanvas3D) dtc).getUniverse();
+			dropImp = dropUniverse.getWindow().getImagePlus();
+			setImp(dropImp);
+
 		} else if (WindowManager.getCurrentImage() != null)
 //			setImp(WindowManager.getCurrentImage());
 			;
@@ -202,9 +208,15 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 										|| tmp.trim().split(" ")[0].toLowerCase().matches("\\D{1}\\d{1,2}\\D{1,2}\\d{1,2}\\.\\d{1,2}"))) {
 							//							IJ.log("https://www.wormbase.org/db/get?name="+ tmp.trim().split(" ")[0] + ";class=gene"
 							//									+ (tmp.trim().split(" ").length>1?" "+tmp.trim().split(" ")[1]:""));
-							droppedItemsArrayList.add("https://www.wormbase.org/db/get?name="+ tmp.trim().split(" ")[0] + ";class=gene"
-									+ (tmp.trim().split(" ").length>1?" "+tmp.trim().split(" ")[tmp.trim().split(" ").length-1]:""));
 
+//OLD FORMAT, FAILS FOR MANY GENES 12052021
+//							droppedItemsArrayList.add("https://www.wormbase.org/db/get?name="+ tmp.trim().split(" ")[0] + ";class=gene"
+//									+ (tmp.trim().split(" ").length>1?" "+tmp.trim().split(" ")[tmp.trim().split(" ").length-1]:""));
+//NEW FORMAT, WORKS FOR ALL? GENES 12052021
+						String newSearchString = "https://www.wormbase.org/search/gene/"+ tmp.trim().split(" ")[0] + "?species=c_elegans"
+									+ (tmp.trim().split(" ").length>1?" "+tmp.trim().split(" ")[tmp.trim().split(" ").length-1]:"");
+							droppedItemsArrayList.add(newSearchString);
+	
 						} else if (tmp.endsWith("ColorLegend.lgd")){
 							ColorLegend cl;
 							Frame[] frames = WindowManager.getImageWindows();
@@ -710,24 +722,27 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							nDrops--;
 							return;
 						}
-					} else if (imp !=null && ((String)nextItem).contains("https://www.wormbase.org/")){
-						imp.getRoiManager().setBusy(true);
-						Graphics g = dropImp.getCanvas().getGraphics();
-						if (dropImp.getCanvas().messageRois.containsKey("Finding tags from drop"))
-							dropImp.getCanvas().messageRois.remove("Finding tags from drop");
+//					} else if (dropUniverse !=null && ((String)nextItem).contains("https://www.wormbase.org/")){
+						
+					} else if ((dropUniverse !=null || imp !=null) && ((String)nextItem).contains("https://www.wormbase.org/")){
+						if (dropUniverse == null) {
+							imp.getRoiManager().setBusy(true);
+							Graphics g = dropImp.getCanvas().getGraphics();
+							if (dropImp.getCanvas().messageRois.containsKey("Finding tags from drop"))
+								dropImp.getCanvas().messageRois.remove("Finding tags from drop");
 
-						messageRoi = new TextRoi(dropImp.getCanvas().getSrcRect().x, dropImp.getCanvas().getSrcRect().y,
-								"   Finding tags that match\n   "+ (cellSets.size()+1)  +" pattern(s)\n   ...");
+							messageRoi = new TextRoi(dropImp.getCanvas().getSrcRect().x, dropImp.getCanvas().getSrcRect().y,
+									"   Finding tags that match\n   "+ (cellSets.size()+1)  +" pattern(s)\n   ...");
 
-						((TextRoi) messageRoi).setCurrentFont(g.getFont().deriveFont((float) (dropImp.getCanvas().getSrcRect().width/16)));
-						messageRoi.setStrokeColor(Color.black);
-						messageRoi.setFillColor(Colors.decode("#99ffdddd",
-								dropImp.getCanvas().getDefaultColor()));
+							((TextRoi) messageRoi).setCurrentFont(g.getFont().deriveFont((float) (dropImp.getCanvas().getSrcRect().width/16)));
+							messageRoi.setStrokeColor(Color.black);
+							messageRoi.setFillColor(Colors.decode("#99ffdddd",
+									dropImp.getCanvas().getDefaultColor()));
 
-						dropImp.getCanvas().messageRois.put("Finding tags from drop", messageRoi);
-						dropImp.getCanvas().paintDoubleBuffered(dropImp.getCanvas().getGraphics());
+							dropImp.getCanvas().messageRois.put("Finding tags from drop", messageRoi);
+							dropImp.getCanvas().paintDoubleBuffered(dropImp.getCanvas().getGraphics());
 
-
+						}
 						if ( ((String)nextItem).matches(".*/anatomy_term/WBbt:\\d*") ||
 								((String)nextItem).matches(".*https://www.wormbase.org/db/get\\?name=.*;class=Anatomy_term")){
 							//							IJ.log("cellURL");
@@ -870,7 +885,8 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 								}
 							}
 						} else if ( ((String)nextItem).matches(".*/gene/WBGene\\d*.*") 
-								|| ((String)nextItem).matches(".*https://www.wormbase.org/db/get\\?name=.*;class=gene.*")){
+								|| ((String)nextItem).matches(".*https://www.wormbase.org/db/get\\?name=.*;class=gene.*")
+								|| ((String)nextItem).matches(".*https://www.wormbase.org/search/gene/.*\\?species.*"))  {
 							String cellColorCode = (((String)nextItem).split(" ").length>1?((String)nextItem).split(" ")[((String)nextItem).split(" ").length-1].trim():"");
 							String oldLog = IJ.getLog();
 							IJ.log("\\Clear");
@@ -1797,7 +1813,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 		if (imp == null) 
 			return;
 
-		if (dropImp != null) {
+		if (dropImp != null && dropUniverse == null) {
 			if (dropImp.getCanvas().droppedGeneUrls != null && dropImp.getCanvas().droppedGeneUrls.endsWith("&"))
 				dropImp.getCanvas().droppedGeneUrls = dropImp.getCanvas().droppedGeneUrls.substring(0, dropImp.getCanvas().droppedGeneUrls.length()-1);
 			dropImp.getCanvas().droppedGeneUrls = (dropImp.getCanvas().droppedGeneUrls != "" ?dropImp.getCanvas().droppedGeneUrls+(cellListString.trim() != ""?"\nand_":""):"") 
@@ -1826,7 +1842,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 			cellsRegex= cellsRegex + finalSuffix;
 			//				IJ.log(cellsRegex);
 
-			if (dropImp!=null && (!(dropImp.getWindow() instanceof ImageWindow3D)) && (!dropImp.isSketch3D() || (dropImp != imp && IJ.altKeyDown()))) {
+			if (dropImp!=null  && (!dropImp.isSketch3D() || (dropImp != imp && IJ.altKeyDown()))) {
 				ColorLegend cl = imp.getRoiManager().getColorLegend();
 				String hideState = ""; 
 				if (cl != null) {
@@ -1837,48 +1853,55 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						cb.setSelected(false);
 					}
 				}
-				imp.getRoiManager().getTextSearchField().setText(cellsRegex);
-				imp.getRoiManager().setSearching(true);
-				imp.getRoiManager().actionPerformed(new ActionEvent(imp.getRoiManager().getTextSearchField(),0,"",0,0));
-				Graphics g = dropImp.getCanvas().getGraphics();
-				long timeLast = 0;
-				long timeNow = 0;
+				if (dropUniverse == null) {
+					imp.getRoiManager().getTextSearchField().setText(cellsRegex);
+					imp.getRoiManager().setSearching(true);
+					imp.getRoiManager().actionPerformed(new ActionEvent(imp.getRoiManager().getTextSearchField(),0,"",0,0));
+					Graphics g = dropImp.getCanvas().getGraphics();
+					long timeLast = 0;
+					long timeNow = 0;
 
-				while (imp.getRoiManager().isSearching()) {
-					timeNow = System.currentTimeMillis();
-					if (timeNow > timeLast + 100) {
-						timeLast = timeNow;
-						if (imp.getCanvas().messageRois.containsKey("Finding tags from drop"))
-							imp.getCanvas().messageRois.remove("Finding tags from drop");
-						{
-							dropImp.getCanvas().droppedGeneUrls = (or?dropImp.getCanvas().droppedGeneUrls.replace("&", "OR"):dropImp.getCanvas().droppedGeneUrls);
-							messageRoi = new TextRoi(dropImp.getCanvas().getSrcRect().x, dropImp.getCanvas().getSrcRect().y,
-									"   Finding tags that match\n   "+ "these pattern(s):\n   ..." 
-											+ imp.getRoiManager().getListModel().getSize() + " found."
-											+ "\n" + dropImp.getCanvas().droppedGeneUrls);
+					while (imp.getRoiManager().isSearching()) {
+						timeNow = System.currentTimeMillis();
+						if (timeNow > timeLast + 100) {
+							timeLast = timeNow;
+							if (imp.getCanvas().messageRois.containsKey("Finding tags from drop"))
+								imp.getCanvas().messageRois.remove("Finding tags from drop");
+							{
+								dropImp.getCanvas().droppedGeneUrls = (or?dropImp.getCanvas().droppedGeneUrls.replace("&", "OR"):dropImp.getCanvas().droppedGeneUrls);
+								messageRoi = new TextRoi(dropImp.getCanvas().getSrcRect().x, dropImp.getCanvas().getSrcRect().y,
+										"   Finding tags that match\n   "+ "these pattern(s):\n   ..." 
+												+ imp.getRoiManager().getListModel().getSize() + " found."
+												+ "\n" + dropImp.getCanvas().droppedGeneUrls);
 
-							((TextRoi) messageRoi).setCurrentFont(g.getFont().deriveFont((float) (dropImp.getCanvas().getSrcRect().width/16)));
-							messageRoi.setStrokeColor(Color.black);
-							messageRoi.setFillColor(Colors.decode("#99ffdddd",
-									dropImp.getCanvas().getDefaultColor()));
+								((TextRoi) messageRoi).setCurrentFont(g.getFont().deriveFont((float) (dropImp.getCanvas().getSrcRect().width/16)));
+								messageRoi.setStrokeColor(Color.black);
+								messageRoi.setFillColor(Colors.decode("#99ffdddd",
+										dropImp.getCanvas().getDefaultColor()));
 
-							dropImp.getCanvas().messageRois.put("Finding tags from drop", messageRoi);
-							dropImp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
-						} 
+								dropImp.getCanvas().messageRois.put("Finding tags from drop", messageRoi);
+								dropImp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
+							} 
+						}
+					} 
+					dropImp.getCanvas().messageRois.remove("Finding tags from drop");
+					dropImp.getCanvas().paintDoubleBuffered(g);
+
+					if (doSketch3D) {
+						imp.getRoiManager().setControlKeyDown(true);
+						imp.getRoiManager().sketch3D(imp.getCanvas());
+						dropImp.getCanvas().droppedGeneUrls = "";
 					}
-				} 
-				dropImp.getCanvas().messageRois.remove("Finding tags from drop");
-				dropImp.getCanvas().paintDoubleBuffered(g);
+					imp.getRoiManager().setBusy(false);
+					if (cl != null) {
+						cl.getChoice().select(hideState);
+						cl.itemStateChanged(new ItemEvent(cl.getChoice(), ItemEvent.ITEM_STATE_CHANGED, cl.getChoice(), ItemEvent.SELECTED));
+					}
+				}else {
+					dropUniverse.getContent3DManager().getTextSearchField().setText(cellsRegex);
+					dropUniverse.getContent3DManager().setSearching(true);
+					dropUniverse.getContent3DManager().actionPerformed(new ActionEvent(dropUniverse.getContent3DManager().getTextSearchField(),0,"",0,0));
 
-				if (doSketch3D) {
-					imp.getRoiManager().setControlKeyDown(true);
-					imp.getRoiManager().sketch3D(imp.getCanvas());
-					dropImp.getCanvas().droppedGeneUrls = "";
-				}
-				imp.getRoiManager().setBusy(false);
-				if (cl != null) {
-					cl.getChoice().select(hideState);
-					cl.itemStateChanged(new ItemEvent(cl.getChoice(), ItemEvent.ITEM_STATE_CHANGED, cl.getChoice(), ItemEvent.SELECTED));
 				}
 			} else { //dropImp.isSketch3D()
 				if (imp.getRoiManager().getColorLegend() !=null) {

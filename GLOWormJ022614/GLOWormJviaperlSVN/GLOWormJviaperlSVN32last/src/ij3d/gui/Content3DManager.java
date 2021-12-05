@@ -489,11 +489,11 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 		boolean wasVis = this.isVisible();
 
 		if (e.getSource() == textFilterField) {
-			this.setVisible(false);
+//			this.setVisible(false);
 
 
 			String thisWasTitle = this.getTitle();
-			String searchString = textFilterField.getText();
+			String searchString = textFilterField.getText().toUpperCase();
 			boolean isRegex = (searchString.startsWith("??"));
 			boolean isLinBackTrace = (searchString.toLowerCase().startsWith("?lbt?"));
 			boolean isLinTrace = (searchString.toLowerCase().startsWith("?lt?"));
@@ -539,7 +539,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 				}
 
 				if (isRegex) {
-					if (((String) fullListModel.get(i)).matches(searchString.substring(2))) {
+					if (((String) fullListModel.get(i)).replace("_#0_#0 \"_0", " ").matches(searchString.substring(2))) {
 					listModel.addElement(fullListModel.get(i));
 					contentInstants.get(fullListModel.get(i)).setVisible(true);
 				} else {
