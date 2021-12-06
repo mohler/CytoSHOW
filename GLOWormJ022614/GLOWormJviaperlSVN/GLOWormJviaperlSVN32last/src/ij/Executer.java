@@ -1,5 +1,6 @@
 package ij;
 import ij.util.Tools;
+import ij3d.ImageWindow3D;
 import ij.text.TextWindow;
 import ij.plugin.DragAndDrop;
 import ij.plugin.MacroInstaller;
@@ -24,6 +25,9 @@ import org.vcell.gloworm.MultiChannelController;
 import org.vcell.gloworm.QTMovieOpenerMultiMod;
 
 import client.RemoteMQTVSHandler;
+
+import ij3d.ImageWindow3D;
+import ij3d.Image3DUniverse;
 
 
 /** Runs ImageJ menu commands in a separate thread.*/
@@ -85,16 +89,26 @@ public class Executer implements Runnable {
 				}
 			} else {
 				cmdImp = ((ImageWindow) WindowManager.getFrame(cmdChunks[cmdChunks.length-1])).getImagePlus();
-
-				Object[] targetItems =  cmdImp.getRoiManager().getListModel().toArray();
-				for (int i=0; i<targetItems.length; i++) {
-					if (((String) targetItems[i]).startsWith(cmdChunks[0]) ) {
-						new ij.macro.MacroRunner("roiManager('select', "+i+", "+cmdImp.getID()+");" +
-								"getSelectionBounds(roix, roiy, roiwidth, roiheight);" +
-								"run(\"Set... \", \"zoom=\" + getZoom*100 + \" x=\" + roix+roiwidth/2 + \" y=\" + roiy+roiheight/2);" +
-								"");
-						cmdImp.getWindow().toFront();
-						i = targetItems.length;
+				if (cmdImp.getWindow() instanceof ImageWindow3D) {
+					Object[] targetItems =  ((Image3DUniverse)((ImageWindow3D)cmdImp.getWindow()).getUniverse()).getContent3DManager().getListModel().toArray();
+					for (int i=0; i<targetItems.length; i++) {
+						if (((String) targetItems[i]).startsWith(cmdChunks[0]) ) {
+							((Image3DUniverse)((ImageWindow3D)cmdImp.getWindow()).getUniverse()).getContent3DManager().select(i);
+							cmdImp.getWindow().toFront();
+							i = targetItems.length;
+						}
+					}
+				} else {
+					Object[] targetItems =  cmdImp.getRoiManager().getListModel().toArray();
+					for (int i=0; i<targetItems.length; i++) {
+						if (((String) targetItems[i]).startsWith(cmdChunks[0]) ) {
+							new ij.macro.MacroRunner("roiManager('select', "+i+", "+cmdImp.getID()+");" +
+									"getSelectionBounds(roix, roiy, roiwidth, roiheight);" +
+									"run(\"Set... \", \"zoom=\" + getZoom*100 + \" x=\" + roix+roiwidth/2 + \" y=\" + roiy+roiheight/2);" +
+									"");
+							cmdImp.getWindow().toFront();
+							i = targetItems.length;
+						}
 					}
 				}
 			}

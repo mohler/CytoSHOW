@@ -23,6 +23,7 @@ import ij.*;
 import ij.util.*;
 import ij3d.ImageCanvas3D;
 import ij3d.ImageWindow3D;
+import ij3d.Image3DUniverse;
 
 import java.awt.event.*;
 import java.awt.font.FontRenderContext;
@@ -1567,7 +1568,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 					n = labelShapes.size();
 
 				String cellName = "";
-				String cellTag = "";
+				String fullTagName = "";
 				String cellDescription = "";
 				JComponent[] standardmis = new JComponent[popup.getComponentCount()];
 				for (int k = standardmis.length - 1; k >= 0; k--) {
@@ -1606,12 +1607,14 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				}
 				
 				if (ij3dSelection) {
-					cellName = ((ImageWindow3D)((ImageCanvas3D)e.getSource())
+					fullTagName = ((ImageWindow3D)((ImageCanvas3D)e.getSource())
 							.getParent().getParent().getParent().getParent()).getUniverse().getPicker().getPickedContent(e.getX(), e.getY()).getName().split("-")[0];
-					if (cellName.matches("[A-Z]+by([A-Z]+)")){
-						cellName = cellName.replaceAll("[A-Z]+by([A-Z]+)","$1");
+					fullTagName = fullTagName.replaceAll("(.*)?_(pre|post)\\d?.*", "$1");
+					if (fullTagName.matches("[A-Z]+by([A-Z]+)")){
+						cellName = fullTagName.replaceAll("[A-Z]+by([A-Z]+)","$1");
 					}
-				}
+					clickedROIstring = fullTagName + ": "
+							+ rm.getImagePlus().getTitle();				}
 
 				if (sliceRois!=null) {
 					Roi[] sliceRoisArray = new Roi[sliceRois.size()];
@@ -1630,8 +1633,9 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 							targetTag[2] = (int) this.getLabelShapes().get(sliceRoisArray[r]).getBounds().getCenterY();
 
 							if (!brainbowSelection) {
-								cellTag = this.getLabelShapes().get(sliceRoisArray[r]).getName();
-								cellName = cellTag.split("[\"|=]")[1].trim();
+								fullTagName = this.getLabelShapes().get(sliceRoisArray[r]).getName();
+								fullTagName = fullTagName.split(" ")[0];
+								cellName = fullTagName.split("[\"|=]")[1].trim();
 								if (cellName.split(" ").length >1 
 										&& cellName.split(" ")[1].matches("-*\\d*") 
 										&& (cellName.split(" ").length <3?true:cellName.split(" ")[2].matches("\\+*")) ){
@@ -1643,7 +1647,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 								mi =new JMenuItem("\""+cellName + " \": synch all windows to this tag" );
 								mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Synch.png")));
-								clickedROIstring = this.getLabelShapes().get(sliceRoisArray[r]).getName() + ": "
+								clickedROIstring = fullTagName + ": "
 										+ rm.getImagePlus().getTitle();
 								mi.addActionListener(ij);
 								popup.add(mi);
@@ -1708,20 +1712,55 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				final String fCellDescription = cellDescription;
 				
 				for (int i = 0; i < impIDs.length; i++) {
-					if (true /*WindowManager.getImage(impIDs[i]) != this.getImage()*/) {
-						DefaultListModel otherListModel =WindowManager.getImage(impIDs[i]).getRoiManager().getListModel();
-						Object[] roiNames = otherListModel.toArray();
-						for (int j = 0; j < roiNames.length; j++) {
-							if (((String) roiNames[j]).contains("\"") && ((String) roiNames[j]).split("\"")[1].split(" ")[0].toLowerCase().trim().equals(cellName.toLowerCase())
+					if (WindowManager.getImage(impIDs[i]).getWindow() instanceof ImageWindow3D) {
+						DefaultListModel otherListModel = ((Image3DUniverse)((ImageWindow3D)WindowManager.getImage(impIDs[i]).getWindow()).getUniverse()).getContent3DManager().getListModel();
+						Object[] objNames = otherListModel.toArray();
+						for (int j = 0; j < objNames.length; j++) {
+							String nextObjName = (String) objNames[j];
+							nextObjName = nextObjName.replaceAll("(.*)?_(pre|post)\\d?.*", "$1");
+							if ((nextObjName).contains("\"") && ("\""+(nextObjName).split("\"")[1].split(" ")[0].toLowerCase().trim()).equals(fullTagName.toLowerCase())
 									&& !clickedROIstring
-									.contains(roiNames[j]
+									.contains(nextObjName
 											+ ": "
 											+ WindowManager
 											.getImage(
 													impIDs[i])
 													.getTitle())) {
 								mi = new JMenuItem("also see: "
-										+ ((String) roiNames[j]).split("_")[0]
+										+ (nextObjName).split("_")[0]
+												+ " in \""
+												+ (WindowManager.getImage(
+														impIDs[i]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
+																(WindowManager.getImage(
+																		impIDs[i]).getTitle().replaceAll("\\d+-movie Scene - ", "").split(",")[0].substring(0,25) +"..."):
+																			(WindowManager.getImage(
+																					impIDs[i]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0]))+"\"");
+								mi.setActionCommand("also see: "
+										+ objNames[j]
+												+ ": "
+												+ WindowManager.getImage(
+														impIDs[i]).getTitle());
+								mi.setIcon(new ImageIcon(ImageWindow.class.getResource("images/More.png")));
+								mi.addActionListener(ij);
+								popup.add(mi);
+								j = objNames.length;
+							}
+						}
+					} else {
+						DefaultListModel otherListModel =WindowManager.getImage(impIDs[i]).getRoiManager().getListModel();
+						Object[] roiNames = otherListModel.toArray();
+						for (int j = 0; j < roiNames.length; j++) {
+							String nextRoiName = (String) roiNames[j];
+							if ((nextRoiName).contains("\"") && (nextRoiName).split("\"")[1].split(" ")[0].toLowerCase().trim().equals(fullTagName.toLowerCase())
+									&& !clickedROIstring
+									.contains(nextRoiName
+											+ ": "
+											+ WindowManager
+											.getImage(
+													impIDs[i])
+													.getTitle())) {
+								mi = new JMenuItem("also see: "
+										+ (nextRoiName).split("_")[0]
 												+ " in \""
 												+ (WindowManager.getImage(
 														impIDs[i]).getTitle().replaceAll("\\d-movie scene - ", "").split(",")[0].length()>28?
@@ -1740,6 +1779,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 								j = roiNames.length;
 							}
 						}
+			
 					}
 				}
 				popupInfo[0] = cellName;
