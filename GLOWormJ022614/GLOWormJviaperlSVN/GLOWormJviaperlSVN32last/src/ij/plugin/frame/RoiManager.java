@@ -497,7 +497,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			showAll(SHOW_NONE);
 
 			String thisWasTitle = this.getTitle();
-			String searchString = textFilterField.getText().toUpperCase();
+			String searchString = textFilterField.getText();
 			boolean isRegex = (searchString.startsWith("??"));
 			boolean isLinBackTrace = (searchString.toLowerCase().startsWith("?lbt?"));
 			boolean isLinTrace = (searchString.toLowerCase().startsWith("?lt?"));

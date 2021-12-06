@@ -493,7 +493,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 
 
 			String thisWasTitle = this.getTitle();
-			String searchString = textFilterField.getText().toUpperCase();
+			String searchString = textFilterField.getText();
 			boolean isRegex = (searchString.startsWith("??"));
 			boolean isLinBackTrace = (searchString.toLowerCase().startsWith("?lbt?"));
 			boolean isLinTrace = (searchString.toLowerCase().startsWith("?lt?"));

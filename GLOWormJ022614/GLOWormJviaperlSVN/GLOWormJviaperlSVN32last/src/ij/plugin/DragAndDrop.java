@@ -409,10 +409,14 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 
 		String cellsRegex = "??\"(";
 		String finalSuffix = ") .*";
-		String embSymExcludedRegex = "(e(a|p)|c(a|p)....|ab(a|p)|ab......|ab.......)";
+//		String embSymExcludedRegex = "(e(a|p)|c(a|p)....|ab(a|p)|ab......|ab.......)";
+		String embSymExcludedRegex = "(E(A|P)|C(A|P)....|AB(A|P)|AB......|AB.......)";
 		//			String embSymExcludedRegex = "(?<!e(a|p)|c(a|p)....|ab(a|p)|ab......|ab.......)";
-		String symAxesRegex = "(l|r|d|v|dl|dr|vl|vr)";
-		String synPrefix = "synapse:.*";
+//		String symAxesRegex = "(l|r|d|v|dl|dr|vl|vr)";
+		String symAxesRegex = "(L|R|D|V|DL|DR|VL|VR)";
+//		String synPrefix = "synapse:.*";
+		String synPrefix = ".*(undefined|chemical|electrical|by|\\&)";
+		
 		String synSuffix = ".*";
 		String cellListString = "";
 		ColorLegend impCL = null;
