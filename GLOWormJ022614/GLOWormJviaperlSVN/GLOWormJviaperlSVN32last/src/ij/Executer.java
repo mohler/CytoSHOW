@@ -98,6 +98,13 @@ public class Executer implements Runnable {
 							((Image3DUniverse)((ImageWindow3D)cmdImp.getWindow()).getUniverse()).getContent3DManager()
 											.mouseClicked(new MouseEvent(((Image3DUniverse)((ImageWindow3D)cmdImp.getWindow()).getUniverse()).getContent3DManager()
 													.getList(), 0, 0, 0, 0, 0, 0, 0, 2, false, 0));
+
+					//Weird voodoo that makes the intended zooming happen		
+							IJ.wait(1000);							
+							((Image3DUniverse)((ImageWindow3D)cmdImp.getWindow()).getUniverse()).getContent3DManager()
+							.mouseClicked(new MouseEvent(((Image3DUniverse)((ImageWindow3D)cmdImp.getWindow()).getUniverse()).getContent3DManager()
+									.getList(), 0, 0, 0, 0, 0, 0, 0, 2, false, 0));
+
 							cmdImp.getWindow().toFront();
 							i = targetItems.length;
 						}
