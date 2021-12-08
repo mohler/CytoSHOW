@@ -1717,7 +1717,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 						Object[] objNames = otherListModel.toArray();
 						for (int j = 0; j < objNames.length; j++) {
 							String nextObjName = (String) objNames[j];
-							nextObjName = nextObjName.replaceAll("(.*)?_(pre|post)\\d?.*", "$1");
+							nextObjName = nextObjName.replaceAll("(.*?)((_pre|_post\\d+)?)_#0_#0 \"_0", "$1");
 							if ((nextObjName).contains("\"") && ("\""+(nextObjName).split("\"")[1].split(" ")[0].toLowerCase().trim()).equals(fullTagName.toLowerCase())
 									&& !clickedROIstring
 									.contains(nextObjName
@@ -1751,7 +1751,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 						Object[] roiNames = otherListModel.toArray();
 						for (int j = 0; j < roiNames.length; j++) {
 							String nextRoiName = (String) roiNames[j];
-							if ((nextRoiName).contains("\"") && (nextRoiName).split("\"")[1].split(" ")[0].toLowerCase().trim().equals(fullTagName.toLowerCase())
+							nextRoiName = (nextRoiName).split("\"")[1].split(" ")[0];
+							if (nextRoiName.toLowerCase().trim().equals(fullTagName.toLowerCase())
 									&& !clickedROIstring
 									.contains(nextRoiName
 											+ ": "

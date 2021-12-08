@@ -393,7 +393,7 @@ public class Opener {
 						for (String stl:suiteTextLines)
 							IJ.log(stl);
 						// purges any old dropped stuff?
-//						while (IJ.getInstance().getDragAndDrop().getIterator()!=null && DragAndDrop.getInstance().getIterator().hasNext())
+						while (IJ.getInstance().getDragAndDrop().getIterator()!=null && IJ.getInstance().getDragAndDrop().getIterator().hasNext())
 							IJ.wait(100);
 						
 						

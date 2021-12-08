@@ -164,15 +164,6 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		super(imp.getTitle());
 		BorderLayout bl = new BorderLayout();
 
-		DragAndDrop dnd = new DragAndDrop();
-		if (dnd!=null)
-			dnd.addDropTarget(this.ic);
-		else {
-			IJ.runPlugIn("ij.plugin.DragAndDrop", "");
-			dnd = new DragAndDrop();
-			dnd.addDropTarget(this.ic);
-		}
-
 		if (false/*Prefs.blackCanvas && getClass().getName().equals("ij.gui.ImageWindow")*/) {
 			setForeground(Color.white);
 			setBackground(Color.black);
@@ -192,6 +183,15 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 			newCanvas=true;
 		}
 		this.ic = ic;
+		DragAndDrop dnd = new DragAndDrop();
+		if (dnd!=null)
+			dnd.addDropTarget(this.ic);
+		else {
+			IJ.runPlugIn("ij.plugin.DragAndDrop", "");
+			dnd = new DragAndDrop();
+			dnd.addDropTarget(this.ic);
+		}
+
 		this.setVisible(true);
 		pack();
 		this.setLayout(bl);

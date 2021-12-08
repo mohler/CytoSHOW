@@ -10230,6 +10230,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		public String getText() {
 			return showingHint ? "" : super.getText();
 		}
+		
+
+		@Override		
+		public void setText(String textToSet) {
+			showingHint = false;
+			super.setText(textToSet);
+		}
+
 	}
 
 }

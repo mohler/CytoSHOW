@@ -1590,9 +1590,9 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					}
 				}
 
-				if (dropViewer == null) {
-					dropViewer = new ImageJ3DViewer();
-					dropViewer.run(".");
+				if (dropUniverse == null) {
+					dropUniverse = new Image3DUniverse();
+					dropUniverse.show(false);
 				}
 
 				freshDrop = false;
@@ -1680,11 +1680,16 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						ImageJ3DViewer.importContent(((File)nextItem).getPath());
 					}
 				} catch (Exception e) {
-					dropViewer.run(".");
+					dropUniverse = new Image3DUniverse();
+					dropUniverse.show(false);
 					if (openAsVirtualStack) {
-						ImageJ3DViewer.importContentFlipXcoords(((File)nextItem).getPath());
+						dropUniverse.setFlipXonImport(true);
+						dropUniverse.addContentLater(((File)nextItem).getPath(), null);
+
 					} else {
-						ImageJ3DViewer.importContent(((File)nextItem).getPath());
+						dropUniverse.setFlipXonImport(false);
+						dropUniverse.addContentLater(((File)nextItem).getPath(), null);
+
 					}
 				}
 				//ImageJ3DViewer.lock();

@@ -15,6 +15,7 @@ import java.util.*;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
 import java.awt.Choice;
 import java.awt.Menu;
 import java.awt.MenuItem;
@@ -94,6 +95,9 @@ public class Executer implements Runnable {
 					for (int i=0; i<targetItems.length; i++) {
 						if (((String) targetItems[i]).startsWith(cmdChunks[0]) ) {
 							((Image3DUniverse)((ImageWindow3D)cmdImp.getWindow()).getUniverse()).getContent3DManager().select(i);
+							((Image3DUniverse)((ImageWindow3D)cmdImp.getWindow()).getUniverse()).getContent3DManager()
+											.mouseClicked(new MouseEvent(((Image3DUniverse)((ImageWindow3D)cmdImp.getWindow()).getUniverse()).getContent3DManager()
+													.getList(), 0, 0, 0, 0, 0, 0, 0, 2, false, 0));
 							cmdImp.getWindow().toFront();
 							i = targetItems.length;
 						}
@@ -102,10 +106,12 @@ public class Executer implements Runnable {
 					Object[] targetItems =  cmdImp.getRoiManager().getListModel().toArray();
 					for (int i=0; i<targetItems.length; i++) {
 						if (((String) targetItems[i]).startsWith(cmdChunks[0]) ) {
-							new ij.macro.MacroRunner("roiManager('select', "+i+", "+cmdImp.getID()+");" +
-									"getSelectionBounds(roix, roiy, roiwidth, roiheight);" +
-									"run(\"Set... \", \"zoom=\" + getZoom*100 + \" x=\" + roix+roiwidth/2 + \" y=\" + roiy+roiheight/2);" +
-									"");
+//							new ij.macro.MacroRunner("roiManager('select', "+i+", "+cmdImp.getID()+");" +
+//									"getSelectionBounds(roix, roiy, roiwidth, roiheight);" +
+//									"run(\"Set... \", \"zoom=\" + getZoom*100 + \" x=\" + roix+roiwidth/2 + \" y=\" + roiy+roiheight/2);" +
+//									"");
+							cmdImp.getRoiManager().select(i);
+							cmdImp.getRoiManager().mouseClicked(new MouseEvent(cmdImp.getRoiManager().getList(), 0, 0, 0, 0, 0, 0, 0, 2, false, 0));
 							cmdImp.getWindow().toFront();
 							i = targetItems.length;
 						}

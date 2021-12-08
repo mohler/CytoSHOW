@@ -2353,6 +2353,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 			if (e.getClickCount() > 1) {
 				if (univ instanceof Image3DUniverse) {
 					((Image3DUniverse)univ).adjustView(univ.getSelected());
+					((Image3DUniverse)univ).getViewPlatformTransformer().zoom(-10);
 					((Image3DUniverse)univ).centerSelected(univ.getSelected());
 				}
 			}
@@ -7230,6 +7231,12 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 		@Override
 		public String getText() {
 			return showingHint ? "" : super.getText();
+		}
+
+		@Override		
+		public void setText(String textToSet) {
+			showingHint = false;
+			super.setText(textToSet);
 		}
 	}
 
