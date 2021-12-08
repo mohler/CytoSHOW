@@ -392,11 +392,14 @@ public class Opener {
 					if (suiteTextLines.length>0 ) {
 						for (String stl:suiteTextLines)
 							IJ.log(stl);
-						while (DragAndDrop.getInstance().getIterator()!=null && DragAndDrop.getInstance().getIterator().hasNext())
+						// purges any old dropped stuff?
+//						while (IJ.getInstance().getDragAndDrop().getIterator()!=null && DragAndDrop.getInstance().getIterator().hasNext())
 							IJ.wait(100);
-						DragAndDrop.getInstance().setIterator(Arrays.asList(suiteTextLines).iterator());
-						if (DragAndDrop.getInstance().getIterator()!=null) {
-							Thread thread = new Thread(DragAndDrop.getInstance(), "DrawAndSubDrop");
+						
+						
+						IJ.getInstance().getDragAndDrop().setIterator(Arrays.asList(suiteTextLines).iterator());
+						if (IJ.getInstance().getDragAndDrop().getIterator()!=null) {
+							Thread thread = new Thread(IJ.getInstance().getDragAndDrop(), "DrawAndSubDrop");
 							thread.setPriority(Math.max(thread.getPriority()-1, Thread.MIN_PRIORITY));
 							thread.start();
 						}

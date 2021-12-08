@@ -43,29 +43,29 @@ import client.RemoteMTVSHandler;
 
 public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 	private Iterator iterator;
-	private ImagePlus targetImp;
+	private ImagePlus imp;
+	private ImagePlus dropImp;
 	private static boolean convertToRGB;
 	private static boolean virtualStack;
 	private boolean openAsVirtualStack;
-	private ImagePlus imp;
 	private boolean doSketch3D;
-	private static DragAndDrop instance;
 	private int nDrops =0;
-	private ImagePlus dropImp;
 	private boolean traceLineages = false;
 	private boolean traceForward = false;
 	private boolean traceBackward = false;
-	private ImageJ3DViewer ij3dv;
 	private DropTargetDropEvent dtde;
 	private boolean freshDrop;
+	private ImageJ3DViewer dropViewer;
 	private Image3DUniverse dropUniverse;
-
-	public static DragAndDrop getInstance() {
-		return instance;
-	}
+	
+//	private static DragAndDrop instance;
+//
+//	public static DragAndDrop getInstance() {
+//		return instance;
+//	}
 
 	public void run(String arg) {
-		instance = this;
+//		instance = this;
 		ImageJ ij = IJ.getInstance();
 		if (ij!=null) {
 			ij.setDropTarget(null);
@@ -602,11 +602,11 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 										imp = i3duniv.getWindow().getImagePlus();
 										i3duniv.setAutoAdjustView(true);
 										if (freshDrop){
-											ij3dv = null;		
+											dropViewer = null;		
 										}
-										if (ij3dv == null) {
-											ij3dv = new ImageJ3DViewer();
-											ij3dv.setUniv(i3duniv);
+										if (dropViewer == null) {
+											dropViewer = new ImageJ3DViewer();
+											dropViewer.setUniv(i3duniv);
 										}
 									}
 								}
@@ -616,14 +616,14 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 										|| this.dtde.getDropTargetContext().getDropTarget().getComponent() == Toolbar.getInstance()
 										|| this.dtde.getDropTargetContext().getDropTarget().getComponent() == IJ.getInstance().getStatusBar()){
 									if (freshDrop){
-										ij3dv = null;		
+										dropViewer = null;		
 									}
 								}
 							}
 
-							if (ij3dv == null) {
-								ij3dv = new ImageJ3DViewer();
-								ij3dv.run(".");
+							if (dropViewer == null) {
+								dropViewer = new ImageJ3DViewer();
+								dropViewer.run(".");
 							}
 
 							freshDrop = false;
@@ -706,7 +706,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 									ImageJ3DViewer.importContent(((File)nextItem).getPath());
 								}
 							} catch (Exception e) {
-								ij3dv.run(".");
+								dropViewer.run(".");
 								if (openAsVirtualStack) {
 									ImageJ3DViewer.importContentFlipXcoords(((File)nextItem).getPath());
 								} else {
@@ -1261,11 +1261,11 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 								imp = i3duniv.getWindow().getImagePlus();
 								i3duniv.setAutoAdjustView(true);
 								if (freshDrop){
-									ij3dv = null;		
+									dropViewer = null;		
 								}
-								if (ij3dv == null) {
-									ij3dv = new ImageJ3DViewer();
-									ij3dv.setUniv(i3duniv);
+								if (dropViewer == null) {
+									dropViewer = new ImageJ3DViewer();
+									dropViewer.setUniv(i3duniv);
 								}
 							}
 						}
@@ -1275,14 +1275,14 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 								|| this.dtde.getDropTargetContext().getDropTarget().getComponent() == Toolbar.getInstance()
 								|| this.dtde.getDropTargetContext().getDropTarget().getComponent() == IJ.getInstance().getStatusBar()){
 							if (freshDrop){
-								ij3dv = null;		
+								dropViewer = null;		
 							}
 						}
 					}
 
-					if (ij3dv == null) {
-						ij3dv = new ImageJ3DViewer();
-						ij3dv.run(".");
+					if (dropViewer == null) {
+						dropViewer = new ImageJ3DViewer();
+						dropViewer.run(".");
 					}
 
 					freshDrop = false;
@@ -1370,7 +1370,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							ImageJ3DViewer.importContent(((File)nextItem).getPath());
 						}
 					} catch (Exception e) {
-						ij3dv.run(".");
+						dropViewer.run(".");
 						if (openAsVirtualStack) {
 							ImageJ3DViewer.importContentFlipXcoords(((File)nextItem).getPath());
 						} else {
@@ -1570,11 +1570,11 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							imp = i3duniv.getWindow().getImagePlus();
 							i3duniv.setAutoAdjustView(true);
 							if (freshDrop){
-								ij3dv = null;		
+								dropViewer = null;		
 							}
-							if (ij3dv == null) {
-								ij3dv = new ImageJ3DViewer();
-								ij3dv.setUniv(i3duniv);
+							if (dropViewer == null) {
+								dropViewer = new ImageJ3DViewer();
+								dropViewer.setUniv(i3duniv);
 							}
 
 						}
@@ -1585,14 +1585,14 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							|| this.dtde.getDropTargetContext().getDropTarget().getComponent() == Toolbar.getInstance()
 							|| this.dtde.getDropTargetContext().getDropTarget().getComponent() == IJ.getInstance().getStatusBar()){
 						if (freshDrop){
-							ij3dv = null;		
+							dropViewer = null;		
 						}
 					}
 				}
 
-				if (ij3dv == null) {
-					ij3dv = new ImageJ3DViewer();
-					ij3dv.run(".");
+				if (dropViewer == null) {
+					dropViewer = new ImageJ3DViewer();
+					dropViewer.run(".");
 				}
 
 				freshDrop = false;
@@ -1680,7 +1680,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						ImageJ3DViewer.importContent(((File)nextItem).getPath());
 					}
 				} catch (Exception e) {
-					ij3dv.run(".");
+					dropViewer.run(".");
 					if (openAsVirtualStack) {
 						ImageJ3DViewer.importContentFlipXcoords(((File)nextItem).getPath());
 					} else {
@@ -1774,11 +1774,11 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 
 		}
 		if (newSubDropsList.size()>0 ) {
-			while (DragAndDrop.getInstance().getIterator()!=null && DragAndDrop.getInstance().getIterator().hasNext())
+			while (this.getIterator()!=null && this.getIterator().hasNext())
 				IJ.wait(100);
-			DragAndDrop.getInstance().setIterator(newSubDropsList.iterator());
-			if (DragAndDrop.getInstance().getIterator()!=null) {
-				Thread thread = new Thread(DragAndDrop.getInstance(), "DrawAndSubDrop");
+			this.setIterator(newSubDropsList.iterator());
+			if (this.getIterator()!=null) {
+				Thread thread = new Thread(this, "DrawAndSubDrop");
 				thread.setPriority(Math.max(thread.getPriority()-1, Thread.MIN_PRIORITY));
 				thread.start();
 			}

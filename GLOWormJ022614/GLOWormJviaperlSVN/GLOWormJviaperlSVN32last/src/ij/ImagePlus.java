@@ -2125,12 +2125,12 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			rm.dispose();
 			rm = null;
 		}
-		if (DragAndDrop.getInstance().getImp() == this) {
-			DragAndDrop.getInstance().setImp(null);
-		}
-		if (DragAndDrop.getInstance().getDropImp() == this) {
-			DragAndDrop.getInstance().setDropImp(null);
-		}
+//		if (DragAndDrop.getInstance().getImp() == this) {
+//			DragAndDrop.getInstance().setImp(null);
+//		}
+//		if (DragAndDrop.getInstance().getDropImp() == this) {
+//			DragAndDrop.getInstance().setDropImp(null);
+//		}
 
 	}
 	

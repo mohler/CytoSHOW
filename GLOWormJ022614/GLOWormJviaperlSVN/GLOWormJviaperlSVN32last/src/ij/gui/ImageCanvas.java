@@ -140,7 +140,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		magnification = 1.0;
 		messageRois = new Hashtable<String,Roi>();
 
-		DragAndDrop dnd = DragAndDrop.getInstance();
+		DragAndDrop dnd = new DragAndDrop();
 		if (dnd!=null)
 			dnd.addDropTarget(this);
 

@@ -146,6 +146,7 @@ public class ImageJ extends Frame implements ActionListener,
 		
 	boolean hotkey;
 	private ArrayList<JPopupMenu> openPopupsArrayList;
+	private DragAndDrop dragAndDrop;
 	
 	/** Creates a new ImageJ frame that runs as an application. 
 	 * @throws URISyntaxException 
@@ -193,6 +194,7 @@ public class ImageJ extends Frame implements ActionListener,
 //	        System.exit(-1);
 	    }
 	    
+	    dragAndDrop = new DragAndDrop();
 	    openPopupsArrayList = new ArrayList<JPopupMenu>();
 	    
 		embedded = applet==null && (mode==EMBEDDED||mode==NO_SHOW);
@@ -1463,6 +1465,11 @@ public class ImageJ extends Frame implements ActionListener,
 	
 	public static void setCommandName(String name) {
 		commandName = name;
+	}
+
+	public DragAndDrop getDragAndDrop() {
+		// TODO Auto-generated method stub
+		return dragAndDrop;
 	}
 	
 }
