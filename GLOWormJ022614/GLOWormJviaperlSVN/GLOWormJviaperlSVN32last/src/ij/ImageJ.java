@@ -37,6 +37,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.MenuElement;
 import javax.swing.MenuSelectionManager;
+import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.swing.UIManager;
 import javax.swing.event.PopupMenuEvent;
@@ -622,7 +623,10 @@ public class ImageJ extends Frame implements ActionListener,
 			new Executer(cmd, imp, e);
 		} else {
 			String cmd = e.getActionCommand();
-			ImagePlus imp = IJ.getImage();
+			Window actWin = SwingUtilities.windowForComponent((Component) e.getSource());
+			if (!(actWin instanceof ImageWindow))
+				return;
+			ImagePlus imp = ((ImageWindow)actWin).getImagePlus();
 			new Executer(cmd, imp, e);
 
 			imp.getCanvas().requestFocus();
