@@ -394,6 +394,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				int cbi = e.getButton();
 				boolean showPopup = !(win instanceof SimpleImageWindow3D) && (cd || cbi!=1);
 				contextmenu.showPopup(new MouseEvent(e.getComponent(),e.getID(),e.getWhen(),e.getModifiers(),e.getX(),e.getY(),e.getClickCount(), showPopup));   
+				if (showPopup)
+					e.consume();
 				//to mute popup 
 			}
 

@@ -150,6 +150,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 	public JButton sqrtButton;
 	public JButton logButton;
 	public JButton advancedButton;
+	protected DragAndDrop dnd;
 
 	
 	public ImageWindow(String title) {
@@ -183,15 +184,17 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 			newCanvas=true;
 		}
 		this.ic = ic;
-		DragAndDrop dnd = new DragAndDrop();
-		if (dnd!=null)
-			dnd.addDropTarget(this.ic);
-		else {
-			IJ.runPlugIn("ij.plugin.DragAndDrop", "");
+		if (!(this instanceof ImageWindow3D)) {
 			dnd = new DragAndDrop();
-			dnd.addDropTarget(this.ic);
+			if (dnd!=null) {
+				dnd.setImp(this.imp);
+				dnd.addDropTarget(this.ic);
+			} else {
+				dnd = new DragAndDrop();
+				dnd.setImp(this.imp);
+				dnd.addDropTarget(this.ic);
+			}
 		}
-
 		this.setVisible(true);
 		pack();
 		this.setLayout(bl);
@@ -938,6 +941,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
     	boolean isRunning = running || running2 || running3;
     	running = running2 = running3 = false;
     	boolean virtual = imp!=null && imp.getStackSize()>1 && imp.getStack().isVirtual();
+		this.getDragAndDrop().setWorking(false);
     	if (isRunning) IJ.wait(500);
     	if (imp!=null && ij==null || IJ.getApplet()!=null || Interpreter.isBatchMode() || IJ.macroRunning() || virtual)
     		imp.changes = false;
@@ -1407,6 +1411,14 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 //		}
 	}
 
+	public DragAndDrop getDragAndDrop() {
+		return dnd;
+	}
+	
+	public void setDragAndDrop(DragAndDrop dnd) {
+		this.dnd = dnd;
+		dnd.addDropTarget(this.getCanvas());
+	}
 
 
 	

@@ -107,12 +107,15 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 		imp.setWindow(this);
 		this.univ = universe;
 		this.canvas3D = (ImageCanvas3D)universe.getCanvas();
-		DragAndDrop dnd = new DragAndDrop();
-		if (dnd!=null)
+		dnd = new DragAndDrop();
+		if (dnd!=null) {
+			dnd.setUniverse(universe);
+			dnd.setImp(imp);
 			dnd.addDropTarget(this.canvas3D);
-		else {
-			IJ.runPlugIn("ij.plugin.DragAndDrop", "");
+		}else {
 			dnd = new DragAndDrop();
+			dnd.setUniverse(universe);
+			dnd.setImp(imp);
 			dnd.addDropTarget(this.canvas3D);
 		}
 
@@ -560,10 +563,6 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 		return univ;
 	}
 
-	public ImageCanvas getCanvas() {
-		return new ImageCanvas(getImagePlus());
-	}
-
 	/* off-screen rendering stuff */
 	private Canvas3D offScreenCanvas3D;
 	private Canvas3D getOffScreenCanvas() {
@@ -731,6 +730,8 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 
 	public boolean close() {
 		if (null == univ) return false;
+		this.getDragAndDrop().setWorking(false);
+
 		WindowManager.removeWindow(this);
 		univ.removeUniverseListener(this);
 
@@ -902,5 +903,15 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 	public void setMenubar(Image3DMenubar menubar) {
 		this.menubar = menubar;
 	}
+	
+	public DragAndDrop getDragAndDrop() {
+		return dnd;
+	}
+	
+	public void setDragAndDrop(DragAndDrop dnd) {
+		this.dnd = dnd;
+		dnd.addDropTarget(this.getCanvas());
+	}
+
 }
 

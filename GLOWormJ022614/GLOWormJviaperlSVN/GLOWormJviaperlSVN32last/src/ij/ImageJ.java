@@ -1,6 +1,7 @@
 package ij;
 
 import java.awt.*;
+import java.awt.dnd.DropTarget;
 import java.util.*;
 import java.awt.event.*;
 import java.io.*;
@@ -147,7 +148,7 @@ public class ImageJ extends Frame implements ActionListener,
 		
 	boolean hotkey;
 	private ArrayList<JPopupMenu> openPopupsArrayList;
-	private DragAndDrop dragAndDrop;
+	private DragAndDrop dnd;
 	
 	/** Creates a new ImageJ frame that runs as an application. 
 	 * @throws URISyntaxException 
@@ -195,7 +196,8 @@ public class ImageJ extends Frame implements ActionListener,
 //	        System.exit(-1);
 	    }
 	    
-	    dragAndDrop = new DragAndDrop();
+	    dnd = new DragAndDrop();
+
 	    openPopupsArrayList = new ArrayList<JPopupMenu>();
 	    
 		embedded = applet==null && (mode==EMBEDDED||mode==NO_SHOW);
@@ -233,6 +235,10 @@ public class ImageJ extends Frame implements ActionListener,
 		((JComponent) statusLine).setToolTipText("<html>Left-Clicking icons selects from a variety of tools for measurement and/or tagging of the movies or images.<br>Right-clicking allows choice of even more tools.<br>Double-clicking allows you to set tool-specific options.<br>Dragging and dropping file icons or web links onto this toolbar will launch them in CytoSHOW.</html>");		
 		ToolTipManager.sharedInstance().setDismissDelay(60000);
 		add(statusBar);
+
+		dnd.addDropTarget(this);
+		dnd.addDropTarget(toolbar);
+		dnd.addDropTarget(statusBar);
 
 		IJ.init(this, applet);
  		addKeyListener(this);
@@ -1472,8 +1478,12 @@ public class ImageJ extends Frame implements ActionListener,
 	}
 
 	public DragAndDrop getDragAndDrop() {
-		// TODO Auto-generated method stub
-		return dragAndDrop;
+		return dnd;
+	}
+	
+	public void setDragAndDrop(DragAndDrop dnd) {
+		this.dnd = dnd;
+		dnd.addDropTarget(statusBar);
 	}
 	
 }

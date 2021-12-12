@@ -140,10 +140,10 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		magnification = 1.0;
 		messageRois = new Hashtable<String,Roi>();
 
-		DragAndDrop dnd = new DragAndDrop();
-		if (dnd!=null)
-			dnd.addDropTarget(this);
-
+//		DragAndDrop dnd = new DragAndDrop();
+//		if (dnd!=null)
+//			dnd.addDropTarget(this);
+//
 		addMouseListener(this);
 		addMouseMotionListener(this);
 		addMouseWheelListener (this);
@@ -1612,6 +1612,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 					fullTagName = fullTagName.replaceAll("(.*)?_(pre|post)\\d?.*", "$1");
 					if (fullTagName.matches("[A-Z]+by([A-Z]+)")){
 						cellName = fullTagName.replaceAll("[A-Z]+by([A-Z]+)","$1");
+					} else if (!fullTagName.contains("~")) {
+						cellName = fullTagName;
 					}
 					clickedROIstring = fullTagName + ": "
 							+ rm.getImagePlus().getTitle();				}
@@ -2956,10 +2958,12 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				popup.add(mi);
 
 			}
-			if (brainbowSelection && e.getSource() instanceof Checkbox && !sketchyMQTVS)
+			if (brainbowSelection && e.getSource() instanceof Checkbox && !sketchyMQTVS) {
 				colorLegend.add(popup);
-			else
-				imp.getWindow().add(popup);
+			} else if (ij3dSelection) { 
+			} else {
+//				imp.getWindow().add(popup);
+			}
 			if (IJ.isMacOSX()) IJ.wait(10);
 			if (IJ.isLinux()) IJ.wait(10);
 
