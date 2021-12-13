@@ -77,6 +77,7 @@ public class ImageCanvas3D extends Canvas3D implements KeyListener {
 		roiImageCanvas.removeKeyListener(ij.IJ.getInstance());
 		roiImageCanvas.removeMouseListener(roiImageCanvas);
 		roiImageCanvas.removeMouseMotionListener(roiImageCanvas);
+		roiImageCanvas.setEnabled(false);
 		roiImageCanvas.disablePopupMenu(false);
 
 		background = new Background(

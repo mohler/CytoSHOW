@@ -1907,10 +1907,9 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 			return;
 		}
 
-		if (rawCellSet.size()==0) {
-			rawCellSet.add(" ");
+		if (rawCellSet.size()!=0) {
+			cellSets.add(rawCellSet);
 		}	
-		cellSets.add(rawCellSet);
 
 		if (cellListString.endsWith(","))
 			cellListString = cellListString.substring(0, cellListString.length()-1).toUpperCase();
