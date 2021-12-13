@@ -598,7 +598,9 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 
 						}else if (path.toLowerCase().endsWith(".obj")) {
 //							Component dtc = this.dtde.getDropTargetContext().getDropTarget().getComponent();
-							Window dropWin = dropUniverse.getWindow();
+							Window dropWin = null;
+							if (dropUniverse != null)
+								dropWin = dropUniverse.getWindow();
 //							if (dropWin instanceof ImageWindow3D){
 //									if (dtc == ((ImageWindow3D)dropWin).getUniverse().getCanvas()){
 //										dropUniverse = (Image3DUniverse)((ImageWindow3D)dropWin).getUniverse();
@@ -1288,7 +1290,9 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						MQTVSSceneLoader64.runMQTVS_SceneLoader64(path);
 				}else if (((String)nextItem).toLowerCase().endsWith(".obj")) {
 //					Component dtc = this.dtde.getDropTargetContext().getDropTarget().getComponent();
-					Window dropWin = dropUniverse.getWindow();
+					Window dropWin = null;
+					if (dropUniverse != null)
+						dropWin = dropUniverse.getWindow();
 //					if (dropWin instanceof ImageWindow3D){
 //							if (dtc == ((ImageWindow3D)dropWin).getUniverse().getCanvas()){
 //								dropUniverse = (Image3DUniverse)((ImageWindow3D)dropWin).getUniverse();
@@ -1353,70 +1357,72 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					PrintWriter out = null;
 
 					
+					File cacheObj = null;
+					File cacheMtl = null;
 					if (path.startsWith("/Volumes/GLOWORM_DATA/")
 							|| path.contains("\\GLOWORM_DATA\\")) {	
 
-						File cacheFile = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+path);
-						if (!(new File(cacheFile.getParent())).canWrite()) {
+						cacheObj = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+path);
+						cacheMtl = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+path.replace(".obj", ".mtl"));
+						if (!(new File(cacheObj.getParent())).canWrite()) {
 							//Crappy loop seems necessary for windows...							
-							while (!(new File(cacheFile.getParent())).mkdirs()) { 
-								while (!(new File(new File(cacheFile.getParent()).getParent())).mkdirs()) {
-									while (!(new File(new File(new File(cacheFile.getParent()).getParent()).getParent())).mkdirs()) {
-										while (!(new File(new File(new File(new File(cacheFile.getParent()).getParent()).getParent()).getParent()).mkdirs())) {
+							while (!(new File(cacheObj.getParent())).mkdirs()) { 
+								while (!(new File(new File(cacheObj.getParent()).getParent())).mkdirs()) {
+									while (!(new File(new File(new File(cacheObj.getParent()).getParent()).getParent())).mkdirs()) {
+										while (!(new File(new File(new File(new File(cacheObj.getParent()).getParent()).getParent()).getParent()).mkdirs())) {
 
 										}
 									}
 								}
 							}
 						}
-						if (cacheFile.canRead()) {
-							try {
-								in = new BufferedReader(new FileReader(cacheFile));
-							} catch (FileNotFoundException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-						}else {
-							in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
-									RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replace(".obj", ".mtl").replaceAll("%2B", "\\+").replaceAll("%25", "%").replace("|", "")))));
-							try {
-								out = new PrintWriter(
-										new BufferedWriter(
-												new FileWriter(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path.replace(".obj", ".mtl")) ), true);
-								String line = "";
-								if (line != null) {
-									while (line != null && !line.contains("End of parameter list")) {
-										line = in.readLine();
-										if (out!=null)
-											out.println(line);
-									}
-								}
-								out.close();
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
+						if (cacheObj.canRead() && cacheMtl.canRead()) {
 
+							// skip ahead to opening obj
 							
-							in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
-									RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replaceAll("%2B", "\\+").replaceAll("%25", "%").replace("|", "")))));
-							try {
-								out = new PrintWriter(
-										new BufferedWriter(
-												new FileWriter(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path) ), true);
-								String line = "";
-								if (line != null) {
-									while (line != null && !line.contains("End of parameter list")) {
-										line = in.readLine();
-										if (out!=null)
-											out.println(line);
+						}else {
+							if (!cacheMtl.canRead()) {
+								in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
+										RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replace(".obj", ".mtl").replaceAll("%2B", "\\+").replaceAll("%25", "%").replace("|", "")))));
+								try {
+									out = new PrintWriter(
+											new BufferedWriter(
+													new FileWriter(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path.replace(".obj", ".mtl")) ), true);
+									String line = "";
+									if (line != null) {
+										while (line != null && !line.contains("End of parameter list")) {
+											line = in.readLine();
+											if (out!=null)
+												out.println(line);
+										}
 									}
+									out.close();
+								} catch (IOException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
 								}
-								out.close();
-								nextItem = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path);
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+							}
+							if (!cacheObj.canRead()) {							
+								in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
+										RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replaceAll("%2B", "\\+").replaceAll("%25", "%").replace("|", "")))));
+								try {
+									out = new PrintWriter(
+											new BufferedWriter(
+													new FileWriter(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path) ), true);
+									String line = "";
+									if (line != null) {
+										while (line != null && !line.contains("End of parameter list")) {
+											line = in.readLine();
+											if (out!=null)
+												out.println(line);
+										}
+									}
+									out.close();
+									cacheObj = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path);
+								} catch (IOException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
 							}
 						}
 					} else {
@@ -1426,9 +1432,9 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					try {
 						if (openAsVirtualStack) {
 							dropUniverse.setFlipXonImport(true);
-							dropUniverse.addContentLater(((File)nextItem).getPath(), null);
+							dropUniverse.addContentLater(cacheObj.getAbsolutePath(), null);
 						} else {
-							dropUniverse.addContentLater(((File)nextItem).getPath(), null);
+							dropUniverse.addContentLater(cacheObj.getAbsolutePath(), null);
 						}
 					} catch (Exception e) {
 						dropUniverse = new Image3DUniverse();
@@ -1436,9 +1442,9 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							while (dropUniverse.getWindow() == null) IJ.wait (10);
 						if (openAsVirtualStack) {
 							dropUniverse.setFlipXonImport(true);
-							dropUniverse.addContentLater(((File)nextItem).getPath(), null);
+							dropUniverse.addContentLater(cacheObj.getAbsolutePath(), null);
 						} else {
-							dropUniverse.addContentLater(((File)nextItem).getPath(), null);
+							dropUniverse.addContentLater(cacheObj.getAbsolutePath(), null);
 						}
 					}
 					//ImageJ3DViewer.lock();
@@ -1647,7 +1653,9 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					setImp(dropImp);
 				}
 //				Component dtc = this.dtde.getDropTargetContext().getDropTarget().getComponent();
-				Window dropWin = dropUniverse.getWindow();
+				Window dropWin = null;
+				if (dropUniverse != null)
+					dropWin = dropUniverse.getWindow();
 //				if (dropWin instanceof ImageWindow3D){
 //						if (dtc == ((ImageWindow3D)dropWin).getUniverse().getCanvas()){
 //							dropUniverse = (Image3DUniverse)((ImageWindow3D)dropWin).getUniverse();
