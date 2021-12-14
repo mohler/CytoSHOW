@@ -563,6 +563,10 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 		return univ;
 	}
 
+	public ImageCanvas getCanvas() {
+		return new ImageCanvas(getImagePlus());
+	}
+
 	/* off-screen rendering stuff */
 	private Canvas3D offScreenCanvas3D;
 	private Canvas3D getOffScreenCanvas() {
