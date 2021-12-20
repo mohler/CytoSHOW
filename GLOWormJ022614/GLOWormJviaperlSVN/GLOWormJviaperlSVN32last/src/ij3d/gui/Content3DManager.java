@@ -616,7 +616,9 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 			univ.getWindow().countLabel.repaint();
 
 			univ.getWindow().tagsButton.repaint();
-
+			
+			univ.getWindow().revalidate();
+			
 			IJ.runMacro("print(\"\\\\Update:\")");
 
 			if (!(univ.getWindow().getTitle().matches(".*[XY]Z +\\d+.*"))) {

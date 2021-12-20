@@ -1921,6 +1921,16 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 													+ ":");
 
 							//					boolean hasCytoSHOWData = glowormGenePage.contains("Interactive movies are available for a fluorescence reporter of this gene.");
+							boolean redundant = false;
+							for(int i=0;i<genePopup.getItemCount();i++) {
+								if (genePopup.getItem(i).getLabel().contentEquals(logLines2[l])) {
+									redundant = true;
+									break;
+								}
+									
+							}
+							if (redundant)
+								continue;
 							mi = new JMenuItem(logLines2[l]);
 							popupInfo[1] = popupInfo[1]+ logLines2[l] + "\n";
 
