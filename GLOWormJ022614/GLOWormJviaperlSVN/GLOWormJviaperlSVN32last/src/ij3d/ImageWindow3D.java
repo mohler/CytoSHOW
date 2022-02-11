@@ -119,7 +119,6 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 			dnd.addDropTarget(this.canvas3D);
 		}
 
-		this.setResizable(true);
 		ic = this.canvas3D.getRoiCanvas();
 		this.setLayout(bl);
 
@@ -146,6 +145,7 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 		this.imp.setWindow(this);
 
 		WindowManager.addWindow(-1, this);
+		this.setResizable(IJ.isWindows()?true:false);
 
 	}
 

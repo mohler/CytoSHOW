@@ -7272,14 +7272,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							Integer.parseInt(cellData[8].trim()), Integer.parseInt(cellData[8].trim()));
 					newOval.setImage(imp);
 					newOval.setPosition(imp.getChannel(), (int) Double.parseDouble(cellData[7].trim()), frame);
-					addRoi(newOval, false, Color.white, 1, false);
+
 					String currID = cellData[0];
 					String prevCell = cellData[2];
 					String[] prevCellThings = null;
 					String prevCellDesc1 = "";
 					String prevCellDesc2 = "";
 
-					if (prevHash != null && !useGivenNames) {
+					if (prevHash != null && (!useGivenNames || cellData[9].startsWith("Nuc"))) {
 						if (prevHash.get(cellData[2]) != null) {
 							prevCellThings = prevHash.get(cellData[2]);
 							if (prevCellThings[1].equalsIgnoreCase(cellData[0])) {
@@ -7287,31 +7287,32 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								prevCellDesc2 = prevCellThings[2];
 								if (!prevCellThings[2].equalsIgnoreCase("-1")) {
 									newNames.add(prevCellThings[3] + "g");
-//									rename(prevCellThings[3]+"g", new int[] {this.getCount()-1}, false);
+									newOval.setName(prevCellThings[3]+"g");
 									nextHash.put(cellData[0], new String[] { cellData[2], cellData[3], cellData[4],
 											prevCellThings[3] + "g" });
 
 								} else {
 									newNames.add(prevCellThings[3]);
-//									rename(prevCellThings[3], new int[] {this.getCount()-1}, false);
+									newOval.setName(prevCellThings[3]);
 									nextHash.put(cellData[0],
 											new String[] { cellData[2], cellData[3], cellData[4], prevCellThings[3] });
 
 								}
 							} else if (prevCellThings[2].equalsIgnoreCase(cellData[0])) {
 								newNames.add(prevCellThings[3] + "h");
-//								rename(prevCellThings[3]+"h", new int[] {this.getCount()-1}, false);
+								newOval.setName(prevCellThings[3]+"h");
 								nextHash.put(cellData[0], new String[] { cellData[2], cellData[3], cellData[4],
 										prevCellThings[3] + "h" });
 							}
 						} else {
 							newNames.add(cellData[9]);
-//							rename(cellData[9], new int[] {this.getCount()-1}, false);
+							newOval.setName(cellData[9]);
 						}
 					} else {
 						newNames.add(cellData[9]);
-//						rename(cellData[9], new int[] {this.getCount()-1}, false);
+						newOval.setName(cellData[9]);
 					}
+					addRoi(newOval, false, Colors.decode("#44ff0000", Color.red), 1, false);
 
 					IJ.showStatus("importing nucleus " + getCount());
 				}
@@ -7324,7 +7325,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			nameIndexes[n] = n;
 		}
 		list.setModel(listModel);
-		rename(newNamesArray, nameIndexes, false);
+//		rename(newNamesArray, nameIndexes, false);
 
 		if (this.getCount() > 0) {
 			select(-1);
