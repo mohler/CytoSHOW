@@ -1717,15 +1717,17 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						}
 					}
 					if (cacheFile.canRead()) {
-						try {
-							in = new BufferedReader(new FileReader(cacheFile));
-						} catch (FileNotFoundException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
+//						try {
+//							in = new BufferedReader(new FileReader(cacheFile));
+							nextItem = cacheFile;
+//						} catch (FileNotFoundException e) {
+//							// TODO Auto-generated catch block
+//							e.printStackTrace();
+//						}
 					}else {
-						in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
-								RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replace(".obj", ".mtl").replaceAll("%2B", "\\+").replaceAll("%25", "%").replace("|", "")))));
+						byte[] buf = RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replace(".obj", ".mtl").replaceAll("%2B", "\\+").replaceAll("%25", "%").replace("|", ""));
+						
+						in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(buf)));
 						try {
 							out = new PrintWriter(
 									new BufferedWriter(
