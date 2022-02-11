@@ -90,8 +90,8 @@
 	<classpathentry kind="lib" path="imglib.jar"/>
 	<classpathentry kind="lib" path="Jama-1.0.3.jar"/>
 	<classpathentry kind="lib" path="junit-4.12.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="jogamp-java3d"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/AceTreeLegacyModForCytoSHOWsynch"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="output" path="plugins"/>
 </classpath>
