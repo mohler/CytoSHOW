@@ -145,6 +145,7 @@ public class ImageJ extends Frame implements ActionListener,
 	private boolean embedded;
 	private boolean windowClosed;
 	private static String commandName;
+	public static boolean javaFXalreadyLaunched;
 		
 	boolean hotkey;
 	private ArrayList<JPopupMenu> openPopupsArrayList;

@@ -14,10 +14,16 @@ import ij.measure.ResultsTable;
 import ij.measure.Measurements;
 import ij3d.ImageJ3DViewer;
 import ij3d.ImageWindow3D;
+import javafx.application.Application;
+import javafx.application.Platform;
+import javafx.stage.Stage;
 
 import java.awt.event.*;
 import java.text.*;
-import java.util.*;	
+import java.util.*;
+
+import javax.swing.JFileChooser;
+
 import java.awt.*;	
 import java.applet.Applet;
 import java.io.*;
@@ -1590,10 +1596,49 @@ public class IJ {
 			else
 				return null;
 		} else {
-			DirectoryChooser dc = new DirectoryChooser(title);
-			String dir = dc.getDirectory();
-			if (dir==null) Macro.abort();
-			return dir;
+//			DirChooser dc = new DirChooser();
+//			try {
+//				dc.start(new Stage());
+//			} catch (Exception e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+			
+			
+			if (!getInstance().javaFXalreadyLaunched) {
+				new Thread(new Runnable() {
+					public void run() {
+						getInstance().javaFXalreadyLaunched = true;
+						Application.launch(DirChooser.class, OpenDialog.getDefaultDirectory());
+						
+					}
+				}).start();
+			}
+			else {
+
+				try {
+					Platform.runLater( new Runnable() {
+								public void run() {
+									try {
+										DirChooser.args = OpenDialog.getDefaultDirectory();
+										new DirChooser().start(DirChooser.staticPrimaryStage);
+									} catch (Exception e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+								}
+						}
+					);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}
+			while (!DirChooser.choiceMade) IJ.wait(100);
+			DirChooser.choiceMade = false;
+			String[] logLines = IJ.getLog().split("\n"); 
+			return (logLines[logLines.length - 1]);
 		}
 	}
 	
