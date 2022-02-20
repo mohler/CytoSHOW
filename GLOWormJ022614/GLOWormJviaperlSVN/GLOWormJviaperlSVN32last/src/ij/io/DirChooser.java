@@ -12,17 +12,6 @@ public class DirChooser extends Application {
 	public static String args;
 	public static boolean choiceMade;
 
-//	public static void startStart(String args) {
-//		try {
-//			DirChooser.args = args;
-//			start(staticPrimaryStage);
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//	}
-
-	
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		choiceMade = false;

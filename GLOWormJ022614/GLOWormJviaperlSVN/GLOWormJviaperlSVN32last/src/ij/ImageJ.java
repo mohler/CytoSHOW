@@ -16,11 +16,11 @@ import ij.plugin.filter.*;
 import ij.plugin.frame.*;
 import ij.text.*;
 import ij.macro.Interpreter;
-import ij.io.Opener;
 import ij.util.*;
 import ij3d.Image3DUniverse;
 import ij3d.ImageJ3DViewer;
 import ij3d.ImageWindow3D;
+import javafx.application.Application;
 
 import javax.jnlp.ServiceManager;
 import javax.jnlp.SingleInstanceListener;
@@ -196,6 +196,17 @@ public class ImageJ extends Frame implements ActionListener,
 	        use.printStackTrace();
 //	        System.exit(-1);
 	    }
+	    
+		if (!ImageJ.javaFXalreadyLaunched) {
+			Thread IJfxThread = new Thread(new Runnable() {
+				public void run() {
+					ImageJ.javaFXalreadyLaunched = true;
+					Application.launch(ij.IJfxLauncher.class, "launchHerUp!");					
+				}
+			});
+			IJfxThread.start();
+		}
+
 	    
 	    dnd = new DragAndDrop();
 
