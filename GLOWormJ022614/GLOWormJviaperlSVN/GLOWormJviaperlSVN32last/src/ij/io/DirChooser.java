@@ -18,7 +18,10 @@ public class DirChooser extends Application {
 		staticPrimaryStage = primaryStage;
         Platform.setImplicitExit(false);
 		javafx.stage.DirectoryChooser dc = new javafx.stage.DirectoryChooser();
+		
 		String directory = OpenDialog.getDefaultDirectory();
+		if (!new File(directory).canRead())
+			directory = "";
 		dc.setTitle("Select a Directory of TIFFs");
 		String defaultDir = this.args;
 		if (defaultDir == null)
@@ -27,7 +30,9 @@ public class DirChooser extends Application {
 			File f = new File(defaultDir);
 			if (IJ.debugMode)
 				IJ.log("DirectoryChooser,setSelectedFile: "+f);
-			dc.setInitialDirectory(f);
+			if (f.canRead())
+				dc.setInitialDirectory(f);
+			
 		}
 		File dir = dc.showDialog(primaryStage);
 		if (dir.canRead()) {
