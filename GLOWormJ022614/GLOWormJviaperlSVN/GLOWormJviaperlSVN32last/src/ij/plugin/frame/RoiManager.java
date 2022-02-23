@@ -7451,7 +7451,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		ZipInputStream in = null;
 		ByteArrayOutputStream out;
 		String str = "";
-
+		double endImportTime = IJ.getNumber("Import up until which timepoint?", 1000);
 		try {
 			in = new ZipInputStream(new FileInputStream(path));
 
@@ -7467,6 +7467,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				String name = entry.getName();
 				IJ.log(name);
 				if (name.endsWith("-nuclei")) {
+					if (name.contains("t"+(IJ.pad((int)(endImportTime + 1),3)+"-nuclei")))
+						break;
 					out = new ByteArrayOutputStream();
 					while ((len = in.read(buf)) > 0)
 						out.write(buf, 0, len);
