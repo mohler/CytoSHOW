@@ -2656,7 +2656,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //				c =0;
 			String numbersKey = c + "_" + z + "_" + t;
 			roisByRootName.get(nameRoot).remove(roi);
-			roisByNumbers.get(numbersKey).remove(roi);
+			if (roisByNumbers.get(numbersKey) != null) {
+				roisByNumbers.get(numbersKey).remove(roi);
+			} else if (roisByNumbers.get(numbersKey.replaceAll("\\d_(.*)", "0_$1")) != null) {
+				roisByNumbers.get(numbersKey.replaceAll("\\d_(.*)", "0_$1")).remove(roi);
+			}
 			rois.remove(name);
 			String label = name != null ? name : getLabel(imp, roi, -1);
 			if (roi instanceof TextRoi) {
