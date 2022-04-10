@@ -387,6 +387,7 @@ public class Slicer implements PlugIn, TextListener, ItemListener {
 		 boolean isStack = imp.getStackSize()>1;
 		 IJ.resetEscape();
 		 for (int i=0; i<outputSlices; i++)	{
+			 IJ.log(""+i);
 				if (virtualStack)
 					status = outputSlices>1?(i+1)+"/"+outputSlices+", ":"";
 				ImageProcessor ip = getSlice(imp, x1, y1, x2, y2, status);
@@ -398,6 +399,9 @@ public class Slicer implements PlugIn, TextListener, ItemListener {
 				}
 				stack2.setPixels(ip.getPixels(), i+1);
 				x1+=xInc; x2+=xInc; y1+=yInc; y2+=yInc;
+//				if (imp2!=null) imp2.flush();
+				imp2= new ImagePlus("Reslicing in progress...",stack2);
+				imp2.show();
 				if (IJ.escapePressed())
 					{IJ.beep(); imp.draw(); return null;}
 		 }
