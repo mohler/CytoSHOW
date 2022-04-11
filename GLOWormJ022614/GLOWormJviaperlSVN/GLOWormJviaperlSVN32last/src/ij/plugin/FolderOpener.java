@@ -16,7 +16,7 @@ public class FolderOpener implements PlugIn {
 
 	private static String[] excludedTypes = {".txt", ".lut", ".roi", ".pty", ".hdr", ".java", ".ijm", ".py", ".js", ".bsh", ".xml"};
 	private static boolean staticSortFileNames = true;
-	private static boolean staticOpenAsVirtualStack;
+	private static boolean staticOpenAsVirtualStack = true;
 	private boolean convertToRGB;
 	private boolean sortFileNames = true;
 	private boolean openAsVirtualStack;

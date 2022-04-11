@@ -6,6 +6,7 @@ import ij.measure.*;
 import ij.util.Tools;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
 import java.util.*;
 
 /** Implements the Image/Stacks/Reslice command. Known shortcomings: 
@@ -383,29 +384,36 @@ public class Slicer implements PlugIn, TextListener, ItemListener {
 		 boolean virtualStack = imp.getStack().isVirtual();
 		 String status = null;
 		 ImagePlus imp2 = null;
-		 ImageStack stack2 = null;
+//		 ImageStack stack2 = null;
 		 boolean isStack = imp.getStackSize()>1;
 		 IJ.resetEscape();
+		 File saveDir = new File(imp.getOriginalFileInfo().directory+File.separator+imp.getTitle()+"_resliced");
+		 saveDir.mkdirs();
 		 for (int i=0; i<outputSlices; i++)	{
 			 IJ.log(""+i);
-				if (virtualStack)
+				if (virtualStack) {
 					status = outputSlices>1?(i+1)+"/"+outputSlices+", ":"";
-				ImageProcessor ip = getSlice(imp, x1, y1, x2, y2, status);
-				//IJ.log(i+" "+x1+" "+y1+" "+x2+" "+y2+"   "+ip);
-				if (isStack) drawLine(x1, y1, x2, y2, imp);
-				if (stack2==null) {
-					stack2 = createOutputStack(imp, ip);
-					if (stack2==null || stack2.getSize()<outputSlices) return null; // out of memory
 				}
-				stack2.setPixels(ip.getPixels(), i+1);
+				if (!(new File(saveDir.getPath()+File.separator+ imp.getTitle()+"_resliced_"+i+".tif").canRead())) {
+					ImageProcessor ip = getSlice(imp, x1, y1, x2, y2, status);
+					//IJ.log(i+" "+x1+" "+y1+" "+x2+" "+y2+"   "+ip);
+					IJ.saveAsTiff(new ImagePlus(""+i,ip), saveDir.getPath()+File.separator+ imp.getTitle()+"_resliced_"+i+".tif");
+				}
+				if (isStack) drawLine(x1, y1, x2, y2, imp);
 				x1+=xInc; x2+=xInc; y1+=yInc; y2+=yInc;
-//				if (imp2!=null) imp2.flush();
-				imp2= new ImagePlus("Reslicing in progress...",stack2);
-				imp2.show();
+
 				if (IJ.escapePressed())
-					{IJ.beep(); imp.draw(); return null;}
+					{IJ.beep(); 
+					imp.draw(); 
+					FolderOpener fo = new FolderOpener();
+					fo.openAsVirtualStack(true);
+					imp2 = fo.openFolder(saveDir.getPath());
+					imp2.show();
+					IJ.resetEscape();
+//					return null;
+				}
 		 }
-		 return new ImagePlus("Reslice of "+imp.getShortTitle(), stack2);
+		 return FolderOpener.open(saveDir.getPath());
 	}
 
 	ImageStack createOutputStack(ImagePlus imp, ImageProcessor ip) {
