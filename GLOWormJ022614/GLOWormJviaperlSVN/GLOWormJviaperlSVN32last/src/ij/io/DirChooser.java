@@ -22,8 +22,9 @@ public class DirChooser extends Application {
 		String directory = OpenDialog.getDefaultDirectory();
 		if (!new File(directory).canRead())
 			directory = "";
-		dc.setTitle("Select a Directory of TIFFs");
-		String defaultDir = this.args;
+		String title = DirChooser.args.split(":")[0];
+		dc.setTitle(title);
+		String defaultDir = DirChooser.args.split(":")[2];
 		if (defaultDir == null)
 			defaultDir = getParameters().getRaw().get(0);
 		if (defaultDir!=null) {

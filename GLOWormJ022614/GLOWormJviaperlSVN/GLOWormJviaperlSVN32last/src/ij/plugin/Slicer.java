@@ -312,7 +312,7 @@ public class Slicer implements PlugIn, TextListener, ItemListener {
 		 gLength = line.getRawLength();
 	}
 
-	ImagePlus resliceRectOrLine(ImagePlus imp) {
+	public ImagePlus resliceRectOrLine(ImagePlus imp) {
 		 double x1 = 0.0;
 		 double y1 = 0.0;
 		 double x2 = 0.0;
@@ -387,7 +387,9 @@ public class Slicer implements PlugIn, TextListener, ItemListener {
 //		 ImageStack stack2 = null;
 		 boolean isStack = imp.getStackSize()>1;
 		 IJ.resetEscape();
-		 File saveDir = new File(imp.getOriginalFileInfo().directory+File.separator+imp.getTitle()+"_resliced");
+		 File saveDir = new File (IJ.getDirectory("home")+"Documents"+File.separator+imp.getTitle()+"_resliced");
+		 
+//		 File saveDir = new File(imp.getOriginalFileInfo().directory+File.separator+imp.getTitle()+"_resliced");
 		 saveDir.mkdirs();
 		 for (int i=0; i<outputSlices; i++)	{
 			 IJ.log(""+i);
@@ -396,6 +398,7 @@ public class Slicer implements PlugIn, TextListener, ItemListener {
 				}
 				if (!(new File(saveDir.getPath()+File.separator+ imp.getTitle()+"_resliced_"+i+".tif").canRead())) {
 					ImageProcessor ip = getSlice(imp, x1, y1, x2, y2, status);
+					ip = ip.resize((int)imp.getCalibration().pixelDepth, (int)imp.getCalibration().pixelHeight, true);
 					//IJ.log(i+" "+x1+" "+y1+" "+x2+" "+y2+"   "+ip);
 					IJ.saveAsTiff(new ImagePlus(""+i,ip), saveDir.getPath()+File.separator+ imp.getTitle()+"_resliced_"+i+".tif");
 				}

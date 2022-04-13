@@ -1609,7 +1609,7 @@ public class IJ {
 				new Thread(new Runnable() {
 					public void run() {
 						getInstance().javaFXalreadyLaunched = true;
-						Application.launch(DirChooser.class, OpenDialog.getDefaultDirectory());
+						Application.launch(DirChooser.class, title + "::" + OpenDialog.getDefaultDirectory());
 						
 					}
 				}).start();
@@ -1620,7 +1620,7 @@ public class IJ {
 					Platform.runLater( new Runnable() {
 								public void run() {
 									try {
-										DirChooser.args = OpenDialog.getDefaultDirectory();
+										DirChooser.args = title + "::" + OpenDialog.getDefaultDirectory();
 										new DirChooser().start(DirChooser.staticPrimaryStage);
 									} catch (Exception e) {
 										// TODO Auto-generated catch block

@@ -76,6 +76,7 @@ import ij.plugin.Orthogonal_Views;
 import ij.plugin.RGBStackMerge;
 import ij.plugin.RoiEnlarger;
 import ij.plugin.Selection;
+import ij.plugin.Slicer;
 import ij.plugin.StackReverser;
 import ij.plugin.Zoom;
 import ij.util.*;
@@ -1753,6 +1754,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 
 	private void sketchVolumeViewer(Object source) {
+		if (true) {
+			sketchVolumeSlicer(source);
+			return;
+		}
 		boolean singleSave = IJ.shiftKeyDown();
 		double scaleFactor = IJ.getNumber("Downscale for faster rendering?", 1.0d);
 		double zPadFactor = 3;
@@ -1941,6 +1946,188 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	}
 
+	private void sketchVolumeSlicer(Object source) {
+		boolean singleSave = IJ.shiftKeyDown();
+		double scaleFactor = 1.0;
+		double zPadFactor = 1;
+		IJ.setForegroundColor(255, 255, 255);
+		IJ.setBackgroundColor(0, 0, 0);
+		if (getSelectedRoisAsArray().length < 1)
+			return;
+		ArrayList<String> rootNames_rootFrames = new ArrayList<String>();
+		ArrayList<String> rootNames = new ArrayList<String>();
+		String roiColorString = Colors.colorToHexString(this.getSelectedRoisAsArray()[0].getFillColor());
+//		roiColorString = roiColorString.substring(3 /*roiColorString.length()-6*/);
+		String assignedColorString = roiColorString;
+
+		for (Roi selRoi : getSelectedRoisAsArray()) {
+			String rootName = selRoi.getName().contains("\"") ? selRoi.getName().split("\"")[1].trim() : "";
+			rootName = rootName.contains(" ") ? rootName.split("[_\\- ]")[0].trim() : rootName;
+			String[] rootChunks = selRoi.getName().split("_");
+			String rootFrame = rootChunks[rootChunks.length - 1].replaceAll("[CZT]", "").split("-")[0];
+			if (!rootNames_rootFrames.contains(rootName + "_" + rootFrame)) {
+				rootNames_rootFrames.add(rootName + "_" + rootFrame);
+				rootNames.add(rootName);
+			}
+		}
+
+		for (int n = 0; n < rootNames_rootFrames.size(); n++) {
+			ImagePlus sketchImp = null;
+
+			String rootName = rootNames.get(n);
+
+			select(-1);
+			IJ.wait(50);
+			ArrayList<Integer> nameMatchIndexArrayList = new ArrayList<Integer>();
+			Roi[] rois = getFullRoisAsArray();
+			int fraa = rois.length;
+			int minX = Integer.MAX_VALUE;
+			int minY = Integer.MAX_VALUE;
+			int minZ = Integer.MAX_VALUE;
+			int maxX = Integer.MIN_VALUE;
+			int maxY = Integer.MIN_VALUE;
+			int maxZ = Integer.MIN_VALUE;
+			for (int r = 0; r < fraa; r++) {
+				String nextName = rois[r].getName();
+				if (nextName.startsWith("\"" + rootName/* .split("_")[0] */)
+				/*
+				 * && rootName.endsWith(nextName.split("_")[nextName.split("_").length-1].
+				 * replaceAll("[CZT]", "").split("-")[0])
+				 */
+				) {
+					nameMatchIndexArrayList.add(r);
+					minX = minX > rois[r].getBounds().x ? rois[r].getBounds().x : minX;
+					minY = minY > rois[r].getBounds().y ? rois[r].getBounds().y : minY;
+					minZ = minZ > rois[r].getZPosition() - 1 ? rois[r].getZPosition() - 1 : minZ; // minZ = 0 for full
+																									// stack...
+					maxX = maxX < rois[r].getBounds().x + rois[r].getBounds().width
+							? rois[r].getBounds().x + rois[r].getBounds().width
+							: maxX;
+					maxY = maxY < rois[r].getBounds().y + rois[r].getBounds().height
+							? rois[r].getBounds().y + rois[r].getBounds().height
+							: maxY;
+					maxZ = maxZ < rois[r].getZPosition() ? rois[r].getZPosition() : maxZ;
+
+				}
+			}
+			IJ.log(rootName + " " + minX + " " + minY + " " + minZ + " " + maxX + " " + maxY + " " + maxZ);
+//			sketchImp = NewImage.createImage("SVV_"+rootNames_rootFrames.get(0),(int)(imp.getWidth()*scaleFactor), (int)(imp.getHeight()*scaleFactor), (int)(imp.getNSlices()*imp.getNFrames()*zPadFactor), 8, NewImage.FILL_BLACK, false);
+			sketchImp = NewImage.createImage("SVV_" + rootNames_rootFrames.get(0),
+					(int) ((maxX - minX) * scaleFactor) + 20, (int) ((maxY - minY) * scaleFactor) + 20,
+					(int) ((maxZ - minZ) * zPadFactor) + 2, 8, NewImage.FILL_BLACK, false);
+			sketchImp.setDimensions(1, (int) ((maxZ - minZ) * zPadFactor) + 2, imp.getNFrames());
+			sketchImp.setMotherImp(imp, imp.getID());
+			sketchImp.setCalibration(imp.getCalibration());
+			sketchImp.getCalibration().pixelWidth = imp.getCalibration().pixelWidth / scaleFactor;
+			sketchImp.getCalibration().pixelHeight = imp.getCalibration().pixelHeight / scaleFactor;
+			sketchImp.getCalibration().pixelDepth = imp.getCalibration().pixelDepth / zPadFactor;
+
+			sketchImp.setTitle("SVS_" + rootName);
+//			sketchImp.show();
+			sketchImp.getRoiManager().select(-1);
+			IJ.wait(50);
+			if (sketchImp.getRoiManager().getCount() > 0) {
+				sketchImp.getRoiManager().delete(false);
+			}
+			int[] nameMatchIndexes = new int[nameMatchIndexArrayList.size()];
+			Roi nextRoi = ((Roi) rois[0]);
+			for (int i = 0; i < nameMatchIndexes.length; i++) {
+				nameMatchIndexes[i] = nameMatchIndexArrayList.get(i);
+				nextRoi = ((Roi) rois[nameMatchIndexArrayList.get(i)]);
+				String[] nextChunks = nextRoi.getName().split("_");
+				int nextSlice = ((Integer.parseInt(nextChunks[nextChunks.length - 2]) - minZ) * (int) zPadFactor);
+				int nextFrame = Integer
+						.parseInt(nextChunks[nextChunks.length - 1].replaceAll("[CZT]", "").split("-")[0]);
+				nextRoi.setLocation(nextRoi.getBounds().x - minX + 10, nextRoi.getBounds().y - minY + 10);
+				Roi scaledRoi = null;
+				try {
+
+					if (!nextRoi.isArea()) {
+						ImageProcessor ip2 = new ByteProcessor(imp.getWidth(), imp.getHeight());
+						ip2.setColor(255);
+						if (nextRoi.getType() == Roi.LINE) {
+							if (!(nextRoi.getStrokeWidth() > 1)) {
+								nextRoi.setStrokeWidth(2d);
+							}
+							ip2.fillPolygon(nextRoi.getPolygon());
+						} else {
+							(nextRoi).drawPixels(ip2);
+						}
+						ip2.setThreshold(255, 255, ImageProcessor.NO_LUT_UPDATE);
+						ThresholdToSelection tts = new ThresholdToSelection();
+						Roi roi2 = tts.convert(ip2);
+						Selection.transferProperties(nextRoi, roi2);
+						nextRoi = roi2;
+
+					}
+
+					if (nextRoi instanceof TextRoi) {
+						scaledRoi = (Roi) nextRoi.clone();
+					} else {
+						scaledRoi = new RoiDecoder(scaleFactor, RoiEncoder.saveAsByteArray(nextRoi), nextRoi.getName())
+								.getRoi();
+					}
+					nextRoi.setLocation(nextRoi.getBounds().x + minX - 10, nextRoi.getBounds().y + minY - 10);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				for (int zp = 0; zp < (int) zPadFactor; zp++) {
+//					sketchImp.setPosition(1, nextSlice-zp, nextFrame);  ***
+					scaledRoi.setPosition(1, nextSlice - zp, nextFrame);
+					sketchImp.getRoiManager().addRoi(scaledRoi, false, scaledRoi.getFillColor(), -1, false);
+				}
+			}
+			sketchImp.getRoiManager().select(-1);
+			boolean filled = false;
+			filled = sketchImp.getRoiManager().drawOrFill(nextRoi instanceof TextRoi ? DRAW : FILL);
+
+			while (!filled) {
+				IJ.wait(100);
+			}
+			sketchImp.setMotherImp(imp, imp.getID());
+			sketchImp.getRoiManager().setSelectedIndexes(sketchImp.getRoiManager().getFullListIndexes());
+			roiColorString = Colors.colorToHexString(nextRoi.getFillColor());
+//			roiColorString = roiColorString.substring(3 /*roiColorString.length()-6*/);
+			assignedColorString = roiColorString;
+			(new StackReverser()).flipStack(sketchImp);
+			sketchImp.setMotherImp(imp, imp.getID());
+//			sketchImp.show();
+			String scaleShiftString = "" + 1.0 + "|" + 1.0 + "|" + 1.0 + "|"
+					+ (minX - 10) * sketchImp.getCalibration().pixelWidth * scaleFactor + "|"
+					+ (minY - 10) * sketchImp.getCalibration().pixelHeight * scaleFactor + "|"
+					/* maxZ b\c stackflip */ + (-maxZ - 1) * sketchImp.getCalibration().pixelDepth * zPadFactor;
+			Slicer.setStartAt("Left");
+			Slicer.setRotate(true);
+			ImagePlus resliceSketchImp = new Slicer().resliceRectOrLine(sketchImp);
+			resliceSketchImp.show();
+
+//			IJ.log("" + 1.0 + "|" + 1.0 + "|" + 1.0 + "|" + (minX - 10) * sketchImp.getCalibration().pixelWidth + "|"
+//					+ (minY - 10) * sketchImp.getCalibration().pixelHeight + "|"
+//					/* maxZ b\c stackflip */ + (-maxZ - 1) * sketchImp.getCalibration().pixelDepth * zPadFactor + "|"
+//					+ outDir + File.separator + "SVV_" + rootName + "_" + rootName + "_1_1_0000.obj" + "|" + outDir
+//					+ File.separator);
+			sketchImp.changes = false;
+			sketchImp.close();
+			sketchImp.flush();
+			sketchImp = null;
+//			ImageJ3DViewer.select(null);
+
+//			THIS GARBAGECOLLECTOR CALL IS ABSOLUTELY REQUIRED FOR BIG DATA!!!!
+			System.gc();
+		}
+//		Image3DUniverse univ = vv.getUniv();
+
+//		Hashtable<String, Content> contents = univ.getContentsHT();
+
+//		for (Object content : contents.values()) {
+//			((Content) content).setLocked(true);
+//			((Content) content).setVisible(true);
+//		}
+
+	}
+
+	
 	public void itemStateChanged(ItemEvent e) {
 		Object source = e.getSource();
 		if (source == addRoiSpanCCheckbox) {

@@ -2019,6 +2019,8 @@ public abstract class ImageProcessor implements Cloneable {
 	      image or selection down, negative values move it up.
 	*/
   	public void translate(double xOffset, double yOffset) {
+  		if (xOffset ==0 && yOffset ==0)
+  			return;
   		ImageProcessor ip2 = this.duplicate();
   		ip2.setBackgroundValue(0.0);
 		boolean integerOffsets = xOffset==(int)xOffset && yOffset==(int)yOffset;
