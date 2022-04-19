@@ -92,7 +92,7 @@ public class Slicer implements PlugIn, TextListener, ItemListener {
 		 Roi roi = imp.getRoi();
 		 int roiType = roi!=null?roi.getType():0;
 		 Calibration origCal = imp.getCalibration();
-		inputZSpacing = origCal.pixelDepth;
+		 inputZSpacing = origCal.pixelDepth;
 
 		 boolean globalCalibration = false;
 		 if (nointerpolate) {// temporarily clear spatial calibration
@@ -398,7 +398,7 @@ public class Slicer implements PlugIn, TextListener, ItemListener {
 				}
 				if (!(new File(saveDir.getPath()+File.separator+ imp.getTitle()+"_resliced_"+i+".tif").canRead())) {
 					ImageProcessor ip = getSlice(imp, x1, y1, x2, y2, status);
-					ip = ip.resize((int)imp.getCalibration().pixelDepth, (int)imp.getCalibration().pixelHeight, true);
+//					ip = ip.resize(ip.getWidth()*(int)imp.getCalibration().pixelDepth/(int)imp.getCalibration().pixelWidth, ip.getHeight(), true);
 					//IJ.log(i+" "+x1+" "+y1+" "+x2+" "+y2+"   "+ip);
 					IJ.saveAsTiff(new ImagePlus(""+i,ip), saveDir.getPath()+File.separator+ imp.getTitle()+"_resliced_"+i+".tif");
 				}

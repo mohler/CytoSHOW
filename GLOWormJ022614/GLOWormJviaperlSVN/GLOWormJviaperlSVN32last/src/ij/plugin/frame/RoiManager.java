@@ -2092,14 +2092,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			assignedColorString = roiColorString;
 			(new StackReverser()).flipStack(sketchImp);
 			sketchImp.setMotherImp(imp, imp.getID());
-//			sketchImp.show();
+			sketchImp.show();
 			String scaleShiftString = "" + 1.0 + "|" + 1.0 + "|" + 1.0 + "|"
 					+ (minX - 10) * sketchImp.getCalibration().pixelWidth * scaleFactor + "|"
 					+ (minY - 10) * sketchImp.getCalibration().pixelHeight * scaleFactor + "|"
 					/* maxZ b\c stackflip */ + (-maxZ - 1) * sketchImp.getCalibration().pixelDepth * zPadFactor;
 			Slicer.setStartAt("Left");
 			Slicer.setRotate(true);
-			ImagePlus resliceSketchImp = new Slicer().resliceRectOrLine(sketchImp);
+			IJ.run(sketchImp,"Select All","");
+			ImagePlus resliceSketchImp = new Slicer().reslice(sketchImp);
 			resliceSketchImp.show();
 
 //			IJ.log("" + 1.0 + "|" + 1.0 + "|" + 1.0 + "|" + (minX - 10) * sketchImp.getCalibration().pixelWidth + "|"
