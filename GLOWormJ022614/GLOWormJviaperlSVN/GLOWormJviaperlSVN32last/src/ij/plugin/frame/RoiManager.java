@@ -790,6 +790,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 				Roi[] selRois = getSelectedRoisAsArray();
 				int[] selIndexes = getSelectedIndexes();
+				if (selRois.length <1) 
+					return;
 				int selectedTime = selRois[0].getTPosition();
 				String selName = selRois[0].getName();
 				String newName = promptForName(selName.split(" ")[0].replace("\"", "").trim());
@@ -2022,8 +2024,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			sketchImp.getCalibration().pixelHeight = imp.getCalibration().pixelHeight / scaleFactor;
 			sketchImp.getCalibration().pixelDepth = imp.getCalibration().pixelDepth / zPadFactor;
 
-			sketchImp.setTitle("SVS_" + rootName);
-//			sketchImp.show();
+			sketchImp.setTitle("SVV_" + rootName);
+			sketchImp.show();
 			sketchImp.getRoiManager().select(-1);
 			IJ.wait(50);
 			if (sketchImp.getRoiManager().getCount() > 0) {
@@ -2092,22 +2094,41 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			assignedColorString = roiColorString;
 			(new StackReverser()).flipStack(sketchImp);
 			sketchImp.setMotherImp(imp, imp.getID());
-			sketchImp.show();
+
 			String scaleShiftString = "" + 1.0 + "|" + 1.0 + "|" + 1.0 + "|"
 					+ (minX - 10) * sketchImp.getCalibration().pixelWidth * scaleFactor + "|"
 					+ (minY - 10) * sketchImp.getCalibration().pixelHeight * scaleFactor + "|"
 					/* maxZ b\c stackflip */ + (-maxZ - 1) * sketchImp.getCalibration().pixelDepth * zPadFactor;
+			
+			sketchImp.setDimensions(1, (int) ((maxZ - minZ) * zPadFactor) + 2, imp.getNFrames());
+			
+			ImagePlus impBuildTagSet = NewImage.createImage("SVV_" + rootNames_rootFrames.get(0)+"_virtualResliceStackForROIs",
+					(int)(sketchImp.getNSlices()*sketchImp.getCalibration().pixelDepth/sketchImp.getCalibration().pixelWidth), sketchImp.getHeight(),
+					sketchImp.getWidth(), 8, NewImage.FILL_BLACK, true);
+			impBuildTagSet.show();
 			Slicer.setStartAt("Left");
 			Slicer.setRotate(true);
-			IJ.run(sketchImp,"Select All","");
-			ImagePlus resliceSketchImp = new Slicer().reslice(sketchImp);
-			resliceSketchImp.show();
+			int y1 = 0; 
+			int y2 = sketchImp.getHeight()-1;
+			for (int x=0; x<sketchImp.getWidth(); x++) {
+				sketchImp.setRoi(new Line(x,y1,x,y2));
+				Slicer sketchSlice = new Slicer();
+				sketchSlice.setOutputSlices(1);
+				ImagePlus resliceSketchImp = sketchSlice.reslice(sketchImp);
+//				resliceSketchImp.show();
+				IJ.setThreshold(resliceSketchImp,2,255);
+				ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.ADD_TO_MANAGER,0,null,10,Double.MAX_VALUE,0,1);
+				pa.analyze(resliceSketchImp);
+				for (Roi nextNewRoi:resliceSketchImp.getRoiManager().getFullRoisAsArray()) {
+					impBuildTagSet.setPosition(1, x, 1);
+					nextNewRoi.setName(rootName);
+					impBuildTagSet.getRoiManager().addRoi(nextNewRoi, false, ((Roi) rois[nameMatchIndexArrayList.get(0)]).getFillColor(), 1, true);
+					
+				}
+				resliceSketchImp.close();
+				resliceSketchImp.flush();
 
-//			IJ.log("" + 1.0 + "|" + 1.0 + "|" + 1.0 + "|" + (minX - 10) * sketchImp.getCalibration().pixelWidth + "|"
-//					+ (minY - 10) * sketchImp.getCalibration().pixelHeight + "|"
-//					/* maxZ b\c stackflip */ + (-maxZ - 1) * sketchImp.getCalibration().pixelDepth * zPadFactor + "|"
-//					+ outDir + File.separator + "SVV_" + rootName + "_" + rootName + "_1_1_0000.obj" + "|" + outDir
-//					+ File.separator);
+			}
 			sketchImp.changes = false;
 			sketchImp.close();
 			sketchImp.flush();

@@ -387,36 +387,41 @@ public class Slicer implements PlugIn, TextListener, ItemListener {
 //		 ImageStack stack2 = null;
 		 boolean isStack = imp.getStackSize()>1;
 		 IJ.resetEscape();
-		 File saveDir = new File (IJ.getDirectory("home")+"Documents"+File.separator+imp.getTitle()+"_resliced");
 		 
-//		 File saveDir = new File(imp.getOriginalFileInfo().directory+File.separator+imp.getTitle()+"_resliced");
-		 saveDir.mkdirs();
-		 for (int i=0; i<outputSlices; i++)	{
-			 IJ.log(""+i);
-				if (virtualStack) {
-					status = outputSlices>1?(i+1)+"/"+outputSlices+", ":"";
-				}
-				if (!(new File(saveDir.getPath()+File.separator+ imp.getTitle()+"_resliced_"+i+".tif").canRead())) {
-					ImageProcessor ip = getSlice(imp, x1, y1, x2, y2, status);
-//					ip = ip.resize(ip.getWidth()*(int)imp.getCalibration().pixelDepth/(int)imp.getCalibration().pixelWidth, ip.getHeight(), true);
-					//IJ.log(i+" "+x1+" "+y1+" "+x2+" "+y2+"   "+ip);
-					IJ.saveAsTiff(new ImagePlus(""+i,ip), saveDir.getPath()+File.separator+ imp.getTitle()+"_resliced_"+i+".tif");
-				}
-				if (isStack) drawLine(x1, y1, x2, y2, imp);
-				x1+=xInc; x2+=xInc; y1+=yInc; y2+=yInc;
+		 if (outputSlices > 1) {
+			 File saveDir = new File (IJ.getDirectory("home")+"Documents"+File.separator+imp.getTitle()+"_resliced");
 
-				if (IJ.escapePressed())
-					{IJ.beep(); 
-					imp.draw(); 
-					FolderOpener fo = new FolderOpener();
-					fo.openAsVirtualStack(true);
-					imp2 = fo.openFolder(saveDir.getPath());
-					imp2.show();
-					IJ.resetEscape();
-//					return null;
-				}
+			 //		 File saveDir = new File(imp.getOriginalFileInfo().directory+File.separator+imp.getTitle()+"_resliced");
+			 saveDir.mkdirs();
+			 for (int i=0; i<outputSlices; i++)	{
+				 IJ.log(""+i);
+				 if (virtualStack) {
+					 status = outputSlices>1?(i+1)+"/"+outputSlices+", ":"";
+				 }
+				 if (!(new File(saveDir.getPath()+File.separator+ imp.getTitle()+"_resliced_"+i+".tif").canRead())) {
+					 ImageProcessor ip = getSlice(imp, x1, y1, x2, y2, status);
+					 //					ip = ip.resize(ip.getWidth()*(int)imp.getCalibration().pixelDepth/(int)imp.getCalibration().pixelWidth, ip.getHeight(), true);
+					 //IJ.log(i+" "+x1+" "+y1+" "+x2+" "+y2+"   "+ip);
+					 IJ.saveAsTiff(new ImagePlus(""+i,ip), saveDir.getPath()+File.separator+ imp.getTitle()+"_resliced_"+i+".tif");
+				 }
+				 if (isStack) drawLine(x1, y1, x2, y2, imp);
+				 x1+=xInc; x2+=xInc; y1+=yInc; y2+=yInc;
+
+				 if (IJ.escapePressed())
+				 {IJ.beep(); 
+				 imp.draw(); 
+				 FolderOpener fo = new FolderOpener();
+				 fo.openAsVirtualStack(true);
+				 imp2 = fo.openFolder(saveDir.getPath());
+				 imp2.show();
+				 IJ.resetEscape();
+				 //					return null;
+				 }
+			 }
+			 return FolderOpener.open(saveDir.getPath());
+		 } else {
+			 return new ImagePlus(""+x,getSlice(imp, x1, y1, x2, y2, status));
 		 }
-		 return FolderOpener.open(saveDir.getPath());
 	}
 
 	ImageStack createOutputStack(ImagePlus imp, ImageProcessor ip) {
