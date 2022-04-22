@@ -2103,8 +2103,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			sketchImp.setDimensions(1, (int) ((maxZ - minZ) * zPadFactor) + 2, imp.getNFrames());
 			
 			ImagePlus impBuildTagSet = NewImage.createImage("SVV_" + rootNames_rootFrames.get(0)+"_virtualResliceStackForROIs",
-					(int)(sketchImp.getNSlices()*sketchImp.getCalibration().pixelDepth/sketchImp.getCalibration().pixelWidth), sketchImp.getHeight(),
-					sketchImp.getWidth(), 8, NewImage.FILL_BLACK, true);
+					(int)(imp.getNSlices()*sketchImp.getCalibration().pixelDepth/sketchImp.getCalibration().pixelWidth), imp.getHeight(),
+					imp.getWidth(), 8, NewImage.FILL_BLACK, true);
 			impBuildTagSet.show();
 			Slicer.setStartAt("Left");
 			Slicer.setRotate(true);
@@ -2115,13 +2115,16 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				Slicer sketchSlice = new Slicer();
 				sketchSlice.setOutputSlices(1);
 				ImagePlus resliceSketchImp = sketchSlice.reslice(sketchImp);
+				resliceSketchImp.getProcessor().flipHorizontal();
 //				resliceSketchImp.show();
 				IJ.setThreshold(resliceSketchImp,2,255);
 				ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.ADD_TO_MANAGER,0,null,10,Double.MAX_VALUE,0,1);
 				pa.analyze(resliceSketchImp);
 				for (Roi nextNewRoi:resliceSketchImp.getRoiManager().getFullRoisAsArray()) {
-					impBuildTagSet.setPosition(1, x, 1);
+					impBuildTagSet.setPosition(1, x + minX-(10+1), 1);
 					nextNewRoi.setName(rootName);
+					nextNewRoi.setLocation(nextNewRoi.getBounds().x+ minZ*sketchImp.getCalibration().pixelDepth/sketchImp.getCalibration().pixelWidth
+											, nextNewRoi.getBounds().y + minY - 10);
 					impBuildTagSet.getRoiManager().addRoi(nextNewRoi, false, ((Roi) rois[nameMatchIndexArrayList.get(0)]).getFillColor(), 1, true);
 					
 				}
