@@ -1973,6 +1973,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 		}
 
+		ImagePlus impBuildTagSet = NewImage.createImage("SVV_" + rootNames_rootFrames.get(0)+"_virtualResliceStackForROIs",
+				(int)(imp.getNSlices()*imp.getCalibration().pixelDepth/imp.getCalibration().pixelWidth), imp.getHeight(),
+				imp.getWidth(), 8, NewImage.FILL_BLACK, true);
+
 		for (int n = 0; n < rootNames_rootFrames.size(); n++) {
 			ImagePlus sketchImp = null;
 
@@ -2102,9 +2106,6 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			
 			sketchImp.setDimensions(1, (int) ((maxZ - minZ) * zPadFactor) + 2, imp.getNFrames());
 			
-			ImagePlus impBuildTagSet = NewImage.createImage("SVV_" + rootNames_rootFrames.get(0)+"_virtualResliceStackForROIs",
-					(int)(imp.getNSlices()*sketchImp.getCalibration().pixelDepth/sketchImp.getCalibration().pixelWidth), imp.getHeight(),
-					imp.getWidth(), 8, NewImage.FILL_BLACK, true);
 			impBuildTagSet.show();
 			Slicer.setStartAt("Left");
 			Slicer.setRotate(true);
