@@ -1977,6 +1977,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				(int)(imp.getNSlices()*imp.getCalibration().pixelDepth/imp.getCalibration().pixelWidth), imp.getHeight(),
 				imp.getWidth(), 8, NewImage.FILL_BLACK, true);
 
+		String roiSaveDir = IJ.getDirectory("Save ROIs here...")+File.separator+"RoisSingly"+File.separator;
+		new File(roiSaveDir).mkdirs();
+		ArrayList<String> namesAlreadySaved = new ArrayList<String>();
+		
 		for (int n = 0; n < rootNames_rootFrames.size(); n++) {
 			ImagePlus sketchImp = null;
 
@@ -2127,6 +2131,27 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					nextNewRoi.setLocation(nextNewRoi.getBounds().x+ minZ*sketchImp.getCalibration().pixelDepth/sketchImp.getCalibration().pixelWidth
 											, nextNewRoi.getBounds().y + minY - 10);
 					impBuildTagSet.getRoiManager().addRoi(nextNewRoi, false, ((Roi) rois[nameMatchIndexArrayList.get(0)]).getFillColor(), 1, true);
+					String nextNewRoiNameFromListModel = impBuildTagSet.getRoiManager().getListModel()
+															.get(impBuildTagSet.getRoiManager().getListModel().size()-1);
+					Roi nextNewRoiFromListModel = impBuildTagSet.getRoiManager().getROIs().get(nextNewRoiNameFromListModel);
+					String label = nextNewRoiNameFromListModel;
+					// Substituting updated color, Z, T, C info to saved name:
+					String labelNew = label.replaceAll("(\".* \"_)(.*)", "$1" + Colors.colorToHexString(nextNewRoiFromListModel.getFillColor())
+							+ "_" + nextNewRoiFromListModel.getCPosition() + "_" + nextNewRoiFromListModel.getZPosition() + "_" + nextNewRoiFromListModel.getTPosition());
+					if (!labelNew.endsWith(".roi"))
+						labelNew += ".roi";
+					int hitCount = 0;
+					while (namesAlreadySaved.contains(labelNew)) {
+						hitCount++;
+						labelNew = labelNew.replaceAll("(.*)(-[0-9]+)?(.roi)", "$1-" + hitCount + "$3");
+					}
+					namesAlreadySaved.add(labelNew);
+					RoiEncoder re = new RoiEncoder(roiSaveDir + labelNew);
+					try {
+						re.write(nextNewRoiFromListModel);
+					} catch (IOException e) {
+						IJ.error("Tag Manager", e.getMessage());
+					}
 					
 				}
 				resliceSketchImp.close();
