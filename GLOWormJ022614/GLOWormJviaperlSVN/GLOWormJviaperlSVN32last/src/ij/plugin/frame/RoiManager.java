@@ -1977,10 +1977,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				(int)(imp.getNSlices()*imp.getCalibration().pixelDepth/imp.getCalibration().pixelWidth), imp.getHeight(),
 				imp.getWidth(), 8, NewImage.FILL_BLACK, true);
 
-		String roiSaveDir = IJ.getDirectory("Save ROIs here...")+File.separator+"RoisSingly"+File.separator;
+		String roiSaveDir = IJ.getDirectory("Save ROIs here...")+File.separator+"RoisSingly";
 		new File(roiSaveDir).mkdirs();
 		ArrayList<String> namesAlreadySaved = new ArrayList<String>();
-		
+		ZipOutputStream zos = null;
+
 		for (int n = 0; n < rootNames_rootFrames.size(); n++) {
 			ImagePlus sketchImp = null;
 
@@ -2146,9 +2147,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						labelNew = labelNew.replaceAll("(.*)(-[0-9]+)?(.roi)", "$1-" + hitCount + "$3");
 					}
 					namesAlreadySaved.add(labelNew);
-					RoiEncoder re = new RoiEncoder(roiSaveDir + labelNew);
+//					RoiEncoder re = new RoiEncoder(roiSaveDir + labelNew);
 					try {
+						zos = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(new File(roiSaveDir))));
+						RoiEncoder re = new RoiEncoder(zos);
+						zos.putNextEntry(new ZipEntry(labelNew));
 						re.write(nextNewRoiFromListModel);
+						zos.closeEntry();
+						zos.close();
 					} catch (IOException e) {
 						IJ.error("Tag Manager", e.getMessage());
 					}
