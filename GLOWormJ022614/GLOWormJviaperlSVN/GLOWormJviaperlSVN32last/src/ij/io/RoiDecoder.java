@@ -192,6 +192,8 @@ public class RoiDecoder {
 		
 		if (name!=null && name.endsWith(".roi"))
 			name = name.substring(0, name.length()-4);
+//		if (!name.contains("\""))
+//			name = "\""+name.replace("_#", " \"_#");
 		int shapeRoiSize = getInt(SHAPE_ROI_SIZE);
 		boolean isComposite = shapeRoiSize>0;
 		

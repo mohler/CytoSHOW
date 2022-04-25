@@ -1977,11 +1977,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				(int)(imp.getNSlices()*imp.getCalibration().pixelDepth/imp.getCalibration().pixelWidth), imp.getHeight(),
 				imp.getWidth(), 8, NewImage.FILL_BLACK, true);
 
-		String roiSaveDir = IJ.getDirectory("Save ROIs here...")+File.separator+"RoisSingly";
+		String roiSaveDir = IJ.getDirectory("Save ROIs here...")+File.separator+"RoisSingly"+File.separator;
 		new File(roiSaveDir).mkdirs();
 		ArrayList<String> namesAlreadySaved = new ArrayList<String>();
-		ZipOutputStream zos = null;
-
+		
 		for (int n = 0; n < rootNames_rootFrames.size(); n++) {
 			ImagePlus sketchImp = null;
 
@@ -2138,7 +2137,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					String label = nextNewRoiNameFromListModel;
 					// Substituting updated color, Z, T, C info to saved name:
 					String labelNew = label.replaceAll("(\".* \"_)(.*)", "$1" + Colors.colorToHexString(nextNewRoiFromListModel.getFillColor())
-							+ "_" + nextNewRoiFromListModel.getCPosition() + "_" + nextNewRoiFromListModel.getZPosition() + "_" + nextNewRoiFromListModel.getTPosition());
+							+ "_" + nextNewRoiFromListModel.getCPosition() + "_" + nextNewRoiFromListModel.getZPosition() + "_" + nextNewRoiFromListModel.getTPosition())
+							.replace(" ", "").replace("\"", "");
 					if (!labelNew.endsWith(".roi"))
 						labelNew += ".roi";
 					int hitCount = 0;
@@ -2147,14 +2147,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						labelNew = labelNew.replaceAll("(.*)(-[0-9]+)?(.roi)", "$1-" + hitCount + "$3");
 					}
 					namesAlreadySaved.add(labelNew);
-//					RoiEncoder re = new RoiEncoder(roiSaveDir + labelNew);
+					RoiEncoder re = new RoiEncoder(roiSaveDir + labelNew);
 					try {
-						zos = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(new File(roiSaveDir))));
-						RoiEncoder re = new RoiEncoder(zos);
-						zos.putNextEntry(new ZipEntry(labelNew));
 						re.write(nextNewRoiFromListModel);
-						zos.closeEntry();
-						zos.close();
 					} catch (IOException e) {
 						IJ.error("Tag Manager", e.getMessage());
 					}
@@ -3589,6 +3584,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					byte[] bytes = out.toByteArray();
 					RoiDecoder rd = new RoiDecoder(roiRescaleFactor, bytes, name);
 					Roi roi = rd.getRoi();
+					String savedName = roi.getName();
+					if (savedName != "" && savedName != name){
+						name = savedName;
+					}
 					if (roi instanceof ShapeRoi) {
 //						IJ.wait(1);
 					}
@@ -3598,7 +3597,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					//
 
 					if (roi != null) {
-						name = name.substring(0, name.length() - 4);
+//						name = name.substring(0, name.length() - 4);
 
 						int c = roi.getCPosition();
 						int z = roi.getZPosition();
@@ -3637,6 +3636,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 						if (imp.getNSlices() == 1)
 							roi.setPosition(c, 1, t);
+						if (!name.contains(" \"_#"))
+							name = name.replace(" \"_", " \"_"+Colors.colorToHexString(roiColor)+"_");
 						name = name.replace("_" + oldZ + "_", "_" + z + "_");
 						name = getUniqueName(name);
 
