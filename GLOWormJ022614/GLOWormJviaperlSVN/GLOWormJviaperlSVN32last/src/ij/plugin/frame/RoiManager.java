@@ -1756,7 +1756,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 
 	private void sketchVolumeViewer(Object source) {
-		if (true) {
+		if (IJ.shiftKeyDown()) {
 			sketchVolumeSlicer(source);
 			return;
 		}
@@ -2136,9 +2136,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					Roi nextNewRoiFromListModel = impBuildTagSet.getRoiManager().getROIs().get(nextNewRoiNameFromListModel);
 					String label = nextNewRoiNameFromListModel;
 					// Substituting updated color, Z, T, C info to saved name:
+
+////NEEDed TO CHANGE THIS NEXT LINE TO TAKE ADVANTAGE OF GETUNIQUENAME HAVING BEEN CALLED ALREADY DURING .ADDROI 3 LINES AGO!!!!
+//					String labelNew = label.replaceAll("(\".* \"_)(.*)", "$1" + Colors.colorToHexString(nextNewRoiFromListModel.getFillColor())
+//							+ "_" + nextNewRoiFromListModel.getCPosition() + "_" + nextNewRoiFromListModel.getZPosition() + "_" + nextNewRoiFromListModel.getTPosition())
+//							.replace(" ", "").replace("\"", "");
 					String labelNew = label.replaceAll("(\".* \"_)(.*)", "$1" + Colors.colorToHexString(nextNewRoiFromListModel.getFillColor())
-							+ "_" + nextNewRoiFromListModel.getCPosition() + "_" + nextNewRoiFromListModel.getZPosition() + "_" + nextNewRoiFromListModel.getTPosition())
-							.replace(" ", "").replace("\"", "");
+					+ "_$2" )
+					.replace(" ", "").replace("\"", "");
+
 					if (!labelNew.endsWith(".roi"))
 						labelNew += ".roi";
 					int hitCount = 0;
