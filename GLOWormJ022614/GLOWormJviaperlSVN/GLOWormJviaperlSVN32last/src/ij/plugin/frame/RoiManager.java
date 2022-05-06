@@ -1033,7 +1033,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				busy = true;
 				imp.getWindow().sketchVVButton
 						.setIcon(new ImageIcon(ImageWindow.class.getResource("images/VV_55184.gif")));
-				sketchVolumeViewer(e.getSource());
+				if (shiftKeyDown) {
+					sketchVolumeSlicer(e.getSource());
+				} else {
+					sketchVolumeViewer(e.getSource());
+				}
 				busy = false;
 				imp.getWindow().sketchVVButton
 						.setIcon(new ImageIcon(ImageWindow.class.getResource("images/VV_57282.gif")));
@@ -1756,10 +1760,6 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 
 	private void sketchVolumeViewer(Object source) {
-		if (IJ.shiftKeyDown()) {
-			sketchVolumeSlicer(source);
-			return;
-		}
 		boolean singleSave = IJ.shiftKeyDown();
 		double scaleFactor = IJ.getNumber("Downscale for faster rendering?", 1.0d);
 		double zPadFactor = 3;
