@@ -3119,7 +3119,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			Recorder.record("roiManager", "Open", path);
 		if (path.endsWith(".zip")) {
 			if (!isRoiScaleFactorSet) {
-				roiRescaleFactor = IJ.getNumber("Rescale incoming tags to fit resized image?", roiRescaleFactor);
+				roiRescaleFactor = IJ.getNumber("Rescale incoming tags from "+new File(path).getName()+" to fit resized image?", roiRescaleFactor);
 			} else {
 				isRoiScaleFactorSet = false;
 			}
@@ -3874,14 +3874,17 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		try {
 			ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(new File(path))));
+			zos.setLevel(0);
 			RoiEncoder re = new RoiEncoder(zos);
 			ArrayList<String> namesAlreadySaved = new ArrayList<String>();
 			for (int i = 0; i < indexes.length; i++) {
 				String label = (String) listModel.getElementAt(indexes[i]);
 				Roi roi = (Roi) rois.get(label);
 				// Substituting updated color, Z, T, C info to saved name:
-				String labelNew = label.replaceAll("(\".* \"_)(.*)", "$1" + Colors.colorToHexString(roi.getFillColor())
+				String newColorString = Colors.colorToHexString(roi.getFillColor());
+				String labelNew = label.replaceAll("(\".* \"_)(.*)", "$1" + newColorString
 						+ "_" + roi.getCPosition() + "_" + roi.getZPosition() + "_" + roi.getTPosition());
+				roi.setName(labelNew);
 				if (!labelNew.endsWith(".roi"))
 					labelNew += ".roi";
 				int hitCount = 0;
@@ -6709,7 +6712,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		shiftZ = ((int) gd.getNextNumber());
 		shiftT = ((int) gd.getNextNumber());
 		shiftC = ((int) gd.getNextNumber());
-		for (Roi roi : getShownRoisAsArray()) {
+		for (Roi roi : getSelectedRoisAsArray()) {
 			String roiWasName = roi.getName();
 			roi.setLocation((int) (roi.getBounds().getX() + shiftX), (int) roi.getBounds().getY() + shiftY);
 //		for (Roi roi:getShownRoisAsArray())
@@ -7020,7 +7023,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		String[] objectLines = s.split("\n");
 		int fullCount = objectLines.length;
 
-		if ((path.contains("object") || path.contains("innerjoin")) && s.contains("OBJ_Name")) {
+		if ((path.contains("jsh_object") || path.contains("n2u_innerjoin")) 
+//				&& s.contains("OBJ_Name")
+				) {
 			int[] sliceNumbers = new int[fullCount];
 			for (int f = 0; f < fullCount; f++) {
 				if (objectLines[f].contains("N2UNR"))
@@ -7060,7 +7065,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			Hashtable<String, ArrayList<String>> synapseNameTallyHashtable = new Hashtable<String, ArrayList<String>>();
 
 			for (int obj = 1; obj < objectLines.length; obj++) {
-				String sObj = objectLines[obj];
+				String sObj = objectLines[obj].replace("[", "").replace("]", "");
 				String[] objChunks = sObj.replace(",,,",",NULL,NULL,").replace(",NULL,NULL,", ",\"NULL\",\"NULL\",").replace(",,",",NULL,").replace(",NULL,", ",\"NULL\",").split(",\"");
 				String objType = objChunks[6].replace("\"", "");
 				String imageNumber = objChunks[4].replace("\"", "");
@@ -7126,9 +7131,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					continue;
 				}
 				int adjustmentZ = 0;
-//				
-	zSustain =1;		//choice to eliminate stupid depth traces (highly inaccurate in several ways.	
-//				
+////				
+//	zSustain =1;		//choice to eliminate stupid depth traces (highly inaccurate in several ways.	
+////				
 				for (int susStep = 0; susStep < zSustain; susStep++) {
 					int plotZ = frontZ + susStep - adjustmentZ;
 					if (plotZ < 1 || plotZ > imp.getNSlices()) {
@@ -7185,7 +7190,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			for (int f = 0; f < fullCount; f++) {
 				if (objectLines[f].startsWith("Presynaptic"))
 					continue;
-				if (objectLines[f].contains("\"")) {
+				if (objectLines[f].contains("\"")) {  //this and below case true for mei lab synapses, polyadic and monadic respectively
 					sliceNumbers[f] = Integer.parseInt(objectLines[f].split("\"")[2].split(",")[4]);
 					pres[f] = objectLines[f].split(",")[0];
 					posts[f] = objectLines[f].split("\"")[1].split(",");

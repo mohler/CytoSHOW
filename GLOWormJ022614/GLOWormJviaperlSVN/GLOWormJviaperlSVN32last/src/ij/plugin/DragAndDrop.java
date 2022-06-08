@@ -206,6 +206,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 										|| tmp.toLowerCase().endsWith(".avi") 
 										|| tmp.toLowerCase().contains("scene.scn")
 										|| tmp.toLowerCase().endsWith(".obj")
+										|| tmp.toLowerCase().endsWith(".zip")
 										|| tmp.toLowerCase().endsWith(".tif"))){
 							if (IJ.debugMode) IJ.log(" stringinput");
 							droppedItemsArrayList.add(tmp);
@@ -2072,9 +2073,23 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						//							IJ.log(nDrops+" nDrops");
 						nDrops--;
 						return;
-					}
-					else
+					} else if (path.endsWith(".zip")||path.endsWith(".ZIP")) {
+						Frame[] frames = WindowManager.getImageWindows();
+						if (this.dtde.getDropTargetContext().getDropTarget().getComponent() instanceof ImageCanvas) {
+							for (Frame frame:frames){
+								if (frame instanceof ImageWindow){
+									if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow)frame).getCanvas()){
+										dropImp = ((ImageWindow)frame).getImagePlus();
+										setImp(dropImp);
+										dropImp.getRoiManager().open(path);
+									}
+								}
+							}
+						}
+
+					}else {
 						(new Opener()).openAndAddToRecent(path);
+					}
 					OpenDialog.setLastDirectory(f.getParent()+File.separator);
 					OpenDialog.setLastName(f.getName());
 				}
