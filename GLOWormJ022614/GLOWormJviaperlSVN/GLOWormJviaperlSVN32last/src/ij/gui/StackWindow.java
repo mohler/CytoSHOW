@@ -11,6 +11,7 @@ import java.awt.event.*;
 import java.util.ArrayList;
 
 import javax.swing.JComponent;
+import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.ToolTipManager;
 
@@ -20,7 +21,7 @@ import org.vcell.gloworm.MultiQTVirtualStack;
 /** This class is an extended ImageWindow used to display image stacks. */
 public class StackWindow extends ImageWindow implements Runnable, AdjustmentListener, ActionListener, MouseWheelListener {
 
-	protected Scrollbar sliceSelector; // for backward compatibity with Image5D
+	protected JScrollBar sliceSelector; // for backward compatibity with Image5D
 	public ScrollbarWithLabel cSelector, zSelector, tSelector;
 	public ArrayList<ScrollbarWithLabel> activeScrollBars = new ArrayList<ScrollbarWithLabel>();
 	protected Thread thread;
@@ -31,7 +32,7 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 	int nChannels=1, nSlices=1, nFrames=1;
 	int c=1, z=1, t=1;
 	boolean wormAtlas;
-	Panel scrollbarPanel;
+	JPanel scrollbarPanel;
 	
 
 	public StackWindow(ImagePlus imp, boolean showNow) {
@@ -43,7 +44,7 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 		addScrollbars(imp);
 		addMouseWheelListener(this);
 		if (sliceSelector==null && this.getClass().getName().indexOf("Image5D")!=-1) {
-			sliceSelector = new Scrollbar(); // prevents Image5D from crashing
+			sliceSelector = new JScrollBar(); // prevents Image5D from crashing
 		}
 		//IJ.log(nChannels+" "+nSlices+" "+nFrames);
 		pack();
@@ -102,7 +103,7 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 			removeScrollbars();
 		ImageJ ij = IJ.getInstance();
 
-		scrollbarPanel = new Panel();
+		scrollbarPanel = new JPanel();
 		GridBagLayout sbgridbag = new GridBagLayout();
 		GridBagConstraints sbgc = new GridBagConstraints();
 		scrollbarPanel.setLayout(sbgridbag);

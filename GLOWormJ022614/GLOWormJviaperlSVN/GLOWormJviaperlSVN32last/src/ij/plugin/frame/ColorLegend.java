@@ -246,8 +246,12 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 				}
 				IJ.log("All content color-adjusted per ColorLegend");
 			}else {
-				for (Roi roi:rm.getROIs().values()) {
+				int roiConvCount = 0;
+				int nRois = rm.getCount();
+				for (int r=0; r<nRois; r++) {
+					Roi roi = rm.getFullRoisAsArray()[r];
 					if (roi!=null) { 
+						roiConvCount++;
 						if (this != null) {
 							Color clColor = this.getBrainbowColors()
 									.get(roi.getName().toLowerCase().split("_")[0].split("=")[0].replace("\"", "").trim());
@@ -255,13 +259,32 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 								String hexRed = Integer.toHexString(clColor.getRed());
 								String hexGreen = Integer.toHexString(clColor.getGreen());
 								String hexBlue = Integer.toHexString(clColor.getBlue());
-								roi.setFillColor(Colors.decode("#ff"+(hexRed.length()==1?"0":"")+hexRed
+								String hexAlpha = Colors.colorToHexString(roi.getFillColor()).substring(0, 3);
+								roi.setFillColor(Colors.decode(hexAlpha+(hexRed.length()==1?"0":"")+hexRed
 										+(hexGreen.length()==1?"0":"")+hexGreen
 										+(hexBlue.length()==1?"0":"")+hexBlue
 										, Color.white));
 							}
 						}
 						roi.setImage(imp);
+						String label ="";
+						String roiWasName = roi.getName();
+						if (roi.getName() != null && roi.getName().split("\"").length > 1){
+							label = "\"" + roi.getName().split("\"")[1].trim() + " \"" + "_" +Colors.colorToHexString(roi.getFillColor()) + "_" + roi.getCPosition() + "_"
+									+ roi.getZPosition() + "_" + roi.getTPosition();
+						}else if (roi.getName() != null){
+							label = "\"" + roi.getName() + " \"" + "_" +Colors.colorToHexString(roi.getFillColor()) + "_" + roi.getCPosition() + "_" + roi.getZPosition() + "_"
+									+ roi.getTPosition();
+						}
+
+						rm.getListModel().set(rm.getListModel().indexOf(roiWasName), label);
+						rm.getFullListModel().set(rm.getFullListModel().indexOf(roiWasName), label);
+						roi.setName(label);
+						rm.getROIs().put(roi.getName(), roi);
+						rm.getROIs().remove(roiWasName);
+						
+						
+						IJ.showStatus(roiConvCount+"/"+nRois+" tags color-adjusted.");
 					}
 
 				}

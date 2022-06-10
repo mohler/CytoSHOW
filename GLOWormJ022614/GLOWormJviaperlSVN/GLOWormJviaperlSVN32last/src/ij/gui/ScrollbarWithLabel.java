@@ -26,8 +26,8 @@ import javax.swing.SwingUtilities;
 	 and play-pause icons (T) to the stack and hyperstacks dimension sliders.
  * @author Joachim Walter
  */
-public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListener, AdjustmentListener, Action {
-	Scrollbar bar; //DO NOT CHANGE TO JSCROLLBAR!  breaks animator...
+public class ScrollbarWithLabel extends JPanel implements Adjustable, MouseListener, AdjustmentListener, Action {
+	JScrollBar bar; //DO NOT CHANGE TO JSCROLLBAR!  breaks animator...
 	Icon icon;
 	Icon icon2;
 	StackWindow stackWindow;
@@ -47,7 +47,7 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 		addMouseListener(this);
 		this.stackWindow = stackWindow;
 		this.label = label;
-		bar = new Scrollbar(Scrollbar.HORIZONTAL, value, visible, minimum, maximum);
+		bar = new JScrollBar(JScrollBar.HORIZONTAL, value, visible, minimum, maximum);
 		bar.addMouseListener(this);
 		setBarCursor(label);
 		iconPanel = new IconButton(this);
@@ -392,16 +392,18 @@ public class ScrollbarWithLabel extends Panel implements Adjustable, MouseListen
 	}
 
 	public void actionPerformed(ActionEvent e) {
+		
 		if (getType()!='t' && getType()!='z' && getType()!='c' || !iconEnabled) return;
 		int flags = e.getModifiers();
+		e = null;
 		if ((flags&(Event.ALT_MASK|Event.META_MASK|Event.CTRL_MASK))!=0){
 			if (getType() =='t' || getType() =='z') IJ.doCommand("Animation Options...");
 			else if (getType() =='c') IJ.run("Channels Tool...");
 		}
 		else if (getType() =='t' )
 			IJ.doCommand("Start Animation [\\]");
-		else if (getType() == 'z' && stackWindow.getAnimationSelector().getType() == 'z')
-			IJ.doCommand("Start Animation [\\]");
+//		else if (getType() == 'z' && stackWindow.getAnimationSelector().getType() == 'z')
+//			IJ.doCommand("Start Animation [\\]");
 		else if (getType() =='z' )
 			IJ.doCommand("Start Z Animation");
 		else if (getType() =='c' ){

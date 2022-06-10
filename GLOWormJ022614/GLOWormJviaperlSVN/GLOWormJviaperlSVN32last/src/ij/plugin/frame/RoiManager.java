@@ -2445,8 +2445,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					String hexRed = Integer.toHexString(clColor.getRed());
 					String hexGreen = Integer.toHexString(clColor.getGreen());
 					String hexBlue = Integer.toHexString(clColor.getBlue());
+					String hexAlpha = Colors.colorToHexString(roiCopy.getFillColor()).substring(0, 3);
 					this.setRoiFillColor(roiCopy,
-							Colors.decode("#ff" + (hexRed.length() == 1 ? "0" : "") + hexRed
+							Colors.decode(hexAlpha + (hexRed.length() == 1 ? "0" : "") + hexRed
 									+ (hexGreen.length() == 1 ? "0" : "") + hexGreen
 									+ (hexBlue.length() == 1 ? "0" : "") + hexBlue, Color.white));
 				}
@@ -2950,8 +2951,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						String hexRed = Integer.toHexString(clColor.getRed());
 						String hexGreen = Integer.toHexString(clColor.getGreen());
 						String hexBlue = Integer.toHexString(clColor.getBlue());
+						String hexAlpha = Colors.colorToHexString(roi.getFillColor()).substring(0, 3);
 						this.setRoiFillColor(roi,
-								Colors.decode("#ff" + (hexRed.length() == 1 ? "0" : "") + hexRed
+								Colors.decode(hexAlpha + (hexRed.length() == 1 ? "0" : "") + hexRed
 										+ (hexGreen.length() == 1 ? "0" : "") + hexGreen
 										+ (hexBlue.length() == 1 ? "0" : "") + hexBlue, Color.white));
 					}
@@ -3645,7 +3647,6 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						if (!name.contains(" \"_#"))
 							name = name.replace(" \"_", " \"_"+Colors.colorToHexString(roiColor)+"_");
 						name = name.replace("_" + oldZ + "_", "_" + z + "_");
-						name = getUniqueName(name);
 
 						if (cl != null) {
 							Color clColor = cl.getBrainbowColors().get(
@@ -3654,8 +3655,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								String hexRed = Integer.toHexString(clColor.getRed());
 								String hexGreen = Integer.toHexString(clColor.getGreen());
 								String hexBlue = Integer.toHexString(clColor.getBlue());
+								String hexAlpha = Colors.colorToHexString(roiColor).substring(0, 3);
 								this.setRoiFillColor(roi,
-										Colors.decode("#ff" + (hexRed.length() == 1 ? "0" : "") + hexRed
+										Colors.decode(hexAlpha + (hexRed.length() == 1 ? "0" : "") + hexRed
 												+ (hexGreen.length() == 1 ? "0" : "") + hexGreen
 												+ (hexBlue.length() == 1 ? "0" : "") + hexBlue, Color.white));
 								roiColor = roi.getFillColor();
@@ -3675,6 +3677,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 									+ "_" + name.split("_")[2] + "_" + name.split("_")[3];
 
 						}
+						name = getUniqueName(name);
+						
 						listModel.addElement(name);
 						fullListModel.addElement(name);
 						rois.put(name, roi);
@@ -3896,8 +3900,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				zos.putNextEntry(new ZipEntry(labelNew));
 				re.write(roi);
 				zos.closeEntry();
+				IJ.showStatus(""+i+ " tags written to .zip file");
 			}
 			zos.close();
+			IJ.showStatus("Zip file complete.");
+
 		} catch (IOException e) {
 			error("" + e);
 			return false;
@@ -6750,6 +6757,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					label = "\"" + roi.getName() + " \"" + "_" +Colors.colorToHexString(roi.getFillColor()) + "_" + roi.getCPosition() + "_" + roi.getZPosition() + "_"
 							+ roi.getTPosition();
 				}
+				
 				label = getUniqueName(label);
 				listModel.set(listModel.indexOf(roiWasName), label);
 				fullListModel.set(fullListModel.indexOf(roiWasName), label);

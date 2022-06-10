@@ -1320,7 +1320,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 					TextRoi fakeTR = new TextRoi(0,0,imp.getRoiManager().getSelectedRoisAsArray()[0]
 							.getName().split("[\"|=]")[1].trim());
-					fakeTR.searchWormbase();
+//					fakeTR.searchWormbase();
+					
 					//				IJ.setKeyUp(KeyEvent.VK_ALT);
 					//				IJ.setKeyUp(KeyEvent.VK_SHIFT);
 
@@ -3581,7 +3582,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 					TextRoi fakeTR = new TextRoi(0,0,imp.getRoiManager().getSelectedRoisAsArray()[0]
 							.getName().split("[\"|=]")[1].trim());
-					fakeTR.searchWormbase();
+//					fakeTR.searchWormbase();
+					
 					//				IJ.setKeyUp(KeyEvent.VK_ALT);
 					//				IJ.setKeyUp(KeyEvent.VK_SHIFT);
 
