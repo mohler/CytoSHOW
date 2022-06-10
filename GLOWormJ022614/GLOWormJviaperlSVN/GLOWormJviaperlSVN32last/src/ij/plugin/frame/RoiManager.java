@@ -4342,6 +4342,26 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			if (roi != null && (roi instanceof ImageRoi) && opacity != -1)
 				((ImageRoi) roi).setOpacity(opacity);
+			
+			String newLabel ="";
+			String roiWasName = roi.getName();
+			if (roi.getName() != null && roi.getName().split("\"").length > 1){
+				newLabel = "\"" + roi.getName().split("\"")[1].trim() + " \"" + "_" +Colors.colorToHexString(roi.getFillColor()) + "_" + roi.getCPosition() + "_"
+						+ roi.getZPosition() + "_" + roi.getTPosition();
+			}else if (roi.getName() != null){
+				newLabel = "\"" + roi.getName() + " \"" + "_" +Colors.colorToHexString(roi.getFillColor()) + "_" + roi.getCPosition() + "_" + roi.getZPosition() + "_"
+						+ roi.getTPosition();
+			}
+
+			newLabel = getUniqueName(newLabel);
+			getListModel().set(getListModel().indexOf(roiWasName), newLabel);
+			getFullListModel().set(getFullListModel().indexOf(roiWasName), newLabel);
+			roi.setName(newLabel);
+			getROIs().put(roi.getName(), roi);
+			getROIs().remove(roiWasName);
+
+			
+			IJ.showStatus(""+i+"/"+n+" tags modified.");
 		}
 //		String[] newNames = new String[indexes.length];
 //		for(int nn=0;nn<newNames.length;nn++) {

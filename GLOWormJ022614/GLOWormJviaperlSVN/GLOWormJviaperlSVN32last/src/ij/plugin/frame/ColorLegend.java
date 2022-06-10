@@ -277,6 +277,8 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 									+ roi.getTPosition();
 						}
 
+						label = rm.getUniqueName(label);
+
 						rm.getListModel().set(rm.getListModel().indexOf(roiWasName), label);
 						rm.getFullListModel().set(rm.getFullListModel().indexOf(roiWasName), label);
 						roi.setName(label);

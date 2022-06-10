@@ -198,7 +198,7 @@ tools_09="Remove Slice Labels",ij.plugin.SimpleCommands("remove")
 tools_10=-
 tools_11="Start Animation [\\]",ij.plugin.Animator("start")
 tools_12="Start Z Animation",ij.plugin.Animator("startZ")
-tools_13="Stop Animation",ij.plugin.Animator("stop")
+tools_13="Stop Animation",ij.plugin.Animator("")
 tools_14="Animation Options...",ij.plugin.Animator("options")
 
 # Plugins installed in the Image/Hyperstacks submenu
