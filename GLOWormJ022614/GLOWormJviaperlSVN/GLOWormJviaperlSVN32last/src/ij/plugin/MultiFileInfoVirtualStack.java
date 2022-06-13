@@ -1415,7 +1415,7 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 				t=t-1;
 			}
 			//	IJ.log(""+n+" "+z+" "+t);
-			return fivStacks.get(0).infoArray[0].fileName + " slice "+ sliceNumber;
+			return fivStacks.get(t).infoArray[0].fileName + " slice "+ sliceNumber;
 		}
 		else
 			return infoArray[0].sliceLabels[n-1];

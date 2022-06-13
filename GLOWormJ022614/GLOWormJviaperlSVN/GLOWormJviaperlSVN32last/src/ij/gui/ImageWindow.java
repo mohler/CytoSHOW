@@ -69,6 +69,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import org.vcell.gloworm.MultiChannelController;
@@ -151,8 +152,17 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 	public JButton logButton;
 	public JButton advancedButton;
 	protected DragAndDrop dnd;
+	protected JTextField subTitleField;
 
 	
+	public JTextField getSubTitleField() {
+		return subTitleField;
+	}
+
+	public void setSubTitleField(JTextField subTitleField) {
+		this.subTitleField = subTitleField;
+	}
+
 	public ImageWindow(String title) {
 		super(title);
 	}
@@ -289,8 +299,10 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 
 	public void addToolBarPanel() {
 		overheadPanel = new JPanel();
-		overheadPanel.setLayout(new GridLayout(1, 1));
-		
+		overheadPanel.setLayout(new GridLayout(2,1));
+		subTitleField = new JTextField(this.createSubtitle());
+		subTitleField.setEnabled(false);
+		overheadPanel.add(subTitleField);
 		toolbar = new Toolbar();
 		Toolbar.setInstance(toolbar);
 		toolbar.installBuiltinTool("LUT Menu");

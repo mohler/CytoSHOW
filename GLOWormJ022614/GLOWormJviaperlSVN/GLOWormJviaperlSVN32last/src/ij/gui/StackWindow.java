@@ -85,7 +85,7 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 		wormAtlas = ( (s instanceof MultiQTVirtualStack && ((MultiQTVirtualStack) imp.getMotherImp().getStack()).getVirtualStack(0) != null) && ((MultiQTVirtualStack)s).getVirtualStack(0).getMovieName().startsWith("SW"));
 		int stackSize = s.getSize();
 		nSlices = stackSize;
-		hyperStack = imp.getOpenAsHyperStack();
+		hyperStack = true;  //imp.getOpenAsHyperStack();
 		//imp.setOpenAsHyperStack(false);
 		int[] dim = imp.getDimensions();
 		int nDimensions = 2+(dim[2]>1?1:0)+(dim[3]>1?1:0)+(dim[4]>1?1:0);
@@ -504,7 +504,7 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 				MultiFileInfoVirtualStack mfivs = ((MultiFileInfoVirtualStack)this.getImagePlus().getStack());
 				channelLabel = " ["+ mfivs.getVirtualStack(mfivs.stackNumber) + "]";
 			}
-			s += "c:"+imp.getChannel()+"/"+channels + channelLabel ;
+			s += "c:"+imp.getChannel()+"/"+channels;   // + channelLabel ;
 			if (slices>1||frames>1) s += " ";
 		}
 		if (slices>1) {
@@ -566,6 +566,7 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 				imp.setSlice(s);
 		}
 		t = trueFrame;
+		subTitleField.setText(createSubtitle());
 		imp.updatePosition(c, z, t);
     }
     

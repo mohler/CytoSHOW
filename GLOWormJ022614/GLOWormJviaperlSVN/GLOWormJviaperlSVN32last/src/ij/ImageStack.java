@@ -16,7 +16,7 @@ public class ImageStack {
 	private int type = UNKNOWN;
 	public int nSlices = 0;
 	private Object[] stack;
-	private String[] label;
+	protected String[] label;
 	protected int width;
 	protected int height;
 	protected double skewXperZ = 0f;

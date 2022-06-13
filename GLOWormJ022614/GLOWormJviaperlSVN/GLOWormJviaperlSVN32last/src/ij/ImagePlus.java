@@ -2616,6 +2616,8 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 
 	public void updatePosition(int c, int z, int t) {
 		//IJ.log("updatePosition: "+c+", "+z+", "+t);
+    	if (win!=null)
+    		((StackWindow)win).getSubTitleField().setText(win.createSubtitle());
 		position[0] = c;
 		position[1] = z;
 		position[2] = t;
