@@ -55,17 +55,17 @@ public class VirtualStack extends ImageStack {
 	public void addSlice(String name) {
 		if (name==null) 
 			throw new IllegalArgumentException("'name' is null!");
-		nSlices++;
+		nImageSlices++;
 	   //IJ.log("addSlice: "+nSlices+"	"+name);
-	   if (nSlices==names.length) {
-			String[] tmp = new String[nSlices*2];
-			System.arraycopy(names, 0, tmp, 0, nSlices);
+	   if (nImageSlices==names.length) {
+			String[] tmp = new String[nImageSlices*2];
+			System.arraycopy(names, 0, tmp, 0, nImageSlices);
 			names = tmp;
-			tmp = new String[nSlices*2];
-			System.arraycopy(labels, 0, tmp, 0, nSlices);
+			tmp = new String[nImageSlices*2];
+			System.arraycopy(labels, 0, tmp, 0, nImageSlices);
 			labels = tmp;
 		}
-		names[nSlices-1] = name;
+		names[nImageSlices-1] = name;
 	}
 
    /** Does nothing. */
@@ -82,20 +82,20 @@ public class VirtualStack extends ImageStack {
 
 	/** Deletes the specified slice, were 1<=n<=nslices. */
 	public void deleteSlice(int n) {
-		if (n<1 || n>nSlices)
+		if (n<1 || n>nImageSlices)
 			throw new IllegalArgumentException("Argument out of range: "+n);
-			if (nSlices<1)
+			if (nImageSlices<1)
 				return;
-			for (int i=n; i<nSlices; i++)
+			for (int i=n; i<nImageSlices; i++)
 				names[i-1] = names[i];
-			names[nSlices-1] = null;
-			nSlices--;
+			names[nImageSlices-1] = null;
+			nImageSlices--;
 		}
 	
 	/** Deletes the last slice in the stack. */
 	public void deleteLastSlice() {
-		if (nSlices>0)
-			deleteSlice(nSlices);
+		if (nImageSlices>0)
+			deleteSlice(nImageSlices);
 	}
 	   
    /** Returns the pixel array for the specified slice, were 1<=n<=nslices. */
@@ -190,7 +190,7 @@ public class VirtualStack extends ImageStack {
 
 	 /** Returns the number of slices in this stack. */
 	public int getSize() {
-		return nSlices;
+		return nImageSlices;
 	}
 
 	/** Returns the label of the Nth image. */

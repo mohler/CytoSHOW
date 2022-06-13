@@ -536,7 +536,7 @@ array and displays it if 'show' is true. */
 			IJ.log(infoArray[0].debugInfo);
 		fivStacks.add(new FileInfoVirtualStack());
 		fivStacks.get(fivStacks.size()-1).infoArray = fi;
-		nSlices = fivStacks.size() * fivStacks.get(0).nSlices*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1);
+		nImageSlices = fivStacks.size() * fivStacks.get(0).nImageSlices*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1);
 	}
 
 	public void run(String arg) {
@@ -546,9 +546,9 @@ array and displays it if 'show' is true. */
 	public ImagePlus open(boolean show) {
 		String[] splitPath = cumulativeTiffFileArray[0].split(Pattern.quote(File.separator));
 		if (splitPath[splitPath.length-1].contains("MMStack_") && (cumulativeTiffFileArray.length >0)) { 
-			nSlices = 0;
+			nImageSlices = 0;
 			for (FileInfoVirtualStack mmStack:fivStacks) {
-				nSlices = nSlices + mmStack.getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1)
+				nImageSlices = nImageSlices + mmStack.getSize()*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1)
 						*(dimOrder.toLowerCase().matches(".*splitratioc.*")?2:1);
 			}
 
@@ -556,47 +556,47 @@ array and displays it if 'show' is true. */
 				GenericDialog gd = new GenericDialog("Dimensions of HyperStacks");
 				gd.addNumericField("Channels (c):", 2, 0);
 				gd.addNumericField("Slices (z):", 50, 0);
-				gd.addNumericField("Frames (t):", nSlices/(50*2*2), 0);
+				gd.addNumericField("Frames (t):", nImageSlices/(50*2*2), 0);
 				gd.showDialog();
 				if (gd.wasCanceled()) return null;
 				cDim = (int) gd.getNextNumber();
 				zDim = (int) gd.getNextNumber();
 				tDim = (int) gd.getNextNumber();
-				nSlices = cDim*zDim*tDim;
+				nImageSlices = cDim*zDim*tDim;
 			} else {
 				/*why like this?*/
-				this.tDim =nSlices/(this.cDim*this.zDim*vDim*(dimOrder.toLowerCase().matches(".*splitc.*")?(cDim/2):1));
+				this.tDim =nImageSlices/(this.cDim*this.zDim*vDim*(dimOrder.toLowerCase().matches(".*splitc.*")?(cDim/2):1));
 			}
 
 		} else if (monitoringDecon){
-			zDim = fivStacks.get(0).nSlices;
-			nSlices = fivStacks.size() * zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1);
+			zDim = fivStacks.get(0).nImageSlices;
+			nImageSlices = fivStacks.size() * zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1);
 
 			int internalChannels = ((new FileOpener(fivStacks.get(0).infoArray[0])).decodeDescriptionString(fivStacks.get(0).infoArray[0]) != null
 					?(fivStacks.get(0).getInt((new FileOpener(fivStacks.get(0).infoArray[0])).decodeDescriptionString(fivStacks.get(0).infoArray[0]), "channels"))
 							:1);	
 			int channels = channelDirectories * internalChannels;
 			cDim = channels;
-			zDim = fivStacks.get(0).nSlices/(cDim/channelDirectories);
+			zDim = fivStacks.get(0).nImageSlices/(cDim/channelDirectories);
 			//	tDim = fivStacks.size()/cDim;
-			this.tDim =nSlices/(this.cDim*this.zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
+			this.tDim =nImageSlices/(this.cDim*this.zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
 		} else if (fivStacks.get(0).getInfo()[0].fileName.matches(".*Decon(-Fuse|_reg)_.*aaa_.*")){
-			zDim = fivStacks.get(0).nSlices;
+			zDim = fivStacks.get(0).nImageSlices;
 			cDim = 2;
 			tDim = fivStacks.size();
-			nSlices = cDim*zDim*tDim;
+			nImageSlices = cDim*zDim*tDim;
 		} else {
-			zDim = fivStacks.get(0).nSlices;
-			nSlices = /*channelDirectories**/ fivStacks.size() * zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1);
+			zDim = fivStacks.get(0).nImageSlices;
+			nImageSlices = /*channelDirectories**/ fivStacks.size() * zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1);
 
 			int internalChannels = ((new FileOpener(fivStacks.get(0).infoArray[0])).decodeDescriptionString(fivStacks.get(0).infoArray[0]) != null
 					?(fivStacks.get(0).getInt((new FileOpener(fivStacks.get(0).infoArray[0])).decodeDescriptionString(fivStacks.get(0).infoArray[0]), "channels"))
 							:1);	
 			int channels = channelDirectories * internalChannels;
 			cDim = channels;
-			zDim = fivStacks.get(0).nSlices/(cDim/channelDirectories);
+			zDim = fivStacks.get(0).nImageSlices/(cDim/channelDirectories);
 			//	tDim = fivStacks.size()/(cDim/internalChannels);
-			this.tDim =nSlices/(this.cDim*this.zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
+			this.tDim =nImageSlices/(this.cDim*this.zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
 
 		}
 
@@ -749,7 +749,7 @@ array and displays it if 'show' is true. */
 	/** Deletes the specified image, where 1<=n<=nSlices. */
 	public void deleteSlice(int n) {
 
-		if (n<1 || n>nSlices) {
+		if (n<1 || n>nImageSlices) {
 			throw new IllegalArgumentException(outOfRange+n);
 		}
 		int stackNumber = 0;
@@ -777,7 +777,7 @@ array and displays it if 'show' is true. */
 			fivStacks.get(stackNumber).deleteSlice(fivStacks.get(stackNumber).getSize());
 		}
 
-		nSlices--;
+		nImageSlices--;
 	}
 
 	/** Returns an ImageProcessor for the specified image,
@@ -785,7 +785,7 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 	 */
 	public ImageProcessor getProcessor(int slice) {
 		int n =slice;
-		if (n<1 || n>nSlices) {
+		if (n<1 || n>nImageSlices) {
 			//	IJ.runMacro("waitForUser(\""+n+"\");");
 			return fivStacks.get(0).getProcessor(1);
 			//	throw new IllegalArgumentException("Argument out of range: "+n);
@@ -1395,27 +1395,27 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 
 	/** Returns the number of images in this stack. */
 	public int getSize() {
-		return nSlices/vDim;
+		return nImageSlices/vDim;
 	}
 
 	/** Returns the label of the Nth image. */
 	public String getSliceLabel(int n) {
-		if (n<1 || n>nSlices)
+		if (n<1 || n>nImageSlices)
 			throw new IllegalArgumentException("Argument out of range: "+n);
-		if (infoArray==null || infoArray[0].sliceLabels==null || infoArray[0].sliceLabels.length!=nSlices) {
-			if (n<1 || n>nSlices) {
+		if (infoArray==null || infoArray[0].sliceLabels==null || infoArray[0].sliceLabels.length!=nImageSlices) {
+			if (n<1 || n>nImageSlices) {
 				//	IJ.runMacro("waitForUser(\""+n+"\");");
 				return fivStacks.get(0).infoArray[0].fileName;
 				//	throw new IllegalArgumentException("Argument out of range: "+n);
 			}
-			int z = n % fivStacks.get(0).nSlices;
-			int t = (int) Math.floor(n/fivStacks.get(0).nSlices);
+			int z = n % fivStacks.get(0).nImageSlices;
+			int t = (int) Math.floor(n/fivStacks.get(0).nImageSlices);
 			if (z==0) {
-				z = fivStacks.get(0).nSlices;
+				z = fivStacks.get(0).nImageSlices;
 				t=t-1;
 			}
 			//	IJ.log(""+n+" "+z+" "+t);
-			return fivStacks.get(t).infoArray[0].fileName + " slice "+ sliceNumber;
+			return new File(fivStacks.get(t).infoArray[0].fileName).getName() + ":s"+ sliceNumber/(dimOrder.toLowerCase().equals("xysplitczt")?2:1);
 		}
 		else
 			return infoArray[0].sliceLabels[n-1];
@@ -1436,11 +1436,11 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 
 	public void setDimOrder(String dimOrder) {
 		if (this.dimOrder.contains("Split") && !dimOrder.contains("Split")){
-			nSlices=nSlices/2;
+			nImageSlices=nImageSlices/2;
 			cDim=cDim/2;
 		}
 		if (!this.dimOrder.contains("Split") && dimOrder.contains("Split")){
-			nSlices=nSlices*2;
+			nImageSlices=nImageSlices*2;
 			cDim=cDim*2;
 		}
 		this.dimOrder = dimOrder;

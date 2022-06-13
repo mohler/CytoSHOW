@@ -660,7 +660,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			boolean soloStackUser = true;
 			if (WindowManager.getIDList()!=null) {
 				if (soloStackUser) {
-					while (stack.nSlices>0) {
+					while (stack.nImageSlices>0) {
 						stack.deleteLastSlice();
 					}
 				}
@@ -1464,6 +1464,9 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		if (nChannels==stackSize) updatePosition(currentSlice, 1, 1);
 		if (nSlices==stackSize) updatePosition(1, currentSlice, 1);
 		if (nFrames==stackSize) updatePosition(1, 1, currentSlice);
+		if (win != null)
+			win.getSubTitleField().setText(win.createSubtitle());
+
 	}
 
 	public int getChannel() {
@@ -1500,6 +1503,9 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			setSlice((frame-1)*nChannels*nSlices + (slice-1)*nChannels + channel);
 			updatePosition(channel, slice, frame);
 		}
+		if (win!=null)
+			win.getSubTitleField().setText(win.createSubtitle());
+
 	}
 	
 	/** Sets the current hyperstack position without updating the display,
@@ -2071,7 +2077,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			boolean soloStackUser = true;
 			if (WindowManager.getIDList()!=null) {
 				if (soloStackUser) {
-					while (stack.nSlices>0) {
+					while (stack.nImageSlices>0) {
 						stack.deleteLastSlice();
 					}
 				}
@@ -2616,8 +2622,6 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 
 	public void updatePosition(int c, int z, int t) {
 		//IJ.log("updatePosition: "+c+", "+z+", "+t);
-    	if (win!=null)
-    		((StackWindow)win).getSubTitleField().setText(win.createSubtitle());
 		position[0] = c;
 		position[1] = z;
 		position[2] = t;

@@ -964,7 +964,7 @@ public class RemoteMTVSHandler {
 				//				IJ.log(""+ adjustedSlice +" "+ channelBaseZero +" "+shiftZPosition[channelBaseZero] +" "+stkNChannels +" "+stkNSlices);
 				if (shiftZPosition[channelBaseZero] > 0 ) {
 					adjustedSlice = adjustedSlice - (stkNChannels * stkNSlices);
-					if  (adjustedSlice > nSlices && adjustedSlice < nSlices + (shiftZPosition[channelBaseZero]  * stkNChannels))
+					if  (adjustedSlice > nImageSlices && adjustedSlice < nImageSlices + (shiftZPosition[channelBaseZero]  * stkNChannels))
 						adjustedSlice = adjustedSlice - (stkNChannels * stkNSlices);
 				}
 				else if (shiftZPosition[channelBaseZero] < 0 ) {

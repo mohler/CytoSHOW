@@ -102,12 +102,12 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 				infoArray[i].longOffset = fi.getOffset() + i*(size + fi.gapBetweenImages);
 			}
 		}
-		nSlices = infoArray.length;
-		names = new String[nSlices+1];
-		labels = new String[nSlices+1];
+		nImageSlices = infoArray.length;
+		names = new String[nImageSlices+1];
+		labels = new String[nImageSlices+1];
 		FileOpener fo = new FileOpener(infoArray[0] );
 		ImagePlus imp = fo.open(false);
-		if (nSlices==1 && fi.fileType==FileInfo.RGB48) {
+		if (nImageSlices==1 && fi.fileType==FileInfo.RGB48) {
 			if (show) imp.show();
 			return imp;
 		}
@@ -124,7 +124,7 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 			int channels = getInt(props,"channels");
 			int slices = getInt(props,"slices");
 			int frames = getInt(props,"frames");
-			if (channels*slices*frames==nSlices) {
+			if (channels*slices*frames==nImageSlices) {
 				imp2.setDimensions(channels, slices, frames);
 				if (getBoolean(props, "hyperstack"))
 					imp2.setOpenAsHyperStack(true);
@@ -157,9 +157,9 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 				infoArray[i].longOffset = fi.getOffset() + i*(size + fi.gapBetweenImages);
 			}
 		}
-		nSlices = infoArray.length;
-		names = new String[nSlices+1];
-		labels = new String[nSlices+1];
+		nImageSlices = infoArray.length;
+		names = new String[nImageSlices+1];
+		labels = new String[nImageSlices+1];
 
 		
 		return;
@@ -188,14 +188,14 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 
 	/** Deletes the specified image, were 1<=n<=nSlices. */
 	public void deleteSlice(int n) {
-		if (nSlices<1) return;
-		if (n<1 || n>nSlices)
+		if (nImageSlices<1) return;
+		if (n<1 || n>nImageSlices)
 			throw new IllegalArgumentException("Argument out of range: "+n);
-		for (int i=n; i<nSlices; i++)
+		for (int i=n; i<nImageSlices; i++)
 			infoArray[i-1] = infoArray[i];
-		if (nSlices-1<infoArray.length)
-			infoArray[nSlices-1] = null;
-		nSlices--;
+		if (nImageSlices-1<infoArray.length)
+			infoArray[nImageSlices-1] = null;
+		nImageSlices--;
 	}
 	
 	/** Returns an ImageProcessor for the specified image,
@@ -203,13 +203,13 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 	*/
 	public ImageProcessor getProcessor(int n) {
 //		IJ.log(""+this.getInfo()[0].fileName);
-		if (n<1 || n>nSlices)
+		if (n<1 || n>nImageSlices)
 			return getProcessor(1);
 //			throw new IllegalArgumentException("Argument out of range: "+n);
 		if (IJ.debugMode) IJ.log("FileInfoVirtualStack: "+n+", "+infoArray[n-1].getOffset());
 		//if (n>1) IJ.log("  "+(info[n-1].getOffset()-info[n-2].getOffset()));
 		ImagePlus imp = null;		
-		if (n<=nSlices ) {
+		if (n<=nImageSlices ) {
 			while (infoArray.length < n-1) {
 				setupStack();
 			}
@@ -225,7 +225,7 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 			return ip;
 		} else {
 			int w=getWidth(), h=getHeight();
-			if (n<=nSlices ) 
+			if (n<=nImageSlices ) 
 				/*IJ.log("Read error or file not found ("+n+"): "+info[n-1].directory+info[n-1].fileName)*/;
 			switch (getBitDepth()) {
 			
@@ -241,14 +241,14 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
  
 	 /** Returns the number of images in this stack. */
 	public int getSize() {
-		return nSlices;
+		return nImageSlices;
 	}
 
 	/** Returns the label of the Nth image. */
 	public String getSliceLabel(int n) {
-		if (n<1 || n>nSlices)
+		if (n<1 || n>nImageSlices)
 			throw new IllegalArgumentException("Argument out of range: "+n);
-		if (infoArray[0].sliceLabels==null || infoArray[0].sliceLabels.length!=nSlices)
+		if (infoArray[0].sliceLabels==null || infoArray[0].sliceLabels.length!=nImageSlices)
 			return infoArray[0].fileName + " slice "+ n;
 		else
 			return infoArray[0].sliceLabels[n-1];

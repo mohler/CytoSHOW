@@ -283,6 +283,8 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 			slice = (t-1)*nChannels*nSlices + (z-1)*nChannels + c;
 		}
 		imp.updatePosition(c, z, t);
+		subTitleField.setText(createSubtitle());
+
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -496,14 +498,14 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
     	int channels=dim[2], slices=dim[3], frames=dim[4];
 		if (channels>=1) {
 			String channelLabel ="";
-			if( this.getImagePlus().getStack() instanceof MultiQTVirtualStack && ((MultiQTVirtualStack) imp.getMotherImp().getStack()).getVirtualStack(0) != null)
-				channelLabel = " [" + ((MultiQTVirtualStack)this.getImagePlus().getStack()).getVirtualStack(imp.getChannel()-1).getMovieName() + "]";
-			else if (this.getImagePlus().getRemoteMQTVSHandler()!=null)
-				channelLabel = " [" + this.getImagePlus().getRemoteMQTVSHandler().getChannelPathNames()[imp.getChannel()-1].replaceAll(".*/", "").replaceAll("(.*(slc|prx|pry)).*", "$1") + "]";
-			else if (this.getImagePlus().getStack() instanceof MultiFileInfoVirtualStack) {
-				MultiFileInfoVirtualStack mfivs = ((MultiFileInfoVirtualStack)this.getImagePlus().getStack());
-				channelLabel = " ["+ mfivs.getVirtualStack(mfivs.stackNumber) + "]";
-			}
+//			if( this.getImagePlus().getStack() instanceof MultiQTVirtualStack && ((MultiQTVirtualStack) imp.getMotherImp().getStack()).getVirtualStack(0) != null)
+//				channelLabel = " [" + ((MultiQTVirtualStack)this.getImagePlus().getStack()).getVirtualStack(imp.getChannel()-1).getMovieName() + "]";
+//			else if (this.getImagePlus().getRemoteMQTVSHandler()!=null)
+//				channelLabel = " [" + this.getImagePlus().getRemoteMQTVSHandler().getChannelPathNames()[imp.getChannel()-1].replaceAll(".*/", "").replaceAll("(.*(slc|prx|pry)).*", "$1") + "]";
+//			else if (this.getImagePlus().getStack() instanceof MultiFileInfoVirtualStack) {
+//				MultiFileInfoVirtualStack mfivs = ((MultiFileInfoVirtualStack)this.getImagePlus().getStack());
+//				channelLabel = " ["+ mfivs.getVirtualStack(mfivs.stackNumber) + "]";
+//			}
 			s += "c:"+imp.getChannel()+"/"+channels;   // + channelLabel ;
 			if (slices>1||frames>1) s += " ";
 		}
@@ -566,8 +568,8 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 				imp.setSlice(s);
 		}
 		t = trueFrame;
-		subTitleField.setText(createSubtitle());
 		imp.updatePosition(c, z, t);
+		subTitleField.setText(createSubtitle());
     }
     
     public void setPositionWithoutScrollbarCheck(int channel, int slice, int frame) {

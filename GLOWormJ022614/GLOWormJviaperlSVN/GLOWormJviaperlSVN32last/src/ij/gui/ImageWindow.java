@@ -871,7 +871,15 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
     		ImageStack stack = imp.getStack();
     		int currentSlice = imp.getCurrentSlice();
     		s += currentSlice+"/"+nSlices;
-    		String label = stack.getSliceLabel(currentSlice);
+    		String label = "";
+    		if (!(stack instanceof MultiFileInfoVirtualStack)) {
+    			stack.getSliceLabel(currentSlice);
+    		} else {
+    			String stkDimOrder = ((MultiFileInfoVirtualStack) stack).getDimOrder();
+    			if (stkDimOrder.toLowerCase().equals("xysplitczt")) {
+    				label = ((MultiFileInfoVirtualStack) stack).getSliceLabel(1+(int)(currentSlice/2)).replace("_dummy", "");
+    			}
+    		}
     		if (label!=null && label.length()>0) {
     			if (imp.isHyperStack()) label = label.replace(';', ' ');
     			s += " (" + label + ")";
