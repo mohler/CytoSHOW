@@ -283,8 +283,8 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 			slice = (t-1)*nChannels*nSlices + (z-1)*nChannels + c;
 		}
 		imp.updatePosition(c, z, t);
-		subTitleField.setText(createSubtitle());
-
+		subTitleField.setText(createSubtitle(false));
+		subTitleField.setToolTipText(createSubtitle(true));
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -490,8 +490,8 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 		}
 	}
 	
-	public String createSubtitle() {
-		String subtitle = super.createSubtitle();
+	public String createSubtitle(boolean longPath) {
+		String subtitle = super.createSubtitle(longPath);
 		if (!hyperStack) return subtitle;
     	String s="";
     	int[] dim = imp.getDimensions(false);
@@ -506,15 +506,15 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 //				MultiFileInfoVirtualStack mfivs = ((MultiFileInfoVirtualStack)this.getImagePlus().getStack());
 //				channelLabel = " ["+ mfivs.getVirtualStack(mfivs.stackNumber) + "]";
 //			}
-			s += "c:"+imp.getChannel()+"/"+channels;   // + channelLabel ;
-			if (slices>1||frames>1) s += " ";
+			s += "c"+imp.getChannel()+"/"+channels;   // + channelLabel ;
+			if (slices>1||frames>1) s += "; ";
 		}
 		if (slices>1) {
-			s += "z:"+imp.getSlice()+"/"+slices;
-			if (frames>1) s += " ";
+			s += "z"+imp.getSlice()+"/"+slices;
+			if (frames>1) s += "; ";
 		}
 		if (frames>1)
-			s += "t:"+imp.getFrame()+"/"+frames;
+			s += "t"+imp.getFrame()+"/"+frames;
 		if (running2 || running3) return s;
 		int index = subtitle.indexOf(";");
 		if (index!=-1) {
@@ -526,7 +526,7 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 			subtitle = subtitle.substring(index, subtitle.length());
 		} else
 			subtitle = "";
-    	return s + subtitle;
+    	return (s + subtitle).replace(" ", longPath?" ":"");
     }
     
     public boolean isHyperStack() {
@@ -569,7 +569,9 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 		}
 		t = trueFrame;
 		imp.updatePosition(c, z, t);
-		subTitleField.setText(createSubtitle());
+		subTitleField.setText(createSubtitle(false));
+		subTitleField.setToolTipText(createSubtitle(true));
+
     }
     
     public void setPositionWithoutScrollbarCheck(int channel, int slice, int frame) {

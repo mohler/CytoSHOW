@@ -1399,7 +1399,7 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 	}
 
 	/** Returns the label of the Nth image. */
-	public String getSliceLabel(int n) {
+	public String getSliceLabel(int n, boolean fullPath) {
 		if (n<1 || n>nImageSlices)
 			throw new IllegalArgumentException("Argument out of range: "+n);
 		if (infoArray==null || infoArray[0].sliceLabels==null || infoArray[0].sliceLabels.length!=nImageSlices) {
@@ -1415,7 +1415,10 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 				t=t-1;
 			}
 			//	IJ.log(""+n+" "+z+" "+t);
-			return new File(fivStacks.get(t).infoArray[0].fileName).getName() + ":s"+ sliceNumber/(dimOrder.toLowerCase().equals("xysplitczt")?2:1);
+			if (!fullPath)
+				return new File(fivStacks.get(t).infoArray[0].fileName).getName() + ":s"+ sliceNumber/(dimOrder.toLowerCase().equals("xysplitczt")?2:1);
+			else 
+				return fivStacks.get(t).infoArray[0].fileName + ":s"+ sliceNumber/(dimOrder.toLowerCase().equals("xysplitczt")?2:1);
 		}
 		else
 			return infoArray[0].sliceLabels[n-1];

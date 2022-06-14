@@ -1464,8 +1464,10 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		if (nChannels==stackSize) updatePosition(currentSlice, 1, 1);
 		if (nSlices==stackSize) updatePosition(1, currentSlice, 1);
 		if (nFrames==stackSize) updatePosition(1, 1, currentSlice);
-		if (win != null)
-			win.getSubTitleField().setText(win.createSubtitle());
+		if (win != null) {
+			win.getSubTitleField().setText(win.createSubtitle(false));
+			win.getSubTitleField().setToolTipText(win.createSubtitle(true));
+		}
 
 	}
 
@@ -1503,9 +1505,10 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			setSlice((frame-1)*nChannels*nSlices + (slice-1)*nChannels + channel);
 			updatePosition(channel, slice, frame);
 		}
-		if (win!=null)
-			win.getSubTitleField().setText(win.createSubtitle());
-
+		if (win!=null) {
+			win.getSubTitleField().setText(win.createSubtitle(false));
+			win.getSubTitleField().setToolTipText(win.createSubtitle(true));
+		}
 	}
 	
 	/** Sets the current hyperstack position without updating the display,

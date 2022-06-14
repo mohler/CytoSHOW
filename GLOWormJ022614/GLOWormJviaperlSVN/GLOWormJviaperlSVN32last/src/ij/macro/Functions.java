@@ -1488,7 +1488,7 @@ public class Functions implements MacroConstants, Measurements {
 			else if (lowercaseKey.equals("image.subtitle")) {
 				ImagePlus imp = getImage();
 				ImageWindow win = imp.getWindow();
-				return win!=null?win.createSubtitle():"";
+				return win!=null?win.createSubtitle(true):"";
 			} else if (lowercaseKey.equals("slice.label")) {
 				ImagePlus imp = getImage();
 				String label = null;

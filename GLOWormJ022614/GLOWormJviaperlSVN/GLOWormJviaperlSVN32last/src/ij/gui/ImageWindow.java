@@ -300,8 +300,10 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 	public void addToolBarPanel() {
 		overheadPanel = new JPanel();
 		overheadPanel.setLayout(new GridLayout(2,1));
-		subTitleField = new JTextField(this.createSubtitle());
-		subTitleField.setEnabled(false);
+		subTitleField = new JTextField(this.createSubtitle(false));
+		subTitleField.setEnabled(true);
+		subTitleField.setEditable(false);
+		subTitleField.setToolTipText(this.createSubtitle(true));
 		overheadPanel.add(subTitleField);
 		toolbar = new Toolbar();
 		Toolbar.setInstance(toolbar);
@@ -848,7 +850,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 			Insets insets = super.getInsets();
 				
 			g.setColor(subTitleBkgdColor);
-			g.fillRect(insets.left, insets.top, (int) g.getFontMetrics().getStringBounds(createSubtitle(), g).getWidth()+10, this.origICtop);
+			g.fillRect(insets.left, insets.top, (int) g.getFontMetrics().getStringBounds(createSubtitle(false), g).getWidth()+10, this.origICtop);
 			if (imp.isComposite()) {
 				CompositeImage ci = (CompositeImage)imp;
 				if (ci.getMode()==CompositeImage.COMPOSITE)
@@ -858,13 +860,14 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 			} else {
 				g.setColor(Color.black);
 			}
-			String subTitle = createSubtitle();
+			String subTitle = createSubtitle(false);
 			g.drawString(subTitle, insets.left+5, insets.top+TEXT_GAP);
 		}
     }
     
-    /** Creates the subtitle. */
-    public String createSubtitle() {
+    /** Creates the subtitle. 
+     * @param fullPath */
+    public String createSubtitle(boolean fullPath) {
     	String s="";
     	int nSlices = imp.getStackSize();
     	if (nSlices>1) {
@@ -877,7 +880,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
     		} else {
     			String stkDimOrder = ((MultiFileInfoVirtualStack) stack).getDimOrder();
     			if (stkDimOrder.toLowerCase().equals("xysplitczt")) {
-    				label = ((MultiFileInfoVirtualStack) stack).getSliceLabel(1+(int)(currentSlice/2)).replace("_dummy", "");
+    				label = ((MultiFileInfoVirtualStack) stack).getSliceLabel(1+(int)(currentSlice/2), fullPath).replace("_dummy", "");
     			}
     		}
     		if (label!=null && label.length()>0) {

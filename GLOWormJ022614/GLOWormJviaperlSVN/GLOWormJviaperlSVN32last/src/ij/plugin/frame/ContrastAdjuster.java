@@ -257,12 +257,12 @@ ActionListener, AdjustmentListener, ItemListener {
 		ImagePlus imp = WindowManager.getCurrentImage();
 		choiceWidth = 256;
 		if (imp!=null && imp.isComposite()) {
-			if (imp.getWindow().createSubtitle().matches(".*\\[.*\\].*")) {
+			if (imp.getWindow().createSubtitle(false).matches(".*\\[.*\\].*")) {
 				int currentChannel = imp.getChannel();
 				for (int i=0; i<imp.getNChannels(); i++) {
 					imp.setPositionWithoutUpdate(i+1, imp.getSlice(), imp.getFrame());
 					choice.addItem(i+1 + ". " + 
-							imp.getWindow().createSubtitle().replaceAll(".*\\[(.*)\\].*", "$1"));
+							imp.getWindow().createSubtitle(false).replaceAll(".*\\[(.*)\\].*", "$1"));
 					if (choice.getItem(choice.getItemCount()-1).length()*9 > choiceWidth) {
 						String shortenedItem = choice.getItem(choice.getItemCount()-1).substring(0, -2+choiceWidth/9) + "...";
 						choice.remove(choice.getItemCount()-1);
@@ -421,7 +421,7 @@ ActionListener, AdjustmentListener, ItemListener {
 				choice.removeAll();
 				return;
 			} else if (imp.isComposite()) {
-				if (choice.getItemCount()!= imp.getNChannels()+1 || ( !(imp.getWindow().createSubtitle().contains(choice.getItem(imp.getChannel()-1).substring(4)))
+				if (choice.getItemCount()!= imp.getNChannels()+1 || ( !(imp.getWindow().createSubtitle(false).contains(choice.getItem(imp.getChannel()-1).substring(4)))
 						&& !(choice.getSelectedItem().matches("Channel *+0?" +imp.getChannel())))) {
 					
 					choice.removeAll();
