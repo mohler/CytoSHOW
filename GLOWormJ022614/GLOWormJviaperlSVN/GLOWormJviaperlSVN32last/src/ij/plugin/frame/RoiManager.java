@@ -459,6 +459,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		addPopupItem("Plot AG c-phate icospheres to coords");
 		addPopupItem("fixcrappynames");
 		addPopupItem("HiLite lineage name conflicts");
+		addPopupItem("MeasureROIvolSA");
 		add(pm);
 	}
 
@@ -1118,6 +1119,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				fixdamnRedundantNames();
 			} else if (command.equals("HiLite lineage name conflicts")) {
 				scanForRedundantContemporaneousNames();
+			} else if (command.equals("MeasureROvolSA") || command.equals("MeasureROIvolSA")) {
+				this.sketchVolumeMeasurer(null);
 			}
 
 			this.imp.getCanvas().requestFocus();
@@ -1946,6 +1949,63 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			((Content) content).setVisible(true);
 		}
 
+	}
+
+	private void sketchVolumeMeasurer(Object source) {
+		boolean singleSave = IJ.shiftKeyDown();
+		double scaleFactor = 1.0;
+		double zPadFactor = 1;
+		IJ.setForegroundColor(255, 255, 255);
+		IJ.setBackgroundColor(0, 0, 0);
+		if (getSelectedRoisAsArray().length < 1)
+			return;
+		ArrayList<String> rootNames_rootFrames = new ArrayList<String>();
+		ArrayList<String> rootNames = new ArrayList<String>();
+		String roiColorString = Colors.colorToHexString(this.getSelectedRoisAsArray()[0].getFillColor());
+//		roiColorString = roiColorString.substring(3 /*roiColorString.length()-6*/);
+		String assignedColorString = roiColorString;
+
+		for (Roi selRoi : getSelectedRoisAsArray()) {
+			String rootName = selRoi.getName().contains("\"") ? selRoi.getName().split("\"")[1].trim() : "";
+			rootName = rootName.contains(" ") ? rootName.split("[_\\- ]")[0].trim() : rootName;
+			String[] rootChunks = selRoi.getName().split("_");
+			String rootFrame = rootChunks[rootChunks.length - 1].replaceAll("[CZT]", "").split("-")[0];
+			if (!rootNames_rootFrames.contains(rootName + "_" + rootFrame)) {
+				rootNames_rootFrames.add(rootName + "_" + rootFrame);
+				rootNames.add(rootName);
+			}
+		}
+		ImageProcessor dummyIP = new ByteProcessor(imp.getWidth(), imp.getHeight());
+		
+		for (int n = 0; n < rootNames_rootFrames.size(); n++) {
+			String rootName = rootNames.get(n);
+
+			select(-1);
+			IJ.wait(50);
+			ArrayList<Double> nameMatchROIareaArrayList = new ArrayList<Double>();
+			ArrayList<Double> nameMatchROIperimArrayList = new ArrayList<Double>();
+			double sumAreas = 0;
+			double sumPerims = 0;
+			Roi[] rois = getFullRoisAsArray();
+			int fraa = rois.length;
+			for (int r = 0; r < fraa; r++) {
+				
+				String nextName = rois[r].getName();
+				if (nextName.startsWith("\"" + rootName + " \"" /* .split("_")[0] */)){
+					if (true/*rois[r] instanceof ShapeRoi*/) {
+						dummyIP.setRoi(rois[r]);
+						nameMatchROIareaArrayList.add(new ByteStatistics(dummyIP, ImageStatistics.AREA, imp.getCalibration()).area);
+						sumAreas += nameMatchROIareaArrayList.get(nameMatchROIareaArrayList.size() -1);
+						double perim = rois[r].getLength();
+						nameMatchROIperimArrayList.add(perim);
+						sumPerims += nameMatchROIperimArrayList.get(nameMatchROIperimArrayList.size() -1);
+					}
+				}
+			}
+			double totalVolume = sumAreas * imp.getCalibration().pixelDepth;
+			double totalSA = sumPerims * imp.getCalibration().pixelDepth;
+			IJ.log(""+rootName+","+String.format("%.20f",totalVolume)+","+String.format("%.20f",totalSA));
+		}
 	}
 
 	private void sketchVolumeSlicer(Object source) {

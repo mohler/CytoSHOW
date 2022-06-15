@@ -573,6 +573,8 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 
 		if (mouseLocColor.equals(chosenColor)){
 			return;
+		} else if (mouseLocColor == null){
+			return;
 		}else if (mouseLocColor.equals(Color.black)) {
 			chosenCB = null;
 			chosenColor = null;
