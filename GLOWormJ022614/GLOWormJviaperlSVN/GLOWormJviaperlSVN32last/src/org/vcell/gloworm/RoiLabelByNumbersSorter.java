@@ -14,6 +14,10 @@ public class RoiLabelByNumbersSorter {
 	}
 	
 	static void sort(String[] labels, int from, int to, int mode) {
+		if (mode == 0) {
+			Arrays.sort(labels);
+			return;
+		}
 		int listLength = labels.length;
 		boolean allSameLength = true;
 		int len0 = labels[0].length();
@@ -56,7 +60,7 @@ public class RoiLabelByNumbersSorter {
 			for (int i=0; i<listLength; i++) {
 				labels[i] = labels[i].substring(maxDigits);
 			}
-		} else {
+		} else {  //why on earth use this pig of a sorter instead of Arrays.sort()?
 			ij.util.StringSorter.sort(labels);
 		}
 	}

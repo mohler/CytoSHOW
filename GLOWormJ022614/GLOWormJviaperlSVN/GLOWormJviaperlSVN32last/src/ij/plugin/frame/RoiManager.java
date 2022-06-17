@@ -2754,7 +2754,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		int fullCount = fullListModel.getSize();
 		if (count == 0)
 			return error("The list is empty.");
-		int indexes[] = getSelectedIndexes();
+		int[] indexes = getSelectedIndexes();
+//		Roi[] selRois = getSelectedRoisAsArray();
 		if (indexes.length == 0 || (replacing && count > 1)) {
 			String msg = "Delete all items on the list?";
 			if (replacing)
@@ -2778,35 +2779,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			listModel.removeAllElements();
 			fullListModel.removeAllElements();
 		} else {
+						
 			list.setModel(new DefaultListModel<String>());
-			for (int i = count - 1; i >= 0; i--) {
-				boolean delete = false;
-				for (int j = 0; j < indexes.length; j++) {
-					if (indexes[j] == i)
-						delete = true;
-				}
-				if (delete) {
-					Roi roi = rois.get(listModel.getElementAt(i));
-					if (roi != null) {
-						String rootName = roi.getName().contains("\"") ? "\"" + roi.getName().split("\"")[1] + "\""
-								: roi.getName().split("_")[0].trim();
-						int c = roi.getCPosition();
-						int z = roi.getZPosition();
-						int t = roi.getTPosition();
-
-						if (getRoisByRootName().containsKey(rootName)) {
-							getRoisByRootName().get(rootName).remove(roi);
-						}
-
-						if (getRoisByNumbers().containsKey(c + "_" + z + "_" + t)) {
-							getRoisByNumbers().get(c + "_" + z + "_" + t).remove(roi);
-						}
-						rois.remove(roi.getName());
-					}
-					fullListModel.removeElement(listModel.getElementAt(i));
-					listModel.remove(i);
-				}
-			}
+			Arrays.sort(indexes);
+			for (int r = indexes.length - 1; r >= 0; r--) {
+				listModel.remove(indexes[r]);
+			}		
 			list.setModel(listModel);
 		}
 		ImagePlus imp = this.imp;
@@ -4697,11 +4675,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		fullListModel.removeAllElements();
 		// this.setTitle( "Tag Manager SORTING!!!") ;
 
-		if (sortmode > 0) {
+		if (sortmode > -1) {
 			RoiLabelByNumbersSorter.sort(labels, sortmode);
 			RoiLabelByNumbersSorter.sort(fullLabels, sortmode);
 
-		} else {
+		} else {   //why on earth use this pig of a sorter instead of Arrays.sort()?
 			StringSorter.sort(labels);
 			StringSorter.sort(fullLabels);
 
