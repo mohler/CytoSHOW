@@ -1977,6 +1977,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		ImageProcessor dummyIP = new ByteProcessor(imp.getWidth(), imp.getHeight());
 		
+		Roi[] rois = getShownRoisAsArray();
+		
 		for (int n = 0; n < rootNames_rootFrames.size(); n++) {
 			String rootName = rootNames.get(n);
 
@@ -1986,7 +1988,6 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			ArrayList<Double> nameMatchROIperimArrayList = new ArrayList<Double>();
 			double sumAreas = 0;
 			double sumPerims = 0;
-			Roi[] rois = getShownRoisAsArray();
 			int fraa = rois.length;
 			for (int r = 0; r < fraa; r++) {
 				
