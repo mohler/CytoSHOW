@@ -1986,7 +1986,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			ArrayList<Double> nameMatchROIperimArrayList = new ArrayList<Double>();
 			double sumAreas = 0;
 			double sumPerims = 0;
-			Roi[] rois = getFullRoisAsArray();
+			Roi[] rois = getShownRoisAsArray();
 			int fraa = rois.length;
 			for (int r = 0; r < fraa; r++) {
 				
