@@ -1464,7 +1464,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		if (nChannels==stackSize) updatePosition(currentSlice, 1, 1);
 		if (nSlices==stackSize) updatePosition(1, currentSlice, 1);
 		if (nFrames==stackSize) updatePosition(1, 1, currentSlice);
-		if (win != null) {
+		if (win != null && !(win instanceof ImageWindow3D)) {
 			win.getSubTitleField().setText(win.createSubtitle(false));
 			win.getSubTitleField().setToolTipText(win.createSubtitle(true));
 		}

@@ -130,6 +130,8 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 			checkbox = new JCheckBox[clLines.length];
 			for (int i=0; i<clLines.length; i++) {		
 				//			IJ.log(clLines[i]);
+				if (clLines[i].equals(""))
+					continue;
 				checkbox[i] = new JCheckBox();
 				((JCheckBox)checkbox[i]).setSize(150, 10);
 				checkbox[i].setLabel(clLines[i].split(",")[0].length()<20?clLines[i].split(",")[0]:clLines[i].split(",")[0].substring(0, 20) + "...");
@@ -204,7 +206,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 				for (int index =0; index < lm.getSize(); index++) {
 					String hashkey = (String) lm.getElementAt(index);
 					ContentInstant ci = contentInstants.get(hashkey);
-					String fixedName = ci.getName().replace("BWM-", "BWM").replace("_#0_#0", "");
+					String fixedName = ci.getName().replace("_#0_#0", "")/* .replace("BWM-", "BWM") */;
 					for (String key:this.getBrainbowColors().keySet()) {
 
 						// THESE CONDITIONS WILL CERTAINLY NEED ADJUSTMENT TO GET ALL CASES NEEDED CORRECT
@@ -216,6 +218,13 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 								|| fixedName.split("-")[0].toLowerCase().matches(".*"+key.toLowerCase()+"(chemical)" + ".*"+"_pre")
 								|| fixedName.split("-")[0].toLowerCase().matches(".*"+"(electrical|&)" + key.toLowerCase()+".*"+"_gapjxn")
 								|| fixedName.split("-")[0].toLowerCase().matches(".*"+key.toLowerCase()+"(electrical)" + ".*"+"_gapjxn")
+								||fixedName.split("-")[0].toLowerCase().contentEquals(key.toLowerCase())
+								|| fixedName.toLowerCase().endsWith("by" + key.toLowerCase())
+								|| fixedName.toLowerCase().contains("_" + key.toLowerCase())
+								|| fixedName.toLowerCase().matches(".*"+key.toLowerCase()+"(undefined)" + ".*"+"_pre")
+								|| fixedName.toLowerCase().matches(".*"+key.toLowerCase()+"(chemical)" + ".*"+"_pre")
+								|| fixedName.toLowerCase().matches(".*"+"(electrical|&)" + key.toLowerCase()+".*"+"_gapjxn")
+								|| fixedName.toLowerCase().matches(".*"+key.toLowerCase()+"(electrical)" + ".*"+"_gapjxn")
 ////								|| fixedName.split("-")[0].toLowerCase().contains("chemical" + key.toLowerCase())
 ////								|| fixedName.split("-")[0].toLowerCase().contains("electrical" + key.toLowerCase())
 							|| fixedName.split("-")[0].toLowerCase().startsWith(key.toLowerCase() + "_")) {		

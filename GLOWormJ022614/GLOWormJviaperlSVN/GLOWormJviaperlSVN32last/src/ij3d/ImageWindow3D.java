@@ -23,6 +23,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuBar;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 import java.awt.AWTException;
 import java.awt.GridBagConstraints;
@@ -152,7 +153,12 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 	public void addToolBarPanel() {
 		overheadPanel = new JPanel();
 		overheadPanel.setLayout(new GridLayout(2,1));
-		
+
+		subTitleField = new JTextField(this.createSubtitle(false));
+		subTitleField.setEnabled(true);
+		subTitleField.setEditable(false);
+		subTitleField.setToolTipText(this.createSubtitle(true));
+
 		toolbar = new Toolbar();
 		toolbar.setThreeDViewer(true);
 

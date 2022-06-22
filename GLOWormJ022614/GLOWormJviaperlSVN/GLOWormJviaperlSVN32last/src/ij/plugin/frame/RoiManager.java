@@ -460,6 +460,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		addPopupItem("fixcrappynames");
 		addPopupItem("HiLite lineage name conflicts");
 		addPopupItem("MeasureROIvolSA");
+		addPopupItem("synapseStatsFromROIs");
 		add(pm);
 	}
 
@@ -1121,6 +1122,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				scanForRedundantContemporaneousNames();
 			} else if (command.equals("MeasureROvolSA") || command.equals("MeasureROIvolSA")) {
 				this.sketchVolumeMeasurer(null);
+			} else if (command.equals("synapseStatsFromROIs")) {
+				this.synapseStatsFromRois();
 			}
 
 			this.imp.getCanvas().requestFocus();
@@ -2428,7 +2431,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				name = null;
 		String label = name != null ? name : getLabel(imp, roi, -1);
 		if (promptForName) {
-			// label = promptForName(label);
+			 label = promptForName(label);
 		} else if (roi instanceof TextRoi)
 			if (imp != null)
 				label = (((TextRoi) roi).getText().indexOf("\n") > 0
@@ -2436,7 +2439,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						: "Blank") + "_" + imp.getChannel() + "_" + imp.getSlice() + "_" + imp.getFrame();
 			else
 				label = roi.getName();
-		else if (true) {
+		if (true) {
+			String colorString = Colors.colorToHexString(roi.getFillColor());
 			String altType = null;
 			if (roi instanceof EllipseRoi)
 				altType = "Ellipse";
@@ -2444,23 +2448,23 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				altType = "Arrow";
 			if (imp != null && addToCurrentImpPosition) {
 				if (roi.getName() != null && roi.getName().split("\"").length > 1)
-					label = "\"" + roi.getName().split("\"")[1].trim() + " \"" + "_" + imp.getChannel() + "_"
+					label = "\"" + roi.getName().split("\"")[1].trim() + " \"" + "_" + colorString + "_" + imp.getChannel() + "_"
 							+ imp.getSlice() + "_" + imp.getFrame();
 				else if (roi.getName() != null)
-					label = "\"" + roi.getName() + " \"" + "_" + imp.getChannel() + "_" + imp.getSlice() + "_"
+					label = "\"" + roi.getName() + " \"" + "_" + colorString + "_" + imp.getChannel() + "_" + imp.getSlice() + "_"
 							+ imp.getFrame();
 				else
-					label = ((altType != null) ? altType : roi.getTypeAsString()) + "_" + imp.getChannel() + "_"
+					label = "\"" + ((altType != null) ? altType : roi.getTypeAsString()) + " \"" + "_" + colorString + "_" + imp.getChannel() + "_"
 							+ imp.getSlice() + "_" + imp.getFrame();
 			} else if (roi.getPosition() != 0) {
 				if (roi.getName() != null && roi.getName().split("\"").length > 1)
-					label = "\"" + roi.getName().split("\"")[1].trim() + " \"" + "_" + roi.getCPosition() + "_"
+					label = "\"" + roi.getName().split("\"")[1].trim() + " \"" + "_" + colorString + "_" + roi.getCPosition() + "_"
 							+ roi.getZPosition() + "_" + roi.getTPosition();
 				else if (roi.getName() != null)
-					label = "\"" + roi.getName() + " \"" + "_" + roi.getCPosition() + "_" + roi.getZPosition() + "_"
+					label = "\"" + roi.getName() + " \"" + "_" + colorString + "_" + roi.getCPosition() + "_" + roi.getZPosition() + "_"
 							+ roi.getTPosition();
 				else
-					label = ((altType != null) ? altType : roi.getTypeAsString()) + "_" + roi.getCPosition() + "_"
+					label = "\"" + ((altType != null) ? altType : roi.getTypeAsString())  + " \"" + "_" + colorString + "_" + roi.getCPosition() + "_"
 							+ roi.getZPosition() + "_" + roi.getTPosition();
 			} else {
 				label = roi.getName();
@@ -2784,6 +2788,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			list.setModel(new DefaultListModel<String>());
 			Arrays.sort(indexes);
 			for (int r = indexes.length - 1; r >= 0; r--) {
+				fullListModel.removeElement(listModel.get(indexes[r]));
 				listModel.remove(indexes[r]);
 			}		
 			list.setModel(listModel);
@@ -7092,7 +7097,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		if ((path.contains("jsh_object") || path.contains("n2u_innerjoin")) 
 //				&& s.contains("OBJ_Name")
-				) {
+				) {  // Emmons Lab data
 			int[] sliceNumbers = new int[fullCount];
 			for (int f = 0; f < fullCount; f++) {
 				if (objectLines[f].contains("N2UNR"))
@@ -7244,7 +7249,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			for (Object key : synapsePairFrequencyHashtable.keySet()) {
 				IJ.log(((String) key) + "=" + synapsePairFrequencyHashtable.get((String) key).size());
 			}
-		} else if (path.contains("synapse_key")) {
+		} else if (path.contains("synapse_key")) {  // Mei lab synapse data
 
 			int[] sliceNumbers = new int[fullCount];
 			String[] pres = new String[fullCount];
@@ -7406,6 +7411,49 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			this.setVisible(true);
 			return;
 		}
+	}
+	
+	public void synapseStatsFromRois() {
+		Roi cropRoi = imp.getRoi();
+		if (cropRoi == null)
+			cropRoi = new Roi(0,0,imp.getWidth(),imp.getHeight());
+		Hashtable<String, ArrayList> synapsePairFrequencyHashtable = new Hashtable<String, ArrayList>();			
+		for (Roi roi:getShownRoisAsArray()) {
+			if (!cropRoi.contains((int)roi.getBounds().getCenterX(), (int)roi.getBounds().getCenterY())) {
+				continue;
+			}
+			String name = roi.getName();
+			String[] nameChunks = name.split("(\"|electric|chemical|undefined|\\~)");
+//			IJ.log(Arrays.toString(nameChunks));
+			String presynName = nameChunks[1];
+			String[] postsynNames = nameChunks[2].split("\\&");
+			String plotZ = ""+roi.getZPosition();
+			String objType = name.split("\""+presynName+"|"+postsynNames[0])[1];
+			
+			for (String postsynName : postsynNames) {
+				IJ.log(presynName + "," + postsynName + "," + plotZ + "," + 1 + "," + objType);
+
+				if (synapsePairFrequencyHashtable
+						.get(presynName + "," + postsynName + "," + objType) == null) {
+					synapsePairFrequencyHashtable.put(presynName + "," + postsynName + "," + objType,
+							new ArrayList<String>());
+				}
+				synapsePairFrequencyHashtable.get(presynName + "," + postsynName + "," + objType)
+				.add(presynName + "," + postsynName + "," + plotZ + "," + 1 + "," + objType);
+			}
+		}
+		updateShowAll();
+		Object[] keysArray = synapsePairFrequencyHashtable.keySet().toArray();
+		Arrays.sort(keysArray);
+		IJ.log(" ");
+		IJ.log(" ");
+		IJ.log(" ");
+		IJ.log("pre,post,type,synapses");
+		for (Object key : keysArray) {
+			String outLine = (((String) key) + "," + synapsePairFrequencyHashtable.get((String) key).size());
+			IJ.log(outLine);
+		}
+
 	}
 
 	public void windowClosed(WindowEvent e) {
