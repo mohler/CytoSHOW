@@ -726,7 +726,7 @@ public class ImageJ extends Frame implements ActionListener,
 					}
 				if (roi instanceof TextRoi)
 					((TextRoi)roi).addChar(keyChar);
-				return;
+//				return;
 			} else {
 				if (imp.getMotherImp()!=imp ){
 					if (imp.getMotherImp().getRoiManager().getColorLegend()!=null){

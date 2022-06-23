@@ -17,6 +17,7 @@ import ij.plugin.filter.Projector;
 import ij.plugin.frame.ColorLegend;
 import ij.plugin.frame.Recorder;
 import ij.plugin.frame.RoiManager;
+import ij.plugin.tool.MacroToolRunner;
 import ij.plugin.tool.PlugInTool;
 import ij.macro.*;
 import ij.*;
@@ -3734,21 +3735,31 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		IJ.setKeyUp(KeyEvent.VK_ALT);
 		IJ.setKeyUp(KeyEvent.VK_SHIFT);
 		IJ.setKeyUp(KeyEvent.VK_CONTROL);
-		if (shiftKeyDown){
-			int newT = imp.getFrame()+rot;
-			if (newT > imp.getNFrames()) newT = 1;
-			if (newT <  1) newT = imp.getNFrames();
-			imp.setPosition(imp.getChannel(), imp.getSlice(), newT);
-		} else if (controlKeyDown){
-			int newC = imp.getChannel()+rot;
-			if (newC > imp.getNChannels()) newC = 1;
-			if (newC <  1) newC = imp.getNChannels();
-			imp.setPosition(newC, imp.getSlice(), imp.getFrame());
+		Point p = this.getCursorLoc();
+
+		if (imp.getRoi() != null
+				/* && imp.getRoi().contains(p.x, p.y) */ && Toolbar.getToolId() == Toolbar.OVAL && Toolbar.getOvalToolType() == Toolbar.BRUSH_ROI) {
+			Toolbar.setBrushSize(Toolbar.getBrushSize() > rot?Toolbar.getBrushSize() - rot: 1);
+			
+			flags += InputEvent.BUTTON1_MASK;
+			new RoiBrush();
 		} else {
-			int newZ = imp.getSlice()+rot;
-			if (newZ > imp.getNSlices()) newZ = 1;
-			if (newZ <  1) newZ = imp.getNSlices();
-			imp.setPosition(imp.getChannel(), newZ, imp.getFrame());
+			if (shiftKeyDown){
+				int newT = imp.getFrame()+rot;
+				if (newT > imp.getNFrames()) newT = 1;
+				if (newT <  1) newT = imp.getNFrames();
+				imp.setPosition(imp.getChannel(), imp.getSlice(), newT);
+			} else if (controlKeyDown){
+				int newC = imp.getChannel()+rot;
+				if (newC > imp.getNChannels()) newC = 1;
+				if (newC <  1) newC = imp.getNChannels();
+				imp.setPosition(newC, imp.getSlice(), imp.getFrame());
+			} else {
+				int newZ = imp.getSlice()+rot;
+				if (newZ > imp.getNSlices()) newZ = 1;
+				if (newZ <  1) newZ = imp.getNSlices();
+				imp.setPosition(imp.getChannel(), newZ, imp.getFrame());
+			}
 		}
 		e.consume();
 	}

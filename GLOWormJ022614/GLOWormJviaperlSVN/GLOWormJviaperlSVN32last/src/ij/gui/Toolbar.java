@@ -68,7 +68,7 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 	private int mpPrevious = RECTANGLE;
 	private String[] names = new String[NUM_TOOLS];
 	private String[] icons = new String[NUM_TOOLS];
-	private PlugInTool[] tools = new PlugInTool[NUM_TOOLS];
+	PlugInTool[] tools = new PlugInTool[NUM_TOOLS];
     private PopupMenu[] menus = new PopupMenu[NUM_TOOLS];
     private MacroInstaller macroInstaller;
     private boolean addingSingleTool;

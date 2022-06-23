@@ -1107,7 +1107,10 @@ public class ShapeRoi extends Roi {
 		g.setColor(ROIColor);
 		int size = Toolbar.getBrushSize();
 		if (size==0) return;
-		int flags = ic.getModifiers();
+		
+		int flags = 0;
+		if (ic!=null)
+			flags = ic.getModifiers();
 		if ((flags&16)==0) return; // exit if mouse button up
 		size = (int)(size*mag);
 		Point p = ic.getCursorLoc();

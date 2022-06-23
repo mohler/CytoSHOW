@@ -73,7 +73,7 @@ class RoiBrush implements Runnable {
 
     
 	ShapeRoi getCircularRoi(int x, int y, int width) {
-		if (poly==null) {
+		if (poly==null || poly!= null) {
 			Roi roi = new OvalRoi(x-width/2, y-width/2, width, width);
 			poly = roi.getPolygon();
 			for (int i=0; i<poly.npoints; i++) {
