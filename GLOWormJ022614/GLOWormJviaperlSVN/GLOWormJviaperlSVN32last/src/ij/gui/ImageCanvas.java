@@ -729,7 +729,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		ImageWindow win = imp.getWindow();
 		if (win==null)
 			return;
-		if (IJ.spaceBarDown()) {
+		if (IJ.spaceBarDown() && (roi==null || !(roi.contains(ox,oy)) )) {
 			setCursor(handCursor);
 			return;
 		}
@@ -1267,6 +1267,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		//if (ij==null) return;
 		showCursorStatus = true;
 		int toolID = Toolbar.getToolId();
+		int toolAlt = Toolbar.getOvalToolType();
 		ImageWindow win = imp.getWindow();
 		if (win!=null && (win.running2 || win.running3) && toolID!=Toolbar.MAGNIFIER) {
 			if (win instanceof StackWindow) {
@@ -1292,7 +1293,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		int ox = offScreenX(x);
 		int oy = offScreenY(y);
 		setXMouse(ox); setYMouse(oy);
-		if (IJ.spaceBarDown()) {
+		if (IJ.spaceBarDown() && (toolID!=Toolbar.OVAL || toolAlt!=Toolbar.BRUSH_ROI)) {
 			// temporarily switch to "hand" tool of space bar down
 			setupScroll(ox, oy);
 			return;
@@ -1387,9 +1388,12 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			}
 			break;
 		case Toolbar.OVAL:
-			if (Toolbar.getBrushSize()>0)
-				new RoiBrush();
-			else
+			if (Toolbar.getBrushSize()>0) {
+				if (IJ.spaceBarDown())
+					handleRoiMouseDown(e);
+				else
+					new RoiBrush();
+			} else
 				handleRoiMouseDown(e);
 			break;
 		case Toolbar.SPARE1: case Toolbar.SPARE2: case Toolbar.SPARE3: 
@@ -3033,10 +3037,20 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		flags = e.getModifiers();
 		//		mousePressedX = mousePressedY = -1;
 		//IJ.log("mouseDragged: "+flags);
+		Roi roi = imp.getRoi();
 		if (flags==0)  // workaround for Mac OS 9 bug
 			flags = InputEvent.BUTTON1_MASK;
 		if (Toolbar.getToolId()==Toolbar.HAND || IJ.spaceBarDown())
-			scroll(x, y);
+			if (roi != null ) {
+				if (roi.contains(xMouse, yMouse)){
+					Rectangle b = roi.getBounds();
+					roi.handleMouseDrag(x, y, flags);
+				} else {
+					scroll(x, y);
+				}			
+			} else {
+				scroll(x, y);
+			}
 		else {
 			PlugInTool tool = Toolbar.getPlugInTool();
 			if (tool!=null) {
@@ -3044,7 +3058,6 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				if (e.isConsumed()) return;
 			}
 			IJ.setInputEvent(e);
-			Roi roi = imp.getRoi();
 			if (roi != null){
 				//				IJ.log("NOT NULL");
 				//				if (roi instanceof TextRoi)
@@ -3738,7 +3751,10 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		Point p = this.getCursorLoc();
 
 		if (imp.getRoi() != null
-				/* && imp.getRoi().contains(p.x, p.y) */ && Toolbar.getToolId() == Toolbar.OVAL && Toolbar.getOvalToolType() == Toolbar.BRUSH_ROI) {
+				/* && imp.getRoi().contains(p.x, p.y) */ 
+				&& Toolbar.getToolId() == Toolbar.OVAL 
+				&& Toolbar.getOvalToolType() == Toolbar.BRUSH_ROI
+				&& !IJ.spaceBarDown()) {
 			Toolbar.setBrushSize(Toolbar.getBrushSize() > rot?Toolbar.getBrushSize() - rot: 1);
 			
 			flags += InputEvent.BUTTON1_MASK;
