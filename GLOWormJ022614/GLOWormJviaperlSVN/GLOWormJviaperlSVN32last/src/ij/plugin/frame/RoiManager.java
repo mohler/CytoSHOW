@@ -2374,6 +2374,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	/** Adds the specified ROI. */
 	public void addRoi(Roi roi) {
+		if (roi != null && roi.getFillColor() == null && imp!=null)
+			roi.setFillColor(imp.getRoiFillColor());
 		addRoi(roi, false, roi.getFillColor(), -1, true);
 	}
 
@@ -2392,19 +2394,21 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				return false;
 			}
 		}
-		if (color == null && roi.getStrokeColor() != null)
-			color = roi.getStrokeColor();
-		else if (color == null && defaultColor != null)
-			color = defaultColor;
-		Color fillColor = null;
-		if (color != null)
-			fillColor = color;
-		else if (imp != null)
-			fillColor = imp.getRoiFillColor();
-		else if (roi.getFillColor() != null)
-			fillColor = roi.getFillColor();
-		else
-			fillColor = defaultColor;
+		if (color == null) { 
+			if (roi.getStrokeColor() != null)
+				color = roi.getStrokeColor();
+			else if (color == null && imp!=null && imp.getRoiStrokeColor() != null)
+				color = imp.getRoiStrokeColor();
+		}
+		Color fillColor = color;
+		if (fillColor == null) 
+			if (imp != null)
+				fillColor = imp.getRoiFillColor();
+			if (fillColor == null) 
+				fillColor = roi.getFillColor();
+			if (fillColor == null) 
+				fillColor = defaultColor;
+		
 		// IJ.log(""+imp.getRoiFillColor());
 		if (lineWidth < 0) {
 			int sw = (int) roi.getStrokeWidth();
@@ -3078,6 +3082,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 		}
 		Roi roi2 = (Roi) roi.clone();
+		roi2.copyAttributes(roi);
 		Calibration cal = imp.getCalibration();
 		Rectangle r = roi2.getBounds();
 		if (cal.xOrigin != 0.0 || cal.yOrigin != 0.0)

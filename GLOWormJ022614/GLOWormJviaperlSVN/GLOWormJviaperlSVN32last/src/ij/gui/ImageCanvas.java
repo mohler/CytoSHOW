@@ -1427,7 +1427,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 					&& getLabelShapes().get(sliceRoisArray[i]).contains(x, y)) {
 				
 				int q = listModel.indexOf(sliceRoisArray[i].getName());
-				new ij.macro.MacroRunner("roiManager('select', "+q+", "+imp.getID()+");");
+//				new ij.macro.MacroRunner("roiManager('select', "+q+", "+imp.getID()+");");
+				rm.select(imp, q);
 				rm.validate();
 				rm.repaint();
 				return true;
@@ -1444,7 +1445,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				// "update2" does not clone the ROI so the "Show All"
 				// outline moves as the user moves the RO.
 				int q = listModel.indexOf(sliceRoisArray[i].getName());
-				new ij.macro.MacroRunner("roiManager('select', "+q+", "+imp.getID()+");");
+//				new ij.macro.MacroRunner("roiManager('select', "+q+", "+imp.getID()+");");
+				rm.select(imp, q);
 				rm.validate();
 				rm.repaint();
 				return true;

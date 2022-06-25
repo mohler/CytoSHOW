@@ -56,7 +56,7 @@ class RoiBrush implements Runnable {
 			roi2.copyAttributes(roi);
 		} else
 			roi2 = new OvalRoi(x-width/2, y-width/2, width, width);
-		img.setRoi(roi2);
+//		img.setRoi(roi2);
 	}
 
 	void subtractCircle(ImagePlus img, int x, int y, int width) {
@@ -64,10 +64,10 @@ class RoiBrush implements Runnable {
 		Roi roi2 = roi;
 		if (roi2!=null) {
 			if (!(roi2 instanceof ShapeRoi))
-			roi2 = new ShapeRoi(roi2);
+				roi2 = new ShapeRoi(roi2);
 			((ShapeRoi)roi2).not(getCircularRoi(x, y, width));
 			roi2.copyAttributes(roi);
-			img.setRoi(roi2);
+//			img.setRoi(roi2);
 		}
 	}
 

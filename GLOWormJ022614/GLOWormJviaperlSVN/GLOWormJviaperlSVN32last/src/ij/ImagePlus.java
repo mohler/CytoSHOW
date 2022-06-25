@@ -28,6 +28,7 @@ import ij.plugin.frame.ColorLegend;
 import ij.plugin.frame.ContrastAdjuster;
 import ij.plugin.frame.Recorder;
 import ij.plugin.frame.RoiManager;
+import ij.plugin.Colors;
 import ij.plugin.Converter;
 import ij.plugin.DragAndDrop;
 import ij.plugin.Duplicator;
@@ -1700,10 +1701,17 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			{deleteRoi(); return;}
 		roi = newRoi;
 		roiFillColor = roi.getFillColor();
+		if (roiFillColor == null)
+			roiFillColor = Color.yellow;
+		else
+			roiFillColor = Colors.decode(Colors.colorToHexString(roiFillColor), roiFillColor);
+		
 		roiStrokeWidth = roi.getStrokeWidth();
 		roiStrokeColor = roi.getStrokeColor();
 		if (roiStrokeColor ==null)
 			roiStrokeColor = Color.yellow;
+		else
+			roiStrokeColor = Colors.decode(Colors.colorToHexString(roiStrokeColor), roiStrokeColor);
 		
 		if (ip!=null) {
 			ip.setMask(null);
@@ -1721,9 +1729,9 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 				public void run()
 				{
 					double strokeWidthMagAdjust = roiStrokeWidth/win.getCanvas().getMagnification();
-					Roi dummyRoi = new Roi(0,0,0,0);
-					dummyRoi.setStrokeWidth(strokeWidthMagAdjust);
-					strokeWidthMagAdjust = dummyRoi.getStrokeWidth();
+//					Roi dummyRoi = new Roi(0,0,0,0);
+//					dummyRoi.setStrokeWidth(strokeWidthMagAdjust);
+//					strokeWidthMagAdjust = dummyRoi.getStrokeWidth();
 
 					if (roi instanceof Line) 
 						roi.setStrokeWidth(strokeWidthMagAdjust);
@@ -1733,7 +1741,9 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 					if (blinkOn){
 						if (roi instanceof Arrow)
 							roi.setStrokeColor(roiStrokeColor.brighter());
+						
 						roi.setFillColor(Roi.getDefaultFillColor());
+						
 						if (roi instanceof TextRoi)
 							roi.setFillColor(Color.yellow);
 
@@ -1741,6 +1751,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 					} else {
 						if (roi instanceof Arrow)
 							roi.setStrokeColor(roiStrokeColor.darker());
+						
 						roi.setFillColor(roiFillColor);
 						blinkOn =true;
 					}
@@ -2857,6 +2868,14 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 
 	public Color getRoiFillColor() {
 		return roiFillColor;
+	}
+
+	public Color getRoiStrokeColor() {
+		return roiStrokeColor;
+	}
+
+	public void setRoiStrokeColor(Color roiStrokeColor) {
+		this.roiStrokeColor = roiStrokeColor;
 	}
 
 	public void setDupImp(ImagePlus impCopy) {
