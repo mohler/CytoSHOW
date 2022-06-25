@@ -13,7 +13,7 @@ public class ColorChooser implements TextListener, AdjustmentListener {
 	Vector colors, sliders;
 	ColorPanel panel;
 	Color initialColor;
-	int red, green, blue;
+	int red, green, blue, alpha;
 	boolean useHSB;
 	String title;
 	Frame frame;
@@ -30,6 +30,7 @@ public class ColorChooser implements TextListener, AdjustmentListener {
 		red = initialColor.getRed();
 		green = initialColor.getGreen();
 		blue = initialColor.getBlue();
+		alpha = initialColor.getAlpha();
 		this.useHSB = useHSB;
 		this.frame = frame;
 	}
@@ -37,6 +38,7 @@ public class ColorChooser implements TextListener, AdjustmentListener {
 	/** Displays a color selection dialog and returns the color selected by the user. */
 	public Color getColor() {
 		GenericDialog gd = frame!=null?new GenericDialog(title, frame):new GenericDialog(title);
+		gd.addSlider("Opacity:", 0, 255, blue);
 		gd.addSlider("Red:", 0, 255, red);
 		gd.addSlider("Green:", 0, 255, green);
 		gd.addSlider("Blue:", 0, 255, blue);
@@ -50,20 +52,31 @@ public class ColorChooser implements TextListener, AdjustmentListener {
 			((Scrollbar)sliders.elementAt(i)).addAdjustmentListener(this);
 		gd.showDialog();
 		if (gd.wasCanceled()) return null;
+		int alpha = (int)gd.getNextNumber();
 		int red = (int)gd.getNextNumber();
 		int green = (int)gd.getNextNumber();
 		int blue = (int)gd.getNextNumber();
-		return new Color(red, green, blue);
+		return new Color(red, green, blue, alpha);
 	}
 
 	public void textValueChanged(TextEvent e) {
-		int red = (int)Tools.parseDouble(((TextField)colors.elementAt(0)).getText());
-		int green = (int)Tools.parseDouble(((TextField)colors.elementAt(1)).getText());
-		int blue = (int)Tools.parseDouble(((TextField)colors.elementAt(2)).getText());
+		int alpha = (int)Tools.parseDouble(((TextField)colors.elementAt(0)).getText());
+		int red = (int)Tools.parseDouble(((TextField)colors.elementAt(1)).getText());
+		int green = (int)Tools.parseDouble(((TextField)colors.elementAt(2)).getText());
+		int blue = (int)Tools.parseDouble(((TextField)colors.elementAt(3)).getText());
 		if (red<0) red=0; if (red>255) red=255;
 		if (green<0) green=0; if (green>255) green=255;
 		if (blue<0) blue=0; if (blue>255) blue=255;
-		panel.setColor(new Color(red, green, blue));
+		if (alpha<0) alpha=0; if (alpha>255) alpha=255;
+		panel.setColor(new Color(red, green, blue, alpha));
+		if (frame instanceof ImageWindow) {
+			for (Roi roi:((ImageWindow)frame).getImagePlus().getRoiManager().getSelectedRoisAsArray()) {
+				if (roi != null) {
+					roi.setFillColor(new Color(red, green, blue, alpha));
+				}
+				((ImageWindow)frame).getImagePlus().getCanvas().paintDoubleBuffered(((ImageWindow)frame).getImagePlus().getCanvas().getGraphics());
+			}
+		}
 		panel.repaint();
 	}
 

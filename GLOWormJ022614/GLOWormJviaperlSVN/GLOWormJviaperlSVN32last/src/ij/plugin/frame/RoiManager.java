@@ -694,7 +694,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 				if (existingColor != null) {
 					this.setRoiFillColor(rois.get(getListModel().get(getListModel().getSize() - 1)), existingColor);
-
+					imp.getRoiManager().select(imp, getListModel().getSize() - 1);
 				}
 
 				updateShowAll();
@@ -718,9 +718,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					for (int c = 0; c < 8 - l; c++)
 						hexInt = "0" + hexInt;
 					String hexName = "#" + hexInt;
-					Color fillColor = JColorChooser.showDialog(this.getFocusOwner(),
-							"Pick a color for " + this.getSelectedRoisAsArray()[0].getName() + "...",
-							Colors.decode(hexName, Color.cyan));
+//					Color fillColor = JColorChooser.showDialog(this.getFocusOwner(),
+//							"Pick a color for " + this.getSelectedRoisAsArray()[0].getName() + "...",
+//							Colors.decode(hexName, Color.cyan));
+					ColorChooser cc = new ColorChooser("Pick a color for " + this.getSelectedRoisAsArray()[0].getName() + "...",
+							Colors.decode(hexName, Color.cyan), false, imp.getWindow());
+					Color fillColor = cc.getColor();
+
 					String whackchacha = hexName.substring(0, 3);
 					if (whackchacha.equals("#00"))
 						whackchacha = "#88";
