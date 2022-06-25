@@ -58,9 +58,9 @@ public class Roi extends Object implements Cloneable, java.io.Serializable {
 	protected double asp_bk; //saves aspect ratio if resizing takes roi very small
 	protected ImageProcessor cachedMask;
 	protected Color handleColor = Color.white;
-	protected Color  strokeColor;
+	protected Color  strokeColor, trueStrokeColor;
 	protected Color instanceColor; //obsolete; replaced by  strokeColor
-	protected Color fillColor;
+	protected Color fillColor, trueFillColor;
 	protected BasicStroke stroke;
 	protected boolean nonScalable;
 	protected boolean overlay;
