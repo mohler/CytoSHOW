@@ -939,6 +939,10 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 												((StackWindow)imp.getWindow()).cSelector.getHeight())
 						:0)
 						+imp.getWindow().overheadPanel.getHeight();
+		
+		newWidth = imageWidth;
+		newHeight = imageHeight;
+		
 		Dimension newSize = canEnlarge(newWidth, newHeight);
 		if (sx > newWidth)
 			sx= (int)(imageWidth*magnification);
@@ -1296,9 +1300,14 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		if (IJ.spaceBarDown() ) {
 			// temporarily switch to "hand" tool of space bar down
 			if (toolID==Toolbar.OVAL || toolAlt==Toolbar.BRUSH_ROI) {
-				if (imp.getRoi().contains(ox, oy)) {
-					toolID = Toolbar.RECTANGLE;
-				} else {
+				if (imp.getRoi()!=null) {
+					if (imp.getRoi().contains(ox, oy)) {
+						toolID = Toolbar.RECTANGLE;
+					} else {
+						setupScroll(ox, oy);
+						return;
+					}
+				}else {
 					setupScroll(ox, oy);
 					return;
 				}
