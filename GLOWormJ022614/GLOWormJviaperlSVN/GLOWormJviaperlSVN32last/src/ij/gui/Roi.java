@@ -1400,9 +1400,10 @@ public class Roi extends Object implements Cloneable, java.io.Serializable {
 		return defaultFillColor;
 	}
 	
-	/** Copy the attributes (outline color, fill color, outline width) 
+	/** Copy the attributes (name, outline color, fill color, outline width) 
 		of  'roi2' to the this selection. */
 	public void copyAttributes(Roi roi2) {
+		this.name = roi2.getName();
 		this. strokeColor = roi2. strokeColor;
 		this.fillColor = roi2.fillColor;
 		this.stroke = roi2.stroke;
