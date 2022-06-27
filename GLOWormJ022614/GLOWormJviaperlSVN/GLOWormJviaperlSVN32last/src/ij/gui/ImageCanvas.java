@@ -1293,10 +1293,19 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		int ox = offScreenX(x);
 		int oy = offScreenY(y);
 		setXMouse(ox); setYMouse(oy);
-		if (IJ.spaceBarDown() && (toolID!=Toolbar.OVAL || toolAlt!=Toolbar.BRUSH_ROI)) {
+		if (IJ.spaceBarDown() ) {
 			// temporarily switch to "hand" tool of space bar down
-			setupScroll(ox, oy);
-			return;
+			if (toolID==Toolbar.OVAL || toolAlt==Toolbar.BRUSH_ROI) {
+				if (imp.getRoi().contains(ox, oy)) {
+					toolID = Toolbar.RECTANGLE;
+				} else {
+					setupScroll(ox, oy);
+					return;
+				}
+			} else {
+				setupScroll(ox, oy);
+				return;
+			}
 		}
 
 
@@ -1389,10 +1398,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			break;
 		case Toolbar.OVAL:
 			if (Toolbar.getBrushSize()>0) {
-				if (IJ.spaceBarDown())
-					handleRoiMouseDown(e);
-				else
-					new RoiBrush();
+				new RoiBrush();
 			} else
 				handleRoiMouseDown(e);
 			break;
