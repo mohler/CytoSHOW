@@ -169,7 +169,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		if (ic == null /* || ic==this */|| ic.imp==null)
 			return;
 		
-		IJ.log("a. "+ic.getBounds().width +" "+ic.getBounds().height+" "+magnification);
+//		IJ.log("a. "+ic.getBounds().width +" "+ic.getBounds().height+" "+magnification);
 		
 		if (ic.imp.getWidth()!=imageWidth || ic.imp.getHeight()!=imageHeight)
 			return;
@@ -177,7 +177,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		dstWidth = ic.getBounds().width;
 		dstHeight = ic.getBounds().height;
 		
-		IJ.log("b. "+dstWidth +" "+dstHeight+" "+magnification);
+//		IJ.log("b. "+dstWidth +" "+dstHeight+" "+magnification);
 		
 		srcRect.width = (int)(dstWidth/magnification);
 		srcRect.height = (int)(dstHeight/magnification);
@@ -187,14 +187,14 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			srcRect.height = imageHeight;
 		}
 		
-		IJ.log("c. "+srcRect.width +" "+srcRect.height+" "+magnification);
+//		IJ.log("c. "+srcRect.width +" "+srcRect.height+" "+magnification);
 		
 		if (srcRect.width < (int) (dstWidth/magnification)){
 				dstWidth = (int) (srcRect.width * magnification);
 				dstHeight = (int) (srcRect.height * magnification);
 		}
 
-		IJ.log("d. "+dstWidth +" "+dstHeight+" "+magnification);
+//		IJ.log("d. "+dstWidth +" "+dstHeight+" "+magnification);
 		
 		
 		srcRect = new Rectangle(ic.srcRect.x, ic.srcRect.y, ic.srcRect.width, ic.srcRect.height);
