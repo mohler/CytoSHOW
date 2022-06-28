@@ -47,7 +47,7 @@ import javax.swing.JPopupMenu;
 import org.vcell.gloworm.MultiQTVirtualStack;
 
 /** This is a Canvas used to display images in a Window. */
-public class ImageCanvas extends Canvas implements MouseListener, MouseMotionListener, MouseWheelListener, Cloneable {
+public class ImageCanvas extends Canvas implements MouseListener, MouseMotionListener, MouseWheelListener, ComponentListener, Cloneable {
 
 	public static Cursor defaultCursor = new Cursor(Cursor.DEFAULT_CURSOR);
 	protected static Cursor handCursor = new Cursor(Cursor.HAND_CURSOR);
@@ -148,6 +148,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		addMouseListener(this);
 		addMouseMotionListener(this);
 		addMouseWheelListener (this);
+		addComponentListener(this);
 		addKeyListener(ij);  // ImageJ handles keyboard shortcuts
 		setFocusTraversalKeysEnabled(false);
 	}
@@ -165,10 +166,37 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 	/** Update this ImageCanvas to have the same zoom and scale settings as the one specified. */
 	void update(ImageCanvas ic) {
-		if (ic==null || ic==this || ic.imp==null)
+		if (ic == null /* || ic==this */|| ic.imp==null)
 			return;
+		
+		IJ.log("a. "+ic.getBounds().width +" "+ic.getBounds().height+" "+magnification);
+		
 		if (ic.imp.getWidth()!=imageWidth || ic.imp.getHeight()!=imageHeight)
 			return;
+		
+		dstWidth = ic.getBounds().width;
+		dstHeight = ic.getBounds().height;
+		
+		IJ.log("b. "+dstWidth +" "+dstHeight+" "+magnification);
+		
+		srcRect.width = (int)(dstWidth/magnification);
+		srcRect.height = (int)(dstHeight/magnification);
+		
+		if (srcRect.width > imageWidth) {
+			srcRect.width = imageWidth;
+			srcRect.height = imageHeight;
+		}
+		
+		IJ.log("c. "+srcRect.width +" "+srcRect.height+" "+magnification);
+		
+		if (srcRect.width < (int) (dstWidth/magnification)){
+				dstWidth = (int) (srcRect.width * magnification);
+				dstHeight = (int) (srcRect.height * magnification);
+		}
+
+		IJ.log("d. "+dstWidth +" "+dstHeight+" "+magnification);
+		
+		
 		srcRect = new Rectangle(ic.srcRect.x, ic.srcRect.y, ic.srcRect.width, ic.srcRect.height);
 		setMagnification(ic.magnification);
 		setDrawingSize(ic.dstWidth, ic.dstHeight);
@@ -3767,14 +3795,21 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		IJ.setKeyUp(KeyEvent.VK_CONTROL);
 		Point p = this.getCursorLoc();
 
-		if (imp.getRoi() != null
+		Roi roi = imp.getRoi();
+		if (roi != null
 				/* && imp.getRoi().contains(p.x, p.y) */ 
 				&& Toolbar.getToolId() == Toolbar.OVAL 
 				&& Toolbar.getOvalToolType() == Toolbar.BRUSH_ROI
 				&& !IJ.spaceBarDown()) {
 			Toolbar.setBrushSize(Toolbar.getBrushSize() > rot?Toolbar.getBrushSize() - rot: 1);
-			
-			flags += InputEvent.BUTTON1_MASK;
+//			if (!roi.isArea()){
+//				imp.deleteRoi();
+//			} else {
+//				int size = (int) roi.getBounds().width/2;
+//				Toolbar.setBrushSize(size);
+//			}
+
+ 			flags += InputEvent.BUTTON1_MASK;
 			new RoiBrush();
 		} else {
 			if (shiftKeyDown){
@@ -3795,6 +3830,30 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			}
 		}
 		e.consume();
+	}
+
+	@Override
+	public void componentResized(ComponentEvent e) {
+		
+		update(this);
+	}
+
+	@Override
+	public void componentMoved(ComponentEvent e) {
+			// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void componentShown(ComponentEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void componentHidden(ComponentEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
