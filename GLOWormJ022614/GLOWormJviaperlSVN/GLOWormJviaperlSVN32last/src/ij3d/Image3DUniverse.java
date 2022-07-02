@@ -238,134 +238,125 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				
 				if (c == recentContent && (( Math.abs(win.canvas3D.recentX-e.getX()))<3) && ( Math.abs((win.canvas3D.recentY-e.getY()))<3)) {
 					
-				} else if (c == null){
-					win.canvas3D.crsrImg = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB_PRE);
-					Graphics2D g2Dcanv = win.canvas3D.getGraphics2D();
-					win.canvas3D.stopRenderer();
-//					win.canvas3D.swap();
-					g2Dcanv.drawImage(win.canvas3D.crsrImg, e.getX(), e.getY(), null);
-//					win.canvas3D.swap();
-					win.canvas3D.startRenderer();
-
-				} else {
+				} else if (c != null){
 					win.canvas3D.recentX=e.getX();
 					win.canvas3D.recentY=e.getY();
 
 					recentContent = c;
 					String cursorString = " ";
 					Toolkit tk = Toolkit.getDefaultToolkit();
-					if(c != null) {
-						IJ.showStatus(c.getName().split("( |_)=")[0]);
-						cursorString = c.getName().replace("electrical", "_electrical_")
-													.replace("chemical", "_chemical_")
-													.replace("undefined", "_undefined_")
-													.replace("certain", "")
-													.replace("uncertain", "")
-													.split("( |_)=")[0];
-
-
-						if (IJ.isWindows())
-							cursorString = c.getName().replace("electrical", "_electrical_")
+					IJ.showStatus(c.getName().split("( |_)=")[0]);
+					cursorString = c.getName().replace("electrical", "_electrical_")
 							.replace("chemical", "_chemical_")
 							.replace("undefined", "_undefined_")
 							.replace("certain", "")
 							.replace("uncertain", "")
 							.split("( |_)=")[0];
 
-						String[] cursorWords = cursorString.replaceAll(("(-i\\d+-(c|g)\\d+-s\\d+)"), "").replace("_", " ").split(" ");
-						if (cursorString.matches("(.*)(-i\\d+-(c|g)\\d+-s\\d+)")) {
-							Arrays.sort(cursorWords);
-							if (cursorWords.length >1) {
-								cursorWords[cursorWords.length-1] = cursorWords[cursorWords.length-1] 
-										+ cursorString.replaceAll(("(.*)(-i\\d+-(c|g)\\d+-s\\d+)"), "$2");
-							}
+
+					if (IJ.isWindows())
+						cursorString = c.getName().replace("electrical", "_electrical_")
+						.replace("chemical", "_chemical_")
+						.replace("undefined", "_undefined_")
+						.replace("certain", "")
+						.replace("uncertain", "")
+						.split("( |_)=")[0];
+
+					String[] cursorWords = cursorString.replaceAll(("(-i\\d+-(c|g)\\d+-s\\d+)"), "").replace("_", " ").split(" ");
+					if (cursorString.matches("(.*)(-i\\d+-(c|g)\\d+-s\\d+)")) {
+						Arrays.sort(cursorWords);
+						if (cursorWords.length >1) {
+							cursorWords[cursorWords.length-1] = cursorWords[cursorWords.length-1] 
+									+ cursorString.replaceAll(("(.*)(-i\\d+-(c|g)\\d+-s\\d+)"), "$2");
 						}
-						int wordsPerRow = (cursorString.contains("chemical")||cursorString.contains("electrical")||cursorString.contains("undefined"))?1:5;
-						int cursorLineCount = cursorWords.length / wordsPerRow
-								+ (cursorWords.length % 3 == 0 ? 0 : 1) /* +wordsPerRow */;
-						int fontSize = 18-(4*cursorLineCount/18);
-						Font font = Font.decode("Arial-"+(fontSize));
-						String[] cursorStringCRs = new String[cursorLineCount+1] ;
-						cursorStringCRs[0] = "    ";
-						int l =0;
-						for (int word=0; word<cursorWords.length; word=word+1) {
-							if (word >0 && (word)%wordsPerRow==0) {
-								l++;
-							} 
-							if (word == cursorWords.length-1 && cursorWords[word].matches("(.*)(-i\\d+-(c|g)\\d+-s\\d+)")) {
-								if (cursorStringCRs[l] == null) {
-									cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)(-i\\d+-(c|g)\\d+-s\\d+)", "$1");
-									l++;
-									cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)(-i\\d+-(c|g)\\d+-s\\d+)", "$2").replace("-", " ")
-															+ " count=" + cursorWords.length;
-									continue;
-								} else {
-									cursorStringCRs[l] = cursorStringCRs[l] + " "+ cursorWords[word].replaceAll("(.*)(-i\\d+-(c|g)\\d+-s\\d+)", "$1");
-									l++;
-									cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)(-i\\d+-(c|g)\\d+-s\\d+)", "$2").replace("-", " ")
-															+ " count=" + cursorWords.length;
-									continue;
-								}
-							}
-							if (cursorStringCRs[l] == null) {
-								cursorStringCRs[l] = cursorWords[word];
-							} else
-								cursorStringCRs[l] = cursorStringCRs[l] + " "+ cursorWords[word];
-						}
-						String longestString = "";
-						for (String cscrString:cursorStringCRs) {
-							if (cscrString!=null && longestString.length() < cscrString.length()) {
-								longestString = cscrString;
-							}
-						}
-						Point3d pickCenter = new Point3d();
-						c.getBounds().getCenter(pickCenter);
-
-						//create the FontRenderContext object which helps us to measure the text
-						FontRenderContext frc = new FontRenderContext(null, true, true);
-
-						//get the height and width of the text
-						Font rectFont = font.deriveFont((long)(fontSize+2));
-						Rectangle2D bounds = rectFont.getStringBounds(longestString, frc);
-						int w = (int) bounds.getWidth();
-						int ht = (int) bounds.getHeight();
-						win.canvas3D.crsrImg = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB_PRE);
-
-
-						//		img.getGraphics().setColor(Colors.decode("00000000", Color.white));
-						Graphics2D g2d = (Graphics2D) win.canvas3D.crsrImg.getGraphics();
-
-						g2d.setFont(font);
-
-						g2d.setColor(Colors.decode("#88111111",Color.gray));
-						g2d.fillRect(0, 0, w, 10+ht*cursorLineCount);
-						g2d.setColor(Color.YELLOW);
-						g2d.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
-						g2d.drawLine(0, 0, 2, 7);
-						g2d.drawLine(0, 0, 7, 2);
-						g2d.drawLine(0, 0, 8, 8);
-						//					g2d.drawString(cursorString, 1, img.getHeight(null)-1);
-						for (int line=0; line<cursorStringCRs.length; line++) {
-							if (cursorStringCRs[line]!=null)
-								g2d.drawString(cursorStringCRs[line], 1, (line+1) * fontSize + 8);
-						}
-						if(true /*IJ.isWindows()*/){
-
-							Graphics2D g2Dcanv = win.canvas3D.getGraphics2D();
-							win.canvas3D.stopRenderer();
-//							win.canvas3D.swap();
-							g2Dcanv.drawImage(win.canvas3D.crsrImg, e.getX(), e.getY(), null);
-//							win.canvas3D.swap();
-							win.canvas3D.startRenderer();
-
-						} else {
-							win.canvas3D.setCursor(tk.createCustomCursor(win.canvas3D.crsrImg,new Point(0,0),"searchCursor"));
-						}
-
-					} else {
-						IJ.showStatus("");
-						win.canvas3D.setCursor(ImageCanvas.defaultCursor);
 					}
+					int wordsPerRow = (cursorString.contains("chemical")||cursorString.contains("electrical")||cursorString.contains("undefined"))?1:5;
+					int cursorLineCount = cursorWords.length / wordsPerRow
+							+ (cursorWords.length % 3 == 0 ? 0 : 1) /* +wordsPerRow */;
+					int fontSize = 18-(4*cursorLineCount/18);
+					Font font = Font.decode("Arial-"+(fontSize));
+					String[] cursorStringCRs = new String[cursorLineCount+1] ;
+					cursorStringCRs[0] = "    ";
+					int l =0;
+					for (int word=0; word<cursorWords.length; word=word+1) {
+						if (word >0 && (word)%wordsPerRow==0) {
+							l++;
+						} 
+						if (word == cursorWords.length-1 && cursorWords[word].matches("(.*)(-i\\d+-(c|g)\\d+-s\\d+)")) {
+							if (cursorStringCRs[l] == null) {
+								cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)(-i\\d+-(c|g)\\d+-s\\d+)", "$1");
+								l++;
+								cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)(-i\\d+-(c|g)\\d+-s\\d+)", "$2").replace("-", " ")
+										+ " count=" + cursorWords.length;
+								continue;
+							} else {
+								cursorStringCRs[l] = cursorStringCRs[l] + " "+ cursorWords[word].replaceAll("(.*)(-i\\d+-(c|g)\\d+-s\\d+)", "$1");
+								l++;
+								cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)(-i\\d+-(c|g)\\d+-s\\d+)", "$2").replace("-", " ")
+										+ " count=" + cursorWords.length;
+								continue;
+							}
+						}
+						if (cursorStringCRs[l] == null) {
+							cursorStringCRs[l] = cursorWords[word];
+						} else
+							cursorStringCRs[l] = cursorStringCRs[l] + " "+ cursorWords[word];
+					}
+					String longestString = "";
+					for (String cscrString:cursorStringCRs) {
+						if (cscrString!=null && longestString.length() < cscrString.length()) {
+							longestString = cscrString;
+						}
+					}
+					Point3d pickCenter = new Point3d();
+					c.getBounds().getCenter(pickCenter);
+
+					//create the FontRenderContext object which helps us to measure the text
+					FontRenderContext frc = new FontRenderContext(null, true, true);
+
+					//get the height and width of the text
+					Font rectFont = font.deriveFont((long)(fontSize+2));
+					Rectangle2D bounds = rectFont.getStringBounds(longestString, frc);
+					int w = (int) bounds.getWidth();
+					int ht = (int) bounds.getHeight();
+					win.canvas3D.crsrImg = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB_PRE);
+
+
+					//		img.getGraphics().setColor(Colors.decode("00000000", Color.white));
+					Graphics2D g2d = (Graphics2D) win.canvas3D.crsrImg.getGraphics();
+
+					g2d.setFont(font);
+
+					g2d.setColor(Colors.decode("#88111111",Color.gray));
+					g2d.fillRect(0, 0, w, 10+ht*cursorLineCount);
+					g2d.setColor(Color.YELLOW);
+					g2d.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
+					g2d.drawLine(0, 0, 2, 7);
+					g2d.drawLine(0, 0, 7, 2);
+					g2d.drawLine(0, 0, 8, 8);
+					//					g2d.drawString(cursorString, 1, img.getHeight(null)-1);
+					for (int line=0; line<cursorStringCRs.length; line++) {
+						if (cursorStringCRs[line]!=null)
+							g2d.drawString(cursorStringCRs[line], 1, (line+1) * fontSize + 8);
+					}
+					if(true /*IJ.isWindows()*/){
+
+						Graphics2D g2Dcanv = win.canvas3D.getGraphics2D();
+						win.canvas3D.stopRenderer();
+						win.canvas3D.swap();
+						int x = e.getX();
+						int y = e.getY();
+						g2Dcanv.drawImage(win.canvas3D.crsrImg, x,y, null);
+						win.canvas3D.swap();
+						win.canvas3D.startRenderer();
+
+						//						} else {
+						//							win.canvas3D.setCursor(tk.createCustomCursor(win.canvas3D.crsrImg,new Point(0,0),"searchCursor"));
+					}
+
+				} else {
+					IJ.showStatus("");
+					win.canvas3D.setCursor(ImageCanvas.defaultCursor);
 				}
 			}
 		});
