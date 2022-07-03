@@ -461,6 +461,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		addPopupItem("HiLite lineage name conflicts");
 		addPopupItem("MeasureROIvolSA");
 		addPopupItem("synapseStatsFromROIs");
+		addPopupItem("flipRoiHorizontalWithImage");
+		addPopupItem("flipRoiVerticalWithImage");
 		add(pm);
 	}
 
@@ -1128,6 +1130,18 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				this.sketchVolumeMeasurer(null);
 			} else if (command.equals("synapseStatsFromROIs")) {
 				this.synapseStatsFromRois();
+			} else if (command.equals("flipRoiHorizontalWithImage")) {
+				for (Roi roi:getSelectedRoisAsArray()) {
+					roi = this.flipRoiWithImage(roi, false);
+					rois.replace(roi.getName(), roi);
+					IJ.log("flipH "+roi.getName());
+				}
+			} else if (command.equals("flipRoiVerticalWithImage")) {
+				for (Roi roi:getSelectedRoisAsArray()) {
+					roi = this.flipRoiWithImage(roi, true);
+					rois.replace(roi.getName(), roi);
+					IJ.log("flipV "+roi.getName());
+				}
 			}
 
 			this.imp.getCanvas().requestFocus();
@@ -10549,6 +10563,23 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 	}
 
+	public Roi flipRoiWithImage(Roi roi, boolean vertical) {
+		Polygon poly = roi.getPolygon();
+		for (int p=0;p< poly.npoints;p++) {
+			if (vertical) {
+				poly.ypoints[p] = imp.getHeight() - poly.ypoints[p];
+			} else {
+				poly.xpoints[p] = imp.getWidth() - poly.xpoints[p];		
+			}
+		}		
+		Roi flippedRoi = new PolygonRoi(poly, Roi.POLYGON);
+		flippedRoi.copyAttributes(roi);
+		flippedRoi.setPosition(roi.getCPosition(), roi.getZPosition(), roi.getTPosition());
+		return flippedRoi;
+	}
+	
+	
+	
 	@Override
 	public void changedUpdate(DocumentEvent e) {
 		// TODO Auto-generated method stub

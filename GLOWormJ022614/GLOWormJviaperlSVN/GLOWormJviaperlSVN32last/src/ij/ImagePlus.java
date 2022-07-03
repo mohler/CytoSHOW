@@ -1755,7 +1755,8 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 						roi.setFillColor(roiFillColor);
 						blinkOn =true;
 					}
-					draw();
+					Rectangle roiBounds = roi.getBounds();
+					draw(roiBounds.x, roiBounds.y, roiBounds.width, roiBounds.width);
 				}
 			}, 0, 500, TimeUnit.MILLISECONDS);
 		}
