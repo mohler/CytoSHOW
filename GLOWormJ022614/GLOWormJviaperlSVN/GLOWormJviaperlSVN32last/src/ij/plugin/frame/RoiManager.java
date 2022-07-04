@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.PathIterator;
 import java.io.*;
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -10564,15 +10565,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 
 	public Roi flipRoiWithImage(Roi roi, boolean vertical) {
-		Polygon poly = roi.getPolygon();
-		for (int p=0;p< poly.npoints;p++) {
-			if (vertical) {
-				poly.ypoints[p] = imp.getHeight() - poly.ypoints[p];
-			} else {
-				poly.xpoints[p] = imp.getWidth() - poly.xpoints[p];		
-			}
-		}		
-		Roi flippedRoi = new PolygonRoi(poly, Roi.POLYGON);
+		ShapeRoi sr = new ShapeRoi(roi);
+		AffineTransform at = AffineTransform.getScaleInstance(vertical?1:-1, vertical?-1:1);
+		at.translate(roi.getBounds().x + (vertical?0:-imp.getWidth()),roi.getBounds().y + (vertical?-imp.getHeight():0));
+		Shape flippedShape = at.createTransformedShape(sr.getShape());
+		ShapeRoi flippedRoi = new ShapeRoi(flippedShape);
+
 		flippedRoi.copyAttributes(roi);
 		flippedRoi.setPosition(roi.getCPosition(), roi.getZPosition(), roi.getTPosition());
 		return flippedRoi;
