@@ -1999,7 +1999,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		ImageProcessor dummyIP = new ByteProcessor(imp.getWidth(), imp.getHeight());
 		
-		Roi[] rois = getShownRoisAsArray();
+		Roi[] rois = getSelectedRoisAsArray();  //just changed this 07062022
 		
 		for (int n = 0; n < rootNames_rootFrames.size(); n++) {
 			String rootName = rootNames.get(n);
@@ -2010,16 +2010,19 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			ArrayList<Double> nameMatchROIperimArrayList = new ArrayList<Double>();
 			double sumAreas = 0;
 			double sumPerims = 0;
-			int fraa = rois.length;
-			for (int r = 0; r < fraa; r++) {
+			int sraa = rois.length;
+			for (int r = 0; r < sraa; r++) {
 				
 				String nextName = rois[r].getName();
 				if (nextName.startsWith("\"" + rootName + " \"" /* .split("_")[0] */)){
 					if (true/*rois[r] instanceof ShapeRoi*/) {
-						dummyIP.setRoi(rois[r]);
+						ShapeRoi shroi = new ShapeRoi(rois[r]);
+						shroi.setImage(rois[r].getImage());
+//						Roi shroi = rois[r];
+						dummyIP.setRoi(shroi);
 						nameMatchROIareaArrayList.add(new ByteStatistics(dummyIP, ImageStatistics.AREA, imp.getCalibration()).area);
 						sumAreas += nameMatchROIareaArrayList.get(nameMatchROIareaArrayList.size() -1);
-						double perim = rois[r].getLength();
+						double perim = shroi.getLength();
 						nameMatchROIperimArrayList.add(perim);
 						sumPerims += nameMatchROIperimArrayList.get(nameMatchROIperimArrayList.size() -1);
 					}

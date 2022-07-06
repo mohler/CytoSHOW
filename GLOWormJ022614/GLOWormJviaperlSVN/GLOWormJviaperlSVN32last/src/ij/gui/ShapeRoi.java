@@ -445,15 +445,19 @@ public class ShapeRoi extends Roi {
 		Vector rois = new Vector();
 		if (shape instanceof Rectangle2D.Double) {
 			Roi r = new Roi((int)((Rectangle2D.Double)shape).getX(), (int)((Rectangle2D.Double)shape).getY(), (int)((Rectangle2D.Double)shape).getWidth(), (int)((Rectangle2D.Double)shape).getHeight());
+			r.setImage(imp);
 			rois.addElement(r);
 		} else if (shape instanceof Ellipse2D.Double) {
 			Roi r = new OvalRoi((int)((Ellipse2D.Double)shape).getX(), (int)((Ellipse2D.Double)shape).getY(), (int)((Ellipse2D.Double)shape).getWidth(), (int)((Ellipse2D.Double)shape).getHeight());
+			r.setImage(imp);
 			rois.addElement(r);
 		} else if (shape instanceof Line2D.Double) {
 			Roi r = new ij.gui.Line((int)((Line2D.Double)shape).getX1(), (int)((Line2D.Double)shape).getY1(), (int)((Line2D.Double)shape).getX2(), (int)((Line2D.Double)shape).getY2());
+			r.setImage(imp);
 			rois.addElement(r);
 		} else if (shape instanceof Polygon) {
 			Roi r = new PolygonRoi(((Polygon)shape).xpoints, ((Polygon)shape).ypoints, ((Polygon)shape).npoints, Roi.POLYGON);
+			r.setImage(imp);
 			rois.addElement(r);
 		} else if (shape instanceof GeneralPath) {
 			PathIterator pIter;
@@ -465,6 +469,8 @@ public class ShapeRoi extends Roi {
 		}
 		Roi[] array = new Roi[rois.size()];
 		rois.copyInto((Roi[])array);
+		for (Roi re:array)
+			re.setImage(imp);
 		return array;
 	}
 	
@@ -946,6 +952,7 @@ public class ShapeRoi extends Roi {
 						if (rois!=null) {
 							roiType = guessType(count, linesOnly, curvesOnly, closed);
 							Roi r = createRoi(xCoords, yCoords, roiType);
+							r.setImage(imp);
 							if (r!=null)
 								rois.addElement(r);
 						}
@@ -1028,6 +1035,7 @@ public class ShapeRoi extends Roi {
 				if (rois!=null) {
 					roiType = shapeToRoi?TRACED_ROI:guessType(count+1, linesOnly, curvesOnly, closed);
 					Roi r = createRoi(xCoords, yCoords, roiType);
+					r.setImage(imp);
 					if (r!=null && r!=this)
 						rois.addElement(r);
 				}
@@ -1261,6 +1269,13 @@ public class ShapeRoi extends Roi {
 			return rois[0].getConvexHull();
 		else
 			return null;
+	}
+	
+	public void setImage(ImagePlus imp) {
+		this.imp = imp;
+		for (Roi roi:this.getRois()) {
+			roi.setImage(imp);
+		}
 	}
 
     /*
