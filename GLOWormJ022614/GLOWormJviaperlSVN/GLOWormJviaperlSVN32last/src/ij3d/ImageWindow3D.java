@@ -146,7 +146,7 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 		this.imp.setWindow(this);
 
 		WindowManager.addWindow(-1, this);
-		this.setResizable(IJ.isWindows()?true:true);
+		this.setResizable(IJ.isWindows()?true:false);
 
 	}
 

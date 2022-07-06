@@ -257,8 +257,9 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 			}else {
 				int roiConvCount = 0;
 				int nRois = rm.getCount();
+				Roi[] fullRois = rm.getFullRoisAsArray();
 				for (int r=0; r<nRois; r++) {
-					Roi roi = rm.getFullRoisAsArray()[r];
+					Roi roi = fullRois[r];
 					if (roi!=null) { 
 						roiConvCount++;
 						if (this != null) {
