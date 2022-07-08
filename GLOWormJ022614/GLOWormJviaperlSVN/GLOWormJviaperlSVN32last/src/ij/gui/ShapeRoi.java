@@ -1158,7 +1158,7 @@ public class ShapeRoi extends Roi {
 	/** Returns this ROI's mask pixels as a ByteProcessor with pixels "in" the mask
 		set to white (255) and pixels "outside" the mask set to black (0). */
 	public ImageProcessor getMask() {
-		if(shape==null) return null;
+		if(shape==null || width<1 || height<1) return null;
 		if (cachedMask!=null && cachedMask.getPixels()!=null)
 			return cachedMask;
 		//Rectangle r = getBounds();
