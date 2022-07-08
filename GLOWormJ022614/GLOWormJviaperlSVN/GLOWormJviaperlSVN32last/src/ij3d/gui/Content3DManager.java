@@ -1244,37 +1244,16 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 			fullListModel.removeAllElements();
 		} else {
 			list.setModel(new DefaultListModel<String>());
-			for (int i = count - 1; i >= 0; i--) {
-				boolean delete = false;
-				for (int j = 0; j < indexes.length; j++) {
-					if (indexes[j] == i)
-						delete = true;
-				}
-				if (delete) {
-					ContentInstant contentInstant = contentInstants.get(listModel.getElementAt(i));
-					if (contentInstant != null) {
-						String rootName = contentInstant.getName().contains("\"") ? "\"" + contentInstant.getName().split("\"")[1] + "\""
-								: contentInstant.getName().split("_")[0].trim();
-						int t = contentInstant.getTimepoint();
-
-						if (getContentInstantsByRootName().containsKey(rootName)) {
-							getContentInstantsByRootName().get(rootName).remove(contentInstant);
-						}
-
-						if (getContentInstantsByNumbers().containsKey(t)) {
-							getContentInstantsByNumbers().get(t).remove(contentInstant);
-						}
-						contentInstants.remove(contentInstant.getName());
-					}
-					fullListModel.removeElement(listModel.getElementAt(i));
-					listModel.remove(i);
-					if (univ.contains(contentInstant.getName().replace("_#0", "")))
-						univ.removeContent(contentInstant.getName().replace("_#0", ""));
-				}
-			}
+			Arrays.sort(indexes);
+			for (int r = indexes.length - 1; r >= 0; r--) {
+				univ.removeContent(listModel.get(indexes[r]).replace("\"","").split("\\_")[0]);
+				contentInstants.remove(listModel.get(indexes[r]));
+				fullListModel.removeElement(listModel.get(indexes[r]));
+				listModel.remove(indexes[r]);
+			}		
 			list.setModel(listModel);
+			
 		}
-
 		if (count > 1 && indexes.length == 1 && univ != null)
 			univ.removeContent(univ.getSelected().getName());
 
