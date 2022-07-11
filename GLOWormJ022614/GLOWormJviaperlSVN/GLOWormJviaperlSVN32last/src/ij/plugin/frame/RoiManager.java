@@ -4314,7 +4314,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			if (Colors.colorToHexString(fillColor).endsWith("f0f0f0")) {
 				alphaPrefix = Colors.colorToHexString(fillColor).substring(0, 3);
 			}
-			defaultColor = color;
+
 			if (rpRoi instanceof TextRoi) {
 				font = ((TextRoi) rpRoi).getCurrentFont();
 				justification = ((TextRoi) rpRoi).getJustification();
