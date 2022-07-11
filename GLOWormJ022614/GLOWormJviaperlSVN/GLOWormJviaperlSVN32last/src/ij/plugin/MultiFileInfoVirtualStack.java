@@ -1253,9 +1253,9 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 											tailFitRoi.setPosition(ownerImp.getChannel(), ownerImp.getSlice(), ownerImp.getFrame());
 										}
 											if (headFitRoi !=null)
-												ownerImp.getRoiManager().addRoi(headFitRoi, false, Color.blue, 1, false);
+												ownerImp.getRoiManager().addRoi(headFitRoi, false, null, Color.blue, 1, false);
 											if (tailFitRoi !=null)
-												ownerImp.getRoiManager().addRoi(tailFitRoi, false, Color.red, 1, false);
+												ownerImp.getRoiManager().addRoi(tailFitRoi, false, null, Color.red, 1, false);
 									}
 								}
 							}

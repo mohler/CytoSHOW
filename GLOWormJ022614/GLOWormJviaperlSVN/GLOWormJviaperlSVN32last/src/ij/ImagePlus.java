@@ -1701,17 +1701,10 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			{deleteRoi(); return;}
 		roi = newRoi;
 		roiFillColor = roi.getFillColor();
-		if (roiFillColor == null)
-			roiFillColor = Color.yellow;
-		else
-			roiFillColor = Colors.decode(Colors.colorToHexString(roiFillColor), roiFillColor);
-		
 		roiStrokeWidth = roi.getStrokeWidth();
 		roiStrokeColor = roi.getStrokeColor();
 		if (roiStrokeColor ==null)
 			roiStrokeColor = Color.yellow;
-		else
-			roiStrokeColor = Colors.decode(Colors.colorToHexString(roiStrokeColor), roiStrokeColor);
 		
 		if (ip!=null) {
 			ip.setMask(null);

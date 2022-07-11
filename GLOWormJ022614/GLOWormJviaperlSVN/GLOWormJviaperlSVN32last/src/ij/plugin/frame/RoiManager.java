@@ -1920,7 +1920,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				for (int zp = 0; zp < (int) zPadFactor; zp++) {
 //					sketchImp.setPosition(1, nextSlice-zp, nextFrame);  ***
 					scaledRoi.setPosition(1, nextSlice - zp, nextFrame);
-					sketchImp.getRoiManager().addRoi(scaledRoi, false, scaledRoi.getFillColor(), -1, false);
+					sketchImp.getRoiManager().addRoi(scaledRoi, false, scaledRoi.getStrokeColor(), scaledRoi.getFillColor(), -1, false);
 				}
 			}
 			sketchImp.getRoiManager().select(-1);
@@ -2171,7 +2171,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				for (int zp = 0; zp < (int) zPadFactor; zp++) {
 //					sketchImp.setPosition(1, nextSlice-zp, nextFrame);  ***
 					scaledRoi.setPosition(1, nextSlice - zp, nextFrame);
-					sketchImp.getRoiManager().addRoi(scaledRoi, false, scaledRoi.getFillColor(), -1, false);
+					sketchImp.getRoiManager().addRoi(scaledRoi, false, scaledRoi.getStrokeColor(), scaledRoi.getFillColor(), -1, false);
 				}
 			}
 			sketchImp.getRoiManager().select(-1);
@@ -2216,7 +2216,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					nextNewRoi.setName(rootName);
 					nextNewRoi.setLocation(nextNewRoi.getBounds().x+ minZ*sketchImp.getCalibration().pixelDepth/sketchImp.getCalibration().pixelWidth
 											, nextNewRoi.getBounds().y + minY - 10);
-					impBuildTagSet.getRoiManager().addRoi(nextNewRoi, false, ((Roi) rois[nameMatchIndexArrayList.get(0)]).getFillColor(), 1, true);
+					impBuildTagSet.getRoiManager().addRoi(nextNewRoi, false, ((Roi) rois[nameMatchIndexArrayList.get(0)]).getStrokeColor(), ((Roi) rois[nameMatchIndexArrayList.get(0)]).getFillColor(), 1, true);
 					String nextNewRoiNameFromListModel = impBuildTagSet.getRoiManager().getListModel()
 															.get(impBuildTagSet.getRoiManager().getListModel().size()-1);
 					Roi nextNewRoiFromListModel = impBuildTagSet.getRoiManager().getROIs().get(nextNewRoiNameFromListModel);
@@ -2392,16 +2392,16 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	/** Adds the specified ROI. */
 	public void addRoi(Roi roi) {
-		if (roi != null && roi.getFillColor() == null && imp!=null)
+		if (roi != null && roi.getFillColor() == null && imp!=null)  //  WHY THIS CHECK?
 			roi.setFillColor(imp.getRoiFillColor());
-		addRoi(roi, false, roi.getFillColor(), -1, true);
+		addRoi(roi, false, roi.getStrokeColor(), roi.getFillColor(), -1, true);
 	}
 
 	public boolean addRoi(boolean promptForName) {
-		return addRoi(null, promptForName, null, -1, true);
+		return addRoi(null, promptForName, null, null, -1, true);
 	}
 
-	public boolean addRoi(Roi roi, boolean promptForName, Color color, int lineWidth, boolean addToCurrentImpPosition) {
+	public boolean addRoi(Roi roi, boolean promptForName, Color strokeColor, Color fillColor, int lineWidth, boolean addToCurrentImpPosition) {
 		ImagePlus imp = this.imp;
 		if (roi == null) {
 			if (imp == null)
@@ -2412,13 +2412,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				return false;
 			}
 		}
-		if (color == null) { 
+		if (strokeColor == null) { 
 			if (roi.getStrokeColor() != null)
-				color = roi.getStrokeColor();
-			else if (color == null && imp!=null && imp.getRoiStrokeColor() != null)
-				color = imp.getRoiStrokeColor();
+				strokeColor = roi.getStrokeColor();
+			else if (strokeColor == null && imp!=null && imp.getRoiStrokeColor() != null)
+				strokeColor = imp.getRoiStrokeColor();
 		}
-		Color fillColor = color;
+
 		if (fillColor == null) 
 			if (imp != null)
 				fillColor = imp.getRoiFillColor();
@@ -2519,8 +2519,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		if (lineWidth > 1)
 			roiCopy.setStrokeWidth(lineWidth);
-		if (color != null)
-			roiCopy.setStrokeColor(color);
+		if (strokeColor != null)
+			roiCopy.setStrokeColor(strokeColor);
 		if (fillColor != null)
 			this.setRoiFillColor(roiCopy, fillColor, false);
 		rois.put(label, roiCopy);
@@ -4314,7 +4314,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			if (Colors.colorToHexString(fillColor).endsWith("f0f0f0")) {
 				alphaPrefix = Colors.colorToHexString(fillColor).substring(0, 3);
 			}
-
+//			defaultColor = color;
 			if (rpRoi instanceof TextRoi) {
 				font = ((TextRoi) rpRoi).getCurrentFont();
 				justification = ((TextRoi) rpRoi).getJustification();
@@ -5312,7 +5312,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			addRoi(true);
 		else {
 			Color color = hexColor != null ? Colors.decode(hexColor, Color.cyan) : null;
-			addRoi(null, false, color, (int) Math.round(lineWidth), true);
+			addRoi(null, false, color, color, (int) Math.round(lineWidth), true);
 		}
 		return true;
 	}
@@ -7252,7 +7252,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						oRoi.setPosition(1, plotZ, 1);
 //						imp.setPosition(1, plotZ, 1);
 //						this.addRoi(oRoi);
-						this.addRoi(oRoi, false, oRoi.getFillColor(), -1, false);
+						this.addRoi(oRoi, false, oRoi.getStrokeColor(), oRoi.getFillColor(), -1, false);
 						for (String postsynName : postsynNames) {
 							IJ.log(presynName + "," + postsynName + "," + plotZ + "," + 1 + "," + objType);
 							if (synapsePairFrequencyHashtable
@@ -7411,7 +7411,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						oRoi.setPosition(1, plotZ, 1);
 //						imp.setPosition(1, plotZ, 1);
 //						this.addRoi(oRoi);
-						this.addRoi(oRoi, false, oRoi.getFillColor(), -1, false);
+						this.addRoi(oRoi, false, oRoi.getStrokeColor(), oRoi.getFillColor(), -1, false);
 						for (String postsynName : postsynNames) {
 							IJ.log(presynName + "," + postsynName + "," + plotZ + "," + 1 + "," + objType);
 							if (synapsePairFrequencyHashtable
@@ -7714,7 +7714,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						newNames.add(cellData[9]);
 						newOval.setName(cellData[9]);
 					}
-					addRoi(newOval, false, Colors.decode("#44ff0000", Color.red), 1, false);
+					addRoi(newOval, false, null, Colors.decode("#44ff0000", Color.red), 1, false);
 
 					IJ.showStatus("importing nucleus " + getCount());
 				}
@@ -8186,7 +8186,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 						andRoi.setPosition(cPos, zPos, tPos);
 						this.setRoiFillColor(andRoi, testColor);
-						this.addRoi(andRoi, false, testColor, -1, false);
+						this.addRoi(andRoi, false, null, testColor, -1, false);
 					}
 				}
 			}
