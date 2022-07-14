@@ -141,7 +141,6 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		setDrawingSize(imageWidth, imageHeight);
 		magnification = 1.0;
 		messageRois = new Hashtable<String,Roi>();
-		canvasRoiBrush = new RoiBrush(imp);
 		
 //		DragAndDrop dnd = new DragAndDrop();
 //		if (dnd!=null)
@@ -922,6 +921,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 	}
 
 	private int rotation;
+	private Point previousP;
+	private long previousT;
 
 	public static double getLowerZoomLevel(double currentMag) {
 		double newMag = zoomLevels[0];
@@ -1327,6 +1328,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		int ox = offScreenX(x);
 		int oy = offScreenY(y);
 		setXMouse(ox); setYMouse(oy);
+		previousP = new Point(ox, oy);
 		if (IJ.spaceBarDown() ) {
 			// temporarily switch to "hand" tool of space bar down
 			if (toolID==Toolbar.OVAL || toolAlt==Toolbar.BRUSH_ROI) {
@@ -3085,6 +3087,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		int y = e.getY();
 		setXMouse(offScreenX(x));
 		setYMouse(offScreenY(y));
+		Point p = this.getCursorLoc();
 		flags = e.getModifiers();
 		//		mousePressedX = mousePressedY = -1;
 		//IJ.log("mouseDragged: "+flags);
@@ -3093,7 +3096,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			flags = InputEvent.BUTTON1_MASK;
 		if (Toolbar.getToolId()==Toolbar.HAND || IJ.spaceBarDown())
 			if (roi != null ) {
-				if (roi.contains(xMouse, yMouse)){
+				if (roi.contains(previousP.x, previousP.y)){
 					Rectangle b = roi.getBounds();
 					roi.handleMouseDrag(x, y, flags);
 				} else {
@@ -3115,8 +3118,11 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				//					roi.state = roi.MOVING;
 				roi.handleMouseDrag(x, y, flags);
 			}
+
 		}
-		
+		previousP = p;
+		previousT = new Date().getTime();
+
 		int theta = (int)Math.round(Math.random()*360);
 		double thetarad = theta * Math.PI/180.0;
 		int BIGPOWEROF2 = 8192;

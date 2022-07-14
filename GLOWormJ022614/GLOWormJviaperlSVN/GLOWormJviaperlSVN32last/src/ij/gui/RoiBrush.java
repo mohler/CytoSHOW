@@ -19,10 +19,6 @@ class RoiBrush implements Runnable {
 	}
 
 	public void run() {
-		if (img.getSchfut() != null) {
-			img.getSchfut().cancel(true);
-//			img.setSchfut(ImagePlus.blinkService.scheduleAtFixedRate(img.getBlinkRunnable(), 0, 5, TimeUnit.MILLISECONDS));
-		}
 
 		int size = Toolbar.getBrushSize();
 		if (img==null) return;
@@ -36,7 +32,7 @@ class RoiBrush implements Runnable {
 		int flags;
 		while (true) {
 			p = ic.getCursorLoc();
-			if (p.equals(previousP))
+			if (p.equals(previousP) || IJ.spaceBarDown())
 				{IJ.wait(1); continue;}
 			previousP = p;
 			flags = ic.getModifiers();
@@ -62,8 +58,9 @@ class RoiBrush implements Runnable {
 			roi2.copyAttributes(roi);
 		} else
 			roi2 = new OvalRoi(x-width/2, y-width/2, width, width);
-		if (roi2!=roi)
+		if (roi2!=roi) {
 			img.setRoi(roi2);
+		}
 		img.draw();
 	}
 
@@ -75,8 +72,9 @@ class RoiBrush implements Runnable {
 				roi2 = new ShapeRoi(roi2);
 			((ShapeRoi)roi2).not(getCircularRoi(x, y, width));
 			roi2.copyAttributes(roi);
-			if (roi2!=roi)
+			if (roi2!=roi) {
 				img.setRoi(roi2);
+			}
 		}
 		img.draw();
 	}

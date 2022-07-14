@@ -38,7 +38,7 @@ public class ColorChooser implements TextListener, AdjustmentListener {
 	/** Displays a color selection dialog and returns the color selected by the user. */
 	public Color getColor() {
 		GenericDialog gd = frame!=null?new GenericDialog(title, frame):new GenericDialog(title);
-		gd.addSlider("Opacity:", 0, 255, blue);
+		gd.addSlider("Opacity:", 0, 255, alpha);
 		gd.addSlider("Red:", 0, 255, red);
 		gd.addSlider("Green:", 0, 255, green);
 		gd.addSlider("Blue:", 0, 255, blue);
