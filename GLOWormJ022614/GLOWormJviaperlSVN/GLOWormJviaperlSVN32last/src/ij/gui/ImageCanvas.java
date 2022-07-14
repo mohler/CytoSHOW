@@ -105,6 +105,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 	public String droppedGeneUrls = "";
 	public boolean sketchyMQTVS;
 	private ArrayList<Roi> sliceRois;
+	private RoiBrush canvasRoiBrush;
 
 
 
@@ -140,7 +141,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		setDrawingSize(imageWidth, imageHeight);
 		magnification = 1.0;
 		messageRois = new Hashtable<String,Roi>();
-
+		canvasRoiBrush = new RoiBrush(imp);
+		
 //		DragAndDrop dnd = new DragAndDrop();
 //		if (dnd!=null)
 //			dnd.addDropTarget(this);
@@ -1328,6 +1330,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		if (IJ.spaceBarDown() ) {
 			// temporarily switch to "hand" tool of space bar down
 			if (toolID==Toolbar.OVAL || toolAlt==Toolbar.BRUSH_ROI) {
+	 			canvasRoiBrush = new RoiBrush(imp);
+
 				if (imp.getRoi()!=null) {
 					if (imp.getRoi().contains(ox, oy)) {
 						toolID = Toolbar.RECTANGLE;
@@ -1435,7 +1439,9 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			break;
 		case Toolbar.OVAL:
 			if (Toolbar.getBrushSize()>0) {
-				new RoiBrush();
+	 			canvasRoiBrush = new RoiBrush(imp);
+
+
 			} else
 				handleRoiMouseDown(e);
 			break;
@@ -3346,7 +3352,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		PlugInTool tool = Toolbar.getPlugInTool();
 		if (tool!=null) {
 			tool.mouseReleased(imp, e);
-			if (e.isConsumed()) return;
+//			if (e.isConsumed()) return;
 		}
 		flags = e.getModifiers();
 		flags &= ~InputEvent.BUTTON1_MASK; // make sure button 1 bit is not set
@@ -3356,19 +3362,24 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		if (roi != null) {
 			Rectangle r = roi.getBounds();
 			int type = roi.getType();
-			if ((r.width==0 || r.height==0)
-					&& !(type==Roi.POLYGON||type==Roi.POLYLINE||type==Roi.ANGLE||type==Roi.LINE)
-					&& !(roi instanceof TextRoi)
-					&& roi.getState()==roi.CONSTRUCTING
-					&& type!=roi.POINT)
-				imp.deleteRoi();
-			else {
-				roi.handleMouseUp(e.getX(), e.getY());
-				if (roi.getType()==Roi.LINE && roi.getLength()==0.0)
+			if (!e.isConsumed()) {
+
+				if ((r.width==0 || r.height==0)
+						&& !(type==Roi.POLYGON||type==Roi.POLYLINE||type==Roi.ANGLE||type==Roi.LINE)
+						&& !(roi instanceof TextRoi)
+						&& roi.getState()==roi.CONSTRUCTING
+						&& type!=roi.POINT)
 					imp.deleteRoi();
+				else {
+					roi.handleMouseUp(e.getX(), e.getY());
+					if (roi.getType()==Roi.LINE && roi.getLength()==0.0)
+						imp.deleteRoi();
+				}
+			} else {
+				imp.setSchfut(null);
+				imp.setRoi(imp.getRoi());
 			}
 		}
-
 	}
 
 	private boolean activateOverlayRoi(int ox, int oy) {
@@ -3810,8 +3821,9 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 //			}
 
  			flags += InputEvent.BUTTON1_MASK;
-			new RoiBrush();
+ 			canvasRoiBrush = new RoiBrush(imp);
 		} else {
+ 			canvasRoiBrush = new RoiBrush(imp);
 			if (shiftKeyDown){
 				int newT = imp.getFrame()+rot;
 				if (newT > imp.getNFrames()) newT = 1;

@@ -1,6 +1,7 @@
 package ij.gui;
 import ij.*;
 import java.awt.*;
+import java.util.concurrent.TimeUnit;
 
 /** Implements the ROI Brush tool.*/
 class RoiBrush implements Runnable {
@@ -9,15 +10,21 @@ class RoiBrush implements Runnable {
 	private Polygon poly;
 	private Point previousP;
 	private int mode = ADD;
- 
-	RoiBrush() {
+	private ImagePlus img;
+	
+	RoiBrush(ImagePlus imp) {
+		this.img = imp;
 		Thread thread = new Thread(this, "RoiBrush");
 		thread.start();
 	}
 
 	public void run() {
+		if (img.getSchfut() != null) {
+			img.getSchfut().cancel(true);
+//			img.setSchfut(ImagePlus.blinkService.scheduleAtFixedRate(img.getBlinkRunnable(), 0, 5, TimeUnit.MILLISECONDS));
+		}
+
 		int size = Toolbar.getBrushSize();
-		ImagePlus img = WindowManager.getCurrentImage();
 		if (img==null) return;
 		ImageCanvas ic = img.getCanvas();
 		if (ic==null) return;
@@ -57,6 +64,7 @@ class RoiBrush implements Runnable {
 			roi2 = new OvalRoi(x-width/2, y-width/2, width, width);
 		if (roi2!=roi)
 			img.setRoi(roi2);
+		img.draw();
 	}
 
 	void subtractCircle(ImagePlus img, int x, int y, int width) {
@@ -70,6 +78,7 @@ class RoiBrush implements Runnable {
 			if (roi2!=roi)
 				img.setRoi(roi2);
 		}
+		img.draw();
 	}
 
     

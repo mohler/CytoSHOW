@@ -469,8 +469,6 @@ public class ShapeRoi extends Roi {
 		}
 		Roi[] array = new Roi[rois.size()];
 		rois.copyInto((Roi[])array);
-		for (Roi re:array)
-			re.setImage(imp);
 		return array;
 	}
 	
@@ -952,7 +950,6 @@ public class ShapeRoi extends Roi {
 						if (rois!=null) {
 							roiType = guessType(count, linesOnly, curvesOnly, closed);
 							Roi r = createRoi(xCoords, yCoords, roiType);
-							r.setImage(imp);
 							if (r!=null)
 								rois.addElement(r);
 						}
@@ -1035,7 +1032,6 @@ public class ShapeRoi extends Roi {
 				if (rois!=null) {
 					roiType = shapeToRoi?TRACED_ROI:guessType(count+1, linesOnly, curvesOnly, closed);
 					Roi r = createRoi(xCoords, yCoords, roiType);
-					r.setImage(imp);
 					if (r!=null && r!=this)
 						rois.addElement(r);
 				}
@@ -1270,13 +1266,13 @@ public class ShapeRoi extends Roi {
 		else
 			return null;
 	}
-	
-	public void setImage(ImagePlus imp) {
-		this.imp = imp;
-		for (Roi roi:this.getRois()) {
-			roi.setImage(imp);
-		}
-	}
+//	ADDING THIS METHOD MAY ACTUALLY BREAK STUFF
+//	public void setImage(ImagePlus imp) {
+//		this.imp = imp;
+//		for (Roi roi:this.getRois()) {
+//			roi.setImage(imp);
+//		}
+//	}
 
     /*
     static Polygon poly;

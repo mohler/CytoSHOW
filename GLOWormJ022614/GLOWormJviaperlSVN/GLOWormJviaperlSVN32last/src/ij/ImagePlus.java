@@ -113,11 +113,54 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	private Overlay overlay;
 	private boolean hideOverlay;
 	private static int default16bitDisplayRange;
-    private static ScheduledThreadPoolExecutor blinkService;
+    public static ScheduledThreadPoolExecutor blinkService;
     private ScheduledFuture schfut;
+    private Runnable blinkRunnable = new Runnable()
+	{
+		public void run()
+		{
+			double strokeWidthMagAdjust = roiStrokeWidth/win.getCanvas().getMagnification();
+//			Roi dummyRoi = new Roi(0,0,0,0);
+//			dummyRoi.setStrokeWidth(strokeWidthMagAdjust);
+//			strokeWidthMagAdjust = dummyRoi.getStrokeWidth();
+
+			if (roi instanceof Line) 
+				roi.setStrokeWidth(strokeWidthMagAdjust);
+			else
+				roi.setStrokeWidth(roiStrokeWidth);
+			
+			if (blinkOn){
+				if (roi instanceof Arrow)
+					roi.setStrokeColor(roiStrokeColor.brighter());
+				
+				roi.setFillColor(Roi.getDefaultFillColor());
+				
+				if (roi instanceof TextRoi)
+					roi.setFillColor(Color.yellow);
+
+				blinkOn = false;
+			} else {
+				if (roi instanceof Arrow)
+					roi.setStrokeColor(roiStrokeColor.darker());
+				
+				roi.setFillColor(roiFillColor);
+				blinkOn =true;
+			}
+			Rectangle roiBounds = roi.getBounds();
+			draw(roiBounds.x-10, roiBounds.y-10, roiBounds.width+10, roiBounds.height+10);
+		}
+	};
 
 
-    /** Constructs an uninitialized ImagePlus. */
+    public Runnable getBlinkRunnable() {
+		return blinkRunnable;
+	}
+
+	public void setBlinkRunnable(Runnable blinkRunnable) {
+		this.blinkRunnable = blinkRunnable;
+	}
+
+	/** Constructs an uninitialized ImagePlus. */
     public ImagePlus() {
 		if (blinkService ==null){
 			blinkService = new ScheduledThreadPoolExecutor(1);
@@ -1717,47 +1760,23 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			blinkOn=true;
 			if (schfut != null)
 				schfut.cancel(true);
-			schfut = blinkService.scheduleAtFixedRate(new Runnable()
-			{
-				public void run()
-				{
-					double strokeWidthMagAdjust = roiStrokeWidth/win.getCanvas().getMagnification();
-//					Roi dummyRoi = new Roi(0,0,0,0);
-//					dummyRoi.setStrokeWidth(strokeWidthMagAdjust);
-//					strokeWidthMagAdjust = dummyRoi.getStrokeWidth();
-
-					if (roi instanceof Line) 
-						roi.setStrokeWidth(strokeWidthMagAdjust);
-					else
-						roi.setStrokeWidth(roiStrokeWidth);
-					
-					if (blinkOn){
-						if (roi instanceof Arrow)
-							roi.setStrokeColor(roiStrokeColor.brighter());
-						
-						roi.setFillColor(Roi.getDefaultFillColor());
-						
-						if (roi instanceof TextRoi)
-							roi.setFillColor(Color.yellow);
-
-						blinkOn = false;
-					} else {
-						if (roi instanceof Arrow)
-							roi.setStrokeColor(roiStrokeColor.darker());
-						
-						roi.setFillColor(roiFillColor);
-						blinkOn =true;
-					}
-					Rectangle roiBounds = roi.getBounds();
-					draw(roiBounds.x, roiBounds.y, roiBounds.width, roiBounds.width);
-				}
-			}, 0, 500, TimeUnit.MILLISECONDS);
+			schfut = blinkService.scheduleAtFixedRate(blinkRunnable, 0, 500, TimeUnit.MILLISECONDS);
 		}
 		if (roi!=null)
 			roi.setImage(this);
-		if (updateDisplay) draw();
+		if (updateDisplay) {
+			draw(bounds.x-10, bounds.y-10, bounds.width+10, bounds.width+10);
+		}
 	}
 	
+	public ScheduledFuture getSchfut() {
+		return schfut;
+	}
+
+	public void setSchfut(ScheduledFuture schfut) {
+		this.schfut = schfut;
+	}
+
 	/** Creates a rectangular selection. */
 	public void setRoi(int x, int y, int width, int height) {
 		setRoi(new Rectangle(x, y, width, height));
