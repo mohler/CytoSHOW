@@ -1370,7 +1370,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 
 	private Color roiStrokeColor;
 
-	protected boolean blinkOn;
+	public boolean blinkOn;
 
 	public boolean zeroUpdateMode;
 

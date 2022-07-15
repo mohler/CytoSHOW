@@ -3382,6 +3382,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 						imp.deleteRoi();
 				}
 			} else {
+				while(imp.blinkOn)
+					IJ.wait(10);
 				imp.setSchfut(null);
 				imp.setRoi(imp.getRoi());
 			}
