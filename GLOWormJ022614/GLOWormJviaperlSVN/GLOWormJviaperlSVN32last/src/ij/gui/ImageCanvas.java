@@ -1332,7 +1332,6 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		if (IJ.spaceBarDown() ) {
 			// temporarily switch to "hand" tool of space bar down
 			if (toolID==Toolbar.OVAL || toolAlt==Toolbar.BRUSH_ROI) {
-	 			canvasRoiBrush = new RoiBrush(imp);
 
 				if (imp.getRoi()!=null) {
 					if (imp.getRoi().contains(ox, oy)) {
@@ -3831,7 +3830,6 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
  			flags += InputEvent.BUTTON1_MASK;
  			canvasRoiBrush = new RoiBrush(imp);
 		} else {
- 			canvasRoiBrush = new RoiBrush(imp);
 			if (shiftKeyDown){
 				int newT = imp.getFrame()+rot;
 				if (newT > imp.getNFrames()) newT = 1;

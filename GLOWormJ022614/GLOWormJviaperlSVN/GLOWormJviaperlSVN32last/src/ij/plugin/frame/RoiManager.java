@@ -2529,7 +2529,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		ColorLegend cl = getColorLegend();
 		//
 		if (roiCopy != null) {
-			if (cl != null) {
+			if (cl != null && cl.getBrainbowColors() != null) {
 				Color clColor = cl.getBrainbowColors()
 						.get(roiCopy.getName().toLowerCase().split("_")[0].split("=")[0].replace("\"", "").trim());
 				if (clColor != null) {
@@ -3017,7 +3017,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				if (cl != null) {
 					Color clColor = cl.getBrainbowColors()
 							.get(roi.getName().toLowerCase().split("_")[0].split("=")[0].replace("\"", "").trim());
-					if (clColor != null) {
+					if (clColor != null && !clColor.equals(roi.getFillColor())) {
 						String hexRed = Integer.toHexString(clColor.getRed());
 						String hexGreen = Integer.toHexString(clColor.getGreen());
 						String hexBlue = Integer.toHexString(clColor.getBlue());
@@ -10563,7 +10563,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					: roi.getName().replace(" \"_", Colors.colorToHexString(color));
 
 			if (reNameInListNow && listModel.indexOf(roi.getName()) != -1)
-				rename(newColorName, new int[] { listModel.indexOf(roi.getName()) }, false);
+				if (!newColorName.equals(roi.getName()))
+					rename(newColorName, new int[] { listModel.indexOf(roi.getName()) }, false);
 		}
 	}
 
