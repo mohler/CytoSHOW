@@ -466,9 +466,15 @@ public class ShapeRoi extends Roi {
 			else
 				pIter = shape.getPathIterator(new AffineTransform());
 			parsePath(pIter, null, null, rois, null);
+			for (Object parsedRoi:rois) {
+				((Roi)parsedRoi).setImage(imp);
+			}
 		}
 		Roi[] array = new Roi[rois.size()];
-		rois.copyInto((Roi[])array);
+//		rois.copyInto((Roi[])array);
+		for(int r=0; r<array.length; r++) {
+			array[r] = (Roi) rois.get(r);
+		}
 		return array;
 	}
 	

@@ -2018,7 +2018,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					if (true/*rois[r] instanceof ShapeRoi*/) {
 						ShapeRoi shroi = new ShapeRoi(rois[r]);
 						shroi.setImage(rois[r].getImage());
-//						Roi shroi = rois[r];
+
 						dummyIP.setRoi(shroi);
 						nameMatchROIareaArrayList.add(new ByteStatistics(dummyIP, ImageStatistics.AREA, imp.getCalibration()).area);
 						sumAreas += nameMatchROIareaArrayList.get(nameMatchROIareaArrayList.size() -1);
@@ -2030,7 +2030,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			double totalVolume = sumAreas * imp.getCalibration().pixelDepth;
 			double totalSA = sumPerims * imp.getCalibration().pixelDepth;
-			IJ.log(""+rootName+","+String.format("%.20f",totalVolume)+","+String.format("%.20f",totalSA));
+			IJ.log(""+rootName+","+String.format("%.2f",totalVolume)+","+String.format("%.2f",totalSA));
 		}
 	}
 

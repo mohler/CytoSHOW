@@ -1140,7 +1140,7 @@ public class PolygonRoi extends Roi {
 		}
 		double dx = xp[nPoints-1]-xp[0];
 		double dy = yp[nPoints-1]-yp[0];
-		length += Math.sqrt(dx*dx*w2+dy*dy*h2);
+		length += Math.sqrt(dx*dx*w2+dy*dy*h2); //this fills in final segment between x[n-1] and x[0]
 		return length;
 	}
 
