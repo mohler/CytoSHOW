@@ -3314,7 +3314,7 @@ public class Functions implements MacroConstants, Measurements {
 		String name = interp.tokenString;
 		try {
 			if (name.equals("create")) {
-				gd = new GenericDialog(getStringArg());
+				gd = new GenericDialog(getFirstString(), getLastString()=="true"?true:false);
 				return null;
 			}
 			if (gd==null) {

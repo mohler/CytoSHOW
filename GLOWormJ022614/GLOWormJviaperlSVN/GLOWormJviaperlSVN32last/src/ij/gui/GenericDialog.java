@@ -88,10 +88,22 @@ FocusListener, ItemListener, KeyListener, AdjustmentListener, WindowListener {
 		this(title, WindowManager.getCurrentImage()!=null?
 			(Frame)WindowManager.getCurrentImage().getWindow():IJ.getInstance()!=null?IJ.getInstance():new Frame());
 	}
+	
+	public GenericDialog(String title, boolean modal) {
+		this(title, WindowManager.getCurrentImage()!=null?
+				(Frame)WindowManager.getCurrentImage().getWindow():IJ.getInstance()!=null?IJ.getInstance():new Frame(),
+				modal);
+	}
 
     /** Creates a new GenericDialog using the specified title and parent frame. */
     public GenericDialog(String title, Frame parent) {
-		super(parent==null?new Frame():parent, title, true);
+		this(title, WindowManager.getCurrentImage()!=null?
+				(Frame)WindowManager.getCurrentImage().getWindow():IJ.getInstance()!=null?IJ.getInstance():new Frame(),
+				true);    	
+    }
+    
+    public GenericDialog(String title, Frame parent, boolean modal) {
+		super(parent==null?new Frame():parent, title, modal);
 		if (Prefs.blackCanvas) {
 			setForeground(SystemColor.controlText);
 			setBackground(SystemColor.control);

@@ -1304,6 +1304,16 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		int toolID = Toolbar.getToolId();
 		int toolAlt = Toolbar.getOvalToolType();
 		ImageWindow win = imp.getWindow();
+
+		if (e.isPopupTrigger() && toolAlt==Toolbar.BRUSH_ROI) {
+			if (imp.getRoi() !=null) {
+				imp.getRoiManager().add(imp.getRoi(), false, false, false, true);
+				imp.setPosition(imp.getChannel(),imp.getSlice()+1, imp.getFrame());
+			}
+			e.consume();
+			return;
+		}
+		
 		if (win!=null && (win.running2 || win.running3) && toolID!=Toolbar.MAGNIFIER) {
 			if (win instanceof StackWindow) {
 				((StackWindow)win).setAnimate(false);
@@ -3625,7 +3635,9 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 		showCursorStatus = true;
 		int toolID = Toolbar.getToolId();
+		int toolAlt = Toolbar.getOvalToolType();
 		ImageWindow win = imp.getWindow();
+		
 		if (win!=null && (win.running2 || win.running3) && toolID!=Toolbar.MAGNIFIER) {
 			if (win instanceof StackWindow) {
 				((StackWindow)win).setAnimate(false);

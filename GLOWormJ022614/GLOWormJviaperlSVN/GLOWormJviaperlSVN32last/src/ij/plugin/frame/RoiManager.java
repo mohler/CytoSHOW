@@ -2374,6 +2374,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 
 	void add(Roi roi, boolean shiftKeyDown, boolean altKeyDown, boolean controlKeyDown) {
+		add(roi, shiftKeyDown, altKeyDown, controlKeyDown, false);
+	}
+	
+	public void add(Roi roi, boolean shiftKeyDown, boolean altKeyDown, boolean controlKeyDown, boolean nextSlice) {
 		if (controlKeyDown) {
 			addRoiSpanC = true;
 			addRoi(roi);
