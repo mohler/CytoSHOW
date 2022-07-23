@@ -1305,7 +1305,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		int toolAlt = Toolbar.getOvalToolType();
 		ImageWindow win = imp.getWindow();
 
-		if (e.isPopupTrigger() && toolAlt==Toolbar.BRUSH_ROI) {
+		if (e.getButton() == MouseEvent.BUTTON3 && toolID==Toolbar.OVAL && toolAlt==Toolbar.BRUSH_ROI) {
 			if (imp.getRoi() !=null) {
 				imp.getRoiManager().add(imp.getRoi(), false, false, false, true);
 				imp.setPosition(imp.getChannel(),imp.getSlice()+1, imp.getFrame());
