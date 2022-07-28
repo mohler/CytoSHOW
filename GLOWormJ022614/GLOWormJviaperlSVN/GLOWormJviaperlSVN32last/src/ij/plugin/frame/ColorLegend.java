@@ -136,12 +136,16 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 				((JCheckBox)checkbox[i]).setSize(150, 10);
 				checkbox[i].setLabel(clLines[i].split(",")[0].length()<20?clLines[i].split(",")[0]:clLines[i].split(",")[0].substring(0, 20) + "...");
 				checkbox[i].setName(clLines[i].split(",")[0]);			
-				checkbox[i].setBackground(Colors.decode(clLines[i].split(",")[2], Color.white));
-				brainbowColors.put(checkbox[i].getName().toLowerCase(), Colors.decode(clLines[i].split(",")[2], Color.white));	
-				if (clLines[i].split(",")[0] != clLines[i].split(",")[1])
-					brainbowColors.put(clLines[i].split(",")[1].toLowerCase(), Colors.decode(clLines[i].split(",")[2], Color.white));	
-
-				checkboxHash.put(Colors.decode(clLines[i].split(",")[2], Color.white), checkbox[i]);
+				if (clLines[i].split(",")[0] != clLines[i].split(",")[1]) {
+					if (clLines[i].split(",")[1].startsWith("#")) {
+						brainbowColors.put(clLines[i].split(",")[0].toLowerCase(), Colors.decode(clLines[i].split(",")[1], Color.white));	
+					}
+				} else if (clLines[i].length() >2){
+					brainbowColors.put(checkbox[i].getName().toLowerCase(), Colors.decode(clLines[i].split(",")[2], Color.white));	
+					checkbox[i].setBackground(Colors.decode(clLines[i].split(",")[2], Color.white));
+					checkboxHash.put(Colors.decode(clLines[i].split(",")[2], Color.white), checkbox[i]);
+				}
+				
 				checkbox[i].setFont(Menus.getFont().deriveFont(8));
 				//			IJ.log("WHATUP?");
 

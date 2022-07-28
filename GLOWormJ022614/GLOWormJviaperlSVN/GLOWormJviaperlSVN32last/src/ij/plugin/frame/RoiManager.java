@@ -8152,7 +8152,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	public void mapNearNeighborContacts() {
 		Roi[] selRois = this.getSelectedRoisAsArray();
-		expansionDistance = IJ.getNumber("Distance for contact partner search", expansionDistance);
+		expansionDistance = IJ.getNumber("Distance (pixels) for contact partner search", expansionDistance);
 		ArrayList<String> cellsAlreadyMapped = new ArrayList<String>();
 		for (Roi roi : selRois) {
 			if (cellsAlreadyMapped.contains(roi.getName().split("\"")[1])) {
