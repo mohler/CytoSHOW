@@ -1820,7 +1820,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			ImagePlus sketchImp = null;
 
 			String rootName = rootNames.get(n);
-
+			String outPathObj = outDir + File.separator + "SVV_" + rootName + "__1_1_0000.obj";
+			String outPathMtl = outDir + File.separator + "SVV_" + rootName + "__1_1_0000.mtl";
+			String outPathGltf = outDir + File.separator + "SVV_" + rootName + "__1_1_0000.gltf";
+			if (new File(outPathObj).canRead() 
+					&& new File(outPathMtl).canRead() 
+					&& new File(outPathGltf).canRead()) {
+				continue;
+			}				
+			
 			select(-1);
 			IJ.wait(50);
 			ArrayList<Integer> nameMatchIndexArrayList = new ArrayList<Integer>();
@@ -1951,7 +1959,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			IJ.log("" + 1.0 + "|" + 1.0 + "|" + 1.0 + "|" + (minX - 10) * sketchImp.getCalibration().pixelWidth + "|"
 					+ (minY - 10) * sketchImp.getCalibration().pixelHeight + "|"
 					/* maxZ b\c stackflip */ + (-maxZ - 1) * sketchImp.getCalibration().pixelDepth * zPadFactor + "|"
-					+ outDir + File.separator + "SVV_" + rootName + "_" + rootName + "_1_1_0000.obj" + "|" + outDir
+					+ outDir + File.separator + "SVV_" + rootName + "_1_1_0000.obj" + "|" + outDir
 					+ File.separator);
 			sketchImp.changes = false;
 			sketchImp.close();
