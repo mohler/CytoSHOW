@@ -8174,7 +8174,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					continue;
 				}
 //	WITH justSelectedSlices, NEIGHBOR SEARCH ONLY IN SELECTED SLICE, NOT ALL SLICES
-				if (justSelectedSlices && queryRoi != roi){
+				if (justSelectedSlices && (queryRoi.getCPosition() != roi.getCPosition()
+										|| queryRoi.getZPosition() != roi.getZPosition()
+										|| queryRoi.getTPosition() != roi.getTPosition())){
 					continue;
 				}
 				int cPos = queryRoi.getCPosition();
