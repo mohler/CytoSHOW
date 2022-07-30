@@ -1106,7 +1106,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			} else if (command.equals("StarryNiteExporter")) {
 				this.exportROIsAsZippedStarryNiteNuclei(IJ.getFilePath("Save zipped SN nuclei"));
 			} else if (command.equals("Map Neighbors")) {
-				mapNearNeighborContacts();
+				mapNearNeighborContacts(shiftKeyDown);
 			} else if (command.equals("Color Tags by Group Interaction Rules")) {
 				colorTagsByGroupInteractionRules();
 			} else if (command.equals("Color Objs by Group Interaction Rules")) {
@@ -8158,16 +8158,23 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	}
 
-	public void mapNearNeighborContacts() {
+	public void mapNearNeighborContacts(boolean justSelectedSlices) {
 		Roi[] selRois = this.getSelectedRoisAsArray();
-		expansionDistance = IJ.getNumber("Distance for contact partner search", expansionDistance);
+		expansionDistance = IJ.getNumber("Distance (pixels) for contact partner search", expansionDistance);
 		ArrayList<String> cellsAlreadyMapped = new ArrayList<String>();
 		for (Roi roi : selRois) {
 			if (cellsAlreadyMapped.contains(roi.getName().split("\"")[1])) {
 				continue;
 			}
+			
+// THIS LOOP CASTS THE SEARCH ALONG THE ENTIRE LENGTH OF EACH SELECTED CELL.  
+			
 			for (Roi queryRoi : this.getROIsByName().get("\"" + roi.getName().split("\"")[1] + "\"")) {
 				if (!queryRoi.getName().split("\"")[1].equalsIgnoreCase(roi.getName().split("\"")[1])) {
+					continue;
+				}
+//	WITH justSelectedSlices, NEIGHBOR SEARCH ONLY IN SELECTED SLICE, NOT ALL SLICES
+				if (justSelectedSlices && queryRoi != roi){
 					continue;
 				}
 				int cPos = queryRoi.getCPosition();
