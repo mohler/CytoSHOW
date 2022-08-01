@@ -3710,7 +3710,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 						int oldZ = z;
 
-////		  SPECIAL CASE ONLY FOR honoring JSH image GAPS AT Z56 z162-166				
+////		  SPECIAL CASE ONLY FOR honoring JSH image GAPS AT Z56 z163-166				
 //						if (z>55){
 //							z++;
 //						}
