@@ -3734,6 +3734,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						if (cl != null) {
 							Color clColor = cl.getBrainbowColors().get(
 									roi.getName().toLowerCase().split("_")[0].split("=")[0].replace("\"", "").trim());
+							if (clColor == null) {
+								clColor = cl.getBrainbowColors().get(
+										roi.getName().toLowerCase().split("_")[0].split("=")[0].replace("\"", "").trim()
+										.replaceAll(".*by", ""));
+							}
 							if (clColor != null) {
 								String hexRed = Integer.toHexString(clColor.getRed());
 								String hexGreen = Integer.toHexString(clColor.getGreen());
