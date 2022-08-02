@@ -464,7 +464,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		addPopupItem("synapseStatsFromROIs");
 		addPopupItem("flipRoiHorizontalWithImage");
 		addPopupItem("flipRoiVerticalWithImage");
-		add(pm);
+//		add(pm);
 	}
 
 	void addPopupItem(String s) {
@@ -982,6 +982,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						sortmode = chunksLength - 3;
 					if (shiftKeyDown)
 						sortmode = chunksLength - 2;
+					if (shiftKeyDown && controlKeyDown)
+						sortmode = chunksLength - 4;
 //					if (sortmode>1)
 //						sortmode++;
 				}
@@ -5630,8 +5632,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	public void mousePressed(MouseEvent e) {
 		int x = e.getX(), y = e.getY();
-		if (e.isPopupTrigger() || e.isMetaDown())
-			pm.show(e.getComponent(), x, y);
+//		if (e.getButton()==3 && e.getSource() instanceof JButton && ((JButton)e.getSource()).getText().equals("Sort"))
+//			pm.show(e.getComponent(), x, y);
 	}
 
 	public void mouseWheelMoved(MouseWheelEvent event) {
