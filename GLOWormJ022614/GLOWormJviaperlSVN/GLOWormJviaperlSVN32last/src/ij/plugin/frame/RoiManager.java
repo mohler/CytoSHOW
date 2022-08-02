@@ -310,7 +310,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		bigPanel.setLayout(layout);
 		list.setPrototypeCellValue("012345678901234567890123456789");
 		list.addListSelectionListener(this);
-		list.addKeyListener(ij);
+		list.addKeyListener(this);
 		list.addMouseListener(this);
 		list.addMouseWheelListener(this);
 		((JComponent) list).setToolTipText(
@@ -1147,7 +1147,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				}
 			}
 
-			this.imp.getCanvas().requestFocus();
+//			this.imp.getCanvas().requestFocus();
 		}
 		// IJ.log("THREAD DONE");
 	}
@@ -5735,9 +5735,31 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 	}
 
-	public void keyPressed(KeyEvent arg0) {
-		// TODO Auto-generated method stub
-
+	public void keyPressed(KeyEvent e) {
+		ImageJ ij = IJ.getInstance();
+		switch(e.getKeyCode()) {
+			case KeyEvent.VK_EQUALS: 
+			case KeyEvent.VK_MINUS: 
+			case KeyEvent.VK_ESCAPE:
+//			case KeyEvent.VK_COMMA: case 0xbc: 
+//			case KeyEvent.VK_PERIOD: case 0xbe: 
+//	
+//			case KeyEvent.VK_LEFT: case KeyEvent.VK_RIGHT: case KeyEvent.VK_UP: case KeyEvent.VK_DOWN: // arrow keys
+//			case KeyEvent.VK_NUMPAD6: case KeyEvent.VK_6: case KeyEvent.VK_KP_RIGHT:
+//			case KeyEvent.VK_NUMPAD4: case KeyEvent.VK_4: case KeyEvent.VK_KP_LEFT:
+//			case KeyEvent.VK_NUMPAD8: case KeyEvent.VK_8: case KeyEvent.VK_KP_UP:
+//			case KeyEvent.VK_NUMPAD2: case KeyEvent.VK_2: case KeyEvent.VK_KP_DOWN: 
+//			case KeyEvent.VK_NUMPAD7: case KeyEvent.VK_7: case KeyEvent.VK_HOME:
+//			case KeyEvent.VK_NUMPAD9: case KeyEvent.VK_9: case KeyEvent.VK_PAGE_DOWN:
+//			case KeyEvent.VK_NUMPAD1: case KeyEvent.VK_1: case KeyEvent.VK_END:
+//			case KeyEvent.VK_NUMPAD3: case KeyEvent.VK_3: case KeyEvent.VK_PAGE_UP:
+//			case KeyEvent.VK_NUMPAD5: case KeyEvent.VK_5: /*case KeyEvent.VK_PAGE_UP:*/
+//			case KeyEvent.VK_NUMPAD0: case KeyEvent.VK_0: /*case KeyEvent.VK_PAGE_UP:*/	
+				WindowManager.setTempCurrentImage(imp);
+				ij.keyPressed(e);
+				WindowManager.setTempCurrentImage(null);
+			default: break;
+		}
 	}
 
 	public void keyReleased(KeyEvent arg0) {
