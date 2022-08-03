@@ -5739,7 +5739,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		ImageJ ij = IJ.getInstance();
 		switch(e.getKeyCode()) {
 			case KeyEvent.VK_EQUALS: 
-			case KeyEvent.VK_MINUS: 
+			case KeyEvent.VK_PLUS:
+			case KeyEvent.VK_ADD: //specific to numberpad
+			case KeyEvent.VK_MINUS:
+			case KeyEvent.VK_SUBTRACT: //specific to numberpad
 			case KeyEvent.VK_ESCAPE:
 //			case KeyEvent.VK_COMMA: case 0xbc: 
 //			case KeyEvent.VK_PERIOD: case 0xbe: 
