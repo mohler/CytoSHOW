@@ -1512,7 +1512,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				return true;
 			}
 		}
-		rm.select(imp, -1);
+//		rm.select(imp, -1);
 		return false;
 	}
 

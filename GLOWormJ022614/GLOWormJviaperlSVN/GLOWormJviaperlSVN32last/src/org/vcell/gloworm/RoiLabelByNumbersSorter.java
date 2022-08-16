@@ -46,7 +46,7 @@ public class RoiLabelByNumbersSorter {
 				num = num.substring(num.length()-maxDigits);//trim back to maxDigits total in num
 				labels[i] = num + labels[i];
 			}
-			labels[i] = labels[i].replaceAll("(0*)(([A-Z]|[a-z]|\\#)+)(.*)", "$2$4");
+//			labels[i] = labels[i].replaceAll("(0*)(([A-Z]|[a-z]|\\#)+)(.*)", "$2$4");    // CLEVER REGEX WITH DUMB IDEA BEHIND IT!!
 		}
 		if (labels!=null) {
 			Arrays.sort(labels);

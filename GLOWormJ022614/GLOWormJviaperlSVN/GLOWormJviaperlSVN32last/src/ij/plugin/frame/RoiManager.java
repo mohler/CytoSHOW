@@ -1989,15 +1989,31 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		double zPadFactor = 1;
 		IJ.setForegroundColor(255, 255, 255);
 		IJ.setBackgroundColor(0, 0, 0);
-		if (getSelectedRoisAsArray().length < 1)
-			return;
+//		if (getSelectedRoisAsArray().length < 1)
+//			return;
 		ArrayList<String> rootNames_rootFrames = new ArrayList<String>();
 		ArrayList<String> rootNames = new ArrayList<String>();
-		String roiColorString = Colors.colorToHexString(this.getSelectedRoisAsArray()[0].getFillColor());
-//		roiColorString = roiColorString.substring(3 /*roiColorString.length()-6*/);
-		String assignedColorString = roiColorString;
+//		String roiColorString = Colors.colorToHexString(this.getSelectedRoisAsArray()[0].getFillColor());
+////		roiColorString = roiColorString.substring(3 /*roiColorString.length()-6*/);
+//		String assignedColorString = roiColorString;
 
-		for (Roi selRoi : getSelectedRoisAsArray()) {
+		Roi[] roisArray = getSelectedRoisAsArray();
+		if (roisArray == null || roisArray.length <1) {
+			roisArray = getShownRoisAsArray();
+		}
+		Roi cropRoi = imp.getRoi();
+		if (cropRoi == null) {
+			cropRoi = new Roi(0,0,imp.getWidth(),imp.getHeight());
+		} 
+		int sraa = roisArray.length;
+		ArrayList<Integer> skipIndexes = new ArrayList<Integer>();
+		for (int r = 0; r < sraa; r++) {
+			Roi selRoi = roisArray[r];
+			if (!cropRoi.contains((int)selRoi.getBounds().getCenterX(), (int)selRoi.getBounds().getCenterY())) {
+				roisArray[r] = null;
+				skipIndexes.add(r);
+				continue;
+			}
 			String rootName = selRoi.getName().contains("\"") ? selRoi.getName().split("\"")[1].trim() : "";
 			rootName = rootName.contains(" ") ? rootName.split("[_\\- ]")[0].trim() : rootName;
 			String[] rootChunks = selRoi.getName().split("_");
@@ -2009,20 +2025,23 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		ImageProcessor dummyIP = new ByteProcessor(imp.getWidth(), imp.getHeight());
 		
-		Roi[] rois = getSelectedRoisAsArray();  //just changed this 07062022
+		Roi[] rois = roisArray;  
 		
 		for (int n = 0; n < rootNames_rootFrames.size(); n++) {
 			String rootName = rootNames.get(n);
 
 			select(-1);
-			IJ.wait(50);
+//			IJ.wait(50);
 			ArrayList<Double> nameMatchROIareaArrayList = new ArrayList<Double>();
 			ArrayList<Double> nameMatchROIperimArrayList = new ArrayList<Double>();
 			double sumAreas = 0;
 			double sumPerims = 0;
-			int sraa = rois.length;
-			for (int r = 0; r < sraa; r++) {
-				
+			int sraaa = rois.length;
+			for (int r = 0; r < sraaa; r++) {
+				if (rois[r] == null || skipIndexes.contains(r)) {
+//					IJ.wait(1);
+					continue;
+				}
 				String nextName = rois[r].getName();
 				if (nextName.startsWith("\"" + rootName + " \"" /* .split("_")[0] */)){
 					if (true/*rois[r] instanceof ShapeRoi*/) {
@@ -7117,6 +7136,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (imp != null) {
 			if (list.getSelectedIndices().length <= 1) {
 				restore(imp, index, true);
+			} else {
+				imp.killRoi();
 			}
 			if (record()) {
 				if (Recorder.scriptMode())

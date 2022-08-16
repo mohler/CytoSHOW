@@ -171,7 +171,7 @@ public class ThresholdToSelection implements PlugInFilter {
 	 * lower right corner of the previous row.
 	 */
 	Roi getRoi() {
-		IJ.showStatus("Converting threshold to selection");
+//		IJ.showStatus("Converting threshold to selection");
 		boolean[] prevRow, thisRow;
 		ArrayList polygons = new ArrayList();
 		Outline[] outline;
