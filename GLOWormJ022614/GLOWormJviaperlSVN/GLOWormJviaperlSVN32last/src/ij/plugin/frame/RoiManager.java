@@ -1989,13 +1989,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		double zPadFactor = 1;
 		IJ.setForegroundColor(255, 255, 255);
 		IJ.setBackgroundColor(0, 0, 0);
-//		if (getSelectedRoisAsArray().length < 1)
-//			return;
+
 		ArrayList<String> rootNames_rootFrames = new ArrayList<String>();
 		ArrayList<String> rootNames = new ArrayList<String>();
-//		String roiColorString = Colors.colorToHexString(this.getSelectedRoisAsArray()[0].getFillColor());
-////		roiColorString = roiColorString.substring(3 /*roiColorString.length()-6*/);
-//		String assignedColorString = roiColorString;
+		Hashtable<String,ArrayList<Roi>> rootNameFrameSpecificRoisHashTable = new Hashtable<String,ArrayList<Roi>>();
 
 		Roi[] roisArray = getSelectedRoisAsArray();
 		if (roisArray == null || roisArray.length <1) {
@@ -2021,14 +2018,49 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			if (!rootNames_rootFrames.contains(rootName + "_" + rootFrame)) {
 				rootNames_rootFrames.add(rootName + "_" + rootFrame);
 				rootNames.add(rootName);
+				ArrayList<Roi> sameRootNameRoiArrayList = new ArrayList<Roi>();
+				rootNameFrameSpecificRoisHashTable.put(rootName + "_" + rootFrame, sameRootNameRoiArrayList);
 			}
+			rootNameFrameSpecificRoisHashTable.get(rootName + "_" + rootFrame).add(selRoi);
 		}
 		ImageProcessor dummyIP = new ByteProcessor(imp.getWidth(), imp.getHeight());
 		
 		Roi[] rois = roisArray;  
 		
+//		for (int n = 0; n < rootNames_rootFrames.size(); n++) {
+//			String rootName = rootNames.get(n);
+//
+//			select(-1);
+////			IJ.wait(50);
+//			ArrayList<Double> nameMatchROIareaArrayList = new ArrayList<Double>();
+//			ArrayList<Double> nameMatchROIperimArrayList = new ArrayList<Double>();
+//			double sumAreas = 0;
+//			double sumPerims = 0;
+//			int sraaa = rois.length;
+//			for (int r = 0; r < sraaa; r++) {
+//				if (rois[r] == null || skipIndexes.contains(r)) {
+////					IJ.wait(1);
+//					continue;
+//				}
+//				String nextName = rois[r].getName();
+//				if (nextName.startsWith("\"" + rootName + " \"" /* .split("_")[0] */)){
+//					if (true/*rois[r] instanceof ShapeRoi*/) {
+//						ShapeRoi shroi = new ShapeRoi(rois[r]);
+//						shroi.setImage(rois[r].getImage());
+//
+//						dummyIP.setRoi(shroi);
+//						nameMatchROIareaArrayList.add(new ByteStatistics(dummyIP, ImageStatistics.AREA, imp.getCalibration()).area);
+//						sumAreas += nameMatchROIareaArrayList.get(nameMatchROIareaArrayList.size() -1);
+//						double perim = shroi.getLength();
+//						nameMatchROIperimArrayList.add(perim);
+//						sumPerims += nameMatchROIperimArrayList.get(nameMatchROIperimArrayList.size() -1);
+//					}
+//				}
+//			}
+
 		for (int n = 0; n < rootNames_rootFrames.size(); n++) {
 			String rootName = rootNames.get(n);
+			String rootNameFrame = rootNames_rootFrames.get(n);
 
 			select(-1);
 //			IJ.wait(50);
@@ -2037,16 +2069,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			double sumAreas = 0;
 			double sumPerims = 0;
 			int sraaa = rois.length;
-			for (int r = 0; r < sraaa; r++) {
-				if (rois[r] == null || skipIndexes.contains(r)) {
-//					IJ.wait(1);
-					continue;
-				}
-				String nextName = rois[r].getName();
+			ArrayList<Roi> theseRois = rootNameFrameSpecificRoisHashTable.get(rootNameFrame);
+			for (Roi thisRoi : theseRois) {
+
+				String nextName = thisRoi.getName();
 				if (nextName.startsWith("\"" + rootName + " \"" /* .split("_")[0] */)){
-					if (true/*rois[r] instanceof ShapeRoi*/) {
-						ShapeRoi shroi = new ShapeRoi(rois[r]);
-						shroi.setImage(rois[r].getImage());
+					if (true/*thisRoi instanceof ShapeRoi*/) {
+						ShapeRoi shroi = new ShapeRoi(thisRoi);
+						shroi.setImage(thisRoi.getImage());
 
 						dummyIP.setRoi(shroi);
 						nameMatchROIareaArrayList.add(new ByteStatistics(dummyIP, ImageStatistics.AREA, imp.getCalibration()).area);
@@ -2057,6 +2087,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					}
 				}
 			}
+
 			double totalVolume = sumAreas * imp.getCalibration().pixelDepth;
 			double totalSA = sumPerims * imp.getCalibration().pixelDepth;
 			IJ.log(""+rootName+","+String.format("%.2f",totalVolume)+","+String.format("%.2f",totalSA));
