@@ -19,7 +19,7 @@ public class RoiLabelByNumbersSorter {
 //			return;
 //		}
 		int listLength = labels.length;
-		int maxDigits = 15;		
+		int maxDigits = 30;		
 		int lDCChunksLength = 0;
 
 		for (int i=0; i<listLength; i++) {
@@ -39,14 +39,14 @@ public class RoiLabelByNumbersSorter {
 			
 			for (String num:nums) {
 
-				num = num.split("-")[0].replace("\"", "").replace(" ", "").toLowerCase();
+				String newNum = num.replace("\"", "").replace(" ", "").toLowerCase().replaceAll("^(.*)-\\d+$", "$1");
 				
-				if (num.length()==0) num = "aaaaaa";
-				num = "000000000000000" + num; // prepend maxDigits leading zeroes
-				num = num.substring(num.length()-maxDigits);//trim back to maxDigits total in num
-				labels[i] = num + labels[i];
+				if (newNum.length()==0) newNum = "aaaaaa";
+				newNum = "00000000000000000000000000000000000" + newNum; // prepend maxDigits leading zeroes
+				newNum = newNum.substring(newNum.length()-maxDigits);//trim back to maxDigits total in newNum
+				labels[i] = newNum + labels[i];
 			}
-//			labels[i] = labels[i].replaceAll("(0*)(([A-Z]|[a-z]|\\#)+)(.*)", "$2$4");    // CLEVER REGEX WITH DUMB IDEA BEHIND IT!!
+			labels[i] = labels[i].replaceAll("(0*)(([A-Z]|[a-z]|\\#)+)(.*)", "$2$4");    
 		}
 		if (labels!=null) {
 			Arrays.sort(labels);
