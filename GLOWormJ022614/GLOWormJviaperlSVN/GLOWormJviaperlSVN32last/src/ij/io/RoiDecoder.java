@@ -318,6 +318,9 @@ public class RoiDecoder {
 			default:
 				throw new IOException("Unrecognized ROI type: "+type);
 		}
+		if (roi == null)
+			return null;
+		
 		roi.setName(getRoiName());
 		
 		// read stroke width, stroke color and fill color (1.43i or later)

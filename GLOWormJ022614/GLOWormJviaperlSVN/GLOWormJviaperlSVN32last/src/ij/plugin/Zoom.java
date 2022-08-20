@@ -3,6 +3,7 @@ import ij.*;
 import ij.gui.*;
 import ij.process.*;
 import ij.measure.*;
+import ij.plugin.frame.RoiManager;
 
 import java.awt.*;
 
@@ -57,6 +58,7 @@ public class Zoom implements PlugIn{
 		int x = r.x+r.width/2;
 		int y = r.y+r.height/2;
 		mag = ic.getHigherZoomLevel(mag);
+		imp.getRoiManager().showAll(RoiManager.SHOW_NONE);
 		while(r.width*mag*10<w.width - marginw && r.height*mag*2<w.height - marginh) {
 			ic.zoomIn(ic.screenX(x), ic.screenY(y));
 			double cmag = ic.getMagnification();
@@ -64,6 +66,8 @@ public class Zoom implements PlugIn{
 			mag = ic.getHigherZoomLevel(cmag);
 			w = imp.getWindow().getBounds();
 		}
+		imp.getRoiManager().showAll(RoiManager.SHOW_ALL);	
+		imp.setRoi(roi);
 	}
 	
 	/** Based on Albert Cardona's ZoomExact plugin:

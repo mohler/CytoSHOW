@@ -2698,7 +2698,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					+ (addRoiSpanZ ? 0 : roi.getZPosition()) + "_" + (addRoiSpanT ? 0 : roi.getTPosition()));
 		}
 		//						sliceRois.add(roi);
-		if (roi.getName().contains("~")){
+		if (roi.getName().contains("~") || roi.getName().contains("by")){
 			sliceRois.add(0,roi);
 		}else {
 			sliceRois.add(roi);
@@ -3727,6 +3727,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					byte[] bytes = out.toByteArray();
 					RoiDecoder rd = new RoiDecoder(roiRescaleFactor, bytes, name);
 					Roi roi = rd.getRoi();
+					if (roi == null)
+						break;
 					String savedName = roi.getName();
 					if (savedName != "" && savedName != name){
 						name = savedName;
@@ -3848,7 +3850,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							sliceRois = getRoisByNumbers().get(rbnKey);
 						}
 //						sliceRois.add(roi);
-						if (roi.getName().contains("~")){
+						if (roi.getName().contains("~") || roi.getName().contains("by") ){
 							sliceRois.add(0,roi);
 						}else {
 							sliceRois.add(roi);
@@ -8281,11 +8283,62 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							+ testRoi.getName().split("\"")[1].trim();
 
 					Roi scaledRoi = null;
+					Roi shrunkRoi = null;
 
 					scaledRoi = RoiEnlarger.enlarge(testRoi, expansionDistance);
+					shrunkRoi = RoiEnlarger.enlarge(queryRoi, -1);
+					ShapeRoi scaledShapeRoi = new ShapeRoi(scaledRoi);
+					ShapeRoi shrunkShapeRoi = new ShapeRoi(shrunkRoi);
+					ShapeRoi dupShapeRoi = new ShapeRoi(dupRoi);
 
-					Roi andRoi = (new ShapeRoi(scaledRoi).and(new ShapeRoi(dupRoi)));
+					Roi andRoi = (scaledShapeRoi.and(dupShapeRoi));
 					if (andRoi != null && andRoi.getBounds().getWidth() > 0) {
+						ArrayList<Point> borderLinePoints = new ArrayList<Point>();
+						ArrayList<Point> contactLinePoints = new ArrayList<Point>();
+						boolean pointerInside = false;
+						for (int x=-10 ;x<andRoi.getBounds().width+10; x++) {
+							pointerInside = false;
+							for (int y=-10;y<andRoi.getBounds().height+10; y++) {
+								Point andRoiBoundsPoint = new Point((int)andRoi.getBounds().x +x,(int)andRoi.getBounds().y +y);
+								if ( !pointerInside && andRoi.contains(andRoiBoundsPoint.x, andRoiBoundsPoint.y)) {
+									borderLinePoints.add(new Point(andRoiBoundsPoint.x, andRoiBoundsPoint.y));
+									pointerInside = true;	
+									continue;
+								} 
+							}
+							if (pointerInside)
+								continue;
+						}
+						for (int x=andRoi.getBounds().width+10;x>-10; x--) {
+							pointerInside = false;
+							for (int y=andRoi.getBounds().height+10;y>-10; y--) {
+								Point andRoiBoundsPoint = new Point((int)andRoi.getBounds().x +x,(int)andRoi.getBounds().y +y);
+								if ( !pointerInside && andRoi.contains(andRoiBoundsPoint.x, andRoiBoundsPoint.y)) {
+									borderLinePoints.add(new Point(andRoiBoundsPoint.x, andRoiBoundsPoint.y));
+									pointerInside = true;	
+									continue;
+								} 
+							}
+							if (pointerInside)
+								continue;
+						}
+						
+						for (Point nextPoint:borderLinePoints) {
+							if (!shrunkShapeRoi.contains(nextPoint.x, nextPoint.y))
+								contactLinePoints.add(nextPoint);
+						}
+						
+						Polygon oneDcontactPolygon = new Polygon();
+						for (Point p:contactLinePoints) {
+							oneDcontactPolygon.addPoint(p.x, p.y);
+						}
+						PolygonRoi oneDcontactPolyLine = new PolygonRoi(oneDcontactPolygon, Roi.FREELINE);
+						
+						oneDcontactPolyLine.setName(andName + "borderline");
+						IJ.log(""+oneDcontactPolyLine.getName() +" z"+ zPos +" "+ borderLinePoints.size() +" "+ oneDcontactPolyLine.getNCoordinates());
+						oneDcontactPolyLine.setPosition(cPos, zPos, tPos);
+						this.setRoiFillColor(oneDcontactPolyLine, testColor);
+						this.addRoi(oneDcontactPolyLine, false, null, testColor, -1, false);
 
 						andRoi.setName(andName);
 
