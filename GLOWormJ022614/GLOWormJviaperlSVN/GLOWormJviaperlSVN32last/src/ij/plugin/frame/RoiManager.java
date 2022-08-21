@@ -8303,7 +8303,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								if ( !pointerInside && andRoi.contains(andRoiBoundsPoint.x, andRoiBoundsPoint.y)) {
 									borderLinePoints.add(new Point(andRoiBoundsPoint.x, andRoiBoundsPoint.y));
 									pointerInside = true;	
-									continue;
+									break;
 								} 
 							}
 							if (pointerInside)
@@ -8316,7 +8316,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								if ( !pointerInside && andRoi.contains(andRoiBoundsPoint.x, andRoiBoundsPoint.y)) {
 									borderLinePoints.add(new Point(andRoiBoundsPoint.x, andRoiBoundsPoint.y));
 									pointerInside = true;	
-									continue;
+									break;
 								} 
 							}
 							if (pointerInside)
@@ -8324,15 +8324,22 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						}
 						int frontsieCount =0;
 						int pointsCount =0;
+						Collections.sort(borderLinePoints, 
+								  Comparator.comparingDouble(Point::getY).thenComparingDouble(Point::getX));
 						for (Point nextPoint:borderLinePoints) {
 							if (!shrunkShapeRoi.contains(nextPoint.x, nextPoint.y)) {
 								if (contactLinePoints.size()>0 && nextPoint.distance(contactLinePoints.get(frontsieCount)) < nextPoint.distance(contactLinePoints.get(contactLinePoints.size()-1))) {
-									contactLinePoints.add(frontsieCount,nextPoint);
-									frontsieCount++;
+									if (nextPoint.distance(contactLinePoints.get(frontsieCount)) < expansionDistance){	//needed for skinny query cells
+										contactLinePoints.add(frontsieCount,nextPoint);
+										frontsieCount++;
+										pointsCount++;
+									}
 								} else {
-									contactLinePoints.add(nextPoint);
+									if (contactLinePoints.size()==0 || nextPoint.distance(contactLinePoints.get(contactLinePoints.size()-1)) < expansionDistance){	//needed for skinny query cells
+										contactLinePoints.add(nextPoint);
+										pointsCount++;
+									}
 								}
-								pointsCount++;
 							}
 						}
 						
