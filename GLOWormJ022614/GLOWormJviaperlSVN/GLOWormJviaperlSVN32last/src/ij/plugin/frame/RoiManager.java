@@ -8322,23 +8322,31 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							if (pointerInside)
 								continue;
 						}
-						
+						int frontsieCount =0;
+						int pointsCount =0;
 						for (Point nextPoint:borderLinePoints) {
-							if (!shrunkShapeRoi.contains(nextPoint.x, nextPoint.y))
-								contactLinePoints.add(nextPoint);
+							if (!shrunkShapeRoi.contains(nextPoint.x, nextPoint.y)) {
+								if (contactLinePoints.size()>0 && nextPoint.distance(contactLinePoints.get(frontsieCount)) < nextPoint.distance(contactLinePoints.get(contactLinePoints.size()-1))) {
+									contactLinePoints.add(frontsieCount,nextPoint);
+									frontsieCount++;
+								} else {
+									contactLinePoints.add(nextPoint);
+								}
+								pointsCount++;
+							}
 						}
 						
 						Polygon oneDcontactPolygon = new Polygon();
 						for (Point p:contactLinePoints) {
-							oneDcontactPolygon.addPoint(p.x, p.y);
+								oneDcontactPolygon.addPoint(p.x, p.y);
 						}
-						PolygonRoi oneDcontactPolyLine = new PolygonRoi(oneDcontactPolygon, Roi.FREELINE);
-						
-						oneDcontactPolyLine.setName(andName + "borderline");
-						IJ.log(""+oneDcontactPolyLine.getName() +" z"+ zPos +" "+ borderLinePoints.size() +" "+ oneDcontactPolyLine.getNCoordinates());
-						oneDcontactPolyLine.setPosition(cPos, zPos, tPos);
-						this.setRoiFillColor(oneDcontactPolyLine, testColor);
-						this.addRoi(oneDcontactPolyLine, false, null, testColor, -1, false);
+						Roi oneDcontactPolyLine = new PolygonRoi(oneDcontactPolygon, Roi.FREELINE);
+						Roi oneDcontactShapeRoi = oneDcontactPolyLine;//new ShapeRoi(oneDcontactPolyLine);
+						oneDcontactShapeRoi.setName(andName + "borderline");
+						IJ.log(""+oneDcontactShapeRoi.getName() +" z"+ zPos +" "+ borderLinePoints.size() +" "+ oneDcontactPolygon.npoints);
+						oneDcontactShapeRoi.setPosition(cPos, zPos, tPos);
+						this.setRoiFillColor(oneDcontactShapeRoi, null);
+						this.addRoi(oneDcontactShapeRoi, false, Color.yellow, null, -1, false);
 
 						andRoi.setName(andName);
 
