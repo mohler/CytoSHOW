@@ -8295,6 +8295,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					if (andRoi != null && andRoi.getBounds().getWidth() > 0) {
 						Roi[] andRoiParts = ((ShapeRoi)andRoi).getRois();
 						int partsCount = 0;
+						
+						int pointsCount =0;
 						for (Roi andRoiPart:andRoiParts) {
 							partsCount++;
 							ArrayList<Point> borderLinePoints = new ArrayList<Point>();
@@ -8380,7 +8382,6 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							}
 
 							int frontsieCount =0;
-							int pointsCount =0;
 							Collections.sort(borderLinePoints, 
 									Comparator.comparingDouble(Point::getY).thenComparingDouble(Point::getX));
 							for (Point nextPoint:borderLinePoints) {
@@ -8389,7 +8390,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 									if (contactLinePoints.size()>0) {
 
-										if (nextPoint.distance(contactLinePoints.get(contactLinePoints.size()-1)) > 2.5){	//needed to catch jump across skinny query cells
+										if (nextPoint.distance(contactLinePoints.get(contactLinePoints.size()-1)) > 2){	//needed to catch jump across skinny query cells
 											if (Math.abs(nextPoint.y - contactLinePoints.get(contactLinePoints.size()-1).y) < 2 || Math.abs(nextPoint.x - contactLinePoints.get(contactLinePoints.size()-1).x) < 2) {
 												// nuttin
 											} else {
@@ -8420,12 +8421,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							this.setRoiFillColor(oneDcontactShapeRoi, null);
 							this.addRoi(oneDcontactShapeRoi, false, Color.yellow, null, -1, false);
 						}
+						IJ.log("Total "+andName +"borderlines z"+ zPos +" "+ pointsCount);
 
-							andRoi.setName(andName);
 
-							andRoi.setPosition(cPos, zPos, tPos);
-							this.setRoiFillColor(andRoi, testColor);
-							this.addRoi(andRoi, false, null, testColor, -1, false);
+						andRoi.setName(andName);
+
+						andRoi.setPosition(cPos, zPos, tPos);
+						this.setRoiFillColor(andRoi, testColor);
+						this.addRoi(andRoi, false, null, testColor, -1, false);
 					}
 				}
 			}
