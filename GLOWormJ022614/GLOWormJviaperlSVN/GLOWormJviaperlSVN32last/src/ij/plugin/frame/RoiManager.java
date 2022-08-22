@@ -8293,73 +8293,139 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 					Roi andRoi = (scaledShapeRoi.and(dupShapeRoi));
 					if (andRoi != null && andRoi.getBounds().getWidth() > 0) {
-						ArrayList<Point> borderLinePoints = new ArrayList<Point>();
-						ArrayList<Point> contactLinePoints = new ArrayList<Point>();
-						boolean pointerInside = false;
-						for (int x=-10 ;x<andRoi.getBounds().width+10; x++) {
-							pointerInside = false;
-							for (int y=-10;y<andRoi.getBounds().height+10; y++) {
-								Point andRoiBoundsPoint = new Point((int)andRoi.getBounds().x +x,(int)andRoi.getBounds().y +y);
-								if ( !pointerInside && andRoi.contains(andRoiBoundsPoint.x, andRoiBoundsPoint.y)) {
-									borderLinePoints.add(new Point(andRoiBoundsPoint.x, andRoiBoundsPoint.y));
-									pointerInside = true;	
-									break;
-								} 
+						Roi[] andRoiParts = ((ShapeRoi)andRoi).getRois();
+						int partsCount = 0;
+						for (Roi andRoiPart:andRoiParts) {
+							partsCount++;
+							ArrayList<Point> borderLinePoints = new ArrayList<Point>();
+							ArrayList<Point> contactLinePoints = new ArrayList<Point>();
+							boolean pointerInside = false;
+
+							for (int y=-10;y<andRoiPart.getBounds().height+10; y++) { // top to bottom
+								pointerInside = false;
+								for (int x=-10 ;x<andRoiPart.getBounds().width+10; x++) { // left to right
+									Point andRoiPartQueryPoint = new Point((int)andRoiPart.getBounds().x +x,(int)andRoiPart.getBounds().y +y);
+									if ( !pointerInside ) {
+										if (andRoiPart.contains(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y)) {
+											if (!borderLinePoints.contains(new Point(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y))){
+												borderLinePoints.add(new Point(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y));
+												pointerInside = true;	
+												continue;
+											}
+										} else {
+											// nuttin
+										}
+									} 
+								}
+								if (pointerInside)
+									continue;
 							}
-							if (pointerInside)
-								continue;
-						}
-						for (int x=andRoi.getBounds().width+10;x>-10; x--) {
-							pointerInside = false;
-							for (int y=andRoi.getBounds().height+10;y>-10; y--) {
-								Point andRoiBoundsPoint = new Point((int)andRoi.getBounds().x +x,(int)andRoi.getBounds().y +y);
-								if ( !pointerInside && andRoi.contains(andRoiBoundsPoint.x, andRoiBoundsPoint.y)) {
-									borderLinePoints.add(new Point(andRoiBoundsPoint.x, andRoiBoundsPoint.y));
-									pointerInside = true;	
-									break;
-								} 
+
+							for (int x=-10 ;x<andRoiPart.getBounds().width+10; x++) { // left to right
+								pointerInside = false;
+								for (int y=andRoiPart.getBounds().height+10;y>-10; y--) { // bottom to top
+									Point andRoiPartQueryPoint = new Point((int)andRoiPart.getBounds().x +x,(int)andRoiPart.getBounds().y +y);
+									if ( !pointerInside ) {
+										if (andRoiPart.contains(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y)) {
+											if (!borderLinePoints.contains(new Point(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y))){
+												borderLinePoints.add(new Point(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y));
+												pointerInside = true;	
+												continue;
+											}
+										} else {
+											// nuttin
+										}
+									} 
+								}
+								if (pointerInside)
+									continue;
 							}
-							if (pointerInside)
-								continue;
-						}
-						int frontsieCount =0;
-						int pointsCount =0;
-						Collections.sort(borderLinePoints, 
-								  Comparator.comparingDouble(Point::getY).thenComparingDouble(Point::getX));
-						for (Point nextPoint:borderLinePoints) {
-							if (!shrunkShapeRoi.contains(nextPoint.x, nextPoint.y)) {
-								if (contactLinePoints.size()>0 && nextPoint.distance(contactLinePoints.get(frontsieCount)) < nextPoint.distance(contactLinePoints.get(contactLinePoints.size()-1))) {
-									if (nextPoint.distance(contactLinePoints.get(frontsieCount)) < expansionDistance){	//needed for skinny query cells
-										contactLinePoints.add(frontsieCount,nextPoint);
-										frontsieCount++;
-										pointsCount++;
-									}
-								} else {
-									if (contactLinePoints.size()==0 || nextPoint.distance(contactLinePoints.get(contactLinePoints.size()-1)) < expansionDistance){	//needed for skinny query cells
+							for (int y=andRoiPart.getBounds().height+10;y>-10; y--) { // bottom to top
+								pointerInside = false;
+								for (int x=andRoiPart.getBounds().width+10 ;x>-10; x--) { // right to left
+									Point andRoiPartQueryPoint = new Point((int)andRoiPart.getBounds().x +x,(int)andRoiPart.getBounds().y +y);
+									if ( !pointerInside ) {
+										if (andRoiPart.contains(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y)) {
+											if (!borderLinePoints.contains(new Point(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y))){
+												borderLinePoints.add(new Point(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y));
+												pointerInside = true;	
+												continue;
+											}
+										} else {
+											// nuttin
+										}
+									} 
+								}
+								if (pointerInside)
+									continue;
+							}
+							for (int x=andRoiPart.getBounds().width+10 ;x>-10; x--) { // right to left
+								pointerInside = false;
+								for (int y=-10;y<andRoiPart.getBounds().height+10; y++) { // top to bottom
+									Point andRoiPartQueryPoint = new Point((int)andRoiPart.getBounds().x +x,(int)andRoiPart.getBounds().y +y);
+									if ( !pointerInside ) {
+										if (andRoiPart.contains(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y)) {
+											if (!borderLinePoints.contains(new Point(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y))){
+												borderLinePoints.add(new Point(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y));
+												pointerInside = true;	
+												continue;
+											}
+										} else {
+											// nuttin
+										}
+									} 
+								}
+								if (pointerInside)
+									continue;
+							}
+
+							int frontsieCount =0;
+							int pointsCount =0;
+							Collections.sort(borderLinePoints, 
+									Comparator.comparingDouble(Point::getY).thenComparingDouble(Point::getX));
+							for (Point nextPoint:borderLinePoints) {
+
+								if (!shrunkShapeRoi.contains(nextPoint.x, nextPoint.y)) {
+
+									if (contactLinePoints.size()>0) {
+
+										if (nextPoint.distance(contactLinePoints.get(contactLinePoints.size()-1)) > 2.5){	//needed to catch jump across skinny query cells
+											if (Math.abs(nextPoint.y - contactLinePoints.get(contactLinePoints.size()-1).y) < 2 || Math.abs(nextPoint.x - contactLinePoints.get(contactLinePoints.size()-1).x) < 2) {
+												// nuttin
+											} else {
+												contactLinePoints.add(nextPoint);
+												pointsCount++;
+											}
+										} else {
+											contactLinePoints.add(nextPoint);
+											pointsCount++;
+										}
+
+									} else 	{
 										contactLinePoints.add(nextPoint);
 										pointsCount++;
 									}
 								}
 							}
-						}
-						
-						Polygon oneDcontactPolygon = new Polygon();
-						for (Point p:contactLinePoints) {
+
+							Polygon oneDcontactPolygon = new Polygon();
+							for (Point p:contactLinePoints) {
 								oneDcontactPolygon.addPoint(p.x, p.y);
+							}
+							Roi oneDcontactPolyLine = new PolygonRoi(oneDcontactPolygon, Roi.FREELINE);
+							Roi oneDcontactShapeRoi = oneDcontactPolyLine;//new ShapeRoi(oneDcontactPolyLine);
+							oneDcontactShapeRoi.setName(andName + "borderline"+partsCount);
+							IJ.log(""+oneDcontactShapeRoi.getName() +" z"+ zPos +" "+ borderLinePoints.size() +" "+ oneDcontactPolygon.npoints);
+							oneDcontactShapeRoi.setPosition(cPos, zPos, tPos);
+							this.setRoiFillColor(oneDcontactShapeRoi, null);
+							this.addRoi(oneDcontactShapeRoi, false, Color.yellow, null, -1, false);
 						}
-						Roi oneDcontactPolyLine = new PolygonRoi(oneDcontactPolygon, Roi.FREELINE);
-						Roi oneDcontactShapeRoi = oneDcontactPolyLine;//new ShapeRoi(oneDcontactPolyLine);
-						oneDcontactShapeRoi.setName(andName + "borderline");
-						IJ.log(""+oneDcontactShapeRoi.getName() +" z"+ zPos +" "+ borderLinePoints.size() +" "+ oneDcontactPolygon.npoints);
-						oneDcontactShapeRoi.setPosition(cPos, zPos, tPos);
-						this.setRoiFillColor(oneDcontactShapeRoi, null);
-						this.addRoi(oneDcontactShapeRoi, false, Color.yellow, null, -1, false);
 
-						andRoi.setName(andName);
+							andRoi.setName(andName);
 
-						andRoi.setPosition(cPos, zPos, tPos);
-						this.setRoiFillColor(andRoi, testColor);
-						this.addRoi(andRoi, false, null, testColor, -1, false);
+							andRoi.setPosition(cPos, zPos, tPos);
+							this.setRoiFillColor(andRoi, testColor);
+							this.addRoi(andRoi, false, null, testColor, -1, false);
 					}
 				}
 			}
