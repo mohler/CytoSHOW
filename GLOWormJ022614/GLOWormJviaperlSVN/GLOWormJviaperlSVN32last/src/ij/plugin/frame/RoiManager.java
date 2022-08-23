@@ -8418,8 +8418,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							oneDcontactShapeRoi.setName(andName + "borderline"+partsCount);
 							IJ.log(""+oneDcontactShapeRoi.getName() +" z"+ zPos +" "+ borderLinePoints.size() +" "+ oneDcontactPolygon.npoints);
 							oneDcontactShapeRoi.setPosition(cPos, zPos, tPos);
-							this.setRoiFillColor(oneDcontactShapeRoi, null);
-							this.addRoi(oneDcontactShapeRoi, false, Color.yellow, null, -1, false);
+							this.addRoi(oneDcontactShapeRoi, false, null, null, -1, false);
 						}
 						IJ.log("Total "+andName +"borderlines z"+ zPos +" "+ pointsCount);
 
@@ -10797,7 +10796,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 
 	public void setRoiFillColor(Roi roi, Color color, boolean reNameInListNow) {
-		roi.setFillColor(color);
+		if (roi.isLine()) {
+			roi.setStrokeColor(color);
+		} else {
+			roi.setFillColor(color);
+		}
 		if (roi.getName() != null && roi.getName().contains(" \"_")) {
 			String roiColorChunk = roi.getName().split("_")[1];
 			String newColorName = roiColorChunk.startsWith("#")
