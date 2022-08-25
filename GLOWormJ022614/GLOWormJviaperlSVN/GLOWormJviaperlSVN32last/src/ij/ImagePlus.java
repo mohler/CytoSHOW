@@ -1740,8 +1740,11 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 				return;
 			}
 		}
-		if (bounds.width==0 && bounds.height==0 && !(newRoi.getType()==Roi.POINT||newRoi.getType()==Roi.LINE))
-			{deleteRoi(); return;}
+		if (bounds.width == 0 && bounds.height == 0 && !(newRoi.getType() == Roi.POINT/* ||newRoi.isLine() */)) {
+//			{deleteRoi(); return;}
+			Roi newerRoi = new PointRoi(bounds.x, bounds.y);
+			newerRoi.copyAttributes(newRoi);
+		}
 		roi = newRoi;
 		roiFillColor = roi.getFillColor();
 		roiStrokeWidth = roi.getStrokeWidth();

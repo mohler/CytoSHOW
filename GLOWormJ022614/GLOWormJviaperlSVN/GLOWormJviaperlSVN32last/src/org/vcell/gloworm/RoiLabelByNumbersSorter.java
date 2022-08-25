@@ -46,7 +46,7 @@ public class RoiLabelByNumbersSorter {
 				newNum = newNum.substring(newNum.length()-maxDigits);//trim back to maxDigits total in newNum
 				labels[i] = newNum + labels[i];
 			}
-			labels[i] = labels[i].replaceAll("(0*)(([A-Z]|[a-z]|\\#)+)(.*)", "$2$4");    
+			labels[i] = labels[i].replaceAll("^(0*)(([A-Z]|[a-z]|\\#)+)(.*)", "$2$4");   // ^ trims all leadingest 0s if text chunk is what is being sorted on. But leaves them if numeric chunk is placed first...
 		}
 		if (labels!=null) {
 			Arrays.sort(labels);
@@ -54,6 +54,7 @@ public class RoiLabelByNumbersSorter {
 				labels[i] = labels[i].replaceAll("(.*)(\".*\".*)","$2");
 			}
 		} else {  //why on earth use this pig of a sorter instead of Arrays.sort()?
+
 //			ij.util.StringSorter.sort(labels);
 		}
 	}

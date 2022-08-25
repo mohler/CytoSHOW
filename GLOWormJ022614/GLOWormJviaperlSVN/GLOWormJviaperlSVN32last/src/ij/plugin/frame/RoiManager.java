@@ -3727,8 +3727,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					byte[] bytes = out.toByteArray();
 					RoiDecoder rd = new RoiDecoder(roiRescaleFactor, bytes, name);
 					Roi roi = rd.getRoi();
-					if (roi == null)
-						break;
+					if (roi == null) {
+//						break;
+						entry = in.getNextEntry();
+						continue; // while loop to next entry if this entry decoded as null...
+					}
 					String savedName = roi.getName();
 					if (savedName != "" && savedName != name){
 						name = savedName;
@@ -8413,12 +8416,16 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							for (Point p:contactLinePoints) {
 								oneDcontactPolygon.addPoint(p.x, p.y);
 							}
-							Roi oneDcontactPolyLine = new PolygonRoi(oneDcontactPolygon, Roi.FREELINE);
-							Roi oneDcontactShapeRoi = oneDcontactPolyLine;//new ShapeRoi(oneDcontactPolyLine);
-							oneDcontactShapeRoi.setName(andName + "borderline"+partsCount);
-							IJ.log(""+oneDcontactShapeRoi.getName() +" z"+ zPos +" "+ borderLinePoints.size() +" "+ oneDcontactPolygon.npoints);
-							oneDcontactShapeRoi.setPosition(cPos, zPos, tPos);
-							this.addRoi(oneDcontactShapeRoi, false, null, null, -1, false);
+							if (oneDcontactPolygon.npoints > 0) {
+								Roi oneDcontactPolyLine = new PolygonRoi(oneDcontactPolygon, Roi.FREELINE);
+								Roi oneDcontactShapeRoi = oneDcontactPolyLine;//new ShapeRoi(oneDcontactPolyLine);
+								oneDcontactShapeRoi.setName(andName + "borderline"+partsCount);
+								IJ.log(""+oneDcontactShapeRoi.getName() +" z"+ zPos +" "+ borderLinePoints.size() +" "+ oneDcontactPolygon.npoints);
+								oneDcontactShapeRoi.setPosition(cPos, zPos, tPos);
+								this.addRoi(oneDcontactShapeRoi, false, null, null, -1, false);
+							}else {
+								IJ.wait(1);
+							}
 						}
 						IJ.log("Total "+andName +"borderlines z"+ zPos +" "+ pointsCount);
 
