@@ -450,6 +450,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		addPopupItem("UpdateAceTreeLineage");
 		addPopupItem("StarryNiteExporter");
 		addPopupItem("Map Neighbors");
+		addPopupItem("Tally Tag Points");
 		addPopupItem("Color Tags by Group Interaction Rules");
 		addPopupItem("Color Objs by Group Interaction Rules");
 		addPopupItem("Substitute synapse type objs");
@@ -1109,6 +1110,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				this.exportROIsAsZippedStarryNiteNuclei(IJ.getFilePath("Save zipped SN nuclei"));
 			} else if (command.equals("Map Neighbors")) {
 				mapNearNeighborContacts(shiftKeyDown);
+			} else if (command.equals("Tally Tag Points")) {
+				this.tallyTagPointCounts();
 			} else if (command.equals("Color Tags by Group Interaction Rules")) {
 				colorTagsByGroupInteractionRules();
 			} else if (command.equals("Color Objs by Group Interaction Rules")) {
@@ -10832,7 +10835,19 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		return flippedRoi;
 	}
 	
-	
+	public void tallyTagPointCounts(){
+		for (Roi nextRoi:getSelectedRoisAsArray()){
+			if (nextRoi instanceof PolygonRoi){
+				Polygon oneDcontactPolygon = ((PolygonRoi)nextRoi).getPolygon();
+				if (oneDcontactPolygon.npoints > 0) {
+					IJ.log(""+nextRoi.getName() +" z"+ nextRoi.getZPosition() +" "+ oneDcontactPolygon.npoints +" "+ oneDcontactPolygon.npoints);
+				}else {
+					IJ.wait(1);
+				}
+			}
+			//		IJ.log("Total "+andName +"borderlines z"+ zPos +" "+ pointsCount);
+		}
+	}
 	
 	@Override
 	public void changedUpdate(DocumentEvent e) {
