@@ -263,17 +263,17 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 						.replace("uncertain", "")
 						.split("( |_)=")[0];
 
-					String[] cursorWords = cursorString.replaceAll(("(-i\\d+-(c|g)\\d+-s\\d+)"), "").replace("_", " ").split(" ");
-					if (cursorString.matches("(.*)(-i\\d+-(c|g)\\d+-s\\d+)")) {
+					String[] cursorWords = cursorString.replaceAll(("(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+)"), "").replace("_", " ").split(" ");
+					if (cursorString.matches("(.*)(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+)")) {
 						Arrays.sort(cursorWords);
-						if (cursorWords.length >1) {
+						if (cursorWords.length >0) {
 							cursorWords[cursorWords.length-1] = cursorWords[cursorWords.length-1] 
-									+ cursorString.replaceAll(("(.*)(-i\\d+-(c|g)\\d+-s\\d+)"), "$2");
+									+ cursorString.replaceAll(("(.*)(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+)"), "$2");
 						}
 					}
-					String sortedPrefixedCursorString = cursorString.replaceAll(("(.*)(-i\\d+-(c|g)\\d+-s\\d+)"), "$2")+ " count=" + cursorWords.length;
+					String sortedPrefixedCursorString = cursorString.replaceAll(("(.*)(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+)"), "$2")+ " count=" + cursorWords.length;
 					for (String word:cursorWords) {
-						sortedPrefixedCursorString = sortedPrefixedCursorString + (",") + word.replaceAll(("(-i\\d+-(c|g)\\d+-s\\d+)"), "");
+						sortedPrefixedCursorString = sortedPrefixedCursorString + (",") + word.replaceAll(("(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+)"), "");
 					}
 					if (!sortedPrefixedCursorString.equals(prevsortedPrefixedCursorString)) {
 						IJ.log(sortedPrefixedCursorString);
@@ -284,24 +284,24 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 							+ (cursorWords.length % 3 == 0 ? 0 : 1) /* +wordsPerRow */;
 					int fontSize = 18-(4*cursorLineCount/18);
 					Font font = Font.decode("Arial-"+(fontSize));
-					String[] cursorStringCRs = new String[cursorLineCount+1] ;
+					String[] cursorStringCRs = new String[cursorLineCount+2] ;
 					cursorStringCRs[0] = "    ";
 					int l =0;
 					for (int word=0; word<cursorWords.length; word=word+1) {
 						if (word >0 && (word)%wordsPerRow==0) {
 							l++;
 						} 
-						if (word == cursorWords.length-1 && cursorWords[word].matches("(.*)(-i\\d+-(c|g)\\d+-s\\d+)")) {
+						if (word == cursorWords.length-1 && cursorWords[word].matches("(.*)(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+)")) {
 							if (cursorStringCRs[l] == null) {
-								cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)(-i\\d+-(c|g)\\d+-s\\d+)", "$1");
+								cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+)", "$1");
 								l++;
-								cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)(-i\\d+-(c|g)\\d+-s\\d+)", "$2").replace("-", " ")
+								cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+)", "$2").replace("-", " ")
 										+ " count=" + cursorWords.length;
 								continue;
 							} else {
-								cursorStringCRs[l] = cursorStringCRs[l] + " "+ cursorWords[word].replaceAll("(.*)(-i\\d+-(c|g)\\d+-s\\d+)", "$1");
+								cursorStringCRs[l] = cursorStringCRs[l] + " "+ cursorWords[word].replaceAll("(.*)(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+)", "$1");
 								l++;
-								cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)(-i\\d+-(c|g)\\d+-s\\d+)", "$2").replace("-", " ")
+								cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+)", "$2").replace("-", " ")
 										+ " count=" + cursorWords.length;
 								continue;
 							}
@@ -373,16 +373,26 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		canvas.addMouseListener(new MouseAdapter() {
 
 			public void mouseClicked(MouseEvent e) {
+				boolean selectAllClustersThisIteration = IJ.shiftKeyDown();
 				if (e.isConsumed())
 					return;
 				Content picked = picker.getPickedContent(e.getX(), e.getY());
 				if (!(win instanceof SimpleImageWindow3D) && (e.getButton()==1)){
 					select(picked);
-						if (e.getClickCount() > 1 && picked!=null) {
-								adjustView(Image3DUniverse.this.getSelected());
-								centerSelected(Image3DUniverse.this.getSelected());
-							
-						}					
+					if (e.getClickCount() > 1 && picked!=null) {
+						adjustView(Image3DUniverse.this.getSelected());
+						centerSelected(Image3DUniverse.this.getSelected());
+
+					}			
+					if (selectAllClustersThisIteration) {
+						String pickedIterationString = picked.getName().replaceAll("(.*)(i[0-9]+)( .*)", "$2");
+						for (Object otherObject:Image3DUniverse.this.getContents()) {
+							Content otherContent = ((Content)otherObject);
+							if (otherContent.getName().contains(pickedIterationString)) {
+								select(otherContent);
+							}
+						}
+					}
 					e.consume();
 				}
 			}

@@ -9983,6 +9983,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		Hashtable<String, String> meiSNtoNameHashtable = new Hashtable<String, String>();
 
 		Hashtable<String, Double[]> name_iterationToCoordsHashtable = new Hashtable<String, Double[]>();
+		Hashtable<Integer, Integer> iterationNumberToIterationClusterCountHashtable = new Hashtable<Integer, Integer>();
 
 		for (String phateCoordsRow : inputPhateCoordinatesRows) {
 			if (phateCoordsRow.startsWith("serialNumber") || phateCoordsRow.startsWith(",0,1,2"))
@@ -10063,6 +10064,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						maxGroupNum = Integer.parseInt(clusterAsgnChunks[cell]);
 					}
 				}
+				iterationNumberToIterationClusterCountHashtable.put(iteration, maxGroupNum);
 				previousMaxSN = nextMaxSN;
 			}
 		}
@@ -10121,29 +10123,29 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 // WHY ARE ALL THE FAILOVER DEFAULTS HERE = 5?  WAS THAT JUST A RANDOM CHOICE??
 		if (false) {
-			if (inputPhateCoordinatesPath.toLowerCase().contains("n2u")) {
-				for (int cell = 0; cell < cellHeadersDecoded.length; cell++) {
-					nameKeyclusterTable.put(cellHeadersDecoded[cell].split("_")[0],
-							nameToCOMPClustersAndSNsHashtable
-									.get(cellHeadersDecoded[cell].split("_")[0])[0][iterationOfSix != 0 ? iterationOfSix
-											: 5]);
-				}
-			} else if (inputPhateCoordinatesPath.toLowerCase().contains("jsh")) {
-				for (int cell = 0; cell < cellHeadersDecoded.length; cell++) {
-					nameKeyclusterTable.put(cellHeadersDecoded[cell].split("_")[0],
-							nameToCOMPClustersAndSNsHashtable.get(
-									cellHeadersDecoded[cell].split("_")[0])[0][iterationOfFour != 0 ? iterationOfFour
-											: iterationOfSix != 0 ? iterationOfSix : 5]);
-				}
-			} else {
-				for (int cell = 0; cell < cellHeadersDecoded.length; cell++) {
-					nameKeyclusterTable.put(cellHeadersDecoded[cell].split("_")[0],
-							nameToCOMPClustersAndSNsHashtable.get(
-									cellHeadersDecoded[cell].split("_")[0])[0][iterationOfNine != 0 ? iterationOfNine
-											: iterationOfFour != 0 ? iterationOfFour
-													: iterationOfSix != 0 ? iterationOfSix : 5]);
-				}
-			}
+//			if (inputPhateCoordinatesPath.toLowerCase().contains("n2u")) {
+//				for (int cell = 0; cell < cellHeadersDecoded.length; cell++) {
+//					nameKeyclusterTable.put(cellHeadersDecoded[cell].split("_")[0],
+//							nameToCOMPClustersAndSNsHashtable
+//									.get(cellHeadersDecoded[cell].split("_")[0])[0][iterationOfSix != 0 ? iterationOfSix
+//											: 5]);
+//				}
+//			} else if (inputPhateCoordinatesPath.toLowerCase().contains("jsh")) {
+//				for (int cell = 0; cell < cellHeadersDecoded.length; cell++) {
+//					nameKeyclusterTable.put(cellHeadersDecoded[cell].split("_")[0],
+//							nameToCOMPClustersAndSNsHashtable.get(
+//									cellHeadersDecoded[cell].split("_")[0])[0][iterationOfFour != 0 ? iterationOfFour
+//											: iterationOfSix != 0 ? iterationOfSix : 5]);
+//				}
+//			} else {
+//				for (int cell = 0; cell < cellHeadersDecoded.length; cell++) {
+//					nameKeyclusterTable.put(cellHeadersDecoded[cell].split("_")[0],
+//							nameToCOMPClustersAndSNsHashtable.get(
+//									cellHeadersDecoded[cell].split("_")[0])[0][iterationOfNine != 0 ? iterationOfNine
+//											: iterationOfFour != 0 ? iterationOfFour
+//													: iterationOfSix != 0 ? iterationOfSix : 5]);
+//				}
+//			}
 		} else {
 			/**/
 			for (int cell = 0; cell < cellHeadersDecoded.length; cell++) {
@@ -10178,7 +10180,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					cluster = clusters[s];
 				}
 			}
-			outputTag = outputTag + "-i" + itr + "-c" + cluster + "-s" + serial;
+			outputTag = outputTag + "-i" + itr + "/" + (clusterAsgnCOMPRows.length-1) + "-c" + cluster + "/" + 
+										iterationNumberToIterationClusterCountHashtable.get(itr) + "-s" + serial;
 
 			String outputPath = outputDir + inputFile.getName() + ".i" + itr + ".c" + cluster + ".s" + serial + "."
 					+ outputTag.split("[_-]")[0] + ".obj";
