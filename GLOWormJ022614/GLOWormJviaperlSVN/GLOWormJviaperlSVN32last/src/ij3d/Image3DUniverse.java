@@ -230,6 +230,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		canvas.addMouseMotionListener(new MouseMotionAdapter() {
 			
 			Content recentContent ;
+			String prevsortedPrefixedCursorString;
 
 			public void mouseMoved(MouseEvent e) {
 
@@ -269,6 +270,14 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 							cursorWords[cursorWords.length-1] = cursorWords[cursorWords.length-1] 
 									+ cursorString.replaceAll(("(.*)(-i\\d+-(c|g)\\d+-s\\d+)"), "$2");
 						}
+					}
+					String sortedPrefixedCursorString = cursorString.replaceAll(("(.*)(-i\\d+-(c|g)\\d+-s\\d+)"), "$2")+ " count=" + cursorWords.length;
+					for (String word:cursorWords) {
+						sortedPrefixedCursorString = sortedPrefixedCursorString + (",") + word.replaceAll(("(-i\\d+-(c|g)\\d+-s\\d+)"), "");
+					}
+					if (!sortedPrefixedCursorString.equals(prevsortedPrefixedCursorString)) {
+						IJ.log(sortedPrefixedCursorString);
+						prevsortedPrefixedCursorString = sortedPrefixedCursorString;
 					}
 					int wordsPerRow = (cursorString.contains("chemical")||cursorString.contains("electrical")||cursorString.contains("undefined"))?1:5;
 					int cursorLineCount = cursorWords.length / wordsPerRow
