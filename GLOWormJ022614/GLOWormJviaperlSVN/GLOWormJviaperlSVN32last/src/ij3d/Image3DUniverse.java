@@ -265,19 +265,19 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 						.replace("uncertain", "")
 						.split("( |_)=")[0];
 
-					String[] cursorWords = cursorString.replaceAll(("(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+)"), "").replace("_", " ").split(" ");
-					if (cursorString.matches("(.*)(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+)")) {
+					String[] cursorWords = cursorString.replaceAll(("((-i\\d+-(c|g)\\d+-s\\d+)|(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+))"), "").replace("_", " ").split(" ");
+					if (cursorString.matches("(.*)((-i\\d+-(c|g)\\d+-s\\d+)|(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+))")) {
 						Arrays.sort(cursorWords);
 						if (cursorWords.length >0) {
 							cursorWords[cursorWords.length-1] = cursorWords[cursorWords.length-1] 
-									+ cursorString.replaceAll(("(.*)(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+)"), "$2");
+									+ cursorString.replaceAll(("(.*)((-i\\d+-(c|g)\\d+-s\\d+)|(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+))"), "$2");
 						}
 					}
-					String sortedPrefixedCursorString = cursorString.replaceAll(("(.*)(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+)"), "$2")+ " count=" + cursorWords.length;
+					String sortedPrefixedCursorString = cursorString.replaceAll(("(.*)((-i\\d+-(c|g)\\d+-s\\d+)|(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+))"), "$2")+ " count=" + cursorWords.length;
 					for (String word:cursorWords) {
-						sortedPrefixedCursorString = sortedPrefixedCursorString + (",") + word.replaceAll(("(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+)"), "");
+						sortedPrefixedCursorString = sortedPrefixedCursorString + (",") + word.replaceAll(("((-i\\d+-(c|g)\\d+-s\\d+)|(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+))"), "");
 					}
-					if (!sortedPrefixedCursorString.equals(prevsortedPrefixedCursorString)) {
+					if (!sortedPrefixedCursorString.equals(prevsortedPrefixedCursorString) &&  e.isShiftDown()) {
 						IJ.log(sortedPrefixedCursorString);
 						prevsortedPrefixedCursorString = sortedPrefixedCursorString;
 					}
@@ -293,17 +293,18 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 						if (word >0 && (word)%wordsPerRow==0) {
 							l++;
 						} 
-						if (word == cursorWords.length-1 && cursorWords[word].matches("(.*)(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+)")) {
+						// matching below fits both old and new formats for cphate obj names
+						if (word == cursorWords.length-1 && cursorWords[word].matches("(.*)((-i\\d+-(c|g)\\d+-s\\d+)|(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+))")) {
 							if (cursorStringCRs[l] == null) {
-								cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+)", "$1");
+								cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)((-i\\d+-(c|g)\\d+-s\\d+)|(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+))", "$1");
 								l++;
-								cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+)", "$2").replace("-", " ")
+								cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)((-i\\d+-(c|g)\\d+-s\\d+)|(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+))", "$2").replace("-", " ")
 										+ " count=" + cursorWords.length;
 								continue;
 							} else {
-								cursorStringCRs[l] = cursorStringCRs[l] + " "+ cursorWords[word].replaceAll("(.*)(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+)", "$1");
+								cursorStringCRs[l] = cursorStringCRs[l] + " "+ cursorWords[word].replaceAll("(.*)((-i\\d+-(c|g)\\d+-s\\d+)|(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+))", "$1");
 								l++;
-								cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+)", "$2").replace("-", " ")
+								cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)((-i\\d+-(c|g)\\d+-s\\d+)|(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+))", "$2").replace("-", " ")
 										+ " count=" + cursorWords.length;
 								continue;
 							}
@@ -395,7 +396,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 					}			
 					if (selectAllClustersThisIteration) {
-						String pickedIterationString = picked.getName().replaceAll("(.*)(-i[0-9]+)(.*)", "$2");
+						String pickedIterationString = picked.getName().replaceAll("(.*)(-i[0-9]+-)(.*)", "$2");
 						for (Object otherObject:Image3DUniverse.this.getContents()) {
 							Content otherContent = ((Content)otherObject);
 							if (otherContent.getName().contains(pickedIterationString)) {
@@ -816,14 +817,14 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 							}
 							blinkOn =true;
 						}
-						if(true /*IJ.isWindows()*/){
+						if(false /*IJ.isWindows()*/){
 
-//							Graphics2D g2Dcanv = win.canvas3D.getGraphics2D();
-//							win.canvas3D.stopRenderer();
-//							win.canvas3D.swap();
-//							g2Dcanv.drawImage(win.canvas3D.crsrImg, win.canvas3D.recentX, win.canvas3D.recentY, null);
-//							win.canvas3D.swap();
-//							win.canvas3D.startRenderer();
+							Graphics2D g2Dcanv = win.canvas3D.getGraphics2D();
+							win.canvas3D.stopRenderer();
+							win.canvas3D.swap();
+							g2Dcanv.drawImage(win.canvas3D.crsrImg, win.canvas3D.recentX, win.canvas3D.recentY, null);
+							win.canvas3D.swap();
+							win.canvas3D.startRenderer();
 
 						}
 					}
