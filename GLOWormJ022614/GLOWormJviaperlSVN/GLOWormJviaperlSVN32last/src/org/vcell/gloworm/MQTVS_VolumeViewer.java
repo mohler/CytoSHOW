@@ -159,7 +159,7 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 
 					Hashtable<String, Content> contents = univ.getContentsHT();
 					univ.addContent(impD, new Color3f(channelColor), objectName, threshold, new boolean[]{true, true, true}, binFactor, Content.SURFACE);
-					univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
+					univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)), true);
 					Content sel = univ.getSelected();
 					try {
 						float r = Integer.parseInt(""+channelColor.getRed()) / 256f;
@@ -176,7 +176,7 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 						Hashtable<String, Content> newestContent = new Hashtable<String, Content>();
 						newestContent.put(""+objectName, univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
 						MeshExporter.saveAsWaveFront(newestContent.values(), new File(((outDir==null?IJ.getDirectory("home"):outDir)+File.separator+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"+objectName.replaceAll(":","").replaceAll("(/|\\s+)","")+"_"+ch+"_"+0+".obj")), univ.getStartTime(), univ.getEndTime(), true);
-						univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
+						univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)), true);
 						univ.getSelected().setLocked(false);
 						univ.removeContent(univ.getSelected().getName());
 					}
@@ -249,7 +249,7 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 						//					impD.show();
 						Hashtable<String, Content> contents = univ.getContentsHT();
 						univ.addContent(impD, new Color3f(channelColor), objectName, threshold, new boolean[]{true, true, true}, binFactor, Content.SURFACE);
-						univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
+						univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)), true);
 						Content sel = univ.getSelected();
 						while (sel==null){
 							IJ.wait(100);

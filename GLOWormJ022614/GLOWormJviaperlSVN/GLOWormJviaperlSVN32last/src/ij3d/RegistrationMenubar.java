@@ -122,7 +122,7 @@ public class RegistrationMenubar extends JMenuBar implements ActionListener,
 		content.displayAs(Content.ORTHO);
 		content.showPointList(true);
 		univ.ui.setPointTool();
-		univ.select(content);
+		univ.select(content, true);
 
 		univ.setStatus("Select landmarks in " + content.getName() +
 				" and click OK");

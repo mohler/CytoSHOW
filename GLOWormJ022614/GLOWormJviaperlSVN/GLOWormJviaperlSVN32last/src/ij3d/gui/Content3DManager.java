@@ -1983,7 +1983,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 				String editedLabel = selectedLabel.replace("_#0_#0 \"_0", "").replace("\"", "");
 				Content c = ((Content)((Image3DUniverse) univ).getContent(editedLabel));
 				if (c.getInstants().containsValue(contentInstants.get(selectedLabel))) {
-					((Image3DUniverse)univ).select(c);
+					((Image3DUniverse)univ).select(c, true);
 
 				}
 			
@@ -2041,7 +2041,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 		list.setSelectedIndices(getSelectedIndexes());
 		ContentInstant contentInstant = (ContentInstant) contentInstants.get(label);
 		if (contentInstant != null) {
-			((Image3DUniverse) univ).select(((Content)contentInstant.getContentsContainingThisInstant().get(0)));
+			((Image3DUniverse) univ).select(((Content)contentInstant.getContentsContainingThisInstant().get(0)), true);
 		}
 	}
 
@@ -3713,7 +3713,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 				String editedLabel = selectedLabel.replace("_#0_#0 \"_0", "").replace("\"", "");
 				Content c = ((Content)((Image3DUniverse) univ).getContent(editedLabel));
 				if (c.getInstants().containsValue(contentInstants.get(selectedLabel))) {
-					((Image3DUniverse)univ).select(c);
+					((Image3DUniverse)univ).select(c, true);
 
 				}
 			}
