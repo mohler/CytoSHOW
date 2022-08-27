@@ -358,8 +358,6 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 						int x = e.getX();
 						int y = e.getY();
 						g2Dcanv.drawImage(win.canvas3D.crsrImg, x,y, null);
-						while (win.canvas3D.isRendererRunning())
-							IJ.wait(0);
 						win.canvas3D.swap();
 						win.canvas3D.startRenderer();
 
@@ -369,7 +367,15 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 				} else {
 					IJ.showStatus("");
-					win.canvas3D.setCursor(ImageCanvas.defaultCursor);
+					win.canvas3D.crsrImg = null;				
+					Graphics2D g2Dcanv = win.canvas3D.getGraphics2D();
+					win.canvas3D.stopRenderer();
+					win.canvas3D.swap();
+					int x = e.getX();
+					int y = e.getY();
+//					g2Dcanv.drawImage(win.canvas3D.crsrImg, x,y, null);
+					win.canvas3D.swap();
+					win.canvas3D.startRenderer();
 				}
 			}
 		});
@@ -393,7 +399,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 						for (Object otherObject:Image3DUniverse.this.getContents()) {
 							Content otherContent = ((Content)otherObject);
 							if (otherContent.getName().contains(pickedIterationString)) {
-//  	this next step will involve putting all selected spheres under the same blink timer.  Needs some major refactoring of "selected" into a Collection.
+
 								select(otherContent, !selectAllClustersThisIteration);
 							}
 						}
@@ -812,12 +818,12 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 						}
 						if(true /*IJ.isWindows()*/){
 
-							Graphics2D g2Dcanv = win.canvas3D.getGraphics2D();
-							win.canvas3D.stopRenderer();
-							win.canvas3D.swap();
-							g2Dcanv.drawImage(win.canvas3D.crsrImg, win.canvas3D.recentX, win.canvas3D.recentY, null);
-							win.canvas3D.swap();
-							win.canvas3D.startRenderer();
+//							Graphics2D g2Dcanv = win.canvas3D.getGraphics2D();
+//							win.canvas3D.stopRenderer();
+//							win.canvas3D.swap();
+//							g2Dcanv.drawImage(win.canvas3D.crsrImg, win.canvas3D.recentX, win.canvas3D.recentY, null);
+//							win.canvas3D.swap();
+//							win.canvas3D.startRenderer();
 
 						}
 					}
