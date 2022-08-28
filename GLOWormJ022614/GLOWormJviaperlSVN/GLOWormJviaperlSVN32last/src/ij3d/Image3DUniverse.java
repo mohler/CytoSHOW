@@ -869,6 +869,14 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			IJ3dExecuter.record("select", c.getName());
 	}
 
+	public ArrayList<Content> getSelectedContents() {
+		return selectedContents;
+	}
+
+	public void setSelectedContents(ArrayList<Content> selectedContents) {
+		this.selectedContents = selectedContents;
+	}
+
 	/**
 	 * Returns the selected Content, or null if none is selected.
 	 */

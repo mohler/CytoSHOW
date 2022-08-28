@@ -717,6 +717,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 					delete(false);
 			} else if (command.equals("Color")) {
 				ContentInstant[] selectedContentInstants = getSelectedContentInstantsAsArray();
+				((Image3DUniverse) univ).select(null, true);
 				if (selectedContentInstants.length > 0) {
 					int fillColorInt = Colors.decode("#00000000", Color.black).getRGB();
 					if (selectedContentInstants[0].getColor().get() != null) {
@@ -747,7 +748,6 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 						// fullcontentInstants[nameMatchIndexes[i]]imp.getRoiManager().setRoiFillColor(Colors.decode(alphaCorrFillColorString,
 						// fillColor));
 						((Image3DUniverse) univ).getContent3DManager().setContentInstantFillColor(selContentInstant, Colors.decode(alphaCorrFillColorString, fillColor));
-
 					}
 					// this.setSelectedIndexes(nameMatchIndexes);
 					//
@@ -7107,6 +7107,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 
 	public void setContentInstantFillColor(ContentInstant contentInstant, Color color, boolean reNameInListNow) {
 		contentInstant.setColor(new Color3f(color));
+		contentInstant.setTrueColor(new Color3f(color));
 		if (contentInstant.getName() != null && contentInstant.getName().contains(" \"_")) {
 			String contentInstantColorChunk = contentInstant.getName().split("_")[1];
 			String newColorName = contentInstantColorChunk.startsWith("#")
