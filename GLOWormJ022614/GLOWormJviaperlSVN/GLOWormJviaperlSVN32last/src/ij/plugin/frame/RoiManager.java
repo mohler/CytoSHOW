@@ -4786,8 +4786,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		// this.setTitle( "Tag Manager SORTING!!!") ;
 
 		if (sortmode > -1) {
-			RoiLabelByNumbersSorter.sort(labels, sortmode);
-			RoiLabelByNumbersSorter.sort(fullLabels, sortmode);
+			RoiLabelByNumbersSorter.sort(labels, null, sortmode);
+			RoiLabelByNumbersSorter.sort(fullLabels, null, sortmode);
 
 		} else {   //why on earth use this pig of a sorter instead of Arrays.sort()?
 			StringSorter.sort(labels);

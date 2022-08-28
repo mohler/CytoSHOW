@@ -1,19 +1,28 @@
 package org.vcell.gloworm;
 
+import java.awt.Color;
 import java.util.Arrays;
 
 import ij.IJ;
+import ij.plugin.Colors;
 
 /** A simple QuickSort for String arrays. */
 public class RoiLabelByNumbersSorter {
 	
-	/** Sorts the array. */
-	public static void sort(String[] labels, int mode) {
+	/** Sorts the array. 
+	 * @param splitDelimiter */
+	
+	public static void sort(String[] labels, Color[] colors, int mode) {
 		if (true/*!alreadySorted(list)*/)
-			sort(labels, 0, labels.length - 1, mode);
+			sort(labels, colors, "_", mode);
 	}
 	
-	static void sort(String[] labels, int from, int to, int mode) {
+	public static void sort(String[] labels, Color[] colors, String splitDelimiter, int mode) {
+		if (true/*!alreadySorted(list)*/)
+			sort(labels, colors, splitDelimiter, 0, labels.length - 1, mode);
+	}
+	
+	static void sort(String[] labels, Color[] colors, String splitDelimiter, int from, int to, int mode) {
 //		if (mode == 0) {
 //			Arrays.sort(labels);
 //			return;
@@ -25,10 +34,17 @@ public class RoiLabelByNumbersSorter {
 		for (int i=0; i<listLength; i++) {
 			int len =0;
 			String labelDollared = labels[i].replace("\'", "$");
-			String[] labelDollaredChunks = labelDollared.split("_");
+			String[] labelDollaredChunks = labelDollared.split(splitDelimiter);
 			lDCChunksLength = labelDollaredChunks.length;
 			String[] nums = new String[lDCChunksLength];
-			nums[lDCChunksLength-1] =  labelDollaredChunks[mode];
+			if (mode == (int)Integer.MAX_VALUE) {
+				if (colors!=null && colors.length==labels.length) {
+					nums = new String[lDCChunksLength+1];
+					nums[lDCChunksLength] = Colors.colorToHexString(colors[i]);
+				}
+			} else {
+				nums[lDCChunksLength-1] =  labelDollaredChunks[mode <lDCChunksLength? mode:lDCChunksLength-1];
+			}
 			int count = 0;
 			for (int ldc=lDCChunksLength-1; ldc>=0; ldc--) {
 				if (mode!= ldc) {
@@ -39,11 +55,19 @@ public class RoiLabelByNumbersSorter {
 			
 			for (String num:nums) {
 
-				String newNum = num.replace("\"", "").replace(" ", "").toLowerCase().replaceAll("^(.*)-\\d+$", "$1");
+				String newNum = "";
+				if (!newNum.equals(nums[0])) 
+					newNum = num.replaceAll("[ics]","").replace("\"", "").replace(" ", "").toLowerCase().replaceAll("^(.*)-\\d+$", "$1").split("_")[0];
+				else
+					newNum = num.replace("\"", "").replace(" ", "").toLowerCase().replaceAll("^(.*)-\\d+$", "$1");
 				
 				if (newNum.length()==0) newNum = "aaaaaa";
-				newNum = "00000000000000000000000000000000000" + newNum; // prepend maxDigits leading zeroes
-				newNum = newNum.substring(newNum.length()-maxDigits);//trim back to maxDigits total in newNum
+				if (mode == 0 && newNum.equals(nums[0])) {
+					
+				} else {
+					newNum = "00000000000000000000000000000000000" + newNum; // prepend maxDigits leading zeroes
+					newNum = newNum.substring(newNum.length()-maxDigits);//trim back to maxDigits total in newNum
+				}
 				labels[i] = newNum + labels[i];
 			}
 			labels[i] = labels[i].replaceAll("^(0*)(([A-Z]|[a-z]|\\#)+)(.*)", "$2$4");   // ^ trims all leadingest 0s if text chunk is what is being sorted on. But leaves them if numeric chunk is placed first...
