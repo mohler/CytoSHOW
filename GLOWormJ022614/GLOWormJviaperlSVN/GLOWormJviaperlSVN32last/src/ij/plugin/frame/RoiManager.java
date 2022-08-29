@@ -459,6 +459,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //		addPopupItem("Plot phate spheres to coords");
 //		addPopupItem("Plot MK c-phate icospheres to coords");
 		addPopupItem("Plot AG c-phate icospheres to coords");
+		addPopupItem("MeiZhenNamingSwap");
+		addPopupItem("FormatCytoSHOWtoBrittin");
 		addPopupItem("fixcrappynames");
 		addPopupItem("HiLite lineage name conflicts");
 		addPopupItem("MeasureROIvolSA");
@@ -1128,6 +1130,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				plotManikFmtPhateObjsToCoordsIcospheres();
 			} else if (command.equals("Plot AG c-phate icospheres to coords")) {
 				plotAlexFmtPhateObjsToCoordsIcospheres();
+			} else if (command.equals("MeiZhenNamingSwap")) {
+				swapMeiZhenCellNamesForLabels();
+			} else if (command.equals("FormatCytoSHOWtoBrittin")) {
+				formatCytoSHOWtoBrittin();
 			} else if (command.equals("fixcrappynames")) {
 				fixdamnRedundantNames();
 			} else if (command.equals("HiLite lineage name conflicts")) {
@@ -1153,6 +1159,73 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //			this.imp.getCanvas().requestFocus();
 		}
 		// IJ.log("THREAD DONE");
+	}
+
+	private void formatCytoSHOWtoBrittin() {
+		IJ.log("Select txt file with CytoSHOW adjacency data");
+		String inputCytoSHOWAdjacencyPath = IJ.getFilePath("Select txt file with CytoSHOW adjacency data");
+		String cytoshowAdjacencyData = IJ.openAsString(inputCytoSHOWAdjacencyPath);
+		
+		String[] adjacencyRows = cytoshowAdjacencyData.split("\n");
+		ArrayList<String> sortableAdjRows = new ArrayList<String>();
+		for (int i=0;i<adjacencyRows.length;i++) {
+			if (adjacencyRows[i].length() <4 | adjacencyRows[i].matches(".*(BWM|excgl).*") || adjacencyRows[i].startsWith("Total"))
+				IJ.wait(0);
+			else {
+				int sliceNumber = Integer.parseInt(adjacencyRows[i].split(" ")[adjacencyRows[i].split(" ").length-2].replace("z",""));
+				sortableAdjRows.add(IJ.pad(sliceNumber, 6) +"___"+adjacencyRows[i].replaceAll("(^.* z\\d+ )(\\d+) (\\d+)", "$1$2").replace("by", ",").replace("borderline", ",0,").replace(" ",",").replace(",z","z "));
+			}
+		}
+		Collections.sort(sortableAdjRows);
+
+		StringBuilder sb = new StringBuilder();
+		for (int j=0;j<sortableAdjRows.size();j++) {
+//			sortedAdjRows[j] = sortedAdjRows[j].replaceAll("\\d+___", "");
+//			outputAdjData = outputAdjData + sortedAdjRows[j].replaceAll("\\d+___", "") + "\\n" ;
+			sb.append(sortableAdjRows.get(j).replaceAll("\\d+___", "") + "\n");
+		}
+		IJ.saveString(sb.toString(), inputCytoSHOWAdjacencyPath.replace(".txt", "_renamedZsortedNeuronOnly.csv"));
+
+	}
+	
+	private void swapMeiZhenCellNamesForLabels() {
+		IJ.log("Select csv file with adjacency data");
+		String inputLabelAdjacencyPath = IJ.getFilePath("Select csv file with adjacency data");
+		IJ.log("Select csv file with Mei Zhen lab VAST metadata");
+		String inputVASTmetadataPath = IJ.getFilePath("Select csv file with Mei Zhen lab VAST metadata");
+		String labelAdjacencyData = IJ.openAsString(inputLabelAdjacencyPath);
+		String vastMetaData = IJ.openAsString(inputVASTmetadataPath);
+		String[] vastRows = vastMetaData.split("\n");
+		for (String vastRow : vastRows) {
+
+			if (vastRow.startsWith("%") || vastRow.equals("")
+					|| vastRow.startsWith("0")) {
+				continue;
+			}
+			String[] vastRowChunks = vastRow.split(" ");
+			String serialNumber = vastRowChunks[0];
+			String name = vastRowChunks[40];
+			name = name.replaceAll("\"(.*) \\(.*\\).*", "$1");
+			labelAdjacencyData = labelAdjacencyData.replace("Label "+serialNumber+",", name+",");			
+		}
+		String[] adjacencyRows = labelAdjacencyData.split("\n");
+		String[] sortedAdjRows = new String[adjacencyRows.length];
+		for (int i=0;i<adjacencyRows.length;i++) {
+			int sliceNumber = Integer.parseInt(adjacencyRows[i].split("[ ,]")[adjacencyRows[i].split("[ ,]").length-2]);
+			if (adjacencyRows[i].matches(".*(BWM|excgl).*"))
+				sortedAdjRows[i] = "";
+			else
+				sortedAdjRows[i] = ""+IJ.pad(sliceNumber, 6) +"___"+adjacencyRows[i];
+		}
+		Arrays.sort(sortedAdjRows);
+
+		StringBuilder sb = new StringBuilder();
+		for (int j=0;j<sortedAdjRows.length;j++) {
+//			sortedAdjRows[j] = sortedAdjRows[j].replaceAll("\\d+___", "");
+//			outputAdjData = outputAdjData + sortedAdjRows[j].replaceAll("\\d+___", "") + "\\n" ;
+			sb.append(sortedAdjRows[j].replaceAll("\\d+___", "") + "\n");
+		}
+		IJ.saveString(sb.toString(), inputLabelAdjacencyPath.replace(".csv", "_renamedZsortedNeuronOnly.csv"));
 	}
 
 	private void resolveMNGHsisters() {
@@ -2170,7 +2243,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				}
 			}
 			IJ.log(rootName + " " + minX + " " + minY + " " + minZ + " " + maxX + " " + maxY + " " + maxZ);
-//			sketchImp = NewImage.createImage("SVV_"+rootNames_rootFrames.get(0),(int)(imp.getWidth()*scaleFactor), (int)(imp.getHeight()*scaleFactor), (int)(imp.getNSlices()*imp.getNFrames()*zPadFactor), 8, NewImage.FILL_BLACK, false);
+//			sketchImp = NewImage.createImage("SVV)_"+rootNames_rootFrames.get(0),(int)(imp.getWidth()*scaleFactor), (int)(imp.getHeight()*scaleFactor), (int)(imp.getNSlices()*imp.getNFrames()*zPadFactor), 8, NewImage.FILL_BLACK, false);
 			sketchImp = NewImage.createImage("SVV_" + rootNames_rootFrames.get(0),
 					(int) ((maxX - minX) * scaleFactor) + 20, (int) ((maxY - minY) * scaleFactor) + 20,
 					(int) ((maxZ - minZ) * zPadFactor) + 2, 8, NewImage.FILL_BLACK, false);
@@ -4786,8 +4859,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		// this.setTitle( "Tag Manager SORTING!!!") ;
 
 		if (sortmode > -1) {
-			RoiLabelByNumbersSorter.sort(labels, sortmode);
-			RoiLabelByNumbersSorter.sort(fullLabels, sortmode);
+			RoiLabelByNumbersSorter.sort(labels, null, sortmode);
+			RoiLabelByNumbersSorter.sort(fullLabels, null, sortmode);
 
 		} else {   //why on earth use this pig of a sorter instead of Arrays.sort()?
 			StringSorter.sort(labels);
@@ -9983,6 +10056,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		Hashtable<String, String> meiSNtoNameHashtable = new Hashtable<String, String>();
 
 		Hashtable<String, Double[]> name_iterationToCoordsHashtable = new Hashtable<String, Double[]>();
+		Hashtable<Integer, Integer> iterationNumberToIterationClusterCountHashtable = new Hashtable<Integer, Integer>();
 
 		for (String phateCoordsRow : inputPhateCoordinatesRows) {
 			if (phateCoordsRow.startsWith("serialNumber") || phateCoordsRow.startsWith(",0,1,2"))
@@ -10063,6 +10137,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						maxGroupNum = Integer.parseInt(clusterAsgnChunks[cell]);
 					}
 				}
+				iterationNumberToIterationClusterCountHashtable.put(iteration, maxGroupNum);
 				previousMaxSN = nextMaxSN;
 			}
 		}
@@ -10121,29 +10196,29 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 // WHY ARE ALL THE FAILOVER DEFAULTS HERE = 5?  WAS THAT JUST A RANDOM CHOICE??
 		if (false) {
-			if (inputPhateCoordinatesPath.toLowerCase().contains("n2u")) {
-				for (int cell = 0; cell < cellHeadersDecoded.length; cell++) {
-					nameKeyclusterTable.put(cellHeadersDecoded[cell].split("_")[0],
-							nameToCOMPClustersAndSNsHashtable
-									.get(cellHeadersDecoded[cell].split("_")[0])[0][iterationOfSix != 0 ? iterationOfSix
-											: 5]);
-				}
-			} else if (inputPhateCoordinatesPath.toLowerCase().contains("jsh")) {
-				for (int cell = 0; cell < cellHeadersDecoded.length; cell++) {
-					nameKeyclusterTable.put(cellHeadersDecoded[cell].split("_")[0],
-							nameToCOMPClustersAndSNsHashtable.get(
-									cellHeadersDecoded[cell].split("_")[0])[0][iterationOfFour != 0 ? iterationOfFour
-											: iterationOfSix != 0 ? iterationOfSix : 5]);
-				}
-			} else {
-				for (int cell = 0; cell < cellHeadersDecoded.length; cell++) {
-					nameKeyclusterTable.put(cellHeadersDecoded[cell].split("_")[0],
-							nameToCOMPClustersAndSNsHashtable.get(
-									cellHeadersDecoded[cell].split("_")[0])[0][iterationOfNine != 0 ? iterationOfNine
-											: iterationOfFour != 0 ? iterationOfFour
-													: iterationOfSix != 0 ? iterationOfSix : 5]);
-				}
-			}
+//			if (inputPhateCoordinatesPath.toLowerCase().contains("n2u")) {
+//				for (int cell = 0; cell < cellHeadersDecoded.length; cell++) {
+//					nameKeyclusterTable.put(cellHeadersDecoded[cell].split("_")[0],
+//							nameToCOMPClustersAndSNsHashtable
+//									.get(cellHeadersDecoded[cell].split("_")[0])[0][iterationOfSix != 0 ? iterationOfSix
+//											: 5]);
+//				}
+//			} else if (inputPhateCoordinatesPath.toLowerCase().contains("jsh")) {
+//				for (int cell = 0; cell < cellHeadersDecoded.length; cell++) {
+//					nameKeyclusterTable.put(cellHeadersDecoded[cell].split("_")[0],
+//							nameToCOMPClustersAndSNsHashtable.get(
+//									cellHeadersDecoded[cell].split("_")[0])[0][iterationOfFour != 0 ? iterationOfFour
+//											: iterationOfSix != 0 ? iterationOfSix : 5]);
+//				}
+//			} else {
+//				for (int cell = 0; cell < cellHeadersDecoded.length; cell++) {
+//					nameKeyclusterTable.put(cellHeadersDecoded[cell].split("_")[0],
+//							nameToCOMPClustersAndSNsHashtable.get(
+//									cellHeadersDecoded[cell].split("_")[0])[0][iterationOfNine != 0 ? iterationOfNine
+//											: iterationOfFour != 0 ? iterationOfFour
+//													: iterationOfSix != 0 ? iterationOfSix : 5]);
+//				}
+//			}
 		} else {
 			/**/
 			for (int cell = 0; cell < cellHeadersDecoded.length; cell++) {
@@ -10178,7 +10253,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					cluster = clusters[s];
 				}
 			}
-			outputTag = outputTag + "-i" + itr + "-c" + cluster + "-s" + serial;
+			outputTag = outputTag + "-i" + itr + "/" + (clusterAsgnCOMPRows.length-1) + "-c" + cluster + "/" + 
+										iterationNumberToIterationClusterCountHashtable.get(itr) + "-s" + serial;
 
 			String outputPath = outputDir + inputFile.getName() + ".i" + itr + ".c" + cluster + ".s" + serial + "."
 					+ outputTag.split("[_-]")[0] + ".obj";

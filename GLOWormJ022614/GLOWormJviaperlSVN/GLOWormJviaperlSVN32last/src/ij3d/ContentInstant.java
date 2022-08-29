@@ -331,7 +331,7 @@ public class ContentInstant extends BranchGroup implements UniverseListener, Con
 
 //	private boolean blinkOn;
 
-	Color3f trueColor;
+	private Color3f trueColor;
 
 	private String getOriginalDataSwapfile() {
 		if(originalDataSwapfile != null)
@@ -663,7 +663,7 @@ public class ContentInstant extends BranchGroup implements UniverseListener, Con
 				(this.color != null && color != null &&
 				 this.color.equals(color)))
 			return;
-		this.trueColor = color;
+		this.setTrueColor(color);
 		this.color = color;
  		plShape.setColor(color);
 		if(contentNode != null)
@@ -841,6 +841,14 @@ public class ContentInstant extends BranchGroup implements UniverseListener, Con
 
 	public boolean isPLVisible() {
 		return showPL;
+	}
+
+	public Color3f getTrueColor() {
+		return trueColor;
+	}
+
+	public void setTrueColor(Color3f trueColor) {
+		this.trueColor = trueColor;
 	}
 }
 

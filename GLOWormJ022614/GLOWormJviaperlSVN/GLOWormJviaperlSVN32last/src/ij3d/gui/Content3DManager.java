@@ -717,6 +717,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 					delete(false);
 			} else if (command.equals("Color")) {
 				ContentInstant[] selectedContentInstants = getSelectedContentInstantsAsArray();
+				((Image3DUniverse) univ).select(null, true);
 				if (selectedContentInstants.length > 0) {
 					int fillColorInt = Colors.decode("#00000000", Color.black).getRGB();
 					if (selectedContentInstants[0].getColor().get() != null) {
@@ -741,45 +742,12 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 
 					fillColor = Colors.decode(alphaCorrFillColorString, fillColor);
 
-					ArrayList<String> rootNames_rootFrames = new ArrayList<String>();
-					ArrayList<String> rootNames = new ArrayList<String>();
 
-					for (ContentInstant selContentInstant : getSelectedContentInstantsAsArray()) {
-						String rootName = selContentInstant.getName().contains("\"")
-								? "\"" + selContentInstant.getName().split("\"")[1] + "\""
-								: selContentInstant.getName().split("_")[0].trim();
-						// rootName = rootName.contains(" ")?rootName.split("[_\\-
-						// ]")[0].trim():rootName;
-						String[] rootChunks = selContentInstant.getName().split("_");
-						String rootFrame = rootChunks[rootChunks.length - 1].replaceAll("[CZT]", "").split("-")[0];
-						if (!rootNames_rootFrames.contains(rootName + "_" + rootFrame)) {
-							rootNames_rootFrames.add(rootName + "_" + rootFrame);
-							rootNames.add(rootName);
-						}
-					}
-
-					ArrayList<ContentInstant> nameMatchArrayList = new ArrayList<ContentInstant>();
-					// ContentInstant[] fullcontentInstants = getFullContentInstantsAsArray();
-
-					for (int n = 0; n < rootNames.size(); n++) {
-						String rootName = rootNames.get(n);
-						nameMatchArrayList.addAll(getContentInstantsByRootName().get(rootName));
-						// int fraa = fullcontentInstants.length;
-						// for (int r=0; r < fraa; r++) {
-						// String nextName = fullcontentInstants[r].getName();
-						// if (nextName.startsWith(rootName)){
-						// nameMatchIndexArrayList.add(r);
-						// }
-						// }
-
-					}
-					// int[] nameMatchIndexes = new int[nameMatchIndexArrayList.size()];
-					for (ContentInstant nmContentInstant : nameMatchArrayList) {
+					for (ContentInstant selContentInstant : selectedContentInstants) {
 						// nameMatchIndexes[i] = nameMatchIndexArrayList.get(i);
 						// fullcontentInstants[nameMatchIndexes[i]]imp.getRoiManager().setRoiFillColor(Colors.decode(alphaCorrFillColorString,
 						// fillColor));
-						((Image3DUniverse) univ).getContent3DManager().setContentInstantFillColor(nmContentInstant, Colors.decode(alphaCorrFillColorString, fillColor));
-
+						((Image3DUniverse) univ).getContent3DManager().setContentInstantFillColor(selContentInstant, Colors.decode(alphaCorrFillColorString, fillColor));
 					}
 					// this.setSelectedIndexes(nameMatchIndexes);
 					//
@@ -788,7 +756,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 
 				}
 				this.close();
-				ImageWindow imgWin = imp.getWindow();
+				ImageWindow imgWin = univ.getWindow();
 				this.setVisible(true);
 				if (imgWin != null)
 					setLocation(imgWin.getLocationOnScreen().x + imgWin.getWidth() + 5, imgWin.getLocationOnScreen().y);
@@ -941,13 +909,15 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 			} else if (command.equals("Sort")) {
 				sortmode = 0;
 				if (listModel.size() > 0 /* && listModel.get(0).split("_").length == 5 */) {
-					int chunksLength = listModel.get(0).split("_").length;
+					int chunksLength = listModel.get(0).split("-").length;
 					if (controlKeyDown)
 						sortmode = chunksLength - 1;
 					if (altKeyDown)
 						sortmode = chunksLength - 3;
 					if (shiftKeyDown)
 						sortmode = chunksLength - 2;
+					if (shiftKeyDown && controlKeyDown)
+						sortmode = Integer.MAX_VALUE;
 //					if (sortmode>1)
 //						sortmode++;
 				}
@@ -1625,8 +1595,11 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 		// int n = contentInstants.size();
 		// if (n==0) return;
 		String[] labels = new String[listModel.getSize()];
-		for (int i = 0; i < labels.length; i++)
+		Color[] colors = new Color[listModel.getSize()];
+		for (int i = 0; i < labels.length; i++) {
 			labels[i] = (String) listModel.get(i);
+			colors[i] = contentInstants.get((String) listModel.get(i)).getColor().get();
+		}
 		String[] fullLabels = new String[fullListModel.getSize()];
 		for (int i = 0; i < fullLabels.length; i++)
 			fullLabels[i] = (String) fullListModel.get(i);
@@ -1637,10 +1610,10 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 		listModel.removeAllElements();
 		fullListModel.removeAllElements();
 		// this.setTitle( "Content3D Manager SORTING!!!") ;
-
-		if (sortmode > 0) {
-			RoiLabelByNumbersSorter.sort(labels, sortmode);
-			RoiLabelByNumbersSorter.sort(fullLabels, sortmode);
+		
+		if ((int)sortmode >= 0) {
+			RoiLabelByNumbersSorter.sort(labels, colors, "-", sortmode);
+			RoiLabelByNumbersSorter.sort(fullLabels, colors, "-", sortmode);
 
 		} else {
 			StringSorter.sort(labels);
@@ -1983,7 +1956,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 				String editedLabel = selectedLabel.replace("_#0_#0 \"_0", "").replace("\"", "");
 				Content c = ((Content)((Image3DUniverse) univ).getContent(editedLabel));
 				if (c.getInstants().containsValue(contentInstants.get(selectedLabel))) {
-					((Image3DUniverse)univ).select(c);
+					((Image3DUniverse)univ).select(c, true);
 
 				}
 			
@@ -2041,7 +2014,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 		list.setSelectedIndices(getSelectedIndexes());
 		ContentInstant contentInstant = (ContentInstant) contentInstants.get(label);
 		if (contentInstant != null) {
-			((Image3DUniverse) univ).select(((Content)contentInstant.getContentsContainingThisInstant().get(0)));
+			((Image3DUniverse) univ).select(((Content)contentInstant.getContentsContainingThisInstant().get(0)), true);
 		}
 	}
 
@@ -2249,8 +2222,8 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 
 	public void mousePressed(MouseEvent e) {
 		int x = e.getX(), y = e.getY();
-		if (e.isPopupTrigger() || e.isMetaDown())
-			pm.show(e.getComponent(), x, y);
+//		if (e.isPopupTrigger() || e.isMetaDown())
+//			pm.show(e.getComponent(), x, y);
 	}
 
 	public void mouseWheelMoved(MouseWheelEvent event) {
@@ -3713,7 +3686,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 				String editedLabel = selectedLabel.replace("_#0_#0 \"_0", "").replace("\"", "");
 				Content c = ((Content)((Image3DUniverse) univ).getContent(editedLabel));
 				if (c.getInstants().containsValue(contentInstants.get(selectedLabel))) {
-					((Image3DUniverse)univ).select(c);
+					((Image3DUniverse)univ).select(c, true);
 
 				}
 			}
@@ -7134,6 +7107,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 
 	public void setContentInstantFillColor(ContentInstant contentInstant, Color color, boolean reNameInListNow) {
 		contentInstant.setColor(new Color3f(color));
+		contentInstant.setTrueColor(new Color3f(color));
 		if (contentInstant.getName() != null && contentInstant.getName().contains(" \"_")) {
 			String contentInstantColorChunk = contentInstant.getName().split("_")[1];
 			String newColorName = contentInstantColorChunk.startsWith("#")

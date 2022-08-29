@@ -1426,11 +1426,11 @@ public class IJ3dExecuter {
 	 * *********************************************************/
 	public void select(String name) {
 		if(name == null) {
-			univ.select(null);
+			univ.select(null, true);
 			return;
 		}
 		Content c = univ.getContent(name);
-		univ.select(c);
+		univ.select(c, false);
 	}
 
 	/* **********************************************************

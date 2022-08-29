@@ -31,6 +31,7 @@ import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
@@ -121,7 +122,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	private TimelineGUI timelineGUI;
 
 	/** The selected Content */
-	private Content selected;
+	private ArrayList<Content> selectedContents;
 
 	/**
 	 * A Hashtable which stores the Contents of this universe. Keys in
@@ -213,6 +214,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		iJ3dExecuter = new IJ3dExecuter(this);
 		
 		c3dm = new Content3DManager(this, false);
+		selectedContents = new ArrayList<Content>();
 		
 		this.timeline = new Timeline(this);
 		this.timelineGUI = new TimelineGUI(timeline);
@@ -230,6 +232,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		canvas.addMouseMotionListener(new MouseMotionAdapter() {
 			
 			Content recentContent ;
+			String prevsortedPrefixedCursorString;
 
 			public void mouseMoved(MouseEvent e) {
 
@@ -262,37 +265,46 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 						.replace("uncertain", "")
 						.split("( |_)=")[0];
 
-					String[] cursorWords = cursorString.replaceAll(("(-i\\d+-(c|g)\\d+-s\\d+)"), "").replace("_", " ").split(" ");
-					if (cursorString.matches("(.*)(-i\\d+-(c|g)\\d+-s\\d+)")) {
+					String[] cursorWords = cursorString.replaceAll(("((-i\\d+-(c|g)\\d+-s\\d+)|(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+))"), "").replace("_", " ").split(" ");
+					if (cursorString.matches("(.*)((-i\\d+-(c|g)\\d+-s\\d+)|(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+))")) {
 						Arrays.sort(cursorWords);
-						if (cursorWords.length >1) {
+						if (cursorWords.length >0) {
 							cursorWords[cursorWords.length-1] = cursorWords[cursorWords.length-1] 
-									+ cursorString.replaceAll(("(.*)(-i\\d+-(c|g)\\d+-s\\d+)"), "$2");
+									+ cursorString.replaceAll(("(.*)((-i\\d+-(c|g)\\d+-s\\d+)|(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+))"), "$2");
 						}
+					}
+					String sortedPrefixedCursorString = cursorString.replaceAll(("(.*)((-i\\d+-(c|g)\\d+-s\\d+)|(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+))"), "$2")+ " count=" + cursorWords.length;
+					for (String word:cursorWords) {
+						sortedPrefixedCursorString = sortedPrefixedCursorString + (",") + word.replaceAll(("((-i\\d+-(c|g)\\d+-s\\d+)|(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+))"), "");
+					}
+					if (!sortedPrefixedCursorString.equals(prevsortedPrefixedCursorString) &&  e.isShiftDown()) {
+						IJ.log(sortedPrefixedCursorString);
+						prevsortedPrefixedCursorString = sortedPrefixedCursorString;
 					}
 					int wordsPerRow = (cursorString.contains("chemical")||cursorString.contains("electrical")||cursorString.contains("undefined"))?1:5;
 					int cursorLineCount = cursorWords.length / wordsPerRow
 							+ (cursorWords.length % 3 == 0 ? 0 : 1) /* +wordsPerRow */;
 					int fontSize = 18-(4*cursorLineCount/18);
 					Font font = Font.decode("Arial-"+(fontSize));
-					String[] cursorStringCRs = new String[cursorLineCount+1] ;
+					String[] cursorStringCRs = new String[cursorLineCount+2] ;
 					cursorStringCRs[0] = "    ";
 					int l =0;
 					for (int word=0; word<cursorWords.length; word=word+1) {
 						if (word >0 && (word)%wordsPerRow==0) {
 							l++;
 						} 
-						if (word == cursorWords.length-1 && cursorWords[word].matches("(.*)(-i\\d+-(c|g)\\d+-s\\d+)")) {
+						// matching below fits both old and new formats for cphate obj names
+						if (word == cursorWords.length-1 && cursorWords[word].matches("(.*)((-i\\d+-(c|g)\\d+-s\\d+)|(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+))")) {
 							if (cursorStringCRs[l] == null) {
-								cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)(-i\\d+-(c|g)\\d+-s\\d+)", "$1");
+								cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)((-i\\d+-(c|g)\\d+-s\\d+)|(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+))", "$1");
 								l++;
-								cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)(-i\\d+-(c|g)\\d+-s\\d+)", "$2").replace("-", " ")
+								cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)((-i\\d+-(c|g)\\d+-s\\d+)|(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+))", "$2").replace("-", " ")
 										+ " count=" + cursorWords.length;
 								continue;
 							} else {
-								cursorStringCRs[l] = cursorStringCRs[l] + " "+ cursorWords[word].replaceAll("(.*)(-i\\d+-(c|g)\\d+-s\\d+)", "$1");
+								cursorStringCRs[l] = cursorStringCRs[l] + " "+ cursorWords[word].replaceAll("(.*)((-i\\d+-(c|g)\\d+-s\\d+)|(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+))", "$1");
 								l++;
-								cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)(-i\\d+-(c|g)\\d+-s\\d+)", "$2").replace("-", " ")
+								cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)((-i\\d+-(c|g)\\d+-s\\d+)|(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+))", "$2").replace("-", " ")
 										+ " count=" + cursorWords.length;
 								continue;
 							}
@@ -356,7 +368,15 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 				} else {
 					IJ.showStatus("");
-					win.canvas3D.setCursor(ImageCanvas.defaultCursor);
+					win.canvas3D.crsrImg = null;				
+					Graphics2D g2Dcanv = win.canvas3D.getGraphics2D();
+					win.canvas3D.stopRenderer();
+					win.canvas3D.swap();
+					int x = e.getX();
+					int y = e.getY();
+//					g2Dcanv.drawImage(win.canvas3D.crsrImg, x,y, null);
+					win.canvas3D.swap();
+					win.canvas3D.startRenderer();
 				}
 			}
 		});
@@ -364,16 +384,27 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		canvas.addMouseListener(new MouseAdapter() {
 
 			public void mouseClicked(MouseEvent e) {
+				boolean selectAllClustersThisIteration = e.isShiftDown();
 				if (e.isConsumed())
 					return;
 				Content picked = picker.getPickedContent(e.getX(), e.getY());
 				if (!(win instanceof SimpleImageWindow3D) && (e.getButton()==1)){
-					select(picked);
-						if (e.getClickCount() > 1 && picked!=null) {
-								adjustView(Image3DUniverse.this.getSelected());
-								centerSelected(Image3DUniverse.this.getSelected());
-							
-						}					
+					select(picked, !selectAllClustersThisIteration);
+					if (e.getClickCount() > 1 && picked!=null) {
+						adjustView(Image3DUniverse.this.getSelected());
+						centerSelected(Image3DUniverse.this.getSelected());
+
+					}			
+					if (selectAllClustersThisIteration) {
+						String pickedIterationString = picked.getName().replaceAll("(.*)(-i[0-9]+-)(.*)", "$2");
+						for (Object otherObject:Image3DUniverse.this.getContents()) {
+							Content otherContent = ((Content)otherObject);
+							if (otherContent.getName().contains(pickedIterationString)) {
+
+								select(otherContent, !selectAllClustersThisIteration);
+							}
+						}
+					}
 					e.consume();
 				}
 			}
@@ -641,7 +672,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			c.showPointList(false);
 		}
 		// just for now, to update the menu bar
-		fireContentSelected(selected);
+		fireContentSelected(selectedContents.get(0));
 	}
 
 	/* *************************************************************
@@ -755,7 +786,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 * it will be deselected. fireContentSelected() is thrown.
 	 * @param c
 	 */
-	public void select(Content c) {
+	public void select(Content c, boolean singleSelection) {
 		if(c != null && c.isVisibleAt(currentTimepoint)) {
 			if (c.trueColor == null)
 				c.trueColor = c.getColor();
@@ -767,49 +798,57 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				c.setColor(c.trueColor);
 //			} else {
 				c.setSelected(true);
+				selectedContents.add(c);
 				schfut = blinkService.scheduleAtFixedRate(new Runnable()
 				{
 					public void run()
 					{
 
 						if (blinkOn){
-							c.setTempColor(c.trueColor);
+							for(Content nextC:selectedContents) {
+								nextC.setTempColor(nextC.trueColor);
+							}
 							blinkOn = false;
 						} else {
-							c.setTempColor(new Color3f(c.trueColor.x*0.7f,
-									c.trueColor.y*0.7f,
-									c.trueColor.z*0.7f));
+							for(Content nextC:selectedContents) {
+								nextC.setTempColor(new Color3f(nextC.trueColor.x*0.7f,
+										nextC.trueColor.y*0.7f,
+										nextC.trueColor.z*0.7f));
+							}
 							blinkOn =true;
 						}
-						if(true /*IJ.isWindows()*/){
+						if(false /*IJ.isWindows()*/){
 
 							Graphics2D g2Dcanv = win.canvas3D.getGraphics2D();
 							win.canvas3D.stopRenderer();
-//							win.canvas3D.swap();
+							win.canvas3D.swap();
 							g2Dcanv.drawImage(win.canvas3D.crsrImg, win.canvas3D.recentX, win.canvas3D.recentY, null);
-//							win.canvas3D.swap();
+							win.canvas3D.swap();
 							win.canvas3D.startRenderer();
 
 						}
 					}
 				}, 0, 500, TimeUnit.MILLISECONDS);
-				if(selected != null) {
-					selected.setSelected(false);
-					selected.setColor(selected.trueColor);
-					selected = null;
+				if(singleSelection && selectedContents.size()>0 && selectedContents.get(0) != null) {
+					while (selectedContents.size()>1) {
+						selectedContents.get(0).setSelected(false);
+						selectedContents.get(0).setColor(selectedContents.get(0).trueColor);
+						selectedContents.remove(0);
+					}
 				}
 			}
 
-			selected = c;
 		} else {
 			if (schfut != null) {
 				schfut.cancel(true);
 				schfut = null;
 			}
-			if(selected != null) {
-				selected.setSelected(false);
-				selected.setColor(selected.trueColor);
-				selected = null;
+			if(singleSelection && selectedContents.size()>0 && selectedContents.get(0) != null) {
+				while (selectedContents.size()>0) {
+					selectedContents.get(0).setSelected(false);
+					selectedContents.get(0).setColor(selectedContents.get(0).trueColor);
+					selectedContents.remove(0);
+				}
 			}
 			if (win != null) {
 				win.canvas3D.stopRenderer();
@@ -821,8 +860,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		IJ.showStatus("selected: " + st);
 
 		fireContentSelected(c);
-		if (selected != null) {
-			int q = c3dm.getListModel().indexOf("\""+selected.getName()+"_#0_#0 \"_0");
+		if (singleSelection && selectedContents.size()>0 && selectedContents.get(0) != null) {
+			int q = c3dm.getListModel().indexOf("\""+selectedContents.get(0).getName()+"_#0_#0 \"_0");
 			c3dm.getList().setSelectedIndex(q);
 			c3dm.getList().ensureIndexIsVisible(q);
 		}
@@ -830,22 +869,35 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			IJ3dExecuter.record("select", c.getName());
 	}
 
+	public ArrayList<Content> getSelectedContents() {
+		return selectedContents;
+	}
+
+	public void setSelectedContents(ArrayList<Content> selectedContents) {
+		this.selectedContents = selectedContents;
+	}
+
 	/**
 	 * Returns the selected Content, or null if none is selected.
 	 */
 
 	public Content getSelected() {
-		return selected;
+		if (selectedContents.size() > 0)
+			return selectedContents.get(0);
+		else
+			return null;
 	}
 
 	/**
 	 * If any Content is selected, deselects it.
 	 */
 	public void clearSelection() {
-		if(selected != null)
-			selected.setSelected(false);
-		selected = null;
-		fireContentSelected(null);
+		if(selectedContents.get(0) != null) {
+			for (Content content:selectedContents) {
+				content.setSelected(false);
+			}
+			fireContentSelected(null);
+		}
 	}
 
 	/**
@@ -853,9 +905,11 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 */
 	public void setShowBoundingBoxUponSelection(boolean b) {
 		UniverseSettings.showSelectionBox = b;
-		if(selected != null) {
-			selected.setSelected(false);
-			selected.setSelected(true);
+		if(selectedContents.get(0) != null) {
+			for (Content content:selectedContents) {
+				content.setSelected(false);
+				content.setSelected(true);
+			}
 		}
 	}
 
@@ -1648,7 +1702,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				return;
 			scene.removeChild(content);
 			contents.remove(name);
-			if(selected == content)
+			if(selectedContents.contains(content))
 				clearSelection();
 			fireContentRemoved(content);
 			this.removeUniverseListener(content);
