@@ -1903,7 +1903,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					if (!nextRoi.isArea()) {
 						ImageProcessor ip2 = new ByteProcessor(imp.getWidth(), imp.getHeight());
 						ip2.setColor(255);
-						if (nextRoi.getType() == Roi.LINE) {
+						if (nextRoi.isLine()) {
 							if (!(nextRoi.getStrokeWidth() > 1)) {
 								nextRoi.setStrokeWidth(2d);
 							}
