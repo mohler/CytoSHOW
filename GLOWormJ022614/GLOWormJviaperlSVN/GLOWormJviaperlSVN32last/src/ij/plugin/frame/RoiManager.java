@@ -1169,10 +1169,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		String[] adjacencyRows = cytoshowAdjacencyData.split("\n");
 		ArrayList<String> sortableAdjRows = new ArrayList<String>();
 		for (int i=0;i<adjacencyRows.length;i++) {
-			if (adjacencyRows[i].length() <4 | adjacencyRows[i].matches(".*(BWM|excgl).*") || adjacencyRows[i].startsWith("Total"))
+			if (adjacencyRows[i].length() <4 | adjacencyRows[i].matches(".*(BWM|excgl).*") || adjacencyRows[i].startsWith("Total") || adjacencyRows[i].startsWith("Offset"))
 				IJ.wait(0);
 			else {
-				int sliceNumber = Integer.parseInt(adjacencyRows[i].split(" ")[adjacencyRows[i].split(" ").length-2].replace("z",""));
+				int sliceNumber = Integer.parseInt(adjacencyRows[i].split(" ")[adjacencyRows[i].split(" ").length-3].replace("z",""));
 				sortableAdjRows.add(IJ.pad(sliceNumber, 6) +"___"+adjacencyRows[i].replaceAll("(^.* z\\d+ )(\\d+) (\\d+)", "$1$2").replace("by", ",").replace("borderline", ",0,").replace(" ",",").replace(",z",",z "));
 			}
 		}
