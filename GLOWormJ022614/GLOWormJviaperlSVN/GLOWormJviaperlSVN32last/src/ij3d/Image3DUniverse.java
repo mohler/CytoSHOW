@@ -817,10 +817,11 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 							}
 							blinkOn =true;
 						}
-						if(false /*IJ.isWindows()*/){
+						if(true /*IJ.isWindows()*/){
 
 							Graphics2D g2Dcanv = win.canvas3D.getGraphics2D();
 							win.canvas3D.stopRenderer();
+							g2Dcanv.drawImage(win.canvas3D.crsrImg, win.canvas3D.recentX, win.canvas3D.recentY, null);
 							win.canvas3D.swap();
 							g2Dcanv.drawImage(win.canvas3D.crsrImg, win.canvas3D.recentX, win.canvas3D.recentY, null);
 							win.canvas3D.swap();
