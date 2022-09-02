@@ -1654,7 +1654,8 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 
 				if (dropUniverse == null) {
 					dropUniverse = new Image3DUniverse();
-							dropUniverse.show(false);
+					IJ.wait(100);  //This little pause is needed not crash on windows
+					dropUniverse.show(false);
 							dropUniverse.getWindow().setDragAndDrop(DragAndDrop.this);
 							IJ.getInstance().setDragAndDrop(new DragAndDrop());
 							dropUniverse.getWindow().getDragAndDrop().addDropTarget(dropUniverse.getCanvas());
@@ -1789,7 +1790,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					} else {
 						int s = this.dtde.getDropAction();
 						IJ.log(""+s);
-						dropUniverse.addContentLater(((File)nextItem).getPath(), null, s==1?true:false);     //this call picked when dropping a mixed folder with objs and others
+						dropUniverse.addContentLater(((File)nextItem).getPath(), null, s==1||s==1073741824?true:false);     //this call picked when dropping a mixed folder with objs and others
 					}
 				} catch (Exception e) {
 					dropUniverse = new Image3DUniverse();
