@@ -15,6 +15,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.awt.Checkbox;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Event;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Point;
@@ -736,6 +737,8 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 									dropUniverse.setFlipXonImport(true);
 									dropUniverse.addContentLater(((File)nextItem).getPath(), null);
 								} else {
+									String s = ""+this.dtde.getDropAction();
+									IJ.log(s);
 									dropUniverse.addContentLater(((File)nextItem).getPath(), null);
 								}
 							} catch (Exception e) {
@@ -745,6 +748,8 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 									dropUniverse.setFlipXonImport(true);
 									dropUniverse.addContentLater(((File)nextItem).getPath(), null);
 								} else {
+									String s = ""+this.dtde.getDropAction();
+									IJ.log(s);
 									dropUniverse.addContentLater(((File)nextItem).getPath(), null);
 								}
 							}
@@ -1435,6 +1440,8 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							dropUniverse.setFlipXonImport(true);
 							dropUniverse.addContentLater(cacheObj.getAbsolutePath(), null);
 						} else {
+							String s = ""+this.dtde.getDropAction();
+							IJ.log(s);
 							dropUniverse.addContentLater(cacheObj.getAbsolutePath(), null);
 						}
 					} catch (Exception e) {
@@ -1445,6 +1452,8 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							dropUniverse.setFlipXonImport(true);
 							dropUniverse.addContentLater(cacheObj.getAbsolutePath(), null);
 						} else {
+							String s = ""+this.dtde.getDropAction();
+							IJ.log(s);
 							dropUniverse.addContentLater(cacheObj.getAbsolutePath(), null);
 						}
 					}
@@ -1778,7 +1787,9 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						dropUniverse.setFlipXonImport(true);
 						dropUniverse.addContentLater(((File)nextItem).getPath(), null);
 					} else {
-						dropUniverse.addContentLater(((File)nextItem).getPath(), null);
+						int s = this.dtde.getDropAction();
+						IJ.log(""+s);
+						dropUniverse.addContentLater(((File)nextItem).getPath(), null, s==1?true:false);     //this call picked when dropping a mixed folder with objs and others
 					}
 				} catch (Exception e) {
 					dropUniverse = new Image3DUniverse();
@@ -1789,6 +1800,8 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						dropUniverse.addContentLater(((File)nextItem).getPath(), null);
 
 					} else {
+						String s = ""+this.dtde.getDropAction();
+						IJ.log(s);
 						dropUniverse.setFlipXonImport(false);
 						dropUniverse.addContentLater(((File)nextItem).getPath(), null);
 
