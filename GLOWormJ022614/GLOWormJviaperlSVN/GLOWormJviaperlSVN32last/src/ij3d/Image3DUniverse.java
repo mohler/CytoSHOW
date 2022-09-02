@@ -2222,7 +2222,12 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		});
 	}
 
-	public void addContentLater(String filePath, InputStream[] objmtlStreams) {
+	public void addContentLater(String path,  InputStream[] objmtlStreams) {
+		addContentLater(path,objmtlStreams, false);
+	}
+
+
+	public void addContentLater(String filePath, InputStream[] objmtlStreams, boolean parseTimeInCPHATE) {
 		ArrayList<String> timedObjFileNames = new ArrayList<String>();
 		File file = new File(filePath);
 		String titleName = file.getName();
@@ -2253,6 +2258,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			int nextTpt =0;
 			if (tptParse[tptParse.length-1].matches("\\d+.obj")) {
 				nextTpt = Integer.parseInt(tptParse[tptParse.length-1].replace(".obj", ""));
+			} else if (parseTimeInCPHATE && ((String)nextmatchingfilename).matches("(.*)(csv\\.i)(\\d+)(\\.c\\d+.*\\.obj)")) {
+				nextTpt = Integer.parseInt(((String)nextmatchingfilename).replaceAll("(.*)(csv\\.i)(\\d+)(\\.c\\d+.*\\.obj)","$3"));
 			}
 			
 			Map<String, CustomMesh> meshes= null;
