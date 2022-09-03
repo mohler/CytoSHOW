@@ -1789,7 +1789,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						dropUniverse.addContentLater(((File)nextItem).getPath(), null);
 					} else {
 						int s = this.dtde.getDropAction();
-						IJ.log(""+s);
+//						IJ.log(""+s);
 						dropUniverse.addContentLater(((File)nextItem).getPath(), null, s==1||s==1073741824?true:false);     //this call picked when dropping a mixed folder with objs and others
 					}
 				} catch (Exception e) {
