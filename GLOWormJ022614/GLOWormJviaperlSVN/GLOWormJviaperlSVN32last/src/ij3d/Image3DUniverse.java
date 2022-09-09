@@ -386,7 +386,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				Content picked = picker.getPickedContent(e.getX(), e.getY());
 				if (!(win instanceof SimpleImageWindow3D) && (e.getButton()==1)){
 					if (selectAllClustersThisIteration ) {
-						if (!e.isMetaDown()) {
+						if (!e.isControlDown()) {
 							while (selectedContents.size()>0) {
 								selectedContents.get(0).setSelected(false);
 								selectedContents.get(0).setColor(selectedContents.get(0).trueColor);
@@ -417,9 +417,9 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 //				contextmenu.showPopup(e);
 				boolean cd = e.isControlDown();
 				int cbi = e.getButton();
-				boolean showPopup = !(win instanceof SimpleImageWindow3D) && (cd || cbi!=1);
+				boolean showPopup = !(win instanceof SimpleImageWindow3D) && (/* cd || */ cbi!=1);
 				contextmenu.showPopup(new MouseEvent(e.getComponent(),e.getID(),e.getWhen(),e.getModifiers(),e.getX(),e.getY(),e.getClickCount(), showPopup));   
-				if (showPopup)
+//				if (showPopup)
 					e.consume();
 				//to mute popup 
 			}
@@ -429,8 +429,9 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 //				contextmenu.showPopup(e);
 				boolean cd = e.isControlDown();
 				int cbi = e.getButton();
-				boolean showPopup = !(win instanceof SimpleImageWindow3D) && (cd || cbi!=1);
+				boolean showPopup = !(win instanceof SimpleImageWindow3D) && (/* cd || */cbi!=1);
 				contextmenu.showPopup(new MouseEvent(e.getComponent(),e.getID(),e.getWhen(),e.getModifiers(),e.getX(),e.getY(),e.getClickCount(), showPopup));   
+				e.consume();
 				//to mute popup 
 			}
 		});
