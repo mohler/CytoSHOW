@@ -1169,7 +1169,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		String[] adjacencyRows = cytoshowAdjacencyData.split("\n");
 		ArrayList<String> sortableAdjRows = new ArrayList<String>();
 		for (int i=0;i<adjacencyRows.length;i++) {
-			if (adjacencyRows[i].length() <4 | adjacencyRows[i].matches(".*(BWM|excgl).*") || adjacencyRows[i].startsWith("Total") || adjacencyRows[i].startsWith("Offset"))
+			if (adjacencyRows[i].length() <4 | adjacencyRows[i].matches(".*(BWM|excgl|VAn).*") || adjacencyRows[i].startsWith("Total") || adjacencyRows[i].startsWith("Offset"))
 				IJ.wait(0);
 			else {
 				int sliceNumber = Integer.parseInt(adjacencyRows[i].split(" ")[adjacencyRows[i].split(" ").length-3].replace("z",""));
@@ -1205,25 +1205,30 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			String[] vastRowChunks = vastRow.split(" ");
 			String serialNumber = vastRowChunks[0];
 			String name = vastRowChunks[40];
-			name = name.replaceAll("\"(.*) \\(.*\\).*", "$1");
+			name = name.replaceAll("\"(.*) \\(.*\\).*", "$1").replace("\"", "");
 			labelAdjacencyData = labelAdjacencyData.replace("Label "+serialNumber+",", name+",");			
 		}
 		String[] adjacencyRows = labelAdjacencyData.split("\n");
-		String[] sortedAdjRows = new String[adjacencyRows.length];
+		ArrayList<String> filteredAdjRows = new ArrayList<String>();
 		for (int i=0;i<adjacencyRows.length;i++) {
 			int sliceNumber = Integer.parseInt(adjacencyRows[i].split("[ ,]")[adjacencyRows[i].split("[ ,]").length-2]);
-			if (adjacencyRows[i].matches(".*(BWM|excgl).*"))
-				sortedAdjRows[i] = "";
+			if (adjacencyRows[i].matches(".*(BWM|excgl|VAn).*"))
+//				sortedAdjRows.add("");
+				;
 			else
-				sortedAdjRows[i] = ""+IJ.pad(sliceNumber, 6) +"___"+adjacencyRows[i];
+				filteredAdjRows.add(""+IJ.pad(sliceNumber, 6) +"___"+adjacencyRows[i]);
 		}
-		Arrays.sort(sortedAdjRows);
+		String[] sortedAdjacencyRows =  new String[filteredAdjRows.size()];
+		for (int r=0; r<filteredAdjRows.size();r++) {
+			sortedAdjacencyRows[r]= filteredAdjRows.get(r);
+		}
+		Arrays.sort(sortedAdjacencyRows);
 
 		StringBuilder sb = new StringBuilder();
-		for (int j=0;j<sortedAdjRows.length;j++) {
+		for (int j=0;j<sortedAdjacencyRows.length;j++) {
 //			sortedAdjRows[j] = sortedAdjRows[j].replaceAll("\\d+___", "");
 //			outputAdjData = outputAdjData + sortedAdjRows[j].replaceAll("\\d+___", "") + "\\n" ;
-			sb.append(sortedAdjRows[j].replaceAll("\\d+___", "") + "\n");
+			sb.append(sortedAdjacencyRows[j].replaceAll("\\d+___", "") + "\n");
 		}
 		IJ.saveString(sb.toString(), inputLabelAdjacencyPath.replace(".csv", "_renamedZsortedNeuronOnly.csv"));
 	}

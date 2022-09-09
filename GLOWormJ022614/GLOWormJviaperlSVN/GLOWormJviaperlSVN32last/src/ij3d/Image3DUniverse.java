@@ -184,7 +184,6 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
     private static ScheduledThreadPoolExecutor blinkService;
 	private ScheduledFuture schfut;
 	private boolean blinkOn;
-
 	
 	static{
 		UniverseSettings.load();
@@ -211,6 +210,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			blinkService = new ScheduledThreadPoolExecutor(1);
 		}
 		canvas = (ImageCanvas3D)getCanvas();
+		canvas.crsrImg = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB_PRE);
 		iJ3dExecuter = new IJ3dExecuter(this);
 		
 		c3dm = new Content3DManager(this, false);
@@ -239,15 +239,18 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				Content c = picker.getPickedContent(
 						e.getX(), e.getY());
 				
-				if (c == recentContent && (( Math.abs(win.canvas3D.recentX-e.getX()))<3) && ( Math.abs((win.canvas3D.recentY-e.getY()))<3)) {
+				if (c == recentContent 
+										  && (( Math.abs(canvas.recentX-e.getX()))<5) && (
+										  Math.abs((canvas.recentY-e.getY()))<5)
+										 ) {
 					
 				} else if (c != null){
-					win.canvas3D.recentX=e.getX();
-					win.canvas3D.recentY=e.getY();
+					canvas.recentX=e.getX();
+					canvas.recentY=e.getY();
 
 					recentContent = c;
 					String cursorString = " ";
-					Toolkit tk = Toolkit.getDefaultToolkit();
+
 					IJ.showStatus(c.getName().split("( |_)=")[0]);
 					cursorString = c.getName().replace("electrical", "_electrical_")
 							.replace("chemical", "_chemical_")
@@ -331,11 +334,11 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 					Rectangle2D bounds = rectFont.getStringBounds(longestString, frc);
 					int w = (int) bounds.getWidth();
 					int ht = (int) bounds.getHeight();
-					win.canvas3D.crsrImg = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB_PRE);
+					canvas.crsrImg = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB_PRE);
 
 
 					//		img.getGraphics().setColor(Colors.decode("00000000", Color.white));
-					Graphics2D g2d = (Graphics2D) win.canvas3D.crsrImg.getGraphics();
+					Graphics2D g2d = (Graphics2D) canvas.crsrImg.getGraphics();
 
 					g2d.setFont(font);
 
@@ -353,30 +356,23 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 					}
 					if(true /*IJ.isWindows()*/){
 
-						Graphics2D g2Dcanv = win.canvas3D.getGraphics2D();
-						win.canvas3D.stopRenderer();
-						win.canvas3D.swap();
-						int x = e.getX();
-						int y = e.getY();
-						g2Dcanv.drawImage(win.canvas3D.crsrImg, x,y, null);
-						win.canvas3D.swap();
-						win.canvas3D.startRenderer();
-
-						//						} else {
-						//							win.canvas3D.setCursor(tk.createCustomCursor(win.canvas3D.crsrImg,new Point(0,0),"searchCursor"));
+						canvas.cursorX = e.getX();
+						canvas.cursorY = e.getY();
+						canvas.stopRenderer();
+						canvas.swap();  // activates the overridden postSwap() of DefaultUniverse's canvas
+						canvas.swap();
+						canvas.startRenderer();
 					}
 
-				} else {
+				} else {  // c == null
 					IJ.showStatus("");
-					win.canvas3D.crsrImg = null;				
-					Graphics2D g2Dcanv = win.canvas3D.getGraphics2D();
-					win.canvas3D.stopRenderer();
-					win.canvas3D.swap();
-					int x = e.getX();
-					int y = e.getY();
-//					g2Dcanv.drawImage(win.canvas3D.crsrImg, x,y, null);
-					win.canvas3D.swap();
-					win.canvas3D.startRenderer();
+					canvas.crsrImg = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB_PRE);
+					canvas.cursorX = e.getX();
+					canvas.cursorY = e.getY();
+					canvas.stopRenderer();
+					canvas.swap();     // activates the overridden postSwap() of DefaultUniverse's canvas
+					canvas.swap();
+					canvas.startRenderer();
 				}
 			}
 		});
@@ -389,22 +385,29 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 					return;
 				Content picked = picker.getPickedContent(e.getX(), e.getY());
 				if (!(win instanceof SimpleImageWindow3D) && (e.getButton()==1)){
+					if (selectAllClustersThisIteration ) {
+						if (!e.isMetaDown()) {
+							while (selectedContents.size()>0) {
+								selectedContents.get(0).setSelected(false);
+								selectedContents.get(0).setColor(selectedContents.get(0).trueColor);
+								selectedContents.remove(0);
+							}
+						}
+						String pickedIterationString = picked==null?"":picked.getName().replaceAll("(.*)(-i[0-9]+\\/+[0-9]+-)(.*)", "$2");
+						for (Object otherObject:Image3DUniverse.this.getContents()) {
+							Content otherContent = ((Content)otherObject);
+							if (otherContent.getName().contains(pickedIterationString)) {
+								if (otherContent != picked)
+									select(otherContent, !selectAllClustersThisIteration);
+							}
+						}
+					}
 					select(picked, !selectAllClustersThisIteration);
 					if (e.getClickCount() > 1 && picked!=null) {
 						adjustView(Image3DUniverse.this.getSelected());
 						centerSelected(Image3DUniverse.this.getSelected());
 
 					}			
-					if (selectAllClustersThisIteration) {
-						String pickedIterationString = picked.getName().replaceAll("(.*)(-i[0-9]+-)(.*)", "$2");
-						for (Object otherObject:Image3DUniverse.this.getContents()) {
-							Content otherContent = ((Content)otherObject);
-							if (otherContent.getName().contains(pickedIterationString)) {
-
-								select(otherContent, !selectAllClustersThisIteration);
-							}
-						}
-					}
 					e.consume();
 				}
 			}
@@ -783,66 +786,71 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 * *************************************************************/
 	/**
 	 * Select the specified Content. If another Content is already selected,
-	 * it will be deselected. fireContentSelected() is thrown.
+	 * it will be deselected. fireContentSelected() is NO LONGER thrown; CAN REACTIVATE IF WE EVER HAVE A USEFUL LISTENER?.
 	 * @param c
 	 */
 	public void select(Content c, boolean singleSelection) {
 		if(c != null && c.isVisibleAt(currentTimepoint)) {
 			if (c.trueColor == null)
 				c.trueColor = c.getColor();
-			if (true /* schfut != null && c != selected */) {
-				if (schfut != null)
-					schfut.cancel(true);
-				schfut = null;
-				c.setSelected(false);
-				c.setColor(c.trueColor);
-//			} else {
-				c.setSelected(true);
-				selectedContents.add(c);
-				schfut = blinkService.scheduleAtFixedRate(new Runnable()
-				{
+
+			c.setSelected(false);
+			c.setColor(c.trueColor);
+
+			c.setSelected(true);
+			selectedContents.add(c);
+			if (schfut == null || schfut.isDone() || schfut.isCancelled()) {
+				schfut = blinkService.scheduleAtFixedRate(new Runnable() {
 					public void run()
 					{
-
 						if (blinkOn){
+							Image cursor = canvas.crsrImg;
 							for(Content nextC:selectedContents) {
 								nextC.setTempColor(nextC.trueColor);
 							}
+							canvas.crsrImg = cursor;
+//							canvas.stopRenderer();
+////							while (canvas.isRendererRunning())
+////								IJ.wait(0);
+//							canvas.swap();
+//							canvas.getGraphics2D().drawImage(canvas.crsrImg, canvas.cursorX, canvas.cursorY, null);
+////							while (canvas.isRendererRunning())
+////								IJ.wait(0);
+//							canvas.swap();
+//							canvas.startRenderer();
+
 							blinkOn = false;
 						} else {
+							Image cursor = canvas.crsrImg;
 							for(Content nextC:selectedContents) {
 								nextC.setTempColor(new Color3f(nextC.trueColor.x*0.7f,
 										nextC.trueColor.y*0.7f,
 										nextC.trueColor.z*0.7f));
 							}
+							canvas.crsrImg = cursor;
+//							canvas.stopRenderer();
+////							while (canvas.isRendererRunning())
+////								IJ.wait(0);
+//							canvas.swap();
+//							canvas.getGraphics2D().drawImage(canvas.crsrImg, cursorX, cursorY, null);
+////							while (canvas.isRendererRunning())
+////								IJ.wait(0);
+//							canvas.swap();
+//							canvas.startRenderer();
 							blinkOn =true;
-						}
-						if(false /*IJ.isWindows()*/){
-
-							Graphics2D g2Dcanv = win.canvas3D.getGraphics2D();
-							win.canvas3D.stopRenderer();
-							win.canvas3D.swap();
-							g2Dcanv.drawImage(win.canvas3D.crsrImg, win.canvas3D.recentX, win.canvas3D.recentY, null);
-							win.canvas3D.swap();
-							win.canvas3D.startRenderer();
-
 						}
 					}
 				}, 0, 500, TimeUnit.MILLISECONDS);
-				if(singleSelection && selectedContents.size()>0 && selectedContents.get(0) != null) {
-					while (selectedContents.size()>1) {
-						selectedContents.get(0).setSelected(false);
-						selectedContents.get(0).setColor(selectedContents.get(0).trueColor);
-						selectedContents.remove(0);
-					}
+			}
+			
+			if(singleSelection && selectedContents.size()>0 && selectedContents.get(0) != null) {
+				while (selectedContents.size()>1) {
+					selectedContents.get(0).setSelected(false);
+					selectedContents.get(0).setColor(selectedContents.get(0).trueColor);
+					selectedContents.remove(0);
 				}
 			}
-
 		} else {
-			if (schfut != null) {
-				schfut.cancel(true);
-				schfut = null;
-			}
 			if(singleSelection && selectedContents.size()>0 && selectedContents.get(0) != null) {
 				while (selectedContents.size()>0) {
 					selectedContents.get(0).setSelected(false);
@@ -850,16 +858,11 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 					selectedContents.remove(0);
 				}
 			}
-			if (win != null) {
-				win.canvas3D.stopRenderer();
-				win.canvas3D.swap();
-				win.canvas3D.startRenderer();
-			}
 		}
 		String st = c != null ? c.getName() : "none";
 		IJ.showStatus("selected: " + st);
 
-		fireContentSelected(c);
+//		fireContentSelected(c);
 		if (singleSelection && selectedContents.size()>0 && selectedContents.get(0) != null) {
 			int q = c3dm.getListModel().indexOf("\""+selectedContents.get(0).getName()+"_#0_#0 \"_0");
 			c3dm.getList().setSelectedIndex(q);

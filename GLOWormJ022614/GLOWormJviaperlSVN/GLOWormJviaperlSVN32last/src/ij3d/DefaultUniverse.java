@@ -8,6 +8,7 @@ import ij.ImagePlus;
 import java.awt.GraphicsEnvironment;
 import java.awt.GraphicsConfiguration;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
@@ -207,7 +208,14 @@ public abstract class DefaultUniverse extends SimpleUniverse
 	}
 
 	public DefaultUniverse(int width, int height, UIAdapter uia) {
-		super(new ImageCanvas3D(width, height, uia), 5);
+		super(new ImageCanvas3D(width, height, uia) {
+			public void postSwap() {
+				Graphics2D g2Dcanv = getGraphics2D();
+				g2Dcanv.drawImage(crsrImg, cursorX, cursorY, this);
+//				new ImagePlus("Hello World",crsrImg).show();
+
+			}
+		}, 5);
 		this.ui = uia;
 		getViewer().getView().setProjectionPolicy(UniverseSettings.projection);
 

@@ -42,6 +42,8 @@ public class ImageCanvas3D extends Canvas3D implements KeyListener {
 	final private ExecutorService exec = Executors.newSingleThreadExecutor();
 	public int recentX, recentY;
 	public Image crsrImg;
+	public int cursorX;
+	public int cursorY;
 
 
 	protected void flush() {
