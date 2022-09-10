@@ -184,6 +184,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
     private static ScheduledThreadPoolExecutor blinkService;
 	private ScheduledFuture schfut;
 	private boolean blinkOn;
+
+	private BufferedImage noPickCrsrImg;
 	
 	static{
 		UniverseSettings.load();
@@ -211,6 +213,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		}
 		canvas = (ImageCanvas3D)getCanvas();
 		canvas.crsrImg = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB_PRE);
+		noPickCrsrImg = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB_PRE);
 		iJ3dExecuter = new IJ3dExecuter(this);
 		
 		c3dm = new Content3DManager(this, false);
@@ -239,9 +242,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				Content c = picker.getPickedContent(
 						e.getX(), e.getY());
 				
-				if (c == recentContent 
-										  && (( Math.abs(canvas.recentX-e.getX()))<5) && (
-										  Math.abs((canvas.recentY-e.getY()))<5)
+				if (c == recentContent && (( Math.abs(canvas.recentX-e.getX()))<2) && (
+										  Math.abs((canvas.recentY-e.getY()))<2)
 										 ) {
 					
 				} else if (c != null){
@@ -366,13 +368,17 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 				} else {  // c == null
 					IJ.showStatus("");
-					canvas.crsrImg = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB_PRE);
-					canvas.cursorX = e.getX();
-					canvas.cursorY = e.getY();
-					canvas.stopRenderer();
-					canvas.swap();     // activates the overridden postSwap() of DefaultUniverse's canvas
-					canvas.swap();
-					canvas.startRenderer();
+					if (canvas.crsrImg == noPickCrsrImg) {
+						
+					} else {
+						canvas.crsrImg = noPickCrsrImg;
+						canvas.cursorX = e.getX();
+						canvas.cursorY = e.getY();
+						canvas.stopRenderer();
+						canvas.swap();     // activates the overridden postSwap() of DefaultUniverse's canvas
+						canvas.swap();
+						canvas.startRenderer();
+					}
 				}
 			}
 		});

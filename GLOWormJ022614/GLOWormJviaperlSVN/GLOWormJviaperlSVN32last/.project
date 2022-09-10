@@ -3,7 +3,7 @@
 	<name>CytoSHOWviaperlGitHub</name>
 	<comment></comment>
 	<projects>
-		<project>AceTreeLegacyModForCytoSHOWsynchB</project>
+		<project>AceTreeLegacyModForCytoSHOWsynch</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
