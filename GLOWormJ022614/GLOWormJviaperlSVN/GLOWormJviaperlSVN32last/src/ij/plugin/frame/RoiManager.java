@@ -10011,15 +10011,19 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		IJ.log("Select csv file with PHATE coordinates data");
 		String inputPhateCoordinatesPath = IJ.getFilePath("Select csv file with PHATE coordinates data");
-		IJ.log("Select csv file with condensation cluster assignment data");
-		String clusterAssignmentsPath = IJ.getFilePath("Select csv file with condensation cluster assignment data");
-		IJ.log("!!Select csv file with condensation cluster assignment data to compare!!");
-		String clusterAssignmentsCOMPPath = IJ
-				.getFilePath("!!Select csv file with condensation cluster assignment data to compare!!");
+		String clusterAssignmentsPath = new File(inputPhateCoordinatesPath).getParentFile().getParent()+File.separator+"cluster_assigments.csv";
+		IJ.log("Select csv file with condensation cluster assignment data "+clusterAssignmentsPath);
+//		String clusterAssignmentsPath = IJ.getFilePath("Select csv file with condensation cluster assignment data");
+		String clusterAssignmentsCOMPPath = clusterAssignmentsPath;
+		IJ.log("!!Select csv file with condensation cluster assignment data to compare!! "+clusterAssignmentsPath);
 		IJ.log("Select Mei Lab metadata for naming");
-		String cellNamesFromMeiLabPath = IJ.getFilePath("Select Mei Lab metadata for naming");
-		IJ.log("Select mtl file with color rules");
-		String mtlPath = IJ.getFilePath("Select mtl file with color rules");
+//		String clusterAssignmentsCOMPPath = IJ
+//				.getFilePath("!!Select csv file with condensation cluster assignment data to compare!!");
+		String cellNamesFromMeiLabPath = null;
+//		String cellNamesFromMeiLabPath = IJ.getFilePath("Select Mei Lab metadata for naming");
+//		IJ.log("Select mtl file with color rules");
+		String mtlPath = new File(clusterAssignmentsPath).getParentFile().getParent()+File.separator+"icosphereOut_22distinctClusterColors.mtl";
+//		String mtlPath = IJ.getFilePath("Select mtl file with color rules");
 		File inputFile = new File(inputPhateCoordinatesPath);
 		File clustAsnFile = new File(clusterAssignmentsPath);
 		mtlFile = new File(mtlPath);
