@@ -64,7 +64,9 @@ public class RoiLabelByNumbersSorter {
 				if (newNum.length()==0) newNum = "aaaaaa";
 				if (mode == 0 && newNum.equals(nums[0])) {
 					
-				} else {
+				} else if(num.equals(labelDollaredChunks[0])){  //leaves text of name un-prepended, so get alpha sort order after whatever chunk is the lead sort key.
+					
+				}else {
 					newNum = "00000000000000000000000000000000000" + newNum; // prepend maxDigits leading zeroes
 					newNum = newNum.substring(newNum.length()-maxDigits);//trim back to maxDigits total in newNum
 				}
