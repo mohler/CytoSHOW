@@ -816,15 +816,6 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 								nextC.setTempColor(nextC.trueColor);
 							}
 							canvas.crsrImg = cursor;
-//							canvas.stopRenderer();
-////							while (canvas.isRendererRunning())
-////								IJ.wait(0);
-//							canvas.swap();
-//							canvas.getGraphics2D().drawImage(canvas.crsrImg, canvas.cursorX, canvas.cursorY, null);
-////							while (canvas.isRendererRunning())
-////								IJ.wait(0);
-//							canvas.swap();
-//							canvas.startRenderer();
 
 							blinkOn = false;
 						} else {
@@ -835,15 +826,6 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 										nextC.trueColor.z*0.7f));
 							}
 							canvas.crsrImg = cursor;
-//							canvas.stopRenderer();
-////							while (canvas.isRendererRunning())
-////								IJ.wait(0);
-//							canvas.swap();
-//							canvas.getGraphics2D().drawImage(canvas.crsrImg, cursorX, cursorY, null);
-////							while (canvas.isRendererRunning())
-////								IJ.wait(0);
-//							canvas.swap();
-//							canvas.startRenderer();
 							blinkOn =true;
 						}
 					}

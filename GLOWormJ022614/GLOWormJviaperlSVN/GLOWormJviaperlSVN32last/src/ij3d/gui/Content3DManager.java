@@ -1443,109 +1443,65 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 
 
 	void setProperties(Color color, int lineWidth, Color fillColor) {
+		if (true) {
+			actionPerformed(new ActionEvent(new JButton(), ActionEvent.ACTION_PERFORMED, "Color", 0));
+			return;
+		}
 		boolean showDialog = color == null && lineWidth == -1 && fillColor == null;
+		ArrayList<Content> blinkingContents = ((Image3DUniverse)univ).getSelectedContents();
+		((Image3DUniverse)univ).setSelectedContents(new ArrayList<Content>());
 		int[] indexes = getSelectedIndexes();
 		if (indexes.length == 0)
 			indexes = getAllShownIndexes();
 		int n = indexes.length;
-		if (n == 0)
+		if (n == 0){
+			for (Content bc:blinkingContents)
+				((Image3DUniverse)univ).select(bc, true);
 			return;
+		}
 		ContentInstant cipContentInstant = null;
 		String rpName = null;
-		Font font = null;
-		int justification = TextRoi.LEFT;
-		double opacity = -1;
-		String alphaPrefix = "";
 		float transparency = 0f;
-			if (showDialog) {
+		if (showDialog) {
 			String label = (String) listModel.getElementAt(indexes[0]);
 			if (n > 1)
 				label = "range: " + (indexes[0] + 1) + "-" + (indexes[n - 1] + 1);
-//			else
-//				cipContentInstant.setColor(fillColor != null ? new Color3f(fillColor) : new Color3f(Colors.decode("#00000000", Color.black)));
-			cipContentInstant = new ContentInstant(label);
+			cipContentInstant = contentInstants.get(label);
 			if (n == 1) {
-				fillColor = contentInstants.get(label).getColor().get();
+				fillColor = cipContentInstant.getColor().get();
 				rpName = cipContentInstant.getName();
 			}
 
 			ContentInstantProperties ciprops = new ContentInstantProperties("Properties", cipContentInstant);
-			if (!ciprops.showDialog())
+			if (!ciprops.showDialog()){
+				for (Content bc:blinkingContents)
+					((Image3DUniverse)univ).select(bc, true);
 				return;
+			}
 			defaultLineWidth = lineWidth;
 			fillColor = cipContentInstant.getColor().get();
 			transparency = cipContentInstant.getTransparency();
 			defaultColor = color;
 		}
-		ImagePlus imp = this.imp;
 		if (n == listModel.getSize() && n > 1 && !IJ.isMacro()) {
 			GenericDialog gd = new GenericDialog("Content3D Manager");
 			gd.addMessage("Apply changes to all " + n + " selections?");
 			gd.showDialog();
-			if (gd.wasCanceled())
+			if (gd.wasCanceled()) {
+				for (Content bc:blinkingContents)
+					((Image3DUniverse)univ).select(bc, true);
 				return;
+			}
 		}
 		ColorLegend cl = this.getColorLegend();
-		if (cl != null) {
-//			ArrayList<Integer> hitIndexes = new ArrayList<Integer>();
-//			ContentInstant[] targetContentInstants = getSelectedContentInstantsAsArray();
-//			if (targetContentInstants.length<1)
-//				targetContentInstants = getFullContentInstantsAsArray();
-//			for (int i=0; i<n; i++) {
-//				String label = (String) listModel.getElementAt(indexes[i]);
-//				Color currentBBColor = targetContentInstants[0].getFillColor();
-//				String hexAlpha = Integer.toHexString(fillColor.getAlpha());
-//				String hexRed = Integer.toHexString(fillColor.getRed());
-//				String hexGreen = Integer.toHexString(fillColor.getGreen());
-//				String hexBlue = Integer.toHexString(fillColor.getBlue());
-//				String fillRGBstring = "#"+(hexAlpha.length()==1?"0":"")+hexAlpha
-//						+(hexRed.length()==1?"0":"")+hexRed
-//						+(hexGreen.length()==1?"0":"")+hexGreen
-//						+(hexBlue.length()==1?"0":"")+hexBlue; 
-//				int fillRGB = fillColor.getRGB();
-//				int currentRGB = currentBBColor!=null?currentBBColor.getRGB():0;
-//				if (fillRGB == currentRGB)
-//					return;
-//
-//				while (cl.getBrainbowColors().contains(new Color(fillColor.getRGB())) && fillColor.getRGB() != currentRGB) {
-//					if (fillColor.getBlue()<255) {
-//						hexBlue = Integer.toHexString(fillColor.getBlue()+1);
-//					} else if (fillColor.getGreen()<255) {
-//						hexGreen = Integer.toHexString(fillColor.getGreen()+1);
-//					} else if (fillColor.getRed()<255) {
-//						hexRed = Integer.toHexString(fillColor.getRed()+1);
-//					} 
-//					fillRGBstring = "#"+(hexAlpha.length()==1?"0":"")+hexAlpha
-//							+(hexRed.length()==1?"0":"")+hexRed
-//							+(hexGreen.length()==1?"0":"")+hexGreen
-//							+(hexBlue.length()==1?"0":"")+hexBlue; 
-//					fillColor = Colors.decode(fillRGBstring, fillColor);
-//				}
-//				cl.getBrainbowColors().put(label.split(" ")[0].replace("\"","").toLowerCase(), new Color(fillColor.getRGB()));				
-//				for (Checkbox cbC:cl.getCheckbox()) {
-//					String cbcName=cbC.getName();
-//					if (cbcName.equals(label.split(" ")[0].replace("\"",""))){
-//						cbC.setBackground(new Color(fillColor.getRGB()));
-//					}
-//				}
-//				for (int l=0; l<listModel.size(); l++) {
-//					if (((String) listModel.getElementAt(l)).startsWith(label.split(" =")[0])) {
-//						hitIndexes.add(l);
-//					}
-//				}
-//			}
-//			indexes = new int[hitIndexes.size()];
-//			n=indexes.length;
-//			for (int h=0;h<indexes.length;h++) {
-//				indexes[h] = ((int)hitIndexes.get(h));
-//			}
-		}
 		for (int i = 0; i < n; i++) {
 			String label = (String) listModel.getElementAt(indexes[i]);
 			ContentInstant contentInstant = (ContentInstant) contentInstants.get(label);
 			// IJ.log("set "+color+" "+lineWidth+" "+fillColor);
-			if (color != null)
-				contentInstant.setColor(new Color3f(color));
+			if (fillColor != null) {
+				contentInstant.setColor(new Color3f(fillColor));
+				contentInstant.setTrueColor(new Color3f(fillColor));
+			}
 			contentInstant.setTransparency(transparency);
 			if (!Colors.colorToHexString(fillColor).toUpperCase().endsWith("F0F0F0"))
 					contentInstant.setColor(new Color3f(fillColor));
@@ -1554,30 +1510,10 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 			if (fillColor != null)
 				brainbowColors.put(label.split(" ")[0].replace("\"", "").toLowerCase(), new Color(fillColor.getRGB()));
 		}
-//		String[] newNames = new String[indexes.length];
-//		for(int nn=0;nn<newNames.length;nn++) {
-//			String label2 = (String) listModel.getElementAt(indexes[nn]);
-//			newNames[nn]=label2;
-//			String dummyString = label2.replaceAll("\".* \"_", "Dummy_");
-//			String contentInstantColorChunk = dummyString.split("_")[1];
-//			String newColorName = contentInstantColorChunk.startsWith("#")? 
-//					label2.replace(contentInstantColorChunk, Colors.colorToHexString(fillColor)):
-//						label2.replace(" \"_", " \"_"+Colors.colorToHexString(fillColor));
-//			newNames[nn] = newColorName;
-//		}
-//		rename(newNames,  indexes, true);
+		for (Content bc:blinkingContents)
+			((Image3DUniverse)univ).select(bc, true);
 
-		if (cipContentInstant != null && rpName != null && !cipContentInstant.getName().equals(rpName))
-			rename(cipContentInstant.getName(), null, true);
-		ImageCanvas ic = imp != null ? imp.getCanvas() : null;
-		ContentInstant contentInstant = imp != null ? univ.getSelected().getCurrentInstant() : null;
-		boolean showingAll = ic != null && ic.getShowAllROIs();
-		if (contentInstant != null && (n == 1 || !showingAll)) {
-			if (fillColor != null)
-				contentInstant.setColor(new Color3f(fillColor));
-		}
-		if (imp != null)
-			imp.draw();
+		
 		if (record()) {
 			if (fillColor != null)
 				Recorder.record("contentInstantManager", "Set Fill Color", Colors.colorToString(fillColor));
@@ -1934,6 +1870,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 		int n = listModel.getSize();
 		int[] selecteds = list.getSelectedIndices();
 		if (index < 0) {
+			((Image3DUniverse)univ).select(null, true);
 			list.clearSelection();
 			if (record())
 				Recorder.record("contentInstantManager", "Deselect");
@@ -7116,6 +7053,9 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 
 			if (reNameInListNow && listModel.indexOf(contentInstant.getName()) != -1)
 				rename(newColorName, new int[] { listModel.indexOf(contentInstant.getName()) }, false);
+		}
+		for (Content c:contentInstant.getContentsContainingThisInstant().values()) {
+			c.setColor(new Color3f(color));
 		}
 	}
 
