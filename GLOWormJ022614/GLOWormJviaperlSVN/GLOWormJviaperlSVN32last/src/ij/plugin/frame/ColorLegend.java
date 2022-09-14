@@ -255,7 +255,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 								ci.setColor(new Color3f(brainbowColors.get(hitTests.get(finalTestNumber))));
 							}
 						}).start();
-						IJ.log(fixedName+" "+ci.getColor().get());
+//						IJ.log(fixedName+" "+ci.getColor().get());
 					}
 
 //					!!! NEED TO FIX THIS ONE NEXT!!!!!
@@ -275,14 +275,14 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 									ci.setColor(new Color3f(brainbowColors.get(hitTestPost)));
 								}
 							}).start();
-							IJ.log(fixedName+" "+hitTestPost+" "+ColorLegend.this.getBrainbowColors().get(hitTestPost));
+//							IJ.log(fixedName+" "+hitTestPost+" "+ColorLegend.this.getBrainbowColors().get(hitTestPost));
 						}
 					}
 					
 					IJ.showStatus(index+"/"+lm.getSize()+" tags color-adjusted.");
 				}
 
-				IJ.log("All content color-adjusted per ColorLegend");
+				IJ.showStatus("All content color-adjusted per ColorLegend");
 			}else {
 				int roiConvCount = 0;
 				int nRois = rm.getCount();
@@ -330,7 +330,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 
 				}
 				imp.updateAndRepaintWindow();
-				IJ.log("All tags color-adjusted per ColorLegend");
+				IJ.showStatus("All tags color-adjusted per ColorLegend");
 
 			}
 			IJ.wait(0);
