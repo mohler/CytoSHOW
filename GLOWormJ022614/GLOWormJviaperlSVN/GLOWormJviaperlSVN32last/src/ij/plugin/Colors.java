@@ -1384,7 +1384,8 @@ public class Colors implements PlugIn, ItemListener {
 			else if (name.toLowerCase().equals(colors[8])) c = Color.white;
 			if (c == defaultColor) {
 				String colorHex = kaleidoColors.get(name.toLowerCase());
-				c = decode(colorHex, defaultColor);
+				if (colorHex!=null)
+					c = decode(colorHex, defaultColor);
 			}
 			return c;
 		}
