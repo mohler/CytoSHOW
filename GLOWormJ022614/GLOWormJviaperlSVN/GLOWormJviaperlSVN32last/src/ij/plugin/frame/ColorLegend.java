@@ -27,6 +27,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import javax.swing.JCheckBox;
+import javax.swing.JList;
 import javax.swing.ListModel;
 import javax.vecmath.Color3f;
 
@@ -258,7 +259,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 //						IJ.log(fixedName+" "+ci.getColor().get());
 					}
 
-//					!!! NEED TO FIX THIS ONE NEXT!!!!!
+//					!!! succeeded to FIX THIS ONE NEXT!!!!!
 					if (fixedName.contains("_post")) {
 
 						int postSynRank = Integer.parseInt(fixedName.replaceAll("^.*post(\\d*)","$1"));
@@ -281,7 +282,15 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 					
 					IJ.showStatus(index+"/"+lm.getSize()+" tags color-adjusted.");
 				}
+				JList list = ((Image3DUniverse)univ).getContent3DManager().getList();
+				int listfirstposition = list.getFirstVisibleIndex();
+				int listlastposition = list.getLastVisibleIndex();
 
+				((Image3DUniverse)univ).getContent3DManager().close();
+				((Image3DUniverse)univ).getContent3DManager().setVisible(true);
+				list.ensureIndexIsVisible(listlastposition);
+				list.ensureIndexIsVisible(listfirstposition);
+				
 				IJ.showStatus("All content color-adjusted per ColorLegend");
 			}else {
 				int roiConvCount = 0;

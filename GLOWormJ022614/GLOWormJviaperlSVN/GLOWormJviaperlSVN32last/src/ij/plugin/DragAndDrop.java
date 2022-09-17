@@ -273,18 +273,6 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						}	
 					}
 					if (!clStr.contentEquals("")) {
-//						Frame[] frames = WindowManager.getImageWindows();
-//						if (this.dtde.getDropTargetContext().getDropTarget().getComponent() instanceof ImageCanvas3D) {
-//							for (Frame frame:frames){
-//								if (frame instanceof ImageWindow3D){
-//									if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow3D)frame).getUniverse().getCanvas()){
-//										Image3DUniverse i3duniv = (Image3DUniverse)((ImageWindow3D)frame).getUniverse();
-//										imp = i3duniv.getWindow().getImagePlus();
-//										dropImp = imp;
-//									}
-//								}
-//							}
-//						}
 						ColorLegend cl = new ColorLegend(imp, clStr);
 						return;
 					}
@@ -603,40 +591,6 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							Window dropWin = null;
 							if (dropUniverse != null)
 								dropWin = dropUniverse.getWindow();
-//							if (dropWin instanceof ImageWindow3D){
-//									if (dtc == ((ImageWindow3D)dropWin).getUniverse().getCanvas()){
-//										dropUniverse = (Image3DUniverse)((ImageWindow3D)dropWin).getUniverse();
-//										dropImp = dropUniverse.getWindow().getImagePlus();
-//										setImp(dropImp);
-//										dropUniverse.setAutoAdjustView(true);
-//										if (freshDrop){
-//											dropUniverse = null;
-//											dropImp = null;
-//											setImp(dropImp);
-//										}
-//										if (dropUniverse == null) {
-//											dropUniverse = new Image3DUniverse();
-//											try {
-//												SwingUtilities.invokeLater(new Runnable() {
-//													@Override
-//													public void run() {
-//														dropUniverse.show(false);
-//													}
-//												}
-//														);
-//											} catch (InvocationTargetException e) {
-//												// TODO Auto-generated catch block
-//												e.printStackTrace();
-//											} catch (InterruptedException e) {
-//												// TODO Auto-generated catch block
-//												e.printStackTrace();
-//											}
-//											dropImp = dropUniverse.getWindow().getImagePlus();
-//											setImp(dropImp);
-//										}
-			//
-//									}
-//								}
 							
 							if (IJ.getInstance()!=null) {
 								if ( this.dtde.getDropTargetContext().getDropTarget().getComponent() == IJ.getInstance().getStatusBar()){
@@ -1299,40 +1253,6 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					Window dropWin = null;
 					if (dropUniverse != null)
 						dropWin = dropUniverse.getWindow();
-//					if (dropWin instanceof ImageWindow3D){
-//							if (dtc == ((ImageWindow3D)dropWin).getUniverse().getCanvas()){
-//								dropUniverse = (Image3DUniverse)((ImageWindow3D)dropWin).getUniverse();
-//								dropImp = dropUniverse.getWindow().getImagePlus();
-//								setImp(dropImp);
-//								dropUniverse.setAutoAdjustView(true);
-//								if (freshDrop){
-//									dropUniverse = null;
-//									dropImp = null;
-//									setImp(dropImp);
-//								}
-//								if (dropUniverse == null) {
-//									dropUniverse = new Image3DUniverse();
-//									try {
-//										SwingUtilities.invokeLater(new Runnable() {
-//											@Override
-//											public void run() {
-//												dropUniverse.show(false);
-//											}
-//										}
-//												);
-//									} catch (InvocationTargetException e) {
-//										// TODO Auto-generated catch block
-//										e.printStackTrace();
-//									} catch (InterruptedException e) {
-//										// TODO Auto-generated catch block
-//										e.printStackTrace();
-//									}
-//									dropImp = dropUniverse.getWindow().getImagePlus();
-//									setImp(dropImp);
-//								}
-	//
-//							}
-//						}
 					
 					if (IJ.getInstance()!=null) {
 						if ( this.dtde.getDropTargetContext().getDropTarget().getComponent() == IJ.getInstance().getStatusBar()){
