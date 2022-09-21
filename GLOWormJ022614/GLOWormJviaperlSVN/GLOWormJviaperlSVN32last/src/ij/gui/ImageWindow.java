@@ -247,7 +247,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 				show();
 			}
 			if (ic.getMagnification()!=0.0)
-				imp.setTitle(imp.getTitle());
+				imp.setTitle(this.getTitle());
 			boolean unlocked = imp.lockSilently();
 			boolean changes = imp.changes;
 			imp.changes = false;

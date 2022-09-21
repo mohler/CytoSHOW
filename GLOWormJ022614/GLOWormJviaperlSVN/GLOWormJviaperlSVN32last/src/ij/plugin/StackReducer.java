@@ -59,7 +59,7 @@ public class StackReducer implements PlugIn {
 		imp.setStack(null, stack2);
 		if (virtual) {
 			IJ.showProgress(1.0);
-			imp.setTitle(imp.getTitle());
+			imp.setTitle(imp.getWindow().getTitle());
 		}
 		Calibration cal = imp.getCalibration();
 		if (cal.scaled()) cal.pixelDepth *= factor;
