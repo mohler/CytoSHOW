@@ -148,7 +148,7 @@ public class WavefrontLoader {
 		String[] sp = line.split("\\s+");
 		int flipXCoef = specialDrop?-1:1;
 		String objFileGrandParentName = new File(objfile).getParentFile().getParentFile().getName();
-		if (new File(objfile).getParentFile().getParentFile().getParentFile().getName().contains("AllNineBrains_FilesToUse")
+		if ( objFileGrandParentName.contains("AllNineBrains_FilesToUse")
 				&& !specialDrop) {
 			flipXCoef = 1;
 			//		FOR JSH
