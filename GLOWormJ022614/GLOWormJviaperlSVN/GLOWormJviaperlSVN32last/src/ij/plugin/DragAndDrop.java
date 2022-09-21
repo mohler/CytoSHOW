@@ -354,9 +354,9 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 				openAsVirtualStack = width-loc.x<=buttonSize && 
 						(e.getDropTargetContext().getDropTarget().getComponent() instanceof ImageCanvas3D);
 				if (openAsVirtualStack)
-					IJ.showStatus("<<Open with Special Settings>> in existing IJ3DViewer");
+					IJ.showStatus("<<Open with Special Settings>> into IJ3DViewer");
 				else
-					IJ.showStatus("<<Drag and Drop>> in existing IJ3DViewer");
+					IJ.showStatus("<<Drag and Drop>> into IJ3DViewer");
 
 			}
 		}
