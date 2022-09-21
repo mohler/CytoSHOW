@@ -217,7 +217,7 @@ public class ScrollbarWithLabel extends JPanel implements Adjustable, MouseListe
 
 		g.setFont(font);
 
-		g.setColor(Colors.decode("66ffffff",Color.white));
+		g.setColor(Colors.decode("#66ffffff",Color.white));
 		g.fillRect(0, 0, w, h);
 		g.setColor(Color.BLACK);
 		g.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));

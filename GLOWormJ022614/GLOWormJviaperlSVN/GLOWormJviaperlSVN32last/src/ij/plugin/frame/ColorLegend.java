@@ -98,7 +98,6 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 				}
 			}
 		}
-		Colors.init();
 //		WindowManager.addWindow(this);
 		ScrollPane fsp = new ScrollPane();
 		GridBagLayout fspgridbag = new GridBagLayout();

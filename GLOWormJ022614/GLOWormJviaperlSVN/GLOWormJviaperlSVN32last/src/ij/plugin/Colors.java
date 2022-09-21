@@ -1393,6 +1393,8 @@ public class Colors implements PlugIn, ItemListener {
 
 	public static Color decode(String hexColorString, Color defaultColor) {
 		Color color = defaultColor;
+		if (kaleidoColors == null)
+			init();
 		if (hexColorString.matches("#......(..)?")) {
 			hexColorString = hexColorString.substring(1);
 			int len = hexColorString.length();
