@@ -2251,9 +2251,10 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			int nextTpt =0;
 			if (tptParse[tptParse.length-1].matches("\\d+.obj")) {
 				nextTpt = Integer.parseInt(tptParse[tptParse.length-1].replace(".obj", ""));
-			} else if (parseTimeInCPHATE && ((String)nextmatchingfilename).matches("(.*)(csv\\.i)(\\d+)(\\.c\\d+.*\\.obj)")) {
-				nextTpt = Integer.parseInt(((String)nextmatchingfilename).replaceAll("(.*)(csv\\.i)(\\d+)(\\.c\\d+.*\\.obj)","$3"));
-			}
+			} 
+//			else if (parseTimeInCPHATE && ((String)nextmatchingfilename).matches("(.*)(csv\\.i)(\\d+)(\\.c\\d+.*\\.obj)")) {
+//				nextTpt = Integer.parseInt(((String)nextmatchingfilename).replaceAll("(.*)(csv\\.i)(\\d+)(\\.c\\d+.*\\.obj)","$3"));
+//			}
 			
 			Map<String, CustomMesh> meshes= null;
 			try {
@@ -2268,6 +2269,10 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			for(Map.Entry<String,CustomMesh> entry : meshes.entrySet()) {
 				String name = entry.getKey();
 				name = getSafeContentName(name);
+				if (parseTimeInCPHATE && name.matches("(.*)(\\-i)(\\d+)\\/\\d+(\\-c\\d+.*)")) {
+					nextTpt = Integer.parseInt(name.replaceAll("(.*)(\\-i)(\\d+)\\/\\d+(\\-c\\d+.*)","$3"));
+				}
+
 				CustomMesh mesh = entry.getValue();
 				if (!cInstants.containsKey(name)) {
 					cInstants.put(name, new TreeMap<Integer, ContentInstant>());

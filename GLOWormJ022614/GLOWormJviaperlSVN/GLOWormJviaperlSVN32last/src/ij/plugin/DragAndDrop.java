@@ -689,22 +689,22 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							try {
 								if (openAsVirtualStack) {
 									dropUniverse.setFlipXonImport(true);
-									dropUniverse.addContentLater(((File)nextItem).getPath(), null);
+									int s = this.dtde.getDropAction();
+									dropUniverse.addContentLater(((File)nextItem).getPath(), null, s==1||s==1073741824?true:false);
 								} else {
-									String s = ""+this.dtde.getDropAction();
-									IJ.log(s);
-									dropUniverse.addContentLater(((File)nextItem).getPath(), null);
+									int s = this.dtde.getDropAction();
+									dropUniverse.addContentLater(((File)nextItem).getPath(), null, s==1||s==1073741824?true:false);
 								}
 							} catch (Exception e) {
 								dropUniverse = new Image3DUniverse();
 										dropUniverse.show(false);
 								if (openAsVirtualStack) {
 									dropUniverse.setFlipXonImport(true);
-									dropUniverse.addContentLater(((File)nextItem).getPath(), null);
+									int s = this.dtde.getDropAction();
+									dropUniverse.addContentLater(((File)nextItem).getPath(), null, s==1||s==1073741824?true:false);
 								} else {
-									String s = ""+this.dtde.getDropAction();
-									IJ.log(s);
-									dropUniverse.addContentLater(((File)nextItem).getPath(), null);
+									int s = this.dtde.getDropAction();
+									dropUniverse.addContentLater(((File)nextItem).getPath(), null, s==1||s==1073741824?true:false);
 								}
 							}
 							//ImageJ3DViewer.lock();
@@ -1358,11 +1358,11 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					try {
 						if (openAsVirtualStack) {
 							dropUniverse.setFlipXonImport(true);
-							dropUniverse.addContentLater(cacheObj.getAbsolutePath(), null);
+							int s = this.dtde.getDropAction();
+							dropUniverse.addContentLater(((File)nextItem).getPath(), null, s==1||s==1073741824?true:false);
 						} else {
-							String s = ""+this.dtde.getDropAction();
-							IJ.log(s);
-							dropUniverse.addContentLater(cacheObj.getAbsolutePath(), null);
+							int s = this.dtde.getDropAction();
+							dropUniverse.addContentLater(((File)nextItem).getPath(), null, s==1||s==1073741824?true:false);
 						}
 					} catch (Exception e) {
 						dropUniverse = new Image3DUniverse();
@@ -1370,11 +1370,11 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							while (dropUniverse.getWindow() == null) IJ.wait (10);
 						if (openAsVirtualStack) {
 							dropUniverse.setFlipXonImport(true);
-							dropUniverse.addContentLater(cacheObj.getAbsolutePath(), null);
+							int s = this.dtde.getDropAction();
+							dropUniverse.addContentLater(((File)nextItem).getPath(), null, s==1||s==1073741824?true:false);
 						} else {
-							String s = ""+this.dtde.getDropAction();
-							IJ.log(s);
-							dropUniverse.addContentLater(cacheObj.getAbsolutePath(), null);
+							int s = this.dtde.getDropAction();
+							dropUniverse.addContentLater(((File)nextItem).getPath(), null, s==1||s==1073741824?true:false);
 						}
 					}
 					//ImageJ3DViewer.lock();
@@ -1672,11 +1672,12 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 				try {
 					if (openAsVirtualStack) {
 						dropUniverse.setFlipXonImport(true);
-						dropUniverse.addContentLater(((File)nextItem).getPath(), null);
+						int s = this.dtde.getDropAction();
+						dropUniverse.addContentLater(((File)nextItem).getPath(), null, s==1||s==1073741824?true:false);
 					} else {
 						int s = this.dtde.getDropAction();
 //						IJ.log(""+s);
-						dropUniverse.addContentLater(((File)nextItem).getPath(), null, s==1||s==1073741824?true:false);     //this call picked when dropping a mixed folder with objs and others
+						dropUniverse.addContentLater(((File)nextItem).getPath(), null, s==1||s==1073741824?true:false);     //this call picked when dropping either a single obj file or a mixed folder with objs and others
 					}
 				} catch (Exception e) {
 					dropUniverse = new Image3DUniverse();
@@ -1684,13 +1685,13 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					while (dropUniverse.getWindow() == null) IJ.wait (10);
 					if (openAsVirtualStack) {
 						dropUniverse.setFlipXonImport(true);
-						dropUniverse.addContentLater(((File)nextItem).getPath(), null);
+						int s = this.dtde.getDropAction();
+						dropUniverse.addContentLater(((File)nextItem).getPath(), null, s==1||s==1073741824?true:false);
 
 					} else {
-						String s = ""+this.dtde.getDropAction();
-						IJ.log(s);
 						dropUniverse.setFlipXonImport(false);
-						dropUniverse.addContentLater(((File)nextItem).getPath(), null);
+						int s = this.dtde.getDropAction();
+						dropUniverse.addContentLater(((File)nextItem).getPath(), null, s==1||s==1073741824?true:false);
 
 					}
 				}
