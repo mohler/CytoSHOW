@@ -83,6 +83,7 @@ import javax.vecmath.Point3f;
 import javax.vecmath.Vector3d;
 
 import com.sun.j3d.utils.universe.MultiTransformGroup;
+import com.sun.java.swing.plaf.windows.resources.windows;
 
 import octree.VolumeOctree;
 import view4d.Timeline;
@@ -728,6 +729,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		if(timelineGUIVisible)
 			timelineGUI.updateTimepoint(tp);
 		fireTimepointChanged(currentTimepoint);
+		win.pack();
 	}
 
 	public int getCurrentTimepoint() {
