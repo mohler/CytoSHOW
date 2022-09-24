@@ -83,7 +83,6 @@ import javax.vecmath.Point3f;
 import javax.vecmath.Vector3d;
 
 import com.sun.j3d.utils.universe.MultiTransformGroup;
-import com.sun.java.swing.plaf.windows.resources.windows;
 
 import octree.VolumeOctree;
 import view4d.Timeline;
@@ -2223,6 +2222,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 
 	public void addContentLater(String filePath, InputStream[] objmtlStreams, boolean parseTimeInCPHATE) {
+		if (parseTimeInCPHATE && startTime!=1)
+			startTime = 1;
 		ArrayList<String> timedObjFileNames = new ArrayList<String>();
 		File file = new File(filePath);
 		String titleName = file.getName();
@@ -2271,8 +2272,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			for(Map.Entry<String,CustomMesh> entry : meshes.entrySet()) {
 				String name = entry.getKey();
 				name = getSafeContentName(name);
-				if (parseTimeInCPHATE && name.matches("(.*)(\\-i)(\\d+)\\/\\d+(\\-c\\d+.*)")) {
-					nextTpt = Integer.parseInt(name.replaceAll("(.*)(\\-i)(\\d+)\\/\\d+(\\-c\\d+.*)","$3"));
+				if (parseTimeInCPHATE && name.matches("(.*)(\\-i)(\\d+)(\\/\\d+)?(\\-c\\d+.*)")) {
+					nextTpt = Integer.parseInt(name.replaceAll("(.*)(\\-i)(\\d+)(\\/\\d+)?(\\-c\\d+.*)","$3"));
 				}
 
 				CustomMesh mesh = entry.getValue();
@@ -2308,8 +2309,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			if (!titleName.contentEquals("."))
 				setTitle((this.flipXonImport?"FlipX_":"")+titleName);
 		}
-		if (parseTimeInCPHATE)
-			updateStartAndEndTime(1, this.getEndTime());
+//		if (parseTimeInCPHATE)
+//			updateStartAndEndTime(1, this.getEndTime());
 	}
 
 
