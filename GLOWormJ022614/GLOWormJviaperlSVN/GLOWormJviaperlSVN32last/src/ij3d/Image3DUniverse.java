@@ -2308,6 +2308,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			if (!titleName.contentEquals("."))
 				setTitle((this.flipXonImport?"FlipX_":"")+titleName);
 		}
+		if (parseTimeInCPHATE)
+			updateStartAndEndTime(1, this.getEndTime());
 	}
 
 
