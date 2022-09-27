@@ -58,6 +58,7 @@ new12="diSPIM Monitor (Stage-Scan WG_MicroManager)", org.vcell.gloworm.DISPIM_Mo
 new13="diSPIM Monitor (Currently Open Stack Pair)", org.vcell.gloworm.DISPIM_Monitor("currentStacks")
 new14="Ratio Chaser (megaTiff MicroManager)", org.vcell.gloworm.DISPIM_Monitor("megaTiffMMrc")
 new15="Scene Editor",ij.plugin.frame.SceneEditor
+new16="DC-CPHATE Model",ij.plugin.PHATEplotter
 
 # Plugins installed in the File/Import submenu
 import01="Image Sequence...",ij.plugin.FolderOpener
