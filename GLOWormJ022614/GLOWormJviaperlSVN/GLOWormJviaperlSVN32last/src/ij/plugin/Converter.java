@@ -69,7 +69,7 @@ public class Converter implements PlugIn {
 		    		if (nColors!=0)
 						new StackConverter(imp).convertToIndexedColor(nColors);
 				} else throw new IllegalArgumentException();
-				if (wasVirtual) imp.setTitle(imp.getWindow().getTitle());
+				if (wasVirtual) imp.setTitle(imp.getTitle());
 			} else {
 				// do single image conversions
 				Undo.setup(Undo.TYPE_CONVERSION, imp);
