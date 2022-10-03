@@ -116,6 +116,7 @@ public class IJ3dExecuter {
 	public static final String DELETE = "delete";
 
 	public static final String SMOOTH = "smooth";
+	private static final String CURRENT_TO_DEFAULT_VIEW = "currentViewToDefault";
 
 	private Image3DUniverse univ;
 
@@ -1618,6 +1619,11 @@ public class IJ3dExecuter {
 	public void resetView() {
 		univ.resetView();
 		record(RESET_VIEW);
+	}
+
+	public void currentViewToDefault() {
+		univ.currentViewToDefault();
+		record(CURRENT_TO_DEFAULT_VIEW);
 	}
 
 	public void centerSelected(Content c) {

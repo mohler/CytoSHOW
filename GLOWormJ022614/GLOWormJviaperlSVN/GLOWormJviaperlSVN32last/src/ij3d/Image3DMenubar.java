@@ -109,6 +109,7 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 	private JMenuItem newViewer;
 	private JMenuItem saveCLView;
 	private JMenuItem renameViewer;
+	private JMenuItem resetDefaultView;
 
 	public Image3DMenubar(Image3DUniverse univ) {
 		super();
@@ -422,7 +423,7 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 	public JMenu createViewMenu() {
 		JMenu view = new JMenu("View");
 
-		resetView = new JMenuItem("Reset view");
+		resetView = new JMenuItem("Reset view to default");
 		resetView.addActionListener(this);
 		view.add(resetView);
 
@@ -460,6 +461,10 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 		viewnegXZ = new JMenuItem("- XZ"); viewnegXZ.addActionListener(this); menu.add(viewnegXZ);
 		viewnegYZ = new JMenuItem("- YZ"); viewnegYZ.addActionListener(this); menu.add(viewnegYZ);
 		view.add(menu);
+
+		resetDefaultView = new JMenuItem("Use Current View as Default");
+		resetDefaultView.addActionListener(this);
+		view.add(resetDefaultView);
 
 		view.addSeparator();
 
@@ -598,6 +603,8 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 			iJ3dExecuter.delete(getSelected());
 		else if(src == resetView)
 			iJ3dExecuter.resetView();
+		else if(src == resetDefaultView)
+			iJ3dExecuter.currentViewToDefault();
 		else if(src == centerSelected)
 			iJ3dExecuter.centerSelected(getSelected());
 		else if(src == centerOrigin)
