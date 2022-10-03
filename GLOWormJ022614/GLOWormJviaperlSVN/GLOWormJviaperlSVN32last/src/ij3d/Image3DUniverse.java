@@ -151,10 +151,6 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	private TransformGroup contentRotTG = new TransformGroup();
 	private TransformGroup contentTranTG = new TransformGroup();
 
-	private Transform3D defaultRotXfm = new Transform3D();
-	private Transform3D defaultTranXfm = new Transform3D();
-	private Transform3D defaultZoomXfm = new Transform3D();
-
 	
 	/**
 	 * A flag indicating whether the view is adjusted each time a
@@ -212,11 +208,6 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	public Image3DUniverse(int width, int height) {
 		super(width, height);
 		numUniversesLaunched++;
-		
-		defaultRotXfm.set(new AxisAngle4d(1, 0, 0, Math.PI));
-		defaultTranXfm.setIdentity();
-		defaultZoomXfm.setIdentity();
-		
 		if (blinkService ==null){
 			blinkService = new ScheduledThreadPoolExecutor(1);
 		}
@@ -862,7 +853,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		String st = c != null ? c.getName() : "none";
 		IJ.showStatus("selected: " + st);
 
-		fireContentSelected(c);
+//		fireContentSelected(c);
 		if (singleSelection && selectedContents.size()>0 && selectedContents.get(0) != null) {
 			int q = c3dm.getListModel().indexOf("\""+selectedContents.get(0).getName()+"_#0_#0 \"_0");
 			c3dm.getList().setSelectedIndex(q);
@@ -1868,7 +1859,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		((Content)getContents().toArray()[0]).getLocalRotate().getTransform(clr);
 		IJ.log("clr: " +clr);
 		
-		resetView();
+		resetView(false);
 		
 		fireTransformationUpdated();
 		fireTransformationFinished();
@@ -1890,14 +1881,13 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		Transform3D t = new Transform3D();
 		if (resetRotation) {
 			// rotate so that y shows downwards
-//			AxisAngle4d aa = new AxisAngle4d(1, 0, 0, Math.PI);
-//			t.set(aa);
-			
-			getRotationTG().setTransform(defaultRotXfm);
+			AxisAngle4d aa = new AxisAngle4d(1, 0, 0, Math.PI);
+			t.set(aa);
+			getRotationTG().setTransform(t);
 		}
 		t.setIdentity();
-		getTranslateTG().setTransform(defaultTranXfm);
-		getZoomTG().setTransform(defaultZoomXfm);
+		getTranslateTG().setTransform(t);
+		getZoomTG().setTransform(t);
 		recalculateGlobalMinMax();
 		getViewPlatformTransformer().centerAt(globalCenter);
 		// reset zoom
@@ -1906,13 +1896,6 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		fireTransformationUpdated();
 		fireTransformationFinished();
 	}
-	
-	public void currentViewToDefault() {
-		getRotationTG().getTransform(defaultRotXfm);
-		getTranslateTG().getTransform(defaultTranXfm);
-		getZoomTG().getTransform(defaultZoomXfm);
-	}
-
 
 	/**
 	 * Reflect universe thru YZ plane
@@ -2465,7 +2448,6 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	public String getTitle() {
 		return title;
 	}
-
 
 
 
