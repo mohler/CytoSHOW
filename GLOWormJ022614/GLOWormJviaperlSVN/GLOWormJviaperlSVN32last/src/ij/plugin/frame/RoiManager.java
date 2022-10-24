@@ -10011,8 +10011,6 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		IJ.log("Select csv file with PHATE coordinates data");
 		String inputPhateCoordinatesPath = IJ.getFilePath("Select csv file with PHATE coordinates data");
-		if (inputPhateCoordinatesPath == null)
-			return;
 		String clusterAssignmentsPath = new File(inputPhateCoordinatesPath).getParentFile().getParent()+File.separator+"cluster_assigments.csv";
 		IJ.log("Select csv file with condensation cluster assignment data "+clusterAssignmentsPath);
 //		String clusterAssignmentsPath = IJ.getFilePath("Select csv file with condensation cluster assignment data");

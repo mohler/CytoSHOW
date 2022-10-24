@@ -840,7 +840,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		if (magnification>32.0) magnification = 32.0;
 		if (magnification<0.03125) magnification = 0.03125;
 		this.magnification = magnification;
-		imp.setTitle(imp.getWindow().getTitle());
+		imp.setTitle(imp.getTitle());
 	}
 
 	/** Enlarge the canvas if the user enlarges the window. */
