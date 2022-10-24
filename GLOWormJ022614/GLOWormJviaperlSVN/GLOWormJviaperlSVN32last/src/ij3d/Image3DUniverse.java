@@ -728,6 +728,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		if(timelineGUIVisible)
 			timelineGUI.updateTimepoint(tp);
 		fireTimepointChanged(currentTimepoint);
+		win.pack();
 	}
 
 	public int getCurrentTimepoint() {
@@ -1798,70 +1799,71 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 */
 
 	public void setContentTfmsAndResetView() {
+		for (int n=0;n<2;n++) {    					// NEED TO RUN ALL STEPS TWICE TO GET DESIRED EFFECT!(?)
+			fireTransformationStarted();
+			Transform3D tRot = new Transform3D();
+			this.getRotationTG().getTransform(tRot);
+			IJ.log("tRot \n"+ tRot.toString()+"\n");
 
-		fireTransformationStarted();
-		Transform3D tRot = new Transform3D();
-		this.getRotationTG().getTransform(tRot);
-		IJ.log("tRot \n"+ tRot.toString()+"\n");
-		
-		Transform3D tTrans = new Transform3D();
-		this.getTranslateTG().getTransform(tTrans);
-		IJ.log("tTrans \n"+ tTrans.toString()+"\n");
+			Transform3D tTrans = new Transform3D();
+			this.getTranslateTG().getTransform(tTrans);
+			IJ.log("tTrans \n"+ tTrans.toString()+"\n");
 
-		double[] univTransTransformMatrix = new double[16];
-		tTrans.get(univTransTransformMatrix);
-		double[][] univTransTransformMatrix4x4 = new double[4][4];
-		for (int i =0; i<16; i++) {
-			 univTransTransformMatrix4x4[i/4][i%4] = univTransTransformMatrix[i] ;
-		}
+			double[] univTransTransformMatrix = new double[16];
+			tTrans.get(univTransTransformMatrix);
+			double[][] univTransTransformMatrix4x4 = new double[4][4];
+			for (int i =0; i<16; i++) {
+				univTransTransformMatrix4x4[i/4][i%4] = univTransTransformMatrix[i] ;
+			}
 
-		//NEED TO negate values to create inverse translation matrix of univTTM
-		double[] contentTransTransformMatrix = new double[16];
-		for (int i =0; i<16; i++) {
+			//NEED TO negate values to create inverse translation matrix of univTTM
+			double[] contentTransTransformMatrix = new double[16];
+			for (int i =0; i<16; i++) {
 				contentTransTransformMatrix[i] = univTransTransformMatrix4x4[i/4][i%4]; //untransposed
 				if ((i+1)%4 == 0 && i<15) {
 					contentTransTransformMatrix[i] = -contentTransTransformMatrix[i];
 				}
-		}
-		
-		double[] univRotTransformMatrix = new double[16];
-		tRot.get(univRotTransformMatrix);
-		double[][] univRotTransformMatrix4x4 = new double[4][4];
-		for (int i =0; i<16; i++) {
-			 univRotTransformMatrix4x4[i/4][i%4] = univRotTransformMatrix[i] ;
-		}
+			}
 
-		//NEED TO TRANSPOSE to create inverse rotation matrix of univRTM...
-		double[] contentRotTransformMatrix = new double[16];
-		for (int i =0; i<16; i++) {
+			double[] univRotTransformMatrix = new double[16];
+			tRot.get(univRotTransformMatrix);
+			double[][] univRotTransformMatrix4x4 = new double[4][4];
+			for (int i =0; i<16; i++) {
+				univRotTransformMatrix4x4[i/4][i%4] = univRotTransformMatrix[i] ;
+			}
+
+			//NEED TO TRANSPOSE to create inverse rotation matrix of univRTM...
+			double[] contentRotTransformMatrix = new double[16];
+			for (int i =0; i<16; i++) {
 				contentRotTransformMatrix[i] = univRotTransformMatrix4x4[i%4][i/4];  //transposed
-		}
-		
-		
-		Transform3D contentTransTransform = new Transform3D(contentTransTransformMatrix);
-		contentTranTG.setTransform(contentTransTransform);
-		IJ.log("contentTransTransform \n"+ contentTransTransform.toString()+"\n");
+			}
 
-		Transform3D contentRotTransform = new Transform3D(contentRotTransformMatrix);
-		contentRotTG.setTransform(contentRotTransform);
-		IJ.log("contentRotTransform \n"+ contentRotTransform.toString()+"\n");
 
-		for (Object o: getContents()) {
-			Content c = ((Content)o);
-			c.applyTransform(contentTransTransform);
-			c.applyTransform(contentRotTransform);
+			Transform3D contentTransTransform = new Transform3D(contentTransTransformMatrix);
+			contentTranTG.setTransform(contentTransTransform);
+			IJ.log("contentTransTransform \n"+ contentTransTransform.toString()+"\n");
+
+			Transform3D contentRotTransform = new Transform3D(contentRotTransformMatrix);
+			contentRotTG.setTransform(contentRotTransform);
+			IJ.log("contentRotTransform \n"+ contentRotTransform.toString()+"\n");
+
+			for (Object o: getContents()) {
+				Content c = ((Content)o);
+				c.applyTransform(contentTransTransform);
+				c.applyTransform(contentRotTransform);
+			}
+			Transform3D clt = new Transform3D();
+			((Content)getContents().toArray()[0]).getLocalTranslate().getTransform(clt);
+			IJ.log("clt: " +clt);
+			Transform3D clr = new Transform3D();
+			((Content)getContents().toArray()[0]).getLocalRotate().getTransform(clr);
+			IJ.log("clr: " +clr);
+
+			fireTransformationUpdated();
+			fireTransformationFinished();
+
+			resetView(true);
 		}
-		Transform3D clt = new Transform3D();
-		((Content)getContents().toArray()[0]).getLocalTranslate().getTransform(clt);
-		IJ.log("clt: " +clt);
-		Transform3D clr = new Transform3D();
-		((Content)getContents().toArray()[0]).getLocalRotate().getTransform(clr);
-		IJ.log("clr: " +clr);
-		
-		resetView();
-		
-		fireTransformationUpdated();
-		fireTransformationFinished();
 	}
 	
 
@@ -2221,6 +2223,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 
 	public void addContentLater(String filePath, InputStream[] objmtlStreams, boolean parseTimeInCPHATE) {
+		if (parseTimeInCPHATE && startTime!=1)
+			startTime = 1;
 		ArrayList<String> timedObjFileNames = new ArrayList<String>();
 		File file = new File(filePath);
 		String titleName = file.getName();
@@ -2251,9 +2255,10 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			int nextTpt =0;
 			if (tptParse[tptParse.length-1].matches("\\d+.obj")) {
 				nextTpt = Integer.parseInt(tptParse[tptParse.length-1].replace(".obj", ""));
-			} else if (parseTimeInCPHATE && ((String)nextmatchingfilename).matches("(.*)(csv\\.i)(\\d+)(\\.c\\d+.*\\.obj)")) {
-				nextTpt = Integer.parseInt(((String)nextmatchingfilename).replaceAll("(.*)(csv\\.i)(\\d+)(\\.c\\d+.*\\.obj)","$3"));
-			}
+			} 
+//			else if (parseTimeInCPHATE && ((String)nextmatchingfilename).matches("(.*)(csv\\.i)(\\d+)(\\.c\\d+.*\\.obj)")) {
+//				nextTpt = Integer.parseInt(((String)nextmatchingfilename).replaceAll("(.*)(csv\\.i)(\\d+)(\\.c\\d+.*\\.obj)","$3"));
+//			}
 			
 			Map<String, CustomMesh> meshes= null;
 			try {
@@ -2268,6 +2273,10 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			for(Map.Entry<String,CustomMesh> entry : meshes.entrySet()) {
 				String name = entry.getKey();
 				name = getSafeContentName(name);
+				if (parseTimeInCPHATE && name.matches("(.*)(\\-i)(\\d+)(\\/\\d+)?(\\-c\\d+.*)")) {
+					nextTpt = Integer.parseInt(name.replaceAll("(.*)(\\-i)(\\d+)(\\/\\d+)?(\\-c\\d+.*)","$3"));
+				}
+
 				CustomMesh mesh = entry.getValue();
 				if (!cInstants.containsKey(name)) {
 					cInstants.put(name, new TreeMap<Integer, ContentInstant>());
@@ -2301,6 +2310,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			if (!titleName.contentEquals("."))
 				setTitle((this.flipXonImport?"FlipX_":"")+titleName);
 		}
+//		if (parseTimeInCPHATE)
+//			updateStartAndEndTime(1, this.getEndTime());
 	}
 
 

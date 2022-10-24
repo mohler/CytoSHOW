@@ -9954,7 +9954,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	}
 
-	public void plotAlexFmtPhateObjsToCoordsIcospheres() {
+	public static void plotAlexFmtPhateObjsToCoordsIcospheres() {
 
 		IJ.wait(1);
 		String icosphereObj = IJ
@@ -10030,7 +10030,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		String outputDir = inputFile.getParent() + File.separator + inputFile.getName().replace(".csv", "")
 				+ File.separator;
 		new File(outputDir).mkdirs();
-		IJ.saveString(IJ.openAsString(mtlPath), outputDir + mtlFile.getName());
+//		IJ.saveString(IJ.openAsString(mtlPath), outputDir + mtlFile.getName());
+		IJ.saveString(mtlFile.canRead()?IJ.openAsString(mtlPath)
+				:IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/icosphereOut_22distinctClusterColors.mtl").toString())
+				, outputDir + mtlFile.getName());
 		String inputPhateCoordinatesData = IJ.openAsString(inputPhateCoordinatesPath);
 		String[] inputPhateCoordinatesRows = inputPhateCoordinatesData.split("\n");
 		String clusterAsgnData = IJ.openAsString(clusterAssignmentsPath);

@@ -70,29 +70,8 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 	protected Label status = new Label("");
 	protected boolean noOffScreen = false;
 	protected ErrorListener error_listener;
-//	private ImagePlus imp;
-//	private ImageCanvas ic;
-//	protected Panel overheadPanel;
 	protected Toolbar toolbar;
 	protected Image3DMenubar menubar;
-//	protected ImageJ ij;
-//	private Panel tagButtonPanel;
-//	private Panel viewButtonPanel;
-//	private Panel modeButtonPanel;
-//	private Label countLabel;
-//	private JButton fullSetButton;
-//	private JButton hideShowButton;
-//	private JButton sketch3DButton;
-//	private JButton sketchVVButton;
-//	private JButton dupButton;
-//	private JButton modeButton;
-//	private JButton slice4dButton;
-//	private JButton stereo4dxButton;
-//	private JButton stereo4dyButton;
-//	private JButton stereo4dXrcButton;
-//	private SliceStereoToggle sst;
-//	private JButton stereo4dYrcButton;
-//	private Panel optionsPanel;
 
 
 	public ImageWindow3D(String title, DefaultUniverse universe) {
@@ -604,7 +583,7 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 
 	public void updateImagePlus() {
 		int id = this.imp.getID();
-//		this.imp = getNewImagePlus();
+		this.imp = getNewImagePlus();
 		imp_updater.update();
 		this.imp.setWindow(this);
 	}
