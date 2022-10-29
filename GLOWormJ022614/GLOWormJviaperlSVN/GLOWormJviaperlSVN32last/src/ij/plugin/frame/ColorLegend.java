@@ -215,131 +215,162 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 			} else
 				setLocation(location);
 			//		this.setVisible(true);
-			if (imp.getWindow()!=null && imp.getWindow() instanceof ImageWindow3D) {
-				DefaultUniverse univ = ((ImageWindow3D)imp.getWindow()).getUniverse();
-				Hashtable<String, ContentInstant> contentInstants = ((Image3DUniverse)univ).getContent3DManager().getCIs();
-				ListModel lm = ((Image3DUniverse)univ).getContent3DManager().getListModel();
-				for (int index =0; index < lm.getSize(); index++) {
-					String hashkey = (String) lm.getElementAt(index);
-					ContentInstant ci = contentInstants.get(hashkey);
-					String fixedName = ci.getName().replace("_#0_#0", "")/* .replace("BWM-", "BWM") */;
+			if (imp.getWindow()!=null ){
+				if (imp.getWindow() instanceof ImageWindow3D) {
+					DefaultUniverse univ = ((ImageWindow3D)imp.getWindow()).getUniverse();
+					Hashtable<String, ContentInstant> contentInstants = ((Image3DUniverse)univ).getContent3DManager().getCIs();
+					ListModel lm = ((Image3DUniverse)univ).getContent3DManager().getListModel();
+					for (int index =0; index < lm.getSize(); index++) {
+						String hashkey = (String) lm.getElementAt(index);
+						ContentInstant ci = contentInstants.get(hashkey);
+						String fixedName = ci.getName().replace("_#0_#0", "")/* .replace("BWM-", "BWM") */;
 
 
-					ArrayList<String> hitTests = new ArrayList<String>();
-					
-					hitTests.add( fixedName.split("-")[0].toLowerCase());
-					hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^(.*by)(.*)$", "$2"));
-					hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll(".*_(.*)[_$].*","$1"));
-					hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^(.*)undefined.*(_pre)*", "$1"));
-					hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^(.*)chemical.*(_pre)*", "$1"));
-					hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^.*(electrical|&)(.*)$","$2"));
-					hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^(.*)electrical.*$","$2"));
-					hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^(.*)_.*", "$1")); 		
-					hitTests.add( fixedName.toLowerCase());
-					hitTests.add( fixedName.toLowerCase().replaceAll("^(.*by)(.*)$", "$2"));
-					hitTests.add( fixedName.toLowerCase().replaceAll(".*_(.*)[_$].*","$1"));
-					hitTests.add( fixedName.toLowerCase().replaceAll("^(.*)undefined.*(_pre)*", "$1"));
-					hitTests.add( fixedName.toLowerCase().replaceAll("^(.*)chemical.*(_pre)*", "$1"));
-					hitTests.add( fixedName.toLowerCase().replaceAll("^.*(electrical|&)(.*)$","$2"));
-					hitTests.add( fixedName.toLowerCase().replaceAll("^(.*)electrical.*$","$2"));
+						ArrayList<String> hitTests = new ArrayList<String>();
 
-					int testNumber=0;
-					while (testNumber < hitTests.size() 
-							&& 
-							brainbowColors.get(hitTests.get(testNumber))==null)
-						testNumber++;
-					final int finalTestNumber = testNumber;
-					if (testNumber<hitTests.size()) {
-						new Thread(new Runnable() {
-							public void run() {
-								ci.setColor(new Color3f(brainbowColors.get(hitTests.get(finalTestNumber))));
-							}
-						}).start();
-//						IJ.log(fixedName+" "+ci.getColor().get());
-					}
+						hitTests.add( fixedName.split("-")[0].toLowerCase());
+						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^(.*by)(.*)$", "$2"));
+						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll(".*_(.*)[_$].*","$1"));
+						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^(.*)undefined.*(_pre)*", "$1"));
+						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^(.*)chemical.*(_pre)*", "$1"));
+						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^.*(electrical|&)(.*)$","$2"));
+						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^(.*)electrical.*$","$2"));
+						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^(.*)_.*", "$1")); 		
+						hitTests.add( fixedName.toLowerCase());
+						hitTests.add( fixedName.toLowerCase().replaceAll("^(.*by)(.*)$", "$2"));
+						hitTests.add( fixedName.toLowerCase().replaceAll(".*_(.*)[_$].*","$1"));
+						hitTests.add( fixedName.toLowerCase().replaceAll("^(.*)undefined.*(_pre)*", "$1"));
+						hitTests.add( fixedName.toLowerCase().replaceAll("^(.*)chemical.*(_pre)*", "$1"));
+						hitTests.add( fixedName.toLowerCase().replaceAll("^.*(electrical|&)(.*)$","$2"));
+						hitTests.add( fixedName.toLowerCase().replaceAll("^(.*)electrical.*$","$2"));
 
-//					!!! succeeded to FIX THIS ONE NEXT!!!!!
-					if (fixedName.contains("_post")) {
-
-						int postSynRank = Integer.parseInt(fixedName.replaceAll("^.*post(\\d*)","$1"));
-						String buildHitTest = "^.*(undefined|chemical)";
-						for (int psr=1;psr<=postSynRank;psr++) {
-							buildHitTest = buildHitTest+ (psr<postSynRank?".*?[\\&~]":"(.*?)[\\&~]");
-						}
-						buildHitTest = buildHitTest+ ".*post.*$";
-						final String hitTestPost = fixedName.split("-")[0].toLowerCase().replaceAll(buildHitTest, "$2");
-
-						if(brainbowColors.get(hitTestPost)!=null) {
+						int testNumber=0;
+						while (testNumber < hitTests.size() 
+								&& 
+								brainbowColors.get(hitTests.get(testNumber))==null)
+							testNumber++;
+						final int finalTestNumber = testNumber;
+						if (testNumber<hitTests.size()) {
 							new Thread(new Runnable() {
 								public void run() {
-									ci.setColor(new Color3f(brainbowColors.get(hitTestPost)));
+									ci.setColor(new Color3f(brainbowColors.get(hitTests.get(finalTestNumber))));
 								}
 							}).start();
-//							IJ.log(fixedName+" "+hitTestPost+" "+ColorLegend.this.getBrainbowColors().get(hitTestPost));
+							//						IJ.log(fixedName+" "+ci.getColor().get());
 						}
-					}
-					
-					IJ.showStatus(index+"/"+lm.getSize()+" tags color-adjusted.");
-				}
-				JList list = ((Image3DUniverse)univ).getContent3DManager().getList();
-				int listfirstposition = list.getFirstVisibleIndex();
-				int listlastposition = list.getLastVisibleIndex();
 
-				((Image3DUniverse)univ).getContent3DManager().close();
-				((Image3DUniverse)univ).getContent3DManager().setVisible(true);
-				list.ensureIndexIsVisible(listlastposition);
-				list.ensureIndexIsVisible(listfirstposition);
-				
-				IJ.showStatus("All content color-adjusted per ColorLegend");
-			}else {
-				int roiConvCount = 0;
-				int nRois = rm.getCount();
-				Roi[] fullRois = rm.getFullRoisAsArray();
-				for (int r=0; r<nRois; r++) {
-					Roi roi = fullRois[r];
-					if (roi!=null) { 
-						roiConvCount++;
-						if (this != null) {
-							Color clColor = this.getBrainbowColors()
-									.get(roi.getName().toLowerCase().split("_")[0].split("=")[0].replace("\"", "").trim());
-							if (clColor !=null) {
-								String hexRed = Integer.toHexString(clColor.getRed());
-								String hexGreen = Integer.toHexString(clColor.getGreen());
-								String hexBlue = Integer.toHexString(clColor.getBlue());
-								String hexAlpha = Colors.colorToHexString(roi.getFillColor()).substring(0, 3);
-								roi.setFillColor(Colors.decode(hexAlpha+(hexRed.length()==1?"0":"")+hexRed
-										+(hexGreen.length()==1?"0":"")+hexGreen
-										+(hexBlue.length()==1?"0":"")+hexBlue
-										, Color.white));
+						//					!!! succeeded to FIX THIS ONE NEXT!!!!!
+						if (fixedName.contains("_post")) {
+
+							int postSynRank = Integer.parseInt(fixedName.replaceAll("^.*post(\\d*)","$1"));
+							String buildHitTest = "^.*(undefined|chemical)";
+							for (int psr=1;psr<=postSynRank;psr++) {
+								buildHitTest = buildHitTest+ (psr<postSynRank?".*?[\\&~]":"(.*?)[\\&~]");
+							}
+							buildHitTest = buildHitTest+ ".*post.*$";
+							final String hitTestPost = fixedName.split("-")[0].toLowerCase().replaceAll(buildHitTest, "$2");
+
+							if(brainbowColors.get(hitTestPost)!=null) {
+								new Thread(new Runnable() {
+									public void run() {
+										ci.setColor(new Color3f(brainbowColors.get(hitTestPost)));
+									}
+								}).start();
+								//							IJ.log(fixedName+" "+hitTestPost+" "+ColorLegend.this.getBrainbowColors().get(hitTestPost));
 							}
 						}
-						roi.setImage(imp);
-						String label ="";
-						String roiWasName = roi.getName();
-						if (roi.getName() != null && roi.getName().split("\"").length > 1){
-							label = "\"" + roi.getName().split("\"")[1].trim() + " \"" + "_" +Colors.colorToHexString(roi.getFillColor()) + "_" + roi.getCPosition() + "_"
-									+ roi.getZPosition() + "_" + roi.getTPosition();
-						}else if (roi.getName() != null){
-							label = "\"" + roi.getName() + " \"" + "_" +Colors.colorToHexString(roi.getFillColor()) + "_" + roi.getCPosition() + "_" + roi.getZPosition() + "_"
-									+ roi.getTPosition();
+
+						IJ.showStatus(index+"/"+lm.getSize()+" tags color-adjusted.");
+					}
+					JList list = ((Image3DUniverse)univ).getContent3DManager().getList();
+					int listfirstposition = list.getFirstVisibleIndex();
+					int listlastposition = list.getLastVisibleIndex();
+
+					((Image3DUniverse)univ).getContent3DManager().close();
+					((Image3DUniverse)univ).getContent3DManager().setVisible(true);
+					list.ensureIndexIsVisible(listlastposition);
+					list.ensureIndexIsVisible(listfirstposition);
+
+					IJ.showStatus("All content color-adjusted per ColorLegend");
+
+				} else {  //ImageWindow rather than ImageWindow3D
+
+					Hashtable<String, Roi> contentInstants = imp.getRoiManager().getROIs();
+					ListModel lm = imp.getRoiManager().getListModel();
+					for (int index =0; index < lm.getSize(); index++) {
+						String hashkey = (String) lm.getElementAt(index);
+						Roi roi = contentInstants.get(hashkey);
+						String fixedName = roi.getName().replace("_#0_#0", "")/* .replace("BWM-", "BWM") */;
+
+
+						ArrayList<String> hitTests = new ArrayList<String>();
+
+						hitTests.add( fixedName.split("-")[0].toLowerCase());
+						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^(.*by)(.*)$", "$2"));
+						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll(".*_(.*)[_$].*","$1"));
+						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^(.*)undefined.*(_pre)*", "$1"));
+						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^(.*)chemical.*(_pre)*", "$1"));
+						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^.*(electrical|&)(.*)$","$2"));
+						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^(.*)electrical.*$","$2"));
+						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^(.*)_.*", "$1")); 		
+						hitTests.add( fixedName.toLowerCase());
+						hitTests.add( fixedName.toLowerCase().replaceAll("^(.*by)(.*)$", "$2"));
+						hitTests.add( fixedName.toLowerCase().replaceAll(".*_(.*)[_$].*","$1"));
+						hitTests.add( fixedName.toLowerCase().replaceAll("^(.*)undefined.*(_pre)*", "$1"));
+						hitTests.add( fixedName.toLowerCase().replaceAll("^(.*)chemical.*(_pre)*", "$1"));
+						hitTests.add( fixedName.toLowerCase().replaceAll("^.*(electrical|&)(.*)$","$2"));
+						hitTests.add( fixedName.toLowerCase().replaceAll("^(.*)electrical.*$","$2"));
+
+						int testNumber=0;
+						while (testNumber < hitTests.size() 
+								&& 
+								brainbowColors.get(hitTests.get(testNumber))==null)
+							testNumber++;
+						final int finalTestNumber = testNumber;
+						if (testNumber<hitTests.size()) {
+							new Thread(new Runnable() {
+								public void run() {
+									roi.setColor(brainbowColors.get(hitTests.get(finalTestNumber)));
+								}
+							}).start();
+							//						IJ.log(fixedName+" "+ci.getColor().get());
 						}
 
-						label = rm.getUniqueName(label);
+						//					!!! succeeded to FIX THIS ONE NEXT!!!!!
+						if (fixedName.contains("_post")) {
 
-						rm.getListModel().set(rm.getListModel().indexOf(roiWasName), label);
-						rm.getFullListModel().set(rm.getFullListModel().indexOf(roiWasName), label);
-						roi.setName(label);
-						rm.getROIs().put(roi.getName(), roi);
-						rm.getROIs().remove(roiWasName);
-						
-						
-						IJ.showStatus(roiConvCount+"/"+nRois+" tags color-adjusted.");
+							int postSynRank = Integer.parseInt(fixedName.replaceAll("^.*post(\\d*)","$1"));
+							String buildHitTest = "^.*(undefined|chemical)";
+							for (int psr=1;psr<=postSynRank;psr++) {
+								buildHitTest = buildHitTest+ (psr<postSynRank?".*?[\\&~]":"(.*?)[\\&~]");
+							}
+							buildHitTest = buildHitTest+ ".*post.*$";
+							final String hitTestPost = fixedName.split("-")[0].toLowerCase().replaceAll(buildHitTest, "$2");
+
+							if(brainbowColors.get(hitTestPost)!=null) {
+								new Thread(new Runnable() {
+									public void run() {
+										roi.setColor(brainbowColors.get(hitTestPost));
+									}
+								}).start();
+								//							IJ.log(fixedName+" "+hitTestPost+" "+ColorLegend.this.getBrainbowColors().get(hitTestPost));
+							}
+						}
+
+						IJ.showStatus(index+"/"+lm.getSize()+" tags color-adjusted.");
 					}
+					JList list = imp.getRoiManager().getList();
+					int listfirstposition = list.getFirstVisibleIndex();
+					int listlastposition = list.getLastVisibleIndex();
+
+					imp.getRoiManager().close();
+					imp.getRoiManager().setVisible(true);
+					list.ensureIndexIsVisible(listlastposition);
+					list.ensureIndexIsVisible(listfirstposition);
+
+					IJ.showStatus("All content color-adjusted per ColorLegend");
 
 				}
-				imp.updateAndRepaintWindow();
-				IJ.showStatus("All tags color-adjusted per ColorLegend");
-
 			}
 			IJ.wait(0);
 		}
