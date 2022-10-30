@@ -779,7 +779,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						// nameMatchIndexes[i] = nameMatchIndexArrayList.get(i);
 						// fullrois[nameMatchIndexes[i]]this.setRoiFillColor(Colors.decode(alphaCorrFillColorString,
 						// fillColor));
-						this.setRoiFillColor(nmRoi, Colors.decode(alphaCorrFillColorString, fillColor));
+						this.setRoiFillColor(nmRoi, Colors.decode(alphaCorrFillColorString, fillColor), true, false);
 
 					}
 					// this.setSelectedIndexes(nameMatchIndexes);
@@ -3064,15 +3064,23 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 
 	private void rename(String label2, int[] indexes, boolean updateCanvas) {
+		rename(label2,indexes,updateCanvas, true);
+	}
+		
+	private void rename(String label2, int[] indexes, boolean updateCanvas, boolean checkCLtoRecolor) {
 		String[] newNames = new String[indexes.length];
 		for (int n = 0; n < newNames.length; n++) {
 			newNames[n] = label2;
 		}
-		rename(newNames, indexes, false);
+		rename(newNames, indexes, updateCanvas, checkCLtoRecolor);
 
 	}
 
 	boolean rename(String[] newNames, int[] indexes, boolean updateCanvas) {
+		return rename(newNames, indexes, updateCanvas, true);
+	}
+	
+	boolean rename(String[] newNames, int[] indexes, boolean updateCanvas, boolean checkCLtoRecolor) {
 		// int index = list.getSelectedIndex();
 		// Roi[] selectedRois = this.getSelectedRoisAsArray();
 		if (indexes == null)
@@ -3158,19 +3166,21 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 			ColorLegend cl = getColorLegend();
 			//
-			if (roi != null) {
-				if (cl != null) {
-					Color clColor = cl.getBrainbowColors()
-							.get(roi.getName().toLowerCase().split("_")[0].split("=")[0].replace("\"", "").trim());
-					if (clColor != null && !clColor.equals(roi.getFillColor())) {
-						String hexRed = Integer.toHexString(clColor.getRed());
-						String hexGreen = Integer.toHexString(clColor.getGreen());
-						String hexBlue = Integer.toHexString(clColor.getBlue());
-						String hexAlpha = Colors.colorToHexString(roi.getFillColor()).substring(0, 3);
-						this.setRoiFillColor(roi,
-								Colors.decode(hexAlpha + (hexRed.length() == 1 ? "0" : "") + hexRed
-										+ (hexGreen.length() == 1 ? "0" : "") + hexGreen
-										+ (hexBlue.length() == 1 ? "0" : "") + hexBlue, Color.white));
+			if (checkCLtoRecolor) {
+				if (roi != null) {
+					if (cl != null) {
+						Color clColor = cl.getBrainbowColors()
+								.get(roi.getName().toLowerCase().split("_")[0].split("=")[0].replace("\"", "").trim());
+						if (clColor != null && !clColor.equals(roi.getFillColor())) {
+							String hexRed = Integer.toHexString(clColor.getRed());
+							String hexGreen = Integer.toHexString(clColor.getGreen());
+							String hexBlue = Integer.toHexString(clColor.getBlue());
+							String hexAlpha = Colors.colorToHexString(roi.getFillColor()).substring(0, 3);
+							this.setRoiFillColor(roi,
+									Colors.decode(hexAlpha + (hexRed.length() == 1 ? "0" : "") + hexRed
+											+ (hexGreen.length() == 1 ? "0" : "") + hexGreen
+											+ (hexBlue.length() == 1 ? "0" : "") + hexBlue, Color.white));
+						}
 					}
 				}
 			}
@@ -10894,6 +10904,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 
 	public void setRoiFillColor(Roi roi, Color color, boolean reNameInListNow) {
+		setRoiFillColor(roi, color, reNameInListNow, true);
+	}
+	
+	public void setRoiFillColor(Roi roi, Color color, boolean reNameInListNow, boolean checkCLafterRename) {
+
 		if (roi.isLine()) {
 			roi.setStrokeColor(color);
 		} else {
@@ -10907,7 +10922,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 			if (reNameInListNow && listModel.indexOf(roi.getName()) != -1)
 				if (!newColorName.equals(roi.getName()))
-					rename(newColorName, new int[] { listModel.indexOf(roi.getName()) }, false);
+					rename(newColorName, new int[] { listModel.indexOf(roi.getName()) }, true, checkCLafterRename);
 		}
 	}
 

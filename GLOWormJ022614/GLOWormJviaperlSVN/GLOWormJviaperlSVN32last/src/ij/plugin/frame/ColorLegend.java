@@ -139,7 +139,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 				checkbox[i].setName(clLines[i].split(",")[0]);			
 				if (!clLines[i].split(",")[0].equals(clLines[i].split(",")[1])) {
 					if (true || clLines[i].split(",")[1].startsWith("#")) {
-						if (imp.getWindow()!=null && imp.getWindow() instanceof ImageWindow3D) {
+						if (imp.getWindow()!=null && imp.getWindow() instanceof ImageWindow) {
 							brainbowColors.put(clLines[i].split(",")[0].toLowerCase().split("[_-]")[0], Colors.decode(clLines[i].split(",")[1], Color.white));
 						}else {
 							brainbowColors.put(clLines[i].split(",")[0].toLowerCase(), Colors.decode(clLines[i].split(",")[1], Color.white));
@@ -147,7 +147,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 					}
 				} else if (clLines[i].length() >2){
 					if (true || clLines[i].split(",")[2].startsWith("#")) {
-						if (imp.getWindow()!=null && imp.getWindow() instanceof ImageWindow3D) {
+						if (imp.getWindow()!=null && imp.getWindow() instanceof ImageWindow) {
 							brainbowColors.put(clLines[i].split(",")[0].toLowerCase().split("[_-]")[0], Colors.decode(clLines[i].split(",")[2], Color.white));
 						}else {
 							brainbowColors.put(clLines[i].split(",")[0].toLowerCase(), Colors.decode(clLines[i].split(",")[1], Color.white));
@@ -305,21 +305,21 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 
 						ArrayList<String> hitTests = new ArrayList<String>();
 
-						hitTests.add( fixedName.split("-")[0].toLowerCase());
-						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^(.*by)(.*)$", "$2"));
-						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll(".*_(.*)[_$].*","$1"));
-						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^(.*)undefined.*(_pre)*", "$1"));
-						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^(.*)chemical.*(_pre)*", "$1"));
-						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^.*(electrical|&)(.*)$","$2"));
-						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^(.*)electrical.*$","$2"));
-						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^(.*)_.*", "$1")); 		
-						hitTests.add( fixedName.toLowerCase());
-						hitTests.add( fixedName.toLowerCase().replaceAll("^(.*by)(.*)$", "$2"));
-						hitTests.add( fixedName.toLowerCase().replaceAll(".*_(.*)[_$].*","$1"));
-						hitTests.add( fixedName.toLowerCase().replaceAll("^(.*)undefined.*(_pre)*", "$1"));
-						hitTests.add( fixedName.toLowerCase().replaceAll("^(.*)chemical.*(_pre)*", "$1"));
-						hitTests.add( fixedName.toLowerCase().replaceAll("^.*(electrical|&)(.*)$","$2"));
-						hitTests.add( fixedName.toLowerCase().replaceAll("^(.*)electrical.*$","$2"));
+						hitTests.add( fixedName.split(" \"_")[0].toLowerCase().replace("\"", ""));
+						hitTests.add( fixedName.split(" \"_")[0].toLowerCase().replace("\"", "").replaceAll("^(.*by)(.*)$", "$2"));
+						hitTests.add( fixedName.split(" \"_")[0].toLowerCase().replace("\"", "").replaceAll(".*_(.*)[_$].*","$1"));
+						hitTests.add( fixedName.split(" \"_")[0].toLowerCase().replace("\"", "").replaceAll("^(.*)undefined.*(_pre)*", "$1"));
+						hitTests.add( fixedName.split(" \"_")[0].toLowerCase().replace("\"", "").replaceAll("^(.*)chemical.*(_pre)*", "$1"));
+						hitTests.add( fixedName.split(" \"_")[0].toLowerCase().replace("\"", "").replaceAll("^.*(electrical|&)(.*)$","$2"));
+						hitTests.add( fixedName.split(" \"_")[0].toLowerCase().replace("\"", "").replaceAll("^(.*)electrical.*$","$2"));
+						hitTests.add( fixedName.split(" \"_")[0].toLowerCase().replace("\"", "").replaceAll("^(.*)_.*", "$1")); 		
+						hitTests.add( fixedName.toLowerCase().replace("\"", ""));
+						hitTests.add( fixedName.toLowerCase().replace("\"", "").replaceAll("^(.*by)(.*)$", "$2"));
+						hitTests.add( fixedName.toLowerCase().replace("\"", "").replaceAll(".*_(.*)[_$].*","$1"));
+						hitTests.add( fixedName.toLowerCase().replace("\"", "").replaceAll("^(.*)undefined.*(_pre)*", "$1"));
+						hitTests.add( fixedName.toLowerCase().replace("\"", "").replaceAll("^(.*)chemical.*(_pre)*", "$1"));
+						hitTests.add( fixedName.toLowerCase().replace("\"", "").replaceAll("^.*(electrical|&)(.*)$","$2"));
+						hitTests.add( fixedName.toLowerCase().replace("\"", "").replaceAll("^(.*)electrical.*$","$2"));
 
 						int testNumber=0;
 						while (testNumber < hitTests.size() 
@@ -330,7 +330,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 						if (testNumber<hitTests.size()) {
 							new Thread(new Runnable() {
 								public void run() {
-									roi.setColor(brainbowColors.get(hitTests.get(finalTestNumber)));
+									imp.getRoiManager().setRoiFillColor(roi, brainbowColors.get(hitTests.get(finalTestNumber)), true, false);
 								}
 							}).start();
 							//						IJ.log(fixedName+" "+ci.getColor().get());
@@ -350,7 +350,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 							if(brainbowColors.get(hitTestPost)!=null) {
 								new Thread(new Runnable() {
 									public void run() {
-										roi.setColor(brainbowColors.get(hitTestPost));
+										imp.getRoiManager().setRoiFillColor(roi, brainbowColors.get(hitTestPost), true, false);
 									}
 								}).start();
 								//							IJ.log(fixedName+" "+hitTestPost+" "+ColorLegend.this.getBrainbowColors().get(hitTestPost));
