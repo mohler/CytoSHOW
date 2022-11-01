@@ -3,6 +3,8 @@ import ij.*;
 import ij.process.*;
 import ij.util.*;
 import ij.plugin.Colors;
+import ij.plugin.frame.RoiManager;
+
 import java.awt.*;
 import java.util.Vector;
 import java.awt.event.*;
@@ -70,12 +72,18 @@ public class ColorChooser implements TextListener, AdjustmentListener {
 		if (alpha<0) alpha=0; if (alpha>255) alpha=255;
 		panel.setColor(new Color(red, green, blue, alpha));
 		if (frame instanceof ImageWindow) {
-			for (Roi roi:((ImageWindow)frame).getImagePlus().getRoiManager().getSelectedRoisAsArray()) {
+			ImagePlus imp = ((ImageWindow) frame).getImagePlus();
+			RoiManager rm = imp.getRoiManager();
+			for (Roi roi:rm.getSliceSpecificRoiArray(imp.getSlice(), imp.getFrame(), true)) {
 				if (roi != null) {
-					roi.setFillColor(new Color(red, green, blue, alpha));
+					for(Roi selRoi:rm.getSelectedRoisAsArray()) {
+						if (selRoi == roi) {
+							roi.setFillColor(new Color(red, green, blue, alpha));
+						}
+					}
 				}
-				((ImageWindow)frame).getImagePlus().getCanvas().paintDoubleBuffered(((ImageWindow)frame).getImagePlus().getCanvas().getGraphics());
 			}
+			imp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
 		}
 		panel.repaint();
 	}

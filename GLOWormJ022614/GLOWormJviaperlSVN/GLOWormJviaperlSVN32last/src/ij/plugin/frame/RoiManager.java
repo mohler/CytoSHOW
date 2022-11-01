@@ -764,7 +764,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 					for (int n = 0; n < rootNames.size(); n++) {
 						String rootName = rootNames.get(n);
-						nameMatchArrayList.addAll(getRoisByRootName().get(rootName));
+						ArrayList<Roi> gRN = getRoisByRootName().get(rootName);
+						nameMatchArrayList.addAll(gRN);
 						// int fraa = fullrois.length;
 						// for (int r=0; r < fraa; r++) {
 						// String nextName = fullrois[r].getName();
@@ -788,11 +789,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					// }
 
 				}
-				this.close();
-				ImageWindow imgWin = imp.getWindow();
-				this.setVisible(true);
-				if (imgWin != null)
-					setLocation(imgWin.getLocationOnScreen().x + imgWin.getWidth() + 5, imgWin.getLocationOnScreen().y);
+//				this.close();
+//				ImageWindow imgWin = imp.getWindow();
+//				this.setVisible(true);
+//				if (imgWin != null)
+//					setLocation(imgWin.getLocationOnScreen().x + imgWin.getWidth() + 5, imgWin.getLocationOnScreen().y);
 				updateShowAll();
 
 			} else if (command.equals("Rename")) {
@@ -10908,7 +10909,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 	
 	public void setRoiFillColor(Roi roi, Color color, boolean reNameInListNow, boolean checkCLafterRename) {
-
+		if (roi == null)
+			return;
 		if (roi.isLine()) {
 			roi.setStrokeColor(color);
 		} else {
