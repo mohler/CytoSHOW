@@ -1490,7 +1490,7 @@ public class Colors implements PlugIn, ItemListener {
 //		if (str.length()==9 && str.startsWith("#ff"))
 //			str = "#"+str.substring(3);
 		if (str.length()==7)
-		str = "#ff"+str.substring(1);
+			str = "#ff"+str.substring(1);
 		return str;
 	}
 

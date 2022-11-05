@@ -718,19 +718,22 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 			} else if (command.equals("Color")) {
 				ContentInstant[] selectedContentInstants = getSelectedContentInstantsAsArray();
 				((Image3DUniverse) univ).select(null, true);
+				float[] currentFillColorRGBComp = null;
 				if (selectedContentInstants.length > 0) {
-					int fillColorInt = Colors.decode("#00000000", Color.black).getRGB();
+					int currentFillColorInt = Colors.decode("#00000000", Color.black).getRGB();
 					if (selectedContentInstants[0].getColor().get() != null) {
-						fillColorInt = selectedContentInstants[0].getColor().get().getRGB();
+						Color currentFillColor = selectedContentInstants[0].getColor().get();
+						currentFillColorRGBComp = currentFillColor.getRGBComponents(null);
+						currentFillColorRGBComp[3] = (1.0f-selectedContentInstants[0].getTransparency()); 
 					}
-					String hexInt = Integer.toHexString(fillColorInt);
+					String hexInt = Integer.toHexString(currentFillColorInt);
 					int l = hexInt.length();
 					for (int c = 0; c < 8 - l; c++)
 						hexInt = "0" + hexInt;
 					String hexName = "#" + hexInt;
 					Color fillColor = JColorChooser.showDialog(this.getFocusOwner(),
 							"Pick a color for " + this.getSelectedContentInstantsAsArray()[0].getName() + "...",
-							Colors.decode(hexName, Color.cyan));
+							new Color(currentFillColorRGBComp[0],currentFillColorRGBComp[1],currentFillColorRGBComp[2],currentFillColorRGBComp[3]));
 					String whackchacha = hexName.substring(0, 3);
 					if (whackchacha.equals("#00"))
 						whackchacha = "#88";
@@ -741,6 +744,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 							alphaCorrFillColorString = alphaCorrFillColorString.replaceAll("#", whackchacha);
 
 					fillColor = Colors.decode(alphaCorrFillColorString, fillColor);
+					float fillAlpha = fillColor.getRGBComponents(null)[3];
 
 
 					for (ContentInstant selContentInstant : selectedContentInstants) {
@@ -748,6 +752,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 						// fullcontentInstants[nameMatchIndexes[i]]imp.getRoiManager().setRoiFillColor(Colors.decode(alphaCorrFillColorString,
 						// fillColor));
 						((Image3DUniverse) univ).getContent3DManager().setContentInstantFillColor(selContentInstant, Colors.decode(alphaCorrFillColorString, fillColor));
+						selContentInstant.setTransparency(1.0f - fillAlpha);
 					}
 					// this.setSelectedIndexes(nameMatchIndexes);
 					//

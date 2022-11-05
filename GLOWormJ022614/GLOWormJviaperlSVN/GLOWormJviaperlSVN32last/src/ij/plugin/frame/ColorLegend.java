@@ -253,7 +253,11 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 						if (testNumber<hitTests.size()) {
 							new Thread(new Runnable() {
 								public void run() {
-									ci.setColor(new Color3f(brainbowColors.get(hitTests.get(finalTestNumber))));
+									Color hitColor = brainbowColors.get(hitTests.get(finalTestNumber));
+									ci.setColor(new Color3f(hitColor));
+									float fAlpha = hitColor.getRGBComponents(null)[3];
+									ci.setTransparency(1.0f - fAlpha);
+									IJ.wait(0);
 								}
 							}).start();
 							//						IJ.log(fixedName+" "+ci.getColor().get());
@@ -273,7 +277,11 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 							if(brainbowColors.get(hitTestPost)!=null) {
 								new Thread(new Runnable() {
 									public void run() {
+										Color hitTestPostColor = brainbowColors.get(hitTests.get(finalTestNumber));
 										ci.setColor(new Color3f(brainbowColors.get(hitTestPost)));
+										float fAlpha = hitTestPostColor.getRGBComponents(null)[3];
+										ci.setTransparency(1.0f - fAlpha);
+										IJ.wait(0);
 									}
 								}).start();
 								//							IJ.log(fixedName+" "+hitTestPost+" "+ColorLegend.this.getBrainbowColors().get(hitTestPost));
