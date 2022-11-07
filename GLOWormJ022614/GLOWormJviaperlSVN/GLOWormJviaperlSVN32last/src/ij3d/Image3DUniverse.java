@@ -1732,6 +1732,29 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 * contents of this universe.
 	 * @return
 	 */
+	public Collection getListOrderedSelectedContents() {
+		if(contents == null)
+			return null;
+		Collection<Content> orderedSelectedContents = new ArrayList<Content>();
+		int[] selIndexes = this.getContent3DManager().getList().getSelectedIndices();
+		if (selIndexes.length <1) {
+			selIndexes = new int[this.getContent3DManager().getListModel().getSize()];
+			for (int i=0;i<selIndexes.length;i++)
+				selIndexes[i] = i;
+		}
+		Arrays.sort(selIndexes);
+		for (int nextIndex:selIndexes) {
+			Content nextC = contents.get(((String)this.getContent3DManager().getListModel().get(nextIndex)).replace("_#0_#0 \"_0", "").replace("\"",""));
+			orderedSelectedContents.add(nextC);
+		}
+		return orderedSelectedContents;
+	}
+
+	/**
+	 * Returns a HashTable containing the references to all the
+	 * contents of this universe.
+	 * @return
+	 */
 	public Hashtable getContentsHT() {
 		if(contents == null)
 			return null;
