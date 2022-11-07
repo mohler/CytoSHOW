@@ -987,7 +987,10 @@ public class IJ3dExecuter {
 	public void changeThreshold(Content c) {
 		boolean imageData = true;
 		boolean noSelection = false;
-		final boolean others = IJ.shiftKeyDown();
+		final boolean others = IJ.shiftKeyDown();  //would be nice to actually make this option work...
+		
+		ContentInstant[] selCIarray = univ.getContent3DManager().getSelectedContentInstantsAsArray();
+
 		if(!checkSel(c)){
 			noSelection = true;
 //			return;
@@ -1017,6 +1020,8 @@ public class IJ3dExecuter {
 		final Content finalC= c;
 		final ContentInstant finalCi = ci;
 		final boolean finalNoSelection = noSelection;
+		
+
 		final SliderAdjuster thresh_adjuster = new SliderAdjuster() {
 
 			public synchronized final void setValue(ContentInstant ci, int v) {
@@ -1031,29 +1036,55 @@ public class IJ3dExecuter {
 				if (!(finalNoSelection || others)){
 					finalC.setTransparency(v / 100f);
 					univ.fireContentChanged(finalC);
-				} else {
-					Hashtable<String, ContentInstant> contentInstants = ((Image3DUniverse)univ).getContent3DManager().getCIs();
-					ListModel lm = ((Image3DUniverse)univ).getContent3DManager().getListModel();
-					for (int index =0; index < lm.getSize(); index++) {
-						String hashkey = (String) lm.getElementAt(index);
-						ContentInstant cinst = contentInstants.get(hashkey);
-						cinst.setTransparency(v / 100f);						
+				} else {					
+					if (selCIarray !=null && selCIarray.length > 0){
+						ContentInstant currentCI = selCIarray[0];
+						for (Object nextCI:selCIarray){
+							((ContentInstant) nextCI).setTransparency(v / 100f);
+							currentCI = (ContentInstant) nextCI;
+							//						univ.fireContentChanged(((Content) nextC));
+						}							
+					} else if (others){
+						for (Object nextC:univ.getContents()){
+							if (nextC!=finalC) {
+								((Content) nextC).setTransparency(v / 100f);
+//								univ.fireContentChanged(((Content) nextC));
+							}
+						}
+					} else {						
+						for (Object nextC:univ.getContents()){
+							((Content) nextC).setTransparency(v / 100f);
+//							univ.fireContentChanged(((Content) nextC));
+
+						}
 					}
 				}
 			}
 		};
 
 		final ColorListener colorListener = new ColorListener() {
-
+			
 			public void colorChanged(Color3f color) {
 				if (!(finalNoSelection || others)){
 					finalC.setColor(color);
-//					univ.fireContentChanged(finalC);
+					//					univ.fireContentChanged(finalC);
 				} else {
-					for (Object nextC:univ.getContents()){
-						if (nextC!=finalC) {
+					if (selCIarray !=null && selCIarray.length > 0){
+						for (Object nextCI:selCIarray){
+							((ContentInstant) nextCI).setColor(color);
+							//							univ.fireContentChanged(((Content) nextC));
+						}							
+					} else if (others){
+						for (Object nextC:univ.getContents()){
+							if (nextC!=finalC) {
+								((Content) nextC).setColor(color);
+								//							univ.fireContentChanged(((Content) nextC));
+							}
+						}
+					} else {
+						for (Object nextC:univ.getContents()){
 							((Content) nextC).setColor(color);
-//							univ.fireContentChanged(((Content) nextC));
+							//							univ.fireContentChanged(((Content) nextC));
 						}
 					}
 				}
@@ -1065,10 +1096,25 @@ public class IJ3dExecuter {
 					finalC.setColor(finalCi.getColor());
 					univ.fireContentChanged(finalC);
 				} else {
-					for (Object nextC:univ.getContents()){
-						if (nextC!=finalC) {
+					if (selCIarray !=null && selCIarray.length > 0){
+						ContentInstant currentCI = selCIarray[0];
+						for (Object nextCI:selCIarray){
+							((ContentInstant) nextCI).setColor(currentCI.getColor());
+							currentCI = (ContentInstant) nextCI;
+//							univ.fireContentChanged(((Content) nextC));
+						}							
+					} else if (others){
+						for (Object nextC:univ.getContents()){
+							if (nextC!=finalC) {
+								((Content) nextC).setColor(((Content) nextC).getCurrentInstant().getColor());
+								univ.fireContentChanged(((Content) nextC));
+							}
+						}
+					} else {						
+						for (Object nextC:univ.getContents()){
 							((Content) nextC).setColor(((Content) nextC).getCurrentInstant().getColor());
 							univ.fireContentChanged(((Content) nextC));
+
 						}
 					}
 				}
