@@ -1004,7 +1004,6 @@ public class IJ3dExecuter {
 					//			return;
 					imageData = false;
 				}
-
 				ci = c.getCurrentInstant();
 			} else {
 				imageData = false;
@@ -1014,8 +1013,12 @@ public class IJ3dExecuter {
 		} else {
 			imageData = false;
 			noSelection = c==null;
-			c = new Content(noSelection?"All Objects":"Other Objects");
+			c = new Content(noSelection?(selCIarray !=null && selCIarray.length > 0? ""+selCIarray.length+ " Selected Objects":"All Objects"):"Other Objects");
 			ci = c.getCurrentInstant();
+			if (selCIarray !=null && selCIarray.length > 0){
+				ci = selCIarray[0];
+			}
+
 		}
 		final Content finalC= c;
 		final ContentInstant finalCi = ci;
@@ -1038,10 +1041,8 @@ public class IJ3dExecuter {
 					univ.fireContentChanged(finalC);
 				} else {					
 					if (selCIarray !=null && selCIarray.length > 0){
-						ContentInstant currentCI = selCIarray[0];
 						for (Object nextCI:selCIarray){
 							((ContentInstant) nextCI).setTransparency(v / 100f);
-							currentCI = (ContentInstant) nextCI;
 							//						univ.fireContentChanged(((Content) nextC));
 						}							
 					} else if (others){
@@ -1097,11 +1098,9 @@ public class IJ3dExecuter {
 					univ.fireContentChanged(finalC);
 				} else {
 					if (selCIarray !=null && selCIarray.length > 0){
-						ContentInstant currentCI = selCIarray[0];
 						for (Object nextCI:selCIarray){
-							((ContentInstant) nextCI).setColor(currentCI.getColor());
-							currentCI = (ContentInstant) nextCI;
-//							univ.fireContentChanged(((Content) nextC));
+							((ContentInstant) nextCI).setTrueColor(((ContentInstant) nextCI).getColor());
+							((ContentInstant) nextCI).getContentsContainingThisInstant().get(0).trueColor = (((ContentInstant) nextCI).getTrueColor());
 						}							
 					} else if (others){
 						for (Object nextC:univ.getContents()){
@@ -1171,9 +1170,6 @@ public class IJ3dExecuter {
 		final TextField gNumField = (TextField)gd.getNumericFields().get(imageData?3:2);
 		final TextField bNumField = (TextField)gd.getNumericFields().get(imageData?4:3);
 
-//		rSlider.setEnabled(oldC != null);
-//		gSlider.setEnabled(oldC != null);
-//		bSlider.setEnabled(oldC != null);
 		rSlider.setEnabled(true);
 		gSlider.setEnabled(true);
 		bSlider.setEnabled(true);
@@ -1213,14 +1209,26 @@ public class IJ3dExecuter {
 
 			public void windowClosed(WindowEvent e) {
 				try {
-					if(gd.wasCanceled()) {
-						finalCi.setThreshold((int) oldThr);
-						univ.fireContentChanged(finalC);
-						float newTr = (float) (oldTr / 100f);
-						finalCi.setTransparency(newTr);
-						univ.fireContentChanged(finalC);
-						finalCi.setColor(oldC);
-						univ.fireContentChanged(finalC);
+					if(gd.wasCanceled()) {				
+						if (selCIarray !=null && selCIarray.length > 0){
+							for (ContentInstant ciSel:selCIarray) {
+								ciSel.setThreshold((int) oldThr);
+
+								float newTr = (float) (oldTr / 100f);
+								ciSel.setTransparency(newTr);
+								ciSel.setColor(oldC);
+
+							}
+						} else {
+
+							finalCi.setThreshold((int) oldThr);
+							univ.fireContentChanged(finalC);
+							float newTr = (float) (oldTr / 100f);
+							finalCi.setTransparency(newTr);
+							univ.fireContentChanged(finalC);
+							finalCi.setColor(oldC);
+							univ.fireContentChanged(finalC);
+						}
 						return;
 					}
 					// apply to other time points

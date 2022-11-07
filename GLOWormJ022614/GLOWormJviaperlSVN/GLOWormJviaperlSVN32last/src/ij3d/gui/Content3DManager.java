@@ -2795,6 +2795,8 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 					((Image3DUniverse)univ).select(c, true);
 
 				}
+			} else {
+				((Image3DUniverse)univ).select(null,true);
 			}
 			if (record()) {
 				if (Recorder.scriptMode())
