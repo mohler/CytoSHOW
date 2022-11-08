@@ -11,6 +11,7 @@ import ij.io.SaveDialog;
 import ij.plugin.frame.ColorLegend;
 import ij.plugin.frame.Recorder;
 import ij.text.TextWindow;
+import ij3d.gui.Content3DManager;
 import ij3d.gui.ContentCreatorDialog;
 import ij3d.gui.InteractiveMeshDecimation;
 import ij3d.gui.InteractiveTransformDialog;
@@ -989,7 +990,8 @@ public class IJ3dExecuter {
 		boolean noSelection = false;
 		final boolean others = IJ.shiftKeyDown();  //would be nice to actually make this option work...
 		
-		ContentInstant[] selCIarray = univ.getContent3DManager().getSelectedContentInstantsAsArray();
+		Content3DManager c3dm = univ.getContent3DManager();
+		ContentInstant[] selCIarray = c3dm.getSelectedContentInstantsAsArray();
 
 		if(!checkSel(c)){
 			noSelection = true;
@@ -1042,20 +1044,37 @@ public class IJ3dExecuter {
 				} else {					
 					if (selCIarray !=null && selCIarray.length > 0){
 						for (Object nextCI:selCIarray){
-							((ContentInstant) nextCI).setTransparency(v / 100f);
+							if (v<100) {
+								((ContentInstant) nextCI).setTransparency(v / 100f);
+								((ContentInstant) nextCI).setVisible(true);
+
+							} else {
+								((ContentInstant) nextCI).setVisible(false);
+							}
 							//						univ.fireContentChanged(((Content) nextC));
 						}							
 					} else if (others){
 						for (Object nextC:univ.getContents()){
 							if (nextC!=finalC) {
-								((Content) nextC).setTransparency(v / 100f);
+								if (v<100) {
+									((Content) nextC).setTransparency(v / 100f);
+									((Content) nextC).setVisible(true);
+
+								} else {
+									((Content) nextC).setVisible(false);
+								}
 //								univ.fireContentChanged(((Content) nextC));
 							}
 						}
 					} else {						
 						for (Object nextC:univ.getContents()){
-							((Content) nextC).setTransparency(v / 100f);
-//							univ.fireContentChanged(((Content) nextC));
+							if (v<100) {
+								((Content) nextC).setTransparency(v / 100f);
+								((Content) nextC).setVisible(true);
+							} else {
+								((Content) nextC).setVisible(false);
+							}
+							//							univ.fireContentChanged(((Content) nextC));
 
 						}
 					}
