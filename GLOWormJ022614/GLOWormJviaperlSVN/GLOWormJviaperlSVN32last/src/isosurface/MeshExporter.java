@@ -27,6 +27,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.ArrayList;
@@ -487,7 +488,7 @@ public class MeshExporter {
 	static public void writeAsWaveFront(Collection contents, String objFilePathString, String mtl_filename, 
 										Writer w_obj, Writer w_mtl, String scaleShiftString,boolean oneFile) throws IOException {
 		
-		HashMap<String, CustomMesh> meshes = new HashMap<String, CustomMesh>();
+		LinkedHashMap<String, CustomMesh> meshes = new LinkedHashMap<String, CustomMesh>();
 
 		for(Iterator it = contents.iterator(); it.hasNext(); ) {
 			Content mob = (Content)it.next();

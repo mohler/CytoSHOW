@@ -146,7 +146,7 @@ public class WavefrontExporter {
 			objWriter.write('\n');
 		}
 	
-		for(String name : meshes.keySet()) {
+		for(String name : meshes.keySet()) {     //MAKE A VERSION OF THIS THAT WILL WORK WITH AND ORDERED COLLECTION???
 			Writer singleObjWriter =null;
 			Writer singleMtlWriter =null;
 			HashMap<Mtl, Mtl> single_ht_mat = null;

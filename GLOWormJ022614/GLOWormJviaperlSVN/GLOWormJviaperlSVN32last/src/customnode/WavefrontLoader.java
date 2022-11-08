@@ -6,7 +6,7 @@ import javax.vecmath.Color3f;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-
+import java.util.LinkedHashMap;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -22,7 +22,7 @@ public class WavefrontLoader {
 	 * <code>CustomMesh</code> objects.
 	 * @param objmtlStreams 
 	 */
-	public static HashMap<String, CustomMesh> load(String objfile, InputStream[] objmtlStreams, boolean flipXcoords)
+	public static LinkedHashMap<String, CustomMesh> load(String objfile, InputStream[] objmtlStreams, boolean flipXcoords)
 						throws IOException {
 		WavefrontLoader wl = new WavefrontLoader();
 		try {
@@ -34,7 +34,7 @@ public class WavefrontLoader {
 		return wl.meshes;
 	}
 
-	private HashMap<String, CustomMesh> meshes;
+	private LinkedHashMap<String, CustomMesh> meshes;
 
 	private  WavefrontLoader() {}
 
@@ -61,7 +61,7 @@ public class WavefrontLoader {
 
 		HashMap<String, Color4f> materials = null;
 
-		meshes = new HashMap<String, CustomMesh>();
+		meshes = new LinkedHashMap<String, CustomMesh>();
 
 		while((line = in.readLine()) != null) {
 			if(line.startsWith("mtllib")) {

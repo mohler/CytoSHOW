@@ -50,6 +50,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -2270,7 +2271,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		Object[] timedObjFileNms = timedObjFileNames.toArray();
 		Arrays.sort(timedObjFileNms);
 		List<Content>contents = new ArrayList<Content>();
-		Hashtable<String, TreeMap<Integer, ContentInstant>> cInstants = new Hashtable<String, TreeMap<Integer, ContentInstant>>();
+		LinkedHashMap<String, TreeMap<Integer, ContentInstant>> cInstants = new LinkedHashMap<String, TreeMap<Integer, ContentInstant>>();
 
 		for (Object nextmatchingfilename: timedObjFileNms) {
 			String nextmatchingfilePath = file.getParent() +File.separator + (String)nextmatchingfilename;
@@ -2283,7 +2284,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 //				nextTpt = Integer.parseInt(((String)nextmatchingfilename).replaceAll("(.*)(csv\\.i)(\\d+)(\\.c\\d+.*\\.obj)","$3"));
 //			}
 			
-			Map<String, CustomMesh> meshes= null;
+			LinkedHashMap<String, CustomMesh> meshes= null;
 			try {
 				meshes = WavefrontLoader.load(nextmatchingfilePath, objmtlStreams, flipXonImport);
 			} catch (IOException e) {
@@ -2293,14 +2294,14 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			if(meshes == null)
 				return;
 
-			for(Map.Entry<String,CustomMesh> entry : meshes.entrySet()) {
-				String name = entry.getKey();
+			for(String key : meshes.keySet()) {
+				String name = key;
 				name = getSafeContentName(name);
 				if (parseTimeInCPHATE && name.matches("(.*)(\\-i)(\\d+)(\\/\\d+)?(\\-c\\d+.*)")) {
 					nextTpt = Integer.parseInt(name.replaceAll("(.*)(\\-i)(\\d+)(\\/\\d+)?(\\-c\\d+.*)","$3"));
 				}
 
-				CustomMesh mesh = entry.getValue();
+				CustomMesh mesh = meshes.get(key);
 				if (!cInstants.containsKey(name)) {
 					cInstants.put(name, new TreeMap<Integer, ContentInstant>());
 				}
@@ -2317,9 +2318,9 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				cInstants.get(name).put(nextTpt,contInst);
 			}
 		}
-		for (Map.Entry<String, TreeMap<Integer, ContentInstant>> ciMap: cInstants.entrySet()) {
-			TreeMap<Integer, ContentInstant> ciTreeMap = ciMap.getValue();
-			String cName = ciMap.getKey();
+		for (String ciKey: cInstants.keySet()) {
+			TreeMap<Integer, ContentInstant> ciTreeMap = cInstants.get(ciKey);
+			String cName = ciKey;
 			for (Map.Entry<Integer,ContentInstant> ciEntry: ciTreeMap.entrySet()) {
 				c3dm.addContentInstant(ciEntry.getValue());	
 			}
