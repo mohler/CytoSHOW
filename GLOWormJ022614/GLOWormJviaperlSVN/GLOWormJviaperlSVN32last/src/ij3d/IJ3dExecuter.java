@@ -195,7 +195,7 @@ public class IJ3dExecuter {
 		if(c == null)
 			return null;
 
-		univ.addContent(c);
+		univ.addContent(c, true);
 
 		// record
 		String title = gui.getFile() != null ?
@@ -220,7 +220,7 @@ public class IJ3dExecuter {
 	public void delete(Content c) {
 		if(!checkSel(c))
 			return;
-		univ.removeContent(c.getName());
+		univ.removeContent(c.getName(), true);
 		record(DELETE);
 	}
 
@@ -574,7 +574,7 @@ public class IJ3dExecuter {
 				public void adjustmentValueChanged(
 						AdjustmentEvent e) {
 					os.setSlice(dirs[i], sl[i].getValue());
-					univ.fireContentChanged(c);
+					univ.fireContentChanged(c, true);
 				}
 			});
 
@@ -598,7 +598,7 @@ public class IJ3dExecuter {
 					os.setVisible(VolumeRenderer.X_AXIS, vis1);
 					os.setVisible(VolumeRenderer.Y_AXIS, vis2);
 					os.setVisible(VolumeRenderer.Z_AXIS, vis3);
-					univ.fireContentChanged(c);
+					univ.fireContentChanged(c, true);
 					return;
 				} else {
 					record(SET_SLICES,
@@ -625,7 +625,7 @@ public class IJ3dExecuter {
 				ImageCanvas3D canvas = (ImageCanvas3D)univ.getCanvas();
 				((VoltexGroup)c.getContentNode()).
 				fillRoi(canvas, canvas.getRoi(), (byte)0);
-				univ.fireContentChanged(c);
+				univ.fireContentChanged(c, true);
 				record(FILL_SELECTION);
 			}
 		}.start();
@@ -800,7 +800,7 @@ public class IJ3dExecuter {
 
 			public void colorChanged(Color3f color) {
 				ci.setColor(color);
-				univ.fireContentChanged(c);
+				univ.fireContentChanged(c, true);
 			}
 
 
@@ -814,7 +814,7 @@ public class IJ3dExecuter {
 				// gd.wasOKed: apply to all time points
 				if (gd.getNextBoolean())
 					c.setColor(ci.getColor());
-				univ.fireContentChanged(c);
+				univ.fireContentChanged(c, true);
 			}
 		};
 		showColorDialog("Change color...", oldC, colorListener, true, true);
@@ -852,7 +852,7 @@ public class IJ3dExecuter {
 
 			public void colorChanged(Color3f color) {
 				ci.setLandmarkColor(color);
-				univ.fireContentChanged(c);
+				univ.fireContentChanged(c, true);
 			}
 
 
@@ -861,7 +861,7 @@ public class IJ3dExecuter {
 				// gd.wasOKed: apply to all time points
 				if (gd.getNextBoolean())
 					c.setLandmarkColor(ci.getLandmarkColor());
-				univ.fireContentChanged(c);
+				univ.fireContentChanged(c, true);
 			}
 		};
 		showColorDialog("Change point color...", oldC, colorListener, false, true);
@@ -882,7 +882,7 @@ public class IJ3dExecuter {
 
 			public void applied() {
 				c.setLUT(r, g, b, a);
-				univ.fireContentChanged(c);
+				univ.fireContentChanged(c, true);
 			}
 		});
 		ld.showDialog();
@@ -912,7 +912,7 @@ public class IJ3dExecuter {
 			c.setChannels(channels);
 		else
 			ci.setChannels(channels);
-		univ.fireContentChanged(c);
+		univ.fireContentChanged(c, true);
 		record(SET_CHANNELS, Boolean.toString(channels[0]),
 				Boolean.toString(channels[1]),
 				Boolean.toString(channels[2]));
@@ -926,7 +926,7 @@ public class IJ3dExecuter {
 
 			public synchronized final void setValue(ContentInstant ci, int v) {
 				ci.setTransparency(v / 100f);
-				univ.fireContentChanged(c);
+				univ.fireContentChanged(c, true);
 			}
 		};
 		final GenericDialog gd = new GenericDialog(
@@ -970,7 +970,7 @@ public class IJ3dExecuter {
 				if(gd.wasCanceled()) {
 					float newTr = oldTr / 100f;
 					ci.setTransparency(newTr);
-					univ.fireContentChanged(c);
+					univ.fireContentChanged(c, true);
 					return;
 				}
 				// apply to all instants of the content
@@ -1031,7 +1031,7 @@ public class IJ3dExecuter {
 
 			public synchronized final void setValue(ContentInstant ci, int v) {
 				finalC.setThreshold(v);
-				univ.fireContentChanged(finalC);
+				univ.fireContentChanged(finalC, true);
 			}
 		};
 		
@@ -1040,7 +1040,7 @@ public class IJ3dExecuter {
 			public synchronized final void setValue(ContentInstant ci, int v) {
 				if (!(finalNoSelection || others)){
 					finalC.setTransparency(v / 100f);
-					univ.fireContentChanged(finalC);
+					univ.fireContentChanged(finalC, true);
 				} else {					
 					if (selCIarray !=null && selCIarray.length > 0){
 						for (Object nextCI:selCIarray){
@@ -1051,7 +1051,7 @@ public class IJ3dExecuter {
 							} else {
 								((ContentInstant) nextCI).setVisible(false);
 							}
-							//						univ.fireContentChanged(((Content) nextC));
+							//						univ.fireContentChanged(((Content) nextC), true);
 						}							
 					} else if (others){
 						for (Object nextC:univ.getContents()){
@@ -1063,7 +1063,7 @@ public class IJ3dExecuter {
 								} else {
 									((Content) nextC).setVisible(false);
 								}
-//								univ.fireContentChanged(((Content) nextC));
+//								univ.fireContentChanged(((Content) nextC), true);
 							}
 						}
 					} else {						
@@ -1074,7 +1074,7 @@ public class IJ3dExecuter {
 							} else {
 								((Content) nextC).setVisible(false);
 							}
-							//							univ.fireContentChanged(((Content) nextC));
+							//							univ.fireContentChanged(((Content) nextC), true);
 
 						}
 					}
@@ -1087,24 +1087,24 @@ public class IJ3dExecuter {
 			public void colorChanged(Color3f color) {
 				if (!(finalNoSelection || others)){
 					finalC.setColor(color);
-					//					univ.fireContentChanged(finalC);
+					//					univ.fireContentChanged(finalC, true);
 				} else {
 					if (selCIarray !=null && selCIarray.length > 0){
 						for (Object nextCI:selCIarray){
 							((ContentInstant) nextCI).setColor(color);
-							//							univ.fireContentChanged(((Content) nextC));
+							//							univ.fireContentChanged(((Content) nextC), true);
 						}							
 					} else if (others){
 						for (Object nextC:univ.getContents()){
 							if (nextC!=finalC) {
 								((Content) nextC).setColor(color);
-								//							univ.fireContentChanged(((Content) nextC));
+								//							univ.fireContentChanged(((Content) nextC), true);
 							}
 						}
 					} else {
 						for (Object nextC:univ.getContents()){
 							((Content) nextC).setColor(color);
-							//							univ.fireContentChanged(((Content) nextC));
+							//							univ.fireContentChanged(((Content) nextC), true);
 						}
 					}
 				}
@@ -1114,7 +1114,7 @@ public class IJ3dExecuter {
 				// gd.wasOKed: apply to all time points
 				if (!(finalNoSelection || others)){
 					finalC.setColor(finalCi.getColor());
-					univ.fireContentChanged(finalC);
+					univ.fireContentChanged(finalC, true);
 				} else {
 					if (selCIarray !=null && selCIarray.length > 0){
 						for (Object nextCI:selCIarray){
@@ -1125,13 +1125,13 @@ public class IJ3dExecuter {
 						for (Object nextC:univ.getContents()){
 							if (nextC!=finalC) {
 								((Content) nextC).setColor(((Content) nextC).getCurrentInstant().getColor());
-								univ.fireContentChanged(((Content) nextC));
+								univ.fireContentChanged(((Content) nextC), true);
 							}
 						}
 					} else {						
 						for (Object nextC:univ.getContents()){
 							((Content) nextC).setColor(((Content) nextC).getCurrentInstant().getColor());
-							univ.fireContentChanged(((Content) nextC));
+							univ.fireContentChanged(((Content) nextC), true);
 
 						}
 					}
@@ -1241,12 +1241,12 @@ public class IJ3dExecuter {
 						} else {
 
 							finalCi.setThreshold((int) oldThr);
-							univ.fireContentChanged(finalC);
+							univ.fireContentChanged(finalC, true);
 							float newTr = (float) (oldTr / 100f);
 							finalCi.setTransparency(newTr);
-							univ.fireContentChanged(finalC);
+							univ.fireContentChanged(finalC, true);
 							finalCi.setColor(oldC);
-							univ.fireContentChanged(finalC);
+							univ.fireContentChanged(finalC, true);
 						}
 						return;
 					}

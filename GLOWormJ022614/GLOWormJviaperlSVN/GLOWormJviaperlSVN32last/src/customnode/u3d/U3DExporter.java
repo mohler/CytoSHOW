@@ -45,12 +45,12 @@ public class U3DExporter {
 		List<Point3f> l = customnode.MeshMaker.createIcosahedron(1, 1f);
 		CustomTriangleMesh ctm = new CustomTriangleMesh(l);
 		ctm.setColor(new Color3f(0f, 1f, 0f));
-		univ.addCustomMesh(ctm, "icosahedron");
+		univ.addCustomMesh(ctm, "icosahedron", true);
 
 		l = customnode.MeshMaker.createSphere(1, 0, 0, 0.5f);
 		ctm = new CustomTriangleMesh(l);
 		ctm.setColor(new Color3f(1f, 0f, 0f));
-		univ.addCustomMesh(ctm, "sphere");
+		univ.addCustomMesh(ctm, "sphere", true);
 
 		U3DExporter.export(univ, "/tmp/sphere.u3d");
 	}

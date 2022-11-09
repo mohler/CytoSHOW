@@ -765,21 +765,24 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 	public void universeClosed() {}
 	public void transformationStarted(View view) {}
 	public void transformationUpdated(View view) {}
-	public void contentSelected(Content c) {}
+	public void contentSelected(Content c, boolean updateNow) {}
 	public void transformationFinished(View view) {
 		updateImagePlus();
 	}
 
-	public void contentAdded(Content c){
-		updateImagePlus();
+	public void contentAdded(Content c, boolean updateNow){
+		if (updateNow)
+			updateImagePlus();
 	}
 
-	public void contentRemoved(Content c){
-		updateImagePlus();
+	public void contentRemoved(Content c, boolean updateNow){
+		if (updateNow)
+			updateImagePlus();
 	}
 
-	public void contentChanged(Content c){
-		updateImagePlus();
+	public void contentChanged(Content c, boolean updateNow){
+		if (updateNow)
+			updateImagePlus();
 	}
 
 	public void canvasResized() {

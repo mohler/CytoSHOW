@@ -1221,7 +1221,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 			list.setModel(new DefaultListModel<String>());
 			Arrays.sort(indexes);
 			for (int r = indexes.length - 1; r >= 0; r--) {
-				univ.removeContent(listModel.get(indexes[r]).replace("\"","").split("\\_")[0]);
+				univ.removeContent(listModel.get(indexes[r]).replace("\"","").split("\\_")[0], true);
 				contentInstants.remove(listModel.get(indexes[r]));
 				fullListModel.removeElement(listModel.get(indexes[r]));
 				listModel.remove(indexes[r]);
@@ -1230,7 +1230,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 			
 		}
 		if (count > 1 && indexes.length == 1 && univ != null)
-			univ.removeContent(univ.getSelected().getName());
+			univ.removeContent(univ.getSelected().getName(), true);
 
 		textCountLabel.setText("" + listModel.size() + "/" + fullListModel.size());
 		if (univ.getWindow() != null) {
@@ -1758,6 +1758,8 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 	/** Returns the selected ROIs as an array. */
 	public ContentInstant[] getSelectedContentInstantsAsArray() {
 		int[] indexes = getSelectedIndexes();
+		if (indexes == null)
+			return null;
 		int n = indexes.length;
 		ContentInstant[] array = new ContentInstant[n];
 		for (int i = 0; i < n; i++) {
@@ -2219,7 +2221,9 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 			selectedIndexes = null;
 			return indexes;
 		} else
-			return list.getSelectedIndices();
+			if (list != null)
+				return list.getSelectedIndices();
+		return null;
 	}
 
 	private boolean record() {
@@ -4947,17 +4951,19 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 			}
 			previousMaxSN = nextMaxSN;
 		}
-
+		
+		Sphere sph800 = null;
+		String outputTag = "";
 		for (String phateLine : inputPhateList) {
 			if (phateLine.startsWith("serialNumber"))
 				continue;
 			String[] phateLineChunks = phateLine.split(",");
 			String serial = phateLineChunks[0];
-			String outputTag = serialRosters.get(Integer.parseInt(serial)) + "-" + serial;
+			outputTag = serialRosters.get(Integer.parseInt(serial)) + "-" + serial;
 			float offsetVX = (float) (Double.parseDouble(phateLineChunks[1]) * 1000 - 50000);
 			float offsetVY = (float) (Double.parseDouble(phateLineChunks[2]) * 1000 - 50000);
 			float offsetVZ = (float) (Double.parseDouble(phateLineChunks[3]) * 1000 - 50000);
-			Sphere sph800 = new Sphere(new Point3f(offsetVX, offsetVY, offsetVZ), 800, 50, 50);
+			sph800 = new Sphere(new Point3f(offsetVX, offsetVY, offsetVZ), 800, 50, 50);
 
 			String colorString = phateLineChunks[4];
 			float cycle = Float.parseFloat(phateLineChunks[9]);
@@ -5009,10 +5015,11 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 
 			if (!condensed)
 				IJ.log(outputTag + "\n");
-			univ.addCustomMesh(sph800, outputTag).setLocked(true);
+			univ.addCustomMesh(sph800, outputTag, false).setLocked(true);
 
 		}
 //		univ.addCustomMesh(bigmesh,"multi");
+		univ.addCustomMesh(sph800, outputTag, true).setLocked(true);
 
 	}
 

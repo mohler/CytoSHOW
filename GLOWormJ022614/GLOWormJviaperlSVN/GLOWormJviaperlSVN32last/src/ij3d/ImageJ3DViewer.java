@@ -191,7 +191,7 @@ public class ImageJ3DViewer implements PlugIn {
 	public static void delete() {
 		Image3DUniverse univ = getUniv();
 		if(univ != null && univ.getSelected() != null) {
-			univ.removeContent(univ.getSelected().getName());
+			univ.removeContent(univ.getSelected().getName(), true);
 		}
 	}
 

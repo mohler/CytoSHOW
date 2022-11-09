@@ -740,10 +740,10 @@ public abstract class DefaultUniverse extends SimpleUniverse
 	 * Invokes the contentAdded() method of all registered
 	 * UniverseListeners.
 	 */
-	public void fireContentAdded(Content c) {
+	public void fireContentAdded(Content c, boolean updateNow) {
 		for(int i = 0; i < listeners.size(); i++) {
 			UniverseListener l = (UniverseListener)listeners.get(i);
-			l.contentAdded(c);
+			l.contentAdded(c,  updateNow);
 		}
 	}
 
@@ -751,10 +751,10 @@ public abstract class DefaultUniverse extends SimpleUniverse
 	 * Invokes the contentChanged() method of all registered
 	 * UniverseListeners.
 	 */
-	public void fireContentChanged(Content c) {
+	public void fireContentChanged(Content c, boolean updateNow) {
 		for(int i = 0; i < listeners.size(); i++) {
 			UniverseListener l = (UniverseListener)listeners.get(i);
-			l.contentChanged(c);
+			l.contentChanged(c,  updateNow);
 		}
 	}
 
@@ -762,10 +762,10 @@ public abstract class DefaultUniverse extends SimpleUniverse
 	 * Invokes the contentRemoved() method of all registered
 	 * UniverseListeners.
 	 */
-	public void fireContentRemoved(Content c) {
+	public void fireContentRemoved(Content c, boolean updateNow) {
 		for(int i = 0; i < listeners.size(); i++) {
 			UniverseListener l = (UniverseListener)listeners.get(i);
-			l.contentRemoved(c);
+			l.contentRemoved(c,  updateNow);
 		}
 	}
 
@@ -773,10 +773,10 @@ public abstract class DefaultUniverse extends SimpleUniverse
 	 * Invokes the contentSelected() method of all registered
 	 * UniverseListeners.
 	 */
-	public void fireContentSelected(Content c) {
+	public void fireContentSelected(Content c, boolean updateNow) {
 		for(int i = 0; i < listeners.size(); i++) {
 			UniverseListener l = (UniverseListener)listeners.get(i);
-			l.contentSelected(c);
+			l.contentSelected(c,  updateNow);
 		}
 	}
 

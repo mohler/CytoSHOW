@@ -135,7 +135,7 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 		helpMenu = createHelpMenu();
 		this.add(helpMenu);
 
-		contentSelected(null);
+		contentSelected(null, true);
 	}
 
 	public JMenu createFileMenu() {
@@ -772,7 +772,8 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 	}
 
 	private Content getSelected() {
-		if (univ.getContent3DManager().getSelectedContentInstantsAsArray() != null 
+		if (univ.getContent3DManager() != null
+				&& univ.getContent3DManager().getSelectedContentInstantsAsArray() != null 
 				&& univ.getContent3DManager().getSelectedContentInstantsAsArray().length > 1)
 			return null;
 		Content c = univ.getSelected();
@@ -799,12 +800,12 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 	
 	public void transformationUpdated(View view) {}
 	
-	public void contentChanged(Content c) {}
+	public void contentChanged(Content c, boolean updateNow) {}
 	
 	public void universeClosed() {}
 
 	
-	public void contentAdded(Content c) {
+	public void contentAdded(Content c, boolean updateNow) {
 		updateMenus();
 		if(c == null)
 			return;
@@ -824,7 +825,7 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 	}
 
 	
-	public void contentRemoved(Content c) {
+	public void contentRemoved(Content c, boolean updateNow) {
 		updateMenus();
 		if(c == null)
 			return;
@@ -839,7 +840,7 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 
 
 	
-	public void contentSelected(Content c) {
+	public void contentSelected(Content c, boolean updateNow) {
 		updateMenus();
 	}
 

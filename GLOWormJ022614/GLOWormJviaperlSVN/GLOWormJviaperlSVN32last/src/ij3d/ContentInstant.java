@@ -712,18 +712,18 @@ public class ContentInstant extends BranchGroup implements UniverseListener, Con
 	
 	public void transformationStarted(View view) {}
 	
-	public void contentAdded(Content c) {}
+	public void contentAdded(Content c, boolean updateNow) {}
 	
-	public void contentRemoved(Content c) {
+	public void contentRemoved(Content c, boolean updateNow) {
 		if(plDialog != null)
 			plDialog.removePointList(plPanel);
 	}
 	
 	public void canvasResized() {}
 	
-	public void contentSelected(Content c) {}
+	public void contentSelected(Content c, boolean updateNow) {}
 	
-	public void contentChanged(Content c) {}
+	public void contentChanged(Content c, boolean updateNow) {}
 
 	
 	public void universeClosed() {

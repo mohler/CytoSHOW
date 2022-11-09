@@ -61,10 +61,10 @@ public class PrimitiveDialogs {
 		public void updatePreview() {
 			String name = getNameForContent();
 			if(content != null)
-				univ.removeContent(content.getName());
+				univ.removeContent(content.getName(), true);
 			Primitive prim = getPrimitive();
 			if(prim != null)
-				content = univ.addCustomMesh(prim, name);
+				content = univ.addCustomMesh(prim, name, true);
 		}
 	}
 
@@ -103,7 +103,7 @@ public class PrimitiveDialogs {
 			tf2.addFocusListener(this);
 			showDialog();
 			if(wasCanceled())
-				univ.removeContent(tf0.getText());
+				univ.removeContent(tf0.getText(), true);
 			else
 				updatePreview();
 		}
@@ -141,7 +141,7 @@ public class PrimitiveDialogs {
 			tf2.addFocusListener(this);
 			showDialog();
 			if(wasCanceled())
-				univ.removeContent(tf0.getText());
+				univ.removeContent(tf0.getText(), true);
 			else
 				updatePreview();
 		}
@@ -182,7 +182,7 @@ public class PrimitiveDialogs {
 			tf3.addFocusListener(this);
 			showDialog();
 			if(wasCanceled())
-				univ.removeContent(tf0.getText());
+				univ.removeContent(tf0.getText(), true);
 			else
 				updatePreview();
 		}
@@ -256,7 +256,7 @@ public class PrimitiveDialogs {
 			co.setForeground(java.awt.Color.BLUE);
 			showDialog();
 			if(wasCanceled())
-				univ.removeContent(tf0.getText());
+				univ.removeContent(tf0.getText(), true);
 			else
 				updatePreview();
 		}

@@ -601,15 +601,15 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 	 *
 	 *************************************************************/
 	public void transformationStarted(View view) {}
-	public void contentAdded(Content c) {}
-	public void contentRemoved(Content c) {
+	public void contentAdded(Content c, boolean updateNow) {}
+	public void contentRemoved(Content c, boolean updateNow) {
 		for(ContentInstant co : contentInstants.values()) {
-			co.contentRemoved(c);
+			co.contentRemoved(c, updateNow);
 		}
 	}
 	public void canvasResized() {}
-	public void contentSelected(Content c) {}
-	public void contentChanged(Content c) {}
+	public void contentSelected(Content c, boolean updateNow) {}
+	public void contentChanged(Content c, boolean updateNow) {}
 
 	public void universeClosed() {
 		for(ContentInstant ci : contentInstants.values()) {
@@ -789,5 +789,6 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 	public void setContentSwitch(Switch contentSwitch) {
 		this.contentSwitch = contentSwitch;
 	}
+
 }
 

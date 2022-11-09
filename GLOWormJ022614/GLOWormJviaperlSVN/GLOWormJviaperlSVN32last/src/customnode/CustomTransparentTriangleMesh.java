@@ -188,6 +188,6 @@ public class CustomTransparentTriangleMesh extends CustomTriangleMesh {
 
 		m.setTransparentColor(cols);
 
-		u.addCustomMesh(m, "lkjl");
+		u.addCustomMesh(m, "lkjl", true);
 	}
 }

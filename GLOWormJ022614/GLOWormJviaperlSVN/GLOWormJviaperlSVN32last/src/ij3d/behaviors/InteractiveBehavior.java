@@ -294,7 +294,7 @@ public class InteractiveBehavior extends Behavior {
 				}
 			}
 			if(changed)
-				univ.fireContentChanged(c);
+				univ.fireContentChanged(c,true);
 		} else if( axis != -1) {
 			((Image3DUniverse)univ).pauseAnimation();
 
@@ -445,7 +445,7 @@ public class InteractiveBehavior extends Behavior {
 					if(units > 0) og.increase(axis);
 					else if(units < 0) og.decrease(axis);
 				}
-				univ.fireContentChanged(c);
+				univ.fireContentChanged(c,true);
 			} else {
 				viewTransformer.wheel_zoom(e);
 			}

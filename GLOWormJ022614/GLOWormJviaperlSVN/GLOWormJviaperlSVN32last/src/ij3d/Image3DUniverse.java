@@ -684,7 +684,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			c.showPointList(false);
 		}
 		// just for now, to update the menu bar
-		fireContentSelected(selectedContents.get(0));
+		fireContentSelected(selectedContents.get(0), true);
 	}
 
 	/* *************************************************************
@@ -891,7 +891,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			for (Content content:selectedContents) {
 				content.setSelected(false);
 			}
-			fireContentSelected(null);
+			fireContentSelected(null, true);
 		}
 	}
 
@@ -1170,7 +1170,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		}
 		Content c = ContentCreator.createContent(name, image, type,
 				resf, 0, color, thresh, channels);
-		return addContent(c);
+		return addContent(c, true);
 	}
 
 	/**
@@ -1456,13 +1456,13 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 * @param name the name for the added Content
 	 * @return the added Content
 	 */
-	public Content addCustomMesh(CustomMesh mesh, String name) {
+	public Content addCustomMesh(CustomMesh mesh, String name, boolean updateNow) {
 		if(contents.containsKey(name)) {
 			IJ.error("Mesh named '"+name+"' exists already");
 			return null;
 		}
 		Content content = createContent(mesh, name);
-		return addContent(content);
+		return addContent(content, updateNow);
 	}
 
 	/**
@@ -1480,7 +1480,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			return null;
 		}
 		Content content = createContent(mesh, name);
-		return addContent(content);
+		return addContent(content, true);
 	}
 
 	/**
@@ -1535,7 +1535,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		int mode = strips ? CustomLineMesh.CONTINUOUS
 				: CustomLineMesh.PAIRWISE;
 		CustomLineMesh lmesh = new CustomLineMesh(mesh, mode, color, 0);
-		return addCustomMesh(lmesh, name);
+		return addCustomMesh(lmesh, name, true);
 	}
 
 	/**
@@ -1553,7 +1553,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	public Content addPointMesh(List<Point3f> mesh,
 			Color3f color, String name) {
 		CustomPointMesh tmesh = new CustomPointMesh(mesh, color, 0);
-		return addCustomMesh(tmesh, name);
+		return addCustomMesh(tmesh, name, true);
 	}
 
 	/**
@@ -1572,7 +1572,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			float ptsize, String name) {
 		CustomPointMesh tmesh = new CustomPointMesh(mesh, color, 0);
 		tmesh.setPointSize(ptsize);
-		return addCustomMesh(tmesh, name);
+		return addCustomMesh(tmesh, name, true);
 	}
 
 	/** At every {@link Point3f} in @param points, place an icosphere
@@ -1588,7 +1588,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		for (final Point3f p : points) {
 			mesh.addAll(MeshMaker.copyTranslated(ico, p.x, p.y, p.z));
 		}
-		return addCustomMesh(new CustomTriangleMesh(mesh, color, 0), name);
+		return addCustomMesh(new CustomTriangleMesh(mesh, color, 0), name, true);
 	}
 
 	/**
@@ -1608,7 +1608,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	public Content addQuadMesh(List<Point3f> mesh,
 			Color3f color, String name) {
 		CustomQuadMesh tmesh = new CustomQuadMesh(mesh, color, 0);
-		return addCustomMesh(tmesh, name);
+		return addCustomMesh(tmesh, name, true);
 	}
 
 	/**
@@ -1627,7 +1627,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	public Content addTriangleMesh(List<Point3f> mesh,
 			Color3f color, String name) {
 		CustomTriangleMesh tmesh = new CustomTriangleMesh(mesh, color, 0);
-		return addCustomMesh(tmesh, name);
+		return addCustomMesh(tmesh, name, true);
 	}
 
 	/**
@@ -1649,7 +1649,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			List<Color3f> colors, String name) {
 		CustomTriangleMesh tmesh = new CustomTriangleMesh(mesh);
 		tmesh.setColor(colors);
-		return addCustomMesh(tmesh, name);
+		return addCustomMesh(tmesh, name, true);
 	}
 
 	/**
@@ -1683,14 +1683,16 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		String[] names = new String[contents.size()];
 		contents.keySet().toArray(names);
 		for (int i=0; i<names.length; i++)
-			removeContent(names[i]);
+			removeContent(names[i], false);
+		removeContent(names[names.length-1], true);
+
 	}
 
 	/**
 	 * Remove the Content with the specified name from the universe.
 	 * @param name
 	 */
-	public void removeContent(String name) {
+	public void removeContent(String name, boolean updateNow) {
 		synchronized(lock) {
 			Content content = contents.get(name);
 			if(content == null)
@@ -1699,7 +1701,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			contents.remove(name);
 			if(selectedContents.contains(content))
 				clearSelection();
-			fireContentRemoved(content);
+			fireContentRemoved(content, true);
 			this.removeUniverseListener(content);
 			updateTimeline();
 		}
@@ -2191,9 +2193,9 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 * @param c
 	 * @return the added Content, or null if an error occurred.
 	 */
-	public Content addContent(Content c) {
+	public Content addContent(Content c, boolean updateNow) {
 		try {
-			return addContentLater(c).get();
+			return addContentLater(c, updateNow).get();
 		} catch (InterruptedException ie) {
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -2214,7 +2216,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 * @param c The Content to add
 	 * @return a Future holding the added Content, or null if an error occurred.
 	 */
-	public Future<Content> addContentLater(final Content c) {
+	public Future<Content> addContentLater(final Content c, boolean updateNow) {
 		final Image3DUniverse univ = this;
 		return adder.submit(new Callable<Content>() {
 
@@ -2231,11 +2233,13 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				}
 //WHY WAS THIS EVER CALLED??				
 //				univ.waitForNextFrame();
-				univ.fireContentAdded(c);
+				univ.fireContentAdded(c, updateNow);
 				univ.addUniverseListener(c);
 
-				univ.fireTransformationUpdated();
-				canvas.revalidate();
+				if (updateNow) {
+					univ.fireTransformationUpdated();
+					canvas.revalidate();
+				}
 				return c;
 			}
 		});
@@ -2318,6 +2322,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				cInstants.get(name).put(nextTpt,contInst);
 			}
 		}
+		Content recentContent = null;
 		for (String ciKey: cInstants.keySet()) {
 			TreeMap<Integer, ContentInstant> ciTreeMap = cInstants.get(ciKey);
 			String cName = ciKey;
@@ -2326,9 +2331,12 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			}
 
 			Content content = new Content(cName, cInstants.get(cName), false);
-			this.addContent(content);
+			recentContent = content;
+			this.addContent(content, false);
 			content.setLocked(true);
 		}
+		this.addContent(recentContent, true);
+		
 		if (win.getTitle().matches("CytoSHOW3D.*")){
 			win.getImagePlus().setWindow(win);
 			if (!titleName.contentEquals("."))
@@ -2352,17 +2360,29 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	public Collection<Future<Content>> addContentLater(Collection<Content> cc) {
 		final Image3DUniverse univ = this;
 		final ArrayList<Future<Content>> all = new ArrayList<Future<Content>>();
+		Content recentC  = null;
 		for (final Content c : cc) {
+			recentC = c;
 			all.add(adder.submit(new Callable<Content>() {
 
 				public Content call() {
 					if (!addContentToScene(c)) return null;
-					univ.fireContentAdded(c);
+					univ.fireContentAdded(c, false);
 					univ.addUniverseListener(c);
 					return c;
 				}
 			}));
 		}
+		final Content lastC = recentC;
+		all.add(adder.submit(new Callable<Content>() {
+
+			public Content call() {
+				if (!addContentToScene(lastC)) return null;
+				univ.fireContentAdded(lastC, true);
+				return lastC;
+			}
+		}));
+
 		// Post actions: submit a new task to the single-threaded
 		// executor service, so it will be executed after all other
 		// tasks.

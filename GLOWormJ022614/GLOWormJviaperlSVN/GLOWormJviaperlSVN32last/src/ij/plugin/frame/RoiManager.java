@@ -9628,17 +9628,18 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			previousMaxSN = nextMaxSN;
 		}
-
+		Sphere sph800 = null;
+		String outputTag = "";
 		for (String phateLine : inputPhateList) {
 			if (phateLine.startsWith("serialNumber"))
 				continue;
 			String[] phateLineChunks = phateLine.split(",");
 			String serial = phateLineChunks[0];
-			String outputTag = serialRosters.get(Integer.parseInt(serial)) + "-" + serial;
+			outputTag = serialRosters.get(Integer.parseInt(serial)) + "-" + serial;
 			float offsetVX = (float) (Double.parseDouble(phateLineChunks[1]) * 1000 - 50000);
 			float offsetVY = (float) (Double.parseDouble(phateLineChunks[2]) * 1000 - 50000);
 			float offsetVZ = (float) (Double.parseDouble(phateLineChunks[3]) * 1000 - 50000);
-			Sphere sph800 = new Sphere(new Point3f(offsetVX, offsetVY, offsetVZ), 800, 50, 50);
+			sph800 = new Sphere(new Point3f(offsetVX, offsetVY, offsetVZ), 800, 50, 50);
 
 			String colorString = phateLineChunks[4];
 			float cycle = Float.parseFloat(phateLineChunks[9]);
@@ -9690,10 +9691,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 			if (!condensed)
 				IJ.log(outputTag + "\n");
-			univ.addCustomMesh(sph800, outputTag).setLocked(true);
+			univ.addCustomMesh(sph800, outputTag, false).setLocked(true);
 
 		}
 //		univ.addCustomMesh(bigmesh,"multi");
+		univ.addCustomMesh(sph800, outputTag, true).setLocked(true);
 
 	}
 
