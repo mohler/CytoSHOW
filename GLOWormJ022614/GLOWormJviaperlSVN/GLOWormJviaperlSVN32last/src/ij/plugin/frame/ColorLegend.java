@@ -869,6 +869,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 		for (JCheckBox cb:getJCheckBox()) {
 			clString = clString + cb.getName() +","+ cb.getLabel() +","
 						+ Colors.colorToHexString(cb.getBackground()) +","
+						+ cb.getBackground().getAlpha() +","
 						+ cb.getBackground().getRed() +","
 						+ cb.getBackground().getGreen() +","
 						+ cb.getBackground().getBlue() +"\n";
@@ -893,13 +894,16 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 			int i=0;
 			while (contentIterator.hasNext()) {
 				Content content = (Content) contentIterator.next();
+				Color contentRGBcolor = content.getColor().get();
+				float contentTransp = content.getTransparency();
+				Color contentARGBcolor = new Color(contentRGBcolor.getRed(),contentRGBcolor.getGreen(),contentRGBcolor.getBlue(), (int)((1f-contentTransp)*255));
 				//		IJ.log(clLines[i]);
 				checkbox[i] = new JCheckBox();
 				((JCheckBox)checkbox[i]).setSize(150, 10);
 				checkbox[i].setLabel(content.getName());
 				checkbox[i].setName(content.getName());			
-				checkbox[i].setBackground(content.getColor().get());
-				brainbowColors.put(checkbox[i].getName().toLowerCase(), content.getColor().get());	
+				checkbox[i].setBackground(contentARGBcolor);
+				brainbowColors.put(checkbox[i].getName().toLowerCase(), contentARGBcolor);
 
 				checkboxHash.put(content.getColor().get(), checkbox[i]);
 				checkbox[i].setFont(Menus.getFont().deriveFont(8));

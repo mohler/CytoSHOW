@@ -603,8 +603,8 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 	public void transformationStarted(View view) {}
 	public void contentAdded(Content c, boolean updateNow) {}
 	public void contentRemoved(Content c, boolean updateNow) {
-		for(ContentInstant co : contentInstants.values()) {
-			co.contentRemoved(c, updateNow);
+		for(ContentInstant ci : contentInstants.values()) {
+			ci.contentRemoved(c, updateNow);
 		}
 	}
 	public void canvasResized() {}

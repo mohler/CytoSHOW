@@ -707,9 +707,20 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 
 				}
 
-//			} else if (command.equals("Update [u]")) {
-//				if (imp.getMultiChannelController() != null)
-//					imp.getMultiChannelController().updateContentInstantManager();
+			} else if (command.equals("Update [u]")) {
+				Image3DUniverse univ = (Image3DUniverse) this.univ;
+				ContentInstant[] cis = this.getShownContentInstantsAsArray();
+				ContentInstant nextC = null;
+				this.delete(false);
+				for (ContentInstant ci:cis) {
+					nextC= ci;
+					Content newC = new Content(ci.getName());
+					newC.addInstant(ci);
+					univ.addContentLater(newC, false);
+					this.addContentInstant(ci);	
+
+				}
+//				univ.addContentLater(nextC, true);
 			} else if (command.equals("Delete"))
 				delete(false);
 			else if (command.equals("Delete ")) {

@@ -1701,7 +1701,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			contents.remove(name);
 			if(selectedContents.contains(content))
 				clearSelection();
-			fireContentRemoved(content, true);
+			fireContentRemoved(content, updateNow);
 			this.removeUniverseListener(content);
 			updateTimeline();
 		}
@@ -1732,10 +1732,10 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 	/**
 	 * Returns a Collection containing the references to all the
-	 * contents of this universe.
+	 * selected contents in the list of this universe's Content3DManager.
 	 * @return
 	 */
-	public Collection getListOrderedSelectedContents() {
+	public Collection<Content> getListOrderedSelectedContents() {
 		if(contents == null)
 			return null;
 		Collection<Content> orderedSelectedContents = new ArrayList<Content>();
