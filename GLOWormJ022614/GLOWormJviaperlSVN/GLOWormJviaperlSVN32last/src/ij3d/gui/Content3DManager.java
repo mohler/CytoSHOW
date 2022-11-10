@@ -712,32 +712,42 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 
 				int[] indexes = getSelectedIndexes();
 				list.setModel(new DefaultListModel<String>());
-				Arrays.sort(indexes);
-				for (int r = indexes.length - 1; r >= 0; r--) {
-					String thisLabel = listModel.get(indexes[r]);
-					String thisContentLabel = thisLabel.replace("\"","").split("\\_#")[0];
-					Content thisContent = univ.getContent(thisContentLabel);
-					if (thisContent == null){
-						IJ.wait(10);
-						if (thisContent == null) {
-							thisContent = univ.getContent(thisContentLabel);
-							IJ.wait(100);
+				ArrayList<Content> invertSelContents = new ArrayList<Content>();
+				ArrayList<String> invertSelContentLabels = new ArrayList<String>();
+				for (int r = listModel.getSize() - 1; r >= 0; r--) {
+					///	to move UNselected objects to the end of the list and scenegraph.				
+					boolean selected = false;
+					for (int index:indexes) {
+						if (r==index) {
+							selected = true;
 						}
 					}
-					contentInstants.remove(listModel.get(indexes[r]));
-					fullListModel.removeElement(listModel.get(indexes[r]));
-					listModel.remove(indexes[r]);
-					
-					Content newC = new Content(thisContentLabel);
-					if (thisContent != null) {
-						Collection<ContentInstant> cis = thisContent.getInstants().values();
+					if (selected)
+						continue;
+					///					
+					String thisLabel = listModel.get(r);
+					String thisContentLabel = thisLabel.replace("\"","").split("\\_#")[0];
+					Content thisContent = univ.getContent(thisContentLabel);
+
+					contentInstants.remove(listModel.get(r));
+					fullListModel.removeElement(listModel.get(r));
+					listModel.remove(r);
+					invertSelContents.add(thisContent);
+					invertSelContentLabels.add(thisContentLabel);
+				}
+				
+				for (int c= invertSelContents.size()-1;c>=0;c--) {
+					Content nextContent = invertSelContents.get(c);
+					String nextContentLabel = invertSelContentLabels.get(c);
+					if (nextContent != null) {
+						Collection<ContentInstant> cis = nextContent.getInstants().values();
 						for (ContentInstant thisCI:cis) {
 							this.addContentInstant(thisCI);
 						}
-						univ.removeContent(thisContentLabel, false);
-						univ.addContentLater(thisContent, false);
+						univ.removeContent(nextContentLabel, false);
+						univ.addContentLater(nextContent, false);
 					} else {
-						IJ.log(thisLabel);
+//						IJ.log(thisLabel);
 					}
 				}		
 				list.setModel(listModel);
