@@ -709,17 +709,39 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 
 			} else if (command.equals("Update [u]")) {
 				Image3DUniverse univ = (Image3DUniverse) this.univ;
-				ContentInstant[] cis = this.getShownContentInstantsAsArray();
-				ContentInstant nextC = null;
-				this.delete(false);
-				for (ContentInstant ci:cis) {
-					nextC= ci;
-					Content newC = new Content(ci.getName());
-					newC.addInstant(ci);
-					univ.addContentLater(newC, false);
-					this.addContentInstant(ci);	
 
-				}
+				int[] indexes = getSelectedIndexes();
+				list.setModel(new DefaultListModel<String>());
+				Arrays.sort(indexes);
+				for (int r = indexes.length - 1; r >= 0; r--) {
+					String thisLabel = listModel.get(indexes[r]);
+					String thisContentLabel = thisLabel.replace("\"","").split("\\_#")[0];
+					Content thisContent = univ.getContent(thisContentLabel);
+					if (thisContent == null){
+						IJ.wait(10);
+						if (thisContent == null) {
+							thisContent = univ.getContent(thisContentLabel);
+							IJ.wait(100);
+						}
+					}
+					contentInstants.remove(listModel.get(indexes[r]));
+					fullListModel.removeElement(listModel.get(indexes[r]));
+					listModel.remove(indexes[r]);
+					
+					Content newC = new Content(thisContentLabel);
+					if (thisContent != null) {
+						Collection<ContentInstant> cis = thisContent.getInstants().values();
+						for (ContentInstant thisCI:cis) {
+							this.addContentInstant(thisCI);
+						}
+						univ.removeContent(thisContentLabel, false);
+						univ.addContentLater(thisContent, false);
+					} else {
+						IJ.log(thisLabel);
+					}
+				}		
+				list.setModel(listModel);
+
 //				univ.addContentLater(nextC, true);
 			} else if (command.equals("Delete"))
 				delete(false);

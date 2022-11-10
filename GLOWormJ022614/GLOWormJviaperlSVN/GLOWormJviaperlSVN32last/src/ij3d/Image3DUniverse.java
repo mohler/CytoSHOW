@@ -2335,7 +2335,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			this.addContent(content, false);
 			content.setLocked(true);
 		}
-		this.addContent(recentContent, true);
+//		this.addContent(recentContent, true);
 		
 		if (win.getTitle().matches("CytoSHOW3D.*")){
 			win.getImagePlus().setWindow(win);
