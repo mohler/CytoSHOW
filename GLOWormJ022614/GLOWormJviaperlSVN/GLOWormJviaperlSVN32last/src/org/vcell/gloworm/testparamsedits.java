@@ -5,7 +5,6 @@ import ij.plugin.PlugIn;
 
 public class testparamsedits implements PlugIn {
 
-	@Override
 	public void run(String arg) {
 		Double intensityCue = 2298.0;
 		IJ.log(IJ.openAsString(null)

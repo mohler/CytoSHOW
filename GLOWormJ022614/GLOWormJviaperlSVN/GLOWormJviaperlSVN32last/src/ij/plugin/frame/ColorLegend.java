@@ -234,7 +234,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^(.*)undefined.*(_pre)*", "$1"));
 						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^(.*)chemical.*(_pre)*", "$1"));
 						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^.*(electrical|&)(.*)$","$2"));
-						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^(.*)electrical.*$","$2"));
+						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^(.*)electrical.*$","$1"));
 						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^(.*)_.*", "$1")); 		
 						hitTests.add( fixedName.toLowerCase());
 						hitTests.add( fixedName.toLowerCase().replaceAll("^(.*by)(.*)$", "$2"));
@@ -242,7 +242,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 						hitTests.add( fixedName.toLowerCase().replaceAll("^(.*)undefined.*(_pre)*", "$1"));
 						hitTests.add( fixedName.toLowerCase().replaceAll("^(.*)chemical.*(_pre)*", "$1"));
 						hitTests.add( fixedName.toLowerCase().replaceAll("^.*(electrical|&)(.*)$","$2"));
-						hitTests.add( fixedName.toLowerCase().replaceAll("^(.*)electrical.*$","$2"));
+						hitTests.add( fixedName.toLowerCase().replaceAll("^(.*)electrical.*$","$1"));
 
 						int testNumber=0;
 						while (testNumber < hitTests.size() 
@@ -319,7 +319,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 						hitTests.add( fixedName.split(" \"_")[0].toLowerCase().replace("\"", "").replaceAll("^(.*)undefined.*(_pre)*", "$1"));
 						hitTests.add( fixedName.split(" \"_")[0].toLowerCase().replace("\"", "").replaceAll("^(.*)chemical.*(_pre)*", "$1"));
 						hitTests.add( fixedName.split(" \"_")[0].toLowerCase().replace("\"", "").replaceAll("^.*(electrical|&)(.*)$","$2"));
-						hitTests.add( fixedName.split(" \"_")[0].toLowerCase().replace("\"", "").replaceAll("^(.*)electrical.*$","$2"));
+						hitTests.add( fixedName.split(" \"_")[0].toLowerCase().replace("\"", "").replaceAll("^(.*)electrical.*$","$1"));
 						hitTests.add( fixedName.split(" \"_")[0].toLowerCase().replace("\"", "").replaceAll("^(.*)_.*", "$1")); 		
 						hitTests.add( fixedName.toLowerCase().replace("\"", ""));
 						hitTests.add( fixedName.toLowerCase().replace("\"", "").replaceAll("^(.*by)(.*)$", "$2"));
@@ -327,7 +327,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 						hitTests.add( fixedName.toLowerCase().replace("\"", "").replaceAll("^(.*)undefined.*(_pre)*", "$1"));
 						hitTests.add( fixedName.toLowerCase().replace("\"", "").replaceAll("^(.*)chemical.*(_pre)*", "$1"));
 						hitTests.add( fixedName.toLowerCase().replace("\"", "").replaceAll("^.*(electrical|&)(.*)$","$2"));
-						hitTests.add( fixedName.toLowerCase().replace("\"", "").replaceAll("^(.*)electrical.*$","$2"));
+						hitTests.add( fixedName.toLowerCase().replace("\"", "").replaceAll("^(.*)electrical.*$","$1"));
 
 						int testNumber=0;
 						while (testNumber < hitTests.size() 
