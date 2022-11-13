@@ -4113,7 +4113,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			String dir = sd.getDirectory();
 			path = dir + name;
 		}
+		String clPath = path.replace("_ROIs.zip","_ColorLegend.lgd");
 		try {
+				
+			new ColorLegend(imp, "").saveCLfromRoiMgr(clPath);
+
+			
 			ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(new File(path))));
 			zos.setLevel(0);
 			RoiEncoder re = new RoiEncoder(zos);

@@ -455,75 +455,77 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 			rm.setColorLegend(this);
 			brainbowColors = this.getBrainbowColors();
 		}
-		checkbox = new JCheckBox[fullCellNames.size()];
-		checkboxHash = new Hashtable<Color,JCheckBox>();
-		int count=0;
-		int panelWidth =0;
-		int panelHeight =0;
-		for (int i=0; i<fullCellNames.size(); i++) {
-			checkbox[i] = new JCheckBox();
-			((JCheckBox)checkbox[i]).setSize(150, 10);
-			checkbox[i].setLabel(fullCellNames.get(i).length()<20?fullCellNames.get(i):fullCellNames.get(i).substring(0, 20) + "...");
-			checkbox[i].setName(fullCellNames.get(i));			
-			checkbox[i].setBackground(brainbowColors.get(fullCellNames.get(i).toLowerCase()));
-			if (!fullCellNames.get(i).contains("NOTE:")) {
-				checkboxHash.put(brainbowColors.get(fullCellNames.get(i).toLowerCase()), checkbox[i]);
-				checkbox[i].setFont(Menus.getFont().deriveFont(8));
-			         
-				fspp.add(checkbox[i],fspc);
-				if (count==0) {
-					panelWidth = panelWidth + checkbox[i].getWidth();
-					count++;
-					panelHeight = panelHeight+checkbox[i].getHeight();
-					fspc.gridx++;
-				} else if (count>=1 && fspc.gridx < 4){
-					if (count < 4){
+		if (brainbowColors != null) {
+			checkbox = new JCheckBox[fullCellNames.size()];
+			checkboxHash = new Hashtable<Color,JCheckBox>();
+			int count=0;
+			int panelWidth =0;
+			int panelHeight =0;
+			for (int i=0; i<fullCellNames.size(); i++) {
+				checkbox[i] = new JCheckBox();
+				((JCheckBox)checkbox[i]).setSize(150, 10);
+				checkbox[i].setLabel(fullCellNames.get(i).length()<20?fullCellNames.get(i):fullCellNames.get(i).substring(0, 20) + "...");
+				checkbox[i].setName(fullCellNames.get(i));			
+				checkbox[i].setBackground(brainbowColors.get(fullCellNames.get(i).toLowerCase()));
+				if (!fullCellNames.get(i).contains("NOTE:")) {
+					checkboxHash.put(brainbowColors.get(fullCellNames.get(i).toLowerCase()), checkbox[i]);
+					checkbox[i].setFont(Menus.getFont().deriveFont(8));
+
+					fspp.add(checkbox[i],fspc);
+					if (count==0) {
 						panelWidth = panelWidth + checkbox[i].getWidth();
+						count++;
+						panelHeight = panelHeight+checkbox[i].getHeight();
 						fspc.gridx++;
-//						count=0;
+					} else if (count>=1 && fspc.gridx < 4){
+						if (count < 4){
+							panelWidth = panelWidth + checkbox[i].getWidth();
+							fspc.gridx++;
+							//						count=0;
+						}
+					} else {
+						fspc.gridy++;
+						fspc.gridx=0;
 					}
-				} else {
-					fspc.gridy++;
-					fspc.gridx=0;
+					checkbox[i].addItemListener(this);
+					checkbox[i].addMouseListener(this);
 				}
-				checkbox[i].addItemListener(this);
-				checkbox[i].addMouseListener(this);
 			}
+
+			fspc.gridx =0;
+			fspc.gridy= fullCellNames.size()/4+1;		
+			choice = new Choice();
+			for (int i=0; i<modes.length; i++)
+				choice.addItem(modes[i]);
+			choice.select(3);
+			choice.addItemListener(this);
+			//		if (sketchyMQTVS)
+			//			choice.setEnabled(false);
+
+			update();
+			addKeyListener(IJ.getInstance());  // ImageJ handles keyboard shortcuts
+
+			setLayout(new BorderLayout());
+			add(choice, BorderLayout.PAGE_START);
+			Panel p = new Panel();
+			p.setLayout(new BorderLayout());
+			p.add(clearButton, BorderLayout.NORTH);
+			clearButton.addActionListener(this);
+			p.add(fsp, BorderLayout.CENTER);
+			add(p, BorderLayout.CENTER);
+			//		hideChecked = true;
+
+			this.setResizable(true);
+			this.pack();
+			this.setSize(fspp.getWidth()+30, fspp.getHeight()+30+choice.getHeight());
+			if (location==null) {
+				GUI.center(this);
+				location = getLocation();
+			} else
+				setLocation(location);
+			this.setVisible(true);
+			show();
 		}
-		
-		fspc.gridx =0;
-		fspc.gridy= fullCellNames.size()/4+1;		
-		choice = new Choice();
-		for (int i=0; i<modes.length; i++)
-			choice.addItem(modes[i]);
-		choice.select(3);
-		choice.addItemListener(this);
-//		if (sketchyMQTVS)
-//			choice.setEnabled(false);
-
-		update();
-		addKeyListener(IJ.getInstance());  // ImageJ handles keyboard shortcuts
-
-		setLayout(new BorderLayout());
-		add(choice, BorderLayout.PAGE_START);
-		Panel p = new Panel();
-		p.setLayout(new BorderLayout());
-		p.add(clearButton, BorderLayout.NORTH);
-		clearButton.addActionListener(this);
-		p.add(fsp, BorderLayout.CENTER);
-		add(p, BorderLayout.CENTER);
-//		hideChecked = true;
-		
-		this.setResizable(true);
-		this.pack();
-		this.setSize(fspp.getWidth()+30, fspp.getHeight()+30+choice.getHeight());
-		if (location==null) {
-			GUI.center(this);
-			location = getLocation();
-		} else
-			setLocation(location);
-		this.setVisible(true);
-		show();
 	}
 	
 	public ColorLegend(Content3DManager content3dManager) {
@@ -880,6 +882,37 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 		out.write(clString);
 		out.close();
 	}
+	
+	public void saveCLfromRoiMgr(String path) throws IOException {
+		if (!(bbImp.getWindow() instanceof ImageWindow3D)) {
+			Roi[] selRois = bbImp.getRoiManager().getSelectedRoisAsArray();
+			if (selRois.length <1)
+				selRois = bbImp.getRoiManager().getShownRoisAsArray();
+			ArrayList<JCheckBox> tempCheckboxes = new ArrayList<JCheckBox>();
+			ArrayList<String> alreadyNamed = new ArrayList<String>();
+			int i=0;
+			for (Roi roi:selRois) {
+				if (alreadyNamed.contains(roi.getName().split(" \"_")[0].replace("\"","")))
+					continue;
+				Color roiARGBcolor = roi.getFillColor();
+				tempCheckboxes.add(new JCheckBox(roi.getName().split(" \"_")[0].replace("\"","")));
+				tempCheckboxes.get(tempCheckboxes.size()-1).setSize(150, 10);
+				tempCheckboxes.get(tempCheckboxes.size()-1).setText(roi.getName().split(" \"_")[0].replace("\"",""));
+				tempCheckboxes.get(tempCheckboxes.size()-1).setName(roi.getName().split(" \"_")[0].replace("\"",""));			
+				tempCheckboxes.get(tempCheckboxes.size()-1).setBackground(roiARGBcolor);
+				brainbowColors.put(tempCheckboxes.get(tempCheckboxes.size()-1).getName().toLowerCase(), roiARGBcolor);
+
+				checkboxHash.put(roiARGBcolor, tempCheckboxes.get(tempCheckboxes.size()-1));
+				tempCheckboxes.get(tempCheckboxes.size()-1).setFont(Menus.getFont().deriveFont(8));
+				//		IJ.log("WHATUP?");
+				i++;
+				alreadyNamed.add(roi.getName().split(" \"_")[0].replace("\"",""));
+			}
+			checkbox = tempCheckboxes.toArray(new JCheckBox[tempCheckboxes.size()]);
+			save(path);
+		}
+	}
+
 	
 	public void saveCLfromIJ3D(String path) throws IOException {
 		if (bbImp.getWindow() instanceof ImageWindow3D) {
