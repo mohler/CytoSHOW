@@ -517,24 +517,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 				if (searchString.trim().equalsIgnoreCase("") || searchString.trim().equalsIgnoreCase(".*")) {
 					listModel.addElement(fullListModel.get(i));
 					contentInstants.get(fullListModel.get(i)).setVisible(true);
-					// IJ.log(listStrings[i]);
-//					if (timeNow > timeLast + 100) {
-//						timeLast = timeNow;
-//						Graphics g = imp.getCanvas().getGraphics();
-//						if (imp.getCanvas().messageRois.containsKey("Loading Tags"))
-//							imp.getCanvas().messageRois.remove("Loading Tags");
-//
-//						Roi messageRoi = new TextRoi(imp.getCanvas().getSrcRect().x, imp.getCanvas().getSrcRect().y,
-//								"   Finding tags that match:\n   " + "Reloading full set" + "..."
-//										+ ((Image3DUniverse) univ).getContent3DManager().getListModel().getSize() + "");
-//
-//						((TextRoi) messageRoi).setCurrentFont(
-//								g.getFont().deriveFont((float) (imp.getCanvas().getSrcRect().width / 16)));
-//						messageRoi.setStrokeColor(Color.black);
-//						imp.getRoiManager().setRoiFillColor(messageRoi, Colors.decode("#99ffffdd", imp.getCanvas().getDefaultColor()));
-//						imp.getCanvas().messageRois.put("Loading Tags", messageRoi);
-//						imp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
-//					}
+
 					continue;
 				}
 
@@ -583,32 +566,9 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 				} else {
 					contentInstants.get(fullListModel.get(i)).setVisible(false);
 				}
-//				if (timeNow > timeLast + 100 && !imp.getCanvas().messageRois.containsKey("Finding tags from drop")) {
-//					timeLast = timeNow;
-//					Graphics g = imp.getCanvas().getGraphics();
-//					if (imp.getCanvas().messageRois.containsKey("Finding tags that match"))
-//						imp.getCanvas().messageRois.remove("Finding tags that match");
-//
-//					TextRoi messageRoi = new TextRoi(imp.getCanvas().getSrcRect().x, imp.getCanvas().getSrcRect().y,
-//							"   Finding tags that match:\n   \"" + searchString + "\"..."
-//									+ ((Image3DUniverse) univ).getContent3DManager().getListModel().getSize() + " found.");
-//
-//					((TextRoi) messageRoi)
-//							.setCurrentFont(g.getFont().deriveFont((float) (imp.getCanvas().getSrcRect().width / 16)));
-//					messageRoi.setStrokeColor(Color.black);
-//					imp.getRoiManager().setRoiFillColor(messageRoi, Colors.decode("#99ffffdd", imp.getCanvas().getDefaultColor()));
-//
-//					imp.getCanvas().messageRois.put("Finding tags that match", messageRoi);
-//					// imp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
-//
-//				}
 
 			}
-//			if (imp.getCanvas().messageRois.containsKey("Finding tags that match"))
-//				imp.getCanvas().messageRois.remove("Finding tags that match");
-//			if (imp.getCanvas().messageRois.containsKey("Loading Tags"))
-//				imp.getCanvas().messageRois.remove("Loading Tags");
-
+			
 			searching = false;
 			list.setSize(dim);
 			textCountLabel.setText("" + listModel.size() + "/" + fullListModel.size());
@@ -627,28 +587,6 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 				if (imgWin != null)
 					setLocation(imgWin.getLocationOnScreen().x + imgWin.getWidth() + 5, imgWin.getLocationOnScreen().y);
 			}
-
-//			if (this.getDisplayedContentInstantsAsArray( imp.getFrame()).length < 1) {
-////				int nearestTagIndex = -1;
-////				int closestYet = imp.getNSlices() + imp.getNFrames();
-////				ContentInstant[] contentInstants = getShownContentInstantsAsArray();
-////				for (int r = 0; r < contentInstants.length; r++) {
-////					if (Math.abs(contentInstants[r].getZPosition() - imp.getSlice())
-////							+ Math.abs(contentInstants[r].getTimepoint() - imp.getFrame()) < closestYet) {
-////						closestYet = Math.abs(contentInstants[r].getZPosition() - imp.getSlice())
-////								+ Math.abs(contentInstants[r].getTimepoint() - imp.getFrame());
-////						nearestTagIndex = r;
-////					}
-////					// IJ.log(""+closestYet);
-////				}
-////				if (nearestTagIndex >= 0) {
-////					new ij.macro.MacroRunner("contentInstantManager('select', " + nearestTagIndex + ", " + imp.getID() + ");");
-////					select(-1);
-////					while (univ.getSelected().getCurrentInstant() == null)
-////						IJ.wait(100);
-////					imp.killContentInstant();
-////				}
-//			}
 
 		} else {
 
@@ -709,29 +647,29 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 
 			} else if (command.equals("Update [u]")) {
 				Image3DUniverse univ = (Image3DUniverse) this.univ;
-
+				String filterString = this.textFilterField.getText();
 				int[] indexes = getSelectedIndexes();
 				list.setModel(new DefaultListModel<String>());
 				ArrayList<Content> invertSelContents = new ArrayList<Content>();
 				ArrayList<String> invertSelContentLabels = new ArrayList<String>();
-				for (int r = listModel.getSize() - 1; r >= 0; r--) {
+				for (int r = fullListModel.getSize() - 1; r >= 0; r--) {
 					///	to move UNselected objects to the end of the list and scenegraph.				
 					boolean selected = false;
 					for (int index:indexes) {
-						if (r==index) {
+						if (fullListModel.get(r).equals(listModel.get(index))) {
 							selected = true;
 						}
 					}
 					if (selected)
 						continue;
 					///					
-					String thisLabel = listModel.get(r);
+					String thisLabel = fullListModel.get(r);
 					String thisContentLabel = thisLabel.replace("\"","").split("\\_#")[0];
 					Content thisContent = univ.getContent(thisContentLabel);
 
-					contentInstants.remove(listModel.get(r));
-					fullListModel.removeElement(listModel.get(r));
-					listModel.remove(r);
+					contentInstants.remove(fullListModel.get(r));
+					listModel.removeElement(fullListModel.get(r));
+					fullListModel.remove(r);
 					invertSelContents.add(thisContent);
 					invertSelContentLabels.add(thisContentLabel);
 				}
@@ -750,7 +688,13 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 //						IJ.log(thisLabel);
 					}
 				}		
+				listModel.removeAllElements();
+				for (int q=0;q<fullListModel.getSize();q++) {
+					listModel.addElement(fullListModel.get(q));
+				}
 				list.setModel(listModel);
+				this.textFilterField.setText(filterString);
+				this.actionPerformed(new ActionEvent(this.textFilterField, 0, ""));
 
 //				univ.addContentLater(nextC, true);
 			} else if (command.equals("Delete"))
