@@ -217,7 +217,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		noPickCrsrImg = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB_PRE);
 		iJ3dExecuter = new IJ3dExecuter(this);
 		
-		c3dm = new Content3DManager(this, false);
+		c3dm = new Content3DManager(this, true);
 		selectedContents = new ArrayList<Content>();
 		
 		this.timeline = new Timeline(this);
@@ -889,8 +889,9 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	public void clearSelection() {
 		if(selectedContents.get(0) != null) {
 			for (Content content:selectedContents) {
-				content.setSelected(false);
+				content.setSelected(false);				
 			}
+			selectedContents.removeAll(selectedContents);
 			fireContentSelected(null, true);
 		}
 	}
@@ -1697,10 +1698,11 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			Content content = contents.get(name);
 			if(content == null)
 				return;
+			if(selectedContents.contains(content)) {
+				clearSelection();
+			}
 			scene.removeChild(content);
 			contents.remove(name);
-			if(selectedContents.contains(content))
-				clearSelection();
 			fireContentRemoved(content, updateNow);
 			this.removeUniverseListener(content);
 			updateTimeline();

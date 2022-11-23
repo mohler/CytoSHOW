@@ -152,10 +152,11 @@ public class WavefrontExporter {
 			HashMap<Mtl, Mtl> single_ht_mat = null;
 			String objOutPathString = "";
 			if (!oneFile) {
-				String singleObjPathRoot = objFilePathString.replace("0000", "").replace(".obj", "").replace(".OBJ", "");
-				objOutPathString = singleObjPathRoot+name.replace("&", "_").replace("~", "-")+".obj";
+//				String singleObjPathRoot = objFilePathString.replace("0000", "").replace(".obj", "").replace(".OBJ", "");
+//				objOutPathString = singleObjPathRoot+name.replace("&", "_").replace("~", "-")+".obj";
+				objOutPathString = objFilePathString;
 				File objF = new File(objOutPathString);
-				String mtlOutPathString = singleObjPathRoot+name.replace("&", "_").replace("~", "-")+".mtl";
+				String mtlOutPathString = objOutPathString.replace(".obj",".mtl");
 				File mtlF = new File(mtlOutPathString);
 				singleObjWriter = new OutputStreamWriter(
 						new BufferedOutputStream(

@@ -207,6 +207,7 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 				for (int tpt = (singleSave?duper.getFirstT():0); tpt<=(singleSave?duper.getLastT():0); tpt = tpt+(singleSave?duper.getStepT():1)) {
 					for (int ch=duper.getFirstC(); ch<=duper.getLastC(); ch++) {
 						imp.setRoi(impRoi);
+						univ = new Image3DUniverse();
 						ImagePlus impD = imp;
 						if (!imp.getTitle().startsWith("SVV")){
 							impD = duper.run(imp, ch, ch, duper.getFirstZ(), duper.getLastZ(), singleSave?tpt:duper.getFirstT(), singleSave?tpt:duper.getLastT(), singleSave?1:duper.getStepT(), false, msec);
@@ -278,7 +279,7 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 																	+"_"+ch+"_"+tpt+".obj")), 
 															univ.getStartTime(), 
 															univ.getEndTime(),
-															scaleShiftString, true);
+															scaleShiftString, false);
 							//						univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
 							//						univ.getSelected().setLocked(false);
 							//						univ.removeContent(univ.getSelected().getName());
@@ -286,6 +287,7 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 						for (Object content:contents.values()){
 							if (((Content)content).getName() != objectName){
 								((Content)content).setVisible(false);
+								univ.removeContent(objectName, true);
 							}
 						}
 
@@ -297,6 +299,7 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 							impD.getWindow().close();
 //							impD.flush();
 						}
+						univ.getContent3DManager().dispose();
 					}
 				}
 			}
