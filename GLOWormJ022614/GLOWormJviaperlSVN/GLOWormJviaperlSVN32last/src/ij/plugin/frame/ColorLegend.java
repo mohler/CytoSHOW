@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -250,6 +251,15 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 								brainbowColors.get(hitTests.get(testNumber))==null)
 							testNumber++;
 						final int finalTestNumber = testNumber;
+						
+						Set<Thread> threadsInJVM = Thread.getAllStackTraces().keySet();
+						int nbThreads = threadsInJVM.size();
+						while (nbThreads >200) {
+							IJ.wait(10);
+							threadsInJVM = Thread.getAllStackTraces().keySet();
+							nbThreads = threadsInJVM.size();
+						}
+
 						if (testNumber<hitTests.size()) {
 							new Thread(new Runnable() {
 								public void run() {
@@ -261,6 +271,8 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 								}
 							}).start();
 							//						IJ.log(fixedName+" "+ci.getColor().get());
+						} else {
+							continue; // next ListModel element...
 						}
 
 						//					!!! succeeded to FIX THIS ONE NEXT!!!!!
@@ -335,6 +347,15 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 								brainbowColors.get(hitTests.get(testNumber))==null)
 							testNumber++;
 						final int finalTestNumber = testNumber;
+						
+						Set<Thread> threadsInJVM = Thread.getAllStackTraces().keySet();
+						int nbThreads = threadsInJVM.size();
+						while (nbThreads >200) {
+							IJ.wait(10);
+							threadsInJVM = Thread.getAllStackTraces().keySet();
+							nbThreads = threadsInJVM.size();
+						}
+
 						if (testNumber<hitTests.size()) {
 							new Thread(new Runnable() {
 								public void run() {
@@ -342,6 +363,8 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 								}
 							}).start();
 							//						IJ.log(fixedName+" "+ci.getColor().get());
+						} else {
+							continue; // next ListModel element...
 						}
 
 						//					!!! succeeded to FIX THIS ONE NEXT!!!!!
