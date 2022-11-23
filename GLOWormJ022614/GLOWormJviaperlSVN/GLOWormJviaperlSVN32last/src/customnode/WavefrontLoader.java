@@ -154,7 +154,7 @@ public class WavefrontLoader {
 				&& !specialDrop) {
 			flipXCoef = 1;
 			//		FOR JSH
-			if (objFileParentName.contains("JSH")) {
+			if (objFileParentName.contains("JSH") || objFileGrandParentName.contains("JSH")) {
 				float x = 20803.52f;
 				float y = 12784.513f;
 				float z = -4789.9414f;
@@ -176,7 +176,7 @@ public class WavefrontLoader {
 			//				w*(flipXCoef*(Float.parseFloat(sp[1]) - x))/(-x+4736)));
 			//		}
 			//		FOR MEI ADULT rot corr xz
-			else if (objFileParentName.contains("MeiAdult")) {
+			else if (objFileParentName.contains("MeiAdult") || objFileGrandParentName.contains("MeiAdult")) {
 				float x = 10800.0f;
 				float y = 10816.0f;
 				float z =  -8844.971f;
@@ -187,7 +187,7 @@ public class WavefrontLoader {
 						(float)(Math.sin(-0.227)*(w*(Float.parseFloat(sp[3]) -z)/(x-4736)) +  Math.cos(-0.227)*(w*(flipXCoef*(Float.parseFloat(sp[1]) - x))/(-x+4736)))));
 			}
 			//		FOR L3
-			else if (objFileParentName.contains("L3")) {
+			else if (objFileParentName.contains("L3") || objFileGrandParentName.contains("L3")) {
 				float x = 13793f;
 				float y = 13302f;
 				float z = -4242f;
@@ -198,7 +198,7 @@ public class WavefrontLoader {
 						w*(Float.parseFloat(sp[3]) -z)/(x-8829)));
 			}
 			//		FOR L2_2
-			else if (objFileParentName.contains("L2_2")) {
+			else if (objFileParentName.contains("L2_2") || objFileGrandParentName.contains("L2_2")) {
 				float x = 8002f;
 				float y = 5648f;
 				float z = -4090f;
@@ -209,7 +209,7 @@ public class WavefrontLoader {
 						w*(Float.parseFloat(sp[3]) -z)/(x-2804)));
 			}
 			//	FOR L1_3
-			else if (objFileParentName.contains("L1_3")) {
+			else if (objFileParentName.contains("L1_3") || objFileGrandParentName.contains("L1_3")) {
 				float x = 8316f;
 				float y = 6042f;
 				float z = -2470f;
@@ -232,7 +232,7 @@ public class WavefrontLoader {
 			//		}
 
 			//	FOR L1_2 fixing rot around Yaxis
-			else if (objFileParentName.contains("L1_2")) {
+			else if (objFileParentName.contains("L1_2") || objFileGrandParentName.contains("L1_2")) {
 				float x = 12564f;
 				float y = 7782f;
 				float z =  -3865f;
@@ -255,7 +255,7 @@ public class WavefrontLoader {
 			//		}
 
 			//		FOR L1_4 with yz rotation around x axis
-			else if (objFileParentName.contains("L1_4")) {		
+			else if (objFileParentName.contains("L1_4") || objFileGrandParentName.contains("L1_4")) {		
 				float x = 8402f;
 				float y = 12372f;
 				float z =  -2725f;
@@ -267,7 +267,7 @@ public class WavefrontLoader {
 			}
 
 			//	FOR L1_5
-			else if (objFileParentName.contains("L1_5")) {		
+			else if (objFileParentName.contains("L1_5") || objFileGrandParentName.contains("L1_5")) {		
 				float x = 7990f;
 				float y = 6999f;
 				float z =  -3317f;
@@ -279,7 +279,7 @@ public class WavefrontLoader {
 				//
 			}
 			//	FOR N2Uadult
-			else if (objFileParentName.contains("N2U")) {
+			else if (objFileParentName.contains("N2U") || objFileGrandParentName.contains("N2U")) {
 				float x = 19953f;
 				float y = 15255f;
 				float z =  -6105f;
