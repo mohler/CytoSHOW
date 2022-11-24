@@ -97,11 +97,13 @@ public class MeshExporter {
 
 			File mtl_file = new File(obj_file.getParentFile(), mtl_filename);
 
-			OutputStreamWriter dos_obj = null,
-					dos_mtl = null;
+			OutputStreamWriter dos_obj = null;
+			OutputStreamWriter dos_mtl = null;
 			try {
-				dos_obj = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(obj_file)), "8859_1"); // encoding in Latin 1 (for macosx not to mess around
-				dos_mtl = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(mtl_file)), "8859_1"); // encoding in Latin 1 (for macosx not to mess around
+				if (oneFile) {
+					dos_obj = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(obj_file)), "8859_1"); // encoding in Latin 1 (for macosx not to mess around
+					dos_mtl = new OutputStreamWriter(new BufferedOutputStream(new FileOutputStream(mtl_file)), "8859_1"); // encoding in Latin 1 (for macosx not to mess around
+				}
 				writeAsWaveFront(contents, obj_file.getAbsolutePath(), mtl_filename, dos_obj, dos_mtl, scaleShiftString, oneFile);
 				try { 
 					if (null != dos_obj) {
