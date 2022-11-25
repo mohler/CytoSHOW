@@ -6223,6 +6223,10 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 			c.setColor(new Color3f(color));
 		}
 	}
+	
+	public void batchOpenColorExportObjs() {
+		
+	}
 
 	@Override
 	public void changedUpdate(DocumentEvent e) {
