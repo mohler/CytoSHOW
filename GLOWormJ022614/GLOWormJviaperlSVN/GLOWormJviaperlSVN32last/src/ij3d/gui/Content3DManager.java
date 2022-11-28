@@ -1288,8 +1288,8 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 //			if (name.endsWith("C"))
 //				c =0;
 			String numbersKey = ""+t;
-			contentInstantsByRootName.get(nameRoot).remove(contentInstant);
-			contentInstantsByNumbers.get(numbersKey).remove(contentInstant);
+//			contentInstantsByRootName.get(nameRoot).remove(contentInstant);
+//			contentInstantsByNumbers.get(numbersKey).remove(contentInstant);
 			contentInstants.remove(name);
 			String label = name != null ? name : getLabel((Image3DUniverse) univ, contentInstant, -1);
 			 if (true) {
@@ -1300,7 +1300,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 			contentInstant.setName(label);
 			recentName = label;
 			contentInstants.put(label, contentInstant);
-			setUpContentInstantsByNameAndNumbers(contentInstant);
+//			setUpContentInstantsByNameAndNumbers(contentInstant);
 
 			ColorLegend cl = getColorLegend();
 			//

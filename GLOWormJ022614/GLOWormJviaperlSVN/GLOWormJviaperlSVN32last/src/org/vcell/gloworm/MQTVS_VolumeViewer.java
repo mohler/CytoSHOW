@@ -279,7 +279,7 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 																	+"_"+ch+"_"+tpt+".obj")), 
 															univ.getStartTime(), 
 															univ.getEndTime(),
-															scaleShiftString, false);
+															scaleShiftString, true);
 							//						univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
 							//						univ.getSelected().setLocked(false);
 							//						univ.removeContent(univ.getSelected().getName());
