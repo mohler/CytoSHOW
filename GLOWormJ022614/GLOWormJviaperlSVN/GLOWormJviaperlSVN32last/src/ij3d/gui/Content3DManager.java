@@ -92,6 +92,7 @@ import ij3d.Image3DUniverse;
 import ij3d.ImageJ3DViewer;
 import ij3d.ImageWindow3D;
 import ij3d.gui.Content3DManager.ModCellRenderer;
+import isosurface.MeshExporter;
 import javafx.scene.control.Cell;
 import javafx.scene.control.Tooltip;
 
@@ -880,8 +881,12 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 			else if (command.equals("Save..."))
 				save();
 			else if (command.equals("Save")) {
-				select(-1);
-				save();
+				if (shiftKeyDown)
+					batchOpenColorExportObjs();
+				else {
+					select(-1);
+					save();
+				}
 
 			} else if (command.equals("Adv.")) {
 				// if (imp.getMotherImp().getRoiManager().getColorLegend(e.getSource()) != null)
@@ -6225,7 +6230,29 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 	}
 	
 	public void batchOpenColorExportObjs() {
-		
+		String objSourcePath = IJ.getDirectory("Select folder of objs to batch process");
+		if (objSourcePath == null)
+			return;
+		File destFolder = new File(objSourcePath.replace("_FilesToUse","_SynchUCL"));
+		destFolder.mkdirs();
+		String[] objList = new File(objSourcePath).list();
+		Image3DUniverse batchUniv = (Image3DUniverse) this.univ;
+		String universalCLURL = MQTVSSceneLoader64.class.getResource("docs/fullUniversal_ColorLegend.lgd").toString();
+		String clStr = IJ.openUrlAsString(universalCLURL);
+
+		for (String objName:objList) {
+			if (!objName.toLowerCase().endsWith(".obj"))
+				continue;
+			String addPath = objSourcePath+File.separator+objName;
+			batchUniv.addContentLater(addPath, null);
+			while (listModel.getSize() <1 )
+				IJ.wait(10);
+			select(0);
+			ColorLegend cl = new ColorLegend(batchUniv, clStr);
+			MeshExporter.saveAsWaveFront(((Image3DUniverse) univ).getListOrderedSelectedContents(), 
+											destFolder, 0, 0, false);
+			delete(false);
+		}
 	}
 
 	@Override
