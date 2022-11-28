@@ -92,7 +92,6 @@ import ij3d.Image3DUniverse;
 import ij3d.ImageJ3DViewer;
 import ij3d.ImageWindow3D;
 import ij3d.gui.Content3DManager.ModCellRenderer;
-import isosurface.MeshExporter;
 import javafx.scene.control.Cell;
 import javafx.scene.control.Tooltip;
 
@@ -881,12 +880,8 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 			else if (command.equals("Save..."))
 				save();
 			else if (command.equals("Save")) {
-				if (shiftKeyDown)
-					batchOpenColorExportObjs();
-				else {
-					select(-1);
-					save();
-				}
+				select(-1);
+				save();
 
 			} else if (command.equals("Adv.")) {
 				// if (imp.getMotherImp().getRoiManager().getColorLegend(e.getSource()) != null)
@@ -1288,8 +1283,8 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 //			if (name.endsWith("C"))
 //				c =0;
 			String numbersKey = ""+t;
-//			contentInstantsByRootName.get(nameRoot).remove(contentInstant);
-//			contentInstantsByNumbers.get(numbersKey).remove(contentInstant);
+			contentInstantsByRootName.get(nameRoot).remove(contentInstant);
+			contentInstantsByNumbers.get(numbersKey).remove(contentInstant);
 			contentInstants.remove(name);
 			String label = name != null ? name : getLabel((Image3DUniverse) univ, contentInstant, -1);
 			 if (true) {
@@ -1300,7 +1295,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 			contentInstant.setName(label);
 			recentName = label;
 			contentInstants.put(label, contentInstant);
-//			setUpContentInstantsByNameAndNumbers(contentInstant);
+			setUpContentInstantsByNameAndNumbers(contentInstant);
 
 			ColorLegend cl = getColorLegend();
 			//
@@ -6226,32 +6221,6 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 		}
 		for (Content c:contentInstant.getContentsContainingThisInstant().values()) {
 			c.setColor(new Color3f(color));
-		}
-	}
-	
-	public void batchOpenColorExportObjs() {
-		String objSourcePath = IJ.getDirectory("Select folder of objs to batch process");
-		if (objSourcePath == null)
-			return;
-		File destFolder = new File(objSourcePath.replace("_FilesToUse","_SynchUCL"));
-		destFolder.mkdirs();
-		String[] objList = new File(objSourcePath).list();
-		Image3DUniverse batchUniv = (Image3DUniverse) this.univ;
-		String universalCLURL = MQTVSSceneLoader64.class.getResource("docs/fullUniversal_ColorLegend.lgd").toString();
-		String clStr = IJ.openUrlAsString(universalCLURL);
-
-		for (String objName:objList) {
-			if (!objName.toLowerCase().endsWith(".obj"))
-				continue;
-			String addPath = objSourcePath+File.separator+objName;
-			batchUniv.addContentLater(addPath, null);
-			while (listModel.getSize() <1 )
-				IJ.wait(10);
-			select(0);
-			ColorLegend cl = new ColorLegend(batchUniv, clStr);
-			MeshExporter.saveAsWaveFront(((Image3DUniverse) univ).getListOrderedSelectedContents(), 
-											destFolder, 0, 0, false);
-			delete(false);
 		}
 	}
 

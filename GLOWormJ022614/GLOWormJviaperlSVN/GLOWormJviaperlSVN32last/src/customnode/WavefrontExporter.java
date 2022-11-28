@@ -268,21 +268,24 @@ public class WavefrontExporter {
 				singleMtlWriter.close();
 				singleObjWriter.flush();
 				singleObjWriter.close();
-//				String commandString = "cmd /c start /min /wait for %f in ("+objOutPathString+") do (set g=%f&& npx obj2gltf -i %f&& npx gltf-pipeline -i %g:.obj=.gltf% -o %g:.obj=.gltf% -d)";
-				String[] commandStringArrayA = new String[]{"cmd","/c","npx","obj2gltf","-i",objOutPathString};
-				Process objTOgltf = Runtime.getRuntime().exec(commandStringArrayA);
-				String gltfOutPathString = objOutPathString.replace(".obj", ".gltf");
-				String[] commandStringArrayB = new String[]{"cmd","/c","npx","gltf-pipeline","-i",gltfOutPathString,"-o",gltfOutPathString,"-d"};
-//				while (!new File (gltfOutPathString).canRead())
-//					IJ.wait(10);
-				try {
-					int waitResult = objTOgltf.waitFor();
-					if (waitResult == 0) {
-						Runtime.getRuntime().exec(commandStringArrayB);
+
+				if (IJ.isWindows()) {
+					//				String commandString = "cmd /c start /min /wait for %f in ("+objOutPathString+") do (set g=%f&& npx obj2gltf -i %f&& npx gltf-pipeline -i %g:.obj=.gltf% -o %g:.obj=.gltf% -d)";
+					String[] commandStringArrayA = new String[]{"cmd","/c","npx","obj2gltf","-i",objOutPathString};
+					Process objTOgltf = Runtime.getRuntime().exec(commandStringArrayA);
+					String gltfOutPathString = objOutPathString.replace(".obj", ".gltf");
+					String[] commandStringArrayB = new String[]{"cmd","/c","npx","gltf-pipeline","-i",gltfOutPathString,"-o",gltfOutPathString,"-d"};
+					//				while (!new File (gltfOutPathString).canRead())
+					//					IJ.wait(10);
+					try {
+						int waitResult = objTOgltf.waitFor();
+						if (waitResult == 0) {
+							Runtime.getRuntime().exec(commandStringArrayB);
+						}
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
 				}
 			}
 		}
@@ -298,20 +301,23 @@ public class WavefrontExporter {
 			mtlWriter.close();
 			objWriter.flush();
 			objWriter.close();
-			String[] commandStringArrayA = new String[]{"cmd","/c","npx","obj2gltf","-i",objFilePathString};
-			Process objTOgltf = Runtime.getRuntime().exec(commandStringArrayA);
-			String gltfOutPathString = objFilePathString.replace(".obj", ".gltf");
-			String[] commandStringArrayB = new String[]{"cmd","/c","npx","gltf-pipeline","-i",gltfOutPathString,"-o",gltfOutPathString,"-d"};
-//			while (!new File (gltfOutPathString).canRead())
-//				IJ.wait(10);
-			try {
-				int waitResult = objTOgltf.waitFor();
-				if (waitResult == 0) {
-					Runtime.getRuntime().exec(commandStringArrayB);
+
+			if (IJ.isWindows()) {
+				String[] commandStringArrayA = new String[]{"cmd","/c","npx","obj2gltf","-i",objFilePathString};
+				Process objTOgltf = Runtime.getRuntime().exec(commandStringArrayA);
+				String gltfOutPathString = objFilePathString.replace(".obj", ".gltf");
+				String[] commandStringArrayB = new String[]{"cmd","/c","npx","gltf-pipeline","-i",gltfOutPathString,"-o",gltfOutPathString,"-d"};
+				//			while (!new File (gltfOutPathString).canRead())
+				//				IJ.wait(10);
+				try {
+					int waitResult = objTOgltf.waitFor();
+					if (waitResult == 0) {
+						Runtime.getRuntime().exec(commandStringArrayB);
+					}
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 		}
 	}

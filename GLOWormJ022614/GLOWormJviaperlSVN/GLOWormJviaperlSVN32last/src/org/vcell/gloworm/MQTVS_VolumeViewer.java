@@ -207,7 +207,6 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 				for (int tpt = (singleSave?duper.getFirstT():0); tpt<=(singleSave?duper.getLastT():0); tpt = tpt+(singleSave?duper.getStepT():1)) {
 					for (int ch=duper.getFirstC(); ch<=duper.getLastC(); ch++) {
 						imp.setRoi(impRoi);
-						univ = new Image3DUniverse();
 						ImagePlus impD = imp;
 						if (!imp.getTitle().startsWith("SVV")){
 							impD = duper.run(imp, ch, ch, duper.getFirstZ(), duper.getLastZ(), singleSave?tpt:duper.getFirstT(), singleSave?tpt:duper.getLastT(), singleSave?1:duper.getStepT(), false, msec);
@@ -299,7 +298,6 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 							impD.getWindow().close();
 //							impD.flush();
 						}
-						univ.getContent3DManager().dispose();
 					}
 				}
 			}
