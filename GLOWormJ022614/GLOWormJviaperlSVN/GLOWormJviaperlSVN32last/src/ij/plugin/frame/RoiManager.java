@@ -4116,7 +4116,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		String clPath = path.replace("_ROIs.zip","_ColorLegend.lgd");
 		try {
 				
-			new ColorLegend(imp, "").saveCLfromRoiMgr(clPath);
+  			new ColorLegend(imp, null).saveCLfromRoiMgr(clPath);		//this step can be VERY time-consuming for large sets of rois if second parameter is non-null
 
 			
 			ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(new File(path))));
