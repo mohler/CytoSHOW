@@ -57,7 +57,7 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 			imp.setSlice(previousSlice);
 		else
 			imp.setSlice(1);
-		thread = new Thread(this, "zSelector");
+		thread = new Thread(this, "SliceSelector");
 		thread.start();
 		this.pack();
 		int padH = 1+this.getInsets().left
