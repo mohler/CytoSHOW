@@ -483,7 +483,7 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 			if (slice>0) {
 				int s = slice;
 				slice = 0;
-				if (imp!=null || s!=imp.getCurrentSlice() && !Orthogonal_Views.isOrthoViewsImage(imp)) {
+				if (imp!=null || s!=imp.getCurrentSlice() ) {
 					imp.setSlice(s);
 				}
 			}
@@ -565,6 +565,9 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 			int s = this.slice;
 			this.slice = 0;
 //			if (s!=imp.getCurrentSlice())
+			if (imp instanceof CompositeImage)
+				((CompositeImage)imp).setSlice(s);
+			else
 				imp.setSlice(s);
 		}
 		t = trueFrame;

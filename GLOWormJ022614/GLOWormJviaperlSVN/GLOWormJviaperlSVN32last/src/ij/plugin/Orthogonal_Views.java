@@ -870,7 +870,9 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 				((StackWindow)originalImp.getWindow()).zSelector.setEnabled(true);
 		}
 //		xy_image.close();
-//		originalImp.setPosition(originalImp.getChannel(), recentZ, originalImp.getFrame());
+		
+// BELOW LINES COMMENTED OUT BECAUSE THEY CAUSE THREADING DEADLOCK BETWEEN SLICESELECTOR THREADS...PROBLEM MITIGATED??
+		originalImp.setPosition(originalImp.getChannel(), recentZ, originalImp.getFrame());
 //		originalImp.setPosition(originalImp.getChannel(), recentZ+1, originalImp.getFrame());
 //		originalImp.setPosition(originalImp.getChannel(), recentZ, originalImp.getFrame());
 //		IJ.runMacro("waitForUser;");
