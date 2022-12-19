@@ -271,30 +271,38 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 								}
 							}).start();
 							//						IJ.log(fixedName+" "+ci.getColor().get());
-						}
 
-						//					!!! succeeded to FIX THIS ONE NEXT!!!!!
-						if (fixedName.contains("_post")) {
+							//					!!! succeeded to FIX THIS ONE NEXT!!!!!
+							if (fixedName.contains("_post")) {
 
-							int postSynRank = Integer.parseInt(fixedName.replaceAll("^.*post(\\d*)","$1"));
-							String buildHitTest = "^.*(undefined|chemical)";
-							for (int psr=1;psr<=postSynRank;psr++) {
-								buildHitTest = buildHitTest+ (psr<postSynRank?".*?[\\&~]":"(.*?)[\\&~]");
-							}
-							buildHitTest = buildHitTest+ ".*post.*$";
-							final String hitTestPost = fixedName.split("-")[0].toLowerCase().replaceAll(buildHitTest, "$2");
+								int postSynRank = Integer.parseInt(fixedName.replaceAll("^.*post(\\d*)","$1"));
+								String buildHitTest = "^.*(undefined|chemical)";
+								for (int psr=1;psr<=postSynRank;psr++) {
+									buildHitTest = buildHitTest+ (psr<postSynRank?".*?[\\&~]":"(.*?)[\\&~]");
+								}
+								buildHitTest = buildHitTest+ ".*post.*$";
+								final String hitTestPost = fixedName.split("-")[0].toLowerCase().replaceAll(buildHitTest, "$2");
 
-							if(brainbowColors.get(hitTestPost)!=null) {
-								new Thread(new Runnable() {
-									public void run() {
-										Color hitTestPostColor = brainbowColors.get(hitTests.get(finalTestNumber));
-										ci.setColor(new Color3f(brainbowColors.get(hitTestPost)));
-										float fAlpha = hitTestPostColor.getRGBComponents(null)[3];
-										ci.setTransparency(1.0f - fAlpha);
-										IJ.wait(0);
-									}
-								}).start();
-								//							IJ.log(fixedName+" "+hitTestPost+" "+ColorLegend.this.getBrainbowColors().get(hitTestPost));
+								while (nbThreads >200) {
+									IJ.wait(10);
+									threadsInJVM = Thread.getAllStackTraces().keySet();
+									nbThreads = threadsInJVM.size();
+								}
+
+								if(brainbowColors.get(hitTestPost)!=null) {
+									if (hitTestPost.contains("bwm"))
+										IJ.wait(1);
+									new Thread(new Runnable() {
+										public void run() {
+											Color hitTestPostColor = brainbowColors.get(hitTestPost);
+											ci.setColor(new Color3f(hitTestPostColor));
+											float fAlpha = hitTestPostColor.getRGBComponents(null)[3];
+											ci.setTransparency(1.0f - fAlpha);
+											IJ.wait(0);
+										}
+									}).start();
+									//							IJ.log(fixedName+" "+hitTestPost+" "+ColorLegend.this.getBrainbowColors().get(hitTestPost));
+								}
 							}
 						}
 
