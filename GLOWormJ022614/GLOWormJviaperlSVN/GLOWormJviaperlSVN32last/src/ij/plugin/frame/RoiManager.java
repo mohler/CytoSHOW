@@ -7643,11 +7643,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (cropRoi == null)
 			cropRoi = new Roi(0,0,imp.getWidth(),imp.getHeight());
 		Hashtable<String, ArrayList> synapsePairFrequencyHashtable = new Hashtable<String, ArrayList>();			
+		int skipCount = 0;
 		for (Roi roi:getShownRoisAsArray()) {
 			if (!cropRoi.contains((int)roi.getBounds().getCenterX(), (int)roi.getBounds().getCenterY())) {
+				skipCount++;
 				continue;
 			}
 			String name = roi.getName();
+			if (name.contains("?"))
+				continue;
 			String[] nameChunks = name.split("(\"|electric|chemical|undefined|\\~)");
 //			IJ.log(Arrays.toString(nameChunks));
 			String presynName = nameChunks[1];
@@ -7670,6 +7674,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		updateShowAll();
 		Object[] keysArray = synapsePairFrequencyHashtable.keySet().toArray();
 		Arrays.sort(keysArray);
+		IJ.log(" ");
+		IJ.log("skipped "+skipCount);
 		IJ.log(" ");
 		IJ.log(" ");
 		IJ.log(" ");

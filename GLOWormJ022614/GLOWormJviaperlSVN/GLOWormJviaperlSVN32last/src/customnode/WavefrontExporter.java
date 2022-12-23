@@ -271,21 +271,38 @@ public class WavefrontExporter {
 
 				if (IJ.isWindows()) {
 					//				String commandString = "cmd /c start /min /wait for %f in ("+objOutPathString+") do (set g=%f&& npx obj2gltf -i %f&& npx gltf-pipeline -i %g:.obj=.gltf% -o %g:.obj=.gltf% -d)";
-					String[] commandStringArrayA = new String[]{"cmd","/c","npx","obj2gltf","-i",objOutPathString};
-					Process objTOgltf = Runtime.getRuntime().exec(commandStringArrayA);
-					String gltfOutPathString = objOutPathString.replace(".obj", ".gltf");
-					String[] commandStringArrayB = new String[]{"cmd","/c","npx","gltf-pipeline","-i",gltfOutPathString,"-o",gltfOutPathString,"-d"};
-					//				while (!new File (gltfOutPathString).canRead())
-					//					IJ.wait(10);
-					try {
-						int waitResult = objTOgltf.waitFor();
-						if (waitResult == 0) {
-							Runtime.getRuntime().exec(commandStringArrayB);
+					final String finalObjOutPathString = objOutPathString;
+					Thread makeDracoGLTF = new Thread(new Runnable(){
+						public void run() {
+							String[] commandStringArrayA = new String[]{"cmd","/c","npx","obj2gltf","-i",finalObjOutPathString};
+							Process objTOgltf = null;
+							try {
+								objTOgltf = Runtime.getRuntime().exec(commandStringArrayA);
+							} catch (IOException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+							String gltfOutPathString = finalObjOutPathString.replace(".obj", ".gltf");
+							String[] commandStringArrayB = new String[]{"cmd","/c","npx","gltf-pipeline","-i",gltfOutPathString,"-o",gltfOutPathString,"-d"};
+							//				while (!new File (gltfOutPathString).canRead())
+							//					IJ.wait(10);
+							try {
+								int waitResult = objTOgltf.waitFor();
+								if (waitResult == 0) {
+									try {
+										Runtime.getRuntime().exec(commandStringArrayB);
+									} catch (IOException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+								}
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
 						}
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					});
+					makeDracoGLTF.start();
 				}
 			}
 		}
