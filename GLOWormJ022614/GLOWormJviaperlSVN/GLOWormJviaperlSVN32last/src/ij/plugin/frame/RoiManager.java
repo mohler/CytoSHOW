@@ -7643,10 +7643,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (cropRoi == null)
 			cropRoi = new Roi(0,0,imp.getWidth(),imp.getHeight());
 		Hashtable<String, ArrayList> synapsePairFrequencyHashtable = new Hashtable<String, ArrayList>();			
-		int skipCount = 0;
+		int cropSkipCount = 0;
+		int preSynSkipCount = 0;
+		int postSynSkipCount = 0;
 		for (Roi roi:getShownRoisAsArray()) {
 			if (!cropRoi.contains((int)roi.getBounds().getCenterX(), (int)roi.getBounds().getCenterY())) {
-				skipCount++;
+				cropSkipCount++;
 				continue;
 			}
 			String core160names = "ADAL|ADAR|ADFL|ADFR|ADLL|ADLR|AFDL|AFDR|AIAL|AIAR|AIBL|AIBR|AIML|AIMR|AINL|AINR|AIYL|AIYR|AIZL|AIZR|ALA|ALML|ALMR|ASEL|ASER|ASGL|ASGR|ASHL|ASHR|ASIL|ASIR|ASJL|ASJR|ASKL|ASKR|AUAL|AUAR|AVAL|AVAR|AVBL|AVBR|AVDL|AVDR|AVEL|AVER|AVHL|AVHR|AVJL|AVJR|AVKL|AVKR|AVL|AWAL|AWAR|AWBL|AWBR|AWCL|AWCR|BAGL|BAGR|BDUL|BDUR|CEPDL|CEPDR|CEPVL|CEPVR|DVA|DVC|FLPL|FLPR|IL1DL|IL1DR|IL1L|IL1R|IL1VL|IL1VR|IL2DL|IL2DR|IL2L|IL2R|IL2VL|IL2VR|OLLL|OLLR|OLQDL|OLQDR|OLQVL|OLQVR|PVCL|PVCR|PVPL|PVPR|PVQL|PVQR|PVR|PVT|RIAL|RIAR|RIBL|RIBR|RICL|RICR|RID|RIFL|RIFR|RIGL|RIGR|RIH|RIML|RIMR|RIPL|RIPR|RIR|RIS|RIVL|RIVR|RMDDL|RMDDR|RMDL|RMDR|RMDVL|RMDVR|RMED|RMEL|RMER|RMEV|RMGL|RMGR|SAADL|SAADR|SAAVL|SAAVR|SIADL|SIADR|SIAVL|SIAVR|SIBDL|SIBDR|SIBVL|SIBVR|SMBDL|SMBDR|SMBVL|SMBVR|SMDDL|SMDDR|SMDVL|SMDVR|URADL|URADR|URAVL|URAVR|URBL|URBR|URXL|URXR|URYDL|URYDR|URYVL|URYVR";
@@ -7655,12 +7657,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			String core160fulregextext = "^.*(ADAL|ADAR|ADFL|ADFR|ADLL|ADLR|AFDL|AFDR|AIAL|AIAR|AIBL|AIBR|AIML|AIMR|AINL|AINR|AIYL|AIYR|AIZL|AIZR|ALA|ALML|ALMR|ASEL|ASER|ASGL|ASGR|ASHL|ASHR|ASIL|ASIR|ASJL|ASJR|ASKL|ASKR|AUAL|AUAR|AVAL|AVAR|AVBL|AVBR|AVDL|AVDR|AVEL|AVER|AVHL|AVHR|AVJL|AVJR|AVKL|AVKR|AVL|AWAL|AWAR|AWBL|AWBR|AWCL|AWCR|BAGL|BAGR|BDUL|BDUR|CEPDL|CEPDR|CEPVL|CEPVR|DVA|DVC|FLPL|FLPR|IL1DL|IL1DR|IL1L|IL1R|IL1VL|IL1VR|IL2DL|IL2DR|IL2L|IL2R|IL2VL|IL2VR|OLLL|OLLR|OLQDL|OLQDR|OLQVL|OLQVR|PVCL|PVCR|PVPL|PVPR|PVQL|PVQR|PVR|PVT|RIAL|RIAR|RIBL|RIBR|RICL|RICR|RID|RIFL|RIFR|RIGL|RIGR|RIH|RIML|RIMR|RIPL|RIPR|RIR|RIS|RIVL|RIVR|RMDDL|RMDDR|RMDL|RMDR|RMDVL|RMDVR|RMED|RMEL|RMER|RMEV|RMGL|RMGR|SAADL|SAADR|SAAVL|SAAVR|SIADL|SIADR|SIAVL|SIAVR|SIBDL|SIBDR|SIBVL|SIBVR|SMBDL|SMBDR|SMBVL|SMBVR|SMDDL|SMDDR|SMDVL|SMDVR|URADL|URADR|URAVL|URAVR|URBL|URBR|URXL|URXR|URYDL|URYDR|URYVL|URYVR)(undefined|chemical|electrical)*(\\&*(ADAL|ADAR|ADFL|ADFR|ADLL|ADLR|AFDL|AFDR|AIAL|AIAR|AIBL|AIBR|AIML|AIMR|AINL|AINR|AIYL|AIYR|AIZL|AIZR|ALA|ALML|ALMR|ASEL|ASER|ASGL|ASGR|ASHL|ASHR|ASIL|ASIR|ASJL|ASJR|ASKL|ASKR|AUAL|AUAR|AVAL|AVAR|AVBL|AVBR|AVDL|AVDR|AVEL|AVER|AVHL|AVHR|AVJL|AVJR|AVKL|AVKR|AVL|AWAL|AWAR|AWBL|AWBR|AWCL|AWCR|BAGL|BAGR|BDUL|BDUR|CEPDL|CEPDR|CEPVL|CEPVR|DVA|DVC|FLPL|FLPR|IL1DL|IL1DR|IL1L|IL1R|IL1VL|IL1VR|IL2DL|IL2DR|IL2L|IL2R|IL2VL|IL2VR|OLLL|OLLR|OLQDL|OLQDR|OLQVL|OLQVR|PVCL|PVCR|PVPL|PVPR|PVQL|PVQR|PVR|PVT|RIAL|RIAR|RIBL|RIBR|RICL|RICR|RID|RIFL|RIFR|RIGL|RIGR|RIH|RIML|RIMR|RIPL|RIPR|RIR|RIS|RIVL|RIVR|RMDDL|RMDDR|RMDL|RMDR|RMDVL|RMDVR|RMED|RMEL|RMER|RMEV|RMGL|RMGR|SAADL|SAADR|SAAVL|SAAVR|SIADL|SIADR|SIAVL|SIAVR|SIBDL|SIBDR|SIBVL|SIBVR|SMBDL|SMBDR|SMBVL|SMBVR|SMDDL|SMDDR|SMDVL|SMDVR|URADL|URADR|URAVL|URAVR|URBL|URBR|URXL|URXR|URYDL|URYDR|URYVL|URYVR))+.* \\\".*";
 //			core160synMatchKey = core160fulregextext;
 			if (!roiName.matches(core160synMatchKey)) {
-				skipCount++;
+				preSynSkipCount++;
 				continue;
 			}
 			String name = roi.getName();
-			if (name.contains("?"))
+			if (name.contains("?")) {
+				preSynSkipCount++;
 				continue;
+			}
 			String[] nameChunks = name.split("(\"|electrical|chemical|undefined|\\~)");
 //			IJ.log(Arrays.toString(nameChunks));
 			String presynName = nameChunks[1];
@@ -7669,6 +7673,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			String objType = name.split("\""+presynName+"|"+postsynNames[0])[1];
 			
 			for (String postsynName : postsynNames) {
+				if (!postsynName.matches(core160names)) {
+					postSynSkipCount++;
+					continue;
+				}
 				IJ.log(presynName + "," + postsynName + "," + plotZ + "," + 1 + "," + objType);
 
 				if (synapsePairFrequencyHashtable
@@ -7684,7 +7692,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		Object[] keysArray = synapsePairFrequencyHashtable.keySet().toArray();
 		Arrays.sort(keysArray);
 		IJ.log(" ");
-		IJ.log("skipped "+skipCount);
+		IJ.log("skipped "+cropSkipCount+" crop");
+		IJ.log("skipped "+preSynSkipCount+" pre");
+		IJ.log("skipped "+postSynSkipCount+" post");
 		IJ.log(" ");
 		IJ.log(" ");
 		IJ.log(" ");
