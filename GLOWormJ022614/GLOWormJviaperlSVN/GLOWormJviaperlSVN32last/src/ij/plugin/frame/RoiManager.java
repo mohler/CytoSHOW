@@ -3839,25 +3839,32 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					if (roi != null) {
 //						name = name.substring(0, name.length() - 4);
 
-						int c = roi.getCPosition();
-						int z = roi.getZPosition();
-						int t = roi.getTPosition();
+						int c = 1;
+						int z = 1;
+						int t = 1;
+						
+						int roiC = roi.getCPosition();
+						int roiZ = roi.getZPosition();
+						int roiT = roi.getTPosition();
 						Color roiColor = roi.getFillColor();
 
+						int readC = roiC;
+						int readZ = roiZ;
+						int readT = roiT;
 						if (name.split("_").length == 4) {
-							c = Integer.parseInt(name.split("_")[1]);
-							z = Integer.parseInt(name.split("_")[2]);
-							t = Integer.parseInt(name.split("_")[3].split("[CZT-]")[0]);
+							readC = Integer.parseInt(name.split("_")[1]);
+							readZ = Integer.parseInt(name.split("_")[2]);
+							readT = Integer.parseInt(name.split("_")[3].split("[CZT-]")[0]);
 						}
 
 						if (name.split("_").length == 5) {
 							roiColor = Colors.decode(name.split("_")[1], roiColor);
-							c = Integer.parseInt(name.split("_")[2]);
-							z = Integer.parseInt(name.split("_")[3]);
-							t = Integer.parseInt(name.split("_")[4].split("[CZT-]")[0]);
+							readC = Integer.parseInt(name.split("_")[2]);
+							readZ = Integer.parseInt(name.split("_")[3]);
+							readT = Integer.parseInt(name.split("_")[4].split("[CZT-]")[0]);
 						}
 
-						int oldZ = z;
+//						int oldZ = z;
 
 ////		  SPECIAL CASE ONLY FOR honoring JSH image GAPS AT Z56 z163-166				
 //						if (z>55){
@@ -3869,16 +3876,31 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //							z++;
 //							z++;							
 //						}
-
-						roi.setPosition(c, z, t);
+						
+						if (readC>imp.getNChannels()) {
+							c = imp.getNChannels();
+						}else {
+							c = readC;
+						}
+						if (readZ>imp.getNSlices()) {
+							z = imp.getNSlices();
+						}else {
+							z = readZ;
+						}
+						if (readT>imp.getNFrames()) {
+							t = imp.getNFrames();
+						}else {
+							t = readT;
+						}
+						
 						roi.setFillColor(roiColor); // only place in this class where this.setRoiFillColor(Roi, Color)
 													// should not be used.
 
-						if (imp.getNSlices() == 1)
-							roi.setPosition(c, 1, t);
-						if (!name.contains(" \"_#"))
-							name = name.replace(" \"_", " \"_"+Colors.colorToHexString(roiColor)+"_");
-						name = name.replace("_" + oldZ + "_", "_" + z + "_");
+//						if (imp.getNSlices() == 1)
+//							roi.setPosition(c, 1, t);
+//						if (!name.contains(" \"_#"))
+//							name = name.replace(" \"_", " \"_"+Colors.colorToHexString(roiColor)+"_");
+//						name = name.replace("_" + oldZ + "_", "_" + z + "_");
 
 						if (cl != null) {
 							Color clColor = cl.getBrainbowColors().get(
@@ -3905,15 +3927,18 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						} else if (name.split("_").length == 5) {
 							name = name.replace(name.split("_")[1], Colors.colorToHexString(roiColor));
 						}
-						roi.setImage(imp);
-
+						
 						if (roi instanceof TextRoi) {
 							name = (((TextRoi) roi).getText().indexOf("\n") > 0
 									? ("\"" + ((TextRoi) roi).getText().replace("\n", " ") + "\"")
-									: "Blank") + "_" + Colors.colorToHexString(roiColor) + "_" + name.split("_")[1]
-									+ "_" + name.split("_")[2] + "_" + name.split("_")[3];
+									: "Blank") + "_" + name.split("_")[1]
+									+ "_" + name.split("_")[2] + "_" + name.split("_")[3]  + "_" + name.split("_")[4];
 
 						}
+						name = name.split("_")[0] + "_" + name.split("_")[1]
+									+ "_" + name.split("_")[2].replace(""+readC, ""+c) 
+									+ "_" + name.split("_")[3].replace(""+readZ, ""+z)  
+									+ "_" + name.split("_")[4].replace(""+readT, ""+t);
 						name = getUniqueName(name);
 						
 						listModel.addElement(name);
@@ -3936,6 +3961,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								nameEndReader = nameEndReader.substring(0, nameEndReader.length() - 1);
 							}
 						}
+						roi.setImage(imp);
+
 						roi.setPosition(c, z, t);
 						String rbnKey = roi.getCPosition() + "_" + (imp.getNSlices() == 1 ? 1 : roi.getZPosition())
 								+ "_" + roi.getTPosition();

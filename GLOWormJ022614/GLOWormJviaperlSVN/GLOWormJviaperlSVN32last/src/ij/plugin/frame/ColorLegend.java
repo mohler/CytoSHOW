@@ -254,7 +254,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 						
 						Set<Thread> threadsInJVM = Thread.getAllStackTraces().keySet();
 						int nbThreads = threadsInJVM.size();
-						while (nbThreads >200) {
+						while (nbThreads >50) {
 							IJ.wait(10);
 							threadsInJVM = Thread.getAllStackTraces().keySet();
 							nbThreads = threadsInJVM.size();
@@ -283,7 +283,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 								buildHitTest = buildHitTest+ ".*post.*$";
 								final String hitTestPost = fixedName.split("-")[0].toLowerCase().replaceAll(buildHitTest, "$2");
 
-								while (nbThreads >200) {
+								while (nbThreads >50) {
 									IJ.wait(10);
 									threadsInJVM = Thread.getAllStackTraces().keySet();
 									nbThreads = threadsInJVM.size();
@@ -306,7 +306,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 							}
 						}
 
-						IJ.showStatus(index+"/"+lm.getSize()+" tags color-adjusted.");
+						IJ.showStatus(index+"/"+lm.getSize()+" contents color-adjusted.");
 					}
 					JList list = ((Image3DUniverse)univ).getContent3DManager().getList();
 					int listfirstposition = list.getFirstVisibleIndex();
@@ -331,6 +331,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 
 						ArrayList<String> hitTests = new ArrayList<String>();
 
+						hitTests.add( fixedName.split(" =.* \"_")[0].toLowerCase().replace("\"", ""));
 						hitTests.add( fixedName.split(" \"_")[0].toLowerCase().replace("\"", ""));
 						hitTests.add( fixedName.split(" \"_")[0].toLowerCase().replace("\"", "").replaceAll("^(.*by)(.*)$", "$2"));
 						hitTests.add( fixedName.split(" \"_")[0].toLowerCase().replace("\"", "").replaceAll(".*_(.*)[_$].*","$1"));
@@ -403,7 +404,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 					list.ensureIndexIsVisible(listlastposition);
 					list.ensureIndexIsVisible(listfirstposition);
 
-					IJ.showStatus("All content color-adjusted per ColorLegend");
+					IJ.showStatus("All tags color-adjusted per ColorLegend");
 
 				}
 			}
