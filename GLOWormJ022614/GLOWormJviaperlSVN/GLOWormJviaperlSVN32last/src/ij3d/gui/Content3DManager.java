@@ -668,7 +668,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 					Content thisContent = univ.getContent(thisContentLabel);
 
 					contentInstants.remove(fullListModel.get(r));
-					listModel.removeElement(fullListModel.get(r));
+//					listModel.removeElement(fullListModel.get(r));  DO NOT REMOVE NOW, WILL REMOVEALL BELOW.
 					fullListModel.remove(r);
 					invertSelContents.add(thisContent);
 					invertSelContentLabels.add(thisContentLabel);

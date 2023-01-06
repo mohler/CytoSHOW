@@ -1999,7 +1999,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					}
 
 					if (nextRoi instanceof TextRoi) {
-						scaledRoi = (Roi) nextRoi.clone();
+						if (false) {							//implementing this will allow printing of 3d text.  Not desired right now.
+//							scaledRoi = (Roi) nextRoi.clone();
+						} else {
+							Roi fontMetricsRoi = new TextRoi(((TextRoi)nextRoi).getText(), nextRoi.getBounds().x, nextRoi.getBounds().y, ((TextRoi)nextRoi).getCurrentFont());
+							Rectangle fmrBounds = fontMetricsRoi.getBounds();
+							Roi textBoundsBoxRoi = new Roi(fmrBounds.x, fmrBounds.y, fmrBounds.height*2, fmrBounds.height*2);
+							scaledRoi = new RoiDecoder(scaleFactor, RoiEncoder.saveAsByteArray(textBoundsBoxRoi), nextRoi.getName())
+									.getRoi();
+						}
 					} else {
 						scaledRoi = new RoiDecoder(scaleFactor, RoiEncoder.saveAsByteArray(nextRoi), nextRoi.getName())
 								.getRoi();
@@ -2017,7 +2025,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			sketchImp.getRoiManager().select(-1);
 			boolean filled = false;
-			filled = sketchImp.getRoiManager().drawOrFill(nextRoi instanceof TextRoi ? DRAW : FILL);
+			filled = sketchImp.getRoiManager().drawOrFill(/* nextRoi instanceof TextRoi ? DRAW : */ FILL);  //DRAW option would print text.  May be useful someday, but not now.
 
 			while (!filled) {
 				IJ.wait(100);
