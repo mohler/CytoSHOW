@@ -221,6 +221,8 @@ transform08="Bin...",ij.plugin.Binner
 transform09=-
 transform10="Image to Results",ij.plugin.SimpleCommands("itor")
 transform11="Results to Image",ij.plugin.SimpleCommands("rtoi")
+transform12="bUnwarpJ",bunwarpj.bUnwarpJ_
+transform13="bUnwarpJ_fullAuto",org.vcell.gloworm.bUnwarpJ_record_Plugin
 
 # Plugins installed in the Image/Zoom submenu
 zoom01="In [+]",ij.plugin.Zoom("in")

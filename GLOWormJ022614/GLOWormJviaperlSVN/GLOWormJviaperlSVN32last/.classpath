@@ -90,6 +90,7 @@
 	<classpathentry kind="lib" path="Jama-1.0.3.jar"/>
 	<classpathentry kind="lib" path="junit-4.12.jar"/>
 	<classpathentry kind="lib" path="jogamp-java3d"/>
+	<classpathentry kind="lib" path="bUnwarpJ_-2.6.13.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/AceTreeLegacyModForCytoSHOWsynch"/>
 	<classpathentry kind="output" path="plugins"/>
