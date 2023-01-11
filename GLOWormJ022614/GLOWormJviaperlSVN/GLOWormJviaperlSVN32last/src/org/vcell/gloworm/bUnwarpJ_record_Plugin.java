@@ -4,6 +4,8 @@ import ij.*;
 import ij.process.*;
 import ij.gui.*;
 import java.awt.*;
+
+import bunwarpj.bUnwarpJ_;
 import ij.plugin.*;
 
 public class bUnwarpJ_record_Plugin implements PlugIn {
@@ -11,6 +13,8 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
     public void run(String arg) {
     	
        ImagePlus imp = IJ.getImage();
+       boolean applyTfm = IJ.getString("Do what? Build or Apply?", "Build").equals("Apply");
+       if (!applyTfm) {
        while(true){
 	        int lastNum = imp.getCurrentSlice();
 	        IJ.run(imp, "Next Slice [>]", "");
@@ -32,6 +36,22 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 	        impRegNumLessOne.close();
 	        regStack.close();
         }
+       } else {
+    	   while(true){
+    		   int lastNum = imp.getCurrentSlice();
+    		   IJ.run(imp, "Next Slice [>]", "");
+    		   int num = imp.getCurrentSlice();
+    		   if (num <= lastNum)
+    			   return;
+    		   ImagePlus impDupNum = new ImagePlus("",imp.getProcessor());
+    		   impDupNum.setTitle(""+num+".tif");
+    		   impDupNum.setCalibration(imp.getCalibration());
+    		   impDupNum.show();
+    		   bUnwarpJ_.loadElasticTransform("/Users/wmohler/Documents/N2U_skelROIs/n2u_bUnwarpJ_2ndRound_testFromCytoShow/"+num+"_direct_transf.txt", "blank", ""+num+".tif");
+    		   IJ.saveAs(impDupNum, "Tiff", "/Users/wmohler/Documents/N2U_skelROIs/N2U_uncropped_bUnwarpJ_Apply2NDtfm/"+num+"tfmApp.tif");
+    		   impDupNum.close();
+    	   }
+       }
     }
 
 }
