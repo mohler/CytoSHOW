@@ -92,6 +92,6 @@
 	<classpathentry kind="lib" path="jogamp-java3d"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/AceTreeLegacyModForCytoSHOWsynch"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/bUnwarpJ"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/bUnwarpJ_modsForCytoSHOW"/>
 	<classpathentry kind="output" path="plugins"/>
 </classpath>

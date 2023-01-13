@@ -69,14 +69,28 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 				imp.setPosition(imp.getChannel(), z, imp.getFrame());
 				targetImp.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame());
 				Transformation tmxn = bUnwarpJ_.computeTransformationBatch(imp, targetImp, null, null, new Param(2, 0, 0, 2, 0, 0, 0, 1, 10, 0.01));
+				targetImp.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame());
 
 				Roi[] sliceRois = imp.getRoiManager().getSliceSpecificRoiArray(imp.getSlice(), imp.getFrame(), false);
 				for (Roi roi:sliceRois) {
-					targetImp.getRoiManager().addRoi((Roi)roi.clone(), false, roi.getStrokeColor(), roi.getFillColor(), 0, true);
 					double[] xyF = new double[2];
 					tmxn.transform((double) roi.getBounds().getCenterX(), (double) roi.getBounds().getCenterY(), xyF, false);
-					targetImp.getRoiManager().getROIs().get(targetImp.getRoiManager().getListModel().get(targetImp.getRoiManager().getListModel().size()-1))
-					.setLocation(xyF[0]-roi.getBounds().width/2, xyF[1]-roi.getBounds().height/2);
+					Roi newRoi = (Roi)roi.clone();
+					if (roi instanceof TextRoi) {
+						newRoi.setLocation(xyF[0]-roi.getBounds().width/2, xyF[1]-roi.getBounds().height/2);
+					} else {
+						Polygon poly = roi.getPolygon();
+						for (int p=0; p< poly.npoints; p++) {
+							tmxn.transform(poly.xpoints[p], poly.ypoints[p], xyF, false);
+							poly.xpoints[p] = (int) xyF[0];
+							poly.ypoints[p] = (int) xyF[1];
+						}
+						ShapeRoi newShapeRoi = new ShapeRoi(poly);
+						newShapeRoi.copyAttributes(newRoi);
+						newRoi = newShapeRoi;
+					}
+					targetImp.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame());
+					targetImp.getRoiManager().addRoi(newRoi, false, roi.getStrokeColor(), roi.getFillColor(), 0, true);
 				}
 			}
 
