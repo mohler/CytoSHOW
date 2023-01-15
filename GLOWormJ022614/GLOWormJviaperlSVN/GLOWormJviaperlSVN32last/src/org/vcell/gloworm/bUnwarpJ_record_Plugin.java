@@ -63,8 +63,9 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 			}
 		} else if (mode.equals("RemapRois")) {
 			//THE ORDER OF TARGET AND SOURCE SEEMS TO WORK OPPOSITE OF WHAT I WOULD HAVE EXPECTED.  BUT THIS ALL WORKS.
-			
-			for (int z=1;z<=imp.getNSlices();z++) {
+			int endZ = imp.getNSlices();
+			endZ = 181;
+			for (int z=1;z<=endZ;z++) {
 				ImagePlus targetImp = WindowManager.getImage("blank.tif");
 				imp.setPosition(imp.getChannel(), z, imp.getFrame());
 				targetImp.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame());
@@ -78,6 +79,32 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 					Roi newRoi = (Roi)roi.clone();
 					if (roi instanceof TextRoi) {
 						newRoi.setLocation(xyF[0]-roi.getBounds().width/2, xyF[1]-roi.getBounds().height/2);
+					} else if (roi instanceof ShapeRoi) {
+						Roi[] rois = ((ShapeRoi) roi).getRois();
+						Roi[] scaledRois = new Roi[rois.length];
+						for (int r=0;r<rois.length;r++) {
+							Polygon poly = rois[r].getPolygon();
+
+							for (int p=0;p<poly.npoints;p++) {
+								tmxn.transform(poly.xpoints[p], poly.ypoints[p], xyF, false);
+								poly.xpoints[p] = (int) xyF[0];
+								poly.ypoints[p] = (int) xyF[1];
+							}
+							scaledRois[r] = new ShapeRoi(poly);
+							scaledRois[r].copyAttributes(rois[r]);
+						}
+						ShapeRoi scaledRoi = null;
+						for (Roi scaledPart:scaledRois) {
+							if (scaledRoi == null) {
+								scaledRoi = new ShapeRoi(scaledPart);
+							} else {
+								// can't really do anything with additional saved Rois, can I?
+							}
+						}
+
+						scaledRoi.copyAttributes(roi);
+						newRoi = scaledRoi;
+
 					} else {
 						Polygon poly = roi.getPolygon();
 						for (int p=0; p< poly.npoints; p++) {

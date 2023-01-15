@@ -7061,8 +7061,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					rbnShifted = new ArrayList<Roi>();
 					rbnShifted.add(roi);
 					roisByNumbers.put(rbnsKey, rbnShifted);
-					IJ.log(roisByNumbers.containsKey(rbnsKey) + " " + roisByNumbers.containsValue(rbnShifted) + " "
-							+ rbnShifted.contains(roi));
+//					IJ.log(roisByNumbers.containsKey(rbnsKey) + " " + roisByNumbers.containsValue(rbnShifted) + " "
+//							+ rbnShifted.contains(roi));
 				} else {
 					if (roi.getName().contains("~")){
 						rbnShifted.add(0,roi);
@@ -7070,7 +7070,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						rbnShifted.add(roi);
 					}
 				}
-				IJ.log(roisByNumbers.get(rbnsKey).toString());
+//				IJ.log(roisByNumbers.get(rbnsKey).toString());
 				String label ="";
 				if (roi.getName() != null && roi.getName().split("\"").length > 1){
 					label = "\"" + roi.getName().split("\"")[1].trim() + " \"" + "_" +Colors.colorToHexString(roi.getFillColor()) + "_" + roi.getCPosition() + "_"
