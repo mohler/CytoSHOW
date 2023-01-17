@@ -65,9 +65,9 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 		} else if (mode.equals("RemapRois")) {
 			//THE ORDER OF TARGET AND SOURCE SEEMS TO WORK OPPOSITE OF WHAT I WOULD HAVE EXPECTED.  BUT THIS ALL WORKS.
 			int endZ = imp.getNSlices();
-			endZ = 32;
-			for (int z=32;z<=endZ;z++) {
-				ImagePlus targetImp = WindowManager.getImage("blank.tif");
+			ImagePlus targetImp = WindowManager.getImage("blank.tif");
+			endZ = targetImp.getNSlices();
+			for (int z=1;z<=endZ;z++) {
 				imp.setPosition(imp.getChannel(), z, imp.getFrame());
 				targetImp.setPosition(imp.getChannel(), z, imp.getFrame());
 				imp.killRoi();
@@ -89,7 +89,7 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 				//this method works with landmarks selected OR without landmarks if nothing selected
 				//landmarks do still affect initial Affine fit, even if landmarkWeight parameter is set to 0.
 				//With 20 scattered landmark points and 
-				//landmarkWeight set to 1 and imageWeight set to 1, it succeeds in some seriously funky fixes to build an excelent overall transform!!!
+				//landmarkWeight set to 1 and imageWeight set to 1, it succeeds in some seriously funky fixes to build an excellent overall transform!!!
 				Transformation tmxn = bUnwarpJ_.computeTransformationBatch(imp, targetImp, null, null, new Param(2, 0, 0, 2, 0, 0, 1, 1, 10, 0.01));
 				targetImp.setPosition(imp.getChannel(), z, imp.getFrame());
 
