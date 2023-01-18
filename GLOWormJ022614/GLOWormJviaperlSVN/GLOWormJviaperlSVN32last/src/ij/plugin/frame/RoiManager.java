@@ -2690,7 +2690,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					String hexRed = Integer.toHexString(clColor.getRed());
 					String hexGreen = Integer.toHexString(clColor.getGreen());
 					String hexBlue = Integer.toHexString(clColor.getBlue());
-					String hexAlpha = Colors.colorToHexString(roiCopy.getFillColor()).substring(0, 3);
+					String hexAlpha = "";
+					if (Colors.colorToHexString(clColor).length() == 9)
+						hexAlpha = Colors.colorToHexString(clColor).substring(0, 3);
 					this.setRoiFillColor(roiCopy,
 							Colors.decode(hexAlpha + (hexRed.length() == 1 ? "0" : "") + hexRed
 									+ (hexGreen.length() == 1 ? "0" : "") + hexGreen
@@ -3922,7 +3924,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								String hexRed = Integer.toHexString(clColor.getRed());
 								String hexGreen = Integer.toHexString(clColor.getGreen());
 								String hexBlue = Integer.toHexString(clColor.getBlue());
-								String hexAlpha = Colors.colorToHexString(roiColor).substring(0, 3);
+								String hexAlpha = "";
+								if (Colors.colorToHexString(roiColor).length() == 9)
+										hexAlpha = Colors.colorToHexString(roiColor).substring(0, 3);
 								this.setRoiFillColor(roi,
 										Colors.decode(hexAlpha + (hexRed.length() == 1 ? "0" : "") + hexRed
 												+ (hexGreen.length() == 1 ? "0" : "") + hexGreen

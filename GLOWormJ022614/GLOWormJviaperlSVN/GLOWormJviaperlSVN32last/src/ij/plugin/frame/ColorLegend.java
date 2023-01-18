@@ -929,10 +929,19 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 			ArrayList<JCheckBox> tempCheckboxes = new ArrayList<JCheckBox>();
 			ArrayList<String> alreadyNamed = new ArrayList<String>();
 			int i=0;
+			if (brainbowColors == null) {
+				brainbowColors = new Hashtable<String, Color>();
+			}
 			for (Roi roi:selRois) {
 				if (alreadyNamed.contains(roi.getName().split(" \"_")[0].replace("\"","")))
 					continue;
 				Color roiARGBcolor = roi.getFillColor();
+				if (roiARGBcolor == null) {
+					roiARGBcolor = roi.getStrokeColor();
+				}
+				if (roiARGBcolor == null) {
+					roiARGBcolor = roi.getColor();
+				}
 				tempCheckboxes.add(new JCheckBox(roi.getName().split(" \"_")[0].replace("\"","")));
 				tempCheckboxes.get(tempCheckboxes.size()-1).setSize(150, 10);
 				tempCheckboxes.get(tempCheckboxes.size()-1).setText(roi.getName().split(" \"_")[0].replace("\"",""));
