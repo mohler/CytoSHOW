@@ -897,12 +897,22 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 		File clFile = new File(path);
 		String clString = "";
 		for (JCheckBox cb:getJCheckBox()) {
-			clString = clString + cb.getName() +","+ cb.getLabel() +","
+			if (cb.getBackground() != null) {
+				clString = clString + cb.getName().replace("_", "") +","+ cb.getLabel() +","
 						+ Colors.colorToHexString(cb.getBackground()) +","
 						+ cb.getBackground().getAlpha() +","
 						+ cb.getBackground().getRed() +","
 						+ cb.getBackground().getGreen() +","
 						+ cb.getBackground().getBlue() +"\n";
+			} else {
+				clString = clString + cb.getName().replace("_", "") +","+ cb.getLabel() +","
+						+ "#00000000" +","
+						+ 0 +","
+						+ 0 +","
+						+ 0 +","
+						+ 0 +"\n";
+
+			}
 		}
 		clFile.createNewFile();
 
@@ -928,9 +938,11 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 				tempCheckboxes.get(tempCheckboxes.size()-1).setText(roi.getName().split(" \"_")[0].replace("\"",""));
 				tempCheckboxes.get(tempCheckboxes.size()-1).setName(roi.getName().split(" \"_")[0].replace("\"",""));			
 				tempCheckboxes.get(tempCheckboxes.size()-1).setBackground(roiARGBcolor);
-				brainbowColors.put(tempCheckboxes.get(tempCheckboxes.size()-1).getName().toLowerCase(), roiARGBcolor);
+				if (roiARGBcolor != null) {
 
-				checkboxHash.put(roiARGBcolor, tempCheckboxes.get(tempCheckboxes.size()-1));
+					brainbowColors.put(tempCheckboxes.get(tempCheckboxes.size()-1).getName().toLowerCase(), roiARGBcolor);
+					checkboxHash.put(roiARGBcolor, tempCheckboxes.get(tempCheckboxes.size()-1));
+				}
 				tempCheckboxes.get(tempCheckboxes.size()-1).setFont(Menus.getFont().deriveFont(8));
 				//		IJ.log("WHATUP?");
 				i++;
