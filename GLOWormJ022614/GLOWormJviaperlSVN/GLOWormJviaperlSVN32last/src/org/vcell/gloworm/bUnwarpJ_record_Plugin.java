@@ -162,7 +162,7 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 			//THE ORDER OF TARGET AND SOURCE SEEMS TO WORK OPPOSITE OF WHAT I WOULD HAVE EXPECTED.  BUT THIS ALL WORKS.
 			int endZ = imp.getNSlices();
 			ImagePlus targetImp = WindowManager.getImage("blank.tif");
-			endZ = targetImp.getNSlices();
+
 			for (int z=1;z<=endZ;z++) {
 				imp.setPosition(imp.getChannel(), z, imp.getFrame());
 				targetImp.setPosition(imp.getChannel(), z, imp.getFrame());
@@ -186,38 +186,83 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 				//landmarks do still affect initial Affine fit, even if landmarkWeight parameter is set to 0.
 				//With 20 scattered landmark points and 
 				//landmarkWeight set to 1 and imageWeight set to 1, it succeeds in some seriously funky fixes to build an excellent overall transform!!!
-				Transformation warp = bUnwarpJ_.computeTransformationBatch(imp, targetImp, null, null, new Param(2, 0, 0, 2, 0, 0, 1, 1, 10, 0.01));
-						
+				
+				//This tfm warps next image in source stack to fit the last slice in the growing target stack:
+				Transformation warp = bUnwarpJ_.computeTransformationBatch(targetImp, imp, null, null, new Param(2, 0, 0, 2, 0, 0, 1, 1, 10, 0.01));
+				
+				//This reverse tfm is used to remap the source multipoint roi to fit the new warped last target slice:
+				Transformation revWarp = bUnwarpJ_.computeTransformationBatch(imp, targetImp, null, null, new Param(2, 0, 0, 2, 0, 0, 1, 1, 10, 0.01));
+
 				targetImp.setPosition(imp.getChannel(), z, imp.getFrame());
 				
 				//This direct unidirectional case seems to work!
 			     if (true) {
 			        	// Do unidirectional registration
 			        	warp.doUnidirectionalRegistration();
+			        	revWarp.doUnidirectionalRegistration();
+			        	
 			    		ImagePlus sourceOut = warp.getDirectResults();
 			    		sourceOut.show();
+
+//			    		targetImp.getStack().deleteSlice(z+1);
+			    		targetImp.getStack().addSlice("resultSlice "+z+0+1, sourceOut.getStack().getProcessor(1).duplicate());
+			    		targetImp.setWindow(new StackWindow(targetImp,false)); 
+			    		targetImp.setTitle("blank.tif");
+
+			    		sourceOut.close();
 			        } else {
-			        	// Do bidirectional registration
-			        	warp.doBidirectionalRegistration();
-			        	// Save transformations
-//			        	if(this.dialog.isSaveTransformationSet())
-//			        	{
-//			        		warp.saveDirectTransformation();
-//			        		warp.saveInverseTransformation();
-//			        	}
-//			        	if(source.isSubOutput())
-//			    		{
-//			    			IJ.log("Calculating final transformed source image");
-//			    		}
-			    		warp.showDirectResults();
-//			        	if(target.isSubOutput())
-//			    		{
-//			    			IJ.log("Calculating final transformed target image");			
-//			    		}
-//			    		ImagePlus targetOut = warp.getInverseResults();
-//			    		targetOut.show();
+
 			        }
 
+					Roi[] sliceRois = imp.getRoiManager().getSliceSpecificRoiArray(imp.getSlice(), imp.getFrame(), false);
+					for (Roi roi:sliceRois) {
+						double[] xyF = new double[2];
+						revWarp.transform((double) roi.getBounds().getCenterX(), (double) roi.getBounds().getCenterY(), xyF, false);
+						Roi newRoi = (Roi)roi.clone();
+						if (roi instanceof TextRoi) {
+							newRoi.setLocation(xyF[0]-roi.getBounds().width/2, xyF[1]-roi.getBounds().height/2);
+						} else if (roi instanceof ShapeRoi) {
+							Roi[] rois = ((ShapeRoi) roi).getRois();
+							Roi[] scaledRois = new Roi[rois.length];
+							for (int r=0;r<rois.length;r++) {
+								Polygon poly = rois[r].getPolygon();
+
+								for (int p=0;p<poly.npoints;p++) {
+									revWarp.transform(poly.xpoints[p], poly.ypoints[p], xyF, false);
+									poly.xpoints[p] = (int) xyF[0];
+									poly.ypoints[p] = (int) xyF[1];
+								}
+								scaledRois[r] = new ShapeRoi(poly);
+								scaledRois[r].copyAttributes(rois[r]);
+							}
+							ShapeRoi scaledRoi = null;
+							for (Roi scaledPart:scaledRois) {
+								if (scaledRoi == null) {
+									scaledRoi = new ShapeRoi(scaledPart);
+								} else {
+									// can't really do anything with additional saved Rois, can I?
+								}
+							}
+
+							scaledRoi.copyAttributes(roi);
+							newRoi = scaledRoi;
+
+						} else {
+							Polygon poly = roi.getPolygon();
+							for (int p=0; p< poly.npoints; p++) {
+								revWarp.transform(poly.xpoints[p], poly.ypoints[p], xyF, false);
+								poly.xpoints[p] = (int) xyF[0];
+								poly.ypoints[p] = (int) xyF[1];
+							}
+							PointRoi newPointRoi = new PointRoi(poly);
+							newPointRoi.copyAttributes(newRoi);
+							newRoi = newPointRoi;
+						}
+						targetImp.setPosition(imp.getChannel(), z+1, imp.getFrame());
+						targetImp.getRoiManager().addRoi(newRoi, false, roi.getStrokeColor(), roi.getFillColor(), 0, true);
+						targetImp.getRoiManager().setShowAllCheckbox(true);
+					}
+					IJ.log("Slice "+z+1+" warp fit complete.");
 			}
 
 			//Code below is nice interaction confirmation that tmxn works!!
