@@ -162,8 +162,8 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 			//THE ORDER OF TARGET AND SOURCE SEEMS TO WORK OPPOSITE OF WHAT I WOULD HAVE EXPECTED.  BUT THIS ALL WORKS.
 			int endZ = imp.getNSlices();
 			ImagePlus targetImp = WindowManager.getImage("blank.tif");
-
-			for (int z=1;z<=endZ;z++) {
+			int startZ = targetImp.getNSlices();
+			for (int z=startZ;z<=endZ;z++) {
 				imp.setPosition(imp.getChannel(), z, imp.getFrame());
 				targetImp.setPosition(imp.getChannel(), z, imp.getFrame());
 				imp.killRoi();
