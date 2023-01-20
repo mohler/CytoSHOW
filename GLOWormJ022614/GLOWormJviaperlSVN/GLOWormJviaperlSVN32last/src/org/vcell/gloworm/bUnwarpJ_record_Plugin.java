@@ -202,7 +202,7 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 			        	revWarp.doUnidirectionalRegistration();
 			        	
 			    		ImagePlus sourceOut = warp.getDirectResults();
-			    		sourceOut.show();
+//			    		sourceOut.show();
 
 //			    		targetImp.getStack().deleteSlice(z+1);
 			    		targetImp.getStack().addSlice("resultSlice "+z+0+1, sourceOut.getStack().getProcessor(1).duplicate());
@@ -262,7 +262,7 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 						targetImp.getRoiManager().addRoi(newRoi, false, roi.getStrokeColor(), roi.getFillColor(), 0, true);
 						targetImp.getRoiManager().setShowAllCheckbox(true);
 					}
-					IJ.log("Slice "+z+1+" warp fit complete.");
+					IJ.log("Slice "+(z+1)+" warp fit complete.");
 			}
 
 			//Code below is nice interaction confirmation that tmxn works!!
