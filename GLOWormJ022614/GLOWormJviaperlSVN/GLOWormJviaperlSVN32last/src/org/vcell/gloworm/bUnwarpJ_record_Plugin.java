@@ -262,7 +262,12 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 						targetImp.getRoiManager().addRoi(newRoi, false, roi.getStrokeColor(), roi.getFillColor(), 0, true);
 						targetImp.getRoiManager().setShowAllCheckbox(true);
 					}
+					IJ.log(" ");
+					IJ.log("*******************************");
 					IJ.log("Slice "+(z+1)+" warp fit complete.");
+					IJ.log("*******************************");
+					IJ.log(" ");
+
 			}
 
 			//Code below is nice interaction confirmation that tmxn works!!
