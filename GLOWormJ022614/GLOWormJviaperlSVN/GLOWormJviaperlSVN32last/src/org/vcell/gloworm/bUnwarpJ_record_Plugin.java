@@ -58,14 +58,14 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 				impDupNum.setTitle(""+num+".tif");
 				impDupNum.setCalibration(imp.getCalibration());
 				impDupNum.show();
-				bUnwarpJ_.loadElasticTransform("/Users/wmohler/Documents/N2U_skelROIs/n2u_bUnwarpJ_2ndRound_testFromCytoShow/"+num+"_direct_transf.txt", "blank", ""+num+".tif");
+				bUnwarpJ_.loadElasticTransform("/Users/wmohler/Documents/N2U_skelROIs/n2u_bUnwarpJ_2ndRound_testFromCytoShow/"+num+"_direct_transf.txt", "target", ""+num+".tif");
 				IJ.saveAs(impDupNum, "Tiff", "/Users/wmohler/Documents/N2U_skelROIs/N2U_uncropped_bUnwarpJ_Apply2NDtfm/"+num+"tfmApp.tif");
 				impDupNum.close();
 			}
 		} else if (mode.equals("RemapRois")) {
 			//THE ORDER OF TARGET AND SOURCE SEEMS TO WORK OPPOSITE OF WHAT I WOULD HAVE EXPECTED.  BUT THIS ALL WORKS.
 			int endZ = imp.getNSlices();
-			ImagePlus targetImp = WindowManager.getImage("blank.tif");
+			ImagePlus targetImp = WindowManager.getImage("target.tif");
 			endZ = targetImp.getNSlices();
 			for (int z=1;z<=endZ;z++) {
 				imp.setPosition(imp.getChannel(), z, imp.getFrame());
@@ -154,8 +154,8 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 			////    			String[] inputNumS = new String[]{""+cLoc.x,""+cLoc.y};
 			//    			tmxn.transform((double) cLoc.x, (double) cLoc.y, xyF, false);
 			////    			IJ.log(""+xyF[0] + ","+xyF[1]);
-			//    			WindowManager.getImage("blank.tif").killRoi();
-			//    			WindowManager.getImage("blank.tif").setRoi((int)xyF[0]-25,(int)xyF[1]-25,50,50);
+			//    			WindowManager.getImage("target.tif").killRoi();
+			//    			WindowManager.getImage("target.tif").setRoi((int)xyF[0]-25,(int)xyF[1]-25,50,50);
 			//    	   }
 			//       }
 		} else if (mode.equals("AlignStk")) {
@@ -213,7 +213,7 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 //			    		targetImp.getStack().deleteSlice(z+1);
 			    		targetImp.getStack().addSlice("resultSlice "+z+0+1, sourceOut.getStack().getProcessor(1).duplicate());
 			    		targetImp.setWindow(new StackWindow(targetImp,false)); 
-			    		targetImp.setTitle("blank.tif");
+			    		targetImp.setTitle("target.tif");
 
 			    		sourceOut.close();
 			        } else {
@@ -283,8 +283,8 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 			////    			String[] inputNumS = new String[]{""+cLoc.x,""+cLoc.y};
 			//    			tmxn.transform((double) cLoc.x, (double) cLoc.y, xyF, false);
 			////    			IJ.log(""+xyF[0] + ","+xyF[1]);
-			//    			WindowManager.getImage("blank.tif").killRoi();
-			//    			WindowManager.getImage("blank.tif").setRoi((int)xyF[0]-25,(int)xyF[1]-25,50,50);
+			//    			WindowManager.getImage("target.tif").killRoi();
+			//    			WindowManager.getImage("target.tif").setRoi((int)xyF[0]-25,(int)xyF[1]-25,50,50);
 			//    	   }
 			//       }
 		}
