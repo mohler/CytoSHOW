@@ -161,7 +161,7 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 		} else if (mode.equals("AlignStk")) {
 			//THE ORDER OF TARGET AND SOURCE SEEMS TO WORK OPPOSITE OF WHAT I WOULD HAVE EXPECTED.  BUT THIS ALL WORKS.
 			int endZ = imp.getNSlices();
-			ImagePlus targetImp = WindowManager.getImage("blank.tif");
+			ImagePlus targetImp = WindowManager.getImage("target.tif");
 			int startZ = targetImp.getNSlices();
 			for (int z=startZ;z<=endZ;z++) {
 				imp.setPosition(imp.getChannel(), z, imp.getFrame());
@@ -182,6 +182,12 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 						break;
 					}
 				}
+				
+				if (imp.getRoi() == null)
+					targetImp.killRoi();
+				if (targetImp.getRoi() == null)
+					imp.killRoi();
+				
 				//this method works with landmarks selected OR without landmarks if nothing selected
 				//landmarks do still affect initial Affine fit, even if landmarkWeight parameter is set to 0.
 				//With 20 scattered landmark points and 
