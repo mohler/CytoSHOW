@@ -194,21 +194,21 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 				//landmarkWeight set to 1 and imageWeight set to 1, it succeeds in some seriously funky fixes to build an excellent overall transform!!!
 				
 				//This tfm warps next image in source stack to fit the last slice in the growing target stack:
-				Transformation warp = bUnwarpJ_.computeTransformationBatch(targetImp, imp, null, null, new Param(2, 0, 0, 2, 0, 0, 1, 1, 10, 0.01));
+				Transformation warp = bUnwarpJ_.computeTransformationBatch(targetImp, imp, null, null, new Param(1, 0, 0, 2, 0.1, 0.1, 1, 1, 10, 0.01));
 				
 				//This reverse tfm is used to remap the source multipoint roi to fit the new warped last target slice:
-				Transformation revWarp = bUnwarpJ_.computeTransformationBatch(imp, targetImp, null, null, new Param(2, 0, 0, 2, 0, 0, 1, 1, 10, 0.01));
+				Transformation revWarp = bUnwarpJ_.computeTransformationBatch(imp, targetImp, null, null, new Param(1, 0, 0, 2, 0.1, 0.1, 1, 1, 10, 0.01));
 
 				targetImp.setPosition(imp.getChannel(), z, imp.getFrame());
 				
 				//This direct unidirectional case seems to work!
 			     if (true) {
 			        	// Do unidirectional registration
-			        	warp.doUnidirectionalRegistration();
-			        	revWarp.doUnidirectionalRegistration();
+//			        	warp.doUnidirectionalRegistration();
+//			        	revWarp.doUnidirectionalRegistration();
 			        	
 			    		ImagePlus sourceOut = warp.getDirectResults();
-//			    		sourceOut.show();
+			    		sourceOut.show();
 
 //			    		targetImp.getStack().deleteSlice(z+1);
 			    		targetImp.getStack().addSlice("resultSlice "+z+0+1, sourceOut.getStack().getProcessor(1).duplicate());
