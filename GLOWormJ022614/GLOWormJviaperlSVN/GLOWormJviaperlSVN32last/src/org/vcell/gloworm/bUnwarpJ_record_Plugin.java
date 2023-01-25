@@ -197,7 +197,7 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 				Transformation warp = bUnwarpJ_.computeTransformationBatch(targetImp, imp, null, null, new Param(1, 0, 0, 2, 0.1, 0.1, 1, 1, 10, 0.01));
 				
 				//This reverse tfm is used to remap the source multipoint roi to fit the new warped last target slice:
-				Transformation revWarp = bUnwarpJ_.computeTransformationBatch(imp, targetImp, null, null, new Param(1, 0, 0, 2, 0.1, 0.1, 1, 1, 10, 0.01));
+//				Transformation revWarp = bUnwarpJ_.computeTransformationBatch(imp, targetImp, null, null, new Param(1, 0, 0, 2, 0.1, 0.1, 1, 1, 10, 0.01));
 
 				targetImp.setPosition(imp.getChannel(), z, imp.getFrame());
 				
@@ -208,7 +208,7 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 //			        	revWarp.doUnidirectionalRegistration();
 			        	
 			    		ImagePlus sourceOut = warp.getDirectResults();
-			    		sourceOut.show();
+//			    		sourceOut.show();
 
 //			    		targetImp.getStack().deleteSlice(z+1);
 			    		targetImp.getStack().addSlice("resultSlice "+z+0+1, sourceOut.getStack().getProcessor(1).duplicate());
@@ -223,7 +223,7 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 					Roi[] sliceRois = imp.getRoiManager().getSliceSpecificRoiArray(imp.getSlice(), imp.getFrame(), false);
 					for (Roi roi:sliceRois) {
 						double[] xyF = new double[2];
-						revWarp.transform((double) roi.getBounds().getCenterX(), (double) roi.getBounds().getCenterY(), xyF, false);
+						warp.transform((double) roi.getBounds().getCenterX(), (double) roi.getBounds().getCenterY(), xyF, true);
 						Roi newRoi = (Roi)roi.clone();
 						if (roi instanceof TextRoi) {
 							newRoi.setLocation(xyF[0]-roi.getBounds().width/2, xyF[1]-roi.getBounds().height/2);
@@ -234,7 +234,7 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 								Polygon poly = rois[r].getPolygon();
 
 								for (int p=0;p<poly.npoints;p++) {
-									revWarp.transform(poly.xpoints[p], poly.ypoints[p], xyF, false);
+									warp.transform(poly.xpoints[p], poly.ypoints[p], xyF, true);
 									poly.xpoints[p] = (int) xyF[0];
 									poly.ypoints[p] = (int) xyF[1];
 								}
@@ -256,7 +256,7 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 						} else {
 							Polygon poly = roi.getPolygon();
 							for (int p=0; p< poly.npoints; p++) {
-								revWarp.transform(poly.xpoints[p], poly.ypoints[p], xyF, false);
+								warp.transform(poly.xpoints[p], poly.ypoints[p], xyF, true);
 								poly.xpoints[p] = (int) xyF[0];
 								poly.ypoints[p] = (int) xyF[1];
 							}
