@@ -16,8 +16,8 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 		ImagePlus imp = IJ.getImage();
 		ImagePlus targetStack = WindowManager.getImage("N2U_uncropped_bUnwarpJ_Apply2NDtfm.tif");
 		String mode = "";
-		while (!(mode.equals("Build") || mode.equals("Apply") || mode.equals("RemapRois")  || mode.equals("AlignStk"))){
-			mode = IJ.getString("Do what? Build or Apply or AlignStk or RemapRois?", "Build");
+		while (!(mode.equals("Build") || mode.equals("Apply") || mode.equals("RemapRois")  || mode.equals("AlignStk") || mode.equals("AlignSlc"))){
+			mode = IJ.getString("Do what? Build or Apply or AlignStk  or AlignSlc or RemapRois?", "Build");
 		}
 		if (mode.equals("Build")) {
 			while(true){
@@ -158,11 +158,12 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 			//    			WindowManager.getImage("target.tif").setRoi((int)xyF[0]-25,(int)xyF[1]-25,50,50);
 			//    	   }
 			//       }
-		} else if (mode.equals("AlignStk")) {
+		} else if (mode.equals("AlignStk") ||mode.equals("AlignSlc")) {
 			//THE ORDER OF TARGET AND SOURCE SEEMS TO WORK OPPOSITE OF WHAT I WOULD HAVE EXPECTED.  BUT THIS ALL WORKS.
 			int endZ = imp.getNSlices();
 			ImagePlus targetImp = WindowManager.getImage("target.tif");
 			int startZ = targetImp.getNSlices();
+			if (mode.equals("AlignSlc")) endZ = startZ;
 			for (int z=startZ;z<=endZ;z++) {
 				imp.setPosition(imp.getChannel(), z, imp.getFrame());
 				targetImp.setPosition(imp.getChannel(), z, imp.getFrame());
