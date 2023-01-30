@@ -12,8 +12,8 @@ public class StackReverser implements PlugIn {
 			return;
 		}
 		if (imp.isHyperStack()) {
-			IJ.error("Flip Z", "This command does not currently work with hyperstacks.");
-			return;
+//			IJ.error("Flip Z", "This command does not currently work with hyperstacks.");
+//			return;
 		}
 		flipStack(imp);
 	}
