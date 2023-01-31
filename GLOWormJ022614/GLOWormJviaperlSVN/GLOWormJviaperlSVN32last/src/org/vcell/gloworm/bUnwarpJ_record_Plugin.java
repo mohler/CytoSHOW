@@ -90,13 +90,13 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 				//landmarks do still affect initial Affine fit, even if landmarkWeight parameter is set to 0.
 				//With 20 scattered landmark points and 
 				//landmarkWeight set to 1 and imageWeight set to 1, it succeeds in some seriously funky fixes to build an excellent overall transform!!!
-				Transformation tmxn = bUnwarpJ_.computeTransformationBatch(imp, targetImp, null, null, new Param(2, 0, 0, 2, 0, 0, 1, 1, 10, 0.01));
+				Transformation tmxn = bUnwarpJ_.computeTransformationBatch(targetImp, imp, null, null, new Param(1, 0, 0, 2, 0.1, 0.1, 1, 1, 10, 0.01));
 				targetImp.setPosition(imp.getChannel(), z, imp.getFrame());
 
 				Roi[] sliceRois = imp.getRoiManager().getSliceSpecificRoiArray(imp.getSlice(), imp.getFrame(), false);
 				for (Roi roi:sliceRois) {
 					double[] xyF = new double[2];
-					tmxn.transform((double) roi.getBounds().getCenterX(), (double) roi.getBounds().getCenterY(), xyF, false);
+					tmxn.transform((double) roi.getBounds().getCenterX(), (double) roi.getBounds().getCenterY(), xyF, true);
 					Roi newRoi = (Roi)roi.clone();
 					if (roi instanceof TextRoi) {
 						newRoi.setLocation(xyF[0]-roi.getBounds().width/2, xyF[1]-roi.getBounds().height/2);
@@ -107,7 +107,7 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 							Polygon poly = rois[r].getPolygon();
 
 							for (int p=0;p<poly.npoints;p++) {
-								tmxn.transform(poly.xpoints[p], poly.ypoints[p], xyF, false);
+								tmxn.transform(poly.xpoints[p], poly.ypoints[p], xyF, true);
 								poly.xpoints[p] = (int) xyF[0];
 								poly.ypoints[p] = (int) xyF[1];
 							}
@@ -129,7 +129,7 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 					} else {
 						Polygon poly = roi.getPolygon();
 						for (int p=0; p< poly.npoints; p++) {
-							tmxn.transform(poly.xpoints[p], poly.ypoints[p], xyF, false);
+							tmxn.transform(poly.xpoints[p], poly.ypoints[p], xyF, true);
 							poly.xpoints[p] = (int) xyF[0];
 							poly.ypoints[p] = (int) xyF[1];
 						}
@@ -160,6 +160,8 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 			//       }
 		} else if (mode.equals("AlignStk") ||mode.equals("AlignSlc")) {
 			//THE ORDER OF TARGET AND SOURCE SEEMS TO WORK OPPOSITE OF WHAT I WOULD HAVE EXPECTED.  BUT THIS ALL WORKS.
+			if (imp.getTitle() == "target.tif")
+				return;
 			int endZ = imp.getNSlices();
 			ImagePlus targetImp = WindowManager.getImage("target.tif");
 			int startZ = targetImp.getNSlices();
