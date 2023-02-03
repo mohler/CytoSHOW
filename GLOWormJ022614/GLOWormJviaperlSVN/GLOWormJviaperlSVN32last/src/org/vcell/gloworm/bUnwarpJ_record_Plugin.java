@@ -86,6 +86,12 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 						break;
 					}
 				}
+				
+				if (imp.getRoi() == null)
+					targetImp.killRoi();
+				if (targetImp.getRoi() == null)
+					imp.killRoi();
+				
 				//this method works with landmarks selected OR without landmarks if nothing selected
 				//landmarks do still affect initial Affine fit, even if landmarkWeight parameter is set to 0.
 				//With 20 scattered landmark points and 

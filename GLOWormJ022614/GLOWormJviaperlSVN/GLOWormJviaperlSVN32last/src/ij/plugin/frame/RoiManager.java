@@ -492,6 +492,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	public void doAction(ActionEvent e) {
 		// IJ.log(e.toString()+3);
+		this.imp.getCanvas().requestFocus();
 
 		if (e == null)
 			return;
