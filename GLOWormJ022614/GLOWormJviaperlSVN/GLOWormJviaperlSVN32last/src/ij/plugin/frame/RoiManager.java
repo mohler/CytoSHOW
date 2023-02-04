@@ -711,8 +711,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			} else if (command.equals("Delete"))
 				delete(false);
 			else if (command.equals("Delete ")) {
-				if (list.getSelectedIndices().length == 1)
-					delete(false);
+				delete(false);
+//				if (list.getSelectedIndices().length == 1)
+//					delete(false);
 			} else if (command.equals("Color")) {
 				Roi[] selectedRois = getSelectedRoisAsArray();
 				if (selectedRois.length > 0) {
@@ -2943,8 +2944,64 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (count == 0)
 			return error("The list is empty.");
 		int[] indexes = getSelectedIndexes();
+		
+		Roi impRoi = imp.getRoi();
+		if (impRoi != null) {
+			boolean fullInclusion = IJ.getString("Delete only tags Fully within selection?", "Fully").equals("Fully"); 
+			Roi[] sliceRois = this.getSliceSpecificRoiArray(imp.getSlice(), imp.getFrame(), false);
+			int[] sliceIndexes = this.getSliceSpecificIndexes(imp.getSlice(), imp.getFrame(), false);
+			ArrayList<Integer> containedRoiIndexes = new ArrayList<Integer>();
+			for (int r=0;r<sliceRois.length;r++) {
+				boolean include = fullInclusion;
+				
+				if (sliceRois[r] instanceof ShapeRoi) {
+					Roi[] rois = ((ShapeRoi) sliceRois[r]).getRois();
+					for (int r1=0;r1<rois.length;r1++) {
+						Polygon srBounds = rois[r1].getPolygon();
+
+						for (int p=0;p<srBounds.npoints;p++) {
+							if (impRoi.contains(srBounds.xpoints[p], srBounds.ypoints[p])) {
+								if (!fullInclusion) {						
+									include = true;
+									p = srBounds.npoints;
+								}
+							} else {
+								if (fullInclusion) {	
+									include = false;
+									p = srBounds.npoints;
+								}
+							}					
+						}
+					}
+
+				} else {
+					Polygon srBounds = sliceRois[r].getPolygon();
+					for (int p=0;p<srBounds.npoints;p++) {
+						if (impRoi.contains(srBounds.xpoints[p], srBounds.ypoints[p])) {
+							if (!fullInclusion) {						
+								include = true;
+								p = srBounds.npoints;
+							}
+						} else {
+							if (fullInclusion) {	
+								include = false;
+								p = srBounds.npoints;
+							}
+						}					
+					}
+	
+				}
+				
+				if (include)
+					containedRoiIndexes.add(sliceIndexes[r]);
+			}
+			indexes = new int[containedRoiIndexes.size()];
+			for (int i=0;i<indexes.length;i++) {
+				indexes[i] = containedRoiIndexes.get(i);
+			}
+		}
 //		Roi[] selRois = getSelectedRoisAsArray();
-		if (indexes.length == 0 || (replacing && count > 1)) {
+		if (impRoi == null && indexes.length == 0 || (replacing && count > 1)) {
 			String msg = "Delete all items on the list?";
 			if (replacing)
 				msg = "Replace items on the list?";
