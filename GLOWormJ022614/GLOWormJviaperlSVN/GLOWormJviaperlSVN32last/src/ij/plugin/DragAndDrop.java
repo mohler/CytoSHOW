@@ -1554,7 +1554,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 			}
 			else if (nextItem!=null && ( ((File)nextItem).getPath().toLowerCase().endsWith(".mov") 
 					|| ((File)nextItem).getPath().toLowerCase().endsWith(".avi"))) 
-				pathList = pathList + ((File)nextItem).getPath() +  ((iterator.hasNext()  || openAsVirtualStack)? "|": "");
+				pathList = pathList + ((File)nextItem).getPath() +  ((((File)nextItem).getPath().toLowerCase().endsWith(".mov") && (iterator.hasNext()  || openAsVirtualStack))? "|": "");
 			else if (nextItem!=null && ((File)nextItem).getPath().toLowerCase().contains("scene.scn")) {
 				if (IJ.is64Bit())
 					MQTVSSceneLoader64.runMQTVS_SceneLoader64( ((File)nextItem).getPath() );
@@ -1804,7 +1804,15 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 		if (pathList != "") {
 			if (IJ.debugMode) IJ.log( pathList);
 			if (!pathList.contains("/Volumes/GLOWORM_DATA/")) {
-				new QTMovieOpenerMultiMod(pathList);
+				if (pathList.toLowerCase().endsWith(".avi")) {
+					if (openAsVirtualStack)
+						IJ.run("AVI...", "select="+pathList+" use");
+					else
+						IJ.run("AVI...", "select="+pathList+"");
+
+				} else {
+					new QTMovieOpenerMultiMod(pathList);
+				}
 			} else {
 				MQTVSSceneLoader64.runMQTVS_SceneLoader64(pathList.replaceAll("%2B", "\\+").replaceAll("%25", "%"));
 			}
