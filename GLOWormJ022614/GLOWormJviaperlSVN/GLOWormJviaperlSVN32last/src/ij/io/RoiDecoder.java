@@ -200,17 +200,47 @@ public class RoiDecoder {
 		Roi roi = null;
 		if (isComposite) {
 			roi = getShapeRoi();
+			Roi[] rois = ((ShapeRoi) roi).getRois();
+			Roi[] scaledRois = new Roi[rois.length];
+			for (int r=0;r<rois.length;r++) {
+				Polygon poly = rois[r].getPolygon();
+
+				for (int p=0;p<poly.npoints;p++) {
+					poly.xpoints[p] = (int)(poly.xpoints[p]*scaleFactor);
+					poly.ypoints[p] = (int)(poly.ypoints[p]*scaleFactor);
+				}
+				scaledRois[r] = new ShapeRoi(poly);
+				scaledRois[r].copyAttributes(rois[r]);
+			}
+			ShapeRoi scaledRoi = null;
+			for (Roi scaledPart:scaledRois) {
+				if (scaledRoi == null) {
+					scaledRoi = new ShapeRoi(scaledPart);
+				} else {
+					// can't really do anything with additional saved Rois, can I?
+				}
+			}
 			if (version>=218)
 				getStrokeWidthAndColor(roi, hdr2Offset);
-			roi.setPosition(roi.getImage(), position);
+			
+			scaledRoi.copyAttributes(roi);
+			scaledRoi.setPosition(roi.getImage(), position);
 			if (channel>0 || slice>0 || frame>0)
-				roi.setPosition(channel, slice, frame);
-			decodeOverlayOptions(roi, version, options, overlayLabelColor, overlayFontSize);
-			return roi;
+				scaledRoi.setPosition(channel, slice, frame);
+			decodeOverlayOptions(scaledRoi, version, options, overlayLabelColor, overlayFontSize);
+			return scaledRoi;
 		}
 
 		switch (type) {
 			case rect:
+				if (version>=218 && subtype==TEXT) {
+					if (subPixelRect)
+						roi = new Roi(xd, yd, widthd, heightd);
+					else
+						roi = new Roi(left, top, width, height);
+					roi = getTextRoi(roi);
+					break;
+				}
 				if (subPixelRect)
 					roi = new Roi(xd*scaleFactor, yd*scaleFactor, widthd*scaleFactor, heightd*scaleFactor);
 				else
@@ -331,9 +361,6 @@ public class RoiDecoder {
 				((PolygonRoi)roi).fitSpline();
 		}
 		
-		if (version>=218 && subtype==TEXT)
-			roi = getTextRoi(roi);
-
 		if (version>=221 && subtype==IMAGE)
 			roi = getImageRoi(roi, imageOpacity, imageSize);
 
@@ -384,10 +411,10 @@ public class RoiDecoder {
 		int type = getByte(TYPE);
 		if (type!=rect)
 			throw new IllegalArgumentException("Invalid composite ROI type");
-		int top= (int) (getShort(TOP)*scaleFactor);
-		int left = (int) (getShort(LEFT)*scaleFactor);
-		int bottom = (int) (getShort(BOTTOM)*scaleFactor);
-		int right = (int) (getShort(RIGHT)*scaleFactor);
+		int top= (int) (getShort(TOP));
+		int left = (int) (getShort(LEFT));
+		int bottom = (int) (getShort(BOTTOM));
+		int right = (int) (getShort(RIGHT));
 		int width = right-left;
 		int height = bottom-top;
 		int n = getInt(SHAPE_ROI_SIZE);
@@ -396,7 +423,7 @@ public class RoiDecoder {
 		float[] shapeArray = new float[n];
 		int base = COORDINATES;
 		for(int i=0; i<n; i++) {
-			shapeArray[i] = (float) (getFloat(base)*scaleFactor);
+			shapeArray[i] = (float) (getFloat(base));
 			base += 4;
 		}
 		roi = new ShapeRoi(shapeArray);

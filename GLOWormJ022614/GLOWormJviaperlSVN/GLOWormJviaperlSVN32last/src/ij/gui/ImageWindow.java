@@ -967,7 +967,8 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		this.getDragAndDrop().setWorking(false);
     	if (isRunning) IJ.wait(500);
     	if (imp!=null && ij==null || IJ.getApplet()!=null || Interpreter.isBatchMode() || IJ.macroRunning() || virtual)
-    		imp.changes = false;
+    		if (imp!=null)
+    			imp.changes = false;
     	if (imp!=null && imp.changes) {
     		String msg;
     		String name = imp.getTitle();

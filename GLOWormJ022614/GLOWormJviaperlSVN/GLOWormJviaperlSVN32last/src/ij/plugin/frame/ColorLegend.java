@@ -254,7 +254,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 						
 						Set<Thread> threadsInJVM = Thread.getAllStackTraces().keySet();
 						int nbThreads = threadsInJVM.size();
-						while (nbThreads >200) {
+						while (nbThreads >50) {
 							IJ.wait(10);
 							threadsInJVM = Thread.getAllStackTraces().keySet();
 							nbThreads = threadsInJVM.size();
@@ -283,7 +283,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 								buildHitTest = buildHitTest+ ".*post.*$";
 								final String hitTestPost = fixedName.split("-")[0].toLowerCase().replaceAll(buildHitTest, "$2");
 
-								while (nbThreads >200) {
+								while (nbThreads >50) {
 									IJ.wait(10);
 									threadsInJVM = Thread.getAllStackTraces().keySet();
 									nbThreads = threadsInJVM.size();
@@ -306,7 +306,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 							}
 						}
 
-						IJ.showStatus(index+"/"+lm.getSize()+" tags color-adjusted.");
+						IJ.showStatus(index+"/"+lm.getSize()+" contents color-adjusted.");
 					}
 					JList list = ((Image3DUniverse)univ).getContent3DManager().getList();
 					int listfirstposition = list.getFirstVisibleIndex();
@@ -331,6 +331,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 
 						ArrayList<String> hitTests = new ArrayList<String>();
 
+						hitTests.add( fixedName.split(" =.* \"_")[0].toLowerCase().replace("\"", ""));
 						hitTests.add( fixedName.split(" \"_")[0].toLowerCase().replace("\"", ""));
 						hitTests.add( fixedName.split(" \"_")[0].toLowerCase().replace("\"", "").replaceAll("^(.*by)(.*)$", "$2"));
 						hitTests.add( fixedName.split(" \"_")[0].toLowerCase().replace("\"", "").replaceAll(".*_(.*)[_$].*","$1"));
@@ -403,7 +404,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 					list.ensureIndexIsVisible(listlastposition);
 					list.ensureIndexIsVisible(listfirstposition);
 
-					IJ.showStatus("All content color-adjusted per ColorLegend");
+					IJ.showStatus("All tags color-adjusted per ColorLegend");
 
 				}
 			}
@@ -896,12 +897,22 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 		File clFile = new File(path);
 		String clString = "";
 		for (JCheckBox cb:getJCheckBox()) {
-			clString = clString + cb.getName() +","+ cb.getLabel() +","
+			if (cb.getBackground() != null) {
+				clString = clString + cb.getName().replace("_", "") +","+ cb.getLabel() +","
 						+ Colors.colorToHexString(cb.getBackground()) +","
 						+ cb.getBackground().getAlpha() +","
 						+ cb.getBackground().getRed() +","
 						+ cb.getBackground().getGreen() +","
 						+ cb.getBackground().getBlue() +"\n";
+			} else {
+				clString = clString + cb.getName().replace("_", "") +","+ cb.getLabel() +","
+						+ "#00000000" +","
+						+ 0 +","
+						+ 0 +","
+						+ 0 +","
+						+ 0 +"\n";
+
+			}
 		}
 		clFile.createNewFile();
 
@@ -918,18 +929,29 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 			ArrayList<JCheckBox> tempCheckboxes = new ArrayList<JCheckBox>();
 			ArrayList<String> alreadyNamed = new ArrayList<String>();
 			int i=0;
+			if (brainbowColors == null) {
+				brainbowColors = new Hashtable<String, Color>();
+			}
 			for (Roi roi:selRois) {
 				if (alreadyNamed.contains(roi.getName().split(" \"_")[0].replace("\"","")))
 					continue;
 				Color roiARGBcolor = roi.getFillColor();
+				if (roiARGBcolor == null) {
+					roiARGBcolor = roi.getStrokeColor();
+				}
+				if (roiARGBcolor == null) {
+					roiARGBcolor = roi.getColor();
+				}
 				tempCheckboxes.add(new JCheckBox(roi.getName().split(" \"_")[0].replace("\"","")));
 				tempCheckboxes.get(tempCheckboxes.size()-1).setSize(150, 10);
 				tempCheckboxes.get(tempCheckboxes.size()-1).setText(roi.getName().split(" \"_")[0].replace("\"",""));
 				tempCheckboxes.get(tempCheckboxes.size()-1).setName(roi.getName().split(" \"_")[0].replace("\"",""));			
 				tempCheckboxes.get(tempCheckboxes.size()-1).setBackground(roiARGBcolor);
-				brainbowColors.put(tempCheckboxes.get(tempCheckboxes.size()-1).getName().toLowerCase(), roiARGBcolor);
+				if (roiARGBcolor != null) {
 
-				checkboxHash.put(roiARGBcolor, tempCheckboxes.get(tempCheckboxes.size()-1));
+					brainbowColors.put(tempCheckboxes.get(tempCheckboxes.size()-1).getName().toLowerCase(), roiARGBcolor);
+					checkboxHash.put(roiARGBcolor, tempCheckboxes.get(tempCheckboxes.size()-1));
+				}
 				tempCheckboxes.get(tempCheckboxes.size()-1).setFont(Menus.getFont().deriveFont(8));
 				//		IJ.log("WHATUP?");
 				i++;

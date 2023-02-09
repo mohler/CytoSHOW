@@ -492,6 +492,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	public void doAction(ActionEvent e) {
 		// IJ.log(e.toString()+3);
+		this.imp.getCanvas().requestFocus();
 
 		if (e == null)
 			return;
@@ -710,8 +711,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			} else if (command.equals("Delete"))
 				delete(false);
 			else if (command.equals("Delete ")) {
-				if (list.getSelectedIndices().length == 1)
-					delete(false);
+				delete(false);
+//				if (list.getSelectedIndices().length == 1)
+//					delete(false);
 			} else if (command.equals("Color")) {
 				Roi[] selectedRois = getSelectedRoisAsArray();
 				if (selectedRois.length > 0) {
@@ -1999,7 +2001,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					}
 
 					if (nextRoi instanceof TextRoi) {
-						scaledRoi = (Roi) nextRoi.clone();
+						if (false) {							//implementing this will allow printing of 3d text.  Not desired right now.
+//							scaledRoi = (Roi) nextRoi.clone();
+						} else {
+							Roi fontMetricsRoi = new TextRoi(((TextRoi)nextRoi).getText(), nextRoi.getBounds().x, nextRoi.getBounds().y, ((TextRoi)nextRoi).getCurrentFont());
+							Rectangle fmrBounds = fontMetricsRoi.getBounds();
+							Roi textBoundsBoxRoi = new Roi(fmrBounds.x, fmrBounds.y, fmrBounds.height*2, fmrBounds.height*2);
+							scaledRoi = new RoiDecoder(scaleFactor, RoiEncoder.saveAsByteArray(textBoundsBoxRoi), nextRoi.getName())
+									.getRoi();
+						}
 					} else {
 						scaledRoi = new RoiDecoder(scaleFactor, RoiEncoder.saveAsByteArray(nextRoi), nextRoi.getName())
 								.getRoi();
@@ -2017,7 +2027,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			sketchImp.getRoiManager().select(-1);
 			boolean filled = false;
-			filled = sketchImp.getRoiManager().drawOrFill(nextRoi instanceof TextRoi ? DRAW : FILL);
+			filled = sketchImp.getRoiManager().drawOrFill(/* nextRoi instanceof TextRoi ? DRAW : */ FILL);  //DRAW option would print text.  May be useful someday, but not now.
 
 			while (!filled) {
 				IJ.wait(100);
@@ -2682,7 +2692,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					String hexRed = Integer.toHexString(clColor.getRed());
 					String hexGreen = Integer.toHexString(clColor.getGreen());
 					String hexBlue = Integer.toHexString(clColor.getBlue());
-					String hexAlpha = Colors.colorToHexString(roiCopy.getFillColor()).substring(0, 3);
+					String hexAlpha = "";
+					if (Colors.colorToHexString(clColor).length() == 9)
+						hexAlpha = Colors.colorToHexString(clColor).substring(0, 3);
 					this.setRoiFillColor(roiCopy,
 							Colors.decode(hexAlpha + (hexRed.length() == 1 ? "0" : "") + hexRed
 									+ (hexGreen.length() == 1 ? "0" : "") + hexGreen
@@ -2932,8 +2944,64 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (count == 0)
 			return error("The list is empty.");
 		int[] indexes = getSelectedIndexes();
+		
+		Roi impRoi = imp.getRoi();
+		if (impRoi != null) {
+			boolean fullInclusion = IJ.getString("Delete only tags Fully within selection?", "Fully").equals("Fully"); 
+			Roi[] sliceRois = this.getSliceSpecificRoiArray(imp.getSlice(), imp.getFrame(), false);
+			int[] sliceIndexes = this.getSliceSpecificIndexes(imp.getSlice(), imp.getFrame(), false);
+			ArrayList<Integer> containedRoiIndexes = new ArrayList<Integer>();
+			for (int r=0;r<sliceRois.length;r++) {
+				boolean include = fullInclusion;
+				
+				if (sliceRois[r] instanceof ShapeRoi) {
+					Roi[] rois = ((ShapeRoi) sliceRois[r]).getRois();
+					for (int r1=0;r1<rois.length;r1++) {
+						Polygon srBounds = rois[r1].getPolygon();
+
+						for (int p=0;p<srBounds.npoints;p++) {
+							if (impRoi.contains(srBounds.xpoints[p], srBounds.ypoints[p])) {
+								if (!fullInclusion) {						
+									include = true;
+									p = srBounds.npoints;
+								}
+							} else {
+								if (fullInclusion) {	
+									include = false;
+									p = srBounds.npoints;
+								}
+							}					
+						}
+					}
+
+				} else {
+					Polygon srBounds = sliceRois[r].getPolygon();
+					for (int p=0;p<srBounds.npoints;p++) {
+						if (impRoi.contains(srBounds.xpoints[p], srBounds.ypoints[p])) {
+							if (!fullInclusion) {						
+								include = true;
+								p = srBounds.npoints;
+							}
+						} else {
+							if (fullInclusion) {	
+								include = false;
+								p = srBounds.npoints;
+							}
+						}					
+					}
+	
+				}
+				
+				if (include)
+					containedRoiIndexes.add(sliceIndexes[r]);
+			}
+			indexes = new int[containedRoiIndexes.size()];
+			for (int i=0;i<indexes.length;i++) {
+				indexes[i] = containedRoiIndexes.get(i);
+			}
+		}
 //		Roi[] selRois = getSelectedRoisAsArray();
-		if (indexes.length == 0 || (replacing && count > 1)) {
+		if (impRoi == null && indexes.length == 0 || (replacing && count > 1)) {
 			String msg = "Delete all items on the list?";
 			if (replacing)
 				msg = "Replace items on the list?";
@@ -3839,25 +3907,32 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					if (roi != null) {
 //						name = name.substring(0, name.length() - 4);
 
-						int c = roi.getCPosition();
-						int z = roi.getZPosition();
-						int t = roi.getTPosition();
+						int c = 1;
+						int z = 1;
+						int t = 1;
+						
+						int roiC = roi.getCPosition();
+						int roiZ = roi.getZPosition();
+						int roiT = roi.getTPosition();
 						Color roiColor = roi.getFillColor();
 
+						int readC = roiC;
+						int readZ = roiZ;
+						int readT = roiT;
 						if (name.split("_").length == 4) {
-							c = Integer.parseInt(name.split("_")[1]);
-							z = Integer.parseInt(name.split("_")[2]);
-							t = Integer.parseInt(name.split("_")[3].split("[CZT-]")[0]);
+							readC = Integer.parseInt(name.split("_")[1]);
+							readZ = Integer.parseInt(name.split("_")[2]);
+							readT = Integer.parseInt(name.split("_")[3].split("[CZT-]")[0]);
 						}
 
 						if (name.split("_").length == 5) {
 							roiColor = Colors.decode(name.split("_")[1], roiColor);
-							c = Integer.parseInt(name.split("_")[2]);
-							z = Integer.parseInt(name.split("_")[3]);
-							t = Integer.parseInt(name.split("_")[4].split("[CZT-]")[0]);
+							readC = Integer.parseInt(name.split("_")[2]);
+							readZ = Integer.parseInt(name.split("_")[3]);
+							readT = Integer.parseInt(name.split("_")[4].split("[CZT-]")[0]);
 						}
 
-						int oldZ = z;
+//						int oldZ = z;
 
 ////		  SPECIAL CASE ONLY FOR honoring JSH image GAPS AT Z56 z163-166				
 //						if (z>55){
@@ -3869,16 +3944,31 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //							z++;
 //							z++;							
 //						}
-
-						roi.setPosition(c, z, t);
+						
+						if (readC>imp.getNChannels()) {
+							c = imp.getNChannels();
+						}else {
+							c = readC;
+						}
+						if (readZ>imp.getNSlices()) {
+							z = imp.getNSlices();
+						}else {
+							z = readZ;
+						}
+						if (readT>imp.getNFrames()) {
+							t = imp.getNFrames();
+						}else {
+							t = readT;
+						}
+						
 						roi.setFillColor(roiColor); // only place in this class where this.setRoiFillColor(Roi, Color)
 													// should not be used.
 
-						if (imp.getNSlices() == 1)
-							roi.setPosition(c, 1, t);
-						if (!name.contains(" \"_#"))
-							name = name.replace(" \"_", " \"_"+Colors.colorToHexString(roiColor)+"_");
-						name = name.replace("_" + oldZ + "_", "_" + z + "_");
+//						if (imp.getNSlices() == 1)
+//							roi.setPosition(c, 1, t);
+//						if (!name.contains(" \"_#"))
+//							name = name.replace(" \"_", " \"_"+Colors.colorToHexString(roiColor)+"_");
+//						name = name.replace("_" + oldZ + "_", "_" + z + "_");
 
 						if (cl != null) {
 							Color clColor = cl.getBrainbowColors().get(
@@ -3892,7 +3982,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								String hexRed = Integer.toHexString(clColor.getRed());
 								String hexGreen = Integer.toHexString(clColor.getGreen());
 								String hexBlue = Integer.toHexString(clColor.getBlue());
-								String hexAlpha = Colors.colorToHexString(roiColor).substring(0, 3);
+								String hexAlpha = "";
+								if (Colors.colorToHexString(roiColor).length() == 9)
+										hexAlpha = Colors.colorToHexString(roiColor).substring(0, 3);
 								this.setRoiFillColor(roi,
 										Colors.decode(hexAlpha + (hexRed.length() == 1 ? "0" : "") + hexRed
 												+ (hexGreen.length() == 1 ? "0" : "") + hexGreen
@@ -3905,15 +3997,18 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						} else if (name.split("_").length == 5) {
 							name = name.replace(name.split("_")[1], Colors.colorToHexString(roiColor));
 						}
-						roi.setImage(imp);
-
+						
 						if (roi instanceof TextRoi) {
 							name = (((TextRoi) roi).getText().indexOf("\n") > 0
 									? ("\"" + ((TextRoi) roi).getText().replace("\n", " ") + "\"")
-									: "Blank") + "_" + Colors.colorToHexString(roiColor) + "_" + name.split("_")[1]
-									+ "_" + name.split("_")[2] + "_" + name.split("_")[3];
+									: "Blank") + "_" + name.split("_")[1]
+									+ "_" + name.split("_")[2] + "_" + name.split("_")[3]  + "_" + name.split("_")[4];
 
 						}
+						name = name.split("_")[0] + "_" + name.split("_")[1]
+									+ "_" + name.split("_")[2].replace(""+readC, ""+c) 
+									+ "_" + name.split("_")[3].replace(""+readZ, ""+z)  
+									+ "_" + name.split("_")[4].replace(""+readT, ""+t);
 						name = getUniqueName(name);
 						
 						listModel.addElement(name);
@@ -3936,6 +4031,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								nameEndReader = nameEndReader.substring(0, nameEndReader.length() - 1);
 							}
 						}
+						roi.setImage(imp);
+
 						roi.setPosition(c, z, t);
 						String rbnKey = roi.getCPosition() + "_" + (imp.getNSlices() == 1 ? 1 : roi.getZPosition())
 								+ "_" + roi.getTPosition();
@@ -7026,8 +7123,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					rbnShifted = new ArrayList<Roi>();
 					rbnShifted.add(roi);
 					roisByNumbers.put(rbnsKey, rbnShifted);
-					IJ.log(roisByNumbers.containsKey(rbnsKey) + " " + roisByNumbers.containsValue(rbnShifted) + " "
-							+ rbnShifted.contains(roi));
+//					IJ.log(roisByNumbers.containsKey(rbnsKey) + " " + roisByNumbers.containsValue(rbnShifted) + " "
+//							+ rbnShifted.contains(roi));
 				} else {
 					if (roi.getName().contains("~")){
 						rbnShifted.add(0,roi);
@@ -7035,7 +7132,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						rbnShifted.add(roi);
 					}
 				}
-				IJ.log(roisByNumbers.get(rbnsKey).toString());
+//				IJ.log(roisByNumbers.get(rbnsKey).toString());
 				String label ="";
 				if (roi.getName() != null && roi.getName().split("\"").length > 1){
 					label = "\"" + roi.getName().split("\"")[1].trim() + " \"" + "_" +Colors.colorToHexString(roi.getFillColor()) + "_" + roi.getCPosition() + "_"
@@ -7643,12 +7740,30 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (cropRoi == null)
 			cropRoi = new Roi(0,0,imp.getWidth(),imp.getHeight());
 		Hashtable<String, ArrayList> synapsePairFrequencyHashtable = new Hashtable<String, ArrayList>();			
+		int cropSkipCount = 0;
+		int preSynSkipCount = 0;
+		int postSynSkipCount = 0;
 		for (Roi roi:getShownRoisAsArray()) {
 			if (!cropRoi.contains((int)roi.getBounds().getCenterX(), (int)roi.getBounds().getCenterY())) {
+				cropSkipCount++;
+				continue;
+			}
+			String core158names = "ADAL|ADAR|ADFL|ADFR|ADLL|ADLR|AFDL|AFDR|AIAL|AIAR|AIBL|AIBR|AIML|AIMR|AINL|AINR|AIYL|AIYR|AIZL|AIZR|ALA|ALML|ALMR|ASEL|ASER|ASGL|ASGR|ASHL|ASHR|ASIL|ASIR|ASJL|ASJR|ASKL|ASKR|AUAL|AUAR|AVAL|AVAR|AVBL|AVBR|AVDL|AVDR|AVEL|AVER|AVHL|AVHR|AVJL|AVJR|AVKL|AVKR|AWAL|AWAR|AWBL|AWBR|AWCL|AWCR|BAGL|BAGR|BDUL|BDUR|CEPDL|CEPDR|CEPVL|CEPVR|DVA|DVC|FLPL|FLPR|IL1DL|IL1DR|IL1L|IL1R|IL1VL|IL1VR|IL2DL|IL2DR|IL2L|IL2R|IL2VL|IL2VR|OLLL|OLLR|OLQDL|OLQDR|OLQVL|OLQVR|PVCL|PVCR|PVPL|PVPR|PVQL|PVQR|PVT|RIAL|RIAR|RIBL|RIBR|RICL|RICR|RID|RIFL|RIFR|RIGL|RIGR|RIH|RIML|RIMR|RIPL|RIPR|RIR|RIS|RIVL|RIVR|RMDDL|RMDDR|RMDL|RMDR|RMDVL|RMDVR|RMED|RMEL|RMER|RMEV|RMGL|RMGR|SAADL|SAADR|SAAVL|SAAVR|SIADL|SIADR|SIAVL|SIAVR|SIBDL|SIBDR|SIBVL|SIBVR|SMBDL|SMBDR|SMBVL|SMBVR|SMDDL|SMDDR|SMDVL|SMDVR|URADL|URADR|URAVL|URAVR|URBL|URBR|URXL|URXR|URYDL|URYDR|URYVL|URYVR";
+			String core160names = "ADAL|ADAR|ADFL|ADFR|ADLL|ADLR|AFDL|AFDR|AIAL|AIAR|AIBL|AIBR|AIML|AIMR|AINL|AINR|AIYL|AIYR|AIZL|AIZR|ALA|ALML|ALMR|ASEL|ASER|ASGL|ASGR|ASHL|ASHR|ASIL|ASIR|ASJL|ASJR|ASKL|ASKR|AUAL|AUAR|AVAL|AVAR|AVBL|AVBR|AVDL|AVDR|AVEL|AVER|AVHL|AVHR|AVJL|AVJR|AVKL|AVKR|AVL|AWAL|AWAR|AWBL|AWBR|AWCL|AWCR|BAGL|BAGR|BDUL|BDUR|CEPDL|CEPDR|CEPVL|CEPVR|DVA|DVC|FLPL|FLPR|IL1DL|IL1DR|IL1L|IL1R|IL1VL|IL1VR|IL2DL|IL2DR|IL2L|IL2R|IL2VL|IL2VR|OLLL|OLLR|OLQDL|OLQDR|OLQVL|OLQVR|PVCL|PVCR|PVPL|PVPR|PVQL|PVQR|PVR|PVT|RIAL|RIAR|RIBL|RIBR|RICL|RICR|RID|RIFL|RIFR|RIGL|RIGR|RIH|RIML|RIMR|RIPL|RIPR|RIR|RIS|RIVL|RIVR|RMDDL|RMDDR|RMDL|RMDR|RMDVL|RMDVR|RMED|RMEL|RMER|RMEV|RMGL|RMGR|SAADL|SAADR|SAAVL|SAAVR|SIADL|SIADR|SIAVL|SIAVR|SIBDL|SIBDR|SIBVL|SIBVR|SMBDL|SMBDR|SMBVL|SMBVR|SMDDL|SMDDR|SMDVL|SMDVR|URADL|URADR|URAVL|URAVR|URBL|URBR|URXL|URXR|URYDL|URYDR|URYVL|URYVR";
+			String core160synMatchKey = "^.*("+ core160names +")+((undefined|chemical|electrical)+)(\\&*("+ core160names +"))+.* \\\".*";
+			String core158synMatchKey = "^.*("+ core158names +")+((undefined|chemical|electrical)+)(\\&*("+ core158names +"))+.* \\\".*";
+			String roiName = roi.getName();
+
+			if (!roiName.matches(shiftKeyDown?core158synMatchKey:".*")) {
+				preSynSkipCount++;
 				continue;
 			}
 			String name = roi.getName();
-			String[] nameChunks = name.split("(\"|electric|chemical|undefined|\\~)");
+			if (name.contains("?")) {
+				preSynSkipCount++;
+				continue;
+			}
+			String[] nameChunks = name.split("(\"|electrical|chemical|undefined|\\~)");
 //			IJ.log(Arrays.toString(nameChunks));
 			String presynName = nameChunks[1];
 			String[] postsynNames = nameChunks[2].split("\\&");
@@ -7656,6 +7771,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			String objType = name.split("\""+presynName+"|"+postsynNames[0])[1];
 			
 			for (String postsynName : postsynNames) {
+				if (!postsynName.matches(shiftKeyDown?core158names:".*")) {
+					postSynSkipCount++;
+					continue;
+				}
 				IJ.log(presynName + "," + postsynName + "," + plotZ + "," + 1 + "," + objType);
 
 				if (synapsePairFrequencyHashtable
@@ -7670,6 +7789,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		updateShowAll();
 		Object[] keysArray = synapsePairFrequencyHashtable.keySet().toArray();
 		Arrays.sort(keysArray);
+		IJ.log(" ");
+		IJ.log("skipped "+cropSkipCount+" crop");
+		IJ.log("skipped "+preSynSkipCount+" pre");
+		IJ.log("skipped "+postSynSkipCount+" post");
 		IJ.log(" ");
 		IJ.log(" ");
 		IJ.log(" ");
@@ -10269,8 +10392,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			Integer[] clusters = null;
 			Integer[] SNs = null;
 			if (cellNamesFromMeiLabPath == null) {
-				clusters = nameToClustersAndSNsHashtable.get(outputTag.split("[_-]")[0])[0];
-				SNs = nameToClustersAndSNsHashtable.get(outputTag.split("[_-]")[0])[1];
+				clusters = nameToClustersAndSNsHashtable.get(outputTag.split("[_]")[0])[0];
+				SNs = nameToClustersAndSNsHashtable.get(outputTag.split("[_]")[0])[1];
 			} else if (cellNamesFromMeiLabPath != null) {
 				clusters = nameToClustersAndSNsHashtable.get(outputTag.split("[_-]")[0])[0];
 				SNs = nameToClustersAndSNsHashtable.get(outputTag.split("[_-]")[0])[1];

@@ -22,14 +22,14 @@ public class PointRoi extends PolygonRoi {
 	private static final BasicStroke twoPixelsWide = new BasicStroke(2);
 	private static final BasicStroke threePixelsWide = new BasicStroke(3);
 	private static int defaultType = HYBRID;
-	private static int defaultSize = SMALL;
+	private static int defaultSize = EXTRA_LARGE;
 	private static Font font;
-	private static Color defaultCrossColor = Color.white;
-	private static int fontSize = 9;
+	private static Color defaultCrossColor = Color.cyan;
+	private static int fontSize = 12;
 	private double saveMag;
 	private boolean showLabels;
 	private int type = HYBRID;
-	private int size = SMALL;
+	private int size = EXTRA_LARGE;
 	
 	static {
 		setDefaultType((int)Prefs.get(TYPE_KEY, HYBRID));
