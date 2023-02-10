@@ -184,7 +184,7 @@ public class BoundingBox extends BranchGroup {
 	private Geometry makeLine(Point3f start, Point3f end, Color3f color,
 				float tickDistance, float first, float tickSize, boolean noTicks) {
 		float lineLength = start.distance(end);
-		int nTicks = (int)Math.floor((lineLength - first) / tickDistance) + 1;
+		int nTicks = Math.abs((int)Math.floor((lineLength - first) / tickDistance)) + 1;
 
 		int n = noTicks ? 2 : nTicks * 6 + 2;
 
