@@ -67,7 +67,8 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 			int endZ = imp.getNSlices();
 			ImagePlus targetImp = WindowManager.getImage("target.tif");
 			endZ = targetImp.getNSlices();
-			for (int z=1;z<=endZ;z++) {
+			int startZ = targetImp.getSlice();
+			for (int z=startZ;z<=endZ;z++) {
 				imp.setPosition(imp.getChannel(), z, imp.getFrame());
 				targetImp.setPosition(imp.getChannel(), z, imp.getFrame());
 				imp.killRoi();
@@ -86,6 +87,12 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 						break;
 					}
 				}
+				
+				if (imp.getRoi() == null)
+					targetImp.killRoi();
+				if (targetImp.getRoi() == null)
+					imp.killRoi();
+				
 				//this method works with landmarks selected OR without landmarks if nothing selected
 				//landmarks do still affect initial Affine fit, even if landmarkWeight parameter is set to 0.
 				//With 20 scattered landmark points and 

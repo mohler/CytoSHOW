@@ -326,7 +326,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 					for (int index =0; index < lm.getSize(); index++) {
 						String hashkey = (String) lm.getElementAt(index);
 						Roi roi = contentInstants.get(hashkey);
-						String fixedName = roi.getName().replace("_#0_#0", "")/* .replace("BWM-", "BWM") */;
+						String fixedName = roi.getName().replace("_#0_#0", "").replace("BWM-", "BWM");
 
 
 						ArrayList<String> hitTests = new ArrayList<String>();
