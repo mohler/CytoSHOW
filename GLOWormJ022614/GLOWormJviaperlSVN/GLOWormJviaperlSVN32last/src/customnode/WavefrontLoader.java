@@ -147,9 +147,16 @@ public class WavefrontLoader {
 	private void readVertex(boolean specialDrop) {
 		String[] sp = line.split("\\s+");
 		int flipXCoef = specialDrop?-1:1;
-		String objFileGreatGrandParentName = new File(objfile).getParentFile().getParentFile().getParentFile().getName();
-		String objFileGrandParentName = new File(objfile).getParentFile().getParentFile().getName();
-		String objFileParentName = new File(objfile).getParentFile().getName();
+		String objFileParentName = "";
+		String objFileGrandParentName = "";
+		String objFileGreatGrandParentName = "";
+		if (new File(objfile).getParentFile().exists() 
+				&& new File(objfile).getParentFile().getParentFile().exists() 
+				&& new File(objfile).getParentFile().getParentFile().getParentFile().exists()){
+			objFileParentName = new File(objfile).getParentFile().getName();
+			objFileGrandParentName = new File(objfile).getParentFile().getParentFile().getName();
+			objFileGreatGrandParentName = new File(objfile).getParentFile().getParentFile().getParentFile().getName();
+		}
 		if (( objFileGrandParentName.contains("AllNineBrains_FilesToUse") || objFileGreatGrandParentName.contains("AllNineBrains_FilesToUse"))
 				&& !specialDrop) {
 			flipXCoef = 1;
