@@ -7103,6 +7103,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		shiftZ = ((int) gd.getNextNumber());
 		shiftT = ((int) gd.getNextNumber());
 		shiftC = ((int) gd.getNextNumber());
+		int shiftedCount = 0;
 		for (Roi roi : getSelectedRoisAsArray()) {
 			String roiWasName = roi.getName();
 			roi.setLocation((int) (roi.getBounds().getX() + shiftX), (int) roi.getBounds().getY() + shiftY);
@@ -7148,7 +7149,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				roi.setName(label);
 				rois.remove(roiWasName);
 				rois.put(roi.getName(), roi);
-				
+				shiftedCount++;
+				IJ.showStatus(""+shiftedCount+" tags shifted in xyzct");
 			}
 		}
 		showAll(SHOW_ALL);
