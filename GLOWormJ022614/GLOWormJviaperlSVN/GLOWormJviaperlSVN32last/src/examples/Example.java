@@ -96,17 +96,18 @@
             new Point3d(1, 1, 0), //
             new Point3d(1, -1, 0), //
             new Point3d(-1, -1, 0), //
-            new Point3d(0, 0, 1), //
-            new Point3d(0, 0, -1), //
+            new Point3d(0, 0, 1.414), //
+            new Point3d(0, 0, -1.414), //
         };
         final int[] idxs = new int[] {// the triangle faces
-							        	0, 1, 2,//
-							            2, 3, 0,//
 							            1, 0, 4,//
 							            1, 2, 4,//
 							            2, 3, 4,//
 							            3, 0, 4, 
-							            0, 1, 5
+							            0, 1, 5,
+							            2, 1, 5,
+							            3, 2, 5,
+							            0, 3, 5,
 							        };
         final IndexedTriangleArray ita = new IndexedTriangleArray(points.length, GeometryArray.COORDINATES
             | GeometryArray.COLOR_3, idxs.length);
@@ -114,17 +115,20 @@
         ita.setCoordinateIndices(0, idxs);
         //per vertex colors really are per vertex reference
         //so each vertex can have a different color for each of its faces
+        //^^Those comments are confusing....
+        //Key things are: points array and colors array must have same length
+        //ita.setColorIndices can take args that allow reordering of the colors for each vertex of each triangle.
         final Color3f[] colors = new Color3f[] {//
         new Color3f(1, 0, 1),//
             new Color3f(0, 1, 0),//
             new Color3f(0, 0, 1),//
             new Color3f(1, 1, 0),//
             new Color3f(1, 1, 1),//
-            new Color3f(0, 1, 1),//
-        };
+            new Color3f(0, 0, 0),//
+         };
         ita.setColors(0, colors);
         ita.setColorIndices(0, idxs);
-        ita.setColorIndices(0, new int[] { 0, 0, 0, 1, 1, 1 });
+        ita.setColorIndices(0, new int[] { 0, 0, 0, 1, 1, 1 ,2,2,2,3,3,3, 4,4,4,5,5,5,3,3,3, 0, 0, 0});
         //
         final GeometryInfo gi = new GeometryInfo(ita);
         //also generate normal vectors so that the surface can be light
