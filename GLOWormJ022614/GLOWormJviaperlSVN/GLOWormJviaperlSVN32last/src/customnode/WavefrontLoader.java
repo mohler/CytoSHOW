@@ -150,7 +150,10 @@ public class WavefrontLoader {
 		String objFileParentName = "";
 		String objFileGrandParentName = "";
 		String objFileGreatGrandParentName = "";
-		if (new File(objfile).getParentFile().exists() 
+		if (new File(objfile).getParentFile()!=null 
+				&& new File(objfile).getParentFile().getParentFile()!=null 
+				&& new File(objfile).getParentFile().getParentFile().getParentFile()!=null 
+				&& new File(objfile).getParentFile().exists()
 				&& new File(objfile).getParentFile().getParentFile().exists() 
 				&& new File(objfile).getParentFile().getParentFile().getParentFile().exists()){
 			objFileParentName = new File(objfile).getParentFile().getName();
