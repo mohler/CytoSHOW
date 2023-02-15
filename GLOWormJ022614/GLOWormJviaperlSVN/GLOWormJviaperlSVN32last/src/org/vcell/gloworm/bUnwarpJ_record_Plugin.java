@@ -4,6 +4,8 @@ import ij.*;
 import ij.process.*;
 import ij.gui.*;
 import java.awt.*;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Stack;
 
 import bunwarpj.*;
@@ -147,6 +149,14 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 					targetImp.setPosition(imp.getChannel(), z, imp.getFrame());
 					targetImp.getRoiManager().addRoi(newRoi, false, roi.getStrokeColor(), roi.getFillColor(), 0, true);
 				}
+				
+				IJ.log(" ");
+				IJ.log("*******************************");
+				IJ.log("Slice "+(z)+" warp fit complete.  "+  DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss").format(LocalDateTime.now()));  
+				IJ.log("*******************************");
+				IJ.log(" ");
+
+				
 			}
 
 			//Code below is nice interaction confirmation that tmxn works!!
@@ -280,7 +290,7 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 					}
 					IJ.log(" ");
 					IJ.log("*******************************");
-					IJ.log("Slice "+(z+1)+" warp fit complete.");
+					IJ.log("Slice "+(z+1)+" warp fit complete.  "+  DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss").format(LocalDateTime.now()));  
 					IJ.log("*******************************");
 					IJ.log(" ");
 
