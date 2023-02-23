@@ -119,15 +119,33 @@ public class ImageCanvas3D extends Canvas3D implements KeyListener {
 			}
 			public void mouseMoved(MouseEvent e) {
 
-				if ((( Math.abs(recentX-e.getX()))==0) && (
-						  Math.abs((recentY-e.getY()))==0))
+				if ((( Math.abs(recentX-e.getX()))<3) && (
+						Math.abs((recentY-e.getY()))<3))
 					return;
-		
+
 				Content c = getUniverse().picker.getPickedContent(
 						e.getX(), e.getY());
 				
-				if (c == recentContent ) {
-					
+				if (c==null){  // c == null
+					IJ.showStatus("");
+
+					crsrImg = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB_PRE);
+
+					Graphics2D g2d = (Graphics2D) crsrImg.getGraphics();
+
+					ImageCanvas3D.this.paint(g2d);
+					//								render();
+					//							}
+				
+				
+				} else if (c == recentContent ) {
+					cursorX = e.getX();
+					cursorY = e.getY();
+					Graphics2D g2d = (Graphics2D) crsrImg.getGraphics();
+
+					ImageCanvas3D.this.paint(g2d);
+					//					render();
+
 				} else if (c != null){
 					recentX=e.getX();
 					recentY=e.getY();
@@ -219,7 +237,7 @@ public class ImageCanvas3D extends Canvas3D implements KeyListener {
 					int w = (int) bounds.getWidth();
 					int ht = (int) bounds.getHeight();
 
-//					IJ.showStatus(c.getName().split("( |_)=")[0] + " wrapping figured");
+					//					IJ.showStatus(c.getName().split("( |_)=")[0] + " wrapping figured");
 					crsrImg = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB_PRE);
 					noPickCrsrImg = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB_PRE);
 
@@ -246,25 +264,11 @@ public class ImageCanvas3D extends Canvas3D implements KeyListener {
 						cursorX = e.getX();
 						cursorY = e.getY();
 						ImageCanvas3D.this.paint(g2d);
-//						render();
+						//						render();
 					}
 
-				} else {  // c == null
-					IJ.showStatus("");
-					crsrImg = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB_PRE);
-					noPickCrsrImg = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB_PRE);
-					if (crsrImg == noPickCrsrImg) {
-						
-					} else {
-						crsrImg = noPickCrsrImg;
-//						cursorX = e.getX();
-//						cursorY = e.getY();
-						Graphics2D g2d = (Graphics2D) crsrImg.getGraphics();
-
-						ImageCanvas3D.this.paint(g2d);
-//						render();
-					}
 				}
+				
 				if(ui.isRoiTool())
 					exec.submit(new Runnable() { public void run() {
 						postRender();
