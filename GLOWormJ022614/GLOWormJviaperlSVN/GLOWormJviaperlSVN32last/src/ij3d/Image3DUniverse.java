@@ -186,7 +186,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	private ScheduledFuture schfut;
 	private boolean blinkOn;
 
-	private BufferedImage noPickCrsrImg;
+//	private BufferedImage noPickCrsrImg;
 	
 	static{
 		UniverseSettings.load();
@@ -214,7 +214,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		}
 		canvas = (ImageCanvas3D)getCanvas();
 		canvas.crsrImg = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB_PRE);
-		noPickCrsrImg = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB_PRE);
+		canvas.noPickCrsrImg = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB_PRE);
 		iJ3dExecuter = new IJ3dExecuter(this);
 		
 		c3dm = new Content3DManager(this, true);
@@ -235,152 +235,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		// add mouse listeners
 		canvas.addMouseMotionListener(new MouseMotionAdapter() {
 			
-			Content recentContent ;
-			String prevsortedPrefixedCursorString;
-
 			public void mouseMoved(MouseEvent e) {
 
-				Content c = picker.getPickedContent(
-						e.getX(), e.getY());
-				
-				if (c == recentContent && (( Math.abs(canvas.recentX-e.getX()))<2) && (
-										  Math.abs((canvas.recentY-e.getY()))<2)
-										 ) {
-					
-				} else if (c != null){
-					canvas.recentX=e.getX();
-					canvas.recentY=e.getY();
-
-					recentContent = c;
-					String cursorString = " ";
-
-					IJ.showStatus(c.getName().split("( |_)=")[0]);
-					cursorString = c.getName().replace("electrical", "_electrical_")
-							.replace("chemical", "_chemical_")
-							.replace("undefined", "_undefined_")
-							.replace("certain", "")
-							.replace("uncertain", "")
-							.split("( |_)=")[0];
-
-
-					if (IJ.isWindows())
-						cursorString = c.getName().replace("electrical", "_electrical_")
-						.replace("chemical", "_chemical_")
-						.replace("undefined", "_undefined_")
-						.replace("certain", "")
-						.replace("uncertain", "")
-						.split("( |_)=")[0];
-
-					String[] cursorWords = cursorString.replaceAll(("((-i\\d+-(c|g)\\d+-s\\d+)|(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+))"), "").replace("_", " ").split(" ");
-					if (cursorString.matches("(.*)((-i\\d+-(c|g)\\d+-s\\d+)|(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+))")) {
-						Arrays.sort(cursorWords);
-						if (cursorWords.length >0) {
-							cursorWords[cursorWords.length-1] = cursorWords[cursorWords.length-1] 
-									+ cursorString.replaceAll(("(.*)((-i\\d+-(c|g)\\d+-s\\d+)|(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+))"), "$2");
-						}
-					}
-					String sortedPrefixedCursorString = cursorString.replaceAll(("(.*)((-i\\d+-(c|g)\\d+-s\\d+)|(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+))"), "$2")+ " count=" + cursorWords.length;
-					for (String word:cursorWords) {
-						sortedPrefixedCursorString = sortedPrefixedCursorString + (",") + word.replaceAll(("((-i\\d+-(c|g)\\d+-s\\d+)|(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+))"), "");
-					}
-					if (!sortedPrefixedCursorString.equals(prevsortedPrefixedCursorString) &&  e.isShiftDown()) {
-						IJ.log(sortedPrefixedCursorString);
-						prevsortedPrefixedCursorString = sortedPrefixedCursorString;
-					}
-					int wordsPerRow = (cursorString.contains("chemical")||cursorString.contains("electrical")||cursorString.contains("undefined"))?1:5;
-					int cursorLineCount = cursorWords.length / wordsPerRow
-							+ (cursorWords.length % 3 == 0 ? 0 : 1) /* +wordsPerRow */;
-					int fontSize = 18-(4*cursorLineCount/18);
-					Font font = Font.decode("Arial-"+(fontSize));
-					String[] cursorStringCRs = new String[cursorLineCount+2] ;
-					cursorStringCRs[0] = "    ";
-					int l =0;
-					for (int word=0; word<cursorWords.length; word=word+1) {
-						if (word >0 && (word)%wordsPerRow==0) {
-							l++;
-						} 
-						// matching below fits both old and new formats for cphate obj names
-						if (word == cursorWords.length-1 && cursorWords[word].matches("(.*)((-i\\d+-(c|g)\\d+-s\\d+)|(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+))")) {
-							if (cursorStringCRs[l] == null) {
-								cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)((-i\\d+-(c|g)\\d+-s\\d+)|(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+))", "$1");
-								l++;
-								cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)((-i\\d+-(c|g)\\d+-s\\d+)|(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+))", "$2").replace("-", " ")
-										+ " count=" + cursorWords.length;
-								continue;
-							} else {
-								cursorStringCRs[l] = cursorStringCRs[l] + " "+ cursorWords[word].replaceAll("(.*)((-i\\d+-(c|g)\\d+-s\\d+)|(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+))", "$1");
-								l++;
-								cursorStringCRs[l] = cursorWords[word].replaceAll("(.*)((-i\\d+-(c|g)\\d+-s\\d+)|(-i\\d+\\/\\d+-(c|g)\\d+\\/\\d+-s\\d+))", "$2").replace("-", " ")
-										+ " count=" + cursorWords.length;
-								continue;
-							}
-						}
-						if (cursorStringCRs[l] == null) {
-							cursorStringCRs[l] = cursorWords[word];
-						} else
-							cursorStringCRs[l] = cursorStringCRs[l] + " "+ cursorWords[word];
-					}
-					String longestString = "";
-					for (String cscrString:cursorStringCRs) {
-						if (cscrString!=null && longestString.length() < cscrString.length()) {
-							longestString = cscrString;
-						}
-					}
-					Point3d pickCenter = new Point3d();
-					c.getBounds().getCenter(pickCenter);
-
-					//create the FontRenderContext object which helps us to measure the text
-					FontRenderContext frc = new FontRenderContext(null, true, true);
-
-					//get the height and width of the text
-					Font rectFont = font.deriveFont((long)(fontSize+2));
-					Rectangle2D bounds = rectFont.getStringBounds(longestString, frc);
-					int w = (int) bounds.getWidth();
-					int ht = (int) bounds.getHeight();
-					canvas.crsrImg = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB_PRE);
-
-
-					//		img.getGraphics().setColor(Colors.decode("00000000", Color.white));
-					Graphics2D g2d = (Graphics2D) canvas.crsrImg.getGraphics();
-
-					g2d.setFont(font);
-
-					g2d.setColor(Colors.decode("#88111111",Color.gray));
-					g2d.fillRect(0, 0, w, 10+ht*cursorLineCount);
-					g2d.setColor(Color.YELLOW);
-					g2d.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
-					g2d.drawLine(0, 0, 2, 7);
-					g2d.drawLine(0, 0, 7, 2);
-					g2d.drawLine(0, 0, 8, 8);
-					//					g2d.drawString(cursorString, 1, img.getHeight(null)-1);
-					for (int line=0; line<cursorStringCRs.length; line++) {
-						if (cursorStringCRs[line]!=null)
-							g2d.drawString(cursorStringCRs[line], 1, (line+1) * fontSize + 8);
-					}
-					if(true /*IJ.isWindows()*/){
-
-						canvas.cursorX = e.getX();
-						canvas.cursorY = e.getY();
-						canvas.stopRenderer();
-						canvas.swap();  // activates the overridden postSwap() of DefaultUniverse's canvas
-						canvas.swap();
-						canvas.startRenderer();
-					}
-
-				} else {  // c == null
-					IJ.showStatus("");
-					if (canvas.crsrImg == noPickCrsrImg) {
-						
-					} else {
-						canvas.crsrImg = noPickCrsrImg;
-						canvas.cursorX = e.getX();
-						canvas.cursorY = e.getY();
-						canvas.stopRenderer();
-						canvas.swap();     // activates the overridden postSwap() of DefaultUniverse's canvas
-						canvas.swap();
-						canvas.startRenderer();
-					}
-				}
 			}
 		});
 
