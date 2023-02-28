@@ -602,6 +602,15 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 				return;
 			}
 			String command = label;
+			if (command.equals(moreButtonLabel)) {
+				Point ploc = panel.getLocation();
+				Point bloc = moreButton.getLocation();
+				pm.show(this, ploc.x, bloc.y);
+				pm.setVisible(true);
+				return;
+			} else {
+				pm.setVisible(false);
+			}
 			if (command.equals("Add\n(ctrl-t)")) {
 				ContentInstant contentInstant = univ.getSelected().getCurrentInstant();
 				if (contentInstant == null) {
@@ -890,14 +899,8 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 				this.setVisible(true);
 				if (imgWin != null)
 					setLocation(imgWin.getLocationOnScreen().x + imgWin.getWidth() + 5, imgWin.getLocationOnScreen().y);
-			} else if (command.equals("Deselect"))
+			} else if (command.equals("Deselect")) {
 				select(-1);
-			else if (command.equals(moreButtonLabel)) {
-				Point ploc = panel.getLocation();
-				Point bloc = moreButton.getLocation();
-				pm.show(this, ploc.x, bloc.y);
-				return;
-
 			} else if (command.equals("Sort")) {
 				sortmode = 0;
 				if (listModel.size() > 0 /* && listModel.get(0).split("_").length == 5 */) {

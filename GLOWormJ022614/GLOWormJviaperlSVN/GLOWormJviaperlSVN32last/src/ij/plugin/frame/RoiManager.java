@@ -467,7 +467,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		addPopupItem("synapseStatsFromROIs");
 		addPopupItem("flipRoiHorizontalWithImage");
 		addPopupItem("flipRoiVerticalWithImage");
-//		add(pm);
+		add(pm);
 	}
 
 	void addPopupItem(String s) {
@@ -661,6 +661,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				return;
 			}
 			String command = label;
+			if (command.equals(moreButtonLabel)) {
+				Point ploc = panel.getLocation();
+				Point bloc = moreButton.getLocation();
+				pm.show(this, ploc.x, bloc.y);
+				pm.setVisible(true);
+				return;
+			} else {
+				pm.setVisible(false);
+			}
 			if (command.equals("Add\n(ctrl-t)")) {
 				Roi roi = imp.getRoi();
 				if (roi == null) {
@@ -957,15 +966,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						.setIcon(new ImageIcon(ImageWindow.class.getResource("images/hideIcon.png")));
 			} else if (command.equals("Fill"))
 				drawOrFill(FILL);
-			else if (command.equals("Draw"))
+			else if (command.equals("Draw")) {
 				drawOrFill(DRAW);
-			else if (command.equals("Deselect"))
+			}else if (command.equals("Deselect")) {
 				select(-1);
-			else if (command.equals(moreButtonLabel)) {
-				Point ploc = panel.getLocation();
-				Point bloc = moreButton.getLocation();
-				pm.show(this, ploc.x, bloc.y);
-				return;
 			} else if (command.equals("OR (Combine)"))
 				combine();
 			else if (command.equals("Split"))
