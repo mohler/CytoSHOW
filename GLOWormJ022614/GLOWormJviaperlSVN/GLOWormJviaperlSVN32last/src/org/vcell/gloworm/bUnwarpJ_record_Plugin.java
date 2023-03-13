@@ -152,7 +152,7 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 				
 				IJ.log(" ");
 				IJ.log("*******************************");
-				IJ.log("Slice "+(z)+" warp fit complete.  "+  DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss").format(LocalDateTime.now()));  
+				IJ.log("Slice "+(z)+" Tags warp fit complete.  "+  DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss").format(LocalDateTime.now()));  
 				IJ.log("*******************************");
 				IJ.log(" ");
 
@@ -290,7 +290,7 @@ public class bUnwarpJ_record_Plugin implements PlugIn {
 					}
 					IJ.log(" ");
 					IJ.log("*******************************");
-					IJ.log("Slice "+(z+1)+" warp fit complete.  "+  DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss").format(LocalDateTime.now()));  
+					IJ.log("Slice "+(z+1)+" image warp fit complete.  "+  DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss").format(LocalDateTime.now()));  
 					IJ.log("*******************************");
 					IJ.log(" ");
 

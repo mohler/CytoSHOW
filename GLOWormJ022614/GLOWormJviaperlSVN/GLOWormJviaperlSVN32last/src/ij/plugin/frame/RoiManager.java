@@ -416,6 +416,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	void addPopupMenu() {
 		pm = new JPopupMenu();
 		// addPopupItem("Select All");
+		addPopupItem("Less <<");
+		addPopupItem("________");
 		addPopupItem("Open...");
 		addPopupItem("Save...");
 		addPopupItem("Flatten [F]");
@@ -6011,6 +6013,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //			case KeyEvent.VK_NUMPAD3: case KeyEvent.VK_3: case KeyEvent.VK_PAGE_UP:
 //			case KeyEvent.VK_NUMPAD5: case KeyEvent.VK_5: /*case KeyEvent.VK_PAGE_UP:*/
 //			case KeyEvent.VK_NUMPAD0: case KeyEvent.VK_0: /*case KeyEvent.VK_PAGE_UP:*/	
+				pm.setVisible(false);
 				WindowManager.setTempCurrentImage(imp);
 				ij.keyPressed(e);
 				WindowManager.setTempCurrentImage(null);
