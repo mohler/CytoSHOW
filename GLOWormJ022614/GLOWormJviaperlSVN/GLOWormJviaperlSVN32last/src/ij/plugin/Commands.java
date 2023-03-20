@@ -119,7 +119,7 @@ public class Commands implements PlugIn {
 						public void run(){
 							imp.close();
 						}
-					});
+					}).start();
 					
 				}
 			}
