@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.regex.Pattern;
 
 import javax.swing.JButton;
@@ -467,28 +468,51 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 			while (!(new File(dirOrOMETiff)).isDirectory()
 					&& !dirOrOMETiff.endsWith(".tif")) {
+//				if (arg.contains("newMM")) {
+//					dirOrOMETiff = IJ
+//							.getDirectory("Select a timepoint directory with MM diSPIM raw data");
+//					keyString = (new File(dirOrOMETiff)).getName().split("_")[0];
+//					IJ.log(dirOrOMETiff);
+//					String[] dirChunks = dirOrOMETiff.split("\\|");
+//					for (String s:dirChunks){
+//						IJ.log(s);
+//					}
+//					dirOrOMETiff = dirChunks[0];
+//					if (dirChunks.length>1){
+//						String[] posStringArray = Arrays.copyOfRange(dirChunks, 1, dirChunks.length-1);
+//						posIntArray = new int[posStringArray.length];
+//						for(int p=0;p<posIntArray.length;p++){
+//							try{
+//								posIntArray[p] = Integer.parseInt(posStringArray[p].trim());
+//							} catch (NumberFormatException nfe){
+//								posIntArray[p]=-1;
+//							}
+//						}
+//					}
+//					IJ.log(dirOrOMETiff);
+//
+//					dirOrOMETiff = (new File(dirOrOMETiff)).getParent()+File.separator;
+//					stackDualViewTimePoints = true;
+//					singleImageTiffs = false;
+//					omeTiffs = true;
+//					stackLabviewTimePoints = false;
+//					stageScan = false;
+//				}	
 				if (arg.contains("newMM")) {
-					dirOrOMETiff = IJ
-							.getDirectory("Select a timepoint directory with MM diSPIM raw data");
+					List<String> filesList = IJ
+							.getFilePathsList("Select Pos files from a Timepoint Directory");
+					dirOrOMETiff = new File(filesList.get(0)).getParent();
 					keyString = (new File(dirOrOMETiff)).getName().split("_")[0];
 					IJ.log(dirOrOMETiff);
-					String[] dirChunks = dirOrOMETiff.split("\\|");
-					for (String s:dirChunks){
-						IJ.log(s);
-					}
-					dirOrOMETiff = dirChunks[0];
-					if (dirChunks.length>1){
-						String[] posStringArray = Arrays.copyOfRange(dirChunks, 1, dirChunks.length-1);
-						posIntArray = new int[posStringArray.length];
-						for(int p=0;p<posIntArray.length;p++){
-							try{
-								posIntArray[p] = Integer.parseInt(posStringArray[p].trim());
-							} catch (NumberFormatException nfe){
-								posIntArray[p]=-1;
-							}
+
+					posIntArray = new int[filesList.size()];
+					for(int p=0;p<posIntArray.length;p++){
+						try{
+							posIntArray[p] = Integer.parseInt(filesList.get(p).replaceAll(".*_Pos(\\d+).ome.tif", "$1"));
+						} catch (NumberFormatException nfe){
+							posIntArray[p]=-1;
 						}
 					}
-					IJ.log(dirOrOMETiff);
 
 					dirOrOMETiff = (new File(dirOrOMETiff)).getParent()+File.separator;
 					stackDualViewTimePoints = true;

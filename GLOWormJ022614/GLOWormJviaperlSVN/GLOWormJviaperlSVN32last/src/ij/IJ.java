@@ -21,6 +21,7 @@ import javafx.stage.Stage;
 import java.awt.event.*;
 import java.text.*;
 import java.util.*;
+import java.util.List;
 
 import javax.swing.JFileChooser;
 
@@ -1641,6 +1642,51 @@ public class IJ {
 			return (logLines[logLines.length - 1]);
 		}
 	}
+	
+	public static List<String> getFilePathsList(String title) {
+
+			if (!getInstance().javaFXalreadyLaunched) {
+				new Thread(new Runnable() {
+					public void run() {
+						getInstance().javaFXalreadyLaunched = true;
+						Application.launch(FileChooser.class, title + "::" + OpenDialog.getDefaultDirectory());
+						
+					}
+				}).start();
+			} else {
+
+				try {
+					Platform.runLater( new Runnable() {
+								public void run() {
+									try {
+										FileChooser.args = title + "::" + OpenDialog.getDefaultDirectory();
+										new FileChooser().start(FileChooser.staticPrimaryStage);
+									} catch (Exception e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+								}
+						}
+					);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}
+			while (!FileChooser.choiceMade) IJ.wait(100);
+			FileChooser.choiceMade = false;
+			String[] logLines = IJ.getLog().split("\n");
+			List<String> pathsList = new ArrayList<String>();
+			for (int l=logLines.length-1;l>0;l--) {
+				if (logLines[l].equals("*****"))
+					break;
+				pathsList.add(logLines[l]);
+			}
+			return (pathsList);
+		
+	}
+
 	
 	/** Displays an open file dialog and returns the path to the
 		choosen file, or returns null if the dialog is canceled. */
