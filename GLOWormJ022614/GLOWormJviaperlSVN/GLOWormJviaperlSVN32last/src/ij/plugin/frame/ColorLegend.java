@@ -254,7 +254,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 						
 						Set<Thread> threadsInJVM = Thread.getAllStackTraces().keySet();
 						int nbThreads = threadsInJVM.size();
-						while (nbThreads >50) {
+						while (nbThreads >250) {
 							IJ.wait(10);
 							threadsInJVM = Thread.getAllStackTraces().keySet();
 							nbThreads = threadsInJVM.size();
