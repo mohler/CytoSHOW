@@ -59,7 +59,9 @@ public class Zoom implements PlugIn{
 		int x = r.x+r.width/2;
 		int y = r.y+r.height/2;
 		mag = ic.getHigherZoomLevel(mag);
-		imp.getRoiManager().showAll(RoiManager.SHOW_NONE);
+		boolean reShow = imp.getRoiManager().isShowAll();
+		if (reShow)
+			imp.getRoiManager().showAll(RoiManager.SHOW_NONE);
 		while(r.width*mag*10<w.width - marginw && r.height*mag*2<w.height - marginh) {
 			ic.zoomIn(ic.screenX(x), ic.screenY(y));
 			double cmag = ic.getMagnification();
@@ -67,7 +69,8 @@ public class Zoom implements PlugIn{
 			mag = ic.getHigherZoomLevel(cmag);
 			w = imp.getWindow().getBounds();
 		}
-		imp.getRoiManager().showAll(RoiManager.SHOW_ALL);	
+		if (reShow)
+			imp.getRoiManager().showAll(RoiManager.SHOW_ALL);	
 		imp.setRoi(roi);
 	}
 	

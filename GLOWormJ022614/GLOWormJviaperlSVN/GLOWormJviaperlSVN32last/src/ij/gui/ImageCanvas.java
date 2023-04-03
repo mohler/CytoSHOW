@@ -251,7 +251,10 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				g.drawImage(img, 0, 0, (int)(srcRect.width*magnification), (int)(srcRect.height*magnification),
 						srcRect.x, srcRect.y, srcRect.x+srcRect.width, srcRect.y+srcRect.height, null);
 			if (overlay!=null) drawOverlay(g);
-			if (showAllROIs) drawAllROIs(g);
+			if (showAllROIs) 
+				drawAllROIs(g);
+			else
+				sliceRois = null;
 			if (roi!=null) drawRoi(roi, g);
 			if (srcRect.width+10<imageWidth || srcRect.height+10<imageHeight)
 				drawZoomIndicator(g);
@@ -423,6 +426,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 							position = getSliceNumber(roi.getName());
 						if (position==0 || position==currentImage)
 							drawRoi(g, roi, -1);  //Why is this line here?
+							;
 						drawRoi(g, roi, drawLabels?i:-1);
 					}
 				}
@@ -431,6 +435,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		if (overlay != null) {
 			for (int o=0;o<overlay.size();o++)
 				drawRoi(g, overlay.get(o), -1);
+				;
 		}
 		((Graphics2D)g).setStroke(Roi.onePixelWide);
 	}
@@ -655,7 +660,10 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 					offScreenGraphics.drawImage(img, 0, 0, srcRectWidthMag, srcRectHeightMag,
 							srcRect.x, srcRect.y, srcRect.x+srcRect.width, srcRect.y+srcRect.height, null);
 				if (overlay!=null) drawOverlay(offScreenGraphics);
-				if (showAllROIs) drawAllROIs(offScreenGraphics);
+				if (showAllROIs) 
+					drawAllROIs(offScreenGraphics);
+				else
+					sliceRois = null;
 				if (roi!=null) drawRoi(roi, offScreenGraphics);
 				if (srcRect.width<imageWidth ||srcRect.height<imageHeight)
 					drawZoomIndicator(offScreenGraphics);
@@ -3484,28 +3492,47 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 					return;
 				String cursorString = null;
 
+				if (sliceRois == null) {
+					String rbnString = ""+(imp.getChannel()>0?imp.getChannel():1)+"_"+imp.getSlice()+"_"+imp.getFrame();
+					if(rm.getROIsByNumbers().get(rbnString)!=null) {
+						sliceRois = new ArrayList<Roi>();
+						labelShapes.clear();
+						sliceRois.addAll(rm.getROIsByNumbers().get(rbnString));
+					}
+				}
 				if (sliceRois == null)
 					return;
 				Roi[] sliceRoisArray = new Roi[sliceRois.size()];
-				for (int sr=0;sr<sliceRoisArray.length;sr++)
+				for (int sr=0;sr<sliceRoisArray.length;sr++) {
 					sliceRoisArray[sr] = ((Roi)sliceRois.get(sr));
-				
+					Roi slcRoi = sliceRoisArray[sr];
+					if (slcRoi instanceof ShapeRoi) {
+						labelShapes.put(slcRoi, (ShapeRoi)slcRoi);
+					}else{
+						labelShapes.put(slcRoi,(slcRoi instanceof Arrow?((Arrow)slcRoi).getShapeRoi():new ShapeRoi(slcRoi)));
+						if (labelShapes!=null && slcRoi!= null)
+							if (labelShapes.get(slcRoi) != null) {
+								labelShapes.get(slcRoi).setName(slcRoi.getName());
+							}
+					}
+
+				}
 				for (int i=0; i<sliceRoisArray.length; i++) {  
 					if (sliceRoisArray[i] instanceof Arrow
-							&& getLabelShapes().get(sliceRoisArray[i]) != null
-							&& getLabelShapes().get(sliceRoisArray[i]).contains(getXMouse(), getYMouse())
-							 && showAllROIs) {
+							&& labelShapes.get(sliceRoisArray[i]) != null
+							&& labelShapes.get(sliceRoisArray[i]).contains(ox, oy)
+					/* && showAllROIs */) {
 						cursorString = sliceRoisArray[i].getName().split("[\"|=]")[1];
 						i = sliceRoisArray.length;
 					}
 				}
-				if (cursorString == null && showAllROIs) {
-					for (int i=0; i<sliceRoisArray.length; i++) {  
-						if (getLabelShapes().get(sliceRoisArray[i]) != null 
-								&& getLabelShapes().get(sliceRoisArray[i]).contains(getXMouse(), getYMouse())
-								&& sliceRoisArray[i].getName().split("[\"|=]").length > 1) {
-							cursorString = sliceRoisArray[i].getName().split("[\"|=]")[1];
-							i = sliceRoisArray.length;
+				if (cursorString == null /* && showAllROIs */) {
+					for (Roi slcRoi:sliceRoisArray) {  
+						if (labelShapes.get(slcRoi) != null 
+								&& labelShapes.get(slcRoi).contains(ox, oy)
+								&& slcRoi.getName().split("[\"|=]").length > 1) {
+							cursorString = slcRoi.getName().split("[\"|=]")[1];
+							break;
 						}
 					}
 				}
