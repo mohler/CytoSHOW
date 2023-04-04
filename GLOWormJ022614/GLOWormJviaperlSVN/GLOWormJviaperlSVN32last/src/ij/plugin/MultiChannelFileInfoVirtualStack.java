@@ -153,7 +153,8 @@ public class MultiChannelFileInfoVirtualStack extends VirtualStack implements Pl
 		if (imp.getOriginalFileInfo() == null) {
 			setUpFileInfo(imp);
 		}
-		imp = new CompositeImage(imp);
+		if (!(imp.getProcessor() instanceof ColorProcessor)) 
+			imp = new CompositeImage(imp);
 		imp.show();
 	}
 
@@ -207,7 +208,7 @@ public class MultiChannelFileInfoVirtualStack extends VirtualStack implements Pl
 //			throw new IllegalArgumentException("Argument out of range: "+n);
 		}
 		int c = (n-1) % (fivStacks.size());
-		ImageProcessor ip = fivStacks.get(c).getProcessor((int)Math.floor(((double)n-1)/fivStacks.size()));
+		ImageProcessor ip = fivStacks.get(c).getProcessor((int)Math.floor(((double)n-1)/fivStacks.size())+1);
 		ip.setInterpolationMethod(ImageProcessor.BICUBIC);
 		ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
 		return ip;

@@ -3493,7 +3493,9 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				String cursorString = null;
 
 				if (sliceRois == null) {
-					String rbnString = ""+(imp.getChannel()>0?imp.getChannel():1)+"_"+imp.getSlice()+"_"+imp.getFrame();
+					String rbnString = ""+(imp.getChannel()>0?imp.getChannel():1)+"_"+(imp.getSlice())+"_"+imp.getFrame();
+					if (true)
+						rbnString = ""+0+"_"+imp.getSlice()+"_"+imp.getFrame();
 					if(rm.getROIsByNumbers().get(rbnString)!=null) {
 						sliceRois = new ArrayList<Roi>();
 						labelShapes.clear();
@@ -3529,7 +3531,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				if (cursorString == null /* && showAllROIs */) {
 					for (Roi slcRoi:sliceRoisArray) {  
 						if (labelShapes.get(slcRoi) != null 
-								&& labelShapes.get(slcRoi).contains(ox, oy)
+     								&& labelShapes.get(slcRoi).contains(ox, oy)
 								&& slcRoi.getName().split("[\"|=]").length > 1) {
 							cursorString = slcRoi.getName().split("[\"|=]")[1];
 							break;

@@ -135,7 +135,8 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 					mode = CompositeImage.COLOR;
 				else if (fi.description.indexOf("mode=gray")!=-1)
 					mode = CompositeImage.GRAYSCALE;
-				imp2 = new CompositeImage(imp2, mode);
+				if (!(imp2.getProcessor() instanceof ColorProcessor))
+					imp2 = new CompositeImage(imp2, mode);
 			}
 		}
 		if (imp!= null)

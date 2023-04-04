@@ -64,10 +64,10 @@ public class HyperStackConverter implements PlugIn {
 			new CompositeConverter().run(mode==0?"composite":"color");
 			return;
 		}
-		if (rgb && nChannels>1) {
-			IJ.error("HyperStack Converter", "RGB stacks are limited to one channel");
-			return;
-		}
+//		if (rgb && nChannels>1) {
+//			IJ.error("HyperStack Converter", "RGB stacks are limited to one channel");
+//			return;
+//		}
 		if (nChannels*nSlices*nFrames!=stackSize) {
 			if (nChannels*nSlices*nFrames>stackSize) {
 				for (int a=stackSize;a<nChannels*nSlices*nFrames;a++) {
