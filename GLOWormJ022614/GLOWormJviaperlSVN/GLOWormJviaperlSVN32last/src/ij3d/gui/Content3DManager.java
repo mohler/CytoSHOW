@@ -6122,7 +6122,10 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 				bg = contentInstants.get(value).getColor().get();
 			}
 			setBackground(isSelected ? Color.black : bg);
-			setForeground(isSelected ? Color.white : Color.BLACK);
+//			setForeground(isSelected ? Color.white : Color.BLACK);
+			setForeground(isSelected ? Color.white : Color.decode((Math.abs(16777215 - bg.getRGB()) > 50?
+																	""+(Math.abs(16777215 - bg.getRGB())):
+																		""+0)));
 			setOpaque(true); // otherwise, it's transparent
 			return this;
 		}

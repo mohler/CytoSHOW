@@ -4102,9 +4102,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (imp.getMultiChannelController() != null)
 			imp.getMultiChannelController().updateRoiManager();
 		this.setVisible(wasVis);
-		showAll(SHOW_ALL);
-		updateShowAll();
-		showAllCheckbox.setSelected(true);
+//		showAll(SHOW_ALL);
+//		updateShowAll();
+//		showAllCheckbox.setSelected(true);
 		if (imp.getCanvas() != null) {
 			imp.getCanvas().messageRois.remove("Loading Tags");
 			imp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
@@ -10927,7 +10927,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				bg = rois.get(value).getFillColor();
 			}
 			setBackground(isSelected ? Color.black : bg);
-			setForeground(isSelected ? Color.white : Color.BLACK);
+//			setForeground(isSelected ? Color.white : Color.BLACK);
+			setForeground(isSelected ? Color.white : Color.decode((Math.abs(16777215 - bg.getRGB()) > 50?
+																	""+(Math.abs(16777215 - bg.getRGB())):
+																		""+0)));
 			setOpaque(true); // otherwise, it's transparent
 			return this;
 		}
