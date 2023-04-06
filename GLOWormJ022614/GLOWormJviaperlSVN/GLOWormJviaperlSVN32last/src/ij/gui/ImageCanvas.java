@@ -3485,11 +3485,13 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 					return;
 				Hashtable<String, Roi> rois = rm.getROIs();
 				DefaultListModel<String> listModel = rm.getListModel();
-				if (labelShapes == null)
-					return;
+				if (labelShapes == null) {
+					labelShapes = new Hashtable<Roi,ShapeRoi>();
+					
+				}
 				int n = labelShapes.size();
-				if (getLabelShapes() == null || getLabelShapes().size() != n)
-					return;
+//				if (getLabelShapes() == null || getLabelShapes().size() != n)
+//					return;
 				String cursorString = null;
 
 				if (sliceRois == null) {
