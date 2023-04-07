@@ -6123,9 +6123,27 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 			}
 			setBackground(isSelected ? Color.black : bg);
 //			setForeground(isSelected ? Color.white : Color.BLACK);
-			setForeground(isSelected ? Color.white : Color.decode((Math.abs(16777215 - bg.getRGB()) > 50?
-																	""+(Math.abs(16777215 - bg.getRGB())):
-																		""+0)));
+			int rgb = bg.getRGB();
+			long maxInt = 4294967295L;
+			long max24bit = 16777215L;
+			long alphaMaxVal = maxInt - max24bit;
+			long truncColorVal = (rgb<<4)>>4;
+//			IJ.log(" "+rgb+" "+truncColorVal);
+			Color rgbDiff = Color.decode(""+(max24bit - truncColorVal));
+			
+//			boolean diffOK = (((rgbDiff.getRed()+rgbDiff.getGreen()+rgbDiff.getBlue())/3) - ((bg.getRed()+bg.getGreen()+bg.getBlue())/3) >50);
+			boolean diffOK = (Math.abs(((bg.getRed()*0.299 +bg.getGreen()*0.587 +bg.getBlue()*0.114 )/3)) < 40);
+//			IJ.log(""+(Math.abs(bg.getRed()*0.299 +bg.getGreen()*0.587 +bg.getBlue()*0.114 )/3));
+			
+			//			setForeground(isSelected ? Color.white : Color.decode((Math.abs(((long)(max24bit/2)) - truncColorVal) > 50?
+//																	""+(max24bit - truncColorVal):
+//																		""+0)));
+//			setForeground(isSelected ? Color.white : Color.decode(diffOK?
+//					""+(max24bit - truncColorVal):
+//						""+0));
+			setForeground(isSelected ? Color.white : Color.decode(diffOK?
+					""+max24bit:
+						""+0));
 			setOpaque(true); // otherwise, it's transparent
 			return this;
 		}
