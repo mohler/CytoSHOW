@@ -253,8 +253,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			if (overlay!=null) drawOverlay(g);
 			if (showAllROIs) 
 				drawAllROIs(g);
-			else
-				sliceRois = null;
+//			else
+//				sliceRois = null;
 			if (roi!=null) drawRoi(roi, g);
 			if (srcRect.width+10<imageWidth || srcRect.height+10<imageHeight)
 				drawZoomIndicator(g);
@@ -662,8 +662,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				if (overlay!=null) drawOverlay(offScreenGraphics);
 				if (showAllROIs) 
 					drawAllROIs(offScreenGraphics);
-				else
-					sliceRois = null;
+//				else
+//					sliceRois = null;
 				if (roi!=null) drawRoi(roi, offScreenGraphics);
 				if (srcRect.width<imageWidth ||srcRect.height<imageHeight)
 					drawZoomIndicator(offScreenGraphics);
@@ -3497,12 +3497,16 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 				if (sliceRois == null) {
 					String rbnString = ""+(imp.getChannel()>0?imp.getChannel():1)+"_"+(imp.getSlice())+"_"+imp.getFrame();
-					if (true)
-						rbnString = ""+0+"_"+imp.getSlice()+"_"+imp.getFrame();
+					String rbnCh0String = ""+0+"_"+imp.getSlice()+"_"+imp.getFrame();
+
+					sliceRois = new ArrayList<Roi>();
 					if(rm.getROIsByNumbers().get(rbnString)!=null) {
-						sliceRois = new ArrayList<Roi>();
 						labelShapes.clear();
 						sliceRois.addAll(rm.getROIsByNumbers().get(rbnString));
+					}
+					if(rm.getROIsByNumbers().get(rbnCh0String)!=null) {
+						labelShapes.clear();
+						sliceRois.addAll(rm.getROIsByNumbers().get(rbnCh0String));
 					}
 				}
 				if (sliceRois == null)

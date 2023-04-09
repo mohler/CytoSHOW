@@ -121,7 +121,17 @@ public class FlattenerOfTags implements PlugIn, TextListener {
 					stack.addSlice(ip);
 					ip = null; 
 					if (imp.getRoiManager().getROIsByNumbers().get(c+"_"+z+"_"+t)!=null){
+						int sliceCount = 0;
 						for (Roi roi:imp.getRoiManager().getROIsByNumbers().get(c+"_"+z+"_"+t)){
+							sliceCount++;
+							IJ.log(""+sliceCount+" "+c+"_"+z+"_"+t);
+							if (roi == null) {
+								IJ.log("roi == null");
+								continue;
+							}
+							IJ.log(roi.getName());
+							if (roi.getName().equals("\"AVKRbyAVL \"_#ff00004c_1_39_1-1"))
+								IJ.wait(10);
 							Roi cRoi = (Roi)roi.clone();
 							cRoi.setPosition(cRoi.getCPosition(), cRoi.getZPosition()-firstZ+1, cRoi.getTPosition()-firstT+1);
 							newRM.addRoi(cRoi, false, null, Colors.decode(Colors.colorToHexString(cRoi.getFillColor()).replaceAll("#..(......)","#00$1"), Color.white), -1, false);					
