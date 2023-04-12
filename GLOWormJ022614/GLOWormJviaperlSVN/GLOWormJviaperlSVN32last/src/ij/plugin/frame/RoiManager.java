@@ -3423,6 +3423,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (path.endsWith(".zip")) {
 			if (!isRoiScaleFactorSet) {
 				roiRescaleFactor = IJ.getNumber("Rescale incoming tags from "+new File(path).getName()+" to fit resized image?", roiRescaleFactor);
+				if (roiRescaleFactor - IJ.CANCELED == 0) {
+					roiRescaleFactor = 1;
+					return;
+				}
 			} else {
 				isRoiScaleFactorSet = false;
 			}

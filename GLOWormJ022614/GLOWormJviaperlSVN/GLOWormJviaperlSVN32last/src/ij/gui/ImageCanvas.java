@@ -1020,9 +1020,9 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 						:0)
 						+imp.getWindow().overheadPanel.getHeight();
 		
-		newWidth = imageWidth;
-		newHeight = imageHeight;
-		
+//		newWidth = imageWidth;
+//		newHeight = imageHeight;
+//		
 		Dimension newSize = canEnlarge(newWidth, newHeight);
 		if (sx > newWidth)
 			sx= (int)(imageWidth*magnification);
@@ -1036,11 +1036,11 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				setMagnification(newMag);
 				adjustSourceRect(newMag, sx, sy);
 			}
-			imp.getWindow().pack();
+//			imp.getWindow().pack();
 			imp.getWindow().setSize(dstWidth+padH, dstHeight+padV);
 		} else {
 			adjustSourceRect(newMag, sx, sy);
-			imp.getWindow().pack();
+//			imp.getWindow().pack();
 			imp.getWindow().setSize(dstWidth+padH, dstHeight+padV);
 		}
 		if (srcRect.width<imageWidth || srcRect.height<imageHeight)
@@ -1152,12 +1152,12 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			if (newDstWidth<dstWidth || newDstHeight<dstHeight) {
 				//IJ.log("pack");
 				setDrawingSize(newDstWidth, newDstHeight);
-				imp.getWindow().pack();
+//				imp.getWindow().pack();
 				imp.getWindow().setSize(newDstWidth+padH, newDstHeight+padV);
 				paintDoubleBuffered(getGraphics());
 			} else {
 				setDrawingSize(newDstWidth, newDstHeight);
-				imp.getWindow().pack();
+//				imp.getWindow().pack();
 				imp.getWindow().setSize(newDstWidth+padH, newDstHeight+padV);
 				paintDoubleBuffered(getGraphics());
 			}

@@ -1990,7 +1990,13 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 									if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow)frame).getCanvas()){
 										dropImp = ((ImageWindow)frame).getImagePlus();
 										setImp(dropImp);
-										dropImp.getWindow().tagButtonPanel.setVisible(true);
+										if (!dropImp.getWindow().tagButtonPanel.isVisible()) {
+											dropImp.getWindow().tagButtonPanel.setVisible(true);
+											IJ.wait(100);  //pause needed for next resize to work
+											dropImp.getWindow().setSize(dropImp.getWindow().getWidth()
+													+ dropImp.getWindow().tagButtonPanel.getWidth()
+													, dropImp.getWindow().getHeight());
+										}
 										dropImp.getRoiManager().setVisible(true);
 										dropImp.getRoiManager().open(path);
 									}

@@ -495,7 +495,8 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			}
 			notifyListeners(OPENED);
 			ImageCanvas ic = getCanvas();
-			win.pack();
+
+			IJ.wait(100);  //without a pause, the following resize fails.
 			int padH = 1+win.getInsets().left
 					+win.getInsets().right
 					+(win.optionsPanel.isVisible()?win.optionsPanel.getWidth():0)
