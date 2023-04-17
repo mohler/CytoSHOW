@@ -6141,7 +6141,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 //			setForeground(isSelected ? Color.white : Color.decode(diffOK?
 //					""+(max24bit - truncColorVal):
 //						""+0));
-			setForeground(isSelected ? Color.white : Color.decode(diffOK?
+			setForeground(isSelected ? Color.white : Color.decode((diffOK && bg.getAlpha()>32)?
 					""+max24bit:
 						""+0));
 			setOpaque(true); // otherwise, it's transparent
