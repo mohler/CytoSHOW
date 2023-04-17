@@ -386,7 +386,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				} catch(Exception e) {
 					roi = null;
 				}
-				if (roi==null || !rm.getListModel().contains(roi.getName() )) 
+				if (roi==null || roi.getFillColor().getAlpha() <17 
+						|| !rm.getListModel().contains(roi.getName() )) 
 					continue;
 				if (showAllList!=null)
 					showAllList.add(roi);
