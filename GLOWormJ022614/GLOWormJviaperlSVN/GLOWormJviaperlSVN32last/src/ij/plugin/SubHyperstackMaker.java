@@ -110,9 +110,11 @@ public class SubHyperstackMaker implements PlugIn {
 					ot++;
 					final int i = input.getStackIndex(c, z, t);
 					final int oi = output.getStackIndex(oc, oz, ot);
-					final String label = inputStack.getSliceLabel(i);
+					if (inputStack.getSliceLabels() != null){
+						final String label = inputStack.getSliceLabel(i);
+						outputStack.setSliceLabel(label, oi);
+					}
 					final ImageProcessor ip = inputStack.getProcessor(i);
-					outputStack.setSliceLabel(label, oi);
 					outputStack.setPixels(ip.getPixels(), oi);
 				}
 			}
