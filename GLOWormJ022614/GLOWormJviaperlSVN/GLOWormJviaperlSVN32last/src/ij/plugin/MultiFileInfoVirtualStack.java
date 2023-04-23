@@ -73,6 +73,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	double maxCirc = 1.000;
 	private ImageProcessor statsIP;
 	private ImageProcessor bigIP;
+	private boolean sharpBlur;
+	private int sharpBlurIterations;
 
 	/* Default constructor. */
 	public MultiFileInfoVirtualStack() {}
@@ -1351,10 +1353,17 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 		//	ip.multiply(0.25);
 
 		//	ip.setMinAndMax(min, max);
+		
+		sharpBlur = false;
+		if (sharpBlur){
+			sharpBlurIterations = 3;
+			for (int b=0;b<sharpBlurIterations;b++){
+			ip.sharpen();
+			ip.filter(ImageProcessor.BLUR_MORE);
+			}
+		}
 		if (edges) {
 			ip.findEdges();
-
-			//	ip.doAffineTransform(new AffineTransform(1.075,0.25,0.2,1.075,0,0));
 		}
 		if (logScale) {
 			ip.log();
