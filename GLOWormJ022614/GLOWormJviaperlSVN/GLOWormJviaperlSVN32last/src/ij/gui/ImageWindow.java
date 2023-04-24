@@ -150,6 +150,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 	public JButton edgeButton;
 	public JButton sqrtButton;
 	public JButton logButton;
+	public JButton sharpBlurButton;
 	public JButton advancedButton;
 	protected DragAndDrop dnd;
 	protected JTextField subTitleField;
@@ -527,6 +528,17 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 			edgeButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Edges.png")));
 			edgeButton.addActionListener(ij);
 			viewButtonPanel.add(edgeButton, fspc);
+			fspc.gridy = y++;
+			fspc.weighty = 0.5;
+			fspc.fill = GridBagConstraints.BOTH;
+			
+			sharpBlurButton = new JButton();
+			sharpBlurButton.setActionCommand("SharpBlur");
+			sharpBlurButton.setName("SharpBlur");
+			sharpBlurButton.setToolTipText("SharpBlur Image Denoising");
+			sharpBlurButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/sharpBlur.png")));
+			sharpBlurButton.addActionListener(ij);
+			viewButtonPanel.add(sharpBlurButton, fspc);
 			fspc.gridy = y++;
 			fspc.weighty = 0.5;
 			fspc.fill = GridBagConstraints.BOTH;

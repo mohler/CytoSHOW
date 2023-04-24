@@ -29,6 +29,7 @@ public class ImageStack {
 	protected boolean edges;
 	protected boolean logScale;
 	protected boolean sqrtScale;
+	protected boolean sharpBlur;
 	/** Default constructor. */
 	public ImageStack() { }
 
@@ -633,5 +634,16 @@ public class ImageStack {
 	public void setSqRtScale(boolean sqrtScale) {
 		this.sqrtScale = sqrtScale;
 	}
+
+	public boolean isSharpBlur() {
+		// TODO Auto-generated method stub
+		return sharpBlur;
+	}
+	
+	public void setSharpBlur(boolean sharpBlur) {
+		this.sharpBlur = sharpBlur;
+	}
+
+	
 
 }

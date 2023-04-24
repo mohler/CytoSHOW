@@ -1354,9 +1354,9 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 
 		//	ip.setMinAndMax(min, max);
 		
-		sharpBlur = false;
+		
 		if (sharpBlur){
-			sharpBlurIterations = 3;
+			int sharpBlurIterations = 3;
 			for (int b=0;b<sharpBlurIterations;b++){
 			ip.sharpen();
 			ip.filter(ImageProcessor.BLUR_MORE);

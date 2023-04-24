@@ -15,8 +15,6 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 //	private int nSlices;
 	
 	public FileInfo[] infoArray;
-	private boolean sharpBlur;
-	private int sharpBlurIterations;
 	
 	public FileInfo[] getInfo() {
 		return infoArray;
@@ -226,9 +224,8 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 			ip.setInterpolationMethod(ImageProcessor.BICUBIC);
 			ip.translate(skewXperZ*(n-1), skewYperZ*(n-1));
 			
-			sharpBlur = false;
 			if (sharpBlur){
-				sharpBlurIterations = 3;
+				int sharpBlurIterations = 3;
 				for (int b=0;b<sharpBlurIterations;b++){
 				ip.sharpen();
 				ip.filter(ImageProcessor.BLUR_MORE);
