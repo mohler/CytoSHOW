@@ -73,8 +73,6 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	double maxCirc = 1.000;
 	private ImageProcessor statsIP;
 	private ImageProcessor bigIP;
-	private boolean sharpBlur;
-	private int sharpBlurIterations;
 
 	/* Default constructor. */
 	public MultiFileInfoVirtualStack() {}
