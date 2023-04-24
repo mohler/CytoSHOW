@@ -1610,8 +1610,9 @@ public class IJ {
 				new Thread(new Runnable() {
 					public void run() {
 						getInstance().javaFXalreadyLaunched = true;
-						Application.launch(DirChooser.class, title + "::" + OpenDialog.getDefaultDirectory());
-						
+						Application.launch(DirChooser.class, title + "::" + (IJ.getDirectory("image")!=null?IJ.getDirectory("image"):IJ.getDirectory("default")));
+//						Application.launch(DirChooser.class, title + "::" + OpenDialog.getDefaultDirectory());
+
 					}
 				}).start();
 			}
@@ -1621,7 +1622,8 @@ public class IJ {
 					Platform.runLater( new Runnable() {
 								public void run() {
 									try {
-										DirChooser.args = title + "::" + OpenDialog.getDefaultDirectory();
+//										DirChooser.args = title + "::" + OpenDialog.getDefaultDirectory();
+										DirChooser.args = title + "::" + (IJ.getDirectory("image")!=null?IJ.getDirectory("image"):IJ.getDirectory("default"));
 										new DirChooser().start(DirChooser.staticPrimaryStage);
 									} catch (Exception e) {
 										// TODO Auto-generated catch block
