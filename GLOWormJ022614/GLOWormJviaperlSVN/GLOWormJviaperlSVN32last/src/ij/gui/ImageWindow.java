@@ -536,7 +536,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 			sharpBlurButton.setActionCommand("SharpBlur");
 			sharpBlurButton.setName("SharpBlur");
 			sharpBlurButton.setToolTipText("SharpBlur Image Denoising");
-			sharpBlurButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/sharpBlur.png")));
+			sharpBlurButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/SharpBlur.png")));
 			sharpBlurButton.addActionListener(ij);
 			viewButtonPanel.add(sharpBlurButton, fspc);
 			fspc.gridy = y++;
