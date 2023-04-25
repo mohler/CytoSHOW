@@ -25,7 +25,7 @@ public class FileChooser extends Application {
 			directory = "";
 		String title = FileChooser.args.split(":")[0];
 		fc.setTitle(title);
-		String defaultDir = FileChooser.args.split(":")[2];
+		String defaultDir = FileChooser.args.split(":")[2]+":"+FileChooser.args.split(":")[3];
 		if (defaultDir == null)
 			defaultDir = getParameters().getRaw().get(0);
 		if (defaultDir!=null) {

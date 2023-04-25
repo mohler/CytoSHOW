@@ -464,7 +464,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 //		}
 
 		if (fullRun) {
-			OpenDialog.setDefaultDirectory(Prefs.get("diSPIMmonitor.input", dirOrOMETiff));
+//			OpenDialog.setDefaultDirectory(Prefs.get("diSPIMmonitor.input", dirOrOMETiff));
 
 			while (!(new File(dirOrOMETiff)).isDirectory()
 					&& !dirOrOMETiff.endsWith(".tif")) {

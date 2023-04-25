@@ -3889,12 +3889,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				count++;
 
 				String name = entry.getName();
-				if (name.endsWith(".roi")) {
+				if ((name.endsWith(".roi") && name.matches("\".* \"(_.*)*_\\d+_\\d+_\\d+.*"))) {
 					out = new ByteArrayOutputStream();
 					while ((len = in.read(buf)) > 0)
 						out.write(buf, 0, len);
 					out.close();
 					byte[] bytes = out.toByteArray();
+
 					RoiDecoder rd = new RoiDecoder(roiRescaleFactor, bytes, name);
 					Roi roi = rd.getRoi();
 					if (roi == null) {
