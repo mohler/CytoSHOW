@@ -218,6 +218,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 	private int iterations;
 	private Process regDeconProcess;
 	private boolean doSerialRegPriming;
+	private boolean doPrimeFromDefaultRegTMX;
+	private boolean doForcePreviousRegTMX;
+	private boolean doForceDefaultRegTMX;
 	private double sliceTresholdVsModeA;
 	private double sliceTresholdVsModeB;
 	private long tempTime = -1;
@@ -410,8 +413,6 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 	private double[] intensityCues;
 	private boolean snfCycleComplete = false;
 	private String keyView;
-	private boolean doPrimeFromDefaultRegTMX;
-	private boolean doForceDefaultRegTMX;
 	private String argField;
 	private boolean useSavedPreview;
 	private String metaDataFilePath;
@@ -1818,6 +1819,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				doMipavDecon = d.getRegDeconMethod() == "mipav CPU method";
 				doGPUdecon = d.getRegDeconMethod() == "MinGuo GPU method";
 				doSerialRegPriming = d.getMatPrimMethod() == "Prime registration with previous matrix";
+				doForcePreviousRegTMX = d.getMatPrimMethod() == "Force registration with previous matrix";
 				doPrimeFromDefaultRegTMX = d.getMatPrimMethod() == "Prime registration with default matrix";
 				doForceDefaultRegTMX = d.getMatPrimMethod() == "Force registration with default matrix";
 				if (doGPUdecon) {
@@ -5104,6 +5106,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			private File outputMaxzFile;
 
 			public void run() {	
+				//I FORGET HOW THE LOGIC OF THIS LOOP WORKS, BUT I THINK IT DOES WORK!
 				for (int f = (orientBeforeLineage?tDim:1); (orientBeforeLineage?(f>=1):(f<=tDim)); f=(orientBeforeLineage?(f-1):(f+1))) {
 
 					int[] failIteration = new int[pDim];
@@ -5116,36 +5119,50 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						if (doPrimeFromDefaultRegTMX){
 							failIteration[pos] = 2;
 						}
-						if (doForceDefaultRegTMX){
+						if (doForcePreviousRegTMX){
 							failIteration[pos] = 3;
+						}
+						if (doForceDefaultRegTMX){
+							failIteration[pos] = 4;
 						}
 					}
 					for (int pos=0; pos<pDim; pos++) {
 
 						boolean doForceDefaultRegTMXiterated = false;
+						boolean doForcePreviousRegTMXiterated = false;
 						boolean doPrimeFromDefaultRegTMXiterated = false;
 						boolean doSerialRegPrimingIterated = false;
 						if (failIteration[pos]==0){
 							doForceDefaultRegTMXiterated = false;
+							doForcePreviousRegTMXiterated = false;
 							doPrimeFromDefaultRegTMXiterated = false;
 							doSerialRegPrimingIterated = false;
 						}
 						if (failIteration[pos]==1){
 							doForceDefaultRegTMXiterated = false;
+							doForcePreviousRegTMXiterated = false;
 							doPrimeFromDefaultRegTMXiterated = false;
 							doSerialRegPrimingIterated = true;
 						}
 						if (failIteration[pos]==2){
 							doForceDefaultRegTMXiterated = false;
+							doForcePreviousRegTMXiterated = false;
 							doPrimeFromDefaultRegTMXiterated = true;
 							doSerialRegPrimingIterated = false;
 						}
 						if (failIteration[pos]==3){
-							doForceDefaultRegTMXiterated = true;
+							doForceDefaultRegTMXiterated = false;
+							doForcePreviousRegTMXiterated = true;
 							doPrimeFromDefaultRegTMXiterated = false;
 							doSerialRegPrimingIterated = false;
 						}
 						if (failIteration[pos]==4){
+							doForceDefaultRegTMXiterated = true;
+							doForcePreviousRegTMXiterated = false;
+							doPrimeFromDefaultRegTMXiterated = false;
+							doSerialRegPrimingIterated = false;
+						}
+						if (failIteration[pos]==5){
 							continue;
 						}
 
@@ -5407,14 +5424,14 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										String[] cmdln =null;
 										if (keyView == "B"){
 											if (useSavedPreview)
-												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\CytoSHOWextrasForC\\spimfusion_withRotationOptions_zyx.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_", saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,(doForceDefaultRegTMXiterated?"4":"1"), threeDorientationIndex,"0", ((doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated || (doSerialRegPrimingIterated  && f>1))?"1":"0"),saveDFPath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ (doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated?"0000":IJ.pad(f-fi, 4))+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\CytoSHOWextrasForC\\DataForTest\\PSFA128.tif","C:\\CytoSHOWextrasForC\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
+												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\CytoSHOWextrasForC\\spimfusion_withRotationOptions_zyx.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_", saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,(doForceDefaultRegTMXiterated || doForcePreviousRegTMXiterated ?"4":"1"), threeDorientationIndex,"0", ((doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated || doForcePreviousRegTMXiterated ||  (doSerialRegPrimingIterated  && f>1))?"1":"0"),saveDFPath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ (doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated?"0000":IJ.pad(f-fi, 4))+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\CytoSHOWextrasForC\\DataForTest\\PSFA128.tif","C:\\CytoSHOWextrasForC\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
 											else
-												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\CytoSHOWextrasForC\\spimfusion.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_", saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,(doForceDefaultRegTMXiterated?"4":"1"), threeDorientationIndex,"0", ((doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated || (doSerialRegPrimingIterated  && f>1))?"1":"0"),saveDFPath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ (doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated?"0000":IJ.pad(f-fi, 4))+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\CytoSHOWextrasForC\\DataForTest\\PSFA128.tif","C:\\CytoSHOWextrasForC\\DataForTest\\PSFB128.tif","1","0"};
+												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\CytoSHOWextrasForC\\spimfusion.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_", saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,(doForceDefaultRegTMXiterated || doForcePreviousRegTMXiterated ?"4":"1"), threeDorientationIndex,"0", ((doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated || doForcePreviousRegTMXiterated ||  (doSerialRegPrimingIterated  && f>1))?"1":"0"),saveDFPath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ (doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated?"0000":IJ.pad(f-fi, 4))+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\CytoSHOWextrasForC\\DataForTest\\PSFA128.tif","C:\\CytoSHOWextrasForC\\DataForTest\\PSFB128.tif","1","0"};
 										}else{
 											if (useSavedPreview)
-												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\CytoSHOWextrasForC\\spimfusion_withRotationOptions_zyx.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_", saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,(doForceDefaultRegTMXiterated?"4":"1"), threeDorientationIndex,"0", ((doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated || (doSerialRegPrimingIterated  && f>1))?"1":"0"),saveDFPath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ (doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated?"0000":IJ.pad(f-fi, 4))+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\CytoSHOWextrasForC\\DataForTest\\PSFA128.tif","C:\\CytoSHOWextrasForC\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
+												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\CytoSHOWextrasForC\\spimfusion_withRotationOptions_zyx.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_", saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,(doForceDefaultRegTMXiterated || doForcePreviousRegTMXiterated ?"4":"1"), threeDorientationIndex,"0", ((doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated || doForcePreviousRegTMXiterated ||  (doSerialRegPrimingIterated  && f>1))?"1":"0"),saveDFPath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ (doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated?"0000":IJ.pad(f-fi, 4))+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\CytoSHOWextrasForC\\DataForTest\\PSFA128.tif","C:\\CytoSHOWextrasForC\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
 											else
-												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\CytoSHOWextrasForC\\spimfusion.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_", saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,(doForceDefaultRegTMXiterated?"4":"1"), threeDorientationIndex,"0", ((doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated || (doSerialRegPrimingIterated  && f>1))?"1":"0"),saveDFPath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ (doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated?"0000":IJ.pad(f-fi, 4))+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\CytoSHOWextrasForC\\DataForTest\\PSFA128.tif","C:\\CytoSHOWextrasForC\\DataForTest\\PSFB128.tif","1","0"};
+												cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\CytoSHOWextrasForC\\spimfusion.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_", saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,(doForceDefaultRegTMXiterated || doForcePreviousRegTMXiterated ?"4":"1"), threeDorientationIndex,"0", ((doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated || doForcePreviousRegTMXiterated ||  (doSerialRegPrimingIterated  && f>1))?"1":"0"),saveDFPath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ (doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated?"0000":IJ.pad(f-fi, 4))+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\CytoSHOWextrasForC\\DataForTest\\PSFA128.tif","C:\\CytoSHOWextrasForC\\DataForTest\\PSFB128.tif","1","0"};
 										}
 
 										regDeconProcess = Runtime.getRuntime().exec(cmdln);
@@ -5577,26 +5594,26 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										if (keyChannel ==1){
 											if (keyView == "B"){
 												if (useSavedPreview)
-													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\CytoSHOWextrasForC\\spimfusion_withRotationOptions_zyx.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,(doForceDefaultRegTMXiterated?"4":"1"), threeDorientationIndex,"0", ((doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated || (doSerialRegPrimingIterated  && f>1))?"1":"0"),saveDFPath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ (doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated?"0000":IJ.pad(f-fi, 4))+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\CytoSHOWextrasForC\\DataForTest\\PSFA128.tif","C:\\CytoSHOWextrasForC\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\CytoSHOWextrasForC\\spimfusion_withRotationOptions_zyx.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,(doForceDefaultRegTMXiterated || doForcePreviousRegTMXiterated ?"4":"1"), threeDorientationIndex,"0", ((doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated || doForcePreviousRegTMXiterated ||  (doSerialRegPrimingIterated  && f>1))?"1":"0"),saveDFPath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ (doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated?"0000":IJ.pad(f-fi, 4))+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\CytoSHOWextrasForC\\DataForTest\\PSFA128.tif","C:\\CytoSHOWextrasForC\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
 												else
-													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\CytoSHOWextrasForC\\spimfusion.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,(doForceDefaultRegTMXiterated?"4":"1"), threeDorientationIndex,"0", ((doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated || (doSerialRegPrimingIterated  && f>1))?"1":"0"),saveDFPath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ (doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated?"0000":IJ.pad(f-fi, 4))+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\CytoSHOWextrasForC\\DataForTest\\PSFA128.tif","C:\\CytoSHOWextrasForC\\DataForTest\\PSFB128.tif","1","0"};
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\CytoSHOWextrasForC\\spimfusion.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-1_","SPIMA"+pos+"-"+f+"-1_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,(doForceDefaultRegTMXiterated || doForcePreviousRegTMXiterated ?"4":"1"), threeDorientationIndex,"0", ((doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated || doForcePreviousRegTMXiterated ||  (doSerialRegPrimingIterated  && f>1))?"1":"0"),saveDFPath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ (doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated?"0000":IJ.pad(f-fi, 4))+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\CytoSHOWextrasForC\\DataForTest\\PSFA128.tif","C:\\CytoSHOWextrasForC\\DataForTest\\PSFB128.tif","1","0"};
 											}else{
 												if (useSavedPreview)
-													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\CytoSHOWextrasForC\\spimfusion_withRotationOptions_zyx.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,(doForceDefaultRegTMXiterated?"4":"1"), threeDorientationIndex,"0", ((doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated || (doSerialRegPrimingIterated  && f>1))?"1":"0"),saveDFPath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ (doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated?"0000":IJ.pad(f-fi, 4))+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\CytoSHOWextrasForC\\DataForTest\\PSFA128.tif","C:\\CytoSHOWextrasForC\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\CytoSHOWextrasForC\\spimfusion_withRotationOptions_zyx.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,(doForceDefaultRegTMXiterated || doForcePreviousRegTMXiterated ?"4":"1"), threeDorientationIndex,"0", ((doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated || doForcePreviousRegTMXiterated ||  (doSerialRegPrimingIterated  && f>1))?"1":"0"),saveDFPath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ (doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated?"0000":IJ.pad(f-fi, 4))+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\CytoSHOWextrasForC\\DataForTest\\PSFA128.tif","C:\\CytoSHOWextrasForC\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
 												else
-													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\CytoSHOWextrasForC\\spimfusion.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,(doForceDefaultRegTMXiterated?"4":"1"), threeDorientationIndex,"0", ((doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated || (doSerialRegPrimingIterated  && f>1))?"1":"0"),saveDFPath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ (doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated?"0000":IJ.pad(f-fi, 4))+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\CytoSHOWextrasForC\\DataForTest\\PSFA128.tif","C:\\CytoSHOWextrasForC\\DataForTest\\PSFB128.tif","1","0"};
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\CytoSHOWextrasForC\\spimfusion.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-1_","SPIMB"+pos+"-"+f+"-1_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,(doForceDefaultRegTMXiterated || doForcePreviousRegTMXiterated ?"4":"1"), threeDorientationIndex,"0", ((doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated || doForcePreviousRegTMXiterated ||  (doSerialRegPrimingIterated  && f>1))?"1":"0"),saveDFPath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ (doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated?"0000":IJ.pad(f-fi, 4))+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\CytoSHOWextrasForC\\DataForTest\\PSFA128.tif","C:\\CytoSHOWextrasForC\\DataForTest\\PSFB128.tif","1","0"};
 											}
 										}else{
 											if (keyView == "B"){
 												if (useSavedPreview)
-													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\CytoSHOWextrasForC\\spimfusion_withRotationOptions_zyx.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-2_","SPIMA"+pos+"-"+f+"-2_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,(doForceDefaultRegTMXiterated?"4":"1"), threeDorientationIndex,"0", ((doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated || (doSerialRegPrimingIterated  && f>1))?"1":"0"),saveDFPath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ (doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated?"0000":IJ.pad(f-fi, 4))+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\CytoSHOWextrasForC\\DataForTest\\PSFA128.tif","C:\\CytoSHOWextrasForC\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\CytoSHOWextrasForC\\spimfusion_withRotationOptions_zyx.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-2_","SPIMA"+pos+"-"+f+"-2_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,(doForceDefaultRegTMXiterated || doForcePreviousRegTMXiterated ?"4":"1"), threeDorientationIndex,"0", ((doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated || doForcePreviousRegTMXiterated ||  (doSerialRegPrimingIterated  && f>1))?"1":"0"),saveDFPath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ (doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated?"0000":IJ.pad(f-fi, 4))+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\CytoSHOWextrasForC\\DataForTest\\PSFA128.tif","C:\\CytoSHOWextrasForC\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
 												else
-													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\CytoSHOWextrasForC\\spimfusion.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-2_","SPIMA"+pos+"-"+f+"-2_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,(doForceDefaultRegTMXiterated?"4":"1"), threeDorientationIndex,"0", ((doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated || (doSerialRegPrimingIterated  && f>1))?"1":"0"),saveDFPath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ (doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated?"0000":IJ.pad(f-fi, 4))+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\CytoSHOWextrasForC\\DataForTest\\PSFA128.tif","C:\\CytoSHOWextrasForC\\DataForTest\\PSFB128.tif","1","0"};
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\CytoSHOWextrasForC\\spimfusion.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMB"+pos+"-"+f+"-2_","SPIMA"+pos+"-"+f+"-2_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwB, ""+phB,""+pdB, ""+pwA, ""+phA,""+pdA,(doForceDefaultRegTMXiterated || doForcePreviousRegTMXiterated ?"4":"1"), threeDorientationIndex,"0", ((doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated || doForcePreviousRegTMXiterated ||  (doSerialRegPrimingIterated  && f>1))?"1":"0"),saveDFPath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ (doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated?"0000":IJ.pad(f-fi, 4))+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\CytoSHOWextrasForC\\DataForTest\\PSFA128.tif","C:\\CytoSHOWextrasForC\\DataForTest\\PSFB128.tif","1","0"};
 											}else{
 												if (useSavedPreview)
-													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\CytoSHOWextrasForC\\spimfusion_withRotationOptions_zyx.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-2_","SPIMB"+pos+"-"+f+"-2_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,(doForceDefaultRegTMXiterated?"4":"1"), threeDorientationIndex,"0", ((doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated || (doSerialRegPrimingIterated  && f>1))?"1":"0"),saveDFPath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ (doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated?"0000":IJ.pad(f-fi, 4))+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\CytoSHOWextrasForC\\DataForTest\\PSFA128.tif","C:\\CytoSHOWextrasForC\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\CytoSHOWextrasForC\\spimfusion_withRotationOptions_zyx.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-2_","SPIMB"+pos+"-"+f+"-2_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,(doForceDefaultRegTMXiterated || doForcePreviousRegTMXiterated ?"4":"1"), threeDorientationIndex,"0", ((doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated || doForcePreviousRegTMXiterated ||  (doSerialRegPrimingIterated  && f>1))?"1":"0"),saveDFPath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ (doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated?"0000":IJ.pad(f-fi, 4))+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\CytoSHOWextrasForC\\DataForTest\\PSFA128.tif","C:\\CytoSHOWextrasForC\\DataForTest\\PSFB128.tif","1","0",""+zRotAngle,""+yRotAngle,""+xRotAngle};
 												else
-													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\CytoSHOWextrasForC\\spimfusion.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-2_","SPIMB"+pos+"-"+f+"-2_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,(doForceDefaultRegTMXiterated?"4":"1"), threeDorientationIndex,"0", ((doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated || (doSerialRegPrimingIterated  && f>1))?"1":"0"),saveDFPath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ (doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated?"0000":IJ.pad(f-fi, 4))+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\CytoSHOWextrasForC\\DataForTest\\PSFA128.tif","C:\\CytoSHOWextrasForC\\DataForTest\\PSFB128.tif","1","0"};
+													cmdln = new String[] {"cmd","/c","start","/min","/wait","C:\\CytoSHOWextrasForC\\spimfusion.exe", saveDFPath + "CropBkgdSub" + File.separator  , saveDFPath + "CropBkgdSub" + File.separator  , "SPIMA"+pos+"-"+f+"-2_","SPIMB"+pos+"-"+f+"-2_"  , saveDFPath + "RegDecon" + File.separator ,"1","1","1","1",""+pwA, ""+phA,""+pdA, ""+pwB, ""+phB,""+pdB,(doForceDefaultRegTMXiterated || doForcePreviousRegTMXiterated ?"4":"1"), threeDorientationIndex,"0", ((doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated || doForcePreviousRegTMXiterated ||  (doSerialRegPrimingIterated  && f>1))?"1":"0"),saveDFPath + "RegDecon" + File.separator +"TMX" +File.separator+"RegMatrix_Pos"+pos+"_t"+ (doForceDefaultRegTMXiterated || doPrimeFromDefaultRegTMXiterated?"0000":IJ.pad(f-fi, 4))+".tmx" , "0","0.0001" , ""+iterations , "16","C:\\CytoSHOWextrasForC\\DataForTest\\PSFA128.tif","C:\\CytoSHOWextrasForC\\DataForTest\\PSFB128.tif","1","0"};
 											}
 										}
 										//	IJ.log(cmdln);
