@@ -2221,7 +2221,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				(int)(imp.getNSlices()*imp.getCalibration().pixelDepth/imp.getCalibration().pixelWidth), imp.getHeight(),
 				imp.getWidth(), 8, NewImage.FILL_BLACK, true);
 
-		String roiSaveDir = IJ.getDirectory("Save ROIs here...")+File.separator+"RoisSingly"+File.separator;
+		String roiSaveDir = IJ.getDirectory("Save Resliced ROIs here...")+File.separator+"RoisSingly"+File.separator;
 		new File(roiSaveDir).mkdirs();
 		ArrayList<String> namesAlreadySaved = new ArrayList<String>();
 		
@@ -2364,40 +2364,40 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				Slicer sketchSlice = new Slicer();
 				sketchSlice.setOutputSlices(1);
 				ImagePlus resliceSketchImp = sketchSlice.reslice(sketchImp);
-				resliceSketchImp.getProcessor().flipHorizontal();
+//				resliceSketchImp.getProcessor().flipHorizontal();
 //				resliceSketchImp.show();
 				IJ.setThreshold(resliceSketchImp,2,255);
 				ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.ADD_TO_MANAGER,0,null,10,Double.MAX_VALUE,0,1);
 				pa.analyze(resliceSketchImp);
-				for (Roi nextNewRoi:resliceSketchImp.getRoiManager().getFullRoisAsArray()) {
-					impBuildTagSet.setPosition(1, x + minX-(10+1), 1);
-					nextNewRoi.setName(rootName);
+				for (String nextNewRoiLabel:resliceSketchImp.getRoiManager().getROIs().keySet()) {
+					impBuildTagSet.setPosition(1, (int)((x + minX-(10+1))*(sketchImp.getCalibration().pixelWidth)/sketchImp.getCalibration().pixelDepth), 1);
+					Roi nextNewRoi = resliceSketchImp.getRoiManager().getROIs().get(nextNewRoiLabel);
+					nextNewRoi.setName(nextNewRoiLabel.replace("Traced",rootName));
 					nextNewRoi.setLocation(nextNewRoi.getBounds().x+ minZ*sketchImp.getCalibration().pixelDepth/sketchImp.getCalibration().pixelWidth
 											, nextNewRoi.getBounds().y + minY - 10);
 					impBuildTagSet.getRoiManager().addRoi(nextNewRoi, false, ((Roi) rois[nameMatchIndexArrayList.get(0)]).getStrokeColor(), ((Roi) rois[nameMatchIndexArrayList.get(0)]).getFillColor(), 1, true);
 					String nextNewRoiNameFromListModel = impBuildTagSet.getRoiManager().getListModel()
 															.get(impBuildTagSet.getRoiManager().getListModel().size()-1);
 					Roi nextNewRoiFromListModel = impBuildTagSet.getRoiManager().getROIs().get(nextNewRoiNameFromListModel);
-					String label = nextNewRoiNameFromListModel;
+					String label = nextNewRoi.getName();
 					// Substituting updated color, Z, T, C info to saved name:
 
 ////NEEDed TO CHANGE THIS NEXT LINE TO TAKE ADVANTAGE OF GETUNIQUENAME HAVING BEEN CALLED ALREADY DURING .ADDROI 3 LINES AGO!!!!
 //					String labelNew = label.replaceAll("(\".* \"_)(.*)", "$1" + Colors.colorToHexString(nextNewRoiFromListModel.getFillColor())
 //							+ "_" + nextNewRoiFromListModel.getCPosition() + "_" + nextNewRoiFromListModel.getZPosition() + "_" + nextNewRoiFromListModel.getTPosition())
 //							.replace(" ", "").replace("\"", "");
-					String labelNew = label.replaceAll("(\".* \"_)(.*)", "$1" + Colors.colorToHexString(nextNewRoiFromListModel.getFillColor())
-					+ "_$2" )
-					.replace(" ", "").replace("\"", "");
+					String labelNew = label.replace("#00000000", Colors.colorToHexString(nextNewRoiFromListModel.getFillColor()));
 
 					if (!labelNew.endsWith(".roi"))
 						labelNew += ".roi";
 					int hitCount = 0;
 					while (namesAlreadySaved.contains(labelNew)) {
 						hitCount++;
-						labelNew = labelNew.replaceAll("(.*)(-[0-9]+)?(.roi)", "$1-" + hitCount + "$3");
+//						labelNew = labelNew.replaceAll("(.*)(-[0-9]+)?(.roi)", "$1-" + hitCount + "$3");
+						labelNew = labelNew.replace("-"+ (hitCount-1), "-"+ (hitCount));
 					}
 					namesAlreadySaved.add(labelNew);
-					RoiEncoder re = new RoiEncoder(roiSaveDir + labelNew);
+					RoiEncoder re = new RoiEncoder(roiSaveDir + labelNew.replace("\"", "qQqQ"));
 					try {
 						re.write(nextNewRoiFromListModel);
 					} catch (IOException e) {
@@ -3889,6 +3889,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				count++;
 
 				String name = entry.getName();
+				name = name.replace("qQqQ","\"");
 				if ((name.endsWith(".roi") && name.matches("\".* \"(_.*)*_\\d+_\\d+_\\d+.*"))) {
 					out = new ByteArrayOutputStream();
 					while ((len = in.read(buf)) > 0)
