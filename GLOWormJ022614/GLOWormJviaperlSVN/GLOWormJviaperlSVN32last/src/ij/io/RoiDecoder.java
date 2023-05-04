@@ -474,6 +474,9 @@ public class RoiDecoder {
 
 	String getRoiName() {
 		String fileName = name;
+		if (name.matches("\".* \"(_.*)*_\\d+_\\d+_\\d+.*")) {
+			return fileName;
+		}
 		int hdr2Offset = getInt(HEADER2_OFFSET);
 		if (hdr2Offset==0)
 			return fileName;
@@ -483,10 +486,10 @@ public class RoiDecoder {
 			return fileName;
 		if (offset+length*2>size)
 			return fileName;
-		char[] name = new char[length];
+		char[] charName = new char[length];
 		for (int i=0; i<length; i++)
-			name[i] = (char)getShort(offset+i*2);
-		return new String(name);
+			charName[i] = (char)getShort(offset+i*2);
+		return new String(charName);
 	}
 
 	int getByte(int base) {
