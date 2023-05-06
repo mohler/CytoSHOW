@@ -24,7 +24,7 @@ public class DirChooser extends Application {
 			directory = "";
 		String title = DirChooser.args.split(":")[0];
 		dc.setTitle(title);
-		String defaultDir = DirChooser.args.split(":")[2]+":"+DirChooser.args.split(":")[3];
+		String defaultDir = DirChooser.args.split(":")[1]+":"+DirChooser.args.split(":")[2];
 		if (defaultDir == null)
 			defaultDir = getParameters().getRaw().get(0);
 		if (defaultDir!=null) {

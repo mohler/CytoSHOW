@@ -2370,10 +2370,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.ADD_TO_MANAGER,0,null,10,Double.MAX_VALUE,0,1);
 				pa.analyze(resliceSketchImp);
 				for (String nextNewRoiLabel:resliceSketchImp.getRoiManager().getROIs().keySet()) {
-					impBuildTagSet.setPosition(1, (int)((x + minX-(10+1))*(sketchImp.getCalibration().pixelWidth)/sketchImp.getCalibration().pixelDepth), 1);
+
+				//Added +2 term to z position based on empirical fitting of MeiAdult reslices...					
+					impBuildTagSet.setPosition(1, (int)((x + minX-(10+1 +2 ))*(sketchImp.getCalibration().pixelWidth)/sketchImp.getCalibration().pixelDepth), 1);
 					Roi nextNewRoi = resliceSketchImp.getRoiManager().getROIs().get(nextNewRoiLabel);
 					nextNewRoi.setName(nextNewRoiLabel.replace("Traced",rootName));
-					nextNewRoi.setLocation(nextNewRoi.getBounds().x+ minZ*sketchImp.getCalibration().pixelDepth/sketchImp.getCalibration().pixelWidth
+					
+				//Added -10 term to x position based on empirical fitting of MeiAdult reslices...
+					nextNewRoi.setLocation(nextNewRoi.getBounds().x+ minZ*sketchImp.getCalibration().pixelDepth/sketchImp.getCalibration().pixelWidth -10
 											, nextNewRoi.getBounds().y + minY - 10);
 					impBuildTagSet.getRoiManager().addRoi(nextNewRoi, false, ((Roi) rois[nameMatchIndexArrayList.get(0)]).getStrokeColor(), ((Roi) rois[nameMatchIndexArrayList.get(0)]).getFillColor(), 1, true);
 					String nextNewRoiNameFromListModel = impBuildTagSet.getRoiManager().getListModel()
@@ -2394,6 +2398,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					while (namesAlreadySaved.contains(labelNew)) {
 						hitCount++;
 //						labelNew = labelNew.replaceAll("(.*)(-[0-9]+)?(.roi)", "$1-" + hitCount + "$3");
+						if (!labelNew.matches(".*-[0-9]+\\.roi"))
+							labelNew = labelNew.replace(".roi", "-1.roi");
 						labelNew = labelNew.replace("-"+ (hitCount-1), "-"+ (hitCount));
 					}
 					namesAlreadySaved.add(labelNew);
@@ -3927,6 +3933,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						int roiZ = roi.getZPosition();
 						int roiT = roi.getTPosition();
 						Color roiColor = roi.getFillColor();
+						if (roiColor.getRGB() == 0)
+							roi.setFillColor(Colors.decode(entry.getName().replaceAll("(.*_)(#\\d\\d\\d\\d\\d\\d\\d?\\d?)-.*", "$2"), roiColor));
 
 						int readC = roiC;
 						int readZ = roiZ;
