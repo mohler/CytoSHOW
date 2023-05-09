@@ -1661,6 +1661,11 @@ public class IJ {
 					Platform.runLater( new Runnable() {
 								public void run() {
 									try {
+										String dir = "";
+										if (OpenDialog.getDefaultDirectory() != "\\")
+											dir = OpenDialog.getDefaultDirectory();
+										else
+											dir = "C:";
 										FileChooser.args = title + "::" + OpenDialog.getDefaultDirectory();
 										new FileChooser().start(FileChooser.staticPrimaryStage);
 									} catch (Exception e) {
