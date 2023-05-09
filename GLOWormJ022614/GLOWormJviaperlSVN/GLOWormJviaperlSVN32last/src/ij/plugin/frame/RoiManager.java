@@ -2374,13 +2374,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				pa.analyze(resliceSketchImp);
 				for (String nextNewRoiLabel:resliceSketchImp.getRoiManager().getROIs().keySet()) {
 
-				//Added +2 term to z position based on empirical fitting of MeiAdult reslices...					
-					impBuildTagSet.setPosition(1, (int)((x + minX-(10+1 +2 ))*(sketchImp.getCalibration().pixelWidth)/sketchImp.getCalibration().pixelDepth), 1);
+				//Added +4 term to z position based on empirical fitting of MeiAdult reslices...					
+					impBuildTagSet.setPosition(1, (int)((x + minX-(10+1+4))*(sketchImp.getCalibration().pixelWidth)/sketchImp.getCalibration().pixelDepth), 1);
 					Roi nextNewRoi = resliceSketchImp.getRoiManager().getROIs().get(nextNewRoiLabel);
 					nextNewRoi.setName(nextNewRoiLabel.replace("Traced",rootName));
 					
 				//Added -10 term to x position based on empirical fitting of MeiAdult reslices...
-					nextNewRoi.setLocation(nextNewRoi.getBounds().x+ minZ*sketchImp.getCalibration().pixelDepth/sketchImp.getCalibration().pixelWidth -10
+					nextNewRoi.setLocation(nextNewRoi.getBounds().x+ impBuildTagSet.getWidth()-maxZ*sketchImp.getCalibration().pixelDepth/sketchImp.getCalibration().pixelWidth -10
 											, nextNewRoi.getBounds().y + minY - 10);
 					impBuildTagSet.getRoiManager().addRoi(nextNewRoi, false, ((Roi) rois[nameMatchIndexArrayList.get(0)]).getStrokeColor(), ((Roi) rois[nameMatchIndexArrayList.get(0)]).getFillColor(), 1, true);
 					String nextNewRoiNameFromListModel = impBuildTagSet.getRoiManager().getListModel()
@@ -6259,9 +6259,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							andTester.and(new ShapeRoi(otherInGroup));
 							double andFD = andTester.getFeretsDiameter();
 							if (nextInGroup!=otherInGroup && andTester != null) {
-								//WITH ABOVE TRUE, GET A SINGLE COMPOUND ROI FOR ALL SEPARATE AREAS OF CELL X IN SLICE.
-								//HOWEVER, saving and reopening from roi or zip file only shows 
-								//****NEED TO FIX THIS!!  using feret == 0.0 test seemed promising, but also gave weird saved rois.
+								//WITH ABOVE TRUE, GET A NICE SINGLE COMPOUND ROI FOR ALL SEPARATE AREAS OF CELL X IN SLICE.
+								//HOWEVER, saving and reopening from roi or zip file only shows a single one of the areas.
+								//****NEED TO FIX THIS!!  
+								//Using feret == 0.0 test to get exclusively singular areas (opposite effect) seemed promising, but also gave weird saved rois.
 								orSweeper = orSweeper.or(new ShapeRoi(otherInGroup));
 								overlapBunches.get(overlapBunches.size()-1).add(otherInGroup);
 								claimedRois.add(otherInGroup);
