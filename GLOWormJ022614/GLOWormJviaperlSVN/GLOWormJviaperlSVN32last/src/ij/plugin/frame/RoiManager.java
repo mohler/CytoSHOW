@@ -469,6 +469,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		addPopupItem("synapseStatsFromROIs");
 		addPopupItem("flipRoiHorizontalWithImage");
 		addPopupItem("flipRoiVerticalWithImage");
+		addPopupItem("fuseOverlapping");
 		add(pm);
 	}
 
@@ -1012,7 +1013,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				setShowAllColor();
 			else if (command.equals("Get ROIs this Slice")) {
 				ImagePlus imp = this.imp;
-
+				//WHY IS THIS VARIABLE BEING CALLED WITHOUT BEING ASSIGNED?
 				getSliceSpecificRoi(imp, imp.getSlice(), imp.getFrame());
 			} else if (command.equals("Copy Selected to Other Images"))
 				copyToOtherRMs();
@@ -1163,6 +1164,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					rois.replace(roi.getName(), roi);
 					IJ.log("flipV "+roi.getName());
 				}
+			} else if (command.equals("fuseOverlapping")) {
+				this.fuseOverlappingSynonymousRois();
 			}
 
 //			this.imp.getCanvas().requestFocus();
@@ -6224,6 +6227,54 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		imp.killRoi();
 
 		return combinedROI;
+	}
+	
+	public void fuseOverlappingSynonymousRois() {
+		for (String key:getRoisByRootName().keySet()) {
+			ArrayList<ArrayList<Roi>> sameSliceSynonymousRoiGroups = new ArrayList<ArrayList<Roi>>();
+			ArrayList<Roi> synROIs = getRoisByRootName().get(key);
+			for (int c = 0; c<=imp.getNChannels();c++) {
+				for (int t=1;t<=imp.getNFrames();t++) {
+					for (int z=1;z<=imp.getNSlices();z++) {
+						sameSliceSynonymousRoiGroups.add(new ArrayList<Roi>());
+						for (Roi synRoi:synROIs) {
+							if (synRoi.getCPosition() == c && synRoi.getZPosition() == z && synRoi.getTPosition() ==t) {
+								sameSliceSynonymousRoiGroups.get(sameSliceSynonymousRoiGroups.size() -1).add(synRoi);
+							}
+						}
+					}
+				}
+			}
+			ArrayList<ArrayList<Roi>> overlapBunches = new ArrayList<ArrayList<Roi>>();
+			for (ArrayList<Roi> group:sameSliceSynonymousRoiGroups) {
+				ArrayList<Roi> claimedRois = new ArrayList<Roi>();
+				for (Roi nextInGroup:group) {
+					if (!claimedRois.contains(nextInGroup)) {
+						overlapBunches.add(new ArrayList<Roi>());
+						overlapBunches.get(overlapBunches.size()-1).add(nextInGroup);
+						claimedRois.add(nextInGroup);
+						ShapeRoi orSweeper = new ShapeRoi(nextInGroup);
+						for (Roi otherInGroup:group) {
+							ShapeRoi andTester = (ShapeRoi) orSweeper.clone();
+							andTester.and(new ShapeRoi(otherInGroup));
+							double andFD = andTester.getFeretsDiameter();
+							if (nextInGroup!=otherInGroup && andTester != null) {
+								//WITH ABOVE TRUE, GET A SINGLE COMPOUND ROI FOR ALL SEPARATE AREAS OF CELL X IN SLICE.
+								//HOWEVER, saving and reopening from roi or zip file only shows 
+								//****NEED TO FIX THIS!!  using feret == 0.0 test seemed promising, but also gave weird saved rois.
+								orSweeper = orSweeper.or(new ShapeRoi(otherInGroup));
+								overlapBunches.get(overlapBunches.size()-1).add(otherInGroup);
+								claimedRois.add(otherInGroup);
+							}
+						}
+						orSweeper.setPosition(nextInGroup.getCPosition(), nextInGroup.getZPosition(), nextInGroup.getTPosition());
+						orSweeper.setFillColor(nextInGroup.getFillColor());
+						orSweeper.setName(nextInGroup.getName());
+						this.addRoi(orSweeper, false, orSweeper.getStrokeColor(), orSweeper.getFillColor(), (int)orSweeper.getStrokeWidth(), false);
+					}
+				}
+			}
+		}
 	}
 
 	public void setImagePlus(ImagePlus imp) {
