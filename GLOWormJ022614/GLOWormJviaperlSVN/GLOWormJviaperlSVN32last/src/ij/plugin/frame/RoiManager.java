@@ -2370,7 +2370,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.ADD_TO_MANAGER,0,null,10,Double.MAX_VALUE,0,1);
 				pa.analyze(resliceSketchImp);
 				for (String nextNewRoiLabel:resliceSketchImp.getRoiManager().getROIs().keySet()) {
+					
+			//NEXT LINE MAY NEED TO BE TWEAKED SLIGHTLY TO NAIL THE EXACT Z POSISION.  I THINK -(10+1) MAY BE OFF SLIGHTLY
 					impBuildTagSet.setPosition(1, (int)((x + minX-(10+1))*(sketchImp.getCalibration().pixelWidth)/sketchImp.getCalibration().pixelDepth), 1);
+
 					Roi nextNewRoi = resliceSketchImp.getRoiManager().getROIs().get(nextNewRoiLabel);
 					nextNewRoi.setName(nextNewRoiLabel.replace("Traced",rootName));
 //					nextNewRoi.setLocation(nextNewRoi.getBounds().x+ minZ*sketchImp.getCalibration().pixelDepth/sketchImp.getCalibration().pixelWidth
