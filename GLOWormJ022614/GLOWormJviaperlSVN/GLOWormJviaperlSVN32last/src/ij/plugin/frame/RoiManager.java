@@ -6231,13 +6231,20 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	
 	public void fuseOverlappingSynonymousRois() {
 		for (String key:getRoisByRootName().keySet()) {
-			ArrayList<ArrayList<Roi>> sameSliceSynonymousRoiGroups = new ArrayList<ArrayList<Roi>>();
-			ArrayList<Roi> synROIs = getRoisByRootName().get(key);
+			ArrayList<ArrayList<ShapeRoi>> sameSliceSynonymousRoiGroups = new ArrayList<ArrayList<ShapeRoi>>();
+			ArrayList<ShapeRoi> synROIs = new ArrayList<ShapeRoi>();
+			for (Roi roi:getRoisByRootName().get(key)){
+				synROIs.add(new ShapeRoi(roi));
+				int size = synROIs.size();
+				synROIs.get(size-1).setPosition(roi.getCPosition(), roi.getZPosition(), roi.getTPosition());
+				synROIs.get(size-1).setFillColor(roi.getFillColor());
+				synROIs.get(size-1).setName(roi.getName());
+			}
 			for (int c = 0; c<=imp.getNChannels();c++) {
 				for (int t=1;t<=imp.getNFrames();t++) {
 					for (int z=1;z<=imp.getNSlices();z++) {
-						sameSliceSynonymousRoiGroups.add(new ArrayList<Roi>());
-						for (Roi synRoi:synROIs) {
+						sameSliceSynonymousRoiGroups.add(new ArrayList<ShapeRoi>());
+						for (ShapeRoi synRoi:synROIs) {
 							if (synRoi.getCPosition() == c && synRoi.getZPosition() == z && synRoi.getTPosition() ==t) {
 								sameSliceSynonymousRoiGroups.get(sameSliceSynonymousRoiGroups.size() -1).add(synRoi);
 							}
@@ -6245,33 +6252,70 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					}
 				}
 			}
-			ArrayList<ArrayList<Roi>> overlapBunches = new ArrayList<ArrayList<Roi>>();
-			for (ArrayList<Roi> group:sameSliceSynonymousRoiGroups) {
-				ArrayList<Roi> claimedRois = new ArrayList<Roi>();
-				for (Roi nextInGroup:group) {
+			boolean pauseAfter;
+			for (ArrayList<ShapeRoi> group:sameSliceSynonymousRoiGroups) {
+				pauseAfter = false;
+				ArrayList<ShapeRoi> claimedRois = new ArrayList<ShapeRoi>();
+				for (ShapeRoi nextInGroup:group) {
 					if (!claimedRois.contains(nextInGroup)) {
-						overlapBunches.add(new ArrayList<Roi>());
-						overlapBunches.get(overlapBunches.size()-1).add(nextInGroup);
+//						claimedRois.add(nextInGroup);
+						ShapeRoi orSweeper = nextInGroup;
+						for (ShapeRoi otherInGroup:group) {
+							if (!claimedRois.contains(otherInGroup)) {
+								ShapeRoi andTester = (ShapeRoi) orSweeper.clone();
+								andTester.and(otherInGroup);
+								if ( nextInGroup!=otherInGroup &&  andTester != null && andTester.getFeretsDiameter() > 1) {
+											//WITH FIRST TWO CONDITIONS ABOVE TRUE, GET A NICE SINGLE COMPOUND ROI FOR ALL SEPARATE AREAS OF CELL X IN SLICE.
+											//HOWEVER, saving and reopening from roi or zip file only shows a single one of the areas.
+											//****NEED TO FIX THIS!!  multi-shape rois also fail to render properly.
+											//Using feret > 0.0 test to get exclusively singular areas is promising, but also gives some weird saved rois,
+		
+											//Right now, cannot get this loop to match all fragements for every slice. Need a way to reloop over the or-products.  
+									orSweeper.or(otherInGroup);
+									claimedRois.add(otherInGroup);
+								}
+							}
+						}
+					}
+					String nextName = nextInGroup.getName();
+					if (nextName.matches(".*(_206_|_222_|_402_).*")) //debugging of some test data.
+						pauseAfter = true;
+				}
+				if (pauseAfter)
+					IJ.wait(1);
+				
+				//THROUGH CAREFUL DEBUGGING, I CONFIRMED THAT THIS LOOP WORKS, 
+				//BUT THAT .REMOVEALL(CLAIMEDROIS) CAN OCCASIONALLY REMOVE ONE EXTRA NONSPECIFIC ELEMENT FROM GROUP
+				//SCARY.
+				for (ShapeRoi cRoi:claimedRois) {
+					group.remove(cRoi);					
+				}
+				claimedRois.clear();
+				
+				for (ShapeRoi nextInGroup:group) {
+					if (!claimedRois.contains(nextInGroup)) {
 						claimedRois.add(nextInGroup);
-						ShapeRoi orSweeper = new ShapeRoi(nextInGroup);
-						for (Roi otherInGroup:group) {
-							ShapeRoi andTester = (ShapeRoi) orSweeper.clone();
-							andTester.and(new ShapeRoi(otherInGroup));
-							double andFD = andTester.getFeretsDiameter();
-							if (nextInGroup!=otherInGroup && andTester != null) {
-								//WITH ABOVE TRUE, GET A NICE SINGLE COMPOUND ROI FOR ALL SEPARATE AREAS OF CELL X IN SLICE.
-								//HOWEVER, saving and reopening from roi or zip file only shows a single one of the areas.
-								//****NEED TO FIX THIS!!  
-								//Using feret == 0.0 test to get exclusively singular areas (opposite effect) seemed promising, but also gave weird saved rois.
-								orSweeper = orSweeper.or(new ShapeRoi(otherInGroup));
-								overlapBunches.get(overlapBunches.size()-1).add(otherInGroup);
-								claimedRois.add(otherInGroup);
+						ShapeRoi orSweeper = nextInGroup;
+						for (ShapeRoi otherInGroup:group) {
+							if (!claimedRois.contains(otherInGroup)) {
+								ShapeRoi andTester = (ShapeRoi) orSweeper.clone();
+								andTester.and(otherInGroup);
+								if ( nextInGroup!=otherInGroup &&  andTester != null && andTester.getFeretsDiameter() > 1) {
+											//WITH FIRST TWO CONDITIONS ABOVE TRUE, GET A NICE SINGLE COMPOUND ROI FOR ALL SEPARATE AREAS OF CELL X IN SLICE.
+											//HOWEVER, saving and reopening from roi or zip file only shows a single one of the areas.
+											//****NEED TO FIX THIS!!  multi-shape rois also fail to render properly.
+											//Using feret > 0.0 test to get exclusively singular areas is promising, but also gives some weird saved rois,
+		
+											//Right now, cannot get this loop to match all fragements for every slice. Need a way to reloop over the or-products.  
+									orSweeper.or(otherInGroup);
+									claimedRois.add(otherInGroup);
+								}
 							}
 						}
 						orSweeper.setPosition(nextInGroup.getCPosition(), nextInGroup.getZPosition(), nextInGroup.getTPosition());
 						orSweeper.setFillColor(nextInGroup.getFillColor());
 						orSweeper.setName(nextInGroup.getName());
-						this.addRoi(orSweeper, false, orSweeper.getStrokeColor(), orSweeper.getFillColor(), (int)orSweeper.getStrokeWidth(), false);
+						this.addRoi(orSweeper, false, orSweeper.getStrokeColor(), /*Colors.decode("#33ff0000", Color.red)*/orSweeper.getFillColor(), (int)orSweeper.getStrokeWidth(), false);
 					}
 				}
 			}
