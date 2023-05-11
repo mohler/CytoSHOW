@@ -2269,7 +2269,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			IJ.log(rootName + " " + minX + " " + minY + " " + minZ + " " + maxX + " " + maxY + " " + maxZ);
 //			sketchImp = NewImage.createImage("SVV)_"+rootNames_rootFrames.get(0),(int)(imp.getWidth()*scaleFactor), (int)(imp.getHeight()*scaleFactor), (int)(imp.getNSlices()*imp.getNFrames()*zPadFactor), 8, NewImage.FILL_BLACK, false);
-			sketchImp = NewImage.createImage("SVV_" + rootNames_rootFrames.get(0),
+			sketchImp = NewImage.createImage("SVV_" + rootNames_rootFrames.get(n),
 					(int) ((maxX - minX) * scaleFactor) + 20, (int) ((maxY - minY) * scaleFactor) + 20,
 					(int) ((maxZ - minZ) * zPadFactor) + 2, 8, NewImage.FILL_BLACK, false);
 			sketchImp.setDimensions(1, (int) ((maxZ - minZ) * zPadFactor) + 2, imp.getNFrames());
