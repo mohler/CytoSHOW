@@ -467,11 +467,11 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 			sliceRois = new ArrayList<Roi>();
 			if(imp.getRoiManager().getROIsByNumbers().get(rbnString)!=null) {
-				labelShapes.clear();
+				labelShapes = new Hashtable<Roi,ShapeRoi>();
 				sliceRois.addAll(imp.getRoiManager().getROIsByNumbers().get(rbnString));
 			}
 			if(imp.getRoiManager().getROIsByNumbers().get(rbnCh0String)!=null) {
-				labelShapes.clear();
+				labelShapes = new Hashtable<Roi,ShapeRoi>();
 				sliceRois.addAll(imp.getRoiManager().getROIsByNumbers().get(rbnCh0String));
 			}
 		}

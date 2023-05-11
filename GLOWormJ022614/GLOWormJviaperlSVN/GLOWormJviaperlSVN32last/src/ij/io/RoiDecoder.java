@@ -474,6 +474,8 @@ public class RoiDecoder {
 
 	String getRoiName() {
 		String fileName = name;
+		if (name == null)
+			return "UnnamedRoi";
 		if (name.matches("\".* \"(_.*)*_\\d+_\\d+_\\d+.*")) {
 			return fileName;
 		}

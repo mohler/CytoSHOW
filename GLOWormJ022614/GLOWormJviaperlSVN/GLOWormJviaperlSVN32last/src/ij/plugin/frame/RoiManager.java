@@ -469,6 +469,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		addPopupItem("synapseStatsFromROIs");
 		addPopupItem("flipRoiHorizontalWithImage");
 		addPopupItem("flipRoiVerticalWithImage");
+		addPopupItem("fuseOverlapping");
 		add(pm);
 	}
 
@@ -1012,7 +1013,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				setShowAllColor();
 			else if (command.equals("Get ROIs this Slice")) {
 				ImagePlus imp = this.imp;
-
+				//WHY IS THIS VARIABLE BEING CALLED WITHOUT BEING ASSIGNED?
 				getSliceSpecificRoi(imp, imp.getSlice(), imp.getFrame());
 			} else if (command.equals("Copy Selected to Other Images"))
 				copyToOtherRMs();
@@ -1163,6 +1164,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					rois.replace(roi.getName(), roi);
 					IJ.log("flipV "+roi.getName());
 				}
+			} else if (command.equals("fuseOverlapping")) {
+				this.fuseOverlappingSynonymousRois();
 			}
 
 //			this.imp.getCanvas().requestFocus();
@@ -2266,7 +2269,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			IJ.log(rootName + " " + minX + " " + minY + " " + minZ + " " + maxX + " " + maxY + " " + maxZ);
 //			sketchImp = NewImage.createImage("SVV)_"+rootNames_rootFrames.get(0),(int)(imp.getWidth()*scaleFactor), (int)(imp.getHeight()*scaleFactor), (int)(imp.getNSlices()*imp.getNFrames()*zPadFactor), 8, NewImage.FILL_BLACK, false);
-			sketchImp = NewImage.createImage("SVV_" + rootNames_rootFrames.get(n),
+			sketchImp = NewImage.createImage("SVV_" + rootNames_rootFrames.get(0),
 					(int) ((maxX - minX) * scaleFactor) + 20, (int) ((maxY - minY) * scaleFactor) + 20,
 					(int) ((maxZ - minZ) * zPadFactor) + 2, 8, NewImage.FILL_BLACK, false);
 			sketchImp.setDimensions(1, (int) ((maxZ - minZ) * zPadFactor) + 2, imp.getNFrames());
@@ -2370,10 +2373,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.ADD_TO_MANAGER,0,null,10,Double.MAX_VALUE,0,1);
 				pa.analyze(resliceSketchImp);
 				for (String nextNewRoiLabel:resliceSketchImp.getRoiManager().getROIs().keySet()) {
-					
-			//NEXT LINE MAY NEED TO BE TWEAKED SLIGHTLY TO NAIL THE EXACT Z POSISION.  I THINK -(10+1) MAY BE OFF SLIGHTLY
 					impBuildTagSet.setPosition(1, (int)((x + minX-(10+1))*(sketchImp.getCalibration().pixelWidth)/sketchImp.getCalibration().pixelDepth), 1);
-
 					Roi nextNewRoi = resliceSketchImp.getRoiManager().getROIs().get(nextNewRoiLabel);
 					nextNewRoi.setName(nextNewRoiLabel.replace("Traced",rootName));
 //					nextNewRoi.setLocation(nextNewRoi.getBounds().x+ minZ*sketchImp.getCalibration().pixelDepth/sketchImp.getCalibration().pixelWidth
@@ -2382,6 +2382,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					nextNewRoi.setLocation(nextNewRoi.getBounds().x
 							+ (imp.getNSlices() - maxZ)*sketchImp.getCalibration().pixelDepth/sketchImp.getCalibration().pixelWidth
 							, nextNewRoi.getBounds().y + minY - 10);
+					
+				//Added -10 term to x position based on empirical fitting of MeiAdult reslices...
+					nextNewRoi.setLocation(nextNewRoi.getBounds().x+ impBuildTagSet.getWidth()-maxZ*sketchImp.getCalibration().pixelDepth/sketchImp.getCalibration().pixelWidth -10
+											, nextNewRoi.getBounds().y + minY - 10);
 					impBuildTagSet.getRoiManager().addRoi(nextNewRoi, false, ((Roi) rois[nameMatchIndexArrayList.get(0)]).getStrokeColor(), ((Roi) rois[nameMatchIndexArrayList.get(0)]).getFillColor(), 1, true);
 					String nextNewRoiNameFromListModel = impBuildTagSet.getRoiManager().getListModel()
 															.get(impBuildTagSet.getRoiManager().getListModel().size()-1);
@@ -2401,6 +2405,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					while (namesAlreadySaved.contains(labelNew)) {
 						hitCount++;
 //						labelNew = labelNew.replaceAll("(.*)(-[0-9]+)?(.roi)", "$1-" + hitCount + "$3");
+						if (!labelNew.matches(".*-[0-9]+\\.roi"))
+							labelNew = labelNew.replace(".roi", "-1.roi");
 						if (hitCount == 1)
 							labelNew = labelNew.replace(".roi", "-1.roi");
 						labelNew = labelNew.replace("-"+ (hitCount-1), "-"+ hitCount);
@@ -3937,6 +3943,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						int roiZ = roi.getZPosition();
 						int roiT = roi.getTPosition();
 						Color roiColor = roi.getFillColor();
+						if (roiColor.getRGB() == 0)
+							roi.setFillColor(Colors.decode(entry.getName().replaceAll("(.*_)(#\\d\\d\\d\\d\\d\\d\\d?\\d?)-.*", "$2"), roiColor));
 
 						int readC = roiC;
 						int readZ = roiZ;
@@ -6226,6 +6234,99 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		imp.killRoi();
 
 		return combinedROI;
+	}
+	
+	public void fuseOverlappingSynonymousRois() {
+		for (String key:getRoisByRootName().keySet()) {
+			ArrayList<ArrayList<ShapeRoi>> sameSliceSynonymousRoiGroups = new ArrayList<ArrayList<ShapeRoi>>();
+			ArrayList<ShapeRoi> synROIs = new ArrayList<ShapeRoi>();
+			for (Roi roi:getRoisByRootName().get(key)){
+				synROIs.add(new ShapeRoi(roi));
+				int size = synROIs.size();
+				synROIs.get(size-1).setPosition(roi.getCPosition(), roi.getZPosition(), roi.getTPosition());
+				synROIs.get(size-1).setFillColor(roi.getFillColor());
+				synROIs.get(size-1).setName(roi.getName());
+			}
+			for (int c = 0; c<=imp.getNChannels();c++) {
+				for (int t=1;t<=imp.getNFrames();t++) {
+					for (int z=1;z<=imp.getNSlices();z++) {
+						sameSliceSynonymousRoiGroups.add(new ArrayList<ShapeRoi>());
+						for (ShapeRoi synRoi:synROIs) {
+							if (synRoi.getCPosition() == c && synRoi.getZPosition() == z && synRoi.getTPosition() ==t) {
+								sameSliceSynonymousRoiGroups.get(sameSliceSynonymousRoiGroups.size() -1).add(synRoi);
+							}
+						}
+					}
+				}
+			}
+			boolean pauseAfter;
+			for (ArrayList<ShapeRoi> group:sameSliceSynonymousRoiGroups) {
+				pauseAfter = false;
+				ArrayList<ShapeRoi> claimedRois = new ArrayList<ShapeRoi>();
+				for (ShapeRoi nextInGroup:group) {
+					if (!claimedRois.contains(nextInGroup)) {
+//						claimedRois.add(nextInGroup);
+						ShapeRoi orSweeper = nextInGroup;
+						for (ShapeRoi otherInGroup:group) {
+							if (!claimedRois.contains(otherInGroup)) {
+								ShapeRoi andTester = (ShapeRoi) orSweeper.clone();
+								andTester.and(otherInGroup);
+								if ( nextInGroup!=otherInGroup &&  andTester != null && andTester.getFeretsDiameter() > 1) {
+											//WITH FIRST TWO CONDITIONS ABOVE TRUE, GET A NICE SINGLE COMPOUND ROI FOR ALL SEPARATE AREAS OF CELL X IN SLICE.
+											//HOWEVER, saving and reopening from roi or zip file only shows a single one of the areas.
+											//****NEED TO FIX THIS!!  multi-shape rois also fail to render properly.
+											//Using feret > 0.0 test to get exclusively singular areas is promising, but also gives some weird saved rois,
+		
+											//Right now, cannot get this loop to match all fragements for every slice. Need a way to reloop over the or-products.  
+									orSweeper.or(otherInGroup);
+									claimedRois.add(otherInGroup);
+								}
+							}
+						}
+					}
+					String nextName = nextInGroup.getName();
+					if (nextName.matches(".*(_206_|_222_|_402_).*")) //debugging of some test data.
+						pauseAfter = true;
+				}
+				if (pauseAfter)
+					IJ.wait(1);
+				
+				//THROUGH CAREFUL DEBUGGING, I CONFIRMED THAT THIS LOOP WORKS, 
+				//BUT THAT .REMOVEALL(CLAIMEDROIS) CAN OCCASIONALLY REMOVE ONE EXTRA NONSPECIFIC ELEMENT FROM GROUP
+				//SCARY.
+				for (ShapeRoi cRoi:claimedRois) {
+					group.remove(cRoi);					
+				}
+				claimedRois.clear();
+				
+				for (ShapeRoi nextInGroup:group) {
+					if (!claimedRois.contains(nextInGroup)) {
+						claimedRois.add(nextInGroup);
+						ShapeRoi orSweeper = nextInGroup;
+						for (ShapeRoi otherInGroup:group) {
+							if (!claimedRois.contains(otherInGroup)) {
+								ShapeRoi andTester = (ShapeRoi) orSweeper.clone();
+								andTester.and(otherInGroup);
+								if ( nextInGroup!=otherInGroup &&  andTester != null && andTester.getFeretsDiameter() > 1) {
+											//WITH FIRST TWO CONDITIONS ABOVE TRUE, GET A NICE SINGLE COMPOUND ROI FOR ALL SEPARATE AREAS OF CELL X IN SLICE.
+											//HOWEVER, saving and reopening from roi or zip file only shows a single one of the areas.
+											//****NEED TO FIX THIS!!  multi-shape rois also fail to render properly.
+											//Using feret > 0.0 test to get exclusively singular areas is promising, but also gives some weird saved rois,
+		
+											//Right now, cannot get this loop to match all fragements for every slice. Need a way to reloop over the or-products.  
+									orSweeper.or(otherInGroup);
+									claimedRois.add(otherInGroup);
+								}
+							}
+						}
+						orSweeper.setPosition(nextInGroup.getCPosition(), nextInGroup.getZPosition(), nextInGroup.getTPosition());
+						orSweeper.setFillColor(nextInGroup.getFillColor());
+						orSweeper.setName(nextInGroup.getName());
+						this.addRoi(orSweeper, false, orSweeper.getStrokeColor(), /*Colors.decode("#33ff0000", Color.red)*/orSweeper.getFillColor(), (int)orSweeper.getStrokeWidth(), false);
+					}
+				}
+			}
+		}
 	}
 
 	public void setImagePlus(ImagePlus imp) {
