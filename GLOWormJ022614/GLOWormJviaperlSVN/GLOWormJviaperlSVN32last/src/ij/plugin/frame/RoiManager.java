@@ -2269,7 +2269,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 			IJ.log(rootName + " " + minX + " " + minY + " " + minZ + " " + maxX + " " + maxY + " " + maxZ);
 //			sketchImp = NewImage.createImage("SVV)_"+rootNames_rootFrames.get(0),(int)(imp.getWidth()*scaleFactor), (int)(imp.getHeight()*scaleFactor), (int)(imp.getNSlices()*imp.getNFrames()*zPadFactor), 8, NewImage.FILL_BLACK, false);
-			sketchImp = NewImage.createImage("SVV_" + rootNames_rootFrames.get(n),
+			sketchImp = NewImage.createImage("SVV_" + rootNames_rootFrames.get(0),
 					(int) ((maxX - minX) * scaleFactor) + 20, (int) ((maxY - minY) * scaleFactor) + 20,
 					(int) ((maxZ - minZ) * zPadFactor) + 2, 8, NewImage.FILL_BLACK, false);
 			sketchImp.setDimensions(1, (int) ((maxZ - minZ) * zPadFactor) + 2, imp.getNFrames());
@@ -2373,15 +2373,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.ADD_TO_MANAGER,0,null,10,Double.MAX_VALUE,0,1);
 				pa.analyze(resliceSketchImp);
 				for (String nextNewRoiLabel:resliceSketchImp.getRoiManager().getROIs().keySet()) {
-					impBuildTagSet.setPosition(1, (int)((x + minX-(10+1))*(sketchImp.getCalibration().pixelWidth)/sketchImp.getCalibration().pixelDepth), 1);
+
+				//Added +4 term to z position based on empirical fitting of MeiAdult reslices...					
+					impBuildTagSet.setPosition(1, (int)((x + minX-(10+1+4))*(sketchImp.getCalibration().pixelWidth)/sketchImp.getCalibration().pixelDepth), 1);
 					Roi nextNewRoi = resliceSketchImp.getRoiManager().getROIs().get(nextNewRoiLabel);
 					nextNewRoi.setName(nextNewRoiLabel.replace("Traced",rootName));
-//					nextNewRoi.setLocation(nextNewRoi.getBounds().x+ minZ*sketchImp.getCalibration().pixelDepth/sketchImp.getCalibration().pixelWidth
-//											, nextNewRoi.getBounds().y + minY - 10);
-//below change needed to acount for fliphorizontal earlier...		
-					nextNewRoi.setLocation(nextNewRoi.getBounds().x
-							+ (imp.getNSlices() - maxZ)*sketchImp.getCalibration().pixelDepth/sketchImp.getCalibration().pixelWidth
-							, nextNewRoi.getBounds().y + minY - 10);
 					
 				//Added -10 term to x position based on empirical fitting of MeiAdult reslices...
 					nextNewRoi.setLocation(nextNewRoi.getBounds().x+ impBuildTagSet.getWidth()-maxZ*sketchImp.getCalibration().pixelDepth/sketchImp.getCalibration().pixelWidth -10
@@ -2407,10 +2403,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //						labelNew = labelNew.replaceAll("(.*)(-[0-9]+)?(.roi)", "$1-" + hitCount + "$3");
 						if (!labelNew.matches(".*-[0-9]+\\.roi"))
 							labelNew = labelNew.replace(".roi", "-1.roi");
-						if (hitCount == 1)
-							labelNew = labelNew.replace(".roi", "-1.roi");
-						labelNew = labelNew.replace("-"+ (hitCount-1), "-"+ hitCount);
-						IJ.log(labelNew);
+						labelNew = labelNew.replace("-"+ (hitCount-1), "-"+ (hitCount));
 					}
 					namesAlreadySaved.add(labelNew);
 					RoiEncoder re = new RoiEncoder(roiSaveDir + labelNew.replace("\"", "qQqQ"));
@@ -6271,7 +6264,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							if (!claimedRois.contains(otherInGroup)) {
 								ShapeRoi andTester = (ShapeRoi) orSweeper.clone();
 								andTester.and(otherInGroup);
-								if ( nextInGroup!=otherInGroup &&  andTester != null && andTester.getFeretsDiameter() > 1) {
+								if ( andTester != null && andTester.getFeretsDiameter() > 1) {
 											//WITH FIRST TWO CONDITIONS ABOVE TRUE, GET A NICE SINGLE COMPOUND ROI FOR ALL SEPARATE AREAS OF CELL X IN SLICE.
 											//HOWEVER, saving and reopening from roi or zip file only shows a single one of the areas.
 											//****NEED TO FIX THIS!!  multi-shape rois also fail to render properly.
@@ -6279,7 +6272,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		
 											//Right now, cannot get this loop to match all fragements for every slice. Need a way to reloop over the or-products.  
 									orSweeper.or(otherInGroup);
-									claimedRois.add(otherInGroup);
+									if (nextInGroup!=otherInGroup)
+										claimedRois.add(otherInGroup);
 								}
 							}
 						}
@@ -6307,7 +6301,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							if (!claimedRois.contains(otherInGroup)) {
 								ShapeRoi andTester = (ShapeRoi) orSweeper.clone();
 								andTester.and(otherInGroup);
-								if ( nextInGroup!=otherInGroup &&  andTester != null && andTester.getFeretsDiameter() > 1) {
+								if ( andTester != null && andTester.getFeretsDiameter() > 1) {
 											//WITH FIRST TWO CONDITIONS ABOVE TRUE, GET A NICE SINGLE COMPOUND ROI FOR ALL SEPARATE AREAS OF CELL X IN SLICE.
 											//HOWEVER, saving and reopening from roi or zip file only shows a single one of the areas.
 											//****NEED TO FIX THIS!!  multi-shape rois also fail to render properly.
@@ -6315,7 +6309,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		
 											//Right now, cannot get this loop to match all fragements for every slice. Need a way to reloop over the or-products.  
 									orSweeper.or(otherInGroup);
-									claimedRois.add(otherInGroup);
+									if (nextInGroup!=otherInGroup)
+										claimedRois.add(otherInGroup);
 								}
 							}
 						}
