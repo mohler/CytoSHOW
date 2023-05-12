@@ -26,7 +26,9 @@ public class Roi extends Object implements Cloneable, java.io.Serializable {
 	
 	static final int NO_MODS=0, ADD_TO_ROI=1, SUBTRACT_FROM_ROI=2; // modification states
 		
-	int startX, startY, x, y, width, height;
+	int startX, startY, x, y;
+	public int width;
+	public int height;
 	double startXD, startYD;
 	Rectangle2D.Double bounds;
 	double xd, yd, widthd, heightd;

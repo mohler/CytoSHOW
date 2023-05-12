@@ -1,5 +1,6 @@
 package ij.io;
 import ij.gui.*;
+import ij.IJ;
 import ij.ImagePlus;
 import ij.process.*;
 import java.io.*;
@@ -217,7 +218,8 @@ public class RoiDecoder {
 				if (scaledRoi == null) {
 					scaledRoi = new ShapeRoi(scaledPart);
 				} else {
-					// can't really do anything with additional saved Rois, can I?
+					//after long time floundering with dead code here, realized all I need is to OR the several component rois together.
+					scaledRoi.or(new ShapeRoi(scaledPart));
 				}
 			}
 			if (version>=218)

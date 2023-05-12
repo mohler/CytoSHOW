@@ -1165,7 +1165,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					IJ.log("flipV "+roi.getName());
 				}
 			} else if (command.equals("fuseOverlapping")) {
-				this.fuseOverlappingSynonymousRois();
+				this.fuseOverlappingSynonymousRois(shiftKeyDown);
 			}
 
 //			this.imp.getCanvas().requestFocus();
@@ -6229,7 +6229,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		return combinedROI;
 	}
 	
-	public void fuseOverlappingSynonymousRois() {
+	public void fuseOverlappingSynonymousRois(boolean archipelagos) {
 		for (String key:getRoisByRootName().keySet()) {
 			ArrayList<ArrayList<ShapeRoi>> sameSliceSynonymousRoiGroups = new ArrayList<ArrayList<ShapeRoi>>();
 			ArrayList<ShapeRoi> synROIs = new ArrayList<ShapeRoi>();
@@ -6264,7 +6264,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							if (!claimedRois.contains(otherInGroup)) {
 								ShapeRoi andTester = (ShapeRoi) orSweeper.clone();
 								andTester.and(otherInGroup);
-								if ( andTester != null && andTester.getFeretsDiameter() > 1) {
+								if (archipelagos || (andTester != null && andTester.getFeretsDiameter() > 1 )) {
 											//WITH FIRST TWO CONDITIONS ABOVE TRUE, GET A NICE SINGLE COMPOUND ROI FOR ALL SEPARATE AREAS OF CELL X IN SLICE.
 											//HOWEVER, saving and reopening from roi or zip file only shows a single one of the areas.
 											//****NEED TO FIX THIS!!  multi-shape rois also fail to render properly.
@@ -6279,7 +6279,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						}
 					}
 					String nextName = nextInGroup.getName();
-					if (nextName.matches(".*(_206_|_222_|_402_).*")) //debugging of some test data.
+					if (nextName.matches("SMDDL.*(_240_).*")) //debugging of some test data.
 						pauseAfter = true;
 				}
 				if (pauseAfter)
@@ -6301,7 +6301,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							if (!claimedRois.contains(otherInGroup)) {
 								ShapeRoi andTester = (ShapeRoi) orSweeper.clone();
 								andTester.and(otherInGroup);
-								if ( andTester != null && andTester.getFeretsDiameter() > 1) {
+								if (archipelagos || (andTester != null && andTester.getFeretsDiameter() > 1 )) {
 											//WITH FIRST TWO CONDITIONS ABOVE TRUE, GET A NICE SINGLE COMPOUND ROI FOR ALL SEPARATE AREAS OF CELL X IN SLICE.
 											//HOWEVER, saving and reopening from roi or zip file only shows a single one of the areas.
 											//****NEED TO FIX THIS!!  multi-shape rois also fail to render properly.
