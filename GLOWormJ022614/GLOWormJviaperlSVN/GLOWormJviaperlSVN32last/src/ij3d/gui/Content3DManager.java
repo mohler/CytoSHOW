@@ -1222,7 +1222,8 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 			
 		}
 		if (count > 1 && indexes.length == 1 && univ != null)
-			univ.removeContent(univ.getSelected().getName(), true);
+			if (this.getListModel().size()>indexes[0])
+				univ.removeContent(this.getListModel().get(indexes[0]), true);
 
 		textCountLabel.setText("" + listModel.size() + "/" + fullListModel.size());
 		if (univ.getWindow() != null) {
