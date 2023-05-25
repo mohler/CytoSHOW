@@ -3965,7 +3965,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				count++;
 
 				String name = entry.getName();
-				name = name.replace("qQqQ","\"");
+				
+				//hacks in next line deal with 7z.exe's dislike of quotes in zip element names
+				name = name.replace("qQqQ","\"").replaceAll("_(.* )_(_.*)", "\"$1\"$2");
 				if ((name.endsWith(".roi") && name.matches("\".* \"(_.*)*_\\d+_\\d+_\\d+.*"))) {
 					out = new ByteArrayOutputStream();
 					while ((len = in.read(buf)) > 0)
