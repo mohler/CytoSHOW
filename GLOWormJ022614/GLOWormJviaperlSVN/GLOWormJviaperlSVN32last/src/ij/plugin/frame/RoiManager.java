@@ -2231,201 +2231,268 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		for (int n = 0; n < rootNames_rootFrames.size(); n++) {
 			ImagePlus sketchImp = null;
 
+			Roi[] selectedRois = getSelectedRoisAsArray();
 			String rootName = rootNames.get(n);
+			if (!rootName.contains("~")) {  //this complex reslicing and particle analysis only for non-synapses
 
-			select(-1);
-			IJ.wait(50);
-			ArrayList<Integer> nameMatchIndexArrayList = new ArrayList<Integer>();
-			Roi[] rois = getFullRoisAsArray();
-			int fraa = rois.length;
-			int minX = Integer.MAX_VALUE;
-			int minY = Integer.MAX_VALUE;
-			int minZ = Integer.MAX_VALUE;
-			int maxX = Integer.MIN_VALUE;
-			int maxY = Integer.MIN_VALUE;
-			int maxZ = Integer.MIN_VALUE;
-			for (int r = 0; r < fraa; r++) {
-				String nextName = rois[r].getName();
-				if (nextName.startsWith("\"" + rootName/* .split("_")[0] */)
-				/*
-				 * && rootName.endsWith(nextName.split("_")[nextName.split("_").length-1].
-				 * replaceAll("[CZT]", "").split("-")[0])
-				 */
-				) {
-					nameMatchIndexArrayList.add(r);
-					minX = minX > rois[r].getBounds().x ? rois[r].getBounds().x : minX;
-					minY = minY > rois[r].getBounds().y ? rois[r].getBounds().y : minY;
-					minZ = minZ > rois[r].getZPosition() - 1 ? rois[r].getZPosition() - 1 : minZ; // minZ = 0 for full
-																									// stack...
-					maxX = maxX < rois[r].getBounds().x + rois[r].getBounds().width
-							? rois[r].getBounds().x + rois[r].getBounds().width
-							: maxX;
-					maxY = maxY < rois[r].getBounds().y + rois[r].getBounds().height
-							? rois[r].getBounds().y + rois[r].getBounds().height
-							: maxY;
-					maxZ = maxZ < rois[r].getZPosition() ? rois[r].getZPosition() : maxZ;
+//				select(-1);
+				IJ.wait(50);
+				ArrayList<Integer> nameMatchIndexArrayList = new ArrayList<Integer>();
+				int sraa = selectedRois.length;
+				int minX = Integer.MAX_VALUE;
+				int minY = Integer.MAX_VALUE;
+				int minZ = Integer.MAX_VALUE;
+				int maxX = Integer.MIN_VALUE;
+				int maxY = Integer.MIN_VALUE;
+				int maxZ = Integer.MIN_VALUE;
+				for (int r = 0; r < sraa; r++) {
+					String nextName = selectedRois[r].getName();
+					if (nextName.startsWith("\"" + rootName/* .split("_")[0] */)
+							/*
+							 * && rootName.endsWith(nextName.split("_")[nextName.split("_").length-1].
+							 * replaceAll("[CZT]", "").split("-")[0])
+							 */
+							) {
+						nameMatchIndexArrayList.add(r);
 
+						minX = minX > selectedRois[r].getBounds().x ? selectedRois[r].getBounds().x : minX;
+						minY = minY > selectedRois[r].getBounds().y ? selectedRois[r].getBounds().y : minY;
+						minZ = minZ > selectedRois[r].getZPosition() - 1 ? selectedRois[r].getZPosition() - 1 : minZ; // minZ = 0 for full
+						// stack...
+						maxX = maxX < selectedRois[r].getBounds().x + selectedRois[r].getBounds().width
+								? selectedRois[r].getBounds().x + selectedRois[r].getBounds().width
+										: maxX;
+						maxY = maxY < selectedRois[r].getBounds().y + selectedRois[r].getBounds().height
+								? selectedRois[r].getBounds().y + selectedRois[r].getBounds().height
+										: maxY;
+						maxZ = maxZ < selectedRois[r].getZPosition() ? selectedRois[r].getZPosition() : maxZ;
+
+					}
 				}
-			}
-			IJ.log(rootName + " " + minX + " " + minY + " " + minZ + " " + maxX + " " + maxY + " " + maxZ);
-//			sketchImp = NewImage.createImage("SVV)_"+rootNames_rootFrames.get(0),(int)(imp.getWidth()*scaleFactor), (int)(imp.getHeight()*scaleFactor), (int)(imp.getNSlices()*imp.getNFrames()*zPadFactor), 8, NewImage.FILL_BLACK, false);
-			sketchImp = NewImage.createImage("SVV_" + rootNames_rootFrames.get(0),
-					(int) ((maxX - minX) * scaleFactor) + 20, (int) ((maxY - minY) * scaleFactor) + 20,
-					(int) ((maxZ - minZ) * zPadFactor) + 2, 8, NewImage.FILL_BLACK, false);
-			sketchImp.setDimensions(1, (int) ((maxZ - minZ) * zPadFactor) + 2, imp.getNFrames());
-			sketchImp.setMotherImp(imp, imp.getID());
-			sketchImp.setCalibration(imp.getCalibration());
-			sketchImp.getCalibration().pixelWidth = imp.getCalibration().pixelWidth / scaleFactor;
-			sketchImp.getCalibration().pixelHeight = imp.getCalibration().pixelHeight / scaleFactor;
-			sketchImp.getCalibration().pixelDepth = imp.getCalibration().pixelDepth / zPadFactor;
+				IJ.log(rootName + " " + minX + " " + minY + " " + minZ + " " + maxX + " " + maxY + " " + maxZ);
+				//			sketchImp = NewImage.createImage("SVV)_"+rootNames_rootFrames.get(0),(int)(imp.getWidth()*scaleFactor), (int)(imp.getHeight()*scaleFactor), (int)(imp.getNSlices()*imp.getNFrames()*zPadFactor), 8, NewImage.FILL_BLACK, false);
 
-			sketchImp.setTitle("SVV_" + rootName);
-			sketchImp.show();
-			sketchImp.getRoiManager().select(-1);
-			IJ.wait(50);
-			if (sketchImp.getRoiManager().getCount() > 0) {
-				sketchImp.getRoiManager().delete(false);
-			}
-			int[] nameMatchIndexes = new int[nameMatchIndexArrayList.size()];
-			Roi nextRoi = ((Roi) rois[0]);
-			for (int i = 0; i < nameMatchIndexes.length; i++) {
-				nameMatchIndexes[i] = nameMatchIndexArrayList.get(i);
-				nextRoi = ((Roi) rois[nameMatchIndexArrayList.get(i)]);
-				String[] nextChunks = nextRoi.getName().split("_");
-				int nextSlice = ((Integer.parseInt(nextChunks[nextChunks.length - 2]) - minZ) * (int) zPadFactor);
-				int nextFrame = Integer
-						.parseInt(nextChunks[nextChunks.length - 1].replaceAll("[CZT]", "").split("-")[0]);
-				nextRoi.setLocation(nextRoi.getBounds().x - minX + 10, nextRoi.getBounds().y - minY + 10);
-				Roi scaledRoi = null;
-				try {
 
-					if (!nextRoi.isArea()) {
-						ImageProcessor ip2 = new ByteProcessor(imp.getWidth(), imp.getHeight());
-						ip2.setColor(255);
-						if (nextRoi.getType() == Roi.LINE) {
-							if (!(nextRoi.getStrokeWidth() > 1)) {
-								nextRoi.setStrokeWidth(2d);
+					sketchImp = NewImage.createImage("SVV_" + rootNames_rootFrames.get(0),
+							(int) ((maxX - minX) * scaleFactor) + 20, (int) ((maxY - minY) * scaleFactor) + 20,
+							(int) ((maxZ - minZ) * zPadFactor) + 2, 8, NewImage.FILL_BLACK, false);
+					sketchImp.setDimensions(1, (int) ((maxZ - minZ) * zPadFactor) + 2, imp.getNFrames());
+					sketchImp.setMotherImp(imp, imp.getID());
+					sketchImp.setCalibration(imp.getCalibration());
+					sketchImp.getCalibration().pixelWidth = imp.getCalibration().pixelWidth / scaleFactor;
+					sketchImp.getCalibration().pixelHeight = imp.getCalibration().pixelHeight / scaleFactor;
+					sketchImp.getCalibration().pixelDepth = imp.getCalibration().pixelDepth / zPadFactor;
+
+					sketchImp.setTitle("SVV_" + rootName);
+					sketchImp.show();
+					sketchImp.getRoiManager().select(-1);
+					IJ.wait(50);
+					if (sketchImp.getRoiManager().getCount() > 0) {
+						sketchImp.getRoiManager().delete(false);
+					}
+					int[] nameMatchIndexes = new int[nameMatchIndexArrayList.size()];
+					Roi nextRoi = ((Roi) selectedRois[0]);
+					for (int i = 0; i < nameMatchIndexes.length; i++) {
+						nameMatchIndexes[i] = nameMatchIndexArrayList.get(i);
+						nextRoi = ((Roi) selectedRois[nameMatchIndexArrayList.get(i)]);
+						String[] nextChunks = nextRoi.getName().split("_");
+						int nextSlice = ((Integer.parseInt(nextChunks[nextChunks.length - 2]) - minZ) * (int) zPadFactor);
+						int nextFrame = Integer
+								.parseInt(nextChunks[nextChunks.length - 1].replaceAll("[CZT]", "").split("-")[0]);
+						nextRoi.setLocation(nextRoi.getBounds().x - minX + 10, nextRoi.getBounds().y - minY + 10);
+						Roi scaledRoi = null;
+						try {
+
+							if (!nextRoi.isArea()) {
+								ImageProcessor ip2 = new ByteProcessor(imp.getWidth(), imp.getHeight());
+								ip2.setColor(255);
+								if (nextRoi.getType() == Roi.LINE) {
+									if (!(nextRoi.getStrokeWidth() > 1)) {
+										nextRoi.setStrokeWidth(2d);
+									}
+									ip2.fillPolygon(nextRoi.getPolygon());
+								} else {
+									(nextRoi).drawPixels(ip2);
+								}
+								ip2.setThreshold(255, 255, ImageProcessor.NO_LUT_UPDATE);
+								ThresholdToSelection tts = new ThresholdToSelection();
+								Roi roi2 = tts.convert(ip2);
+								Selection.transferProperties(nextRoi, roi2);
+								nextRoi = roi2;
+
 							}
-							ip2.fillPolygon(nextRoi.getPolygon());
-						} else {
-							(nextRoi).drawPixels(ip2);
+
+							if (nextRoi instanceof TextRoi) {
+								scaledRoi = (Roi) nextRoi.clone();
+							} else {
+								scaledRoi = new RoiDecoder(scaleFactor, RoiEncoder.saveAsByteArray(nextRoi), nextRoi.getName())
+										.getRoi();
+							}
+							nextRoi.setLocation(nextRoi.getBounds().x + minX - 10, nextRoi.getBounds().y + minY - 10);
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
 						}
-						ip2.setThreshold(255, 255, ImageProcessor.NO_LUT_UPDATE);
-						ThresholdToSelection tts = new ThresholdToSelection();
-						Roi roi2 = tts.convert(ip2);
-						Selection.transferProperties(nextRoi, roi2);
-						nextRoi = roi2;
+						for (int zp = 0; zp < (int) zPadFactor; zp++) {
+							//					sketchImp.setPosition(1, nextSlice-zp, nextFrame);  ***
+							scaledRoi.setPosition(1, nextSlice - zp, nextFrame);
+							sketchImp.getRoiManager().addRoi(scaledRoi, false, scaledRoi.getStrokeColor(), scaledRoi.getFillColor(), -1, false);
+						}
+					}
+					sketchImp.getRoiManager().select(-1);
+					boolean filled = false;
+					filled = sketchImp.getRoiManager().drawOrFill(nextRoi instanceof TextRoi ? DRAW : FILL);
+
+					while (!filled) {
+						IJ.wait(100);
+					}
+					sketchImp.setMotherImp(imp, imp.getID());
+					sketchImp.getRoiManager().setSelectedIndexes(sketchImp.getRoiManager().getFullListIndexes());
+					roiColorString = Colors.colorToHexString(nextRoi.getFillColor());
+					//			roiColorString = roiColorString.substring(3 /*roiColorString.length()-6*/);
+					assignedColorString = roiColorString;
+					(new StackReverser()).flipStack(sketchImp);
+					sketchImp.setMotherImp(imp, imp.getID());
+
+					String scaleShiftString = "" + 1.0 + "|" + 1.0 + "|" + 1.0 + "|"
+							+ (minX - 10) * sketchImp.getCalibration().pixelWidth * scaleFactor + "|"
+							+ (minY - 10) * sketchImp.getCalibration().pixelHeight * scaleFactor + "|"
+							/* maxZ b\c stackflip */ + (-maxZ - 1) * sketchImp.getCalibration().pixelDepth * zPadFactor;
+
+					sketchImp.setDimensions(1, (int) ((maxZ - minZ) * zPadFactor) + 2, imp.getNFrames());
+
+					impBuildTagSet.show();
+					Slicer.setStartAt("Left");
+					Slicer.setRotate(true);
+					int y1 = 0; 
+					int y2 = sketchImp.getHeight()-1;
+					for (int x=0; x<sketchImp.getWidth(); x++) {
+						sketchImp.setRoi(new Line(x,y1,x,y2));
+						Slicer sketchSlice = new Slicer();
+						sketchSlice.setOutputSlices(1);
+						ImagePlus resliceSketchImp = sketchSlice.reslice(sketchImp);
+						//				resliceSketchImp.getProcessor().flipHorizontal();
+						//				resliceSketchImp.show();
+						IJ.setThreshold(resliceSketchImp,2,255);
+						ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.ADD_TO_MANAGER,0,null,10,Double.MAX_VALUE,0,1);
+						pa.analyze(resliceSketchImp);
+						for (String nextNewRoiLabel:resliceSketchImp.getRoiManager().getROIs().keySet()) {
+
+							//Added +4 term to z position based on empirical fitting of MeiAdult reslices...					
+							impBuildTagSet.setPosition(1, (int)((x + minX-(10+1+4))*(sketchImp.getCalibration().pixelWidth)/sketchImp.getCalibration().pixelDepth), 1);
+							Roi nextNewRoi = resliceSketchImp.getRoiManager().getROIs().get(nextNewRoiLabel);
+							nextNewRoi.setName(nextNewRoiLabel.replace("Traced",rootName));
+
+							//Added -10 term to x position based on empirical fitting of MeiAdult reslices...
+							nextNewRoi.setLocation(nextNewRoi.getBounds().x+ impBuildTagSet.getWidth()-maxZ*sketchImp.getCalibration().pixelDepth/sketchImp.getCalibration().pixelWidth -10
+									, nextNewRoi.getBounds().y + minY - 10);
+							impBuildTagSet.getRoiManager().addRoi(nextNewRoi, false, ((Roi) selectedRois[nameMatchIndexArrayList.get(0)]).getStrokeColor(), ((Roi) selectedRois[nameMatchIndexArrayList.get(0)]).getFillColor(), 1, true);
+							String nextNewRoiNameFromListModel = impBuildTagSet.getRoiManager().getListModel()
+									.get(impBuildTagSet.getRoiManager().getListModel().size()-1);
+							Roi nextNewRoiFromListModel = impBuildTagSet.getRoiManager().getROIs().get(nextNewRoiNameFromListModel);
+							String label = nextNewRoi.getName();
+							// Substituting updated color, Z, T, C info to saved name:
+
+							////NEEDed TO CHANGE THIS NEXT LINE TO TAKE ADVANTAGE OF GETUNIQUENAME HAVING BEEN CALLED ALREADY DURING .ADDROI 3 LINES AGO!!!!
+							//					String labelNew = label.replaceAll("(\".* \"_)(.*)", "$1" + Colors.colorToHexString(nextNewRoiFromListModel.getFillColor())
+							//							+ "_" + nextNewRoiFromListModel.getCPosition() + "_" + nextNewRoiFromListModel.getZPosition() + "_" + nextNewRoiFromListModel.getTPosition())
+							//							.replace(" ", "").replace("\"", "");
+							String labelNew = label.replace("#00000000", Colors.colorToHexString(nextNewRoiFromListModel.getFillColor()));
+
+							if (!labelNew.endsWith(".roi"))
+								labelNew += ".roi";
+							int hitCount = 0;
+							while (namesAlreadySaved.contains(labelNew)) {
+								hitCount++;
+								//						labelNew = labelNew.replaceAll("(.*)(-[0-9]+)?(.roi)", "$1-" + hitCount + "$3");
+								if (!labelNew.matches(".*-[0-9]+\\.roi"))
+									labelNew = labelNew.replace(".roi", "-1.roi");
+								labelNew = labelNew.replace("-"+ (hitCount-1), "-"+ (hitCount));
+							}
+							namesAlreadySaved.add(labelNew);
+							RoiEncoder re = new RoiEncoder(roiSaveDir + labelNew.replace("\"", "qQqQ"));
+							try {
+								re.write(nextNewRoiFromListModel);
+							} catch (IOException e) {
+								IJ.error("Tag Manager", e.getMessage());
+							}
+
+						}
+						resliceSketchImp.close();
+						resliceSketchImp.flush();
 
 					}
+					sketchImp.changes = false;
+					sketchImp.close();
+					sketchImp.flush();
+					sketchImp = null;
+					//			ImageJ3DViewer.select(null);
 
-					if (nextRoi instanceof TextRoi) {
-						scaledRoi = (Roi) nextRoi.clone();
-					} else {
-						scaledRoi = new RoiDecoder(scaleFactor, RoiEncoder.saveAsByteArray(nextRoi), nextRoi.getName())
-								.getRoi();
-					}
-					nextRoi.setLocation(nextRoi.getBounds().x + minX - 10, nextRoi.getBounds().y + minY - 10);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				for (int zp = 0; zp < (int) zPadFactor; zp++) {
-//					sketchImp.setPosition(1, nextSlice-zp, nextFrame);  ***
-					scaledRoi.setPosition(1, nextSlice - zp, nextFrame);
-					sketchImp.getRoiManager().addRoi(scaledRoi, false, scaledRoi.getStrokeColor(), scaledRoi.getFillColor(), -1, false);
-				}
-			}
-			sketchImp.getRoiManager().select(-1);
-			boolean filled = false;
-			filled = sketchImp.getRoiManager().drawOrFill(nextRoi instanceof TextRoi ? DRAW : FILL);
-
-			while (!filled) {
-				IJ.wait(100);
-			}
-			sketchImp.setMotherImp(imp, imp.getID());
-			sketchImp.getRoiManager().setSelectedIndexes(sketchImp.getRoiManager().getFullListIndexes());
-			roiColorString = Colors.colorToHexString(nextRoi.getFillColor());
-//			roiColorString = roiColorString.substring(3 /*roiColorString.length()-6*/);
-			assignedColorString = roiColorString;
-			(new StackReverser()).flipStack(sketchImp);
-			sketchImp.setMotherImp(imp, imp.getID());
-
-			String scaleShiftString = "" + 1.0 + "|" + 1.0 + "|" + 1.0 + "|"
-					+ (minX - 10) * sketchImp.getCalibration().pixelWidth * scaleFactor + "|"
-					+ (minY - 10) * sketchImp.getCalibration().pixelHeight * scaleFactor + "|"
-					/* maxZ b\c stackflip */ + (-maxZ - 1) * sketchImp.getCalibration().pixelDepth * zPadFactor;
-			
-			sketchImp.setDimensions(1, (int) ((maxZ - minZ) * zPadFactor) + 2, imp.getNFrames());
-			
-			impBuildTagSet.show();
-			Slicer.setStartAt("Left");
-			Slicer.setRotate(true);
-			int y1 = 0; 
-			int y2 = sketchImp.getHeight()-1;
-			for (int x=0; x<sketchImp.getWidth(); x++) {
-				sketchImp.setRoi(new Line(x,y1,x,y2));
-				Slicer sketchSlice = new Slicer();
-				sketchSlice.setOutputSlices(1);
-				ImagePlus resliceSketchImp = sketchSlice.reslice(sketchImp);
-//				resliceSketchImp.getProcessor().flipHorizontal();
-//				resliceSketchImp.show();
-				IJ.setThreshold(resliceSketchImp,2,255);
-				ParticleAnalyzer pa = new ParticleAnalyzer(ParticleAnalyzer.ADD_TO_MANAGER,0,null,10,Double.MAX_VALUE,0,1);
-				pa.analyze(resliceSketchImp);
-				for (String nextNewRoiLabel:resliceSketchImp.getRoiManager().getROIs().keySet()) {
-
-				//Added +4 term to z position based on empirical fitting of MeiAdult reslices...					
-					impBuildTagSet.setPosition(1, (int)((x + minX-(10+1+4))*(sketchImp.getCalibration().pixelWidth)/sketchImp.getCalibration().pixelDepth), 1);
-					Roi nextNewRoi = resliceSketchImp.getRoiManager().getROIs().get(nextNewRoiLabel);
-					nextNewRoi.setName(nextNewRoiLabel.replace("Traced",rootName));
+					//			THIS GARBAGECOLLECTOR CALL IS ABSOLUTELY REQUIRED FOR BIG DATA!!!!
+					System.gc();
+					//end complex reslicing and particle analysis only for non-synapses
 					
-				//Added -10 term to x position based on empirical fitting of MeiAdult reslices...
-					nextNewRoi.setLocation(nextNewRoi.getBounds().x+ impBuildTagSet.getWidth()-maxZ*sketchImp.getCalibration().pixelDepth/sketchImp.getCalibration().pixelWidth -10
-											, nextNewRoi.getBounds().y + minY - 10);
-					impBuildTagSet.getRoiManager().addRoi(nextNewRoi, false, ((Roi) rois[nameMatchIndexArrayList.get(0)]).getStrokeColor(), ((Roi) rois[nameMatchIndexArrayList.get(0)]).getFillColor(), 1, true);
-					String nextNewRoiNameFromListModel = impBuildTagSet.getRoiManager().getListModel()
-															.get(impBuildTagSet.getRoiManager().getListModel().size()-1);
-					Roi nextNewRoiFromListModel = impBuildTagSet.getRoiManager().getROIs().get(nextNewRoiNameFromListModel);
-					String label = nextNewRoi.getName();
-					// Substituting updated color, Z, T, C info to saved name:
+				} else {  //for synapses
 
-////NEEDed TO CHANGE THIS NEXT LINE TO TAKE ADVANTAGE OF GETUNIQUENAME HAVING BEEN CALLED ALREADY DURING .ADDROI 3 LINES AGO!!!!
-//					String labelNew = label.replaceAll("(\".* \"_)(.*)", "$1" + Colors.colorToHexString(nextNewRoiFromListModel.getFillColor())
-//							+ "_" + nextNewRoiFromListModel.getCPosition() + "_" + nextNewRoiFromListModel.getZPosition() + "_" + nextNewRoiFromListModel.getTPosition())
-//							.replace(" ", "").replace("\"", "");
-					String labelNew = label.replace("#00000000", Colors.colorToHexString(nextNewRoiFromListModel.getFillColor()));
+					n = rootNames_rootFrames.size();
+					for (Roi nextRoi:selectedRois) {
+						//Added +4 term to z position based on empirical fitting of MeiAdult reslices...					
+						Rectangle nextBounds = nextRoi.getBounds();
+						Point nextCenter = new Point((int)nextBounds.getCenterX(), (int)nextBounds.getCenterY());
+						IJ.log(nextRoi.getName());
+						IJ.log(""+nextRoi.toString()+" "+nextRoi.getZPosition());
+						int oldZPos = nextRoi.getZPosition();
+						Roi newRoi = (Roi)nextRoi.clone();
+						newRoi.setName(nextRoi.getName());
+						newRoi.setFillColor(nextRoi.getFillColor());
+						IJ.log(""+newRoi.toString()+" "+newRoi.getZPosition());
+						int newZPos = (int)(nextCenter.x*(imp.getCalibration().pixelWidth)/imp.getCalibration().pixelDepth);
+						impBuildTagSet.setPosition(1, newZPos, 1);
+						//Added -10 term to x position based on empirical fitting of MeiAdult reslices...
+//						newRoi.setLocation(impBuildTagSet.getWidth()-(nextRoi.getZPosition() + nextRoi.width/2)*imp.getCalibration().pixelDepth/imp.getCalibration().pixelWidth -10
+//								, nextCenter.y +nextBounds.height/2 - 10);
 
-					if (!labelNew.endsWith(".roi"))
-						labelNew += ".roi";
-					int hitCount = 0;
-					while (namesAlreadySaved.contains(labelNew)) {
-						hitCount++;
-//						labelNew = labelNew.replaceAll("(.*)(-[0-9]+)?(.roi)", "$1-" + hitCount + "$3");
-						if (!labelNew.matches(".*-[0-9]+\\.roi"))
-							labelNew = labelNew.replace(".roi", "-1.roi");
-						labelNew = labelNew.replace("-"+ (hitCount-1), "-"+ (hitCount));
+						impBuildTagSet.getRoiManager().addRoi(newRoi, false, newRoi.getStrokeColor(), newRoi.getFillColor(), 1, true);
+						String nextNewRoiNameFromListModel = impBuildTagSet.getRoiManager().getListModel()
+								.get(impBuildTagSet.getRoiManager().getListModel().size()-1);
+						Roi nextNewRoiFromListModel = impBuildTagSet.getRoiManager().getROIs().get(nextNewRoiNameFromListModel);
+						IJ.log(""+nextNewRoiFromListModel.toString()+" "+nextNewRoiFromListModel.getZPosition());
+						int nextZP = nextRoi.getZPosition();
+						nextNewRoiFromListModel.setLocation(impBuildTagSet.getWidth()-(nextZP)*imp.getCalibration().pixelDepth/imp.getCalibration().pixelWidth
+								, nextNewRoiFromListModel.getBounds().y);
+						IJ.log(""+nextNewRoiFromListModel.toString()+" "+nextNewRoiFromListModel.getZPosition());
+
+						String label = nextRoi.getName();
+						// Substituting updated color, Z, T, C info to saved name:
+
+						////NEEDed TO CHANGE THIS NEXT LINE TO TAKE ADVANTAGE OF GETUNIQUENAME HAVING BEEN CALLED ALREADY DURING .ADDROI 4 LINES AGO!!!!
+						//					String labelNew = label.replaceAll("(\".* \"_)(.*)", "$1" + Colors.colorToHexString(nextNewRoiFromListModel.getFillColor())
+						//							+ "_" + nextNewRoiFromListModel.getCPosition() + "_" + nextNewRoiFromListModel.getZPosition() + "_" + nextNewRoiFromListModel.getTPosition())
+						//							.replace(" ", "").replace("\"", "");
+						String labelNew = label.replace("#00000000", Colors.colorToHexString(nextNewRoiFromListModel.getFillColor())).replace("_"+oldZPos+"_","_"+newZPos+"_");
+
+						if (!labelNew.endsWith(".roi"))
+							labelNew += ".roi";
+						int hitCount = 0;
+						while (namesAlreadySaved.contains(labelNew)) {
+							hitCount++;
+							//						labelNew = labelNew.replaceAll("(.*)(-[0-9]+)?(.roi)", "$1-" + hitCount + "$3");
+							if (!labelNew.matches(".*-[0-9]+\\.roi"))
+								labelNew = labelNew.replace(".roi", "-1.roi");
+							labelNew = labelNew.replace("-"+ (hitCount-1), "-"+ (hitCount));
+						}
+						namesAlreadySaved.add(labelNew);
+						IJ.log(labelNew);
+						RoiEncoder re = new RoiEncoder(roiSaveDir + labelNew.replace("\"", "qQqQ"));
+						try {
+							re.write(nextNewRoiFromListModel);
+						} catch (IOException e) {
+							IJ.error("Tag Manager", e.getMessage());
+						}
+
 					}
-					namesAlreadySaved.add(labelNew);
-					RoiEncoder re = new RoiEncoder(roiSaveDir + labelNew.replace("\"", "qQqQ"));
-					try {
-						re.write(nextNewRoiFromListModel);
-					} catch (IOException e) {
-						IJ.error("Tag Manager", e.getMessage());
-					}
-					
+
 				}
-				resliceSketchImp.close();
-				resliceSketchImp.flush();
-
-			}
-			sketchImp.changes = false;
-			sketchImp.close();
-			sketchImp.flush();
-			sketchImp = null;
-//			ImageJ3DViewer.select(null);
-
-//			THIS GARBAGECOLLECTOR CALL IS ABSOLUTELY REQUIRED FOR BIG DATA!!!!
-			System.gc();
 		}
 //		Image3DUniverse univ = vv.getUniv();
 
