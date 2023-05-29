@@ -186,6 +186,16 @@ public class WavefrontLoader {
 			//				w*(flipXCoef*(Float.parseFloat(sp[1]) - x))/(-x+4736)));
 			//		}
 			//		FOR MEI ADULT rot corr xz
+			else if (objFileParentName.contains("MeiAdult_Reslice") || objFileGrandParentName.contains("MeiAdult_Reslice")) {
+				float x = 10800.0f;
+				float y = 10816.0f;
+				float z =  -8844.971f;
+				float w = 50000;
+				vertices.add(new Point3f(
+						-w*(flipXCoef*(Float.parseFloat(sp[1]) - x))/(-x+4736),
+						w*(Float.parseFloat(sp[2]) - y)/(x-4736),
+						w*(Float.parseFloat(sp[3]) -z)/(x-4736)));
+			}
 			else if (objFileParentName.contains("MeiAdult") || objFileGrandParentName.contains("MeiAdult")) {
 				float x = 10800.0f;
 				float y = 10816.0f;
