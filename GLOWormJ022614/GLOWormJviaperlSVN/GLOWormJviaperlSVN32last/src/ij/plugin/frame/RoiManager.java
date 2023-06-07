@@ -4005,7 +4005,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						int roiZ = roi.getZPosition();
 						int roiT = roi.getTPosition();
 						Color roiColor = roi.getFillColor();
-						if (roiColor.getRGB() == 0)
+						if (roiColor == null || roiColor.getRGB() == 0)
 							roi.setFillColor(Colors.decode(entry.getName().replaceAll("(.*_)(#\\d\\d\\d\\d\\d\\d\\d?\\d?)-.*", "$2"), roiColor));
 
 						int readC = roiC;
