@@ -57,7 +57,8 @@ public class RoiLabelByNumbersSorter {
 
 				String newNum = "";
 				if (!newNum.equals(nums[0])) 
-					newNum = num.replaceAll("[ics]","").replace("\"", "").replace(" ", "").toLowerCase().replaceAll("^(.*)-\\d+$", "$1").split("_")[0];
+					//WHAT THE HELL IS REPLACEALL("[ICS]","") NEEDED FOR???
+					newNum = num/*.replaceAll("[ics]","")*/.replace("\"", "").replace(" ", "").toLowerCase().replaceAll("^(.*)-\\d+$", "$1").split("_")[0];
 				else
 					newNum = num.replace("\"", "").replace(" ", "").toLowerCase().replaceAll("^(.*)-\\d+$", "$1");
 				
