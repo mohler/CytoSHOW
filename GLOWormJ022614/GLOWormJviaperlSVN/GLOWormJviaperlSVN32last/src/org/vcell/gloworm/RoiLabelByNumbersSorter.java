@@ -41,6 +41,8 @@ public class RoiLabelByNumbersSorter {
 				if (colors!=null && colors.length==labels.length) {
 					nums = new String[lDCChunksLength+1];
 					nums[lDCChunksLength] = Colors.colorToHexString(colors[i]);
+					if (nums[lDCChunksLength].matches("\\#..00ffff"))
+						nums[lDCChunksLength] = "#00000000";
 				}
 			} else {
 				nums[lDCChunksLength-1] =  labelDollaredChunks[mode <lDCChunksLength? mode:lDCChunksLength-1];
@@ -60,8 +62,6 @@ public class RoiLabelByNumbersSorter {
 					//REPLACEALL("[ICS]","") NEEDED FOR CLEAN DISPLAY OF DC-CPHATE PLOTS...NEED TO KEEP IT...WITHOUT CONFLICT WITH COLOR CODES...
 					if (newNum.startsWith("#")) {
 						newNum = num/*.replaceAll("[ics]","")*/.replace("\"", "").replace(" ", "").toLowerCase().replaceAll("^(.*)-\\d+$", "$1").split("_")[0];
-						if (newNum == "#00FFFF")
-							newNum = "#000000";
 					} else {
 						newNum = num.replaceAll("[ics]","").replace("\"", "").replace(" ", "").toLowerCase().replaceAll("^(.*)-\\d+$", "$1").split("_")[0];
 					}
