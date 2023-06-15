@@ -738,7 +738,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 					String colorPickerString = Colors.colorToHexString(fillColor);
 					String alphaCorrFillColorString = colorPickerString;
 					while (!alphaCorrFillColorString.matches("#........"))
-						if (alphaCorrFillColorString.matches("#......"))
+						if (alphaCorrFillColorString.matches("#.{0,6}"))
 							alphaCorrFillColorString = alphaCorrFillColorString.replaceAll("#", whackchacha);
 
 					fillColor = Colors.decode(alphaCorrFillColorString, fillColor);
