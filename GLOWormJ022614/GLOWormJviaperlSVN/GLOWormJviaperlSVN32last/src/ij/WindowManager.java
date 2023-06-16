@@ -284,10 +284,10 @@ public class WindowManager {
 		//IJ.write("addWindow: "+win.getTitle());
 		if (win==null)
 			return;
-		else if (win instanceof ImageWindow)
-			addImageWindow(n, (ImageWindow)win);
 		else if (win instanceof ImageWindow3D)
 			addImageWindow3D(n, (ImageWindow3D)win);
+		else if (win instanceof ImageWindow)
+			addImageWindow(n, (ImageWindow)win);
 		else {
 			Menus.insertWindowMenuItem(win);
 			nonImageList.add(n, win);
@@ -318,12 +318,15 @@ public class WindowManager {
 	private static void addImageWindow3D(int n, ImageWindow3D win) {
 		Image3DUniverse univ = (Image3DUniverse)win.getUniverse();
 		if (univ==null) return;
-		checkForDuplicateName(new ImagePlus(univ.getTitle()));
+		String newTitle = getUniqueIJ3DVName(univ.getTitle());
 		if (n<0)
 			imageList.addElement(win);
 		else
 			imageList.add(n, win);
-        Menus.addWindowMenuItem(n, new ImagePlus(univ.getTitle()));
+		
+		win.getImagePlus().setTitle(newTitle);
+		
+        Menus.addWindowMenuItem(n, win.getImagePlus());
         setCurrentWindow(win);
     }
 
@@ -340,7 +343,7 @@ public class WindowManager {
 		int n = imageList.size();
 		for (int i=0; i<n; i++) {
 			ImageWindow win = (ImageWindow)imageList.elementAt(i);
-			String name2 = win.getImagePlus().getTitle();
+			String name2 = win.getImagePlus().getTitle().replace( " (IJ3DV)", "");
 			if (name.equals(name2))
 				return true;
 		}
@@ -349,6 +352,29 @@ public class WindowManager {
 
 	/** Returns a unique name by adding, before the extension,  -1, -2, etc. as needed. */
 	public static String getUniqueName(String name) {
+        String name2 = name;
+        String extension = "";
+        int len = name2.length();
+        int lastDot = name2.lastIndexOf(".");
+        if (lastDot!=-1 && len-lastDot<6 && lastDot!=len-1) {
+            extension = name2.substring(lastDot, len);
+            name2 = name2.substring(0, lastDot);
+        }
+        int lastDash = name2.lastIndexOf("-");
+        len = name2.length();
+        if (lastDash!=-1&&len-lastDash<4&&lastDash<len-1&&Character.isDigit(name2.charAt(lastDash+1))&&name2.charAt(lastDash+1)!='0')
+            name2 = name2.substring(0, lastDash);
+        for (int i=1; i<=99; i++) {
+            String name3 = name2+"-"+ i + extension;
+            //IJ.log(i+" "+name3);
+            if (!isDuplicateName(name3))
+                return name3;
+        }
+        return name;
+	}
+
+	/** Returns a unique name by adding, before the extension,  -1, -2, etc. as needed. */
+	public static String getUniqueIJ3DVName(String name) {
         String name2 = name;
         String extension = "";
         int len = name2.length();
@@ -557,11 +583,13 @@ public class WindowManager {
 			}
 		}
 		int lastSpace = menuItemLabel.lastIndexOf(' ');
-		if (lastSpace>0) // remove image size (e.g., " 90K")
-			menuItemLabel = menuItemLabel.substring(0, lastSpace);
+		if (!menuItemLabel.endsWith("(IJ3DV)"))
+				if (lastSpace>0) // remove image size (e.g., " 90K")
+					menuItemLabel = menuItemLabel.substring(0, lastSpace);
 		String idString = item.getActionCommand();
 		int id = (int)Tools.parseDouble(idString, 0);
 		ImagePlus imp = WindowManager.getImage(id);
+		imp = WindowManager.getImage(menuItemLabel);
 		if (imp==null) return;
 		ImageWindow win1 = imp.getWindow();
 		if (win1==null) {

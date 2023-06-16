@@ -46,24 +46,25 @@ public class RoiLabelByNumbersSorter {
 				}
 			} else {
 				nums[lDCChunksLength-1] =  labelDollaredChunks[mode <lDCChunksLength? mode:lDCChunksLength-1];
-			}
-			int count = 0;
-			for (int ldc=lDCChunksLength-1; ldc>=0; ldc--) {
-				if (mode!= ldc) {
-					nums[count] = labelDollaredChunks[ldc];
-					count++;
+				int count = 0;
+				for (int ldc=lDCChunksLength-1; ldc>=0; ldc--) {
+					if (mode!= ldc) {
+						nums[count] = labelDollaredChunks[ldc];
+						count++;
+					}
 				}
 			}
 			
 			for (String num:nums) {
-
+				if (num == null)
+					continue;
 				String newNum = "";
 				if (!newNum.equals(nums[0])) 
 					//REPLACEALL("[ICS]","") NEEDED FOR CLEAN DISPLAY OF DC-CPHATE PLOTS...NEED TO KEEP IT...WITHOUT CONFLICT WITH COLOR CODES...
-					if (newNum.startsWith("#")) {
+					if (num.startsWith("#")) {
 						newNum = num/*.replaceAll("[ics]","")*/.replace("\"", "").replace(" ", "").toLowerCase().replaceAll("^(.*)-\\d+$", "$1").split("_")[0];
 					} else {
-						newNum = num.replaceAll("[ics]","").replace("\"", "").replace(" ", "").toLowerCase().replaceAll("^(.*)-\\d+$", "$1").split("_")[0];
+						num = num.replaceAll("[ics]","").replace("\"", "").replace(" ", "").toLowerCase().replaceAll("^(.*)-\\d+$", "$1").split("_")[0];
 					}
 				else
 					newNum = num.replace("\"", "").replace(" ", "").toLowerCase().replaceAll("^(.*)-\\d+$", "$1");

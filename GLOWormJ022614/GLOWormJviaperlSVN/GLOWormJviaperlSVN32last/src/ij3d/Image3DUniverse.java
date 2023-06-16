@@ -311,11 +311,9 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	public void show(boolean simpleWindow3D) {
 		menubar = new Image3DMenubar(this);
 		if (simpleWindow3D) {
-			init(new SimpleImageWindow3D("CytoSHOW3D [" + numUniversesLaunched +"]", this));	
-			this.title = "CytoSHOW3D [" + numUniversesLaunched +"]";
+			init(new SimpleImageWindow3D(this.getTitle(), this));	
 		} else {
-			init(new ImageWindow3D("CytoSHOW3D [" + numUniversesLaunched +"]", this));
-			this.title = "CytoSHOW3D [" + numUniversesLaunched +"]";
+			init(new ImageWindow3D(this.getTitle(), this));
 		}
 //		init(new ImageWindow3D("CytoSHOW3D [IJ3DV]", this));
 		win.pack();
@@ -2135,6 +2133,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		List<Content>contents = new ArrayList<Content>();
 		LinkedHashMap<String, TreeMap<Integer, ContentInstant>> cInstants = new LinkedHashMap<String, TreeMap<Integer, ContentInstant>>();
 
+//		setTitle((this.flipXonImport?"FlipX_":"")+titleName);
+		
 		for (Object nextmatchingfilename: timedObjFileNms) {
 			String nextmatchingfilePath = file.getParent() +File.separator + (String)nextmatchingfilename;
 			String[] tptParse = ((String)nextmatchingfilename).split("_");
@@ -2195,11 +2195,9 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		}
 //		this.addContent(recentContent, true);
 		
-		if (win.getTitle().matches("CytoSHOW3D.*")){
-			win.getImagePlus().setWindow(win);
-			if (!titleName.contentEquals("."))
-				setTitle((this.flipXonImport?"FlipX_":"")+titleName);
-		}
+//			if (!titleName.contentEquals(".")) {
+//				setTitle((this.flipXonImport?"FlipX_":"")+titleName);
+//		}
 //		if (parseTimeInCPHATE)
 //			updateStartAndEndTime(1, this.getEndTime());
 	}
@@ -2331,6 +2329,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				scale = " (" + IJ.d2s(percent,digits) + "%)";
 			}
 			win.setTitle(newTitle+threeD+virtual+global+scale);
+			win.getImagePlus().setTitle(newTitle+threeD+virtual+global+scale);
+			this.setTitle(newTitle+threeD+virtual+global+scale);
     	}
     	this.title = newTitle;
     	if (c3dm !=null) {

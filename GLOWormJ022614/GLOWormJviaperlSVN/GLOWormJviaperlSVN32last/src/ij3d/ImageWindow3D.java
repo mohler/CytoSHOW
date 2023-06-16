@@ -123,8 +123,8 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 		addWindowListener(this);
 //		updateImagePlus();
 		this.imp.setWindow(this);
-
-		WindowManager.addWindow(-1, this);
+		int[] idList = WindowManager.getIDList();
+		WindowManager.addWindow(idList == null?-1:(idList[idList.length -1] -1), this);
 		this.setResizable(IJ.isWindows()?true:false);
 
 	}

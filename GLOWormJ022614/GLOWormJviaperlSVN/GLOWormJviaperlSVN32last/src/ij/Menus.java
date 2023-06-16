@@ -1,6 +1,7 @@
 package ij;
 import ij.process.*;
 import ij.util.*;
+import ij3d.ImageWindow3D;
 import ij.gui.ImageWindow;
 import ij.plugin.MacroInstaller;
 import ij.gui.Toolbar;
@@ -1235,7 +1236,12 @@ public class Menus {
 			default: // 8-bit
 				;
 		}
-		CheckboxMenuItem item = new CheckboxMenuItem(name + " " + size + "K");
+		CheckboxMenuItem item = null;
+		if (imp.getWindow() instanceof ImageWindow3D)
+			item = new CheckboxMenuItem(name + " " + "(IJ3DV)");
+		else
+			item = new CheckboxMenuItem(name + " " + size + "K");
+
 		item.setActionCommand("" + imp.getID());
 		if (n<0)
 			window.add(item);
