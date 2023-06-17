@@ -1014,7 +1014,9 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 				int digits = percent>100.0||percent==(int)percent?0:1;
 				scale = " (" + IJ.d2s(percent,digits) + "%)";
 			}
-			win.setTitle(title+threeD+virtual+global+scale);
+			win.setTitle(title+ (title.contains(threeD)?"":threeD)
+							  + (title.contains(virtual)?"":virtual)  
+							  +  global+scale);
     	}
     	this.title = title;
     	if (rm !=null) {

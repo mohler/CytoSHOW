@@ -870,6 +870,15 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 			IJ.wait(10); // may be needed for Java 1.4 on OS X
 			setMenuBar(Menus.getMenuBar());
 		}
+		if (imp==null) return;
+		imp.setActivated(); // notify ImagePlus that image has been activated
+		if (!closed && !quitting && !Interpreter.isBatchMode())
+			WindowManager.setCurrentWindow(this);
+		Channels channels = Channels.getInstance();
+		if (channels!=null && imp.isComposite()) {
+			((Channels)channels).update();
+			WindowManager.getCurrentWindow().toFront();
+		}
 		toolbar.setTool(toolbar.localCurrent);
 	}
 
