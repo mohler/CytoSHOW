@@ -50,14 +50,15 @@ public class RoiLabelByNumbersSorter {
 				}
 			} else {
 				nums[lDCChunksLength-1] =  labelDollaredChunks[sortmode <lDCChunksLength? sortmode:lDCChunksLength-1];
-				int count = 0;
-				for (int ldc=lDCChunksLength-1; ldc>=0; ldc--) {
-					if (sortmode!= ldc) {
-						nums[count] = labelDollaredChunks[ldc];
-						count++;
-					}
+			}
+			int count = 0;
+			for (int ldc=lDCChunksLength-1; ldc>=0; ldc--) {
+				if (sortmode!= ldc) {
+					nums[count] = labelDollaredChunks[ldc];
+					count++;
 				}
 			}
+			
 			
 			for (String num:nums) {
 				if (num == null)
@@ -68,7 +69,7 @@ public class RoiLabelByNumbersSorter {
 					if (num.startsWith("#")) {
 						newNum = num/*.replaceAll("[ics]","")*/.replace("\"", "").replace(" ", "").toLowerCase().replaceAll("^(.*)-\\d+$", "$1").split("_")[0];
 					} else {
-						num = num.replaceAll("[ics]","").replace("\"", "").replace(" ", "").toLowerCase().replaceAll("^(.*)-\\d+$", "$1").split("_")[0];
+						newNum = num.replaceAll("[ics]","").replace("\"", "").replace(" ", "").toLowerCase().replaceAll("^(.*)-\\d+$", "$1").split("_")[0];
 					}
 				else
 					newNum = num.replace("\"", "").replace(" ", "").toLowerCase().replaceAll("^(.*)-\\d+$", "$1");
