@@ -904,17 +904,18 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 			} else if (command.equals("Deselect")) {
 				select(-1);
 			} else if (command.equals("Sort")) {
+				int wasSortmode = sortmode;
 				sortmode = 0;
 				if (listModel.size() > 0 /* && listModel.get(0).split("_").length == 5 */) {
 					int chunksLength = listModel.get(0).split("-").length;
-					if (controlKeyDown)
-						sortmode = chunksLength - 1;
-					if (altKeyDown)
-						sortmode = chunksLength - 3;
-					if (shiftKeyDown)
-						sortmode = chunksLength - 2;
+//					if (controlKeyDown)
+//						sortmode = wasSortmode==chunksLength - 1?-(chunksLength - 1):chunksLength - 1;
+//					if (altKeyDown)
+//						sortmode = wasSortmode==chunksLength - 3?-(chunksLength - 3):chunksLength - 3;
+//					if (shiftKeyDown)
+//						sortmode = wasSortmode==chunksLength - 2?-(chunksLength - 2):chunksLength - 2;
 					if (shiftKeyDown && controlKeyDown)
-						sortmode = Integer.MAX_VALUE;
+						sortmode = wasSortmode == Integer.MAX_VALUE?-Integer.MAX_VALUE:Integer.MAX_VALUE;					
 //					if (sortmode>1)
 //						sortmode++;
 				}
@@ -1545,9 +1546,9 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 		fullListModel.removeAllElements();
 		// this.setTitle( "Content3D Manager SORTING!!!") ;
 		
-		if ((int)sortmode >= 0) {
-			RoiLabelByNumbersSorter.sort(labels, colors, "-", sortmode);
-			RoiLabelByNumbersSorter.sort(fullLabels, colors, "-", sortmode);
+		if ((int)sortmode != 0) {
+			labels = RoiLabelByNumbersSorter.sort(labels, colors, "-", sortmode);
+			fullLabels = RoiLabelByNumbersSorter.sort(fullLabels, colors, "-", sortmode);
 
 		} else {
 			StringSorter.sort(labels);
