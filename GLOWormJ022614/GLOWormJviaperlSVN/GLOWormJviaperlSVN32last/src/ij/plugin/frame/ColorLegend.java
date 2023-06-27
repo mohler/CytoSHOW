@@ -283,7 +283,8 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 								buildHitTest = buildHitTest+ ".*post.*$";
 								final String hitTestPost = fixedName.split("-")[0].toLowerCase().replaceAll(buildHitTest, "$2");
 
-								while (nbThreads >50) {
+								//THIS CAN CAUSE A TRAP IF THERE ARE MORE THAN 100 THREADS THAT DO NOT RESOLVE QUICKLY
+								while (nbThreads >100) {
 									IJ.wait(10);
 									threadsInJVM = Thread.getAllStackTraces().keySet();
 									nbThreads = threadsInJVM.size();
