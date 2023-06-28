@@ -470,6 +470,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		addPopupItem("flipRoiHorizontalWithImage");
 		addPopupItem("flipRoiVerticalWithImage");
 		addPopupItem("fuseOverlapping");
+		addPopupItem("claimCellParts");
 		add(pm);
 	}
 
@@ -1166,6 +1167,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				}
 			} else if (command.equals("fuseOverlapping")) {
 				this.fuseOverlappingSynonymousRois(shiftKeyDown);
+			} else if (command.equals("claimCellParts")) {
+				this.claimCellParts(new String[]{"Mito", "Traced"});
 			}
 
 //			this.imp.getCanvas().requestFocus();
@@ -6298,6 +6301,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		return combinedROI;
 	}
 	
+	//This method useful after reslicing rois...
 	public void fuseOverlappingSynonymousRois(boolean archipelagos) {
 		for (String key:getRoisByRootName().keySet()) {
 			ArrayList<ArrayList<ShapeRoi>> sameSliceSynonymousRoiGroups = new ArrayList<ArrayList<ShapeRoi>>();
@@ -11295,6 +11299,72 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			//		IJ.log("Total "+andName +"borderlines z"+ zPos +" "+ pointsCount);
 		}
 	}
+	
+	public void claimCellParts(String[] partTypes) {
+		for (int z=17;z<=17;z++) {
+			for (int t=1;t<=1;t++) {
+				Roi[] sliceRois= getSliceSpecificRoiArray(z,t,true);
+				int[] sliceIndexes= getSliceSpecificIndexes(z,t,true);
+				for (String partType:partTypes) {
+
+					for (int r=0;r<sliceRois.length;r++) {
+						ArrayList<Integer> containedRoiIndexes = new ArrayList<Integer>();
+						if (sliceRois[r].getName().contains(partType)){
+							continue;   //Want these r rois to only be cells
+						}
+
+						ShapeRoi sssrRoi = new ShapeRoi(sliceRois[r]);
+						Roi[] subrRois = ((ShapeRoi)sssrRoi).getRois();
+						for (int r1=0;r1<subrRois.length;r1++) {
+							Polygon srBounds = subrRois[r1].getPolygon();
+
+							for (int q=0;q<sliceRois.length;q++) {
+								boolean include = true;
+								if (q==r) 
+									continue;
+								if (!sliceRois[q].getName().contains(partType)){
+									continue;   //Want these q rois to only be parts
+								}
+
+								ShapeRoi sssqRoi = new ShapeRoi(sliceRois[q]);
+								Roi[] subqRois = ((ShapeRoi)sssqRoi).getRois();
+								for (int q1=0;q1<subqRois.length;q1++) {
+									include = true;
+									Polygon sqBounds = subqRois[q1].getPolygon();
+									for (int p=0;p<sqBounds.npoints;p++) {
+										if (srBounds.contains(sqBounds.xpoints[p], sqBounds.ypoints[p])) {
+											//must all be included to be claimed by cell
+											include = true;
+											IJ.log("hit: "+z+" "+r+" "+q+" "+q1+" "+p+" "+sqBounds.xpoints[p]+" "+sqBounds.ypoints[p]);
+										} else {
+											include = false;
+											IJ.log("miss: "+z+" "+r+" "+q+" "+q1+" "+p+" "+sqBounds.xpoints[p]+" "+sqBounds.ypoints[p]);
+											p = sqBounds.npoints;
+
+										}					
+									}
+									IJ.log("end q1");
+								}
+								if (include){
+									containedRoiIndexes.add(sliceIndexes[q]);
+								}
+							}
+							int[] crIdxes = new int[containedRoiIndexes.size()];
+							for (int c=0;c<crIdxes.length;c++) {
+								crIdxes[c] = (int)containedRoiIndexes.get(c);
+							}
+							this.rename(sliceRois[r].getName().split(" ")[0].replace("\"","")
+									+"_"+partType,
+									crIdxes, true, false);
+
+						}
+					}
+				}
+			}
+		}
+		IJ.log("Done Claiming Parts");
+	}
+	
 	
 	@Override
 	public void changedUpdate(DocumentEvent e) {
