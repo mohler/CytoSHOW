@@ -1168,7 +1168,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			} else if (command.equals("fuseOverlapping")) {
 				this.fuseOverlappingSynonymousRois(shiftKeyDown);
 			} else if (command.equals("claimCellParts")) {
-				this.claimCellParts(new String[]{"Mito", "Traced"});
+				this.claimCellParts(new String[]{"MITO", "Traced"});
 			}
 
 //			this.imp.getCanvas().requestFocus();
@@ -3970,7 +3970,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				String name = entry.getName();
 				
 				//hacks in next line deal with 7z.exe's dislike of quotes in zip element names
-				name = name.replace("qQqQ","\"").replaceAll("_(.* )_(_.*)", "\"$1\"$2");
+				name = name.replace("qQqQ","\"")
+							//.replace("_Mito","-Mito")	
+							.replaceAll("_(.* )_(_.*)", "\"$1\"$2");
 				if ((name.endsWith(".roi") && name.matches("\".* \"(_.*)*_\\d+_\\d+_\\d+.*"))) {
 					out = new ByteArrayOutputStream();
 					while ((len = in.read(buf)) > 0)
@@ -11300,9 +11302,16 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 	}
 	
+	public void groupCellPartSlices(String[] partTypes) {
+		
+	}
+	
 	public void claimCellParts(String[] partTypes) {
-		for (int z=17;z<=17;z++) {
-			for (int t=1;t<=1;t++) {
+		int cellcounter = 0;
+		int segcounter = 0;
+		boolean cellCounterReset = false;
+		for (int z=1;z<=imp.getNSlices();z++) {   ////ugggh. I had this starting at 17...why?
+			for (int t=1;t<=imp.getNFrames();t++) {
 				Roi[] sliceRois= getSliceSpecificRoiArray(z,t,true);
 				int[] sliceIndexes= getSliceSpecificIndexes(z,t,true);
 				for (String partType:partTypes) {
@@ -11312,6 +11321,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						if (sliceRois[r].getName().contains(partType)){
 							continue;   //Want these r rois to only be cells
 						}
+						cellCounterReset = true;
 
 						ShapeRoi sssrRoi = new ShapeRoi(sliceRois[r]);
 						Roi[] subrRois = ((ShapeRoi)sssrRoi).getRois();
@@ -11347,22 +11357,27 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								}
 								if (include){
 									containedRoiIndexes.add(sliceIndexes[q]);
+									if (cellCounterReset)
+										cellcounter ++;
+									cellCounterReset = false;
+
 								}
 							}
 							int[] crIdxes = new int[containedRoiIndexes.size()];
+							segcounter = segcounter + crIdxes.length;
 							for (int c=0;c<crIdxes.length;c++) {
 								crIdxes[c] = (int)containedRoiIndexes.get(c);
 							}
-							this.rename(sliceRois[r].getName().split(" ")[0].replace("\"","")
-									+"_"+partType,
-									crIdxes, true, false);
-
+							this.rename(partType+"in"+sliceRois[r].getName().split("\"")[1].trim()
+									,crIdxes, true, false);
+							IJ.showStatus(segcounter+" parts segments claimed by "+cellcounter+" cell segments...");
 						}
 					}
 				}
 			}
 		}
 		IJ.log("Done Claiming Parts");
+		IJ.log(segcounter+" parts segments claimed by "+cellcounter+" cell segments...");
 	}
 	
 	

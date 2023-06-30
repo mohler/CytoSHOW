@@ -231,6 +231,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 
 						hitTests.add( fixedName.split("-")[0].toLowerCase());
 						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^(.*by)(.*)$", "$2"));
+						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^(.*in)(.*)$", "$2"));
 						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll(".*_(.*)[_$].*","$1"));
 						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^(.*)undefined.*(_pre)*", "$1"));
 						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^(.*)chemical.*(_pre)*", "$1"));
@@ -239,6 +240,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 						hitTests.add( fixedName.split("-")[0].toLowerCase().replaceAll("^(.*)_.*", "$1")); 		
 						hitTests.add( fixedName.toLowerCase());
 						hitTests.add( fixedName.toLowerCase().replaceAll("^(.*by)(.*)$", "$2"));
+						hitTests.add( fixedName.toLowerCase().replaceAll("^(.*in)(.*)$", "$2"));
 						hitTests.add( fixedName.toLowerCase().replaceAll(".*_(.*)[_$].*","$1"));
 						hitTests.add( fixedName.toLowerCase().replaceAll("^(.*)undefined.*(_pre)*", "$1"));
 						hitTests.add( fixedName.toLowerCase().replaceAll("^(.*)chemical.*(_pre)*", "$1"));
@@ -335,6 +337,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 						hitTests.add( fixedName.split(" =.* \"_")[0].toLowerCase().replace("\"", ""));
 						hitTests.add( fixedName.split(" \"_")[0].toLowerCase().replace("\"", ""));
 						hitTests.add( fixedName.split(" \"_")[0].toLowerCase().replace("\"", "").replaceAll("^(.*by)(.*)$", "$2"));
+						hitTests.add( fixedName.split(" \"_")[0].toLowerCase().replace("\"", "").replaceAll("^(.*in)(.*)$", "$2"));
 						hitTests.add( fixedName.split(" \"_")[0].toLowerCase().replace("\"", "").replaceAll(".*_(.*)[_$].*","$1"));
 						hitTests.add( fixedName.split(" \"_")[0].toLowerCase().replace("\"", "").replaceAll("^(.*)undefined.*(_pre)*", "$1"));
 						hitTests.add( fixedName.split(" \"_")[0].toLowerCase().replace("\"", "").replaceAll("^(.*)chemical.*(_pre)*", "$1"));
@@ -343,6 +346,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 						hitTests.add( fixedName.split(" \"_")[0].toLowerCase().replace("\"", "").replaceAll("^(.*)_.*", "$1")); 		
 						hitTests.add( fixedName.toLowerCase().replace("\"", ""));
 						hitTests.add( fixedName.toLowerCase().replace("\"", "").replaceAll("^(.*by)(.*)$", "$2"));
+						hitTests.add( fixedName.toLowerCase().replace("\"", "").replaceAll("^(.*in)(.*)$", "$2"));
 						hitTests.add( fixedName.toLowerCase().replace("\"", "").replaceAll(".*_(.*)[_$].*","$1"));
 						hitTests.add( fixedName.toLowerCase().replace("\"", "").replaceAll("^(.*)undefined.*(_pre)*", "$1"));
 						hitTests.add( fixedName.toLowerCase().replace("\"", "").replaceAll("^(.*)chemical.*(_pre)*", "$1"));
