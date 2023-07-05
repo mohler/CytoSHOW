@@ -11319,100 +11319,100 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		int segcounter = 0;
 		boolean groupCounterReset = false;
 		ArrayList<Integer> alreadyGroupedRoiIndexes = new ArrayList<Integer>();
-//		for (int z=1;z<=imp.getNSlices()-2;z++) {  
-//			for (int t=1;t<=imp.getNFrames();t++) {
-//				Roi[] sliceRois= getSliceSpecificRoiArray(z,t,true);
-//				int[] sliceIndexes= getSliceSpecificIndexes(z,t,true);
-//				for (String partType:partTypes) {
-//
-//					for (int r=0;r<sliceRois.length;r++) {
-//
-//						ArrayList<Integer> groupableRoiIndexes = new ArrayList<Integer>();
-//						//THIS IS ABOUT PARTS CLAIMING PARTS.
-//						if (!sliceRois[r].getName().contains(partType)){
-//							continue;   //Want these r rois to only be cells
-//						}
-//						groupCounterReset = true;
-//
-//						ShapeRoi sssrRoi = new ShapeRoi(sliceRois[r]);
-//						Roi[] subrRois = ((ShapeRoi)sssrRoi).getRois();
-//						for (int r1=0;r1<subrRois.length;r1++) {
-//							Polygon srBounds = subrRois[r1].getPolygon();
-//							//lumping together both next slices' rois.  incase of gaps during em sectionin (or even optical sectioning glitches)
-//							Roi[] nextSliceRois= getSliceSpecificRoiArray(z+1,t,true);
-//							Roi[] nextNextSliceRois= getSliceSpecificRoiArray(z+2,t,true);
-//						    Roi[] nextTwoSlicesRois = Arrays.copyOf(nextSliceRois, nextSliceRois.length + nextNextSliceRois.length);
-//						    System.arraycopy(nextNextSliceRois, 0, nextTwoSlicesRois, nextSliceRois.length, nextNextSliceRois.length);
-//
-//						    int[] nextSliceIndexes= getSliceSpecificIndexes(z+1,t,true);
-//							int[] nextNextSliceIndexes= getSliceSpecificIndexes(z+2,t,true);
-//							int[] nextTwoSlicesIndexes = Arrays.copyOf(nextSliceIndexes, nextSliceIndexes.length + nextNextSliceIndexes.length);
-//						    System.arraycopy(nextNextSliceIndexes, 0, nextTwoSlicesIndexes, nextSliceIndexes.length, nextNextSliceIndexes.length);
-//						    
-//							for (int q=0;q<nextTwoSlicesRois.length;q++) {
-////								if (alreadyGroupedRoiIndexes.contains(nextTwoSlicesIndexes[q]))
-////									continue;
-//								boolean include = true;
-//								if (!nextTwoSlicesRois[q].getName().split("\"")[1].trim().contains(partType)){
-//									continue;   //Want these q rois to only be parts
-//								}
-//
-//								ShapeRoi sssqRoi = new ShapeRoi(nextTwoSlicesRois[q]);
-//								Roi[] subqRois = ((ShapeRoi)sssqRoi).getRois();
-//								for (int q1=0;q1<subqRois.length;q1++) {
-//									include = false;
-//									Polygon sqBounds = subqRois[q1].getPolygon();
-//									for (int pq=0;pq<sqBounds.npoints;pq++) {
-//										if (srBounds.contains(sqBounds.xpoints[pq], sqBounds.ypoints[pq])) {
-//											include = true;
-////											IJ.log("hit: "+z+" "+r+" "+q+" "+q1+" "+p+" "+sqBounds.xpoints[p]+" "+sqBounds.ypoints[p]);
-//											break;   //Only need one hit to be grouped
-//										} else {
-////											include = false;
-//////											IJ.log("miss: "+z+" "+r+" "+q+" "+q1+" "+p+" "+sqBounds.xpoints[p]+" "+sqBounds.ypoints[p]);
-////											p = sqBounds.npoints;
-//
-//										}					
-//									}
-//									for (int pr=0;pr<srBounds.npoints;pr++) {
-//										if (sqBounds.contains(srBounds.xpoints[pr], srBounds.ypoints[pr])) {
-//											include = true;
-////											IJ.log("hit: "+z+" "+r+" "+q+" "+q1+" "+p+" "+sqBounds.xpoints[p]+" "+sqBounds.ypoints[p]);
-//											break;   //Only need one hit to be grouped
-//										} else {
-////											include = false;
-//////											IJ.log("miss: "+z+" "+r+" "+q+" "+q1+" "+p+" "+sqBounds.xpoints[p]+" "+sqBounds.ypoints[p]);
-////											p = srBounds.npoints;
-//
-//										}					
-//									}
-////									IJ.log("end q1");
-//								}
-//								if (include){
-//									groupableRoiIndexes.add(nextTwoSlicesIndexes[q]);
-//									groupCounterReset = false;
-//								}
-//							}
-//							int[] crIdxes = new int[groupableRoiIndexes.size()];
-//							segcounter = segcounter + crIdxes.length;
-//							for (int c=0;c<crIdxes.length;c++) {
-//								crIdxes[c] = (int)groupableRoiIndexes.get(c);
-//							}
-//							if (!sliceRois[r].getName().split("\"")[1].trim().contains("@")) {
-//								rename (sliceRois[r].getName().split("\"")[1].trim()+"@"+IJ.pad(groupcounter, 6), new int[]{sliceIndexes[r]}, true, false);
-//								groupcounter++;
-//							}
-//							rename(sliceRois[r].getName().split("\"")[1].trim()
-//									,crIdxes, true, false);
-//							IJ.log(""+z+" "+t+" "+sliceRois[r].getName().split("\"")[1].trim());
-//							IJ.showStatus(segcounter+" parts segments claimed by "+groupcounter+" segment-groups...");
-//							alreadyGroupedRoiIndexes.add(sliceIndexes[r]);
-//							alreadyGroupedRoiIndexes.addAll(groupableRoiIndexes);
-//						}
-//					}
-//				}
-//			}
-//		}
+		for (int z=1;z<=imp.getNSlices()-2;z++) {  
+			for (int t=1;t<=imp.getNFrames();t++) {
+				Roi[] sliceRois= getSliceSpecificRoiArray(z,t,true);
+				int[] sliceIndexes= getSliceSpecificIndexes(z,t,true);
+				for (String partType:partTypes) {
+
+					for (int r=0;r<sliceRois.length;r++) {
+
+						ArrayList<Integer> groupableRoiIndexes = new ArrayList<Integer>();
+						//THIS IS ABOUT PARTS CLAIMING PARTS.
+						if (!sliceRois[r].getName().contains(partType)){
+							continue;   //Want these r rois to only be cells
+						}
+						groupCounterReset = true;
+
+						ShapeRoi sssrRoi = new ShapeRoi(sliceRois[r]);
+						Roi[] subrRois = ((ShapeRoi)sssrRoi).getRois();
+						for (int r1=0;r1<subrRois.length;r1++) {
+							Polygon srBounds = subrRois[r1].getPolygon();
+							//lumping together both next slices' rois.  incase of gaps during em sectionin (or even optical sectioning glitches)
+							Roi[] nextSliceRois= getSliceSpecificRoiArray(z+1,t,true);
+							Roi[] nextNextSliceRois= getSliceSpecificRoiArray(z+2,t,true);
+						    Roi[] nextTwoSlicesRois = Arrays.copyOf(nextSliceRois, nextSliceRois.length + nextNextSliceRois.length);
+						    System.arraycopy(nextNextSliceRois, 0, nextTwoSlicesRois, nextSliceRois.length, nextNextSliceRois.length);
+
+						    int[] nextSliceIndexes= getSliceSpecificIndexes(z+1,t,true);
+							int[] nextNextSliceIndexes= getSliceSpecificIndexes(z+2,t,true);
+							int[] nextTwoSlicesIndexes = Arrays.copyOf(nextSliceIndexes, nextSliceIndexes.length + nextNextSliceIndexes.length);
+						    System.arraycopy(nextNextSliceIndexes, 0, nextTwoSlicesIndexes, nextSliceIndexes.length, nextNextSliceIndexes.length);
+						    
+							for (int q=0;q<nextTwoSlicesRois.length;q++) {
+//								if (alreadyGroupedRoiIndexes.contains(nextTwoSlicesIndexes[q]))
+//									continue;
+								boolean include = true;
+								if (!nextTwoSlicesRois[q].getName().split("\"")[1].trim().contains(partType)){
+									continue;   //Want these q rois to only be parts
+								}
+
+								ShapeRoi sssqRoi = new ShapeRoi(nextTwoSlicesRois[q]);
+								Roi[] subqRois = ((ShapeRoi)sssqRoi).getRois();
+								for (int q1=0;q1<subqRois.length;q1++) {
+									include = false;
+									Polygon sqBounds = subqRois[q1].getPolygon();
+									for (int pq=0;pq<sqBounds.npoints;pq++) {
+										if (srBounds.contains(sqBounds.xpoints[pq], sqBounds.ypoints[pq])) {
+											include = true;
+//											IJ.log("hit: "+z+" "+r+" "+q+" "+q1+" "+p+" "+sqBounds.xpoints[p]+" "+sqBounds.ypoints[p]);
+											break;   //Only need one hit to be grouped
+										} else {
+//											include = false;
+////											IJ.log("miss: "+z+" "+r+" "+q+" "+q1+" "+p+" "+sqBounds.xpoints[p]+" "+sqBounds.ypoints[p]);
+//											p = sqBounds.npoints;
+
+										}					
+									}
+									for (int pr=0;pr<srBounds.npoints;pr++) {
+										if (sqBounds.contains(srBounds.xpoints[pr], srBounds.ypoints[pr])) {
+											include = true;
+//											IJ.log("hit: "+z+" "+r+" "+q+" "+q1+" "+p+" "+sqBounds.xpoints[p]+" "+sqBounds.ypoints[p]);
+											break;   //Only need one hit to be grouped
+										} else {
+//											include = false;
+////											IJ.log("miss: "+z+" "+r+" "+q+" "+q1+" "+p+" "+sqBounds.xpoints[p]+" "+sqBounds.ypoints[p]);
+//											p = srBounds.npoints;
+
+										}					
+									}
+//									IJ.log("end q1");
+								}
+								if (include){
+									groupableRoiIndexes.add(nextTwoSlicesIndexes[q]);
+									groupCounterReset = false;
+								}
+							}
+							int[] crIdxes = new int[groupableRoiIndexes.size()];
+							segcounter = segcounter + crIdxes.length;
+							for (int c=0;c<crIdxes.length;c++) {
+								crIdxes[c] = (int)groupableRoiIndexes.get(c);
+							}
+							if (!sliceRois[r].getName().split("\"")[1].trim().contains("@")) {
+								rename (sliceRois[r].getName().split("\"")[1].trim()+"@"+IJ.pad(groupcounter, 6), new int[]{sliceIndexes[r]}, true, false);
+								groupcounter++;
+							}
+							rename(sliceRois[r].getName().split("\"")[1].trim()
+									,crIdxes, true, false);
+							IJ.log(""+z+" "+t+" "+sliceRois[r].getName().split("\"")[1].trim());
+							IJ.showStatus(segcounter+" parts segments claimed by "+groupcounter+" segment-groups...");
+							alreadyGroupedRoiIndexes.add(sliceIndexes[r]);
+							alreadyGroupedRoiIndexes.addAll(groupableRoiIndexes);
+						}
+					}
+				}
+			}
+		}
 		
 		//FLIP THE WHOLE STACK, AND RECHECK GROUPABLES TO FIND ANY REVERSE FORKS MISSED IN FIRST PASS
 		for (int z =imp.getNSlices()-1; z>=3;z--) {  
@@ -11518,7 +11518,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		int cellcounter = 0;
 		int segcounter = 0;
 		boolean cellCounterReset = false;
-		for (int z=1;z<=imp.getNSlices();z++) {   ////ugggh. I had this starting at 17...why?
+		for (int z=1;z<=imp.getNSlices();z++) {   
 			for (int t=1;t<=imp.getNFrames();t++) {
 				Roi[] sliceRois= getSliceSpecificRoiArray(z,t,true);
 				int[] sliceIndexes= getSliceSpecificIndexes(z,t,true);
@@ -11578,8 +11578,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							for (int c=0;c<crIdxes.length;c++) {
 								crIdxes[c] = (int)containedRoiIndexes.get(c);
 							}
-							this.rename(partType+"in"+sliceRois[r].getName().split("\"")[1].trim()
-									,crIdxes, true, false);
+							if (crIdxes.length == 0)
+								continue;
+							//use name bits of first claimed part name to build new claimed name for all, including any previous @### for first in list
+							String claimerName = sliceRois[r].getName();
+							String oldLabel = getListModel().get(crIdxes[0]);
+							String newName = oldLabel.split("\"")[1].trim()
+										.replaceAll("("+partType+")(in.*)??(@.*)??", "$1"+"in"+claimerName.split("\"")[1].trim()+"$3");
+							this.rename(newName,crIdxes, true, false);
 							IJ.log(""+z+" "+t+" "+partType+"in"+sliceRois[r].getName().split("\"")[1].trim());
 							IJ.showStatus(segcounter+" parts segments claimed by "+cellcounter+" cell segments...");
 						}
