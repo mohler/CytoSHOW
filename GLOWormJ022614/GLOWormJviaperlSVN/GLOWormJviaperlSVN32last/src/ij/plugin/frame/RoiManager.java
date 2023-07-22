@@ -1170,6 +1170,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				this.fuseOverlappingSynonymousRois(shiftKeyDown);
 			} else if (command.equals("groupPartSegments")) {
 				String[] partTypes = IJ.getString("Which part types to group?", "MITO, Traced").split(", *");
+				if (partTypes[0].equals(""))
+					return;
 				this.groupCellPartSlices(partTypes);
 			} else if (command.equals("claimCellParts")) {
 				String[] partTypes = IJ.getString("Which part types to claim?", "MITO, Traced").split(", *");
