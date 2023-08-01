@@ -11349,37 +11349,31 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							//lumping together both next slices' rois.  in case of gaps during EM sectioning (or even optical sectioning glitches)
 							Roi[] nextSliceRois= getSliceSpecificRoiArray(z+1,t,true);
 							Roi[] nextNextSliceRois= getSliceSpecificRoiArray(z+2,t,true);
-							Roi[] nextNextNextSliceRois= getSliceSpecificRoiArray(z+3,t,true);
 						    Roi[] nextTwoSlicesRois = Arrays.copyOf(nextSliceRois, nextSliceRois.length + nextNextSliceRois.length);
 						    System.arraycopy(nextNextSliceRois, 0, nextTwoSlicesRois, nextSliceRois.length, nextNextSliceRois.length);
-						    Roi[] nextThreeSlicesRois = Arrays.copyOf(nextTwoSlicesRois, nextTwoSlicesRois.length + nextNextNextSliceRois.length);
-						    System.arraycopy(nextNextNextSliceRois, 0, nextThreeSlicesRois, nextTwoSlicesRois.length, nextNextNextSliceRois.length);
 
 						    int[] nextSliceIndexes= getSliceSpecificIndexes(z+1,t,true);
 							int[] nextNextSliceIndexes= getSliceSpecificIndexes(z+2,t,true);
-							int[] nextNextNextSliceIndexes= getSliceSpecificIndexes(z+3,t,true);
 							int[] nextTwoSlicesIndexes = Arrays.copyOf(nextSliceIndexes, nextSliceIndexes.length + nextNextSliceIndexes.length);
 						    System.arraycopy(nextNextSliceIndexes, 0, nextTwoSlicesIndexes, nextSliceIndexes.length, nextNextSliceIndexes.length);
-						    int[] nextThreeSlicesIndexes = Arrays.copyOf(nextTwoSlicesIndexes, nextTwoSlicesIndexes.length + nextNextNextSliceIndexes.length);
-						    System.arraycopy(nextNextNextSliceIndexes, 0, nextThreeSlicesIndexes, nextTwoSlicesIndexes.length, nextNextNextSliceIndexes.length);
 						    boolean matchedPlusOne = false;
-							for (int q=0;q<nextThreeSlicesRois.length;q++) {
-//								if (alreadyGroupedRoiIndexes.contains(nextThreeSlicesIndexes[q]))
+							for (int q=0;q<nextTwoSlicesRois.length;q++) {
+//								if (alreadyGroupedRoiIndexes.contains(nextTwoSlicesIndexes[q]))
 //									continue;
 								boolean include = true;
-								if (!nextThreeSlicesRois[q].getName().split("\"")[1].trim().contains(partType)){
+								if (!nextTwoSlicesRois[q].getName().split("\"")[1].trim().contains(partType)){
 									continue;   //Want these q rois to only be the parts requested, not others 
 								}
-								if (q > nextSliceRois.length && matchedPlusOne) {  //Case when match is made in z+1 or z+2
-									q = nextThreeSlicesRois.length;
+								if (q > nextSliceRois.length && matchedPlusOne) {  //Case when match is made in z+1
+									q = nextTwoSlicesRois.length;
 									continue;
 								}
-								if (nextThreeSlicesRois[q].getMask()==null || nextThreeSlicesRois[q].getMask().getStatistics().area < 25) {
-									setRoiFillColor(nextThreeSlicesRois[q], Color.WHITE, true);
+								if (nextTwoSlicesRois[q].getMask()==null || nextTwoSlicesRois[q].getMask().getStatistics().area < 25) {
+									setRoiFillColor(nextTwoSlicesRois[q], Color.WHITE, true);
 									continue;
 								}
 
-								ShapeRoi sssqRoi = new ShapeRoi(nextThreeSlicesRois[q]);
+								ShapeRoi sssqRoi = new ShapeRoi(nextTwoSlicesRois[q]);
 								Roi[] subqRois = ((ShapeRoi)sssqRoi).getRois();
 								for (int q1=0;q1<subqRois.length;q1++) {
 									include = false;
@@ -11387,7 +11381,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 									for (int pq=0;pq<sqBounds.npoints;pq++) {
 										if (srBounds.contains(sqBounds.xpoints[pq], sqBounds.ypoints[pq])) {
 											include = true;
-											if (q < nextSliceRois.length)  //Case when match is made in z+1 or z+2, to eliminate need for redundant  z+2 checking and double measuring
+											if (q < nextSliceRois.length)  //Case when match is made in z+1, to eliminate need for redundant  z+2 checking and double measuring
 												matchedPlusOne = true;
 											double cumulativeLength = 0;
 											if (cellLengthDistancesHT.get(sliceRois[r].getName().split("\"")[1].trim().split("@")[0]) != null)
@@ -11397,7 +11391,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 																				sliceRois[r].getZPosition()};
 											double[] sssqCenter = new double[] {subqRois[q1].getMask().getStatistics().xCentroid, 
 																				subqRois[q1].getMask().getStatistics().yCentroid, 
-																				nextThreeSlicesRois[q].getZPosition()};
+																				nextTwoSlicesRois[q].getZPosition()};
 											double diffX= (sssrCenter[0]- sssqCenter[0])*imp.getCalibration().pixelWidth;
 											double diffY= (sssrCenter[1]- sssqCenter[1])*imp.getCalibration().pixelHeight;
 											double diffZ= (sssrCenter[2]- sssqCenter[2])*imp.getCalibration().pixelDepth;
@@ -11410,7 +11404,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 									}
 								}
 								if (include){
-									groupableRoiIndexes.add(nextThreeSlicesIndexes[q]);
+									groupableRoiIndexes.add(nextTwoSlicesIndexes[q]);
 									groupCounterReset = false;
 								}
 							}
@@ -11465,42 +11459,36 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							//lumping together both next slices' rois.  incase of gaps during em sectionin (or even optical sectioning glitches)
 							Roi[] nextSliceRois= getSliceSpecificRoiArray(z-1,t,true);
 							Roi[] nextNextSliceRois= getSliceSpecificRoiArray(z-2,t,true);
-							Roi[] nextNextNextSliceRois= getSliceSpecificRoiArray(z-3,t,true);
 						    Roi[] nextTwoSlicesRois = Arrays.copyOf(nextSliceRois, nextSliceRois.length + nextNextSliceRois.length);
 						    System.arraycopy(nextNextSliceRois, 0, nextTwoSlicesRois, nextSliceRois.length, nextNextSliceRois.length);
-						    Roi[] nextThreeSlicesRois = Arrays.copyOf(nextTwoSlicesRois, nextTwoSlicesRois.length + nextNextNextSliceRois.length);
-						    System.arraycopy(nextNextNextSliceRois, 0, nextThreeSlicesRois, nextTwoSlicesRois.length, nextNextNextSliceRois.length);
 
 						    int[] nextSliceIndexes= getSliceSpecificIndexes(z-1,t,true);
 							int[] nextNextSliceIndexes= getSliceSpecificIndexes(z-2,t,true);
-							int[] nextNextNextSliceIndexes= getSliceSpecificIndexes(z-3,t,true);
 							int[] nextTwoSlicesIndexes = Arrays.copyOf(nextSliceIndexes, nextSliceIndexes.length + nextNextSliceIndexes.length);
 						    System.arraycopy(nextNextSliceIndexes, 0, nextTwoSlicesIndexes, nextSliceIndexes.length, nextNextSliceIndexes.length);
-						    int[] nextThreeSlicesIndexes = Arrays.copyOf(nextTwoSlicesIndexes, nextTwoSlicesIndexes.length + nextNextNextSliceIndexes.length);
-						    System.arraycopy(nextNextNextSliceIndexes, 0, nextThreeSlicesIndexes, nextTwoSlicesIndexes.length, nextNextNextSliceIndexes.length);
 						    boolean matchedMinusOne = false;
-							for (int q=0;q<nextThreeSlicesRois.length;q++) {
-//								if (alreadyGroupedRoiIndexes.contains(nextThreeSlicesIndexes[q]))
+							for (int q=0;q<nextTwoSlicesRois.length;q++) {
+//								if (alreadyGroupedRoiIndexes.contains(nextTwoSlicesIndexes[q]))
 //									continue;
 								boolean include = true;
-								if (!nextThreeSlicesRois[q].getName().split("\"")[1].trim().contains(partType)){
+								if (!nextTwoSlicesRois[q].getName().split("\"")[1].trim().contains(partType)){
 									continue;   //Want these q rois to only be the parts requested, not others 
 								}
 								//Name match check for any segs already grouped on the way forward thru stack.
-								if (nextThreeSlicesRois[q].getName().split("\"")[1].trim().equals(sliceRois[r].getName().split("\"")[1].trim())){
+								if (nextTwoSlicesRois[q].getName().split("\"")[1].trim().equals(sliceRois[r].getName().split("\"")[1].trim())){
 									if (q < nextSliceRois.length)  //Case when match is made in z-1, to eliminate need for redundant  z-2 checking
 										matchedMinusOne = true;
 									continue;   //Avoid counting/measuring any segs that were already grouped going through the first pass   
 								}
 								if (q > nextSliceRois.length && matchedMinusOne) {  //Case when match is made in z-1
-									q = nextThreeSlicesRois.length;
+									q = nextTwoSlicesRois.length;
 									continue;
 								}
-								if (nextThreeSlicesRois[q].getMask()==null || nextThreeSlicesRois[q].getMask().getStatistics().area < 25) {
-									setRoiFillColor(nextThreeSlicesRois[q], Color.WHITE, true);
+								if (nextTwoSlicesRois[q].getMask()==null || nextTwoSlicesRois[q].getMask().getStatistics().area < 25) {
+									setRoiFillColor(nextTwoSlicesRois[q], Color.WHITE, true);
 									continue;
 								}
-								ShapeRoi sssqRoi = new ShapeRoi(nextThreeSlicesRois[q]);
+								ShapeRoi sssqRoi = new ShapeRoi(nextTwoSlicesRois[q]);
 								Roi[] subqRois = ((ShapeRoi)sssqRoi).getRois();
 								for (int q1=0;q1<subqRois.length;q1++) {
 									include = false;
@@ -11518,7 +11506,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 																				sliceRois[r].getZPosition()};
 											double[] sssqCenter = new double[] {subqRois[q1].getMask().getStatistics().xCentroid, 
 																				subqRois[q1].getMask().getStatistics().yCentroid, 
-																				nextThreeSlicesRois[q].getZPosition()};
+																				nextTwoSlicesRois[q].getZPosition()};
 											double diffX= (sssrCenter[0]- sssqCenter[0])*imp.getCalibration().pixelWidth;
 											double diffY= (sssrCenter[1]- sssqCenter[1])*imp.getCalibration().pixelHeight;
 											double diffZ= (sssrCenter[2]- sssqCenter[2])*imp.getCalibration().pixelDepth;
@@ -11531,7 +11519,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 									}
 								}
 								if (include){
-									groupableRoiIndexes.add(nextThreeSlicesIndexes[q]);
+									groupableRoiIndexes.add(nextTwoSlicesIndexes[q]);
 									groupCounterReset = false;
 								}
 							}
