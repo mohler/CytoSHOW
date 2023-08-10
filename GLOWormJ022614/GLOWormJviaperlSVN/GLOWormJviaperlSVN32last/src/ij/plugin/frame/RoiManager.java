@@ -635,6 +635,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				int closestYet = imp.getNSlices() + imp.getNFrames();
 				Roi[] rois = getShownRoisAsArray();
 				for (int r = 0; r < rois.length; r++) {
+					if (rois[r] == null)
+						continue;
 					if (Math.abs(rois[r].getZPosition() - imp.getSlice())
 							+ Math.abs(rois[r].getTPosition() - imp.getFrame()) < closestYet) {
 						closestYet = Math.abs(rois[r].getZPosition() - imp.getSlice())
@@ -4232,8 +4234,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					+ suffix;
 			name2 = name2.substring(0, name2.length() - 1);
 		}
+		if (!name2.contains("-")) {
+			name2 = name2+"-1";
+		}
 		Roi roi2 = (Roi) rois.get(name2 + suffix);
-		int n = 1;
+		int n = 2;
 		while (roi2 != null) {
 			roi2 = (Roi) rois.get(name2 + suffix);
 			if (roi2 != null) {
@@ -5414,6 +5419,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		for (int i = 0; i < roiSetIn.length; i++) {
 			// IJ.log(( roiSetIn[i].getZPosition() +" "+ z +" "+ roiSetIn[i].getTPosition()
 			// +" "+ t+"\n"));
+			if (roiSetIn[i] == null)
+				continue;
 			if (roiSetIn[i].getZPosition() > z - zSustain && roiSetIn[i].getZPosition() < z + zSustain
 					&& roiSetIn[i].getTPosition() > t - tSustain && roiSetIn[i].getTPosition() < t + tSustain) {
 				matchedRois.add(roiSetIn[i]);
@@ -5433,13 +5440,27 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	/** Returns the full set of ROIs as an array. */
 	public Roi[] getFullRoisAsArray() {
+		return getFullRoisAsArray(false);
+	}
+	
+	/** Returns the full set of ROIs as an array. */
+	public Roi[] getFullRoisAsArray(boolean forceAlphaSort) {
 		int n = fullListModel.getSize();
-		Roi[] array = new Roi[n];
+		String[] fullListNamesArray = new String[n];
 		for (int i = 0; i < n; i++) {
 			String label = (String) fullListModel.getElementAt(i);
+			fullListNamesArray[i] = label;
+		}
+		if (forceAlphaSort)
+			Arrays.sort(fullListNamesArray);
+		
+		Roi[] array = new Roi[n];
+		for (int i = 0; i < n; i++) {
+			String label = fullListNamesArray[i];
 			if (rois != null)
 				array[i] = (Roi) rois.get(label);
 		}
+
 		return array;
 	}
 
@@ -6173,13 +6194,19 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 
 	public Roi[] getSliceSpecificRoiArray(int z, int t, boolean getSpanners) {
-		Roi[] roiSetIn = this.getFullRoisAsArray();
+		return getSliceSpecificRoiArray(z,t,getSpanners,false);
+	}
+			
+	public Roi[] getSliceSpecificRoiArray(int z, int t, boolean getSpanners, boolean alphaSortList) {
+		Roi[] roiSetIn = this.getFullRoisAsArray(alphaSortList);
 		if (roiSetIn == null)
 			return null;
 		ArrayList<Roi> matchedRois = new ArrayList<Roi>();
 		for (int i = 0; i < roiSetIn.length; i++) {
 			// IJ.log(( roiSetIn[i].getZPosition() +" "+ z +" "+ roiSetIn[i].getTPosition()
 			// +" "+ t+"\n"));
+			if (roiSetIn[i] == null)
+				continue;
 			if (roiSetIn[i].getTPosition() == t || (roiSetIn[i].getTPosition() == 0 && getSpanners)) {
 				if (roiSetIn[i].getZPosition() == z || (roiSetIn[i].getZPosition() == 0
 						&& getSpanners)/*
@@ -6203,13 +6230,19 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 
 	public int[] getSliceSpecificIndexes(int z, int t, boolean getSpanners) {
-		Roi[] roiSetIn = this.getFullRoisAsArray();
+		return getSliceSpecificIndexes(z,t,getSpanners,false);
+	}
+			
+	public int[] getSliceSpecificIndexes(int z, int t, boolean getSpanners, boolean alphaSortList) {
+		Roi[] roiSetIn = this.getFullRoisAsArray(alphaSortList);
 		if (roiSetIn == null)
 			return null;
 		ArrayList<Integer> matchedIndexes = new ArrayList<Integer>();
 		for (int i = 0; i < roiSetIn.length; i++) {
 			// IJ.log(( roiSetIn[i].getZPosition() +" "+ z +" "+ roiSetIn[i].getTPosition()
 			// +" "+ t+"\n"));
+			if (roiSetIn[i] == null)
+				continue;
 			if (roiSetIn[i].getTPosition() == t || (roiSetIn[i].getTPosition() == 0 && getSpanners)) {
 				if (roiSetIn[i].getZPosition() == z || (roiSetIn[i].getZPosition() == 0
 						&& getSpanners)/*
@@ -11326,8 +11359,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		Hashtable<String, Double> cellLengthDistancesHT = new Hashtable<String, Double>();
 		for (int z=1;z<=imp.getNSlices()-2;z++) {  
 			for (int t=1;t<=imp.getNFrames();t++) {
-				Roi[] sliceRois= getSliceSpecificRoiArray(z,t,true);
-				int[] sliceIndexes= getSliceSpecificIndexes(z,t,true);
+				Roi[] sliceRois = getSliceSpecificRoiArray(z, t, true/* ,true */);  //use of second true forces alphasort on list, overriding displayed sort order, but leaving display order unchanged.
+				int[] sliceIndexes = getSliceSpecificIndexes(z, t, true/* ,true */); //use of second true forces alphasort on list, overriding displayed sort order, but leaving display order unchanged.
 				for (String partType:partTypes) {
 
 					for (int r=0;r<sliceRois.length;r++) {
@@ -11396,11 +11429,40 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 											double diffY= (sssrCenter[1]- sssqCenter[1])*imp.getCalibration().pixelHeight;
 											double diffZ= (sssrCenter[2]- sssqCenter[2])*imp.getCalibration().pixelDepth;
 											double incrementLength = Math.sqrt(Math.pow(diffX, 2)+Math.pow(diffY, 2)+Math.pow(diffZ, 2));
+											IJ.log(""+diffX+" "+diffY+" "+diffZ+"  =  "+incrementLength);
 											cellLengthDistancesHT.put(sliceRois[r].getName().split("\"")[1].trim().split("@")[0],cumulativeLength+incrementLength);
 											pq = sqBounds.npoints;   //Only need one point hit to be grouped
 											//q1 = subqRois.length;  //NEED TO MEASURE ALL DISTANCES, even though Only need one subRoi hit to be grouped
 										} else {
 										}					
+									}
+									//This converse test is required in case r actually fits inside q.  It can happen.
+									if (!include) {
+										for (int pr=0;pr<srBounds.npoints;pr++) {
+											if (sqBounds.contains(srBounds.xpoints[pr], srBounds.ypoints[pr])) {
+												include = true;
+												if (q < nextSliceRois.length)  //Case when match is made in z+1, to eliminate need for redundant  z+2 checking and double measuring
+													matchedPlusOne = true;
+												double cumulativeLength = 0;
+												if (cellLengthDistancesHT.get(sliceRois[r].getName().split("\"")[1].trim().split("@")[0]) != null)
+													cumulativeLength = cellLengthDistancesHT.get(sliceRois[r].getName().split("\"")[1].trim().split("@")[0]);
+												double[] sssrCenter = new double[] {subrRois[r1].getMask().getStatistics().xCentroid, 
+														subrRois[r1].getMask().getStatistics().yCentroid, 
+														sliceRois[r].getZPosition()};
+												double[] sssqCenter = new double[] {subqRois[q1].getMask().getStatistics().xCentroid, 
+														subqRois[q1].getMask().getStatistics().yCentroid, 
+														nextTwoSlicesRois[q].getZPosition()};
+												double diffX= (sssrCenter[0]- sssqCenter[0])*imp.getCalibration().pixelWidth;
+												double diffY= (sssrCenter[1]- sssqCenter[1])*imp.getCalibration().pixelHeight;
+												double diffZ= (sssrCenter[2]- sssqCenter[2])*imp.getCalibration().pixelDepth;
+												double incrementLength = Math.sqrt(Math.pow(diffX, 2)+Math.pow(diffY, 2)+Math.pow(diffZ, 2));
+												IJ.log(""+diffX+" "+diffY+" "+diffZ+"  =  "+incrementLength);
+												cellLengthDistancesHT.put(sliceRois[r].getName().split("\"")[1].trim().split("@")[0],cumulativeLength+incrementLength);
+												pr = srBounds.npoints;   //Only need one point hit to be grouped
+												//r1 = subrRois.length;  //NEED TO MEASURE ALL DISTANCES, even though Only need one subRoi hit to be grouped
+											} else {
+											}					
+										}
 									}
 								}
 								if (include){
@@ -11413,13 +11475,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							for (int c=0;c<crIdxes.length;c++) {
 								crIdxes[c] = (int)groupableRoiIndexes.get(c);
 							}
+							IJ.log(""+z+" "+t+" "+sliceRois[r].getName()+" claims "+(crIdxes.length>0?listModel.get(crIdxes[0]):"none"));
 							if (!sliceRois[r].getName().split("\"")[1].trim().contains("@")) {
 								rename (sliceRois[r].getName().split("\"")[1].trim()+"@"+IJ.pad(groupcounter, 6), new int[]{sliceIndexes[r]}, true, false);
 								groupcounter++;
 							}
 							rename(sliceRois[r].getName().split("\"")[1].trim()
 									,crIdxes, true, false);
-							IJ.log(""+z+" "+t+" "+sliceRois[r].getName().split("\"")[1].trim());
+//							IJ.log(""+z+" "+t+" "+sliceRois[r].getName().split("\"")[1].trim());
 							IJ.showStatus(segcounter+" parts segments claimed by "+groupcounter+" segment-groups...");
 							alreadyGroupedRoiIndexes.add(sliceIndexes[r]);
 							alreadyGroupedRoiIndexes.addAll(groupableRoiIndexes);
@@ -11502,21 +11565,50 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 											if (cellLengthDistancesHT.get(sliceRois[r].getName().split("\"")[1].trim().split("@")[0]) != null)
 												cumulativeLength = cellLengthDistancesHT.get(sliceRois[r].getName().split("\"")[1].trim().split("@")[0]);
 											double[] sssrCenter = new double[] {subrRois[r1].getMask().getStatistics().xCentroid, 
-																				subrRois[r1].getMask().getStatistics().yCentroid, 
-																				sliceRois[r].getZPosition()};
+													subrRois[r1].getMask().getStatistics().yCentroid, 
+													sliceRois[r].getZPosition()};
 											double[] sssqCenter = new double[] {subqRois[q1].getMask().getStatistics().xCentroid, 
-																				subqRois[q1].getMask().getStatistics().yCentroid, 
-																				nextTwoSlicesRois[q].getZPosition()};
+													subqRois[q1].getMask().getStatistics().yCentroid, 
+													nextTwoSlicesRois[q].getZPosition()};
 											double diffX= (sssrCenter[0]- sssqCenter[0])*imp.getCalibration().pixelWidth;
 											double diffY= (sssrCenter[1]- sssqCenter[1])*imp.getCalibration().pixelHeight;
 											double diffZ= (sssrCenter[2]- sssqCenter[2])*imp.getCalibration().pixelDepth;
 											double incrementLength = Math.sqrt(Math.pow(diffX, 2)+Math.pow(diffY, 2)+Math.pow(diffZ, 2));
+											IJ.log(""+diffX+" "+diffY+" "+diffZ+"  =  "+incrementLength);
 											cellLengthDistancesHT.put(sliceRois[r].getName().split("\"")[1].trim().split("@")[0],cumulativeLength+incrementLength);
 											pq = sqBounds.npoints;   //Only need one point hit to be grouped
 											//q1 = subqRois.length;  //NEED TO MEASURE ALL DISTANCES, even though Only need one subRoi hit to be grouped
 										} else {
 										}					
 									}
+									//This converse test is required in case r actually fits inside q.  It can happen.
+									if (!include) {
+										for (int pr=0;pr<srBounds.npoints;pr++) {
+											if (sqBounds.contains(srBounds.xpoints[pr], srBounds.ypoints[pr])) {
+												include = true;
+												if (q < nextSliceRois.length)  //Case when match is made in z-1, to eliminate need for redundant  z-2 checking and double measuring
+													matchedMinusOne = true;
+												double cumulativeLength = 0;
+												if (cellLengthDistancesHT.get(sliceRois[r].getName().split("\"")[1].trim().split("@")[0]) != null)
+													cumulativeLength = cellLengthDistancesHT.get(sliceRois[r].getName().split("\"")[1].trim().split("@")[0]);
+												double[] sssrCenter = new double[] {subrRois[r1].getMask().getStatistics().xCentroid, 
+														subrRois[r1].getMask().getStatistics().yCentroid, 
+														sliceRois[r].getZPosition()};
+												double[] sssqCenter = new double[] {subqRois[q1].getMask().getStatistics().xCentroid, 
+														subqRois[q1].getMask().getStatistics().yCentroid, 
+														nextTwoSlicesRois[q].getZPosition()};
+												double diffX= (sssrCenter[0]- sssqCenter[0])*imp.getCalibration().pixelWidth;
+												double diffY= (sssrCenter[1]- sssqCenter[1])*imp.getCalibration().pixelHeight;
+												double diffZ= (sssrCenter[2]- sssqCenter[2])*imp.getCalibration().pixelDepth;
+												double incrementLength = Math.sqrt(Math.pow(diffX, 2)+Math.pow(diffY, 2)+Math.pow(diffZ, 2));
+												IJ.log(""+diffX+" "+diffY+" "+diffZ+"  =  "+incrementLength);
+												cellLengthDistancesHT.put(sliceRois[r].getName().split("\"")[1].trim().split("@")[0],cumulativeLength+incrementLength);
+												pr = srBounds.npoints;   //Only need one point hit to be grouped
+												//r1 = subrRois.length;  //NEED TO MEASURE ALL DISTANCES, even though Only need one subRoi hit to be grouped
+											} else {
+											}					
+										}
+									}	
 								}
 								if (include){
 									groupableRoiIndexes.add(nextTwoSlicesIndexes[q]);
@@ -11528,13 +11620,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							for (int c=0;c<crIdxes.length;c++) {
 								crIdxes[c] = (int)groupableRoiIndexes.get(c);
 							}
+							IJ.log(""+z+" "+t+" "+sliceRois[r].getName()+" claims "+(crIdxes.length>0?listModel.get(crIdxes[0]):"none"));
 							if (!sliceRois[r].getName().split("\"")[1].trim().contains("@")) {
 								rename (sliceRois[r].getName().split("\"")[1].trim()+"@"+IJ.pad(groupcounter, 6), new int[]{sliceIndexes[r]}, true, false);
 								groupcounter++;
 							}
 							rename(sliceRois[r].getName().split("\"")[1].trim()
 									,crIdxes, true, false);
-							IJ.log(""+z+" "+t+" "+sliceRois[r].getName().split("\"")[1].trim());
+//							IJ.log(""+z+" "+t+" "+sliceRois[r].getName().split("\"")[1].trim());
 							IJ.showStatus(segcounter+" parts segments claimed by "+groupcounter+" segment-groups...");
 							alreadyGroupedRoiIndexes.add(sliceIndexes[r]);
 							alreadyGroupedRoiIndexes.addAll(groupableRoiIndexes);
