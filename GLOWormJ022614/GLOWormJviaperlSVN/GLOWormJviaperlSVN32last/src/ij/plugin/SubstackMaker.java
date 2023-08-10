@@ -29,8 +29,8 @@ public class SubstackMaker implements PlugIn {
 	public void run(String arg) {
 		ImagePlus imp = IJ.getImage();
 		if (imp.isHyperStack() || imp.isComposite()) {
-			IJ.error("Make Substack", "This command does not currently work with hyperstacks.");
-			return;
+//			IJ.error("Make Substack", "This command does not currently work with hyperstacks.");
+//			return;
 		}
 		String userInput = showDialog();
 		if (userInput==null)
