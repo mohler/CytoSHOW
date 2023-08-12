@@ -6193,6 +6193,46 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		showAllCheckbox.setSelected(canvasShowAllState);
 	}
 
+	public Roi[] getShownSliceSpecificRoiArray(int z, int t, boolean getSpanners) {
+		return getShownSliceSpecificRoiArray(z,t,getSpanners,false);
+	}
+			
+	public Roi[] getShownSliceSpecificRoiArray(int z, int t, boolean getSpanners, boolean alphaSortList) {
+//		Roi[] roiSetIn = this.getFullRoisAsArray(alphaSortList);
+		Roi[] roiSetIn = this.getShownRoisAsArray();
+		if (roiSetIn == null)
+			return null;
+		ArrayList<Roi> matchedRois = new ArrayList<Roi>();
+		for (int i = 0; i < roiSetIn.length; i++) {
+			// IJ.log(( roiSetIn[i].getZPosition() +" "+ z +" "+ roiSetIn[i].getTPosition()
+			// +" "+ t+"\n"));
+			if (roiSetIn[i] == null)
+				continue;
+			if (roiSetIn[i].getTPosition() == t || (roiSetIn[i].getTPosition() == 0 && getSpanners)) {
+				if (roiSetIn[i].getZPosition() == z || (roiSetIn[i].getZPosition() == 0
+						&& getSpanners)/*
+										 * && roiSetIn[i].getTPosition() > t - tSustain && roiSetIn[i].getTPosition() <
+										 * t + tSustain
+										 */) {
+					matchedRois.add(roiSetIn[i]);
+					// IJ.showMessage("");
+
+				}
+			}
+		}
+		// IJ.log(""+matchedRoiIndexes.size());
+
+		Roi[] sliceSpecificRois = new Roi[matchedRois.size()];
+		for (int i = 0; i < sliceSpecificRois.length; i++) {
+			sliceSpecificRois[i] = matchedRois.get(i);
+		}
+		return sliceSpecificRois;
+
+	}
+
+
+	
+	
 	public Roi[] getSliceSpecificRoiArray(int z, int t, boolean getSpanners) {
 		return getSliceSpecificRoiArray(z,t,getSpanners,false);
 	}
@@ -6221,14 +6261,51 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		// IJ.log(""+matchedRoiIndexes.size());
 
-		Roi[] sliceSpecificFullRois = new Roi[matchedRois.size()];
-		for (int i = 0; i < sliceSpecificFullRois.length; i++) {
-			sliceSpecificFullRois[i] = matchedRois.get(i);
+		Roi[] sliceSpecificRois = new Roi[matchedRois.size()];
+		for (int i = 0; i < sliceSpecificRois.length; i++) {
+			sliceSpecificRois[i] = matchedRois.get(i);
 		}
-		return sliceSpecificFullRois;
+		return sliceSpecificRois;
 
 	}
 
+	public int[] getShownSliceSpecificIndexes(int z, int t, boolean getSpanners) {
+		return getShownSliceSpecificIndexes(z,t,getSpanners,false);
+	}
+			
+	public int[] getShownSliceSpecificIndexes(int z, int t, boolean getSpanners, boolean alphaSortList) {
+//		Roi[] roiSetIn = this.getFullRoisAsArray(alphaSortList);
+		Roi[] roiSetIn = this.getShownRoisAsArray();
+		if (roiSetIn == null)
+			return null;
+		ArrayList<Integer> matchedIndexes = new ArrayList<Integer>();
+		for (int i = 0; i < roiSetIn.length; i++) {
+			// IJ.log(( roiSetIn[i].getZPosition() +" "+ z +" "+ roiSetIn[i].getTPosition()
+			// +" "+ t+"\n"));
+			if (roiSetIn[i] == null)
+				continue;
+			if (roiSetIn[i].getTPosition() == t || (roiSetIn[i].getTPosition() == 0 && getSpanners)) {
+				if (roiSetIn[i].getZPosition() == z || (roiSetIn[i].getZPosition() == 0
+						&& getSpanners)/*
+										 * && roiSetIn[i].getTPosition() > t - tSustain && roiSetIn[i].getTPosition() <
+										 * t + tSustain
+										 */) {
+					matchedIndexes.add(i);
+					// IJ.showMessage("");
+				}
+			}
+		}
+		// IJ.log(""+matchedRoiIndexes.size());
+
+		int[] sliceSpecificShownIndexes = new int[matchedIndexes.size()];
+		for (int i = 0; i < sliceSpecificShownIndexes.length; i++) {
+			sliceSpecificShownIndexes[i] = matchedIndexes.get(i);
+		}
+		return sliceSpecificShownIndexes;
+
+	}
+	
+	
 	public int[] getSliceSpecificIndexes(int z, int t, boolean getSpanners) {
 		return getSliceSpecificIndexes(z,t,getSpanners,false);
 	}
@@ -11359,8 +11436,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		Hashtable<String, Double> cellLengthDistancesHT = new Hashtable<String, Double>();
 		for (int z=1;z<=imp.getNSlices()-2;z++) {  
 			for (int t=1;t<=imp.getNFrames();t++) {
-				Roi[] sliceRois = getSliceSpecificRoiArray(z, t, true/* ,true */);  //use of second true forces alphasort on list, overriding displayed sort order, but leaving display order unchanged.
-				int[] sliceIndexes = getSliceSpecificIndexes(z, t, true/* ,true */); //use of second true forces alphasort on list, overriding displayed sort order, but leaving display order unchanged.
+				Roi[] sliceRois = getShownSliceSpecificRoiArray(z, t, true);  
+				int[] sliceIndexes = getShownSliceSpecificIndexes(z, t, true);
 				for (String partType:partTypes) {
 
 					for (int r=0;r<sliceRois.length;r++) {
@@ -11380,13 +11457,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						for (int r1=0;r1<subrRois.length;r1++) {
 							Polygon srBounds = subrRois[r1].getPolygon();
 							//lumping together both next slices' rois.  in case of gaps during EM sectioning (or even optical sectioning glitches)
-							Roi[] nextSliceRois= getSliceSpecificRoiArray(z+1,t,true);
-							Roi[] nextNextSliceRois= getSliceSpecificRoiArray(z+2,t,true);
+							Roi[] nextSliceRois= getShownSliceSpecificRoiArray(z+1,t,true);
+							Roi[] nextNextSliceRois= getShownSliceSpecificRoiArray(z+2,t,true);
 						    Roi[] nextTwoSlicesRois = Arrays.copyOf(nextSliceRois, nextSliceRois.length + nextNextSliceRois.length);
 						    System.arraycopy(nextNextSliceRois, 0, nextTwoSlicesRois, nextSliceRois.length, nextNextSliceRois.length);
 
-						    int[] nextSliceIndexes= getSliceSpecificIndexes(z+1,t,true);
-							int[] nextNextSliceIndexes= getSliceSpecificIndexes(z+2,t,true);
+						    int[] nextSliceIndexes= getShownSliceSpecificIndexes(z+1,t,true);
+							int[] nextNextSliceIndexes= getShownSliceSpecificIndexes(z+2,t,true);
 							int[] nextTwoSlicesIndexes = Arrays.copyOf(nextSliceIndexes, nextSliceIndexes.length + nextNextSliceIndexes.length);
 						    System.arraycopy(nextNextSliceIndexes, 0, nextTwoSlicesIndexes, nextSliceIndexes.length, nextNextSliceIndexes.length);
 						    boolean matchedPlusOne = false;
@@ -11467,6 +11544,17 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								}
 								if (include){
 									groupableRoiIndexes.add(nextTwoSlicesIndexes[q]);
+									
+									// HERE MUST ADD SEARCH FOR ALL SIMILARLY NAMED SHOWN SEGS, SO THEY CAN BE CLAIMED BY WHAT CLAIMS SEG[q].
+									int lmSize = listModel.getSize();
+									String hitRootName = listModel.get(nextTwoSlicesIndexes[q]).split("\"")[1].trim();
+									if (!hitRootName.equals(sliceRois[r].getName().split("\"")[1].trim()) & hitRootName.contains("@")) {
+										for (int v=0; v<lmSize; v++) {
+											if (listModel.get(v).startsWith("\""+hitRootName)){
+												groupableRoiIndexes.add(v);
+											}
+										}
+									}
 									groupCounterReset = false;
 								}
 							}
@@ -11498,8 +11586,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		//FLIP THE WHOLE STACK, AND RECHECK GROUPABLES TO FIND ANY REVERSE FORKS MISSED IN FIRST PASS
 		for (int z =imp.getNSlices()-1; z>=3;z--) {  
 			for (int t=1;t<=imp.getNFrames();t++) {
-				Roi[] sliceRois= getSliceSpecificRoiArray(z,t,true);
-				int[] sliceIndexes= getSliceSpecificIndexes(z,t,true);
+				Roi[] sliceRois= getShownSliceSpecificRoiArray(z,t,true);
+				int[] sliceIndexes= getShownSliceSpecificIndexes(z,t,true);
 				for (String partType:partTypes) {
 
 					for (int r=0;r<sliceRois.length;r++) {
@@ -11520,13 +11608,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						for (int r1=0;r1<subrRois.length;r1++) {
 							Polygon srBounds = subrRois[r1].getPolygon();
 							//lumping together both next slices' rois.  incase of gaps during em sectionin (or even optical sectioning glitches)
-							Roi[] nextSliceRois= getSliceSpecificRoiArray(z-1,t,true);
-							Roi[] nextNextSliceRois= getSliceSpecificRoiArray(z-2,t,true);
+							Roi[] nextSliceRois= getShownSliceSpecificRoiArray(z-1,t,true);
+							Roi[] nextNextSliceRois= getShownSliceSpecificRoiArray(z-2,t,true);
 						    Roi[] nextTwoSlicesRois = Arrays.copyOf(nextSliceRois, nextSliceRois.length + nextNextSliceRois.length);
 						    System.arraycopy(nextNextSliceRois, 0, nextTwoSlicesRois, nextSliceRois.length, nextNextSliceRois.length);
 
-						    int[] nextSliceIndexes= getSliceSpecificIndexes(z-1,t,true);
-							int[] nextNextSliceIndexes= getSliceSpecificIndexes(z-2,t,true);
+						    int[] nextSliceIndexes= getShownSliceSpecificIndexes(z-1,t,true);
+							int[] nextNextSliceIndexes= getShownSliceSpecificIndexes(z-2,t,true);
 							int[] nextTwoSlicesIndexes = Arrays.copyOf(nextSliceIndexes, nextSliceIndexes.length + nextNextSliceIndexes.length);
 						    System.arraycopy(nextNextSliceIndexes, 0, nextTwoSlicesIndexes, nextSliceIndexes.length, nextNextSliceIndexes.length);
 						    boolean matchedMinusOne = false;
@@ -11612,6 +11700,17 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								}
 								if (include){
 									groupableRoiIndexes.add(nextTwoSlicesIndexes[q]);
+																		
+									// HERE MUST ADD SEARCH FOR ALL SIMILARLY NAMED SHOWN SEGS, SO THEY CAN BE CLAIMED BY WHAT CLAIMS SEG[q].
+									int lmSize = listModel.getSize();
+									String hitRootName = listModel.get(nextTwoSlicesIndexes[q]).split("\"")[1].trim();
+									if (!hitRootName.equals(sliceRois[r].getName().split("\"")[1].trim()) & hitRootName.contains("@")) {
+										for (int v=0; v<lmSize; v++) {
+											if (listModel.get(v).startsWith("\""+hitRootName)){
+												groupableRoiIndexes.add(v);
+											}
+										}
+									}
 									groupCounterReset = false;
 								}
 							}
