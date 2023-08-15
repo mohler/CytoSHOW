@@ -5408,7 +5408,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 
 	/**
-	 * Returns the shown (searched) set of ROIs for the specifice slice/frame as an
+	 * Returns the shown (searched) set of ROIs for the specific slice/frame as an
 	 * array.
 	 */
 	private Roi[] getDisplayedRoisAsArray(int z, int t) {
@@ -6209,11 +6209,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			if (roiSetIn[i] == null)
 				continue;
 			if (roiSetIn[i].getTPosition() == t || (roiSetIn[i].getTPosition() == 0 && getSpanners)) {
-				if (roiSetIn[i].getZPosition() == z || (roiSetIn[i].getZPosition() == 0
-						&& getSpanners)/*
-										 * && roiSetIn[i].getTPosition() > t - tSustain && roiSetIn[i].getTPosition() <
-										 * t + tSustain
-										 */) {
+				if (roiSetIn[i].getZPosition() == z || (roiSetIn[i].getZPosition() == 0 && getSpanners)) {
 					matchedRois.add(roiSetIn[i]);
 					// IJ.showMessage("");
 
@@ -6274,22 +6270,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 			
 	public int[] getShownSliceSpecificIndexes(int z, int t, boolean getSpanners, boolean alphaSortList) {
-//		Roi[] roiSetIn = this.getFullRoisAsArray(alphaSortList);
 		Roi[] roiSetIn = this.getShownRoisAsArray();
 		if (roiSetIn == null)
 			return null;
 		ArrayList<Integer> matchedIndexes = new ArrayList<Integer>();
 		for (int i = 0; i < roiSetIn.length; i++) {
-			// IJ.log(( roiSetIn[i].getZPosition() +" "+ z +" "+ roiSetIn[i].getTPosition()
-			// +" "+ t+"\n"));
 			if (roiSetIn[i] == null)
 				continue;
 			if (roiSetIn[i].getTPosition() == t || (roiSetIn[i].getTPosition() == 0 && getSpanners)) {
-				if (roiSetIn[i].getZPosition() == z || (roiSetIn[i].getZPosition() == 0
-						&& getSpanners)/*
-										 * && roiSetIn[i].getTPosition() > t - tSustain && roiSetIn[i].getTPosition() <
-										 * t + tSustain
-										 */) {
+				if (roiSetIn[i].getZPosition() == z || (roiSetIn[i].getZPosition() == 0 && getSpanners)) {
 					matchedIndexes.add(i);
 					// IJ.showMessage("");
 				}
@@ -6316,16 +6305,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			return null;
 		ArrayList<Integer> matchedIndexes = new ArrayList<Integer>();
 		for (int i = 0; i < roiSetIn.length; i++) {
-			// IJ.log(( roiSetIn[i].getZPosition() +" "+ z +" "+ roiSetIn[i].getTPosition()
-			// +" "+ t+"\n"));
 			if (roiSetIn[i] == null)
 				continue;
 			if (roiSetIn[i].getTPosition() == t || (roiSetIn[i].getTPosition() == 0 && getSpanners)) {
-				if (roiSetIn[i].getZPosition() == z || (roiSetIn[i].getZPosition() == 0
-						&& getSpanners)/*
-										 * && roiSetIn[i].getTPosition() > t - tSustain && roiSetIn[i].getTPosition() <
-										 * t + tSustain
-										 */) {
+				if (roiSetIn[i].getZPosition() == z || (roiSetIn[i].getZPosition() == 0 && getSpanners)) {
 					matchedIndexes.add(i);
 					// IJ.showMessage("");
 				}
@@ -11474,7 +11457,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								if (!nextTwoSlicesRois[q].getName().split("\"")[1].trim().contains(partType)){
 									continue;   //Want these q rois to only be the parts requested, not others 
 								}
-								if (q > nextSliceRois.length && matchedPlusOne) {  //Case when match is made in z+1
+								if (q >= nextSliceRois.length && matchedPlusOne) {  //Case when match is made in z+1
 									q = nextTwoSlicesRois.length;
 									continue;
 								}
@@ -11631,7 +11614,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 										matchedMinusOne = true;
 									continue;   //Avoid counting/measuring any segs that were already grouped going through the first pass   
 								}
-								if (q > nextSliceRois.length && matchedMinusOne) {  //Case when match is made in z-1
+								if (q >= nextSliceRois.length && matchedMinusOne) {  //Case when match is made in z-1
 									q = nextTwoSlicesRois.length;
 									continue;
 								}
