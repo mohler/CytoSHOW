@@ -11412,6 +11412,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 	
 	public void groupCellPartSlices(String[] partTypes) {
+		if (partTypes[0].equals("*")) {
+			partTypes = this.roisByRootName.keySet().toArray(new String[roisByRootName.keySet().size()]);
+		}					
 		int groupcounter = 1;
 		int segcounter = 0;
 		boolean groupCounterReset = false;
@@ -11421,11 +11424,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			for (int t=1;t<=imp.getNFrames();t++) {
 				Roi[] sliceRois = getShownSliceSpecificRoiArray(z, t, true);  
 				int[] sliceIndexes = getShownSliceSpecificIndexes(z, t, true);
-				if (partTypes[0].equals("*")) {
-					partTypes = this.roisByRootName.keySet().toArray(new String[roisByRootName.keySet().size()]);
-				}					
+				ArrayList<String> completedPartTypes = new ArrayList<String>();
 				for (String partType:partTypes) {
-					partType = partType.replace("\"","").trim();
+					partType = partType.replace("\"","").trim().split("@")[0];
+					if (completedPartTypes.contains(partType)) {
+						continue;
+					} else {
+						completedPartTypes.add(partType);				
+					}
 					for (int r=0;r<sliceRois.length;r++) {
 
 						ArrayList<Integer> groupableRoiIndexes = new ArrayList<Integer>();
@@ -11574,8 +11580,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			for (int t=1;t<=imp.getNFrames();t++) {
 				Roi[] sliceRois= getShownSliceSpecificRoiArray(z,t,true);
 				int[] sliceIndexes= getShownSliceSpecificIndexes(z,t,true);
+				ArrayList<String> completedPartTypes = new ArrayList<String>();
 				for (String partType:partTypes) {
-
+					partType = partType.replace("\"","").trim().split("@")[0];
+					if (completedPartTypes.contains(partType)) {
+						continue;
+					} else {
+						completedPartTypes.add(partType);				
+					}
 					for (int r=0;r<sliceRois.length;r++) {
 
 						ArrayList<Integer> groupableRoiIndexes = new ArrayList<Integer>();
