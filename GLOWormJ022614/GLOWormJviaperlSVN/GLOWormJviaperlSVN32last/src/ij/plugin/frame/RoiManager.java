@@ -11425,7 +11425,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					partTypes = this.roisByRootName.keySet().toArray(new String[roisByRootName.keySet().size()]);
 				}					
 				for (String partType:partTypes) {
-
+					partType = partType.replace("\"","").trim();
 					for (int r=0;r<sliceRois.length;r++) {
 
 						ArrayList<Integer> groupableRoiIndexes = new ArrayList<Integer>();
