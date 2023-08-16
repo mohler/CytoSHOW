@@ -11435,7 +11435,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					for (int r=0;r<sliceRois.length;r++) {
 
 						ArrayList<Integer> groupableRoiIndexes = new ArrayList<Integer>();
-						if (!sliceRois[r].getName().contains(partType)){
+						if (!sliceRois[r].getName().split("\"")[1].trim().startsWith(partType)){
 							continue;   //Want these r rois to only be the parts requested, not others 
 						}
 						if (sliceRois[r].getMask()==null || sliceRois[r].getMask().getStatistics().area < 25) {
@@ -11463,7 +11463,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //								if (alreadyGroupedRoiIndexes.contains(nextTwoSlicesIndexes[q]))
 //									continue;
 								boolean include = true;
-								if (!nextTwoSlicesRois[q].getName().split("\"")[1].trim().contains(partType)){
+								if (!nextTwoSlicesRois[q].getName().split("\"")[1].trim().startsWith(partType)){
 									continue;   //Want these q rois to only be the parts requested, not others 
 								}
 								if (q >= nextSliceRois.length && matchedPlusOne) {  //Case when match is made in z+1
@@ -11591,7 +11591,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					for (int r=0;r<sliceRois.length;r++) {
 
 						ArrayList<Integer> groupableRoiIndexes = new ArrayList<Integer>();
-						if (!sliceRois[r].getName().contains(partType)){
+						if (!sliceRois[r].getName().split("\"")[1].trim().startsWith(partType)){
 							continue;   //Want these r rois to only be the parts requested, not others 
 						}
 						if (sliceRois[r].getMask()==null || sliceRois[r].getMask().getStatistics().area < 25) {
@@ -11620,7 +11620,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //								if (alreadyGroupedRoiIndexes.contains(nextTwoSlicesIndexes[q]))
 //									continue;
 								boolean include = true;
-								if (!nextTwoSlicesRois[q].getName().split("\"")[1].trim().contains(partType)){
+								if (!nextTwoSlicesRois[q].getName().split("\"")[1].trim().startsWith(partType)){
 									continue;   //Want these q rois to only be the parts requested, not others 
 								}
 								//Name match check for any segs already grouped on the way forward thru stack.
