@@ -11421,6 +11421,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			for (int t=1;t<=imp.getNFrames();t++) {
 				Roi[] sliceRois = getShownSliceSpecificRoiArray(z, t, true);  
 				int[] sliceIndexes = getShownSliceSpecificIndexes(z, t, true);
+				if (partTypes[0].equals("*")) {
+					partTypes = this.roisByRootName.keySet().toArray(new String[roisByRootName.keySet().size()]);
+				}					
 				for (String partType:partTypes) {
 
 					for (int r=0;r<sliceRois.length;r++) {
