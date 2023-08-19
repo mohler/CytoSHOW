@@ -11435,10 +11435,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					for (int r=0;r<sliceRois.length;r++) {
 
 						ArrayList<Integer> groupableRoiIndexes = new ArrayList<Integer>();
+						groupableRoiIndexes.add(sliceIndexes[r]);
 						if (!sliceRois[r].getName().split("\"")[1].trim().startsWith(partType)){
 							continue;   //Want these r rois to only be the parts requested, not others 
 						}
-						if (sliceRois[r].getMask()==null || sliceRois[r].getMask().getStatistics().area < 25) {
+						if (sliceRois[r].getMask() == null /* || sliceRois[r].getMask().getStatistics().area < 25 */) {
 							setRoiFillColor(sliceRois[r], Color.WHITE, true);
 							continue;
 						}
@@ -11470,7 +11471,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 									q = nextTwoSlicesRois.length;
 									continue;
 								}
-								if (nextTwoSlicesRois[q].getMask()==null || nextTwoSlicesRois[q].getMask().getStatistics().area < 25) {
+								if (nextTwoSlicesRois[q].getMask() == null/* || nextTwoSlicesRois[q].getMask().getStatistics().area < 25*/) {
 									setRoiFillColor(nextTwoSlicesRois[q], Color.WHITE, true);
 									continue;
 								}
@@ -11591,10 +11592,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					for (int r=0;r<sliceRois.length;r++) {
 
 						ArrayList<Integer> groupableRoiIndexes = new ArrayList<Integer>();
+						groupableRoiIndexes.add(sliceIndexes[r]);
 						if (!sliceRois[r].getName().split("\"")[1].trim().startsWith(partType)){
 							continue;   //Want these r rois to only be the parts requested, not others 
 						}
-						if (sliceRois[r].getMask()==null || sliceRois[r].getMask().getStatistics().area < 25) {
+						if (sliceRois[r].getMask() == null /* || sliceRois[r].getMask().getStatistics().area < 25 */) {
 							setRoiFillColor(sliceRois[r], Color.WHITE, true);
 							continue;
 						}
@@ -11633,7 +11635,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 									q = nextTwoSlicesRois.length;
 									continue;
 								}
-								if (nextTwoSlicesRois[q].getMask()==null || nextTwoSlicesRois[q].getMask().getStatistics().area < 25) {
+								if (nextTwoSlicesRois[q].getMask() == null/* || nextTwoSlicesRois[q].getMask().getStatistics().area < 25*/) {
 									setRoiFillColor(nextTwoSlicesRois[q], Color.WHITE, true);
 									continue;
 								}
