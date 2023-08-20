@@ -11415,6 +11415,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (partTypes[0].equals("*")) {
 			partTypes = this.roisByRootName.keySet().toArray(new String[roisByRootName.keySet().size()]);
 		}					
+		int expansionDistance = 0; //nanometers
 		int groupcounter = 1;
 		int segcounter = 0;
 		boolean groupCounterReset = false;
@@ -11448,7 +11449,18 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						ShapeRoi sssrRoi = new ShapeRoi(sliceRois[r]);
 						Roi[] subrRois = ((ShapeRoi)sssrRoi).getRois();
 						for (int r1=0;r1<subrRois.length;r1++) {
-							Polygon srBounds = subrRois[r1].getPolygon();
+							Rectangle srBox = subrRois[r1].getBounds();
+							double srShortSide = (srBox.width>=srBox.height?srBox.height:srBox.width)*imp.getCalibration().pixelWidth;
+							double srScaleFactor = (srShortSide+expansionDistance)/srShortSide;
+							Polygon srBounds = null;
+							try {
+								srBounds = new RoiDecoder(srScaleFactor, RoiEncoder.saveAsByteArray(subrRois[r1]), subrRois[r1].getName())
+										.getRoi().getPolygon();
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							srBounds.translate(-expansionDistance/2, -expansionDistance/2);
 							//lumping together both next slices' rois.  in case of gaps during EM sectioning (or even optical sectioning glitches)
 							Roi[] nextSliceRois= getShownSliceSpecificRoiArray(z+1,t,true);
 							Roi[] nextNextSliceRois= getShownSliceSpecificRoiArray(z+2,t,true);
@@ -11480,7 +11492,18 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								Roi[] subqRois = ((ShapeRoi)sssqRoi).getRois();
 								for (int q1=0;q1<subqRois.length;q1++) {
 									include = false;
-									Polygon sqBounds = subqRois[q1].getPolygon();
+									Rectangle sqBox = subqRois[q1].getBounds();
+									double shortSide = (sqBox.width>=sqBox.height?sqBox.height:sqBox.width)*imp.getCalibration().pixelWidth;
+									double sqScaleFactor = (shortSide+expansionDistance)/shortSide;
+									Polygon sqBounds = null;
+									try {
+										sqBounds = new RoiDecoder(sqScaleFactor, RoiEncoder.saveAsByteArray(subqRois[q1]), subqRois[q1].getName())
+												.getRoi().getPolygon();
+									} catch (IOException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+									sqBounds.translate(-expansionDistance/2, -expansionDistance/2);									
 									for (int pq=0;pq<sqBounds.npoints;pq++) {
 										if (srBounds.contains(sqBounds.xpoints[pq], sqBounds.ypoints[pq])) {
 											include = true;
@@ -11556,7 +11579,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							for (int c=0;c<crIdxes.length;c++) {
 								crIdxes[c] = (int)groupableRoiIndexes.get(c);
 							}
-							IJ.log(""+z+" "+t+" "+sliceRois[r].getName()+" claims "+(crIdxes.length>0?listModel.get(crIdxes[0]):"none"));
+							IJ.log(""+z+" "+t+" "+sliceRois[r].getName()+" claims "+(crIdxes.length>1?listModel.get(crIdxes[1]):"none"));
 							if (!sliceRois[r].getName().split("\"")[1].trim().contains("@")) {
 								rename (sliceRois[r].getName().split("\"")[1].trim()+"@"+IJ.pad(groupcounter, 6), new int[]{sliceIndexes[r]}, true, false);
 								groupcounter++;
@@ -11606,7 +11629,18 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						ShapeRoi sssrRoi = new ShapeRoi(sliceRois[r]);
 						Roi[] subrRois = ((ShapeRoi)sssrRoi).getRois();
 						for (int r1=0;r1<subrRois.length;r1++) {
-							Polygon srBounds = subrRois[r1].getPolygon();
+							Rectangle srBox = subrRois[r1].getBounds();
+							double srShortSide = (srBox.width>=srBox.height?srBox.height:srBox.width)*imp.getCalibration().pixelWidth;
+							double srScaleFactor = (srShortSide+expansionDistance)/srShortSide;
+							Polygon srBounds = null;
+							try {
+								srBounds = new RoiDecoder(srScaleFactor, RoiEncoder.saveAsByteArray(subrRois[r1]), subrRois[r1].getName())
+										.getRoi().getPolygon();
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							srBounds.translate(-expansionDistance/2, -expansionDistance/2);
 							//lumping together both next slices' rois.  incase of gaps during em sectionin (or even optical sectioning glitches)
 							Roi[] nextSliceRois= getShownSliceSpecificRoiArray(z-1,t,true);
 							Roi[] nextNextSliceRois= getShownSliceSpecificRoiArray(z-2,t,true);
@@ -11643,7 +11677,18 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								Roi[] subqRois = ((ShapeRoi)sssqRoi).getRois();
 								for (int q1=0;q1<subqRois.length;q1++) {
 									include = false;
-									Polygon sqBounds = subqRois[q1].getPolygon();
+									Rectangle sqBox = subqRois[q1].getBounds();
+									double shortSide = (sqBox.width>=sqBox.height?sqBox.height:sqBox.width)*imp.getCalibration().pixelWidth;
+									double sqScaleFactor = (shortSide+expansionDistance)/shortSide;
+									Polygon sqBounds = null;
+									try {
+										sqBounds = new RoiDecoder(sqScaleFactor, RoiEncoder.saveAsByteArray(subqRois[q1]), subqRois[q1].getName())
+												.getRoi().getPolygon();
+									} catch (IOException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+									sqBounds.translate(-expansionDistance/2, -expansionDistance/2);
 									for (int pq=0;pq<sqBounds.npoints;pq++) {
 										if (srBounds.contains(sqBounds.xpoints[pq], sqBounds.ypoints[pq])) {
 											include = true;
@@ -11719,7 +11764,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							for (int c=0;c<crIdxes.length;c++) {
 								crIdxes[c] = (int)groupableRoiIndexes.get(c);
 							}
-							IJ.log(""+z+" "+t+" "+sliceRois[r].getName()+" claims "+(crIdxes.length>0?listModel.get(crIdxes[0]):"none"));
+							IJ.log(""+z+" "+t+" "+sliceRois[r].getName()+" claims "+(crIdxes.length>1?listModel.get(crIdxes[1]):"none"));
 							if (!sliceRois[r].getName().split("\"")[1].trim().contains("@")) {
 								rename (sliceRois[r].getName().split("\"")[1].trim()+"@"+IJ.pad(groupcounter, 6), new int[]{sliceIndexes[r]}, true, false);
 								groupcounter++;
