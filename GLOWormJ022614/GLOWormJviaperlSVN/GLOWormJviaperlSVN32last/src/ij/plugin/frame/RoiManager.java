@@ -3051,35 +3051,35 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				if (sliceRois[r] instanceof ShapeRoi) {
 					Roi[] rois = ((ShapeRoi) sliceRois[r]).getRois();
 					for (int r1=0;r1<rois.length;r1++) {
-						Polygon srBounds = rois[r1].getPolygon();
+						Polygon srPolygon = rois[r1].getPolygon();
 
-						for (int p=0;p<srBounds.npoints;p++) {
-							if (impRoi.contains(srBounds.xpoints[p], srBounds.ypoints[p])) {
+						for (int p=0;p<srPolygon.npoints;p++) {
+							if (impRoi.contains(srPolygon.xpoints[p], srPolygon.ypoints[p])) {
 								if (!fullInclusion) {						
 									include = true;
-									p = srBounds.npoints;
+									p = srPolygon.npoints;
 								}
 							} else {
 								if (fullInclusion) {	
 									include = false;
-									p = srBounds.npoints;
+									p = srPolygon.npoints;
 								}
 							}					
 						}
 					}
 
 				} else {
-					Polygon srBounds = sliceRois[r].getPolygon();
-					for (int p=0;p<srBounds.npoints;p++) {
-						if (impRoi.contains(srBounds.xpoints[p], srBounds.ypoints[p])) {
+					Polygon srPolygon = sliceRois[r].getPolygon();
+					for (int p=0;p<srPolygon.npoints;p++) {
+						if (impRoi.contains(srPolygon.xpoints[p], srPolygon.ypoints[p])) {
 							if (!fullInclusion) {						
 								include = true;
-								p = srBounds.npoints;
+								p = srPolygon.npoints;
 							}
 						} else {
 							if (fullInclusion) {	
 								include = false;
-								p = srBounds.npoints;
+								p = srPolygon.npoints;
 							}
 						}					
 					}
@@ -11415,7 +11415,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (partTypes[0].equals("*")) {
 			partTypes = this.roisByRootName.keySet().toArray(new String[roisByRootName.keySet().size()]);
 		}					
-		int expansionDistance = 0; //nanometers
+		int expansionDistance = 100; //nanometers
 		int groupcounter = 1;
 		int segcounter = 0;
 		boolean groupCounterReset = false;
@@ -11449,18 +11449,30 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						ShapeRoi sssrRoi = new ShapeRoi(sliceRois[r]);
 						Roi[] subrRois = ((ShapeRoi)sssrRoi).getRois();
 						for (int r1=0;r1<subrRois.length;r1++) {
+							double[] sssrCenter = new double[] {subrRois[r1].getMask().getStatistics().xCentroid, 
+									subrRois[r1].getMask().getStatistics().yCentroid, 
+									sliceRois[r].getZPosition()};
 							Rectangle srBox = subrRois[r1].getBounds();
 							double srShortSide = (srBox.width>=srBox.height?srBox.height:srBox.width)*imp.getCalibration().pixelWidth;
 							double srScaleFactor = (srShortSide+expansionDistance)/srShortSide;
-							Polygon srBounds = null;
+							Roi srExpandedPolygonRoi = null;
+							Polygon srExpandedPolygon = null;
+							double srExpandedPolygonCentroidx = 0;
+							double srExpandedPolygonCentroidy = 0;
 							try {
-								srBounds = new RoiDecoder(srScaleFactor, RoiEncoder.saveAsByteArray(subrRois[r1]), subrRois[r1].getName())
-										.getRoi().getPolygon();
+								srExpandedPolygonRoi = new RoiDecoder(srScaleFactor, RoiEncoder.saveAsByteArray(subrRois[r1]), subrRois[r1].getName())
+										.getRoi();
+								srExpandedPolygon = srExpandedPolygonRoi.getPolygon();
+								srExpandedPolygonCentroidx = srExpandedPolygonRoi.getMask().getStatistics().xCentroid;
+								srExpandedPolygonCentroidy = srExpandedPolygonRoi.getMask().getStatistics().yCentroid; 
+								
 							} catch (IOException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
-							srBounds.translate(-expansionDistance/2, -expansionDistance/2);
+							Rectangle srExpandedBox = srExpandedPolygonRoi.getBounds();
+							srExpandedPolygon.translate(((int)(srBox.x-srExpandedBox.x-(srExpandedPolygonCentroidx-sssrCenter[0])))
+														, (int)(srBox.y-srExpandedBox.y-(srExpandedPolygonCentroidy-sssrCenter[1])));
 							//lumping together both next slices' rois.  in case of gaps during EM sectioning (or even optical sectioning glitches)
 							Roi[] nextSliceRois= getShownSliceSpecificRoiArray(z+1,t,true);
 							Roi[] nextNextSliceRois= getShownSliceSpecificRoiArray(z+2,t,true);
@@ -11492,66 +11504,78 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								Roi[] subqRois = ((ShapeRoi)sssqRoi).getRois();
 								for (int q1=0;q1<subqRois.length;q1++) {
 									include = false;
+									double[] sssqCenter = new double[] {subqRois[q1].getMask().getStatistics().xCentroid, 
+											subqRois[q1].getMask().getStatistics().yCentroid, 
+											nextTwoSlicesRois[q].getZPosition()};
 									Rectangle sqBox = subqRois[q1].getBounds();
-									double shortSide = (sqBox.width>=sqBox.height?sqBox.height:sqBox.width)*imp.getCalibration().pixelWidth;
-									double sqScaleFactor = (shortSide+expansionDistance)/shortSide;
-									Polygon sqBounds = null;
+									double sqShortSide = (sqBox.width>=sqBox.height?sqBox.height:sqBox.width)*imp.getCalibration().pixelWidth;
+									double sqScaleFactor = (sqShortSide+expansionDistance)/sqShortSide;
+									Roi sqExpandedPolygonRoi = null;
+									Polygon sqExpandedPolygon = null;
+									double sqExpandedPolygonCentroidx = 0;
+									double sqExpandedPolygonCentroidy = 0;
 									try {
-										sqBounds = new RoiDecoder(sqScaleFactor, RoiEncoder.saveAsByteArray(subqRois[q1]), subqRois[q1].getName())
-												.getRoi().getPolygon();
+										sqExpandedPolygonRoi = new RoiDecoder(sqScaleFactor, RoiEncoder.saveAsByteArray(subqRois[r1]), subqRois[r1].getName())
+												.getRoi();
+										sqExpandedPolygon = sqExpandedPolygonRoi.getPolygon();
+										sqExpandedPolygonCentroidx = sqExpandedPolygonRoi.getMask().getStatistics().xCentroid;
+										sqExpandedPolygonCentroidy = sqExpandedPolygonRoi.getMask().getStatistics().yCentroid; 
+										
 									} catch (IOException e) {
 										// TODO Auto-generated catch block
 										e.printStackTrace();
 									}
-									sqBounds.translate(-expansionDistance/2, -expansionDistance/2);									
-									for (int pq=0;pq<sqBounds.npoints;pq++) {
-										if (srBounds.contains(sqBounds.xpoints[pq], sqBounds.ypoints[pq])) {
+									Rectangle sqExpandedBox = sqExpandedPolygonRoi.getBounds();
+									sqExpandedPolygon.translate(((int)(sqBox.x-sqExpandedBox.x-(sqExpandedPolygonCentroidx-sssqCenter[0])))
+																, (int)(sqBox.y-sqExpandedBox.y-(sqExpandedPolygonCentroidy-sssqCenter[1])));
+									for (int pq=0;pq<sqExpandedPolygon.npoints;pq++) {
+										if (srExpandedPolygon.contains(sqExpandedPolygon.xpoints[pq], sqExpandedPolygon.ypoints[pq])) {
 											include = true;
 											if (q < nextSliceRois.length)  //Case when match is made in z+1, to eliminate need for redundant  z+2 checking and double measuring
 												matchedPlusOne = true;
 											double cumulativeLength = 0;
 											if (cellLengthDistancesHT.get(sliceRois[r].getName().split("\"")[1].trim().split("@")[0]) != null)
 												cumulativeLength = cellLengthDistancesHT.get(sliceRois[r].getName().split("\"")[1].trim().split("@")[0]);
-											double[] sssrCenter = new double[] {subrRois[r1].getMask().getStatistics().xCentroid, 
-																				subrRois[r1].getMask().getStatistics().yCentroid, 
-																				sliceRois[r].getZPosition()};
-											double[] sssqCenter = new double[] {subqRois[q1].getMask().getStatistics().xCentroid, 
-																				subqRois[q1].getMask().getStatistics().yCentroid, 
-																				nextTwoSlicesRois[q].getZPosition()};
+//											double[] sssrCenter = new double[] {subrRois[r1].getMask().getStatistics().xCentroid, 
+//																				subrRois[r1].getMask().getStatistics().yCentroid, 
+//																				sliceRois[r].getZPosition()};
+//											double[] sssqCenter = new double[] {subqRois[q1].getMask().getStatistics().xCentroid, 
+//																				subqRois[q1].getMask().getStatistics().yCentroid, 
+//																				nextTwoSlicesRois[q].getZPosition()};
 											double diffX= (sssrCenter[0]- sssqCenter[0])*imp.getCalibration().pixelWidth;
 											double diffY= (sssrCenter[1]- sssqCenter[1])*imp.getCalibration().pixelHeight;
 											double diffZ= (sssrCenter[2]- sssqCenter[2])*imp.getCalibration().pixelDepth;
 											double incrementLength = Math.sqrt(Math.pow(diffX, 2)+Math.pow(diffY, 2)+Math.pow(diffZ, 2));
 											IJ.log(""+diffX+" "+diffY+" "+diffZ+"  =  "+incrementLength);
 											cellLengthDistancesHT.put(sliceRois[r].getName().split("\"")[1].trim().split("@")[0],cumulativeLength+incrementLength);
-											pq = sqBounds.npoints;   //Only need one point hit to be grouped
+											pq = sqExpandedPolygon.npoints;   //Only need one point hit to be grouped
 											//q1 = subqRois.length;  //NEED TO MEASURE ALL DISTANCES, even though Only need one subRoi hit to be grouped
 										} else {
 										}					
 									}
 									//This converse test is required in case r actually fits inside q.  It can happen.
 									if (!include) {
-										for (int pr=0;pr<srBounds.npoints;pr++) {
-											if (sqBounds.contains(srBounds.xpoints[pr], srBounds.ypoints[pr])) {
+										for (int pr=0;pr<srExpandedPolygon.npoints;pr++) {
+											if (sqExpandedPolygon.contains(srExpandedPolygon.xpoints[pr], srExpandedPolygon.ypoints[pr])) {
 												include = true;
 												if (q < nextSliceRois.length)  //Case when match is made in z+1, to eliminate need for redundant  z+2 checking and double measuring
 													matchedPlusOne = true;
 												double cumulativeLength = 0;
 												if (cellLengthDistancesHT.get(sliceRois[r].getName().split("\"")[1].trim().split("@")[0]) != null)
 													cumulativeLength = cellLengthDistancesHT.get(sliceRois[r].getName().split("\"")[1].trim().split("@")[0]);
-												double[] sssrCenter = new double[] {subrRois[r1].getMask().getStatistics().xCentroid, 
-														subrRois[r1].getMask().getStatistics().yCentroid, 
-														sliceRois[r].getZPosition()};
-												double[] sssqCenter = new double[] {subqRois[q1].getMask().getStatistics().xCentroid, 
-														subqRois[q1].getMask().getStatistics().yCentroid, 
-														nextTwoSlicesRois[q].getZPosition()};
+//												double[] sssrCenter = new double[] {subrRois[r1].getMask().getStatistics().xCentroid, 
+//														subrRois[r1].getMask().getStatistics().yCentroid, 
+//														sliceRois[r].getZPosition()};
+//												double[] sssqCenter = new double[] {subqRois[q1].getMask().getStatistics().xCentroid, 
+//														subqRois[q1].getMask().getStatistics().yCentroid, 
+//														nextTwoSlicesRois[q].getZPosition()};
 												double diffX= (sssrCenter[0]- sssqCenter[0])*imp.getCalibration().pixelWidth;
 												double diffY= (sssrCenter[1]- sssqCenter[1])*imp.getCalibration().pixelHeight;
 												double diffZ= (sssrCenter[2]- sssqCenter[2])*imp.getCalibration().pixelDepth;
 												double incrementLength = Math.sqrt(Math.pow(diffX, 2)+Math.pow(diffY, 2)+Math.pow(diffZ, 2));
 												IJ.log(""+diffX+" "+diffY+" "+diffZ+"  =  "+incrementLength);
 												cellLengthDistancesHT.put(sliceRois[r].getName().split("\"")[1].trim().split("@")[0],cumulativeLength+incrementLength);
-												pr = srBounds.npoints;   //Only need one point hit to be grouped
+												pr = srExpandedPolygon.npoints;   //Only need one point hit to be grouped
 												//r1 = subrRois.length;  //NEED TO MEASURE ALL DISTANCES, even though Only need one subRoi hit to be grouped
 											} else {
 											}					
@@ -11629,18 +11653,30 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						ShapeRoi sssrRoi = new ShapeRoi(sliceRois[r]);
 						Roi[] subrRois = ((ShapeRoi)sssrRoi).getRois();
 						for (int r1=0;r1<subrRois.length;r1++) {
+							double[] sssrCenter = new double[] {subrRois[r1].getMask().getStatistics().xCentroid, 
+									subrRois[r1].getMask().getStatistics().yCentroid, 
+									sliceRois[r].getZPosition()};
 							Rectangle srBox = subrRois[r1].getBounds();
 							double srShortSide = (srBox.width>=srBox.height?srBox.height:srBox.width)*imp.getCalibration().pixelWidth;
 							double srScaleFactor = (srShortSide+expansionDistance)/srShortSide;
-							Polygon srBounds = null;
+							Roi srExpandedPolygonRoi = null;
+							Polygon srExpandedPolygon = null;
+									double srExpandedPolygonCentroidx = 0;
+							double srExpandedPolygonCentroidy = 0;
 							try {
-								srBounds = new RoiDecoder(srScaleFactor, RoiEncoder.saveAsByteArray(subrRois[r1]), subrRois[r1].getName())
-										.getRoi().getPolygon();
+								srExpandedPolygonRoi = new RoiDecoder(srScaleFactor, RoiEncoder.saveAsByteArray(subrRois[r1]), subrRois[r1].getName())
+										.getRoi();
+								srExpandedPolygon = srExpandedPolygonRoi.getPolygon();
+								srExpandedPolygonCentroidx = srExpandedPolygonRoi.getMask().getStatistics().xCentroid;
+								srExpandedPolygonCentroidy = srExpandedPolygonRoi.getMask().getStatistics().yCentroid; 
+								
 							} catch (IOException e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
-							srBounds.translate(-expansionDistance/2, -expansionDistance/2);
+							Rectangle srExpandedBox = srExpandedPolygonRoi.getBounds();
+							srExpandedPolygon.translate(((int)(srBox.x-srExpandedBox.x-(srExpandedPolygonCentroidx-sssrCenter[0])))
+														, (int)(srBox.y-srExpandedBox.y-(srExpandedPolygonCentroidy-sssrCenter[1])));
 							//lumping together both next slices' rois.  incase of gaps during em sectionin (or even optical sectioning glitches)
 							Roi[] nextSliceRois= getShownSliceSpecificRoiArray(z-1,t,true);
 							Roi[] nextNextSliceRois= getShownSliceSpecificRoiArray(z-2,t,true);
@@ -11677,66 +11713,78 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								Roi[] subqRois = ((ShapeRoi)sssqRoi).getRois();
 								for (int q1=0;q1<subqRois.length;q1++) {
 									include = false;
+									double[] sssqCenter = new double[] {subqRois[q1].getMask().getStatistics().xCentroid, 
+											subqRois[q1].getMask().getStatistics().yCentroid, 
+											nextTwoSlicesRois[q].getZPosition()};
 									Rectangle sqBox = subqRois[q1].getBounds();
-									double shortSide = (sqBox.width>=sqBox.height?sqBox.height:sqBox.width)*imp.getCalibration().pixelWidth;
-									double sqScaleFactor = (shortSide+expansionDistance)/shortSide;
-									Polygon sqBounds = null;
+									double sqShortSide = (sqBox.width>=sqBox.height?sqBox.height:sqBox.width)*imp.getCalibration().pixelWidth;
+									double sqScaleFactor = (sqShortSide+expansionDistance)/sqShortSide;
+									Roi sqExpandedPolygonRoi = null;
+									Polygon sqExpandedPolygon = null;
+									double sqExpandedPolygonCentroidx = 0;
+									double sqExpandedPolygonCentroidy = 0;
 									try {
-										sqBounds = new RoiDecoder(sqScaleFactor, RoiEncoder.saveAsByteArray(subqRois[q1]), subqRois[q1].getName())
-												.getRoi().getPolygon();
+										sqExpandedPolygonRoi = new RoiDecoder(sqScaleFactor, RoiEncoder.saveAsByteArray(subqRois[r1]), subqRois[r1].getName())
+												.getRoi();
+										sqExpandedPolygon = sqExpandedPolygonRoi.getPolygon();
+										sqExpandedPolygonCentroidx = sqExpandedPolygonRoi.getMask().getStatistics().xCentroid;
+										sqExpandedPolygonCentroidy = sqExpandedPolygonRoi.getMask().getStatistics().yCentroid; 
+										
 									} catch (IOException e) {
 										// TODO Auto-generated catch block
 										e.printStackTrace();
 									}
-									sqBounds.translate(-expansionDistance/2, -expansionDistance/2);
-									for (int pq=0;pq<sqBounds.npoints;pq++) {
-										if (srBounds.contains(sqBounds.xpoints[pq], sqBounds.ypoints[pq])) {
+									Rectangle sqExpandedBox = sqExpandedPolygonRoi.getBounds();
+									sqExpandedPolygon.translate(((int)(sqBox.x-sqExpandedBox.x-(sqExpandedPolygonCentroidx-sssqCenter[0])))
+																, (int)(sqBox.y-sqExpandedBox.y-(sqExpandedPolygonCentroidy-sssqCenter[1])));
+									for (int pq=0;pq<sqExpandedPolygon.npoints;pq++) {
+										if (srExpandedPolygon.contains(sqExpandedPolygon.xpoints[pq], sqExpandedPolygon.ypoints[pq])) {
 											include = true;
 											if (q < nextSliceRois.length)  //Case when match is made in z-1, to eliminate need for redundant  z-2 checking
 												matchedMinusOne = true;
 											double cumulativeLength = 0;
 											if (cellLengthDistancesHT.get(sliceRois[r].getName().split("\"")[1].trim().split("@")[0]) != null)
 												cumulativeLength = cellLengthDistancesHT.get(sliceRois[r].getName().split("\"")[1].trim().split("@")[0]);
-											double[] sssrCenter = new double[] {subrRois[r1].getMask().getStatistics().xCentroid, 
-													subrRois[r1].getMask().getStatistics().yCentroid, 
-													sliceRois[r].getZPosition()};
-											double[] sssqCenter = new double[] {subqRois[q1].getMask().getStatistics().xCentroid, 
-													subqRois[q1].getMask().getStatistics().yCentroid, 
-													nextTwoSlicesRois[q].getZPosition()};
+//											double[] sssrCenter = new double[] {subrRois[r1].getMask().getStatistics().xCentroid, 
+//													subrRois[r1].getMask().getStatistics().yCentroid, 
+//													sliceRois[r].getZPosition()};
+//											double[] sssqCenter = new double[] {subqRois[q1].getMask().getStatistics().xCentroid, 
+//													subqRois[q1].getMask().getStatistics().yCentroid, 
+//													nextTwoSlicesRois[q].getZPosition()};
 											double diffX= (sssrCenter[0]- sssqCenter[0])*imp.getCalibration().pixelWidth;
 											double diffY= (sssrCenter[1]- sssqCenter[1])*imp.getCalibration().pixelHeight;
 											double diffZ= (sssrCenter[2]- sssqCenter[2])*imp.getCalibration().pixelDepth;
 											double incrementLength = Math.sqrt(Math.pow(diffX, 2)+Math.pow(diffY, 2)+Math.pow(diffZ, 2));
 											IJ.log(""+diffX+" "+diffY+" "+diffZ+"  =  "+incrementLength);
 											cellLengthDistancesHT.put(sliceRois[r].getName().split("\"")[1].trim().split("@")[0],cumulativeLength+incrementLength);
-											pq = sqBounds.npoints;   //Only need one point hit to be grouped
+											pq = sqExpandedPolygon.npoints;   //Only need one point hit to be grouped
 											//q1 = subqRois.length;  //NEED TO MEASURE ALL DISTANCES, even though Only need one subRoi hit to be grouped
 										} else {
 										}					
 									}
 									//This converse test is required in case r actually fits inside q.  It can happen.
 									if (!include) {
-										for (int pr=0;pr<srBounds.npoints;pr++) {
-											if (sqBounds.contains(srBounds.xpoints[pr], srBounds.ypoints[pr])) {
+										for (int pr=0;pr<srExpandedPolygon.npoints;pr++) {
+											if (sqExpandedPolygon.contains(srExpandedPolygon.xpoints[pr], srExpandedPolygon.ypoints[pr])) {
 												include = true;
 												if (q < nextSliceRois.length)  //Case when match is made in z-1, to eliminate need for redundant  z-2 checking and double measuring
 													matchedMinusOne = true;
 												double cumulativeLength = 0;
 												if (cellLengthDistancesHT.get(sliceRois[r].getName().split("\"")[1].trim().split("@")[0]) != null)
 													cumulativeLength = cellLengthDistancesHT.get(sliceRois[r].getName().split("\"")[1].trim().split("@")[0]);
-												double[] sssrCenter = new double[] {subrRois[r1].getMask().getStatistics().xCentroid, 
-														subrRois[r1].getMask().getStatistics().yCentroid, 
-														sliceRois[r].getZPosition()};
-												double[] sssqCenter = new double[] {subqRois[q1].getMask().getStatistics().xCentroid, 
-														subqRois[q1].getMask().getStatistics().yCentroid, 
-														nextTwoSlicesRois[q].getZPosition()};
+//												double[] sssrCenter = new double[] {subrRois[r1].getMask().getStatistics().xCentroid, 
+//														subrRois[r1].getMask().getStatistics().yCentroid, 
+//														sliceRois[r].getZPosition()};
+//												double[] sssqCenter = new double[] {subqRois[q1].getMask().getStatistics().xCentroid, 
+//														subqRois[q1].getMask().getStatistics().yCentroid, 
+//														nextTwoSlicesRois[q].getZPosition()};
 												double diffX= (sssrCenter[0]- sssqCenter[0])*imp.getCalibration().pixelWidth;
 												double diffY= (sssrCenter[1]- sssqCenter[1])*imp.getCalibration().pixelHeight;
 												double diffZ= (sssrCenter[2]- sssqCenter[2])*imp.getCalibration().pixelDepth;
 												double incrementLength = Math.sqrt(Math.pow(diffX, 2)+Math.pow(diffY, 2)+Math.pow(diffZ, 2));
 												IJ.log(""+diffX+" "+diffY+" "+diffZ+"  =  "+incrementLength);
 												cellLengthDistancesHT.put(sliceRois[r].getName().split("\"")[1].trim().split("@")[0],cumulativeLength+incrementLength);
-												pr = srBounds.npoints;   //Only need one point hit to be grouped
+												pr = srExpandedPolygon.npoints;   //Only need one point hit to be grouped
 												//r1 = subrRois.length;  //NEED TO MEASURE ALL DISTANCES, even though Only need one subRoi hit to be grouped
 											} else {
 											}					
@@ -11811,7 +11859,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						ShapeRoi sssrRoi = new ShapeRoi(sliceRois[r]);
 						Roi[] subrRois = ((ShapeRoi)sssrRoi).getRois();
 						for (int r1=0;r1<subrRois.length;r1++) {
-							Polygon srBounds = subrRois[r1].getPolygon();
+							Polygon srPolygon = subrRois[r1].getPolygon();
 
 							for (int q=0;q<sliceRois.length;q++) {
 								boolean include = true;
@@ -11825,18 +11873,18 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								Roi[] subqRois = ((ShapeRoi)sssqRoi).getRois();
 								for (int q1=0;q1<subqRois.length;q1++) {
 									include = true;
-									Polygon sqBounds = subqRois[q1].getPolygon();
-									for (int p=0;p<sqBounds.npoints;p++) {
-										if (srBounds.contains(sqBounds.xpoints[p], sqBounds.ypoints[p])) {
+									Polygon sqPolygon = subqRois[q1].getPolygon();
+									for (int p=0;p<sqPolygon.npoints;p++) {
+										if (srPolygon.contains(sqPolygon.xpoints[p], sqPolygon.ypoints[p])) {
 											//must all be included to be claimed by cell
 											//SHOULD CONSIDER ALLOWING SOME MISSED POINTS GIVEN DIFFERENT MODES OF CELL/PART SEGMENTATION BY VAST AND APEER!!!
 											//ESPECIALLY IF NO OTHER CELL CAN CLAIM THE MISSING POINTS.
 											include = true;
-//											IJ.log("hit: "+z+" "+r+" "+q+" "+q1+" "+p+" "+sqBounds.xpoints[p]+" "+sqBounds.ypoints[p]);
+//											IJ.log("hit: "+z+" "+r+" "+q+" "+q1+" "+p+" "+sqPolygon.xpoints[p]+" "+sqPolygon.ypoints[p]);
 										} else {
 											include = false;
-//											IJ.log("miss: "+z+" "+r+" "+q+" "+q1+" "+p+" "+sqBounds.xpoints[p]+" "+sqBounds.ypoints[p]);
-											p = sqBounds.npoints;
+//											IJ.log("miss: "+z+" "+r+" "+q+" "+q1+" "+p+" "+sqPolygon.xpoints[p]+" "+sqPolygon.ypoints[p]);
+											p = sqPolygon.npoints;
 
 										}					
 									}
