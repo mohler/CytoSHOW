@@ -11415,7 +11415,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (partTypes[0].equals("*")) {
 			partTypes = this.roisByRootName.keySet().toArray(new String[roisByRootName.keySet().size()]);
 		}					
-		int expansionDistance = 100; //nanometers
+		int expansionDistance = 50; //nanometers
 		int groupcounter = 1;
 		int segcounter = 0;
 		boolean groupCounterReset = false;
