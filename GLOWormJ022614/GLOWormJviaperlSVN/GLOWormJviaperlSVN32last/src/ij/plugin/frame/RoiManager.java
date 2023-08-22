@@ -11832,6 +11832,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 		}
 		IJ.log("Done Grouping Parts");
+		IJ.log(""+imp.getTitle());
 		IJ.log(""+expansionDistance+"-nm expansion distance");
 		IJ.log(segcounter+" parts segments grouped into "+(groupcounter-1)+" segment-groups...");
 		for (String key:cellLengthDistancesHT.keySet()) {
