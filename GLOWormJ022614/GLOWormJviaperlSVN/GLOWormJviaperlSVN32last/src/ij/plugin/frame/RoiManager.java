@@ -11415,13 +11415,17 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (partTypes[0].equals("*")) {
 			partTypes = this.roisByRootName.keySet().toArray(new String[roisByRootName.keySet().size()]);
 		}					
+		String sliceRange = IJ.getString("Range of slices to analyze?", "1-"+imp.getNSlices());
+		int firstSlice = Integer.parseInt(sliceRange.split("-")[0].trim());
+		int lastSlice = Integer.parseInt(sliceRange.split("-")[1].trim());
+		
 		int expansionDistance = (int)IJ.getNumber("Expand tags by XX nm during grouping search.", 50); //nanometers
 		int groupcounter = 1;
 		int segcounter = 0;
 		boolean groupCounterReset = false;
 		ArrayList<Integer> alreadyGroupedRoiIndexes = new ArrayList<Integer>();
 		Hashtable<String, Double> cellLengthDistancesHT = new Hashtable<String, Double>();
-		for (int z=1;z<=imp.getNSlices()-2;z++) {  
+		for (int z=firstSlice;z<=lastSlice-2;z++) {  
 			for (int t=1;t<=imp.getNFrames();t++) {
 				Roi[] sliceRois = getShownSliceSpecificRoiArray(z, t, true);  
 				int[] sliceIndexes = getShownSliceSpecificIndexes(z, t, true);
@@ -11624,7 +11628,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		
 		//FLIP THE WHOLE STACK, AND RECHECK GROUPABLES TO FIND ANY REVERSE FORKS MISSED IN FIRST PASS
-		for (int z =imp.getNSlices()-1; z>=3;z--) {  
+		for (int z =lastSlice; z>=3;z--) {  
 			for (int t=1;t<=imp.getNFrames();t++) {
 				Roi[] sliceRois= getShownSliceSpecificRoiArray(z,t,true);
 				int[] sliceIndexes= getShownSliceSpecificIndexes(z,t,true);
