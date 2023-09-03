@@ -989,7 +989,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 										}
 									}
 								}
-								if (traceLineages) {
+								if (traceLineages && impCL!=null) {
 									for (JCheckBox cbq:impCL.getJCheckBox()) {
 										if ((traceForward 
 												&& (cbq.getName().toUpperCase().trim().startsWith(s.toUpperCase().trim())
