@@ -558,7 +558,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					continue;
 				}
 
-				if (isRegex && ((String) fullListModel.get(i)).matches(searchString.substring(2))) {
+				if (isRegex && ((String) fullListModel.get(i)).toLowerCase().matches(searchString.toLowerCase().substring(2))) {
 					listModel.addElement(fullListModel.get(i));
 				} else if (isLinBackTrace) { // Uses complex regex lookahead query to anticipate various terminations of
 												// ancestor names
@@ -580,7 +580,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								+ ")|((?= )))";
 					}
 					matchString = matchString + ".* \".*$";
-					if (((String) fullListModel.get(i)).matches(matchString)) {
+					if (((String) fullListModel.get(i).toLowerCase()).matches(matchString.toLowerCase())) {
 						listModel.addElement(fullListModel.get(i));
 					}
 

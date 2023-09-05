@@ -842,13 +842,13 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 													|| (s.toUpperCase().matches("P3") && cbq.getName().toUpperCase().matches("P.|D.*|Z."))
 													|| (s.toUpperCase().matches("P4") && cbq.getName().toUpperCase().matches("P.|Z."))
 													|| (s.toUpperCase().matches("EMS") && cbq.getName().toUpperCase().matches("E.*|MS.*"))))
-											||(traceBackward
-													&& (s.toUpperCase().trim().startsWith(cbq.getName().toUpperCase().trim())
-															|| (cbq.getName().toUpperCase().matches("P1") && s.toUpperCase().matches("P.|C.*|D.*|E.*|MS.*|Z."))
-															|| (cbq.getName().toUpperCase().matches("P2") && s.toUpperCase().matches("P.|C.*|D.*|Z."))
-															|| (cbq.getName().toUpperCase().matches("P3") && s.toUpperCase().matches("P.|D.*|Z."))
-															|| (cbq.getName().toUpperCase().matches("P4") && s.toUpperCase().matches("P.|Z."))
-															|| (cbq.getName().toUpperCase().matches("EMS") && s.toUpperCase().matches("E.*|MS.*"))))
+													||(traceBackward
+															&& (s.toUpperCase().trim().startsWith(cbq.getName().toUpperCase().trim())
+																	|| (cbq.getName().toUpperCase().matches("P1") && s.toUpperCase().matches("P.|C.*|D.*|E.*|MS.*|Z."))
+																	|| (cbq.getName().toUpperCase().matches("P2") && s.toUpperCase().matches("P.|C.*|D.*|Z."))
+																	|| (cbq.getName().toUpperCase().matches("P3") && s.toUpperCase().matches("P.|D.*|Z."))
+																	|| (cbq.getName().toUpperCase().matches("P4") && s.toUpperCase().matches("P.|Z."))
+																	|| (cbq.getName().toUpperCase().matches("EMS") && s.toUpperCase().matches("E.*|MS.*"))))
 											) {
 										rawCellSet.add(cbq.getName().toUpperCase().trim());  //to search with
 										Enumeration bbcKenum = impCL.getBrainbowColors().keys();
@@ -989,8 +989,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 										}
 									}
 								}
-								if (traceLineages && impCL != null) {
-									
+								if (traceLineages && impCL!=null) {
 									for (JCheckBox cbq:impCL.getJCheckBox()) {
 										if ((traceForward 
 												&& (cbq.getName().toUpperCase().trim().startsWith(s.toUpperCase().trim())
