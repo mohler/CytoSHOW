@@ -3121,8 +3121,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 			if (IJ.isMacOSX()) IJ.wait(10);
 			if (IJ.isLinux()) IJ.wait(10);
 
+			popup.setLightWeightPopupEnabled(false);
 			popup.show((Component)e.getSource(), x, y);
-
 			((Canvas)e.getSource()).setCursor(defaultCursor);
 		}
 	}

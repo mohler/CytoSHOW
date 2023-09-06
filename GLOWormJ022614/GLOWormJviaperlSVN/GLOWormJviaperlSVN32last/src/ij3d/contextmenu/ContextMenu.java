@@ -99,8 +99,10 @@ public class ContextMenu implements ActionListener, ItemListener, ContentConstan
 //		shaded.setState(content.isShaded());
 //		saturated.setState(content.isSaturatedVolumeRendering());
 		boolean popIt=popup.isPopupTrigger(e);
-		if(popIt)
+		if(popIt) {
+			popup.setLightWeightPopupEnabled(false);
 			popup.show(e.getComponent(), e.getX(), e.getY());
+		}
 	}
 
 	

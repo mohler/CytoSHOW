@@ -309,6 +309,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 */
 
 	public void show(boolean simpleWindow3D) {
+		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		menubar = new Image3DMenubar(this);
 		if (simpleWindow3D) {
 			init(new SimpleImageWindow3D(this.getTitle(), this));	

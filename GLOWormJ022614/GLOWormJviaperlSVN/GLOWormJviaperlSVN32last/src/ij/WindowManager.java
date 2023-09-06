@@ -376,6 +376,8 @@ public class WindowManager {
 	/** Returns a unique name by adding, before the extension,  -1, -2, etc. as needed. */
 	public static String getUniqueIJ3DVName(String name) {
         String name2 = name;
+        if (name2 == null)
+        	name2 = "New IJ#DV";
         String extension = "";
         int len = name2.length();
         int lastDot = name2.lastIndexOf(".");
