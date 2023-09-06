@@ -397,8 +397,9 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 			}
 		}
 		String pathList = "";
-		ArrayList<ArrayList<String>> cellSets = new ArrayList<ArrayList<String>>();
-		ArrayList<String> rawCellSet = new ArrayList<String>();
+		ArrayList<ArrayList<String>> cellLists = new ArrayList<ArrayList<String>>();
+		cellLists.add(new ArrayList<String>());		//This is cellLists.get(0), used below for logical operations
+		ArrayList<String> rawCellList = new ArrayList<String>();
 
 		String cellsRegex = "??\"(";
 		String finalSuffix = ") .*";
@@ -731,7 +732,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 								dropImp.getCanvas().messageRois.remove("Finding tags from drop");
 
 							messageRoi = new TextRoi(dropImp.getCanvas().getSrcRect().x, dropImp.getCanvas().getSrcRect().y,
-									"   Finding tags that match\n   "+ (cellSets.size()+1)  +" pattern(s)\n   ...");
+									"   Finding tags that match\n   "+ (cellLists.size())  +" pattern(s)\n   ...");
 
 							((TextRoi) messageRoi).setCurrentFont(g.getFont().deriveFont((float) (dropImp.getCanvas().getSrcRect().width/16)));
 							messageRoi.setStrokeColor(Color.black);
@@ -757,7 +758,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							if (logLines2.length<2)
 								return;
 							String s = logLines2[1].split("  </title>")[0];
-							rawCellSet.add(s.toUpperCase().trim());	
+							rawCellList.add(s.toUpperCase().trim());	
 
 							if (cellColorCode != "" && impCL!=null) {
 								if (impCL.getBrainbowColors().get(s.toLowerCase().trim())!=null) {
@@ -803,7 +804,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 									if (partsListLogLines2[l].startsWith("begets ")
 											&& partsListLogLines2[l].toLowerCase().matches(".*:"+s.toLowerCase().replace("*", "")+".*;.*")) {
 										String as = partsListLogLines2[l].toLowerCase().replaceAll(".*rel=nofollow>", "").replaceAll(":.*", "");
-										rawCellSet.add(as.toUpperCase().trim());
+										rawCellList.add(as.toUpperCase().trim());
 										if (cellColorCode != "" && impCL!=null) {
 											if (impCL.getBrainbowColors().get(as.toLowerCase().trim())!=null) {
 												if (impCL.droppedCellColors.get(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB()) == null) {
@@ -850,7 +851,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 																	|| (cbq.getName().toUpperCase().matches("P4") && s.toUpperCase().matches("P.|Z."))
 																	|| (cbq.getName().toUpperCase().matches("EMS") && s.toUpperCase().matches("E.*|MS.*"))))
 											) {
-										rawCellSet.add(cbq.getName().toUpperCase().trim());  //to search with
+										rawCellList.add(cbq.getName().toUpperCase().trim());  //to search with
 										Enumeration bbcKenum = impCL.getBrainbowColors().keys();
 										while (bbcKenum.hasMoreElements()) {
 											String es = (String) bbcKenum.nextElement();
@@ -915,10 +916,10 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							IJ.log("\\Clear");
 							IJ.log(oldLog);
 							Arrays.sort(logLines2);
-							ArrayList<String> cellSet = new ArrayList<String>();
-							cellSets.add(cellSet);
+							ArrayList<String> cellList = new ArrayList<String>();
+							cellLists.add(cellList);
 							for (String s:logLines2) {
-								cellSet.add(s.toUpperCase().trim());
+								cellList.add(s.toUpperCase().trim());
 								if (cellColorCode != "" && impCL!=null) {
 									if (impCL.getBrainbowColors().get(s.toLowerCase().trim())!=null) {
 										if (impCL.droppedCellColors.get(impCL.getBrainbowColors().get(s.toLowerCase().trim()).getRGB()) == null) {
@@ -960,7 +961,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 										if (partsListLogLines2[l].startsWith("begets ")
 												&& partsListLogLines2[l].toLowerCase().matches(".*:"+s.toLowerCase().replace("*", "")+".*;.*")) {
 											String as = partsListLogLines2[l].toLowerCase().replaceAll(".*rel=nofollow>", "").replaceAll(":.*", "");
-											cellSet.add(as.toUpperCase().trim());
+											cellList.add(as.toUpperCase().trim());
 											if (cellColorCode != "" && impCL!=null) {
 												if (impCL.getBrainbowColors().get(as.toLowerCase().trim())!=null) {
 													if (impCL.droppedCellColors.get(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB()) == null) {
@@ -1006,8 +1007,8 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 																		|| (cbq.getName().toUpperCase().matches("P4") && s.toUpperCase().matches("P.|Z."))
 																		|| (cbq.getName().toUpperCase().matches("EMS") && s.toUpperCase().matches("E.*|MS.*"))))
 												) {
-											if (!cellSet.contains(cbq.getName().toUpperCase().trim())) {
-												cellSet.add(cbq.getName().toUpperCase().trim());  //to search with
+											if (!cellList.contains(cbq.getName().toUpperCase().trim())) {
+												cellList.add(cbq.getName().toUpperCase().trim());  //to search with
 												Enumeration bbcKenum = impCL.getBrainbowColors().keys();
 												while (bbcKenum.hasMoreElements()) {
 													String es = (String) bbcKenum.nextElement();
@@ -1076,10 +1077,10 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							IJ.log("\\Clear");
 							IJ.log(oldLog);
 							Arrays.sort(logLines2);
-							ArrayList<String> cellSet = new ArrayList<String>();
-							cellSets.add(cellSet);
+							ArrayList<String> cellList = new ArrayList<String>();
+							cellLists.add(cellList);
 							for (String s:logLines2) {
-								cellSet.add(s.toUpperCase().trim());
+								cellList.add(s.toUpperCase().trim());
 								if (cellColorCode != "" && impCL!=null) {
 									if (impCL.getBrainbowColors().get(s.toLowerCase().trim())!=null) {
 										if (impCL.droppedCellColors.get(impCL.getBrainbowColors().get(s.toLowerCase().trim()).getRGB()) == null) {
@@ -1121,7 +1122,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 										if (partsListLogLines2[l].startsWith("begets ")
 												&& partsListLogLines2[l].toLowerCase().matches(".*:"+s.toLowerCase().replace("*", "")+".*;.*")) {
 											String as = partsListLogLines2[l].toLowerCase().replaceAll(".*rel=nofollow>", "").replaceAll(":.*", "");
-											cellSet.add(as.toUpperCase().trim());
+											cellList.add(as.toUpperCase().trim());
 											if (cellColorCode != "" && impCL!=null) {
 												if (impCL.getBrainbowColors().get(as.toLowerCase().trim())!=null) {
 													if (impCL.droppedCellColors.get(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB()) == null) {
@@ -1167,8 +1168,8 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 																		|| (cbq.getName().toUpperCase().matches("P4") && s.toUpperCase().matches("P.|Z."))
 																		|| (cbq.getName().toUpperCase().matches("EMS") && s.toUpperCase().matches("E.*|MS.*"))))
 												) {
-											if (!cellSet.contains(cbq.getName().toUpperCase().trim())){
-												cellSet.add(cbq.getName().toUpperCase().trim());  //to search with
+											if (!cellList.contains(cbq.getName().toUpperCase().trim())){
+												cellList.add(cbq.getName().toUpperCase().trim());  //to search with
 												Enumeration bbcKenum = impCL.getBrainbowColors().keys();
 												while (bbcKenum.hasMoreElements()) {
 													String es = (String) bbcKenum.nextElement();
@@ -1382,6 +1383,8 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 
 				} else if (( ((String)nextItem).toLowerCase().trim().equals("or"))){
 					or = true;
+				} else if (( ((String)nextItem).toLowerCase().trim().equals("and"))){
+					or = false;
 				} else if (( ((String)nextItem).toLowerCase().trim().contains("trace"))){
 					traceLineages = true;
 					traceForward = true;
@@ -1398,7 +1401,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					String cellColorCode = (((String)nextItem).split(" ").length>1?((String)nextItem).split(" ")[((String)nextItem).split(" ").length-1].trim():"");
 					String s = ((String)nextItem);
 					String ss = s.split(" ")[0].replaceAll("(?<!(\\.))\\*", "\\.\\*").trim();
-					rawCellSet.add(ss.toUpperCase().trim());  //to search with
+					rawCellList.add(ss.toUpperCase().trim());  //to search with
 					//						IJ.log(ss +" ss1");
 					//						IJ.runMacro("waitForUser;");
 					cellListString = cellListString + s.trim().replaceAll("\\.(?!\\*)", "*").replaceAll(" .*", "").trim() + ",";  //to show
@@ -1463,7 +1466,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 								String as = partsListLogLines2[l].toLowerCase().replaceAll(".*rel=nofollow>", "").replaceAll(":.*", "");
 								//									IJ.log(as + " as");
 								//									IJ.runMacro("waitForUser;");
-								rawCellSet.add(as);
+								rawCellList.add(as);
 								if (cellColorCode != "" && impCL!=null) {
 									if (impCL.getBrainbowColors().get(as.toLowerCase().trim())!=null) {
 										if (impCL.droppedCellColors.get(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB()) == null) {
@@ -1513,7 +1516,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 																|| (cbq.getName().toUpperCase().matches("P4") && ns.toUpperCase().matches("P.|Z."))
 																|| (cbq.getName().toUpperCase().matches("EMS") && ns.toUpperCase().matches("E.*|MS.*"))))
 										) {
-									rawCellSet.add(cbq.getName().toUpperCase().trim());  //to search with
+									rawCellList.add(cbq.getName().toUpperCase().trim());  //to search with
 									Enumeration bbcKenum = impCL.getBrainbowColors().keys();
 									while (bbcKenum.hasMoreElements()) {
 										String es = (String) bbcKenum.nextElement();
@@ -1840,8 +1843,8 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 			return;
 		}
 
-		if (rawCellSet.size()!=0) {
-			cellSets.add(rawCellSet);
+		if (rawCellList.size()!=0) {
+			cellLists.add(rawCellList);
 		}	
 
 		if (cellListString.endsWith(","))
@@ -1855,17 +1858,22 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 			dropImp.getCanvas().droppedGeneUrls = (dropImp.getCanvas().droppedGeneUrls != "" ?dropImp.getCanvas().droppedGeneUrls+(cellListString.trim() != ""?"\nand_":""):"") 
 					+ (cellListString.trim() != ""?"cell(s):":"")+cellListString + "\n";
 		}
-		for (int cs=0; cs < cellSets.size()-1; cs++) {
-			if (or)
-				cellSets.get(0).addAll(cellSets.get(cs));
-			else
-				cellSets.get(0).retainAll(cellSets.get(cs));
+		for (int cs=1; cs < cellLists.size(); cs++) {
+				cellLists.get(0).addAll(cellLists.get(cs));
 		}
-		if (cellSets.size() > 0) {
-			cellSets.get(0).addAll(cellSets.get(cellSets.size()-1));
+		for (int cs=1; cs < cellLists.size(); cs++) {
+			if (!or) {
+				cellLists.get(0).retainAll(cellLists.get(cs));
+			}
+		}
+		Set<String> cellSet = new HashSet<>(cellLists.get(0));
+//		cellLists.get(0).clear();
+//		cellLists.get(0).addAll(cellSet);
+		
+		if (cellSet.size() > 0) {
 
 
-			for (String s:cellSets.get(0)) {
+			for (String s:cellSet) {
 				cellsRegex = cellsRegex + s + (s.matches(embSymExcludedRegex)?"":symAxesRegex+"?") 
 						+"|"
 						+ synPrefix 
@@ -1951,6 +1959,12 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 				imp.getRoiManager().setBusy(false);
 			}
 		}
+		imp.getRoiManager().setBusy(false);
+		Graphics g = dropImp.getCanvas().getGraphics();
+		dropImp.getCanvas().droppedGeneUrls = "";
+		dropImp.getCanvas().messageRois.clear();
+		dropImp.getCanvas().paintDoubleBuffered(g);
+
 		if (dropImp == null) {
 			setImp(dropImp);
 			return;
