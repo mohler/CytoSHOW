@@ -458,7 +458,8 @@ public	String showDialog(ImagePlus imp, String title, String prompt, String defa
 		if (dupTitle==null)
 			return null;
 //		imp.getCanvas().setVisible(false);
-		imp.getWindow().setVisible(false);
+		if (imp.getWindow()!=null)
+			imp.getWindow().setVisible(false);
 		ImagePlus imp2 = null;
 		Roi roi = imp.getRoi();
 		Roi manualRoi = null;
@@ -609,9 +610,10 @@ public	String showDialog(ImagePlus imp, String title, String prompt, String defa
 		if (imp2.getWindow() != null) {
 			imp2.getWindow().setVisible(true);
 		}
-		if(imp.getWindow()!=null)
+		if(imp.getWindow()!=null) {
 			imp.getWindow().dupButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/download_button_animatedStill.png")));
-		imp.getWindow().setVisible(true);
+			imp.getWindow().setVisible(true);
+		}
 		//		IJ.saveAs(imp2, "Tiff", "");
 		return imp2;
 
