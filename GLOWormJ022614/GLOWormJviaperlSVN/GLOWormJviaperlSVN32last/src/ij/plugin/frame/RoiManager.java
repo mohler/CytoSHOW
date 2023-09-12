@@ -11,6 +11,7 @@ import java.math.MathContext;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.PrimitiveIterator.OfDouble;
 import java.awt.List;
@@ -1894,7 +1895,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	private void sketchVolumeViewer(Object source) {
 		boolean singleSave = IJ.shiftKeyDown();
 		double scaleFactor = IJ.getNumber("Downscale for faster rendering?", 1.0d);
-		double zPadFactor = 1; // 3;
+		double zPadFactor = 3;
 		IJ.setForegroundColor(255, 255, 255);
 		IJ.setBackgroundColor(0, 0, 0);
 		if (getSelectedRoisAsArray().length < 1)
@@ -1958,11 +1959,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				 * && rootName.endsWith(nextName.split("_")[nextName.split("_").length-1].
 				 * replaceAll("[CZT]", "").split("-")[0])
 				 */
-				&& nextFrame == rootFrame) {
+				/* && nextFrame == rootFrame */) {
 					nameMatchIndexArrayList.add(r);
 					minX = minX > rois[r].getBounds().x ? rois[r].getBounds().x : minX;
 					minY = minY > rois[r].getBounds().y ? rois[r].getBounds().y : minY;
-					minZ = minZ > rois[r].getZPosition() - zSustain/2 ? rois[r].getZPosition() - zSustain/2 : minZ; // minZ = 0 for full
+					minZ = minZ > rois[r].getZPosition() - 1 ? rois[r].getZPosition() - 1 : minZ; // minZ = 0 for full
 																									// stack...
 					maxX = maxX < rois[r].getBounds().x + rois[r].getBounds().width
 							? rois[r].getBounds().x + rois[r].getBounds().width
@@ -1970,7 +1971,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					maxY = maxY < rois[r].getBounds().y + rois[r].getBounds().height
 							? rois[r].getBounds().y + rois[r].getBounds().height
 							: maxY;
-					maxZ = maxZ < rois[r].getZPosition() + zSustain/2 ? rois[r].getZPosition() + zSustain/2: maxZ;
+					maxZ = maxZ < rois[r].getZPosition() ? rois[r].getZPosition() : maxZ;
 
 				}
 			}
@@ -1978,8 +1979,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //			sketchImp = NewImage.createImage("SVV_"+rootNames_rootFrames.get(0),(int)(imp.getWidth()*scaleFactor), (int)(imp.getHeight()*scaleFactor), (int)(imp.getNSlices()*imp.getNFrames()*zPadFactor), 8, NewImage.FILL_BLACK, false);
 			sketchImp = NewImage.createImage("SVV_" + rootNames_rootFrames.get(0),
 					(int) ((maxX - minX) * scaleFactor) + 20, (int) ((maxY - minY) * scaleFactor) + 20,
-					(int) ((maxZ - minZ) * zPadFactor) + 2, 8, NewImage.FILL_BLACK, false);
-			sketchImp.setDimensions(1, (int) ((maxZ - minZ) * zPadFactor) + 2, imp.getNFrames());
+					(int) ((maxZ - minZ) * zPadFactor) + this.zSustain + 4, 8, NewImage.FILL_BLACK, false);
+			sketchImp.setDimensions(1, (int) ((maxZ - minZ) * zPadFactor) + this.zSustain + 4, imp.getNFrames());
 			sketchImp.setMotherImp(imp, imp.getID());
 			sketchImp.setCalibration(imp.getCalibration());
 			sketchImp.getCalibration().pixelWidth = imp.getCalibration().pixelWidth / scaleFactor;
@@ -1988,7 +1989,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			sketchImp.getRoiManager().setZSustain(this.zSustain);
 
 			sketchImp.setTitle("SVV_" + rootName);
-//			sketchImp.show();
+			sketchImp.show();
 			sketchImp.getRoiManager().select(-1);
 			IJ.wait(50);
 			if (sketchImp.getRoiManager().getCount() > 0) {
@@ -2045,11 +2046,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				for (int zp = 2; zp < (int) sketchImp.getNSlices()-1; zp++) {
+				for (int zp = 0; zp < (int) this.getZSustain(); zp++) {
 //					sketchImp.setPosition(1, nextSlice-zp, nextFrame);  ***
-					Roi scRoiClone = (Roi) scaledRoi.clone();
-					scRoiClone.setPosition(1, zp, 1);
-					sketchImp.getRoiManager().addRoi(scRoiClone, false, nextRoi.getStrokeColor(), nextRoi.getFillColor(), -1, false);
+					scaledRoi.setPosition(1, nextSlice + this.getZSustain() - zp, nextFrame);
+					sketchImp.getRoiManager().addRoi(scaledRoi, false, scaledRoi.getStrokeColor(), scaledRoi.getFillColor(), -1, false);
 				}
 			}
 			sketchImp.getRoiManager().select(-1);
@@ -2085,7 +2085,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			while (!new File(outPathObj).canRead())
 				IJ.wait(100);
 			try {
-				Files.move(Paths.get(outPathObj), Paths.get(outPathObj.replace("0000.obj", IJ.pad(rootFrame, 4)+".obj")));
+				Files.move(Paths.get(outPathObj), Paths.get(outPathObj.replace("0000.obj", IJ.pad(rootFrame, 4)+".obj")), StandardCopyOption.REPLACE_EXISTING);
 //				Files.move(Paths.get(outPathMtl), Paths.get(outPathMtl.replace("0000.mtl", IJ.pad(rootFrame, 4)+".mtl")));
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
