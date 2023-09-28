@@ -8355,7 +8355,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						newNames.add(cellData[9]);
 						newOval.setName(cellData[9]);
 					}
-					addRoi(newOval, false, null, Colors.decode("#44ff0000", Color.red), 1, false);
+					addRoi(newOval, false, null, Colors.decode("#5500ffff", Color.red), 1, false);
 
 					IJ.showStatus("importing nucleus " + getCount());
 				}
@@ -8388,7 +8388,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			zipPath = IJ.getFilePath("Select the zip file with <nuclei> files");
 			zipFile = new File(zipPath);
 		}
-		String str = openZipNucleiAsString(zipPath);
+		String str = openZipNucleiAsString(zipPath, 0);
 		String outStr = "";
 		String[] lines = str.split("\n");
 		StringBuilder sb = new StringBuilder();
@@ -8488,13 +8488,22 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //		} catch (IOException e) {error(e.toString());} 
 //		return str;
 //	} 
-
+	
 	public static String openZipNucleiAsString(String path) {
+		return openZipNucleiAsString(path, 1000);
+	}
+	
+	public static String openZipNucleiAsString(String path, int endTime) {
 
 		ZipInputStream in = null;
 		ByteArrayOutputStream out;
 		String str = "";
-		double endImportTime = IJ.getNumber("Import up until which timepoint?", 1000);
+		double endImportTime = -1;
+		if (endTime == 0){
+			endImportTime = 1000;
+		} else {
+			endImportTime = IJ.getNumber("Import up until which timepoint?", 1000);
+		}
 		try {
 			in = new ZipInputStream(new FileInputStream(path));
 
