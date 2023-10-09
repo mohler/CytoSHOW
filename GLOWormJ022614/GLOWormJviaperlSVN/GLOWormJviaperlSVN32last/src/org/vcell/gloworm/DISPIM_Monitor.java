@@ -6561,6 +6561,16 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 													new File(outDir+subdir).mkdirs();
 													new File(outDir+subdir+"Skipped").mkdirs();
 
+													// set calibrations on these AceTree stacks
+
+													frameRGsplitImp.getCalibration().setUnit(impDF1s[pos].getCalibration().getUnit());
+													frameRGsplitImp.getCalibration().pixelWidth = impDF1s[pos].getCalibration().pixelWidth;
+													frameRGsplitImp.getCalibration().pixelHeight = impDF1s[pos].getCalibration().pixelHeight;
+													frameRGsplitImp.getCalibration().pixelDepth = impDF1s[pos].getCalibration().pixelWidth;
+													frameRGsplitImpSkipped.getCalibration().setUnit(impDF1s[pos].getCalibration().getUnit());
+													frameRGsplitImpSkipped.getCalibration().pixelWidth = impDF1s[pos].getCalibration().pixelWidth;
+													frameRGsplitImpSkipped.getCalibration().pixelHeight = impDF1s[pos].getCalibration().pixelHeight;
+													frameRGsplitImpSkipped.getCalibration().pixelDepth = impDF1s[pos].getCalibration().pixelWidth;
 
 													// save a stack
 
