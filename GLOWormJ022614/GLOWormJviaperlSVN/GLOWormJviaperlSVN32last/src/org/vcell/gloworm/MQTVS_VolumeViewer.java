@@ -108,10 +108,8 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 			
 			impDup = null;
 			if (imp.getRoiManager().getSelectedRoisAsArray().length == 0){  //??????WHY??????
-//			if (true){ 
 //				duperString = duper.showHSDialog(imp, imp.getTitle()+"_DUP");
-//				impDup = duper.duplicateHyperstack(imp, imp.getTitle()+"_DUP", false);
-				impDup = duper.run(imp, 1, imp.getNChannels(), 1, imp.getNSlices(), 1, imp.getNFrames(), 1, false, 0, true);
+				impDup = duper.duplicateHyperstack(imp, imp.getTitle()+"_DUP", false);
 				impDup.hide();
 			}
 			Date currentDate = new Date();
@@ -281,9 +279,9 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 															univ.getStartTime(), 
 															univ.getEndTime(),
 															scaleShiftString, true);
-													univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)), true);
-													univ.getSelected().setLocked(false);
-													univ.removeContent(univ.getSelected().getName(), true);
+							//						univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
+							//						univ.getSelected().setLocked(false);
+							//						univ.removeContent(univ.getSelected().getName());
 						}
 						for (Object content:contents.values()){
 							if (((Content)content).getName() != objectName){
