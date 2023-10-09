@@ -3269,7 +3269,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								stackAs[pos].setSkewXperZ(
 										impNext.getCalibration().pixelDepth / impNext.getCalibration().pixelWidth);
 
-							impAs[pos].flush();
+//							impAs[pos].flush();
 							impAs[pos] = impNext;
 
 
@@ -3281,6 +3281,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								sw.addScrollbars(impAs[pos]);
 							}
 							impAs[pos].getStack().setEdges(edgesA);
+							impAs[pos].setDimensions(cDim, zDim, tDim);
 							impAs[pos].setPosition(cA, zA, (tailing || tA > impAs[pos].getNFrames())? impAs[pos].getNFrames() : tA);
 							((CompositeImage)impAs[pos]).setMode(modeA);
 							win.getCanvas().setMagnification(zoomA);
@@ -3318,7 +3319,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								stackAs[pos].setSkewXperZ(
 										impNext.getCalibration().pixelDepth / impNext.getCalibration().pixelWidth);
 
-							impBs[pos].flush();
+//							impBs[pos].flush();
 							impBs[pos] = impNext;
 
 							win.setImage(impBs[pos]);
@@ -3329,6 +3330,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								sw.addScrollbars(impBs[pos]);
 							}
 							impBs[pos].getStack().setEdges(edgesB);
+							impBs[pos].setDimensions(cDim, zDim, tDim);
 							impBs[pos].setPosition(cB, zB, (tailing || tB > impBs[pos].getNFrames())? impBs[pos].getNFrames() : tB);
 							((CompositeImage)impBs[pos]).setMode(modeB);
 							win.getCanvas().setMagnification(zoomB);
@@ -6559,6 +6561,16 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 													new File(outDir+subdir).mkdirs();
 													new File(outDir+subdir+"Skipped").mkdirs();
 
+													// set calibrations on these AceTree stacks
+
+													frameRGsplitImp.getCalibration().setUnit(impDF1s[pos].getCalibration().getUnit());
+													frameRGsplitImp.getCalibration().pixelWidth = impDF1s[pos].getCalibration().pixelWidth;
+													frameRGsplitImp.getCalibration().pixelHeight = impDF1s[pos].getCalibration().pixelHeight;
+													frameRGsplitImp.getCalibration().pixelDepth = impDF1s[pos].getCalibration().pixelWidth;
+													frameRGsplitImpSkipped.getCalibration().setUnit(impDF1s[pos].getCalibration().getUnit());
+													frameRGsplitImpSkipped.getCalibration().pixelWidth = impDF1s[pos].getCalibration().pixelWidth;
+													frameRGsplitImpSkipped.getCalibration().pixelHeight = impDF1s[pos].getCalibration().pixelHeight;
+													frameRGsplitImpSkipped.getCalibration().pixelDepth = impDF1s[pos].getCalibration().pixelWidth;
 
 													// save a stack
 

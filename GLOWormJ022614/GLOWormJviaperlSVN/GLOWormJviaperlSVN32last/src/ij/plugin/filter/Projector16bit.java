@@ -534,7 +534,9 @@ public class Projector16bit implements PlugInFilter, TextListener {
 				if (buildWin==null) {
 					buildImp.show();
 					buildWin = buildImp.getWindow();
-				}
+				} else 
+					buildWin.setImage(buildImp);
+			
 
 				if (imp != null & buildImp != null && imp.getWindow()!=null){
 					buildWin.setBackground(imp.getWindow().getBackground());
@@ -570,7 +572,7 @@ public class Projector16bit implements PlugInFilter, TextListener {
 				bigRM.showAll(RoiManager.SHOW_ALL);
 				buildImp.setPosition(inChannel-firstC+1, 1, inFrame-firstT+1);
 
-				//		buildImp.setRoiManager(bigRM);
+						buildImp.setRoiManager(bigRM);
 				IJ.runMacro("print(\"\\\\Update:\\\n \")");
 
 				if (imp.getMotherImp() != null && !imp.getMotherImp().isSketch3D())
@@ -627,6 +629,7 @@ public class Projector16bit implements PlugInFilter, TextListener {
 //				buildWin.setVisible(true);				
 
 			}
+//			buildImp.getRoiManager().revalidate();
 		}		
 		if (imp.getWindow()!=null)
 			imp.getWindow().setVisible(true);

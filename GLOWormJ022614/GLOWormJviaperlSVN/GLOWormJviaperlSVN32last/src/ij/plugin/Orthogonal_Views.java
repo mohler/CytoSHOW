@@ -91,6 +91,9 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 	 
 	public void run(String arg) {
 		originalImp = IJ.getImage();
+		originalImp.getWindow().running = false;
+		originalImp.getWindow().running2 = false;
+		originalImp.getWindow().running3 = false;
 		originalStack = originalImp.getStack();
 		originalCM = originalStack.getColorModel();
 		defaultWinColor = new Color(originalImp.getWindow().getBackground().getRGB());
