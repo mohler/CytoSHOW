@@ -50,6 +50,7 @@ import javax.vecmath.Point3f;
 
 import org.rhwlab.acetree.AceTree;
 import org.rhwlab.acetree.AceTreeNoUI;
+import org.rhwlab.tree.SulstonTree;
 import org.rhwlab.tree.VTreeImpl;
 import org.rhwlab.tree.VTreeImpl.CellLine;
 import org.rhwlab.tree.VTreeImpl.TestCanvas;
@@ -8750,6 +8751,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			vti.printTree(paramStrings, true, true, pngFile.getName(), pngFile.getParent());
 			vti.showTree(paramStrings, true, true);
 			vti.getTestCanvas().addMouseListener(this);
+			new SulstonTree(aceTree, "Your Tree", new org.rhwlab.tree.Cell("P0"), true, null);
 		}
 
 		aceTree.saveNuclei(new File(zipPath.replace(".zip", "_ATAutoCorrected.zip")));
