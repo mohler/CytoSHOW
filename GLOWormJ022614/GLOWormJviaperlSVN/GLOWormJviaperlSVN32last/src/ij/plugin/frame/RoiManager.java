@@ -8732,11 +8732,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			aceTree = AceTree.getAceTree(configPath);
 		}
 		if (aceTree != null) {
-			VTreeImpl vti = aceTree.getVtree().getiVTreeImpl();
-			vti.printTree(paramStrings, true, true, pngFile.getName(), pngFile.getParent());
-			vti.showTree(paramStrings, true, true);
-			vti.getTestCanvas().addMouseListener(this);
-			new SulstonTree(aceTree, "Your Tree", new org.rhwlab.tree.Cell("P0"), true, null);
+			SulstonTree nsTree = new SulstonTree(aceTree, this.getTitle(), new org.rhwlab.tree.Cell("P0"), true, null);
+	        nsTree.iLateTimeField.setText("250");
+	        nsTree.refreshTree();
 		}
 
 		aceTree.saveNuclei(new File(zipPath.replace(".zip", "_ATAutoCorrected.zip")));
