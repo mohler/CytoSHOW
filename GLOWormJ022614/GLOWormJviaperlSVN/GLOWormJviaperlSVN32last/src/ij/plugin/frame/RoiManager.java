@@ -7671,7 +7671,39 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			index = 0;
 		if (imp != null) {
 			if (list.getSelectedIndices().length <= 1) {
+
+
 				restore(imp, index, true);
+				if (aceTree != null) {
+					Roi cRoi = rois.get(listModel.get(getSelectedIndexes()[0]));
+					VTreeImpl vti = aceTree.getVtree().getiVTreeImpl();
+					if (vti != null && vti.getTestCanvas() != null) {
+						for (int i = 0; i < vti.iCellLines.size(); i++) {
+							Object o = vti.iCellLines.get(i);
+							if (!(o instanceof CellLine))
+								continue;
+							CellLine cL = (CellLine) o;
+							org.rhwlab.tree.Cell c = cL.c;
+							if (c.getName()
+									.equals(listModel.get(getSelectedIndexes()[0]).replace("\"", "").split(" ")[0])) {
+								int cStart = c.getTime();
+								int cEnd = c.getEndTime();
+								int rTime = cRoi.getTPosition();
+								if (cStart <= rTime && cEnd >= rTime) {
+									c.setIntTime(rTime);
+									for (MouseListener ml : vti.getTestCanvas().getMouseListeners()) {
+										if (ml != this) {
+											ml.mouseClicked(new MouseEvent(vti.getTestCanvas(), 0, 0, 0,
+													c.getIntTime() + 100, cL.y1 + 5, 1, false, MouseEvent.BUTTON1));
+										}
+									}
+								}
+								break;
+							}
+						}
+					}
+				}
+			
 			} else {
 				imp.killRoi();
 			}
