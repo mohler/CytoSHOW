@@ -2092,12 +2092,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		Image3DUniverse univ = vv.getUniv();
 
-		Hashtable<String, Content> contents = univ.getContentsHT();
-
-		for (Object content : contents.values()) {
-			((Content) content).setLocked(true);
-			((Content) content).setVisible(true);
-		}
+//		Hashtable<String, Content> contents = univ.getContentsHT();
+//
+//		for (Object content : contents.values()) {
+//			((Content) content).setLocked(true);
+//			((Content) content).setVisible(true);
+//		}
 
 	}
 

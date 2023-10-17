@@ -283,7 +283,7 @@ public class WavefrontExporter {
 								e1.printStackTrace();
 							}
 							String gltfOutPathString = finalObjOutPathString.replace(".obj", ".gltf");
-							String[] commandStringArrayB = new String[]{"cmd","/c","npx","gltf-pipeline","-i",gltfOutPathString,"-o",gltfOutPathString,"-d"};
+							String[] commandStringArrayB = new String[]{"cmd","/c","npx","gltf-pipeline","-i",gltfOutPathString,"-o",gltfOutPathString,"--draco.compressionLevel","10","-d"};
 							//				while (!new File (gltfOutPathString).canRead())
 							//					IJ.wait(10);
 							try {
@@ -323,7 +323,7 @@ public class WavefrontExporter {
 				String[] commandStringArrayA = new String[]{"cmd","/c","npx","obj2gltf","-i",objFilePathString};
 				Process objTOgltf = Runtime.getRuntime().exec(commandStringArrayA);
 				String gltfOutPathString = objFilePathString.replace(".obj", ".gltf");
-				String[] commandStringArrayB = new String[]{"cmd","/c","npx","gltf-pipeline","-i",gltfOutPathString,"-o",gltfOutPathString,"-d"};
+				String[] commandStringArrayB = new String[]{"cmd","/c","npx","gltf-pipeline","-i",gltfOutPathString,"-o",gltfOutPathString,"--draco.compressionLevel","10","-d"};
 				//			while (!new File (gltfOutPathString).canRead())
 				//				IJ.wait(10);
 				try {
