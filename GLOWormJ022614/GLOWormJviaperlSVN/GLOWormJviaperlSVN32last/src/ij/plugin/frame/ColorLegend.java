@@ -942,6 +942,8 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 				brainbowColors = new Hashtable<String, Color>();
 			}
 			for (Roi roi:selRois) {
+				if (roi == null)
+					continue;
 				if (alreadyNamed.contains(roi.getName().split(" \"_")[0].replace("\"","")))
 					continue;
 				Color roiARGBcolor = roi.getFillColor();

@@ -1912,6 +1912,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		new File(outDir).mkdirs();
 
 		for (Roi selRoi : getSelectedRoisAsArray()) {
+			if (selRoi == null)
+				continue;
 			String rootName = selRoi.getName().contains("\"") ? selRoi.getName().split("\"")[1].trim() : "";
 			rootName = rootName.contains(" ") ? rootName.split("[_\\- ]")[0].trim() : rootName;
 			String[] rootChunks = selRoi.getName().split("_");
@@ -1948,6 +1950,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			int maxY = Integer.MIN_VALUE;
 			int maxZ = Integer.MIN_VALUE;
 			for (int r = 0; r < fraa; r++) {
+				if (rois[r] == null)
+					continue;
 				String nextName = rois[r].getName();
 				if (nextName.startsWith("\"" + rootName/* .split("_")[0] */)
 				/*
@@ -4336,6 +4340,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			for (int i = 0; i < indexes.length; i++) {
 				String label = (String) listModel.getElementAt(indexes[i]);
 				Roi roi = (Roi) rois.get(label);
+				if (roi==null)
+					continue;
 				// Substituting updated color, Z, T, C info to saved name:
 				String newColorString = Colors.colorToHexString(roi.getFillColor());
 //				String labelNew = label.replaceAll("(\".* \"_)(.*)", "$1" + newColorString
