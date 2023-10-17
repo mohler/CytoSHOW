@@ -1897,6 +1897,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 						Object[] roiNames = otherListModel.toArray();
 						for (int j = 0; j < roiNames.length; j++) {
 							String nextRoiName = (String) roiNames[j];
+							if (nextRoiName.startsWith("\" \""))
+								continue;
 							nextRoiName = (nextRoiName).split("\"")[1].split(" ")[0];
 							if (nextRoiName.toLowerCase().trim().equals(fullTagName.toLowerCase())
 									&& !clickedROIstring

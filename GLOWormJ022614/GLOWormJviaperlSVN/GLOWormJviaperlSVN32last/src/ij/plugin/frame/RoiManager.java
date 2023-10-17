@@ -49,6 +49,7 @@ import javax.vecmath.Point3f;
 
 import org.rhwlab.acetree.AceTree;
 import org.rhwlab.acetree.AceTreeNoUI;
+import org.rhwlab.tree.SulstonTree;
 import org.rhwlab.tree.VTreeImpl;
 import org.rhwlab.tree.VTreeImpl.CellLine;
 import org.rhwlab.tree.VTreeImpl.TestCanvas;
@@ -883,9 +884,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 				for (int n = 0; n < rootNames.size(); n++) {
 					String rootName = rootNames.get(n);
-					Roi[] rois2 = getFullRoisAsArray();
-					int fraaa = rois2.length;
-					for (int r2 = 0; r2 < fraaa; r2++) {
+					Roi[] rois2 = getShownRoisAsArray();
+					int shraaa = rois2.length;
+					for (int r2 = 0; r2 < shraaa; r2++) {
 						String nextName = rois2[r2].getName();
 						if (!rootName.replace("\"", "").trim().equals("")) {
 							String rootMatch = "\"" + rootName.replace("\"", "").trim()
@@ -7676,7 +7677,39 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			index = 0;
 		if (imp != null) {
 			if (list.getSelectedIndices().length <= 1) {
+
+
 				restore(imp, index, true);
+				if (aceTree != null) {
+					Roi cRoi = rois.get(listModel.get(getSelectedIndexes()[0]));
+					VTreeImpl vti = aceTree.getVtree().getiVTreeImpl();
+					if (vti != null && vti.getTestCanvas() != null) {
+						for (int i = 0; i < vti.iCellLines.size(); i++) {
+							Object o = vti.iCellLines.get(i);
+							if (!(o instanceof CellLine))
+								continue;
+							CellLine cL = (CellLine) o;
+							org.rhwlab.tree.Cell c = cL.c;
+							if (c.getName()
+									.equals(listModel.get(getSelectedIndexes()[0]).replace("\"", "").split(" ")[0])) {
+								int cStart = c.getTime();
+								int cEnd = c.getEndTime();
+								int rTime = cRoi.getTPosition();
+								if (cStart <= rTime && cEnd >= rTime) {
+									c.setIntTime(rTime);
+									for (MouseListener ml : vti.getTestCanvas().getMouseListeners()) {
+										if (ml != this) {
+											ml.mouseClicked(new MouseEvent(vti.getTestCanvas(), 0, 0, 0,
+													c.getIntTime() + 100, cL.y1 + 5, 1, false, MouseEvent.BUTTON1));
+										}
+									}
+								}
+								break;
+							}
+						}
+					}
+				}
+			
 			} else {
 				imp.killRoi();
 			}
@@ -8346,7 +8379,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						newNames.add(cellData[9]);
 						newOval.setName(cellData[9]);
 					}
-					addRoi(newOval, false, null, Colors.decode("#44ff0000", Color.red), 1, false);
+					addRoi(newOval, false, null, Colors.decode("#5500ffff", Color.red), 1, false);
 
 					IJ.showStatus("importing nucleus " + getCount());
 				}
@@ -8379,7 +8412,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			zipPath = IJ.getFilePath("Select the zip file with <nuclei> files");
 			zipFile = new File(zipPath);
 		}
-		String str = openZipNucleiAsString(zipPath);
+		String str = openZipNucleiAsString(zipPath, 0);
 		String outStr = "";
 		String[] lines = str.split("\n");
 		StringBuilder sb = new StringBuilder();
@@ -8479,13 +8512,22 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //		} catch (IOException e) {error(e.toString());} 
 //		return str;
 //	} 
-
+	
 	public static String openZipNucleiAsString(String path) {
+		return openZipNucleiAsString(path, 1000);
+	}
+	
+	public static String openZipNucleiAsString(String path, int endTime) {
 
 		ZipInputStream in = null;
 		ByteArrayOutputStream out;
 		String str = "";
-		double endImportTime = IJ.getNumber("Import up until which timepoint?", 1000);
+		double endImportTime = -1;
+		if (endTime == 0){
+			endImportTime = 1000;
+		} else {
+			endImportTime = IJ.getNumber("Import up until which timepoint?", 1000);
+		}
 		try {
 			in = new ZipInputStream(new FileInputStream(path));
 
@@ -8728,10 +8770,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			aceTree = AceTree.getAceTree(configPath);
 		}
 		if (aceTree != null) {
-			VTreeImpl vti = aceTree.getVtree().getiVTreeImpl();
-			vti.printTree(paramStrings, true, true, pngFile.getName(), pngFile.getParent());
-			vti.showTree(paramStrings, true, true);
-			vti.getTestCanvas().addMouseListener(this);
+			SulstonTree nsTree = new SulstonTree(aceTree, this.getTitle(), new org.rhwlab.tree.Cell("P0"), true, null);
+	        nsTree.iLateTimeField.setText("250");
+	        nsTree.refreshTree();
 		}
 
 		aceTree.saveNuclei(new File(zipPath.replace(".zip", "_ATAutoCorrected.zip")));
