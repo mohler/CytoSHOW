@@ -165,10 +165,10 @@ public class ImageCanvas2 extends JComponent implements MouseListener, MouseMoti
 		g2d.fillRect(8, 16, 16, 1);
 		crosshairCursor = Toolkit.getDefaultToolkit().createCustomCursor(img,new Point(16,16),"crosshairCursor");
 
-//		DragAndDrop dnd = new DragAndDrop();
-//		if (dnd!=null)
-//			dnd.addDropTarget(this);
-//
+		DragAndDrop dnd = new DragAndDrop();
+		if (dnd!=null)
+			dnd.addDropTarget(this);
+
 		addMouseListener(this);
 		addMouseMotionListener(this);
 		addMouseWheelListener (this);

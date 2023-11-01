@@ -94,7 +94,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 //		dropImp = WindowManager.getCurrentImage();
 		dropImp = null;
 		setImp(dropImp);
-		if (dtc instanceof ImageCanvas) {
+		if (dtc instanceof ImageCanvas2) {
 			dropImp = ((ImageCanvas2) dtc).getImage();
 			if (dropImp == null)
 				dropImp = IJ.getImage();
@@ -354,9 +354,9 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 				openAsVirtualStack = width-loc.x<=buttonSize && 
 						(e.getDropTargetContext().getDropTarget().getComponent() instanceof ImageCanvas3D);
 				if (openAsVirtualStack)
-					IJ.showStatus("<<Open with Special Settings>> into IJ3DViewer");
+					IJ.showStatus("<<Open with Special Settings>> into Viewer");
 				else
-					IJ.showStatus("<<Drag and Drop>> into IJ3DViewer");
+					IJ.showStatus("<<Drag and Drop>> into Viewer");
 
 			}
 		}
@@ -2011,7 +2011,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						return;
 					} else if (path.endsWith(".zip")||path.endsWith(".ZIP")) {
 						Frame[] frames = WindowManager.getImageWindows();
-						if (this.dtde.getDropTargetContext().getDropTarget().getComponent() instanceof ImageCanvas) {
+						if (this.dtde.getDropTargetContext().getDropTarget().getComponent() instanceof ImageCanvas2) {
 							for (Frame frame:frames){
 								if (frame instanceof ImageWindow){
 									if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow)frame).getCanvas()){
