@@ -6,6 +6,7 @@ import java.math.MathContext;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.awt.image.*;
+import java.io.IOException;
 
 import ij.process.*;
 import ij.measure.*;
@@ -31,6 +32,7 @@ import java.awt.font.FontRenderContext;
 import java.util.*;
 import java.awt.geom.*;
 
+import javax.imageio.ImageIO;
 import javax.media.j3d.Canvas3D;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
@@ -52,7 +54,7 @@ public class ImageCanvas2 extends JComponent implements MouseListener, MouseMoti
 	public static Cursor defaultCursor = new Cursor(Cursor.DEFAULT_CURSOR);
 	protected static Cursor handCursor = new Cursor(Cursor.HAND_CURSOR);
 	protected static Cursor moveCursor = new Cursor(Cursor.MOVE_CURSOR);
-	protected static Cursor crosshairCursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
+	protected static Cursor crosshairCursor;	
 
 	public static boolean usePointer = Prefs.usePointerCursor;
 
@@ -141,7 +143,28 @@ public class ImageCanvas2 extends JComponent implements MouseListener, MouseMoti
 		setDrawingSize(imageWidth, imageHeight);
 		magnification = 1.0;
 		messageRois = new Hashtable<String,Roi>();
-		
+//		try {
+//			crosshairCursor =  Toolkit.getDefaultToolkit().createCustomCursor(ImageIO.read(ImageWindow.class.getResource("images/crosshairAA2_32x32.png")),new Point(16,16),"crosshairCursor");
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+		Image img = new BufferedImage(32,32, BufferedImage.TYPE_INT_ARGB_PRE);
+
+		//		img.getGraphics().setColor(Colors.decode("00000000", Color.white));
+		Graphics2D g2d = (Graphics2D) img.getGraphics();
+
+		g2d.setFont(font);
+
+//		g2d.setColor(Colors.decode("#00111111",Color.gray));
+//		g2d.fillRect(0, 0, 32,32);
+		g2d.setColor(Color.WHITE);
+		g2d.fillRect(15, 8, 3, 16);
+		g2d.fillRect(8, 15, 16, 3);
+		g2d.setColor(Color.BLACK);
+		g2d.fillRect(16, 8, 1, 16);
+		g2d.fillRect(8, 16, 16, 1);
+		crosshairCursor = Toolkit.getDefaultToolkit().createCustomCursor(img,new Point(16,16),"crosshairCursor");
+
 //		DragAndDrop dnd = new DragAndDrop();
 //		if (dnd!=null)
 //			dnd.addDropTarget(this);
@@ -1649,8 +1672,10 @@ public class ImageCanvas2 extends JComponent implements MouseListener, MouseMoti
 		g2d.drawLine(0, 0, 8, 8);
 		g2d.drawString(cursorString, 1, img.getHeight(null)-1);
 		Cursor searchCursor = tk.createCustomCursor(img,new Point(0,0),"searchCursor");
-		((Canvas)e.getSource()).setCursor(searchCursor);
-
+		if (e.getSource() instanceof Canvas)
+			((Canvas)e.getSource()).setCursor(searchCursor);
+		else 
+			((JComponent)e.getSource()).setCursor(searchCursor);
 
 		boolean getGenes = true /*|| e.getSource() instanceof Checkbox*/;
 		boolean getFates = true /*|| e.getSource() instanceof Checkbox*/;
@@ -3125,7 +3150,12 @@ public class ImageCanvas2 extends JComponent implements MouseListener, MouseMoti
 
 			popup.setLightWeightPopupEnabled(false);
 			popup.show((Component)e.getSource(), x, y);
-			((Canvas)e.getSource()).setCursor(defaultCursor);
+			if (e.getSource() instanceof Canvas)
+				((Canvas)e.getSource()).setCursor(defaultCursor);
+			else 
+				((JComponent)e.getSource()).setCursor(defaultCursor);
+
+
 		}
 	}
 
