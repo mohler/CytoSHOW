@@ -567,7 +567,7 @@ public class ImageJ extends Frame implements ActionListener,
 					return;
 				}
 				if (invoker instanceof ImageCanvas) {
-					imp = ((ImageCanvas)invoker).getImage();
+					imp = ((ImageCanvas2)invoker).getImage();
 					imp.getWindow().setAlwaysOnTop(false);
 				}
 				else if (invoker instanceof ColorLegend) {
@@ -583,7 +583,7 @@ public class ImageJ extends Frame implements ActionListener,
 					IJ.showMessage(invoker.toString());
 					Object grandparent = ((MenuItem)invoker).getParent();
 					if (grandparent instanceof ImageCanvas)
-						imp = ((ImageCanvas)grandparent).getImage();
+						imp = ((ImageCanvas2)grandparent).getImage();
 					else if (invoker instanceof ColorLegend) {
 						RoiManager rm = ((ColorLegend)invoker).getRoiManager();
 						for (int i=0; i< rm.getCompImps().size(); i++){
@@ -597,7 +597,7 @@ public class ImageJ extends Frame implements ActionListener,
 						IJ.showMessage(grandparent.toString());
 						Object ggparent = ((MenuItem)grandparent).getParent();
 						if (ggparent instanceof ImageCanvas)
-							imp = ((ImageCanvas)ggparent).getImage();
+							imp = ((ImageCanvas2)ggparent).getImage();
 						else if (invoker instanceof ColorLegend) {
 							RoiManager rm = ((ColorLegend)invoker).getRoiManager();
 							for (int i=0; i< rm.getCompImps().size(); i++){
@@ -611,7 +611,7 @@ public class ImageJ extends Frame implements ActionListener,
 							IJ.showMessage(ggparent.toString());
 							Object gggparent = ((MenuItem)ggparent).getParent();
 							if (gggparent instanceof ImageCanvas)
-								imp = ((ImageCanvas)gggparent).getImage();
+								imp = ((ImageCanvas2)gggparent).getImage();
 						}
 					}
 				}

@@ -155,7 +155,7 @@ public class QuickTime_ZTGrabWriter implements PlugIn, StdQTConstants, TextListe
 		ImageWindow window = imp.getWindow();
 		window.toFront();
 	//	IJ.wait(500);
-		ImageCanvas imcan = window.getCanvas();
+		ImageCanvas2 imcan = window.getCanvas();
 		Rectangle captureBnds = imcan.getBounds();
 
 		int viewChannel = imp.getChannel();

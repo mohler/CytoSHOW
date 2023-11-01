@@ -112,7 +112,7 @@ public class TextRoi extends Roi {
 
 	public TextRoi(int x, int y, ImagePlus imp) {
 		super(x, y, imp);
-        ImageCanvas ic = imp.getCanvas();
+        ImageCanvas2 ic = imp.getCanvas();
         double mag = getMagnification();
         if (mag>1.0)
             mag = 1.0;

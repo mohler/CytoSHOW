@@ -4,7 +4,7 @@ import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
 import ij.Menus;
-import ij.gui.ImageCanvas;
+import ij.gui.ImageCanvas2;
 import ij.plugin.Colors;
 import ij.plugin.frame.RoiManager;
 import ij3d.contextmenu.ContextMenu;

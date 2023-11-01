@@ -24,7 +24,7 @@ public class OverlayLabels implements PlugIn, DialogListener {
 		imp = WindowManager.getCurrentImage();
 		overlay = null;
 		if (imp!=null) {
-			ImageCanvas ic = imp.getCanvas();
+			ImageCanvas2 ic = imp.getCanvas();
 			if (ic!=null)
 				overlay = ic.getShowAllList();
 			if (overlay==null)
@@ -99,7 +99,7 @@ public class OverlayLabels implements PlugIn, DialogListener {
 			if (imp!=null) {
 				Overlay o = imp.getOverlay();
 				if (o==null) {
-					ImageCanvas ic = imp.getCanvas();
+					ImageCanvas2 ic = imp.getCanvas();
 					if (ic!=null)
 						o = ic.getShowAllList();
 				}

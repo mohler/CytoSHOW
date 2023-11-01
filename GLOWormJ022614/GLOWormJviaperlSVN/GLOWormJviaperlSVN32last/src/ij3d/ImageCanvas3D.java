@@ -31,7 +31,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import ij.process.ByteProcessor;
-import ij.gui.ImageCanvas;
+import ij.gui.ImageCanvas2;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Roi;
@@ -43,7 +43,7 @@ import java.util.concurrent.ExecutorService;
 public class ImageCanvas3D extends Canvas3D implements KeyListener {
 
 	private RoiImagePlus roiImagePlus;
-	private ImageCanvas roiImageCanvas;
+	private ImageCanvas2 roiImageCanvas;
 	private Map<Integer, Long> pressed, released;
 	private Background background;
 	private UIAdapter ui;
@@ -66,7 +66,7 @@ public class ImageCanvas3D extends Canvas3D implements KeyListener {
 			released = new HashMap<Integer, Long>();
 		}
 
-		public ImageCanvas getCanvas() {
+		public ImageCanvas2 getCanvas() {
 			return roiImageCanvas;
 		}
 	}
@@ -77,10 +77,10 @@ public class ImageCanvas3D extends Canvas3D implements KeyListener {
 		setPreferredSize(new Dimension(width, height));
 		ByteProcessor ip = new ByteProcessor(width, height);
 		roiImagePlus = new RoiImagePlus("RoiImage", ip);
-		roiImageCanvas = new ImageCanvas(roiImagePlus) {
+		roiImageCanvas = new ImageCanvas2(roiImagePlus) {
 			/* prevent ROI to enlarge/move on mouse click */
 			public void mousePressed(MouseEvent e) {
-				if(!ui.isMagnifierTool() && !ui.isPointTool())
+				if(!ImageCanvas3D.this.ui.isMagnifierTool() && !ImageCanvas3D.this.ui.isPointTool())
 					super.mousePressed(e);
 			}
 		};
@@ -306,7 +306,7 @@ public class ImageCanvas3D extends Canvas3D implements KeyListener {
 		});
 	}
 
-	public ImageCanvas getRoiCanvas() {
+	public ImageCanvas2 getRoiCanvas() {
 		return roiImageCanvas;
 	}
 

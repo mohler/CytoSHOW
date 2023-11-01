@@ -138,7 +138,7 @@ public class FileSaver {
 			return null;
 		Overlay overlay = imp.getOverlay();
 		if (overlay==null) {
-			ImageCanvas ic = imp.getCanvas();
+			ImageCanvas2 ic = imp.getCanvas();
 			if (ic==null) return null;
 			overlay = ic.getShowAllList(); // ROI Manager "Show All" list
 			if (overlay==null) return null;

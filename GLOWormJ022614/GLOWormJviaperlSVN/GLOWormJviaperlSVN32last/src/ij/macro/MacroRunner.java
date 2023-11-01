@@ -2,7 +2,7 @@ package ij.macro;
 import ij.*;
 import ij.text.*;
 import ij.util.*;
-import ij.gui.ImageCanvas;
+import ij.gui.ImageCanvas2;
 import java.io.*;
 import java.awt.*;
 
@@ -146,8 +146,8 @@ public class MacroRunner implements Runnable {
 					if (popup!=null) {
 						ImagePlus imp = null;
 						Object parent = popup.getParent();
-						if (parent instanceof ImageCanvas)
-							imp = ((ImageCanvas)parent).getImage();
+						if (parent instanceof ImageCanvas2)
+							imp = ((ImageCanvas2)parent).getImage();
 						if (imp!=null)
 							WindowManager.setTempCurrentImage(Thread.currentThread(), imp);
 					}

@@ -395,7 +395,7 @@ public class IJ {
 	public static void showStatus(String s) {
 		if (ij!=null) ij.showStatus(s);
 		ImagePlus imp = WindowManager.getCurrentImage();
-		ImageCanvas ic = imp!=null?imp.getCanvas():null;
+		ImageCanvas2 ic = imp!=null?imp.getCanvas():null;
 		if (ic!=null)
 			ic.setShowCursorStatus(s.length()==0?true:false);
 	}

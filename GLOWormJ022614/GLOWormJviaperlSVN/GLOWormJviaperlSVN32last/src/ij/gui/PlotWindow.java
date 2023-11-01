@@ -580,7 +580,7 @@ public class PlotWindow extends ImageWindow implements ActionListener, Clipboard
 	private void createListeners() {
 		//IJ.log("createListeners");
 		if (srcImp==null) return;
-		ImageCanvas ic = srcImp.getCanvas();
+		ImageCanvas2 ic = srcImp.getCanvas();
 		if (ic==null) return;
 		ic.addMouseListener(this);
 		ic.addMouseMotionListener(this);
@@ -595,7 +595,7 @@ public class PlotWindow extends ImageWindow implements ActionListener, Clipboard
 		//IJ.log("removeListeners");
 		if (srcImp==null)
 			return;
-		ImageCanvas ic = srcImp.getCanvas();
+		ImageCanvas2 ic = srcImp.getCanvas();
 		if (ic!=null) {
 			ic.removeMouseListener(this);
 			ic.removeMouseMotionListener(this);

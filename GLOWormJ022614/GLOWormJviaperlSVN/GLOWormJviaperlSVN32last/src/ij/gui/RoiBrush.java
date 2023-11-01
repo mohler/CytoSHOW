@@ -22,7 +22,7 @@ class RoiBrush implements Runnable {
 
 		int size = Toolbar.getBrushSize();
 		if (img==null) return;
-		ImageCanvas ic = img.getCanvas();
+		ImageCanvas2 ic = img.getCanvas();
 		if (ic==null) return;
 		Roi roi = img.getRoi();
 

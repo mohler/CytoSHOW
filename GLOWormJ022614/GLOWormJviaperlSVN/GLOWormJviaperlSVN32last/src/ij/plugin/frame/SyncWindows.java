@@ -9,6 +9,7 @@ import java.util.*;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListModel;
@@ -216,7 +217,7 @@ public class SyncWindows extends PlugInFrame implements
 		}
 
 		// Store srcRect, Magnification and others of current ImageCanvas
-		ImageCanvas icc = iwc.getCanvas();
+		ImageCanvas2 icc = iwc.getCanvas();
 		storeCanvasState(icc);
 	}
 
@@ -234,7 +235,7 @@ public class SyncWindows extends PlugInFrame implements
 		if (vwins == null) return;
 		ImagePlus imp;
 		ImageWindow iw;
-		ImageCanvas ic;
+		ImageCanvas2 ic;
 		Point p;
 		Point oldp;
 		Rectangle rect;
@@ -246,8 +247,8 @@ public class SyncWindows extends PlugInFrame implements
 		p = new Point(x, y);
 		rect = boundingRect(x,y,oldX,oldY);
 
-		// get ImageCanvas that received event
-		ImageCanvas icc = (ImageCanvas) e.getSource();
+		// get ImageCanvas2 that received event
+		ImageCanvas2 icc = (ImageCanvas2) e.getSource();
 		ImageWindow iwc = (ImageWindow) icc.getParent().getParent().getParent().getParent();
 
 		// Draw new cursor box in each synchronized window.
@@ -295,7 +296,7 @@ public class SyncWindows extends PlugInFrame implements
 		if (vwins == null) return;
 		ImagePlus imp;
 		ImageWindow iw;
-		ImageCanvas ic;
+		ImageCanvas2 ic;
 		Point p;
 		Point oldp;
 		Rectangle rect;
@@ -307,8 +308,8 @@ public class SyncWindows extends PlugInFrame implements
 		p = new Point(x, y);
 		rect = boundingRect(x,y,oldX,oldY);
 
-		// get ImageCanvas that received event
-		ImageCanvas icc = (ImageCanvas) e.getSource();
+		// get ImageCanvas2 that received event
+		ImageCanvas2 icc = (ImageCanvas2) e.getSource();
 		ImageWindow iwc = (ImageWindow) icc.getParent().getParent().getParent().getParent();
 
 		// Draw new cursor box in each synchronized window.
@@ -361,13 +362,13 @@ public class SyncWindows extends PlugInFrame implements
 			(e.isPopupTrigger() || (e.getModifiers() & MouseEvent.META_MASK)!=0)) return;
 		ImagePlus imp;
 		ImageWindow iw;
-		ImageCanvas ic;
+		ImageCanvas2 ic;
 		Point p;
 
 		p = new Point(x,y);
 
-		// get ImageCanvas that received event
-		ImageCanvas icc = (ImageCanvas) e.getSource();
+		// get ImageCanvas2 that received event
+		ImageCanvas2 icc = (ImageCanvas2) e.getSource();
 		ImageWindow iwc = (ImageWindow) icc.getParent().getParent().getParent().getParent();
 
 		for(int n=0; n<vwins.size();++n) {
@@ -398,13 +399,13 @@ public class SyncWindows extends PlugInFrame implements
 		if (vwins == null) return;
 		ImagePlus imp;
 		ImageWindow iw;
-		ImageCanvas ic;
+		ImageCanvas2 ic;
 		Point p;
 
 		p = new Point(x,y);
 
-		// get ImageCanvas that received event
-		ImageCanvas icc = (ImageCanvas) e.getSource();
+		// get ImageCanvas2 that received event
+		ImageCanvas2 icc = (ImageCanvas2) e.getSource();
 		ImageWindow iwc = (ImageWindow) icc.getParent().getParent().getParent().getParent();
 
 		for(int n=0; n<vwins.size();++n) {
@@ -437,15 +438,15 @@ public class SyncWindows extends PlugInFrame implements
 		if (vwins == null) return;
 		ImagePlus imp;
 		ImageWindow iw;
-		ImageCanvas ic;
+		ImageCanvas2 ic;
 		Point p;
 		Rectangle rect;
 
 		p = new Point(x,y);
 		rect = boundingRect(x,y,x,y);
 
-		// get ImageCanvas that received event
-		ImageCanvas icc = (ImageCanvas) e.getSource();
+		// get ImageCanvas2 that received event
+		ImageCanvas2 icc = (ImageCanvas2) e.getSource();
 		ImageWindow iwc = (ImageWindow) icc.getParent().getParent().getParent().getParent();
 
 		for(int n=0; n<vwins.size();++n) {
@@ -496,14 +497,14 @@ public class SyncWindows extends PlugInFrame implements
 			(e.isPopupTrigger() || (e.getModifiers() & MouseEvent.META_MASK)!=0)) return;
 		ImagePlus imp;
 		ImageWindow iw;
-		ImageCanvas ic;
+		ImageCanvas2 ic;
 		Point p;
 
 		p = new Point(x,y);
 
 		// Current window already received mouse event.
-		// get ImageCanvas that received event
-		ImageCanvas icc = (ImageCanvas) e.getSource();
+		// get ImageCanvas2 that received event
+		ImageCanvas2 icc = (ImageCanvas2) e.getSource();
 		ImageWindow iwc = (ImageWindow) icc.getParent().getParent().getParent().getParent();
 
 		for(int n=0; n<vwins.size();++n) {
@@ -541,7 +542,7 @@ public class SyncWindows extends PlugInFrame implements
 			(e.isPopupTrigger() || (e.getModifiers() & MouseEvent.META_MASK)!=0)) return;
 		ImagePlus imp;
 		ImageWindow iw;
-		ImageCanvas ic;
+		ImageCanvas2 ic;
 
 		int xloc = e.getX();
 		int yloc = e.getY();
@@ -549,8 +550,8 @@ public class SyncWindows extends PlugInFrame implements
 		Rectangle rect = boundingRect(xloc, yloc, xloc, yloc);
 
 
-		// get ImageCanvas that received event
-		ImageCanvas icc = (ImageCanvas) e.getSource();
+		// get ImageCanvas2 that received event
+		ImageCanvas2 icc = (ImageCanvas2) e.getSource();
 		ImageWindow iwc = (ImageWindow) icc.getParent().getParent().getParent().getParent();
 
 		for(int n=0; n<vwins.size();++n) {
@@ -920,7 +921,7 @@ public class SyncWindows extends PlugInFrame implements
 	private void removeWindow(Integer I) {
 		ImagePlus imp;
 		ImageWindow iw;
-		ImageCanvas ic;
+		ImageCanvas2 ic;
 
 		imp = WindowManager.getImage(I.intValue());
 		if (imp != null) {
@@ -939,7 +940,7 @@ public class SyncWindows extends PlugInFrame implements
 
 	// --------------------------------------------------
 	/** Draw cursor that indicates windows are synchronized. */
-	private void drawSyncCursor(ImageCanvas ic, Rectangle rect,
+	private void drawSyncCursor(ImageCanvas2 ic, Rectangle rect,
 				int x, int y) {
 		int xpSZ = x+SZ;
 		int xmSZ = x-SZ;
@@ -967,8 +968,8 @@ public class SyncWindows extends PlugInFrame implements
 		}
 	}
 
-	/** Store srcRect and Magnification of the currently active ImageCanvas ic */
-	private void storeCanvasState(ImageCanvas ic) {
+	/** Store srcRect and Magnification of the currently active ImageCanvas2 ic */
+	private void storeCanvasState(ImageCanvas2 ic) {
 		currentMag = ic.getMagnification();
 		currentSrcRect = new Rectangle(ic.getSrcRect());
 	}
@@ -1019,14 +1020,14 @@ public class SyncWindows extends PlugInFrame implements
 	}
 
 	// --------------------------------------------------
-	/** Get Screen Coordinates for ImageCanvas ic matching
+	/** Get Screen Coordinates for ImageCanvas2 ic matching
 	 *	the OffScreen Coordinates of the current ImageCanvas.
 	 *	(srcRect and magnification stored after each received event.)
 	 *	Input: The target ImageCanvas, the current ImageCanvas, 
 	 *	x-ScreenCoordinate for current Canvas, y-ScreenCoordinate for current Canvas
 	 *	If the "ImageScaling" checkbox is selected, Scaling and Offset 
 	 *	of the images are taken into account. */
-	protected Point getMatchingCoords(ImageCanvas ic, ImageCanvas icc, int x, int y) {
+	protected Point getMatchingCoords(ImageCanvas2 ic, ImageCanvas2 icc, int x, int y) {
 
 		double xOffScreen = currentSrcRect.x + (x/currentMag);
 		double yOffScreen = currentSrcRect.y + (y/currentMag);
@@ -1048,7 +1049,7 @@ public class SyncWindows extends PlugInFrame implements
 	// --------------------------------------------------
 	/** Makes a new mouse event from MouseEvent e with the Canvas c
 	 *	as source and the coordinates of Point p as X and Y.*/
-	private MouseEvent adaptEvent(MouseEvent e, Canvas c, Point p) {
+	private MouseEvent adaptEvent(MouseEvent e, JComponent c, Point p) {
 		return new MouseEvent(c, e.getID(), e.getWhen(), e.getModifiers(),
 		   p.x, p.y, e.getClickCount(), e.isPopupTrigger());
 

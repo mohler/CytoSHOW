@@ -100,7 +100,7 @@ public class LutViewer implements PlugInFilter {
 		
         ImagePlus imp = new ImagePlus("Look-Up Table", img);
         //imp.show();
-        new LutWindow(imp, new ImageCanvas(imp), ip);
+        new LutWindow(imp, new ImageCanvas2(imp), ip);
     }
 
 } // LutViewer class
@@ -110,7 +110,7 @@ class LutWindow extends ImageWindow implements ActionListener {
 	private Button button;
 	private ImageProcessor ip;
 
-	LutWindow(ImagePlus imp, ImageCanvas ic, ImageProcessor ip) {
+	LutWindow(ImagePlus imp, ImageCanvas2 ic, ImageProcessor ip) {
 		super(imp, ic);
 		this.ip = ip;
 		addPanel();

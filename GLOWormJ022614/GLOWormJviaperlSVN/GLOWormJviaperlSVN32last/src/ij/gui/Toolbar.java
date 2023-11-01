@@ -1181,7 +1181,7 @@ public class Toolbar extends Canvas implements MouseListener, MouseMotionListene
 					this.win = (ImageWindow)c;
 					if (!(win instanceof ImageWindow3D)) {
 						if (imp!=null) {
-							ImageCanvas ic = imp.getCanvas();
+							ImageCanvas2 ic = imp.getCanvas();
 							if (ic!=null) {
 								ic.unzoom();
 								c.validate();

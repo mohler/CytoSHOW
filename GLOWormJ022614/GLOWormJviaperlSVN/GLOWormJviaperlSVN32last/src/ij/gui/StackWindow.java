@@ -39,7 +39,7 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 		this(imp, null, showNow);
 	}
     
-    public StackWindow(ImagePlus imp, ImageCanvas ic, boolean showNow) {
+    public StackWindow(ImagePlus imp, ImageCanvas2 ic, boolean showNow) {
 		super(imp, ic);
 		addScrollbars(imp);
 		addMouseWheelListener(this);

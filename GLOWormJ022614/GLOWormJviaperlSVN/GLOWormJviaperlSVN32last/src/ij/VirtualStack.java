@@ -1,7 +1,7 @@
 package ij;
 import ij.process.*;
 import ij.io.*;
-import ij.gui.ImageCanvas;
+import ij.gui.ImageCanvas2;
 import ij.util.Tools;
 
 import java.io.*;

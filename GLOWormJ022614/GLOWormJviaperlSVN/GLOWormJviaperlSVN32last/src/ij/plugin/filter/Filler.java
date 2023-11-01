@@ -120,7 +120,7 @@ public class Filler implements PlugInFilter, Measurements {
 			drawParticleLabels(ip);
 		else {
 			ip.setColor(Toolbar.getForegroundColor());
-			ImageCanvas ic = imp.getCanvas();
+			ImageCanvas2 ic = imp.getCanvas();
 			if (ic!=null) {
 				double mag = ic.getMagnification();
 				if (mag<1.0) {
@@ -167,7 +167,7 @@ public class Filler implements PlugInFilter, Measurements {
 			background = Color.white;
 		}
 		int size = 9;
-		ImageCanvas ic = imp.getCanvas();
+		ImageCanvas2 ic = imp.getCanvas();
 		if (ic!=null) {
 			double mag = ic.getMagnification();
 			if (mag<1.0)

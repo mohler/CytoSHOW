@@ -47,7 +47,7 @@ import javax.swing.JPopupMenu;
 import org.vcell.gloworm.MultiQTVirtualStack;
 
 /** This is a Canvas used to display images in a Window. */
-public class ImageCanvas extends Canvas implements MouseListener, MouseMotionListener, MouseWheelListener, ComponentListener, Cloneable {
+public class ImageCanvas2 extends JComponent implements MouseListener, MouseMotionListener, MouseWheelListener, ComponentListener, Cloneable {
 
 	public static Cursor defaultCursor = new Cursor(Cursor.DEFAULT_CURSOR);
 	protected static Cursor handCursor = new Cursor(Cursor.HAND_CURSOR);
@@ -109,7 +109,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 
 
-	public ImageCanvas(ImagePlus imp) {
+	public ImageCanvas2(ImagePlus imp) {
 		this.imp = imp;
 		//		sketchyMQTVS = false;
 		
@@ -165,8 +165,8 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 		magnification = 1.0;
 	}
 
-	/** Update this ImageCanvas to have the same zoom and scale settings as the one specified. */
-	void update(ImageCanvas ic) {
+	/** Update this ImageCanvas2 to have the same zoom and scale settings as the one specified. */
+	void update(ImageCanvas2 ic) {
 		if (ic == null /* || ic==this */|| ic.imp==null)
 			return;
 		
@@ -233,7 +233,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 	public void paint(Graphics g) {
 		Roi roi = imp.getRoi();
-		if (/* this == imp.getCanvas() && */(roi!=null || showAllROIs || overlay!=null)) {
+		if (this == imp.getCanvas() && (roi!=null || showAllROIs || overlay!=null)) {
 			if (roi!=null) roi.updatePaste();
 			if (/*!IJ.isMacOSX() &&*/ imageWidth!=0) {
 				paintDoubleBuffered(g);

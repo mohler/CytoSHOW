@@ -48,7 +48,7 @@ public class Roi extends Object implements Cloneable, java.io.Serializable {
 	protected int xMax, yMax;
 	protected ImagePlus imp;
 	private int imageID;
-	protected ImageCanvas ic;
+	protected ImageCanvas2 ic;
 	protected int oldX, oldY, oldWidth, oldHeight;
 	protected int clipX, clipY, clipWidth, clipHeight;
 	protected ImagePlus clipboard;
@@ -1730,7 +1730,7 @@ public class Roi extends Object implements Cloneable, java.io.Serializable {
 		Overlay overlay = imp.getOverlay();
 		if (overlay!=null && overlay.contains(this))
 			return true;
-		ImageCanvas ic = imp.getCanvas();
+		ImageCanvas2 ic = imp.getCanvas();
 		overlay = ic!=null?ic.getShowAllList():null; // Tag Manager overlay
 		return overlay!=null && overlay.contains(this);
 	}

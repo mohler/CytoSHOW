@@ -35,7 +35,7 @@ import java.util.Vector;
 	}
 
 	public void mousePressed(ImagePlus imp, MouseEvent e) {
-		ImageCanvas ic = imp.getCanvas();
+		ImageCanvas2 ic = imp.getCanvas();
 		int x = ic.offScreenX(e.getX());
 		int y = ic.offScreenY(e.getY());
 		xStart = x;
@@ -72,7 +72,7 @@ import java.util.Vector;
 
 	public void mouseDragged(ImagePlus imp, MouseEvent e) {
 		if (mode == IDLE) return;
-		ImageCanvas ic = imp.getCanvas();
+		ImageCanvas2 ic = imp.getCanvas();
 		int x = ic.offScreenX(e.getX());
 		int y = ic.offScreenY(e.getY());
 		if (mode == RESIZING) {

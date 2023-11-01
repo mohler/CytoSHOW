@@ -60,7 +60,7 @@ public class ScreenGrabber implements PlugIn {
 			win.toFront();
 			IJ.wait(500);
 			Point loc = win.getLocation();
-			ImageCanvas ic = win.getCanvas();
+			ImageCanvas2 ic = win.getCanvas();
 			Rectangle bounds = ic.getBounds();
 			loc.x += bounds.x;
 			loc.y += bounds.y;

@@ -10,7 +10,7 @@ import ij.ImagePlus;
 import ij.Menus;
 import ij.WindowManager;
 import ij.gui.ImageWindow;
-import ij.gui.ImageCanvas;
+import ij.gui.ImageCanvas2;
 import ij.gui.Toolbar;
 import ij.plugin.DragAndDrop;
 import ij.plugin.frame.Channels;
@@ -548,8 +548,8 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 		return univ;
 	}
 
-	public ImageCanvas getCanvas() {
-		return new ImageCanvas(getImagePlus());
+	public ImageCanvas2 getCanvas() {
+		return new ImageCanvas2(getImagePlus());
 	}
 
 	/* off-screen rendering stuff */

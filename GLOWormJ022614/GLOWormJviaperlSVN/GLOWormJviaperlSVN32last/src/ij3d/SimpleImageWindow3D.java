@@ -10,7 +10,7 @@ import ij.ImagePlus;
 import ij.Menus;
 import ij.WindowManager;
 import ij.gui.ImageWindow;
-import ij.gui.ImageCanvas;
+import ij.gui.ImageCanvas2;
 import ij.gui.Toolbar;
 import ij.plugin.DragAndDrop;
 import ij.plugin.frame.Channels;
@@ -69,7 +69,7 @@ public class SimpleImageWindow3D extends ImageWindow3D  {
 //	private boolean noOffScreen = false;
 //	private ErrorListener error_listener;
 //	private ImagePlus imp;
-//	private ImageCanvas ic;
+//	private ImageCanvas2 ic;
 //	private Panel overheadPanel;
 //	private Toolbar toolbar;
 //	private Image3DMenubar menubar;

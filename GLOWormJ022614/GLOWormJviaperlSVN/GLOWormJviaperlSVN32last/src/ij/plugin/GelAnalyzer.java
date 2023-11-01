@@ -64,7 +64,7 @@ public class GelAnalyzer implements PlugIn {
 			ipLanes = null;
 			overlay = null;
 			if (gel!=null) {
-				ImageCanvas ic = gel.getCanvas();
+				ImageCanvas2 ic = gel.getCanvas();
 				if (ic!=null) ic.setDisplayList(null);
 				gel.draw();
 			}
@@ -381,7 +381,7 @@ public class GelAnalyzer implements PlugIn {
 		toolbar.setColor(Color.black);
 		toolbar.setTool(Toolbar.LINE);
 		ImageWindow win = WindowManager.getCurrentWindow();
-		ImageCanvas canvas = win.getCanvas();
+		ImageCanvas2 canvas = win.getCanvas();
 		if (canvas instanceof PlotsCanvas)
 			plotsCanvas = (PlotsCanvas)canvas;
 		else
@@ -470,7 +470,7 @@ class Plots extends ImagePlus {
 	/** Overrides ImagePlus.show(). */
 	public void show() {
 		img = ip.createImage();
-		ImageCanvas ic = new PlotsCanvas(this);
+		ImageCanvas2 ic = new PlotsCanvas(this);
 		win = new ImageWindow(this, ic);
 		IJ.showStatus("");
 		if (ic.getMagnification()==1.0)
@@ -493,7 +493,7 @@ class Plots extends ImagePlus {
 }
 
 
-class PlotsCanvas extends ImageCanvas {
+class PlotsCanvas extends ImageCanvas2 {
 
 	public static final int MAX_PEAKS = 200;
 

@@ -631,7 +631,7 @@ public class Slicer implements PlugIn, TextListener, ItemListener {
 	}
 
 	void drawLine(double x1, double y1, double x2, double y2, ImagePlus imp) {
-		 ImageCanvas ic = imp.getCanvas();
+		 ImageCanvas2 ic = imp.getCanvas();
 		 if (ic==null) return;
 		 Graphics g = ic.getGraphics();
 		 g.setColor(new Color(1f, 1f, 0f, 0.4f));

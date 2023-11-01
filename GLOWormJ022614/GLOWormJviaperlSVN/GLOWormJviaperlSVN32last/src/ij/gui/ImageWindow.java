@@ -86,7 +86,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 	
 	protected ImagePlus imp;
 	protected ImageJ ij;
-	protected ImageCanvas ic;
+	protected ImageCanvas2 ic;
 	private double initialMagnification = 1;
 	private int newWidth, newHeight;
 	protected boolean closed;
@@ -172,7 +172,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
     	this(imp, null);
    }
     
-    public ImageWindow(ImagePlus imp, ImageCanvas ic) {
+    public ImageWindow(ImagePlus imp, ImageCanvas2 ic) {
 		super(imp.getTitle());
 		BorderLayout bl = new BorderLayout();
 
@@ -191,7 +191,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		ij = IJ.getInstance();
 		this.imp = imp;
 		if (ic==null) {
-			ic=new ImageCanvas(imp); 
+			ic=new ImageCanvas2(imp); 
 			newCanvas=true;
 		}
 		this.ic = ic;
@@ -288,7 +288,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 //	    addComponentListener(new ComponentAdapter() {
 //	      public void componentResized(ComponentEvent e) {
 //	    	  System.out.println(e.getSource().toString());
-//	    	  ImageCanvas ic = ImageWindow.this.ic;
+//	    	  ImageCanvas2 ic = ImageWindow.this.ic;
 //	    	  double mag = ic.getMagnification();
 //	    	  ic.setSourceRect(new Rectangle(ic.getX(), ic.getY(), 
 //	    			  ((int)(ic.getWidth()/mag)),
@@ -1110,7 +1110,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 	}
 
 	public void setImage(ImagePlus imp2) {
-		ImageCanvas ic = getCanvas();
+		ImageCanvas2 ic = getCanvas();
 		if (ic==null || imp2==null)
 			return;
 		imp = imp2;
@@ -1143,7 +1143,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		setMaxBoundsTime = System.currentTimeMillis();
 	}
 
-	public ImageCanvas getCanvas() {
+	public ImageCanvas2 getCanvas() {
 		return ic;
 	}
 	

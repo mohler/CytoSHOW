@@ -1957,7 +1957,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 	}
 
 	public void setEditMode(ImagePlus imp, boolean editMode) {
-		ImageCanvas ic = imp.getCanvas();
+		ImageCanvas2 ic = imp.getCanvas();
 		boolean showAll = false;
 		if (ic != null) {
 			showAll = ic.getShowAllROIs() | editMode;
@@ -1981,7 +1981,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 //		ContentInstant[] contentInstants = getShownContentInstantsAsArray();
 //		int n = contentInstants.length;
 //		Overlay overlay = new Overlay();
-//		ImageCanvas ic = imp.getCanvas();
+//		ImageCanvas2 ic = imp.getCanvas();
 //		Color color = ic != null ? ic.getShowAllColor() : null;
 //		for (int i = 0; i < n; i++) {
 //			ContentInstant contentInstant = (ContentInstant) contentInstants[i].cloneNode(true);

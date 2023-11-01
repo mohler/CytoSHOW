@@ -18,7 +18,7 @@ public class Save_JPEGsnapshot implements PlugIn {
 //		win.toFront();
 //		IJ.wait(500);
 //		Point loc = win.getLocation();
-//		ImageCanvas ic = win.getCanvas();
+//		ImageCanvas2 ic = win.getCanvas();
 //		Rectangle boundsForCapture = win.getBounds();
 //		loc.x += boundsForCapture.x;
 //		loc.y += boundsForCapture.y;

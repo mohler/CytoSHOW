@@ -688,7 +688,7 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 	public void mouseMoved(MouseEvent e) {
 
 		Object source = e.getSource();
-		bb2Imp = ((ImageCanvas)source).getImage();
+		bb2Imp = ((ImageCanvas2)source).getImage();
 		if (rm == null || (bb2Imp == rm.getImagePlus()  && !bb2Imp.getTitle().startsWith("Sketch3D") && !sketchyMQTVS))
 			return;
 
@@ -785,10 +785,10 @@ public class ColorLegend extends PlugInFrame implements PlugIn, ItemListener, Ac
 		Object source = e.getSource();
 		if (source instanceof JCheckBox)
 			return;
-		if (bbImp!=null && bbImp.getCanvas()!= (ImageCanvas)source)
+		if (bbImp!=null && bbImp.getCanvas()!= (ImageCanvas2)source)
 			bbImp=null;
 		else {
-			bbImp = ((ImageCanvas)source).getImage();
+			bbImp = ((ImageCanvas2)source).getImage();
 			if (bbImp.getIP() instanceof ColorProcessor) 
 				mouseLocColor = ((ColorProcessor)bbImp.getIP())
 				.getColor(bbImp.getCanvas().offScreenX(e.getX()),

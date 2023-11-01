@@ -95,7 +95,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 		dropImp = null;
 		setImp(dropImp);
 		if (dtc instanceof ImageCanvas) {
-			dropImp = ((ImageCanvas) dtc).getImage();
+			dropImp = ((ImageCanvas2) dtc).getImage();
 			if (dropImp == null)
 				dropImp = IJ.getImage();
 			setImp(dropImp);

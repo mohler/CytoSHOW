@@ -106,7 +106,7 @@ public class WindowOrganizer implements PlugIn {
 			if (win!=null) {
 				win.setLocation(hloc, vloc);
 				//IJ.write(i+" "+w+" "+tileWidth+" "+mag+" "+IJ.d2s(zoomFactor,2)+" "+zoomCount);
-				ImageCanvas canvas = win.getCanvas();
+				ImageCanvas2 canvas = win.getCanvas();
 				while (IJ.isWindows() && win.getSize().width*0.85>=tileWidth && canvas.getMagnification()>0.03125)
 					canvas.zoomOut(0, 0);
 				win.toFront();

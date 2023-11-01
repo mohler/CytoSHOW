@@ -10,7 +10,7 @@ public class ArrowTool extends PlugInTool {
 	Roi arrow;
 
 	public void mousePressed(ImagePlus imp, MouseEvent e) {
-		ImageCanvas ic = imp.getCanvas();
+		ImageCanvas2 ic = imp.getCanvas();
 		int sx = e.getX();
 		int sy = e.getY();
 		int ox = ic.offScreenX(sx);
@@ -25,7 +25,7 @@ public class ArrowTool extends PlugInTool {
 	}
 
 	public void mouseDragged(ImagePlus imp, MouseEvent e) {
-		ImageCanvas ic = imp.getCanvas();
+		ImageCanvas2 ic = imp.getCanvas();
 		int sx = e.getX();
 		int sy = e.getY();
 		int ox = ic.offScreenX(sx);
@@ -39,7 +39,7 @@ public class ArrowTool extends PlugInTool {
 	}
 
 	public void mouseReleased(ImagePlus imp, MouseEvent e) {
-		ImageCanvas ic = imp.getCanvas();
+		ImageCanvas2 ic = imp.getCanvas();
 		int sx = e.getX();
 		int sy = e.getY();
 		int ox = ic.offScreenX(sx);

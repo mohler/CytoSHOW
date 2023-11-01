@@ -8,10 +8,10 @@ public class ImageLayout implements LayoutManager {
 
     int hgap;
     int vgap;
-	ImageCanvas ic;
+	ImageCanvas2 ic;
 
     /** Creates a new ImageLayout with center alignment and 5 pixel horizontal and vertical gaps. */
-    public ImageLayout(ImageCanvas ic) {
+    public ImageLayout(ImageCanvas2 ic) {
     	this.ic = ic;
 		this.hgap = 5;
 		this.vgap = 5;

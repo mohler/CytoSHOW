@@ -109,7 +109,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	private boolean openAsHyperStack;
 	private int[] position = {1,1,1};
 	private boolean noUpdateMode;
-	public ImageCanvas flatteningCanvas;
+	public ImageCanvas2 flatteningCanvas;
 	private Overlay overlay;
 	private boolean hideOverlay;
 	private static int default16bitDisplayRange;
@@ -313,7 +313,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	/** Draws image and roi outline using a clip rect. */
 	public void draw(int x, int y, int width, int height){
 		if (win!=null) {
-			ImageCanvas ic = win.getCanvas();
+			ImageCanvas2 ic = win.getCanvas();
 			double mag = ic.getMagnification();
 			x = ic.screenX(x);
 			y = ic.screenY(y);
@@ -494,7 +494,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 				getCanvas().addMouseListener(cl);
 			}
 			notifyListeners(OPENED);
-			ImageCanvas ic = getCanvas();
+			ImageCanvas2 ic = getCanvas();
 
 			IJ.wait(100);  //without a pause, the following resize fails.
 			int padH = 1+win.getInsets().left
@@ -812,9 +812,9 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 			roi.setImage(this);  // update roi's 'ic' field
 	}
 	
-	/** Returns the ImageCanvas being used to
+	/** Returns the ImageCanvas2 being used to
 		display this image, or null...??? */
-	public ImageCanvas getCanvas() {
+	public ImageCanvas2 getCanvas() {
 		return win!=null?win.getCanvas():flatteningCanvas;
 	}
 
@@ -1836,7 +1836,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 				if (Prefs.pointAutoMeasure || (Prefs.pointAutoNextSlice&&!Prefs.pointAddToManager)) IJ.run("Measure");
 				if (Prefs.pointAddToManager) {
 					IJ.run("Add to Manager ");
-					ImageCanvas ic = getCanvas();
+					ImageCanvas2 ic = getCanvas();
 					if (ic!=null && ic.getShowAllList()==null)
 						ic.setShowAllROIs(true);
 				}
@@ -2306,7 +2306,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	}
 
     /** Displays the cursor coordinates and pixel value in the status bar.
-    	Called by ImageCanvas when the mouse moves. Can be overridden by
+    	Called by ImageCanvas2 when the mouse moves. Can be overridden by
     	ImagePlus subclasses.
     */
     public void mouseMoved(int x, int y) {
@@ -2511,7 +2511,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 		//}
 		if (r==null || (r!=null && (w!=r.width || h!=r.height))) {
 			// create a new roi centered on visible part of image
-			ImageCanvas ic = null;
+			ImageCanvas2 ic = null;
 			if (win!=null)
 				ic = win.getCanvas();
 			Rectangle srcRect = ic!=null?ic.getSrcRect():new Rectangle(0,0,width, height);
@@ -2664,7 +2664,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	public ImagePlus flatten() {
 		String title = "Flat_"+getTitle();
 		BufferedImage bi = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-		flatteningCanvas = new ImageCanvas(this);
+		flatteningCanvas = new ImageCanvas2(this);
 		flatteningCanvas.setShowAllROIs(this.getCanvas().getShowAllROIs());
 		flatteningCanvas.paint(bi.getGraphics());
 		if (Recorder.record) Recorder.recordCall("imp = IJ.getImage().flatten();");
@@ -2680,7 +2680,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	 * @see ij.gui.Roi#setNonScalable
 	 */
 	public void setOverlay(Overlay overlay) {
-		ImageCanvas ic = getCanvas();
+		ImageCanvas2 ic = getCanvas();
 		if (ic!=null) {
 			ic.setOverlay(overlay);
 			overlay = null;
@@ -2716,7 +2716,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 
 	/** Returns the current overly, or null if this image does not have an overlay. */
 	public Overlay getOverlay() {
-		ImageCanvas ic = getCanvas();
+		ImageCanvas2 ic = getCanvas();
 		if (ic!=null)
 			return ic.getOverlay();
 		else
@@ -2725,7 +2725,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	
 	public void setHideOverlay(boolean hide) {
 		hideOverlay = hide;
-		ImageCanvas ic = getCanvas();
+		ImageCanvas2 ic = getCanvas();
 		if (ic!=null && ic.getOverlay()!=null)
 			ic.repaint();
 	}

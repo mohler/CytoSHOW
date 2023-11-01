@@ -1697,7 +1697,7 @@ public class Functions implements MacroConstants, Measurements {
 		Variable z = getNextVariable();
 		Variable flags = getLastVariable();
 		ImagePlus imp = getImage();
-		ImageCanvas ic = imp.getCanvas();
+		ImageCanvas2 ic = imp.getCanvas();
 		if (ic==null) return;
 		Point p = ic.getCursorLoc();
 		x.setValue(p.x);
@@ -2916,7 +2916,7 @@ public class Functions implements MacroConstants, Measurements {
 	double getZoom() {
 		interp.getParens();
 		ImagePlus imp = getImage();
-		ImageCanvas ic = imp.getCanvas();
+		ImageCanvas2 ic = imp.getCanvas();
 		if (ic==null)
 			{interp.error("Image not displayed"); return 0.0;}
 		else
@@ -3939,11 +3939,11 @@ public class Functions implements MacroConstants, Measurements {
 		interp.getRightParen();
 		arg1 = arg1.toLowerCase(Locale.US);
 		if (arg1.equals("disablepopupmenu")) {
-			ImageCanvas ic = getImage().getCanvas();
+			ImageCanvas2 ic = getImage().getCanvas();
 			if (ic!=null) ic.disablePopupMenu(state);
 		} else if (arg1.startsWith("show all")) {
 			ImagePlus img = getImage();
-			ImageCanvas ic = img.getCanvas();
+			ImageCanvas2 ic = img.getCanvas();
 			if (ic!=null) {
 				boolean previousState = ic.getShowAllROIs();
 				ic.setShowAllROIs(state);
@@ -5773,7 +5773,7 @@ public class Functions implements MacroConstants, Measurements {
 		Variable w = getNextVariable();
 		Variable h = getLastVariable();
 		ImagePlus imp = getImage();
-		ImageCanvas ic = imp.getCanvas();
+		ImageCanvas2 ic = imp.getCanvas();
 		if (ic==null) return;
 		Rectangle r = ic.getSrcRect();
 		x.setValue(r.x);

@@ -598,7 +598,7 @@ public class HistogramWindow extends ImageWindow implements Measurements, Action
 	private void createListeners() {
 		//IJ.log("createListeners");
 		if (srcImp==null) return;
-		ImageCanvas ic = srcImp.getCanvas();
+		ImageCanvas2 ic = srcImp.getCanvas();
 		if (ic==null) return;
 		ic.addMouseListener(this);
 		ic.addMouseMotionListener(this);
@@ -612,7 +612,7 @@ public class HistogramWindow extends ImageWindow implements Measurements, Action
 	private void removeListeners() {
 		//IJ.log("removeListeners");
 		if (srcImp==null) return;
-		ImageCanvas ic = srcImp.getCanvas();
+		ImageCanvas2 ic = srcImp.getCanvas();
 		ic.removeMouseListener(this);
 		ic.removeMouseMotionListener(this);
 		ic.removeKeyListener(this);

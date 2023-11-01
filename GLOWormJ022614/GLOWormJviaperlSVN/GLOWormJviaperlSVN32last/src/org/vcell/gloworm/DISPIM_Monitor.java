@@ -64,7 +64,7 @@ import ij.VirtualStack;
 import ij.WindowManager;
 import ij.gui.EllipseRoi;
 import ij.gui.GenericDialog;
-import ij.gui.ImageCanvas;
+import ij.gui.ImageCanvas2;
 import ij.gui.ImageWindow;
 import ij.gui.Line;
 import ij.gui.PolygonRoi;
@@ -2965,7 +2965,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											prjXwin.viewButtonPanel
 											.validate();
 											prjXwin.pack();
-											ImageCanvas ic = prjXwin.getImagePlus().getCanvas();
+											ImageCanvas2 ic = prjXwin.getImagePlus().getCanvas();
 											int padH = 1+prjXwin.getInsets().left
 													+prjXwin.getInsets().right
 													+(prjXwin.optionsPanel.isVisible()?prjXwin.optionsPanel.getWidth():0)
@@ -3053,7 +3053,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										prjYwin.viewButtonPanel
 										.validate();
 										prjYwin.pack();
-										ImageCanvas ic = prjYwin.getImagePlus().getCanvas();
+										ImageCanvas2 ic = prjYwin.getImagePlus().getCanvas();
 										int padH = 1+prjYwin.getInsets().left
 												+prjYwin.getInsets().right
 												+(prjYwin.optionsPanel.isVisible()?prjYwin.optionsPanel.getWidth():0)
@@ -6233,7 +6233,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 												prjXwin.viewButtonPanel
 												.validate();
 												prjXwin.pack();
-												ImageCanvas ic = prjXwin.getImagePlus().getCanvas();
+												ImageCanvas2 ic = prjXwin.getImagePlus().getCanvas();
 												int padH = 1+prjXwin.getInsets().left
 														+prjXwin.getInsets().right
 														+(prjXwin.optionsPanel.isVisible()?prjXwin.optionsPanel.getWidth():0)
@@ -6370,7 +6370,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 												prjYwin.viewButtonPanel
 												.validate();
 												prjYwin.pack();
-												ImageCanvas ic = prjYwin.getImagePlus().getCanvas();
+												ImageCanvas2 ic = prjYwin.getImagePlus().getCanvas();
 												int padH = 1+prjYwin.getInsets().left
 														+prjYwin.getInsets().right
 														+(prjYwin.optionsPanel.isVisible()?prjYwin.optionsPanel.getWidth():0)

@@ -3155,7 +3155,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		if (imp == null)
 			return false;
-		ImageCanvas ic = imp.getCanvas();
+		ImageCanvas2 ic = imp.getCanvas();
 		boolean showingAll = ic != null && ic.getShowAllROIs();
 		Roi roi = imp.getRoi();
 		this.setRoiFillColor(roi, Roi.getDefaultFillColor());
@@ -3435,7 +3435,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		int width = imp.getWidth(), height = imp.getHeight();
 		if (restoreCentered) {
 			if (imp.getCanvas() != null) {
-				ImageCanvas ic = imp.getCanvas();
+				ImageCanvas2 ic = imp.getCanvas();
 				if (ic != null) {
 					Rectangle r1 = ic.getSrcRect();
 					Rectangle r2 = roi2.getBounds();
@@ -4661,7 +4661,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				break;
 			}
 		}
-		ImageCanvas ic = imp.getCanvas();
+		ImageCanvas2 ic = imp.getCanvas();
 		if (ic != null)
 			ic.setShowAllROIs(false);
 		imp.updateAndDraw();
@@ -4847,7 +4847,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		if (rpRoi != null && rpName != null && !rpRoi.getName().equals(rpName))
 			rename(rpRoi.getName(), null, true);
-		ImageCanvas ic = imp != null ? imp.getCanvas() : null;
+		ImageCanvas2 ic = imp != null ? imp.getCanvas() : null;
 		Roi roi = imp != null ? imp.getRoi() : null;
 		boolean showingAll = ic != null && ic.getShowAllROIs();
 		if (roi != null && (n == 1 || !showingAll)) {
@@ -4889,7 +4889,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			IJ.noImage();
 			return;
 		}
-		ImageCanvas ic = imp.getCanvas();
+		ImageCanvas2 ic = imp.getCanvas();
 		if (!ic.getShowAllROIs() && ic.getDisplayList() == null && imp.getRoi() == null)
 			error("Image does not have an overlay or ROI");
 		else
@@ -5240,7 +5240,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			error("Linked image is not open.");
 			return;
 		}
-		ImageCanvas ic = imp.getCanvas();
+		ImageCanvas2 ic = imp.getCanvas();
 		if (ic == null)
 			return;
 		showAll = mode == SHOW_ALL;
@@ -5298,7 +5298,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		ImagePlus imp = this.imp;
 		if (imp == null)
 			return;
-		ImageCanvas ic = imp.getCanvas();
+		ImageCanvas2 ic = imp.getCanvas();
 		if (ic != null && ic.getShowAllROIs())
 			imp.draw();
 	}
@@ -5824,7 +5824,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 
 	public void setEditMode(ImagePlus imp, boolean editMode) {
-		ImageCanvas ic = imp.getCanvas();
+		ImageCanvas2 ic = imp.getCanvas();
 		boolean showAll = false;
 		if (ic != null) {
 			showAll = ic.getShowAllROIs() | editMode;
@@ -5848,7 +5848,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		Roi[] rois = getShownRoisAsArray();
 		int n = rois.length;
 		Overlay overlay = new Overlay();
-		ImageCanvas ic = imp.getCanvas();
+		ImageCanvas2 ic = imp.getCanvas();
 		Color color = ic != null ? ic.getShowAllColor() : null;
 		for (int i = 0; i < n; i++) {
 			Roi roi = (Roi) rois[i].clone();
@@ -7262,7 +7262,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			sp.flipHorizontal();
 			projZImps.get(projZImps.size() - 1).setStack(sp.rotateLeft());
 
-			ImageCanvas ic = projZImps.get(projZImps.size() - 1).getCanvas();
+			ImageCanvas2 ic = projZImps.get(projZImps.size() - 1).getCanvas();
 			projZImps.get(projZImps.size() - 1).getWindow().pack();
 			int padH = 1 + projZImps.get(projZImps.size() - 1).getWindow().getInsets().left
 					+ projZImps.get(projZImps.size() - 1).getWindow().getInsets().right

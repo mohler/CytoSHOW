@@ -15,7 +15,7 @@ public class Zoom implements PlugIn{
 		ImagePlus imp = WindowManager.getCurrentImage();
 		if (imp==null)
 			{IJ.noImage(); return;}
-		ImageCanvas ic = imp.getCanvas();
+		ImageCanvas2 ic = imp.getCanvas();
 		if (ic==null) return;
 		Point loc = ic.getCursorLoc();
 		if (!ic.cursorOverImage()) {
@@ -46,7 +46,7 @@ public class Zoom implements PlugIn{
 		}
 	}
 	
-	void zoomToSelection(ImagePlus imp, ImageCanvas ic) {
+	void zoomToSelection(ImagePlus imp, ImageCanvas2 ic) {
 		Roi roi = imp.getRoi();
 		ic.unzoom();
 		if (roi==null) 
@@ -76,7 +76,7 @@ public class Zoom implements PlugIn{
 	
 	/** Based on Albert Cardona's ZoomExact plugin:
 		http://albert.rierol.net/software.html */
-	void setZoom(ImagePlus imp, ImageCanvas ic) {
+	void setZoom(ImagePlus imp, ImageCanvas2 ic) {
 		int x = imp.getWidth()/2;
 		int y = imp.getHeight()/2;
 		ImageWindow win = imp.getWindow();

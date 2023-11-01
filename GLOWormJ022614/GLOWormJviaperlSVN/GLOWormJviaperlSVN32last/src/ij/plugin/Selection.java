@@ -282,7 +282,7 @@ public class Selection implements PlugIn, Measurements {
 		Undo.setup(Undo.ROI, imp);
 		FloatPolygon poly = roi.getInterpolatedPolygon(interval, smooth);
 		int type = roi.isLine()?Roi.FREELINE:Roi.FREEROI;
-		ImageCanvas ic = imp.getCanvas();
+		ImageCanvas2 ic = imp.getCanvas();
 		if (poly.npoints<=150 && ic!=null && ic.getMagnification()>=12.0)
 			type = roi.isLine()?Roi.POLYLINE:Roi.POLYGON;
 		Roi p = new PolygonRoi(poly,type);

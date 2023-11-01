@@ -143,7 +143,7 @@ public class QuickTime_TGrabWriter implements PlugIn, StdQTConstants, TextListen
 	
 		ImageWindow window = imp.getWindow();
 		window.toFront();
-		ImageCanvas imcan = window.getCanvas();
+		ImageCanvas2 imcan = window.getCanvas();
 		Rectangle captureBnds = imcan.getBounds();
 		
 		int viewChannel = imp.getChannel();
@@ -209,7 +209,7 @@ public class QuickTime_TGrabWriter implements PlugIn, StdQTConstants, TextListen
 						win.toFront();
 						IJ.wait(500);
 						Point loc = win.getLocation();
-						ImageCanvas ic = win.getCanvas();
+						ImageCanvas2 ic = win.getCanvas();
 						Rectangle boundsForCapture = ic.getBounds();
 						loc.x += boundsForCapture.x;
 						loc.y += boundsForCapture.y;

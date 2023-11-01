@@ -57,7 +57,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 	private boolean hyperstack;
 	private int currentChannel, currentFrame; 
 	private int currentMode = 10000;
-	private ImageCanvas xyCanvas;
+	private ImageCanvas2 xyCanvas;
 	private static final int H_ROI=0, H_ZOOM=1;
 	private static boolean sticky=true;
 	private static int xzID, yzID, xyID;
@@ -269,7 +269,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 			return originalImp.getStack();
 	}
  
-	private void addListeners(ImageCanvas canvass) {
+	private void addListeners(ImageCanvas2 canvass) {
 		xyCanvas.addMouseListener(this);
 		xyCanvas.addMouseMotionListener(this);
 		xyCanvas.addKeyListener(this);
@@ -310,7 +310,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
         int z = xy_image.getSlice()-1;
         ImageWindow xz_win = xz_image.getWindow();
         if (xz_win==null) return;
-        ImageCanvas xz_ic = xz_win.getCanvas();
+        ImageCanvas2 xz_ic = xz_win.getCanvas();
         double xz_mag = xz_ic.getMagnification();
         double arat = az/ax;
 		int zcoord=(int)(arat*z);
@@ -325,7 +325,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
         }
         ImageWindow yz_win = yz_image.getWindow();
         if (yz_win==null) return;
-        ImageCanvas yz_ic = yz_win.getCanvas();
+        ImageCanvas2 yz_ic = yz_win.getCanvas();
         double yz_mag = yz_ic.getMagnification();
 		zcoord = (int)(arat*z);
         while (yz_mag<magnification) {
@@ -404,7 +404,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 		if (yz_image.getWindow()==null) {
 			yz_image.show();
 			yz_image.getWindow().setBackground(Color.cyan);
-			ImageCanvas ic = yz_image.getCanvas();
+			ImageCanvas2 ic = yz_image.getCanvas();
 			ic.addKeyListener(this);
 			ic.addMouseListener(this);
 			ic.addMouseMotionListener(this);
@@ -419,13 +419,13 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 	
 
 		} else {
-			ImageCanvas ic = yz_image.getWindow().getCanvas();
+			ImageCanvas2 ic = yz_image.getWindow().getCanvas();
 //			yz_image.getRoiManager().showAll(RoiManager.SHOW_ALL);
 		}
 		if (xz_image.getWindow()==null) {
 			xz_image.show();
 			xz_image.getWindow().setBackground(Color.magenta);
-			ImageCanvas ic = xz_image.getCanvas();
+			ImageCanvas2 ic = xz_image.getCanvas();
 			ic.addKeyListener(this);
 			ic.addMouseListener(this);
 			ic.addMouseMotionListener(this);
@@ -438,7 +438,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 			xz_image.getRoiManager().showAll(RoiManager.SHOW_ALL);			
 
 		} else {
-			ImageCanvas ic = xz_image.getWindow().getCanvas();
+			ImageCanvas2 ic = xz_image.getWindow().getCanvas();
 //			xz_image.getRoiManager().showAll(RoiManager.SHOW_ALL);			
 		}
  
@@ -797,7 +797,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 			ImageWindow win1 = xz_image.getWindow();
 			if (win1!=null && !win1.isClosed()) {
 				win1.removeMouseWheelListener(this);
-				ImageCanvas ic = win1.getCanvas();
+				ImageCanvas2 ic = win1.getCanvas();
 				if (ic!=null) {
 					//IJ.log("TEST1");
 					ic.removeKeyListener(this);
@@ -821,7 +821,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 			ImageWindow win2 = yz_image.getWindow();
 			if (win2!=null && !win2.isClosed()) {
 				win2.removeMouseWheelListener(this);
-				ImageCanvas ic = win2.getCanvas();
+				ImageCanvas2 ic = win2.getCanvas();
 				if (ic!=null) {
 					//IJ.log("TEST2");
 					ic.removeKeyListener(this);
@@ -893,7 +893,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 	}
 
 	public void mousePressed(MouseEvent e) {
-		ImageCanvas xyCanvas = xy_image.getCanvas();
+		ImageCanvas2 xyCanvas = xy_image.getCanvas();
 		startingSrcRect = (Rectangle)xyCanvas.getSrcRect().clone();
 		mouseDragged(e);
 	}
@@ -973,12 +973,12 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 	}
 
 	public void mouseReleased(MouseEvent e) {
-		ImageCanvas ic = xy_image.getCanvas();
+		ImageCanvas2 ic = xy_image.getCanvas();
 		Rectangle srcRect = ic.getSrcRect();
 		if (srcRect.x!=startingSrcRect.x || srcRect.y!=startingSrcRect.y) {
 			// user has scrolled xy image
 			int dy = srcRect.y - startingSrcRect.y;
-			ImageCanvas yzic = yz_image.getCanvas();
+			ImageCanvas2 yzic = yz_image.getCanvas();
 			Rectangle yzSrcRect =yzic.getSrcRect();
 			if (rotateYZ) {
 				yzSrcRect.x += dy;
@@ -995,7 +995,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 			}
 			yzic.repaint();
 			int dx = srcRect.x - startingSrcRect.x;
-			ImageCanvas xzic = xz_image.getCanvas();
+			ImageCanvas2 xzic = xz_image.getCanvas();
 			Rectangle xzSrcRect =xzic.getSrcRect();
 			xzSrcRect.x += dx;
 			if (xzSrcRect.x<0)
@@ -1075,7 +1075,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 		int zcoord=(int)Math.round(arat*zlice);
 		if (flipXZ) zcoord = (int)Math.round(arat*(z-zlice));
 		
-//		ImageCanvas xzCanvas = xz_image.getCanvas();
+//		ImageCanvas2 xzCanvas = xz_image.getCanvas();
 		p=new Point (x, zcoord);
 		Line vLine = null;
 		Line hLine = null;
@@ -1177,7 +1177,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 			ImagePlus cimp = WindowManager.getCurrentImage();
 			if (cimp==null) return command;
 			if (cimp==xy_image) {
-				ImageCanvas ic = xy_image.getCanvas();
+				ImageCanvas2 ic = xy_image.getCanvas();
 				if (ic==null) return null;
 				int x = ic.screenX(crossLoc.x);
 				int y = ic.screenY(crossLoc.y);
@@ -1249,7 +1249,7 @@ public class Orthogonal_Views implements PlugIn, MouseListener, MouseMotionListe
 	}
 
 	public void focusGained(FocusEvent e) {
-		ImageCanvas ic = xy_image.getCanvas();
+		ImageCanvas2 ic = xy_image.getCanvas();
 		if (ic!=null) xyCanvas.requestFocus();
 		arrangeWindows(sticky);
 	}

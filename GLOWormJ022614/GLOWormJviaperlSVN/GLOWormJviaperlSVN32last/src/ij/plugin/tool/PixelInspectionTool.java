@@ -61,7 +61,7 @@ public class  PixelInspectionTool extends PlugInTool {
 	}
 
 	void drawOutline(ImagePlus imp, MouseEvent e) {
-		ImageCanvas ic = imp.getCanvas();
+		ImageCanvas2 ic = imp.getCanvas();
 		int x = ic.offScreenX(e.getX());
 		int y = ic.offScreenY(e.getY());
 		int radius = PixelInspector.radius;
@@ -146,7 +146,7 @@ class PixelInspector extends PlugInFrame
 	int bitDepth;                 //the image bit depth
 	int digits;						//decimal fraction digits to display
 	boolean expMode;				//whether to display the data in exp format
-	ImageCanvas canvas;				//the canvas of imp
+	ImageCanvas2 canvas;				//the canvas of imp
 	Thread bgThread;				//thread for output (in the background)
 	Label[] labels;					//the display fields
 	//Label prefsLabel = new Label("Prefs\u2026");

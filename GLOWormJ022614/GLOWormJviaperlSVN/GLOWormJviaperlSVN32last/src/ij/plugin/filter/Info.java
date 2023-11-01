@@ -168,7 +168,7 @@ public class Info implements PlugInFilter {
 			}
 			s += "Threshold: "+IJ.d2s(lower,dp)+"-"+IJ.d2s(upper,dp)+"\n";
 		}
-		ImageCanvas ic = imp.getCanvas();
+		ImageCanvas2 ic = imp.getCanvas();
     	double mag = ic!=null?ic.getMagnification():1.0;
     	if (mag!=1.0)
 			s += "Magnification: " + IJ.d2s(mag,2) + "\n";

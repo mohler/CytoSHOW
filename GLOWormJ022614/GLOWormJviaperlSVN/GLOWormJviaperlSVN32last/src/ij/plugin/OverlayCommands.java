@@ -214,7 +214,7 @@ public class OverlayCommands implements PlugIn {
 	void remove() {
 		ImagePlus imp = WindowManager.getCurrentImage();
 		if (imp!=null) {
-			ImageCanvas ic = imp.getCanvas();
+			ImageCanvas2 ic = imp.getCanvas();
 			if (ic!=null)
 				ic.setShowAllList(null);
 			imp.setOverlay(null);
@@ -277,7 +277,7 @@ public class OverlayCommands implements PlugIn {
 			return;
 		}
 		rm.moveRoisToOverlay(imp);
-		ImageCanvas ic = imp.getCanvas();
+		ImageCanvas2 ic = imp.getCanvas();
 		if (ic!=null) ic.setShowAllROIs(false);
 		rm.setEditMode(imp, false);
 		imp.deleteRoi();

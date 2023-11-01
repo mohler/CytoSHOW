@@ -82,7 +82,7 @@ public class Rotator implements ExtendedPlugInFilter, DialogListener {
 	}
 
 	void drawGridLines(int lines) {
-		ImageCanvas ic = imp.getCanvas();
+		ImageCanvas2 ic = imp.getCanvas();
 		if (ic==null) return;
 		if (lines==0) {ic.setDisplayList(null); return;}
 		GeneralPath path = new GeneralPath();

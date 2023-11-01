@@ -28,7 +28,7 @@ public class OverlayBrushTool extends PlugInTool implements Runnable {
 	private GenericDialog gd;
 
 	public void mousePressed(ImagePlus imp, MouseEvent e) {
-		ImageCanvas ic = imp.getCanvas();
+		ImageCanvas2 ic = imp.getCanvas();
 		float x = (float)ic.offScreenXD(e.getX());
 		float y = (float)ic.offScreenYD(e.getY());
 		xStart = x;
@@ -64,7 +64,7 @@ public class OverlayBrushTool extends PlugInTool implements Runnable {
 
 	public void mouseDragged(ImagePlus imp, MouseEvent e) {
 		if (mode == IDLE) return;
-		ImageCanvas ic = imp.getCanvas();
+		ImageCanvas2 ic = imp.getCanvas();
 		float x = (float)ic.offScreenXD(e.getX());
 		float y = (float)ic.offScreenYD(e.getY());
 		Overlay overlay = imp.getOverlay();
