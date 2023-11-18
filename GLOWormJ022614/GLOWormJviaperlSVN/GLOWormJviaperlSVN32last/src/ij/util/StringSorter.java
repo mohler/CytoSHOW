@@ -134,7 +134,7 @@ public class StringSorter {
 					if (!nameIncr[i].startsWith("0")) {
 						nameIncr[i] = IJ.padLong(Long.parseLong(nameIncr[i]), nameIncrMax - nameIncrMin +1);
 					}
-					listToPad[i] = nameRoot[i] + nameIncr[i] +nameEnd[i];
+					listToPad[i] = nameRoot[i] + "00" + nameIncr[i] +nameEnd[i];
 				}
 			}
 		}
