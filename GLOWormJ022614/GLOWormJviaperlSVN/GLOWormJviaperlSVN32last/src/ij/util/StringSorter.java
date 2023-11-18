@@ -115,7 +115,7 @@ public class StringSorter {
 						nameEnd[i] = "";
 					}
 					nameRoot[i] = list[i].replaceAll("(.*\\D)\\d+"+nameEnd[i], "$1");
-					nameIncr[i] = list[i].replaceAll(".*\\D(\\d+)"+nameEnd[i], "$1");
+					nameIncr[i] = ""+Long.parseLong(list[i].replaceAll(".*\\D(\\d+)"+nameEnd[i], "$1")); //Need to parse this to strip any leading zeros
 					if(nameIncr[i].length() > nameIncrMax) {
 						nameIncrMax = nameIncr[i].length();
 					}
@@ -132,14 +132,14 @@ public class StringSorter {
 			if(list[i].length() <= stringMaxLength) {
 				if (list[i].matches(".*\\d+.*")) {
 					if (!nameIncr[i].startsWith("0")) {
-						nameIncr[i] = IJ.padLong(Long.parseLong(nameIncr[i]), nameIncrMax - nameIncrMin +1);
+						nameIncr[i] = IJ.padLong(Long.parseLong(nameIncr[i]), nameIncrMax - nameIncrMin +1);   //With leading 0s stripped (above), this seeming nonsense is ignored
 					}
-					listToPad[i] = nameRoot[i] + "00" + nameIncr[i] +nameEnd[i];
+					listToPad[i] = nameRoot[i] + nameIncr[i] +nameEnd[i];
 				}
 			}
 		}
 		String[] sortedList = new String[n];
-		int[] indexes = Tools.rank(listToPad);
+		int[] indexes = Tools.rank(listToPad);    //Tools.rank() has some weird problem sorting beyond 999 for file_nnnn.tif
 		for (int i = 0; i < n; i++)
 			sortedList[i] = list[indexes[i]];
 		return sortedList;
