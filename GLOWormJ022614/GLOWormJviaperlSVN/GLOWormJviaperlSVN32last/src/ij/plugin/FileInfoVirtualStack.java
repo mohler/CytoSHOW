@@ -240,6 +240,12 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 			if (sqrtScale) {
 				ip.sqrt();
 			}
+			if (flipH) {
+				ip.flipHorizontal();
+			}
+			if (flipV) {
+				ip.flipVertical();
+			}
 			return ip;
 		} else {
 			int w=getWidth(), h=getHeight();

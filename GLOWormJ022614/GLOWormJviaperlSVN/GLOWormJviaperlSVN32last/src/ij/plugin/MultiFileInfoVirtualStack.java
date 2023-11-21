@@ -1369,6 +1369,12 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 		if (sqrtScale) {
 			ip.sqrt();
 		}
+		if (flipH) {
+			ip.flipHorizontal();
+		}
+		if (flipV) {
+			ip.flipVertical();
+		}
 		return ip;
 	}
 

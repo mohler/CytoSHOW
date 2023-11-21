@@ -16,19 +16,29 @@ public class Transformer implements PlugInFilter {
 	public int setup(String arg, ImagePlus imp) {
 		this.arg = arg;
 		this.imp = imp;
-		if (arg.equals("fliph") || arg.equals("flipv"))
-			return IJ.setupDialog(imp, DOES_ALL+NO_UNDO);
-		else
+//		if (arg.equals("fliph") || arg.equals("flipv"))
+//			return IJ.setupDialog(imp, DOES_ALL+NO_UNDO);
+//		else
 			return DOES_ALL+NO_UNDO+NO_CHANGES;
 	}
 
 	public void run(ImageProcessor ip) {
 		if (arg.equals("fliph")) {
-			ip.flipHorizontal();
+			if (imp.getStack() instanceof VirtualStack) {
+				imp.getStack().setFlipH(!imp.getStack().isFlipH());
+				imp.updateAndRepaintWindow();
+			} else {
+				ip.flipHorizontal();
+			}
 			return;
 		}
 		if (arg.equals("flipv")) {
-			ip.flipVertical();
+			if (imp.getStack() instanceof VirtualStack) {
+				imp.getStack().setFlipV(!imp.getStack().isFlipV());
+				imp.updateAndRepaintWindow();
+			} else {
+				ip.flipVertical();
+			}
 			return;
 		}
 		if (arg.equals("right") || arg.equals("left")) {
