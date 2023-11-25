@@ -3043,9 +3043,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (count == 0)
 			return error("The list is empty.");
 		int[] indexes = getSelectedIndexes();
-		
+		Roi listRoi = null;
+		if (indexes.length == 1) {
+			listRoi = rois.get(listModel.get(indexes[0]));
+			listRoi.setImage(imp);
+		}
 		Roi impRoi = imp.getRoi();
-		if (impRoi != null && !(indexes.length == 1 && impRoi == rois.get(listModel.get(indexes[0])))) {
+		if (impRoi != null &&  !impRoi.equals(listRoi)) {
 			boolean fullInclusion = IJ.getString("Delete only tags Fully within selection?", "Fully").equals("Fully"); 
 			Roi[] sliceRois = this.getSliceSpecificRoiArray(imp.getSlice(), imp.getFrame(), false);
 			int[] sliceIndexes = this.getSliceSpecificIndexes(imp.getSlice(), imp.getFrame(), false);
