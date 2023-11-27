@@ -8791,7 +8791,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	        nsTree.refreshTree();
 		}
 
-		aceTree.saveNuclei(new File(zipPath.replace(".zip", "_ATAutoCorrected.zip")));
+		aceTree.saveNuclei(new File(zipPath.replace(".zip", "_ATAutoCorrected.zip").replace(".ZIP", "_ATAutoCorrected.zip")));
 
 	}
 
