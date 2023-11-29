@@ -46,6 +46,9 @@ import javax.swing.JMenu;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 
+import org.rhwlab.acetree.AceTree;
+import org.rhwlab.tree.Cell;
+import org.rhwlab.tree.SulstonTree;
 import org.vcell.gloworm.MultiQTVirtualStack;
 
 /** This is a Canvas used to display images in a Window. */
@@ -1601,10 +1604,31 @@ public class ImageCanvas2 extends JComponent implements MouseListener, MouseMoti
 				// this needs to run on a separate thread, at least on OS X
 				// "update2" does not clone the ROI so the "Show All"
 				// outline moves as the user moves the RO.
-				int q = listModel.indexOf(sliceRoisArray[i].getName());
+				String pickedRoiName = sliceRoisArray[i].getName();
+				String pickedCellName = pickedRoiName.split(" ")[0].replace("\"", "");
+				int q = listModel.indexOf(pickedRoiName);
 //				new ij.macro.MacroRunner("roiManager('select', "+q+", "+imp.getID()+");");
+				
 				if (q <0)
 					return false;
+				if (imp.getRoiManager().aceTree != null) {
+					int t = imp.getT();
+					double tCal = 1; // imp.getCalibration().frameInterval;
+					double ysc = imp.getRoiManager().aceTree.iSulstonTree.iTreePanel.c.ysc;
+					int[] cellXY = imp.getRoiManager().aceTree.iSulstonTree.iTreePanel.cellTreeLocation(pickedCellName, (int) (t/tCal));
+					Graphics g = imp.getRoiManager().aceTree.iSulstonTree.iTreePanel.getGraphics();
+//					imp.getRoiManager().aceTree.iSulstonTree.iTreePanel.repaint();
+                    double ypad = 10*100/imp.getRoiManager().aceTree.iSulstonTree.getHeight();
+                    IJ.log("c.ysc= "+imp.getRoiManager().aceTree.iSulstonTree.iTreePanel.c.ysc+" ypad= "+ ypad);
+                    g.setColor(Color.magenta);
+//                    g.drawOval(e.getX()-10, e.getY()-10, 20, 20);
+                    g.drawOval(cellXY[0]-10, (int)((((cellXY[1]) +Cell.START1 +Cell.START0)*ysc) ), 20, 20);
+                   	g.setColor(Color.black);
+                	g.drawString(pickedCellName, cellXY[0]+6, (int)((((cellXY[1]) +Cell.START1 +Cell.START0)*ysc) ));
+
+
+				}
+
 				rm.select(imp, q);
 				rm.validate();
 				rm.repaint();

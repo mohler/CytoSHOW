@@ -192,7 +192,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	private int lastSelectedIndex = 0;
 	private int toolTipDefaultDismissDelay;
 	private int toolTipDefaultInitialDelay;
-	private AceTree aceTree;
+	public AceTree aceTree;
 	private boolean isRoiScaleFactorSet;
 	private JScrollPane scrollPane;
 	private int shiftT;
@@ -8786,9 +8786,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			aceTree = AceTree.getAceTree(configPath);
 		}
 		if (aceTree != null) {
-			SulstonTree nsTree = new SulstonTree(aceTree, this.getTitle(), new org.rhwlab.tree.Cell("P0"), true, null);
-	        nsTree.iLateTimeField.setText("250");
-	        nsTree.refreshTree();
+			aceTree.iSulstonTree = new SulstonTree(aceTree, this.getTitle(), new org.rhwlab.tree.Cell("P0"), true, null);
+			aceTree.iSulstonTree.iLateTimeField.setText("250");
+			aceTree.iSulstonTree.refreshTree();
 		}
 
 		aceTree.saveNuclei(new File(zipPath.replace(".zip", "_ATAutoCorrected.zip").replace(".ZIP", "_ATAutoCorrected.zip")));
