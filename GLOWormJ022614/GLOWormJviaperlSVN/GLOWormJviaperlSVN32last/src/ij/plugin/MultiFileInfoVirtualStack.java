@@ -877,7 +877,7 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 			} else if (dimOrder.toLowerCase().matches(".*splitratioc.*")){
 				vSliceNumber = (n%2 + sliceNumber/2);
 			} else {
-				vSliceNumber = (sliceNumber)+(isViewB?zDim*(cDim/2)*(dimOrder.toLowerCase().matches(".*splitsequentialc.*")?2:1):0);
+				vSliceNumber = (sliceNumber)+(isViewB?zDim*(cDim/2)*(dimOrder.toLowerCase().matches(".*splitsequential.*c.*")?2:1):0);
 			}
 
 			//ADJUSTMENTS BELOW DEAL WITH CALLING C1 AND C4 FOR CSM MODE SWITCH TO JUST 2 MAIN RG CHANNELS
@@ -936,11 +936,18 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 				ip.setRoi(xOri, yOri, 1024, 2048);
 
 
-			} else if (ip.getWidth()==1536) {	//Yale splitview setup
+			} else if (ip.getWidth()==1536 && dimOrder.toLowerCase().matches(".*splitsequentialcisc.*")) {	//Yale splitview cis-emission setup with sequential laser scans
+
+				int xOri = 0+((0+(n+1)%2)*(0));
+				int yOri = 0+((1-(n+1)%2)*(0));
+				ip.setRoi(xOri, yOri, 512, 512);
+				
+			} else if (ip.getWidth()==1536 ) {	//Yale splitview trans-emission or non-sequential split setup
 
 				int xOri = 0+((0+(n+1)%2)*(1024));
 				int yOri = 0+((1-(n+1)%2)*(0));
 				ip.setRoi(xOri, yOri, 512, 512);
+				
 			} 
 			ip = ip.crop();
 			if (fivStacks.get(0).getInfo()[0].fileName.matches(".*Decon(-Fuse|_reg)_.*aaa_.*")){  //StarryNiteFeeder output

@@ -962,7 +962,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							cDim = 2;
 							wavelengths = 2;
 							splitChannels = true;
-							dimOrder = "xySplitSequentialCzt";
+							if (diSPIM_MM_ChNames[0].contains("488") && diSPIM_MM_ChNames[2].contains("561")){
+								dimOrder = "xySplitSequentialTransCzt";
+							} else if (diSPIM_MM_ChNames[0].contains("488") && diSPIM_MM_ChNames[2].contains("405")) {
+								dimOrder = "xySplitSequentialCisCzt";
+							}
 						} 
 						final int fPos = pos;
 
@@ -7088,7 +7092,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				//	if (diSPIM_MM_numChannels == 2) {
 				//	cDim = 2;    
 				//	splitChannels = true;
-				//	dimOrder = "xySplitSequentialCzt";
+				//	dimOrder = "xySplitSequentialTransCzt";
 				//	}
 				if (diSPIM_MM_numChannels == 2) {
 					cDim = 4;    
@@ -7313,7 +7317,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					dispimToolsButton[pos][0].setBackground(!shown?Color.yellow:null);
 					fuseButton[pos][0].setVisible(!shown);
 					if (splitButton[pos][0]!=null){
-						splitButton[pos][0].setVisible(dimOrder.contains("Sequential") && !shown);
+						splitButton[pos][0].setVisible(dimOrder.contains("SequentialTrans") && !shown);
 						xSpinner[pos][0].setVisible(!shown);
 						ySpinner[pos][0].setVisible(!shown);
 						zSpinner[pos][0].setVisible(!shown);
@@ -7360,7 +7364,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						dispimToolsButton[pos][1].setBackground(!shown?Color.yellow:null);
 						fuseButton[pos][1].setVisible(!shown);
 						if (splitButton[pos][1]!=null){
-							splitButton[pos][1].setVisible(dimOrder.contains("Sequential") && !shown);
+							splitButton[pos][1].setVisible(dimOrder.contains("SequentialTrans") && !shown);
 							xSpinner[pos][1].setVisible(!shown);
 							ySpinner[pos][1].setVisible(!shown);
 							zSpinner[pos][1].setVisible(!shown);
@@ -7649,9 +7653,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				cDim = 2;
 				wavelengths = 2;
 				splitChannels = true;
-				dimOrder = "xySplitSequentialCzt";
+				dimOrder = "xySplitSequentialTransCzt";
 			} else if (cDim == 2 && wavelengths == 2 && splitChannels == true
-					&& dimOrder == "xySplitSequentialCzt") {
+					&& dimOrder == "xySplitSequentialTransCzt") {
 				cDim = 4;
 				wavelengths = 4;
 				splitChannels = true;
