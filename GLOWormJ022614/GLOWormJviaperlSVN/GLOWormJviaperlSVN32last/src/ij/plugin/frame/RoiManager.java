@@ -1122,7 +1122,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								impDir + File.separator + ((RemoteMQTVirtualStack) imp.getStack()).getSceneFileName());
 					}
 				}
-				this.exportROIsAsZippedStarryNiteNuclei(impDir + File.separator + "aaa_emb_Unskipped.zip");
+				this.exportROIsAsZippedStarryNiteNuclei(impDir + File.separator + "aaa_emb_Exported.zip");
+				this.select(-1);
+				this.delete(false);
+				importStarryNiteNuclei(impDir + File.separator + "aaa_emb_Exported_ATAutoCorrected.zip");
 			} else if (command.equals("StarryNiteExporter")) {
 				this.exportROIsAsZippedStarryNiteNuclei(IJ.getFilePath("Save zipped SN nuclei"));
 			} else if (command.equals("Map Neighbors")) {
