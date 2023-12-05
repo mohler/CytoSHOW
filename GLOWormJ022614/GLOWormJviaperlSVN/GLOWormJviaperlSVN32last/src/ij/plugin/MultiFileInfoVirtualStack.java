@@ -868,7 +868,7 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 			//IJ.log("stk="+stackNumber +"  vslc="+vSliceNumber);
 			initiateStack(stackNumber, 0);
 			ip = fivStacks.get(stackNumber).getProcessor(vSliceNumber+(sliceNumber%2==0?0:dZ)+corrZ);
-			ip.translate(corrX, corrY);
+			ip.translate(corrX, corrY);   //should these be negative?
 		}
 		if (dimOrder.toLowerCase().matches(".*split.*c.*")) {
 
@@ -900,9 +900,9 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 			//	}
 
 			int frameNumber = (slice-1)/(cDim*zDim*vDim);
-			corrX=isViewB?corrXB[frameNumber]:corrXA[frameNumber];
-			corrY=isViewB?corrYB[frameNumber]:corrYA[frameNumber];
-			corrZ=isViewB?corrZB[frameNumber]:corrZA[frameNumber];
+			corrX=isViewB?corrXB[frameNumber]-corrXB[0]:corrXA[frameNumber]-corrXA[0];
+			corrY=isViewB?corrYB[frameNumber]-corrYB[0]:corrYA[frameNumber]-corrYA[0];
+			corrZ=isViewB?corrZB[frameNumber]-corrZB[0]:corrZA[frameNumber]-corrZA[0];
 			//	IJ.log("stk="+stackNumber +"  vslc="+vSliceNumber);
 			initiateStack(stackNumber, 0);
 			if (dimOrder.toLowerCase().matches(".*splitratioc.*")){
@@ -952,6 +952,9 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 			ip = ip.crop();
 			if (fivStacks.get(0).getInfo()[0].fileName.matches(".*Decon(-Fuse|_reg)_.*aaa_.*")){  //StarryNiteFeeder output
 				ip.flipHorizontal();
+				ip.translate(-corrX, -corrY);       //These are negative to work correctly
+			} else {
+				ip.translate(-corrX, -corrY);  
 			}
 			ip.translate((1-n%2)*dX, (1-n%2)*dY);
 			double corrdiffX = corrX-corrXA[0];
@@ -1288,7 +1291,7 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 			initiateStack(stackNumber, 0);
 			int corrSlc = vSliceNumber+corrZ;
 			ip = fivStacks.get(stackNumber).getProcessor(corrSlc);
-			ip.translate(corrX, corrY);
+			ip.translate(-corrX, -corrY);			// must be negative!
 		}
 		if (dimOrder == "xyztc") {
 			vSliceNumber = (sliceNumber);
@@ -1299,7 +1302,7 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 			initiateStack(stackNumber, 0);
 			int corrSlc = vSliceNumber+corrZ;
 			ip = fivStacks.get(stackNumber).getProcessor(corrSlc);
-			ip.translate(corrX, corrY);
+			ip.translate(-corrX, -corrY);			// must be negative!
 		}
 
 		//	IJ.log(dimOrder+" "+stackNumber+" "+fivStacks.get(stackNumber).getSize()+" "+sliceNumber+" "+vSliceNumber+" ");
