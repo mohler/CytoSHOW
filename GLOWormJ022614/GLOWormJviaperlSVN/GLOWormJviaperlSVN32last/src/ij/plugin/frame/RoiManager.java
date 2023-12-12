@@ -473,6 +473,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		addPopupItem("fuseOverlapping");
 		addPopupItem("claimCellParts");
 		addPopupItem("groupPartSegments");
+		addPopupItem("TabulateCellsAndMitos");
 		add(pm);
 	}
 
@@ -1182,6 +1183,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			} else if (command.equals("claimCellParts")) {
 				String[] partTypes = IJ.getString("Which part types to claim?", "MITO, Traced").split(", *");
 				this.claimCellParts(partTypes);
+			} else if (command.contentEquals("TabulateCellsAndMitos")) {
+				this.tabulateCellMitoObjects();
 			}
 
 //			this.imp.getCanvas().requestFocus();
@@ -12014,6 +12017,28 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			}
 		}
 
+	}
+	
+	public Hashtable<String, ArrayList<String>> tabulateCellMitoObjects() {
+		Hashtable<String, ArrayList<String>> cmHT = new Hashtable<String, ArrayList<String>>();
+		String[] fileList = new File(IJ.getDirectory("")).list();
+		Arrays.sort(fileList);
+		for (String fileName:fileList) {
+			if(fileName.toLowerCase().endsWith(".obj")) {
+				IJ.log(fileName);
+				String[] fnChunks = fileName.replaceAll("SVV_(.*)__.*", "$1").split("@");
+				if (fnChunks.length >= 1 && !cmHT.containsKey(fnChunks[0].replace("MITOin",""))) {
+					cmHT.put(fnChunks[0].replace("MITOin","").split("in")[0], new ArrayList<String>());
+				}
+				if (fnChunks.length==2) {
+					cmHT.get(fnChunks[0].replace("MITOin","").split("in")[0]).add(fnChunks[1]);
+				}
+			}
+		}
+		for (String cm:cmHT.keySet()) {
+			IJ.log(cm+","+cmHT.get(cm).size());
+		}
+		return cmHT;
 	}
 
 	@Override

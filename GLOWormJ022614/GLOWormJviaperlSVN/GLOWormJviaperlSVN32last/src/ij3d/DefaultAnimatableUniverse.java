@@ -192,7 +192,7 @@ public abstract class DefaultAnimatableUniverse extends DefaultUniverse {
 		} catch (Exception e) {e.printStackTrace();}
 		centerXformInv.invert(centerXform);
 		double deg2 = rotationInterval * Math.PI / 180;
-		int steps = (int)Math.round(2 * Math.PI / deg2);
+		int steps = (int)Math.abs(Math.round(2 * Math.PI / deg2));
 
 		getCanvas().getView().stopView();
 
