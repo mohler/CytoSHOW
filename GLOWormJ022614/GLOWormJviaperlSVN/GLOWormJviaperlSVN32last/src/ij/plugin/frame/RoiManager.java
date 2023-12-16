@@ -11917,6 +11917,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	public void claimCellParts(String[] partTypes) {
 		int cellcounter = 0;
 		int segcounter = 0;
+		double minFraction = 0.60;
 		boolean cellCounterReset = false;
 		for (int z=1;z<=imp.getNSlices();z++) {   
 			for (int t=1;t<=imp.getNFrames();t++) {
@@ -11937,7 +11938,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							Polygon srPolygon = subrRois[r1].getPolygon();
 
 							for (int q=0;q<sliceRois.length;q++) {
-								boolean include = true;
+								boolean include = false;
 								if (q==r) 
 									continue;
 								if (!sliceRois[q].getName().contains(partType)){
@@ -11949,17 +11950,21 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								for (int q1=0;q1<subqRois.length;q1++) {
 									include = true;
 									Polygon sqPolygon = subqRois[q1].getPolygon();
+									int hitCount = 0;
 									for (int p=0;p<sqPolygon.npoints;p++) {
 										if (srPolygon.contains(sqPolygon.xpoints[p], sqPolygon.ypoints[p])) {
-											//must all be included to be claimed by cell
-											//SHOULD CONSIDER ALLOWING SOME MISSED POINTS GIVEN DIFFERENT MODES OF CELL/PART SEGMENTATION BY VAST AND APEER!!!
-											//ESPECIALLY IF NO OTHER CELL CAN CLAIM THE MISSING POINTS.
-											include = true;
+											//previously needed all points to be included to be claimed by cell
+											//NOWALLOWING SOME MISSED POINTS GIVEN DIFFERENT MODES OF CELL/PART SEGMENTATION BY VAST AND APEER!!!
+											//Not yet checking IF NO OTHER CELL CAN CLAIM THE MISSING POINTS.
+											hitCount++;
+											if (hitCount >= minFraction*sqPolygon.npoints) {
+												p = sqPolygon.npoints;    
+												include = true;
+											}
 //											IJ.log("hit: "+z+" "+r+" "+q+" "+q1+" "+p+" "+sqPolygon.xpoints[p]+" "+sqPolygon.ypoints[p]);
 										} else {
-											include = false;
+
 //											IJ.log("miss: "+z+" "+r+" "+q+" "+q1+" "+p+" "+sqPolygon.xpoints[p]+" "+sqPolygon.ypoints[p]);
-											p = sqPolygon.npoints;
 
 										}					
 									}
