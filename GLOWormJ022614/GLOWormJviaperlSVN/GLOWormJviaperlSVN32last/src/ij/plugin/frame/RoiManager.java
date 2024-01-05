@@ -12069,20 +12069,41 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 	
 	public void translateMapColors() {
+		int gridN = 168;
 		int w = imp.getWidth();
+		double wStep = (double)(w)/gridN;
 		int h = imp.getHeight();
-		int[][] colorInts = new int[169*169][3];
-		int count = 0;
-		for (int y=35; y<h; y=y+69) {
-			for (int x=35; x<w; x=x+69) {
-				count++;
-				int p = ((y-35)/69)*169 + (x-35)/69;
-				colorInts[count][0] = new Color(((int[])imp.getProcessor().getPixels())[p]).getRed();
-				colorInts[count][1] = new Color(((int[])imp.getProcessor().getPixels())[p]).getGreen();
-				colorInts[count][2] = new Color(((int[])imp.getProcessor().getPixels())[p]).getBlue();
-				IJ.log(""+x+" "+y+" "+colorInts[count][0]+" "+colorInts[count][1]+" "+colorInts[count][2]+" "+p);
-				if (colorIntToCalXYlut.get(colorInts[count])!= null) {
-					IJ.log(colorIntToCalXYlut.get(colorInts[count]).toString());
+		double hStep = (double)(h)/gridN;
+		double centeringFraction = .30;
+		int[][] colorInts = new int[(gridN)*(gridN)][3];
+		int countY = 0;
+		for (double y=(int)(hStep*centeringFraction); y<h; y= (y+hStep)) {
+			countY++;
+			if (countY > gridN) {
+				y=h;
+				continue;
+			}			
+			int countX = 0;
+			for (double x=(int)(wStep*centeringFraction); x<w; x= (x+wStep)) {
+				countX++;
+				if (countX > gridN) {
+					x=w;
+					continue;
+				}
+				int q = (int) (w*Math.ceil(y)+Math.ceil(x));   
+//				int p = (int)((y-hStep*centeringFraction)/hStep)*gridN + (int)((x-wStep*centeringFraction)/wStep);
+				int countXY = countY*gridN+countX;
+				if (countXY >= colorInts.length) {
+					x=w;
+					y=h;
+					continue;
+				}
+				colorInts[countXY][0] = new Color(((int[])imp.getProcessor().getPixels())[q]).getRed();
+				colorInts[countXY][1] = new Color(((int[])imp.getProcessor().getPixels())[q]).getGreen();
+				colorInts[countXY][2] = new Color(((int[])imp.getProcessor().getPixels())[q]).getBlue();
+				IJ.log(""+x+" "+y+" "+colorInts[countXY][0]+" "+colorInts[countXY][1]+" "+colorInts[countXY][2]+" "+countX+" "+countY+" "+(countXY));
+				if (colorIntToCalXYlut.get(((int[])imp.getProcessor().getPixels())[q])!= null) {
+					IJ.log(colorIntToCalXYlut.get(((int[])imp.getProcessor().getPixels())[q]).toString());
 				}
 			}			
 		}
