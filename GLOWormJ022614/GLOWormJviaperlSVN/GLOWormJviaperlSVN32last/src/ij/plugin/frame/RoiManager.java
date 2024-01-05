@@ -197,6 +197,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	private JScrollPane scrollPane;
 	private int shiftT;
 	private int shiftC;
+	private static Hashtable colorIntToCalXYlut;
 
 	public RoiManager() {
 		super("Tag Manager");
@@ -474,6 +475,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		addPopupItem("claimCellParts");
 		addPopupItem("groupPartSegments");
 		addPopupItem("TabulateCellsAndMitos");
+		addPopupItem("makeColorHTlut");
+		addPopupItem("translateMapColors");
 		add(pm);
 	}
 
@@ -1185,8 +1188,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				this.claimCellParts(partTypes);
 			} else if (command.contentEquals("TabulateCellsAndMitos")) {
 				this.tabulateCellMitoObjects();
+			} else if (command.equals("makeColorHTlut")) {
+				colorIntToCalXYlut = this.colorIntToCalXYlut();
+			} else if (command.equals("translateMapColors")) {
+				this.translateMapColors();
 			}
-
 //			this.imp.getCanvas().requestFocus();
 		}
 		// IJ.log("THREAD DONE");
@@ -12044,6 +12050,42 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			IJ.log(cm+","+cmHT.get(cm).size());
 		}
 		return cmHT;
+	}
+	
+	public Hashtable<Integer, Double[]> colorIntToCalXYlut(){
+		int w = imp.getWidth();
+		Hashtable<Integer, Double[]> ht = new Hashtable<Integer, Double[]>();
+		for (int p=0;p<((int[])imp.getProcessor().getPixels()).length;p++){
+			IJ.log(""+ p+" "+((int[])imp.getProcessor().getPixels())[p]+" "+(-((p%w)-imp.getCalibration().xOrigin)*imp.getCalibration().pixelWidth)+" "+(((p/w)-imp.getCalibration().yOrigin)*imp.getCalibration().pixelHeight));
+			ht.put(((int[])imp.getProcessor().getPixels())[p], new Double[]{(double) (-((p%w)-imp.getCalibration().xOrigin)*imp.getCalibration().pixelWidth),(double) (((p/w)-imp.getCalibration().yOrigin)*imp.getCalibration().pixelHeight)});
+		}
+		for (int p=0;p<((int[])imp.getProcessor().getPixels()).length;p++){
+			IJ.log(""+ p+" "+new Color(((int[])imp.getProcessor().getPixels())[p]).getRed()
+					+" "+new Color(((int[])imp.getProcessor().getPixels())[p]).getGreen()
+					+" "+new Color(((int[])imp.getProcessor().getPixels())[p]).getBlue()+" "+(p%w+1)+" "+(p/w+1));
+		}
+
+		return ht;
+	}
+	
+	public void translateMapColors() {
+		int w = imp.getWidth();
+		int h = imp.getHeight();
+		int[][] colorInts = new int[169*169][3];
+		int count = 0;
+		for (int y=35; y<h; y=y+69) {
+			for (int x=35; x<w; x=x+69) {
+				count++;
+				int p = ((y-35)/69)*169 + (x-35)/69;
+				colorInts[count][0] = new Color(((int[])imp.getProcessor().getPixels())[p]).getRed();
+				colorInts[count][1] = new Color(((int[])imp.getProcessor().getPixels())[p]).getGreen();
+				colorInts[count][2] = new Color(((int[])imp.getProcessor().getPixels())[p]).getBlue();
+				IJ.log(""+x+" "+y+" "+colorInts[count][0]+" "+colorInts[count][1]+" "+colorInts[count][2]+" "+p);
+				if (colorIntToCalXYlut.get(colorInts[count])!= null) {
+					IJ.log(colorIntToCalXYlut.get(colorInts[count]).toString());
+				}
+			}			
+		}
 	}
 
 	@Override
