@@ -197,7 +197,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	private JScrollPane scrollPane;
 	private int shiftT;
 	private int shiftC;
-	private static Hashtable colorIntToCalXYlut;
+	private static Hashtable<String, Double[]> colorIntToCalXYlut;
 
 	public RoiManager() {
 		super("Tag Manager");
@@ -12052,18 +12052,36 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		return cmHT;
 	}
 	
-	public Hashtable<Integer, Double[]> colorIntToCalXYlut(){
+	public Hashtable<String, Double[]> colorIntToCalXYlut(){
 		int w = imp.getWidth();
-		Hashtable<Integer, Double[]> ht = new Hashtable<Integer, Double[]>();
+		Hashtable<String, Double[]> ht = new Hashtable<String, Double[]>();
 		for (int p=0;p<((int[])imp.getProcessor().getPixels()).length;p++){
-			IJ.log(""+ p+" "+((int[])imp.getProcessor().getPixels())[p]+" "+(-((p%w)-imp.getCalibration().xOrigin)*imp.getCalibration().pixelWidth)+" "+(((p/w)-imp.getCalibration().yOrigin)*imp.getCalibration().pixelHeight));
-			ht.put(((int[])imp.getProcessor().getPixels())[p], new Double[]{(double) (-((p%w)-imp.getCalibration().xOrigin)*imp.getCalibration().pixelWidth),(double) (((p/w)-imp.getCalibration().yOrigin)*imp.getCalibration().pixelHeight)});
+//			IJ.log(""+ p+" "+((int[])imp.getProcessor().getPixels())[p]+" "+(-((p%w)-imp.getCalibration().xOrigin)*imp.getCalibration().pixelWidth)+" "+(((p/w)-imp.getCalibration().yOrigin)*imp.getCalibration().pixelHeight));
+			int padReach=2;
+			for(int rPad = -padReach;rPad<=padReach;rPad++) {
+				for(int gPad = -padReach;gPad<=padReach;gPad++) {
+					for(int bPad = -padReach;bPad<=padReach;bPad++) {
+						ht.put((""+(new Color(((int[])imp.getProcessor().getPixels())[p]).getRed()+rPad)+"_"+
+												(new Color(((int[])imp.getProcessor().getPixels())[p]).getGreen()+gPad)+"_"+
+												(new Color(((int[])imp.getProcessor().getPixels())[p]).getBlue()+bPad)), 
+								new Double[]{(double) (-((p%w)-imp.getCalibration().xOrigin)*imp.getCalibration().pixelWidth),
+												(double) (((p/w)-imp.getCalibration().yOrigin)*imp.getCalibration().pixelHeight)});
+						
+						IJ.log(""+ p+" "+(new Color(((int[])imp.getProcessor().getPixels())[p]).getRed()+rPad)+"_"+
+								(new Color(((int[])imp.getProcessor().getPixels())[p]).getGreen()+gPad)+"_"+
+								(new Color(((int[])imp.getProcessor().getPixels())[p]).getBlue()+bPad)+
+								(double)(-((p%w)-imp.getCalibration().xOrigin)*imp.getCalibration().pixelWidth)+" "+
+								(double)(((p/w)-imp.getCalibration().yOrigin)*imp.getCalibration().pixelHeight));
+		
+					}
+				}
+			}
 		}
-		for (int p=0;p<((int[])imp.getProcessor().getPixels()).length;p++){
-			IJ.log(""+ p+" "+new Color(((int[])imp.getProcessor().getPixels())[p]).getRed()
-					+" "+new Color(((int[])imp.getProcessor().getPixels())[p]).getGreen()
-					+" "+new Color(((int[])imp.getProcessor().getPixels())[p]).getBlue()+" "+(p%w+1)+" "+(p/w+1));
-		}
+//		for (int p=0;p<((int[])imp.getProcessor().getPixels()).length;p++){
+//			IJ.log(""+ p+" "+new Color(((int[])imp.getProcessor().getPixels())[p]).getRed()
+//					+" "+new Color(((int[])imp.getProcessor().getPixels())[p]).getGreen()
+//					+" "+new Color(((int[])imp.getProcessor().getPixels())[p]).getBlue()+" "+(p%w+1)+" "+(p/w+1));
+//		}
 
 		return ht;
 	}
@@ -12101,9 +12119,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				colorInts[countXY][0] = new Color(((int[])imp.getProcessor().getPixels())[q]).getRed();
 				colorInts[countXY][1] = new Color(((int[])imp.getProcessor().getPixels())[q]).getGreen();
 				colorInts[countXY][2] = new Color(((int[])imp.getProcessor().getPixels())[q]).getBlue();
-				IJ.log(""+x+" "+y+" "+colorInts[countXY][0]+" "+colorInts[countXY][1]+" "+colorInts[countXY][2]+" "+countX+" "+countY+" "+(countXY));
-				if (colorIntToCalXYlut.get(((int[])imp.getProcessor().getPixels())[q])!= null) {
-					IJ.log(colorIntToCalXYlut.get(((int[])imp.getProcessor().getPixels())[q]).toString());
+				IJ.log(""+x+" "+y+" "+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2]+" "+countX+" "+countY+" "+(countXY));
+
+				if (colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])!= null) {
+					IJ.log(""+colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])[0] +" "+
+							colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])[1]);
 				}
 			}			
 		}
