@@ -12125,7 +12125,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 				if (colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])!= null) {
 					hitCount++;
-					addRoi(new OvalRoi(x-4, y-4,8,8),false, null, Colors.decode("#5500ffff", Color.cyan),  0, true);
+					Roi newOval = new OvalRoi(x-4, y-4,8,8);
+					newOval.setName(randiNeuronNames[countX]+"to"+randiNeuronNames[countY]);
+					addRoi(newOval,false, null, Colors.decode("#5500ffff", Color.cyan),  0, true);
 					IJ.log("OnChart: "+randiNeuronNames[countX]+"to"+randiNeuronNames[countY] +" "+ colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])[0] +" "+
 							colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])[1]);
 				} else if (colorInts[countXY][0]>0 && colorInts[countXY][1]>0 && colorInts[countXY][2]>0 && 
@@ -12136,7 +12138,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						||colorInts[countXY][0]*colorInts[countXY][2]/colorInts[countXY][1] < 60
 						||colorInts[countXY][1]*colorInts[countXY][2]/colorInts[countXY][0] < 60)) {
 					hitCount++;
-					addRoi(new OvalRoi(x-4, y-4,8,8),false, null, Colors.decode("#55ff00ff", Color.magenta),  0, true);	
+					Roi newOval = new OvalRoi(x-4, y-4,8,8);
+					newOval.setName(randiNeuronNames[countX]+"to"+randiNeuronNames[countY]);
+					addRoi(newOval,false, null, Colors.decode("#55ff00ff", Color.magenta),  0, true);	
 					IJ.log("OffChart: "+randiNeuronNames[countX]+"to"+randiNeuronNames[countY]
 //							+" "+ 
 //							colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])[0] +" "+
