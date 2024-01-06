@@ -2685,14 +2685,16 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			else if (strokeColor == null && imp!=null && imp.getRoiStrokeColor() != null)
 				strokeColor = imp.getRoiStrokeColor();
 		}
-
+		roi.setStrokeColor(strokeColor);
+		
 		if (fillColor == null) 
 			if (imp != null)
 				fillColor = imp.getRoiFillColor();
-			if (fillColor == null) 
-				fillColor = roi.getFillColor();
-			if (fillColor == null) 
-				fillColor = defaultColor;
+		if (fillColor == null) 
+			fillColor = roi.getFillColor();
+		if (fillColor == null) 
+			fillColor = defaultColor;
+		roi.setFillColor(fillColor);
 		
 		// IJ.log(""+imp.getRoiFillColor());
 		if (lineWidth < 0) {
@@ -4264,7 +4266,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			roi2 = (Roi) rois.get(name2 + suffix);
 			if (roi2 != null) {
 				int lastDash = name2.lastIndexOf("-");
-				if (lastDash != -1 && name2.length() - lastDash < 5)
+				if (lastDash != -1 && name2.length() - lastDash < 10)
 					name2 = name2.substring(0, lastDash);
 				name2 = name2 + "-" + n;
 
@@ -12086,6 +12088,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 	
 	public void translateMapColors() {
+		this.colorLegend = null;
 		String[] randiNeuronNames = new String[] {"ADEL","ADER","ADFL","ADLL","ADLR","AFDL","AFDR","AQR","ASEL","ASER","ASGL","ASGR","ASHL","ASHR","ASIL","ASIR","ASJL","ASJR","ASKL","ASKR","AUAL","AUAR","AVG","AWAL","AWAR","AWBL","AWBR","AWCL","AWCR","BAGL","BAGR","CEPDL","CEPDR","CEPVL","CEPVR","FLPL","FLPR","IL1DL","IL1DR","IL1R","IL1VL","IL1VR","IL2DL","IL2DR","IL2L","IL2R","IL2VL","IL2VR","NSML","NSMR","OLLL","OLLR","OLQDL","OLQDR","OLQVL","OLQVR","URADL","URADR","URAVL","URAVR","URBL","URBR","URXL","URXR","URYDL","URYDR","URYVL","URYVR","ADAL","ADAR","AIBL","AIBR","AIML","AIMR","AINL","AINR","AIYL","AIYR","AIZL","AIZR","ALA","AVAL","AVAR","AVBL","AVBR","AVDL","AVDR","AVEL","AVER","AVFL","AVHL","AVHR","AVJL","AVJR","AVKL","AVKR","AVL","I1L","I1R","I2L","I2R","I3","I4","I6","RIAL","RIAR","RIBL","RIBR","RICL","RICR","RIFR","RIGL","RIGR","RIH","RIPL","RIR","RIS","RIVL","RIVR","SAADL","SAADR","SAAVL","SAAVR","SABD","SABVL","SABVR","SIBVR","AS1","DA1","DB2","DD1","M1","M2L","M2R","M3L","M3R","M5","MCL","MCR","MI","RID","RIML","RIMR","RMDDL","RMDDR","RMDL","RMDR","RMDVL","RMDVR","RMED","RMEL","RMER","RMEV","RMFL","RMFR","RMGL","RMGR","SMBDL","SMBDR","SMBVL","SMBVR","SMDDL","SMDDR","SMDVL","SMDVR","VA1","VB1","VB2"};
 		int gridN = 168;
 		int w = imp.getWidth();
@@ -12122,9 +12125,24 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 				if (colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])!= null) {
 					hitCount++;
-
-					IJ.log(""+randiNeuronNames[countX]+"to"+randiNeuronNames[countY] +" "+ colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])[0] +" "+
+					addRoi(new OvalRoi(x-4, y-4,8,8),false, null, Colors.decode("#5500ffff", Color.cyan),  0, true);
+					IJ.log("OnChart: "+randiNeuronNames[countX]+"to"+randiNeuronNames[countY] +" "+ colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])[0] +" "+
 							colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])[1]);
+				} else if (colorInts[countXY][0]>0 && colorInts[countXY][1]>0 && colorInts[countXY][2]>0 && 
+						(colorInts[countXY][0]*colorInts[countXY][1]/colorInts[countXY][2] > 300
+						||colorInts[countXY][0]*colorInts[countXY][2]/colorInts[countXY][1] > 300
+						||colorInts[countXY][1]*colorInts[countXY][2]/colorInts[countXY][0] > 300
+						||colorInts[countXY][0]*colorInts[countXY][1]/colorInts[countXY][2] < 60
+						||colorInts[countXY][0]*colorInts[countXY][2]/colorInts[countXY][1] < 60
+						||colorInts[countXY][1]*colorInts[countXY][2]/colorInts[countXY][0] < 60)) {
+					hitCount++;
+					addRoi(new OvalRoi(x-4, y-4,8,8),false, null, Colors.decode("#55ff00ff", Color.magenta),  0, true);	
+					IJ.log("OffChart: "+randiNeuronNames[countX]+"to"+randiNeuronNames[countY]
+//							+" "+ 
+//							colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])[0] +" "+
+//							colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])[1]
+									);
+
 				}
 				countX++;
 			}			
