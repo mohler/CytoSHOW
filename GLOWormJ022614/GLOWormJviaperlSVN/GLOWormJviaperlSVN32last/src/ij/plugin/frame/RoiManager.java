@@ -12055,9 +12055,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	public Hashtable<String, Double[]> colorIntToCalXYlut(){
 		int w = imp.getWidth();
 		Hashtable<String, Double[]> ht = new Hashtable<String, Double[]>();
+		int padReach= (int) IJ.getNumber("Allow color code fitting?", 2);
 		for (int p=0;p<((int[])imp.getProcessor().getPixels()).length;p++){
 //			IJ.log(""+ p+" "+((int[])imp.getProcessor().getPixels())[p]+" "+(-((p%w)-imp.getCalibration().xOrigin)*imp.getCalibration().pixelWidth)+" "+(((p/w)-imp.getCalibration().yOrigin)*imp.getCalibration().pixelHeight));
-			int padReach=2;
 			for(int rPad = -padReach;rPad<=padReach;rPad++) {
 				for(int gPad = -padReach;gPad<=padReach;gPad++) {
 					for(int bPad = -padReach;bPad<=padReach;bPad++) {
@@ -12066,10 +12066,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 												(new Color(((int[])imp.getProcessor().getPixels())[p]).getBlue()+bPad)), 
 								new Double[]{(double) (-((p%w)-imp.getCalibration().xOrigin)*imp.getCalibration().pixelWidth),
 												(double) (((p/w)-imp.getCalibration().yOrigin)*imp.getCalibration().pixelHeight)});
-						
 						IJ.log(""+ p+" "+(new Color(((int[])imp.getProcessor().getPixels())[p]).getRed()+rPad)+"_"+
 								(new Color(((int[])imp.getProcessor().getPixels())[p]).getGreen()+gPad)+"_"+
-								(new Color(((int[])imp.getProcessor().getPixels())[p]).getBlue()+bPad)+
+								(new Color(((int[])imp.getProcessor().getPixels())[p]).getBlue()+bPad)+" "+
 								(double)(-((p%w)-imp.getCalibration().xOrigin)*imp.getCalibration().pixelWidth)+" "+
 								(double)(((p/w)-imp.getCalibration().yOrigin)*imp.getCalibration().pixelHeight));
 		
@@ -12087,6 +12086,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 	
 	public void translateMapColors() {
+		String[] randiNeuronNames = new String[] {"ADEL","ADER","ADFL","ADLL","ADLR","AFDL","AFDR","AQR","ASEL","ASER","ASGL","ASGR","ASHL","ASHR","ASIL","ASIR","ASJL","ASJR","ASKL","ASKR","AUAL","AUAR","AVG","AWAL","AWAR","AWBL","AWBR","AWCL","AWCR","BAGL","BAGR","CEPDL","CEPDR","CEPVL","CEPVR","FLPL","FLPR","IL1DL","IL1DR","IL1R","IL1VL","IL1VR","IL2DL","IL2DR","IL2L","IL2R","IL2VL","IL2VR","NSML","NSMR","OLLL","OLLR","OLQDL","OLQDR","OLQVL","OLQVR","URADL","URADR","URAVL","URAVR","URBL","URBR","URXL","URXR","URYDL","URYDR","URYVL","URYVR","ADAL","ADAR","AIBL","AIBR","AIML","AIMR","AINL","AINR","AIYL","AIYR","AIZL","AIZR","ALA","AVAL","AVAR","AVBL","AVBR","AVDL","AVDR","AVEL","AVER","AVFL","AVHL","AVHR","AVJL","AVJR","AVKL","AVKR","AVL","I1L","I1R","I2L","I2R","I3","I4","I6","RIAL","RIAR","RIBL","RIBR","RICL","RICR","RIFR","RIGL","RIGR","RIH","RIPL","RIR","RIS","RIVL","RIVR","SAADL","SAADR","SAAVL","SAAVR","SABD","SABVL","SABVR","SIBVR","AS1","DA1","DB2","DD1","M1","M2L","M2R","M3L","M3R","M5","MCL","MCR","MI","RID","RIML","RIMR","RMDDL","RMDDR","RMDL","RMDR","RMDVL","RMDVR","RMED","RMEL","RMER","RMEV","RMFL","RMFR","RMGL","RMGR","SMBDL","SMBDR","SMBVL","SMBVR","SMDDL","SMDDR","SMDVL","SMDVR","VA1","VB1","VB2"};
 		int gridN = 168;
 		int w = imp.getWidth();
 		double wStep = (double)(w)/gridN;
@@ -12095,15 +12095,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		double centeringFraction = .30;
 		int[][] colorInts = new int[(gridN)*(gridN)][3];
 		int countY = 0;
+		int hitCount = 0;
 		for (double y=(int)(hStep*centeringFraction); y<h; y= (y+hStep)) {
-			countY++;
 			if (countY > gridN) {
 				y=h;
 				continue;
 			}			
 			int countX = 0;
 			for (double x=(int)(wStep*centeringFraction); x<w; x= (x+wStep)) {
-				countX++;
 				if (countX > gridN) {
 					x=w;
 					continue;
@@ -12122,11 +12121,17 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				IJ.log(""+x+" "+y+" "+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2]+" "+countX+" "+countY+" "+(countXY));
 
 				if (colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])!= null) {
-					IJ.log(""+colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])[0] +" "+
+					hitCount++;
+
+					IJ.log(""+randiNeuronNames[countX]+"to"+randiNeuronNames[countY] +" "+ colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])[0] +" "+
 							colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])[1]);
 				}
+				countX++;
 			}			
+			countY++;
 		}
+		IJ.log("Hitcount = "+hitCount);
+
 	}
 
 	@Override
