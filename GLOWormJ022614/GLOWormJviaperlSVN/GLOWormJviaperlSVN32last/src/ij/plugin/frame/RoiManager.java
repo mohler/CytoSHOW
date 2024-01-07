@@ -12118,6 +12118,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					y=h;
 					continue;
 				}
+				String hexColorCode = Colors.colorToHexString(new Color(((int[])imp.getProcessor().getPixels())[q]));
 				colorInts[countXY][0] = new Color(((int[])imp.getProcessor().getPixels())[q]).getRed();
 				colorInts[countXY][1] = new Color(((int[])imp.getProcessor().getPixels())[q]).getGreen();
 				colorInts[countXY][2] = new Color(((int[])imp.getProcessor().getPixels())[q]).getBlue();
@@ -12127,9 +12128,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					hitCount++;
 					Roi newOval = new OvalRoi(x-4, y-4,8,8);
 					newOval.setName(randiNeuronNames[countX]+"to"+randiNeuronNames[countY]);
-					addRoi(newOval,false, null, Colors.decode("#5500ffff", Color.cyan),  0, true);
-					IJ.log("OnChart: "+randiNeuronNames[countX]+"to"+randiNeuronNames[countY] +" "+ colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])[0] +" "+
-							colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])[1]);
+					addRoi(newOval,false, Color.cyan, Colors.decode(hexColorCode/*"#5500ffff"*/, Color.cyan),  1, true);
+					IJ.log("OnChart: "+randiNeuronNames[countX]+"to"+randiNeuronNames[countY] 
+									+" "+ hexColorCode 
+									+" q="+ colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])[0]
+									+" dF/F="+ colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])[1]);
 				} else if (colorInts[countXY][0]>0 && colorInts[countXY][1]>0 && colorInts[countXY][2]>0 && 
 						(colorInts[countXY][0]*colorInts[countXY][1]/colorInts[countXY][2] > 300
 						||colorInts[countXY][0]*colorInts[countXY][2]/colorInts[countXY][1] > 300
@@ -12140,8 +12143,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					hitCount++;
 					Roi newOval = new OvalRoi(x-4, y-4,8,8);
 					newOval.setName(randiNeuronNames[countX]+"to"+randiNeuronNames[countY]);
-					addRoi(newOval,false, null, Colors.decode("#55ff00ff", Color.magenta),  0, true);	
-					IJ.log("OffChart: "+randiNeuronNames[countX]+"to"+randiNeuronNames[countY]
+					addRoi(newOval,false, Color.magenta, Colors.decode(hexColorCode/*"#55ff00ff"*/, Color.magenta),  1, true);	
+					IJ.log("OffChart: "+randiNeuronNames[countX]+"to"+randiNeuronNames[countY]+" "+hexColorCode
 //							+" "+ 
 //							colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])[0] +" "+
 //							colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])[1]
