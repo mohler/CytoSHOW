@@ -11948,7 +11948,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								ShapeRoi sssqRoi = new ShapeRoi(sliceRois[q]);
 								Roi[] subqRois = ((ShapeRoi)sssqRoi).getRois();
 								for (int q1=0;q1<subqRois.length;q1++) {
-									include = true;
+									include = false;
 									Polygon sqPolygon = subqRois[q1].getPolygon();
 									int hitCount = 0;
 									for (int p=0;p<sqPolygon.npoints;p++) {
