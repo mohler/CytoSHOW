@@ -12099,6 +12099,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		int[][] colorInts = new int[(gridN)*(gridN)][3];
 		int countY = 0;
 		int hitCount = 0;
+		double qCutoff = IJ.getNumber("Max acceptable q value: ", 0.5);
 		for (double y=(int)(hStep*centeringFraction); y<h; y= (y+hStep)) {
 			if (countY > gridN) {
 				y=h;
@@ -12128,11 +12129,16 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					hitCount++;
 					Roi newOval = new OvalRoi(x-4, y-4,8,8);
 					newOval.setName(randiNeuronNames[countX]+"to"+randiNeuronNames[countY]);
-					addRoi(newOval,false, Color.cyan, Colors.decode(hexColorCode/*"#5500ffff"*/, Color.cyan),  1, true);
-					IJ.log("OnChart: "+randiNeuronNames[countX]+"to"+randiNeuronNames[countY] 
-									+" "+ hexColorCode 
-									+" q="+ colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])[0]
-									+" dF/F="+ colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])[1]);
+					boolean qAccepted = colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])[0] > -qCutoff;
+
+					if (qAccepted) {
+						addRoi(newOval,false, Color.cyan, Colors.decode(hexColorCode/*"#5500ffff"*/, Color.cyan),  1, true);
+
+						IJ.log("OnChart: "+randiNeuronNames[countX]+"to"+randiNeuronNames[countY] 
+								+" "+ hexColorCode 
+								+" "+ (qAccepted?"√":"x") +"q="+ colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])[0]
+										+" dF/F="+ colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])[1]);
+					}
 				} else if (colorInts[countXY][0]>0 && colorInts[countXY][1]>0 && colorInts[countXY][2]>0 && 
 						(colorInts[countXY][0]*colorInts[countXY][1]/colorInts[countXY][2] > 300
 						||colorInts[countXY][0]*colorInts[countXY][2]/colorInts[countXY][1] > 300
@@ -12142,14 +12148,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						||colorInts[countXY][1]*colorInts[countXY][2]/colorInts[countXY][0] < 60)) {
 					hitCount++;
 					Roi newOval = new OvalRoi(x-4, y-4,8,8);
-					newOval.setName(randiNeuronNames[countX]+"to"+randiNeuronNames[countY]);
-					addRoi(newOval,false, Color.magenta, Colors.decode(hexColorCode/*"#55ff00ff"*/, Color.magenta),  1, true);	
-					IJ.log("OffChart: "+randiNeuronNames[countX]+"to"+randiNeuronNames[countY]+" "+hexColorCode
-//							+" "+ 
-//							colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])[0] +" "+
-//							colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])[1]
-									);
-
+					if (false) {
+						newOval.setName(randiNeuronNames[countX]+"to"+randiNeuronNames[countY]);
+						addRoi(newOval,false, Color.magenta, Colors.decode(hexColorCode/*"#55ff00ff"*/, Color.magenta),  1, true);	
+						IJ.log("OffChart: "+randiNeuronNames[countX]+"to"+randiNeuronNames[countY]+" "+hexColorCode
+								//							+" "+ 
+								//							colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])[0] +" "+
+								//							colorIntToCalXYlut.get(""+colorInts[countXY][0]+"_"+colorInts[countXY][1]+"_"+colorInts[countXY][2])[1]
+								);
+					}
 				}
 				countX++;
 			}			

@@ -785,9 +785,9 @@ public class IJ {
 	}
 		
 	/** Converts a number to a formatted string using
-		2 digits to the right of the decimal point. */
+		4 digits to the right of the decimal point. */
 	public static String d2s(double n) {
-		return d2s(n, 2);
+		return d2s(n, 4);
 	}
 	
 	private static DecimalFormat[] df;
