@@ -356,7 +356,7 @@ public class FileOpener {
 		Properties props = decodeDescriptionString(fi);
 		Calibration cal = imp.getCalibration();
 		boolean calibrated = false;
-		if (fi.pixelWidth>0.0 && fi.unit!=null) {
+		if (fi.pixelWidth!=0.0 && fi.pixelHeight!=0.0 && fi.unit!=null) {
 			cal.pixelWidth = fi.pixelWidth;
 			cal.pixelHeight = fi.pixelHeight;
 			cal.pixelDepth = fi.pixelDepth;
