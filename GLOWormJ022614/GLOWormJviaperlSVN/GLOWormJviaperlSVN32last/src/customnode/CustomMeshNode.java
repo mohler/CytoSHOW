@@ -18,7 +18,8 @@ public class CustomMeshNode extends ContentNode {
 	public CustomMeshNode(CustomMesh mesh) {
 		this.mesh = mesh;
 		calculateMinMaxCenterPoint();
-		addChild(mesh);
+		if (mesh.getParent() == null)
+			addChild(mesh);
 	}
 
 	public CustomMesh getMesh() {

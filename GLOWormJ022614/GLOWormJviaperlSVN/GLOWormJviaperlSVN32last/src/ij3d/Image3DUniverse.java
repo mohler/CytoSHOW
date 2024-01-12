@@ -1540,7 +1540,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		contents.keySet().toArray(names);
 		for (int i=0; i<names.length; i++)
 			removeContent(names[i], false);
-		removeContent(names[names.length-1], true);
+//		removeContent(names[names.length-1], true);
 
 	}
 
@@ -2154,45 +2154,59 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			if(meshes == null)
-				return;
-
-			for(String key : meshes.keySet()) {
-				String name = key;
-				name = getSafeContentName(name);
-				if (parseTimeInCPHATE && name.matches("(.*)(\\-i)(\\d+)(\\/\\d+)?(\\-c\\d+.*)")) {
-					nextTpt = Integer.parseInt(name.replaceAll("(.*)(\\-i)(\\d+)(\\/\\d+)?(\\-c\\d+.*)","$3"));
-				}
-
-				CustomMesh mesh = meshes.get(key);
-				if (!cInstants.containsKey(name)) {
-					cInstants.put(name, new TreeMap<Integer, ContentInstant>());
-				}
-				ContentInstant contInst = new ContentInstant(name + "_#" + nextTpt);
-				contInst.timepoint = nextTpt;
-
-				contInst.color = mesh.getColor();
-				contInst.transparency = mesh.getTransparency();
-				contInst.shaded = mesh.isShaded();
-				contInst.showCoordinateSystem(UniverseSettings.showLocalCoordinateSystemsByDefault);
-				contInst.display(new CustomMeshNode(mesh));
-				contInst.compile();
-
-				cInstants.get(name).put(nextTpt,contInst);
+			while (meshes == null) {
+				IJ.wait(1000);
 			}
-		}
-		Content recentContent = null;
-		for (String ciKey: cInstants.keySet()) {
-			TreeMap<Integer, ContentInstant> ciTreeMap = cInstants.get(ciKey);
-			String cName = ciKey;
-			for (Map.Entry<Integer,ContentInstant> ciEntry: ciTreeMap.entrySet()) {
-				c3dm.addContentInstant(ciEntry.getValue());	
+			while (meshes.size() == 0) {
+				IJ.wait(1000);
 			}
+			ArrayList<String> meshNamesCompleted = new ArrayList<String>();
+			while (meshNamesCompleted.size() < meshes.size()) {
+				Object[] mksCloneArray =  Arrays.copyOf(meshes.keySet().toArray(),meshes.keySet().toArray().length);
+				for(Object key : mksCloneArray) {
+					String name = (String)key;
+					name = getSafeContentName(name);
+					if (parseTimeInCPHATE && name.matches("(.*)(\\-i)(\\d+)(\\/\\d+)?(\\-c\\d+.*)")) {
+						nextTpt = Integer.parseInt(name.replaceAll("(.*)(\\-i)(\\d+)(\\/\\d+)?(\\-c\\d+.*)","$3"));
+					}
 
-			Content content = new Content(cName, cInstants.get(cName), false);
-			recentContent = content;
-			this.addContent(content, false);
-			content.setLocked(true);
+					CustomMesh mesh = meshes.get(key);
+					if (!meshNamesCompleted.contains(name)) {
+						cInstants.put(name, new TreeMap<Integer, ContentInstant>());
+						ContentInstant contInst = new ContentInstant(name + "_#" + nextTpt);
+						contInst.timepoint = nextTpt;
+
+						contInst.color = mesh.getColor();
+						contInst.transparency = mesh.getTransparency();
+						contInst.shaded = mesh.isShaded();
+						contInst.showCoordinateSystem(UniverseSettings.showLocalCoordinateSystemsByDefault);
+						contInst.display(new CustomMeshNode(mesh));
+						contInst.compile();
+
+						cInstants.get(name).put(nextTpt,contInst);
+						meshNamesCompleted.add(name);
+					}
+
+				}
+				for (String ciKey: cInstants.keySet()) {
+					TreeMap<Integer, ContentInstant> ciTreeMap = cInstants.get(ciKey);
+					String cName = ciKey;
+					for (Map.Entry<Integer,ContentInstant> ciEntry: ciTreeMap.entrySet()) {
+						if (!c3dm.getListModel().contains(ciEntry.getValue()))
+							c3dm.addContentInstant(ciEntry.getValue());	
+					}
+
+					Content content = new Content(cName, cInstants.get(cName), false);
+					if (!contents.contains(content.getName())) {
+						this.addContent(content, true);
+						content.setLocked(true);
+					}
+				}
+				if (this.getWindow() ==null)
+					this.show(false);
+				IJ.wait(5000);
+			}
+			IJ.log(""+meshNamesCompleted.size()+" "+meshes.size());
 		}
 //		this.addContent(recentContent, true);
 		

@@ -106,7 +106,8 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 			ContentInstant ci = instants.get(i);
 			ci.timepoint = i;
 			getTimepointToSwitchIndex().put(i, getContentSwitch().numChildren());
-			getContentSwitch().addChild(ci);
+			if (ci.getParent() == null)
+				getContentSwitch().addChild(ci);
 			ci.getContentsContainingThisInstant().put(0, this);
 		}
 		addChild(getContentSwitch());

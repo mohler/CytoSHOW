@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.BufferedReader;
 
@@ -50,54 +51,70 @@ public class WavefrontLoader {
 	private String objfile = null;
 
 	private void parse(String objfile, InputStream[] objmtlStreams, boolean flipXcoords) throws IOException {
-		this.objfile = objfile;
-		File f = null;
-		if (objmtlStreams==null || objmtlStreams[0]==null) {
-			f = new File(objfile);
-			in = new BufferedReader(new FileReader(objfile));
-		}else {
-			in = new BufferedReader(new InputStreamReader(objmtlStreams[0]));
-		}
-
-		HashMap<String, Color4f> materials = null;
-
 		meshes = new LinkedHashMap<String, CustomMesh>();
 
-		while((line = in.readLine()) != null) {
-			if(line.startsWith("mtllib")) {
-				String mtlName = line.split("\\s+")[1].trim();
-				materials = readMaterials(f, mtlName, objmtlStreams);
-			} else if(line.startsWith("g ")) {
-				if(name != null) {
+		Thread compoundObjOpeningThread = new Thread (new Runnable() {
+
+			@Override
+			public void run() {
+				WavefrontLoader.this.objfile = objfile;
+				File f = null;
+				if (objmtlStreams==null || objmtlStreams[0]==null) {
+					f = new File(objfile);
+					try {
+						in = new BufferedReader(new FileReader(objfile));
+					} catch (FileNotFoundException e) {
+						e.printStackTrace();
+					}
+				}else {
+					in = new BufferedReader(new InputStreamReader(objmtlStreams[0]));
+				}
+
+				HashMap<String, Color4f> materials = null;
+
+				try{
+					while((line = in.readLine()) != null) {
+					if(line.startsWith("mtllib")) {
+						String mtlName = line.split("\\s+")[1].trim();
+						materials = readMaterials(f, mtlName, objmtlStreams);
+					} else if(line.startsWith("g ")) {
+						if(name != null) {
+							CustomMesh cm = createCustomMesh();
+							if(cm != null)
+								meshes.put(name, cm);
+							indices = new ArrayList<Point3f>();
+							material = null;
+						}
+						name = line.split("\\s+")[1].trim();
+					} else if(line.startsWith("usemtl ")) {
+						if(materials != null)
+							material = materials.get(line.split("\\s+")[1]);
+					} else if(line.startsWith("v ")) {
+						readVertex(flipXcoords);
+					} else if(line.startsWith("f ")) {
+						readFace();
+					} else if(line.startsWith("l ")) {
+						readFace();
+					} else if(line.startsWith("p ")) {
+						readFace();
+					}
+				}
+				in.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+				if(name != null && indices.size() > 0) {
 					CustomMesh cm = createCustomMesh();
+					cm.setFlippedXCoords(flipXcoords);
 					if(cm != null)
 						meshes.put(name, cm);
 					indices = new ArrayList<Point3f>();
 					material = null;
 				}
-				name = line.split("\\s+")[1].trim();
-			} else if(line.startsWith("usemtl ")) {
-				if(materials != null)
-					material = materials.get(line.split("\\s+")[1]);
-			} else if(line.startsWith("v ")) {
-				readVertex(flipXcoords);
-			} else if(line.startsWith("f ")) {
-				readFace();
-			} else if(line.startsWith("l ")) {
-				readFace();
-			} else if(line.startsWith("p ")) {
-				readFace();
+
 			}
-		}
-		in.close();
-		if(name != null && indices.size() > 0) {
-			CustomMesh cm = createCustomMesh();
-			cm.setFlippedXCoords(flipXcoords);
-			if(cm != null)
-				meshes.put(name, cm);
-			indices = new ArrayList<Point3f>();
-			material = null;
-		}
+		});
+		compoundObjOpeningThread.start();
 	}
 
 	private CustomMesh createCustomMesh() {
