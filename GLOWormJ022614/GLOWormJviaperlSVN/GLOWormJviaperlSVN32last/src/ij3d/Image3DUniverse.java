@@ -2007,39 +2007,42 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 	/** Returns true on success. */
 	private boolean addContentToScene(Content c) {
-		synchronized (lock) {
-			String name = c.getName();
-			if(contents.containsKey(name)) {
-				IJ.log("Mesh named '" + name + "' exists already");
-				return false;
+		if(!contents.containsKey(c.getName())) {
+			synchronized (lock) {
+				String name = c.getName();
+				if(contents.containsKey(name)) {
+					IJ.log("Mesh named '" + name + "' exists already");
+					return false;
+				}
+				// update start and end time
+				int st = startTime;
+				int e = endTime;
+				int cst = c.getStartTime();
+				int ce = c.getEndTime();
+				if(cst < startTime)
+					st = cst;
+				if(ce > endTime)
+					e = ce;
+				updateStartAndEndTime(st, e);
+
+				this.scene.addChild(c);
+
+				//			//ADDED THIS TO MAKE resetView() ACTUALLY RESET TO IDENTITY MATRIX INSTEAD OF WEIRD X-180 THING
+				//			Transform3D t = new Transform3D();
+				//			AxisAngle4d aa = new AxisAngle4d(1, 0, 0, Math.PI);
+				//			t.set(aa);
+				//			c.setTransform(t);
+
+				this.contents.put(name, c);
+				this.recalculateGlobalMinMax(c);
+
+				c.setPointListDialog(plDialog);
+
+				c.showTimepoint(currentTimepoint, true);
 			}
-			// update start and end time
-			int st = startTime;
-			int e = endTime;
-			int cst = c.getStartTime();
-			int ce = c.getEndTime();
-			if(cst < startTime)
-				st = cst;
-			if(ce > endTime)
-				e = ce;
-			updateStartAndEndTime(st, e);
-
-			this.scene.addChild(c);
-			
-//			//ADDED THIS TO MAKE resetView() ACTUALLY RESET TO IDENTITY MATRIX INSTEAD OF WEIRD X-180 THING
-//			Transform3D t = new Transform3D();
-//			AxisAngle4d aa = new AxisAngle4d(1, 0, 0, Math.PI);
-//			t.set(aa);
-//			c.setTransform(t);
-			
-			this.contents.put(name, c);
-			this.recalculateGlobalMinMax(c);
-
-			c.setPointListDialog(plDialog);
-
-			c.showTimepoint(currentTimepoint, true);
+			return true;
 		}
-		return true;
+		return false;
 	}
 
 	/**
@@ -2107,6 +2110,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	}
 
 
+	@SuppressWarnings("static-access")
 	public void addContentLater(String filePath, InputStream[] objmtlStreams, boolean parseTimeInCPHATE) {
 		if (parseTimeInCPHATE && startTime!=1)
 			startTime = 1;
@@ -2148,8 +2152,9 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 //			}
 			
 			LinkedHashMap<String, CustomMesh> meshes= null;
+			WavefrontLoader wl = new WavefrontLoader();
 			try {
-				meshes = WavefrontLoader.load(nextmatchingfilePath, objmtlStreams, flipXonImport);
+				meshes = wl.loadObjs(nextmatchingfilePath, objmtlStreams, flipXonImport);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -2160,18 +2165,20 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			while (meshes.size() == 0) {
 				IJ.wait(1000);
 			}
-			ArrayList<String> meshNamesCompleted = new ArrayList<String>();
-			while (meshNamesCompleted.size() < meshes.size()) {
+			int meshCountOld = 0;
+			while (!wl.allLinesParsed || meshCountOld < wl.finalMeshCount) {
+				 meshCountOld = meshes.size();
 				Object[] mksCloneArray =  Arrays.copyOf(meshes.keySet().toArray(),meshes.keySet().toArray().length);
 				for(Object key : mksCloneArray) {
 					String name = (String)key;
+					if (cInstants.containsKey(name))
+						continue;
 					name = getSafeContentName(name);
 					if (parseTimeInCPHATE && name.matches("(.*)(\\-i)(\\d+)(\\/\\d+)?(\\-c\\d+.*)")) {
 						nextTpt = Integer.parseInt(name.replaceAll("(.*)(\\-i)(\\d+)(\\/\\d+)?(\\-c\\d+.*)","$3"));
 					}
 
 					CustomMesh mesh = meshes.get(key);
-					if (!meshNamesCompleted.contains(name)) {
 						cInstants.put(name, new TreeMap<Integer, ContentInstant>());
 						ContentInstant contInst = new ContentInstant(name + "_#" + nextTpt);
 						contInst.timepoint = nextTpt;
@@ -2184,11 +2191,11 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 						contInst.compile();
 
 						cInstants.get(name).put(nextTpt,contInst);
-						meshNamesCompleted.add(name);
-					}
 
 				}
 				for (String ciKey: cInstants.keySet()) {
+					if (this.contents.containsKey(ciKey))
+						continue;
 					TreeMap<Integer, ContentInstant> ciTreeMap = cInstants.get(ciKey);
 					String cName = ciKey;
 					for (Map.Entry<Integer,ContentInstant> ciEntry: ciTreeMap.entrySet()) {
@@ -2196,17 +2203,20 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 							c3dm.addContentInstant(ciEntry.getValue());	
 					}
 
-					Content content = new Content(cName, cInstants.get(cName), false);
-					if (!contents.contains(content.getName())) {
-						this.addContent(content, true);
-						content.setLocked(true);
+					if (!this.contents.containsKey(cName)) {
+						Content content = new Content(cName, cInstants.get(cName), false);
+						if (this.addContent(content, true)!=null) {
+							content.setLocked(true);
+						}
 					}
 				}
-				if (this.getWindow() ==null)
-					this.show(false);
+//				if (this.getWindow() ==null)
+//					this.show(false);
 				IJ.wait(5000);
+				
 			}
-			IJ.log(""+meshNamesCompleted.size()+" "+meshes.size());
+			IJ.log(""+" "+meshes.size());
+			IJ.wait(10);
 		}
 //		this.addContent(recentContent, true);
 		

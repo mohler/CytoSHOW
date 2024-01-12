@@ -35,9 +35,20 @@ public class WavefrontLoader {
 		return wl.meshes;
 	}
 
+	public  LinkedHashMap<String, CustomMesh> loadObjs(String objfile, InputStream[] objmtlStreams, boolean flipXcoords)
+			throws IOException {
+		try {
+			parse(objfile, objmtlStreams, flipXcoords);
+		} catch(RuntimeException e) {
+			System.out.println("error reading " + name);
+			throw e;
+		}
+		return meshes;
+	}
+	
 	private LinkedHashMap<String, CustomMesh> meshes;
 
-	private  WavefrontLoader() {}
+	public  WavefrontLoader() {}
 
 	private BufferedReader in;
 	private String line;
@@ -49,6 +60,8 @@ public class WavefrontLoader {
 	private Color4f material = null;
 	private int type = -1;
 	private String objfile = null;
+	public boolean allLinesParsed;
+	public int finalMeshCount;
 
 	private void parse(String objfile, InputStream[] objmtlStreams, boolean flipXcoords) throws IOException {
 		meshes = new LinkedHashMap<String, CustomMesh>();
@@ -74,32 +87,32 @@ public class WavefrontLoader {
 
 				try{
 					while((line = in.readLine()) != null) {
-					if(line.startsWith("mtllib")) {
-						String mtlName = line.split("\\s+")[1].trim();
-						materials = readMaterials(f, mtlName, objmtlStreams);
-					} else if(line.startsWith("g ")) {
-						if(name != null) {
-							CustomMesh cm = createCustomMesh();
-							if(cm != null)
-								meshes.put(name, cm);
-							indices = new ArrayList<Point3f>();
-							material = null;
+						if(line.startsWith("mtllib")) {
+							String mtlName = line.split("\\s+")[1].trim();
+							materials = readMaterials(f, mtlName, objmtlStreams);
+						} else if(line.startsWith("g ")) {
+							if(name != null) {
+								CustomMesh cm = createCustomMesh();
+								if(cm != null)
+									meshes.put(name, cm);
+								indices = new ArrayList<Point3f>();
+								material = null;
+							}
+							name = line.split("\\s+")[1].trim();
+						} else if(line.startsWith("usemtl ")) {
+							if(materials != null)
+								material = materials.get(line.split("\\s+")[1]);
+						} else if(line.startsWith("v ")) {
+							readVertex(flipXcoords);
+						} else if(line.startsWith("f ")) {
+							readFace();
+						} else if(line.startsWith("l ")) {
+							readFace();
+						} else if(line.startsWith("p ")) {
+							readFace();
 						}
-						name = line.split("\\s+")[1].trim();
-					} else if(line.startsWith("usemtl ")) {
-						if(materials != null)
-							material = materials.get(line.split("\\s+")[1]);
-					} else if(line.startsWith("v ")) {
-						readVertex(flipXcoords);
-					} else if(line.startsWith("f ")) {
-						readFace();
-					} else if(line.startsWith("l ")) {
-						readFace();
-					} else if(line.startsWith("p ")) {
-						readFace();
 					}
-				}
-				in.close();
+					in.close();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -111,6 +124,8 @@ public class WavefrontLoader {
 					indices = new ArrayList<Point3f>();
 					material = null;
 				}
+				allLinesParsed = true;
+				finalMeshCount = meshes.size();
 
 			}
 		});

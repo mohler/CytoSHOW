@@ -1664,6 +1664,13 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					dropUniverse = new Image3DUniverse();
 					IJ.wait(100);  //This little pause is needed not crash on windows
 					dropUniverse.setTitle(((File) nextItem).getName()/* +" (IJ3DV)" */);
+					dropUniverse.show(false);
+					dropUniverse.getWindow().setDragAndDrop(DragAndDrop.this);
+					IJ.getInstance().setDragAndDrop(new DragAndDrop());
+					dropUniverse.getWindow().getDragAndDrop().addDropTarget(dropUniverse.getCanvas());
+					while (dropUniverse.getWindow() == null) IJ.wait (10);
+					dropImp = dropUniverse.getWindow().getImagePlus();
+					setImp(dropImp);
 				}
 
 
@@ -1676,15 +1683,6 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						int s = this.dtde.getDropAction();
 //						IJ.log(""+s);
 						dropUniverse.addContentLater(((File)nextItem).getPath(), null, s==1||s==1073741824?true:false);     //this call picked when dropping either a single obj file or a mixed folder with objs and others
-					}
-					if (newUnivNeeded) {
-						dropUniverse.show(false);
-						dropUniverse.getWindow().setDragAndDrop(DragAndDrop.this);
-						IJ.getInstance().setDragAndDrop(new DragAndDrop());
-						dropUniverse.getWindow().getDragAndDrop().addDropTarget(dropUniverse.getCanvas());
-						while (dropUniverse.getWindow() == null) IJ.wait (10);
-						dropImp = dropUniverse.getWindow().getImagePlus();
-						setImp(dropImp);
 					}
 				} catch (Exception e) {
 					dropUniverse = new Image3DUniverse();
