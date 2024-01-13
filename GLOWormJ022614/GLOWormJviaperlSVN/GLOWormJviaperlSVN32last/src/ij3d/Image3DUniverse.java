@@ -2147,10 +2147,10 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			if (tptParse[tptParse.length-1].matches("\\d+.obj")) {
 				nextTpt = Integer.parseInt(tptParse[tptParse.length-1].replace(".obj", ""));
 			} 
-//			else if (parseTimeInCPHATE && ((String)nextmatchingfilename).matches("(.*)(csv\\.i)(\\d+)(\\.c\\d+.*\\.obj)")) {
-//				nextTpt = Integer.parseInt(((String)nextmatchingfilename).replaceAll("(.*)(csv\\.i)(\\d+)(\\.c\\d+.*\\.obj)","$3"));
-//			}
-			
+			//			else if (parseTimeInCPHATE && ((String)nextmatchingfilename).matches("(.*)(csv\\.i)(\\d+)(\\.c\\d+.*\\.obj)")) {
+			//				nextTpt = Integer.parseInt(((String)nextmatchingfilename).replaceAll("(.*)(csv\\.i)(\\d+)(\\.c\\d+.*\\.obj)","$3"));
+			//			}
+
 			LinkedHashMap<String, CustomMesh> meshes= null;
 			WavefrontLoader wl = new WavefrontLoader();
 			try {
@@ -2160,25 +2160,30 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				e.printStackTrace();
 			}
 			while (meshes == null) {
-				IJ.wait(1000);
+				IJ.wait(10);
 			}
 			while (meshes.size() == 0) {
-				IJ.wait(1000);
+				IJ.wait(10);
 			}
-			int meshCountOld = 0;
-			while (!wl.allLinesParsed || meshCountOld < wl.finalMeshCount) {
-				 meshCountOld = meshes.size();
-				Object[] mksCloneArray =  Arrays.copyOf(meshes.keySet().toArray(),meshes.keySet().toArray().length);
-				for(Object key : mksCloneArray) {
-					String name = (String)key;
-					if (cInstants.containsKey(name))
-						continue;
-					name = getSafeContentName(name);
-					if (parseTimeInCPHATE && name.matches("(.*)(\\-i)(\\d+)(\\/\\d+)?(\\-c\\d+.*)")) {
-						nextTpt = Integer.parseInt(name.replaceAll("(.*)(\\-i)(\\d+)(\\/\\d+)?(\\-c\\d+.*)","$3"));
-					}
+			int meshCountDone = 0;
 
-					CustomMesh mesh = meshes.get(key);
+			while (!wl.allLinesParsed) {
+
+				while (meshCountDone == meshes.size())
+					IJ.wait(1000);
+				
+				while (meshCountDone < meshes.size()) {
+					Object[] mksCloneArray =  Arrays.copyOf(meshes.keySet().toArray(),meshes.keySet().toArray().length);
+					for(Object key : mksCloneArray) {
+						String name = (String)key;
+						if (cInstants.containsKey(name))
+							continue;
+						name = getSafeContentName(name);
+						if (parseTimeInCPHATE && name.matches("(.*)(\\-i)(\\d+)(\\/\\d+)?(\\-c\\d+.*)")) {
+							nextTpt = Integer.parseInt(name.replaceAll("(.*)(\\-i)(\\d+)(\\/\\d+)?(\\-c\\d+.*)","$3"));
+						}
+
+						CustomMesh mesh = meshes.get(key);
 						cInstants.put(name, new TreeMap<Integer, ContentInstant>());
 						ContentInstant contInst = new ContentInstant(name + "_#" + nextTpt);
 						contInst.timepoint = nextTpt;
@@ -2192,31 +2197,34 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 						cInstants.get(name).put(nextTpt,contInst);
 
-				}
-				for (String ciKey: cInstants.keySet()) {
-					if (this.contents.containsKey(ciKey))
-						continue;
-					TreeMap<Integer, ContentInstant> ciTreeMap = cInstants.get(ciKey);
-					String cName = ciKey;
-					for (Map.Entry<Integer,ContentInstant> ciEntry: ciTreeMap.entrySet()) {
-						if (!c3dm.getListModel().contains(ciEntry.getValue()))
-							c3dm.addContentInstant(ciEntry.getValue());	
 					}
+					for (String ciKey: cInstants.keySet()) {
+						if (this.contents.containsKey(ciKey))
+							continue;
+						TreeMap<Integer, ContentInstant> ciTreeMap = cInstants.get(ciKey);
+						String cName = ciKey;
+						for (Map.Entry<Integer,ContentInstant> ciEntry: ciTreeMap.entrySet()) {
+							if (!c3dm.getListModel().contains(ciEntry.getValue()))
+								c3dm.addContentInstant(ciEntry.getValue());	
+						}
 
-					if (!this.contents.containsKey(cName)) {
-						Content content = new Content(cName, cInstants.get(cName), false);
-						if (this.addContent(content, true)!=null) {
-							content.setLocked(true);
+						if (!this.contents.containsKey(cName)) {
+							Content content = new Content(cName, cInstants.get(cName), false);
+							if (this.addContent(content, true)!=null) {
+								content.setLocked(true);
+							}
 						}
 					}
+					//				if (this.getWindow() ==null)
+					//					this.show(false);
+					//				IJ.wait(5000);
+					meshCountDone++;
+
 				}
-//				if (this.getWindow() ==null)
-//					this.show(false);
-				IJ.wait(5000);
-				
 			}
-			IJ.log(""+" "+meshes.size());
-			IJ.wait(10);
+				if (meshes.size() >1)
+					IJ.log(""+" "+meshes.size());
+				IJ.wait(10);
 		}
 //		this.addContent(recentContent, true);
 		

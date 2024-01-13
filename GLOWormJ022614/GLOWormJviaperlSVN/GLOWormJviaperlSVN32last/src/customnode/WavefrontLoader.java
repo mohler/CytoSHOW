@@ -62,9 +62,25 @@ public class WavefrontLoader {
 	private String objfile = null;
 	public boolean allLinesParsed;
 	public int finalMeshCount;
+	private String objFileParentName;
+	private String objFileGrandParentName;
+	private String objFileGreatGrandParentName;
 
 	private void parse(String objfile, InputStream[] objmtlStreams, boolean flipXcoords) throws IOException {
 		meshes = new LinkedHashMap<String, CustomMesh>();
+		objFileParentName = "";
+		objFileGrandParentName = "";
+		objFileGreatGrandParentName = "";
+		if (new File(objfile).getParentFile()!=null 
+				&& new File(objfile).getParentFile().getParentFile()!=null 
+				&& new File(objfile).getParentFile().getParentFile().getParentFile()!=null 
+				&& new File(objfile).getParentFile().exists()
+				&& new File(objfile).getParentFile().getParentFile().exists() 
+				&& new File(objfile).getParentFile().getParentFile().getParentFile().exists()){
+			objFileParentName = new File(objfile).getParentFile().getName();
+			objFileGrandParentName = new File(objfile).getParentFile().getParentFile().getName();
+			objFileGreatGrandParentName = new File(objfile).getParentFile().getParentFile().getParentFile().getName();
+		}
 
 		Thread compoundObjOpeningThread = new Thread (new Runnable() {
 
@@ -179,19 +195,6 @@ public class WavefrontLoader {
 	private void readVertex(boolean specialDrop) {
 		String[] sp = line.split("\\s+");
 		int flipXCoef = specialDrop?-1:1;
-		String objFileParentName = "";
-		String objFileGrandParentName = "";
-		String objFileGreatGrandParentName = "";
-		if (new File(objfile).getParentFile()!=null 
-				&& new File(objfile).getParentFile().getParentFile()!=null 
-				&& new File(objfile).getParentFile().getParentFile().getParentFile()!=null 
-				&& new File(objfile).getParentFile().exists()
-				&& new File(objfile).getParentFile().getParentFile().exists() 
-				&& new File(objfile).getParentFile().getParentFile().getParentFile().exists()){
-			objFileParentName = new File(objfile).getParentFile().getName();
-			objFileGrandParentName = new File(objfile).getParentFile().getParentFile().getName();
-			objFileGreatGrandParentName = new File(objfile).getParentFile().getParentFile().getParentFile().getName();
-		}
 		if (( objFileGrandParentName.contains("AllNineBrains_FilesToUse") || objFileGreatGrandParentName.contains("AllNineBrains_FilesToUse"))
 				&& !specialDrop) {
 			flipXCoef = 1;
