@@ -195,9 +195,8 @@ public class WavefrontLoader {
 	private void readVertex(boolean specialDrop) {
 		String[] sp = line.split("\\s+");
 		int flipXCoef = specialDrop?-1:1;
-		if (( objFileGrandParentName.contains("AllNineBrains_FilesToUse") || objFileGreatGrandParentName.contains("AllNineBrains_FilesToUse"))
-				&& !specialDrop) {
-			flipXCoef = 1;
+		if (( objFileGrandParentName.contains("AllNineBrains_FilesToUse") || objFileGreatGrandParentName.contains("AllNineBrains_FilesToUse"))) {
+//			flipXCoef = 1;
 			//		FOR JSH
 			if (objFileParentName.contains("JSH") || objFileGrandParentName.contains("JSH")) {
 				float x = 20803.52f;

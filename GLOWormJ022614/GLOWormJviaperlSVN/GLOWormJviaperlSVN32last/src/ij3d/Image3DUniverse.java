@@ -2167,7 +2167,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			}
 			int meshCountDone = 0;
 
-			while (!wl.allLinesParsed) {
+			while (!wl.allLinesParsed || (wl.allLinesParsed && meshCountDone < meshes.size())) {
 
 				while (meshCountDone == meshes.size())
 					IJ.wait(1000);
