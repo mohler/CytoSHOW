@@ -198,7 +198,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	private int shiftT;
 	private int shiftC;
 	private static Hashtable<String, Double[]> colorIntToCalXYlut;
-	private static LinkedHashMap<String, Double[]> cellPairToQandDFoverF;
+	private static LinkedHashMap<String, Double[]> cellPairToDFoverFandQvalues;
 
 	public RoiManager() {
 		super("Tag Manager");
@@ -479,7 +479,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		addPopupItem("makeColorHTlut");
 		addPopupItem("translateMapColors");
 		addPopupItem("cellPairTodFoverFAndQvalue");
-		addPopupItem("translateLegendQanddFoverFValuesToColors");
+		addPopupItem("translateLegendDFoverFandQValuesToColors");
 		add(pm);
 	}
 
@@ -1196,9 +1196,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			} else if (command.equals("translateMapColors")) {
 				this.translateMapColors();
 			} else if (command.equals("cellPairTodFoverFAndQvalue")) {
-				cellPairToQandDFoverF = this.cellPairTodFoverFAndQvalue();
-			}else if (command.equals("translateLegendQanddFoverFValuesToColors")) {
-				this.translateLegendQanddFoverFValuesToColors();
+				cellPairToDFoverFandQvalues = this.cellPairToDFoverFAndQvalue();
+			}else if (command.equals("translateLegendDFoverFandQValuesToColors")) {
+				this.translateLegendDFoverFandQValuesToColors();
 			}
 		//			this.imp.getCanvas().requestFocus();
 		}
@@ -12094,10 +12094,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		return ht;
 	}
 	
-	public LinkedHashMap<String, Double[]> cellPairTodFoverFAndQvalue(){
+	public LinkedHashMap<String, Double[]> cellPairToDFoverFAndQvalue(){
 		LinkedHashMap<String, Double[]> ht = new LinkedHashMap<String, Double[]>();
-		String oneMinusQvaluesString = IJ.openAsString(IJ.getFilePath("Open table of Randi q values"));
+		IJ.log("Open table of Randi alpha = 1-q values");
+		String oneMinusQvaluesString = IJ.openAsString(IJ.getFilePath("Open table of Randi alpha = 1-q values"));
 		String[] oneMinusQvaluesLines = oneMinusQvaluesString.split("\n");
+		IJ.log("Open table of Randi dFoverF values");
 		String dFoverFString = IJ.openAsString(IJ.getFilePath("Open table of Randi dFoverF values"));
 		String[] dFoverFLines = dFoverFString.split("\n");
 		String hCellListString = null;
@@ -12110,14 +12112,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		String[] hCellListArray = hCellListString.split(",");
 		for (int row=1; row< dFoverFLines.length; row++){
-			String[] rowoneMinusQvalueStrings = oneMinusQvaluesLines[row].split(",");
+			String[] rowOneMinusQvalueStrings = oneMinusQvaluesLines[row].split(",");
 			String[] rowDFOverFvalueStrings = dFoverFLines[row].split(",");
 			for(int col=1; col<rowDFOverFvalueStrings.length; col++) {
 				String cellPairName = hCellListArray[col]+"to"+rowDFOverFvalueStrings[0];
 				Double cellPairQvalue;
 				Double rowDFOverFvalue;
-				if (!rowoneMinusQvalueStrings[col].equals("") && !rowDFOverFvalueStrings[col].equals("")) {
-					cellPairQvalue = 1d-Double.parseDouble(rowoneMinusQvalueStrings[col]);
+				if (!rowOneMinusQvalueStrings[col].equals("0") && !rowDFOverFvalueStrings[col].equals("")) {
+					cellPairQvalue = 1d-Double.parseDouble(rowOneMinusQvalueStrings[col]);
 					rowDFOverFvalue = Double.parseDouble(rowDFOverFvalueStrings[col]);
 				} else {
 					cellPairQvalue = 0.5d;
@@ -12135,17 +12137,18 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		return ht;
 	}
 
-	public void translateLegendQanddFoverFValuesToColors() {
+	public void translateLegendDFoverFandQValuesToColors() {
 		double qCutoff = IJ.getNumber("Max acceptable q value: ", 0.05);
-
-		for (String cellPair:cellPairToQandDFoverF.keySet()) {
-			if (1d-cellPairToQandDFoverF.get(cellPair)[1] > qCutoff)
+		String[] keysToBeSorted = cellPairToDFoverFandQvalues.keySet().toArray(new String[cellPairToDFoverFandQvalues.keySet().size()]);
+		Arrays.sort(keysToBeSorted);
+		for (String cellPair:keysToBeSorted) {
+			if (cellPairToDFoverFandQvalues.get(cellPair)[1] > qCutoff)
 				continue;
-			double xCal = cellPairToQandDFoverF.get(cellPair)[1];
-			double yCal = cellPairToQandDFoverF.get(cellPair)[0];
+			double qVal = cellPairToDFoverFandQvalues.get(cellPair)[1];
+			double dFoverFval = cellPairToDFoverFandQvalues.get(cellPair)[0];
 			//NEED SOME MAJOR CONSIDERATION OF WHAT WE ARE GETTING FOR THESE FORMULAS WHEN MY HEAD IS CLEARER
-			int xPos = (int)((1d-xCal/imp.getCalibration().pixelWidth)-imp.getCalibration().xOrigin);
-			int yPos = (int)(-(yCal/imp.getCalibration().pixelHeight)+imp.getCalibration().yOrigin);
+			int xPos = (int)((1d-qVal/imp.getCalibration().pixelWidth)-imp.getCalibration().xOrigin);
+			int yPos = (int)(-(dFoverFval/imp.getCalibration().pixelHeight)+imp.getCalibration().yOrigin);
 			//
 			
 			String hexColorCode = Colors.colorToHexString(new Color((int)imp.getProcessor().get(xPos,yPos)));
@@ -12154,7 +12157,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			String greenIntString = ""+new Color(((int)imp.getProcessor().get(xPos,yPos))).getGreen();
 			String blueIntString = ""+new Color((int)(imp.getProcessor().get(xPos,yPos))).getBlue();
 
-			IJ.log(cellPair +","+ hexColorCode +","+ alphaIntString +","+ redIntString +","+ greenIntString +","+ blueIntString);
+			IJ.log(cellPair +","+ qVal +","+ dFoverFval +","+ hexColorCode +","+ alphaIntString +","+ redIntString +","+ greenIntString +","+ blueIntString);
 
 
 		}
