@@ -1198,7 +1198,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			} else if (command.equals("cellPairTodFoverFAndQvalue")) {
 				cellPairToDFoverFandQvalues = this.cellPairToDFoverFAndQvalue();
 			}else if (command.equals("translateLegendDFoverFandQValuesToColors")) {
-				this.translateLegendDFoverFandQValuesToColors();
+				this.translateLegendDFoverFandAlphaValuesToColors();
 			}
 		//			this.imp.getCanvas().requestFocus();
 		}
@@ -12116,19 +12116,19 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			String[] rowDFOverFvalueStrings = dFoverFLines[row].split(",");
 			for(int col=1; col<rowDFOverFvalueStrings.length; col++) {
 				String cellPairName = hCellListArray[col]+"to"+rowDFOverFvalueStrings[0];
-				Double cellPairQvalue;
+				Double cellAlphavalue;
 				Double rowDFOverFvalue;
 				if (!rowOneMinusQvalueStrings[col].equals("0") && !rowDFOverFvalueStrings[col].equals("")) {
-					cellPairQvalue = 1d-Double.parseDouble(rowOneMinusQvalueStrings[col]);
+					cellAlphavalue = Double.parseDouble(rowOneMinusQvalueStrings[col]);
 					rowDFOverFvalue = Double.parseDouble(rowDFOverFvalueStrings[col]);
 				} else {
-					cellPairQvalue = 0.5d;
+					cellAlphavalue = 0.5d;
 					rowDFOverFvalue = 0d;
 				}
 
-				ht.put(cellPairName, new Double[]{rowDFOverFvalue, cellPairQvalue});
+				ht.put(cellPairName, new Double[]{rowDFOverFvalue, cellAlphavalue});
 
-				IJ.log(cellPairName +" "+ rowDFOverFvalue +" "+ cellPairQvalue);
+				IJ.log(cellPairName +" "+ rowDFOverFvalue +" "+ cellAlphavalue);
 
 
 			}
@@ -12137,30 +12137,46 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		return ht;
 	}
 
-	public void translateLegendDFoverFandQValuesToColors() {
-		double qCutoff = IJ.getNumber("Max acceptable q value: ", 0.05);
+	public void translateLegendDFoverFandAlphaValuesToColors() {
+		double qHiCutoff = IJ.getNumber("Max acceptable q value: ", 0.05);
+		double alphaLoCutoff = 1d-qHiCutoff;
 		String[] keysToBeSorted = cellPairToDFoverFandQvalues.keySet().toArray(new String[cellPairToDFoverFandQvalues.keySet().size()]);
 		Arrays.sort(keysToBeSorted);
+		int countIn = 0;
+		int countBroughtInboundsDFoverF = 0;
 		for (String cellPair:keysToBeSorted) {
-			if (cellPairToDFoverFandQvalues.get(cellPair)[1] > qCutoff)
+			if (cellPairToDFoverFandQvalues.get(cellPair)[1] < alphaLoCutoff)
 				continue;
-			double qVal = cellPairToDFoverFandQvalues.get(cellPair)[1];
+			if (cellPair.split("to")[0].equals(cellPair.split("to")[1]))
+				continue;
+			
+			double alphaVal = cellPairToDFoverFandQvalues.get(cellPair)[1];
 			double dFoverFval = cellPairToDFoverFandQvalues.get(cellPair)[0];
-			//NEED SOME MAJOR CONSIDERATION OF WHAT WE ARE GETTING FOR THESE FORMULAS WHEN MY HEAD IS CLEARER
-			int xPos = (int)((1d-qVal/imp.getCalibration().pixelWidth)-imp.getCalibration().xOrigin);
-			int yPos = (int)(-(dFoverFval/imp.getCalibration().pixelHeight)+imp.getCalibration().yOrigin);
-			//
+
+			int xPos = (int)Math.floor((alphaVal/imp.getCalibration().pixelWidth)+imp.getCalibration().xOrigin);
+			int yPos = (int)Math.floor((dFoverFval/imp.getCalibration().pixelHeight)+imp.getCalibration().yOrigin);
+
+			//Randi et al data tables have df/f outside the range of the damn color table....correcting here.
+			if (yPos < 0) {
+				yPos = 0;
+				countBroughtInboundsDFoverF++;
+			}
+			if (yPos > imp.getHeight()-1) {
+				yPos = imp.getHeight()-1;
+				countBroughtInboundsDFoverF++;
+			}
 			
 			String hexColorCode = Colors.colorToHexString(new Color((int)imp.getProcessor().get(xPos,yPos)));
-			String alphaIntString = ""+new Color(((int)imp.getProcessor().get(xPos,yPos))).getAlpha();
+			String colorAlfIntString = ""+new Color(((int)imp.getProcessor().get(xPos,yPos))).getAlpha();
 			String redIntString = ""+new Color(((int)imp.getProcessor().get(xPos,yPos))).getRed();
 			String greenIntString = ""+new Color(((int)imp.getProcessor().get(xPos,yPos))).getGreen();
 			String blueIntString = ""+new Color((int)(imp.getProcessor().get(xPos,yPos))).getBlue();
 
-			IJ.log(cellPair +","+ qVal +","+ dFoverFval +","+ hexColorCode +","+ alphaIntString +","+ redIntString +","+ greenIntString +","+ blueIntString);
-
+			IJ.log(cellPair +","+ alphaVal +","+ dFoverFval +","+ xPos +","+ yPos +","+ hexColorCode +","+ colorAlfIntString +","+ redIntString +","+ greenIntString +","+ blueIntString);
+			countIn++;
 
 		}
+		IJ.log("\n"+countIn+ " fit q criterion.  "+ countBroughtInboundsDFoverF +" were out of range limits for dF/F, corrected back to 0.4 or -0.4 .");
 		
 //						(double)(-((p%w)-imp.getCalibration().xOrigin)*imp.getCalibration().pixelWidth)+" "+
 //						(double)(((p/w)-imp.getCalibration().yOrigin)*imp.getCalibration().pixelHeight));
