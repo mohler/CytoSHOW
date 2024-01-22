@@ -100,7 +100,8 @@ public class WavefrontLoader {
 				}
 
 				HashMap<String, Color4f> materials = null;
-
+				boolean noVlines = true;
+				boolean noFlines = true;
 				try{
 					while((line = in.readLine()) != null) {
 						if(line.startsWith("mtllib")) {
@@ -120,8 +121,10 @@ public class WavefrontLoader {
 								material = materials.get(line.split("\\s+")[1]);
 						} else if(line.startsWith("v ")) {
 							readVertex(flipXcoords);
+							noVlines = false;
 						} else if(line.startsWith("f ")) {
 							readFace();
+							noFlines = false;
 						} else if(line.startsWith("l ")) {
 							readFace();
 						} else if(line.startsWith("p ")) {
@@ -129,6 +132,12 @@ public class WavefrontLoader {
 						}
 					}
 					in.close();
+					if (noVlines || noFlines) {
+						meshes = null;
+						name = null;
+						allLinesParsed = true;
+						return;
+					}
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

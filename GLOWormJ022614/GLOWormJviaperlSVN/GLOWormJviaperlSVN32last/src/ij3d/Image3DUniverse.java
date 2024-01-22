@@ -2141,6 +2141,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 //		setTitle((this.flipXonImport?"FlipX_":"")+titleName);
 		
 		for (Object nextmatchingfilename: timedObjFileNms) {
+			if (nextmatchingfilename.equals("SVV_0000.obj"))
+				continue;
 			String nextmatchingfilePath = file.getParent() +File.separator + (String)nextmatchingfilename;
 			String[] tptParse = ((String)nextmatchingfilename).split("_");
 			int nextTpt =0;
@@ -2159,9 +2161,13 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			while (meshes == null) {
+			while (meshes == null || !wl.allLinesParsed) {
 				IJ.wait(10);
 			}
+			if (meshes == null && wl.allLinesParsed) {
+				continue;
+			}
+			
 			while (meshes.size() == 0) {
 				IJ.wait(10);
 			}
