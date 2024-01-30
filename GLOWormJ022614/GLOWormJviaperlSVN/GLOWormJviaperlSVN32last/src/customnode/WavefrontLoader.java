@@ -377,7 +377,7 @@ public class WavefrontLoader {
 		return null;
 	}
 
-	private static HashMap<String, Color4f> readMaterials(File f)
+	public static HashMap<String, Color4f> readMaterials(File f)
 							throws IOException {
 		return readMaterials(f.getAbsolutePath(), null);
 	}

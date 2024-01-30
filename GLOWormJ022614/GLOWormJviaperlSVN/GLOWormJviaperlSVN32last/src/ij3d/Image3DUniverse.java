@@ -2164,7 +2164,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			while (meshes == null || !wl.allLinesParsed) {
 				IJ.wait(10);
 			}
-			if (meshes == null && wl.allLinesParsed) {
+			if ((meshes == null || meshes.size() == 0) && wl.allLinesParsed) {
 				continue;
 			}
 			
