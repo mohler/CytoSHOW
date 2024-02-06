@@ -1710,6 +1710,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					}
 				}
 				//ImageJ3DViewer.lock();
+				dropUniverse.setFlipXonImport(false);
 
 			} else if (nextItem!=null && ((File)nextItem).getPath().endsWith("ColorLegend.lgd")){
 				ColorLegend cl;
