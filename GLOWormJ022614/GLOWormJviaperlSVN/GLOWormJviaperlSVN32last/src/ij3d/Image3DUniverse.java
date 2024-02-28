@@ -2161,13 +2161,9 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			while (meshes == null || !wl.allLinesParsed) {
+			while (meshes == null) {
 				IJ.wait(10);
 			}
-			if ((meshes == null || meshes.size() == 0) && wl.allLinesParsed) {
-				continue;
-			}
-			
 			while (meshes.size() == 0) {
 				IJ.wait(10);
 			}
