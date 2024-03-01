@@ -12094,11 +12094,15 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		return ht;
 	}
 	
+	
+//	Both of next two methods have been refactored after Andy Leifer realized Fig2a was mislabeled as to the alpha = 1-q value.
+//  The new factoring is to match Fig Supp 5a (or 4a, he says), both of which are supposed to be correct...  2/28/2024
+	
 	public LinkedHashMap<String, Double[]> cellPairToDFoverFAndQvalue(){
 		LinkedHashMap<String, Double[]> ht = new LinkedHashMap<String, Double[]>();
-		IJ.log("Open table of Randi alpha = 1-q values");
-		String oneMinusQvaluesString = IJ.openAsString(IJ.getFilePath("Open table of Randi alpha = 1-q values"));
-		String[] oneMinusQvaluesLines = oneMinusQvaluesString.split("\n");
+		IJ.log("Open table of Randi q values");
+		String qValuesString = IJ.openAsString(IJ.getFilePath("Open table of Randi q values"));
+		String[] qValuesLines = qValuesString.split("\n");
 		IJ.log("Open table of Randi dFoverF values");
 		String dFoverFString = IJ.openAsString(IJ.getFilePath("Open table of Randi dFoverF values"));
 		String[] dFoverFLines = dFoverFString.split("\n");
@@ -12106,29 +12110,33 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (hCellListString == null) {
 			hCellListString = dFoverFLines[0];
 		}
-		if (!hCellListString.equals(oneMinusQvaluesLines[0])) {
-			IJ.log("Cell lists do not match:\n"+dFoverFLines[0]+"\n"+oneMinusQvaluesLines[0]);
+		if (!hCellListString.equals(qValuesLines[0])) {
+			IJ.log("Cell lists do not match:\n"+dFoverFLines[0]+"\n"+qValuesLines[0]);
 			return null;
 		}
 		String[] hCellListArray = hCellListString.split(",");
 		for (int row=1; row< dFoverFLines.length; row++){
-			String[] rowOneMinusQvalueStrings = oneMinusQvaluesLines[row].split(",");
+			String[] rowQvalueStrings = qValuesLines[row].split(",");
 			String[] rowDFOverFvalueStrings = dFoverFLines[row].split(",");
 			for(int col=1; col<rowDFOverFvalueStrings.length; col++) {
-				String cellPairName = hCellListArray[col]+"to"+rowDFOverFvalueStrings[0];
-				Double cellAlphavalue;
+				//commented version had stimmed cell in wrong place in the StimToTarget phrasing.
+//				String cellPairName = hCellListArray[col]+"to"+rowDFOverFvalueStrings[0];
+				
+				//This version below should work for ColorLegend.lgds
+				String cellPairName = rowDFOverFvalueStrings[0]+"by"+hCellListArray[col];
+				Double cellQvalue;
 				Double rowDFOverFvalue;
-				if (!rowOneMinusQvalueStrings[col].equals("0") && !rowDFOverFvalueStrings[col].equals("")) {
-					cellAlphavalue = Double.parseDouble(rowOneMinusQvalueStrings[col]);
+				if (!rowQvalueStrings[col].equals("0") && !rowDFOverFvalueStrings[col].equals("")) {
+					cellQvalue = Double.parseDouble(rowQvalueStrings[col]);
 					rowDFOverFvalue = Double.parseDouble(rowDFOverFvalueStrings[col]);
 				} else {
-					cellAlphavalue = 0.5d;
+					cellQvalue = 0.5d;
 					rowDFOverFvalue = 0d;
 				}
 
-				ht.put(cellPairName, new Double[]{rowDFOverFvalue, cellAlphavalue});
+				ht.put(cellPairName, new Double[]{rowDFOverFvalue, cellQvalue});
 
-				IJ.log(cellPairName +" "+ rowDFOverFvalue +" "+ cellAlphavalue);
+				IJ.log(cellPairName +" "+ rowDFOverFvalue +" "+ cellQvalue);
 
 
 			}
@@ -12139,21 +12147,21 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	public void translateLegendDFoverFandAlphaValuesToColors() {
 		double qHiCutoff = IJ.getNumber("Max acceptable q value: ", 0.05);
-		double alphaLoCutoff = 1d-qHiCutoff;
+//		double alphaLoCutoff = 1d-qHiCutoff;
 		String[] keysToBeSorted = cellPairToDFoverFandQvalues.keySet().toArray(new String[cellPairToDFoverFandQvalues.keySet().size()]);
 		Arrays.sort(keysToBeSorted);
 		int countIn = 0;
 		int countBroughtInboundsDFoverF = 0;
 		for (String cellPair:keysToBeSorted) {
-			if (cellPairToDFoverFandQvalues.get(cellPair)[1] < alphaLoCutoff)
+			if (cellPairToDFoverFandQvalues.get(cellPair)[1] > qHiCutoff)
 				continue;
-			if (cellPair.split("to")[0].equals(cellPair.split("to")[1]))
+			if (cellPair.split("by")[0].equals(cellPair.split("by")[1]))
 				continue;
 			
-			double alphaVal = cellPairToDFoverFandQvalues.get(cellPair)[1];
+			double qVal = cellPairToDFoverFandQvalues.get(cellPair)[1];
 			double dFoverFval = cellPairToDFoverFandQvalues.get(cellPair)[0];
 
-			int xPos = (int)Math.floor((alphaVal/imp.getCalibration().pixelWidth)+imp.getCalibration().xOrigin);
+			int xPos = (int)Math.floor((qVal/imp.getCalibration().pixelWidth)+imp.getCalibration().xOrigin);
 			int yPos = (int)Math.floor((dFoverFval/imp.getCalibration().pixelHeight)+imp.getCalibration().yOrigin);
 
 			//Randi et al data tables have df/f outside the range of the damn color table....correcting here.
@@ -12172,7 +12180,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			String greenIntString = ""+new Color(((int)imp.getProcessor().get(xPos,yPos))).getGreen();
 			String blueIntString = ""+new Color((int)(imp.getProcessor().get(xPos,yPos))).getBlue();
 
-			IJ.log(cellPair +","+ alphaVal +","+ dFoverFval +","+ xPos +","+ yPos +","+ hexColorCode +","+ colorAlfIntString +","+ redIntString +","+ greenIntString +","+ blueIntString);
+			IJ.log(cellPair +","+ dFoverFval +","+ qVal +","+ xPos +","+ yPos +","+ hexColorCode +","+ colorAlfIntString +","+ redIntString +","+ greenIntString +","+ blueIntString);
 			countIn++;
 
 		}
