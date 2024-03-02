@@ -12161,7 +12161,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			double qVal = cellPairToDFoverFandQvalues.get(cellPair)[1];
 			double dFoverFval = cellPairToDFoverFandQvalues.get(cellPair)[0];
 
-			int xPos = (int)Math.floor((qVal/imp.getCalibration().pixelWidth)+imp.getCalibration().xOrigin);
+			int xPos = (int)Math.floor((-qVal/imp.getCalibration().pixelWidth)+imp.getCalibration().xOrigin);
 			int yPos = (int)Math.floor((dFoverFval/imp.getCalibration().pixelHeight)+imp.getCalibration().yOrigin);
 
 			//Randi et al data tables have df/f outside the range of the damn color table....correcting here.
