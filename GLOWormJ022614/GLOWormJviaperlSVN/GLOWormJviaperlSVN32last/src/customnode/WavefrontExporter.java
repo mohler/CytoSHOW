@@ -274,7 +274,7 @@ public class WavefrontExporter {
 					final String finalObjOutPathString = objOutPathString;
 					Thread makeDracoGLTF = new Thread(new Runnable(){
 						public void run() {
-							String[] commandStringArrayA = new String[]{"cmd","/c","npx","obj2gltf","-i",finalObjOutPathString};
+							String[] commandStringArrayA = new String[]{"cmd","/c","npx","obj2gltf","--separate","--checkTransparency","-i",finalObjOutPathString};
 							Process objTOgltf = null;
 							try {
 								objTOgltf = Runtime.getRuntime().exec(commandStringArrayA);
