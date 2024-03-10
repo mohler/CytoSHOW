@@ -320,7 +320,7 @@ public class WavefrontExporter {
 			objWriter.close();
 
 			if (IJ.isWindows()) {
-				String[] commandStringArrayA = new String[]{"cmd","/c","npx","obj2gltf","-i",objFilePathString};
+				String[] commandStringArrayA = new String[]{"cmd","/c","npx","obj2gltf","--separate","--checkTransparency","-i",objFilePathString};
 				Process objTOgltf = Runtime.getRuntime().exec(commandStringArrayA);
 				String gltfOutPathString = objFilePathString.replace(".obj", ".gltf");
 				String[] commandStringArrayB = new String[]{"cmd","/c","npx","gltf-pipeline","-i",gltfOutPathString,"-o",gltfOutPathString,"--draco.compressionLevel","10","-d"};
