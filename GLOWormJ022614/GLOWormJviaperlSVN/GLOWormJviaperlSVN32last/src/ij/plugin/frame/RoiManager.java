@@ -12123,9 +12123,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //				String cellPairName = hCellListArray[col]+"to"+rowDFOverFvalueStrings[0];
 				
 				//This version below should work for ColorLegend.lgds
-				String cellPairName = rowDFOverFvalueStrings[0]+"by"+hCellListArray[col];
+				String cellPairName = hCellListArray[col]+"by"+rowDFOverFvalueStrings[0];
 				Double cellQvalue;
-				Double rowDFOverFvalue;
+				Double rowDFOverFvalue;		
 				if (!rowQvalueStrings[col].equals("0") && !rowDFOverFvalueStrings[col].equals("")) {
 					cellQvalue = Double.parseDouble(rowQvalueStrings[col]);
 					rowDFOverFvalue = Double.parseDouble(rowDFOverFvalueStrings[col]);
@@ -12180,7 +12180,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			String greenIntString = ""+new Color(((int)imp.getProcessor().get(xPos,yPos))).getGreen();
 			String blueIntString = ""+new Color((int)(imp.getProcessor().get(xPos,yPos))).getBlue();
 
-			IJ.log(cellPair +","+ dFoverFval +","+ qVal +","+ xPos +","+ yPos +","+ hexColorCode +","+ colorAlfIntString +","+ redIntString +","+ greenIntString +","+ blueIntString);
+//			IJ.log(cellPair +","+ dFoverFval +"_"+ qVal +"_"+ xPos +"_"+ yPos +","+ hexColorCode +","+ colorAlfIntString +","+ redIntString +","+ greenIntString +","+ blueIntString);
+			IJ.log(cellPair  +","+cellPair +","+ hexColorCode +","+ colorAlfIntString +","+ redIntString +","+ greenIntString +","+ blueIntString);
 			countIn++;
 
 		}
