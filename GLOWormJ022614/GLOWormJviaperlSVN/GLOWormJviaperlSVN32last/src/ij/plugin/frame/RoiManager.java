@@ -6556,50 +6556,56 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 	
 	public void fuseAdjacentRois(boolean archipelagos) {
-		Roi[] roisToFuse = this.getShownSliceSpecificRoiArray(imp.getSlice(), imp.getFrame(), true, true);
-		Roi sroiA = ((Roi)roisToFuse[0].clone());
-		sroiA.setLocation(((Roi)roisToFuse[0]).getBounds().x,((Roi)roisToFuse[0]).getBounds().y);
 		double srScaleFactor = IJ.getNumber("Expand rois by factor:", 1.2); 
-		ShapeRoi adjA;
-		try {
-			adjA = new ShapeRoi(new RoiDecoder(srScaleFactor, RoiEncoder.saveAsByteArray(sroiA), sroiA.getName()).getRoi());
-			adjA.setLocation(sroiA.getBounds().getCenterX()-adjA.getBounds().width/2, sroiA.getBounds().getCenterY()-adjA.getBounds().height/2);
+		for (int z=1;z<=imp.getNSlices();z++) {
+			imp.setPosition(imp.getChannel(), z, imp.getFrame());
+			Roi[] roisToFuse = this.getShownSliceSpecificRoiArray(imp.getSlice(), imp.getFrame(), true, true);
+			if (roisToFuse==null ||
+					roisToFuse.length==0)
+				continue;
+			Roi sroiA = ((Roi)roisToFuse[0].clone());
+			sroiA.setLocation(((Roi)roisToFuse[0]).getBounds().x,((Roi)roisToFuse[0]).getBounds().y);
+			ShapeRoi adjA;
+			try {
+				adjA = new ShapeRoi(new RoiDecoder(srScaleFactor, RoiEncoder.saveAsByteArray(sroiA), sroiA.getName()).getRoi());
+				adjA.setLocation(sroiA.getBounds().getCenterX()-adjA.getBounds().width/2, sroiA.getBounds().getCenterY()-adjA.getBounds().height/2);
 
-			for (Roi roiB:roisToFuse) {
-				int xA = sroiA.getBounds().x;
-				int yA = sroiA.getBounds().y;
-				Roi sroiB = ((Roi)roiB.clone());
-				sroiB.setLocation(roiB.getBounds().x,roiB.getBounds().y);
-				int xB = sroiB.getBounds().x;
-				int yB = sroiB.getBounds().y;			
-				ShapeRoi adjB = new ShapeRoi(new RoiDecoder(srScaleFactor, RoiEncoder.saveAsByteArray(sroiB), sroiB.getName()).getRoi());
-				adjB.setLocation(sroiB.getBounds().getCenterX()-adjB.getBounds().width/2, sroiB.getBounds().getCenterY()-adjB.getBounds().height/2);
+				for (Roi roiB:roisToFuse) {
+					int xA = sroiA.getBounds().x;
+					int yA = sroiA.getBounds().y;
+					Roi sroiB = ((Roi)roiB.clone());
+					sroiB.setLocation(roiB.getBounds().x,roiB.getBounds().y);
+					int xB = sroiB.getBounds().x;
+					int yB = sroiB.getBounds().y;			
+					ShapeRoi adjB = new ShapeRoi(new RoiDecoder(srScaleFactor, RoiEncoder.saveAsByteArray(sroiB), sroiB.getName()).getRoi());
+					adjB.setLocation(sroiB.getBounds().getCenterX()-adjB.getBounds().width/2, sroiB.getBounds().getCenterY()-adjB.getBounds().height/2);
 
-				Roi fuseRoi = (adjA).or(adjB).shapeToRoi();
-				if (fuseRoi!=null){
-//					imp.setRoi(fuseRoi);
-//					IJ.wait(2000);
-				} else {
+					Roi fuseRoi = (adjA).or(adjB).shapeToRoi();
+					if (fuseRoi!=null){
+						//					imp.setRoi(fuseRoi);
+						//					IJ.wait(2000);
+					} else {
 
-					fuseRoi = (new ShapeRoi(new RoiDecoder(srScaleFactor, RoiEncoder.saveAsByteArray(sroiA), sroiA.getName())
-							.getRoi())).or((new ShapeRoi(new RoiDecoder(srScaleFactor, RoiEncoder.saveAsByteArray(sroiB), sroiB.getName())
-									.getRoi())));
-//					imp.setRoi(fuseRoi);
-//					IJ.wait(2000);
+						fuseRoi = (adjA).or(adjB);
+						//					imp.setRoi(fuseRoi);
+						//					IJ.wait(2000);
+					}
+					//				sroiA = (new ShapeRoi(new RoiDecoder(1/srScaleFactor, RoiEncoder.saveAsByteArray(fuseRoi), sroiA.getName())
+					//						.getRoi()));
+					//				sroiA.setLocation(Math.min(xA, xB), Math.min(yA, yB));
+					sroiA = fuseRoi;
+					sroiA.setName("Fused");
+					imp.setRoi(sroiA);
+					//				IJ.wait(2000);
 				}
-//				sroiA = (new ShapeRoi(new RoiDecoder(1/srScaleFactor, RoiEncoder.saveAsByteArray(fuseRoi), sroiA.getName())
-//						.getRoi()));
-//				sroiA.setLocation(Math.min(xA, xB), Math.min(yA, yB));
-				sroiA = fuseRoi;
-//				imp.setRoi(sroiA);
-//				IJ.wait(2000);
+				//			IJ.wait(2000);
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-//			IJ.wait(2000);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			addRoi(sroiA, false, null, Colors.decode("#31646464", Color.cyan), 1, true);
 		}
-		addRoi(sroiA, false, null, Colors.decode("#31646464", Color.cyan), 1, true);
+		IJ.log("Full tag fusion complete.");
 	}
 
 
