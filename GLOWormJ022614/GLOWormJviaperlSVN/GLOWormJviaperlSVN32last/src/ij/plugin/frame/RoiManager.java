@@ -1915,8 +1915,16 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 
 	private void sketchVolumeViewer(Object source) {
+//I think next line is moot, as shift down prompts slicer as choice over Viewer
 		boolean singleSave = IJ.shiftKeyDown();
-		double scaleFactor = IJ.getNumber("Downscale for faster rendering?", 1.0d);
+		GenericDialog svvDialog = new GenericDialog("SketchVolumeViewer");
+		svvDialog.addNumericField("Downscale for faster rendering?", 1.0d, 2);
+//		svvDialog.addCheckbox("Temp-flip volume 90° during render?", false);
+		svvDialog.showDialog();
+		if (svvDialog.wasCanceled())
+			return;
+		double scaleFactor = svvDialog.getNextNumber();
+//		boolean flip90forProj = svvDialog.getNextBoolean();
 		double zPadFactor = 3;
 		IJ.setForegroundColor(255, 255, 255);
 		IJ.setBackgroundColor(0, 0, 0);

@@ -13,15 +13,20 @@ import javax.vecmath.Color3f;
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.ImageStack;
 import ij.WindowManager;
 import ij.gui.Roi;
+import ij.plugin.CanvasResizer;
 import ij.plugin.ChannelSplitter;
 import ij.plugin.Colors;
 import ij.plugin.PlugIn;
 import ij.plugin.Scaler;
+import ij.plugin.Slicer;
+import ij.plugin.StackReverser;
 import ij.plugin.SubHyperstackMaker;
 import ij.plugin.filter.Projector;
 import ij.plugin.frame.RoiManager;
+import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 import ij3d.ColorTable;
 import ij3d.Content;
@@ -210,7 +215,7 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 						ImagePlus impD = imp;
 						if (!imp.getTitle().startsWith("SVV")){
 							impD = duper.run(imp, ch, ch, duper.getFirstZ(), duper.getLastZ(), singleSave?tpt:duper.getFirstT(), singleSave?tpt:duper.getLastT(), singleSave?1:duper.getStepT(), false, msec);
-							impD.show();
+//							impD.show();
 							impD.setTitle(imp.getShortTitle()+"_DUP_"+ch+"_"+tpt);
 							impD.changes = false;
 						}
@@ -248,6 +253,22 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 							objectName = impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_");
 						//					impD.show();
 						Hashtable<String, Content> contents = univ.getContentsHT();
+
+						IJ.save(impD, "/Users/wmohler/Documents/testingStuff/"+ objectName +"impD.tif");
+						
+//  THIS NEXT BLOCK DOES AN reslice and then flips the reslice stack to give proper 90°-Y rotation relative to impD						
+						if (true) {
+							Slicer sketchImpSlicer = new Slicer();
+							ImagePlus flipLeftSketchImp = sketchImpSlicer.reslice(impD);
+							(new StackReverser()).flipStack(flipLeftSketchImp);
+							flipLeftSketchImp.setTitle(impD.getTitle()+"flip");
+							IJ.save(flipLeftSketchImp, "/Users/wmohler/Documents/testingStuff/"+ objectName +"flipLeftSketchImp.tif");
+							IJ.log("drawn... " +impD.toString());
+							IJ.log("flipped... " +flipLeftSketchImp.toString());
+							impD= flipLeftSketchImp;
+						}
+//
+						
 						univ.addContent(impD, new Color3f(channelColor), objectName, threshold, new boolean[]{true, true, true}, binFactor, Content.SURFACE);
 						univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)), true);
 						Content sel = univ.getSelected();
@@ -270,18 +291,14 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 						univ.getSelected().setLocked(true);
 						if (singleSave) {
 							Hashtable<String, Content> newestContent = new Hashtable<String, Content>();
-							newestContent.put(""+objectName, univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
+							newestContent.put(""+objectName, univ.getContent((""+objectName)));
 							MeshExporter.saveAsWaveFront(newestContent.values(), 
 															new File(((outDir==null?IJ.getDirectory("home"):outDir)+File.separator
 																	+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"
-																	//+objectName.replaceAll(":","").replaceAll("(/|\\s+)","")
 																	+"_"+ch+"_"+tpt+".obj")), 
 															univ.getStartTime(), 
 															univ.getEndTime(),
 															scaleShiftString, true);
-							//						univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
-							//						univ.getSelected().setLocked(false);
-							//						univ.removeContent(univ.getSelected().getName());
 						}
 						for (Object content:contents.values()){
 							if (((Content)content).getName() != objectName){
@@ -290,10 +307,8 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 							}
 						}
 
-						//					ImageJ3DViewer.select(null);
-						//					IJ.getInstance().toFront();
 						IJ.setTool(ij.gui.Toolbar.HAND);
-						if (impD != imp){
+						if (impD != imp && impD!=null && impD.getWindow()!=null){
 							impD.changes = false;
 							impD.getWindow().close();
 //							impD.flush();

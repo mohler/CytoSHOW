@@ -443,7 +443,7 @@ public class Slicer implements PlugIn, TextListener, ItemListener {
 		 }
 	}
 
-	ImageProcessor getSlice(ImagePlus imp, double x1, double y1, double x2, double y2, String status) {
+	public ImageProcessor getSlice(ImagePlus imp, double x1, double y1, double x2, double y2, String status) {
 		 Roi roi = imp.getRoi();
 		 int roiType = roi!=null?roi.getType():0;
 		 ImageStack stack = imp.getStack();
