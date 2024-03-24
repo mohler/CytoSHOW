@@ -1924,7 +1924,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (svvDialog.wasCanceled())
 			return;
 		double scaleFactor = svvDialog.getNextNumber();
-//		boolean flip90forProj = svvDialog.getNextBoolean();  a rolled back idea for changing rendering aspect...
+//		boolean flip90forProj = svvDialog.getNextBoolean();
 		boolean flip90forProj = false;
 		double zPadFactor = 3;
 		IJ.setForegroundColor(255, 255, 255);
@@ -6568,6 +6568,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 	
 	public void fuseAdjacentRois(boolean archipelagos) {
+		ShapeRoi notRoi = new ShapeRoi(imp.getRoi());
 		double srScaleFactor = IJ.getNumber("Expand rois by factor:", 1.2); 
 		for (int z=1;z<=imp.getNSlices();z++) {
 			imp.setPosition(imp.getChannel(), z, imp.getFrame());
@@ -6581,17 +6582,16 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			try {
 				adjA = new ShapeRoi(new RoiDecoder(srScaleFactor, RoiEncoder.saveAsByteArray(sroiA), sroiA.getName()).getRoi());
 				adjA.setLocation(sroiA.getBounds().getCenterX()-adjA.getBounds().width/2, sroiA.getBounds().getCenterY()-adjA.getBounds().height/2);
-
+				adjA = (adjA).not(notRoi);
+				
 				for (Roi roiB:roisToFuse) {
-					int xA = sroiA.getBounds().x;
-					int yA = sroiA.getBounds().y;
+					
 					Roi sroiB = ((Roi)roiB.clone());
 					sroiB.setLocation(roiB.getBounds().x,roiB.getBounds().y);
-					int xB = sroiB.getBounds().x;
-					int yB = sroiB.getBounds().y;			
 					ShapeRoi adjB = new ShapeRoi(new RoiDecoder(srScaleFactor, RoiEncoder.saveAsByteArray(sroiB), sroiB.getName()).getRoi());
 					adjB.setLocation(sroiB.getBounds().getCenterX()-adjB.getBounds().width/2, sroiB.getBounds().getCenterY()-adjB.getBounds().height/2);
-
+					adjB = (adjB).not(notRoi);
+					
 					Roi fuseRoi = (adjA).or(adjB).shapeToRoi();
 					if (fuseRoi!=null){
 						//					imp.setRoi(fuseRoi);
@@ -6607,7 +6607,6 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					//				sroiA.setLocation(Math.min(xA, xB), Math.min(yA, yB));
 					sroiA = fuseRoi;
 					sroiA.setName("Fused");
-					imp.setRoi(sroiA);
 					//				IJ.wait(2000);
 				}
 				//			IJ.wait(2000);
@@ -6615,7 +6614,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-			addRoi(sroiA, false, null, Colors.decode("#31646464", Color.cyan), 1, true);
+			
+			imp.setRoi(sroiA);
+			addRoi(sroiA, false, null, Colors.decode("#33fff464", Color.cyan), 1, true);
 		}
 		IJ.log("Full tag fusion complete.");
 	}
