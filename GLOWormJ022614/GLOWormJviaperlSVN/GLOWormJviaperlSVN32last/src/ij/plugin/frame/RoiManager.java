@@ -1924,7 +1924,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (svvDialog.wasCanceled())
 			return;
 		double scaleFactor = svvDialog.getNextNumber();
-//		boolean flip90forProj = svvDialog.getNextBoolean();
+//		boolean flip90forProj = svvDialog.getNextBoolean();  a rolled back idea for changing rendering aspect...
+		boolean flip90forProj = false;
 		double zPadFactor = 3;
 		IJ.setForegroundColor(255, 255, 255);
 		IJ.setBackgroundColor(0, 0, 0);
@@ -2099,18 +2100,21 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			String scaleShiftString = "" + 1.0 + "|" + 1.0 + "|" + 1.0 + "|"
 					+ (minX - 10) * sketchImp.getCalibration().pixelWidth * scaleFactor + "|"
 					+ (minY - 10) * sketchImp.getCalibration().pixelHeight * scaleFactor + "|"
-					/* maxZ b\c stackflip */ + (-maxZ - 1) * sketchImp.getCalibration().pixelDepth * zPadFactor;
+					+ (-maxZ - 1) * sketchImp.getCalibration().pixelDepth * zPadFactor + "|"
+					+ (flip90forProj?"10":"0");
 			vv.runVolumeViewer(sketchImp, rootName, assignedColorString, true, null, outDir, scaleShiftString);
 //			new ObjEditor().run("1.0|1.0|1.0|"+(minX-10)*sketchImp.getCalibration().pixelWidth*scaleFactor+"|"
 //											  +(minY-10)*sketchImp.getCalibration().pixelHeight*scaleFactor+"|"
 //											  +(-maxZ-1)*sketchImp.getCalibration().pixelDepth*zPadFactor+"|"
 //											  +outDir+File.separator+"SVV_"+rootName+"_"+rootName+"_1_1_0000.obj"+"|"
 //											  +outDir+File.separator);
-			IJ.log("" + 1.0 + "|" + 1.0 + "|" + 1.0 + "|" + (minX - 10) * sketchImp.getCalibration().pixelWidth + "|"
-					+ (minY - 10) * sketchImp.getCalibration().pixelHeight + "|"
-					/* maxZ b\c stackflip */ + (-maxZ - 1) * sketchImp.getCalibration().pixelDepth * zPadFactor + "|"
-					+ outDir + File.separator + "SVV_" + rootName + "_1_1_0000.obj" + "|" + outDir
+			IJ.log("" + 1.0 + "|" + 1.0 + "|" + 1.0 + "|" 
+					+ (minX - 10) * sketchImp.getCalibration().pixelWidth * scaleFactor  + "|"
+					+ (minY - 10) * sketchImp.getCalibration().pixelHeight * scaleFactor  + "|"
+					+ (-maxZ - 1) * sketchImp.getCalibration().pixelDepth * zPadFactor + "|"
+					+ (flip90forProj?"10":"0") + "||"+ outDir + File.separator + "SVV_" + rootName + "_1_1_0000.obj" + "|" + outDir
 					+ File.separator);
+			
 			sketchImp.changes = false;
 			sketchImp.close();
 			sketchImp.flush();

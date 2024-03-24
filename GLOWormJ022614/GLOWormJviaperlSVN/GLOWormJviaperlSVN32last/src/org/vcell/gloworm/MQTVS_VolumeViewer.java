@@ -115,7 +115,8 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 			if (imp.getRoiManager().getSelectedRoisAsArray().length == 0){  //??????WHY??????
 //				duperString = duper.showHSDialog(imp, imp.getTitle()+"_DUP");
 				impDup = duper.duplicateHyperstack(imp, imp.getTitle()+"_DUP", false);
-				impDup.hide();
+				if (impDup !=null)
+					impDup.hide();
 			}
 			Date currentDate = new Date();
 			long msec = currentDate.getTime();	
@@ -255,9 +256,10 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 						Hashtable<String, Content> contents = univ.getContentsHT();
 
 						IJ.save(impD, "/Users/wmohler/Documents/testingStuff/"+ objectName +"impD.tif");
-						
+						String[] scaleShifts = scaleShiftString.split("\\|");
+						boolean rotate90Y = (scaleShifts.length>6) && !scaleShifts[6].equals("0");
 //  THIS NEXT BLOCK DOES AN reslice and then flips the reslice stack to give proper 90°-Y rotation relative to impD						
-						if (true) {
+						if (rotate90Y) {
 							Slicer sketchImpSlicer = new Slicer();
 							ImagePlus flipLeftSketchImp = sketchImpSlicer.reslice(impD);
 							(new StackReverser()).flipStack(flipLeftSketchImp);
@@ -268,7 +270,7 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 							impD= flipLeftSketchImp;
 						}
 //
-						
+						impD.setMotherImp(imp, imp.getID());
 						univ.addContent(impD, new Color3f(channelColor), objectName, threshold, new boolean[]{true, true, true}, binFactor, Content.SURFACE);
 						univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)), true);
 						Content sel = univ.getSelected();
@@ -289,6 +291,9 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 							IJ.wait(100);
 						}
 						univ.getSelected().setLocked(true);
+						
+//						univ.show(false);
+						
 						if (singleSave) {
 							Hashtable<String, Content> newestContent = new Hashtable<String, Content>();
 							newestContent.put(""+objectName, univ.getContent((""+objectName)));

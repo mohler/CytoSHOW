@@ -112,7 +112,7 @@ public class WavefrontExporter {
 				String scaleShiftString,
 				boolean oneFile) throws IOException {
 
-		Double scaleX = 1.0, scaleY = 1.0, scaleZ = 1.0, shiftX = 0.0, shiftY = 0.0, shiftZ = 0.0;
+		Double scaleX = 1.0, scaleY = 1.0, scaleZ = 1.0, shiftX = 0.0, shiftY = 0.0, shiftZ = 0.0, rotate90Y = 0.0;
 		
 		String[] scaleShiftChunks = null;
 		if (scaleShiftString!= null) {
@@ -127,6 +127,7 @@ public class WavefrontExporter {
 				case 3: shiftX = scalesAndShifts[a];
 				case 4: shiftY = scalesAndShifts[a];
 				case 5: shiftZ = scalesAndShifts[a];
+				case 6: rotate90Y = scalesAndShifts[a];
 				}
 			}
 		}
@@ -146,7 +147,7 @@ public class WavefrontExporter {
 			objWriter.write('\n');
 		}
 	
-		for(String name : meshes.keySet()) {     //MAKE A VERSION OF THIS THAT WILL WORK WITH AND ORDERED COLLECTION???
+		for(String name : meshes.keySet()) {     //MADE A VERSION OF THIS THAT WILL WORK WITH AN ORDERED COLLECTION by Using LinkedHashMap for meshes
 			Writer singleObjWriter =null;
 			Writer singleMtlWriter =null;
 			HashMap<Mtl, Mtl> single_ht_mat = null;
@@ -217,10 +218,17 @@ public class WavefrontExporter {
 					// record
 					ht_points.put(p, j);
 					// append vertex
-					tmp.append('v').append(' ')
-					   .append(p.x*scaleX+shiftX).append(' ')
-					   .append(p.y*scaleY+shiftY).append(' ')
-					   .append(p.z*scaleZ+shiftZ).append('\n');
+					if (true) { //rotate90Y==0
+						tmp.append('v').append(' ')
+						.append(p.x*scaleX+shiftX).append(' ')
+						.append(p.y*scaleY+shiftY).append(' ')
+						.append(p.z*scaleZ+shiftZ).append('\n');
+					} else {
+						tmp.append('v').append(' ')
+						.append(p.x*scaleX+shiftX).append(' ')
+						.append(p.z*scaleZ+shiftZ).append(' ')
+						.append(-p.y*scaleY-shiftY).append('\n');
+					}
 					singleObjWriter.write(tmp.toString());
 					tmp.setLength(0);
 					j++;

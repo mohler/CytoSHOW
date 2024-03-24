@@ -311,7 +311,7 @@ public final class MCCube {
 	
 	//THIS WORKS INCREDIBLY FAST!!
 	private static final void getCytoSHOWImageTriangles(final Volume volume, final Carrier car, final List<Point3f> tri, String name) {
-		final RoiManager rm = volume.getImagePlus().getRoiManager();
+		final RoiManager rm = volume.getImagePlus().getMotherImp().getRoiManager();
 		final Hashtable<String, ArrayList<Roi>> roisByNum = rm.getROIsByNumbers();
 
 		// Collect the bounds of all rois in each slice:
@@ -320,7 +320,7 @@ public final class MCCube {
 			int next = -1;
 
 
-			for(int z=1; z<=volume.getImagePlus().getNSlices(); z++){
+			for(int z=1; z<=volume.getImagePlus().getMotherImp().getNSlices(); z++){
 				next++;
 				ArrayList<Roi> roisZ = roisByNum.get("1_"+z+"_1");
 				if (roisZ==null || roisZ.isEmpty()) {
@@ -329,10 +329,12 @@ public final class MCCube {
 				final ArrayList<Rectangle> bs = new ArrayList<Rectangle>();
 				for (Roi roi:roisZ){
 					if (roi!=null){
-						bs.add(roi.getBounds());					
+						if (name.startsWith(roi.getName().replace("\"", "").split(" ")[0]))
+							bs.add(roi.getBounds());					
 					}
 				}
-				sectionBounds.put(volume.getImagePlus().getNSlices()+1-z, bs);
+				if (bs.size() >0)
+					sectionBounds.put(volume.getImagePlus().getMotherImp().getNSlices()+1-z, bs);
 			}
 		}
 		// Add Z paddings on top and bottom
@@ -348,20 +350,38 @@ public final class MCCube {
 
 		// Scan only relevant areas:
 		final MCCube cube = new MCCube();
-		for (int z = sbMinKey-2; z < car.d + 2 ; z += 1) {
-			final ArrayList<Rectangle> bs = sectionBounds.get(z);
-			if (null == bs || bs.isEmpty()) continue;
-			for (final Rectangle bounds : bs) {
-				for (int x = bounds.x -1; x < bounds.x + bounds.width +2; x+=1) {
-					for (int y = bounds.y -1; y < bounds.y + bounds.height +2; y+=1) {
-						cube.init(x, y, z);
-						cube.computeEdges(car);
-						cube.getTriangles(tri, car);
+		if (false) {  //run mc on resliced 90° profile of stack.
+			for (int y = car.d + 2; y > sbMinKey-2 ; y -= 1) {
+				final ArrayList<Rectangle> bs = sectionBounds.get(y);
+				if (null == bs || bs.isEmpty()) continue;
+				for (final Rectangle bounds : bs) {
+					for (int x = bounds.x -1; x < bounds.x + bounds.width +2; x+=1) {
+						for (int z = bounds.y -1; z < bounds.y + bounds.height +2; z+=1) {
+							cube.init(x, y, z);
+							cube.computeEdges(car);
+							cube.getTriangles(tri, car);
+						}
 					}
 				}
-			}
 
-			IJ.showProgress(z, car.d-2);
+				IJ.showProgress(y, car.d-2);
+			}
+		} else {
+			for (int z = sbMinKey-2; z < car.d + 2 ; z += 1) {
+				final ArrayList<Rectangle> bs = sectionBounds.get(z);
+				if (null == bs || bs.isEmpty()) continue;
+				for (final Rectangle bounds : bs) {
+					for (int x = bounds.x -1; x < bounds.x + bounds.width +2; x+=1) {
+						for (int y = bounds.y -1; y < bounds.y + bounds.height +2; y+=1) {
+							cube.init(x, y, z);
+							cube.computeEdges(car);
+							cube.getTriangles(tri, car);
+						}
+					}
+				}
+
+				IJ.showProgress(z, car.d-2);
+			}
 		}
 		IJ.showProgress(car.d-2, car.d-2);
 	}
