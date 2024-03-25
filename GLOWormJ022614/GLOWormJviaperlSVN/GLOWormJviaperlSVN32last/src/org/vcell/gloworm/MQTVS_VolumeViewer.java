@@ -255,7 +255,7 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 						//					impD.show();
 						Hashtable<String, Content> contents = univ.getContentsHT();
 
-						IJ.save(impD, "/Users/wmohler/Documents/testingStuff/"+ objectName +"impD.tif");
+//						IJ.save(impD, "/Users/wmohler/Documents/testingStuff/"+ objectName +"impD.tif");
 						String[] scaleShifts = scaleShiftString.split("\\|");
 						boolean rotate90Y = (scaleShifts.length>6) && !scaleShifts[6].equals("0");
 //  THIS NEXT BLOCK DOES AN reslice and then flips the reslice stack to give proper 90°-Y rotation relative to impD						
@@ -264,9 +264,9 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 							ImagePlus flipLeftSketchImp = sketchImpSlicer.reslice(impD);
 							(new StackReverser()).flipStack(flipLeftSketchImp);
 							flipLeftSketchImp.setTitle(impD.getTitle()+"flip");
-							IJ.save(flipLeftSketchImp, "/Users/wmohler/Documents/testingStuff/"+ objectName +"flipLeftSketchImp.tif");
-							IJ.log("drawn... " +impD.toString());
-							IJ.log("flipped... " +flipLeftSketchImp.toString());
+////							IJ.save(flipLeftSketchImp, "/Users/wmohler/Documents/testingStuff/"+ objectName +"flipLeftSketchImp.tif");
+//							IJ.log("drawn... " +impD.toString());
+//							IJ.log("flipped... " +flipLeftSketchImp.toString());
 							impD= flipLeftSketchImp;
 						}
 //
