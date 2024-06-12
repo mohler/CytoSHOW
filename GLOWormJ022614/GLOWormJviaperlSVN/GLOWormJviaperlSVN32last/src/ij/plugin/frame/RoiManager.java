@@ -464,6 +464,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //		addPopupItem("Plot phate spheres to coords");
 //		addPopupItem("Plot MK c-phate icospheres to coords");
 		addPopupItem("Plot AG c-phate icospheres to coords");
+		addPopupItem("MeiZhenXMLtoCSV");
 		addPopupItem("MeiZhenNamingSwap");
 		addPopupItem("FormatCytoSHOWtoBrittin");
 		addPopupItem("fixcrappynames");
@@ -1156,6 +1157,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				plotManikFmtPhateObjsToCoordsIcospheres();
 			} else if (command.equals("Plot AG c-phate icospheres to coords")) {
 				plotAlexFmtPhateObjsToCoordsIcospheres();
+			} else if (command.equals("MeiZhenXMLtoCSV")) {
+				this.parseMeiZhenAdjacencyXMLtoCSV();
 			} else if (command.equals("MeiZhenNamingSwap")) {
 				swapMeiZhenCellNamesForLabels();
 			} else if (command.equals("FormatCytoSHOWtoBrittin")) {
@@ -1235,6 +1238,31 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	}
 	
+	private void parseMeiZhenAdjacencyXMLtoCSV() {
+		IJ.log("Select Brittin XML file with adjacency data");
+		String inputXMLAdjacencyPath = IJ.getFilePath("Select Brittin XML file with adjacency data");
+		String inputXMLAdjacencyData = IJ.openAsString(inputXMLAdjacencyPath);
+		String[] inputXMLlayers = inputXMLAdjacencyData.split("\\<layer name=\"");
+		IJ.saveString("Neuron1,Neuron2,Layer,Adjacency\n", inputXMLAdjacencyPath.replace("xml", "csv"));
+		for (String layer:inputXMLlayers) {
+			if (layer.equals("<data>"))
+				continue;
+			int layerNumber = Integer.parseInt(layer.split("\"")[0].split(" ")[1]);
+			String[] inputXMLareas = layer.split("\\<area\\>\\<cell1\\>");
+			for (int a=1; a<inputXMLareas.length;a++) {
+				//			Label 3</cell1><cell2>Label 31</cell2><index1>0</index1><index2>0</index2><adjacency>181</adjacency></area>
+				String[] inputXMLareaChunks = inputXMLareas[a].split("(\\<|\\>)");
+				String cell1 = inputXMLareaChunks[0];
+				String cell2 = inputXMLareaChunks[4];
+				String index1 =  inputXMLareaChunks[8];
+				String index2 =  inputXMLareaChunks[12];
+				String adjacency =  inputXMLareaChunks[16];
+				String csvLine = ""+ cell1 +","+ cell2 +","+ layerNumber +","+ adjacency;
+				IJ.append(csvLine, inputXMLAdjacencyPath.replace("xml", "csv"));
+			}
+		}
+	}
+	
 	private void swapMeiZhenCellNamesForLabels() {
 		IJ.log("Select csv file with adjacency data");
 		String inputLabelAdjacencyPath = IJ.getFilePath("Select csv file with adjacency data");
@@ -1258,12 +1286,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		String[] adjacencyRows = labelAdjacencyData.split("\n");
 		ArrayList<String> filteredAdjRows = new ArrayList<String>();
 		for (int i=0;i<adjacencyRows.length;i++) {
-			int sliceNumber = Integer.parseInt(adjacencyRows[i].split("[ ,]")[adjacencyRows[i].split("[ ,]").length-2]);
-			if (adjacencyRows[i].matches(".*(BWM|excgl|VAn).*"))
+			if (adjacencyRows[i].matches(".*(Neuron1|Cell1|BWM|excgl|VAn).*")) {
 //				sortedAdjRows.add("");
 				;
-			else
+			} else {
+				int sliceNumber = Integer.parseInt(adjacencyRows[i].split("[ ,]")[adjacencyRows[i].split("[ ,]").length-2]);
 				filteredAdjRows.add(""+IJ.pad(sliceNumber, 6) +"___"+adjacencyRows[i]);
+			}
 		}
 		String[] sortedAdjacencyRows =  new String[filteredAdjRows.size()];
 		for (int r=0; r<filteredAdjRows.size();r++) {
@@ -10613,27 +10642,26 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		String inputPhateCoordinatesPath = IJ.getFilePath("Select csv file with PHATE coordinates data");
 		String clusterAssignmentsPath = new File(inputPhateCoordinatesPath).getParentFile().getParent()+File.separator+"cluster_assigments.csv";
 		IJ.log("Select csv file with condensation cluster assignment data "+clusterAssignmentsPath);
-//		String clusterAssignmentsPath = IJ.getFilePath("Select csv file with condensation cluster assignment data");
+
 		String clusterAssignmentsCOMPPath = clusterAssignmentsPath;
 		IJ.log("!!Select csv file with condensation cluster assignment data to compare!! "+clusterAssignmentsPath);
 		IJ.log("Select Mei Lab metadata for naming");
-//		String clusterAssignmentsCOMPPath = IJ
-//				.getFilePath("!!Select csv file with condensation cluster assignment data to compare!!");
+
 		String cellNamesFromMeiLabPath = null;
-//		String cellNamesFromMeiLabPath = IJ.getFilePath("Select Mei Lab metadata for naming");
-//		IJ.log("Select mtl file with color rules");
+
 		String mtlPath = new File(clusterAssignmentsPath).getParentFile().getParent()+File.separator+"icosphereOut_22distinctClusterColors.mtl";
-//		String mtlPath = IJ.getFilePath("Select mtl file with color rules");
+
 		File inputFile = new File(inputPhateCoordinatesPath);
 		File clustAsnFile = new File(clusterAssignmentsPath);
 		mtlFile = new File(mtlPath);
-		String outputDir = inputFile.getParent() + File.separator + inputFile.getName().replace(".csv", "")
-				+ File.separator;
-		new File(outputDir).mkdirs();
-//		IJ.saveString(IJ.openAsString(mtlPath), outputDir + mtlFile.getName());
+
+		String outputDir = inputFile.getParent() + File.separator + "C-PHATEobjs";
+		if (!new File(outputDir).exists() && !new File(outputDir).mkdirs())
+			IJ.wait(100);
+
 		IJ.saveString(mtlFile.canRead()?IJ.openAsString(mtlPath)
 				:IJ.openUrlAsString(MQTVSSceneLoader64.class.getResource("docs/icosphereOut_22distinctClusterColors.mtl").toString())
-				, outputDir + mtlFile.getName());
+				, outputDir + File.separator + mtlFile.getName());
 		String inputPhateCoordinatesData = IJ.openAsString(inputPhateCoordinatesPath);
 		String[] inputPhateCoordinatesRows = inputPhateCoordinatesData.split("\n");
 		String clusterAsgnData = IJ.openAsString(clusterAssignmentsPath);
@@ -10868,7 +10896,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			outputTag = outputTag + "-i" + itr + "/" + (clusterAsgnCOMPRows.length-1) + "-c" + cluster + "/" + 
 										iterationNumberToIterationClusterCountHashtable.get(itr) + "-s" + serial;
 
-			String outputPath = outputDir + inputFile.getName() + ".i" + itr + ".c" + cluster + ".s" + serial + "."
+			String outputPath = outputDir + File.separator + inputFile.getName() + ".i" + itr + ".c" + cluster + ".s" + serial + "."
 					+ outputTag.split("[_-]")[0] + ".obj";
 
 			String[] outputSections = icosphereSections;
