@@ -210,6 +210,8 @@ import javax.swing.filechooser.*;
 	public static String getDefaultDirectory() {
 		if (defaultDirectory==null)
 			defaultDirectory = Prefs.getDefaultDirectory();
+		if (defaultDirectory==null)
+			defaultDirectory = IJ.getDirectory("home");
 		return defaultDirectory;
 	}
 
