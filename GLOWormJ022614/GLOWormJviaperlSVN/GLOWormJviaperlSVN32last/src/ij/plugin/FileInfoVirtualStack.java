@@ -204,8 +204,10 @@ public class FileInfoVirtualStack extends VirtualStack implements PlugIn {
 	*/
 	public ImageProcessor getProcessor(int n) {
 //		IJ.log(""+this.getInfo()[0].fileName);
-		if (n<1 || n>nImageSlices)
-			return getProcessor(1);
+		while (n<1)
+			n = nImageSlices + n;
+		while (n>nImageSlices)
+			n = n - nImageSlices;
 //			throw new IllegalArgumentException("Argument out of range: "+n);
 		if (IJ.debugMode) IJ.log("FileInfoVirtualStack: "+n+", "+infoArray[n-1].getOffset());
 		//if (n>1) IJ.log("  "+(info[n-1].getOffset()-info[n-2].getOffset()));

@@ -73,6 +73,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	double maxCirc = 1.000;
 	private ImageProcessor statsIP;
 	private ImageProcessor bigIP;
+	private boolean rcstereo; 
 
 	/* Default constructor. */
 	public MultiFileInfoVirtualStack() {}
@@ -96,6 +97,7 @@ array and displays it if 'show' is true. */
 	public MultiFileInfoVirtualStack(String dirOrOMETiff, String string, boolean isViewB, boolean show) {
 		this(dirOrOMETiff, "xyczt", string, 0, 0, 0, 1, -1, isViewB, show, false, false, null);
 	}
+
 
 	public MultiFileInfoVirtualStack(String arg, String sliceOrder, String keyString, int cDim, int zDim, int tDim, int vDim, final int pos, boolean isViewB, boolean show, boolean rawdispimdata, boolean omeMegaTiff, ImagePlus ownerImp) {
 		this.rawdispimdata = rawdispimdata;
@@ -261,7 +263,8 @@ array and displays it if 'show' is true. */
 			//	IJ.wait(10);
 			//	}
 			////	IJ.log(infoLoadReport + (savedInfoCollectorArrayList != null?savedInfoCollectorArrayList.size():""));
-
+			if (cumulativeTiffFileArray[0].matches(".*proj._\\d+_\\d+.tif"))
+				rcstereo = (IJ.getString("View in RGstereo", "No").toLowerCase().startsWith("y"));
 			if (cumulativeTiffFileArray.length >0){ 
 				for (String cumulativeTiffFileArrayElement:cumulativeTiffFileArray)
 					bigSubFileArrayList.add(cumulativeTiffFileArrayElement);
@@ -295,15 +298,15 @@ array and displays it if 'show' is true. */
 			monitoringDecon = keyString.toLowerCase().contains("deconvolution") 
 					|| keyString.toLowerCase().contains("color");
 
-			String[] goDirFileList = {""};
+			String[] goDirFileNameList = {""};
 
 			if (allDirectories) {
 				//	dimOrder = "xyztc";
 				dir = "";
 
-				goDirFileList = new String[bigSubFileArrayList.size()];
-				for (int s=0; s<goDirFileList.length; s++) {
-					goDirFileList [s] = (String) bigSubFileArrayList.get(s);
+				goDirFileNameList = new String[bigSubFileArrayList.size()];
+				for (int s=0; s<goDirFileNameList.length; s++) {
+					goDirFileNameList [s] = (String) bigSubFileArrayList.get(s);
 				}
 
 			} else {
@@ -311,19 +314,26 @@ array and displays it if 'show' is true. */
 				dir = "";
 				channelDirectories = 1;
 				largestDirectoryTiffCount = tiffCount;
-				goDirFileList = cumulativeTiffFileArray;
+				goDirFileNameList = cumulativeTiffFileArray;
 			}
 			if (dir.length() > 0 && !dir.endsWith(File.separator))
 				dir = dir + File.separator;
 
 			if (monitoringDecon)
-				goDirFileList = StringSorter.sortNumericallyViaRegex(goDirFileList);
-
-			if (goDirFileList != null) {
-				long firstFileSize = (new File(dir + goDirFileList[0])).length();
+				goDirFileNameList = StringSorter.sortNumericallyViaRegex(goDirFileNameList);
+				if (rcstereo){
+					String[] stereoGoDirFileNameList = new String[goDirFileNameList.length *2];
+					for (int g=0;g< goDirFileNameList.length;g++){
+						stereoGoDirFileNameList[g] = goDirFileNameList[g];
+						stereoGoDirFileNameList[goDirFileNameList.length + g] = goDirFileNameList[g];
+					}
+					goDirFileNameList = stereoGoDirFileNameList;
+				}
+			if (goDirFileNameList != null) {
+				long firstFileSize = (new File(dir + goDirFileNameList[0])).length();
 
 				if (!omeMegaTiff){
-					for (String fileName:goDirFileList){
+					for (String fileName:goDirFileNameList){
 						if ((new File(fileName)).exists()) {
 
 							TiffDecoder td = new TiffDecoder(dir, fileName);
@@ -349,7 +359,7 @@ array and displays it if 'show' is true. */
 
 				if (channelDirectories >0) {
 					if (infoCollectorArrayList.size()==0){
-						for (String fileName:goDirFileList){
+						for (String fileName:goDirFileNameList){
 							if ((new File(dir + fileName)).canRead() && fileName.toLowerCase().endsWith(".tif")) {
 								if (dummyInfoArray == null || (new File(dir + fileName)).length() < firstFileSize*0.998
 										|| (new File(dir + fileName)).length() > firstFileSize*1.002) {
@@ -576,8 +586,8 @@ array and displays it if 'show' is true. */
 					?(fivStacks.get(0).getInt((new FileOpener(fivStacks.get(0).infoArray[0])).decodeDescriptionString(fivStacks.get(0).infoArray[0]), "channels"))
 							:1);	
 			int channels = channelDirectories * internalChannels;
-			cDim = channels;
-			zDim = fivStacks.get(0).nImageSlices/(cDim/channelDirectories);
+			cDim = channels * (rcstereo?2:1);
+			zDim = fivStacks.get(0).nImageSlices/(channels/channelDirectories);
 			//	tDim = fivStacks.size()/cDim;
 			this.tDim =nImageSlices/(this.cDim*this.zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
 		} else if (fivStacks.get(0).getInfo()[0].fileName.matches(".*Decon(-Fuse|_reg)_.*aaa_.*")){
@@ -1300,7 +1310,7 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 			corrZ=isViewB?corrZB[((stackNumber)%tDim)]-corrZB[0]:corrZA[((stackNumber)%tDim)]-corrZA[0];
 			//IJ.log("stk="+stackNumber +"  vslc="+vSliceNumber);
 			initiateStack(stackNumber, 0);
-			int corrSlc = vSliceNumber+corrZ;
+			int corrSlc = vSliceNumber+corrZ + (rcstereo?stackNumber>tDim*channelDirectories-1?1:0:0);
 			ip = fivStacks.get(stackNumber).getProcessor(corrSlc);
 			ip.translate(-corrX, -corrY);			// must be negative!
 		}
