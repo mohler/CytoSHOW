@@ -6,7 +6,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.ColorModel;
 import java.awt.image.IndexColorModel;
+import java.io.File;
 import java.rmi.RemoteException;
+import java.util.Arrays;
 import java.util.Hashtable;
 
 import client.RemoteMQTVSHandler;
@@ -71,7 +73,15 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 
 			imp.killRoi();
 
-			String name = imp.getRemoteMQTVSHandler().getChannelPathNames()[imp.getChannel()-1];
+			String name = "";
+			if (imp.getRemoteMQTVSHandler() != null ) {
+				name = imp.getRemoteMQTVSHandler().getChannelPathNames()[imp.getChannel()-1];
+			} else {
+				String[] fileList = new File(imp.getOriginalFileInfo().directory).list();
+				Arrays.sort(fileList);
+				name = imp.getOriginalFileInfo().directory + fileList[imp.getFrame()-1];
+//				IJ.log(name);
+			}
 			if (name.matches(".*(_pr|_slc)..*_z.*_t.*")) {
 				String[] matchedNames = {""};
 				try {
