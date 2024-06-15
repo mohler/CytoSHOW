@@ -24,11 +24,15 @@ public class DirChooser extends Application {
 			directory = "";
 		String title = DirChooser.args.split(":")[0];
 		dc.setTitle(title);
-		String defaultDir = DirChooser.args.split(":")[1]+":"+DirChooser.args.split(":")[2];
+		String defaultDir = directory;
+		if (defaultDir == ""){
+			defaultDir = DirChooser.args.split(":")[1]+":"+DirChooser.args.split(":")[2];
+		}
+
 		if (defaultDir == null)
 			defaultDir = getParameters().getRaw().get(0);
 		if (defaultDir!=null) {
-			File f = new File(defaultDir);
+			File f = new File(directory);
 			if (IJ.debugMode)
 				IJ.log("DirectoryChooser,setSelectedFile: "+f);
 			if (f.canRead())

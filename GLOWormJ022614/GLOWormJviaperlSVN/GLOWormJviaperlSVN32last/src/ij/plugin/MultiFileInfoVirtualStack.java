@@ -455,7 +455,15 @@ array and displays it if 'show' is true. */
 					this.cDim = 2;
 					dimOrder = "xySplitCzt";
 				}
-				open(show);
+				ImagePlus openedImp = open(show);
+				
+				if (rcstereo){
+					for (int c=2; c<=openedImp.getNChannels();c=c+2){
+						openedImp.setPosition(c, openedImp.getSlice(), openedImp.getFrame());
+						IJ.run("Red");
+					}
+					openedImp.setPosition(1, openedImp.getSlice(), openedImp.getFrame());
+				}
 			}
 		}
 	}
