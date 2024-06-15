@@ -1317,7 +1317,7 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 			corrZ=isViewB?corrZB[((stackNumber)%tDim)]-corrZB[0]:corrZA[((stackNumber)%tDim)]-corrZA[0];
 			//IJ.log("stk="+stackNumber +"  vslc="+vSliceNumber);
 			initiateStack(stackNumber, 0);
-			int corrSlc = vSliceNumber+corrZ + (rcstereo? (stackNumber%(tDim*2)/(tDim))>0.5 ? rotMinus90? -1: 1 : 0 : 0);
+			int corrSlc = vSliceNumber+corrZ + (rcstereo? (stackNumber%(tDim*2)/(tDim))>0.5 ? rotMinus90 ? -1: 1 : 0 : 0);
 			ip = fivStacks.get(stackNumber).getProcessor(corrSlc);
 			ip.translate(-corrX, -corrY);			// must be negative!
 		}
