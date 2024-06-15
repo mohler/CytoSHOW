@@ -32,6 +32,7 @@ public class ImageStack {
 	protected boolean sharpBlur;
 	protected boolean flipH;
 	protected boolean flipV;
+	protected boolean rotMinus90;
 	/** Default constructor. */
 	public ImageStack() { }
 
