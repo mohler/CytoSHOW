@@ -883,6 +883,9 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 				vSliceNumber = vSliceNumber-fivStacks.get(stackNumber).getSize();
 				stackNumber++;
 			}
+			if (flipZ) {
+				vSliceNumber = vSliceNumber;  //NEED LOGIC FOR LIVE FLIP OF CURRENT VOLUME HERE...DIFF SOLUTION FOR EACH DIMORDER
+			}
 
 			//	if (stackNumber >= fivStacks.size()){
 			//	stackNumber = fivStacks.size()-1;

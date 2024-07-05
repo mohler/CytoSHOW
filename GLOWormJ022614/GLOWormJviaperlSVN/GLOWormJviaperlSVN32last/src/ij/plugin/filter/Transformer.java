@@ -41,6 +41,15 @@ public class Transformer implements PlugInFilter {
 			}
 			return;
 		}
+		if (arg.equals("flipz")) {
+			if (imp.getStack() instanceof VirtualStack) {
+				imp.getStack().setFlipZ(!imp.getStack().isFlipZ());
+				imp.updateAndRepaintWindow();
+			} else {
+				IJ.run(imp, "StackReverser", "");
+			}
+			return;
+		}
 		if (arg.equals("right") || arg.equals("left")) {
 	    	StackProcessor sp = new StackProcessor(imp.getStack(), ip);
 	    	ImageStack s2 = null;

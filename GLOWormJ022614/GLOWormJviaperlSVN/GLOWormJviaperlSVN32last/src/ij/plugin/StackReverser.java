@@ -8,7 +8,7 @@ public class StackReverser implements PlugIn {
 	public void run(String arg) {
 		ImagePlus imp = IJ.getImage();
 		if (imp.getStackSize()==1) {
-			IJ.error("Flip Z", "This command requires a stack");
+//			IJ.error("Flip Z", "This command requires a stack");
 			return;
 		}
 		if (imp.isHyperStack()) {

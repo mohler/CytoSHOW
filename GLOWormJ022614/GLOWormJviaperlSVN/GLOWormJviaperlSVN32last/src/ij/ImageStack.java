@@ -32,7 +32,10 @@ public class ImageStack {
 	protected boolean sharpBlur;
 	protected boolean flipH;
 	protected boolean flipV;
+	protected boolean flipZ;
 	protected boolean rotMinus90;
+	protected boolean rotPlus90;
+
 	/** Default constructor. */
 	public ImageStack() { }
 
@@ -648,7 +651,6 @@ public class ImageStack {
 	}
 
 	public boolean isFlipH() {
-		// TODO Auto-generated method stub
 		return flipH;
 	}
 	
@@ -657,12 +659,19 @@ public class ImageStack {
 	}
 
 	public boolean isFlipV() {
-		// TODO Auto-generated method stub
 		return flipV;
 	}
 	
 	public void setFlipV(boolean flipV) {
 		this.flipV = flipV;
+	}
+
+	public boolean isFlipZ() {
+		return flipZ;
+	}
+
+	public void setFlipZ(boolean b) {
+		this.flipZ = flipZ;
 	}
 
 
