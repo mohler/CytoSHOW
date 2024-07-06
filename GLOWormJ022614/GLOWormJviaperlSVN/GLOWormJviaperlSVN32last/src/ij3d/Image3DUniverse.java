@@ -2368,7 +2368,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			}
 			win.setTitle(newTitle+threeD+virtual+global+scale);
 			win.getImagePlus().setTitle(newTitle+threeD+virtual+global+scale);
-			this.setTitle(newTitle+threeD+virtual+global+scale);
+			this.title = ""+newTitle+threeD+virtual+global+scale;
     	}
     	this.title = newTitle;
     	if (c3dm !=null) {

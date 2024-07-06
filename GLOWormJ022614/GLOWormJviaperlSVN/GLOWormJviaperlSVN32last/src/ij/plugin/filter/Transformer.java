@@ -51,18 +51,32 @@ public class Transformer implements PlugInFilter {
 			return;
 		}
 		if (arg.equals("right") || arg.equals("left")) {
-	    	StackProcessor sp = new StackProcessor(imp.getStack(), ip);
-	    	ImageStack s2 = null;
-			if (arg.equals("right"))
-	    		s2 = sp.rotateRight();
-	    	else
-	    		s2 = sp.rotateLeft();
-	    	Calibration cal = imp.getCalibration();
-	    	imp.setStack(null, s2);
-	    	double pixelWidth = cal.pixelWidth;
-	    	cal.pixelWidth = cal.pixelHeight;
-	    	cal.pixelHeight = pixelWidth;
-			return;
+			if (imp.getStack() instanceof VirtualStack) {
+				if (arg.equals("right")) {
+					imp.getStack().setRotateRight(!imp.getStack().isRotateRight());
+				}
+				if (arg.equals("left")) {
+					imp.getStack().setRotateLeft(!imp.getStack().isRotateLeft());
+				}
+	//????????????
+				imp = new ImagePlus(imp.getTitle(), imp.getProcessor().rotateLeft());
+				imp.show();
+	//??????????????
+				imp.updateAndRepaintWindow();
+			} else {
+				StackProcessor sp = new StackProcessor(imp.getStack(), ip);
+				ImageStack s2 = null;
+				if (arg.equals("right"))
+					s2 = sp.rotateRight();
+				else
+					s2 = sp.rotateLeft();
+				Calibration cal = imp.getCalibration();
+				imp.setStack(null, s2);
+				double pixelWidth = cal.pixelWidth;
+				cal.pixelWidth = cal.pixelHeight;
+				cal.pixelHeight = pixelWidth;
+				return;
+			}
 		}
 	}
 	

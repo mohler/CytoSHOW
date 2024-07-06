@@ -266,7 +266,7 @@ array and displays it if 'show' is true. */
 			if (cumulativeTiffFileArray[0].matches(".*proj._\\d+_\\d+.tif")){
 				rcstereo = (IJ.getString("View in RGstereo", "No").toLowerCase().startsWith("y"));
 				if (rcstereo && cumulativeTiffFileArray[0].matches(".*projX_\\d+_\\d+.tif"))
-					rotMinus90 = true;
+					rotateLeft = true;
 			} 
 			if (cumulativeTiffFileArray.length >0){ 
 				for (String cumulativeTiffFileArrayElement:cumulativeTiffFileArray)
@@ -884,9 +884,9 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 				stackNumber++;
 			}
 			if (flipZ) {
-				vSliceNumber = vSliceNumber;  //NEED LOGIC FOR LIVE FLIP OF CURRENT VOLUME HERE...DIFF SOLUTION FOR EACH DIMORDER
+				//vSliceNumber = vSliceNumber;  //NEED LOGIC FOR LIVE FLIP OF CURRENT VOLUME HERE...DIFF SOLUTION FOR EACH DIMORDER
+				vSliceNumber = zDim*cDim - vSliceNumber;			
 			}
-
 			//	if (stackNumber >= fivStacks.size()){
 			//	stackNumber = fivStacks.size()-1;
 			//	}
@@ -1328,7 +1328,7 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 			corrZ=isViewB?corrZB[((stackNumber)%tDim)]-corrZB[0]:corrZA[((stackNumber)%tDim)]-corrZA[0];
 			//IJ.log("stk="+stackNumber +"  vslc="+vSliceNumber);
 			initiateStack(stackNumber, 0);
-			int corrSlc = vSliceNumber+corrZ + (rcstereo? (stackNumber%(tDim*2)/(tDim))>0.5 ? rotMinus90 ? -1: 1 : 0 : 0);
+			int corrSlc = vSliceNumber+corrZ + (rcstereo? (stackNumber%(tDim*2)/(tDim))>0.5 ? rotateLeft ? -1: 1 : 0 : 0);
 			ip = fivStacks.get(stackNumber).getProcessor(corrSlc);
 			ip.translate(-corrX, -corrY);			// must be negative!
 		}
@@ -1413,8 +1413,11 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 		if (flipV) {
 			ip.flipVertical();
 		}
-		if (rotMinus90) {
+		if (rotateLeft) {
 			ip = ip.rotateLeft();
+		}
+		if (rotateRight) {
+			ip = ip.rotateRight();
 		}
 		return ip;
 	}

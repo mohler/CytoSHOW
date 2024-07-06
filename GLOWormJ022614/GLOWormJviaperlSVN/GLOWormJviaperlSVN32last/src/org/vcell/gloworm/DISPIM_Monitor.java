@@ -1792,8 +1792,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 			IJ.log("" + WindowManager.getImageCount());
 
 			//NEED TO FIGURE OUT FOR DECON LAUNNCH FROM NEW BUTTON ON WINDOW!
-			autoUpload = IJ.showMessageWithCancel("AutoUpload Data to WormGUIDES Server?", "Click to have CytoSHOW backup these data to the WormGUIDES server.");
+//			autoUpload = IJ.showMessageWithCancel("AutoUpload Data to WormGUIDES Server?", "Click to have CytoSHOW backup these data to the WormGUIDES server.");
 
+			autoUpload = false;
+			
 			if (autoUpload){
 				Thread uploadThread = new Thread(new Runnable() {
 					public void run() {

@@ -33,8 +33,8 @@ public class ImageStack {
 	protected boolean flipH;
 	protected boolean flipV;
 	protected boolean flipZ;
-	protected boolean rotMinus90;
-	protected boolean rotPlus90;
+	protected boolean rotateRight;
+	protected boolean rotateLeft;
 
 	/** Default constructor. */
 	public ImageStack() { }
@@ -670,9 +670,27 @@ public class ImageStack {
 		return flipZ;
 	}
 
-	public void setFlipZ(boolean b) {
+	public void setFlipZ(boolean flipZ) {
 		this.flipZ = flipZ;
 	}
+
+	public boolean isRotateRight() {
+		return rotateRight;
+	}
+
+	public void setRotateRight(boolean rotateRight) {
+		this.rotateRight = rotateRight;
+	}
+
+	public boolean isRotateLeft() {
+		return rotateLeft;
+	}
+
+	public void setRotateLeft(boolean rotateLeft) {
+		this.rotateLeft = rotateLeft;
+	}
+
+
 
 
 
