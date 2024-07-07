@@ -3,6 +3,7 @@ import ij.*;
 import ij.process.*;
 import ij.gui.*;
 import ij.measure.Calibration;
+import ij.plugin.MultiFileInfoVirtualStack;
 
 import java.awt.*;
 import java.awt.image.*;
@@ -51,18 +52,29 @@ public class Transformer implements PlugInFilter {
 			return;
 		}
 		if (arg.equals("right") || arg.equals("left")) {
-			if (imp.getStack() instanceof VirtualStack) {
-				if (arg.equals("right")) {
-					imp.getStack().setRotateRight(!imp.getStack().isRotateRight());
+			if (imp.getStack() instanceof MultiFileInfoVirtualStack) {
+				MultiFileInfoVirtualStack origStack = (MultiFileInfoVirtualStack) imp.getStack();
+				
+				VirtualStack rotStack = new VirtualStack(imp.getHeight(), imp.getWidth(), null, arg, false, null) {
+					public ImageProcessor getProcessor(int i) {
+						if (arg.equals("right")) {
+							ImageProcessor origIP = origStack.getProcessor(i);
+							ImageProcessor rotIP = origIP.rotateRight();
+							return rotIP;
+						} else {
+							ImageProcessor origIP = origStack.getProcessor(i);
+							ImageProcessor rotIP = origIP.rotateLeft();
+							return rotIP;
+						}					
+					}
+				};
+				for (int s=1; s<= origStack.getSize(); s++) {
+					rotStack.addSlice("");
 				}
-				if (arg.equals("left")) {
-					imp.getStack().setRotateLeft(!imp.getStack().isRotateLeft());
-				}
-	//????????????
-				imp = new ImagePlus(imp.getTitle(), imp.getProcessor().rotateLeft());
-				imp.show();
-	//??????????????
+				imp.setStack(null, rotStack, false);
+				
 				imp.updateAndRepaintWindow();
+				
 			} else {
 				StackProcessor sp = new StackProcessor(imp.getStack(), ip);
 				ImageStack s2 = null;

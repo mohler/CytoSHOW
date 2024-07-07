@@ -31,6 +31,7 @@ public class Scaler implements PlugIn, TextListener, FocusListener {
 	private Rectangle r;
 	private Object fieldWithFocus;
 	private int oldDepth;
+	private boolean doZScaling;
 
 	public void run(String arg) {
 		imp = IJ.getImage();
@@ -40,6 +41,7 @@ public class Scaler implements PlugIn, TextListener, FocusListener {
 		ImageProcessor ip = imp.getProcessor();
 		if (!showDialog(ip))
 			return;
+		doZScaling = newDepth>0 && newDepth!=oldDepth;
 		if (newDepth>0 && newDepth!=imp.getStackSize()) {
 			newWindow = true;
 			processStack = true;
@@ -62,6 +64,103 @@ public class Scaler implements PlugIn, TextListener, FocusListener {
 		IJ.showProgress(1.0);
 	}
 	
+	/** Returns a scaled copy of this image or ROI, where the
+	 'options'  string can contain 'none', 'bilinear'. 'bicubic',
+	'slice' and 'constrain'.
+	 */
+	public static ImagePlus resize(ImagePlus imp, int dstWidth, int dstHeight, int dstDepth, String options) {
+		if (options==null)
+			options = "";
+		Scaler scaler = new Scaler();
+		if (options.contains("none"))
+			scaler.interpolationMethod = ImageProcessor.NONE;
+		if (options.contains("bicubic"))
+			scaler.interpolationMethod = ImageProcessor.BICUBIC;
+		if (scaler.xscale==0) {
+			scaler.xscale = (double)dstWidth/imp.getWidth();
+			scaler.yscale = (double)dstHeight/imp.getHeight();
+			scaler.zscale = (double)dstDepth/imp.getStackSize();
+		}
+		boolean processStack = imp.getStackSize()>1 && !options.contains("slice");
+		//return new ImagePlus("Untitled", ip.resize(dstWidth, dstHeight, useAveraging));
+		Roi roi = imp.getRoi();
+		ImageProcessor ip = imp.getProcessor();
+		if (roi!=null && !roi.isArea())
+			ip.resetRoi();
+		scaler.doZScaling = dstDepth!=1;
+		if (scaler.doZScaling)
+			scaler.processStack = true;
+		return scaler.createNewStack(imp, ip, dstWidth, dstHeight, dstDepth);
+	}
+
+	private ImagePlus createNewStack(ImagePlus imp, ImageProcessor ip, int newWidth, int newHeight, int newDepth) {
+		int nSlices = imp.getStackSize();
+		int w=imp.getWidth(), h=imp.getHeight();
+		ImagePlus imp2 = imp.createImagePlus();
+		Rectangle r = ip.getRoi();
+		boolean crop = r.width!=imp.getWidth() || r.height!=imp.getHeight();
+		ImageStack stack1 = imp.getStack();
+		ImageStack stack2 = new ImageStack(newWidth, newHeight);
+		boolean virtualStack = stack1.isVirtual();
+		double min = imp.getDisplayRangeMin();
+		double max = imp.getDisplayRangeMax();
+		ImageProcessor ip1, ip2;
+		int method = interpolationMethod;
+		if (w==1 || h==1)
+			method = ImageProcessor.NONE;
+		for (int i=1; i<=nSlices; i++) {
+			IJ.showStatus("Scale: " + i + "/" + nSlices);
+			ip1 = stack1.getProcessor(i);
+			String label = stack1.getSliceLabel(i);
+			if (crop) {
+				ip1.setRoi(r);
+				ip1 = ip1.crop();
+			}
+			ip1.setInterpolationMethod(method);
+			ip2 = ip1.resize(newWidth, newHeight, averageWhenDownsizing);
+			if (ip2!=null)
+				stack2.addSlice(label, ip2);
+			IJ.showProgress(i, nSlices);
+		}
+		imp2.setStack(title, stack2);
+		if (virtualStack)
+			imp2.setDisplayRange(min, max);
+		Calibration cal = imp2.getCalibration();
+		if (cal.scaled()) {
+			cal.pixelWidth *= 1.0/xscale;
+			cal.pixelHeight *= 1.0/yscale;
+		}
+		cal.xOrigin *= xscale;
+		cal.yOrigin *= yscale;		
+		Overlay overlay = imp.getOverlay();
+		if (overlay!=null && !imp.getHideOverlay() && !doZScaling) {
+			overlay = overlay.duplicate();
+			Rectangle roi = imp.getProcessor().getRoi();
+			if (roi!=null)
+				overlay = overlay.crop(ip.getRoi());
+	//		imp2.setOverlay(overlay.scale(xscale, yscale));
+		}
+		IJ.showProgress(1.0);
+		int[] dim = imp.getDimensions();
+		imp2.setDimensions(dim[2], dim[3], dim[4]);
+		if (imp.isComposite()) {
+			imp2 = new CompositeImage(imp2, ((CompositeImage)imp).getMode());
+			((CompositeImage)imp2).copyLuts(imp);
+		}
+		if (imp.isHyperStack())
+			imp2.setOpenAsHyperStack(true);
+		if (doZScaling) {
+			double oldSize = imp2.getStackSize();
+			Resizer resizer = new Resizer();
+//			resizer.setAverageWhenDownsizing(averageWhenDownsizing);
+			imp2 = resizer.zScale(imp2, newDepth, interpolationMethod);			
+			cal = imp2.getCalibration();
+			cal.zOrigin *= imp2.getStackSize()/oldSize;
+		}
+		return imp2;
+	}
+
+
 	void createNewStack(ImagePlus imp, ImageProcessor ip) {
 		int nSlices = imp.getStackSize();
 		int w=imp.getWidth(), h=imp.getHeight();
