@@ -458,6 +458,8 @@ array and displays it if 'show' is true. */
 				ImagePlus openedImp = open(show);
 				
 				if (rcstereo){
+//					if (true)
+//						openedImp.setDimensions(openedImp.getNChannels()*2, openedImp.getNSlices(), openedImp.getNFrames()/2);
 					for (int c=2; c<=openedImp.getNChannels();c=c+2){
 						openedImp.setPosition(c, openedImp.getSlice(), openedImp.getFrame());
 						IJ.run("Red");
