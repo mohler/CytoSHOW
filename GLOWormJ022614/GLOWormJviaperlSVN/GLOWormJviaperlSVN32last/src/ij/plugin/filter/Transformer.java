@@ -54,24 +54,9 @@ public class Transformer implements PlugInFilter {
 		if (arg.equals("right") || arg.equals("left")) {
 			if (imp.getStack() instanceof MultiFileInfoVirtualStack) {
 				MultiFileInfoVirtualStack origStack = (MultiFileInfoVirtualStack) imp.getStack();
-				
-				VirtualStack rotStack = new VirtualStack(imp.getHeight(), imp.getWidth(), null, arg, false, null) {
-					public ImageProcessor getProcessor(int i) {
-						if (arg.equals("right")) {
-							ImageProcessor origIP = origStack.getProcessor(i);
-							ImageProcessor rotIP = origIP.rotateRight();
-							return rotIP;
-						} else {
-							ImageProcessor origIP = origStack.getProcessor(i);
-							ImageProcessor rotIP = origIP.rotateLeft();
-							return rotIP;
-						}					
-					}
-				};
-				for (int s=1; s<= origStack.getSize(); s++) {
-					rotStack.addSlice("");
-				}
-				imp.setStack(null, rotStack, false);
+				origStack.setRotateRight(arg.equals("right"));
+				origStack.setRotateLeft(arg.equals("left"));
+				imp.setStack(null, origStack, false);
 				
 				imp.updateAndRepaintWindow();
 				

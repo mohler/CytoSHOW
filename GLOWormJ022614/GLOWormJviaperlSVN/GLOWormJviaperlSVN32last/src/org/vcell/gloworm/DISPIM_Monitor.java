@@ -5499,16 +5499,16 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 											continue;
 										} else {
 											String matrixOne = IJ.openAsString("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
-											if (matrixOne.startsWith("Error") 
-													|| Double.parseDouble(matrixOne.split("\\t")[0])< 0.95
-													|| Double.parseDouble(matrixOne.split("\\t")[0])> 1.05
-													|| Double.parseDouble(matrixOne.split("\\t")[5])< 0.95
-													|| Double.parseDouble(matrixOne.split("\\t")[5])> 1.05
-													|| Double.parseDouble(matrixOne.split("\\t")[10])< 0.95
-													|| Double.parseDouble(matrixOne.split("\\t")[10])> 1.05
-													|| Double.parseDouble(matrixOne.split("\\t")[15])< 0.95
-													|| Double.parseDouble(matrixOne.split("\\t")[15])> 1.05
-													){
+											if (false /* || matrixOne.startsWith("Error") 
+													|| Double.parseDouble(matrixOne.split("\\t")[0])< 0.8
+													|| Double.parseDouble(matrixOne.split("\\t")[0])> 1.2
+													|| Double.parseDouble(matrixOne.split("\\t")[5])< 0.8
+													|| Double.parseDouble(matrixOne.split("\\t")[5])> 1.2
+													|| Double.parseDouble(matrixOne.split("\\t")[10])< 0.8
+													|| Double.parseDouble(matrixOne.split("\\t")[10])> 1.2
+													|| Double.parseDouble(matrixOne.split("\\t")[15])< 0.8
+													|| Double.parseDouble(matrixOne.split("\\t")[15])> 1.2
+													*/ ){
 												IJ.log("Bah Humbug, poor registration");
 												IJ.log(""+ pos+ "new=> " + matrixOne);
 												new File("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx").delete();
