@@ -229,6 +229,10 @@ public class WavefrontLoader {
 			//				w*(flipXCoef*(Float.parseFloat(sp[1]) - x))/(-x+4736)));
 			//		}
 			//		FOR MEI ADULT rot corr xz
+			
+			
+// Why has this adult cell been scaled by a substantially lower MANITUDE denominator than N2U ///////
+			
 			else if (objFileParentName.contains("MeiAdult_Reslice") || objFileGrandParentName.contains("MeiAdult_Reslice")) {
 				float x = 10800.0f;
 				float y = 10816.0f;
@@ -249,6 +253,10 @@ public class WavefrontLoader {
 						w*(Float.parseFloat(sp[2]) - y)/(x-4736),
 						(float)(Math.sin(-0.227)*(w*(Float.parseFloat(sp[3]) -z)/(x-4736)) +  Math.cos(-0.227)*(w*(flipXCoef*(Float.parseFloat(sp[1]) - x))/(-x+4736)))));
 			}
+//?????
+			
+			
+			
 			//		FOR L3
 			else if (objFileParentName.contains("L3") || objFileGrandParentName.contains("L3")) {
 				float x = 13793f;
