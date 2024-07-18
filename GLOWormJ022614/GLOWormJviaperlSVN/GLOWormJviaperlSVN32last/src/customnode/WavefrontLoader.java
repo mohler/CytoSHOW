@@ -267,6 +267,7 @@ public class WavefrontLoader {
 				float z = -4090f;
 				float w = 50000;
 				vertices.add(new Point3f(
+						//THIS SHOULD HAVE HAD AN X-FLIP AT THIS STAGE...WE FLIPPED AFTER PRODUCTION...
 						w*(flipXCoef*(Float.parseFloat(sp[1]) - x))/(x-2804),
 						w*(Float.parseFloat(sp[2]) - y)/(x-2804),
 						w*(Float.parseFloat(sp[3]) -z)/(x-2804)));
