@@ -767,10 +767,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					vDim = 2;
 					if (arg.contains("megaTiffMMrc"))
 						vDim = 1;
-					impAs[0].getCalibration().setUnit("micron");
-					impAs[0].getCalibration().pixelWidth = 0.1625;
-					impAs[0].getCalibration().pixelHeight = 0.1625;
-					impAs[0].getCalibration().pixelDepth = 1;
+//					impAs[0].getCalibration().setUnit("micron");
+//					impAs[0].getCalibration().pixelWidth = 0.1625;
+//					impAs[0].getCalibration().pixelHeight = 0.1625;
+//					impAs[0].getCalibration().pixelDepth = 1;
 				}else{
 					wavelengths = impAs[0].getNChannels();
 					cDim = impAs[0].getNChannels();
@@ -779,10 +779,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					vDim = 2;
 					if (arg.contains("megaTiffMMrc"))
 						vDim = 1;
-					impAs[0].getCalibration().setUnit("micron");
-					impAs[0].getCalibration().pixelWidth = 0.1625;
-					impAs[0].getCalibration().pixelHeight = 0.1625;
-					impAs[0].getCalibration().pixelDepth = 1;
+//					impAs[0].getCalibration().setUnit("micron");
+//					impAs[0].getCalibration().pixelWidth = 0.1625;
+//					impAs[0].getCalibration().pixelHeight = 0.1625;
+//					impAs[0].getCalibration().pixelDepth = 1;
 
 				}
 
@@ -1511,7 +1511,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						IJ.setMinAndMax(impAs[pos], 20, 300);
 					}
 
-					if (true /*!arg.contains("megaTiffMMrc")*/){
+					if (!arg.contains("megaTiffMMrc")){
 
 
 						impBs[pos].setStack(new MultiFileInfoVirtualStack(mmPath, dimOrder, "MMStack_Pos"+pos, cDim, zDim, tDim, vDim, pos, true, false, true, true, impBs[pos]));
