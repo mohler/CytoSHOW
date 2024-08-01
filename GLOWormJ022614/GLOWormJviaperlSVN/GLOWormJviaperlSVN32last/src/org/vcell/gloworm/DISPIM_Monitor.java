@@ -1449,6 +1449,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					int stackSizeA = impAs[pos].getImageStackSize();
 					//	int nChannels = cDim/(dimOrder=="xySplitCzt"?1:vDim);
 					int nChannelsA = ((MultiFileInfoVirtualStack)impAs[pos].getStack()).cDim /((MultiFileInfoVirtualStack)impAs[pos].getStack()).vDim;
+					if (nChannelsA == 0) nChannelsA =1;
 					int nSlicesA = ((MultiFileInfoVirtualStack)impAs[pos].getStack()).zDim;
 					int nFramesA = ((MultiFileInfoVirtualStack)impAs[pos].getStack()).tDim;
 					//	dirOrOMETiff = ((MultiFileInfoVirtualStack)impAs[pos].getStack()).getFivStacks().get(0).getInfo()[pos].directory +
@@ -1505,6 +1506,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					impAs[pos].getOriginalFileInfo().fileName = dirOrOMETiff;
 					impAs[pos].getOriginalFileInfo().directory = dirOrOMETiff;
 					impAs[pos].show();
+					IJ.run(impAs[pos], "Flip Vertically","");
+					IJ.run(impAs[pos], "Flip Z","");
+					IJ.run(impAs[pos], "Rotate 90 Degrees Left","");
 					if (arg.contains("megaTiffMMrc")) {
 						impAs[pos].setPosition(1, 1, 1);	
 
@@ -1518,6 +1522,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 						int stackSizeB = impBs[pos].getImageStackSize();
 						int nChannelsB = ((MultiFileInfoVirtualStack)impBs[pos].getStack()).cDim /((MultiFileInfoVirtualStack)impBs[pos].getStack()).vDim;
+						if (nChannelsB == 0) nChannelsB =1;
 						int nSlicesB = ((MultiFileInfoVirtualStack)impBs[pos].getStack()).zDim;
 						int nFramesB = ((MultiFileInfoVirtualStack)impBs[pos].getStack()).tDim;
 						//	dirOrOMETiff = ((MultiFileInfoVirtualStack)impBs[pos].getStack()).getFivStacks().get(0).getInfo()[pos].directory +
@@ -1574,6 +1579,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						impBs[pos].getOriginalFileInfo().fileName = dirOrOMETiff;
 						impBs[pos].getOriginalFileInfo().directory = dirOrOMETiff;
 						impBs[pos].show();
+						IJ.run(impBs[pos], "Rotate 90 Degrees Right","");
 						if (arg.contains("megaTiffMMrc")) {
 								IJ.run(impBs[pos],"Ice","");
 								impBs[pos].setDisplayRange(18, 28, 7);
