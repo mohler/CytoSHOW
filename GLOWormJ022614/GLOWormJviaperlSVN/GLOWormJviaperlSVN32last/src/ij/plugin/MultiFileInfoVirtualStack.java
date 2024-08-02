@@ -270,7 +270,7 @@ array and displays it if 'show' is true. */
 			////	IJ.log(infoLoadReport + (savedInfoCollectorArrayList != null?savedInfoCollectorArrayList.size():""));
 			if (cumulativeTiffFileArray[0].matches(".*proj._\\d+_\\d+.tif")){
 //				rcstereo = (IJ.getString("View in RGstereo", "No").toLowerCase().startsWith("y"));
-				rcstereo = (IJ.shiftKeyDown() && IJ.controlKeyDown());
+//				rcstereo = (!IJ.shiftKeyDown());
 				if (rcstereo && cumulativeTiffFileArray[0].matches(".*projX_\\d+_\\d+.tif"))
 					rotateLeft = true;
 			} 
