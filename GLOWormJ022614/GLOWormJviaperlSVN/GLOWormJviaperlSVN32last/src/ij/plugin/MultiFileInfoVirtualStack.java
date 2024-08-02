@@ -91,17 +91,22 @@ array and displays it if 'show' is true. */
 	}
 
 	public MultiFileInfoVirtualStack(String dirOrOMETiff, String string, boolean show) {
-		this(dirOrOMETiff, "xyczt", string, 0, 0, 0, 1, -1, false, show, false, false, null);
+		this(dirOrOMETiff, "xyczt", string, false, 0, 0, 0, 1, -1, false, show, false, false, null);
 	}
 
 	public MultiFileInfoVirtualStack(String dirOrOMETiff, String string, boolean isViewB, boolean show) {
-		this(dirOrOMETiff, "xyczt", string, 0, 0, 0, 1, -1, isViewB, show, false, false, null);
+		this(dirOrOMETiff, "xyczt", string, false, 0, 0, 0, 1, -1, isViewB, show, false, false, null);
+	}
+
+	public MultiFileInfoVirtualStack(String dirOrOMETiff, String string, boolean rcstereo, boolean isViewB, boolean show) {
+		this(dirOrOMETiff, "xyczt", string,  rcstereo, 0, 0, 0, 1, -1, isViewB, show, false, false, null);
 	}
 
 
-	public MultiFileInfoVirtualStack(String arg, String sliceOrder, String keyString, int cDim, int zDim, int tDim, int vDim, final int pos, boolean isViewB, boolean show, boolean rawdispimdata, boolean omeMegaTiff, ImagePlus ownerImp) {
+	public MultiFileInfoVirtualStack(String arg, String sliceOrder, String keyString, boolean rcstereo, int cDim, int zDim, int tDim, int vDim, final int pos, boolean isViewB, boolean show, boolean rawdispimdata, boolean omeMegaTiff, ImagePlus ownerImp) {
 		this.rawdispimdata = rawdispimdata;
 		this.keyString = keyString;
+		this.rcstereo = rcstereo;
 		this.isViewB = isViewB;
 		if (cDim<0) {
 			cDim = cDim*(-1);
@@ -264,7 +269,8 @@ array and displays it if 'show' is true. */
 			//	}
 			////	IJ.log(infoLoadReport + (savedInfoCollectorArrayList != null?savedInfoCollectorArrayList.size():""));
 			if (cumulativeTiffFileArray[0].matches(".*proj._\\d+_\\d+.tif")){
-				rcstereo = (IJ.getString("View in RGstereo", "No").toLowerCase().startsWith("y"));
+//				rcstereo = (IJ.getString("View in RGstereo", "No").toLowerCase().startsWith("y"));
+				rcstereo = (IJ.shiftKeyDown() && IJ.controlKeyDown());
 				if (rcstereo && cumulativeTiffFileArray[0].matches(".*projX_\\d+_\\d+.tif"))
 					rotateLeft = true;
 			} 
