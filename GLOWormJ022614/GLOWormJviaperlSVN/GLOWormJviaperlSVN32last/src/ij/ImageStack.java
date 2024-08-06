@@ -35,7 +35,16 @@ public class ImageStack {
 	protected boolean flipZ;
 	protected boolean rotateRight;
 	protected boolean rotateLeft;
+	protected boolean rcstereo;
+	
+	public boolean isRcstereo() {
+		return rcstereo;
+	}
 
+	public void setRcstereo(boolean rcstereo) {
+		this.rcstereo = rcstereo;
+	}
+	
 	/** Default constructor. */
 	public ImageStack() { }
 

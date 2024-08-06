@@ -2785,7 +2785,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										((new File(dirOrOMETiff)).isDirectory() ? dirOrOMETiff
 												: (new File(dirOrOMETiff)).getParent())
 												+ File.separator, "Deconvolution",
-												false);
+												false, false);
 							}
 							if (stackDFs[pos]!=null && stackDFs[pos].getSize() > 0) {
 								ImageWindow win = null;
@@ -6019,7 +6019,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									}
 									stackDFs[pos] = new MultiFileInfoVirtualStack(openDFPath
 											+ File.separator + "RegDecon" + File.separator + "Pos" + pos, "Deconvolution",
-											false);
+											false, false);
 
 								}
 
@@ -6120,11 +6120,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 													IJ.wait(100);
 												}
 											}
-
+											boolean wasStereoX = stackPrxs[pos] !=null && stackPrxs[pos].isRcstereo();
+											boolean wasStereoY = stackPrys[pos] !=null && stackPrys[pos].isRcstereo();
 											stackPrxs[pos] = null;
 											stackPrys[pos] = null;
-											stackPrxs[pos] = new MultiFileInfoVirtualStack(openPrxPath+File.separator, "Color", false);
-											stackPrys[pos] = new MultiFileInfoVirtualStack(openPryPath+File.separator, "Color", false);
+											stackPrxs[pos] = new MultiFileInfoVirtualStack(openPrxPath+File.separator, "Color", wasStereoX, false);
+											stackPrys[pos] = new MultiFileInfoVirtualStack(openPryPath+File.separator, "Color", wasStereoY, false);
 
 										}
 

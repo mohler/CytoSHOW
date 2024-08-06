@@ -343,7 +343,7 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 			}
 		}
 		if (!singleStack) {
-			stack2 = new MultiFileInfoVirtualStack(saveRootDir + File.separator + "DUP_"+ saveRootPrefix.replaceAll("[,. ;:]","").replace(File.separator, "_") + tempTime,"",false);
+			stack2 = new MultiFileInfoVirtualStack(saveRootDir + File.separator + "DUP_"+ saveRootPrefix.replaceAll("[,. ;:]","").replace(File.separator, "_") + tempTime,"",false, false);
 		} else {
 			stack2 = impT.getStack();
 		}

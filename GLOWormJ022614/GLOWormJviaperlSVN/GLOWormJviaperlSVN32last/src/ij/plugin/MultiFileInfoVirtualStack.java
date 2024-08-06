@@ -32,7 +32,7 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	//	int nSlices;  //already present in fields for FileInfoVirtualStack;
 	private String dir;
 	private int channelDirectories;
-	private String keyString = "";
+	public String keyString = "";
 	//	private String dimOrder;     //already present in fields for VirtualStack;
 	private double min;  
 	private double max;
@@ -48,12 +48,12 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	public int  vDim=1;
 	public int stackNumber;
 	public int sliceNumber;
-	private boolean isViewB;
+	public boolean isViewB;
 	private boolean monitoringDecon;
 	private boolean reverseChannelOrder;
 	private boolean rawdispimdata;
 	private boolean initiatorRunning;
-	private int pos;
+	public int pos;
 	private boolean newRealInfo;
 	private ArrayList<FileInfo[]> savedInfoCollectorArrayList;
 	private String infoLoadReport;
@@ -73,8 +73,8 @@ public class MultiFileInfoVirtualStack extends VirtualStack implements PlugIn {
 	double maxCirc = 1.000;
 	private ImageProcessor statsIP;
 	private ImageProcessor bigIP;
-	private boolean rcstereo; 
-
+	public String arg;
+	 
 	/* Default constructor. */
 	public MultiFileInfoVirtualStack() {}
 
@@ -90,20 +90,21 @@ array and displays it if 'show' is true. */
 		open(show);
 	}
 
-	public MultiFileInfoVirtualStack(String dirOrOMETiff, String string, boolean show) {
+	public MultiFileInfoVirtualStack(String dirOrOMETiff, String string, boolean rcstereo, boolean show) {
 		this(dirOrOMETiff, "xyczt", string, false, 0, 0, 0, 1, -1, false, show, false, false, null);
 	}
 
-	public MultiFileInfoVirtualStack(String dirOrOMETiff, String string, boolean isViewB, boolean show) {
+	public MultiFileInfoVirtualStack(String dirOrOMETiff, String string, boolean rcstereo, boolean isViewB, boolean show) {
 		this(dirOrOMETiff, "xyczt", string, false, 0, 0, 0, 1, -1, isViewB, show, false, false, null);
 	}
 
-	public MultiFileInfoVirtualStack(String dirOrOMETiff, String string, boolean rcstereo, boolean isViewB, boolean show) {
-		this(dirOrOMETiff, "xyczt", string,  rcstereo, 0, 0, 0, 1, -1, isViewB, show, false, false, null);
-	}
+//	public MultiFileInfoVirtualStack(String dirOrOMETiff, String string, boolean rcstereo, boolean isViewB, boolean show) {
+//		this(dirOrOMETiff, "xyczt", string,  rcstereo, 0, 0, 0, 1, -1, isViewB, show, false, false, null);
+//	}
 
 
 	public MultiFileInfoVirtualStack(String arg, String sliceOrder, String keyString, boolean rcstereo, int cDim, int zDim, int tDim, int vDim, final int pos, boolean isViewB, boolean show, boolean rawdispimdata, boolean omeMegaTiff, ImagePlus ownerImp) {
+		this.arg = arg;
 		this.rawdispimdata = rawdispimdata;
 		this.keyString = keyString;
 		this.rcstereo = rcstereo;
@@ -133,6 +134,7 @@ array and displays it if 'show' is true. */
 				defaultKey = "Color";
 			keyString = IJ.getString("Subdirectory Name Key String?", defaultKey);
 			args[0]=dir;
+			this.arg = dir +"|";
 		} else
 			dir = args[0];
 		if (dir==null) return;
@@ -268,10 +270,11 @@ array and displays it if 'show' is true. */
 			//	IJ.wait(10);
 			//	}
 			////	IJ.log(infoLoadReport + (savedInfoCollectorArrayList != null?savedInfoCollectorArrayList.size():""));
-			if (cumulativeTiffFileArray[0].matches(".*proj._\\d+_\\d+.tif")){
+			if (cumulativeTiffFileArray[0].matches(".*proj.*.tif")){
 //				rcstereo = (IJ.getString("View in RGstereo", "No").toLowerCase().startsWith("y"));
 //				rcstereo = (!IJ.shiftKeyDown());
-				if (rcstereo && cumulativeTiffFileArray[0].matches(".*projX_\\d+_\\d+.tif"))
+				
+				if (rcstereo && cumulativeTiffFileArray[0].matches(".*projX.*.tif"))
 					rotateLeft = true;
 			} 
 			if (cumulativeTiffFileArray.length >0){ 
@@ -330,18 +333,18 @@ array and displays it if 'show' is true. */
 
 			if (monitoringDecon)
 				goDirFileNameList = StringSorter.sortNumericallyViaRegex(goDirFileNameList);
-				if (rcstereo){
-					String[] stereoGoDirFileNameList = new String[goDirFileNameList.length *2];
-					for (int g=0;g< goDirFileNameList.length/2;g++){
-						stereoGoDirFileNameList[g] = goDirFileNameList[g];
-						stereoGoDirFileNameList[goDirFileNameList.length/2 + g] = goDirFileNameList[g];
-					}
-					for (int g=goDirFileNameList.length/2;g< goDirFileNameList.length;g++){
-						stereoGoDirFileNameList[(goDirFileNameList.length/2) + g] = goDirFileNameList[g];
-						stereoGoDirFileNameList[goDirFileNameList.length + g] = goDirFileNameList[g];
-					}
-					goDirFileNameList = stereoGoDirFileNameList;
+			if (rcstereo){
+				String[] stereoGoDirFileNameList = new String[goDirFileNameList.length *2];
+				for (int g=0;g< goDirFileNameList.length/2;g++){
+					stereoGoDirFileNameList[g] = goDirFileNameList[g];
+					stereoGoDirFileNameList[goDirFileNameList.length/2 + g] = goDirFileNameList[g];
 				}
+				for (int g=goDirFileNameList.length/2;g< goDirFileNameList.length;g++){
+					stereoGoDirFileNameList[(goDirFileNameList.length/2) + g] = goDirFileNameList[g];
+					stereoGoDirFileNameList[goDirFileNameList.length + g] = goDirFileNameList[g];
+				}
+				goDirFileNameList = stereoGoDirFileNameList;
+			}
 			if (goDirFileNameList != null) {
 				long firstFileSize = (new File(dir + goDirFileNameList[0])).length();
 
@@ -463,9 +466,8 @@ array and displays it if 'show' is true. */
 				}
 				ImagePlus openedImp = open(show);
 				
-				if (rcstereo){
-//					if (true)
-//						openedImp.setDimensions(openedImp.getNChannels()*2, openedImp.getNSlices(), openedImp.getNFrames()/2);
+				if (rcstereo && show){
+					openedImp.setDimensions(this.cDim, this.zDim, this.tDim);
 					for (int c=2; c<=openedImp.getNChannels();c=c+2){
 						openedImp.setPosition(c, openedImp.getSlice(), openedImp.getFrame());
 						IJ.run("Red");
@@ -573,7 +575,7 @@ array and displays it if 'show' is true. */
 	}
 
 	public void run(String arg) {
-		new MultiFileInfoVirtualStack(arg, "", true);
+		new MultiFileInfoVirtualStack(arg, "", false, true);
 	}
 
 	public ImagePlus open(boolean show) {
@@ -615,21 +617,24 @@ array and displays it if 'show' is true. */
 			this.tDim =nImageSlices/(this.cDim*this.zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
 		} else if (fivStacks.get(0).getInfo()[0].fileName.matches(".*Decon(-Fuse|_reg)_.*aaa_.*")){
 			zDim = fivStacks.get(0).nImageSlices;
-			cDim = 2;
+			cDim = (rcstereo?4:2);
+//			cDim = 2;
 			tDim = fivStacks.size();
 			nImageSlices = cDim*zDim*tDim;
 		} else {
+//			cDim = (rcstereo?2:1);
 			zDim = fivStacks.get(0).nImageSlices;
-			nImageSlices = /*channelDirectories**/ fivStacks.size() * zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1);
 
 			int internalChannels = ((new FileOpener(fivStacks.get(0).infoArray[0])).decodeDescriptionString(fivStacks.get(0).infoArray[0]) != null
 					?(fivStacks.get(0).getInt((new FileOpener(fivStacks.get(0).infoArray[0])).decodeDescriptionString(fivStacks.get(0).infoArray[0]), "channels"))
 							:1);	
 			int channels = channelDirectories * internalChannels;
 			cDim = channels;
-			zDim = fivStacks.get(0).nImageSlices/(cDim/channelDirectories);
+			cDim = (rcstereo?cDim*2:cDim);
+			nImageSlices = /*channelDirectories**/ fivStacks.size() * zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:channels);
+			zDim = fivStacks.get(0).nImageSlices/(channels/channelDirectories);
 			//	tDim = fivStacks.size()/(cDim/internalChannels);
-			this.tDim =nImageSlices/(this.cDim*this.zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
+			this.tDim =nImageSlices/(cDim*this.zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));
 
 		}
 
@@ -745,8 +750,15 @@ array and displays it if 'show' is true. */
 			}
 			((CompositeImage)imp).setMode(CompositeImage.COMPOSITE);
 		}
-		if (show)
+		if (show) {
 			imp.show();
+			if (imp.getTitle().toLowerCase().contains("proj")) {
+				imp.getWindow().modeButton.setToolTipText("Toggle between starndard viewing and RGstereo glasses viewing");
+				imp.getWindow().modeButton.setActionCommand("Normal<>RGstereo");
+				imp.getWindow().modeButton.setName("Normal<>RGstereo");
+
+			}
+		}
 		return imp;
 	}
 

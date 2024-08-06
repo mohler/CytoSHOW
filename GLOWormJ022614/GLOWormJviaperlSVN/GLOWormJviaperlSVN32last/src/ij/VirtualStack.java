@@ -22,7 +22,7 @@ public class VirtualStack extends ImageStack {
 	Color fillColor = Color.black;
 	private boolean burnIn = false;
 	private ImagePlus lineageMapImage;
-	protected String dimOrder;
+	public String dimOrder;
 	protected  int[] dXA = new int[]{0};
 	protected  int[] dXB = new int[]{0};
 	protected  int[] dYA = new int[]{0};

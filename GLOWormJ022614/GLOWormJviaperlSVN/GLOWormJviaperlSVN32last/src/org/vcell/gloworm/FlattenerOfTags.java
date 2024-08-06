@@ -146,7 +146,7 @@ public class FlattenerOfTags implements PlugIn, TextListener {
 				imp2.flush();
 			}
 		}
-		ImagePlus imp3 = new MultiFileInfoVirtualStack(dir, "", false).open(false);
+		ImagePlus imp3 = new MultiFileInfoVirtualStack(dir, "", false, false).open(false);
 		imp3.setRoiManager(newRM);
 		newRM.setImagePlus(imp3);
 		newRM.setShowAllCheckbox(false);

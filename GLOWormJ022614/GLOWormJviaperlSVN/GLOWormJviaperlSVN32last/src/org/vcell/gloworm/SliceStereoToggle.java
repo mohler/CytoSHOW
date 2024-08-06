@@ -15,7 +15,9 @@ import client.RemoteMQTVSHandler;
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.ImageStack;
 import ij.gui.TextRoi;
+import ij.plugin.MultiFileInfoVirtualStack;
 import ij.plugin.PlugIn;
 import ij.plugin.frame.ContrastAdjuster;
 import ij.process.LUT;
@@ -47,6 +49,28 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 		if (e.getActionCommand() == "Slice<>Stereo") {
 			if(imp.getWindow().modeButtonPanel.isVisible()) {
 				primeButtons(imp);
+				return;
+			}
+		}
+		if (e.getActionCommand() == "Normal<>RGstereo") {
+			if (imp.getStack() instanceof MultiFileInfoVirtualStack) {
+				imp.getStack().setRcstereo(!imp.getStack().isRcstereo());
+				ImageStack newStack = new MultiFileInfoVirtualStack( ((MultiFileInfoVirtualStack)imp.getStack()).arg, ((MultiFileInfoVirtualStack)imp.getStack()).dimOrder, ((MultiFileInfoVirtualStack)imp.getStack()).keyString, imp.getStack().isRcstereo(), ((MultiFileInfoVirtualStack)imp.getStack()).cDim, ((MultiFileInfoVirtualStack)imp.getStack()).zDim, ((MultiFileInfoVirtualStack)imp.getStack()).tDim, ((MultiFileInfoVirtualStack)imp.getStack()).vDim, ((MultiFileInfoVirtualStack)imp.getStack()).pos, ((MultiFileInfoVirtualStack)imp.getStack()).isViewB, false, keepOriginal, keepOriginal, imp);
+				imp.setStack(newStack);
+				imp.setDimensions(((MultiFileInfoVirtualStack)newStack).cDim, ((MultiFileInfoVirtualStack)newStack).zDim, ((MultiFileInfoVirtualStack)newStack).tDim);
+				if (newStack.isRcstereo()){
+					for (int c=2; c<=imp.getNChannels();c=c+2){
+						imp.setPosition(c, imp.getSlice(), imp.getFrame());
+						IJ.run("Red");
+					}
+					imp.setPosition(1, imp.getSlice(), imp.getFrame());
+				}
+				if (imp.getTitle().toLowerCase().contains("proj")) {
+					imp.getWindow().modeButton.setToolTipText("Toggle between starndard viewing and RGstereo glasses viewing");
+					imp.getWindow().modeButton.setActionCommand("Normal<>RGstereo");
+					imp.getWindow().modeButton.setName("Normal<>RGstereo");
+
+				}
 				return;
 			}
 		}
