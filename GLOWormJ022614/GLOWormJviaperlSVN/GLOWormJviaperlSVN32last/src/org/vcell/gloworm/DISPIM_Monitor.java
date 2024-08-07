@@ -2860,7 +2860,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									ImageWindow prjXwin = null;
 									ImageWindow prjYwin = null;
 
-									impPrxs[pos] = new ImagePlus();
+//									impPrxs[pos] = new ImagePlus();
+									impPrxs[pos] = stackPrxs[pos].open(false);
+								
 									impPrxs[pos].getRoiManager().setImagePlus(null);
 									impPrxs[pos].getRoiManager().dispose();
 									impPrxs[pos].setRoiManager(null);
@@ -2886,7 +2888,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									ciPrxs[pos] = new CompositeImage(impPrxs[pos]);
 									ciPrxs[pos].setPosition(1, 1, ciPrxs[pos].getNFrames());
 
-									impPrys[pos] = new ImagePlus();
+//									impPrxs[pos] = new ImagePlus();
+									impPrys[pos] = stackPrys[pos].open(false);
+
 									impPrys[pos].getRoiManager().setImagePlus(null);
 									impPrys[pos].getRoiManager().dispose();
 									impPrys[pos].setRoiManager(null);
@@ -2919,6 +2923,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									if (prjXwin==null) {
 										ciPrxs[pos].show();
 										prjXwin = ciPrxs[pos].getWindow();
+										if (ciPrxs[pos].getTitle().toLowerCase().contains("proj")) {
+											ciPrxs[pos].getWindow().modeButton.setToolTipText("Toggle between starndard viewing and RGstereo glasses viewing");
+											ciPrxs[pos].getWindow().modeButton.setActionCommand("Normal<>RGstereo");
+											ciPrxs[pos].getWindow().modeButton.setName("Normal<>RGstereo");
+										}
 										WindowManager.group(ciDFs[pos], ciPrxs[pos]);
 										ciPrxs[pos].setPosition(1, 1, ciPrxs[pos].getNFrames());
 									} else {
@@ -3006,6 +3015,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									if (prjYwin==null) {
 										ciPrys[pos].show();
 										prjYwin = ciPrys[pos].getWindow();
+										if (ciPrys[pos].getTitle().toLowerCase().contains("proj")) {
+											ciPrys[pos].getWindow().modeButton.setToolTipText("Toggle between starndard viewing and RGstereo glasses viewing");
+											ciPrys[pos].getWindow().modeButton.setActionCommand("Normal<>RGstereo");
+											ciPrys[pos].getWindow().modeButton.setName("Normal<>RGstereo");
+										}
 										WindowManager.group(ciPrxs[pos], ciPrys[pos]);
 										ciPrys[pos].setPosition(1, 1, ciPrys[pos].getNFrames());
 									} else {
@@ -6136,7 +6150,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 												impPrxs[pos].getRoiManager().dispose();
 												impPrxs[pos].setRoiManager(null);
 											}else {
-												impPrxs[pos] = new ImagePlus();
+//												impPrxs[pos] = new ImagePlus();
+												impPrxs[pos] = stackPrxs[pos].open(true);
 											}
 											impPrxs[pos].setStack((orientBeforeLineage?"Preview_":"") + "3DProjX_Decon-Fuse_"
 													+ impAs[pos].getTitle().split(":")[0], stackPrxs[pos]);
@@ -6273,7 +6288,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 												impPrys[pos].getRoiManager().dispose();
 												impPrys[pos].setRoiManager(null);
 											} else {
-												impPrys[pos] = new ImagePlus();
+//												impPrys[pos] = new ImagePlus();
+												impPrys[pos] = stackPrys[pos].open(true);
 											}
 											impPrys[pos].setStack((orientBeforeLineage?"Preview_":"") + "3DProjY_Decon-Fuse_"
 													+ impAs[pos].getTitle().split(":")[0], stackPrys[pos]);

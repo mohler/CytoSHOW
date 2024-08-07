@@ -54,17 +54,19 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 		}
 		if (e.getActionCommand() == "Normal<>RGstereo") {
 			if (imp.getStack() instanceof MultiFileInfoVirtualStack) {
+				int sImp = imp.getSlice();
+				int fImp =imp.getFrame();
 				imp.getStack().setRcstereo(!imp.getStack().isRcstereo());
 				ImageStack newStack = new MultiFileInfoVirtualStack( ((MultiFileInfoVirtualStack)imp.getStack()).arg, ((MultiFileInfoVirtualStack)imp.getStack()).dimOrder, ((MultiFileInfoVirtualStack)imp.getStack()).keyString, imp.getStack().isRcstereo(), ((MultiFileInfoVirtualStack)imp.getStack()).cDim, ((MultiFileInfoVirtualStack)imp.getStack()).zDim, ((MultiFileInfoVirtualStack)imp.getStack()).tDim, ((MultiFileInfoVirtualStack)imp.getStack()).vDim, ((MultiFileInfoVirtualStack)imp.getStack()).pos, ((MultiFileInfoVirtualStack)imp.getStack()).isViewB, false, keepOriginal, keepOriginal, imp);
 				imp.setStack(newStack);
 				imp.setDimensions(((MultiFileInfoVirtualStack)newStack).cDim, ((MultiFileInfoVirtualStack)newStack).zDim, ((MultiFileInfoVirtualStack)newStack).tDim);
 				if (newStack.isRcstereo()){
 					for (int c=2; c<=imp.getNChannels();c=c+2){
-						imp.setPosition(c, imp.getSlice(), imp.getFrame());
+						imp.setPosition(c,  sImp, fImp);
 						IJ.run("Red");
 					}
-					imp.setPosition(1, imp.getSlice(), imp.getFrame());
 				}
+				imp.setPosition(1, sImp, fImp);
 				if (imp.getTitle().toLowerCase().contains("proj")) {
 					imp.getWindow().modeButton.setToolTipText("Toggle between starndard viewing and RGstereo glasses viewing");
 					imp.getWindow().modeButton.setActionCommand("Normal<>RGstereo");
