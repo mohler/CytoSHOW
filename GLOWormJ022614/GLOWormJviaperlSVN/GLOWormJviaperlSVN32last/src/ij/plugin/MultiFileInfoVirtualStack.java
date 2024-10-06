@@ -271,8 +271,6 @@ array and displays it if 'show' is true. */
 			//	}
 			////	IJ.log(infoLoadReport + (savedInfoCollectorArrayList != null?savedInfoCollectorArrayList.size():""));
 			if (cumulativeTiffFileArray[0].matches(".*proj.*.tif")){
-//				rcstereo = (IJ.getString("View in RGstereo", "No").toLowerCase().startsWith("y"));
-//				rcstereo = (!IJ.shiftKeyDown());
 				
 				if (rcstereo && cumulativeTiffFileArray[0].matches(".*projX.*.tif"))
 					rotateLeft = true;
@@ -851,7 +849,7 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 			n=n+adjN;
 		}
 
-		while (stackNumber < fivStacks.size() && n > fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*split(ratio)?c.*")?2:1)) {
+		while (stackNumber < fivStacks.size() -1 && n > fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*split(ratio)?c.*")?2:1)) {
 			n = n - fivStacks.get(stackNumber).getSize()*(dimOrder.toLowerCase().matches(".*split(ratio)?c.*")?2:1);
 			stackNumber++;
 		}

@@ -30,7 +30,7 @@ public class CompositeImage extends ImagePlus {
 	LUT[] lut;
 	int currentChannel;
 	int previousChannel;
-	int currentSlice = 1;
+	int currentZPlane = 1;
 	int currentFrame = 1;
 	boolean singleChannel;
 	boolean[] active = new boolean[MAX_CHANNELS];
@@ -138,7 +138,7 @@ public class CompositeImage extends ImagePlus {
 				cip[i] = stack2.getProcessor(i+1);
 				cip[i].setLut(lut[i]);
 			}
-			currentSlice = currentFrame = 1;
+			currentZPlane = currentFrame = 1;
 		}
 	}
 
@@ -216,9 +216,9 @@ public class CompositeImage extends ImagePlus {
 		if (mode!=COMPOSITE && mode!=RATIO12 && mode!=RATIO21) {
 			setupLuts(nChannels);
 			LUT cm = lut[currentChannel];
-			currentSlice = getSlice();
+			currentZPlane = getSlice();
 			currentFrame = getFrame();
-			int positionA = getStackIndex(1, currentSlice, currentFrame);
+			int positionA = getStackIndex(1, currentZPlane, currentFrame);
 			if (getOriginalFileInfo() != null && getOriginalFileInfo().fileName.toLowerCase().endsWith("_csv.ome.tif")) {
 //				IJ.log("ome");
 				ip.setPixels(getImageStack().getProcessor(positionA + (currentChannel*getNSlices())).getPixels());
@@ -274,10 +274,10 @@ public class CompositeImage extends ImagePlus {
 		}
 		//IJ.log(nChannels+" "+ch+" "+currentChannel+"  "+newChannel);
 				
-		if (true  /*getSlice()!=currentSlice || getFrame()!=currentFrame*/) { //why was this obnoxious test here?
-			currentSlice = getSlice();
+		if (getSlice()!=currentZPlane || getFrame()!=currentFrame) { //why was this obnoxious test here?
+			currentZPlane = getSlice();
 			currentFrame = getFrame();
-			int position = getStackIndex(1, currentSlice, currentFrame);
+			int position = getStackIndex(1, currentZPlane, currentFrame);
 			if (cip==null) return;
 			for (int i=0; i<nChannels; ++i) {
 				if (getOriginalFileInfo() != null && getOriginalFileInfo().fileName.toLowerCase().endsWith("_csv.ome.tif")) {
@@ -744,7 +744,7 @@ public class CompositeImage extends ImagePlus {
 		img = null;
 		currentChannel = 0;
 		previousChannel = 0;
-		currentSlice = currentFrame = 1;
+		currentZPlane = currentFrame = 1;
 		singleChannel = false;
 		rgbPixels = null;
 		awtImage = null;

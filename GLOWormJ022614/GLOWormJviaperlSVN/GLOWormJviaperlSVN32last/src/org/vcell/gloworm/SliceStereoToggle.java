@@ -53,11 +53,12 @@ public class SliceStereoToggle implements PlugIn, ActionListener {
 			}
 		}
 		if (e.getActionCommand() == "Normal<>RGstereo") {
-			if (imp.getStack() instanceof MultiFileInfoVirtualStack) {
+			ImageStack impStack = imp.getStack();
+			if (impStack instanceof MultiFileInfoVirtualStack) {
 				int sImp = imp.getSlice();
 				int fImp =imp.getFrame();
-				imp.getStack().setRcstereo(!imp.getStack().isRcstereo());
-				ImageStack newStack = new MultiFileInfoVirtualStack( ((MultiFileInfoVirtualStack)imp.getStack()).arg, ((MultiFileInfoVirtualStack)imp.getStack()).dimOrder, ((MultiFileInfoVirtualStack)imp.getStack()).keyString, imp.getStack().isRcstereo(), ((MultiFileInfoVirtualStack)imp.getStack()).cDim, ((MultiFileInfoVirtualStack)imp.getStack()).zDim, ((MultiFileInfoVirtualStack)imp.getStack()).tDim, ((MultiFileInfoVirtualStack)imp.getStack()).vDim, ((MultiFileInfoVirtualStack)imp.getStack()).pos, ((MultiFileInfoVirtualStack)imp.getStack()).isViewB, false, keepOriginal, keepOriginal, imp);
+				impStack.setRcstereo(!impStack.isRcstereo());
+				ImageStack newStack = new MultiFileInfoVirtualStack( ((MultiFileInfoVirtualStack)impStack).arg, ((MultiFileInfoVirtualStack)impStack).dimOrder, ((MultiFileInfoVirtualStack)impStack).keyString, impStack.isRcstereo(), ((MultiFileInfoVirtualStack)impStack).cDim, ((MultiFileInfoVirtualStack)impStack).zDim, ((MultiFileInfoVirtualStack)impStack).tDim, ((MultiFileInfoVirtualStack)impStack).vDim, ((MultiFileInfoVirtualStack)impStack).pos, ((MultiFileInfoVirtualStack)impStack).isViewB, false, keepOriginal, keepOriginal, imp);
 				imp.setStack(newStack);
 				imp.setDimensions(((MultiFileInfoVirtualStack)newStack).cDim, ((MultiFileInfoVirtualStack)newStack).zDim, ((MultiFileInfoVirtualStack)newStack).tDim);
 				if (newStack.isRcstereo()){
