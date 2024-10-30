@@ -1588,7 +1588,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								impBs[pos].setPosition(1, 1, 1);	
 								syncEm.addImp(impAs[pos]);
 								syncEm.addImp(impBs[pos]);
-								IJ.run("Tile");
+//								IJ.run("Tile");
 						}
 						
 					}
@@ -1793,9 +1793,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				splitChannels=false;
 			}
 
-			
-			IJ.run("Tile");
-			IJ.log("" + WindowManager.getImageCount());
+//			IJ.run("Tile");
+//			IJ.log("" + WindowManager.getImageCount());
 
 			//NEED TO FIGURE OUT FOR DECON LAUNNCH FROM NEW BUTTON ON WINDOW!
 //			autoUpload = IJ.showMessageWithCancel("AutoUpload Data to WormGUIDES Server?", "Click to have CytoSHOW backup these data to the WormGUIDES server.");
@@ -2410,7 +2409,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					//	impBs[pos].getWindow().pack();
 				}
 			}
-			IJ.run("Tile");
+//			IJ.run("Tile");
 
 		} else {	//if not deconning immediately)
 			Panel[][] diSPIMPanel = new Panel[pDim][2];
@@ -2686,7 +2685,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 
 			}
-			IJ.run("Tile");
+//			IJ.run("Tile");
 		}
 
 		if (doMipavDecon || doGPUdecon) {
@@ -3103,7 +3102,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 				}
 
 			}  //END SETUP OF WINDOW SHOWING PRE-EXISTING DECON OUTPUTS
-			IJ.run("Tile");
+//			IJ.run("Tile");
 		}
 
 
