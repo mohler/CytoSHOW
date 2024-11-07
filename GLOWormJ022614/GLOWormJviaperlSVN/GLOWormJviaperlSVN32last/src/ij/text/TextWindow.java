@@ -2,17 +2,23 @@ package ij.text;
 
 import java.awt.*;
 import java.io.*;
+
+import javax.swing.JFrame;
+import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
+
 import java.awt.event.*;
 import ij.*;
 import ij.io.*;
 import ij.gui.*;
 import ij.plugin.filter.Analyzer;
+import javafx.scene.control.ScrollPane.ScrollBarPolicy;
 import ij.macro.Interpreter;
 
 /** Uses a TextPanel to displays text in a window.
 	@see TextPanel
 */
-public class TextWindow extends Frame implements ActionListener, FocusListener, ItemListener {
+public class TextWindow extends JFrame implements ActionListener, FocusListener, ItemListener {
 
 	public static final String LOC_KEY = "results.loc";
 	public static final String WIDTH_KEY = "results.width";
@@ -21,6 +27,7 @@ public class TextWindow extends Frame implements ActionListener, FocusListener, 
 	public static final String DEBUG_LOC_KEY = "debug.loc";
 	static final String FONT_SIZE = "tw.font.size";
 	static final String FONT_ANTI= "tw.font.anti";
+	JScrollPane scrollPane;
 	TextPanel textPanel;
     CheckboxMenuItem antialiased;
 	int[] sizes = {9, 10, 11, 12, 13, 14, 16, 18, 20, 24, 36, 48, 60, 72};
@@ -51,8 +58,10 @@ public class TextWindow extends Frame implements ActionListener, FocusListener, 
 		enableEvents(AWTEvent.WINDOW_EVENT_MASK);
 		if (IJ.isLinux()) setBackground(ImageJ.backgroundColor);
 		textPanel = new TextPanel(title);
+		scrollPane = new JScrollPane(textPanel);
+		add("Center", scrollPane);
+//		scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
 		textPanel.setTitle(title);
-		add("Center", textPanel);
 		textPanel.setColumnHeadings(headings);
 		if (data!=null && !data.equals(""))
 			textPanel.append(data);

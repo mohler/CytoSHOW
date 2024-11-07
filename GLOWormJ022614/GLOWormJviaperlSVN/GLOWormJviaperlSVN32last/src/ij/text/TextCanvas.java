@@ -1,9 +1,12 @@
 package ij.text;
+import ij.IJ;
 import ij.util.Java2;
 import java.awt.*;
 import java.awt.event.*;
 
-class TextCanvas extends Canvas {
+import javax.swing.JPanel;
+
+class TextCanvas extends JPanel {
 
 	TextPanel tp;
 	Font fFont;
@@ -68,7 +71,8 @@ class TextCanvas extends Canvas {
 				if(j>=tp.selStart && j<=tp.selEnd) {
 					int w2 = w;
 					if (tp.iColCount==1)
-						w2 = iWidth;
+//						w2 = iWidth;
+						w2 = tp.maxiColWidth;
 					b=Color.black;
 					t=Color.white;
 					gImage.setColor(b);
@@ -83,6 +87,7 @@ class TextCanvas extends Canvas {
 		}
 		if (iImage!=null)
 			g.drawImage(iImage,0,0,null);
+		IJ.wait(0);
 	}
   
  	void makeImage(int iWidth, int iHeight) {
@@ -192,8 +197,9 @@ class TextCanvas extends Canvas {
 		int rowCount = Math.min(tp.iRowCount, maxRows);
 		for(int row=0; row<rowCount; row++) {
 			char[] chars = getChars(column,row);
-			if (chars!=null)
+			if (chars!=null){
 				w = Math.max(w,fMetrics.charsWidth(chars,0,chars.length));
+			}
 		}
 		//System.out.println("calcAutoWidth: "+column+"  "+tp.iRowCount);
 		char[] chars = tp.iRowCount>0?getChars(column, tp.iRowCount-1):null;

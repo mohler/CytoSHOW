@@ -4,6 +4,12 @@ import java.awt.*;
 import java.io.*;
 import java.awt.event.*;
 import java.util.*;
+
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+
+import com.sun.jndi.url.iiopname.iiopnameURLContextFactory;
+
 import java.awt.datatransfer.*;
 import ij.*;
 import ij.plugin.filter.Analyzer;
@@ -20,7 +26,7 @@ labeled and resizable columns. It is based on the hGrid
 class at
     http://www.lynx.ch/contacts/~/thomasm/Grid/index.html.
 */
-public class TextPanel extends Panel implements AdjustmentListener,
+public class TextPanel extends JPanel implements AdjustmentListener,
 	MouseListener, MouseMotionListener, KeyListener,  ClipboardOwner,
 	ActionListener, MouseWheelListener, Runnable {
 
@@ -32,6 +38,7 @@ public class TextPanel extends Panel implements AdjustmentListener,
 	String[] sColHead;
 	Vector vData;
 	int[] iColWidth;
+	int maxiColWidth;
 	int iColCount,iRowCount;
 	int iRowHeight,iFirstRow;
 	// scrolling
@@ -175,9 +182,11 @@ public class TextPanel extends Panel implements AdjustmentListener,
 		char[] chars = data.toCharArray();
 		vData.addElement(chars);
 		iRowCount++;
-		if (isShowing()) {
+//		if (isShowing()) {
+		if (true) {
 			if (iColCount==1 && tc.fMetrics!=null) {
 				iColWidth[0] = Math.max(iColWidth[0], tc.fMetrics.charsWidth(chars,0,chars.length));
+				maxiColWidth = Math.max(maxiColWidth, iColWidth[0]);
 				adjustHScroll();
 			}
 			updateDisplay();
@@ -225,6 +234,16 @@ public class TextPanel extends Panel implements AdjustmentListener,
 			char[] chars = data.toCharArray();
 			vData.addElement(chars);
 			iRowCount++;
+//			if (isShowing()) {
+			if (true) {
+				if (iColCount==1 && tc.fMetrics!=null) {
+					iColWidth[0] = Math.max(iColWidth[0], tc.fMetrics.charsWidth(chars,0,chars.length));
+					maxiColWidth = Math.max(maxiColWidth, iColWidth[0]);
+					adjustHScroll();
+				}
+				unsavedLines = true;
+			}
+
 		}
 	}
 
@@ -262,7 +281,7 @@ public class TextPanel extends Panel implements AdjustmentListener,
 		for (int i=0; i<iColCount; i++)
 			w+=iColWidth[i];
 		iGridWidth=w;
-		sbHoriz.setValues(iX,d.width,0,iGridWidth);
+		sbHoriz.setValues(iX,d.width,0,maxiColWidth);
 		iX=sbHoriz.getValue();
 	}
 
@@ -649,7 +668,17 @@ public class TextPanel extends Panel implements AdjustmentListener,
 				}
 			}
 		}
-		selStart=-1; selEnd=-1; selOrigin=-1; selLine=-1; 
+		selStart=-1; selEnd=-1; selOrigin=-1; selLine=-1;
+		maxiColWidth =0;
+		for (int row=0;row<iRowCount;row++){
+			char[] chars = (char[])(vData.elementAt(row));
+			if (iColCount==1 && tc.fMetrics!=null) {
+				iColWidth[0] = tc.fMetrics.charsWidth(chars,0,chars.length);
+				maxiColWidth = Math.max(maxiColWidth, iColWidth[0]);
+			}
+		}
+		updateDisplay();
+		adjustHScroll();
 		adjustVScroll();
 		tc.repaint();
 	}
@@ -660,6 +689,9 @@ public class TextPanel extends Panel implements AdjustmentListener,
 		vData.removeAllElements();
 		iRowCount = 0;
 		selStart=-1; selEnd=-1; selOrigin=-1; selLine=-1;
+		maxiColWidth = 0;
+		updateDisplay();
+		adjustHScroll();
 		adjustVScroll();
 		tc.repaint();
 	}
