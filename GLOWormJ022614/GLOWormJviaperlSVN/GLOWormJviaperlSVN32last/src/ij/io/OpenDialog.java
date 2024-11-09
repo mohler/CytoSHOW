@@ -98,6 +98,7 @@ import javax.swing.filechooser.*;
 	// Assumes we are running on the event dispatch thread
 	void jOpenDispatchThread(String title, String path, final String fileName) {
 		JFileChooser fc = new JFileChooser();
+		fc.setFileHidingEnabled(false);
 		fc.setDialogTitle(title);
 		File fdir = null;
 		if (path!=null)
@@ -123,6 +124,7 @@ import javax.swing.filechooser.*;
 			EventQueue.invokeAndWait(new Runnable() {
 				public void run() {
 				JFileChooser fc = new JFileChooser();
+				fc.setFileHidingEnabled(false);
 				fc.setDialogTitle(title);
 				File fdir = null;
 				if (path!=null)

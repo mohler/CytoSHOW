@@ -260,7 +260,9 @@ public class Projector implements PlugInFilter, TextListener {
 			tempDirFile = new File(saveRootDir + File.separator + saveRootPrefix +"Proj_"+imp.getTitle().replaceAll("[,. ;:]","").replace(File.separator, "_") + tempTime);
 
 		tempDirFile.mkdirs();
-
+		Point winPoint = new Point(200,200);
+		Dimension winDim = new Dimension(300,300);
+		boolean winRMshown = false;
 		for (loopT = firstT; loopT < lastT +1; loopT=loopT+stepT) { 
 			long memoryFree = Runtime.getRuntime().freeMemory();
 			long memoryTotal = Runtime.getRuntime().totalMemory();
@@ -431,6 +433,15 @@ public class Projector implements PlugInFilter, TextListener {
 				
 				
 				MultiFileInfoVirtualStack nextStack = new MultiFileInfoVirtualStack(tempDirFile.getPath()+ File.separator , "xyczt", "",false, 0,0,0, 1, 0, false, false, false, false, null);
+				if (buildWin !=null) {
+					winPoint = buildWin.getLocation();
+					winDim = buildWin.getSize();
+					winRMshown = buildWin.getImagePlus().getRoiManager().isShowing();
+					buildWin.close();
+				}
+				buildWin = null;
+				if (buildImp !=null) 
+					buildImp.flush();
 				buildImp = new ImagePlus();
 				buildImp.setOpenAsHyperStack(true);
 
@@ -517,6 +528,9 @@ public class Projector implements PlugInFilter, TextListener {
 				if (buildWin==null) {
 					buildImp.show();
 					buildWin = buildImp.getWindow();
+					buildWin.setLocation(winPoint);
+					buildWin.setSize(winDim);
+					buildWin.getImagePlus().getRoiManager().setVisible(winRMshown);
 				}
 
 				if (imp != null & buildImp != null && imp.getWindow()!=null){
@@ -542,11 +556,12 @@ public class Projector implements PlugInFilter, TextListener {
 				RoiManager bigRM = buildImp.getRoiManager();
 				bigRM.setVisible(false);
 				for (int r=0; r<bigRoiAList.size(); r++) {
-					int c = bigRoiAList.get(r).getCPosition();
-					int z = bigRoiAList.get(r).getZPosition();
-					int t = bigRoiAList.get(r).getTPosition();
-					buildImp.setPosition(c, z, t); 
-					bigRM.addRoi(((Roi)bigRoiAList.get(r).clone()));
+//					int c = bigRoiAList.get(r).getCPosition();
+//					int z = bigRoiAList.get(r).getZPosition();
+//					int t = bigRoiAList.get(r).getTPosition();
+//					buildImp.setPosition(c, z, t); 
+//					bigRM.addRoi(((Roi)bigRoiAList.get(r).clone()));
+					bigRM.addRoi(((Roi)bigRoiAList.get(r).clone()), false, null, null, 0, false);
 				}
 				bigRM.setZSustain(1);
 				bigRM.setTSustain(imp.getRoiManager().getTSustain());

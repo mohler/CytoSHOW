@@ -97,6 +97,7 @@ public class Opener {
 			EventQueue.invokeAndWait(new Runnable() {
 				public void run() {
 					JFileChooser fc = new JFileChooser();
+					fc.setFileHidingEnabled(false);
 					fc.setMultiSelectionEnabled(true);
 					File dir = null;
 					String sdir = OpenDialog.getDefaultDirectory();

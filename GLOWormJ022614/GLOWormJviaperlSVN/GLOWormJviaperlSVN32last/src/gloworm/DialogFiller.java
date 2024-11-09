@@ -419,15 +419,16 @@ public class DialogFiller {
 	return returnValue;
     }
     private void j2PickAFile(JFileChooser jfc) {
-	if (textComponentStates==null || textComponentStates.length < 2)
-	    throw new IllegalArgumentException("Need to specify filename & directory as text states for '"
-					       + targetTitle + "' dialog.");
-	else {
-	    synchronized(jfc) {
-		jfc.setSelectedFile(new java.io.File(textComponentStates[0] + textComponentStates[1]));
-		jfc.approveSelection();
-	    }
-	}
+    	jfc.setFileHidingEnabled(false);
+    	if (textComponentStates==null || textComponentStates.length < 2)
+    		throw new IllegalArgumentException("Need to specify filename & directory as text states for '"
+    				+ targetTitle + "' dialog.");
+    	else {
+    		synchronized(jfc) {
+    			jfc.setSelectedFile(new java.io.File(textComponentStates[0] + textComponentStates[1]));
+    			jfc.approveSelection();
+    		}
+    	}
     }
     private void noteMiscellaneousWidget(Component widget, Class type) {}
     private void pickAFile(FileDialog fd) {

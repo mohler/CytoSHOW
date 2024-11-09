@@ -107,6 +107,7 @@ public class MQTVS_SceneLoader implements PlugIn {
 		Java2.setSystemLookAndFeel();
 //		JFileChooser fc = new JFileChooser();
 //		File loadFile = new File("MQTVS_scene.scn") ;
+//		fc.setFileHidingEnabled(false);
 //		fc.setDialogTitle( "Select a saved *_scene.scn MQTVS Scene file" );
 //		fc.setSelectedFile(loadFile);
 //		int dialogResult = fc.showOpenDialog(null);

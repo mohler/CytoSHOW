@@ -132,6 +132,7 @@ public class IJ3dExecuter {
 
 	public void addContentFromFile() {
 		JFileChooser chooser = new JFileChooser(OpenDialog.getLastDirectory());
+		chooser.setFileHidingEnabled(false);
 		chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
 		chooser.setMultiSelectionEnabled(false);
 		int returnVal = chooser.showOpenDialog(null);

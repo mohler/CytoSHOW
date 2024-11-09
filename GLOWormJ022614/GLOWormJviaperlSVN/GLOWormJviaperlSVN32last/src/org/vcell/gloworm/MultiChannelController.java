@@ -908,6 +908,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 							JFileChooser fc = new JFileChooser( ((stack instanceof MultiQTVirtualStack)?
 									((MultiQTVirtualStack) stack).getVirtualStack(j).getMovieFile().getPath():
 										((QTVirtualStack) stack).getMovieFile().getPath()), FileSystemView.getFileSystemView());
+							fc.setFileHidingEnabled(false);
 							fc.setDialogTitle( "Save a new *.adj Channel Adjustment file" );
 							fc.setSelectedFile(saveFileAdj);
 							int dialogResult = fc.showSaveDialog(null);
@@ -976,6 +977,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 									JFileChooser fc = new JFileChooser( ((stack instanceof MultiQTVirtualStack)?
 											((MultiQTVirtualStack) stack).getVirtualStack(j).getMovieFile().getPath():
 												((QTVirtualStack) stack).getMovieFile().getPath()), FileSystemView.getFileSystemView());
+									fc.setFileHidingEnabled(false);
 									fc.setDialogTitle( "Save a new *.adj Channel Adjustment file" );
 									fc.setSelectedFile(saveFileAdj);
 									int dialogResult = fc.showSaveDialog(null);
@@ -1047,6 +1049,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 					File loadFile = new File( ((stack instanceof MultiQTVirtualStack)?
 							((MultiQTVirtualStack) stack).getVirtualStack(j).getMovieFile().toString():
 								((QTVirtualStack) stack).getMovieFile().toString()) + ".adj") ;
+					fc.setFileHidingEnabled(false);
 					fc.setDialogTitle( "Select a *.mov.adj Channel Adjustment file" );
 					fc.setSelectedFile(loadFile);
 					int dialogResult = fc.showOpenDialog(null);
@@ -1373,6 +1376,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 
 					//				while ( saveFile == null || !( saveFile.getPath().toLowerCase().contains("scene.scn")) || !saveFile.exists() ) {
 					//					JFileChooser fc = new JFileChooser();
+					//					fc.setFileHidingEnabled(false);
 					//					fc.setDialogTitle( "Save a new *_scene.scn MQTVS Scene file" );
 					//					fc.setSelectedFile(saveFile);
 					//					int dialogResult = fc.showSaveDialog(null);
