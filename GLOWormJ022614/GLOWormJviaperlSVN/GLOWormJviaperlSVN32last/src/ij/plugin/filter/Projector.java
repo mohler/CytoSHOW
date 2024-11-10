@@ -51,7 +51,7 @@ public class Projector implements PlugInFilter, TextListener {
 	private  int axisOfRotation = yAxis;
 	private  int projectionMethod = brightestPoint;
 	private static String tempDir = "";
-	private static long tempCode = 0;
+	static long tempCode = 0;
 	
 	public static String getTempDir() {
 		return tempDir;
@@ -111,6 +111,8 @@ public class Projector implements PlugInFilter, TextListener {
 	private long tempTime;
 	private boolean noDialogs;
 	private boolean noShow;
+	private File tempXDir;
+	private File tempYDir;
 	private String saveRootDir;
 	private String saveRootPrefix;
 
@@ -260,6 +262,33 @@ public class Projector implements PlugInFilter, TextListener {
 			tempDirFile = new File(saveRootDir + File.separator + saveRootPrefix +"Proj_"+imp.getTitle().replaceAll("[,. ;:]","").replace(File.separator, "_") + tempTime);
 
 		tempDirFile.mkdirs();
+		
+		if (!tempDirFile.exists()) {
+			saveRootDir = IJ.getDirectory("temp");
+		} else if (IJ.getDirectory("image") != null){
+		
+			saveRootDir = (new File(IJ.getDirectory("image"))).getParent()/*)*/ ;
+			saveRootPrefix = (new File(IJ.getDirectory("image"))).getName()+"_";
+		}else {
+			saveRootDir = IJ.getDirectory("temp");
+		}
+		for (File saveSibFile: (new File(saveRootDir)).listFiles()) {
+			if (saveSibFile.isDirectory() || (!saveSibFile.getName().toLowerCase().endsWith(".tif")
+												&& !saveSibFile.getName().toLowerCase().contains("ds_store"))) {
+				correctSaveRoot = true;
+			}
+		}
+		if (!correctSaveRoot) {
+			saveRootDir = (new File(saveRootDir)).getParent();
+		}
+		tempDirFile = new File(saveRootDir + File.separator + "PROJ_"+ saveRootPrefix.replaceAll("[,. ;:]","").replace(File.separator, "_") + tempTime);
+		tempDirFile.mkdirs();		
+		if (!tempDirFile.exists()) {
+			IJ.error("Projection failed", "Unable to save copied stacks to" + tempDirFile.getPath());
+			return;
+		}
+
+
 		Point winPoint = new Point(200,200);
 		Dimension winDim = new Dimension(300,300);
 		boolean winRMshown = false;
@@ -270,6 +299,7 @@ public class Projector implements PlugInFilter, TextListener {
 		double winZoom = 1d;
 		double oldMin = 0;		
 		double oldMax = 0;
+
 
 		for (loopT = firstT; loopT < lastT +1; loopT=loopT+stepT) { 
 			long memoryFree = Runtime.getRuntime().freeMemory();
@@ -1142,12 +1172,11 @@ public class Projector implements PlugInFilter, TextListener {
 								zBuffer[offset] = (short)znew;
 								if (OpacityAndNotNearestPt) {
 									if (DepthCueSurfLessThan100)
-										opaArray[offset] = (byte)(/*255 -*/ (depthCueSurf*(/*255-*/thispixel)/100 + 
-												c100minusDepthCueSurf*(/*255-*/thispixel)*(zmax-znew)/zmaxminuszmintimes100));
+										opaArray[offset] = (byte)( (depthCueSurf*(thispixel)/100 + 
+												c100minusDepthCueSurf*(thispixel)*(zmax-znew)/zmaxminuszmintimes100));
 									else
 										opaArray[offset] = (byte)thispixel;
 								} else {
-									//p = (BYTE *)(projaddr + offset);
 									if (DepthCueSurfLessThan100)
 										projArray[offset] = (byte)(/*255 -*/ (depthCueSurf*(/*255-*/thispixel)/100 +
 												c100minusDepthCueSurf*(/*255-*/thispixel)*(zmax-znew)/zmaxminuszmintimes100));
@@ -1623,5 +1652,187 @@ public class Projector implements PlugInFilter, TextListener {
 		}
 	} // projectCursorAroundY()
 
+	
+	public  int getAxisOfRotation() {
+		return axisOfRotation;
+	}
+
+	public  void setAxisOfRotation(int axisOfRotation) {
+		axisOfRotation = axisOfRotation;
+	}
+
+	public  int getProjectionMethod() {
+		return projectionMethod;
+	}
+
+	public  void setProjectionMethod(int projectionMethod) {
+		projectionMethod = projectionMethod;
+	}
+
+	public double getSliceInterval() {
+		return sliceInterval;
+	}
+
+	public void setSliceInterval(double sliceInterval) {
+		this.sliceInterval = sliceInterval;
+	}
+
+	public static int getInitAngle() {
+		return initAngle;
+	}
+
+	public static void setInitAngle(int initAngle) {
+		Projector.initAngle = initAngle;
+	}
+
+	public static int getTotalAngle() {
+		return totalAngle;
+	}
+
+	public static void setTotalAngle(int totalAngle) {
+		Projector.totalAngle = totalAngle;
+	}
+
+	public static int getAngleInc() {
+		return angleInc;
+	}
+
+	public static void setAngleInc(int angleInc) {
+		Projector.angleInc = angleInc;
+	}
+
+	public static int getOpacity() {
+		return opacity;
+	}
+
+	public static void setOpacity(int opacity) {
+		Projector.opacity = opacity;
+	}
+
+	public static int getDepthCueSurf() {
+		return depthCueSurf;
+	}
+
+	public static void setDepthCueSurf(int depthCueSurf) {
+		Projector.depthCueSurf = depthCueSurf;
+	}
+
+	public static int getDepthCueInt() {
+		return depthCueInt;
+	}
+
+	public static void setDepthCueInt(int depthCueInt) {
+		Projector.depthCueInt = depthCueInt;
+	}
+
+	public static boolean isInterpolate() {
+		return interpolate;
+	}
+
+	public static void setInterpolate(boolean interpolate) {
+		Projector.interpolate = interpolate;
+	}
+
+	public int getTransparencyLower() {
+		return transparencyLower;
+	}
+
+	public void setTransparencyLower(int transparencyLower) {
+		this.transparencyLower = transparencyLower;
+	}
+
+	public int getTransparencyUpper() {
+		return transparencyUpper;
+	}
+
+	public void setTransparencyUpper(int transparencyUpper) {
+		this.transparencyUpper = transparencyUpper;
+	}
+
+	public int getFirstC() {
+		return firstC;
+	}
+
+	public void setFirstC(int firstC) {
+		this.firstC = firstC;
+	}
+
+	public int getLastC() {
+		return lastC;
+	}
+
+	public void setLastC(int lastC) {
+		this.lastC = lastC;
+	}
+
+	public int getFirstZ() {
+		return firstZ;
+	}
+
+	public void setFirstZ(int firstZ) {
+		this.firstZ = firstZ;
+	}
+
+	public int getLastZ() {
+		return lastZ;
+	}
+
+	public void setLastZ(int lastZ) {
+		this.lastZ = lastZ;
+	}
+
+	public int getFirstT() {
+		return firstT;
+	}
+
+	public void setFirstT(int firstT) {
+		this.firstT = firstT;
+	}
+
+	public int getLastT() {
+		return lastT;
+	}
+
+	public void setLastT(int lastT) {
+		this.lastT = lastT;
+	}
+
+	public int getLoopC() {
+		return loopC;
+	}
+
+	public void setLoopC(int loopC) {
+		this.loopC = loopC;
+	}
+
+	public int getLoopT() {
+		return loopT;
+	}
+
+	public void setLoopT(int loopT) {
+		this.loopT = loopT;
+	}
+
+	public int getStepT() {
+		return stepT;
+	}
+
+	public void setStepT(int stepT) {
+		this.stepT = stepT;
+	}
+
+	public File getTempXorYDir() {
+		if (axisOfRotation == 0)
+			return tempXDir;
+		else
+			return tempYDir;
+	}
+
+	public void setTempXorYDir(File tempDir) {
+		if (axisOfRotation == 0)
+			this.tempXDir = tempDir;
+		else
+			this.tempYDir = tempDir;
+	}
 
 }

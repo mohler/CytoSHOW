@@ -221,8 +221,10 @@ public class Projector16bit implements PlugInFilter, TextListener {
 
 		ArrayList<Roi> bigRoiAList = new ArrayList<Roi>();
 		int finalT = lastT;
-		if (tempTime==0)
+		if (Projector.tempCode==0)
 			tempTime = (new Date()).getTime();
+		else
+			tempTime = Projector.tempCode;
 		if (saveRootDir == null) {
 			if (IJ.getDirectory("image") != null){
 				saveRootDir = (new File(IJ.getDirectory("image"))).getParent()/*)*/ ;
@@ -243,7 +245,6 @@ public class Projector16bit implements PlugInFilter, TextListener {
 		if (!correctSaveRoot) {
 			saveRootDir = (new File(saveRootDir)).getParent();
 		}
-		
 		File tempDirFile = null;
 		if (Projector.getTempDir()!="")
 			tempDirFile = new File(Projector.getTempDir());
@@ -276,6 +277,17 @@ public class Projector16bit implements PlugInFilter, TextListener {
 			return;
 		}
 
+
+		Point winPoint = new Point(200,200);
+		Dimension winDim = new Dimension(300,300);
+		boolean winRMshown = false;
+		int wasC = 1;
+		int wasZ = 1;
+		int wasT = 1;
+		Point rmPoint = new Point(500,200);
+		double winZoom = 1d;
+		double oldMin = 0;		
+		double oldMax = 0;
 
 
 		for (loopT = firstT; loopT < lastT +1; loopT=loopT+stepT) { 
@@ -319,7 +331,7 @@ public class Projector16bit implements PlugInFilter, TextListener {
 					if (impDZ.getBitDepth() > 8 && !isRGB) {
 						impDZ.setPosition(1, (1+lastZ+1-firstZ)/2, 1);
 						impDZ.getProcessor().setMinAndMax(0.0, 50.0);
-						//						IJ.run(impDZ,"8-bit","");
+
 						if (impDZ.isComposite()   )
 							((CompositeImage)impDZ).setMode(CompositeImage.GRAYSCALE);
 					}
@@ -390,9 +402,6 @@ public class Projector16bit implements PlugInFilter, TextListener {
 					rm2.setTSustain(imp.getRoiManager().getTSustain());
 					rm2.showAll(RoiManager.SHOW_ALL);
 
-					//				impDZ.getWindow().setVisible(true);
-					//				IJ.runMacro("waitForUser;");
-
 					impDZ.setRoi(0, 0, impDZ.getWidth()-1, impDZ.getHeight()-1);
 
 					//Code above here taken from MQTVS_Duplicator.duplicateHyperstTack
@@ -413,10 +422,8 @@ public class Projector16bit implements PlugInFilter, TextListener {
 					IJ.runMacro("print(\"\\\\Update:\\\n \")");
 
 					if ( loopC == firstC && loopT == firstT)  {
-						//						tempDirFile.mkdir();
 						finalSlices = projImpD[loopC-firstC].getStackSize();
 					}
-					//					projImpD[loopC-firstC].show();
 
 					Roi[] roisArray = projImpD[loopC-firstC].getRoiManager().getShownRoisAsArray();
 					for (int i=0; i<roisArray.length; i++) {
@@ -448,6 +455,26 @@ public class Projector16bit implements PlugInFilter, TextListener {
 				
 				
 				MultiFileInfoVirtualStack nextStack = new MultiFileInfoVirtualStack(tempDirFile.getPath()+ File.separator , "xyczt", "",false, 0,0,0, 1, 0, false, false, false, false, null);
+				if (buildWin !=null) {
+					winPoint = buildWin.getLocation();
+					winDim = buildWin.getSize();
+					winZoom = buildWin.getImagePlus().getCanvas().getMagnification();
+					wasC = buildWin.getImagePlus().getChannel();
+					wasZ =  buildWin.getImagePlus().getSlice();
+					wasT =  buildWin.getImagePlus().getFrame();
+					 oldMin = buildWin.getImagePlus()
+							.getDisplayRangeMin();
+					 oldMax = buildWin.getImagePlus()
+							.getDisplayRangeMax();
+
+					winRMshown = buildWin.getImagePlus().getRoiManager().isShowing();
+					if (winRMshown) 
+						rmPoint = buildWin.getImagePlus().getRoiManager().getLocation();
+					buildWin.close();
+				}
+				buildWin = null;
+				if (buildImp !=null) 
+					buildImp.flush();
 				buildImp = new ImagePlus();
 				buildImp.setOpenAsHyperStack(true);
 
@@ -472,11 +499,6 @@ public class Projector16bit implements PlugInFilter, TextListener {
 					imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() - 1);
 				}
 
-//				imp.setRoi(manualRoi);
-//				if(imp.getWindow()!=null)
-//					imp.getWindow().setVisible(true);
-
-
 				if (rm != null && rmVis) 
 					rm.setVisible(true);
 				if (mcc != null && mccVis) 
@@ -489,18 +511,12 @@ public class Projector16bit implements PlugInFilter, TextListener {
 
 				finalFrames = (buildImp.getStackSize()/(finalChannels*finalSlices));
 
-
-				//		IJ.run( buildImp, 
-				//				"Stack to Hyperstack...", "order=xyzct channels=" + finalChannels + " slices=" + finalSlices + " frames=" + finalFrames + " display=Composite");
-
 				buildImp.setDimensions(finalChannels, finalSlices, finalFrames);
 
 				if ( imp.isComposite() ) {
 					CompositeImage buildImp2 = new CompositeImage(buildImp, 0);
 					((CompositeImage)buildImp2).copyLuts(imp);
-					//buildImp2.show();
 					buildImp = buildImp2;
-					//			((CompositeImage)buildImp).setMode(	(imp.isComposite() && ((CompositeImage)imp).getCompositeMode() >= CompositeImage.RATIO12)?CompositeImage.GRAYSCALE:stackMode);
 
 				}
 
@@ -534,15 +550,17 @@ public class Projector16bit implements PlugInFilter, TextListener {
 				if (buildWin==null) {
 					buildImp.show();
 					buildWin = buildImp.getWindow();
-				} else 
-					buildWin.setImage(buildImp);
-			
+					buildWin.setLocation(winPoint);
+					buildWin.setSize(winDim);
+					buildWin.getImagePlus().getCanvas().setMagnification(winZoom);
+					if (wasT == buildImp.getNFrames()-1)
+						wasT++;
+				}
 
 				if (imp != null & buildImp != null && imp.getWindow()!=null){
 					buildWin.setBackground(imp.getWindow().getBackground());
 					buildWin.setSubTitleBkgdColor(imp.getWindow().getBackground());
 				}
-				//				buildWin.setVisible(false);
 
 				IJ.runMacro("print(\"\\\\Update:   Arranging Tags...   \")");
 
@@ -559,20 +577,18 @@ public class Projector16bit implements PlugInFilter, TextListener {
 				}
 
 				RoiManager bigRM = buildImp.getRoiManager();
-				bigRM.setVisible(false);
+				bigRM.setVisible(winRMshown);
+				bigRM.setLocation(rmPoint);
 				for (int r=0; r<bigRoiAList.size(); r++) {
-					int c = bigRoiAList.get(r).getCPosition();
-					int z = bigRoiAList.get(r).getZPosition();
-					int t = bigRoiAList.get(r).getTPosition();
-					buildImp.setPosition(c, z, t); 
-					bigRM.addRoi(((Roi)bigRoiAList.get(r).clone()));
+					bigRM.addRoi(((Roi)bigRoiAList.get(r).clone()), false, null, null, 0, false);
 				}
 				bigRM.setZSustain(1);
 				bigRM.setTSustain(imp.getRoiManager().getTSustain());
 				bigRM.showAll(RoiManager.SHOW_ALL);
-				buildImp.setPosition(inChannel-firstC+1, 1, inFrame-firstT+1);
+				buildImp.setPosition(wasC, wasZ, wasT);
+				buildWin.getImagePlus().setDisplayRange(oldMin, oldMax);
 
-						buildImp.setRoiManager(bigRM);
+				//		buildImp.setRoiManager(bigRM);
 				IJ.runMacro("print(\"\\\\Update:\\\n \")");
 
 				if (imp.getMotherImp() != null && !imp.getMotherImp().isSketch3D())
@@ -606,34 +622,12 @@ public class Projector16bit implements PlugInFilter, TextListener {
 					imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() - 1);
 
 				}
-				int oldW = buildWin.getWidth();
-				int oldH = buildWin.getHeight();
-				int oldC = buildWin.getImagePlus().getChannel();
-				int oldZ = buildWin.getImagePlus().getSlice();
-				int oldT = buildWin.getImagePlus().getFrame();
-				double oldMin = buildWin.getImagePlus()
-						.getDisplayRangeMin();
-				double oldMax = buildWin.getImagePlus()
-						.getDisplayRangeMax();
-//				buildWin.setVisible(false);				
-				buildImp.setWindow(buildWin);
-				buildWin.updateImage(buildImp);
-				buildWin.setSize(oldW, oldH);
-
-				((StackWindow) buildWin).addScrollbars(buildImp);
-				buildWin.getImagePlus().updateAndRepaintWindow();
-				buildWin.getImagePlus().setPosition(oldC, oldZ, oldT);
-				buildWin.getImagePlus().setDisplayRange(oldMin, oldMax);
-				buildWin.setSize(buildWin.getSize().width,
-						buildWin.getSize().height);
-//				buildWin.setVisible(true);				
 
 			}
-//			buildImp.getRoiManager().revalidate();
 		}		
-		if (imp.getWindow()!=null)
-			imp.getWindow().setVisible(true);
-		
+		if(imp.getWindow()!=null)
+			imp.getWindow().setEnabled(true);
+
 		if (Projector.getTempDir()=="")
 			buildWin.setVisible(true);				
 
@@ -1167,12 +1161,11 @@ public class Projector16bit implements PlugInFilter, TextListener {
 								zBuffer[offset] = (short)znew;
 								if (OpacityAndNotNearestPt) {
 									if (DepthCueSurfLessThan100)
-										opaArray[offset] = (short)(/*255 -*/ (depthCueSurf*(/*255-*/thispixel)/100 + 
-												c100minusDepthCueSurf*(/*255-*/thispixel)*(zmax-znew)/zmaxminuszmintimes100));
+										opaArray[offset] = (short)( (depthCueSurf*(thispixel)/100 + 
+												c100minusDepthCueSurf*(thispixel)*(zmax-znew)/zmaxminuszmintimes100));
 									else
 										opaArray[offset] = (short)thispixel;
 								} else {
-									//p = (short *)(projaddr + offset);
 									if (DepthCueSurfLessThan100)
 										projArray[offset] = (short)(/*255 -*/ (depthCueSurf*(/*255-*/thispixel)/100 +
 												c100minusDepthCueSurf*(/*255-*/thispixel)*(zmax-znew)/zmaxminuszmintimes100));
@@ -1525,7 +1518,130 @@ public class Projector16bit implements PlugInFilter, TextListener {
 	public void textValueChanged(TextEvent e) {
 		checkbox.setState(true);
 	}
+	
+	public static void projectCursorAroundX (int projSlice, int nSlices, int ycenter, int zcenter, int projwidth, int projheight, int costheta, int sintheta) {
+		int     thispixel;			//current pixel to be projected
+		int    offset, offsetinit;		//precomputed offsets into an image buffer
+		int z;					//z-coordinate of points in current slice before rotation
+		int ynew, znew;			//y- and z-coordinates of current point after rotation
+		int zmax, zmin;			//z-coordinates of first and last slices before rotation
+		int zmaxminuszmintimes100;	//precomputed values to save time in loops
+		int c100minusDepthCueInt, c100minusDepthCueSurf;
+		boolean DepthCueIntLessThan100, DepthCueSurfLessThan100;
+		boolean OpacityOrNearestPt, OpacityAndNotNearestPt;
+		boolean MeanVal, BrightestPt;
+		int ysintheta, ycostheta;
+		int zsintheta, zcostheta, ysinthetainit, ycosthetainit;
+		byte[] pixels;
+		int projsize = projwidth * projheight;
+		ImagePlus imp = WindowManager.getCurrentImage();
 
+		int top =0;
+		int left =0;
+		int right = imp.getWidth()-1;
+		int bottom = imp.getHeight()-1;
+
+		ycosthetainit = (top - ycenter - 1) * costheta;
+		ysinthetainit = (top - ycenter - 1) * sintheta;
+		offsetinit = ((projheight-bottom+top)/2) * projwidth + (projwidth - right + left)/2 - 1;
+		
+
+		if (imp.getCanvas().getCursorLoc()!=null) {
+			//			for (int k=1; k<=nSlices; k++) {
+			z = (int)((imp.getCurrentSlice()-1)*(imp.getCalibration().pixelDepth/imp.getCalibration().pixelWidth)+0.5) - zcenter;
+			zcostheta = z * costheta;
+			zsintheta = z * sintheta;
+			ycostheta = ycosthetainit;
+			ysintheta = ysinthetainit;
+			//				for (int j=top; j<bottom; j++) {
+			ycostheta = ycostheta + (int) (costheta * imp.getCanvas().getCursorLoc().getX()/imp.getWidth()) ;  //rotate about x-axis and find new y,z
+			ysintheta = ysintheta + (int) (sintheta * imp.getCanvas().getCursorLoc().getX()/imp.getWidth());  //x-coordinates will not change
+			ynew = (ycostheta - zsintheta)/BIGPOWEROF2 + ycenter - top;
+			znew = (ysintheta + zcostheta)/BIGPOWEROF2 + zcenter;
+
+			ynew = (offsetinit/projwidth) +ynew;
+
+			imp.setPosition(imp.getChannel(), znew, imp.getFrame());
+			Roi nextRoi = null;
+					
+			if (nextRoi == null)
+				nextRoi = new TextRoi((int)imp.getCanvas().getCursorLoc().getX(),ynew, ""+costheta+" "+sintheta);
+			else
+				nextRoi.setLocation((int)imp.getCanvas().getCursorLoc().getX(),ynew);
+
+			imp.setRoi(nextRoi);
+
+		}
+	} //  projectCursorAroundX()
+
+
+	/** Projects each pixel of a volume (stack of slices) onto a plane as the volume rotates about the y-axis. */
+	public void  projectCursorAroundY (int projSlice, int nSlices, int xcenter, int zcenter, int projwidth, int projheight, int costheta, int sintheta) {
+		//IJ.write("DoOneProjectionY: "+xcenter+" "+zcenter+" "+(double)costheta/BIGPOWEROF2+ " "+(double)sintheta/BIGPOWEROF2);
+		int thispixel;			//current pixel to be projected
+		int offset, offsetinit;		//precomputed offsets into an image buffer
+		int z;					//z-coordinate of points in current slice before rotation
+		int xnew, znew;			//y- and z-coordinates of current point after rotation
+		int zmax, zmin;			//z-coordinates of first and last slices before rotation
+		int zmaxminuszmintimes100; //precomputed values to save time in loops
+		int c100minusDepthCueInt, c100minusDepthCueSurf;
+		boolean DepthCueIntLessThan100, DepthCueSurfLessThan100;
+		boolean OpacityOrNearestPt, OpacityAndNotNearestPt;
+		boolean MeanVal, BrightestPt;
+		int xsintheta, xcostheta;
+		int zsintheta, zcostheta, xsinthetainit, xcosthetainit;
+		byte[] pixels;
+		int projsize = projwidth * projheight;
+
+		//find z-coordinates of first and last slices
+		zmax = zcenter + projwidth/2;  
+		zmin = zcenter - projwidth/2;
+		zmaxminuszmintimes100 = 100 * (zmax-zmin);
+		c100minusDepthCueInt = 100 - depthCueInt;
+		c100minusDepthCueSurf = 100 - depthCueSurf;
+		DepthCueIntLessThan100 = (depthCueInt < 100);
+		DepthCueSurfLessThan100 = (depthCueSurf < 100);
+		OpacityOrNearestPt = ((projectionMethod==nearestPoint) || (opacity>0));
+		OpacityAndNotNearestPt = ((opacity>0) && (projectionMethod!=nearestPoint));
+		MeanVal = (projectionMethod==meanValue);
+		BrightestPt = (projectionMethod==brightestPoint);
+		xcosthetainit = (left - xcenter - 1) * costheta;
+		xsinthetainit = (left - xcenter - 1) * sintheta;
+
+
+		for(int r=0; r < roiArray.length; r++) {
+			//			for (int k=1; k<=nSlices; k++) {
+			z = (int)((roiArray[r].getZPosition()-1)*(imp.getCalibration().pixelDepth/imp.getCalibration().pixelWidth)+0.5) - zcenter;
+			zcostheta = z * costheta;
+			zsintheta = z * sintheta;
+			offsetinit = ((projheight-bottom+top)/2) * projwidth +(projwidth - right + left)/2 - projwidth;
+			//			IJ.log(""+offsetinit);
+			//			for (int j=top; j<bottom; j++) {
+			xcostheta = xcosthetainit;
+			xsintheta = xsinthetainit;
+			offsetinit = offsetinit + (int) (projwidth * roiArray[r].getBounds().getCenterY());
+			//			for (int i=left; i<right; i++) 
+			xcostheta = xcostheta + (int) (costheta * (roiArray[r].getBounds().getCenterX())) ;  //rotate about y-axis and find new x,z
+			xsintheta = xsintheta + (int) (sintheta * (roiArray[r].getBounds().getCenterX()));  //y-coordinates will not change
+			xnew = (xcostheta + zsintheta)/BIGPOWEROF2 + xcenter - left;
+			znew = (zcostheta - xsintheta)/BIGPOWEROF2 + zcenter;
+			offset = offsetinit + xnew;
+
+			xnew = xnew + ((projheight-bottom+top)/2) * projwidth +(projwidth - right + left)/2;
+			//			ynew = (offset/projwidth) + roiArray[r].getBounds().getCenterY();
+
+			Roi nextRoi = (Roi) roiArray[r].clone();
+			nextRoi.setLocation( (int) (xnew - nextRoi.getBounds().getWidth()/2), (int)((roiArray[r].getBounds().getCenterY() - nextRoi.getBounds().getHeight()/2)));
+			projImpD[loopC-firstC].setSlice(projSlice);
+			rmProj.addRoi(((Roi)nextRoi.clone()));
+			//			if (imp.getRoiManager() != null){
+			//				imp.getRoiManager().dispose();
+			//				WindowManager.removeWindow(imp.getRoiManager());
+			//			}
+		}
+	} // projectCursorAroundY()
+
+	
 	public  int getAxisOfRotation() {
 		return axisOfRotation;
 	}
