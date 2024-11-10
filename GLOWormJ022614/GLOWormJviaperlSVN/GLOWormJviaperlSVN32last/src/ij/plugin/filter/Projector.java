@@ -263,6 +263,14 @@ public class Projector implements PlugInFilter, TextListener {
 		Point winPoint = new Point(200,200);
 		Dimension winDim = new Dimension(300,300);
 		boolean winRMshown = false;
+		int wasC = 1;
+		int wasZ = 1;
+		int wasT = 1;
+		Point rmPoint = new Point(500,200);
+		double winZoom = 1d;
+		double oldMin = 0;		
+		double oldMax = 0;
+
 		for (loopT = firstT; loopT < lastT +1; loopT=loopT+stepT) { 
 			long memoryFree = Runtime.getRuntime().freeMemory();
 			long memoryTotal = Runtime.getRuntime().totalMemory();
@@ -375,9 +383,6 @@ public class Projector implements PlugInFilter, TextListener {
 					rm2.setTSustain(imp.getRoiManager().getTSustain());
 					rm2.showAll(RoiManager.SHOW_ALL);
 
-					//				impDZ.getWindow().setVisible(true);
-					//				IJ.runMacro("waitForUser;");
-
 					impDZ.setRoi(0, 0, impDZ.getWidth()-1, impDZ.getHeight()-1);
 
 					//Code above here taken from MQTVS_Duplicator.duplicateHyperstTack
@@ -398,10 +403,8 @@ public class Projector implements PlugInFilter, TextListener {
 					IJ.runMacro("print(\"\\\\Update:\\\n \")");
 
 					if ( loopC == firstC && loopT == firstT)  {
-						//						tempDir.mkdir();
 						finalSlices = projImpD[loopC-firstC].getStackSize();
 					}
-					//					projImpD[loopC-firstC].show();
 
 					Roi[] roisArray = projImpD[loopC-firstC].getRoiManager().getShownRoisAsArray();
 					for (int i=0; i<roisArray.length; i++) {
@@ -436,7 +439,18 @@ public class Projector implements PlugInFilter, TextListener {
 				if (buildWin !=null) {
 					winPoint = buildWin.getLocation();
 					winDim = buildWin.getSize();
+					winZoom = buildWin.getImagePlus().getCanvas().getMagnification();
+					wasC = buildWin.getImagePlus().getChannel();
+					wasZ =  buildWin.getImagePlus().getSlice();
+					wasT =  buildWin.getImagePlus().getFrame();
+					 oldMin = buildWin.getImagePlus()
+							.getDisplayRangeMin();
+					 oldMax = buildWin.getImagePlus()
+							.getDisplayRangeMax();
+
 					winRMshown = buildWin.getImagePlus().getRoiManager().isShowing();
+					if (winRMshown) 
+						rmPoint = buildWin.getImagePlus().getRoiManager().getLocation();
 					buildWin.close();
 				}
 				buildWin = null;
@@ -466,11 +480,6 @@ public class Projector implements PlugInFilter, TextListener {
 					imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() - 1);
 				}
 
-//				imp.setRoi(manualRoi);
-//				if(imp.getWindow()!=null)
-//					imp.getWindow().setVisible(true);
-
-
 				if (rm != null && rmVis) 
 					rm.setVisible(true);
 				if (mcc != null && mccVis) 
@@ -483,18 +492,12 @@ public class Projector implements PlugInFilter, TextListener {
 
 				finalFrames = (buildImp.getStackSize()/(finalChannels*finalSlices));
 
-
-				//		IJ.run( buildImp, 
-				//				"Stack to Hyperstack...", "order=xyzct channels=" + finalChannels + " slices=" + finalSlices + " frames=" + finalFrames + " display=Composite");
-
 				buildImp.setDimensions(finalChannels, finalSlices, finalFrames);
 
 				if ( imp.isComposite() ) {
 					CompositeImage buildImp2 = new CompositeImage(buildImp, 0);
 					((CompositeImage)buildImp2).copyLuts(imp);
-					//buildImp2.show();
 					buildImp = buildImp2;
-					//			((CompositeImage)buildImp).setMode(	(imp.isComposite() && ((CompositeImage)imp).getCompositeMode() >= CompositeImage.RATIO12)?CompositeImage.GRAYSCALE:stackMode);
 
 				}
 
@@ -530,14 +533,15 @@ public class Projector implements PlugInFilter, TextListener {
 					buildWin = buildImp.getWindow();
 					buildWin.setLocation(winPoint);
 					buildWin.setSize(winDim);
-					buildWin.getImagePlus().getRoiManager().setVisible(winRMshown);
+					buildWin.getImagePlus().getCanvas().setMagnification(winZoom);
+					if (wasT == buildImp.getNFrames()-1)
+						wasT++;
 				}
 
 				if (imp != null & buildImp != null && imp.getWindow()!=null){
 					buildWin.setBackground(imp.getWindow().getBackground());
 					buildWin.setSubTitleBkgdColor(imp.getWindow().getBackground());
 				}
-				//				buildWin.setVisible(false);
 
 				IJ.runMacro("print(\"\\\\Update:   Arranging Tags...   \")");
 
@@ -554,19 +558,16 @@ public class Projector implements PlugInFilter, TextListener {
 				}
 
 				RoiManager bigRM = buildImp.getRoiManager();
-				bigRM.setVisible(false);
+				bigRM.setVisible(winRMshown);
+				bigRM.setLocation(rmPoint);
 				for (int r=0; r<bigRoiAList.size(); r++) {
-//					int c = bigRoiAList.get(r).getCPosition();
-//					int z = bigRoiAList.get(r).getZPosition();
-//					int t = bigRoiAList.get(r).getTPosition();
-//					buildImp.setPosition(c, z, t); 
-//					bigRM.addRoi(((Roi)bigRoiAList.get(r).clone()));
 					bigRM.addRoi(((Roi)bigRoiAList.get(r).clone()), false, null, null, 0, false);
 				}
 				bigRM.setZSustain(1);
 				bigRM.setTSustain(imp.getRoiManager().getTSustain());
 				bigRM.showAll(RoiManager.SHOW_ALL);
-				buildImp.setPosition(inChannel-firstC+1, 1, inFrame-firstT+1);
+				buildImp.setPosition(wasC, wasZ, wasT);
+				buildWin.getImagePlus().setDisplayRange(oldMin, oldMax);
 
 				//		buildImp.setRoiManager(bigRM);
 				IJ.runMacro("print(\"\\\\Update:\\\n \")");
@@ -602,27 +603,6 @@ public class Projector implements PlugInFilter, TextListener {
 					imp.setPosition(origChannel, imp.getSlice(), imp.getFrame() - 1);
 
 				}
-				int oldW = buildWin.getWidth();
-				int oldH = buildWin.getHeight();
-				int oldC = buildWin.getImagePlus().getChannel();
-				int oldZ = buildWin.getImagePlus().getSlice();
-				int oldT = buildWin.getImagePlus().getFrame();
-				double oldMin = buildWin.getImagePlus()
-						.getDisplayRangeMin();
-				double oldMax = buildWin.getImagePlus()
-						.getDisplayRangeMax();
-//				buildWin.setVisible(false);				
-				buildImp.setWindow(buildWin);
-				buildWin.updateImage(buildImp);
-				buildWin.setSize(oldW, oldH);
-
-				((StackWindow) buildWin).addScrollbars(buildImp);
-				buildWin.getImagePlus().updateAndRepaintWindow();
-				buildWin.getImagePlus().setPosition(oldC, oldZ, oldT);
-				buildWin.getImagePlus().setDisplayRange(oldMin, oldMax);
-				buildWin.setSize(buildWin.getSize().width,
-						buildWin.getSize().height);
-//				buildWin.setVisible(true);				
 
 			}
 		}		
