@@ -290,7 +290,8 @@ public class MQTVS_Duplicator implements PlugIn, TextListener {
 							((CompositeImage)imp).updateImage();
 						ImageProcessor ip = imp.getProcessor();
 						ip.setRoi(roi);
-						String label = (stack instanceof MultiFileInfoVirtualStack?((MultiFileInfoVirtualStack)stack).getSliceLabel(n1, true):stack.getSliceLabel(n1));
+//						String label = (stack instanceof MultiFileInfoVirtualStack?((MultiFileInfoVirtualStack)stack).getSliceLabel(n1, true):stack.getSliceLabel(n1));
+						String label = "";
 						
 						if (roi!=null && (roi.getType() != Roi.RECTANGLE || roi.getBounds().width != imp.getWidth() || roi.getBounds().height != imp.getHeight() )) {
 							ip.setColor(Color.black);

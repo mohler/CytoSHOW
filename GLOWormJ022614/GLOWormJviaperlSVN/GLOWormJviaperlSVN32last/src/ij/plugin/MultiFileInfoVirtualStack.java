@@ -127,6 +127,7 @@ array and displays it if 'show' is true. */
 		File argFile = new File(args[0]);
 		dir = "";
 		if (!argFile.exists() || !argFile.isDirectory()) {
+			IJ.log("Select Directory of TIFFs");
 			dir = IJ.getDirectory("Select Directory of TIFFs");
 			String defaultKey = "Deconvolution";
 			if (dir.replace(File.separator, "/").matches(".*/Proj[XY]_Decon-Fuse.*/")
@@ -629,7 +630,7 @@ array and displays it if 'show' is true. */
 			int channels = channelDirectories * internalChannels;
 			cDim = channels;
 			cDim = (rcstereo?cDim*2:cDim);
-			nImageSlices = /*channelDirectories**/ fivStacks.size() * zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:channels);
+			nImageSlices = /*channelDirectories**/ fivStacks.size() * zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:channelDirectories);
 			zDim = fivStacks.get(0).nImageSlices/(channels/channelDirectories);
 			//	tDim = fivStacks.size()/(cDim/internalChannels);
 			this.tDim =nImageSlices/(cDim*this.zDim*(dimOrder.toLowerCase().matches(".*splitc.*")?2:1));

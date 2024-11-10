@@ -50,7 +50,7 @@ public class Projector implements PlugInFilter, TextListener {
 
 	private  int axisOfRotation = yAxis;
 	private  int projectionMethod = brightestPoint;
-	private static String tempDir = "";
+	static String tempDir = "";
 	static long tempCode = 0;
 	
 	public static String getTempDir() {
@@ -262,7 +262,6 @@ public class Projector implements PlugInFilter, TextListener {
 			tempDirFile = new File(saveRootDir + File.separator + saveRootPrefix +"Proj_"+imp.getTitle().replaceAll("[,. ;:]","").replace(File.separator, "_") + tempTime);
 
 		tempDirFile.mkdirs();
-		
 		if (!tempDirFile.exists()) {
 			saveRootDir = IJ.getDirectory("temp");
 		} else if (IJ.getDirectory("image") != null){
@@ -297,9 +296,9 @@ public class Projector implements PlugInFilter, TextListener {
 		int wasT = 1;
 		Point rmPoint = new Point(500,200);
 		double winZoom = 1d;
-		double oldMin = 0;		
-		double oldMax = 0;
-
+		double[] oldMins = null;		
+		double[] oldMaxes = null;
+		ColorModel[] colorModels = null;
 
 		for (loopT = firstT; loopT < lastT +1; loopT=loopT+stepT) { 
 			long memoryFree = Runtime.getRuntime().freeMemory();
@@ -473,11 +472,15 @@ public class Projector implements PlugInFilter, TextListener {
 					wasC = buildWin.getImagePlus().getChannel();
 					wasZ =  buildWin.getImagePlus().getSlice();
 					wasT =  buildWin.getImagePlus().getFrame();
-					 oldMin = buildWin.getImagePlus()
-							.getDisplayRangeMin();
-					 oldMax = buildWin.getImagePlus()
-							.getDisplayRangeMax();
-
+					oldMins = new double[buildWin.getImagePlus().getNChannels()];		
+					oldMaxes = new double[buildWin.getImagePlus().getNChannels()];
+					colorModels = new ColorModel[buildWin.getImagePlus().getNChannels()];
+					for (int c=0; c<buildWin.getImagePlus().getNChannels(); c++){
+						oldMins[c] = buildWin.getImagePlus().getChannelProcessor().getMin();
+						oldMaxes[c] = buildWin.getImagePlus().getChannelProcessor().getMax();
+						buildWin.getImagePlus().setPositionWithoutUpdate(c, wasZ, wasT);
+						colorModels[c] = buildWin.getImagePlus().getChannelProcessor().getColorModel();
+					}
 					winRMshown = buildWin.getImagePlus().getRoiManager().isShowing();
 					if (winRMshown) 
 						rmPoint = buildWin.getImagePlus().getRoiManager().getLocation();
@@ -596,9 +599,13 @@ public class Projector implements PlugInFilter, TextListener {
 				bigRM.setZSustain(1);
 				bigRM.setTSustain(imp.getRoiManager().getTSustain());
 				bigRM.showAll(RoiManager.SHOW_ALL);
-				buildImp.setPosition(wasC, wasZ, wasT);
-				buildWin.getImagePlus().setDisplayRange(oldMin, oldMax);
-
+				for (int c=0; c<buildImp.getNChannels(); c++){
+					buildImp.setPosition(wasC, wasZ, wasT);
+					if (oldMins!=null && oldMaxes!=null)
+						buildWin.getImagePlus().getChannelProcessor().setMinAndMax(oldMins[c], oldMaxes[c]);
+					if (colorModels!=null)
+						buildWin.getImagePlus().getChannelProcessor().setColorModel(colorModels[c]);
+				}
 				//		buildImp.setRoiManager(bigRM);
 				IJ.runMacro("print(\"\\\\Update:\\\n \")");
 
