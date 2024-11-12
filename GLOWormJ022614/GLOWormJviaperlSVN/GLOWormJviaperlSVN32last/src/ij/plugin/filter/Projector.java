@@ -54,7 +54,7 @@ public class Projector implements PlugInFilter, TextListener {
 	static long tempCode = 0;
 	
 	public static String getTempDir() {
-		return tempDir;
+		return Projector.tempDir;
 	}
 
 	public static void setTempDir(String tempDir) {
@@ -452,7 +452,7 @@ public class Projector implements PlugInFilter, TextListener {
 				}
 				projImpDC.setStack(stackC, lastC-firstC+1, stackC.getSize()/(lastC-firstC+1), 1);
 
-				IJ.save(projImpDC, tempDirFile + File.separator + "proj_"+loopT+"_"+firstC+".tif");
+				IJ.save(projImpDC, tempDirFile + File.separator + "proj_"+IJ.pad(loopT,5)+"_"+firstC+".tif");
 				if (!isRGB) 
 					projImpDC= new CompositeImage(projImpDC);
 				for (loopC = firstC; loopC < lastC +1; loopC++) {
