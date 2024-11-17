@@ -880,7 +880,7 @@ public class Menus {
 		if (!(new File(pluginsPath).exists()))
 			new File(pluginsPath).mkdirs();
 		if (!(new File(macrosPath).exists()))
-			new File(macrosPath).mkdirs();
+			new File(macrosPath).mkdirs();  //seems not to work on windows.  likely a permissions thing.
 		File f = pluginsPath!=null?new File(pluginsPath):null;
 		if (f==null || !f.isDirectory()) {
 			ImageJPath = currentDir+File.separator;
