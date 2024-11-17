@@ -1450,7 +1450,9 @@ public class ImageCanvas2 extends JComponent implements MouseListener, MouseMoti
 		//		if (cursorRoi != null) {
 		if (this.getCursor().getType() == Cursor.CUSTOM_CURSOR) {
 			if (doubleClick) {
-				Roi roi = imp.getRoiManager().getSelectedRoisAsArray()[0];
+				Roi roi = null;
+				if (imp.getRoiManager().getSelectedRoisAsArray().length >0)
+					roi = imp.getRoiManager().getSelectedRoisAsArray()[0];
 
 				if (roi != null) 
 					currentRoi = roi;

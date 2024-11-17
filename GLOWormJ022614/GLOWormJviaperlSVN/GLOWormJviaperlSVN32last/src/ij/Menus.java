@@ -841,6 +841,15 @@ public class Menus {
 	void setupPluginsAndMacrosPaths() {
 		ImageJPath = pluginsPath = macrosPath = null;
 		String currentDir = Prefs.getHomeDir(); // "user.dir"
+		if (IJ.isWindows())
+			currentDir = "C:\\Program Files\\CytoSHOW\\";
+		else if (IJ.isMacOSX())
+			currentDir = "/Applications/CytoSHOW/";
+		else if (IJ.isLinux())
+			currentDir = "/usr/bin/";
+		File currentDirFile = new File(currentDir);
+		if (!currentDirFile.exists())
+			currentDirFile.mkdirs();
 		if (currentDir==null)
 			return;
 		if (currentDir.endsWith("plugins"))
@@ -863,10 +872,14 @@ public class Menus {
 				if (applet==null)
 					System.setSecurityManager(null);
 				jnlp = true;
-			}
+			} 			
 			pluginsPath = pluginsDir+File.separator+"plugins"+File.separator;
 			macrosPath = pluginsDir+File.separator+"macros"+File.separator;
 			ImageJPath = pluginsDir+File.separator;
+			if (!(new File(pluginsPath).exists()))
+				new File(pluginsPath).mkdirs();
+			if (!(new File(macrosPath).exists()))
+				new File(macrosPath).mkdirs();
 		}
 		File f = pluginsPath!=null?new File(pluginsPath):null;
 		if (f==null || !f.isDirectory()) {

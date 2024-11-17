@@ -38,6 +38,12 @@ public class VirtualStack extends ImageStack {
 		labels = new String[INITIAL_SIZE];
 	}
 
+	/** Creates a new, virtual stack via super call from BFVirtualStack. */
+	public VirtualStack(int width, int height, ColorModel cm, String path) {
+		this(width, height, null, path, false, Color.black);
+	}
+
+
 	/** Creates a new, empty virtual stack. */
 	public VirtualStack(int width, int height, ColorModel cm, String path, boolean emptyImage, Color fillColor) {
 		super(width, height, cm);
