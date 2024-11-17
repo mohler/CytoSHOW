@@ -876,11 +876,11 @@ public class Menus {
 			pluginsPath = pluginsDir+File.separator+"plugins"+File.separator;
 			macrosPath = pluginsDir+File.separator+"macros"+File.separator;
 			ImageJPath = pluginsDir+File.separator;
-			if (!(new File(pluginsPath).exists()))
-				new File(pluginsPath).mkdirs();
-			if (!(new File(macrosPath).exists()))
-				new File(macrosPath).mkdirs();
 		}
+		if (!(new File(pluginsPath).exists()))
+			new File(pluginsPath).mkdirs();
+		if (!(new File(macrosPath).exists()))
+			new File(macrosPath).mkdirs();
 		File f = pluginsPath!=null?new File(pluginsPath):null;
 		if (f==null || !f.isDirectory()) {
 			ImageJPath = currentDir+File.separator;
