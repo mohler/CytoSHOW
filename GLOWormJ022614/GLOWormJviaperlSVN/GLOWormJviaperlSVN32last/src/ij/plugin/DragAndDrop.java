@@ -200,7 +200,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							tmp = tmp.replaceAll("file://", "").replaceAll("localhost", "");
 						}
 						if (IJ.debugMode) IJ.log("  content: "+tmp);
-						if (tmp.contains("http://")) {
+						if (tmp.contains("http://") || tmp.contains("https://")) {
 							droppedItemsArrayList.add(tmp);
 						} else if ( !tmp.contains(File.separator)  
 								&& (tmp.toLowerCase().endsWith(".mov") 
@@ -437,7 +437,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 
 				IJ.runMacro(""
 						+ "print(\"starting...\");"
-						+ "string = File.openUrlAsString(\"http://fsbill.cam.uchc.edu/gloworm/Xwords/Partslist.html\");"
+						+ "string = File.openUrlAsString(\"https://fsbill.cam.uchc.edu/gloworm/Xwords/Partslist.html\");"
 						+ "fates = split(string, \"\\\'?\\\'\");"
 						+ "print(\"Derived Fates:\");"
 						+ "for (i=0; i<lengthOf(fates); i++) {"
@@ -452,9 +452,10 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 			}
 			Object nextItem = iterator.next();
 			if (nextItem!=null && (nextItem instanceof String) ) {
-				if ( ((String)nextItem).startsWith("http")) {
-					if ( ((String)nextItem).contains("http://fsbill.cam.uchc.edu/") ||
-							((String)nextItem).contains("http://fsbill.vcell.uchc.edu/")){
+				if ( ((String)nextItem).startsWith("http") || ((String)nextItem).startsWith("https")) {
+					if ( ((String)nextItem).contains("://fsbill.cam.uchc.edu/") ||
+							((String)nextItem).contains("://fsbill.vcell.uchc.edu/") ||
+							((String)nextItem).contains("://cgi.cytoshow.org/") ){
 
 						//						String macro = IJ.openUrlAsString("http://fsbill.cam.uchc.edu/gloworm/Xwords/Mount_GLOWORM_DATAmacro.txt");
 						//						if (macro.contains("Remount GLOWORM_DATA")){

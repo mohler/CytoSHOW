@@ -415,7 +415,7 @@ public class ImageCanvas2 extends JComponent implements MouseListener, MouseMoti
 				Color roiFillColor = roi.getFillColor();
 				if (roi==null 
 						|| roiFillColor==null 
-						|| roiFillColor.getAlpha() <17 
+						|| (0 < roiFillColor.getAlpha() && roiFillColor.getAlpha() < 17) 
 						|| !rm.getListModel().contains(roi.getName() )) 
 					continue;
 				if (showAllList!=null)

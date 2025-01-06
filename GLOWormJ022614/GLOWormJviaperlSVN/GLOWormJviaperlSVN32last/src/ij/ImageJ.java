@@ -1277,6 +1277,16 @@ public class ImageJ extends Frame implements ActionListener,
 				}
 			}
 		}
+		if (CytoSHOW.codebaseURL ==null) {
+			IJ.log("Local Copy of CytoSHOW.app");
+		}else {
+			
+			String jarWebAddress = CytoSHOW.codebaseURL.toString();
+			jarWebAddress = jarWebAddress.substring(0, jarWebAddress.length()-1);
+			ij.setTitle(ij.getTitle() + jarWebAddress);
+			IJ.log(jarWebAddress);
+		}
+		
 		MemoryMonitor mm = new MemoryMonitor();
 		if (IJ.debugMode && IJ.getInstance()==null)
 			new JavaProperties().run("");
