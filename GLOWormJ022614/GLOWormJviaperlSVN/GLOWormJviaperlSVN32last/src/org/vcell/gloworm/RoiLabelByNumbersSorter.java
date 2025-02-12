@@ -40,42 +40,58 @@ public class RoiLabelByNumbersSorter {
 			String labelDollared = labels[i].replace("\'", "$");
 			String[] labelDollaredChunks = labelDollared.split(splitDelimiter);
 			lDCChunksLength = labelDollaredChunks.length;
-			String[] nums = new String[lDCChunksLength];
+			String[] sortedldcChunks = new String[lDCChunksLength];
 			if (sortmode == (int)Integer.MAX_VALUE) {
 				if (colors!=null && colors.length==labels.length) {
-					nums = new String[lDCChunksLength+1];
-					nums[lDCChunksLength] = Colors.colorToHexString(colors[i]);
-					if (nums[lDCChunksLength].matches("\\#..00ffff"))
-						nums[lDCChunksLength] = "#00000000";
+					sortedldcChunks = new String[lDCChunksLength+1];
+					sortedldcChunks[lDCChunksLength] = Colors.colorToHexString(colors[i]);
+//WHY IS NEXT SUBSTITUTION BEING DONE??
+					if (sortedldcChunks[lDCChunksLength].matches("\\#..00ffff"))
+						sortedldcChunks[lDCChunksLength] = "#11000000";
 				}
 			} else {
-				nums[lDCChunksLength-1] =  labelDollaredChunks[sortmode <lDCChunksLength? sortmode:lDCChunksLength-1];
+				sortedldcChunks[0] =  labelDollaredChunks[sortmode <lDCChunksLength? sortmode:lDCChunksLength-1];
 			}
-			int count = 0;
-			for (int ldc=lDCChunksLength-1; ldc>=0; ldc--) {
-				if (sortmode!= ldc) {
-					nums[count] = labelDollaredChunks[ldc];
+			int count = 1;
+			for (int ldc=0; ldc<lDCChunksLength; ldc++) { // N#CZT -> TZC#N ... 43210
+				int ldcMod = lDCChunksLength- 1 - ldc;
+				if (sortmode>0) {
+					ldcMod = ldcMod+1;
+					if (count==1) {
+						sortedldcChunks[1] =  labelDollaredChunks[0];
+						count++;
+						continue;
+					}
+				}
+
+				if (sortmode < ldcMod) {
+					sortedldcChunks[count] = labelDollaredChunks[ldcMod];
+					count++;
+				} else if (sortmode > ldcMod) {
+					sortedldcChunks[count] = labelDollaredChunks[ldcMod];
 					count++;
 				}
+				IJ.wait(0);
 			}
 			
+				String numSum = "";
 			
-			for (String num:nums) {
+			for (String num:sortedldcChunks) {
 				if (num == null)
 					continue;
 				String newNum = "";
-				if (!newNum.equals(nums[0])) 
+				if (!num.equals(sortedldcChunks[0])) 
 					//REPLACEALL("[ICS]","") NEEDED FOR CLEAN DISPLAY OF DC-CPHATE PLOTS...NEED TO KEEP IT...WITHOUT CONFLICT WITH COLOR CODES...
 					if (num.startsWith("#")) {
-						newNum = num/*.replaceAll("[ics]","")*/.replace("\"", "").replace(" ", "").toLowerCase().replaceAll("^(.*)-\\d+$", "$1").split("_")[0];
+						newNum = num/*.replaceAll("[ics]","")*/.replace("\"", "").replace(" ", "").toLowerCase().replaceAll("^(.*)-\\d+$*", "$1").split("_")[0];
 					} else {
-						newNum = num.replaceAll("[ics]","").replace("\"", "").replace(" ", "").toLowerCase().replaceAll("^(.*)-\\d+$", "$1").split("_")[0];
+						newNum = num.replaceAll("[ics]","").replace("\"", "").replace(" ", "").toLowerCase().replaceAll("^(.*)-\\d+[CZTczt]*$*", "$1").split("_")[0];
 					}
-				else
-					newNum = num.replace("\"", "").replace(" ", "").toLowerCase().replaceAll("^(.*)-\\d+$", "$1");
+				else 
+					newNum = num.replace("\"", "").replace(" ", "").toLowerCase().replaceAll("^(.*)-\\d+$*", "$1");
 				
 				if (newNum.length()==0) newNum = "aaaaaa";
-				if (sortmode == 0 && newNum.equals(nums[0])) {
+				if (sortmode == 0 && newNum.equals(sortedldcChunks[0])) {
 					
 				} else if(num.equals(labelDollaredChunks[0])){  //leaves text of name un-prepended, so get alpha sort order after whatever chunk is the lead sort key.
 					
@@ -83,8 +99,9 @@ public class RoiLabelByNumbersSorter {
 					newNum = "00000000000000000000000000000000000" + newNum; // prepend maxDigits leading zeroes
 					newNum = newNum.substring(newNum.length()-maxDigits);//trim back to maxDigits total in newNum
 				}
-				labels[i] = newNum + labels[i];
+				numSum = numSum + newNum;
 			}
+			labels[i] = numSum + labels[i];
 			labels[i] = labels[i].replaceAll("^(0*)(([A-Z]|[a-z]|\\#)+)(.*)", "$2$4");   // ^ trims all leadingest 0s if text chunk is what is being sorted on. But leaves them if numeric chunk is placed first...
 		}
 		if (labels!=null) {
