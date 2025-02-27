@@ -9048,16 +9048,17 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //									Figure out long-edge rois on some cells. 
 //									 I think they involve multiple cell islands touching a single cell??  
 //
-//									The segment with a long slash is always(?) a duplicate of a true segment 
+//									The segment with a long slash is always(?) a duplicate of a two true segments(?) 
 //									but with a spurious jump added.   
 //									Can I detect crazy jump points in this loop????
 										
 									IJ.wait(1);
 
 								} else {
-									if (contactSegmentPoints.size() ==0)
+									if (contactSegmentPoints.size() <= 1) {
+										contactSegmentPoints = new ArrayList<Point>();
 										continue;
-									else {
+									} else {
 										contactSubsegments.add(contactSegmentPoints);
 										contactSegmentPoints = new ArrayList<Point>();
 									}
@@ -9070,25 +9071,28 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 							if (contactSubsegments.size() ==0) {
 								continue;
 							}
-							// Now loop through all captured segments to find overlaps and discard short overlappers
-							ArrayList<ArrayList<Point>> trashableRedundantSubsegments = new ArrayList<ArrayList<Point>>();
+							// Now loop through all captured segments to find overlaps and null out short overlappers
 							cssloop:
 							for (int css=0; css < contactSubsegments.size(); css++) {
 								if (contactSubsegments.get(css)!=null) {
 									cssbloop:
 									for (int cssb=css+1; cssb < contactSubsegments.size(); cssb++) {
 										if (contactSubsegments.get(cssb)!=null) {
+											nextPointLoop:
 											for (Point nextPoint:contactSubsegments.get(css)) {
 												if (contactSubsegments.get(cssb).contains(nextPoint)){
 													if (contactSubsegments.get(css).size() > contactSubsegments.get(cssb).size()) {
-														//												trashableRedundantSubsegments.add(contactSubsegments.get(cssb));
 														contactSubsegments.set(cssb, null);
-														continue cssbloop;
 													} else {
-														//												trashableRedundantSubsegments.add(contactSubsegments.get(css));		
 														contactSubsegments.set(css, null);
-														continue cssloop;
 													}
+													while (cssb<contactSubsegments.size()-1 && contactSubsegments.get(cssb) == null) cssb++;
+													if (cssb==contactSubsegments.size()-1)
+														continue cssloop;
+													while (css<contactSubsegments.size()-1 && contactSubsegments.get(css) == null) css++;
+													if (css==contactSubsegments.size()-1)
+														break cssloop;
+													continue nextPointLoop;
 												}
 											}
 										}
@@ -9125,8 +9129,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					}
 					
 
-					Roi andRoi = (scaledShapeRoi.and(dupShapeRoi));
-//					if (andRoi != null && andRoi.getBounds().getWidth() > 0) {
+//					Roi andRoi = (scaledShapeRoi.and(dupShapeRoi));
+
+					//					if (andRoi != null && andRoi.getBounds().getWidth() > 0) {
 //						Roi[] andRoiParts = ((ShapeRoi)andRoi).getRois();
 //						int partsCount = 0;
 //						
