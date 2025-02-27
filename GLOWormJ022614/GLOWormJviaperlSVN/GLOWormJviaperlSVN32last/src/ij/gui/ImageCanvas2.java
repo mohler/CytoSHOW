@@ -1621,7 +1621,7 @@ public class ImageCanvas2 extends JComponent implements MouseListener, MouseMoti
 					Graphics g = imp.getRoiManager().aceTree.iSulstonTree.iTreePanel.getGraphics();
 //					imp.getRoiManager().aceTree.iSulstonTree.iTreePanel.repaint();
                     double ypad = 10*100/imp.getRoiManager().aceTree.iSulstonTree.getHeight();
-                    IJ.log("c.ysc= "+imp.getRoiManager().aceTree.iSulstonTree.iTreePanel.c.ysc+" ypad= "+ ypad);
+//                    IJ.log("c.ysc= "+imp.getRoiManager().aceTree.iSulstonTree.iTreePanel.c.ysc+" ypad= "+ ypad);
                     g.setColor(Color.magenta);
 //                    g.drawOval(e.getX()-10, e.getY()-10, 20, 20);
                     g.drawOval(cellXY[0]-10, (int)((((cellXY[1]) +Cell.START1 +Cell.START0)*ysc) ), 20, 20);
@@ -3592,6 +3592,7 @@ public class ImageCanvas2 extends JComponent implements MouseListener, MouseMoti
 			if (roi!=null && (roi.getType()==Roi.POLYGON || roi.getType()==Roi.POLYLINE || roi.getType()==Roi.ANGLE) 
 					&& roi.getState()==Roi.CONSTRUCTING) {
 				PolygonRoi pRoi = (PolygonRoi)roi;
+				pRoi.setImage(this.getImage());
 				pRoi.handleMouseMove(sx, sy);
 			} else {
 				if (ox<imageWidth && oy<imageHeight) {

@@ -239,6 +239,10 @@ public class Roi extends Object implements Cloneable, java.io.Serializable {
 		return state;
 	}
 	
+	public void setState(int state) {
+		this.state = state;
+	}
+	
 	/** Returns the perimeter length. */
 	public double getLength() {
 		double pw=1.0, ph=1.0;

@@ -416,50 +416,53 @@ public class PolygonRoi extends Roi {
 		// Do rubber banding
 		int tool = Toolbar.getToolId();
 		if (!(tool==Toolbar.POLYGON || tool==Toolbar.POLYLINE || tool==Toolbar.ANGLE)) {
-			imp.deleteRoi();
+			if (this.getState() != Roi.NORMAL) {
+				imp.deleteRoi();
+			}
 			imp.draw();
 			return;
-		}
-        drawRubberBand(sx, sy);
-		degrees = Double.NaN;
-		double len = -1;
-		if (nPoints>1) {
-			double x1, y1, x2, y2;
-			if (xpf!=null) {
-				x1 = xpf[nPoints-2];
-				y1 = ypf[nPoints-2];
-				x2 = xpf[nPoints-1];
-				y2 = ypf[nPoints-1];
-			} else {
-				x1 = xp[nPoints-2];
-				y1 = yp[nPoints-2];
-				x2 = xp[nPoints-1];
-				y2 = yp[nPoints-1];
+		} else {
+			drawRubberBand(sx, sy);
+			degrees = Double.NaN;
+			double len = -1;
+			if (nPoints>1) {
+				double x1, y1, x2, y2;
+				if (xpf!=null) {
+					x1 = xpf[nPoints-2];
+					y1 = ypf[nPoints-2];
+					x2 = xpf[nPoints-1];
+					y2 = ypf[nPoints-1];
+				} else {
+					x1 = xp[nPoints-2];
+					y1 = yp[nPoints-2];
+					x2 = xp[nPoints-1];
+					y2 = yp[nPoints-1];
+				}
+				degrees = getAngle((int)Math.round(x1), (int)Math.round(y1), (int)Math.round(x2), (int)Math.round(y2));
+				if (tool!=Toolbar.ANGLE) {
+					Calibration cal = imp.getCalibration();
+					double pw=cal.pixelWidth, ph=cal.pixelHeight;
+					if (IJ.altKeyDown()) {pw=1.0; ph=1.0;}
+					len = Math.sqrt((x2-x1)*pw*(x2-x1)*pw + (y2-y1)*ph*(y2-y1)*ph);
+				}
 			}
-			degrees = getAngle((int)Math.round(x1), (int)Math.round(y1), (int)Math.round(x2), (int)Math.round(y2));
-			if (tool!=Toolbar.ANGLE) {
-				Calibration cal = imp.getCalibration();
-				double pw=cal.pixelWidth, ph=cal.pixelHeight;
-				if (IJ.altKeyDown()) {pw=1.0; ph=1.0;}
-				len = Math.sqrt((x2-x1)*pw*(x2-x1)*pw + (y2-y1)*ph*(y2-y1)*ph);
+			if (tool==Toolbar.ANGLE) {
+				if (nPoints==2)
+					angle1 = degrees;
+				else if (nPoints==3) {
+					double angle2 = getAngle(xp[1], yp[1], xp[2], yp[2]);
+					degrees = Math.abs(180-Math.abs(angle1-angle2));
+					if (degrees>180.0)
+						degrees = 360.0-degrees;
+				}
 			}
-		}
-		if (tool==Toolbar.ANGLE) {
-			if (nPoints==2)
-				angle1 = degrees;
-			else if (nPoints==3) {
-				double angle2 = getAngle(xp[1], yp[1], xp[2], yp[2]);
-				degrees = Math.abs(180-Math.abs(angle1-angle2));
-				if (degrees>180.0)
-					degrees = 360.0-degrees;
-			}
-		}
 		String length = len!=-1?", length=" + IJ.d2s(len):"";
 		double degrees2 = tool==Toolbar.ANGLE&&nPoints==3&&Prefs.reflexAngle?360.0-degrees:degrees;
 		String angle = !Double.isNaN(degrees)?", angle=" + IJ.d2s(degrees2):"";
 		int ox = ic!=null?ic.offScreenX(sx):sx;
 		int oy = ic!=null?ic.offScreenY(sy):sy;
 		IJ.showStatus(imp.getLocationAsString(ox,oy) + length + angle);
+		}
 	}
 
 	void drawRubberBand(int sx, int sy) {

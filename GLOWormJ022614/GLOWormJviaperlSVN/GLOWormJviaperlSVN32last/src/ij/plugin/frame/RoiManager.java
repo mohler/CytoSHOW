@@ -3690,6 +3690,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			roi.setPosition(c, z, t);
 			setUpRoisByNameAndNumbers(roi);
 		}
+		showAll(SHOW_NONE);
+		updateShowAll();
 		showAll(SHOW_ALL);
 		updateShowAll();
 	}
@@ -5834,6 +5836,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		if (list.getSelectedIndices().length <= 1) {
 
 			restore(imp, index, true);
+			imp.getRoi().setState(Roi.NORMAL);
+			imp.updateAndRepaintWindow();
 			if (aceTree != null) {
 				Roi cRoi = rois.get(listModel.get(getSelectedIndexes()[0]));
 				VTreeImpl vti = aceTree.getVtree().getiVTreeImpl();
@@ -8959,15 +8963,18 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		Roi[] selRois = this.getSelectedRoisAsArray();
 		expansionDistance = IJ.getNumber("Distance (pixels) for contact partner search", expansionDistance);
 		ArrayList<String> cellsAlreadyMapped = new ArrayList<String>();
+		IJ.wait(0);
 		for (Roi roi : selRois) {
 			if (cellsAlreadyMapped.contains(roi.getName().split("\"")[1])) {
 				continue;
 			}
 			
 // THIS LOOP CASTS THE SEARCH ALONG THE ENTIRE LENGTH OF EACH SELECTED CELL.  
+			ArrayList<Roi> soNamedRois = this.getROIsByName().get("\"" + roi.getName().split("\"")[1] + "\"");
 			
-			for (Roi queryRoi : this.getROIsByName().get("\"" + roi.getName().split("\"")[1] + "\"")) {
-				if (!queryRoi.getName().split("\"")[1].equalsIgnoreCase(roi.getName().split("\"")[1])) {
+			for (Roi queryRoi : soNamedRois) {
+				String roiNameRoot = roi.getName().split("\"")[1];
+				if (!queryRoi.getName().split("\"")[1].equalsIgnoreCase(roiNameRoot)) {
 					continue;
 				}
 //	WITH justSelectedSlices, NEIGHBOR SEARCH ONLY IN SELECTED SLICE, NOT ALL SLICES
@@ -8979,171 +8986,287 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				int cPos = queryRoi.getCPosition();
 				int zPos = queryRoi.getZPosition();
 				int tPos = queryRoi.getTPosition();
-				Roi dupRoi = (Roi) queryRoi.clone();
 
 				Roi[] sameSliceRois = this.getROIsByNumbers().get("" + cPos + "_" + zPos + "_" + tPos)
 						.toArray(new Roi[1]);
 				for (Roi testRoi : sameSliceRois) {
 					if (zPos != testRoi.getZPosition()
 							|| queryRoi.getName().split("\"")[1].equalsIgnoreCase(testRoi.getName().split("\"")[1])
-							|| testRoi.getName().split("\"")[1].trim().contains("by")) {
+							|| testRoi.getName().split("\"")[1].trim().contains("by")
+							|| queryRoi.getName().split("\"")[1].trim().contains("by")) {
+						continue;
+					}
+					if ((testRoi.getCPosition() != queryRoi.getCPosition()
+							|| testRoi.getZPosition() != queryRoi.getZPosition()
+							|| testRoi.getTPosition() != queryRoi.getTPosition())){
 						continue;
 					}
 					Color testColor = testRoi.getFillColor();
 					String andName = "" + queryRoi.getName().split("\"")[1].trim() + "by"
 							+ testRoi.getName().split("\"")[1].trim();
 
-					Roi scaledRoi = null;
-					Roi shrunkRoi = null;
-
-					scaledRoi = RoiEnlarger.enlarge(testRoi, expansionDistance);
-					shrunkRoi = RoiEnlarger.enlarge(queryRoi, -1);
+					Roi scaledRoi = RoiEnlarger.enlarge(testRoi, expansionDistance);
+//					imp.setRoi(scaledRoi);
+//					IJ.wait(1);
+					Roi shrunkRoi = queryRoi;
+//					imp.setRoi(shrunkRoi);
+//					IJ.wait(1);
+					Roi dupRoi = (Roi) queryRoi.clone();
+//					imp.setRoi(dupRoi);
+//					IJ.wait(1);
 					ShapeRoi scaledShapeRoi = new ShapeRoi(scaledRoi);
+//					imp.setRoi(scaledShapeRoi);
+//					IJ.wait(1);
+					Roi[] shScaledComponentRois = scaledShapeRoi.getRois();
 					ShapeRoi shrunkShapeRoi = new ShapeRoi(shrunkRoi);
+//					imp.setRoi(shrunkShapeRoi);
+//					IJ.wait(1);
+					Roi[] shShrunkComponentRois = shrunkShapeRoi.getRois();
 					ShapeRoi dupShapeRoi = new ShapeRoi(dupRoi);
+//					imp.setRoi(scaledRoi);
+//					IJ.wait(1);
+					Roi[] shDupComponentRois = dupShapeRoi.getRois();
+					for (int a=0; a<shScaledComponentRois.length; a++) {
+						for (int b=0; b<shDupComponentRois.length ; b++) {
+							ArrayList<ArrayList<Integer>> contactSubsegsX = new ArrayList<ArrayList<Integer>>();
+							ArrayList<ArrayList<Integer>> contactSubsegsY = new ArrayList<ArrayList<Integer>>();
+							ArrayList<Integer> contactSegXs = new ArrayList<Integer>();
+							ArrayList<Integer> contactSegYs = new ArrayList<Integer>();
+//							imp.setRoi(shShrunkComponentRois[a]);
+//							IJ.wait(1);
+							Polygon scaledPoly = shScaledComponentRois[a].getPolygon();
+//							imp.setRoi(shDupComponentRois[a]);
+//							IJ.wait(1);
+							Polygon dupPoly = shDupComponentRois[b].getPolygon();
+							ArrayList<ArrayList<Point>> contactSubsegments = new ArrayList<ArrayList<Point>>();
+							ArrayList<Point> contactSegmentPoints = new ArrayList<Point>();
+							//Double loop to be sure all contiguous points are chained in the final form.  Record multiple contig segments if needed.
+							for (int p=0; p<scaledPoly.npoints*2; p++) {
+								if (dupPoly.contains(scaledPoly.xpoints[p%scaledPoly.npoints], scaledPoly.ypoints[p%scaledPoly.npoints])) {
+									contactSegmentPoints.add(new Point(scaledPoly.xpoints[p%scaledPoly.npoints], scaledPoly.ypoints[p%scaledPoly.npoints]));
+									
+//									Figure out long-edge rois on some cells. 
+//									 I think they involve multiple cell islands touching a single cell??  
+//
+//									The segment with a long slash is always(?) a duplicate of a true segment 
+//									but with a spurious jump added.   
+//									Can I detect crazy jump points in this loop????
+										
+									IJ.wait(1);
 
-					Roi andRoi = (scaledShapeRoi.and(dupShapeRoi));
-					if (andRoi != null && andRoi.getBounds().getWidth() > 0) {
-						Roi[] andRoiParts = ((ShapeRoi)andRoi).getRois();
-						int partsCount = 0;
-						
-						int pointsCount =0;
-						for (Roi andRoiPart:andRoiParts) {
-							partsCount++;
-							ArrayList<Point> borderLinePoints = new ArrayList<Point>();
-							ArrayList<Point> contactLinePoints = new ArrayList<Point>();
-							boolean pointerInside = false;
-
-							for (int y=-10;y<andRoiPart.getBounds().height+10; y++) { // top to bottom
-								pointerInside = false;
-								for (int x=-10 ;x<andRoiPart.getBounds().width+10; x++) { // left to right
-									Point andRoiPartQueryPoint = new Point((int)andRoiPart.getBounds().x +x,(int)andRoiPart.getBounds().y +y);
-									if ( !pointerInside ) {
-										if (andRoiPart.contains(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y)) {
-											if (!borderLinePoints.contains(new Point(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y))){
-												borderLinePoints.add(new Point(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y));
-												pointerInside = true;	
-												continue;
-											}
-										} else {
-											// nuttin
-										}
-									} 
-								}
-								if (pointerInside)
-									continue;
-							}
-
-							for (int x=-10 ;x<andRoiPart.getBounds().width+10; x++) { // left to right
-								pointerInside = false;
-								for (int y=andRoiPart.getBounds().height+10;y>-10; y--) { // bottom to top
-									Point andRoiPartQueryPoint = new Point((int)andRoiPart.getBounds().x +x,(int)andRoiPart.getBounds().y +y);
-									if ( !pointerInside ) {
-										if (andRoiPart.contains(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y)) {
-											if (!borderLinePoints.contains(new Point(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y))){
-												borderLinePoints.add(new Point(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y));
-												pointerInside = true;	
-												continue;
-											}
-										} else {
-											// nuttin
-										}
-									} 
-								}
-								if (pointerInside)
-									continue;
-							}
-							for (int y=andRoiPart.getBounds().height+10;y>-10; y--) { // bottom to top
-								pointerInside = false;
-								for (int x=andRoiPart.getBounds().width+10 ;x>-10; x--) { // right to left
-									Point andRoiPartQueryPoint = new Point((int)andRoiPart.getBounds().x +x,(int)andRoiPart.getBounds().y +y);
-									if ( !pointerInside ) {
-										if (andRoiPart.contains(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y)) {
-											if (!borderLinePoints.contains(new Point(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y))){
-												borderLinePoints.add(new Point(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y));
-												pointerInside = true;	
-												continue;
-											}
-										} else {
-											// nuttin
-										}
-									} 
-								}
-								if (pointerInside)
-									continue;
-							}
-							for (int x=andRoiPart.getBounds().width+10 ;x>-10; x--) { // right to left
-								pointerInside = false;
-								for (int y=-10;y<andRoiPart.getBounds().height+10; y++) { // top to bottom
-									Point andRoiPartQueryPoint = new Point((int)andRoiPart.getBounds().x +x,(int)andRoiPart.getBounds().y +y);
-									if ( !pointerInside ) {
-										if (andRoiPart.contains(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y)) {
-											if (!borderLinePoints.contains(new Point(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y))){
-												borderLinePoints.add(new Point(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y));
-												pointerInside = true;	
-												continue;
-											}
-										} else {
-											// nuttin
-										}
-									} 
-								}
-								if (pointerInside)
-									continue;
-							}
-
-							int frontsieCount =0;
-							Collections.sort(borderLinePoints, 
-									Comparator.comparingDouble(Point::getY).thenComparingDouble(Point::getX));
-							for (Point nextPoint:borderLinePoints) {
-
-								if (!shrunkShapeRoi.contains(nextPoint.x, nextPoint.y)) {
-
-									if (contactLinePoints.size()>0) {
-
-										if (nextPoint.distance(contactLinePoints.get(contactLinePoints.size()-1)) > 2){	//needed to catch jump across skinny query cells
-											if (Math.abs(nextPoint.y - contactLinePoints.get(contactLinePoints.size()-1).y) < 2 || Math.abs(nextPoint.x - contactLinePoints.get(contactLinePoints.size()-1).x) < 2) {
-												// nuttin
-											} else {
-												contactLinePoints.add(nextPoint);
-												pointsCount++;
-											}
-										} else {
-											contactLinePoints.add(nextPoint);
-											pointsCount++;
-										}
-
-									} else 	{
-										contactLinePoints.add(nextPoint);
-										pointsCount++;
+								} else {
+									if (contactSegmentPoints.size() ==0)
+										continue;
+									else {
+										contactSubsegments.add(contactSegmentPoints);
+										contactSegmentPoints = new ArrayList<Point>();
 									}
 								}
 							}
-
-							Polygon oneDcontactPolygon = new Polygon();
-							for (Point p:contactLinePoints) {
-								oneDcontactPolygon.addPoint(p.x, p.y);
+							//Capture the final point chain from the double run-around
+							if (contactSegmentPoints.size()>0) {
+								contactSubsegments.add(contactSegmentPoints);
 							}
-							if (oneDcontactPolygon.npoints > 0) {
-								Roi oneDcontactPolyLine = new PolygonRoi(oneDcontactPolygon, Roi.FREELINE);
-								Roi oneDcontactShapeRoi = oneDcontactPolyLine;//new ShapeRoi(oneDcontactPolyLine);
-								oneDcontactShapeRoi.setName(andName + "borderline"+partsCount);
-								IJ.log(""+oneDcontactShapeRoi.getName() +" z"+ zPos +" "+ borderLinePoints.size() +" "+ oneDcontactPolygon.npoints);
-								oneDcontactShapeRoi.setPosition(cPos, zPos, tPos);
-								this.addRoi(oneDcontactShapeRoi, false, null, null, -1, false);
-							}else {
-								IJ.wait(1);
+							if (contactSubsegments.size() ==0) {
+								continue;
+							}
+							// Now loop through all captured segments to find overlaps and discard short overlappers
+							ArrayList<ArrayList<Point>> trashableRedundantSubsegments = new ArrayList<ArrayList<Point>>();
+							cssloop:
+							for (int css=0; css < contactSubsegments.size(); css++) {
+								if (contactSubsegments.get(css)!=null) {
+									cssbloop:
+									for (int cssb=css+1; cssb < contactSubsegments.size(); cssb++) {
+										if (contactSubsegments.get(cssb)!=null) {
+											for (Point nextPoint:contactSubsegments.get(css)) {
+												if (contactSubsegments.get(cssb).contains(nextPoint)){
+													if (contactSubsegments.get(css).size() > contactSubsegments.get(cssb).size()) {
+														//												trashableRedundantSubsegments.add(contactSubsegments.get(cssb));
+														contactSubsegments.set(cssb, null);
+														continue cssbloop;
+													} else {
+														//												trashableRedundantSubsegments.add(contactSubsegments.get(css));		
+														contactSubsegments.set(css, null);
+														continue cssloop;
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+							//Now save the unique segments.  (SHOULD I DO THIS INTO A SINGLE MULTIPART SHAPEROI??
+//							contactSubsegments.removeAll(trashableRedundantSubsegments);
+							for (ArrayList<Point> contactSegPts:contactSubsegments) {
+								if (contactSegPts == null) {
+									continue;
+								}
+								for (int csp=0; csp<contactSegPts.size(); csp++) {
+									contactSegXs.add(contactSegPts.get(csp).x);
+									contactSegYs.add(contactSegPts.get(csp).y);
+									if (contactSegXs.size()==1)
+										IJ.wait(1);
+								}
+								// Nice java8 stream().mapToInt() trick!!
+								int[] csxs = contactSegXs.stream().mapToInt(i -> i).toArray();
+								int[] csys = contactSegYs.stream().mapToInt(i -> i).toArray();
+								PolygonRoi contactSegmentRoi = new PolygonRoi( csxs, csys, csxs.length, PolygonRoi.POLYLINE);
+								contactSegmentRoi.setStrokeWidth(5);
+
+								contactSegmentRoi.setName(andName/*+"ContactPolyLineSegement"*/);
+
+								contactSegmentRoi.setPosition(cPos, zPos, tPos);
+								contactSegmentRoi.setFillColor(testRoi.getFillColor());
+								contactSegmentRoi.setStrokeColor(testRoi.getFillColor());
+								this.addRoi(contactSegmentRoi, false, testRoi.getFillColor(), testRoi.getFillColor(),  5, false);
+								IJ.log(contactSegmentRoi.getName());
 							}
 						}
-						IJ.log("Total "+andName +"borderlines z"+ zPos +" "+ pointsCount);
-
-
-						andRoi.setName(andName);
-
-						andRoi.setPosition(cPos, zPos, tPos);
-						this.setRoiFillColor(andRoi, testColor);
-						this.addRoi(andRoi, false, null, testColor, -1, false);
 					}
+					
+
+					Roi andRoi = (scaledShapeRoi.and(dupShapeRoi));
+//					if (andRoi != null && andRoi.getBounds().getWidth() > 0) {
+//						Roi[] andRoiParts = ((ShapeRoi)andRoi).getRois();
+//						int partsCount = 0;
+//						
+//						int pointsCount =0;
+//						for (Roi andRoiPart:andRoiParts) {
+//							partsCount++;
+//							ArrayList<Point> borderLinePoints = new ArrayList<Point>();
+//							ArrayList<Point> contactLinePoints = new ArrayList<Point>();
+//							boolean pointerInside = false;
+//
+//							for (int y=-10;y<andRoiPart.getBounds().height+10; y++) { // top to bottom
+//								pointerInside = false;
+//								for (int x=-10 ;x<andRoiPart.getBounds().width+10; x++) { // left to right
+//									Point andRoiPartQueryPoint = new Point((int)andRoiPart.getBounds().x +x,(int)andRoiPart.getBounds().y +y);
+//									if ( !pointerInside ) {
+//										if (andRoiPart.contains(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y)) {
+//											if (!borderLinePoints.contains(new Point(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y))){
+//												borderLinePoints.add(new Point(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y));
+//												pointerInside = true;	
+//												continue;
+//											}
+//										} else {
+//											// nuttin
+//										}
+//									} 
+//								}
+//								if (pointerInside)
+//									continue;
+//							}
+//
+//							for (int x=-10 ;x<andRoiPart.getBounds().width+10; x++) { // left to right
+//								pointerInside = false;
+//								for (int y=andRoiPart.getBounds().height+10;y>-10; y--) { // bottom to top
+//									Point andRoiPartQueryPoint = new Point((int)andRoiPart.getBounds().x +x,(int)andRoiPart.getBounds().y +y);
+//									if ( !pointerInside ) {
+//										if (andRoiPart.contains(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y)) {
+//											if (!borderLinePoints.contains(new Point(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y))){
+//												borderLinePoints.add(new Point(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y));
+//												pointerInside = true;	
+//												continue;
+//											}
+//										} else {
+//											// nuttin
+//										}
+//									} 
+//								}
+//								if (pointerInside)
+//									continue;
+//							}
+//							for (int y=andRoiPart.getBounds().height+10;y>-10; y--) { // bottom to top
+//								pointerInside = false;
+//								for (int x=andRoiPart.getBounds().width+10 ;x>-10; x--) { // right to left
+//									Point andRoiPartQueryPoint = new Point((int)andRoiPart.getBounds().x +x,(int)andRoiPart.getBounds().y +y);
+//									if ( !pointerInside ) {
+//										if (andRoiPart.contains(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y)) {
+//											if (!borderLinePoints.contains(new Point(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y))){
+//												borderLinePoints.add(new Point(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y));
+//												pointerInside = true;	
+//												continue;
+//											}
+//										} else {
+//											// nuttin
+//										}
+//									} 
+//								}
+//								if (pointerInside)
+//									continue;
+//							}
+//							for (int x=andRoiPart.getBounds().width+10 ;x>-10; x--) { // right to left
+//								pointerInside = false;
+//								for (int y=-10;y<andRoiPart.getBounds().height+10; y++) { // top to bottom
+//									Point andRoiPartQueryPoint = new Point((int)andRoiPart.getBounds().x +x,(int)andRoiPart.getBounds().y +y);
+//									if ( !pointerInside ) {
+//										if (andRoiPart.contains(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y)) {
+//											if (!borderLinePoints.contains(new Point(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y))){
+//												borderLinePoints.add(new Point(andRoiPartQueryPoint.x, andRoiPartQueryPoint.y));
+//												pointerInside = true;	
+//												continue;
+//											}
+//										} else {
+//											// nuttin
+//										}
+//									} 
+//								}
+//								if (pointerInside)
+//									continue;
+//							}
+//
+//							int frontsieCount =0;
+//							Collections.sort(borderLinePoints, 
+//									Comparator.comparingDouble(Point::getY).thenComparingDouble(Point::getX));
+//							for (Point nextPoint:borderLinePoints) {
+//
+//								if (!shrunkShapeRoi.contains(nextPoint.x, nextPoint.y)) {
+//
+//									if (contactLinePoints.size()>0) {
+//
+//										if (nextPoint.distance(contactLinePoints.get(contactLinePoints.size()-1)) > 2){	//needed to catch jump across skinny query cells
+//											if (Math.abs(nextPoint.y - contactLinePoints.get(contactLinePoints.size()-1).y) < 2 || Math.abs(nextPoint.x - contactLinePoints.get(contactLinePoints.size()-1).x) < 2) {
+//												// nuttin
+//											} else {
+//												contactLinePoints.add(nextPoint);
+//												pointsCount++;
+//											}
+//										} else {
+//											contactLinePoints.add(nextPoint);
+//											pointsCount++;
+//										}
+//
+//									} else 	{
+//										contactLinePoints.add(nextPoint);
+//										pointsCount++;
+//									}
+//								}
+//							}
+//
+//							Polygon oneDcontactPolygon = new Polygon();
+//							for (Point p:contactLinePoints) {
+//								oneDcontactPolygon.addPoint(p.x, p.y);
+//							}
+//							if (oneDcontactPolygon.npoints > 0) {
+//								Roi oneDcontactPolyLine = new PolygonRoi(oneDcontactPolygon, Roi.FREELINE);
+//								Roi oneDcontactShapeRoi = oneDcontactPolyLine;//new ShapeRoi(oneDcontactPolyLine);
+//								oneDcontactShapeRoi.setName(andName + "borderline"+partsCount);
+//								IJ.log(""+oneDcontactShapeRoi.getName() +" z"+ zPos +" "+ borderLinePoints.size() +" "+ oneDcontactPolygon.npoints);
+//								oneDcontactShapeRoi.setPosition(cPos, zPos, tPos);
+//								this.addRoi(oneDcontactShapeRoi, false, null, null, -1, false);
+//							}else {
+//								IJ.wait(1);
+//							}
+//						}
+//						IJ.log("Total "+andName +"borderlines z"+ zPos +" "+ pointsCount);
+//
+//
+//						andRoi.setName(andName);
+//
+//						andRoi.setPosition(cPos, zPos, tPos);
+//						this.setRoiFillColor(andRoi, testColor);
+//						this.addRoi(andRoi, false, null, testColor, -1, false);
+//					}
 				}
 			}
 			cellsAlreadyMapped.add(roi.getName().split("\"")[1]);
@@ -11403,6 +11526,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			Color bg = Color.gray;
 			if (rois != null && rois.get(value) != null) {
 				bg = rois.get(value).getFillColor();
+				if (bg == null)
+					bg = Color.gray;
 			}
 			setBackground(isSelected ? Color.black : bg);
 //			setForeground(isSelected ? Color.white : Color.BLACK);
