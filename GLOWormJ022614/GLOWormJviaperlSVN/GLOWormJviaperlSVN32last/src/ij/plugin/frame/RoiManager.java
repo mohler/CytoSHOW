@@ -9034,34 +9034,38 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						//					imp.setRoi(scaledRoi);
 						//					IJ.wait(1);
 						Roi[] shDupComponentRois = dupShapeRoi.getRois();
+						shScaledComponents:
 						for (int a=0; a<shScaledComponentRois.length; a++) {
+							shDupComponents:
 							for (int b=0; b<shDupComponentRois.length ; b++) {
 								ArrayList<ArrayList<Integer>> contactSubsegsX = new ArrayList<ArrayList<Integer>>();
 								ArrayList<ArrayList<Integer>> contactSubsegsY = new ArrayList<ArrayList<Integer>>();
-								ArrayList<Integer> contactSegXs = new ArrayList<Integer>();
-								ArrayList<Integer> contactSegYs = new ArrayList<Integer>();
-								//							imp.setRoi(shShrunkComponentRois[a]);
-								//							IJ.wait(1);
+
 								Polygon scaledPoly = shScaledComponentRois[a].getPolygon();
-								//							imp.setRoi(shDupComponentRois[a]);
-								//							IJ.wait(1);
+
 								Polygon dupPoly = shDupComponentRois[b].getPolygon();
 								ArrayList<ArrayList<Point>> contactSubsegments = new ArrayList<ArrayList<Point>>();
 								ArrayList<Point> contactSegmentPoints = new ArrayList<Point>();
 								//Double loop to be sure all contiguous points are chained in the final form.  Record multiple contig segments if needed.
+								if (/*andName.contains("SIADL")||*/andName.contains("SMDVR")/*||andName.contains("SMDVL")*/)
+									IJ.wait(1);
+								scaledPolyPoints:
 								for (int p=0; p<scaledPoly.npoints*2; p++) {
 									if (dupPoly.contains(scaledPoly.xpoints[p%scaledPoly.npoints], scaledPoly.ypoints[p%scaledPoly.npoints])) {
 										contactSegmentPoints.add(new Point(scaledPoly.xpoints[p%scaledPoly.npoints], scaledPoly.ypoints[p%scaledPoly.npoints]));
-
-										IJ.wait(1);
+										imp.setRoi(new Roi(contactSegmentPoints.get(contactSegmentPoints.size()-1).x-1,
+															contactSegmentPoints.get(contactSegmentPoints.size()-1).y-1, 2,2));
+										if (/*andName.contains("SIADL")||*/andName.contains("SMDVR")/*||andName.contains("SMDVL")*/)
+											IJ.wait(1);
 
 									} else {
 										if (contactSegmentPoints.size() <= 1) {
 											contactSegmentPoints = new ArrayList<Point>();
-											continue;
+											continue scaledPolyPoints;
 										} else {
 											contactSubsegments.add(contactSegmentPoints);
 											contactSegmentPoints = new ArrayList<Point>();
+											continue scaledPolyPoints;
 										}
 									}
 								}
@@ -9070,13 +9074,17 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 									contactSubsegments.add(contactSegmentPoints);
 								}
 								if (contactSubsegments.size() ==0) {
-									continue;
+									continue shDupComponents;
 								}
-								// Now loop through all captured segments to find overlaps and null out short overlappers
+
+								
+								if (/*andName.contains("SIADL")||*/andName.contains("SMDVR")/*||andName.contains("SMDVL")*/)
+									IJ.wait(1);
+// Now loop through all captured segments to find overlaps and null out short overlappers
 								cssloop:
 									for (int css=0; css < contactSubsegments.size(); css++) {
 										if (contactSubsegments.get(css)!=null) {
-											if (andName.contains("SIADL")||andName.contains("SMDVR")/*||andName.contains("SMDVL")*/)
+											if (/* andName.contains("SIADL")|| */andName.contains("SMDVR")/*||andName.contains("SMDVL")*/)
 												IJ.wait(1);
 											cssbloop:
 												for (int cssb=css+1; cssb < contactSubsegments.size(); cssb++) {
@@ -9084,11 +9092,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 														nextPointLoop:
 															for (Point nextPoint:contactSubsegments.get(css)) {
 																if (contactSubsegments.get(cssb).contains(nextPoint)){
-																	if (contactSubsegments.get(css).size() > contactSubsegments.get(cssb).size()) {
+																	if (contactSubsegments.get(css).size() >= contactSubsegments.get(cssb).size()) {
 																		contactSubsegments.set(cssb, null);
 																	} else if (contactSubsegments.get(css).size() < contactSubsegments.get(cssb).size()) {
 																		contactSubsegments.set(css, null);
 																	}
+																	css = -1;
 																	continue cssloop;																	
 																}
 															}
@@ -9098,12 +9107,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 									}
 
 								for (ArrayList<Point> contactSegPts:contactSubsegments) {
-									if (andName.contains("SIADL"))
+									if (/*andName.contains("SIADL")||*/andName.contains("SMDVR"))
 										IJ.wait(1);
 									
 									if (contactSegPts == null) {
 										continue;
 									}
+									ArrayList<Integer> contactSegXs = new ArrayList<Integer>();
+									ArrayList<Integer> contactSegYs = new ArrayList<Integer>();
 									for (int csp=0; csp<contactSegPts.size(); csp++) {
 										contactSegXs.add(contactSegPts.get(csp).x);
 										contactSegYs.add(contactSegPts.get(csp).y);
