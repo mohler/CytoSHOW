@@ -9013,7 +9013,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					for (Roi testSubRoi:shTestComponentRois) {
 						Roi scaledRoi = RoiEnlarger.enlarge(testSubRoi, expansionDistance);
 
-						imp.setRoi(scaledRoi);
+//						imp.setRoi(scaledRoi);
 						if (andName.contains("SIADL")||andName.contains("SMDVR")/*||andName.contains("SMDVL")*/)
 							IJ.wait(1);
 						Roi shrunkRoi = queryRoi;
@@ -9053,8 +9053,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								for (int p=0; p<scaledPoly.npoints*2; p++) {
 									if (dupPoly.contains(scaledPoly.xpoints[p%scaledPoly.npoints], scaledPoly.ypoints[p%scaledPoly.npoints])) {
 										contactSegmentPoints.add(new Point(scaledPoly.xpoints[p%scaledPoly.npoints], scaledPoly.ypoints[p%scaledPoly.npoints]));
-										imp.setRoi(new Roi(contactSegmentPoints.get(contactSegmentPoints.size()-1).x-1,
-															contactSegmentPoints.get(contactSegmentPoints.size()-1).y-1, 2,2));
+//										imp.setRoi(new Roi(contactSegmentPoints.get(contactSegmentPoints.size()-1).x-1,
+//															contactSegmentPoints.get(contactSegmentPoints.size()-1).y-1, 2,2));
 										if (/*andName.contains("SIADL")||*/andName.contains("SMDVR")/*||andName.contains("SMDVL")*/)
 											IJ.wait(1);
 
