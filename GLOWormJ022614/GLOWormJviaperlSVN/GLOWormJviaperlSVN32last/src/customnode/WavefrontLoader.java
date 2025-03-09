@@ -217,18 +217,19 @@ public class WavefrontLoader {
 						w*(Float.parseFloat(sp[2]) - y)/(x-14701),
 						w*(Float.parseFloat(sp[3]) -z)/(x-14701)));
 			}
-			//		//		FOR MEI ADULT
-			//		if (objFileGrandParentName.contains("MeiAdult")) {
-			//		float x = 10800.0f;
-			//		float y = 10816.0f;
-			//		float z =  -8844.971f;
-			//		float w = 50000;
-			//		vertices.add(new Point3f(
-			//				w*(Float.parseFloat(sp[3]) -z)/(x-4736),
-			//				w*(Float.parseFloat(sp[2]) - y)/(x-4736),
-			//				w*(flipXCoef*(Float.parseFloat(sp[1]) - x))/(-x+4736)));
-			//		}
-			//		FOR MEI ADULT rot corr xz
+					//		FOR MEI ADULT
+//			else if (objFileParentName.contains("MeiAdult") || objFileGrandParentName.contains("MeiAdult")
+//					 ||objFileParentName.contains("EM_Stack") || objFileGrandParentName.contains("EM_Stack")) {
+//					float x = 10800.0f;
+//					float y = 10816.0f;
+//					float z =  -8844.971f;
+//					float w = 50000;
+//					vertices.add(new Point3f(
+//							w*(Float.parseFloat(sp[3]) -z)/(x-4736),
+//							w*(Float.parseFloat(sp[2]) - y)/(x-4736),
+//							w*(flipXCoef*(Float.parseFloat(sp[1]) - x))/(-x+4736)));
+//					}
+//					FOR MEI ADULT rot corr xz
 			
 			
 // Why has this adult cell been scaled by a substantially lower MANITUDE denominator than N2U ///////
@@ -243,7 +244,8 @@ public class WavefrontLoader {
 						w*(Float.parseFloat(sp[2]) - y)/(x-4736),
 						w*(Float.parseFloat(sp[3]) -z)/(x-4736)));
 			}
-			else if (objFileParentName.contains("MeiAdult") || objFileGrandParentName.contains("MeiAdult")) {
+			else if (objFileParentName.contains("MeiAdult") || objFileGrandParentName.contains("MeiAdult")
+					 ||objFileParentName.contains("EM_Stack") || objFileGrandParentName.contains("EM_Stack")) {
 				float x = 10800.0f;
 				float y = 10816.0f;
 				float z =  -8844.971f;

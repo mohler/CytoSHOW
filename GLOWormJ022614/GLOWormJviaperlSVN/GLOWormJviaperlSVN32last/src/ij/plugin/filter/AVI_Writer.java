@@ -46,8 +46,9 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 	//compression options: dialog parameters
 	private static int      compressionIndex = 2; //0=none, 1=PNG, 2=JPEG
 	private static int      jpegQuality = 100;    //0 is worst, 100 best (not currently used)
-	public final static String[] COMPRESSION_STRINGS = new String[] {"Uncompressed", "PNG", "JPEG"};
-	private final static int[] COMPRESSION_TYPES = new int[] {NO_COMPRESSION, PNG_COMPRESSION, JPEG_COMPRESSION};
+	// Hiding PNG option, which never works for me as written...
+	public final static String[] COMPRESSION_STRINGS = new String[] { "Uncompressed", /* "PNG", */"JPEG"};
+	private final static int[] COMPRESSION_TYPES = new int[] { NO_COMPRESSION, /* PNG_COMPRESSION, */JPEG_COMPRESSION};
 
 	private ImagePlus imp;
 	private RandomAccessFile raFile;
@@ -117,7 +118,11 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 		}
 		if (nSlices>1) {
 			gd.setInsets(2, 30, 3);
-			gd.addStringField("Slices (z):", imp.getSlice() +"-"+ imp.getSlice());
+			if (nFrames>1) {
+				gd.addStringField("Slices (z):", imp.getSlice() +"-"+ imp.getSlice());
+			} else if (nFrames == 1) {
+				gd.addStringField("Slices (z):", "1" +"-"+ imp.getNSlices());
+			}
 			nRangeFields++;
 		}
 		if (nFrames>1) {
@@ -384,13 +389,19 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 						//        					imp.setPositionWithoutUpdate(channel, z+1, frame);
 						//        				else if (saveChannels)
 						//        					imp.setPositionWithoutUpdate(z+1, slice, frame);
-						imp.setPositionWithoutUpdate(channel, z, t);
+
+						imp.setPosition(channel, z, t);
+
+//	ACTUALLY NEED UPDATE and pause FOR ALL IMAGE DATA AND TAGS TO GET CAPTURED FLATTENED.						
+//						imp.setPositionWithoutUpdate(channel, z, t);
 
 						ImagePlus imp2 = imp;
 						if (isOverlay) {
 							if (!(saveFrames||saveSlices||saveChannels))
 								imp.setSliceWithoutUpdate(z+1);
 							imp2 = imp.flatten();
+						} else {
+							imp2 = imp.flatten();    //  Need flatten step even without tags, otherwise drop frames for channels >1.
 						}
 						ip = new ColorProcessor(imp2.getImage());
 					} else {

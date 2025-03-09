@@ -709,7 +709,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		String st = c != null ? c.getName() : "none";
 		IJ.showStatus("selected: " + st);
 
-//		fireContentSelected(c);
+// THIS WAS COMMENTED OUT AT SOME POINT.  THEREFORE, COULD NOT UNLOCK ANY CONTENTS...		
+		fireContentSelected(c,true);
 		if (singleSelection && selectedContents.size()>0 && selectedContents.get(0) != null) {
 			int q = c3dm.getListModel().indexOf("\""+selectedContents.get(0).getName()+"_#0_#0 \"_0");
 			c3dm.getList().setSelectedIndex(q);
