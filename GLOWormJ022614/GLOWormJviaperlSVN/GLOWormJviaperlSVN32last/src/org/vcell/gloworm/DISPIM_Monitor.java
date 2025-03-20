@@ -759,7 +759,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					int wasZ = impAs[0].getNSlices();
 					int wasT = impAs[0].getNFrames();
 					stackAs[0].setDimOrder("xySplitCzt");
-					impAs[0].setStack(stackAs[0],2*wasC, wasZ, wasT);
+					splitChannels = true;
+					dimOrder = "xySplitCzt";
+					impAs[0].setStack(stackAs[0],wasC, wasZ, wasT);
 					wavelengths = impAs[0].getNChannels();
 					cDim = impAs[0].getNChannels();
 					zDim = impAs[0].getNSlices();
@@ -792,7 +794,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					int wasZ = impBs[0].getNSlices();
 					int wasT = impBs[0].getNFrames();
 					stackBs[0].setDimOrder("xySplitCzt");
-					impBs[0].setStack(stackBs[0],2*wasC, wasZ, wasT);
+					splitChannels = true;
+					dimOrder = "xySplitCzt";
+					impBs[0].setStack(stackBs[0],wasC, wasZ, wasT);
 					impBs[0].getCalibration().setUnit("micron");
 					impBs[0].getCalibration().pixelWidth = 0.1625;
 					impBs[0].getCalibration().pixelHeight = 0.1625;
