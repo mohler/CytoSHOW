@@ -417,6 +417,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 	private boolean useSavedPreview;
 	private String metaDataFilePath;
 	private boolean ayyBeforeBee;
+	private boolean mitAdjustments = false;
 
 	public Process getRegDeconProcess() {
 		return regDeconProcess;
@@ -577,6 +578,16 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					}
 
 					stackDualViewTimePoints = false;
+					singleImageTiffs = false;
+					omeTiffs = true;
+					stackLabviewTimePoints = false;
+					stageScan = false;
+				} else if (arg.contains("megaTiffMMmit")) {
+					;
+					dirOrOMETiff = IJ
+							.getFilePath("Select a file with MIT megaTiff MM diSPIM raw data");
+					stackDualViewTimePoints = false;
+					mitAdjustments = true;
 					singleImageTiffs = false;
 					omeTiffs = true;
 					stackLabviewTimePoints = false;
@@ -1510,9 +1521,11 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					impAs[pos].getOriginalFileInfo().fileName = dirOrOMETiff;
 					impAs[pos].getOriginalFileInfo().directory = dirOrOMETiff;
 					impAs[pos].show();
-					IJ.run(impAs[pos], "Flip Vertically","");
-					IJ.run(impAs[pos], "Flip Z","");
-					IJ.run(impAs[pos], "Rotate 90 Degrees Left","");
+					if (mitAdjustments) {
+						IJ.run(impAs[pos], "Flip Vertically","");
+						IJ.run(impAs[pos], "Flip Z","");
+						IJ.run(impAs[pos], "Rotate 90 Degrees Left","");
+					}
 					if (arg.contains("megaTiffMMrc")) {
 						impAs[pos].setPosition(1, 1, 1);	
 
@@ -1583,7 +1596,9 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						impBs[pos].getOriginalFileInfo().fileName = dirOrOMETiff;
 						impBs[pos].getOriginalFileInfo().directory = dirOrOMETiff;
 						impBs[pos].show();
-						IJ.run(impBs[pos], "Rotate 90 Degrees Right","");
+						if (mitAdjustments) {
+							IJ.run(impBs[pos], "Rotate 90 Degrees Right","");
+						}
 						if (arg.contains("megaTiffMMrc")) {
 								IJ.run(impBs[pos],"Ice","");
 								impBs[pos].setDisplayRange(18, 28, 7);

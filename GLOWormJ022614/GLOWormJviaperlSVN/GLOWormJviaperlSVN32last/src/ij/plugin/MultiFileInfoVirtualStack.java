@@ -971,7 +971,8 @@ where 1<=n<=nSlices. Returns null if the stack is empty.
 			}else if (ip.getWidth()==2048 && vDim ==2) { //NIBIB splitview setup(?)
 				//	dX=2;
 				//	dY=0;
-				int xOri = 256+((1-(n+1)%2)*(1024));
+//				int xOri = 256+((1-(n+1)%2)*(1024));
+				int xOri = 192+((1-(n+1)%2)*(1150));
 				int yOri = 0+((1-(n+1)%2)*(0));
 				ip.setRoi(xOri, yOri, 512, 512);
 			}else if (ip.getWidth()==2048 && vDim ==1) { //Yale ratio setup(?)
