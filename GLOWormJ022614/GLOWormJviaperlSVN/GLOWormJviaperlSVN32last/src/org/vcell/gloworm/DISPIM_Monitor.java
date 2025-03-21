@@ -1530,7 +1530,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					} else {
 						IJ.run(impAs[pos], "Flip Vertically","");
 						IJ.run(impAs[pos], "Flip Z","");
-						IJ.run(impAs[pos], "Rotate 90 Degrees Left","");					
+						IJ.run(impAs[pos], "Rotate 90 Degrees Right","");					
 					}
 					if (arg.contains("megaTiffMMrc")) {
 						impAs[pos].setPosition(1, 1, 1);	
@@ -1609,7 +1609,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						if (mitAdjustments) {
 							IJ.run(impBs[pos], "Rotate 90 Degrees Right","");
 						} else {
-							IJ.run(impBs[pos], "Rotate 90 Degrees Right","");
+							IJ.run(impBs[pos], "Rotate 90 Degrees Left","");
 						}
 						if (arg.contains("megaTiffMMrc")) {
 								IJ.run(impBs[pos],"Ice","");
