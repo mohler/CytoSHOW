@@ -730,6 +730,7 @@ array and displays it if 'show' is true. */
 			} else if (cztDims < impSize) {
 				for (int a=impSize;a>cztDims;a--) {
 					imp.getStack().deleteSlice(a);
+					IJ.wait(0);
 				}
 			}else {
 				IJ.error("HyperStack Converter", "channels x slices x frames <> stack size");
@@ -811,15 +812,17 @@ array and displays it if 'show' is true. */
 		sliceNumber = n/(dimOrder.toLowerCase().matches(".*splitc.*")?2:1);
 		if (sliceNumber <1) sliceNumber = 1;
 		if (stackNumber<0) stackNumber = 0;
-		if (dimOrder.toLowerCase().matches(".*splitc.*")){	//IS ALL THIS REALLY NECESSARY??? MIGHT BE FOR SPLITC
-			if (sliceNumber%2==0){
-				if (fivStacks.get(stackNumber).getSize()>0){
-					fivStacks.get(stackNumber).deleteSlice(sliceNumber>0?sliceNumber:1);
-				}
-			}
-		} else {
-			fivStacks.get(stackNumber).deleteSlice(fivStacks.get(stackNumber).getSize());
-		}
+		
+		//WHY SHOULD I BOTHER DELETING SLICES FROM THE REFERENCED SUBSTACKS AT ALL???
+//		if (dimOrder.toLowerCase().matches(".*splitc.*")){	//IS ALL THIS REALLY NECESSARY??? MIGHT BE FOR SPLITC
+//			if (sliceNumber%2==0){
+//				if (fivStacks.get(stackNumber).getSize()>0){
+//					fivStacks.get(stackNumber).deleteSlice(sliceNumber>0?sliceNumber:1);
+//				}
+//			}
+//		} else {
+//			fivStacks.get(stackNumber).deleteSlice(fivStacks.get(stackNumber).getSize());
+//		}
 
 		nImageSlices--;
 	}

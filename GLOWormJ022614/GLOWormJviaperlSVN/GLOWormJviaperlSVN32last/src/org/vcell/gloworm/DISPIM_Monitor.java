@@ -1463,7 +1463,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 					int stackSizeA = impAs[pos].getImageStackSize();
 					//	int nChannels = cDim/(dimOrder=="xySplitCzt"?1:vDim);
-					int nChannelsA = ((MultiFileInfoVirtualStack)impAs[pos].getStack()).cDim /((MultiFileInfoVirtualStack)impAs[pos].getStack()).vDim;
+					int nChannelsA = ((MultiFileInfoVirtualStack) impAs[pos].getStack()).cDim /* /((MultiFileInfoVirtualStack)impAs[pos].getStack()).vDim */;
 					if (nChannelsA == 0) nChannelsA =1;
 					int nSlicesA = ((MultiFileInfoVirtualStack)impAs[pos].getStack()).zDim;
 					int nFramesA = ((MultiFileInfoVirtualStack)impAs[pos].getStack()).tDim;
@@ -1481,16 +1481,18 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									impAs[pos].getStack().addSlice(impAs[pos].getProcessor().createProcessor(impAs[pos].getWidth(), impAs[pos].getHeight()));
 							}
 						} else if (nChannelsA*nSlicesA*nFramesA<stackSizeA) {
-							for (int a=nChannelsA*nSlicesA*nFramesA;a<stackSizeA;a++) {
-								((MultiFileInfoVirtualStack)impAs[pos].getStack()).deleteSlice(1);
-								stackSizeA--;
+//							for (int a=stackSizeA;a>nChannelsA*nSlicesA*nFramesA;a--) {
+							while (nChannelsA*nSlicesA*nFramesA<stackSizeA) {
+								((MultiFileInfoVirtualStack)impAs[pos].getStack()).deleteSlice(stackSizeA);
+								stackSizeA = impAs[pos].getImageStackSize();
 							}
 						}else {
 							IJ.error("HyperStack Converter", "channels x slices x frames <> stack size");
 							return;
 						}
 					}
-
+					//repeat count after delete loop
+					stackSizeA = impAs[pos].getImageStackSize();
 
 					impAs[pos].setStack(impAs[pos].getImageStack());
 					impAs[pos].setOpenAsHyperStack(true);
@@ -1525,6 +1527,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						IJ.run(impAs[pos], "Flip Vertically","");
 						IJ.run(impAs[pos], "Flip Z","");
 						IJ.run(impAs[pos], "Rotate 90 Degrees Left","");
+					} else {
+						IJ.run(impAs[pos], "Flip Vertically","");
+						IJ.run(impAs[pos], "Flip Z","");
+						IJ.run(impAs[pos], "Rotate 90 Degrees Left","");					
 					}
 					if (arg.contains("megaTiffMMrc")) {
 						impAs[pos].setPosition(1, 1, 1);	
@@ -1538,7 +1544,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						impBs[pos].setStack(new MultiFileInfoVirtualStack(mmPath, dimOrder, "MMStack_Pos"+pos, false, cDim, zDim, tDim, vDim, pos, true, false, true, true, impBs[pos]));
 
 						int stackSizeB = impBs[pos].getImageStackSize();
-						int nChannelsB = ((MultiFileInfoVirtualStack)impBs[pos].getStack()).cDim /((MultiFileInfoVirtualStack)impBs[pos].getStack()).vDim;
+						int nChannelsB = ((MultiFileInfoVirtualStack) impBs[pos].getStack()).cDim /* /((MultiFileInfoVirtualStack)impBs[pos].getStack()).vDim */;
 						if (nChannelsB == 0) nChannelsB =1;
 						int nSlicesB = ((MultiFileInfoVirtualStack)impBs[pos].getStack()).zDim;
 						int nFramesB = ((MultiFileInfoVirtualStack)impBs[pos].getStack()).tDim;
@@ -1556,15 +1562,19 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										impBs[pos].getStack().addSlice(impBs[pos].getProcessor().createProcessor(impBs[pos].getWidth(), impBs[pos].getHeight()));
 								}
 							} else if (nChannelsB*nSlicesB*nFramesB<stackSizeB) {
-								for (int a=nChannelsB*nSlicesB*nFramesB;a<stackSizeB;a++) {
-									((MultiFileInfoVirtualStack)impBs[pos].getStack()).deleteSlice(1);
-									stackSizeB--;
+//								for (int a=stackSizeB; a>nChannelsB*nSlicesB*nFramesB;a--) {
+								while (nChannelsB*nSlicesB*nFramesB<stackSizeB) {
+									((MultiFileInfoVirtualStack)impBs[pos].getStack()).deleteSlice(stackSizeB);
+									stackSizeB = impBs[pos].getImageStackSize();
+//									stackSizeB--;
 								}
 							}else {
 								IJ.error("HyperStack Converter", "channels x slices x frames <> stack size");
 								return;
 							}
 						}
+						//repeat count after delete loop
+						stackSizeB = impBs[pos].getImageStackSize();
 
 
 						impBs[pos].setStack(impBs[pos].getImageStack());
@@ -1597,6 +1607,8 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						impBs[pos].getOriginalFileInfo().directory = dirOrOMETiff;
 						impBs[pos].show();
 						if (mitAdjustments) {
+							IJ.run(impBs[pos], "Rotate 90 Degrees Right","");
+						} else {
 							IJ.run(impBs[pos], "Rotate 90 Degrees Right","");
 						}
 						if (arg.contains("megaTiffMMrc")) {
