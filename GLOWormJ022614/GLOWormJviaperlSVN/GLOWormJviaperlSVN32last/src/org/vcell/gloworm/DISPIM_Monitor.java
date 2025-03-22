@@ -2750,12 +2750,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 
 				if (doProcessing[pos]) {
-					double pwA = impAs[pos].getCalibration().pixelWidth;
-					double phA = impAs[pos].getCalibration().pixelHeight;
-					double pdA = impAs[pos].getCalibration().pixelDepth;
-					double pwB = impBs[pos].getCalibration().pixelWidth;
-					double phB = impBs[pos].getCalibration().pixelHeight;
-					double pdB = impBs[pos].getCalibration().pixelDepth;
+					double pwA = impAs[pos].getCalibration().pixelWidth; if (pwA==0d) pwA=0.1625;
+					double phA = impAs[pos].getCalibration().pixelHeight; if (phA==0d) phA=0.1625;
+					double pdA = impAs[pos].getCalibration().pixelDepth; if (pdA==0d) pdA=1d;
+					double pwB = impBs[pos].getCalibration().pixelWidth; if (pwB==0d) pwB=0.1625;
+					double phB = impBs[pos].getCalibration().pixelHeight; if (phB==0d) phB=0.1625;
+					double pdB = impBs[pos].getCalibration().pixelDepth; if (pdB==0d) pdB=1d;
 
 					stackDFs[pos] = null;	
 
@@ -3586,13 +3586,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						} 
 
 						if (doProcessing[pos]) {
-							double pwA = impAs[pos].getCalibration().pixelWidth;
-							double phA = impAs[pos].getCalibration().pixelHeight;
-							double pdA = impAs[pos].getCalibration().pixelDepth;
-							double pwB = impBs[pos].getCalibration().pixelWidth;
-							double phB = impBs[pos].getCalibration().pixelHeight;
-							double pdB = impBs[pos].getCalibration().pixelDepth;
-
+							double pwA = impAs[pos].getCalibration().pixelWidth; if (pwA==0d) pwA=0.1625;
+							double phA = impAs[pos].getCalibration().pixelHeight; if (phA==0d) phA=0.1625;
+							double pdA = impAs[pos].getCalibration().pixelDepth; if (pdA==0d) pdA=1d;
+							double pwB = impBs[pos].getCalibration().pixelWidth; if (pwB==0d) pwB=0.1625;
+							double phB = impBs[pos].getCalibration().pixelHeight; if (phB==0d) phB=0.1625;
+							double pdB = impBs[pos].getCalibration().pixelDepth; if (pdB==0d) pdB=1d;
 
 							if (impAs[pos].hasNullStack())
 								continue;
@@ -3705,13 +3704,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					} 
 
 					if (doProcessing[pos]) {
-						double pwA = impAs[pos].getCalibration().pixelWidth;
-						double phA = impAs[pos].getCalibration().pixelHeight;
-						double pdA = impAs[pos].getCalibration().pixelDepth;
-						double pwB = impBs[pos].getCalibration().pixelWidth;
-						double phB = impBs[pos].getCalibration().pixelHeight;
-						double pdB = impBs[pos].getCalibration().pixelDepth;
-
+						double pwA = impAs[pos].getCalibration().pixelWidth; if (pwA==0d) pwA=0.1625;
+						double phA = impAs[pos].getCalibration().pixelHeight; if (phA==0d) phA=0.1625;
+						double pdA = impAs[pos].getCalibration().pixelDepth; if (pdA==0d) pdA=1d;
+						double pwB = impBs[pos].getCalibration().pixelWidth; if (pwB==0d) pwB=0.1625;
+						double phB = impBs[pos].getCalibration().pixelHeight; if (phB==0d) phB=0.1625;
+						double pdB = impBs[pos].getCalibration().pixelDepth; if (pdB==0d) pdB=1d;
 
 						if (impAs[pos].hasNullStack())
 							continue;
@@ -4859,14 +4857,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 						int longAxisLength = (int)longAxesA[pos];
 						if (doProcessing[pos]) {
-							double pwA = impAs[pos].getCalibration().pixelWidth;
-							double phA = impAs[pos].getCalibration().pixelHeight;
-							double pdA = impAs[pos].getCalibration().pixelDepth;
-							double pwB = impBs[pos].getCalibration().pixelWidth;
-							double phB = impBs[pos].getCalibration().pixelHeight;
-							double pdB = impBs[pos].getCalibration().pixelDepth;
-
-
+							double pwA = impAs[pos].getCalibration().pixelWidth; if (pwA==0d) pwA=0.1625;
+							double phA = impAs[pos].getCalibration().pixelHeight; if (phA==0d) phA=0.1625;
+							double pdA = impAs[pos].getCalibration().pixelDepth; if (pdA==0d) pdA=1d;
+							double pwB = impBs[pos].getCalibration().pixelWidth; if (pwB==0d) pwB=0.1625;
+							double phB = impBs[pos].getCalibration().pixelHeight; if (phB==0d) phB=0.1625;
+							double pdB = impBs[pos].getCalibration().pixelDepth; if (pdB==0d) pdB=1d;
 
 							if (impAs[pos].hasNullStack() || impAs[pos].getNFrames()<f-1)
 								continue;
@@ -5302,14 +5298,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 									(wavelengths>=2 && !(new File(saveDFPath + "CropBkgdSub" + File.separator + "SPIMB"+pos+"-"+f+"-2_1.tif").canRead())) ){
 								IJ.wait(100);
 							}
-							double pwA = impAs[pos].getCalibration().pixelWidth;
-							double phA = impAs[pos].getCalibration().pixelHeight;
-							double pdA = impAs[pos].getCalibration().pixelDepth;
-							double pwB = impBs[pos].getCalibration().pixelWidth;
-							double phB = impBs[pos].getCalibration().pixelHeight;
-							double pdB = impBs[pos].getCalibration().pixelDepth;
-
-
+							double pwA = impAs[pos].getCalibration().pixelWidth; if (pwA==0d) pwA=0.1625;
+							double phA = impAs[pos].getCalibration().pixelHeight; if (phA==0d) phA=0.1625;
+							double pdA = impAs[pos].getCalibration().pixelDepth; if (pdA==0d) pdA=1d;
+							double pwB = impBs[pos].getCalibration().pixelWidth; if (pwB==0d) pwB=0.1625;
+							double phB = impBs[pos].getCalibration().pixelHeight; if (phB==0d) phB=0.1625;
+							double pdB = impBs[pos].getCalibration().pixelDepth; if (pdB==0d) pdB=1d;
 
 							if (impAs[pos].hasNullStack() || impAs[pos].getNFrames()<f-1)
 								continue;
@@ -5734,14 +5728,23 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										} else {
 											String matrixOne = IJ.openAsString("" + saveDFPath + "RegDecon" + File.separator + "TMX" + File.separator + "Matrix_1.tmx");
 											if (matrixOne.startsWith("Error") 
-													|| Double.parseDouble(matrixOne.split("\\t")[0])< 0.75
-													|| Double.parseDouble(matrixOne.split("\\t")[0])> 1.25
+//													|| Double.parseDouble(matrixOne.split("\\t")[0])< 0.75
+//													|| Double.parseDouble(matrixOne.split("\\t")[0])> 1.25
+//													|| Double.parseDouble(matrixOne.split("\\t")[5])< 0.95
+//													|| Double.parseDouble(matrixOne.split("\\t")[5])> 1.05
+//													|| Double.parseDouble(matrixOne.split("\\t")[10])< 0.75
+//													|| Double.parseDouble(matrixOne.split("\\t")[10])> 1.25
+//													|| Double.parseDouble(matrixOne.split("\\t")[15])< 0.95
+//													|| Double.parseDouble(matrixOne.split("\\t")[15])> 1.05
+													|| Double.parseDouble(matrixOne.split("\\t")[0])< 0.92
+													|| Double.parseDouble(matrixOne.split("\\t")[0])> 1.08
 													|| Double.parseDouble(matrixOne.split("\\t")[5])< 0.95
 													|| Double.parseDouble(matrixOne.split("\\t")[5])> 1.05
-													|| Double.parseDouble(matrixOne.split("\\t")[10])< 0.75
-													|| Double.parseDouble(matrixOne.split("\\t")[10])> 1.25
+													|| Double.parseDouble(matrixOne.split("\\t")[10])< 0.95
+													|| Double.parseDouble(matrixOne.split("\\t")[10])> 1.05
 													|| Double.parseDouble(matrixOne.split("\\t")[15])< 0.95
 													|| Double.parseDouble(matrixOne.split("\\t")[15])> 1.05
+
 													){
 												IJ.log("Bah Humbug, poor registration");
 												IJ.log(""+ pos+ "new=> " + matrixOne);
@@ -6028,14 +6031,12 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 						if (doProcessing[pos]) {
 
 
-							double pwA = impAs[pos].getCalibration().pixelWidth;
-							double phA = impAs[pos].getCalibration().pixelHeight;
-							double pdA = impAs[pos].getCalibration().pixelDepth;
-							double pwB = impBs[pos].getCalibration().pixelWidth;
-							double phB = impBs[pos].getCalibration().pixelHeight;
-							double pdB = impBs[pos].getCalibration().pixelDepth;
-
-
+							double pwA = impAs[pos].getCalibration().pixelWidth; if (pwA==0d) pwA=0.1625;
+							double phA = impAs[pos].getCalibration().pixelHeight; if (phA==0d) phA=0.1625;
+							double pdA = impAs[pos].getCalibration().pixelDepth; if (pdA==0d) pdA=1d;
+							double pwB = impBs[pos].getCalibration().pixelWidth; if (pwB==0d) pwB=0.1625;
+							double phB = impBs[pos].getCalibration().pixelHeight; if (phB==0d) phB=0.1625;
+							double pdB = impBs[pos].getCalibration().pixelDepth; if (pdB==0d) pdB=1d;
 
 							if (impAs[pos].hasNullStack())
 								continue;
