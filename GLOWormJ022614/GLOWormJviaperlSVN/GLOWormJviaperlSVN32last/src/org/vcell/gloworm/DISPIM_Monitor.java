@@ -4346,7 +4346,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										stackA2.addSlice(ip2);
 									}
 						}
-						impAs[pos].getWindow().setEnabled(true);
+//						impAs[pos].getWindow().setEnabled(true);
 						ImagePlus impXA1 = new ImagePlus();
 						impXA1.setStack(stackA1);
 						impXA1.setCalibration(impAs[pos].getCalibration());
@@ -4426,7 +4426,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 										stackB2.addSlice(ip2);
 									}
 						}
-						impBs[pos].getWindow().setEnabled(true);
+//						impBs[pos].getWindow().setEnabled(true);
 						ImagePlus impXB1 = new ImagePlus();
 						impXB1.setStack(stackB1);
 						impXB1.setCalibration(impBs[pos].getCalibration());
@@ -4980,7 +4980,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							stackA1.addSlice(new ShortProcessor(longAxisLength, longAxisLength));
 							stackA2.addSlice(new ShortProcessor(longAxisLength, longAxisLength));
 
-							impAs[pos].getWindow().setEnabled(true);
+//							impAs[pos].getWindow().setEnabled(true);
 							impXA1 = new ImagePlus();
 							impXA1.setStack(stackA1);
 							if (diSPIM_MM_ComputerName!=null && diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
@@ -5098,7 +5098,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							stackB1.addSlice(new ShortProcessor(longAxisLength, longAxisLength));
 							stackB2.addSlice(new ShortProcessor(longAxisLength, longAxisLength));
 
-							impBs[pos].getWindow().setEnabled(true);
+//							impBs[pos].getWindow().setEnabled(true);
 							impXB1 = new ImagePlus();
 							impXB1.setStack(stackB1);
 							if (diSPIM_MM_ComputerName!=null && diSPIM_MM_ComputerName.startsWith("diSPIM-HP")) {
@@ -5144,6 +5144,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 
 						}
 					}
+				}
+				for (int w=0; w<impAs.length; w++) {
+					impAs[w].getWindow().setEnabled(true);
+					impBs[w].getWindow().setEnabled(true);
 				}
 			}
 

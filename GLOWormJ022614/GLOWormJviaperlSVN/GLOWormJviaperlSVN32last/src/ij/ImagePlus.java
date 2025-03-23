@@ -1554,13 +1554,13 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
     	if (slice>nSlices) slice = nSlices;
     	if (frame<1) frame = 1;
     	if (frame>nFrames) frame = nFrames;
-		if (isDisplayedHyperStack())
+		if (!noUpdateMode && isDisplayedHyperStack())
 			((StackWindow)win).setPosition(channel, slice, frame);
 		else {
 			setSlice((frame-1)*nChannels*nSlices + (slice-1)*nChannels + channel);
 			updatePosition(channel, slice, frame);
 		}
-		if (win!=null) {
+		if (!noUpdateMode && win!=null) {
 			win.getSubTitleField().setText(win.createSubtitle(false));
 			win.getSubTitleField().setToolTipText(win.createSubtitle(true));
 		}
@@ -1680,7 +1680,7 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 				stack.setPixels(ip.getPixels(),currentSlice);
 //			ip = getProcessor();
 			setCurrentSlice(n);
-			if (win!=null && win instanceof StackWindow)
+			if (!noUpdateMode && win!=null && win instanceof StackWindow)
 				((StackWindow)win).updateSliceSelector();
 			Object pixels = stack.getPixels(currentSlice);
 			if ((ip!=null && pixels!=null) 
