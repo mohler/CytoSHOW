@@ -6186,7 +6186,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 												impPrxs[pos].setRoiManager(null);
 											}else {
 //												impPrxs[pos] = new ImagePlus();
-												impPrxs[pos] = stackPrxs[pos].open(true);
+												impPrxs[pos] = stackPrxs[pos].open(false);
 											}
 											impPrxs[pos].setStack((orientBeforeLineage?"Preview_":"") + "3DProjX_Decon-Fuse_"
 													+ impAs[pos].getTitle().split(":")[0], stackPrxs[pos]);
@@ -6324,7 +6324,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 												impPrys[pos].setRoiManager(null);
 											} else {
 //												impPrys[pos] = new ImagePlus();
-												impPrys[pos] = stackPrys[pos].open(true);
+												impPrys[pos] = stackPrys[pos].open(false);
 											}
 											impPrys[pos].setStack((orientBeforeLineage?"Preview_":"") + "3DProjY_Decon-Fuse_"
 													+ impAs[pos].getTitle().split(":")[0], stackPrys[pos]);
