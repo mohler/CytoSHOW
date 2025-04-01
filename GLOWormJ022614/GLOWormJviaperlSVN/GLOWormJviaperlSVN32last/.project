@@ -3,29 +3,6 @@
 	<name>CytoSHOWviaperlGitHub</name>
 	<comment></comment>
 	<projects>
-		<project>AceTreeLegacyModForCytoSHOWsynch</project>
-		<project>autogen</project>
-		<project>bioformats</project>
-		<project>bioformats_package</project>
-		<project>bio-formats-plugins</project>
-		<project>bio-formats-tools</project>
-		<project>formats-api</project>
-		<project>formats-bsd</project>
-		<project>formats-common</project>
-		<project>formats-gpl</project>
-		<project>loci-tools</project>
-		<project>lwf-stubs</project>
-		<project>mdbtools</project>
-		<project>metakit</project>
-		<project>mipav</project>
-		<project>ome-jxr</project>
-		<project>ome-tools</project>
-		<project>ome-xml</project>
-		<project>poi</project>
-		<project>specification</project>
-		<project>test-suite</project>
-		<project>turbojpeg</project>
-		<project>xsd-fu</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
