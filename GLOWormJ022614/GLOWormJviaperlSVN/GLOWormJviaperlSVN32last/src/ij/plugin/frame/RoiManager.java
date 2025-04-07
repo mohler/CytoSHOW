@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.PrimitiveIterator.OfDouble;
+import java.util.stream.Collectors;
 import java.awt.List;
 import java.util.zip.*;
 
@@ -2208,6 +2209,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		
 		Roi[] rois = roisArray;  
 		
+// THIS OLD VERSION IS FROM WHEN AND WHY?  I CAN'T RECALL....
+//
 //		for (int n = 0; n < rootNames_rootFrames.size(); n++) {
 //			String rootName = rootNames.get(n);
 //
@@ -2239,6 +2242,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //				}
 //			}
 
+		LinkedHashMap<String, Double> rootNameRootFrame_VolumeLHM = new LinkedHashMap<String, Double>();                  
+		LinkedHashMap<String, Double> rootNameRootFrame_SurfaceAreaLHM = new LinkedHashMap<String, Double>();                  
+		LinkedHashMap<String, Double> rootNameRootFrame_RankedVolumesOrderLHM = new LinkedHashMap<String, Double>();                  
+		LinkedHashMap<String, Double> rootNameRootFrame_RankedSurfaceAreasOrderLHM = new LinkedHashMap<String, Double>();                  
+
 		for (int n = 0; n < rootNames_rootFrames.size(); n++) {
 			String rootName = rootNames.get(n);
 			String rootNameFrame = rootNames_rootFrames.get(n);
@@ -2269,11 +2277,39 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				}
 			}
 
-			double totalVolume = sumAreas * imp.getCalibration().pixelDepth;
-			double totalSA = sumPerims * imp.getCalibration().pixelDepth;
-			IJ.log(""+rootName+","+String.format("%.2f",totalVolume)+","+String.format("%.2f",totalSA));
+			double totalRNRF_Volume = sumAreas * imp.getCalibration().pixelDepth;
+			double totalRNRF_SA = sumPerims * imp.getCalibration().pixelDepth;
+			IJ.log(""+rootName+", vol="+String.format("%.2f",totalRNRF_Volume)+", SA="+String.format("%.2f",totalRNRF_SA));
+			rootNameRootFrame_VolumeLHM.put(rootNameFrame, totalRNRF_Volume);
+			rootNameRootFrame_SurfaceAreaLHM.put(rootNameFrame, totalRNRF_SA);			
 		}
+		
+		ArrayList<String> sortedRNRFsbyVol = 
+				rootNameRootFrame_VolumeLHM
+			    .entrySet()
+			    .stream()
+			    .sorted(Map.Entry.comparingByValue())
+			    .map(Map.Entry::getKey)
+			    .collect(Collectors.toCollection(ArrayList::new));
+		for (int v=sortedRNRFsbyVol.size()-1; v>=0; v--) {
+			rootNameRootFrame_RankedVolumesOrderLHM.put(sortedRNRFsbyVol.get(v),rootNameRootFrame_VolumeLHM.get(sortedRNRFsbyVol.get(v)));
+		}
+	
+		ArrayList<String> sortedRNRFsbySA = 
+				rootNameRootFrame_SurfaceAreaLHM
+			    .entrySet()
+			    .stream()
+			    .sorted(Map.Entry.comparingByValue())
+			    .map(Map.Entry::getKey)
+			    .collect(Collectors.toCollection(ArrayList::new));
+		for (int sa=sortedRNRFsbySA.size()-1; sa>=0; sa--) {
+			rootNameRootFrame_RankedSurfaceAreasOrderLHM.put(sortedRNRFsbySA.get(sa),rootNameRootFrame_SurfaceAreaLHM.get(sortedRNRFsbySA.get(sa)));
+		}
+	
+		IJ.wait(0);
+		
 	}
+	
 
 	private void sketchVolumeSlicer(Object source) {
 		boolean singleSave = IJ.shiftKeyDown();
