@@ -2291,8 +2291,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			    .sorted(Map.Entry.comparingByValue())
 			    .map(Map.Entry::getKey)
 			    .collect(Collectors.toCollection(ArrayList::new));
+		IJ.log("\nRanked By Volume");
 		for (int v=sortedRNRFsbyVol.size()-1; v>=0; v--) {
 			rootNameRootFrame_RankedVolumesOrderLHM.put(sortedRNRFsbyVol.get(v),rootNameRootFrame_VolumeLHM.get(sortedRNRFsbyVol.get(v)));
+			IJ.log(sortedRNRFsbyVol.get(v)+" "+rootNameRootFrame_VolumeLHM.get(sortedRNRFsbyVol.get(v)));
 		}
 	
 		ArrayList<String> sortedRNRFsbySA = 
@@ -2302,8 +2304,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			    .sorted(Map.Entry.comparingByValue())
 			    .map(Map.Entry::getKey)
 			    .collect(Collectors.toCollection(ArrayList::new));
+		IJ.log("\nRanked By SurfaceArea");
 		for (int sa=sortedRNRFsbySA.size()-1; sa>=0; sa--) {
 			rootNameRootFrame_RankedSurfaceAreasOrderLHM.put(sortedRNRFsbySA.get(sa),rootNameRootFrame_SurfaceAreaLHM.get(sortedRNRFsbySA.get(sa)));
+			IJ.log(sortedRNRFsbySA.get(sa)+" "+rootNameRootFrame_SurfaceAreaLHM.get(sortedRNRFsbySA.get(sa)));
 		}
 	
 		IJ.wait(0);
