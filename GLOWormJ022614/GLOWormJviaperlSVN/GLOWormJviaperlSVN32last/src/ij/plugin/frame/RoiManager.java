@@ -2300,6 +2300,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			} else {
 				continue; //for rnrfA
 			}
+			if (rootNameRootFrame_SurfaceAreaLHM.get(rnrfA)!=null && rootNameRootFrame_SurfaceAreaLHM.get(rnrfB)!=null) {
+				
+			} else {
+				continue; //for rnrfA
+			}
 			Double rnrfRecipAvgSurfaceArea = (rootNameRootFrame_SurfaceAreaLHM.get(rnrfA) 
 											+ rootNameRootFrame_SurfaceAreaLHM.get(rnrfB))
 											/ 2;
