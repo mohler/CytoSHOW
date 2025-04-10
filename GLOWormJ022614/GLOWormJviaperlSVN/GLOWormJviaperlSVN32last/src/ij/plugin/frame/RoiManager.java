@@ -2244,8 +2244,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		LinkedHashMap<String, Double> rootNameRootFrame_VolumeLHM = new LinkedHashMap<String, Double>();                  
 		LinkedHashMap<String, Double> rootNameRootFrame_SurfaceAreaLHM = new LinkedHashMap<String, Double>();                  
-		LinkedHashMap<String, Double> rootNameRootFrame_RankedVolumesOrderLHM = new LinkedHashMap<String, Double>();                  
-		LinkedHashMap<String, Double> rootNameRootFrame_RankedSurfaceAreasOrderLHM = new LinkedHashMap<String, Double>();                  
+//		LinkedHashMap<String, Double> rootNameRootFrame_RecipAvgVolumeLHM = new LinkedHashMap<String, Double>();                  
+		LinkedHashMap<String, Double> rootNameRootFrame_RecipAvgSurfaceAreaLHM = new LinkedHashMap<String, Double>();                  
+		LinkedHashMap<String, Double> rootNameRootFrame_RankedVolumesOrderWholeBrainLHM = new LinkedHashMap<String, Double>();                  
+		LinkedHashMap<String, Double> rootNameRootFrame_RankedSurfaceAreasOrderWholeBrainLHM = new LinkedHashMap<String, Double>();                  
+		LinkedHashMap<String, Double> rootNameRootFrame_RankedVolumesOrderToCellLHM = new LinkedHashMap<String, Double>();                  
+		LinkedHashMap<String, Double> rootNameRootFrame_RankedSurfaceAreasOrderToCellLHM = new LinkedHashMap<String, Double>();                  
+		LinkedHashMap<String, Double> rootNameRootFrame_RankedVolumesOrderByCellLHM = new LinkedHashMap<String, Double>();                  
+		LinkedHashMap<String, Double> rootNameRootFrame_RankedSurfaceAreasOrderByCellLHM = new LinkedHashMap<String, Double>();                  
 
 		for (int n = 0; n < rootNames_rootFrames.size(); n++) {
 			String rootName = rootNames.get(n);
@@ -2282,7 +2288,33 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			IJ.log(""+rootName+", vol="+String.format("%.2f",totalRNRF_Volume)+", SA="+String.format("%.2f",totalRNRF_SA));
 			rootNameRootFrame_VolumeLHM.put(rootNameFrame, totalRNRF_Volume);
 			rootNameRootFrame_SurfaceAreaLHM.put(rootNameFrame, totalRNRF_SA);			
+			
+			
 		}
+		
+		IJ.log("\nUn-Ranked RecipAvg Surface Areas over Whole Brain");
+		for (String rnrfA : rootNames_rootFrames) {
+			String rnrfB = "";
+			if (rnrfA.matches("([A-Z]+)by([A-Z]+)(_\\d+)")) {
+				 rnrfB = rnrfA.replaceAll("([A-Z]+)by([A-Z]+)(_\\d+)", "$2by$1$3");
+			} else {
+				continue; //for rnrfA
+			}
+			Double rnrfRecipAvgSurfaceArea = (rootNameRootFrame_SurfaceAreaLHM.get(rnrfA) 
+											+ rootNameRootFrame_SurfaceAreaLHM.get(rnrfB))
+											/ 2;
+			if (!(rootNameRootFrame_RecipAvgSurfaceAreaLHM.containsKey(rnrfA.replace("by", "and"))
+				 ||rootNameRootFrame_RecipAvgSurfaceAreaLHM.containsKey((rnrfB.replace("by", "and"))))) {
+					rootNameRootFrame_RecipAvgSurfaceAreaLHM.put(rnrfA.replace("by", "and"), rnrfRecipAvgSurfaceArea);
+					rootNameRootFrame_RecipAvgSurfaceAreaLHM.put(rnrfB.replace("by", "and"), rnrfRecipAvgSurfaceArea);	
+					IJ.log(rnrfA+" "+rootNameRootFrame_SurfaceAreaLHM.get(rnrfA));
+					IJ.log((rnrfA.replace("by", "and")+" "+rootNameRootFrame_RecipAvgSurfaceAreaLHM.get(rnrfA.replace("by", "and"))));
+					IJ.log((rnrfB.replace("by", "and")+" "+rootNameRootFrame_RecipAvgSurfaceAreaLHM.get(rnrfB.replace("by", "and"))));
+					IJ.log(rnrfB+" "+rootNameRootFrame_SurfaceAreaLHM.get(rnrfB));
+					IJ.log("-");
+			}
+		}
+
 		
 		ArrayList<String> sortedRNRFsbyVol = 
 				rootNameRootFrame_VolumeLHM
@@ -2291,9 +2323,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			    .sorted(Map.Entry.comparingByValue())
 			    .map(Map.Entry::getKey)
 			    .collect(Collectors.toCollection(ArrayList::new));
-		IJ.log("\nRanked By Volume");
+		IJ.log("\nRanked By Volume over Whole Brain");
 		for (int v=sortedRNRFsbyVol.size()-1; v>=0; v--) {
-			rootNameRootFrame_RankedVolumesOrderLHM.put(sortedRNRFsbyVol.get(v),rootNameRootFrame_VolumeLHM.get(sortedRNRFsbyVol.get(v)));
+			rootNameRootFrame_RankedVolumesOrderWholeBrainLHM.put(sortedRNRFsbyVol.get(v),rootNameRootFrame_VolumeLHM.get(sortedRNRFsbyVol.get(v)));
 			IJ.log(sortedRNRFsbyVol.get(v)+" "+rootNameRootFrame_VolumeLHM.get(sortedRNRFsbyVol.get(v)));
 		}
 	
@@ -2304,11 +2336,51 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			    .sorted(Map.Entry.comparingByValue())
 			    .map(Map.Entry::getKey)
 			    .collect(Collectors.toCollection(ArrayList::new));
-		IJ.log("\nRanked By SurfaceArea");
+		IJ.log("\nRanked By SurfaceArea over Whole Brain");
 		for (int sa=sortedRNRFsbySA.size()-1; sa>=0; sa--) {
-			rootNameRootFrame_RankedSurfaceAreasOrderLHM.put(sortedRNRFsbySA.get(sa),rootNameRootFrame_SurfaceAreaLHM.get(sortedRNRFsbySA.get(sa)));
+			rootNameRootFrame_RankedSurfaceAreasOrderWholeBrainLHM.put(sortedRNRFsbySA.get(sa),rootNameRootFrame_SurfaceAreaLHM.get(sortedRNRFsbySA.get(sa)));
 			IJ.log(sortedRNRFsbySA.get(sa)+" "+rootNameRootFrame_SurfaceAreaLHM.get(sortedRNRFsbySA.get(sa)));
 		}
+	
+		IJ.wait(0);
+		
+/////////////// VVVVVVVV This block does not sort into sorted cell bins yet!!! NEEDS WORK.
+		ArrayList<String> sortedRNRFsbyVolEachCell = 
+				rootNameRootFrame_RankedVolumesOrderWholeBrainLHM
+			    .entrySet()
+			    .stream()
+			    .sorted(Map.Entry.comparingByKey())
+			    .sorted(Map.Entry.comparingByValue())
+			    .map(Map.Entry::getKey)
+			    .collect(Collectors.toCollection(ArrayList::new));
+		IJ.log("\nRanked By Volume over each contacted cell");
+		for (int vToBy=sortedRNRFsbyVolEachCell.size()-1; vToBy>=0; vToBy--) {
+			rootNameRootFrame_RankedVolumesOrderToCellLHM.put(sortedRNRFsbyVolEachCell.get(vToBy).split("(by|_)")[0],rootNameRootFrame_VolumeLHM.get(sortedRNRFsbyVolEachCell.get(vToBy)));
+			IJ.log(sortedRNRFsbyVolEachCell.get(vToBy).split("(by|_)")[0]+" "+sortedRNRFsbyVolEachCell.get(vToBy)+" "+rootNameRootFrame_VolumeLHM.get(sortedRNRFsbyVolEachCell.get(vToBy)));
+//			if(sortedRNRFsbyVolEachCell.get(vToBy).split("(by|_)").length>1) {
+//				rootNameRootFrame_RankedVolumesOrderByCellLHM.put(sortedRNRFsbyVolEachCell.get(vToBy).split("(by|_)")[1],rootNameRootFrame_VolumeLHM.get(sortedRNRFsbyVolEachCell.get(vToBy)));
+//				IJ.log(sortedRNRFsbyVolEachCell.get(vToBy).split("(by|_)")[1]+" "+sortedRNRFsbyVolEachCell.get(vToBy)+" "+rootNameRootFrame_VolumeLHM.get(sortedRNRFsbyVolEachCell.get(vToBy)));
+//			}
+		}
+	
+		ArrayList<String> sortedRNRFsbySAEachCell = 
+				rootNameRootFrame_RankedSurfaceAreasOrderWholeBrainLHM
+			    .entrySet()
+			    .stream()
+			    .sorted( Map.Entry.comparingByKey())
+			    .sorted(Map.Entry.comparingByValue())
+			    .map(Map.Entry::getKey)
+			    .collect(Collectors.toCollection(ArrayList::new));
+		IJ.log("\nRanked By SurfaceArea over each contacted cell");
+		for (int saToBy = sortedRNRFsbySAEachCell.size()-1; saToBy>=0; saToBy--) {
+			rootNameRootFrame_RankedSurfaceAreasOrderToCellLHM.put(sortedRNRFsbySAEachCell.get(saToBy).split("(by|_)")[0],rootNameRootFrame_SurfaceAreaLHM.get(sortedRNRFsbySAEachCell.get(saToBy)));
+			IJ.log(sortedRNRFsbySAEachCell.get(saToBy).split("(by|_)")[0]+" "+sortedRNRFsbySAEachCell.get(saToBy)+" "+rootNameRootFrame_SurfaceAreaLHM.get(sortedRNRFsbySAEachCell.get(saToBy)));
+//			if(sortedRNRFsbySAEachCell.get(saToBy).split("(by|_)").length>1) {
+//				rootNameRootFrame_RankedSurfaceAreasOrderByCellLHM.put(sortedRNRFsbySAEachCell.get(saToBy).split("(by|_)")[1],rootNameRootFrame_SurfaceAreaLHM.get(sortedRNRFsbySAEachCell.get(saToBy)));
+//				IJ.log(sortedRNRFsbySAEachCell.get(saToBy).split("(by|_)")[1]+" "+sortedRNRFsbySAEachCell.get(saToBy)+" "+rootNameRootFrame_SurfaceAreaLHM.get(sortedRNRFsbySAEachCell.get(saToBy)));
+//			}
+		}
+/////////////// ^^^^ This block does not sort into sorted cell bins yet!!! NEEDS WORK.
 	
 		IJ.wait(0);
 		
