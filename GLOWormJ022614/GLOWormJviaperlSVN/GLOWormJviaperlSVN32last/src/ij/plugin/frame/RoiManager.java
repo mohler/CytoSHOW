@@ -9160,9 +9160,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						Roi scaledRoi = RoiEnlarger.enlarge(testSubRoi, expansionDistance);
 
 //						imp.setRoi(scaledRoi);
-						if (andName.contains("SIADL")||andName.contains("SMDVR")/*||andName.contains("SMDVL")*/)
-							IJ.wait(1);
-						Roi shrunkRoi = queryRoi;
+//						if (andName.contains("SIADL")||andName.contains("SMDVR")/*||andName.contains("SMDVL")*/)
+//							IJ.wait(1);
+						Roi unScaledRoi = queryRoi;
 						//					imp.setRoi(shrunkRoi);
 						//					IJ.wait(1);
 						Roi dupRoi = (Roi) queryRoi.clone();
@@ -9172,10 +9172,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						//					imp.setRoi(scaledShapeRoi);
 						//					IJ.wait(1);
 						Roi[] shScaledComponentRois = scaledShapeRoi.getRois();
-						ShapeRoi shrunkShapeRoi = new ShapeRoi(shrunkRoi);
+						ShapeRoi unScaledShapeRoi = new ShapeRoi(unScaledRoi);
 						//					imp.setRoi(shrunkShapeRoi);
 						//					IJ.wait(1);
-						Roi[] shShrunkComponentRois = shrunkShapeRoi.getRois();
+						Roi[] shShrunkComponentRois = unScaledShapeRoi.getRois();
 						ShapeRoi dupShapeRoi = new ShapeRoi(dupRoi);
 						//					imp.setRoi(scaledRoi);
 						//					IJ.wait(1);
@@ -9192,26 +9192,29 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								Polygon dupPoly = shDupComponentRois[b].getPolygon();
 								ArrayList<ArrayList<Point>> contactSubsegments = new ArrayList<ArrayList<Point>>();
 								ArrayList<Point> contactSegmentPoints = new ArrayList<Point>();
+								
 								//Double loop to be sure all contiguous points are chained in the final form.  Record multiple contig segments if needed.
-								if (/*andName.contains("SIADL")||*/andName.contains("SMDVR")/*||andName.contains("SMDVL")*/)
-									IJ.wait(1);
-								scaledPolyPoints:
-								for (int p=0; p<scaledPoly.npoints*2; p++) {
-									if (dupPoly.contains(scaledPoly.xpoints[p%scaledPoly.npoints], scaledPoly.ypoints[p%scaledPoly.npoints])) {
-										contactSegmentPoints.add(new Point(scaledPoly.xpoints[p%scaledPoly.npoints], scaledPoly.ypoints[p%scaledPoly.npoints]));
+								//What about skipped points??  How record gaps in contact chain??  Will need several polylines.
+								
+//								if (/*andName.contains("SIADL")||*/andName.contains("SMDVR")/*||andName.contains("SMDVL")*/)
+//									IJ.wait(1);
+								dupPolyPoints:
+								for (int p=0; p<dupPoly.npoints*2; p++) {
+									if (scaledPoly.contains(dupPoly.xpoints[p%dupPoly.npoints], dupPoly.ypoints[p%dupPoly.npoints])) {
+										contactSegmentPoints.add(new Point(dupPoly.xpoints[p%dupPoly.npoints], dupPoly.ypoints[p%dupPoly.npoints]));
 //										imp.setRoi(new Roi(contactSegmentPoints.get(contactSegmentPoints.size()-1).x-1,
 //															contactSegmentPoints.get(contactSegmentPoints.size()-1).y-1, 2,2));
-										if (/*andName.contains("SIADL")||*/andName.contains("SMDVR")/*||andName.contains("SMDVL")*/)
-											IJ.wait(1);
+//										if (/*andName.contains("SIADL")||*/andName.contains("SMDVR")/*||andName.contains("SMDVL")*/)
+//											IJ.wait(1);
 
 									} else {
 										if (contactSegmentPoints.size() <= 1) {
 											contactSegmentPoints = new ArrayList<Point>();
-											continue scaledPolyPoints;
+											continue dupPolyPoints;
 										} else {
 											contactSubsegments.add(contactSegmentPoints);
 											contactSegmentPoints = new ArrayList<Point>();
-											continue scaledPolyPoints;
+											continue dupPolyPoints;
 										}
 									}
 								}
@@ -9224,14 +9227,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 								}
 
 								
-								if (/*andName.contains("SIADL")||*/andName.contains("SMDVR")/*||andName.contains("SMDVL")*/)
-									IJ.wait(1);
+//								if (/*andName.contains("SIADL")||*/andName.contains("SMDVR")/*||andName.contains("SMDVL")*/)
+//									IJ.wait(1);
 // Now loop through all captured segments to find overlaps and null out short overlappers
 								cssloop:
 									for (int css=0; css < contactSubsegments.size(); css++) {
 										if (contactSubsegments.get(css)!=null) {
-											if (/* andName.contains("SIADL")|| */andName.contains("SMDVR")/*||andName.contains("SMDVL")*/)
-												IJ.wait(1);
+//											if (/* andName.contains("SIADL")|| */andName.contains("SMDVR")/*||andName.contains("SMDVL")*/)
+//												IJ.wait(1);
 											cssbloop:
 												for (int cssb=css+1; cssb < contactSubsegments.size(); cssb++) {
 													if (contactSubsegments.get(cssb)!=null) {
@@ -9253,8 +9256,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 									}
 
 								for (ArrayList<Point> contactSegPts:contactSubsegments) {
-									if (/*andName.contains("SIADL")||*/andName.contains("SMDVR"))
-										IJ.wait(1);
+//									if (/*andName.contains("SIADL")||andName.contains("SMDVR")*/)
+//										IJ.wait(1);
 									
 									if (contactSegPts == null) {
 										continue;
@@ -9274,12 +9277,13 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 									contactSegmentRoi.setStrokeWidth(5);
 
 									contactSegmentRoi.setName(andName/*+"ContactPolyLineSegement"*/);
-									
+
+									Color tColor= testRoi.getFillColor();									
 									contactSegmentRoi.setPosition(cPos, zPos, tPos);
-									contactSegmentRoi.setFillColor(testRoi.getFillColor());
-									contactSegmentRoi.setStrokeColor(testRoi.getFillColor());
-									this.addRoi(contactSegmentRoi, false, testRoi.getFillColor(), testRoi.getFillColor(),  5, false);
-									IJ.log(contactSegmentRoi.getName());
+									contactSegmentRoi.setFillColor(tColor);
+									contactSegmentRoi.setStrokeColor(tColor);
+									this.addRoi(contactSegmentRoi, false, tColor, tColor,  5, false);
+									IJ.log(contactSegmentRoi.getName()+" "+ contactSegmentRoi.getStrokeColor().toString());
 
 								}
 							}
@@ -11544,7 +11548,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 			Color bg = Color.gray;
 			if (rois != null && rois.get(value) != null) {
-				bg = rois.get(value).getFillColor();
+				if (rois.get(value).isLine()) {
+					bg = rois.get(value).getStrokeColor();
+				} else {
+					bg = rois.get(value).getFillColor();
+				}
 				if (bg == null)
 					bg = Color.gray;
 			}
