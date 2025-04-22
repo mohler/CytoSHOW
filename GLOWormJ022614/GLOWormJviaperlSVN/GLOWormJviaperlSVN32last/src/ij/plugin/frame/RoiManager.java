@@ -2324,6 +2324,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		Double sumAllCellVolumes = 0d;
 		Double sumAllCellSurfaceAreas = 0d;
+		Double sumAllRecipAvgPatchSurfaceAreas = 0d;
 		Double sumAllPatchSurfaceAreas = 0d;
 		
 		ArrayList<String> sortedRNRFneuronsbyVol = 
@@ -2355,7 +2356,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 		
 	
-		ArrayList<String> sortedRNRFsbySA = 
+		ArrayList<String> sortedRNRFsbyRecipAvgSA = 
 //				rootNameRootFrame_SurfaceAreaLHM
 				rootNameRootFrame_PatchesRecipAvgSurfaceAreaLHM
 				.entrySet()
@@ -2364,14 +2365,34 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			    .map(Map.Entry::getKey)
 			    .collect(Collectors.toCollection(ArrayList::new));
 		IJ.log("\nPatches Ranked By RecipAvgSurfaceArea");
+		for (int psa=sortedRNRFsbyRecipAvgSA.size()-1; psa>=0; psa--) {
+			if (sortedRNRFsbyRecipAvgSA.get(psa).matches("([A-Z]+)and([A-Z]+)(_\\d+)")) {
+				rootNameRootFrame_RankedPatchesSurfaceAreasOrderWholeBrainLHM.put(sortedRNRFsbyRecipAvgSA.get(psa),rootNameRootFrame_PatchesRecipAvgSurfaceAreaLHM.get(sortedRNRFsbyRecipAvgSA.get(psa)));
+				IJ.log(sortedRNRFsbyRecipAvgSA.get(psa)+","+rootNameRootFrame_PatchesRecipAvgSurfaceAreaLHM.get(sortedRNRFsbyRecipAvgSA.get(psa)));
+				sumAllRecipAvgPatchSurfaceAreas = sumAllRecipAvgPatchSurfaceAreas + rootNameRootFrame_PatchesRecipAvgSurfaceAreaLHM.get(sortedRNRFsbyRecipAvgSA.get(psa));
+			}
+		}
+
+		ArrayList<String> sortedRNRFsbySA = 
+//				rootNameRootFrame_SurfaceAreaLHM
+				rootNameRootFrame_PatchesSurfaceAreaLHM
+				.entrySet()
+			    .stream()
+			    .sorted(Map.Entry.comparingByValue())
+			    .map(Map.Entry::getKey)
+			    .collect(Collectors.toCollection(ArrayList::new));
+		IJ.log("\nPatches Ranked By SurfaceArea");
 		for (int psa=sortedRNRFsbySA.size()-1; psa>=0; psa--) {
-			rootNameRootFrame_RankedPatchesSurfaceAreasOrderWholeBrainLHM.put(sortedRNRFsbySA.get(psa),rootNameRootFrame_PatchesRecipAvgSurfaceAreaLHM.get(sortedRNRFsbySA.get(psa)));
-			IJ.log(sortedRNRFsbySA.get(psa)+","+rootNameRootFrame_PatchesRecipAvgSurfaceAreaLHM.get(sortedRNRFsbySA.get(psa)));
-			sumAllPatchSurfaceAreas = sumAllPatchSurfaceAreas + rootNameRootFrame_PatchesRecipAvgSurfaceAreaLHM.get(sortedRNRFsbySA.get(psa));
+			if (sortedRNRFsbySA.get(psa).matches("([A-Z]+)by([A-Z]+)(_\\d+)")) {
+			rootNameRootFrame_RankedPatchesSurfaceAreasOrderWholeBrainLHM.put(sortedRNRFsbySA.get(psa),rootNameRootFrame_PatchesSurfaceAreaLHM.get(sortedRNRFsbySA.get(psa)));
+			IJ.log(sortedRNRFsbySA.get(psa)+","+rootNameRootFrame_PatchesSurfaceAreaLHM.get(sortedRNRFsbySA.get(psa)));
+			sumAllPatchSurfaceAreas = sumAllPatchSurfaceAreas + rootNameRootFrame_PatchesSurfaceAreaLHM.get(sortedRNRFsbySA.get(psa));
+			}
 		}
 
 		IJ.log("\nSum all cell volumes: "+ sumAllCellVolumes);
 		IJ.log("\nSum all cell surface areas: "+ sumAllCellSurfaceAreas);
+		IJ.log("\nSum all recip avg patches surface areas: "+ sumAllRecipAvgPatchSurfaceAreas);
 		IJ.log("\nSum all patches surface areas: "+ sumAllPatchSurfaceAreas);
 
 		IJ.wait(0);
