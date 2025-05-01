@@ -2351,7 +2351,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		IJ.log("\nCells Ranked By SurfaceArea");
 		for (int nsa=sortedRNRFneuronsbySurfaceArea.size()-1; nsa>=0; nsa--) {
 			rootNameRootFrame_RankedNeuronSurfaceAreasOrderWholeBrainLHM.put(sortedRNRFneuronsbySurfaceArea.get(nsa),rootNameRootFrame_NeuronsSurfaceAreaLHM.get(sortedRNRFneuronsbySurfaceArea.get(nsa)));
-			IJ.log(sortedRNRFneuronsbySurfaceArea.get(nsa)+","+rootNameRootFrame_NeuronsVolumeLHM.get(sortedRNRFneuronsbySurfaceArea.get(nsa)));
+			IJ.log(sortedRNRFneuronsbySurfaceArea.get(nsa)+","+rootNameRootFrame_NeuronsSurfaceAreaLHM.get(sortedRNRFneuronsbySurfaceArea.get(nsa)));
 			sumAllCellSurfaceAreas = sumAllCellSurfaceAreas + rootNameRootFrame_NeuronsSurfaceAreaLHM.get(sortedRNRFneuronsbySurfaceArea.get(nsa));
 		}
 		
