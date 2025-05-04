@@ -2174,7 +2174,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 		ArrayList<String> rootNames_rootFrames = new ArrayList<String>();
 		ArrayList<String> rootNames = new ArrayList<String>();
-		Hashtable<String,ArrayList<Roi>> rootNameFrameSpecificRoisHashTable = new Hashtable<String,ArrayList<Roi>>();
+		LinkedHashMap<String,ArrayList<Roi>> rootNameFrameSpecificRoisLHM = new LinkedHashMap<String,ArrayList<Roi>>();
 
 		Roi[] roisArray = getSelectedRoisAsArray();
 		if (roisArray == null || roisArray.length <1) {
@@ -2201,9 +2201,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				rootNames_rootFrames.add(rootName + "_" + rootFrame);
 				rootNames.add(rootName);
 				ArrayList<Roi> sameRootNameRoiArrayList = new ArrayList<Roi>();
-				rootNameFrameSpecificRoisHashTable.put(rootName + "_" + rootFrame, sameRootNameRoiArrayList);
+				rootNameFrameSpecificRoisLHM.put(rootName + "_" + rootFrame, sameRootNameRoiArrayList);
 			}
-			rootNameFrameSpecificRoisHashTable.get(rootName + "_" + rootFrame).add(selRoi);
+			rootNameFrameSpecificRoisLHM.get(rootName + "_" + rootFrame).add(selRoi);
 		}
 		ImageProcessor dummyIP = new ByteProcessor(imp.getWidth(), imp.getHeight());
 		
@@ -2245,13 +2245,20 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		LinkedHashMap<String, Double> rootNameRootFrame_NeuronsVolumeLHM = new LinkedHashMap<String, Double>();                  
 		LinkedHashMap<String, Double> rootNameRootFrame_NeuronsSurfaceAreaLHM = new LinkedHashMap<String, Double>();                  
 		LinkedHashMap<String, Double> rootNameRootFrame_PatchesSurfaceAreaLHM = new LinkedHashMap<String, Double>();                  
+		LinkedHashMap<String, Double> rootNameRootFrame_NeuronsTotalPatchesSurfaceAreaLHM = new LinkedHashMap<String, Double>();                  
 		LinkedHashMap<String, Double> rootNameRootFrame_PatchesRecipAvgSurfaceAreaLHM = new LinkedHashMap<String, Double>();                  
 		LinkedHashMap<String, Double> rootNameRootFrame_RankedNeuronVolumesOrderWholeBrainLHM = new LinkedHashMap<String, Double>();                  
 		LinkedHashMap<String, Double> rootNameRootFrame_RankedNeuronSurfaceAreasOrderWholeBrainLHM = new LinkedHashMap<String, Double>();                  
 		LinkedHashMap<String, Double> rootNameRootFrame_RankedPatchesSurfaceAreasOrderWholeBrainLHM = new LinkedHashMap<String, Double>();                  
-		LinkedHashMap<String, Double> rootNameRootFrame_RankedVolumesOrderToCellLHM = new LinkedHashMap<String, Double>();                  
-		LinkedHashMap<String, Double> rootNameRootFrame_RankedSurfaceAreasOrderToCellLHM = new LinkedHashMap<String, Double>();                  
 
+		LinkedHashMap<String, Object[]> rootNameRootFrame_RankedPatchVolumesOrderToCellLHM = new LinkedHashMap<String,Object[]>();                  
+		LinkedHashMap<String, Object[]> rootNameRootFrame_RankedPatchSurfaceAreasOrderToCellLHM = new LinkedHashMap<String, Object[]>();                  
+		LinkedHashMap<String, Object[]> rootNameRootFrame_RankedCellVolumesOrderToBrainLHM = new LinkedHashMap<String, Object[]>();                  
+		LinkedHashMap<String, Object[]> rootNameRootFrame_RankedCellSurfaceAreasOrderToBrainLHM = new LinkedHashMap<String, Object[]>();                  
+		LinkedHashMap<String, Object[]> rootNameRootFrame_RankedPatchVolumesOrderToBrainLHM = new LinkedHashMap<String, Object[]>();                  
+		LinkedHashMap<String, Object[]> rootNameRootFrame_RankedPatchSurfaceAreasOrderToBrainLHM = new LinkedHashMap<String, Object[]>();                  
+
+		IJ.log("\nEach Entity's Volume and Surface Area");
 		for (int n = 0; n < rootNames_rootFrames.size(); n++) {
 			String rootName = rootNames.get(n);
 			String rootNameFrame = rootNames_rootFrames.get(n);
@@ -2262,8 +2269,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			ArrayList<Double> nameMatchROIperimArrayList = new ArrayList<Double>();
 			double sumAreas = 0;
 			double sumPerims = 0;
-			int sraaa = rois.length;
-			ArrayList<Roi> theseRois = rootNameFrameSpecificRoisHashTable.get(rootNameFrame);
+
+			ArrayList<Roi> theseRois = rootNameFrameSpecificRoisLHM.get(rootNameFrame);
 			for (Roi thisRoi : theseRois) {
 
 				String nextName = thisRoi.getName();
@@ -2288,11 +2295,29 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			if (!rootName.contains("by")) {
 				rootNameRootFrame_NeuronsVolumeLHM.put(rootNameFrame, totalRNRF_Volume);
 				rootNameRootFrame_NeuronsSurfaceAreaLHM.put(rootNameFrame, totalRNRF_SA);
+			} else {
+				rootNameRootFrame_NeuronsTotalPatchesSurfaceAreaLHM.put(rootNameFrame.replaceAll("(.*)(by.*)(_.*)", "$1$3"), 
+								totalRNRF_SA + (rootNameRootFrame_NeuronsTotalPatchesSurfaceAreaLHM.get(rootNameFrame.replaceAll("(.*)(by.*)(_.*)", "$1$3"))!=null?
+										rootNameRootFrame_NeuronsTotalPatchesSurfaceAreaLHM.get(rootNameFrame.replaceAll("(.*)(by.*)(_.*)", "$1$3")):
+											0));
 			}
 			rootNameRootFrame_PatchesSurfaceAreaLHM.put(rootNameFrame, totalRNRF_SA);			
 			
 			
 		}
+		
+		IJ.log("\nEach Cell's Surface Area and Patched Surface Area");		
+		for (int n = 0; n < rootNames_rootFrames.size(); n++) {
+			String rootName = rootNames.get(n);
+			String rootNameFrame = rootNames_rootFrames.get(n);
+			if (!rootName.contains("by") && rootNameRootFrame_NeuronsTotalPatchesSurfaceAreaLHM.get(rootNameFrame)!=null) {
+				double rnfSA = rootNameRootFrame_NeuronsSurfaceAreaLHM.get(rootNameFrame);
+				double rnfTPSA = rootNameRootFrame_NeuronsTotalPatchesSurfaceAreaLHM.get(rootNameFrame);
+				IJ.log(""+rootName+", SA="+String.format("%.2f",rnfSA)+", TPSA="+String.format("%.2f",rnfTPSA));
+
+			}
+		}
+
 		
 		IJ.log("\nPatches Un-Ranked RecipAvg Surface Areas over Whole Brain");
 		for (String rnrfA : rootNames_rootFrames) {
@@ -2357,7 +2382,6 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		
 	
 		ArrayList<String> sortedRNRFsbyRecipAvgSA = 
-//				rootNameRootFrame_SurfaceAreaLHM
 				rootNameRootFrame_PatchesRecipAvgSurfaceAreaLHM
 				.entrySet()
 			    .stream()
@@ -2374,7 +2398,6 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 
 		ArrayList<String> sortedRNRFsbySA = 
-//				rootNameRootFrame_SurfaceAreaLHM
 				rootNameRootFrame_PatchesSurfaceAreaLHM
 				.entrySet()
 			    .stream()
@@ -2384,9 +2407,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		IJ.log("\nPatches Ranked By SurfaceArea");
 		for (int psa=sortedRNRFsbySA.size()-1; psa>=0; psa--) {
 			if (sortedRNRFsbySA.get(psa).matches("([A-Z]+)by([A-Z]+)(_\\d+)")) {
-			rootNameRootFrame_RankedPatchesSurfaceAreasOrderWholeBrainLHM.put(sortedRNRFsbySA.get(psa),rootNameRootFrame_PatchesSurfaceAreaLHM.get(sortedRNRFsbySA.get(psa)));
-			IJ.log(sortedRNRFsbySA.get(psa)+","+rootNameRootFrame_PatchesSurfaceAreaLHM.get(sortedRNRFsbySA.get(psa)));
-			sumAllPatchSurfaceAreas = sumAllPatchSurfaceAreas + rootNameRootFrame_PatchesSurfaceAreaLHM.get(sortedRNRFsbySA.get(psa));
+				rootNameRootFrame_RankedPatchesSurfaceAreasOrderWholeBrainLHM.put(sortedRNRFsbySA.get(psa),rootNameRootFrame_PatchesSurfaceAreaLHM.get(sortedRNRFsbySA.get(psa)));
+				IJ.log(sortedRNRFsbySA.get(psa)+","+rootNameRootFrame_PatchesSurfaceAreaLHM.get(sortedRNRFsbySA.get(psa)));
+				sumAllPatchSurfaceAreas = sumAllPatchSurfaceAreas + rootNameRootFrame_PatchesSurfaceAreaLHM.get(sortedRNRFsbySA.get(psa));
 			}
 		}
 
