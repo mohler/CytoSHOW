@@ -2258,7 +2258,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		LinkedHashMap<String, Object[]> rootNameRootFrame_RankedPatchVolumesOrderToBrainLHM = new LinkedHashMap<String, Object[]>();                  
 		LinkedHashMap<String, Object[]> rootNameRootFrame_RankedPatchSurfaceAreasOrderToBrainLHM = new LinkedHashMap<String, Object[]>();                  
 
-		IJ.log("\nEach Entity's Volume and Surface Area");
+		IJ.log("\nEach Entity's Volume and/or Surface Area");
 		for (int n = 0; n < rootNames_rootFrames.size(); n++) {
 			String rootName = rootNames.get(n);
 			String rootNameFrame = rootNames_rootFrames.get(n);
@@ -2283,6 +2283,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						nameMatchROIareaArrayList.add(new ByteStatistics(dummyIP, ImageStatistics.AREA, imp.getCalibration()).area);
 						sumAreas += nameMatchROIareaArrayList.get(nameMatchROIareaArrayList.size() -1);
 						double perim = shroi.getLength();
+						if (perim == 0d)
+							perim = 1d* imp.getCalibration().pixelWidth;
 						nameMatchROIperimArrayList.add(perim);
 						sumPerims += nameMatchROIperimArrayList.get(nameMatchROIperimArrayList.size() -1);
 					}
@@ -2291,39 +2293,53 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 			double totalRNRF_Volume = sumAreas * imp.getCalibration().pixelDepth;
 			double totalRNRF_SA = sumPerims * imp.getCalibration().pixelDepth;
-			IJ.log(""+rootName+", vol="+String.format("%.2f",totalRNRF_Volume)+", SA="+String.format("%.2f",totalRNRF_SA));
-			if (!rootName.contains("by")) {
+			IJ.log(""+rootName+(!rootNameFrame.matches("([A-Z,0-9,-]+)by([A-Z,0-9,-]+)(_\\d+)")?(", vol="+String.format("%.2f",totalRNRF_Volume)):"")+", SA="+String.format("%.2f",totalRNRF_SA));
+//			if (!rootName.contains("by")) {
+			if (!rootNameFrame.matches("([A-Z,0-9,-]+)by([A-Z,0-9,-]+)(_\\d+)")) {
 				rootNameRootFrame_NeuronsVolumeLHM.put(rootNameFrame, totalRNRF_Volume);
 				rootNameRootFrame_NeuronsSurfaceAreaLHM.put(rootNameFrame, totalRNRF_SA);
 			} else {
-				rootNameRootFrame_NeuronsTotalPatchesSurfaceAreaLHM.put(rootNameFrame.replaceAll("(.*)(by.*)(_.*)", "$1$3"), 
-								totalRNRF_SA + (rootNameRootFrame_NeuronsTotalPatchesSurfaceAreaLHM.get(rootNameFrame.replaceAll("(.*)(by.*)(_.*)", "$1$3"))!=null?
-										rootNameRootFrame_NeuronsTotalPatchesSurfaceAreaLHM.get(rootNameFrame.replaceAll("(.*)(by.*)(_.*)", "$1$3")):
-											0));
+				if (!rootNameFrame.contains("by")) {
+					IJ.wait(0);
+				} else {
+					rootNameRootFrame_NeuronsTotalPatchesSurfaceAreaLHM.put(rootNameFrame.replaceAll("(.*)(by.*)(_.*)", "$1$3"), 
+							totalRNRF_SA + (rootNameRootFrame_NeuronsTotalPatchesSurfaceAreaLHM.get(rootNameFrame.replaceAll("(.*)(by.*)(_.*)", "$1$3"))!=null?
+									rootNameRootFrame_NeuronsTotalPatchesSurfaceAreaLHM.get(rootNameFrame.replaceAll("(.*)(by.*)(_.*)", "$1$3")):
+										0));
+				}
+				rootNameRootFrame_PatchesSurfaceAreaLHM.put(rootNameFrame, totalRNRF_SA);			
 			}
-			rootNameRootFrame_PatchesSurfaceAreaLHM.put(rootNameFrame, totalRNRF_SA);			
 			
 			
 		}
 		
-		IJ.log("\nEach Cell's Surface Area and Patched Surface Area");		
+		IJ.log("\nEach Cell's Surface Area and Patched Surface Area");
+		double sumSAs=0d;
+		double sumTPSAs=0d;		
 		for (int n = 0; n < rootNames_rootFrames.size(); n++) {
 			String rootName = rootNames.get(n);
 			String rootNameFrame = rootNames_rootFrames.get(n);
+			//
+			//
+			// Line below seems to give too large a patch sum for each cell...why?
+			//
+			//
+			//
 			if (!rootName.contains("by") && rootNameRootFrame_NeuronsTotalPatchesSurfaceAreaLHM.get(rootNameFrame)!=null) {
 				double rnfSA = rootNameRootFrame_NeuronsSurfaceAreaLHM.get(rootNameFrame);
 				double rnfTPSA = rootNameRootFrame_NeuronsTotalPatchesSurfaceAreaLHM.get(rootNameFrame);
 				IJ.log(""+rootName+", SA="+String.format("%.2f",rnfSA)+", TPSA="+String.format("%.2f",rnfTPSA));
-
+				sumSAs = sumSAs + rnfSA;
+				sumTPSAs = sumTPSAs + rnfTPSA;
 			}
 		}
-
+		IJ.log("Totals: cellSurfaceAreas = "+sumSAs+" cellPatchworkSurfaceAreas = "+sumTPSAs);
 		
 		IJ.log("\nPatches Un-Ranked RecipAvg Surface Areas over Whole Brain");
 		for (String rnrfA : rootNames_rootFrames) {
 			String rnrfB = "";
-			if (rnrfA.matches("([A-Z]+)by([A-Z]+)(_\\d+)")) {
-				 rnrfB = rnrfA.replaceAll("([A-Z]+)by([A-Z]+)(_\\d+)", "$2by$1$3");
+			if (rnrfA.matches("([A-Z,0-9,-]+)by([A-Z,0-9,-]+)(_\\d+)")) {
+				 rnrfB = rnrfA.replaceAll("([A-Z,0-9,-]+)by([A-Z,0-9,-]+)(_\\d+)", "$2by$1$3");
 			} else {
 				continue; //for rnrfA
 			}
@@ -2390,7 +2406,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			    .collect(Collectors.toCollection(ArrayList::new));
 		IJ.log("\nPatches Ranked By RecipAvgSurfaceArea");
 		for (int psa=sortedRNRFsbyRecipAvgSA.size()-1; psa>=0; psa--) {
-			if (sortedRNRFsbyRecipAvgSA.get(psa).matches("([A-Z]+)and([A-Z]+)(_\\d+)")) {
+			if (sortedRNRFsbyRecipAvgSA.get(psa).matches("([A-Z,0-9,-]+)and([A-Z,0-9,-]+)(_\\d+)")) {
 				rootNameRootFrame_RankedPatchesSurfaceAreasOrderWholeBrainLHM.put(sortedRNRFsbyRecipAvgSA.get(psa),rootNameRootFrame_PatchesRecipAvgSurfaceAreaLHM.get(sortedRNRFsbyRecipAvgSA.get(psa)));
 				IJ.log(sortedRNRFsbyRecipAvgSA.get(psa)+","+rootNameRootFrame_PatchesRecipAvgSurfaceAreaLHM.get(sortedRNRFsbyRecipAvgSA.get(psa)));
 				sumAllRecipAvgPatchSurfaceAreas = sumAllRecipAvgPatchSurfaceAreas + rootNameRootFrame_PatchesRecipAvgSurfaceAreaLHM.get(sortedRNRFsbyRecipAvgSA.get(psa));
@@ -2406,7 +2422,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			    .collect(Collectors.toCollection(ArrayList::new));
 		IJ.log("\nPatches Ranked By SurfaceArea");
 		for (int psa=sortedRNRFsbySA.size()-1; psa>=0; psa--) {
-			if (sortedRNRFsbySA.get(psa).matches("([A-Z]+)by([A-Z]+)(_\\d+)")) {
+			if (sortedRNRFsbySA.get(psa).matches("([A-Z,0-9,-]+)by([A-Z,0-9,-]+)(_\\d+)")) {
 				rootNameRootFrame_RankedPatchesSurfaceAreasOrderWholeBrainLHM.put(sortedRNRFsbySA.get(psa),rootNameRootFrame_PatchesSurfaceAreaLHM.get(sortedRNRFsbySA.get(psa)));
 				IJ.log(sortedRNRFsbySA.get(psa)+","+rootNameRootFrame_PatchesSurfaceAreaLHM.get(sortedRNRFsbySA.get(psa)));
 				sumAllPatchSurfaceAreas = sumAllPatchSurfaceAreas + rootNameRootFrame_PatchesSurfaceAreaLHM.get(sortedRNRFsbySA.get(psa));
