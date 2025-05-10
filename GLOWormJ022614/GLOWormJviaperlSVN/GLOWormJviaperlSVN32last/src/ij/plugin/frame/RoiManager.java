@@ -2242,21 +2242,19 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //				}
 //			}
 
-		LinkedHashMap<String, Double> rootNameRootFrame_NeuronsVolumeLHM = new LinkedHashMap<String, Double>();                  
-		LinkedHashMap<String, Double> rootNameRootFrame_NeuronsSurfaceAreaLHM = new LinkedHashMap<String, Double>();                  
-		LinkedHashMap<String, Double> rootNameRootFrame_PatchesSurfaceAreaLHM = new LinkedHashMap<String, Double>();                  
-		LinkedHashMap<String, Double> rootNameRootFrame_NeuronsTotalPatchesSurfaceAreaLHM = new LinkedHashMap<String, Double>();                  
-		LinkedHashMap<String, Double> rootNameRootFrame_PatchesRecipAvgSurfaceAreaLHM = new LinkedHashMap<String, Double>();                  
-		LinkedHashMap<String, Double> rootNameRootFrame_RankedNeuronVolumesOrderWholeBrainLHM = new LinkedHashMap<String, Double>();                  
-		LinkedHashMap<String, Double> rootNameRootFrame_RankedNeuronSurfaceAreasOrderWholeBrainLHM = new LinkedHashMap<String, Double>();                  
-		LinkedHashMap<String, Double> rootNameRootFrame_RankedPatchesSurfaceAreasOrderWholeBrainLHM = new LinkedHashMap<String, Double>();                  
+		LinkedHashMap<String, Double> rNRF_NeuronsVolumeLHM = new LinkedHashMap<String, Double>();                  
+		LinkedHashMap<String, Double> rNRF_NeuronsSA_LHM = new LinkedHashMap<String, Double>();                  
+		LinkedHashMap<String, Double> rNRF_PatchesSA_LHM = new LinkedHashMap<String, Double>();                  
+		LinkedHashMap<String, Double> rNRF_NeuronsTotalPatchesSA_LHM = new LinkedHashMap<String, Double>();                  
+		LinkedHashMap<String, Double> rNRF_PatchesRecipAvgSA_LHM = new LinkedHashMap<String, Double>();                  
+		LinkedHashMap<String, Double> rNRF_RankedNeuronVolumesOrderWholeBrainLHM = new LinkedHashMap<String, Double>();                  
+		LinkedHashMap<String, Double> rNRF_RankedNeuronSAsOrderWholeBrainLHM = new LinkedHashMap<String, Double>();                  
+		LinkedHashMap<String, Double> rNRF_RankedPatchesSAsOrderWholeBrainLHM = new LinkedHashMap<String, Double>();                  
 
-		LinkedHashMap<String, Object[]> rootNameRootFrame_RankedPatchVolumesOrderToCellLHM = new LinkedHashMap<String,Object[]>();                  
-		LinkedHashMap<String, Object[]> rootNameRootFrame_RankedPatchSurfaceAreasOrderToCellLHM = new LinkedHashMap<String, Object[]>();                  
-		LinkedHashMap<String, Object[]> rootNameRootFrame_RankedCellVolumesOrderToBrainLHM = new LinkedHashMap<String, Object[]>();                  
-		LinkedHashMap<String, Object[]> rootNameRootFrame_RankedCellSurfaceAreasOrderToBrainLHM = new LinkedHashMap<String, Object[]>();                  
-		LinkedHashMap<String, Object[]> rootNameRootFrame_RankedPatchVolumesOrderToBrainLHM = new LinkedHashMap<String, Object[]>();                  
-		LinkedHashMap<String, Object[]> rootNameRootFrame_RankedPatchSurfaceAreasOrderToBrainLHM = new LinkedHashMap<String, Object[]>();                  
+		LinkedHashMap<String, ArrayList<String>> rNRF_RankedCellVolumesPerBrainLHM = new LinkedHashMap<String, ArrayList<String>>();                  
+		LinkedHashMap<String, ArrayList<String>> rNRF_RankedCellSAsPerBrainLHM = new LinkedHashMap<String, ArrayList<String>>();                  
+		LinkedHashMap<String, ArrayList<String>> rNRF_RankedPatchSAsPerCellLHM = new LinkedHashMap<String, ArrayList<String>>();                  
+		LinkedHashMap<String, ArrayList<String>> rNRF_RankedPatchSAsPerBrainLHM = new LinkedHashMap<String, ArrayList<String>>();                  
 
 		IJ.log("\nEach Entity's Volume and/or Surface Area");
 		for (int n = 0; n < rootNames_rootFrames.size(); n++) {
@@ -2291,23 +2289,23 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				}
 			}
 
-			double totalRNRF_Volume = sumAreas * imp.getCalibration().pixelDepth;
-			double totalRNRF_SA = sumPerims * imp.getCalibration().pixelDepth;
-			IJ.log(""+rootName+(!rootNameFrame.matches("([A-Z,0-9,-]+)by([A-Z,0-9,-]+)(_\\d+)")?(", vol="+String.format("%.2f",totalRNRF_Volume)):"")+", SA="+String.format("%.2f",totalRNRF_SA));
+			double totalrNRF__Volume = sumAreas * imp.getCalibration().pixelDepth;
+			double totalrNRF__SA = sumPerims * imp.getCalibration().pixelDepth;
+			IJ.log(""+rootName+(!rootNameFrame.matches("([A-Z,0-9,-]+)by([A-Z,0-9,-]+)(_\\d+)")?(", vol="+String.format("%.2f",totalrNRF__Volume)):"")+", SA="+String.format("%.2f",totalrNRF__SA));
 //			if (!rootName.contains("by")) {
 			if (!rootNameFrame.matches("([A-Z,0-9,-]+)by([A-Z,0-9,-]+)(_\\d+)")) {
-				rootNameRootFrame_NeuronsVolumeLHM.put(rootNameFrame, totalRNRF_Volume);
-				rootNameRootFrame_NeuronsSurfaceAreaLHM.put(rootNameFrame, totalRNRF_SA);
+				rNRF_NeuronsVolumeLHM.put(rootNameFrame, totalrNRF__Volume);
+				rNRF_NeuronsSA_LHM.put(rootNameFrame, totalrNRF__SA);
 			} else {
 				if (!rootNameFrame.contains("by")) {
 					IJ.wait(0);
 				} else {
-					rootNameRootFrame_NeuronsTotalPatchesSurfaceAreaLHM.put(rootNameFrame.replaceAll("(.*)(by.*)(_.*)", "$1$3"), 
-							totalRNRF_SA + (rootNameRootFrame_NeuronsTotalPatchesSurfaceAreaLHM.get(rootNameFrame.replaceAll("(.*)(by.*)(_.*)", "$1$3"))!=null?
-									rootNameRootFrame_NeuronsTotalPatchesSurfaceAreaLHM.get(rootNameFrame.replaceAll("(.*)(by.*)(_.*)", "$1$3")):
+					rNRF_NeuronsTotalPatchesSA_LHM.put(rootNameFrame.replaceAll("(.*)(by.*)(_.*)", "$1$3"), 
+							totalrNRF__SA + (rNRF_NeuronsTotalPatchesSA_LHM.get(rootNameFrame.replaceAll("(.*)(by.*)(_.*)", "$1$3"))!=null?
+									rNRF_NeuronsTotalPatchesSA_LHM.get(rootNameFrame.replaceAll("(.*)(by.*)(_.*)", "$1$3")):
 										0));
 				}
-				rootNameRootFrame_PatchesSurfaceAreaLHM.put(rootNameFrame, totalRNRF_SA);			
+				rNRF_PatchesSA_LHM.put(rootNameFrame, totalrNRF__SA);			
 			}
 			
 			
@@ -2325,122 +2323,128 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			//
 			//
 			//
-			if (!rootName.contains("by") && rootNameRootFrame_NeuronsTotalPatchesSurfaceAreaLHM.get(rootNameFrame)!=null) {
-				double rnfSA = rootNameRootFrame_NeuronsSurfaceAreaLHM.get(rootNameFrame);
-				double rnfTPSA = rootNameRootFrame_NeuronsTotalPatchesSurfaceAreaLHM.get(rootNameFrame);
+			if (!rootName.contains("by") && rNRF_NeuronsTotalPatchesSA_LHM.get(rootNameFrame)!=null) {
+				double rnfSA = rNRF_NeuronsSA_LHM.get(rootNameFrame);
+				double rnfTPSA = rNRF_NeuronsTotalPatchesSA_LHM.get(rootNameFrame);
 				IJ.log(""+rootName+", SA="+String.format("%.2f",rnfSA)+", TPSA="+String.format("%.2f",rnfTPSA));
 				sumSAs = sumSAs + rnfSA;
 				sumTPSAs = sumTPSAs + rnfTPSA;
 			}
 		}
-		IJ.log("Totals: cellSurfaceAreas = "+sumSAs+" cellPatchworkSurfaceAreas = "+sumTPSAs);
+		IJ.log("Totals: cellSAs = "+sumSAs+" cellPatchworkSAs = "+sumTPSAs);
 		
 		IJ.log("\nPatches Un-Ranked RecipAvg Surface Areas over Whole Brain");
-		for (String rnrfA : rootNames_rootFrames) {
-			String rnrfB = "";
-			if (rnrfA.matches("([A-Z,0-9,-]+)by([A-Z,0-9,-]+)(_\\d+)")) {
-				 rnrfB = rnrfA.replaceAll("([A-Z,0-9,-]+)by([A-Z,0-9,-]+)(_\\d+)", "$2by$1$3");
+		for (String rNRF_A : rootNames_rootFrames) {
+			String rNRF_B = "";
+			if (rNRF_A.matches("([A-Z,0-9,-]+)by([A-Z,0-9,-]+)(_\\d+)")) {
+				 rNRF_B = rNRF_A.replaceAll("([A-Z,0-9,-]+)by([A-Z,0-9,-]+)(_\\d+)", "$2by$1$3");
 			} else {
-				continue; //for rnrfA
+				continue; //for rNRF_A
 			}
-			if (rootNameRootFrame_PatchesSurfaceAreaLHM.get(rnrfA)!=null && rootNameRootFrame_PatchesSurfaceAreaLHM.get(rnrfB)!=null) {
+			if (rNRF_PatchesSA_LHM.get(rNRF_A)!=null && rNRF_PatchesSA_LHM.get(rNRF_B)!=null) {
 				
 			} else {
-				continue; //for rnrfA
+				continue; //for rNRF_A
 			}
-			Double rnrfRecipAvgSurfaceArea = (rootNameRootFrame_PatchesSurfaceAreaLHM.get(rnrfA) 
-											+ rootNameRootFrame_PatchesSurfaceAreaLHM.get(rnrfB))
+			Double rNRF_RecipAvgSA = (rNRF_PatchesSA_LHM.get(rNRF_A) 
+											+ rNRF_PatchesSA_LHM.get(rNRF_B))
 											/ 2;
-			if (!(rootNameRootFrame_PatchesRecipAvgSurfaceAreaLHM.containsKey(rnrfA.replace("by", "and"))
-				 ||rootNameRootFrame_PatchesRecipAvgSurfaceAreaLHM.containsKey((rnrfB.replace("by", "and"))))) {
-					rootNameRootFrame_PatchesRecipAvgSurfaceAreaLHM.put(rnrfA.replace("by", "and"), rnrfRecipAvgSurfaceArea);
-					rootNameRootFrame_PatchesRecipAvgSurfaceAreaLHM.put(rnrfB.replace("by", "and"), rnrfRecipAvgSurfaceArea);	
-					IJ.log(rnrfA+","+rootNameRootFrame_PatchesSurfaceAreaLHM.get(rnrfA));
-					IJ.log((rnrfA.replace("by", "and")+","+rootNameRootFrame_PatchesRecipAvgSurfaceAreaLHM.get(rnrfA.replace("by", "and"))));
-					IJ.log((rnrfB.replace("by", "and")+","+rootNameRootFrame_PatchesRecipAvgSurfaceAreaLHM.get(rnrfB.replace("by", "and"))));
-					IJ.log(rnrfB+","+rootNameRootFrame_PatchesSurfaceAreaLHM.get(rnrfB));
+			if (!(rNRF_PatchesRecipAvgSA_LHM.containsKey(rNRF_A.replace("by", "and"))
+				 ||rNRF_PatchesRecipAvgSA_LHM.containsKey((rNRF_B.replace("by", "and"))))) {
+					rNRF_PatchesRecipAvgSA_LHM.put(rNRF_A.replace("by", "and"), rNRF_RecipAvgSA);
+					rNRF_PatchesRecipAvgSA_LHM.put(rNRF_B.replace("by", "and"), rNRF_RecipAvgSA);	
+					IJ.log(rNRF_A+","+rNRF_PatchesSA_LHM.get(rNRF_A));
+					IJ.log((rNRF_A.replace("by", "and")+","+rNRF_PatchesRecipAvgSA_LHM.get(rNRF_A.replace("by", "and"))));
+					IJ.log((rNRF_B.replace("by", "and")+","+rNRF_PatchesRecipAvgSA_LHM.get(rNRF_B.replace("by", "and"))));
+					IJ.log(rNRF_B+","+rNRF_PatchesSA_LHM.get(rNRF_B));
 					IJ.log("-");
 			}
 		}
 
 		Double sumAllCellVolumes = 0d;
-		Double sumAllCellSurfaceAreas = 0d;
-		Double sumAllRecipAvgPatchSurfaceAreas = 0d;
-		Double sumAllPatchSurfaceAreas = 0d;
+		Double sumAllCellSAs = 0d;
+		Double sumAllRecipAvgPatchSAs = 0d;
+		Double sumAllPatchSAs = 0d;
 		
-		ArrayList<String> sortedRNRFneuronsbyVol = 
-				rootNameRootFrame_NeuronsVolumeLHM
+		ArrayList<String> sortedrNRF_neuronsbyVol = 
+				rNRF_NeuronsVolumeLHM
 			    .entrySet()
 			    .stream()
 			    .sorted(Map.Entry.comparingByValue())
 			    .map(Map.Entry::getKey)
 			    .collect(Collectors.toCollection(ArrayList::new));
 		IJ.log("\nCells Ranked By Volume");
-		for (int v=sortedRNRFneuronsbyVol.size()-1; v>=0; v--) {
-			rootNameRootFrame_RankedNeuronVolumesOrderWholeBrainLHM.put(sortedRNRFneuronsbyVol.get(v),rootNameRootFrame_NeuronsVolumeLHM.get(sortedRNRFneuronsbyVol.get(v)));
-			IJ.log(sortedRNRFneuronsbyVol.get(v)+","+rootNameRootFrame_NeuronsVolumeLHM.get(sortedRNRFneuronsbyVol.get(v)));
-			sumAllCellVolumes = sumAllCellVolumes + rootNameRootFrame_NeuronsVolumeLHM.get(sortedRNRFneuronsbyVol.get(v));
+		for (int v=sortedrNRF_neuronsbyVol.size()-1; v>=0; v--) {
+			rNRF_RankedNeuronVolumesOrderWholeBrainLHM.put(sortedrNRF_neuronsbyVol.get(v),rNRF_NeuronsVolumeLHM.get(sortedrNRF_neuronsbyVol.get(v)));
+			IJ.log(sortedrNRF_neuronsbyVol.get(v)+","+rNRF_NeuronsVolumeLHM.get(sortedrNRF_neuronsbyVol.get(v)));
+			sumAllCellVolumes = sumAllCellVolumes + rNRF_NeuronsVolumeLHM.get(sortedrNRF_neuronsbyVol.get(v));
 		}
 		
-		ArrayList<String> sortedRNRFneuronsbySurfaceArea = 
-				rootNameRootFrame_NeuronsSurfaceAreaLHM
+		ArrayList<String> sortedrNRF_neuronsbySA = 
+				rNRF_NeuronsSA_LHM
 			    .entrySet()
 			    .stream()
 			    .sorted(Map.Entry.comparingByValue())
 			    .map(Map.Entry::getKey)
 			    .collect(Collectors.toCollection(ArrayList::new));
-		IJ.log("\nCells Ranked By SurfaceArea");
-		for (int nsa=sortedRNRFneuronsbySurfaceArea.size()-1; nsa>=0; nsa--) {
-			rootNameRootFrame_RankedNeuronSurfaceAreasOrderWholeBrainLHM.put(sortedRNRFneuronsbySurfaceArea.get(nsa),rootNameRootFrame_NeuronsSurfaceAreaLHM.get(sortedRNRFneuronsbySurfaceArea.get(nsa)));
-			IJ.log(sortedRNRFneuronsbySurfaceArea.get(nsa)+","+rootNameRootFrame_NeuronsSurfaceAreaLHM.get(sortedRNRFneuronsbySurfaceArea.get(nsa)));
-			sumAllCellSurfaceAreas = sumAllCellSurfaceAreas + rootNameRootFrame_NeuronsSurfaceAreaLHM.get(sortedRNRFneuronsbySurfaceArea.get(nsa));
+		IJ.log("\nCells Ranked By SA");
+		for (int nsa=sortedrNRF_neuronsbySA.size()-1; nsa>=0; nsa--) {
+			rNRF_RankedNeuronSAsOrderWholeBrainLHM.put(sortedrNRF_neuronsbySA.get(nsa),rNRF_NeuronsSA_LHM.get(sortedrNRF_neuronsbySA.get(nsa)));
+			IJ.log(sortedrNRF_neuronsbySA.get(nsa)+","+rNRF_NeuronsSA_LHM.get(sortedrNRF_neuronsbySA.get(nsa)));
+			sumAllCellSAs = sumAllCellSAs + rNRF_NeuronsSA_LHM.get(sortedrNRF_neuronsbySA.get(nsa));
 		}
 		
 	
-		ArrayList<String> sortedRNRFsbyRecipAvgSA = 
-				rootNameRootFrame_PatchesRecipAvgSurfaceAreaLHM
+		ArrayList<String> sortedrNRF_sbyRecipAvgSA = 
+				rNRF_PatchesRecipAvgSA_LHM
 				.entrySet()
 			    .stream()
 			    .sorted(Map.Entry.comparingByValue())
 			    .map(Map.Entry::getKey)
 			    .collect(Collectors.toCollection(ArrayList::new));
-		IJ.log("\nPatches Ranked By RecipAvgSurfaceArea");
-		for (int psa=sortedRNRFsbyRecipAvgSA.size()-1; psa>=0; psa--) {
-			if (sortedRNRFsbyRecipAvgSA.get(psa).matches("([A-Z,0-9,-]+)and([A-Z,0-9,-]+)(_\\d+)")) {
-				rootNameRootFrame_RankedPatchesSurfaceAreasOrderWholeBrainLHM.put(sortedRNRFsbyRecipAvgSA.get(psa),rootNameRootFrame_PatchesRecipAvgSurfaceAreaLHM.get(sortedRNRFsbyRecipAvgSA.get(psa)));
-				IJ.log(sortedRNRFsbyRecipAvgSA.get(psa)+","+rootNameRootFrame_PatchesRecipAvgSurfaceAreaLHM.get(sortedRNRFsbyRecipAvgSA.get(psa)));
-				sumAllRecipAvgPatchSurfaceAreas = sumAllRecipAvgPatchSurfaceAreas + rootNameRootFrame_PatchesRecipAvgSurfaceAreaLHM.get(sortedRNRFsbyRecipAvgSA.get(psa));
+		IJ.log("\nPatches Ranked By RecipAvgSA");
+		for (int psa=sortedrNRF_sbyRecipAvgSA.size()-1; psa>=0; psa--) {
+			if (sortedrNRF_sbyRecipAvgSA.get(psa).matches("([A-Z,0-9,-]+)and([A-Z,0-9,-]+)(_\\d+)")) {
+				rNRF_RankedPatchesSAsOrderWholeBrainLHM.put(sortedrNRF_sbyRecipAvgSA.get(psa),rNRF_PatchesRecipAvgSA_LHM.get(sortedrNRF_sbyRecipAvgSA.get(psa)));
+				IJ.log(sortedrNRF_sbyRecipAvgSA.get(psa)+","+rNRF_PatchesRecipAvgSA_LHM.get(sortedrNRF_sbyRecipAvgSA.get(psa)));
+				sumAllRecipAvgPatchSAs = sumAllRecipAvgPatchSAs + rNRF_PatchesRecipAvgSA_LHM.get(sortedrNRF_sbyRecipAvgSA.get(psa));
 			}
 		}
 
-		ArrayList<String> sortedRNRFsbySA = 
-				rootNameRootFrame_PatchesSurfaceAreaLHM
+		ArrayList<String> sortedrNRF_sbySA = 
+				rNRF_PatchesSA_LHM
 				.entrySet()
 			    .stream()
 			    .sorted(Map.Entry.comparingByValue())
 			    .map(Map.Entry::getKey)
 			    .collect(Collectors.toCollection(ArrayList::new));
-		IJ.log("\nPatches Ranked By SurfaceArea");
-		for (int psa=sortedRNRFsbySA.size()-1; psa>=0; psa--) {
-			if (sortedRNRFsbySA.get(psa).matches("([A-Z,0-9,-]+)by([A-Z,0-9,-]+)(_\\d+)")) {
-				rootNameRootFrame_RankedPatchesSurfaceAreasOrderWholeBrainLHM.put(sortedRNRFsbySA.get(psa),rootNameRootFrame_PatchesSurfaceAreaLHM.get(sortedRNRFsbySA.get(psa)));
-				IJ.log(sortedRNRFsbySA.get(psa)+","+rootNameRootFrame_PatchesSurfaceAreaLHM.get(sortedRNRFsbySA.get(psa)));
-				sumAllPatchSurfaceAreas = sumAllPatchSurfaceAreas + rootNameRootFrame_PatchesSurfaceAreaLHM.get(sortedRNRFsbySA.get(psa));
+		IJ.log("\nPatches Ranked By SA");
+		for (int psa=sortedrNRF_sbySA.size()-1; psa>=0; psa--) {
+			if (sortedrNRF_sbySA.get(psa).matches("([A-Z,0-9,-]+)by([A-Z,0-9,-]+)(_\\d+)")) {
+				rNRF_RankedPatchesSAsOrderWholeBrainLHM.put(sortedrNRF_sbySA.get(psa),rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa)));
+				if (rNRF_RankedPatchSAsPerCellLHM.get(sortedrNRF_sbySA.get(psa).split("by")[0]) == null){
+					rNRF_RankedPatchSAsPerCellLHM.put(sortedrNRF_sbySA.get(psa).split("by")[0],new ArrayList<String>());
+				}
+				rNRF_RankedPatchSAsPerCellLHM.get(sortedrNRF_sbySA.get(psa).split("by")[0]).add(sortedrNRF_sbySA.get(psa));
+				
+				
+				IJ.log(sortedrNRF_sbySA.get(psa)+","+rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa)));
+				sumAllPatchSAs = sumAllPatchSAs + rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa));
 			}
 		}
 
 		IJ.log("\nSum all cell volumes: "+ sumAllCellVolumes);
-		IJ.log("\nSum all cell surface areas: "+ sumAllCellSurfaceAreas);
-		IJ.log("\nSum all recip avg patches surface areas: "+ sumAllRecipAvgPatchSurfaceAreas);
-		IJ.log("\nSum all patches surface areas: "+ sumAllPatchSurfaceAreas);
+		IJ.log("\nSum all cell surface areas: "+ sumAllCellSAs);
+		IJ.log("\nSum all recip avg patches surface areas: "+ sumAllRecipAvgPatchSAs);
+		IJ.log("\nSum all patches surface areas: "+ sumAllPatchSAs);
 
 		IJ.wait(0);
 		
 
 /////////////// VVVVVVVV This block does not sort into sorted cell bins yet!!! NEEDS WORK.
 //
-//		ArrayList<String> sortedRNRFsbyVolEachCell = 
-//				rootNameRootFrame_RankedVolumesOrderWholeBrainLHM
+//		ArrayList<String> sortedrNRF_sbyVolEachCell = 
+//				rNRF_RankedVolumesOrderWholeBrainLHM
 //			    .entrySet()
 //			    .stream()
 //			    .sorted(Map.Entry.comparingByKey())
@@ -2448,30 +2452,30 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 //			    .map(Map.Entry::getKey)
 //			    .collect(Collectors.toCollection(ArrayList::new));
 //		IJ.log("\nRanked By Volume over each contacted cell");
-//		for (int vToBy=sortedRNRFsbyVolEachCell.size()-1; vToBy>=0; vToBy--) {
-//			rootNameRootFrame_RankedVolumesOrderToCellLHM.put(sortedRNRFsbyVolEachCell.get(vToBy).split("(by|_)")[0],rootNameRootFrame_VolumeLHM.get(sortedRNRFsbyVolEachCell.get(vToBy)));
-//			IJ.log(sortedRNRFsbyVolEachCell.get(vToBy).split("(by|_)")[0]+","+sortedRNRFsbyVolEachCell.get(vToBy)+","+rootNameRootFrame_VolumeLHM.get(sortedRNRFsbyVolEachCell.get(vToBy)));
-////			if(sortedRNRFsbyVolEachCell.get(vToBy).split("(by|_)").length>1) {
-////				rootNameRootFrame_RankedVolumesOrderByCellLHM.put(sortedRNRFsbyVolEachCell.get(vToBy).split("(by|_)")[1],rootNameRootFrame_VolumeLHM.get(sortedRNRFsbyVolEachCell.get(vToBy)));
-////				IJ.log(sortedRNRFsbyVolEachCell.get(vToBy).split("(by|_)")[1]+","+sortedRNRFsbyVolEachCell.get(vToBy)+","+rootNameRootFrame_VolumeLHM.get(sortedRNRFsbyVolEachCell.get(vToBy)));
+//		for (int vToBy=sortedrNRF_sbyVolEachCell.size()-1; vToBy>=0; vToBy--) {
+//			rNRF_RankedVolumesOrderToCellLHM.put(sortedrNRF_sbyVolEachCell.get(vToBy).split("(by|_)")[0],rNRF_VolumeLHM.get(sortedrNRF_sbyVolEachCell.get(vToBy)));
+//			IJ.log(sortedrNRF_sbyVolEachCell.get(vToBy).split("(by|_)")[0]+","+sortedrNRF_sbyVolEachCell.get(vToBy)+","+rNRF_VolumeLHM.get(sortedrNRF_sbyVolEachCell.get(vToBy)));
+////			if(sortedrNRF_sbyVolEachCell.get(vToBy).split("(by|_)").length>1) {
+////				rNRF_RankedVolumesOrderByCellLHM.put(sortedrNRF_sbyVolEachCell.get(vToBy).split("(by|_)")[1],rNRF_VolumeLHM.get(sortedrNRF_sbyVolEachCell.get(vToBy)));
+////				IJ.log(sortedrNRF_sbyVolEachCell.get(vToBy).split("(by|_)")[1]+","+sortedrNRF_sbyVolEachCell.get(vToBy)+","+rNRF_VolumeLHM.get(sortedrNRF_sbyVolEachCell.get(vToBy)));
 ////			}
 //		}
 //	
-//		ArrayList<String> sortedRNRFsbySAEachCell = 
-//				rootNameRootFrame_RankedSurfaceAreasOrderWholeBrainLHM
+//		ArrayList<String> sortedrNRF_sbySAEachCell = 
+//				rNRF_RankedSAsOrderWholeBrainLHM
 //			    .entrySet()
 //			    .stream()
 //			    .sorted( Map.Entry.comparingByKey())
 //			    .sorted(Map.Entry.comparingByValue())
 //			    .map(Map.Entry::getKey)
 //			    .collect(Collectors.toCollection(ArrayList::new));
-//		IJ.log("\nRanked By SurfaceArea over each contacted cell");
-//		for (int saToBy = sortedRNRFsbySAEachCell.size()-1; saToBy>=0; saToBy--) {
-//			rootNameRootFrame_RankedSurfaceAreasOrderToCellLHM.put(sortedRNRFsbySAEachCell.get(saToBy).split("(by|and|_)")[0],rootNameRootFrame_SurfaceAreaLHM.get(sortedRNRFsbySAEachCell.get(saToBy)));
-//			IJ.log(sortedRNRFsbySAEachCell.get(saToBy).split("(by|and|_)")[0]+","+sortedRNRFsbySAEachCell.get(saToBy)+","+rootNameRootFrame_SurfaceAreaLHM.get(sortedRNRFsbySAEachCell.get(saToBy)));
-////			if(sortedRNRFsbySAEachCell.get(saToBy).split("(by|_)").length>1) {
-////				rootNameRootFrame_RankedSurfaceAreasOrderByCellLHM.put(sortedRNRFsbySAEachCell.get(saToBy).split("(by|_)")[1],rootNameRootFrame_SurfaceAreaLHM.get(sortedRNRFsbySAEachCell.get(saToBy)));
-////				IJ.log(sortedRNRFsbySAEachCell.get(saToBy).split("(by|_)")[1]+","+sortedRNRFsbySAEachCell.get(saToBy)+","+rootNameRootFrame_SurfaceAreaLHM.get(sortedRNRFsbySAEachCell.get(saToBy)));
+//		IJ.log("\nRanked By SA over each contacted cell");
+//		for (int saToBy = sortedrNRF_sbySAEachCell.size()-1; saToBy>=0; saToBy--) {
+//			rNRF_RankedSAsOrderToCellLHM.put(sortedrNRF_sbySAEachCell.get(saToBy).split("(by|and|_)")[0],rNRF_SA_LHM.get(sortedrNRF_sbySAEachCell.get(saToBy)));
+//			IJ.log(sortedrNRF_sbySAEachCell.get(saToBy).split("(by|and|_)")[0]+","+sortedrNRF_sbySAEachCell.get(saToBy)+","+rNRF_SA_LHM.get(sortedrNRF_sbySAEachCell.get(saToBy)));
+////			if(sortedrNRF_sbySAEachCell.get(saToBy).split("(by|_)").length>1) {
+////				rNRF_RankedSAsOrderByCellLHM.put(sortedrNRF_sbySAEachCell.get(saToBy).split("(by|_)")[1],rNRF_SA_LHM.get(sortedrNRF_sbySAEachCell.get(saToBy)));
+////				IJ.log(sortedrNRF_sbySAEachCell.get(saToBy).split("(by|_)")[1]+","+sortedrNRF_sbySAEachCell.get(saToBy)+","+rNRF_SA_LHM.get(sortedrNRF_sbySAEachCell.get(saToBy)));
 ////			}
 //		}
 /////////////// ^^^^ This block does not sort into sorted cell bins yet!!! NEEDS WORK.
