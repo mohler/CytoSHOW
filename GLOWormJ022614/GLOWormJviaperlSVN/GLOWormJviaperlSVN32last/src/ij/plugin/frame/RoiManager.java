@@ -2422,16 +2422,39 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		for (int psa=sortedrNRF_sbySA.size()-1; psa>=0; psa--) {
 			if (sortedrNRF_sbySA.get(psa).matches("([A-Z,0-9,-]+)by([A-Z,0-9,-]+)(_\\d+)")) {
 				rNRF_RankedPatchesSAsOrderWholeBrainLHM.put(sortedrNRF_sbySA.get(psa),rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa)));
+				////
 				if (rNRF_RankedPatchSAsPerCellLHM.get(sortedrNRF_sbySA.get(psa).split("by")[0]) == null){
 					rNRF_RankedPatchSAsPerCellLHM.put(sortedrNRF_sbySA.get(psa).split("by")[0],new ArrayList<String>());
 				}
-				rNRF_RankedPatchSAsPerCellLHM.get(sortedrNRF_sbySA.get(psa).split("by")[0]).add(sortedrNRF_sbySA.get(psa));
-				
+				rNRF_RankedPatchSAsPerCellLHM.get(sortedrNRF_sbySA.get(psa).split("by")[0]).add(sortedrNRF_sbySA.get(psa)+"=>"+String.format("%.2f",rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa))));
+				////
 				
 				IJ.log(sortedrNRF_sbySA.get(psa)+","+rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa)));
 				sumAllPatchSAs = sumAllPatchSAs + rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa));
 			}
 		}
+		
+		ArrayList<String> sortedrNRF_EachCellSorted = 
+				rNRF_RankedPatchSAsPerCellLHM
+				.entrySet()
+			    .stream()
+			    .sorted(Map.Entry.comparingByKey())
+			    .map(Map.Entry::getKey)
+			    .collect(Collectors.toCollection(ArrayList::new));
+		IJ.log("\nPatches On Each Cell, Ranked By SA");
+		for (int ess=0; ess<sortedrNRF_EachCellSorted.size(); ess++) {
+			if (sortedrNRF_EachCellSorted.get(ess).matches("([A-Z,0-9,-]+)")) {
+				////
+				if (rNRF_RankedPatchSAsPerCellLHM.get(sortedrNRF_EachCellSorted.get(ess).split("by")[0]) == null){
+					continue;
+				}
+				ArrayList<String> contactCellNames = rNRF_RankedPatchSAsPerCellLHM.get(sortedrNRF_EachCellSorted.get(ess).split("by")[0]);
+				////
+				
+				IJ.log(sortedrNRF_EachCellSorted.get(ess).split("by")[0]+": "+contactCellNames.toString());
+			}
+		}
+
 
 		IJ.log("\nSum all cell volumes: "+ sumAllCellVolumes);
 		IJ.log("\nSum all cell surface areas: "+ sumAllCellSAs);
