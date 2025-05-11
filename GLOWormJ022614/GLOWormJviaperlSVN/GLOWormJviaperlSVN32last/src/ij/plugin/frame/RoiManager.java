@@ -2376,7 +2376,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		IJ.log("\nCells Ranked By Volume");
 		for (int v=sortedrNRF_neuronsbyVol.size()-1; v>=0; v--) {
 			rNRF_RankedNeuronVolumesOrderWholeBrainLHM.put(sortedrNRF_neuronsbyVol.get(v),rNRF_NeuronsVolumeLHM.get(sortedrNRF_neuronsbyVol.get(v)));
-			IJ.log(sortedrNRF_neuronsbyVol.get(v)+","+rNRF_NeuronsVolumeLHM.get(sortedrNRF_neuronsbyVol.get(v)));
+			IJ.log(sortedrNRF_neuronsbyVol.get(v)+", "+String.format("%.2f",rNRF_NeuronsVolumeLHM.get(sortedrNRF_neuronsbyVol.get(v))));
 			sumAllCellVolumes = sumAllCellVolumes + rNRF_NeuronsVolumeLHM.get(sortedrNRF_neuronsbyVol.get(v));
 		}
 		
@@ -2390,7 +2390,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		IJ.log("\nCells Ranked By SA");
 		for (int nsa=sortedrNRF_neuronsbySA.size()-1; nsa>=0; nsa--) {
 			rNRF_RankedNeuronSAsOrderWholeBrainLHM.put(sortedrNRF_neuronsbySA.get(nsa),rNRF_NeuronsSA_LHM.get(sortedrNRF_neuronsbySA.get(nsa)));
-			IJ.log(sortedrNRF_neuronsbySA.get(nsa)+","+rNRF_NeuronsSA_LHM.get(sortedrNRF_neuronsbySA.get(nsa)));
+			IJ.log(sortedrNRF_neuronsbySA.get(nsa)+", "+String.format("%.2f",rNRF_NeuronsSA_LHM.get(sortedrNRF_neuronsbySA.get(nsa))));
 			sumAllCellSAs = sumAllCellSAs + rNRF_NeuronsSA_LHM.get(sortedrNRF_neuronsbySA.get(nsa));
 		}
 		
@@ -2406,7 +2406,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		for (int psa=sortedrNRF_sbyRecipAvgSA.size()-1; psa>=0; psa--) {
 			if (sortedrNRF_sbyRecipAvgSA.get(psa).matches("([A-Z,0-9,-]+)and([A-Z,0-9,-]+)(_\\d+)")) {
 				rNRF_RankedPatchesSAsOrderWholeBrainLHM.put(sortedrNRF_sbyRecipAvgSA.get(psa),rNRF_PatchesRecipAvgSA_LHM.get(sortedrNRF_sbyRecipAvgSA.get(psa)));
-				IJ.log(sortedrNRF_sbyRecipAvgSA.get(psa)+","+rNRF_PatchesRecipAvgSA_LHM.get(sortedrNRF_sbyRecipAvgSA.get(psa)));
+				IJ.log(sortedrNRF_sbyRecipAvgSA.get(psa)+", "+String.format("%.2f",rNRF_PatchesRecipAvgSA_LHM.get(sortedrNRF_sbyRecipAvgSA.get(psa))));
 				sumAllRecipAvgPatchSAs = sumAllRecipAvgPatchSAs + rNRF_PatchesRecipAvgSA_LHM.get(sortedrNRF_sbyRecipAvgSA.get(psa));
 			}
 		}
@@ -2426,10 +2426,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				if (rNRF_RankedPatchSAsPerCellLHM.get(sortedrNRF_sbySA.get(psa).split("by")[0]) == null){
 					rNRF_RankedPatchSAsPerCellLHM.put(sortedrNRF_sbySA.get(psa).split("by")[0],new ArrayList<String>());
 				}
-				rNRF_RankedPatchSAsPerCellLHM.get(sortedrNRF_sbySA.get(psa).split("by")[0]).add(sortedrNRF_sbySA.get(psa)+"=>"+String.format("%.2f",rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa)))
-						+","+(rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa))/sumTPSAs)+" ("+(sortedrNRF_sbySA.size()-psa)+")"
-//						+","+(rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa))/rNRF_NeuronsTotalPatchesSA_LHM.get(sortedrNRF_sbySA.get(psa).split("by")[0])
-//						+","+(rNRF_RankedPatchSAsPerCellLHM.get(sortedrNRF_sbySA.get(psa).split("by")[0]).size()
+				rNRF_RankedPatchSAsPerCellLHM.get(sortedrNRF_sbySA.get(psa).split("by")[0]).add(" "+sortedrNRF_sbySA.get(psa)+"=>"+String.format("%.2f",rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa)))
+						+" | "+(rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa))/sumTPSAs)+" ("+(sortedrNRF_sbySA.size()-psa)+")"
+//						+" | "+(rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa).split("by")[0])/(rNRF_NeuronsTotalPatchesSA_LHM.get(sortedrNRF_sbySA.get(psa).split("by")[0])))+" ("+(sortedrNRF_sbySA.size()-psa)+")"
+						+" | ("+(1+rNRF_RankedPatchSAsPerCellLHM.get(sortedrNRF_sbySA.get(psa).split("by")[0]).size())+")"
 						);
 				////
 				
