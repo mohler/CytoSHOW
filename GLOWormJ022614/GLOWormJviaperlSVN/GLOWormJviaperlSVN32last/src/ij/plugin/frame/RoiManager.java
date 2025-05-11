@@ -2426,10 +2426,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				if (rNRF_RankedPatchSAsPerCellLHM.get(sortedrNRF_sbySA.get(psa).split("by")[0]) == null){
 					rNRF_RankedPatchSAsPerCellLHM.put(sortedrNRF_sbySA.get(psa).split("by")[0],new ArrayList<String>());
 				}
-				rNRF_RankedPatchSAsPerCellLHM.get(sortedrNRF_sbySA.get(psa).split("by")[0]).add(sortedrNRF_sbySA.get(psa)+"=>"+String.format("%.2f",rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa))));
+				rNRF_RankedPatchSAsPerCellLHM.get(sortedrNRF_sbySA.get(psa).split("by")[0]).add(sortedrNRF_sbySA.get(psa)+"=>"+String.format("%.2f",rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa)))
+						+","+(rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa))/sumTPSAs)+" ("+(sortedrNRF_sbySA.size()-psa)+")"
+//						+","+(rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa))/rNRF_NeuronsTotalPatchesSA_LHM.get(sortedrNRF_sbySA.get(psa).split("by")[0])
+//						+","+(rNRF_RankedPatchSAsPerCellLHM.get(sortedrNRF_sbySA.get(psa).split("by")[0]).size()
+						);
 				////
 				
-				IJ.log(sortedrNRF_sbySA.get(psa)+","+rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa)));
+				IJ.log(sortedrNRF_sbySA.get(psa)+", "+String.format("%.2f",rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa)))+" ("+(sortedrNRF_sbySA.size()-psa)+")");
 				sumAllPatchSAs = sumAllPatchSAs + rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa));
 			}
 		}
@@ -2457,9 +2461,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 
 		IJ.log("\nSum all cell volumes: "+ sumAllCellVolumes);
-		IJ.log("\nSum all cell surface areas: "+ sumAllCellSAs);
+		IJ.log("\nSum all cell surface areas: "+ sumAllCellSAs +"="+ sumSAs);
 		IJ.log("\nSum all recip avg patches surface areas: "+ sumAllRecipAvgPatchSAs);
-		IJ.log("\nSum all patches surface areas: "+ sumAllPatchSAs);
+		IJ.log("\nSum all patches surface areas: "+ sumAllPatchSAs +"="+ sumTPSAs);
 
 		IJ.wait(0);
 		
