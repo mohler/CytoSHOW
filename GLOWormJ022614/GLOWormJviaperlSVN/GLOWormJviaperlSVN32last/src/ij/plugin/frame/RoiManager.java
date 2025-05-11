@@ -2428,8 +2428,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				}
 				rNRF_RankedPatchSAsPerCellLHM.get(sortedrNRF_sbySA.get(psa).split("by")[0]).add(" "+sortedrNRF_sbySA.get(psa)+"=>"+String.format("%.2f",rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa)))+"nm^2"
 						+" | "+String.format("%.7f",rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa))/sumTPSAs)+" ("+(sortedrNRF_sbySA.size()-psa)+")"
-//						+" | "+(rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa).split("by")[0])/(rNRF_NeuronsTotalPatchesSA_LHM.get(sortedrNRF_sbySA.get(psa).split("by")[0])))+" ("+(sortedrNRF_sbySA.size()-psa)+")"
-						+" | ("+(1+rNRF_RankedPatchSAsPerCellLHM.get(sortedrNRF_sbySA.get(psa).split("by")[0]).size())+")"
+						
+						+" | "+String.format("%.7f", (rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa))/ /*+"..."+*/(rNRF_NeuronsTotalPatchesSA_LHM.get(sortedrNRF_sbySA.get(psa).replaceAll("(.*)by.*(_.*)","$1$2")))))						
+						+" ("+(1+rNRF_RankedPatchSAsPerCellLHM.get(sortedrNRF_sbySA.get(psa).split("by")[0]).size())+")"
 						);
 				////
 				
