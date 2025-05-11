@@ -2426,8 +2426,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				if (rNRF_RankedPatchSAsPerCellLHM.get(sortedrNRF_sbySA.get(psa).split("by")[0]) == null){
 					rNRF_RankedPatchSAsPerCellLHM.put(sortedrNRF_sbySA.get(psa).split("by")[0],new ArrayList<String>());
 				}
-				rNRF_RankedPatchSAsPerCellLHM.get(sortedrNRF_sbySA.get(psa).split("by")[0]).add(" "+sortedrNRF_sbySA.get(psa)+"=>"+String.format("%.2f",rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa)))
-						+" | "+(rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa))/sumTPSAs)+" ("+(sortedrNRF_sbySA.size()-psa)+")"
+				rNRF_RankedPatchSAsPerCellLHM.get(sortedrNRF_sbySA.get(psa).split("by")[0]).add(" "+sortedrNRF_sbySA.get(psa)+"=>"+String.format("%.2f",rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa)))+"nm^2"
+						+" | "+String.format("%.7f",rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa))/sumTPSAs)+" ("+(sortedrNRF_sbySA.size()-psa)+")"
 //						+" | "+(rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa).split("by")[0])/(rNRF_NeuronsTotalPatchesSA_LHM.get(sortedrNRF_sbySA.get(psa).split("by")[0])))+" ("+(sortedrNRF_sbySA.size()-psa)+")"
 						+" | ("+(1+rNRF_RankedPatchSAsPerCellLHM.get(sortedrNRF_sbySA.get(psa).split("by")[0]).size())+")"
 						);
@@ -2460,10 +2460,10 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		}
 
 
-		IJ.log("\nSum all cell volumes: "+ sumAllCellVolumes);
-		IJ.log("\nSum all cell surface areas: "+ sumAllCellSAs +"="+ sumSAs);
-		IJ.log("\nSum all recip avg patches surface areas: "+ sumAllRecipAvgPatchSAs);
-		IJ.log("\nSum all patches surface areas: "+ sumAllPatchSAs +"="+ sumTPSAs);
+		IJ.log("\nSum all cell volumes: "+ String.format("%.2f",sumAllCellVolumes)+"nm^3");
+		IJ.log("\nSum all cell surface areas: "/* + sumAllCellSAs +"=" */+ String.format("%.2f",sumSAs)+"nm^2");
+		IJ.log("\nSum all recip avg patches surface areas: "+ String.format("%.2f",sumAllRecipAvgPatchSAs)+"nm^2");
+		IJ.log("\nSum all patches surface areas: "/* + sumAllPatchSAs +"=" */+ String.format("%.2f",sumTPSAs)+"nm^2");
 
 		IJ.wait(0);
 		
