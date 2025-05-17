@@ -2320,7 +2320,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			//
 			//
 			// Line below seems to give too large a patch sum for each cell...why?
-			//
+			// Because each "close-enough" pixel on a cell surface can possibly be "close enough" to be adjacent to two or more neighboring cells.
 			//
 			//
 			if (!rootName.contains("by") && rNRF_NeuronsTotalPatchesSA_LHM.get(rootNameFrame)!=null) {
@@ -2426,7 +2426,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				if (rNRF_RankedPatchSAsPerCellLHM.get(sortedrNRF_sbySA.get(psa).split("by")[0]) == null){
 					rNRF_RankedPatchSAsPerCellLHM.put(sortedrNRF_sbySA.get(psa).split("by")[0],new ArrayList<String>());
 				}
-				rNRF_RankedPatchSAsPerCellLHM.get(sortedrNRF_sbySA.get(psa).split("by")[0]).add(" "+sortedrNRF_sbySA.get(psa)+"=>"+String.format("%.2f",rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa)))+"nm^2"
+				rNRF_RankedPatchSAsPerCellLHM.get(sortedrNRF_sbySA.get(psa).split("by")[0]).add(" "+sortedrNRF_sbySA.get(psa).replace("_1", "")+" | "+String.format("%.2f",rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa)))+"nm^2"
 						+" | "+String.format("%.7f",rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa))/sumTPSAs)+" ("+(sortedrNRF_sbySA.size()-psa)+")"
 						
 						+" | "+String.format("%.7f", (rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa))/ /*+"..."+*/(rNRF_NeuronsTotalPatchesSA_LHM.get(sortedrNRF_sbySA.get(psa).replaceAll("(.*)by.*(_.*)","$1$2")))))						
@@ -2456,7 +2456,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				ArrayList<String> contactCellNames = rNRF_RankedPatchSAsPerCellLHM.get(sortedrNRF_EachCellSorted.get(ess).split("by")[0]);
 				////
 				
-				IJ.log(sortedrNRF_EachCellSorted.get(ess).split("by")[0]+": "+contactCellNames.toString());
+				IJ.log(sortedrNRF_EachCellSorted.get(ess).split("by")[0]+" | "+String.format("%.0f",rNRF_NeuronsVolumeLHM.get(sortedrNRF_EachCellSorted.get(ess)+"_1")) +"nm^3 ("
+																				+ (sortedrNRF_neuronsbyVol.size() - (sortedrNRF_neuronsbyVol.indexOf(sortedrNRF_EachCellSorted.get(ess).split("by")[0] + "_1"))) +")"
+																		+" | "+String.format("%.2f", rNRF_NeuronsSA_LHM.get(sortedrNRF_EachCellSorted.get(ess)+"_1")) +"nm^2 ("
+																				+ (sortedrNRF_neuronsbySA.size() - (sortedrNRF_neuronsbySA.indexOf(sortedrNRF_EachCellSorted.get(ess).split("by")[0] + "_1"))) +")"
+																		+",=>"+contactCellNames.toString().replace("[", ",").replace("]",""));
 			}
 		}
 
