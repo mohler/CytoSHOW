@@ -2291,9 +2291,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 			double totalrNRF__Volume = sumAreas * imp.getCalibration().pixelDepth;
 			double totalrNRF__SA = sumPerims * imp.getCalibration().pixelDepth;
-			IJ.log(""+rootName+(!rootNameFrame.matches("([A-Z,0-9,-]+)by([A-Z,0-9,-]+)(_\\d+)")?(", vol="+String.format("%.2f",totalrNRF__Volume)):"")+", SA="+String.format("%.2f",totalrNRF__SA));
+			IJ.log(""+rootName+(!rootNameFrame.matches("([a-z,A-Z,0-9,-]+)by([a-z,A-Z,0-9,-]+)(_\\d+)")?(", vol="+String.format("%.2f",totalrNRF__Volume)):"")+", SA="+String.format("%.2f",totalrNRF__SA));
 //			if (!rootName.contains("by")) {
-			if (!rootNameFrame.matches("([A-Z,0-9,-]+)by([A-Z,0-9,-]+)(_\\d+)")) {
+			if (!rootNameFrame.matches("([a-z,A-Z,0-9,-]+)by([a-z,A-Z,0-9,-]+)(_\\d+)")) {
 				rNRF_NeuronsVolumeLHM.put(rootNameFrame, totalrNRF__Volume);
 				rNRF_NeuronsSA_LHM.put(rootNameFrame, totalrNRF__SA);
 			} else {
@@ -2336,8 +2336,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		IJ.log("\nPatches Un-Ranked RecipAvg Surface Areas over Whole Brain");
 		for (String rNRF_A : rootNames_rootFrames) {
 			String rNRF_B = "";
-			if (rNRF_A.matches("([A-Z,0-9,-]+)by([A-Z,0-9,-]+)(_\\d+)")) {
-				 rNRF_B = rNRF_A.replaceAll("([A-Z,0-9,-]+)by([A-Z,0-9,-]+)(_\\d+)", "$2by$1$3");
+			if (rNRF_A.matches("([a-z,A-Z,0-9,-]+)by([a-z,A-Z,0-9,-]+)(_\\d+)")) {
+				 rNRF_B = rNRF_A.replaceAll("([a-z,A-Z,0-9,-]+)by([a-z,A-Z,0-9,-]+)(_\\d+)", "$2by$1$3");
 			} else {
 				continue; //for rNRF_A
 			}
@@ -2373,10 +2373,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			    .sorted(Map.Entry.comparingByValue())
 			    .map(Map.Entry::getKey)
 			    .collect(Collectors.toCollection(ArrayList::new));
-		IJ.log("\nCells Ranked By Volume");
+		IJ.log("\nCells Ranked By Volume\ncell,vol");
 		for (int v=sortedrNRF_neuronsbyVol.size()-1; v>=0; v--) {
 			rNRF_RankedNeuronVolumesOrderWholeBrainLHM.put(sortedrNRF_neuronsbyVol.get(v),rNRF_NeuronsVolumeLHM.get(sortedrNRF_neuronsbyVol.get(v)));
-			IJ.log(sortedrNRF_neuronsbyVol.get(v)+", "+String.format("%.2f",rNRF_NeuronsVolumeLHM.get(sortedrNRF_neuronsbyVol.get(v))));
+			IJ.log((sortedrNRF_neuronsbyVol.get(v) + ", " + String.format("%.2f", rNRF_NeuronsVolumeLHM
+					.get(sortedrNRF_neuronsbyVol.get(v))))/* .replace("_1, ",",").replaceAll(" \\(.*\\)", "") */);   //UNCOMMENT LAST BITS TO MAKE CSV FOR NEUROSCAN INGESTION.
 			sumAllCellVolumes = sumAllCellVolumes + rNRF_NeuronsVolumeLHM.get(sortedrNRF_neuronsbyVol.get(v));
 		}
 		
@@ -2387,10 +2388,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			    .sorted(Map.Entry.comparingByValue())
 			    .map(Map.Entry::getKey)
 			    .collect(Collectors.toCollection(ArrayList::new));
-		IJ.log("\nCells Ranked By SA");
+		IJ.log("\nCells Ranked By SA\ncell,sa");
 		for (int nsa=sortedrNRF_neuronsbySA.size()-1; nsa>=0; nsa--) {
 			rNRF_RankedNeuronSAsOrderWholeBrainLHM.put(sortedrNRF_neuronsbySA.get(nsa),rNRF_NeuronsSA_LHM.get(sortedrNRF_neuronsbySA.get(nsa)));
-			IJ.log(sortedrNRF_neuronsbySA.get(nsa)+", "+String.format("%.2f",rNRF_NeuronsSA_LHM.get(sortedrNRF_neuronsbySA.get(nsa))));
+			IJ.log((sortedrNRF_neuronsbySA.get(nsa) + ", " + String.format("%.2f", rNRF_NeuronsSA_LHM
+					.get(sortedrNRF_neuronsbySA.get(nsa))))/* .replace("_1, ",",").replaceAll(" \\(.*\\)", "") */);   //UNCOMMENT LAST BITS TO MAKE CSV FOR NEUROSCAN INGESTION.
 			sumAllCellSAs = sumAllCellSAs + rNRF_NeuronsSA_LHM.get(sortedrNRF_neuronsbySA.get(nsa));
 		}
 		
@@ -2404,7 +2406,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			    .collect(Collectors.toCollection(ArrayList::new));
 		IJ.log("\nPatches Ranked By RecipAvgSA");
 		for (int psa=sortedrNRF_sbyRecipAvgSA.size()-1; psa>=0; psa--) {
-			if (sortedrNRF_sbyRecipAvgSA.get(psa).matches("([A-Z,0-9,-]+)and([A-Z,0-9,-]+)(_\\d+)")) {
+			if (sortedrNRF_sbyRecipAvgSA.get(psa).matches("([a-z,A-Z,0-9,-]+)and([a-z,A-Z,0-9,-]+)(_\\d+)")) {
 				rNRF_RankedPatchesSAsOrderWholeBrainLHM.put(sortedrNRF_sbyRecipAvgSA.get(psa),rNRF_PatchesRecipAvgSA_LHM.get(sortedrNRF_sbyRecipAvgSA.get(psa)));
 				IJ.log(sortedrNRF_sbyRecipAvgSA.get(psa)+", "+String.format("%.2f",rNRF_PatchesRecipAvgSA_LHM.get(sortedrNRF_sbyRecipAvgSA.get(psa))));
 				sumAllRecipAvgPatchSAs = sumAllRecipAvgPatchSAs + rNRF_PatchesRecipAvgSA_LHM.get(sortedrNRF_sbyRecipAvgSA.get(psa));
@@ -2418,9 +2420,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			    .sorted(Map.Entry.comparingByValue())
 			    .map(Map.Entry::getKey)
 			    .collect(Collectors.toCollection(ArrayList::new));
-		IJ.log("\nPatches Ranked By SA");
+		IJ.log("\nPatches Ranked By SA\ncontact,sa");
 		for (int psa=sortedrNRF_sbySA.size()-1; psa>=0; psa--) {
-			if (sortedrNRF_sbySA.get(psa).matches("([A-Z,0-9,-]+)by([A-Z,0-9,-]+)(_\\d+)")) {
+			if (sortedrNRF_sbySA.get(psa).matches("([a-z,A-Z,0-9,-]+)by([a-z,A-Z,0-9,-]+)(_\\d+)")) {
 				rNRF_RankedPatchesSAsOrderWholeBrainLHM.put(sortedrNRF_sbySA.get(psa),rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa)));
 				////
 				if (rNRF_RankedPatchSAsPerCellLHM.get(sortedrNRF_sbySA.get(psa).split("by")[0]) == null){
@@ -2434,7 +2436,9 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						);
 				////
 				
-				IJ.log(sortedrNRF_sbySA.get(psa)+", "+String.format("%.2f",rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa)))+" ("+(sortedrNRF_sbySA.size()-psa)+")");
+				IJ.log((sortedrNRF_sbySA.get(psa) + ", "
+						+ String.format("%.2f", rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa))) + " ("
+						+ (sortedrNRF_sbySA.size() - psa) + ")")/* .replace("_1, ",",").replaceAll(" \\(.*\\)", "") */);   //UNCOMMENT LAST BITS TO MAKE CSV FOR NEUROSCAN INGESTION.
 				sumAllPatchSAs = sumAllPatchSAs + rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa));
 			}
 		}
@@ -2448,7 +2452,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			    .collect(Collectors.toCollection(ArrayList::new));
 		IJ.log("\nPatches On Each Cell, Ranked By SA");
 		for (int ess=0; ess<sortedrNRF_EachCellSorted.size(); ess++) {
-			if (sortedrNRF_EachCellSorted.get(ess).matches("([A-Z,0-9,-]+)")) {
+			if (sortedrNRF_EachCellSorted.get(ess).matches("([a-z,A-Z,0-9,-]+)")) {
 				////
 				if (rNRF_RankedPatchSAsPerCellLHM.get(sortedrNRF_EachCellSorted.get(ess).split("by")[0]) == null){
 					continue;
