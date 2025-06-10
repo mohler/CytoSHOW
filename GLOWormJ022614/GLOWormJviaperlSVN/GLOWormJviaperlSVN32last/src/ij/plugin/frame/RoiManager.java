@@ -2166,7 +2166,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 
 	private void sketchVolumeMeasurer(Object source) {
-		boolean singleSave = IJ.shiftKeyDown();
+		boolean singleSave = shiftKeyDown;
 		double scaleFactor = 1.0;
 		double zPadFactor = 1;
 		IJ.setForegroundColor(255, 255, 255);
@@ -2376,8 +2376,12 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		IJ.log("\nCells Ranked By Volume\ncell,vol");
 		for (int v=sortedrNRF_neuronsbyVol.size()-1; v>=0; v--) {
 			rNRF_RankedNeuronVolumesOrderWholeBrainLHM.put(sortedrNRF_neuronsbyVol.get(v),rNRF_NeuronsVolumeLHM.get(sortedrNRF_neuronsbyVol.get(v)));
-			IJ.log((sortedrNRF_neuronsbyVol.get(v) + ", " + String.format("%.2f", rNRF_NeuronsVolumeLHM
-					.get(sortedrNRF_neuronsbyVol.get(v))))/* .replace("_1, ",",").replaceAll(" \\(.*\\)", "") */);   //UNCOMMENT LAST BITS TO MAKE CSV FOR NEUROSCAN INGESTION.
+			if (singleSave) {
+				IJ.log((sortedrNRF_neuronsbyVol.get(v) + ", " + String.format("%.2f", rNRF_NeuronsVolumeLHM
+					.get(sortedrNRF_neuronsbyVol.get(v)))).replace("_1, ",",").replaceAll(" \\(.*\\)", ""));   //HOLD SHIFT DOWN TO MAKE CSV FOR NEUROSCAN INGESTION.
+			} else {IJ.log((sortedrNRF_neuronsbyVol.get(v) + ", " + String.format("%.2f", rNRF_NeuronsVolumeLHM
+					.get(sortedrNRF_neuronsbyVol.get(v))))/* .replace("_1, ",",").replaceAll(" \\(.*\\)", "") */);
+			}
 			sumAllCellVolumes = sumAllCellVolumes + rNRF_NeuronsVolumeLHM.get(sortedrNRF_neuronsbyVol.get(v));
 		}
 		
@@ -2391,8 +2395,14 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 		IJ.log("\nCells Ranked By SA\ncell,sa");
 		for (int nsa=sortedrNRF_neuronsbySA.size()-1; nsa>=0; nsa--) {
 			rNRF_RankedNeuronSAsOrderWholeBrainLHM.put(sortedrNRF_neuronsbySA.get(nsa),rNRF_NeuronsSA_LHM.get(sortedrNRF_neuronsbySA.get(nsa)));
-			IJ.log((sortedrNRF_neuronsbySA.get(nsa) + ", " + String.format("%.2f", rNRF_NeuronsSA_LHM
-					.get(sortedrNRF_neuronsbySA.get(nsa))))/* .replace("_1, ",",").replaceAll(" \\(.*\\)", "") */);   //UNCOMMENT LAST BITS TO MAKE CSV FOR NEUROSCAN INGESTION.
+			if (singleSave) {
+				IJ.log((sortedrNRF_neuronsbySA.get(nsa) + ", " + String.format("%.2f", rNRF_NeuronsSA_LHM
+					.get(sortedrNRF_neuronsbySA.get(nsa)))).replace("_1, ",",").replaceAll(" \\(.*\\)", ""));      //HOLD SHIFT DOWN TO MAKE CSV FOR NEUROSCAN INGESTION.
+			} else {
+				IJ.log((sortedrNRF_neuronsbySA.get(nsa) + ", " + String.format("%.2f", rNRF_NeuronsSA_LHM
+						.get(sortedrNRF_neuronsbySA.get(nsa))))/* .replace("_1, ",",").replaceAll(" \\(.*\\)", "") */);
+				
+			}
 			sumAllCellSAs = sumAllCellSAs + rNRF_NeuronsSA_LHM.get(sortedrNRF_neuronsbySA.get(nsa));
 		}
 		
@@ -2436,9 +2446,17 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						);
 				////
 				
-				IJ.log((sortedrNRF_sbySA.get(psa) + ", "
-						+ String.format("%.2f", rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa))) + " ("
-						+ (sortedrNRF_sbySA.size() - psa) + ")")/* .replace("_1, ",",").replaceAll(" \\(.*\\)", "") */);   //UNCOMMENT LAST BITS TO MAKE CSV FOR NEUROSCAN INGESTION.
+				if (singleSave) {
+					IJ.log((sortedrNRF_sbySA.get(psa) + ", "
+							+ String.format("%.2f", rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa))) + " ("
+							+ (sortedrNRF_sbySA.size() - psa) + ")").replace("_1, ",",").replaceAll(" \\(.*\\)", ""));   //UNCOMMENT LAST BITS TO MAKE CSV FOR NEUROSCAN INGESTION.
+				}else {
+					IJ.log((sortedrNRF_sbySA.get(psa) + ", "
+							+ String.format("%.2f", rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa))) + " ("
+							+ (sortedrNRF_sbySA.size() - psa) + ")")/* .replace("_1, ",",").replaceAll(" \\(.*\\)", "") */);   //UNCOMMENT LAST BITS TO MAKE CSV FOR NEUROSCAN INGESTION.
+					
+				}
+				
 				sumAllPatchSAs = sumAllPatchSAs + rNRF_PatchesSA_LHM.get(sortedrNRF_sbySA.get(psa));
 			}
 		}
