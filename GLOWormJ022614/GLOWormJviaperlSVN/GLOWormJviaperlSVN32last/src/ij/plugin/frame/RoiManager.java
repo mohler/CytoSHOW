@@ -1112,7 +1112,7 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				realignByParameters();
 			} else if (command.equals("Auto-advance when tagging")) {
 				new ij.macro.MacroRunner(
-						IJ.openUrlAsString("http://fsbill.cam.uchc.edu/gloworm/Xwords/WormAtlasLabelerMacro.txt"));
+						IJ.openUrlAsString("http://gloworm.org/gloworm/Xwords/WormAtlasLabelerMacro.txt"));
 			} else if (command.equals("StarryNiteImporter")) {
 				importStarryNiteNuclei("");
 			} else if (command.equals("Resolve a-p l-r sisters")) {

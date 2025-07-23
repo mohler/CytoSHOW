@@ -66,7 +66,7 @@ public class CorrectDispimZStreaks implements PlugIn {
 	public void run(String arg) {
 		imp = IJ.getImage();
 		int slice = imp.getSlice();
-		//		ImagePlus gaussianDiffImp = (new ImagePlus("http://fsbill.cam.uchc.edu/Xwords/z-x_Mask_ver_-32bkg_x255over408_15x33rect.tif"));
+		//		ImagePlus gaussianDiffImp = (new ImagePlus("http://gloworm.org/Xwords/z-x_Mask_ver_-32bkg_x255over408_15x33rect.tif"));
 		URL url = ImageWindow.class.getResource("images/z-x_Mask_ver_-32bkg_x255over408_15x33rect.tif");
 		if (url==null) return;
 		ImagePlus gaussianDiffImp = null;

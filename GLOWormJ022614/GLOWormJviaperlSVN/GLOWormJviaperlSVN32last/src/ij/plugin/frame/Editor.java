@@ -702,7 +702,7 @@ public class Editor extends PlugInFrame implements ActionListener, ItemListener,
 			GenericDialog lgd = new GenericDialog("Shared CytoSHOW Suite");
 			lgd.addMessage("This suite of scenes can be accessed at the web address below.\n" +
 					"Please copy, save, and share this link.\n");
-			String link = "http://fsbill.cam.uchc.edu/cgi-bin/gloworm.pl?MOVIE="
+			String link = "http://gloworm.org/cgi-bin/gloworm.pl?MOVIE="
 					+saveFile.getName();
 			lgd.addStringField("", link, link.length());
 			lgd.pack();

@@ -933,7 +933,7 @@ public class MQTVSSceneLoader implements PlugIn {
 							lineageMapImage.getWindow().setBackground(imp.getWindow().getBackground());
 							if (imp!=null) ((VirtualStack) imp.getStack()).setLineageMapImage(lineageMapImage);
 							ImagePlus lineageLinkedImp = imp;
-							String lineageMacro = IJ.openUrlAsString("http://fsbill.cam.uchc.edu/gloworm/Xwords/LineageTreeBrowseMacro.txt");
+							String lineageMacro = IJ.openUrlAsString("http://gloworm.org/gloworm/Xwords/LineageTreeBrowseMacro.txt");
 							File tempLCDFile = null;
 							lineageLCDFilePath = lineageLCDFilePath.replaceAll("Q:", "/Volumes/GLOWORM_DATA");
 							if (lineageLCDFilePath.contains("/Volumes/GLOWORM_DATA"))

@@ -1818,7 +1818,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				IJ.log(cellName);
 				IJ.runMacro(""
 						+ "print(\"starting...\");"
-						+ "string = File.openUrlAsString(\"http://fsbill.cam.uchc.edu/gloworm/Xwords/Partslist.html\");"
+						+ "string = File.openUrlAsString(\"http://gloworm.org/gloworm/Xwords/Partslist.html\");"
 						+ "fates = split(string, \"\\\'?\\\'\");"
 						+ "print(\"Derived Fates:\");"
 						+ "for (i=0; i<lengthOf(fates); i++) {"
@@ -1938,7 +1938,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 				
 				new Thread(new Runnable() {
 					public void run() {
-						ImagePlus cartoonImp = IJ.openImage("http://fsbill.cam.uchc.edu/gloworm/Xwords/NeuronDiagrams/"+finalCellName.toLowerCase()+".gif");
+						ImagePlus cartoonImp = IJ.openImage("http://gloworm.org/gloworm/Xwords/NeuronDiagrams/"+finalCellName.toLowerCase()+".gif");
 						if (cartoonImp!=null && cartoonImp.getImage()!=null) {
 							cartoonImp.setTitle(finalCellName);
 							JPanel cartoonPanel = new JPanel();
@@ -1978,7 +1978,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 						//						cellName = ((TextRoi)cursorRoi).getName();
 						IJ.runMacro(""
 								+ "print(\"starting...\");"
-								+ "string = File.openUrlAsString(\"http://fsbill.cam.uchc.edu/gloworm/Xwords/Partslist.html\");"
+								+ "string = File.openUrlAsString(\"http://gloworm.org/gloworm/Xwords/Partslist.html\");"
 								+ "fates = split(string, \"\\\'?\\\'\");"
 								+ "print(\"Derived Fates:\");"
 								+ "for (i=0; i<lengthOf(fates); i++) {"
@@ -2120,7 +2120,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 									} else {
 										tagLag++;
 									}
-									if (glowGeneLogLines[gg].contains("http://fsbill.cam.uchc.edu/cgi-bin/gloworm.pl?MOVIE=") && tagLag<3) {
+									if (glowGeneLogLines[gg].contains("http://gloworm.org/cgi-bin/gloworm.pl?MOVIE=") && tagLag<3) {
 										mi = new JMenuItem("movie "+ glowGeneLogLines[gg].substring(glowGeneLogLines[gg].indexOf("\">")+2, 
 												glowGeneLogLines[gg].indexOf("</a>")));
 										popupInfo[1] = popupInfo[1]+ "      "+ glowGeneLogLines[gg].substring(glowGeneLogLines[gg].indexOf("\">")+2, 
@@ -2326,7 +2326,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 					popupInfo[1] = popupInfo[1] +"\n";
 
 					String analogName ="";
-					String embAnalogsMatrix = IJ.openUrlAsString("http://fsbill.cam.uchc.edu/gloworm/Xwords/EmbryonicAnalogousCells.csv");
+					String embAnalogsMatrix = IJ.openUrlAsString("http://gloworm.org/gloworm/Xwords/EmbryonicAnalogousCells.csv");
 					String[] embAnalogsRows = embAnalogsMatrix.split("\n");
 					JMenu analogsPopup = new JMenu(cellName+": Analogous cells >", true);
 					analogsPopup.setIcon(new ImageIcon(ImageWindow.class.getResource("images/Analogs.png")));
@@ -2391,7 +2391,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 
 						IJ.runMacro(""
 								+ "print(\"starting...\");"
-								+ "string = File.openUrlAsString(\"http://fsbill.cam.uchc.edu/gloworm/Xwords/Partslist.html\");"
+								+ "string = File.openUrlAsString(\"http://gloworm.org/gloworm/Xwords/Partslist.html\");"
 								+ "fates = split(string, \"\\\'?\\\'\");"
 								+ "print(\"Derived Fates:\");"
 								+ "for (i=0; i<lengthOf(fates); i++) {"
@@ -2447,7 +2447,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 					}
 					popupInfo[1] = popupInfo[1] +"\n";
 
-					String synapseMatrix = IJ.openUrlAsString("http://fsbill.cam.uchc.edu/gloworm/Xwords/NeuronConnect.csv");
+					String synapseMatrix = IJ.openUrlAsString("http://gloworm.org/gloworm/Xwords/NeuronConnect.csv");
 					if (synapseMatrix.contains(cellName)){
 						boolean presyn = false;
 						boolean postsyn = false;
@@ -2676,7 +2676,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 //					imp.getWindow().toFront();
 					IJ.runMacro(""
 							+ "print(\"starting...\");"
-							+ "string = File.openUrlAsString(\"http://fsbill.cam.uchc.edu/gloworm/Xwords/Partslist.html\");"
+							+ "string = File.openUrlAsString(\"http://gloworm.org/gloworm/Xwords/Partslist.html\");"
 							+ "fates = split(string, \"\\\'?\\\'\");"
 							+ "print(\"Derived Fates:\");"
 							+ "for (i=0; i<lengthOf(fates); i++) {"
@@ -3027,7 +3027,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 						}
 
 						for (int f=0; f<fileList.length;f++) {
-							if (fileList[f].contains("http://fsbill.cam.uchc.edu/cgi-bin/gloworm.pl?MOVIE=") 
+							if (fileList[f].contains("http://gloworm.org/cgi-bin/gloworm.pl?MOVIE=") 
 									&& 
 									(fileList[f].toLowerCase().contains( ((MultiQTVirtualStack)dataImp.getStack()).getVirtualStack(m).getMovieFile().getName()
 											.toLowerCase().replaceAll("(_slc.*|_pr.*)", ""))) ) {
@@ -3051,7 +3051,7 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 									samePopup.add(mi);
 
 								}
-							}else if (fileList[f].contains("http://fsbill.cam.uchc.edu/cgi-bin/gloworm.pl?MOVIE=") 
+							}else if (fileList[f].contains("http://gloworm.org/cgi-bin/gloworm.pl?MOVIE=") 
 									&& fileList[f].toLowerCase().contains(".mov")){
 								for (int e1=0; e1<movieGeneNames.length; e1++) {
 									if (fileList[f].toLowerCase().contains(movieGeneNames[e1].toLowerCase().trim())){

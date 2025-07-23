@@ -243,7 +243,7 @@ public class Opener {
 				while(iterator.hasNext()) {
 					Object obj = iterator.next();
 					if (obj!=null && (obj instanceof String)) {
-						if ( ((String)obj).startsWith("http://fsbill.cam.uchc.edu/")){
+						if ( ((String)obj).startsWith("http://gloworm.org/")){
 							String[] fn = ((String)obj).split("/") ;
 							String fileName = fn[fn.length-1];	
 							String viewName= null;
@@ -364,7 +364,7 @@ public class Opener {
 									e.printStackTrace();
 								}
 								if (line != null)
-									stringBuilder.append(line.replace("http://fsbill.cam.uchc.edu/cgi-bin/gloworm.pl?MOVIE=", "/Volumes/GLOWORM_DATA/")).append(ls);
+									stringBuilder.append(line.replace("http://gloworm.org/cgi-bin/gloworm.pl?MOVIE=", "/Volumes/GLOWORM_DATA/")).append(ls);
 							}
 							suiteTextLines = stringBuilder.toString().split("\n");
 						}
@@ -378,13 +378,13 @@ public class Opener {
 							String line = "";
 							while (line != null) {
 								try {
-									line = in.readLine().replace("http://fsbill.cam.uchc.edu/cgi-bin/gloworm.pl?MOVIE=", "/Volumes/GLOWORM_DATA/");;
+									line = in.readLine().replace("http://gloworm.org/cgi-bin/gloworm.pl?MOVIE=", "/Volumes/GLOWORM_DATA/");;
 								} catch (IOException e) {
 									// TODO Auto-generated catch block
 									e.printStackTrace();
 								}
 								if (line != null)
-									stringBuilder.append(line.replace("http://fsbill.cam.uchc.edu/cgi-bin/gloworm.pl?MOVIE=", "/Volumes/GLOWORM_DATA/")).append(ls);
+									stringBuilder.append(line.replace("http://gloworm.org/cgi-bin/gloworm.pl?MOVIE=", "/Volumes/GLOWORM_DATA/")).append(ls);
 							}
 							suiteTextLines = stringBuilder.toString().split("\n");
 						}

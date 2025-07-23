@@ -183,7 +183,7 @@ public class SceneEditor extends Editor {
 			GenericDialog lgd = new GenericDialog("Shared CytoSHOW Scene");
 			lgd.addMessage("This scene can be accessed at the web address below.\n" +
 					"Please copy, save, and share this link.\n");
-			String link = "http://fsbill.cam.uchc.edu/cgi-bin/gloworm.pl?MOVIE="
+			String link = "http://gloworm.org/cgi-bin/gloworm.pl?MOVIE="
 					+saveFile.getName();
 			lgd.addStringField("", link, link.length());
 			lgd.pack();

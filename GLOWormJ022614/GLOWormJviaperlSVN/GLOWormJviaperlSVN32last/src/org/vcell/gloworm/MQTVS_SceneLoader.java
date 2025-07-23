@@ -346,7 +346,7 @@ public class MQTVS_SceneLoader implements PlugIn {
 								lineageMapImage.getWindow().setBackground(imp.getWindow().getBackground());
 								if (imp!=null) ((MultiQTVirtualStack) imp.getStack()).setLineageMapImage(lineageMapImage);
 								ImagePlus lineageLinkedImp = imp;
-								String lineageMacro = IJ.openUrlAsString("http://fsbill.cam.uchc.edu/gloworm/Xwords/LineageTreeBrowseMacro.txt");
+								String lineageMacro = IJ.openUrlAsString("http://gloworm.org/gloworm/Xwords/LineageTreeBrowseMacro.txt");
 								IJ.runMacro(lineageMacro, lineageMapImage.getTitle() + "|" + lineageLCDFilePath+ "|" + lineageLinkedImp.getID());
 							}							
 

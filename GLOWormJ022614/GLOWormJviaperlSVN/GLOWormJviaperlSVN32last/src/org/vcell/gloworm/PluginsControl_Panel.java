@@ -161,7 +161,7 @@ public class PluginsControl_Panel extends PlugInFrame implements PlugIn, MouseLi
 		String command = e.getActionCommand();
 		if (command==null) return;
 //		if (command == "Show Map of Keypad Controls") {
-//			IJ.run("URL...", "url=http://fsbill.cam.uchc.edu/gloworm/Xwords/CytoSHOWKeypad.jpg");
+//			IJ.run("URL...", "url=http://gloworm.org/gloworm/Xwords/CytoSHOWKeypad.jpg");
 //			return;
 //		}
 		ImagePlus adjimp = WindowManager.getCurrentImage();

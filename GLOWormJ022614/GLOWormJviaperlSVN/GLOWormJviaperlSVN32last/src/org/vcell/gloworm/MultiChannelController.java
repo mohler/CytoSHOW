@@ -1587,11 +1587,11 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 			}
 			if (command.equals("Show Scene Details")) {
 				if (imp.getStack() instanceof MultiQTVirtualStack) {
-					tw = new TextWindow(((MultiQTVirtualStack)imp.getStack()).getSceneFileName(),"", "Shared as: \nhttp://fsbill.cam.uchc.edu/cgi-bin/gloworm.pl?MOVIE="+((MultiQTVirtualStack)imp.getStack()).getSceneFileName()+"\n"+((MultiQTVirtualStack)imp.getStack()).getSceneFileText(), 300, 300);
+					tw = new TextWindow(((MultiQTVirtualStack)imp.getStack()).getSceneFileName(),"", "Shared as: \nhttp://gloworm.org/cgi-bin/gloworm.pl?MOVIE="+((MultiQTVirtualStack)imp.getStack()).getSceneFileName()+"\n"+((MultiQTVirtualStack)imp.getStack()).getSceneFileText(), 300, 300);
 				} else if (imp.getStack() instanceof RemoteMQTVSHandler.RemoteMQTVirtualStack) {
-					tw = new TextWindow(((RemoteMQTVSHandler.RemoteMQTVirtualStack)imp.getStack()).getSceneFileName(),"", "Shared as: \nhttp://fsbill.cam.uchc.edu/cgi-bin/gloworm.pl?MOVIE="+((RemoteMQTVSHandler.RemoteMQTVirtualStack)imp.getStack()).getSceneFileName()+"\n"+((RemoteMQTVSHandler.RemoteMQTVirtualStack)imp.getStack()).getSceneFileText(), 300, 300);
+					tw = new TextWindow(((RemoteMQTVSHandler.RemoteMQTVirtualStack)imp.getStack()).getSceneFileName(),"", "Shared as: \nhttp://gloworm.org/cgi-bin/gloworm.pl?MOVIE="+((RemoteMQTVSHandler.RemoteMQTVirtualStack)imp.getStack()).getSceneFileName()+"\n"+((RemoteMQTVSHandler.RemoteMQTVirtualStack)imp.getStack()).getSceneFileText(), 300, 300);
 				} else {
-					tw = new TextWindow(saveFile.getName(), "", "Shared as: \nhttp://fsbill.cam.uchc.edu/cgi-bin/gloworm.pl?MOVIE="+saveFile.getName()+"\n"+IJ.openAsString(saveFile.getPath()), 300, 300);
+					tw = new TextWindow(saveFile.getName(), "", "Shared as: \nhttp://gloworm.org/cgi-bin/gloworm.pl?MOVIE="+saveFile.getName()+"\n"+IJ.openAsString(saveFile.getPath()), 300, 300);
 				}
 			}
 
@@ -1649,7 +1649,7 @@ public class MultiChannelController extends PlugInFrame implements PlugIn, ItemL
 				GenericDialog lgd = new GenericDialog("Shared CytoSHOW Scene");
 				lgd.addMessage("This scene can be accessed at the web address below.\n" +
 						"Please copy, save, and share this link.\n");
-				String link = "http://fsbill.cam.uchc.edu/cgi-bin/gloworm.pl?MOVIE="
+				String link = "http://gloworm.org/cgi-bin/gloworm.pl?MOVIE="
 						+saveFile.getName();
 				lgd.addStringField("", link, link.length());
 				lgd.pack();
