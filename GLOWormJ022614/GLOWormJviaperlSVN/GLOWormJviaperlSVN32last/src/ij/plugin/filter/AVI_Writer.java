@@ -104,119 +104,47 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 		IJ.showStatus("");
 		
 ////TOTALLY FLUMOXED WHY CANNOT WRITE OUT VIDEO FROM EITHER OF THESE 3 VERSIONS OF A PROCESSBUILDER...		
-//		String aviToMp4ffmpeg = "/Volumes/InternalSDD4TB/Users/wmohler/Downloads/ffmpeg -i " + fileDir + fileName
-//				+ " -vf \"pad=ceil(iw/2)*2:ceil(ih/2)*2\" " + fileDir + fileName.replace("avi", "mp4") +" -y" ;
-//		
-//		final Path videoInPath = Paths.get(fileDir + fileName);
-//		final Path encodingFilePath = Paths.get(fileDir + fileName.replace("avi", "mp4"));
-//		final Path errorFile = Paths.get("c:\\ffmpeg\\bin\\error.txt");
-//
-//		int retCode;
-//
-//		try {
-//		    Files.deleteIfExists(encodingFilePath);
-//		    Files.deleteIfExists(errorFile);
-//
-//		    final ProcessBuilder pb 
-//		        = new ProcessBuilder("c:\\ffmpeg\\bin\\ffmpeg.exe",
-//		            "-i", videoInPath.toString(),
-//		            "-y", 
-//		            "-s", "360x480", // stripped the extraneous "-1"
-//		            "-vcodec", "libx264",                    
-//		            "c:\\ffmpeg\\bin\\output.mp4"
-//		    ); //or other command....
-//
-//		    pb.redirectError(errorFile.toFile());
-//		    pb.redirectOutput(encodingFilePath.toFile());
-//
-//		    final Process p = pb.start();
-//
-//		    // CHECK FOR THIS!
-//		    try {
-//				retCode = p.waitFor();
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//
-//		} catch (IOException e) {
-//		    // deal with e here
-//		}
-//		IJ.log(aviToMp4ffmpeg);
-//			Process p = Runtime.getRuntime().exec(aviToMp4ffmpeg);
-//			p.waitFor();
+		String aviToMp4ffmpeg = "/Volumes/InternalSDD4TB/Users/wmohler/Downloads/ffmpeg -i " + fileDir + fileName
+				+ " -vf \"pad=ceil(iw/2)*2:ceil(ih/2)*2\" " +" -y" +" -vcodec"+ " libx264 " + fileDir + fileName.replace("avi", "mp4") ;
 		
-		String[] aviToMp4ffmpeg = { "/Volumes/InternalSDD4TB/Users/wmohler/Downloads/ffmpeg", "-i", fileDir + fileName,
-				"-vf", "\'pad=ceil(iw/2)*2:ceil(ih/2)*2\'", fileDir + fileName.replace("avi", "mp4")/* , "-y" */};
-//		try {
-//			ProcessBuilder p = new ProcessBuilder(aviToMp4ffmpeg);
-//			String cmd = p.toString();
-//			Process ps = p.start();
-//			IJ.log(cmd+ " "+ps.waitFor());
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+		final Path videoInPath = Paths.get(fileDir + fileName);
+		final Path encodingFilePath = Paths.get(fileDir + fileName.replace("avi", "mp4"));
+		final Path errorFile = Paths.get("/Volumes/InternalSDD4TB/Users/wmohler/Downloads/ffmpegError.txt");
 
-		
-//		   ProcessBuilder mp4Builder = new ProcessBuilder(aviToMp4ffmpeg);
-//
-//		    Process mp4Process;
-//			try {
-//				mp4Process = mp4Builder.start();
-//		    InputStream inputStream = new ByteArrayInputStream(new FileInputStream(fileDir + fileName));
-//		    CompletableFuture<Void> mp4Input = CompletableFuture.runAsync(() -> {
-//		      try {
-//		        try {
-//		          byte[] buffer = new byte[8192];
-//		          while (true) {
-//		            int size = inputStream.read(buffer);
-//		            if (size < 0) {
-//		              break;
-//		            }
-//		            if (size > 0) {
-//		            	mp4Process.getOutputStream().write(buffer, 0, size);
-//		            }
-//		          }
-//		        } finally {
-//		        	mp4Process.getOutputStream().close();
-//		        }
-//		      } catch (IOException ex) {
-//		        throw new RuntimeException(ex);
-//		      }
-//		    });
-//
-//		    try {
-//		      byte[] buffer = new byte[8192];
-//		      while (true) {
-//		        int size = mp4Process.getInputStream().read(buffer);
-//		        if (size < 0) {
-//		          break;
-//		        }
-//		        if (size > 0) {
-//		          System.out.write(buffer, 0, size);
-//		        }
-//		      }
-//		    } catch (IOException ex) {
-//		      throw new RuntimeException(ex);
-//		    }
-//		    try {
-//				mp4Process.waitFor();
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-//		    if (mp4Process.exitValue() != 0) {
-//		      IJ.log("Process " + mp4Builder.command() + " has failed with exit code " + mp4Process.exitValue());
-//		    }
-//		    mp4Input.join();
-//			} catch (IOException e1) {
-//				// TODO Auto-generated catch block
-//				e1.printStackTrace();
-//			}
+		int retCode;
+
+		try {
+		    Files.deleteIfExists(encodingFilePath);
+		    Files.deleteIfExists(errorFile);
+
+		    final ProcessBuilder pb 
+		        = new ProcessBuilder("/Volumes/InternalSDD4TB/Users/wmohler/Downloads/ffmpeg",
+		            "-i", videoInPath.toString(),
+		            "-vf", "pad=ceil(iw/2)*2:ceil(ih/2)*2",
+		            "-y", 
+		            "-vcodec", "libx264",                    
+		            encodingFilePath.toString()
+		    ); //or other command....
+
+		    pb.redirectError(errorFile.toFile());
+		    pb.redirectOutput(encodingFilePath.toFile());
+
+		    IJ.log(aviToMp4ffmpeg);
+		    final Process p = pb.start();
+
+		    // CHECK FOR THIS!
+		    try {
+				retCode = p.waitFor();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+		} catch (IOException e) {
+		    // deal with e here
+			e.printStackTrace();
+
+		}
 
 	}
 
