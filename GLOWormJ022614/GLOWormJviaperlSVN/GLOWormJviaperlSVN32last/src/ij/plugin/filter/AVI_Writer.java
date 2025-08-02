@@ -92,7 +92,7 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 		String fileDir = sd.getDirectory();
 		String pathToffmpeg = Prefs.get("FFMPEG.pathToBinaryFile", "");
 		if (pathToffmpeg == null || pathToffmpeg == "") {
-			pathToffmpeg = (new SaveDialog("Indicate path to ffmpeg...","","")).getDirectory() + "ffmpeg";
+			pathToffmpeg = (new SaveDialog("Indicate path to ffmpeg...","","")).getDirectory() + "ffmpeg" + (IJ.isWindows()?".exe":"");
 		}
 		if (pathToffmpeg != null && pathToffmpeg != "") {
 			Prefs.set("FFMPEG.pathToBinaryFile", pathToffmpeg);
@@ -116,7 +116,7 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 		
 		final Path videoInPath = Paths.get(fileDir + fileName);
 		final Path encodingFilePath = Paths.get(fileDir + fileName.replace("avi", "mp4"));
-		final Path errorFile = Paths.get("/Volumes/InternalSDD4TB/Users/wmohler/Downloads/ffmpegError.txt");
+		final Path errorFile = Paths.get(pathToffmpeg.replace(".exe","") + "Error.txt");
 
 		int retCode;
 
