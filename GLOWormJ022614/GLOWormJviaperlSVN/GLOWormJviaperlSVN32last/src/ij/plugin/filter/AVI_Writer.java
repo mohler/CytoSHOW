@@ -90,6 +90,14 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 		if (fileName == null)
 			return;
 		String fileDir = sd.getDirectory();
+		String pathToffmpeg = Prefs.get("FFMPEG.pathToBinaryFile", "");
+		if (pathToffmpeg == null || pathToffmpeg == "") {
+			pathToffmpeg = (new SaveDialog("Indicate path to ffmpeg...","","")).getDirectory() + "ffmpeg";
+		}
+		if (pathToffmpeg != null && pathToffmpeg != "") {
+			Prefs.set("FFMPEG.pathToBinaryFile", pathToffmpeg);
+		}
+			
 		FileInfo fi = imp.getOriginalFileInfo();
 		if (fi!=null && imp.getStack().isVirtual() && fileDir.equals(fi.directory) && fileName.equals(fi.fileName)) {
 			IJ.error("AVI Writer", "Virtual stacks cannot be saved in place.");
@@ -103,8 +111,7 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 		}
 		IJ.showStatus("");
 		
-////TOTALLY FLUMOXED WHY CANNOT WRITE OUT VIDEO FROM EITHER OF THESE 3 VERSIONS OF A PROCESSBUILDER...		
-		String aviToMp4ffmpeg = "/Volumes/InternalSDD4TB/Users/wmohler/Downloads/ffmpeg -i " + fileDir + fileName
+		String aviToMp4ffmpeg = pathToffmpeg + " -i " + fileDir + fileName
 				+ " -vf \"pad=ceil(iw/2)*2:ceil(ih/2)*2\" " +" -y" +" -vcodec"+ " libx264 " + fileDir + fileName.replace("avi", "mp4") ;
 		
 		final Path videoInPath = Paths.get(fileDir + fileName);
@@ -118,7 +125,7 @@ public class AVI_Writer implements PlugInFilter, TextListener {
 		    Files.deleteIfExists(errorFile);
 
 		    final ProcessBuilder pb 
-		        = new ProcessBuilder("/Volumes/InternalSDD4TB/Users/wmohler/Downloads/ffmpeg",
+		        = new ProcessBuilder(pathToffmpeg,
 		            "-i", videoInPath.toString(),
 		            "-vf", "pad=ceil(iw/2)*2:ceil(ih/2)*2",
 		            "-y", 
