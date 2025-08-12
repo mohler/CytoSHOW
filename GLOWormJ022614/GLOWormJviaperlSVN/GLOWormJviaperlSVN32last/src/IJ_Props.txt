@@ -358,6 +358,7 @@ filters15="Variance 3D...",ij.plugin.Filters3D("var")
 filters16=-
 filters17="Show Circular Masks...",ij.plugin.filter.RankFilters("masks")
 filters18="Enhance Local Contrast (CLAHE)", ij.plugin.CLAHE
+filters19="FibsemCleanup", ij.plugin.FibsemCleanup
 
 
 # Plugins installed in the File/Batch submenu
