@@ -5,6 +5,7 @@ import ij.process.*;
 import ij.gui.*;
 import ij.plugin.*;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.concurrent.*;
 
 /**
@@ -42,6 +43,7 @@ public class FibsemCleanup implements PlugIn {
         // Loop through each open image ID.
         for (int impID : impIDs) {
             ImagePlus sourceImp = WindowManager.getImage(impID);
+            ArrayList<String> zsProcessing = new ArrayList<String>();
             if (sourceImp == null) {
                 continue; // Skip if image is no longer available
             }
@@ -79,18 +81,20 @@ public class FibsemCleanup implements PlugIn {
             for (int z = 1; z <= zDepth; z++) {
                 final int finalZ = z;
                 
+                // Define the full path for the output file
+                String fullOutputPath = destination.replace(".tif", "") +"_"+IJ.pad(finalZ,6)+".tif";
+
+                // Check if the output file already exists. If so, skip processing this slice.
+                if (new File(fullOutputPath).exists() || zsProcessing.contains(""+finalZ)) {
+                	IJ.log("Skipping slice " + finalZ + ", output file already exists.");
+                	continue; 
+                } else {
+                	zsProcessing.add(""+finalZ);
+                }
+
                 // Submit the processing task for this slice to the thread pool.
                 executor.submit(() -> {
                     try {
-                        // Define the full path for the output file
-                        String fullOutputPath = destination.replace(".tif", "") +"_"+IJ.pad(finalZ,6)+".tif";
-                        
-                        // Check if the output file already exists. If so, skip processing this slice.
-                        if (new File(fullOutputPath).exists()) {
-                            IJ.log("Skipping slice " + finalZ + ", output file already exists.");
-                            return; 
-                        }
-                        
                         ImagePlus currentSlice;
                         // All operations that affect the global state (like WindowManager or IJ.run)
                         // must be synchronized to prevent race conditions.
@@ -191,6 +195,8 @@ public class FibsemCleanup implements PlugIn {
                         synchronized (lock) {
                             currentSlice.close();
                             invFFTimp.close();
+                            zsProcessing.remove(finalZ);
+                            IJ.log("finished slice "+finalZ);
                         }
                     } catch (Exception e) {
                         IJ.error("Error processing slice " + finalZ + ": " + e.getMessage());
