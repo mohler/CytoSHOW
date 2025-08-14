@@ -37,8 +37,9 @@ public class FibsemCleanup implements PlugIn {
 
         // Determine the number of available processors to create an optimal-sized thread pool.
         int processors = Runtime.getRuntime().availableProcessors();
-        ExecutorService executor = Executors.newFixedThreadPool(processors);
-        IJ.log("Using a thread pool with " + processors + " threads.");
+        int nThreads = processors<=2?1:(processors/2);
+        ExecutorService executor = Executors.newFixedThreadPool(nThreads);
+        IJ.log("Using a thread pool with " + nThreads + " threads.");
 
         // Loop through each open image ID.
         for (int impID : impIDs) {
@@ -195,11 +196,11 @@ public class FibsemCleanup implements PlugIn {
                         synchronized (lock) {
                             currentSlice.close();
                             invFFTimp.close();
-                            zsProcessing.remove(finalZ);
+                            zsProcessing.remove(""+finalZ);
                             IJ.log("finished slice "+finalZ);
                         }
                     } catch (Exception e) {
-                        IJ.error("Error processing slice " + finalZ + ": " + e.getMessage());
+                        IJ.error("Error processing slice " + finalZ + ": " + e.getMessage()+ e.toString());
                     }
                 });
             }
