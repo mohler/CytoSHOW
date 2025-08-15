@@ -181,7 +181,7 @@ public class FibsemCleanup implements PlugIn {
                         // Close the temporary images to free up memory.
                             currentSlice.close();
                             invFFTimp.close();
-                            zsProcessing.remove(finalZ);
+                            zsProcessing.remove(""+finalZ);
                             IJ.log("finished slice "+finalZ);
                         
                     } catch (Exception e) {
