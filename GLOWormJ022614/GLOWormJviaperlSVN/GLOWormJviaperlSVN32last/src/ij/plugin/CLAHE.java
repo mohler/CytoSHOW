@@ -203,6 +203,8 @@ public class CLAHE implements PlugIn
 		
 		for ( int y = box.y; y < boxYMax; ++y )
 		{
+			IJ.showStatus("Running CLAHE");
+			IJ.showProgress(y, boxYMax);
 			final int yMin = Math.max( 0, y - blockRadius );
 			final int yMax = Math.min( imp.getHeight(), y + blockRadius + 1 );
 			final int h = yMax - yMin;
@@ -219,6 +221,7 @@ public class CLAHE implements PlugIn
 			
 			for ( int x = box.x; x < boxXMax; ++x )
 			{
+
 				final int v = roundPositive( src.get( x, y ) / 255.0f * bins );
 				
 				final int xMin = Math.max( 0, x - blockRadius );

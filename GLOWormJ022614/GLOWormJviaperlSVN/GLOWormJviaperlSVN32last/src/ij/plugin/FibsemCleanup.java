@@ -2,6 +2,8 @@ package ij.plugin;
 
 import ij.*;
 import ij.process.*;
+import ij.process.FHT;
+import ij.plugin.FFT;
 import ij.gui.*;
 import ij.plugin.*;
 import java.io.File;
@@ -37,9 +39,8 @@ public class FibsemCleanup implements PlugIn {
 
         // Determine the number of available processors to create an optimal-sized thread pool.
         int processors = Runtime.getRuntime().availableProcessors();
-        int nThreads = processors<=2?1:(processors/2);
-        ExecutorService executor = Executors.newFixedThreadPool(nThreads);
-        IJ.log("Using a thread pool with " + nThreads + " threads.");
+        ExecutorService executor = Executors.newFixedThreadPool(processors);
+        IJ.log("Using a thread pool with " + processors + " threads.");
 
         // Loop through each open image ID.
         for (int impID : impIDs) {
@@ -101,27 +102,23 @@ public class FibsemCleanup implements PlugIn {
                         // must be synchronized to prevent race conditions.
                         
                         // Get the current slice to process using the user's preferred method.
-                        synchronized (lock) {
                             sourceImp.setPosition(1, finalZ, 1);
                             currentSlice = new ImagePlus("CurrentSlice=" + finalZ, sourceImp.getProcessor());
-                            WindowManager.setTempCurrentImage(currentSlice);
-                        }
 
 
                         // --- Processing steps as per the macro ---
                         
                         // 1. Remove Outliers (Dark and Bright)
-                        synchronized (lock) {
-                            IJ.run("Remove Outliers...", "radius=2 threshold=50 which=Dark slice");
-                            IJ.run("Remove Outliers...", "radius=2 threshold=50 which=Bright slice");
-                        }
+                            IJ.run(currentSlice,"Remove Outliers...", "radius=2 threshold=50 which=Dark slice");
+                            IJ.run(currentSlice,"Remove Outliers...", "radius=2 threshold=50 which=Bright slice");
+                        
 
                         // 2. FFT
                         // The FFT command creates a new image window which we will capture.
-                        synchronized (lock) {
-                            IJ.run("FFT");
-                        }
-                        ImagePlus fftImp = WindowManager.getCurrentImage();
+                        FFT fft = new FFT();
+                        fft.setImp(currentSlice);
+                        FHT fht = fft.newFHT(currentSlice.getProcessor());
+                        ImagePlus fftImp = fft.doForwardTransform(fht);
                         
                         // Check if the FFT image was created.
                         if (fftImp == null) {
@@ -138,27 +135,23 @@ public class FibsemCleanup implements PlugIn {
                         fftImp.setTitle("FFTfwd");
 
                         // 3. Clear elliptical regions in FFT image
-                        synchronized (lock) {
                             fftImp.setRoi(new EllipseRoi(864, 2051, 1980, 2051, 0.04));
                             IJ.run(fftImp, "Clear", "stack");
                             fftImp.setRoi(new EllipseRoi(2142, 2051, 3258, 2051, 0.04));
                             IJ.run(fftImp, "Clear", "stack");
                             fftImp.killRoi();
-                        }
+                        
                         
                         // 4. Inverse FFT
-                        synchronized (lock) {
-                            WindowManager.setTempCurrentImage(fftImp);
-                            IJ.run("Inverse FFT");
-                        }
+                        Object obj = fftImp.getProperty("FHT");
+                        FHT theFht = (obj instanceof FHT)?(FHT)obj:null;
+                        ImagePlus invFFTimp = fft.doInverseTransform(theFht);
                         
-                        ImagePlus invFFTimp = WindowManager.getCurrentImage();
                         if (invFFTimp == null) {
                             IJ.error("Inverse FFT failed for slice " + finalZ);
-                            synchronized (lock) {
                                 fftImp.close();
                                 currentSlice.close();
-                            }
+                            
                             return;
                         }
 
@@ -166,41 +159,33 @@ public class FibsemCleanup implements PlugIn {
                         invFFTimp.setTitle("invFFTslice");
                         
                         // Close the FFT image window to free up memory.
-                        synchronized (lock) {
                             fftImp.close();
-                        }
                         
                         // 5. Enhance Local Contrast (CLAHE)
-                        synchronized (lock) {
-                            WindowManager.setTempCurrentImage(invFFTimp);
-                            IJ.run("Enhance Local Contrast (CLAHE)", "blocksize=127 histogram=256 maximum=2.7 mask=*None*");
-                        }
+                            IJ.run(invFFTimp, "Enhance Local Contrast (CLAHE)", "blocksize=127 histogram=256 maximum=2.7 mask=*None*");
+                        
                         
                         // 6. Remove Outliers (Dark and Bright) - Second pass
-                        synchronized (lock) {
-                            IJ.run("Remove Outliers...", "radius=2 threshold=50 which=Dark slice");
-                            IJ.run("Remove Outliers...", "radius=2 threshold=50 which=Bright slice");
-                        }
+                            IJ.run(invFFTimp,"Remove Outliers...", "radius=2 threshold=50 which=Dark slice");
+                            IJ.run(invFFTimp,"Remove Outliers...", "radius=2 threshold=50 which=Bright slice");
+                        
                         
                         // 7. Gaussian Blur
-                        synchronized (lock) {
-                            IJ.run("Gaussian Blur...", "sigma=0.008 scaled slice");
-                        }
+                            IJ.run(invFFTimp, "Gaussian Blur...", "sigma=0.008 scaled slice");
+                        
                         
                         // 8. Save the processed slice.
-                        synchronized (lock) {
                             IJ.saveAs(invFFTimp, "Tiff", fullOutputPath);
-                        }
+                        
                         
                         // Close the temporary images to free up memory.
-                        synchronized (lock) {
                             currentSlice.close();
                             invFFTimp.close();
-                            zsProcessing.remove(""+finalZ);
+                            zsProcessing.remove(finalZ);
                             IJ.log("finished slice "+finalZ);
-                        }
+                        
                     } catch (Exception e) {
-                        IJ.error("Error processing slice " + finalZ + ": " + e.getMessage()+ e.toString());
+                        IJ.error("Error processing slice " + finalZ + ": " + e.getMessage());
                     }
                 });
             }

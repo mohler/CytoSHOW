@@ -36,7 +36,7 @@ public class FFT implements  PlugIn, Measurements {
     private int stackSize = 1;
     private int slice = 1;
     private boolean doFFT;
-	private boolean noScaling;
+	private boolean noScaling = true;
 
 	
     public void run(String arg) {
@@ -163,7 +163,7 @@ public class FFT implements  PlugIn, Measurements {
             fht.originalWidth = originalWidth;
             fht.originalHeight = originalHeight;
         }
-        fht.originalBitDepth = imp.getBitDepth();
+        fht.originalBitDepth = ip.getBitDepth();
         fht.originalColorModel = ip.getColorModel();
         return fht;
     }
@@ -403,6 +403,14 @@ public class FFT implements  PlugIn, Measurements {
                   }
             }
       }
+
+	public ImagePlus getImp() {
+		return imp;
+	}
+
+	public void setImp(ImagePlus imp) {
+		this.imp = imp;
+	}
 
 }
 
