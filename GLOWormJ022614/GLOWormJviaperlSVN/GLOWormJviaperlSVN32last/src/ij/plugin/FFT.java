@@ -36,10 +36,16 @@ public class FFT implements  PlugIn, Measurements {
     private int stackSize = 1;
     private int slice = 1;
     private boolean doFFT;
-	private boolean noScaling = true;
+	private boolean noScaling;
+	private ImagePlus fwdFHT;
+	private ImagePlus invFHT;
 
 	
     public void run(String arg) {
+    	String[] args = arg.split(" ");
+    	boolean hideWindows = (args.length>1) && (args[1].equals("hide"));
+    	if (args.length>1)
+    		arg = args[0];
         if (arg.equals("options")) {
             showDialog();
             if (doFFT) arg="fft"; else return;
@@ -82,11 +88,15 @@ public class FFT implements  PlugIn, Measurements {
         if(noDisplay) {
         	
         } else {
-        	if (inverse)
-        		doInverseTransform(fht).show();
-        	else {
+        	if (inverse) {
+        		invFHT = doInverseTransform(fht);
+        		if (!hideWindows)
+        			invFHT.show();
+        	} else {
         		fileName = imp.getTitle();
-        		doForwardTransform(fht).show();   
+        		fwdFHT = doForwardTransform(fht);
+        		if (!hideWindows)
+        			fwdFHT.show();   
         	}    
         }
         IJ.showProgress(1.0);
@@ -410,6 +420,22 @@ public class FFT implements  PlugIn, Measurements {
 
 	public void setImp(ImagePlus imp) {
 		this.imp = imp;
+	}
+
+	public ImagePlus getFwdFHT() {
+		return fwdFHT;
+	}
+
+	public void setFwdFHT(ImagePlus fwdFHT) {
+		this.fwdFHT = fwdFHT;
+	}
+
+	public ImagePlus getInvFHT() {
+		return invFHT;
+	}
+
+	public void setInvFHT(ImagePlus invFHT) {
+		this.invFHT = invFHT;
 	}
 
 }

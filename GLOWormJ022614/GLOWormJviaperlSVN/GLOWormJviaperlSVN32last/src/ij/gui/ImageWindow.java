@@ -54,6 +54,8 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowEvent;
@@ -79,7 +81,7 @@ import org.vcell.gloworm.SliceStereoToggle;
 import com.sun.xml.internal.ws.util.StringUtils;
 
 /** A frame for displaying images. */
-public class ImageWindow extends JFrame implements FocusListener, WindowListener, WindowStateListener, MouseWheelListener {
+public class ImageWindow extends JFrame implements FocusListener, WindowListener, WindowStateListener, MouseWheelListener, KeyListener {
 
 	public static final int MIN_WIDTH = 128;
 	public static final int MIN_HEIGHT = 32;
@@ -302,7 +304,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		overheadPanel = new JPanel();
 		overheadPanel.setLayout(new GridLayout(2,1));
 		subTitleField = new JTextField(this.createSubtitle(false));
-		subTitleField.setEnabled(true);
+		subTitleField.setEnabled(false);
 		subTitleField.setEditable(false);
 		subTitleField.setToolTipText(this.createSubtitle(true));
 		overheadPanel.add(subTitleField);
@@ -1454,6 +1456,26 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 	public void setDragAndDrop(DragAndDrop dnd) {
 		this.dnd = dnd;
 		dnd.addDropTarget(this.getCanvas());
+	}
+
+	@Override
+	public void keyTyped(KeyEvent e) {
+		// TODO Auto-generated method stub
+		if (e.getKeyChar() == '+') IJ.run(this.getImagePlus(), "In [+]", ""); 
+		if (e.getKeyChar() == '-') IJ.run(this.getImagePlus(), "Out [-]", ""); 
+
+	}
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		// TODO Auto-generated method stub
+		
 	}
 
 

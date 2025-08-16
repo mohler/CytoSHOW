@@ -2,7 +2,7 @@ package ij.plugin;
 
 import ij.*;
 import ij.process.*;
-import ij.process.FHT;
+import ij.util.Tools;
 import ij.plugin.FFT;
 import ij.gui.*;
 import ij.plugin.*;
@@ -39,6 +39,7 @@ public class FibsemCleanup implements PlugIn {
 
         // Determine the number of available processors to create an optimal-sized thread pool.
         int processors = Runtime.getRuntime().availableProcessors();
+//        processors = 1;
         ExecutorService executor = Executors.newFixedThreadPool(processors);
         IJ.log("Using a thread pool with " + processors + " threads.");
 
@@ -104,7 +105,7 @@ public class FibsemCleanup implements PlugIn {
                         // Get the current slice to process using the user's preferred method.
                             sourceImp.setPosition(1, finalZ, 1);
                             currentSlice = new ImagePlus("CurrentSlice=" + finalZ, sourceImp.getProcessor());
-
+//                            currentSlice.show();
 
                         // --- Processing steps as per the macro ---
                         
@@ -115,56 +116,37 @@ public class FibsemCleanup implements PlugIn {
 
                         // 2. FFT
                         // The FFT command creates a new image window which we will capture.
-                        FFT fft = new FFT();
-                        fft.setImp(currentSlice);
-                        FHT fht = fft.newFHT(currentSlice.getProcessor());
-                        ImagePlus fftImp = fft.doForwardTransform(fht);
-                        
-                        // Check if the FFT image was created.
-                        if (fftImp == null) {
-                            IJ.error("FFT failed to create an image for slice " + finalZ);
-                            if (currentSlice != null) {
-                                synchronized (lock) {
-                                    currentSlice.close();
-                                }
-                            }
-                            return;
-                        }
-
-                        fftImp.hide();
-                        fftImp.setTitle("FFTfwd");
-
+                           FFT fwdFFT = new FFT();
+                           fwdFFT.setImp(currentSlice);
+                           fwdFFT.run("fft hide");
+//                           ImagePlus fftFwdImp = WindowManager.getCurrentImage();
+//                           fftFwdImp.hide();
                         // 3. Clear elliptical regions in FFT image
-                            fftImp.setRoi(new EllipseRoi(864, 2051, 1980, 2051, 0.04));
-                            IJ.run(fftImp, "Clear", "stack");
-                            fftImp.setRoi(new EllipseRoi(2142, 2051, 3258, 2051, 0.04));
-                            IJ.run(fftImp, "Clear", "stack");
-                            fftImp.killRoi();
-                        
+                            fwdFFT.getFwdFHT().setRoi(new EllipseRoi(864, 2051, 1980, 2051, 0.04));
+                            IJ.run(fwdFFT.getFwdFHT(), "Clear", "stack");
+                            fwdFFT.getFwdFHT().setRoi(new EllipseRoi(2142, 2051, 3258, 2051, 0.04));
+                            IJ.run(fwdFFT.getFwdFHT(), "Clear", "stack");
+                            fwdFFT.getFwdFHT().killRoi();
                         
                         // 4. Inverse FFT
-                        Object obj = fftImp.getProperty("FHT");
-                        FHT theFht = (obj instanceof FHT)?(FHT)obj:null;
-                        ImagePlus invFFTimp = fft.doInverseTransform(theFht);
                         
-                        if (invFFTimp == null) {
+                            FFT invFFT = new FFT();
+                            invFFT.setImp(fwdFFT.getFwdFHT());
+                            invFFT.run("inverse hide");
+                        if (invFFT.getInvFHT() == null) {
                             IJ.error("Inverse FFT failed for slice " + finalZ);
-                                fftImp.close();
+                                fwdFFT.getImp().close();
+                                fwdFFT.getFwdFHT().close();
                                 currentSlice.close();
                             
                             return;
                         }
-
-                        invFFTimp.hide();
-                        invFFTimp.setTitle("invFFTslice");
-                        
-                        // Close the FFT image window to free up memory.
-                            fftImp.close();
+                        ImagePlus invFFTimp = invFFT.getInvFHT();
                         
                         // 5. Enhance Local Contrast (CLAHE)
                             IJ.run(invFFTimp, "Enhance Local Contrast (CLAHE)", "blocksize=127 histogram=256 maximum=2.7 mask=*None*");
                         
-                        
+                            
                         // 6. Remove Outliers (Dark and Bright) - Second pass
                             IJ.run(invFFTimp,"Remove Outliers...", "radius=2 threshold=50 which=Dark slice");
                             IJ.run(invFFTimp,"Remove Outliers...", "radius=2 threshold=50 which=Bright slice");
