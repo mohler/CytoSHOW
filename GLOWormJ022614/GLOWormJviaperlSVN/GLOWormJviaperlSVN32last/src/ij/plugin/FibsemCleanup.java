@@ -7,6 +7,7 @@ import ij.plugin.FFT;
 import ij.gui.*;
 import ij.plugin.*;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.*;
 
@@ -45,25 +46,21 @@ public class FibsemCleanup implements PlugIn {
 
         // Loop through each open image ID.
         for (int impID : impIDs) {
-            ImagePlus sourceImp = WindowManager.getImage(impID);
-            ArrayList<String> zsProcessing = new ArrayList<String>();
+            WindowManager.setTempCurrentImage(WindowManager.getImage(impID));
+
+            ImagePlus sourceImp = WindowManager.getTempCurrentImage();
             if (sourceImp == null) {
                 continue; // Skip if image is no longer available
             }
-
-            // Set the current image temporarily to get its directory.
-            synchronized (lock) {
-                WindowManager.setTempCurrentImage(sourceImp);
-            }
             String path = IJ.getDirectory("image");
-            synchronized (lock) {
-                WindowManager.setTempCurrentImage(null); // Clear the temporary current image
-            }
+            WindowManager.setTempCurrentImage(null); // Clear the temporary current image
+            
             if (path == null) {
                 IJ.error("Could not determine image directory.");
                 return;
             }
 
+            
             // Get image dimensions from the source ImagePlus object.
             int zDepth = sourceImp.getNSlices();
             String sourceName = sourceImp.getTitle();
@@ -82,42 +79,39 @@ public class FibsemCleanup implements PlugIn {
 
             // Loop through each Z-slice and submit a processing task to the executor.
             for (int z = 1; z <= zDepth; z++) {
-                final int finalZ = z;
-                
-                // Define the full path for the output file
-                String fullOutputPath = destination.replace(".tif", "") +"_"+IJ.pad(finalZ,6)+".tif";
+
+                String fullOutputPath = destination.replace(".tif", "") +"_"+IJ.pad(z,6)+".tif";
 
                 // Check if the output file already exists. If so, skip processing this slice.
-                if (new File(fullOutputPath).exists() || zsProcessing.contains(""+finalZ)) {
-                	IJ.log("Skipping slice " + finalZ + ", output file already exists.");
+                if ((new File(fullOutputPath)).exists()){
+                	IJ.log("Skipping slice " + z + ", output file already exists.");
                 	continue; 
-                } else {
-                	zsProcessing.add(""+finalZ);
                 }
+
+                final int finalZ = z;
+                
+                final ThreadLocal<Integer> finalThreadedZ = ThreadLocal.withInitial(() -> finalZ);
+                sourceImp.setPosition(1,finalZ,1);
+                final ThreadLocal<ImagePlus> sliceThreadedImp = ThreadLocal.withInitial(() -> new ImagePlus(sourceName+"_slice_"+IJ.pad(finalZ, 6), sourceImp.getProcessor()));
+
+                // Define the full path for the output file
+                final ThreadLocal<String> fullThreadedOutputPath = ThreadLocal.withInitial(() -> destination.replace(".tif", "") +"_"+IJ.pad(finalZ,6)+".tif");
 
                 // Submit the processing task for this slice to the thread pool.
                 executor.submit(() -> {
                     try {
-                        ImagePlus currentSlice;
-                        // All operations that affect the global state (like WindowManager or IJ.run)
-                        // must be synchronized to prevent race conditions.
-                        
-                        // Get the current slice to process using the user's preferred method.
-                            sourceImp.setPosition(1, finalZ, 1);
-                            currentSlice = new ImagePlus("CurrentSlice=" + finalZ, sourceImp.getProcessor());
-//                            currentSlice.show();
 
                         // --- Processing steps as per the macro ---
                         
                         // 1. Remove Outliers (Dark and Bright)
-                            IJ.run(currentSlice,"Remove Outliers...", "radius=2 threshold=50 which=Dark slice");
-                            IJ.run(currentSlice,"Remove Outliers...", "radius=2 threshold=50 which=Bright slice");
+                            IJ.run(sliceThreadedImp.get(),"Remove Outliers...", "radius=2 threshold=50 which=Dark slice");
+                            IJ.run(sliceThreadedImp.get(),"Remove Outliers...", "radius=2 threshold=50 which=Bright slice");
                         
 
                         // 2. FFT
                         // The FFT command creates a new image window which we will capture.
                            FFT fwdFFT = new FFT();
-                           fwdFFT.setImp(currentSlice);
+                           fwdFFT.setImp(sliceThreadedImp.get());
                            fwdFFT.run("fft hide");
 //                           ImagePlus fftFwdImp = WindowManager.getCurrentImage();
 //                           fftFwdImp.hide();
@@ -134,10 +128,10 @@ public class FibsemCleanup implements PlugIn {
                             invFFT.setImp(fwdFFT.getFwdFHT());
                             invFFT.run("inverse hide");
                         if (invFFT.getInvFHT() == null) {
-                            IJ.error("Inverse FFT failed for slice " + finalZ);
+                            IJ.error("Inverse FFT failed for slice " + finalThreadedZ);
                                 fwdFFT.getImp().close();
                                 fwdFFT.getFwdFHT().close();
-                                currentSlice.close();
+                                sliceThreadedImp.get().close();
                             
                             return;
                         }
@@ -157,13 +151,12 @@ public class FibsemCleanup implements PlugIn {
                         
                         
                         // 8. Save the processed slice.
-                            IJ.saveAs(invFFTimp, "Tiff", fullOutputPath);
+                            IJ.saveAs(invFFTimp, "Tiff", fullThreadedOutputPath.get());
                         
                         
                         // Close the temporary images to free up memory.
-                            currentSlice.close();
+                            sliceThreadedImp.get().close();
                             invFFTimp.close();
-                            zsProcessing.remove(""+finalZ);
                             IJ.log("finished slice "+finalZ);
                         
                     } catch (Exception e) {
