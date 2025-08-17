@@ -4,7 +4,10 @@ import ij.*;
 import ij.process.*;
 import ij.util.Tools;
 import ij.plugin.FFT;
+import ij.plugin.filter.GaussianBlur;
+import ij.plugin.filter.RankFilters;
 import ij.gui.*;
+import ij.io.FileSaver;
 import ij.plugin.*;
 import java.io.File;
 import java.io.IOException;
@@ -76,6 +79,20 @@ public class FibsemCleanup implements PlugIn {
                 IJ.error("Could not create directory: " + savePath);
                 continue;
             }
+            
+//            final ThreadLocal<Integer> finalThreadedZ = ThreadLocal.withInitial(() -> new Integer(1));
+            final ThreadLocal<ImagePlus> sliceThreadedImp = ThreadLocal.withInitial(() -> new ImagePlus(sourceName+"_slice_XXXXXX", sourceImp.getProcessor()));
+            final ThreadLocal<FFT> fwdFFT = ThreadLocal.withInitial(() -> new FFT());
+            final ThreadLocal<FFT> invFFT = ThreadLocal.withInitial(() -> new FFT());
+            final ThreadLocal<RankFilters> rankFilterA = ThreadLocal.withInitial(() -> new RankFilters());
+            final ThreadLocal<RankFilters> rankFilterB = ThreadLocal.withInitial(() -> new RankFilters());
+            final ThreadLocal<GaussianBlur> gaussBlur = ThreadLocal.withInitial(() -> new GaussianBlur());
+            final ThreadLocal<CLAHE> claheFilter = ThreadLocal.withInitial(() -> new CLAHE());
+            final ThreadLocal<ImagePlus> invFFTimp = ThreadLocal.withInitial(() -> new ImagePlus("invFFTimp" +"_XXXXXX.tif", sourceImp.getProcessor()));
+            final ThreadLocal<FileSaver> tiffSaver = ThreadLocal.withInitial(() -> new FileSaver(new ImagePlus()));
+
+            // Define the full path for the output file
+            final ThreadLocal<String> fullThreadedOutputPath = ThreadLocal.withInitial(() -> destination.replace(".tif", "") +"_XXXXXX.tif");
 
             // Loop through each Z-slice and submit a processing task to the executor.
             for (int z = 1; z <= zDepth; z++) {
@@ -89,74 +106,83 @@ public class FibsemCleanup implements PlugIn {
                 }
 
                 final int finalZ = z;
-                
-                final ThreadLocal<Integer> finalThreadedZ = ThreadLocal.withInitial(() -> finalZ);
-                sourceImp.setPosition(1,finalZ,1);
-                final ThreadLocal<ImagePlus> sliceThreadedImp = ThreadLocal.withInitial(() -> new ImagePlus(sourceName+"_slice_"+IJ.pad(finalZ, 6), sourceImp.getProcessor()));
 
-                // Define the full path for the output file
-                final ThreadLocal<String> fullThreadedOutputPath = ThreadLocal.withInitial(() -> destination.replace(".tif", "") +"_"+IJ.pad(finalZ,6)+".tif");
-
+//                final ThreadLocal<Integer> finalThreadedZ = ThreadLocal.withInitial(() -> finalZ);
+//                final ThreadLocal<ImagePlus> sliceThreadedImp = ThreadLocal.withInitial(() -> new ImagePlus(sourceName+"_slice_"+IJ.pad(finalThreadedZ.get(), 6), sourceImp.getProcessor()));
+//                final ThreadLocal<FFT> fwdFFT = ThreadLocal.withInitial(() -> new FFT());
+//                final ThreadLocal<FFT> invFFT = ThreadLocal.withInitial(() -> new FFT());
+//                final ThreadLocal<RankFilters> rankFilterA = ThreadLocal.withInitial(() -> new RankFilters());
+//                final ThreadLocal<RankFilters> rankFilterB = ThreadLocal.withInitial(() -> new RankFilters());
+//                final ThreadLocal<GaussianBlur> gaussBlur = ThreadLocal.withInitial(() -> new GaussianBlur());
+//                final ThreadLocal<ImagePlus> invFFTimp = ThreadLocal.withInitial(() -> new ImagePlus("invFFTimp" +"_"+IJ.pad(finalThreadedZ.get(),6)+".tif",invFFT.get().getInvFHT().getProcessor()));;
+//                final ThreadLocal<FileSaver> tiffSaver = ThreadLocal.withInitial(() -> new FileSaver(invFFTimp.get()));
+//
+//                // Define the full path for the output file
+//                final ThreadLocal<String> fullThreadedOutputPath = ThreadLocal.withInitial(() -> destination.replace(".tif", "") +"_"+IJ.pad(finalThreadedZ.get(),6)+".tif");
+//
                 // Submit the processing task for this slice to the thread pool.
                 executor.submit(() -> {
                     try {
 
                         // --- Processing steps as per the macro ---
                         
+                        sliceThreadedImp.set(new ImagePlus(sourceName+"_slice_"+IJ.pad(finalZ, 6), sourceImp.getStack().getProcessor(finalZ)));
+
                         // 1. Remove Outliers (Dark and Bright)
-                            IJ.run(sliceThreadedImp.get(),"Remove Outliers...", "radius=2 threshold=50 which=Dark slice");
-                            IJ.run(sliceThreadedImp.get(),"Remove Outliers...", "radius=2 threshold=50 which=Bright slice");
-                        
+                        	rankFilterA.get().rank(sliceThreadedImp.get().getProcessor(), 2, RankFilters.OUTLIERS, 1, 50);
+                        	rankFilterA.get().rank(sliceThreadedImp.get().getProcessor(), 2, RankFilters.OUTLIERS, 0, 50);
+                       
 
                         // 2. FFT
                         // The FFT command creates a new image window which we will capture.
-                           FFT fwdFFT = new FFT();
-                           fwdFFT.setImp(sliceThreadedImp.get());
-                           fwdFFT.run("fft hide");
+                           fwdFFT.get().setImp(sliceThreadedImp.get());
+                           fwdFFT.get().run("fft hide");
 //                           ImagePlus fftFwdImp = WindowManager.getCurrentImage();
 //                           fftFwdImp.hide();
                         // 3. Clear elliptical regions in FFT image
-                            fwdFFT.getFwdFHT().setRoi(new EllipseRoi(864, 2051, 1980, 2051, 0.04));
-                            IJ.run(fwdFFT.getFwdFHT(), "Clear", "stack");
-                            fwdFFT.getFwdFHT().setRoi(new EllipseRoi(2142, 2051, 3258, 2051, 0.04));
-                            IJ.run(fwdFFT.getFwdFHT(), "Clear", "stack");
-                            fwdFFT.getFwdFHT().killRoi();
+                            fwdFFT.get().getFwdFHT().setRoi(new EllipseRoi(864, 2051, 1980, 2051, 0.04));
+                            IJ.run(fwdFFT.get().getFwdFHT(), "Clear", "stack");
+                            fwdFFT.get().getFwdFHT().setRoi(new EllipseRoi(2142, 2051, 3258, 2051, 0.04));
+                            IJ.run(fwdFFT.get().getFwdFHT(), "Clear", "stack");
+                            fwdFFT.get().getFwdFHT().killRoi();
                         
                         // 4. Inverse FFT
                         
-                            FFT invFFT = new FFT();
-                            invFFT.setImp(fwdFFT.getFwdFHT());
-                            invFFT.run("inverse hide");
-                        if (invFFT.getInvFHT() == null) {
-                            IJ.error("Inverse FFT failed for slice " + finalThreadedZ);
-                                fwdFFT.getImp().close();
-                                fwdFFT.getFwdFHT().close();
+                            invFFT.get().setImp(fwdFFT.get().getFwdFHT());
+                            invFFT.get().run("inverse hide");
+                        if (invFFT.get().getInvFHT() == null) {
+                            IJ.error("Inverse FFT failed for slice " + finalZ);
+                                fwdFFT.get().getImp().close();
+                                fwdFFT.get().getFwdFHT().close();
                                 sliceThreadedImp.get().close();
                             
                             return;
                         }
-                        ImagePlus invFFTimp = invFFT.getInvFHT();
+                        invFFTimp.set(new ImagePlus("invFFTimp" +"_"+IJ.pad(finalZ,6)+".tif",invFFT.get().getInvFHT().getProcessor()));
                         
                         // 5. Enhance Local Contrast (CLAHE)
-                            IJ.run(invFFTimp, "Enhance Local Contrast (CLAHE)", "blocksize=127 histogram=256 maximum=2.7 mask=*None*");
+                        
+                            CLAHE.run(invFFTimp.get(), 127, 256, 2.7f, null, null);
                         
                             
                         // 6. Remove Outliers (Dark and Bright) - Second pass
-                            IJ.run(invFFTimp,"Remove Outliers...", "radius=2 threshold=50 which=Dark slice");
-                            IJ.run(invFFTimp,"Remove Outliers...", "radius=2 threshold=50 which=Bright slice");
+                    		rankFilterB.get().rank(invFFTimp.get().getProcessor(), 2, RankFilters.OUTLIERS, 1, 50);
+                    		rankFilterB.get().rank(invFFTimp.get().getProcessor(), 2, RankFilters.OUTLIERS, 0, 50);
                         
                         
                         // 7. Gaussian Blur
-                            IJ.run(invFFTimp, "Gaussian Blur...", "sigma=0.008 scaled slice");
+                            gaussBlur.get().blurGaussian(invFFTimp.get().getProcessor(), 0.008, 0.008, 0.002);
                         
                         
                         // 8. Save the processed slice.
-                            IJ.saveAs(invFFTimp, "Tiff", fullThreadedOutputPath.get());
+                            tiffSaver.set(new FileSaver(invFFTimp.get()));
+                            fullThreadedOutputPath.set(destination.replace(".tif", "") +"_"+IJ.pad(finalZ,6)+".tif");
+                            tiffSaver.get().saveAsTiff(fullThreadedOutputPath.get());
                         
                         
                         // Close the temporary images to free up memory.
                             sliceThreadedImp.get().close();
-                            invFFTimp.close();
+                            invFFTimp.get().close();
                             IJ.log("finished slice "+finalZ);
                         
                     } catch (Exception e) {
