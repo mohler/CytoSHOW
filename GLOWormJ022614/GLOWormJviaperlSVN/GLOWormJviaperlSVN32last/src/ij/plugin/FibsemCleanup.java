@@ -107,20 +107,6 @@ public class FibsemCleanup implements PlugIn {
 
                 final int finalZ = z;
 
-//                final ThreadLocal<Integer> finalThreadedZ = ThreadLocal.withInitial(() -> finalZ);
-//                final ThreadLocal<ImagePlus> sliceThreadedImp = ThreadLocal.withInitial(() -> new ImagePlus(sourceName+"_slice_"+IJ.pad(finalThreadedZ.get(), 6), sourceImp.getProcessor()));
-//                final ThreadLocal<FFT> fwdFFT = ThreadLocal.withInitial(() -> new FFT());
-//                final ThreadLocal<FFT> invFFT = ThreadLocal.withInitial(() -> new FFT());
-//                final ThreadLocal<RankFilters> rankFilterA = ThreadLocal.withInitial(() -> new RankFilters());
-//                final ThreadLocal<RankFilters> rankFilterB = ThreadLocal.withInitial(() -> new RankFilters());
-//                final ThreadLocal<GaussianBlur> gaussBlur = ThreadLocal.withInitial(() -> new GaussianBlur());
-//                final ThreadLocal<ImagePlus> invFFTimp = ThreadLocal.withInitial(() -> new ImagePlus("invFFTimp" +"_"+IJ.pad(finalThreadedZ.get(),6)+".tif",invFFT.get().getInvFHT().getProcessor()));;
-//                final ThreadLocal<FileSaver> tiffSaver = ThreadLocal.withInitial(() -> new FileSaver(invFFTimp.get()));
-//
-//                // Define the full path for the output file
-//                final ThreadLocal<String> fullThreadedOutputPath = ThreadLocal.withInitial(() -> destination.replace(".tif", "") +"_"+IJ.pad(finalThreadedZ.get(),6)+".tif");
-//
-                // Submit the processing task for this slice to the thread pool.
                 executor.submit(() -> {
                     try {
 
