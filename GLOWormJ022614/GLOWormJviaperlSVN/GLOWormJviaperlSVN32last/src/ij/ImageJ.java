@@ -242,7 +242,10 @@ public class ImageJ extends Frame implements ActionListener,
 		progressBar = new ProgressBar(120, 20);
 		progressBar.addKeyListener(this);
 		progressBar.addMouseListener(this);
-		statusBar.add("East", progressBar);
+		JPanel specialTargetPanel = new JPanel();
+		statusBar.add("East",specialTargetPanel);
+		specialTargetPanel.setBackground(Colors.decode("#aaaaffaa",Color.green));
+		specialTargetPanel.add(progressBar);
 		statusBar.setSize(toolbar.getPreferredSize());
 		((JComponent) statusLine).setToolTipText("<html>Left-Clicking icons selects from a variety of tools for measurement and/or tagging of the movies or images.<br>Right-clicking allows choice of even more tools.<br>Double-clicking allows you to set tool-specific options.<br>Dragging and dropping file icons or web links onto this toolbar will launch them in CytoSHOW.</html>");		
 		ToolTipManager.sharedInstance().setDismissDelay(60000);
@@ -382,7 +385,15 @@ public class ImageJ extends Frame implements ActionListener,
         return statusBar;
 	}
 
-    /** Starts executing a menu command in a separate thread. */
+    public Toolbar getToolbar() {
+		return toolbar;
+	}
+
+	public void setToolbar(Toolbar toolbar) {
+		this.toolbar = toolbar;
+	}
+
+	/** Starts executing a menu command in a separate thread. */
     void doCommand(String name) {
 		new Executer(name, null, null);
     }

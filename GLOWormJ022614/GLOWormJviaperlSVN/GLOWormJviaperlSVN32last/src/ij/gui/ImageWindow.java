@@ -304,7 +304,8 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		overheadPanel = new JPanel();
 		overheadPanel.setLayout(new GridLayout(2,1));
 		subTitleField = new JTextField(this.createSubtitle(false));
-		subTitleField.setEnabled(false);
+		subTitleField.setEnabled(true);
+		subTitleField.setFocusable(false);
 		subTitleField.setEditable(false);
 		subTitleField.setToolTipText(this.createSubtitle(true));
 		overheadPanel.add(subTitleField);
