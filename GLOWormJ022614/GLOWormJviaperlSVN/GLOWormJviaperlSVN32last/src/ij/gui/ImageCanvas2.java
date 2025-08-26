@@ -1,6 +1,7 @@
 package ij.gui;
 
 import java.awt.*;
+import java.awt.dnd.DropTarget;
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.Hashtable;
@@ -169,9 +170,11 @@ public class ImageCanvas2 extends JComponent implements MouseListener, MouseMoti
 		crosshairCursor = Toolkit.getDefaultToolkit().createCustomCursor(img,new Point(16,16),"crosshairCursor");
 
 		DragAndDrop dnd = new DragAndDrop();
+		
 		if (dnd!=null)
 			dnd.addDropTarget(this);
-
+//			new DropTarget(this, new DnDFlavorDebugger());
+		
 		addMouseListener(this);
 		addMouseMotionListener(this);
 		addMouseWheelListener (this);

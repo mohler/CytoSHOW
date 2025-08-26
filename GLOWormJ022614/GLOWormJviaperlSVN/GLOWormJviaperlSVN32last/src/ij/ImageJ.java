@@ -238,7 +238,6 @@ public class ImageJ extends Frame implements ActionListener,
 		statusLine.setFont(SansSerif12);
 		statusLine.addKeyListener(this);
 		statusLine.addMouseListener(this);
-		statusBar.add("Center", statusLine);
 		progressBar = new ProgressBar(120, 20);
 		progressBar.addKeyListener(this);
 		progressBar.addMouseListener(this);
@@ -246,7 +245,12 @@ public class ImageJ extends Frame implements ActionListener,
 		statusBar.add("East",specialTargetPanel);
 		specialTargetPanel.setBackground(Colors.decode("#aaaaffaa",Color.green));
 		specialTargetPanel.add(progressBar);
+		JPanel standardTargetPanel = new JPanel();
+		statusBar.add("West", standardTargetPanel);
 		statusBar.setSize(toolbar.getPreferredSize());
+		standardTargetPanel.setBackground(Colors.decode("#aaccaaff",Color.magenta));
+		standardTargetPanel.add("Center", statusLine);
+
 		((JComponent) statusLine).setToolTipText("<html>Left-Clicking icons selects from a variety of tools for measurement and/or tagging of the movies or images.<br>Right-clicking allows choice of even more tools.<br>Double-clicking allows you to set tool-specific options.<br>Dragging and dropping file icons or web links onto this toolbar will launch them in CytoSHOW.</html>");		
 		ToolTipManager.sharedInstance().setDismissDelay(60000);
 		add(statusBar);
@@ -254,6 +258,9 @@ public class ImageJ extends Frame implements ActionListener,
 		dnd.addDropTarget(this);
 		dnd.addDropTarget(toolbar);
 		dnd.addDropTarget(statusBar);
+//		new DropTarget(this, new DnDFlavorDebugger());
+//		new DropTarget(toolbar, new DnDFlavorDebugger());
+//		new DropTarget(statusBar, new DnDFlavorDebugger());
 
 		IJ.init(this, applet);
  		addKeyListener(this);

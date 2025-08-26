@@ -12,6 +12,14 @@ import ij3d.ImageWindow3D;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.awt.Checkbox;
 import java.awt.Color;
 import java.awt.Component;
@@ -119,6 +127,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 		catch ( ClassNotFoundException ignore ) {
 
 		}
+		DataFlavor textFlavor = DataFlavor.stringFlavor;
 
 		DataFlavor[] flavors = null;
 		try  {
@@ -129,157 +138,227 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 			if (IJ.debugMode) IJ.log("DragAndDrop.drop: "+flavors.length+" flavors");
 			ArrayList droppedItemsArrayList = new ArrayList();
 
-			for (int i=0; i<flavors.length; i++) {
-				if (IJ.debugMode) IJ.log("  flavor["+i+"]: "+flavors[i].getMimeType());
-				boolean consumed = false;
-				if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-					dtde.acceptDrop(dtde.getDropAction());
-					try {
+			String finalUrl = null;
 
-						List transferData = (List) transferable.getTransferData(DataFlavor.javaFileListFlavor);
-						if (transferData != null && transferData.size() > 0) {
-							//							IJ.log("You dropped " + transferData.size() + " files");							
-							dtde.dropComplete(true);
-							if (transferData.get(0) instanceof File && ((File)transferData.get(0)).isDirectory()){
-								for (int j=0; j<transferData.size();j++){
-									for (File file:((File)transferData.get(j)).listFiles()){
-										if (file.getName().toLowerCase().endsWith(".obj"))
-											droppedItemsArrayList.add(file);
-									}
-								}
-								setIterator(droppedItemsArrayList.iterator());
-							} else{
-								setIterator(((List)transferData).iterator());
-							}
-							consumed = true;
-							break;
-						}
+            // Check if the transferable object supports this flavor.
+            if (transferable.isDataFlavorSupported(textFlavor)) {
+                // Retrieve the data as a String.
+                String droppedUrl = (String) transferable.getTransferData(textFlavor);
+                
+                // Print the URL to the console to confirm it works.
+                System.out.println("URL successfully retrieved: " + droppedUrl);
 
-					} catch (Exception ex) {
-						ex.printStackTrace();
-					}
-				}
-				if (flavors[i].isFlavorJavaFileListType()) {
-					Object data = t.getTransferData(DataFlavor.javaFileListFlavor);
-					String dataString = "" + ((List)data);
-//					IJ.log(dataString);
-					if (!dataString.contains("[]")) {
-						setIterator(((List)data).iterator());
-						consumed = true;
-						break;
-					}
-				} 
-				if (!consumed && flavors[i].isFlavorTextType() || 
-						( URI_LIST_FLAVOR != null && t.isDataFlavorSupported( URI_LIST_FLAVOR ))){
-					Object ob = null;
-					if( URI_LIST_FLAVOR != null && t.isDataFlavorSupported( URI_LIST_FLAVOR )) {
-						ob =  t.getTransferData( URI_LIST_FLAVOR );
-					}
-					else
-						ob = t.getTransferData(flavors[i]);
-					if (!(ob instanceof String)) continue;
-					String s = ob.toString().trim().replaceAll("\\%(\\D)", "\\%25$1");
-					if (IJ.debugMode) IJ.log(s+" is the input string from drop");
-					if (IJ.isLinux() && s.length()>1 && (int)s.charAt(1)==0)
-						s = fixLinuxString(s);
+                finalUrl = droppedUrl;
 
-					if (s.indexOf("href=\"")!=-1 || s.indexOf("src=\"")!=-1) {
-						s = parseHTML(s);
-						if (IJ.debugMode) IJ.log("  url: "+s);
-						droppedItemsArrayList.add(s);
-						this.setIterator(droppedItemsArrayList.iterator());
-						break;
-					}
-					BufferedReader br = new BufferedReader(new StringReader(s));
-					String tmp;
-					String clStr = "";
-					while (null != (tmp = br.readLine())) {
-						tmp = java.net.URLDecoder.decode(tmp.replaceAll("\\+","%2b"), "UTF-8");
-						if (tmp.contains("file://")) {
-							//							tmp = tmp.substring(7);
-							tmp = tmp.replaceAll("file://", "").replaceAll("localhost", "");
-						}
-						if (IJ.debugMode) IJ.log("  content: "+tmp);
-						if (tmp.contains("http://") || tmp.contains("https://")) {
-							droppedItemsArrayList.add(tmp);
-						} else if ( !tmp.contains(File.separator)  
-								&& (tmp.toLowerCase().endsWith(".mov") 
-										|| tmp.toLowerCase().endsWith(".avi") 
-										|| tmp.toLowerCase().contains("scene.scn")
-										|| tmp.toLowerCase().endsWith(".obj")
-										|| tmp.toLowerCase().endsWith(".zip")
-										|| tmp.toLowerCase().endsWith(".tif"))){
-							if (IJ.debugMode) IJ.log(" stringinput");
-							droppedItemsArrayList.add(tmp);
-						} else if ( !tmp.contains(File.separator) 
-								&& (tmp.trim().split(" ")[0].toLowerCase().matches("\\D{3,5}-\\d{1,4}")
-										|| tmp.trim().split(" ")[0].toLowerCase().matches("\\D{1}\\d{1,2}\\D{1,2}\\d{1,2}\\.\\d{1,2}"))) {
-							//							IJ.log("https://www.wormbase.org/db/get?name="+ tmp.trim().split(" ")[0] + ";class=gene"
-							//									+ (tmp.trim().split(" ").length>1?" "+tmp.trim().split(" ")[1]:""));
+               // IMPORTANT: From here, you can add your code to download or process the URL.
+                // For example:
+                // downloadFileFromUrl(droppedUrl);
+            } else {
+                System.out.println("The dropped item does not contain a plain text URL.");
+            }
 
-//OLD FORMAT, FAILS FOR MANY GENES 12052021
-//							droppedItemsArrayList.add("https://www.wormbase.org/db/get?name="+ tmp.trim().split(" ")[0] + ";class=gene"
-//									+ (tmp.trim().split(" ").length>1?" "+tmp.trim().split(" ")[tmp.trim().split(" ").length-1]:""));
-//NEW FORMAT, WORKS FOR ALL? GENES 12052021
-						String newSearchString = "https://www.wormbase.org/search/gene/"+ tmp.trim().split(" ")[0] + "?species=c_elegans"
-									+ (tmp.trim().split(" ").length>1?" "+tmp.trim().split(" ")[tmp.trim().split(" ").length-1]:"");
-							droppedItemsArrayList.add(newSearchString);
-	
-						} else if (tmp.endsWith("ColorLegend.lgd")){
-							ColorLegend cl;
-							Frame[] frames = WindowManager.getImageWindows();
-							if (this.dtde.getDropTargetContext().getDropTarget().getComponent() instanceof ImageCanvas3D) {
-								for (Frame frame:frames){
-									if (frame instanceof ImageWindow3D){
-										if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow3D)frame).getUniverse().getCanvas()){
-											Image3DUniverse i3duniv = (Image3DUniverse)((ImageWindow3D)frame).getUniverse();
-											imp = i3duniv.getWindow().getImagePlus();
-										}
-									}
-								}
-							}
+            if (finalUrl != null) {
+            	
+        		droppedItemsArrayList.add(finalUrl);
+        		
+            } else {
+            	
+            	// Check if any of the flavors are text/html and try to get a non-null data object
+            	for (int i = 0; i < flavors.length; i++) {
+            		// Only proceed if the flavor is text/html
+            		if (flavors[i].getPrimaryType().equals("text") && flavors[i].getSubType().equals("html")) {
+            			try {
+            				// Attempt to get the transferable data
+            				Object ob = transferable.getTransferData(flavors[i]);
 
-							if (new File(tmp).exists()){
-								cl = new ColorLegend(getImp(), IJ.openAsString(tmp));
-								IJ.showStatus("");
-							} else
-								IJ.showStatus("badpath");
-							return;
-						} else if(tmp.contains(File.separator)){
-							if (IJ.debugMode) IJ.log(" fileinput");
-							droppedItemsArrayList.add(new File(tmp));
-						} else if (tmp.trim().split(" ")[0].toLowerCase().matches(".*expr\\d*.*")){
-							droppedItemsArrayList.add("https://www.wormbase.org/species/c_elegans/expr_pattern/" +tmp.trim());
-						} else if (tmp.trim().equalsIgnoreCase("*") || tmp.trim().equalsIgnoreCase(".*")) {
-							getImp().getRoiManager().getTextSearchField().setText("");
-							getImp().getRoiManager().actionPerformed(new ActionEvent(getImp().getRoiManager().getTextSearchField(),0,"",0,0));
-							return;
-						} else if (tmp.trim().split(" ")[0].matches(".*\\S.*")){
-							//							IJ.log("anatomyName?");
-							if ((tmp.trim().split(",").length ==2 && Colors.decode(tmp.split(",")[1], null) != null) ||
-								(tmp.trim().split(",").length >2 && Colors.decode(tmp.split(",")[2], null) != null)){
-//								if (tmp.equals(tmp.replaceAll("([A-Za-z]+),([A-Za-z]+),(.*)", "$1,$1,$3"))) {
-//										IJ.wait(1); 
-										Color testColor3 = Colors.decode(tmp.split(",")[1], null);
-										if (testColor3 != null) {
-											tmp = tmp.replaceAll("([A-Za-z]+,)(.*)", "$1$1$2");
-										}
-										clStr = clStr + tmp +"\n";
-										continue;
-									
-//								}
-							}
-							droppedItemsArrayList.add(tmp.trim());
-						}	
-					}
-					if (!clStr.contentEquals("")) {
-						ColorLegend cl = new ColorLegend(imp, clStr);
-						return;
-					}
-					this.setIterator(droppedItemsArrayList.iterator());
-					break;
-				}
-			}
+            				// If the data object is not null, we have found what we need
+            				if (ob != null) {
+            					String htmlContent = (String) ob;
+
+            					// Use a regular expression to find the href attribute in an <a> tag
+            					java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("<a\\s+[^>]*?href=\"(.*?)\"", java.util.regex.Pattern.CASE_INSENSITIVE | java.util.regex.Pattern.DOTALL);
+            					java.util.regex.Matcher matcher = pattern.matcher(htmlContent);
+
+            					if (matcher.find()) {
+            						finalUrl = matcher.group(1); // The URL is found, store it
+            						System.out.println("Found a URL in HTML content: " + finalUrl);
+            						// Break the loop as soon as a valid URL is found
+            						break;
+            					}
+            				} else {
+            					System.out.println("Attempt " + (i + 1) + ": HTML data was null for flavor.");
+            				}
+            			} catch (java.io.IOException | java.awt.datatransfer.UnsupportedFlavorException e) {
+            				// Print error but continue to the next flavor
+            				System.err.println("Error processing data flavor at index " + i + ": " + e.getMessage());
+            				e.printStackTrace();
+            			}
+            		}
+            	}
+
+            	// After the loop, you can check if a URL was found
+            	if (finalUrl != null) {
+            		// Use the finalUrl variable here
+            		System.out.println("Final captured URL: " + finalUrl);
+            	} else {
+            		System.out.println("No valid URL found after checking all flavors.");
+            	}
+
+
+            	for (int i=0; i<flavors.length; i++) {
+            		if (IJ.debugMode) IJ.log("  flavor["+i+"]: "+flavors[i].getMimeType());
+            		boolean consumed = false;
+            		if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+            			dtde.acceptDrop(dtde.getDropAction());
+            			try {
+
+            				List transferData = (List) transferable.getTransferData(DataFlavor.javaFileListFlavor);
+            				if (transferData != null && transferData.size() > 0) {
+            					//							IJ.log("You dropped " + transferData.size() + " files");							
+            					dtde.dropComplete(true);
+            					if (transferData.get(0) instanceof File && ((File)transferData.get(0)).isDirectory()){
+            						for (int j=0; j<transferData.size();j++){
+            							for (File file:((File)transferData.get(j)).listFiles()){
+            								if (file.getName().toLowerCase().endsWith(".obj"))
+            									droppedItemsArrayList.add(file);
+            							}
+            						}
+            						setIterator(droppedItemsArrayList.iterator());
+            					} else{
+            						setIterator(((List)transferData).iterator());
+            					}
+            					consumed = true;
+            					//							break;
+            				}
+
+            			} catch (Exception ex) {
+            				ex.printStackTrace();
+            			}
+            		}
+            		if (flavors[i].isFlavorJavaFileListType()) {
+            			Object data = t.getTransferData(DataFlavor.javaFileListFlavor);
+            			String dataString = "" + ((List)data);
+            			//					IJ.log(dataString);
+            			if (!dataString.contains("[]")) {
+            				setIterator(((List)data).iterator());
+            				consumed = true;
+            				break;
+            			}
+            		} 
+            		if (!consumed && flavors[i].isFlavorTextType() || 
+            				( URI_LIST_FLAVOR != null && t.isDataFlavorSupported( URI_LIST_FLAVOR ))){
+            			Object ob = null;
+            			if( URI_LIST_FLAVOR != null && t.isDataFlavorSupported( URI_LIST_FLAVOR )) {
+            				ob =  t.getTransferData( URI_LIST_FLAVOR );
+            			}
+            			else
+            				ob = t.getTransferData(flavors[i]);
+            			if (!(ob instanceof String)) continue;
+            			String s = ob.toString().trim().replaceAll("\\%(\\D)", "\\%25$1");
+            			if (IJ.debugMode) IJ.log(s+" is the input string from drop");
+            			if (IJ.isLinux() && s.length()>1 && (int)s.charAt(1)==0)
+            				s = fixLinuxString(s);
+
+            			if (s.indexOf("href=\"")!=-1 || s.indexOf("src=\"")!=-1) {
+            				s = parseHTML(s);
+            				if (IJ.debugMode) IJ.log("  url: "+s);
+            				droppedItemsArrayList.add(s);
+            				this.setIterator(droppedItemsArrayList.iterator());
+            				break;
+            			}
+            			BufferedReader br = new BufferedReader(new StringReader(s));
+            			String tmp;
+            			String clStr = "";
+            			while (null != (tmp = br.readLine())) {
+            				tmp = java.net.URLDecoder.decode(tmp.replaceAll("\\+","%2b"), "UTF-8");
+            				if (tmp.contains("file://")) {
+            					//							tmp = tmp.substring(7);
+            					tmp = tmp.replaceAll("file://", "").replaceAll("localhost", "");
+            				}
+            				if (IJ.debugMode) IJ.log("  content: "+tmp);
+            				if (tmp.contains("http://") || tmp.contains("https://")) {
+            					droppedItemsArrayList.add(tmp);
+            				} else if ( !tmp.contains(File.separator)  
+            						&& (tmp.toLowerCase().endsWith(".mov") 
+            								|| tmp.toLowerCase().endsWith(".avi") 
+            								|| tmp.toLowerCase().contains("scene.scn")
+            								|| tmp.toLowerCase().endsWith(".obj")
+            								|| tmp.toLowerCase().endsWith(".zip")
+            								|| tmp.toLowerCase().endsWith(".tif"))){
+            					if (IJ.debugMode) IJ.log(" stringinput");
+            					droppedItemsArrayList.add(tmp);
+            				} else if ( !tmp.contains(File.separator) 
+            						&& (tmp.trim().split(" ")[0].toLowerCase().matches("\\D{3,5}-\\d{1,4}")
+            								|| tmp.trim().split(" ")[0].toLowerCase().matches("\\D{1}\\d{1,2}\\D{1,2}\\d{1,2}\\.\\d{1,2}"))) {
+            					//							IJ.log("https://www.wormbase.org/db/get?name="+ tmp.trim().split(" ")[0] + ";class=gene"
+            					//									+ (tmp.trim().split(" ").length>1?" "+tmp.trim().split(" ")[1]:""));
+
+            					//OLD FORMAT, FAILS FOR MANY GENES 12052021
+            					//							droppedItemsArrayList.add("https://www.wormbase.org/db/get?name="+ tmp.trim().split(" ")[0] + ";class=gene"
+            					//									+ (tmp.trim().split(" ").length>1?" "+tmp.trim().split(" ")[tmp.trim().split(" ").length-1]:""));
+            					//NEW FORMAT, WORKS FOR ALL? GENES 12052021
+            					String newSearchString = "https://www.wormbase.org/search/gene/"+ tmp.trim().split(" ")[0] + "?species=c_elegans"
+            							+ (tmp.trim().split(" ").length>1?" "+tmp.trim().split(" ")[tmp.trim().split(" ").length-1]:"");
+            					droppedItemsArrayList.add(newSearchString);
+
+            				} else if (tmp.endsWith("ColorLegend.lgd")){
+            					ColorLegend cl;
+            					Frame[] frames = WindowManager.getImageWindows();
+            					if (this.dtde.getDropTargetContext().getDropTarget().getComponent() instanceof ImageCanvas3D) {
+            						for (Frame frame:frames){
+            							if (frame instanceof ImageWindow3D){
+            								if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow3D)frame).getUniverse().getCanvas()){
+            									Image3DUniverse i3duniv = (Image3DUniverse)((ImageWindow3D)frame).getUniverse();
+            									imp = i3duniv.getWindow().getImagePlus();
+            								}
+            							}
+            						}
+            					}
+
+            					if (new File(tmp).exists()){
+            						cl = new ColorLegend(getImp(), IJ.openAsString(tmp));
+            						IJ.showStatus("");
+            					} else
+            						IJ.showStatus("badpath");
+            					return;
+            				} else if(tmp.contains(File.separator)){
+            					if (IJ.debugMode) IJ.log(" fileinput");
+            					droppedItemsArrayList.add(new File(tmp));
+            				} else if (tmp.trim().split(" ")[0].toLowerCase().matches(".*expr\\d*.*")){
+            					droppedItemsArrayList.add("https://www.wormbase.org/species/c_elegans/expr_pattern/" +tmp.trim());
+            				} else if (tmp.trim().equalsIgnoreCase("*") || tmp.trim().equalsIgnoreCase(".*")) {
+            					getImp().getRoiManager().getTextSearchField().setText("");
+            					getImp().getRoiManager().actionPerformed(new ActionEvent(getImp().getRoiManager().getTextSearchField(),0,"",0,0));
+            					return;
+            				} else if (tmp.trim().split(" ")[0].matches(".*\\S.*")){
+            					//							IJ.log("anatomyName?");
+            					if ((tmp.trim().split(",").length ==2 && Colors.decode(tmp.split(",")[1], null) != null) ||
+            							(tmp.trim().split(",").length >2 && Colors.decode(tmp.split(",")[2], null) != null)){
+            						//								if (tmp.equals(tmp.replaceAll("([A-Za-z]+),([A-Za-z]+),(.*)", "$1,$1,$3"))) {
+            						//										IJ.wait(1); 
+            						Color testColor3 = Colors.decode(tmp.split(",")[1], null);
+            						if (testColor3 != null) {
+            							tmp = tmp.replaceAll("([A-Za-z]+,)(.*)", "$1$1$2");
+            						}
+            						clStr = clStr + tmp +"\n";
+            						continue;
+
+            						//								}
+            					}
+            					droppedItemsArrayList.add(tmp.trim());
+            				}	
+            			}
+            			if (!clStr.contentEquals("")) {
+            				ColorLegend cl = new ColorLegend(imp, clStr);
+            				return;
+            			}
+            			break;
+            		}
+            	}
+            }
+			this.setIterator(droppedItemsArrayList.iterator());
+
+			
 			if (getIterator()!=null) {
 				Thread thread = new Thread(this, "DrawAndDrop");
 				thread.setPriority(Math.max(thread.getPriority()-1, Thread.MIN_PRIORITY));
@@ -454,7 +533,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 			}
 			Object nextItem = iterator.next();
 			if (nextItem!=null && (nextItem instanceof String) ) {
-				if ( ((String)nextItem).startsWith("http") || ((String)nextItem).startsWith("https")) {
+				if (( ((String)nextItem).startsWith("http") || ((String)nextItem).startsWith("https")) && !((String)nextItem).endsWith(".obj")){
 					if ( ((String)nextItem).contains("://gloworm.org/") ||
 							((String)nextItem).contains("://fsbill.vcell.uchc.edu/") ||
 							((String)nextItem).contains("://cgi.cytoshow.org/") ){
@@ -1224,7 +1303,8 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						}
 					} else {
 						imp = new Opener().openURL((String)nextItem);
-						imp.show();
+						if (imp != null)
+							imp.show();
 					}
 				} else if ( ((String)nextItem).toLowerCase().endsWith(".mov") || ((String)nextItem).toLowerCase().endsWith(".avi") ){
 					String path = "";
@@ -1253,7 +1333,8 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					else
 						MQTVSSceneLoader64.runMQTVS_SceneLoader64(path);
 				}else if (((String)nextItem).toLowerCase().endsWith(".obj")) {
-//					Component dtc = this.dtde.getDropTargetContext().getDropTarget().getComponent();
+// BEGIN OPEN .OBJ/.MTL BLOCK
+					//					Component dtc = this.dtde.getDropTargetContext().getDropTarget().getComponent();
 					Window dropWin = null;
 					if (dropUniverse != null)
 						dropWin = dropUniverse.getWindow();
@@ -1270,10 +1351,10 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 
 					if (dropUniverse == null) {
 						dropUniverse = new Image3DUniverse();
-								dropUniverse.show(false);
-								dropUniverse.getWindow().setDragAndDrop(DragAndDrop.this);
-								IJ.getInstance().setDragAndDrop(new DragAndDrop());
-								dropUniverse.getWindow().getDragAndDrop().addDropTarget(dropUniverse.getCanvas());
+						dropUniverse.show(false);
+						dropUniverse.getWindow().setDragAndDrop(DragAndDrop.this);
+						IJ.getInstance().setDragAndDrop(new DragAndDrop());
+						dropUniverse.getWindow().getDragAndDrop().addDropTarget(dropUniverse.getCanvas());
 						while (dropUniverse.getWindow() == null) IJ.wait (10);
 						dropImp = dropUniverse.getWindow().getImagePlus();
 						setImp(dropImp);
@@ -1355,6 +1436,31 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 								}
 							}
 						}
+					} else if (path.startsWith("http://") || path.startsWith("https://")) {
+				        URL objUrl = null;
+				        URL mtlUrl = null;
+						try {
+							objUrl = new URL(path);
+							mtlUrl = new URL(path.replace(".obj",".mtl"));
+						} catch (MalformedURLException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+				        String mtlUrlDownloadPath = IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+mtlUrl.toString().replace("http://", "").replace("https://", "").replaceAll("/", File.separator);
+				        String objUrlDownloadPath = IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+objUrl.toString().replace("http://", "").replace("https://", "").replaceAll("/", File.separator);
+				        try {
+				        	new File(objUrlDownloadPath).getParentFile().mkdirs();
+				        	InputStream mtlUrlInStream = mtlUrl.openStream(); 
+				        	InputStream objUrlInStream = objUrl.openStream(); 
+				            IJ.log(""+Files.copy(mtlUrlInStream, Paths.get(mtlUrlDownloadPath), StandardCopyOption.REPLACE_EXISTING)+"bytes out mtl");
+				            IJ.log(""+Files.copy(objUrlInStream, Paths.get(objUrlDownloadPath), StandardCopyOption.REPLACE_EXISTING)+"bytes out obj");
+				        } catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+				        
+				        nextItem = objUrlDownloadPath;
+				        
 					} else {
 
 					}
@@ -1363,10 +1469,10 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						if (openAsVirtualStack) {
 							dropUniverse.setFlipXonImport(true);
 							int s = this.dtde.getDropAction();
-							dropUniverse.addContentLater(((File)nextItem).getPath(), null, s==1||s==1073741824?true:false);
+							dropUniverse.addContentLater((new File((String)nextItem)).getPath(), null, s==1||s==1073741824?true:false);
 						} else {
 							int s = this.dtde.getDropAction();
-							dropUniverse.addContentLater(((File)nextItem).getPath(), null, s==1||s==1073741824?true:false);
+							dropUniverse.addContentLater((new File((String)nextItem)).getPath(), null, s==1||s==1073741824?true:false);
 						}
 					} catch (Exception e) {
 						dropUniverse = new Image3DUniverse();
@@ -1375,13 +1481,14 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						if (openAsVirtualStack) {
 							dropUniverse.setFlipXonImport(true);
 							int s = this.dtde.getDropAction();
-							dropUniverse.addContentLater(((File)nextItem).getPath(), null, s==1||s==1073741824?true:false);
+							dropUniverse.addContentLater((new File((String)nextItem)).getPath(), null, s==1||s==1073741824?true:false);
 						} else {
 							int s = this.dtde.getDropAction();
-							dropUniverse.addContentLater(((File)nextItem).getPath(), null, s==1||s==1073741824?true:false);
+							dropUniverse.addContentLater((new File((String)nextItem)).getPath(), null, s==1||s==1073741824?true:false);
 						}
 					}
 					//ImageJ3DViewer.lock();
+// END OPEN .OBJ/.MTL BLOCK
 
 
 				} else if (( ((String)nextItem).toLowerCase().trim().equals("or"))){
