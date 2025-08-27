@@ -228,7 +228,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
             						setIterator(((List)transferData).iterator());
             					}
             					consumed = true;
-            					//							break;
+            					break;
             				}
 
             			} catch (Exception ex) {
@@ -245,8 +245,8 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
             				break;
             			}
             		} 
-            		if (!consumed && flavors[i].isFlavorTextType() || 
-            				( URI_LIST_FLAVOR != null && t.isDataFlavorSupported( URI_LIST_FLAVOR ))){
+            		if (!consumed && (flavors[i].isFlavorTextType() || 
+            				( URI_LIST_FLAVOR != null && t.isDataFlavorSupported( URI_LIST_FLAVOR )))){
             			Object ob = null;
             			if( URI_LIST_FLAVOR != null && t.isDataFlavorSupported( URI_LIST_FLAVOR )) {
             				ob =  t.getTransferData( URI_LIST_FLAVOR );
@@ -352,13 +352,15 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
             				ColorLegend cl = new ColorLegend(imp, clStr);
             				return;
             			}
+
+            			this.setIterator(droppedItemsArrayList.iterator());
             			break;
             		}
             	}
             }
-			this.setIterator(droppedItemsArrayList.iterator());
+            if (this.getIterator() == null  && droppedItemsArrayList.size()>0)
+    			this.setIterator(droppedItemsArrayList.iterator());
 
-			
 			if (getIterator()!=null) {
 				Thread thread = new Thread(this, "DrawAndDrop");
 				thread.setPriority(Math.max(thread.getPriority()-1, Thread.MIN_PRIORITY));
