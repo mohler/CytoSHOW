@@ -158,9 +158,11 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
             }
 
             if (finalUrl != null) {
+            	String[] finalUrlChunks = finalUrl.replace("https","\nhttps" ).split("\n");
             	
-        		droppedItemsArrayList.add(finalUrl);
-        		
+            	for (String nextUrl:finalUrlChunks)
+            		droppedItemsArrayList.add(nextUrl);
+        		           	
             } else {
             	
             	// Check if any of the flavors are text/html and try to get a non-null data object
