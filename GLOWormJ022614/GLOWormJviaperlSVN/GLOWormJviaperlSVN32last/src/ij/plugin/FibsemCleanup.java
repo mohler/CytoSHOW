@@ -6,6 +6,7 @@ import ij.util.Tools;
 import ij.plugin.FFT;
 import ij.plugin.filter.GaussianBlur;
 import ij.plugin.filter.RankFilters;
+import ij.plugin.filter.Transformer;
 import ij.gui.*;
 import ij.io.FileSaver;
 import ij.plugin.*;
@@ -90,6 +91,7 @@ public class FibsemCleanup implements PlugIn {
             final ThreadLocal<CLAHE> claheFilter = ThreadLocal.withInitial(() -> new CLAHE());
             final ThreadLocal<ImagePlus> invFFTimp = ThreadLocal.withInitial(() -> new ImagePlus("invFFTimp" +"_XXXXXX.tif", sourceImp.getProcessor()));
             final ThreadLocal<FileSaver> tiffSaver = ThreadLocal.withInitial(() -> new FileSaver(new ImagePlus()));
+            final ThreadLocal<Transformer> transformer = ThreadLocal.withInitial(() -> new Transformer());
 
             // Define the full path for the output file
             final ThreadLocal<String> fullThreadedOutputPath = ThreadLocal.withInitial(() -> destination.replace(".tif", "") +"_XXXXXX.tif");
@@ -158,9 +160,13 @@ public class FibsemCleanup implements PlugIn {
                         
                         // 7. Gaussian Blur
                             gaussBlur.get().blurGaussian(invFFTimp.get().getProcessor(), 0.008, 0.008, 0.002);
+                            
+                        // 8. Rotate right 90%
+                            transformer.get().setup("right", invFFTimp.get());
+                            transformer.get().run(null);
                         
                         
-                        // 8. Save the processed slice.
+                        // 9. Save the processed slice.
                             tiffSaver.set(new FileSaver(invFFTimp.get()));
                             fullThreadedOutputPath.set(destination.replace(".tif", "") +"_"+IJ.pad(finalZ,6)+".tif");
                             tiffSaver.get().saveAsTiff(fullThreadedOutputPath.get());
