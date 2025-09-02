@@ -158,7 +158,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
             }
 
             if (finalUrl != null) {
-            	String[] finalUrlChunks = finalUrl.replace("https","\nhttps" ).split("\n");
+            	String[] finalUrlChunks = finalUrl.replace(",https","https").replace("https","\nhttps" ).replace(",https","https").split("\n");
             	
             	for (String nextUrl:finalUrlChunks)
             		droppedItemsArrayList.add(nextUrl);
@@ -280,6 +280,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
             				if (IJ.debugMode) IJ.log("  content: "+tmp);
             				if (tmp.contains("http://") || tmp.contains("https://")) {
             					droppedItemsArrayList.add(tmp);
+            					
             				} else if ( !tmp.contains(File.separator)  
             						&& (tmp.toLowerCase().endsWith(".mov") 
             								|| tmp.toLowerCase().endsWith(".avi") 
@@ -536,197 +537,875 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 				partsLoaded = true;
 			}
 			Object nextItem = iterator.next();
-			if (nextItem!=null && (nextItem instanceof String) ) {
-				if (( ((String)nextItem).startsWith("http") || ((String)nextItem).startsWith("https")) && !((String)nextItem).endsWith(".obj")){
-					if ( ((String)nextItem).contains("://gloworm.org/") ||
-							((String)nextItem).contains("://fsbill.vcell.uchc.edu/") ||
-							((String)nextItem).contains("://cgi.cytoshow.org/") ){
+			if (nextItem!=null && (nextItem instanceof String)) {
+				if (!nextItem.equals(""))  {
 
-						//						String macro = IJ.openUrlAsString("http://gloworm.org/gloworm/Xwords/Mount_GLOWORM_DATAmacro.txt");
-						//						if (macro.contains("Remount GLOWORM_DATA")){
-						//							IJ.runMacro(macro);
-						//						}
+					if (( ((String)nextItem).toLowerCase().startsWith("http") || ((String)nextItem).toLowerCase().startsWith("https")) && !((String)nextItem).toLowerCase().endsWith(".obj")){
+						if ( ((String)nextItem).contains("://gloworm.org/") ||
+								((String)nextItem).contains("://fsbill.vcell.uchc.edu/") ||
+								((String)nextItem).contains("://cgi.cytoshow.org/") ){
 
-						String[] fn = ((String)nextItem).replaceAll("%25", "%").split("/") ;
-						String fileName = fn[fn.length-1];	
-						String viewName= null;
-						if (fileName.contains("MOVIE=") ) {
-							String[] fn2 = fileName.split("=|&");
-							if (fn2.length < 3 /*&& !fn2[fn2.length - 1].contains("scene.scn")*/) 
-								fileName = fn2[fn2.length-1];
-							else if  (fn2.length >= 3) {
-								if ((fn2[fn2.length - 3].contains(".mov") || fn2[fn2.length - 3].contains(".avi"))){
-									fileName = fn2[fn2.length-3];
-									if (fn2[fn2.length-1].contains("scene.scn"))
-										viewName = fn2[fn2.length-1];
+							//						String macro = IJ.openUrlAsString("http://gloworm.org/gloworm/Xwords/Mount_GLOWORM_DATAmacro.txt");
+							//						if (macro.contains("Remount GLOWORM_DATA")){
+							//							IJ.runMacro(macro);
+							//						}
+
+							String[] fn = ((String)nextItem).replaceAll("%25", "%").split("/") ;
+							String fileName = fn[fn.length-1];	
+							String viewName= null;
+							if (fileName.contains("MOVIE=") ) {
+								String[] fn2 = fileName.split("=|&");
+								if (fn2.length < 3 /*&& !fn2[fn2.length - 1].contains("scene.scn")*/) 
+									fileName = fn2[fn2.length-1];
+								else if  (fn2.length >= 3) {
+									if ((fn2[fn2.length - 3].contains(".mov") || fn2[fn2.length - 3].contains(".avi"))){
+										fileName = fn2[fn2.length-3];
+										if (fn2[fn2.length-1].contains("scene.scn"))
+											viewName = fn2[fn2.length-1];
+									} else {
+										if (fileName.contains("_SPECTAG=")) {
+											fileName = fileName.replaceAll(".*MOVIE=", "");
+										}
+									}
+								}
+							}
+							String path = fileName;
+							if (IJ.isMacOSX() || IJ.isLinux())
+								path = "/Volumes/GLOWORM_DATA/" + fileName;
+							if(IJ.isWindows())
+								path = "Q:\\" + fileName;							
+							if (IJ.debugMode) IJ.log(path + " is the result of split and concatenate to build a path");
+							if ((path.toLowerCase().endsWith(".mov") || path.toLowerCase().endsWith(".avi")) && viewName ==null  ) {
+								pathList = pathList + path + ( (iterator.hasNext()  || openAsVirtualStack)? "|": "");
+							} else if (path.toLowerCase().endsWith(".mov!") || path.toLowerCase().endsWith(".avi!")){
+								String pathListSingle = path;
+								//pathListSingle.replace(".mov!", ".mov");
+								//							new QTMovieOpenerMultiMod(pathListSingle.substring(0, pathListSingle.length() - 1));
+								RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replaceAll("%2B", "\\+").replaceAll("%25", "%")+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
+										false, true, true, false, true, false, false, false, false);
+								rmqtvsh.getImagePlus().getWindow().setVisible(true);
+								if (dropImp == null)
+									return;
+								dropImp.getCanvas().messageRois.remove("Pending drop "+nDrops);
+								dropImp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
+								//							IJ.log(nDrops+" nDrops");
+								nDrops--;
+								return;
+
+							} else if ((path.toLowerCase().endsWith(".mov") || path.toLowerCase().endsWith(".avi")) && viewName != null) {
+								if (IJ.debugMode) IJ.log("Found viewname =" + viewName);
+								String pathListStereo = path;
+								//							new QTMovieOpenerMultiMod(pathListStereo, true, false);
+								RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replaceAll("%2B", "\\+").replaceAll("%25", "%")+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/+" "+path.replaceAll("%2B", "\\+").replaceAll("%25", "%")+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
+										false, true, true, false, true, false, true, false, false);
+
+								ImagePlus stereoImp = rmqtvsh.getImagePlus();
+								MultiChannelController mcc = stereoImp.getMultiChannelController();
+								mcc.setChannelLUTChoice(0, 0);
+								CompositeImage ci = (CompositeImage)stereoImp;
+								ci.setPosition( 0+1, ci.getSlice(), ci.getFrame() );
+								IJ.doCommand(mcc.getChannelLUTChoice(0) );
+								mcc.setChannelLUTChoice(1, 4);
+								ci.setPosition( 1+1, ci.getSlice(), ci.getFrame() );
+								IJ.doCommand(mcc.getChannelLUTChoice(1) );
+								mcc.setSliceSpinner(0, 1);					
+								//							if (path.contains("_prx_")) {
+								//								mcc.setRotateAngleSpinner(0, 90);
+								//								mcc.setRotateAngleSpinner(1, 90);
+								//								rmqtvsh.setRotation(90);
+								//							}
+								stereoImp.getWindow().setVisible(true);
+
+								if (dropImp == null)
+									return;
+								dropImp.getCanvas().messageRois.remove("Pending drop "+nDrops);
+								dropImp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
+								//							IJ.log(nDrops+" nDrops");
+								nDrops--;
+							} else if (path.toLowerCase().endsWith(".tif") ) {
+								String pathListStereo = path;
+								//							new QTMovieOpenerMultiMod(pathListStereo, true, false);
+								RemoteMTVSHandler rmtvsh = RemoteMTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replaceAll("%2B", "\\+").replaceAll("%25", "%")+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
+										false, true, true, false, true, false, true, false, false);
+
+								ImagePlus stereoImp = rmtvsh.getImagePlus();
+								MultiChannelController mcc = stereoImp.getMultiChannelController();
+								mcc.setChannelLUTChoice(0, 0);
+								CompositeImage ci = (CompositeImage)stereoImp;
+								ci.setPosition( 0+1, ci.getSlice(), ci.getFrame() );
+								IJ.doCommand(mcc.getChannelLUTChoice(0) );
+								mcc.setChannelLUTChoice(1, 4);
+								ci.setPosition( 1+1, ci.getSlice(), ci.getFrame() );
+								IJ.doCommand(mcc.getChannelLUTChoice(1) );
+								mcc.setSliceSpinner(0, 1);					
+								//							if (path.contains("_prx_")) {
+								//								mcc.setRotateAngleSpinner(0, 90);
+								//								mcc.setRotateAngleSpinner(1, 90);
+								//								rmqtvsh.setRotation(90);
+								//							}
+								stereoImp.getWindow().setVisible(true);
+
+								if (dropImp == null)
+									return;
+								dropImp.getCanvas().messageRois.remove("Pending drop "+nDrops);
+								dropImp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
+								//							IJ.log(nDrops+" nDrops");
+								nDrops--;
+								return;
+
+							}else if (path.toLowerCase().contains("scene.scn")) {
+								if (IJ.is64Bit())
+									MQTVSSceneLoader64.runMQTVS_SceneLoader64(path);
+								else
+									MQTVSSceneLoader64.runMQTVS_SceneLoader64(path);
+								if (dropImp == null)
+									return;
+								dropImp.getCanvas().messageRois.remove("Pending drop "+nDrops);
+								dropImp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
+								//							IJ.log(nDrops+" nDrops");
+								nDrops--;
+								return;
+							}else if (path.toLowerCase().endsWith("suite.ste")) {
+								(new Opener()).open(path);
+
+								if (dropImp == null)
+									return;
+								dropImp.getCanvas().messageRois.remove("Pending drop "+nDrops);
+								dropImp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
+								//							IJ.log(nDrops+" nDrops");
+								nDrops--;
+								return;
+
+							}else if (path.toLowerCase().endsWith(".obj")) {
+								//							Component dtc = this.dtde.getDropTargetContext().getDropTarget().getComponent();
+								Window dropWin = null;
+								if (dropUniverse != null)
+									dropWin = dropUniverse.getWindow();
+
+								if (IJ.getInstance()!=null) {
+									if ( this.dtde.getDropTargetContext().getDropTarget().getComponent() == IJ.getInstance().getStatusBar()){
+										if (freshDrop){
+											dropUniverse = null;
+											dropImp = null;
+											setImp(dropImp);
+										}
+									}
+								}
+
+								if (dropUniverse == null) {
+									dropUniverse = new Image3DUniverse();
+									dropUniverse.show(false);
+									dropUniverse.getWindow().setDragAndDrop(DragAndDrop.this);
+									IJ.getInstance().setDragAndDrop(new DragAndDrop());
+									dropUniverse.getWindow().getDragAndDrop().addDropTarget(dropUniverse.getCanvas());
+									while (dropUniverse.getWindow() == null) IJ.wait (10);
+									dropImp = dropUniverse.getWindow().getImagePlus();
+									setImp(dropImp);
+								}
+
+								freshDrop = false;
+
+								File file = new File(path) ;
+								BufferedReader in = null;
+								PrintWriter out = null;
+
+
+								if (path.startsWith("/Volumes/GLOWORM_DATA/")
+										|| path.contains("\\GLOWORM_DATA\\")) {	
+
+									File cacheFile = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+path);
+									if (!(new File(cacheFile.getParent())).canWrite()) {
+										//Crappy loop seems necessary for windows...							
+										while (!(new File(cacheFile.getParent())).mkdirs()) { 
+											while (!(new File(new File(cacheFile.getParent()).getParent())).mkdirs()) {
+												while (!(new File(new File(new File(cacheFile.getParent()).getParent()).getParent())).mkdirs()) {
+													while (!(new File(new File(new File(new File(cacheFile.getParent()).getParent()).getParent()).getParent()).mkdirs())) {
+
+													}
+												}
+											}
+										}
+									}
+									if (cacheFile.canRead()) {
+										//										in = new BufferedReader(new FileReader(cacheFile));
+										nextItem = cacheFile;
+									}else {
+										in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
+												RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replace(".obj", ".mtl").replaceAll("%2B", "\\+").replaceAll("%25", "%").replace("|", "")))));
+										try {
+											out = new PrintWriter(
+													new BufferedWriter(
+															new FileWriter(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path.replace(".obj", ".mtl")) ), true);
+											String line = "";
+											if (line != null) {
+												while (line != null && !line.contains("End of parameter list")) {
+													line = in.readLine();
+													if (out!=null)
+														out.println(line);
+												}
+											}
+											out.close();
+										} catch (IOException e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
+										}
+
+
+										in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
+												RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replaceAll("%2B", "\\+").replaceAll("%25", "%").replace("|", "")))));
+										try {
+											out = new PrintWriter(
+													new BufferedWriter(
+															new FileWriter(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path) ), true);
+											String line = "";
+											if (line != null) {
+												while (line != null && !line.contains("End of parameter list")) {
+													line = in.readLine();
+													if (out!=null)
+														out.println(line);
+												}
+											}
+											out.close();
+											nextItem = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path);
+										} catch (IOException e) {
+											// TODO Auto-generated catch block
+											e.printStackTrace();
+										}
+									}
 								} else {
-									if (fileName.contains("_SPECTAG=")) {
-										fileName = fileName.replaceAll(".*MOVIE=", "");
+
+								}
+
+								try {
+									if (openAsVirtualStack) {
+										dropUniverse.setFlipXonImport(true);
+										int s = this.dtde.getDropAction();
+										dropUniverse.addContentLater(((File)nextItem).getPath(), null, s==1||s==1073741824?true:false);
+									} else {
+										int s = this.dtde.getDropAction();
+										dropUniverse.addContentLater(((File)nextItem).getPath(), null, s==1||s==1073741824?true:false);
+									}
+								} catch (Exception e) {
+									dropUniverse = new Image3DUniverse();
+									dropUniverse.show(false);
+									if (openAsVirtualStack) {
+										dropUniverse.setFlipXonImport(true);
+										int s = this.dtde.getDropAction();
+										dropUniverse.addContentLater(((File)nextItem).getPath(), null, s==1||s==1073741824?true:false);
+									} else {
+										int s = this.dtde.getDropAction();
+										dropUniverse.addContentLater(((File)nextItem).getPath(), null, s==1||s==1073741824?true:false);
 									}
 								}
-							}
-						}
-						String path = fileName;
-						if (IJ.isMacOSX() || IJ.isLinux())
-							path = "/Volumes/GLOWORM_DATA/" + fileName;
-						if(IJ.isWindows())
-							path = "Q:\\" + fileName;							
-						if (IJ.debugMode) IJ.log(path + " is the result of split and concatenate to build a path");
-						if ((path.toLowerCase().endsWith(".mov") || path.toLowerCase().endsWith(".avi")) && viewName ==null  ) {
-							pathList = pathList + path + ( (iterator.hasNext()  || openAsVirtualStack)? "|": "");
-						} else if (path.toLowerCase().endsWith(".mov!") || path.toLowerCase().endsWith(".avi!")){
-							String pathListSingle = path;
-							//pathListSingle.replace(".mov!", ".mov");
-							//							new QTMovieOpenerMultiMod(pathListSingle.substring(0, pathListSingle.length() - 1));
-							RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replaceAll("%2B", "\\+").replaceAll("%25", "%")+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
-									false, true, true, false, true, false, false, false, false);
-							rmqtvsh.getImagePlus().getWindow().setVisible(true);
-							if (dropImp == null)
-								return;
-							dropImp.getCanvas().messageRois.remove("Pending drop "+nDrops);
-							dropImp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
-							//							IJ.log(nDrops+" nDrops");
-							nDrops--;
-							return;
+								//ImageJ3DViewer.lock();
 
-						} else if ((path.toLowerCase().endsWith(".mov") || path.toLowerCase().endsWith(".avi")) && viewName != null) {
-							if (IJ.debugMode) IJ.log("Found viewname =" + viewName);
-							String pathListStereo = path;
-							//							new QTMovieOpenerMultiMod(pathListStereo, true, false);
-							RemoteMQTVSHandler rmqtvsh = RemoteMQTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replaceAll("%2B", "\\+").replaceAll("%25", "%")+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/+" "+path.replaceAll("%2B", "\\+").replaceAll("%25", "%")+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
-									false, true, true, false, true, false, true, false, false);
-
-							ImagePlus stereoImp = rmqtvsh.getImagePlus();
-							MultiChannelController mcc = stereoImp.getMultiChannelController();
-							mcc.setChannelLUTChoice(0, 0);
-							CompositeImage ci = (CompositeImage)stereoImp;
-							ci.setPosition( 0+1, ci.getSlice(), ci.getFrame() );
-							IJ.doCommand(mcc.getChannelLUTChoice(0) );
-							mcc.setChannelLUTChoice(1, 4);
-							ci.setPosition( 1+1, ci.getSlice(), ci.getFrame() );
-							IJ.doCommand(mcc.getChannelLUTChoice(1) );
-							mcc.setSliceSpinner(0, 1);					
-							//							if (path.contains("_prx_")) {
-							//								mcc.setRotateAngleSpinner(0, 90);
-							//								mcc.setRotateAngleSpinner(1, 90);
-							//								rmqtvsh.setRotation(90);
-							//							}
-							stereoImp.getWindow().setVisible(true);
-
-							if (dropImp == null)
-								return;
-							dropImp.getCanvas().messageRois.remove("Pending drop "+nDrops);
-							dropImp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
-							//							IJ.log(nDrops+" nDrops");
-							nDrops--;
-						} else if (path.toLowerCase().endsWith(".tif") ) {
-							String pathListStereo = path;
-							//							new QTMovieOpenerMultiMod(pathListStereo, true, false);
-							RemoteMTVSHandler rmtvsh = RemoteMTVSHandler.build(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replaceAll("%2B", "\\+").replaceAll("%25", "%")+" "+path.replaceAll(".*_z(\\d+)_t.*", "$1")/*+"36"*/, 
-									false, true, true, false, true, false, true, false, false);
-
-							ImagePlus stereoImp = rmtvsh.getImagePlus();
-							MultiChannelController mcc = stereoImp.getMultiChannelController();
-							mcc.setChannelLUTChoice(0, 0);
-							CompositeImage ci = (CompositeImage)stereoImp;
-							ci.setPosition( 0+1, ci.getSlice(), ci.getFrame() );
-							IJ.doCommand(mcc.getChannelLUTChoice(0) );
-							mcc.setChannelLUTChoice(1, 4);
-							ci.setPosition( 1+1, ci.getSlice(), ci.getFrame() );
-							IJ.doCommand(mcc.getChannelLUTChoice(1) );
-							mcc.setSliceSpinner(0, 1);					
-							//							if (path.contains("_prx_")) {
-							//								mcc.setRotateAngleSpinner(0, 90);
-							//								mcc.setRotateAngleSpinner(1, 90);
-							//								rmqtvsh.setRotation(90);
-							//							}
-							stereoImp.getWindow().setVisible(true);
-
-							if (dropImp == null)
-								return;
-							dropImp.getCanvas().messageRois.remove("Pending drop "+nDrops);
-							dropImp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
-							//							IJ.log(nDrops+" nDrops");
-							nDrops--;
-							return;
-
-						}else if (path.toLowerCase().contains("scene.scn")) {
-							if (IJ.is64Bit())
-								MQTVSSceneLoader64.runMQTVS_SceneLoader64(path);
-							else
-								MQTVSSceneLoader64.runMQTVS_SceneLoader64(path);
-							if (dropImp == null)
-								return;
-							dropImp.getCanvas().messageRois.remove("Pending drop "+nDrops);
-							dropImp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
-							//							IJ.log(nDrops+" nDrops");
-							nDrops--;
-							return;
-						}else if (path.toLowerCase().endsWith("suite.ste")) {
-							(new Opener()).open(path);
-
-							if (dropImp == null)
-								return;
-							dropImp.getCanvas().messageRois.remove("Pending drop "+nDrops);
-							dropImp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
-							//							IJ.log(nDrops+" nDrops");
-							nDrops--;
-							return;
-
-						}else if (path.toLowerCase().endsWith(".obj")) {
-//							Component dtc = this.dtde.getDropTargetContext().getDropTarget().getComponent();
-							Window dropWin = null;
-							if (dropUniverse != null)
-								dropWin = dropUniverse.getWindow();
-							
-							if (IJ.getInstance()!=null) {
-								if ( this.dtde.getDropTargetContext().getDropTarget().getComponent() == IJ.getInstance().getStatusBar()){
-									if (freshDrop){
-										dropUniverse = null;
-										dropImp = null;
-										setImp(dropImp);
-									}
-								}
-							}
-
-							if (dropUniverse == null) {
-								dropUniverse = new Image3DUniverse();
-										dropUniverse.show(false);
-										dropUniverse.getWindow().setDragAndDrop(DragAndDrop.this);
-										IJ.getInstance().setDragAndDrop(new DragAndDrop());
-										dropUniverse.getWindow().getDragAndDrop().addDropTarget(dropUniverse.getCanvas());
-								while (dropUniverse.getWindow() == null) IJ.wait (10);
-								dropImp = dropUniverse.getWindow().getImagePlus();
+							} else {
+								dropImp = new Opener().openURL((String)nextItem);
 								setImp(dropImp);
+								dropImp.show();
+								if (dropImp == null)
+									return;
+								dropImp.getCanvas().messageRois.remove("Pending drop "+nDrops);
+								dropImp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
+								//							IJ.log(nDrops+" nDrops");
+								nDrops--;
+								return;
 							}
+							//					} else if (dropUniverse !=null && ((String)nextItem).contains("https://www.wormbase.org/")){
 
-							freshDrop = false;
-							
-							File file = new File(path) ;
-							BufferedReader in = null;
-							PrintWriter out = null;
+						} else if ((dropUniverse !=null || imp !=null) && ((String)nextItem).contains("https://www.wormbase.org/")){
+							if (dropUniverse == null) {
+								imp.getRoiManager().setBusy(true);
+								Graphics g = dropImp.getCanvas().getGraphics();
+								if (dropImp.getCanvas().messageRois.containsKey("Finding tags from drop"))
+									dropImp.getCanvas().messageRois.remove("Finding tags from drop");
 
-							
-							if (path.startsWith("/Volumes/GLOWORM_DATA/")
-									|| path.contains("\\GLOWORM_DATA\\")) {	
+								messageRoi = new TextRoi(dropImp.getCanvas().getSrcRect().x, dropImp.getCanvas().getSrcRect().y,
+										"   Finding tags that match\n   "+ (cellLists.size())  +" pattern(s)\n   ...");
 
-								File cacheFile = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+path);
-								if (!(new File(cacheFile.getParent())).canWrite()) {
-									//Crappy loop seems necessary for windows...							
-									while (!(new File(cacheFile.getParent())).mkdirs()) { 
-										while (!(new File(new File(cacheFile.getParent()).getParent())).mkdirs()) {
-											while (!(new File(new File(new File(cacheFile.getParent()).getParent()).getParent())).mkdirs()) {
-												while (!(new File(new File(new File(new File(cacheFile.getParent()).getParent()).getParent()).getParent()).mkdirs())) {
+								((TextRoi) messageRoi).setCurrentFont(g.getFont().deriveFont((float) (dropImp.getCanvas().getSrcRect().width/16)));
+								messageRoi.setStrokeColor(Color.black);
+								messageRoi.setFillColor(Colors.decode("#99ffdddd",
+										dropImp.getCanvas().getDefaultColor()));
 
+								dropImp.getCanvas().messageRois.put("Finding tags from drop", messageRoi);
+								dropImp.getCanvas().paintDoubleBuffered(dropImp.getCanvas().getGraphics());
+
+							}
+							if ( ((String)nextItem).matches(".*/anatomy_term/WBbt:\\d*") ||
+									((String)nextItem).matches(".*https://www.wormbase.org/db/get\\?name=.*;class=Anatomy_term")){
+								//							IJ.log("cellURL");
+								String cellColorCode = (((String)nextItem).split(" ").length>1?((String)nextItem).split(" ")[((String)nextItem).split(" ").length-1].trim():"");
+								String oldLog = IJ.getLog();
+								IJ.log("\\Clear");
+								IJ.runMacro(""
+										+ "string = File.openUrlAsString(\""+((String)nextItem)+"\");"
+										+ "print(string);");							
+								String[] logLines2 = IJ.getLog().split("<title>WormBase:  anatomy_term Summary: ");
+								IJ.log("\\Clear");
+								IJ.log(oldLog);
+								if (logLines2.length<2)
+									return;
+								String s = logLines2[1].split("  </title>")[0];
+								rawCellList.add(s.toUpperCase().trim());	
+
+								if (cellColorCode != "" && impCL!=null) {
+									if (impCL.getBrainbowColors().get(s.toLowerCase().trim())!=null) {
+										if (impCL.droppedCellColors.get(impCL.getBrainbowColors().get(s.toLowerCase().trim()).getRGB()) == null) {
+											impCL.droppedCellColors.put(impCL.getBrainbowColors().get(s.toLowerCase().trim()).getRGB(), Colors.decode(cellColorCode, Color.white));
+										} else {
+											Color old = impCL.droppedCellColors.get(impCL.getBrainbowColors().get(s.toLowerCase().trim()).getRGB());
+											Color nuevo = Colors.decode(cellColorCode, Color.white);
+											int newRed = old.getRed()+nuevo.getRed(); 
+											int newGreen = old.getGreen()+nuevo.getGreen(); 
+											int newBlue = old.getBlue()+nuevo.getBlue();
+											int newMax = Math.max(newBlue, Math.max(newRed, newGreen));
+											Color mix = new Color(255*newRed/newMax, 
+													255*newGreen/newMax, 
+													255*newBlue/newMax);
+											impCL.droppedCellColors.put(impCL.getBrainbowColors().get(s.toLowerCase().trim()).getRGB(), mix);
+										}
+									}
+									//								IJ.showStatus("newdropcolor");
+								}
+
+								cellListString = cellListString + s + ",";
+
+								if (traceLineages && traceForward) {
+									for (int l = 0; l < partsListLogLines2.length; l++) {
+										partsListLogLines2[l] = partsListLogLines2[l]
+												.replace("</a></td><td>", ":")
+												.replace("</td><td>", ";")
+												.replaceAll("\\.", "");
+										if (s.toUpperCase().trim().matches("EMS"))
+											s = "(E|MS)";
+										if (s.toUpperCase().trim().matches("P0"))
+											s = "(P0|AB|EMS|E|MS|C|D)";
+										if (s.toUpperCase().trim().matches("P1"))
+											s = "(P0p|EMS|E|MS|C|D)";
+										if (s.toUpperCase().trim().matches("P2"))
+											s = "(P0pp|C|D)";
+										if (s.toUpperCase().trim().matches("P3"))
+											s = "(P0ppp|D)";
+										if (s.toUpperCase().trim().matches("P4"))
+											s = "(P0pppp)";
+
+										if (partsListLogLines2[l].startsWith("begets ")
+												&& partsListLogLines2[l].toLowerCase().matches(".*:"+s.toLowerCase().replace("*", "")+".*;.*")) {
+											String as = partsListLogLines2[l].toLowerCase().replaceAll(".*rel=nofollow>", "").replaceAll(":.*", "");
+											rawCellList.add(as.toUpperCase().trim());
+											if (cellColorCode != "" && impCL!=null) {
+												if (impCL.getBrainbowColors().get(as.toLowerCase().trim())!=null) {
+													if (impCL.droppedCellColors.get(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB()) == null) {
+														impCL.droppedCellColors.put(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB(), Colors.decode(cellColorCode, Color.white));
+													} else {
+														Color old = impCL.droppedCellColors.get(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB());
+														Color nuevo = Colors.decode(cellColorCode, Color.white);
+														int newRed = old.getRed()+nuevo.getRed(); 
+														int newGreen = old.getGreen()+nuevo.getGreen(); 
+														int newBlue = old.getBlue()+nuevo.getBlue();
+														int newMax = Math.max(newBlue, Math.max(newRed, newGreen));
+														Color mix = new Color(255*newRed/newMax, 
+																255*newGreen/newMax, 
+																255*newBlue/newMax);
+														impCL.droppedCellColors.put(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB(), mix);
+													}
+												}
+												//										IJ.showStatus("newdropcolor");
+											}
+											cellListString = cellListString + as + ",";
+										}
+										if (partsListLogLines2[l].startsWith("begets ")
+												&& partsListLogLines2[l].toLowerCase().replaceAll(".*rel=nofollow>", "").replaceAll(":.*", "").matches(s.toLowerCase().replace("*", "")+".*")) {
+											s = partsListLogLines2[l].toLowerCase().replaceAll(".*:", "").replaceAll(";.*", "");
+											IJ.showStatus(s);
+											//										IJ.runMacro("waitForUser;");
+										}
+									}
+								}
+								if (traceLineages) {
+									for (JCheckBox cbq:impCL.getJCheckBox()) {
+										if ((traceForward 
+												&& (cbq.getName().toUpperCase().trim().startsWith(s.toUpperCase().trim())
+														|| (s.toUpperCase().matches("P1") && cbq.getName().toUpperCase().matches("P.|C.*|D.*|E.*|MS.*|Z."))
+														|| (s.toUpperCase().matches("P2") && cbq.getName().toUpperCase().matches("P.|C.*|D.*|Z."))
+														|| (s.toUpperCase().matches("P3") && cbq.getName().toUpperCase().matches("P.|D.*|Z."))
+														|| (s.toUpperCase().matches("P4") && cbq.getName().toUpperCase().matches("P.|Z."))
+														|| (s.toUpperCase().matches("EMS") && cbq.getName().toUpperCase().matches("E.*|MS.*"))))
+												||(traceBackward
+														&& (s.toUpperCase().trim().startsWith(cbq.getName().toUpperCase().trim())
+																|| (cbq.getName().toUpperCase().matches("P1") && s.toUpperCase().matches("P.|C.*|D.*|E.*|MS.*|Z."))
+																|| (cbq.getName().toUpperCase().matches("P2") && s.toUpperCase().matches("P.|C.*|D.*|Z."))
+																|| (cbq.getName().toUpperCase().matches("P3") && s.toUpperCase().matches("P.|D.*|Z."))
+																|| (cbq.getName().toUpperCase().matches("P4") && s.toUpperCase().matches("P.|Z."))
+																|| (cbq.getName().toUpperCase().matches("EMS") && s.toUpperCase().matches("E.*|MS.*"))))
+												) {
+											rawCellList.add(cbq.getName().toUpperCase().trim());  //to search with
+											Enumeration bbcKenum = impCL.getBrainbowColors().keys();
+											while (bbcKenum.hasMoreElements()) {
+												String es = (String) bbcKenum.nextElement();
+												//								IJ.showStatus(es);
+												IJ.showStatus(cbq.getName().trim());
+												if (es.toLowerCase().trim().matches(cbq.getName().toLowerCase().trim())) {
+													if (cellColorCode != "" && impCL!=null) {
+														if (impCL.getBrainbowColors().get(es.toLowerCase().trim())!=null) {
+															if (impCL.droppedCellColors.get(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB()) == null) {
+																//												IJ.showStatus("NO OVERLAP");
+																impCL.droppedCellColors.put(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB(), Colors.decode(cellColorCode, Color.white));
+															} else {
+																//												IJ.showStatus("OVERLAP");
+																Color old = impCL.droppedCellColors.get(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB());
+																Color nuevo = Colors.decode(cellColorCode, Color.white);
+																int newRed = old.getRed()+nuevo.getRed(); 
+																int newGreen = old.getGreen()+nuevo.getGreen(); 
+																int newBlue = old.getBlue()+nuevo.getBlue();
+																int newMax = Math.max(newBlue, Math.max(newRed, newGreen));
+																Color mix = new Color(255*newRed/newMax, 
+																		255*newGreen/newMax, 
+																		255*newBlue/newMax);
+																impCL.droppedCellColors.put(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB(), mix);
+															}
+														}
+														//										IJ.showStatus("newdropcolor");
+													}
 												}
 											}
 										}
 									}
 								}
-								if (cacheFile.canRead()) {
-									//										in = new BufferedReader(new FileReader(cacheFile));
-									nextItem = cacheFile;
-								}else {
+							} else if ( ((String)nextItem).matches(".*/gene/WBGene\\d*.*") 
+									|| ((String)nextItem).matches(".*https://www.wormbase.org/db/get\\?name=.*;class=gene.*")
+									|| ((String)nextItem).matches(".*https://www.wormbase.org/search/gene/.*\\?species.*"))  {
+								String cellColorCode = (((String)nextItem).split(" ").length>1?((String)nextItem).split(" ")[((String)nextItem).split(" ").length-1].trim():"");
+								String oldLog = IJ.getLog();
+								IJ.log("\\Clear");
+								IJ.runMacro(""
+										+ "string = File.openUrlAsString(\""+((String)nextItem).split(" ")[0].trim()+"\");"
+										+ "print(string);");							
+								String[] logLines2 = IJ.getLog().split("wname=\"expression\"");
+								IJ.log("\\Clear");
+								IJ.log(oldLog);
+								String restString = "";
+								if (logLines2.length > 1 && logLines2[1].split("\"").length > 1)
+									restString= logLines2[1].split("\"")[1];
+								//							IJ.log(restString);
+
+								IJ.log("\\Clear");
+								IJ.runMacro(""
+										+ "string = File.openUrlAsString(\"https://www.wormbase.org"
+										+ restString
+										+ "\");"
+
+									+ "cells = split(string, \"><\");"
+									+ "for (i=0; i<lengthOf(cells); i++) {"
+									+ "	if (startsWith(cells[i], \"a href=\\\"/species/all/anatomy_term/\") ) "
+									+ "		print(cells[i+1]);"
+									+ "}");
+								logLines2 = IJ.getLog().toLowerCase().split("\n");
+								IJ.log("\\Clear");
+								IJ.log(oldLog);
+								Arrays.sort(logLines2);
+								ArrayList<String> cellList = new ArrayList<String>();
+								cellLists.add(cellList);
+								for (String s:logLines2) {
+									cellList.add(s.toUpperCase().trim());
+									if (cellColorCode != "" && impCL!=null) {
+										if (impCL.getBrainbowColors().get(s.toLowerCase().trim())!=null) {
+											if (impCL.droppedCellColors.get(impCL.getBrainbowColors().get(s.toLowerCase().trim()).getRGB()) == null) {
+												impCL.droppedCellColors.put(impCL.getBrainbowColors().get(s.toLowerCase().trim()).getRGB(), Colors.decode(cellColorCode, Color.white));
+											} else {
+												Color old = impCL.droppedCellColors.get(impCL.getBrainbowColors().get(s.toLowerCase().trim()).getRGB());
+												Color nuevo = Colors.decode(cellColorCode, Color.white);
+												int newRed = old.getRed()+nuevo.getRed(); 
+												int newGreen = old.getGreen()+nuevo.getGreen(); 
+												int newBlue = old.getBlue()+nuevo.getBlue();
+												int newMax = Math.max(newBlue, Math.max(newRed, newGreen));
+												Color mix = new Color(255*newRed/newMax, 
+														255*newGreen/newMax, 
+														255*newBlue/newMax);
+												impCL.droppedCellColors.put(impCL.getBrainbowColors().get(s.toLowerCase().trim()).getRGB(), mix);
+											}
+										}
+										//									IJ.showStatus("newdropcolor");
+									}
+									if (traceLineages && traceForward) {
+										for (int l = 0; l < partsListLogLines2.length; l++) {
+											partsListLogLines2[l] = partsListLogLines2[l]
+													.replace("</a></td><td>", ":")
+													.replace("</td><td>", ";")
+													.replaceAll("\\.", "");
+											if (s.toUpperCase().trim().matches("EMS"))
+												s = "(E|MS)";
+											if (s.toUpperCase().trim().matches("P0"))
+												s = "(P0|AB|EMS|E|MS|C|D)";
+											if (s.toUpperCase().trim().matches("P1"))
+												s = "(P0p|EMS|E|MS|C|D)";
+											if (s.toUpperCase().trim().matches("P2"))
+												s = "(P0pp|C|D)";
+											if (s.toUpperCase().trim().matches("P3"))
+												s = "(P0ppp|D)";
+											if (s.toUpperCase().trim().matches("P4"))
+												s = "(P0pppp)";
+
+											if (partsListLogLines2[l].startsWith("begets ")
+													&& partsListLogLines2[l].toLowerCase().matches(".*:"+s.toLowerCase().replace("*", "")+".*;.*")) {
+												String as = partsListLogLines2[l].toLowerCase().replaceAll(".*rel=nofollow>", "").replaceAll(":.*", "");
+												cellList.add(as.toUpperCase().trim());
+												if (cellColorCode != "" && impCL!=null) {
+													if (impCL.getBrainbowColors().get(as.toLowerCase().trim())!=null) {
+														if (impCL.droppedCellColors.get(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB()) == null) {
+															impCL.droppedCellColors.put(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB(), Colors.decode(cellColorCode, Color.white));
+														} else {
+															Color old = impCL.droppedCellColors.get(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB());
+															Color nuevo = Colors.decode(cellColorCode, Color.white);
+															int newRed = old.getRed()+nuevo.getRed(); 
+															int newGreen = old.getGreen()+nuevo.getGreen(); 
+															int newBlue = old.getBlue()+nuevo.getBlue();
+															int newMax = Math.max(newBlue, Math.max(newRed, newGreen));
+															Color mix = new Color(255*newRed/newMax, 
+																	255*newGreen/newMax, 
+																	255*newBlue/newMax);
+															impCL.droppedCellColors.put(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB(), mix);
+														}
+													}
+													//										IJ.showStatus("newdropcolor");
+												}
+											}
+											if (partsListLogLines2[l].startsWith("begets ")
+													&& partsListLogLines2[l].toLowerCase().replaceAll(".*rel=nofollow>", "").replaceAll(":.*", "").matches(s.toLowerCase().replace("*", "")+".*")) {
+												s = partsListLogLines2[l].toLowerCase().replaceAll(".*:", "").replaceAll(";.*", "");
+												IJ.showStatus(s);
+												//											IJ.runMacro("waitForUser;");
+											}
+										}
+									}
+									if (traceLineages && impCL!=null) {
+										for (JCheckBox cbq:impCL.getJCheckBox()) {
+											if ((traceForward 
+													&& (cbq.getName().toUpperCase().trim().startsWith(s.toUpperCase().trim())
+															|| (s.toUpperCase().matches("P1") && cbq.getName().toUpperCase().matches("P.|C.*|D.*|E.*|MS.*|Z."))
+															|| (s.toUpperCase().matches("P2") && cbq.getName().toUpperCase().matches("P.|C.*|D.*|Z."))
+															|| (s.toUpperCase().matches("P3") && cbq.getName().toUpperCase().matches("P.|D.*|Z."))
+															|| (s.toUpperCase().matches("P4") && cbq.getName().toUpperCase().matches("P.|Z."))
+															|| (s.toUpperCase().matches("EMS") && cbq.getName().toUpperCase().matches("E.*|MS.*"))))
+													||(traceBackward
+															&& (s.toUpperCase().trim().startsWith(cbq.getName().toUpperCase().trim())
+																	|| (cbq.getName().toUpperCase().matches("P1") && s.toUpperCase().matches("P.|C.*|D.*|E.*|MS.*|Z."))
+																	|| (cbq.getName().toUpperCase().matches("P2") && s.toUpperCase().matches("P.|C.*|D.*|Z."))
+																	|| (cbq.getName().toUpperCase().matches("P3") && s.toUpperCase().matches("P.|D.*|Z."))
+																	|| (cbq.getName().toUpperCase().matches("P4") && s.toUpperCase().matches("P.|Z."))
+																	|| (cbq.getName().toUpperCase().matches("EMS") && s.toUpperCase().matches("E.*|MS.*"))))
+													) {
+												if (!cellList.contains(cbq.getName().toUpperCase().trim())) {
+													cellList.add(cbq.getName().toUpperCase().trim());  //to search with
+													Enumeration bbcKenum = impCL.getBrainbowColors().keys();
+													while (bbcKenum.hasMoreElements()) {
+														String es = (String) bbcKenum.nextElement();
+														//								IJ.showStatus(es);
+														IJ.showStatus(cbq.getName().trim());
+														if (es.toLowerCase().trim().matches(cbq.getName().toLowerCase().trim())) {
+															if (cellColorCode != "" && impCL!=null) {
+																if (impCL.getBrainbowColors().get(es.toLowerCase().trim())!=null) {
+																	if (impCL.droppedCellColors.get(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB()) == null) {
+																		//												IJ.showStatus("NO OVERLAP");
+																		impCL.droppedCellColors.put(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB(), Colors.decode(cellColorCode, Color.white));
+																	} else {
+																		//												IJ.showStatus("OVERLAP");
+																		Color old = impCL.droppedCellColors.get(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB());
+																		Color nuevo = Colors.decode(cellColorCode, Color.white);
+																		int newRed = old.getRed()+nuevo.getRed(); 
+																		int newGreen = old.getGreen()+nuevo.getGreen(); 
+																		int newBlue = old.getBlue()+nuevo.getBlue();
+																		int newMax = Math.max(newBlue, Math.max(newRed, newGreen));
+																		Color mix = new Color(255*newRed/newMax, 
+																				255*newGreen/newMax, 
+																				255*newBlue/newMax);
+																		impCL.droppedCellColors.put(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB(), mix);
+																	}
+																}
+																//										IJ.showStatus("newdropcolor");
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+								dropImp.getCanvas().droppedGeneUrls = (dropImp.getCanvas().droppedGeneUrls != ""?dropImp.getCanvas().droppedGeneUrls:"(Live_from_WormBase...)\nCells_expressing:\n") 
+										+ ((String)nextItem).replace("https://www.wormbase.org/db/get?name=", "")
+										.replace(";class=gene", "")
+										.replaceAll(".*/gene/", "").split(" ")[0]+ "&";
+
+							} else if ( ((String)nextItem).matches(".*/expr_pattern/Expr\\d*")){
+								//							IJ.log("exprURL");							
+								String cellColorCode = (((String)nextItem).split(" ").length>1?((String)nextItem).split(" ")[((String)nextItem).split(" ").length-1].trim():"");
+								String oldLog = IJ.getLog();
+								IJ.log("\\Clear");
+								IJ.runMacro(""
+										+ "string = File.openUrlAsString(\""+((String)nextItem)+"\");"
+										+ "print(string);");							
+								String[] logLines2 = IJ.getLog().split("wname=\"details\"");
+								IJ.log("\\Clear");
+								IJ.log(oldLog);
+								String restString = logLines2[1].split("\"")[1];
+								//							IJ.log(restString);
+
+								IJ.log("\\Clear");
+								IJ.runMacro(""
+										+ "string = File.openUrlAsString(\"https://www.wormbase.org"
+										+ restString
+										+ "\");"
+
+									+ "cells = split(string, \"><\");"
+									+ "for (i=0; i<lengthOf(cells); i++) {"
+									+ "	if (startsWith(cells[i], \"a href=\\\"/species/all/anatomy_term/\") ) "
+									+ "		print(cells[i+1]);"
+									+ "}");
+								logLines2 = IJ.getLog().toLowerCase().split("\n");
+								IJ.log("\\Clear");
+								IJ.log(oldLog);
+								Arrays.sort(logLines2);
+								ArrayList<String> cellList = new ArrayList<String>();
+								cellLists.add(cellList);
+								for (String s:logLines2) {
+									cellList.add(s.toUpperCase().trim());
+									if (cellColorCode != "" && impCL!=null) {
+										if (impCL.getBrainbowColors().get(s.toLowerCase().trim())!=null) {
+											if (impCL.droppedCellColors.get(impCL.getBrainbowColors().get(s.toLowerCase().trim()).getRGB()) == null) {
+												impCL.droppedCellColors.put(impCL.getBrainbowColors().get(s.toLowerCase().trim()).getRGB(), Colors.decode(cellColorCode, Color.white));
+											} else {
+												Color old = impCL.droppedCellColors.get(impCL.getBrainbowColors().get(s.toLowerCase().trim()).getRGB());
+												Color nuevo = Colors.decode(cellColorCode, Color.white);
+												int newRed = old.getRed()+nuevo.getRed(); 
+												int newGreen = old.getGreen()+nuevo.getGreen(); 
+												int newBlue = old.getBlue()+nuevo.getBlue();
+												int newMax = Math.max(newBlue, Math.max(newRed, newGreen));
+												Color mix = new Color(255*newRed/newMax, 
+														255*newGreen/newMax, 
+														255*newBlue/newMax);
+												impCL.droppedCellColors.put(impCL.getBrainbowColors().get(s.toLowerCase().trim()).getRGB(), mix);
+											}
+										}
+										//									IJ.showStatus("newdropcolor");
+									}
+									if (traceLineages && traceForward) {
+										for (int l = 0; l < partsListLogLines2.length; l++) {
+											partsListLogLines2[l] = partsListLogLines2[l]
+													.replace("</a></td><td>", ":")
+													.replace("</td><td>", ";")
+													.replaceAll("\\.", "");
+											if (s.toUpperCase().trim().matches("EMS"))
+												s = "(E|MS)";
+											if (s.toUpperCase().trim().matches("P0"))
+												s = "(P0|AB|EMS|E|MS|C|D)";
+											if (s.toUpperCase().trim().matches("P1"))
+												s = "(P0p|EMS|E|MS|C|D)";
+											if (s.toUpperCase().trim().matches("P2"))
+												s = "(P0pp|C|D)";
+											if (s.toUpperCase().trim().matches("P3"))
+												s = "(P0ppp|D)";
+											if (s.toUpperCase().trim().matches("P4"))
+												s = "(P0pppp)";
+
+											if (partsListLogLines2[l].startsWith("begets ")
+													&& partsListLogLines2[l].toLowerCase().matches(".*:"+s.toLowerCase().replace("*", "")+".*;.*")) {
+												String as = partsListLogLines2[l].toLowerCase().replaceAll(".*rel=nofollow>", "").replaceAll(":.*", "");
+												cellList.add(as.toUpperCase().trim());
+												if (cellColorCode != "" && impCL!=null) {
+													if (impCL.getBrainbowColors().get(as.toLowerCase().trim())!=null) {
+														if (impCL.droppedCellColors.get(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB()) == null) {
+															impCL.droppedCellColors.put(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB(), Colors.decode(cellColorCode, Color.white));
+														} else {
+															Color old = impCL.droppedCellColors.get(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB());
+															Color nuevo = Colors.decode(cellColorCode, Color.white);
+															int newRed = old.getRed()+nuevo.getRed(); 
+															int newGreen = old.getGreen()+nuevo.getGreen(); 
+															int newBlue = old.getBlue()+nuevo.getBlue();
+															int newMax = Math.max(newBlue, Math.max(newRed, newGreen));
+															Color mix = new Color(255*newRed/newMax, 
+																	255*newGreen/newMax, 
+																	255*newBlue/newMax);
+															impCL.droppedCellColors.put(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB(), mix);
+														}
+													}
+													//										IJ.showStatus("newdropcolor");
+												}
+											}
+											if (partsListLogLines2[l].startsWith("begets ")
+													&& partsListLogLines2[l].toLowerCase().replaceAll(".*rel=nofollow>", "").replaceAll(":.*", "").matches(s.toLowerCase().replace("*", "")+".*")) {
+												s = partsListLogLines2[l].toLowerCase().replaceAll(".*:", "").replaceAll(";.*", "");
+												IJ.showStatus(s);
+												//											IJ.runMacro("waitForUser;");
+											}
+										}
+									}
+									if (traceLineages) {
+										for (JCheckBox cbq:impCL.getJCheckBox()) {
+											if ((traceForward 
+													&& (cbq.getName().toUpperCase().trim().startsWith(s.toUpperCase().trim())
+															|| (s.toUpperCase().matches("P1") && cbq.getName().toUpperCase().matches("P.|C.*|D.*|E.*|MS.*|Z."))
+															|| (s.toUpperCase().matches("P2") && cbq.getName().toUpperCase().matches("P.|C.*|D.*|Z."))
+															|| (s.toUpperCase().matches("P3") && cbq.getName().toUpperCase().matches("P.|D.*|Z."))
+															|| (s.toUpperCase().matches("P4") && cbq.getName().toUpperCase().matches("P.|Z."))
+															|| (s.toUpperCase().matches("EMS") && cbq.getName().toUpperCase().matches("E.*|MS.*"))))
+													||(traceBackward
+															&& (s.toUpperCase().trim().startsWith(cbq.getName().toUpperCase().trim())
+																	|| (cbq.getName().toUpperCase().matches("P1") && s.toUpperCase().matches("P.|C.*|D.*|E.*|MS.*|Z."))
+																	|| (cbq.getName().toUpperCase().matches("P2") && s.toUpperCase().matches("P.|C.*|D.*|Z."))
+																	|| (cbq.getName().toUpperCase().matches("P3") && s.toUpperCase().matches("P.|D.*|Z."))
+																	|| (cbq.getName().toUpperCase().matches("P4") && s.toUpperCase().matches("P.|Z."))
+																	|| (cbq.getName().toUpperCase().matches("EMS") && s.toUpperCase().matches("E.*|MS.*"))))
+													) {
+												if (!cellList.contains(cbq.getName().toUpperCase().trim())){
+													cellList.add(cbq.getName().toUpperCase().trim());  //to search with
+													Enumeration bbcKenum = impCL.getBrainbowColors().keys();
+													while (bbcKenum.hasMoreElements()) {
+														String es = (String) bbcKenum.nextElement();
+														//								IJ.showStatus(es);
+														IJ.showStatus(cbq.getName().trim());
+														if (es.toLowerCase().trim().matches(cbq.getName().toLowerCase().trim())) {
+															if (cellColorCode != "" && impCL!=null) {
+																if (impCL.getBrainbowColors().get(es.toLowerCase().trim())!=null) {
+																	if (impCL.droppedCellColors.get(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB()) == null) {
+																		//												IJ.showStatus("NO OVERLAP");
+																		impCL.droppedCellColors.put(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB(), Colors.decode(cellColorCode, Color.white));
+																	} else {
+																		//												IJ.showStatus("OVERLAP");
+																		Color old = impCL.droppedCellColors.get(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB());
+																		Color nuevo = Colors.decode(cellColorCode, Color.white);
+																		int newRed = old.getRed()+nuevo.getRed(); 
+																		int newGreen = old.getGreen()+nuevo.getGreen(); 
+																		int newBlue = old.getBlue()+nuevo.getBlue();
+																		int newMax = Math.max(newBlue, Math.max(newRed, newGreen));
+																		Color mix = new Color(255*newRed/newMax, 
+																				255*newGreen/newMax, 
+																				255*newBlue/newMax);
+																		impCL.droppedCellColors.put(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB(), mix);
+																	}
+																}
+																//										IJ.showStatus("newdropcolor");
+															}
+														}
+													}
+												}
+											}
+										}
+									}
+								}
+								dropImp.getCanvas().droppedGeneUrls = (dropImp.getCanvas().droppedGeneUrls != ""?dropImp.getCanvas().droppedGeneUrls:"(Live_from_WormBase...)\nCells_expressing:\n") 
+										+ ((String)nextItem).replaceAll(".*/expr_pattern/", "")+ "&";
+
+							} else {
+								dropImp = new Opener().openURL((String)nextItem);
+								setImp(dropImp);
+								dropImp.show();
+								if (dropImp == null)
+									return;
+								dropImp.getCanvas().messageRois.remove("Pending drop "+nDrops);
+								dropImp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
+								//							IJ.log(nDrops+" nDrops");
+								nDrops--;
+								return;
+							}
+						} else {
+							imp = new Opener().openURL((String)nextItem);
+							if (imp != null)
+								imp.show();
+						}
+
+
+
+						//NEXT ALLOWABLE ACTIONS IF ITEM ENDS IN .OBJ and starts with http or https::
+
+					} else if ( ((String)nextItem).toLowerCase().endsWith(".mov") || ((String)nextItem).toLowerCase().endsWith(".avi") ){
+						String path = "";
+						if (!((String)nextItem).contains(File.separator) && !((String)nextItem).startsWith("/Volumes/GLOWORM_DATA/")) {
+							if (IJ.isMacOSX()  || IJ.isLinux()) 
+								path = "/Volumes/GLOWORM_DATA/" + ((String)nextItem);
+							if(IJ.isWindows())
+								path = "Q:\\" + ((String)nextItem);
+						}else
+							path = ((String)nextItem);
+						if (IJ.debugMode) IJ.log(path + " is the path sent to QTMOMM");
+						pathList = pathList + path +  ((iterator.hasNext()  || openAsVirtualStack)? "|": "");
+					} else if (( ((String)nextItem).toLowerCase().contains("scene.scn"))){
+						String path = "";
+						if (!((String)nextItem).contains(File.separator) && !((String)nextItem).startsWith("/Volumes/GLOWORM_DATA/")) {
+							if (IJ.isMacOSX() || IJ.isLinux()) {
+								path = "/Volumes/GLOWORM_DATA/" + ((String)nextItem);
+							}
+							if(IJ.isWindows())
+								path = "Q:\\" + ((String)nextItem);
+						} else
+							path = ((String)nextItem);
+						if (IJ.debugMode) IJ.log(path + " is the path sent to QTMOMM");
+						if (IJ.is64Bit())
+							MQTVSSceneLoader64.runMQTVS_SceneLoader64(path);
+						else
+							MQTVSSceneLoader64.runMQTVS_SceneLoader64(path);
+					}else if (((String)nextItem).toLowerCase().endsWith(".obj")) {
+
+						// BEGIN OPEN WEB-BASED .OBJ/.MTL BLOCK (distinct from GLOWORM_DATA based opener at line 1382 below
+						//					Component dtc = this.dtde.getDropTargetContext().getDropTarget().getComponent();
+						Window dropWin = null;
+						if (dropUniverse != null)
+							dropWin = dropUniverse.getWindow();
+
+						if (IJ.getInstance()!=null) {
+							if ( this.dtde.getDropTargetContext().getDropTarget().getComponent() == IJ.getInstance().getStatusBar()){
+								if (freshDrop){
+									dropUniverse = null;
+									dropImp = null;
+									setImp(dropImp);
+								}
+							}
+						}
+
+						if (dropUniverse == null) {
+							dropUniverse = new Image3DUniverse();
+							dropUniverse.show(false);
+							dropUniverse.getWindow().setDragAndDrop(DragAndDrop.this);
+							IJ.getInstance().setDragAndDrop(new DragAndDrop());
+							dropUniverse.getWindow().getDragAndDrop().addDropTarget(dropUniverse.getCanvas());
+							while (dropUniverse.getWindow() == null) IJ.wait (10);
+							dropImp = dropUniverse.getWindow().getImagePlus();
+							setImp(dropImp);
+						}
+
+						freshDrop = false;
+
+						String path = (String)nextItem;
+						File file = new File(path) ;
+						BufferedReader in = null;
+						PrintWriter out = null;
+
+
+						File cacheObj = null;
+						File cacheMtl = null;
+						if (path.startsWith("/Volumes/GLOWORM_DATA/")
+								|| path.contains("\\GLOWORM_DATA\\")) {	
+
+							cacheObj = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+path);
+							cacheMtl = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+path.replace(".obj", ".mtl"));
+							if (!(new File(cacheObj.getParent())).canWrite()) {
+								//Crappy loop seems necessary for windows...							
+								while (!(new File(cacheObj.getParent())).mkdirs()) { 
+									while (!(new File(new File(cacheObj.getParent()).getParent())).mkdirs()) {
+										while (!(new File(new File(new File(cacheObj.getParent()).getParent()).getParent())).mkdirs()) {
+											while (!(new File(new File(new File(new File(cacheObj.getParent()).getParent()).getParent()).getParent()).mkdirs())) {
+
+											}
+										}
+									}
+								}
+							}
+							if (cacheObj.canRead() && cacheMtl.canRead()) {
+
+								// skip ahead to opening obj
+
+							}else {
+								if (!cacheMtl.canRead()) {
 									in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
 											RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replace(".obj", ".mtl").replaceAll("%2B", "\\+").replaceAll("%25", "%").replace("|", "")))));
 									try {
@@ -746,8 +1425,8 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 										// TODO Auto-generated catch block
 										e.printStackTrace();
 									}
-
-									
+								}
+								if (!cacheObj.canRead()) {							
 									in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
 											RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replaceAll("%2B", "\\+").replaceAll("%25", "%").replace("|", "")))));
 									try {
@@ -763,179 +1442,201 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 											}
 										}
 										out.close();
-										nextItem = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path);
+										cacheObj = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path);
 									} catch (IOException e) {
 										// TODO Auto-generated catch block
 										e.printStackTrace();
 									}
 								}
-							} else {
-
 							}
-							
+						} else if (path.startsWith("http://") || path.startsWith("https://")) {
+							URL objUrl = null;
+							URL mtlUrl = null;
 							try {
-								if (openAsVirtualStack) {
-									dropUniverse.setFlipXonImport(true);
-									int s = this.dtde.getDropAction();
-									dropUniverse.addContentLater(((File)nextItem).getPath(), null, s==1||s==1073741824?true:false);
-								} else {
-									int s = this.dtde.getDropAction();
-									dropUniverse.addContentLater(((File)nextItem).getPath(), null, s==1||s==1073741824?true:false);
-								}
-							} catch (Exception e) {
-								dropUniverse = new Image3DUniverse();
-										dropUniverse.show(false);
-								if (openAsVirtualStack) {
-									dropUniverse.setFlipXonImport(true);
-									int s = this.dtde.getDropAction();
-									dropUniverse.addContentLater(((File)nextItem).getPath(), null, s==1||s==1073741824?true:false);
-								} else {
-									int s = this.dtde.getDropAction();
-									dropUniverse.addContentLater(((File)nextItem).getPath(), null, s==1||s==1073741824?true:false);
-								}
+								objUrl = new URL(path);
+								mtlUrl = new URL(path.replace(".obj",".mtl"));
+							} catch (MalformedURLException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
 							}
-							//ImageJ3DViewer.lock();
+							String mtlUrlDownloadPath = IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+mtlUrl.toString().replace("http://", "").replace("https://", "").replaceAll("/", File.separator);
+							String objUrlDownloadPath = IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+objUrl.toString().replace("http://", "").replace("https://", "").replaceAll("/", File.separator);
+							try {
+								new File(objUrlDownloadPath).getParentFile().mkdirs();
+								InputStream mtlUrlInStream = mtlUrl.openStream(); 
+								InputStream objUrlInStream = objUrl.openStream(); 
+								IJ.log(""+Files.copy(mtlUrlInStream, Paths.get(mtlUrlDownloadPath), StandardCopyOption.REPLACE_EXISTING)+"bytes out mtl");
+								IJ.log(""+Files.copy(objUrlInStream, Paths.get(objUrlDownloadPath), StandardCopyOption.REPLACE_EXISTING)+"bytes out obj");
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+
+							nextItem = objUrlDownloadPath;
 
 						} else {
-							dropImp = new Opener().openURL((String)nextItem);
-							setImp(dropImp);
-							dropImp.show();
-							if (dropImp == null)
-								return;
-							dropImp.getCanvas().messageRois.remove("Pending drop "+nDrops);
-							dropImp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
-							//							IJ.log(nDrops+" nDrops");
-							nDrops--;
-							return;
-						}
-//					} else if (dropUniverse !=null && ((String)nextItem).contains("https://www.wormbase.org/")){
-						
-					} else if ((dropUniverse !=null || imp !=null) && ((String)nextItem).contains("https://www.wormbase.org/")){
-						if (dropUniverse == null) {
-							imp.getRoiManager().setBusy(true);
-							Graphics g = dropImp.getCanvas().getGraphics();
-							if (dropImp.getCanvas().messageRois.containsKey("Finding tags from drop"))
-								dropImp.getCanvas().messageRois.remove("Finding tags from drop");
-
-							messageRoi = new TextRoi(dropImp.getCanvas().getSrcRect().x, dropImp.getCanvas().getSrcRect().y,
-									"   Finding tags that match\n   "+ (cellLists.size())  +" pattern(s)\n   ...");
-
-							((TextRoi) messageRoi).setCurrentFont(g.getFont().deriveFont((float) (dropImp.getCanvas().getSrcRect().width/16)));
-							messageRoi.setStrokeColor(Color.black);
-							messageRoi.setFillColor(Colors.decode("#99ffdddd",
-									dropImp.getCanvas().getDefaultColor()));
-
-							dropImp.getCanvas().messageRois.put("Finding tags from drop", messageRoi);
-							dropImp.getCanvas().paintDoubleBuffered(dropImp.getCanvas().getGraphics());
 
 						}
-						if ( ((String)nextItem).matches(".*/anatomy_term/WBbt:\\d*") ||
-								((String)nextItem).matches(".*https://www.wormbase.org/db/get\\?name=.*;class=Anatomy_term")){
-							//							IJ.log("cellURL");
-							String cellColorCode = (((String)nextItem).split(" ").length>1?((String)nextItem).split(" ")[((String)nextItem).split(" ").length-1].trim():"");
-							String oldLog = IJ.getLog();
-							IJ.log("\\Clear");
-							IJ.runMacro(""
-									+ "string = File.openUrlAsString(\""+((String)nextItem)+"\");"
-									+ "print(string);");							
-							String[] logLines2 = IJ.getLog().split("<title>WormBase:  anatomy_term Summary: ");
-							IJ.log("\\Clear");
-							IJ.log(oldLog);
-							if (logLines2.length<2)
-								return;
-							String s = logLines2[1].split("  </title>")[0];
-							rawCellList.add(s.toUpperCase().trim());	
 
-							if (cellColorCode != "" && impCL!=null) {
-								if (impCL.getBrainbowColors().get(s.toLowerCase().trim())!=null) {
-									if (impCL.droppedCellColors.get(impCL.getBrainbowColors().get(s.toLowerCase().trim()).getRGB()) == null) {
-										impCL.droppedCellColors.put(impCL.getBrainbowColors().get(s.toLowerCase().trim()).getRGB(), Colors.decode(cellColorCode, Color.white));
-									} else {
-										Color old = impCL.droppedCellColors.get(impCL.getBrainbowColors().get(s.toLowerCase().trim()).getRGB());
-										Color nuevo = Colors.decode(cellColorCode, Color.white);
-										int newRed = old.getRed()+nuevo.getRed(); 
-										int newGreen = old.getGreen()+nuevo.getGreen(); 
-										int newBlue = old.getBlue()+nuevo.getBlue();
-										int newMax = Math.max(newBlue, Math.max(newRed, newGreen));
-										Color mix = new Color(255*newRed/newMax, 
-												255*newGreen/newMax, 
-												255*newBlue/newMax);
-										impCL.droppedCellColors.put(impCL.getBrainbowColors().get(s.toLowerCase().trim()).getRGB(), mix);
-									}
-								}
-								//								IJ.showStatus("newdropcolor");
+						try {
+							if (openAsVirtualStack) {
+								dropUniverse.setFlipXonImport(true);
+								int s = this.dtde.getDropAction();
+								dropUniverse.addContentLater((new File((String)nextItem)).getPath(), null, s==1||s==1073741824?true:false);
+							} else {
+								int s = this.dtde.getDropAction();
+								dropUniverse.addContentLater((new File((String)nextItem)).getPath(), null, s==1||s==1073741824?true:false);
 							}
+						} catch (Exception e) {
+							dropUniverse = new Image3DUniverse();
+							dropUniverse.show(false);
+							while (dropUniverse.getWindow() == null) IJ.wait (10);
+							if (openAsVirtualStack) {
+								dropUniverse.setFlipXonImport(true);
+								int s = this.dtde.getDropAction();
+								dropUniverse.addContentLater((new File((String)nextItem)).getPath(), null, s==1||s==1073741824?true:false);
+							} else {
+								int s = this.dtde.getDropAction();
+								dropUniverse.addContentLater((new File((String)nextItem)).getPath(), null, s==1||s==1073741824?true:false);
+							}
+						}
+						//ImageJ3DViewer.lock();
 
-							cellListString = cellListString + s + ",";
 
-							if (traceLineages && traceForward) {
-								for (int l = 0; l < partsListLogLines2.length; l++) {
-									partsListLogLines2[l] = partsListLogLines2[l]
-											.replace("</a></td><td>", ":")
-											.replace("</td><td>", ";")
-											.replaceAll("\\.", "");
-									if (s.toUpperCase().trim().matches("EMS"))
-										s = "(E|MS)";
-									if (s.toUpperCase().trim().matches("P0"))
-										s = "(P0|AB|EMS|E|MS|C|D)";
-									if (s.toUpperCase().trim().matches("P1"))
-										s = "(P0p|EMS|E|MS|C|D)";
-									if (s.toUpperCase().trim().matches("P2"))
-										s = "(P0pp|C|D)";
-									if (s.toUpperCase().trim().matches("P3"))
-										s = "(P0ppp|D)";
-									if (s.toUpperCase().trim().matches("P4"))
-										s = "(P0pppp)";
-
-									if (partsListLogLines2[l].startsWith("begets ")
-											&& partsListLogLines2[l].toLowerCase().matches(".*:"+s.toLowerCase().replace("*", "")+".*;.*")) {
-										String as = partsListLogLines2[l].toLowerCase().replaceAll(".*rel=nofollow>", "").replaceAll(":.*", "");
-										rawCellList.add(as.toUpperCase().trim());
-										if (cellColorCode != "" && impCL!=null) {
-											if (impCL.getBrainbowColors().get(as.toLowerCase().trim())!=null) {
-												if (impCL.droppedCellColors.get(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB()) == null) {
-													impCL.droppedCellColors.put(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB(), Colors.decode(cellColorCode, Color.white));
-												} else {
-													Color old = impCL.droppedCellColors.get(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB());
-													Color nuevo = Colors.decode(cellColorCode, Color.white);
-													int newRed = old.getRed()+nuevo.getRed(); 
-													int newGreen = old.getGreen()+nuevo.getGreen(); 
-													int newBlue = old.getBlue()+nuevo.getBlue();
-													int newMax = Math.max(newBlue, Math.max(newRed, newGreen));
-													Color mix = new Color(255*newRed/newMax, 
-															255*newGreen/newMax, 
-															255*newBlue/newMax);
-													impCL.droppedCellColors.put(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB(), mix);
-												}
+					} else if (( ((String)nextItem).toLowerCase().trim().equals("or"))){
+						or = true;
+					} else if (( ((String)nextItem).toLowerCase().trim().equals("and"))){
+						or = false;
+					} else if (( ((String)nextItem).toLowerCase().trim().contains("trace"))){
+						traceLineages = true;
+						traceForward = true;
+						traceBackward = true;
+						if (( ((String)nextItem).toLowerCase().trim().contains("back"))){
+							traceForward = false;
+							traceBackward = true;
+						}
+						if (( ((String)nextItem).toLowerCase().trim().contains("forward"))){
+							traceForward = true;
+							traceBackward = false;
+						}
+					}else {
+						String cellColorCode = (((String)nextItem).split(" ").length>1?((String)nextItem).split(" ")[((String)nextItem).split(" ").length-1].trim():"");
+						String s = ((String)nextItem);
+						String ss = s.split(" ")[0].replaceAll("(?<!(\\.))\\*", "\\.\\*").trim();
+						rawCellList.add(ss.toUpperCase().trim());  //to search with
+						//						IJ.log(ss +" ss1");
+						//						IJ.runMacro("waitForUser;");
+						cellListString = cellListString + s.trim().replaceAll("\\.(?!\\*)", "*").replaceAll(" .*", "").trim() + ",";  //to show
+						if (cellColorCode != "" && impCL!=null) {
+							Enumeration bbcKenum = impCL.getBrainbowColors().keys();
+							while (bbcKenum.hasMoreElements()) {
+								String es = (String) bbcKenum.nextElement();
+								//								IJ.showStatus(es);
+								IJ.showStatus(s.split(" ")[0].toLowerCase().replace("*",".*").trim());
+								if (es.toLowerCase().trim().matches(s.split(" ")[0].toLowerCase().replace("*",".*").trim())) {
+									if (cellColorCode != "" && impCL!=null) {
+										if (impCL.getBrainbowColors().get(es.toLowerCase().trim())!=null) {
+											if (impCL.droppedCellColors.get(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB()) == null) {
+												//												IJ.showStatus("NO OVERLAP");
+												impCL.droppedCellColors.put(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB(), Colors.decode(cellColorCode, Color.white));
+											} else {
+												//												IJ.showStatus("OVERLAP");
+												Color old = impCL.droppedCellColors.get(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB());
+												Color nuevo = Colors.decode(cellColorCode, Color.white);
+												int newRed = old.getRed()+nuevo.getRed(); 
+												int newGreen = old.getGreen()+nuevo.getGreen(); 
+												int newBlue = old.getBlue()+nuevo.getBlue();
+												int newMax = Math.max(newBlue, Math.max(newRed, newGreen));
+												Color mix = new Color(255*newRed/newMax, 
+														255*newGreen/newMax, 
+														255*newBlue/newMax);
+												impCL.droppedCellColors.put(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB(), mix);
 											}
-											//										IJ.showStatus("newdropcolor");
 										}
-										cellListString = cellListString + as + ",";
-									}
-									if (partsListLogLines2[l].startsWith("begets ")
-											&& partsListLogLines2[l].toLowerCase().replaceAll(".*rel=nofollow>", "").replaceAll(":.*", "").matches(s.toLowerCase().replace("*", "")+".*")) {
-										s = partsListLogLines2[l].toLowerCase().replaceAll(".*:", "").replaceAll(";.*", "");
-										IJ.showStatus(s);
-										//										IJ.runMacro("waitForUser;");
+										//										IJ.showStatus("newdropcolor");
 									}
 								}
 							}
-							if (traceLineages) {
+						}
+						ArrayList<String> ssHits = new ArrayList<String>();
+						ssHits.add(ss);
+						if (traceLineages && traceForward) {
+							for (int l = 0; l < partsListLogLines2.length; l++) {
+								partsListLogLines2[l] = partsListLogLines2[l]
+										.replace("</a></td><td>", ":")
+										.replace("</td><td>", ";")
+										.replaceAll("\\.", "");
+								if (ss.toUpperCase().trim().matches("EMS"))
+									ss = "(E|MS)";
+								if (ss.toUpperCase().trim().matches("P0"))
+									ss = "(P0|AB|EMS|E|MS|C|D)";
+								if (ss.toUpperCase().trim().matches("P1"))
+									ss = "(P0p|EMS|E|MS|C|D)";
+								if (ss.toUpperCase().trim().matches("P2"))
+									ss = "(P0pp|C|D)";
+								if (ss.toUpperCase().trim().matches("P3"))
+									ss = "(P0ppp|D)";
+								if (ss.toUpperCase().trim().matches("P4"))
+									ss = "(P0pppp)";
+
+								//									IJ.log(ss +" ss2");
+								//									IJ.runMacro("waitForUser;");
+
+								if (partsListLogLines2[l].startsWith("begets ")
+										&& (partsListLogLines2[l].toLowerCase().matches(".*:"+ss.toLowerCase().replace("*", "")+".*;.*")
+												||	partsListLogLines2[l].toLowerCase().matches(".*:.*;.*"+ss.toLowerCase().replaceAll("(?<!(\\.))\\*", "\\.\\*")+".*") )) {
+									String as = partsListLogLines2[l].toLowerCase().replaceAll(".*rel=nofollow>", "").replaceAll(":.*", "");
+									//									IJ.log(as + " as");
+									//									IJ.runMacro("waitForUser;");
+									rawCellList.add(as);
+									if (cellColorCode != "" && impCL!=null) {
+										if (impCL.getBrainbowColors().get(as.toLowerCase().trim())!=null) {
+											if (impCL.droppedCellColors.get(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB()) == null) {
+												impCL.droppedCellColors.put(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB(), Colors.decode(cellColorCode, Color.white));
+											} else {
+												Color old = impCL.droppedCellColors.get(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB());
+												Color nuevo = Colors.decode(cellColorCode, Color.white);
+												int newRed = old.getRed()+nuevo.getRed(); 
+												int newGreen = old.getGreen()+nuevo.getGreen(); 
+												int newBlue = old.getBlue()+nuevo.getBlue();
+												int newMax = Math.max(newBlue, Math.max(newRed, newGreen));
+												Color mix = new Color(255*newRed/newMax, 
+														255*newGreen/newMax, 
+														255*newBlue/newMax);
+												impCL.droppedCellColors.put(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB(), mix);
+											}
+										}
+										//										IJ.showStatus("newdropcolor");
+									}
+									//										cellListString = cellListString + as + ",";
+								}
+								if (partsListLogLines2[l].startsWith("begets ")
+										&& (partsListLogLines2[l].toLowerCase().replaceAll(".*rel=nofollow>", "").replaceAll(":.*", "").matches(s.split(" ")[0].replaceAll("(?<!(\\.))\\*", "\\.\\*").toLowerCase().trim()+".*")
+												||	partsListLogLines2[l].toLowerCase().matches(".*:.*;.*"+s.split(" ")[0].replaceAll("(?<!(\\.))\\*", "\\.\\*").toLowerCase().trim()+".*") )) {
+									ss = partsListLogLines2[l].toLowerCase().replaceAll(".*:", "").replaceAll(";.*", "");
+									IJ.showStatus(s.split(" ")[0].replaceAll("(?<!(\\.))\\*", "\\.\\*").trim()+" "+ss);
+									ssHits.add(ss);
+									//									IJ.runMacro("waitForUser;");
+								}
+							}
+						}
+						if (traceLineages) {
+							for (String ns:ssHits) {
 								for (JCheckBox cbq:impCL.getJCheckBox()) {
 									if ((traceForward 
-											&& (cbq.getName().toUpperCase().trim().startsWith(s.toUpperCase().trim())
-													|| (s.toUpperCase().matches("P1") && cbq.getName().toUpperCase().matches("P.|C.*|D.*|E.*|MS.*|Z."))
-													|| (s.toUpperCase().matches("P2") && cbq.getName().toUpperCase().matches("P.|C.*|D.*|Z."))
-													|| (s.toUpperCase().matches("P3") && cbq.getName().toUpperCase().matches("P.|D.*|Z."))
-													|| (s.toUpperCase().matches("P4") && cbq.getName().toUpperCase().matches("P.|Z."))
-													|| (s.toUpperCase().matches("EMS") && cbq.getName().toUpperCase().matches("E.*|MS.*"))))
-													||(traceBackward
-															&& (s.toUpperCase().trim().startsWith(cbq.getName().toUpperCase().trim())
-																	|| (cbq.getName().toUpperCase().matches("P1") && s.toUpperCase().matches("P.|C.*|D.*|E.*|MS.*|Z."))
-																	|| (cbq.getName().toUpperCase().matches("P2") && s.toUpperCase().matches("P.|C.*|D.*|Z."))
-																	|| (cbq.getName().toUpperCase().matches("P3") && s.toUpperCase().matches("P.|D.*|Z."))
-																	|| (cbq.getName().toUpperCase().matches("P4") && s.toUpperCase().matches("P.|Z."))
-																	|| (cbq.getName().toUpperCase().matches("EMS") && s.toUpperCase().matches("E.*|MS.*"))))
+											&& (cbq.getName().toUpperCase().trim().startsWith(ns.toUpperCase().trim())
+													|| (ns.toUpperCase().matches("P1") && cbq.getName().toUpperCase().matches("P.|C.*|D.*|E.*|MS.*|Z."))
+													|| (ns.toUpperCase().matches("P2") && cbq.getName().toUpperCase().matches("P.|C.*|D.*|Z."))
+													|| (ns.toUpperCase().matches("P3") && cbq.getName().toUpperCase().matches("P.|D.*|Z."))
+													|| (ns.toUpperCase().matches("P4") && cbq.getName().toUpperCase().matches("P.|Z."))
+													|| (ns.toUpperCase().matches("EMS") && cbq.getName().toUpperCase().matches("E.*|MS.*"))))
+											||(traceBackward
+													&& (ns.toUpperCase().trim().startsWith(cbq.getName().toUpperCase().trim())
+															|| (cbq.getName().toUpperCase().matches("P1") && ns.toUpperCase().matches("P.|C.*|D.*|E.*|MS.*|Z."))
+															|| (cbq.getName().toUpperCase().matches("P2") && ns.toUpperCase().matches("P.|C.*|D.*|Z."))
+															|| (cbq.getName().toUpperCase().matches("P3") && ns.toUpperCase().matches("P.|D.*|Z."))
+															|| (cbq.getName().toUpperCase().matches("P4") && ns.toUpperCase().matches("P.|Z."))
+															|| (cbq.getName().toUpperCase().matches("EMS") && ns.toUpperCase().matches("E.*|MS.*"))))
 											) {
 										rawCellList.add(cbq.getName().toUpperCase().trim());  //to search with
 										Enumeration bbcKenum = impCL.getBrainbowColors().keys();
@@ -969,705 +1670,13 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 										}
 									}
 								}
-							}
-						} else if ( ((String)nextItem).matches(".*/gene/WBGene\\d*.*") 
-								|| ((String)nextItem).matches(".*https://www.wormbase.org/db/get\\?name=.*;class=gene.*")
-								|| ((String)nextItem).matches(".*https://www.wormbase.org/search/gene/.*\\?species.*"))  {
-							String cellColorCode = (((String)nextItem).split(" ").length>1?((String)nextItem).split(" ")[((String)nextItem).split(" ").length-1].trim():"");
-							String oldLog = IJ.getLog();
-							IJ.log("\\Clear");
-							IJ.runMacro(""
-									+ "string = File.openUrlAsString(\""+((String)nextItem).split(" ")[0].trim()+"\");"
-									+ "print(string);");							
-							String[] logLines2 = IJ.getLog().split("wname=\"expression\"");
-							IJ.log("\\Clear");
-							IJ.log(oldLog);
-							String restString = "";
-							if (logLines2.length > 1 && logLines2[1].split("\"").length > 1)
-								restString= logLines2[1].split("\"")[1];
-							//							IJ.log(restString);
 
-							IJ.log("\\Clear");
-							IJ.runMacro(""
-									+ "string = File.openUrlAsString(\"https://www.wormbase.org"
-									+ restString
-									+ "\");"
-
-									+ "cells = split(string, \"><\");"
-									+ "for (i=0; i<lengthOf(cells); i++) {"
-									+ "	if (startsWith(cells[i], \"a href=\\\"/species/all/anatomy_term/\") ) "
-									+ "		print(cells[i+1]);"
-									+ "}");
-							logLines2 = IJ.getLog().toLowerCase().split("\n");
-							IJ.log("\\Clear");
-							IJ.log(oldLog);
-							Arrays.sort(logLines2);
-							ArrayList<String> cellList = new ArrayList<String>();
-							cellLists.add(cellList);
-							for (String s:logLines2) {
-								cellList.add(s.toUpperCase().trim());
-								if (cellColorCode != "" && impCL!=null) {
-									if (impCL.getBrainbowColors().get(s.toLowerCase().trim())!=null) {
-										if (impCL.droppedCellColors.get(impCL.getBrainbowColors().get(s.toLowerCase().trim()).getRGB()) == null) {
-											impCL.droppedCellColors.put(impCL.getBrainbowColors().get(s.toLowerCase().trim()).getRGB(), Colors.decode(cellColorCode, Color.white));
-										} else {
-											Color old = impCL.droppedCellColors.get(impCL.getBrainbowColors().get(s.toLowerCase().trim()).getRGB());
-											Color nuevo = Colors.decode(cellColorCode, Color.white);
-											int newRed = old.getRed()+nuevo.getRed(); 
-											int newGreen = old.getGreen()+nuevo.getGreen(); 
-											int newBlue = old.getBlue()+nuevo.getBlue();
-											int newMax = Math.max(newBlue, Math.max(newRed, newGreen));
-											Color mix = new Color(255*newRed/newMax, 
-													255*newGreen/newMax, 
-													255*newBlue/newMax);
-											impCL.droppedCellColors.put(impCL.getBrainbowColors().get(s.toLowerCase().trim()).getRGB(), mix);
-										}
-									}
-									//									IJ.showStatus("newdropcolor");
-								}
-								if (traceLineages && traceForward) {
-									for (int l = 0; l < partsListLogLines2.length; l++) {
-										partsListLogLines2[l] = partsListLogLines2[l]
-												.replace("</a></td><td>", ":")
-												.replace("</td><td>", ";")
-												.replaceAll("\\.", "");
-										if (s.toUpperCase().trim().matches("EMS"))
-											s = "(E|MS)";
-										if (s.toUpperCase().trim().matches("P0"))
-											s = "(P0|AB|EMS|E|MS|C|D)";
-										if (s.toUpperCase().trim().matches("P1"))
-											s = "(P0p|EMS|E|MS|C|D)";
-										if (s.toUpperCase().trim().matches("P2"))
-											s = "(P0pp|C|D)";
-										if (s.toUpperCase().trim().matches("P3"))
-											s = "(P0ppp|D)";
-										if (s.toUpperCase().trim().matches("P4"))
-											s = "(P0pppp)";
-
-										if (partsListLogLines2[l].startsWith("begets ")
-												&& partsListLogLines2[l].toLowerCase().matches(".*:"+s.toLowerCase().replace("*", "")+".*;.*")) {
-											String as = partsListLogLines2[l].toLowerCase().replaceAll(".*rel=nofollow>", "").replaceAll(":.*", "");
-											cellList.add(as.toUpperCase().trim());
-											if (cellColorCode != "" && impCL!=null) {
-												if (impCL.getBrainbowColors().get(as.toLowerCase().trim())!=null) {
-													if (impCL.droppedCellColors.get(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB()) == null) {
-														impCL.droppedCellColors.put(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB(), Colors.decode(cellColorCode, Color.white));
-													} else {
-														Color old = impCL.droppedCellColors.get(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB());
-														Color nuevo = Colors.decode(cellColorCode, Color.white);
-														int newRed = old.getRed()+nuevo.getRed(); 
-														int newGreen = old.getGreen()+nuevo.getGreen(); 
-														int newBlue = old.getBlue()+nuevo.getBlue();
-														int newMax = Math.max(newBlue, Math.max(newRed, newGreen));
-														Color mix = new Color(255*newRed/newMax, 
-																255*newGreen/newMax, 
-																255*newBlue/newMax);
-														impCL.droppedCellColors.put(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB(), mix);
-													}
-												}
-												//										IJ.showStatus("newdropcolor");
-											}
-										}
-										if (partsListLogLines2[l].startsWith("begets ")
-												&& partsListLogLines2[l].toLowerCase().replaceAll(".*rel=nofollow>", "").replaceAll(":.*", "").matches(s.toLowerCase().replace("*", "")+".*")) {
-											s = partsListLogLines2[l].toLowerCase().replaceAll(".*:", "").replaceAll(";.*", "");
-											IJ.showStatus(s);
-											//											IJ.runMacro("waitForUser;");
-										}
-									}
-								}
-								if (traceLineages && impCL!=null) {
-									for (JCheckBox cbq:impCL.getJCheckBox()) {
-										if ((traceForward 
-												&& (cbq.getName().toUpperCase().trim().startsWith(s.toUpperCase().trim())
-														|| (s.toUpperCase().matches("P1") && cbq.getName().toUpperCase().matches("P.|C.*|D.*|E.*|MS.*|Z."))
-														|| (s.toUpperCase().matches("P2") && cbq.getName().toUpperCase().matches("P.|C.*|D.*|Z."))
-														|| (s.toUpperCase().matches("P3") && cbq.getName().toUpperCase().matches("P.|D.*|Z."))
-														|| (s.toUpperCase().matches("P4") && cbq.getName().toUpperCase().matches("P.|Z."))
-														|| (s.toUpperCase().matches("EMS") && cbq.getName().toUpperCase().matches("E.*|MS.*"))))
-														||(traceBackward
-																&& (s.toUpperCase().trim().startsWith(cbq.getName().toUpperCase().trim())
-																		|| (cbq.getName().toUpperCase().matches("P1") && s.toUpperCase().matches("P.|C.*|D.*|E.*|MS.*|Z."))
-																		|| (cbq.getName().toUpperCase().matches("P2") && s.toUpperCase().matches("P.|C.*|D.*|Z."))
-																		|| (cbq.getName().toUpperCase().matches("P3") && s.toUpperCase().matches("P.|D.*|Z."))
-																		|| (cbq.getName().toUpperCase().matches("P4") && s.toUpperCase().matches("P.|Z."))
-																		|| (cbq.getName().toUpperCase().matches("EMS") && s.toUpperCase().matches("E.*|MS.*"))))
-												) {
-											if (!cellList.contains(cbq.getName().toUpperCase().trim())) {
-												cellList.add(cbq.getName().toUpperCase().trim());  //to search with
-												Enumeration bbcKenum = impCL.getBrainbowColors().keys();
-												while (bbcKenum.hasMoreElements()) {
-													String es = (String) bbcKenum.nextElement();
-													//								IJ.showStatus(es);
-													IJ.showStatus(cbq.getName().trim());
-													if (es.toLowerCase().trim().matches(cbq.getName().toLowerCase().trim())) {
-														if (cellColorCode != "" && impCL!=null) {
-															if (impCL.getBrainbowColors().get(es.toLowerCase().trim())!=null) {
-																if (impCL.droppedCellColors.get(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB()) == null) {
-																	//												IJ.showStatus("NO OVERLAP");
-																	impCL.droppedCellColors.put(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB(), Colors.decode(cellColorCode, Color.white));
-																} else {
-																	//												IJ.showStatus("OVERLAP");
-																	Color old = impCL.droppedCellColors.get(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB());
-																	Color nuevo = Colors.decode(cellColorCode, Color.white);
-																	int newRed = old.getRed()+nuevo.getRed(); 
-																	int newGreen = old.getGreen()+nuevo.getGreen(); 
-																	int newBlue = old.getBlue()+nuevo.getBlue();
-																	int newMax = Math.max(newBlue, Math.max(newRed, newGreen));
-																	Color mix = new Color(255*newRed/newMax, 
-																			255*newGreen/newMax, 
-																			255*newBlue/newMax);
-																	impCL.droppedCellColors.put(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB(), mix);
-																}
-															}
-															//										IJ.showStatus("newdropcolor");
-														}
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-							dropImp.getCanvas().droppedGeneUrls = (dropImp.getCanvas().droppedGeneUrls != ""?dropImp.getCanvas().droppedGeneUrls:"(Live_from_WormBase...)\nCells_expressing:\n") 
-									+ ((String)nextItem).replace("https://www.wormbase.org/db/get?name=", "")
-									.replace(";class=gene", "")
-									.replaceAll(".*/gene/", "").split(" ")[0]+ "&";
-
-						} else if ( ((String)nextItem).matches(".*/expr_pattern/Expr\\d*")){
-							//							IJ.log("exprURL");							
-							String cellColorCode = (((String)nextItem).split(" ").length>1?((String)nextItem).split(" ")[((String)nextItem).split(" ").length-1].trim():"");
-							String oldLog = IJ.getLog();
-							IJ.log("\\Clear");
-							IJ.runMacro(""
-									+ "string = File.openUrlAsString(\""+((String)nextItem)+"\");"
-									+ "print(string);");							
-							String[] logLines2 = IJ.getLog().split("wname=\"details\"");
-							IJ.log("\\Clear");
-							IJ.log(oldLog);
-							String restString = logLines2[1].split("\"")[1];
-							//							IJ.log(restString);
-
-							IJ.log("\\Clear");
-							IJ.runMacro(""
-									+ "string = File.openUrlAsString(\"https://www.wormbase.org"
-									+ restString
-									+ "\");"
-
-									+ "cells = split(string, \"><\");"
-									+ "for (i=0; i<lengthOf(cells); i++) {"
-									+ "	if (startsWith(cells[i], \"a href=\\\"/species/all/anatomy_term/\") ) "
-									+ "		print(cells[i+1]);"
-									+ "}");
-							logLines2 = IJ.getLog().toLowerCase().split("\n");
-							IJ.log("\\Clear");
-							IJ.log(oldLog);
-							Arrays.sort(logLines2);
-							ArrayList<String> cellList = new ArrayList<String>();
-							cellLists.add(cellList);
-							for (String s:logLines2) {
-								cellList.add(s.toUpperCase().trim());
-								if (cellColorCode != "" && impCL!=null) {
-									if (impCL.getBrainbowColors().get(s.toLowerCase().trim())!=null) {
-										if (impCL.droppedCellColors.get(impCL.getBrainbowColors().get(s.toLowerCase().trim()).getRGB()) == null) {
-											impCL.droppedCellColors.put(impCL.getBrainbowColors().get(s.toLowerCase().trim()).getRGB(), Colors.decode(cellColorCode, Color.white));
-										} else {
-											Color old = impCL.droppedCellColors.get(impCL.getBrainbowColors().get(s.toLowerCase().trim()).getRGB());
-											Color nuevo = Colors.decode(cellColorCode, Color.white);
-											int newRed = old.getRed()+nuevo.getRed(); 
-											int newGreen = old.getGreen()+nuevo.getGreen(); 
-											int newBlue = old.getBlue()+nuevo.getBlue();
-											int newMax = Math.max(newBlue, Math.max(newRed, newGreen));
-											Color mix = new Color(255*newRed/newMax, 
-													255*newGreen/newMax, 
-													255*newBlue/newMax);
-											impCL.droppedCellColors.put(impCL.getBrainbowColors().get(s.toLowerCase().trim()).getRGB(), mix);
-										}
-									}
-									//									IJ.showStatus("newdropcolor");
-								}
-								if (traceLineages && traceForward) {
-									for (int l = 0; l < partsListLogLines2.length; l++) {
-										partsListLogLines2[l] = partsListLogLines2[l]
-												.replace("</a></td><td>", ":")
-												.replace("</td><td>", ";")
-												.replaceAll("\\.", "");
-										if (s.toUpperCase().trim().matches("EMS"))
-											s = "(E|MS)";
-										if (s.toUpperCase().trim().matches("P0"))
-											s = "(P0|AB|EMS|E|MS|C|D)";
-										if (s.toUpperCase().trim().matches("P1"))
-											s = "(P0p|EMS|E|MS|C|D)";
-										if (s.toUpperCase().trim().matches("P2"))
-											s = "(P0pp|C|D)";
-										if (s.toUpperCase().trim().matches("P3"))
-											s = "(P0ppp|D)";
-										if (s.toUpperCase().trim().matches("P4"))
-											s = "(P0pppp)";
-
-										if (partsListLogLines2[l].startsWith("begets ")
-												&& partsListLogLines2[l].toLowerCase().matches(".*:"+s.toLowerCase().replace("*", "")+".*;.*")) {
-											String as = partsListLogLines2[l].toLowerCase().replaceAll(".*rel=nofollow>", "").replaceAll(":.*", "");
-											cellList.add(as.toUpperCase().trim());
-											if (cellColorCode != "" && impCL!=null) {
-												if (impCL.getBrainbowColors().get(as.toLowerCase().trim())!=null) {
-													if (impCL.droppedCellColors.get(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB()) == null) {
-														impCL.droppedCellColors.put(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB(), Colors.decode(cellColorCode, Color.white));
-													} else {
-														Color old = impCL.droppedCellColors.get(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB());
-														Color nuevo = Colors.decode(cellColorCode, Color.white);
-														int newRed = old.getRed()+nuevo.getRed(); 
-														int newGreen = old.getGreen()+nuevo.getGreen(); 
-														int newBlue = old.getBlue()+nuevo.getBlue();
-														int newMax = Math.max(newBlue, Math.max(newRed, newGreen));
-														Color mix = new Color(255*newRed/newMax, 
-																255*newGreen/newMax, 
-																255*newBlue/newMax);
-														impCL.droppedCellColors.put(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB(), mix);
-													}
-												}
-												//										IJ.showStatus("newdropcolor");
-											}
-										}
-										if (partsListLogLines2[l].startsWith("begets ")
-												&& partsListLogLines2[l].toLowerCase().replaceAll(".*rel=nofollow>", "").replaceAll(":.*", "").matches(s.toLowerCase().replace("*", "")+".*")) {
-											s = partsListLogLines2[l].toLowerCase().replaceAll(".*:", "").replaceAll(";.*", "");
-											IJ.showStatus(s);
-											//											IJ.runMacro("waitForUser;");
-										}
-									}
-								}
-								if (traceLineages) {
-									for (JCheckBox cbq:impCL.getJCheckBox()) {
-										if ((traceForward 
-												&& (cbq.getName().toUpperCase().trim().startsWith(s.toUpperCase().trim())
-														|| (s.toUpperCase().matches("P1") && cbq.getName().toUpperCase().matches("P.|C.*|D.*|E.*|MS.*|Z."))
-														|| (s.toUpperCase().matches("P2") && cbq.getName().toUpperCase().matches("P.|C.*|D.*|Z."))
-														|| (s.toUpperCase().matches("P3") && cbq.getName().toUpperCase().matches("P.|D.*|Z."))
-														|| (s.toUpperCase().matches("P4") && cbq.getName().toUpperCase().matches("P.|Z."))
-														|| (s.toUpperCase().matches("EMS") && cbq.getName().toUpperCase().matches("E.*|MS.*"))))
-														||(traceBackward
-																&& (s.toUpperCase().trim().startsWith(cbq.getName().toUpperCase().trim())
-																		|| (cbq.getName().toUpperCase().matches("P1") && s.toUpperCase().matches("P.|C.*|D.*|E.*|MS.*|Z."))
-																		|| (cbq.getName().toUpperCase().matches("P2") && s.toUpperCase().matches("P.|C.*|D.*|Z."))
-																		|| (cbq.getName().toUpperCase().matches("P3") && s.toUpperCase().matches("P.|D.*|Z."))
-																		|| (cbq.getName().toUpperCase().matches("P4") && s.toUpperCase().matches("P.|Z."))
-																		|| (cbq.getName().toUpperCase().matches("EMS") && s.toUpperCase().matches("E.*|MS.*"))))
-												) {
-											if (!cellList.contains(cbq.getName().toUpperCase().trim())){
-												cellList.add(cbq.getName().toUpperCase().trim());  //to search with
-												Enumeration bbcKenum = impCL.getBrainbowColors().keys();
-												while (bbcKenum.hasMoreElements()) {
-													String es = (String) bbcKenum.nextElement();
-													//								IJ.showStatus(es);
-													IJ.showStatus(cbq.getName().trim());
-													if (es.toLowerCase().trim().matches(cbq.getName().toLowerCase().trim())) {
-														if (cellColorCode != "" && impCL!=null) {
-															if (impCL.getBrainbowColors().get(es.toLowerCase().trim())!=null) {
-																if (impCL.droppedCellColors.get(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB()) == null) {
-																	//												IJ.showStatus("NO OVERLAP");
-																	impCL.droppedCellColors.put(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB(), Colors.decode(cellColorCode, Color.white));
-																} else {
-																	//												IJ.showStatus("OVERLAP");
-																	Color old = impCL.droppedCellColors.get(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB());
-																	Color nuevo = Colors.decode(cellColorCode, Color.white);
-																	int newRed = old.getRed()+nuevo.getRed(); 
-																	int newGreen = old.getGreen()+nuevo.getGreen(); 
-																	int newBlue = old.getBlue()+nuevo.getBlue();
-																	int newMax = Math.max(newBlue, Math.max(newRed, newGreen));
-																	Color mix = new Color(255*newRed/newMax, 
-																			255*newGreen/newMax, 
-																			255*newBlue/newMax);
-																	impCL.droppedCellColors.put(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB(), mix);
-																}
-															}
-															//										IJ.showStatus("newdropcolor");
-														}
-													}
-												}
-											}
-										}
-									}
-								}
-							}
-							dropImp.getCanvas().droppedGeneUrls = (dropImp.getCanvas().droppedGeneUrls != ""?dropImp.getCanvas().droppedGeneUrls:"(Live_from_WormBase...)\nCells_expressing:\n") 
-									+ ((String)nextItem).replaceAll(".*/expr_pattern/", "")+ "&";
-
-						} else {
-							dropImp = new Opener().openURL((String)nextItem);
-							setImp(dropImp);
-							dropImp.show();
-							if (dropImp == null)
-								return;
-							dropImp.getCanvas().messageRois.remove("Pending drop "+nDrops);
-							dropImp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
-							//							IJ.log(nDrops+" nDrops");
-							nDrops--;
-							return;
-						}
-					} else {
-						imp = new Opener().openURL((String)nextItem);
-						if (imp != null)
-							imp.show();
-					}
-				} else if ( ((String)nextItem).toLowerCase().endsWith(".mov") || ((String)nextItem).toLowerCase().endsWith(".avi") ){
-					String path = "";
-					if (!((String)nextItem).contains(File.separator) && !((String)nextItem).startsWith("/Volumes/GLOWORM_DATA/")) {
-						if (IJ.isMacOSX()  || IJ.isLinux()) 
-							path = "/Volumes/GLOWORM_DATA/" + ((String)nextItem);
-						if(IJ.isWindows())
-							path = "Q:\\" + ((String)nextItem);
-					}else
-						path = ((String)nextItem);
-					if (IJ.debugMode) IJ.log(path + " is the path sent to QTMOMM");
-					pathList = pathList + path +  ((iterator.hasNext()  || openAsVirtualStack)? "|": "");
-				} else if (( ((String)nextItem).toLowerCase().contains("scene.scn"))){
-					String path = "";
-					if (!((String)nextItem).contains(File.separator) && !((String)nextItem).startsWith("/Volumes/GLOWORM_DATA/")) {
-						if (IJ.isMacOSX() || IJ.isLinux()) {
-							path = "/Volumes/GLOWORM_DATA/" + ((String)nextItem);
-						}
-						if(IJ.isWindows())
-							path = "Q:\\" + ((String)nextItem);
-					} else
-						path = ((String)nextItem);
-					if (IJ.debugMode) IJ.log(path + " is the path sent to QTMOMM");
-					if (IJ.is64Bit())
-						MQTVSSceneLoader64.runMQTVS_SceneLoader64(path);
-					else
-						MQTVSSceneLoader64.runMQTVS_SceneLoader64(path);
-				}else if (((String)nextItem).toLowerCase().endsWith(".obj")) {
-// BEGIN OPEN .OBJ/.MTL BLOCK
-					//					Component dtc = this.dtde.getDropTargetContext().getDropTarget().getComponent();
-					Window dropWin = null;
-					if (dropUniverse != null)
-						dropWin = dropUniverse.getWindow();
-					
-					if (IJ.getInstance()!=null) {
-						if ( this.dtde.getDropTargetContext().getDropTarget().getComponent() == IJ.getInstance().getStatusBar()){
-							if (freshDrop){
-								dropUniverse = null;
-								dropImp = null;
-								setImp(dropImp);
 							}
 						}
-					}
-
-					if (dropUniverse == null) {
-						dropUniverse = new Image3DUniverse();
-						dropUniverse.show(false);
-						dropUniverse.getWindow().setDragAndDrop(DragAndDrop.this);
-						IJ.getInstance().setDragAndDrop(new DragAndDrop());
-						dropUniverse.getWindow().getDragAndDrop().addDropTarget(dropUniverse.getCanvas());
-						while (dropUniverse.getWindow() == null) IJ.wait (10);
-						dropImp = dropUniverse.getWindow().getImagePlus();
-						setImp(dropImp);
-					}
-
-					freshDrop = false;
-					
-					String path = (String)nextItem;
-					File file = new File(path) ;
-					BufferedReader in = null;
-					PrintWriter out = null;
-
-					
-					File cacheObj = null;
-					File cacheMtl = null;
-					if (path.startsWith("/Volumes/GLOWORM_DATA/")
-							|| path.contains("\\GLOWORM_DATA\\")) {	
-
-						cacheObj = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+path);
-						cacheMtl = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+path.replace(".obj", ".mtl"));
-						if (!(new File(cacheObj.getParent())).canWrite()) {
-							//Crappy loop seems necessary for windows...							
-							while (!(new File(cacheObj.getParent())).mkdirs()) { 
-								while (!(new File(new File(cacheObj.getParent()).getParent())).mkdirs()) {
-									while (!(new File(new File(new File(cacheObj.getParent()).getParent()).getParent())).mkdirs()) {
-										while (!(new File(new File(new File(new File(cacheObj.getParent()).getParent()).getParent()).getParent()).mkdirs())) {
-
-										}
-									}
-								}
-							}
-						}
-						if (cacheObj.canRead() && cacheMtl.canRead()) {
-
-							// skip ahead to opening obj
-							
-						}else {
-							if (!cacheMtl.canRead()) {
-								in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
-										RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replace(".obj", ".mtl").replaceAll("%2B", "\\+").replaceAll("%25", "%").replace("|", "")))));
-								try {
-									out = new PrintWriter(
-											new BufferedWriter(
-													new FileWriter(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path.replace(".obj", ".mtl")) ), true);
-									String line = "";
-									if (line != null) {
-										while (line != null && !line.contains("End of parameter list")) {
-											line = in.readLine();
-											if (out!=null)
-												out.println(line);
-										}
-									}
-									out.close();
-								} catch (IOException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-							}
-							if (!cacheObj.canRead()) {							
-								in = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
-										RemoteMQTVSHandler.getFileInputByteArray(IJ.rmiURL.split(" ")[0], IJ.rmiURL.split(" ")[1], path.replaceAll("%2B", "\\+").replaceAll("%25", "%").replace("|", "")))));
-								try {
-									out = new PrintWriter(
-											new BufferedWriter(
-													new FileWriter(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path) ), true);
-									String line = "";
-									if (line != null) {
-										while (line != null && !line.contains("End of parameter list")) {
-											line = in.readLine();
-											if (out!=null)
-												out.println(line);
-										}
-									}
-									out.close();
-									cacheObj = new File(IJ.getDirectory("home")+"CytoSHOWCacheFiles"+path);
-								} catch (IOException e) {
-									// TODO Auto-generated catch block
-									e.printStackTrace();
-								}
-							}
-						}
-					} else if (path.startsWith("http://") || path.startsWith("https://")) {
-				        URL objUrl = null;
-				        URL mtlUrl = null;
-						try {
-							objUrl = new URL(path);
-							mtlUrl = new URL(path.replace(".obj",".mtl"));
-						} catch (MalformedURLException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-				        String mtlUrlDownloadPath = IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+mtlUrl.toString().replace("http://", "").replace("https://", "").replaceAll("/", File.separator);
-				        String objUrlDownloadPath = IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+objUrl.toString().replace("http://", "").replace("https://", "").replaceAll("/", File.separator);
-				        try {
-				        	new File(objUrlDownloadPath).getParentFile().mkdirs();
-				        	InputStream mtlUrlInStream = mtlUrl.openStream(); 
-				        	InputStream objUrlInStream = objUrl.openStream(); 
-				            IJ.log(""+Files.copy(mtlUrlInStream, Paths.get(mtlUrlDownloadPath), StandardCopyOption.REPLACE_EXISTING)+"bytes out mtl");
-				            IJ.log(""+Files.copy(objUrlInStream, Paths.get(objUrlDownloadPath), StandardCopyOption.REPLACE_EXISTING)+"bytes out obj");
-				        } catch (IOException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-				        
-				        nextItem = objUrlDownloadPath;
-				        
-					} else {
-
-					}
-					
-					try {
-						if (openAsVirtualStack) {
-							dropUniverse.setFlipXonImport(true);
-							int s = this.dtde.getDropAction();
-							dropUniverse.addContentLater((new File((String)nextItem)).getPath(), null, s==1||s==1073741824?true:false);
-						} else {
-							int s = this.dtde.getDropAction();
-							dropUniverse.addContentLater((new File((String)nextItem)).getPath(), null, s==1||s==1073741824?true:false);
-						}
-					} catch (Exception e) {
-						dropUniverse = new Image3DUniverse();
-								dropUniverse.show(false);
-							while (dropUniverse.getWindow() == null) IJ.wait (10);
-						if (openAsVirtualStack) {
-							dropUniverse.setFlipXonImport(true);
-							int s = this.dtde.getDropAction();
-							dropUniverse.addContentLater((new File((String)nextItem)).getPath(), null, s==1||s==1073741824?true:false);
-						} else {
-							int s = this.dtde.getDropAction();
-							dropUniverse.addContentLater((new File((String)nextItem)).getPath(), null, s==1||s==1073741824?true:false);
-						}
-					}
-					//ImageJ3DViewer.lock();
-// END OPEN .OBJ/.MTL BLOCK
-
-
-				} else if (( ((String)nextItem).toLowerCase().trim().equals("or"))){
-					or = true;
-				} else if (( ((String)nextItem).toLowerCase().trim().equals("and"))){
-					or = false;
-				} else if (( ((String)nextItem).toLowerCase().trim().contains("trace"))){
-					traceLineages = true;
-					traceForward = true;
-					traceBackward = true;
-					if (( ((String)nextItem).toLowerCase().trim().contains("back"))){
-						traceForward = false;
-						traceBackward = true;
-					}
-					if (( ((String)nextItem).toLowerCase().trim().contains("forward"))){
-						traceForward = true;
-						traceBackward = false;
-					}
-				}else {
-					String cellColorCode = (((String)nextItem).split(" ").length>1?((String)nextItem).split(" ")[((String)nextItem).split(" ").length-1].trim():"");
-					String s = ((String)nextItem);
-					String ss = s.split(" ")[0].replaceAll("(?<!(\\.))\\*", "\\.\\*").trim();
-					rawCellList.add(ss.toUpperCase().trim());  //to search with
-					//						IJ.log(ss +" ss1");
-					//						IJ.runMacro("waitForUser;");
-					cellListString = cellListString + s.trim().replaceAll("\\.(?!\\*)", "*").replaceAll(" .*", "").trim() + ",";  //to show
-					if (cellColorCode != "" && impCL!=null) {
-						Enumeration bbcKenum = impCL.getBrainbowColors().keys();
-						while (bbcKenum.hasMoreElements()) {
-							String es = (String) bbcKenum.nextElement();
-							//								IJ.showStatus(es);
-							IJ.showStatus(s.split(" ")[0].toLowerCase().replace("*",".*").trim());
-							if (es.toLowerCase().trim().matches(s.split(" ")[0].toLowerCase().replace("*",".*").trim())) {
-								if (cellColorCode != "" && impCL!=null) {
-									if (impCL.getBrainbowColors().get(es.toLowerCase().trim())!=null) {
-										if (impCL.droppedCellColors.get(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB()) == null) {
-											//												IJ.showStatus("NO OVERLAP");
-											impCL.droppedCellColors.put(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB(), Colors.decode(cellColorCode, Color.white));
-										} else {
-											//												IJ.showStatus("OVERLAP");
-											Color old = impCL.droppedCellColors.get(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB());
-											Color nuevo = Colors.decode(cellColorCode, Color.white);
-											int newRed = old.getRed()+nuevo.getRed(); 
-											int newGreen = old.getGreen()+nuevo.getGreen(); 
-											int newBlue = old.getBlue()+nuevo.getBlue();
-											int newMax = Math.max(newBlue, Math.max(newRed, newGreen));
-											Color mix = new Color(255*newRed/newMax, 
-													255*newGreen/newMax, 
-													255*newBlue/newMax);
-											impCL.droppedCellColors.put(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB(), mix);
-										}
-									}
-									//										IJ.showStatus("newdropcolor");
-								}
-							}
-						}
-					}
-					ArrayList<String> ssHits = new ArrayList<String>();
-					ssHits.add(ss);
-					if (traceLineages && traceForward) {
-						for (int l = 0; l < partsListLogLines2.length; l++) {
-							partsListLogLines2[l] = partsListLogLines2[l]
-									.replace("</a></td><td>", ":")
-									.replace("</td><td>", ";")
-									.replaceAll("\\.", "");
-							if (ss.toUpperCase().trim().matches("EMS"))
-								ss = "(E|MS)";
-							if (ss.toUpperCase().trim().matches("P0"))
-								ss = "(P0|AB|EMS|E|MS|C|D)";
-							if (ss.toUpperCase().trim().matches("P1"))
-								ss = "(P0p|EMS|E|MS|C|D)";
-							if (ss.toUpperCase().trim().matches("P2"))
-								ss = "(P0pp|C|D)";
-							if (ss.toUpperCase().trim().matches("P3"))
-								ss = "(P0ppp|D)";
-							if (ss.toUpperCase().trim().matches("P4"))
-								ss = "(P0pppp)";
-
-							//									IJ.log(ss +" ss2");
-							//									IJ.runMacro("waitForUser;");
-
-							if (partsListLogLines2[l].startsWith("begets ")
-									&& (partsListLogLines2[l].toLowerCase().matches(".*:"+ss.toLowerCase().replace("*", "")+".*;.*")
-											||	partsListLogLines2[l].toLowerCase().matches(".*:.*;.*"+ss.toLowerCase().replaceAll("(?<!(\\.))\\*", "\\.\\*")+".*") )) {
-								String as = partsListLogLines2[l].toLowerCase().replaceAll(".*rel=nofollow>", "").replaceAll(":.*", "");
-								//									IJ.log(as + " as");
-								//									IJ.runMacro("waitForUser;");
-								rawCellList.add(as);
-								if (cellColorCode != "" && impCL!=null) {
-									if (impCL.getBrainbowColors().get(as.toLowerCase().trim())!=null) {
-										if (impCL.droppedCellColors.get(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB()) == null) {
-											impCL.droppedCellColors.put(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB(), Colors.decode(cellColorCode, Color.white));
-										} else {
-											Color old = impCL.droppedCellColors.get(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB());
-											Color nuevo = Colors.decode(cellColorCode, Color.white);
-											int newRed = old.getRed()+nuevo.getRed(); 
-											int newGreen = old.getGreen()+nuevo.getGreen(); 
-											int newBlue = old.getBlue()+nuevo.getBlue();
-											int newMax = Math.max(newBlue, Math.max(newRed, newGreen));
-											Color mix = new Color(255*newRed/newMax, 
-													255*newGreen/newMax, 
-													255*newBlue/newMax);
-											impCL.droppedCellColors.put(impCL.getBrainbowColors().get(as.toLowerCase().trim()).getRGB(), mix);
-										}
-									}
-									//										IJ.showStatus("newdropcolor");
-								}
-								//										cellListString = cellListString + as + ",";
-							}
-							if (partsListLogLines2[l].startsWith("begets ")
-									&& (partsListLogLines2[l].toLowerCase().replaceAll(".*rel=nofollow>", "").replaceAll(":.*", "").matches(s.split(" ")[0].replaceAll("(?<!(\\.))\\*", "\\.\\*").toLowerCase().trim()+".*")
-											||	partsListLogLines2[l].toLowerCase().matches(".*:.*;.*"+s.split(" ")[0].replaceAll("(?<!(\\.))\\*", "\\.\\*").toLowerCase().trim()+".*") )) {
-								ss = partsListLogLines2[l].toLowerCase().replaceAll(".*:", "").replaceAll(";.*", "");
-								IJ.showStatus(s.split(" ")[0].replaceAll("(?<!(\\.))\\*", "\\.\\*").trim()+" "+ss);
-								ssHits.add(ss);
-								//									IJ.runMacro("waitForUser;");
-							}
-						}
-					}
-					if (traceLineages) {
-						for (String ns:ssHits) {
-							for (JCheckBox cbq:impCL.getJCheckBox()) {
-								if ((traceForward 
-										&& (cbq.getName().toUpperCase().trim().startsWith(ns.toUpperCase().trim())
-												|| (ns.toUpperCase().matches("P1") && cbq.getName().toUpperCase().matches("P.|C.*|D.*|E.*|MS.*|Z."))
-												|| (ns.toUpperCase().matches("P2") && cbq.getName().toUpperCase().matches("P.|C.*|D.*|Z."))
-												|| (ns.toUpperCase().matches("P3") && cbq.getName().toUpperCase().matches("P.|D.*|Z."))
-												|| (ns.toUpperCase().matches("P4") && cbq.getName().toUpperCase().matches("P.|Z."))
-												|| (ns.toUpperCase().matches("EMS") && cbq.getName().toUpperCase().matches("E.*|MS.*"))))
-												||(traceBackward
-														&& (ns.toUpperCase().trim().startsWith(cbq.getName().toUpperCase().trim())
-																|| (cbq.getName().toUpperCase().matches("P1") && ns.toUpperCase().matches("P.|C.*|D.*|E.*|MS.*|Z."))
-																|| (cbq.getName().toUpperCase().matches("P2") && ns.toUpperCase().matches("P.|C.*|D.*|Z."))
-																|| (cbq.getName().toUpperCase().matches("P3") && ns.toUpperCase().matches("P.|D.*|Z."))
-																|| (cbq.getName().toUpperCase().matches("P4") && ns.toUpperCase().matches("P.|Z."))
-																|| (cbq.getName().toUpperCase().matches("EMS") && ns.toUpperCase().matches("E.*|MS.*"))))
-										) {
-									rawCellList.add(cbq.getName().toUpperCase().trim());  //to search with
-									Enumeration bbcKenum = impCL.getBrainbowColors().keys();
-									while (bbcKenum.hasMoreElements()) {
-										String es = (String) bbcKenum.nextElement();
-										//								IJ.showStatus(es);
-										IJ.showStatus(cbq.getName().trim());
-										if (es.toLowerCase().trim().matches(cbq.getName().toLowerCase().trim())) {
-											if (cellColorCode != "" && impCL!=null) {
-												if (impCL.getBrainbowColors().get(es.toLowerCase().trim())!=null) {
-													if (impCL.droppedCellColors.get(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB()) == null) {
-														//												IJ.showStatus("NO OVERLAP");
-														impCL.droppedCellColors.put(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB(), Colors.decode(cellColorCode, Color.white));
-													} else {
-														//												IJ.showStatus("OVERLAP");
-														Color old = impCL.droppedCellColors.get(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB());
-														Color nuevo = Colors.decode(cellColorCode, Color.white);
-														int newRed = old.getRed()+nuevo.getRed(); 
-														int newGreen = old.getGreen()+nuevo.getGreen(); 
-														int newBlue = old.getBlue()+nuevo.getBlue();
-														int newMax = Math.max(newBlue, Math.max(newRed, newGreen));
-														Color mix = new Color(255*newRed/newMax, 
-																255*newGreen/newMax, 
-																255*newBlue/newMax);
-														impCL.droppedCellColors.put(impCL.getBrainbowColors().get(es.toLowerCase().trim()).getRGB(), mix);
-													}
-												}
-												//										IJ.showStatus("newdropcolor");
-											}
-										}
-									}
-								}
-							}
-
-						}
-					}
-					//						IJ.runMacro("waitForUser;");
-					//							IJ.showStatus("newdropcolor");
-				}	
+						//						IJ.runMacro("waitForUser;");
+						//							IJ.showStatus("newdropcolor");
+					}	
+				}
 			}
 			else if (nextItem!=null && ( ((File)nextItem).getPath().toLowerCase().endsWith(".mov") 
 					|| ((File)nextItem).getPath().toLowerCase().endsWith(".avi"))) 
