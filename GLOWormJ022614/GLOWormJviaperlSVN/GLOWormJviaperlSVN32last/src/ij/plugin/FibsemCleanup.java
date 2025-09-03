@@ -4,12 +4,15 @@ import ij.*;
 import ij.process.*;
 import ij.util.Tools;
 import ij.plugin.FFT;
+import ij.plugin.filter.Filler;
 import ij.plugin.filter.GaussianBlur;
 import ij.plugin.filter.RankFilters;
 import ij.plugin.filter.Transformer;
 import ij.gui.*;
 import ij.io.FileSaver;
 import ij.plugin.*;
+
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -33,7 +36,8 @@ public class FibsemCleanup implements PlugIn {
     // A shared lock object to synchronize access to non-thread-safe ImageJ methods.
     private final Object lock = new Object();
 
-    @Override
+    @SuppressWarnings("static-access")
+	@Override
     public void run(String arg) {
         // Get a list of IDs for all open images.
         int[] impIDs = WindowManager.getIDList();
@@ -85,6 +89,8 @@ public class FibsemCleanup implements PlugIn {
             final ThreadLocal<ImagePlus> sliceThreadedImp = ThreadLocal.withInitial(() -> new ImagePlus(sourceName+"_slice_XXXXXX", sourceImp.getProcessor()));
             final ThreadLocal<FFT> fwdFFT = ThreadLocal.withInitial(() -> new FFT());
             final ThreadLocal<FFT> invFFT = ThreadLocal.withInitial(() -> new FFT());
+            final ThreadLocal<Toolbar> toolbarForColorSettings = ThreadLocal.withInitial(() -> new Toolbar());
+            final ThreadLocal<Filler> filler = ThreadLocal.withInitial(() -> new Filler());
             final ThreadLocal<RankFilters> rankFilterA = ThreadLocal.withInitial(() -> new RankFilters());
             final ThreadLocal<RankFilters> rankFilterB = ThreadLocal.withInitial(() -> new RankFilters());
             final ThreadLocal<GaussianBlur> gaussBlur = ThreadLocal.withInitial(() -> new GaussianBlur());
@@ -128,12 +134,15 @@ public class FibsemCleanup implements PlugIn {
 //                           ImagePlus fftFwdImp = WindowManager.getCurrentImage();
 //                           fftFwdImp.hide();
                         // 3. Clear elliptical regions in FFT image
-                            fwdFFT.get().getFwdFHT().setRoi(new EllipseRoi(864, 2051, 1980, 2051, 0.04));
-                            IJ.run(fwdFFT.get().getFwdFHT(), "Clear", "stack");
-                            fwdFFT.get().getFwdFHT().setRoi(new EllipseRoi(2142, 2051, 3258, 2051, 0.04));
-                            IJ.run(fwdFFT.get().getFwdFHT(), "Clear", "stack");
+                           
+//STILL STRUGGLING TO GET FREE OF IJ.RUN CALLS , NOW NOT SURE I HAVE THE METHODS OR BACKGROUND COLOR SET RIGHT...
+
+                            fwdFFT.get().getFwdFHT().getProcessor().setColor(Color.black);
+                            fwdFFT.get().getFwdFHT().getProcessor().fill(new EllipseRoi(864, 2051, 1980, 2051, 0.04)); // fill with black color
+                            fwdFFT.get().getFwdFHT().getProcessor().setColor(Color.black);
+                            fwdFFT.get().getFwdFHT().getProcessor().fill(new EllipseRoi(2142, 2051, 3258, 2051, 0.04)); // fill with black color
                             fwdFFT.get().getFwdFHT().killRoi();
-                        
+
                         // 4. Inverse FFT
                         
                             invFFT.get().setImp(fwdFFT.get().getFwdFHT());
@@ -150,7 +159,7 @@ public class FibsemCleanup implements PlugIn {
                         
                         // 5. Enhance Local Contrast (CLAHE)
                         
-                            CLAHE.run(invFFTimp.get(), 127, 256, 2.7f, null, null);
+                            claheFilter.get().run(invFFTimp.get(), 127, 256, 2.7f, null, null);
                         
                             
                         // 6. Remove Outliers (Dark and Bright) - Second pass
@@ -159,7 +168,7 @@ public class FibsemCleanup implements PlugIn {
                         
                         
                         // 7. Gaussian Blur
-                            gaussBlur.get().blurGaussian(invFFTimp.get().getProcessor(), 0.008, 0.008, 0.002);
+                            gaussBlur.get().blurGaussian(invFFTimp.get().getProcessor(), 1.333, 1.333, 0.0001);
                             
                         // 8. Rotate right 90%
                             transformer.get().setup("right", invFFTimp.get());
