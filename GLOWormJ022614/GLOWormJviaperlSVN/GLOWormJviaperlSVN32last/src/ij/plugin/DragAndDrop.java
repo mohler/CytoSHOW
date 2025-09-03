@@ -1459,8 +1459,8 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
-							String mtlUrlDownloadPath = IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+mtlUrl.toString().replace("http://", "").replace("https://", "").replaceAll("/", File.separator);
-							String objUrlDownloadPath = IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+objUrl.toString().replace("http://", "").replace("https://", "").replaceAll("/", File.separator);
+							String mtlUrlDownloadPath = IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+mtlUrl.toString().replace("http://", "").replace("https://", "").replace("/", File.separator);
+							String objUrlDownloadPath = IJ.getDirectory("home")+"CytoSHOWCacheFiles"+File.separator+objUrl.toString().replace("http://", "").replace("https://", "").replace("/", File.separator);
 							try {
 								new File(objUrlDownloadPath).getParentFile().mkdirs();
 								InputStream mtlUrlInStream = mtlUrl.openStream(); 
