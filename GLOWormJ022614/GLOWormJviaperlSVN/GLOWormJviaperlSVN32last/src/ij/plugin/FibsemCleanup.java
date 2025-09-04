@@ -45,6 +45,36 @@ public class FibsemCleanup implements PlugIn {
             IJ.error("No images are open.");
             return;
         }
+        
+        String outliersParamsString = IJ.getString("Parameters for Remove Outliers?", " 2, 5, 1  , 50");     
+        String[] outliersParamsArray = outliersParamsString.split(" *, *");
+        final int outParam0 = Integer.parseInt(outliersParamsArray[0].trim());
+        final int outParam1 = Integer.parseInt(outliersParamsArray[1].trim());
+        final int outParam2 = Integer.parseInt(outliersParamsArray[2].trim());
+        final int outParam3 = Integer.parseInt(outliersParamsArray[3].trim());
+        
+        String fftBlankEllipsesParamsString = IJ.getString("Parameters for EllipseRoi? x1,y1,y2,aspectRation", "864, 2051, 1980, 2051, 0.04");
+        String[] fftBlankEllipsesParamsArray = fftBlankEllipsesParamsString.split(" *, *");
+        final double fftParam0 = Double.parseDouble(fftBlankEllipsesParamsArray[0].trim());
+        final double fftParam1 = Double.parseDouble(fftBlankEllipsesParamsArray[1].trim());
+        final double fftParam2 = Double.parseDouble(fftBlankEllipsesParamsArray[2].trim());
+        final double fftParam3 = Double.parseDouble(fftBlankEllipsesParamsArray[3].trim());
+        final double fftParam4 = Double.parseDouble(fftBlankEllipsesParamsArray[4].trim());
+       
+        String claheParamsString = IJ.getString("Parameters for CLAHE? blockRadius, bins, slope ", "127, 256, 2.7f");
+        String[] claheParamsArray = claheParamsString.split(" *, *");
+        final int claheParam0 = Integer.parseInt(claheParamsArray[0].trim());
+        final int claheParam1 = Integer.parseInt(claheParamsArray[1].trim());
+        final float claheParam2 = Float.parseFloat(claheParamsArray[2].trim());
+       
+        String gaussParamsString = IJ.getString("Parameters for final Gaussian Blur (pixels): sigX, sigY, accuracy?", "1.333, 1.333, 0.0001");
+        String[] gaussParamsArray = gaussParamsString.split(" *, *");
+        final double gaussParam0 = Double.parseDouble(gaussParamsArray[0].trim());
+        final double gaussParam1 = Double.parseDouble(gaussParamsArray[1].trim());
+        final double gaussParam2 = Double.parseDouble(gaussParamsArray[2].trim());
+       
+        String rotateNewImageString = IJ.getString("Rotate final image?", "Right");
+        final String rotImgString = rotateNewImageString.toLowerCase();
 
         // Determine the number of available processors to create an optimal-sized thread pool.
         int processors = Runtime.getRuntime().availableProcessors();
@@ -123,8 +153,10 @@ public class FibsemCleanup implements PlugIn {
                         sliceThreadedImp.set(new ImagePlus(sourceName+"_slice_"+IJ.pad(finalZ, 6), sourceImp.getStack().getProcessor(finalZ)));
 
                         // 1. Remove Outliers (Dark and Bright)
-                        	rankFilterA.get().rank(sliceThreadedImp.get().getProcessor(), 2, RankFilters.OUTLIERS, 1, 50);
-                        	rankFilterA.get().rank(sliceThreadedImp.get().getProcessor(), 2, RankFilters.OUTLIERS, 0, 50);
+//                        	rankFilterA.get().rank(sliceThreadedImp.get().getProcessor(), 2, RankFilters.OUTLIERS, 1, 50);
+//                        	rankFilterA.get().rank(sliceThreadedImp.get().getProcessor(), 2, RankFilters.OUTLIERS, 0, 50);
+	                    	rankFilterA.get().rank(sliceThreadedImp.get().getProcessor(), outParam0, outParam1, 1, outParam3);
+	                    	rankFilterA.get().rank(sliceThreadedImp.get().getProcessor(), outParam0, outParam1, 0, outParam3);
                        
 
                         // 2. FFT
@@ -135,12 +167,11 @@ public class FibsemCleanup implements PlugIn {
 //                           fftFwdImp.hide();
                         // 3. Clear elliptical regions in FFT image
                            
-//STILL STRUGGLING TO GET FREE OF IJ.RUN CALLS , NOW NOT SURE I HAVE THE METHODS OR BACKGROUND COLOR SET RIGHT...
-
                             fwdFFT.get().getFwdFHT().getProcessor().setColor(Color.black);
-                            fwdFFT.get().getFwdFHT().getProcessor().fill(new EllipseRoi(864, 2051, 1980, 2051, 0.04)); // fill with black color
+//                            fwdFFT.get().getFwdFHT().getProcessor().fill(new EllipseRoi(864, 2051, 1980, 2051, 0.04)); // fill with black color
+                            fwdFFT.get().getFwdFHT().getProcessor().fill(new EllipseRoi(fftParam0, fftParam1, fftParam2, fftParam3, fftParam4)); // fill with black color
                             fwdFFT.get().getFwdFHT().getProcessor().setColor(Color.black);
-                            fwdFFT.get().getFwdFHT().getProcessor().fill(new EllipseRoi(2142, 2051, 3258, 2051, 0.04)); // fill with black color
+                            fwdFFT.get().getFwdFHT().getProcessor().fill(new EllipseRoi((fftParam0+1278), 2051, (fftParam2+1278), 2051, 0.04)); // fill with black color
                             fwdFFT.get().getFwdFHT().killRoi();
 
                         // 4. Inverse FFT
@@ -159,19 +190,23 @@ public class FibsemCleanup implements PlugIn {
                         
                         // 5. Enhance Local Contrast (CLAHE)
                         
-                            claheFilter.get().run(invFFTimp.get(), 127, 256, 2.7f, null, null);
+//                            claheFilter.get().run(invFFTimp.get(), 127, 256, 2.7f, null, null);
+                        claheFilter.get().run(invFFTimp.get(), claheParam0, claheParam1, claheParam2, null, null);
                         
                             
                         // 6. Remove Outliers (Dark and Bright) - Second pass
-                    		rankFilterB.get().rank(invFFTimp.get().getProcessor(), 2, RankFilters.OUTLIERS, 1, 50);
-                    		rankFilterB.get().rank(invFFTimp.get().getProcessor(), 2, RankFilters.OUTLIERS, 0, 50);
+                    		rankFilterB.get().rank(invFFTimp.get().getProcessor(),  outParam0, outParam1, 1, outParam3);
+                    		rankFilterB.get().rank(invFFTimp.get().getProcessor(),  outParam0, outParam1, 0, outParam3);
                         
                         
                         // 7. Gaussian Blur
-                            gaussBlur.get().blurGaussian(invFFTimp.get().getProcessor(), 1.333, 1.333, 0.0001);
-                            
+//                            gaussBlur.get().blurGaussian(invFFTimp.get().getProcessor(), 1.333, 1.333, 0.0001);
+                            gaussBlur.get().blurGaussian(invFFTimp.get().getProcessor(), gaussParam0, gaussParam1, gaussParam2);
+
+                    		
                         // 8. Rotate right 90%
-                            transformer.get().setup("right", invFFTimp.get());
+//                            transformer.get().setup("right", invFFTimp.get());
+                            transformer.get().setup(rotImgString, invFFTimp.get());
                             transformer.get().run(null);
                         
                         
