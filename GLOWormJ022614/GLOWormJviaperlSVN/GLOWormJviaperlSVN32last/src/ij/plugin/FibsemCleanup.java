@@ -168,10 +168,20 @@ public class FibsemCleanup implements PlugIn {
                         // 3. Clear elliptical regions in FFT image
                            
                             fwdFFT.get().getFwdFHT().getProcessor().setColor(Color.black);
+                            final int fftScaleFactor = fwdFFT.get().getFwdFHT().getWidth()/4096;
+                            
 //                            fwdFFT.get().getFwdFHT().getProcessor().fill(new EllipseRoi(864, 2051, 1980, 2051, 0.04)); // fill with black color
-                            fwdFFT.get().getFwdFHT().getProcessor().fill(new EllipseRoi(fftParam0, fftParam1, fftParam2, fftParam3, fftParam4)); // fill with black color
+                            fwdFFT.get().getFwdFHT().getProcessor().fill(new EllipseRoi(fftParam0*fftScaleFactor, 
+                            															fftParam1*fftScaleFactor, 
+                            															fftParam2*fftScaleFactor, 
+                            															fftParam3*fftScaleFactor, 
+                            															fftParam4)); // fill with black color
                             fwdFFT.get().getFwdFHT().getProcessor().setColor(Color.black);
-                            fwdFFT.get().getFwdFHT().getProcessor().fill(new EllipseRoi((fftParam0+1278), 2051, (fftParam2+1278), 2051, 0.04)); // fill with black color
+                            fwdFFT.get().getFwdFHT().getProcessor().fill(new EllipseRoi(fwdFFT.get().getFwdFHT().getWidth() - fftParam0*fftScaleFactor, 
+                            														     fftParam1*fftScaleFactor, 
+                            														     fwdFFT.get().getFwdFHT().getWidth() - fftParam2*fftScaleFactor, 
+                            														     fftParam3*fftScaleFactor, 
+                            														     fftParam4)); // fill with black color
                             fwdFFT.get().getFwdFHT().killRoi();
 
                         // 4. Inverse FFT
