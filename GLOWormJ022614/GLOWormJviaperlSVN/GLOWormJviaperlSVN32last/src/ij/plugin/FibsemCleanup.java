@@ -105,7 +105,8 @@ public class FibsemCleanup implements PlugIn {
 
             // Create a new directory for the processed images.
             String processedDirName = sourceName.substring(0, sourceName.lastIndexOf('.')) + "_processed";
-            String savePath = path + processedDirName + File.separator;
+            String destDir = IJ.getDirectory("Save output where?");
+            String savePath = destDir + processedDirName + File.separator;
             String destination = savePath + sourceName;
 
             try {

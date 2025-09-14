@@ -203,7 +203,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
             		// Use the finalUrl variable here
             		System.out.println("Final captured URL: " + finalUrl);
             	} else {
-            		System.out.println("No valid URL found after checking all flavors.");
+            		System.out.println("No valid URL found after checking all flavors.\n May be a different message format...checking....");
             	}
 
 
