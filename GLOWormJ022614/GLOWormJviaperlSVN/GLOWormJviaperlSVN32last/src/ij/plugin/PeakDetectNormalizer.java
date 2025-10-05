@@ -3,6 +3,7 @@ package ij.plugin;
 import ij.*;
 import ij.measure.ResultsTable;
 import ij.plugin.filter.ParticleAnalyzer;
+import ij.process.ImageProcessor;
 
 
 public class PeakDetectNormalizer implements PlugIn {
@@ -21,9 +22,26 @@ public class PeakDetectNormalizer implements PlugIn {
         
         // Loop through each open image ID.
         for (int impID : impIDs) {
-        	IJ.log(WindowManager.getImage(impID).getTitle());
-        	ParticleAnalyzer pa = new ParticleAnalyzer (options,  measurements, null, 8d, 28d, 0.0d, 1.00d);
-        	pa.analyze(WindowManager.getImage(impID));
+        	ImagePlus nextImp = WindowManager.getImage(impID);
+        	IJ.log(nextImp.getTitle());
+        	int maxValue = 0;
+        	for (int z=1; z<=nextImp.getNSlices(); z++) {
+        		nextImp.setPositionWithoutUpdate(nextImp.getChannel(),z,nextImp.getFrame());
+        		int sliceMax = (int)nextImp.getProcessor().maxValue();
+        		maxValue = sliceMax>maxValue?sliceMax:maxValue;
+        	}
+        	int span = 50;
+
+        	ParticleAnalyzer pa = new ParticleAnalyzer (options,  measurements, null, 8, 128, 0.0d, 1.00d);
+        	for (int z=1; z<=nextImp.getNSlices(); z++) {
+        		nextImp.setPositionWithoutUpdate(nextImp.getChannel(),z,nextImp.getFrame());
+        		ImageProcessor ip = nextImp.getProcessor();
+        		for (int i=maxValue;i>=span;i=i-span) {
+        			ip.setThreshold(i-span+1, i, ImageProcessor.RED_LUT);
+        			pa.analyze(nextImp, ip);
+        		}
+        	}
+
         }
 
         IJ.log("Particle Peak Picking Plugin execution complete.");
