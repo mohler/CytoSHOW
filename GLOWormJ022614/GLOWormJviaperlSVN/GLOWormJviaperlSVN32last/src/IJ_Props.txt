@@ -360,6 +360,7 @@ filters17="Show Circular Masks...",ij.plugin.filter.RankFilters("masks")
 filters18="Enhance Local Contrast (CLAHE)", ij.plugin.CLAHE
 filters19="FibsemCleanup", ij.plugin.FibsemCleanup
 filters20="ExpandZslicesDepthOfField", ij.plugin.SliceExpander_MultiThread
+filters21="DetectNormalizedBrightPoints", ij.plugin.PeakDetectNormalizer
 
 
 # Plugins installed in the File/Batch submenu

@@ -7,8 +7,6 @@ import ij.gui.*;
 import ij.process.*;
 import ij.measure.*;
 import ij.text.*;
-import ij.plugin.filter.Analyzer;
-import ij.plugin.frame.Recorder;
 import ij.plugin.frame.RoiManager;
 import ij.macro.Interpreter;
 import ij.util.Tools;
@@ -168,6 +166,8 @@ public class ParticleAnalyzer implements PlugInFilter, Measurements {
 	public ParticleAnalyzer(int options, int measurements, ResultsTable rt, double minSize, double maxSize, double minCirc, double maxCirc) {
 		this.options = options;
 		this.measurements = measurements;
+		IJ.log("options a= "+options);
+		IJ.log("measurements a="+ measurements);
 		this.rt = rt;
 		if (this.rt==null)
 			this.rt = new ResultsTable();
@@ -502,6 +502,9 @@ public class ParticleAnalyzer implements PlugInFilter, Measurements {
 		}
 		beginningCount = Analyzer.getCounter();
 
+		
+//		IJ.log("measurements (b) = "+measurements);
+		
 		byte[] pixels = null;
 		if (ip instanceof ByteProcessor)
 			pixels = (byte[])ip.getPixels();
@@ -541,6 +544,11 @@ public class ParticleAnalyzer implements PlugInFilter, Measurements {
 			ff = new FloodFiller(ipf);
 		}
 		roiType = Wand.allPoints()?Roi.FREEROI:Roi.TRACED_ROI;
+		
+//		IJ.log("measurements (c) = "+measurements);
+		IJ.log("options c= "+options);
+		IJ.log("measurements c="+ measurements);
+
 
 		for (int y=r.y; y<(r.y+r.height); y++) {
 			offset = y*width;
