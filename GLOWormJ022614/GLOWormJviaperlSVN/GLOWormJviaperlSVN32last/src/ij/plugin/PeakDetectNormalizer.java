@@ -55,7 +55,7 @@ public class PeakDetectNormalizer implements PlugIn {
 
         		}
 
-        		nZspecRois[z] = nextImp.getRoiManager().getCount() - totalRoiCount;
+        		nZspecRois[z-1] = nextImp.getRoiManager().getCount() - totalRoiCount;
         		
         		//OVERLAP CHECKING BLOCKS --- now running once all intensity thresholds have been sampled for a given Z value.        	
         		ArrayList<Integer> redundantRoiIndexes = new ArrayList<Integer>();
@@ -87,7 +87,7 @@ public class PeakDetectNormalizer implements PlugIn {
         						}  //end if overlap
 
         					} //end for pt
-        				}else {       // for some reason, the double loop never gives me routing to this same-roi case.   WHY NOT??
+        				}else {       // for some reason, the double loop never gives me routing to this same-roi case.   WHY NOT??  Because I was using .equal instead of ==, duh!
         					continue;
         				}            // end if !equals
 
