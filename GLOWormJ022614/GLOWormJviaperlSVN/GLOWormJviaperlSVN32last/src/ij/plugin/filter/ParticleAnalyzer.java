@@ -7,6 +7,7 @@ import ij.gui.*;
 import ij.process.*;
 import ij.measure.*;
 import ij.text.*;
+import ij.plugin.Colors;
 import ij.plugin.frame.RoiManager;
 import ij.macro.Interpreter;
 import ij.util.Tools;
@@ -909,6 +910,7 @@ public class ParticleAnalyzer implements PlugInFilter, Measurements {
 			if (lineWidth!=1)
 				roi.setStrokeWidth(lineWidth);
 //			roiManager.add(imp, roi, rt.getCounter());
+			roi.setFillColor(Colors.decode("#4400ffff", Color.cyan));
 			roiManager.addRoi(roi);
 		}
 		if (showResultsWindow && showResults)
