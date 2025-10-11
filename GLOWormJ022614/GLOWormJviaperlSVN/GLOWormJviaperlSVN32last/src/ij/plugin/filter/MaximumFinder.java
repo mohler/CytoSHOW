@@ -1,4 +1,5 @@
 package ij.plugin.filter;
+import ij.plugin.Colors;
 import ij.plugin.filter.*;
 import ij.*;
 import ij.gui.*;
@@ -668,8 +669,14 @@ public class MaximumFinder implements ExtendedPlugInFilter, DialogListener {
                     ypoints[i] = xy[1];
                 }
                 if (imp!=null) {
-                	PointRoi points = new PointRoi(xpoints, ypoints, npoints);
-                	imp.setRoi(points);
+//                	PointRoi points = new PointRoi(xpoints, ypoints, npoints);
+//                	imp.setRoi(points);
+                	for (int p=0;p<npoints;p++) {
+                		int ovalRad = 2;
+                		OvalRoi newOval = new OvalRoi(xpoints[p]-ovalRad, ypoints[p]-ovalRad, 2*ovalRad, 2*ovalRad );
+                		
+                		imp.getRoiManager().addRoi( newOval, false, null, Colors.decode("#44FF00FF", Color.magenta), 0, true);
+                	}
                 }
                 points = new Polygon(xpoints, ypoints, npoints);
             } else if (outputType==LIST) {

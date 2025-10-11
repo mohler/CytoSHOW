@@ -8,8 +8,10 @@ import ij.*;
 import ij.gui.Roi;
 import ij.measure.ResultsTable;
 import ij.plugin.filter.Analyzer;
+import ij.plugin.filter.MaximumFinder;
 import ij.plugin.filter.ParticleAnalyzer;
 import ij.plugin.frame.RoiManager;
+import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 
 
@@ -40,7 +42,7 @@ public class PeakDetectNormalizer implements PlugIn {
         	}
         	int span = 30;
 
-        	ParticleAnalyzer pa = new ParticleAnalyzer (options,  measurements, null, 8, 80, 0.7d, 1.00d);
+        	ParticleAnalyzer pa = new ParticleAnalyzer (options,  measurements, null, 4, 80, 0.7d, 1.00d);
         	
         	int[] nZspecRois = new int[nextImp.getNSlices()];
         	int totalRoiCount =0;
@@ -107,7 +109,11 @@ public class PeakDetectNormalizer implements PlugIn {
 
         		IJ.wait(0);
         		totalRoiCount = nextImp.getRoiManager().getCount();
-
+                ByteProcessor typeP = new ByteProcessor(nextImp.getWidth(), nextImp.getHeight());     
+                byte[] types = (byte[])typeP.getPixels();
+                MaximumFinder maxFinder = new MaximumFinder();
+                maxFinder.setup("", nextImp);
+        		maxFinder.findMaxima(nextImp.getProcessor(), 30, ImageProcessor.NO_THRESHOLD, MaximumFinder.POINT_SELECTION, true, false);
         	}  // end for Z loop
 
         }  // end for impID loop
