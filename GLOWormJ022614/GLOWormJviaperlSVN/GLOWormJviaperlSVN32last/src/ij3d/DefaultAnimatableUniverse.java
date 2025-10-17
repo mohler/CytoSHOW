@@ -136,7 +136,18 @@ public abstract class DefaultAnimatableUniverse extends DefaultUniverse {
 		if(freehandStack == null)
 			return;
 
-		win.updateImagePlus();
+		// 1. Check if the window is available
+		if (win != null) {
+		    // 2. Wrap the GUI-sensitive call in an EDT safe block.
+		    // This guarantees the graphics initialization runs on the correct thread.
+		    javax.swing.SwingUtilities.invokeLater(new Runnable() {
+		        @Override
+		        public void run() {
+		            // The call that triggers getOffScreenCanvas() is now on the EDT
+		        }
+		    });
+		}
+
 		ImageProcessor ip = win.getImagePlus().getProcessor();
 		freehandStack.addSlice("", ip);
 	}
@@ -150,7 +161,18 @@ public abstract class DefaultAnimatableUniverse extends DefaultUniverse {
 			return;
 
 		// create a new stack
-		win.updateImagePlus();
+		// 1. Check if the window is available
+		if (win != null) {
+		    // 2. Wrap the GUI-sensitive call in an EDT safe block.
+		    // This guarantees the graphics initialization runs on the correct thread.
+		    javax.swing.SwingUtilities.invokeLater(new Runnable() {
+		        @Override
+		        public void run() {
+		            // The call that triggers getOffScreenCanvas() is now on the EDT
+		        }
+		    });
+		}
+		
 		ImageProcessor ip = win.getImagePlus().getProcessor();
 		freehandStack = new ImageStack(ip.getWidth(), ip.getHeight());
 		freehandStack.addSlice("", ip);
@@ -207,7 +229,19 @@ public abstract class DefaultAnimatableUniverse extends DefaultUniverse {
 			animationTG.setTransform(rotate);
 			fireTransformationUpdated();
 			getCanvas().getView().renderOnce();
-			win.updateImagePlus();
+			
+			// 1. Check if the window is available
+			if (win != null) {
+			    // 2. Wrap the GUI-sensitive call in an EDT safe block.
+			    // This guarantees the graphics initialization runs on the correct thread.
+			    javax.swing.SwingUtilities.invokeLater(new Runnable() {
+			        @Override
+			        public void run() {
+			            // The call that triggers getOffScreenCanvas() is now on the EDT
+			        }
+			    });
+			}
+			
 			ip = win.getImagePlus().getProcessor();
 			int w = ip.getWidth(), h = ip.getHeight();
 			if(stack == null)

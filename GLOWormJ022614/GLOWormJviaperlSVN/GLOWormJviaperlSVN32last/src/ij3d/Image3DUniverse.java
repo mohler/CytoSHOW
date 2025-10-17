@@ -56,6 +56,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -1029,6 +1030,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				resf, 0, color, thresh, channels);
 		return addContent(c, true);
 	}
+	
+	
 
 	/**
 	 * Add the specified image as a new Content to the universe. The specified
@@ -2092,20 +2095,53 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 						univ.ensureScale(range);
 					}
 				}
-//WHY WAS THIS EVER CALLED??				
-//				univ.waitForNextFrame();
-				univ.fireContentAdded(c, updateNow);
-				univ.addUniverseListener(c);
+////WHY WAS THIS EVER CALLED??				
+////				univ.waitForNextFrame();
+//				univ.fireContentAdded(c, updateNow);
+//				univ.addUniverseListener(c);
+//
+//				if (updateNow) {
+//					univ.fireTransformationUpdated();
+//					canvas.revalidate();
+//				}
+//				return c;
+//			}
+//		});
+//	}
+				// NEW BLOCK: Wrap all GUI/Event-Sensitive calls in a single EDT block
+			    try {
+			        EDTExecutor.submit(new Callable<Void>() {
+			            @Override
+			            public Void call() {
+			                // All these calls run SAFELY on the AWT-EventQueue-0 thread
 
-				if (updateNow) {
-					univ.fireTransformationUpdated();
-					canvas.revalidate();
-				}
-				return c;
+			                // This line triggers the initial updateImagePlus() -> getOffScreenCanvas() hang
+			                univ.fireContentAdded(c, updateNow); 
+			                
+			                // This line also contains GUI work and must be kept on the EDT
+			                univ.addUniverseListener(c); 
+
+			                if (updateNow) {
+			                    univ.fireTransformationUpdated();
+			                    canvas.revalidate();
+			                }
+			                return null;
+			            }
+			        }).get(); // Worker thread BLOCKS safely here until the GUI work is done.
+			        
+			    } catch (InterruptedException | ExecutionException e) {
+			        Thread.currentThread().interrupt();
+			        throw new RuntimeException("Error during 3D Content initialization on EDT", e.getCause());
+			    }
+
+			    // The worker thread only continues here AFTER the GUI work is complete.
+			    return c;
 			}
 		});
 	}
-
+			
+			
+		
 	public void addContentLater(String path,  InputStream[] objmtlStreams) {
 		addContentLater(path,objmtlStreams, false);
 	}
@@ -2216,7 +2252,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 						if (!this.contents.containsKey(cName)) {
 							Content content = new Content(cName, cInstants.get(cName), false);
-							if (this.addContent(content, true)!=null) {
+							if (this.addContentLater(content, true)!=null) {
 								content.setLocked(true);
 							}
 						}
@@ -2232,7 +2268,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 					IJ.log(""+" "+meshes.size());
 				IJ.wait(10);
 		}
-//		this.addContent(recentContent, true);
+//		this.addContentLater(recentContent, true);
 		
 //			if (!titleName.contentEquals(".")) {
 //				setTitle((this.flipXonImport?"FlipX_":"")+titleName);
@@ -2301,6 +2337,19 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		return all;
 	}
 
+	public Future<Content> addContentLater(ImagePlus image, Color3f color, String name,
+	        int thresh, boolean[] channels, int resf, int type) {
+	    if(contents.containsKey(name)) {
+	        IJ.error("Content named '" + name + "' exists already");
+	        return null; // or Future that resolves to null
+	    }
+	    Content c = ContentCreator.createContent(name, image, type,
+	            resf, 0, color, thresh, channels);
+	    
+	    // CHANGE IS HERE: Return the Future from the asynchronous core method
+	    return addContentLater(c, true); 
+	}
+	
 	public boolean getFlipXonImport() {
 		return flipXonImport;
 	}

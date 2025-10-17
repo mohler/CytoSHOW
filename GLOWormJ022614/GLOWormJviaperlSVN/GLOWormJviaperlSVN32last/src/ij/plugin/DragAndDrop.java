@@ -154,7 +154,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
                 // For example:
                 // downloadFileFromUrl(droppedUrl);
             } else {
-                System.out.println("The dropped item does not contain a plain text URL.");
+//                System.out.println("The dropped item does not contain a plain text URL.");
             }
 
             if (finalUrl != null) {
@@ -203,7 +203,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
             		// Use the finalUrl variable here
             		System.out.println("Final captured URL: " + finalUrl);
             	} else {
-            		System.out.println("No valid URL found after checking all flavors.\n May be a different message format...checking....");
+//            		System.out.println("No valid URL found after checking all flavors.\n May be a different message format...checking....");
             	}
 
 

@@ -365,7 +365,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		addButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/plusicon.png")));
 		addButton.setFont(buttonPanelFont);
 		tagButtonPanel.add(addButton, fspc);
-//		viewButtonPanel.add(addButton, fspc);
+
 		addButton.addActionListener(imp.getRoiManager());
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
@@ -376,7 +376,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		paintButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/DIYPaintbrush.png")));
 		paintButton.setFont(buttonPanelFont);
 		tagButtonPanel.add(paintButton, fspc);
-//		viewButtonPanel.add(renameButton, fspc);
+
 		paintButton.addActionListener(imp.getRoiManager());
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
@@ -387,7 +387,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		renameButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/editIcon.png")));
 		renameButton.setFont(buttonPanelFont);
 		tagButtonPanel.add(renameButton, fspc);
-//		viewButtonPanel.add(renameButton, fspc);
+
 		renameButton.addActionListener(imp.getRoiManager());
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
@@ -398,7 +398,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		deleteButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/menu_eraser.png")));
 		deleteButton.setFont(buttonPanelFont);
 		tagButtonPanel.add(deleteButton, fspc);
-//		viewButtonPanel.add(deleteButton, fspc);
+
 		deleteButton.addActionListener(imp.getRoiManager());
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
@@ -409,7 +409,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		saveButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/SaveIcon.png")));
 		saveButton.setFont(buttonPanelFont);
 		tagButtonPanel.add(saveButton, fspc);
-//		viewButtonPanel.add(saveButton, fspc);
+
 		saveButton.addActionListener(imp.getRoiManager());
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
@@ -420,7 +420,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		advancedButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/gearIcon.png")));
 		advancedButton.setFont(buttonPanelFont);
 		tagButtonPanel.add(advancedButton, fspc);
-//		viewButtonPanel.add(advancedButton, fspc);
+
 		advancedButton.addActionListener(imp.getRoiManager());
 		fspc.gridy = y++;
 		fspc.weightx = 1.0;
@@ -428,7 +428,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		countLabel = new Label(imp.getRoiManager().textCountLabel.getText(),Label.CENTER);
 		countLabel.setFont(buttonPanelFont);
 		tagButtonPanel.add(countLabel, fspc);
-//		viewButtonPanel.add(countLabel, fspc);
+
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
 		fullSetButton = new JButton();
@@ -438,7 +438,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		fullSetButton.setToolTipText("Refresh Tag Set");
 		fullSetButton.setFont(buttonPanelFont);
 		tagButtonPanel.add(fullSetButton, fspc);
-//		viewButtonPanel.add(fullSetButton, fspc);
+
 		fullSetButton.addActionListener(imp.getRoiManager());
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
@@ -449,7 +449,7 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		hideShowButton.setToolTipText("Showing Tags...click to Hide Tags");
 		hideShowButton.setFont(buttonPanelFont);
 		tagButtonPanel.add(hideShowButton, fspc);
-//		viewButtonPanel.add(hideShowButton, fspc);
+
 		hideShowButton.addActionListener(imp.getRoiManager());
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
@@ -460,19 +460,8 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		flattenTagsButton.setToolTipText("Flatten Tags into Image");
 		flattenTagsButton.setFont(buttonPanelFont);
 		tagButtonPanel.add(flattenTagsButton, fspc);
-//		viewButtonPanel.add(flattenTagsButton, fspc);
 		flattenTagsButton.addActionListener(imp.getRoiManager());
-//		fspc.gridy = y++;
-//		fspc.weighty = 0.5;
-//		sketch3DButton = new JButton();
-//		sketch3DButton.setActionCommand("Sketch\n3D");
-//		sketch3DButton.setName("Sketch\n3D");
-//		sketch3DButton.setIcon(new ImageIcon(ImageWindow.class.getResource("images/3D_47973.gif")));
-//		sketch3DButton.setToolTipText("Sketch3D");
-//		sketch3DButton.setFont(buttonPanelFont);
-//		tagButtonPanel.add(sketch3DButton, fspc);
-////		viewButtonPanel.add(sketch3DButton, fspc);
-//		sketch3DButton.addActionListener(imp.getRoiManager());
+
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
 		sketchVVButton = new JButton();
@@ -482,7 +471,6 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		sketchVVButton.setToolTipText("SketchVV");
 		sketchVVButton.setFont(buttonPanelFont);
 		tagButtonPanel.add(sketchVVButton, fspc);
-//		viewButtonPanel.add(sketch3DButton, fspc);
 		sketchVVButton.addActionListener(imp.getRoiManager());
 		
 //		
@@ -497,7 +485,6 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 		JLabel viewing = new JLabel();
 		viewing.setIcon(new ImageIcon(ImageWindow.class.getResource("images/TVviewSmall.png")));
 		viewing.setToolTipText("These buttons help you adjust your view of the scene...");
-//		viewButtonPanel.add(viewing, vspc);
 		fspc.gridy = y++;
 		fspc.weighty = 0.5;
 		fspc.fill = GridBagConstraints.BOTH;

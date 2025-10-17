@@ -94,9 +94,9 @@ public class SaveSession {
 		while((c = sase.readContent(in)) != null) {
 			// TODO
 			c.setPointListDialog(univ.getPointListDialog());
-			univ.addContent(c, false);
+			univ.addContentLater(c, false);
 		}
-		univ.addContent(c, true);
+		univ.addContentLater(c, true);
 
 		in.close();
 		sase.apply(view, univ);

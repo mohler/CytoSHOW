@@ -226,8 +226,9 @@ public class RoiDecoder {
 				getStrokeWidthAndColor(roi, hdr2Offset);
 			
 			scaledRoi.copyAttributes(roi);
-			scaledRoi.setPosition(roi.getImage(), position);
-			if (channel>0 || slice>0 || frame>0)
+			if (roi.getImage()!=null){
+				scaledRoi.setPosition(roi.getImage(), position);
+			} else if (channel>0 || slice>0 || frame>0)
 				scaledRoi.setPosition(channel, slice, frame);
 			decodeOverlayOptions(scaledRoi, version, options, overlayLabelColor, overlayFontSize);
 			return scaledRoi;

@@ -196,7 +196,7 @@ public class IJ3dExecuter {
 		if(c == null)
 			return null;
 
-		univ.addContent(c, true);
+		univ.addContentLater(c, true);
 
 		// record
 		String title = gui.getFile() != null ?

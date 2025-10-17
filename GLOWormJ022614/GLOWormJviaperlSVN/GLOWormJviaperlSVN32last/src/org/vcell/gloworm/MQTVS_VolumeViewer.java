@@ -32,6 +32,7 @@ import ij3d.ColorTable;
 import ij3d.Content;
 import ij3d.Image3DUniverse;
 import ij3d.ImageJ3DViewer;
+import ij3d.ImageWindow3D;
 import isosurface.MeshExporter;
 
 
@@ -44,17 +45,18 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 	public void run(String arg) {
 		String cellName = arg;
 		ImagePlus imp = IJ.getImage();
-		runVolumeViewer(imp, cellName, null, false, new Image3DUniverse(), null, null);
+		runVolumeViewer(imp, cellName, null, false, new Image3DUniverse(), null, "");
 	}
 	
 	public void runVolumeViewer(ImagePlus imp, String cellName, String assignedColorString, Image3DUniverse univ) {
-		runVolumeViewer(imp, cellName, assignedColorString, false, univ, null, null);
+		runVolumeViewer(imp, cellName, assignedColorString, false, univ, null, "");
 	}
 	
 	public void runVolumeViewer(ImagePlus imp, String cellName, String assignedColorString, Image3DUniverse univ, String outDir) {
-		runVolumeViewer(imp, cellName, assignedColorString, false, univ, outDir, null);
+		runVolumeViewer(imp, cellName, assignedColorString, false, univ, outDir, "");
 	}
-	public void runVolumeViewer(ImagePlus imp, String cellName, String assignedColorString, boolean saveSingly, Image3DUniverse univ, String outDir, String scaleShiftString) {
+	public void runVolumeViewer(ImagePlus imp, String cellName, String assignedColorString, 
+			boolean saveSingly, Image3DUniverse univ, String outDir, String scaleShiftString) {
 		boolean singleSave = IJ.shiftKeyDown() || saveSingly;
 		if (univ == null){
 			if (this.univ == null){	
@@ -62,6 +64,7 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 			}
 			univ = this.univ;
 		}
+		final Image3DUniverse finalUniv = univ;
 		if (!saveSingly && univ.getWindow() == null){
 			univ.show(false);
 			univ.getWindow().addWindowListener(this);
@@ -114,7 +117,11 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 			impDup = null;
 			if (imp.getRoiManager().getSelectedRoisAsArray().length == 0){  //??????WHY??????
 //				duperString = duper.showHSDialog(imp, imp.getTitle()+"_DUP");
+
+
 				impDup = duper.duplicateHyperstack(imp, imp.getTitle()+"_DUP", false);
+							
+				
 				if (impDup !=null)
 					impDup.hide();
 			}
@@ -124,207 +131,139 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 
 			
 			if (impDup!=null){
-				
-				
-				for (int ch=duper.getFirstC(); ch<=duper.getLastC(); ch++) {
-					imp.setRoi(impRoi);
-					ImagePlus impD = SubHyperstackMaker.makeSubhyperstack(impDup, ""+ch, "1-"+impDup.getNSlices(), "1-"+impDup.getNFrames());
-					impD.setTitle(impD.getTitle()+"_"+ch);
-//					impD.show();
-					impD.setRoi(0, 0, impD.getWidth(), impD.getHeight());
 
-					Color white = Colors.decode("#ff229900", Color.white);
-
-					Color channelColor = assignedColorString!=null?Colors.decode(assignedColorString, null):null;
-					if (channelColor == null) {
-						channelColor = imp instanceof CompositeImage?((CompositeImage)imp).getChannelColor(ch-1):white;
-						if (channelColor == Color.black)
-							channelColor = white;
-						if (cellName != "" && imp.getMotherImp().getRoiManager().getColorLegend() != null)
-							channelColor = imp.getMotherImp().getRoiManager().getColorLegend().getBrainbowColors().get(cellName.split(" =")[0].split(" \\|")[0].toLowerCase());
-						if (channelColor == null)
-							channelColor = white;
-					}
-					int binFactor = 2;
-					double scaleFactor  = 1.0;
-					int threshold = 90;
-					if (imp.getTitle().startsWith("SVV")) {
-						binFactor = 1;
-						scaleFactor  = 0.1;
-						if (!(imp.getMotherImp().getTitle().contains("SW_") || imp.getMotherImp().getTitle().contains("RGB_")))
-							scaleFactor  = 1;
-						threshold = 1;
-					}
-					if (impD.getBitDepth()!=8){
-
-						IJ.run(impD, "8-bit", "");
-					}
-					String objectName = cellName;
-					if (objectName =="")
-						objectName = impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_");
-
-					Hashtable<String, Content> contents = univ.getContentsHT();
-					univ.addContent(impD, new Color3f(channelColor), objectName, threshold, new boolean[]{true, true, true}, binFactor, Content.SURFACE);
-					univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)), true);
-					Content sel = univ.getSelected();
-					try {
-						float r = Integer.parseInt(""+channelColor.getRed()) / 256f;
-						float g = Integer.parseInt(""+channelColor.getGreen()) / 256f;
-						float b = Integer.parseInt(""+channelColor.getBlue()) / 256f;
-						if(univ != null && univ.getSelected() != null) {
-							sel.setColor(new Color3f(r, g, b));
-						}
-					} catch(NumberFormatException e) {
-						sel.setColor(null);
-					}
-					univ.getSelected().setLocked(true);
-					if (singleSave) {
-						Hashtable<String, Content> newestContent = new Hashtable<String, Content>();
-						newestContent.put(""+objectName, univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
-						MeshExporter.saveAsWaveFront(newestContent.values(), new File(((outDir==null?IJ.getDirectory("home"):outDir)+File.separator+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"+objectName.replaceAll(":","").replaceAll("(/|\\s+)","")+"_"+ch+"_"+0+".obj")), univ.getStartTime(), univ.getEndTime(), true);
-						univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)), true);
-						univ.getSelected().setLocked(false);
-						univ.removeContent(univ.getSelected().getName(), true);
-					}
-//					for (Object content:contents.values()){
-//						if (((Content)content).getName() != objectName){
-//							((Content)content).setVisible(false);
-//						}
-//					}
-
-					IJ.setTool(ij.gui.Toolbar.HAND);
-					if (impD != imp){
-						impD.changes = false;
-						if (impD.getWindow() != null)
-							impD.getWindow().close();
-//						impD.flush();
-					}
-
-				}
-				if (impDup != imp){
-					impDup.changes = false;
-					if (impDup.getWindow() != null)
-						impDup.getWindow().close();
-//					impDup.flush();
-				}
-				ImageJ3DViewer.select(null);
-				IJ.getInstance().toFront();
-			} else {  
-				for (int tpt = (singleSave?duper.getFirstT():0); tpt<=(singleSave?duper.getLastT():0); tpt = tpt+(singleSave?duper.getStepT():1)) {
-					for (int ch=duper.getFirstC(); ch<=duper.getLastC(); ch++) {
-						imp.setRoi(impRoi);
-						ImagePlus impD = imp;
-						if (!imp.getTitle().startsWith("SVV")){
-							impD = duper.run(imp, ch, ch, duper.getFirstZ(), duper.getLastZ(), singleSave?tpt:duper.getFirstT(), singleSave?tpt:duper.getLastT(), singleSave?1:duper.getStepT(), false, msec);
-//							impD.show();
-							impD.setTitle(imp.getShortTitle()+"_DUP_"+ch+"_"+tpt);
-							impD.changes = false;
-						}
-						Color white = Colors.decode("#ff229900", Color.white);
-
-						Color channelColor = assignedColorString!=null?Colors.decode(assignedColorString, null):null;
-						if (channelColor == null) {
-							channelColor = imp instanceof CompositeImage?((CompositeImage)imp).getChannelColor(ch-1):white;
-							if (channelColor == Color.black)
-								channelColor = white;
-							if (cellName != "" && imp.getMotherImp().getRoiManager().getColorLegend() != null)
-								channelColor = imp.getMotherImp().getRoiManager().getColorLegend().getBrainbowColors().get(cellName.split(" =")[0].split(" \\|")[0].toLowerCase());
-							if (channelColor == null)
-								channelColor = white;
-						}
-						int binFactor = 2;
-						double scaleFactor  = 1.0;
-						int threshold = 90;
-						if (imp.getTitle().startsWith("SVV")) {
-							binFactor = 1;
-							scaleFactor  = 0.1;
-							if (!(imp.getMotherImp().getTitle().contains("SW_") || imp.getMotherImp().getTitle().contains("RGB_")))
-								scaleFactor  = 1;
-							threshold = 1;
-						}
-						//NOW HANDLE SCALING BEFORE CALL TO HIS METHOD					
-						//					IJ.run(impD, "Scale...", "x="+(scaleFactor)+" y="+(scaleFactor)+" z=1.0 interpolation=Bicubic average process create" );
-						//					ImagePlus impDS = IJ.getImage();
-						//					impD = impDS;
-						if (impD.getBitDepth()!=8){
-							IJ.run(impD, "8-bit", "");
-						}
-						String objectName = cellName;
-						if (objectName =="")
-							objectName = impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_");
-						//					impD.show();
-						Hashtable<String, Content> contents = univ.getContentsHT();
-
-//						IJ.save(impD, "/Users/wmohler/Documents/testingStuff/"+ objectName +"impD.tif");
-						String[] scaleShifts = scaleShiftString.split("\\|");
-						boolean rotate90Y = (scaleShifts.length>6) && !scaleShifts[6].equals("0");
-//  THIS NEXT BLOCK DOES AN reslice and then flips the reslice stack to give proper 90°-Y rotation relative to impD						
-						if (rotate90Y) {
-							Slicer sketchImpSlicer = new Slicer();
-							ImagePlus flipLeftSketchImp = sketchImpSlicer.reslice(impD);
-							(new StackReverser()).flipStack(flipLeftSketchImp);
-							flipLeftSketchImp.setTitle(impD.getTitle()+"flip");
-////							IJ.save(flipLeftSketchImp, "/Users/wmohler/Documents/testingStuff/"+ objectName +"flipLeftSketchImp.tif");
-//							IJ.log("drawn... " +impD.toString());
-//							IJ.log("flipped... " +flipLeftSketchImp.toString());
-							impD= flipLeftSketchImp;
-						}
-//
-						impD.setMotherImp(imp, imp.getID());
-						univ.addContent(impD, new Color3f(channelColor), objectName, threshold, new boolean[]{true, true, true}, binFactor, Content.SURFACE);
-						univ.select(univ.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)), true);
-						Content sel = univ.getSelected();
-						while (sel==null){
-							IJ.wait(100);
-						}
+				javax.swing.SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
 						try {
-							float r = Integer.parseInt(""+channelColor.getRed()) / 256f;
-							float g = Integer.parseInt(""+channelColor.getGreen()) / 256f;
-							float b = Integer.parseInt(""+channelColor.getBlue()) / 256f;
-							if(univ != null && univ.getSelected() != null) {
-								sel.setColor(new Color3f(r, g, b));
-							}
-						} catch(NumberFormatException e) {
-							sel.setColor(null);
-						}
-						while (univ.getSelected()==null){
-							IJ.wait(100);
-						}
-						univ.getSelected().setLocked(true);
-						
-//						univ.show(false);
-						
-						if (singleSave) {
-							Hashtable<String, Content> newestContent = new Hashtable<String, Content>();
-							newestContent.put(""+objectName, univ.getContent((""+objectName)));
-							MeshExporter.saveAsWaveFront(newestContent.values(), 
-															new File(((outDir==null?IJ.getDirectory("home"):outDir)+File.separator
-																	+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"
-																	+"_"+ch+"_"+tpt+".obj")), 
-															univ.getStartTime(), 
-															univ.getEndTime(),
-															scaleShiftString, true);
-						}
-						for (Object content:contents.values()){
-							if (((Content)content).getName() != objectName){
-								((Content)content).setVisible(false);
-								univ.removeContent(objectName, true);
-							}
-						}
+							// NOW, place the ENTIRE image processing and content addition loop here.
+							// The outer thread will not execute this until the EDT is free (i.e., after the dialog).
 
-						IJ.setTool(ij.gui.Toolbar.HAND);
-						if (impD != imp && impD!=null && impD.getWindow()!=null){
-							impD.changes = false;
-							impD.getWindow().close();
-//							impD.flush();
+							// Loop over ch and add content				
+							for (int ch=duper.getFirstC(); ch<=duper.getLastC(); ch++) {
+								imp.setRoi(impRoi);
+								ImagePlus impD = SubHyperstackMaker.makeSubhyperstack(impDup, ""+ch, "1-"+impDup.getNSlices(), "1-"+impDup.getNFrames());
+								impD.setTitle(impD.getTitle()+"_"+ch);
+								//					impD.show();
+								impD.setRoi(0, 0, impD.getWidth(), impD.getHeight());
+
+								Color white = Colors.decode("#ff229900", Color.white);
+
+								Color channelColor = assignedColorString!=null?Colors.decode(assignedColorString, null):null;
+								if (channelColor == null) {
+									channelColor = imp instanceof CompositeImage?((CompositeImage)imp).getChannelColor(ch-1):white;
+									if (channelColor == Color.black)
+										channelColor = white;
+									if (cellName != "" && imp.getMotherImp().getRoiManager().getColorLegend() != null)
+										channelColor = imp.getMotherImp().getRoiManager().getColorLegend().getBrainbowColors().get(cellName.split(" =")[0].split(" \\|")[0].toLowerCase());
+									if (channelColor == null)
+										channelColor = white;
+								}
+								int binFactor = 2;
+								double scaleFactor  = 1.0;
+								int threshold = 90;
+								if (imp.getTitle().startsWith("SVV")) {
+									binFactor = 1;
+									scaleFactor  = 0.1;
+									if (!(imp.getMotherImp().getTitle().contains("SW_") || imp.getMotherImp().getTitle().contains("RGB_")))
+										scaleFactor  = 1;
+									threshold = 1;
+								}
+								if (impD.getBitDepth()!=8){
+
+									IJ.run(impD, "8-bit", "");
+								}
+								String objectName = cellName;
+								if (objectName =="")
+									objectName = impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_");
+
+								Hashtable<String, Content> contents = finalUniv.getContentsHT();
+								finalUniv.addContentLater(impD, new Color3f(channelColor), objectName, threshold, new boolean[]{true, true, true}, binFactor, Content.SURFACE);
+								finalUniv.select(finalUniv.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)), true);
+								Content sel = finalUniv.getSelected();
+								try {
+									float r = Integer.parseInt(""+channelColor.getRed()) / 256f;
+									float g = Integer.parseInt(""+channelColor.getGreen()) / 256f;
+									float b = Integer.parseInt(""+channelColor.getBlue()) / 256f;
+									if(finalUniv != null && finalUniv.getSelected() != null) {
+										sel.setColor(new Color3f(r, g, b));
+									}
+								} catch(NumberFormatException e) {
+									sel.setColor(null);
+								}
+								if (finalUniv.getSelected()!= null)
+									finalUniv.getSelected().setLocked(true);
+								if (singleSave) {
+									Hashtable<String, Content> newestContent = new Hashtable<String, Content>();
+									newestContent.put(""+objectName, finalUniv.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
+									MeshExporter.saveAsWaveFront(newestContent.values(), new File(((outDir==null?IJ.getDirectory("home"):outDir)+File.separator+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"+objectName.replaceAll(":","").replaceAll("(/|\\s+)","")+"_"+ch+"_"+0+".obj")), finalUniv.getStartTime(), finalUniv.getEndTime(), true);
+									finalUniv.select(finalUniv.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)), true);
+									finalUniv.getSelected().setLocked(false);
+									finalUniv.removeContent(finalUniv.getSelected().getName(), true);
+								}
+								//					for (Object content:contents.values()){
+								//						if (((Content)content).getName() != objectName){
+								//							((Content)content).setVisible(false);
+								//						}
+								//					}
+
+								IJ.setTool(ij.gui.Toolbar.HAND);
+								if (impD != imp){
+									impD.changes = false;
+									if (impD.getWindow() != null)
+										impD.getWindow().close();
+									//						impD.flush();
+								}
+
+							}
+							if (impDup != imp){
+								impDup.changes = false;
+								if (impDup.getWindow() != null)
+									impDup.getWindow().close();
+								//					impDup.flush();
+							}
+							ImageJ3DViewer.select(null);
+							IJ.getInstance().toFront();
+						} catch (Exception e) {
+							// Handle the exception
+							e.printStackTrace();
+						} finally {
+							if (impDup != imp){
+								impDup.changes = false;
+								// Be careful with objects that might be null if the exception happened early
+								if (impDup != null && impDup.getWindow() != null) 
+									impDup.getWindow().close();
+							}
 						}
 					}
-				}
+				});
+			} else {  
+
+
 			}
 
 			if (!imp.getTitle().startsWith("SVV")) {
-				imp.getWindow().setVisible(true);
-				imp.getWindow().setAlwaysOnTop(false);
+				
+		        // Ensure the dialog creation is executed on the Event Dispatch Thread (EDT)
+		        // This is a much safer way to handle GUI element creation.
+				javax.swing.SwingUtilities.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							// Call the method that creates the AWT dialog.
+							// This code will now run on the AWT-EventQueue-0 thread,
+							// which is where AWT Tree Lock operations should be serialized.
+
+							imp.getWindow().setVisible(true);
+							imp.getWindow().setAlwaysOnTop(false);
+
+						} catch (Exception e) {
+							// Handle any exceptions during dialog show
+							e.printStackTrace();
+						}
+					}
+				});
+				
 			}
 //			ImageJ3DViewer.select(null);
 //			IJ.getInstance().toFront();

@@ -72,6 +72,7 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 	protected ErrorListener error_listener;
 	protected Toolbar toolbar;
 	protected Image3DMenubar menubar;
+	private volatile boolean initializingGraphics = false; // The Guard Flag
 
 
 	public ImageWindow3D(String title, DefaultUniverse universe) {
@@ -582,10 +583,29 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 	}
 
 	public void updateImagePlus() {
-		int id = this.imp.getID();
-		this.imp = getNewImagePlus();
-		imp_updater.update();
-		this.imp.setWindow(this);
+	    // 1. Check the Guard Flag
+	    if (initializingGraphics) {
+	        // We are already inside this method. Exit to prevent recursion and the hang.
+	        System.err.println("DEBUG: Preventing recursive call to updateImagePlus()");
+	        return;
+	    }
+
+	    try {
+	        // 2. Set the Guard Flag to true
+	        initializingGraphics = true;
+	        
+	        // Original logic starts here:
+	        int id = this.imp.getID();
+	        this.imp = getNewImagePlus(); // Contains the problematic J3D call
+	        imp_updater.update();
+	        this.imp.setWindow(this); // Can trigger AWT validation/resize events
+	        
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    } finally {
+	        // 3. ALWAYS clear the flag
+	        initializingGraphics = false;
+	    }
 	}
 
 	public void updateImagePlusAndWait() {
@@ -786,8 +806,30 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 	}
 
 	public void canvasResized() {
-		updateImagePlus();
+		// 1. Check the Guard Flag at the highest-level event entry
+		if (initializingGraphics) {
+			// We are already running an update initiated by a resize event.
+			// Exit this recursive/second event to prevent the deadlock.
+			System.err.println("DEBUG: Preventing recursive call to canvasResized()");
+			return; 
+		}
+
+		try {
+			// 2. Set the Guard Flag to true
+			initializingGraphics = true;
+
+			// This is the original content of canvasResized,
+			// which includes the call to your guarded updateImagePlus()
+
+			// Example: universe.fireCanvasResized(); // Often happens before updateImagePlus
+			updateImagePlus(); 
+
+		} finally {
+			// 3. ALWAYS clear the flag
+			initializingGraphics = false;
+		}
 	}
+	
 	
 //	/** Override Container getInsets() to avoid ic, imp, etc... */
 //	@Override
