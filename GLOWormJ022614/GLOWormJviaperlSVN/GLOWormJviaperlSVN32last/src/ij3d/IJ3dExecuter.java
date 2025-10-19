@@ -294,7 +294,8 @@ public class IJ3dExecuter {
 		obj_file = new File(obj_file.getParent()+ File.separator + obj_file.getName().replace(" ", "_"));
 		if(obj_file == null)
 			return;
-		MeshExporter.saveAsWaveFront(univ.getListOrderedSelectedContents(), obj_file, univ.getStartTime(), univ.getEndTime(), oneFile);
+//		MeshExporter.saveAsWaveFront(univ.getListOrderedSelectedContents(), obj_file, univ.getStartTime(), univ.getEndTime(), oneFile);
+		MeshExporter.saveAsWaveFront(univ.getContents(), obj_file, univ.getStartTime(), univ.getEndTime(), oneFile);
 		saveColorLegend(obj_file);
 		record(EXPORT, "WaveFront", obj_file.getAbsolutePath());
 	}

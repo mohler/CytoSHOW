@@ -296,7 +296,8 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 
 	
 	public void windowClosed(WindowEvent e) {
-		univ.getWindow().removeWindowListener(this);
+		if (univ!=null && univ.getWindow()!=null)
+			univ.getWindow().removeWindowListener(this);
 		impDup.getWindow().dispose();
 		impDup.flush();
 		//I don't think this is really cleaning up memory...

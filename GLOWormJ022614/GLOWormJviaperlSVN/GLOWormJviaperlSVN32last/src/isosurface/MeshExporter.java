@@ -120,8 +120,8 @@ public class MeshExporter {
 				} 
 				catch (Exception e) {}
 			} catch (IOException e) {
-//				IJ.log("Some error ocurred while saving to wavefront:\n" + e);
-//				e.printStackTrace();
+				IJ.log("Some error ocurred while saving to wavefront:\n" + e);
+				e.printStackTrace();
 			} finally {
 				try { if (null != dos_obj) dos_obj.close(); } catch (Exception e) {}
 				try { if (null != dos_mtl) dos_mtl.close(); } catch (Exception e) {}

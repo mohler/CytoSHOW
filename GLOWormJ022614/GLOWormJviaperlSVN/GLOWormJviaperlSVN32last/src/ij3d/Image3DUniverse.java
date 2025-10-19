@@ -2037,9 +2037,18 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				//			t.set(aa);
 				//			c.setTransform(t);
 
+				
 				this.contents.put(name, c);
 				this.recalculateGlobalMinMax(c);
 
+
+				for (ContentInstant ci: this.contents.get(name).getInstants().values()) {
+					String ciName = ci.getName();
+						if (!c3dm.getListModel().contains(ciName))
+							c3dm.addContentInstant(ci);	
+					
+				}
+	
 				c.setPointListDialog(plDialog);
 
 				c.showTimepoint(currentTimepoint, true);
@@ -2095,19 +2104,6 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 						univ.ensureScale(range);
 					}
 				}
-////WHY WAS THIS EVER CALLED??				
-////				univ.waitForNextFrame();
-//				univ.fireContentAdded(c, updateNow);
-//				univ.addUniverseListener(c);
-//
-//				if (updateNow) {
-//					univ.fireTransformationUpdated();
-//					canvas.revalidate();
-//				}
-//				return c;
-//			}
-//		});
-//	}
 				// NEW BLOCK: Wrap all GUI/Event-Sensitive calls in a single EDT block
 			    try {
 			        EDTExecutor.submit(new Callable<Void>() {

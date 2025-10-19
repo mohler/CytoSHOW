@@ -586,7 +586,7 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 	    // 1. Check the Guard Flag
 	    if (initializingGraphics) {
 	        // We are already inside this method. Exit to prevent recursion and the hang.
-	        System.err.println("DEBUG: Preventing recursive call to updateImagePlus()");
+//	        System.err.println("DEBUG: Preventing recursive call to updateImagePlus()");
 	        return;
 	    }
 
@@ -810,7 +810,7 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 		if (initializingGraphics) {
 			// We are already running an update initiated by a resize event.
 			// Exit this recursive/second event to prevent the deadlock.
-			System.err.println("DEBUG: Preventing recursive call to canvasResized()");
+//			System.err.println("DEBUG: Preventing recursive call to canvasResized()");
 			return; 
 		}
 
