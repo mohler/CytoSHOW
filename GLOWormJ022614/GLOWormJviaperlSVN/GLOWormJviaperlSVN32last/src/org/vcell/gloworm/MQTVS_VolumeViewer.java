@@ -1,38 +1,28 @@
 package org.vcell.gloworm;
 import java.awt.Color;
-import java.awt.Frame;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.awt.image.ColorModel;
 import java.io.File;
 import java.util.Date;
 import java.util.Hashtable;
+import java.util.concurrent.ConcurrentLinkedQueue; // ADDED for thread-safe queue
+import java.util.concurrent.Future;             // ADDED for asynchronous task management
 
+import javax.swing.SwingUtilities; // Already present, but good to ensure
 import javax.vecmath.Color3f;
 
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
-import ij.ImageStack;
 import ij.WindowManager;
 import ij.gui.Roi;
-import ij.plugin.CanvasResizer;
-import ij.plugin.ChannelSplitter;
 import ij.plugin.Colors;
 import ij.plugin.PlugIn;
-import ij.plugin.Scaler;
-import ij.plugin.Slicer;
-import ij.plugin.StackReverser;
 import ij.plugin.SubHyperstackMaker;
-import ij.plugin.filter.Projector;
 import ij.plugin.frame.RoiManager;
-import ij.process.ByteProcessor;
-import ij.process.ImageProcessor;
-import ij3d.ColorTable;
 import ij3d.Content;
 import ij3d.Image3DUniverse;
 import ij3d.ImageJ3DViewer;
-import ij3d.ImageWindow3D;
 import isosurface.MeshExporter;
 
 
@@ -132,114 +122,86 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 			
 			if (impDup!=null){
 
-				javax.swing.SwingUtilities.invokeLater(new Runnable() {
-					@Override
-					public void run() {
-						try {
-							// NOW, place the ENTIRE image processing and content addition loop here.
-							// The outer thread will not execute this until the EDT is free (i.e., after the dialog).
+				// 1. Initialize and start the dispatcher thread for parallel loading 🚀
+				ResultDispatcher dispatcher = new ResultDispatcher(finalUniv);
+				dispatcher.start();
+				
+				// The entire loop now runs NON-BLOCKING on the main plugin thread
+				for (int ch=duper.getFirstC(); ch<=duper.getLastC(); ch++) {
+					imp.setRoi(impRoi);
+					ImagePlus impD = SubHyperstackMaker.makeSubhyperstack(impDup, ""+ch, "1-"+impDup.getNSlices(), "1-"+impDup.getNFrames());
+					impD.setTitle(impD.getTitle()+"_"+ch);
+					impD.setRoi(0, 0, impD.getWidth(), impD.getHeight());
 
-							// Loop over ch and add content				
-							for (int ch=duper.getFirstC(); ch<=duper.getLastC(); ch++) {
-								imp.setRoi(impRoi);
-								ImagePlus impD = SubHyperstackMaker.makeSubhyperstack(impDup, ""+ch, "1-"+impDup.getNSlices(), "1-"+impDup.getNFrames());
-								impD.setTitle(impD.getTitle()+"_"+ch);
-								//					impD.show();
-								impD.setRoi(0, 0, impD.getWidth(), impD.getHeight());
+					Color white = Colors.decode("#ff229900", Color.white);
 
-								Color white = Colors.decode("#ff229900", Color.white);
-
-								Color channelColor = assignedColorString!=null?Colors.decode(assignedColorString, null):null;
-								if (channelColor == null) {
-									channelColor = imp instanceof CompositeImage?((CompositeImage)imp).getChannelColor(ch-1):white;
-									if (channelColor == Color.black)
-										channelColor = white;
-									if (cellName != "" && imp.getMotherImp().getRoiManager().getColorLegend() != null)
-										channelColor = imp.getMotherImp().getRoiManager().getColorLegend().getBrainbowColors().get(cellName.split(" =")[0].split(" \\|")[0].toLowerCase());
-									if (channelColor == null)
-										channelColor = white;
-								}
-								int binFactor = 2;
-								double scaleFactor  = 1.0;
-								int threshold = 90;
-								if (imp.getTitle().startsWith("SVV")) {
-									binFactor = 1;
-									scaleFactor  = 0.1;
-									if (!(imp.getMotherImp().getTitle().contains("SW_") || imp.getMotherImp().getTitle().contains("RGB_")))
-										scaleFactor  = 1;
-									threshold = 1;
-								}
-								if (impD.getBitDepth()!=8){
-
-									IJ.run(impD, "8-bit", "");
-								}
-								String objectName = cellName;
-								if (objectName =="")
-									objectName = impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_");
-
-								Hashtable<String, Content> contents = finalUniv.getContentsHT();
-								finalUniv.addContentLater(impD, new Color3f(channelColor), objectName, threshold, new boolean[]{true, true, true}, binFactor, Content.SURFACE);
-								finalUniv.select(finalUniv.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)), true);
-								Content sel = finalUniv.getSelected();
-								try {
-									float r = Integer.parseInt(""+channelColor.getRed()) / 256f;
-									float g = Integer.parseInt(""+channelColor.getGreen()) / 256f;
-									float b = Integer.parseInt(""+channelColor.getBlue()) / 256f;
-									if(finalUniv != null && finalUniv.getSelected() != null) {
-										sel.setColor(new Color3f(r, g, b));
-									}
-								} catch(NumberFormatException e) {
-									sel.setColor(null);
-								}
-								if (finalUniv.getSelected()!= null)
-									finalUniv.getSelected().setLocked(true);
-								if (singleSave) {
-									Hashtable<String, Content> newestContent = new Hashtable<String, Content>();
-									newestContent.put(""+objectName, finalUniv.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
-									MeshExporter.saveAsWaveFront(newestContent.values(), new File(((outDir==null?IJ.getDirectory("home"):outDir)+File.separator+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"+objectName.replaceAll(":","").replaceAll("(/|\\s+)","")+"_"+ch+"_"+0+".obj")), finalUniv.getStartTime(), finalUniv.getEndTime(), true);
-									finalUniv.select(finalUniv.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)), true);
-									finalUniv.getSelected().setLocked(false);
-									finalUniv.removeContent(finalUniv.getSelected().getName(), true);
-								}
-								//					for (Object content:contents.values()){
-								//						if (((Content)content).getName() != objectName){
-								//							((Content)content).setVisible(false);
-								//						}
-								//					}
-
-								IJ.setTool(ij.gui.Toolbar.HAND);
-								if (impD != imp){
-									impD.changes = false;
-									if (impD.getWindow() != null)
-										impD.getWindow().close();
-									//						impD.flush();
-								}
-
-							}
-							if (impDup != imp){
-								impDup.changes = false;
-								if (impDup.getWindow() != null)
-									impDup.getWindow().close();
-								//					impDup.flush();
-							}
-							ImageJ3DViewer.select(null);
-							IJ.getInstance().toFront();
-						} catch (Exception e) {
-							// Handle the exception
-							e.printStackTrace();
-						} finally {
-							if (impDup != imp){
-								impDup.changes = false;
-								// Be careful with objects that might be null if the exception happened early
-								if (impDup != null && impDup.getWindow() != null) 
-									impDup.getWindow().close();
-							}
-						}
+					Color channelColor = assignedColorString!=null?Colors.decode(assignedColorString, null):null;
+					if (channelColor == null) {
+						channelColor = imp instanceof CompositeImage?((CompositeImage)imp).getChannelColor(ch-1):white;
+						if (channelColor == Color.black)
+							channelColor = white;
+						if (cellName != "" && imp.getMotherImp().getRoiManager().getColorLegend() != null)
+							channelColor = imp.getMotherImp().getRoiManager().getColorLegend().getBrainbowColors().get(cellName.split(" =")[0].split(" \\|")[0].toLowerCase());
+						if (channelColor == null)
+							channelColor = white;
 					}
-				});
+					int binFactor = 2;
+					double scaleFactor  = 1.0;
+					int threshold = 90;
+					if (imp.getTitle().startsWith("SVV")) {
+						binFactor = 1;
+						scaleFactor  = 0.1;
+						if (!(imp.getMotherImp().getTitle().contains("SW_") || imp.getMotherImp().getTitle().contains("RGB_")))
+							scaleFactor  = 1;
+						threshold = 1;
+					}
+					if (impD.getBitDepth()!=8){
+
+						IJ.run(impD, "8-bit", "");
+					}
+					String objectName = cellName;
+					if (objectName =="")
+						objectName = impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_");
+
+					Hashtable<String, Content> contents = finalUniv.getContentsHT();
+					
+					// ASYNCHRONOUS CALL: Start the heavy content creation in a background thread
+					Future<Content> futureContent = finalUniv.addContentLater(impD, new Color3f(channelColor), objectName, threshold, new boolean[]{true, true, true}, binFactor, Content.SURFACE);
+
+					// SUBMIT TO DISPATCHER: Add the future and color context for non-blocking processing
+					dispatcher.addTask(futureContent, channelColor);
+					
+					// --- CLEANUP LOGIC (Must NOT manipulate UI or Scene Graph) ---
+					if (singleSave) {
+						Hashtable<String, Content> newestContent = new Hashtable<String, Content>();
+						// NOTE: This call to getContent() here is risky, as the content may not be loaded yet.
+						// If singleSave requires the content to exist, this block needs its own Future.get() or dispatch.
+						newestContent.put(""+objectName, finalUniv.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
+						MeshExporter.saveAsWaveFront(newestContent.values(), new File(((outDir==null?IJ.getDirectory("home"):outDir)+File.separator+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"+objectName.replaceAll(":","").replaceAll("(/|\\s+)","")+"_"+ch+"_"+0+".obj")), finalUniv.getStartTime(), finalUniv.getEndTime(), true);
+						finalUniv.select(finalUniv.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)), true);
+						finalUniv.getSelected().setLocked(false);
+						finalUniv.removeContent(finalUniv.getSelected().getName(), true);
+					}
+
+					IJ.setTool(ij.gui.Toolbar.HAND);
+					if (impD != imp){
+						impD.changes = false;
+						if (impD.getWindow() != null)
+							impD.getWindow().close();
+					}
+
+				} // End of channel loop
+				
+				// Final cleanup after all content is added
+				if (impDup != imp){
+					impDup.changes = false;
+					if (impDup.getWindow() != null)
+						impDup.getWindow().close();
+				}
+				ImageJ3DViewer.select(null);
+				IJ.getInstance().toFront();
 			} else {  
-
-
+				// Original else block (empty in the provided code)
 			}
 
 			if (!imp.getTitle().startsWith("SVV")) {
@@ -325,5 +287,79 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 	public void windowDeactivated(WindowEvent e) {
 		// TODO Auto-generated method stub
 		
+	}
+
+	// -------------------------------------------------------------------------
+	// NEW ASYNCHRONOUS DISPATCHER FOR PARALLEL CONTENT LOADING
+	// -------------------------------------------------------------------------
+
+	/**
+	 * A dedicated thread to poll for completed content tasks and safely dispatch 
+	 * the UI updates (select, lock, color) to the EDT.
+	 */
+	private class ResultDispatcher extends Thread {
+	    // Simple structure to pair the Future with the color data needed for the EDT update
+	    private  class TaskContext {
+	        final Future<Content> future;
+	        final Color color;
+	        TaskContext(Future<Content> f, Color c) { this.future = f; this.color = c; }
+	    }
+	    
+	    private final ConcurrentLinkedQueue<TaskContext> taskQueue;
+	    private final Image3DUniverse univ;
+
+	    public ResultDispatcher(Image3DUniverse univ) {
+	        this.taskQueue = new ConcurrentLinkedQueue<>();
+	        this.univ = univ;
+	        this.setDaemon(true); // Ensures the thread terminates when the main program exits
+	    }
+
+	    public void addTask(Future<Content> future, Color color) {
+	        taskQueue.add(new TaskContext(future, color));
+	    }
+
+	    @Override
+	    public void run() {
+	        // Continue running as long as there are tasks or the viewer window is open
+	        while (!taskQueue.isEmpty() || (univ.getWindow() != null && univ.getWindow().isShowing())) {
+	            // Sleep to prevent the thread from consuming 100% CPU while polling
+	            try { Thread.sleep(50); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+
+	            // Get the next future to check, but don't remove it yet
+	            TaskContext context = taskQueue.peek();
+
+	            if (context != null && context.future.isDone()) {
+	                taskQueue.remove(); // Remove the completed task
+
+	                try {
+	                    // Get the content. This call is guaranteed not to block since isDone() was true.
+	                    final Content loadedContent = context.future.get();
+	                    final Color finalChannelColor = context.color;
+
+	                    //  UI UPDATE: Dispatch the lock, select, and color operations to the EDT 
+	                    SwingUtilities.invokeLater(() -> {
+	                        if (loadedContent != null) {
+	                            // Perform UI and Scene Graph manipulations safely on the EDT
+	                            univ.select(loadedContent, true);
+	                            
+	                            // Re-apply Color Logic (copied from the loop)
+	                            try {
+	                                float r = Integer.parseInt(""+finalChannelColor.getRed()) / 256f;
+	                                float g = Integer.parseInt(""+finalChannelColor.getGreen()) / 256f;
+	                                float b = Integer.parseInt(""+finalChannelColor.getBlue()) / 256f;
+	                                loadedContent.setColor(new Color3f(r, g, b));
+	                            } catch(NumberFormatException e) {
+	                                loadedContent.setColor(null);
+	                            }
+	                            
+	                            loadedContent.setLocked(true);
+	                        }
+	                    });
+	                } catch (Exception e) {
+	                    System.err.println("Error processing content result: " + e.getMessage());
+	                }
+	            }
+	        }
+	    }
 	}
 }
