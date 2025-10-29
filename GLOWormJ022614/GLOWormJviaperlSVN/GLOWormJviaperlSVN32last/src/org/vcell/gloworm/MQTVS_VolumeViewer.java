@@ -129,6 +129,8 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 				// The entire loop now runs NON-BLOCKING on the main plugin thread
 				for (int ch=duper.getFirstC(); ch<=duper.getLastC(); ch++) {
 					imp.setRoi(impRoi);
+					// NOTE: impD is used below, so it must be final or effectively final if used in lambdas, 
+					// but since it's passed to the dispatcher, we are safe.
 					ImagePlus impD = SubHyperstackMaker.makeSubhyperstack(impDup, ""+ch, "1-"+impDup.getNSlices(), "1-"+impDup.getNFrames());
 					impD.setTitle(impD.getTitle()+"_"+ch);
 					impD.setRoi(0, 0, impD.getWidth(), impD.getHeight());
@@ -168,24 +170,17 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 					// ASYNCHRONOUS CALL: Start the heavy content creation in a background thread
 					Future<Content> futureContent = finalUniv.addContentLater(impD, new Color3f(channelColor), objectName, threshold, new boolean[]{true, true, true}, binFactor, Content.SURFACE);
 
-					// SUBMIT TO DISPATCHER: Add the future and color context for non-blocking processing
-					dispatcher.addTask(futureContent, channelColor);
+					// SUBMIT TO DISPATCHER: Pass all necessary variables to the dispatcher thread
+					dispatcher.addTask(futureContent, channelColor, singleSave, objectName, outDir, impD);
 					
-					// --- CLEANUP LOGIC (Must NOT manipulate UI or Scene Graph) ---
-					if (singleSave) {
-						Hashtable<String, Content> newestContent = new Hashtable<String, Content>();
-						// NOTE: This call to getContent() here is risky, as the content may not be loaded yet.
-						// If singleSave requires the content to exist, this block needs its own Future.get() or dispatch.
-						newestContent.put(""+objectName, finalUniv.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)));
-						MeshExporter.saveAsWaveFront(newestContent.values(), new File(((outDir==null?IJ.getDirectory("home"):outDir)+File.separator+impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_")+"_"+objectName.replaceAll(":","").replaceAll("(/|\\s+)","")+"_"+ch+"_"+0+".obj")), finalUniv.getStartTime(), finalUniv.getEndTime(), true);
-						finalUniv.select(finalUniv.getContent((""+objectName/*+"_"+ch+"_"+tpt*/)), true);
-						finalUniv.getSelected().setLocked(false);
-						finalUniv.removeContent(finalUniv.getSelected().getName(), true);
-					}
-
+					// --- CRITICAL FIX: The old if (singleSave) block is REMOVED from here. ---
+					// The logic has been safely moved inside the ResultDispatcher to prevent race conditions.
+					
+					// --- CLEANUP LOGIC ---
 					IJ.setTool(ij.gui.Toolbar.HAND);
 					if (impD != imp){
-						impD.changes = false;
+						// Set changes to false so close() doesn't prompt the user to save
+						impD.changes = false; 
 						if (impD.getWindow() != null)
 							impD.getWindow().close();
 					}
@@ -207,28 +202,21 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 			if (!imp.getTitle().startsWith("SVV")) {
 				
 		        // Ensure the dialog creation is executed on the Event Dispatch Thread (EDT)
-		        // This is a much safer way to handle GUI element creation.
 				javax.swing.SwingUtilities.invokeLater(new Runnable() {
 					@Override
 					public void run() {
 						try {
-							// Call the method that creates the AWT dialog.
-							// This code will now run on the AWT-EventQueue-0 thread,
-							// which is where AWT Tree Lock operations should be serialized.
-
-							imp.getWindow().setVisible(true);
-							imp.getWindow().setAlwaysOnTop(false);
-
+							if (imp.getWindow()!=null) {
+								imp.getWindow().setVisible(true);
+								imp.getWindow().setAlwaysOnTop(false);
+							}
 						} catch (Exception e) {
-							// Handle any exceptions during dialog show
 							e.printStackTrace();
 						}
 					}
 				});
 				
 			}
-//			ImageJ3DViewer.select(null);
-//			IJ.getInstance().toFront();
 			IJ.setTool(ij.gui.Toolbar.HAND);
 			if (rm != null) rm.setVisible(rmWasVis);
 			if (mcc != null) mcc.setVisible(mccWasVis);
@@ -258,10 +246,15 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 
 	
 	public void windowClosed(WindowEvent e) {
+        // FIX 1: Add null check for impDup to prevent NullPointerException on cleanup
 		if (univ!=null && univ.getWindow()!=null)
 			univ.getWindow().removeWindowListener(this);
-		impDup.getWindow().dispose();
-		impDup.flush();
+            
+        if (impDup != null) {
+            if (impDup.getWindow() != null)
+                 impDup.getWindow().dispose();
+            impDup.flush();
+        }
 		//I don't think this is really cleaning up memory...
 	}
 
@@ -290,76 +283,115 @@ public class MQTVS_VolumeViewer  implements PlugIn, WindowListener {
 	}
 
 	// -------------------------------------------------------------------------
-	// NEW ASYNCHRONOUS DISPATCHER FOR PARALLEL CONTENT LOADING
-	// -------------------------------------------------------------------------
+		// NEW ASYNCHRONOUS DISPATCHER FOR PARALLEL CONTENT LOADING
+		// -------------------------------------------------------------------------
 
-	/**
-	 * A dedicated thread to poll for completed content tasks and safely dispatch 
-	 * the UI updates (select, lock, color) to the EDT.
-	 */
-	private class ResultDispatcher extends Thread {
-	    // Simple structure to pair the Future with the color data needed for the EDT update
-	    private  class TaskContext {
-	        final Future<Content> future;
-	        final Color color;
-	        TaskContext(Future<Content> f, Color c) { this.future = f; this.color = c; }
-	    }
-	    
-	    private final ConcurrentLinkedQueue<TaskContext> taskQueue;
-	    private final Image3DUniverse univ;
+		/**
+		 * A dedicated thread to poll for completed content tasks and safely dispatch 
+		 * the UI updates (select, lock, color) to the EDT.
+		 */
+		private class ResultDispatcher extends Thread {
+		    
+		    private class TaskContext {
+		        final Future<Content> future;
+		        final Color color;
+		        final boolean singleSave;
+		        final String objectName;
+		        final String outDir;
+		        final ImagePlus impD;
 
-	    public ResultDispatcher(Image3DUniverse univ) {
-	        this.taskQueue = new ConcurrentLinkedQueue<>();
-	        this.univ = univ;
-	        this.setDaemon(true); // Ensures the thread terminates when the main program exits
-	    }
+		        TaskContext(Future<Content> f, Color c, boolean sS, String oN, String oD, ImagePlus iD) { 
+		            this.future = f; this.color = c; 
+		            this.singleSave = sS; 
+		            this.objectName = oN; 
+		            this.outDir = oD;
+		            this.impD = iD;
+		        }
+		    }
+		    
+		    private final ConcurrentLinkedQueue<TaskContext> taskQueue;
+		    private final Image3DUniverse univ;
 
-	    public void addTask(Future<Content> future, Color color) {
-	        taskQueue.add(new TaskContext(future, color));
-	    }
+		    public ResultDispatcher(Image3DUniverse univ) {
+		        this.taskQueue = new ConcurrentLinkedQueue<>();
+		        this.univ = univ;
+		        this.setDaemon(true); 
+		    }
 
-	    @Override
-	    public void run() {
-	        // Continue running as long as there are tasks or the viewer window is open
-	        while (!taskQueue.isEmpty() || (univ.getWindow() != null && univ.getWindow().isShowing())) {
-	            // Sleep to prevent the thread from consuming 100% CPU while polling
-	            try { Thread.sleep(50); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+		    public void addTask(Future<Content> future, Color color, boolean singleSave, String objectName, String outDir, ImagePlus impD) {
+		        taskQueue.add(new TaskContext(future, color, singleSave, objectName, outDir, impD));
+		    }
 
-	            // Get the next future to check, but don't remove it yet
-	            TaskContext context = taskQueue.peek();
+		    @Override
+		    public void run() {
+		    	System.out.println("ResultDispatcher thread is active..."); // <--- ADD THIS LINE
+		            while (!taskQueue.isEmpty() || (univ.getWindow() != null && univ.getWindow().isShowing())) {
+		            try { Thread.sleep(50); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
 
-	            if (context != null && context.future.isDone()) {
-	                taskQueue.remove(); // Remove the completed task
+		            TaskContext context = taskQueue.peek();
 
-	                try {
-	                    // Get the content. This call is guaranteed not to block since isDone() was true.
-	                    final Content loadedContent = context.future.get();
-	                    final Color finalChannelColor = context.color;
+		            if (context != null && context.future.isDone()) {
+		                taskQueue.remove(); 
 
-	                    //  UI UPDATE: Dispatch the lock, select, and color operations to the EDT 
-	                    SwingUtilities.invokeLater(() -> {
-	                        if (loadedContent != null) {
-	                            // Perform UI and Scene Graph manipulations safely on the EDT
-	                            univ.select(loadedContent, true);
-	                            
-	                            // Re-apply Color Logic (copied from the loop)
-	                            try {
-	                                float r = Integer.parseInt(""+finalChannelColor.getRed()) / 256f;
-	                                float g = Integer.parseInt(""+finalChannelColor.getGreen()) / 256f;
-	                                float b = Integer.parseInt(""+finalChannelColor.getBlue()) / 256f;
-	                                loadedContent.setColor(new Color3f(r, g, b));
-	                            } catch(NumberFormatException e) {
-	                                loadedContent.setColor(null);
-	                            }
-	                            
-	                            loadedContent.setLocked(true);
-	                        }
-	                    });
-	                } catch (Exception e) {
-	                    System.err.println("Error processing content result: " + e.getMessage());
-	                }
-	            }
-	        }
-	    }
-	}
+		                try {
+		                    final Content loadedContent = context.future.get();
+		                    final Color finalChannelColor = context.color;
+
+		                    if (context.singleSave) {
+		                        // === 1. SINGLE SAVE LOGIC (Runs on ResultDispatcher Thread) ===
+		                        Hashtable<String, Content> newestContent = new Hashtable<String, Content>();
+		                        newestContent.put(""+context.objectName, loadedContent); 
+		                        
+		                        String finalOutDir = context.outDir == null ? IJ.getDirectory("home") : context.outDir;
+		                        String fileName = context.impD.getTitle().replaceAll(":","").replaceAll("(/|\\s+)", "_") 
+		                                        + "_" + context.objectName.replaceAll(":","").replaceAll("(/|\\s+)","") 
+		                                        + "_" + 0 + ".obj";
+		                                        
+		                        File outputFile = new File(finalOutDir + File.separator + fileName);
+		                                        
+		                        MeshExporter.saveAsWaveFront(newestContent.values(), 
+		                                outputFile, 
+		                                univ.getStartTime(), univ.getEndTime(), true);
+
+	                        	// ADDED: Check if the file was created successfully and log the result
+		                        if (outputFile.exists() && outputFile.length() > 0) {
+		                            System.out.println("FACTORY MODE SUCCESS: Saved content '"+context.objectName+"' to: " + outputFile.getAbsolutePath());
+		                        } else {
+		                            System.err.println("FACTORY MODE FAILURE: Failed to save content '"+context.objectName+"'. File not created or empty at: " + outputFile.getAbsolutePath());
+		                            System.err.println("Target Directory Exists? " + new File(finalOutDir).exists());
+		                        }
+
+		                        // === 2. REMOVAL UI ACTION (Dispatch to EDT) ===
+		                        SwingUtilities.invokeLater(() -> {
+		                            univ.removeContent(loadedContent.getName(), true);
+		                        });
+
+		                    } else {
+		                        // === 3. EXPLORATORY MODE LOCK LOGIC (Dispatch to EDT) ===
+		                        SwingUtilities.invokeLater(() -> {
+		                            if (loadedContent != null) {
+		                                // Select and apply color
+		                                univ.select(loadedContent, true);
+		                                
+		                                try {
+		                                    float r = Integer.parseInt(""+finalChannelColor.getRed()) / 256f;
+		                                    float g = Integer.parseInt(""+finalChannelColor.getGreen()) / 256f;
+		                                    float b = Integer.parseInt(""+finalChannelColor.getBlue()) / 256f;
+		                                    loadedContent.setColor(new Color3f(r, g, b));
+		                                } catch(NumberFormatException e) {
+		                                    loadedContent.setColor(null);
+		                                }
+		                                
+		                                // Lock the content
+		                                loadedContent.setLocked(true); 
+		                            }
+		                        });
+		                    }
+		                } catch (Exception e) {
+		                    System.err.println("Error processing content result or save: " + e.getMessage());
+		                }
+		            }
+		        }
+		    }
+		}
 }

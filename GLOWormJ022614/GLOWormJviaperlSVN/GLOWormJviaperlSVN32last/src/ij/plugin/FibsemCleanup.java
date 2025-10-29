@@ -76,8 +76,8 @@ public class FibsemCleanup implements PlugIn {
         // Determine the number of available processors to create an optimal-sized thread pool.
         int processors = Runtime.getRuntime().availableProcessors();
 //        processors = 1;
-        ExecutorService executor = Executors.newFixedThreadPool(processors);
-        IJ.log("Using a thread pool with " + processors + " threads.");
+        ExecutorService executor = Executors.newFixedThreadPool((processors-2)>0?(processors-2):1);
+        IJ.log("Using a thread pool with " + processors + "-2" + " threads.");
 
         // Loop through each open image ID.
         for (int impID : impIDs) {

@@ -62,12 +62,14 @@ public class WavefrontLoader {
 	private String objfile = null;
 	public boolean allLinesParsed;
 	public int finalMeshCount;
+	private String objFileName;
 	private String objFileParentName;
 	private String objFileGrandParentName;
 	private String objFileGreatGrandParentName;
 
 	private void parse(String objfile, InputStream[] objmtlStreams, boolean flipXcoords) throws IOException {
 		meshes = new LinkedHashMap<String, CustomMesh>();
+		objFileName = new File(objfile).getName();
 		objFileParentName = "";
 		objFileGrandParentName = "";
 		objFileGreatGrandParentName = "";
@@ -207,7 +209,7 @@ public class WavefrontLoader {
 		if (( objFileGrandParentName.contains("AllNineBrains_FilesToUse") || objFileGreatGrandParentName.contains("AllNineBrains_FilesToUse"))) {
 //			flipXCoef = 1;
 			//		FOR JSH
-			if (objFileParentName.contains("JSH") || objFileGrandParentName.contains("JSH")) {
+			if (objFileName.contains("JSH") ||   objFileParentName.contains("JSH") || objFileGrandParentName.contains("JSH")) {
 				float x = 20803.52f;
 				float y = 12784.513f;
 				float z = -4789.9414f;
@@ -234,7 +236,7 @@ public class WavefrontLoader {
 			
 // Why has this adult cell been scaled by a substantially lower MANITUDE denominator than N2U ///////
 			
-			else if (objFileParentName.contains("MeiAdult_Reslice") || objFileGrandParentName.contains("MeiAdult_Reslice")) {
+			else if (objFileName.contains("MeiAdult_Reslice") ||   objFileParentName.contains("MeiAdult_Reslice") || objFileGrandParentName.contains("MeiAdult_Reslice")) {
 				float x = 10800.0f;
 				float y = 10816.0f;
 				float z =  -8844.971f;
@@ -244,7 +246,7 @@ public class WavefrontLoader {
 						w*(Float.parseFloat(sp[2]) - y)/(x-4736),
 						w*(Float.parseFloat(sp[3]) -z)/(x-4736)));
 			}
-			else if (objFileParentName.contains("MeiAdult") || objFileGrandParentName.contains("MeiAdult")
+			else if (objFileName.contains("MeiAdult") || objFileName.contains("EM_Stack") || objFileParentName.contains("MeiAdult") || objFileGrandParentName.contains("MeiAdult")
 					 ||objFileParentName.contains("EM_Stack") || objFileGrandParentName.contains("EM_Stack")) {
 				float x = 10800.0f;
 				float y = 10816.0f;
@@ -260,7 +262,7 @@ public class WavefrontLoader {
 			
 			
 			//		FOR L3
-			else if (objFileParentName.contains("L3") || objFileGrandParentName.contains("L3")) {
+			else if (objFileName.contains("L3") || objFileParentName.contains("L3") || objFileGrandParentName.contains("L3")) {
 				float x = 13793f;
 				float y = 13302f;
 				float z = -4242f;
@@ -271,19 +273,20 @@ public class WavefrontLoader {
 						w*(Float.parseFloat(sp[3]) -z)/(x-8829)));
 			}
 			//		FOR L2_2
-			else if (objFileParentName.contains("L2_2") || objFileGrandParentName.contains("L2_2")) {
+			else if (objFileName.contains("L2_2") || objFileParentName.contains("L2_2") || objFileGrandParentName.contains("L2_2")) {
 				float x = 8002f;
 				float y = 5648f;
 				float z = -4090f;
 				float w = 50000;
 				vertices.add(new Point3f(
 						//THIS SHOULD HAVE HAD AN X-FLIP AT THIS STAGE...WE FLIPPED AFTER PRODUCTION...
-						w*(flipXCoef*(Float.parseFloat(sp[1]) - x))/(x-2804),
+						//just added x-flip...
+						-w*(flipXCoef*(Float.parseFloat(sp[1]) - x))/(x-2804),
 						w*(Float.parseFloat(sp[2]) - y)/(x-2804),
 						w*(Float.parseFloat(sp[3]) -z)/(x-2804)));
 			}
 			//	FOR L1_3
-			else if (objFileParentName.contains("L1_3") || objFileGrandParentName.contains("L1_3")) {
+			else if (objFileName.contains("L1_3") || objFileParentName.contains("L1_3") || objFileGrandParentName.contains("L1_3")) {
 				float x = 8316f;
 				float y = 6042f;
 				float z = -2470f;
@@ -306,7 +309,7 @@ public class WavefrontLoader {
 			//		}
 
 			//	FOR L1_2 fixing rot around Yaxis
-			else if (objFileParentName.contains("L1_2") || objFileGrandParentName.contains("L1_2")) {
+			else if (objFileName.contains("L1_2") || objFileParentName.contains("L1_2") || objFileGrandParentName.contains("L1_2")) {
 				float x = 12564f;
 				float y = 7782f;
 				float z =  -3865f;
@@ -329,7 +332,7 @@ public class WavefrontLoader {
 			//		}
 
 			//		FOR L1_4 with yz rotation around x axis
-			else if (objFileParentName.contains("L1_4") || objFileGrandParentName.contains("L1_4")) {		
+			else if (objFileName.contains("L1_4") || objFileParentName.contains("L1_4") || objFileGrandParentName.contains("L1_4")) {		
 				float x = 8402f;
 				float y = 12372f;
 				float z =  -2725f;
@@ -341,7 +344,7 @@ public class WavefrontLoader {
 			}
 
 			//	FOR L1_5
-			else if (objFileParentName.contains("L1_5") || objFileGrandParentName.contains("L1_5")) {		
+			else if (objFileName.contains("L1_5") || objFileParentName.contains("L1_5") || objFileGrandParentName.contains("L1_5")) {		
 				float x = 7990f;
 				float y = 6999f;
 				float z =  -3317f;
@@ -353,7 +356,7 @@ public class WavefrontLoader {
 				//
 			}
 			//	FOR N2Uadult
-			else if (objFileParentName.contains("N2U") || objFileGrandParentName.contains("N2U")) {
+			else if (objFileName.contains("N2U") || objFileParentName.contains("N2U") || objFileGrandParentName.contains("N2U")) {
 				float x = 19953f;
 				float y = 15255f;
 				float z =  -6105f;

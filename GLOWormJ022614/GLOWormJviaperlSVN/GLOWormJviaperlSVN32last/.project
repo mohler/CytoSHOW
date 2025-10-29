@@ -3,6 +3,8 @@
 	<name>CytoSHOWviaperlGitHub</name>
 	<comment></comment>
 	<projects>
+		<project>AceTreeLegacyModForCytoSHOWsynch</project>
+		<project>bUnwarpJ_modsForCytoSHOW</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

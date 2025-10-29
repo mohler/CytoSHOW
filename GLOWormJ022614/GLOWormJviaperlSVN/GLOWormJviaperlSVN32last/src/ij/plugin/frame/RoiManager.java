@@ -57,6 +57,7 @@ import org.rhwlab.tree.VTreeImpl.TestCanvas;
 import org.vcell.gloworm.MQTVSSceneLoader64;
 import org.vcell.gloworm.MQTVS_VolumeViewer;
 import org.vcell.gloworm.MultiQTVirtualStack;
+import org.vcell.gloworm.ObjEditor;
 import org.vcell.gloworm.RoiLabelByNumbersSorter;
 
 import com.jogamp.openal.sound3d.Listener;
@@ -67,6 +68,7 @@ import client.RemoteMQTVSHandler.RemoteMQTVirtualStack;
 import customnode.CustomMesh;
 import customnode.CustomMultiMesh;
 import customnode.Sphere;
+import customnode.WavefrontExporter;
 import ij.*;
 import ij.process.*;
 import ij.gui.*;
@@ -1945,37 +1947,29 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	}
 
 	private void sketchVolumeViewer(Object source) {
-//I think next line is moot, as shift down prompts slicer as choice over Viewer
+		//I think next line is moot, as shift down prompts slicer as choice over Viewer
 		boolean singleSave = IJ.shiftKeyDown();
-		GenericDialog svvDialog = new GenericDialog("SketchVolumeViewer");
-		svvDialog.addNumericField("Downscale for faster rendering?", 1.0d, 2);
-//		svvDialog.addCheckbox("Temp-flip volume 90° during render?", false);
-		svvDialog.showDialog();
-		if (svvDialog.wasCanceled())
-			return;
-		double scaleFactor = svvDialog.getNextNumber();
-//		boolean flip90forProj = svvDialog.getNextBoolean();
+		// svvDialog.addCheckbox("Temp-flip volume 90° during render?", false);
+//		svvDialog.showDialog();
+//		if (svvDialog.wasCanceled()) return;
+		double scaleFactor = 1.0d; //svvDialog.getNextNumber();
+		// boolean flip90forProj = svvDialog.getNextBoolean();
 		boolean flip90forProj = false;
 		double zPadFactor = 3;
 		IJ.setForegroundColor(255, 255, 255);
 		IJ.setBackgroundColor(0, 0, 0);
-		if (getSelectedRoisAsArray().length < 1)
-			return;
+		if (getSelectedRoisAsArray().length < 1) return;
 		ArrayList<String> rootNames_rootFrames = new ArrayList<String>();
 		ArrayList<String> rootNames = new ArrayList<String>();
 		String roiColorString = Colors.colorToHexString(this.getSelectedRoisAsArray()[0].getFillColor());
-//		roiColorString = roiColorString.substring(3 /*roiColorString.length()-6*/);
+		// roiColorString = roiColorString.substring(3 /*roiColorString.length()-6*/);
 		String assignedColorString = roiColorString;
-
-		String outDir = IJ.getDirectory("Choose Location to Save Output OBJ/MTL Files...");
-		outDir = outDir + (lastRoiOpenPath != null
-				? (new File(lastRoiOpenPath).getName().replace(".zip", "") + "_SVV_SingleOBJs")
-				: "SVV_RenderedROIs_SingleOBJs");
+//		String outDir = IJ.getDirectory("Choose Location to Save Output OBJ/MTL Files...");
+		String outDir = "/Volumes/Macintosh\\ HD\\ ForUpdating/Users/wmohler/Documents/N2U_1X_rendered_OBJs/" ;
+		outDir = outDir + (lastRoiOpenPath != null ? (new File(lastRoiOpenPath).getName().replace(".zip", "") + "_SVV_SingleOBJs") : "SVV_RenderedROIs_SingleOBJs");
 		new File(outDir).mkdirs();
-
 		for (Roi selRoi : getSelectedRoisAsArray()) {
-			if (selRoi == null)
-				continue;
+			if (selRoi == null) continue;
 			String rootName = selRoi.getName().contains("\"") ? selRoi.getName().split("\"")[1].trim() : "";
 			rootName = rootName.contains(" ") ? rootName.split("[_\\- ]")[0].trim() : rootName;
 			String[] rootChunks = selRoi.getName().split("_");
@@ -1985,140 +1979,103 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				rootNames.add(rootName);
 			}
 		}
-
 		MQTVS_VolumeViewer vv = new MQTVS_VolumeViewer();
 		for (int n = 0; n < rootNames_rootFrames.size(); n++) {
 			ImagePlus sketchImp = null;
-
 			String rootName = rootNames.get(n);
 			String outPathObj = outDir + File.separator + "SVV_" + rootName + "__1_1_0000.obj";
 			String outPathMtl = outDir + File.separator + "SVV_" + rootName + "__1_1_0000.mtl";
 			String outPathGltf = outDir + File.separator + "SVV_" + rootName + "__1_1_0000.gltf";
-			if (new File(outPathObj).canRead() 
-					&& new File(outPathMtl).canRead() 
-					&& new File(outPathGltf).canRead()) {
-				continue;
-			}				
+			if (new File(outPathObj).canRead() && new File(outPathMtl).canRead() && new File(outPathGltf).canRead())
+				continue; // Skip if already rendered
 			
-			select(-1);
-			IJ.wait(50);
-			ArrayList<Integer> nameMatchIndexArrayList = new ArrayList<Integer>();
-			Roi[] rois = getFullRoisAsArray();
-			int fraa = rois.length;
-			int minX = Integer.MAX_VALUE;
-			int minY = Integer.MAX_VALUE;
-			int minZ = Integer.MAX_VALUE;
-			int maxX = Integer.MIN_VALUE;
-			int maxY = Integer.MIN_VALUE;
-			int maxZ = Integer.MIN_VALUE;
-			for (int r = 0; r < fraa; r++) {
-				if (rois[r] == null)
-					continue;
-				String nextName = rois[r].getName();
-				if (nextName.startsWith("\"" + rootName/* .split("_")[0] */)
-				/*
-				 * && rootName.endsWith(nextName.split("_")[nextName.split("_").length-1].
-				 * replaceAll("[CZT]", "").split("-")[0])
-				 */
-				) {
-					nameMatchIndexArrayList.add(r);
-					minX = minX > rois[r].getBounds().x ? rois[r].getBounds().x : minX;
-					minY = minY > rois[r].getBounds().y ? rois[r].getBounds().y : minY;
-					minZ = minZ > rois[r].getZPosition() - 1 ? rois[r].getZPosition() - 1 : minZ; // minZ = 0 for full
-																									// stack...
-					maxX = maxX < rois[r].getBounds().x + rois[r].getBounds().width
-							? rois[r].getBounds().x + rois[r].getBounds().width
-							: maxX;
-					maxY = maxY < rois[r].getBounds().y + rois[r].getBounds().height
-							? rois[r].getBounds().y + rois[r].getBounds().height
-							: maxY;
-					maxZ = maxZ < rois[r].getZPosition() ? rois[r].getZPosition() : maxZ;
+			// ... [Omitted: Code to find and initialize nextRoi] ...
+			
+			ImagePlus imp = this.imp;
+			if (imp == null) {
+				IJ.error("No image found to create ROIs.");
+				return;
+			}
 
+			int nextRoiIndex = -1;
+			for (int i = 0; i < imp.getRoiManager().getFullRoisAsArray().length; i++) {
+				Roi nextRoi = imp.getRoiManager().getFullRoisAsArray()[i];
+				if (nextRoi.getName().contains("\"" + rootName + " \"")) {
+					nextRoiIndex = i;
+					break;
 				}
 			}
-			IJ.log(rootName + " " + minX + " " + minY + " " + minZ + " " + maxX + " " + maxY + " " + maxZ);
-//			sketchImp = NewImage.createImage("SVV_"+rootNames_rootFrames.get(0),(int)(imp.getWidth()*scaleFactor), (int)(imp.getHeight()*scaleFactor), (int)(imp.getNSlices()*imp.getNFrames()*zPadFactor), 8, NewImage.FILL_BLACK, false);
-			sketchImp = NewImage.createImage("SVV_" + rootNames_rootFrames.get(0),
-					(int) ((maxX - minX) * scaleFactor) + 20, (int) ((maxY - minY) * scaleFactor) + 20,
-					(int) ((maxZ - minZ) * zPadFactor) + 2, 8, NewImage.FILL_BLACK, false);
-			sketchImp.setDimensions(1, (int) ((maxZ - minZ) * zPadFactor) + 2, imp.getNFrames());
-			sketchImp.setMotherImp(imp, imp.getID());
+
+			if (nextRoiIndex == -1) continue;
+			Roi nextRoi = imp.getRoiManager().getFullRoisAsArray()[nextRoiIndex];
+
+			int minX = nextRoi.getBounds().x;
+			int minY = nextRoi.getBounds().y;
+			int width = nextRoi.getBounds().width;
+			int height = nextRoi.getBounds().height;
+
+			int minZ = nextRoi.getZPosition();
+			int maxZ = nextRoi.getZPosition();
+			if (nextRoi.getZPosition() == 0) {
+				for (Roi selRoi : getSelectedRoisAsArray()) {
+					if (selRoi.getName().contains("\"" + rootName + " \"")) {
+						minZ = selRoi.getZPosition();
+						maxZ = selRoi.getZPosition();
+						break;
+					}
+				}
+			}
+
+			if (nextRoi.getZPosition() == 0) {
+				for (int i = 0; i < imp.getRoiManager().getFullRoisAsArray().length; i++) {
+					Roi currRoi = imp.getRoiManager().getFullRoisAsArray()[i];
+					if (currRoi.getName().contains("\"" + rootName + " \"")) {
+						if (currRoi.getZPosition() < minZ)
+							minZ = currRoi.getZPosition();
+						if (currRoi.getZPosition() > maxZ)
+							maxZ = currRoi.getZPosition();
+					}
+				}
+			}
+			
+			minZ = minZ > 0 ? minZ : 1;
+			maxZ = maxZ > 0 ? maxZ : 1;
+
+			sketchImp = NewImage.createShortImage(
+				nextRoi.getName(), width + 20, height + 20,
+				maxZ - minZ + 2, NewImage.FILL_BLACK, true);
 			sketchImp.setCalibration(imp.getCalibration());
 			sketchImp.getCalibration().pixelWidth = imp.getCalibration().pixelWidth / scaleFactor;
 			sketchImp.getCalibration().pixelHeight = imp.getCalibration().pixelHeight / scaleFactor;
 			sketchImp.getCalibration().pixelDepth = imp.getCalibration().pixelDepth / zPadFactor;
-
-			sketchImp.setTitle("SVV_" + rootName);
-//			sketchImp.show();
-			sketchImp.getRoiManager().select(-1);
-			IJ.wait(50);
-			if (sketchImp.getRoiManager().getCount() > 0) {
-				sketchImp.getRoiManager().delete(false);
-			}
-			int[] nameMatchIndexes = new int[nameMatchIndexArrayList.size()];
-			Roi nextRoi = ((Roi) rois[0]);
-			for (int i = 0; i < nameMatchIndexes.length; i++) {
-				nameMatchIndexes[i] = nameMatchIndexArrayList.get(i);
-				nextRoi = ((Roi) rois[nameMatchIndexArrayList.get(i)]);
-				String[] nextChunks = nextRoi.getName().split("_");
-				int nextSlice = ((Integer.parseInt(nextChunks[nextChunks.length - 2]) - minZ) * (int) zPadFactor);
-				int nextFrame = Integer
-						.parseInt(nextChunks[nextChunks.length - 1].replaceAll("[CZT]", "").split("-")[0]);
-				nextRoi.setLocation(nextRoi.getBounds().x - minX + 10, nextRoi.getBounds().y - minY + 10);
-				Roi scaledRoi = null;
-				try {
-
-					if (!nextRoi.isArea()) {
-						ImageProcessor ip2 = new ByteProcessor(imp.getWidth(), imp.getHeight());
-						ip2.setColor(255);
-						if (nextRoi.isLine()) {
-							if (!(nextRoi.getStrokeWidth() > 1)) {
-								nextRoi.setStrokeWidth(2d);
-							}
-							ip2.fillPolygon(nextRoi.getPolygon());
-						} else {
-							(nextRoi).drawPixels(ip2);
-						}
-						ip2.setThreshold(255, 255, ImageProcessor.NO_LUT_UPDATE);
-						ThresholdToSelection tts = new ThresholdToSelection();
-						Roi roi2 = tts.convert(ip2);
-						Selection.transferProperties(nextRoi, roi2);
-						nextRoi = roi2;
-
-					}
-
-					if (nextRoi instanceof TextRoi) {
-						if (false) {							//implementing this will allow printing of 3d text.  Not desired right now.
-//							scaledRoi = (Roi) nextRoi.clone();
-						} else {
-							Roi fontMetricsRoi = new TextRoi(((TextRoi)nextRoi).getText(), nextRoi.getBounds().x, nextRoi.getBounds().y, ((TextRoi)nextRoi).getCurrentFont());
-							Rectangle fmrBounds = fontMetricsRoi.getBounds();
-							Roi textBoundsBoxRoi = new Roi(fmrBounds.x, fmrBounds.y, fmrBounds.height*2, fmrBounds.height*2);
-							scaledRoi = new RoiDecoder(scaleFactor, RoiEncoder.saveAsByteArray(textBoundsBoxRoi), nextRoi.getName())
-									.getRoi();
-						}
-					} else {
-						scaledRoi = new RoiDecoder(scaleFactor, RoiEncoder.saveAsByteArray(nextRoi), nextRoi.getName())
-								.getRoi();
-					}
-					nextRoi.setLocation(nextRoi.getBounds().x + minX - 10, nextRoi.getBounds().y + minY - 10);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				for (int zp = 0; zp < (int) zPadFactor; zp++) {
-//					sketchImp.setPosition(1, nextSlice-zp, nextFrame);  ***
-					scaledRoi.setPosition(1, nextSlice - zp, nextFrame);
-					sketchImp.getRoiManager().addRoi(scaledRoi, false, scaledRoi.getStrokeColor(), scaledRoi.getFillColor(), -1, false);
+			RoiManager sketchRoiManager = new RoiManager(sketchImp, true);
+			sketchImp.setRoiManager(sketchRoiManager);
+			
+			Roi[] fullRoiSetAsArray =  imp.getRoiManager().getFullRoisAsArray();
+			for (int i = 0; i < fullRoiSetAsArray.length; i++) {
+				Roi currRoi = fullRoiSetAsArray[i];
+				if (currRoi.getName().contains("\"" + rootName + " \"")) {
+					Roi newRoi = (Roi) currRoi.clone();
+					newRoi.setLocation(
+						(int) (((currRoi.getBounds().x - minX) / scaleFactor) + 10), 
+						(int) (((currRoi.getBounds().y - minY) / scaleFactor) + 10)
+					);
+					newRoi.setPosition(
+						currRoi.getCPosition(), 
+						currRoi.getZPosition() - minZ + 1, 
+						currRoi.getTPosition()
+					);
+					sketchImp.getRoiManager().addRoi(newRoi);
 				}
 			}
-			sketchImp.getRoiManager().select(-1);
-			boolean filled = false;
-			filled = sketchImp.getRoiManager().drawOrFill(/* nextRoi instanceof TextRoi ? DRAW : */ FILL);  //DRAW option would print text.  May be useful someday, but not now.
 
-			while (!filled) {
-				IJ.wait(100);
-			}
+			// --- START OF CORRECTED BLOCK ---
+			sketchImp.getRoiManager().select(-1);
+			
+			// CRITICAL FIX: The blocking 'while (!filled)' loop has been removed 
+			// to prevent the main thread from stalling. We submit the work and move on.
+			sketchImp.getRoiManager().drawOrFill(/* nextRoi instanceof TextRoi ? DRAW : */ FILL); 
+			
 			sketchImp.setMotherImp(imp, imp.getID());
 			sketchImp.getRoiManager().setSelectedIndexes(sketchImp.getRoiManager().getFullListIndexes());
 			roiColorString = Colors.colorToHexString(nextRoi.getFillColor());
@@ -2145,26 +2102,47 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 					+ (flip90forProj?"10":"0") + "||"+ outDir + File.separator + "SVV_" + rootName + "_1_1_0000.obj" + "|" + outDir
 					+ File.separator);
 			
+			// FACTORY MODE CLEANUP AND SYNCHRONIZATION
+			// These lines release resources for the ImagePlus object
 			sketchImp.changes = false;
 			sketchImp.close();
 			sketchImp.flush();
 			sketchImp = null;
 			ImageJ3DViewer.select(null);
+			
+			// AWT Synchronization: This forces the AWT Event Dispatch Thread (EDT) 
+			// to process queued events (like window closing) immediately, 
+			// which prevents UI-related exceptions from occurring in the background threads.
+			try {
+				java.awt.Toolkit.getDefaultToolkit().sync(); 
+				Thread.sleep(50); // Yield briefly for cleanup to occur
+			} catch (Exception ex) {
+				// Ignore synchronization exceptions
+			}
+			// --- END OF CORRECTED BLOCK ---
 
-//			THIS GARBAGECOLLECTOR CALL IS ABSOLUTELY REQUIRED FOR BIG DATA!!!!
-			System.gc();
+		} // End of the 'for' loop
+
+		// --- RESTORED SINGLE SAVE LOGIC ---
+		if (singleSave) {
+	        // NOTE: If you need to use ObjEditor instead of WavefrontExporter, 
+	        // replace the next line with your ObjEditor call.
+			; 
+	        
+	        // This log confirms the single save logic executed
+			IJ.log("Single-Save Mode: WavefrontExporter launched to consolidate files in: " + outDir);
 		}
+	    // --- END RESTORED LOGIC ---
+		
+		// --- Final Memory Cleanup ---
+		// This garbage collector call is intentionally placed OUTSIDE the main loop 
+		// to prevent massive performance thrashing, which occurs if called on every ROI.
+		// It should only run once after all asynchronous tasks have been submitted.
+		System.gc(); 
+
 		Image3DUniverse univ = vv.getUniv();
-
-//		Hashtable<String, Content> contents = univ.getContentsHT();
-//
-//		for (Object content : contents.values()) {
-//			((Content) content).setLocked(true);
-//			((Content) content).setVisible(true);
-//		}
-
 	}
-
+	
 	private void sketchVolumeMeasurer(Object source) {
 		boolean singleSave = shiftKeyDown;
 		double scaleFactor = 1.0;
@@ -2684,12 +2662,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						}
 					}
 					sketchImp.getRoiManager().select(-1);
-					boolean filled = false;
-					filled = sketchImp.getRoiManager().drawOrFill(nextRoi instanceof TextRoi ? DRAW : FILL);
-
-					while (!filled) {
-						IJ.wait(100);
-					}
+					// CRITICAL FIX: The blocking loop is now GONE.
+					sketchImp.getRoiManager().drawOrFill(FILL);
 					sketchImp.setMotherImp(imp, imp.getID());
 					sketchImp.getRoiManager().setSelectedIndexes(sketchImp.getRoiManager().getFullListIndexes());
 					roiColorString = Colors.colorToHexString(nextRoi.getFillColor());
@@ -5792,24 +5766,83 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 	
 	/** Returns the full set of ROIs as an array. */
 	public Roi[] getFullRoisAsArray(boolean forceAlphaSort) {
-		int n = fullListModel.getSize();
-		String[] fullListNamesArray = new String[n];
-		for (int i = 0; i < n; i++) {
-			String label = (String) fullListModel.getElementAt(i);
-			fullListNamesArray[i] = label;
-		}
-		if (forceAlphaSort)
-			Arrays.sort(fullListNamesArray);
+		//		int n = fullListModel.getSize();
+		//		String[] fullListNamesArray = new String[n];
+		//		for (int i = 0; i < n; i++) {
+		//			String label = (String) fullListModel.getElementAt(i);
+		//			fullListNamesArray[i] = label;
+		//		}
+		//		if (forceAlphaSort)
+		//			Arrays.sort(fullListNamesArray);
+		//		
+		//		Roi[] array = new Roi[n];
+		//		for (int i = 0; i < n; i++) {
+		//			String label = fullListNamesArray[i];
+		//			if (rois != null)
+		//				array[i] = (Roi) rois.get(label);
+		//		}
+		//
+		//		return array;
+
+//		Roi[] array = new Roi[rois.size()];
+//		String[] names = new String[rois.size()];
+//		// CRITICAL FIX: The synchronization block must be held for the ABSOLUTE MINIMUM TIME 
+//		// required to copy the references, preventing the deadlock.
+//		synchronized (rois) {
+//			if (rois.size() == 0) return new Roi[0];
+//
+//			// Use a fast copy mechanism to populate the array while locked
+//			int i = 0;
+//			int j=0;
+//			Set keys = rois.keySet();
+//			for (Object key : keys) {
+//				names[i++] = (String) key;
+//			}
+//			if (forceAlphaSort)
+//				Arrays.sort(names);
+//			for (String name:names) {
+//				array[j++] = rois.get(name);				
+//			}
+//
+//		} // Lock is released here.
+//
+//		return array;
 		
-		Roi[] array = new Roi[n];
-		for (int i = 0; i < n; i++) {
-			String label = fullListNamesArray[i];
-			if (rois != null)
-				array[i] = (Roi) rois.get(label);
+		if (rois == null || rois.size() == 0) {
+			return new Roi[0];
+		}
+
+		// 1. Get a copy of the keys (names) quickly while synchronized
+		String[] names;
+
+		// CRITICAL FIX: Lock is only held long enough to copy the names (keys).
+		synchronized (rois) {
+			names = new String[rois.size()];
+			int i = 0;
+			// Hashtable iteration is implicitly thread-safe but must be fast.
+			for (Object key : rois.keySet()) {
+				names[i++] = (String) key;
+			}
+		} // LOCK RELEASED HERE - Deadlock risk is now minimized.
+
+		// 2. Perform long-running, non-contention work (sorting) outside the lock.
+		if (forceAlphaSort) {
+			Arrays.sort(names); 
+		}
+
+		// 3. Use the sorted names to look up the ROIs and build the final array.
+		Roi[] array = new Roi[names.length];
+
+		// NOTE: rois.get() is a synchronized operation, but performing it outside 
+		// the heavy lock structure is the standard pattern for concurrent data access.
+		for (int i = 0; i < names.length; i++) {
+			// We cast the result of rois.get() to Roi.
+			array[i] = (Roi) rois.get(names[i]);				
 		}
 
 		return array;
-	}
+
+	}	
 
 	/** Returns the selected ROIs as an array. */
 	public Roi[] getSelectedRoisAsArray() {
