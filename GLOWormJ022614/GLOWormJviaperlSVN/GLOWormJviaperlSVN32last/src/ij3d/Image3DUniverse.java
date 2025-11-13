@@ -76,8 +76,10 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
+import javax.swing.JProgressBar;
 import javax.swing.JRootPane;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.vecmath.AxisAngle4d;
 import javax.vecmath.Color3f;
 import javax.vecmath.Point3d;
@@ -2082,59 +2084,6 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 	private String title;
 
-//	/** OLD BROKEN ATTEMPT BY ME AND GEMINI
-//	 * Add the specified Content to the universe. It is assumed that the
-//	 * specified Content is constructed correctly.
-//	 * The Content is added asynchronously, and this method returns immediately.
-//	 * @param c The Content to add
-//	 * @return a Future holding the added Content, or null if an error occurred.
-//	 */
-//	public Future<Content> addContentLater(final Content c, boolean updateNow) {
-//		final Image3DUniverse univ = this;
-//		return adder.submit(new Callable<Content>() {
-//
-//			public Content call() {
-//				synchronized (lock) {
-//					if (!addContentToScene(c)) return null;
-//					if (univ.autoAdjustView) {
-//						univ.getViewPlatformTransformer()
-//						.centerAt(univ.globalCenter);
-//						float range = (float)(univ.globalMax.x
-//								- univ.globalMin.x);
-//						univ.ensureScale(range);
-//					}
-//				}
-//				// NEW BLOCK: Wrap all GUI/Event-Sensitive calls in a single EDT block
-//			    try {
-//			        EDTExecutor.submit(new Callable<Void>() {
-//			            @Override
-//			            public Void call() {
-//			                // All these calls run SAFELY on the AWT-EventQueue-0 thread
-//
-//			                // This line triggers the initial updateImagePlus() -> getOffScreenCanvas() hang
-//			                univ.fireContentAdded(c, updateNow); 
-//			                
-//			                // This line also contains GUI work and must be kept on the EDT
-//			                univ.addUniverseListener(c); 
-//
-//			                if (updateNow) {
-//			                    univ.fireTransformationUpdated();
-//			                    canvas.revalidate();
-//			                }
-//			                return null;
-//			            }
-//			        }).get(); // Worker thread BLOCKS safely here until the GUI work is done.
-//			        
-//			    } catch (InterruptedException | ExecutionException e) {
-//			        Thread.currentThread().interrupt();
-//			        throw new RuntimeException("Error during 3D Content initialization on EDT", e.getCause());
-//			    }
-//
-//			    // The worker thread only continues here AFTER the GUI work is complete.
-//			    return c;
-//			}
-//		});
-//	}
 			
 	/**  NEWER NON-BLOCKING VERSION...
 	 * Add the specified Content to the universe. It is assumed that the
@@ -2148,40 +2097,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		return adder.submit(new Callable<Content>() {
 
 			public Content call() {
-				synchronized (lock) {
-					if (!addContentToScene(c)) return null;
-					if (univ.autoAdjustView) {
-						univ.getViewPlatformTransformer()
-						.centerAt(univ.globalCenter);
-						float range = (float)(univ.globalMax.x
-								- univ.globalMin.x);
-						univ.ensureScale(range);
-					}
-				}
 				// NEW BLOCK: Wrap all GUI/Event-Sensitive calls in a single EDT block
 			    
-//                // The block below is now asynchronous (non-blocking)
-//
-//			    EDTExecutor.submit(new Callable<Void>() {
-//			        @Override
-//			        public Void call() {
-//			            // All these calls run SAFELY on the AWT-EventQueue-0 thread
-//
-//			            univ.fireContentAdded(c, updateNow); 
-//			            
-//			            univ.addUniverseListener(c); 
-//
-//			            if (updateNow) {
-//			                univ.fireTransformationUpdated();
-//			                canvas.revalidate();
-//			            }
-//			            return null;
-//			        }
-//			    }); // <--- The .get() call and surrounding try/catch block are removed here.
-//
-//			    // The worker thread returns immediately and continues processing.
-//			    return c;
-
 				// We submit the task, but we must catch any exception inside the EDT call()
 			    // and log it, rather than letting it crash the EDT itself.
 			    EDTExecutor.submit(new Callable<Void>() {
@@ -2190,6 +2107,19 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			            try { // <-- ADD TRY BLOCK
 			                // All these calls run SAFELY on the AWT-EventQueue-0 thread
 
+			            	synchronized (lock) {
+			            		if (updateNow) {
+			            			if (!addContentToScene(c)) return null;
+			            			if (univ.autoAdjustView) {
+			            				univ.getViewPlatformTransformer()
+			            				.centerAt(univ.globalCenter);
+			            				float range = (float)(univ.globalMax.x
+			            						- univ.globalMin.x);
+			            				univ.ensureScale(range);
+			            			}
+			            		}
+			            	}
+			            	
 			                univ.fireContentAdded(c, updateNow); 
 			                univ.addUniverseListener(c); 
 
@@ -2214,211 +2144,266 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	}			
 		
 	public void addContentLater(String path,  InputStream[] objmtlStreams) {
-		addContentLater(path,objmtlStreams, false);
+		addContentLater(new String[]{path},objmtlStreams, false);
 	}
 
 
 	@SuppressWarnings("static-access")
-	public void addContentLater(String filePath, InputStream[] objmtlStreams, boolean parseTimeInCPHATE) {
+	public void addContentLater(String[] filePaths, InputStream[] objmtlStreams, boolean parseTimeInCPHATE) {
 		if (parseTimeInCPHATE && startTime!=1)
-			startTime = 1;
-		ArrayList<String> timedObjFileNames = new ArrayList<String>();
-		File file = new File(filePath);
-		String titleName = file.getName();
-		if (false/*filePath.matches(".*_\\d+.obj")*/) {
-			if (file.getParentFile() != null && file.getParentFile().list() != null){
-				for(String nextfilename: file.getParentFile().list()) {
-					String fileNameRoot = file.getName().split("_\\d+.obj")[0];
-					if (nextfilename.matches(fileNameRoot+"_\\d+.obj")) {
-						timedObjFileNames.add(nextfilename);
-					}
-				}
-			} else {
-				timedObjFileNames.add(new File(filePath).getName());
-			}
-		} else {
-			if (filePath.matches(".*\\.obj")) {
-				timedObjFileNames.add(new File(filePath).getName());
-			}
-		}
-		Object[] timedObjFileNms = timedObjFileNames.toArray();
-		Arrays.sort(timedObjFileNms);
-		List<Content>contents = new ArrayList<Content>();
-		LinkedHashMap<String, TreeMap<Integer, ContentInstant>> cInstants = new LinkedHashMap<String, TreeMap<Integer, ContentInstant>>();
+	        startTime = 1;
 
-//		setTitle((this.flipXonImport?"FlipX_":"")+titleName);
-		
-		for (Object nextmatchingfilename: timedObjFileNms) {
-			if (nextmatchingfilename.equals("SVV_0000.obj"))
-				continue;
-			String nextmatchingfilePath = file.getParent() +File.separator + (String)nextmatchingfilename;
-			String[] tptParse = ((String)nextmatchingfilename).split("_");
-			int nextTpt =0;
-			if (tptParse[tptParse.length-1].matches("\\d+.obj")) {
-				nextTpt = Integer.parseInt(tptParse[tptParse.length-1].replace(".obj", ""));
-			} 
-			//			else if (parseTimeInCPHATE && ((String)nextmatchingfilename).matches("(.*)(csv\\.i)(\\d+)(\\.c\\d+.*\\.obj)")) {
-			//				nextTpt = Integer.parseInt(((String)nextmatchingfilename).replaceAll("(.*)(csv\\.i)(\\d+)(\\.c\\d+.*\\.obj)","$3"));
-			//			}
-
-			LinkedHashMap<String, CustomMesh> meshes= null;
-			WavefrontLoader wl = new WavefrontLoader();
-			try {
-				meshes = wl.loadObjs(nextmatchingfilePath, objmtlStreams, flipXonImport);
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			if (meshes == null) {
-				IJ.wait(100);
-			}
-			while (meshes.size() == 0) {
-				IJ.wait(10);
-				if (wl.allLinesParsed) {
-					break;
-				}
-			}
-			int meshCountDone = 0; // Keeping this for now, though it's not strictly necessary for loop control
-
-			// The loop condition is correct: process as long as meshes are loaded but not processed
-			while (meshes.size() > cInstants.size()) {
-
-				Object[] mksCloneArray =  Arrays.copyOf(meshes.keySet().toArray(),meshes.keySet().toArray().length);
-				for(Object key : mksCloneArray) {
-					String name = (String)key;
-					// This check is the primary mechanism to prevent duplicate processing
-					if (cInstants.containsKey(name)) 
-						continue;
-					
-					name = getSafeContentName(name);
-					if (parseTimeInCPHATE && name.matches("(.*)(\\-i)(\\d+)(\\/\\d+)?(\\-c\\d+.*)")) {
-						nextTpt = Integer.parseInt(name.replaceAll("(.*)(\\-i)(\\d+)(\\/\\d+)?(\\-c\\d+.*)","$3"));
-					}
-
-					CustomMesh mesh = meshes.get(key);
-					// CRITICAL: Put the ContentInstant tracking into cInstants
-					cInstants.put(name, new TreeMap<Integer, ContentInstant>()); 
-					ContentInstant contInst = new ContentInstant(name + "_#" + nextTpt);
-					contInst.timepoint = nextTpt;
-
-					contInst.color = mesh.getColor();
-					contInst.transparency = mesh.getTransparency();
-					contInst.shaded = mesh.isShaded();
-					contInst.showCoordinateSystem(UniverseSettings.showLocalCoordinateSystemsByDefault);
-					contInst.display(new CustomMeshNode(mesh));
-					contInst.compile();
-
-					cInstants.get(name).put(nextTpt,contInst);
-
-				}
-				
-				// REMOVED: The entire block that processed cInstants and created Content
-				// This was the source of the chatter because it ran on every iteration.
-				
-				// The redundant meshCountDone increment is also removed from here if it was present
-				
-				// Add a small wait here to yield control if the loop is running very fast
-				if (meshes.size() > cInstants.size()) {
-				    IJ.wait(10);
-				}
-			}
-			// --- END OF MESH PROCESSING LOOP ---
-			
-//original	// --- START OF CONTENT CREATION LOGIC (MOVED OUTSIDE LOOP) ---
-//			for (String ciKey: cInstants.keySet()) {
-//				if (this.contents.containsKey(ciKey))
-//					continue;
-//				TreeMap<Integer, ContentInstant> ciTreeMap = cInstants.get(ciKey);
-//				String cName = ciKey;
-//				
-//				// 1. Add all ContentInstants to the global list (c3dm)
-//				for (Map.Entry<Integer,ContentInstant> ciEntry: ciTreeMap.entrySet()) {
-//					if (!c3dm.getListModel().contains(ciEntry.getValue()))
-//						c3dm.addContentInstant(ciEntry.getValue());	
-//				}
+//	     JProgressBar jbar = new JProgressBar();
+//	     this.getWindow().add(jbar); 
+//	     this.getWindow().pack();
 //
-//				// 2. Create the parent Content object only once
-//				if (!this.contents.containsKey(cName)) {
-//					Content content = new Content(cName, cInstants.get(cName), false);
-//					if (this.addContentLater(content, true)!=null) {
-//						content.setLocked(true);
-//					}
-//				}
-//			}
-//			// --- END OF CONTENT CREATION LOGIC ---
+	    // Create and execute the worker.
+	    ContentImportWorker worker = new ContentImportWorker(
+	        this, 
+//	        jbar, // pass the JProgressBar reference
+	        filePaths,
+	        objmtlStreams,
+	        parseTimeInCPHATE
+	    );
+	    worker.execute(); 
+	}
+	
+	// NOTE: You must ensure this class can access the necessary base classes (CytoSHOW, Content, etc.)
+	// by placing it where it can see them (e.g., as a static nested class or in the same package).
 
-//fixed chatter
-//broke display			// --- START OF CONTENT CREATION LOGIC (MOVED OUTSIDE LOOP & MODIFIED) ---
-//						for (String ciKey: cInstants.keySet()) {
-//							// CRITICAL CHECK: If Content already exists globally, skip.
-//							if (this.contents.containsKey(ciKey))
-//								continue;
-//								
-//							TreeMap<Integer, ContentInstant> ciTreeMap = cInstants.get(ciKey);
-//							String cName = ciKey;
-//							
-//							// 1. Add all ContentInstants (children) to the global list (c3dm)
-//							for (Map.Entry<Integer,ContentInstant> ciEntry: ciTreeMap.entrySet()) {
-//								// We trust our local cInstants map; let c3dm handle its own duplicates/thread safety
-//								if (!c3dm.getListModel().contains(ciEntry.getValue()))
-//									c3dm.addContentInstant(ciEntry.getValue());	
-//							}
-//
-//							// 2. Create the parent Content object
-//							// Check for existence is already done at the top of this 'ciKey' loop
-//							Content content = new Content(cName, cInstants.get(cName), false);
-//
-//							// 3. IMMEDIATE GLOBAL REGISTRATION to prevent a race condition 
-//							//    if the recursive call 'this.addContentLater' takes time or spawns a thread.
-//							// NOTE: THIS IS THE HYPOTHETICAL LINE REQUIRED FOR THREAD SAFETY.
-//							this.contents.put(cName, content); 
-//
-//							// 4. Call the original external/recursive method
-//							if (this.addContentLater(content, true)!=null) {
-//								content.setLocked(true);
-//							}
-//						}
-//						// --- END OF CONTENT CREATION LOGIC ---
-						
-						// --- START OF CONTENT CREATION LOGIC (FINAL CORRECTED BLOCK) ---
-						for (String ciKey: cInstants.keySet()) {
-							// CRITICAL CHECK: If Content already exists globally (from a previous file iteration)
-							if (this.contents.containsKey(ciKey))
-								continue;
-								
-							TreeMap<Integer, ContentInstant> ciTreeMap = cInstants.get(ciKey);
-							String cName = ciKey;
-							
-							// 1. Add all ContentInstants (children) to the global list (c3dm)
-							for (Map.Entry<Integer,ContentInstant> ciEntry: ciTreeMap.entrySet()) {
-								if (!c3dm.getListModel().contains(ciEntry.getValue()))
-									c3dm.addContentInstant(ciEntry.getValue());	
-							}
+	class ContentImportWorker extends SwingWorker<Void, Integer> {
+	    
+	    // ------------------------------------------------------------------------
+	    // FIELDS (To hold the state and input parameters)
+	    // ------------------------------------------------------------------------
+	    private final Image3DUniverse univ; 
+//	    private final JProgressBar progressBar;
+	    private final String[] filePaths;
+	    private final InputStream[] objmtlStreams;
+	    private final boolean parseTimeInCPHATE;
+	    
+	    // ------------------------------------------------------------------------
+	    // CONSTRUCTOR
+	    // ------------------------------------------------------------------------
+	    public ContentImportWorker(
+	    	Image3DUniverse universe, 
+//	        JProgressBar bar, 
+	        String[] paths, 
+	        InputStream[] streams, 
+	        boolean parseTime
+	    ) {
+	        this.univ = universe;
+//	        this.progressBar = bar;
+	        this.filePaths = paths;
+	        this.objmtlStreams = streams;
+	        this.parseTimeInCPHATE = parseTime;
+	        
+	        // Initialize progress bar settings (assuming it was added to the GUI already)
+//	        if (this.progressBar != null) {
+//	            this.progressBar.setMinimum(0);
+//	            this.progressBar.setMaximum(paths.length);
+//	            this.progressBar.setStringPainted(true);
+//	            this.progressBar.setString("Starting import...");
+//	            this.progressBar.setVisible(true);
+//	        }
+	    }
 
-							// 2. Create the parent Content object
-							Content content = new Content(cName, cInstants.get(cName), false);
-							
-							// 3. Call the critical method that updates the internal map (this.contents) 
-							//    and performs the GUI work necessary for display.
-							// NOTE: The chatter is gone because the OUTER loop condition was fixed.
-							
-							if (this.addContentLater(content, true)!=null) {
-								content.setLocked(true);
+	    // ------------------------------------------------------------------------
+	    // doInBackground (Runs on Background Thread)
+	    // ------------------------------------------------------------------------
+	    @Override
+	    protected Void doInBackground() throws Exception {
+	        
+	        // Use 'univ' reference to access instance members (e.g., univ.contents, univ.flipXonImport)	        
+	        // ... (The entire body of your current addContentLater method goes here) ...
+	        // Ensure all references to instance variables (like 'flipXonImport') are changed to 'univ.flipXonImport'.
+			ArrayList<Content> batchedContents = new ArrayList<Content>();
+			if (parseTimeInCPHATE && startTime!=1)
+				startTime = 1;
+//			JProgressBar jbar = new JProgressBar();
+//			this.getWindow().add(jbar);
+//			Arrays.sort(filePaths);
+			for (String filePath:filePaths) {
+				//			jbar.setValue(filePaths.length/(jbar.getValue()+1));
+				IJ.log(filePath);
+				if (filePath.endsWith("SVV_0000.obj"))
+					continue;
+				ArrayList<String> timedObjFileNames = new ArrayList<String>();
+				File file = new File(filePath);
+				String titleName = file.getName();
+				if (false/*filePath.matches(".*_\\d+.obj")*/) {
+					if (file.getParentFile() != null && file.getParentFile().list() != null){
+						for(String nextfilename: file.getParentFile().list()) {
+							String fileNameRoot = file.getName().split("_\\d+.obj")[0];
+							if (nextfilename.matches(fileNameRoot+"_\\d+.obj")) {
+								timedObjFileNames.add(nextfilename);
 							}
 						}
-						// --- END OF CONTENT CREATION LOGIC ---
-						
+					} else {
+						timedObjFileNames.add(new File(filePath).getName());
+					}
+				} else {
+					if (filePath.matches(".*\\.obj")) {
+						timedObjFileNames.add(new File(filePath).getName());
+					}
+				}
+				String[] timedObjFileNms = timedObjFileNames.toArray(new String[timedObjFileNames.size()]);
+				Arrays.sort(timedObjFileNms);
+				List<Content>contents = new ArrayList<Content>();
+				LinkedHashMap<String, TreeMap<Integer, ContentInstant>> cInstants = new LinkedHashMap<String, TreeMap<Integer, ContentInstant>>();
+
+				//		setTitle((this.flipXonImport?"FlipX_":"")+titleName);
+
+				for (String nextmatchingfilename: timedObjFileNms) {
+					if (nextmatchingfilename.equals("SVV_0000.obj"))
+						continue;
+					String nextmatchingfilePath = file.getParent() +File.separator + nextmatchingfilename;
+					String[] tptParse = (nextmatchingfilename).split("_");
+					int nextTpt =0;
+					if (tptParse[tptParse.length-1].matches("\\d+.obj")) {
+						nextTpt = Integer.parseInt(tptParse[tptParse.length-1].replace(".obj", ""));
+					} 
+					//			else if (parseTimeInCPHATE && (nextmatchingfilename).matches("(.*)(csv\\.i)(\\d+)(\\.c\\d+.*\\.obj)")) {
+					//				nextTpt = Integer.parseInt(((String)nextmatchingfilename).replaceAll("(.*)(csv\\.i)(\\d+)(\\.c\\d+.*\\.obj)","$3"));
+					//			}
+
+					LinkedHashMap<String, CustomMesh> meshes= null;
+					WavefrontLoader wl = new WavefrontLoader();
+					try {
+						meshes = wl.loadObjs(nextmatchingfilePath, objmtlStreams, univ.flipXonImport);
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					if (meshes == null) {
+						IJ.wait(100);
+					}
+					while (meshes.size() == 0) {
+						IJ.wait(10);
+						if (wl.allLinesParsed) {
+							break;
+						}
+					}
+					int meshCountDone = 0; // Keeping this for now, though it's not strictly necessary for loop control
+
+					// The loop condition is correct: process as long as meshes are loaded but not processed
+					while (meshes.size() > cInstants.size()) {
+
+						Object[] mksCloneArray =  Arrays.copyOf(meshes.keySet().toArray(),meshes.keySet().toArray().length);
+						for(Object key : mksCloneArray) {
+							String name = (String)key;
+							// This check is the primary mechanism to prevent duplicate processing
+							if (cInstants.containsKey(name)) 
+								continue;
+
+							name = getSafeContentName(name);
+							if (parseTimeInCPHATE && name.matches("(.*)(\\-i)(\\d+)(\\/\\d+)?(\\-c\\d+.*)")) {
+								nextTpt = Integer.parseInt(name.replaceAll("(.*)(\\-i)(\\d+)(\\/\\d+)?(\\-c\\d+.*)","$3"));
+							}
+
+							CustomMesh mesh = meshes.get(key);
+							// CRITICAL: Put the ContentInstant tracking into cInstants
+							cInstants.put(name, new TreeMap<Integer, ContentInstant>()); 
+							ContentInstant contInst = new ContentInstant(name + "_#" + nextTpt);
+							contInst.timepoint = nextTpt;
+
+							contInst.color = mesh.getColor();
+							contInst.transparency = mesh.getTransparency();
+							contInst.shaded = mesh.isShaded();
+							contInst.showCoordinateSystem(UniverseSettings.showLocalCoordinateSystemsByDefault);
+							contInst.display(new CustomMeshNode(mesh));
+							contInst.compile();
+
+							cInstants.get(name).put(nextTpt,contInst);
+
+						}
+
+						// REMOVED: The entire block that processed cInstants and created Content
+						// This was the source of the chatter because it ran on every iteration.
+
+						// The redundant meshCountDone increment is also removed from here if it was present
+
+						// Add a small wait here to yield control if the loop is running very fast
+						if (meshes.size() > cInstants.size()) {
+							IJ.wait(10);
+						}
 						if (meshes.size() >1)
-				IJ.log(""+" "+meshes.size());
-		}
-//		this.addContentLater(recentContent, true);
-		
-//			if (!titleName.contentEquals(".")) {
-//				setTitle((this.flipXonImport?"FlipX_":"")+titleName);
-//		}
-//		if (parseTimeInCPHATE)
-//			updateStartAndEndTime(1, this.getEndTime());
-	}
+							IJ.log(""+" "+meshes.size());
+					}
+					// --- END OF MESH PROCESSING LOOP ---
+				}
+
+				// --- START OF CONTENT CREATION LOGIC  (BEFORE DISPLAY UPDATE) (FINAL CORRECTED BLOCK) ---
+				String cName="";	
+				for (String ciKey: cInstants.keySet()) {
+					// CRITICAL CHECK: If Content already exists globally (from a previous file iteration)
+					if (univ.contents.containsKey(ciKey))
+						continue;
+
+					TreeMap<Integer, ContentInstant> ciTreeMap = cInstants.get(ciKey);
+					cName = ciKey;
+				}
+
+				// 2. Create the parent Content object
+				Content content = new Content(cName, cInstants.get(cName), false);
+				if (content!=null) {
+					batchedContents.add(content);
+					if (univ.addContentLater(content, false)!=null) {
+						content.setLocked(true);
+					}
+				}
+				IJ.log(""+batchedContents.size()  +" "+batchedContents.get(batchedContents.size()-1));
+				IJ.wait(0);
+				// --- END OF CONTENT CREATION LOGIC (BEFORE DISPLAY UPDATE) (FINAL CORRECTED BLOCK)---
+
+
+			}
+			
+	        for (Content c:batchedContents) {
+	            if (!univ.addContentToScene(c));
+	        }
+
+	        return null; 
+	    }
+
+	    // ------------------------------------------------------------------------
+	    // process (Runs on EDT for JProgressBar updates)
+	    // ------------------------------------------------------------------------
+//	    @Override
+//	    protected void process(List<Integer> chunks) {
+//	        if (progressBar == null) return;
+//	        
+//	        int latestStep = chunks.get(chunks.size() - 1);
+//	        progressBar.setValue(latestStep);
+//	        progressBar.setString("Loading files: " + latestStep + " of " + filePaths.length);
+//	    }
+
+	    // ------------------------------------------------------------------------
+	    // done (Runs ONCE on the Event Dispatch Thread for final GUI updates)
+	    // ------------------------------------------------------------------------
+	    @Override
+	    protected void done() {
+//	        if (progressBar != null) {
+//	            progressBar.setValue(filePaths.length);
+//	            progressBar.setString("Import Complete!");
+//	            // Optional: Hide the progress bar after a short delay
+//	            // progressBar.setVisible(false);
+//	        }
+	        
+	        // Your original final blocks, now running safely on the EDT:
+	        if (univ.autoAdjustView) {
+	            univ.getViewPlatformTransformer()
+	            .centerAt(univ.globalCenter);
+	            float range = (float)(univ.globalMax.x
+	                    - univ.globalMin.x);
+	            univ.ensureScale(range);
+	        }
+	        
+	        univ.fireTransformationUpdated();
+	        univ.canvas.revalidate();
+	    }
+	}	
+	
 
 	/**
 	 * Add the specified collection of Content to the universe. It is
@@ -2427,7 +2412,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	 * @param c The Collection of Content to add
 	 * @return a Collection of Future objects, each holding an added Content.
 	 *         The returned Collection is never null, but its Future objects
-	 *         may return null on calling get() on them if an error ocurred
+	 *         may return null on calling get() on them if an error occurred
 	 *         when adding a specific Content object.
 	 */
 	public Collection<Future<Content>> addContentLater(Collection<Content> cc) {

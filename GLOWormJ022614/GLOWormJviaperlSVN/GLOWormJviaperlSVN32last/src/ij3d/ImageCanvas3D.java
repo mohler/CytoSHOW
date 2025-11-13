@@ -24,17 +24,20 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.util.Map;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Hashtable;
 
 import ij.process.ByteProcessor;
 import ij.gui.ImageCanvas2;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.Roi;
+import ij.gui.TextRoi;
 import ij.plugin.Colors;
 
 import java.util.concurrent.Executors;
@@ -52,6 +55,8 @@ public class ImageCanvas3D extends Canvas3D implements KeyListener {
 	public Image crsrImg, noPickCrsrImg;
 	public int cursorX;
 	public int cursorY;
+	public Hashtable<String,Roi> messageRois;
+
 
 
 	protected void flush() {
@@ -76,6 +81,7 @@ public class ImageCanvas3D extends Canvas3D implements KeyListener {
 		this.ui = uia;
 		setPreferredSize(new Dimension(width, height));
 		ByteProcessor ip = new ByteProcessor(width, height);
+		messageRois = new Hashtable<String,Roi>();
 		roiImagePlus = new RoiImagePlus("RoiImage", ip);
 		roiImageCanvas = new ImageCanvas2(roiImagePlus) {
 			/* prevent ROI to enlarge/move on mouse click */
@@ -364,6 +370,25 @@ public class ImageCanvas3D extends Canvas3D implements KeyListener {
 
 	public Image3DUniverse getUniverse() {
 		return (Image3DUniverse) ((ImageWindow3D)SwingUtilities.windowForComponent(this)).getUniverse();
+	}
+	
+	@Override
+	public void paint(Graphics g) {
+	    // 1. Call the superclass's paint method FIRST. This handles the 3D rendering.
+	    super.paint(g); 
+	    
+	    // 2. Overlay the 2D messages.
+	    // Ensure the Graphics context is not null and we have messages to draw.
+	    if (g == null || messageRois.isEmpty()) {
+	        return;
+	    }
+
+	    // 3. Iterate through all messageRois and draw them.
+	    for (Roi roi : messageRois.values()) {
+	        if (roi != null) {
+	            roi.drawOverlay(g); // Use drawOverlay if available, otherwise just roi.draw(g);
+	        }
+	    }
 	}
 }
 
