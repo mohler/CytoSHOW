@@ -1,6 +1,9 @@
 package customnode;
 
 import javax.vecmath.Point3f;
+
+import ij.IJ;
+
 import javax.vecmath.Color4f;
 import javax.vecmath.Color3f;
 
@@ -27,8 +30,8 @@ public class WavefrontLoader {
 						throws IOException {
 		WavefrontLoader wl = new WavefrontLoader();
 		try {
-			wl.parse(objfile, objmtlStreams, flipXcoords);
-		} catch(RuntimeException e) {
+				wl.parse(objfile, objmtlStreams, flipXcoords);
+			} catch(RuntimeException e) {
 			System.out.println("error reading " + wl.name);
 			throw e;
 		}
@@ -132,6 +135,7 @@ public class WavefrontLoader {
 						} else if(line.startsWith("p ")) {
 							readFace();
 						}
+						IJ.wait(0);
 					}
 					in.close();
 					if (noVlines || noFlines) {

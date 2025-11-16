@@ -218,7 +218,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
             				List transferData = (List) transferable.getTransferData(DataFlavor.javaFileListFlavor);
             				if (transferData != null && transferData.size() > 0) {
             					//							IJ.log("You dropped " + transferData.size() + " files");							
-            					dtde.dropComplete(true);
+
             					if (transferData.get(0) instanceof File && ((File)transferData.get(0)).isDirectory()){
             						for (int j=0; j<transferData.size();j++){
             							for (File file:((File)transferData.get(j)).listFiles()){

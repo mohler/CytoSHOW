@@ -2231,7 +2231,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				ArrayList<String> timedObjFileNames = new ArrayList<String>();
 				File file = new File(filePath);
 				String titleName = file.getName();
-				if (false/*filePath.matches(".*_\\d+.obj")*/) {
+				if (filePath.matches(".*_\\d+.obj")) {
 					if (file.getParentFile() != null && file.getParentFile().list() != null){
 						for(String nextfilename: file.getParentFile().list()) {
 							String fileNameRoot = file.getName().split("_\\d+.obj")[0];
@@ -2275,62 +2275,104 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					if (meshes == null) {
-						IJ.wait(100);
+					
+					
+					// -------------------------------------------------------------------------
+					// START OF PARALLEL MESH PROCESSING (Replaces Polling/Compiling Loops)
+					// -------------------------------------------------------------------------
+
+					final int NUM_THREADS = Runtime.getRuntime().availableProcessors();
+					// Using a fixed pool to match your core count (24 threads)
+					ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS); 
+					List<Future<?>> futures = new ArrayList<>();
+
+					// 1. SYNCHRONIZE: Wait for the WavefrontLoader to complete I/O and fill 'meshes' map
+					// This uses the stable 100ms pause from the previous fix for large files.
+					while (!wl.allLinesParsed) {
+					    try {
+					        Thread.sleep(100); 
+					    } catch (InterruptedException ignored) {}
 					}
-					while (meshes.size() == 0) {
-						IJ.wait(10);
-						if (wl.allLinesParsed) {
-							break;
-						}
+
+					// 2. PARALLELIZE: Submit ContentInstant creation and compilation for every mesh
+					// The loader is guaranteed finished here, so we iterate over the fully populated map.
+					for (Object key : meshes.keySet()) {
+					    final String meshKey = (String)key;
+					    final CustomMesh mesh = meshes.get(key);
+					    
+					    // Skip if already processed (though it shouldn't be at this stage)
+					    if (cInstants.containsKey(meshKey)) continue; 
+
+					    // Capture the current time point for the lambda
+					    final int tpt = nextTpt; 
+
+					    // Launch a new task for each mesh
+					    Future<?> future = executor.submit(() -> {
+					        try {
+					            // --- ContentInstant Creation Logic (The heavy, parallel work) ---
+					            String safeName = meshKey; // Start with the raw mesh key
+					            int currentTpt = tpt;
+					            
+					            // Re-apply esoteric timepoint parsing if needed for this mesh name (now runs in parallel)
+					            if (parseTimeInCPHATE && meshKey.matches("(.*)(\\-i)(\\d+)(\\/\\d+)?(\\-c\\d+.*)")) {
+					                currentTpt = Integer.parseInt(meshKey.replaceAll("(.*)(\\-i)(\\d+)(\\/\\d+)?(\\-c\\d+.*)","$3"));
+					            }
+
+					            safeName = getSafeContentName(meshKey); // Apply global naming rules
+
+					            ContentInstant contInst = new ContentInstant(safeName + "_#" + currentTpt);
+					            contInst.timepoint = currentTpt;
+
+					            contInst.color = mesh.getColor();
+					            contInst.transparency = mesh.getTransparency();
+					            contInst.shaded = mesh.isShaded();
+					            contInst.showCoordinateSystem(UniverseSettings.showLocalCoordinateSystemsByDefault);
+					            
+					            // The contInst.compile() call is the major CPU bottleneck, now parallelized!
+					            contInst.display(new CustomMeshNode(mesh));
+					            contInst.compile();
+					            
+					            // --- CRITICAL SYNCHRONIZATION: Add to cInstants SAFELY ---
+					            // MUST be synchronized as multiple threads write to the same map.
+					            synchronized(cInstants) {
+					                if (!cInstants.containsKey(safeName)) {
+					                    // Initialize the TreeMap for this new mesh name
+					                    cInstants.put(safeName, new TreeMap<Integer, ContentInstant>());
+					                }
+					                // Add the ContentInstant (time point) to the mesh's TreeMap
+					                cInstants.get(safeName).put(currentTpt, contInst);
+					            }
+					            // --- END CRITICAL SYNCHRONIZATION ---
+
+					        } catch (Exception e) {
+					            System.err.println("Error processing mesh " + meshKey + ": " + e.getMessage());
+					        }
+					    });
+					    futures.add(future);
 					}
-					int meshCountDone = 0; // Keeping this for now, though it's not strictly necessary for loop control
 
-					// The loop condition is correct: process as long as meshes are loaded but not processed
-					while (meshes.size() > cInstants.size()) {
-
-						Object[] mksCloneArray =  Arrays.copyOf(meshes.keySet().toArray(),meshes.keySet().toArray().length);
-						for(Object key : mksCloneArray) {
-							String name = (String)key;
-							// This check is the primary mechanism to prevent duplicate processing
-							if (cInstants.containsKey(name)) 
-								continue;
-
-							name = getSafeContentName(name);
-							if (parseTimeInCPHATE && name.matches("(.*)(\\-i)(\\d+)(\\/\\d+)?(\\-c\\d+.*)")) {
-								nextTpt = Integer.parseInt(name.replaceAll("(.*)(\\-i)(\\d+)(\\/\\d+)?(\\-c\\d+.*)","$3"));
-							}
-
-							CustomMesh mesh = meshes.get(key);
-							// CRITICAL: Put the ContentInstant tracking into cInstants
-							cInstants.put(name, new TreeMap<Integer, ContentInstant>()); 
-							ContentInstant contInst = new ContentInstant(name + "_#" + nextTpt);
-							contInst.timepoint = nextTpt;
-
-							contInst.color = mesh.getColor();
-							contInst.transparency = mesh.getTransparency();
-							contInst.shaded = mesh.isShaded();
-							contInst.showCoordinateSystem(UniverseSettings.showLocalCoordinateSystemsByDefault);
-							contInst.display(new CustomMeshNode(mesh));
-							contInst.compile();
-
-							cInstants.get(name).put(nextTpt,contInst);
-
-						}
-
-						// REMOVED: The entire block that processed cInstants and created Content
-						// This was the source of the chatter because it ran on every iteration.
-
-						// The redundant meshCountDone increment is also removed from here if it was present
-
-						// Add a small wait here to yield control if the loop is running very fast
-						if (meshes.size() > cInstants.size()) {
-							IJ.wait(10);
-						}
-						if (meshes.size() >1)
-							IJ.log(""+" "+meshes.size());
+					// 3. WAIT: Block the doInBackground thread until all parallel tasks are complete
+					for (Future<?> future : futures) {
+					    try {
+					        future.get(); // Blocks until task completes
+					    } catch (InterruptedException | ExecutionException e) {
+					        System.err.println("Error waiting for parallel mesh processing: " + e.getMessage());
+					    }
 					}
-					// --- END OF MESH PROCESSING LOOP ---
+
+					// 4. CLEANUP: Shut down the executor service
+					executor.shutdown();
+					// Optional: Wait a bit for threads to terminate gracefully
+					try {
+					    executor.awaitTermination(1, TimeUnit.MINUTES);
+					} catch (InterruptedException e) {
+					    Thread.currentThread().interrupt();
+					}
+
+					// -------------------------------------------------------------------------
+					// END OF PARALLEL MESH PROCESSING
+					// -------------------------------------------------------------------------
+					
 				}
 
 				// --- START OF CONTENT CREATION LOGIC  (BEFORE DISPLAY UPDATE) (FINAL CORRECTED BLOCK) ---
@@ -2342,8 +2384,6 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 					TreeMap<Integer, ContentInstant> ciTreeMap = cInstants.get(ciKey);
 					cName = ciKey;
-				}
-
 				// 2. Create the parent Content object
 				Content content = new Content(cName, cInstants.get(cName), false);
 				if (content!=null) {
@@ -2354,6 +2394,8 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 				}
 				IJ.log(""+batchedContents.size()  +" "+batchedContents.get(batchedContents.size()-1));
 				IJ.wait(0);
+				}
+
 				// --- END OF CONTENT CREATION LOGIC (BEFORE DISPLAY UPDATE) (FINAL CORRECTED BLOCK)---
 
 
