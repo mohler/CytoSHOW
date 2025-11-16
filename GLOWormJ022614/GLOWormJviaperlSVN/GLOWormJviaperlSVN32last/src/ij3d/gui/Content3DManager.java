@@ -2813,10 +2813,12 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 			if (list.getSelectedIndices().length <= 1) {
 //				restore(imp, index, true);
 				String selectedLabel = list.getSelectedValue();
-				String editedLabel = selectedLabel.replace("_#0_#0 \"_0", "").replace("\"", "");
+				String editedLabel = selectedLabel.replaceAll("(.*?)(_\\#\\d){2} \"_\\d.*", "$1").replace("\"", "");
+				int labelTpt = Integer.parseInt((selectedLabel).replaceAll("(.*?)((_\\#)(\\d)){2} \"_\\d.*", "$4").replace("\"", ""));
 				Content c = ((Content)((Image3DUniverse) univ).getContent(editedLabel));
 				if (c.getInstants().containsValue(contentInstants.get(selectedLabel))) {
 					((Image3DUniverse)univ).select(c, true);
+					((Image3DUniverse)univ).showTimepoint(labelTpt);
 
 				}
 			} else {

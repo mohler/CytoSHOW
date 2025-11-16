@@ -715,9 +715,13 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 // THIS WAS COMMENTED OUT AT SOME POINT.  THEREFORE, COULD NOT UNLOCK ANY CONTENTS...		
 		fireContentSelected(c,true);
 		if (singleSelection && selectedContents.size()>0 && selectedContents.get(0) != null) {
-			int q = c3dm.getListModel().indexOf("\""+selectedContents.get(0).getName()+"_#0_#0 \"_0");
-			c3dm.getList().setSelectedIndex(q);
-			c3dm.getList().ensureIndexIsVisible(q);
+			int t = this.getCurrentTimepoint();
+			int q = c3dm.getListModel().indexOf("\""+selectedContents.get(0).getName()+"_#"+t+"_#"+t+" \"_0");
+			if (c3dm.getList().getSelectedIndex() != q) {
+				c3dm.getList().setSelectedIndex(q);
+				c3dm.getList().ensureIndexIsVisible(q);
+			
+			}
 		}
 		if(c != null && ij.plugin.frame.Recorder.record)
 			IJ3dExecuter.record("select", c.getName());
@@ -2254,12 +2258,12 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 				//		setTitle((this.flipXonImport?"FlipX_":"")+titleName);
 
+				int nextTpt =0;
 				for (String nextmatchingfilename: timedObjFileNms) {
 					if (nextmatchingfilename.equals("SVV_0000.obj"))
 						continue;
 					String nextmatchingfilePath = file.getParent() +File.separator + nextmatchingfilename;
 					String[] tptParse = (nextmatchingfilename).split("_");
-					int nextTpt =0;
 					if (tptParse[tptParse.length-1].matches("\\d+.obj")) {
 						nextTpt = Integer.parseInt(tptParse[tptParse.length-1].replace(".obj", ""));
 					} 
@@ -2287,21 +2291,21 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 					List<Future<?>> futures = new ArrayList<>();
 
 					// 1. SYNCHRONIZE: Wait for the WavefrontLoader to complete I/O and fill 'meshes' map
-					// This uses the stable 100ms pause from the previous fix for large files.
+					// This uses the stable 100ms pause from the previous fix for large files. NOW JUST 1ms...Stable??
 					while (!wl.allLinesParsed) {
 					    try {
-					        Thread.sleep(100); 
+					        Thread.sleep(1); 
 					    } catch (InterruptedException ignored) {}
 					}
 
-					// 2. PARALLELIZE: Submit ContentInstant creation and compilation for every mesh
-					// The loader is guaranteed finished here, so we iterate over the fully populated map.
+					// 2. PARALLELIZE: Submit ContentInstant creation and compilation for every mesh in the current file
+					// The loader for current file is guaranteed finished here, so we iterate over the fully populated map.
 					for (Object key : meshes.keySet()) {
 					    final String meshKey = (String)key;
 					    final CustomMesh mesh = meshes.get(key);
 					    
-					    // Skip if already processed (though it shouldn't be at this stage)
-					    if (cInstants.containsKey(meshKey)) continue; 
+//					    // Skip if already processed (though it shouldn't be at this stage)
+//					    if (cInstants.containsKey(meshKey)) continue; 
 
 					    // Capture the current time point for the lambda
 					    final int tpt = nextTpt; 
