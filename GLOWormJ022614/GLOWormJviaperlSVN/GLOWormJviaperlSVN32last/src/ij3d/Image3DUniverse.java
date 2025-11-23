@@ -29,6 +29,7 @@ import java.awt.MenuItem;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
@@ -185,8 +186,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	
 	private Content3DManager c3dm;
 
-    private static ScheduledThreadPoolExecutor blinkService;
-	private ScheduledFuture schfut;
+	private javax.swing.Timer blinkTimer;
 	private boolean blinkOn;
 
 //	private BufferedImage noPickCrsrImg;
@@ -212,9 +212,42 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	public Image3DUniverse(int width, int height) {
 		super(width, height);
 		numUniversesLaunched++;
-		if (blinkService ==null){
-			blinkService = new ScheduledThreadPoolExecutor(1);
-		}
+
+		// Create the timer, but don't start it yet. 500ms delay.
+		blinkTimer = new javax.swing.Timer(500, new ActionListener() {
+		    public void actionPerformed(ActionEvent e) {
+		        if (selectedContents.isEmpty()) {
+		            // Safety: stop if nothing is selected
+		            blinkTimer.stop();
+		            return;
+		        }
+		        
+		        if (blinkOn) {
+		            // State A: Show Blink Color
+		            Image cursor = canvas.crsrImg;
+		            for (Content nextC : selectedContents) {
+		                nextC.setTempColor(nextC.trueColor);
+		            }
+		            canvas.crsrImg = cursor;
+		            blinkOn = false;
+		        } else {
+		            // State B: Show Dimmed Color
+		            Image cursor = canvas.crsrImg;
+		            for (Content nextC : selectedContents) {
+		                nextC.setTempColor(new Color3f(
+		                    nextC.trueColor.x * 0.7f,
+		                    nextC.trueColor.y * 0.7f,
+		                    nextC.trueColor.z * 0.7f));
+		            }
+		            canvas.crsrImg = cursor;
+		            blinkOn = true;
+		        }
+		        // Force a lightweight repaint so the color change shows up immediately
+		        canvas.repaint(); 
+		    }
+		});
+		blinkTimer.setRepeats(true);
+
 		canvas = (ImageCanvas3D)getCanvas();
 		canvas.crsrImg = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB_PRE);
 		canvas.noPickCrsrImg = new BufferedImage(800, 800, BufferedImage.TYPE_INT_ARGB_PRE);
@@ -417,24 +450,76 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		return fullscreen;
 	}
 
+	
 	/**
 	 * Close this universe. Remove all Contents and release all resources.
 	 */
 
 	public void cleanup() {
-		timeline.pause();
-		removeAllContents();
-		contents.clear();
-		universes.remove(this);
-		adder.shutdownNow();
-		iJ3dExecuter.flush();
-		WindowListener[] ls = plDialog.getWindowListeners();
-		for(WindowListener l : ls)
-			plDialog.removeWindowListener(l);
-		plDialog.dispose();
-		super.cleanup();
-	}
+	    // 1. Stop the Swing Timer (The "Lag" Fix)
+	    if (blinkTimer != null) {
+	        blinkTimer.stop();
+	        blinkTimer = null;
+	    }
 
+	    // 2. KILL THE INVISIBLE MANAGER (The 50GB Leak Fix)
+	    if (c3dm != null) {
+	        // Content3DManager extends PlugInFrame, so close() calls dispose()
+	        c3dm.dispose(); 
+	        c3dm = null;
+	    }
+
+	    // 3. Pause Timeline
+	    if (timeline != null) {
+	        timeline.pause();
+	    }
+	    if (timelineGUI != null) {
+	        // If TimelineGUI creates a JFrame/JDialog, it needs disposal too!
+	        // Check TimelineGUI code. If it extends Window, call dispose().
+	        // Otherwise, just nulling it might be fine if it's just a JPanel.
+	        timelineGUI = null; 
+	    }
+
+	    // 4. Standard Cleanup
+	    removeAllContents();
+	    if (contents != null) contents.clear();
+	    if (selectedContents != null) selectedContents.clear();
+	    
+	    // 5. Remove from static list
+	    universes.remove(this);
+	    
+	    // 6. Shutdown the adder
+	    if (adder != null) {
+	        adder.shutdownNow();
+	    }
+	    
+	    if (iJ3dExecuter != null) {
+	        iJ3dExecuter.flush();
+	    }
+	    
+	    // 7. Null-safe Dialog disposal
+	    if (plDialog != null) {
+	        WindowListener[] ls = plDialog.getWindowListeners();
+	        for(WindowListener l : ls)
+	            plDialog.removeWindowListener(l);
+	        plDialog.dispose();
+	    }
+	    
+	    // 8. Window cleanup
+	    if (win != null) {
+	        WindowListener[] wls = win.getWindowListeners();
+	        for (WindowListener wl : wls) {
+	            win.removeWindowListener(wl);
+	        }
+	        // Quit the updater thread inside the window
+	        win.quitImageUpdater(); 
+	        win.dispose();
+	    }
+
+	    super.cleanup();
+	}
+	
+	
 	/**
 	 * Shows the specified status string at the bottom of the viewer window.
 	 * @param text
@@ -667,32 +752,11 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 			c.setSelected(true);
 			selectedContents.add(c);
-			if (schfut == null || schfut.isDone() || schfut.isCancelled()) {
-				schfut = blinkService.scheduleAtFixedRate(new Runnable() {
-					public void run()
-					{
-						if (blinkOn){
-							Image cursor = canvas.crsrImg;
-							for(Content nextC:selectedContents) {
-								nextC.setTempColor(nextC.trueColor);
-							}
-							canvas.crsrImg = cursor;
-
-							blinkOn = false;
-						} else {
-							Image cursor = canvas.crsrImg;
-							for(Content nextC:selectedContents) {
-								nextC.setTempColor(new Color3f(nextC.trueColor.x*0.7f,
-										nextC.trueColor.y*0.7f,
-										nextC.trueColor.z*0.7f));
-							}
-							canvas.crsrImg = cursor;
-							blinkOn =true;
-						}
-					}
-				}, 0, 500, TimeUnit.MILLISECONDS);
-			}
 			
+			if (!blinkTimer.isRunning()) {
+			    blinkOn = false; // Reset state
+			    blinkTimer.start();
+			}			
 			if(singleSelection && selectedContents.size()>0 && selectedContents.get(0) != null) {
 				while (selectedContents.size()>1) {
 					selectedContents.get(0).setSelected(false);
@@ -757,6 +821,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			selectedContents.removeAll(selectedContents);
 			fireContentSelected(null, true);
 		}
+		if (blinkTimer != null) blinkTimer.stop();
 	}
 
 	/**

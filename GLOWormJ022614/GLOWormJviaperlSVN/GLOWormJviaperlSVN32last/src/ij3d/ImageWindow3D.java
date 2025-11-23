@@ -612,62 +612,78 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 		imp_updater.updateAndWait();
 	}
 
-	void quitImageUpdater() {
-		imp_updater.quit();
+	// Make it public so Image3DUniverse can call it
+	public void quitImageUpdater() {
+	    imp_updater.quit();
 	}
-
+	
+	
 	final ImagePlusUpdater imp_updater = new ImagePlusUpdater();
 
 	private class ImagePlusUpdater extends Thread {
-		boolean go = true;
-		int update = 0;
-		ImagePlusUpdater() {
-			super("3D-V-IMP-updater");
-			try { setDaemon(true); } catch (Exception e) { e.printStackTrace(); }
-			setPriority(Thread.NORM_PRIORITY);
-			start();
-		}
-		void update() {
-			synchronized (this) {
-				update++;
-				notify();
-			}
-		}
-		void updateAndWait() {
-			update();
-			synchronized (this) {
-				while (update > 0) {
-					try { wait(); } catch (InterruptedException ie) { ie.printStackTrace(); }
-				}
-			}
-		}
-		public void run() {
-			while (go) {
-				final int u;
-				synchronized (this) {
-					if (0 == update) {
-						try { wait(); } catch (InterruptedException ie) { ie.printStackTrace(); }
-					}
-					u = update;
-				}
-				ImageWindow3D.this.imp.setImage(getNewImagePlus());
-				synchronized (this) {
-					if (u != update) continue; // try again, there was a new request
-					// Else, done:
-					update = 0;
-					notify(); // for updateAndWait
-				}
-			}
-		}
-		void quit() {
-			go = false;
-			synchronized (this) {
-				update = -Integer.MAX_VALUE;
-				notify();
-			}
-		}
-	}
+	    volatile boolean go = true;
+	    int update = 0;
 
+	    ImagePlusUpdater() {
+	        super("3D-V-IMP-updater");
+	        try { setDaemon(true); } catch (Exception e) { e.printStackTrace(); }
+	        setPriority(Thread.NORM_PRIORITY);
+	        start();
+	    }
+
+	    void update() {
+	        synchronized (this) {
+	            update++;
+	            notify();
+	        }
+	    }
+
+	    void updateAndWait() {
+	        update();
+	        synchronized (this) {
+	            while (update > 0) {
+	                try { wait(); } catch (InterruptedException ie) { ie.printStackTrace(); }
+	            }
+	        }
+	    }
+
+	    public void run() {
+	        while (go) {
+	            final int u;
+	            synchronized (this) {
+	                if (0 == update) {
+	                    try { wait(); } catch (InterruptedException ie) { ie.printStackTrace(); }
+	                }
+	                
+	                // CRITICAL FIX: Check 'go' immediately after waking up.
+	                if (!go) return; 
+	                
+	                u = update;
+	            }
+	            
+	            // Only perform the heavy image update if we are still alive
+	            if (go) {
+	                ImageWindow3D.this.imp.setImage(getNewImagePlus());
+	            }
+	            
+	            synchronized (this) {
+	                if (u != update) continue; 
+	                update = 0;
+	                notify(); // for updateAndWait
+	            }
+	        }
+	    }
+
+	    void quit() {
+	        go = false;
+	        synchronized (this) {
+	            update = -Integer.MAX_VALUE; // Ensure updateAndWait doesn't block
+	            notifyAll(); // <--- THIS IS THE NOTIFY YOU WERE LOOKING FOR
+	        }
+	    }
+	}
+	
+	
 	public ImagePlus getImagePlus() {
 		if(imp == null)
 			imp_updater.updateAndWait(); //updateImagePlus();

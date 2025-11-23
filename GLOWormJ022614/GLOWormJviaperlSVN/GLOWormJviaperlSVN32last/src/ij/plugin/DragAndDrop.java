@@ -1944,30 +1944,30 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 
 			}
 
-
-			try {
-				if (openAsVirtualStack) {
-					dropUniverse.setFlipXonImport(true);
-					int s = this.dtde.getDropAction();
-					dropUniverse.addContentLater(objPathsJustDropped.toArray(new String[objPathsJustDropped.size()]), null, s==1||s==1073741824?true:false);
-				} else {
-					int s = this.dtde.getDropAction();
-					dropUniverse.addContentLater(objPathsJustDropped.toArray(new String[objPathsJustDropped.size()]), null, s==1||s==1073741824?true:false);
-				}
-			} catch (Exception e) {
-				dropUniverse = new Image3DUniverse();
-				dropUniverse.show(false);
-				while (dropUniverse.getWindow() == null) IJ.wait (10);
-				if (openAsVirtualStack) {
-					dropUniverse.setFlipXonImport(true);
-					int s = this.dtde.getDropAction();
-					dropUniverse.addContentLater(objPathsJustDropped.toArray(new String[objPathsJustDropped.size()]), null, s==1||s==1073741824?true:false);
-				} else {
-					int s = this.dtde.getDropAction();
-					dropUniverse.addContentLater(objPathsJustDropped.toArray(new String[objPathsJustDropped.size()]), null, s==1||s==1073741824?true:false);
+			if (objPathsJustDropped!=null && objPathsJustDropped.size()>0) {
+				try {
+					if (openAsVirtualStack) {
+						dropUniverse.setFlipXonImport(true);
+						int s = this.dtde.getDropAction();
+						dropUniverse.addContentLater(objPathsJustDropped.toArray(new String[objPathsJustDropped.size()]), null, s==1||s==1073741824?true:false);
+					} else {
+						int s = this.dtde.getDropAction();
+						dropUniverse.addContentLater(objPathsJustDropped.toArray(new String[objPathsJustDropped.size()]), null, s==1||s==1073741824?true:false);
+					}
+				} catch (Exception e) {
+					dropUniverse = new Image3DUniverse();
+					dropUniverse.show(false);
+					while (dropUniverse.getWindow() == null) IJ.wait (10);
+					if (openAsVirtualStack) {
+						dropUniverse.setFlipXonImport(true);
+						int s = this.dtde.getDropAction();
+						dropUniverse.addContentLater(objPathsJustDropped.toArray(new String[objPathsJustDropped.size()]), null, s==1||s==1073741824?true:false);
+					} else {
+						int s = this.dtde.getDropAction();
+						dropUniverse.addContentLater(objPathsJustDropped.toArray(new String[objPathsJustDropped.size()]), null, s==1||s==1073741824?true:false);
+					}
 				}
 			}
-
 			//ImageJ3DViewer.lock();
 
 

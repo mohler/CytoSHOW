@@ -59,7 +59,7 @@ public class ImageCanvas3D extends Canvas3D implements KeyListener {
 
 
 
-	protected void flush() {
+	public void flush() {
 		exec.shutdown();
 	}
 
