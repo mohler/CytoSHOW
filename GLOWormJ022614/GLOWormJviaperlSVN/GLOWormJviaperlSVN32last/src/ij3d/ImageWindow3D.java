@@ -622,6 +622,7 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 
 	private class ImagePlusUpdater extends Thread {
 	    volatile boolean go = true;
+	    volatile boolean suspended = false; // Batching Flag
 	    int update = 0;
 
 	    ImagePlusUpdater() {
@@ -651,17 +652,22 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 	        while (go) {
 	            final int u;
 	            synchronized (this) {
-	                if (0 == update) {
+	                // WAIT CONDITION:
+	                // Wait if (no updates pending) OR (we are suspended)
+	                // But stop waiting if (go becomes false)
+	                while ((0 == update || suspended) && go) {
 	                    try { wait(); } catch (InterruptedException ie) { ie.printStackTrace(); }
 	                }
 	                
-	                // CRITICAL FIX: Check 'go' immediately after waking up.
+	                // ZOMBIE CHECK:
+	                // If we woke up because quit() was called, die immediately.
 	                if (!go) return; 
 	                
 	                u = update;
 	            }
 	            
-	            // Only perform the heavy image update if we are still alive
+	            // WORK PAYLOAD:
+	            // Only perform the heavy update if we are alive
 	            if (go) {
 	                ImageWindow3D.this.imp.setImage(getNewImagePlus());
 	            }
@@ -678,7 +684,26 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 	        go = false;
 	        synchronized (this) {
 	            update = -Integer.MAX_VALUE; // Ensure updateAndWait doesn't block
-	            notifyAll(); // <--- THIS IS THE NOTIFY YOU WERE LOOKING FOR
+	            notifyAll(); // Wake up the thread so it checks !go and exits
+	        }
+	    }
+	}	
+	
+	
+	public void suspendImagePlusUpdater() {
+	    if (imp_updater != null) {
+	        synchronized(imp_updater) {
+	            imp_updater.suspended = true;
+	        }
+	    }
+	}
+
+	public void resumeImagePlusUpdater() {
+	    if (imp_updater != null) {
+	        synchronized(imp_updater) {
+	            imp_updater.suspended = false;
+	            imp_updater.update++;    // Queue one final catch-up update
+	            imp_updater.notifyAll(); // Wake up the thread
 	        }
 	    }
 	}

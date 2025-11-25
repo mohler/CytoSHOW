@@ -491,103 +491,115 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 		boolean wasVis = this.isVisible();
 
 		if (e.getSource() == textFilterField) {
-//			this.setVisible(false);
-
-
-			String thisWasTitle = this.getTitle();
-			String searchString = textFilterField.getText();
-			boolean isRegex = (searchString.startsWith("??"));
-			boolean isLinBackTrace = (searchString.toLowerCase().startsWith("?lbt?"));
-			boolean isLinTrace = (searchString.toLowerCase().startsWith("?lt?"));
-			listModel.removeAllElements();
-			prevSearchString = searchString;
-			int count = fullListModel.getSize();
-			Dimension dim = list.getSize();
-			list.setSize(0, 0);
-			textCountLabel.setText("?" + "/" + fullListModel.size());
-			univ.getWindow().countLabel.setText("" + listModel.size() + "/" + fullListModel.size() + "");
-			univ.getWindow().countLabel.repaint();
-			// imp.getWindow().tagsButton.setText(""+fullListModel.size());
-
-			univ.getWindow().tagsButton.repaint();
-			searching = true;
-			long timeLast = 0;
-			long timeNow = 0;
-
-			for (int i = 0; i < count; i++) {
-				timeNow = System.currentTimeMillis();
-				if (searchString.trim().equalsIgnoreCase("") || searchString.trim().equalsIgnoreCase(".*")) {
-					listModel.addElement(fullListModel.get(i));
-					contentInstants.get(fullListModel.get(i)).setVisible(true);
-
-					continue;
-				}
-
-				if (isRegex) {
-					if (((String) fullListModel.get(i)).replace("_#0_#0 \"_0", " ").matches(searchString.substring(2))) {
-					listModel.addElement(fullListModel.get(i));
-					contentInstants.get(fullListModel.get(i)).setVisible(true);
-				} else {
-					contentInstants.get(fullListModel.get(i)).setVisible(false);
-				}				
-				} else if (isLinBackTrace) { // Uses complex regex lookahead query to anticipate various terminations of
-												// ancestor names
-					String matchString = "^\"" + searchString.charAt(5);
-					for (int c = 6; c < searchString.length(); c++) {
-						matchString = matchString + "(((?=" + searchString.charAt(c) + ")" + searchString.charAt(c)
-								+ ")|((?= )))";
-					}
-					matchString = matchString + " \".*$";
-					if (((String) fullListModel.get(i)).matches(matchString)) {
-						listModel.addElement(fullListModel.get(i));
-						contentInstants.get(fullListModel.get(i)).setVisible(true);
-					} else {
-						contentInstants.get(fullListModel.get(i)).setVisible(false);
-					}
-
-
-				} else if (isLinTrace) {// Uses complex regex lookahead query to anticipate various terminations of
-										// ancestor names
-					String matchString = "^\"" + searchString.charAt(4);
-					for (int c = 5; c < searchString.length(); c++) {
-						matchString = matchString + "(((?=" + searchString.charAt(c) + ")" + searchString.charAt(c)
-								+ ")|((?= )))";
-					}
-					matchString = matchString + ".* \".*$";
-					if (((String) fullListModel.get(i)).matches(matchString)) {
-						listModel.addElement(fullListModel.get(i));
-						contentInstants.get(fullListModel.get(i)).setVisible(true);
-					} else {
-						contentInstants.get(fullListModel.get(i)).setVisible(false);
-					}
-
-
-				} else if (((String) fullListModel.get(i)).toLowerCase().contains(searchString.toLowerCase())) {
-					listModel.addElement(fullListModel.get(i));
-					contentInstants.get(fullListModel.get(i)).setVisible(true);
-				} else {
-					contentInstants.get(fullListModel.get(i)).setVisible(false);
-				}
-
+			// --- 1. INSERT SUSPEND LOGIC AT THE VERY TOP OF THE IF-BLOCK ---
+			ImageWindow3D win = null;
+			if (univ != null && univ.getWindow() instanceof ImageWindow3D) {
+				win = (ImageWindow3D) univ.getWindow();
+				win.suspendImagePlusUpdater(); // <--- PAUSE UPDATES
 			}
-			
-			searching = false;
-			list.setSize(dim);
-			textCountLabel.setText("" + listModel.size() + "/" + fullListModel.size());
-			univ.getWindow().countLabel.setText("" + listModel.size() + "/" + fullListModel.size() + "");
-			univ.getWindow().countLabel.repaint();
 
-			univ.getWindow().tagsButton.repaint();
-			
-			univ.getWindow().revalidate();
-			
-			IJ.runMacro("print(\"\\\\Update:\")");
+			try {
+				String thisWasTitle = this.getTitle();
+				String searchString = textFilterField.getText();
+				boolean isRegex = (searchString.startsWith("??"));
+				boolean isLinBackTrace = (searchString.toLowerCase().startsWith("?lbt?"));
+				boolean isLinTrace = (searchString.toLowerCase().startsWith("?lt?"));
+				listModel.removeAllElements();
+				prevSearchString = searchString;
+				int count = fullListModel.getSize();
+				Dimension dim = list.getSize();
+				list.setSize(0, 0);
+				textCountLabel.setText("?" + "/" + fullListModel.size());
+				univ.getWindow().countLabel.setText("" + listModel.size() + "/" + fullListModel.size() + "");
+				univ.getWindow().countLabel.repaint();
+				// imp.getWindow().tagsButton.setText(""+fullListModel.size());
 
-			if (!(univ.getWindow().getTitle().matches(".*[XY]Z +\\d+.*"))) {
-				ImageWindow imgWin = univ.getWindow();
-				this.setVisible(wasVis);
-				if (imgWin != null)
-					setLocation(imgWin.getLocationOnScreen().x + imgWin.getWidth() + 5, imgWin.getLocationOnScreen().y);
+				univ.getWindow().tagsButton.repaint();
+				searching = true;
+				long timeLast = 0;
+				long timeNow = 0;
+
+				for (int i = 0; i < count; i++) {
+					timeNow = System.currentTimeMillis();
+					if (searchString.trim().equalsIgnoreCase("") || searchString.trim().equalsIgnoreCase(".*")) {
+						listModel.addElement(fullListModel.get(i));
+						contentInstants.get(fullListModel.get(i)).setVisible(true);
+
+						continue;
+					}
+
+					if (isRegex) {
+						if (((String) fullListModel.get(i)).replace("_#0_#0 \"_0", " ").matches(searchString.substring(2))) {
+							listModel.addElement(fullListModel.get(i));
+							contentInstants.get(fullListModel.get(i)).setVisible(true);
+						} else {
+							contentInstants.get(fullListModel.get(i)).setVisible(false);
+						}				
+					} else if (isLinBackTrace) { // Uses complex regex lookahead query to anticipate various terminations of
+						// ancestor names
+						String matchString = "^\"" + searchString.charAt(5);
+						for (int c = 6; c < searchString.length(); c++) {
+							matchString = matchString + "(((?=" + searchString.charAt(c) + ")" + searchString.charAt(c)
+							+ ")|((?= )))";
+						}
+						matchString = matchString + " \".*$";
+						if (((String) fullListModel.get(i)).matches(matchString)) {
+							listModel.addElement(fullListModel.get(i));
+							contentInstants.get(fullListModel.get(i)).setVisible(true);
+						} else {
+							contentInstants.get(fullListModel.get(i)).setVisible(false);
+						}
+
+
+					} else if (isLinTrace) {// Uses complex regex lookahead query to anticipate various terminations of
+						// ancestor names
+						String matchString = "^\"" + searchString.charAt(4);
+						for (int c = 5; c < searchString.length(); c++) {
+							matchString = matchString + "(((?=" + searchString.charAt(c) + ")" + searchString.charAt(c)
+							+ ")|((?= )))";
+						}
+						matchString = matchString + ".* \".*$";
+						if (((String) fullListModel.get(i)).matches(matchString)) {
+							listModel.addElement(fullListModel.get(i));
+							contentInstants.get(fullListModel.get(i)).setVisible(true);
+						} else {
+							contentInstants.get(fullListModel.get(i)).setVisible(false);
+						}
+
+
+					} else if (((String) fullListModel.get(i)).toLowerCase().contains(searchString.toLowerCase())) {
+						listModel.addElement(fullListModel.get(i));
+						contentInstants.get(fullListModel.get(i)).setVisible(true);
+					} else {
+						contentInstants.get(fullListModel.get(i)).setVisible(false);
+					}
+
+				}
+
+				searching = false;
+				list.setSize(dim);
+				textCountLabel.setText("" + listModel.size() + "/" + fullListModel.size());
+				univ.getWindow().countLabel.setText("" + listModel.size() + "/" + fullListModel.size() + "");
+				univ.getWindow().countLabel.repaint();
+
+				univ.getWindow().tagsButton.repaint();
+
+				univ.getWindow().revalidate();
+
+				IJ.runMacro("print(\"\\\\Update:\")");
+
+				if (!(univ.getWindow().getTitle().matches(".*[XY]Z +\\d+.*"))) {
+					ImageWindow imgWin = univ.getWindow();
+					this.setVisible(wasVis);
+					if (imgWin != null)
+						setLocation(imgWin.getLocationOnScreen().x + imgWin.getWidth() + 5, imgWin.getLocationOnScreen().y);
+				}
+
+			} finally {
+				// --- 2. INSERT RESUME LOGIC AT THE VERY BOTTOM (inside finally) ---
+				if (win != null) {
+					win.resumeImagePlusUpdater(); // <--- RESUME & TRIGGER ONE UPDATE
+				}
 			}
 
 		} else {
