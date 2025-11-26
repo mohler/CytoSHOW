@@ -222,7 +222,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
             					if (transferData.get(0) instanceof File && ((File)transferData.get(0)).isDirectory()){
             						for (int j=0; j<transferData.size();j++){
             							for (File file:((File)transferData.get(j)).listFiles()){
-            								if (file.getName().toLowerCase().endsWith(".obj"))
+            								if (file.getName().toLowerCase().endsWith(".obj") || file.getName().toLowerCase().endsWith(".glb"))
             									droppedItemsArrayList.add(file);
             							}
             						}
@@ -287,6 +287,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
             								|| tmp.toLowerCase().endsWith(".avi") 
             								|| tmp.toLowerCase().contains("scene.scn")
             								|| tmp.toLowerCase().endsWith(".obj")
+            								|| tmp.toLowerCase().endsWith(".glb")
             								|| tmp.toLowerCase().endsWith(".zip")
             								|| tmp.toLowerCase().endsWith(".tif"))){
             					if (IJ.debugMode) IJ.log(" stringinput");
@@ -559,7 +560,8 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 				if (nextItem!=null && (nextItem instanceof String)) {
 					if (!nextItem.equals(""))  {
 
-						if (( ((String)nextItem).toLowerCase().startsWith("http") || ((String)nextItem).toLowerCase().startsWith("https")) && !((String)nextItem).toLowerCase().endsWith(".obj")){
+						if (( ((String)nextItem).toLowerCase().startsWith("http") || ((String)nextItem).toLowerCase().startsWith("https")) 
+									&& !(((String)nextItem).toLowerCase().endsWith(".obj") || ((String)nextItem).toLowerCase().endsWith(".glb"))){
 							if ( ((String)nextItem).contains("://gloworm.org/") ||
 									((String)nextItem).contains("://fsbill.vcell.uchc.edu/") ||
 									((String)nextItem).contains("://cgi.cytoshow.org/") ){
@@ -695,7 +697,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 									nDrops--;
 									return;
 
-								}else if (path.toLowerCase().endsWith(".obj")) {
+								}else if (path.toLowerCase().endsWith(".obj") || path.toLowerCase().endsWith(".glb")) {
 									//							Component dtc = this.dtde.getDropTargetContext().getDropTarget().getComponent();
 									Window dropWin = null;
 									if (dropUniverse != null)
@@ -1337,7 +1339,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 
 
 
-							//NEXT ALLOWABLE ACTIONS IF ITEM ENDS IN .OBJ and starts with http or https::
+							//NEXT ALLOWABLE ACTIONS IF ITEM ENDS IN .OBJ or .GLB and starts with http or https::
 
 						} else if ( ((String)nextItem).toLowerCase().endsWith(".mov") || ((String)nextItem).toLowerCase().endsWith(".avi") ){
 							String path = "";
@@ -1365,7 +1367,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 								MQTVSSceneLoader64.runMQTVS_SceneLoader64(path);
 							else
 								MQTVSSceneLoader64.runMQTVS_SceneLoader64(path);
-						}else if (((String)nextItem).toLowerCase().endsWith(".obj")) {
+						}else if (((String)nextItem).toLowerCase().endsWith(".obj") || ((String)nextItem).toLowerCase().endsWith(".glb")) {
 
 							// BEGIN OPEN WEB-BASED .OBJ/.MTL BLOCK (distinct from GLOWORM_DATA based opener at line 1382 below
 							//					Component dtc = this.dtde.getDropTargetContext().getDropTarget().getComponent();
@@ -1710,7 +1712,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					else
 						MQTVSSceneLoader64.runMQTVS_SceneLoader64( ((File)nextItem).getPath() );
 
-				}else if (nextItem!=null && ((File)nextItem).getPath().toLowerCase().endsWith(".obj")) {
+				}else if (nextItem!=null && (((File)nextItem).getPath().toLowerCase().endsWith(".obj") || ((File)nextItem).getPath().toLowerCase().endsWith(".glb"))) {
 					if (IJ.getInstance()!=null) {
 						if ( this.dtde.getDropTargetContext().getDropTarget().getComponent() == IJ.getInstance().getStatusBar()){
 							if (freshDrop){

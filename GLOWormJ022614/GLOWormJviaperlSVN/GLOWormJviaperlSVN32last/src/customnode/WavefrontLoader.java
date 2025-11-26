@@ -10,6 +10,7 @@ import javax.vecmath.Color3f;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -29,22 +30,92 @@ public class WavefrontLoader {
 	public static LinkedHashMap<String, CustomMesh> load(String objfile, InputStream[] objmtlStreams, boolean flipXcoords)
 						throws IOException {
 		WavefrontLoader wl = new WavefrontLoader();
-		try {
+		if (objfile.toLowerCase().endsWith(".obj")){
+			try {
 				wl.parse(objfile, objmtlStreams, flipXcoords);
 			} catch(RuntimeException e) {
-			System.out.println("error reading " + wl.name);
-			throw e;
+				System.out.println("error reading " + wl.name);
+				throw e;
+			}
+		} else if (objfile.toLowerCase().endsWith(".glb")){
+			try {
+				File file = new File(objfile);
+		        IJ.log("Importing GLB: " + file.getName());
+		        
+		        // 1. Use our new importer to decode the Meshopt/Draco data
+		        List<List<Point3f>> rawGeometries = GltfMeshImporter.loadMeshes(file);
+		        
+		        if (rawGeometries.isEmpty()) {
+		            IJ.log("Warning: No meshes found in GLB (or decode failed).");
+		        }
+
+		        // 2. Convert to CustomMesh objects
+		        for (int i = 0; i < rawGeometries.size(); i++) {
+		            List<Point3f> vertices = rawGeometries.get(i);
+		            
+		            // 3. The Constructor you confirmed exists!
+		            CustomMesh mesh = new CustomTriangleMesh(vertices);
+		            
+		            // Optional: Set default name and color
+		            String meshName = file.getName() + "_mesh_" + i;
+		            mesh.setName(meshName);
+		            
+		            // Add to your result map/list
+		            wl.meshes.put(meshName, mesh);
+		        }
+		        
+		        IJ.log("Successfully loaded " + rawGeometries.size() + " meshes.");
+
+		    } catch (Exception e) {
+		        IJ.log("GLB Import Failed: " + e.getMessage());
+		        e.printStackTrace();
+		    }
 		}
 		return wl.meshes;
 	}
 
 	public  LinkedHashMap<String, CustomMesh> loadObjs(String objfile, InputStream[] objmtlStreams, boolean flipXcoords)
 			throws IOException {
-		try {
-			parse(objfile, objmtlStreams, flipXcoords);
-		} catch(RuntimeException e) {
-			System.out.println("error reading " + name);
-			throw e;
+		if (objfile.toLowerCase().endsWith(".obj")){
+			try {
+				parse(objfile, objmtlStreams, flipXcoords);
+			} catch(RuntimeException e) {
+				System.out.println("error reading " + name);
+				throw e;
+			}
+		} else if (objfile.toLowerCase().endsWith(".glb")){
+			try {
+				File file = new File(objfile);
+		        IJ.log("Importing GLB: " + file.getName());
+		        
+		        // 1. Use our new importer to decode the Meshopt/Draco data
+		        List<List<Point3f>> rawGeometries = GltfMeshImporter.loadMeshes(file);
+		        
+		        if (rawGeometries.isEmpty()) {
+		            IJ.log("Warning: No meshes found in GLB (or decode failed).");
+		        }
+
+		        // 2. Convert to CustomMesh objects
+		        for (int i = 0; i < rawGeometries.size(); i++) {
+		            List<Point3f> vertices = rawGeometries.get(i);
+		            
+		            // 3. The Constructor you confirmed exists!
+		            CustomMesh mesh = new CustomTriangleMesh(vertices);
+		            
+		            // Optional: Set default name and color
+		            String meshName = file.getName() + "_mesh_" + i;
+		            mesh.setName(meshName);
+		            
+		            // Add to your result map/list
+		            meshes.put(meshName, mesh);
+		        }
+		        
+		        IJ.log("Successfully loaded " + rawGeometries.size() + " meshes.");
+
+		    } catch (Exception e) {
+		        IJ.log("GLB Import Failed: " + e.getMessage());
+		        e.printStackTrace();
+		    }
 		}
 		return meshes;
 	}
