@@ -2295,16 +2295,17 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			for (String filePath:filePaths) {
 				//			jbar.setValue(filePaths.length/(jbar.getValue()+1));
 				IJ.log(filePath);
-				if (filePath.endsWith("SVV_0000.obj"))
+				if (filePath.endsWith("SVV_0000.obj") || filePath.endsWith("SVV_0000.glb"))
 					continue;
 				ArrayList<String> timedObjFileNames = new ArrayList<String>();
 				File file = new File(filePath);
 				String titleName = file.getName();
-				if (filePath.matches(".*_\\d+.obj")) {
+				if (filePath.matches(".*_\\d+.(obj|glb)")) {
 					if (file.getParentFile() != null && file.getParentFile().list() != null){
 						for(String nextfilename: file.getParentFile().list()) {
-							String fileNameRoot = file.getName().split("_\\d+.obj")[0];
-							if (nextfilename.matches(fileNameRoot+"_\\d+.obj")) {
+							String fileNameRoot = file.getName().split("_\\d+.(obj|glb)")[0];
+							String fileNameSuffix = file.getName().replaceAll(".*\\.(obj|glb)", "$1");
+							if (nextfilename.matches(fileNameRoot+"_\\d+\\."+fileNameSuffix)) {
 								timedObjFileNames.add(nextfilename);
 							}
 						}
@@ -2312,7 +2313,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 						timedObjFileNames.add(new File(filePath).getName());
 					}
 				} else {
-					if (filePath.matches(".*\\.obj")) {
+					if (filePath.matches(".*\\.(obj|glb)")) {
 						timedObjFileNames.add(new File(filePath).getName());
 					}
 				}
@@ -2325,12 +2326,12 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 				int nextTpt =0;
 				for (String nextmatchingfilename: timedObjFileNms) {
-					if (nextmatchingfilename.equals("SVV_0000.obj"))
+					if (nextmatchingfilename.equals("SVV_0000.(obj|glb)"))
 						continue;
 					String nextmatchingfilePath = file.getParent() +File.separator + nextmatchingfilename;
 					String[] tptParse = (nextmatchingfilename).split("_");
-					if (tptParse[tptParse.length-1].matches("\\d+.obj")) {
-						nextTpt = Integer.parseInt(tptParse[tptParse.length-1].replace(".obj", ""));
+					if (tptParse[tptParse.length-1].matches("\\d+.(obj|glb)")) {
+						nextTpt = Integer.parseInt(tptParse[tptParse.length-1].replaceAll(".(obj|glb)", ""));
 					} 
 					//			else if (parseTimeInCPHATE && (nextmatchingfilename).matches("(.*)(csv\\.i)(\\d+)(\\.c\\d+.*\\.obj)")) {
 					//				nextTpt = Integer.parseInt(((String)nextmatchingfilename).replaceAll("(.*)(csv\\.i)(\\d+)(\\.c\\d+.*\\.obj)","$3"));

@@ -1,9 +1,7 @@
 package customnode;
 
 import javax.vecmath.Point3f;
-
 import ij.IJ;
-
 import javax.vecmath.Color4f;
 import javax.vecmath.Color3f;
 
@@ -19,256 +17,255 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.BufferedReader;
 
+// IMPORT THE DTO
+import customnode.GltfMeshImporter.ImportedMesh;
+
 public class WavefrontLoader {
 
-	/**
-	 * Load the specified obj file and returns the result as
-	 * a hash map, mapping the object names to the corresponding
-	 * <code>CustomMesh</code> objects.
-	 * @param objmtlStreams 
-	 */
-	public static LinkedHashMap<String, CustomMesh> load(String objfile, InputStream[] objmtlStreams, boolean flipXcoords)
-						throws IOException {
-		WavefrontLoader wl = new WavefrontLoader();
-		if (objfile.toLowerCase().endsWith(".obj")){
-			try {
-				wl.parse(objfile, objmtlStreams, flipXcoords);
-			} catch(RuntimeException e) {
-				System.out.println("error reading " + wl.name);
-				throw e;
-			}
-		} else if (objfile.toLowerCase().endsWith(".glb")){
-			try {
-				File file = new File(objfile);
-		        IJ.log("Importing GLB: " + file.getName());
-		        
-		        // 1. Use our new importer to decode the Meshopt/Draco data
-		        List<List<Point3f>> rawGeometries = GltfMeshImporter.loadMeshes(file);
-		        
-		        if (rawGeometries.isEmpty()) {
-		            IJ.log("Warning: No meshes found in GLB (or decode failed).");
-		        }
+    /**
+     * Load the specified obj file and returns the result as
+     * a hash map, mapping the object names to the corresponding
+     * <code>CustomMesh</code> objects.
+     * @param objmtlStreams 
+     */
+    public static LinkedHashMap<String, CustomMesh> load(String objfile, InputStream[] objmtlStreams, boolean flipXcoords) throws IOException {
+        WavefrontLoader wl = new WavefrontLoader();
+        try {
+            wl.parse(objfile, objmtlStreams, flipXcoords);
+        } catch(RuntimeException e) {
+            System.out.println("error reading " + wl.name);
+            throw e;
+        }
+        return wl.meshes;
+    }
 
-		        // 2. Convert to CustomMesh objects
-		        for (int i = 0; i < rawGeometries.size(); i++) {
-		            List<Point3f> vertices = rawGeometries.get(i);
-		            
-		            // 3. The Constructor you confirmed exists!
-		            CustomMesh mesh = new CustomTriangleMesh(vertices);
-		            
-		            // Optional: Set default name and color
-		            String meshName = file.getName() + "_mesh_" + i;
-		            mesh.setName(meshName);
-		            
-		            // Add to your result map/list
-		            wl.meshes.put(meshName, mesh);
-		        }
-		        
-		        IJ.log("Successfully loaded " + rawGeometries.size() + " meshes.");
+    public LinkedHashMap<String, CustomMesh> loadObjs(String objfile, InputStream[] objmtlStreams, boolean flipXcoords) throws IOException {
+        try {
+            parse(objfile, objmtlStreams, flipXcoords);
+        } catch(RuntimeException e) {
+            System.out.println("error reading " + name);
+            throw e;
+        }
+        return meshes;
+    }
+    
+    private LinkedHashMap<String, CustomMesh> meshes;
 
-		    } catch (Exception e) {
-		        IJ.log("GLB Import Failed: " + e.getMessage());
-		        e.printStackTrace();
-		    }
-		}
-		return wl.meshes;
-	}
+    public WavefrontLoader() {}
 
-	public  LinkedHashMap<String, CustomMesh> loadObjs(String objfile, InputStream[] objmtlStreams, boolean flipXcoords)
-			throws IOException {
-		if (objfile.toLowerCase().endsWith(".obj")){
-			try {
-				parse(objfile, objmtlStreams, flipXcoords);
-			} catch(RuntimeException e) {
-				System.out.println("error reading " + name);
-				throw e;
-			}
-		} else if (objfile.toLowerCase().endsWith(".glb")){
-			try {
-				File file = new File(objfile);
-		        IJ.log("Importing GLB: " + file.getName());
-		        
-		        // 1. Use our new importer to decode the Meshopt/Draco data
-		        List<List<Point3f>> rawGeometries = GltfMeshImporter.loadMeshes(file);
-		        
-		        if (rawGeometries.isEmpty()) {
-		            IJ.log("Warning: No meshes found in GLB (or decode failed).");
-		        }
+    private BufferedReader in;
+    private String line;
 
-		        // 2. Convert to CustomMesh objects
-		        for (int i = 0; i < rawGeometries.size(); i++) {
-		            List<Point3f> vertices = rawGeometries.get(i);
-		            
-		            // 3. The Constructor you confirmed exists!
-		            CustomMesh mesh = new CustomTriangleMesh(vertices);
-		            
-		            // Optional: Set default name and color
-		            String meshName = file.getName() + "_mesh_" + i;
-		            mesh.setName(meshName);
-		            
-		            // Add to your result map/list
-		            meshes.put(meshName, mesh);
-		        }
-		        
-		        IJ.log("Successfully loaded " + rawGeometries.size() + " meshes.");
+    // attributes of the currently read mesh
+    private ArrayList<Point3f> vertices = new ArrayList<Point3f>();
+    private ArrayList<Point3f> indices = new ArrayList<Point3f>();
+    private String name = null;
+    private Color4f material = null;
+    private int type = -1;
+    private String objfile = null;
+    public boolean allLinesParsed;
+    public int finalMeshCount;
+    private String objFileName;
+    private String objFileParentName;
+    private String objFileGrandParentName;
+    private String objFileGreatGrandParentName;
 
-		    } catch (Exception e) {
-		        IJ.log("GLB Import Failed: " + e.getMessage());
-		        e.printStackTrace();
-		    }
-		}
-		return meshes;
-	}
-	
-	private LinkedHashMap<String, CustomMesh> meshes;
+    private void parse(String objfile, InputStream[] objmtlStreams, boolean flipXcoords) throws IOException {
+        // Initialize map for both paths
+        meshes = new LinkedHashMap<String, CustomMesh>();
+        
+        File f = new File(objfile);
+        String fileName = f.getName();
 
-	public  WavefrontLoader() {}
+        // --- GLB PATH (Synchronous) ---
+        if (fileName.toLowerCase().endsWith(".glb")) {
+            try {
+                IJ.log("Importing GLB: " + fileName);
+                
+                // 1. Load using GltfMeshImporter
+                List<ImportedMesh> importedMeshes = GltfMeshImporter.loadMeshes(f);
+                
+                if (importedMeshes.isEmpty()) {
+                    IJ.log("Warning: No meshes found in GLB.");
+                }
 
-	private BufferedReader in;
-	private String line;
+                // 2. Convert to CustomMesh
 
-	// attributes of the currently read mesh
-	private ArrayList<Point3f> vertices = new ArrayList<Point3f>();
-	private ArrayList<Point3f> indices = new ArrayList<Point3f>();
-	private String name = null;
-	private Color4f material = null;
-	private int type = -1;
-	private String objfile = null;
-	public boolean allLinesParsed;
-	public int finalMeshCount;
-	private String objFileName;
-	private String objFileParentName;
-	private String objFileGrandParentName;
-	private String objFileGreatGrandParentName;
+                for (int i = 0; i < importedMeshes.size(); i++) {
+                	// ... inside the loop ...
+                        ImportedMesh data = importedMeshes.get(i);
+                        CustomMesh mesh = new CustomTriangleMesh(data.vertices);
+                        
+                        // FIX 1: Force Normal Calculation (Critical for lighting)
+                        if (mesh instanceof CustomTriangleMesh) {
+                            ((CustomTriangleMesh)mesh).recalculateNormals(null);
+                        }
+                        
+                        // FIX 2: Apply Color to both Diffuse AND Ambient
+                        Color3f c3 = new Color3f(data.color.x, data.color.y, data.color.z);
+                        mesh.setColor(c3);
+                        
+                        // This prevents "black shadows" - makes it look solid like OBJ
+                        if (mesh.getAppearance() != null && mesh.getAppearance().getMaterial() != null) {
+                            mesh.getAppearance().getMaterial().setAmbientColor(c3);
+                            // Optional: Add a little shine to match standard look
+                            mesh.getAppearance().getMaterial().setSpecularColor(new javax.vecmath.Color3f(0.5f, 0.5f, 0.5f));
+                        }
 
-	private void parse(String objfile, InputStream[] objmtlStreams, boolean flipXcoords) throws IOException {
-		meshes = new LinkedHashMap<String, CustomMesh>();
-		objFileName = new File(objfile).getName();
-		objFileParentName = "";
-		objFileGrandParentName = "";
-		objFileGreatGrandParentName = "";
-		if (new File(objfile).getParentFile()!=null 
-				&& new File(objfile).getParentFile().getParentFile()!=null 
-				&& new File(objfile).getParentFile().getParentFile().getParentFile()!=null 
-				&& new File(objfile).getParentFile().exists()
-				&& new File(objfile).getParentFile().getParentFile().exists() 
-				&& new File(objfile).getParentFile().getParentFile().getParentFile().exists()){
-			objFileParentName = new File(objfile).getParentFile().getName();
-			objFileGrandParentName = new File(objfile).getParentFile().getParentFile().getName();
-			objFileGreatGrandParentName = new File(objfile).getParentFile().getParentFile().getParentFile().getName();
-		}
+                        // Transparency (Inverted logic usually for Java3D: 0=Opaque)
+                        mesh.setTransparency(1.0f - data.color.w); 
+                        
+                        // NAME FIX: The Importer now provides the correct NODE name here
+                        String meshName = (data.name != null && !data.name.isEmpty()) 
+                                          ? data.name 
+                                          : fileName + "_mesh_" + i;
+                        mesh.setName(meshName);
+                        
+//                        if (wl != null) wl.meshes.put(meshName, mesh);
+//                        else 
+                        meshes.put(meshName, mesh);
+                            
+                }                
+                IJ.log("Successfully loaded " + importedMeshes.size() + " meshes.");
+                
+                // Signal completion immediately since this was synchronous
+                allLinesParsed = true;
+                finalMeshCount = meshes.size();
 
-		Thread compoundObjOpeningThread = new Thread (new Runnable() {
+            } catch (Exception e) {
+                IJ.log("GLB Import Failed: " + e.getMessage());
+                e.printStackTrace();
+                allLinesParsed = true; // Ensure we don't hang caller
+            }
+            return; // Done with GLB
+        }
 
-			@Override
-			public void run() {
-				WavefrontLoader.this.objfile = objfile;
-				File f = null;
-				if (objmtlStreams==null || objmtlStreams[0]==null) {
-					f = new File(objfile);
-					try {
-						in = new BufferedReader(new FileReader(objfile));
-					} catch (FileNotFoundException e) {
-						e.printStackTrace();
-					}
-				}else {
-					in = new BufferedReader(new InputStreamReader(objmtlStreams[0]));
-				}
+        // --- OBJ PATH (Async / Legacy) ---
+        objFileName = fileName;
+        objFileParentName = "";
+        objFileGrandParentName = "";
+        objFileGreatGrandParentName = "";
+        
+        if (f.getParentFile()!=null 
+                && f.getParentFile().getParentFile()!=null 
+                && f.getParentFile().getParentFile().getParentFile()!=null 
+                && f.getParentFile().exists()
+                && f.getParentFile().getParentFile().exists() 
+                && f.getParentFile().getParentFile().getParentFile().exists()){
+            objFileParentName = f.getParentFile().getName();
+            objFileGrandParentName = f.getParentFile().getParentFile().getName();
+            objFileGreatGrandParentName = f.getParentFile().getParentFile().getParentFile().getName();
+        }
 
-				HashMap<String, Color4f> materials = null;
-				boolean noVlines = true;
-				boolean noFlines = true;
-				try{
-					while((line = in.readLine()) != null) {
-						if(line.startsWith("mtllib")) {
-							String mtlName = line.split("\\s+")[1].trim();
-							materials = readMaterials(f, mtlName, objmtlStreams);
-						} else if(line.startsWith("g ")) {
-							if(name != null) {
-								CustomMesh cm = createCustomMesh();
-								if(cm != null)
-									meshes.put(name, cm);
-								indices = new ArrayList<Point3f>();
-								material = null;
-							}
-							name = line.split("\\s+")[1].trim();
-						} else if(line.startsWith("usemtl ")) {
-							if(materials != null)
-								material = materials.get(line.split("\\s+")[1]);
-						} else if(line.startsWith("v ")) {
-							readVertex(flipXcoords);
-							noVlines = false;
-						} else if(line.startsWith("f ")) {
-							readFace();
-							noFlines = false;
-						} else if(line.startsWith("l ")) {
-							readFace();
-						} else if(line.startsWith("p ")) {
-							readFace();
-						}
-						IJ.wait(0);
-					}
-					in.close();
-					if (noVlines || noFlines) {
-						meshes = null;
-						name = null;
-						allLinesParsed = true;
-						return;
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				if(name != null && indices.size() > 0) {
-					CustomMesh cm = createCustomMesh();
-					cm.setFlippedXCoords(flipXcoords);
-					if(cm != null)
-						meshes.put(name, cm);
-					indices = new ArrayList<Point3f>();
-					material = null;
-				}
-				allLinesParsed = true;
-				finalMeshCount = meshes.size();
+        Thread compoundObjOpeningThread = new Thread (new Runnable() {
+            @Override
+            public void run() {
+                WavefrontLoader.this.objfile = objfile;
+                File f = null;
+                if (objmtlStreams==null || objmtlStreams[0]==null) {
+                    f = new File(objfile);
+                    try {
+                        in = new BufferedReader(new FileReader(objfile));
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    in = new BufferedReader(new InputStreamReader(objmtlStreams[0]));
+                }
 
-			}
-		});
-		compoundObjOpeningThread.start();
-	}
+                HashMap<String, Color4f> materials = null;
+                boolean noVlines = true;
+                boolean noFlines = true;
+                try {
+                    while((line = in.readLine()) != null) {
+                        if(line.startsWith("mtllib")) {
+                            String mtlName = line.split("\\s+")[1].trim();
+                            materials = readMaterials(f, mtlName, objmtlStreams);
+                        } else if(line.startsWith("g ")) {
+                            if(name != null) {
+                                CustomMesh cm = createCustomMesh();
+                                if(cm != null)
+                                    meshes.put(name, cm);
+                                indices = new ArrayList<Point3f>();
+                                material = null;
+                            }
+                            name = line.split("\\s+")[1].trim();
+                        } else if(line.startsWith("usemtl ")) {
+                            if(materials != null)
+                                material = materials.get(line.split("\\s+")[1]);
+                        } else if(line.startsWith("v ")) {
+                            readVertex(flipXcoords);
+                            noVlines = false;
+                        } else if(line.startsWith("f ")) {
+                            readFace();
+                            noFlines = false;
+                        } else if(line.startsWith("l ")) {
+                            readFace();
+                        } else if(line.startsWith("p ")) {
+                            readFace();
+                        }
+                        IJ.wait(0);
+                    }
+                    in.close();
+                    if (noVlines || noFlines) {
+                        meshes = null;
+                        name = null;
+                        allLinesParsed = true;
+                        return;
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                if(name != null && indices.size() > 0) {
+                    CustomMesh cm = createCustomMesh();
+                    cm.setFlippedXCoords(flipXcoords);
+                    if(cm != null)
+                        meshes.put(name, cm);
+                    indices = new ArrayList<Point3f>();
+                    material = null;
+                }
+                allLinesParsed = true;
+                finalMeshCount = meshes.size();
+            }
+        });
+        compoundObjOpeningThread.start();
+    }
 
-	private CustomMesh createCustomMesh() {
-		if(indices.size() == 0)
-			return null;
-		CustomMesh cm = null;
-		switch(type) {
-			case 1: cm = new CustomPointMesh(indices); break;
-			case 2: cm = new CustomLineMesh(indices, CustomLineMesh.PAIRWISE); break;
-			case 3: cm = new CustomTriangleMesh(indices); break;
-			case 4: cm = new CustomQuadMesh(indices); break;
-			default: throw new RuntimeException(
-				"Unexpected number of vertices for faces");
-		}
-		cm.loadedFromFile = objfile;
-		cm.loadedFromName = name;
-		cm.changed = false;
-		if(material == null)
-			return cm;
-		cm.setColor(new Color3f(material.x, material.y, material.z));
-		cm.setTransparency(material.w);
-		cm.changed = false;
-		return cm;
-	}
+    private CustomMesh createCustomMesh() {
+        if(indices.size() == 0)
+            return null;
+        CustomMesh cm = null;
+        switch(type) {
+            case 1: cm = new CustomPointMesh(indices); break;
+            case 2: cm = new CustomLineMesh(indices, CustomLineMesh.PAIRWISE); break;
+            case 3: cm = new CustomTriangleMesh(indices); break;
+            case 4: cm = new CustomQuadMesh(indices); break;
+            default: throw new RuntimeException(
+                "Unexpected number of vertices for faces");
+        }
+        cm.loadedFromFile = objfile;
+        cm.loadedFromName = name;
+        cm.changed = false;
+        if(material == null)
+            return cm;
+        cm.setColor(new Color3f(material.x, material.y, material.z));
+        cm.setTransparency(material.w);
+        cm.changed = false;
+        return cm;
+    }
 
-	private void readFace() {
-		String[] sp = line.split("\\s+");
-		type = sp.length - 1;
-		for(int i = 1; i < sp.length; i++) {
-			int idx = -1;
-			try {
-				idx = Integer.parseInt(sp[i]) - 1;
-			} catch(NumberFormatException e) {
-				int l = sp[i].indexOf('/');
-				if(l != -1) {
-					sp[i] = sp[i].substring(0, l);
-					idx = Integer.parseInt(sp[i]) - 1;
+    private void readFace() {
+        String[] sp = line.split("\\s+");
+        type = sp.length - 1;
+        for(int i = 1; i < sp.length; i++) {
+            int idx = -1;
+            try {
+                idx = Integer.parseInt(sp[i]) - 1;
+            } catch(NumberFormatException e) {
+                int l = sp[i].indexOf('/');
+                if(l != -1) {
+                    sp[i] = sp[i].substring(0, l);
+                    idx = Integer.parseInt(sp[i]) - 1;
 				}
 			}
 			if(idx == -1)
@@ -294,23 +291,6 @@ public class WavefrontLoader {
 						w*(Float.parseFloat(sp[2]) - y)/(x-14701),
 						w*(Float.parseFloat(sp[3]) -z)/(x-14701)));
 			}
-					//		FOR MEI ADULT
-//			else if (objFileParentName.contains("MeiAdult") || objFileGrandParentName.contains("MeiAdult")
-//					 ||objFileParentName.contains("EM_Stack") || objFileGrandParentName.contains("EM_Stack")) {
-//					float x = 10800.0f;
-//					float y = 10816.0f;
-//					float z =  -8844.971f;
-//					float w = 50000;
-//					vertices.add(new Point3f(
-//							w*(Float.parseFloat(sp[3]) -z)/(x-4736),
-//							w*(Float.parseFloat(sp[2]) - y)/(x-4736),
-//							w*(flipXCoef*(Float.parseFloat(sp[1]) - x))/(-x+4736)));
-//					}
-//					FOR MEI ADULT rot corr xz
-			
-			
-// Why has this adult cell been scaled by a substantially lower MANITUDE denominator than N2U ///////
-			
 			else if (objFileName.contains("MeiAdult_Reslice") ||   objFileParentName.contains("MeiAdult_Reslice") || objFileGrandParentName.contains("MeiAdult_Reslice")) {
 				float x = 10800.0f;
 				float y = 10816.0f;
@@ -332,11 +312,6 @@ public class WavefrontLoader {
 						w*(Float.parseFloat(sp[2]) - y)/(x-4736),
 						(float)(Math.sin(-0.227)*(w*(Float.parseFloat(sp[3]) -z)/(x-4736)) +  Math.cos(-0.227)*(w*(flipXCoef*(Float.parseFloat(sp[1]) - x))/(-x+4736)))));
 			}
-//?????
-			
-			
-			
-			//		FOR L3
 			else if (objFileName.contains("L3") || objFileParentName.contains("L3") || objFileGrandParentName.contains("L3")) {
 				float x = 13793f;
 				float y = 13302f;
@@ -347,20 +322,16 @@ public class WavefrontLoader {
 						w*(Float.parseFloat(sp[2]) - y)/(x-8829),
 						w*(Float.parseFloat(sp[3]) -z)/(x-8829)));
 			}
-			//		FOR L2_2
 			else if (objFileName.contains("L2_2") || objFileParentName.contains("L2_2") || objFileGrandParentName.contains("L2_2")) {
 				float x = 8002f;
 				float y = 5648f;
 				float z = -4090f;
 				float w = 50000;
 				vertices.add(new Point3f(
-						//THIS SHOULD HAVE HAD AN X-FLIP AT THIS STAGE...WE FLIPPED AFTER PRODUCTION...
-						//just added x-flip...
 						-w*(flipXCoef*(Float.parseFloat(sp[1]) - x))/(x-2804),
 						w*(Float.parseFloat(sp[2]) - y)/(x-2804),
 						w*(Float.parseFloat(sp[3]) -z)/(x-2804)));
 			}
-			//	FOR L1_3
 			else if (objFileName.contains("L1_3") || objFileParentName.contains("L1_3") || objFileGrandParentName.contains("L1_3")) {
 				float x = 8316f;
 				float y = 6042f;
@@ -371,19 +342,6 @@ public class WavefrontLoader {
 						w*(Float.parseFloat(sp[2]) - y)/(x-4412),
 						w*(Float.parseFloat(sp[3]) -z)/(x-4412)));
 			}
-			//	FOR L1_2
-			//		if (objFileGrandParentName.contains("L1_2")) {
-			//	float x = 12564f;
-			//	float y = 7782f;
-			//	float z =  -3865f;
-			//	float w = 50000;
-			//	vertices.add(new Point3f(
-			//	-w*(Float.parseFloat(sp[3]) -z)/(x-8788),
-			//	w*(Float.parseFloat(sp[2]) - y)/(x-8788),
-			//	-w*(flipXCoef*(Float.parseFloat(sp[1]) - x))/(x-8788)));
-			//		}
-
-			//	FOR L1_2 fixing rot around Yaxis
 			else if (objFileName.contains("L1_2") || objFileParentName.contains("L1_2") || objFileGrandParentName.contains("L1_2")) {
 				float x = 12564f;
 				float y = 7782f;
@@ -394,19 +352,6 @@ public class WavefrontLoader {
 						w*(Float.parseFloat(sp[2]) - y)/(x-8788),
 						-(float)(Math.sin(-0.495)*(w*(Float.parseFloat(sp[3]) -z)/(x-8788)) + Math.cos(-0.495)*(w*(flipXCoef*(Float.parseFloat(sp[1]) - x))/(x-8788)))));
 			}
-			//	//	FOR L1_4
-			//		if (objFileGrandParentName.contains("L1_4")) {
-			//			float x = 8402f;
-			//		float y = 12372f;
-			//		float z =  -2725f;
-			//		float w = 50000;
-			//		vertices.add(new Point3f(
-			//				w*(Float.parseFloat(sp[1]) - x)/(x-4464),
-			//				w*(Float.parseFloat(sp[2]) - y)/(x-4464),
-			//				w*(flipXCoef*(Float.parseFloat(sp[3]) - z))/(x-4464)));
-			//		}
-
-			//		FOR L1_4 with yz rotation around x axis
 			else if (objFileName.contains("L1_4") || objFileParentName.contains("L1_4") || objFileGrandParentName.contains("L1_4")) {		
 				float x = 8402f;
 				float y = 12372f;
@@ -417,8 +362,6 @@ public class WavefrontLoader {
 						(float)(Math.cos(-0.558)*(w*(Float.parseFloat(sp[2]) - y)/(x-4464)) - Math.sin(-0.558)*(w*(flipXCoef*(Float.parseFloat(sp[3]) - z))/(x-4464))),
 						(float)(Math.sin(-0.558)*(w*(Float.parseFloat(sp[2]) - y)/(x-4464)) + Math.cos(-0.558)*(w*(flipXCoef*(Float.parseFloat(sp[3]) - z))/(x-4464)))));
 			}
-
-			//	FOR L1_5
 			else if (objFileName.contains("L1_5") || objFileParentName.contains("L1_5") || objFileGrandParentName.contains("L1_5")) {		
 				float x = 7990f;
 				float y = 6999f;
@@ -428,9 +371,7 @@ public class WavefrontLoader {
 						-(float)(Math.cos(-2.30)*(w*(Float.parseFloat(sp[1]) - x)/(x-3973)) - Math.sin(-2.30)*((w*(Float.parseFloat(sp[2]) - y)/(x-3973)))),
 						(float)(Math.sin(-2.30)*(w*(Float.parseFloat(sp[1]) - x)/(x-3973)) + Math.cos(-2.30)*((w*(Float.parseFloat(sp[2]) - y)/(x-3973)))),
 						w*(flipXCoef*(Float.parseFloat(sp[3]) - z))/(x-3973)));
-				//
 			}
-			//	FOR N2Uadult
 			else if (objFileName.contains("N2U") || objFileParentName.contains("N2U") || objFileGrandParentName.contains("N2U")) {
 				float x = 19953f;
 				float y = 15255f;
@@ -487,8 +428,6 @@ public class WavefrontLoader {
 		}
 		String line;
 		while((line = mtlInReader.readLine()) != null) {
-			// newmtl: if we've read one before
-			// add it to the hash map
 			if(line.startsWith("newmtl")) {
 				if(name != null && color != null)
 					materials.put(name, color);
@@ -521,4 +460,3 @@ public class WavefrontLoader {
 		return materials;
 	}
 }
-
