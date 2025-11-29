@@ -106,11 +106,11 @@ public class WavefrontLoader {
                         mesh.setColor(c3);
                         
                         // This prevents "black shadows" - makes it look solid like OBJ
-                        if (mesh.getAppearance() != null && mesh.getAppearance().getMaterial() != null) {
-                            mesh.getAppearance().getMaterial().setAmbientColor(c3);
-                            // Optional: Add a little shine to match standard look
-                            mesh.getAppearance().getMaterial().setSpecularColor(new javax.vecmath.Color3f(0.5f, 0.5f, 0.5f));
-                        }
+//                        if (mesh.getAppearance() != null && mesh.getAppearance().getMaterial() != null) {
+//                            mesh.getAppearance().getMaterial().setAmbientColor(c3);
+//                            // Optional: Add a little shine to match standard look
+//                            mesh.getAppearance().getMaterial().setDiffuseColor(new Color3f(c3));
+//                        }
 
                         // Transparency (Inverted logic usually for Java3D: 0=Opaque)
                         mesh.setTransparency(1.0f - data.color.w); 

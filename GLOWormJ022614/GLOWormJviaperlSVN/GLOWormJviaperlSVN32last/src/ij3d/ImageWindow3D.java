@@ -800,7 +800,7 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 			ex.printStackTrace();
 		}
 		if (univ instanceof Image3DUniverse) {
-			((Image3DUniverse) univ).getContent3DManager().dispose();
+			((Image3DUniverse) univ).getContent3DManager(false).dispose();
 		}
 		if (null != univ.getWindow())
 			univ.cleanup();

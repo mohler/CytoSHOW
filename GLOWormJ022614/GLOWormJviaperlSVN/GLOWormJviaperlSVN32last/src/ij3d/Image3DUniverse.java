@@ -2624,12 +2624,20 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		this.c3dm = content3dManager;
 	}	
 
+
 	public Content3DManager getContent3DManager() {
+		return getContent3DManager(true);
+	}
+
+	
+	public Content3DManager getContent3DManager(boolean createIfNull) {
 		if (c3dm!=null)
 			return c3dm;
-		else {
+		else if (createIfNull){
 			c3dm = new Content3DManager(this, false);
 			return c3dm;
+		} else {
+			return null;
 		}
 
 	}	

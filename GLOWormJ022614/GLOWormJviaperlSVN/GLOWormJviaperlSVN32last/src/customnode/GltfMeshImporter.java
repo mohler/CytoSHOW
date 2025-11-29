@@ -243,40 +243,43 @@ public class GltfMeshImporter {
 	// ... (decodeAccessorPoints, decodeAccessorIndices, getDecodedBuffer, extractColor, readFully are UNCHANGED) ...
 
 	private static List<Point3f> decodeAccessorPoints(int accessorId, JsonNode root, List<ByteBuffer> buffers) {
-		List<Point3f> points = new ArrayList<>();
-		ByteBuffer raw = getDecodedBuffer(accessorId, root, buffers);
-		if (raw != null) {
-			JsonNode accessor = root.get("accessors").get(accessorId);
-			int count = accessor.get("count").asInt();
-			int stride = raw.capacity() / count;
-			raw.order(ByteOrder.LITTLE_ENDIAN);
-
-			if (stride >= 12) { 
-				FloatBuffer fb = raw.asFloatBuffer();
-				for (int i = 0; i < count; i++) points.add(new Point3f(fb.get(), fb.get(), fb.get()));
-			} else if (stride >= 8) { 
-				ShortBuffer sb = raw.asShortBuffer();
-				float[] min = new float[3];
-				float[] max = new float[3];
-				if (accessor.has("min")) for(int k=0;k<3;k++) min[k] = (float) accessor.get("min").get(k).asDouble();
-				if (accessor.has("max")) for(int k=0;k<3;k++) max[k] = (float) accessor.get("max").get(k).asDouble();
-
-				float rangeX = max[0] - min[0];
-				float rangeY = max[1] - min[1];
-				float rangeZ = max[2] - min[2];
-
-				for (int i = 0; i < count; i++) {
-					int sx = sb.get() & 0xFFFF; int sy = sb.get() & 0xFFFF; int sz = sb.get() & 0xFFFF; sb.get();
-					float px = (sx / 65535.0f) * rangeX + min[0];
-					float py = (sy / 65535.0f) * rangeY + min[1];
-					float pz = (sz / 65535.0f) * rangeZ + min[2];
-					points.add(new Point3f(px, py, pz));
-				}
-			}
-		}
-		return points;
-	}
-
+        List<Point3f> points = new ArrayList<>();
+        ByteBuffer raw = getDecodedBuffer(accessorId, root, buffers);
+        
+        if (raw != null) {
+            JsonNode accessor = root.get("accessors").get(accessorId);
+            int count = accessor.get("count").asInt();
+            int stride = raw.capacity() / count;
+            
+            raw.order(ByteOrder.LITTLE_ENDIAN);
+            
+            if (stride >= 12) { // FLOAT (12 bytes) - Already World Scale
+                FloatBuffer fb = raw.asFloatBuffer();
+                for (int i = 0; i < count; i++) {
+                    points.add(new Point3f(fb.get(), fb.get(), fb.get()));
+                }
+            } else if (stride >= 8) { // SHORT (Quantized) - Needs Node Matrix to Scale
+                ShortBuffer sb = raw.asShortBuffer();
+                
+                // FIX: DO NOT NORMALIZE.
+                // gltfpack expects these to be large integers. 
+                // The Node Transform Matrix will shrink them back to the correct size.
+                
+                for (int i = 0; i < count; i++) {
+                    // Read as signed short (Java default)
+                    // If gltfpack uses unsigned, we might need & 0xFFFF, 
+                    // but usually positions are signed centered at 0.
+                    float px = sb.get(); 
+                    float py = sb.get(); 
+                    float pz = sb.get(); 
+                    sb.get(); // Skip padding
+                    
+                    points.add(new Point3f(px, py, pz));
+                }
+            }
+        }
+        return points;
+    }
 	private static int[] decodeAccessorIndices(int accessorId, JsonNode root, List<ByteBuffer> buffers) {
 		ByteBuffer raw = getDecodedBuffer(accessorId, root, buffers);
 		if (raw == null) return new int[0];
