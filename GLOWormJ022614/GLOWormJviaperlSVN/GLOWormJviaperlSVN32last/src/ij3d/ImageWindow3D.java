@@ -537,7 +537,7 @@ public class ImageWindow3D extends ImageWindow implements FocusListener, WindowL
 
 		add(optionsPanel, BorderLayout.EAST);
 		add(viewButtonPanel, BorderLayout.WEST);
-		tagButtonPanel.setVisible(false);
+		tagButtonPanel.setVisible(true);
 		modeButtonPanel.setVisible(false);
 		optionsPanel.setVisible(true);
 		viewButtonPanel.setVisible(true);

@@ -1379,6 +1379,9 @@ public class ImageWindow extends JFrame implements FocusListener, WindowListener
 	//}
 	
 	public void toggleTagTools() {
+		if(this instanceof ImageWindow3D) {
+			return;
+		}
 		tagButtonPanel.setVisible(!tagButtonPanel.isVisible());
 		this.pack();
 		int padH = 1+getInsets().left

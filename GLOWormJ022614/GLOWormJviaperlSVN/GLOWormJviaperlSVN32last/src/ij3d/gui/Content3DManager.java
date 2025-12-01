@@ -591,8 +591,8 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 				if (!(univ.getWindow().getTitle().matches(".*[XY]Z +\\d+.*"))) {
 					ImageWindow imgWin = univ.getWindow();
 					this.setVisible(wasVis);
-					if (imgWin != null)
-						setLocation(imgWin.getLocationOnScreen().x + imgWin.getWidth() + 5, imgWin.getLocationOnScreen().y);
+//					if (imgWin != null)
+//						setLocation(imgWin.getLocationOnScreen().x + imgWin.getWidth() + 5, imgWin.getLocationOnScreen().y);
 				}
 
 			} finally {
@@ -773,8 +773,8 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 				this.close();
 				ImageWindow imgWin = univ.getWindow();
 				this.setVisible(true);
-				if (imgWin != null)
-					setLocation(imgWin.getLocationOnScreen().x + imgWin.getWidth() + 5, imgWin.getLocationOnScreen().y);
+//				if (imgWin != null)
+//					setLocation(imgWin.getLocationOnScreen().x + imgWin.getWidth() + 5, imgWin.getLocationOnScreen().y);
 
 			} else if (command.equals("Rename")) {
 
@@ -890,9 +890,9 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 					this.close();
 					ImageWindow imgWin = imp.getWindow();
 					this.setVisible(wasVis);
-					if (imgWin != null)
-						setLocation(imgWin.getLocationOnScreen().x + imgWin.getWidth() + 5,
-								imgWin.getLocationOnScreen().y);
+//					if (imgWin != null)
+//						setLocation(imgWin.getLocationOnScreen().x + imgWin.getWidth() + 5,
+//								imgWin.getLocationOnScreen().y);
 				}
 
 			}
@@ -1226,7 +1226,13 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 			list.setModel(new DefaultListModel<String>());
 			Arrays.sort(indexes);
 			for (int r = indexes.length - 1; r >= 0; r--) {
-				univ.removeContent(listModel.get(indexes[r]).replace("\"","").split("\\_")[0], true);
+				String[] listNameChunks = listModel.get(indexes[r]).replace("\"","").split("\\_");
+				String shorty = "";
+				for (int s= 0; s<listNameChunks.length-3;s ++) {
+					shorty = shorty +(s>0?"_":"") + listNameChunks[s];
+				}
+				String zapThisContentName = shorty;
+				univ.removeContent(zapThisContentName, true);
 				contentInstants.remove(listModel.get(indexes[r]));
 				fullListModel.removeElement(listModel.get(indexes[r]));
 				listModel.remove(indexes[r]);
