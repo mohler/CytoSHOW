@@ -71,6 +71,14 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 	private boolean freshDrop;
 //	private ImageJ3DViewer dropViewer;
 	private Image3DUniverse dropUniverse;
+	public Image3DUniverse getDropUniverse() {
+		return dropUniverse;
+	}
+
+	public void setDropUniverse(Image3DUniverse dropUniverse) {
+		this.dropUniverse = dropUniverse;
+	}
+
 	private boolean working;
 	
 //	private static DragAndDrop instance;
@@ -224,7 +232,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 								if (transferData.get(0) instanceof File && ((File)transferData.get(0)).isDirectory()){
 									for (int j=0; j<transferData.size();j++){
 										for (File file:((File)transferData.get(j)).listFiles()){
-											if (file.getName().toLowerCase().endsWith(".obj") || file.getName().toLowerCase().endsWith(".glb"))
+											if (file.getName().toLowerCase().endsWith(".obj") || file.getName().toLowerCase().endsWith(".glb") || file.getName().toLowerCase().endsWith(".gltf"))
 												droppedItemsArrayList.add(file);
 										}
 									}
@@ -290,6 +298,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 											|| tmp.toLowerCase().contains("scene.scn")
 											|| tmp.toLowerCase().endsWith(".obj")
 											|| tmp.toLowerCase().endsWith(".glb")
+											|| tmp.toLowerCase().endsWith(".gltf")
 											|| tmp.toLowerCase().endsWith(".zip")
 											|| tmp.toLowerCase().endsWith(".tif"))){
 								if (IJ.debugMode) IJ.log(" stringinput");
@@ -565,7 +574,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					if (!nextItem.equals(""))  {
 
 						if (( ((String)nextItem).toLowerCase().startsWith("http") || ((String)nextItem).toLowerCase().startsWith("https")) 
-									&& !(((String)nextItem).toLowerCase().endsWith(".obj") || ((String)nextItem).toLowerCase().endsWith(".glb"))){
+									&& !(((String)nextItem).toLowerCase().endsWith(".obj") || ((String)nextItem).toLowerCase().endsWith(".glb")|| ((String)nextItem).toLowerCase().endsWith(".gltf"))){
 							if ( ((String)nextItem).contains("://gloworm.org/") ||
 									((String)nextItem).contains("://fsbill.vcell.uchc.edu/") ||
 									((String)nextItem).contains("://cgi.cytoshow.org/") ){
@@ -701,7 +710,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 									nDrops--;
 									return;
 
-								}else if (path.toLowerCase().endsWith(".obj") || path.toLowerCase().endsWith(".glb")) {
+								}else if (path.toLowerCase().endsWith(".obj") || path.toLowerCase().endsWith(".glb")|| path.toLowerCase().endsWith(".gltf")) {
 									//							Component dtc = this.dtde.getDropTargetContext().getDropTarget().getComponent();
 									Window dropWin = null;
 									if (dropUniverse != null)
@@ -1343,7 +1352,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 
 
 
-							//NEXT ALLOWABLE ACTIONS IF ITEM ENDS IN .OBJ or .GLB and starts with http or https::
+							//NEXT ALLOWABLE ACTIONS IF ITEM ENDS IN .OBJ or .GLB/.GLTF and starts with http or https::
 
 						} else if ( ((String)nextItem).toLowerCase().endsWith(".mov") || ((String)nextItem).toLowerCase().endsWith(".avi") ){
 							String path = "";
@@ -1371,7 +1380,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 								MQTVSSceneLoader64.runMQTVS_SceneLoader64(path);
 							else
 								MQTVSSceneLoader64.runMQTVS_SceneLoader64(path);
-						}else if (((String)nextItem).toLowerCase().endsWith(".obj") || ((String)nextItem).toLowerCase().endsWith(".glb")) {
+						}else if (((String)nextItem).toLowerCase().endsWith(".obj") || ((String)nextItem).toLowerCase().endsWith(".glb")|| ((String)nextItem).toLowerCase().endsWith(".gltf")) {
 
 							// BEGIN OPEN WEB-BASED .OBJ/.MTL BLOCK (distinct from GLOWORM_DATA based opener at line 1382 below
 							//					Component dtc = this.dtde.getDropTargetContext().getDropTarget().getComponent();
@@ -1716,7 +1725,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 					else
 						MQTVSSceneLoader64.runMQTVS_SceneLoader64( ((File)nextItem).getPath() );
 
-				}else if (nextItem!=null && (((File)nextItem).getPath().toLowerCase().endsWith(".obj") || ((File)nextItem).getPath().toLowerCase().endsWith(".glb"))) {
+				}else if (nextItem!=null && (((File)nextItem).getPath().toLowerCase().endsWith(".obj") || ((File)nextItem).getPath().toLowerCase().endsWith(".glb") || ((File)nextItem).getPath().toLowerCase().endsWith(".gltf"))) {
 					if (IJ.getInstance()!=null) {
 						if ( this.dtde.getDropTargetContext().getDropTarget().getComponent() == IJ.getInstance().getStatusBar()){
 							if (freshDrop){
@@ -1818,7 +1827,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 						dropUniverse.setTitle(((File) nextItem).getName()/* +" (IJ3DV)" */);
 						dropUniverse.show(false);
 						dropUniverse.getWindow().setDragAndDrop(DragAndDrop.this);
-						IJ.getInstance().setDragAndDrop(new DragAndDrop());
+//						IJ.getInstance().setDragAndDrop(new DragAndDrop());
 						dropUniverse.getWindow().getDragAndDrop().addDropTarget(dropUniverse.getCanvas());
 						while (dropUniverse.getWindow() == null) IJ.wait (10);
 						dropImp = dropUniverse.getWindow().getImagePlus();

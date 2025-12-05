@@ -291,13 +291,17 @@ public class IJ3dExecuter {
 
 	public void saveAsWaveFront(boolean oneFile) {
 		File obj_file = promptForFile("Save WaveFront", univ.getTitle(), ".obj");
-		obj_file = new File(obj_file.getParent()+ File.separator + obj_file.getName().replace(" ", "_"));
-		if(obj_file == null)
+		if ((obj_file!= null) && (obj_file.getParentFile()!=null)){
+			obj_file = new File(obj_file.getParent()+ File.separator + obj_file.getName().replace(" ", "_"));
+			if(obj_file == null)
+				return;
+			//		MeshExporter.saveAsWaveFront(univ.getListOrderedSelectedContents(), obj_file, univ.getStartTime(), univ.getEndTime(), oneFile);
+			MeshExporter.saveAsWaveFront(univ.getContents(), obj_file, univ.getStartTime(), univ.getEndTime(), oneFile);
+			saveColorLegend(obj_file);
+			record(EXPORT, "WaveFront", obj_file.getAbsolutePath());
+		} else {
 			return;
-//		MeshExporter.saveAsWaveFront(univ.getListOrderedSelectedContents(), obj_file, univ.getStartTime(), univ.getEndTime(), oneFile);
-		MeshExporter.saveAsWaveFront(univ.getContents(), obj_file, univ.getStartTime(), univ.getEndTime(), oneFile);
-		saveColorLegend(obj_file);
-		record(EXPORT, "WaveFront", obj_file.getAbsolutePath());
+		}
 	}
 
 

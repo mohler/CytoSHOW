@@ -2,6 +2,8 @@ package customnode;
 
 import javax.vecmath.Point3f;
 import ij.IJ;
+import ij3d.Image3DUniverse;
+
 import javax.vecmath.Color4f;
 import javax.vecmath.Color3f;
 
@@ -18,7 +20,7 @@ import java.io.FileReader;
 import java.io.BufferedReader;
 
 // IMPORT THE DTO
-import customnode.GltfMeshImporter.ImportedMesh;
+import customnode.GltfMeshImporter;
 
 public class WavefrontLoader {
 
@@ -78,60 +80,13 @@ public class WavefrontLoader {
         String fileName = f.getName();
 
         // --- GLB PATH (Synchronous) ---
-        if (fileName.toLowerCase().endsWith(".glb")) {
+        if (fileName.toLowerCase().endsWith(".glb") || fileName.toLowerCase().endsWith(".gltf")) {
             try {
                 IJ.log("Importing GLB: " + fileName);
                 
                 // 1. Load using GltfMeshImporter
-                List<ImportedMesh> importedMeshes = GltfMeshImporter.loadMeshes(f);
+                GltfMeshImporter.loadAndShowGltfMeshes(f.getAbsoluteFile(), IJ.getInstance().getDragAndDrop().getDropUniverse());
                 
-                if (importedMeshes.isEmpty()) {
-                    IJ.log("Warning: No meshes found in GLB.");
-                }
-
-                // 2. Convert to CustomMesh
-
-                for (int i = 0; i < importedMeshes.size(); i++) {
-                	// ... inside the loop ...
-                        ImportedMesh data = importedMeshes.get(i);
-                        CustomMesh mesh = new CustomTriangleMesh(data.vertices);
-                        
-                        // FIX 1: Force Normal Calculation (Critical for lighting)
-                        if (mesh instanceof CustomTriangleMesh) {
-                            ((CustomTriangleMesh)mesh).recalculateNormals(null);
-                        }
-                        
-                        // FIX 2: Apply Color to both Diffuse AND Ambient
-                        Color3f c3 = new Color3f(data.color.x, data.color.y, data.color.z);
-                        mesh.setColor(c3);
-                        
-                        // This prevents "black shadows" - makes it look solid like OBJ
-//                        if (mesh.getAppearance() != null && mesh.getAppearance().getMaterial() != null) {
-//                            mesh.getAppearance().getMaterial().setAmbientColor(c3);
-//                            // Optional: Add a little shine to match standard look
-//                            mesh.getAppearance().getMaterial().setDiffuseColor(new Color3f(c3));
-//                        }
-
-                        // Transparency (Inverted logic usually for Java3D: 0=Opaque)
-                        mesh.setTransparency(1.0f - data.color.w); 
-                        
-                        // NAME FIX: The Importer now provides the correct NODE name here
-                        String meshName = (data.name != null && !data.name.isEmpty()) 
-                                          ? data.name 
-                                          : fileName + "_mesh_" + i;
-                        mesh.setName(meshName);
-                        
-//                        if (wl != null) wl.meshes.put(meshName, mesh);
-//                        else 
-                        meshes.put(meshName, mesh);
-                            
-                }                
-                IJ.log("Successfully loaded " + importedMeshes.size() + " meshes.");
-                
-                // Signal completion immediately since this was synchronous
-                allLinesParsed = true;
-                finalMeshCount = meshes.size();
-
             } catch (Exception e) {
                 IJ.log("GLB Import Failed: " + e.getMessage());
                 e.printStackTrace();
@@ -395,7 +350,7 @@ public class WavefrontLoader {
 			File objfile, String mtlFileName, InputStream[] objmtlStreams) throws IOException {
 
 		if(objmtlStreams!=null)
-			return readMaterials(mtlFileName, objmtlStreams[1]);
+			return readMaterials(mtlFileName, objmtlStreams[objmtlStreams.length>1?1:0]);
 			
 		File mtlFile = new File(objfile.getParentFile(), mtlFileName);
 		if(mtlFile.exists())

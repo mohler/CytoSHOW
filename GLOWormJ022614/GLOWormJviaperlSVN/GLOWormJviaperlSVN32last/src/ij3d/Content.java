@@ -716,7 +716,11 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 	}
 
 	public Color3f getColor() {
-		return getCurrentInstant().getColor();
+		if (getCurrentInstant()!=null) {
+			return getCurrentInstant().getColor();
+		} else {
+			return null;
+		}
 	}
 
 	public boolean isShaded() {

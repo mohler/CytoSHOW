@@ -2295,7 +2295,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 			for (String filePath:filePaths) {
 				//			jbar.setValue(filePaths.length/(jbar.getValue()+1));
 				IJ.log(filePath);
-				if (filePath.endsWith("SVV_0000.obj") || filePath.endsWith("SVV_0000.glb"))
+				if (filePath.endsWith("SVV_0000.obj") || filePath.endsWith("SVV_0000.glb") || filePath.endsWith("SVV_0000.gltf"))
 					continue;
 				ArrayList<String> timedObjFileNames = new ArrayList<String>();
 				File file = new File(filePath);
