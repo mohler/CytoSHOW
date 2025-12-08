@@ -2,7 +2,7 @@ package customnode;
 
 import customnode.CustomMesh;
 import ij.IJ;
-import ij.util.GltfPackLoader;
+// import ij.util.GltfPackLoader; // Appears unused, but keeping if you need it later
 
 import java.io.File;
 import java.io.Writer;
@@ -15,6 +15,7 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -74,9 +75,9 @@ public class WavefrontExporter {
 	/**
 	 * Write the given collection of <code>CustomMesh</code>es;
 	 * @param meshes maps a name to a <code>CustomMesh</code>. The name
-	 *        is used to set the group name ('g') in the obj file.
+	 * is used to set the group name ('g') in the obj file.
 	 * @param mtlFileName name of the material file, which is used to
-	 *        store in the obj-file.
+	 * store in the obj-file.
 	 * @param objWriter <code>Writer</code> for the obj file
 	 * @param mtlWriter <code>Writer</code> for the material file.
 	 */
@@ -279,77 +280,93 @@ public class WavefrontExporter {
 				singleMtlWriter.close();
 				singleObjWriter.flush();
 				singleObjWriter.close();
+//				try {Thread.sleep(30000);}
+//				catch (Exception e) {e.printStackTrace();}
 
-				try {
-				    // 1. Get the path to the extracted binary (Magic happens inside here)
-				    String gltfpackBin = GltfPackLoader.getExecutablePath();
-
-				    // 2. Define your files (Use absolute paths!)
-				    // Assuming you have 'String outPathObj' and 'String outPathGlb' from your variables
-				    File inputFile = new File(objOutPathString); 
-				    File outputFile = new File(objOutPathString.replace(".obj",".glb")); // Or .glb
-
-				    // 3. Run it
-				    // -cc = Meshopt compression (High) + Quantization
-				    // -tc = (Optional) Texture compression if you have textures
-				    ProcessBuilder pb = new ProcessBuilder(
-				        gltfpackBin, 
-				        "-cc", 
-				        "-i", inputFile.getAbsolutePath(), 
-				        "-o", outputFile.getAbsolutePath()
-				    );
-				    
-				    pb.inheritIO(); // Helper to see gltfpack output in your Java console
-				    
-				    Process p = pb.start();
-				    int exitCode = p.waitFor(); // Wait for C++ tool to finish
-				    
-				    if (exitCode != 0) {
-				        IJ.log("Error: gltfpack failed with exit code " + exitCode);
-				    } else {
-				        IJ.log("gltfpack success: " + outputFile.getName());
-				    }
-				    
-				} catch (Exception e) {
-				    e.printStackTrace();
-				    IJ.log("Export failed: " + e.getMessage());
-				}
 				
-//				if (IJ.isWindows()) {
-//					//				String commandString = "cmd /c start /min /wait for %f in ("+objOutPathString+") do (set g=%f&& npx obj2gltf -i %f&& npx gltf-pipeline -i %g:.obj=.gltf% -o %g:.obj=.gltf% -d)";
-//					final String finalObjOutPathString = objOutPathString;
-//					Thread makeDracoGLTF = new Thread(new Runnable(){
-//						public void run() {
-//							String[] commandStringArrayA = new String[]{"cmd","/c","npx","obj2gltf","--separate","--checkTransparency","-i",finalObjOutPathString};
-//							Process objTOgltf = null;
-//							try {
-//								objTOgltf = Runtime.getRuntime().exec(commandStringArrayA);
-//							} catch (IOException e1) {
-//								// TODO Auto-generated catch block
-//								e1.printStackTrace();
-//							}
-//							String gltfOutPathString = finalObjOutPathString.replace(".obj", ".gltf");
-//							String[] commandStringArrayB = new String[]{"cmd","/c","npx","gltf-pipeline","-i",gltfOutPathString,"-o",gltfOutPathString,"--draco.compressionLevel","10","-d"};
-//							//				while (!new File (gltfOutPathString).canRead())
-//							//					IJ.wait(10);
-//							try {
-//								int waitResult = objTOgltf.waitFor();
-//								if (waitResult == 0) {
-//									try {
-//										Runtime.getRuntime().exec(commandStringArrayB);
-//									} catch (IOException e) {
-//										// TODO Auto-generated catch block
-//										e.printStackTrace();
-//									}
-//								}
-//							} catch (InterruptedException e) {
-//								// TODO Auto-generated catch block
-//								e.printStackTrace();
-//							}
-//						}
-//					});
-//					makeDracoGLTF.start();
-//				}
+				if (IJ.isWindows()) {
+					//				String commandString = "cmd /c start /min /wait for %f in ("+objOutPathString+") do (set g=%f&& npx obj2gltf -i %f&& npx gltf-pipeline -i %g:.obj=.gltf% -o %g:.obj=.gltf% -d)";
+					final String finalObjOutPathString = objOutPathString;
+					Thread makeDracoGLTF = new Thread(new Runnable(){
+						public void run() {
+							String[] commandStringArrayA = new String[]{"cmd","/c","npx","obj2gltf","--checkTransparency","-i",finalObjOutPathString};
+							Process objTOgltf = null;
+							try {
+								objTOgltf = Runtime.getRuntime().exec(commandStringArrayA);
+							} catch (IOException e1) {
+								// TODO Auto-generated catch block
+								e1.printStackTrace();
+							}
+							String gltfOutPathString = finalObjOutPathString.replace(".obj", ".gltf");
+							String[] commandStringArrayB = new String[]{"cmd","/c","npx","gltf-pipeline","-i",gltfOutPathString,"-o",gltfOutPathString,"--draco.compressionLevel","10","-d"};
+							//				while (!new File (gltfOutPathString).canRead())
+							//					IJ.wait(10);
+							try {
+								int waitResult = objTOgltf.waitFor();
+								if (waitResult == 0) {
+									try {
+										Runtime.getRuntime().exec(commandStringArrayB);
+									} catch (IOException e) {
+										// TODO Auto-generated catch block
+										e.printStackTrace();
+									}
+								}
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+					});
+					makeDracoGLTF.start();
+				} else if (IJ.isMacOSX()) {
+                    // Logic for processing MULTIPLE files (Batch) on Mac
+                    
+	                String gltfOutPathString = objOutPathString.replace(".obj", ".gltf");
+	                String glbOutPathString = objOutPathString.replace(".obj", ".glb");
+
+                    // --- 1. OBJ to GLTF Command List ---
+                    List<String> commandListA = Arrays.asList(
+                        "/usr/local/bin/npx",      // Executable
+                        "obj2gltf",                // Tool
+                        "--checkTransparency",     // Arg
+                        "-i",                      // Arg
+                        objOutPathString,         // Input
+                        "-o",                      // Arg
+                        gltfOutPathString          // Output
+                    );
+
+                    // --- 2. GLTF to Draco Command List ---
+                    List<String> commandListB = Arrays.asList(
+                        "/usr/local/bin/npx",
+                        "gltf-pipeline",
+                        "-i",
+                        gltfOutPathString,
+                        "-o",
+                        glbOutPathString,         // Overwrite existing .gltf
+                        "--draco.compressionLevel",
+                        "10",
+                        "-d"
+                    );
+
+                    try {
+                        while(!new File(objOutPathString).canRead()) Thread.sleep(10);
+                        
+                        // RUN STEP A
+                        int resultA = runNpxCommand(commandListA, "OBJ2GLTF Conversion"); 
+
+                        if (resultA == 0) {
+                            // RUN STEP B
+                            int resultB = runNpxCommand(commandListB, "Draco Compression");
+                            if (resultB != 0) IJ.error("Draco compression failed with code: " + resultB);
+                        } else {
+                            IJ.error("OBJ to GLTF conversion failed with code: " + resultA);
+                        }
+                    } catch (Exception e) {
+                        IJ.error("Process execution error: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                }
+
 			}
 		}
 		if(oneFile) {
@@ -366,44 +383,12 @@ public class WavefrontExporter {
 			mtlWriter.close();
 			objWriter.flush();
 			objWriter.close();
-
-			try {
-			    // 1. Get the path to the extracted binary (Magic happens inside here)
-			    String gltfpackBin = GltfPackLoader.getExecutablePath();
-
-			    // 2. Define your files (Use absolute paths!)
-			    // Assuming you have 'String outPathObj' and 'String outPathGlb' from your variables
-			    File inputFile = new File(outPathObj); 
-			    File outputFile = new File(outPathGltf); // Or .glb
-
-			    // 3. Run it
-			    // -cc = Meshopt compression (High) + Quantization
-			    // -tc = (Optional) Texture compression if you have textures
-			    ProcessBuilder pb = new ProcessBuilder(
-			        gltfpackBin, 
-			        "-cc", 
-			        "-i", inputFile.getAbsolutePath(), 
-			        "-o", outputFile.getAbsolutePath()
-			    );
-			    
-			    pb.inheritIO(); // Helper to see gltfpack output in your Java console
-			    
-			    Process p = pb.start();
-			    int exitCode = p.waitFor(); // Wait for C++ tool to finish
-			    
-			    if (exitCode != 0) {
-			        IJ.log("Error: gltfpack failed with exit code " + exitCode);
-			    } else {
-			        IJ.log("gltfpack success: " + outputFile.getName());
-			    }
-			    
-			} catch (Exception e) {
-			    e.printStackTrace();
-			    IJ.log("Export failed: " + e.getMessage());
-			}
+//			try {Thread.sleep(30000);}
+//			catch (Exception e) {e.printStackTrace();}
+			
 			
 			if (IJ.isWindows()) {
-				String[] commandStringArrayA = new String[]{"cmd","/c","npx","obj2gltf","--separate","--checkTransparency","-i",objFilePathString};
+				String[] commandStringArrayA = new String[]{"cmd","/c","npx","obj2gltf","--checkTransparency","-i",objFilePathString};
 				Process objTOgltf = Runtime.getRuntime().exec(commandStringArrayA);
 				String gltfOutPathString = objFilePathString.replace(".obj", ".gltf");
 				String[] commandStringArrayB = new String[]{"cmd","/c","npx","gltf-pipeline","-i",gltfOutPathString,"-o",gltfOutPathString,"--draco.compressionLevel","10","-d"};
@@ -418,48 +403,57 @@ public class WavefrontExporter {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			} else if  (IJ.isMacOSX()){
+			} else if (IJ.isMacOSX()) {
+                // Logic for processing ONE file on Mac
+                
+                String gltfOutPathString = objFilePathString.replace(".obj", ".gltf");
+                String glbOutPathString = objFilePathString.replace(".obj", ".glb");
 
-				// ... inside your 'else if (IJ.isMacOSX())' block ...
+                // --- 1. OBJ to GLTF Command List ---
+                List<String> commandListA = Arrays.asList(
+                    "/usr/local/bin/npx",
+                    "obj2gltf",
+                    "--checkTransparency",
+                    "-i",
+                    objFilePathString,
+                    "-o",
+                    gltfOutPathString
+                );
 
-				// Fix the path variable:
-				String nodeBinDir = "/usr/local/bin"; 
-				String gltfOutPathString = objFilePathString.replace(".obj", ".gltf");
+                // --- 2. GLTF to Draco GLB Command List ---
+                List<String> commandListB = Arrays.asList(
+                    "/usr/local/bin/npx",
+                    "gltf-pipeline",
+                    "-i",
+                    gltfOutPathString,
+                    "-o",
+                    gltfOutPathString,          // Output as .glb
+                    "--draco.compressionLevel",
+                    "10",
+                    "-d"
+                );
 
-				// --- 1. OBJ to GLTF Command Array ---
-				// Build the PATH injection into the command string
-				String npx1Command = String.format("obj2gltf --separate --checkTransparency -i %s -o %s",
-				                                   objFilePathString, gltfOutPathString);
-				String commandStringA = npx1Command;
+                try {
+                    while(!new File(objFilePathString).canRead()) Thread.sleep(10);
+                    
+                    // RUN STEP A
+                    int resultA = runNpxCommand(commandListA, "OBJ2GLTF Conversion"); 
 
-				// --- 2. GLTF to Draco GLB Command Array ---
-				String npx2Command = String.format("gltf-pipeline -i %s -o %s --draco.compressionLevel 10 -d",
-				                                   gltfOutPathString, gltfOutPathString);
-				String commandStringB = npx2Command;
-
-				try {
-				    // RUN STEP A: OBJ2GLTF and WAIT
-				    int resultA = runNpxCommand(commandStringA, "OBJ2GLTF Conversion"); 
-
-				    if (resultA == 0) {
-				        // RUN STEP B: GLTF-PIPELINE (Draco) and WAIT
-				        int resultB = runNpxCommand(commandStringB, "Draco Compression");
-				        
-				        if (resultB != 0) {
-				            IJ.error("Draco compression failed with code: " + resultB);
-				        }
-				    } else {
-				        // This likely still logs 127 if the PATH fix didn't work.
-				        IJ.error("OBJ to GLTF conversion failed with code: " + resultA);
-				    }
-				} catch (Exception e) {
-				    IJ.error("Process execution error: " + e.getMessage());
-				    e.printStackTrace();
-				}
-			
-			}
+                    if (resultA == 0) {
+                        // RUN STEP B
+                        int resultB = runNpxCommand(commandListB, "Draco Compression");
+                        if (resultB != 0) IJ.error("Draco compression failed with code: " + resultB);
+                    } else {
+                        IJ.error("OBJ to GLTF conversion failed with code: " + resultA);
+                    }
+                } catch (Exception e) {
+                    IJ.error("Process execution error: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
 		}
 	}
+	
 	
 	/**
 	 * Inner class to consume streams prevents the process from hanging.
@@ -489,33 +483,31 @@ public class WavefrontExporter {
 	}
 
 	/**
-	 * reliable execution method that handles PATH, Streams, and Waiting
+	 * Reliable execution method that handles PATH, Streams, and Waiting
 	 */
-	private static int runNpxCommand(String commandLine, String description) {
+	private static int runNpxCommand(List<String> commandList, String description) {
 	    try {
-	        // 1. Use ProcessBuilder - it's safer than Runtime.exec for arguments
-	        // We run via bash -c to ensure npx resolves correctly
-	        ProcessBuilder pb = new ProcessBuilder("/bin/bash", "-c", commandLine);
+	        ProcessBuilder pb = new ProcessBuilder(commandList);
 	        
-	        // 2. FIX THE PATH (Crucial for exit code 127)
-	        // This grabs your current Java environment's path and adds /usr/local/bin
-	        // You can add other paths here if needed (like /opt/local/bin for MacPorts)
-	        java.util.Map<String, String> env = pb.environment();
-	        String currentPath = env.getOrDefault("PATH", "");
-	        env.put("PATH", "/usr/local/bin:/opt/local/bin:" + currentPath);
+            // --- FIX: UPDATE THE PATH ---
+            // Eclipse often doesn't see /usr/local/bin. We must add it explicitly.
+            java.util.Map<String, String> env = pb.environment();
+            String currentPath = env.getOrDefault("PATH", "");
+            env.put("PATH", "/usr/local/bin:" + currentPath);
 	        
-	        // 3. Merge Error and Output streams (Simpler handling)
+	        // 2. Merge Error and Output streams (Simpler handling)
 	        pb.redirectErrorStream(true);
 
-	        IJ.log(commandLine);
+	        IJ.log(commandList.toString());
 	        IJ.log("--- Starting " + description + " ---");
 	        Process p = pb.start();
+            
+            // --- FIX: CONSUME OUTPUT ---
+            // Must run in a separate thread to prevent blocking
+            StreamGobbler outputGobbler = new StreamGobbler(p.getInputStream(), description);
+            new Thread(outputGobbler).start();
 
-	        // 4. Start the Gobbler (Prevents Hangs)
-	        StreamGobbler outputGobbler = new StreamGobbler(p.getInputStream(), "");
-	        new Thread(outputGobbler).start();
-
-	        // 5. Wait for finish
+	        // 3. Wait for finish
 	        int exitCode = p.waitFor();
 	        IJ.log("--- " + description + " finished with Exit Code: " + exitCode + " ---");
 	        
@@ -690,4 +682,3 @@ public class WavefrontExporter {
 		return true;
 	}
 }
-

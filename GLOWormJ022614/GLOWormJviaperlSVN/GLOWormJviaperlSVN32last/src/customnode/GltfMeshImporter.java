@@ -2,83 +2,73 @@ package customnode;
 
 import ij.IJ;
 import ij3d.Image3DUniverse;
-import ij3d.Content;
-import ij3d.ContentCreator;
-import ij3d.ContentInstant;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.Arrays;
-import java.util.Comparator;
+import java.util.Map;
+import javax.swing.SwingUtilities;
 
 public class GltfMeshImporter {
 
     /**
      * MAIN ENTRY POINT
+     * Decodes GLB/GLTF in memory and adds directly to the Universe.
      */
     public static void loadAndShowGltfMeshes(File glbFile, Image3DUniverse univ) {
         if (!glbFile.exists() || !(glbFile.getName().toLowerCase().endsWith(".glb") || glbFile.getName().toLowerCase().endsWith(".gltf"))) return;
 
-        // 1. Prepare Output Directory
-        String safeName = glbFile.getName().replace(".", "_") + "_parts";
-        File outputDir = new File(glbFile.getParentFile(), safeName);
-        if (!outputDir.exists() && !outputDir.mkdir()) {
-            IJ.error("Could not create output dir: " + outputDir);
-            return;
-        }
-
-        IJ.showStatus("Processing Draco GLB...");
-
-        try {
-            // 2. Extract Decoder from correct resource folder
-            File decoder = extractDecoder();
-
-            // 3. Convert (Generates _0.obj files)
-            new GlbToObjConverter().convert(glbFile, outputDir, decoder);
-
-            // 5. Load Results
-            loadMeshes(outputDir, IJ.getInstance().getDragAndDrop().getDropUniverse());
-            
-            IJ.showStatus("Import Complete.");
-
-        } catch (Exception e) {
-            IJ.handleException(e);
-        }
-    }
-
-    private static void loadMeshes(File dir, Image3DUniverse univ) {
-        String[] objPaths = dir.list((d, n) -> n.toLowerCase().endsWith(".obj"));
-        if (objPaths == null || objPaths.length < 1) return;
-        for (int c=0; c<objPaths.length; c++) {
-        	objPaths[c] = dir+File.separator+objPaths[c];
-        }
-        	
+        // Ensure we have a universe
+        final Image3DUniverse finalUniv = (univ == null) ? new Image3DUniverse() : univ;
         if (univ == null) {
-        	univ = new Image3DUniverse();
-        	IJ.getInstance().getDragAndDrop().setDropUniverse(univ);
-        }
-        
-        try {
-        	univ.addContentLater(objPaths, null, false);
-        } catch (Exception e) {
-        	IJ.log("Error loading: " + dir.getAbsolutePath());
+             IJ.getInstance().getDragAndDrop().setDropUniverse(finalUniv);
+             finalUniv.show(false);
         }
 
-        long waitCount=0;
-        while (univ.getContents().size() < objPaths.length && waitCount<100) {
-        	try {
-				Thread.sleep(100);
-				waitCount++;
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-        }
-        if (univ.getWindow() == null) {
-        	univ.show(false);
-        	univ.resetView();
-        }
+        IJ.log("Streaming Draco GLB...");
+
+        // Run in a background thread to keep the UI responsive while decoding
+        new Thread(() -> {
+            try {
+                // 1. Extract Decoder
+                File decoder = extractDecoder();
+
+                // 2. Convert & Load (The Pipeline)
+                // Returns Map<String, CustomMesh>
+                GlbToObjConverter converter = new GlbToObjConverter();
+                Map<String, CustomMesh> meshes = converter.convert(glbFile, decoder);
+
+                // 3. Add to Universe (Back on the Event Dispatch Thread)
+                if (meshes != null && !meshes.isEmpty()) {
+                    SwingUtilities.invokeLater(() -> {
+                        for (Map.Entry<String, CustomMesh> entry : meshes.entrySet()) {
+                            try {
+                                String name = entry.getKey();
+                                CustomMesh mesh = entry.getValue();
+                                
+                                // Standard Image3DUniverse method
+                                finalUniv.addCustomMesh(mesh, name, true);
+                                
+                            } catch (Exception e) {
+                                IJ.log("Failed to add mesh: " + entry.getKey());
+                            }
+                        }
+                        // Reset view if this was a fresh import
+                        if (finalUniv.getContents().size() == meshes.size()) {
+                             finalUniv.resetView();
+                        }
+                        IJ.log("Import Complete.");
+                    });
+                } else {
+                    IJ.log("Import Failed: No meshes found.");
+                }
+
+            } catch (Exception e) {
+                IJ.handleException(e);
+            }
+        }).start();
     }
 
     private static File extractDecoder() throws IOException {
