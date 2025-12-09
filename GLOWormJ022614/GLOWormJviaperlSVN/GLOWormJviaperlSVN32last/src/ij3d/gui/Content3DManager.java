@@ -2818,39 +2818,75 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 //		}
 //	}
 
+	// Add this field to your Content3DManager class if you don't have it
+	private boolean isUpdating = false; 
+
 	public void valueChanged(ListSelectionEvent e) {
-		int index = 0;
-		if (listModel.getSize() == 0)
-			return;
-		if (list.getSelectedIndices().length == 0)
-			return;
-		index = list.getSelectedIndices()[0];
-		if (index < 0)
-			index = 0;
-		if (univ != null) {
-			if (list.getSelectedIndices().length <= 1) {
-//				restore(imp, index, true);
-				String selectedLabel = list.getSelectedValue();
-				String editedLabel = selectedLabel.replaceAll("(.*?)(_\\#\\d){2} \"_\\d.*", "$1").replace("\"", "");
-				int labelTpt = Integer.parseInt((selectedLabel).replaceAll("(.*?)((_\\#)(\\d)){2} \"_\\d.*", "$4").replace("\"", ""));
-				Content c = ((Content)((Image3DUniverse) univ).getContent(editedLabel));
-				if (c.getInstants().containsValue(contentInstants.get(selectedLabel))) {
-					((Image3DUniverse)univ).select(c, true);
-					((Image3DUniverse)univ).showTimepoint(labelTpt);
+	    if (e.getValueIsAdjusting()) return; 
+	    if (isUpdating) return; // <--- RECURSION GUARD
 
-				}
-			} else {
-				((Image3DUniverse)univ).select(null,true);
-			}
-			if (record()) {
-				if (Recorder.scriptMode())
-					Recorder.recordCall("rm.select(imp, " + index + ");");
-				else
-					Recorder.record("contentInstantManager", "Select", index);
-			}
-		}
+	    try {
+	        isUpdating = true; // Lock
 
+	        if (listModel.getSize() == 0) return;
+	        int[] selectedIndices = list.getSelectedIndices();
+	        if (selectedIndices.length == 0) return;
+
+	        int index = selectedIndices[0];
+	        if (index < 0) index = 0;
+	        
+	        Image3DUniverse ij3duniv = ((Image3DUniverse)univ);
+	        if (ij3duniv != null) {
+	            // Case 1: Single Selection - Sync logic
+	            if (selectedIndices.length == 1) {
+	                String selectedLabel = (String) list.getSelectedValue();
+	                
+	                // Robust Regex Parsing
+	                // (Assuming your regex is correct for your naming convention)
+	                String editedLabel = selectedLabel.replaceAll("(.*?)(_\\#\\d){2} \"_\\d.*", "$1").replace("\"", "");
+	                String tptString = selectedLabel.replaceAll("(.*?)((_\\#)(\\d)){2} \"_\\d.*", "$4").replace("\"", "");
+	                
+	                int labelTpt = 0;
+	                try {
+	                    labelTpt = Integer.parseInt(tptString);
+	                } catch (NumberFormatException nfe) {
+	                    // Fallback if regex fails to find digits
+	                    labelTpt = ij3duniv.getCurrentTimepoint(); 
+	                }
+
+	                Content c = ij3duniv.getContent(editedLabel);
+	                
+	                // Null Check to prevent NPE
+	                if (c != null && c.getInstants() != null) {
+	                    if (c.getInstants().containsValue(contentInstants.get(selectedLabel))) {
+	                    	ij3duniv.select(c, true); // Select single
+	                        ij3duniv.showTimepoint(labelTpt);
+	                    }
+	                }
+	            } 
+	            // Case 2: Multi-Selection
+	            else {
+	                // If the Universe supports multi-selection, we should iterate and select all.
+	                // If not, clearing selection is safer than crashing.
+	            	ij3duniv.select(null, true); 
+	            }
+
+	            // Recorder Logic
+	            if (record()) {
+	                if (Recorder.scriptMode())
+	                    Recorder.recordCall("rm.select(imp, " + index + ");");
+	                else
+	                    Recorder.record("contentInstantManager", "Select", index);
+	            }
+	        }
+	    } catch (Exception ex) {
+	        IJ.log("Error in Content3DManager selection: " + ex.getMessage());
+	        ex.printStackTrace();
+	    } finally {
+	        isUpdating = false; // Unlock
+	    }
 	}
+	
 
 	public DefaultListModel<String> getListModel() {
 		return listModel;

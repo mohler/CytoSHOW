@@ -19,17 +19,8 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.BufferedReader;
 
-// IMPORT THE DTO
-import customnode.GltfMeshImporter;
-
 public class WavefrontLoader {
 
-    /**
-     * Load the specified obj file and returns the result as
-     * a hash map, mapping the object names to the corresponding
-     * <code>CustomMesh</code> objects.
-     * @param objmtlStreams 
-     */
     public static LinkedHashMap<String, CustomMesh> load(String objfile, InputStream[] objmtlStreams, boolean flipXcoords) throws IOException {
         WavefrontLoader wl = new WavefrontLoader();
         try {
@@ -73,17 +64,17 @@ public class WavefrontLoader {
     private String objFileGreatGrandParentName;
 
     private void parse(String objfile, InputStream[] objmtlStreams, boolean flipXcoords) throws IOException {
-        // Initialize map for both paths
         meshes = new LinkedHashMap<String, CustomMesh>();
         
         File f = new File(objfile);
         String fileName = f.getName();
 
-        // --- GLB PATH (Synchronous) ---
+        // --- GLB CHECK ---
         if (fileName.toLowerCase().endsWith(".glb") || fileName.toLowerCase().endsWith(".gltf")) {
             try {
                 IJ.log("Importing GLB: " + fileName);
                 GltfMeshImporter.loadAndShowGltfMeshes(f.getAbsoluteFile(), IJ.getInstance().getDragAndDrop().getDropUniverse());
+                allLinesParsed = true;
             } catch (Exception e) {
                 IJ.log("GLB Import Failed: " + e.getMessage());
                 e.printStackTrace();
@@ -92,9 +83,7 @@ public class WavefrontLoader {
             return; 
         }
 
-        // --- OBJ PATH (Synchronous / Rescued) ---
-        // Logic extracted from the old compoundObjOpeningThread
-        
+        // --- PREPARE LOGIC ---
         objFileName = fileName;
         objFileParentName = "";
         objFileGrandParentName = "";
@@ -111,93 +100,96 @@ public class WavefrontLoader {
             objFileGreatGrandParentName = f.getParentFile().getParentFile().getParentFile().getName();
         }
 
-        // --- DIRECT EXECUTION (No new Thread) ---
         this.objfile = objfile;
-        File fileRef = null;
-        
-        // Stream setup
-        if (objmtlStreams==null || objmtlStreams[0]==null) {
-            fileRef = new File(objfile);
-            try {
-                in = new BufferedReader(new FileReader(objfile));
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-                return; // Fail fast if file not found
-            }
-        } else {
-            in = new BufferedReader(new InputStreamReader(objmtlStreams[0]));
-        }
+        final File fileRef = f; // Capture for inner class
 
-        HashMap<String, Color4f> materials = null;
-        boolean noVlines = true;
-        boolean noFlines = true;
-        
-        try {
-            while((line = in.readLine()) != null) {
-                if(line.startsWith("mtllib")) {
-                    String mtlName = line.split("\\s+")[1].trim();
-                    materials = readMaterials(fileRef, mtlName, objmtlStreams);
-                } else if(line.startsWith("g ")) {
-                    if(name != null) {
+        // Define the heavy lifting as a Runnable
+        Runnable parserLogic = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // Stream Setup
+                    if (objmtlStreams == null || objmtlStreams[0] == null) {
+                        try {
+                            in = new BufferedReader(new FileReader(fileRef));
+                        } catch (FileNotFoundException e) {
+                            e.printStackTrace();
+                            return;
+                        }
+                    } else {
+                        in = new BufferedReader(new InputStreamReader(objmtlStreams[0]));
+                    }
+
+                    HashMap<String, Color4f> materials = null;
+                    boolean noVlines = true;
+                    boolean noFlines = true;
+
+                    while((line = in.readLine()) != null) {
+                        if(line.startsWith("mtllib")) {
+                            String mtlName = line.split("\\s+")[1].trim();
+                            materials = readMaterials(fileRef, mtlName, objmtlStreams);
+                        } else if(line.startsWith("g ")) {
+                            if(name != null) {
+                                CustomMesh cm = createCustomMesh();
+                                if(cm != null) meshes.put(name, cm);
+                                indices = new ArrayList<Point3f>();
+                                material = null;
+                            }
+                            name = line.split("\\s+")[1].trim();
+                        } else if(line.startsWith("usemtl ")) {
+                            if(materials != null) material = materials.get(line.split("\\s+")[1]);
+                        } else if(line.startsWith("v ")) {
+                            readVertex(flipXcoords);
+                            noVlines = false;
+                        } else if(line.startsWith("f ")) {
+                            readFace();
+                            noFlines = false;
+                        } else if(line.startsWith("l ")) readFace();
+                          else if(line.startsWith("p ")) readFace();
+                        
+                        // Only sleep if running async to yield to UI
+                        if (objmtlStreams == null) IJ.wait(0); 
+                    }
+                    
+                    if (objmtlStreams == null || objmtlStreams[0] == null) {
+                        in.close();
+                    }
+
+                    if (noVlines || noFlines) {
+                        meshes = null;
+                        name = null;
+                        allLinesParsed = true;
+                        return;
+                    }
+
+                    if(name != null && indices.size() > 0) {
                         CustomMesh cm = createCustomMesh();
-                        if(cm != null)
-                            meshes.put(name, cm);
+                        cm.setFlippedXCoords(flipXcoords);
+                        if(cm != null) meshes.put(name, cm);
                         indices = new ArrayList<Point3f>();
                         material = null;
                     }
-                    name = line.split("\\s+")[1].trim();
-                } else if(line.startsWith("usemtl ")) {
-                    if(materials != null)
-                        material = materials.get(line.split("\\s+")[1]);
-                } else if(line.startsWith("v ")) {
-                    readVertex(flipXcoords);
-                    noVlines = false;
-                } else if(line.startsWith("f ")) {
-                    readFace();
-                    noFlines = false;
-                } else if(line.startsWith("l ")) {
-                    readFace();
-                } else if(line.startsWith("p ")) {
-                    readFace();
+                    allLinesParsed = true;
+                    finalMeshCount = meshes != null ? meshes.size() : 0;
+
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                // Removed IJ.wait(0) - unnecessary in synchronous execution
             }
-            
-            // IMPORTANT: Close internal reader if we opened it, 
-            // but if it came from objmtlStreams, the caller handles lifecycle.
-            // (BufferedReader close will close the underlying stream)
-            // in.close(); 
-            // Suggestion: Don't close 'in' here if it wraps the passed InputStream, 
-            // let the caller (GlbToObjConverter) close the underlying streams.
-            // However, legacy behavior often expects close here. 
-            // Ideally, leave it open if stream passed, close if file opened.
-            // For now, mirroring previous logic but respecting the caller's finally block:
-            // If we created the FileReader, we should close it. 
-            // If we wrapped a stream, the caller closes it.
-            if (objmtlStreams == null || objmtlStreams[0] == null) {
-                in.close();
-            }
+        };
 
-            if (noVlines || noFlines) {
-                meshes = null;
-                name = null;
-                allLinesParsed = true;
-                return;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        // --- EXECUTION STRATEGY ---
+        // HEURISTIC: If streams are provided, it's the GLB Converter -> RUN SYNC.
+        // If streams are NULL, it's a standard File Drag-Drop -> RUN ASYNC (Thread).
+        
+        if (objmtlStreams != null && objmtlStreams.length > 0 && objmtlStreams[0] != null) {
+            // SYNC MODE (For GLB Pipes)
+            parserLogic.run();
+        } else {
+            // ASYNC MODE (For Legacy OBJ Drag & Drop)
+            Thread compoundObjOpeningThread = new Thread(parserLogic);
+            compoundObjOpeningThread.start();
         }
-
-        if(name != null && indices.size() > 0) {
-            CustomMesh cm = createCustomMesh();
-            cm.setFlippedXCoords(flipXcoords);
-            if(cm != null)
-                meshes.put(name, cm);
-            indices = new ArrayList<Point3f>();
-            material = null;
-        }
-        allLinesParsed = true;
-        finalMeshCount = meshes != null ? meshes.size() : 0;
     }
 
     private CustomMesh createCustomMesh() {

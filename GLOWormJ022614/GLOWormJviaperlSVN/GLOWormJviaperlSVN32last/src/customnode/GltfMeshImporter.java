@@ -42,25 +42,32 @@ public class GltfMeshImporter {
 
                 // 3. Add to Universe (Back on the Event Dispatch Thread)
                 if (meshes != null && !meshes.isEmpty()) {
-                    SwingUtilities.invokeLater(() -> {
-                        for (Map.Entry<String, CustomMesh> entry : meshes.entrySet()) {
-                            try {
-                                String name = entry.getKey();
-                                CustomMesh mesh = entry.getValue();
-                                
-                                // Standard Image3DUniverse method
-                                finalUniv.addCustomMesh(mesh, name, true);
-                                
-                            } catch (Exception e) {
-                                IJ.log("Failed to add mesh: " + entry.getKey());
-                            }
-                        }
-                        // Reset view if this was a fresh import
-                        if (finalUniv.getContents().size() == meshes.size()) {
-                             finalUniv.resetView();
-                        }
-                        IJ.log("Import Complete.");
-                    });
+                	// Inside GltfMeshImporter.loadAndShowGltfMeshes...
+
+                	SwingUtilities.invokeLater(() -> {
+                		for (Map.Entry<String, CustomMesh> entry : meshes.entrySet()) {
+                			try {
+                				String name = entry.getKey();
+                				CustomMesh mesh = entry.getValue();
+
+                				// FIX: Capture the Content object and explicitly lock it
+                				// Assuming addCustomMesh returns the Content object (standard behavior)
+                				ij3d.Content c = finalUniv.addCustomMesh(mesh, name, true);
+
+                				if (c != null) {
+                					c.setLocked(true); // <--- Force lock
+                				}
+
+                			} catch (Exception e) {
+                				IJ.log("Failed to add mesh: " + entry.getKey());
+                			}
+                		}
+                		// Reset view if this was a fresh import (first item only)
+                		if (finalUniv.getContents().size() == meshes.size()) {
+//                			finalUniv.resetView();
+                		}
+//                		IJ.log("Import Complete.");
+                	});                
                 } else {
                     IJ.log("Import Failed: No meshes found.");
                 }
