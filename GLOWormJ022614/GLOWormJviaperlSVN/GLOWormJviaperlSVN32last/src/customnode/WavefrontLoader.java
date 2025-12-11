@@ -21,27 +21,6 @@ import java.io.BufferedReader;
 
 public class WavefrontLoader {
 
-    public static LinkedHashMap<String, CustomMesh> load(String objfile, InputStream[] objmtlStreams, boolean flipXcoords) throws IOException {
-        WavefrontLoader wl = new WavefrontLoader();
-        try {
-            wl.parse(objfile, objmtlStreams, flipXcoords);
-        } catch(RuntimeException e) {
-            System.out.println("error reading " + wl.name);
-            throw e;
-        }
-        return wl.meshes;
-    }
-
-    public LinkedHashMap<String, CustomMesh> loadObjs(String objfile, InputStream[] objmtlStreams, boolean flipXcoords) throws IOException {
-        try {
-            parse(objfile, objmtlStreams, flipXcoords);
-        } catch(RuntimeException e) {
-            System.out.println("error reading " + name);
-            throw e;
-        }
-        return meshes;
-    }
-    
     private LinkedHashMap<String, CustomMesh> meshes;
 
     public WavefrontLoader() {}
@@ -63,6 +42,27 @@ public class WavefrontLoader {
     private String objFileGrandParentName;
     private String objFileGreatGrandParentName;
 
+    public static LinkedHashMap<String, CustomMesh> load(String objfile, InputStream[] objmtlStreams, boolean flipXcoords) throws IOException {
+        WavefrontLoader wl = new WavefrontLoader();
+        try {
+            wl.parse(objfile, objmtlStreams, flipXcoords);
+        } catch(RuntimeException e) {
+            System.out.println("error reading " + wl.name);
+            throw e;
+        }
+        return wl.meshes;
+    }
+
+    public LinkedHashMap<String, CustomMesh> loadObjs(String objfile, InputStream[] objmtlStreams, boolean flipXcoords) throws IOException {
+        try {
+            parse(objfile, objmtlStreams, flipXcoords);
+        } catch(RuntimeException e) {
+            System.out.println("error reading " + name);
+            throw e;
+        }
+        return meshes;
+    }
+    
     private void parse(String objfile, InputStream[] objmtlStreams, boolean flipXcoords) throws IOException {
         meshes = new LinkedHashMap<String, CustomMesh>();
         

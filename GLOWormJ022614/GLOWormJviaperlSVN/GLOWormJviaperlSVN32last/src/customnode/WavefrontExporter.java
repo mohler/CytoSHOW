@@ -427,7 +427,7 @@ public class WavefrontExporter {
                     "-i",
                     gltfOutPathString,
                     "-o",
-                    gltfOutPathString,          // Output as .glb
+                    glbOutPathString,          // Output as .glb
                     "--draco.compressionLevel",
                     "10",
                     "-d"

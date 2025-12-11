@@ -1917,7 +1917,7 @@ public class ImageCanvas2 extends JComponent implements MouseListener, MouseMoti
 						Object[] objNames = otherListModel.toArray();
 						for (int j = 0; j < objNames.length; j++) {
 							String nextObjName = (String) objNames[j];
-							nextObjName = nextObjName.replaceAll("(.*?)((_pre|_post\\d+)?)_#0_#0 \"_0", "$1");
+							nextObjName = nextObjName.replaceAll("(.*?)(_\\d+)?", "$1");
 							if ((nextObjName).contains("\"") && ("\""+(nextObjName).split("\"")[1].split(" ")[0].toLowerCase().trim()).equals(fullTagName.toLowerCase())
 									&& !clickedROIstring
 									.contains(nextObjName

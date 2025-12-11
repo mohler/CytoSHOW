@@ -60,8 +60,8 @@ public class GlbToObjConverter {
 
         JsonArray meshes = gltf.getAsJsonArray("meshes");
         JsonArray bufferViews = gltf.getAsJsonArray("bufferViews");
+        JsonArray accessors = gltf.has("accessors") ? gltf.getAsJsonArray("accessors") : new JsonArray(); // Needed for Standard Path
 
-        // FIX 1: Hard cap threads at 4 to prevent RAM explosion from OBJ text
         int threads = 4;
         int cores = Runtime.getRuntime().availableProcessors();
         threads = cores/4;
@@ -82,6 +82,10 @@ public class GlbToObjConverter {
                     for (int p = 0; p < primitives.size(); p++) {
                     	JsonObject prim = primitives.get(p).getAsJsonObject();
 
+                    	int matIdx = prim.has("material") ? prim.get("material").getAsInt() : -1;
+                        String matName = matData.indexToName.getOrDefault(matIdx, "default");
+                        
+                        // --- BRANCH 1: DRACO COMPRESSED ---
                     	if (prim.has("extensions") && prim.getAsJsonObject("extensions").has("KHR_draco_mesh_compression")) {
                     		JsonObject draco = prim.getAsJsonObject("extensions").getAsJsonObject("KHR_draco_mesh_compression");
 
@@ -94,8 +98,6 @@ public class GlbToObjConverter {
 
                     		int offset = bufferView.has("byteOffset") ? bufferView.get("byteOffset").getAsInt() : 0;
                     		int len = bufferView.get("byteLength").getAsInt();
-                    		int matIdx = prim.has("material") ? prim.get("material").getAsInt() : -1;
-                    		String matName = matData.indexToName.getOrDefault(matIdx, "default");
 
                     		File tempDrc = File.createTempFile("draco_in_" + meshIndex + "_", ".drc");
                     		try (FileOutputStream fos = new FileOutputStream(tempDrc)) {
@@ -109,71 +111,102 @@ public class GlbToObjConverter {
 
                     		try {
                     			if (IS_WINDOWS) {
-                    				// Keep existing Windows Temp File Logic
                     				File tempObj = File.createTempFile("draco_out_" + meshIndex + "_", ".obj");
                     				tempObjCleanup = tempObj;
                     				ProcessBuilder pb = new ProcessBuilder(decoderExe.getAbsolutePath(), "-i", tempDrc.getAbsolutePath(), "-o", tempObj.getAbsolutePath());
                     				pb.redirectError(ProcessBuilder.Redirect.INHERIT);
                     				if (pb.start().waitFor() != 0) throw new IOException("Decoder failed");
-
-                    				// Open stream but DO NOT close it in a try-with-resources block
                     				objDataStream = new FileInputStream(tempObj);
                     			} else {
-                    				// Keep existing Unix Named Pipe Logic
                     				String pipeName = "pipe_" + UUID.randomUUID() + ".obj";
                     				Path pipePath = Paths.get("/tmp", pipeName);
                     				pipeCleanup = pipePath;
                     				new ProcessBuilder("mkfifo", pipePath.toString()).start().waitFor();
-
                     				ProcessBuilder pb = new ProcessBuilder(decoderExe.getAbsolutePath(), "-i", tempDrc.getAbsolutePath(), "-o", pipePath.toString());
                     				pb.redirectError(ProcessBuilder.Redirect.INHERIT);
                     				processToWait = pb.start();
-
-                    				// Open stream but DO NOT close it in a try-with-resources block
                     				objDataStream = new FileInputStream(pipePath.toFile());
                     			}
 
                     			if (objDataStream != null) {
                     				String objHeader = "g " + cleanName + "\nmtllib virtual_materials.mtl\nusemtl " + matName + "\n";
                     				InputStream headerStream = new ByteArrayInputStream(objHeader.getBytes(StandardCharsets.UTF_8));
-
-                    				// FIX 2: Chain streams and pass to loader without closing 'objDataStream'
                     				InputStream finalObjStream = new SequenceInputStream(headerStream, objDataStream);
                     				InputStream mtlStream = new ByteArrayInputStream(matData.mtlContent.getBytes(StandardCharsets.UTF_8));
 
                     				WavefrontLoader loader = new WavefrontLoader();
                     				String safeProxyName = originalFile.getName() + ".obj";
-
-                    				// Loader reads until EOF
                     				Map<String, CustomMesh> loaded = loader.loadObjs(safeProxyName, new InputStream[]{ finalObjStream, mtlStream }, false);
-
                     				if (loaded != null) collectedMeshes.putAll(loaded);
                     			}
-
                     			if (processToWait != null) processToWait.waitFor();
 
                     		} finally {
-                    			// 1. Close the stream explicitly (Safe now!)
-                    			if (objDataStream != null) {
-                    				try { 
-                    					objDataStream.close(); 
-                    				} catch (IOException e) {
-                    					// Ignore close errors
-                    				}
-                    			}
-
-                    			// 2. Clean up temp files
+                    			if (objDataStream != null) try { objDataStream.close(); } catch (IOException e) {}
                     			tempDrc.delete();
                     			if (tempObjCleanup != null) tempObjCleanup.delete();
-
-                    			// 3. Clean up pipes (Unix only)
                     			if (pipeCleanup != null) {
-                    				if (processToWait != null && processToWait.isAlive()) {
-                    					processToWait.destroy();
-                    				}
+                    				if (processToWait != null && processToWait.isAlive()) processToWait.destroy();
                     				Files.deleteIfExists(pipeCleanup);
                     			}
                     		}
+                    	} 
+                    	// --- BRANCH 2: STANDARD GLTF (Uncompressed) ---
+                    	else {
+                    	    JsonObject attributes = prim.getAsJsonObject("attributes");
+                            if (attributes.has("POSITION")) {
+                                int posAccIdx = attributes.get("POSITION").getAsInt();
+                                float[] positions = readAccessorFloatVec3(accessors, bufferViews, bufferMap, posAccIdx);
+                                
+                                float[] normals = null;
+                                if (attributes.has("NORMAL")) {
+                                    normals = readAccessorFloatVec3(accessors, bufferViews, bufferMap, attributes.get("NORMAL").getAsInt());
+                                }
+                                
+                                int[] indices = null;
+                                if (prim.has("indices")) {
+                                    indices = readAccessorIndices(accessors, bufferViews, bufferMap, prim.get("indices").getAsInt());
+                                }
+                                
+                                // Build OBJ in memory
+                                StringBuilder objSb = new StringBuilder();
+                                objSb.append("g ").append(cleanName).append("\n");
+                                objSb.append("mtllib virtual_materials.mtl\n");
+                                objSb.append("usemtl ").append(matName).append("\n");
+                                
+                                for(int k=0; k<positions.length; k+=3) {
+                                    objSb.append("v ").append(positions[k]).append(" ").append(positions[k+1]).append(" ").append(positions[k+2]).append("\n");
+                                }
+                                if (normals != null) {
+                                    for(int k=0; k<normals.length; k+=3) {
+                                        objSb.append("vn ").append(normals[k]).append(" ").append(normals[k+1]).append(" ").append(normals[k+2]).append("\n");
+                                    }
+                                }
+                                if (indices != null) {
+                                    for(int k=0; k<indices.length; k+=3) {
+                                        int i1 = indices[k]+1; int i2 = indices[k+1]+1; int i3 = indices[k+2]+1;
+                                        if (normals != null) {
+                                            objSb.append("f ").append(i1).append("//").append(i1).append(" ")
+                                                 .append(i2).append("//").append(i2).append(" ")
+                                                 .append(i3).append("//").append(i3).append("\n");
+                                        } else {
+                                            objSb.append("f ").append(i1).append(" ").append(i2).append(" ").append(i3).append("\n");
+                                        }
+                                    }
+                                } else {
+                                    // No indices? Assume linear topology (rare in GLTF but possible)
+                                    int count = positions.length / 3;
+                                    for(int k=0; k<count; k+=3) {
+                                        objSb.append("f ").append(k+1).append(" ").append(k+2).append(" ").append(k+3).append("\n");
+                                    }
+                                }
+                                
+                                InputStream objStream = new ByteArrayInputStream(objSb.toString().getBytes(StandardCharsets.UTF_8));
+                                InputStream mtlStream = new ByteArrayInputStream(matData.mtlContent.getBytes(StandardCharsets.UTF_8));
+                                WavefrontLoader loader = new WavefrontLoader();
+                                Map<String, CustomMesh> loaded = loader.loadObjs(originalFile.getName() + ".obj", new InputStream[]{ objStream, mtlStream }, false);
+                                if (loaded != null) collectedMeshes.putAll(loaded);
+                            }
                     	}
                     }
                 } catch (Exception e) {
@@ -190,7 +223,59 @@ public class GlbToObjConverter {
         return collectedMeshes;
     }
 
-    // --- Helpers (MaterialData, Parsers) same as before ---
+    // --- ACCESSOR READERS FOR STANDARD GLTF ---
+
+    private float[] readAccessorFloatVec3(JsonArray accessors, JsonArray bufferViews, Map<Integer, byte[]> bufferMap, int accIdx) {
+        JsonObject acc = accessors.get(accIdx).getAsJsonObject();
+        int count = acc.get("count").getAsInt();
+        int bvIdx = acc.get("bufferView").getAsInt();
+        int byteOffset = acc.has("byteOffset") ? acc.get("byteOffset").getAsInt() : 0;
+        
+        JsonObject bv = bufferViews.get(bvIdx).getAsJsonObject();
+        int bvOffset = bv.has("byteOffset") ? bv.get("byteOffset").getAsInt() : 0;
+        int bufIdx = bv.has("buffer") ? bv.get("buffer").getAsInt() : 0;
+        byte[] data = bufferMap.get(bufIdx);
+        
+        // GLTF uses Little Endian by default
+        float[] res = new float[count * 3];
+        ByteBuffer bb = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
+        int start = bvOffset + byteOffset;
+        
+        for(int i=0; i<count*3; i++) {
+            res[i] = bb.getFloat(start + (i*4));
+        }
+        return res;
+    }
+
+    private int[] readAccessorIndices(JsonArray accessors, JsonArray bufferViews, Map<Integer, byte[]> bufferMap, int accIdx) {
+        JsonObject acc = accessors.get(accIdx).getAsJsonObject();
+        int count = acc.get("count").getAsInt();
+        int compType = acc.get("componentType").getAsInt(); // 5121=UB, 5123=US, 5125=UI
+        int bvIdx = acc.get("bufferView").getAsInt();
+        int byteOffset = acc.has("byteOffset") ? acc.get("byteOffset").getAsInt() : 0;
+        
+        JsonObject bv = bufferViews.get(bvIdx).getAsJsonObject();
+        int bvOffset = bv.has("byteOffset") ? bv.get("byteOffset").getAsInt() : 0;
+        int bufIdx = bv.has("buffer") ? bv.get("buffer").getAsInt() : 0;
+        byte[] data = bufferMap.get(bufIdx);
+        
+        int[] res = new int[count];
+        ByteBuffer bb = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN);
+        int start = bvOffset + byteOffset;
+        
+        for(int i=0; i<count; i++) {
+            if (compType == 5123) { // UNSIGNED_SHORT
+                res[i] = bb.getShort(start + (i*2)) & 0xFFFF;
+            } else if (compType == 5125) { // UNSIGNED_INT
+                res[i] = bb.getInt(start + (i*4));
+            } else if (compType == 5121) { // UNSIGNED_BYTE
+                res[i] = bb.get(start + i) & 0xFF;
+            }
+        }
+        return res;
+    }
+
+    // --- EXISTING HELPERS ---
     private static class MaterialData {
         Map<Integer, String> indexToName = new HashMap<>();
         String mtlContent = "";
@@ -224,6 +309,7 @@ public class GlbToObjConverter {
         data.mtlContent = sb.toString();
         return data;
     }
+    
     private JsonObject parseBinaryGLB(BufferedInputStream bis, Map<Integer, byte[]> bufferMap) throws IOException {
         DataInputStream dis = new DataInputStream(bis);
         readUnsignedIntLE(dis); readUnsignedIntLE(dis); readUnsignedIntLE(dis);
@@ -242,6 +328,7 @@ public class GlbToObjConverter {
         } catch (EOFException e) {} 
         return gltf;
     }
+    
     private JsonObject parseTextGLTF(BufferedInputStream bis, Map<Integer, byte[]> bufferMap) throws IOException {
         Scanner s = new Scanner(bis, StandardCharsets.UTF_8.name()).useDelimiter("\\A");
         String jsonStr = s.hasNext() ? s.next() : "";
@@ -266,6 +353,10 @@ public class GlbToObjConverter {
         return ByteBuffer.wrap(b).order(ByteOrder.LITTLE_ENDIAN).getInt() & 0xFFFFFFFFL;
     }
     private String cleanName(String s) {
-        return s == null ? "unnamed" : s.replaceAll("[^a-zA-Z0-9_-]", "_");
+        s= (s == null ? "unnamed" : s.replaceAll("[^a-zA-Z0-9_-]", "_"));
+        if (!s.startsWith("mat_")) {
+        	s = s.replaceAll("(.*)_.*", "$1");
+        }
+        return s;
     }
 }

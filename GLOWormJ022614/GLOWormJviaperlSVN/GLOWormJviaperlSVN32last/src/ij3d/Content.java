@@ -71,7 +71,7 @@ public class Content extends BranchGroup implements UniverseListener, ContentCon
 		setCapability(BranchGroup.ENABLE_PICK_REPORTING);
 		setTimepointToSwitchIndex(new HashMap<Integer, Integer>());
 		contentInstants = new TreeMap<Integer, ContentInstant>();
-		ContentInstant ci = new ContentInstant(name + "_#" + tp);
+		ContentInstant ci = new ContentInstant(name);
 		ci.timepoint = tp;
 		contentInstants.put(tp, ci);
 		ci.getContentsContainingThisInstant().put(0, this);

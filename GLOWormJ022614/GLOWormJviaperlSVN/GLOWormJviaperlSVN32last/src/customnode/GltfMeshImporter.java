@@ -18,7 +18,8 @@ public class GltfMeshImporter {
      * Decodes GLB/GLTF in memory and adds directly to the Universe.
      */
     public static void loadAndShowGltfMeshes(File glbFile, Image3DUniverse univ) {
-        if (!glbFile.exists() || !(glbFile.getName().toLowerCase().endsWith(".glb") || glbFile.getName().toLowerCase().endsWith(".gltf"))) return;
+        if (!glbFile.exists() || !(glbFile.getName().toLowerCase().endsWith(".glb") || glbFile.getName().toLowerCase().endsWith(".gltf"))) 
+        	return;
 
         // Ensure we have a universe
         final Image3DUniverse finalUniv = (univ == null) ? new Image3DUniverse() : univ;
@@ -27,7 +28,7 @@ public class GltfMeshImporter {
              finalUniv.show(false);
         }
 
-        IJ.log("Streaming Draco GLB...");
+        IJ.log("Streaming GLTF/GLB file for import...");
 
         // Run in a background thread to keep the UI responsive while decoding
         new Thread(() -> {

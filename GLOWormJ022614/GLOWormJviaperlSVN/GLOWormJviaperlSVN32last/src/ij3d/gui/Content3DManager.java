@@ -34,6 +34,7 @@ import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -466,19 +467,29 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 	}
 
 	public synchronized void actionPerformed(ActionEvent e) {
+	    final ActionEvent fe = e;
 
-		final ActionEvent fe = e;
-
-		Thread actThread = new Thread(new Runnable() {
-
-			public void run() {
-				doAction(fe);
-			}
-
-		});
-		actThread.start();
+	    Thread actThread = new Thread(new Runnable() {
+	        public void run() {
+	            // --- THE TRAP START ---
+	            try {
+	                // This executes YOUR original doAction method
+	                doAction(fe); 
+	            } catch (Throwable t) {
+	                // --- THE TRAP SPRUNG ---
+	                // If doAction crashes (StackOverflow, NPE, etc.), this prints it
+	                // and prevents the "Silent Death" of the thread.
+	                System.err.println("CRASH CAUGHT IN BACKGROUND THREAD:");
+	                t.printStackTrace(); 
+	                IJ.log("Background Action Failed: " + t.toString());
+	            }
+	            // --- THE TRAP END ---
+	        }
+	    });
+	    actThread.start();
 	}
-
+	
+	
 	public void doAction(ActionEvent e) {
 		// IJ.log(e.toString()+3);
 
@@ -529,7 +540,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 					}
 
 					if (isRegex) {
-						if (((String) fullListModel.get(i)).replace("_#0_#0 \"_0", " ").matches(searchString.substring(2))) {
+						if (((String) fullListModel.get(i)).replaceAll(" \"_\\d+", " ").matches(searchString.substring(2))) {
 							listModel.addElement(fullListModel.get(i));
 							contentInstants.get(fullListModel.get(i)).setVisible(true);
 						} else {
@@ -1096,27 +1107,43 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 	}
 
 	public void setUpContentInstantsByNameAndNumbers(ContentInstant contentInstant) {
-		ArrayList<ContentInstant> timeContentInstants = getContentInstantsByNumbers().get(contentInstant.getTimepoint());
-		if (timeContentInstants == null) {
-			getContentInstantsByNumbers().put(""+contentInstant.getTimepoint(), new ArrayList<ContentInstant>());
-			timeContentInstants = getContentInstantsByNumbers().get((contentInstant.getTimepoint()));
-		}
-		//						timeContentInstants.add(contentInstant);
-		if (contentInstant.getName().contains("~")){
-			timeContentInstants.add(0,contentInstant);
-		}else {
-			timeContentInstants.add(contentInstant);
-		}
+	    // 1. Handle Timepoint Map
+	    // FIX: Convert int timepoint to String explicitly for both GET and PUT.
+	    String tptKey = String.valueOf(contentInstant.getTimepoint());
+	    
+	    ArrayList<ContentInstant> timeContentInstants = getContentInstantsByNumbers().get(tptKey);
+	    
+	    if (timeContentInstants == null) {
+	        timeContentInstants = new ArrayList<ContentInstant>();
+	        getContentInstantsByNumbers().put(tptKey, timeContentInstants);
+	    }
 
-		String rootName = contentInstant.getName().contains("\"") ? "\"" + contentInstant.getName().split("\"")[1] + "\""
-				: "\"" + contentInstant.getName().split("_")[0].trim() + " \"";
+	    // Add to list (Logic preserved: prepend if name contains '~', otherwise append)
+	    if (contentInstant.getName().contains("~")) {
+	        timeContentInstants.add(0, contentInstant);
+	    } else {
+	        timeContentInstants.add(contentInstant);
+	    }
 
-		ArrayList<ContentInstant> rootNameContentInstants = getContentInstantsByRootName().get(rootName);
-		if (rootNameContentInstants == null) {
-			getContentInstantsByRootName().put(rootName, new ArrayList<ContentInstant>());
-			rootNameContentInstants = getContentInstantsByRootName().get(rootName);
-		}
-		rootNameContentInstants.add(contentInstant);
+	    // 2. Handle Root Name Map
+	    String rootName;
+	    if (contentInstant.getName().contains("\"")) {
+	        // Extract content inside quotes
+	        String[] parts = contentInstant.getName().split("\"");
+	        rootName = (parts.length > 1) ? "\"" + parts[1] + "\"" : contentInstant.getName();
+	    } else {
+	        // Extract prefix before underscore
+	        rootName = "\"" + contentInstant.getName().split("_")[0].trim() + " \"";
+	    }
+
+	    ArrayList<ContentInstant> rootNameContentInstants = getContentInstantsByRootName().get(rootName);
+	    
+	    if (rootNameContentInstants == null) {
+	        rootNameContentInstants = new ArrayList<ContentInstant>();
+	        getContentInstantsByRootName().put(rootName, rootNameContentInstants);
+	    }
+	    
+	    rootNameContentInstants.add(contentInstant);
 	}
 
 	void recordAdd(Color color, int lineWidth) {
@@ -1301,13 +1328,13 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 				return false;
 			String nameRoot = name.contains("\"") ? "\"" + name.split("\"")[1] + "\""
 					: "\"" + name.split("_")[0].trim() + " \"";
-//			String numbersKey = name.replaceAll(".*(_.*_.*_.*)(\\-*.*)", "$1")
-//					.replaceFirst("_", "")
-//					.replaceAll("(.*)C", "$1");
+			String numbersKey = name.replaceAll(".*(_.*_.*_.*)(\\-*.*)", "$1")
+					.replaceFirst("_", "")
+					.replaceAll("(.*)C", "$1");
 //			String numbersKey = "0_"+z+"_"+t;
 //			if (name.endsWith("C"))
 //				c =0;
-			String numbersKey = ""+t;
+//			String numbersKey = ""+t;
 			contentInstantsByRootName.get(nameRoot).remove(contentInstant);
 			contentInstantsByNumbers.get(numbersKey).remove(contentInstant);
 			contentInstants.remove(name);
@@ -1909,7 +1936,7 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 
 //			restore(imp, index, true);
 				String selectedLabel = list.getSelectedValue();
-				String editedLabel = selectedLabel.replace("_#0_#0 \"_0", "").replace("\"", "");
+				String editedLabel = selectedLabel.replace(" \"_\\d+", "").replace("\"", "").trim();
 				Content c = ((Content)((Image3DUniverse) univ).getContent(editedLabel));
 				if (c.getInstants().containsValue(contentInstants.get(selectedLabel))) {
 					((Image3DUniverse)univ).select(c, true);
@@ -2822,68 +2849,59 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 	private boolean isUpdating = false; 
 
 	public void valueChanged(ListSelectionEvent e) {
-	    if (e.getValueIsAdjusting()) return; 
-	    if (isUpdating) return; // <--- RECURSION GUARD
+	    // 1. Basic safety checks
+	    if (e.getValueIsAdjusting()) return;
+	    if (listModel.getSize() == 0) return;
 
+	    // 2. THE DIAGNOSTIC TRAP
+	    // We catch 'Throwable' (not just Exception) to catch StackOverflowError or any other fatal crash.
 	    try {
-	        isUpdating = true; // Lock
-
-	        if (listModel.getSize() == 0) return;
+	        
+	        // --- YOUR ORIGINAL LOGIC (Simplified for diagnosis) ---
 	        int[] selectedIndices = list.getSelectedIndices();
+	        
 	        if (selectedIndices.length == 0) return;
-
+	        
 	        int index = selectedIndices[0];
 	        if (index < 0) index = 0;
-	        
-	        Image3DUniverse ij3duniv = ((Image3DUniverse)univ);
-	        if (ij3duniv != null) {
-	            // Case 1: Single Selection - Sync logic
-	            if (selectedIndices.length == 1) {
-	                String selectedLabel = (String) list.getSelectedValue();
-	                
-	                // Robust Regex Parsing
-	                // (Assuming your regex is correct for your naming convention)
-	                String editedLabel = selectedLabel.replaceAll("(.*?)(_\\#\\d){2} \"_\\d.*", "$1").replace("\"", "");
-	                String tptString = selectedLabel.replaceAll("(.*?)((_\\#)(\\d)){2} \"_\\d.*", "$4").replace("\"", "");
-	                
-	                int labelTpt = 0;
-	                try {
-	                    labelTpt = Integer.parseInt(tptString);
-	                } catch (NumberFormatException nfe) {
-	                    // Fallback if regex fails to find digits
-	                    labelTpt = ij3duniv.getCurrentTimepoint(); 
-	                }
 
-	                Content c = ij3duniv.getContent(editedLabel);
-	                
-	                // Null Check to prevent NPE
-	                if (c != null && c.getInstants() != null) {
-	                    if (c.getInstants().containsValue(contentInstants.get(selectedLabel))) {
-	                    	ij3duniv.select(c, true); // Select single
-	                        ij3duniv.showTimepoint(labelTpt);
-	                    }
-	                }
-	            } 
-	            // Case 2: Multi-Selection
-	            else {
-	                // If the Universe supports multi-selection, we should iterate and select all.
-	                // If not, clearing selection is safer than crashing.
-	            	ij3duniv.select(null, true); 
+	        if (univ != null) {
+	            // MULTI-SELECTION CHECK:
+	            // If more than 1 item is selected, we print a warning and STOP to see if this is the cause.
+	            if (selectedIndices.length > 1) {
+	                System.out.println("DEBUG: Multi-selection detected (" + selectedIndices.length + " items). Stopping 3D update to prevent crash.");
+	                return; 
 	            }
 
-	            // Recorder Logic
-	            if (record()) {
-	                if (Recorder.scriptMode())
-	                    Recorder.recordCall("rm.select(imp, " + index + ");");
-	                else
-	                    Recorder.record("contentInstantManager", "Select", index);
+	            // SINGLE SELECTION LOGIC
+	            String selectedLabel = (String) list.getSelectedValue();
+	            System.out.println("DEBUG: Processing selection: " + selectedLabel); // Print to Console, not IJ.log
+
+//	            String editedLabel = selectedLabel.replaceAll("(.*?)(_\\#\\d)+ \"_\\d.*", "$1").replace("\"", "");
+//	            String tptStr = selectedLabel.replaceAll("(.*?)((_\\#)(\\d))+ \"_\\d.*", "$4").replace("\"", "");
+
+	            String editedLabel = selectedLabel.replaceAll("(.*?)(_\\d+)", "$1").replace("\"", "").trim();
+	            String tptStr = selectedLabel.replaceAll("(.*?)(_\\d+)", "$2").replace("\"", "").replace("_", "");
+	            
+	            
+	            int labelTpt = Integer.parseInt(tptStr);
+
+	            Content c = ((Image3DUniverse) univ).getContent(editedLabel);
+	            
+	            if (c != null && c.getInstants() != null) {
+	                 if (c.getInstants().containsValue(contentInstants.get(selectedLabel))) {
+	                     ((Image3DUniverse) univ).select(c, true);
+	                     ((Image3DUniverse) univ).showTimepoint(labelTpt);
+	                 }
 	            }
 	        }
-	    } catch (Exception ex) {
-	        IJ.log("Error in Content3DManager selection: " + ex.getMessage());
-	        ex.printStackTrace();
-	    } finally {
-	        isUpdating = false; // Unlock
+	        // -------------------------------------------------------
+
+	    } catch (Throwable t) {
+	        // 3. CATCH THE CRASH
+	        // This will print the EXACT reason the window is closing to your system console (Eclipse/Terminal).
+	        System.err.println("CRITICAL CRASH CAUGHT IN CONTENT3DMANAGER:");
+	        t.printStackTrace();
 	    }
 	}
 	

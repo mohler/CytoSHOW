@@ -780,7 +780,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		fireContentSelected(c,true);
 		if (singleSelection && selectedContents.size()>0 && selectedContents.get(0) != null) {
 			int t = this.getCurrentTimepoint();
-			int q = c3dm.getListModel().indexOf("\""+selectedContents.get(0).getName()+"_#"+t+"_#"+t+" \"_0");
+			int q = c3dm.getListModel().indexOf("\""+selectedContents.get(0).getName()+" \"_0");
 			if (c3dm.getList().getSelectedIndex() != q) {
 				c3dm.getList().setSelectedIndex(q);
 				c3dm.getList().ensureIndexIsVisible(q);
@@ -1679,7 +1679,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		}
 		Arrays.sort(selIndexes);
 		for (int nextIndex:selIndexes) {
-			Content nextC = contents.get(((String)this.getContent3DManager().getListModel().get(nextIndex)).replace("_#0_#0 \"_0", "").replace("\"",""));
+			Content nextC = contents.get(((String)this.getContent3DManager().getListModel().get(nextIndex)).replace(" \"_\\d+", "").replace("\"",""));
 			orderedSelectedContents.add(nextC);
 		}
 		return orderedSelectedContents;
@@ -2082,53 +2082,57 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 	/** Returns true on success. */
 	private boolean addContentToScene(Content c) {
-		if(!contents.containsKey(c.getName())) {
+		if (!contents.containsKey(c.getName())) {
 			synchronized (lock) {
 				String name = c.getName();
-				if(contents.containsKey(name)) {
+				// Double-check locking safety
+				if (contents.containsKey(name)) {
 					IJ.log("Mesh named '" + name + "' exists already");
 					return false;
 				}
-				// update start and end time
+
+				// --- 1. Update start and end time ---
 				int st = startTime;
 				int e = endTime;
 				int cst = c.getStartTime();
 				int ce = c.getEndTime();
-				if(cst < startTime)
+				if (cst < startTime)
 					st = cst;
-				if(ce > endTime)
+				if (ce > endTime)
 					e = ce;
 				updateStartAndEndTime(st, e);
 
+				// --- 2. Add to Scene Graph & Registry ---
 				this.scene.addChild(c);
-
-				//			//ADDED THIS TO MAKE resetView() ACTUALLY RESET TO IDENTITY MATRIX INSTEAD OF WEIRD X-180 THING
-				//			Transform3D t = new Transform3D();
-				//			AxisAngle4d aa = new AxisAngle4d(1, 0, 0, Math.PI);
-				//			t.set(aa);
-				//			c.setTransform(t);
-
-				
 				this.contents.put(name, c);
 				this.recalculateGlobalMinMax(c);
 
-
-				for (ContentInstant ci: this.contents.get(name).getInstants().values()) {
-					String ciName = ci.getName();
-						if (!c3dm.getListModel().contains(ciName))
-							c3dm.addContentInstant(ci);	
-					
+				// --- 3. Update Manager (CRITICAL FIX) ---
+				// Ensure c3dm exists before calling methods on it to avoid NPEs.
+				if (c3dm != null) {
+					for (ContentInstant ci : c.getInstants().values()) {
+						String ciName = ci.getName();
+						
+						// Add to list if not present
+						if (!c3dm.getListModel().contains(ciName)) {
+							c3dm.addContentInstant(ci);
+						}
+						
+						// Populate fast-lookup tables immediately
+						// (Using the new 1-arg method we just cleaned up)
+						c3dm.setUpContentInstantsByNameAndNumbers(ci);
+					}
 				}
-	
-				c.setPointListDialog(plDialog);
 
+				// --- 4. Finalize Display ---
+				c.setPointListDialog(plDialog);
 				c.showTimepoint(currentTimepoint, true);
 			}
 			return true;
 		}
 		return false;
 	}
-
+	
 	/**
 	 * Add the specified Content to the universe. It is assumed that the
 	 * specified Content is constructed correctly.
@@ -2335,7 +2339,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	                            try {
 	                                // ... [Your existing ContentInstant creation/compile logic] ...
 	                                String safeName = getSafeContentName(meshKey);
-	                                ContentInstant contInst = new ContentInstant(safeName + "_#" + tpt);
+									ContentInstant contInst = new ContentInstant(safeName /* + "_#" + tpt */);
 	                                contInst.timepoint = tpt;
 	                                contInst.color = mesh.getColor();
 	                                contInst.transparency = mesh.getTransparency();

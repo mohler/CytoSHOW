@@ -752,7 +752,7 @@ public class ContentInstant extends BranchGroup implements UniverseListener, Con
 	 **************************************************************/
 	
 	public String getName() {
-		return name + "_#" + timepoint;
+		return name; // + "_#" + timepoint;
 	}
 
 	public int getTimepoint() {

@@ -772,12 +772,10 @@ public class Image3DMenubar extends JMenuBar implements ActionListener,
 	}
 
 	private Content getSelected() {
-		if (univ.getContent3DManager(false) != null
-				&& univ.getContent3DManager(false).getSelectedContentInstantsAsArray() != null 
-				&& univ.getContent3DManager(false).getSelectedContentInstantsAsArray().length > 1) {
-			univ.getContent3DManager(false).dispose();
+		if (univ.getContent3DManager() != null
+				&& univ.getContent3DManager().getSelectedContentInstantsAsArray() != null 
+				&& univ.getContent3DManager().getSelectedContentInstantsAsArray().length > 1)
 			return null;
-		}
 		Content c = univ.getSelected();
 		if(c != null)
 			return c;
