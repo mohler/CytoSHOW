@@ -2420,7 +2420,15 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	            get(); 
 
 	            // 1. Refresh the View
-	            univ.fireTransformationUpdated();
+		        if (univ.autoAdjustView) {
+		            univ.getViewPlatformTransformer()
+		            .centerAt(univ.globalCenter);
+		            float range = (float)(univ.globalMax.x
+		                    - univ.globalMin.x);
+		            univ.ensureScale(range);
+		        }
+
+		        univ.fireTransformationUpdated();
 	            univ.canvas.revalidate();
 
 	            // 2. Announce Completion
@@ -2545,7 +2553,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 
 
 	public Content3DManager getContent3DManager() {
-		return getContent3DManager(true);
+		return getContent3DManager(false);
 	}
 
 	
