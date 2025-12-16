@@ -83,7 +83,8 @@ public class WavefrontLoader {
             return; 
         }
 
-        // --- PREPARE LOGIC ---
+        // --- PREPARE LOGIC ---    Cuteness here involving original path with a faked obj name, 
+        //						        so data read from obj-formatted stream from the Gltf.decoder logic branch, but "...FilesToUse" switch can reformat vertices:
         objFileName = fileName;
         objFileParentName = "";
         objFileGrandParentName = "";

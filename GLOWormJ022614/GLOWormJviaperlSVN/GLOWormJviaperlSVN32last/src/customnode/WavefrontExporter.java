@@ -413,11 +413,13 @@ public class WavefrontExporter {
                 List<String> commandListA = Arrays.asList(
                     "/usr/local/bin/npx",
                     "obj2gltf",
+                    "--separate",
                     "--checkTransparency",
                     "-i",
                     objFilePathString,
                     "-o",
-                    gltfOutPathString
+                    gltfOutPathString,
+                    "-d"
                 );
 
                 // --- 2. GLTF to Draco GLB Command List ---

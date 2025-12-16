@@ -135,7 +135,8 @@ public class GlbToObjConverter {
                     				InputStream mtlStream = new ByteArrayInputStream(matData.mtlContent.getBytes(StandardCharsets.UTF_8));
 
                     				WavefrontLoader loader = new WavefrontLoader();
-                    				String safeProxyName = originalFile.getName() + ".obj";
+//                    				String safeProxyName = originalFile.getName() + ".obj";
+                    				String safeProxyName = originalFile.getAbsolutePath() + ".obj";
                     				Map<String, CustomMesh> loaded = loader.loadObjs(safeProxyName, new InputStream[]{ finalObjStream, mtlStream }, false);
                     				if (loaded != null) collectedMeshes.putAll(loaded);
                     			}

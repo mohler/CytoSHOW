@@ -4323,7 +4323,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 				in = new ZipInputStream(
 						new FileInputStream(new File(IJ.getDirectory("home") + "CytoSHOWCacheFiles" + path)));
 			else {
-				if (imp.getRemoteMQTVSHandler().getCompQ().getFileInputByteArray(path) != null)
+				if (imp.getRemoteMQTVSHandler() == null) {  //Not an rmi connection, just using local GLOWORM_DATA drive....
+					in = new ZipInputStream(new FileInputStream(path));
+	
+				}
+				else if (imp.getRemoteMQTVSHandler().getCompQ().getFileInputByteArray(path) != null)
 					in = new ZipInputStream(new ByteArrayInputStream(
 							imp.getRemoteMQTVSHandler().getCompQ().getFileInputByteArray(path)));
 			}
