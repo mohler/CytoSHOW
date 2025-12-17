@@ -154,6 +154,15 @@ public class GlbToObjConverter {
                     	} 
                     	// --- BRANCH 2: STANDARD GLTF (Uncompressed) ---
                     	else {
+                    		
+                    		IJ.log("Processing UNCOMPRESSED primitive in mesh: " + cleanName); // <--- ADD THIS
+                    	    
+                    	    // Check the mode while we are here!
+                    	    int mode = prim.has("mode") ? prim.get("mode").getAsInt() : 4;
+                    	    if (mode != 4) {
+                    	        IJ.log("  -> WARNING: Topology is Mode " + mode + " (Not Triangles!)");
+                    	    }
+                    		
                     	    JsonObject attributes = prim.getAsJsonObject("attributes");
                             if (attributes.has("POSITION")) {
                                 int posAccIdx = attributes.get("POSITION").getAsInt();

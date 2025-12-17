@@ -17,7 +17,9 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Set;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import javax.vecmath.Color4f;
 import javax.vecmath.Color3f;
@@ -526,28 +528,142 @@ public class WavefrontExporter {
 	/**
 	 * Write faces for triangle meshes.
 	 */
+// MY BIG CLUNKY THOROUGH VERSION...
+//	static void writeTriangleFaces(int[] indices, Writer objWriter, String name)
+//						throws IOException {
+//		if(indices.length % 3 != 0)
+//			throw new IllegalArgumentException(
+//				"list of triangles not multiple of 3: " + name);
+//		final StringBuffer buf = new StringBuffer(100);
+//		objWriter.write("s 1\n");
+//		
+//		ArrayList<String> indexTrios = new ArrayList<String>();	
+//		ArrayList<String> iTriosEdited = null;
+//		ArrayList<String> iTriosAlreadyFlipped = new ArrayList<String>();
+//		ArrayList<String> iTriosToZap =new ArrayList<String>();
+//
+//		for (int i = 0; i < indices.length; i += 3) {
+//			indexTrios.add(buf.append(indices[i]).append(' ').append(indices[i+1]).append(' ').append(indices[i+2]).toString());
+//			buf.setLength(0);
+//		}
+//		
+//		iTriosEdited = new ArrayList<String>(indexTrios);
+//		for (String iTrio:indexTrios) {
+//			String[] iTrioSplit = iTrio.split(" ");
+//			StringBuffer sb = new StringBuffer(200);
+//			if (iTrioSplit[0].equals(iTrioSplit[1]) || iTrioSplit[0].equals(iTrioSplit[2]) || iTrioSplit[2].equals(iTrioSplit[1])) {
+//				iTriosToZap.add(iTrio);
+//				continue;
+//			}
+//			String iTloop = sb.append(iTrioSplit[0]).append(" ")
+//					    							.append(iTrioSplit[2]).append(" ")
+//					    							.append(iTrioSplit[1]).append(" ")
+//					    							.append(iTrioSplit[0]).append(" ")
+//					    							.append(iTrioSplit[2]).append(" ")
+//					    							.append(iTrioSplit[1]).toString();
+//			sb.setLength(0);
+//			
+//			boolean pre2faced = false;
+//			for (String iTkey:iTriosEdited) {
+//				pre2faced = iTloop.contains(iTkey);
+//				if (pre2faced) {
+//					iTriosAlreadyFlipped.add(iTkey);
+//				}
+//				continue;			
+//			}
+//			if (!pre2faced) {
+//				iTriosEdited.add(sb.append(iTrioSplit[0]).append(" ")
+//					    							.append(iTrioSplit[2]).append(" ")
+//					    							.append(iTrioSplit[1]).toString());
+//				sb.setLength(0);
+//			}
+//		}
+//		iTriosEdited.removeAll(iTriosToZap);
+//		for (String iTkey:iTriosEdited) {
+//			buf.append("f ").append(iTkey).append("\n");
+//			objWriter.write(buf.toString());
+//
+//			buf.setLength(0);
+//		}
+//		objWriter.write('\n');
+//	}
+	
+	
+// GEMINI'S SLICKED UP SPEEDY VERSION BASED ON MY BASIC LOGIC BUT IMPROVED...
+	/**
+	 * Write faces for triangle meshes.
+	 * Optimized with Sorted Key ID to handle mirroring and uniqueness in O(N).
+	 */
 	static void writeTriangleFaces(int[] indices, Writer objWriter, String name)
-						throws IOException {
-		if(indices.length % 3 != 0)
-			throw new IllegalArgumentException(
-				"list of triangles not multiple of 3: " + name);
-		final StringBuffer buf = new StringBuffer(100);
-		objWriter.write("s 1\n");
-		for (int i = 0; i < indices.length; i += 3) {
-			buf.append('f').append(' ')
-				.append(indices[i]).append(' ')
-				.append(indices[i+1]).append(' ')
-				.append(indices[i+2]).append('\n')
-				.append('f').append(' ')			//write both sides of every triangle explicitly to avoid "normal confusion" in some viewers.
-				.append(indices[i]).append(' ')
-				.append(indices[i+2]).append(' ')
-				.append(indices[i+1]).append('\n');
-			objWriter.write(buf.toString());
-			buf.setLength(0);
-		}
-		objWriter.write('\n');
-	}
+	                    throws IOException {
+	    if (indices.length % 3 != 0)
+	        throw new IllegalArgumentException(
+	            "list of triangles not multiple of 3: " + name);
 
+	    objWriter.write("s 1\n");
+	    
+	    // StringBuilder is not synchronized, so it's faster than StringBuffer
+	    final StringBuilder buf = new StringBuilder(50);
+	    
+	    // Set to store unique geometric IDs.
+	    // Use HashSet for O(1) lookups. LinkedHashSet if you desperately need to preserve order.
+	    Set<String> processedGeometry = new HashSet<String>();
+
+	    for (int i = 0; i < indices.length; i += 3) {
+	        int v1 = indices[i];
+	        int v2 = indices[i+1];
+	        int v3 = indices[i+2];
+
+	        // 1. ZAP VESTIGIAL (Degenerate Faces)
+	        // If any vertex indices are identical, it's a line or point. Skip it.
+	        if (v1 == v2 || v2 == v3 || v3 == v1) {
+	            continue; 
+	        }
+
+	        // 2. CREATE GEOMETRIC ID
+	        // We sort the indices purely to generate a unique ID for this triangle,
+	        // regardless of its winding order or rotation.
+	        // (s1, s2, s3 will be the sorted versions of v1, v2, v3)
+	        int s1 = v1, s2 = v2, s3 = v3;
+	        if (s1 > s2) { int t = s1; s1 = s2; s2 = t; }
+	        if (s2 > s3) { int t = s2; s2 = s3; s3 = t; }
+	        if (s1 > s2) { int t = s1; s1 = s2; s2 = t; }
+	        
+	        // ID string e.g., "10 20 30"
+	        String geomID = buf.append(s1).append(' ')
+	                           .append(s2).append(' ')
+	                           .append(s3).toString();
+	        buf.setLength(0); // Clear buffer
+
+	        // 3. CHECK UNIQUENESS
+	        // If we have seen this geometry before (even flipped or rotated), skip it.
+	        if (processedGeometry.contains(geomID)) {
+	            continue;
+	        }
+	        processedGeometry.add(geomID);
+
+	        // 4. WRITE MIRRORED PAIR
+	        // We write the triangle EXACTLY as it appeared in the array (v1 v2 v3),
+	        // and then its exact geometric mirror (v1 v3 v2).
+	        
+	        // Forward Face
+	        buf.append("f ").append(v1).append(' ')
+	           .append(v2).append(' ')
+	           .append(v3).append('\n');
+	        
+	        // Backward Face (Swap last two to flip normal)
+	        buf.append("f ").append(v1).append(' ')
+	           .append(v3).append(' ')
+	           .append(v2).append('\n');
+	           
+	        objWriter.write(buf.toString());
+	        buf.setLength(0);
+	    }
+	    objWriter.write('\n');
+	}
+	
+	
+	
 	/**
 	 * Write faces for point meshes.
 	 */

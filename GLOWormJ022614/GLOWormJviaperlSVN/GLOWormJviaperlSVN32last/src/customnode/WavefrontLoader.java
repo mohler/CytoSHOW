@@ -344,6 +344,12 @@ public class WavefrontLoader {
 						(float)(Math.sin(-0.384)*(w*(Float.parseFloat(sp[1]) - x)/(x-9936)) + (float)(Math.cos(-0.384)*(w*(Float.parseFloat(sp[2]) - y)/(x-9936)))),
 						w*(flipXCoef*(Float.parseFloat(sp[3]) - z))/(x-9936)));
 			}
+			else {
+				vertices.add(new Point3f(
+						flipXCoef*(Float.parseFloat(sp[1])),
+						Float.parseFloat(sp[2]),
+						Float.parseFloat(sp[3])));
+			}
 		}
 		else {
 			vertices.add(new Point3f(
