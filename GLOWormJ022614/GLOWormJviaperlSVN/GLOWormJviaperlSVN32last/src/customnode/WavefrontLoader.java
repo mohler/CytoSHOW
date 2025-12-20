@@ -338,7 +338,7 @@ public class WavefrontLoader {
 				float x = 19953f;
 				float y = 15255f;
 				float z =  -6105f;
-				float w = 50000;
+				float w = 50000 * 1.5f;  //added scale needed to match N2Ucorr realign
 				vertices.add(new Point3f(
 						(float)(Math.cos(-0.384)*(w*(Float.parseFloat(sp[1]) - x)/(x-9936)) - (float)(Math.sin(-0.384)*(w*(Float.parseFloat(sp[2]) - y)/(x-9936)))),
 						(float)(Math.sin(-0.384)*(w*(Float.parseFloat(sp[1]) - x)/(x-9936)) + (float)(Math.cos(-0.384)*(w*(Float.parseFloat(sp[2]) - y)/(x-9936)))),

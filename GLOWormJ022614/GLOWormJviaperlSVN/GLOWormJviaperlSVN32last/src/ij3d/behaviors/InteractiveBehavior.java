@@ -269,8 +269,8 @@ public class InteractiveBehavior extends Behavior {
 			}
 		} else if(e.isAltDown()) {
 			switch(code) {
-				case KeyEvent.VK_UP: viewTransformer.zoom(1); return;
-				case KeyEvent.VK_DOWN: viewTransformer.zoom(-1); return;
+				case KeyEvent.VK_UP: viewTransformer.zoom(-1); return;
+				case KeyEvent.VK_DOWN: viewTransformer.zoom(1); return;
 			}
 		} else if(c != null && c.getType() == Content.ORTHO && axis != -1) {
 			boolean changed = false;

@@ -35,6 +35,7 @@ import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.ToolTipManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -680,57 +681,86 @@ public class Content3DManager extends PlugInFrame implements ActionListener, Ite
 				}
 
 			} else if (command.equals("Update [u]")) {
-				Image3DUniverse univ = (Image3DUniverse) this.univ;
-				String filterString = this.textFilterField.getText();
-				int[] indexes = getSelectedIndexes();
-				list.setModel(new DefaultListModel<String>());
-				ArrayList<Content> invertSelContents = new ArrayList<Content>();
-				ArrayList<String> invertSelContentLabels = new ArrayList<String>();
-				for (int r = fullListModel.getSize() - 1; r >= 0; r--) {
-					///	to move UNselected objects to the end of the list and scenegraph.				
-					boolean selected = false;
-					for (int index:indexes) {
-						if (fullListModel.get(r).equals(listModel.get(index))) {
-							selected = true;
-						}
-					}
-					if (selected)
-						continue;
-					///					
-					String thisLabel = fullListModel.get(r);
-					String thisContentLabel = thisLabel.replace("\"","").split("\\_#")[0];
-					Content thisContent = univ.getContent(thisContentLabel);
+			    Image3DUniverse univ = (Image3DUniverse) this.univ;
+			    String filterString = this.textFilterField.getText();
+			    int[] indexes = getSelectedIndexes();
+			    list.setModel(new DefaultListModel<String>()); // Safe: detaches model from view temporarily
 
-					contentInstants.remove(fullListModel.get(r));
-//					listModel.removeElement(fullListModel.get(r));  DO NOT REMOVE NOW, WILL REMOVEALL BELOW.
-					fullListModel.remove(r);
-					invertSelContents.add(thisContent);
-					invertSelContentLabels.add(thisContentLabel);
-				}
-				
-				for (int c= invertSelContents.size()-1;c>=0;c--) {
-					Content nextContent = invertSelContents.get(c);
-					String nextContentLabel = invertSelContentLabels.get(c);
-					if (nextContent != null) {
-						Collection<ContentInstant> cis = nextContent.getInstants().values();
-						for (ContentInstant thisCI:cis) {
-							this.addContentInstant(thisCI);
-						}
-						univ.removeContent(nextContentLabel, false);
-						univ.addContentLater(nextContent, false);
-					} else {
-//						IJ.log(thisLabel);
-					}
-				}		
-				listModel.removeAllElements();
-				for (int q=0;q<fullListModel.getSize();q++) {
-					listModel.addElement(fullListModel.get(q));
-				}
-				list.setModel(listModel);
-				this.textFilterField.setText(filterString);
-				this.actionPerformed(new ActionEvent(this.textFilterField, 0, ""));
+			    ArrayList<Content> invertSelContents = new ArrayList<Content>();
+			    ArrayList<String> invertSelOriginalLabels = new ArrayList<String>();
+			    ArrayList<String> invertSelContentLabels = new ArrayList<String>();
+			    
+			    // --- STAGE 1: UI PREPARATION (Main Thread) ---
+			    for (int r = fullListModel.getSize() - 1; r >= 0; r--) {
+			        boolean selected = false;
+			        for (int index:indexes) {
+			            if (fullListModel.get(r).equals(listModel.get(index))) {
+			                selected = true;
+			            }
+			        }
+			        if (selected) continue;
+			        
+			        String thisLabel = fullListModel.get(r);
+			        String thisContentLabel = thisLabel.replace("\"","").split(" \\_")[0];
+			        Content thisContent = univ.getContent(thisContentLabel);
 
-//				univ.addContentLater(nextC, true);
+			        contentInstants.remove(fullListModel.get(r));
+			        fullListModel.remove(r);
+			    
+			        invertSelContents.add(thisContent);
+			        invertSelOriginalLabels.add(thisLabel);
+			        invertSelContentLabels.add(thisContentLabel);
+			    }
+			    listModel.removeAllElements();
+
+			    // --- STAGE 2: BACKGROUND WORK (Worker Thread) ---
+			    SwingWorker<Void, Void> worker = new SwingWorker<Void, Void>() {
+			        @Override
+			        protected Void doInBackground() throws Exception {
+			            // Keep strictly non-UI logic here
+			            for (int c= invertSelContents.size()-1; c>=0; c--) {
+			                Content nextContent = invertSelContents.get(c);
+			                String nextContentLabel = invertSelContentLabels.get(c);
+			                // String originalLabel = invertSelOriginalLabels.get(c); // Unused since we rely on listener
+
+			                if (nextContent != null) {
+			                    univ.removeContent(nextContentLabel, false);
+			                    
+			                    // The "Grit": Blocks here until 3D add is complete
+			                    // Side effect: Triggers 'contentAdded' listener which repopulates fullListModel on EDT
+			                    univ.addContentLater(nextContent, true).get();
+			                }
+			            }       
+			            
+			            // MOVED: The listModel rebuild loop was unsafe here!
+			            return null;
+			        }
+
+			        // --- STAGE 3: UI REFRESH (EDT) ---
+			        @Override
+			        protected void done() {
+			            try {
+			                get(); // Catch any errors from doInBackground
+
+			                // MOVED FROM ABOVE: Now safe to touch Swing components
+			                // By the time we are here, all 'contentAdded' listeners from the .get() calls 
+			                // have finished running on the EDT, so fullListModel is fully populated.
+			                for (int q=0; q<fullListModel.getSize(); q++) {
+			                    listModel.addElement(fullListModel.get(q));
+			                }
+			                
+			                list.setModel(listModel);
+			                Content3DManager.this.textFilterField.setText(filterString);
+			                Content3DManager.this.actionPerformed(new ActionEvent(Content3DManager.this.textFilterField, 0, ""));
+
+			            } catch (Exception e) {
+			                e.printStackTrace();
+			            }                       
+			        }
+			    };
+
+			    worker.execute();               
+
 			} else if (command.equals("Delete"))
 				delete(false);
 			else if (command.equals("Delete ")) {

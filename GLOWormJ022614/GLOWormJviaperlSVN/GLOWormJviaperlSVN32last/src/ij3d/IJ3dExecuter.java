@@ -945,7 +945,8 @@ public class IJ3dExecuter {
 		addAdjustmentListener(new AdjustmentListener() {
 
 			public void adjustmentValueChanged(AdjustmentEvent e) {
-				if(!transp_adjuster.go)
+				// FIX: Check Thread state to prevent double-start crash
+				if(transp_adjuster.getState() == Thread.State.NEW)
 					transp_adjuster.start();
 				transp_adjuster.exec(e.getValue(), ci, univ);
 			}
@@ -954,8 +955,10 @@ public class IJ3dExecuter {
 		addTextListener(new TextListener() {
 
 			public void textValueChanged(TextEvent e) {
-				if(!transp_adjuster.go)
+				// FIX: Check Thread state to prevent double-start crash
+				if(transp_adjuster.getState() == Thread.State.NEW)
 					transp_adjuster.start();
+				
 				TextField input = (TextField)e.getSource();
 				String text = input.getText();
 				try {
@@ -990,7 +993,8 @@ public class IJ3dExecuter {
 		});
 		gd.showDialog();
 	}
-
+	
+	
 	public void changeThreshold(Content c) {
 		boolean imageData = true;
 		boolean noSelection = false;
@@ -1158,7 +1162,8 @@ public class IJ3dExecuter {
 			((Scrollbar)gd.getSliders().get(0)).addAdjustmentListener(new AdjustmentListener() {
 				public void adjustmentValueChanged(final AdjustmentEvent e) {
 					// start adjuster and request an action
-					if(!thresh_adjuster.go)
+					// FIX: Check Thread state to prevent double-start crash
+					if(thresh_adjuster.getState() == Thread.State.NEW)
 						thresh_adjuster.start();
 					thresh_adjuster.exec(e.getValue(), finalCi, univ);
 				}
@@ -1170,16 +1175,24 @@ public class IJ3dExecuter {
 		((TextField)gd.getNumericFields().get(imageData?1:0)).setEnabled(true);
 		((Scrollbar)gd.getSliders().get(imageData?1:0)).addAdjustmentListener(new AdjustmentListener() {			
 			public void adjustmentValueChanged(AdjustmentEvent e) {
-				if(!transp_adjuster.go)
+				// FIX: Check Thread state to prevent double-start crash
+				if(transp_adjuster.getState() == Thread.State.NEW)
 					transp_adjuster.start();
 				transp_adjuster.exec(e.getValue(), finalCi, univ);
 			}
 		});
 		((TextField)gd.getNumericFields().get(imageData?1:0)).addTextListener(new TextListener() {
 			public void textValueChanged(TextEvent e) {
-						if(!transp_adjuster.go)
-							transp_adjuster.start();
-						transp_adjuster.exec(Integer.parseInt(((TextField)gd.getNumericFields().get(fImageData?1:0)).getText()), finalCi, univ);
+				// FIX: Check Thread state to prevent double-start crash
+				if(transp_adjuster.getState() == Thread.State.NEW)
+					transp_adjuster.start();
+				
+				// Added try-catch to prevent errors while typing incomplete numbers
+				try {
+					transp_adjuster.exec(Integer.parseInt(((TextField)gd.getNumericFields().get(fImageData?1:0)).getText()), finalCi, univ);
+				} catch (NumberFormatException ex) {
+					// ignore
+				}
 			}
 		});
 
@@ -1289,7 +1302,8 @@ public class IJ3dExecuter {
 		});
 		gd.showDialog();
 	}
-
+	
+	
 	public void setSaturatedVolumeRendering(Content c, boolean b) {
 		if(!checkSel(c))
 			return;
