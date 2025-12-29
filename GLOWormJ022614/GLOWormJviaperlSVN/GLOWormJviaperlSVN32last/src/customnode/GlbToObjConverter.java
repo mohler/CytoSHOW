@@ -64,7 +64,7 @@ public class GlbToObjConverter {
 
         int threads = 4;
         int cores = Runtime.getRuntime().availableProcessors();
-        threads = cores/4;
+        threads = cores-2;
         IJ.log("Streaming " + meshes.size() + " meshes using " + threads + " threads...");
         
         ExecutorService executor = Executors.newFixedThreadPool(threads);

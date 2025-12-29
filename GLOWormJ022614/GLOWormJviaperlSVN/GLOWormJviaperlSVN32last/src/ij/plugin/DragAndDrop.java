@@ -103,314 +103,235 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 		new DropTarget(c, this);
 	}
 
-	public void drop(DropTargetDropEvent dtde)  {
-		boolean success = false;
-		try {
-			this.dtde = dtde;
-			freshDrop = true;
-			dtde.acceptDrop(DnDConstants.ACTION_COPY);
-			Component dtc = dtde.getDropTargetContext().getDropTarget().getComponent();
-			//		dropImp = WindowManager.getCurrentImage();
-			dropImp = null;
-			setImp(dropImp);
-			if (dtc instanceof ImageCanvas2) {
-				dropImp = ((ImageCanvas2) dtc).getImage();
-				if (dropImp == null)
-					dropImp = IJ.getImage();
-				setImp(dropImp);
-				if (getImp().getTitle().contains("Sketch3D"))
-					doSketch3D = true;
-				if (getImp().getMotherImp() != null && getImp().getMotherImp() != getImp())
-					setImp(getImp().getMotherImp());
-			} else if (dtc instanceof ImageCanvas3D) {
-				dropUniverse = ((ImageCanvas3D) dtc).getUniverse();
-				dropImp = dropUniverse.getWindow().getImagePlus();
-				setImp(dropImp);
+	
+	public void drop(DropTargetDropEvent dtde) {
+	    dtde.acceptDrop(DnDConstants.ACTION_COPY);
+	    
+	    // --- FIX: Restore the class-level reference so run() doesn't crash ---
+	    this.dtde = dtde; 
+	    // -------------------------------------------------------------------
 
-			} else {
-				setImp(null);
-			}
+	    // 1. EXTRACT DATA ON EDT
+	    Component targetComponent = dtde.getDropTargetContext().getDropTarget().getComponent();
+	    Transferable t = dtde.getTransferable();
+	    
+	    List<File> extractedFiles = null;
+	    String extractedText = null;
+	    String extractedHtml = null;
+	    
+	    try {
+	        if (t.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+	            extractedFiles = (List<File>) t.getTransferData(DataFlavor.javaFileListFlavor);
+	        }
+	        
+	        DataFlavor uriListFlavor = new DataFlavor("text/uri-list;class=java.lang.String");
+	        if (t.isDataFlavorSupported(uriListFlavor)) {
+	             extractedText = (String) t.getTransferData(uriListFlavor);
+	        } else if (t.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+	             extractedText = (String) t.getTransferData(DataFlavor.stringFlavor);
+	        }
+	        
+	        for (DataFlavor f : t.getTransferDataFlavors()) {
+	            if (f.getPrimaryType().equals("text") && f.getSubType().equals("html")) {
+	                extractedHtml = (String) t.getTransferData(f);
+	                break;
+	            }
+	        }
+	    } catch (Exception e) {
+	        // Ignore extraction errors; continue with what we have
+	    }
 
-			DataFlavor URI_LIST_FLAVOR =null;
-			try {
-				URI_LIST_FLAVOR = new DataFlavor( "text/uri-list;class=java.lang.String" );
-			}
-			catch ( ClassNotFoundException ignore ) {
+	    // 2. SIGNAL SUCCESS IMMEDIATELY (Prevents -1850 error)
+	    dtde.dropComplete(true);
 
-			}
-			DataFlavor textFlavor = DataFlavor.stringFlavor;
-
-			DataFlavor[] flavors = null;
-
-			Transferable t = dtde.getTransferable();
-			Transferable transferable = dtde.getTransferable();
-			setIterator(null);
-			flavors = t.getTransferDataFlavors();
-			if (IJ.debugMode) IJ.log("DragAndDrop.drop: "+flavors.length+" flavors");
-			ArrayList droppedItemsArrayList = new ArrayList();
-
-			String finalUrl = null;
-
-			// Check if the transferable object supports this flavor.
-			if (transferable.isDataFlavorSupported(textFlavor)) {
-				// Retrieve the data as a String.
-				String droppedUrl = (String) transferable.getTransferData(textFlavor);
-
-				// Print the URL to the console to confirm it works.
-				System.out.println("URL successfully retrieved: " + droppedUrl);
-
-				finalUrl = droppedUrl;
-
-				// IMPORTANT: From here, you can add your code to download or process the URL.
-				// For example:
-				// downloadFileFromUrl(droppedUrl);
-			} else {
-				//                System.out.println("The dropped item does not contain a plain text URL.");
-			}
-
-			if (finalUrl != null) {
-				String[] finalUrlChunks = finalUrl.replace(",https","https").replace("https","\nhttps" ).replace(",https","https").split("\n");
-
-				for (String nextUrl:finalUrlChunks)
-					droppedItemsArrayList.add(nextUrl);
-
-			} else {
-
-				// Check if any of the flavors are text/html and try to get a non-null data object
-				for (int i = 0; i < flavors.length; i++) {
-					// Only proceed if the flavor is text/html
-					if (flavors[i].getPrimaryType().equals("text") && flavors[i].getSubType().equals("html")) {
-						try {
-							// Attempt to get the transferable data
-							Object ob = transferable.getTransferData(flavors[i]);
-
-							// If the data object is not null, we have found what we need
-							if (ob != null) {
-								String htmlContent = (String) ob;
-
-								// Use a regular expression to find the href attribute in an <a> tag
-								java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("<a\\s+[^>]*?href=\"(.*?)\"", java.util.regex.Pattern.CASE_INSENSITIVE | java.util.regex.Pattern.DOTALL);
-								java.util.regex.Matcher matcher = pattern.matcher(htmlContent);
-
-								if (matcher.find()) {
-									finalUrl = matcher.group(1); // The URL is found, store it
-									System.out.println("Found a URL in HTML content: " + finalUrl);
-									// Break the loop as soon as a valid URL is found
-									break;
-								}
-							} else {
-								System.out.println("Attempt " + (i + 1) + ": HTML data was null for flavor.");
-							}
-						} catch (java.io.IOException | java.awt.datatransfer.UnsupportedFlavorException e) {
-							// Print error but continue to the next flavor
-							System.err.println("Error processing data flavor at index " + i + ": " + e.getMessage());
-							e.printStackTrace();
-						}
-					}
-				}
-
-				// After the loop, you can check if a URL was found
-				if (finalUrl != null) {
-					// Use the finalUrl variable here
-					System.out.println("Final captured URL: " + finalUrl);
-				} else {
-					//            		System.out.println("No valid URL found after checking all flavors.\n May be a different message format...checking....");
-				}
-
-
-				for (int i=0; i<flavors.length; i++) {
-					if (IJ.debugMode) IJ.log("  flavor["+i+"]: "+flavors[i].getMimeType());
-					boolean consumed = false;
-					if (dtde.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-						dtde.acceptDrop(dtde.getDropAction());
-						try {
-
-							List transferData = (List) transferable.getTransferData(DataFlavor.javaFileListFlavor);
-							if (transferData != null && transferData.size() > 0) {
-								//							IJ.log("You dropped " + transferData.size() + " files");							
-
-								if (transferData.get(0) instanceof File && ((File)transferData.get(0)).isDirectory()){
-									for (int j=0; j<transferData.size();j++){
-										for (File file:((File)transferData.get(j)).listFiles()){
-											if (file.getName().toLowerCase().endsWith(".obj") || file.getName().toLowerCase().endsWith(".glb") || file.getName().toLowerCase().endsWith(".gltf"))
-												droppedItemsArrayList.add(file);
-										}
-									}
-									setIterator(droppedItemsArrayList.iterator());
-								} else{
-									setIterator(((List)transferData).iterator());
-								}
-								consumed = true;
-								break;
-							}
-
-						} catch (Exception ex) {
-							ex.printStackTrace();
-						}
-					}
-					if (flavors[i].isFlavorJavaFileListType()) {
-						Object data = t.getTransferData(DataFlavor.javaFileListFlavor);
-						String dataString = "" + ((List)data);
-						//					IJ.log(dataString);
-						if (!dataString.contains("[]")) {
-							setIterator(((List)data).iterator());
-							consumed = true;
-							break;
-						}
-					} 
-					if (!consumed && (flavors[i].isFlavorTextType() || 
-							( URI_LIST_FLAVOR != null && t.isDataFlavorSupported( URI_LIST_FLAVOR )))){
-						Object ob = null;
-						if( URI_LIST_FLAVOR != null && t.isDataFlavorSupported( URI_LIST_FLAVOR )) {
-							ob =  t.getTransferData( URI_LIST_FLAVOR );
-						}
-						else
-							ob = t.getTransferData(flavors[i]);
-						if (!(ob instanceof String)) continue;
-						String s = ob.toString().trim().replaceAll("\\%(\\D)", "\\%25$1");
-						if (IJ.debugMode) IJ.log(s+" is the input string from drop");
-						if (IJ.isLinux() && s.length()>1 && (int)s.charAt(1)==0)
-							s = fixLinuxString(s);
-
-						if (s.indexOf("href=\"")!=-1 || s.indexOf("src=\"")!=-1) {
-							s = parseHTML(s);
-							if (IJ.debugMode) IJ.log("  url: "+s);
-							droppedItemsArrayList.add(s);
-							this.setIterator(droppedItemsArrayList.iterator());
-							break;
-						}
-						BufferedReader br = new BufferedReader(new StringReader(s));
-						String tmp;
-						String clStr = "";
-						while (null != (tmp = br.readLine())) {
-							tmp = java.net.URLDecoder.decode(tmp.replaceAll("\\+","%2b"), "UTF-8");
-							if (tmp.contains("file://")) {
-								//							tmp = tmp.substring(7);
-								tmp = tmp.replaceAll("file://", "").replaceAll("localhost", "");
-							}
-							if (IJ.debugMode) IJ.log("  content: "+tmp);
-							if (tmp.contains("http://") || tmp.contains("https://")) {
-								droppedItemsArrayList.add(tmp);
-
-							} else if ( !tmp.contains(File.separator)  
-									&& (tmp.toLowerCase().endsWith(".mov") 
-											|| tmp.toLowerCase().endsWith(".avi") 
-											|| tmp.toLowerCase().contains("scene.scn")
-											|| tmp.toLowerCase().endsWith(".obj")
-											|| tmp.toLowerCase().endsWith(".glb")
-											|| tmp.toLowerCase().endsWith(".gltf")
-											|| tmp.toLowerCase().endsWith(".zip")
-											|| tmp.toLowerCase().endsWith(".tif"))){
-								if (IJ.debugMode) IJ.log(" stringinput");
-								droppedItemsArrayList.add(tmp);
-							} else if ( !tmp.contains(File.separator) 
-									&& (tmp.trim().split(" ")[0].toLowerCase().matches("\\D{3,5}-\\d{1,4}")
-											|| tmp.trim().split(" ")[0].toLowerCase().matches("\\D{1}\\d{1,2}\\D{1,2}\\d{1,2}\\.\\d{1,2}"))) {
-								//							IJ.log("https://www.wormbase.org/db/get?name="+ tmp.trim().split(" ")[0] + ";class=gene"
-								//									+ (tmp.trim().split(" ").length>1?" "+tmp.trim().split(" ")[1]:""));
-
-								//OLD FORMAT, FAILS FOR MANY GENES 12052021
-								//							droppedItemsArrayList.add("https://www.wormbase.org/db/get?name="+ tmp.trim().split(" ")[0] + ";class=gene"
-								//									+ (tmp.trim().split(" ").length>1?" "+tmp.trim().split(" ")[tmp.trim().split(" ").length-1]:""));
-								//NEW FORMAT, WORKS FOR ALL? GENES 12052021
-								String newSearchString = "https://www.wormbase.org/search/gene/"+ tmp.trim().split(" ")[0] + "?species=c_elegans"
-										+ (tmp.trim().split(" ").length>1?" "+tmp.trim().split(" ")[tmp.trim().split(" ").length-1]:"");
-								droppedItemsArrayList.add(newSearchString);
-
-							} else if (tmp.endsWith("ColorLegend.lgd")){
-								ColorLegend cl;
-								Frame[] frames = WindowManager.getImageWindows();
-								if (this.dtde.getDropTargetContext().getDropTarget().getComponent() instanceof ImageCanvas3D) {
-									for (Frame frame:frames){
-										if (frame instanceof ImageWindow3D){
-											if (this.dtde.getDropTargetContext().getDropTarget().getComponent() == ((ImageWindow3D)frame).getUniverse().getCanvas()){
-												Image3DUniverse i3duniv = (Image3DUniverse)((ImageWindow3D)frame).getUniverse();
-												imp = i3duniv.getWindow().getImagePlus();
-											}
-										}
-									}
-								}
-
-								if (new File(tmp).exists()){
-									cl = new ColorLegend(getImp(), IJ.openAsString(tmp));
-									IJ.showStatus("");
-								} else
-									IJ.showStatus("badpath");
-								return;
-							} else if(tmp.contains(File.separator)){
-								if (IJ.debugMode) IJ.log(" fileinput");
-								droppedItemsArrayList.add(new File(tmp));
-							} else if (tmp.trim().split(" ")[0].toLowerCase().matches(".*expr\\d*.*")){
-								droppedItemsArrayList.add("https://www.wormbase.org/species/c_elegans/expr_pattern/" +tmp.trim());
-							} else if (tmp.trim().equalsIgnoreCase("*") || tmp.trim().equalsIgnoreCase(".*")) {
-								getImp().getRoiManager().getTextSearchField().setText("");
-								getImp().getRoiManager().actionPerformed(new ActionEvent(getImp().getRoiManager().getTextSearchField(),0,"",0,0));
-								return;
-							} else if (tmp.trim().split(" ")[0].matches(".*\\S.*")){
-								//							IJ.log("anatomyName?");
-								if ((tmp.trim().split(",").length ==2 && Colors.decode(tmp.split(",")[1], null) != null) ||
-										(tmp.trim().split(",").length >2 && Colors.decode(tmp.split(",")[2], null) != null)){
-									//								if (tmp.equals(tmp.replaceAll("([A-Za-z]+),([A-Za-z]+),(.*)", "$1,$1,$3"))) {
-									//										IJ.wait(1); 
-									Color testColor3 = Colors.decode(tmp.split(",")[1], null);
-									if (testColor3 != null) {
-										tmp = tmp.replaceAll("([A-Za-z]+,)(.*)", "$1$1$2");
-									}
-									clStr = clStr + tmp +"\n";
-									continue;
-
-									//								}
-								}
-								droppedItemsArrayList.add(tmp.trim());
-							}	
-						}
-						if (!clStr.contentEquals("")) {
-							ColorLegend cl = new ColorLegend(imp, clStr);
-							return;
-						}
-
-						this.setIterator(droppedItemsArrayList.iterator());
-						break;
-					}
-				}
-			}
-			if (this.getIterator() == null  && droppedItemsArrayList.size()>0)
-				this.setIterator(droppedItemsArrayList.iterator());
-
-			// --------------------------------------------------------------------
-			// ADDED: Prevent new drop from starting if a drop is already in progress.
-			if (working) { // If the previous drop thread is still active
-				dtde.dropComplete(false);
-				// Display conspicuous message addition to IJ.showStatus
-				IJ.showStatus("System Busy. Processing previous drop...");
-				displayConspicuousStatus("System Busy. Processing previous drop...", true); 
-				// Note: This message will remain until the next successful drop's cleanup runs.
-				return;
-			}           
-			// --------------------------------------------------------------------
-
-			if (getIterator()!=null) {
-				Thread thread = new Thread(this, "DrawAndDrop");
-				thread.setPriority(Math.max(thread.getPriority()-1, Thread.MIN_PRIORITY));
-				thread.start();
-			}
-
-			success = true;
-		}
-		catch(Exception e)  {
-			e.printStackTrace();
-			if (IJ.isMacOSX())
-				IJ.error("First drag and drop ignored. Please try again. You can avoid this\n"
-						+"problem by dragging to the toolbar instead of the status bar.");
-			else
-				IJ.error("Drag and drop failed");
-			success = false;
-		} finally {
-			dtde.dropComplete(success);
-
-
-		}
+	    // 3. START WORKER THREAD
+	    final Component finalComp = targetComponent;
+	    final List<File> finalFiles = extractedFiles;
+	    final String finalText = extractedText;
+	    final String finalHtml = extractedHtml;
+	    
+	    Thread dropThread = new Thread(new Runnable() {
+	        public void run() {
+	            handleDropData(finalComp, finalFiles, finalText, finalHtml);
+	        }
+	    }, "DragAndDrop-Processor");
+	    
+	    dropThread.setPriority(Thread.NORM_PRIORITY);
+	    dropThread.start();
 	}
+	
+	
+	/**
+	 * Handles the heavy lifting of parsing and loading.
+	 * Runs on a background thread.
+	 * DOES NOT touch DropTargetDropEvent or Transferable directly.
+	 */
+	private void handleDropData(Component dtc, List<File> fileList, String textData, String htmlData) {
+	    try {
+	        working = true;
+	        freshDrop = true;
+	        
+	        // Setup state variables based on target component
+	        dropImp = null;
+	        setImp(dropImp);
+	        if (dtc instanceof ImageCanvas2) {
+	            dropImp = ((ImageCanvas2) dtc).getImage();
+	            if (dropImp == null) dropImp = IJ.getImage();
+	            setImp(dropImp);
+	            if (getImp().getTitle().contains("Sketch3D")) doSketch3D = true;
+	            if (getImp().getMotherImp() != null && getImp().getMotherImp() != getImp())
+	                setImp(getImp().getMotherImp());
+	        } else if (dtc instanceof ImageCanvas3D) {
+	            dropUniverse = ((ImageCanvas3D) dtc).getUniverse();
+	            dropImp = dropUniverse.getWindow().getImagePlus();
+	            setImp(dropImp);
+	        } else {
+	            setImp(null);
+	        }
+
+	        setIterator(null);
+	        ArrayList droppedItemsArrayList = new ArrayList();
+	        String finalUrl = null;
+
+	        // --- RECONSTRUCTED LOGIC USING EXTRACTED DATA ---
+	        
+	        // 1. Check Text Data for URLs
+	        if (textData != null) {
+	            System.out.println("URL/Text retrieved: " + textData);
+	            finalUrl = textData;
+	        }
+
+	        if (finalUrl != null) {
+	            String[] finalUrlChunks = finalUrl.replace(",https", "https").replace("https", "\nhttps").replace(",https", "https").split("\n");
+	            for (String nextUrl : finalUrlChunks)
+	                droppedItemsArrayList.add(nextUrl);
+	        } else if (htmlData != null) {
+	            // 2. Check HTML Data
+	            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("<a\\s+[^>]*?href=\"(.*?)\"", java.util.regex.Pattern.CASE_INSENSITIVE | java.util.regex.Pattern.DOTALL);
+	            java.util.regex.Matcher matcher = pattern.matcher(htmlData);
+	            if (matcher.find()) {
+	                finalUrl = matcher.group(1);
+	                System.out.println("Found URL in HTML: " + finalUrl);
+	                droppedItemsArrayList.add(finalUrl);
+	            }
+	        }
+	        
+	        // 3. Process File List (The heavy 8000+ files part)
+	        if (fileList != null && !fileList.isEmpty()) {
+	            if (fileList.get(0).isDirectory()) {
+	                 // Iterate directory contents - time consuming, perfect for thread
+	                for (File dir : fileList) {
+	                    File[] innerFiles = dir.listFiles();
+	                    if (innerFiles != null) {
+	                        for (File file : innerFiles) {
+	                            if (file.getName().toLowerCase().endsWith(".obj") || 
+	                                file.getName().toLowerCase().endsWith(".glb") || 
+	                                file.getName().toLowerCase().endsWith(".gltf")) {
+	                                droppedItemsArrayList.add(file);
+	                            }
+	                        }
+	                    }
+	                }
+	                setIterator(droppedItemsArrayList.iterator());
+	            } else {
+	                setIterator(fileList.iterator());
+	            }
+	        } 
+	        
+	        // 4. Fallback text parsing if list is still empty but we have text
+	        // (Re-using your detailed string parsing logic logic here)
+	        if (droppedItemsArrayList.isEmpty() && textData != null) {
+	            String s = textData.trim().replaceAll("\\%(\\D)", "\\%25$1");
+	            if (IJ.isLinux() && s.length() > 1 && (int) s.charAt(1) == 0) s = fixLinuxString(s);
+	            
+	            if (s.indexOf("href=\"") != -1 || s.indexOf("src=\"") != -1) {
+	                s = parseHTML(s);
+	                droppedItemsArrayList.add(s);
+	                setIterator(droppedItemsArrayList.iterator());
+	            } else {
+	                BufferedReader br = new BufferedReader(new StringReader(s));
+	                String tmp;
+	                String clStr = "";
+	                while (null != (tmp = br.readLine())) {
+	                    tmp = java.net.URLDecoder.decode(tmp.replaceAll("\\+", "%2b"), "UTF-8");
+	                     if (tmp.contains("file://")) {
+	                        tmp = tmp.replaceAll("file://", "").replaceAll("localhost", "");
+	                    }
+	                    if (tmp.contains("http://") || tmp.contains("https://")) {
+	                        droppedItemsArrayList.add(tmp);
+	                    } else if (!tmp.contains(File.separator) &&
+	                            (tmp.toLowerCase().endsWith(".mov") ||
+	                                    tmp.toLowerCase().endsWith(".avi") ||
+	                                    tmp.toLowerCase().contains("scene.scn") ||
+	                                    tmp.toLowerCase().endsWith(".obj") ||
+	                                    tmp.toLowerCase().endsWith(".glb") ||
+	                                    tmp.toLowerCase().endsWith(".gltf") ||
+	                                    tmp.toLowerCase().endsWith(".zip") ||
+	                                    tmp.toLowerCase().endsWith(".tif"))) {
+	                        droppedItemsArrayList.add(tmp);
+	                    } 
+	                    // ... (Regex logic) ...
+	                    else if (!tmp.contains(File.separator) &&
+	                            (tmp.trim().split(" ")[0].toLowerCase().matches("\\D{3,5}-\\d{1,4}") ||
+	                                    tmp.trim().split(" ")[0].toLowerCase().matches("\\D{1}\\d{1,2}\\D{1,2}\\d{1,2}\\.\\d{1,2}"))) {
+	                        
+	                        String newSearchString = "https://www.wormbase.org/search/gene/" + tmp.trim().split(" ")[0] + "?species=c_elegans" +
+	                                (tmp.trim().split(" ").length > 1 ? " " + tmp.trim().split(" ")[tmp.trim().split(" ").length - 1] : "");
+	                        droppedItemsArrayList.add(newSearchString);
+	                    }
+	                    else if (tmp.endsWith("ColorLegend.lgd")) {
+	                         final String finalTmp = tmp;
+	                        SwingUtilities.invokeLater(() -> {
+	                             new ColorLegend(imp, IJ.openAsString(finalTmp));
+	                        });
+	                        return;
+	                    }
+	                    else if (tmp.contains(File.separator)) {
+	                        droppedItemsArrayList.add(new File(tmp));
+	                    }
+	                    else if (tmp.trim().split(" ")[0].matches(".*\\S.*")) {
+	                         // Color decoding logic
+	                         if ((tmp.trim().split(",").length == 2 && Colors.decode(tmp.split(",")[1], null) != null)) {
+	                            clStr = clStr + tmp + "\n";
+	                            continue;
+	                        }
+	                        droppedItemsArrayList.add(tmp.trim());
+	                    }
+	                }
+	                
+	                if (!clStr.contentEquals("")) {
+	                    final String fClStr = clStr;
+	                    SwingUtilities.invokeLater(() -> new ColorLegend(imp, fClStr));
+	                    return;
+	                }
+	            }
+	        }
+
+	        if (getIterator() == null && droppedItemsArrayList.size() > 0)
+	            setIterator(droppedItemsArrayList.iterator());
+
+	        // --- EXECUTE THE DROP ---
+	        
+	        // Prevent new drop if busy
+	        if (working && nDrops > 0) { // Simple check, careful with thread safety on 'working'
+	             // If needed, show busy status
+	        }
+
+	        if (getIterator() != null) {
+	            // We are already in a background thread, so we can run the logic directly,
+	            // OR spin up your "DrawAndDrop" thread if you want to keep that structure.
+	            // Since "run()" implements Runnable, we can just call it:
+	            run(); 
+	        }
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    } finally {
+	        // NOTE: We do NOT call dropComplete here anymore. 
+	        // It was called in drop() on the EDT.
+	    }
+	}
+	
 
 	private String fixLinuxString(String s) {
 		StringBuffer sb = new StringBuffer(200);

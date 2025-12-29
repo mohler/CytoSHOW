@@ -30,8 +30,10 @@ public class GltfMeshImporter {
 
         IJ.log("Streaming GLTF/GLB file for import...");
 
-        // Run in a background thread to keep the UI responsive while decoding
-        new Thread(() -> {
+     // --- REMOVED: new Thread(() -> { ... }).start(); --- 
+        // We now run on the thread provided by ContentImportWorker
+        // old thinking->        // Run in a background thread to keep the UI responsive while decoding
+//        new Thread(() -> {
             try {
                 // 1. Extract Decoder
                 File decoder = extractDecoder();
@@ -76,7 +78,7 @@ public class GltfMeshImporter {
             } catch (Exception e) {
                 IJ.handleException(e);
             }
-        }).start();
+//        }).start();
     }
 
     private static File extractDecoder() throws IOException {

@@ -2283,7 +2283,7 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 	        try {
 	            // 1. SETUP: Shared Thread Pool
 	            int totalCores = Runtime.getRuntime().availableProcessors();
-	            int poolSize = Math.max(1, totalCores/6);
+	            int poolSize = Math.max(1, totalCores-2);
 	            IJ.log("Starting Batch Import: Processing " + filePaths.length + " files using " + poolSize + " worker threads...");
 
 	            ExecutorService sharedExecutor = Executors.newFixedThreadPool(poolSize);
