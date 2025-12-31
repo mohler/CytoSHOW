@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="binaryresources"/>
 	<classpathentry kind="lib" path="precompiled-mpicbg_.jar"/>
 	<classpathentry kind="lib" path="precompiled-mpicbg.jar"/>
 	<classpathentry kind="lib" path="jdom.jar"/>
@@ -90,6 +91,7 @@
 	<classpathentry kind="lib" path="Jama-1.0.3.jar"/>
 	<classpathentry kind="lib" path="junit-4.12.jar"/>
 	<classpathentry kind="lib" path="jogamp-java3d"/>
+	<classpathentry kind="lib" path="gson-2.11.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/AceTreeLegacyModForCytoSHOWsynch"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/bUnwarpJ_modsForCytoSHOW"/>
