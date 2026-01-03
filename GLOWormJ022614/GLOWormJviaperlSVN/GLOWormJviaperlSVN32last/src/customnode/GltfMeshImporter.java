@@ -1,6 +1,7 @@
 package customnode;
 
 import ij.IJ;
+import ij.util.NativeTools;
 import ij3d.Image3DUniverse;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -82,60 +83,10 @@ public class GltfMeshImporter {
     }
 
     private static File extractDecoder() throws IOException {
-        // Determine path based on OS/Arch matches your Project Structure
-        String resourcePath = getPlatformSpecificBinaryPath("draco_decoder");
-        
-        InputStream in = GltfMeshImporter.class.getResourceAsStream(resourcePath);
-        if (in == null) {
-            throw new FileNotFoundException("Decoder not found at: " + resourcePath + 
-                "\nMake sure the binary is in the correct bin.os.arch package.");
-        }
-
-        String ext = resourcePath.endsWith(".exe") ? ".exe" : "";
-        File temp = File.createTempFile("draco", ext);
-        temp.deleteOnExit();
-        
-        Files.copy(in, temp.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        
-        if (!temp.getName().endsWith(".exe")) {
-            temp.setExecutable(true);
-        }
-        
-        return temp;
+        // NativeTools handles the path lookup, extraction, and executable permissions.
+        // We just return the File it gives us.
+        return NativeTools.getBundledBinary("draco_decoder");
     }
 
-    /**
-     * Maps the current OS/Arch to your specific Eclipse package structure.
-     * Structure:
-     * - /bin/mac/intel/
-     * - /bin/mac/arm64/
-     * - /bin/win/
-     * - /bin/linux/
-     */
-    private static String getPlatformSpecificBinaryPath(String baseName) {
-        String os = System.getProperty("os.name").toLowerCase();
-        String arch = System.getProperty("os.arch").toLowerCase();
-        
-        String pathPrefix = "/bin"; // Root of the package structure
 
-        if (os.contains("mac")) {
-            pathPrefix += "/mac";
-            // Check for Apple Silicon (M1/M2/M3)
-            if (arch.contains("aarch64") || arch.contains("arm64")) {
-                pathPrefix += "/arm64";
-            } else {
-                pathPrefix += "/intel";
-            }
-        } else if (os.contains("win")) {
-            pathPrefix += "/win";
-            baseName += ".exe";
-        } else if (os.contains("nix") || os.contains("nux") || os.contains("aix")) {
-            pathPrefix += "/linux";
-        } else {
-            // Fallback or Unknown
-            IJ.log("Unknown OS: " + os + ". Trying default path.");
-        }
-
-        return pathPrefix + "/" + baseName;
-    }
 }
