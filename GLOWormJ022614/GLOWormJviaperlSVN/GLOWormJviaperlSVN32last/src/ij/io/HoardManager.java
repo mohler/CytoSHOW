@@ -40,6 +40,8 @@ public class HoardManager {
     public static Path writeChunk(String filename, byte[] data) {
         return writeChunkWithHeader(filename, null, data);
     }
+    
+    private static int writeCounter = 0;
 
     /**
      * Internal Helper: Handles the actual I/O and Governance.
@@ -64,7 +66,12 @@ public class HoardManager {
             }
 
             // Trigger the Governor to clean up old files
-            CacheGovernor.govern(); 
+         // PERF FIX: Only govern every 60 frames (approx every 2 seconds of video)
+            // This prevents listing thousands of files 30 times a second.
+            writeCounter++;
+            if (writeCounter % 60 == 0) {
+                 CacheGovernor.govern(); 
+            }
             
             return targetPath;
 

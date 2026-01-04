@@ -638,7 +638,17 @@ public class Opener {
 			return null;
 		}
 		imp = (ImagePlus)IJ.runPlugIn("HandleExtraFileTypes", path);
-		if (imp==null) return null;
+		if (imp==null) {
+			try {
+				imp = (new FFmpegPlayer()).play(path);
+				return imp;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		if (imp==null) {
+			return null;
+		}
 		FileInfo fi = imp.getOriginalFileInfo();
 		if (fi==null) {
 			fi = new FileInfo();

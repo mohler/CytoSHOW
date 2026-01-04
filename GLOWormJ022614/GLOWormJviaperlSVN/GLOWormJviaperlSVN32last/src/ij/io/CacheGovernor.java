@@ -12,8 +12,8 @@ import java.util.stream.Stream;
 
 public class CacheGovernor {
 
-    // 10 GB in bytes (10 * 1024 * 1024 * 1024)
-    private static long maxHoardSize = 10L * 1024 * 1024 * 1024;
+    // 25 GB in bytes (25 * 1024 * 1024 * 1024)
+    private static long maxHoardSize = 25L * 1024 * 1024 * 1024;
 
  // This allows the Test (or a future Prefs dialog) to change it.
     public static void setMaxHoardSize(long bytes) {
@@ -54,7 +54,7 @@ public class CacheGovernor {
                 }
 
                 // Check if we are safe yet
-                if (currentSize < maxHoardSize) {
+                if (currentSize < maxHoardSize * 0.8) {
                     IJ.log("Hoard governed. New size: " + formatSize(currentSize));
                     break;
                 }

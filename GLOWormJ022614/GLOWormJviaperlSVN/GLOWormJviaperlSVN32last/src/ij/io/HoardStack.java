@@ -14,7 +14,6 @@ public class HoardStack extends VirtualStack {
 
     private final String sourceAbsolutePath;
     private final Path hoardDir;
-    private int nSlices;
 
     /**
      * @param width  Width of the video
@@ -26,8 +25,10 @@ public class HoardStack extends VirtualStack {
         // We pass 'null' for the color model and 'hoardDir' string to super
         super(width, height, null, ""); 
         this.sourceAbsolutePath = sourceAbsolutePath;
-        this.nSlices = count;
-        
+        nImageSlices = count;
+        names = new String[nImageSlices];
+        labels = new String[nImageSlices];
+       
         try {
             this.hoardDir = CacheLocation.getHoardLocation();
         } catch (IOException e) {
@@ -38,7 +39,7 @@ public class HoardStack extends VirtualStack {
     // ImageJ calls this method to know how many scrollbar ticks to draw
     @Override
     public int getSize() {
-        return nSlices;
+        return nImageSlices;
     }
     
     /**
@@ -48,25 +49,42 @@ public class HoardStack extends VirtualStack {
      */
     @Override
     public ImageProcessor getProcessor(int n) {
-        // 1. Calculate the expected filename (1-based index)
         String filename = CacheNaming.generateCacheName(sourceAbsolutePath, n, "tif");
         Path cachedFile = hoardDir.resolve(filename);
 
-        // 2. Check if the frame has been captured/cached yet
+        // CLEANER FIX: If this is Frame 1, wait until Frame 2 exists.
+        // This guarantees Frame 1 is fully written and closed by the producer.
+        if (n == 1) {
+            String nextFilename = CacheNaming.generateCacheName(sourceAbsolutePath, 2, "tif");
+            waitForPath(hoardDir.resolve(nextFilename));
+        }
+
         if (Files.exists(cachedFile)) {
-            // LOAD IT
-            // IJ.openImage is robust: handles the TIFF header we created
             ImagePlus imp = IJ.openImage(cachedFile.toString());
             if (imp != null) {
                 return imp.getProcessor();
             }
         }
 
-        // 3. Fallback (Frame missing or not yet captured)
-        // Return a black/blank frame so the UI doesn't crash while waiting for ffmpeg
         return createPlaceholder(n);
     }
 
+    /**
+     * Blocks for up to 2.5 seconds waiting for the path to exist.
+     */
+    private void waitForPath(Path p) {
+        long start = System.currentTimeMillis();
+        // 2500ms timeout prevents permanent hang if video is only 1 frame long
+        while (!Files.exists(p) && (System.currentTimeMillis() - start < 25000)) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                break;
+            }
+        }
+    }
+    
+    
     /**
      * Creates a placeholder image with "Loading" text.
      * Useful if the user scrolls ahead of the capture stream.
@@ -83,7 +101,7 @@ public class HoardStack extends VirtualStack {
         ip.setFont(new java.awt.Font("SansSerif", java.awt.Font.BOLD, fontSize));
         
         // 3. Construct the message
-        String msg = "Loading Frame " + n + "...";
+        String msg = "Loading\nFrame\n" + n + "...";
         
         // 4. Center the text
         // getStringWidth is an ImageJ helper that calculates pixel width of the text
