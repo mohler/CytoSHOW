@@ -327,7 +327,7 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	    } finally {
-	        // NOTE: We do NOT call dropComplete here anymore. 
+	        // NOTE: We do NOT call dropComplete here. 
 	        // It was called in drop() on the EDT.
 	    }
 	}
@@ -1944,10 +1944,12 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 							IJ.run("AVI...", "select="+pathList+"");
 
 					} else {
-						new QTMovieOpenerMultiMod(pathList);
+						(new Opener()).open(pathList);
+						//						new QTMovieOpenerMultiMod(pathList);
 					}
 				} else {
-					MQTVSSceneLoader64.runMQTVS_SceneLoader64(pathList.replaceAll("%2B", "\\+").replaceAll("%25", "%"));
+					(new Opener()).open(pathList);
+//					MQTVSSceneLoader64.runMQTVS_SceneLoader64(pathList.replaceAll("%2B", "\\+").replaceAll("%25", "%"));
 				}
 				if (dropImp == null) {
 					setImp(dropImp);

@@ -466,6 +466,7 @@ public class Opener {
 		fileType = getFileType(path);
 		if (IJ.debugMode)
 			IJ.log("openImage: \""+types[fileType]+"\", "+path);
+		int[] wrap = new int[] {fileType};
 		switch (fileType) {
 		case TIFF:
 			imp = openTiff(directory, name);
@@ -505,13 +506,14 @@ public class Opener {
 			if (imp.getWidth()!=0) return imp; else return null;
 		case ZIP:
 			return openZip(path);
-			/*			case AVI:
-				AVI_Reader reader = (AVI_Reader)IJ.runPlugIn("ij.plugin.AVI_Reader", path);
-				return reader.getImagePlus();
-			 */	
+		case AVI:case MOV:
+//			int[] wrap = new int[] {fileType};
+			imp = openWithHandleExtraFileTypes(path, wrap);
+//				AVI_Reader reader = (AVI_Reader)IJ.runPlugIn("ij.plugin.AVI_Reader", path);
+//				return reader.getImagePlus();
 		case UNKNOWN: case TEXT:
 			// Call HandleExtraFileTypes plugin to see if it can handle unknown format
-			int[] wrap = new int[] {fileType};
+//			int[] wrap = new int[] {fileType};
 			imp = openWithHandleExtraFileTypes(path, wrap);
 			if (imp!=null && imp.getNChannels()>1)
 				imp = new CompositeImage(imp, CompositeImage.COLOR);

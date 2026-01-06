@@ -629,7 +629,13 @@ public class ScrollbarWithLabel extends JPanel implements Adjustable, MouseListe
 		
 	}
 
-
+	/**
+     * Exposes the underlying JScrollBar so listeners can be attached safely.
+     * Added for CytoSHOW FFmpeg integration.
+     */
+    public JScrollBar getScrollBar() {
+        return bar;
+    }
 
 
 
