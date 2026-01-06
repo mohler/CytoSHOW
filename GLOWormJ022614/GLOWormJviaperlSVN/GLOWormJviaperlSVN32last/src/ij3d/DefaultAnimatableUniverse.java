@@ -144,6 +144,7 @@ public abstract class DefaultAnimatableUniverse extends DefaultUniverse {
 		        @Override
 		        public void run() {
 		            // The call that triggers getOffScreenCanvas() is now on the EDT
+					win.updateImagePlus();
 		        }
 		    });
 		}
@@ -169,6 +170,7 @@ public abstract class DefaultAnimatableUniverse extends DefaultUniverse {
 		        @Override
 		        public void run() {
 		            // The call that triggers getOffScreenCanvas() is now on the EDT
+					win.updateImagePlus();
 		        }
 		    });
 		}
@@ -238,6 +240,7 @@ public abstract class DefaultAnimatableUniverse extends DefaultUniverse {
 			        @Override
 			        public void run() {
 			            // The call that triggers getOffScreenCanvas() is now on the EDT
+						win.updateImagePlus();
 			        }
 			    });
 			}
