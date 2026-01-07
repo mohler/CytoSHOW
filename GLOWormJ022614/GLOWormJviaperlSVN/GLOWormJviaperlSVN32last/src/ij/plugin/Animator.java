@@ -1,7 +1,6 @@
 package ij.plugin;
 import java.awt.Frame;
 import java.awt.event.KeyEvent;
-
 import SmartCaptureLite.Composite_Adjuster;
 import ij.*;
 import ij.gui.*;
@@ -10,10 +9,7 @@ import ij.plugin.frame.PlugInFrame;
 import ij.process.*;
 import ij.measure.Calibration;
 
-
 /** 091310 CODE MODIFIED TO BROWSE SLICES WITH UP/DOWN AND FRAMES WITH LEFT/RIGHT KEYS */
-
-
 
 /** This plugin animates stacks. */
 public class Animator implements PlugIn {
@@ -43,24 +39,31 @@ public class Animator implements PlugIn {
 			}
 		}
 
-		if (imp==null)
-			imp = WindowManager.getCurrentImage();
-		if (imp==null)
-			{IJ.noImage(); return;}
+		// [FIX] Trust the private references if they were set by StackWindow
+		if (imp == null) imp = WindowManager.getCurrentImage();
+		if (imp == null) { IJ.noImage(); return; }
+		
     	nSlices = imp.getStackSize();
     	if (nSlices<2) {
     		IJ.error("Animator...", "Stack required."); return;
     	}
-		ImageWindow win = imp.getWindow();
-		if (win==null || !(win instanceof StackWindow)) {
+    	
+    	// [FIX] Use the existing swin reference if available, otherwise look it up
+    	if (swin == null) {
+			ImageWindow win = imp.getWindow();
+			if (win!=null && win instanceof StackWindow)
+				swin = (StackWindow)win;
+    	}
+
+		if (swin==null) {
 			if (arg.equals("next"))
 				imp.setSlice(imp.getCurrentSlice()+1);
 			else if (arg.equals("previous"))
 				imp.setSlice(imp.getCurrentSlice()-1);
-			if (win!=null) imp.updateStatusbarValue();
+			imp.updateStatusbarValue();
 			return;
 		}
-		swin = (StackWindow)win;
+		
 		ImageStack stack = imp.getStack();
 		slice = imp.getCurrentSlice();
 		IJ.register(Animator.class);
@@ -69,16 +72,6 @@ public class Animator implements PlugIn {
 			doOptions();
 			return;
 		}
-			
-/***** DO I WANT THIS STOPPING TO HAPPEN IN GLOWORMJ? *************/
-		
-/*		if (swin.getAnimate()) // "stop", "next" and "previous" all stop animation
-			stopAnimation();
-
-		if (arg.equals("stop")) {
-			return;
-		}
-*/
 			
 		if (arg.equals("start")) {
 			if (swin.getAnimationSelector() != null)
@@ -94,8 +87,6 @@ public class Animator implements PlugIn {
 			return;
 		}
 
-
-/***********THIS IS CODE THAT I MODIFIED BEFORE WAYNE MADE THE CHANGE JUST ABOVE.  DO I NEED IT NOW?*****/
 		if (arg.equals("next")) {
 			while (imp.getRemoteMQTVSHandler() != null 
 					&& !imp.getRemoteMQTVSHandler().isReady()) {
@@ -103,19 +94,14 @@ public class Animator implements PlugIn {
 			}
 			boolean ta = (swin.getAnimate());
 			boolean za = (swin.getZAnimate()); 
-			if (ta) 
-				stopAnimation();
-			if (za) 
-				stopZAnimation();
+			if (ta) stopAnimation();
+			if (za) stopZAnimation();
 			
 			nextSlice();
 
-			if (ta) 
-				startAnimation();
-			if (za) 
-				startZAnimation();
+			if (ta) startAnimation();
+			if (za) startZAnimation();
 			return;
-
 		}
 
 		if (arg.equals("thisSlice")) {
@@ -125,19 +111,14 @@ public class Animator implements PlugIn {
 			}
 			boolean ta = (swin.getAnimate());
 			boolean za = (swin.getZAnimate()); 
-			if (ta) 
-				stopAnimation();
-			if (za) 
-				stopZAnimation();
+			if (ta) stopAnimation();
+			if (za) stopZAnimation();
 			
 			thisSlice();
 
-			if (ta) 
-				startAnimation();
-			if (za) 
-				startZAnimation();
+			if (ta) startAnimation();
+			if (za) startZAnimation();
 			return;
-
 		}
 
 		if (arg.equals("previous")) {
@@ -147,29 +128,22 @@ public class Animator implements PlugIn {
 			}
 			boolean ta = (swin.getAnimate());
 			boolean za = (swin.getZAnimate()); 
-			if (ta) 
-				stopAnimation();
-			if (za) 
-				stopZAnimation();
+			if (ta) stopAnimation();
+			if (za) stopZAnimation();
 			
 			previousSlice();
 
-			if (ta) 
-				startAnimation();
-			if (za) 
-				startZAnimation();
+			if (ta) startAnimation();
+			if (za) startZAnimation();
 			return;
-
 		}
 		
-		
 		if (arg.equals("stop")) { // "stop" stops animation
-//			stopAnimation();
-//			stopZAnimation();
+			stopAnimation();
+			stopZAnimation();
 			return;
 		}
 			
-		
 		if (arg.equals("set")) {
 			setSlice();
 			return;
@@ -236,7 +210,6 @@ public class Animator implements PlugIn {
 			imp.setProcessor(Orthogonal_Views.getInstance().imageStack.getProcessor(imp.getSlice()+1));
 			imp.zeroUpdateMode = true;
 			imp.setPositionWithoutUpdate(imp.getChannel(), imp.getSlice()+1, imp.getFrame());
-			//				imp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
 			imp.zeroUpdateMode = false;
 			imp.updateStatusbarValue();
 			imp.unlock();
@@ -267,12 +240,10 @@ public class Animator implements PlugIn {
 			swin.setPosition(imp.getChannel(), imp.getSlice(), t);
 			IJ.setKeyUp(KeyEvent.VK_ALT);
 			IJ.setKeyUp(KeyEvent.VK_SPACE);
-		
 		} else {
 			int t = imp.getCurrentSlice();
 			if (IJ.spaceBarDown()&&IJ.altKeyDown()) {
 				t = t + imp.getStackSize()/10;
-
 			} else {
 				t = t + 1;
 			}
@@ -286,19 +257,12 @@ public class Animator implements PlugIn {
 	}
 	
 	void thisSlice() {
-		if (!imp.lock())
-			return;
-		
-//		ImageProcessor ip = imp.getProcessor();
-//		if (imp.getRemoteMQTVSHandler() != null)
-//			ip = imp.getStack().getProcessor(imp.getSlice());
-//		ip.setMinAndMax(ip.getMin(), ip.getMax());
+		if (!imp.lock()) return;
 		swin.setPosition(imp.getChannel(), imp.getSlice(), imp.getFrame());
 		imp.updateStatusbarValue();
 		imp.unlock();
 	}
 
-	
 	void previousSlice() {
 		if (!imp.lock())
 			return;
@@ -306,7 +270,6 @@ public class Animator implements PlugIn {
 			imp.setProcessor(Orthogonal_Views.getInstance().imageStack.getProcessor(imp.getSlice()-1));
 			imp.zeroUpdateMode = true;
 			imp.setPositionWithoutUpdate(imp.getChannel(), imp.getSlice()-1, imp.getFrame());
-			//				imp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
 			imp.zeroUpdateMode = false;
 			imp.updateStatusbarValue();
 			imp.unlock();
@@ -337,12 +300,10 @@ public class Animator implements PlugIn {
 			swin.setPosition(imp.getChannel(), imp.getSlice(), t);
 			IJ.setKeyUp(KeyEvent.VK_ALT);
 			IJ.setKeyUp(KeyEvent.VK_SPACE);
- 
 		} else {
 			int t = imp.getCurrentSlice();
 			if (IJ.spaceBarDown()&&IJ.altKeyDown()) {
 				t = t - imp.getStackSize()/10;
-
 			} else {
 				t = t - 1;
 			}
@@ -373,7 +334,6 @@ public class Animator implements PlugIn {
 		return animationRate;
 	}
 
-	
 	void stopAnimation() {
 		if (swin != null) {
 			if (swin.getAnimationSelector() != null) 
@@ -543,12 +503,10 @@ public class Animator implements PlugIn {
 					swin.getAnimationSelector().updatePlayPauseIcon();
 				if (swin.getAnimationZSelector() != null)
 					swin.getAnimationZSelector().updatePlayPauseIcon();
-
 			}
 		}
 		return;
 	}
-	
 	
 	void startZAnimation() {
 		if (swin != null) {
@@ -562,23 +520,16 @@ public class Animator implements PlugIn {
 			wasTAnimating = swin.getAnimate();
 
 			if (swin.getZAnimate()){
-				if (wasTAnimating) {
-					//IJ.log("wasTAnimating1 " + wasTAnimating);
-					stopAnimation();  //stops T
-				}
+				if (wasTAnimating) stopAnimation();  //stops T
 				stopZAnimation(); 
 				if (wasTAnimating && !swin.getAnimate()){
-					//IJ.log("wasTAnimating2 " + wasTAnimating);
 					wasTAnimating = false;
 					startAnimation();  //restarts T
 				}
 				return;
 			}
 
-			if (wasTAnimating) {
-				//IJ.log("wasTAnimating3 " + wasTAnimating);
-				stopAnimation();  //stops T
-			}
+			if (wasTAnimating) stopAnimation();  //stops T
 			imp.unlock(); // so users can adjust brightness/contrast/threshold
 			swin.setZAnimate(true);
 			long time, nextTime=System.currentTimeMillis();
@@ -641,17 +592,14 @@ public class Animator implements PlugIn {
 						imp.setProcessor(Orthogonal_Views.getInstance().imageStack.getProcessor(slice));
 						imp.zeroUpdateMode = true;
 						imp.setPositionWithoutUpdate(imp.getChannel(), slice, imp.getFrame());
-						//				imp.getCanvas().paintDoubleBuffered(imp.getCanvas().getGraphics());
 						imp.zeroUpdateMode = false;
 						Orthogonal_Views.getInstance().update();
 					} else
 						imp.setPosition(imp.getChannel(), slice, frame);
 					if (wasTAnimating && !swin.getAnimate()){
-						//IJ.log("wasTAnimating4 " + wasTAnimating);
 						wasTAnimating = false;
 						swin.setAnimate(true);
 					}
-					//IJ.log("ZAnimating...");
 					if (swin.getAnimationSelector() != null)
 						swin.getAnimationSelector().updatePlayPauseIcon();
 					if (swin.getAnimationZSelector() != null)
@@ -703,7 +651,6 @@ public class Animator implements PlugIn {
 		return;
 	}
 
-
 	public void setImagePlus(ImagePlus imagePlus) {
 		this.imp = imagePlus;
 	}
@@ -711,8 +658,5 @@ public class Animator implements PlugIn {
 	public ImagePlus getImagePlus() {
 		return imp;
 	}
-
-	
 	
 }
-

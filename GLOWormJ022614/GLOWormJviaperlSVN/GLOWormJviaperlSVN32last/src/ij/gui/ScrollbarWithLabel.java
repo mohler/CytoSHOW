@@ -71,7 +71,6 @@ public class ScrollbarWithLabel extends JPanel implements Adjustable, MouseListe
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                //if(isRighticonPanelPressed) {underlyingiconPanel.getModel().setPressed(true));
                 iconPanel.getModel().setArmed(false);
                 iconPanel.getModel().setPressed(false);
 
@@ -134,7 +133,6 @@ public class ScrollbarWithLabel extends JPanel implements Adjustable, MouseListe
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                //if(isRighticonPanelPressed) {underlyingiconPanel.getModel().setPressed(true));
                 icon2Panel.getModel().setArmed(false);
                 icon2Panel.getModel().setPressed(false);
 
@@ -213,7 +211,6 @@ public class ScrollbarWithLabel extends JPanel implements Adjustable, MouseListe
 		int h = (int) bounds.getHeight();
 		Image img = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB_PRE);
 
-		//		img.getGraphics().setColor(Colors.decode("00000000", Color.white));
 		Graphics2D g = (Graphics2D) img.getGraphics();
 
 		g.setFont(font);
@@ -267,8 +264,7 @@ public class ScrollbarWithLabel extends JPanel implements Adjustable, MouseListe
 			icon2Panel.removeKeyListener(l);
 	}
 
-	/* 
-	 * Methods of the Adjustable interface
+	/* * Methods of the Adjustable interface
 	 */
 	public synchronized void addAdjustmentListener(AdjustmentListener l) {
 		if (l == null) {
@@ -351,33 +347,15 @@ public class ScrollbarWithLabel extends JPanel implements Adjustable, MouseListe
 	}
 
 	public void mouseClicked(MouseEvent e) {
-//		if (SwingUtilities.isRightMouseButton(e)) {
-//			if (iconPanel.contains(e.getPoint())||icon2Panel.contains(e.getPoint())){
-//				 if (getType() == 'c') {
-//					 IJ.run("Channels Tool...");
-//				 } else {
-//					 IJ.doCommand("Animation Options...");
-//				 }
-//			}
-//			
-//		}
-
 	}
 
 	public void mouseEntered(MouseEvent e) {
-		//		IJ.runMacro("print(\"\\\\Clear\")");
-		//		IJ.runMacro("print(\"\\\\Update:Movie Dimension Sliders:\\\n\'z\' and \'t\' Sliders adjust the movie position in space and time.\\\n\'c\' Slider selects which channel is being displayed or is adjusted by the Display Tool.\\\n\'r\' Slider adjusts the resolution (pixelation) of the display; low r => faster slice animation.\\\n \")");
-
 	}
 
 	public void mouseExited(MouseEvent e) {
-		// TODO Auto-generated method stub
-
 	}
 
 	public void mousePressed(MouseEvent e) {
-		// TODO Auto-generated method stub
-
 	}
 
 	public void mouseReleased(MouseEvent e) {
@@ -388,7 +366,6 @@ public class ScrollbarWithLabel extends JPanel implements Adjustable, MouseListe
 	}
 
 	public char getType() {
-		// TODO Auto-generated method stub
 		return label;
 	}
 
@@ -400,21 +377,26 @@ public class ScrollbarWithLabel extends JPanel implements Adjustable, MouseListe
 		if ((flags&(Event.ALT_MASK|Event.META_MASK|Event.CTRL_MASK))!=0){
 			if (getType() =='t' || getType() =='z') IJ.doCommand("Animation Options...");
 			else if (getType() =='c') IJ.run("Channels Tool...");
-//			e = null;
-//			return;
 		} else if (getType() =='t' ) {
-//			IJ.doCommand("Start Animation [\\]");
-			stackWindow.animator.run("start");
-//			return;
-//			e = null;
-//		else if (getType() == 'z' && stackWindow.getAnimationSelector().getType() == 'z')
-//			IJ.doCommand("Start Animation [\\]");
-
+			
+			// [FIX] CRITICAL THREADING FIX
+			// Run the animation loop on a NEW thread, not the EDT.
+			// This prevents UI lockups and allows repaint events to process.
+			new Thread(new Runnable() {
+				public void run() {
+					stackWindow.animator.run("start");
+				}
+			}, "Animator-Thread-T").start();
+			
 		} else if (getType() =='z' ) {
-//			IJ.doCommand("Start Z Animation");
-			stackWindow.animator.run("startZ");
-//			return;
-//			e = null;
+			
+			// [FIX] CRITICAL THREADING FIX for Z-stack animation
+			new Thread(new Runnable() {
+				public void run() {
+					stackWindow.animator.run("startZ");
+				}
+			}, "Animator-Thread-Z").start();
+			
 		} else if (getType() =='c' ){
 			int origChannel = stackWindow.getImagePlus().getChannel();
 			if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 5 ){
@@ -431,9 +413,7 @@ public class ScrollbarWithLabel extends JPanel implements Adjustable, MouseListe
 				}
 				boolean animationState = stackWindow.running2;
 				boolean animationZState = stackWindow.running3;
-//				IJ.doCommand("Stop Animation");
 
-				
 				for (int j=1; j<=stackWindow.getImagePlus().getNChannels(); j++){
 					stackWindow.setPosition(j, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame());
 				}
@@ -447,40 +427,30 @@ public class ScrollbarWithLabel extends JPanel implements Adjustable, MouseListe
 					((CompositeImage)stackWindow.getImagePlus()).setMode(3);
 					((CompositeImage)stackWindow.getImagePlus()).setMode(mode);
 				}
-				if (animationState) stackWindow.setAnimate(false); /* IJ.doCommand("Start Animation [\\]");*/
-				if (animationZState)  stackWindow.setZAnimate(false); /* IJ.doCommand("Start Z Animation");*/
+				if (animationState) stackWindow.setAnimate(false); 
+				if (animationZState)  stackWindow.setZAnimate(false); 
 			}
 			else if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 1 ){
 				((CompositeImage) stackWindow.getImagePlus()).setMode(2);	
-//				if (stackWindow.getImagePlus().getNFrames()>1) {
 					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()+1);
 					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()-1);
-//				}
 			}
 			else if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 2 ){
 				((CompositeImage) stackWindow.getImagePlus()).setMode(3);
-//				if (stackWindow.getImagePlus().getNFrames()>1) {
 					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()+1);
 					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()-1);
-//				}
 			}
 			else if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 3 ){
 				((CompositeImage) stackWindow.getImagePlus()).setMode(4);
-//				if (stackWindow.getImagePlus().getNFrames()>1) {
 					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()+1);
 					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()-1);
-//				}
 			}
 			else if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 4 ){
 				((CompositeImage) stackWindow.getImagePlus()).setMode(5);
-//				if (stackWindow.getImagePlus().getNFrames()>1) {
 					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()+1);
 					stackWindow.setPosition(origChannel, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame()-1);
-//				}
 			}
 			stackWindow.cSelector.updatePlayPauseIcon();
-//			e=null;
-//			return;
 		}
 	}
 
@@ -490,27 +460,22 @@ public class ScrollbarWithLabel extends JPanel implements Adjustable, MouseListe
 
 		public IconButton() {
 			super();
-			// TODO Auto-generated constructor stub
 		}
 
 		public IconButton(Action a) {
 			super(a);
-			// TODO Auto-generated constructor stub
 		}
 
 		public IconButton(javax.swing.Icon icon) {
 			super(icon);
-			// TODO Auto-generated constructor stub
 		}
 
 		public IconButton(String text, javax.swing.Icon icon) {
 			super(text, icon);
-			// TODO Auto-generated constructor stub
 		}
 
 		public IconButton(String text) {
 			super(text);
-			// TODO Auto-generated constructor stub
 		}
 
 	}
@@ -523,12 +488,10 @@ public class ScrollbarWithLabel extends JPanel implements Adjustable, MouseListe
 		private Image image;
 
 		public Icon(char type) {
-//			addKeyListener(IJ.getInstance()); 
 			setSize(WIDTH, HEIGHT);
 			this.setType(type);
 		}
 
-		/** Overrides Component getPreferredSize(). */
 		public Dimension getPreferredSize() {
 			return new Dimension(WIDTH, HEIGHT);
 		}
@@ -616,9 +579,7 @@ public class ScrollbarWithLabel extends JPanel implements Adjustable, MouseListe
 		public void setType(char type) {
 			this.type = type;
 		}
-	} // StartStopIcon class
-
-
+	} 
 
 	public void setIconEnabled(boolean b) {
 		iconEnabled = b;
@@ -633,24 +594,14 @@ public class ScrollbarWithLabel extends JPanel implements Adjustable, MouseListe
 	}
 
 	public Object getValue(String key) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	public void putValue(String key, Object value) {
-		// TODO Auto-generated method stub
-		
 	}
 
-	/**
-     * Exposes the underlying JScrollBar so listeners can be attached safely.
-     * Added for CytoSHOW FFmpeg integration.
-     */
     public JScrollBar getScrollBar() {
         return bar;
     }
-
-
-
 
 }

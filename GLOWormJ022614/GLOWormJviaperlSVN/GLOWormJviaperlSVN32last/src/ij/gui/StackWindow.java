@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
+import javax.swing.SwingUtilities; // [FIX] Added import
 import javax.swing.ToolTipManager;
 
 import org.vcell.gloworm.MultiChannelController;
@@ -22,21 +23,21 @@ import org.vcell.gloworm.MultiQTVirtualStack;
 /** This class is an extended ImageWindow used to display image stacks. */
 public class StackWindow extends ImageWindow implements Runnable, AdjustmentListener, ActionListener, MouseWheelListener {
 
-	protected JScrollBar sliceSelector; // for backward compatibity with Image5D
+	protected JScrollBar sliceSelector; 
 	public ScrollbarWithLabel cSelector, zSelector, tSelector;
 	public ArrayList<ScrollbarWithLabel> activeScrollBars = new ArrayList<ScrollbarWithLabel>();
 	protected Thread thread;
 	protected volatile boolean done;
 	protected volatile int slice;
-//	private ScrollbarWithLabel animationSelector, animationZSelector;
 	boolean hyperStack;
 	int nChannels=1, nSlices=1, nFrames=1;
 	int c=1, z=1, t=1;
 	boolean wormAtlas;
 	protected JPanel scrollbarPanel;
+	
+	// [FIX] Private animator for this specific window
 	protected Animator animator;
 	
-
 	public StackWindow(ImagePlus imp, boolean showNow) {
 		this(imp, null, showNow);
 	}
@@ -46,9 +47,8 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 		addScrollbars(imp);
 		addMouseWheelListener(this);
 		if (sliceSelector==null && this.getClass().getName().indexOf("Image5D")!=-1) {
-			sliceSelector = new JScrollBar(); // prevents Image5D from crashing
+			sliceSelector = new JScrollBar(); 
 		}
-		//IJ.log(nChannels+" "+nSlices+" "+nFrames);
 		pack();
 		ic = imp.getCanvas();
 		if (ic!=null) ic.setMaxBounds();
@@ -79,7 +79,6 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 						:0)
 						+this.overheadPanel.getHeight();
 		this.setSize(ic.dstWidth+padH, ic.dstHeight+padV);
-
 	}
 	
 	public void addScrollbars(ImagePlus imp) {
@@ -87,8 +86,7 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 		wormAtlas = ( (s instanceof MultiQTVirtualStack && ((MultiQTVirtualStack) imp.getMotherImp().getStack()).getVirtualStack(0) != null) && ((MultiQTVirtualStack)s).getVirtualStack(0).getMovieName().startsWith("SW"));
 		int stackSize = s.getSize();
 		nSlices = stackSize;
-		hyperStack = true;  //imp.getOpenAsHyperStack();
-		//imp.setOpenAsHyperStack(false);
+		hyperStack = true; 
 		int[] dim = imp.getDimensions();
 		int nDimensions = 2+(dim[2]>1?1:0)+(dim[3]>1?1:0)+(dim[4]>1?1:0);
 		if (nDimensions<=3 && (dim[2]!=nSlices && dim[3]!=nSlices && dim[4]!=nSlices ) )
@@ -98,8 +96,6 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 			nSlices = dim[3];
 			nFrames = dim[4];
 		}
-		//IJ.log("StackWindow: "+hyperStack+" "+nChannels+" "+nSlices+" "+nFrames);
-//		if (nSlices==stackSize) hyperStack = false;
 		if (nChannels*nSlices*nFrames!=stackSize) hyperStack = false;
 		if (cSelector!=null||zSelector!=null||tSelector!=null)
 			removeScrollbars();
@@ -140,13 +136,6 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 			zSelector = new ScrollbarWithLabel(this, 1, 1, 1, nSlices+1, label);
 			((JComponent) zSelector.iconPanel).setToolTipText("<html>Left-Clicking this Slice selector's icon <br>plays/pauses animation through the Z dimension.<br>Right-clicking or control-clicking <br>activates the Animation Options Tool.</html>");		
 			((JComponent) zSelector.icon2Panel).setToolTipText("<html>Left-Clicking this Slice selector's icon <br>plays/pauses animation through the Z dimension.<br>Right-clicking or control-clicking <br>activates the Animation Options Tool.</html>");		
-
-//			if (label=='t') 
-//				animationSelector = zSelector;
-//			if (label=='z') {
-//				animationZSelector = zSelector; 
-//				setZAnimate(false); 
-//			}
 			sbgridbag.setConstraints(zSelector, sbgc);
 			sbgc.gridy = y++; 
 			scrollbarPanel.add(zSelector);
@@ -161,11 +150,11 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 
 		}
 		if (nFrames>1) {
-			/*animationSelector = */tSelector = new ScrollbarWithLabel(this, 1, 1, 1, nFrames+1, 't');
+			tSelector = new ScrollbarWithLabel(this, 1, 1, 1, nFrames+1, 't');
 			((JComponent) tSelector.iconPanel).setToolTipText("<html>Left-Clicking this Frame selector's icon <br>plays/pauses animation through the T dimension.<br>Right-clicking or control-clicking <br>activates the Animation Options Tool.</html>");		
 			((JComponent) tSelector.icon2Panel).setToolTipText("<html>Left-Clicking this Frame selector's icon <br>plays/pauses animation through the T dimension.<br>Right-clicking or control-clicking <br>activates the Animation Options Tool.</html>");		
 			if (wormAtlas) {
-				/*animationSelector = */tSelector = new ScrollbarWithLabel(this, 1, 1, 1, nFrames+1, 'z');
+				tSelector = new ScrollbarWithLabel(this, 1, 1, 1, nFrames+1, 'z');
 				((JComponent) tSelector.iconPanel).setToolTipText("<html>Left-Clicking this Slice selector's icon <br>plays/pauses animation through the Z dimension.<br>Right-clicking or control-clicking <br>activates the Animation Options Tool.</html>");		
 				((JComponent) tSelector.icon2Panel).setToolTipText("<html>Left-Clicking this Slice selector's icon <br>plays/pauses animation through the Z dimension.<br>Right-clicking or control-clicking <br>activates the Animation Options Tool.</html>");		
 			}
@@ -182,9 +171,10 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 
 		}
 		this.add(scrollbarPanel, BorderLayout.SOUTH);
+		
+		// [FIX] Initialize the private animator
 		this.animator = new Animator();
 		animator.setImagePlus(this.getImagePlus());
-		
 	}
 
 	public synchronized void adjustmentValueChanged(AdjustmentEvent e) {
@@ -202,12 +192,17 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 		if (running2 || running3) {
 			boolean animationState = this.running2;
 			boolean animationZState = this.running3;
+			
+			// [FIX] Detect if the adjustment is from the User (EDT) or the Animator (Background Thread).
 			if ((e.getSource() == tSelector) || (e.getSource() == zSelector)) {
-//				IJ.doCommand("Stop Animation");
-//				this.animator.run("stop");
+				// Only stop animation if the event comes from the Event Dispatch Thread (User interaction).
+				// If it comes from 'Animator-Thread-Z', let it proceed.
+				if (SwingUtilities.isEventDispatchThread()) {
+					this.animator.run("stop");
+				}
 			} else if (e.getSource() == cSelector) {
-//				IJ.doCommand("Stop Animation");
-//				this.animator.run("stop");
+				// Channel switching usually requires a full stop/reset
+				this.animator.run("stop");
 				if (this.getImagePlus().isComposite()) 
 					((CompositeImage) this.getImagePlus()).setC(cSelector.getValue());
 				int origChannel = this.getImagePlus().getChannel();
@@ -215,13 +210,11 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 					((CompositeImage)this.getImagePlus()).setMode(3);
 					((CompositeImage)this.getImagePlus()).setMode(1);
 				}
-				if (animationState) this.animator.run("start");
-					/* IJ.doCommand("Start Animation [\\]") */
-				if (animationZState) this.animator.run("startZ");
-					/*IJ.doCommand("Start Z Animation");*/
+				// [FIX] Restart animations on a new Thread to avoid blocking EDT
+				if (animationState) new Thread(() -> this.animator.run("start")).start();
+				if (animationZState) new Thread(() -> this.animator.run("startZ")).start();
 			}
 		}
-
 
 		if (!running2 && !running3) {
 			if (e.getSource()==cSelector) {
@@ -260,7 +253,6 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 					WindowManager.getFrame("Display").toFront();
 				this.toFront();
 			}
-
 		}
 		if (!running && !running2 && !running3)
 			syncWindows(e.getSource());
@@ -282,12 +274,10 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 	
 	void updatePosition() {
 		if (imp.getOriginalFileInfo() != null && imp.getOriginalFileInfo().fileName.toLowerCase().endsWith("_csv.ome.tif")) {
-//			IJ.log("ome");
 			slice =  (t-1)*nChannels*nSlices + (c-1)*nSlices + z;
 		} else if (imp.getStack() instanceof MultiFileInfoVirtualStack && ((MultiFileInfoVirtualStack)imp.getStack()).getDimOrder() == "xyztc") {
 			slice =   (c-1)*nSlices*nFrames + (t-1)*nSlices + z;
 		} else {
-//			IJ.log("not ome");
 			slice = (t-1)*nChannels*nSlices + (z-1)*nChannels + c;
 		}
 		imp.updatePosition(c, z, t);
@@ -298,156 +288,8 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 	public void actionPerformed(ActionEvent e) {
 	}
 
-//	public void mouseWheelMoved(MouseWheelEvent event) {
-//		synchronized(this) {
-//			int rotation = event.getWheelRotation();
-//			if (hyperStack) {
-//				if (rotation>0)
-//					IJ.runPlugIn("ij.plugin.Animator", "next");
-//				else if (rotation<0)
-//					IJ.runPlugIn("ij.plugin.Animator", "previous");
-//			} else {
-//				int slice = imp.getCurrentSlice() + rotation;
-//				if (slice<1)
-//					slice = 1;
-//				else if (slice>imp.getStack().getSize())
-//					slice = imp.getStack().getSize();
-//				imp.setSlice(slice);
-//				imp.updateStatusbarValue();
-//			}
-//		}
-//	}
-
 	public boolean close() {
 		removeScrollbars();
-		if (cSelector!=null) {
-			while (cSelector.iconPanel.getMouseWheelListeners().length>0) 
-				cSelector.iconPanel.removeMouseWheelListener(cSelector.iconPanel.getMouseWheelListeners()[0]);
-			while (cSelector.icon2Panel.getMouseWheelListeners().length>0) 
-				cSelector.icon2Panel.removeMouseWheelListener(cSelector.icon2Panel.getMouseWheelListeners()[0]);
-			
-			cSelector.bar.removeAdjustmentListener(cSelector);
-			cSelector.bar.removeMouseListener(cSelector);
-			cSelector.removeAdjustmentListener(this);
-			cSelector.removeKeyListener(ij);
-			while (cSelector.getMouseListeners().length>0) 
-				cSelector.removeMouseListener(cSelector.getMouseListeners()[0]);
-			while (cSelector.iconPanel.getMouseListeners().length>0) 
-				cSelector.iconPanel.removeMouseListener(cSelector.iconPanel.getMouseListeners()[0]);
-			while (cSelector.icon2Panel.getMouseListeners().length>0) 
-				cSelector.icon2Panel.removeMouseListener(cSelector.icon2Panel.getMouseListeners()[0]);
-			ActionListener[] csipals=cSelector.iconPanel.getActionListeners();
-			while (csipals.length>0) { 
-				cSelector.iconPanel.removeActionListener(csipals[0]);		
-				csipals=cSelector.iconPanel.getActionListeners();
-			}
-			ActionListener[] csipals2=cSelector.icon2Panel.getActionListeners();;
-			while (csipals2.length>0) {
-				cSelector.icon2Panel.removeActionListener(csipals2[0]);	
-				csipals2=cSelector.icon2Panel.getActionListeners();
-			}
-			
-			cSelector.iconPanel.setAction(null);
-			cSelector.icon2Panel.setAction(null);
-			while (cSelector.getComponents().length >0){
-				cSelector.remove(0);
-			}
-			cSelector.icon=null;
-			cSelector.icon2=null;
-			cSelector.iconPanel=null;
-			cSelector.icon2Panel=null;
-			cSelector.bar = null;
-			cSelector.stackWindow = null;
-
-			cSelector.adjustmentListener=null;
-			cSelector.stackWindow = null;
-			cSelector=null;
-		}
-		if (tSelector!=null) {
-			tSelector.bar.removeAdjustmentListener(tSelector);
-			tSelector.bar.removeMouseListener(tSelector);
-			tSelector.removeAdjustmentListener(this);
-			tSelector.removeKeyListener(ij);
-			while (tSelector.getMouseListeners().length>0) 
-				tSelector.removeMouseListener(tSelector.getMouseListeners()[0]);
-			if (tSelector.iconPanel!=null) {
-				while (tSelector.iconPanel.getMouseListeners().length>0) 
-					tSelector.iconPanel.removeMouseListener(tSelector.iconPanel.getMouseListeners()[0]);
-				while (tSelector.icon2Panel.getMouseListeners().length>0) 
-					tSelector.icon2Panel.removeMouseListener(tSelector.icon2Panel.getMouseListeners()[0]);
-				ActionListener[] tsipals=tSelector.iconPanel.getActionListeners();
-				while (tsipals.length>0) {
-					tSelector.iconPanel.removeActionListener(tsipals[0]);			
-					tsipals=tSelector.iconPanel.getActionListeners();
-				}
-				ActionListener[] tsipals2=tSelector.icon2Panel.getActionListeners();;
-				while (tsipals2.length>0) {
-					tSelector.icon2Panel.removeActionListener(tsipals2[0]);	
-					tsipals2=tSelector.icon2Panel.getActionListeners();
-				}
-				tSelector.iconPanel.setAction(null);
-				tSelector.icon2Panel.setAction(null);
-				while (tSelector.getComponents().length >0){
-					tSelector.remove(0);
-				}
-				tSelector.icon=null;
-				tSelector.icon2=null;
-				tSelector.iconPanel=null;
-				tSelector.icon2Panel=null;
-			}
-			tSelector.bar = null;
-			tSelector.stackWindow = null;
-
-			tSelector.adjustmentListener=null;
-			tSelector.stackWindow = null;
-			tSelector=null;
-		}
-		if (zSelector!=null) {
-			zSelector.bar.removeAdjustmentListener(zSelector);
-			zSelector.bar.removeMouseListener(zSelector);
-			zSelector.removeAdjustmentListener(this);
-			zSelector.removeKeyListener(ij);
-			while (zSelector.getMouseListeners().length>0) 
-				zSelector.removeMouseListener(zSelector.getMouseListeners()[0]);
-			if (zSelector.iconPanel!=null) {
-				while (zSelector.iconPanel.getMouseListeners().length>0) 
-					zSelector.iconPanel.removeMouseListener(zSelector.iconPanel.getMouseListeners()[0]);
-				while (zSelector.icon2Panel.getMouseListeners().length>0) 
-					zSelector.icon2Panel.removeMouseListener(zSelector.icon2Panel.getMouseListeners()[0]);
-				ActionListener[] zsipals=zSelector.iconPanel.getActionListeners();
-				while (zsipals.length>0) {
-					zSelector.iconPanel.removeActionListener(zsipals[0]);		
-					zsipals=zSelector.iconPanel.getActionListeners();
-				}
-				ActionListener[] zasipals2=zSelector.icon2Panel.getActionListeners();
-				while (zasipals2.length>0) {
-					zSelector.icon2Panel.removeActionListener(zasipals2[0]);	
-					zasipals2=zSelector.icon2Panel.getActionListeners();
-				}
-				zSelector.iconPanel.setAction(null);
-				zSelector.icon2Panel.setAction(null);
-				while (zSelector.getComponents().length >0){
-					zSelector.remove(0);
-				}
-				zSelector.icon=null;
-				zSelector.icon2=null;
-				zSelector.iconPanel=null;
-				zSelector.icon2Panel=null;
-			}
-			zSelector.bar = null;
-			zSelector.stackWindow = null;
-
-			zSelector.adjustmentListener=null;
-			zSelector.stackWindow = null;
-			zSelector=null;
-		}
-		if (activeScrollBars!=null) {
-			int asbs = activeScrollBars.size();
-			for (int asbl=0;asbl<asbs;asbl++) {
-				activeScrollBars.remove(0);
-			}
-			activeScrollBars=null;
-		}
 		if (!super.close()) {
 			return false;
 		}
@@ -506,14 +348,6 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
     	int channels=dim[2], slices=dim[3], frames=dim[4];
 		if (channels>=1) {
 			String channelLabel ="";
-//			if( this.getImagePlus().getStack() instanceof MultiQTVirtualStack && ((MultiQTVirtualStack) imp.getMotherImp().getStack()).getVirtualStack(0) != null)
-//				channelLabel = " [" + ((MultiQTVirtualStack)this.getImagePlus().getStack()).getVirtualStack(imp.getChannel()-1).getMovieName() + "]";
-//			else if (this.getImagePlus().getRemoteMQTVSHandler()!=null)
-//				channelLabel = " [" + this.getImagePlus().getRemoteMQTVSHandler().getChannelPathNames()[imp.getChannel()-1].replaceAll(".*/", "").replaceAll("(.*(slc|prx|pry)).*", "$1") + "]";
-//			else if (this.getImagePlus().getStack() instanceof MultiFileInfoVirtualStack) {
-//				MultiFileInfoVirtualStack mfivs = ((MultiFileInfoVirtualStack)this.getImagePlus().getStack());
-//				channelLabel = " ["+ mfivs.getVirtualStack(mfivs.stackNumber) + "]";
-//			}
 			s += "c"+imp.getChannel()+"/"+channels;   // + channelLabel ;
 			if (slices>1||frames>1) s += "; ";
 		}
@@ -572,7 +406,6 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 		if (this.slice>0) {
 			int s = this.slice;
 			this.slice = 0;
-//			if (s!=imp.getCurrentSlice())
 			if (imp instanceof CompositeImage)
 				((CompositeImage)imp).setSlice(s);
 			else
@@ -586,27 +419,11 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
     }
     
     public void setPositionWithoutScrollbarCheck(int channel, int slice, int frame) {
-//    	if (cSelector!=null && channel!=c) {
-//    		c = channel;
-//			cSelector.setValue(channel);
-//			SyncWindows.setC(this, channel);
-//		}
-//    	if (zSelector!=null && slice!=z) {
-//    		z = slice;
-//			zSelector.setValue(slice);
-//			SyncWindows.setZ(this, slice);
-//		}
-//    	if (tSelector!=null && frame!=t) {
-//    		t = frame;
-//			tSelector.setValue(frame);
-//			SyncWindows.setT(this, frame);
-//		}
     	updatePosition();
 		if (this.slice>0) {
 			int s = this.slice;
 			this.slice = 0;
-//			if (s!=imp.getCurrentSlice())
-				imp.setSlice(s);
+			imp.setSlice(s);
 		}
     }
     
@@ -650,21 +467,6 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
     }
     
     void removeScrollbars() {
-//    	if (cSelector!=null) {
-//    		scrollbarPanel.remove(cSelector);
-//			cSelector.removeAdjustmentListener(this);
-//    		cSelector = null;
-//    	}
-//    	if (zSelector!=null) {
-//    		scrollbarPanel.remove(zSelector);
-//			zSelector.removeAdjustmentListener(this);
-//    		zSelector = null;
-//    	}
-//    	if (tSelector!=null) {
-//    		scrollbarPanel.remove(tSelector);
-//			tSelector.removeAdjustmentListener(this);
-//    		tSelector = null;
-//    	}
 		if (cSelector!=null) {
 			cSelector.bar.removeAdjustmentListener(cSelector);
 			cSelector.bar.removeMouseListener(cSelector);
@@ -776,22 +578,15 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 				activeScrollBars.remove(0);
 			}
 		}
-//    	remove(scrollbarPanel);
     	scrollbarPanel = null;
     }
 
 	public ScrollbarWithLabel getAnimationSelector() {
-//		if (animationSelector != null) 
-//			return animationSelector;
-//		else
-			return tSelector != null? tSelector:(zSelector != null? zSelector:null);
+		return tSelector != null? tSelector:(zSelector != null? zSelector:null);
 	}
 
 	public ScrollbarWithLabel getAnimationZSelector() {
-//		if (animationZSelector != null) 
-//			return animationZSelector;
-//		else
-			return zSelector != null? zSelector:(tSelector != null? tSelector:null);
+		return zSelector != null? zSelector:(tSelector != null? tSelector:null);
 	}
 
 	public void setWormAtlas(boolean wormAtlas) {
