@@ -49,13 +49,13 @@ public class HoardStack extends VirtualStack {
      */
     @Override
     public ImageProcessor getProcessor(int n) {
-        String filename = CacheNaming.generateCacheName(sourceAbsolutePath, n, "tif");
+        String filename = CacheNaming.generateCacheName(sourceAbsolutePath, n-1, "tif"); //getProcessor counts from 1, but the cached tiffs start a 0
         Path cachedFile = hoardDir.resolve(filename);
 
         // CLEANER FIX: If this is Frame 1, wait until Frame 2 exists.
         // This guarantees Frame 1 is fully written and closed by the producer.
         if (n == 1) {
-            String nextFilename = CacheNaming.generateCacheName(sourceAbsolutePath, 2, "tif");
+            String nextFilename = CacheNaming.generateCacheName(sourceAbsolutePath, 1, "tif");  //getProcessor counts from 1, but the cached tiffs start a 0
             waitForPath(hoardDir.resolve(nextFilename));
         }
 

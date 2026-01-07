@@ -207,7 +207,25 @@ public abstract class DefaultAnimatableUniverse extends DefaultUniverse {
 		if(!animation.isPaused())
 			pauseAnimation();
 		// create a new stack
+
+		// 1. Check if the window is available
+		if (win != null) {
+		    // 2. Wrap the GUI-sensitive call in an EDT safe block.
+		    // This guarantees the graphics initialization runs on the correct thread.
+		    javax.swing.SwingUtilities.invokeLater(new Runnable() {
+		        @Override
+		        public void run() {
+		            // The call that triggers getOffScreenCanvas() is now on the EDT
+					win.updateImagePlus();
+		        }
+		    });
+		}
+
 		ImageProcessor ip = win.getImagePlus().getProcessor();
+		while (ip == null) {
+			ip = win.getImagePlus().getProcessor();
+			IJ.wait(10);
+		}
 		ImageStack stack = new ImageStack(ip.getWidth(), ip.getHeight());
 		// prepare everything
 		updateRotationAxisAndCenter();

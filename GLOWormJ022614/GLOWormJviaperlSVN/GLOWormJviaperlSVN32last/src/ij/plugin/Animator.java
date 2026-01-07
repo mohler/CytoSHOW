@@ -43,12 +43,14 @@ public class Animator implements PlugIn {
 			}
 		}
 
-		imp = WindowManager.getCurrentImage();
+		if (imp==null)
+			imp = WindowManager.getCurrentImage();
 		if (imp==null)
 			{IJ.noImage(); return;}
     	nSlices = imp.getStackSize();
-		if (nSlices<2)
-			{IJ.error("Animator...", "Stack required."); return;}
+    	if (nSlices<2) {
+    		IJ.error("Animator...", "Stack required."); return;
+    	}
 		ImageWindow win = imp.getWindow();
 		if (win==null || !(win instanceof StackWindow)) {
 			if (arg.equals("next"))
@@ -162,8 +164,8 @@ public class Animator implements PlugIn {
 		
 		
 		if (arg.equals("stop")) { // "stop" stops animation
-			stopAnimation();
-			stopZAnimation();
+//			stopAnimation();
+//			stopZAnimation();
 			return;
 		}
 			
@@ -699,6 +701,15 @@ public class Animator implements PlugIn {
 			}
 		}
 		return;
+	}
+
+
+	public void setImagePlus(ImagePlus imagePlus) {
+		this.imp = imagePlus;
+	}
+	
+	public ImagePlus getImagePlus() {
+		return imp;
 	}
 
 	

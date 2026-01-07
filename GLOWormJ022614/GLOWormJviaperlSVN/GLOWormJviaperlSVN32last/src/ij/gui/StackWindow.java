@@ -1,6 +1,7 @@
 package ij.gui;
 import ij.*;
 import ij.measure.Calibration;
+import ij.plugin.Animator;
 import ij.plugin.MultiFileInfoVirtualStack;
 import ij.plugin.Orthogonal_Views;
 import ij.plugin.frame.SyncWindows;
@@ -32,7 +33,8 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 	int nChannels=1, nSlices=1, nFrames=1;
 	int c=1, z=1, t=1;
 	boolean wormAtlas;
-	JPanel scrollbarPanel;
+	protected JPanel scrollbarPanel;
+	protected Animator animator;
 	
 
 	public StackWindow(ImagePlus imp, boolean showNow) {
@@ -180,6 +182,8 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 
 		}
 		this.add(scrollbarPanel, BorderLayout.SOUTH);
+		this.animator = new Animator();
+		animator.setImagePlus(this.getImagePlus());
 		
 	}
 
@@ -199,9 +203,11 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 			boolean animationState = this.running2;
 			boolean animationZState = this.running3;
 			if ((e.getSource() == tSelector) || (e.getSource() == zSelector)) {
-				IJ.doCommand("Stop Animation");
+//				IJ.doCommand("Stop Animation");
+//				this.animator.run("stop");
 			} else if (e.getSource() == cSelector) {
-				IJ.doCommand("Stop Animation");
+//				IJ.doCommand("Stop Animation");
+//				this.animator.run("stop");
 				if (this.getImagePlus().isComposite()) 
 					((CompositeImage) this.getImagePlus()).setC(cSelector.getValue());
 				int origChannel = this.getImagePlus().getChannel();
@@ -209,8 +215,10 @@ public class StackWindow extends ImageWindow implements Runnable, AdjustmentList
 					((CompositeImage)this.getImagePlus()).setMode(3);
 					((CompositeImage)this.getImagePlus()).setMode(1);
 				}
-				if (animationState) IJ.doCommand("Start Animation [\\]");
-				if (animationZState) IJ.doCommand("Start Z Animation");
+				if (animationState) this.animator.run("start");
+					/* IJ.doCommand("Start Animation [\\]") */
+				if (animationZState) this.animator.run("startZ");
+					/*IJ.doCommand("Start Z Animation");*/
 			}
 		}
 

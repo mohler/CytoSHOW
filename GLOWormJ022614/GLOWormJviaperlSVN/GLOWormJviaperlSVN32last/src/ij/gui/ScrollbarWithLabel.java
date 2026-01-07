@@ -2,6 +2,7 @@ package ij.gui;
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
+import ij.plugin.Animator;
 import ij.plugin.Colors;
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
@@ -26,7 +27,7 @@ import javax.swing.SwingUtilities;
 	 and play-pause icons (T) to the stack and hyperstacks dimension sliders.
  * @author Joachim Walter
  */
-public class ScrollbarWithLabel extends JPanel implements Adjustable, MouseListener, AdjustmentListener, Action {
+public class ScrollbarWithLabel extends JPanel implements Adjustable, MouseListener, AdjustmentListener, ActionListener, Action {
 	JScrollBar bar; //DO NOT CHANGE TO JSCROLLBAR!  breaks animator...
 	Icon icon;
 	Icon icon2;
@@ -399,14 +400,22 @@ public class ScrollbarWithLabel extends JPanel implements Adjustable, MouseListe
 		if ((flags&(Event.ALT_MASK|Event.META_MASK|Event.CTRL_MASK))!=0){
 			if (getType() =='t' || getType() =='z') IJ.doCommand("Animation Options...");
 			else if (getType() =='c') IJ.run("Channels Tool...");
-		}
-		else if (getType() =='t' )
-			IJ.doCommand("Start Animation [\\]");
+//			e = null;
+//			return;
+		} else if (getType() =='t' ) {
+//			IJ.doCommand("Start Animation [\\]");
+			stackWindow.animator.run("start");
+//			return;
+//			e = null;
 //		else if (getType() == 'z' && stackWindow.getAnimationSelector().getType() == 'z')
 //			IJ.doCommand("Start Animation [\\]");
-		else if (getType() =='z' )
-			IJ.doCommand("Start Z Animation");
-		else if (getType() =='c' ){
+
+		} else if (getType() =='z' ) {
+//			IJ.doCommand("Start Z Animation");
+			stackWindow.animator.run("startZ");
+//			return;
+//			e = null;
+		} else if (getType() =='c' ){
 			int origChannel = stackWindow.getImagePlus().getChannel();
 			if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 5 ){
 				((CompositeImage) stackWindow.getImagePlus()).setMode(1);
@@ -422,7 +431,9 @@ public class ScrollbarWithLabel extends JPanel implements Adjustable, MouseListe
 				}
 				boolean animationState = stackWindow.running2;
 				boolean animationZState = stackWindow.running3;
-				IJ.doCommand("Stop Animation");
+//				IJ.doCommand("Stop Animation");
+
+				
 				for (int j=1; j<=stackWindow.getImagePlus().getNChannels(); j++){
 					stackWindow.setPosition(j, stackWindow.getImagePlus().getSlice(), stackWindow.getImagePlus().getFrame());
 				}
@@ -436,8 +447,8 @@ public class ScrollbarWithLabel extends JPanel implements Adjustable, MouseListe
 					((CompositeImage)stackWindow.getImagePlus()).setMode(3);
 					((CompositeImage)stackWindow.getImagePlus()).setMode(mode);
 				}
-				if (animationState) IJ.doCommand("Start Animation [\\]");
-				if (animationZState) IJ.doCommand("Start Z Animation");
+				if (animationState) stackWindow.setAnimate(false); /* IJ.doCommand("Start Animation [\\]");*/
+				if (animationZState)  stackWindow.setZAnimate(false); /* IJ.doCommand("Start Z Animation");*/
 			}
 			else if ( stackWindow.getImagePlus().isComposite() && ((CompositeImage) stackWindow.getImagePlus()).getMode() == 1 ){
 				((CompositeImage) stackWindow.getImagePlus()).setMode(2);	
@@ -468,6 +479,8 @@ public class ScrollbarWithLabel extends JPanel implements Adjustable, MouseListe
 //				}
 			}
 			stackWindow.cSelector.updatePlayPauseIcon();
+//			e=null;
+//			return;
 		}
 	}
 
@@ -636,6 +649,7 @@ public class ScrollbarWithLabel extends JPanel implements Adjustable, MouseListe
     public JScrollBar getScrollBar() {
         return bar;
     }
+
 
 
 
