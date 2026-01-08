@@ -5,11 +5,14 @@ import ij.ImageListener;
 import ij.ImagePlus;
 import ij.gui.ScrollbarWithLabel;
 import ij.gui.StackWindow;
+import ij.util.NativeTools;
 
 import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 
 public class FFmpegPlayer {
@@ -147,43 +150,53 @@ public class FFmpegPlayer {
 
     // --- PROBE LOGIC (Unchanged) ---
     private VideoMeta probeVideo(String path) {
-        ProcessBuilder pb = new ProcessBuilder(
-            FFPROBE_PATH, "-v", "error", "-count_packets", "-select_streams", "v:0",
-            "-show_streams", "-of", "default=noprint_wrappers=1", path
-        );
+    	
+    	File ffprobeBin = null;
+		try {
+			ffprobeBin = NativeTools.getBundledBinary("ffprobe");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		if (ffprobeBin != null) {
+			ProcessBuilder pb = new ProcessBuilder(
+					ffprobeBin.getAbsolutePath(), "-v", "error", "-count_packets", "-select_streams", "v:0",
+					"-show_streams", "-of", "default=noprint_wrappers=1", path
+					);
+			VideoMeta meta = new VideoMeta();
+			int rotation = 0;
 
-        VideoMeta meta = new VideoMeta();
-        int rotation = 0;
+			try {
+				Process p = pb.start();
+				BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
+				String line;
+				while ((line = reader.readLine()) != null) {
+					int idx = line.indexOf('=');
+					if (idx == -1) continue;
+					String key = line.substring(0, idx).trim();
+					String val = line.substring(idx + 1).trim();
+					switch (key) {
+					case "width": meta.width = Integer.parseInt(val); break;
+					case "height": meta.height = Integer.parseInt(val); break;
+					case "avg_frame_rate": meta.fps = parseFps(val); break;
+					case "nb_read_packets": meta.frameCount = Integer.parseInt(val); break;
+					case "rotation": case "TAG:rotate": rotation = parseRotation(val); break;
+					}
+				}
+				p.waitFor();
 
-        try {
-            Process p = pb.start();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                int idx = line.indexOf('=');
-                if (idx == -1) continue;
-                String key = line.substring(0, idx).trim();
-                String val = line.substring(idx + 1).trim();
-                switch (key) {
-                    case "width": meta.width = Integer.parseInt(val); break;
-                    case "height": meta.height = Integer.parseInt(val); break;
-                    case "avg_frame_rate": meta.fps = parseFps(val); break;
-                    case "nb_read_packets": meta.frameCount = Integer.parseInt(val); break;
-                    case "rotation": case "TAG:rotate": rotation = parseRotation(val); break;
-                }
-            }
-            p.waitFor();
-
-            if (Math.abs(rotation) == 90 || Math.abs(rotation) == 270) {
-                meta.rotWidth = meta.height; meta.rotHeight = meta.width;
-            } else {
-                meta.rotWidth = meta.width; meta.rotHeight = meta.height;
-            }
-            return meta;
-        } catch (Exception e) {
-            IJ.handleException(e);
-            return null;
-        }
+				if (Math.abs(rotation) == 90 || Math.abs(rotation) == 270) {
+					meta.rotWidth = meta.height; meta.rotHeight = meta.width;
+				} else {
+					meta.rotWidth = meta.width; meta.rotHeight = meta.height;
+				}
+				return meta;
+			} catch (Exception e) {
+				IJ.handleException(e);
+				return null;
+			}
+		}
+		return null;
     }
     
     private double parseFps(String fpsString) {

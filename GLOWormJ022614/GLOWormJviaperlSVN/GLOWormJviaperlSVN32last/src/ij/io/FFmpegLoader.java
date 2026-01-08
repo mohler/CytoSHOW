@@ -1,14 +1,18 @@
 package ij.io;
 
 import ij.IJ;
+import ij.util.NativeTools;
+
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class FFmpegLoader {
 
-    private static final String FFMPEG_PATH = "/usr/local/bin/ffmpeg"; 
     private static final int BACKWARD_CHUNK_SIZE = 40; 
 
+    private File ffmpegBin = null;
     private final String sourcePath;
     private final int width;
     private final int height;
@@ -26,7 +30,17 @@ public class FFmpegLoader {
         this.width = width;
         this.height = height;
         this.fps = fps;
-        this.frameSize = width * height * 3; 
+        this.frameSize = width * height * 3;
+        try {
+			this.ffmpegBin = NativeTools.getBundledBinary("ffmpeg");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        if (ffmpegBin == null) {
+        	IJ.log("Cannot find binary ffmpeg");
+        	return;
+        }
     }
 
     public synchronized void jumpTo(int startFrameIndex) {
@@ -57,7 +71,7 @@ public class FFmpegLoader {
         try {
             double startTime = startFrame / fps;
             ProcessBuilder pb = new ProcessBuilder(
-                FFMPEG_PATH, "-ss", String.format("%.3f", startTime), 
+                ffmpegBin.getAbsolutePath(), "-ss", String.format("%.3f", startTime), 
                 "-i", sourcePath, "-f", "rawvideo", "-pix_fmt", "rgb24", "-v", "quiet", "pipe:1"
             );
 
@@ -89,7 +103,7 @@ public class FFmpegLoader {
             Process process = null;
             try {
                 ProcessBuilder pb = new ProcessBuilder(
-                    FFMPEG_PATH, "-ss", String.format("%.3f", startTime), "-i", sourcePath,
+                    ffmpegBin.getAbsolutePath(), "-ss", String.format("%.3f", startTime), "-i", sourcePath,
                     "-frames:v", String.valueOf(framesToRead), "-f", "rawvideo", 
                     "-pix_fmt", "rgb24", "-v", "quiet", "pipe:1"
                 );
