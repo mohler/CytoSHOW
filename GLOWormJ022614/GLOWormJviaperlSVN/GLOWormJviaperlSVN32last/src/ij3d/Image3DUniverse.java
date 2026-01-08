@@ -242,8 +242,6 @@ public class Image3DUniverse extends DefaultAnimatableUniverse {
 		            canvas.crsrImg = cursor;
 		            blinkOn = true;
 		        }
-		        // Force a lightweight repaint so the color change shows up immediately
-		        canvas.repaint(); 
 		    }
 		});
 		blinkTimer.setRepeats(true);
