@@ -75,7 +75,7 @@ public class HoardStack extends VirtualStack {
     private void waitForPath(Path p) {
         long start = System.currentTimeMillis();
         // 2500ms timeout prevents permanent hang if video is only 1 frame long
-        while (!Files.exists(p) && (System.currentTimeMillis() - start < 25000)) {
+        while (!Files.exists(p) && (System.currentTimeMillis() - start < 2500)) {
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
