@@ -1,26 +1,26 @@
 package ij.gui;
 
-
 import ij.ImagePlus;
 import ij.gui.StackWindow;
 import java.awt.Component;
 import java.awt.Scrollbar;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 
 public class HoardWindow extends StackWindow {
 
     public HoardWindow(ImagePlus imp) {
+        // Preserving your custom signature exactly:
         super(imp, null, false);
         
-        // 1. The "Neutering": Prevent scrollbars from stealing focus.
-        // This ensures the Canvas keeps focus even after you click/drag a slider.
+        // 1. NEUTER SCROLLBARS (Focus Fix)
         disableScrollbarFocus(this);
         
-        // 2. The "Magnet": Force focus to the Canvas whenever the window is active.
-        // This fixes the "Dead on Arrival" bug where keys don't work until you click.
+        // 2. MAGNET FOCUS (Start-up Fix)
         this.addWindowFocusListener(new WindowFocusListener() {
             @Override
             public void windowGainedFocus(WindowEvent e) {
@@ -30,17 +30,70 @@ public class HoardWindow extends StackWindow {
             public void windowLostFocus(WindowEvent e) { }
         });
 
-        // 3. The Navigation Logic
-        // Since we disabled the scrollbars, they no longer handle Arrow Keys natively.
-        // We must re-implement that behavior on the Canvas.
+        // 3. NAVIGATION LOGIC
         if (ic != null) {
+            // A. Restore Arrow Keys (Custom Handler)
             ic.addKeyListener(new KeyAdapter() {
                 @Override
                 public void keyPressed(KeyEvent e) {
                     handleNavigationKeys(e);
                 }
             });
+
+            // B. Explicit Dimension Mapping (Wheel Fix)
+            // Fixes "Shift+Scroll" failing on Windows
+            ic.addMouseWheelListener(new MouseWheelListener() {
+                @Override
+                public void mouseWheelMoved(MouseWheelEvent e) {
+                    handleExplicitWheel(e);
+                }
+            });
         }
+    }
+
+    /**
+     * Enforces strict dimension mapping:
+     * Unmod = Z (Slice) - Handled naturally by ImageJ if we don't consume
+     * Shift = T (Frame)
+     * Alt   = C (Channel)
+     */
+    private void handleExplicitWheel(MouseWheelEvent e) {
+        int rotation = e.getWheelRotation();
+        if (rotation == 0) return;
+
+        // SHIFT = TIME (Frame)
+        if (e.isShiftDown()) {
+            int currentT = imp.getFrame();
+            int maxT = imp.getNFrames();
+            // Invert logic: Wheel down (positive) usually means "Next", so +rotation
+            int newT = clamp(currentT + rotation, 1, maxT);
+            
+            if (newT != currentT) {
+                imp.setPosition(imp.getChannel(), imp.getSlice(), newT);
+            }
+            // CRITICAL: Consume event so Windows doesn't try to Horizontal Scroll
+            e.consume(); 
+        } 
+        // ALT = CHANNEL
+        else if (e.isAltDown()) {
+            int currentC = imp.getChannel();
+            int maxC = imp.getNChannels();
+            int newC = clamp(currentC + rotation, 1, maxC);
+            
+            if (newC != currentC) {
+                imp.setPosition(newC, imp.getSlice(), imp.getFrame());
+            }
+            e.consume();
+        } 
+        // UNMODIFIED = SLICE (Z)
+        // We do NOT consume here. We let the event bubble up so ImageJ's 
+        // standard Slice scrolling (which works fine) handles it.
+    }
+
+    private int clamp(int val, int min, int max) {
+        if (val < min) return min;
+        if (val > max) return max;
+        return val;
     }
 
     /**
