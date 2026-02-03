@@ -436,6 +436,7 @@ plug-in42="LogScale", ij.plugin.LogScaleToggler
 plug-in43="SqRtScale", ij.plugin.SqRtScaleToggler
 plug-in44="StarryNite Feeder", org.vcell.gloworm.StarryNiteFeeder
 plug-in45="testit", org.vcell.gloworm.testparamsedits
+plug-in46="getSegments3D", ij.plugin.ColorMaskSorterExtractor
 
 # Install user plugins located in ij.jar to Plugins>User Plugins submenu
 #user_plugins01="Red And Blue",RedAndBlue_
