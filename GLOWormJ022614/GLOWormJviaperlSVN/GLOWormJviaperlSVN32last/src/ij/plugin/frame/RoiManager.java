@@ -3631,11 +3631,11 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 
 	}
 
-	boolean rename(String[] newNames, int[] indexes, boolean updateCanvas) {
+	public boolean rename(String[] newNames, int[] indexes, boolean updateCanvas) {
 		return rename(newNames, indexes, updateCanvas, true);
 	}
 	
-	boolean rename(String[] newNames, int[] indexes, boolean updateCanvas, boolean checkCLtoRecolor) {
+	public boolean rename(String[] newNames, int[] indexes, boolean updateCanvas, boolean checkCLtoRecolor) {
 		// int index = list.getSelectedIndex();
 		// Roi[] selectedRois = this.getSelectedRoisAsArray();
 		if (indexes == null)

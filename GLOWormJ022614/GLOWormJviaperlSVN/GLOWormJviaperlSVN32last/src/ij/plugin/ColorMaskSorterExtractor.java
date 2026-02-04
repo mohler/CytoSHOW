@@ -8,6 +8,7 @@ import java.util.Map;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.gui.Roi;
 import ij.plugin.frame.RoiManager;
 import ij.plugin.filter.ParticleAnalyzer;
 import ij.process.ImageProcessor;
@@ -16,10 +17,11 @@ public class ColorMaskSorterExtractor implements PlugIn {
 
     // --- INNER CLASS: The "Spoke" Definition ---
     // Represents a unique color direction (Hue/Tint) discovered in the image
+	// --- INNER CLASS: The "Spoke" Definition ---
     private static class Spoke {
         int id;
-        double dx, dy, dz; // Normalized Unit Vector (Direction)
-        double maxMagnitude; // The "furthest" point observed (Saturation limit)
+        double dx, dy, dz; 
+        double maxMagnitude; 
         int pixelCount;
 
         public Spoke(int id, double dx, double dy, double dz) {
@@ -29,13 +31,46 @@ public class ColorMaskSorterExtractor implements PlugIn {
             this.pixelCount = 0;
         }
 
-        // Adds a pixel's observation to this spoke (updating max saturation)
         public void registerObservation(double mag) {
             if (mag > maxMagnitude) maxMagnitude = mag;
             pixelCount++;
         }
-    }
 
+        /**
+         * Returns the "Key Color" for this spoke.
+         * FIXED: Now projects the vector from Mid-Gray to the RGB cube limits.
+         * This preserves negative vectors (e.g. Purple = Negative Green).
+         */
+        public Color getKeyColor() {
+            // 1. Find the component with the largest absolute deviation from neutral
+            double maxDev = Math.max(Math.abs(dx), Math.max(Math.abs(dy), Math.abs(dz)));
+            
+            // 2. Calculate scaling factor to push that component to the edge (0 or 255)
+            // We start from Gray (127.5) and extend the vector.
+            // Scale = DistanceToEdge / MaxDeviation
+            double scale = 127.5 / maxDev;
+            
+            // 3. Project
+            // We round to nearest integer to avoid noise
+            int r = (int) Math.round(127.5 + (dx * scale));
+            int g = (int) Math.round(127.5 + (dy * scale));
+            int b = (int) Math.round(127.5 + (dz * scale));
+            
+            // Clamp to be safe
+            return new Color(clamp(r), clamp(g), clamp(b));
+        }
+        
+        private int clamp(int val) {
+            return Math.max(0, Math.min(255, val));
+        }
+        
+        public String getHexString() {
+            Color c = getKeyColor();
+            return String.format("%02x%02x%02x", c.getRed(), c.getGreen(), c.getBlue());
+        }
+    }
+    
+    
     // Map of Raw RGB Color -> Assigned Spoke ID
     // (This acts as our Lookup Table so we don't recalculate vectors for every pixel)
     private HashMap<Integer, Integer> colorToSpokeMap = new HashMap<>();
@@ -190,45 +225,34 @@ public class ColorMaskSorterExtractor implements PlugIn {
     public void generateROIs(ImagePlus imp, ImagePlus clonedImp) {
         IJ.log("Phase 2: Generating ROIs...");
 
-        // FIX 1: DO NOT SHOW THE IMAGE YET!
-        // clonedImp.show(); <--- DELETE THIS. Keeping it hidden prevents AWT interference.
-        
-        RoiManager rm = clonedImp.getRoiManager();
-        if (rm == null) rm = new RoiManager();
-        clonedImp.setRoiManager(rm);
-        
-        // FIX 2: Hide the Manager too. It speeds up adding ROIs by 10x.
-        rm.setVisible(false); 
+        RoiManager clonedRM = clonedImp.getRoiManager();
+        if (clonedRM == null) clonedRM = new RoiManager();
+        clonedImp.setRoiManager(clonedRM);
+        clonedRM = clonedImp.getRoiManager();
+        clonedRM.setVisible(false); // Speed up
 
-        int width = imp.getWidth();
-        int height = imp.getHeight();
         int stackSize = imp.getStackSize();
 
-        // Iterate through each Spoke (Group)
         for (Spoke s : spokes) {
             
-            // A. CLEAR the Mask Image (Reset to Black)
+            // 1. Prepare the Mask (Same as before)
             for (int z = 1; z <= stackSize; z++) {
                 clonedImp.setSlice(z);
-                ImageProcessor ipMask = clonedImp.getProcessor();
-                ipMask.setColor(0);
-                ipMask.fill(); 
+                clonedImp.getProcessor().setColor(0);
+                clonedImp.getProcessor().fill(); 
             }
 
-            // B. PAINT the Mask for Current Spoke
+            // 2. Paint the Spoke (Same as before - keeping it binary 255 is fine now)
             boolean hasData = false;
-            
             for (int z = 1; z <= stackSize; z++) {
                 imp.setPosition(z);
                 clonedImp.setPosition(z); 
-
                 int[] srcPixels = (int[]) imp.getProcessor().getPixels();
                 byte[] maskPixels = (byte[]) clonedImp.getProcessor().getPixels();
 
                 for (int i = 0; i < srcPixels.length; i++) {
                     Integer c = srcPixels[i];
                     Integer spokeID = colorToSpokeMap.get(c);
-
                     if (spokeID != null && spokeID == s.id) {
                         maskPixels[i] = (byte) 255; 
                         hasData = true;
@@ -238,13 +262,12 @@ public class ColorMaskSorterExtractor implements PlugIn {
 
             if (!hasData) continue;
 
-            // FIX 3: REMOVE LOGGING INSIDE THE LOOP
-            // The deadlock was triggered by IJ.log() fighting with the UI. 
-            // We silence this to prevent the "Dining Philosophers" crash.
-            // IJ.log("Analyzing Spoke " + s.id + "..."); <--- COMMENT OUT
+            // --- KEY CHANGE START ---
             
-            int preCount = rm.getCount();
+            // 3. Capture Pre-Count
+            int preCount = clonedRM.getCount();
             
+            // 4. Run Particle Analyzer
             ParticleAnalyzer pa = new ParticleAnalyzer(
                 ParticleAnalyzer.ADD_TO_MANAGER, 
                 0, null, 100, Double.POSITIVE_INFINITY, 0.0, 1.0
@@ -256,16 +279,37 @@ public class ColorMaskSorterExtractor implements PlugIn {
                 pa.analyze(clonedImp);
             }
             
-            int postCount = rm.getCount();
-            // Optional: Only log if significant to keep the console quiet
-            if (postCount - preCount > 0) {
-                 // IJ.log("Spoke " + s.id + ": " + (postCount - preCount) + " ROIs.");
+            // 5. Post-Process the NEW RO
+            int postCount = clonedRM.getCount();
+            
+            if (postCount > preCount) {
+                // Calculate the Signature for this Spoke
+                Color keyColor = s.getKeyColor();
+                String keyHex = s.getHexString(); // e.g., "32cd32" (Lime Green)
+//                for (int k=postCount; k<=postcount; k++){
+//                	
+//                }
+//                
+//                clonedRM.setSelectedIndexes(null);
+                // Iterate ONLY the indices we just added
+                int[] ayes = new int [postCount-preCount];
+                String[] names = new String[postCount-preCount];
+                for (int i = preCount; i < postCount; i++) {
+                    ayes[i-preCount] = i;
+                    names[i-preCount] = "Area-"+keyColor.toString();
+                }
+                clonedRM.rename(names, ayes, false);
+                clonedRM.setSelectedIndexes(ayes);
+                for (Roi next:clonedRM.getSelectedRoisAsArray()) {
+                	clonedRM.setRoiFillColor(next,keyColor);
+                }
+
             }
+            // --- KEY CHANGE END ---
         }
 
-        // FIX 4: NOW we show everything safely
         clonedImp.show(); 
-        rm.setVisible(true);
-        IJ.log("Analysis Complete. Total ROIs: " + rm.getCount());
+        clonedRM.setVisible(true);
+        IJ.log("Analysis Complete. Total ROIs: " + clonedRM.getCount());
     }
 }
