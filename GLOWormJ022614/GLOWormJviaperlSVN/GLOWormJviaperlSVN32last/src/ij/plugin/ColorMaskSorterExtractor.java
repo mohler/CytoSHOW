@@ -3,29 +3,57 @@ package ij.plugin;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import ij.IJ;
 import ij.ImagePlus;
-import ij.process.ByteProcessor; // Swapped Short for Byte
-import ij.process.ImageProcessor;
 import ij.plugin.frame.RoiManager;
 import ij.plugin.filter.ParticleAnalyzer;
+import ij.process.ImageProcessor;
 
 public class ColorMaskSorterExtractor implements PlugIn {
 
-    // Storage for the Vector "DNA" for each unique raw color 'c'
-    // MERGED: Kept your structure (ArrayList<float[]>)
-    HashMap<Integer, ArrayList<float[]>> colorRatioMap = new HashMap<Integer, ArrayList<float[]>>();
+    // --- INNER CLASS: The "Spoke" Definition ---
+    // Represents a unique color direction (Hue/Tint) discovered in the image
+    private static class Spoke {
+        int id;
+        double dx, dy, dz; // Normalized Unit Vector (Direction)
+        double maxMagnitude; // The "furthest" point observed (Saturation limit)
+        int pixelCount;
 
-    // Storage for the final grouped colors (Clusters)
-    // Each inner ArrayList contains the 'c' values belonging to that group
-    ArrayList<ArrayList<Integer>> colorGroups = new ArrayList<>();
+        public Spoke(int id, double dx, double dy, double dz) {
+            this.id = id;
+            this.dx = dx; this.dy = dy; this.dz = dz;
+            this.maxMagnitude = 0;
+            this.pixelCount = 0;
+        }
+
+        // Adds a pixel's observation to this spoke (updating max saturation)
+        public void registerObservation(double mag) {
+            if (mag > maxMagnitude) maxMagnitude = mag;
+            pixelCount++;
+        }
+    }
+
+    // Map of Raw RGB Color -> Assigned Spoke ID
+    // (This acts as our Lookup Table so we don't recalculate vectors for every pixel)
+    private HashMap<Integer, Integer> colorToSpokeMap = new HashMap<>();
     
-    // The reference vector (Signature) for each group
-    ArrayList<float[]> groupSignatures = new ArrayList<>();
-    
+    // The list of discovered Spokes (Chartreuse, Hunter, Blue, etc.)
+    private ArrayList<Spoke> spokes = new ArrayList<>();
+
     ImagePlus imp, clonedImp;
+
+    // --- CONFIGURATION ---
+    // Minimum vector length to be considered "Color" (vs Gray Noise)
+    // 15.0 is a safe "Forensic" threshold for 8-bit images
+    private static final double NOISE_THRESHOLD = 15.0; 
+    
+    // How strictly vectors must align to group together (Cosine Similarity)
+    // 0.95 = ~18 degrees. 0.98 = ~11 degrees. 
+    // Higher = More specific buckets (Chartreuse vs Forest).
+    private static final double SIMILARITY_TOLERANCE = 0.96; 
 
     public ColorMaskSorterExtractor() {
     }
@@ -43,198 +71,201 @@ public class ColorMaskSorterExtractor implements PlugIn {
             return;
         }
 
-        // 1. Create the destination image (Masks)
-        clonedImp = IJ.createImage(imp.getTitle() + "_Masks", imp.getWidth()+2, imp.getHeight()+2, imp.getImageStackSize(), 8);
+        // 1. Create the destination image (Masks) - Same size as source
+        // We use 8-bit (Byte) because we only need 0 or 255 for masks.
+        clonedImp = IJ.createImage(imp.getTitle() + "_Masks", imp.getWidth(), imp.getHeight(), imp.getImageStackSize(), 8);
 
-        // Clear ROI Manager to start fresh using CytoSHOW API
-        RoiManager rm = imp.getRoiManager();
-        if (rm == null) rm = new RoiManager(); // Fallback if null, though CytoSHOW usually provides it
-        
-        // 2. Execute the Logic safely
+        // 2. Execute the Logic
         extractAndGroup(imp, clonedImp);
     }
 
     public void extractAndGroup(ImagePlus imp, ImagePlus clonedImp) {
+        IJ.log("--- Starting Forensic Vector Analysis ---");
         
-        // Sensitivity threshold for Grey Detection 
-        final int GREY_THRESHOLD = 2; 
-
-        if (imp.getStack() != null) {
-            for (int z = 1; z <= imp.getStackSize(); z++) {
-                imp.setPosition(z);
-                
-                // Get the processor for the CURRENT slice safely
-                ImageProcessor ip = imp.getProcessor();
-                int[] pixels = ((int[]) ip.getPixels());
-
-                for (int p = 0; p < pixels.length; p++) {
-                    int c = pixels[p];
-                    
-                    if (colorRatioMap.containsKey(c)) {
-                        continue;
-                    }
-
-                    int pixRed = (c >> 16) & 0xff;
-                    int pixGreen = (c >> 8) & 0xff;
-                    int pixBlue = c & 0xff;
-
-                    int diffRG = Math.abs(pixRed - pixGreen);
-                    int diffGB = Math.abs(pixGreen - pixBlue);
-                    int diffBR = Math.abs(pixBlue - pixRed);
-
-                    if (diffRG < GREY_THRESHOLD && diffGB < GREY_THRESHOLD && diffBR < GREY_THRESHOLD) {
-                        // no action, grayscale pixel
-                    } else {
-                        // --- VECTOR CALCULATION ---
-                        float total = pixRed + pixGreen + pixBlue;
-
-                        if (total > 0) {
-                            float normR = pixRed / total;
-                            float normG = pixGreen / total;
-                            float normB = pixBlue / total;
-
-                            if (colorRatioMap.containsKey(c)) {
-                                colorRatioMap.get(c).add(new float[]{normR, normG, normB, p/ip.getWidth(), p%ip.getWidth(), z});
-                            } else {
-                                ArrayList<float[]> nal = new ArrayList<float[]>();
-                                nal.add(new float[]{normR, normG, normB, p/ip.getWidth(), p%ip.getWidth(), z});
-                                colorRatioMap.put(c, nal);
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        // PHASE 1: DISCOVERY
+        // Scan the image to find unique "Spokes" (Vectors)
+        discoverSpokes(imp);
         
-        IJ.log("Extraction Complete. Found " + colorRatioMap.size() + " unique non-grey color values.");
-        
-        // 3. Group the vectors
-        groupVectors();
-
-        // 4. Generate ROIs (Brute Force Loop)
+        // PHASE 2: GENERATION
+        // Loop through each discovered Spoke, create a mask, and generate ROIs
         generateROIs(imp, clonedImp);
     }
 
-    public void groupVectors() {
-        double groupingTolerance = 0.25; 
+    /**
+     * Phase 1: Iterates the image to find all unique color vectors.
+     * Clusters them into "Spokes" based on SIMILARITY_TOLERANCE.
+     */
+    private void discoverSpokes(ImagePlus imp) {
+        spokes.clear();
+        colorToSpokeMap.clear();
+
+        IJ.log("Phase 1: Discovering Color Vectors...");
         
-        IJ.log("Grouping vectors with tolerance: " + groupingTolerance + "...");
+        int width = imp.getWidth();
+        int height = imp.getHeight();
+        int stackSize = imp.getStackSize();
 
-        for (Map.Entry<Integer, ArrayList<float[]>> entry : colorRatioMap.entrySet()) {
-            Integer c = entry.getKey();
-            
-            for (float[] currentVec: entry.getValue()) {
-                boolean matched = false;
+        // 1. Iterate over the entire stack
+        for (int z = 1; z <= stackSize; z++) {
+            imp.setPosition(z);
+            ImageProcessor ip = imp.getProcessor();
+            int[] pixels = (int[]) ip.getPixels();
 
-                for (int i = 0; i < groupSignatures.size(); i++) {
-                    float[] refVec = groupSignatures.get(i);
+            for (int p = 0; p < pixels.length; p++) {
+                int c = pixels[p];
+                
+                // If we've already classified this color, skip math
+                if (colorToSpokeMap.containsKey(c)) continue;
 
-                    if (isVectorSimilar(currentVec, refVec, groupingTolerance)) {
-                        colorGroups.get(i).add(c);
-                        matched = true;
-                        break;
+                // --- VECTOR EXTRACTION ---
+                int r = (c >> 16) & 0xff;
+                int g = (c >> 8) & 0xff;
+                int b = c & 0xff;
+
+                // Calculate Gray Baseline (The Origin)
+                double grayAvg = (r + g + b) / 3.0;
+                
+                // Calculate Deviation Vector (The "Chroma")
+                double vr = r - grayAvg;
+                double vg = g - grayAvg;
+                double vb = b - grayAvg;
+
+                // Calculate Magnitude (Euclidean Length)
+                double magnitude = Math.sqrt(vr*vr + vg*vg + vb*vb);
+
+                // --- GREY NOISE FILTER ---
+                if (magnitude < NOISE_THRESHOLD) {
+                    colorToSpokeMap.put(c, -1); // -1 = Noise/Background
+                    continue;
+                }
+
+                // Normalize to Unit Vector
+                double nx = vr / magnitude;
+                double ny = vg / magnitude;
+                double nz = vb / magnitude;
+
+                // --- CLUSTERING (The "Hub & Spoke" Logic) ---
+                int matchedSpokeID = -1;
+                double bestScore = -1.0;
+
+                // Check against existing spokes
+                for (Spoke s : spokes) {
+                    // Dot Product: Cosine Similarity
+                    double score = (nx * s.dx) + (ny * s.dy) + (nz * s.dz);
+                    
+                    if (score > bestScore) {
+                        bestScore = score;
+                        if (score >= SIMILARITY_TOLERANCE) {
+                            matchedSpokeID = s.id;
+                        }
                     }
                 }
 
-                if (!matched) {
-                    ArrayList<Integer> newGroup = new ArrayList<>();
-                    newGroup.add(c);
-                    colorGroups.add(newGroup);
-                    groupSignatures.add(currentVec);
+                if (matchedSpokeID != -1) {
+                    // Found a match! Assign this color to that Spoke
+                    colorToSpokeMap.put(c, matchedSpokeID);
+                    spokes.get(matchedSpokeID).registerObservation(magnitude);
+                } else {
+                    // New Vector Discovered! Create a new Spoke
+                    int newID = spokes.size();
+                    Spoke newSpoke = new Spoke(newID, nx, ny, nz);
+                    newSpoke.registerObservation(magnitude);
+                    spokes.add(newSpoke);
+                    colorToSpokeMap.put(c, newID);
                 }
             }
         }
-
-        IJ.log("Grouping Complete. Created " + colorGroups.size() + " distinct color masks.");
+        
+        IJ.log("Discovery Complete. Found " + spokes.size() + " distinct Color Spokes.");
+        for(Spoke s : spokes) {
+            IJ.log(String.format("Spoke %d: MaxSat=%.1f, Pixels=%d, Dir=[%.2f, %.2f, %.2f]", 
+                   s.id, s.maxMagnitude, s.pixelCount, s.dx, s.dy, s.dz));
+        }
     }
 
- // --- UPDATED METHOD: Temporary Full Stack Approach ---
+    /**
+     * Phase 2: For each discovered Spoke, we sweep the image ONE time,
+     * projecting the pixels onto the mask, and running Particle Analyzer.
+     */
     public void generateROIs(ImagePlus imp, ImagePlus clonedImp) {
-        IJ.log("Generating ROIs (Full Stack Construction)...");
+        IJ.log("Phase 2: Generating ROIs...");
+
+        // FIX 1: DO NOT SHOW THE IMAGE YET!
+        // clonedImp.show(); <--- DELETE THIS. Keeping it hidden prevents AWT interference.
         
-        clonedImp.show();
+        RoiManager rm = clonedImp.getRoiManager();
+        if (rm == null) rm = new RoiManager();
+        clonedImp.setRoiManager(rm);
+        
+        // FIX 2: Hide the Manager too. It speeds up adding ROIs by 10x.
+        rm.setVisible(false); 
 
-        // 1. Get the CytoSHOW ROI Manager
-        RoiManager clonedRM = clonedImp.getRoiManager();
-        if (clonedRM == null) {
-        	clonedRM = new RoiManager(); 
-            IJ.log("Note: Created new RoiManager (clonedRM.getRoiManager() was null)");
-        }
-        clonedRM.setVisible(true);
+        int width = imp.getWidth();
+        int height = imp.getHeight();
+        int stackSize = imp.getStackSize();
 
-
-             // 2. Iterate through each identified GROUP
-        for (int i = 0; i < colorGroups.size(); i++) {
-            ArrayList<Integer> groupColors = colorGroups.get(i);
+        // Iterate through each Spoke (Group)
+        for (Spoke s : spokes) {
             
+            // A. CLEAR the Mask Image (Reset to Black)
+            for (int z = 1; z <= stackSize; z++) {
+                clonedImp.setSlice(z);
+                ImageProcessor ipMask = clonedImp.getProcessor();
+                ipMask.setColor(0);
+                ipMask.fill(); 
+            }
 
+            // B. PAINT the Mask for Current Spoke
             boolean hasData = false;
+            
+            for (int z = 1; z <= stackSize; z++) {
+                imp.setPosition(z);
+                clonedImp.setPosition(z); 
 
-            // B. Plot pixels from Memory into the Stack
-            for (Integer c : groupColors) {
-                ArrayList<float[]> pixelDataList = colorRatioMap.get(c);
-                if (pixelDataList == null) continue;
+                int[] srcPixels = (int[]) imp.getProcessor().getPixels();
+                byte[] maskPixels = (byte[]) clonedImp.getProcessor().getPixels();
 
-                for (float[] data : pixelDataList) {
-                    // [NormR, NormG, NormB, Y(p/w), X(p%w), Z]
-                    int y = (int) data[3];
-                    int x = (int) data[4];
-                    int z = (int) data[5];
+                for (int i = 0; i < srcPixels.length; i++) {
+                    Integer c = srcPixels[i];
+                    Integer spokeID = colorToSpokeMap.get(c);
 
-                    // Z is 1-based in ImageJ, data might be 1-based from extraction?
-                    // Let's verify: In extractAndGroup, loop is 'for (int z = 1; ...)'
-                    // So data[5] is 1-based. Correct.
-                    
-                    ImageProcessor ip = clonedImp.getStack().getProcessor(z);
-                    ip.set(x, y, 255);
-                    hasData = true;
+                    if (spokeID != null && spokeID == s.id) {
+                        maskPixels[i] = (byte) 255; 
+                        hasData = true;
+                    }
                 }
             }
 
             if (!hasData) continue;
 
-            // C. Run Particle Analyzer on the Stack
-            // Note: processStack=true (implied by running on a stack usually, but we config PA)
+            // FIX 3: REMOVE LOGGING INSIDE THE LOOP
+            // The deadlock was triggered by IJ.log() fighting with the UI. 
+            // We silence this to prevent the "Dining Philosophers" crash.
+            // IJ.log("Analyzing Spoke " + s.id + "..."); <--- COMMENT OUT
             
-            // Set Threshold globally for the stack
-            clonedImp.getProcessor().setThreshold(255, 255, ImageProcessor.NO_LUT_UPDATE);
-            
-            int preCount = clonedRM.getCount();
+            int preCount = rm.getCount();
             
             ParticleAnalyzer pa = new ParticleAnalyzer(
                 ParticleAnalyzer.ADD_TO_MANAGER, 
                 0, null, 100, Double.POSITIVE_INFINITY, 0.0, 1.0
             );
-            
-            // This runs on the current slice by default. To run on all, we need to loop 
-            // OR use the ParticleAnalyzer "Process Stack" logic. 
-            // The safest, explicit way that guarantees ROIs get correct Z is to loop the stack manually here.
-            
-            for (int z = 1; z <= clonedImp.getStackSize(); z++) {
+
+            for (int z = 1; z <= stackSize; z++) {
                 clonedImp.setPosition(z);
-                // We must set the threshold on the CURRENT processor for PA to see it
                 clonedImp.getProcessor().setThreshold(255, 255, ImageProcessor.NO_LUT_UPDATE);
-                
-                if (pa.analyze(clonedImp)) {
-                    // analyze returns false if user cancels, true otherwise
-                }
+                pa.analyze(clonedImp);
             }
             
-            int postCount = clonedRM.getCount();
-            if (postCount > preCount) {
-                IJ.log("Group " + i + ": Generated " + (postCount - preCount) + " ROIs.");
+            int postCount = rm.getCount();
+            // Optional: Only log if significant to keep the console quiet
+            if (postCount - preCount > 0) {
+                 // IJ.log("Spoke " + s.id + ": " + (postCount - preCount) + " ROIs.");
             }
-            
         }
 
-        IJ.log("ROI Generation Complete. Total ROIs: " + clonedRM.getCount());
-    } 
-    
-    private boolean isVectorSimilar(float[] v1, float[] v2, double tol) {
-        double distSq = Math.pow(v1[0] - v2[0], 2) +
-                        Math.pow(v1[1] - v2[1], 2) +
-                        Math.pow(v1[2] - v2[2], 2);
-
-        return distSq < (tol * tol);
+        // FIX 4: NOW we show everything safely
+        clonedImp.show(); 
+        rm.setVisible(true);
+        IJ.log("Analysis Complete. Total ROIs: " + rm.getCount());
     }
 }
