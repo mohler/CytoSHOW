@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
 
 import ij.IJ;
 import ij.ImagePlus;
@@ -223,7 +224,7 @@ public class ColorMaskSorterExtractor implements PlugIn {
      * projecting the pixels onto the mask, and running Particle Analyzer.
      */
     public void generateROIs(ImagePlus imp, ImagePlus clonedImp) {
-        IJ.log("Phase 2: Generating ROIs...");
+        IJ.log("Phase 2: Generating ROIs (High-Speed Single Pass)...");
 
         RoiManager clonedRM = clonedImp.getRoiManager();
         if (clonedRM == null) clonedRM = new RoiManager();
@@ -233,79 +234,88 @@ public class ColorMaskSorterExtractor implements PlugIn {
 
         int stackSize = imp.getStackSize();
 
-        for (Spoke s : spokes) {
+        // --- STEP 1: PARALLEL "SUPER-PAINT" (The One Pass) ---
+        // We paint the ENTIRE stack once. 
+        // Pixel Value = (SpokeID + 1). Background = 0.
+        // We use parallel streams to maximize CPU usage for this heavy I/O operation.
+        
+        IJ.log("Constructing Label Map (Parallel)...");
+        
+        IntStream.rangeClosed(1, stackSize).parallel().forEach(z -> {
+            // We need thread-local access to processors, so we don't use 'imp.setPosition'
+            // which updates the shared GUI object. We fetch directly from stack.
+            ImageProcessor ipSrc = imp.getStack().getProcessor(z);
+            ImageProcessor ipMask = clonedImp.getStack().getProcessor(z);
             
-            // 1. Prepare the Mask (Same as before)
-            for (int z = 1; z <= stackSize; z++) {
-                clonedImp.setSlice(z);
-                clonedImp.getProcessor().setColor(0);
-                clonedImp.getProcessor().fill(); 
-            }
+            int[] srcPixels = (int[]) ipSrc.getPixels();
+            byte[] maskPixels = (byte[]) ipMask.getPixels();
+            
+            // Clear mask slice (optional, but safe)
+            // Arrays.fill(maskPixels, (byte)0); 
 
-            // 2. Paint the Spoke (Same as before - keeping it binary 255 is fine now)
-            boolean hasData = false;
-            for (int z = 1; z <= stackSize; z++) {
-                imp.setPosition(z);
-                clonedImp.setPosition(z); 
-                int[] srcPixels = (int[]) imp.getProcessor().getPixels();
-                byte[] maskPixels = (byte[]) clonedImp.getProcessor().getPixels();
-
-                for (int i = 0; i < srcPixels.length; i++) {
-                    Integer c = srcPixels[i];
-                    Integer spokeID = colorToSpokeMap.get(c);
-                    if (spokeID != null && spokeID == s.id) {
-                        maskPixels[i] = (byte) 255; 
-                        hasData = true;
-                    }
+            for (int i = 0; i < srcPixels.length; i++) {
+                Integer c = srcPixels[i];
+                // Fast lookup (Concurrent read is safe)
+                Integer spokeID = colorToSpokeMap.get(c);
+                
+                if (spokeID != null) {
+                    // Map Spoke ID 0 -> Pixel Value 1
+                    // Map Spoke ID 1 -> Pixel Value 2
+                    maskPixels[i] = (byte) (spokeID + 1);
+                } else {
+                    maskPixels[i] = (byte) 0;
                 }
             }
+        });
 
-            if (!hasData) continue;
-
-            // --- KEY CHANGE START ---
+        // --- STEP 2: FAST EXTRACTION (The Threshold Switch) ---
+        // We now just toggle the threshold to "see" only one color at a time.
+        // No more pixel iterating!
+        
+        for (Spoke s : spokes) {
             
-            // 3. Capture Pre-Count
+            int targetValue = s.id + 1; // The pixel value we are hunting for
+            
             int preCount = clonedRM.getCount();
             
-            // 4. Run Particle Analyzer
             ParticleAnalyzer pa = new ParticleAnalyzer(
                 ParticleAnalyzer.ADD_TO_MANAGER, 
                 0, null, 100, Double.POSITIVE_INFINITY, 0.0, 1.0
             );
 
+            // We still loop slices for PA to ensure correct Z-positioning of ROIs
             for (int z = 1; z <= stackSize; z++) {
                 clonedImp.setPosition(z);
-                clonedImp.getProcessor().setThreshold(255, 255, ImageProcessor.NO_LUT_UPDATE);
+                
+                // THE TRICK: We isolate the spoke by thresholding ONLY its value.
+                // Min=target, Max=target. Everything else becomes background.
+                clonedImp.getProcessor().setThreshold(targetValue, targetValue, ImageProcessor.NO_LUT_UPDATE);
+                
                 pa.analyze(clonedImp);
             }
             
-            // 5. Post-Process the NEW RO
             int postCount = clonedRM.getCount();
             
             if (postCount > preCount) {
-                // Calculate the Signature for this Spoke
+                // --- NAMING & COLORING ---
                 Color keyColor = s.getKeyColor();
-                String keyHex = s.getHexString(); // e.g., "32cd32" (Lime Green)
-//                for (int k=postCount; k<=postcount; k++){
-//                	
-//                }
-//                
-//                clonedRM.setSelectedIndexes(null);
-                // Iterate ONLY the indices we just added
+                String keyHex = s.getHexString();
+                
                 int[] ayes = new int [postCount-preCount];
                 String[] names = new String[postCount-preCount];
+                
                 for (int i = preCount; i < postCount; i++) {
                     ayes[i-preCount] = i;
-                    names[i-preCount] = "Area-"+keyColor.toString();
+                    names[i-preCount] = "Area-" + keyHex; 
                 }
+                
                 clonedRM.rename(names, ayes, false);
                 clonedRM.setSelectedIndexes(ayes);
-                for (Roi next:clonedRM.getSelectedRoisAsArray()) {
-                	clonedRM.setRoiFillColor(next,keyColor);
+                
+                for (Roi next : clonedRM.getSelectedRoisAsArray()) {
+                    clonedRM.setRoiFillColor(next, keyColor);
                 }
-
             }
-            // --- KEY CHANGE END ---
         }
 
         clonedImp.show(); 
