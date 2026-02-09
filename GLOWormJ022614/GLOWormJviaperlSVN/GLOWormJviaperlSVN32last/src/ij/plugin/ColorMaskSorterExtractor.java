@@ -3,8 +3,6 @@ package ij.plugin;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.stream.IntStream;
 
 import ij.IJ;
@@ -18,7 +16,6 @@ public class ColorMaskSorterExtractor implements PlugIn {
 
     // --- INNER CLASS: The "Spoke" Definition ---
     // Represents a unique color direction (Hue/Tint) discovered in the image
-	// --- INNER CLASS: The "Spoke" Definition ---
     private static class Spoke {
         int id;
         double dx, dy, dz; 
@@ -39,8 +36,8 @@ public class ColorMaskSorterExtractor implements PlugIn {
 
         /**
          * Returns the "Key Color" for this spoke.
-         * FIXED: Now projects the vector from Mid-Gray to the RGB cube limits.
-         * This preserves negative vectors (e.g. Purple = Negative Green).
+         * Logic: Projects the vector from Mid-Gray (127.5) to the RGB cube limits.
+         * This preserves negative vectors (e.g. Cyan = Negative Red).
          */
         public Color getKeyColor() {
             // 1. Find the component with the largest absolute deviation from neutral
@@ -48,16 +45,14 @@ public class ColorMaskSorterExtractor implements PlugIn {
             
             // 2. Calculate scaling factor to push that component to the edge (0 or 255)
             // We start from Gray (127.5) and extend the vector.
-            // Scale = DistanceToEdge / MaxDeviation
             double scale = 127.5 / maxDev;
             
-            // 3. Project
-            // We round to nearest integer to avoid noise
+            // 3. Project and Round
             int r = (int) Math.round(127.5 + (dx * scale));
             int g = (int) Math.round(127.5 + (dy * scale));
             int b = (int) Math.round(127.5 + (dz * scale));
             
-            // Clamp to be safe
+            // Clamp to be safe (0-255)
             return new Color(clamp(r), clamp(g), clamp(b));
         }
         
@@ -71,9 +66,8 @@ public class ColorMaskSorterExtractor implements PlugIn {
         }
     }
     
-    
     // Map of Raw RGB Color -> Assigned Spoke ID
-    // (This acts as our Lookup Table so we don't recalculate vectors for every pixel)
+    // Acts as our Lookup Table so we don't recalculate vectors for every pixel
     private HashMap<Integer, Integer> colorToSpokeMap = new HashMap<>();
     
     // The list of discovered Spokes (Chartreuse, Hunter, Blue, etc.)
@@ -83,13 +77,12 @@ public class ColorMaskSorterExtractor implements PlugIn {
 
     // --- CONFIGURATION ---
     // Minimum vector length to be considered "Color" (vs Gray Noise)
-    // 15.0 is a safe "Forensic" threshold for 8-bit images
     private static final double NOISE_THRESHOLD = 15.0; 
     
-    // How strictly vectors must align to group together (Cosine Similarity)
-    // 0.95 = ~18 degrees. 0.98 = ~11 degrees. 
-    // Higher = More specific buckets (Chartreuse vs Forest).
-    private static final double SIMILARITY_TOLERANCE = 0.96; 
+    // How strictly vectors must align to group together (Cosine Similarity).
+    // 0.96 allows ~16 degrees variance. 
+    // If using subtle shifts (1.15x boost), this must be tight enough to separate them.
+    private static final double SIMILARITY_TOLERANCE = 0.99; // Tightened to 0.98 for sensitivity
 
     public ColorMaskSorterExtractor() {
     }
@@ -108,7 +101,6 @@ public class ColorMaskSorterExtractor implements PlugIn {
         }
 
         // 1. Create the destination image (Masks) - Same size as source
-        // We use 8-bit (Byte) because we only need 0 or 255 for masks.
         clonedImp = IJ.createImage(imp.getTitle() + "_Masks", imp.getWidth(), imp.getHeight(), imp.getImageStackSize(), 8);
 
         // 2. Execute the Logic
@@ -123,7 +115,7 @@ public class ColorMaskSorterExtractor implements PlugIn {
         discoverSpokes(imp);
         
         // PHASE 2: GENERATION
-        // Loop through each discovered Spoke, create a mask, and generate ROIs
+        // Parallel Super-Paint followed by fast threshold extraction
         generateROIs(imp, clonedImp);
     }
 
@@ -137,11 +129,9 @@ public class ColorMaskSorterExtractor implements PlugIn {
 
         IJ.log("Phase 1: Discovering Color Vectors...");
         
-        int width = imp.getWidth();
-        int height = imp.getHeight();
         int stackSize = imp.getStackSize();
 
-        // 1. Iterate over the entire stack
+        // Iterate over the entire stack
         for (int z = 1; z <= stackSize; z++) {
             imp.setPosition(z);
             ImageProcessor ip = imp.getProcessor();
@@ -214,14 +204,14 @@ public class ColorMaskSorterExtractor implements PlugIn {
         
         IJ.log("Discovery Complete. Found " + spokes.size() + " distinct Color Spokes.");
         for(Spoke s : spokes) {
-            IJ.log(String.format("Spoke %d: MaxSat=%.1f, Pixels=%d, Dir=[%.2f, %.2f, %.2f]", 
-                   s.id, s.maxMagnitude, s.pixelCount, s.dx, s.dy, s.dz));
+            IJ.log(String.format("Spoke %d: Key=%s, Pixels=%d", 
+                   s.id, s.getHexString(), s.pixelCount));
         }
     }
 
     /**
-     * Phase 2: For each discovered Spoke, we sweep the image ONE time,
-     * projecting the pixels onto the mask, and running Particle Analyzer.
+     * Phase 2: High-Speed Single Pass Generation.
+     * Uses parallel streams to create a Label Map, then extracts ROIs via thresholding.
      */
     public void generateROIs(ImagePlus imp, ImagePlus clonedImp) {
         IJ.log("Phase 2: Generating ROIs (High-Speed Single Pass)...");
@@ -235,32 +225,25 @@ public class ColorMaskSorterExtractor implements PlugIn {
         int stackSize = imp.getStackSize();
 
         // --- STEP 1: PARALLEL "SUPER-PAINT" (The One Pass) ---
-        // We paint the ENTIRE stack once. 
         // Pixel Value = (SpokeID + 1). Background = 0.
-        // We use parallel streams to maximize CPU usage for this heavy I/O operation.
         
         IJ.log("Constructing Label Map (Parallel)...");
         
         IntStream.rangeClosed(1, stackSize).parallel().forEach(z -> {
-            // We need thread-local access to processors, so we don't use 'imp.setPosition'
-            // which updates the shared GUI object. We fetch directly from stack.
+            // Fetch processors directly from stack to be thread-safe
             ImageProcessor ipSrc = imp.getStack().getProcessor(z);
             ImageProcessor ipMask = clonedImp.getStack().getProcessor(z);
             
             int[] srcPixels = (int[]) ipSrc.getPixels();
             byte[] maskPixels = (byte[]) ipMask.getPixels();
             
-            // Clear mask slice (optional, but safe)
-            // Arrays.fill(maskPixels, (byte)0); 
-
             for (int i = 0; i < srcPixels.length; i++) {
                 Integer c = srcPixels[i];
-                // Fast lookup (Concurrent read is safe)
                 Integer spokeID = colorToSpokeMap.get(c);
                 
+                // Note: spokeID is -1 for noise. 
+                // (-1 + 1) = 0, which correctly paints Background.
                 if (spokeID != null) {
-                    // Map Spoke ID 0 -> Pixel Value 1
-                    // Map Spoke ID 1 -> Pixel Value 2
                     maskPixels[i] = (byte) (spokeID + 1);
                 } else {
                     maskPixels[i] = (byte) 0;
@@ -269,13 +252,10 @@ public class ColorMaskSorterExtractor implements PlugIn {
         });
 
         // --- STEP 2: FAST EXTRACTION (The Threshold Switch) ---
-        // We now just toggle the threshold to "see" only one color at a time.
-        // No more pixel iterating!
         
         for (Spoke s : spokes) {
             
             int targetValue = s.id + 1; // The pixel value we are hunting for
-            
             int preCount = clonedRM.getCount();
             
             ParticleAnalyzer pa = new ParticleAnalyzer(
@@ -283,14 +263,12 @@ public class ColorMaskSorterExtractor implements PlugIn {
                 0, null, 100, Double.POSITIVE_INFINITY, 0.0, 1.0
             );
 
-            // We still loop slices for PA to ensure correct Z-positioning of ROIs
+            // Loop slices for PA to ensure correct Z-positioning of ROIs
             for (int z = 1; z <= stackSize; z++) {
                 clonedImp.setPosition(z);
                 
                 // THE TRICK: We isolate the spoke by thresholding ONLY its value.
-                // Min=target, Max=target. Everything else becomes background.
                 clonedImp.getProcessor().setThreshold(targetValue, targetValue, ImageProcessor.NO_LUT_UPDATE);
-                
                 pa.analyze(clonedImp);
             }
             
@@ -321,5 +299,106 @@ public class ColorMaskSorterExtractor implements PlugIn {
         clonedImp.show(); 
         clonedRM.setVisible(true);
         IJ.log("Analysis Complete. Total ROIs: " + clonedRM.getCount());
+    }
+
+    /**
+     * MACRO ADAPTER: Allows this function to be called from ImageJ Macro Language.
+     * Usage: call("ij.plugin.ColorMaskSorterExtractor.apply6ZoneShiftMacro", "1");
+     */
+    public static String apply6ZoneShiftMacro(String zoneIDStr) {
+        // 1. Grab the active image (Macro style)
+        ImagePlus imp = IJ.getImage();
+        if (imp == null) return "Error: No image open";
+        
+        // 2. Grab the active ROI
+        Roi roi = imp.getRoi();
+        if (roi == null) return "Error: No selection";
+        
+        // 3. Parse the ID and run
+        try {
+            int zoneID = Integer.parseInt(zoneIDStr);
+            apply6ZoneShift(imp, roi, zoneID); // Call the main logic
+            return "Success: Applied Zone " + zoneID;
+        } catch (NumberFormatException e) {
+            return "Error: Zone ID must be a number (1-6)";
+        }
+    }
+    
+    /**
+     * POST-HOC UTILITY: Applies a "Cyclic Crosstalk" shift to create distinguishable clones.
+     * This forces a vector rotation (Hue Shift) that the Extractor can detect.
+     * @param zoneID 1=Red->Magenta, 2=Green->Yellow, 3=Blue->Cyan, etc.
+     */
+    public static void apply6ZoneShift(ImagePlus imp, Roi zoneRoi, int zoneID) {
+        
+        java.awt.Rectangle bounds = zoneRoi.getBounds();
+        int stackSize = imp.getStackSize();
+        
+        // The "Kick": 0.25 (25%) bleed is required to safely clear the 0.99 tolerance.
+        // This rotates the vector by approx 14 degrees.
+        double kick = 0.25; 
+
+        // Iterate the ENTIRE Stack (Drill Down)
+        for (int z = 1; z <= stackSize; z++) {
+            
+            // Fetch processor directly from stack (Thread-safe/Fast)
+            ImageProcessor ip = imp.getStack().getProcessor(z);
+            
+            for (int y = bounds.y; y < bounds.y + bounds.height; y++) {
+                for (int x = bounds.x; x < bounds.x + bounds.width; x++) {
+                    
+                    if (!zoneRoi.contains(x, y)) continue;
+
+                    int c = ip.getPixel(x, y);
+                    int r = (c >> 16) & 0xff;
+                    int g = (c >> 8) & 0xff;
+                    int b = c & 0xff;
+
+                    // Safety: Skip gray/black background to prevent "tinted boxes"
+                    double avg = (r + g + b) / 3.0;
+                    if (Math.abs(r - avg) < 5.0 && Math.abs(g - avg) < 5.0 && Math.abs(b - avg) < 5.0) {
+                        continue;
+                    }
+
+                    int newR = r, newG = g, newB = b;
+
+                    switch (zoneID) {
+                        // --- PRIMARY ROTATIONS ---
+                        case 1: // Rotates RED -> MAGENTA (Red bleeds into Blue)
+                            newB = clamp(b + (int)(r * kick)); 
+                            break;
+                            
+                        case 2: // Rotates GREEN -> YELLOW (Green bleeds into Red)
+                            newR = clamp(r + (int)(g * kick)); 
+                            break;
+                            
+                        case 3: // Rotates BLUE -> CYAN (Blue bleeds into Green)
+                            newG = clamp(g + (int)(b * kick)); 
+                            break;
+            
+                        // --- REVERSE ROTATIONS ---
+                        case 4: // Rotates RED -> YELLOW (Red bleeds into Green)
+                            newG = clamp(g + (int)(r * kick));
+                            break;
+                            
+                        case 5: // Rotates GREEN -> CYAN (Green bleeds into Blue)
+                            newB = clamp(b + (int)(g * kick));
+                            break;
+                            
+                        case 6: // Rotates BLUE -> MAGENTA (Blue bleeds into Red)
+                            newR = clamp(r + (int)(b * kick));
+                            break;
+                    }
+
+                    ip.putPixel(x, y, (newR << 16) | (newG << 8) | newB);
+                }
+            }
+        }
+        
+        imp.updateAndDraw();
+    }
+
+    private static int clamp(int val) {
+        return Math.max(0, Math.min(255, val));
     }
 }
