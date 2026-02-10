@@ -82,7 +82,7 @@ public class ColorMaskSorterExtractor implements PlugIn {
     // How strictly vectors must align to group together (Cosine Similarity).
     // 0.96 allows ~16 degrees variance. 
     // If using subtle shifts (1.15x boost), this must be tight enough to separate them.
-    private static final double SIMILARITY_TOLERANCE = 0.99; // Tightened to 0.98 for sensitivity
+    private static final double SIMILARITY_TOLERANCE = 0.98; // Tightened to 0.98 for sensitivity
 
     public ColorMaskSorterExtractor() {
     }
@@ -260,7 +260,7 @@ public class ColorMaskSorterExtractor implements PlugIn {
             
             ParticleAnalyzer pa = new ParticleAnalyzer(
                 ParticleAnalyzer.ADD_TO_MANAGER, 
-                0, null, 100, Double.POSITIVE_INFINITY, 0.0, 1.0
+                0, null, 25, Double.POSITIVE_INFINITY, 0.0, 1.0
             );
 
             // Loop slices for PA to ensure correct Z-positioning of ROIs
@@ -336,7 +336,8 @@ public class ColorMaskSorterExtractor implements PlugIn {
         
         // The "Kick": 0.25 (25%) bleed is required to safely clear the 0.99 tolerance.
         // This rotates the vector by approx 14 degrees.
-        double kick = 0.25; 
+        // Now testing at 0.25
+        double kick = 0.25 /*0.25*/; 
 
         // Iterate the ENTIRE Stack (Drill Down)
         for (int z = 1; z <= stackSize; z++) {
@@ -398,6 +399,135 @@ public class ColorMaskSorterExtractor implements PlugIn {
         imp.updateAndDraw();
     }
 
+      
+    /**
+     * POST-HOC VISUALIZATION: "Watermark Restoration"
+     * Reverses the vector rotation to restore natural appearance, BUT
+     * leaves a tiny mathematical residue so the ROIs remain uniquely identifiable.
+     * * @param rm The RoiManager containing the shifted ROIs
+     * @param zoneID The shift that was originally applied (1-6)
+     */
+    public static void restoreRoiColors(RoiManager rm, int zoneID) {
+        if (rm == null || rm.getCount() == 0) return;
+        
+        Roi[] rois = rm.getSelectedRoisAsArray();
+        if (rois.length == 0) rois = rm.getFullRoisAsArray();
+        
+        // The original shift was 0.25 (25%).
+        // We subtract 0.24 (24%) to leave a 1% "Digital Watermark".
+        // This makes the color look correct to the eye, but keeps it unique in data.
+        double undoFactor = 0.24; 
+
+        for (Roi roi : rois) {
+            Color c = roi.getFillColor();
+            if (c == null) c = roi.getStrokeColor();
+            if (c == null) continue; 
+
+            int r = c.getRed();
+            int g = c.getGreen();
+            int b = c.getBlue();
+            
+            int newR = r, newG = g, newB = b;
+
+            // Apply the Watermark Subtraction
+            switch (zoneID) {
+                // --- UNDO PRIMARY ROTATIONS ---
+                case 1: // Was Red -> Magenta (Red bled into Blue)
+                    newB = clamp(b - (int)(r * undoFactor)); 
+                    break;
+                    
+                case 2: // Was Green -> Yellow (Green bled into Red)
+                    newR = clamp(r - (int)(g * undoFactor)); 
+                    break;
+                    
+                case 3: // Was Blue -> Cyan (Blue bled into Green)
+                    newG = clamp(g - (int)(b * undoFactor)); 
+                    break;
+
+                // --- UNDO REVERSE ROTATIONS ---
+                case 4: // Was Red -> Yellow (Red bled into Green)
+                    newG = clamp(g - (int)(r * undoFactor));
+                    break;
+                    
+                case 5: // Was Green -> Cyan (Green bled into Blue)
+                    newB = clamp(b - (int)(g * undoFactor));
+                    break;
+                    
+                case 6: // Was Blue -> Magenta (Blue bled into Red)
+                    newR = clamp(r - (int)(b * undoFactor));
+                    break;
+            }
+            
+            rm.setRoiFillColor(roi, new Color(newR, newG, newB), true);
+        }
+    }
+
+    /**
+     * MACRO batch ADAPTER: Allows this function to be called from ImageJ Macro Language.
+     * Usage: call("ij.plugin.ColorMaskSorterExtractor.apply6ZoneShiftMacro", "1");
+     */
+    public static String restoreZoneByLocationMacro(String zoneIDStr) {
+        // 1. Grab the active image (Macro style)
+        ImagePlus imp = IJ.getImage();
+        if (imp == null) return "Error: No image open";
+        
+        // 2. Grab the active ROI
+        Roi roi = imp.getRoi();
+        if (roi == null) return "Error: No selection";
+        
+        // 3. Parse the ID and run
+        try {
+            int zoneID = Integer.parseInt(zoneIDStr);
+            restoreZoneByLocation(imp.getRoiManager(), roi, zoneID); // Call the main logic
+            return "Success: Applied Zone " + zoneID;
+        } catch (NumberFormatException e) {
+            return "Error: Zone ID must be a number (1-6)";
+        }
+    }
+    
+   /**
+     * BATCH RESTORATION: Selects ROIs strictly located within a specific Zone
+     * and applies the correct color restoration to them.
+     * * @param rm The global RoiManager containing all extracted cells
+     * @param zoneBoundary The ROI defining the Zone area (e.g., Rectangle/Polygon)
+     * @param zoneID The ID (1-6) to use for the math lookup
+     */
+    public static void restoreZoneByLocation(RoiManager rm, Roi zoneBoundary, int zoneID) {
+        if (rm == null || rm.getCount() == 0) return;
+        
+        Roi[] allRois = rm.getFullRoisAsArray();
+        java.util.ArrayList<Integer> targetIndices = new java.util.ArrayList<>();
+        
+        // 1. Spatial Census
+        for (int i = 0; i < allRois.length; i++) {
+            Roi candidate = allRois[i];
+            java.awt.Rectangle b = candidate.getBounds();
+            
+            // Check the Center Point of the cell
+            // This handles edge cases better than "contains entire bounds"
+            int centerX = b.x + (b.width / 2);
+            int centerY = b.y + (b.height / 2);
+            
+            if (zoneBoundary.contains(centerX, centerY)) {
+                targetIndices.add(i);
+            }
+        }
+        
+        if (targetIndices.isEmpty()) {
+            IJ.log("Zone " + zoneID + ": No ROIs found within boundary.");
+            return;
+        }
+
+        // 2. Select the subset
+        int[] indexArray = targetIndices.stream().mapToInt(Integer::intValue).toArray();
+        rm.setSelectedIndexes(indexArray);
+        
+        // 3. Apply the specific antidote for this Zone
+        restoreRoiColors(rm, zoneID);
+        
+        IJ.log("Zone " + zoneID + ": Restored " + indexArray.length + " ROIs.");
+    }
+    
     private static int clamp(int val) {
         return Math.max(0, Math.min(255, val));
     }
