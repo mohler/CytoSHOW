@@ -4070,6 +4070,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 			String fvalue = "";
 			if (nameChunk.contains("-#slice=")) {
 				fvalue = nameChunk.replaceAll("(.*#slice=)(\\d+)", "$2");
+			} else if (nameChunk.matches(".*\\.\\d+\\.tif")) {
+				fvalue = nameChunk.replaceAll("(.*)(\\.)(\\d+)(\\.tif)", "$3");
 			} else {
 				fvalue = nameChunk.replaceAll("(.*_s?)(\\d+)(.png|.tiff?)", "$2");
 				fvalue = fvalue.replaceAll("(\\D*)(\\d+)(.png|.tiff?)", "$2");
@@ -4157,6 +4159,8 @@ public class RoiManager extends PlugInFrame implements ActionListener, ItemListe
 						String fvalue = "";
 						if (nameChunk.contains("-#slice=")) {
 							fvalue = nameChunk.replaceAll("(.*#slice=)(\\d+)", "$2");
+						} else if (nameChunk.matches(".*\\.\\d+\\.tif")) {
+							fvalue = nameChunk.replaceAll("(.*)(\\.)(\\d+)(\\.tif)", "$3");
 						} else {
 							fvalue = nameChunk.replaceAll("(.*_s?)(\\d+)(.png|.tiff?)", "$2");
 							fvalue = fvalue.replaceAll("(\\D*)(\\d+)(.png|.tiff?)", "$2");

@@ -1524,7 +1524,10 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 					impAs[pos].getOriginalFileInfo().directory = dirOrOMETiff;
 					impAs[pos].show();
 					if (mitAdjustments) {
-						IJ.run(impAs[pos], "Flip Vertically","");
+						if (dirOrOMETiff.toLowerCase().contains("_beta_"))
+							IJ.run(impAs[pos], "Flip Horizontally","");
+						else if (dirOrOMETiff.toLowerCase().contains("_alpha_"))
+							IJ.run(impAs[pos], "Flip Vertically","");
 						IJ.run(impAs[pos], "Flip Z","");
 						IJ.run(impAs[pos], "Rotate 90 Degrees Left","");
 					} else {
