@@ -1605,6 +1605,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 							stackAs[pos].setRotateLeft(true);
 							stackAs[pos].setFlipZ(true);
 						}
+						impAs[pos].setProcessor(stackAs[pos].getProcessor(impAs[pos].getCurrentSlice()));
 					}
 					impAs[pos].show();
 					if (arg.contains("megaTiffMMrc")) {
@@ -1689,6 +1690,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 								stackBs[pos].setFlipH(true);
 								stackBs[pos].setRotateRight(true);
 							}
+						    impBs[pos].setProcessor(stackBs[pos].getProcessor(impBs[pos].getCurrentSlice()));
 						}
 						impBs[pos].show();
 					if (arg.contains("megaTiffMMrc")) {
