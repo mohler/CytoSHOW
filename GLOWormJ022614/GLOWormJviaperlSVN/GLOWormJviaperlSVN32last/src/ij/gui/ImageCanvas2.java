@@ -261,6 +261,9 @@ public class ImageCanvas2 extends JComponent implements MouseListener, MouseMoti
 	}
 
 	public void paint(Graphics g) {
+		if (imp.isNoUpdateMode()) {
+			return;
+		}
 		Roi roi = imp.getRoi();
 		if (this == imp.getCanvas() && (roi!=null || showAllROIs || overlay!=null)) {
 			if (roi!=null) roi.updatePaste();

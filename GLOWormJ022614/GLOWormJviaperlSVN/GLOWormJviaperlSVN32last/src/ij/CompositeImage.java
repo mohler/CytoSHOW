@@ -598,7 +598,7 @@ public class CompositeImage extends ImagePlus {
 			return;
 		CompositeImage ci = (CompositeImage)imp;
 		for (int i=0; i<channels; i++) {
-			this.setPositionWithoutUpdate(i+1,1,1);
+//			this.setPositionWithoutUpdate(i+1,1,1);		//there is no such method in this class, only in superclass ImagePlus;
 			imp.setPositionWithoutUpdate(i+1,1,1);
 			this.getChannelProcessor().setMinAndMax(imp.getChannelProcessor().getMin(), imp.getChannelProcessor().getMax());
 		}

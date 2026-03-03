@@ -109,6 +109,14 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	private boolean openAsHyperStack;
 	private int[] position = {1,1,1};
 	private boolean noUpdateMode;
+	public boolean isNoUpdateMode() {
+		return noUpdateMode;
+	}
+
+	public void setNoUpdateMode(boolean noUpdateMode) {
+		this.noUpdateMode = noUpdateMode;
+	}
+
 	public ImageCanvas2 flatteningCanvas;
 	private Overlay overlay;
 	private boolean hideOverlay;
