@@ -232,6 +232,9 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 	}
 
 	public void paint(Graphics g) {
+		if (imp.isNoUpdateMode()) {
+			return;
+		}
 		Roi roi = imp.getRoi();
 		if (/* this == imp.getCanvas() && */(roi!=null || showAllROIs || overlay!=null)) {
 			if (roi!=null) roi.updatePaste();

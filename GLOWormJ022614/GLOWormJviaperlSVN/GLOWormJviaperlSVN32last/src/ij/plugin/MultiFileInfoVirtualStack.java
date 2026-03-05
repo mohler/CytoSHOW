@@ -600,6 +600,8 @@ array and displays it if 'show' is true. */
 			} else {
 				/*why like this?*/
 				this.tDim =nImageSlices/(this.cDim*this.zDim*vDim*(dimOrder.toLowerCase().matches(".*splitc.*")?(cDim/2):1));
+				if (this.tDim==0)
+					this.tDim=1;
 			}
 
 		} else if (monitoringDecon){

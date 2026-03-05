@@ -47,13 +47,14 @@ public class VirtualStack extends ImageStack {
 	/** Creates a new, empty virtual stack. */
 	public VirtualStack(int width, int height, ColorModel cm, String path, boolean emptyImage, Color fillColor) {
 		super(width, height, cm);
-		dimOrder = "xyczt";
+		dimOrder = "xyczt" ;
+		;
 		this.path = path;
 		this.emptyImage = emptyImage;
 		if (fillColor != null)
 			this.fillColor = fillColor;
-		names = new String[INITIAL_SIZE];
-		labels = new String[INITIAL_SIZE];
+		names = new String[nImageSlices>INITIAL_SIZE?nImageSlices:INITIAL_SIZE];
+		labels = new String[nImageSlices>INITIAL_SIZE?nImageSlices:INITIAL_SIZE];
 		//IJ.log("VirtualStack: "+path);
 	}
 
@@ -63,12 +64,12 @@ public class VirtualStack extends ImageStack {
 			throw new IllegalArgumentException("'name' is null!");
 		nImageSlices++;
 	   //IJ.log("addSlice: "+nSlices+"	"+name);
-	   if (nImageSlices==names.length) {
+	   if (nImageSlices!=names.length) {
 			String[] tmp = new String[nImageSlices*2];
-			System.arraycopy(names, 0, tmp, 0, nImageSlices);
+			System.arraycopy(names, 0, tmp, 0, names.length);
 			names = tmp;
 			tmp = new String[nImageSlices*2];
-			System.arraycopy(labels, 0, tmp, 0, nImageSlices);
+			System.arraycopy(labels, 0, tmp, 0, labels.length);
 			labels = tmp;
 		}
 		names[nImageSlices-1] = name;

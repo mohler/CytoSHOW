@@ -108,7 +108,8 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	private static Vector listeners = new Vector();
 	private boolean openAsHyperStack;
 	private int[] position = {1,1,1};
-	private boolean noUpdateMode;
+	private volatile boolean noUpdateMode; // Volatile ensures immediate visibility across threads (Written by Background, Read by UI).
+	
 	public boolean isNoUpdateMode() {
 		return noUpdateMode;
 	}
@@ -1577,10 +1578,23 @@ public class ImagePlus implements ImageObserver, Measurements, Cloneable {
 	/** Sets the current hyperstack position without updating the display,
 		where 'channel', 'slice' and 'frame' are one-based indexes. */
 	public void setPositionWithoutUpdate(int channel, int slice, int frame) {
-		noUpdateMode = true;
-		setPosition(channel, slice, frame);
-		noUpdateMode = false;
-	}
+		//		noUpdateMode = true;
+		//		setPosition(channel, slice, frame);
+		//		noUpdateMode = false;
+		// 1. ACQUIRE STATE (Outside)
+		// We set the flag. If this theoretically failed, we wouldn't want to run the cleanup.
+		noUpdateMode = true; 
+
+		try {
+			// 2. DO WORK (Inside)
+			// This is the risky part that might crash.
+			setPosition(channel, slice, frame); 
+		} finally {
+			// 3. RELEASE STATE (Finally)
+			// No matter what happened in step 2, we restore the flag.
+			noUpdateMode = false; 
+		}
+	}	
 	
 	/** Sets the hyperstack channel position (one based). */
 	public void setC(int channel) {
