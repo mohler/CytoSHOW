@@ -437,6 +437,7 @@ plug-in43="SqRtScale", ij.plugin.SqRtScaleToggler
 plug-in44="StarryNite Feeder", org.vcell.gloworm.StarryNiteFeeder
 plug-in45="testit", org.vcell.gloworm.testparamsedits
 plug-in46="getSegments3D", ij.plugin.ColorMaskSorterExtractor
+plug-in47="AnatomicGeneExpressions", ij.plugin.WormMineAnatomyNamesToGenesExpressed("ABalppaa* MSpaa* RIA* ASE* AF*")
 
 # Install user plugins located in ij.jar to Plugins>User Plugins submenu
 #user_plugins01="Red And Blue",RedAndBlue_
