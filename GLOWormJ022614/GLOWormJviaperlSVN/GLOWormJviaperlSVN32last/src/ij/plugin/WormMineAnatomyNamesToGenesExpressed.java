@@ -22,7 +22,7 @@ public class WormMineAnatomyNamesToGenesExpressed implements PlugIn {
 		
 		String urlString = buildWormMineUrl(partsToSearch);
 		IJ.log(urlString);
-        Path outputPath = Paths.get("anatomy_parts_"+arg.replaceAll("[;, ]", "_")+"_to_expr_genes_sorted.csv");
+        Path outputPath = Paths.get("anatomy_parts_"+arg.replaceAll("[;, ]", "_").replaceAll("\\*","")+"_to_expr_genes_sorted.csv");
         IJ.log(outputPath.toString());
     
 	        try {

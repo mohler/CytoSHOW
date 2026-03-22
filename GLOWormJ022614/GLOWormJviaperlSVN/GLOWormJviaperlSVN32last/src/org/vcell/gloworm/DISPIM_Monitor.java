@@ -6855,7 +6855,7 @@ public class DISPIM_Monitor implements PlugIn, ActionListener, ChangeListener, I
 		IJ.log(diSPIMheader);
 		diSPIMheader = diSPIMheader.replaceAll("(.*\\$.\\#.*\\{\")(.*)", "\\{\"$2");
 		diSPIMheader = diSPIMheader.substring(0, diSPIMheader.lastIndexOf(""));
-		diSPIMheader = diSPIMheader.substring(0, diSPIMheader.indexOf('�'));			// the first '�' character marks the start of illegible text after the dispim header.  Must truncate here before parsing with "}" because the curly is possibly included in the binhex unreadable section after '�'.
+		diSPIMheader = diSPIMheader.substring(0, diSPIMheader.indexOf("{"));			// the first "{" character marks the start of illegible text after the dispim header.  Must truncate here before parsing with "}" because the curly is possibly included in the binhex unreadable section after '�'.
 		diSPIMheader = diSPIMheader.substring(0, diSPIMheader.lastIndexOf("}"));
 
 		IJ.log(diSPIMheader);
