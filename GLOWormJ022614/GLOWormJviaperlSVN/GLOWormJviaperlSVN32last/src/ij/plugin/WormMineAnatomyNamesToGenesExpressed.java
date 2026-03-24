@@ -20,13 +20,13 @@ public class WormMineAnatomyNamesToGenesExpressed implements PlugIn {
 		String[] args = arg.split("[,; ]");
 		List<String> partsToSearch = Arrays.asList(args);	
 		
-		String urlString = buildWormMineUrl(partsToSearch);
+		String urlString = buildWormMinePartsToGenesUrl(partsToSearch);
 		IJ.log(urlString);
         Path outputPath = Paths.get("anatomy_parts_"+arg.replaceAll("[;, ]", "_").replaceAll("\\*","")+"_to_expr_genes_sorted.csv");
         IJ.log(outputPath.toString());
     
 	        try {
-	            System.out.println("Downloading data from WormMine using Java 8...");
+	            IJ.log("Downloading data from WormMine using Java 8...");
 	            
 	            URL url = new URL(urlString);
 	            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -41,21 +41,21 @@ public class WormMineAnatomyNamesToGenesExpressed implements PlugIn {
 	                try (InputStream inputStream = connection.getInputStream()) {
 	                    // Files.copy streams the data directly to disk, replacing any existing file
 	                    Files.copy(inputStream, outputPath, StandardCopyOption.REPLACE_EXISTING);
-	                    System.out.println("Success! File saved to: " + outputPath.toAbsolutePath());
+	                    IJ.log("Success! File saved to: " + outputPath.toAbsolutePath());
 	                }
 	            } else {
-	                System.out.println("Failed to download. HTTP Status: " + responseCode);
+	                IJ.log("Failed to download. HTTP Status: " + responseCode);
 	            }
 	            
 	            connection.disconnect();
 	            
 	        } catch (Exception e) {
-	            System.out.println("An error occurred during the request: " + e.getMessage());
+	            IJ.log("An error occurred during the request: " + e.getMessage());
 	            e.printStackTrace();
 	        }
 	}
 	
-	private static String buildWormMineUrl(List<String> partNames) {
+	private static String buildWormMinePartsToGenesUrl(List<String> partNames) {
         StringBuilder logicBuilder = new StringBuilder();
         StringBuilder constraintsBuilder = new StringBuilder();
 
