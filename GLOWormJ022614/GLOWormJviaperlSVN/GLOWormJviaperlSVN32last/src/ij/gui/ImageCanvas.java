@@ -12,6 +12,7 @@ import ij.measure.*;
 import ij.plugin.Colors;
 import ij.plugin.DragAndDrop;
 import ij.plugin.WandToolOptions;
+import ij.plugin.WormMineAnatomyNamesToGenesExpressed;
 import ij.plugin.Zoom;
 import ij.plugin.filter.Projector;
 import ij.plugin.frame.ColorLegend;
@@ -2024,48 +2025,63 @@ public class ImageCanvas extends Canvas implements MouseListener, MouseMotionLis
 //							+ ";class=Anatomy_term\");"
 //							+ "print(string);");							
 
-					IJ.runMacro(""
-							+ "string = File.openUrlAsString(\"https://wormbase.org/species/c_elegans/anatomy_term/"
-							+ cellName
-							+ "\");"
-							+ "print(string);");							
-					logLines2 = IJ.getLog().split("wname=\"associations\"");
+					//					genePopup.add(wbCellID);
 					//					IJ.log("\\Clear");
-					IJ.log(oldLog);
-					//					IJ.showMessage(cellName+IJ.getLog());
-					String restString = "";
-					if (logLines2 != null && logLines2.length > 1 && logLines2[1].split("\"").length > 1)
-						restString = logLines2[1].split("\"")[1];
 
-					IJ.runMacro(""
-							+ "string = File.openUrlAsString(\"https://www.wormbase.org"
-							+ restString
-							+ "\");"
+//		OLD OBSOLETE WORMBASE QUERY SYNTAX...replacing on 06102021					
+//					IJ.runMacro(""
+//							+ "string = File.openUrlAsString(\"https://www.wormbase.org/db/get?name="
+//							+ cellName
+//							+ ";class=Anatomy_term\");"
+//							+ "print(string);");							
 
-							+ "genes = split(string, \"><\");"
-							+ "print(\"Expressed Genes:\");"
-							+ "for (i=0; i<lengthOf(genes); i++) {"
-							+ "	if (startsWith(genes[i], \"span class=\\\"locus\\\"\") ) "
-							+ "		print(\"expresses \"+genes[i+1]);"
-							+ "}");
-					//popup.add(new JMenuItem("-"));
-					logLines2 = IJ.getLog().toLowerCase().split("\n");
-					Arrays.sort(logLines2);
+//					IJ.runMacro(""
+//							+ "string = File.openUrlAsString(\"https://wormbase.org/species/c_elegans/anatomy_term/"
+//							+ cellName
+//							+ "\");"
+//							+ "print(string);");							
+//					logLines2 = IJ.getLog().split("wname=\"associations\"");
+//					//					IJ.log("\\Clear");
+//					IJ.log(oldLog);
+//					//					IJ.showMessage(cellName+IJ.getLog());
+//					String restString = "";
+//					if (logLines2 != null && logLines2.length > 1 && logLines2[1].split("\"").length > 1)
+//						restString = logLines2[1].split("\"")[1];
+//
+//					IJ.runMacro(""
+//							+ "string = File.openUrlAsString(\"https://www.wormbase.org"
+//							+ restString
+//							+ "\");"
+//
+//							+ "genes = split(string, \"><\");"
+//							+ "print(\"Expressed Genes:\");"
+//							+ "for (i=0; i<lengthOf(genes); i++) {"
+//							+ "	if (startsWith(genes[i], \"span class=\\\"locus\\\"\") ) "
+//							+ "		print(\"expresses \"+genes[i+1]);"
+//							+ "}");
+//					//popup.add(new JMenuItem("-"));
+//					logLines2 = IJ.getLog().toLowerCase().split("\n");
+//					Arrays.sort(logLines2);
+//
+//					IJ.log("\\Clear");
+//					IJ.log(oldLog);
+//					IJ.runMacro(""
+//							+ "string = File.openUrlAsString(\"http://www.gloworm.org/\");"
+//							+ "print(string);");
+//					String glowormHomePage = IJ.getLog();
+//					IJ.log("\\Clear");
+//					IJ.log(oldLog);
+//					for (int l = 0; l < logLines2.length; l++) {
+//						if (logLines2[l].startsWith("expresses")) {
 
-					IJ.log("\\Clear");
-					IJ.log(oldLog);
-					IJ.runMacro(""
-							+ "string = File.openUrlAsString(\"http://www.gloworm.org/\");"
-							+ "print(string);");
-					String glowormHomePage = IJ.getLog();
-					IJ.log("\\Clear");
-					IJ.log(oldLog);
+					new WormMineAnatomyNamesToGenesExpressed().run(cellName);
+					
 					for (int l = 0; l < logLines2.length; l++) {
 						if (logLines2[l].startsWith("expresses")) {
-
+							String glowormHomePage = IJ.openUrlAsString("https://www.gloworm.org/");
 							boolean hasCytoSHOWData = glowormHomePage.toLowerCase()
-									.contains(logLines2[l].split(" ")[1] + ")")
-									|| glowormHomePage.contains(logLines2[l]
+									.contains(cellName.toLowerCase())
+									|| glowormHomePage.contains(cellName.toLowerCase()
 											.split(" ")[1]
 													+ ":");
 

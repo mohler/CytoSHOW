@@ -89,7 +89,8 @@ public class Executer implements Runnable {
 					}
 				}
 			} else {
-				cmdImp = ((ImageWindow) WindowManager.getFrame(cmdChunks[cmdChunks.length-1])).getImagePlus();
+//				cmdImp = ((ImageWindow) WindowManager.getFrame(cmdChunks[cmdChunks.length-1])).getImagePlus();
+				cmdImp = IJ.getImage();
 				if (cmdImp.getWindow() instanceof ImageWindow3D) {
 					Object[] targetItems =  ((Image3DUniverse)((ImageWindow3D)cmdImp.getWindow()).getUniverse()).getContent3DManager().getListModel().toArray();
 					for (int i=0; i<targetItems.length; i++) {
@@ -131,7 +132,7 @@ public class Executer implements Runnable {
 			IJ.runPlugIn("ij.plugin.BrowserLauncher", cellPage );
 
 		}else if (cmd.startsWith("expresses")){
-			String genePage = ("https://www.wormbase.org/db/get?name="+cmd.split(" ")[1]+";class=gene");
+			String genePage = ("https://www.wormbase.org/db/get?name="+cmd.split("[ ,]+")[1]+";class=gene");
 			//			String genePage = ("http://legacy.wormbase.org/db/gene/gene?name="+cmd.split(" ")[1]+";class=Gene");
 			if (jumpToCytoSHOW && !jumpToWormAtlas) {
 				genePage = ("http://www.gloworm.org/p/genes.html");

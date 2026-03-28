@@ -15,6 +15,7 @@ import ij.IJ;
 
 public class WormMineAnatomyNamesToGenesExpressed implements PlugIn {
 
+	private Path outputPath;
 	
 	public void run(String arg) {
 		String[] args = arg.split("[,; ]");
@@ -22,7 +23,7 @@ public class WormMineAnatomyNamesToGenesExpressed implements PlugIn {
 		
 		String urlString = buildWormMinePartsToGenesUrl(partsToSearch);
 		IJ.log(urlString);
-        Path outputPath = Paths.get("anatomy_parts_"+arg.replaceAll("[;, ]", "_").replaceAll("\\*","")+"_to_expr_genes_sorted.csv");
+        outputPath = Paths.get("anatomy_parts_"+arg.replaceAll("[;, ]", "_").replaceAll("\\*","")+"_to_expr_genes_sorted.csv");
         IJ.log(outputPath.toString());
     
 	        try {
@@ -91,5 +92,10 @@ public class WormMineAnatomyNamesToGenesExpressed implements PlugIn {
             throw new RuntimeException("Failed to URL-encode the XML payload", e);
         }
     }
+
+	public String getGenesCSV(String cellName) {
+		this.run(cellName);
+		return IJ.openAsString(outputPath.toString());
+	}
 
 }

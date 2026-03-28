@@ -14,6 +14,7 @@ import ij.measure.*;
 import ij.plugin.Colors;
 import ij.plugin.DragAndDrop;
 import ij.plugin.WandToolOptions;
+import ij.plugin.WormMineAnatomyNamesToGenesExpressed;
 import ij.plugin.Zoom;
 import ij.plugin.filter.Projector;
 import ij.plugin.frame.ColorLegend;
@@ -2078,49 +2079,72 @@ public class ImageCanvas2 extends JComponent implements MouseListener, MouseMoti
 //							+ ";class=Anatomy_term\");"
 //							+ "print(string);");							
 
-					IJ.runMacro(""
-							+ "string = File.openUrlAsString(\"https://wormbase.org/species/c_elegans/anatomy_term/"
-							+ cellName
-							+ "\");"
-							+ "print(string);");							
-					logLines2 = IJ.getLog().split("wname=\"associations\"");
-					//					IJ.log("\\Clear");
-					IJ.log(oldLog);
-					//					IJ.showMessage(cellName+IJ.getLog());
-					String restString = "";
-					if (logLines2 != null && logLines2.length > 1 && logLines2[1].split("\"").length > 1)
-						restString = logLines2[1].split("\"")[1];
+//					IJ.runMacro(""
+//							+ "string = File.openUrlAsString(\"https://wormbase.org/species/c_elegans/anatomy_term/"
+//							+ cellName
+//							+ "\");"
+//							+ "print(string);");							
+//					logLines2 = IJ.getLog().split("wname=\"associations\"");
+//					//					IJ.log("\\Clear");
+//					IJ.log(oldLog);
+//					//					IJ.showMessage(cellName+IJ.getLog());
+//					String restString = "";
+//					if (logLines2 != null && logLines2.length > 1 && logLines2[1].split("\"").length > 1)
+//						restString = logLines2[1].split("\"")[1];
+//
+//					IJ.runMacro(""
+//							+ "string = File.openUrlAsString(\"https://www.wormbase.org"
+//							+ restString
+//							+ "\");"
+//
+//							+ "genes = split(string, \"><\");"
+//							+ "print(\"Expressed Genes:\");"
+//							+ "for (i=0; i<lengthOf(genes); i++) {"
+//							+ "	if (startsWith(genes[i], \"span class=\\\"locus\\\"\") ) "
+//							+ "		print(\"expresses \"+genes[i+1]);"
+//							+ "}");
+//					//popup.add(new JMenuItem("-"));
+//					logLines2 = IJ.getLog().toLowerCase().split("\n");
+//					Arrays.sort(logLines2);
+//
+//					IJ.log("\\Clear");
+//					IJ.log(oldLog);
+//					IJ.runMacro(""
+//							+ "string = File.openUrlAsString(\"http://www.gloworm.org/\");"
+//							+ "print(string);");
+//					String glowormHomePage = IJ.getLog();
+//					IJ.log("\\Clear");
+//					IJ.log(oldLog);
+//					for (int l = 0; l < logLines2.length; l++) {
+//						if (logLines2[l].startsWith("expresses")) {
 
-					IJ.runMacro(""
-							+ "string = File.openUrlAsString(\"https://www.wormbase.org"
-							+ restString
-							+ "\");"
-
-							+ "genes = split(string, \"><\");"
-							+ "print(\"Expressed Genes:\");"
-							+ "for (i=0; i<lengthOf(genes); i++) {"
-							+ "	if (startsWith(genes[i], \"span class=\\\"locus\\\"\") ) "
-							+ "		print(\"expresses \"+genes[i+1]);"
-							+ "}");
-					//popup.add(new JMenuItem("-"));
-					logLines2 = IJ.getLog().toLowerCase().split("\n");
-					Arrays.sort(logLines2);
-
-					IJ.log("\\Clear");
-					IJ.log(oldLog);
-					IJ.runMacro(""
-							+ "string = File.openUrlAsString(\"http://www.gloworm.org/\");"
-							+ "print(string);");
-					String glowormHomePage = IJ.getLog();
-					IJ.log("\\Clear");
-					IJ.log(oldLog);
+					WormMineAnatomyNamesToGenesExpressed wormMANTGE = new WormMineAnatomyNamesToGenesExpressed();
+					String genesCSV = wormMANTGE.getGenesCSV(cellName);
+					logLines2 = genesCSV.split("\n") ;
+					
 					for (int l = 0; l < logLines2.length; l++) {
-						if (logLines2[l].startsWith("expresses")) {
+//						if (logLines2[l].startsWith("expresses")) {
+						if (logLines2[l].startsWith("\"Gene >")) {
+							IJ.wait(1);
+							String[] commaChunks = logLines2[l].replace("\"","").split(",");
+							String labelString = "         ";
+							for (String cmachk:commaChunks) {
+								labelString = labelString + cmachk.split(">")[cmachk.split(">").length-1].trim().replace(" ","_") +",\t" ;
+							}
+							genePopup.add(mi);
 
+							mi = new JMenuItem(labelString);
+
+							mi.addActionListener(ij);
+							genePopup.add(mi);
+
+							
+						} else {
+							String glowormHomePage = IJ.openUrlAsString("https://www.gloworm.org/");
 							boolean hasCytoSHOWData = glowormHomePage.toLowerCase()
-									.contains(logLines2[l].split(" ")[1] + ")")
-									|| glowormHomePage.contains(logLines2[l]
-											.split(" ")[1]
+									.contains(cellName.toLowerCase())
+									|| glowormHomePage.contains(cellName.toLowerCase()
+//											.split(" ")[1]
 													+ ":");
 
 							//					boolean hasCytoSHOWData = glowormGenePage.contains("Interactive movies are available for a fluorescence reporter of this gene.");
@@ -2134,8 +2158,10 @@ public class ImageCanvas2 extends JComponent implements MouseListener, MouseMoti
 							}
 							if (redundant)
 								continue;
-							mi = new JMenuItem(logLines2[l]);
-							popupInfo[1] = popupInfo[1]+ logLines2[l] + "\n";
+							String miText = logLines2[l].replace("\"", "");
+//							mi = new JMenuItem(logLines2[l]);
+							mi = new JMenuItem("expresses "+miText);
+							popupInfo[1] = popupInfo[1]+ miText + "\n";
 
 							mi.addActionListener(ij);
 							genePopup.add(mi);
