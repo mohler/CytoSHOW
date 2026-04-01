@@ -21,10 +21,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+
+
 public class WormMineComboAnalyzer implements PlugIn {
 
-    // Safety guard to prevent 2^N memory explosions if a user drops too much text
-    private static final int MAX_GENES_FOR_COMBOS = 12;
+	private List<String> sortedPartsList = new ArrayList<String>();
+
+    public List<String> getSortedPartsList() {
+		return sortedPartsList;
+	}
 
     @Override
     public void run(String arg) {
@@ -50,7 +55,10 @@ public class WormMineComboAnalyzer implements PlugIn {
                                             .sorted()
                                             .collect(Collectors.toList());
             
-            IJ.log("Combo " + sortedGenes + " -> " + sortedParts.size() + " blinking Parts "+ sortedParts +"");
+            IJ.log("Combo " + sortedGenes + " -> " + sortedParts.size() + " expressing Cells/Parts "+ sortedParts +"");
+            
+            sortedPartsList.addAll(sortedParts);
+            
            
         
         }
@@ -210,4 +218,13 @@ public class WormMineComboAnalyzer implements PlugIn {
         }
         return false;
     }
+    
+	public void setSortedPartsList(List<String> sortedPartsList) {
+		this.sortedPartsList = sortedPartsList;
+	}
+
+	// Safety guard to prevent 2^N memory explosions if a user drops too much text
+    private static final int MAX_GENES_FOR_COMBOS = 12;
+
 }
+

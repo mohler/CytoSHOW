@@ -193,18 +193,49 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 	        ArrayList droppedItemsArrayList = new ArrayList();
 	        String finalUrl = null;
 
+//	        // --- RECONSTRUCTED LOGIC USING EXTRACTED DATA ---
+//	        
+//	        // 1. Check Text Data for URLs
+//	        if (textData != null) {
+//	            System.out.println("URL/Text retrieved: " + textData);
+//	            finalUrl = textData;
+//	        }
+//
+//	        if (finalUrl != null) {
+//	            String[] finalUrlChunks = finalUrl.replace(",https", "https").replace("https", "\nhttps").replace(",https", "https").split("\n");
+//	            for (String nextUrl : finalUrlChunks)
+//	                droppedItemsArrayList.add(nextUrl);
+//	        } else if (htmlData != null) {
+//	            // 2. Check HTML Data
+//	            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("<a\\s+[^>]*?href=\"(.*?)\"", java.util.regex.Pattern.CASE_INSENSITIVE | java.util.regex.Pattern.DOTALL);
+//	            java.util.regex.Matcher matcher = pattern.matcher(htmlData);
+//	            if (matcher.find()) {
+//	                finalUrl = matcher.group(1);
+//	                System.out.println("Found URL in HTML: " + finalUrl);
+//	                droppedItemsArrayList.add(finalUrl);
+//	            }
+//	        }
+	        
+	        
 	        // --- RECONSTRUCTED LOGIC USING EXTRACTED DATA ---
 	        
 	        // 1. Check Text Data for URLs
 	        if (textData != null) {
 	            System.out.println("URL/Text retrieved: " + textData);
-	            finalUrl = textData;
+	            // Only intercept and treat as a URL block if it actually contains web protocol strings.
+	            // Plain text gene lists will bypass this and fall through to Block 4.
+	            if (textData.contains("http://") || textData.contains("https://") || textData.contains("file://")) {
+	                finalUrl = textData;
+	            }
 	        }
 
 	        if (finalUrl != null) {
 	            String[] finalUrlChunks = finalUrl.replace(",https", "https").replace("https", "\nhttps").replace(",https", "https").split("\n");
-	            for (String nextUrl : finalUrlChunks)
-	                droppedItemsArrayList.add(nextUrl);
+	            for (String nextUrl : finalUrlChunks) {
+	                if (!nextUrl.trim().isEmpty()) {
+	                    droppedItemsArrayList.add(nextUrl.trim());
+	                }
+	            }
 	        } else if (htmlData != null) {
 	            // 2. Check HTML Data
 	            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("<a\\s+[^>]*?href=\"(.*?)\"", java.util.regex.Pattern.CASE_INSENSITIVE | java.util.regex.Pattern.DOTALL);
@@ -271,13 +302,23 @@ public class DragAndDrop implements PlugIn, DropTargetListener, Runnable {
 	                        droppedItemsArrayList.add(tmp);
 	                    } 
 	                    // ... (Regex logic) ...
-	                    else if (!tmp.contains(File.separator) &&
-	                            (tmp.trim().split(" ")[0].toLowerCase().matches("\\D{3,5}-\\d{1,4}") ||
-	                                    tmp.trim().split(" ")[0].toLowerCase().matches("\\D{1}\\d{1,2}\\D{1,2}\\d{1,2}\\.\\d{1,2}"))) {
+	                    else if (!tmp.contains(File.separator)) {
+	                            if ((tmp.trim().split("[ ,;]+")[0].toLowerCase().matches("\\D{3,5}-\\d{1,4}") ||
+	                            		tmp.trim().split("[ ,;]+")[0].toLowerCase().matches("\\D{1}\\d{1,2}\\D{1,2}\\d{1,2}\\.\\d{1,2}"))) {
+
+	                            	WormMineComboAnalyzer wmca = new WormMineComboAnalyzer();
+	                            	wmca.run(tmp.toLowerCase());
+
+	                            	droppedItemsArrayList.addAll(wmca.getSortedPartsList());
+	                            } else {
+	                            	String[] namesArray = tmp.trim().split("[ ,;]+");
+	                            	for (String name:namesArray)
+	                            	droppedItemsArrayList.add(name);
+	                            }
 	                        
-	                        String newSearchString = "https://www.wormbase.org/search/gene/" + tmp.trim().split(" ")[0] + "?species=c_elegans" +
-	                                (tmp.trim().split(" ").length > 1 ? " " + tmp.trim().split(" ")[tmp.trim().split(" ").length - 1] : "");
-	                        droppedItemsArrayList.add(newSearchString);
+//	                    	String newSearchString = "https://www.wormbase.org/search/gene/" + tmp.trim().split(" ")[0] + "?species=c_elegans" +
+//	                                (tmp.trim().split(" ").length > 1 ? " " + tmp.trim().split(" ")[tmp.trim().split(" ").length - 1] : "");
+//	                        droppedItemsArrayList.add(newSearchString);
 	                    }
 	                    else if (tmp.endsWith("ColorLegend.lgd")) {
 	                         final String finalTmp = tmp;
